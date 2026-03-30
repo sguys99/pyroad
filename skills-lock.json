@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "brainstorming": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "8df9b47092524833138b58682d03f2e153a242e550d1693657afdbee0cc9cdb0"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "computedHash": "d31e234f0c90694a670222cdd1dafa853e051d7066beda389f1097c22dadd461"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "b122f4d1e91aa1d83027e050b5b37c3156203ee85458d7b1360bc48167c9e02a"
+    }
+  }
+}
