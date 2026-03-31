@@ -16,6 +16,7 @@ interface CodePanelProps {
   onRetry: () => void;
   runResult: RunResult | null;
   isCodeEmpty: boolean;
+  validationResult?: { passed: boolean } | null;
 }
 
 export function CodePanel({
@@ -27,6 +28,7 @@ export function CodePanel({
   onRetry,
   runResult,
   isCodeEmpty,
+  validationResult,
 }: CodePanelProps) {
   const isReady = pyodideStatus === 'ready';
   const isLoading = pyodideStatus === 'loading';
@@ -91,7 +93,11 @@ export function CodePanel({
       </div>
 
       {/* 실행 결과 */}
-      <OutputPanel result={runResult} isRunning={isRunning} />
+      <OutputPanel
+        result={runResult}
+        isRunning={isRunning}
+        validationResult={validationResult}
+      />
     </div>
   );
 }

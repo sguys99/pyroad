@@ -1,19 +1,12 @@
 import type { UserProfile } from '@/lib/types/database';
-
-const LEVEL_TITLES: Record<number, string> = {
-  1: '코딩 새싹',
-  2: '코딩 탐험가',
-  3: '코딩 모험가',
-  4: '코딩 용사',
-  5: '코딩 마법사',
-};
+import { getLevelTitle } from '@/lib/quest/xp';
 
 interface ProfileSummaryProps {
   profile: UserProfile;
 }
 
 export function ProfileSummary({ profile }: ProfileSummaryProps) {
-  const title = LEVEL_TITLES[profile.current_level] ?? '코딩 새싹';
+  const title = getLevelTitle(profile.current_level);
 
   return (
     <div className="flex items-center gap-4 rounded-xl bg-card border border-border p-4 shadow-sm">

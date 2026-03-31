@@ -7,9 +7,14 @@ import type { RunResult } from '@/lib/pyodide/usePyodide';
 interface OutputPanelProps {
   result: RunResult | null;
   isRunning: boolean;
+  validationResult?: { passed: boolean } | null;
 }
 
-export function OutputPanel({ result, isRunning }: OutputPanelProps) {
+export function OutputPanel({
+  result,
+  isRunning,
+  validationResult,
+}: OutputPanelProps) {
   if (isRunning) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-4">
@@ -67,12 +72,33 @@ export function OutputPanel({ result, isRunning }: OutputPanelProps) {
     );
   }
 
-  // 성공
+  // 성공 (검증 결과 포함)
+  const borderColor = validationResult?.passed
+    ? 'border-primary/30'
+    : validationResult
+      ? 'border-accent/50'
+      : 'border-primary/30';
+  const bgColor = validationResult?.passed
+    ? 'bg-primary/5'
+    : validationResult
+      ? 'bg-accent/10'
+      : 'bg-primary/5';
+
   return (
-    <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+    <div className={cn('rounded-lg border p-4', borderColor, bgColor)}>
       <div className="mb-2 flex items-center gap-2">
         <CheckCircle className="h-5 w-5 text-primary" />
         <span className="font-bold text-foreground">실행 결과</span>
+        {validationResult?.passed && (
+          <span className="rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-bold text-primary">
+            정답이에요!
+          </span>
+        )}
+        {validationResult && !validationResult.passed && (
+          <span className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs font-bold text-accent-foreground">
+            조금 더 고쳐볼까요?
+          </span>
+        )}
       </div>
       <pre
         className={cn(

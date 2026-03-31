@@ -5,11 +5,18 @@ import {
   SYSTEM_PROMPT,
   buildQuestIntroPrompt,
   buildHintPrompt,
+  buildCodeFeedbackPrompt,
+  buildEncouragementPrompt,
 } from '@/lib/tutor/prompts';
 import type { TutorRequest, TutorResponse } from '@/lib/tutor/types';
 import type { QuestWithStage } from '@/lib/types/database';
 
-const VALID_TYPES = ['quest_intro', 'hint_generator'] as const;
+const VALID_TYPES = [
+  'quest_intro',
+  'hint_generator',
+  'code_feedback',
+  'encouragement',
+] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
 
@@ -32,9 +39,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (!body.type || !VALID_TYPES.includes(body.type)) {
+  if (
+    !body.type ||
+    !VALID_TYPES.includes(body.type as (typeof VALID_TYPES)[number])
+  ) {
     return NextResponse.json(
-      { error: 'Invalid type. Must be quest_intro or hint_generator' },
+      { error: 'Invalid type' },
       { status: 400 },
     );
   }
@@ -76,7 +86,15 @@ export async function POST(request: Request) {
   const q = quest as unknown as QuestWithStage;
   const skeleton = q.prompt_skeleton;
 
-  // 4. 프롬프트 조립
+  // 4. 추가 검증
+  if (body.type === 'code_feedback' && !body.execution_result) {
+    return NextResponse.json(
+      { error: 'execution_result is required for code_feedback' },
+      { status: 400 },
+    );
+  }
+
+  // 5. 프롬프트 조립
   let userPrompt: string;
 
   if (body.type === 'quest_intro') {
@@ -89,7 +107,7 @@ export async function POST(request: Request) {
       storyContext: skeleton.story_context,
       exerciseDescription: skeleton.exercise_description,
     });
-  } else {
+  } else if (body.type === 'hint_generator') {
     const hintLevel = body.hint_level as 1 | 2 | 3;
     const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
     userPrompt = buildHintPrompt({
@@ -99,12 +117,31 @@ export async function POST(request: Request) {
       hintLevel,
       hintReference: skeleton.hints[hintKey],
     });
+  } else if (body.type === 'code_feedback') {
+    const er = body.execution_result!;
+    userPrompt = buildCodeFeedbackPrompt({
+      topic: skeleton.topic,
+      exerciseDescription: skeleton.exercise_description,
+      studentCode: body.student_code || '',
+      stdout: er.stdout,
+      stderr: er.stderr,
+      passed: er.passed,
+      expectedOutput: q.expected_output,
+    });
+  } else {
+    // encouragement
+    userPrompt = buildEncouragementPrompt({
+      questTitle: q.title,
+      topic: skeleton.topic,
+      earnedXP: body.earned_xp ?? 0,
+      hintsUsed: body.hints_used ?? 0,
+    });
   }
 
-  // 5. Claude 호출
+  // 6. Claude 호출
   const result = await callTutor(SYSTEM_PROMPT, userPrompt);
 
-  // 6. 폴백 처리
+  // 7. 폴백 처리
   let message: string;
   let isFallback: boolean;
 
@@ -115,14 +152,21 @@ export async function POST(request: Request) {
     isFallback = true;
     if (body.type === 'quest_intro') {
       message = skeleton.fallback_text;
-    } else {
+    } else if (body.type === 'hint_generator') {
       const hintLevel = body.hint_level as 1 | 2 | 3;
       const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
       message = skeleton.hints[hintKey];
+    } else if (body.type === 'code_feedback') {
+      message = body.execution_result?.passed
+        ? '대단해요! 정답이에요! 🎉'
+        : '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
+    } else {
+      // encouragement
+      message = '퀘스트를 완료했어요! 정말 대단해요! 🎉🐍';
     }
   }
 
-  // 7. 응답
+  // 8. 응답
   const response: TutorResponse = { message, is_fallback: isFallback };
   return NextResponse.json(response);
 }

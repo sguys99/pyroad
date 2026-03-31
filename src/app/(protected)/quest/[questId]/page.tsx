@@ -15,7 +15,7 @@ export default async function QuestPage({ params }: Props) {
   } = await supabase.auth.getUser();
   if (!user) redirect('/');
 
-  const [questResult, progressResult] = await Promise.all([
+  const [questResult, progressResult, profileResult] = await Promise.all([
     supabase
       .from('quests')
       .select('*, stage:stages(id, title, order, theme_name)')
@@ -27,12 +27,26 @@ export default async function QuestPage({ params }: Props) {
       .eq('user_id', user.id)
       .eq('quest_id', questId)
       .maybeSingle(),
+    supabase
+      .from('users')
+      .select('total_xp, current_level')
+      .eq('id', user.id)
+      .single(),
   ]);
 
   if (!questResult.data) notFound();
 
   const quest = questResult.data as unknown as QuestWithStage;
   const progress = progressResult.data as UserProgress | null;
+  const profile = profileResult.data;
 
-  return <QuestShell quest={quest} progress={progress} userId={user.id} />;
+  return (
+    <QuestShell
+      quest={quest}
+      progress={progress}
+      userId={user.id}
+      initialXP={profile?.total_xp ?? 0}
+      initialLevel={profile?.current_level ?? 1}
+    />
+  );
 }

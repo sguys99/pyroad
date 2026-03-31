@@ -69,3 +69,63 @@ export function buildHintPrompt(params: HintParams): string {
 
 참고 힌트: ${params.hintReference}`;
 }
+
+interface CodeFeedbackParams {
+  topic: string;
+  exerciseDescription: string;
+  studentCode: string;
+  stdout: string;
+  stderr: string;
+  passed: boolean;
+  expectedOutput: string;
+}
+
+export function buildCodeFeedbackPrompt(params: CodeFeedbackParams): string {
+  const statusLabel = params.stderr
+    ? '실행 에러'
+    : params.passed
+      ? '정답'
+      : '오답';
+
+  return `## 컨텍스트
+- 학습 주제: ${params.topic}
+- 실습 과제: ${params.exerciseDescription}
+- 학생이 작성한 코드:
+\`\`\`python
+${params.studentCode}
+\`\`\`
+- 실행 결과: ${params.stdout || '(출력 없음)'}
+${params.stderr ? `- 에러: ${params.stderr}` : ''}
+- 판정: ${statusLabel}
+
+## 지시
+${
+  params.stderr
+    ? `학생의 코드에서 에러가 발생했어요. 에러 메시지를 초등학생이 이해할 수 있도록 쉽게 설명해주세요. 어디를 고치면 좋을지 방향만 알려주세요.`
+    : params.passed
+      ? `학생이 정답을 맞혔어요! 잘한 점을 구체적으로 칭찬하고, 이번에 배운 "${params.topic}" 개념을 간단히 정리해주세요.`
+      : `학생의 출력이 기대 결과와 달라요. 절대 정답 코드를 알려주지 말고, 어디가 다른지 힌트만 주세요. 다시 도전하도록 격려해주세요.`
+}`;
+}
+
+interface EncouragementParams {
+  questTitle: string;
+  topic: string;
+  earnedXP: number;
+  hintsUsed: number;
+}
+
+export function buildEncouragementPrompt(params: EncouragementParams): string {
+  return `## 컨텍스트
+- 완료한 퀘스트: ${params.questTitle}
+- 학습 주제: ${params.topic}
+- 획득 XP: ${params.earnedXP}
+- 힌트 사용 횟수: ${params.hintsUsed}회
+
+## 지시
+학생이 퀘스트를 성공적으로 완료했어요! 다음을 포함하여 축하해주세요:
+1. 퀘스트 완료를 크게 축하
+2. "${params.topic}" 개념을 잘 배웠다고 칭찬
+${params.hintsUsed === 0 ? '3. 힌트 없이 스스로 해냈다고 특별히 칭찬' : ''}
+4. 다음 퀘스트에 대한 기대감을 심어주세요`;
+}
