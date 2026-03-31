@@ -77,6 +77,10 @@ export interface StageWithQuests extends Stage {
   quests: Quest[];
 }
 
+export interface QuestWithStage extends Quest {
+  stage: Pick<Stage, 'id' | 'title' | 'order'>;
+}
+
 export interface StageWithStatus extends Stage {
   status: StageStatus;
   quests: Quest[];
