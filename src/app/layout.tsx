@@ -1,9 +1,18 @@
 import type { Metadata } from 'next';
+import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
+import { cn } from '@/lib/utils';
 import './globals.css';
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const notoSansKR = Noto_Sans_KR({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-sans',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+});
 
 export const metadata: Metadata = {
   title: 'pyRoad',
@@ -17,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" className={cn("font-sans", geist.variable)}>
+    <html
+      lang="ko"
+      className={cn('font-sans', notoSansKR.variable, jetbrainsMono.variable)}
+    >
       <body>{children}</body>
     </html>
   );
