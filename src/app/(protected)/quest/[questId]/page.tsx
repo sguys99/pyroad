@@ -18,7 +18,7 @@ export default async function QuestPage({ params }: Props) {
   const [questResult, progressResult] = await Promise.all([
     supabase
       .from('quests')
-      .select('*, stage:stages(id, title, order)')
+      .select('*, stage:stages(id, title, order, theme_name)')
       .eq('id', questId)
       .single(),
     supabase
@@ -34,5 +34,5 @@ export default async function QuestPage({ params }: Props) {
   const quest = questResult.data as unknown as QuestWithStage;
   const progress = progressResult.data as UserProgress | null;
 
-  return <QuestShell quest={quest} progress={progress} />;
+  return <QuestShell quest={quest} progress={progress} userId={user.id} />;
 }

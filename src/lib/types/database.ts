@@ -78,7 +78,7 @@ export interface StageWithQuests extends Stage {
 }
 
 export interface QuestWithStage extends Quest {
-  stage: Pick<Stage, 'id' | 'title' | 'order'>;
+  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'>;
 }
 
 export interface StageWithStatus extends Stage {

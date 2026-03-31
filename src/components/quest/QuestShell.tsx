@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
+import { useTutor } from '@/lib/tutor/useTutor';
+import { createClient } from '@/lib/supabase/client';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
+import type { ChatMessage } from '@/lib/tutor/types';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { CodePanel } from './CodePanel';
@@ -21,9 +24,10 @@ const tabs: { key: Tab; label: string }[] = [
 interface QuestShellProps {
   quest: QuestWithStage;
   progress: UserProgress | null;
+  userId: string;
 }
 
-export function QuestShell({ quest, progress }: QuestShellProps) {
+export function QuestShell({ quest, progress, userId }: QuestShellProps) {
   const [activeTab, setActiveTab] = useState<Tab>('story');
   const [code, setCode] = useState(
     progress?.code_submitted || quest.prompt_skeleton.starter_code,
@@ -31,13 +35,107 @@ export function QuestShell({ quest, progress }: QuestShellProps) {
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const { status: pyodideStatus, runCode, isRunning, retry } = usePyodide();
 
+  // AI 튜터 상태
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [hintsUsed, setHintsUsed] = useState(progress?.hints_used ?? 0);
+  const { sendTutorRequest, isLoading: isAiLoading } = useTutor();
+
   const isCodeEmpty = !code.trim();
+
+  // 퀘스트 진입 시 quest_intro 자동 호출
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchIntro() {
+      try {
+        const res = await sendTutorRequest({
+          type: 'quest_intro',
+          quest_id: quest.id,
+        });
+        if (!cancelled) {
+          setMessages([
+            {
+              role: 'tutor',
+              content: res.message,
+              isFallback: res.is_fallback,
+            },
+          ]);
+        }
+      } catch {
+        if (!cancelled) {
+          setMessages([
+            {
+              role: 'tutor',
+              content: quest.prompt_skeleton.fallback_text,
+              isFallback: true,
+            },
+          ]);
+        }
+      }
+    }
+
+    fetchIntro();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quest.id]);
+
+  // 힌트 요청 핸들러
+  const handleHintRequest = useCallback(async () => {
+    if (hintsUsed >= 3 || isAiLoading) return;
+
+    const nextLevel = (hintsUsed + 1) as 1 | 2 | 3;
+
+    try {
+      const res = await sendTutorRequest({
+        type: 'hint_generator',
+        quest_id: quest.id,
+        student_code: code,
+        hint_level: nextLevel,
+      });
+      setHintsUsed(nextLevel);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'system', content: `힌트 ${nextLevel}/3` },
+        { role: 'tutor', content: res.message, isFallback: res.is_fallback },
+      ]);
+    } catch {
+      const hintKey =
+        `level_${nextLevel}` as keyof typeof quest.prompt_skeleton.hints;
+      setHintsUsed(nextLevel);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'system', content: `힌트 ${nextLevel}/3` },
+        {
+          role: 'tutor',
+          content: quest.prompt_skeleton.hints[hintKey],
+          isFallback: true,
+        },
+      ]);
+    }
+
+    // DB 저장 (fire-and-forget)
+    const supabase = createClient();
+    supabase
+      .from('user_progress')
+      .upsert(
+        {
+          user_id: userId,
+          quest_id: quest.id,
+          hints_used: nextLevel,
+          status: 'in_progress' as const,
+        },
+        { onConflict: 'user_id,quest_id' },
+      )
+      .then();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hintsUsed, isAiLoading, quest.id, code, userId]);
 
   const handleRun = useCallback(async () => {
     if (isCodeEmpty) return;
     const result = await runCode(code);
     setRunResult(result);
-    // 모바일에서 자동으로 결과 탭 전환
     setActiveTab('result');
   }, [code, isCodeEmpty, runCode]);
 
@@ -69,25 +167,29 @@ export function QuestShell({ quest, progress }: QuestShellProps) {
 
       {/* 콘텐츠 영역 */}
       <div className="flex-1 overflow-hidden md:grid md:grid-cols-2">
-        {/* 대화 패널 (데스크톱: 항상 표시, 모바일: story 탭일 때만) */}
+        {/* 대화 패널 */}
         <div
           className={cn(
             'h-full overflow-y-auto border-r border-border',
             activeTab !== 'story' && 'hidden md:block',
           )}
         >
-          <ConversationPanel promptSkeleton={quest.prompt_skeleton} />
+          <ConversationPanel
+            promptSkeleton={quest.prompt_skeleton}
+            messages={messages}
+            isAiLoading={isAiLoading}
+            hintsUsed={hintsUsed}
+            onHintRequest={handleHintRequest}
+          />
         </div>
 
-        {/* 코드+결과 패널 (데스크톱: 항상 표시, 모바일: code/result 탭일 때) */}
+        {/* 코드+결과 패널 */}
         <div
           className={cn(
             'h-full overflow-y-auto',
             activeTab === 'story' && 'hidden md:block',
           )}
         >
-          {/* 모바일: code 탭이면 코드만, result 탭이면 결과만 */}
-          {/* 데스크톱: 코드 + 결과 모두 표시 */}
           <div className={cn(activeTab === 'result' && 'hidden md:block')}>
             <CodePanel
               initialCode={
@@ -105,7 +207,9 @@ export function QuestShell({ quest, progress }: QuestShellProps) {
           </div>
 
           {/* 모바일 결과 전용 뷰 */}
-          <div className={cn('p-4 md:hidden', activeTab !== 'result' && 'hidden')}>
+          <div
+            className={cn('p-4 md:hidden', activeTab !== 'result' && 'hidden')}
+          >
             <OutputPanel result={runResult} isRunning={isRunning} />
           </div>
         </div>
