@@ -6,6 +6,7 @@ import { getLevelTitle } from '@/lib/quest/xp';
 import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
+import { PageTransition } from '@/components/shared/PageTransition';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -54,7 +55,7 @@ export default async function ProfilePage() {
   const totalCompleted = completedQuestIds.size;
 
   return (
-    <main className="mx-auto min-h-screen max-w-lg px-4 py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       {/* 뒤로가기 */}
       <div className="mb-6">
         <Link href="/world" className="text-sm text-primary underline">
@@ -162,20 +163,20 @@ export default async function ProfilePage() {
       {/* 통계 요약 */}
       <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
         <h2 className="mb-3 text-sm font-bold text-foreground">통계</h2>
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
           <div>
-            <p className="text-2xl font-bold text-primary">{totalCompleted}</p>
-            <p className="text-xs text-muted-foreground">완료 퀘스트</p>
+            <p className="text-xl font-bold text-primary sm:text-2xl">{totalCompleted}</p>
+            <p className="text-[10px] text-muted-foreground sm:text-xs">완료 퀘스트</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-primary">{totalQuests}</p>
-            <p className="text-xs text-muted-foreground">전체 퀘스트</p>
+            <p className="text-xl font-bold text-primary sm:text-2xl">{totalQuests}</p>
+            <p className="text-[10px] text-muted-foreground sm:text-xs">전체 퀘스트</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-xl font-bold text-primary sm:text-2xl">
               {badges.length}
             </p>
-            <p className="text-xs text-muted-foreground">획득 뱃지</p>
+            <p className="text-[10px] text-muted-foreground sm:text-xs">획득 뱃지</p>
           </div>
         </div>
       </div>
@@ -184,6 +185,6 @@ export default async function ProfilePage() {
       <div className="flex justify-center">
         <LogoutButton />
       </div>
-    </main>
+    </PageTransition>
   );
 }

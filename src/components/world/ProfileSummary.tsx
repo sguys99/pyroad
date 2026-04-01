@@ -46,7 +46,7 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
       <XPProgressBar totalXP={profile.total_xp} size="sm" />
 
       {/* 뱃지 컬렉션 */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {BADGE_DEFINITIONS.map((badge) => (
           <BadgeIcon
             key={badge.type}

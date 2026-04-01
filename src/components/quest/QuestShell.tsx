@@ -432,7 +432,7 @@ export function QuestShell({
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              'flex-1 py-2.5 text-center text-sm font-medium transition-colors',
+              'flex-1 py-3 text-center text-sm font-medium transition-colors min-h-[44px]',
               activeTab === tab.key
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted-foreground hover:text-foreground',

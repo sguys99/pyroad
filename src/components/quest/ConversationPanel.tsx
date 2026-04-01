@@ -140,16 +140,26 @@ export function ConversationPanel({
           <span className="text-xs text-muted-foreground">
             힌트: {hintsUsed}/3 사용
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onHintRequest}
-            disabled={isAiLoading || hintsUsed >= 3}
-            className="gap-1.5"
+          <motion.div
+            whileHover={
+              !(isAiLoading || hintsUsed >= 3) ? { scale: 1.03 } : undefined
+            }
+            whileTap={
+              !(isAiLoading || hintsUsed >= 3) ? { scale: 0.97 } : undefined
+            }
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
-            <Lightbulb className="h-4 w-4" />
-            {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onHintRequest}
+              disabled={isAiLoading || hintsUsed >= 3}
+              className="gap-1.5"
+            >
+              <Lightbulb className="h-4 w-4" />
+              {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
+            </Button>
+          </motion.div>
         </div>
       </div>
     </div>

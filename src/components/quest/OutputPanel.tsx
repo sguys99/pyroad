@@ -1,8 +1,16 @@
 'use client';
 
-import { CheckCircle, AlertTriangle, Clock, Terminal } from 'lucide-react';
+import { CheckCircle, Terminal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
+
+function TutorAvatar() {
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg">
+      🐍
+    </div>
+  );
+}
 
 interface OutputPanelProps {
   result: RunResult | null;
@@ -38,13 +46,16 @@ export function OutputPanel({
   // 타임아웃
   if (result.isTimeout) {
     return (
-      <div className="rounded-lg border border-accent/50 bg-accent/10 p-4">
+      <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
         <div className="mb-2 flex items-center gap-2">
-          <Clock className="h-5 w-5 text-accent-foreground" />
-          <span className="font-bold text-foreground">시간 초과!</span>
+          <TutorAvatar />
+          <span className="font-bold text-foreground">
+            앗, 시간이 너무 오래 걸려요!
+          </span>
         </div>
         <p className="text-sm text-foreground">
-          코드가 너무 오래 걸려요! 혹시 무한 반복이 있는지 확인해 보세요.
+          혹시 무한 반복이 있는지 한번 살펴볼까요? 반복문의 조건을 확인해
+          보세요!
         </p>
       </div>
     );
@@ -53,15 +64,20 @@ export function OutputPanel({
   // 에러
   if (!result.success) {
     return (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+      <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
         <div className="mb-2 flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          <span className="font-bold text-foreground">앗, 오류가 있어요!</span>
+          <TutorAvatar />
+          <span className="font-bold text-foreground">
+            앗, 여기를 한번 살펴볼까요?
+          </span>
         </div>
+        <p className="mb-2 text-sm text-foreground">
+          괜찮아요! 에러 메시지를 잘 읽어보면 어디를 고쳐야 할지 알 수 있어요.
+        </p>
         {result.stderr && (
           <pre
             className={cn(
-              'mt-2 overflow-x-auto rounded-md bg-muted/50 p-3',
+              'overflow-x-auto rounded-md bg-muted/50 p-3',
               'font-mono text-xs leading-relaxed text-foreground',
             )}
           >

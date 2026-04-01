@@ -48,6 +48,22 @@ export function StageNode({ stage }: StageNodeProps) {
       disabled={!isClickable}
       whileTap={isClickable ? { scale: 0.97 } : undefined}
       whileHover={isClickable ? { scale: 1.02 } : undefined}
+      animate={
+        stage.status === 'in_progress'
+          ? {
+              boxShadow: [
+                '0 0 0 0 rgba(76, 175, 80, 0)',
+                '0 0 8px 3px rgba(76, 175, 80, 0.25)',
+                '0 0 0 0 rgba(76, 175, 80, 0)',
+              ],
+            }
+          : undefined
+      }
+      transition={
+        stage.status === 'in_progress'
+          ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+          : undefined
+      }
       className={cn(
         'flex w-full max-w-md items-center gap-4 rounded-xl border-2 p-4 text-left transition-colors',
         'min-h-[68px]',

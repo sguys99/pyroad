@@ -36,12 +36,12 @@ export function QuestStatusBar({
   const title = getLevelTitle(level);
 
   return (
-    <div className="border-t border-border bg-card px-4 py-2.5">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-foreground">
+    <div className="border-t border-border bg-card px-3 py-2.5 sm:px-4">
+      <div className="flex items-center justify-between text-xs sm:text-sm">
+        <span className="shrink-0 font-medium text-foreground">
           Lv.{level} {title}
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <span className="flex items-center gap-1 text-primary">
             <Star className="h-4 w-4" />
             <AnimatedXP value={xp} /> XP
