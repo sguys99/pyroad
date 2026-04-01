@@ -1,4 +1,4 @@
-const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000] as const;
+export const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000] as const;
 
 export const LEVEL_TITLES: Record<number, string> = {
   1: '코딩 새싹',
@@ -23,4 +23,28 @@ export function calculateLevel(totalXP: number): number {
 
 export function getLevelTitle(level: number): string {
   return LEVEL_TITLES[level] ?? '코딩 새싹';
+}
+
+export function getXPProgress(totalXP: number): {
+  currentLevel: number;
+  currentLevelXP: number;
+  nextLevelXP: number | null;
+  progressPercent: number;
+} {
+  const currentLevel = calculateLevel(totalXP);
+  const currentLevelXP = LEVEL_THRESHOLDS[currentLevel - 1];
+  const nextLevelXP =
+    currentLevel < LEVEL_THRESHOLDS.length
+      ? LEVEL_THRESHOLDS[currentLevel]
+      : null;
+
+  if (nextLevelXP === null) {
+    return { currentLevel, currentLevelXP, nextLevelXP, progressPercent: 100 };
+  }
+
+  const progress = totalXP - currentLevelXP;
+  const required = nextLevelXP - currentLevelXP;
+  const progressPercent = Math.round((progress / required) * 100);
+
+  return { currentLevel, currentLevelXP, nextLevelXP, progressPercent };
 }

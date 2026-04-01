@@ -2,22 +2,28 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
 import { useTutor } from '@/lib/tutor/useTutor';
 import { createClient } from '@/lib/supabase/client';
 import { validateResult } from '@/lib/quest/validation';
+import { getLevelTitle } from '@/lib/quest/xp';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import type { ValidationResult } from '@/lib/quest/validation';
+import type { BadgeType } from '@/lib/quest/badges';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
+import { LevelUpCelebration } from './LevelUpCelebration';
+import { BadgeEarnedPopup } from './BadgeEarnedPopup';
 
 type Tab = 'story' | 'code' | 'result';
+type CelebrationPhase = 'idle' | 'level_up' | 'badges' | 'done';
 
 const tabs: { key: Tab; label: string }[] = [
   { key: 'story', label: '이야기' },
@@ -62,6 +68,15 @@ export function QuestShell({
   const [earnedXP, setEarnedXP] = useState<number | null>(null);
   const [userXP, setUserXP] = useState(initialXP);
   const [userLevel, setUserLevel] = useState(initialLevel);
+
+  // 축하 시퀀싱
+  const [celebrationPhase, setCelebrationPhase] =
+    useState<CelebrationPhase>('idle');
+  const [levelUpInfo, setLevelUpInfo] = useState<{
+    level: number;
+    title: string;
+  } | null>(null);
+  const [newBadges, setNewBadges] = useState<BadgeType[]>([]);
 
   // 코드 자동 저장 debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -261,6 +276,20 @@ export function QuestShell({
           setEarnedXP(completeData.earned_xp);
           setUserXP(completeData.total_xp);
           setUserLevel(completeData.new_level);
+
+          // 축하 시퀀싱
+          const badges: BadgeType[] = completeData.new_badges ?? [];
+          setNewBadges(badges);
+
+          if (completeData.level_changed) {
+            setLevelUpInfo({
+              level: completeData.new_level,
+              title: getLevelTitle(completeData.new_level),
+            });
+            setTimeout(() => setCelebrationPhase('level_up'), 1000);
+          } else if (badges.length > 0) {
+            setTimeout(() => setCelebrationPhase('badges'), 1000);
+          }
         }
         setIsCompleted(true);
 
@@ -476,6 +505,25 @@ export function QuestShell({
         hintsUsed={hintsUsed}
         earnedXP={earnedXP}
       />
+
+      {/* 축하 오버레이 */}
+      <AnimatePresence>
+        {celebrationPhase === 'level_up' && levelUpInfo && (
+          <LevelUpCelebration
+            newLevel={levelUpInfo.level}
+            newTitle={levelUpInfo.title}
+            onClose={() =>
+              setCelebrationPhase(newBadges.length > 0 ? 'badges' : 'done')
+            }
+          />
+        )}
+        {celebrationPhase === 'badges' && newBadges.length > 0 && (
+          <BadgeEarnedPopup
+            badges={newBadges}
+            onComplete={() => setCelebrationPhase('done')}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

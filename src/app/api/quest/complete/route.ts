@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calculateXP, calculateLevel } from '@/lib/quest/xp';
+import { checkAndAwardBadges } from '@/lib/quest/checkBadges';
 
 interface CompleteRequest {
   quest_id: string;
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
       new_level: profile?.current_level ?? 1,
       level_changed: false,
       already_completed: true,
+      new_badges: [],
     });
   }
 
@@ -104,11 +106,20 @@ export async function POST(request: Request) {
     })
     .eq('id', user.id);
 
+  // 7. 뱃지 체크 및 부여
+  const newBadges = await checkAndAwardBadges({
+    supabase,
+    userId: user.id,
+    questId: body.quest_id,
+    hintsUsed: body.hints_used,
+  });
+
   return NextResponse.json({
     earned_xp: earnedXP,
     total_xp: newTotalXP,
     new_level: newLevel,
     level_changed: newLevel > prevLevel,
     already_completed: false,
+    new_badges: newBadges,
   });
 }

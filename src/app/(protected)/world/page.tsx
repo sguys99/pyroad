@@ -13,22 +13,28 @@ export default async function WorldPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/');
 
-  const [stagesResult, progressResult, profileResult] = await Promise.all([
-    supabase
-      .from('stages')
-      .select('*, quests(*)')
-      .order('order', { ascending: true }),
-    supabase.from('user_progress').select('*').eq('user_id', user.id),
-    supabase
-      .from('users')
-      .select('id, display_name, avatar_url, total_xp, current_level')
-      .eq('id', user.id)
-      .single(),
-  ]);
+  const [stagesResult, progressResult, profileResult, badgesResult] =
+    await Promise.all([
+      supabase
+        .from('stages')
+        .select('*, quests(*)')
+        .order('order', { ascending: true }),
+      supabase.from('user_progress').select('*').eq('user_id', user.id),
+      supabase
+        .from('users')
+        .select('id, display_name, avatar_url, total_xp, current_level')
+        .eq('id', user.id)
+        .single(),
+      supabase
+        .from('user_badges')
+        .select('badge_type, earned_at')
+        .eq('user_id', user.id),
+    ]);
 
   const stages = stagesResult.data ?? [];
   const progress = progressResult.data ?? [];
   const profile = profileResult.data as UserProfile | null;
+  const badges = badgesResult.data ?? [];
 
   const stagesWithStatus = getStageStatuses(stages, progress);
 
@@ -46,7 +52,7 @@ export default async function WorldPage() {
 
       {profile && (
         <div className="mb-6">
-          <ProfileSummary profile={profile} />
+          <ProfileSummary profile={profile} badges={badges} />
         </div>
       )}
 
