@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import { QuestShell } from '@/components/quest/QuestShell';
+import { ProjectQuestShell } from '@/components/quest/ProjectQuestShell';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 
 interface Props {
@@ -40,8 +41,11 @@ export default async function QuestPage({ params }: Props) {
   const progress = progressResult.data as UserProgress | null;
   const profile = profileResult.data;
 
+  const isProject = quest.prompt_skeleton.steps != null;
+  const Shell = isProject ? ProjectQuestShell : QuestShell;
+
   return (
-    <QuestShell
+    <Shell
       quest={quest}
       progress={progress}
       userId={user.id}

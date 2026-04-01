@@ -108,6 +108,39 @@ ${
 }`;
 }
 
+interface ProjectGuideParams {
+  projectTitle: string;
+  storyContext: string;
+  currentStep: number;
+  totalSteps: number;
+  stepGoal: string;
+  previousCode: string;
+}
+
+export function buildProjectGuidePrompt(params: ProjectGuideParams): string {
+  const isFirstStep = params.currentStep === 1;
+
+  return `## 컨텍스트
+- 프로젝트: ${params.projectTitle}
+- 스토리 배경: ${params.storyContext}
+- 현재 단계: ${params.currentStep} / ${params.totalSteps}
+- 이 단계 목표: ${params.stepGoal}
+${params.previousCode ? `- 이전까지 작성한 코드:\n\`\`\`python\n${params.previousCode}\n\`\`\`` : '- (첫 단계입니다)'}
+
+## 지시
+${
+  isFirstStep
+    ? `1. 프로젝트 왕국에 도착한 것을 축하하고, 프로젝트 소개를 해주세요
+2. 이 프로젝트에서 만들 "숫자 맞추기 게임"을 재미있게 설명해주세요
+3. 첫 번째 단계 목표(${params.stepGoal})를 안내하세요
+4. 학생이 직접 시도하도록 유도하며 마무리하세요`
+    : `1. 이전 단계까지 잘 진행한 것을 칭찬하세요
+2. 이 단계에서 새로 추가할 기능(${params.stepGoal})을 설명하세요
+3. 구체적인 코딩 방향을 안내하되, 완성 코드는 주지 마세요
+4. 학생이 직접 시도하도록 유도하세요`
+}`;
+}
+
 interface EncouragementParams {
   questTitle: string;
   topic: string;

@@ -3,7 +3,8 @@ export interface TutorRequest {
     | 'quest_intro'
     | 'hint_generator'
     | 'code_feedback'
-    | 'encouragement';
+    | 'encouragement'
+    | 'project_guide';
   quest_id: string;
   student_code?: string;
   hint_level?: 1 | 2 | 3;
@@ -14,6 +15,10 @@ export interface TutorRequest {
   };
   earned_xp?: number;
   hints_used?: number;
+  current_step?: number;
+  total_steps?: number;
+  previous_code?: string;
+  step_goal?: string;
 }
 
 export interface TutorResponse {

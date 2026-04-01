@@ -7,6 +7,7 @@ import {
   buildHintPrompt,
   buildCodeFeedbackPrompt,
   buildEncouragementPrompt,
+  buildProjectGuidePrompt,
 } from '@/lib/tutor/prompts';
 import type { TutorRequest, TutorResponse } from '@/lib/tutor/types';
 import type { QuestWithStage } from '@/lib/types/database';
@@ -16,6 +17,7 @@ const VALID_TYPES = [
   'hint_generator',
   'code_feedback',
   'encouragement',
+  'project_guide',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
@@ -128,13 +130,22 @@ export async function POST(request: Request) {
       passed: er.passed,
       expectedOutput: q.expected_output,
     });
-  } else {
-    // encouragement
+  } else if (body.type === 'encouragement') {
     userPrompt = buildEncouragementPrompt({
       questTitle: q.title,
       topic: skeleton.topic,
       earnedXP: body.earned_xp ?? 0,
       hintsUsed: body.hints_used ?? 0,
+    });
+  } else {
+    // project_guide
+    userPrompt = buildProjectGuidePrompt({
+      projectTitle: q.title,
+      storyContext: skeleton.story_context,
+      currentStep: body.current_step ?? 1,
+      totalSteps: body.total_steps ?? 5,
+      stepGoal: body.step_goal ?? '',
+      previousCode: body.previous_code ?? '',
     });
   }
 
@@ -160,9 +171,16 @@ export async function POST(request: Request) {
       message = body.execution_result?.passed
         ? '대단해요! 정답이에요! 🎉'
         : '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
-    } else {
-      // encouragement
+    } else if (body.type === 'encouragement') {
       message = '퀘스트를 완료했어요! 정말 대단해요! 🎉🐍';
+    } else {
+      // project_guide
+      const stepIdx = (body.current_step ?? 1) - 1;
+      const steps = skeleton.steps;
+      message =
+        steps && steps[stepIdx]
+          ? steps[stepIdx].fallback_text
+          : skeleton.fallback_text;
     }
   }
 

@@ -738,7 +738,7 @@ ON CONFLICT (id) DO UPDATE SET
 -- 스테이지 7: 프로젝트 왕국 (1 퀘스트, 200 XP)
 -- ────────────────────────────────────────────────────────────
 
--- 퀘스트 7-1: 숫자 맞추기 게임
+-- 퀘스트 7-1: 숫자 맞추기 게임 (5단계 가이드 빌딩 프로젝트)
 INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000022',
@@ -750,18 +750,85 @@ VALUES (
     "topic": "종합 프로젝트: 숫자 맞추기 게임 만들기",
     "learning_goals": ["배운 모든 개념(변수, 조건, 반복, 함수)을 조합할 수 있다", "프로그램을 단계적으로 설계하고 구현할 수 있다", "완성된 프로그램을 만드는 경험을 쌓는다"],
     "story_context": "프로젝트 왕국의 최종 관문! 배운 모든 것을 모아 숫자 맞추기 게임을 완성하면 코딩 마법사가 돼요!",
-    "exercise_description": "1~10 사이의 비밀 숫자를 맞추는 게임을 만드세요. while 반복문으로 맞출 때까지 반복하고, 맞추면 축하 메시지를 출력하세요.",
-    "starter_code": "# 숫자 맞추기 게임을 만들어보세요!\nimport random\n\nsecret = random.randint(1, 10)\nguess = 0\nattempts = 0\n\nwhile guess != secret:\n    guess = random.randint(1, 10)  # 실제로는 input()을 쓰지만 자동 실행을 위해 random 사용\n    attempts = attempts + 1\n    if guess == secret:\n        print(\"정답! \" + str(attempts) + \"번 만에 맞췄어요!\")\n    elif guess < secret:\n        print(str(guess) + \"보다 커요!\")\n    else:\n        print(str(guess) + \"보다 작아요!\")",
-    "expected_output_hint": "정답! N번 만에 맞췄어요! 가 출력되어야 해요",
-    "fallback_text": "이 프로젝트는 변수, 조건문, 반복문, 함수를 모두 활용해요! while로 반복하고, if로 정답을 확인하고, 변수로 시도 횟수를 기록해요.",
+    "exercise_description": "1~10 사이의 비밀 숫자를 맞추는 게임을 만드세요. 5단계에 걸쳐 하나씩 기능을 추가하며 완성해요!",
+    "starter_code": "# 숫자 맞추기 게임을 만들어보세요!\nimport random\n",
+    "expected_output_hint": "프로젝트를 5단계로 나누어 완성해요",
+    "fallback_text": "드디어 프로젝트 왕국에 도착했어요! 🏰 지금까지 배운 변수, 조건문, 반복문을 모두 활용해서 숫자 맞추기 게임을 만들 거예요. 5단계로 나누어 하나씩 만들어볼까요?",
     "hints": {
-      "level_1": "while은 조건이 참인 동안 계속 반복해요. 언제까지 반복할까요?",
-      "level_2": "guess != secret 동안 반복하면 정답을 맞출 때까지 계속할 수 있어요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
-    }
+      "level_1": "이 프로젝트는 5단계로 진행돼요. 각 단계의 안내를 잘 따라가 보세요!",
+      "level_2": "random, 변수, 조건문, 반복문을 차례대로 사용할 거예요!",
+      "level_3": "각 단계에서 힌트를 활용하면 더 쉽게 진행할 수 있어요!"
+    },
+    "steps": [
+      {
+        "step_number": 1,
+        "step_goal": "random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기",
+        "starter_code": "# 1단계: 비밀 숫자 만들기\nimport random\n\n# random.randint(1, 10)으로 1~10 사이 숫자를 만들어보세요!\n",
+        "validation_type": "code_check",
+        "expected_output": "random.randint",
+        "hints": {
+          "level_1": "random 모듈의 randint 함수를 사용하면 원하는 범위의 숫자를 만들 수 있어요!",
+          "level_2": "secret = random.randint(1, 10) 이렇게 변수에 저장하고, print()로 확인해보세요!",
+          "level_3": "secret = random.randint(1, 10)\nprint(secret)\n이렇게 작성해보세요!"
+        },
+        "fallback_text": "1단계에서는 random 모듈을 사용해서 비밀 숫자를 만들어요! random.randint(1, 10)을 사용하면 1부터 10 사이의 숫자를 랜덤으로 만들 수 있어요. 변수에 저장하고 print()로 확인해보세요! 🎲"
+      },
+      {
+        "step_number": 2,
+        "step_goal": "추측 숫자를 변수에 저장하기 (Pyodide에서는 random으로 대체)",
+        "starter_code": "",
+        "validation_type": "code_check",
+        "expected_output": "int(",
+        "hints": {
+          "level_1": "추측 숫자를 저장할 변수가 필요해요! guess라는 이름은 어떨까요?",
+          "level_2": "실제 게임에서는 input()을 쓰지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어요!",
+          "level_3": "guess = int(random.randint(1, 10))\nprint(\"추측: \" + str(guess))\n이렇게 추가해보세요!"
+        },
+        "fallback_text": "2단계에서는 추측 숫자를 만들어요! 실제 게임에서는 input()으로 사용자에게 물어보지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어볼 거예요. 🤔"
+      },
+      {
+        "step_number": 3,
+        "step_goal": "if/elif/else로 비밀 숫자와 추측을 비교하기",
+        "starter_code": "",
+        "validation_type": "contains",
+        "expected_output": "보다 커요",
+        "hints": {
+          "level_1": "if, elif, else를 사용해서 세 가지 경우를 나눠보세요: 같을 때, 작을 때, 클 때!",
+          "level_2": "if guess == secret: 정답!\nelif guess < secret: 더 커요!\nelse: 더 작아요!\n이런 구조예요!",
+          "level_3": "if guess == secret:\n    print(\"정답!\")\nelif guess < secret:\n    print(str(guess) + \"보다 커요!\")\nelse:\n    print(str(guess) + \"보다 작아요!\")\n이렇게 추가해보세요!"
+        },
+        "fallback_text": "3단계에서는 조건문으로 비밀 숫자와 추측을 비교해요! if/elif/else를 사용해서 정답인지, 더 큰 숫자를 말해야 하는지, 더 작은 숫자를 말해야 하는지 알려주세요! 🔍"
+      },
+      {
+        "step_number": 4,
+        "step_goal": "while 반복문으로 정답을 맞출 때까지 반복하기",
+        "starter_code": "",
+        "validation_type": "code_check",
+        "expected_output": "while",
+        "hints": {
+          "level_1": "while 반복문을 사용하면 조건이 참인 동안 계속 반복할 수 있어요!",
+          "level_2": "while guess != secret: 이렇게 쓰면 정답을 맞출 때까지 반복해요! 추측 코드를 while 안에 넣어보세요.",
+          "level_3": "while guess != secret:\n    guess = int(random.randint(1, 10))\n    # 여기에 if/elif/else 비교 코드를 넣으세요\n이렇게 감싸보세요!"
+        },
+        "fallback_text": "4단계에서는 while 반복문으로 게임을 반복해요! while guess != secret: 으로 정답을 맞출 때까지 계속 추측하도록 만들어보세요! 🔄"
+      },
+      {
+        "step_number": 5,
+        "step_goal": "시도 횟수를 세고 완성 메시지 출력하기",
+        "starter_code": "",
+        "validation_type": "contains",
+        "expected_output": "번 만에 맞췄어요",
+        "hints": {
+          "level_1": "attempts라는 변수를 만들어서 추측할 때마다 1씩 올려보세요!",
+          "level_2": "attempts = 0을 while 앞에 두고, while 안에서 attempts = attempts + 1로 올려요!",
+          "level_3": "정답을 맞추면 print(\"정답! \" + str(attempts) + \"번 만에 맞췄어요!\") 이렇게 출력해보세요!"
+        },
+        "fallback_text": "마지막 5단계! 시도 횟수를 세는 변수 attempts를 추가하고, 정답을 맞추면 \"정답! N번 만에 맞췄어요!\"를 출력하세요. 이걸로 게임이 완성돼요! 🎉"
+      }
+    ]
   }'::jsonb,
-  'code_check',
-  'while',
+  'contains',
+  '번 만에 맞췄어요',
   200
 )
 ON CONFLICT (id) DO UPDATE SET

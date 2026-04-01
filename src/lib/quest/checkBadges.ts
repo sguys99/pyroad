@@ -71,6 +71,22 @@ export async function checkAndAwardBadges(
     }
   }
 
+  // project_builder: 최종 프로젝트(is_final 스테이지) 완료
+  if (!earned.has('project_builder')) {
+    const { data: questForProject } = await supabase
+      .from('quests')
+      .select('stage_id, stages!inner(is_final)')
+      .eq('id', questId)
+      .single();
+
+    if (
+      questForProject &&
+      (questForProject.stages as unknown as { is_final: boolean })?.is_final
+    ) {
+      newBadges.push('project_builder');
+    }
+  }
+
   // streak_3: 3일 연속 퀘스트 완료 (KST 기준)
   if (!earned.has('streak_3')) {
     const { data: completions } = await supabase

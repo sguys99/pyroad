@@ -32,6 +32,8 @@ export interface UserProgress {
   code_submitted: string;
   completed_at: string | null;
   created_at: string;
+  current_step: number | null;
+  step_submissions: Record<string, string> | null;
 }
 
 export interface UserBadge {
@@ -54,6 +56,20 @@ export interface UserProfile {
   current_level: number;
 }
 
+export interface ProjectStep {
+  step_number: number;
+  step_goal: string;
+  starter_code: string;
+  validation_type: 'output_match' | 'contains' | 'code_check';
+  expected_output: string;
+  hints: {
+    level_1: string;
+    level_2: string;
+    level_3: string;
+  };
+  fallback_text: string;
+}
+
 export interface PromptSkeleton {
   topic: string;
   learning_goals: string[];
@@ -67,6 +83,7 @@ export interface PromptSkeleton {
     level_2: string;
     level_3: string;
   };
+  steps?: ProjectStep[];
 }
 
 // 월드맵 도메인 타입
