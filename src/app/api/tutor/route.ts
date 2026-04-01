@@ -9,7 +9,7 @@ import {
   buildEncouragementPrompt,
   buildProjectGuidePrompt,
 } from '@/lib/tutor/prompts';
-import type { TutorRequest, TutorResponse } from '@/lib/tutor/types';
+import type { TutorRequest, TutorResponse, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStage } from '@/lib/types/database';
 
 const VALID_TYPES = [
@@ -149,8 +149,27 @@ export async function POST(request: Request) {
     });
   }
 
-  // 6. Claude 호출
-  const result = await callTutor(SYSTEM_PROMPT, userPrompt);
+  // 6. Provider 결정 및 LLM 호출
+  let providerType: LLMProviderType | undefined = body.provider;
+  let customApiKey: string | undefined;
+
+  if (!providerType) {
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('preferred_provider, custom_api_keys')
+      .eq('id', user.id)
+      .single();
+
+    if (userProfile?.preferred_provider) {
+      providerType = userProfile.preferred_provider as LLMProviderType;
+    }
+    if (userProfile?.custom_api_keys && providerType) {
+      const keys = userProfile.custom_api_keys as Record<string, string>;
+      customApiKey = keys[providerType] || undefined;
+    }
+  }
+
+  const result = await callTutor(SYSTEM_PROMPT, userPrompt, 600, providerType, customApiKey);
 
   // 7. 폴백 처리
   let message: string;

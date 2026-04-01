@@ -181,8 +181,11 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      {/* 로그아웃 */}
-      <div className="flex justify-center">
+      {/* 설정 / 로그아웃 */}
+      <div className="flex flex-col items-center gap-3">
+        <Link href="/settings" className="text-sm text-primary underline">
+          AI 튜터 설정
+        </Link>
         <LogoutButton />
       </div>
     </PageTransition>

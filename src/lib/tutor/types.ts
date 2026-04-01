@@ -1,3 +1,5 @@
+export type { LLMProviderType } from './providers/types';
+
 export interface TutorRequest {
   type:
     | 'quest_intro'
@@ -6,6 +8,7 @@ export interface TutorRequest {
     | 'encouragement'
     | 'project_guide';
   quest_id: string;
+  provider?: 'anthropic' | 'openai' | 'gemini';
   student_code?: string;
   hint_level?: 1 | 2 | 3;
   execution_result?: {
