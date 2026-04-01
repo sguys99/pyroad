@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Trophy } from 'lucide-react';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 interface ProjectCompleteCelebrationProps {
   earnedXP: number;
@@ -86,7 +87,7 @@ export function ProjectCompleteCelebration({
           animate={{ scale: 1 }}
           transition={{ type: 'spring', delay: 0.3 }}
         >
-          <span>🐍</span>
+          <CharacterAvatar character="pybaem" expression="celebrating" size="md" animated />
           <span>🎉</span>
           <span>🏆</span>
         </motion.div>

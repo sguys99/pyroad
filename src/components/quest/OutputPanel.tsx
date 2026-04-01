@@ -3,11 +3,13 @@
 import { CheckCircle, Terminal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import type { PybaemExpression } from '@/components/characters/expressions';
 
-function TutorAvatar() {
+function TutorAvatar({ expression = 'happy' }: { expression?: PybaemExpression }) {
   return (
-    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg">
-      🐍
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+      <CharacterAvatar character="pybaem" expression={expression} size="sm" />
     </div>
   );
 }
@@ -48,7 +50,7 @@ export function OutputPanel({
     return (
       <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
         <div className="mb-2 flex items-center gap-2">
-          <TutorAvatar />
+          <TutorAvatar expression="confused" />
           <span className="font-bold text-foreground">
             앗, 시간이 너무 오래 걸려요!
           </span>
@@ -66,7 +68,7 @@ export function OutputPanel({
     return (
       <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
         <div className="mb-2 flex items-center gap-2">
-          <TutorAvatar />
+          <TutorAvatar expression="encouraging" />
           <span className="font-bold text-foreground">
             앗, 여기를 한번 살펴볼까요?
           </span>

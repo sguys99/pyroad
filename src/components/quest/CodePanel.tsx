@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CodeEditor } from './CodeEditor';
 import { OutputPanel } from './OutputPanel';
 import type { PyodideStatus, RunResult } from '@/lib/pyodide/usePyodide';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 const CODING_TIPS = [
   'print()로 화면에 글자를 보여줄 수 있어요!',
@@ -30,7 +31,7 @@ function CodingTipRotator() {
 
   return (
     <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-      <span className="shrink-0 text-lg">🐍</span>
+      <span className="shrink-0"><CharacterAvatar character="pybaem" expression="teaching" size="sm" /></span>
       <div className="min-h-[20px] flex-1">
         <AnimatePresence mode="wait">
           <motion.p
@@ -123,7 +124,7 @@ export function CodePanel({
 
         {isError && (
           <span className="text-xs text-accent-foreground">
-            🐍 앗, 실행기를 불러오지 못했어요. 다시 시도해 볼까요?
+            앗, 실행기를 불러오지 못했어요. 다시 시도해 볼까요?
           </span>
         )}
       </div>

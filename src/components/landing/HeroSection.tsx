@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { LoginButton } from '@/components/LoginButton';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 const container = {
   hidden: {},
@@ -40,8 +41,14 @@ export function HeroSection() {
       initial="hidden"
       animate="show"
     >
-      <motion.div className="text-7xl" variants={bounceIn}>
-        🐍
+      <motion.div variants={bounceIn}>
+        <CharacterAvatar
+          character="pybaem"
+          expression="waving"
+          size="lg"
+          animated
+          onHover="happy"
+        />
       </motion.div>
 
       <motion.h1

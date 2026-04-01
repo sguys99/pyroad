@@ -7,6 +7,7 @@ import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -72,8 +73,8 @@ export default async function ProfilePage() {
             className="h-24 w-24 rounded-full"
           />
         ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20 text-4xl">
-            🐍
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
+            <CharacterAvatar character="pybaem" expression="happy" size="lg" animated />
           </div>
         )}
         <p className="text-xl font-bold text-foreground">

@@ -3,6 +3,7 @@ import { getLevelTitle } from '@/lib/quest/xp';
 import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 interface ProfileSummaryProps {
   profile: UserProfile;
@@ -24,8 +25,8 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
             className="h-12 w-12 rounded-full"
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-xl">
-            🐍
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+            <CharacterAvatar character="pybaem" expression="happy" size="sm" />
           </div>
         )}
         <div className="flex-1 min-w-0">
