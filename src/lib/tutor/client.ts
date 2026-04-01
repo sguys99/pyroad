@@ -33,7 +33,7 @@ function delay(ms: number): Promise<void> {
 export async function callTutor(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 300,
+  maxTokens = 600,
 ): Promise<{ text: string; ok: boolean }> {
   try {
     const text = await attempt(systemPrompt, userPrompt, maxTokens);

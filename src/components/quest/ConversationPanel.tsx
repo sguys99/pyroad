@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react';
 import { BookOpen, Lightbulb, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import type { PromptSkeleton } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
@@ -119,9 +121,17 @@ export function ConversationPanel({
                       </span>
                     )}
                   </div>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                    {msg.content}
-                  </p>
+                  <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:leading-relaxed prose-code:bg-muted prose-code:px-1 prose-code:rounded prose-hr:border-border prose-pre:bg-muted prose-pre:text-foreground">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => <h3>{children}</h3>,
+                        h2: ({ children }) => <h4>{children}</h4>,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             );
