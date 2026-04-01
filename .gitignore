@@ -37,6 +37,9 @@ next-env.d.ts
 
 # Test
 coverage/
+e2e/.auth/
+playwright-report/
+test-results/
 
 # Misc
 *.pem

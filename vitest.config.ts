@@ -5,7 +5,8 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom',
+    environment: 'node',
+    exclude: ['e2e/**', 'node_modules/**'],
   },
   resolve: {
     alias: {
