@@ -18,11 +18,11 @@ For the Korean version of this document, see [docs/README(kr).md](docs/README%28
 - [x] Phase 2: Curriculum seed data and world map
 - [x] Phase 3: Quest screen shell and Pyodide code execution
 - [x] Phase 4: AI tutor API, quest intro, and hints
-- [ ] Phase 5: Code validation and quest completion flow
-- [ ] Phase 6: Gamification
-- [ ] Phase 7: Final project guide
-- [ ] Phase 8: Responsive UI polish and animations
-- [ ] Phase 9: Integrated testing and deployment
+- [x] Phase 5: Code validation and quest completion flow
+- [x] Phase 6: Gamification
+- [x] Phase 7: Final project guide
+- [x] Phase 8: Responsive UI polish and animations
+- [x] Phase 9: Integrated testing and deployment
 
 ## Tech Stack
 
