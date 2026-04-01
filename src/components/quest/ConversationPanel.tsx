@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import type { PromptSkeleton } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { useMessageExpression } from '@/components/characters/useCharacterExpression';
 
 interface ConversationPanelProps {
   promptSkeleton: PromptSkeleton;
@@ -43,6 +44,15 @@ function ThinkingIndicator() {
           파이뱀 선생님이 생각 중...
         </p>
       </div>
+    </div>
+  );
+}
+
+function TutorMessageAvatar({ message }: { message: ChatMessage }) {
+  const expression = useMessageExpression(message);
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+      <CharacterAvatar character="pybaem" expression={expression} size="sm" />
     </div>
   );
 }
@@ -107,9 +117,7 @@ export function ConversationPanel({
 
             return (
               <div key={idx} className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <CharacterAvatar character="pybaem" expression="happy" size="sm" />
-                </div>
+                <TutorMessageAvatar message={msg} />
                 <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
                   <div className="mb-1 flex items-center gap-2">
                     <MessageCircle className="h-4 w-4 text-primary" />

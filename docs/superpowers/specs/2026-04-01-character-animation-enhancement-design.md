@@ -231,7 +231,7 @@ src/components/quest/celebrations/
 - [ ] `src/components/characters/BugBugSvg.tsx` (Phase 4)
 - [ ] `src/components/characters/ByeolttongiSvg.tsx` (Phase 4)
 - [ ] `src/components/characters/LottieCharacter.tsx` (Phase 3)
-- [ ] `src/components/characters/useCharacterExpression.ts` (Phase 2)
+- [x] `src/components/characters/useCharacterExpression.ts` (Phase 2)
 - [x] `public/characters/` 디렉토리 구조 생성
 
 ---
@@ -248,14 +248,14 @@ src/components/quest/celebrations/
 - [x] 호흡 애니메이션 (Framer Motion breathe) 추가
 - [x] `public/characters/` 디렉토리 구조 생성
 
-### Phase 2: 표정 다양화 (1주)
+### Phase 2: 표정 다양화 (1주) ✅
 
 목표: 맥락에 맞는 표정 변화로 캐릭터에 생명 부여
 
-- [ ] `useCharacterExpression` 훅 구현
-- [ ] ConversationPanel 대화별 동적 표정
-- [ ] OutputPanel 상태별 표정
-- [ ] 눈깜빡 애니메이션 추가
+- [x] `useCharacterExpression` 훅 구현
+- [x] ConversationPanel 대화별 동적 표정
+- [x] OutputPanel 상태별 표정
+- [x] 눈깜빡 애니메이션 추가
 
 ### Phase 3: Lottie 축하 장면 (1-2주)
 

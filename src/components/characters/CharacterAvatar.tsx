@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PybaemSvg } from './PybaemSvg';
 import type { Character, Expression, AvatarSize } from './expressions';
 import { AVATAR_SIZE_MAP } from './expressions';
@@ -38,8 +38,22 @@ export function CharacterAvatar({
 
   const svgElement = renderCharacter(character, currentExpression, px);
 
+  const expressionTransition = (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={currentExpression}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+      >
+        {svgElement}
+      </motion.div>
+    </AnimatePresence>
+  );
+
   if (!animated && !onHover) {
-    return <div className={className}>{svgElement}</div>;
+    return <div className={className}>{expressionTransition}</div>;
   }
 
   return (
@@ -52,7 +66,7 @@ export function CharacterAvatar({
       onHoverStart={onHover ? () => setIsHovered(true) : undefined}
       onHoverEnd={onHover ? () => setIsHovered(false) : undefined}
     >
-      {svgElement}
+      {expressionTransition}
     </motion.div>
   );
 }

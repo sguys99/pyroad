@@ -28,6 +28,7 @@ export function OutputPanel({
   if (isRunning) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-4">
+        <TutorAvatar expression="thinking" />
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         <span className="text-sm text-muted-foreground">실행 중...</span>
       </div>
@@ -37,6 +38,7 @@ export function OutputPanel({
   if (!result) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/20 p-4">
+        <TutorAvatar expression="happy" />
         <Terminal className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">
           코드를 실행하면 결과가 여기에 표시돼요!
@@ -105,6 +107,15 @@ export function OutputPanel({
   return (
     <div className={cn('rounded-lg border p-4', borderColor, bgColor)}>
       <div className="mb-2 flex items-center gap-2">
+        <TutorAvatar
+          expression={
+            validationResult?.passed
+              ? 'celebrating'
+              : validationResult
+                ? 'teaching'
+                : 'happy'
+          }
+        />
         <CheckCircle className="h-5 w-5 text-primary" />
         <span className="font-bold text-foreground">실행 결과</span>
         {validationResult?.passed && (

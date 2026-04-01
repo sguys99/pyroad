@@ -91,6 +91,44 @@ export function PybaemSvg({
   );
 }
 
+// === 눈깜빡 서브 컴포넌트 ===
+
+interface BlinkableEyeProps {
+  cx: number;
+  cy: number;
+  rx: number;
+  ry: number;
+  hlCx: number;
+  hlCy: number;
+  hlR: number;
+  blinkId: string;
+}
+
+function BlinkableEye({ cx, cy, rx, ry, hlCx, hlCy, hlR, blinkId }: BlinkableEyeProps) {
+  return (
+    <>
+      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="#2E7D32">
+        <animate
+          attributeName="ry"
+          values={`${ry};0.5;${ry}`}
+          dur="0.15s"
+          begin={`3s;${blinkId}.end+4s`}
+          id={blinkId}
+        />
+      </ellipse>
+      <circle cx={hlCx} cy={hlCy} r={hlR} fill="white">
+        <animate
+          attributeName="opacity"
+          values="1;0;1"
+          dur="0.15s"
+          begin={`3s;${blinkId}hl.end+4s`}
+          id={`${blinkId}hl`}
+        />
+      </circle>
+    </>
+  );
+}
+
 // === 표정 컴포넌트들 ===
 
 function HappyFace() {
@@ -98,10 +136,8 @@ function HappyFace() {
     <>
       {/* 눈 */}
       <g id="eyes">
-        <ellipse cx="52" cy="40" rx="5" ry="5.5" fill="#2E7D32" />
-        <ellipse cx="76" cy="40" rx="5" ry="5.5" fill="#2E7D32" />
-        <circle cx="53.5" cy="38.5" r="2" fill="white" />
-        <circle cx="77.5" cy="38.5" r="2" fill="white" />
+        <BlinkableEye cx={52} cy={40} rx={5} ry={5.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="happyL" />
+        <BlinkableEye cx={76} cy={40} rx={5} ry={5.5} hlCx={77.5} hlCy={38.5} hlR={2} blinkId="happyR" />
       </g>
       {/* 입 - 미소 */}
       <g id="mouth">
@@ -158,10 +194,8 @@ function EncouragingFace() {
     <>
       <g id="eyes">
         {/* 부드러운 눈 */}
-        <ellipse cx="52" cy="40" rx="5" ry="4.5" fill="#2E7D32" />
-        <ellipse cx="76" cy="40" rx="5" ry="4.5" fill="#2E7D32" />
-        <circle cx="53.5" cy="38.5" r="2" fill="white" />
-        <circle cx="77.5" cy="38.5" r="2" fill="white" />
+        <BlinkableEye cx={52} cy={40} rx={5} ry={4.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="encL" />
+        <BlinkableEye cx={76} cy={40} rx={5} ry={4.5} hlCx={77.5} hlCy={38.5} hlR={2} blinkId="encR" />
       </g>
       <g id="mouth">
         {/* 따뜻한 미소 */}
@@ -176,10 +210,8 @@ function SurprisedFace() {
     <>
       <g id="eyes">
         {/* 큰 눈 */}
-        <ellipse cx="52" cy="39" rx="6" ry="7" fill="#2E7D32" />
-        <ellipse cx="76" cy="39" rx="6" ry="7" fill="#2E7D32" />
-        <circle cx="53.5" cy="37" r="2.5" fill="white" />
-        <circle cx="77.5" cy="37" r="2.5" fill="white" />
+        <BlinkableEye cx={52} cy={39} rx={6} ry={7} hlCx={53.5} hlCy={37} hlR={2.5} blinkId="surL" />
+        <BlinkableEye cx={76} cy={39} rx={6} ry={7} hlCx={77.5} hlCy={37} hlR={2.5} blinkId="surR" />
       </g>
       <g id="mouth">
         {/* 놀란 O 입 */}
@@ -195,8 +227,7 @@ function TeachingFace() {
     <>
       <g id="eyes">
         {/* 한쪽 눈 윙크 */}
-        <ellipse cx="52" cy="40" rx="5" ry="5.5" fill="#2E7D32" />
-        <circle cx="53.5" cy="38.5" r="2" fill="white" />
+        <BlinkableEye cx={52} cy={40} rx={5} ry={5.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="teachL" />
         <path d="M71 40 Q76 36 81 40" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
       </g>
       <g id="mouth">
@@ -210,10 +241,8 @@ function WavingFace() {
   return (
     <>
       <g id="eyes">
-        <ellipse cx="52" cy="40" rx="5" ry="5.5" fill="#2E7D32" />
-        <ellipse cx="76" cy="40" rx="5" ry="5.5" fill="#2E7D32" />
-        <circle cx="53.5" cy="38.5" r="2" fill="white" />
-        <circle cx="77.5" cy="38.5" r="2" fill="white" />
+        <BlinkableEye cx={52} cy={40} rx={5} ry={5.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="waveL" />
+        <BlinkableEye cx={76} cy={40} rx={5} ry={5.5} hlCx={77.5} hlCy={38.5} hlR={2} blinkId="waveR" />
       </g>
       <g id="mouth">
         {/* 활짝 웃는 입 */}
@@ -244,10 +273,8 @@ function ConfusedFace() {
     <>
       <g id="eyes">
         {/* 한쪽 눈이 더 큰 비대칭 */}
-        <ellipse cx="52" cy="40" rx="5" ry="6" fill="#2E7D32" />
-        <circle cx="53" cy="38" r="2" fill="white" />
-        <ellipse cx="76" cy="40" rx="4" ry="4.5" fill="#2E7D32" />
-        <circle cx="77" cy="38.5" r="1.5" fill="white" />
+        <BlinkableEye cx={52} cy={40} rx={5} ry={6} hlCx={53} hlCy={38} hlR={2} blinkId="confL" />
+        <BlinkableEye cx={76} cy={40} rx={4} ry={4.5} hlCx={77} hlCy={38.5} hlR={1.5} blinkId="confR" />
       </g>
       <g id="mouth">
         {/* 삐뚤 입 */}
