@@ -21,6 +21,7 @@ import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { LevelUpCelebration } from './LevelUpCelebration';
 import { BadgeEarnedPopup } from './BadgeEarnedPopup';
+import { ApiKeyBanner } from './ApiKeyBanner';
 
 type Tab = 'story' | 'code' | 'result';
 type CelebrationPhase = 'idle' | 'level_up' | 'badges' | 'done';
@@ -59,7 +60,7 @@ export function QuestShell({
   // AI 튜터 상태
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hintsUsed, setHintsUsed] = useState(progress?.hints_used ?? 0);
-  const { sendTutorRequest, isLoading: isAiLoading } = useTutor();
+  const { sendTutorRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
 
   // 완료/XP 상태
   const [isCompleted, setIsCompleted] = useState(
@@ -414,6 +415,9 @@ export function QuestShell({
         stageOrder={quest.stage.order}
         questTitle={quest.title}
       />
+
+      {/* API 키 미설정 배너 */}
+      {hasApiKey === false && <ApiKeyBanner />}
 
       {/* 완료 배너 */}
       {isCompleted && (

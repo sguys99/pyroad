@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { callTutor } from '@/lib/tutor/client';
+import { getAvailableProviders } from '@/lib/tutor/providers/factory';
 import {
   SYSTEM_PROMPT,
   buildQuestIntroPrompt,
@@ -153,21 +154,26 @@ export async function POST(request: Request) {
   let providerType: LLMProviderType | undefined = body.provider;
   let customApiKey: string | undefined;
 
-  if (!providerType) {
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('preferred_provider, custom_api_keys')
-      .eq('id', user.id)
-      .single();
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('preferred_provider, custom_api_keys')
+    .eq('id', user.id)
+    .single();
 
+  if (!providerType) {
     if (userProfile?.preferred_provider) {
       providerType = userProfile.preferred_provider as LLMProviderType;
     }
-    if (userProfile?.custom_api_keys && providerType) {
-      const keys = userProfile.custom_api_keys as Record<string, string>;
-      customApiKey = keys[providerType] || undefined;
-    }
   }
+  if (userProfile?.custom_api_keys && providerType) {
+    const keys = userProfile.custom_api_keys as Record<string, string>;
+    customApiKey = keys[providerType] || undefined;
+  }
+
+  // 서버 env 키도 없고 사용자 커스텀 키도 없는지 확인
+  const available = getAvailableProviders();
+  const userKeys = (userProfile?.custom_api_keys ?? {}) as Record<string, string>;
+  const hasAnyKey = available.length > 0 || Object.values(userKeys).some((k) => !!k);
 
   const result = await callTutor(SYSTEM_PROMPT, userPrompt, 600, providerType, customApiKey);
 
@@ -204,6 +210,10 @@ export async function POST(request: Request) {
   }
 
   // 8. 응답
-  const response: TutorResponse = { message, is_fallback: isFallback };
+  const response: TutorResponse = {
+    message,
+    is_fallback: isFallback,
+    ...((!hasAnyKey && isFallback) && { no_api_key: true }),
+  };
   return NextResponse.json(response);
 }

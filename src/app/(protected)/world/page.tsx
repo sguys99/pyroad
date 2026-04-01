@@ -2,8 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import { getAvailableProviders } from '@/lib/tutor/providers/factory';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
+import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
 import { PageTransition } from '@/components/shared/PageTransition';
 import type { UserProfile } from '@/lib/types/database';
 
@@ -23,7 +25,7 @@ export default async function WorldPage() {
       supabase.from('user_progress').select('*').eq('user_id', user.id),
       supabase
         .from('users')
-        .select('id, display_name, avatar_url, total_xp, current_level')
+        .select('id, display_name, avatar_url, total_xp, current_level, custom_api_keys')
         .eq('id', user.id)
         .single(),
       supabase
@@ -39,6 +41,12 @@ export default async function WorldPage() {
 
   const stagesWithStatus = getStageStatuses(stages, progress);
 
+  // API 키 상태 확인: 서버 env 키 + 사용자 커스텀 키
+  const serverProviders = getAvailableProviders();
+  const userKeys = (profileResult.data as Record<string, unknown>)?.custom_api_keys as Record<string, string> | undefined;
+  const hasAnyApiKey = serverProviders.length > 0 ||
+    (userKeys && Object.values(userKeys).some((k) => !!k));
+
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
@@ -50,6 +58,8 @@ export default async function WorldPage() {
           내 프로필
         </Link>
       </div>
+
+      {!hasAnyApiKey && <ApiKeyAlert />}
 
       {profile && (
         <div className="mb-6">

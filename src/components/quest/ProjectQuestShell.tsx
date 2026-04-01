@@ -27,6 +27,7 @@ import { StepProgressBar } from './StepProgressBar';
 import { LevelUpCelebration } from './LevelUpCelebration';
 import { BadgeEarnedPopup } from './BadgeEarnedPopup';
 import { ProjectCompleteCelebration } from './ProjectCompleteCelebration';
+import { ApiKeyBanner } from './ApiKeyBanner';
 
 type Tab = 'story' | 'code' | 'result';
 type CelebrationPhase =
@@ -100,7 +101,7 @@ export function ProjectQuestShell({
   const [totalHintsUsed, setTotalHintsUsed] = useState(
     progress?.hints_used ?? 0,
   );
-  const { sendTutorRequest, isLoading: isAiLoading } = useTutor();
+  const { sendTutorRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
 
   // 완료/XP 상태
   const [isProjectComplete, setIsProjectComplete] = useState(
@@ -490,6 +491,9 @@ export function ProjectQuestShell({
         totalSteps={totalSteps}
         stepGoals={steps.map((s: ProjectStep) => s.step_goal)}
       />
+
+      {/* API 키 미설정 배너 */}
+      {hasApiKey === false && <ApiKeyBanner />}
 
       {/* 완료 배너 */}
       {isProjectComplete && (

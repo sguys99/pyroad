@@ -147,13 +147,30 @@ export default function SettingsPage() {
       </div>
 
       {/* API 키 입력 카드 */}
-      <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
-        <h2 className="mb-1 text-sm font-bold text-foreground">
-          API 키 설정 (선택사항)
-        </h2>
-        <p className="mb-3 text-xs text-muted-foreground">
-          자신의 API 키를 입력하면 해당 모델을 사용할 수 있어요.
-        </p>
+      <div className={`mb-6 rounded-xl border bg-card p-4 shadow-sm ${
+        settings.available_providers.length === 0
+          ? 'border-amber-400 dark:border-amber-600'
+          : 'border-border'
+      }`}>
+        {settings.available_providers.length === 0 ? (
+          <>
+            <h2 className="mb-1 text-sm font-bold text-amber-700 dark:text-amber-300">
+              API 키를 입력해야 AI 튜터를 사용할 수 있어요
+            </h2>
+            <p className="mb-3 text-xs text-amber-600 dark:text-amber-400">
+              아래 중 하나의 API 키를 입력하면 AI 튜터가 활성화돼요.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="mb-1 text-sm font-bold text-foreground">
+              API 키 설정
+            </h2>
+            <p className="mb-3 text-xs text-muted-foreground">
+              자신의 API 키를 입력하면 해당 모델을 사용할 수 있어요.
+            </p>
+          </>
+        )}
         <div className="flex flex-col gap-3">
           {allProviders.map((provider) => (
             <div key={provider}>
@@ -178,6 +195,14 @@ export default function SettingsPage() {
               />
             </div>
           ))}
+        </div>
+        <div className="mt-3 rounded-lg bg-muted/50 p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-1">API 키는 어디서 받나요?</p>
+          <ul className="text-xs text-muted-foreground space-y-0.5">
+            <li>Anthropic: console.anthropic.com</li>
+            <li>OpenAI: platform.openai.com/api-keys</li>
+            <li>Google: aistudio.google.com/apikey</li>
+          </ul>
         </div>
       </div>
 
