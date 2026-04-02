@@ -1,9 +1,10 @@
 'use client';
 
 import { Star, Lightbulb } from 'lucide-react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { useEffect } from 'react';
+import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { getLevelTitle } from '@/lib/quest/xp';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 interface QuestStatusBarProps {
   xp: number;
@@ -27,6 +28,32 @@ function AnimatedXP({ value }: { value: number }) {
   return <motion.span>{display}</motion.span>;
 }
 
+function ByeolttongiXPEffect() {
+  const [phase, setPhase] = useState<'flying' | 'sparkling'>('flying');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPhase('sparkling'), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="ml-0.5"
+        initial={{ opacity: 0, x: -12, y: 8 }}
+        animate={{
+          opacity: 1,
+          x: 0,
+          y: 0,
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.4 }}
+      >
+        <CharacterAvatar character="byeolttongi" expression={phase} size="sm" />
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export function QuestStatusBar({
   xp,
   level,
@@ -46,14 +73,17 @@ export function QuestStatusBar({
             <Star className="h-4 w-4" />
             <AnimatedXP value={xp} /> XP
             {earnedXP !== null && (
-              <motion.span
-                className="ml-1 text-xs font-bold text-primary"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                +{earnedXP}
-              </motion.span>
+              <>
+                <motion.span
+                  className="ml-1 text-xs font-bold text-primary"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  +{earnedXP}
+                </motion.span>
+                <ByeolttongiXPEffect />
+              </>
             )}
           </span>
           <span className="flex items-center gap-1 text-muted-foreground">

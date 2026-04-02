@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { PybaemSvg } from './PybaemSvg';
-import type { Character, Expression, AvatarSize } from './expressions';
+import { BugBugSvg } from './BugBugSvg';
+import { ByeolttongiSvg } from './ByeolttongiSvg';
+import type { Character, Expression, AvatarSize, BugBugExpression, ByeolttongiExpression } from './expressions';
 import { AVATAR_SIZE_MAP } from './expressions';
 
 interface CharacterAvatarProps {
@@ -81,8 +83,8 @@ function renderCharacter(
     case 'pybaem':
       return <PybaemSvg expression={expression as Parameters<typeof PybaemSvg>[0]['expression']} size={size} />;
     case 'bugbug':
+      return <BugBugSvg expression={expression as BugBugExpression} size={size} />;
     case 'byeolttongi':
-      // Phase 4에서 구현 예정, 현재는 파이뱀으로 폴백
-      return <PybaemSvg expression="happy" size={size} />;
+      return <ByeolttongiSvg expression={expression as ByeolttongiExpression} size={size} />;
   }
 }

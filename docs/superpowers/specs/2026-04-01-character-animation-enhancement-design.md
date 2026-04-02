@@ -228,8 +228,8 @@ src/components/quest/celebrations/
 - [x] `src/components/characters/expressions.ts`
 - [x] `src/components/characters/CharacterAvatar.tsx`
 - [x] `src/components/characters/PybaemSvg.tsx`
-- [ ] `src/components/characters/BugBugSvg.tsx` (Phase 4)
-- [ ] `src/components/characters/ByeolttongiSvg.tsx` (Phase 4)
+- [x] `src/components/characters/BugBugSvg.tsx` (Phase 4)
+- [x] `src/components/characters/ByeolttongiSvg.tsx` (Phase 4)
 - [x] `src/components/characters/LottieCharacter.tsx` (Phase 3)
 - [x] `src/components/characters/useCharacterExpression.ts` (Phase 2)
 - [x] `public/characters/` 디렉토리 구조 생성
@@ -273,11 +273,11 @@ src/components/quest/celebrations/
 
 목표: 버그버그, 별똥이 도입 + 월드맵 캐릭터 연출
 
-- [ ] `BugBugSvg` 컴포넌트 (3 표정)
-- [ ] `ByeolttongiSvg` 컴포넌트 (3 표정)
-- [ ] OutputPanel 오류 시 버그버그 등장
-- [ ] WorldMap 현재 스테이지에 파이뱀 위치 표시
-- [ ] XP 획득 시 별똥이 비행 애니메이션
+- [x] `BugBugSvg` 컴포넌트 (3 표정)
+- [x] `ByeolttongiSvg` 컴포넌트 (3 표정)
+- [x] OutputPanel 오류 시 버그버그 등장
+- [x] WorldMap 현재 스테이지에 파이뱀 위치 표시
+- [x] XP 획득 시 별똥이 비행 애니메이션
 
 ### Phase 5: 폴리싱 (1주)
 

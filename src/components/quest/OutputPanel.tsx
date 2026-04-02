@@ -1,16 +1,33 @@
 'use client';
 
 import { CheckCircle, Terminal } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
-import type { PybaemExpression } from '@/components/characters/expressions';
+import type { PybaemExpression, BugBugExpression } from '@/components/characters/expressions';
 
 function TutorAvatar({ expression = 'happy' }: { expression?: PybaemExpression }) {
   return (
     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
       <CharacterAvatar character="pybaem" expression={expression} size="sm" />
     </div>
+  );
+}
+
+function BugBugHelper({ expression }: { expression: BugBugExpression }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, x: 8 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 8 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className="flex h-6 w-6 shrink-0 items-center justify-center"
+      >
+        <CharacterAvatar character="bugbug" expression={expression} size="sm" />
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -53,6 +70,7 @@ export function OutputPanel({
       <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
         <div className="mb-2 flex items-center gap-2">
           <TutorAvatar expression="confused" />
+          <BugBugHelper expression="searching" />
           <span className="font-bold text-foreground">
             앗, 시간이 너무 오래 걸려요!
           </span>
@@ -71,6 +89,7 @@ export function OutputPanel({
       <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
         <div className="mb-2 flex items-center gap-2">
           <TutorAvatar expression="encouraging" />
+          <BugBugHelper expression="found" />
           <span className="font-bold text-foreground">
             앗, 여기를 한번 살펴볼까요?
           </span>
