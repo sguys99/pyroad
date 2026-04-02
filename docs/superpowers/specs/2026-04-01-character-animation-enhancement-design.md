@@ -230,7 +230,7 @@ src/components/quest/celebrations/
 - [x] `src/components/characters/PybaemSvg.tsx`
 - [ ] `src/components/characters/BugBugSvg.tsx` (Phase 4)
 - [ ] `src/components/characters/ByeolttongiSvg.tsx` (Phase 4)
-- [ ] `src/components/characters/LottieCharacter.tsx` (Phase 3)
+- [x] `src/components/characters/LottieCharacter.tsx` (Phase 3)
 - [x] `src/components/characters/useCharacterExpression.ts` (Phase 2)
 - [x] `public/characters/` 디렉토리 구조 생성
 
@@ -257,17 +257,17 @@ src/components/quest/celebrations/
 - [x] OutputPanel 상태별 표정
 - [x] 눈깜빡 애니메이션 추가
 
-### Phase 3: Lottie 축하 장면 (1-2주)
+### Phase 3: Lottie 축하 장면 (1-2주) ✅
 
 목표: 레벨업/프로젝트 완료 시 임팩트 있는 연출
 
-- [ ] `lottie-react` 설치
-- [ ] `LottieCharacter` 컴포넌트 (dynamic import + SVG 폴백)
-- [ ] `pybaem/celebrating.json` Lottie 에셋 제작/소싱
-- [ ] LevelUpCelebration 리팩토링
-- [ ] ProjectCompleteCelebration 리팩토링
-- [ ] `prefers-reduced-motion` 지원
-- [ ] `CelebrationOverlay` 공통 컴포넌트 추출
+- [x] `lottie-react` 설치
+- [x] `LottieCharacter` 컴포넌트 (dynamic import + SVG 폴백)
+- [x] `pybaem/celebrating.json` Lottie 에셋 제작/소싱
+- [x] LevelUpCelebration 리팩토링
+- [x] ProjectCompleteCelebration 리팩토링
+- [x] `prefers-reduced-motion` 지원
+- [x] `CelebrationOverlay` ���통 컴포넌트 추출
 
 ### Phase 4: 보조 캐릭터 + 월드맵 (1-2주)
 

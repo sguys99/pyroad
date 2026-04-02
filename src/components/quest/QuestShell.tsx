@@ -19,8 +19,8 @@ import { ConversationPanel } from './ConversationPanel';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
-import { LevelUpCelebration } from './LevelUpCelebration';
-import { BadgeEarnedPopup } from './BadgeEarnedPopup';
+import { LevelUpCelebration } from './celebrations/LevelUpCelebration';
+import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
 type Tab = 'story' | 'code' | 'result';

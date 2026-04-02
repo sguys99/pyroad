@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { PybaemSvg } from './PybaemSvg';
 import type { Character, Expression, AvatarSize } from './expressions';
 import { AVATAR_SIZE_MAP } from './expressions';
@@ -33,6 +33,7 @@ export function CharacterAvatar({
   className,
 }: CharacterAvatarProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   const px = AVATAR_SIZE_MAP[size];
   const currentExpression = isHovered && onHover ? onHover : expression;
 
@@ -59,7 +60,7 @@ export function CharacterAvatar({
   return (
     <motion.div
       className={className}
-      animate={animated ? breatheAnimation : undefined}
+      animate={animated && !shouldReduceMotion ? breatheAnimation : undefined}
       whileHover={
         onHover ? { scale: 1.08, transition: { type: 'spring', stiffness: 400, damping: 17 } } : undefined
       }

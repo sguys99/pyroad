@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
+import { useState, useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Code, Lightbulb, Map, Flame, Trophy } from 'lucide-react';
 import { getBadgeDefinition, type BadgeType } from '@/lib/quest/badges';
+import { CelebrationOverlay, type ConfettiBurst } from './CelebrationOverlay';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Code,
@@ -24,6 +24,7 @@ export function BadgeEarnedPopup({
   onComplete,
 }: BadgeEarnedPopupProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   const advance = useCallback(() => {
     if (currentIndex < badges.length - 1) {
@@ -33,38 +34,42 @@ export function BadgeEarnedPopup({
     }
   }, [currentIndex, badges.length, onComplete]);
 
-  useEffect(() => {
-    confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
-    const timer = setTimeout(advance, 3000);
-    return () => clearTimeout(timer);
-  }, [currentIndex, advance]);
-
   const badge = getBadgeDefinition(badges[currentIndex]);
   const Icon = ICON_MAP[badge.icon] ?? Code;
 
+  const confettiBursts: ConfettiBurst[] = [
+    { particleCount: 50, spread: 60, origin: { y: 0.6, x: 0.5 } },
+  ];
+
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={advance}
+    <CelebrationOverlay
+      onClose={advance}
+      autoCloseMs={3000}
+      confettiBursts={confettiBursts}
+      backdropClass="bg-black/30"
     >
       <AnimatePresence mode="wait">
         <motion.div
           key={badge.type}
-          className="mx-4 flex max-w-xs flex-col items-center gap-3 rounded-2xl border-2 border-accent bg-card p-6 shadow-xl"
-          initial={{ scale: 0.5, opacity: 0, y: 30 }}
+          className="flex flex-col items-center gap-3"
+          initial={shouldReduceMotion ? undefined : { scale: 0.5, opacity: 0, y: 30 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.8, opacity: 0, y: -20 }}
-          transition={{ type: 'spring', damping: 18, stiffness: 300 }}
-          onClick={(e) => e.stopPropagation()}
+          exit={shouldReduceMotion ? undefined : { scale: 0.8, opacity: 0, y: -20 }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { type: 'spring', damping: 18, stiffness: 300 }
+          }
         >
           <motion.div
             className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/20"
-            initial={{ rotate: -20, scale: 0 }}
+            initial={shouldReduceMotion ? undefined : { rotate: -20, scale: 0 }}
             animate={{ rotate: 0, scale: 1 }}
-            transition={{ type: 'spring', delay: 0.15 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { type: 'spring', delay: 0.15 }
+            }
           >
             <Icon className="h-8 w-8 text-accent" />
           </motion.div>
@@ -84,6 +89,6 @@ export function BadgeEarnedPopup({
           )}
         </motion.div>
       </AnimatePresence>
-    </motion.div>
+    </CelebrationOverlay>
   );
 }

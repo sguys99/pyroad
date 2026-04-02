@@ -24,9 +24,9 @@ import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { StepProgressBar } from './StepProgressBar';
-import { LevelUpCelebration } from './LevelUpCelebration';
-import { BadgeEarnedPopup } from './BadgeEarnedPopup';
-import { ProjectCompleteCelebration } from './ProjectCompleteCelebration';
+import { LevelUpCelebration } from './celebrations/LevelUpCelebration';
+import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
+import { ProjectCompleteCelebration } from './celebrations/ProjectCompleteCelebration';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
 type Tab = 'story' | 'code' | 'result';
@@ -588,6 +588,7 @@ export function ProjectQuestShell({
         {celebrationPhase === 'project_complete' && earnedXP != null && (
           <ProjectCompleteCelebration
             earnedXP={earnedXP}
+            questName={quest.title}
             onClose={() =>
               setCelebrationPhase(
                 levelUpInfo ? 'level_up' : newBadges.length > 0 ? 'badges' : 'done',
