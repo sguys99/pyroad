@@ -2,7 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import { QuestShell } from '@/components/quest/QuestShell';
 import { ProjectQuestShell } from '@/components/quest/ProjectQuestShell';
-import type { QuestWithStage, UserProgress } from '@/lib/types/database';
+import type {
+  QuestWithStage,
+  UserProgress,
+  PromptSkeleton,
+} from '@/lib/types/database';
 
 interface Props {
   params: Promise<{ questId: string }>;
@@ -19,7 +23,9 @@ export default async function QuestPage({ params }: Props) {
   const [questResult, progressResult, profileResult] = await Promise.all([
     supabase
       .from('quests')
-      .select('*, stage:stages(id, title, order, theme_name)')
+      .select(
+        'id, stage_id, order, title, concept, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name)',
+      )
       .eq('id', questId)
       .single(),
     supabase
@@ -38,6 +44,13 @@ export default async function QuestPage({ params }: Props) {
   if (!questResult.data) notFound();
 
   const quest = questResult.data as unknown as QuestWithStage;
+
+  // 클라이언트에 expected_output 노출 방지: steps 내 expected_output 제거
+  if (quest.prompt_skeleton.steps) {
+    quest.prompt_skeleton.steps = quest.prompt_skeleton.steps.map(
+      ({ expected_output: _eo, ...rest }) => ({ ...rest, expected_output: '' }),
+    );
+  }
   const progress = progressResult.data as UserProgress | null;
   const profile = profileResult.data;
 

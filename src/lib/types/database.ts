@@ -94,7 +94,15 @@ export interface StageWithQuests extends Stage {
   quests: Quest[];
 }
 
-export interface QuestWithStage extends Quest {
+/** 서버 전용: expected_output 포함 */
+export interface QuestWithStageServer extends Quest {
+  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'>;
+}
+
+/** 클라이언트에 전달되는 Quest (expected_output 제외) */
+export type QuestClientSafe = Omit<Quest, 'expected_output'>;
+
+export interface QuestWithStage extends QuestClientSafe {
   stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'>;
 }
 

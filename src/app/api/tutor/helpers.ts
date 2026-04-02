@@ -9,7 +9,7 @@ import {
   buildProjectGuidePrompt,
 } from '@/lib/tutor/prompts';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
-import type { QuestWithStage } from '@/lib/types/database';
+import type { QuestWithStageServer } from '@/lib/types/database';
 
 const VALID_TYPES = [
   'quest_intro',
@@ -34,7 +34,7 @@ export interface PreparedTutorCall {
   customApiKey: string | undefined;
   hasAnyKey: boolean;
   fast: boolean;
-  quest: QuestWithStage;
+  quest: QuestWithStageServer;
   body: TutorRequest;
 }
 
@@ -110,7 +110,7 @@ export async function prepareTutorCall(
     return Response.json({ error: 'Quest not found' }, { status: 404 });
   }
 
-  const q = quest as unknown as QuestWithStage;
+  const q = quest as unknown as QuestWithStageServer;
   const skeleton = q.prompt_skeleton;
 
   // 4. 추가 검증
@@ -206,7 +206,7 @@ export async function prepareTutorCall(
 
 export function buildFallbackMessage(
   body: TutorRequest,
-  quest: QuestWithStage,
+  quest: QuestWithStageServer,
 ): string {
   const skeleton = quest.prompt_skeleton;
 

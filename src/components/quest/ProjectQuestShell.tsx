@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
 import { useTutor } from '@/lib/tutor/useTutor';
 import { createClient } from '@/lib/supabase/client';
-import { validateResult } from '@/lib/quest/validation';
 import { getLevelTitle } from '@/lib/quest/xp';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type {
@@ -333,13 +332,24 @@ export function ProjectQuestShell({
       return;
     }
 
-    // 현재 단계 기준 검증
-    const vResult = validateResult({
-      validationType: currentStepDef.validation_type,
-      expectedOutput: currentStepDef.expected_output,
-      stdout: result.stdout,
-      studentCode: code,
-    });
+    // 서버 사이드 검증
+    let vResult: ValidationResult;
+    try {
+      const validateRes = await fetch('/api/quest/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quest_id: quest.id,
+          stdout: result.stdout,
+          student_code: code,
+          step_number: currentStep,
+        }),
+      });
+      const validateData = await validateRes.json();
+      vResult = { passed: validateData.passed, type: currentStepDef.validation_type };
+    } catch {
+      vResult = { passed: false, type: currentStepDef.validation_type };
+    }
     setValidationRes(vResult);
 
     if (vResult.passed) {

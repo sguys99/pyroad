@@ -243,13 +243,13 @@ VALUES (
     "learning_goals": ["int()로 문자열을 숫자로 바꿀 수 있다", "str()로 숫자를 문자열로 바꿀 수 있다", "형변환이 필요한 상황을 이해한다"],
     "story_context": "변신 마법사를 만났어요! 글자를 숫자로, 숫자를 글자로 변신시킬 수 있대요.",
     "exercise_description": "문자열 \"100\"과 \"23\"을 int()로 숫자로 바꿔서 더한 뒤 결과를 출력하세요",
-    "starter_code": "# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = int(a) + int(b)\nprint(result)",
+    "starter_code": "# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = \nprint(result)",
     "expected_output_hint": "123이 출력되어야 해요",
     "fallback_text": "\"100\"은 글자예요. int(\"100\")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요.",
     "hints": {
       "level_1": "따옴표가 있으면 글자, 없으면 숫자예요. 글자를 숫자로 바꾸려면?",
-      "level_2": "int() 안에 문자열을 넣으면 숫자로 변신해요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_2": "int() 안에 문자열을 넣으면 숫자로 변신해요! int(a) + int(b)를 해보세요!",
+      "level_3": "result = int(a) + int(b) 이렇게 써보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -411,13 +411,13 @@ VALUES (
     "learning_goals": ["for 반복문의 구조를 이해한다", "range()로 숫자 범위를 만들 수 있다", "반복문 안의 코드가 여러 번 실행되는 것을 안다"],
     "story_context": "동굴 입구에서 마법 숫자를 세어야 문이 열려요! 1부터 5까지 세어볼까요?",
     "exercise_description": "for 반복문과 range()를 사용하여 1부터 5까지 한 줄에 하나씩 출력하세요",
-    "starter_code": "# 1부터 5까지 세어보세요!\nfor i in range(1, 6):\n    print(i)",
+    "starter_code": "# 1부터 5까지 세어보세요!\n# for 반복문과 range()를 사용해보세요!\n\nfor i in range(__, __):\n    print(i)",
     "expected_output_hint": "1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요",
     "fallback_text": "for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요).",
     "hints": {
-      "level_1": "for는 같은 일을 여러 번 반복해주는 마법이에요!",
+      "level_1": "for는 같은 일을 여러 번 반복해주는 마법이에요! range()에 시작과 끝 숫자를 넣어보세요.",
       "level_2": "range(1, 6)은 1, 2, 3, 4, 5를 만들어줘요. 6은 포함되지 않아요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_3": "for i in range(1, 6): 이렇게 빈칸을 채워보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -447,13 +447,13 @@ VALUES (
     "learning_goals": ["for 반복문을 활용하여 패턴을 출력할 수 있다", "변수를 활용한 계산식을 반복문에서 사용할 수 있다"],
     "story_context": "동굴의 마법사가 구구단 시험을 내요! 2단을 외워볼까요?",
     "exercise_description": "for 반복문으로 2단 구구단(2x1=2부터 2x9=18)을 출력하세요. 형식: 2 x 1 = 2",
-    "starter_code": "# 2단 구구단을 출력해보세요!\nfor i in range(1, 10):\n    print(2, \"x\", i, \"=\", 2 * i)",
+    "starter_code": "# 2단 구구단을 출력해보세요!\n# 형식: 2 x 1 = 2\n\nfor i in range(1, 10):\n    print()",
     "expected_output_hint": "2 x 1 = 2 부터 2 x 9 = 18 까지 출력되어야 해요",
     "fallback_text": "for i in range(1, 10)으로 i가 1부터 9까지 바뀌면서 2 * i를 계산해요! print(2, \"x\", i, \"=\", 2*i)로 예쁘게 출력할 수 있어요.",
     "hints": {
-      "level_1": "구구단은 같은 숫자에 1, 2, 3, ... 9를 곱하는 거예요!",
-      "level_2": "range(1, 10)으로 1부터 9까지 반복하고, 2 * i로 곱해보세요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_1": "구구단은 같은 숫자에 1, 2, 3, ... 9를 곱하는 거예요! print() 안에 무엇을 넣어야 할까요?",
+      "level_2": "print() 안에 2, \"x\", i, \"=\", 2 * i 이렇게 넣어보세요!",
+      "level_3": "print(2, \"x\", i, \"=\", 2 * i) 이렇게 써보세요!"
     }
   }'::jsonb,
   'contains',
@@ -479,13 +479,13 @@ VALUES (
     "learning_goals": ["while 반복문의 구조를 이해한다", "break로 반복문을 중간에 멈출 수 있다", "조건이 거짓이 될 때까지 반복하는 것을 안다"],
     "story_context": "동굴 속에서 보물을 찾아 헤매는 모험가! 보물을 찾으면 멈춰야 해요.",
     "exercise_description": "위치를 1부터 하나씩 늘려가며 위치가 5일 때 \"보물 발견!\"을 출력하고 반복을 멈추세요",
-    "starter_code": "# 보물을 찾아보세요!\nposition = 1\n\nwhile position <= 10:\n    if position == 5:\n        print(\"보물 발견!\")\n        break\n    position = position + 1",
+    "starter_code": "# 보물을 찾아보세요!\nposition = 1\n\nwhile position <= 10:\n    if position == 5:\n        # 보물을 찾으면 메시지를 출력하고 멈추세요!\n        \n    position = position + 1",
     "expected_output_hint": "보물 발견! 이 출력되어야 해요",
     "fallback_text": "while은 조건이 맞는 동안 계속 반복해요. break를 만나면 반복을 멈춰요! if position == 5: 에서 보물을 찾으면 break로 탈출!",
     "hints": {
-      "level_1": "while은 조건이 참인 동안 계속 반복해요. 언제 멈춰야 할까요?",
-      "level_2": "position이 5가 되면 break로 반복을 멈추면 돼요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_1": "while은 조건이 참인 동안 계속 반복해요. position이 5가 되면 뭘 해야 할까요?",
+      "level_2": "print()로 메시지를 출력하고, break로 반복을 멈추면 돼요!",
+      "level_3": "print(\"보물 발견!\")\n        break 이렇게 두 줄을 채워보세요!"
     }
   }'::jsonb,
   'contains',
@@ -511,13 +511,13 @@ VALUES (
     "learning_goals": ["continue가 현재 반복만 건너뛰는 것을 안다", "% (나머지) 연산자를 사용할 수 있다", "for와 if를 조합하여 필터링할 수 있다"],
     "story_context": "동굴의 마법 필터! 짝수만 통과시키고 홀수는 막아요.",
     "exercise_description": "1부터 10까지 반복하면서 짝수만 출력하세요 (홀수는 continue로 건너뛰기)",
-    "starter_code": "# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        continue\n    print(i)",
+    "starter_code": "# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        # 홀수면 건너뛰세요!\n        \n    print(i)",
     "expected_output_hint": "2, 4, 6, 8, 10이 한 줄씩 출력되어야 해요",
     "fallback_text": "% 는 나머지를 구하는 연산자예요! i % 2 != 0은 홀수라는 뜻이에요. continue를 만나면 아래 코드를 건너뛰고 다음 반복으로 가요.",
     "hints": {
-      "level_1": "짝수는 2로 나누어 떨어지는 숫자예요. 나머지가 0!",
-      "level_2": "i % 2 != 0이면 홀수니까 continue로 건너뛰면 돼요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_1": "짝수는 2로 나누어 떨어지는 숫자예요. 홀수는 건너뛰려면 어떤 명령어를 써야 할까요?",
+      "level_2": "continue를 쓰면 아래 코드를 건너뛰고 다음 반복으로 가요!",
+      "level_3": "continue 이렇게 한 줄만 써보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -551,13 +551,13 @@ VALUES (
     "learning_goals": ["대괄호 []로 리스트를 만들 수 있다", "리스트에 여러 값을 저장할 수 있다", "리스트 전체를 출력할 수 있다"],
     "story_context": "호수 옆 과일 가게에서 과일 바구니를 만들어요! 좋아하는 과일을 담아봐요.",
     "exercise_description": "fruits라는 리스트에 \"사과\", \"바나나\", \"포도\"를 넣고 출력하세요",
-    "starter_code": "# 과일 바구니를 만들어보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\nprint(fruits)",
+    "starter_code": "# 과일 바구니를 만들어보세요!\n# 대괄호 [] 안에 \"사과\", \"바나나\", \"포도\"를 넣어보세요!\n\nfruits = []\nprint(fruits)",
     "expected_output_hint": "사과, 바나나, 포도가 리스트로 출력되어야 해요",
     "fallback_text": "리스트는 여러 값을 한 상자에 담는 거예요! [\"사과\", \"바나나\", \"포도\"] 이렇게 대괄호 안에 쉼표로 구분해서 넣어요.",
     "hints": {
       "level_1": "리스트는 대괄호 [] 안에 값을 넣어 만들어요!",
-      "level_2": "각 과일을 따옴표로 감싸고 쉼표로 구분해요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_2": "각 과일을 따옴표로 감싸고 쉼표로 구분해요! [\"사과\", \"바나나\", ...]",
+      "level_3": "fruits = [\"사과\", \"바나나\", \"포도\"] 이렇게 써보세요!"
     }
   }'::jsonb,
   'contains',
@@ -583,13 +583,13 @@ VALUES (
     "learning_goals": ["인덱스 번호로 리스트의 특정 값을 꺼낼 수 있다", "인덱스가 0부터 시작하는 것을 안다", "슬라이싱으로 리스트의 일부를 잘라낼 수 있다"],
     "story_context": "보물 목록에서 원하는 보물을 골라내봐요! 몇 번째 보물을 꺼낼까요?",
     "exercise_description": "treasures 리스트에서 인덱스를 사용하여 \"다이아몬드\"를 출력하세요",
-    "starter_code": "# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[2])",
+    "starter_code": "# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[__])",
     "expected_output_hint": "다이아몬드 가 출력되어야 해요",
     "fallback_text": "리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요.",
     "hints": {
       "level_1": "리스트의 번호(인덱스)는 0부터 시작해요. 다이아몬드는 몇 번째일까요?",
-      "level_2": "금화=0, 은화=1, 다이아몬드=2! treasures[2]로 꺼낼 수 있어요.",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_2": "금화=0, 은화=1, 다이아몬드=2! 대괄호 안에 번호를 넣어보세요.",
+      "level_3": "print(treasures[2]) 이렇게 빈칸에 2를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -615,13 +615,13 @@ VALUES (
     "learning_goals": ["append()로 리스트에 새 값을 추가할 수 있다", "len()으로 리스트의 길이를 구할 수 있다"],
     "story_context": "호수 마을에서 새 친구를 만났어요! 친구 목록에 추가하고 몇 명인지 세어봐요.",
     "exercise_description": "friends 리스트에 \"파이뱀\"을 append하고, len()으로 친구 수를 출력하세요",
-    "starter_code": "# 친구를 추가하고 몇 명인지 세어보세요!\nfriends = [\"토끼\", \"거북이\", \"다람쥐\"]\nfriends.append(\"파이뱀\")\nprint(len(friends))",
+    "starter_code": "# 친구를 추가하고 몇 명인지 세어보세요!\nfriends = [\"토끼\", \"거북이\", \"다람쥐\"]\n\n# 아래에 \"파이뱀\"을 추가하고, 친구 수를 출력하세요!\n\nprint()",
     "expected_output_hint": "4 가 출력되어야 해요 (3명 + 파이뱀 1명)",
     "fallback_text": "append()는 리스트 끝에 새 값을 추가해요! len()은 리스트에 몇 개가 있는지 세어줘요.",
     "hints": {
-      "level_1": "append()로 리스트에 새 친구를 추가할 수 있어요!",
-      "level_2": "len()은 리스트의 길이(개수)를 알려줘요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_1": "append()로 리스트에 새 친구를 추가할 수 있어요! friends.append()를 써보세요.",
+      "level_2": "friends.append(\"파이뱀\")으로 추가하고, len(friends)로 몇 명인지 세어보세요!",
+      "level_3": "friends.append(\"파이뱀\")\nprint(len(friends)) 이렇게 써보세요!"
     }
   }'::jsonb,
   'contains',
@@ -651,17 +651,17 @@ VALUES (
     "learning_goals": ["def 키워드로 함수를 만들 수 있다", "만든 함수를 호출하여 실행할 수 있다", "함수가 코드를 묶어서 재사용하는 것임을 이해한다"],
     "story_context": "탑의 마법사에게 인사 마법을 배워요! 한 번 만들면 여러 번 사용할 수 있어요.",
     "exercise_description": "greet라는 함수를 만들어 \"안녕! 나는 파이뱀이야!\"를 출력하고, 함수를 호출하세요",
-    "starter_code": "# 인사하는 함수를 만들어보세요!\ndef greet():\n    print(\"안녕! 나는 파이뱀이야!\")\n\ngreet()",
+    "starter_code": "# 인사하는 함수를 만들어보세요!\ndef greet():\n    # \"안녕! 나는 파이뱀이야!\"를 출력하세요!\n    \n\ngreet()",
     "expected_output_hint": "안녕! 나는 파이뱀이야! 가 출력되어야 해요",
     "fallback_text": "def greet(): 으로 함수를 만들고, 안에 실행할 코드를 쓴 뒤, greet()으로 호출해요! 함수는 코드를 묶어놓은 마법 주문서예요.",
     "hints": {
-      "level_1": "함수는 def 이름(): 으로 만들어요. 마법 주문서를 만드는 거예요!",
-      "level_2": "def 아래에 들여쓰기를 하고 실행할 코드를 써요. 그리고 함수이름()으로 실행!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_1": "함수는 def 이름(): 으로 만들어요. 안에 실행할 코드를 써보세요!",
+      "level_2": "def 아래에 들여쓰기를 하고 print()로 메시지를 출력해보세요!",
+      "level_3": "print(\"안녕! 나는 파이뱀이야!\") 이렇게 빈 줄을 채워보세요!"
     }
   }'::jsonb,
-  'code_check',
-  'def',
+  'output_match',
+  '안녕! 나는 파이뱀이야!',
   50
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -683,13 +683,13 @@ VALUES (
     "learning_goals": ["함수에 매개변수로 값을 전달할 수 있다", "return으로 함수가 결과를 돌려주는 것을 이해한다"],
     "story_context": "탑의 마법 계산기! 두 숫자를 넣으면 합계를 알려줘요.",
     "exercise_description": "add라는 함수를 만들어 두 숫자를 받아 합계를 return하고, add(7, 8)의 결과를 출력하세요",
-    "starter_code": "# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    return a + b\n\nresult = add(7, 8)\nprint(result)",
+    "starter_code": "# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    # 두 숫자를 더한 결과를 return 하세요!\n    \n\nresult = add(7, 8)\nprint(result)",
     "expected_output_hint": "15 가 출력되어야 해요",
     "fallback_text": "매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요.",
     "hints": {
-      "level_1": "함수 이름 옆 괄호 안에 받을 값의 이름을 써요!",
+      "level_1": "함수 이름 옆 괄호 안의 a, b가 매개변수예요. 이 둘을 더하면?",
       "level_2": "return은 함수가 결과를 돌려주는 거예요. return a + b 이렇게!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_3": "return a + b 이렇게 빈 줄을 채워보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -715,13 +715,13 @@ VALUES (
     "learning_goals": ["max()로 가장 큰 값을 찾을 수 있다", "min()로 가장 작은 값을 찾을 수 있다", "파이썬에 이미 만들어진 함수가 있다는 것을 안다"],
     "story_context": "탑 꼭대기에서 마법 숫자들 중 가장 큰 숫자를 찾는 시험! 파이썬의 내장함수를 사용해봐요.",
     "exercise_description": "numbers 리스트에서 max()를 사용하여 가장 큰 수를 출력하세요",
-    "starter_code": "# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = max(numbers)\nprint(biggest)",
+    "starter_code": "# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = \nprint(biggest)",
     "expected_output_hint": "9 가 출력되어야 해요",
     "fallback_text": "max()는 가장 큰 값을 찾아주는 내장함수예요! max([3, 7, 1, 9, 4])는 9를 돌려줘요. min()은 반대로 가장 작은 값을 찾아줘요.",
     "hints": {
-      "level_1": "파이썬에는 이미 만들어진 편리한 함수들이 있어요!",
-      "level_2": "max()는 가장 큰 값, min()은 가장 작은 값을 찾아줘요!",
-      "level_3": "코드가 이미 완성되어 있어요! 그대로 실행해보세요!"
+      "level_1": "파이썬에는 이미 만들어진 편리한 함수들이 있어요! 가장 큰 값을 찾는 함수는?",
+      "level_2": "max()는 가장 큰 값을 찾아줘요! max(numbers) 이렇게!",
+      "level_3": "biggest = max(numbers) 이렇게 써보세요!"
     }
   }'::jsonb,
   'output_match',
