@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "optimize:svg": "svgo -f public/characters --recursive"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -54,6 +55,7 @@
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8.4.0",
     "prettier": "^3.8.1",
+    "svgo": "^4.0.1",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
     "vitest": "^4.1.2"

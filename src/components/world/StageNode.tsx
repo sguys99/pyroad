@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { CheckCircle, Lock, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StageWithStatus } from '@/lib/types/database';
@@ -34,9 +34,11 @@ interface StageNodeProps {
 
 export function StageNode({ stage }: StageNodeProps) {
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
   const config = statusConfig[stage.status];
   const Icon = config.icon;
   const isClickable = stage.status !== 'locked';
+  const shouldPulse = stage.status === 'in_progress' && !shouldReduceMotion;
 
   function handleClick() {
     if (!isClickable || !stage.firstIncompleteQuestId) return;
@@ -48,8 +50,8 @@ export function StageNode({ stage }: StageNodeProps) {
       {stage.status === 'in_progress' && (
         <motion.div
           className="absolute -right-2 -top-4 z-10"
-          animate={{ y: [0, -4, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          animate={shouldReduceMotion ? undefined : { y: [0, -4, 0] }}
+          transition={shouldReduceMotion ? undefined : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
           <CharacterAvatar character="pybaem" expression="happy" size="sm" />
         </motion.div>
@@ -60,7 +62,7 @@ export function StageNode({ stage }: StageNodeProps) {
         whileTap={isClickable ? { scale: 0.97 } : undefined}
         whileHover={isClickable ? { scale: 1.02 } : undefined}
         animate={
-          stage.status === 'in_progress'
+          shouldPulse
             ? {
                 boxShadow: [
                   '0 0 0 0 rgba(76, 175, 80, 0)',
@@ -71,7 +73,7 @@ export function StageNode({ stage }: StageNodeProps) {
             : undefined
         }
         transition={
-          stage.status === 'in_progress'
+          shouldPulse
             ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
             : undefined
         }

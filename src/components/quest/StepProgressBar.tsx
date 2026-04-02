@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +15,7 @@ export function StepProgressBar({
   totalSteps,
   stepGoals,
 }: StepProgressBarProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="border-b border-border bg-card px-4 py-3">
       <div className="mb-1.5 text-center text-xs font-medium text-muted-foreground">
@@ -51,9 +52,9 @@ export function StepProgressBar({
                     !isCurrent &&
                     'border border-border bg-muted text-muted-foreground',
                 )}
-                animate={isCurrent ? { scale: [1, 1.1, 1] } : {}}
+                animate={isCurrent && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
                 transition={
-                  isCurrent
+                  isCurrent && !shouldReduceMotion
                     ? { repeat: Infinity, duration: 2, ease: 'easeInOut' }
                     : {}
                 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { BookOpen, Lightbulb, MessageCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ interface ConversationPanelProps {
 }
 
 function ThinkingIndicator() {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="flex items-start gap-3 px-4">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -31,12 +32,16 @@ function ThinkingIndicator() {
             <motion.span
               key={i}
               className="block h-2 w-2 rounded-full bg-primary/50"
-              animate={{ y: [0, -6, 0] }}
-              transition={{
-                duration: 0.6,
-                repeat: Infinity,
-                delay: i * 0.15,
-              }}
+              animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
+              transition={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      duration: 0.6,
+                      repeat: Infinity,
+                      delay: i * 0.15,
+                    }
+              }
             />
           ))}
         </div>

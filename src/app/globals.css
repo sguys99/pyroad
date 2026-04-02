@@ -92,6 +92,14 @@
 
 /* 다크 모드: MVP에서 제외 */
 
+/* 접근성: SVG 네이티브 애니메이션 비활성화 (눈깜빡, 반짝 등) */
+@media (prefers-reduced-motion: reduce) {
+  svg animate,
+  svg animateTransform {
+    display: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

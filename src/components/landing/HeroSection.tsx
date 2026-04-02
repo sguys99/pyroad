@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LoginButton } from '@/components/LoginButton';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { LottieCharacter } from '@/components/characters/LottieCharacter';
 
 const container = {
   hidden: {},
@@ -23,17 +25,9 @@ const fadeUp = {
   },
 };
 
-const bounceIn = {
-  hidden: { opacity: 0, scale: 0.3, y: -30 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: 'spring' as const, stiffness: 300, damping: 15 },
-  },
-};
-
 export function HeroSection() {
+  const [entranceDone, setEntranceDone] = useState(false);
+
   return (
     <motion.div
       className="flex flex-col items-center gap-6 text-center"
@@ -41,14 +35,24 @@ export function HeroSection() {
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={bounceIn}>
-        <CharacterAvatar
-          character="pybaem"
-          expression="waving"
-          size="lg"
-          animated
-          onHover="happy"
-        />
+      <motion.div variants={fadeUp}>
+        {entranceDone ? (
+          <CharacterAvatar
+            character="pybaem"
+            expression="waving"
+            size="lg"
+            animated
+            onHover="happy"
+          />
+        ) : (
+          <LottieCharacter
+            character="pybaem"
+            animation="entrance"
+            size={128}
+            fallbackExpression="waving"
+            onComplete={() => setEntranceDone(true)}
+          />
+        )}
       </motion.div>
 
       <motion.h1

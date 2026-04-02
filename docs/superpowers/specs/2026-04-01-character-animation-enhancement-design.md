@@ -269,7 +269,7 @@ src/components/quest/celebrations/
 - [x] `prefers-reduced-motion` 지원
 - [x] `CelebrationOverlay` ���통 컴포넌트 추출
 
-### Phase 4: 보조 캐릭터 + 월드맵 (1-2주)
+### Phase 4: 보조 캐릭터 + 월드맵 (1-2주) ✅
 
 목표: 버그버그, 별똥이 도입 + 월드맵 캐릭터 연출
 
@@ -279,15 +279,15 @@ src/components/quest/celebrations/
 - [x] WorldMap 현재 스테이지에 파이뱀 위치 표시
 - [x] XP 획득 시 별똥이 비행 애니메이션
 
-### Phase 5: 폴리싱 (1주)
+### Phase 5: 폴리싱 (1주) ✅
 
 목표: 최종 품질 점검 + 랜딩 페이지 완성
 
-- [ ] 랜딩 페이지 Lottie 입장 애니메이션
-- [ ] Lighthouse 성능 감사
-- [ ] 저사양 디바이스 테스트 (CPU/네트워크 쓰로틀링)
-- [ ] reduced-motion 전체 점검
-- [ ] SVGO 전체 최적화 패스
+- [x] 랜딩 페이지 Lottie 입장 애니메이션
+- [x] Lighthouse 성능 감사
+- [x] 저사양 디바이스 테스트 (CPU/네트워크 쓰로틀링)
+- [x] reduced-motion 전체 점검
+- [x] SVGO 전체 최적화 패스
 
 ---
 
@@ -296,6 +296,6 @@ src/components/quest/celebrations/
 - [ ] **시각적 확인**: 모든 페이지(랜딩, 월드맵, 퀘스트, 프로필)에서 캐릭터가 올바르게 표시되는지 확인
 - [ ] **표정 변화**: 퀘스트 화면에서 AI 대화, 코드 실행 성공/실패 시 표정이 적절히 변경되는지 확인
 - [ ] **Lottie 축하**: 레벨업, 프로젝트 완료 트리거 시 Lottie 애니메이션 재생 확인
-- [ ] **성능**: Lighthouse Performance 90+ 유지, Lottie 동적 로딩으로 초기 번들 영향 없음 확인
-- [ ] **접근성**: `prefers-reduced-motion` 활성화 시 모든 애니메이션이 정적 SVG로 폴백되는지 확인
+- [x] **성능**: Lighthouse Performance 90+ 유지, Lottie 동적 로딩으로 초기 번들 영향 없음 확인
+- [x] **접근성**: `prefers-reduced-motion` 활성화 시 모든 애니메이션이 정적 SVG로 폴백되는지 확인
 - [ ] **반응형**: 320px~1440px 범위에서 캐릭터 크기(sm/md/lg)가 적절하게 표시되는지 확인
