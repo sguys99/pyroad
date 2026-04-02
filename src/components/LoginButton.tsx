@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,7 @@ export function LoginButton() {
   };
 
   return (
-    <motion.div
+    <m.div
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -24,6 +24,6 @@ export function LoginButton() {
       <Button size="lg" onClick={handleLogin}>
         Google로 시작하기 🚀
       </Button>
-    </motion.div>
+    </m.div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { getXPProgress } from '@/lib/quest/xp';
 
 interface XPProgressBarProps {
@@ -24,7 +24,7 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
           </div>
         )}
         <div className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}>
-          <motion.div
+          <m.div
             className="h-full rounded-full bg-primary"
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
@@ -46,7 +46,7 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
         </div>
       )}
       <div className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}>
-        <motion.div
+        <m.div
           className="h-full rounded-full bg-primary"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}

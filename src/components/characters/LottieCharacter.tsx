@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useReducedMotion } from 'framer-motion';
 import { CharacterAvatar } from './CharacterAvatar';
@@ -18,7 +18,7 @@ interface LottieCharacterProps {
   onComplete?: () => void;
 }
 
-export function LottieCharacter({
+export const LottieCharacter = memo(function LottieCharacter({
   character,
   animation,
   size,
@@ -89,4 +89,4 @@ export function LottieCharacter({
       />
     </div>
   );
-}
+});

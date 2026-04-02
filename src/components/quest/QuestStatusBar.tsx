@@ -1,7 +1,7 @@
 'use client';
 
 import { Star, Lightbulb } from 'lucide-react';
-import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
+import { m, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
@@ -25,7 +25,7 @@ function AnimatedXP({ value }: { value: number }) {
     return controls.stop;
   }, [value, motionVal]);
 
-  return <motion.span>{display}</motion.span>;
+  return <m.span>{display}</m.span>;
 }
 
 function ByeolttongiXPEffect() {
@@ -38,7 +38,7 @@ function ByeolttongiXPEffect() {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         className="ml-0.5"
         initial={{ opacity: 0, x: -12, y: 8 }}
         animate={{
@@ -49,7 +49,7 @@ function ByeolttongiXPEffect() {
         transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.4 }}
       >
         <CharacterAvatar character="byeolttongi" expression={phase} size="sm" />
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }
@@ -74,14 +74,14 @@ export function QuestStatusBar({
             <AnimatedXP value={xp} /> XP
             {earnedXP !== null && (
               <>
-                <motion.span
+                <m.span
                   className="ml-1 text-xs font-bold text-primary"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
                   +{earnedXP}
-                </motion.span>
+                </m.span>
                 <ByeolttongiXPEffect />
               </>
             )}

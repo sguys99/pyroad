@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import type { StageWithStatus } from '@/lib/types/database';
 import { StageNode } from './StageNode';
 
@@ -30,27 +30,27 @@ export function WorldMap({ stages }: WorldMapProps) {
   const reversed = [...stages].sort((a, b) => b.order - a.order);
 
   return (
-    <motion.div
+    <m.div
       className="flex flex-col items-center gap-2 px-4 pb-8"
       variants={container}
       initial="hidden"
       animate="show"
     >
       {reversed.map((stage, index) => (
-        <motion.div
+        <m.div
           key={stage.id}
           className="flex flex-col items-center w-full"
           variants={item}
         >
           <StageNode stage={stage} />
           {index < reversed.length - 1 && (
-            <motion.div
+            <m.div
               className="h-6 w-0.5 bg-border"
               variants={item}
             />
           )}
-        </motion.div>
+        </m.div>
       ))}
-    </motion.div>
+    </m.div>
   );
 }

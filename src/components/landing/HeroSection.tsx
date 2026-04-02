@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { LoginButton } from '@/components/LoginButton';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
@@ -29,13 +29,13 @@ export function HeroSection() {
   const [entranceDone, setEntranceDone] = useState(false);
 
   return (
-    <motion.div
+    <m.div
       className="flex flex-col items-center gap-6 text-center"
       variants={container}
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={fadeUp}>
+      <m.div variants={fadeUp}>
         {entranceDone ? (
           <CharacterAvatar
             character="pybaem"
@@ -53,29 +53,29 @@ export function HeroSection() {
             onComplete={() => setEntranceDone(true)}
           />
         )}
-      </motion.div>
+      </m.div>
 
-      <motion.h1
+      <m.h1
         className="text-4xl font-bold text-primary"
         variants={fadeUp}
       >
         pyRoad
-      </motion.h1>
+      </m.h1>
 
-      <motion.p className="max-w-md text-lg text-foreground" variants={fadeUp}>
+      <m.p className="max-w-md text-lg text-foreground" variants={fadeUp}>
         안녕! 나는 파이뱀 선생님이야~
-      </motion.p>
+      </m.p>
 
-      <motion.p
+      <m.p
         className="max-w-md text-base text-muted-foreground"
         variants={fadeUp}
       >
         함께 파이썬 모험을 떠나볼래?
-      </motion.p>
+      </m.p>
 
-      <motion.div variants={fadeUp}>
+      <m.div variants={fadeUp}>
         <LoginButton />
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }

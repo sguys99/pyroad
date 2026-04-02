@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 export interface ConfettiBurst {
@@ -62,7 +62,7 @@ export function CelebrationOverlay({
   }, [onClose, autoCloseMs, confettiBursts, shouldReduceMotion]);
 
   return (
-    <motion.div
+    <m.div
       className={`fixed inset-0 z-50 flex items-center justify-center ${backdropClass}`}
       data-testid="celebration-overlay"
       initial={{ opacity: 0 }}
@@ -71,7 +71,7 @@ export function CelebrationOverlay({
       transition={shouldReduceMotion ? instantConfig : undefined}
       onClick={onClose}
     >
-      <motion.div
+      <m.div
         className="mx-4 flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-card p-8 shadow-xl"
         initial={shouldReduceMotion ? undefined : { scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -80,7 +80,7 @@ export function CelebrationOverlay({
         onClick={(e) => e.stopPropagation()}
       >
         {children}
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }

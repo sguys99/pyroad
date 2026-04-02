@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { CelebrationOverlay, type ConfettiBurst } from './CelebrationOverlay';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
 
@@ -28,7 +28,7 @@ export function LevelUpCelebration({
       autoCloseMs={5000}
       confettiBursts={confettiBursts}
     >
-      <motion.div
+      <m.div
         initial={{ rotate: -30, scale: 0 }}
         animate={{ rotate: 0, scale: 1 }}
         transition={{ type: 'spring', delay: 0.2 }}
@@ -39,29 +39,29 @@ export function LevelUpCelebration({
           size={80}
           fallbackExpression="celebrating"
         />
-      </motion.div>
+      </m.div>
 
       <p className="text-sm font-medium text-muted-foreground">레벨 업!</p>
 
-      <motion.p
+      <m.p
         className="text-5xl font-black text-primary"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', delay: 0.3 }}
       >
         Lv.{newLevel}
-      </motion.p>
+      </m.p>
 
-      <motion.p
+      <m.p
         className="text-xl font-bold text-foreground"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
         {newTitle}
-      </motion.p>
+      </m.p>
 
-      <motion.button
+      <m.button
         className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -71,7 +71,7 @@ export function LevelUpCelebration({
         transition={{ delay: 0.7 }}
       >
         멋져요!
-      </motion.button>
+      </m.button>
     </CelebrationOverlay>
   );
 }

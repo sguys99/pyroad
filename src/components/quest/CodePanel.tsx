@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Play, Loader2, RefreshCw } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from './CodeEditor';
 import { OutputPanel } from './OutputPanel';
@@ -34,7 +34,7 @@ function CodingTipRotator() {
       <span className="shrink-0"><CharacterAvatar character="pybaem" expression="teaching" size="sm" /></span>
       <div className="min-h-[20px] flex-1">
         <AnimatePresence mode="wait">
-          <motion.p
+          <m.p
             key={tipIndex}
             className="text-xs text-foreground"
             initial={{ opacity: 0, y: 6 }}
@@ -43,7 +43,7 @@ function CodingTipRotator() {
             transition={{ duration: 0.25 }}
           >
             {CODING_TIPS[tipIndex]}
-          </motion.p>
+          </m.p>
         </AnimatePresence>
       </div>
     </div>
@@ -91,7 +91,7 @@ export function CodePanel({
             실행기 다시 불러오기
           </Button>
         ) : (
-          <motion.div
+          <m.div
             whileHover={canRun ? { scale: 1.03 } : undefined}
             whileTap={canRun ? { scale: 0.97 } : undefined}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -119,7 +119,7 @@ export function CodePanel({
                 </>
               )}
             </Button>
-          </motion.div>
+          </m.div>
         )}
 
         {isError && (

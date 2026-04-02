@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -41,7 +41,7 @@ export function StepProgressBar({
                   )}
                 />
               )}
-              <motion.div
+              <m.div
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
                   isCompleted &&
@@ -60,7 +60,7 @@ export function StepProgressBar({
                 }
               >
                 {isCompleted ? <Check className="h-3.5 w-3.5" /> : step}
-              </motion.div>
+              </m.div>
             </div>
           );
         })}

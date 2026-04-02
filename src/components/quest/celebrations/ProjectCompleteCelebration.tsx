@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { CelebrationOverlay, type ConfettiBurst } from './CelebrationOverlay';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
 
@@ -51,7 +51,7 @@ export function ProjectCompleteCelebration({
       autoCloseMs={6000}
       confettiBursts={confettiBursts}
     >
-      <motion.div
+      <m.div
         initial={{ rotate: -30, scale: 0 }}
         animate={{ rotate: 0, scale: 1 }}
         transition={{ type: 'spring', delay: 0.2 }}
@@ -62,18 +62,18 @@ export function ProjectCompleteCelebration({
           size={80}
           fallbackExpression="celebrating"
         />
-      </motion.div>
+      </m.div>
 
-      <motion.p
+      <m.p
         className="text-lg font-bold text-muted-foreground"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         프로젝트 완성!
-      </motion.p>
+      </m.p>
 
-      <motion.p
+      <m.p
         className="text-center text-xl font-black text-primary"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -82,18 +82,18 @@ export function ProjectCompleteCelebration({
         {questName}을
         <br />
         완성했어요!
-      </motion.p>
+      </m.p>
 
-      <motion.p
+      <m.p
         className="text-sm font-medium text-muted-foreground"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
       >
         +{earnedXP} XP 획득!
-      </motion.p>
+      </m.p>
 
-      <motion.button
+      <m.button
         className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -103,7 +103,7 @@ export function ProjectCompleteCelebration({
         transition={{ delay: 0.9 }}
       >
         대단해요!
-      </motion.button>
+      </m.button>
     </CelebrationOverlay>
   );
 }

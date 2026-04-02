@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
+import { MotionProvider } from '@/components/providers/MotionProvider';
 import './globals.css';
 
 const notoSansKR = Noto_Sans_KR({
@@ -30,7 +31,7 @@ export default function RootLayout({
       lang="ko"
       className={cn('font-sans', notoSansKR.variable, jetbrainsMono.variable)}
     >
-      <body>{children}</body>
+      <body><MotionProvider>{children}</MotionProvider></body>
     </html>
   );
 }

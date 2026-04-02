@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { PybaemExpression } from './expressions';
 
 interface PybaemSvgProps {
@@ -10,7 +11,7 @@ interface PybaemSvgProps {
  * 파이뱀 선생님 SVG 캐릭터.
  * 귀여운 초록색 뱀 캐릭터로 다양한 표정을 지원합니다.
  */
-export function PybaemSvg({
+export const PybaemSvg = memo(function PybaemSvg({
   expression = 'happy',
   size = 64,
   className,
@@ -89,7 +90,7 @@ export function PybaemSvg({
       </defs>
     </svg>
   );
-}
+});
 
 // === 눈깜빡 서브 컴포넌트 ===
 

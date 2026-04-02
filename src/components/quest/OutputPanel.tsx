@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle, Terminal } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
@@ -18,7 +18,7 @@ function TutorAvatar({ expression = 'happy' }: { expression?: PybaemExpression }
 function BugBugHelper({ expression }: { expression: BugBugExpression }) {
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         data-testid="bugbug-helper"
         initial={{ opacity: 0, x: 8 }}
         animate={{ opacity: 1, x: 0 }}
@@ -27,7 +27,7 @@ function BugBugHelper({ expression }: { expression: BugBugExpression }) {
         className="flex h-6 w-6 shrink-0 items-center justify-center"
       >
         <CharacterAvatar character="bugbug" expression={expression} size="sm" />
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

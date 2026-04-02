@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { BookOpen, Lightbulb, MessageCircle } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ function ThinkingIndicator() {
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="flex items-center gap-1">
           {[0, 1, 2].map((i) => (
-            <motion.span
+            <m.span
               key={i}
               className="block h-2 w-2 rounded-full bg-primary/50"
               animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
@@ -164,7 +164,7 @@ export function ConversationPanel({
           <span className="text-xs text-muted-foreground">
             힌트: {hintsUsed}/3 사용
           </span>
-          <motion.div
+          <m.div
             whileHover={
               !(isAiLoading || hintsUsed >= 3) ? { scale: 1.03 } : undefined
             }
@@ -183,7 +183,7 @@ export function ConversationPanel({
               <Lightbulb className="h-4 w-4" />
               {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
             </Button>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { CheckCircle, Lock, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StageWithStatus } from '@/lib/types/database';
@@ -48,15 +48,15 @@ export function StageNode({ stage }: StageNodeProps) {
   return (
     <div className="relative w-full max-w-md">
       {stage.status === 'in_progress' && (
-        <motion.div
+        <m.div
           className="absolute -right-2 -top-4 z-10"
           animate={shouldReduceMotion ? undefined : { y: [0, -4, 0] }}
           transition={shouldReduceMotion ? undefined : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
           <CharacterAvatar character="pybaem" expression="happy" size="sm" />
-        </motion.div>
+        </m.div>
       )}
-      <motion.button
+      <m.button
         onClick={handleClick}
         disabled={!isClickable}
         whileTap={isClickable ? { scale: 0.97 } : undefined}
@@ -123,7 +123,7 @@ export function StageNode({ stage }: StageNodeProps) {
             </p>
           )}
         </div>
-      </motion.button>
+      </m.button>
     </div>
   );
 }

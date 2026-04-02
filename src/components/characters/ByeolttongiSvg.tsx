@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { ByeolttongiExpression } from './expressions';
 
 interface ByeolttongiSvgProps {
@@ -10,7 +11,7 @@ interface ByeolttongiSvgProps {
  * 별똥이 SVG 캐릭터.
  * 반짝이는 별똥별 보상/XP 캐릭터로 3가지 표정을 지원합니다.
  */
-export function ByeolttongiSvg({
+export const ByeolttongiSvg = memo(function ByeolttongiSvg({
   expression = 'sparkling',
   size = 64,
   className,
@@ -68,7 +69,7 @@ export function ByeolttongiSvg({
       </defs>
     </svg>
   );
-}
+});
 
 // === 표정 컴포넌트들 ===
 

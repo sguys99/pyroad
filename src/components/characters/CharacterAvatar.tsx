@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { memo, useState, useMemo } from 'react';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { PybaemSvg } from './PybaemSvg';
 import { BugBugSvg } from './BugBugSvg';
 import { ByeolttongiSvg } from './ByeolttongiSvg';
@@ -26,7 +26,12 @@ const breatheAnimation = {
   },
 };
 
-export function CharacterAvatar({
+const hoverSpring = { scale: 1.08, transition: { type: 'spring' as const, stiffness: 400, damping: 17 } };
+const expressionTransitionConfig = { duration: 0.2 };
+const expressionInitial = { opacity: 0, scale: 0.95 };
+const expressionAnimate = { opacity: 1, scale: 1 };
+
+export const CharacterAvatar = memo(function CharacterAvatar({
   character,
   expression = 'happy',
   size = 'md',
@@ -39,19 +44,22 @@ export function CharacterAvatar({
   const px = AVATAR_SIZE_MAP[size];
   const currentExpression = isHovered && onHover ? onHover : expression;
 
-  const svgElement = renderCharacter(character, currentExpression, px);
+  const svgElement = useMemo(
+    () => renderCharacter(character, currentExpression, px),
+    [character, currentExpression, px],
+  );
 
   const expressionTransition = (
     <AnimatePresence mode="wait">
-      <motion.div
+      <m.div
         key={currentExpression}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.2 }}
+        initial={expressionInitial}
+        animate={expressionAnimate}
+        exit={expressionInitial}
+        transition={expressionTransitionConfig}
       >
         {svgElement}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 
@@ -60,20 +68,18 @@ export function CharacterAvatar({
   }
 
   return (
-    <motion.div
+    <m.div
       className={className}
       data-testid={`character-avatar-${character}-${currentExpression}`}
       animate={animated && !shouldReduceMotion ? breatheAnimation : undefined}
-      whileHover={
-        onHover ? { scale: 1.08, transition: { type: 'spring', stiffness: 400, damping: 17 } } : undefined
-      }
+      whileHover={onHover ? hoverSpring : undefined}
       onHoverStart={onHover ? () => setIsHovered(true) : undefined}
       onHoverEnd={onHover ? () => setIsHovered(false) : undefined}
     >
       {expressionTransition}
-    </motion.div>
+    </m.div>
   );
-}
+});
 
 function renderCharacter(
   character: Character,

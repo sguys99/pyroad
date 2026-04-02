@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Code, Lightbulb, Map, Flame, Trophy } from 'lucide-react';
 import { getBadgeDefinition, type BadgeType } from '@/lib/quest/badges';
 import { CelebrationOverlay, type ConfettiBurst } from './CelebrationOverlay';
@@ -49,7 +49,7 @@ export function BadgeEarnedPopup({
       backdropClass="bg-black/30"
     >
       <AnimatePresence mode="wait">
-        <motion.div
+        <m.div
           key={badge.type}
           className="flex flex-col items-center gap-3"
           initial={shouldReduceMotion ? undefined : { scale: 0.5, opacity: 0, y: 30 }}
@@ -61,7 +61,7 @@ export function BadgeEarnedPopup({
               : { type: 'spring', damping: 18, stiffness: 300 }
           }
         >
-          <motion.div
+          <m.div
             className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/20"
             initial={shouldReduceMotion ? undefined : { rotate: -20, scale: 0 }}
             animate={{ rotate: 0, scale: 1 }}
@@ -72,7 +72,7 @@ export function BadgeEarnedPopup({
             }
           >
             <Icon className="h-8 w-8 text-accent" />
-          </motion.div>
+          </m.div>
 
           <p className="text-xs font-medium text-muted-foreground">
             뱃지 획득!
@@ -87,7 +87,7 @@ export function BadgeEarnedPopup({
               {currentIndex + 1} / {badges.length}
             </p>
           )}
-        </motion.div>
+        </m.div>
       </AnimatePresence>
     </CelebrationOverlay>
   );

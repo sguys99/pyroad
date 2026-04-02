@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { BugBugExpression } from './expressions';
 
 interface BugBugSvgProps {
@@ -10,7 +11,7 @@ interface BugBugSvgProps {
  * 버그버그 SVG 캐릭터.
  * 귀여운 무당벌레 디버깅 도우미로 3가지 표정을 지원합니다.
  */
-export function BugBugSvg({
+export const BugBugSvg = memo(function BugBugSvg({
   expression = 'searching',
   size = 64,
   className,
@@ -87,7 +88,7 @@ export function BugBugSvg({
       </defs>
     </svg>
   );
-}
+});
 
 // === 표정 컴포넌트들 ===
 
