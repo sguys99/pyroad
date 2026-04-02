@@ -56,12 +56,13 @@ export function CharacterAvatar({
   );
 
   if (!animated && !onHover) {
-    return <div className={className}>{expressionTransition}</div>;
+    return <div className={className} data-testid={`character-avatar-${character}-${currentExpression}`}>{expressionTransition}</div>;
   }
 
   return (
     <motion.div
       className={className}
+      data-testid={`character-avatar-${character}-${currentExpression}`}
       animate={animated && !shouldReduceMotion ? breatheAnimation : undefined}
       whileHover={
         onHover ? { scale: 1.08, transition: { type: 'spring', stiffness: 400, damping: 17 } } : undefined

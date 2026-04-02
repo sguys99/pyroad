@@ -19,6 +19,7 @@ function BugBugHelper({ expression }: { expression: BugBugExpression }) {
   return (
     <AnimatePresence>
       <motion.div
+        data-testid="bugbug-helper"
         initial={{ opacity: 0, x: 8 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 8 }}

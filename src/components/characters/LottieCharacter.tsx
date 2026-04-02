@@ -79,12 +79,14 @@ export function LottieCharacter({
   }
 
   return (
-    <LottiePlayer
-      animationData={animationData}
-      autoplay={autoplay}
-      loop={loop}
-      style={{ width: size, height: size }}
-      onComplete={onComplete}
-    />
+    <div data-testid={`lottie-character-${character}`}>
+      <LottiePlayer
+        animationData={animationData}
+        autoplay={autoplay}
+        loop={loop}
+        style={{ width: size, height: size }}
+        onComplete={onComplete}
+      />
+    </div>
   );
 }
