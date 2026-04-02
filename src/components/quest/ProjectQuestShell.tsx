@@ -235,9 +235,7 @@ export function ProjectQuestShell({
       );
       finishStreaming(res.message, res.is_fallback);
     } catch {
-      const hintKey =
-        `level_${nextLevel}` as keyof typeof currentStepDef.hints;
-      finishStreaming(currentStepDef.hints[hintKey], true);
+      finishStreaming(currentStepDef.fallback_text, true);
     }
 
     // DB 저장 (fire-and-forget)

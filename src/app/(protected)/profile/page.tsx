@@ -9,6 +9,7 @@ import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -185,8 +186,13 @@ export default async function ProfilePage() {
         </div>
       </div>
 
+      {/* 계정 관리 */}
+      <AccountManagementSection
+        stages={stages.map((s) => ({ id: s.id, order: s.order, title: s.title }))}
+      />
+
       {/* 설정 / 로그아웃 */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="mt-6 flex flex-col items-center gap-3">
         <Link href="/settings" className="text-sm text-primary underline">
           AI 튜터 설정
         </Link>

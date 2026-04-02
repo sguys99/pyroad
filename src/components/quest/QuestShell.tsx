@@ -180,9 +180,7 @@ export function QuestShell({
       );
       finishStreaming(res.message, res.is_fallback);
     } catch {
-      const hintKey =
-        `level_${nextLevel}` as keyof typeof quest.prompt_skeleton.hints;
-      finishStreaming(quest.prompt_skeleton.hints[hintKey], true);
+      finishStreaming(quest.prompt_skeleton.fallback_text, true);
     }
 
     // DB 저장 (fire-and-forget)

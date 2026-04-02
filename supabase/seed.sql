@@ -763,7 +763,7 @@ VALUES (
       {
         "step_number": 1,
         "step_goal": "random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기",
-        "starter_code": "# 1단계: 비밀 숫자 만들기\nimport random\n\n# random.randint(1, 10)으로 1~10 사이 숫자를 만들어보세요!\n",
+        "starter_code": "# 1단계: 비밀 숫자 만들기\nimport random\n\n# 비밀 숫자를 만들어보세요! random 모듈을 사용해볼까요?\n",
         "validation_type": "code_check",
         "expected_output": "random.randint",
         "hints": {

@@ -45,10 +45,15 @@ export default async function QuestPage({ params }: Props) {
 
   const quest = questResult.data as unknown as QuestWithStage;
 
-  // 클라이언트에 expected_output 노출 방지: steps 내 expected_output 제거
+  // 클라이언트에 정답/힌트 노출 방지
+  quest.prompt_skeleton.hints = { level_1: '', level_2: '', level_3: '' };
   if (quest.prompt_skeleton.steps) {
     quest.prompt_skeleton.steps = quest.prompt_skeleton.steps.map(
-      ({ expected_output: _eo, ...rest }) => ({ ...rest, expected_output: '' }),
+      ({ expected_output: _eo, hints: _hints, ...rest }) => ({
+        ...rest,
+        expected_output: '',
+        hints: { level_1: '', level_2: '', level_3: '' },
+      }),
     );
   }
   const progress = progressResult.data as UserProgress | null;
