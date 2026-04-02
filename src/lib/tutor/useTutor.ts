@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { TutorRequest, TutorResponse } from './types';
 
 export function useTutor() {
@@ -41,6 +41,82 @@ export function useTutor() {
     }
   }
 
+  const sendTutorStreamRequest = useCallback(
+    async (
+      req: TutorRequest,
+      onDelta: (fullText: string) => void,
+    ): Promise<TutorResponse> => {
+      setIsLoading(true);
+      let fullText = '';
+
+      try {
+        const res = await fetch('/api/tutor/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.body) throw new Error('No response body');
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          // SSE 파싱: "data: {...}\n\n" 형태
+          const lines = buffer.split('\n\n');
+          // 마지막 요소는 불완전할 수 있으므로 buffer에 유지
+          buffer = lines.pop() ?? '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+
+            const json = trimmed.slice(6);
+            try {
+              const data = JSON.parse(json) as {
+                delta?: string;
+                done?: boolean;
+                error?: boolean;
+              };
+
+              if (data.delta) {
+                fullText += data.delta;
+                onDelta(fullText);
+              } else if (data.error) {
+                throw new Error('스트리밍 에러');
+              }
+              // data.done → 정상 완료, loop가 끝남
+            } catch (e) {
+              if (e instanceof SyntaxError) continue;
+              throw e;
+            }
+          }
+        }
+
+        return {
+          message: fullText,
+          is_fallback: false,
+        };
+      } catch {
+        // 부분 텍스트가 충분하면 그대로 사용
+        if (fullText.length > 50) {
+          return { message: fullText, is_fallback: false };
+        }
+        throw new Error('AI 튜터 요청에 실패했습니다');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
   function refreshApiKeyStatus() {
     fetch('/api/settings')
       .then((res) => res.json())
@@ -50,5 +126,11 @@ export function useTutor() {
       .catch(() => {});
   }
 
-  return { sendTutorRequest, isLoading, hasApiKey, refreshApiKeyStatus };
+  return {
+    sendTutorRequest,
+    sendTutorStreamRequest,
+    isLoading,
+    hasApiKey,
+    refreshApiKeyStatus,
+  };
 }

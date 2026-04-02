@@ -1,215 +1,46 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { callTutor } from '@/lib/tutor/client';
-import { getAvailableProviders } from '@/lib/tutor/providers/factory';
-import {
-  SYSTEM_PROMPT,
-  buildQuestIntroPrompt,
-  buildHintPrompt,
-  buildCodeFeedbackPrompt,
-  buildEncouragementPrompt,
-  buildProjectGuidePrompt,
-} from '@/lib/tutor/prompts';
-import type { TutorRequest, TutorResponse, LLMProviderType } from '@/lib/tutor/types';
-import type { QuestWithStage } from '@/lib/types/database';
-
-const VALID_TYPES = [
-  'quest_intro',
-  'hint_generator',
-  'code_feedback',
-  'encouragement',
-  'project_guide',
-] as const;
-const VALID_HINT_LEVELS = [1, 2, 3] as const;
-const MAX_CODE_LENGTH = 2000;
+import { getCachedResponse, setCachedResponse, buildCacheKey } from '@/lib/tutor/cache';
+import type { TutorResponse } from '@/lib/tutor/types';
+import { prepareTutorCall, buildFallbackMessage, CACHEABLE_TYPES } from './helpers';
 
 export async function POST(request: Request) {
-  // 1. Auth 검증
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const prepared = await prepareTutorCall(request);
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (prepared instanceof Response) {
+    return prepared;
   }
 
-  // 2. Body 검증
-  let body: TutorRequest;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-  }
+  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, quest, body } = prepared;
 
-  if (
-    !body.type ||
-    !VALID_TYPES.includes(body.type as (typeof VALID_TYPES)[number])
-  ) {
-    return NextResponse.json(
-      { error: 'Invalid type' },
-      { status: 400 },
-    );
-  }
-
-  if (!body.quest_id) {
-    return NextResponse.json(
-      { error: 'quest_id is required' },
-      { status: 400 },
-    );
-  }
-
-  if (body.type === 'hint_generator') {
-    if (
-      !body.hint_level ||
-      !VALID_HINT_LEVELS.includes(body.hint_level as 1 | 2 | 3)
-    ) {
-      return NextResponse.json(
-        { error: 'hint_level (1, 2, or 3) is required for hint_generator' },
-        { status: 400 },
-      );
+  // 캐시 확인
+  const cacheable = CACHEABLE_TYPES.has(body.type);
+  if (cacheable) {
+    const cacheKey = buildCacheKey(body.type, body.quest_id);
+    const cached = getCachedResponse(cacheKey);
+    if (cached) {
+      return NextResponse.json({ message: cached, is_fallback: false } satisfies TutorResponse);
     }
   }
 
-  if (body.student_code && body.student_code.length > MAX_CODE_LENGTH) {
-    body.student_code = body.student_code.slice(0, MAX_CODE_LENGTH);
-  }
+  const result = await callTutor(systemPrompt, userPrompt, 300, providerType, customApiKey, fast);
 
-  // 3. Quest 조회
-  const { data: quest } = await supabase
-    .from('quests')
-    .select('*, stage:stages(id, title, order, theme_name)')
-    .eq('id', body.quest_id)
-    .single();
-
-  if (!quest) {
-    return NextResponse.json({ error: 'Quest not found' }, { status: 404 });
-  }
-
-  const q = quest as unknown as QuestWithStage;
-  const skeleton = q.prompt_skeleton;
-
-  // 4. 추가 검증
-  if (body.type === 'code_feedback' && !body.execution_result) {
-    return NextResponse.json(
-      { error: 'execution_result is required for code_feedback' },
-      { status: 400 },
-    );
-  }
-
-  // 5. 프롬프트 조립
-  let userPrompt: string;
-
-  if (body.type === 'quest_intro') {
-    userPrompt = buildQuestIntroPrompt({
-      stageTitle: q.stage.title,
-      themeName: q.stage.theme_name,
-      questTitle: q.title,
-      topic: skeleton.topic,
-      learningGoals: skeleton.learning_goals,
-      storyContext: skeleton.story_context,
-      exerciseDescription: skeleton.exercise_description,
-    });
-  } else if (body.type === 'hint_generator') {
-    const hintLevel = body.hint_level as 1 | 2 | 3;
-    const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
-    userPrompt = buildHintPrompt({
-      topic: skeleton.topic,
-      exerciseDescription: skeleton.exercise_description,
-      studentCode: body.student_code || '',
-      hintLevel,
-      hintReference: skeleton.hints[hintKey],
-    });
-  } else if (body.type === 'code_feedback') {
-    const er = body.execution_result!;
-    userPrompt = buildCodeFeedbackPrompt({
-      topic: skeleton.topic,
-      exerciseDescription: skeleton.exercise_description,
-      studentCode: body.student_code || '',
-      stdout: er.stdout,
-      stderr: er.stderr,
-      passed: er.passed,
-      expectedOutput: q.expected_output,
-    });
-  } else if (body.type === 'encouragement') {
-    userPrompt = buildEncouragementPrompt({
-      questTitle: q.title,
-      topic: skeleton.topic,
-      earnedXP: body.earned_xp ?? 0,
-      hintsUsed: body.hints_used ?? 0,
-    });
-  } else {
-    // project_guide
-    userPrompt = buildProjectGuidePrompt({
-      projectTitle: q.title,
-      storyContext: skeleton.story_context,
-      currentStep: body.current_step ?? 1,
-      totalSteps: body.total_steps ?? 5,
-      stepGoal: body.step_goal ?? '',
-      previousCode: body.previous_code ?? '',
-    });
-  }
-
-  // 6. Provider 결정 및 LLM 호출
-  let providerType: LLMProviderType | undefined = body.provider;
-  let customApiKey: string | undefined;
-
-  const { data: userProfile } = await supabase
-    .from('users')
-    .select('preferred_provider, custom_api_keys')
-    .eq('id', user.id)
-    .single();
-
-  if (!providerType) {
-    if (userProfile?.preferred_provider) {
-      providerType = userProfile.preferred_provider as LLMProviderType;
-    }
-  }
-  if (userProfile?.custom_api_keys && providerType) {
-    const keys = userProfile.custom_api_keys as Record<string, string>;
-    customApiKey = keys[providerType] || undefined;
-  }
-
-  // 서버 env 키도 없고 사용자 커스텀 키도 없는지 확인
-  const available = getAvailableProviders();
-  const userKeys = (userProfile?.custom_api_keys ?? {}) as Record<string, string>;
-  const hasAnyKey = available.length > 0 || Object.values(userKeys).some((k) => !!k);
-
-  const result = await callTutor(SYSTEM_PROMPT, userPrompt, 600, providerType, customApiKey);
-
-  // 7. 폴백 처리
   let message: string;
   let isFallback: boolean;
 
   if (result.ok) {
     message = result.text;
     isFallback = false;
+
+    // 성공 응답 캐시
+    if (cacheable) {
+      setCachedResponse(buildCacheKey(body.type, body.quest_id), message);
+    }
   } else {
     isFallback = true;
-    if (body.type === 'quest_intro') {
-      message = skeleton.fallback_text;
-    } else if (body.type === 'hint_generator') {
-      const hintLevel = body.hint_level as 1 | 2 | 3;
-      const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
-      message = skeleton.hints[hintKey];
-    } else if (body.type === 'code_feedback') {
-      message = body.execution_result?.passed
-        ? '대단해요! 정답이에요! 🎉'
-        : '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
-    } else if (body.type === 'encouragement') {
-      message = '퀘스트를 완료했어요! 정말 대단해요! 🎉🐍';
-    } else {
-      // project_guide
-      const stepIdx = (body.current_step ?? 1) - 1;
-      const steps = skeleton.steps;
-      message =
-        steps && steps[stepIdx]
-          ? steps[stepIdx].fallback_text
-          : skeleton.fallback_text;
-    }
+    message = buildFallbackMessage(body, quest);
   }
 
-  // 8. 응답
   const response: TutorResponse = {
     message,
     is_fallback: isFallback,

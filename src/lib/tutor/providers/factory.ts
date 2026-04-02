@@ -21,15 +21,16 @@ export function getAvailableProviders(): LLMProviderType[] {
 export function createProvider(
   type: LLMProviderType,
   customApiKey?: string,
+  modelOverride?: string,
 ): LLMProvider {
   const apiKey = customApiKey || process.env[ENV_KEY_MAP[type]];
   if (!apiKey) {
     throw new Error(`API key not configured for provider: ${type}`);
   }
 
-  // 사용자별 커스텀 키는 캐시하지 않음
-  if (customApiKey) {
-    return instantiate(type, customApiKey);
+  // 커스텀 키나 모델 오버라이드는 캐시하지 않음
+  if (customApiKey || modelOverride) {
+    return instantiate(type, customApiKey || apiKey, modelOverride);
   }
 
   const cached = cache.get(type);
@@ -40,13 +41,13 @@ export function createProvider(
   return provider;
 }
 
-function instantiate(type: LLMProviderType, apiKey: string): LLMProvider {
+function instantiate(type: LLMProviderType, apiKey: string, model?: string): LLMProvider {
   switch (type) {
     case 'anthropic':
-      return new AnthropicProvider(apiKey);
+      return new AnthropicProvider(apiKey, model);
     case 'openai':
-      return new OpenAIProvider(apiKey);
+      return new OpenAIProvider(apiKey, model);
     case 'gemini':
-      return new GeminiProvider(apiKey);
+      return new GeminiProvider(apiKey, model);
   }
 }

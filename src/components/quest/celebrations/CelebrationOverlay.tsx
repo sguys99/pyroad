@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { m, useReducedMotion } from 'framer-motion';
-import confetti from 'canvas-confetti';
 
 export interface ConfettiBurst {
   particleCount: number;
@@ -37,7 +36,8 @@ export function CelebrationOverlay({
     // Confetti 발사 (reduced-motion 시 비활성화)
     if (!shouldReduceMotion && confettiBursts) {
       for (const burst of confettiBursts) {
-        const timer = setTimeout(() => {
+        const timer = setTimeout(async () => {
+          const confetti = (await import('canvas-confetti')).default;
           confetti({
             particleCount: burst.particleCount,
             spread: burst.spread,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { BookOpen, Lightbulb, MessageCircle } from 'lucide-react';
 import { m, useReducedMotion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -11,10 +11,18 @@ import type { ChatMessage } from '@/lib/tutor/types';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { useMessageExpression } from '@/components/characters/useCharacterExpression';
 
+// 모듈 스코프 상수 — React.memo 무효화 방지
+const remarkPlugins = [remarkGfm];
+const markdownComponents = {
+  h1: ({ children }: { children?: React.ReactNode }) => <h3>{children}</h3>,
+  h2: ({ children }: { children?: React.ReactNode }) => <h4>{children}</h4>,
+};
+
 interface ConversationPanelProps {
   promptSkeleton: PromptSkeleton;
   messages: ChatMessage[];
   isAiLoading: boolean;
+  streamingContent?: string;
   hintsUsed: number;
   onHintRequest: () => void;
 }
@@ -62,19 +70,59 @@ function TutorMessageAvatar({ message }: { message: ChatMessage }) {
   );
 }
 
+const SystemMessage = memo(function SystemMessage({ content }: { content: string }) {
+  return (
+    <div className="flex justify-center">
+      <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+        {content}
+      </span>
+    </div>
+  );
+});
+
+const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
+  return (
+    <div className="flex items-start gap-3">
+      <TutorMessageAvatar message={msg} />
+      <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
+        <div className="mb-1 flex items-center gap-2">
+          <MessageCircle className="h-4 w-4 text-primary" />
+          <span className="text-xs font-bold text-primary">
+            파이뱀 선생님
+          </span>
+          {msg.isFallback && (
+            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              저장된 답변
+            </span>
+          )}
+        </div>
+        <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:leading-relaxed prose-code:bg-muted prose-code:px-1 prose-code:rounded prose-hr:border-border prose-pre:bg-muted prose-pre:text-foreground">
+          <ReactMarkdown
+            remarkPlugins={remarkPlugins}
+            components={markdownComponents}
+          >
+            {msg.content}
+          </ReactMarkdown>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export function ConversationPanel({
   promptSkeleton,
   messages,
   isAiLoading,
+  streamingContent,
   hintsUsed,
   onHintRequest,
 }: ConversationPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 새 메시지 시 자동 스크롤
+  // 새 메시지 또는 스트리밍 콘텐츠 변경 시 자동 스크롤
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length, isAiLoading]);
+  }, [messages.length, isAiLoading, streamingContent]);
 
   return (
     <div className="flex h-full flex-col">
@@ -111,48 +159,17 @@ export function ConversationPanel({
           {/* 채팅 메시지 목록 */}
           {messages.map((msg, idx) => {
             if (msg.role === 'system') {
-              return (
-                <div key={idx} className="flex justify-center">
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                    {msg.content}
-                  </span>
-                </div>
-              );
+              return <SystemMessage key={idx} content={msg.content} />;
             }
-
-            return (
-              <div key={idx} className="flex items-start gap-3">
-                <TutorMessageAvatar message={msg} />
-                <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
-                  <div className="mb-1 flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-bold text-primary">
-                      파이뱀 선생님
-                    </span>
-                    {msg.isFallback && (
-                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                        저장된 답변
-                      </span>
-                    )}
-                  </div>
-                  <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:leading-relaxed prose-code:bg-muted prose-code:px-1 prose-code:rounded prose-hr:border-border prose-pre:bg-muted prose-pre:text-foreground">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        h1: ({ children }) => <h3>{children}</h3>,
-                        h2: ({ children }) => <h4>{children}</h4>,
-                      }}
-                    >
-                      {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-              </div>
-            );
+            return <TutorMessage key={idx} msg={msg} />;
           })}
 
-          {/* 로딩 인디케이터 */}
-          {isAiLoading && <ThinkingIndicator />}
+          {/* 스트리밍 중이면 부분 텍스트 표시, 아니면 로딩 인디케이터 */}
+          {isAiLoading && streamingContent ? (
+            <TutorMessage msg={{ role: 'tutor', content: streamingContent }} />
+          ) : isAiLoading ? (
+            <ThinkingIndicator />
+          ) : null}
 
           <div ref={messagesEndRef} />
         </div>

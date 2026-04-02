@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { LogoutButton } from '@/components/LogoutButton';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
@@ -67,9 +68,11 @@ export default async function ProfilePage() {
       {/* 헤더 */}
       <div className="mb-6 flex flex-col items-center gap-3">
         {profile.avatar_url ? (
-          <img
+          <Image
             src={profile.avatar_url}
             alt="아바타"
+            width={96}
+            height={96}
             className="h-24 w-24 rounded-full"
           />
         ) : (

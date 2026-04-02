@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
@@ -101,7 +100,8 @@ export function ProjectQuestShell({
   const [totalHintsUsed, setTotalHintsUsed] = useState(
     progress?.hints_used ?? 0,
   );
-  const { sendTutorRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
+  const [streamingContent, setStreamingContent] = useState('');
+  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
 
   // 완료/XP 상태
   const [isProjectComplete, setIsProjectComplete] = useState(
@@ -132,27 +132,35 @@ export function ProjectQuestShell({
     async function fetchGuide() {
       const prevCode = currentStep > 1 ? (stepSubmissions[String(currentStep - 1)] ?? '') : '';
 
+      setMessages((prev) => [
+        ...prev,
+        { role: 'system', content: `단계 ${currentStep}/${totalSteps}: ${currentStepDef.step_goal}` },
+      ]);
+
       try {
-        const res = await sendTutorRequest({
-          type: 'project_guide',
-          quest_id: quest.id,
-          current_step: currentStep,
-          total_steps: totalSteps,
-          step_goal: currentStepDef.step_goal,
-          previous_code: prevCode,
-        });
+        const res = await sendTutorStreamRequest(
+          {
+            type: 'project_guide',
+            quest_id: quest.id,
+            current_step: currentStep,
+            total_steps: totalSteps,
+            step_goal: currentStepDef.step_goal,
+            previous_code: prevCode,
+          },
+          (text) => { if (!cancelled) setStreamingContent(text); },
+        );
         if (!cancelled) {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
-            { role: 'system', content: `단계 ${currentStep}/${totalSteps}: ${currentStepDef.step_goal}` },
             { role: 'tutor', content: res.message, isFallback: res.is_fallback },
           ]);
         }
       } catch {
         if (!cancelled) {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
-            { role: 'system', content: `단계 ${currentStep}/${totalSteps}: ${currentStepDef.step_goal}` },
             { role: 'tutor', content: currentStepDef.fallback_text, isFallback: true },
           ]);
         }
@@ -204,28 +212,34 @@ export function ProjectQuestShell({
 
     const nextLevel = (stepHintsUsed + 1) as 1 | 2 | 3;
 
+    setMessages((prev) => [
+      ...prev,
+      { role: 'system', content: `힌트 ${nextLevel}/3` },
+    ]);
+    setStepHintsUsed(nextLevel);
+    setTotalHintsUsed((prev) => prev + 1);
+
     try {
-      const res = await sendTutorRequest({
-        type: 'hint_generator',
-        quest_id: quest.id,
-        student_code: code,
-        hint_level: nextLevel,
-      });
-      setStepHintsUsed(nextLevel);
-      setTotalHintsUsed((prev) => prev + 1);
+      const res = await sendTutorStreamRequest(
+        {
+          type: 'hint_generator',
+          quest_id: quest.id,
+          student_code: code,
+          hint_level: nextLevel,
+        },
+        setStreamingContent,
+      );
+      setStreamingContent('');
       setMessages((prev) => [
         ...prev,
-        { role: 'system', content: `힌트 ${nextLevel}/3` },
         { role: 'tutor', content: res.message, isFallback: res.is_fallback },
       ]);
     } catch {
       const hintKey =
         `level_${nextLevel}` as keyof typeof currentStepDef.hints;
-      setStepHintsUsed(nextLevel);
-      setTotalHintsUsed((prev) => prev + 1);
+      setStreamingContent('');
       setMessages((prev) => [
         ...prev,
-        { role: 'system', content: `힌트 ${nextLevel}/3` },
         {
           role: 'tutor',
           content: currentStepDef.hints[hintKey],
@@ -275,10 +289,8 @@ export function ProjectQuestShell({
     setStepHintsUsed(0);
 
     // 미니 confetti
-    confetti({
-      particleCount: 40,
-      spread: 50,
-      origin: { y: 0.7 },
+    import('canvas-confetti').then(({ default: confetti }) => {
+      confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
     });
 
     // DB 저장
@@ -312,23 +324,28 @@ export function ProjectQuestShell({
 
     // 실행 에러 시
     if (!result.success) {
-      sendTutorRequest({
-        type: 'code_feedback',
-        quest_id: quest.id,
-        student_code: code,
-        execution_result: {
-          stdout: result.stdout,
-          stderr: result.stderr,
-          passed: false,
+      sendTutorStreamRequest(
+        {
+          type: 'code_feedback',
+          quest_id: quest.id,
+          student_code: code,
+          execution_result: {
+            stdout: result.stdout,
+            stderr: result.stderr,
+            passed: false,
+          },
         },
-      })
+        setStreamingContent,
+      )
         .then((res) => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             { role: 'tutor', content: res.message, isFallback: res.is_fallback },
           ]);
         })
         .catch(() => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             {
@@ -447,23 +464,28 @@ export function ProjectQuestShell({
       }
     } else {
       // 검증 실패
-      sendTutorRequest({
-        type: 'code_feedback',
-        quest_id: quest.id,
-        student_code: code,
-        execution_result: {
-          stdout: result.stdout,
-          stderr: '',
-          passed: false,
+      sendTutorStreamRequest(
+        {
+          type: 'code_feedback',
+          quest_id: quest.id,
+          student_code: code,
+          execution_result: {
+            stdout: result.stdout,
+            stderr: '',
+            passed: false,
+          },
         },
-      })
+        setStreamingContent,
+      )
         .then((res) => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             { role: 'tutor', content: res.message, isFallback: res.is_fallback },
           ]);
         })
         .catch(() => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             {
@@ -536,6 +558,7 @@ export function ProjectQuestShell({
             promptSkeleton={quest.prompt_skeleton}
             messages={messages}
             isAiLoading={isAiLoading}
+            streamingContent={streamingContent}
             hintsUsed={stepHintsUsed}
             onHintRequest={handleHintRequest}
           />

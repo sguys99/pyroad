@@ -6,6 +6,12 @@ export interface LLMProvider {
     userPrompt: string,
     maxTokens: number,
   ): Promise<string>;
+
+  callStream(
+    systemPrompt: string,
+    userPrompt: string,
+    maxTokens: number,
+  ): AsyncIterable<string>;
 }
 
 export const PROVIDER_LABELS: Record<LLMProviderType, string> = {

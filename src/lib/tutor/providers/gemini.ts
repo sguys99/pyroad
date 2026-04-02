@@ -26,4 +26,24 @@ export class GeminiProvider implements LLMProvider {
 
     return response.text ?? '';
   }
+
+  async *callStream(
+    systemPrompt: string,
+    userPrompt: string,
+    maxTokens: number,
+  ): AsyncIterable<string> {
+    const response = await this.client.models.generateContentStream({
+      model: this.model,
+      config: {
+        systemInstruction: systemPrompt,
+        maxOutputTokens: maxTokens,
+      },
+      contents: userPrompt,
+    });
+
+    for await (const chunk of response) {
+      const text = chunk.text;
+      if (text) yield text;
+    }
+  }
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
@@ -60,7 +59,8 @@ export function QuestShell({
   // AI 튜터 상태
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hintsUsed, setHintsUsed] = useState(progress?.hints_used ?? 0);
-  const { sendTutorRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
+  const [streamingContent, setStreamingContent] = useState('');
+  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
 
   // 완료/XP 상태
   const [isCompleted, setIsCompleted] = useState(
@@ -90,11 +90,12 @@ export function QuestShell({
 
     async function fetchIntro() {
       try {
-        const res = await sendTutorRequest({
-          type: 'quest_intro',
-          quest_id: quest.id,
-        });
+        const res = await sendTutorStreamRequest(
+          { type: 'quest_intro', quest_id: quest.id },
+          (text) => { if (!cancelled) setStreamingContent(text); },
+        );
         if (!cancelled) {
+          setStreamingContent('');
           setMessages([
             {
               role: 'tutor',
@@ -105,6 +106,7 @@ export function QuestShell({
         }
       } catch {
         if (!cancelled) {
+          setStreamingContent('');
           setMessages([
             {
               role: 'tutor',
@@ -157,26 +159,33 @@ export function QuestShell({
 
     const nextLevel = (hintsUsed + 1) as 1 | 2 | 3;
 
+    setMessages((prev) => [
+      ...prev,
+      { role: 'system', content: `힌트 ${nextLevel}/3` },
+    ]);
+    setHintsUsed(nextLevel);
+
     try {
-      const res = await sendTutorRequest({
-        type: 'hint_generator',
-        quest_id: quest.id,
-        student_code: code,
-        hint_level: nextLevel,
-      });
-      setHintsUsed(nextLevel);
+      const res = await sendTutorStreamRequest(
+        {
+          type: 'hint_generator',
+          quest_id: quest.id,
+          student_code: code,
+          hint_level: nextLevel,
+        },
+        setStreamingContent,
+      );
+      setStreamingContent('');
       setMessages((prev) => [
         ...prev,
-        { role: 'system', content: `힌트 ${nextLevel}/3` },
         { role: 'tutor', content: res.message, isFallback: res.is_fallback },
       ]);
     } catch {
       const hintKey =
         `level_${nextLevel}` as keyof typeof quest.prompt_skeleton.hints;
-      setHintsUsed(nextLevel);
+      setStreamingContent('');
       setMessages((prev) => [
         ...prev,
-        { role: 'system', content: `힌트 ${nextLevel}/3` },
         {
           role: 'tutor',
           content: quest.prompt_skeleton.hints[hintKey],
@@ -216,17 +225,21 @@ export function QuestShell({
 
     // 실행 에러 시 (구문 에러 등)
     if (!result.success) {
-      sendTutorRequest({
-        type: 'code_feedback',
-        quest_id: quest.id,
-        student_code: code,
-        execution_result: {
-          stdout: result.stdout,
-          stderr: result.stderr,
-          passed: false,
+      sendTutorStreamRequest(
+        {
+          type: 'code_feedback',
+          quest_id: quest.id,
+          student_code: code,
+          execution_result: {
+            stdout: result.stdout,
+            stderr: result.stderr,
+            passed: false,
+          },
         },
-      })
+        setStreamingContent,
+      )
         .then((res) => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             {
@@ -237,6 +250,7 @@ export function QuestShell({
           ]);
         })
         .catch(() => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             {
@@ -295,10 +309,8 @@ export function QuestShell({
         setIsCompleted(true);
 
         // Confetti
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
+        import('canvas-confetti').then(({ default: confetti }) => {
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         });
 
         // AI 피드백 (성공)
@@ -373,17 +385,21 @@ export function QuestShell({
       }
     } else {
       // 검증 실패
-      sendTutorRequest({
-        type: 'code_feedback',
-        quest_id: quest.id,
-        student_code: code,
-        execution_result: {
-          stdout: result.stdout,
-          stderr: '',
-          passed: false,
+      sendTutorStreamRequest(
+        {
+          type: 'code_feedback',
+          quest_id: quest.id,
+          student_code: code,
+          execution_result: {
+            stdout: result.stdout,
+            stderr: '',
+            passed: false,
+          },
         },
-      })
+        setStreamingContent,
+      )
         .then((res) => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             {
@@ -394,6 +410,7 @@ export function QuestShell({
           ]);
         })
         .catch(() => {
+          setStreamingContent('');
           setMessages((prev) => [
             ...prev,
             {
@@ -460,6 +477,7 @@ export function QuestShell({
             promptSkeleton={quest.prompt_skeleton}
             messages={messages}
             isAiLoading={isAiLoading}
+            streamingContent={streamingContent}
             hintsUsed={hintsUsed}
             onHintRequest={handleHintRequest}
           />

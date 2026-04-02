@@ -26,4 +26,25 @@ export class OpenAIProvider implements LLMProvider {
 
     return response.choices[0]?.message?.content ?? '';
   }
+
+  async *callStream(
+    systemPrompt: string,
+    userPrompt: string,
+    maxTokens: number,
+  ): AsyncIterable<string> {
+    const stream = await this.client.chat.completions.create({
+      model: this.model,
+      max_completion_tokens: maxTokens,
+      stream: true,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+    });
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content;
+      if (delta) yield delta;
+    }
+  }
 }

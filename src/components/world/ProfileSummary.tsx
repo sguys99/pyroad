@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { UserProfile, UserBadge } from '@/lib/types/database';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
@@ -19,9 +20,11 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
       {/* 상단: 아바타 + 이름 + XP */}
       <div className="flex items-center gap-4">
         {profile.avatar_url ? (
-          <img
+          <Image
             src={profile.avatar_url}
             alt="아바타"
+            width={48}
+            height={48}
             className="h-12 w-12 rounded-full"
           />
         ) : (
