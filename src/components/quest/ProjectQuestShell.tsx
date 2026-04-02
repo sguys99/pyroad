@@ -27,6 +27,12 @@ import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
 import { ProjectCompleteCelebration } from './celebrations/ProjectCompleteCelebration';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
+// canvas-confetti 모듈 사전 로드 (브라우저에서만)
+const confettiReady =
+  typeof window !== 'undefined'
+    ? import('canvas-confetti').then((m) => m.default)
+    : null;
+
 type Tab = 'story' | 'code' | 'result';
 type CelebrationPhase =
   | 'idle'
@@ -275,8 +281,15 @@ export function ProjectQuestShell({
     setStepHintsUsed(0);
 
     // 미니 confetti
-    import('canvas-confetti').then(({ default: confetti }) => {
-      confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+    confettiReady?.then((confetti) => {
+      confetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.7 },
+        ticks: 90,
+        gravity: 2.2,
+        startVelocity: 70,
+      });
     });
 
     // DB 저장

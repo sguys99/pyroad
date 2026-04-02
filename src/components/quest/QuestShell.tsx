@@ -18,6 +18,12 @@ import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { LevelUpCelebration } from './celebrations/LevelUpCelebration';
+
+// canvas-confetti 모듈 사전 로드 (브라우저에서만)
+const confettiReady =
+  typeof window !== 'undefined'
+    ? import('canvas-confetti').then((m) => m.default)
+    : null;
 import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
@@ -59,7 +65,7 @@ export function QuestShell({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hintsUsed, setHintsUsed] = useState(progress?.hints_used ?? 0);
   const [streamingContent, setStreamingContent] = useState('');
-  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, setIsLoading, hasApiKey } = useTutor();
+  const { sendTutorStreamRequest, isLoading: isAiLoading, setIsLoading, hasApiKey } = useTutor();
 
   /** 스트리밍 완료 후 상태를 일괄 정리하는 헬퍼 */
   const finishStreaming = useCallback((message: string, isFallback: boolean, replace = false) => {
@@ -287,69 +293,50 @@ export function QuestShell({
         setIsCompleted(true);
 
         // Confetti
-        import('canvas-confetti').then(({ default: confetti }) => {
-          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        confettiReady?.then((confetti) => {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            ticks: 90,
+            gravity: 2.2,
+            startVelocity: 70,
+          });
         });
 
-        // AI 피드백 (성공)
-        sendTutorRequest({
-          type: 'code_feedback',
-          quest_id: quest.id,
-          student_code: code,
-          execution_result: {
-            stdout: result.stdout,
-            stderr: '',
-            passed: true,
-          },
-        })
-          .then((res) => {
-            setMessages((prev) => [
-              ...prev,
+        // AI 피드백 (성공) — 스트리밍으로 순차 표시
+        (async () => {
+          try {
+            const feedbackRes = await sendTutorStreamRequest(
               {
-                role: 'tutor',
-                content: res.message,
-                isFallback: res.is_fallback,
+                type: 'code_feedback',
+                quest_id: quest.id,
+                student_code: code,
+                execution_result: {
+                  stdout: result.stdout,
+                  stderr: '',
+                  passed: true,
+                },
               },
-            ]);
-          })
-          .catch(() => {
-            setMessages((prev) => [
-              ...prev,
-              {
-                role: 'tutor',
-                content: '대단해요! 정답이에요! 🎉',
-                isFallback: true,
-              },
-            ]);
-          });
+              setStreamingContent,
+            );
+            finishStreaming(feedbackRes.message, feedbackRes.is_fallback);
 
-        // 격려 메시지
-        sendTutorRequest({
-          type: 'encouragement',
-          quest_id: quest.id,
-          earned_xp: completeData.earned_xp,
-          hints_used: hintsUsed,
-        })
-          .then((res) => {
-            setMessages((prev) => [
-              ...prev,
+            // 격려 메시지도 스트리밍
+            const encourageRes = await sendTutorStreamRequest(
               {
-                role: 'tutor',
-                content: res.message,
-                isFallback: res.is_fallback,
+                type: 'encouragement',
+                quest_id: quest.id,
+                earned_xp: completeData.earned_xp,
+                hints_used: hintsUsed,
               },
-            ]);
-          })
-          .catch(() => {
-            setMessages((prev) => [
-              ...prev,
-              {
-                role: 'tutor',
-                content: '퀘스트를 완료했어요! 정말 대단해요! 🎉🐍',
-                isFallback: true,
-              },
-            ]);
-          });
+              setStreamingContent,
+            );
+            finishStreaming(encourageRes.message, encourageRes.is_fallback);
+          } catch {
+            finishStreaming('대단해요! 정답이에요! 🎉', true);
+          }
+        })();
       } catch {
         // 완료 API 실패 시에도 UI는 업데이트
         setMessages((prev) => [

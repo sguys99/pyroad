@@ -3,6 +3,12 @@
 import { useEffect, useRef } from 'react';
 import { m, useReducedMotion } from 'framer-motion';
 
+// canvas-confetti 모듈 사전 로드 (브라우저에서만)
+const confettiReady =
+  typeof window !== 'undefined'
+    ? import('canvas-confetti').then((m) => m.default)
+    : null;
+
 export interface ConfettiBurst {
   particleCount: number;
   spread: number;
@@ -36,14 +42,18 @@ export function CelebrationOverlay({
     // Confetti 발사 (reduced-motion 시 비활성화)
     if (!shouldReduceMotion && confettiBursts) {
       for (const burst of confettiBursts) {
-        const timer = setTimeout(async () => {
-          const confetti = (await import('canvas-confetti')).default;
-          confetti({
-            particleCount: burst.particleCount,
-            spread: burst.spread,
-            origin: burst.origin,
-            ...(burst.colors ? { colors: burst.colors } : {}),
-          });
+        const timer = setTimeout(() => {
+          confettiReady?.then((confetti) =>
+            confetti({
+              particleCount: burst.particleCount,
+              spread: burst.spread,
+              origin: burst.origin,
+              ticks: 90,
+              gravity: 2.2,
+              startVelocity: 70,
+              ...(burst.colors ? { colors: burst.colors } : {}),
+            }),
+          );
         }, burst.delay ?? 0);
         timersRef.current.push(timer);
       }
