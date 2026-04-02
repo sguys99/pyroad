@@ -101,7 +101,14 @@ export function ProjectQuestShell({
     progress?.hints_used ?? 0,
   );
   const [streamingContent, setStreamingContent] = useState('');
-  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
+  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, setIsLoading, hasApiKey } = useTutor();
+
+  /** 스트리밍 완료 후 상태를 일괄 정리하는 헬퍼 */
+  const finishStreaming = useCallback((message: string, isFallback: boolean) => {
+    setStreamingContent('');
+    setIsLoading(false);
+    setMessages((prev) => [...prev, { role: 'tutor', content: message, isFallback }]);
+  }, [setIsLoading]);
 
   // 완료/XP 상태
   const [isProjectComplete, setIsProjectComplete] = useState(
@@ -150,19 +157,11 @@ export function ProjectQuestShell({
           (text) => { if (!cancelled) setStreamingContent(text); },
         );
         if (!cancelled) {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            { role: 'tutor', content: res.message, isFallback: res.is_fallback },
-          ]);
+          finishStreaming(res.message, res.is_fallback);
         }
       } catch {
         if (!cancelled) {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            { role: 'tutor', content: currentStepDef.fallback_text, isFallback: true },
-          ]);
+          finishStreaming(currentStepDef.fallback_text, true);
         }
       }
     }
@@ -229,23 +228,11 @@ export function ProjectQuestShell({
         },
         setStreamingContent,
       );
-      setStreamingContent('');
-      setMessages((prev) => [
-        ...prev,
-        { role: 'tutor', content: res.message, isFallback: res.is_fallback },
-      ]);
+      finishStreaming(res.message, res.is_fallback);
     } catch {
       const hintKey =
         `level_${nextLevel}` as keyof typeof currentStepDef.hints;
-      setStreamingContent('');
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'tutor',
-          content: currentStepDef.hints[hintKey],
-          isFallback: true,
-        },
-      ]);
+      finishStreaming(currentStepDef.hints[hintKey], true);
     }
 
     // DB 저장 (fire-and-forget)
@@ -338,22 +325,10 @@ export function ProjectQuestShell({
         setStreamingContent,
       )
         .then((res) => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            { role: 'tutor', content: res.message, isFallback: res.is_fallback },
-          ]);
+          finishStreaming(res.message, res.is_fallback);
         })
         .catch(() => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'tutor',
-              content: '앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪',
-              isFallback: true,
-            },
-          ]);
+          finishStreaming('앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪', true);
         });
       return;
     }
@@ -478,22 +453,10 @@ export function ProjectQuestShell({
         setStreamingContent,
       )
         .then((res) => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            { role: 'tutor', content: res.message, isFallback: res.is_fallback },
-          ]);
+          finishStreaming(res.message, res.is_fallback);
         })
         .catch(() => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'tutor',
-              content: '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡',
-              isFallback: true,
-            },
-          ]);
+          finishStreaming('앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡', true);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

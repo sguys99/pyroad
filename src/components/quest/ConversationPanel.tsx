@@ -109,6 +109,33 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
   );
 });
 
+/**
+ * 스트리밍 중 표시되는 메시지 컴포넌트.
+ * ReactMarkdown 대신 plain text로 렌더링하여 불완전 마크다운 깜빡임을 방지한다.
+ * memo를 사용하지 않아 매 delta마다 즉시 렌더링된다.
+ */
+function StreamingMessage({ content }: { content: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+        <CharacterAvatar character="pybaem" expression="happy" size="sm" />
+      </div>
+      <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
+        <div className="mb-1 flex items-center gap-2">
+          <MessageCircle className="h-4 w-4 text-primary" />
+          <span className="text-xs font-bold text-primary">
+            파이뱀 선생님
+          </span>
+        </div>
+        <div className="prose prose-sm max-w-none text-foreground prose-p:leading-relaxed whitespace-pre-wrap">
+          {content}
+          <span className="inline-block h-4 w-0.5 animate-pulse bg-primary/60 align-text-bottom" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ConversationPanel({
   promptSkeleton,
   messages,
@@ -164,9 +191,9 @@ export function ConversationPanel({
             return <TutorMessage key={idx} msg={msg} />;
           })}
 
-          {/* 스트리밍 중이면 부분 텍스트 표시, 아니면 로딩 인디케이터 */}
-          {isAiLoading && streamingContent ? (
-            <TutorMessage msg={{ role: 'tutor', content: streamingContent }} />
+          {/* 스트리밍 중이면 plain text로 부분 텍스트 표시, 아니면 로딩 인디케이터 */}
+          {streamingContent ? (
+            <StreamingMessage content={streamingContent} />
           ) : isAiLoading ? (
             <ThinkingIndicator />
           ) : null}

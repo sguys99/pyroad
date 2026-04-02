@@ -100,6 +100,11 @@ export function useTutor() {
           }
         }
 
+        // 주의: setIsLoading(false)를 여기서 호출하지 않음.
+        // 호출자가 streamingContent를 정리하고 messages를 업데이트한 뒤
+        // setIsLoading(false)와 동일 배치에서 처리하도록 함.
+        // → 깜빡임 방지를 위해 caller에서 일괄 처리
+
         return {
           message: fullText,
           is_fallback: false,
@@ -110,27 +115,25 @@ export function useTutor() {
           return { message: fullText, is_fallback: false };
         }
         throw new Error('AI 튜터 요청에 실패했습니다');
-      } finally {
-        setIsLoading(false);
       }
+      // finally에서 setIsLoading(false) 제거 — caller가 직접 관리
     },
     [],
   );
-
-  function refreshApiKeyStatus() {
-    fetch('/api/settings')
-      .then((res) => res.json())
-      .then((data: { available_providers: string[] }) => {
-        setHasApiKey(data.available_providers.length > 0);
-      })
-      .catch(() => {});
-  }
 
   return {
     sendTutorRequest,
     sendTutorStreamRequest,
     isLoading,
+    setIsLoading,
     hasApiKey,
-    refreshApiKeyStatus,
+    refreshApiKeyStatus() {
+      fetch('/api/settings')
+        .then((res) => res.json())
+        .then((data: { available_providers: string[] }) => {
+          setHasApiKey(data.available_providers.length > 0);
+        })
+        .catch(() => {});
+    },
   };
 }

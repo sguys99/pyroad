@@ -60,7 +60,19 @@ export function QuestShell({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hintsUsed, setHintsUsed] = useState(progress?.hints_used ?? 0);
   const [streamingContent, setStreamingContent] = useState('');
-  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, hasApiKey } = useTutor();
+  const { sendTutorRequest, sendTutorStreamRequest, isLoading: isAiLoading, setIsLoading, hasApiKey } = useTutor();
+
+  /** 스트리밍 완료 후 상태를 일괄 정리하는 헬퍼 */
+  const finishStreaming = useCallback((message: string, isFallback: boolean, replace = false) => {
+    // React 18 auto-batching: 이 3개의 setState가 단일 렌더로 처리됨
+    setStreamingContent('');
+    setIsLoading(false);
+    if (replace) {
+      setMessages([{ role: 'tutor', content: message, isFallback }]);
+    } else {
+      setMessages((prev) => [...prev, { role: 'tutor', content: message, isFallback }]);
+    }
+  }, [setIsLoading]);
 
   // 완료/XP 상태
   const [isCompleted, setIsCompleted] = useState(
@@ -95,25 +107,11 @@ export function QuestShell({
           (text) => { if (!cancelled) setStreamingContent(text); },
         );
         if (!cancelled) {
-          setStreamingContent('');
-          setMessages([
-            {
-              role: 'tutor',
-              content: res.message,
-              isFallback: res.is_fallback,
-            },
-          ]);
+          finishStreaming(res.message, res.is_fallback, true);
         }
       } catch {
         if (!cancelled) {
-          setStreamingContent('');
-          setMessages([
-            {
-              role: 'tutor',
-              content: quest.prompt_skeleton.fallback_text,
-              isFallback: true,
-            },
-          ]);
+          finishStreaming(quest.prompt_skeleton.fallback_text, true, true);
         }
       }
     }
@@ -175,23 +173,11 @@ export function QuestShell({
         },
         setStreamingContent,
       );
-      setStreamingContent('');
-      setMessages((prev) => [
-        ...prev,
-        { role: 'tutor', content: res.message, isFallback: res.is_fallback },
-      ]);
+      finishStreaming(res.message, res.is_fallback);
     } catch {
       const hintKey =
         `level_${nextLevel}` as keyof typeof quest.prompt_skeleton.hints;
-      setStreamingContent('');
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'tutor',
-          content: quest.prompt_skeleton.hints[hintKey],
-          isFallback: true,
-        },
-      ]);
+      finishStreaming(quest.prompt_skeleton.hints[hintKey], true);
     }
 
     // DB 저장 (fire-and-forget)
@@ -239,27 +225,10 @@ export function QuestShell({
         setStreamingContent,
       )
         .then((res) => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'tutor',
-              content: res.message,
-              isFallback: res.is_fallback,
-            },
-          ]);
+          finishStreaming(res.message, res.is_fallback);
         })
         .catch(() => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'tutor',
-              content:
-                '앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪',
-              isFallback: true,
-            },
-          ]);
+          finishStreaming('앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪', true);
         });
       return;
     }
@@ -399,27 +368,10 @@ export function QuestShell({
         setStreamingContent,
       )
         .then((res) => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'tutor',
-              content: res.message,
-              isFallback: res.is_fallback,
-            },
-          ]);
+          finishStreaming(res.message, res.is_fallback);
         })
         .catch(() => {
-          setStreamingContent('');
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'tutor',
-              content:
-                '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡',
-              isFallback: true,
-            },
-          ]);
+          finishStreaming('앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡', true);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
