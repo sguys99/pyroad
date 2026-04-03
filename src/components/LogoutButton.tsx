@@ -1,9 +1,8 @@
 'use client';
 
-import { m } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
 
 export function LogoutButton() {
   const router = useRouter();
@@ -15,14 +14,12 @@ export function LogoutButton() {
   };
 
   return (
-    <m.div
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+    <button
+      onClick={handleLogout}
+      className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20"
     >
-      <Button variant="outline" onClick={handleLogout}>
-        로그아웃
-      </Button>
-    </m.div>
+      <LogOut className="h-4 w-4" />
+      로그아웃
+    </button>
   );
 }

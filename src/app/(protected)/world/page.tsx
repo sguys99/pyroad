@@ -8,6 +8,8 @@ import { ProfileSummary } from '@/components/world/ProfileSummary';
 import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
 import { MapBackground } from '@/components/world/MapBackground';
 import { PageTransition } from '@/components/shared/PageTransition';
+import { LogoutButton } from '@/components/LogoutButton';
+import { User } from 'lucide-react';
 import type { UserProfile } from '@/lib/types/database';
 
 export default async function WorldPage() {
@@ -52,12 +54,16 @@ export default async function WorldPage() {
     <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6">
       <div className="relative z-10 mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">모험 지도</h1>
-        <Link
-          href="/profile"
-          className="text-sm text-primary underline"
-        >
-          내 프로필
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+          >
+            <User className="h-4 w-4" />
+            내 프로필
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       {!hasAnyApiKey && <div className="relative z-10"><ApiKeyAlert /></div>}
