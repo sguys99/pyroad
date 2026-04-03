@@ -16,7 +16,7 @@ function delay(ms: number): Promise<void> {
 export async function callTutor(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 300,
+  maxTokens = 500,
   providerType?: LLMProviderType,
   customApiKey?: string,
   fast = false,
@@ -67,7 +67,7 @@ function sseMessage(data: object): Uint8Array {
 export function callTutorStream(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 300,
+  maxTokens = 500,
   providerType?: LLMProviderType,
   customApiKey?: string,
   fast = false,
