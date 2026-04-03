@@ -1,9 +1,17 @@
 import { HeroSection } from '@/components/landing/HeroSection';
+import { LandingHeader } from '@/components/landing/LandingHeader';
+import { FeatureSection } from '@/components/landing/FeatureSection';
+import { LandingFooter } from '@/components/landing/LandingFooter';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <HeroSection />
-    </main>
+    <>
+      <LandingHeader />
+      <main className="flex flex-col items-center justify-start pt-[20vh] px-8">
+        <HeroSection />
+        <FeatureSection />
+      </main>
+      <LandingFooter />
+    </>
   );
 }
