@@ -31,6 +31,12 @@ export function AccountManagementSection({
 }: AccountManagementSectionProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    action: () => Promise<void>;
+    title: string;
+    description: string;
+    actionLabel: string;
+  } | null>(null);
 
   const handleDelete = async () => {
     setLoading('delete');
@@ -120,7 +126,15 @@ export function AccountManagementSection({
               <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
-                onClick={handleResetAll}
+                onClick={() =>
+                  setConfirmAction({
+                    action: handleResetAll,
+                    title: '정말로 리셋하시겠습니까?',
+                    description:
+                      '이 작업은 되돌릴 수 없습니다. 정말 진행하시겠습니까?',
+                    actionLabel: '리셋하기',
+                  })
+                }
                 disabled={isLoading}
               >
                 리셋하기
@@ -163,7 +177,15 @@ export function AccountManagementSection({
                   </AlertDialogCancel>
                   <AlertDialogAction
                     variant="destructive"
-                    onClick={() => handleResetStage(stage.id)}
+                    onClick={() =>
+                      setConfirmAction({
+                        action: () => handleResetStage(stage.id),
+                        title: '정말로 리셋하시겠습니까?',
+                        description:
+                          '이 작업은 되돌릴 수 없습니다. 정말 진행하시겠습니까?',
+                        actionLabel: '리셋하기',
+                      })
+                    }
                     disabled={isLoading}
                   >
                     리셋하기
@@ -209,7 +231,15 @@ export function AccountManagementSection({
               <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() =>
+                  setConfirmAction({
+                    action: handleDelete,
+                    title: '정말로 탈퇴하시겠습니까?',
+                    description:
+                      '계정이 영구적으로 삭제됩니다. 정말 진행하시겠습니까?',
+                    actionLabel: '탈퇴하기',
+                  })
+                }
                 disabled={isLoading}
               >
                 탈퇴하기
@@ -218,6 +248,36 @@ export function AccountManagementSection({
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {/* 2차 확인 다이얼로그 */}
+      <AlertDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmAction(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction?.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                confirmAction?.action();
+                setConfirmAction(null);
+              }}
+              disabled={isLoading}
+            >
+              {confirmAction?.actionLabel}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
