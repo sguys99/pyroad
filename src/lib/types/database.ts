@@ -86,6 +86,34 @@ export interface PromptSkeleton {
   steps?: ProjectStep[];
 }
 
+// 게시판 타입
+
+export interface BoardPost {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BoardComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+}
+
+export interface BoardPostWithAuthor extends BoardPost {
+  user_profiles_public: { display_name: string; avatar_url: string | null };
+  comment_count: number;
+}
+
+export interface BoardCommentWithAuthor extends BoardComment {
+  user_profiles_public: { display_name: string; avatar_url: string | null };
+}
+
 // 월드맵 도메인 타입
 
 export type StageStatus = 'locked' | 'in_progress' | 'completed';

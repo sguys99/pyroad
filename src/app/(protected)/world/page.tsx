@@ -53,7 +53,12 @@ export default async function WorldPage() {
   return (
     <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6">
       <div className="relative z-10 mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">모험 지도</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-foreground">모험 지도</h1>
+          <Link href="/board" className="text-sm text-primary underline">
+            게시판
+          </Link>
+        </div>
         <div className="flex items-center gap-2">
           <Link
             href="/profile"
