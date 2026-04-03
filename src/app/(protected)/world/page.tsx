@@ -6,6 +6,7 @@ import { getAvailableProviders } from '@/lib/tutor/providers/factory';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
 import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
+import { MapBackground } from '@/components/world/MapBackground';
 import { PageTransition } from '@/components/shared/PageTransition';
 import type { UserProfile } from '@/lib/types/database';
 
@@ -48,8 +49,8 @@ export default async function WorldPage() {
     (userKeys && Object.values(userKeys).some((k) => !!k));
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6 flex items-center justify-between">
+    <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6">
+      <div className="relative z-10 mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">모험 지도</h1>
         <Link
           href="/profile"
@@ -59,15 +60,17 @@ export default async function WorldPage() {
         </Link>
       </div>
 
-      {!hasAnyApiKey && <ApiKeyAlert />}
+      {!hasAnyApiKey && <div className="relative z-10"><ApiKeyAlert /></div>}
 
       {profile && (
-        <div className="mb-6">
+        <div className="relative z-10 mb-6">
           <ProfileSummary profile={profile} badges={badges} />
         </div>
       )}
 
-      <WorldMap stages={stagesWithStatus} />
+      <MapBackground className="rounded-2xl overflow-hidden">
+        <WorldMap stages={stagesWithStatus} />
+      </MapBackground>
     </PageTransition>
   );
 }

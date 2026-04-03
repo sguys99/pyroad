@@ -1,56 +1,145 @@
 'use client';
 
-import { m } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import type { StageWithStatus } from '@/lib/types/database';
 import { StageNode } from './StageNode';
+import { WindingPath } from './WindingPath';
+import { FloatingDecorations } from './FloatingDecorations';
+import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 const container = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.08,
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
     },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, scale: 0.85 },
   show: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: 'easeOut' as const },
+    scale: 1,
+    transition: { duration: 0.45, ease: 'easeOut' as const },
   },
 };
+
+/**
+ * Zigzag node positions (bottom-to-top, matching SVG viewBox 0 0 400 600).
+ * Each entry: [leftPercent, topPercent, alignment]
+ * Stages are displayed in reverse order (7 at top, 1 at bottom).
+ */
+const NODE_POSITIONS: Array<{
+  left: string;
+  top: string;
+  align: 'left' | 'right' | 'center';
+}> = [
+  { left: '50%', top: '91%', align: 'center' },      // Stage 1 (bottom)
+  { left: '22%', top: '77.5%', align: 'left' },      // Stage 2
+  { left: '62%', top: '64%', align: 'right' },       // Stage 3
+  { left: '22%', top: '50%', align: 'left' },        // Stage 4
+  { left: '62%', top: '36%', align: 'right' },       // Stage 5
+  { left: '22%', top: '22.5%', align: 'left' },      // Stage 6
+  { left: '50%', top: '9%', align: 'center' },       // Stage 7 (top)
+];
+
+function computeProgressFraction(stages: StageWithStatus[]): number {
+  const sorted = [...stages].sort((a, b) => a.order - b.order);
+  let completed = 0;
+
+  for (const stage of sorted) {
+    if (stage.status === 'completed') {
+      completed++;
+    } else if (stage.status === 'in_progress') {
+      const partial =
+        stage.totalQuestCount > 0
+          ? stage.completedQuestCount / stage.totalQuestCount
+          : 0;
+      completed += partial;
+      break;
+    } else {
+      break;
+    }
+  }
+
+  return Math.min(completed / (sorted.length - 1), 1);
+}
 
 interface WorldMapProps {
   stages: StageWithStatus[];
 }
 
 export function WorldMap({ stages }: WorldMapProps) {
-  const reversed = [...stages].sort((a, b) => b.order - a.order);
+  const shouldReduceMotion = useReducedMotion();
+  const sorted = [...stages].sort((a, b) => a.order - b.order);
+  const progressFraction = computeProgressFraction(stages);
+
+  const inProgressStage = sorted.find((s) => s.status === 'in_progress');
+  const inProgressIndex = inProgressStage
+    ? sorted.findIndex((s) => s.id === inProgressStage.id)
+    : -1;
 
   return (
-    <m.div
-      className="flex flex-col items-center gap-2 px-4 pb-8"
-      variants={container}
-      initial="hidden"
-      animate="show"
-    >
-      {reversed.map((stage, index) => (
+    <div className="relative w-full" style={{ aspectRatio: '400 / 600' }}>
+      {/* SVG winding path background */}
+      <WindingPath progressFraction={progressFraction} />
+
+      {/* Floating decorations (clouds, leaves) */}
+      <FloatingDecorations />
+
+      {/* Pybaem character at in_progress stage */}
+      {inProgressIndex >= 0 && (
         <m.div
-          key={stage.id}
-          className="flex flex-col items-center w-full"
-          variants={item}
+          className="absolute z-20 pointer-events-none"
+          style={{
+            left: NODE_POSITIONS[inProgressIndex].left,
+            top: NODE_POSITIONS[inProgressIndex].top,
+            transform: 'translate(-50%, -110%)',
+          }}
+          animate={
+            shouldReduceMotion ? undefined : { y: [0, -6, 0] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+          }
         >
-          <StageNode stage={stage} />
-          {index < reversed.length - 1 && (
-            <m.div
-              className="h-6 w-0.5 bg-border"
-              variants={item}
-            />
-          )}
+          <CharacterAvatar
+            character="pybaem"
+            expression="happy"
+            size="sm"
+          />
         </m.div>
-      ))}
-    </m.div>
+      )}
+
+      {/* Stage nodes */}
+      <m.div
+        className="absolute inset-0"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        {sorted.map((stage, index) => {
+          const pos = NODE_POSITIONS[index];
+          return (
+            <m.div
+              key={stage.id}
+              className="absolute z-10"
+              style={{
+                left: pos.left,
+                top: pos.top,
+                transform: 'translate(-50%, -50%)',
+              }}
+              variants={item}
+            >
+              <StageNode stage={stage} align={pos.align} />
+            </m.div>
+          );
+        })}
+      </m.div>
+    </div>
   );
 }

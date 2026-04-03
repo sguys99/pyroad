@@ -5,40 +5,48 @@ import { m, useReducedMotion } from 'framer-motion';
 import { CheckCircle, Lock, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StageWithStatus } from '@/lib/types/database';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { StageIllustration } from './StageIllustration';
 
 const statusConfig = {
   completed: {
     icon: CheckCircle,
-    bg: 'bg-primary/10 border-primary',
+    borderColor: 'border-primary/60',
+    bgColor: 'bg-card/90',
     iconColor: 'text-primary',
     label: '완료!',
+    labelClass: 'bg-primary/20 text-primary',
   },
   in_progress: {
     icon: Play,
-    bg: 'bg-secondary/10 border-secondary',
+    borderColor: 'border-secondary',
+    bgColor: 'bg-card/95',
     iconColor: 'text-secondary-foreground',
     label: '도전하기',
+    labelClass: 'bg-secondary/20 text-secondary-foreground',
   },
   locked: {
     icon: Lock,
-    bg: 'bg-muted border-muted',
+    borderColor: 'border-muted',
+    bgColor: 'bg-muted/80',
     iconColor: 'text-muted-foreground',
     label: '잠김',
+    labelClass: 'bg-muted-foreground/10 text-muted-foreground',
   },
 } as const;
 
 interface StageNodeProps {
   stage: StageWithStatus;
+  align?: 'left' | 'right' | 'center';
 }
 
-export function StageNode({ stage }: StageNodeProps) {
+export function StageNode({ stage, align = 'center' }: StageNodeProps) {
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const config = statusConfig[stage.status];
   const Icon = config.icon;
   const isClickable = stage.status !== 'locked';
   const shouldPulse = stage.status === 'in_progress' && !shouldReduceMotion;
+  const isCompleted = stage.status === 'completed';
 
   function handleClick() {
     if (!isClickable || !stage.firstIncompleteQuestId) return;
@@ -46,84 +54,93 @@ export function StageNode({ stage }: StageNodeProps) {
   }
 
   return (
-    <div className="relative w-full max-w-md">
-      {stage.status === 'in_progress' && (
-        <m.div
-          className="absolute -right-2 -top-4 z-10"
-          animate={shouldReduceMotion ? undefined : { y: [0, -4, 0] }}
-          transition={shouldReduceMotion ? undefined : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <CharacterAvatar character="pybaem" expression="happy" size="sm" />
-        </m.div>
+    <m.button
+      onClick={handleClick}
+      disabled={!isClickable}
+      whileTap={isClickable ? { scale: 0.95 } : undefined}
+      whileHover={isClickable ? { scale: 1.05 } : undefined}
+      animate={
+        shouldPulse
+          ? {
+              boxShadow: [
+                '0 0 0 0 rgba(76, 175, 80, 0)',
+                '0 0 12px 4px rgba(76, 175, 80, 0.3)',
+                '0 0 0 0 rgba(76, 175, 80, 0)',
+              ],
+            }
+          : undefined
+      }
+      transition={
+        shouldPulse
+          ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+          : undefined
+      }
+      className={cn(
+        'relative flex flex-row items-center gap-2 rounded-xl border-2 px-2.5 py-2 transition-colors',
+        'w-[170px] sm:w-[190px] backdrop-blur-sm',
+        config.borderColor,
+        config.bgColor,
+        isClickable
+          ? 'cursor-pointer hover:shadow-lg'
+          : 'cursor-not-allowed opacity-60',
+        isCompleted && 'overflow-hidden',
       )}
-      <m.button
-        onClick={handleClick}
-        disabled={!isClickable}
-        whileTap={isClickable ? { scale: 0.97 } : undefined}
-        whileHover={isClickable ? { scale: 1.02 } : undefined}
-        animate={
-          shouldPulse
-            ? {
-                boxShadow: [
-                  '0 0 0 0 rgba(76, 175, 80, 0)',
-                  '0 0 8px 3px rgba(76, 175, 80, 0.25)',
-                  '0 0 0 0 rgba(76, 175, 80, 0)',
-                ],
-              }
-            : undefined
-        }
-        transition={
-          shouldPulse
-            ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
-            : undefined
-        }
+    >
+      {/* Shimmer overlay for completed stages */}
+      {isCompleted && (
+        <div
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,215,0,0.12), transparent)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 3s ease-in-out infinite',
+          }}
+        />
+      )}
+
+      {/* Illustration */}
+      <div className="relative z-10 w-10 h-10 sm:w-11 sm:h-11 shrink-0">
+        <StageIllustration
+          themeName={stage.theme_name}
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Stage info */}
+      <div className="relative z-10 flex-1 min-w-0 text-left">
+        <div className="flex items-center gap-1">
+          <p className="text-[10px] text-muted-foreground">{stage.order}단계</p>
+          <span
+            className={cn(
+              'rounded-full px-1.5 py-px text-[9px] font-semibold',
+              config.labelClass,
+            )}
+          >
+            {config.label}
+          </span>
+        </div>
+        <h3 className="text-xs font-bold text-foreground leading-tight truncate">
+          {stage.title}
+        </h3>
+        {stage.status !== 'locked' && (
+          <p className="text-[9px] text-muted-foreground">
+            {stage.completedQuestCount}/{stage.totalQuestCount} 퀘스트
+          </p>
+        )}
+      </div>
+
+      {/* Status icon */}
+      <div
         className={cn(
-          'flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-colors',
-          'min-h-[68px]',
-          config.bg,
-          isClickable
-            ? 'cursor-pointer hover:shadow-md'
-            : 'cursor-not-allowed opacity-60',
+          'relative z-10 flex h-5 w-5 items-center justify-center rounded-full shrink-0',
+          stage.status === 'completed' && 'bg-primary/20',
+          stage.status === 'in_progress' && 'bg-secondary/20',
+          stage.status === 'locked' && 'bg-muted-foreground/10',
         )}
       >
-        <div
-          className={cn(
-            'flex h-11 w-11 shrink-0 items-center justify-center rounded-full',
-            stage.status === 'completed' && 'bg-primary/20',
-            stage.status === 'in_progress' && 'bg-secondary/20',
-            stage.status === 'locked' && 'bg-muted-foreground/10',
-          )}
-        >
-          <Icon className={cn('h-6 w-6', config.iconColor)} />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">
-              {stage.order}단계
-            </span>
-            <span
-              className={cn(
-                'rounded-full px-2 py-0.5 text-xs font-medium',
-                stage.status === 'completed' &&
-                  'bg-primary/20 text-primary',
-                stage.status === 'in_progress' &&
-                  'bg-secondary/20 text-secondary-foreground',
-                stage.status === 'locked' &&
-                  'bg-muted-foreground/10 text-muted-foreground',
-              )}
-            >
-              {config.label}
-            </span>
-          </div>
-          <h3 className="font-bold text-foreground truncate">{stage.title}</h3>
-          {stage.status !== 'locked' && (
-            <p className="text-xs text-muted-foreground">
-              {stage.completedQuestCount}/{stage.totalQuestCount} 퀘스트 완료
-            </p>
-          )}
-        </div>
-      </m.button>
-    </div>
+        <Icon className={cn('h-3 w-3', config.iconColor)} />
+      </div>
+    </m.button>
   );
 }
