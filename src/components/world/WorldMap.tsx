@@ -38,9 +38,9 @@ const NODE_POSITIONS: Array<{
 }> = [
   { left: '50%', top: '86%', align: 'center' },      // Stage 1 (bottom)
   { left: '22%', top: '72.5%', align: 'left' },      // Stage 2
-  { left: '62%', top: '59%', align: 'right' },       // Stage 3
+  { left: '55%', top: '59%', align: 'right' },       // Stage 3
   { left: '22%', top: '45%', align: 'left' },        // Stage 4
-  { left: '62%', top: '31%', align: 'right' },       // Stage 5
+  { left: '55%', top: '31%', align: 'right' },       // Stage 5
   { left: '22%', top: '17.5%', align: 'left' },      // Stage 6
   { left: '50%', top: '4%', align: 'center' },       // Stage 7 (top)
 ];

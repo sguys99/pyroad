@@ -60,17 +60,19 @@ export default async function WorldPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/board"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+            aria-label="게시판"
+            className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
           >
             <MessageSquare className="h-4 w-4" />
-            게시판
+            <span className="hidden sm:inline">게시판</span>
           </Link>
           <Link
             href="/profile"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+            aria-label="내 프로필"
+            className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
           >
             <User className="h-4 w-4" />
-            내 프로필
+            <span className="hidden sm:inline">내 프로필</span>
           </Link>
           <LogoutButton />
         </div>
