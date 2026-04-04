@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
@@ -14,31 +15,33 @@ import type { UserProfile } from '@/lib/types/database';
 
 export default async function WorldPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
+  const [{ user }, stagesResult] = await Promise.all([
+    getAuthUser(),
+    supabase
+      .from('stages')
+      .select('id, order, title, theme_name, description, is_final, created_at, quests(id, order)')
+      .order('order', { ascending: true }),
+  ]);
   if (!user) redirect('/');
 
-  const [stagesResult, progressResult, profileResult, badgesResult] =
-    await Promise.all([
-      supabase
-        .from('stages')
-        .select('id, order, title, theme_name, description, is_final, created_at, quests(id, order)')
-        .order('order', { ascending: true }),
-      supabase
-        .from('user_progress')
-        .select('quest_id, status')
-        .eq('user_id', user.id),
-      supabase
-        .from('users')
-        .select('id, display_name, avatar_url, total_xp, current_level, custom_api_keys')
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('user_badges')
-        .select('badge_type, earned_at')
-        .eq('user_id', user.id),
-    ]);
+  // user.id 필요한 쿼리는 이후 병렬 실행
+  const [progressResult, profileResult, badgesResult] = await Promise.all([
+    supabase
+      .from('user_progress')
+      .select('quest_id, status')
+      .eq('user_id', user.id),
+    supabase
+      .from('users')
+      .select('id, display_name, avatar_url, total_xp, current_level, custom_api_keys')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('user_badges')
+      .select('badge_type, earned_at')
+      .eq('user_id', user.id),
+  ]);
 
   const stages = stagesResult.data ?? [];
   const progress = progressResult.data ?? [];

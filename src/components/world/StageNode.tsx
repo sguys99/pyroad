@@ -76,8 +76,8 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
           : undefined
       }
       className={cn(
-        'relative flex flex-row items-center gap-2 rounded-xl border-2 px-2.5 py-2 transition-colors',
-        'w-[170px] sm:w-[190px] backdrop-blur-sm',
+        'relative flex flex-row items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-colors',
+        'w-[180px] sm:w-[210px] backdrop-blur-sm',
         config.borderColor,
         config.bgColor,
         isClickable
@@ -100,7 +100,7 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
       )}
 
       {/* Illustration */}
-      <div className="relative z-10 w-10 h-10 sm:w-11 sm:h-11 shrink-0">
+      <div className="relative z-10 w-11 h-11 sm:w-12 sm:h-12 shrink-0">
         <StageIllustration
           themeName={stage.theme_name}
           className="w-full h-full"
@@ -110,21 +110,21 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
       {/* Stage info */}
       <div className="relative z-10 flex-1 min-w-0 text-left">
         <div className="flex items-center gap-1">
-          <p className="text-[10px] text-muted-foreground">{stage.order}단계</p>
+          <p className="text-[11px] text-muted-foreground">{stage.order}단계</p>
           <span
             className={cn(
-              'rounded-full px-1.5 py-px text-[9px] font-semibold',
+              'rounded-full px-1.5 py-px text-[10px] font-semibold',
               config.labelClass,
             )}
           >
             {config.label}
           </span>
         </div>
-        <h3 className="text-xs font-bold text-foreground leading-tight truncate">
+        <h3 className="text-[13px] sm:text-sm font-bold text-foreground leading-tight truncate">
           {stage.title}
         </h3>
         {stage.status !== 'locked' && (
-          <p className="text-[9px] text-muted-foreground">
+          <p className="text-[10px] text-muted-foreground">
             {stage.completedQuestCount}/{stage.totalQuestCount} 퀘스트
           </p>
         )}
@@ -133,13 +133,13 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
       {/* Status icon */}
       <div
         className={cn(
-          'relative z-10 flex h-5 w-5 items-center justify-center rounded-full shrink-0',
+          'relative z-10 flex h-6 w-6 items-center justify-center rounded-full shrink-0',
           stage.status === 'completed' && 'bg-primary/20',
           stage.status === 'in_progress' && 'bg-secondary/20',
           stage.status === 'locked' && 'bg-muted-foreground/10',
         )}
       >
-        <Icon className={cn('h-3 w-3', config.iconColor)} />
+        <Icon className={cn('h-3.5 w-3.5', config.iconColor)} />
       </div>
     </m.button>
   );

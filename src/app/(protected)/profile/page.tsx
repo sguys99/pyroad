@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,32 +14,34 @@ import { AccountManagementSection } from '@/components/profile/AccountManagement
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
+  const [{ user }, stagesResult] = await Promise.all([
+    getAuthUser(),
+    supabase
+      .from('stages')
+      .select('id, order, title, quests(id)')
+      .order('order', { ascending: true }),
+  ]);
   if (!user) redirect('/');
 
-  const [profileResult, progressResult, stagesResult, badgesResult] =
-    await Promise.all([
-      supabase
-        .from('users')
-        .select('id, display_name, avatar_url, total_xp, current_level')
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('user_progress')
-        .select('quest_id, status')
-        .eq('user_id', user.id)
-        .eq('status', 'completed'),
-      supabase
-        .from('stages')
-        .select('id, order, title, quests(id)')
-        .order('order', { ascending: true }),
-      supabase
-        .from('user_badges')
-        .select('badge_type, earned_at')
-        .eq('user_id', user.id),
-    ]);
+  // user.id 필요한 쿼리는 이후 병렬 실행
+  const [profileResult, progressResult, badgesResult] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, display_name, avatar_url, total_xp, current_level')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('user_progress')
+      .select('quest_id, status')
+      .eq('user_id', user.id)
+      .eq('status', 'completed'),
+    supabase
+      .from('user_badges')
+      .select('badge_type, earned_at')
+      .eq('user_id', user.id),
+  ]);
 
   const profile = profileResult.data;
   const progress = progressResult.data ?? [];

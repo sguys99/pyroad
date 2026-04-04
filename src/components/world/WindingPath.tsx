@@ -7,13 +7,13 @@ interface WindingPathProps {
 }
 
 const PATH_D = [
-  'M 200 516',
-  'C 200 480, 100 465, 100 435',
-  'C 100 390, 248 375, 248 354',
-  'C 248 315, 100 295, 100 270',
-  'C 100 230, 248 210, 248 186',
-  'C 248 145, 100 130, 100 105',
-  'C 100 65, 200 48, 200 24',
+  'M 200 413',
+  'C 200 384, 100 372, 100 348',
+  'C 100 312, 248 300, 248 283',
+  'C 248 252, 100 236, 100 216',
+  'C 100 184, 248 168, 248 149',
+  'C 248 116, 100 104, 100 84',
+  'C 100 52, 200 38, 200 19',
 ].join(' ');
 
 export function WindingPath({ progressFraction }: WindingPathProps) {
@@ -21,7 +21,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
 
   return (
     <svg
-      viewBox="0 0 400 600"
+      viewBox="0 0 400 480"
       className="absolute inset-0 h-full w-full"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden

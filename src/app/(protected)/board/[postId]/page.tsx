@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { PageTransition } from '@/components/shared/PageTransition';
@@ -15,14 +16,11 @@ export default async function BoardPostPage({
   params: Promise<{ postId: string }>;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/');
-
   const { postId } = await params;
 
-  const [postResult, commentsResult] = await Promise.all([
+  // getAuthUser()와 게시글/댓글 쿼리를 병렬 실행 (user.id 불필요)
+  const [{ user }, postResult, commentsResult] = await Promise.all([
+    getAuthUser(),
     supabase
       .from('board_posts')
       .select(
@@ -38,6 +36,7 @@ export default async function BoardPostPage({
       .eq('post_id', postId)
       .order('created_at', { ascending: true }),
   ]);
+  if (!user) redirect('/');
 
   if (!postResult.data) notFound();
 

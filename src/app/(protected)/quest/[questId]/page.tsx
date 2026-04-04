@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
 import { QuestShell } from '@/components/quest/QuestShell';
 import { ProjectQuestShell } from '@/components/quest/ProjectQuestShell';
@@ -15,12 +16,10 @@ interface Props {
 export default async function QuestPage({ params }: Props) {
   const { questId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/');
 
-  const [questResult, progressResult, profileResult] = await Promise.all([
+  // getAuthUser()와 user.id 불필요한 quest 쿼리를 병��� 실행
+  const [{ user }, questResult] = await Promise.all([
+    getAuthUser(),
     supabase
       .from('quests')
       .select(
@@ -28,6 +27,11 @@ export default async function QuestPage({ params }: Props) {
       )
       .eq('id', questId)
       .single(),
+  ]);
+  if (!user) redirect('/');
+
+  // user.id 필요한 쿼리는 이후 병렬 실행
+  const [progressResult, profileResult] = await Promise.all([
     supabase
       .from('user_progress')
       .select('*')

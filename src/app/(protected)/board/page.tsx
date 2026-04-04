@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PageTransition } from '@/components/shared/PageTransition';
@@ -13,24 +14,24 @@ export default async function BoardPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/');
-
   const { page } = await searchParams;
   const currentPage = Math.max(1, Number(page) || 1);
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const { data: posts, count } = await supabase
-    .from('board_posts')
-    .select(
-      '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_url), board_comments(count)',
-      { count: 'exact' },
-    )
-    .order('created_at', { ascending: false })
-    .range(from, to);
+  // getAuthUser()와 게시글 목록 쿼리를 병렬 실행 (user.id 불필��)
+  const [{ user }, { data: posts, count }] = await Promise.all([
+    getAuthUser(),
+    supabase
+      .from('board_posts')
+      .select(
+        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_url), board_comments(count)',
+        { count: 'exact' },
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to),
+  ]);
+  if (!user) redirect('/');
 
   const boardPosts: BoardPostWithAuthor[] = (posts ?? []).map((post) => ({
     ...post,

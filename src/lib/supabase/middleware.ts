@@ -30,7 +30,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 보호 경로: 미인증 → / 리다이렉트
-  const protectedPaths = ['/world', '/quest', '/profile', '/board'];
+  const protectedPaths = ['/world', '/quest', '/profile', '/board', '/settings'];
   const isProtected = protectedPaths.some((p) =>
     request.nextUrl.pathname.startsWith(p),
   );
