@@ -1,5 +1,8 @@
 # pyRoad
 
+![Version](https://img.shields.io/badge/version-v0.1.0-blue)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue)
+
 pyRoad is an interactive Python learning platform for elementary school students. It combines a quest-based curriculum, an AI animal tutor, and in-browser Python execution so learners can start coding without installing a local environment.
 
 For the Korean version of this document, see [docs/README(kr).md](docs/README%28kr%29.md).
@@ -11,18 +14,27 @@ For the Korean version of this document, see [docs/README(kr).md](docs/README%28
 - World map and quest progression structure
 - AI tutor support for introductions and step-by-step hints
 
-## Implementation Status
+## Screenshots
 
-- [x] Phase 0: Project bootstrap and infrastructure
-- [x] Phase 1: Google login and protected routes
-- [x] Phase 2: Curriculum seed data and world map
-- [x] Phase 3: Quest screen shell and Pyodide code execution
-- [x] Phase 4: AI tutor API, quest intro, and hints
-- [x] Phase 5: Code validation and quest completion flow
-- [x] Phase 6: Gamification
-- [x] Phase 7: Final project guide
-- [x] Phase 8: Responsive UI polish and animations
-- [x] Phase 9: Integrated testing and deployment
+### Landing Page
+![Landing Page](img/1.landing-page.png)
+
+### World Map
+![World Map](img/2.world-map.png)
+
+### Learning Page
+![Learning Page](img/3.learning-page.png)
+
+## Features
+
+- **Google Login** — One-click authentication via Supabase Auth
+- **World Map Progression** — Stage-based curriculum with visual progress tracking
+- **Quest System** — Step-by-step coding challenges with clear goals
+- **AI Animal Tutor** — Claude-powered tutor that introduces topics and provides hints
+- **In-Browser Python** — Code execution via Pyodide without any local setup
+- **Code Editor** — CodeMirror 6 with Python syntax highlighting
+- **Gamification** — Badges, XP, and rewards to keep learners motivated
+- **Responsive UI** — Optimized for both desktop and tablet screens
 
 ## Tech Stack
 
@@ -32,7 +44,20 @@ For the Korean version of this document, see [docs/README(kr).md](docs/README%28
 - AI Tutor: `Anthropic SDK`
 - Python Runtime: `Pyodide`
 - Editor: `CodeMirror 6`
+- Animation: `Framer Motion`, `canvas-confetti`
 - Tooling: `ESLint`, `Vitest`, `Playwright`
+
+## Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router pages & API routes
+│   ├── (protected)/      # Authenticated routes (world, quest, profile, ...)
+│   ├── api/              # API endpoints (AI tutor, progress, ...)
+│   └── auth/             # Auth callback
+├── components/           # Shared UI components
+└── lib/                  # Utilities, Supabase client, Pyodide helpers
+```
 
 ## Getting Started
 
@@ -70,9 +95,13 @@ This repository includes:
 
 - `supabase/migrations/00001_create_initial_schema.sql`
 - `supabase/migrations/00002_handle_new_user_trigger.sql`
+- `supabase/migrations/00003_add_project_step_columns.sql`
+- `supabase/migrations/00004_add_provider_settings.sql`
+- `supabase/migrations/00005_fix_quest_starter_code.sql`
+- `supabase/migrations/00006_board.sql`
 - `supabase/seed.sql`
 
-Apply the migrations and seed data to prepare the `users`, `stages`, `quests`, `user_progress`, and `user_badges` tables.
+Apply the migrations and seed data to prepare the database tables.
 
 ### 5. Run the development server
 
@@ -85,3 +114,11 @@ The default local URL is `http://localhost:3000`.
 ## Direction
 
 The goal of pyRoad is to make a child's first Python experience simple, playful, and immediately rewarding. The current repository already includes the core MVP foundation for authentication, world progression, quest UI, AI tutor interaction, and browser-based Python execution.
+
+## Contributing
+
+Contributions are welcome! Please open an issue first to discuss what you would like to change. For major changes, create a feature branch and submit a pull request.
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
