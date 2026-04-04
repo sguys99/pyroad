@@ -82,7 +82,7 @@ export function WorldMap({ stages }: WorldMapProps) {
     : -1;
 
   return (
-    <div className="relative w-full" style={{ aspectRatio: '400 / 480' }}>
+    <div className="relative w-full aspect-[2/3] sm:aspect-[400/480]">
       {/* SVG winding path background */}
       <WindingPath progressFraction={progressFraction} />
 

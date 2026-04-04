@@ -23,7 +23,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
     <svg
       viewBox="0 0 400 480"
       className="absolute inset-0 h-full w-full"
-      preserveAspectRatio="xMidYMid meet"
+      preserveAspectRatio="none"
       aria-hidden
     >
       {/* Background dashed path */}
