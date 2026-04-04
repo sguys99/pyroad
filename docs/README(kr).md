@@ -91,12 +91,7 @@ ANTHROPIC_MODEL=claude-sonnet-4-6
 
 이 저장소에는 다음 파일이 포함되어 있습니다.
 
-- `supabase/migrations/00001_create_initial_schema.sql`
-- `supabase/migrations/00002_handle_new_user_trigger.sql`
-- `supabase/migrations/00003_add_project_step_columns.sql`
-- `supabase/migrations/00004_add_provider_settings.sql`
-- `supabase/migrations/00005_fix_quest_starter_code.sql`
-- `supabase/migrations/00006_board.sql`
+- `supabase/migrations/00001_v0.1.0_initial_schema.sql`
 - `supabase/seed.sql`
 
 로컬 또는 원격 Supabase 프로젝트에 migration과 seed를 적용해 데이터베이스 테이블을 준비해야 합니다.
