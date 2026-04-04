@@ -47,12 +47,12 @@ export function LandingHeader() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link
-            href="#"
+          <a
+            href="#about"
             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[13px] text-muted-foreground hover:text-foreground transition-colors"
           >
             About
-          </Link>
+          </a>
 
           <a
             href="https://github.com/sguys99/pyroad"
