@@ -37,13 +37,13 @@ const NODE_POSITIONS: Array<{
   top: string;
   align: 'left' | 'right' | 'center';
 }> = [
-  { mobileLeft: '45%', desktopLeft: '50%', top: '86%', align: 'center' },      // Stage 1 (bottom)
-  { mobileLeft: '30%', desktopLeft: '22%', top: '72.5%', align: 'left' },      // Stage 2
-  { mobileLeft: '56%', desktopLeft: '55%', top: '59%', align: 'right' },       // Stage 3
-  { mobileLeft: '30%', desktopLeft: '22%', top: '45%', align: 'left' },        // Stage 4
-  { mobileLeft: '56%', desktopLeft: '55%', top: '31%', align: 'right' },       // Stage 5
-  { mobileLeft: '30%', desktopLeft: '22%', top: '17.5%', align: 'left' },      // Stage 6
-  { mobileLeft: '45%', desktopLeft: '50%', top: '4%', align: 'center' },       // Stage 7 (top)
+  { mobileLeft: '30%', desktopLeft: '50%', top: '86%', align: 'center' },      // Stage 1 (bottom)
+  { mobileLeft: '15%', desktopLeft: '22%', top: '72.5%', align: 'left' },      // Stage 2
+  { mobileLeft: '45%', desktopLeft: '55%', top: '59%', align: 'right' },       // Stage 3
+  { mobileLeft: '15%', desktopLeft: '22%', top: '45%', align: 'left' },        // Stage 4
+  { mobileLeft: '45%', desktopLeft: '55%', top: '31%', align: 'right' },       // Stage 5
+  { mobileLeft: '15%', desktopLeft: '22%', top: '17.5%', align: 'left' },      // Stage 6
+  { mobileLeft: '30%', desktopLeft: '50%', top: '4%', align: 'center' },       // Stage 7 (top)
 ];
 
 function computeProgressFraction(stages: StageWithStatus[]): number {
