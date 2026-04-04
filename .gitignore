@@ -44,5 +44,8 @@ e2e/.auth/
 playwright-report/
 test-results/
 
+# Supabase
+supabase/.temp/
+
 # Misc
 *.pem
