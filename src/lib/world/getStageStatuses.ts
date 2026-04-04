@@ -1,18 +1,26 @@
 import type {
-  Quest,
   Stage,
   StageStatus,
   StageWithStatus,
-  UserProgress,
 } from '@/lib/types/database';
 
+interface QuestMinimal {
+  id: string;
+  order: number;
+}
+
 interface StageWithQuests extends Stage {
-  quests: Quest[];
+  quests: QuestMinimal[];
+}
+
+interface ProgressMinimal {
+  quest_id: string;
+  status: string;
 }
 
 export function getStageStatuses(
   stages: StageWithQuests[],
-  userProgress: UserProgress[],
+  userProgress: ProgressMinimal[],
 ): StageWithStatus[] {
   const sorted = [...stages].sort((a, b) => a.order - b.order);
   const completedQuestIds = new Set(

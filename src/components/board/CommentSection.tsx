@@ -1,21 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import type { BoardCommentWithAuthor } from '@/lib/types/database';
 
 interface CommentSectionProps {
   postId: string;
   comments: BoardCommentWithAuthor[];
   currentUserId: string;
+  currentUserName?: string;
 }
 
 export function CommentSection({
   postId,
-  comments,
+  comments: initialComments,
   currentUserId,
+  currentUserName,
 }: CommentSectionProps) {
-  const router = useRouter();
+  const [comments, setComments] = useState(initialComments);
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -33,8 +34,20 @@ export function CommentSection({
         body: JSON.stringify({ post_id: postId, content: trimmed }),
       });
       if (res.ok) {
+        const data = await res.json();
+        const optimisticComment: BoardCommentWithAuthor = {
+          id: data.comment?.id ?? crypto.randomUUID(),
+          post_id: postId,
+          user_id: currentUserId,
+          content: trimmed,
+          created_at: new Date().toISOString(),
+          user_profiles_public: {
+            display_name: currentUserName ?? '나',
+            avatar_url: null,
+          },
+        };
+        setComments((prev) => [...prev, optimisticComment]);
         setContent('');
-        router.refresh();
       }
     } finally {
       setSubmitting(false);
@@ -43,13 +56,17 @@ export function CommentSection({
 
   async function handleDelete(commentId: string) {
     setDeletingId(commentId);
+    const prevComments = comments;
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
     try {
       const res = await fetch(`/api/board/comments/${commentId}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        router.refresh();
+      if (!res.ok) {
+        setComments(prevComments);
       }
+    } catch {
+      setComments(prevComments);
     } finally {
       setDeletingId(null);
     }

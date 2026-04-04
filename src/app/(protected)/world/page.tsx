@@ -23,9 +23,12 @@ export default async function WorldPage() {
     await Promise.all([
       supabase
         .from('stages')
-        .select('*, quests(*)')
+        .select('id, order, title, theme_name, description, is_final, created_at, quests(id, order)')
         .order('order', { ascending: true }),
-      supabase.from('user_progress').select('*').eq('user_id', user.id),
+      supabase
+        .from('user_progress')
+        .select('quest_id, status')
+        .eq('user_id', user.id),
       supabase
         .from('users')
         .select('id, display_name, avatar_url, total_xp, current_level, custom_api_keys')

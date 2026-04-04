@@ -33,17 +33,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // 게시글 존재 확인
-  const { data: post } = await supabase
-    .from('board_posts')
-    .select('id')
-    .eq('id', body.post_id)
-    .single();
-
-  if (!post) {
-    return NextResponse.json({ error: '게시글을 찾을 수 없습니다.' }, { status: 404 });
-  }
-
   const { data, error } = await supabase
     .from('board_comments')
     .insert({ post_id: body.post_id, user_id: user.id, content })

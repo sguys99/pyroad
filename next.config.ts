@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
       'lucide-react',
       'canvas-confetti',
       'lottie-react',
+      '@codemirror/view',
+      '@codemirror/state',
+      '@codemirror/lang-python',
+      'codemirror',
     ],
   },
 };

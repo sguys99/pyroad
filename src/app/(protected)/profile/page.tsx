@@ -28,7 +28,8 @@ export default async function ProfilePage() {
       supabase
         .from('user_progress')
         .select('quest_id, status')
-        .eq('user_id', user.id),
+        .eq('user_id', user.id)
+        .eq('status', 'completed'),
       supabase
         .from('stages')
         .select('id, order, title, quests(id)')

@@ -136,7 +136,7 @@ export interface QuestWithStage extends QuestClientSafe {
 
 export interface StageWithStatus extends Stage {
   status: StageStatus;
-  quests: Quest[];
+  quests: Pick<Quest, 'id' | 'order'>[];
   completedQuestCount: number;
   totalQuestCount: number;
   firstIncompleteQuestId: string | null;

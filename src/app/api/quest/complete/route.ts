@@ -33,37 +33,37 @@ export async function POST(request: Request) {
     );
   }
 
-  // 1. Quest 조회
-  const { data: quest } = await supabase
-    .from('quests')
-    .select('id, xp_reward')
-    .eq('id', body.quest_id)
-    .single();
+  // 1. Quest 조회 + 중복 완료 확인 + 유저 프로필 — 병렬 실행
+  const [questResult, existingResult, profileResult] = await Promise.all([
+    supabase
+      .from('quests')
+      .select('id, xp_reward')
+      .eq('id', body.quest_id)
+      .single(),
+    supabase
+      .from('user_progress')
+      .select('status')
+      .eq('user_id', user.id)
+      .eq('quest_id', body.quest_id)
+      .maybeSingle(),
+    supabase
+      .from('users')
+      .select('total_xp, current_level')
+      .eq('id', user.id)
+      .single(),
+  ]);
 
+  const quest = questResult.data;
   if (!quest) {
     return NextResponse.json({ error: 'Quest not found' }, { status: 404 });
   }
 
-  // 2. 중복 완료 방지
-  const { data: existing } = await supabase
-    .from('user_progress')
-    .select('status')
-    .eq('user_id', user.id)
-    .eq('quest_id', body.quest_id)
-    .maybeSingle();
-
-  if (existing?.status === 'completed') {
-    // 이미 완료된 퀘스트 — 현재 프로필 반환
-    const { data: profile } = await supabase
-      .from('users')
-      .select('total_xp, current_level')
-      .eq('id', user.id)
-      .single();
-
+  // 2. 이미 완료된 퀘스트 — 현재 프로필 반환
+  if (existingResult.data?.status === 'completed') {
     return NextResponse.json({
       earned_xp: 0,
-      total_xp: profile?.total_xp ?? 0,
-      new_level: profile?.current_level ?? 1,
+      total_xp: profileResult.data?.total_xp ?? 0,
+      new_level: profileResult.data?.current_level ?? 1,
       level_changed: false,
       already_completed: true,
       new_badges: [],
@@ -86,15 +86,8 @@ export async function POST(request: Request) {
     { onConflict: 'user_id,quest_id' },
   );
 
-  // 5. 현재 유저 조회
-  const { data: currentUser } = await supabase
-    .from('users')
-    .select('total_xp, current_level')
-    .eq('id', user.id)
-    .single();
-
-  const prevLevel = currentUser?.current_level ?? 1;
-  const newTotalXP = (currentUser?.total_xp ?? 0) + earnedXP;
+  const prevLevel = profileResult.data?.current_level ?? 1;
+  const newTotalXP = (profileResult.data?.total_xp ?? 0) + earnedXP;
   const newLevel = calculateLevel(newTotalXP);
 
   // 6. users 업데이트
