@@ -109,11 +109,12 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
 
       {/* Stage info */}
       <div className="relative z-10 flex-1 min-w-0 text-left">
-        <div className="flex items-center gap-1">
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground">{stage.order}단계</p>
+        <div className="flex items-center gap-0.5">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground whitespace-nowrap shrink-0">{stage.order}단계</p>
           <span
             className={cn(
-              'rounded-full px-1.5 py-px text-[9px] sm:text-[10px] font-semibold',
+              'rounded-full px-1 py-px text-[9px] sm:text-[10px] font-semibold shrink-0 whitespace-nowrap',
+              'sm:px-1.5',
               config.labelClass,
             )}
           >

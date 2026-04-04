@@ -32,17 +32,18 @@ const item = {
  * Stages are displayed in reverse order (7 at top, 1 at bottom).
  */
 const NODE_POSITIONS: Array<{
-  left: string;
+  mobileLeft: string;
+  desktopLeft: string;
   top: string;
   align: 'left' | 'right' | 'center';
 }> = [
-  { left: '50%', top: '86%', align: 'center' },      // Stage 1 (bottom)
-  { left: '22%', top: '72.5%', align: 'left' },      // Stage 2
-  { left: '55%', top: '59%', align: 'right' },       // Stage 3
-  { left: '22%', top: '45%', align: 'left' },        // Stage 4
-  { left: '55%', top: '31%', align: 'right' },       // Stage 5
-  { left: '22%', top: '17.5%', align: 'left' },      // Stage 6
-  { left: '50%', top: '4%', align: 'center' },       // Stage 7 (top)
+  { mobileLeft: '50%', desktopLeft: '50%', top: '86%', align: 'center' },      // Stage 1 (bottom)
+  { mobileLeft: '32%', desktopLeft: '22%', top: '72.5%', align: 'left' },      // Stage 2
+  { mobileLeft: '68%', desktopLeft: '55%', top: '59%', align: 'right' },       // Stage 3
+  { mobileLeft: '32%', desktopLeft: '22%', top: '45%', align: 'left' },        // Stage 4
+  { mobileLeft: '68%', desktopLeft: '55%', top: '31%', align: 'right' },       // Stage 5
+  { mobileLeft: '32%', desktopLeft: '22%', top: '17.5%', align: 'left' },      // Stage 6
+  { mobileLeft: '50%', desktopLeft: '50%', top: '4%', align: 'center' },       // Stage 7 (top)
 ];
 
 function computeProgressFraction(stages: StageWithStatus[]): number {
@@ -92,12 +93,13 @@ export function WorldMap({ stages }: WorldMapProps) {
       {/* Pybaem character at in_progress stage */}
       {inProgressIndex >= 0 && (
         <m.div
-          className="absolute z-20 pointer-events-none"
+          className="world-node absolute z-20 pointer-events-none"
           style={{
-            left: NODE_POSITIONS[inProgressIndex].left,
+            '--ml': NODE_POSITIONS[inProgressIndex].mobileLeft,
+            '--dl': NODE_POSITIONS[inProgressIndex].desktopLeft,
             top: NODE_POSITIONS[inProgressIndex].top,
             transform: 'translate(-50%, -110%)',
-          }}
+          } as React.CSSProperties}
           animate={
             shouldReduceMotion ? undefined : { y: [0, -6, 0] }
           }
@@ -127,12 +129,13 @@ export function WorldMap({ stages }: WorldMapProps) {
           return (
             <m.div
               key={stage.id}
-              className="absolute z-10"
+              className="world-node absolute z-10"
               style={{
-                left: pos.left,
+                '--ml': pos.mobileLeft,
+                '--dl': pos.desktopLeft,
                 top: pos.top,
                 transform: 'translate(-50%, -50%)',
-              }}
+              } as React.CSSProperties}
               variants={item}
             >
               <StageNode stage={stage} align={pos.align} />
