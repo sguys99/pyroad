@@ -7,7 +7,7 @@ import './globals.css';
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-sans',
+  variable: '--font-noto',
 });
 
 const jetbrainsMono = JetBrains_Mono({
