@@ -24,6 +24,33 @@ ON CONFLICT (id) DO UPDATE SET
   is_final = EXCLUDED.is_final;
 
 -- ============================================================
+-- 기존 퀘스트 order 사전 업데이트 (unique constraint 충돌 방지)
+-- 큰 order부터 업데이트하여 중간 충돌 방지
+-- ============================================================
+
+-- Stage 1: NN=03 (3→4)
+UPDATE public.quests SET "order" = 4 WHERE id = 'b1000000-0000-0000-0000-000000000003';
+
+-- Stage 2: NN=07 (4→6) 먼저, 그 다음 NN=06 (3→4)
+UPDATE public.quests SET "order" = 6 WHERE id = 'b1000000-0000-0000-0000-000000000007';
+UPDATE public.quests SET "order" = 4 WHERE id = 'b1000000-0000-0000-0000-000000000006';
+
+-- Stage 3: NN=11 (4→5), NN=10 (3→4), NN=09 (2→3) — 큰 것부터
+UPDATE public.quests SET "order" = 5 WHERE id = 'b1000000-0000-0000-0000-000000000011';
+UPDATE public.quests SET "order" = 4 WHERE id = 'b1000000-0000-0000-0000-000000000010';
+UPDATE public.quests SET "order" = 3 WHERE id = 'b1000000-0000-0000-0000-000000000009';
+
+-- Stage 4: NN=15 (4→6), NN=14 (3→5) — 큰 것부터
+UPDATE public.quests SET "order" = 6 WHERE id = 'b1000000-0000-0000-0000-000000000015';
+UPDATE public.quests SET "order" = 5 WHERE id = 'b1000000-0000-0000-0000-000000000014';
+
+-- Stage 5: NN=18 (3→4)
+UPDATE public.quests SET "order" = 4 WHERE id = 'b1000000-0000-0000-0000-000000000018';
+
+-- Stage 6: NN=21 (3→4)
+UPDATE public.quests SET "order" = 4 WHERE id = 'b1000000-0000-0000-0000-000000000021';
+
+-- ============================================================
 -- 퀘스트 (44개)
 -- UUID 규칙: b1000000-0000-0000-0000-0000000000NN (NN=01~44)
 -- ============================================================
@@ -109,14 +136,14 @@ VALUES (
     "topic": "작은따옴표와 큰따옴표의 차이",
     "learning_goals": ["작은따옴표와 큰따옴표 모두 문자열을 만들 수 있다", "문자열 안에 따옴표가 포함될 때 다른 종류의 따옴표로 감싸야 함을 안다"],
     "story_context": "파이썬 마을의 따옴표 가게에 왔어요! 작은따옴표와 큰따옴표, 언제 어떤 걸 써야 할까요?",
-    "exercise_description": "print()를 사용하여 I'\''m happy! 를 출력해보세요. 큰따옴표로 감싸면 안에 작은따옴표를 쓸 수 있어요!",
-    "starter_code": "# I'\''m happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n",
-    "expected_output_hint": "I'\''m happy! 가 출력되어야 해요",
-    "fallback_text": "문자열 안에 작은따옴표(  '\''  )가 있으면 큰따옴표(\")로 감싸면 돼요! print(\"I'\''m happy!\") 이렇게요.",
+    "exercise_description": "print()를 사용하여 I''m happy! 를 출력해보세요. 큰따옴표로 감싸면 안에 작은따옴표를 쓸 수 있어요!",
+    "starter_code": "# I''m happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n",
+    "expected_output_hint": "I''m happy! 가 출력되어야 해요",
+    "fallback_text": "문자열 안에 작은따옴표(  ''  )가 있으면 큰따옴표(\")로 감싸면 돼요! print(\"I''m happy!\") 이렇게요.",
     "hints": {
       "level_1": "글자 안에 작은따옴표가 있으면, 바깥을 큰따옴표로 감싸야 해요!",
-      "level_2": "print(\"I'\''m happy!\") 이렇게 큰따옴표로 감싸보세요!",
-      "level_3": "print(\"___\") 큰따옴표 안에 I'\''m happy!를 넣어보세요!"
+      "level_2": "print(\"I''m happy!\") 이렇게 큰따옴표로 감싸보세요!",
+      "level_3": "print(\"___\") 큰따옴표 안에 I''m happy!를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
