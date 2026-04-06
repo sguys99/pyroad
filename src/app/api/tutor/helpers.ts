@@ -7,6 +7,7 @@ import {
   buildCodeFeedbackPrompt,
   buildEncouragementPrompt,
   buildProjectGuidePrompt,
+  buildStageSummaryPrompt,
 } from '@/lib/tutor/prompts';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
@@ -17,15 +18,16 @@ const VALID_TYPES = [
   'code_feedback',
   'encouragement',
   'project_guide',
+  'stage_summary',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
 
 // quest_intro, encouragement는 품질보다 속도 우선 → 경량 모델 사용
-const FAST_TYPES = new Set(['quest_intro', 'encouragement']);
+const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
 
 // 동일 quest에 대해 동일 프롬프트 → 캐시 가능
-export const CACHEABLE_TYPES = new Set(['quest_intro', 'encouragement']);
+export const CACHEABLE_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
 
 export interface PreparedTutorCall {
   systemPrompt: string;
@@ -161,6 +163,30 @@ export async function prepareTutorCall(
       topic: skeleton.topic,
       earnedXP: body.earned_xp ?? 0,
       hintsUsed: body.hints_used ?? 0,
+    });
+  } else if (body.type === 'stage_summary') {
+    // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
+    const stageConceptsResult = await supabase
+      .from('quests')
+      .select('concept')
+      .eq('stage_id', q.stage.id)
+      .order('"order"');
+    const concepts = stageConceptsResult.data?.map((r) => r.concept) ?? [
+      skeleton.topic,
+    ];
+
+    // 다음 스테이지 제목 조회
+    const nextStageResult = await supabase
+      .from('stages')
+      .select('title')
+      .eq('order', q.stage.order + 1)
+      .maybeSingle();
+
+    userPrompt = buildStageSummaryPrompt({
+      stageTitle: q.stage.title,
+      stageOrder: q.stage.order,
+      concepts,
+      nextStageTitle: nextStageResult.data?.title ?? undefined,
     });
   } else {
     // project_guide
@@ -313,6 +339,8 @@ export function buildFallbackMessage(
       topic: skeleton.topic,
       earned_xp: body.earned_xp ?? 0,
     });
+  } else if (body.type === 'stage_summary') {
+    return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;
   } else {
     // project_guide
     const stepIdx = (body.current_step ?? 1) - 1;

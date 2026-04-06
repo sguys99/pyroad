@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   const [questResult, existingResult, profileResult] = await Promise.all([
     supabase
       .from('quests')
-      .select('id, xp_reward')
+      .select('id, xp_reward, stage_id')
       .eq('id', body.quest_id)
       .single(),
     supabase
@@ -99,13 +99,59 @@ export async function POST(request: Request) {
     })
     .eq('id', user.id);
 
-  // 7. 뱃지 체크 및 부여
-  const newBadges = await checkAndAwardBadges({
-    supabase,
-    userId: user.id,
-    questId: body.quest_id,
-    hintsUsed: body.hints_used,
-  });
+  // 7. 뱃지 체크 및 부여 + 스테이지 완료 판정 — 병렬 실행
+  const [newBadges, stageQuestsResult, completedInStageResult] =
+    await Promise.all([
+      checkAndAwardBadges({
+        supabase,
+        userId: user.id,
+        questId: body.quest_id,
+        hintsUsed: body.hints_used,
+      }),
+      supabase
+        .from('quests')
+        .select('id, concept')
+        .eq('stage_id', quest.stage_id),
+      supabase
+        .from('user_progress')
+        .select('quest_id')
+        .eq('user_id', user.id)
+        .eq('status', 'completed'),
+    ]);
+
+  const stageQuestIds = new Set(
+    stageQuestsResult.data?.map((q) => q.id) ?? [],
+  );
+  const completedIds = new Set(
+    (completedInStageResult.data ?? [])
+      .filter((p) => stageQuestIds.has(p.quest_id))
+      .map((p) => p.quest_id),
+  );
+  completedIds.add(body.quest_id);
+
+  const isLastQuestInStage =
+    stageQuestIds.size > 0 && stageQuestIds.size === completedIds.size;
+
+  // 스테이지 완료 시 추가 정보 수집
+  let stageConcepts: string[] | undefined;
+  let stageTitle: string | undefined;
+  let stageOrder: number | undefined;
+
+  if (isLastQuestInStage) {
+    stageConcepts =
+      stageQuestsResult.data?.map((q) => q.concept) ?? [];
+
+    const stageResult = await supabase
+      .from('stages')
+      .select('title, "order"')
+      .eq('id', quest.stage_id)
+      .single();
+
+    if (stageResult.data) {
+      stageTitle = stageResult.data.title;
+      stageOrder = stageResult.data.order;
+    }
+  }
 
   return NextResponse.json({
     earned_xp: earnedXP,
@@ -114,5 +160,7 @@ export async function POST(request: Request) {
     level_changed: newLevel > prevLevel,
     already_completed: false,
     new_badges: newBadges,
+    isLastQuestInStage,
+    ...(isLastQuestInStage && { stageConcepts, stageTitle, stageOrder }),
   });
 }

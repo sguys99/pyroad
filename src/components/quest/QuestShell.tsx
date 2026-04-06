@@ -18,6 +18,7 @@ import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { LevelUpCelebration } from './celebrations/LevelUpCelebration';
+import { StageCompleteCelebration } from './celebrations/StageCompleteCelebration';
 
 // canvas-confetti 모듈 사전 로드 (브라우저에서만)
 const confettiReady =
@@ -28,7 +29,7 @@ import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
 type Tab = 'story' | 'code' | 'result';
-type CelebrationPhase = 'idle' | 'level_up' | 'badges' | 'done';
+type CelebrationPhase = 'idle' | 'stage_complete' | 'level_up' | 'badges' | 'done';
 
 const tabs: { key: Tab; label: string }[] = [
   { key: 'story', label: '이야기' },
@@ -95,6 +96,11 @@ export function QuestShell({
     title: string;
   } | null>(null);
   const [newBadges, setNewBadges] = useState<BadgeType[]>([]);
+  const [stageCompleteInfo, setStageCompleteInfo] = useState<{
+    stageTitle: string;
+    stageOrder: number;
+    concepts: string[];
+  } | null>(null);
 
   // 코드 자동 저장 debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -283,6 +289,16 @@ export function QuestShell({
               level: completeData.new_level,
               title: getLevelTitle(completeData.new_level),
             });
+          }
+
+          if (completeData.isLastQuestInStage) {
+            setStageCompleteInfo({
+              stageTitle: completeData.stageTitle ?? quest.stage.title,
+              stageOrder: completeData.stageOrder ?? quest.stage.order,
+              concepts: completeData.stageConcepts ?? [],
+            });
+            setTimeout(() => setCelebrationPhase('stage_complete'), 1000);
+          } else if (completeData.level_changed) {
             setTimeout(() => setCelebrationPhase('level_up'), 1000);
           } else if (badges.length > 0) {
             setTimeout(() => setCelebrationPhase('badges'), 1000);
@@ -476,6 +492,23 @@ export function QuestShell({
 
       {/* 축하 오버레이 */}
       <AnimatePresence>
+        {celebrationPhase === 'stage_complete' && stageCompleteInfo && (
+          <StageCompleteCelebration
+            stageTitle={stageCompleteInfo.stageTitle}
+            stageOrder={stageCompleteInfo.stageOrder}
+            concepts={stageCompleteInfo.concepts}
+            questId={quest.id}
+            onClose={() => {
+              if (levelUpInfo) {
+                setCelebrationPhase('level_up');
+              } else if (newBadges.length > 0) {
+                setCelebrationPhase('badges');
+              } else {
+                setCelebrationPhase('done');
+              }
+            }}
+          />
+        )}
         {celebrationPhase === 'level_up' && levelUpInfo && (
           <LevelUpCelebration
             newLevel={levelUpInfo.level}
