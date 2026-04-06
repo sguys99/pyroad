@@ -1,6 +1,6 @@
 # pyRoad
 
-![Version](https://img.shields.io/badge/version-v0.1.0-blue)
+![Version](https://img.shields.io/badge/version-v0.2.0-blue)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
 pyRoad is an interactive Python learning platform for elementary school students. It combines a quest-based curriculum, an AI animal tutor, and in-browser Python execution so learners can start coding without installing a local environment.
