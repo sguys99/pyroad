@@ -151,6 +151,9 @@ CREATE POLICY "progress_insert_own" ON public.user_progress
 CREATE POLICY "progress_update_own" ON public.user_progress
   FOR UPDATE USING (auth.uid() = user_id);
 
+CREATE POLICY "progress_delete_own" ON public.user_progress
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- user_badges: 본인 데이터만 읽기/쓰기
 ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
 
@@ -159,6 +162,9 @@ CREATE POLICY "badges_select_own" ON public.user_badges
 
 CREATE POLICY "badges_insert_own" ON public.user_badges
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "badges_delete_own" ON public.user_badges
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- board_posts: 인증 사용자 읽기, 본인만 수정/삭제
 ALTER TABLE public.board_posts ENABLE ROW LEVEL SECURITY;
