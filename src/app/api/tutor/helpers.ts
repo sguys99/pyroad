@@ -7,6 +7,7 @@ import {
   buildCodeFeedbackPrompt,
   buildEncouragementPrompt,
   buildProjectGuidePrompt,
+  buildStageSummaryPrompt,
 } from '@/lib/tutor/prompts';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
@@ -17,15 +18,16 @@ const VALID_TYPES = [
   'code_feedback',
   'encouragement',
   'project_guide',
+  'stage_summary',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
 
 // quest_intro, encouragement는 품질보다 속도 우선 → 경량 모델 사용
-const FAST_TYPES = new Set(['quest_intro', 'encouragement']);
+const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
 
 // 동일 quest에 대해 동일 프롬프트 → 캐시 가능
-export const CACHEABLE_TYPES = new Set(['quest_intro', 'encouragement']);
+export const CACHEABLE_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
 
 export interface PreparedTutorCall {
   systemPrompt: string;
@@ -162,6 +164,30 @@ export async function prepareTutorCall(
       earnedXP: body.earned_xp ?? 0,
       hintsUsed: body.hints_used ?? 0,
     });
+  } else if (body.type === 'stage_summary') {
+    // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
+    const stageConceptsResult = await supabase
+      .from('quests')
+      .select('concept')
+      .eq('stage_id', q.stage.id)
+      .order('"order"');
+    const concepts = stageConceptsResult.data?.map((r) => r.concept) ?? [
+      skeleton.topic,
+    ];
+
+    // 다음 스테이지 제목 조회
+    const nextStageResult = await supabase
+      .from('stages')
+      .select('title')
+      .eq('order', q.stage.order + 1)
+      .maybeSingle();
+
+    userPrompt = buildStageSummaryPrompt({
+      stageTitle: q.stage.title,
+      stageOrder: q.stage.order,
+      concepts,
+      nextStageTitle: nextStageResult.data?.title ?? undefined,
+    });
   } else {
     // project_guide
     userPrompt = buildProjectGuidePrompt({
@@ -204,6 +230,90 @@ export async function prepareTutorCall(
   };
 }
 
+// ── Fallback 메시지 풀 ──────────────────────────────────────
+
+type HintBucket = 'no_hints' | 'few_hints' | 'max_hints';
+type XPBucket = 'standard' | 'high';
+
+const PASSED_FEEDBACK_POOL: Record<HintBucket, string[]> = {
+  no_hints: [
+    '힌트 없이 혼자 풀다니 정말 대단해요! 🎉',
+    '와, 스스로 해냈어요! 진짜 코딩 천재! ⭐',
+    '힌트 도움 없이 정답! 실력이 쑥쑥 자라고 있어요! 🌱',
+    '완벽해요! 혼자 힘으로 해결했네요! 💪',
+  ],
+  few_hints: [
+    '잘했어요! 힌트를 잘 활용해서 정답을 찾았네요! 🎉',
+    '정답이에요! 힌트가 도움이 됐죠? 👍',
+    '멋져요! 힌트를 참고해서 풀어냈어요! 🌟',
+  ],
+  max_hints: [
+    '정답이에요! 힌트를 따라 끝까지 해낸 게 중요해요! 🎉',
+    '해냈어요! 포기하지 않은 게 최고예요! 💪',
+    '잘했어요! 다음엔 힌트 없이도 할 수 있을 거예요! 🚀',
+  ],
+};
+
+const ENCOURAGEMENT_POOL: Record<HintBucket, Record<XPBucket, string[]>> = {
+  no_hints: {
+    standard: [
+      '퀘스트 완료! 힌트 없이 해내다니 대단해요! 🎉🐍',
+      '{topic} 마스터! 혼자 풀었어요! ⭐🐍',
+      '멋져요! 이 퀘스트를 힌트 없이 클리어! 🏆',
+    ],
+    high: [
+      '보너스 XP까지! 힌트 없이 완벽하게 해냈어요! 🎉✨',
+      '최고예요! {earned_xp}XP 획득! 진짜 코딩 마법사! 🧙‍♂️⭐',
+      '{topic} 완벽 클리어! 보너스 점수까지! 🏆🐍',
+    ],
+  },
+  few_hints: {
+    standard: [
+      '퀘스트 완료! 잘했어요! 🎉🐍',
+      '{topic} 퀘스트를 클리어했어요! 다음 모험으로! 🌟',
+      '축하해요! 한 걸음 더 성장했어요! 🐍💪',
+    ],
+    high: [
+      '퀘스트 완료! {earned_xp}XP 획득! 🎉🐍',
+      '잘했어요! 좋은 점수로 클리어! ⭐',
+      '{topic} 퀘스트 클리어! 대단한 점수예요! 🏆',
+    ],
+  },
+  max_hints: {
+    standard: [
+      '퀘스트 완료! 끝까지 해낸 게 최고예요! 🎉🐍',
+      '잘했어요! 포기하지 않고 완료! 다음엔 더 잘할 수 있어요! 💪',
+      '클리어! {topic}을 배웠어요! 🐍🌱',
+    ],
+    high: [
+      '퀘스트 완료! {earned_xp}XP 획득! 다음엔 힌트를 줄여보세요! 🎉',
+      '해냈어요! 점수도 좋아요! 🌟🐍',
+      '클리어! 다음 퀘스트에서는 더 적은 힌트로 도전해봐요! 💪',
+    ],
+  },
+};
+
+function pickRandom(arr: string[]): string {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function interpolate(
+  template: string,
+  vars: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) =>
+    key in vars ? String(vars[key]) : `{${key}}`,
+  );
+}
+
+function getHintBucket(hintsUsed: number): HintBucket {
+  if (hintsUsed === 0) return 'no_hints';
+  if (hintsUsed <= 2) return 'few_hints';
+  return 'max_hints';
+}
+
+// ── buildFallbackMessage ────────────────────────────────────
+
 export function buildFallbackMessage(
   body: TutorRequest,
   quest: QuestWithStageServer,
@@ -217,11 +327,20 @@ export function buildFallbackMessage(
     const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
     return skeleton.hints[hintKey];
   } else if (body.type === 'code_feedback') {
-    return body.execution_result?.passed
-      ? '대단해요! 정답이에요! 🎉'
-      : '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
+    if (!body.execution_result?.passed) {
+      return '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
+    }
+    return pickRandom(PASSED_FEEDBACK_POOL[getHintBucket(body.hints_used ?? 0)]);
   } else if (body.type === 'encouragement') {
-    return '퀘스트를 완료했어요! 정말 대단해요! 🎉🐍';
+    const hintBucket = getHintBucket(body.hints_used ?? 0);
+    const xpBucket: XPBucket = (body.earned_xp ?? 0) >= 100 ? 'high' : 'standard';
+    const template = pickRandom(ENCOURAGEMENT_POOL[hintBucket][xpBucket]);
+    return interpolate(template, {
+      topic: skeleton.topic,
+      earned_xp: body.earned_xp ?? 0,
+    });
+  } else if (body.type === 'stage_summary') {
+    return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;
   } else {
     // project_guide
     const stepIdx = (body.current_step ?? 1) - 1;

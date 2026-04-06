@@ -6,7 +6,8 @@ export interface TutorRequest {
     | 'hint_generator'
     | 'code_feedback'
     | 'encouragement'
-    | 'project_guide';
+    | 'project_guide'
+    | 'stage_summary';
   quest_id: string;
   provider?: 'anthropic' | 'openai' | 'gemini';
   student_code?: string;

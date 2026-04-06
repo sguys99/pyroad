@@ -141,6 +141,31 @@ ${
 }`;
 }
 
+interface StageSummaryParams {
+  stageTitle: string;
+  stageOrder: number;
+  concepts: string[];
+  nextStageTitle?: string;
+}
+
+export function buildStageSummaryPrompt(params: StageSummaryParams): string {
+  const conceptsList = params.concepts.map((c, i) => `${i + 1}. ${c}`).join('\n');
+
+  return `## 컨텍스트
+- 완료한 스테이지: ${params.stageTitle} (${params.stageOrder}단계)
+- 이 스테이지에서 배운 개념들:
+${conceptsList}
+${params.nextStageTitle ? `- 다음 스테이지: ${params.nextStageTitle}` : '- 이것이 마지막 학습 스테이지입니다!'}
+
+## 지시
+학생이 이 스테이지의 모든 퀘스트를 완료했어요! 다음을 포함하여 정리해주세요:
+1. 스테이지 완료를 크게 축하해주세요
+2. 배운 개념들을 일상생활 비유와 함께 각각 한 줄로 정리해주세요
+3. "오늘 배운 핵심 키워드"를 5개 이내로 정리해주세요
+${params.nextStageTitle ? `4. 다음 스테이지 "${params.nextStageTitle}"에서 배울 내용에 대한 기대감을 심어주세요` : '4. 전체 학습 스테이지를 완료한 것을 특별히 축하해주세요'}
+5. 최대 400토큰 이내로 답변하세요`;
+}
+
 interface EncouragementParams {
   questTitle: string;
   topic: string;
