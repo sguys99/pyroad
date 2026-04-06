@@ -51,7 +51,7 @@ VALUES (
     "hints": {
       "level_1": "화면에 글자를 보여주는 마법 주문이 있어요. 어떤 주문일까요?",
       "level_2": "print() 안에 따옴표로 감싼 글자를 넣으면 돼요!",
-      "level_3": "print(\"안녕하세요!\") 이렇게 작성해보세요!"
+      "level_3": "print(\"___\") 여기서 ___에 인사말을 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -83,7 +83,7 @@ VALUES (
     "hints": {
       "level_1": "print()를 한 번 쓰면 한 줄이 나와요. 두 줄을 쓰려면?",
       "level_2": "print(\"첫 번째 줄\")을 쓰고, 아래에 print(\"두 번째 줄\")을 써보세요!",
-      "level_3": "print(\"나는 파이썬 모험가!\")\nprint(\"반가워!\") 이렇게 써보세요!"
+      "level_3": "print(\"___\")\nprint(\"___\") 두 줄에 각각 자기소개와 인사를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -116,7 +116,7 @@ VALUES (
     "hints": {
       "level_1": "# 뒤에 쓴 글은 컴퓨터가 무시해요. 진짜 실행되는 코드는 뭘까요?",
       "level_2": "주석 줄 아래에 print()로 문장을 출력해보세요!",
-      "level_3": "# 이것은 메모예요\nprint(\"파이썬은 재미있어!\") 이렇게 써보세요!"
+      "level_3": "# ___\nprint(\"___\") 주석에 메모를, print에 문장을 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -152,7 +152,7 @@ VALUES (
     "hints": {
       "level_1": "변수는 상자에 이름표를 붙이는 거예요. name이라는 상자에 뭘 넣을까요?",
       "level_2": "= 기호 오른쪽에 따옴표로 감싼 텍스트를 넣으면 돼요!",
-      "level_3": "name = \"파이뱀\" 이렇게 따옴표 안에 이름을 넣어보세요!"
+      "level_3": "name = \"___\" 따옴표 안에 이름을 넣어보세요!"
     }
   }'::jsonb,
   'contains',
@@ -184,7 +184,7 @@ VALUES (
     "hints": {
       "level_1": "숫자는 그냥 쓰고, 글자는 따옴표로 감싸야 해요!",
       "level_2": "number = 10 이렇게 숫자는 따옴표 없이, greeting = \"안녕\" 이렇게 글자는 따옴표와 함께!",
-      "level_3": "number = 10\ngreeting = \"안녕\" 이렇게 써보세요!"
+      "level_3": "number = ___\ngreeting = \"___\" 숫자와 글자를 각각 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -217,7 +217,7 @@ VALUES (
     "hints": {
       "level_1": "birth_year에 태어난 해를 숫자로 넣어보세요!",
       "level_2": "birth_year = 2014 처럼 따옴표 없이 숫자만 넣으면 돼요!",
-      "level_3": "birth_year = 2014 이렇게 넣어보세요! (자기 태어난 해로 바꿔도 돼요)"
+      "level_3": "birth_year = ___ 자기 태어난 해를 숫자로 넣어보세요!"
     }
   }'::jsonb,
   'contains',
@@ -249,7 +249,7 @@ VALUES (
     "hints": {
       "level_1": "따옴표가 있으면 글자, 없으면 숫자예요. 글자를 숫자로 바꾸려면?",
       "level_2": "int() 안에 문자열을 넣으면 숫자로 변신해요! int(a) + int(b)를 해보세요!",
-      "level_3": "result = int(a) + int(b) 이렇게 써보세요!"
+      "level_3": "result = ___(a) + ___(b) 글자를 숫자로 바꾸는 함수를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -285,7 +285,7 @@ VALUES (
     "hints": {
       "level_1": "if 뒤에 조건을 쓰고, 조건이 맞으면 아래 코드가 실행돼요!",
       "level_2": "print() 안에 \"통과!\"를 넣어보세요!",
-      "level_3": "print(\"통과!\") 이렇게 써보세요!"
+      "level_3": "print(\"___\") 문이 열릴 때 나올 메시지를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -317,7 +317,7 @@ VALUES (
     "hints": {
       "level_1": "score가 85이면 90 이상인가요? 아니라면 80 이상인가요?",
       "level_2": "85는 90보다 작지만 80보다 크니까 elif 조건에 해당해요!",
-      "level_3": "print(\"등급: B\") 이렇게 비어있는 print() 안을 채워보세요!"
+      "level_3": "print(\"등급: ___\") 85점의 등급 알파벳을 넣어보세요!"
     }
   }'::jsonb,
   'contains',
@@ -349,7 +349,7 @@ VALUES (
     "hints": {
       "level_1": ">= 기호는 \"크거나 같다\"는 뜻이에요. 130은 120보다 크거나 같나요?",
       "level_2": "조건이 맞으니까 print() 안에 출력할 메시지를 넣으면 돼요!",
-      "level_3": "print(\"입장 가능!\") 이렇게 써보세요!"
+      "level_3": "print(\"___\") 키가 충분할 때 나올 메시지를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -381,7 +381,7 @@ VALUES (
     "hints": {
       "level_1": "and는 두 조건을 모두 만족해야 해요. 80은 60 이상이고, 70도 60 이상인가요?",
       "level_2": "두 조건 모두 맞으니까 print() 안에 합격 메시지를 넣으면 돼요!",
-      "level_3": "print(\"마법사 합격!\") 이렇게 써보세요!"
+      "level_3": "print(\"___\") 두 시험을 모두 통과하면 나올 메시지를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -417,7 +417,7 @@ VALUES (
     "hints": {
       "level_1": "for는 같은 일을 여러 번 반복해주는 마법이에요! range()에 시작과 끝 숫자를 넣어보세요.",
       "level_2": "range(1, 6)은 1, 2, 3, 4, 5를 만들어줘요. 6은 포함되지 않아요!",
-      "level_3": "for i in range(1, 6): 이렇게 빈칸을 채워보세요!"
+      "level_3": "for i in range(___, ___): 1부터 5까지 나오려면 시작과 끝에 뭘 넣을까요?"
     }
   }'::jsonb,
   'output_match',
@@ -453,7 +453,7 @@ VALUES (
     "hints": {
       "level_1": "구구단은 같은 숫자에 1, 2, 3, ... 9를 곱하는 거예요! print() 안에 무엇을 넣어야 할까요?",
       "level_2": "print() 안에 2, \"x\", i, \"=\", 2 * i 이렇게 넣어보세요!",
-      "level_3": "print(2, \"x\", i, \"=\", 2 * i) 이렇게 써보세요!"
+      "level_3": "print(___, \"x\", i, \"=\", ___) 곱하는 숫자와 결과 계산식을 넣어보세요!"
     }
   }'::jsonb,
   'contains',
@@ -485,7 +485,7 @@ VALUES (
     "hints": {
       "level_1": "while은 조건이 참인 동안 계속 반복해요. position이 5가 되면 뭘 해야 할까요?",
       "level_2": "print()로 메시지를 출력하고, break로 반복을 멈추면 돼요!",
-      "level_3": "print(\"보물 발견!\")\n        break 이렇게 두 줄을 채워보세요!"
+      "level_3": "print(\"___\")\n        ___ 메시지를 출력하고 반복을 멈추는 명령어를 써보세요!"
     }
   }'::jsonb,
   'contains',
@@ -517,7 +517,7 @@ VALUES (
     "hints": {
       "level_1": "짝수는 2로 나누어 떨어지는 숫자예요. 홀수는 건너뛰려면 어떤 명령어를 써야 할까요?",
       "level_2": "continue를 쓰면 아래 코드를 건너뛰고 다음 반복으로 가요!",
-      "level_3": "continue 이렇게 한 줄만 써보세요!"
+      "level_3": "___ 홀수를 건너뛰는 명령어 한 단어를 써보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -557,7 +557,7 @@ VALUES (
     "hints": {
       "level_1": "리스트는 대괄호 [] 안에 값을 넣어 만들어요!",
       "level_2": "각 과일을 따옴표로 감싸고 쉼표로 구분해요! [\"사과\", \"바나나\", ...]",
-      "level_3": "fruits = [\"사과\", \"바나나\", \"포도\"] 이렇게 써보세요!"
+      "level_3": "fruits = [\"___\", \"___\", \"___\"] 좋아하는 과일 3개를 넣어보세요!"
     }
   }'::jsonb,
   'contains',
@@ -589,7 +589,7 @@ VALUES (
     "hints": {
       "level_1": "리스트의 번호(인덱스)는 0부터 시작해요. 다이아몬드는 몇 번째일까요?",
       "level_2": "금화=0, 은화=1, 다이아몬드=2! 대괄호 안에 번호를 넣어보세요.",
-      "level_3": "print(treasures[2]) 이렇게 빈칸에 2를 넣어보세요!"
+      "level_3": "print(treasures[___]) 다이아몬드의 인덱스 번호를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -621,7 +621,7 @@ VALUES (
     "hints": {
       "level_1": "append()로 리스트에 새 친구를 추가할 수 있어요! friends.append()를 써보세요.",
       "level_2": "friends.append(\"파이뱀\")으로 추가하고, len(friends)로 몇 명인지 세어보세요!",
-      "level_3": "friends.append(\"파이뱀\")\nprint(len(friends)) 이렇게 써보세요!"
+      "level_3": "friends.append(\"___\")\nprint(___(friends)) 추가할 이름과 길이를 구하는 함수를 넣어보세요!"
     }
   }'::jsonb,
   'contains',
@@ -657,7 +657,7 @@ VALUES (
     "hints": {
       "level_1": "함수는 def 이름(): 으로 만들어요. 안에 실행할 코드를 써보세요!",
       "level_2": "def 아래에 들여쓰기를 하고 print()로 메시지를 출력해보세요!",
-      "level_3": "print(\"안녕! 나는 파이뱀이야!\") 이렇게 빈 줄을 채워보세요!"
+      "level_3": "print(\"___\") 파이뱀의 인사말을 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -689,7 +689,7 @@ VALUES (
     "hints": {
       "level_1": "함수 이름 옆 괄호 안의 a, b가 매개변수예요. 이 둘을 더하면?",
       "level_2": "return은 함수가 결과를 돌려주는 거예요. return a + b 이렇게!",
-      "level_3": "return a + b 이렇게 빈 줄을 채워보세요!"
+      "level_3": "return ___ + ___ 두 매개변수를 더해서 돌려주세요!"
     }
   }'::jsonb,
   'output_match',
@@ -721,7 +721,7 @@ VALUES (
     "hints": {
       "level_1": "파이썬에는 이미 만들어진 편리한 함수들이 있어요! 가장 큰 값을 찾는 함수는?",
       "level_2": "max()는 가장 큰 값을 찾아줘요! max(numbers) 이렇게!",
-      "level_3": "biggest = max(numbers) 이렇게 써보세요!"
+      "level_3": "biggest = ___(numbers) 가장 큰 값을 찾는 함수 이름을 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -769,7 +769,7 @@ VALUES (
         "hints": {
           "level_1": "random 모듈의 randint 함수를 사용하면 원하는 범위의 숫자를 만들 수 있어요!",
           "level_2": "secret = random.randint(1, 10) 이렇게 변수에 저장하고, print()로 확인해보세요!",
-          "level_3": "secret = random.randint(1, 10)\nprint(secret)\n이렇게 작성해보세요!"
+          "level_3": "secret = random.___(1, 10)\nprint(secret)\n랜덤 숫자를 만드는 함수 이름을 넣어보세요!"
         },
         "fallback_text": "1단계에서는 random 모듈을 사용해서 비밀 숫자를 만들어요! random.randint(1, 10)을 사용하면 1부터 10 사이의 숫자를 랜덤으로 만들 수 있어요. 변수에 저장하고 print()로 확인해보세요! 🎲"
       },
@@ -782,7 +782,7 @@ VALUES (
         "hints": {
           "level_1": "추측 숫자를 저장할 변수가 필요해요! guess라는 이름은 어떨까요?",
           "level_2": "실제 게임에서는 input()을 쓰지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어요!",
-          "level_3": "guess = int(random.randint(1, 10))\nprint(\"추측: \" + str(guess))\n이렇게 추가해보세요!"
+          "level_3": "guess = ___(random.randint(1, 10))\nprint(\"추측: \" + ___(guess))\n타입을 바꾸는 함수를 넣어보세요!"
         },
         "fallback_text": "2단계에서는 추측 숫자를 만들어요! 실제 게임에서는 input()으로 사용자에게 물어보지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어볼 거예요. 🤔"
       },
@@ -795,7 +795,7 @@ VALUES (
         "hints": {
           "level_1": "if, elif, else를 사용해서 세 가지 경우를 나눠보세요: 같을 때, 작을 때, 클 때!",
           "level_2": "if guess == secret: 정답!\nelif guess < secret: 더 커요!\nelse: 더 작아요!\n이런 구조예요!",
-          "level_3": "if guess == secret:\n    print(\"정답!\")\nelif guess < secret:\n    print(str(guess) + \"보다 커요!\")\nelse:\n    print(str(guess) + \"보다 작아요!\")\n이렇게 추가해보세요!"
+          "level_3": "if guess == secret:\n    print(\"___\")\nelif guess < secret:\n    print(\"더 ___!\")\nelse:\n    print(\"더 ___!\")\n정답/커요/작아요 중 알맞은 말을 넣어보세요!"
         },
         "fallback_text": "3단계에서는 조건문으로 비밀 숫자와 추측을 비교해요! if/elif/else를 사용해서 정답인지, 더 큰 숫자를 말해야 하는지, 더 작은 숫자를 말해야 하는지 알려주세요! 🔍"
       },
@@ -808,7 +808,7 @@ VALUES (
         "hints": {
           "level_1": "while 반복문을 사용하면 조건이 참인 동안 계속 반복할 수 있어요!",
           "level_2": "while guess != secret: 이렇게 쓰면 정답을 맞출 때까지 반복해요! 추측 코드를 while 안에 넣어보세요.",
-          "level_3": "while guess != secret:\n    guess = int(random.randint(1, 10))\n    # 여기에 if/elif/else 비교 코드를 넣으세요\n이렇게 감싸보세요!"
+          "level_3": "while guess ___ secret:\n    guess = ___(random.randint(1, 10))\n같지 않다는 비교 기호와 타입 변환 함수를 넣어보세요!"
         },
         "fallback_text": "4단계에서는 while 반복문으로 게임을 반복해요! while guess != secret: 으로 정답을 맞출 때까지 계속 추측하도록 만들어보세요! 🔄"
       },
@@ -821,7 +821,7 @@ VALUES (
         "hints": {
           "level_1": "attempts라는 변수를 만들어서 추측할 때마다 1씩 올려보세요!",
           "level_2": "attempts = 0을 while 앞에 두고, while 안에서 attempts = attempts + 1로 올려요!",
-          "level_3": "정답을 맞추면 print(\"정답! \" + str(attempts) + \"번 만에 맞췄어요!\") 이렇게 출력해보세요!"
+          "level_3": "print(\"정답! \" + ___(attempts) + \"번 만에 맞췄어요!\") 숫자를 글자로 바꾸는 함수를 넣어보세요!"
         },
         "fallback_text": "마지막 5단계! 시도 횟수를 세는 변수 attempts를 추가하고, 정답을 맞추면 \"정답! N번 만에 맞췄어요!\"를 출력하세요. 이걸로 게임이 완성돼요! 🎉"
       }
