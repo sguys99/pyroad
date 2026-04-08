@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Play, Loader2, RefreshCw } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,7 @@ interface CodePanelProps {
   runResult: RunResult | null;
   isCodeEmpty: boolean;
   validationResult?: { passed: boolean } | null;
+  nextQuestId?: string | null;
 }
 
 export function CodePanel({
@@ -72,6 +74,7 @@ export function CodePanel({
   runResult,
   isCodeEmpty,
   validationResult,
+  nextQuestId,
 }: CodePanelProps) {
   const isReady = pyodideStatus === 'ready';
   const isLoading = pyodideStatus === 'loading';
@@ -138,6 +141,20 @@ export function CodePanel({
         isRunning={isRunning}
         validationResult={validationResult}
       />
+
+      {/* 다음 퀘스트 버튼 */}
+      {validationResult?.passed && nextQuestId && (
+        <m.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 20 }}
+          className="mt-2"
+        >
+          <Button render={<Link href={`/quest/${nextQuestId}`} />} className="w-full">
+            다음 퀘스트로 →
+          </Button>
+        </m.div>
+      )}
     </div>
   );
 }
