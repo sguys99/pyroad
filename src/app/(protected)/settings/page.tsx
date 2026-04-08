@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
 import { PROVIDER_LABELS, type LLMProviderType } from '@/lib/tutor/providers/types';
@@ -69,6 +70,40 @@ export default function SettingsPage() {
       setTimeout(() => setSaved(false), 2000);
     } else {
       setError('저장에 실패했어요. 다시 시도해주세요.');
+    }
+  }
+
+  async function handleDeleteKey(provider: LLMProviderType) {
+    setSaving(true);
+    setError('');
+    setSaved(false);
+
+    const res = await fetch('/api/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_keys: { [provider]: '' } }),
+    });
+
+    setSaving(false);
+
+    if (res.ok) {
+      const refreshed = await fetch('/api/settings').then((r) => r.json());
+      setSettings(refreshed);
+      setApiKeys((prev) => {
+        const next = { ...prev };
+        delete next[provider];
+        return next;
+      });
+      // 삭제된 provider가 현재 선택된 provider면 다른 available provider로 전환
+      const refreshedData = refreshed as SettingsData;
+      if (
+        selected === provider &&
+        !refreshedData.available_providers.includes(provider)
+      ) {
+        setSelected(refreshedData.available_providers[0] ?? 'anthropic');
+      }
+    } else {
+      setError('삭제에 실패했어요. 다시 시도해주세요.');
     }
   }
 
@@ -172,29 +207,43 @@ export default function SettingsPage() {
           </>
         )}
         <div className="flex flex-col gap-3">
-          {allProviders.map((provider) => (
-            <div key={provider}>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                {PROVIDER_LABELS[provider]}
-              </label>
-              <input
-                type="password"
-                placeholder={
-                  settings.has_custom_keys.includes(provider)
-                    ? '••••••••  (저장됨)'
-                    : 'API 키 입력'
-                }
-                value={apiKeys[provider] ?? ''}
-                onChange={(e) =>
-                  setApiKeys((prev) => ({
-                    ...prev,
-                    [provider]: e.target.value,
-                  }))
-                }
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-              />
-            </div>
-          ))}
+          {allProviders.map((provider) => {
+            const hasKey = settings.has_custom_keys.includes(provider);
+            return (
+              <div key={provider}>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  {PROVIDER_LABELS[provider]}
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    placeholder={
+                      hasKey ? '••••••••  (저장됨)' : 'API 키 입력'
+                    }
+                    value={apiKeys[provider] ?? ''}
+                    onChange={(e) =>
+                      setApiKeys((prev) => ({
+                        ...prev,
+                        [provider]: e.target.value,
+                      }))
+                    }
+                    className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none ${hasKey ? 'pr-9' : ''}`}
+                  />
+                  {hasKey && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteKey(provider)}
+                      disabled={saving}
+                      className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      title="API 키 삭제"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
         <div className="mt-3 rounded-lg bg-muted/50 p-3">
           <p className="text-xs font-medium text-muted-foreground mb-1">API 키는 어디서 받나요?</p>
