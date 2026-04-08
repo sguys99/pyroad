@@ -48,6 +48,13 @@ export function LandingHeader() {
               About
             </a>
 
+            <Link
+              href="/notice"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              공지사항
+            </Link>
+
             <a
               href="https://github.com/sguys99/pyroad"
               target="_blank"
