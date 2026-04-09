@@ -10,7 +10,7 @@ import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
 import { MapBackground } from '@/components/world/MapBackground';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { LogoutButton } from '@/components/LogoutButton';
-import { User, MessageSquare } from 'lucide-react';
+import { User, MessageSquare, Bell } from 'lucide-react';
 import type { UserProfile } from '@/lib/types/database';
 
 export default async function WorldPage() {
@@ -61,6 +61,14 @@ export default async function WorldPage() {
       <div className="relative z-10 mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">모험 지도</h1>
         <div className="flex items-center gap-2">
+          <Link
+            href="/notice"
+            aria-label="공지사항"
+            className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+          >
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">공지사항</span>
+          </Link>
           <Link
             href="/board"
             aria-label="게시판"

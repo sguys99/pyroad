@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
 import { useTutor } from '@/lib/tutor/useTutor';
@@ -12,6 +13,7 @@ import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import type { ValidationResult } from '@/lib/quest/validation';
 import type { BadgeType } from '@/lib/quest/badges';
+import { Button } from '@/components/ui/button';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { CodePanel } from './CodePanel';
@@ -84,6 +86,7 @@ export function QuestShell({
   const [isCompleted, setIsCompleted] = useState(
     progress?.status === 'completed',
   );
+  const [nextQuestId, setNextQuestId] = useState<string | null>(null);
   const [earnedXP, setEarnedXP] = useState<number | null>(null);
   const [userXP, setUserXP] = useState(initialXP);
   const [userLevel, setUserLevel] = useState(initialLevel);
@@ -279,6 +282,7 @@ export function QuestShell({
           setEarnedXP(completeData.earned_xp);
           setUserXP(completeData.total_xp);
           setUserLevel(completeData.new_level);
+          setNextQuestId(completeData.nextQuestId ?? null);
 
           // 축하 시퀀싱
           const badges: BadgeType[] = completeData.new_badges ?? [];
@@ -402,9 +406,21 @@ export function QuestShell({
       {isCompleted && (
         <div className="bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
           이미 완료한 퀘스트예요!{' '}
-          <a href="/world" className="underline">
-            월드맵으로 돌아가기
-          </a>
+          {nextQuestId ? (
+            <>
+              <Link href={`/quest/${nextQuestId}`} className="underline">
+                다음 퀘스트로
+              </Link>
+              {' · '}
+              <Link href="/world" className="underline">
+                월드맵으로 돌아가기
+              </Link>
+            </>
+          ) : (
+            <Link href="/world" className="underline">
+              월드맵으로 돌아가기
+            </Link>
+          )}
         </div>
       )}
 
@@ -466,6 +482,7 @@ export function QuestShell({
               runResult={runResult}
               isCodeEmpty={isCodeEmpty}
               validationResult={validationRes}
+              nextQuestId={nextQuestId}
             />
           </div>
 
@@ -478,6 +495,13 @@ export function QuestShell({
               isRunning={isRunning}
               validationResult={validationRes}
             />
+            {validationRes?.passed && nextQuestId && (
+              <div className="mt-3">
+                <Button render={<Link href={`/quest/${nextQuestId}`} />} className="w-full">
+                  다음 퀘스트로 →
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

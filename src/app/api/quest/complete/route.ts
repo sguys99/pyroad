@@ -110,7 +110,7 @@ export async function POST(request: Request) {
       }),
       supabase
         .from('quests')
-        .select('id, concept')
+        .select('id, concept, "order"')
         .eq('stage_id', quest.stage_id),
       supabase
         .from('user_progress')
@@ -128,6 +128,17 @@ export async function POST(request: Request) {
       .map((p) => p.quest_id),
   );
   completedIds.add(body.quest_id);
+
+  // 다음 미완료 퀘스트 계산
+  const sortedQuests = (stageQuestsResult.data ?? []).sort(
+    (a, b) => a.order - b.order,
+  );
+  const currentOrder =
+    sortedQuests.find((q) => q.id === body.quest_id)?.order ?? 0;
+  const nextQuest = sortedQuests.find(
+    (q) => q.order > currentOrder && !completedIds.has(q.id),
+  );
+  const nextQuestId = nextQuest?.id ?? null;
 
   const isLastQuestInStage =
     stageQuestIds.size > 0 && stageQuestIds.size === completedIds.size;
@@ -162,5 +173,6 @@ export async function POST(request: Request) {
     new_badges: newBadges,
     isLastQuestInStage,
     ...(isLastQuestInStage && { stageConcepts, stageTitle, stageOrder }),
+    ...(!isLastQuestInStage && nextQuestId && { nextQuestId }),
   });
 }

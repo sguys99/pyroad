@@ -114,6 +114,17 @@ export interface BoardCommentWithAuthor extends BoardComment {
   user_profiles_public: { display_name: string; avatar_url: string | null };
 }
 
+// 공지사항 타입
+
+export interface Notice {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // 월드맵 도메인 타입
 
 export type StageStatus = 'locked' | 'in_progress' | 'completed';

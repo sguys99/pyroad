@@ -1,14 +1,14 @@
 -- ============================================================
--- pyRoad v0.1.0 통합 스키마
--- 7개 테이블 + 1개 뷰 + 8개 인덱스 + RLS 정책 + 트리거
+-- pyRoad 통합 스키마
+-- 8개 테이블 + 1개 뷰 + 9개 인덱스 + RLS 정책 + 트리거
 -- ============================================================
 
 -- ============================================================
--- Section 1: 테이블 (7개)
+-- Section 1: 테이블 (8개)
 -- ============================================================
 
 -- 1. users: 사용자 프로필 (Supabase Auth와 연동)
-CREATE TABLE public.users (
+CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL DEFAULT '',
   avatar_url TEXT DEFAULT '',
@@ -21,7 +21,7 @@ CREATE TABLE public.users (
 );
 
 -- 2. stages: 커리큘럼 스테이지 정의
-CREATE TABLE public.stages (
+CREATE TABLE IF NOT EXISTS public.stages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "order" INTEGER NOT NULL UNIQUE,
   title TEXT NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE public.stages (
 );
 
 -- 3. quests: 퀘스트 정의 (커리큘럼 뼈대)
-CREATE TABLE public.quests (
+CREATE TABLE IF NOT EXISTS public.quests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   stage_id UUID NOT NULL REFERENCES public.stages(id) ON DELETE CASCADE,
   "order" INTEGER NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE public.quests (
 );
 
 -- 4. user_progress: 학생별 퀘스트 진행 상태
-CREATE TABLE public.user_progress (
+CREATE TABLE IF NOT EXISTS public.user_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   quest_id UUID NOT NULL REFERENCES public.quests(id) ON DELETE CASCADE,
@@ -62,7 +62,7 @@ CREATE TABLE public.user_progress (
 );
 
 -- 5. user_badges: 획득한 뱃지
-CREATE TABLE public.user_badges (
+CREATE TABLE IF NOT EXISTS public.user_badges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   badge_type TEXT NOT NULL CHECK (badge_type IN ('first_code', 'hint_master', 'stage_clear', 'project_builder', 'streak_3')),
@@ -71,7 +71,7 @@ CREATE TABLE public.user_badges (
 );
 
 -- 6. board_posts: 게시글
-CREATE TABLE public.board_posts (
+CREATE TABLE IF NOT EXISTS public.board_posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE public.board_posts (
 );
 
 -- 7. board_comments: 댓글
-CREATE TABLE public.board_comments (
+CREATE TABLE IF NOT EXISTS public.board_comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   post_id UUID NOT NULL REFERENCES public.board_posts(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -89,27 +89,38 @@ CREATE TABLE public.board_comments (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 8. notices: 공지사항
+CREATE TABLE IF NOT EXISTS public.notices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ============================================================
 -- Section 2: 뷰
 -- ============================================================
 
 -- user_profiles_public: 안전한 사용자 정보 뷰 (custom_api_keys 노출 방지)
-CREATE VIEW public.user_profiles_public AS
+CREATE OR REPLACE VIEW public.user_profiles_public AS
   SELECT id, display_name, avatar_url
   FROM public.users;
 
 -- ============================================================
--- Section 3: 인덱스 (8개)
+-- Section 3: 인덱스 (9개)
 -- ============================================================
 
-CREATE INDEX idx_user_progress_user_id ON public.user_progress(user_id);
-CREATE INDEX idx_user_progress_quest_id ON public.user_progress(quest_id);
-CREATE INDEX idx_user_badges_user_id ON public.user_badges(user_id);
-CREATE INDEX idx_quests_stage_id ON public.quests(stage_id);
-CREATE INDEX idx_board_posts_user_id ON public.board_posts(user_id);
-CREATE INDEX idx_board_posts_created_at ON public.board_posts(created_at DESC);
-CREATE INDEX idx_board_comments_post_id ON public.board_comments(post_id);
-CREATE INDEX idx_board_comments_user_id ON public.board_comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON public.user_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_progress_quest_id ON public.user_progress(quest_id);
+CREATE INDEX IF NOT EXISTS idx_user_badges_user_id ON public.user_badges(user_id);
+CREATE INDEX IF NOT EXISTS idx_quests_stage_id ON public.quests(stage_id);
+CREATE INDEX IF NOT EXISTS idx_board_posts_user_id ON public.board_posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_board_posts_created_at ON public.board_posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_board_comments_post_id ON public.board_comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_board_comments_user_id ON public.board_comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_notices_created_at ON public.notices(created_at DESC);
 
 -- ============================================================
 -- Section 4: RLS 정책
@@ -193,6 +204,21 @@ CREATE POLICY "board_comments_insert_own" ON public.board_comments
 CREATE POLICY "board_comments_delete_own" ON public.board_comments
   FOR DELETE USING (auth.uid() = user_id);
 
+-- notices: 누구나 읽기 가능, 본인만 쓰기 (관리자 검증은 API 레벨에서 수행)
+ALTER TABLE public.notices ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "notices_select_public" ON public.notices
+  FOR SELECT USING (true);
+
+CREATE POLICY "notices_insert_authenticated" ON public.notices
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "notices_update_own" ON public.notices
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "notices_delete_own" ON public.notices
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- ============================================================
 -- Section 5: 트리거 (auth.users → public.users 자동 동기화)
 -- ============================================================
@@ -210,6 +236,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
