@@ -10,25 +10,25 @@ const features = [
     emoji: '🐍',
     title: 'AI 튜터',
     description: '파이뱀 선생님이\n1:1로 친절하게 알려줘요',
-    gradient: 'from-[#a8d5a2] to-[#7bc67e]',
+
   },
   {
     emoji: '💻',
     title: '브라우저 코딩',
     description: '설치 없이 바로\n파이썬 코드를 실행해요',
-    gradient: 'from-[#8ecae6] to-[#5fa8d3]',
+
   },
   {
     emoji: '🗺️',
     title: '월드맵 모험',
     description: '스테이지를 하나씩\n깨며 앞으로 나아가요',
-    gradient: 'from-[#f4b860] to-[#e89b3e]',
+
   },
   {
     emoji: '🏆',
     title: '뱃지와 보상',
     description: '퀘스트를 완료하면\n멋진 뱃지를 받아요',
-    gradient: 'from-[#d4a5e5] to-[#b07cc6]',
+
   },
 ] as const;
 
