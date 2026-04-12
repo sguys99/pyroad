@@ -77,7 +77,9 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
       }
       className={cn(
         'relative flex flex-row items-center gap-2 rounded-xl border-2 px-2.5 py-2 sm:px-3 sm:py-2.5 transition-colors',
-        'w-[170px] sm:w-[210px] backdrop-blur-sm',
+        stage.order === 1
+          ? 'w-[200px] sm:w-[240px] backdrop-blur-sm'
+          : 'w-[170px] sm:w-[210px] backdrop-blur-sm',
         config.borderColor,
         config.bgColor,
         isClickable
