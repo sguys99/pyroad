@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { calculateXP, calculateLevel } from '@/lib/quest/xp';
 import { checkAndAwardBadges } from '@/lib/quest/checkBadges';
 
@@ -33,9 +34,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const adminClient = createAdminClient();
+
   // 1. Quest 조회 + 중복 완료 확인 + 유저 프로필 — 병렬 실행
   const [questResult, existingResult, profileResult] = await Promise.all([
-    supabase
+    adminClient
       .from('quests')
       .select('id, xp_reward, stage_id')
       .eq('id', body.quest_id)
@@ -108,7 +111,7 @@ export async function POST(request: Request) {
         questId: body.quest_id,
         hintsUsed: body.hints_used,
       }),
-      supabase
+      adminClient
         .from('quests')
         .select('id, concept, "order"')
         .eq('stage_id', quest.stage_id),
@@ -152,7 +155,7 @@ export async function POST(request: Request) {
     stageConcepts =
       stageQuestsResult.data?.map((q) => q.concept) ?? [];
 
-    const stageResult = await supabase
+    const stageResult = await adminClient
       .from('stages')
       .select('title, "order"')
       .eq('id', quest.stage_id)

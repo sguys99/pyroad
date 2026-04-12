@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { validateResult } from '@/lib/quest/validation';
 import type { PromptSkeleton } from '@/lib/types/database';
 
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: quest } = await supabase
+  const adminClient = createAdminClient();
+  const { data: quest } = await adminClient
     .from('quests')
     .select('validation_type, expected_output, prompt_skeleton')
     .eq('id', body.quest_id)

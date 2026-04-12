@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getAvailableProviders } from '@/lib/tutor/providers/factory';
 import {
   SYSTEM_PROMPT,
@@ -45,6 +46,7 @@ export async function prepareTutorCall(
 ): Promise<PreparedTutorCall | Response> {
   // 1. Auth 검증
   const supabase = await createClient();
+  const adminClient = createAdminClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -93,7 +95,7 @@ export async function prepareTutorCall(
 
   // 3. Quest + User Profile 병렬 조회
   const [questResult, userProfileResult] = await Promise.all([
-    supabase
+    adminClient
       .from('quests')
       .select('*, stage:stages(id, title, order, theme_name)')
       .eq('id', body.quest_id)
@@ -166,7 +168,7 @@ export async function prepareTutorCall(
     });
   } else if (body.type === 'stage_summary') {
     // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
-    const stageConceptsResult = await supabase
+    const stageConceptsResult = await adminClient
       .from('quests')
       .select('concept')
       .eq('stage_id', q.stage.id)
@@ -176,7 +178,7 @@ export async function prepareTutorCall(
     ];
 
     // 다음 스테이지 제목 조회
-    const nextStageResult = await supabase
+    const nextStageResult = await adminClient
       .from('stages')
       .select('title')
       .eq('order', q.stage.order + 1)

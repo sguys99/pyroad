@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { calculateLevel } from '@/lib/quest/xp';
 
 interface ResetRequest {
@@ -25,8 +26,10 @@ export async function POST(request: Request) {
     }
 
     if (body.stageId) {
+      const adminClient = createAdminClient();
+
       // 대상 스테이지의 order 조회
-      const { data: targetStage, error: targetStageError } = await supabase
+      const { data: targetStage, error: targetStageError } = await adminClient
         .from('stages')
         .select('id, order, title')
         .eq('id', body.stageId)
@@ -35,7 +38,7 @@ export async function POST(request: Request) {
       if (targetStageError) {
         console.error(
           '[Reset API] Target stage query failed:',
-          targetStageError,
+          { stageId: body.stageId, code: targetStageError.code, message: targetStageError.message },
         );
       }
 
@@ -48,7 +51,7 @@ export async function POST(request: Request) {
 
       // 캐스케이드: 대상 스테이지 이후(order >= target) 모든 스테이지 조회
       const { data: affectedStages, error: affectedStagesError } =
-        await supabase
+        await adminClient
           .from('stages')
           .select('id, order, title')
           .gte('order', targetStage.order)
@@ -71,7 +74,7 @@ export async function POST(request: Request) {
       const affectedStageIds = affectedStages.map((s) => s.id);
 
       // 영향 받는 모든 스테이지의 퀘스트 조회
-      const { data: quests, error: questsError } = await supabase
+      const { data: quests, error: questsError } = await adminClient
         .from('quests')
         .select('id, xp_reward, stage_id')
         .in('stage_id', affectedStageIds);

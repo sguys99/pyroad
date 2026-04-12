@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function DELETE(
   _request: Request,
@@ -15,8 +16,9 @@ export async function DELETE(
   }
 
   const { commentId } = await params;
+  const adminClient = createAdminClient();
 
-  const { data: comment } = await supabase
+  const { data: comment } = await adminClient
     .from('board_comments')
     .select('user_id')
     .eq('id', commentId)

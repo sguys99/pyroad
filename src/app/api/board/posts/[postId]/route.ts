@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function PATCH(
   request: Request,
@@ -15,9 +16,10 @@ export async function PATCH(
   }
 
   const { postId } = await params;
+  const adminClient = createAdminClient();
 
   // 소유권 검증
-  const { data: post } = await supabase
+  const { data: post } = await adminClient
     .from('board_posts')
     .select('user_id')
     .eq('id', postId)
@@ -80,8 +82,9 @@ export async function DELETE(
   }
 
   const { postId } = await params;
+  const adminClient = createAdminClient();
 
-  const { data: post } = await supabase
+  const { data: post } = await adminClient
     .from('board_posts')
     .select('user_id')
     .eq('id', postId)
