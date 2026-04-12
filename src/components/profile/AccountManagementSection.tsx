@@ -20,6 +20,7 @@ interface Stage {
   id: string;
   order: number;
   title: string;
+  hasProgress: boolean;
 }
 
 interface AccountManagementSectionProps {
@@ -88,6 +89,20 @@ export function AccountManagementSection({
   };
 
   const isLoading = loading !== null;
+
+  // 특정 스테이지 리셋 시 함께 리셋되는 후속 스테이지 목록 (진행 기록이 있는 것만)
+  const getAffectedStages = (stageOrder: number) =>
+    stages.filter((s) => s.order > stageOrder && s.hasProgress);
+
+  const getResetDescription = (stage: Stage) => {
+    const affected = getAffectedStages(stage.order);
+    const baseMsg = `"${stage.title}" 스테이지의 퀘스트 진행이 초기화되고, 해당 경험치가 차감됩니다.`;
+    if (affected.length === 0) return baseMsg;
+    const affectedNames = affected
+      .map((s) => `${s.order}. ${s.title}`)
+      .join(', ');
+    return `${baseMsg}\n\n⚠️ 후속 스테이지(${affectedNames})의 진행도 함께 리셋됩니다.`;
+  };
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -166,9 +181,8 @@ export function AccountManagementSection({
                   <AlertDialogTitle>
                     스테이지 {stage.order} 리셋
                   </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    &quot;{stage.title}&quot; 스테이지의 퀘스트 진행이
-                    초기화되고, 해당 경험치가 차감됩니다. 뱃지는 유지됩니다.
+                  <AlertDialogDescription className="whitespace-pre-line">
+                    {getResetDescription(stage)}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

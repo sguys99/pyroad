@@ -2,34 +2,33 @@
 
 import { m } from 'framer-motion';
 import Image from 'next/image';
-import { MessageCircle, Code, Map, Trophy } from 'lucide-react';
 import worldMapImg from '@/../img/2.world-map.png';
 import learningPageImg from '@/../img/3.learning-page.png';
 
 const features = [
   {
-    icon: MessageCircle,
+    emoji: '🐍',
     title: 'AI 튜터',
     description: '파이뱀 선생님이\n1:1로 친절하게 알려줘요',
-    gradient: 'from-[#a8d5a2] to-[#7bc67e]',
+
   },
   {
-    icon: Code,
+    emoji: '💻',
     title: '브라우저 코딩',
     description: '설치 없이 바로\n파이썬 코드를 실행해요',
-    gradient: 'from-[#8ecae6] to-[#5fa8d3]',
+
   },
   {
-    icon: Map,
+    emoji: '🗺️',
     title: '월드맵 모험',
     description: '스테이지를 하나씩\n깨며 앞으로 나아가요',
-    gradient: 'from-[#f4b860] to-[#e89b3e]',
+
   },
   {
-    icon: Trophy,
+    emoji: '🏆',
     title: '뱃지와 보상',
     description: '퀘스트를 완료하면\n멋진 뱃지를 받아요',
-    gradient: 'from-[#d4a5e5] to-[#b07cc6]',
+
   },
 ] as const;
 
@@ -90,15 +89,9 @@ export function AboutSection() {
               className="rounded-2xl border border-white/80 bg-white/60 p-5 text-center backdrop-blur-[10px]"
               variants={fadeUp}
             >
-              <div
-                className={`mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-[11px] bg-gradient-to-br ${feature.gradient}`}
-              >
-                <feature.icon
-                  size={22}
-                  className="text-white"
-                  strokeWidth={2}
-                />
-              </div>
+              <span className="mx-auto mb-3 block text-3xl leading-none">
+                {feature.emoji}
+              </span>
               <h3 className="mb-1 text-[13px] font-bold text-primary">
                 {feature.title}
               </h3>

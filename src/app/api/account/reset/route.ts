@@ -24,22 +24,52 @@ export async function POST(request: Request) {
   }
 
   if (body.stageId) {
-    // 스테이지별 리셋
-    const { data: quests } = await supabase
-      .from('quests')
-      .select('id, xp_reward')
-      .eq('stage_id', body.stageId);
+    // 대상 스테이지의 order 조회
+    const { data: targetStage } = await supabase
+      .from('stages')
+      .select('id, order, title')
+      .eq('id', body.stageId)
+      .single();
 
-    if (!quests || quests.length === 0) {
+    if (!targetStage) {
       return NextResponse.json(
         { error: '해당 스테이지를 찾을 수 없습니다.' },
         { status: 404 },
       );
     }
 
+    // 캐스케이드: 대상 스테이지 이후(order >= target) 모든 스테이지 조회
+    const { data: affectedStages } = await supabase
+      .from('stages')
+      .select('id, order, title')
+      .gte('order', targetStage.order)
+      .order('order', { ascending: true });
+
+    if (!affectedStages || affectedStages.length === 0) {
+      return NextResponse.json(
+        { error: '해당 스테이지를 찾을 수 없습니다.' },
+        { status: 404 },
+      );
+    }
+
+    const affectedStageIds = affectedStages.map((s) => s.id);
+
+    // 영향 받는 모든 스테이지의 퀘스트 조회
+    const { data: quests } = await supabase
+      .from('quests')
+      .select('id, xp_reward, stage_id')
+      .in('stage_id', affectedStageIds);
+
+    if (!quests || quests.length === 0) {
+      return NextResponse.json(
+        { error: '해당 스테이지의 퀘스트를 찾을 수 없습니다.' },
+        { status: 404 },
+      );
+    }
+
     const questIds = quests.map((q) => q.id);
 
-    // 해당 스테이지의 완료된 퀘스트 진행 데이터 조회 (XP 차감용)
+    // 완료된 퀘스트 진행 데이터 조회 (XP 차감용)
     const { data: completedProgress } = await supabase
       .from('user_progress')
       .select('quest_id, hints_used')
@@ -47,7 +77,7 @@ export async function POST(request: Request) {
       .eq('status', 'completed')
       .in('quest_id', questIds);
 
-    // 해당 스테이지의 user_progress 삭제
+    // 영향 받는 모든 스테이지의 user_progress 삭제
     const { error: progressError } = await supabase
       .from('user_progress')
       .delete()
@@ -60,6 +90,15 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
+
+    // 영향 받는 스테이지의 stage_clear 뱃지 삭제
+    // badge_type 형식이 'stage_clear'이므로 해당 뱃지 삭제
+    // (stage_clear 뱃지는 하나만 존재하므로 후속 스테이지가 리셋되면 삭제)
+    await supabase
+      .from('user_badges')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('badge_type', 'stage_clear');
 
     // XP 재계산: 삭제된 퀘스트의 XP를 차감
     if (completedProgress && completedProgress.length > 0) {
@@ -90,7 +129,15 @@ export async function POST(request: Request) {
         .eq('id', user.id);
     }
 
-    return NextResponse.json({ success: true, type: 'stage' });
+    return NextResponse.json({
+      success: true,
+      type: 'stage',
+      resetStages: affectedStages.map((s) => ({
+        id: s.id,
+        order: s.order,
+        title: s.title,
+      })),
+    });
   }
 
   // 전체 리셋
