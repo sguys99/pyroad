@@ -192,7 +192,11 @@ export default async function ProfilePage() {
 
       {/* 계정 관리 */}
       <AccountManagementSection
-        stages={stages.map((s) => ({ id: s.id, order: s.order, title: s.title }))}
+        stages={stages.map((s) => {
+          const quests = (s.quests as { id: string }[]) ?? [];
+          const hasProgress = quests.some((q) => completedQuestIds.has(q.id));
+          return { id: s.id, order: s.order, title: s.title, hasProgress };
+        })}
       />
 
       {/* 설정 / 로그아웃 */}
