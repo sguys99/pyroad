@@ -43,12 +43,19 @@ export function AccountManagementSection({
     setLoading('delete');
     try {
       const res = await fetch('/api/account/delete', { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '탈퇴 처리 중 오류가 발생했습니다.');
+      }
       const supabase = createClient();
       await supabase.auth.signOut();
       router.push('/');
-    } catch {
-      alert('탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : '탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      alert(message);
     } finally {
       setLoading(null);
     }
@@ -62,10 +69,17 @@ export function AccountManagementSection({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '리셋 중 오류가 발생했습니다.');
+      }
       router.refresh();
-    } catch {
-      alert('리셋 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : '리셋 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      alert(message);
     } finally {
       setLoading(null);
     }
@@ -79,10 +93,17 @@ export function AccountManagementSection({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stageId }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '리셋 중 오류가 발생했습니다.');
+      }
       router.refresh();
-    } catch {
-      alert('리셋 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : '리셋 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      alert(message);
     } finally {
       setLoading(null);
     }
@@ -281,8 +302,8 @@ export function AccountManagementSection({
             <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={() => {
-                confirmAction?.action();
+              onClick={async () => {
+                await confirmAction?.action();
                 setConfirmAction(null);
               }}
               disabled={isLoading}
