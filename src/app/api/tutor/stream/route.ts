@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, fast, body } = prepared;
+  const { systemPrompt, userPrompt, providerType, customApiKey, fast, skipFallbackProviders, body } = prepared;
 
   // 캐시 히트 → 단일 delta 이벤트로 즉시 전송
   const cacheable = CACHEABLE_TYPES.has(body.type);
@@ -44,6 +44,7 @@ export async function POST(request: Request) {
     providerType,
     customApiKey,
     fast,
+    skipFallbackProviders,
   );
 
   // 캐시 대상이면 전체 텍스트를 수집하여 완료 시 저장

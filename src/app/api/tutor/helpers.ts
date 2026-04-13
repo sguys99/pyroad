@@ -37,6 +37,7 @@ export interface PreparedTutorCall {
   customApiKey: string | undefined;
   hasAnyKey: boolean;
   fast: boolean;
+  skipFallbackProviders: boolean;
   quest: QuestWithStageServer;
   body: TutorRequest;
 }
@@ -205,20 +206,28 @@ export async function prepareTutorCall(
   // 6. Provider 결정
   let providerType: LLMProviderType | undefined = body.provider;
   let customApiKey: string | undefined;
+  let skipFallbackProviders = false;
+
+  const userKeys = (userProfile?.custom_api_keys ?? {}) as Record<string, string>;
+  const hasCustomKeys = Object.values(userKeys).some((k) => !!k);
 
   if (!providerType) {
-    if (userProfile?.preferred_provider) {
+    if (hasCustomKeys && userProfile?.preferred_provider) {
+      // custom key가 있는 사용자 → 기존 로직 (선호 provider 사용)
       providerType = userProfile.preferred_provider as LLMProviderType;
+    } else {
+      // custom key 없는 사용자 → Gemini 무료 티어, 유료 provider fallback 차단
+      providerType = 'gemini';
+      skipFallbackProviders = true;
     }
   }
-  if (userProfile?.custom_api_keys && providerType) {
-    const keys = userProfile.custom_api_keys as Record<string, string>;
-    customApiKey = keys[providerType] || undefined;
+
+  if (hasCustomKeys && providerType) {
+    customApiKey = userKeys[providerType] || undefined;
   }
 
   const available = getAvailableProviders();
-  const userKeys = (userProfile?.custom_api_keys ?? {}) as Record<string, string>;
-  const hasAnyKey = available.length > 0 || Object.values(userKeys).some((k) => !!k);
+  const hasAnyKey = available.length > 0 || hasCustomKeys;
 
   return {
     systemPrompt: SYSTEM_PROMPT,
@@ -227,6 +236,7 @@ export async function prepareTutorCall(
     customApiKey,
     hasAnyKey,
     fast: FAST_TYPES.has(body.type),
+    skipFallbackProviders,
     quest: q,
     body,
   };

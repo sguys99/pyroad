@@ -21,7 +21,7 @@ const PROVIDER_ICONS: Record<LLMProviderType, string> = {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SettingsData | null>(null);
-  const [selected, setSelected] = useState<LLMProviderType>('anthropic');
+  const [selected, setSelected] = useState<LLMProviderType>('gemini');
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         selected === provider &&
         !refreshedData.available_providers.includes(provider)
       ) {
-        setSelected(refreshedData.available_providers[0] ?? 'anthropic');
+        setSelected(refreshedData.available_providers[0] ?? 'gemini');
       }
     } else {
       setError('삭제에 실패했어요. 다시 시도해주세요.');
@@ -132,7 +132,7 @@ export default function SettingsPage() {
     );
   }
 
-  const allProviders: LLMProviderType[] = ['anthropic', 'openai', 'gemini'];
+  const allProviders: LLMProviderType[] = ['gemini', 'anthropic', 'openai'];
 
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
