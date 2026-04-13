@@ -1,7 +1,7 @@
 import { callTutorStream } from '@/lib/tutor/client';
 import { getCachedResponse, setCachedResponse, buildCacheKey } from '@/lib/tutor/cache';
 import { prepareTutorCall, CACHEABLE_TYPES } from '../helpers';
-import { TOKEN_LIMITS } from '@/lib/tutor/config';
+import { getMaxTokens } from '@/lib/tutor/config';
 
 const encoder = new TextEncoder();
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const innerStream = callTutorStream(
     systemPrompt,
     userPrompt,
-    TOKEN_LIMITS[body.type],
+    getMaxTokens(body.type, providerType),
     providerType,
     customApiKey,
     fast,
