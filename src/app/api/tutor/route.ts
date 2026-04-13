@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   if (result.ok) {
     message = result.text;
-    isFallback = false;
+    isFallback = result.was_fallback ?? false;
 
     // 성공 응답 캐시
     if (cacheable) {
@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     message,
     is_fallback: isFallback,
     ...((!hasAnyKey && isFallback) && { no_api_key: true }),
+    ...(result.provider_used && { provider_used: result.provider_used }),
   };
   return NextResponse.json(response);
 }

@@ -29,6 +29,7 @@ export interface TutorResponse {
   message: string;
   is_fallback: boolean;
   no_api_key?: boolean;
+  provider_used?: string;
 }
 
 export interface ChatMessage {
