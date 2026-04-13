@@ -39,6 +39,7 @@ function makeProgress(questId: string, status: 'completed' | 'in_progress' = 'co
     created_at: '2026-01-01',
     current_step: null,
     step_submissions: null,
+    used_golden_key: false,
   };
 }
 

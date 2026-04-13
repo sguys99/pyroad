@@ -45,6 +45,7 @@ interface QuestShellProps {
   userId: string;
   initialXP: number;
   initialLevel: number;
+  initialGoldenKeys: number;
 }
 
 export function QuestShell({
@@ -53,6 +54,7 @@ export function QuestShell({
   userId,
   initialXP,
   initialLevel,
+  initialGoldenKeys,
 }: QuestShellProps) {
   const [activeTab, setActiveTab] = useState<Tab>('story');
   const [code, setCode] = useState(
@@ -104,6 +106,10 @@ export function QuestShell({
     stageOrder: number;
     concepts: string[];
   } | null>(null);
+
+  // 황금키 상태
+  const [goldenKeys, setGoldenKeys] = useState(initialGoldenKeys);
+  const [isGoldenKeyLoading, setIsGoldenKeyLoading] = useState(false);
 
   // 코드 자동 저장 debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -209,6 +215,94 @@ export function QuestShell({
       .then();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hintsUsed, isAiLoading, quest.id, code, userId]);
+
+  // 황금키 사용 핸들러
+  const handleGoldenKeyUse = useCallback(async () => {
+    if (goldenKeys <= 0 || isAiLoading || isGoldenKeyLoading || isCompleted) return;
+
+    const confirmed = window.confirm(
+      '황금키를 사용하면 정답이 공개되고 XP를 받을 수 없어요. 사용할까요?',
+    );
+    if (!confirmed) return;
+
+    setIsGoldenKeyLoading(true);
+
+    try {
+      const res = await fetch('/api/quest/golden-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quest_id: quest.id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'system', content: data.error ?? '황금키 사용에 실패했어요' },
+        ]);
+        return;
+      }
+
+      setGoldenKeys(data.golden_keys);
+      setCode(data.solution_code);
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'system', content: '🔑 황금키를 사용했어요!' },
+      ]);
+
+      // 정답 코드 자동 실행
+      const result = await runCode(data.solution_code);
+      setRunResult(result);
+      setActiveTab('result');
+
+      // 자동 완료 처리
+      const completeRes = await fetch('/api/quest/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quest_id: quest.id,
+          code_submitted: data.solution_code,
+          hints_used: hintsUsed,
+          used_golden_key: true,
+        }),
+      });
+      const completeData = await completeRes.json();
+
+      if (!completeData.already_completed) {
+        setEarnedXP(0);
+        setUserXP(completeData.total_xp);
+        setUserLevel(completeData.new_level);
+        setNextQuestId(completeData.nextQuestId ?? null);
+      }
+      setIsCompleted(true);
+
+      // 해설 메시지
+      finishStreaming(
+        `정답 코드를 살펴볼까요?\n\n\`\`\`python\n${data.solution_code}\n\`\`\`\n\n이 코드는 "${quest.prompt_skeleton.topic}" 개념을 사용해요. 다음 퀘스트에서는 직접 도전해보세요! 💪`,
+        false,
+      );
+
+      // Confetti (황금키 전용 — 작은 규모)
+      confettiReady?.then((confetti) => {
+        confetti({
+          particleCount: 40,
+          spread: 50,
+          origin: { y: 0.6 },
+          ticks: 60,
+          colors: ['#FFD700', '#FFA500', '#FF8C00'],
+        });
+      });
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'system', content: '황금키 사용 중 오류가 발생했어요' },
+      ]);
+    } finally {
+      setIsGoldenKeyLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goldenKeys, isAiLoading, isGoldenKeyLoading, isCompleted, quest.id, hintsUsed, runCode]);
 
   const handleRun = useCallback(async () => {
     if (isCodeEmpty || isCompleted) return;
@@ -458,6 +552,9 @@ export function QuestShell({
             streamingContent={streamingContent}
             hintsUsed={hintsUsed}
             onHintRequest={handleHintRequest}
+            goldenKeys={goldenKeys}
+            onGoldenKeyUse={handleGoldenKeyUse}
+            isGoldenKeyLoading={isGoldenKeyLoading}
           />
         </div>
 

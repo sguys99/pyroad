@@ -8,7 +8,12 @@ export const LEVEL_TITLES: Record<number, string> = {
   5: '코딩 마법사',
 };
 
-export function calculateXP(baseXP: number, hintsUsed: number): number {
+export function calculateXP(
+  baseXP: number,
+  hintsUsed: number,
+  usedGoldenKey?: boolean,
+): number {
+  if (usedGoldenKey) return 0;
   if (hintsUsed === 0) return Math.round(baseXP * 1.5);
   if (hintsUsed === 1) return Math.round(baseXP * 1.25);
   return baseXP;
