@@ -4,9 +4,9 @@ import { OpenAIProvider } from './openai';
 import { GeminiProvider } from './gemini';
 
 const ENV_KEY_MAP: Record<LLMProviderType, string> = {
+  gemini: 'GEMINI_API_KEY',
   anthropic: 'ANTHROPIC_API_KEY',
   openai: 'OPENAI_API_KEY',
-  gemini: 'GEMINI_API_KEY',
 };
 
 // 환경변수 기반 싱글톤 캐시

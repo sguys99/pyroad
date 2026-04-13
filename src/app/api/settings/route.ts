@@ -32,7 +32,7 @@ export async function GET() {
 
   return NextResponse.json({
     available_providers: allAvailable,
-    current_provider: profile?.preferred_provider ?? 'anthropic',
+    current_provider: profile?.preferred_provider ?? 'gemini',
     has_custom_keys: customProviders,
   });
 }

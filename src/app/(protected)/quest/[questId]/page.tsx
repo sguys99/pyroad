@@ -40,7 +40,7 @@ export default async function QuestPage({ params }: Props) {
       .maybeSingle(),
     supabase
       .from('users')
-      .select('total_xp, current_level')
+      .select('total_xp, current_level, golden_keys')
       .eq('id', user.id)
       .single(),
   ]);
@@ -49,11 +49,12 @@ export default async function QuestPage({ params }: Props) {
 
   const quest = questResult.data as unknown as QuestWithStage;
 
-  // 클라이언트에 정답/힌트 노출 방지
+  // 클라이언트에 정답/힌트/solution_code 노출 방지
   quest.prompt_skeleton.hints = { level_1: '', level_2: '', level_3: '' };
+  delete (quest.prompt_skeleton as PromptSkeleton & { solution_code?: string }).solution_code;
   if (quest.prompt_skeleton.steps) {
     quest.prompt_skeleton.steps = quest.prompt_skeleton.steps.map(
-      ({ expected_output: _eo, hints: _hints, ...rest }) => ({
+      ({ expected_output: _eo, hints: _hints, solution_code: _sc, ...rest }) => ({
         ...rest,
         expected_output: '',
         hints: { level_1: '', level_2: '', level_3: '' },
@@ -73,6 +74,7 @@ export default async function QuestPage({ params }: Props) {
       userId={user.id}
       initialXP={profile?.total_xp ?? 0}
       initialLevel={profile?.current_level ?? 1}
+      initialGoldenKeys={profile?.golden_keys ?? 3}
     />
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useRef } from 'react';
-import { BookOpen, Lightbulb, MessageCircle } from 'lucide-react';
+import { BookOpen, KeyRound, Lightbulb, MessageCircle } from 'lucide-react';
 import { m, useReducedMotion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -25,6 +25,9 @@ interface ConversationPanelProps {
   streamingContent?: string;
   hintsUsed: number;
   onHintRequest: () => void;
+  goldenKeys: number;
+  onGoldenKeyUse: () => void;
+  isGoldenKeyLoading?: boolean;
 }
 
 function ThinkingIndicator() {
@@ -143,6 +146,9 @@ export function ConversationPanel({
   streamingContent,
   hintsUsed,
   onHintRequest,
+  goldenKeys,
+  onGoldenKeyUse,
+  isGoldenKeyLoading,
 }: ConversationPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -202,32 +208,60 @@ export function ConversationPanel({
         </div>
       </div>
 
-      {/* 힌트 버튼 (하단 고정) */}
+      {/* 힌트 + 황금키 버튼 (하단 고정) */}
       <div className="border-t border-border bg-background px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            힌트: {hintsUsed}/3 사용
-          </span>
-          <m.div
-            whileHover={
-              !(isAiLoading || hintsUsed >= 3) ? { scale: 1.03 } : undefined
-            }
-            whileTap={
-              !(isAiLoading || hintsUsed >= 3) ? { scale: 0.97 } : undefined
-            }
-            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onHintRequest}
-              disabled={isAiLoading || hintsUsed >= 3}
-              className="gap-1.5"
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">
+              힌트: {hintsUsed}/3 사용
+            </span>
+            <span className="text-xs text-amber-600">
+              <KeyRound className="mr-0.5 inline h-3 w-3" />
+              황금키: {goldenKeys}/3
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <m.div
+              whileHover={
+                !(isAiLoading || isGoldenKeyLoading || goldenKeys <= 0) ? { scale: 1.03 } : undefined
+              }
+              whileTap={
+                !(isAiLoading || isGoldenKeyLoading || goldenKeys <= 0) ? { scale: 0.97 } : undefined
+              }
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              <Lightbulb className="h-4 w-4" />
-              {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
-            </Button>
-          </m.div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onGoldenKeyUse}
+                disabled={isAiLoading || isGoldenKeyLoading || goldenKeys <= 0}
+                className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
+              >
+                <KeyRound className="h-4 w-4" />
+                {goldenKeys <= 0 ? '키 소진' : '황금키'}
+              </Button>
+            </m.div>
+            <m.div
+              whileHover={
+                !(isAiLoading || hintsUsed >= 3) ? { scale: 1.03 } : undefined
+              }
+              whileTap={
+                !(isAiLoading || hintsUsed >= 3) ? { scale: 0.97 } : undefined
+              }
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onHintRequest}
+                disabled={isAiLoading || hintsUsed >= 3}
+                className="gap-1.5"
+              >
+                <Lightbulb className="h-4 w-4" />
+                {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
+              </Button>
+            </m.div>
+          </div>
         </div>
       </div>
     </div>

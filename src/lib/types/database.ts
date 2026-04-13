@@ -34,6 +34,7 @@ export interface UserProgress {
   created_at: string;
   current_step: number | null;
   step_submissions: Record<string, string> | null;
+  used_golden_key: boolean;
 }
 
 export interface UserBadge {
@@ -68,6 +69,7 @@ export interface ProjectStep {
     level_3: string;
   };
   fallback_text: string;
+  solution_code?: string;
 }
 
 export interface PromptSkeleton {
@@ -83,6 +85,7 @@ export interface PromptSkeleton {
     level_2: string;
     level_3: string;
   };
+  solution_code?: string;
   steps?: ProjectStep[];
 }
 

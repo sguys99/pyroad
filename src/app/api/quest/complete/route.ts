@@ -9,6 +9,7 @@ interface CompleteRequest {
   quest_id: string;
   code_submitted: string;
   hints_used: number;
+  used_golden_key?: boolean;
 }
 
 export async function POST(request: Request) {
@@ -74,8 +75,8 @@ export async function POST(request: Request) {
     });
   }
 
-  // 3. XP 계산
-  const earnedXP = calculateXP(quest.xp_reward, body.hints_used);
+  // 3. XP 계산 (황금키 사용 시 0)
+  const earnedXP = calculateXP(quest.xp_reward, body.hints_used, body.used_golden_key);
 
   // 4. user_progress upsert
   await supabase.from('user_progress').upsert(
@@ -166,6 +167,12 @@ export async function POST(request: Request) {
       stageTitle = stageResult.data.title;
       stageOrder = stageResult.data.order;
     }
+
+    // 다음 스테이지를 위해 황금키 3개로 리셋
+    await supabase
+      .from('users')
+      .update({ golden_keys: 3 })
+      .eq('id', user.id);
   }
 
   // 월드맵·프로필 페이지의 Router Cache 무효화
