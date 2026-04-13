@@ -3,7 +3,6 @@ import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
-import { getAvailableProviders } from '@/lib/tutor/providers/factory';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
 import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
@@ -50,11 +49,9 @@ export default async function WorldPage() {
 
   const stagesWithStatus = getStageStatuses(stages, progress);
 
-  // API 키 상태 확인: 서버 env 키 + 사용자 커스텀 키
-  const serverProviders = getAvailableProviders();
+  // API 키 상태 확인: 사용자 커스텀 키 유무만 체크 (서버 기본 키는 무시)
   const userKeys = (profileResult.data as Record<string, unknown>)?.custom_api_keys as Record<string, string> | undefined;
-  const hasAnyApiKey = serverProviders.length > 0 ||
-    (userKeys && Object.values(userKeys).some((k) => !!k));
+  const hasCustomApiKey = userKeys && Object.values(userKeys).some((k) => !!k);
 
   return (
     <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6">
@@ -89,7 +86,7 @@ export default async function WorldPage() {
         </div>
       </div>
 
-      {!hasAnyApiKey && <div className="relative z-10"><ApiKeyAlert /></div>}
+      {!hasCustomApiKey && <div className="relative z-10"><ApiKeyAlert /></div>}
 
       {profile && (
         <div className="relative z-10 mb-6">

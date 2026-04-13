@@ -10,8 +10,8 @@ export function useTutor() {
   useEffect(() => {
     fetch('/api/settings')
       .then((res) => res.json())
-      .then((data: { available_providers: string[] }) => {
-        setHasApiKey(data.available_providers.length > 0);
+      .then((data: { has_custom_keys: string[] }) => {
+        setHasApiKey(data.has_custom_keys.length > 0);
       })
       .catch(() => {
         setHasApiKey(false);
@@ -136,8 +136,8 @@ export function useTutor() {
     refreshApiKeyStatus() {
       fetch('/api/settings')
         .then((res) => res.json())
-        .then((data: { available_providers: string[] }) => {
-          setHasApiKey(data.available_providers.length > 0);
+        .then((data: { has_custom_keys: string[] }) => {
+          setHasApiKey(data.has_custom_keys.length > 0);
         })
         .catch(() => {});
     },
