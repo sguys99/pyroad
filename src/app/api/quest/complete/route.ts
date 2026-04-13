@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { calculateXP, calculateLevel } from '@/lib/quest/xp';
@@ -166,6 +167,10 @@ export async function POST(request: Request) {
       stageOrder = stageResult.data.order;
     }
   }
+
+  // 월드맵·프로필 페이지의 Router Cache 무효화
+  revalidatePath('/world');
+  revalidatePath('/profile');
 
   return NextResponse.json({
     earned_xp: earnedXP,
