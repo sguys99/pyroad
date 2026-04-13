@@ -486,3 +486,26 @@ UPDATE public.quests SET prompt_skeleton = jsonb_set(
   '"import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\nattempts = 0\n\nwhile guess != secret:\n    attempts = attempts + 1\n    if guess < secret:\n        print(\"비밀 숫자가 추측보다 커요!\")\n    else:\n        print(\"비밀 숫자가 추측보다 작아요!\")\n    guess = int(random.randint(1, 10))\n\nattempts = attempts + 1\nprint(\"정답! \" + str(attempts) + \"번 만에 맞췄어요!\")"'
 )
 WHERE id = 'b1000000-0000-0000-0000-000000000022';
+
+-- ============================================================
+-- Section 7: user_progress status 강등 방지 트리거
+-- ============================================================
+-- auto-save가 completed 퀘스트를 in_progress로 덮어쓰는 버그 방지
+-- 에러를 발생시키지 않고, status와 completed_at을 조용히 보존
+
+CREATE OR REPLACE FUNCTION prevent_status_downgrade()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.status = 'completed' AND NEW.status != 'completed' THEN
+    NEW.status := 'completed';
+    NEW.completed_at := OLD.completed_at;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_prevent_status_downgrade ON public.user_progress;
+CREATE TRIGGER trg_prevent_status_downgrade
+  BEFORE UPDATE ON public.user_progress
+  FOR EACH ROW
+  EXECUTE FUNCTION prevent_status_downgrade();

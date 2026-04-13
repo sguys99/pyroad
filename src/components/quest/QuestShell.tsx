@@ -173,7 +173,7 @@ export function QuestShell({
 
   // 힌트 요청 핸들러
   const handleHintRequest = useCallback(async () => {
-    if (hintsUsed >= 3 || isAiLoading) return;
+    if (hintsUsed >= 3 || isAiLoading || isCompleted) return;
 
     const nextLevel = (hintsUsed + 1) as 1 | 2 | 3;
 
@@ -214,7 +214,7 @@ export function QuestShell({
       )
       .then();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hintsUsed, isAiLoading, quest.id, code, userId]);
+  }, [hintsUsed, isAiLoading, isCompleted, quest.id, code, userId]);
 
   // 황금키 사용 핸들러
   const handleGoldenKeyUse = useCallback(async () => {

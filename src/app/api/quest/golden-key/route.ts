@@ -81,7 +81,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // 3. 황금키 1개 차감 + user_progress 기록 — 병렬
+  // 3. 기존 진행 상태 확인 (completed 강등 방지)
+  const { data: existingProgress } = await supabase
+    .from('user_progress')
+    .select('status')
+    .eq('user_id', user.id)
+    .eq('quest_id', body.quest_id)
+    .maybeSingle();
+
+  const progressStatus =
+    existingProgress?.status === 'completed'
+      ? ('completed' as const)
+      : ('in_progress' as const);
+
+  // 4. 황금키 1개 차감 + user_progress 기록 — 병렬
   await Promise.all([
     supabase
       .from('users')
@@ -92,7 +105,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         quest_id: body.quest_id,
         used_golden_key: true,
-        status: 'in_progress' as const,
+        status: progressStatus,
       },
       { onConflict: 'user_id,quest_id' },
     ),

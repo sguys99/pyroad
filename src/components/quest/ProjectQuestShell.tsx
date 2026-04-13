@@ -218,7 +218,7 @@ export function ProjectQuestShell({
 
   // 힌트 요청 핸들러 (단계별 3회 리셋)
   const handleHintRequest = useCallback(async () => {
-    if (stepHintsUsed >= 3 || isAiLoading) return;
+    if (stepHintsUsed >= 3 || isAiLoading || isProjectComplete) return;
 
     const nextLevel = (stepHintsUsed + 1) as 1 | 2 | 3;
 
@@ -262,7 +262,7 @@ export function ProjectQuestShell({
       )
       .then();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepHintsUsed, isAiLoading, quest.id, code, userId, currentStep, totalHintsUsed]);
+  }, [stepHintsUsed, isAiLoading, isProjectComplete, quest.id, code, userId, currentStep, totalHintsUsed]);
 
   // 황금키 사용 핸들러 (프로젝트 퀘스트: 현재 단계의 정답만 제공)
   const handleGoldenKeyUse = useCallback(async () => {
