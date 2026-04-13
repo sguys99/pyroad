@@ -1,6 +1,6 @@
 # pyRoad
 
-![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![Version](https://img.shields.io/badge/version-v0.3.0-blue)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
 pyRoad는 초등학생이 브라우저에서 바로 파이썬을 배우도록 설계한 인터랙티브 학습 플랫폼입니다. AI 동물 마스코트 튜터와 대화하며 퀘스트를 진행하고, 직접 코드를 실행하면서 파이썬 기초를 익히는 것을 목표로 합니다.
