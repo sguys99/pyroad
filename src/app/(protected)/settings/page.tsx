@@ -49,6 +49,15 @@ export default function SettingsPage() {
     );
     if (Object.keys(nonEmpty).length > 0) {
       body.api_keys = nonEmpty;
+
+      // 새로 키를 입력한 프로바이더가 기존에 없었으면 자동 선택
+      const newKeyProviders = Object.keys(nonEmpty) as LLMProviderType[];
+      const newlyAdded = newKeyProviders.find(
+        (p) => !settings!.available_providers.includes(p),
+      );
+      if (newlyAdded) {
+        body.provider = newlyAdded;
+      }
     }
 
     const res = await fetch('/api/settings', {
@@ -66,6 +75,14 @@ export default function SettingsPage() {
         const refreshed = await fetch('/api/settings').then((r) => r.json());
         setSettings(refreshed);
         setApiKeys({});
+        // 자동 선택된 프로바이더가 있으면 selected 동기화
+        const newKeyProviders = Object.keys(nonEmpty) as LLMProviderType[];
+        const newlyAdded = newKeyProviders.find(
+          (p) => !settings!.available_providers.includes(p),
+        );
+        if (newlyAdded) {
+          setSelected(newlyAdded);
+        }
       }
       setTimeout(() => setSaved(false), 2000);
     } else {

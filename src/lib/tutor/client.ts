@@ -13,6 +13,13 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export interface TutorCallResult {
+  text: string;
+  ok: boolean;
+  provider_used?: LLMProviderType;
+  was_fallback?: boolean;
+}
+
 export async function callTutor(
   systemPrompt: string,
   userPrompt: string,
@@ -20,7 +27,7 @@ export async function callTutor(
   providerType?: LLMProviderType,
   customApiKey?: string,
   fast = false,
-): Promise<{ text: string; ok: boolean }> {
+): Promise<TutorCallResult> {
   const available = getAvailableProviders();
   const primary = providerType && (available.includes(providerType) || customApiKey)
     ? providerType
@@ -41,7 +48,7 @@ export async function callTutor(
     customApiKey,
     modelOverride,
   );
-  if (result.ok) return result;
+  if (result.ok) return { ...result, provider_used: primary!, was_fallback: false };
 
   // 자동 전환: 다른 가용 provider로 fallback
   const fallbacks = available.filter((p) => p !== primary);
@@ -52,7 +59,10 @@ export async function callTutor(
       userPrompt,
       maxTokens,
     );
-    if (fallbackResult.ok) return fallbackResult;
+    if (fallbackResult.ok) {
+      console.warn(`[tutor] Fell back from ${primary} to ${fallback}`);
+      return { ...fallbackResult, provider_used: fallback, was_fallback: true };
+    }
   }
 
   return { text: '', ok: false };
@@ -139,9 +149,13 @@ async function tryStreamProvider(
       controller.enqueue(sseMessage({ delta }));
     }
 
-    controller.enqueue(sseMessage({ done: true }));
+    controller.enqueue(sseMessage({ done: true, provider_used: providerType }));
     return true;
-  } catch {
+  } catch (error) {
+    console.error(
+      `[tutor] ${providerType} stream failed:`,
+      error instanceof Error ? error.message : error,
+    );
     return false;
   }
 }
@@ -181,7 +195,11 @@ async function attemptOnce(
     const provider = createProvider(providerType, customApiKey, modelOverride);
     const text = await provider.call(systemPrompt, userPrompt, maxTokens);
     return { text, ok: true };
-  } catch {
+  } catch (error) {
+    console.error(
+      `[tutor] ${providerType} call failed:`,
+      error instanceof Error ? error.message : error,
+    );
     return { text: '', ok: false };
   }
 }

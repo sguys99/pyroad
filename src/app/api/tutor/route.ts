@@ -3,6 +3,7 @@ import { callTutor } from '@/lib/tutor/client';
 import { getCachedResponse, setCachedResponse, buildCacheKey } from '@/lib/tutor/cache';
 import type { TutorResponse } from '@/lib/tutor/types';
 import { prepareTutorCall, buildFallbackMessage, CACHEABLE_TYPES } from './helpers';
+import { TOKEN_LIMITS } from '@/lib/tutor/config';
 
 export async function POST(request: Request) {
   const prepared = await prepareTutorCall(request);
@@ -23,14 +24,14 @@ export async function POST(request: Request) {
     }
   }
 
-  const result = await callTutor(systemPrompt, userPrompt, 300, providerType, customApiKey, fast);
+  const result = await callTutor(systemPrompt, userPrompt, TOKEN_LIMITS[body.type], providerType, customApiKey, fast);
 
   let message: string;
   let isFallback: boolean;
 
   if (result.ok) {
     message = result.text;
-    isFallback = false;
+    isFallback = result.was_fallback ?? false;
 
     // 성공 응답 캐시
     if (cacheable) {
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
     message,
     is_fallback: isFallback,
     ...((!hasAnyKey && isFallback) && { no_api_key: true }),
+    ...(result.provider_used && { provider_used: result.provider_used }),
   };
   return NextResponse.json(response);
 }

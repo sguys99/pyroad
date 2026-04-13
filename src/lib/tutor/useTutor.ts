@@ -48,6 +48,7 @@ export function useTutor() {
     ): Promise<TutorResponse> => {
       setIsLoading(true);
       let fullText = '';
+      let providerUsed: string | undefined;
 
       try {
         const res = await fetch('/api/tutor/stream', {
@@ -84,6 +85,7 @@ export function useTutor() {
                 delta?: string;
                 done?: boolean;
                 error?: boolean;
+                provider_used?: string;
               };
 
               if (data.delta) {
@@ -91,6 +93,9 @@ export function useTutor() {
                 onDelta(fullText);
               } else if (data.error) {
                 throw new Error('스트리밍 에러');
+              }
+              if (data.provider_used) {
+                providerUsed = data.provider_used;
               }
               // data.done → 정상 완료, loop가 끝남
             } catch (e) {
@@ -108,6 +113,7 @@ export function useTutor() {
         return {
           message: fullText,
           is_fallback: false,
+          provider_used: providerUsed,
         };
       } catch {
         // 부분 텍스트가 충분하면 그대로 사용
