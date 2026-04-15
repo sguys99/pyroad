@@ -729,13 +729,13 @@ VALUES (
     "learning_goals": ["if/elif/else를 활용하여 실용적인 프로그램을 만들 수 있다", "여러 조건을 조합하여 복잡한 로직을 구현할 수 있다", "변수와 조건문을 함께 사용할 수 있다"],
     "story_context": "갈림길의 영화관에서 할인 시스템을 만들어야 해요! 나이와 요일에 따라 할인율이 달라져요.",
     "exercise_description": "age=10, is_weekend=False일 때, 어린이(13세 미만) 평일 50% 할인을 적용하여 나이, 할인율, 가격을 출력하세요. 원래 가격은 10000원이에요.",
-    "starter_code": "# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\nif age < 13:\n    if is_weekend == False:\n        discount = 50\n    else:\n        discount = 30\nelse:\n    discount = 0\n\nfinal_price = price * (100 - discount) // 100\n\nprint(\"나이: \" + str(age) + \"살\")\nprint(\"할인율: \" + str(discount) + \"%\")\nprint(\"가격: \" + str(final_price) + \"원\")",
+    "starter_code": "# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n",
     "expected_output_hint": "나이: 10살, 할인율: 50%, 가격: 5000원 이 각각 출력되어야 해요",
     "fallback_text": "if 안에 또 if를 쓸 수 있어요! 먼저 나이로 어린이인지 확인하고, 그 안에서 평일인지 주말인지 확인해요.",
     "hints": {
       "level_1": "먼저 나이를 확인하고, 그 다음 주말인지 평일인지 확인해야 해요!",
       "level_2": "if age < 13: 안에서 is_weekend를 확인해보세요! 평일이면 50% 할인!",
-      "level_3": "코드를 실행해보세요! 이미 완성된 코드예요. 각 줄이 어떤 역할을 하는지 이해해보세요!"
+      "level_3": "if age < 13: 안에 if is_weekend == False: 를 넣고, discount = 50 으로 설정해보세요! else일 때는 30이에요."
     },
     "is_challenge": true
   }'::jsonb,
@@ -1004,13 +1004,13 @@ VALUES (
     "learning_goals": ["for 반복문과 문자열 반복(*)을 조합할 수 있다", "반복 변수를 활용하여 패턴을 만들 수 있다"],
     "story_context": "동굴을 탈출하면 별 피라미드를 쌓아야 해요! 반복의 마법으로 피라미드를 완성해봐요!",
     "exercise_description": "for 반복문과 \"*\" * i 를 사용하여 5줄짜리 별 피라미드를 만드세요",
-    "starter_code": "# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print(\"*\" * i)",
+    "starter_code": "# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()",
     "expected_output_hint": "* 부터 ***** 까지 피라미드가 출력되어야 해요",
     "fallback_text": "for i in range(1, 6)으로 i가 1, 2, 3, 4, 5가 되면서 \"*\" * i로 별이 1개, 2개, 3개, 4개, 5개 출력돼요!",
     "hints": {
       "level_1": "\"*\" * i 에서 i가 1, 2, 3, 4, 5로 바뀌면 별이 몇 개씩 나올까요?",
       "level_2": "for i in range(1, 6): 으로 i를 1부터 5까지 바꾸면서 print(\"*\" * i)를 써보세요!",
-      "level_3": "코드를 그대로 실행해보세요! 피라미드가 나타날 거예요!"
+      "level_3": "print() 안에 \"*\" * i 를 넣어보세요! i가 1이면 *, 2이면 ** 가 나와요!"
     },
     "is_challenge": true
   }'::jsonb,
@@ -1239,13 +1239,13 @@ VALUES (
     "learning_goals": ["빈 리스트를 만들고 append()로 항목을 추가할 수 있다", "sort()로 리스트를 정렬할 수 있다", "for 반복문으로 리스트를 순회하여 출력할 수 있다", "len()으로 항목 수를 세어 출력할 수 있다"],
     "story_context": "리스트 호수에서 마지막 시험! 쇼핑 리스트를 만들고, 정리하고, 예쁘게 출력해봐요!",
     "exercise_description": "빈 리스트를 만들고, 우유/주스/과자를 append하고, sort()로 정렬한 후, for로 순회 출력하세요",
-    "starter_code": "# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요!\nshopping.append(\"우유\")\nshopping.append(\"주스\")\nshopping.append(\"과자\")\n\n# 정렬하세요!\nshopping.sort()\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")",
+    "starter_code": "# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")",
     "expected_output_hint": "쇼핑 목록이 정렬되어 출력되어야 해요",
     "fallback_text": "빈 리스트 []를 만들고, append()로 항목을 추가하고, sort()로 정렬한 뒤, for로 하나씩 출력해요!",
     "hints": {
       "level_1": "빈 리스트부터 시작해서 하나씩 추가하고, 정렬하고, 출력하는 순서예요!",
       "level_2": "shopping.append()로 추가, shopping.sort()로 정렬, for item in shopping:으로 출력!",
-      "level_3": "코드를 그대로 실행해보세요! 각 줄이 어떤 역할을 하는지 이해해보세요!"
+      "level_3": "shopping.append(\"우유\") 처럼 3개를 추가하고, shopping.sort() 로 정렬하세요!"
     },
     "is_challenge": true
   }'::jsonb,
@@ -1474,13 +1474,13 @@ VALUES (
     "learning_goals": ["여러 함수를 만들어 역할을 분담할 수 있다", "함수의 return 값을 다른 함수에서 활용할 수 있다", "함수를 조합하여 실용적인 프로그램을 만들 수 있다"],
     "story_context": "함수의 탑 마지막 시험! 배운 함수 마법을 모두 써서 성적 분석 프로그램을 완성해봐요!",
     "exercise_description": "average 함수(3과목 평균)와 grade 함수(평균으로 등급 판정)를 만들어 성적을 분석하세요. 점수: 80, 90, 85",
-    "starter_code": "# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    return (a + b + c) / 3\n\ndef grade(avg):\n    if avg >= 90:\n        return \"A\"\n    elif avg >= 80:\n        return \"B\"\n    elif avg >= 70:\n        return \"C\"\n    else:\n        return \"D\"\n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)",
+    "starter_code": "# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)",
     "expected_output_hint": "평균: 85.0 과 등급: B 가 출력되어야 해요",
     "fallback_text": "average 함수로 평균을 구하고, grade 함수로 등급을 판정해요! 두 함수를 조합하면 성적 분석 프로그램이 완성돼요.",
     "hints": {
       "level_1": "average 함수는 3개 숫자의 평균을, grade 함수는 평균에 따른 등급을 돌려줘요!",
       "level_2": "average(80, 90, 85) = 85.0이고, grade(85.0) = \"B\"예요!",
-      "level_3": "코드를 그대로 실행해보세요! 각 함수가 어떤 역할을 하는지 이해해보세요!"
+      "level_3": "average는 return (a + b + c) / 3, grade는 if/elif/else로 등급을 return 하세요!"
     },
     "is_challenge": true
   }'::jsonb,

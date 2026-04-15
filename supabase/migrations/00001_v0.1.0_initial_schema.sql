@@ -358,6 +358,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000031';
 -- 32: 영화관 할인 시스템
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"age = 10\nis_weekend = False\nprice = 10000\n\nif age < 13:\n    if is_weekend == False:\n        discount = 50\n    else:\n        discount = 30\nelse:\n    discount = 0\n\nfinal_price = price * (100 - discount) // 100\n\nprint(\"나이: \" + str(age) + \"살\")\nprint(\"할인율: \" + str(discount) + \"%\")\nprint(\"가격: \" + str(final_price) + \"원\")"')
 WHERE id = 'b1000000-0000-0000-0000-000000000032';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n"'),
+  '{hints,level_3}', '"if age < 13: 안에 if is_weekend == False: 를 넣고, discount = 50 으로 설정해보세요! else일 때는 30이에요."')
+WHERE id = 'b1000000-0000-0000-0000-000000000032';
 
 -- ────────────────────────────────────────────────────────────
 -- 스테이지 4: 반복의 동굴
@@ -394,6 +398,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000035';
 -- 36: 별 피라미드 만들기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"for i in range(1, 6):\n    print(\"*\" * i)"')
 WHERE id = 'b1000000-0000-0000-0000-000000000036';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()"'),
+  '{hints,level_3}', '"print() 안에 \"*\" * i 를 넣어보세요! i가 1이면 *, 2이면 ** 가 나와요!"')
+WHERE id = 'b1000000-0000-0000-0000-000000000036';
 
 -- ────────────────────────────────────────────────────────────
 -- 스테이지 5: 리스트 호수
@@ -426,6 +434,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000039';
 -- 40: 쇼핑 리스트 정리기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"shopping = []\nshopping.append(\"우유\")\nshopping.append(\"주스\")\nshopping.append(\"과자\")\nshopping.sort()\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")"')
 WHERE id = 'b1000000-0000-0000-0000-000000000040';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")"'),
+  '{hints,level_3}', '"shopping.append(\"우유\") 처럼 3개를 추가하고, shopping.sort() 로 정렬하세요!"')
+WHERE id = 'b1000000-0000-0000-0000-000000000040';
 
 -- ────────────────────────────────────────────────────────────
 -- 스테이지 6: 함수의 탑
@@ -457,6 +469,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000043';
 
 -- 44: 성적 분석 프로그램
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"def average(a, b, c):\n    return (a + b + c) / 3\n\ndef grade(avg):\n    if avg >= 90:\n        return \"A\"\n    elif avg >= 80:\n        return \"B\"\n    elif avg >= 70:\n        return \"C\"\n    else:\n        return \"D\"\n\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)"')
+WHERE id = 'b1000000-0000-0000-0000-000000000044';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)"'),
+  '{hints,level_3}', '"average는 return (a + b + c) / 3, grade는 if/elif/else로 등급을 return 하세요!"')
 WHERE id = 'b1000000-0000-0000-0000-000000000044';
 
 -- ────────────────────────────────────────────────────────────
