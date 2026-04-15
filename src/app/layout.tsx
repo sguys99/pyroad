@@ -12,7 +12,7 @@ const notoSansKR = Noto_Sans_KR({
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-mono',
+  variable: '--font-jetbrains',
 });
 
 const SITE_URL = 'https://pyroad.vercel.app';
