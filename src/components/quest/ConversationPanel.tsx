@@ -1,11 +1,17 @@
 'use client';
 
 import { memo, useEffect, useRef } from 'react';
-import { BookOpen, KeyRound, Lightbulb, MessageCircle } from 'lucide-react';
+import { BookOpen, Info, KeyRound, Lightbulb, MessageCircle } from 'lucide-react';
 import { m, useReducedMotion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { PromptSkeleton } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
@@ -211,15 +217,33 @@ export function ConversationPanel({
       {/* 힌트 + 황금키 버튼 (하단 고정) */}
       <div className="border-t border-border bg-background px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">
-              힌트: {hintsUsed}/3 사용
-            </span>
-            <span className="text-xs text-amber-600">
-              <KeyRound className="mr-0.5 inline h-3 w-3" />
-              황금키: {goldenKeys}/3
-            </span>
-          </div>
+          <TooltipProvider delay={200}>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                힌트: {3 - hintsUsed}/3
+                <Tooltip>
+                  <TooltipTrigger className="cursor-help">
+                    <Info className="h-3 w-3 text-muted-foreground/60" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>힌트는 퀘스트마다 3개씩 제공됩니다.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </span>
+              <span className="flex items-center gap-1 text-xs text-amber-600">
+                <KeyRound className="h-3 w-3" />
+                황금키: {goldenKeys}/3
+                <Tooltip>
+                  <TooltipTrigger className="cursor-help">
+                    <Info className="h-3 w-3 text-amber-600/60" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>황금키는 스테이지를 완료하면 3개로 보충됩니다.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </span>
+            </div>
+          </TooltipProvider>
           <div className="flex items-center gap-2">
             <m.div
               whileHover={
