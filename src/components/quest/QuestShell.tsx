@@ -276,6 +276,7 @@ export function QuestShell({
         setNextQuestId(completeData.nextQuestId ?? null);
       }
       setIsCompleted(true);
+      setValidationRes({ passed: true, type: quest.validation_type });
 
       // 해설 메시지
       finishStreaming(
@@ -506,14 +507,14 @@ export function QuestShell({
                 다음 퀘스트로
               </Link>
               {' · '}
-              <Link href="/world" className="underline">
+              <a href="/world" className="underline">
                 월드맵으로 돌아가기
-              </Link>
+              </a>
             </>
           ) : (
-            <Link href="/world" className="underline">
+            <a href="/world" className="underline">
               월드맵으로 돌아가기
-            </Link>
+            </a>
           )}
         </div>
       )}
