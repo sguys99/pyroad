@@ -276,6 +276,7 @@ export function QuestShell({
         setNextQuestId(completeData.nextQuestId ?? null);
       }
       setIsCompleted(true);
+      setValidationRes({ passed: true, type: quest.validation_type });
 
       // 해설 메시지
       finishStreaming(
