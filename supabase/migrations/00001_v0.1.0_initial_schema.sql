@@ -382,6 +382,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000033';
 -- 34: 합계 구하기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"total = 0\n\nfor i in range(1, 11):\n    total = total + i\n\nprint(total)"')
 WHERE id = 'b1000000-0000-0000-0000-000000000034';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)"'),
+  '{hints,level_3}', '"for 안의 빈 줄에 total = total + i 를 넣어보세요!"')
+WHERE id = 'b1000000-0000-0000-0000-000000000034';
 
 -- 14: 보물 찾기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"position = 1\n\nwhile position <= 10:\n    if position == 5:\n        print(\"보물 발견!\")\n        break\n    position = position + 1"')
@@ -393,6 +397,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000015';
 
 -- 35: 카운트다운
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"count = 5\n\nwhile count >= 1:\n    print(count)\n    count = count - 1"')
+WHERE id = 'b1000000-0000-0000-0000-000000000035';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! (힌트: count = count - ?)\n    "'),
+  '{hints,level_3}', '"while 안 마지막 빈 줄에 count = count - 1 을 넣어보세요!"')
 WHERE id = 'b1000000-0000-0000-0000-000000000035';
 
 -- 36: 별 피라미드 만들기
@@ -418,6 +426,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000017';
 -- 37: 리스트 순회하기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"colors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    print(color)"')
 WHERE id = 'b1000000-0000-0000-0000-000000000037';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    "'),
+  '{hints,level_3}', '"for 안 빈 줄에 print(color) 를 넣어보세요!"')
+WHERE id = 'b1000000-0000-0000-0000-000000000037';
 
 -- 18: 친구 목록 관리
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"friends = [\"토끼\", \"거북이\", \"다람쥐\"]\nfriends.append(\"파이뱀\")\nprint(len(friends))"')
@@ -429,6 +441,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000038';
 
 -- 39: 리스트 속 검색
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"fruits = [\"사과\", \"바나나\", \"포도\"]\nresult = \"바나나\" in fruits\nprint(result)"')
+WHERE id = 'b1000000-0000-0000-0000-000000000039';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)"'),
+  '{hints,level_3}', '"result = \"바나나\" in fruits 처럼 in 표현을 result에 넣어보세요!"')
 WHERE id = 'b1000000-0000-0000-0000-000000000039';
 
 -- 40: 쇼핑 리스트 정리기
@@ -454,6 +470,10 @@ WHERE id = 'b1000000-0000-0000-0000-000000000020';
 -- 41: 기본값이 있는 함수
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"def greet(name=\"친구\"):\n    print(\"안녕, \" + name + \"!\")\n\ngreet()\ngreet(\"파이뱀\")"')
 WHERE id = 'b1000000-0000-0000-0000-000000000041';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n"'),
+  '{hints,level_3}', '"함수 안에 print(\"안녕, \" + name + \"!\") 를 쓰고, 아래에 greet() 와 greet(\"파이뱀\") 두 줄을 넣어보세요!"')
+WHERE id = 'b1000000-0000-0000-0000-000000000041';
 
 -- 21: 최댓값 찾기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"numbers = [3, 7, 1, 9, 4]\nbiggest = max(numbers)\nprint(biggest)"')
@@ -462,9 +482,17 @@ WHERE id = 'b1000000-0000-0000-0000-000000000021';
 -- 42: 여러 값 돌려주기
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"def min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    return smallest, biggest\n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)"')
 WHERE id = 'b1000000-0000-0000-0000-000000000042';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)"'),
+  '{hints,level_3}', '"함수 안 빈 줄에 return smallest, biggest 를 넣어보세요!"')
+WHERE id = 'b1000000-0000-0000-0000-000000000042';
 
 -- 43: 함수 안의 함수 호출
 UPDATE public.quests SET prompt_skeleton = jsonb_set(prompt_skeleton, '{solution_code}', '"def double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\nresult = add_one(double(3))\nprint(result)"')
+WHERE id = 'b1000000-0000-0000-0000-000000000043';
+UPDATE public.quests SET prompt_skeleton = jsonb_set(
+  jsonb_set(prompt_skeleton, '{starter_code}', '"# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)"'),
+  '{hints,level_3}', '"result = add_one(double(3)) 처럼 함수 안에 함수를 넣어보세요!"')
 WHERE id = 'b1000000-0000-0000-0000-000000000043';
 
 -- 44: 성적 분석 프로그램

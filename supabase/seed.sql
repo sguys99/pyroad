@@ -868,13 +868,13 @@ VALUES (
     "learning_goals": ["누적 변수를 사용하여 값을 더해갈 수 있다", "for 반복문과 누적 변수를 조합할 수 있다"],
     "story_context": "동굴 속 보물 더미! 금화를 하나씩 세어서 총 몇 개인지 합계를 구해봐요!",
     "exercise_description": "1부터 10까지 숫자를 모두 더한 합계를 구하여 출력하세요",
-    "starter_code": "# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    total = total + i\n\nprint(total)",
+    "starter_code": "# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)",
     "expected_output_hint": "55 가 출력되어야 해요 (1+2+3+...+10 = 55)",
     "fallback_text": "total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요.",
     "hints": {
       "level_1": "total이라는 상자에 숫자를 하나씩 더해가면 돼요!",
       "level_2": "total = 0으로 시작하고, total = total + i로 반복할 때마다 더해보세요!",
-      "level_3": "코드를 그대로 실행해보세요! total이 어떻게 변하는지 따라가 보세요."
+      "level_3": "for 안의 빈 줄에 total = total + i 를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -968,13 +968,13 @@ VALUES (
     "learning_goals": ["while 반복문으로 숫자를 줄여가며 반복할 수 있다", "감소하는 반복 패턴을 이해한다"],
     "story_context": "동굴 탈출 카운트다운! 5초 안에 빠져나가야 해요! 5, 4, 3, 2, 1... 탈출!",
     "exercise_description": "while 반복문으로 5부터 1까지 카운트다운을 출력하세요",
-    "starter_code": "# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    count = count - 1",
+    "starter_code": "# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! (힌트: count = count - ?)\n    ",
     "expected_output_hint": "5, 4, 3, 2, 1이 한 줄씩 출력되어야 해요",
     "fallback_text": "count = 5에서 시작해서, 반복할 때마다 count = count - 1로 1씩 줄여가요. count가 0이 되면 멈춰요!",
     "hints": {
       "level_1": "while count >= 1: 은 count가 1 이상인 동안 반복해요. count를 줄여가야 해요!",
       "level_2": "count = count - 1 으로 반복할 때마다 1씩 줄이면 돼요!",
-      "level_3": "코드를 그대로 실행해보세요! count가 어떻게 변하는지 따라가 보세요."
+      "level_3": "while 안 마지막 빈 줄에 count = count - 1 을 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -1109,13 +1109,13 @@ VALUES (
     "learning_goals": ["for 반복문으로 리스트의 각 항목을 하나씩 꺼낼 수 있다", "리스트 순회의 개념을 이해한다"],
     "story_context": "리스트 호수에서 색깔 물고기를 하나씩 잡아보아요! for 반복문으로 모든 물고기를 순서대로 만나봐요!",
     "exercise_description": "colors = [\"빨강\", \"초록\", \"파랑\"] 리스트를 for 반복문으로 순회하며 각 색깔을 출력하세요",
-    "starter_code": "# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    print(color)",
+    "starter_code": "# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    ",
     "expected_output_hint": "빨강, 초록, 파랑이 한 줄씩 출력되어야 해요",
     "fallback_text": "for color in colors: 라고 쓰면 colors 리스트에서 하나씩 꺼내서 color 변수에 넣어줘요! 첫 번째는 빨강, 두 번째는 초록, 세 번째는 파랑이에요.",
     "hints": {
       "level_1": "for 다음에 변수 이름을 쓰고, in 다음에 리스트를 쓰면 하나씩 꺼내줘요!",
       "level_2": "for color in colors: 이렇게 쓰면 color에 빨강, 초록, 파랑이 차례로 들어와요!",
-      "level_3": "코드를 그대로 실행해보세요! 각 색깔이 한 줄씩 출력될 거예요."
+      "level_3": "for 안 빈 줄에 print(color) 를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -1207,13 +1207,13 @@ VALUES (
     "learning_goals": ["in 연산자로 리스트에 특정 값이 있는지 확인할 수 있다", "in의 결과가 True/False임을 이해한다"],
     "story_context": "리스트 호수의 과일 바구니에서 바나나를 찾아봐요! in 마법으로 있는지 확인할 수 있어요!",
     "exercise_description": "fruits 리스트에 \"바나나\"가 있는지 in 연산자로 확인하고 결과를 출력하세요",
-    "starter_code": "# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\nresult = \"바나나\" in fruits\nprint(result)",
+    "starter_code": "# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)",
     "expected_output_hint": "True 가 출력되어야 해요",
     "fallback_text": "in 연산자는 리스트에 값이 있는지 확인해요! \"바나나\" in fruits는 바나나가 fruits에 있으면 True, 없으면 False를 돌려줘요.",
     "hints": {
       "level_1": "in은 \"안에 있는지\" 확인하는 마법이에요! 결과는 True 또는 False예요.",
       "level_2": "\"바나나\" in fruits 이렇게 쓰면 바나나가 리스트에 있는지 확인해요!",
-      "level_3": "코드를 그대로 실행해보세요! 바나나가 리스트에 있으니까 어떤 결과가 나올까요?"
+      "level_3": "result = \"바나나\" in fruits 처럼 in 표현을 result에 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -1344,13 +1344,13 @@ VALUES (
     "learning_goals": ["함수의 매개변수에 기본값을 설정할 수 있다", "기본값이 있으면 인자를 생략할 수 있음을 이해한다"],
     "story_context": "함수의 탑에서 인사 마법을 업그레이드! 이름을 안 말해도 기본 인사를 해줘요!",
     "exercise_description": "def greet(name=\"친구\") 함수를 만들고, greet()과 greet(\"파이뱀\")을 각각 호출하세요",
-    "starter_code": "# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    print(\"안녕, \" + name + \"!\")\n\n# 이름 없이 호출\ngreet()\n# 이름을 넣어서 호출\ngreet(\"파이뱀\")",
+    "starter_code": "# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n",
     "expected_output_hint": "안녕, 친구! 와 안녕, 파이뱀! 이 각각 출력되어야 해요",
     "fallback_text": "매개변수에 = 으로 기본값을 넣으면, 호출할 때 값을 안 넣어도 기본값이 사용돼요! def greet(name=\"친구\"): 에서 greet()은 \"친구\"가, greet(\"파이뱀\")은 \"파이뱀\"이 name에 들어가요.",
     "hints": {
       "level_1": "기본값이 있으면 함수를 호출할 때 값을 안 넣어도 괜찮아요!",
       "level_2": "greet()은 name이 \"친구\"가 되고, greet(\"파이뱀\")은 name이 \"파이뱀\"이 돼요!",
-      "level_3": "코드를 그대로 실행해보세요! 두 번 호출한 결과를 비교해보세요."
+      "level_3": "함수 안에 print(\"안녕, \" + name + \"!\") 를 쓰고, 아래에 greet() 와 greet(\"파이뱀\") 두 줄을 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -1409,13 +1409,13 @@ VALUES (
     "learning_goals": ["함수에서 여러 값을 return할 수 있다", "return된 여러 값을 각각 변수에 받을 수 있다"],
     "story_context": "함수의 탑에서 마법 분석기를 만들어요! 숫자 중 가장 작은 것과 가장 큰 것을 동시에 알려줘요!",
     "exercise_description": "def min_max(a, b, c) 함수를 만들어 가장 작은 값과 가장 큰 값을 return하세요. min_max(1, 9, 5)를 호출하여 결과를 출력!",
-    "starter_code": "# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    return smallest, biggest\n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)",
+    "starter_code": "# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)",
     "expected_output_hint": "1과 9가 각각 한 줄씩 출력되어야 해요",
     "fallback_text": "return 뒤에 쉼표로 여러 값을 쓰면 한 번에 돌려줄 수 있어요! small, big = min_max(1, 9, 5) 이렇게 받으면 돼요.",
     "hints": {
       "level_1": "return 뒤에 쉼표로 두 개의 값을 쓸 수 있어요!",
       "level_2": "return smallest, biggest 이렇게 두 값을 동시에 돌려줘요!",
-      "level_3": "코드를 그대로 실행해보세요! min()과 max()가 어떤 값을 찾는지 확인해보세요."
+      "level_3": "함수 안 빈 줄에 return smallest, biggest 를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
@@ -1442,13 +1442,13 @@ VALUES (
     "learning_goals": ["함수의 return 값을 다른 함수의 인자로 전달할 수 있다", "함수를 조합하여 복잡한 계산을 할 수 있다"],
     "story_context": "함수의 탑에서 마법을 합쳐볼까요? 두 배로 만드는 마법과 하나 더하는 마법을 합치면 어떻게 될까요?",
     "exercise_description": "double(x)은 x를 2배로, add_one(x)은 x에 1을 더하는 함수를 만들고, add_one(double(3))을 호출하세요",
-    "starter_code": "# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용!\nresult = add_one(double(3))\nprint(result)",
+    "starter_code": "# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)",
     "expected_output_hint": "7 이 출력되어야 해요 (3*2=6, 6+1=7)",
     "fallback_text": "double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요.",
     "hints": {
       "level_1": "double(3)은 3을 2배로 만들어요. 그 결과에 add_one을 하면?",
       "level_2": "double(3) = 6이고, add_one(6) = 7이에요!",
-      "level_3": "코드를 그대로 실행해보세요! 안쪽 함수부터 바깥쪽 함수 순서로 실행돼요."
+      "level_3": "result = add_one(double(3)) 처럼 함수 안에 함수를 넣어보세요!"
     }
   }'::jsonb,
   'output_match',
