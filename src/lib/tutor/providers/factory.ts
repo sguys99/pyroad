@@ -18,6 +18,43 @@ export function getAvailableProviders(): LLMProviderType[] {
   );
 }
 
+/**
+ * 서버 키로는 무료 티어 provider만 제공한다.
+ * 유료 provider(Anthropic, OpenAI)는 사용자 본인 키로만 호출한다.
+ */
+export const FREE_TIER_PROVIDER: LLMProviderType = 'gemini';
+
+/** 사용자가 본인 키를 등록한 provider 목록 (알 수 없는 키·빈 값 제외) */
+export function getUserKeyedProviders(customKeys: unknown): LLMProviderType[] {
+  const keys = (customKeys ?? {}) as Record<string, unknown>;
+  return (Object.keys(ENV_KEY_MAP) as LLMProviderType[]).filter(
+    (type) => typeof keys[type] === 'string' && keys[type] !== '',
+  );
+}
+
+/**
+ * 튜터 호출에 사용할 provider와 키를 결정한다.
+ * - 선호 provider에 본인 키가 있으면 그 키로 호출
+ * - 본인 키가 없거나 무료 티어를 선호하면 서버 무료 티어
+ * - 그 외에는 본인 키가 있는 첫 provider
+ */
+export function resolveUserProvider(
+  preferred: string | null | undefined,
+  customKeys: unknown,
+): { providerType: LLMProviderType; customApiKey?: string } {
+  const keys = (customKeys ?? {}) as Record<string, string>;
+  const keyed = getUserKeyedProviders(customKeys);
+  const pref = preferred as LLMProviderType;
+
+  if (keyed.includes(pref)) {
+    return { providerType: pref, customApiKey: keys[pref] };
+  }
+  if (keyed.length === 0 || pref === FREE_TIER_PROVIDER) {
+    return { providerType: FREE_TIER_PROVIDER };
+  }
+  return { providerType: keyed[0], customApiKey: keys[keyed[0]] };
+}
+
 export function createProvider(
   type: LLMProviderType,
   customApiKey?: string,

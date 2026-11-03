@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { isAdminUser } from '@/lib/admin';
 
 export async function PATCH(
   request: Request,
@@ -14,13 +16,15 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (user.email !== process.env.ADMIN_EMAIL) {
+  if (!isAdminUser(user)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
   }
 
   const { noticeId } = await params;
+  // notices 쓰기 RLS 정책이 없으므로 관리자 검증 후 서비스 역할로 처리
+  const admin = createAdminClient();
 
-  const { data: notice } = await supabase
+  const { data: notice } = await admin
     .from('notices')
     .select('id')
     .eq('id', noticeId)
@@ -53,7 +57,7 @@ export async function PATCH(
     updates.content = content;
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('notices')
     .update(updates)
     .eq('id', noticeId);
@@ -78,13 +82,15 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (user.email !== process.env.ADMIN_EMAIL) {
+  if (!isAdminUser(user)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
   }
 
   const { noticeId } = await params;
+  // notices 쓰기 RLS 정책이 없으므로 관리자 검증 후 서비스 역할로 처리
+  const admin = createAdminClient();
 
-  const { data: notice } = await supabase
+  const { data: notice } = await admin
     .from('notices')
     .select('id')
     .eq('id', noticeId)
@@ -94,7 +100,7 @@ export async function DELETE(
     return NextResponse.json({ error: '공지사항을 찾을 수 없습니다.' }, { status: 404 });
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('notices')
     .delete()
     .eq('id', noticeId);

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getAvailableProviders } from '@/lib/tutor/providers/factory';
+import {
+  FREE_TIER_PROVIDER,
+  getAvailableProviders,
+  getUserKeyedProviders,
+  resolveUserProvider,
+} from '@/lib/tutor/providers/factory';
 import type { LLMProviderType } from '@/lib/tutor/providers/types';
 
 const VALID_PROVIDERS: LLMProviderType[] = ['anthropic', 'openai', 'gemini'];
@@ -21,18 +26,20 @@ export async function GET() {
     .eq('id', user.id)
     .single();
 
-  const available = getAvailableProviders();
-
-  // 사용자 커스텀 키가 있는 provider도 available에 포함
-  const customKeys = (profile?.custom_api_keys ?? {}) as Record<string, string>;
-  const customProviders = (Object.keys(customKeys) as LLMProviderType[]).filter(
-    (k) => !!customKeys[k],
+  // 서버 키로는 무료 티어만 제공 → 유료 provider는 본인 키가 있어야 선택 가능
+  const serverProviders = getAvailableProviders().filter(
+    (p) => p === FREE_TIER_PROVIDER,
   );
-  const allAvailable = [...new Set([...available, ...customProviders])];
+  const customProviders = getUserKeyedProviders(profile?.custom_api_keys);
+  const allAvailable = [...new Set([...serverProviders, ...customProviders])];
+  const { providerType } = resolveUserProvider(
+    profile?.preferred_provider,
+    profile?.custom_api_keys,
+  );
 
   return NextResponse.json({
     available_providers: allAvailable,
-    current_provider: profile?.preferred_provider ?? 'gemini',
+    current_provider: providerType,
     has_custom_keys: customProviders,
   });
 }

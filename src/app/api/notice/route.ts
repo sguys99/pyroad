@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { isAdminUser } from '@/lib/admin';
 
 const PAGE_SIZE = 10;
 
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (user.email !== process.env.ADMIN_EMAIL) {
+  if (!isAdminUser(user)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
   }
 
@@ -67,7 +69,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data, error } = await supabase
+  // notices 쓰기 RLS 정책이 없으므로 관리자 검증 후 서비스 역할로 기록
+  const { data, error } = await createAdminClient()
     .from('notices')
     .insert({ user_id: user.id, title, content })
     .select()

@@ -23,49 +23,41 @@ export interface TutorCallResult {
 export async function callTutor(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 500,
-  providerType?: LLMProviderType,
+  maxTokens: number,
+  providerType: LLMProviderType,
   customApiKey?: string,
   fast = false,
-  skipFallbackProviders = false,
+  fallbackProviders: LLMProviderType[] = [],
 ): Promise<TutorCallResult> {
   const available = getAvailableProviders();
-  const primary = providerType && (available.includes(providerType) || customApiKey)
-    ? providerType
-    : available[0];
 
-  if (!primary && !customApiKey) {
-    return { text: '', ok: false };
+  // 본인 키도 서버 키도 없는 provider는 호출하지 않음 (다른 유료 provider로 대체 금지)
+  if (customApiKey || available.includes(providerType)) {
+    const modelOverride = fast ? FAST_MODEL[providerType] : undefined;
+
+    // 1차 시도 + 재시도
+    const result = await attemptWithRetry(
+      providerType,
+      systemPrompt,
+      userPrompt,
+      maxTokens,
+      customApiKey,
+      modelOverride,
+    );
+    if (result.ok) return { ...result, provider_used: providerType, was_fallback: false };
   }
 
-  const modelOverride = fast && primary ? FAST_MODEL[primary] : undefined;
-
-  // 1차 시도 + 재시도
-  const result = await attemptWithRetry(
-    primary!,
-    systemPrompt,
-    userPrompt,
-    maxTokens,
-    customApiKey,
-    modelOverride,
-  );
-  if (result.ok) return { ...result, provider_used: primary!, was_fallback: false };
-
-  // 무료 티어 모드: 다른 provider 시도 없이 바로 rule-based fallback
-  if (!skipFallbackProviders) {
-    // 자동 전환: 다른 가용 provider로 fallback
-    const fallbacks = available.filter((p) => p !== primary);
-    for (const fallback of fallbacks) {
-      const fallbackResult = await attemptOnce(
-        fallback,
-        systemPrompt,
-        userPrompt,
-        maxTokens,
-      );
-      if (fallbackResult.ok) {
-        console.warn(`[tutor] Fell back from ${primary} to ${fallback}`);
-        return { ...fallbackResult, provider_used: fallback, was_fallback: true };
-      }
+  // 허용된 폴백 provider만 서버 키로 시도, 그 외에는 rule-based fallback
+  for (const fallback of fallbackProviders.filter((p) => available.includes(p))) {
+    const fallbackResult = await attemptOnce(
+      fallback,
+      systemPrompt,
+      userPrompt,
+      maxTokens,
+    );
+    if (fallbackResult.ok) {
+      console.warn(`[tutor] Fell back from ${providerType} to ${fallback}`);
+      return { ...fallbackResult, provider_used: fallback, was_fallback: true };
     }
   }
 
@@ -81,58 +73,47 @@ function sseMessage(data: object): Uint8Array {
 export function callTutorStream(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 500,
-  providerType?: LLMProviderType,
+  maxTokens: number,
+  providerType: LLMProviderType,
   customApiKey?: string,
   fast = false,
-  skipFallbackProviders = false,
+  fallbackProviders: LLMProviderType[] = [],
 ): ReadableStream<Uint8Array> {
   const available = getAvailableProviders();
-  const primary = providerType && (available.includes(providerType) || customApiKey)
-    ? providerType
-    : available[0];
-  const modelOverride = fast && primary ? FAST_MODEL[primary] : undefined;
+  // 본인 키도 서버 키도 없는 provider는 호출하지 않음 (다른 유료 provider로 대체 금지)
+  const canCallPrimary = !!customApiKey || available.includes(providerType);
+  const fallbacks = fallbackProviders.filter((p) => available.includes(p));
+  const modelOverride = fast ? FAST_MODEL[providerType] : undefined;
 
   return new ReadableStream({
     async start(controller) {
-      if (!primary && !customApiKey) {
-        controller.enqueue(sseMessage({ error: true }));
-        controller.close();
-        return;
+      // primary provider 스트리밍 시도
+      let success =
+        canCallPrimary &&
+        (await tryStreamProvider(
+          controller,
+          providerType,
+          systemPrompt,
+          userPrompt,
+          maxTokens,
+          customApiKey,
+          modelOverride,
+        ));
+
+      // 허용된 폴백 provider만 서버 키로 시도
+      for (const fallback of fallbacks) {
+        if (success) break;
+        success = await tryStreamProvider(
+          controller,
+          fallback,
+          systemPrompt,
+          userPrompt,
+          maxTokens,
+        );
       }
 
-      // primary provider 스트리밍 시도
-      const success = await tryStreamProvider(
-        controller,
-        primary!,
-        systemPrompt,
-        userPrompt,
-        maxTokens,
-        customApiKey,
-        modelOverride,
-      );
-
       if (!success) {
-        let fallbackSuccess = false;
-
-        // 무료 티어 모드가 아닐 때만 다른 provider 시도
-        if (!skipFallbackProviders) {
-          const fallbacks = available.filter((p) => p !== primary);
-          for (const fallback of fallbacks) {
-            fallbackSuccess = await tryStreamProvider(
-              controller,
-              fallback,
-              systemPrompt,
-              userPrompt,
-              maxTokens,
-            );
-            if (fallbackSuccess) break;
-          }
-        }
-
-        if (!fallbackSuccess) {
-          controller.enqueue(sseMessage({ error: true }));
-        }
+        controller.enqueue(sseMessage({ error: true }));
       }
 
       controller.close();

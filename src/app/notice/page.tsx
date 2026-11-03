@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
+import { isAdminUser } from '@/lib/admin';
 import Link from 'next/link';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { NoticeCard } from '@/components/notice/NoticeCard';
@@ -27,7 +28,7 @@ export default async function NoticePage({
       .range(from, to),
   ]);
 
-  const isAdminUser = user?.email === process.env.ADMIN_EMAIL;
+  const isAdmin = isAdminUser(user);
   const noticeList: Notice[] = notices ?? [];
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
@@ -44,7 +45,7 @@ export default async function NoticePage({
 
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">공지사항</h1>
-        {isAdminUser && (
+        {isAdmin && (
           <Link
             href="/notice/create"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"

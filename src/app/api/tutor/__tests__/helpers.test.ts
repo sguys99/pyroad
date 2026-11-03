@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildFallbackMessage } from '../helpers';
+import { buildFallbackMessage, sanitizeTutorBody } from '../helpers';
 import type { TutorRequest } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
@@ -193,5 +193,60 @@ describe('buildFallbackMessage', () => {
       };
       expect(buildFallbackMessage(body, quest)).toBe('폴백 텍스트입니다.');
     });
+  });
+});
+
+describe('sanitizeTutorBody', () => {
+  it('허용되지 않은 필드(provider 등)를 제거', () => {
+    const body = {
+      type: 'quest_intro',
+      quest_id: 'q',
+      provider: 'anthropic',
+    } as unknown as TutorRequest;
+    expect(sanitizeTutorBody(body)).not.toHaveProperty('provider');
+  });
+
+  it('프롬프트에 들어가는 문자열 길이를 제한', () => {
+    const long = 'a'.repeat(10_000);
+    const result = sanitizeTutorBody({
+      type: 'project_guide',
+      quest_id: 'q',
+      student_code: long,
+      previous_code: long,
+      step_goal: long,
+      execution_result: { stdout: long, stderr: long, passed: true },
+    });
+    expect(result.student_code).toHaveLength(2000);
+    expect(result.previous_code).toHaveLength(2000);
+    expect(result.step_goal).toHaveLength(500);
+    expect(result.execution_result?.stdout).toHaveLength(2000);
+    expect(result.execution_result?.stderr).toHaveLength(2000);
+  });
+
+  it('숫자 필드는 정수로 변환하고 범위를 제한', () => {
+    const result = sanitizeTutorBody({
+      type: 'encouragement',
+      quest_id: 'q',
+      earned_xp: 999_999,
+      hints_used: -3,
+      current_step: 2.7,
+      total_steps: '9'.repeat(5000) as unknown as number,
+    });
+    expect(result.earned_xp).toBe(10_000);
+    expect(result.hints_used).toBe(0);
+    expect(result.current_step).toBe(2);
+    // 무한대·숫자가 아닌 값은 버림 → 프롬프트에서는 기본값 사용
+    expect(result.total_steps).toBeUndefined();
+  });
+
+  it('문자열이 아닌 코드와 boolean이 아닌 passed를 안전하게 처리', () => {
+    const result = sanitizeTutorBody({
+      type: 'code_feedback',
+      quest_id: 'q',
+      student_code: { evil: true } as unknown as string,
+      execution_result: { stdout: '', stderr: '', passed: 'yes' as unknown as boolean },
+    });
+    expect(result.student_code).toBeUndefined();
+    expect(result.execution_result?.passed).toBe(false);
   });
 });
