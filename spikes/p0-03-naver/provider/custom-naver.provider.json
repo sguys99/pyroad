@@ -1,0 +1,13 @@
+{
+  "_comment": "Phase 3 (P3-04) production config. Body for supabase.auth.admin.customProviders.createProvider() or POST /auth/v1/admin/custom-providers (secret/service-role key). client_id/client_secret come from Naver Developers; never commit real values.",
+  "provider_type": "oidc",
+  "identifier": "custom:naver",
+  "name": "네이버",
+  "client_id": "${NAVER_CLIENT_ID}",
+  "client_secret": "${NAVER_CLIENT_SECRET}",
+  "issuer": "https://nid.naver.com",
+  "scopes": ["openid"],
+  "pkce_enabled": true,
+  "email_optional": true,
+  "enabled": true
+}

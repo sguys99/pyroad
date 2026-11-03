@@ -6,3 +6,4 @@
 |---|---|---|---|
 | P0-02 | MCP 연결 | 설정 완료 (인증 대기) | [P0-02-mcp.md](P0-02-mcp.md) |
 | P0-09 | Node Pyodide 정답 자동 검증 | **채택** | [P0-09-solution-check.md](P0-09-solution-check.md) |
+| P0-03 | Naver 로그인 | **채택** (커스텀 OIDC provider, 방식 변경) | [P0-03-naver-login.md](P0-03-naver-login.md) |
