@@ -9,7 +9,6 @@ export interface TutorRequest {
     | 'project_guide'
     | 'stage_summary';
   quest_id: string;
-  provider?: 'anthropic' | 'openai' | 'gemini';
   student_code?: string;
   hint_level?: 1 | 2 | 3;
   execution_result?: {

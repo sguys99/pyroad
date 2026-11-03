@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getAvailableProviders } from '@/lib/tutor/providers/factory';
+import {
+  FREE_TIER_PROVIDER,
+  getAvailableProviders,
+  resolveUserProvider,
+} from '@/lib/tutor/providers/factory';
 import {
   SYSTEM_PROMPT,
   buildQuestIntroPrompt,
@@ -23,6 +27,8 @@ const VALID_TYPES = [
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
+const MAX_OUTPUT_LENGTH = 2000;
+const MAX_STEP_GOAL_LENGTH = 500;
 
 // quest_intro, encouragement는 품질보다 속도 우선 → 경량 모델 사용
 const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
@@ -33,13 +39,48 @@ export const CACHEABLE_TYPES = new Set(['quest_intro', 'encouragement', 'stage_s
 export interface PreparedTutorCall {
   systemPrompt: string;
   userPrompt: string;
-  providerType: LLMProviderType | undefined;
+  providerType: LLMProviderType;
   customApiKey: string | undefined;
   hasAnyKey: boolean;
   fast: boolean;
-  skipFallbackProviders: boolean;
+  fallbackProviders: LLMProviderType[];
   quest: QuestWithStageServer;
   body: TutorRequest;
+}
+
+function truncate(value: unknown, max: number): string | undefined {
+  return typeof value === 'string' ? value.slice(0, max) : undefined;
+}
+
+function toBoundedInt(value: unknown, min: number, max: number): number | undefined {
+  const n = Math.trunc(Number(value));
+  if (value == null || !Number.isFinite(n)) return undefined;
+  return Math.min(max, Math.max(min, n));
+}
+
+/**
+ * 클라이언트 입력은 프롬프트에 그대로 들어가므로 허용된 필드만 남기고
+ * 길이와 범위를 제한한다 (LLM 비용 남용 방지).
+ */
+export function sanitizeTutorBody(body: TutorRequest): TutorRequest {
+  const er = body.execution_result;
+  return {
+    type: body.type,
+    quest_id: String(body.quest_id),
+    hint_level: body.hint_level,
+    student_code: truncate(body.student_code, MAX_CODE_LENGTH),
+    execution_result: er && {
+      stdout: truncate(er.stdout, MAX_OUTPUT_LENGTH) ?? '',
+      stderr: truncate(er.stderr, MAX_OUTPUT_LENGTH) ?? '',
+      passed: er.passed === true,
+    },
+    earned_xp: toBoundedInt(body.earned_xp, 0, 10_000),
+    hints_used: toBoundedInt(body.hints_used, 0, 100),
+    current_step: toBoundedInt(body.current_step, 1, 50),
+    total_steps: toBoundedInt(body.total_steps, 1, 50),
+    previous_code: truncate(body.previous_code, MAX_CODE_LENGTH),
+    step_goal: truncate(body.step_goal, MAX_STEP_GOAL_LENGTH),
+  };
 }
 
 export async function prepareTutorCall(
@@ -90,9 +131,7 @@ export async function prepareTutorCall(
     }
   }
 
-  if (body.student_code && body.student_code.length > MAX_CODE_LENGTH) {
-    body.student_code = body.student_code.slice(0, MAX_CODE_LENGTH);
-  }
+  body = sanitizeTutorBody(body);
 
   // 3. Quest + User Profile 병렬 조회
   const [questResult, userProfileResult] = await Promise.all([
@@ -203,31 +242,17 @@ export async function prepareTutorCall(
     });
   }
 
-  // 6. Provider 결정
-  let providerType: LLMProviderType | undefined = body.provider;
-  let customApiKey: string | undefined;
-  let skipFallbackProviders = false;
-
-  const userKeys = (userProfile?.custom_api_keys ?? {}) as Record<string, string>;
-  const hasCustomKeys = Object.values(userKeys).some((k) => !!k);
-
-  if (!providerType) {
-    if (hasCustomKeys && userProfile?.preferred_provider) {
-      // custom key가 있는 사용자 → 기존 로직 (선호 provider 사용)
-      providerType = userProfile.preferred_provider as LLMProviderType;
-    } else {
-      // custom key 없는 사용자 → Gemini 무료 티어, 유료 provider fallback 차단
-      providerType = 'gemini';
-      skipFallbackProviders = true;
-    }
-  }
-
-  if (hasCustomKeys && providerType) {
-    customApiKey = userKeys[providerType] || undefined;
-  }
+  // 6. Provider 결정 (서버의 유료 키는 사용하지 않음)
+  // - 본인 키가 있는 사용자: 본인 키로 호출, 실패 시 무료 티어로만 폴백
+  // - 그 외: 서버 무료 티어만 사용, 실패 시 rule-based fallback
+  const { providerType, customApiKey } = resolveUserProvider(
+    userProfile?.preferred_provider,
+    userProfile?.custom_api_keys,
+  );
+  const fallbackProviders = customApiKey ? [FREE_TIER_PROVIDER] : [];
 
   const available = getAvailableProviders();
-  const hasAnyKey = available.length > 0 || hasCustomKeys;
+  const hasAnyKey = !!customApiKey || available.includes(FREE_TIER_PROVIDER);
 
   return {
     systemPrompt: SYSTEM_PROMPT,
@@ -236,7 +261,7 @@ export async function prepareTutorCall(
     customApiKey,
     hasAnyKey,
     fast: FAST_TYPES.has(body.type),
-    skipFallbackProviders,
+    fallbackProviders,
     quest: q,
     body,
   };

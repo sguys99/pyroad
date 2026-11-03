@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, skipFallbackProviders, quest, body } = prepared;
+  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, fallbackProviders, quest, body } = prepared;
 
   // 캐시 확인
   const cacheable = CACHEABLE_TYPES.has(body.type);
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const result = await callTutor(systemPrompt, userPrompt, getMaxTokens(body.type, providerType), providerType, customApiKey, fast, skipFallbackProviders);
+  const result = await callTutor(systemPrompt, userPrompt, getMaxTokens(body.type, providerType), providerType, customApiKey, fast, fallbackProviders);
 
   let message: string;
   let isFallback: boolean;
