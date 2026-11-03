@@ -10,7 +10,7 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  { ignores: ['.next/**', 'next-env.d.ts'] },
+  { ignores: ['.next/**', 'next-env.d.ts', 'spikes/**'] },
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   {
     files: ['postcss.config.mjs'],
