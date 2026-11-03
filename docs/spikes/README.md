@@ -16,3 +16,4 @@
 | P0-14 | 한글 웹폰트 로딩 | **채택** (자체 호스팅 + 랜딩 서브셋 + D2Coding) | [P0-14-korean-fonts.md](P0-14-korean-fonts.md) |
 | P0-07 | 마스코트 애니메이션 | **대안** (코드 기반 SVG 리그, Rive·Lottie 미채택) | [P0-07-mascot-animation.md](P0-07-mascot-animation.md) |
 | P0-16 | 저사양 자동 감지 | **채택** (정적 추정 + 실측 프레임으로 내리기만) | [P0-16-low-spec-detection.md](P0-16-low-spec-detection.md) |
+| P0-13 | 성능 기준선 | **채택** (Lighthouse CI·바이트 예산, FPS는 전후 비교용) | [P0-13-perf-baseline.md](P0-13-perf-baseline.md) |

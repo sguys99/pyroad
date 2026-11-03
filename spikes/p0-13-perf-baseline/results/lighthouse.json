@@ -1,0 +1,3749 @@
+{
+  "batches": {
+    "landing:mobile": {
+      "route": "landing",
+      "label": "랜딩 /",
+      "path": "/",
+      "user": null,
+      "ff": "mobile",
+      "quiet": {
+        "load1": 7.77,
+        "load5": 8.83,
+        "load15": 9.29,
+        "port3107Busy": true,
+        "at": "2026-11-03T12:50:02.769Z",
+        "settled": false,
+        "waitedMin": 40.2,
+        "label": "lh landing mobile"
+      },
+      "loadAfter": {
+        "load1": 8.16,
+        "load5": 8.81,
+        "load15": 9.26,
+        "port3107Busy": true,
+        "at": "2026-11-03T12:50:38.149Z"
+      },
+      "median": {
+        "performance": 64,
+        "accessibility": 92,
+        "bestPractices": 100,
+        "seo": 100,
+        "fcp": 1370.3217,
+        "lcp": 5488.867225000002,
+        "tbt": 602.0835999999999,
+        "cls": 0,
+        "si": 3284.9933406942314,
+        "tti": 5561.270715000002,
+        "ttfb": 16,
+        "bootup": 2083.932000000001,
+        "mainthread": 5623.823999999974,
+        "requests": 40,
+        "totalKB": 695.2724609375,
+        "jsKB": 323.57421875,
+        "cssKB": 68.2646484375,
+        "fontKB": 263.484375,
+        "imageKB": 29.580078125,
+        "wasmKB": 0,
+        "benchmarkIndex": 1622
+      },
+      "spread": {
+        "performance": [
+          52,
+          66
+        ],
+        "lcp": [
+          5418.921199999999,
+          5582.828300000001
+        ],
+        "tbt": [
+          509,
+          975.5000000000009
+        ],
+        "cls": [
+          0,
+          0.13855176171933023
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 11550,
+          "load1": 7.77,
+          "cat": {
+            "performance": 52,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 100,
+            "agentic-browsing": 40
+          },
+          "m": {
+            "first-contentful-paint": 1405.88805,
+            "largest-contentful-paint": 5582.828300000001,
+            "total-blocking-time": 975.5000000000009,
+            "cumulative-layout-shift": 0.13855176171933023,
+            "speed-index": 2999.9911483220358,
+            "interactive": 5770.717105,
+            "server-response-time": 24,
+            "bootup-time": 2519.5879999999934,
+            "mainthread-work-breakdown": 7058.31199999995,
+            "total-byte-weight": 711812
+          },
+          "requests": 40,
+          "bytes": {
+            "total": 711812,
+            "js": 331340,
+            "css": 69903,
+            "font": 269808,
+            "image": 30290,
+            "doc": 8526,
+            "other": 1945,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1490,
+          "finalUrl": "http://localhost:3113/"
+        },
+        {
+          "i": 2,
+          "wall": 10016,
+          "load1": 8.26,
+          "cat": {
+            "performance": 64,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 100,
+            "agentic-browsing": 50
+          },
+          "m": {
+            "first-contentful-paint": 1220.3344,
+            "largest-contentful-paint": 5418.921199999999,
+            "total-blocking-time": 602.0835999999999,
+            "cumulative-layout-shift": 0,
+            "speed-index": 3284.9933406942314,
+            "interactive": 5516.412839999999,
+            "server-response-time": 9,
+            "bootup-time": 2083.932000000001,
+            "mainthread-work-breakdown": 5623.823999999974,
+            "total-byte-weight": 711959
+          },
+          "requests": 40,
+          "bytes": {
+            "total": 711959,
+            "js": 331340,
+            "css": 69903,
+            "font": 269808,
+            "image": 30290,
+            "doc": 8526,
+            "other": 2092,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1622,
+          "finalUrl": "http://localhost:3113/",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "largest-contentful-paint",
+                "title": "Largest Contentful Paint",
+                "score": 0.2,
+                "weight": 25,
+                "display": "5.4 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.49,
+                "weight": 30,
+                "display": "600 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "forced-reflow-insight",
+                "title": "강제 실행된 리플로우",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "image-delivery-insight",
+                "title": "이미지 전송 개선",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 17KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 90밀리초",
+                "n": 3,
+                "savingsMs": 100
+              },
+              {
+                "id": "interactive",
+                "title": "Time to Interactive",
+                "score": 0.7,
+                "weight": 0,
+                "display": "5.5 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.09,
+                "weight": 0,
+                "display": "490 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 200
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 113KiB",
+                "n": 2,
+                "savingsMs": 600
+              },
+              {
+                "id": "bootup-time",
+                "title": "자바스크립트 실행 시간 단축",
+                "score": 0,
+                "weight": 0,
+                "display": "2.1 초",
+                "n": 6,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "5.6 초",
+                "n": 7,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 10,
+                "savingsMs": null
+              },
+              {
+                "id": "link-name",
+                "title": "링크에 인식 가능한 이름이 포함되어 있지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": []
+          },
+          "largest": [
+            {
+              "url": "/_next/static/chunks/13ca74a26f37162f.js",
+              "type": "Script",
+              "kb": 78.6,
+              "resKb": 307.3
+            },
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            },
+            {
+              "url": "/_next/static/media/fca78c2ee6cec166-s.p.723fe4f7.woff2",
+              "type": "Font",
+              "kb": 25.5,
+              "resKb": 25.2
+            },
+            {
+              "url": "/_next/static/chunks/add2fe5f713e07df.js",
+              "type": "Script",
+              "kb": 21.8,
+              "resKb": 85.8
+            },
+            {
+              "url": "/_next/static/media/166adff9cb65b3de-s.3c880152.woff2",
+              "type": "Font",
+              "kb": 19.4,
+              "resKb": 19.2
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 711959,
+            "": 0
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 3,
+          "wall": 11039,
+          "load1": 7.91,
+          "cat": {
+            "performance": 66,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 100,
+            "agentic-browsing": 50
+          },
+          "m": {
+            "first-contentful-paint": 1370.3217,
+            "largest-contentful-paint": 5488.867225000002,
+            "total-blocking-time": 509,
+            "cumulative-layout-shift": 0,
+            "speed-index": 3334.80343274779,
+            "interactive": 5561.270715000002,
+            "server-response-time": 16,
+            "bootup-time": 1818.0280000000046,
+            "mainthread-work-breakdown": 5401.543999999976,
+            "total-byte-weight": 711959
+          },
+          "requests": 40,
+          "bytes": {
+            "total": 711959,
+            "js": 331340,
+            "css": 69903,
+            "font": 269808,
+            "image": 30290,
+            "doc": 8526,
+            "other": 2092,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1646.5,
+          "finalUrl": "http://localhost:3113/"
+        }
+      ]
+    },
+    "landing:desktop": {
+      "route": "landing",
+      "label": "랜딩 /",
+      "path": "/",
+      "user": null,
+      "ff": "desktop",
+      "quiet": {
+        "load1": 7.95,
+        "load5": 8.14,
+        "load15": 8.82,
+        "port3107Busy": true,
+        "at": "2026-11-03T12:57:20.632Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh landing desktop"
+      },
+      "loadAfter": {
+        "load1": 8.54,
+        "load5": 8.24,
+        "load15": 8.83,
+        "port3107Busy": true,
+        "at": "2026-11-03T12:57:54.893Z"
+      },
+      "median": {
+        "performance": 95,
+        "accessibility": 96,
+        "bestPractices": 100,
+        "seo": 100,
+        "fcp": 370.4212,
+        "lcp": 1185.27665,
+        "tbt": 29,
+        "cls": 0.10254843888362114,
+        "si": 604.9467443429684,
+        "tti": 1187.27665,
+        "ttfb": 17,
+        "bootup": 507.51400000000024,
+        "mainthread": 1405.1999999999966,
+        "requests": 40,
+        "totalKB": 695.2724609375,
+        "jsKB": 323.57421875,
+        "cssKB": 68.2646484375,
+        "fontKB": 263.484375,
+        "imageKB": 29.580078125,
+        "wasmKB": 0,
+        "benchmarkIndex": 1437.5
+      },
+      "spread": {
+        "performance": [
+          95,
+          95
+        ],
+        "lcp": [
+          1181.9484,
+          1195.0246000000002
+        ],
+        "tbt": [
+          25,
+          58
+        ],
+        "cls": [
+          0.10254843888362114,
+          0.10254843888362114
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 11036,
+          "load1": 7.95,
+          "cat": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100,
+            "seo": 100,
+            "agentic-browsing": 95
+          },
+          "m": {
+            "first-contentful-paint": 353.2219,
+            "largest-contentful-paint": 1185.27665,
+            "total-blocking-time": 29,
+            "cumulative-layout-shift": 0.10254843888362114,
+            "speed-index": 587.2896646288692,
+            "interactive": 1187.27665,
+            "server-response-time": 13,
+            "bootup-time": 507.51400000000024,
+            "mainthread-work-breakdown": 1405.1999999999966,
+            "total-byte-weight": 711959
+          },
+          "requests": 40,
+          "bytes": {
+            "total": 711959,
+            "js": 331340,
+            "css": 69903,
+            "font": 269808,
+            "image": 30290,
+            "doc": 8526,
+            "other": 2092,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1363,
+          "finalUrl": "http://localhost:3113/",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "cumulative-layout-shift",
+                "title": "Cumulative Layout Shift",
+                "score": 0.89,
+                "weight": 25,
+                "display": "0.103",
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "cls-culprits-insight",
+                "title": "레이아웃 변경 원인",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "image-delivery-insight",
+                "title": "이미지 전송 개선",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 16KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 시간: 10밀리초",
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.8,
+                "weight": 0,
+                "display": "160 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 113KiB",
+                "n": 2,
+                "savingsMs": 100
+              },
+              {
+                "id": "layout-shifts",
+                "title": "대규모 레이아웃 변경 피하기",
+                "score": 0,
+                "weight": 0,
+                "display": "레이아웃 변경 2건 발견",
+                "n": 2,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 10,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": []
+          },
+          "largest": [
+            {
+              "url": "/_next/static/chunks/13ca74a26f37162f.js",
+              "type": "Script",
+              "kb": 78.6,
+              "resKb": 307.3
+            },
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            },
+            {
+              "url": "/_next/static/media/fca78c2ee6cec166-s.p.723fe4f7.woff2",
+              "type": "Font",
+              "kb": 25.5,
+              "resKb": 25.2
+            },
+            {
+              "url": "/_next/static/chunks/add2fe5f713e07df.js",
+              "type": "Script",
+              "kb": 21.8,
+              "resKb": 85.8
+            },
+            {
+              "url": "/_next/static/media/166adff9cb65b3de-s.3c880152.woff2",
+              "type": "Font",
+              "kb": 19.4,
+              "resKb": 19.2
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 711959,
+            "": 0
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 2,
+          "wall": 10139,
+          "load1": 8.05,
+          "cat": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100,
+            "seo": 100,
+            "agentic-browsing": 95
+          },
+          "m": {
+            "first-contentful-paint": 370.4212,
+            "largest-contentful-paint": 1181.9484,
+            "total-blocking-time": 25,
+            "cumulative-layout-shift": 0.10254843888362114,
+            "speed-index": 604.9467443429684,
+            "interactive": 1183.9484000000002,
+            "server-response-time": 17,
+            "bootup-time": 466.1559999999993,
+            "mainthread-work-breakdown": 1403.314999999998,
+            "total-byte-weight": 711959
+          },
+          "requests": 40,
+          "bytes": {
+            "total": 711959,
+            "js": 331340,
+            "css": 69903,
+            "font": 269808,
+            "image": 30290,
+            "doc": 8526,
+            "other": 2092,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1569.5,
+          "finalUrl": "http://localhost:3113/"
+        },
+        {
+          "i": 3,
+          "wall": 10284,
+          "load1": 7.82,
+          "cat": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100,
+            "seo": 100,
+            "agentic-browsing": 95
+          },
+          "m": {
+            "first-contentful-paint": 376.7178,
+            "largest-contentful-paint": 1195.0246000000002,
+            "total-blocking-time": 58,
+            "cumulative-layout-shift": 0.10254843888362114,
+            "speed-index": 640.5241833480234,
+            "interactive": 1195.0246000000002,
+            "server-response-time": 18,
+            "bootup-time": 589.7529999999983,
+            "mainthread-work-breakdown": 1572.303999999992,
+            "total-byte-weight": 711959
+          },
+          "requests": 40,
+          "bytes": {
+            "total": 711959,
+            "js": 331340,
+            "css": 69903,
+            "font": 269808,
+            "image": 30290,
+            "doc": 8526,
+            "other": 2092,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1437.5,
+          "finalUrl": "http://localhost:3113/"
+        }
+      ]
+    },
+    "world:mobile": {
+      "route": "world",
+      "label": "월드맵 /world",
+      "path": "/world",
+      "user": "perf",
+      "ff": "mobile",
+      "quiet": {
+        "load1": 6.09,
+        "load5": 7.65,
+        "load15": 8.59,
+        "port3107Busy": true,
+        "at": "2026-11-03T12:58:58.513Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh world mobile"
+      },
+      "loadAfter": {
+        "load1": 7.4,
+        "load5": 7.8,
+        "load15": 8.6,
+        "port3107Busy": true,
+        "at": "2026-11-03T12:59:36.661Z"
+      },
+      "median": {
+        "performance": 80,
+        "accessibility": 92,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 1517.112,
+        "lcp": 1524.372,
+        "tbt": 685.4999999999995,
+        "cls": 0,
+        "si": 2616.418061319391,
+        "tti": 4536.494,
+        "ttfb": 118,
+        "bootup": 1847.367999999999,
+        "mainthread": 6794.5599999999795,
+        "requests": 35,
+        "totalKB": 572.166015625,
+        "jsKB": 254.1220703125,
+        "cssKB": 68.2646484375,
+        "fontKB": 228.95703125,
+        "imageKB": 0,
+        "wasmKB": 0,
+        "benchmarkIndex": 1652
+      },
+      "spread": {
+        "performance": [
+          67,
+          82
+        ],
+        "lcp": [
+          1517.112,
+          4394.9310000000005
+        ],
+        "tbt": [
+          679.0229999999999,
+          800
+        ],
+        "cls": [
+          0,
+          0
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 13003,
+          "load1": 6.09,
+          "cat": {
+            "performance": 67,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 1379.954,
+            "largest-contentful-paint": 4394.9310000000005,
+            "total-blocking-time": 679.0229999999999,
+            "cumulative-layout-shift": 0,
+            "speed-index": 2716.397105080821,
+            "interactive": 4394.9310000000005,
+            "server-response-time": 222,
+            "bootup-time": 1971.2280000000037,
+            "mainthread-work-breakdown": 6794.5599999999795,
+            "total-byte-weight": 585898
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 585898,
+            "js": 260221,
+            "css": 69903,
+            "font": 234452,
+            "image": 0,
+            "doc": 16746,
+            "other": 4576,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1468.5,
+          "finalUrl": "http://localhost:3113/world"
+        },
+        {
+          "i": 2,
+          "wall": 10849,
+          "load1": 7.09,
+          "cat": {
+            "performance": 82,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 1524.372,
+            "largest-contentful-paint": 1524.372,
+            "total-blocking-time": 685.4999999999995,
+            "cumulative-layout-shift": 0,
+            "speed-index": 2587.3178268228885,
+            "interactive": 4536.494,
+            "server-response-time": 104,
+            "bootup-time": 1847.367999999999,
+            "mainthread-work-breakdown": 6807.59599999999,
+            "total-byte-weight": 586059
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 586059,
+            "js": 260221,
+            "css": 69903,
+            "font": 234452,
+            "image": 0,
+            "doc": 16746,
+            "other": 4737,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1762,
+          "finalUrl": "http://localhost:3113/world"
+        },
+        {
+          "i": 3,
+          "wall": 11023,
+          "load1": 7.14,
+          "cat": {
+            "performance": 80,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 1517.112,
+            "largest-contentful-paint": 1517.112,
+            "total-blocking-time": 800,
+            "cumulative-layout-shift": 0,
+            "speed-index": 2616.418061319391,
+            "interactive": 4552.424000000001,
+            "server-response-time": 118,
+            "bootup-time": 1643.7640000000029,
+            "mainthread-work-breakdown": 6105.492,
+            "total-byte-weight": 585898
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 585898,
+            "js": 260221,
+            "css": 69903,
+            "font": 234452,
+            "image": 0,
+            "doc": 16746,
+            "other": 4576,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1652,
+          "finalUrl": "http://localhost:3113/world",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.36,
+                "weight": 30,
+                "display": "800 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 720밀리초",
+                "n": 3,
+                "savingsMs": 700
+              },
+              {
+                "id": "interactive",
+                "title": "Time to Interactive",
+                "score": 0.82,
+                "weight": 0,
+                "display": "4.6 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.08,
+                "weight": 0,
+                "display": "510 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 300
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 60KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "bootup-time",
+                "title": "자바스크립트 실행 시간 단축",
+                "score": 0,
+                "weight": 0,
+                "display": "1.6 초",
+                "n": 5,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "6.1 초",
+                "n": 7,
+                "savingsMs": null
+              },
+              {
+                "id": "bf-cache",
+                "title": "페이지에서 뒤로-앞으로 캐시 복원이 차단됨",
+                "score": 0,
+                "weight": 0,
+                "display": "실패 이유 2개",
+                "n": 2,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 3,
+                "savingsMs": null
+              },
+              {
+                "id": "heading-order",
+                "title": "제목 요소가 내림차순으로 표시되지 않음",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "/_next/static/chunks/a70ac23957cd672b.js",
+              "type": "Script",
+              "kb": 65.7,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            },
+            {
+              "url": "/_next/static/media/fca78c2ee6cec166-s.p.723fe4f7.woff2",
+              "type": "Font",
+              "kb": 25.5,
+              "resKb": 25.2
+            },
+            {
+              "url": "/_next/static/chunks/add2fe5f713e07df.js",
+              "type": "Script",
+              "kb": 21.8,
+              "resKb": 85.8
+            },
+            {
+              "url": "/_next/static/media/166adff9cb65b3de-s.3c880152.woff2",
+              "type": "Font",
+              "kb": 19.4,
+              "resKb": 19.2
+            },
+            {
+              "url": "/_next/static/chunks/bfbd09d2358ee6a5.js",
+              "type": "Script",
+              "kb": 18.7,
+              "resKb": 58.6
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 585898
+          },
+          "lhVersion": "13.6.0"
+        }
+      ]
+    },
+    "world:desktop": {
+      "route": "world",
+      "label": "월드맵 /world",
+      "path": "/world",
+      "user": "perf",
+      "ff": "desktop",
+      "quiet": {
+        "load1": 6.23,
+        "load5": 7.37,
+        "load15": 8.4,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:00:36.963Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh world desktop"
+      },
+      "loadAfter": {
+        "load1": 8.43,
+        "load5": 7.77,
+        "load15": 8.49,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:01:17.063Z"
+      },
+      "median": {
+        "performance": 99,
+        "accessibility": 92,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 381.23199999999997,
+        "lcp": 381.23199999999997,
+        "tbt": 61.000000000000114,
+        "cls": 0,
+        "si": 714.6745413712031,
+        "tti": 921.3420000000003,
+        "ttfb": 147,
+        "bootup": 455.50100000000043,
+        "mainthread": 1614.4599999999903,
+        "requests": 35,
+        "totalKB": 572.3232421875,
+        "jsKB": 254.1220703125,
+        "cssKB": 68.2646484375,
+        "fontKB": 228.95703125,
+        "imageKB": 0,
+        "wasmKB": 0,
+        "benchmarkIndex": 1561
+      },
+      "spread": {
+        "performance": [
+          99,
+          100
+        ],
+        "lcp": [
+          337.104,
+          921.3420000000003
+        ],
+        "tbt": [
+          48,
+          109.00000000000028
+        ],
+        "cls": [
+          0,
+          0
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 12283,
+          "load1": 6.23,
+          "cat": {
+            "performance": 100,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 381.23199999999997,
+            "largest-contentful-paint": 381.23199999999997,
+            "total-blocking-time": 48,
+            "cumulative-layout-shift": 0,
+            "speed-index": 714.6745413712031,
+            "interactive": 820.4639999999999,
+            "server-response-time": 138,
+            "bootup-time": 465.45399999999876,
+            "mainthread-work-breakdown": 1614.4599999999903,
+            "total-byte-weight": 586059
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 586059,
+            "js": 260221,
+            "css": 69903,
+            "font": 234452,
+            "image": 0,
+            "doc": 16746,
+            "other": 4737,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1719,
+          "finalUrl": "http://localhost:3113/world"
+        },
+        {
+          "i": 2,
+          "wall": 11878,
+          "load1": 6.71,
+          "cat": {
+            "performance": 99,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 385.812,
+            "largest-contentful-paint": 921.3420000000003,
+            "total-blocking-time": 61.000000000000114,
+            "cumulative-layout-shift": 0,
+            "speed-index": 706.9970589439433,
+            "interactive": 921.3420000000003,
+            "server-response-time": 161,
+            "bootup-time": 451.3220000000001,
+            "mainthread-work-breakdown": 1623.0119999999893,
+            "total-byte-weight": 586059
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 586059,
+            "js": 260221,
+            "css": 69903,
+            "font": 234452,
+            "image": 0,
+            "doc": 16746,
+            "other": 4737,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1395,
+          "finalUrl": "http://localhost:3113/world",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 160밀리초",
+                "n": 3,
+                "savingsMs": 150
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.85,
+                "weight": 0,
+                "display": "150 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 80KiB",
+                "n": 2,
+                "savingsMs": 50
+              },
+              {
+                "id": "bf-cache",
+                "title": "페이지에서 뒤로-앞으로 캐시 복원이 차단됨",
+                "score": 0,
+                "weight": 0,
+                "display": "실패 이유 2개",
+                "n": 2,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 7,
+                "savingsMs": null
+              },
+              {
+                "id": "heading-order",
+                "title": "제목 요소가 내림차순으로 표시되지 않음",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "/_next/static/chunks/a70ac23957cd672b.js",
+              "type": "Script",
+              "kb": 65.7,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            },
+            {
+              "url": "/_next/static/media/fca78c2ee6cec166-s.p.723fe4f7.woff2",
+              "type": "Font",
+              "kb": 25.5,
+              "resKb": 25.2
+            },
+            {
+              "url": "/_next/static/chunks/add2fe5f713e07df.js",
+              "type": "Script",
+              "kb": 21.8,
+              "resKb": 85.8
+            },
+            {
+              "url": "/_next/static/media/166adff9cb65b3de-s.3c880152.woff2",
+              "type": "Font",
+              "kb": 19.4,
+              "resKb": 19.2
+            },
+            {
+              "url": "/_next/static/chunks/bfbd09d2358ee6a5.js",
+              "type": "Script",
+              "kb": 18.7,
+              "resKb": 58.6
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 586059
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 3,
+          "wall": 12211,
+          "load1": 7.19,
+          "cat": {
+            "performance": 99,
+            "accessibility": 92,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 337.104,
+            "largest-contentful-paint": 337.104,
+            "total-blocking-time": 109.00000000000028,
+            "cumulative-layout-shift": 0,
+            "speed-index": 733.9549733654997,
+            "interactive": 958.9080000000004,
+            "server-response-time": 147,
+            "bootup-time": 455.50100000000043,
+            "mainthread-work-breakdown": 1583.9499999999925,
+            "total-byte-weight": 585898
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 585898,
+            "js": 260221,
+            "css": 69903,
+            "font": 234452,
+            "image": 0,
+            "doc": 16746,
+            "other": 4576,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1561,
+          "finalUrl": "http://localhost:3113/world"
+        }
+      ]
+    },
+    "quest1:mobile": {
+      "route": "quest1",
+      "label": "첫 퀘스트 1-1 (첫 방문)",
+      "path": "/quest/b1000000-0000-0000-0000-000000000001",
+      "user": "newbie",
+      "ff": "mobile",
+      "quiet": {
+        "load1": 10.09,
+        "load5": 8.26,
+        "load15": 8.61,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:02:17.393Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh quest1 mobile"
+      },
+      "loadAfter": {
+        "load1": 11.9,
+        "load5": 9.06,
+        "load15": 8.87,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:03:01.827Z"
+      },
+      "median": {
+        "performance": 46,
+        "accessibility": 88,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 1374.365,
+        "lcp": 7323.256,
+        "tbt": 2437.0000000000014,
+        "cls": 0.06957475613771151,
+        "si": 2293.1039955559672,
+        "tti": 7576.259000000002,
+        "ttfb": 187,
+        "bootup": 3920.8839999999454,
+        "mainthread": 7046.019999999905,
+        "requests": 48,
+        "totalKB": 6305.2275390625,
+        "jsKB": 503.3837890625,
+        "cssKB": 68.2646484375,
+        "fontKB": 263.89453125,
+        "imageKB": 0,
+        "wasmKB": 5183.7392578125,
+        "benchmarkIndex": 1388.5
+      },
+      "spread": {
+        "performance": [
+          46,
+          47
+        ],
+        "lcp": [
+          7006.507500000001,
+          7837.459999999998
+        ],
+        "tbt": [
+          2049.5000000000005,
+          3454.5000000000014
+        ],
+        "cls": [
+          0.06957475613771151,
+          0.06957475613771151
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 16974,
+          "load1": 10.09,
+          "cat": {
+            "performance": 46,
+            "accessibility": 88,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 48
+          },
+          "m": {
+            "first-contentful-paint": 1385.403,
+            "largest-contentful-paint": 7006.507500000001,
+            "total-blocking-time": 3454.5000000000014,
+            "cumulative-layout-shift": 0.06957475613771151,
+            "speed-index": 2293.1039955559672,
+            "interactive": 7576.259000000002,
+            "server-response-time": 247,
+            "bootup-time": 5109.007999999965,
+            "mainthread-work-breakdown": 9791.775999999914,
+            "total-byte-weight": 6456553
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6456553,
+            "js": 515465,
+            "css": 69903,
+            "font": 270228,
+            "image": 0,
+            "doc": 11054,
+            "other": 281754,
+            "wasm": 5308149
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1191.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000001",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "largest-contentful-paint",
+                "title": "Largest Contentful Paint",
+                "score": 0.06,
+                "weight": 25,
+                "display": "7.0 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.02,
+                "weight": 30,
+                "display": "3,450 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "forced-reflow-insight",
+                "title": "강제 실행된 리플로우",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 680밀리초",
+                "n": 3,
+                "savingsMs": 700
+              },
+              {
+                "id": "interactive",
+                "title": "Time to Interactive",
+                "score": 0.47,
+                "weight": 0,
+                "display": "7.6 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0,
+                "weight": 0,
+                "display": "910 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 150
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 182KiB",
+                "n": 2,
+                "savingsMs": 900
+              },
+              {
+                "id": "total-byte-weight",
+                "title": "네트워크 페이로드가 커지지 않도록 관리하기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "총 크기: 6,305KiB",
+                "n": 10,
+                "savingsMs": null
+              },
+              {
+                "id": "bootup-time",
+                "title": "자바스크립트 실행 시간 단축",
+                "score": 0,
+                "weight": 0,
+                "display": "5.1 초",
+                "n": 8,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "9.8 초",
+                "n": 7,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "button-name",
+                "title": "버튼에 접근 가능한 이름이 없습니다",
+                "score": 0,
+                "weight": 10,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 7,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.wasm",
+              "type": "Fetch",
+              "kb": 2914,
+              "resKb": 9633.3
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/python_stdlib.zip",
+              "type": "Fetch",
+              "kb": 2269.7,
+              "resKb": 2303.6
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.js",
+              "type": "Other",
+              "kb": 239.7,
+              "resKb": 1224.4
+            },
+            {
+              "url": "/_next/static/chunks/632383b0257e9034.js",
+              "type": "Script",
+              "kb": 230,
+              "resKb": 720.6
+            },
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 870759,
+            "cdn.jsdelivr.net": 5585319,
+            "127.0.0.1:54721": 475
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 2,
+          "wall": 11783,
+          "load1": 12.19,
+          "cat": {
+            "performance": 47,
+            "accessibility": 88,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 48
+          },
+          "m": {
+            "first-contentful-paint": 1374.064,
+            "largest-contentful-paint": 7323.256,
+            "total-blocking-time": 2049.5000000000005,
+            "cumulative-layout-shift": 0.06957475613771151,
+            "speed-index": 2315.1108677282027,
+            "interactive": 7422.124,
+            "server-response-time": 161,
+            "bootup-time": 3168.935999999963,
+            "mainthread-work-breakdown": 6207.835999999919,
+            "total-byte-weight": 6470307
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6470307,
+            "js": 515465,
+            "css": 69903,
+            "font": 270228,
+            "image": 0,
+            "doc": 11054,
+            "other": 281704,
+            "wasm": 5321953
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1443.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000001"
+        },
+        {
+          "i": 3,
+          "wall": 11235,
+          "load1": 12.39,
+          "cat": {
+            "performance": 46,
+            "accessibility": 88,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 48
+          },
+          "m": {
+            "first-contentful-paint": 1374.365,
+            "largest-contentful-paint": 7837.459999999998,
+            "total-blocking-time": 2437.0000000000014,
+            "cumulative-layout-shift": 0.06957475613771151,
+            "speed-index": 2190.990683991339,
+            "interactive": 8106.6275000000005,
+            "server-response-time": 187,
+            "bootup-time": 3920.8839999999454,
+            "mainthread-work-breakdown": 7046.019999999905,
+            "total-byte-weight": 6343825
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6343825,
+            "js": 515465,
+            "css": 69903,
+            "font": 270228,
+            "image": 0,
+            "doc": 11054,
+            "other": 281720,
+            "wasm": 5195455
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1388.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000001"
+        }
+      ]
+    },
+    "quest1:desktop": {
+      "route": "quest1",
+      "label": "첫 퀘스트 1-1 (첫 방문)",
+      "path": "/quest/b1000000-0000-0000-0000-000000000001",
+      "user": "newbie",
+      "ff": "desktop",
+      "quiet": {
+        "load1": 7.86,
+        "load5": 8.58,
+        "load15": 8.72,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:04:02.126Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh quest1 desktop"
+      },
+      "loadAfter": {
+        "load1": 12.25,
+        "load5": 9.74,
+        "load15": 9.12,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:04:48.101Z"
+      },
+      "median": {
+        "performance": 77,
+        "accessibility": 84,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 349.453,
+        "lcp": 1592.1640000000002,
+        "tbt": 381.0000000000001,
+        "cls": 0.06061521057700728,
+        "si": 833.6056153183077,
+        "tti": 1654.7284250000002,
+        "ttfb": 196,
+        "bootup": 1045.955999999989,
+        "mainthread": 2252.033999999974,
+        "requests": 48,
+        "totalKB": 6318.619140625,
+        "jsKB": 503.3837890625,
+        "cssKB": 68.2646484375,
+        "fontKB": 263.89453125,
+        "imageKB": 0,
+        "wasmKB": 5197.130859375,
+        "benchmarkIndex": 1288.5
+      },
+      "spread": {
+        "performance": [
+          76,
+          82
+        ],
+        "lcp": [
+          1575.6074999999998,
+          1665.812
+        ],
+        "tbt": [
+          287,
+          387
+        ],
+        "cls": [
+          0.06061521057700728,
+          0.06061521057700728
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 12918,
+          "load1": 7.86,
+          "cat": {
+            "performance": 76,
+            "accessibility": 84,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 349.453,
+            "largest-contentful-paint": 1665.812,
+            "total-blocking-time": 381.0000000000001,
+            "cumulative-layout-shift": 0.06061521057700728,
+            "speed-index": 844.8239052507143,
+            "interactive": 1665.812,
+            "server-response-time": 196,
+            "bootup-time": 1045.955999999989,
+            "mainthread-work-breakdown": 2220.481999999978,
+            "total-byte-weight": 6470061
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6470061,
+            "js": 515465,
+            "css": 69903,
+            "font": 270228,
+            "image": 0,
+            "doc": 11054,
+            "other": 281702,
+            "wasm": 5321709
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1288.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000001"
+        },
+        {
+          "i": 2,
+          "wall": 16390,
+          "load1": 8.97,
+          "cat": {
+            "performance": 77,
+            "accessibility": 84,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 348.291,
+            "largest-contentful-paint": 1592.1640000000002,
+            "total-blocking-time": 387,
+            "cumulative-layout-shift": 0.06061521057700728,
+            "speed-index": 758.3029511536606,
+            "interactive": 1654.7284250000002,
+            "server-response-time": 131,
+            "bootup-time": 1160.3139999999876,
+            "mainthread-work-breakdown": 2436.555999999977,
+            "total-byte-weight": 6470266
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6470266,
+            "js": 515465,
+            "css": 69903,
+            "font": 270228,
+            "image": 0,
+            "doc": 11054,
+            "other": 281754,
+            "wasm": 5321862
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1470.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000001",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "largest-contentful-paint",
+                "title": "Largest Contentful Paint",
+                "score": 0.77,
+                "weight": 25,
+                "display": "1.6 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.43,
+                "weight": 30,
+                "display": "390 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "forced-reflow-insight",
+                "title": "강제 실행된 리플로우",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 160밀리초",
+                "n": 3,
+                "savingsMs": 150
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.54,
+                "weight": 0,
+                "display": "240 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 50
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 176KiB",
+                "n": 2,
+                "savingsMs": 100
+              },
+              {
+                "id": "total-byte-weight",
+                "title": "네트워크 페이로드가 커지지 않도록 관리하기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "총 크기: 6,319KiB",
+                "n": 10,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "2.4 초",
+                "n": 7,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "aria-input-field-name",
+                "title": "ARIA 입력란에 접근 가능한 이름이 없음",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "button-name",
+                "title": "버튼에 접근 가능한 이름이 없습니다",
+                "score": 0,
+                "weight": 10,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 6,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.wasm",
+              "type": "Fetch",
+              "kb": 2927.4,
+              "resKb": 9866.5
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/python_stdlib.zip",
+              "type": "Fetch",
+              "kb": 2269.8,
+              "resKb": 2303.6
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.js",
+              "type": "Other",
+              "kb": 239.7,
+              "resKb": 1224.4
+            },
+            {
+              "url": "/_next/static/chunks/632383b0257e9034.js",
+              "type": "Script",
+              "kb": 230,
+              "resKb": 720.6
+            },
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 870759,
+            "cdn.jsdelivr.net": 5599032,
+            "127.0.0.1:54721": 475
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 3,
+          "wall": 12354,
+          "load1": 13.47,
+          "cat": {
+            "performance": 82,
+            "accessibility": 84,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 364.745,
+            "largest-contentful-paint": 1575.6074999999998,
+            "total-blocking-time": 287,
+            "cumulative-layout-shift": 0.06061521057700728,
+            "speed-index": 833.6056153183077,
+            "interactive": 1575.6075,
+            "server-response-time": 199,
+            "bootup-time": 1033.0939999999864,
+            "mainthread-work-breakdown": 2252.033999999974,
+            "total-byte-weight": 6470380
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6470380,
+            "js": 515465,
+            "css": 69903,
+            "font": 270228,
+            "image": 0,
+            "doc": 11054,
+            "other": 281699,
+            "wasm": 5322031
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1228,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000001"
+        }
+      ]
+    },
+    "project:mobile": {
+      "route": "project",
+      "label": "프로젝트 퀘스트 7-1",
+      "path": "/quest/b1000000-0000-0000-0000-000000000022",
+      "user": "perf",
+      "ff": "mobile",
+      "quiet": {
+        "load1": 9.54,
+        "load5": 9.42,
+        "load15": 9.04,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:05:48.476Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh project mobile"
+      },
+      "loadAfter": {
+        "load1": 10.59,
+        "load5": 9.8,
+        "load15": 9.19,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:06:32.118Z"
+      },
+      "median": {
+        "performance": 45,
+        "accessibility": 88,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 1372.241,
+        "lcp": 7882.669999999998,
+        "tbt": 2539.644,
+        "cls": 0.06254199708479424,
+        "si": 3472.3952495301523,
+        "tti": 7980.952199999998,
+        "ttfb": 156,
+        "bootup": 4770.655999999948,
+        "mainthread": 10184.083999999904,
+        "requests": 48,
+        "totalKB": 6325.03125,
+        "jsKB": 503.3837890625,
+        "cssKB": 68.2646484375,
+        "fontKB": 269.4609375,
+        "imageKB": 0,
+        "wasmKB": 5197.0537109375,
+        "benchmarkIndex": 1336.5
+      },
+      "spread": {
+        "performance": [
+          44,
+          46
+        ],
+        "lcp": [
+          7623.676250000001,
+          8040.4037499999995
+        ],
+        "tbt": [
+          2217,
+          2815.9999999999995
+        ],
+        "cls": [
+          0.06254199708479424,
+          0.06254199708479424
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 14358,
+          "load1": 9.54,
+          "cat": {
+            "performance": 44,
+            "accessibility": 88,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 1372.241,
+            "largest-contentful-paint": 8040.4037499999995,
+            "total-blocking-time": 2815.9999999999995,
+            "cumulative-layout-shift": 0.06254199708479424,
+            "speed-index": 3457.0280524128725,
+            "interactive": 8217.9935,
+            "server-response-time": 124,
+            "bootup-time": 5236.015999999934,
+            "mainthread-work-breakdown": 11171.011999999899,
+            "total-byte-weight": 5987672
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 5987672,
+            "js": 515465,
+            "css": 69903,
+            "font": 275928,
+            "image": 0,
+            "doc": 11876,
+            "other": 281755,
+            "wasm": 4832745
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1336.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000022"
+        },
+        {
+          "i": 2,
+          "wall": 12846,
+          "load1": 11.44,
+          "cat": {
+            "performance": 46,
+            "accessibility": 88,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 1219.647,
+            "largest-contentful-paint": 7623.676250000001,
+            "total-blocking-time": 2217,
+            "cumulative-layout-shift": 0.06254199708479424,
+            "speed-index": 3472.3952495301523,
+            "interactive": 7714.185075000001,
+            "server-response-time": 156,
+            "bootup-time": 4467.2799999999415,
+            "mainthread-work-breakdown": 9645.067999999916,
+            "total-byte-weight": 6476998
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6476998,
+            "js": 515465,
+            "css": 69903,
+            "font": 275928,
+            "image": 0,
+            "doc": 12021,
+            "other": 281722,
+            "wasm": 5321959
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1306,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000022"
+        },
+        {
+          "i": 3,
+          "wall": 12863,
+          "load1": 11.47,
+          "cat": {
+            "performance": 45,
+            "accessibility": 88,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 1376.712,
+            "largest-contentful-paint": 7882.669999999998,
+            "total-blocking-time": 2539.644,
+            "cumulative-layout-shift": 0.06254199708479424,
+            "speed-index": 3663.1093482481165,
+            "interactive": 7980.952199999998,
+            "server-response-time": 206,
+            "bootup-time": 4770.655999999948,
+            "mainthread-work-breakdown": 10184.083999999904,
+            "total-byte-weight": 6476832
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6476832,
+            "js": 515465,
+            "css": 69903,
+            "font": 275928,
+            "image": 0,
+            "doc": 12021,
+            "other": 281732,
+            "wasm": 5321783
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1376.5,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000022",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "largest-contentful-paint",
+                "title": "Largest Contentful Paint",
+                "score": 0.03,
+                "weight": 25,
+                "display": "7.9 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.04,
+                "weight": 30,
+                "display": "2,540 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "speed-index",
+                "title": "Speed Index",
+                "score": 0.86,
+                "weight": 10,
+                "display": "3.7 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "forced-reflow-insight",
+                "title": "강제 실행된 리플로우",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 150
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 700밀리초",
+                "n": 3,
+                "savingsMs": 700
+              },
+              {
+                "id": "interactive",
+                "title": "Time to Interactive",
+                "score": 0.43,
+                "weight": 0,
+                "display": "8.0 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0,
+                "weight": 0,
+                "display": "940 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 300
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 182KiB",
+                "n": 2,
+                "savingsMs": 1050
+              },
+              {
+                "id": "total-byte-weight",
+                "title": "네트워크 페이로드가 커지지 않도록 관리하기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "총 크기: 6,325KiB",
+                "n": 10,
+                "savingsMs": null
+              },
+              {
+                "id": "bootup-time",
+                "title": "자바스크립트 실행 시간 단축",
+                "score": 0,
+                "weight": 0,
+                "display": "4.8 초",
+                "n": 7,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "10.2 초",
+                "n": 7,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "button-name",
+                "title": "버튼에 접근 가능한 이름이 없습니다",
+                "score": 0,
+                "weight": 10,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 8,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.wasm",
+              "type": "Fetch",
+              "kb": 2927.3,
+              "resKb": 9866.5
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/python_stdlib.zip",
+              "type": "Fetch",
+              "kb": 2269.7,
+              "resKb": 2303.6
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.js",
+              "type": "Other",
+              "kb": 239.7,
+              "resKb": 1224.4
+            },
+            {
+              "url": "/_next/static/chunks/632383b0257e9034.js",
+              "type": "Script",
+              "kb": 230,
+              "resKb": 720.6
+            },
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 877426,
+            "cdn.jsdelivr.net": 5598931,
+            "127.0.0.1:54721": 475
+          },
+          "lhVersion": "13.6.0"
+        }
+      ]
+    },
+    "project:desktop": {
+      "route": "project",
+      "label": "프로젝트 퀘스트 7-1",
+      "path": "/quest/b1000000-0000-0000-0000-000000000022",
+      "user": "perf",
+      "ff": "desktop",
+      "quiet": {
+        "load1": 9.23,
+        "load5": 9.4,
+        "load15": 9.08,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:07:32.396Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh project desktop"
+      },
+      "loadAfter": {
+        "load1": 9.81,
+        "load5": 9.56,
+        "load15": 9.15,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:08:13.118Z"
+      },
+      "median": {
+        "performance": 83,
+        "accessibility": 84,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 343.597,
+        "lcp": 1565.3880000000001,
+        "tbt": 273,
+        "cls": 0.05715031659516097,
+        "si": 942.328058715027,
+        "tti": 1565.3880000000004,
+        "ttfb": 156,
+        "bootup": 1034.976999999987,
+        "mainthread": 2249.750999999979,
+        "requests": 48,
+        "totalKB": 6152.18359375,
+        "jsKB": 503.3837890625,
+        "cssKB": 68.2646484375,
+        "fontKB": 269.4609375,
+        "imageKB": 0,
+        "wasmKB": 5024.2333984375,
+        "benchmarkIndex": 1584
+      },
+      "spread": {
+        "performance": [
+          81,
+          85
+        ],
+        "lcp": [
+          1536.6462500000002,
+          1603.14875
+        ],
+        "tbt": [
+          243,
+          299
+        ],
+        "cls": [
+          0.05715031659516097,
+          0.05715031659516097
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 12640,
+          "load1": 9.23,
+          "cat": {
+            "performance": 85,
+            "accessibility": 84,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 343.597,
+            "largest-contentful-paint": 1565.3880000000001,
+            "total-blocking-time": 243,
+            "cumulative-layout-shift": 0.05715031659516097,
+            "speed-index": 914.6664809873137,
+            "interactive": 1565.3880000000004,
+            "server-response-time": 156,
+            "bootup-time": 887.9199999999877,
+            "mainthread-work-breakdown": 2016.703999999975,
+            "total-byte-weight": 6299836
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6299836,
+            "js": 515465,
+            "css": 69903,
+            "font": 275928,
+            "image": 0,
+            "doc": 12021,
+            "other": 281704,
+            "wasm": 5144815
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1691,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000022"
+        },
+        {
+          "i": 2,
+          "wall": 12453,
+          "load1": 10.55,
+          "cat": {
+            "performance": 81,
+            "accessibility": 84,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 348.973,
+            "largest-contentful-paint": 1603.14875,
+            "total-blocking-time": 299,
+            "cumulative-layout-shift": 0.05715031659516097,
+            "speed-index": 959.9108598040011,
+            "interactive": 1604.0744250000002,
+            "server-response-time": 146,
+            "bootup-time": 1057.7909999999815,
+            "mainthread-work-breakdown": 2292.763999999966,
+            "total-byte-weight": 6130648
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6130648,
+            "js": 515465,
+            "css": 69903,
+            "font": 275928,
+            "image": 0,
+            "doc": 12021,
+            "other": 281702,
+            "wasm": 4975629
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1584,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000022"
+        },
+        {
+          "i": 3,
+          "wall": 12243,
+          "load1": 9.6,
+          "cat": {
+            "performance": 83,
+            "accessibility": 84,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 49
+          },
+          "m": {
+            "first-contentful-paint": 314.039,
+            "largest-contentful-paint": 1536.6462500000002,
+            "total-blocking-time": 273,
+            "cumulative-layout-shift": 0.05715031659516097,
+            "speed-index": 942.328058715027,
+            "interactive": 1537.2952750000002,
+            "server-response-time": 205,
+            "bootup-time": 1034.976999999987,
+            "mainthread-work-breakdown": 2249.750999999979,
+            "total-byte-weight": 6477002
+          },
+          "requests": 48,
+          "bytes": {
+            "total": 6477002,
+            "js": 515465,
+            "css": 69903,
+            "font": 275928,
+            "image": 0,
+            "doc": 12021,
+            "other": 281713,
+            "wasm": 5321972
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1533,
+          "finalUrl": "http://localhost:3113/quest/b1000000-0000-0000-0000-000000000022",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "largest-contentful-paint",
+                "title": "Largest Contentful Paint",
+                "score": 0.79,
+                "weight": 25,
+                "display": "1.5 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.64,
+                "weight": 30,
+                "display": "270 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "forced-reflow-insight",
+                "title": "강제 실행된 리플로우",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 50
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 120밀리초",
+                "n": 3,
+                "savingsMs": 100
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.55,
+                "weight": 0,
+                "display": "230 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 50
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 176KiB",
+                "n": 2,
+                "savingsMs": 100
+              },
+              {
+                "id": "total-byte-weight",
+                "title": "네트워크 페이로드가 커지지 않도록 관리하기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "총 크기: 6,325KiB",
+                "n": 10,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "2.2 초",
+                "n": 7,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "aria-input-field-name",
+                "title": "ARIA 입력란에 접근 가능한 이름이 없음",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "button-name",
+                "title": "버튼에 접근 가능한 이름이 없습니다",
+                "score": 0,
+                "weight": 10,
+                "display": null,
+                "n": 2,
+                "savingsMs": null
+              },
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 8,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.wasm",
+              "type": "Fetch",
+              "kb": 2927.4,
+              "resKb": 9866.5
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/python_stdlib.zip",
+              "type": "Fetch",
+              "kb": 2269.8,
+              "resKb": 2303.6
+            },
+            {
+              "url": "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.asm.js",
+              "type": "Other",
+              "kb": 239.7,
+              "resKb": 1224.4
+            },
+            {
+              "url": "/_next/static/chunks/632383b0257e9034.js",
+              "type": "Script",
+              "kb": 230,
+              "resKb": 720.6
+            },
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 877426,
+            "cdn.jsdelivr.net": 5599101,
+            "127.0.0.1:54721": 475
+          },
+          "lhVersion": "13.6.0"
+        }
+      ]
+    },
+    "profile:mobile": {
+      "route": "profile",
+      "label": "프로필 /profile",
+      "path": "/profile",
+      "user": "perf",
+      "ff": "mobile",
+      "quiet": {
+        "load1": 6.35,
+        "load5": 8.61,
+        "load15": 8.85,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:09:13.432Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh profile mobile"
+      },
+      "loadAfter": {
+        "load1": 7.35,
+        "load5": 8.69,
+        "load15": 8.87,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:09:48.839Z"
+      },
+      "median": {
+        "performance": 85,
+        "accessibility": 94,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 1364.626,
+        "lcp": 1364.626,
+        "tbt": 583.5,
+        "cls": 0,
+        "si": 1977.1825889145803,
+        "tti": 4217.209999999999,
+        "ttfb": 158,
+        "bootup": 1567.2920000000054,
+        "mainthread": 4029.5599999999795,
+        "requests": 35,
+        "totalKB": 620.255859375,
+        "jsKB": 268.85546875,
+        "cssKB": 68.2646484375,
+        "fontKB": 269.41796875,
+        "imageKB": 0,
+        "wasmKB": 0,
+        "benchmarkIndex": 1643
+      },
+      "spread": {
+        "performance": [
+          78,
+          86
+        ],
+        "lcp": [
+          1363.48,
+          1372.136
+        ],
+        "tbt": [
+          544,
+          960.9999999999982
+        ],
+        "cls": [
+          0,
+          0
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 10895,
+          "load1": 6.35,
+          "cat": {
+            "performance": 86,
+            "accessibility": 94,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 1364.626,
+            "largest-contentful-paint": 1364.626,
+            "total-blocking-time": 544,
+            "cumulative-layout-shift": 0,
+            "speed-index": 1977.1825889145803,
+            "interactive": 4153.052000000001,
+            "server-response-time": 169,
+            "bootup-time": 1459.3600000000029,
+            "mainthread-work-breakdown": 3997.687999999989,
+            "total-byte-weight": 635142
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 635142,
+            "js": 275308,
+            "css": 69903,
+            "font": 275884,
+            "image": 0,
+            "doc": 13070,
+            "other": 977,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1848.5,
+          "finalUrl": "http://localhost:3113/profile"
+        },
+        {
+          "i": 2,
+          "wall": 10252,
+          "load1": 8.46,
+          "cat": {
+            "performance": 85,
+            "accessibility": 94,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 1363.48,
+            "largest-contentful-paint": 1363.48,
+            "total-blocking-time": 583.5,
+            "cumulative-layout-shift": 0,
+            "speed-index": 1946.2761497005977,
+            "interactive": 4217.209999999999,
+            "server-response-time": 158,
+            "bootup-time": 1567.2920000000054,
+            "mainthread-work-breakdown": 4029.5599999999795,
+            "total-byte-weight": 635142
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 635142,
+            "js": 275308,
+            "css": 69903,
+            "font": 275884,
+            "image": 0,
+            "doc": 13070,
+            "other": 977,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1643,
+          "finalUrl": "http://localhost:3113/profile",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "total-blocking-time",
+                "title": "Total Blocking Time",
+                "score": 0.51,
+                "weight": 30,
+                "display": "580 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 710밀리초",
+                "n": 3,
+                "savingsMs": 700
+              },
+              {
+                "id": "interactive",
+                "title": "Time to Interactive",
+                "score": 0.85,
+                "weight": 0,
+                "display": "4.2 초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "max-potential-fid",
+                "title": "최대 첫 입력 지연 예상 시간",
+                "score": 0.52,
+                "weight": 0,
+                "display": "240 밀리초",
+                "n": null,
+                "savingsMs": null
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 300
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 60KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "bootup-time",
+                "title": "자바스크립트 실행 시간 단축",
+                "score": 0,
+                "weight": 0,
+                "display": "1.6 초",
+                "n": 5,
+                "savingsMs": null
+              },
+              {
+                "id": "mainthread-work-breakdown",
+                "title": "기본 스레드 작업 최소화하기",
+                "score": 0,
+                "weight": 0,
+                "display": "4.0 초",
+                "n": 7,
+                "savingsMs": null
+              },
+              {
+                "id": "bf-cache",
+                "title": "페이지에서 뒤로-앞으로 캐시 복원이 차단됨",
+                "score": 0,
+                "weight": 0,
+                "display": "실패 이유 2개",
+                "n": 2,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 6,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            },
+            {
+              "url": "/_next/static/media/fca78c2ee6cec166-s.p.723fe4f7.woff2",
+              "type": "Font",
+              "kb": 25.5,
+              "resKb": 25.2
+            },
+            {
+              "url": "/_next/static/media/6eac4fb20e551c63-s.909397df.woff2",
+              "type": "Font",
+              "kb": 24.2,
+              "resKb": 23.9
+            },
+            {
+              "url": "/_next/static/chunks/add2fe5f713e07df.js",
+              "type": "Script",
+              "kb": 21.8,
+              "resKb": 85.8
+            },
+            {
+              "url": "/_next/static/chunks/c41136cf57810647.js",
+              "type": "Script",
+              "kb": 19.9,
+              "resKb": 57.4
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 635142
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 3,
+          "wall": 10411,
+          "load1": 7.87,
+          "cat": {
+            "performance": 78,
+            "accessibility": 94,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 1372.136,
+            "largest-contentful-paint": 1372.136,
+            "total-blocking-time": 960.9999999999982,
+            "cumulative-layout-shift": 0,
+            "speed-index": 2143.7064103816156,
+            "interactive": 4687.871999999999,
+            "server-response-time": 155,
+            "bootup-time": 2114.3079999999873,
+            "mainthread-work-breakdown": 5470.383999999942,
+            "total-byte-weight": 635142
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 635142,
+            "js": 275308,
+            "css": 69903,
+            "font": 275884,
+            "image": 0,
+            "doc": 13070,
+            "other": 977,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1543,
+          "finalUrl": "http://localhost:3113/profile"
+        }
+      ]
+    },
+    "profile:desktop": {
+      "route": "profile",
+      "label": "프로필 /profile",
+      "path": "/profile",
+      "user": "perf",
+      "ff": "desktop",
+      "quiet": {
+        "load1": 6.31,
+        "load5": 8.09,
+        "load15": 8.65,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:10:49.131Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "lh profile desktop"
+      },
+      "loadAfter": {
+        "load1": 6.85,
+        "load5": 8.03,
+        "load15": 8.61,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:11:24.072Z"
+      },
+      "median": {
+        "performance": 100,
+        "accessibility": 94,
+        "bestPractices": 100,
+        "seo": 90,
+        "fcp": 343.086,
+        "lcp": 343.086,
+        "tbt": 77,
+        "cls": 0,
+        "si": 527.1659493202901,
+        "tti": 885.7219999999998,
+        "ttfb": 124,
+        "bootup": 476.7230000000013,
+        "mainthread": 1308.189999999987,
+        "requests": 35,
+        "totalKB": 620.255859375,
+        "jsKB": 268.85546875,
+        "cssKB": 68.2646484375,
+        "fontKB": 269.41796875,
+        "imageKB": 0,
+        "wasmKB": 0,
+        "benchmarkIndex": 1643
+      },
+      "spread": {
+        "performance": [
+          99,
+          100
+        ],
+        "lcp": [
+          295.986,
+          349.968
+        ],
+        "tbt": [
+          63.5,
+          119.5
+        ],
+        "cls": [
+          0,
+          0
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "wall": 10445,
+          "load1": 6.31,
+          "cat": {
+            "performance": 100,
+            "accessibility": 94,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 349.968,
+            "largest-contentful-paint": 349.968,
+            "total-blocking-time": 77,
+            "cumulative-layout-shift": 0,
+            "speed-index": 526.8715755206797,
+            "interactive": 826.9359999999999,
+            "server-response-time": 159,
+            "bootup-time": 499.4949999999958,
+            "mainthread-work-breakdown": 1331.8299999999867,
+            "total-byte-weight": 635142
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 635142,
+            "js": 275308,
+            "css": 69903,
+            "font": 275884,
+            "image": 0,
+            "doc": 13070,
+            "other": 977,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1643,
+          "finalUrl": "http://localhost:3113/profile",
+          "representative": true,
+          "failing": {
+            "performance": [
+              {
+                "id": "forced-reflow-insight",
+                "title": "강제 실행된 리플로우",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              },
+              {
+                "id": "legacy-javascript-insight",
+                "title": "레거시 JavaScript",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 14KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "title": "네트워크 종속 항목 트리",
+                "score": 0,
+                "weight": 0,
+                "display": null,
+                "n": 3,
+                "savingsMs": 0
+              },
+              {
+                "id": "render-blocking-insight",
+                "title": "렌더링 차단 요청",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 시간: 160밀리초",
+                "n": 3,
+                "savingsMs": 150
+              },
+              {
+                "id": "unused-css-rules",
+                "title": "사용하지 않는 CSS 줄이기",
+                "score": 0,
+                "weight": 0,
+                "display": "예상 절감 용량: 51KiB",
+                "n": 1,
+                "savingsMs": 50
+              },
+              {
+                "id": "unused-javascript",
+                "title": "사용하지 않는 자바스크립트 줄이기",
+                "score": 0.5,
+                "weight": 0,
+                "display": "예상 절감 용량: 60KiB",
+                "n": 1,
+                "savingsMs": 0
+              },
+              {
+                "id": "bf-cache",
+                "title": "페이지에서 뒤로-앞으로 캐시 복원이 차단됨",
+                "score": 0,
+                "weight": 0,
+                "display": "실패 이유 2개",
+                "n": 2,
+                "savingsMs": null
+              }
+            ],
+            "accessibility": [
+              {
+                "id": "color-contrast",
+                "title": "백그라운드 및 포그라운드 색상의 대비율이 충분하지 않습니다",
+                "score": 0,
+                "weight": 7,
+                "display": null,
+                "n": 7,
+                "savingsMs": null
+              },
+              {
+                "id": "landmark-one-main",
+                "title": "문서에 주요 랜드마크가 없습니다.",
+                "score": 0,
+                "weight": 3,
+                "display": null,
+                "n": 1,
+                "savingsMs": null
+              }
+            ],
+            "best-practices": [],
+            "seo": [
+              {
+                "id": "meta-description",
+                "title": "문서에 메타 설명이 없음",
+                "score": 0,
+                "weight": 1,
+                "display": null,
+                "n": null,
+                "savingsMs": null
+              }
+            ]
+          },
+          "largest": [
+            {
+              "url": "/_next/static/chunks/c005939bea489023.js",
+              "type": "Script",
+              "kb": 65.5,
+              "resKb": 255.1
+            },
+            {
+              "url": "/_next/static/chunks/d41beca67e5354f3.js",
+              "type": "Script",
+              "kb": 58.3,
+              "resKb": 184.1
+            },
+            {
+              "url": "/_next/static/chunks/c373895b9e9f1882.css",
+              "type": "Stylesheet",
+              "kb": 50.9,
+              "resKb": 149.6
+            },
+            {
+              "url": "/_next/static/media/70bc3e132a0a741e-s.p.15008bfb.woff2",
+              "type": "Font",
+              "kb": 39.8,
+              "resKb": 39.5
+            },
+            {
+              "url": "/_next/static/media/fca78c2ee6cec166-s.p.723fe4f7.woff2",
+              "type": "Font",
+              "kb": 25.5,
+              "resKb": 25.2
+            },
+            {
+              "url": "/_next/static/media/6eac4fb20e551c63-s.909397df.woff2",
+              "type": "Font",
+              "kb": 24.2,
+              "resKb": 23.9
+            },
+            {
+              "url": "/_next/static/chunks/add2fe5f713e07df.js",
+              "type": "Script",
+              "kb": 21.8,
+              "resKb": 85.8
+            },
+            {
+              "url": "/_next/static/chunks/c41136cf57810647.js",
+              "type": "Script",
+              "kb": 19.9,
+              "resKb": 57.4
+            }
+          ],
+          "byHost": {
+            "localhost:3113": 635142
+          },
+          "lhVersion": "13.6.0"
+        },
+        {
+          "i": 2,
+          "wall": 11061,
+          "load1": 6.55,
+          "cat": {
+            "performance": 99,
+            "accessibility": 94,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 343.086,
+            "largest-contentful-paint": 343.086,
+            "total-blocking-time": 119.5,
+            "cumulative-layout-shift": 0,
+            "speed-index": 542.3000738195124,
+            "interactive": 946.4220000000001,
+            "server-response-time": 124,
+            "bootup-time": 476.7230000000013,
+            "mainthread-work-breakdown": 1308.189999999987,
+            "total-byte-weight": 634982
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 634982,
+            "js": 275308,
+            "css": 69903,
+            "font": 275884,
+            "image": 0,
+            "doc": 13070,
+            "other": 817,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1326,
+          "finalUrl": "http://localhost:3113/profile"
+        },
+        {
+          "i": 3,
+          "wall": 10301,
+          "load1": 7.1,
+          "cat": {
+            "performance": 100,
+            "accessibility": 94,
+            "best-practices": 100,
+            "seo": 90,
+            "agentic-browsing": 100
+          },
+          "m": {
+            "first-contentful-paint": 295.986,
+            "largest-contentful-paint": 295.986,
+            "total-blocking-time": 63.5,
+            "cumulative-layout-shift": 0,
+            "speed-index": 527.1659493202901,
+            "interactive": 885.7219999999998,
+            "server-response-time": 121,
+            "bootup-time": 444.70199999999863,
+            "mainthread-work-breakdown": 1211.1179999999938,
+            "total-byte-weight": 635142
+          },
+          "requests": 35,
+          "bytes": {
+            "total": 635142,
+            "js": 275308,
+            "css": 69903,
+            "font": 275884,
+            "image": 0,
+            "doc": 13070,
+            "other": 977,
+            "wasm": 0
+          },
+          "lcpEl": null,
+          "benchmarkIndex": 1743,
+          "finalUrl": "http://localhost:3113/profile"
+        }
+      ]
+    }
+  }
+}

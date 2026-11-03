@@ -1,0 +1,12 @@
+{
+  "name": "p0-13-perf-baseline",
+  "private": true,
+  "description": "P0-13 성능 기준선 측정 하네스 (Lighthouse + Playwright/CDP). 저장소 루트가 아니라 작업 디렉터리(스크래치)에 복사해서 설치·실행한다. run-all.sh 참고",
+  "type": "module",
+  "dependencies": {
+    "@supabase/ssr": "0.10.0",
+    "@supabase/supabase-js": "2.101.0",
+    "lighthouse": "13.6.0",
+    "playwright-core": "1.64.1"
+  }
+}

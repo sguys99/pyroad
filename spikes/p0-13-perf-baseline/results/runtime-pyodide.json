@@ -1,0 +1,1508 @@
+{
+  "batches": {
+    "1x": {
+      "plan": "1x",
+      "quiet": {
+        "load1": 6.34,
+        "load5": 7.71,
+        "load15": 8.46,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:12:27.391Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "pyodide 1x"
+      },
+      "loadAfter": {
+        "load1": 11.99,
+        "load5": 9.45,
+        "load15": 9.03,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:13:41.641Z"
+      },
+      "median": {
+        "ttfb": 203,
+        "fcp": 672,
+        "lcp": 1340,
+        "editor": 965,
+        "workerCreated": 936,
+        "workerInitToReady": 3045,
+        "pyodideLastByte": 1527,
+        "pyodideCpuAfterDownload": 2463,
+        "runEnabled": 4029,
+        "longTasksToReady": 3,
+        "longTaskMsToReady": 361,
+        "cdnKB": 5468,
+        "heapMB": 13,
+        "runFirstPaint": 56,
+        "runNextPaint": 44,
+        "warmInitToReady": 3619,
+        "warmRunEnabled": 4364,
+        "reinit": 2353
+      },
+      "spread": {
+        "runEnabled": [
+          3566,
+          7593
+        ],
+        "workerInitToReady": [
+          2653,
+          5623
+        ],
+        "lcp": [
+          1308,
+          2608
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 6.34,
+          "rate": 1,
+          "net": "none",
+          "wallMs": 25150,
+          "ttfb": 141,
+          "fcp": 660,
+          "lcp": 1308,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 392,
+          "load": 394,
+          "editor": 920,
+          "workerCreated": 885,
+          "workerInitToReady": 2653,
+          "pyodideLastByte": 1527,
+          "pyodideCpuAfterDownload": 2012,
+          "runEnabled": 3566,
+          "longTasksToReady": 4,
+          "longTaskMsToReady": 361,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 194
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.7,
+              "ms": 46
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 39
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 41
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 295
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.3,
+              "ms": 394
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 435
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 17
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 27
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 20
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 332
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 420
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 126
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 6
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 15
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 12
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 209
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 279
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 148
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 6
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 17
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 14
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 249
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 315
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 189
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 5
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 26
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 18
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 321
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 415
+            }
+          ],
+          "runFirst": {
+            "dom": 41,
+            "paint": 56
+          },
+          "runNext": {
+            "dom": 42,
+            "paint": 57
+          },
+          "heapMB": 12.8,
+          "warm": {
+            "runEnabled": 4605,
+            "workerCreated": 773,
+            "initToReady": 3823
+          },
+          "reinitMs": [
+            2479,
+            2513,
+            4647
+          ]
+        },
+        {
+          "i": 2,
+          "load1": 11.01,
+          "rate": 1,
+          "net": "none",
+          "wallMs": 25810,
+          "ttfb": 335,
+          "fcp": 1176,
+          "lcp": 2608,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 769,
+          "load": 1283,
+          "editor": 2010,
+          "workerCreated": 1939,
+          "workerInitToReady": 5623,
+          "pyodideLastByte": 3019,
+          "pyodideCpuAfterDownload": 4543,
+          "runEnabled": 7593,
+          "longTasksToReady": 3,
+          "longTaskMsToReady": 608,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 260
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.6,
+              "ms": 66
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 91
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 72
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 557
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.4,
+              "ms": 732
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 274
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 5
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 30
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 22
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 312
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 412
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 142
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 3
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 21
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 15
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 239
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 305
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 150
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 5
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 26
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 20
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 263
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 329
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 105
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 5
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 12
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 9
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 129
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 167
+            }
+          ],
+          "runFirst": {
+            "dom": 58,
+            "paint": 69
+          },
+          "runNext": {
+            "dom": 34,
+            "paint": 44
+          },
+          "heapMB": 12.9,
+          "warm": {
+            "runEnabled": 4364,
+            "workerCreated": 736,
+            "initToReady": 3619
+          },
+          "reinitMs": [
+            2153,
+            2520,
+            2353
+          ]
+        },
+        {
+          "i": 3,
+          "load1": 14.22,
+          "rate": 1,
+          "net": "none",
+          "wallMs": 21466,
+          "ttfb": 203,
+          "fcp": 672,
+          "lcp": 1340,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 415,
+          "load": 415,
+          "editor": 965,
+          "workerCreated": 936,
+          "workerInitToReady": 3045,
+          "pyodideLastByte": 1518,
+          "pyodideCpuAfterDownload": 2463,
+          "runEnabled": 4029,
+          "longTasksToReady": 2,
+          "longTaskMsToReady": 239,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 194
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.6,
+              "ms": 41
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 50
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 61
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 275
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.3,
+              "ms": 336
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 230
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 3
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 35
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 27
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 304
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 381
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 139
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 4
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 14
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 9
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 186
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 242
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 137
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 4
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 19
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 13
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 219
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 264
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 130
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 3
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 18
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 14
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 183
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 233
+            }
+          ],
+          "runFirst": {
+            "dom": 41,
+            "paint": 54
+          },
+          "runNext": {
+            "dom": 27,
+            "paint": 38
+          },
+          "heapMB": 12.9,
+          "warm": {
+            "runEnabled": 3766,
+            "workerCreated": 700,
+            "initToReady": 3023
+          },
+          "reinitMs": [
+            2320,
+            2306,
+            2185
+          ]
+        }
+      ]
+    },
+    "4x": {
+      "plan": "4x",
+      "quiet": {
+        "load1": 8.05,
+        "load5": 8.77,
+        "load15": 8.82,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:14:41.958Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "pyodide 4x"
+      },
+      "loadAfter": {
+        "load1": 8.73,
+        "load5": 8.93,
+        "load15": 8.88,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:16:06.580Z"
+      },
+      "median": {
+        "ttfb": 179,
+        "fcp": 1428,
+        "lcp": 4040,
+        "editor": 3669,
+        "workerCreated": 3347,
+        "workerInitToReady": 3215,
+        "pyodideLastByte": 4075,
+        "pyodideCpuAfterDownload": 2534,
+        "runEnabled": 6646,
+        "longTasksToReady": 13,
+        "longTaskMsToReady": 2624,
+        "cdnKB": 5468,
+        "heapMB": 15,
+        "runFirstPaint": 425,
+        "runNextPaint": 181,
+        "warmInitToReady": 2988,
+        "warmRunEnabled": 4719,
+        "reinit": 2217
+      },
+      "spread": {
+        "runEnabled": [
+          6445,
+          6731
+        ],
+        "workerInitToReady": [
+          3169,
+          3353
+        ],
+        "lcp": [
+          3684,
+          4672
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 8.05,
+          "rate": 4,
+          "net": "none",
+          "wallMs": 27331,
+          "ttfb": 179,
+          "fcp": 1740,
+          "lcp": 4672,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 1365,
+          "load": 1369,
+          "editor": 3734,
+          "workerCreated": 3529,
+          "workerInitToReady": 3169,
+          "pyodideLastByte": 4163,
+          "pyodideCpuAfterDownload": 2534,
+          "runEnabled": 6731,
+          "longTasksToReady": 14,
+          "longTaskMsToReady": 2836,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 237
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.6,
+              "ms": 43
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 44
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 41
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 253
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.4,
+              "ms": 328
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 151
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 3
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 19
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 14
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 205
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 259
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 115
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 4
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 16
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 11
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 202
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 254
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 150
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 4
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 16
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 11
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 205
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 275
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 106
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 1
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 14
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 10
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 193
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 232
+            }
+          ],
+          "runFirst": {
+            "dom": 315,
+            "paint": 427
+          },
+          "runNext": {
+            "dom": 83,
+            "paint": 113
+          },
+          "heapMB": 14.5,
+          "warm": {
+            "runEnabled": 4719,
+            "workerCreated": 1677,
+            "initToReady": 2988
+          },
+          "reinitMs": [
+            2475,
+            2061,
+            2205
+          ]
+        },
+        {
+          "i": 2,
+          "load1": 8.69,
+          "rate": 4,
+          "net": "none",
+          "wallMs": 27623,
+          "ttfb": 196,
+          "fcp": 1428,
+          "lcp": 4040,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 1089,
+          "load": 1090,
+          "editor": 3669,
+          "workerCreated": 3347,
+          "workerInitToReady": 3215,
+          "pyodideLastByte": 4075,
+          "pyodideCpuAfterDownload": 2487,
+          "runEnabled": 6646,
+          "longTasksToReady": 10,
+          "longTaskMsToReady": 2624,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 369
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.6,
+              "ms": 46
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 29
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 30
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 200
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.3,
+              "ms": 276
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 194
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 7
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 29
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 20
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 251
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 319
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 134
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 2
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 14
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 10
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 214
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 264
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 133
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 4
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 15
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 12
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 165
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 221
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 133
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 2
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 16
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 11
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 201
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 264
+            }
+          ],
+          "runFirst": {
+            "dom": 301,
+            "paint": 425
+          },
+          "runNext": {
+            "dom": 138,
+            "paint": 181
+          },
+          "heapMB": 14.5,
+          "warm": {
+            "runEnabled": 4435,
+            "workerCreated": 1614,
+            "initToReady": 2755
+          },
+          "reinitMs": [
+            2259,
+            2275,
+            2107
+          ]
+        },
+        {
+          "i": 3,
+          "load1": 9.38,
+          "rate": 4,
+          "net": "none",
+          "wallMs": 28423,
+          "ttfb": 149,
+          "fcp": 1112,
+          "lcp": 3684,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 922,
+          "load": 923,
+          "editor": 3319,
+          "workerCreated": 3023,
+          "workerInitToReady": 3353,
+          "pyodideLastByte": 3725,
+          "pyodideCpuAfterDownload": 2651,
+          "runEnabled": 6445,
+          "longTasksToReady": 13,
+          "longTaskMsToReady": 2562,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 338
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.7,
+              "ms": 43
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 33
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 178
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.7,
+              "ms": 207
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.3,
+              "ms": 296
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 202
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 8
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 22
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 13
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 245
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 302
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 134
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 9
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 23
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 18
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 182
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 243
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 156
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 4
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 15
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 11
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 187
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 239
+            },
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 123
+            },
+            {
+              "file": "pyodide.js",
+              "kb": -1,
+              "ms": 3
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": -1,
+              "ms": 16
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": -1,
+              "ms": 13
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": -1,
+              "ms": 167
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": -1,
+              "ms": 212
+            }
+          ],
+          "runFirst": {
+            "dom": 237,
+            "paint": 331
+          },
+          "runNext": {
+            "dom": 203,
+            "paint": 240
+          },
+          "heapMB": 14.9,
+          "warm": {
+            "runEnabled": 5358,
+            "workerCreated": 2277,
+            "initToReady": 2996
+          },
+          "reinitMs": [
+            2335,
+            2217,
+            2012
+          ]
+        }
+      ]
+    },
+    "slow4g": {
+      "plan": "slow4g",
+      "quiet": {
+        "load1": 6.62,
+        "load5": 8.34,
+        "load15": 8.68,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:17:06.886Z",
+        "settled": false,
+        "waitedMin": 1,
+        "label": "pyodide slow4g"
+      },
+      "loadAfter": {
+        "load1": 7.18,
+        "load5": 7.81,
+        "load15": 8.44,
+        "port3107Busy": true,
+        "at": "2026-11-03T13:18:52.216Z"
+      },
+      "median": {
+        "ttfb": 154,
+        "fcp": 1864,
+        "lcp": 4880,
+        "editor": 4508,
+        "workerCreated": 4479,
+        "workerInitToReady": 29912,
+        "pyodideLastByte": 31976,
+        "pyodideCpuAfterDownload": 2460,
+        "runEnabled": 34385,
+        "longTasksToReady": 1,
+        "longTaskMsToReady": 176,
+        "cdnKB": 5468,
+        "heapMB": 8,
+        "runFirstPaint": null,
+        "runNextPaint": null,
+        "warmInitToReady": null,
+        "warmRunEnabled": null,
+        "reinit": null
+      },
+      "spread": {
+        "runEnabled": [
+          34382,
+          34847
+        ],
+        "workerInitToReady": [
+          29894,
+          30243
+        ],
+        "lcp": [
+          4848,
+          5128
+        ]
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 6.62,
+          "rate": 1,
+          "net": "slow4g",
+          "wallMs": 35018,
+          "ttfb": 210,
+          "fcp": 1900,
+          "lcp": 5128,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 1553,
+          "load": 4669,
+          "editor": 4638,
+          "workerCreated": 4597,
+          "workerInitToReady": 30243,
+          "pyodideLastByte": 32197,
+          "pyodideCpuAfterDownload": 2643,
+          "runEnabled": 34847,
+          "longTasksToReady": 2,
+          "longTaskMsToReady": 222,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 310
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.6,
+              "ms": 224
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 3929
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 762
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.7,
+              "ms": 23844
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.2,
+              "ms": 27054
+            }
+          ],
+          "runFirst": null,
+          "runNext": null,
+          "heapMB": 7.9,
+          "warm": null,
+          "reinitMs": []
+        },
+        {
+          "i": 2,
+          "load1": 5.63,
+          "rate": 1,
+          "net": "slow4g",
+          "wallMs": 34617,
+          "ttfb": 122,
+          "fcp": 1864,
+          "lcp": 4880,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 1506,
+          "load": 4804,
+          "editor": 4508,
+          "workerCreated": 4479,
+          "workerInitToReady": 29894,
+          "pyodideLastByte": 31976,
+          "pyodideCpuAfterDownload": 2398,
+          "runEnabled": 34382,
+          "longTasksToReady": 1,
+          "longTaskMsToReady": 176,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 222
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.7,
+              "ms": 215
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 3926
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 760
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 23849
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.4,
+              "ms": 27052
+            }
+          ],
+          "runFirst": null,
+          "runNext": null,
+          "heapMB": 7.9,
+          "warm": null,
+          "reinitMs": []
+        },
+        {
+          "i": 3,
+          "load1": 6.01,
+          "rate": 1,
+          "net": "slow4g",
+          "wallMs": 34561,
+          "ttfb": 154,
+          "fcp": 1848,
+          "lcp": 4848,
+          "lcpEl": "P \"print()는 화면에 글자를 보여주는 마법 주문이에요\"",
+          "dcl": 1517,
+          "load": 4790,
+          "editor": 4484,
+          "workerCreated": 4456,
+          "workerInitToReady": 29912,
+          "pyodideLastByte": 31909,
+          "pyodideCpuAfterDownload": 2460,
+          "runEnabled": 34385,
+          "longTasksToReady": 1,
+          "longTaskMsToReady": 139,
+          "cdnKB": 5468,
+          "cdn": [
+            {
+              "file": "pyodide-worker.js",
+              "kb": 0,
+              "ms": 197
+            },
+            {
+              "file": "pyodide.js",
+              "kb": 6.6,
+              "ms": 211
+            },
+            {
+              "file": "pyodide.asm.js",
+              "kb": 239.7,
+              "ms": 3914
+            },
+            {
+              "file": "pyodide-lock.json",
+              "kb": 24.3,
+              "ms": 760
+            },
+            {
+              "file": "python_stdlib.zip",
+              "kb": 2269.8,
+              "ms": 23832
+            },
+            {
+              "file": "pyodide.asm.wasm",
+              "kb": 2927.3,
+              "ms": 27037
+            }
+          ],
+          "runFirst": null,
+          "runNext": null,
+          "heapMB": 7.9,
+          "warm": null,
+          "reinitMs": []
+        }
+      ]
+    }
+  },
+  "browser": "156.0.8078.4"
+}
