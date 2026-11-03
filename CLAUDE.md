@@ -132,3 +132,32 @@ npm run optimize:svg  # public/characters 하위 SVG 최적화
 - 컴포넌트 파일명: PascalCase (e.g., `QuestCard.tsx`)
 - 유틸리티 파일명: camelCase (e.g., `pyodideWorker.ts`)
 - 테스트 파일: `__tests__/` 디렉토리에 위치 (e.g., `src/lib/quest/__tests__/validation.test.ts`)
+
+## 브랜치 & 커밋 규칙
+
+상세 배경은 `docs/4.upgrade-plan.md` §2.7, §10 참고.
+
+### 브랜치
+
+- **Phase당 브랜치 1개**: `feat/phaseN` (예: `feat/phase1`). 항상 최신 `main`에서 분기한다.
+- **긴급 수정**: `main`에서 `hotfix/<주제>` (예: `hotfix/notice-auth`). 기존 `bugfix-<주제>`는 과거 이력이며, `.claude/commands/git/branch.md`의 `hotfix/` 프리픽스 및 `feat/phaseN`의 슬래시 형식과 맞추기 위해 `hotfix/`로 통일한다. 병합 후 `main`을 각 Phase 브랜치에 반영한다.
+- 공유(푸시된) 브랜치에 `--force` 금지. rebase는 아직 푸시하지 않은 커밋에만, 이미 푸시했다면 `git merge main`을 쓴다. 불가피하면 `--force-with-lease`로 본인 브랜치에서만.
+- Phase 2와 3은 병행 가능하므로 서로의 브랜치를 base로 삼지 않고 각자 `main`에서 분기한다. 한쪽이 `main`에 병합되면 다른 쪽에서 즉시 `git merge main`으로 반영한다.
+
+### 커밋
+
+- 형식: `<이모지> <타입>: <한글 요약> (<작업 ID>)` — 예: `✨ feat: 닉네임 설정 화면 추가 (P3-05)`, `🔒️ fix: 공지 쓰기 권한 우회 차단 (B02)`. 이모지 맵은 `.claude/commands/git/commit.md`를 따른다.
+- **작업 항목 1개 = 커밋 1개**, 항목마다 즉시 `git push`. 작업 ID(`P1-03`, `B05`)를 제목에 넣는다.
+- 같은 커밋에서 `docs/4.upgrade-plan.md`의 체크박스, 상단 상태표, §13 진행 기록을 함께 갱신한다.
+- 계획서 충돌 시: 양쪽 변경을 모두 살리고(다른 항목 체크박스는 각자 유지), 상태표 수치는 체크박스를 다시 세어 재계산한다.
+
+### Pull Request & 릴리즈
+
+- Phase 종료 시 `feat/phaseN` → `main` PR 1개. 제목: `🎉 feat: Phase N <Phase명> 완료`. 본문은 `.github/pull_request_template.md`를 채운다 (완료한 P/B-ID 목록, DB 스키마·환경 변수 변경, UI 변경 시 360/768/1280 스크린샷).
+- **병합 방식은 Merge commit** (squash 금지). 기존 이력이 PR 병합 커밋 방식이고, 작업별 커밋을 추적·revert하기 위해서다.
+- 마일스톤 태그는 해당 Phase가 `main`에 병합된 뒤 `main`에서 부여: v0.4(Phase 1+3 완료 후, P1-24/P3-20), v0.5(2·4·5·6), v0.6(7·8), v0.7(9), v0.8(10), v0.9(11), v1.0(12). 예: `git tag -a v0.4 -m "..." && git push origin v0.4`.
+- CI는 P1-15 전까지 없으므로 PR 전에 `npm run lint`, `npx tsc --noEmit`, `npm test`를 로컬에서 실행한다.
+
+### 스파이크
+
+- 코드는 `spikes/p0-XX-<주제>/`, 보고서는 `docs/spikes/P0-XX-<주제>.md`. 앱 빌드·lint·테스트에서 제외된다. 규칙은 [`spikes/README.md`](spikes/README.md) 참고.
