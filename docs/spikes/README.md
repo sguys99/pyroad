@@ -11,3 +11,4 @@
 | P0-06 | turtle → canvas | **채택** (자체 shim + 스트리밍 + 캔버스 렌더러) | [P0-06-turtle-canvas.md](P0-06-turtle-canvas.md) |
 | P0-08 | 퀴즈·정답 분리 저장 | **채택** (+ 00002 핫픽스 검증 통과) | [P0-08-answer-keys.md](P0-08-answer-keys.md) |
 | P0-15 | 사운드 | **대안** (use-sound 대신 자체 Web Audio 래퍼) | [P0-15-sound.md](P0-15-sound.md) |
+| P0-10 | `next/og` 공유 카드 | **채택** (Node 런타임 + 서브셋 폰트 + CDN 캐시) | [P0-10-og-share-card.md](P0-10-og-share-card.md) |
