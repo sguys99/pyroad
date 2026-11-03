@@ -12,3 +12,4 @@
 | P0-08 | 퀴즈·정답 분리 저장 | **채택** (+ 00002 핫픽스 검증 통과) | [P0-08-answer-keys.md](P0-08-answer-keys.md) |
 | P0-15 | 사운드 | **대안** (use-sound 대신 자체 Web Audio 래퍼) | [P0-15-sound.md](P0-15-sound.md) |
 | P0-10 | `next/og` 공유 카드 | **채택** (Node 런타임 + 서브셋 폰트 + CDN 캐시) | [P0-10-og-share-card.md](P0-10-og-share-card.md) |
+| P0-05 | Pyodide `input()` | **채택** (JSPI + Service Worker 폴백, 격리 헤더 불필요) | [P0-05-pyodide-input.md](P0-05-pyodide-input.md) |

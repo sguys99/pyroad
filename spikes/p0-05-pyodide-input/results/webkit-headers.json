@@ -1,0 +1,117 @@
+{
+  "plain": {
+    "crossOriginIsolated": false,
+    "sab": false,
+    "jspi": true,
+    "probes": {
+      "img 헤더 없음": "ok",
+      "img CORP: cross-origin": "ok",
+      "img ACAO:* + crossorigin 속성": "ok",
+      "img ACAO:* (crossorigin 속성 없음)": "ok",
+      "script ACAO:* (속성 없음)": "ok",
+      "script ACAO:* + crossorigin 속성": "ok",
+      "네이버 이미지 ssl.pstatic.net": "blocked",
+      "Kakao SDK (속성 없음)": "blocked",
+      "Kakao SDK + crossorigin": "blocked",
+      "Google 아바타 lh3.googleusercontent.com": "blocked",
+      "네이버 이미지 + crossorigin": "blocked",
+      "fetch CORS (Supabase API 같은 경우)": "ok"
+    },
+    "popup": {
+      "popupHandleClosed": false,
+      "messageFromPopup": true
+    }
+  },
+  "coop": {
+    "crossOriginIsolated": false,
+    "sab": false,
+    "jspi": true,
+    "probes": {
+      "img 헤더 없음": "ok",
+      "img CORP: cross-origin": "ok",
+      "img ACAO:* + crossorigin 속성": "ok",
+      "img ACAO:* (crossorigin 속성 없음)": "ok",
+      "네이버 이미지 ssl.pstatic.net": "blocked",
+      "Google 아바타 lh3.googleusercontent.com": "blocked",
+      "Kakao SDK (속성 없음)": "blocked",
+      "script ACAO:* (속성 없음)": "ok",
+      "script ACAO:* + crossorigin 속성": "ok",
+      "Kakao SDK + crossorigin": "blocked",
+      "네이버 이미지 + crossorigin": "blocked",
+      "fetch CORS (Supabase API 같은 경우)": "ok"
+    },
+    "popup": {
+      "popupHandleClosed": true,
+      "messageFromPopup": false
+    }
+  },
+  "coep": {
+    "crossOriginIsolated": true,
+    "sab": true,
+    "jspi": true,
+    "probes": {
+      "Kakao SDK (속성 없음)": "blocked",
+      "Kakao SDK + crossorigin": "blocked",
+      "img 헤더 없음": "blocked",
+      "네이버 이미지 ssl.pstatic.net": "blocked",
+      "img ACAO:* (crossorigin 속성 없음)": "blocked",
+      "img CORP: cross-origin": "ok",
+      "img ACAO:* + crossorigin 속성": "ok",
+      "script ACAO:* (속성 없음)": "blocked",
+      "script ACAO:* + crossorigin 속성": "ok",
+      "Google 아바타 lh3.googleusercontent.com": "blocked",
+      "네이버 이미지 + crossorigin": "blocked",
+      "fetch CORS (Supabase API 같은 경우)": "ok"
+    },
+    "popup": {
+      "popupHandleClosed": true,
+      "messageFromPopup": false
+    }
+  },
+  "cred": {
+    "crossOriginIsolated": false,
+    "sab": false,
+    "jspi": true,
+    "probes": {
+      "img 헤더 없음": "ok",
+      "img CORP: cross-origin": "ok",
+      "img ACAO:* + crossorigin 속성": "ok",
+      "img ACAO:* (crossorigin 속성 없음)": "ok",
+      "Kakao SDK (속성 없음)": "blocked",
+      "Kakao SDK + crossorigin": "blocked",
+      "script ACAO:* (속성 없음)": "ok",
+      "script ACAO:* + crossorigin 속성": "ok",
+      "네이버 이미지 ssl.pstatic.net": "blocked",
+      "네이버 이미지 + crossorigin": "blocked",
+      "Google 아바타 lh3.googleusercontent.com": "blocked",
+      "fetch CORS (Supabase API 같은 경우)": "ok"
+    },
+    "popup": {
+      "popupHandleClosed": true,
+      "messageFromPopup": false
+    }
+  },
+  "dip": {
+    "crossOriginIsolated": false,
+    "sab": false,
+    "jspi": true,
+    "probes": {
+      "img 헤더 없음": "ok",
+      "네이버 이미지 ssl.pstatic.net": "blocked",
+      "img CORP: cross-origin": "ok",
+      "img ACAO:* + crossorigin 속성": "ok",
+      "img ACAO:* (crossorigin 속성 없음)": "ok",
+      "Kakao SDK (속성 없음)": "blocked",
+      "Kakao SDK + crossorigin": "blocked",
+      "script ACAO:* (속성 없음)": "ok",
+      "script ACAO:* + crossorigin 속성": "ok",
+      "네이버 이미지 + crossorigin": "blocked",
+      "Google 아바타 lh3.googleusercontent.com": "blocked",
+      "fetch CORS (Supabase API 같은 경우)": "ok"
+    },
+    "popup": {
+      "popupHandleClosed": false,
+      "messageFromPopup": true
+    }
+  }
+}

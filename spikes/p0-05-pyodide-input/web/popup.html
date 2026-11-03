@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ko">
+  <head><meta charset="utf-8" /><title>popup</title></head>
+  <body>
+    <p>COOP 영향 확인용 팝업 (OAuth·공유 SDK 팝업 흉내)</p>
+    <script>
+      // opener가 살아 있으면 메시지를 돌려보낸다
+      if (window.opener) window.opener.postMessage({ from: 'popup', hasOpener: true }, '*');
+    </script>
+  </body>
+</html>

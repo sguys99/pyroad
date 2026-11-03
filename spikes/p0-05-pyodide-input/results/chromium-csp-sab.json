@@ -1,0 +1,18 @@
+{
+  "browser": "chromium",
+  "opt": "sab",
+  "mode": "cspcoep",
+  "ready": {
+    "t": 7302.1,
+    "type": "ready",
+    "ms": 7021,
+    "workerMs": 6921,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "jspi": true
+    }
+  },
+  "runOk": true,
+  "violations": []
+}

@@ -1,0 +1,48 @@
+$ node node/scripted-stdin.mjs   # Pyodide 314.0.7
+pyodide 314.0.7 (python 3.14.2) loaded in 5567 ms
+seed 42 -> secret 82
+
+### guess: seed 42, 3 tries incl. non-number  (13.7 ms, inputs used 4/4)
+  | 1부터 100 사이 숫자: 숫자로 입력해 주세요!
+  | 1부터 100 사이 숫자: 더 큰 수예요!
+  | 1부터 100 사이 숫자: 더 큰 수예요!
+  | 1부터 100 사이 숫자: 정답! 3번 만에 맞혔어요.
+
+### guess: same, echo transcript  (7.3 ms, inputs used 3/3)
+  | 1부터 100 사이 숫자: abc
+  | 숫자로 입력해 주세요!
+  | 1부터 100 사이 숫자: 50
+  | 더 큰 수예요!
+  | 1부터 100 사이 숫자: 82
+  | 정답! 2번 만에 맞혔어요.
+
+### guess: inputs run out -> EOFError  (11.2 ms, inputs used 1/1)
+  | 1부터 100 사이 숫자: 더 큰 수예요!
+  | 1부터 100 사이 숫자:
+  !! EOFError:   File "<student>", line 16, in play /   File "<student>", line 6, in ask_number / EOFError: EOF when reading a line
+
+### age: ok  (3.3 ms, inputs used 2/2)
+  | 나이 계산기
+  | 이름: 나이: 파이님은 내년에 11살!
+
+### age: int("열살") -> ValueError line 3  (7.4 ms, inputs used 2/2)
+  | 나이 계산기
+  | 이름: 나이:
+  !! ValueError:     coroutine = eval(self.code, globals, locals) /   File "<student>", line 3, in <module> / ValueError: invalid literal for int() with base 10: '열살'
+
+### sys.stdin.readline vs input (newline handling)  (2.0 ms, inputs used 2/2)
+  | 'first\n' 'second'
+
+### fresh namespace per run -> NameError (ok, no leak)
+
+$ node node/scripted-stdin.mjs ../../node_modules/pyodide   # 0.29.3 (repo)
+pyodide 0.29.3 (python 3.13.2) loaded in 4234 ms
+### guess: seed 42, 3 tries incl. non-number  (19.2 ms, inputs used 4/4)
+### guess: same, echo transcript  (5.1 ms, inputs used 3/3)
+### guess: inputs run out -> EOFError  (16.5 ms, inputs used 1/1)
+  !! EOFError:   File "<student>", line 16, in play /   File "<student>", line 6, in ask_number / EOFError: EOF when reading a line
+### age: ok  (3.0 ms, inputs used 2/2)
+### age: int("열살") -> ValueError line 3  (9.1 ms, inputs used 2/2)
+  !! ValueError:     coroutine = eval(self.code, globals, locals) /   File "<student>", line 3, in <module> / ValueError: invalid literal for int() with base 10: '열살'
+### sys.stdin.readline vs input (newline handling)  (7.6 ms, inputs used 2/2)
+### fresh namespace per run -> NameError (ok, no leak)

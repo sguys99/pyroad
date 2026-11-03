@@ -1,0 +1,15 @@
+{
+  "browser": "chromium",
+  "ready": {
+    "t": 11923.3,
+    "type": "ready",
+    "ms": 11640,
+    "workerMs": 11540,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "jspi": true
+    }
+  },
+  "runOk": true
+}

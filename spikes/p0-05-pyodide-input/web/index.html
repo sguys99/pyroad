@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>P0-05 input() 스파이크</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>P0-05 Pyodide <code>input()</code> — 방식 <b id="opt"></b></h1>
+      <nav>
+        <a href="?opt=sab">① SAB</a> · <a href="?opt=sw">② SW+동기XHR</a> · <a href="?opt=transform">③ 코드 변환</a> ·
+        <a href="?opt=jspi">④ JSPI</a>
+      </nav>
+      <p id="env"></p>
+      <p id="status">Pyodide 준비 중…</p>
+    </header>
+    <main>
+      <section class="editor">
+        <div class="bar">
+          <select id="program"></select>
+          <button id="run" type="button">▶ 실행</button>
+          <button id="stop" type="button">■ 멈추기</button>
+        </div>
+        <textarea id="code" spellcheck="false"></textarea>
+      </section>
+      <section class="console">
+        <div id="out" aria-live="polite"></div>
+        <form id="inputForm" hidden>
+          <input id="answer" autocomplete="off" enterkeyhint="send" placeholder="여기에 답을 쓰고 Enter" />
+          <button type="submit">보내기</button>
+        </form>
+      </section>
+      <section class="probes">
+        <h2>교차 출처 리소스 (<button id="probeBtn" type="button">확인</button>)</h2>
+        <div id="probes"></div>
+        <pre id="probeResult"></pre>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

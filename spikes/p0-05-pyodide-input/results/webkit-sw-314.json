@@ -1,0 +1,155 @@
+{
+  "browser": "webkit",
+  "opt": "sw",
+  "mode": "plain",
+  "ver": "314.0.7",
+  "ready": {
+    "t": 6973,
+    "type": "ready",
+    "ms": 6555,
+    "workerMs": 6451,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "channel": "ok",
+      "swController": true
+    }
+  },
+  "cases": {
+    "loop": {
+      "pass": true,
+      "used": 4,
+      "outcome": "ok"
+    },
+    "chain": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok"
+    },
+    "method": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok"
+    },
+    "init": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok"
+    },
+    "alias": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok"
+    },
+    "lambda": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok"
+    },
+    "generator": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok"
+    },
+    "comprehension": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok"
+    },
+    "recursion": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok"
+    },
+    "callback": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok"
+    },
+    "map": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok"
+    },
+    "collision": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok"
+    },
+    "stdin": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok"
+    },
+    "errorline": {
+      "pass": true,
+      "used": 2,
+      "outcome": "error",
+      "error": "ValueError: invalid literal for int() with base 10: '열살'"
+    }
+  },
+  "latency": {
+    "endToEnd": {
+      "n": 40,
+      "median": 11,
+      "p95": 22,
+      "min": 3
+    },
+    "toWorker": {
+      "n": 39,
+      "median": 4,
+      "p95": 13,
+      "min": 1
+    },
+    "python": {
+      "n": 39,
+      "median": 1,
+      "p95": 4,
+      "min": 0
+    },
+    "toMain": {
+      "n": 39,
+      "median": 3,
+      "p95": 6,
+      "min": 0
+    }
+  },
+  "sleep": {
+    "out": "slept 0.55",
+    "ms": 505
+  },
+  "stopDuringInput": {
+    "how": "graceful",
+    "ms": 22,
+    "stoppedFlag": true,
+    "nextRunOk": true
+  },
+  "stopBusyLoop": {
+    "how": "terminate",
+    "ms": 8297,
+    "reinitMs": 7292,
+    "stoppedFlag": true,
+    "nextRunOk": true
+  },
+  "stopSleepLoop": {
+    "how": "terminate",
+    "ms": 10358,
+    "reinitMs": 9357,
+    "stoppedFlag": true,
+    "nextRunOk": true
+  },
+  "restarts": 2,
+  "afterReload": {
+    "t": 7825,
+    "type": "ready",
+    "ms": 7723,
+    "workerMs": 7580,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "channel": "ok",
+      "swController": true
+    },
+    "runOk": true
+  }
+}

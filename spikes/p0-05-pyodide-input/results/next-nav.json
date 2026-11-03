@@ -1,0 +1,1412 @@
+{
+  "chromium": {
+    "A quest-only (next.config headers)": [
+      {
+        "label": "direct load /quest/1",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 85.6ms",
+        "reloaded": true,
+        "ms": 314
+      },
+      {
+        "label": "direct load /world",
+        "path": "/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 195
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/quest/1",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: no-coi",
+        "reloaded": false,
+        "ms": 113
+      },
+      {
+        "label": "quest/1 → quest/1 (<a href>, hard)",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 96.9ms",
+        "reloaded": true,
+        "ms": 503
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 28.9ms",
+        "reloaded": false,
+        "ms": 311
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 138
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 15.8ms",
+        "reloaded": false,
+        "ms": 83
+      },
+      {
+        "label": "browser back",
+        "path": "/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 23
+      },
+      {
+        "label": "reload on world",
+        "path": "/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 184
+      }
+    ],
+    "D quest-only (middleware headers)": [
+      {
+        "label": "direct load /mw/quest/1",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 34.5ms",
+        "reloaded": true,
+        "ms": 262
+      },
+      {
+        "label": "direct load /mw/world",
+        "path": "/mw/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 200
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/mw/quest/1",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: no-coi",
+        "reloaded": false,
+        "ms": 122
+      },
+      {
+        "label": "quest/1 → quest/1 (<a href>, hard)",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 23.2ms",
+        "reloaded": true,
+        "ms": 248
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/mw/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 11.1ms",
+        "reloaded": false,
+        "ms": 123
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/mw/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 76
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 21.3ms",
+        "reloaded": false,
+        "ms": 114
+      },
+      {
+        "label": "browser back",
+        "path": "/mw/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 38
+      },
+      {
+        "label": "reload on world",
+        "path": "/mw/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 270
+      }
+    ],
+    "C quest-only + QuestLink(hard nav when !coi)": [
+      {
+        "label": "direct load /heal/quest/1",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 31.2ms",
+        "reloaded": true,
+        "ms": 261
+      },
+      {
+        "label": "direct load /heal/world",
+        "path": "/heal/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 339
+      },
+      {
+        "label": "world → quest/1 (QuestLink)",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 26.2ms",
+        "reloaded": true,
+        "ms": 335
+      },
+      {
+        "label": "quest/1 → quest/2 (QuestLink)",
+        "path": "/heal/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 16.1ms",
+        "reloaded": false,
+        "ms": 139
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/heal/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 79
+      },
+      {
+        "label": "world → quest/1 again (QuestLink)",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 15.0ms",
+        "reloaded": false,
+        "ms": 88
+      },
+      {
+        "label": "browser back",
+        "path": "/heal/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 33
+      },
+      {
+        "label": "reload on world",
+        "path": "/heal/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 282
+      }
+    ],
+    "B whole app isolated": [
+      {
+        "label": "direct load /iso/quest/1",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 23.1ms",
+        "reloaded": true,
+        "ms": 289
+      },
+      {
+        "label": "direct load /iso/world",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 87
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 14.4ms",
+        "reloaded": false,
+        "ms": 137
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/iso/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 13.9ms",
+        "reloaded": false,
+        "ms": 95
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 65
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 8.3ms",
+        "reloaded": false,
+        "ms": 77
+      },
+      {
+        "label": "browser back",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 15
+      },
+      {
+        "label": "reload on world",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 61
+      }
+    ]
+  },
+  "firefox": {
+    "A quest-only (next.config headers)": [
+      {
+        "label": "direct load /quest/1",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 237.7ms",
+        "reloaded": true,
+        "ms": 816
+      },
+      {
+        "label": "direct load /world",
+        "path": "/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 391
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/quest/1",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: no-coi",
+        "reloaded": false,
+        "ms": 168
+      },
+      {
+        "label": "quest/1 → quest/1 (<a href>, hard)",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 43.6ms",
+        "reloaded": true,
+        "ms": 408
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 40.7ms",
+        "reloaded": false,
+        "ms": 278
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 137
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 32.0ms",
+        "reloaded": false,
+        "ms": 143
+      },
+      {
+        "label": "browser back",
+        "path": "/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 64
+      },
+      {
+        "label": "reload on world",
+        "path": "/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 398
+      }
+    ],
+    "D quest-only (middleware headers)": [
+      {
+        "label": "direct load /mw/quest/1",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 53.2ms",
+        "reloaded": true,
+        "ms": 366
+      },
+      {
+        "label": "direct load /mw/world",
+        "path": "/mw/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 264
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/mw/quest/1",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: no-coi",
+        "reloaded": false,
+        "ms": 163
+      },
+      {
+        "label": "quest/1 → quest/1 (<a href>, hard)",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 46.5ms",
+        "reloaded": true,
+        "ms": 414
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/mw/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 41.8ms",
+        "reloaded": false,
+        "ms": 234
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/mw/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 167
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 34.7ms",
+        "reloaded": false,
+        "ms": 215
+      },
+      {
+        "label": "browser back",
+        "path": "/mw/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 64
+      },
+      {
+        "label": "reload on world",
+        "path": "/mw/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 374
+      }
+    ],
+    "C quest-only + QuestLink(hard nav when !coi)": [
+      {
+        "label": "direct load /heal/quest/1",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 173.0ms",
+        "reloaded": true,
+        "ms": 1557
+      },
+      {
+        "label": "direct load /heal/world",
+        "path": "/heal/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 574
+      },
+      {
+        "label": "world → quest/1 (QuestLink)",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 60.1ms",
+        "reloaded": true,
+        "ms": 836
+      },
+      {
+        "label": "quest/1 → quest/2 (QuestLink)",
+        "path": "/heal/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 144.6ms",
+        "reloaded": false,
+        "ms": 660
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/heal/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 461
+      },
+      {
+        "label": "world → quest/1 again (QuestLink)",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 187.7ms",
+        "reloaded": false,
+        "ms": 586
+      },
+      {
+        "label": "browser back",
+        "path": "/heal/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 255
+      },
+      {
+        "label": "reload on world",
+        "path": "/heal/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 1054
+      }
+    ],
+    "B whole app isolated": [
+      {
+        "label": "direct load /iso/quest/1",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok not-equal 182.2ms",
+        "reloaded": true,
+        "ms": 1459
+      },
+      {
+        "label": "direct load /iso/world",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 891
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 136.7ms",
+        "reloaded": false,
+        "ms": 719
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/iso/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 134.8ms",
+        "reloaded": false,
+        "ms": 606
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 383
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 102.7ms",
+        "reloaded": false,
+        "ms": 561
+      },
+      {
+        "label": "browser back",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 361
+      },
+      {
+        "label": "reload on world",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 958
+      }
+    ]
+  },
+  "webkit": {
+    "A quest-only (next.config headers)": [
+      {
+        "label": "direct load /quest/1",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 40.8ms",
+        "reloaded": true,
+        "ms": 487
+      },
+      {
+        "label": "direct load /world",
+        "path": "/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 605
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/quest/1",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: no-coi",
+        "reloaded": false,
+        "ms": 151
+      },
+      {
+        "label": "quest/1 → quest/1 (<a href>, hard)",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 15.7ms",
+        "reloaded": true,
+        "ms": 459
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 6.5ms",
+        "reloaded": false,
+        "ms": 103
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 68
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 7.3ms",
+        "reloaded": false,
+        "ms": 74
+      },
+      {
+        "label": "browser back",
+        "path": "/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 27
+      },
+      {
+        "label": "reload on world",
+        "path": "/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 387
+      }
+    ],
+    "D quest-only (middleware headers)": [
+      {
+        "label": "direct load /mw/quest/1",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 36.2ms",
+        "reloaded": true,
+        "ms": 675
+      },
+      {
+        "label": "direct load /mw/world",
+        "path": "/mw/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 479
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/mw/quest/1",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: no-coi",
+        "reloaded": false,
+        "ms": 244
+      },
+      {
+        "label": "quest/1 → quest/1 (<a href>, hard)",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 48.9ms",
+        "reloaded": true,
+        "ms": 687
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/mw/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 19.3ms",
+        "reloaded": false,
+        "ms": 266
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/mw/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 156
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/mw/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 14.2ms",
+        "reloaded": false,
+        "ms": 187
+      },
+      {
+        "label": "browser back",
+        "path": "/mw/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 36
+      },
+      {
+        "label": "reload on world",
+        "path": "/mw/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 522
+      }
+    ],
+    "C quest-only + QuestLink(hard nav when !coi)": [
+      {
+        "label": "direct load /heal/quest/1",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 20.6ms",
+        "reloaded": true,
+        "ms": 623
+      },
+      {
+        "label": "direct load /heal/world",
+        "path": "/heal/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 709
+      },
+      {
+        "label": "world → quest/1 (QuestLink)",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 49.7ms",
+        "reloaded": true,
+        "ms": 890
+      },
+      {
+        "label": "quest/1 → quest/2 (QuestLink)",
+        "path": "/heal/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 13.7ms",
+        "reloaded": false,
+        "ms": 276
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/heal/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 129
+      },
+      {
+        "label": "world → quest/1 again (QuestLink)",
+        "path": "/heal/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 26.1ms",
+        "reloaded": false,
+        "ms": 194
+      },
+      {
+        "label": "browser back",
+        "path": "/heal/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 46
+      },
+      {
+        "label": "reload on world",
+        "path": "/heal/world",
+        "coi": false,
+        "imgs": {
+          "plain": "ok",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 556
+      }
+    ],
+    "B whole app isolated": [
+      {
+        "label": "direct load /iso/quest/1",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 21.6ms",
+        "reloaded": true,
+        "ms": 495
+      },
+      {
+        "label": "direct load /iso/world",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 88
+      },
+      {
+        "label": "world → quest/1 (Link)",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 28.7ms",
+        "reloaded": false,
+        "ms": 253
+      },
+      {
+        "label": "quest/1 → quest/2 (Link)",
+        "path": "/iso/quest/2",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 12.1ms",
+        "reloaded": false,
+        "ms": 122
+      },
+      {
+        "label": "quest/2 → world (Link)",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 86
+      },
+      {
+        "label": "world → quest/1 again (Link)",
+        "path": "/iso/quest/1",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "sab": "SAB: ok ok 75.4ms",
+        "reloaded": false,
+        "ms": 201
+      },
+      {
+        "label": "browser back",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": false,
+        "ms": 35
+      },
+      {
+        "label": "reload on world",
+        "path": "/iso/world",
+        "coi": true,
+        "imgs": {
+          "plain": "blocked",
+          "corp": "ok",
+          "cors": "ok",
+          "next": "ok"
+        },
+        "reloaded": true,
+        "ms": 94
+      }
+    ]
+  }
+}

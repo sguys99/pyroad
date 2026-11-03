@@ -1,0 +1,15 @@
+{
+  "browser": "firefox",
+  "ready": {
+    "t": 20773.1,
+    "type": "ready",
+    "ms": 20265,
+    "workerMs": 19984,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "jspi": true
+    }
+  },
+  "runOk": true
+}
