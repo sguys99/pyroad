@@ -1,0 +1,16 @@
+{
+  "name": "p0-06-turtle-canvas",
+  "private": true,
+  "version": "0.0.0",
+  "description": "P0-06 spike: Python turtle -> canvas shim (Pyodide worker + framework-free renderer)",
+  "type": "module",
+  "scripts": {
+    "serve": "node server.mjs",
+    "test:e2e": "node test/run-demo.mjs",
+    "test:checker": "node test/checker.test.mjs",
+    "crosscheck": "python3 -I test/crosscheck.py"
+  },
+  "dependencies": {
+    "pyodide": "314.0.7"
+  }
+}
