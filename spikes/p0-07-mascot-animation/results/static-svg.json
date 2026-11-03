@@ -1,0 +1,50 @@
+[
+ {
+  "id": "a-happy",
+  "svgBytes": 6590,
+  "serializeMs": 9.42,
+  "reactMs": 21.56,
+  "resvgMs": 5.3,
+  "hasFunctionLeak": false
+ },
+ {
+  "id": "a-think",
+  "svgBytes": 5782,
+  "serializeMs": 6.01,
+  "reactMs": 4.91,
+  "resvgMs": 7.7,
+  "hasFunctionLeak": false
+ },
+ {
+  "id": "a-sad",
+  "svgBytes": 6298,
+  "serializeMs": 3.04,
+  "reactMs": 11.33,
+  "resvgMs": 9.3,
+  "hasFunctionLeak": false
+ },
+ {
+  "id": "b-cheer",
+  "svgBytes": 6954,
+  "serializeMs": 7.14,
+  "reactMs": 4.41,
+  "resvgMs": 50.3,
+  "hasFunctionLeak": false
+ },
+ {
+  "id": "b-dance",
+  "svgBytes": 7007,
+  "serializeMs": 3.97,
+  "reactMs": 4.91,
+  "resvgMs": 35.6,
+  "hasFunctionLeak": false
+ },
+ {
+  "id": "reduced-happy",
+  "svgBytes": 5598,
+  "serializeMs": 10.43,
+  "reactMs": 4.88,
+  "resvgMs": 3.7,
+  "hasFunctionLeak": false
+ }
+]

@@ -1,0 +1,181 @@
+{
+ "at": "2026-11-03T12:01:54.447Z",
+ "esbuild": "0.25.12",
+ "rows": [
+  {
+   "name": "SVG 리그 (engine+geometry+PybaemRig+코스튬)",
+   "min": 28,
+   "gzip": 10.5,
+   "brotli": 9.5,
+   "chunks": 1
+  },
+  {
+   "name": "SVG 리그 정적 렌더만 (PybaemStatic: 마크업+코스튬+geometry, 공유 카드·아바타)",
+   "min": 16.4,
+   "gzip": 6.2,
+   "brotli": 5.5,
+   "chunks": 1
+  },
+  {
+   "name": "참고: framer-motion LazyMotion+domAnimation+m (앱에 이미 있음)",
+   "min": 75,
+   "gzip": 26.7,
+   "brotli": 24.3,
+   "chunks": 1
+  },
+  {
+   "name": "lottie-web 전체 (lottie.js, svg+canvas+html)",
+   "min": 301.7,
+   "gzip": 77.1,
+   "brotli": 64.4,
+   "chunks": 1
+  },
+  {
+   "name": "lottie-web lottie_svg (SVG 렌더러만)",
+   "min": 239.8,
+   "gzip": 63.6,
+   "brotli": 54.2,
+   "chunks": 1
+  },
+  {
+   "name": "lottie-web lottie_light (SVG, 표현식 없음)",
+   "min": 168.2,
+   "gzip": 48,
+   "brotli": 41.5,
+   "chunks": 1
+  },
+  {
+   "name": "lottie-web lottie_canvas",
+   "min": 263,
+   "gzip": 68.8,
+   "brotli": 58.1,
+   "chunks": 1
+  },
+  {
+   "name": "lottie-react 2.4.1 (lottie-web 전체 포함)",
+   "min": 311.2,
+   "gzip": 80.6,
+   "brotli": 67.1,
+   "chunks": 1
+  },
+  {
+   "name": "@lottiefiles/dotlottie-web 0.82.1 (JS만)",
+   "min": 56.8,
+   "gzip": 12.5,
+   "brotli": 11.1,
+   "chunks": 1
+  },
+  {
+   "name": "@lottiefiles/dotlottie-react 0.21.1 (JS만)",
+   "min": 59.7,
+   "gzip": 13.4,
+   "brotli": 12,
+   "chunks": 1
+  },
+  {
+   "name": "@rive-app/canvas 2.49.1 (JS만)",
+   "min": 348,
+   "gzip": 89.5,
+   "brotli": 77.2,
+   "chunks": 1
+  },
+  {
+   "name": "@rive-app/canvas-lite 2.49.1 (JS만)",
+   "min": 213,
+   "gzip": 60.2,
+   "brotli": 52.3,
+   "chunks": 1
+  },
+  {
+   "name": "@rive-app/webgl2 2.49.1 (JS만)",
+   "min": 336.3,
+   "gzip": 84.9,
+   "brotli": 73.2,
+   "chunks": 1
+  },
+  {
+   "name": "@rive-app/react-canvas 4.38.0 (JS만)",
+   "min": 350.9,
+   "gzip": 90,
+   "brotli": 77.3,
+   "chunks": 1
+  },
+  {
+   "name": "canvas-confetti 1.9.4 (참고: 앱에 이미 있음)",
+   "min": 10.4,
+   "gzip": 4.2,
+   "brotli": 3.8,
+   "chunks": 1
+  }
+ ],
+ "wasm": [
+  {
+   "name": "dotlottie-player.wasm",
+   "min": 1197.3,
+   "gzip": 482.2,
+   "brotli": 375.5
+  },
+  {
+   "name": "rive.wasm (@rive-app/canvas)",
+   "min": 2183.5,
+   "gzip": 917.7,
+   "brotli": 722.1
+  },
+  {
+   "name": "rive.wasm (@rive-app/canvas-lite)",
+   "min": 826.8,
+   "gzip": 343.8,
+   "brotli": 268.8
+  },
+  {
+   "name": "rive.wasm (@rive-app/webgl2)",
+   "min": 2324.4,
+   "gzip": 980.4,
+   "brotli": 768.8
+  }
+ ],
+ "assets": [
+  {
+   "name": "저장소 Lottie 4종 합계 (도형 플레이스홀더)",
+   "min": 20.8,
+   "gzip": 1.6,
+   "brotli": 1.3
+  },
+  {
+   "name": "리그→Lottie 굽기: 7상태 전체 (466프레임)",
+   "min": 197.1,
+   "gzip": 22.3,
+   "brotli": 15.1
+  },
+  {
+   "name": "리그→Lottie 굽기: 춤 구간만 (60프레임)",
+   "min": 54.6,
+   "gzip": 7.1,
+   "brotli": 5.2
+  },
+  {
+   "name": "리그→Lottie 굽기: 대기 구간만 (96프레임)",
+   "min": 15.4,
+   "gzip": 1.5,
+   "brotli": 1.3
+  },
+  {
+   "name": "Rive avatars.riv (아바타 4종, 벡터)",
+   "min": 14.4,
+   "gzip": 5.6,
+   "brotli": 4.8
+  },
+  {
+   "name": "Rive birb.riv (PNG 16장 포함)",
+   "min": 402.3,
+   "gzip": 396,
+   "brotli": 387.7
+  },
+  {
+   "name": "현재 PybaemSvg.tsx 소스 (참고)",
+   "min": 11.1,
+   "gzip": 2.7,
+   "brotli": 2.2
+  }
+ ]
+}

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>P0-07 파이뱀 리그</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f3f7ee; --card: #ffffff; --ink: #24331f; --muted: #6b7a63; --mint: #7ed6a8; --coral: #ff8a65;
+    --lemon: #fff176; --sky: #81d4fa; --line: #e3eadb; --chip: #f1f6ec; --chip-on: #2e7d32;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: radial-gradient(1200px 600px at 10% -10%, #e2f6e9 0, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #fff3d6 0, transparent 60%), var(--bg);
+    color: var(--ink); font-family: 'Gowun Dodum', system-ui, sans-serif; font-size: 15px; line-height: 1.55;
+  }
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 60px; }
+  header { margin: 6px 4px 18px; }
+  .kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  h1, h2, h3 { font-family: 'Jua', system-ui, sans-serif; font-weight: 400; margin: 0; }
+  h1 { font-size: 34px; margin: 4px 0 6px; }
+  h2 { font-size: 22px; margin-bottom: 4px; }
+  h3 { font-size: 15px; color: var(--muted); margin: 14px 0 6px; }
+  header p { max-width: 820px; margin: 0; color: #435140; }
+  .card { background: var(--card); border-radius: 26px; box-shadow: 0 2px 0 #dfe8d6, 0 18px 40px -24px rgba(46, 90, 40, .35); padding: 22px; margin-bottom: 22px; }
+  .hero { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 860px) { .hero { grid-template-columns: 1fr; } }
+  .stage { position: relative; border-radius: 22px; display: grid; place-items: center; padding: 34px 10px 30px; min-height: 380px; overflow: hidden; }
+  .stage.clay { background: radial-gradient(circle at 50% 35%, #ffffff 0, #e8f8ee 45%, #cdeedc 100%); box-shadow: inset 0 -10px 0 rgba(46,125,50,.08); }
+  .stage.paper { background: #fbf3e0; background-image: radial-gradient(rgba(120,90,50,.08) 1px, transparent 1px); background-size: 6px 6px; box-shadow: inset 0 0 0 2px #e6d6b5; }
+  .stage-badge { position: absolute; top: 12px; left: 14px; background: #fff; border-radius: 999px; padding: 4px 12px; font-family: 'Jua'; box-shadow: 0 2px 0 #e0e7d8; }
+  .stage-tip { position: absolute; bottom: 10px; font-size: 12px; color: var(--muted); }
+  .fps { position: absolute; top: 14px; right: 14px; font: 11px ui-monospace, monospace; color: var(--muted); }
+  .controls .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .chip { border: 0; background: var(--chip); color: var(--ink); border-radius: 999px; padding: 9px 14px; min-height: 40px; font: inherit; font-size: 14px; cursor: pointer;
+    box-shadow: 0 2px 0 #dbe5d2; transition: transform .12s, background .12s; }
+  .chip:hover { transform: translateY(-1px); }
+  .chip:active { transform: translateY(1px); box-shadow: 0 0 0 #dbe5d2; }
+  .chip.on { background: var(--chip-on); color: #fff; box-shadow: 0 2px 0 #1b5e20; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.15); }
+  .muted { color: var(--muted); margin: 0 0 14px; }
+  code { font: 12.5px ui-monospace, monospace; background: #f1f4ec; padding: 1px 5px; border-radius: 6px; }
+  .runtimes { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 14px; }
+  .rt { background: #f8fbf5; border-radius: 18px; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .rt-stage { height: 170px; display: grid; place-items: center; background: #fff; border-radius: 14px; }
+  .rt-title { font-family: 'Jua'; font-size: 15px; margin-top: 4px; }
+  .rt-note { font-size: 12.5px; color: var(--muted); }
+  .rt-buttons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .mini { border: 0; background: #e9f1e2; border-radius: 999px; padding: 5px 10px; font: inherit; font-size: 12.5px; cursor: pointer; min-height: 30px; }
+  .mini.on { background: #2e7d32; color: #fff; }
+  .gallery { display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; }
+  .gallery figure { margin: 0; text-align: center; background: #f8fbf5; border-radius: 16px; padding: 6px 6px 8px; }
+  .gallery figcaption { font-size: 13px; color: var(--muted); font-family: 'Jua'; }
+  .gallery.small { margin-top: 12px; align-items: end; justify-content: flex-start; gap: 12px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; }
+  @media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/dist/showcase.js"></script>
+</body>
+</html>

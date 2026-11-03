@@ -1,0 +1,36 @@
+{
+  "name": "p0-07-mascot-animation-spike",
+  "private": true,
+  "type": "module",
+  "description": "P0-07 마스코트 애니메이션 스파이크 (앱 코드 아님). SVG 리그(Framer Motion) vs Lottie(lottie-web, dotLottie) vs Rive",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "build": "node bench/build.mjs",
+    "serve": "node bench/serve.mjs",
+    "bundle-size": "node bench/bundle-size.mjs",
+    "gen:lottie": "node bench/gen-lottie.mjs",
+    "measure": "node bench/measure.mjs",
+    "strips": "node bench/strips.mjs"
+  },
+  "devDependencies": {
+    "@lottiefiles/dotlottie-react": "0.21.1",
+    "@lottiefiles/dotlottie-web": "0.82.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "@rive-app/canvas": "2.49.1",
+    "@rive-app/canvas-lite": "2.49.1",
+    "@rive-app/react-canvas": "4.38.0",
+    "@rive-app/webgl2": "2.49.1",
+    "@types/canvas-confetti": "1.9.0",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.6",
+    "canvas-confetti": "1.9.4",
+    "esbuild": "0.25.12",
+    "framer-motion": "12.38.0",
+    "lottie-react": "2.4.1",
+    "lottie-web": "5.13.0",
+    "playwright-core": "1.62.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "5.9.3"
+  }
+}

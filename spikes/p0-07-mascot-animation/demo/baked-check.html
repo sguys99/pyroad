@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:#fff;font:12px sans-serif">
+<div id="g" style="display:grid;grid-template-columns:repeat(7,130px);gap:2px"></div>
+<script src="/dist/lottie.min.js"></script>
+<script>
+(async () => {
+  const data = await (await fetch('/assets/generated/pybaem-rig-baked.json')).json();
+  const g = document.getElementById('g');
+  for (const m of data.markers) {
+    for (const off of [0.3]) {
+      const d = document.createElement('div'); d.style.cssText='width:130px;height:130px;outline:1px solid #eee'; g.appendChild(d);
+      const a = lottie.loadAnimation({ container: d, renderer: 'svg', loop: false, autoplay: false, animationData: JSON.parse(JSON.stringify(data)) });
+      a.goToAndStop(Math.round(m.tm + m.dr * off), true);
+    }
+  }
+  document.title = 'done';
+})();
+</script>
