@@ -15,3 +15,4 @@
 | P0-05 | Pyodide `input()` | **채택** (JSPI + Service Worker 폴백, 격리 헤더 불필요) | [P0-05-pyodide-input.md](P0-05-pyodide-input.md) |
 | P0-14 | 한글 웹폰트 로딩 | **채택** (자체 호스팅 + 랜딩 서브셋 + D2Coding) | [P0-14-korean-fonts.md](P0-14-korean-fonts.md) |
 | P0-07 | 마스코트 애니메이션 | **대안** (코드 기반 SVG 리그, Rive·Lottie 미채택) | [P0-07-mascot-animation.md](P0-07-mascot-animation.md) |
+| P0-16 | 저사양 자동 감지 | **채택** (정적 추정 + 실측 프레임으로 내리기만) | [P0-16-low-spec-detection.md](P0-16-low-spec-detection.md) |

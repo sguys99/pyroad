@@ -1,0 +1,214 @@
+{
+ "bcd": {
+  "timestamp": "2026-11-02T14:19:59.386Z",
+  "version": "8.1.8"
+ },
+ "browsers": [
+  "chrome",
+  "chrome_android",
+  "edge",
+  "firefox",
+  "firefox_android",
+  "safari",
+  "safari_ios",
+  "samsunginternet_android",
+  "webview_android"
+ ],
+ "rows": [
+  {
+   "name": "navigator.hardwareConcurrency",
+   "path": "api.Navigator.hardwareConcurrency",
+   "cells": [
+    "37",
+    "37",
+    "15",
+    "48",
+    "48",
+    "15.4",
+    "15.4",
+    "3.0",
+    "37"
+   ]
+  },
+  {
+   "name": "navigator.deviceMemory",
+   "path": "api.Navigator.deviceMemory",
+   "cells": [
+    "63",
+    "63",
+    "79",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "8.0",
+    "63"
+   ]
+  },
+  {
+   "name": "navigator.connection",
+   "path": "api.Navigator.connection",
+   "cells": [
+    "61",
+    "38",
+    "79",
+    "31–32(제거)",
+    "14–99(제거)",
+    "✗",
+    "✗",
+    "3.0",
+    "50"
+   ]
+  },
+  {
+   "name": "connection.saveData",
+   "path": "api.NetworkInformation.saveData",
+   "cells": [
+    "65",
+    "65",
+    "79",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "9.0",
+    "65"
+   ]
+  },
+  {
+   "name": "connection.effectiveType",
+   "path": "api.NetworkInformation.effectiveType",
+   "cells": [
+    "61",
+    "38",
+    "79",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "3.0",
+    "50"
+   ]
+  },
+  {
+   "name": "prefers-reduced-motion",
+   "path": "css.at-rules.media.prefers-reduced-motion",
+   "cells": [
+    "74",
+    "74",
+    "79",
+    "63",
+    "64",
+    "10.1",
+    "10.3",
+    "11.0",
+    "74"
+   ]
+  },
+  {
+   "name": "prefers-reduced-data",
+   "path": "css.at-rules.media.prefers-reduced-data",
+   "cells": [
+    "85 (플래그)",
+    "85 (플래그)",
+    "85 (플래그)",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "✗"
+   ]
+  },
+  {
+   "name": "Long Tasks (PerformanceLongTaskTiming)",
+   "path": "api.PerformanceLongTaskTiming",
+   "cells": [
+    "58",
+    "58",
+    "79",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "7.0",
+    "58"
+   ]
+  },
+  {
+   "name": "Long Animation Frames (PerformanceLongAnimationFrameTiming)",
+   "path": "api.PerformanceLongAnimationFrameTiming",
+   "cells": [
+    "123",
+    "123",
+    "123",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "27.0",
+    "123"
+   ]
+  },
+  {
+   "name": "navigator.getBattery()",
+   "path": "api.Navigator.getBattery",
+   "cells": [
+    "38",
+    "38",
+    "79",
+    "43–52(제거)",
+    "43–52(제거)",
+    "✗",
+    "✗",
+    "3.0",
+    "38"
+   ]
+  },
+  {
+   "name": "requestAnimationFrame",
+   "path": "api.Window.requestAnimationFrame",
+   "cells": [
+    "24",
+    "25",
+    "12",
+    "23",
+    "23",
+    "7",
+    "7",
+    "1.5",
+    "4.4"
+   ]
+  },
+  {
+   "name": "navigator.userAgentData.mobile",
+   "path": "api.NavigatorUAData.mobile",
+   "cells": [
+    "90",
+    "90",
+    "90",
+    "✗",
+    "✗",
+    "✗",
+    "✗",
+    "23.0",
+    "✗"
+   ]
+  },
+  {
+   "name": "matchMedia",
+   "path": "api.Window.matchMedia",
+   "cells": [
+    "9",
+    "18",
+    "12",
+    "6",
+    "6",
+    "5.1",
+    "5",
+    "1.0",
+    "3"
+   ]
+  }
+ ]
+}

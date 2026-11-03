@@ -1,0 +1,18 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P0-16 저사양 감지</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#24331f;--muted:#66735f}
+body{margin:0;font-family:'Gowun Dodum',system-ui,sans-serif;color:var(--ink);background:linear-gradient(#bfe9ff,#e9f9ef)}
+.scene{position:relative;min-height:100vh;overflow:hidden}
+.ambient{position:absolute;inset:0;pointer-events:none}
+.cloud{position:absolute;left:-30%;width:220px;height:70px;border-radius:40px;background:#fff;opacity:.75;filter:blur(6px);animation:drift linear infinite}
+@keyframes drift{to{transform:translateX(160vw)}}
+.rigs{position:relative;display:flex;gap:18px;justify-content:center;align-items:end;padding:40px 16px 10px;flex-wrap:wrap}
+.card{background:rgba(255,255,255,.55);border-radius:28px;padding:10px;box-shadow:0 30px 60px -20px rgba(30,80,40,.45),0 10px 24px rgba(30,80,40,.2);backdrop-filter:blur(10px)}
+.light .card,[data-motion="lite"] .card,[data-motion="minimal"] .card{backdrop-filter:none;box-shadow:0 2px 0 rgba(30,80,40,.15);background:rgba(255,255,255,.8)}
+.panel{position:relative;margin:12px auto;max-width:560px;background:#fff;border-radius:20px;padding:14px 18px;box-shadow:0 2px 0 #dde5d4}
+.tier{font:22px Jua}.tier em{font:14px 'Gowun Dodum';color:var(--muted)}.row{margin-top:4px}.small{font-size:12.5px;color:var(--muted)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:1px}.dot.full{background:#66BB6A}.dot.lite{background:#FFCA28}.dot.minimal{background:#90A4AE}
+.btns button{border:0;border-radius:999px;padding:7px 12px;margin-right:6px;background:#eef3e8;font:inherit;min-height:36px}.btns button.on{background:#2e7d32;color:#fff}
+@media (prefers-reduced-motion: reduce){.cloud{animation:none}}
+</style></head><body><div id="root"></div><script type="module" src="/dist/main.js"></script></body></html>
