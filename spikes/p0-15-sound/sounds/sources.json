@@ -1,0 +1,21 @@
+{
+  "license": "CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)",
+  "author": "Kenney (www.kenney.nl) — 출처 표기는 의무가 아니지만 크레딧 페이지에 남기기를 권장",
+  "downloaded": "2026-11-03",
+  "processing": "scripts/build-sounds.sh: 앞 무음 제거 → 모노 48kHz → RMS 목표 gain → alimiter -1.5 dBFS → Opus 64k(.webm) / AAC 96k(.m4a) / MP3 96k(.mp3, 비교용)",
+  "review": "파일명·길이·레벨 기준으로 고른 초안. 사람이 직접 듣고 고르는 검수는 P2-14에서 한다",
+  "sounds": {
+    "tap":       { "role": "클릭/탭",               "pack": "interface-sounds", "files": ["Audio/click_001.ogg"],                                   "targetRmsDb": -24 },
+    "blip":      { "role": "타이핑/대사 블립",      "pack": "interface-sounds", "files": ["Audio/tick_004.ogg"],                                    "targetRmsDb": -24 },
+    "correct":   { "role": "정답",                  "pack": "interface-sounds", "files": ["Audio/confirmation_002.ogg"],                            "targetRmsDb": -19 },
+    "wrong":     { "role": "오답 (부드럽게)",       "pack": "interface-sounds", "files": ["Audio/error_006.ogg"],                                   "targetRmsDb": -22 },
+    "coin":      { "role": "코인",                  "pack": "rpg-audio",        "files": ["Audio/handleCoins2.ogg"],                                "targetRmsDb": -19 },
+    "star":      { "role": "별 획득 (1→3 상승, rate 1 / 1.26 / 1.5)", "pack": "interface-sounds", "files": ["Audio/glass_001.ogg"],           "targetRmsDb": -20 },
+    "run":       { "role": "실행 버튼",             "pack": "digital-audio",    "files": ["Audio/phaseJump1.ogg"],                                  "targetRmsDb": -20 },
+    "bug":       { "role": "에러 (버그버그 등장)",  "pack": "digital-audio",    "files": ["Audio/lowRandom.ogg"],                                   "targetRmsDb": -21 },
+    "unlock":    { "role": "스테이지 해제",         "pack": "rpg-audio + interface-sounds", "files": ["Audio/metalLatch.ogg", "Audio/maximize_004.ogg (+150ms)"], "targetRmsDb": -19 },
+    "chest":     { "role": "보물상자",              "pack": "rpg-audio",        "files": ["Audio/creak1.ogg", "Audio/handleCoins.ogg (+300ms)"],    "targetRmsDb": -19 },
+    "levelup":   { "role": "레벨업 징글",           "pack": "music-jingles",    "files": ["Audio/8-Bit jingles/jingles_NES00.ogg"],                 "targetRmsDb": -18 },
+    "celebrate": { "role": "축하 (스테이지 클리어)", "pack": "music-jingles",   "files": ["Audio/Steel jingles/jingles_STEEL07.ogg"],               "targetRmsDb": -18 }
+  }
+}

@@ -1,0 +1,1493 @@
+{
+ "browser": "webkit",
+ "version": "26.5",
+ "at": "2026-11-03T10:00:55.819Z",
+ "probeBeforeGesture": {
+  "initial": "suspended",
+  "hasAudioSession": false,
+  "audioSessionType": null,
+  "resumeWithoutGesture": "pending>1s",
+  "after": "suspended",
+  "mediaPlayWithoutGesture": "played",
+  "console": []
+ },
+ "activationProbe": {
+  "hasUserActivation": true,
+  "sequence": [
+   "pointerdown(touch):true",
+   "touchstart(-):true",
+   "pointerup(touch):true",
+   "touchend(-):true",
+   "click(mouse):true"
+  ]
+ },
+ "webaudio": {
+  "engine": "webaudio",
+  "cpu": 1,
+  "touch": false,
+  "steps": {
+   "beforeGesture": {
+    "ctxCreated": [],
+    "notes": [
+     "engine constructed in 3.00 ms",
+     "audioSession before unlock: n/a"
+    ],
+    "hasAudioSession": false,
+    "userActivationApi": true
+   },
+   "firstGesture": {
+    "gestureType": "pointerdown",
+    "ctxCreatedInGesture": [
+     true
+    ],
+    "ctxCount": 1,
+    "ctxInitialState": [
+     "suspended"
+    ],
+    "sampleRate": 44100,
+    "baseLatency": 0.0029024943310657597,
+    "gestureToRunningMs": 43,
+    "firstStartMs": 63,
+    "firstSoundPlayed": true,
+    "drops": [],
+    "decodesSoFar": 12,
+    "lastDecodeAfterGestureMs": 399,
+    "audioSessionType": null
+   },
+   "decode": {
+    "api": {
+     "n": 12,
+     "median": 28,
+     "p95": 63,
+     "max": 73,
+     "min": 8
+    },
+    "errors": [],
+    "perFile": [
+     {
+      "id": "tap",
+      "src": "tap.webm",
+      "ms": 25,
+      "bytes": 2355,
+      "duration": 0.097
+     },
+     {
+      "id": "correct",
+      "src": "correct.webm",
+      "ms": 35,
+      "bytes": 5915,
+      "duration": 0.539
+     },
+     {
+      "id": "wrong",
+      "src": "wrong.webm",
+      "ms": 44,
+      "bytes": 6374,
+      "duration": 0.477
+     },
+     {
+      "id": "coin",
+      "src": "coin.webm",
+      "ms": 51,
+      "bytes": 3686,
+      "duration": 0.286
+     },
+     {
+      "id": "star",
+      "src": "star.webm",
+      "ms": 63,
+      "bytes": 3494,
+      "duration": 0.276
+     },
+     {
+      "id": "run",
+      "src": "run.webm",
+      "ms": 74,
+      "bytes": 3864,
+      "duration": 0.358
+     },
+     {
+      "id": "unlock",
+      "src": "unlock.webm",
+      "ms": 10,
+      "bytes": 6488,
+      "duration": 0.568
+     },
+     {
+      "id": "levelup",
+      "src": "levelup.webm",
+      "ms": 26,
+      "bytes": 23956,
+      "duration": 1.758
+     },
+     {
+      "id": "chest",
+      "src": "chest.webm",
+      "ms": 43,
+      "bytes": 11823,
+      "duration": 1.083
+     },
+     {
+      "id": "bug",
+      "src": "bug.webm",
+      "ms": 8,
+      "bytes": 4613,
+      "duration": 0.45
+     },
+     {
+      "id": "blip",
+      "src": "blip.webm",
+      "ms": 16,
+      "bytes": 1681,
+      "duration": 0.055
+     },
+     {
+      "id": "celebrate",
+      "src": "celebrate.webm",
+      "ms": 28,
+      "bytes": 15477,
+      "duration": 1.555
+     }
+    ],
+    "count": 12
+   },
+   "latency": {
+    "pointerdownToStart": {
+     "n": 30,
+     "median": 2,
+     "p95": 4,
+     "max": 4,
+     "min": 1
+    },
+    "missing": 0,
+    "debug": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "baseLatency": 0.0029024943310657597,
+     "outputLatency": 0,
+     "voices": 0,
+     "voicesById": {
+      "tap": 0,
+      "correct": 0,
+      "wrong": 0,
+      "coin": 0,
+      "star": 0,
+      "run": 0,
+      "blip": 0,
+      "unlock": 0,
+      "bug": 0,
+      "chest": 0,
+      "levelup": 0,
+      "celebrate": 0
+     },
+     "buffers": 12,
+     "bgmGains": [
+      {
+       "id": null,
+       "gain": 0,
+       "paused": true
+      },
+      {
+       "id": null,
+       "gain": 0,
+       "paused": true
+      }
+     ]
+    }
+   },
+   "coinBurst": {
+    "starts": 10,
+    "voicesSampled": [
+     3,
+     5,
+     6,
+     6,
+     6,
+     5
+    ],
+    "errors": 0
+   },
+   "bgm": {
+    "world1": {
+     "playing": "world1",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "baseLatency": 0.0029024943310657597,
+      "outputLatency": 0,
+      "voices": 0,
+      "voicesById": {
+       "tap": 0,
+       "correct": 0,
+       "wrong": 0,
+       "coin": 0,
+       "star": 0,
+       "run": 0,
+       "blip": 0,
+       "unlock": 0,
+       "bug": 0,
+       "chest": 0,
+       "levelup": 0,
+       "celebrate": 0
+      },
+      "buffers": 12,
+      "bgmGains": [
+       {
+        "id": "world1",
+        "gain": 1,
+        "paused": false
+       },
+       {
+        "id": null,
+        "gain": 0,
+        "paused": true
+       }
+      ]
+     }
+    },
+    "crossfadeAt400ms": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "baseLatency": 0.0029024943310657597,
+     "outputLatency": 0,
+     "voices": 0,
+     "voicesById": {
+      "tap": 0,
+      "correct": 0,
+      "wrong": 0,
+      "coin": 0,
+      "star": 0,
+      "run": 0,
+      "blip": 0,
+      "unlock": 0,
+      "bug": 0,
+      "chest": 0,
+      "levelup": 0,
+      "celebrate": 0
+     },
+     "buffers": 12,
+     "bgmGains": [
+      {
+       "id": "world1",
+       "gain": 0.4739515781402588,
+       "paused": false
+      },
+      {
+       "id": "world2",
+       "gain": 0.5260484218597412,
+       "paused": false
+      }
+     ]
+    },
+    "world2": {
+     "playing": "world2",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "baseLatency": 0.0029024943310657597,
+      "outputLatency": 0,
+      "voices": 0,
+      "voicesById": {
+       "tap": 0,
+       "correct": 0,
+       "wrong": 0,
+       "coin": 0,
+       "star": 0,
+       "run": 0,
+       "blip": 0,
+       "unlock": 0,
+       "bug": 0,
+       "chest": 0,
+       "levelup": 0,
+       "celebrate": 0
+      },
+      "buffers": 12,
+      "bgmGains": [
+       {
+        "id": "world1",
+        "gain": 0,
+        "paused": true
+       },
+       {
+        "id": "world2",
+        "gain": 1,
+        "paused": false
+       }
+      ]
+     }
+    },
+    "bgmPlayingMetrics": [
+     {
+      "type": "bgm-playing",
+      "id": "world1",
+      "src": "http://127.0.0.1:3115/generated/bgm-world1.webm",
+      "ms": 88
+     },
+     {
+      "type": "bgm-playing",
+      "id": "world2",
+      "src": "http://127.0.0.1:3115/generated/bgm-world2.webm",
+      "ms": 98
+     }
+    ],
+    "bgmErrors": []
+   },
+   "visibility": {
+    "hidden": {
+     "state": "suspended",
+     "playingBgm": null,
+     "ctxState": "suspended",
+     "bgm": [
+      {
+       "id": "world1",
+       "gain": 0,
+       "paused": true
+      },
+      {
+       "id": "world2",
+       "gain": 0,
+       "paused": true
+      }
+     ]
+    },
+    "visible": {
+     "state": "running",
+     "playingBgm": "world2",
+     "ctxState": "running",
+     "bgm": [
+      {
+       "id": "world1",
+       "gain": 0,
+       "paused": true
+      },
+      {
+       "id": "world2",
+       "gain": 1,
+       "paused": false
+      }
+     ]
+    }
+   },
+   "mute": {
+    "playingBgmWhileMuted": null,
+    "startsWhileMuted": 0,
+    "persisted": "{\"version\":1,\"muted\":false,\"master\":0.8,\"sfx\":{\"enabled\":true,\"volume\":0.7},\"bgm\":{\"enabled\":true,\"volume\":0.4},\"voice\":{\"enabled\":true,\"volume\":0.9},\"updatedAt\":1793700075321}"
+   }
+  },
+  "console": []
+ },
+ "howler": {
+  "engine": "howler",
+  "cpu": 1,
+  "touch": false,
+  "steps": {
+   "beforeGesture": {
+    "ctxCreated": [],
+    "notes": [
+     "engine constructed in 3.00 ms",
+     "audioSession before unlock: n/a"
+    ],
+    "hasAudioSession": false,
+    "userActivationApi": true
+   },
+   "firstGesture": {
+    "gestureType": "pointerdown",
+    "ctxCreatedInGesture": [
+     true
+    ],
+    "ctxCount": 1,
+    "ctxInitialState": [
+     "suspended"
+    ],
+    "sampleRate": 44100,
+    "baseLatency": 0.0029024943310657597,
+    "gestureToRunningMs": 63,
+    "firstStartMs": 68,
+    "firstSoundPlayed": true,
+    "drops": [],
+    "decodesSoFar": 12,
+    "lastDecodeAfterGestureMs": 170,
+    "audioSessionType": null
+   },
+   "decode": {
+    "api": {
+     "n": 12,
+     "median": 61,
+     "p95": 102,
+     "max": 112,
+     "min": 19
+    },
+    "errors": [],
+    "perFile": [
+     {
+      "id": "tap",
+      "src": "tap.webm",
+      "ms": 62,
+      "bytes": 0,
+      "duration": 0.097
+     },
+     {
+      "id": "correct",
+      "src": "correct.webm",
+      "ms": 47,
+      "bytes": 0,
+      "duration": 0.539
+     },
+     {
+      "id": "wrong",
+      "src": "wrong.webm",
+      "ms": 54,
+      "bytes": 0,
+      "duration": 0.477
+     },
+     {
+      "id": "coin",
+      "src": "coin.webm",
+      "ms": 61,
+      "bytes": 0,
+      "duration": 0.286
+     },
+     {
+      "id": "star",
+      "src": "star.webm",
+      "ms": 66,
+      "bytes": 0,
+      "duration": 0.276
+     },
+     {
+      "id": "levelup",
+      "src": "levelup.webm",
+      "ms": 79,
+      "bytes": 0,
+      "duration": 1.758
+     },
+     {
+      "id": "unlock",
+      "src": "unlock.webm",
+      "ms": 84,
+      "bytes": 0,
+      "duration": 0.568
+     },
+     {
+      "id": "chest",
+      "src": "chest.webm",
+      "ms": 97,
+      "bytes": 0,
+      "duration": 1.083
+     },
+     {
+      "id": "run",
+      "src": "run.webm",
+      "ms": 109,
+      "bytes": 0,
+      "duration": 0.358
+     },
+     {
+      "id": "bug",
+      "src": "bug.webm",
+      "ms": 117,
+      "bytes": 0,
+      "duration": 0.45
+     },
+     {
+      "id": "blip",
+      "src": "blip.webm",
+      "ms": 125,
+      "bytes": 0,
+      "duration": 0.055
+     },
+     {
+      "id": "celebrate",
+      "src": "celebrate.webm",
+      "ms": 135,
+      "bytes": 0,
+      "duration": 1.555
+     }
+    ],
+    "count": 12
+   },
+   "latency": {
+    "pointerdownToStart": {
+     "n": 30,
+     "median": 2,
+     "p95": 4,
+     "max": 7,
+     "min": 1
+    },
+    "missing": 0,
+    "debug": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "howlerState": "running",
+     "usingWebAudio": true,
+     "voices": 0
+    }
+   },
+   "coinBurst": {
+    "starts": 10,
+    "voicesSampled": [
+     3,
+     5,
+     6,
+     6,
+     6,
+     4
+    ],
+    "errors": 0
+   },
+   "bgm": {
+    "world1": {
+     "playing": "world1",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "howlerState": "running",
+      "usingWebAudio": true,
+      "voices": 0
+     }
+    },
+    "crossfadeAt400ms": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "howlerState": "running",
+     "usingWebAudio": true,
+     "voices": 0
+    },
+    "world2": {
+     "playing": "world2",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "howlerState": "running",
+      "usingWebAudio": true,
+      "voices": 0
+     }
+    },
+    "bgmPlayingMetrics": [
+     {
+      "type": "bgm-playing",
+      "id": "world1",
+      "src": "/generated/bgm-world1.webm",
+      "ms": 92
+     },
+     {
+      "type": "bgm-playing",
+      "id": "world2",
+      "src": "/generated/bgm-world2.webm",
+      "ms": 73
+     }
+    ],
+    "bgmErrors": []
+   },
+   "visibility": {
+    "hidden": {
+     "state": "suspended",
+     "playingBgm": null,
+     "ctxState": "suspended"
+    },
+    "visible": {
+     "state": "running",
+     "playingBgm": "world2",
+     "ctxState": "running"
+    }
+   },
+   "mute": {
+    "playingBgmWhileMuted": null,
+    "startsWhileMuted": 0,
+    "persisted": "{\"version\":1,\"muted\":false,\"master\":0.8,\"sfx\":{\"enabled\":true,\"volume\":0.7},\"bgm\":{\"enabled\":true,\"volume\":0.4},\"voice\":{\"enabled\":true,\"volume\":0.9},\"updatedAt\":1793700092661}"
+   },
+   "afterIdle31s": {
+    "ctxStateBefore": "suspended",
+    "latencyMs": 20
+   }
+  },
+  "console": []
+ },
+ "howlerEager": {
+  "engine": "howler-eager",
+  "cpu": 1,
+  "touch": false,
+  "steps": {
+   "beforeGesture": {
+    "ctxCreated": [
+     {
+      "t": 93,
+      "state": "suspended",
+      "sampleRate": 44100,
+      "baseLatency": 0.0029024943310657597,
+      "inGesture": false
+     }
+    ],
+    "notes": [
+     "engine constructed in 8.00 ms",
+     "audioSession before unlock: n/a"
+    ],
+    "hasAudioSession": false,
+    "userActivationApi": true
+   },
+   "firstGesture": {
+    "gestureType": "pointerdown",
+    "ctxCreatedInGesture": [
+     false
+    ],
+    "ctxCount": 1,
+    "ctxInitialState": [
+     "suspended"
+    ],
+    "sampleRate": 44100,
+    "baseLatency": 0.0029024943310657597,
+    "gestureToRunningMs": 42,
+    "firstStartMs": null,
+    "firstSoundPlayed": false,
+    "drops": [],
+    "decodesSoFar": 12,
+    "lastDecodeAfterGestureMs": -807,
+    "audioSessionType": null
+   },
+   "decode": {
+    "api": {
+     "n": 12,
+     "median": 69,
+     "p95": 114,
+     "max": 127,
+     "min": 29
+    },
+    "errors": [],
+    "perFile": [
+     {
+      "id": "tap",
+      "src": "tap.webm",
+      "ms": 48,
+      "bytes": 0,
+      "duration": 0.097
+     },
+     {
+      "id": "correct",
+      "src": "correct.webm",
+      "ms": 54,
+      "bytes": 0,
+      "duration": 0.539
+     },
+     {
+      "id": "wrong",
+      "src": "wrong.webm",
+      "ms": 62,
+      "bytes": 0,
+      "duration": 0.477
+     },
+     {
+      "id": "coin",
+      "src": "coin.webm",
+      "ms": 69,
+      "bytes": 0,
+      "duration": 0.286
+     },
+     {
+      "id": "unlock",
+      "src": "unlock.webm",
+      "ms": 83,
+      "bytes": 0,
+      "duration": 0.568
+     },
+     {
+      "id": "star",
+      "src": "star.webm",
+      "ms": 89,
+      "bytes": 0,
+      "duration": 0.276
+     },
+     {
+      "id": "run",
+      "src": "run.webm",
+      "ms": 97,
+      "bytes": 0,
+      "duration": 0.358
+     },
+     {
+      "id": "chest",
+      "src": "chest.webm",
+      "ms": 110,
+      "bytes": 0,
+      "duration": 1.083
+     },
+     {
+      "id": "levelup",
+      "src": "levelup.webm",
+      "ms": 127,
+      "bytes": 0,
+      "duration": 1.758
+     },
+     {
+      "id": "bug",
+      "src": "bug.webm",
+      "ms": 134,
+      "bytes": 0,
+      "duration": 0.45
+     },
+     {
+      "id": "blip",
+      "src": "blip.webm",
+      "ms": 140,
+      "bytes": 0,
+      "duration": 0.055
+     },
+     {
+      "id": "celebrate",
+      "src": "celebrate.webm",
+      "ms": 154,
+      "bytes": 0,
+      "duration": 1.555
+     }
+    ],
+    "count": 12
+   },
+   "latency": {
+    "pointerdownToStart": null,
+    "missing": 30,
+    "debug": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "howlerState": "interrupted",
+     "usingWebAudio": true,
+     "voices": 30
+    }
+   },
+   "coinBurst": {
+    "starts": 0,
+    "voicesSampled": [
+     33,
+     33,
+     33,
+     33,
+     33,
+     33
+    ],
+    "errors": 0
+   },
+   "bgm": {
+    "world1": {
+     "playing": "world1",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "howlerState": "interrupted",
+      "usingWebAudio": true,
+      "voices": 33
+     }
+    },
+    "crossfadeAt400ms": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "howlerState": "interrupted",
+     "usingWebAudio": true,
+     "voices": 33
+    },
+    "world2": {
+     "playing": "world2",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "howlerState": "interrupted",
+      "usingWebAudio": true,
+      "voices": 33
+     }
+    },
+    "bgmPlayingMetrics": [
+     {
+      "type": "bgm-playing",
+      "id": "world1",
+      "src": "/generated/bgm-world1.webm",
+      "ms": 369
+     },
+     {
+      "type": "bgm-playing",
+      "id": "world2",
+      "src": "/generated/bgm-world2.webm",
+      "ms": 209
+     }
+    ],
+    "bgmErrors": []
+   },
+   "visibility": {
+    "hidden": {
+     "state": "suspended",
+     "playingBgm": null,
+     "ctxState": "suspended"
+    },
+    "visible": {
+     "state": "running",
+     "playingBgm": "world2",
+     "ctxState": "running"
+    }
+   },
+   "mute": {
+    "playingBgmWhileMuted": null,
+    "startsWhileMuted": 0,
+    "persisted": "{\"version\":1,\"muted\":false,\"master\":0.8,\"sfx\":{\"enabled\":true,\"volume\":0.7},\"bgm\":{\"enabled\":true,\"volume\":0.4},\"voice\":{\"enabled\":true,\"volume\":0.9},\"updatedAt\":1793700143370}"
+   }
+  },
+  "console": []
+ },
+ "webaudioTouch": {
+  "engine": "webaudio",
+  "cpu": 1,
+  "touch": true,
+  "steps": {
+   "beforeGesture": {
+    "ctxCreated": [],
+    "notes": [
+     "engine constructed in 3.00 ms",
+     "audioSession before unlock: n/a"
+    ],
+    "hasAudioSession": false,
+    "userActivationApi": true
+   },
+   "firstGesture": {
+    "gestureType": "pointerdown",
+    "ctxCreatedInGesture": [
+     true
+    ],
+    "ctxCount": 1,
+    "ctxInitialState": [
+     "suspended"
+    ],
+    "sampleRate": 44100,
+    "baseLatency": 0.0029024943310657597,
+    "gestureToRunningMs": 82,
+    "firstStartMs": 99,
+    "firstSoundPlayed": true,
+    "drops": [],
+    "decodesSoFar": 12,
+    "lastDecodeAfterGestureMs": 601,
+    "audioSessionType": null
+   },
+   "decode": {
+    "api": {
+     "n": 12,
+     "median": 61,
+     "p95": 84,
+     "max": 105,
+     "min": 30
+    },
+    "errors": [],
+    "perFile": [
+     {
+      "id": "tap",
+      "src": "tap.webm",
+      "ms": 30,
+      "bytes": 2355,
+      "duration": 0.097
+     },
+     {
+      "id": "correct",
+      "src": "correct.webm",
+      "ms": 38,
+      "bytes": 5915,
+      "duration": 0.539
+     },
+     {
+      "id": "wrong",
+      "src": "wrong.webm",
+      "ms": 53,
+      "bytes": 6374,
+      "duration": 0.477
+     },
+     {
+      "id": "coin",
+      "src": "coin.webm",
+      "ms": 65,
+      "bytes": 3686,
+      "duration": 0.286
+     },
+     {
+      "id": "star",
+      "src": "star.webm",
+      "ms": 73,
+      "bytes": 3494,
+      "duration": 0.276
+     },
+     {
+      "id": "run",
+      "src": "run.webm",
+      "ms": 84,
+      "bytes": 3864,
+      "duration": 0.358
+     },
+     {
+      "id": "levelup",
+      "src": "levelup.webm",
+      "ms": 32,
+      "bytes": 23956,
+      "duration": 1.758
+     },
+     {
+      "id": "unlock",
+      "src": "unlock.webm",
+      "ms": 56,
+      "bytes": 6488,
+      "duration": 0.568
+     },
+     {
+      "id": "chest",
+      "src": "chest.webm",
+      "ms": 74,
+      "bytes": 11823,
+      "duration": 1.083
+     },
+     {
+      "id": "bug",
+      "src": "bug.webm",
+      "ms": 61,
+      "bytes": 4613,
+      "duration": 0.45
+     },
+     {
+      "id": "blip",
+      "src": "blip.webm",
+      "ms": 78,
+      "bytes": 1681,
+      "duration": 0.055
+     },
+     {
+      "id": "celebrate",
+      "src": "celebrate.webm",
+      "ms": 106,
+      "bytes": 15477,
+      "duration": 1.555
+     }
+    ],
+    "count": 12
+   },
+   "latency": {
+    "pointerdownToStart": {
+     "n": 30,
+     "median": 2,
+     "p95": 11,
+     "max": 12,
+     "min": 1
+    },
+    "missing": 0,
+    "debug": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "baseLatency": 0.0029024943310657597,
+     "outputLatency": 0,
+     "voices": 0,
+     "voicesById": {
+      "tap": 0,
+      "correct": 0,
+      "wrong": 0,
+      "coin": 0,
+      "star": 0,
+      "run": 0,
+      "blip": 0,
+      "unlock": 0,
+      "bug": 0,
+      "chest": 0,
+      "levelup": 0,
+      "celebrate": 0
+     },
+     "buffers": 12,
+     "bgmGains": [
+      {
+       "id": null,
+       "gain": 0,
+       "paused": true
+      },
+      {
+       "id": null,
+       "gain": 0,
+       "paused": true
+      }
+     ]
+    }
+   },
+   "coinBurst": {
+    "starts": 10,
+    "voicesSampled": [
+     3,
+     5,
+     6,
+     6,
+     6,
+     3
+    ],
+    "errors": 0
+   },
+   "bgm": {
+    "world1": {
+     "playing": "world1",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "baseLatency": 0.0029024943310657597,
+      "outputLatency": 0,
+      "voices": 0,
+      "voicesById": {
+       "tap": 0,
+       "correct": 0,
+       "wrong": 0,
+       "coin": 0,
+       "star": 0,
+       "run": 0,
+       "blip": 0,
+       "unlock": 0,
+       "bug": 0,
+       "chest": 0,
+       "levelup": 0,
+       "celebrate": 0
+      },
+      "buffers": 12,
+      "bgmGains": [
+       {
+        "id": "world1",
+        "gain": 1,
+        "paused": false
+       },
+       {
+        "id": null,
+        "gain": 0,
+        "paused": true
+       }
+      ]
+     }
+    },
+    "crossfadeAt400ms": {
+     "ctxState": "running",
+     "sampleRate": 44100,
+     "baseLatency": 0.0029024943310657597,
+     "outputLatency": 0,
+     "voices": 0,
+     "voicesById": {
+      "tap": 0,
+      "correct": 0,
+      "wrong": 0,
+      "coin": 0,
+      "star": 0,
+      "run": 0,
+      "blip": 0,
+      "unlock": 0,
+      "bug": 0,
+      "chest": 0,
+      "levelup": 0,
+      "celebrate": 0
+     },
+     "buffers": 12,
+     "bgmGains": [
+      {
+       "id": "world1",
+       "gain": 0.46669530868530273,
+       "paused": false
+      },
+      {
+       "id": "world2",
+       "gain": 0.5333046913146973,
+       "paused": false
+      }
+     ]
+    },
+    "world2": {
+     "playing": "world2",
+     "dbg": {
+      "ctxState": "running",
+      "sampleRate": 44100,
+      "baseLatency": 0.0029024943310657597,
+      "outputLatency": 0,
+      "voices": 0,
+      "voicesById": {
+       "tap": 0,
+       "correct": 0,
+       "wrong": 0,
+       "coin": 0,
+       "star": 0,
+       "run": 0,
+       "blip": 0,
+       "unlock": 0,
+       "bug": 0,
+       "chest": 0,
+       "levelup": 0,
+       "celebrate": 0
+      },
+      "buffers": 12,
+      "bgmGains": [
+       {
+        "id": "world1",
+        "gain": 0,
+        "paused": true
+       },
+       {
+        "id": "world2",
+        "gain": 1,
+        "paused": false
+       }
+      ]
+     }
+    },
+    "bgmPlayingMetrics": [
+     {
+      "type": "bgm-playing",
+      "id": "world1",
+      "src": "http://127.0.0.1:3115/generated/bgm-world1.webm",
+      "ms": 152
+     },
+     {
+      "type": "bgm-playing",
+      "id": "world2",
+      "src": "http://127.0.0.1:3115/generated/bgm-world2.webm",
+      "ms": 121
+     }
+    ],
+    "bgmErrors": []
+   },
+   "visibility": {
+    "hidden": {
+     "state": "suspended",
+     "playingBgm": null,
+     "ctxState": "suspended",
+     "bgm": [
+      {
+       "id": "world1",
+       "gain": 0,
+       "paused": true
+      },
+      {
+       "id": "world2",
+       "gain": 0,
+       "paused": true
+      }
+     ]
+    },
+    "visible": {
+     "state": "running",
+     "playingBgm": "world2",
+     "ctxState": "running",
+     "bgm": [
+      {
+       "id": "world1",
+       "gain": 0,
+       "paused": true
+      },
+      {
+       "id": "world2",
+       "gain": 1,
+       "paused": false
+      }
+     ]
+    }
+   },
+   "mute": {
+    "playingBgmWhileMuted": null,
+    "startsWhileMuted": 0,
+    "persisted": "{\"version\":1,\"muted\":false,\"master\":0.8,\"sfx\":{\"enabled\":true,\"volume\":0.7},\"bgm\":{\"enabled\":true,\"volume\":0.4},\"voice\":{\"enabled\":true,\"volume\":0.9},\"updatedAt\":1793700162771}"
+   }
+  },
+  "console": []
+ },
+ "react": {
+  "before": {
+   "ctx": 0,
+   "text": "idle · bgm - (원함 -)"
+  },
+  "ctxCount": 1,
+  "ctxInGesture": [
+   true
+  ],
+  "starts": 1,
+  "w1": "running · bgm world1 (원함 world1)",
+  "w2": "running · bgm world2 (원함 world2)",
+  "left": "running · bgm - (원함 -)",
+  "console": []
+ },
+ "gap": {
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Safari/605.1.15",
+  "sampleRate": 44100,
+  "canPlay": {
+   "wav": "maybe",
+   "webm": "probably",
+   "ogg": "probably",
+   "mp3": "maybe",
+   "m4a": "probably"
+  },
+  "bufferAnalysis": [
+   {
+    "file": "generated/loop440.wav",
+    "ok": true,
+    "decodeMs": 31,
+    "bytes": 384078,
+    "lengthSamples": 176400,
+    "expectedSamples": 176400,
+    "extraSamples": 0,
+    "leadSilenceMs": 0,
+    "tailSilenceMs": 0,
+    "bufferLoopGapMs": 0
+   },
+   {
+    "file": "generated/loop440.webm",
+    "ok": true,
+    "decodeMs": 47,
+    "bytes": 62580,
+    "lengthSamples": 176400,
+    "expectedSamples": 176400,
+    "extraSamples": 0,
+    "leadSilenceMs": 0,
+    "tailSilenceMs": 0,
+    "bufferLoopGapMs": 0
+   },
+   {
+    "file": "generated/loop440.ogg",
+    "ok": true,
+    "decodeMs": 36,
+    "bytes": 61305,
+    "lengthSamples": 176400,
+    "expectedSamples": 176400,
+    "extraSamples": 0,
+    "leadSilenceMs": 0,
+    "tailSilenceMs": 0,
+    "bufferLoopGapMs": 0
+   },
+   {
+    "file": "generated/loop440.mp3",
+    "ok": true,
+    "decodeMs": 30,
+    "bytes": 64941,
+    "lengthSamples": 177811,
+    "expectedSamples": 176400,
+    "extraSamples": 1411,
+    "leadSilenceMs": 22.993197278911563,
+    "tailSilenceMs": 8.956916099773242,
+    "bufferLoopGapMs": 31.950113378684808
+   },
+   {
+    "file": "generated/loop440.m4a",
+    "ok": true,
+    "decodeMs": 111,
+    "bytes": 64445,
+    "lengthSamples": 176401,
+    "expectedSamples": 176400,
+    "extraSamples": 1,
+    "leadSilenceMs": 0,
+    "tailSilenceMs": 0,
+    "bufferLoopGapMs": 0
+   }
+  ],
+  "mediaLoop": [
+   {
+    "file": "generated/loop440.wav",
+    "ok": true,
+    "recordedMs": 9004.467120181405,
+    "gaps": [
+     {
+      "atMs": 3080.0226757369614,
+      "ms": 10.634920634920634
+     },
+     {
+      "atMs": 6010.680272108843,
+      "ms": 10.657596371882086
+     },
+     {
+      "atMs": 8928.027210884353,
+      "ms": 10.634920634920634
+     }
+    ],
+    "maxGapMs": 10.657596371882086
+   },
+   {
+    "file": "generated/loop440.webm",
+    "ok": false,
+    "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+   },
+   {
+    "file": "generated/loop440.ogg",
+    "ok": false,
+    "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+   },
+   {
+    "file": "generated/loop440.mp3",
+    "ok": false,
+    "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+   },
+   {
+    "file": "generated/loop440.m4a",
+    "ok": false,
+    "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+   }
+  ],
+  "sfxDecode": [
+   {
+    "file": "sounds/tap.webm",
+    "ok": true,
+    "bytes": 2355,
+    "decodeMs": 18
+   },
+   {
+    "file": "sounds/blip.webm",
+    "ok": true,
+    "bytes": 1681,
+    "decodeMs": 17
+   },
+   {
+    "file": "sounds/correct.webm",
+    "ok": true,
+    "bytes": 5915,
+    "decodeMs": 14
+   },
+   {
+    "file": "sounds/wrong.webm",
+    "ok": true,
+    "bytes": 6374,
+    "decodeMs": 17
+   },
+   {
+    "file": "sounds/coin.webm",
+    "ok": true,
+    "bytes": 3686,
+    "decodeMs": 13
+   },
+   {
+    "file": "sounds/star.webm",
+    "ok": true,
+    "bytes": 3494,
+    "decodeMs": 8
+   },
+   {
+    "file": "sounds/run.webm",
+    "ok": true,
+    "bytes": 3864,
+    "decodeMs": 11
+   },
+   {
+    "file": "sounds/bug.webm",
+    "ok": true,
+    "bytes": 4613,
+    "decodeMs": 15
+   },
+   {
+    "file": "sounds/unlock.webm",
+    "ok": true,
+    "bytes": 6488,
+    "decodeMs": 14
+   },
+   {
+    "file": "sounds/chest.webm",
+    "ok": true,
+    "bytes": 11823,
+    "decodeMs": 21
+   },
+   {
+    "file": "sounds/levelup.webm",
+    "ok": true,
+    "bytes": 23956,
+    "decodeMs": 23
+   },
+   {
+    "file": "sounds/celebrate.webm",
+    "ok": true,
+    "bytes": 15477,
+    "decodeMs": 19
+   },
+   {
+    "file": "sounds/tap.mp3",
+    "ok": true,
+    "bytes": 1925,
+    "decodeMs": 8
+   },
+   {
+    "file": "sounds/blip.mp3",
+    "ok": true,
+    "bytes": 1612,
+    "decodeMs": 11
+   },
+   {
+    "file": "sounds/correct.mp3",
+    "ok": true,
+    "bytes": 7254,
+    "decodeMs": 8
+   },
+   {
+    "file": "sounds/wrong.mp3",
+    "ok": true,
+    "bytes": 6627,
+    "decodeMs": 14
+   },
+   {
+    "file": "sounds/coin.mp3",
+    "ok": true,
+    "bytes": 4120,
+    "decodeMs": 8
+   },
+   {
+    "file": "sounds/star.mp3",
+    "ok": true,
+    "bytes": 4120,
+    "decodeMs": 18
+   },
+   {
+    "file": "sounds/run.mp3",
+    "ok": true,
+    "bytes": 5060,
+    "decodeMs": 10
+   },
+   {
+    "file": "sounds/bug.mp3",
+    "ok": true,
+    "bytes": 6314,
+    "decodeMs": 15
+   },
+   {
+    "file": "sounds/unlock.mp3",
+    "ok": true,
+    "bytes": 7568,
+    "decodeMs": 14
+   },
+   {
+    "file": "sounds/chest.mp3",
+    "ok": true,
+    "bytes": 13837,
+    "decodeMs": 15
+   },
+   {
+    "file": "sounds/levelup.mp3",
+    "ok": true,
+    "bytes": 21987,
+    "decodeMs": 16
+   },
+   {
+    "file": "sounds/celebrate.mp3",
+    "ok": true,
+    "bytes": 19480,
+    "decodeMs": 16
+   }
+  ],
+  "bgmDecode": [
+   {
+    "file": "generated/bgm-world1.webm",
+    "ok": true,
+    "bytes": 776519,
+    "fetchMs": 68,
+    "decodeMs": 522,
+    "durationS": 75,
+    "decodedMB": 26.46
+   },
+   {
+    "file": "generated/bgm-world1.mp3",
+    "ok": true,
+    "bytes": 1200813,
+    "fetchMs": 21,
+    "decodeMs": 349,
+    "durationS": 75.02399092970522,
+    "decodedMB": 26.468464
+   },
+   {
+    "file": "generated/bgm-world1.m4a",
+    "ok": true,
+    "bytes": 1204440,
+    "fetchMs": 21,
+    "decodeMs": 596,
+    "durationS": 75,
+    "decodedMB": 26.46
+   }
+  ],
+  "done": true,
+  "console": []
+ }
+}

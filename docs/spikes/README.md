@@ -10,3 +10,4 @@
 | P0-04 | Kakao 로그인 | **대안** (내장 provider + scope 덮어쓰기, 비즈앱 불필요) | [P0-04-kakao-login.md](P0-04-kakao-login.md) |
 | P0-06 | turtle → canvas | **채택** (자체 shim + 스트리밍 + 캔버스 렌더러) | [P0-06-turtle-canvas.md](P0-06-turtle-canvas.md) |
 | P0-08 | 퀴즈·정답 분리 저장 | **채택** (+ 00002 핫픽스 검증 통과) | [P0-08-answer-keys.md](P0-08-answer-keys.md) |
+| P0-15 | 사운드 | **대안** (use-sound 대신 자체 Web Audio 래퍼) | [P0-15-sound.md](P0-15-sound.md) |

@@ -1,0 +1,101 @@
+{
+ "chromium": {
+  "version": "151.0.7922.34",
+  "webaudio": {
+   "eventToStart": {
+    "n": 80,
+    "median": 5.9,
+    "p90": 13.8,
+    "max": 24
+   },
+   "handlerToStart": {
+    "n": 80,
+    "median": 0.4,
+    "p90": 0.9,
+    "max": 7.7
+   },
+   "missing": 0
+  },
+  "howler": {
+   "eventToStart": {
+    "n": 80,
+    "median": 3.6,
+    "p90": 8.9,
+    "max": 18.1
+   },
+   "handlerToStart": {
+    "n": 80,
+    "median": 0.3,
+    "p90": 0.8,
+    "max": 5.3
+   },
+   "missing": 0
+  }
+ },
+ "firefox": {
+  "version": "153.0",
+  "webaudio": {
+   "eventToStart": {
+    "n": 80,
+    "median": 7,
+    "p90": 18,
+    "max": 28
+   },
+   "handlerToStart": {
+    "n": 80,
+    "median": 0,
+    "p90": 1,
+    "max": 14
+   },
+   "missing": 0
+  },
+  "howler": {
+   "eventToStart": {
+    "n": 80,
+    "median": 9,
+    "p90": 20,
+    "max": 39
+   },
+   "handlerToStart": {
+    "n": 80,
+    "median": 1,
+    "p90": 2,
+    "max": 13
+   },
+   "missing": 0
+  }
+ },
+ "webkit": {
+  "version": "26.5",
+  "webaudio": {
+   "eventToStart": {
+    "n": 80,
+    "median": 3,
+    "p90": 4,
+    "max": 13
+   },
+   "handlerToStart": {
+    "n": 80,
+    "median": 0,
+    "p90": 1,
+    "max": 2
+   },
+   "missing": 0
+  },
+  "howler": {
+   "eventToStart": {
+    "n": 80,
+    "median": 3,
+    "p90": 6,
+    "max": 20
+   },
+   "handlerToStart": {
+    "n": 80,
+    "median": 0,
+    "p90": 1,
+    "max": 2
+   },
+   "missing": 0
+  }
+ }
+}

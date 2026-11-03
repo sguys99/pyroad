@@ -1,0 +1,27 @@
+{
+  "name": "p0-15-sound-spike",
+  "private": true,
+  "type": "module",
+  "description": "P0-15 사운드 스파이크 (앱 코드 아님). 자체 Web Audio 래퍼 vs Howler/use-sound 비교",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "gen:test-audio": "bash scripts/gen-test-audio.sh",
+    "build": "node bench/build.mjs",
+    "serve": "node bench/serve.mjs",
+    "measure": "node bench/measure.mjs",
+    "ssr-check": "node bench/ssr-check.mjs",
+    "bundle-size": "node bench/bundle-size.mjs"
+  },
+  "devDependencies": {
+    "@types/howler": "2.2.13",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.6",
+    "esbuild": "0.25.12",
+    "howler": "2.2.4",
+    "playwright-core": "1.62.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "5.9.3",
+    "use-sound": "5.0.0"
+  }
+}

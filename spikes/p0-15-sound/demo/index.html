@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P0-15 사운드 데모</title>
+<style>
+  :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+  body { margin: 16px; max-width: 760px; }
+  #sfx { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  button { min-height: 48px; font-size: 16px; border-radius: 12px; touch-action: manipulation; }
+  section { margin: 16px 0; }
+  pre { font-size: 12px; overflow-x: auto; background: #8881; padding: 8px; }
+  label { display: inline-flex; gap: 6px; align-items: center; margin-right: 12px; min-height: 48px; }
+</style>
+</head>
+<body>
+<h1>P0-15 사운드 데모</h1>
+<p>엔진: <a href="?engine=webaudio">자체 Web Audio</a> · <a href="?engine=howler">Howler(지연 생성)</a> · <a href="?engine=howler-eager">Howler(use-sound식 즉시 생성)</a> · <a href="gap.html">코덱·루프 틈 측정</a> · <a href="react.html">React Provider</a></p>
+<p id="state"></p>
+<section>
+  <h2>효과음 (Kenney CC0)</h2>
+  <div id="sfx"></div>
+  <p><button id="stars">별 1→3 (상승음)</button> <button id="coins">코인 10연타</button></p>
+</section>
+<section>
+  <h2>BGM (합성 75초 루프, 기본 OFF)</h2>
+  <label><input type="checkbox" id="bgm-on"> BGM 켜기</label>
+  <label><input type="checkbox" id="mute"> 전체 음소거</label><br>
+  <button id="bgm-world1">월드1 (스트림)</button>
+  <button id="bgm-world2">월드2 (스트림)</button>
+  <button id="bgm-world3">월드3 (버퍼)</button>
+  <button id="bgm-stop">정지</button><br>
+  <label>효과음 <input type="range" id="sfx-vol" min="0" max="1" step="0.05"></label>
+  <label>BGM <input type="range" id="bgm-vol" min="0" max="1" step="0.05"></label>
+</section>
+<pre id="out"></pre>
+<script type="module" src="dist/main.js"></script>
+</body>
+</html>
