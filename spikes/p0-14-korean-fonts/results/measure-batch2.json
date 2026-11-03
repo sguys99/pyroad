@@ -1,0 +1,4052 @@
+{
+ "when": "2026-11-03T11:03:16.182Z",
+ "base": "http://localhost:3114",
+ "runs": 3,
+ "profiles": {
+  "slow4g": {
+   "latency": 150,
+   "down": 209715.2,
+   "up": 96000,
+   "cpu": 4
+  },
+  "fast3g": {
+   "latency": 562.5,
+   "down": 188743.68000000002,
+   "up": 86400,
+   "cpu": 4
+  }
+ },
+ "summary": [
+  {
+   "profile": "slow4g",
+   "variant": "system",
+   "n": 3,
+   "fontRequests": 0,
+   "fontKB": 0,
+   "totalKB": 114,
+   "jsKB": 102,
+   "fcp": 1192,
+   "lcp": 1192,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": null,
+   "bodyReady": null,
+   "codeReady": null,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "slow4g",
+   "variant": "a-next",
+   "n": 3,
+   "fontRequests": 34,
+   "fontKB": 656.8,
+   "totalKB": 809.5,
+   "jsKB": 102,
+   "fcp": 1712,
+   "lcp": 1712,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": 2977,
+   "bodyReady": 3534,
+   "codeReady": 4439,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "slow4g",
+   "variant": "a-landing",
+   "n": 3,
+   "fontRequests": 4,
+   "fontKB": 103.3,
+   "totalKB": 218.3,
+   "jsKB": 102,
+   "fcp": 1084,
+   "lcp": 1084,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": 1073,
+   "bodyReady": 1200,
+   "codeReady": 1207,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "slow4g",
+   "variant": "a-cafe24",
+   "n": 3,
+   "fontRequests": 33,
+   "fontKB": 551.8,
+   "totalKB": 702.4,
+   "jsKB": 102,
+   "fcp": 1424,
+   "lcp": 1424,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": 2594,
+   "bodyReady": 3173,
+   "codeReady": 4073,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "slow4g",
+   "variant": "b-next",
+   "n": 3,
+   "fontRequests": 35,
+   "fontKB": 516.9,
+   "totalKB": 670.7,
+   "jsKB": 102,
+   "fcp": 1832,
+   "lcp": 1832,
+   "cls": 0.026,
+   "clsMax": 0.026,
+   "titleReady": 2843,
+   "bodyReady": 3191,
+   "codeReady": 4033,
+   "lcpEl": "hero-lead"
+  },
+  {
+   "profile": "slow4g",
+   "variant": "b-landing",
+   "n": 3,
+   "fontRequests": 3,
+   "fontKB": 68.6,
+   "totalKB": 183.5,
+   "jsKB": 102,
+   "fcp": 1348,
+   "lcp": 1348,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": 1452,
+   "bodyReady": 1464,
+   "codeReady": 1479,
+   "lcpEl": "hero-lead"
+  },
+  {
+   "profile": "fast3g",
+   "variant": "system",
+   "n": 3,
+   "fontRequests": 0,
+   "fontKB": 0,
+   "totalKB": 114,
+   "jsKB": 102,
+   "fcp": 1720,
+   "lcp": 1720,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": null,
+   "bodyReady": null,
+   "codeReady": null,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "fast3g",
+   "variant": "a-next",
+   "n": 3,
+   "fontRequests": 34,
+   "fontKB": 656.8,
+   "totalKB": 809.5,
+   "jsKB": 102,
+   "fcp": 2352,
+   "lcp": 2352,
+   "cls": 0,
+   "clsMax": 0.001,
+   "titleReady": 4397,
+   "bodyReady": 5286,
+   "codeReady": 6689,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "fast3g",
+   "variant": "a-landing",
+   "n": 3,
+   "fontRequests": 4,
+   "fontKB": 103.3,
+   "totalKB": 218.3,
+   "jsKB": 102,
+   "fcp": 2048,
+   "lcp": 2048,
+   "cls": 0,
+   "clsMax": 0.001,
+   "titleReady": 2069,
+   "bodyReady": 2076,
+   "codeReady": 2444,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "fast3g",
+   "variant": "a-cafe24",
+   "n": 3,
+   "fontRequests": 33,
+   "fontKB": 551.8,
+   "totalKB": 702.4,
+   "jsKB": 102,
+   "fcp": 2360,
+   "lcp": 2360,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": 3876,
+   "bodyReady": 4762,
+   "codeReady": 6212,
+   "lcpEl": "hero-title"
+  },
+  {
+   "profile": "fast3g",
+   "variant": "b-next",
+   "n": 3,
+   "fontRequests": 35,
+   "fontKB": 516.9,
+   "totalKB": 670.7,
+   "jsKB": 102,
+   "fcp": 2804,
+   "lcp": 2804,
+   "cls": 0.027,
+   "clsMax": 0.027,
+   "titleReady": 4821,
+   "bodyReady": 5306,
+   "codeReady": 6982,
+   "lcpEl": "hero-lead"
+  },
+  {
+   "profile": "fast3g",
+   "variant": "b-landing",
+   "n": 3,
+   "fontRequests": 3,
+   "fontKB": 68.6,
+   "totalKB": 183.5,
+   "jsKB": 102,
+   "fcp": 2188,
+   "lcp": 2188,
+   "cls": 0,
+   "clsMax": 0,
+   "titleReady": 2209,
+   "bodyReady": 2214,
+   "codeReady": 2260,
+   "lcpEl": "hero-lead"
+  }
+ ],
+ "results": [
+  {
+   "variant": "system",
+   "profile": "slow4g",
+   "wall": 3903,
+   "fontRequests": 0,
+   "fontBytes": 0,
+   "fontBytesByHost": {},
+   "cssBytes": 4715,
+   "jsBytes": 104428,
+   "totalBytes": 116702,
+   "requests": 6,
+   "fcp": 1576,
+   "lcp": 1576,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 0,
+   "bodyReady": 0,
+   "codeReady": 0,
+   "lastFontEnd": null,
+   "load": 1962.5,
+   "families": [],
+   "fontUrls": [],
+   "run": 0
+  },
+  {
+   "variant": "a-next",
+   "profile": "slow4g",
+   "wall": 6790,
+   "fontRequests": 34,
+   "fontBytes": 672517,
+   "fontBytesByHost": {
+    "localhost:3114": 672517
+   },
+   "cssBytes": 44173,
+   "jsBytes": 104428,
+   "totalBytes": 828962,
+   "requests": 43,
+   "fcp": 1712,
+   "lcp": 1712,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2977.2999999523163,
+   "bodyReady": 3539.2999999523163,
+   "codeReady": 4439.299999952316,
+   "lastFontEnd": 4489.5,
+   "load": 4558.5,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Jua 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/885f624c3dc18cbe-s.p.woff2",
+     13664
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/9ac7be350efa50ff-s.woff2",
+     13920
+    ],
+    [
+     "localhost:3114/_next/static/media/6044ffe0460d7673-s.woff2",
+     20084
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/f0892abefca528a4-s.woff2",
+     21212
+    ],
+    [
+     "localhost:3114/_next/static/media/a4847221e9154dd9-s.woff2",
+     19012
+    ],
+    [
+     "localhost:3114/_next/static/media/ea5aa5f822de0524-s.woff2",
+     17116
+    ],
+    [
+     "localhost:3114/_next/static/media/98e215e408811ebf-s.woff2",
+     19032
+    ],
+    [
+     "localhost:3114/_next/static/media/cf6765dbd12d97e2-s.woff2",
+     16876
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/2ec83be22224929e-s.woff2",
+     19528
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/2d95b859eb63a470-s.woff2",
+     17876
+    ],
+    [
+     "localhost:3114/_next/static/media/88aebde1bd0ecc60-s.woff2",
+     18560
+    ],
+    [
+     "localhost:3114/_next/static/media/8fa3a8d061e14895-s.woff2",
+     18044
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/cab35e116dcfed1a-s.woff2",
+     17536
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "a-landing",
+   "profile": "slow4g",
+   "wall": 3705,
+   "fontRequests": 4,
+   "fontBytes": 105751,
+   "fontBytesByHost": {
+    "localhost:3114": 105751
+   },
+   "cssBytes": 5540,
+   "jsBytes": 104428,
+   "totalBytes": 223497,
+   "requests": 11,
+   "fcp": 1084,
+   "lcp": 1084,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 1073.0999999046326,
+   "bodyReady": 1200.2000000476837,
+   "codeReady": 1207.3999998569489,
+   "lastFontEnd": 1074.0999999046326,
+   "load": 1889.8999998569489,
+   "families": [
+    "juaLanding 400",
+    "pretendardLanding 400",
+    "pretendardLanding 700",
+    "d2Landing 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/7042dcc5803b08d0-s.p.woff2",
+     27976
+    ],
+    [
+     "localhost:3114/_next/static/media/b665fcbc60a3be3f-s.p.woff2",
+     35576
+    ],
+    [
+     "localhost:3114/_next/static/media/c9ef3de62bfa9540-s.p.woff2",
+     36036
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "a-cafe24",
+   "profile": "slow4g",
+   "wall": 6187,
+   "fontRequests": 33,
+   "fontBytes": 565093,
+   "fontBytesByHost": {
+    "localhost:3114": 565093
+   },
+   "cssBytes": 41985,
+   "jsBytes": 104428,
+   "totalBytes": 719235,
+   "requests": 42,
+   "fcp": 1388,
+   "lcp": 1388,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2622.7000000476837,
+   "bodyReady": 3172.7000000476837,
+   "codeReady": 4073.300000190735,
+   "lastFontEnd": 3965.4000000953674,
+   "load": 3985.7000000476837,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Cafe24 Ssurround 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.119.a7cc9174.woff2",
+     9155
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.118.e4aeef62.woff2",
+     9103
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.117.eeb4c204.woff2",
+     9827
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.113.41830564.woff2",
+     11312
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.107.75346e1c.woff2",
+     9939
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.115.ad493e7b.woff2",
+     10720
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.108.69ce3303.woff2",
+     10420
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.116.84a8af1d.woff2",
+     11180
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.112.6066ab9d.woff2",
+     10388
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.110.a94c1391.woff2",
+     10964
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.114.2f1ed456.woff2",
+     11108
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.111.76605315.woff2",
+     10920
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "b-next",
+   "profile": "slow4g",
+   "wall": 6266,
+   "fontRequests": 35,
+   "fontBytes": 529324,
+   "fontBytesByHost": {
+    "localhost:3114": 529324
+   },
+   "cssBytes": 45153,
+   "jsBytes": 104428,
+   "totalBytes": 686776,
+   "requests": 46,
+   "fcp": 1832,
+   "lcp": 1832,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0.02648441814983307,
+   "shifts": [
+    {
+     "t": 3237.7999999523163,
+     "v": 0.02648441814983307
+    }
+   ],
+   "titleReady": 2945.2999999523163,
+   "bodyReady": 3149.699999809265,
+   "codeReady": 4033,
+   "lastFontEnd": 3930.199999809265,
+   "load": 3944.699999809265,
+   "families": [
+    "D2Coding 400",
+    "Gaegu 700",
+    "Gowun Dodum 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/9d87bcf0c05a83d6-s.p.woff2",
+     14088
+    ],
+    [
+     "localhost:3114/_next/static/media/b9ae998183cfcf99-s.p.woff2",
+     12108
+    ],
+    [
+     "localhost:3114/_next/static/media/b9bde58fd979694e-s.woff2",
+     15172
+    ],
+    [
+     "localhost:3114/_next/static/media/4cb92749e68500bf-s.woff2",
+     13716
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/684008be259a59c6-s.woff2",
+     9819
+    ],
+    [
+     "localhost:3114/_next/static/media/ef9b7b7ab6834d29-s.woff2",
+     12188
+    ],
+    [
+     "localhost:3114/_next/static/media/68facad797adecc2-s.woff2",
+     16928
+    ],
+    [
+     "localhost:3114/_next/static/media/f392a13a0094c3d1-s.woff2",
+     15036
+    ],
+    [
+     "localhost:3114/_next/static/media/77901e7a9559d10c-s.woff2",
+     15752
+    ],
+    [
+     "localhost:3114/_next/static/media/84057adca98c0827-s.woff2",
+     16904
+    ],
+    [
+     "localhost:3114/_next/static/media/e6847dd0feab5f92-s.woff2",
+     18592
+    ],
+    [
+     "localhost:3114/_next/static/media/09af4ec4ceadbb94-s.woff2",
+     21128
+    ],
+    [
+     "localhost:3114/_next/static/media/413c8171da142cda-s.woff2",
+     20220
+    ],
+    [
+     "localhost:3114/_next/static/media/30864696d5c4ac14-s.woff2",
+     19924
+    ],
+    [
+     "localhost:3114/_next/static/media/bfe3eb2606baf00a-s.woff2",
+     19740
+    ],
+    [
+     "localhost:3114/_next/static/media/81eb003b78a42a7b-s.woff2",
+     16480
+    ],
+    [
+     "localhost:3114/_next/static/media/5d217fec32e2068e-s.woff2",
+     15668
+    ],
+    [
+     "localhost:3114/_next/static/media/c3040269b1771b02-s.woff2",
+     17672
+    ],
+    [
+     "localhost:3114/_next/static/media/21f0145a081cb2c8-s.woff2",
+     17096
+    ],
+    [
+     "localhost:3114/_next/static/media/6858bbe75ab53fba-s.woff2",
+     16684
+    ],
+    [
+     "localhost:3114/_next/static/media/6fee792b388b8c64-s.woff2",
+     20088
+    ],
+    [
+     "localhost:3114/_next/static/media/1f4ef3a7563c157c-s.woff2",
+     16044
+    ],
+    [
+     "localhost:3114/_next/static/media/b3afeb402d0641d1-s.woff2",
+     16384
+    ],
+    [
+     "localhost:3114/_next/static/media/cd4ad3daa33f882a-s.woff2",
+     20356
+    ],
+    [
+     "localhost:3114/_next/static/media/9984672de16eb8ba-s.woff2",
+     21840
+    ],
+    [
+     "localhost:3114/_next/static/media/c12ef7c3e97ef34c-s.woff2",
+     20224
+    ],
+    [
+     "localhost:3114/_next/static/media/32be0b7a9127e345-s.woff2",
+     12076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/9f6c9c0772407349-s.woff2",
+     20428
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "b-landing",
+   "profile": "slow4g",
+   "wall": 3760,
+   "fontRequests": 3,
+   "fontBytes": 70219,
+   "fontBytesByHost": {
+    "localhost:3114": 70219
+   },
+   "cssBytes": 5530,
+   "jsBytes": 104428,
+   "totalBytes": 187937,
+   "requests": 12,
+   "fcp": 1348,
+   "lcp": 1348,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 1452.0999999046326,
+   "bodyReady": 1464.3999998569489,
+   "codeReady": 1479.3999998569489,
+   "lastFontEnd": 1039.5,
+   "load": 2042.7999999523163,
+   "families": [
+    "gaeguLanding 700",
+    "gowunLanding 400",
+    "d2LandingB 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/c8fd8ad2d08f982a-s.p.woff2",
+     35764
+    ],
+    [
+     "localhost:3114/_next/static/media/eb22c439b49dd0db-s.p.woff2",
+     28292
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "system",
+   "profile": "fast3g",
+   "wall": 4106,
+   "fontRequests": 0,
+   "fontBytes": 0,
+   "fontBytesByHost": {},
+   "cssBytes": 4715,
+   "jsBytes": 104428,
+   "totalBytes": 116702,
+   "requests": 6,
+   "fcp": 1720,
+   "lcp": 1720,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 0,
+   "bodyReady": 0,
+   "codeReady": 0,
+   "lastFontEnd": null,
+   "load": 2215.4000000953674,
+   "families": [],
+   "fontUrls": [],
+   "run": 0
+  },
+  {
+   "variant": "a-next",
+   "profile": "fast3g",
+   "wall": 9417,
+   "fontRequests": 34,
+   "fontBytes": 672517,
+   "fontBytesByHost": {
+    "localhost:3114": 672517
+   },
+   "cssBytes": 44173,
+   "jsBytes": 104428,
+   "totalBytes": 828962,
+   "requests": 43,
+   "fcp": 2324,
+   "lcp": 2324,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0.0003271099305484764,
+   "shifts": [
+    {
+     "t": 3734.600000143051,
+     "v": 0.0003271099305484764
+    }
+   ],
+   "titleReady": 4587.600000143051,
+   "bodyReady": 5459.5,
+   "codeReady": 7028.200000047684,
+   "lastFontEnd": 7192.200000047684,
+   "load": 7200.800000190735,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Jua 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/885f624c3dc18cbe-s.p.woff2",
+     13664
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/9ac7be350efa50ff-s.woff2",
+     13920
+    ],
+    [
+     "localhost:3114/_next/static/media/6044ffe0460d7673-s.woff2",
+     20084
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/f0892abefca528a4-s.woff2",
+     21212
+    ],
+    [
+     "localhost:3114/_next/static/media/a4847221e9154dd9-s.woff2",
+     19012
+    ],
+    [
+     "localhost:3114/_next/static/media/ea5aa5f822de0524-s.woff2",
+     17116
+    ],
+    [
+     "localhost:3114/_next/static/media/98e215e408811ebf-s.woff2",
+     19032
+    ],
+    [
+     "localhost:3114/_next/static/media/cf6765dbd12d97e2-s.woff2",
+     16876
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/2ec83be22224929e-s.woff2",
+     19528
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/2d95b859eb63a470-s.woff2",
+     17876
+    ],
+    [
+     "localhost:3114/_next/static/media/88aebde1bd0ecc60-s.woff2",
+     18560
+    ],
+    [
+     "localhost:3114/_next/static/media/8fa3a8d061e14895-s.woff2",
+     18044
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/cab35e116dcfed1a-s.woff2",
+     17536
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "a-landing",
+   "profile": "fast3g",
+   "wall": 4784,
+   "fontRequests": 4,
+   "fontBytes": 105751,
+   "fontBytesByHost": {
+    "localhost:3114": 105751
+   },
+   "cssBytes": 5540,
+   "jsBytes": 104428,
+   "totalBytes": 223497,
+   "requests": 11,
+   "fcp": 2048,
+   "lcp": 2048,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2069.2999999523163,
+   "bodyReady": 2075.5,
+   "codeReady": 2460.5999999046326,
+   "lastFontEnd": 2410.399999856949,
+   "load": 3086.899999856949,
+   "families": [
+    "juaLanding 400",
+    "pretendardLanding 400",
+    "pretendardLanding 700",
+    "d2Landing 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/7042dcc5803b08d0-s.p.woff2",
+     27976
+    ],
+    [
+     "localhost:3114/_next/static/media/b665fcbc60a3be3f-s.p.woff2",
+     35576
+    ],
+    [
+     "localhost:3114/_next/static/media/c9ef3de62bfa9540-s.p.woff2",
+     36036
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "a-cafe24",
+   "profile": "fast3g",
+   "wall": 8623,
+   "fontRequests": 33,
+   "fontBytes": 565093,
+   "fontBytesByHost": {
+    "localhost:3114": 565093
+   },
+   "cssBytes": 41985,
+   "jsBytes": 104428,
+   "totalBytes": 719235,
+   "requests": 42,
+   "fcp": 2352,
+   "lcp": 2352,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 3876.100000143051,
+   "bodyReady": 4761.799999952316,
+   "codeReady": 6212.100000143051,
+   "lastFontEnd": 6214.700000047684,
+   "load": 6294.100000143051,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Cafe24 Ssurround 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.119.a7cc9174.woff2",
+     9155
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.118.e4aeef62.woff2",
+     9103
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.117.eeb4c204.woff2",
+     9827
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.113.41830564.woff2",
+     11312
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.107.75346e1c.woff2",
+     9939
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.115.ad493e7b.woff2",
+     10720
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.108.69ce3303.woff2",
+     10420
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.116.84a8af1d.woff2",
+     11180
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.112.6066ab9d.woff2",
+     10388
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.110.a94c1391.woff2",
+     10964
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.114.2f1ed456.woff2",
+     11108
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.111.76605315.woff2",
+     10920
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "b-next",
+   "profile": "fast3g",
+   "wall": 9120,
+   "fontRequests": 35,
+   "fontBytes": 529324,
+   "fontBytesByHost": {
+    "localhost:3114": 529324
+   },
+   "cssBytes": 45153,
+   "jsBytes": 104428,
+   "totalBytes": 686776,
+   "requests": 46,
+   "fcp": 2404,
+   "lcp": 2404,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0.026599327921327392,
+   "shifts": [
+    {
+     "t": 3591.2000000476837,
+     "v": 0.00011490977149432218
+    },
+    {
+     "t": 5442.200000047684,
+     "v": 0.02648441814983307
+    }
+   ],
+   "titleReady": 4742.900000095367,
+   "bodyReady": 5273.400000095367,
+   "codeReady": 6823.900000095367,
+   "lastFontEnd": 6879.700000047684,
+   "load": 6914.900000095367,
+   "families": [
+    "D2Coding 400",
+    "Gaegu 700",
+    "Gowun Dodum 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/9d87bcf0c05a83d6-s.p.woff2",
+     14088
+    ],
+    [
+     "localhost:3114/_next/static/media/b9ae998183cfcf99-s.p.woff2",
+     12108
+    ],
+    [
+     "localhost:3114/_next/static/media/b9bde58fd979694e-s.woff2",
+     15172
+    ],
+    [
+     "localhost:3114/_next/static/media/4cb92749e68500bf-s.woff2",
+     13716
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/684008be259a59c6-s.woff2",
+     9819
+    ],
+    [
+     "localhost:3114/_next/static/media/ef9b7b7ab6834d29-s.woff2",
+     12188
+    ],
+    [
+     "localhost:3114/_next/static/media/68facad797adecc2-s.woff2",
+     16928
+    ],
+    [
+     "localhost:3114/_next/static/media/f392a13a0094c3d1-s.woff2",
+     15036
+    ],
+    [
+     "localhost:3114/_next/static/media/77901e7a9559d10c-s.woff2",
+     15752
+    ],
+    [
+     "localhost:3114/_next/static/media/84057adca98c0827-s.woff2",
+     16904
+    ],
+    [
+     "localhost:3114/_next/static/media/e6847dd0feab5f92-s.woff2",
+     18592
+    ],
+    [
+     "localhost:3114/_next/static/media/09af4ec4ceadbb94-s.woff2",
+     21128
+    ],
+    [
+     "localhost:3114/_next/static/media/413c8171da142cda-s.woff2",
+     20220
+    ],
+    [
+     "localhost:3114/_next/static/media/30864696d5c4ac14-s.woff2",
+     19924
+    ],
+    [
+     "localhost:3114/_next/static/media/bfe3eb2606baf00a-s.woff2",
+     19740
+    ],
+    [
+     "localhost:3114/_next/static/media/81eb003b78a42a7b-s.woff2",
+     16480
+    ],
+    [
+     "localhost:3114/_next/static/media/5d217fec32e2068e-s.woff2",
+     15668
+    ],
+    [
+     "localhost:3114/_next/static/media/c3040269b1771b02-s.woff2",
+     17672
+    ],
+    [
+     "localhost:3114/_next/static/media/21f0145a081cb2c8-s.woff2",
+     17096
+    ],
+    [
+     "localhost:3114/_next/static/media/6858bbe75ab53fba-s.woff2",
+     16684
+    ],
+    [
+     "localhost:3114/_next/static/media/6fee792b388b8c64-s.woff2",
+     20088
+    ],
+    [
+     "localhost:3114/_next/static/media/1f4ef3a7563c157c-s.woff2",
+     16044
+    ],
+    [
+     "localhost:3114/_next/static/media/b3afeb402d0641d1-s.woff2",
+     16384
+    ],
+    [
+     "localhost:3114/_next/static/media/cd4ad3daa33f882a-s.woff2",
+     20356
+    ],
+    [
+     "localhost:3114/_next/static/media/9984672de16eb8ba-s.woff2",
+     21840
+    ],
+    [
+     "localhost:3114/_next/static/media/c12ef7c3e97ef34c-s.woff2",
+     20224
+    ],
+    [
+     "localhost:3114/_next/static/media/32be0b7a9127e345-s.woff2",
+     12076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/9f6c9c0772407349-s.woff2",
+     20428
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "b-landing",
+   "profile": "fast3g",
+   "wall": 4426,
+   "fontRequests": 3,
+   "fontBytes": 70219,
+   "fontBytesByHost": {
+    "localhost:3114": 70219
+   },
+   "cssBytes": 5530,
+   "jsBytes": 104428,
+   "totalBytes": 187937,
+   "requests": 12,
+   "fcp": 1860,
+   "lcp": 1860,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 1873.2000000476837,
+   "bodyReady": 1877.7999999523163,
+   "codeReady": 2088.7000000476837,
+   "lastFontEnd": 2069.4000000953674,
+   "load": 2700.100000143051,
+   "families": [
+    "gaeguLanding 700",
+    "gowunLanding 400",
+    "d2LandingB 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/c8fd8ad2d08f982a-s.p.woff2",
+     35764
+    ],
+    [
+     "localhost:3114/_next/static/media/eb22c439b49dd0db-s.p.woff2",
+     28292
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 0
+  },
+  {
+   "variant": "system",
+   "profile": "slow4g",
+   "wall": 3126,
+   "fontRequests": 0,
+   "fontBytes": 0,
+   "fontBytesByHost": {},
+   "cssBytes": 4715,
+   "jsBytes": 104428,
+   "totalBytes": 116702,
+   "requests": 6,
+   "fcp": 720,
+   "lcp": 720,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 0,
+   "bodyReady": 0,
+   "codeReady": 0,
+   "lastFontEnd": null,
+   "load": 1242.2999999523163,
+   "families": [],
+   "fontUrls": [],
+   "run": 1
+  },
+  {
+   "variant": "a-next",
+   "profile": "slow4g",
+   "wall": 6609,
+   "fontRequests": 34,
+   "fontBytes": 672517,
+   "fontBytesByHost": {
+    "localhost:3114": 672517
+   },
+   "cssBytes": 44173,
+   "jsBytes": 104428,
+   "totalBytes": 828962,
+   "requests": 43,
+   "fcp": 1424,
+   "lcp": 1424,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2883.5999999046326,
+   "bodyReady": 3512.7999999523163,
+   "codeReady": 4392.899999856949,
+   "lastFontEnd": 4437.199999809265,
+   "load": 4471.699999809265,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Jua 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/885f624c3dc18cbe-s.p.woff2",
+     13664
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/9ac7be350efa50ff-s.woff2",
+     13920
+    ],
+    [
+     "localhost:3114/_next/static/media/6044ffe0460d7673-s.woff2",
+     20084
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/f0892abefca528a4-s.woff2",
+     21212
+    ],
+    [
+     "localhost:3114/_next/static/media/a4847221e9154dd9-s.woff2",
+     19012
+    ],
+    [
+     "localhost:3114/_next/static/media/ea5aa5f822de0524-s.woff2",
+     17116
+    ],
+    [
+     "localhost:3114/_next/static/media/98e215e408811ebf-s.woff2",
+     19032
+    ],
+    [
+     "localhost:3114/_next/static/media/cf6765dbd12d97e2-s.woff2",
+     16876
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/2ec83be22224929e-s.woff2",
+     19528
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/2d95b859eb63a470-s.woff2",
+     17876
+    ],
+    [
+     "localhost:3114/_next/static/media/88aebde1bd0ecc60-s.woff2",
+     18560
+    ],
+    [
+     "localhost:3114/_next/static/media/8fa3a8d061e14895-s.woff2",
+     18044
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/cab35e116dcfed1a-s.woff2",
+     17536
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "a-landing",
+   "profile": "slow4g",
+   "wall": 3684,
+   "fontRequests": 4,
+   "fontBytes": 105751,
+   "fontBytesByHost": {
+    "localhost:3114": 105751
+   },
+   "cssBytes": 5540,
+   "jsBytes": 104428,
+   "totalBytes": 223497,
+   "requests": 11,
+   "fcp": 1004,
+   "lcp": 1004,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 997.3999998569489,
+   "bodyReady": 1174.7999999523163,
+   "codeReady": 1105.2999999523163,
+   "lastFontEnd": 1059.1999998092651,
+   "load": 1925.6999998092651,
+   "families": [
+    "juaLanding 400",
+    "pretendardLanding 400",
+    "pretendardLanding 700",
+    "d2Landing 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/7042dcc5803b08d0-s.p.woff2",
+     27976
+    ],
+    [
+     "localhost:3114/_next/static/media/b665fcbc60a3be3f-s.p.woff2",
+     35576
+    ],
+    [
+     "localhost:3114/_next/static/media/c9ef3de62bfa9540-s.p.woff2",
+     36036
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "a-cafe24",
+   "profile": "slow4g",
+   "wall": 6103,
+   "fontRequests": 33,
+   "fontBytes": 565093,
+   "fontBytesByHost": {
+    "localhost:3114": 565093
+   },
+   "cssBytes": 41985,
+   "jsBytes": 104428,
+   "totalBytes": 719235,
+   "requests": 42,
+   "fcp": 1424,
+   "lcp": 1424,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2593.5999999046326,
+   "bodyReady": 3066.5999999046326,
+   "codeReady": 4058.5,
+   "lastFontEnd": 3904.7000000476837,
+   "load": 3921.0999999046326,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Cafe24 Ssurround 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.119.a7cc9174.woff2",
+     9155
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.118.e4aeef62.woff2",
+     9103
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.117.eeb4c204.woff2",
+     9827
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.113.41830564.woff2",
+     11312
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.107.75346e1c.woff2",
+     9939
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.115.ad493e7b.woff2",
+     10720
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.108.69ce3303.woff2",
+     10420
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.116.84a8af1d.woff2",
+     11180
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.112.6066ab9d.woff2",
+     10388
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.110.a94c1391.woff2",
+     10964
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.114.2f1ed456.woff2",
+     11108
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.111.76605315.woff2",
+     10920
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "b-next",
+   "profile": "slow4g",
+   "wall": 6129,
+   "fontRequests": 35,
+   "fontBytes": 529324,
+   "fontBytesByHost": {
+    "localhost:3114": 529324
+   },
+   "cssBytes": 45153,
+   "jsBytes": 104428,
+   "totalBytes": 686776,
+   "requests": 46,
+   "fcp": 1664,
+   "lcp": 1664,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0.02648441814983307,
+   "shifts": [
+    {
+     "t": 3308.7000000476837,
+     "v": 0.02648441814983307
+    }
+   ],
+   "titleReady": 2843.2000000476837,
+   "bodyReady": 3191.2000000476837,
+   "codeReady": 4019.600000143051,
+   "lastFontEnd": 3905.7000000476837,
+   "load": 3917.800000190735,
+   "families": [
+    "D2Coding 400",
+    "Gaegu 700",
+    "Gowun Dodum 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/9d87bcf0c05a83d6-s.p.woff2",
+     14088
+    ],
+    [
+     "localhost:3114/_next/static/media/b9ae998183cfcf99-s.p.woff2",
+     12108
+    ],
+    [
+     "localhost:3114/_next/static/media/b9bde58fd979694e-s.woff2",
+     15172
+    ],
+    [
+     "localhost:3114/_next/static/media/4cb92749e68500bf-s.woff2",
+     13716
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/684008be259a59c6-s.woff2",
+     9819
+    ],
+    [
+     "localhost:3114/_next/static/media/ef9b7b7ab6834d29-s.woff2",
+     12188
+    ],
+    [
+     "localhost:3114/_next/static/media/68facad797adecc2-s.woff2",
+     16928
+    ],
+    [
+     "localhost:3114/_next/static/media/f392a13a0094c3d1-s.woff2",
+     15036
+    ],
+    [
+     "localhost:3114/_next/static/media/77901e7a9559d10c-s.woff2",
+     15752
+    ],
+    [
+     "localhost:3114/_next/static/media/84057adca98c0827-s.woff2",
+     16904
+    ],
+    [
+     "localhost:3114/_next/static/media/e6847dd0feab5f92-s.woff2",
+     18592
+    ],
+    [
+     "localhost:3114/_next/static/media/09af4ec4ceadbb94-s.woff2",
+     21128
+    ],
+    [
+     "localhost:3114/_next/static/media/413c8171da142cda-s.woff2",
+     20220
+    ],
+    [
+     "localhost:3114/_next/static/media/30864696d5c4ac14-s.woff2",
+     19924
+    ],
+    [
+     "localhost:3114/_next/static/media/bfe3eb2606baf00a-s.woff2",
+     19740
+    ],
+    [
+     "localhost:3114/_next/static/media/81eb003b78a42a7b-s.woff2",
+     16480
+    ],
+    [
+     "localhost:3114/_next/static/media/5d217fec32e2068e-s.woff2",
+     15668
+    ],
+    [
+     "localhost:3114/_next/static/media/c3040269b1771b02-s.woff2",
+     17672
+    ],
+    [
+     "localhost:3114/_next/static/media/21f0145a081cb2c8-s.woff2",
+     17096
+    ],
+    [
+     "localhost:3114/_next/static/media/6858bbe75ab53fba-s.woff2",
+     16684
+    ],
+    [
+     "localhost:3114/_next/static/media/6fee792b388b8c64-s.woff2",
+     20088
+    ],
+    [
+     "localhost:3114/_next/static/media/1f4ef3a7563c157c-s.woff2",
+     16044
+    ],
+    [
+     "localhost:3114/_next/static/media/b3afeb402d0641d1-s.woff2",
+     16384
+    ],
+    [
+     "localhost:3114/_next/static/media/cd4ad3daa33f882a-s.woff2",
+     20356
+    ],
+    [
+     "localhost:3114/_next/static/media/9984672de16eb8ba-s.woff2",
+     21840
+    ],
+    [
+     "localhost:3114/_next/static/media/c12ef7c3e97ef34c-s.woff2",
+     20224
+    ],
+    [
+     "localhost:3114/_next/static/media/32be0b7a9127e345-s.woff2",
+     12076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/9f6c9c0772407349-s.woff2",
+     20428
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "b-landing",
+   "profile": "slow4g",
+   "wall": 3497,
+   "fontRequests": 3,
+   "fontBytes": 70219,
+   "fontBytesByHost": {
+    "localhost:3114": 70219
+   },
+   "cssBytes": 5530,
+   "jsBytes": 104428,
+   "totalBytes": 187937,
+   "requests": 12,
+   "fcp": 964,
+   "lcp": 964,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 982.7000000476837,
+   "bodyReady": 1117.5999999046326,
+   "codeReady": 987.7000000476837,
+   "lastFontEnd": 921.2999999523163,
+   "load": 1704.9000000953674,
+   "families": [
+    "gaeguLanding 700",
+    "gowunLanding 400",
+    "d2LandingB 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/c8fd8ad2d08f982a-s.p.woff2",
+     35764
+    ],
+    [
+     "localhost:3114/_next/static/media/eb22c439b49dd0db-s.p.woff2",
+     28292
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "system",
+   "profile": "fast3g",
+   "wall": 4361,
+   "fontRequests": 0,
+   "fontBytes": 0,
+   "fontBytesByHost": {},
+   "cssBytes": 4715,
+   "jsBytes": 104428,
+   "totalBytes": 116702,
+   "requests": 6,
+   "fcp": 1576,
+   "lcp": 1576,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 0,
+   "bodyReady": 0,
+   "codeReady": 0,
+   "lastFontEnd": null,
+   "load": 2537.9000000953674,
+   "families": [],
+   "fontUrls": [],
+   "run": 1
+  },
+  {
+   "variant": "a-next",
+   "profile": "fast3g",
+   "wall": 9107,
+   "fontRequests": 34,
+   "fontBytes": 672517,
+   "fontBytesByHost": {
+    "localhost:3114": 672517
+   },
+   "cssBytes": 44173,
+   "jsBytes": 104428,
+   "totalBytes": 828962,
+   "requests": 43,
+   "fcp": 2352,
+   "lcp": 2352,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0.001357773389783214,
+   "shifts": [
+    {
+     "t": 3412,
+     "v": 0.0010306634592347375
+    },
+    {
+     "t": 3579.9000000953674,
+     "v": 0.0003271099305484764
+    }
+   ],
+   "titleReady": 4397.200000047684,
+   "bodyReady": 5190.900000095367,
+   "codeReady": 6689.300000190735,
+   "lastFontEnd": 6745,
+   "load": 6833.900000095367,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Jua 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/885f624c3dc18cbe-s.p.woff2",
+     13664
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/9ac7be350efa50ff-s.woff2",
+     13920
+    ],
+    [
+     "localhost:3114/_next/static/media/6044ffe0460d7673-s.woff2",
+     20084
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/f0892abefca528a4-s.woff2",
+     21212
+    ],
+    [
+     "localhost:3114/_next/static/media/a4847221e9154dd9-s.woff2",
+     19012
+    ],
+    [
+     "localhost:3114/_next/static/media/ea5aa5f822de0524-s.woff2",
+     17116
+    ],
+    [
+     "localhost:3114/_next/static/media/98e215e408811ebf-s.woff2",
+     19032
+    ],
+    [
+     "localhost:3114/_next/static/media/cf6765dbd12d97e2-s.woff2",
+     16876
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/2ec83be22224929e-s.woff2",
+     19528
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/2d95b859eb63a470-s.woff2",
+     17876
+    ],
+    [
+     "localhost:3114/_next/static/media/88aebde1bd0ecc60-s.woff2",
+     18560
+    ],
+    [
+     "localhost:3114/_next/static/media/8fa3a8d061e14895-s.woff2",
+     18044
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/cab35e116dcfed1a-s.woff2",
+     17536
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "a-landing",
+   "profile": "fast3g",
+   "wall": 4792,
+   "fontRequests": 4,
+   "fontBytes": 105751,
+   "fontBytesByHost": {
+    "localhost:3114": 105751
+   },
+   "cssBytes": 5540,
+   "jsBytes": 104428,
+   "totalBytes": 223497,
+   "requests": 11,
+   "fcp": 1800,
+   "lcp": 1800,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0.0006223639006570798,
+   "shifts": [
+    {
+     "t": 2404.7000000476837,
+     "v": 0.0006223639006570798
+    }
+   ],
+   "titleReady": 1820,
+   "bodyReady": 1824.2999999523163,
+   "codeReady": 2391.7999999523163,
+   "lastFontEnd": 2374.9000000953674,
+   "load": 3009,
+   "families": [
+    "juaLanding 400",
+    "pretendardLanding 400",
+    "pretendardLanding 700",
+    "d2Landing 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/7042dcc5803b08d0-s.p.woff2",
+     27976
+    ],
+    [
+     "localhost:3114/_next/static/media/b665fcbc60a3be3f-s.p.woff2",
+     35576
+    ],
+    [
+     "localhost:3114/_next/static/media/c9ef3de62bfa9540-s.p.woff2",
+     36036
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "a-cafe24",
+   "profile": "fast3g",
+   "wall": 8447,
+   "fontRequests": 33,
+   "fontBytes": 565093,
+   "fontBytesByHost": {
+    "localhost:3114": 565093
+   },
+   "cssBytes": 41985,
+   "jsBytes": 104428,
+   "totalBytes": 719235,
+   "requests": 42,
+   "fcp": 2360,
+   "lcp": 2360,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 3770.2999999523163,
+   "bodyReady": 4758.399999856949,
+   "codeReady": 6082.799999952316,
+   "lastFontEnd": 6181.5,
+   "load": 6222.899999856949,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Cafe24 Ssurround 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.119.a7cc9174.woff2",
+     9155
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.118.e4aeef62.woff2",
+     9103
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.117.eeb4c204.woff2",
+     9827
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.113.41830564.woff2",
+     11312
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.107.75346e1c.woff2",
+     9939
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.115.ad493e7b.woff2",
+     10720
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.108.69ce3303.woff2",
+     10420
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.116.84a8af1d.woff2",
+     11180
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.112.6066ab9d.woff2",
+     10388
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.110.a94c1391.woff2",
+     10964
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.114.2f1ed456.woff2",
+     11108
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.111.76605315.woff2",
+     10920
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "b-next",
+   "profile": "fast3g",
+   "wall": 9540,
+   "fontRequests": 35,
+   "fontBytes": 529324,
+   "fontBytesByHost": {
+    "localhost:3114": 529324
+   },
+   "cssBytes": 45153,
+   "jsBytes": 104428,
+   "totalBytes": 686776,
+   "requests": 46,
+   "fcp": 2868,
+   "lcp": 2868,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0.02648441814983307,
+   "shifts": [
+    {
+     "t": 5818.199999809265,
+     "v": 0.02648441814983307
+    }
+   ],
+   "titleReady": 4950.5,
+   "bodyReady": 5671.699999809265,
+   "codeReady": 7393.599999904633,
+   "lastFontEnd": 7221.099999904633,
+   "load": 7254.199999809265,
+   "families": [
+    "D2Coding 400",
+    "Gaegu 700",
+    "Gowun Dodum 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/9d87bcf0c05a83d6-s.p.woff2",
+     14088
+    ],
+    [
+     "localhost:3114/_next/static/media/b9ae998183cfcf99-s.p.woff2",
+     12108
+    ],
+    [
+     "localhost:3114/_next/static/media/b9bde58fd979694e-s.woff2",
+     15172
+    ],
+    [
+     "localhost:3114/_next/static/media/4cb92749e68500bf-s.woff2",
+     13716
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/684008be259a59c6-s.woff2",
+     9819
+    ],
+    [
+     "localhost:3114/_next/static/media/ef9b7b7ab6834d29-s.woff2",
+     12188
+    ],
+    [
+     "localhost:3114/_next/static/media/68facad797adecc2-s.woff2",
+     16928
+    ],
+    [
+     "localhost:3114/_next/static/media/f392a13a0094c3d1-s.woff2",
+     15036
+    ],
+    [
+     "localhost:3114/_next/static/media/77901e7a9559d10c-s.woff2",
+     15752
+    ],
+    [
+     "localhost:3114/_next/static/media/84057adca98c0827-s.woff2",
+     16904
+    ],
+    [
+     "localhost:3114/_next/static/media/e6847dd0feab5f92-s.woff2",
+     18592
+    ],
+    [
+     "localhost:3114/_next/static/media/09af4ec4ceadbb94-s.woff2",
+     21128
+    ],
+    [
+     "localhost:3114/_next/static/media/413c8171da142cda-s.woff2",
+     20220
+    ],
+    [
+     "localhost:3114/_next/static/media/30864696d5c4ac14-s.woff2",
+     19924
+    ],
+    [
+     "localhost:3114/_next/static/media/bfe3eb2606baf00a-s.woff2",
+     19740
+    ],
+    [
+     "localhost:3114/_next/static/media/81eb003b78a42a7b-s.woff2",
+     16480
+    ],
+    [
+     "localhost:3114/_next/static/media/5d217fec32e2068e-s.woff2",
+     15668
+    ],
+    [
+     "localhost:3114/_next/static/media/c3040269b1771b02-s.woff2",
+     17672
+    ],
+    [
+     "localhost:3114/_next/static/media/21f0145a081cb2c8-s.woff2",
+     17096
+    ],
+    [
+     "localhost:3114/_next/static/media/6858bbe75ab53fba-s.woff2",
+     16684
+    ],
+    [
+     "localhost:3114/_next/static/media/6fee792b388b8c64-s.woff2",
+     20088
+    ],
+    [
+     "localhost:3114/_next/static/media/1f4ef3a7563c157c-s.woff2",
+     16044
+    ],
+    [
+     "localhost:3114/_next/static/media/b3afeb402d0641d1-s.woff2",
+     16384
+    ],
+    [
+     "localhost:3114/_next/static/media/cd4ad3daa33f882a-s.woff2",
+     20356
+    ],
+    [
+     "localhost:3114/_next/static/media/9984672de16eb8ba-s.woff2",
+     21840
+    ],
+    [
+     "localhost:3114/_next/static/media/c12ef7c3e97ef34c-s.woff2",
+     20224
+    ],
+    [
+     "localhost:3114/_next/static/media/32be0b7a9127e345-s.woff2",
+     12076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/9f6c9c0772407349-s.woff2",
+     20428
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "b-landing",
+   "profile": "fast3g",
+   "wall": 4844,
+   "fontRequests": 3,
+   "fontBytes": 70219,
+   "fontBytesByHost": {
+    "localhost:3114": 70219
+   },
+   "cssBytes": 5530,
+   "jsBytes": 104428,
+   "totalBytes": 187937,
+   "requests": 12,
+   "fcp": 2188,
+   "lcp": 2188,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2209.4000000953674,
+   "bodyReady": 2214.300000190735,
+   "codeReady": 2393.100000143051,
+   "lastFontEnd": 2200.800000190735,
+   "load": 2941.100000143051,
+   "families": [
+    "gaeguLanding 700",
+    "gowunLanding 400",
+    "d2LandingB 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/c8fd8ad2d08f982a-s.p.woff2",
+     35764
+    ],
+    [
+     "localhost:3114/_next/static/media/eb22c439b49dd0db-s.p.woff2",
+     28292
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 1
+  },
+  {
+   "variant": "system",
+   "profile": "slow4g",
+   "wall": 3538,
+   "fontRequests": 0,
+   "fontBytes": 0,
+   "fontBytesByHost": {},
+   "cssBytes": 4715,
+   "jsBytes": 104428,
+   "totalBytes": 116702,
+   "requests": 6,
+   "fcp": 1192,
+   "lcp": 1192,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 0,
+   "bodyReady": 0,
+   "codeReady": 0,
+   "lastFontEnd": null,
+   "load": 1669.7999999523163,
+   "families": [],
+   "fontUrls": [],
+   "run": 2
+  },
+  {
+   "variant": "a-next",
+   "profile": "slow4g",
+   "wall": 6771,
+   "fontRequests": 34,
+   "fontBytes": 672517,
+   "fontBytesByHost": {
+    "localhost:3114": 672517
+   },
+   "cssBytes": 44173,
+   "jsBytes": 104428,
+   "totalBytes": 828962,
+   "requests": 43,
+   "fcp": 1960,
+   "lcp": 1960,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 3258.5999999046326,
+   "bodyReady": 3533.7000000476837,
+   "codeReady": 4620.599999904633,
+   "lastFontEnd": 4506.900000095367,
+   "load": 4531.099999904633,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Jua 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/885f624c3dc18cbe-s.p.woff2",
+     13664
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/9ac7be350efa50ff-s.woff2",
+     13920
+    ],
+    [
+     "localhost:3114/_next/static/media/6044ffe0460d7673-s.woff2",
+     20084
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/f0892abefca528a4-s.woff2",
+     21212
+    ],
+    [
+     "localhost:3114/_next/static/media/a4847221e9154dd9-s.woff2",
+     19012
+    ],
+    [
+     "localhost:3114/_next/static/media/ea5aa5f822de0524-s.woff2",
+     17116
+    ],
+    [
+     "localhost:3114/_next/static/media/98e215e408811ebf-s.woff2",
+     19032
+    ],
+    [
+     "localhost:3114/_next/static/media/cf6765dbd12d97e2-s.woff2",
+     16876
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/2ec83be22224929e-s.woff2",
+     19528
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/2d95b859eb63a470-s.woff2",
+     17876
+    ],
+    [
+     "localhost:3114/_next/static/media/88aebde1bd0ecc60-s.woff2",
+     18560
+    ],
+    [
+     "localhost:3114/_next/static/media/8fa3a8d061e14895-s.woff2",
+     18044
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/cab35e116dcfed1a-s.woff2",
+     17536
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "a-landing",
+   "profile": "slow4g",
+   "wall": 4061,
+   "fontRequests": 4,
+   "fontBytes": 105751,
+   "fontBytesByHost": {
+    "localhost:3114": 105751
+   },
+   "cssBytes": 5540,
+   "jsBytes": 104428,
+   "totalBytes": 223497,
+   "requests": 11,
+   "fcp": 1232,
+   "lcp": 1232,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 1262,
+   "bodyReady": 1350.7000000476837,
+   "codeReady": 1266.2000000476837,
+   "lastFontEnd": 1166.0999999046326,
+   "load": 2200.4000000953674,
+   "families": [
+    "juaLanding 400",
+    "pretendardLanding 400",
+    "pretendardLanding 700",
+    "d2Landing 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/7042dcc5803b08d0-s.p.woff2",
+     27976
+    ],
+    [
+     "localhost:3114/_next/static/media/b665fcbc60a3be3f-s.p.woff2",
+     35576
+    ],
+    [
+     "localhost:3114/_next/static/media/c9ef3de62bfa9540-s.p.woff2",
+     36036
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "a-cafe24",
+   "profile": "slow4g",
+   "wall": 6739,
+   "fontRequests": 33,
+   "fontBytes": 565093,
+   "fontBytesByHost": {
+    "localhost:3114": 565093
+   },
+   "cssBytes": 41985,
+   "jsBytes": 104428,
+   "totalBytes": 719235,
+   "requests": 42,
+   "fcp": 1992,
+   "lcp": 1992,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2554.899999856949,
+   "bodyReady": 3296.399999856949,
+   "codeReady": 4358.299999952316,
+   "lastFontEnd": 3959.2999999523163,
+   "load": 4201.899999856949,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Cafe24 Ssurround 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.119.a7cc9174.woff2",
+     9155
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.118.e4aeef62.woff2",
+     9103
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.117.eeb4c204.woff2",
+     9827
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.113.41830564.woff2",
+     11312
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.107.75346e1c.woff2",
+     9939
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.115.ad493e7b.woff2",
+     10720
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.108.69ce3303.woff2",
+     10420
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.116.84a8af1d.woff2",
+     11180
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.112.6066ab9d.woff2",
+     10388
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.110.a94c1391.woff2",
+     10964
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.114.2f1ed456.woff2",
+     11108
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.111.76605315.woff2",
+     10920
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "b-next",
+   "profile": "slow4g",
+   "wall": 6902,
+   "fontRequests": 35,
+   "fontBytes": 529324,
+   "fontBytesByHost": {
+    "localhost:3114": 529324
+   },
+   "cssBytes": 45153,
+   "jsBytes": 104428,
+   "totalBytes": 686776,
+   "requests": 46,
+   "fcp": 2548,
+   "lcp": 2548,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2686.0999999046326,
+   "bodyReady": 3294.5,
+   "codeReady": 4198,
+   "lastFontEnd": 3962,
+   "load": 5033.299999952316,
+   "families": [
+    "D2Coding 400",
+    "Gaegu 700",
+    "Gowun Dodum 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/9d87bcf0c05a83d6-s.p.woff2",
+     14088
+    ],
+    [
+     "localhost:3114/_next/static/media/b9ae998183cfcf99-s.p.woff2",
+     12108
+    ],
+    [
+     "localhost:3114/_next/static/media/b9bde58fd979694e-s.woff2",
+     15172
+    ],
+    [
+     "localhost:3114/_next/static/media/4cb92749e68500bf-s.woff2",
+     13716
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/684008be259a59c6-s.woff2",
+     9819
+    ],
+    [
+     "localhost:3114/_next/static/media/ef9b7b7ab6834d29-s.woff2",
+     12188
+    ],
+    [
+     "localhost:3114/_next/static/media/68facad797adecc2-s.woff2",
+     16928
+    ],
+    [
+     "localhost:3114/_next/static/media/f392a13a0094c3d1-s.woff2",
+     15036
+    ],
+    [
+     "localhost:3114/_next/static/media/77901e7a9559d10c-s.woff2",
+     15752
+    ],
+    [
+     "localhost:3114/_next/static/media/84057adca98c0827-s.woff2",
+     16904
+    ],
+    [
+     "localhost:3114/_next/static/media/e6847dd0feab5f92-s.woff2",
+     18592
+    ],
+    [
+     "localhost:3114/_next/static/media/09af4ec4ceadbb94-s.woff2",
+     21128
+    ],
+    [
+     "localhost:3114/_next/static/media/413c8171da142cda-s.woff2",
+     20220
+    ],
+    [
+     "localhost:3114/_next/static/media/30864696d5c4ac14-s.woff2",
+     19924
+    ],
+    [
+     "localhost:3114/_next/static/media/bfe3eb2606baf00a-s.woff2",
+     19740
+    ],
+    [
+     "localhost:3114/_next/static/media/81eb003b78a42a7b-s.woff2",
+     16480
+    ],
+    [
+     "localhost:3114/_next/static/media/5d217fec32e2068e-s.woff2",
+     15668
+    ],
+    [
+     "localhost:3114/_next/static/media/c3040269b1771b02-s.woff2",
+     17672
+    ],
+    [
+     "localhost:3114/_next/static/media/21f0145a081cb2c8-s.woff2",
+     17096
+    ],
+    [
+     "localhost:3114/_next/static/media/6858bbe75ab53fba-s.woff2",
+     16684
+    ],
+    [
+     "localhost:3114/_next/static/media/6fee792b388b8c64-s.woff2",
+     20088
+    ],
+    [
+     "localhost:3114/_next/static/media/1f4ef3a7563c157c-s.woff2",
+     16044
+    ],
+    [
+     "localhost:3114/_next/static/media/b3afeb402d0641d1-s.woff2",
+     16384
+    ],
+    [
+     "localhost:3114/_next/static/media/cd4ad3daa33f882a-s.woff2",
+     20356
+    ],
+    [
+     "localhost:3114/_next/static/media/9984672de16eb8ba-s.woff2",
+     21840
+    ],
+    [
+     "localhost:3114/_next/static/media/c12ef7c3e97ef34c-s.woff2",
+     20224
+    ],
+    [
+     "localhost:3114/_next/static/media/32be0b7a9127e345-s.woff2",
+     12076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/9f6c9c0772407349-s.woff2",
+     20428
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "b-landing",
+   "profile": "slow4g",
+   "wall": 3882,
+   "fontRequests": 3,
+   "fontBytes": 70219,
+   "fontBytesByHost": {
+    "localhost:3114": 70219
+   },
+   "cssBytes": 5530,
+   "jsBytes": 104428,
+   "totalBytes": 187937,
+   "requests": 12,
+   "fcp": 1504,
+   "lcp": 1504,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 1556.9000000953674,
+   "bodyReady": 1558.5999999046326,
+   "codeReady": 1561.4000000953674,
+   "lastFontEnd": 980.5,
+   "load": 2101.5999999046326,
+   "families": [
+    "gaeguLanding 700",
+    "gowunLanding 400",
+    "d2LandingB 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/c8fd8ad2d08f982a-s.p.woff2",
+     35764
+    ],
+    [
+     "localhost:3114/_next/static/media/eb22c439b49dd0db-s.p.woff2",
+     28292
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "system",
+   "profile": "fast3g",
+   "wall": 4963,
+   "fontRequests": 0,
+   "fontBytes": 0,
+   "fontBytesByHost": {},
+   "cssBytes": 4715,
+   "jsBytes": 104428,
+   "totalBytes": 116702,
+   "requests": 6,
+   "fcp": 2100,
+   "lcp": 2100,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 0,
+   "bodyReady": 0,
+   "codeReady": 0,
+   "lastFontEnd": null,
+   "load": 2997.5,
+   "families": [],
+   "fontUrls": [],
+   "run": 2
+  },
+  {
+   "variant": "a-next",
+   "profile": "fast3g",
+   "wall": 9131,
+   "fontRequests": 34,
+   "fontBytes": 672517,
+   "fontBytesByHost": {
+    "localhost:3114": 672517
+   },
+   "cssBytes": 44173,
+   "jsBytes": 104428,
+   "totalBytes": 828962,
+   "requests": 43,
+   "fcp": 2552,
+   "lcp": 2552,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0.0003271099305484764,
+   "shifts": [
+    {
+     "t": 3622.2999999523163,
+     "v": 0.0003271099305484764
+    }
+   ],
+   "titleReady": 4376.5,
+   "bodyReady": 5286.299999952316,
+   "codeReady": 6681.899999856949,
+   "lastFontEnd": 6827,
+   "load": 6849.5,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Jua 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/885f624c3dc18cbe-s.p.woff2",
+     13664
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/9ac7be350efa50ff-s.woff2",
+     13920
+    ],
+    [
+     "localhost:3114/_next/static/media/6044ffe0460d7673-s.woff2",
+     20084
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/f0892abefca528a4-s.woff2",
+     21212
+    ],
+    [
+     "localhost:3114/_next/static/media/a4847221e9154dd9-s.woff2",
+     19012
+    ],
+    [
+     "localhost:3114/_next/static/media/ea5aa5f822de0524-s.woff2",
+     17116
+    ],
+    [
+     "localhost:3114/_next/static/media/98e215e408811ebf-s.woff2",
+     19032
+    ],
+    [
+     "localhost:3114/_next/static/media/cf6765dbd12d97e2-s.woff2",
+     16876
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/2ec83be22224929e-s.woff2",
+     19528
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/2d95b859eb63a470-s.woff2",
+     17876
+    ],
+    [
+     "localhost:3114/_next/static/media/88aebde1bd0ecc60-s.woff2",
+     18560
+    ],
+    [
+     "localhost:3114/_next/static/media/8fa3a8d061e14895-s.woff2",
+     18044
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/cab35e116dcfed1a-s.woff2",
+     17536
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "a-landing",
+   "profile": "fast3g",
+   "wall": 5361,
+   "fontRequests": 4,
+   "fontBytes": 105751,
+   "fontBytesByHost": {
+    "localhost:3114": 105751
+   },
+   "cssBytes": 5540,
+   "jsBytes": 104428,
+   "totalBytes": 223497,
+   "requests": 11,
+   "fcp": 2048,
+   "lcp": 2048,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2135.9000000953674,
+   "bodyReady": 2153.7999999523163,
+   "codeReady": 2444,
+   "lastFontEnd": 2389.100000143051,
+   "load": 3417.2000000476837,
+   "families": [
+    "juaLanding 400",
+    "pretendardLanding 400",
+    "pretendardLanding 700",
+    "d2Landing 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/7042dcc5803b08d0-s.p.woff2",
+     27976
+    ],
+    [
+     "localhost:3114/_next/static/media/b665fcbc60a3be3f-s.p.woff2",
+     35576
+    ],
+    [
+     "localhost:3114/_next/static/media/c9ef3de62bfa9540-s.p.woff2",
+     36036
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "a-cafe24",
+   "profile": "fast3g",
+   "wall": 9040,
+   "fontRequests": 33,
+   "fontBytes": 565093,
+   "fontBytesByHost": {
+    "localhost:3114": 565093
+   },
+   "cssBytes": 41985,
+   "jsBytes": 104428,
+   "totalBytes": 719235,
+   "requests": 42,
+   "fcp": 3420,
+   "lcp": 3420,
+   "lcpEl": "hero-title",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 4517.900000095367,
+   "bodyReady": 5357.799999952316,
+   "codeReady": 6843.200000047684,
+   "lastFontEnd": 6596.600000143051,
+   "load": 6627.900000095367,
+   "families": [
+    "Pretendard Variable 45 920",
+    "D2Coding 400",
+    "Cafe24 Ssurround 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.119.a7cc9174.woff2",
+     9155
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.88.bf992ffe.woff2",
+     25940
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.90.95ee17c4.woff2",
+     21152
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.91.6a7166d6.woff2",
+     38296
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.118.e4aeef62.woff2",
+     9103
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.89.a3315004.woff2",
+     22164
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.87.ac36900f.woff2",
+     24964
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.80.f0f380a8.woff2",
+     29096
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.117.eeb4c204.woff2",
+     9827
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.113.41830564.woff2",
+     11312
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.107.75346e1c.woff2",
+     9939
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.115.ad493e7b.woff2",
+     10720
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.108.69ce3303.woff2",
+     10420
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.85.02f146b9.woff2",
+     25404
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.84.93fd098f.woff2",
+     24792
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.82.58572807.woff2",
+     26800
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.81.e9f78975.woff2",
+     26600
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.79.71c97c38.woff2",
+     26524
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.116.84a8af1d.woff2",
+     11180
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.86.38d14be6.woff2",
+     26016
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.83.bc09ee52.woff2",
+     27264
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.112.6066ab9d.woff2",
+     10388
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.110.a94c1391.woff2",
+     10964
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.114.2f1ed456.woff2",
+     11108
+    ],
+    [
+     "localhost:3114/_next/static/media/PretendardVariable.subset.60.edbcd33e.woff2",
+     38076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/Cafe24Ssurround.111.76605315.woff2",
+     10920
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "b-next",
+   "profile": "fast3g",
+   "wall": 9494,
+   "fontRequests": 35,
+   "fontBytes": 529324,
+   "fontBytesByHost": {
+    "localhost:3114": 529324
+   },
+   "cssBytes": 45153,
+   "jsBytes": 104428,
+   "totalBytes": 686776,
+   "requests": 46,
+   "fcp": 2804,
+   "lcp": 2804,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0.026656969956539527,
+   "shifts": [
+    {
+     "t": 3889.5,
+     "v": 0.00017255180670645775
+    },
+    {
+     "t": 5409.299999952316,
+     "v": 0.02648441814983307
+    }
+   ],
+   "titleReady": 4821.299999952316,
+   "bodyReady": 5306.400000095367,
+   "codeReady": 6982,
+   "lastFontEnd": 7025.299999952316,
+   "load": 7106.5,
+   "families": [
+    "D2Coding 400",
+    "Gaegu 700",
+    "Gowun Dodum 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/9d87bcf0c05a83d6-s.p.woff2",
+     14088
+    ],
+    [
+     "localhost:3114/_next/static/media/b9ae998183cfcf99-s.p.woff2",
+     12108
+    ],
+    [
+     "localhost:3114/_next/static/media/b9bde58fd979694e-s.woff2",
+     15172
+    ],
+    [
+     "localhost:3114/_next/static/media/4cb92749e68500bf-s.woff2",
+     13716
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.119.3f2c380e.woff2",
+     5995
+    ],
+    [
+     "localhost:3114/_next/static/media/684008be259a59c6-s.woff2",
+     9819
+    ],
+    [
+     "localhost:3114/_next/static/media/ef9b7b7ab6834d29-s.woff2",
+     12188
+    ],
+    [
+     "localhost:3114/_next/static/media/68facad797adecc2-s.woff2",
+     16928
+    ],
+    [
+     "localhost:3114/_next/static/media/f392a13a0094c3d1-s.woff2",
+     15036
+    ],
+    [
+     "localhost:3114/_next/static/media/77901e7a9559d10c-s.woff2",
+     15752
+    ],
+    [
+     "localhost:3114/_next/static/media/84057adca98c0827-s.woff2",
+     16904
+    ],
+    [
+     "localhost:3114/_next/static/media/e6847dd0feab5f92-s.woff2",
+     18592
+    ],
+    [
+     "localhost:3114/_next/static/media/09af4ec4ceadbb94-s.woff2",
+     21128
+    ],
+    [
+     "localhost:3114/_next/static/media/413c8171da142cda-s.woff2",
+     20220
+    ],
+    [
+     "localhost:3114/_next/static/media/30864696d5c4ac14-s.woff2",
+     19924
+    ],
+    [
+     "localhost:3114/_next/static/media/bfe3eb2606baf00a-s.woff2",
+     19740
+    ],
+    [
+     "localhost:3114/_next/static/media/81eb003b78a42a7b-s.woff2",
+     16480
+    ],
+    [
+     "localhost:3114/_next/static/media/5d217fec32e2068e-s.woff2",
+     15668
+    ],
+    [
+     "localhost:3114/_next/static/media/c3040269b1771b02-s.woff2",
+     17672
+    ],
+    [
+     "localhost:3114/_next/static/media/21f0145a081cb2c8-s.woff2",
+     17096
+    ],
+    [
+     "localhost:3114/_next/static/media/6858bbe75ab53fba-s.woff2",
+     16684
+    ],
+    [
+     "localhost:3114/_next/static/media/6fee792b388b8c64-s.woff2",
+     20088
+    ],
+    [
+     "localhost:3114/_next/static/media/1f4ef3a7563c157c-s.woff2",
+     16044
+    ],
+    [
+     "localhost:3114/_next/static/media/b3afeb402d0641d1-s.woff2",
+     16384
+    ],
+    [
+     "localhost:3114/_next/static/media/cd4ad3daa33f882a-s.woff2",
+     20356
+    ],
+    [
+     "localhost:3114/_next/static/media/9984672de16eb8ba-s.woff2",
+     21840
+    ],
+    [
+     "localhost:3114/_next/static/media/c12ef7c3e97ef34c-s.woff2",
+     20224
+    ],
+    [
+     "localhost:3114/_next/static/media/32be0b7a9127e345-s.woff2",
+     12076
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.114.d5122627.woff2",
+     8951
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.117.8950c96a.woff2",
+     7919
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.107.393775d1.woff2",
+     8839
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.118.84f4788e.woff2",
+     7763
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.116.ce8dab6b.woff2",
+     8687
+    ],
+    [
+     "localhost:3114/_next/static/media/D2Coding.113.fb827af6.woff2",
+     8815
+    ],
+    [
+     "localhost:3114/_next/static/media/9f6c9c0772407349-s.woff2",
+     20428
+    ]
+   ],
+   "run": 2
+  },
+  {
+   "variant": "b-landing",
+   "profile": "fast3g",
+   "wall": 4839,
+   "fontRequests": 3,
+   "fontBytes": 70219,
+   "fontBytesByHost": {
+    "localhost:3114": 70219
+   },
+   "cssBytes": 5530,
+   "jsBytes": 104428,
+   "totalBytes": 187937,
+   "requests": 12,
+   "fcp": 2272,
+   "lcp": 2272,
+   "lcpEl": "hero-lead",
+   "lcpEntries": 1,
+   "cls": 0,
+   "shifts": [],
+   "titleReady": 2252.5999999046326,
+   "bodyReady": 2256.5999999046326,
+   "codeReady": 2259.699999809265,
+   "lastFontEnd": 2150.899999856949,
+   "load": 3024.0999999046326,
+   "families": [
+    "gaeguLanding 700",
+    "gowunLanding 400",
+    "d2LandingB 400"
+   ],
+   "fontUrls": [
+    [
+     "localhost:3114/_next/static/media/c8fd8ad2d08f982a-s.p.woff2",
+     35764
+    ],
+    [
+     "localhost:3114/_next/static/media/eb22c439b49dd0db-s.p.woff2",
+     28292
+    ],
+    [
+     "localhost:3114/_next/static/media/ce6e6dca15daf29e-s.woff2",
+     6163
+    ]
+   ],
+   "run": 2
+  }
+ ]
+}

@@ -13,3 +13,4 @@
 | P0-15 | 사운드 | **대안** (use-sound 대신 자체 Web Audio 래퍼) | [P0-15-sound.md](P0-15-sound.md) |
 | P0-10 | `next/og` 공유 카드 | **채택** (Node 런타임 + 서브셋 폰트 + CDN 캐시) | [P0-10-og-share-card.md](P0-10-og-share-card.md) |
 | P0-05 | Pyodide `input()` | **채택** (JSPI + Service Worker 폴백, 격리 헤더 불필요) | [P0-05-pyodide-input.md](P0-05-pyodide-input.md) |
+| P0-14 | 한글 웹폰트 로딩 | **채택** (자체 호스팅 + 랜딩 서브셋 + D2Coding) | [P0-14-korean-fonts.md](P0-14-korean-fonts.md) |
