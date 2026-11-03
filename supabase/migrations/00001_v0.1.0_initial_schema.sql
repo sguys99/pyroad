@@ -121,6 +121,10 @@ CREATE OR REPLACE VIEW public.user_profiles_public AS
   SELECT id, display_name, avatar_url
   FROM public.users;
 
+-- 뷰는 users RLS를 우회하므로 로그인 사용자의 조회만 허용 (비로그인 조회·뷰를 통한 수정/삭제 차단)
+REVOKE ALL ON public.user_profiles_public FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.user_profiles_public TO authenticated;
+
 -- ============================================================
 -- Section 3: 인덱스 (9개)
 -- ============================================================
@@ -220,20 +224,16 @@ DO $$ BEGIN
     CREATE POLICY "board_comments_delete_own" ON public.board_comments FOR DELETE USING (auth.uid() = user_id);
   END IF;
 
-  -- notices: 누구나 읽기 가능, 본인만 쓰기 (관리자 검증은 API 레벨에서 수행)
+  -- notices: 누구나 읽기 가능, 쓰기는 API에서 관리자 검증 후 service role로만 수행
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'notices_select_public' AND tablename = 'notices') THEN
     CREATE POLICY "notices_select_public" ON public.notices FOR SELECT USING (true);
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'notices_insert_authenticated' AND tablename = 'notices') THEN
-    CREATE POLICY "notices_insert_authenticated" ON public.notices FOR INSERT WITH CHECK (auth.uid() = user_id);
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'notices_update_own' AND tablename = 'notices') THEN
-    CREATE POLICY "notices_update_own" ON public.notices FOR UPDATE USING (auth.uid() = user_id);
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'notices_delete_own' AND tablename = 'notices') THEN
-    CREATE POLICY "notices_delete_own" ON public.notices FOR DELETE USING (auth.uid() = user_id);
-  END IF;
 END $$;
+
+-- notices: 일반 사용자가 직접 공지를 쓰던 정책 제거 (v0.3.1 보안 핫픽스)
+DROP POLICY IF EXISTS "notices_insert_authenticated" ON public.notices;
+DROP POLICY IF EXISTS "notices_update_own" ON public.notices;
+DROP POLICY IF EXISTS "notices_delete_own" ON public.notices;
 
 -- ============================================================
 -- Section 5: 트리거 (auth.users → public.users 자동 동기화)
