@@ -1,0 +1,13 @@
+{
+  "name": "spike-p0-04-kakao",
+  "private": true,
+  "type": "module",
+  "description": "P0-04 Kakao login spike: provider metadata normalization, handle_new_user draft, GoTrue + mock Kakao e2e",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=spec tests/*.test.ts",
+    "test:e2e": "sh e2e/run.sh"
+  }
+}
