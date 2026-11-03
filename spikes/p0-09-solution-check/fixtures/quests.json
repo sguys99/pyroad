@@ -1,0 +1,870 @@
+{
+  "meta": {
+    "generated_by": "spikes/p0-09-solution-check/extract.mjs",
+    "engine": "PostgreSQL 18.6 (PGlite 0.5.14) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+    "sources": {
+      "supabase/migrations/00001_v0.1.0_initial_schema.sql": "4f43e2162b9ae319",
+      "supabase/migrations/00002_v0.3.1_security_hotfix.sql": "9c5e0d34217d417d",
+      "supabase/seed.sql": "e11229f3248b8e77"
+    },
+    "order_of_operations": [
+      "stub",
+      "migration1",
+      "migration2",
+      "seed",
+      "@fresh",
+      "migration1 (re-run)",
+      "@intended"
+    ],
+    "counts": {
+      "fresh_db": {
+        "quests": 44,
+        "with_solution": 0,
+        "project_steps": 5,
+        "project_steps_with_solution": 0
+      },
+      "intended": {
+        "quests": 44,
+        "with_solution": 43,
+        "project_steps": 5,
+        "project_steps_with_solution": 5
+      }
+    },
+    "lost_on_fresh_db": [
+      {
+        "key": "1-1",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "1-2",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "1-3",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "1-4",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "1-5",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "1-6",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "1-7",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-1",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-2",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-3",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-4",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-5",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-6",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "2-7",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-1",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-2",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-3",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-4",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-5",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-6",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "3-7",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-1",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-2",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-3",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-4",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-5",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-6",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-7",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "4-8",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-1",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-2",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-3",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-4",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-5",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-6",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "5-7",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-1",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-2",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-3",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-4",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-5",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-6",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "6-7",
+        "changed": [
+          "solution_code"
+        ]
+      },
+      {
+        "key": "7-1",
+        "changed": [
+          "steps.0.solution_code",
+          "steps.1.solution_code",
+          "steps.2.solution_code",
+          "steps.3.solution_code",
+          "steps.4.solution_code"
+        ]
+      }
+    ]
+  },
+  "quests": [
+    {
+      "id": "b1000000-0000-0000-0000-000000000001",
+      "key": "1-1",
+      "stage_order": 1,
+      "order": 1,
+      "title": "첫 번째 인사",
+      "validation_type": "output_match",
+      "expected_output": "안녕하세요!",
+      "starter_code": "# 아래에 코드를 작성해보세요!\n",
+      "solution_code": "print(\"안녕하세요!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000002",
+      "key": "1-2",
+      "stage_order": 1,
+      "order": 2,
+      "title": "내 소개를 해볼까?",
+      "validation_type": "output_match",
+      "expected_output": "나는 파이썬 모험가!\n반가워!",
+      "starter_code": "# 두 줄을 출력해보세요!\n",
+      "solution_code": "print(\"나는 파이썬 모험가!\")\nprint(\"반가워!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000023",
+      "key": "1-3",
+      "stage_order": 1,
+      "order": 3,
+      "title": "따옴표의 비밀",
+      "validation_type": "output_match",
+      "expected_output": "I'm happy!",
+      "starter_code": "# I'm happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n",
+      "solution_code": "print(\"I'm happy!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000003",
+      "key": "1-4",
+      "stage_order": 1,
+      "order": 4,
+      "title": "주석으로 메모하기",
+      "validation_type": "output_match",
+      "expected_output": "파이썬은 재미있어!",
+      "starter_code": "# 여기에 메모를 남겨보세요 (이 줄은 주석이에요!)\n",
+      "solution_code": "# 파이썬 메모\nprint(\"파이썬은 재미있어!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000024",
+      "key": "1-5",
+      "stage_order": 1,
+      "order": 5,
+      "title": "특수문자 출력하기",
+      "validation_type": "output_match",
+      "expected_output": "첫째 줄\n둘째 줄",
+      "starter_code": "# print()를 한 번만 사용해서 두 줄로 출력해보세요!\n# 힌트: \\n은 줄바꿈이에요!\n",
+      "solution_code": "print(\"첫째 줄\\n둘째 줄\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000025",
+      "key": "1-6",
+      "stage_order": 1,
+      "order": 6,
+      "title": "숫자도 출력해요",
+      "validation_type": "output_match",
+      "expected_output": "2026",
+      "starter_code": "# 숫자 2026을 출력해보세요!\n# 힌트: 따옴표 없이 숫자만 넣으면 돼요!\n",
+      "solution_code": "print(2026)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000026",
+      "key": "1-7",
+      "stage_order": 1,
+      "order": 7,
+      "title": "마을 안내판 만들기",
+      "validation_type": "output_match",
+      "expected_output": "=== 파이썬 마을 ===\n인구: 2026명\n환영합니다!",
+      "starter_code": "# 마을 안내판을 만들어보세요!\n# 주석 1줄 + print() 3줄로 완성!\n",
+      "solution_code": "# 마을 안내판\nprint(\"=== 파이썬 마을 ===\")\nprint(\"인구: 2026명\")\nprint(\"환영합니다!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000004",
+      "key": "2-1",
+      "stage_order": 2,
+      "order": 1,
+      "title": "마법 상자에 이름 넣기",
+      "validation_type": "contains",
+      "expected_output": "파이뱀",
+      "starter_code": "# 변수에 이름을 넣어보세요!\nname = \nprint(name)",
+      "solution_code": "name = \"파이뱀\"\nprint(name)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000005",
+      "key": "2-2",
+      "stage_order": 2,
+      "order": 2,
+      "title": "숫자 상자와 글자 상자",
+      "validation_type": "output_match",
+      "expected_output": "10\n안녕",
+      "starter_code": "# 숫자와 글자를 각각 변수에 넣어보세요!\nnumber = \ngreeting = \nprint(number)\nprint(greeting)",
+      "solution_code": "number = 10\ngreeting = \"안녕\"\nprint(number)\nprint(greeting)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000027",
+      "key": "2-3",
+      "stage_order": 2,
+      "order": 3,
+      "title": "상자 이름 바꾸기",
+      "validation_type": "output_match",
+      "expected_output": "파랑",
+      "starter_code": "# 색깔을 바꿔보세요!\ncolor = \"빨강\"\n# 아래에서 color를 \"파랑\"으로 바꿔보세요!\n\nprint(color)",
+      "solution_code": "color = \"빨강\"\ncolor = \"파랑\"\nprint(color)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000006",
+      "key": "2-4",
+      "stage_order": 2,
+      "order": 4,
+      "title": "나이 계산기",
+      "validation_type": "contains",
+      "expected_output": "살",
+      "starter_code": "# 나이를 계산해보세요!\nbirth_year = \nage = 2026 - birth_year\nprint(age, \"살\")",
+      "solution_code": "birth_year = 2014\nage = 2026 - birth_year\nprint(str(age) + \"살\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000028",
+      "key": "2-5",
+      "stage_order": 2,
+      "order": 5,
+      "title": "글자 합치기 마법",
+      "validation_type": "output_match",
+      "expected_output": "파이썬",
+      "starter_code": "# 글자를 합쳐보세요!\nfirst = \"파이\"\nsecond = \"썬\"\nresult = \nprint(result)",
+      "solution_code": "first = \"파이\"\nsecond = \"썬\"\nresult = first + second\nprint(result)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000007",
+      "key": "2-6",
+      "stage_order": 2,
+      "order": 6,
+      "title": "변신 마법! 형변환",
+      "validation_type": "output_match",
+      "expected_output": "123",
+      "starter_code": "# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = \nprint(result)",
+      "solution_code": "a = \"100\"\nb = \"23\"\nresult = int(a) + int(b)\nprint(result)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000029",
+      "key": "2-7",
+      "stage_order": 2,
+      "order": 7,
+      "title": "자기소개 카드 만들기",
+      "validation_type": "output_match",
+      "expected_output": "이름: 파이뱀\n나이: 10살\n학교: 코딩초등학교",
+      "starter_code": "# 자기소개 카드를 만들어보세요!\nname = \"파이뱀\"\nage = \"10\"\nschool = \"코딩초등학교\"\n\n# 아래에 print()를 3번 써서 자기소개를 출력하세요!\n",
+      "solution_code": "name = \"파이뱀\"\nage = \"10\"\nschool = \"코딩초등학교\"\nprint(\"이름: \" + name)\nprint(\"나이: \" + age + \"살\")\nprint(\"학교: \" + school)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000008",
+      "key": "3-1",
+      "stage_order": 3,
+      "order": 1,
+      "title": "비밀번호를 맞춰라!",
+      "validation_type": "output_match",
+      "expected_output": "통과!",
+      "starter_code": "# 비밀번호를 확인하는 코드를 작성해보세요!\npassword = \"열려라\"\n\nif password == \"열려라\":\n    print()",
+      "solution_code": "password = \"열려라\"\n\nif password == \"열려라\":\n    print(\"통과!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000030",
+      "key": "3-2",
+      "stage_order": 3,
+      "order": 2,
+      "title": "짝수인지 홀수인지?",
+      "validation_type": "output_match",
+      "expected_output": "홀수",
+      "starter_code": "# 짝수인지 홀수인지 판별해보세요!\nnumber = 7\n\nif number % 2 == 0:\n    print(\"짝수\")\nelse:\n    print()",
+      "solution_code": "number = 7\n\nif number % 2 == 0:\n    print(\"짝수\")\nelse:\n    print(\"홀수\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000009",
+      "key": "3-3",
+      "stage_order": 3,
+      "order": 3,
+      "title": "성적표 만들기",
+      "validation_type": "contains",
+      "expected_output": "등급",
+      "starter_code": "# 점수에 따라 등급을 매겨보세요!\nscore = 85\n\nif score >= 90:\n    print(\"등급: A\")\nelif score >= 80:\n    print()\nelse:\n    print(\"등급: C\")",
+      "solution_code": "score = 85\n\nif score >= 90:\n    print(\"등급: A\")\nelif score >= 80:\n    print(\"등급: B\")\nelse:\n    print(\"등급: C\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000010",
+      "key": "3-4",
+      "stage_order": 3,
+      "order": 4,
+      "title": "놀이공원 입장",
+      "validation_type": "output_match",
+      "expected_output": "입장 가능!",
+      "starter_code": "# 키를 확인하는 코드를 작성해보세요!\nheight = 130\n\nif height >= 120:\n    print()",
+      "solution_code": "height = 130\n\nif height >= 120:\n    print(\"입장 가능!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000011",
+      "key": "3-5",
+      "stage_order": 3,
+      "order": 5,
+      "title": "마법사의 조건",
+      "validation_type": "output_match",
+      "expected_output": "마법사 합격!",
+      "starter_code": "# 마법사 자격을 확인해보세요!\nmagic = 80\ncourage = 70\n\nif magic >= 60 and courage >= 60:\n    print()",
+      "solution_code": "magic = 80\ncourage = 70\n\nif magic >= 60 and courage >= 60:\n    print(\"마법사 합격!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000031",
+      "key": "3-6",
+      "stage_order": 3,
+      "order": 6,
+      "title": "가위바위보 심판",
+      "validation_type": "output_match",
+      "expected_output": "이겼다!",
+      "starter_code": "# 가위바위보 심판이 되어보세요!\nplayer = \"가위\"\ncomputer = \"보\"\n\nif player == computer:\n    print(\"비겼다!\")\nelif player == \"가위\":\n    if computer == \"보\":\n        print()\n    else:\n        print(\"졌다!\")",
+      "solution_code": "player = \"가위\"\ncomputer = \"보\"\n\nif player == computer:\n    print(\"비겼다!\")\nelif player == \"가위\":\n    if computer == \"보\":\n        print(\"이겼다!\")\n    else:\n        print(\"졌다!\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000032",
+      "key": "3-7",
+      "stage_order": 3,
+      "order": 7,
+      "title": "영화관 할인 시스템",
+      "validation_type": "output_match",
+      "expected_output": "나이: 10살\n할인율: 50%\n가격: 5000원",
+      "starter_code": "# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n",
+      "solution_code": "age = 10\nis_weekend = False\nprice = 10000\n\nif age < 13:\n    if is_weekend == False:\n        discount = 50\n    else:\n        discount = 30\nelse:\n    discount = 0\n\nfinal_price = price * (100 - discount) // 100\n\nprint(\"나이: \" + str(age) + \"살\")\nprint(\"할인율: \" + str(discount) + \"%\")\nprint(\"가격: \" + str(final_price) + \"원\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000012",
+      "key": "4-1",
+      "stage_order": 4,
+      "order": 1,
+      "title": "숫자 세기",
+      "validation_type": "output_match",
+      "expected_output": "1\n2\n3\n4\n5",
+      "starter_code": "# 1부터 5까지 세어보세요!\n# for 반복문과 range()를 사용해보세요!\n\nfor i in range(__, __):\n    print(i)",
+      "solution_code": "for i in range(1, 6):\n    print(i)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000013",
+      "key": "4-2",
+      "stage_order": 4,
+      "order": 2,
+      "title": "구구단 외우기",
+      "validation_type": "contains",
+      "expected_output": "= 6",
+      "starter_code": "# 2단 구구단을 출력해보세요!\n# 형식: 2 x 1 = 2\n\nfor i in range(1, 10):\n    print()",
+      "solution_code": "for i in range(1, 10):\n    print(2, \"x\", i, \"=\", 2*i)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000033",
+      "key": "4-3",
+      "stage_order": 4,
+      "order": 3,
+      "title": "별 찍기",
+      "validation_type": "output_match",
+      "expected_output": "*****",
+      "starter_code": "# 별을 5개 찍어보세요!\n# 힌트: 문자열 * 숫자 = 반복!\n\nprint(\"*\" * ___)",
+      "solution_code": "print(\"*\" * 5)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000034",
+      "key": "4-4",
+      "stage_order": 4,
+      "order": 4,
+      "title": "합계 구하기",
+      "validation_type": "output_match",
+      "expected_output": "55",
+      "starter_code": "# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)",
+      "solution_code": "total = 0\n\nfor i in range(1, 11):\n    total = total + i\n\nprint(total)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000014",
+      "key": "4-5",
+      "stage_order": 4,
+      "order": 5,
+      "title": "보물 찾기",
+      "validation_type": "contains",
+      "expected_output": "보물 발견!",
+      "starter_code": "# 보물을 찾아보세요!\nposition = 1\n\nwhile position <= 10:\n    if position == 5:\n        # 보물을 찾으면 메시지를 출력하고 멈추세요!\n        \n    position = position + 1",
+      "solution_code": "position = 1\n\nwhile position <= 10:\n    if position == 5:\n        print(\"보물 발견!\")\n        break\n    position = position + 1",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000015",
+      "key": "4-6",
+      "stage_order": 4,
+      "order": 6,
+      "title": "짝수만 골라내기",
+      "validation_type": "output_match",
+      "expected_output": "2\n4\n6\n8\n10",
+      "starter_code": "# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        # 홀수면 건너뛰세요!\n        \n    print(i)",
+      "solution_code": "for i in range(1, 11):\n    if i % 2 != 0:\n        continue\n    print(i)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000035",
+      "key": "4-7",
+      "stage_order": 4,
+      "order": 7,
+      "title": "카운트다운",
+      "validation_type": "output_match",
+      "expected_output": "5\n4\n3\n2\n1",
+      "starter_code": "# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! (힌트: count = count - ?)\n    ",
+      "solution_code": "count = 5\n\nwhile count >= 1:\n    print(count)\n    count = count - 1",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000036",
+      "key": "4-8",
+      "stage_order": 4,
+      "order": 8,
+      "title": "별 피라미드 만들기",
+      "validation_type": "output_match",
+      "expected_output": "*\n**\n***\n****\n*****",
+      "starter_code": "# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()",
+      "solution_code": "for i in range(1, 6):\n    print(\"*\" * i)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000016",
+      "key": "5-1",
+      "stage_order": 5,
+      "order": 1,
+      "title": "과일 바구니",
+      "validation_type": "contains",
+      "expected_output": "사과",
+      "starter_code": "# 과일 바구니를 만들어보세요!\n# 대괄호 [] 안에 \"사과\", \"바나나\", \"포도\"를 넣어보세요!\n\nfruits = []\nprint(fruits)",
+      "solution_code": "fruits = [\"사과\", \"바나나\", \"포도\"]\nprint(fruits)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000017",
+      "key": "5-2",
+      "stage_order": 5,
+      "order": 2,
+      "title": "보물 목록 정리",
+      "validation_type": "output_match",
+      "expected_output": "다이아몬드",
+      "starter_code": "# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[__])",
+      "solution_code": "treasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[2])",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000037",
+      "key": "5-3",
+      "stage_order": 5,
+      "order": 3,
+      "title": "리스트 순회하기",
+      "validation_type": "output_match",
+      "expected_output": "빨강\n초록\n파랑",
+      "starter_code": "# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    ",
+      "solution_code": "colors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    print(color)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000018",
+      "key": "5-4",
+      "stage_order": 5,
+      "order": 4,
+      "title": "친구 목록 관리",
+      "validation_type": "contains",
+      "expected_output": "4",
+      "starter_code": "# 친구를 추가하고 몇 명인지 세어보세요!\nfriends = [\"토끼\", \"거북이\", \"다람쥐\"]\n\n# 아래에 \"파이뱀\"을 추가하고, 친구 수를 출력하세요!\n\nprint()",
+      "solution_code": "friends = [\"토끼\", \"거북이\", \"다람쥐\"]\nfriends.append(\"파이뱀\")\nprint(len(friends))",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000038",
+      "key": "5-5",
+      "stage_order": 5,
+      "order": 5,
+      "title": "리스트 정렬하기",
+      "validation_type": "output_match",
+      "expected_output": "[1, 1, 3, 4, 5]",
+      "starter_code": "# 숫자를 정렬해보세요!\nnumbers = [3, 1, 4, 1, 5]\n\n# sort()로 정렬하세요!\n\nprint(numbers)",
+      "solution_code": "numbers = [3, 1, 4, 1, 5]\nnumbers.sort()\nprint(numbers)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000039",
+      "key": "5-6",
+      "stage_order": 5,
+      "order": 6,
+      "title": "리스트 속 검색",
+      "validation_type": "output_match",
+      "expected_output": "True",
+      "starter_code": "# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)",
+      "solution_code": "fruits = [\"사과\", \"바나나\", \"포도\"]\nresult = \"바나나\" in fruits\nprint(result)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000040",
+      "key": "5-7",
+      "stage_order": 5,
+      "order": 7,
+      "title": "쇼핑 리스트 정리기",
+      "validation_type": "output_match",
+      "expected_output": "--- 쇼핑 목록 ---\n과자\n우유\n주스\n총 3개",
+      "starter_code": "# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")",
+      "solution_code": "shopping = []\nshopping.append(\"우유\")\nshopping.append(\"주스\")\nshopping.append(\"과자\")\nshopping.sort()\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000019",
+      "key": "6-1",
+      "stage_order": 6,
+      "order": 1,
+      "title": "인사하는 함수",
+      "validation_type": "output_match",
+      "expected_output": "안녕! 나는 파이뱀이야!",
+      "starter_code": "# 인사하는 함수를 만들어보세요!\ndef greet():\n    # \"안녕! 나는 파이뱀이야!\"를 출력하세요!\n    \n\ngreet()",
+      "solution_code": "def greet():\n    print(\"안녕! 나는 파이뱀이야!\")\n\ngreet()",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000020",
+      "key": "6-2",
+      "stage_order": 6,
+      "order": 2,
+      "title": "계산기 함수",
+      "validation_type": "output_match",
+      "expected_output": "15",
+      "starter_code": "# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    # 두 숫자를 더한 결과를 return 하세요!\n    \n\nresult = add(7, 8)\nprint(result)",
+      "solution_code": "def add(a, b):\n    return a + b\n\nresult = add(7, 8)\nprint(result)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000041",
+      "key": "6-3",
+      "stage_order": 6,
+      "order": 3,
+      "title": "기본값이 있는 함수",
+      "validation_type": "output_match",
+      "expected_output": "안녕, 친구!\n안녕, 파이뱀!",
+      "starter_code": "# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n",
+      "solution_code": "def greet(name=\"친구\"):\n    print(\"안녕, \" + name + \"!\")\n\ngreet()\ngreet(\"파이뱀\")",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000021",
+      "key": "6-4",
+      "stage_order": 6,
+      "order": 4,
+      "title": "최댓값 찾기",
+      "validation_type": "output_match",
+      "expected_output": "9",
+      "starter_code": "# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = \nprint(biggest)",
+      "solution_code": "numbers = [3, 7, 1, 9, 4]\nbiggest = max(numbers)\nprint(biggest)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000042",
+      "key": "6-5",
+      "stage_order": 6,
+      "order": 5,
+      "title": "여러 값 돌려주기",
+      "validation_type": "output_match",
+      "expected_output": "1\n9",
+      "starter_code": "# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)",
+      "solution_code": "def min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    return smallest, biggest\n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000043",
+      "key": "6-6",
+      "stage_order": 6,
+      "order": 6,
+      "title": "함수 안의 함수 호출",
+      "validation_type": "output_match",
+      "expected_output": "7",
+      "starter_code": "# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)",
+      "solution_code": "def double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\nresult = add_one(double(3))\nprint(result)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000044",
+      "key": "6-7",
+      "stage_order": 6,
+      "order": 7,
+      "title": "성적 분석 프로그램",
+      "validation_type": "output_match",
+      "expected_output": "평균: 85.0\n등급: B",
+      "starter_code": "# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)",
+      "solution_code": "def average(a, b, c):\n    return (a + b + c) / 3\n\ndef grade(avg):\n    if avg >= 90:\n        return \"A\"\n    elif avg >= 80:\n        return \"B\"\n    elif avg >= 70:\n        return \"C\"\n    else:\n        return \"D\"\n\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)",
+      "steps": null
+    },
+    {
+      "id": "b1000000-0000-0000-0000-000000000022",
+      "key": "7-1",
+      "stage_order": 7,
+      "order": 1,
+      "title": "숫자 맞추기 게임",
+      "validation_type": "contains",
+      "expected_output": "번 만에 맞췄어요",
+      "starter_code": "# 숫자 맞추기 게임을 만들어보세요!\nimport random\n",
+      "solution_code": null,
+      "steps": [
+        {
+          "step_number": 1,
+          "validation_type": "code_check",
+          "expected_output": "random.randint",
+          "starter_code": "# 1단계: 비밀 숫자 만들기\nimport random\n\n# 비밀 숫자를 만들어보세요! random 모듈을 사용해볼까요?\n",
+          "solution_code": "import random\n\nsecret = random.randint(1, 10)\nprint(secret)"
+        },
+        {
+          "step_number": 2,
+          "validation_type": "code_check",
+          "expected_output": "int(",
+          "starter_code": "",
+          "solution_code": "import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\nprint(\"비밀 숫자: \" + str(secret))\nprint(\"추측: \" + str(guess))"
+        },
+        {
+          "step_number": 3,
+          "validation_type": "contains",
+          "expected_output": "보다 커요",
+          "starter_code": "",
+          "solution_code": "import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\n\nif guess == secret:\n    print(\"정답!\")\nelif guess < secret:\n    print(\"비밀 숫자가 추측보다 커요!\")\nelse:\n    print(\"비밀 숫자가 추측보다 작아요!\")"
+        },
+        {
+          "step_number": 4,
+          "validation_type": "code_check",
+          "expected_output": "while",
+          "starter_code": "",
+          "solution_code": "import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\n\nwhile guess != secret:\n    if guess < secret:\n        print(\"비밀 숫자가 추측보다 커요!\")\n    else:\n        print(\"비밀 숫자가 추측보다 작아요!\")\n    guess = int(random.randint(1, 10))\n\nprint(\"정답!\")"
+        },
+        {
+          "step_number": 5,
+          "validation_type": "contains",
+          "expected_output": "번 만에 맞췄어요",
+          "starter_code": "",
+          "solution_code": "import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\nattempts = 0\n\nwhile guess != secret:\n    attempts = attempts + 1\n    if guess < secret:\n        print(\"비밀 숫자가 추측보다 커요!\")\n    else:\n        print(\"비밀 숫자가 추측보다 작아요!\")\n    guess = int(random.randint(1, 10))\n\nattempts = attempts + 1\nprint(\"정답! \" + str(attempts) + \"번 만에 맞췄어요!\")"
+        }
+      ]
+    }
+  ]
+}

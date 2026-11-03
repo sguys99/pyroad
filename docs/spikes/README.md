@@ -5,3 +5,4 @@
 | ID | 주제 | 결론 | 보고서 |
 |---|---|---|---|
 | P0-02 | MCP 연결 | 설정 완료 (인증 대기) | [P0-02-mcp.md](P0-02-mcp.md) |
+| P0-09 | Node Pyodide 정답 자동 검증 | **채택** | [P0-09-solution-check.md](P0-09-solution-check.md) |

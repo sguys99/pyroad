@@ -1,0 +1,19 @@
+{
+  "name": "p0-09-solution-check",
+  "private": true,
+  "type": "module",
+  "description": "P0-09 spike: run every quest solution_code in Node Pyodide and check it passes its own validation",
+  "scripts": {
+    "extract": "node extract.mjs",
+    "extract:docker": "node extract.mjs --docker",
+    "check": "tsx check.ts",
+    "check:0.27": "tsx check.ts --pyodide 0.27.5",
+    "check:flaky": "tsx check.ts --runs 20",
+    "test": "../../node_modules/.bin/vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.14",
+    "pyodide-0.27.5": "npm:pyodide@0.27.5",
+    "tsx": "4.23.15"
+  }
+}
