@@ -130,13 +130,18 @@ export type BoardPost = Tables<'board_posts'>;
 
 export type BoardComment = Tables<'board_comments'>;
 
+/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public, 00014: 닉네임 → 모험가NNNN. 실명·사진 없음) */
+export interface BoardAuthor {
+  display_name: string | null;
+}
+
 export interface BoardPostWithAuthor extends BoardPost {
-  user_profiles_public: { display_name: string; avatar_url: string | null };
+  user_profiles_public: BoardAuthor | null;
   comment_count: number;
 }
 
 export interface BoardCommentWithAuthor extends BoardComment {
-  user_profiles_public: { display_name: string; avatar_url: string | null };
+  user_profiles_public: BoardAuthor | null;
 }
 
 // 공지사항 타입

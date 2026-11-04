@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import {
+  BOARD_MESSAGES,
+  boardError,
+  boardServerError,
+  checkPostInput,
+  readJsonObject,
+} from '@/lib/board/server';
 
+// 글쓰기: 길이·빈 값·금칙어 검사 후 service_role 로 저장 (P1-18, B19).
+// 사용자 클라이언트로 쓰지 않음: ③ 00015 이후 board_posts 쓰기 권한은 service_role 에만 있음
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -8,49 +18,30 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return boardError(401, BOARD_MESSAGES.unauthorized);
   }
 
-  let body: { title: string; content: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  const body = await readJsonObject(request);
+  if (!body) {
+    return boardError(400, BOARD_MESSAGES.badRequest, { code: 'validation' });
   }
 
-  const title = body.title?.trim();
-  const content = body.content?.trim();
+  const checked = checkPostInput(body);
+  if (!checked.ok) return checked.response;
+  const { title, content } = checked.value;
 
-  if (!title || !content) {
-    return NextResponse.json(
-      { error: '제목과 내용을 모두 입력해주세요.' },
-      { status: 400 },
-    );
-  }
-
-  if (title.length > 100) {
-    return NextResponse.json(
-      { error: '제목은 100자 이내로 입력해주세요.' },
-      { status: 400 },
-    );
-  }
-
-  if (content.length > 2000) {
-    return NextResponse.json(
-      { error: '내용은 2000자 이내로 입력해주세요.' },
-      { status: 400 },
-    );
-  }
-
-  const { data, error } = await supabase
+  const { data, error } = await createAdminClient()
     .from('board_posts')
-    .insert({ user_id: user.id, title, content })
-    .select()
+    .insert({ user_id: user.id, title: title!, content: content! })
+    .select('id')
     .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !data) {
+    return boardServerError(
+      error ?? new Error('insert 결과 없음'),
+      'post_create',
+    );
   }
 
-  return NextResponse.json({ ok: true, post: data });
+  return NextResponse.json({ ok: true, post: { id: data.id } });
 }

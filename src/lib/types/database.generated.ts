@@ -13,21 +13,27 @@ export type Database = {
         Row: {
           content: string;
           created_at: string;
+          hidden_at: string | null;
           id: string;
+          is_hidden: boolean;
           post_id: string;
           user_id: string;
         };
         Insert: {
           content: string;
           created_at?: string;
+          hidden_at?: string | null;
           id?: string;
+          is_hidden?: boolean;
           post_id: string;
           user_id: string;
         };
         Update: {
           content?: string;
           created_at?: string;
+          hidden_at?: string | null;
           id?: string;
+          is_hidden?: boolean;
           post_id?: string;
           user_id?: string;
         };
@@ -59,7 +65,9 @@ export type Database = {
         Row: {
           content: string;
           created_at: string;
+          hidden_at: string | null;
           id: string;
+          is_hidden: boolean;
           title: string;
           updated_at: string;
           user_id: string;
@@ -67,7 +75,9 @@ export type Database = {
         Insert: {
           content: string;
           created_at?: string;
+          hidden_at?: string | null;
           id?: string;
+          is_hidden?: boolean;
           title: string;
           updated_at?: string;
           user_id: string;
@@ -75,7 +85,9 @@ export type Database = {
         Update: {
           content?: string;
           created_at?: string;
+          hidden_at?: string | null;
           id?: string;
+          is_hidden?: boolean;
           title?: string;
           updated_at?: string;
           user_id?: string;
@@ -91,6 +103,65 @@ export type Database = {
           {
             foreignKeyName: 'board_posts_user_id_fkey';
             columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      board_reports: {
+        Row: {
+          created_at: string;
+          id: string;
+          reason: string;
+          reporter_id: string;
+          target_id: string;
+          target_type: string;
+          target_user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          reason: string;
+          reporter_id: string;
+          target_id: string;
+          target_type: string;
+          target_user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          reason?: string;
+          reporter_id?: string;
+          target_id?: string;
+          target_type?: string;
+          target_user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'board_reports_reporter_id_fkey';
+            columns: ['reporter_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_profiles_public';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'board_reports_reporter_id_fkey';
+            columns: ['reporter_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'board_reports_target_user_id_fkey';
+            columns: ['target_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_profiles_public';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'board_reports_target_user_id_fkey';
+            columns: ['target_user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
@@ -585,13 +656,13 @@ export type Database = {
           id: string | null;
         };
         Insert: {
-          avatar_url?: string | null;
-          display_name?: string | null;
+          avatar_url?: never;
+          display_name?: never;
           id?: string | null;
         };
         Update: {
-          avatar_url?: string | null;
-          display_name?: string | null;
+          avatar_url?: never;
+          display_name?: never;
           id?: string | null;
         };
         Relationships: [];
@@ -639,6 +710,15 @@ export type Database = {
       };
       record_hint: {
         Args: { p_level: number; p_quest_id: string; p_user_id: string };
+        Returns: Json;
+      };
+      report_board_content: {
+        Args: {
+          p_reason: string;
+          p_reporter_id: string;
+          p_target_id: string;
+          p_target_type: string;
+        };
         Returns: Json;
       };
       reset_progress: {

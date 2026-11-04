@@ -148,6 +148,8 @@ docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
 - KST 날짜(P1-08): `public.kst_date(timestamptz)`(IMMUTABLE, 인라인되도록 `SET search_path` 없이 `pg_catalog.` 명시 — Advisors `function_search_path_mutable` 경고 1건은 의도한 것)와 `public.kst_today()`. 날짜 컬럼은 `DEFAULT public.kst_today()`, TS는 `src/lib/time/kst.ts`.
 - 가입·로그인 트리거(B24·B16, `00013`): `handle_new_user`는 `display_name`에 자리표시자 `모험가NNNN`(`placeholder_display_name`)을, `avatar_url`에 `''`를 넣고 provider 이름·사진은 복사하지 않습니다(§2.8). 로그인 때 `handle_user_signed_in`(`auth.users.last_sign_in_at` 갱신 트리거)이 `last_login_at`과 `last_login_provider`(`user_metadata.iss`로 판별, `social_login_provider`)를 씁니다. 트리거 함수는 모두 `SET search_path = ''` + anon·authenticated EXECUTE 없음(트리거는 실행 권한 없이도 동작).
 - 사용자 API 키(B13): `user_api_keys`(service_role 전용, `00007`)에 AES-256-GCM 암호문만 있습니다. 앱은 `src/lib/tutor/apiKeys.ts`로만 읽고 쓰며, 서버 env `API_KEY_ENCRYPTION_KEY`(`openssl rand -base64 32`)가 없으면 "내 API 키" 기능만 꺼집니다. 로컬에서 이 기능을 쓰려면 `.env.local`에 아무 테스트 키나 넣습니다(운영 키를 쓰지 않음). `users.custom_api_keys`(평문)는 `00009`(③)가 지웁니다.
+- 게시판 안전장치(P1-18·B19, `00014` ①·`00015` ③): 길이·빈 값은 DB CHECK(`board_posts_title_check` 제목 1~100자, `board_posts_content_check` 내용 1~2,000자, `board_comments_content_check` 댓글 1~500자, 글자 수는 `char_length`, 공백만 있으면 거부). 운영에 위반 행이 있으면 `00014`가 NOT VALID로 추가하므로 런북 "00014 확인"으로 정리 후 VALIDATE. 금칙어·개인정보 필터는 DB가 아니라 서버 모듈(`src/lib/moderation/`, 목록은 `data/*.json`)이라 **쓰기는 API Route(service_role)로만**: `00015`가 `board_posts`·`board_comments`의 anon·authenticated 쓰기 권한과 INSERT·UPDATE·DELETE 정책을 지웁니다(SELECT만). 신고는 `board_reports`(service_role 전용, `UNIQUE(reporter_id, target_type, target_id)`) + `report_board_content`(service_role 전용, 대상 행을 잠그고 서로 다른 신고자 3명이면 `is_hidden`). 숨긴 글·댓글은 SELECT 정책으로 작성자만 보고(숨긴 글의 댓글은 아무도), `is_hidden`·`hidden_at`은 보호 트리거 `board_protect_moderation`이 클라이언트 값을 버립니다. 운영 순서상 ③ `00011`이 board SELECT 정책을 `USING (true)`로 다시 쓰므로 `00015`가 숨김 정책을 다시 만듭니다. 해제·삭제는 런북 "게시판 신고 처리"의 SQL
+- 공개 이름(P1-18, X1): `user_profiles_public.display_name`은 `coalesce(nickname, '모험가NNNN')`(자리표시자는 `placeholder_display_name`과 같은 식을 뷰에 그대로 씀 — `00014`가 `00013`(③)보다 먼저 적용되고, 함수를 부르면 authenticated EXECUTE가 필요하기 때문. 회귀 `VIEW-3`이 대조), `avatar_url`은 NULL입니다. 기존 Google 사용자의 실명(`users.display_name`)은 본인 화면용으로 그대로 두고 뷰로는 나가지 않습니다. 계산 컬럼이라 뷰를 통한 UPDATE는 `0A000`으로 거부됩니다(B03-5·6). `security_invoker` 교체는 P3-13(VIEW-2)
 - B08(해결): `00001` Section 6의 `solution_code` UPDATE는 seed보다 먼저 실행되어 새 DB에서 0건이었습니다. 00001은 운영에 적용한 파일이라 고치지 않습니다. P1-02에서 같은 내용을 `seed.sql` 끝에 두었고, P1-12부터는 정답이 `content/`에 있어 생성 seed가 `quest_answer_keys`에 직접 씁니다.
 
 ## 4. RLS·권한 회귀 테스트 (P1-20)
@@ -184,16 +186,17 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 
 | 그룹 | 점검 |
 |---|---|
-| `view` | `user_profiles_public` 비로그인 조회·뷰를 통한 수정/삭제 거부(B03), 모든 뷰의 쓰기 권한 없음, `security_invoker` 아닌 뷰 |
+| `view` | `user_profiles_public` 비로그인 조회·뷰를 통한 수정/삭제 거부(B03), 모든 뷰의 쓰기 권한 없음, `security_invoker` 아닌 뷰 (공개 이름 규칙은 `board`의 VIEW-3) |
 | `notice` | 공지 쓰기(본인 INSERT·UPDATE·DELETE, psql) 거부, 비로그인 목록·service_role 작성 허용(B02) |
 | `write` | XP·레벨·황금키·코인(P8, PENDING)·별·시도·`earned_xp`·뱃지·진행 상태·`hints_used`·`used_golden_key` 직접 쓰기, 다른 사용자 행 쓰기, 권한 없는 프로필 컬럼·`users` INSERT, `custom_api_keys` 조회, 이전 auto-save payload, 완료 행의 `quest_id` 바꾸기, 진행 행 삭제·상태 되돌리기 뒤 재완료로 XP 반복 획득(B04·B05·B13·P1-01·P1-04) |
 | `apikey` | `user_api_keys` 접근 거부(anon/authenticated 조회·임베딩·쓰기·OpenAPI 노출), service_role 조회·저장, 탈퇴 시 삭제(B13) |
 | `answer` | `quests`의 정답 노출(B07), 새 DB의 `solution_code`(B08), `quest_answer_keys` 접근 거부(P1-02 이후 자동 활성화) |
 | `rpc` | 보상 RPC(`complete_quest`·`use_golden_key`·`reset_progress`·`record_hint`)와 규칙 함수를 anon/authenticated가 부를 수 없음 (P1-03·P1-04) |
 | `reward` | 보상 RPC 동작: TS↔SQL 규칙 대조표(`fixtures/reward-rules.json`), 동시 완료 8회·동시 황금키 5회에 1회만 지급, 힌트·황금키는 DB 값(B05·B11), 스테이지 잠금·채점 미통과 거부, 스테이지 클리어, 리셋 XP 재계산·뱃지(B12), `earned_xp` 클라이언트 쓰기 무시, 00006 백필 재실행, `record_hint` 규칙(P1-04) |
-| `app` | 앱이 실제로 보내는 조회·쓰기(월드·프로필·퀘스트 페이지, 뱃지 확인, auto-save, 설정, 게시판, 리셋)와 service_role 경로가 깨지지 않음 |
+| `app` | 앱이 실제로 보내는 조회·쓰기(월드·프로필·퀘스트 페이지, 뱃지 확인, auto-save, 설정, 게시판, 리셋)와 service_role 경로가 깨지지 않음. 게시판 작성자는 `모험가NNNN`(APP-13·14), 게시판 쓰기는 service_role(APP-W4~W8, P1-18) |
 | `schema` | P1-08(`00012`): `worlds` 비로그인 거부·로그인 조회·쓰기 거부, 백필(월드·`quest_type`), 2월드 스테이지 잠금·리셋 순서, `quiz_attempts` 쓰기 거부·본인 행만 조회, 프로필 컬럼 클라이언트 UPDATE 거부(PF-1~4), `settings` 기본 형태, 닉네임 글자 규칙(EUC-KR 변환과 2,350자 전수 비교)·유일, KST 함수 경계값·인라인 |
 | `auth` | B24·B16(`00013`): 가입 트리거가 provider 이름·사진을 복사하지 않음(B16-1·2), 로그인 뒤 `last_login_at` = `last_sign_in_at`, `iss`로 `last_login_provider` |
+| `board` | P1-18·B19(`00014`·`00015`): 길이·빈 값 CHECK(service_role도 거부 B19-1~5, 경계 B19-6, 브라우저 직접 INSERT B19-7, VALID B19-8), 클라이언트 글·댓글 쓰기 거부(BW-1~6), 숨긴 글·댓글 조회(BH-1~3)·보호 트리거(BH-4, ① 상태 재현), `board_reports`·`report_board_content` 접근 거부(BR-1~4·7)·서버 경로(BR-5)·규칙(BR-6: 중복·본인·3명 숨김), 공개 이름에 실명·사진 없음(VIEW-3) |
 | `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정(SECURITY DEFINER ST-4, 전체 함수 ST-6 — `kst_date`만 예외), `auth.uid()`를 감싸지 않은 정책 0(ST-5, B34), 스냅샷 3종 |
 
 GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.

@@ -224,6 +224,14 @@ async function classifyWrite(reqPromise, verifySql) {
   return { actual: 'error', detail: base };
 }
 
+/** 뷰 쓰기: 00014 부터 display_name 은 계산 컬럼이라 PostgREST 가 0A000(갱신할 수 없는 뷰 컬럼)으로 거부 = 막힘 */
+async function classifyViewWrite(reqPromise, verifySql) {
+  const c = await classifyWrite(reqPromise, verifySql);
+  return c.actual === 'error' && /\b0A000\b/.test(c.detail)
+    ? { actual: 'denied', detail: c.detail }
+    : c;
+}
+
 /** quests 응답에서 정답이 섞인 행 수 */
 function classifyLeak(r) {
   const c = classifyRead(r);
@@ -509,7 +517,7 @@ async function groupView(u) {
     op: 'PATCH /user_profiles_public?id=eq.<다른 사용자> {display_name}',
     ...WRITE,
     run: () =>
-      classifyWrite(
+      classifyViewWrite(
         rest('PATCH', `/rest/v1/user_profiles_public?id=eq.${u.bob.id}`, {
           as: u.alice,
           body: { display_name: '해킹됨' },
@@ -525,7 +533,7 @@ async function groupView(u) {
     op: 'PATCH /user_profiles_public?id=eq.<사용자> {display_name}',
     ...WRITE,
     run: () =>
-      classifyWrite(
+      classifyViewWrite(
         rest('PATCH', `/rest/v1/user_profiles_public?id=eq.${u.bob.id}`, {
           body: { display_name: '익명해킹' },
           prefer: 'return=minimal',
@@ -2384,23 +2392,25 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-13',
     role: 'authenticated',
-    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name,avatar_url),board_comments(count) + count=exact',
+    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name,avatar_url),board_comments(count)&order=created_at.desc&offset=0&limit=10',
+        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name),board_comments(count)&order=created_at.desc&offset=0&limit=10',
         { as: u.alice, prefer: 'count=exact' },
       );
       const c = classifyRead(r);
-      if (
-        c.actual === 'allowed' &&
-        !r.json[0]?.user_profiles_public?.display_name
-      )
+      if (c.actual !== 'allowed') return c;
+      const name = r.json[0]?.user_profiles_public?.display_name;
+      if (!name)
         return {
           actual: 'author-missing',
           detail: JSON.stringify(r.json[0]).slice(0, 120),
         };
+      // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
+      if (!/^모험가\d{4}$/.test(name))
+        return { actual: 'real-name', detail: name };
       return c;
     },
   });
@@ -2408,23 +2418,25 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-14',
     role: 'authenticated',
-    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name,avatar_url)',
+    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name,avatar_url)&post_id=eq.${u.postId}&order=created_at.asc`,
+        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name)&post_id=eq.${u.postId}&order=created_at.asc`,
         { as: u.alice },
       );
       const c = classifyRead(r);
-      if (
-        c.actual === 'allowed' &&
-        !r.json[0]?.user_profiles_public?.display_name
-      )
+      if (c.actual !== 'allowed') return c;
+      const name = r.json[0]?.user_profiles_public?.display_name;
+      if (!name)
         return {
           actual: 'author-missing',
           detail: JSON.stringify(r.json[0]).slice(0, 120),
         };
+      // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
+      if (!/^모험가\d{4}$/.test(name))
+        return { actual: 'real-name', detail: name };
       return c;
     },
   });
@@ -2504,17 +2516,18 @@ async function groupApp(u) {
         `select preferred_provider = 'openai' from public.users where id = '${u.alice.id}'`,
       ),
   });
+  // 게시판 쓰기: P1-18 부터 API Route 가 금칙어 검사 후 service_role 로 씀 (사용자 클라이언트 쓰기는 ③ 00015 가 막음, BW-*)
   const title = `app-post-${RUN}`;
   await check({
     group: 'app',
     id: 'APP-W4',
-    role: 'authenticated',
-    op: 'api/board/posts POST → POST /board_posts {user_id: 본인}',
+    role: 'service_role',
+    op: 'api/board/posts POST → POST /board_posts {user_id: 본인} (service_role)',
     ...WRITE,
     run: () =>
       classifyWrite(
         rest('POST', '/rest/v1/board_posts', {
-          as: u.alice,
+          as: 'service',
           body: { user_id: u.alice.id, title, content: '안녕' },
           prefer: 'return=minimal',
         }),
@@ -2527,13 +2540,13 @@ async function groupApp(u) {
   await check({
     group: 'app',
     id: 'APP-W5',
-    role: 'authenticated',
-    op: 'api/board/posts/[postId] PATCH → PATCH /board_posts?id=eq.<본인 글>',
+    role: 'service_role',
+    op: 'api/board/posts/[postId] PATCH → PATCH /board_posts?id=eq.<본인 글>&user_id=eq.<본인> (service_role)',
     ...WRITE,
     run: () =>
       classifyWrite(
-        rest('PATCH', `/rest/v1/board_posts?id=eq.${myPost}`, {
-          as: u.alice,
+        rest('PATCH', `/rest/v1/board_posts?id=eq.${myPost}&user_id=eq.${u.alice.id}`, {
+          as: 'service',
           body: { content: '고쳤어요' },
           prefer: 'return=minimal',
         }),
@@ -2543,13 +2556,13 @@ async function groupApp(u) {
   await check({
     group: 'app',
     id: 'APP-W6',
-    role: 'authenticated',
-    op: 'api/board/comments POST → POST /board_comments {user_id: 본인}',
+    role: 'service_role',
+    op: 'api/board/comments POST → POST /board_comments {user_id: 본인} (service_role)',
     ...WRITE,
     run: () =>
       classifyWrite(
         rest('POST', '/rest/v1/board_comments', {
-          as: u.alice,
+          as: 'service',
           body: {
             post_id: u.postId,
             user_id: u.alice.id,
@@ -2563,15 +2576,15 @@ async function groupApp(u) {
   await check({
     group: 'app',
     id: 'APP-W7',
-    role: 'authenticated',
-    op: 'api/board/comments/[commentId] DELETE → DELETE /board_comments?id=eq.<본인 댓글>',
+    role: 'service_role',
+    op: 'api/board/comments/[commentId] DELETE → DELETE /board_comments?id=eq.<본인 댓글>&user_id=eq.<본인> (service_role)',
     ...WRITE,
     run: () =>
       classifyWrite(
         rest(
           'DELETE',
           `/rest/v1/board_comments?content=eq.app-comment-${RUN}&user_id=eq.${u.alice.id}`,
-          { as: u.alice, prefer: 'return=minimal' },
+          { as: 'service', prefer: 'return=minimal' },
         ),
         `select not exists (select 1 from public.board_comments where content = 'app-comment-${RUN}')`,
       ),
@@ -2579,13 +2592,13 @@ async function groupApp(u) {
   await check({
     group: 'app',
     id: 'APP-W8',
-    role: 'authenticated',
-    op: 'api/board/posts/[postId] DELETE → DELETE /board_posts?id=eq.<본인 글>',
+    role: 'service_role',
+    op: 'api/board/posts/[postId] DELETE → DELETE /board_posts?id=eq.<본인 글>&user_id=eq.<본인> (service_role)',
     ...WRITE,
     run: () =>
       classifyWrite(
-        rest('DELETE', `/rest/v1/board_posts?id=eq.${myPost}`, {
-          as: u.alice,
+        rest('DELETE', `/rest/v1/board_posts?id=eq.${myPost}&user_id=eq.${u.alice.id}`, {
+          as: 'service',
           prefer: 'return=minimal',
         }),
         `select not exists (select 1 from public.board_posts where id::text = ${sqlStr(myPost)})`,
@@ -3349,6 +3362,350 @@ async function groupAuthTriggers(u) {
   });
 }
 
+// ── board: 게시판 안전장치 (P1-18, B19, 00014·00015) ──────────
+/** CHECK 위반(23514)이면 'rejected'. 그 밖은 classifyWrite 와 같음 */
+async function classifyCheckWrite(reqPromise, verifySql) {
+  const r = await reqPromise;
+  const written = one(verifySql) === 't';
+  const base = `${r.status} ${errCode(r) ?? ''} ${errMsg(r) ?? ''}`.trim();
+  if (written) return { actual: 'written', detail: base };
+  if (errCode(r) === '23514') return { actual: 'rejected', detail: base };
+  if (r.status === 401 || r.status === 403 || errCode(r) === '42501')
+    return { actual: 'denied', detail: base };
+  if (r.status >= 200 && r.status < 300)
+    return { actual: 'no-op', detail: `${base} (RLS 로 0행)` };
+  return { actual: 'error', detail: base };
+}
+const CHECKW = { deny: ['rejected'], allow: ['written'] };
+const CLIENTW = { deny: ['denied', 'no-op', 'rejected'], allow: ['written'] };
+
+async function groupBoard(u) {
+  // ① 00014 CHECK: service_role(= 새 API 경로)도 막힘 → DB 가 마지막 방어선 (B19)
+  const longTitle = `b19-${RUN}-` + 'x'.repeat(100);
+  const checks = [
+    ['B19-1', 'POST /board_posts 제목 101자 이상', 'board_posts', { user_id: u.bob.id, title: longTitle, content: 'x' }, `title = ${sqlStr(longTitle)}`],
+    ['B19-2', 'POST /board_posts 제목이 공백뿐', 'board_posts', { user_id: u.bob.id, title: '   ', content: `b19-2-${RUN}` }, `content = 'b19-2-${RUN}'`],
+    ['B19-3', 'POST /board_posts 내용 2,001자', 'board_posts', { user_id: u.bob.id, title: `b19-3-${RUN}`, content: 'x'.repeat(2001) }, `title = 'b19-3-${RUN}'`],
+    ['B19-4', 'POST /board_comments 댓글 501자', 'board_comments', { post_id: u.postId, user_id: u.bob.id, content: `b19-4-${RUN}` + 'x'.repeat(500) }, `content like 'b19-4-${RUN}%'`],
+    ['B19-5', 'POST /board_comments 빈 댓글', 'board_comments', { post_id: u.postId, user_id: u.bob.id, content: '' }, `user_id = '${u.bob.id}' and content = ''`],
+  ];
+  for (const [id, op, table, body, where] of checks) {
+    await check({
+      group: 'board',
+      id,
+      role: 'service_role',
+      op: `${op} (CHECK)`,
+      ...CHECKW,
+      run: () =>
+        classifyCheckWrite(
+          rest('POST', `/rest/v1/${table}`, { as: 'service', body, prefer: 'return=minimal' }),
+          `select exists (select 1 from public.${table} where ${where})`,
+        ),
+    });
+  }
+  // 한도 경계: 이모지 100개(코드 포인트 100, UTF-16 200) 제목 + 2,000자 내용은 저장됨
+  const emojiTitle = '🐍'.repeat(96) + RUN.slice(-4).padStart(4, 'a');
+  await check({
+    group: 'board',
+    id: 'B19-6',
+    role: 'service_role',
+    op: 'POST /board_posts 제목 100자(이모지)·내용 2,000자 → 저장됨 (한도 = char_length)',
+    ...CHECKW,
+    deny: ['rejected', 'error', 'denied'],
+    allow: ['written'],
+    run: () =>
+      classifyCheckWrite(
+        rest('POST', '/rest/v1/board_posts', {
+          as: 'service',
+          body: { user_id: u.bob.id, title: emojiTitle, content: 'y'.repeat(2000) },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.board_posts where title = ${sqlStr(emojiTitle)})`,
+      ),
+  });
+  await check({
+    group: 'board',
+    id: 'B19-7',
+    role: 'authenticated',
+    op: 'POST /board_posts 제목 101자 (원래 B19 우회: 브라우저에서 직접 INSERT)',
+    ...CLIENTW,
+    run: () =>
+      classifyCheckWrite(
+        rest('POST', '/rest/v1/board_posts', {
+          as: u.alice,
+          body: { user_id: u.alice.id, title: `b19-7-${RUN}` + 'x'.repeat(100), content: 'x' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.board_posts where title like 'b19-7-${RUN}%')`,
+      ),
+  });
+  await check({
+    group: 'board',
+    id: 'B19-8',
+    role: 'postgres',
+    op: 'board CHECK 3개가 VALID (운영에 위반 행이 있으면 NOT VALID 로 추가됨 → 런북 "00014 확인")',
+    deny: ['valid'],
+    allow: (a) => a !== 'valid',
+    run: () => {
+      const v = one(`select coalesce(string_agg(conname || '=' || convalidated, ',' order by conname), '')
+        from pg_constraint where conname in ('board_posts_title_check', 'board_posts_content_check', 'board_comments_content_check')`);
+      return {
+        actual: v === 'board_comments_content_check=true,board_posts_content_check=true,board_posts_title_check=true' ? 'valid' : 'invalid',
+        detail: v,
+      };
+    },
+  });
+
+  // ③ 00015: 클라이언트 쓰기 거부 (금칙어 필터 우회 차단)
+  const clientWrites = [
+    ['BW-1', u.alice, 'POST /board_posts {user_id: 본인} (정상 길이)', () =>
+      rest('POST', '/rest/v1/board_posts', { as: u.alice, body: { user_id: u.alice.id, title: `bw-1-${RUN}`, content: '필터 우회' }, prefer: 'return=minimal' }),
+      `select exists (select 1 from public.board_posts where title = 'bw-1-${RUN}')`],
+    ['BW-2', u.alice, 'PATCH /board_posts?id=eq.<본인 글>', () =>
+      rest('PATCH', `/rest/v1/board_posts?id=eq.${u.alicePostId}`, { as: u.alice, body: { content: `bw-2-${RUN}` }, prefer: 'return=minimal' }),
+      `select exists (select 1 from public.board_posts where id = '${u.alicePostId}' and content = 'bw-2-${RUN}')`],
+    ['BW-3', u.alice, 'DELETE /board_posts?id=eq.<본인 글>', () =>
+      rest('DELETE', `/rest/v1/board_posts?id=eq.${u.alicePostId}`, { as: u.alice, prefer: 'return=minimal' }),
+      `select not exists (select 1 from public.board_posts where id = '${u.alicePostId}')`],
+    ['BW-4', u.alice, 'POST /board_comments {user_id: 본인}', () =>
+      rest('POST', '/rest/v1/board_comments', { as: u.alice, body: { post_id: u.postId, user_id: u.alice.id, content: `bw-4-${RUN}` }, prefer: 'return=minimal' }),
+      `select exists (select 1 from public.board_comments where content = 'bw-4-${RUN}')`],
+    ['BW-5', u.alice, 'DELETE /board_comments?id=eq.<본인 댓글>', () =>
+      rest('DELETE', `/rest/v1/board_comments?id=eq.${u.aliceCommentId}`, { as: u.alice, prefer: 'return=minimal' }),
+      `select not exists (select 1 from public.board_comments where id = '${u.aliceCommentId}')`],
+    ['BW-6', 'anon', 'POST /board_posts (비로그인)', () =>
+      rest('POST', '/rest/v1/board_posts', { body: { user_id: u.bob.id, title: `bw-6-${RUN}`, content: 'x' }, prefer: 'return=minimal' }),
+      `select exists (select 1 from public.board_posts where title = 'bw-6-${RUN}')`],
+  ];
+  for (const [id, who, op, req, verify] of clientWrites) {
+    await check({
+      group: 'board',
+      id,
+      role: who === 'anon' ? 'anon' : 'authenticated',
+      op,
+      ...CLIENTW,
+      run: () => classifyCheckWrite(req(), verify),
+    });
+  }
+
+  // ① 00014 숨김: 숨긴 글은 작성자만, 숨긴 글의 댓글은 아무도 (작성자 포함, 글 RLS 를 따름 → 작성자는 볼 수 있음)
+  await check({
+    group: 'board',
+    id: 'BH-1',
+    role: 'authenticated',
+    op: 'GET /board_posts?id=eq.<남의 숨긴 글>',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `/rest/v1/board_posts?select=id&id=eq.${u.hiddenBobPostId}`, { as: u.alice })),
+  });
+  await check({
+    group: 'board',
+    id: 'BH-2',
+    role: 'authenticated',
+    op: 'GET /board_comments?post_id=eq.<남의 숨긴 글> (내가 쓴 댓글이라도 글이 안 보이면 안 보임)',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `/rest/v1/board_comments?select=id&post_id=eq.${u.hiddenBobPostId}`, { as: u.alice })),
+  });
+  await check({
+    group: 'board',
+    id: 'BH-3',
+    role: 'authenticated',
+    op: 'GET /board_posts?id=eq.<내 숨긴 글> (작성자는 봄: "나만 볼 수 있어요")',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `/rest/v1/board_posts?select=id,is_hidden&id=eq.${u.hiddenAlicePostId}`, { as: u.alice })),
+  });
+  await check({
+    group: 'board',
+    id: 'BH-4',
+    role: 'authenticated',
+    op: '① 상태 재현(쓰기 권한·정책 임시 부여): 클라이언트가 is_hidden·hidden_at 을 바꾸면 보호 트리거가 버림',
+    deny: ['ok'],
+    allow: ['mismatch'],
+    run: () =>
+      sqlCheck(`
+        GRANT INSERT, UPDATE ON public.board_posts TO authenticated;
+        CREATE POLICY tmp_bh4_ins ON public.board_posts FOR INSERT TO authenticated WITH CHECK (true);
+        CREATE POLICY tmp_bh4_upd ON public.board_posts FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+        SET LOCAL ROLE authenticated;
+        SET LOCAL request.jwt.claims = '{"sub": "${u.alice.id}", "role": "authenticated"}';
+        DO $$
+        DECLARE v_id UUID; v_hidden BOOLEAN; v_at TIMESTAMPTZ;
+        BEGIN
+          INSERT INTO public.board_posts (user_id, title, content, is_hidden, hidden_at)
+          VALUES ('${u.alice.id}', 'bh4', 'x', true, now()) RETURNING id, is_hidden, hidden_at INTO v_id, v_hidden, v_at;
+          IF v_hidden OR v_at IS NOT NULL THEN RAISE EXCEPTION 'INSERT 로 숨김 상태를 정함: % %', v_hidden, v_at; END IF;
+          UPDATE public.board_posts SET is_hidden = false, hidden_at = NULL WHERE id = '${u.hiddenAlicePostId}'
+            RETURNING is_hidden, hidden_at INTO v_hidden, v_at;
+          IF NOT v_hidden OR v_at IS NULL THEN RAISE EXCEPTION 'UPDATE 로 숨김을 풂: % %', v_hidden, v_at; END IF;
+        END $$;
+        RESET ROLE;`),
+  });
+
+  // ① 00014 신고: board_reports·report_board_content 는 service_role 전용
+  await check({
+    group: 'board',
+    id: 'BR-1',
+    role: 'anon',
+    op: 'GET /board_reports',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', '/rest/v1/board_reports?select=*')),
+  });
+  await check({
+    group: 'board',
+    id: 'BR-2',
+    role: 'authenticated',
+    op: 'GET /board_reports (누가 누구를 신고했는지)',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', '/rest/v1/board_reports?select=*', { as: u.alice })),
+  });
+  await check({
+    group: 'board',
+    id: 'BR-3',
+    role: 'authenticated',
+    op: 'POST /board_reports (API 를 건너뛴 신고 = 혼자 숨김 조작)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/board_reports', {
+          as: u.alice,
+          body: { reporter_id: u.alice.id, target_type: 'post', target_id: u.reportPostId, reason: 'other' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.board_reports where reporter_id = '${u.alice.id}' and target_id = '${u.reportPostId}')`,
+      ),
+  });
+  await check({
+    group: 'board',
+    id: 'BR-4',
+    role: 'authenticated',
+    op: 'POST /rpc/report_board_content (다른 사람 id 로 신고 = 혼자 3번 신고)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/rpc/report_board_content', {
+          as: u.alice,
+          body: { p_reporter_id: u.carol.id, p_target_type: 'post', p_target_id: u.reportPostId, p_reason: 'abuse' },
+        }),
+        `select exists (select 1 from public.board_reports where reporter_id = '${u.carol.id}' and target_id = '${u.reportPostId}')`,
+      ),
+  });
+  await check({
+    group: 'board',
+    id: 'BR-5',
+    role: 'service_role',
+    op: 'api/board/reports → POST /rpc/report_board_content (alice 가 bob 의 글 신고)',
+    ...WRITE,
+    run: async () => {
+      const r = await rest('POST', '/rest/v1/rpc/report_board_content', {
+        as: 'service',
+        body: { p_reporter_id: u.alice.id, p_target_type: 'post', p_target_id: u.reportPostId, p_reason: 'abuse' },
+      });
+      const written = one(`select exists (select 1 from public.board_reports where reporter_id = '${u.alice.id}' and target_id = '${u.reportPostId}')`) === 't';
+      return written && r.json?.result === 'reported'
+        ? { actual: 'written', detail: JSON.stringify(r.json) }
+        : { actual: 'error', detail: `${r.status} ${JSON.stringify(r.json)}` };
+    },
+  });
+  await check({
+    group: 'board',
+    id: 'BR-6',
+    role: 'service_role',
+    op: 'report_board_content 규칙: 중복은 already, 본인 글은 own, 없는 대상은 not_found, 서로 다른 3명이면 숨김(글·댓글), 2명이면 그대로',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`
+        SET LOCAL ROLE service_role;
+        DO $$
+        DECLARE
+          v_post UUID := '${u.reportPostId}';
+          v_comment UUID := '${u.reportCommentId}';
+          r JSONB;
+        BEGIN
+          r := public.report_board_content('${u.alice.id}', 'post', v_post, 'abuse');
+          IF r->>'result' <> 'already' THEN RAISE EXCEPTION '중복 신고: %', r; END IF;
+          r := public.report_board_content('${u.bob.id}', 'post', v_post, 'abuse');
+          IF r->>'result' <> 'own' THEN RAISE EXCEPTION '본인 글: %', r; END IF;
+          r := public.report_board_content('${u.carol.id}', 'post', gen_random_uuid(), 'abuse');
+          IF r->>'result' <> 'not_found' THEN RAISE EXCEPTION '없는 대상: %', r; END IF;
+          r := public.report_board_content('${u.carol.id}', 'post', v_post, 'bullying');
+          IF (r->>'hidden')::boolean OR (SELECT is_hidden FROM public.board_posts WHERE id = v_post) THEN
+            RAISE EXCEPTION '2명인데 숨김: %', r;
+          END IF;
+          r := public.report_board_content('${u.dan.id}', 'post', v_post, 'personal_info');
+          IF NOT (r->>'hidden')::boolean OR NOT (SELECT is_hidden AND hidden_at IS NOT NULL FROM public.board_posts WHERE id = v_post) THEN
+            RAISE EXCEPTION '3명인데 숨기지 않음: %', r;
+          END IF;
+          IF (SELECT count(*) FROM public.board_reports WHERE target_id = v_post) <> 3 THEN
+            RAISE EXCEPTION '신고 행 수가 3이 아님';
+          END IF;
+          PERFORM public.report_board_content('${u.alice.id}', 'comment', v_comment, 'abuse');
+          PERFORM public.report_board_content('${u.carol.id}', 'comment', v_comment, 'abuse');
+          r := public.report_board_content('${u.dan.id}', 'comment', v_comment, 'other');
+          IF NOT (SELECT is_hidden FROM public.board_comments WHERE id = v_comment) THEN
+            RAISE EXCEPTION '댓글 3명인데 숨기지 않음: %', r;
+          END IF;
+          BEGIN
+            PERFORM public.report_board_content('${u.alice.id}', 'user', v_post, 'abuse');
+            RAISE EXCEPTION '알 수 없는 target_type 을 받음';
+          EXCEPTION WHEN invalid_parameter_value THEN NULL;
+          END;
+          BEGIN
+            PERFORM public.report_board_content('${u.carol.id}', 'comment', v_post, 'spam');
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+        END $$;
+        RESET ROLE;`),
+  });
+  await check({
+    group: 'board',
+    id: 'BR-7',
+    role: 'postgres',
+    op: '00014 함수(report_board_content·board_protect_moderation) 중 anon/authenticated 가 EXECUTE 할 수 있는 것',
+    ...NONE,
+    run: () => {
+      const v = one(`select coalesce(string_agg(p.proname, ',' order by p.proname), '')
+        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public' and p.proname in ('report_board_content', 'board_protect_moderation')
+         and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+
+  // ① 00014 작성자 표시: 실명이 들어 있는 기존 사용자(운영 Google 사용자)도 뷰로는 닉네임·자리표시자만
+  await check({
+    group: 'board',
+    id: 'VIEW-3',
+    role: 'authenticated',
+    op: 'user_profiles_public: 실명 display_name·사진이 있는 사용자도 이름 = coalesce(nickname, placeholder_display_name), avatar_url = NULL',
+    deny: ['ok'],
+    allow: ['mismatch'],
+    run: () =>
+      sqlCheck(`
+        UPDATE public.users SET display_name = '박실명', avatar_url = 'https://lh3.googleusercontent.com/x' WHERE id = '${u.bob.id}';
+        UPDATE public.users SET display_name = '최실명', nickname = '캐롤코딩' WHERE id = '${u.carol.id}';
+        CREATE TEMP TABLE tmp_expected ON COMMIT DROP AS
+          SELECT id, coalesce(nickname, public.placeholder_display_name(id)) AS name FROM public.users;
+        GRANT SELECT ON tmp_expected TO authenticated;
+        SET LOCAL ROLE authenticated;
+        SET LOCAL request.jwt.claims = '{"sub": "${u.alice.id}", "role": "authenticated"}';
+        DO $$
+        DECLARE v_bad INTEGER;
+        BEGIN
+          SELECT count(*) INTO v_bad
+            FROM public.user_profiles_public v JOIN tmp_expected e ON e.id = v.id
+           WHERE v.display_name IS DISTINCT FROM e.name OR v.avatar_url IS NOT NULL;
+          IF v_bad > 0 THEN RAISE EXCEPTION '뷰 이름이 닉네임·자리표시자와 다른 행 %', v_bad; END IF;
+          IF EXISTS (SELECT 1 FROM public.user_profiles_public WHERE display_name IN ('박실명', '최실명')) THEN
+            RAISE EXCEPTION '실명이 보임';
+          END IF;
+          IF (SELECT display_name FROM public.user_profiles_public WHERE id = '${u.carol.id}') <> '캐롤코딩' THEN
+            RAISE EXCEPTION '닉네임이 있는데 닉네임이 아님';
+          END IF;
+        END $$;
+        RESET ROLE;`),
+  });
+}
+
 // ── 실행 ──────────────────────────────────────────────────
 async function main() {
   console.log(`[${scenario}] ${S.label}`);
@@ -3361,8 +3718,27 @@ async function main() {
   u.postId = one(
     `insert into public.board_posts (user_id, title, content) values ('${u.bob.id}', 'rls post', 'x') returning id`,
   );
+  u.aliceCommentId = one(
+    `insert into public.board_comments (post_id, user_id, content) values ('${u.postId}', '${u.alice.id}', 'rls comment') returning id`,
+  );
+  // 게시판 안전장치 픽스처 (P1-18): alice 글, 숨긴 글(bob·alice), 신고 대상 글·댓글(bob)
+  u.alicePostId = one(
+    `insert into public.board_posts (user_id, title, content) values ('${u.alice.id}', 'alice post', 'x') returning id`,
+  );
+  u.hiddenBobPostId = one(
+    `insert into public.board_posts (user_id, title, content, is_hidden, hidden_at) values ('${u.bob.id}', 'hidden bob', 'x', true, now()) returning id`,
+  );
   one(
-    `insert into public.board_comments (post_id, user_id, content) values ('${u.postId}', '${u.alice.id}', 'rls comment')`,
+    `insert into public.board_comments (post_id, user_id, content) values ('${u.hiddenBobPostId}', '${u.alice.id}', 'on hidden post')`,
+  );
+  u.hiddenAlicePostId = one(
+    `insert into public.board_posts (user_id, title, content, is_hidden, hidden_at) values ('${u.alice.id}', 'hidden alice', 'x', true, now()) returning id`,
+  );
+  u.reportPostId = one(
+    `insert into public.board_posts (user_id, title, content) values ('${u.bob.id}', 'report me', 'x') returning id`,
+  );
+  u.reportCommentId = one(
+    `insert into public.board_comments (post_id, user_id, content) values ('${u.reportPostId}', '${u.bob.id}', 'report me too') returning id`,
   );
   one(`insert into public.user_progress (user_id, quest_id, status, hints_used, used_golden_key, code_submitted) values
         ('${u.alice.id}', '${Q1}', 'in_progress', 2, true, ''),
@@ -3386,6 +3762,7 @@ async function main() {
   await groupReward();
   await groupSchema(u);
   await groupAuthTriggers(u);
+  await groupBoard(u);
   await groupApp(u);
   await groupStatic();
 

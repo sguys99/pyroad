@@ -490,9 +490,12 @@ export const EXPECT = {
   'APP-12': { expect: 'allow' },
   'APP-13': {
     expect: 'allow',
-    note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩)',
+    note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
   },
-  'APP-14': { expect: 'allow', note: '게시글 댓글 작성자 표시' },
+  'APP-14': {
+    expect: 'allow',
+    note: '게시글 댓글 작성자 표시 (APP-13 과 같음)',
+  },
   'APP-W1': {
     expect: 'allow',
     note: 'P1-04 이후 QuestShell auto-save payload {user_id, quest_id, code_submitted}. 새 행의 status 는 기본값 in_progress(00010). 이전 payload 는 B04-22',
@@ -505,11 +508,14 @@ export const EXPECT = {
     expect: 'allow',
     note: '/api/settings 의 AI 선택 저장. P1-01 이후 users 에서 클라이언트가 UPDATE 할 수 있는 유일한 컬럼',
   },
-  'APP-W4': { expect: 'allow' },
-  'APP-W5': { expect: 'allow' },
-  'APP-W6': { expect: 'allow' },
-  'APP-W7': { expect: 'allow' },
-  'APP-W8': { expect: 'allow' },
+  'APP-W4': {
+    expect: 'allow',
+    note: 'P1-18: /api/board/posts 가 금칙어 검사 후 service_role 로 INSERT (사용자 클라이언트 경로는 BW-1 deny)',
+  },
+  'APP-W5': { expect: 'allow', note: 'P1-18: 글 수정 service_role (BW-2)' },
+  'APP-W6': { expect: 'allow', note: 'P1-18: 댓글 쓰기 service_role (BW-4)' },
+  'APP-W7': { expect: 'allow', note: 'P1-18: 댓글 삭제 service_role (BW-5)' },
+  'APP-W8': { expect: 'allow', note: 'P1-18: 글 삭제 service_role (BW-3)' },
   'APP-W9': { expect: 'deny' },
   'APP-W10': {
     expect: 'deny',
@@ -526,6 +532,64 @@ export const EXPECT = {
     requires: 'public.quest_answer_keys',
     activateIn: 'P1-02',
     note: 'answerKeys.ts fetchAnswerKeyRow (채점·황금키·튜터 힌트)',
+  },
+
+  // ── board: 게시판 안전장치 (P1-18, B19, 00014·00015) ───────
+  'B19-1': {
+    expect: 'deny',
+    note: '① 00014 CHECK board_posts_title_check: 제목 100자 이하 (service_role 도 막힘 = DB 가 마지막 방어선)',
+  },
+  'B19-2': { expect: 'deny', note: '① 00014: 공백뿐인 제목' },
+  'B19-3': { expect: 'deny', note: '① 00014: 내용 2,000자 이하' },
+  'B19-4': { expect: 'deny', note: '① 00014: 댓글 500자 이하' },
+  'B19-5': { expect: 'deny', note: '① 00014: 빈 댓글' },
+  'B19-6': {
+    expect: 'allow',
+    note: '경계: 이모지 제목 100자(코드 포인트)·내용 2,000자는 저장. API 도 같은 기준(src/lib/board/limits.ts charCount)',
+  },
+  'B19-7': {
+    expect: 'deny',
+    note: '원래 B19: 로그인 사용자가 REST 로 직접 긴 제목 INSERT. ①만이면 CHECK(23514), ③ 00015 뒤에는 권한(42501)',
+  },
+  'B19-8': {
+    expect: 'deny',
+    note: '새 DB 는 위반 행이 없어 3개 모두 VALID. 운영에 위반 행이 있으면 00014 가 NOT VALID 로 추가 → 런북에서 정리 후 VALIDATE',
+  },
+  'BW-1': {
+    expect: 'deny',
+    note: '③ 00015: board_posts INSERT 권한·정책 없음 (금칙어 필터 우회 차단). 앱은 APP-W4 (service_role)',
+  },
+  'BW-2': { expect: 'deny', note: '③ 00015: 본인 글 UPDATE 도 서버 경유 (APP-W5)' },
+  'BW-3': { expect: 'deny', note: '③ 00015: 본인 글 DELETE 도 서버 경유 (APP-W8)' },
+  'BW-4': { expect: 'deny', note: '③ 00015: board_comments INSERT (APP-W6)' },
+  'BW-5': { expect: 'deny', note: '③ 00015: 본인 댓글 DELETE (APP-W7)' },
+  'BW-6': { expect: 'deny' },
+  'BH-1': { expect: 'deny', note: '① 00014: 신고로 숨긴 남의 글은 안 보임' },
+  'BH-2': {
+    expect: 'deny',
+    note: '① 00014: 숨긴 글의 댓글은 (내가 쓴 것이라도) 글이 안 보이면 안 보임',
+  },
+  'BH-3': { expect: 'allow', note: '① 00014: 작성자는 자기 숨긴 글을 봄 ("나만 볼 수 있어요" 안내)' },
+  'BH-4': {
+    expect: 'deny',
+    note: '① 00014 보호 트리거: ③ 전(클라이언트 쓰기 권한이 남은 동안) is_hidden·hidden_at 을 바꿔도 버림',
+  },
+  'BR-1': { expect: 'deny' },
+  'BR-2': { expect: 'deny', note: '① 00014: board_reports 는 service_role 전용 (신고자 비공개)' },
+  'BR-3': { expect: 'deny' },
+  'BR-4': {
+    expect: 'deny',
+    note: '① 00014: report_board_content 는 service_role 전용 (신고자 id 는 API 가 getUser() 로)',
+  },
+  'BR-5': { expect: 'allow', note: '/api/board/reports 경로' },
+  'BR-6': {
+    expect: 'allow',
+    note: '신고 규칙: UNIQUE(신고자, 대상), 본인 글 불가, 서로 다른 3명이면 is_hidden (REPORT_HIDE_THRESHOLD)',
+  },
+  'BR-7': { expect: 'deny' },
+  'VIEW-3': {
+    expect: 'deny',
+    note: 'P1-18 ① 00014: 뷰 이름 = coalesce(nickname, 모험가NNNN), avatar_url NULL. 실명·사진이 있는 기존 사용자도 (X1). 뷰 구조 교체는 P3-13(VIEW-2)',
   },
 
   // ── static: 카탈로그 점검 ─────────────────────────────────
