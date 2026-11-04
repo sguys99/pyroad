@@ -10,7 +10,7 @@ import { MapBackground } from '@/components/world/MapBackground';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { LogoutButton } from '@/components/LogoutButton';
 import { User, MessageSquare, Bell } from 'lucide-react';
-import type { UserProfile } from '@/lib/types/database';
+import type { UserBadge, UserProfile } from '@/lib/types/database';
 
 export default async function WorldPage() {
   const supabase = await createClient();
@@ -45,7 +45,7 @@ export default async function WorldPage() {
   const stages = stagesResult.data ?? [];
   const progress = progressResult.data ?? [];
   const profile = profileResult.data as UserProfile | null;
-  const badges = badgesResult.data ?? [];
+  const badges = (badgesResult.data ?? []) as Pick<UserBadge, 'badge_type' | 'earned_at'>[];
 
   const stagesWithStatus = getStageStatuses(stages, progress);
 
