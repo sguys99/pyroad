@@ -1,0 +1,8 @@
+# 스테이지 5: 리스트 호수 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000005
+order: 5
+title: 리스트 호수
+theme_name: list_lake
+description: 리스트 생성, 인덱싱, 슬라이싱, append, len을 배워봐요!
+is_final: false

@@ -1,13 +1,13 @@
-// seed.sql → content/ YAML 추출 (P1-11 시범, P1-12 전체 이관용)
+// seed.sql → content/ YAML 추출 (P1-11 시범, P1-12 전체 이관에 씀. 이관이 끝난 지금은 기록·점검용)
 //
-// 저장소의 migrations + seed.sql 을 PGlite(메모리 Postgres)에서 실행한 상태(정답은 quest_answer_keys,
-// seed 끝의 "정답 코드·시작 코드 보정" 섹션 포함)를 읽어 퀘스트마다 YAML 파일을 씁니다.
-// 정규식으로 SQL 을 해석하지 않습니다.
+// 저장소의 migrations + seed 를 PGlite(메모리 Postgres)에서 실행한 상태(정답은 quest_answer_keys)를 읽어
+// 퀘스트마다 YAML 파일을 씁니다. 정규식으로 SQL 을 해석하지 않습니다.
+// P1-12 부터 supabase/seed.sql 은 content/ 생성물이므로, 손으로 쓴 예전 seed 에서 다시 추출하려면 --seed-rev.
 //
 //   npm run content:extract -- --stage 1          # 스테이지 1만 (여러 개: --stage 1,2,3)
-//   npm run content:extract -- --all              # 모든 스테이지 (P1-12)
+//   npm run content:extract -- --all --seed-rev   # 예전 seed(LEGACY_SEED_REV)의 모든 스테이지 (P1-12)
 //   옵션: --force (이미 있는 파일이 달라도 덮어씀) · --out <dir> (기본 content/)
-//         --seed <file> (기본 supabase/seed.sql) · --migrations-up-to 00005
+//         --seed <file> (기본 supabase/seed.sql) · --seed-rev [<rev>] · --migrations-up-to 00005
 //
 // 추출한 뒤에는 `npm run content:compare` 로 왕복(추출 → 빌드 → 적용 → 비교)이 같은지 확인합니다.
 
@@ -19,8 +19,9 @@ import type { World } from '@/lib/content/schema';
 import { questToYaml, stageToYaml, worldToYaml } from '@/lib/content/yaml';
 
 import { parseArgs, run } from './lib/args';
-import { CONTENT_DIR, LEGACY_SEED, REPO_ROOT } from './lib/paths';
+import { CONTENT_DIR, REPO_ROOT } from './lib/paths';
 import { replay } from './lib/pglite';
+import { readSeedSource } from './lib/seedSource';
 import slugs from './quest-slugs.json';
 
 /** 1월드 (§2.1·§5 "파이썬 섬"). P1-08 의 worlds 행과 slug 로 맞춥니다 */
@@ -38,7 +39,7 @@ const slugMap = slugs as Record<string, string>;
 run(async () => {
   const args = parseArgs();
   const outDir = resolve(REPO_ROOT, args.get('out') ?? CONTENT_DIR);
-  const seedFile = resolve(REPO_ROOT, args.get('seed') ?? LEGACY_SEED);
+  const seed = readSeedSource(args);
   const force = args.has('force');
   const all = args.has('all');
   const wanted = new Set(args.list('stage').map(Number));
@@ -50,16 +51,9 @@ run(async () => {
 
   const { snapshot, migrations } = await replay({
     migrationsUpTo: args.get('migrations-up-to'),
-    seeds: [
-      {
-        name: relative(REPO_ROOT, seedFile),
-        sql: readFileSync(seedFile, 'utf8'),
-      },
-    ],
+    seeds: [seed],
   });
-  console.log(
-    `원본: ${migrations.length}개 마이그레이션 + ${relative(REPO_ROOT, seedFile)}`,
-  );
+  console.log(`원본: ${migrations.length}개 마이그레이션 + ${seed.name}`);
 
   const answers = new Map(snapshot.answer_keys.map((k) => [k.quest_id, k]));
   const stages = snapshot.stages.filter(

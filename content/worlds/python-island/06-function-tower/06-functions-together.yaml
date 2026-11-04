@@ -1,0 +1,48 @@
+# 퀘스트 6-6: 함수 안의 함수 호출
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000043
+order: 6
+title: 함수 안의 함수 호출
+concept: 함수 조합
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 함수 조합 (함수의 결과를 다른 함수에 전달)
+  learning_goals:
+    - 함수의 return 값을 다른 함수의 인자로 전달할 수 있다
+    - 함수를 조합하여 복잡한 계산을 할 수 있다
+  story_context: 함수의 탑에서 마법을 합쳐볼까요? 두 배로 만드는 마법과 하나 더하는 마법을 합치면 어떻게 될까요?
+  exercise_description: double(x)은 x를 2배로, add_one(x)은 x에 1을 더하는 함수를 만들고, add_one(double(3))을 호출하세요
+  starter_code: |-
+    # 두 함수를 만들고 합쳐보세요!
+    def double(x):
+        return x * 2
+
+    def add_one(x):
+        return x + 1
+
+    # double(3)의 결과에 add_one을 적용해서 result에 저장하세요!
+    result = 
+    print(result)
+  expected_output_hint: 7 이 출력되어야 해요 (3*2=6, 6+1=7)
+  fallback_text: double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: '7'
+  hints:
+    level_1: double(3)은 3을 2배로 만들어요. 그 결과에 add_one을 하면?
+    level_2: double(3) = 6이고, add_one(6) = 7이에요!
+    level_3: result = add_one(double(3)) 처럼 함수 안에 함수를 넣어보세요!
+  solution_code: |-
+    def double(x):
+        return x * 2
+
+    def add_one(x):
+        return x + 1
+
+    result = add_one(double(3))
+    print(result)

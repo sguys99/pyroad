@@ -1,11 +1,11 @@
 // content/ → (a) seed SQL, (b) 검증용 JSON (P1-11, §2.4)
 //
-//   npm run content:build                      # build/content/seed.sql, build/content/quests.json (git 제외)
-//   npm run content:build -- --check           # 쓰지 않고, 이미 있는 출력과 다르면 종료 코드 1 (CI 드리프트 검사)
+//   npm run content:build                      # supabase/seed.sql (커밋하는 생성물), build/content/quests.json (git 제외)
+//   npm run content:build -- --check           # 쓰지 않고, supabase/seed.sql 이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사)
 //   옵션: --seed-out <file> · --json-out <file> · --content <dir>
 //
-// 출력 위치: P1-11 에서는 1개 스테이지만 이관했으므로 seed 를 build/ 에 둡니다(supabase/seed.sql 은 아직 손으로 쓴 원본).
-// P1-12 에서 전체 이관이 끝나면 `--seed-out supabase/seed.sql` 을 기본값으로 바꾸고 생성물을 커밋합니다(paths.ts).
+// --check 는 커밋하는 seed 만 봅니다. 검증 JSON 은 git 에 없어서(CI 의 새 checkout 에는 파일이 없음)
+// 비교하지 않고, 쓰는 쪽(P1-13 test:content)이 먼저 빌드합니다.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
@@ -44,26 +44,38 @@ run(async () => {
       `solution_code ${counts.with_solution}, 프로젝트 단계 ${counts.project_steps_with_solution}/${counts.project_steps}`,
   );
 
-  let stale = 0;
+  if (check) {
+    const name = relative(REPO_ROOT, seedOut);
+    const current = existsSync(seedOut) ? readFileSync(seedOut, 'utf8') : null;
+    if (current === seed) {
+      console.log(`같음: ${name}`);
+      return;
+    }
+    console.log(
+      `다름: ${name}${current === null ? ' (파일 없음)' : firstDiff(current, seed)}`,
+    );
+    console.error(
+      '생성물이 content/ 와 달라요. content/ 를 고쳤다면 npm run content:build 를 실행해 다시 만들고 함께 커밋하세요 ' +
+        '(seed.sql 을 직접 고쳤다면 그 내용을 content/ 로 옮기세요)',
+    );
+    return 1;
+  }
+
   for (const [file, text] of [
     [seedOut, seed],
     [jsonOut, json],
   ] as const) {
-    const name = relative(REPO_ROOT, file);
-    if (check) {
-      const same = existsSync(file) && readFileSync(file, 'utf8') === text;
-      if (!same) stale++;
-      console.log(`${same ? '같음' : '다름'}: ${name}`);
-    } else {
-      mkdirSync(dirname(file), { recursive: true });
-      writeFileSync(file, text);
-      console.log(`썼어요: ${name}`);
-    }
-  }
-  if (stale > 0) {
-    console.error(
-      '생성물이 content/ 와 달라요. npm run content:build 를 실행해 다시 만드세요',
-    );
-    return 1;
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, text);
+    console.log(`썼어요: ${relative(REPO_ROOT, file)}`);
   }
 });
+
+/** 처음 다른 줄 번호 (CI 로그에서 어디가 어긋났는지 바로 보이게) */
+function firstDiff(current: string, expected: string): string {
+  const a = current.split('\n');
+  const b = expected.split('\n');
+  const line = a.findIndex((text, i) => text !== b[i]);
+  const at = line === -1 ? Math.min(a.length, b.length) + 1 : line + 1;
+  return ` (${at}번째 줄부터)`;
+}

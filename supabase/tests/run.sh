@@ -14,8 +14,9 @@
 # 모드
 #   fast  이미 켜진 pyroad 로컬 스택(npm run db:start)에 db reset 후 점검. 개발자 일상용
 #   ci    별도 project id·포트로 임시 스택을 띄워 시나리오를 돌리고 내림. 켜진 pyroad 스택과 무관
-#         ① prod_replay       운영 재현: 핫픽스 전 00001 + seed + Section 6 → 00002~ 를 psql -1 로 적용
+#         ① prod_replay       운영 재현: 핫픽스 전 00001 + 운영 seed + Section 6 → 00002~ 를 psql -1 로 적용
 #                             (릴리즈 순서대로: 머리 주석이 "릴리즈 단계: ③" 인 파일은 나머지 파일 뒤에)
+#                             → 콘텐츠 seed(supabase/seed.sql, P1-12 생성물)를 ③ 뒤에 적용 (런북 "콘텐츠 seed 적용")
 #         ② fresh_legacy      새 DB, 새 테이블 자동 노출 켜짐 (운영과 같은 legacy 기본값)
 #         ③ fresh_newdefault  새 DB, 자동 노출 꺼짐 (CLI 신규 기본값, 스택 재시작 1회)
 #
@@ -42,6 +43,7 @@ MIG="$REPO/supabase/migrations"
 RESULTS_DIR="${RLS_RESULTS_DIR:-$HERE/.results}"
 RESULTS="$RESULTS_DIR/results.jsonl"
 PREHOTFIX_REV="2f0a8f3^"   # 00002 핫픽스 직전 커밋 = 운영 DB 에 적용된 00001
+PROD_SEED_REV="e800386"    # main 의 마지막 손으로 쓴 seed = 운영 DB 의 콘텐츠 (P1-12 전). 지금 seed.sql 은 00004 이후용 생성물
 EXCLUDE="realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor"
 FAILED=0
 STARTED=0
@@ -169,10 +171,14 @@ init_project legacy
 mapfile -t ALL_MIGRATIONS < <(repo_migrations)
 
 # ① 운영 재현
-if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] && git -C "$REPO" cat-file -e "$PREHOTFIX_REV:supabase/migrations/00001_v0.1.0_initial_schema.sql" 2>/dev/null; then
+if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] \
+  && git -C "$REPO" cat-file -e "$PREHOTFIX_REV:supabase/migrations/00001_v0.1.0_initial_schema.sql" 2>/dev/null \
+  && git -C "$REPO" cat-file -e "$PROD_SEED_REV:supabase/seed.sql" 2>/dev/null; then
   git -C "$REPO" show "$PREHOTFIX_REV:supabase/migrations/00001_v0.1.0_initial_schema.sql" >"$WORKDIR/00001_prehotfix.sql"
   set_migrations "$WORKDIR/00001_prehotfix.sql:00001_v0.1.0_initial_schema.sql"
-  log "스택 시작 (legacy, 운영 재현: 핫픽스 전 00001 + seed)"
+  # 생성 seed 는 quest_answer_keys(00004)에 쓰므로 핫픽스 전 스키마에는 운영에 들어 있던 예전 seed 를 씀
+  git -C "$REPO" show "$PROD_SEED_REV:supabase/seed.sql" >"$WORKDIR/supabase/seed.sql"
+  log "스택 시작 (legacy, 운영 재현: 핫픽스 전 00001 + 운영 seed $PROD_SEED_REV)"
   start_stack
   # 운영 데이터처럼 solution_code 채우기 (00001 Section 6 을 seed 뒤에 다시 실행)
   sed -n '/^-- Section 6/,/^-- Section 7/p' "$WORKDIR/00001_prehotfix.sql" >"$WORKDIR/section6.sql"
@@ -188,9 +194,12 @@ if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] && git -C "$REPO" cat-file -e "$PREHOTFIX_RE
       apply_sql "$f"
     done
   done
+  log "운영 적용 리허설 (③ 뒤): 콘텐츠 seed supabase/seed.sql (psql -1)"
+  apply_sql "$REPO/supabase/seed.sql"
   run_checks prod_replay
   log "db reset (legacy): 저장소 마이그레이션 + seed"
   set_migrations "${ALL_MIGRATIONS[@]}"
+  cp "$REPO/supabase/seed.sql" "$WORKDIR/supabase/seed.sql"
   supabase db reset --local --workdir "$WORKDIR" --yes >/dev/null 2>&1 || die "db reset 실패"
   load_env "$WORKDIR"
 else

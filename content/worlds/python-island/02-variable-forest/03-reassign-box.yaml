@@ -1,0 +1,38 @@
+# 퀘스트 2-3: 상자 이름 바꾸기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000027
+order: 3
+title: 상자 이름 바꾸기
+concept: 변수 재할당
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 변수 재할당 (값 바꾸기)
+  learning_goals:
+    - 변수에 새로운 값을 다시 넣을 수 있다
+    - 변수의 값은 언제든 바꿀 수 있음을 이해한다
+  story_context: 변수의 숲에서 마법 상자의 내용물을 바꿔볼까요? 상자 안의 색깔을 바꿔봐요!
+  exercise_description: color 변수에 "빨강"을 저장한 후, "파랑"으로 바꾸고 print()로 출력하세요
+  starter_code: |-
+    # 색깔을 바꿔보세요!
+    color = "빨강"
+    # 아래에서 color를 "파랑"으로 바꿔보세요!
+
+    print(color)
+  expected_output_hint: 파랑 이 출력되어야 해요
+  fallback_text: 변수는 상자니까 안에 든 걸 바꿀 수 있어요! color = "파랑" 이렇게 다시 넣으면 이전 값은 사라지고 새 값이 들어가요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: 파랑
+  hints:
+    level_1: 변수에 새 값을 넣으면 이전 값은 사라져요. = 기호로 새 값을 넣어보세요!
+    level_2: color = "파랑" 이렇게 다시 값을 넣으면 돼요!
+    level_3: color = "___" 새로운 색깔을 넣어보세요!
+  solution_code: |-
+    color = "빨강"
+    color = "파랑"
+    print(color)

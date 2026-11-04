@@ -1,34 +1,36 @@
 // 왕복 비교: 원본 seed 상태 ↔ content/ 빌드 결과 (P1-11 시범, P1-12 전체 이관 검증)
 //
 // PGlite(메모리 Postgres) 4개를 띄워 비교합니다. 로컬 Supabase 스택·docker 를 쓰지 않습니다.
-//   A. 원본    : migrations → supabase/seed.sql
+//   A. 원본    : migrations → 원본 seed (기본 supabase/seed.sql = 커밋한 생성물)
 //   B. 생성    : migrations → content 빌드 seed
 //   C. 재실행  : migrations → content 빌드 seed → 한 번 더 (멱등)
-//   D. 덮어쓰기: migrations → supabase/seed.sql → content 빌드 seed (이미 데이터가 있는 DB 에 업서트)
+//   D. 덮어쓰기: migrations → 원본 seed → content 빌드 seed (이미 데이터가 있는 DB 에 업서트 = 운영 적용)
 // 비교: content 에 있는 스테이지·퀘스트의 stages·quests·quest_answer_keys 행 (A=B, B=C), D 전체 = A 전체,
 //       검증용 JSON (A 에서 만든 것 = 빌드 결과)
 //
-//   npm run content:compare
-//   옵션: --expect-diff 7-1,4-7   P1-12 에서 일부러 고친 퀘스트(B09·B30·B31)는 차이를 보여 주되 실패로 보지 않음
-//         --seed <file> · --content <dir> · --migrations-up-to 00005
+//   npm run content:compare                          # 커밋한 supabase/seed.sql 기준 (DB 상태로 비교)
+//   npm run content:compare -- --seed-rev --expect-diff 1-5,4-7,7-1
+//                                                    # 손으로 쓴 예전 seed(LEGACY_SEED_REV) 기준. P1-12 에서 일부러
+//                                                    # 고친 퀘스트(B09·B30·B31, 1-5 concept)만 다른지 확인
+//   옵션: --expect-diff <키,…>  차이를 보여 주되 실패로 보지 않음
+//         --seed <file> · --seed-rev [<rev>] · --content <dir> · --migrations-up-to 00005
 
-import { readFileSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
 import { buildRows, toCheckFixture, toSeedSql } from '@/lib/content/build';
 import { loadContent } from '@/lib/content/load';
 
 import { parseArgs, run } from './lib/args';
-import { CONTENT_DIR, LEGACY_SEED, REPO_ROOT } from './lib/paths';
+import { CONTENT_DIR, REPO_ROOT } from './lib/paths';
 import { replay, type ContentSnapshot } from './lib/pglite';
+import { readSeedSource } from './lib/seedSource';
 
 type Row = Record<string, unknown>;
 
 run(async () => {
   const args = parseArgs();
   const contentDir = resolve(REPO_ROOT, args.get('content') ?? CONTENT_DIR);
-  const seedFile = resolve(REPO_ROOT, args.get('seed') ?? LEGACY_SEED);
   const migrationsUpTo = args.get('migrations-up-to');
   const expectDiff = new Set(args.list('expect-diff'));
 
@@ -36,8 +38,7 @@ run(async () => {
   const { rows, warnings } = buildRows(tree);
   for (const w of warnings) console.warn(`경고: ${w}`);
   const generated = toSeedSql(rows, { hash: tree.hash });
-  const legacy = readFileSync(seedFile, 'utf8');
-  const legacyName = relative(REPO_ROOT, seedFile);
+  const { name: legacyName, sql: legacy } = readSeedSource(args);
 
   const t0 = performance.now();
   const [a, b, c, d] = await Promise.all([
@@ -62,7 +63,7 @@ run(async () => {
     }),
   ]);
   console.log(
-    `${a.engine} · 마이그레이션 ${a.migrations.length}개 (${a.migrations.at(-1)}) · ${((performance.now() - t0) / 1000).toFixed(1)}초`,
+    `원본 ${legacyName} · ${a.engine} · 마이그레이션 ${a.migrations.length}개 (${a.migrations.at(-1)}) · ${((performance.now() - t0) / 1000).toFixed(1)}초`,
   );
 
   const stageIds = new Set(rows.stages.map((s) => s.id));

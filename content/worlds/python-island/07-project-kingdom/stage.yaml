@@ -1,0 +1,8 @@
+# 스테이지 7: 프로젝트 왕국 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000007
+order: 7
+title: 프로젝트 왕국
+theme_name: project_kingdom
+description: 배운 모든 것을 모아 프로젝트를 완성해봐요!
+is_final: true

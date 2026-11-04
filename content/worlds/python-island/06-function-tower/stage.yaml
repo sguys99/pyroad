@@ -1,0 +1,8 @@
+# 스테이지 6: 함수의 탑 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000006
+order: 6
+title: 함수의 탑
+theme_name: function_tower
+description: def, 매개변수, return, 내장함수를 배워봐요!
+is_final: false

@@ -1,0 +1,8 @@
+# 스테이지 2: 변수의 숲 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000002
+order: 2
+title: 변수의 숲
+theme_name: variable_forest
+description: 변수 선언, 자료형(int, str, float), 형변환을 배워봐요!
+is_final: false

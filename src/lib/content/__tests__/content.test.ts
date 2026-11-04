@@ -1,13 +1,13 @@
 // 저장소의 content/ 원본 검사 + 생성 seed 를 메모리 Postgres(PGlite)에 실제로 적용해 보는 테스트.
-// 로컬 Supabase 스택·docker 를 쓰지 않습니다. 원본 seed.sql 과의 전체 왕복 비교는 `npm run content:compare`.
+// 로컬 Supabase 스택·docker 를 쓰지 않습니다. 손으로 쓴 예전 seed 와의 왕복 비교는
+// `npm run content:compare -- --seed-rev --expect-diff 1-5,4-7,7-1` (P1-12).
 
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import {
-  CONTENT_DIR,
-  LEGACY_SEED,
-} from '../../../../scripts/content/lib/paths';
+import { validateRule } from '@/lib/quest/validation';
+
+import { CONTENT_DIR, SEED_SQL } from '../../../../scripts/content/lib/paths';
 import {
   replay,
   type ContentSnapshot,
@@ -39,14 +39,21 @@ describe('content/ 원본', () => {
   });
 });
 
+describe('커밋한 supabase/seed.sql', () => {
+  it('content/ 생성물과 같음 (다르면 npm run content:build 로 다시 만들어 함께 커밋)', () => {
+    expect(readFileSync(SEED_SQL, 'utf8')).toBe(
+      toSeedSql(rows, { hash: tree.hash }),
+    );
+  });
+});
+
 describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
   let once: ContentSnapshot;
   let twice: ContentSnapshot;
-  let original: ContentSnapshot;
 
   beforeAll(async () => {
     const seed = toSeedSql(rows, { hash: tree.hash });
-    const [a, b, c] = await Promise.all([
+    const [a, b] = await Promise.all([
       replay({ seeds: [{ name: 'content seed', sql: seed }] }),
       replay({
         seeds: [
@@ -54,13 +61,9 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
           { name: 'content seed (재실행)', sql: seed },
         ],
       }),
-      replay({
-        seeds: [{ name: 'seed.sql', sql: readFileSync(LEGACY_SEED, 'utf8') }],
-      }),
     ]);
     once = a.snapshot;
     twice = b.snapshot;
-    original = c.snapshot;
   }, 120_000);
 
   it('DB 상태 = 빌드한 행 (SQL 이스케이프·jsonb 변환에 손실 없음)', () => {
@@ -86,17 +89,65 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
     expect(twice).toEqual(once);
   });
 
-  it('content 에 있는 범위는 원본 seed.sql 결과와 같음 (P1-12 이관 중 회귀 방지)', () => {
-    const ids = new Set(rows.quests.map((q) => q.id));
-    const stageIds = new Set(rows.stages.map((s) => s.id));
-    expect(original.stages.filter((s) => stageIds.has(String(s.id)))).toEqual(
-      once.stages,
-    );
-    expect(original.quests.filter((q) => ids.has(String(q.id)))).toEqual(
-      once.quests,
-    );
+  it('새 DB 에도 모든 퀘스트의 정답이 있고 quests 에는 정답이 없음 (B07·B08)', () => {
+    expect(once.quests).toHaveLength(rows.quests.length);
+    expect(once.answer_keys).toHaveLength(rows.quests.length);
+    expect(once.quests.filter((q) => q.expected_output !== '')).toEqual([]);
+    for (const k of once.answer_keys) {
+      const steps = k.steps as { solution_code: string }[];
+      expect(k.expected_output, String(k.quest_id)).toBeTruthy();
+      if (steps.length === 0) expect(k.solution_code).toBeTruthy();
+      for (const s of steps) expect(s.solution_code).toBeTruthy();
+    }
+  });
+});
+
+// 실제 실행(Pyodide) 검증은 P1-13. 여기서는 출력 예시로 규칙만 확인한다
+describe('콘텐츠 버그 회귀 (P1-12)', () => {
+  const NUMBER_GAME = 'b1000000-0000-0000-0000-000000000022'; // 7-1
+  const step = (n: number) => {
+    const quest = tree.worlds
+      .flatMap((w) => w.stages)
+      .flatMap((s) => s.quests)
+      .find((q) => q.quest.id === NUMBER_GAME)!.quest;
+    if (quest.quest_type !== 'project') throw new Error('7-1 은 프로젝트');
+    return quest.steps[n - 1].answer;
+  };
+
+  it('B30: 7-1 2단계는 1단계 코드 그대로면 불합격, 추측을 저장·출력하면 통과', () => {
+    const { validation, solution_code } = step(2);
+    const step1 = step(1).solution_code;
     expect(
-      original.answer_keys.filter((k) => ids.has(String(k.quest_id))),
-    ).toEqual(once.answer_keys);
+      validateRule(validation, { stdout: '7\n', studentCode: step1 }),
+    ).toBe(false);
+    expect(
+      validateRule(validation, {
+        stdout: '비밀 숫자: 7\n추측: 3\n',
+        studentCode: solution_code,
+      }),
+    ).toBe(true);
+  });
+
+  it('B09: 7-1 3단계는 무작위로 어느 갈래가 나와도 통과 (힌트 level_3 문구 포함)', () => {
+    const { validation, solution_code } = step(3);
+    for (const stdout of [
+      '정답!',
+      '비밀 숫자가 추측보다 커요!',
+      '비밀 숫자가 추측보다 작아요!',
+      '비밀 숫자가 더 커요!',
+      '비밀 숫자가 더 작아요!',
+    ]) {
+      expect(
+        validateRule(validation, { stdout, studentCode: solution_code }),
+        stdout,
+      ).toBe(true);
+    }
+    // elif 없이 출력만 흉내 내면 불합격
+    expect(
+      validateRule(validation, {
+        stdout: '정답!',
+        studentCode: 'print("정답!")',
+      }),
+    ).toBe(false);
   });
 });

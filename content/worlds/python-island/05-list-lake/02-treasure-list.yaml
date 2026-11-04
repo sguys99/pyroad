@@ -1,0 +1,36 @@
+# 퀘스트 5-2: 보물 목록 정리
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000017
+order: 2
+title: 보물 목록 정리
+concept: 인덱싱, 슬라이싱
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 리스트 인덱싱과 슬라이싱
+  learning_goals:
+    - 인덱스 번호로 리스트의 특정 값을 꺼낼 수 있다
+    - 인덱스가 0부터 시작하는 것을 안다
+    - 슬라이싱으로 리스트의 일부를 잘라낼 수 있다
+  story_context: 보물 목록에서 원하는 보물을 골라내봐요! 몇 번째 보물을 꺼낼까요?
+  exercise_description: treasures 리스트에서 인덱스를 사용하여 "다이아몬드"를 출력하세요
+  starter_code: |-
+    # 보물 목록에서 다이아몬드를 꺼내보세요!
+    treasures = ["금화", "은화", "다이아몬드", "루비"]
+    print(treasures[__])
+  expected_output_hint: 다이아몬드 가 출력되어야 해요
+  fallback_text: 리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: 다이아몬드
+  hints:
+    level_1: 리스트의 번호(인덱스)는 0부터 시작해요. 다이아몬드는 몇 번째일까요?
+    level_2: 금화=0, 은화=1, 다이아몬드=2! 대괄호 안에 번호를 넣어보세요.
+    level_3: print(treasures[___]) 다이아몬드의 인덱스 번호를 넣어보세요!
+  solution_code: |-
+    treasures = ["금화", "은화", "다이아몬드", "루비"]
+    print(treasures[2])

@@ -20,7 +20,7 @@ export type ValidationType = 'output_match' | 'contains' | 'code_check';
 
 export type Stage = Tables<'stages'>;
 
-// expected_output 컬럼은 00005 이후 항상 '' (P1-12에서 삭제 예정). 정답은 quest_answer_keys에서
+// expected_output 컬럼은 00005 이후 항상 '' (v0.4 운영 적용 뒤 다음 배포에서 삭제, docs/release/v0.4-runbook.md "적용 뒤 정리"). 정답은 quest_answer_keys에서
 // `src/lib/quest/answerKeys.ts`로만 읽으므로 앱 타입에서는 뺍니다 (P1-02).
 export type Quest = Omit<
   Tables<'quests'>,

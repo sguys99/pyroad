@@ -44,7 +44,7 @@ export interface QuestRow {
   concept: string;
   prompt_skeleton: Record<string, unknown> & { steps?: PublicStep[] };
   validation_type: StoredRule['validation_type'];
-  /** 00005 이후 항상 '' (정답은 quest_answer_keys). P1-12 에서 컬럼 삭제 예정 */
+  /** 00005 이후 항상 '' (정답은 quest_answer_keys). v0.4 운영 적용 뒤 다음 배포에서 컬럼 삭제 (런북 "적용 뒤 정리") */
   expected_output: '';
   xp_reward: number;
 }
@@ -252,8 +252,9 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
 
   out.push(
     '-- ============================================================',
-    '-- pyRoad 콘텐츠 seed — 자동 생성 파일입니다. 직접 고치지 마세요.',
-    '-- 원본: content/ (content/README.md) · 생성: npm run content:build',
+    '-- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.',
+    '-- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).',
+    '-- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.',
     `-- 콘텐츠 해시: ${options.hash}`,
     `-- 스테이지 ${rows.stages.length} · 퀘스트 ${rows.quests.length} · 정답 행 ${rows.answer_keys.length}` +
       ` (solution_code ${counts.solutions} + 프로젝트 단계 ${counts.steps})`,
@@ -262,6 +263,9 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
     '-- - 정답·힌트·solution_code 는 quest_answer_keys(service_role 전용)에 따로 씁니다.',
     '-- - 다시 실행해도 결과가 같습니다 (ON CONFLICT DO UPDATE). content/ 에 없는 행은 지우지 않습니다.',
     '-- - DML 만 있습니다. 권한(GRANT/REVOKE)은 마이그레이션이 정합니다.',
+    '--',
+    '-- 적용: supabase db reset 이 migrations 다음에 실행합니다. 운영은 SQL Editor 에서 BEGIN; … COMMIT; 으로',
+    '--       감싸 실행하고, 00005(③) 뒤에 적용합니다 (docs/release/v0.4-runbook.md "콘텐츠 seed 적용").',
     '-- ============================================================',
     '',
   );

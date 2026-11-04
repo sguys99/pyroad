@@ -4,7 +4,7 @@
 id: b1000000-0000-0000-0000-000000000024
 order: 5
 title: 특수문자 출력하기
-concept: 이스케이프 문자 \\n
+concept: 이스케이프 문자 \n
 xp_reward: 50
 quest_type: code
 # 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요

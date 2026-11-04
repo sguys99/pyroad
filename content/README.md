@@ -4,7 +4,7 @@
 
 - **한 파일에 공개 부분과 정답 부분을 함께 씁니다.** 빌드가 나눠서 공개 부분은 `quests`(학생 브라우저로 내려감), 정답 부분은 `quest_answer_keys`(service_role 전용)에 씁니다 (P0-08, P1-02).
 - 스키마: `src/lib/content/schema.ts` (zod). 모르는 키는 모두 오류입니다.
-- 지금(P1-11)은 스테이지 1만 이관했습니다. 나머지 43개 퀘스트 이관과 `supabase/seed.sql` 교체는 P1-12에서 합니다. 그때까지 DB의 원본은 `supabase/seed.sql`입니다.
+- **퀘스트 콘텐츠의 원본은 이 디렉토리입니다** (P1-12에서 44개 퀘스트 전체 이관). `supabase/seed.sql`은 빌드 생성물이라 직접 고치지 않습니다. 고치면 CI의 `content:build -- --check`와 `npm test`(`content.test.ts`)가 실패합니다.
 
 ## 1. 디렉토리 구조
 
@@ -154,51 +154,65 @@ validation:
 
 1. 스테이지 디렉토리에 `NN-<슬러그>.yaml`을 만듭니다(비슷한 퀘스트를 복사해 시작).
 2. `id`는 새 UUID: `node -e "console.log(crypto.randomUUID())"`. 한 번 정하면 바꾸지 않습니다.
-3. `npm run content:build`로 검사·생성합니다. 오류는 파일 경로와 필드 위치를 함께 보여 줍니다.
-4. P1-13 이후: `npm run test:content`로 정답 코드가 규칙을 통과하고 시작 코드는 통과하지 않는지 확인합니다.
-5. 퀘스트를 **지울 때**는 파일만 지우면 DB에서 사라지지 않습니다(빌드는 지우지 않음). 지우면 `user_progress`가 CASCADE로 함께 지워지므로 마이그레이션으로 따로 처리합니다.
+3. `npm run content:build`로 검사·생성합니다. 오류는 파일 경로와 필드 위치를 함께 보여 줍니다. 다시 만든 `supabase/seed.sql`을 YAML과 **같은 커밋**에 넣습니다.
+4. 운영 DB에는 다음 릴리즈 때 `supabase/seed.sql`을 SQL Editor로 적용합니다(`docs/release/v0.4-runbook.md` "콘텐츠 seed 적용").
+5. P1-13 이후: `npm run test:content`로 정답 코드가 규칙을 통과하고 시작 코드는 통과하지 않는지 확인합니다.
+6. 퀘스트를 **지울 때**는 파일만 지우면 DB에서 사라지지 않습니다(빌드는 지우지 않음). 지우면 `user_progress`가 CASCADE로 함께 지워지므로 마이그레이션으로 따로 처리합니다.
 
 ## 6. 명령
 
 ```bash
-npm run content:build              # 검사 + 생성: build/content/seed.sql, build/content/quests.json (git 제외)
-npm run content:build -- --check   # 생성하지 않고, 이미 있는 출력과 다르면 종료 코드 1 (CI 드리프트 검사용)
+npm run content:build              # 검사 + 생성: supabase/seed.sql (커밋), build/content/quests.json (git 제외)
+npm run content:build -- --check   # 생성하지 않고, supabase/seed.sql 이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사용)
 npm run content:compare            # 왕복 비교 (아래)
-npm run content:extract -- --stage 1   # supabase/seed.sql → content/ YAML 추출 (이관용, --all, --force)
+npm run content:extract -- --stage 1   # seed → content/ YAML 추출 (이관용, --all, --force, --seed-rev)
 npx vitest run src/lib/content src/lib/quest   # 스키마·빌드·검증기 단위 테스트 (+ PGlite 적용 테스트)
 ```
 
-- 옵션: `content:build --seed-out <file> --json-out <file> --content <dir>`, `content:compare --expect-diff 7-1,4-7 --seed <file> --content <dir> --migrations-up-to 00005`
+- 옵션: `content:build --seed-out <file> --json-out <file> --content <dir>`, `content:compare --expect-diff 7-1,4-7 --seed <file> --seed-rev [<rev>] --content <dir> --migrations-up-to 00005`
+- `--seed-rev`: 원본 seed 를 파일 대신 git 커밋에서 읽습니다. 값을 생략하면 손으로 쓴 마지막 seed 가 있는 커밋(`scripts/content/lib/paths.ts`의 `LEGACY_SEED_REV` = `9b88cea`)
 - 세 명령 모두 **PGlite**(npm 패키지, 메모리 Postgres)로 SQL을 실행합니다. 로컬 Supabase 스택·docker를 쓰지 않습니다.
 
 ### 생성물
 
 | 파일 | 내용 | 커밋 |
 |---|---|---|
-| seed SQL | 스테이지·`quests`(공개) 업서트 + `quest_answer_keys`(정답) 업서트. DML만 있고 멱등. 머리에 콘텐츠 해시 | P1-12부터 `supabase/seed.sql`로 내보내고 **커밋** (`db reset`·RLS 테스트·운영 SQL Editor가 그대로 읽음, PR에서 SQL diff 리뷰, CI는 `--check`로 원본과 어긋남 검사) |
-| 검증 JSON | 퀘스트마다 `id, key, validation_type, expected_output, starter_code, solution_code, steps[]` (P0-09 fixture 형태, P1-13이 읽음). `validation_type`·`expected_output`은 DB 저장 형태라 `validateResult`에 바로 넣음 | **커밋하지 않음** (원본에서 1초 안에 다시 만들고, 정답을 담은 파생물이라 diff 리뷰 가치가 없음. `test:content`가 먼저 빌드) |
+| seed SQL (`supabase/seed.sql`) | 스테이지·`quests`(공개) 업서트 + `quest_answer_keys`(정답) 업서트. DML만 있고 멱등. 머리에 콘텐츠 해시 | **커밋** (`db reset`·RLS 테스트·운영 SQL Editor가 그대로 읽음, PR에서 SQL diff 리뷰, CI는 `--check`로 원본과 어긋남 검사). content/ 를 고친 커밋에 다시 만든 seed 를 함께 넣습니다 |
+| 검증 JSON (`build/content/quests.json`) | 퀘스트마다 `id, key, validation_type, expected_output, starter_code, solution_code, steps[]` (P0-09 fixture 형태, P1-13이 읽음). `validation_type`·`expected_output`은 DB 저장 형태라 `validateResult`에 바로 넣음 | **커밋하지 않음** (원본에서 1초 안에 다시 만들고, 정답을 담은 파생물이라 diff 리뷰 가치가 없음. `test:content`가 먼저 빌드) |
 
-지금(P1-11)은 스테이지 1만 있어서 seed를 `build/`에 씁니다(`supabase/seed.sql`은 아직 손으로 쓴 원본). P1-12에서 `scripts/content/lib/paths.ts`의 기본값을 바꿉니다.
+`--check`는 커밋하는 seed만 비교합니다. 검증 JSON은 git에 없어 CI의 새 checkout에는 파일이 없기 때문이고, 쓰는 쪽(P1-13 `test:content`)이 먼저 빌드합니다.
 
 ### 왕복 비교 (`content:compare`)
 
 메모리 DB 4개를 띄워 비교합니다.
 
+기본 원본은 커밋한 `supabase/seed.sql`이고, `--seed-rev`를 주면 손으로 쓴 예전 seed입니다.
+
 | 비교 | 뜻 |
 |---|---|
-| A 원본 = B 생성 | `migrations → supabase/seed.sql`과 `migrations → 생성 seed`의 `stages`·`quests`·`quest_answer_keys` 행이 content 범위에서 같음 |
+| A 원본 = B 생성 | `migrations → 원본 seed`와 `migrations → 생성 seed`의 `stages`·`quests`·`quest_answer_keys` 행이 content 범위에서 같음 |
 | B = C 재실행 | 생성 seed를 두 번 실행해도 같음 (멱등) |
 | A = D 덮어쓰기 | 원본 데이터가 있는 DB에 생성 seed를 업서트해도 전체 행이 같음 |
 | 검증 JSON | 원본 DB에서 만든 JSON = 빌드 결과 |
 
-## 7. P1-12 이관 절차 (추출 → 빌드 → 비교)
+## 7. P1-12 이관 기록 (2026-11-04, 완료)
 
 ```bash
-npm run content:extract -- --all            # 1) 44 퀘스트 추출 (스테이지 1은 이미 있음: 같으면 그대로 둠)
-npm run content:build                       # 2) 검사 + 생성 (경고 0, 스테이지 7 · 퀘스트 44 · solution_code 43 · 단계 5/5)
-npm run content:compare                     # 3) 4개 비교 모두 PASS, "퀘스트 44/44"
-# 4) 콘텐츠 버그 수정(B09·B30·B31) 후: 고친 퀘스트만 차이가 나는지 확인
-npm run content:compare -- --expect-diff 7-1,4-7
-# 5) seed 교체: 생성물을 supabase/seed.sql 로 (paths.ts 기본값도 변경)
-npm run content:build -- --seed-out supabase/seed.sql
+npm run content:extract -- --all --seed-rev   # 1) 손으로 쓴 seed(9b88cea)에서 44 퀘스트 추출
+npm run content:build                         # 2) 경고 0, 스테이지 7 · 퀘스트 44 · solution_code 43 · 단계 5/5
+npm run content:compare -- --seed-rev         # 3) 콘텐츠 버그를 고치기 전: 4개 비교 모두 PASS, "퀘스트 44/44"
+# 4) 콘텐츠 버그 수정 후: 고친 퀘스트만 차이가 나는지 확인
+npm run content:compare -- --seed-rev --expect-diff 1-5,4-7,7-1
+# 5) seed 교체: 기본 출력이 supabase/seed.sql (paths.ts)
+npm run content:build
 ```
+
+| 퀘스트 | 고친 것 | 작업 ID |
+|---|---|---|
+| 7-1 2단계 | `code_check "int("` → `all[code_check "guess", contains "추측"]`. 단계 목표·`fallback_text`에 출력 안내 | B30 |
+| 7-1 3단계 | `contains "보다 커요"` → `all[code_check "elif", contains_any ["커요","작아요","정답"]]`, 힌트 level_3 | B09 |
+| 4-7 | 시작 코드에 `count = count - ___` (무한 루프 → 바로 오류로 멈춤), 힌트 level_3 | B31 |
+| 1-5 | `concept`의 `\\n` → `\n` (화면에 역슬래시 두 개로 보였음) | |
+
+- Node Pyodide(P0-09 프로토타입의 실제 워커)로 확인: 48개 검증 단위 모두 정답 통과(무시드 20회 + 시드 0~9), 시작 코드 불합격·타임아웃 없음. 예전 seed는 같은 검사에서 3개 실패(4-7 타임아웃, 7-1#2 시작 코드 통과, 7-1#3 정답 7/30).
+- 7-1 2단계 규칙은 `code_check "int(" whole_word` 대신 `guess` + 출력 "추측"으로 정했습니다. `int(random.randint(…))`는 `input()`을 흉내 낸 불필요한 변환이라, 똑같이 맞는 `guess = random.randint(1, 10)`이 떨어지기 때문입니다. 단계 목표("추측 숫자를 변수에 저장")와 다음 단계 코드가 쓰는 `guess` 변수를 확인합니다.

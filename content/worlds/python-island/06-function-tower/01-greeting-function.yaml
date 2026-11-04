@@ -1,0 +1,41 @@
+# 퀘스트 6-1: 인사하는 함수
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000019
+order: 1
+title: 인사하는 함수
+concept: def, 함수 호출
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 함수 정의(def)와 호출
+  learning_goals:
+    - def 키워드로 함수를 만들 수 있다
+    - 만든 함수를 호출하여 실행할 수 있다
+    - 함수가 코드를 묶어서 재사용하는 것임을 이해한다
+  story_context: 탑의 마법사에게 인사 마법을 배워요! 한 번 만들면 여러 번 사용할 수 있어요.
+  exercise_description: greet라는 함수를 만들어 "안녕! 나는 파이뱀이야!"를 출력하고, 함수를 호출하세요
+  starter_code: |-
+    # 인사하는 함수를 만들어보세요!
+    def greet():
+        # "안녕! 나는 파이뱀이야!"를 출력하세요!
+        
+
+    greet()
+  expected_output_hint: 안녕! 나는 파이뱀이야! 가 출력되어야 해요
+  fallback_text: 'def greet(): 으로 함수를 만들고, 안에 실행할 코드를 쓴 뒤, greet()으로 호출해요! 함수는 코드를 묶어놓은 마법 주문서예요.'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: 안녕! 나는 파이뱀이야!
+  hints:
+    level_1: '함수는 def 이름(): 으로 만들어요. 안에 실행할 코드를 써보세요!'
+    level_2: def 아래에 들여쓰기를 하고 print()로 메시지를 출력해보세요!
+    level_3: print("___") 파이뱀의 인사말을 넣어보세요!
+  solution_code: |-
+    def greet():
+        print("안녕! 나는 파이뱀이야!")
+
+    greet()
