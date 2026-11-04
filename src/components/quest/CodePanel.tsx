@@ -56,6 +56,8 @@ interface CodePanelProps {
   onCodeChange: (code: string) => void;
   pyodideStatus: PyodideStatus;
   isRunning: boolean;
+  /** 채점·완료 요청 중 (B06: 이 동안 실행 버튼을 다시 누를 수 없음) */
+  isSubmitting?: boolean;
   onRun: () => void;
   onRetry: () => void;
   runResult: RunResult | null;
@@ -69,6 +71,7 @@ export function CodePanel({
   onCodeChange,
   pyodideStatus,
   isRunning,
+  isSubmitting = false,
   onRun,
   onRetry,
   runResult,
@@ -79,7 +82,8 @@ export function CodePanel({
   const isReady = pyodideStatus === 'ready';
   const isLoading = pyodideStatus === 'loading';
   const isError = pyodideStatus === 'error';
-  const canRun = isReady && !isRunning && !isCodeEmpty;
+  const isBusy = isRunning || isSubmitting;
+  const canRun = isReady && !isBusy && !isCodeEmpty;
 
   return (
     <div className="flex flex-col gap-3 p-4">
@@ -104,15 +108,21 @@ export function CodePanel({
               disabled={!canRun}
               size="default"
               className="min-w-[140px]"
+              aria-busy={isBusy || undefined}
             >
               {isRunning ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   실행 중...
+                </>
+              ) : isSubmitting ? (
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  정답 확인 중...
                 </>
               ) : isLoading ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   준비 중...
                 </>
               ) : (

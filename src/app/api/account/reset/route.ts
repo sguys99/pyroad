@@ -1,10 +1,30 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { calculateLevel } from '@/lib/quest/xp';
+import { resetProgressRpc } from '@/lib/quest/rewardRpc';
 
+/**
+ * 진행 리셋 (P1-03, B12)
+ *
+ * 진행·뱃지 삭제와 XP 재계산은 DB 함수 reset_progress 가 한 트랜잭션으로 처리합니다.
+ * - 스테이지 리셋: 대상과 그 뒤 스테이지의 진행 삭제 → total_xp = 남은 진행의 earned_xp 합
+ *   (황금키로 0 XP 받은 퀘스트를 과다 차감하지 않음), stage_clear 뱃지는 완료한 스테이지가 남지 않을 때만 삭제
+ * - 전체 리셋: 진행·뱃지 전부 삭제, XP 0, 황금키 3개
+ * 사용자 클라이언트로 user_badges 를 지우지 않습니다 (P1-04 에서 DELETE 정책을 없앰).
+ */
 interface ResetRequest {
   stageId?: string;
+}
+
+interface ResetRpcResult {
+  scope: 'all' | 'stage';
+  reset_stages: { id: string; order: number; title: string }[];
+  removed_quests: number;
+  total_xp: number;
+  level: number;
+  golden_keys: number;
+  removed_badges: string[];
 }
 
 export async function POST(request: Request) {
@@ -17,237 +37,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  let body: ResetRequest = {};
   try {
-    let body: ResetRequest = {};
-    try {
-      body = await request.json();
-    } catch {
-      // body가 없으면 전체 리셋
-    }
+    body = await request.json();
+  } catch {
+    // body가 없으면 전체 리셋
+  }
 
-    if (body.stageId) {
-      const adminClient = createAdminClient();
-
-      // 대상 스테이지의 order 조회
-      const { data: targetStage, error: targetStageError } = await adminClient
-        .from('stages')
-        .select('id, order, title')
-        .eq('id', body.stageId)
-        .single();
-
-      if (targetStageError) {
-        console.error(
-          '[Reset API] Target stage query failed:',
-          { stageId: body.stageId, code: targetStageError.code, message: targetStageError.message },
-        );
-      }
-
-      if (!targetStage) {
-        return NextResponse.json(
-          { error: '해당 스테이지를 찾을 수 없습니다.' },
-          { status: 404 },
-        );
-      }
-
-      // 캐스케이드: 대상 스테이지 이후(order >= target) 모든 스테이지 조회
-      const { data: affectedStages, error: affectedStagesError } =
-        await adminClient
-          .from('stages')
-          .select('id, order, title')
-          .gte('order', targetStage.order)
-          .order('order', { ascending: true });
-
-      if (affectedStagesError) {
-        console.error(
-          '[Reset API] Affected stages query failed:',
-          affectedStagesError,
-        );
-      }
-
-      if (!affectedStages || affectedStages.length === 0) {
-        return NextResponse.json(
-          { error: '해당 스테이지를 찾을 수 없습니다.' },
-          { status: 404 },
-        );
-      }
-
-      const affectedStageIds = affectedStages.map((s) => s.id);
-
-      // 영향 받는 모든 스테이지의 퀘스트 조회
-      const { data: quests, error: questsError } = await adminClient
-        .from('quests')
-        .select('id, xp_reward, stage_id')
-        .in('stage_id', affectedStageIds);
-
-      if (questsError) {
-        console.error('[Reset API] Quests query failed:', questsError);
-        return NextResponse.json(
-          { error: '퀘스트 조회 중 오류가 발생했습니다.' },
-          { status: 500 },
-        );
-      }
-
-      if (!quests || quests.length === 0) {
-        return NextResponse.json(
-          { error: '해당 스테이지의 퀘스트를 찾을 수 없습니다.' },
-          { status: 404 },
-        );
-      }
-
-      const questIds = quests.map((q) => q.id);
-
-      // 완료된 퀘스트 진행 데이터 조회 (XP 차감용)
-      const { data: completedProgress } = await supabase
-        .from('user_progress')
-        .select('quest_id, hints_used')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .in('quest_id', questIds);
-
-      // 영향 받는 모든 스테이지의 user_progress 삭제
-      const { error: progressError } = await supabase
-        .from('user_progress')
-        .delete()
-        .eq('user_id', user.id)
-        .in('quest_id', questIds);
-
-      if (progressError) {
-        console.error(
-          '[Reset API] Stage progress delete failed:',
-          progressError,
-        );
-        return NextResponse.json(
-          { error: '진행 데이터 삭제 중 오류가 발생했습니다.' },
-          { status: 500 },
-        );
-      }
-
-      // 영향 받는 스테이지의 stage_clear 뱃지 삭제
-      const { error: badgeDeleteError } = await supabase
-        .from('user_badges')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('badge_type', 'stage_clear');
-
-      if (badgeDeleteError) {
-        console.error(
-          '[Reset API] Stage clear badge delete failed:',
-          badgeDeleteError,
-        );
-      }
-
-      // XP 재계산: 삭제된 퀘스트의 XP를 차감
-      if (completedProgress && completedProgress.length > 0) {
-        let xpToRemove = 0;
-        for (const prog of completedProgress) {
-          const quest = quests.find((q) => q.id === prog.quest_id);
-          if (quest) {
-            const hintsUsed = prog.hints_used ?? 0;
-            if (hintsUsed === 0)
-              xpToRemove += Math.round(quest.xp_reward * 1.5);
-            else if (hintsUsed === 1)
-              xpToRemove += Math.round(quest.xp_reward * 1.25);
-            else xpToRemove += quest.xp_reward;
-          }
-        }
-
-        const { data: currentUser, error: currentUserError } = await supabase
-          .from('users')
-          .select('total_xp')
-          .eq('id', user.id)
-          .single();
-
-        if (currentUserError) {
-          console.error(
-            '[Reset API] Current user query failed:',
-            currentUserError,
-          );
-          return NextResponse.json(
-            { error: '사용자 정보 조회 중 오류가 발생했습니다.' },
-            { status: 500 },
-          );
-        }
-
-        const newTotalXP = Math.max(
-          0,
-          (currentUser?.total_xp ?? 0) - xpToRemove,
-        );
-        const newLevel = calculateLevel(newTotalXP);
-
-        const { error: userUpdateError } = await supabase
-          .from('users')
-          .update({ total_xp: newTotalXP, current_level: newLevel })
-          .eq('id', user.id);
-
-        if (userUpdateError) {
-          console.error(
-            '[Reset API] User XP update failed:',
-            userUpdateError,
-          );
-          return NextResponse.json(
-            { error: '경험치 업데이트 중 오류가 발생했습니다.' },
-            { status: 500 },
-          );
-        }
-      }
-
-      return NextResponse.json({
-        success: true,
-        type: 'stage',
-        resetStages: affectedStages.map((s) => ({
-          id: s.id,
-          order: s.order,
-          title: s.title,
-        })),
-      });
-    }
-
-    // 전체 리셋
-    const { error: badgesError } = await supabase
-      .from('user_badges')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (badgesError) {
-      console.error('[Reset API] Badges delete failed:', badgesError);
-      return NextResponse.json(
-        { error: '뱃지 삭제 중 오류가 발생했습니다.' },
-        { status: 500 },
-      );
-    }
-
-    const { error: progressError } = await supabase
-      .from('user_progress')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (progressError) {
-      console.error('[Reset API] Full progress delete failed:', progressError);
-      return NextResponse.json(
-        { error: '진행 데이터 삭제 중 오류가 발생했습니다.' },
-        { status: 500 },
-      );
-    }
-
-    const { error: userError } = await supabase
-      .from('users')
-      .update({ total_xp: 0, current_level: 1 })
-      .eq('id', user.id);
-
-    if (userError) {
-      console.error('[Reset API] User reset failed:', userError);
-      return NextResponse.json(
-        { error: '사용자 데이터 초기화 중 오류가 발생했습니다.' },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({ success: true, type: 'full' });
-  } catch (error) {
-    console.error('[Reset API] Unexpected error:', error);
+  if (body.stageId !== undefined && typeof body.stageId !== 'string') {
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
-      { status: 500 },
+      { error: '해당 스테이지를 찾을 수 없습니다.' },
+      { status: 400 },
     );
   }
+
+  const result = await resetProgressRpc<ResetRpcResult>(
+    createAdminClient(),
+    user.id,
+    body.stageId ? { type: 'stage', stageId: body.stageId } : { type: 'all' },
+  );
+  if (!result.ok) return result.response;
+
+  revalidatePath('/world');
+  revalidatePath('/profile');
+
+  const data = result.data;
+  return NextResponse.json({
+    success: true,
+    type: data.scope === 'all' ? 'full' : 'stage',
+    ...(data.scope === 'stage' && { resetStages: data.reset_stages }),
+    total_xp: data.total_xp,
+    level: data.level,
+    golden_keys: data.golden_keys,
+    removed_badges: data.removed_badges,
+  });
 }

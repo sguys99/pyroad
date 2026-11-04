@@ -1,3 +1,6 @@
+// XP·레벨 규칙. 실제 지급은 DB 함수 complete_quest(00006 의 quest_xp·level_for_xp)가 하고,
+// 이 파일과 SQL 은 supabase/tests/fixtures/reward-rules.json 한 표로 대조합니다 (P1-03).
+// 규칙을 바꾸면 SQL·이 파일·표를 함께 고칩니다.
 export const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000] as const;
 
 export const LEVEL_TITLES: Record<number, string> = {

@@ -2,15 +2,27 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { calculateXP, calculateLevel } from '@/lib/quest/xp';
-import { checkAndAwardBadges } from '@/lib/quest/checkBadges';
+import { gradeSubmission } from '@/lib/quest/grade';
+import { completeQuestRpc, rewardError } from '@/lib/quest/rewardRpc';
+import type { QuestCompleteResponse } from '@/lib/quest/rewards';
 
+/**
+ * 퀘스트 완료 (P1-03, B05·B06)
+ *
+ * 완료·XP·레벨·뱃지·스테이지 클리어는 DB 함수 complete_quest 가 한 트랜잭션으로 처리합니다.
+ * 이 라우트는 로그인 확인 → 채점(quest_answer_keys 기준) → RPC 호출만 합니다.
+ * 힌트 수·황금키 사용은 DB 값을 쓰므로 요청 본문의 hints_used·used_golden_key 는 받지 않습니다.
+ * 같은 퀘스트를 여러 번(동시에) 보내도 보상은 한 번이고, 그 뒤 요청은 already_completed 로 응답합니다.
+ */
 interface CompleteRequest {
   quest_id: string;
   code_submitted: string;
-  hints_used: number;
-  used_golden_key?: boolean;
+  /** 브라우저(Pyodide)에서 실행한 출력. 서버가 다시 채점함 (프로젝트는 마지막 단계 기준) */
+  stdout?: string;
 }
+
+const MAX_CODE_LENGTH = 20_000;
+const MAX_STDOUT_LENGTH = 100_000;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -29,165 +41,55 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (!body.quest_id || body.code_submitted === undefined) {
+  if (
+    typeof body?.quest_id !== 'string' ||
+    typeof body.code_submitted !== 'string'
+  ) {
     return NextResponse.json(
       { error: 'quest_id and code_submitted are required' },
       { status: 400 },
     );
   }
+  const stdout = typeof body.stdout === 'string' ? body.stdout : '';
+  if (
+    body.code_submitted.length > MAX_CODE_LENGTH ||
+    stdout.length > MAX_STDOUT_LENGTH
+  ) {
+    return rewardError('submission_too_large');
+  }
 
   const adminClient = createAdminClient();
 
-  // 1. Quest 조회 + 중복 완료 확인 + 유저 프로필 — 병렬 실행
-  const [questResult, existingResult, profileResult] = await Promise.all([
-    adminClient
-      .from('quests')
-      .select('id, xp_reward, stage_id')
-      .eq('id', body.quest_id)
-      .single(),
-    supabase
-      .from('user_progress')
-      .select('status')
-      .eq('user_id', user.id)
-      .eq('quest_id', body.quest_id)
-      .maybeSingle(),
-    supabase
-      .from('users')
-      .select('total_xp, current_level')
-      .eq('id', user.id)
-      .single(),
-  ]);
-
-  const quest = questResult.data;
-  if (!quest) {
-    return NextResponse.json({ error: 'Quest not found' }, { status: 404 });
+  // 채점: 통과하지 않은 제출은 완료하지 않는다. 황금키를 쓴 퀘스트는 DB 함수가 채점 없이 완료 (XP 0)
+  const grade = await gradeSubmission(adminClient, body.quest_id, {
+    stdout,
+    studentCode: body.code_submitted,
+    step: 'final',
+  });
+  if (grade.status === 'quest_not_found') {
+    return rewardError('quest_not_found');
   }
-
-  // 2. 이미 완료된 퀘스트 — 현재 프로필 반환
-  if (existingResult.data?.status === 'completed') {
-    return NextResponse.json({
-      earned_xp: 0,
-      total_xp: profileResult.data?.total_xp ?? 0,
-      new_level: profileResult.data?.current_level ?? 1,
-      level_changed: false,
-      already_completed: true,
-      new_badges: [],
+  const passed = grade.status === 'graded' && grade.passed;
+  if (grade.status !== 'graded') {
+    console.error('[complete API] 채점 기준 없음:', {
+      questId: body.quest_id,
+      status: grade.status,
     });
   }
 
-  // 3. XP 계산 (황금키 사용 시 0)
-  const earnedXP = calculateXP(quest.xp_reward, body.hints_used, body.used_golden_key);
-
-  // 4. user_progress upsert
-  await supabase.from('user_progress').upsert(
-    {
-      user_id: user.id,
-      quest_id: body.quest_id,
-      status: 'completed' as const,
-      hints_used: body.hints_used,
-      code_submitted: body.code_submitted,
-      completed_at: new Date().toISOString(),
-    },
-    { onConflict: 'user_id,quest_id' },
+  const result = await completeQuestRpc<QuestCompleteResponse>(
+    adminClient,
+    user.id,
+    body.quest_id,
+    { code: body.code_submitted, passed },
   );
+  if (!result.ok) return result.response;
 
-  const prevLevel = profileResult.data?.current_level ?? 1;
-  const newTotalXP = (profileResult.data?.total_xp ?? 0) + earnedXP;
-  const newLevel = calculateLevel(newTotalXP);
-
-  // 6. users 업데이트
-  await supabase
-    .from('users')
-    .update({
-      total_xp: newTotalXP,
-      current_level: newLevel,
-    })
-    .eq('id', user.id);
-
-  // 7. 뱃지 체크 및 부여 + 스테이지 완료 판정 — 병렬 실행
-  const [newBadges, stageQuestsResult, completedInStageResult] =
-    await Promise.all([
-      checkAndAwardBadges({
-        supabase,
-        userId: user.id,
-        questId: body.quest_id,
-        hintsUsed: body.hints_used,
-      }),
-      adminClient
-        .from('quests')
-        .select('id, concept, "order"')
-        .eq('stage_id', quest.stage_id),
-      supabase
-        .from('user_progress')
-        .select('quest_id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed'),
-    ]);
-
-  const stageQuestIds = new Set(
-    stageQuestsResult.data?.map((q) => q.id) ?? [],
-  );
-  const completedIds = new Set(
-    (completedInStageResult.data ?? [])
-      .filter((p) => stageQuestIds.has(p.quest_id))
-      .map((p) => p.quest_id),
-  );
-  completedIds.add(body.quest_id);
-
-  // 다음 미완료 퀘스트 계산
-  const sortedQuests = (stageQuestsResult.data ?? []).sort(
-    (a, b) => a.order - b.order,
-  );
-  const currentOrder =
-    sortedQuests.find((q) => q.id === body.quest_id)?.order ?? 0;
-  const nextQuest = sortedQuests.find(
-    (q) => q.order > currentOrder && !completedIds.has(q.id),
-  );
-  const nextQuestId = nextQuest?.id ?? null;
-
-  const isLastQuestInStage =
-    stageQuestIds.size > 0 && stageQuestIds.size === completedIds.size;
-
-  // 스테이지 완료 시 추가 정보 수집
-  let stageConcepts: string[] | undefined;
-  let stageTitle: string | undefined;
-  let stageOrder: number | undefined;
-
-  if (isLastQuestInStage) {
-    stageConcepts =
-      stageQuestsResult.data?.map((q) => q.concept) ?? [];
-
-    const stageResult = await adminClient
-      .from('stages')
-      .select('title, "order"')
-      .eq('id', quest.stage_id)
-      .single();
-
-    if (stageResult.data) {
-      stageTitle = stageResult.data.title;
-      stageOrder = stageResult.data.order;
-    }
-
-    // 다음 스테이지를 위해 황금키 3개로 리셋
-    await supabase
-      .from('users')
-      .update({ golden_keys: 3 })
-      .eq('id', user.id);
+  if (!result.data.already_completed) {
+    // 월드맵·프로필 페이지의 Router Cache 무효화
+    revalidatePath('/world');
+    revalidatePath('/profile');
   }
 
-  // 월드맵·프로필 페이지의 Router Cache 무효화
-  revalidatePath('/world');
-  revalidatePath('/profile');
-
-  return NextResponse.json({
-    earned_xp: earnedXP,
-    total_xp: newTotalXP,
-    new_level: newLevel,
-    level_changed: newLevel > prevLevel,
-    already_completed: false,
-    new_badges: newBadges,
-    isLastQuestInStage,
-    ...(isLastQuestInStage && { stageConcepts, stageTitle, stageOrder }),
-    ...(!isLastQuestInStage && nextQuestId && { nextQuestId }),
-  });
+  return NextResponse.json(result.data);
 }

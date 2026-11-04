@@ -296,6 +296,7 @@ export type Database = {
           completed_at: string | null;
           created_at: string;
           current_step: number | null;
+          earned_xp: number;
           hints_used: number;
           id: string;
           quest_id: string;
@@ -309,6 +310,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           current_step?: number | null;
+          earned_xp?: number;
           hints_used?: number;
           id?: string;
           quest_id: string;
@@ -322,6 +324,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           current_step?: number | null;
+          earned_xp?: number;
           hints_used?: number;
           id?: string;
           quest_id?: string;
@@ -415,7 +418,47 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      complete_quest: {
+        Args: { p_quest_id: string; p_submission: Json; p_user_id: string };
+        Returns: Json;
+      };
+      decide_new_badges: {
+        Args: {
+          p_completed_count: number;
+          p_earned: string[];
+          p_hints_used: number;
+          p_is_final_stage: boolean;
+          p_stage_cleared: boolean;
+          p_streak_3: boolean;
+          p_used_golden_key: boolean;
+        };
+        Returns: string[];
+      };
+      has_three_day_streak: {
+        Args: { p_completed_at: string[] };
+        Returns: boolean;
+      };
+      is_stage_unlocked: {
+        Args: { p_stage_id: string; p_user_id: string };
+        Returns: boolean;
+      };
+      level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      quest_xp: {
+        Args: {
+          p_base: number;
+          p_hints_used: number;
+          p_used_golden_key: boolean;
+        };
+        Returns: number;
+      };
+      reset_progress: {
+        Args: { p_scope: string; p_stage_id?: string; p_user_id: string };
+        Returns: Json;
+      };
+      use_golden_key: {
+        Args: { p_quest_id: string; p_step?: number; p_user_id: string };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;

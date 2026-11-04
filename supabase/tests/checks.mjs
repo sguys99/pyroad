@@ -1385,31 +1385,473 @@ function solutionCount() {
 }
 
 async function groupRpc(u) {
-  // P1-03 complete_quest(p_user_id, p_quest_id, p_submission): service_role 전용
-  const RPC = '/rest/v1/rpc/complete_quest';
-  const body = {
-    p_user_id: u.alice.id,
-    p_quest_id: Q1,
-    p_submission: 'print(1)',
-  };
+  // P1-03 보상 RPC 는 service_role 전용 (00006). anon/authenticated 가 부르면 42501
+  const calls = [
+    [
+      'RPC-1',
+      'anon',
+      'complete_quest',
+      {
+        p_user_id: u.alice.id,
+        p_quest_id: Q1,
+        p_submission: { code: 'print(1)', passed: true },
+      },
+    ],
+    [
+      'RPC-2',
+      u.alice,
+      'complete_quest',
+      {
+        p_user_id: u.alice.id,
+        p_quest_id: Q1,
+        p_submission: { code: 'print(1)', passed: true },
+      },
+    ],
+    [
+      'RPC-3',
+      u.alice,
+      'use_golden_key',
+      { p_user_id: u.alice.id, p_quest_id: Q2 },
+    ],
+    [
+      'RPC-4',
+      u.alice,
+      'reset_progress',
+      { p_user_id: u.bob.id, p_scope: 'all' },
+    ],
+    [
+      'RPC-5',
+      'anon',
+      'reset_progress',
+      { p_user_id: u.bob.id, p_scope: 'all' },
+    ],
+  ];
+  for (const [id, as, fn, body] of calls) {
+    const role = as === 'anon' ? 'anon' : 'authenticated';
+    await check({
+      group: 'rpc',
+      id,
+      role,
+      op: `POST /rpc/${fn}${as === 'anon' ? '' : ' {p_user_id: 본인/다른 사용자}'}`,
+      deny: ['denied'],
+      allow: ['allowed', 'empty'],
+      run: async () =>
+        classifyRead(await rest('POST', `/rest/v1/rpc/${fn}`, { as, body })),
+    });
+  }
   await check({
     group: 'rpc',
-    id: 'RPC-1',
-    role: 'anon',
-    op: `POST ${RPC}`,
-    deny: ['denied'],
-    allow: ['allowed', 'empty'],
-    run: async () => classifyRead(await rest('POST', RPC, { body })),
+    id: 'RPC-6',
+    role: 'postgres',
+    op: '00006 함수(보상 규칙·RPC·트리거) 중 anon/authenticated 가 EXECUTE 할 수 있는 것',
+    ...NONE,
+    run: () => {
+      const v =
+        one(`select coalesce(string_agg(p.proname, ',' order by p.proname), '')
+        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public'
+         and p.proname in ('quest_xp', 'level_for_xp', 'has_three_day_streak', 'decide_new_badges',
+                           'is_stage_unlocked', 'complete_quest', 'use_golden_key', 'reset_progress',
+                           'user_progress_protect_earned_xp')
+         and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
   });
+}
+
+// ── reward: 보상 RPC 동작 (P1-03, B05·B06·B11·B12) ──────────────
+// API Route 처럼 service_role 로 RPC 를 부르고 DB 결과를 확인합니다. 점검마다 새 사용자를 씁니다.
+const OK = { deny: ['mismatch', 'error'], allow: ['ok'] };
+const STAGE2 = 'a1000000-0000-0000-0000-000000000002';
+const Q_STAGE2 = 'b1000000-0000-0000-0000-000000000004'; // 2-1
+const Q_LAST1 = 'b1000000-0000-0000-0000-000000000026'; // 1-7 (75 XP)
+const rpc = (fn, body) =>
+  rest('POST', `/rest/v1/rpc/${fn}`, { as: 'service', body });
+const submission = (passed = true) => ({ code: 'print(1)', passed });
+/** 기대값 표 비교: 다른 항목만 detail 로 */
+function compare(label, expected, actual) {
+  const diffs = Object.keys(expected).filter(
+    (k) => JSON.stringify(expected[k]) !== JSON.stringify(actual[k]),
+  );
+  return diffs.length
+    ? {
+        actual: 'mismatch',
+        detail: diffs
+          .map(
+            (k) =>
+              `${label}.${k}: 기대 ${JSON.stringify(expected[k])} / 실제 ${JSON.stringify(actual[k])}`,
+          )
+          .join('; '),
+      }
+    : null;
+}
+const userRow = (id) =>
+  JSON.parse(
+    one(
+      `select json_build_object('total_xp', total_xp, 'level', current_level, 'golden_keys', golden_keys,
+         'badges', coalesce((select json_agg(badge_type order by badge_type) from public.user_badges where user_id = u.id), '[]'),
+         'badge_rows', (select count(*) from public.user_badges where user_id = u.id))
+         from public.users u where id = '${id}'`,
+    ),
+  );
+const progressRow = (uid, qid) => {
+  const v = one(
+    `select json_build_object('status', status, 'earned_xp', earned_xp, 'hints_used', hints_used, 'used_golden_key', used_golden_key)
+       from public.user_progress where user_id = '${uid}' and quest_id = '${qid}'`,
+  );
+  return v ? JSON.parse(v) : null;
+};
+const stageQuests = (stageId) =>
+  one(
+    `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}'`,
+  ).split(',');
+
+async function groupReward() {
+  const rules = JSON.parse(
+    readFileSync(join(HERE, 'fixtures', 'reward-rules.json'), 'utf8'),
+  );
+  const tsArr = (xs) =>
+    `array[${xs.map((x) => (x === null ? 'null' : sqlStr(x))).join(',')}]::timestamptz[]`;
+  const txtArr = (xs) =>
+    `array[${xs.map(sqlStr).join(',')}]::text[]`;
+
   await check({
-    group: 'rpc',
-    id: 'RPC-2',
+    group: 'reward',
+    id: 'RW-1',
+    role: 'postgres',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges)',
+    ...OK,
+    run: () => {
+      const cases = [
+        ...rules.xp.map((c) => [
+          `xp ${c.base}/${c.hints}/${c.golden}`,
+          `public.quest_xp(${c.base}, ${c.hints}, ${c.golden})::text`,
+          String(c.xp),
+        ]),
+        ...rules.level.map((c) => [
+          `level ${c.total}`,
+          `public.level_for_xp(${c.total})::text`,
+          String(c.level),
+        ]),
+        ...rules.streak.map((c) => [
+          `streak ${c.name}`,
+          `public.has_three_day_streak(${tsArr(c.completed_at)})::text`,
+          String(c.streak),
+        ]),
+        ...rules.badges.map((c) => {
+          const f = c.facts;
+          return [
+            `badges ${c.name}`,
+            `array_to_json(public.decide_new_badges(${txtArr(f.earned)}, ${f.completedCount}, ${f.stageCleared}, ${f.isFinalStage}, ${f.hintsUsed}, ${f.usedGoldenKey}, ${f.streak3}))::text`,
+            JSON.stringify(c.badges),
+          ];
+        }),
+      ];
+      const got = one(
+        cases.map(([, expr]) => `select ${expr};`).join('\n'),
+      ).split('\n');
+      const bad = cases
+        .map(([name, , want], i) => [name, want, got[i]])
+        .filter(([, want, g]) => want !== g)
+        .map(([name, want, g]) => `${name}: 기대 ${want} / SQL ${g}`);
+      return bad.length
+        ? { actual: 'mismatch', detail: bad.join('; ') }
+        : { actual: 'ok', detail: `${cases.length}개 일치` };
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-2',
+    role: 'service_role',
+    op: '같은 퀘스트 complete_quest 를 동시에 8번 → XP·뱃지 1번만 (B06)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw2', '동시완료');
+      const rs = await Promise.all(
+        Array.from({ length: 8 }, () =>
+          rpc('complete_quest', {
+            p_user_id: x.id,
+            p_quest_id: Q1,
+            p_submission: submission(),
+          }),
+        ),
+      );
+      const bad = rs.find((r) => r.status !== 200);
+      if (bad)
+        return { actual: 'error', detail: `${bad.status} ${errMsg(bad)}` };
+      const fresh = rs.filter((r) => r.json.already_completed === false);
+      return (
+        compare('응답', { fresh: 1 }, { fresh: fresh.length }) ||
+        compare('지급', { xp_gained: 75, new_badges: ['first_code', 'hint_master'] }, fresh[0].json) ||
+        compare(
+          'users',
+          { total_xp: 75, badges: ['first_code', 'hint_master'], badge_rows: 2 },
+          userRow(x.id),
+        ) ||
+        compare('progress', { status: 'completed', earned_xp: 75 }, progressRow(x.id, Q1)) || {
+          actual: 'ok',
+          detail: '8회 중 지급 1회, total_xp 75, 뱃지 2개',
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-3',
+    role: 'service_role',
+    op: '같은 코드 퀘스트 use_golden_key 를 동시에 5번 → 황금키 1개만 차감',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw3', '동시황금키');
+      const rs = await Promise.all(
+        Array.from({ length: 5 }, () =>
+          rpc('use_golden_key', { p_user_id: x.id, p_quest_id: Q2 }),
+        ),
+      );
+      const bad = rs.find((r) => r.status !== 200);
+      if (bad)
+        return { actual: 'error', detail: `${bad.status} ${errMsg(bad)}` };
+      return (
+        compare(
+          '차감',
+          { charged: 1 },
+          { charged: rs.filter((r) => r.json.charged).length },
+        ) ||
+        compare('users', { golden_keys: 2 }, userRow(x.id)) ||
+        compare('progress', { used_golden_key: true, status: 'in_progress' }, progressRow(x.id, Q2)) || {
+          actual: 'ok',
+          detail: '5회 중 차감 1회 (3 → 2)',
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-4',
+    role: 'service_role',
+    op: 'B05·B11: 힌트 수·황금키는 DB 값 (요청의 hints_used:0·used_golden_key:false 무시)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw4', '서버값');
+      one(`insert into public.user_progress (user_id, quest_id, status, hints_used) values ('${x.id}', '${Q1}', 'in_progress', 2)`);
+      const lie = { code: 'x', passed: true, hints_used: 0, used_golden_key: false };
+      const a = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q1, p_submission: lie });
+      const g = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: Q2 });
+      const b = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q2, p_submission: lie });
+      for (const r of [a, g, b])
+        if (r.status !== 200)
+          return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
+      return (
+        compare('힌트 2회', { xp_gained: 50, new_badges: ['first_code'] }, a.json) ||
+        compare('황금키', { xp_gained: 0, new_badges: [], used_golden_key: true }, b.json) ||
+        compare('users', { total_xp: 50, golden_keys: 2, badges: ['first_code'] }, userRow(x.id)) ||
+        compare('progress', { earned_xp: 0 }, progressRow(x.id, Q2)) || {
+          actual: 'ok',
+          detail: '힌트 2회 → 50 XP(1.5배 아님), 황금키 → 0 XP·hint_master 없음',
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-5',
+    role: 'service_role',
+    op: 'B05: 잠긴 스테이지의 complete_quest·use_golden_key 거부, 채점 미통과(passed:false) 거부',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw5', '잠금');
+      const c = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q_STAGE2, p_submission: submission() });
+      const g = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: Q_STAGE2 });
+      const n = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q1, p_submission: submission(false) });
+      const got = {
+        complete: `${c.status} ${errMsg(c)}`,
+        golden: `${g.status} ${errMsg(g)}`,
+        not_passed: `${n.status} ${errMsg(n)}`,
+      };
+      return (
+        compare(
+          '응답',
+          { complete: '403 stage_locked', golden: '403 stage_locked', not_passed: '422 not_passed' },
+          got,
+        ) ||
+        compare('users', { total_xp: 0, golden_keys: 3, badge_rows: 0 }, userRow(x.id)) ||
+        compare(
+          'progress',
+          { rows: '0' },
+          { rows: one(`select count(*) from public.user_progress where user_id = '${x.id}'`) },
+        ) || { actual: 'ok', detail: '403 stage_locked ×2, 422 not_passed, 진행 행 없음' }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-6',
+    role: 'service_role',
+    op: '스테이지 1 을 모두 완료 → stage_cleared·stage_clear 뱃지·황금키 3·다음 스테이지 열림',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw6', '스테이지');
+      const qs = stageQuests(STAGE1);
+      one(`update public.users set golden_keys = 1 where id = '${x.id}'`);
+      let last;
+      for (const q of qs) {
+        last = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+        if (last.status !== 200)
+          return { actual: 'error', detail: `${q}: ${last.status} ${errMsg(last)}` };
+      }
+      const unlocked = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: Q_STAGE2 });
+      return (
+        compare(
+          '마지막 응답',
+          { next_quest_id: null, golden_keys: 3, new_badges: ['stage_clear'], level_after: 3 },
+          last.json,
+        ) ||
+        compare(
+          'stage_cleared',
+          { stage_id: STAGE1, order: 1, concepts: qs.length },
+          { ...last.json.stage_cleared, concepts: last.json.stage_cleared?.concepts?.length },
+        ) ||
+        compare('스테이지 2 황금키', { status: 200 }, { status: unlocked.status }) || {
+          actual: 'ok',
+          detail: `${qs.length}개 완료 → stage_clear, 황금키 1 → 3, total_xp ${last.json.total_xp}`,
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-7',
+    role: 'service_role',
+    op: 'B12 스테이지 리셋: earned_xp 합으로 재계산(황금키 0 XP 과다 차감 없음), stage_clear 는 조건부 삭제',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw7', '리셋');
+      const s1 = stageQuests(STAGE1);
+      const s2 = stageQuests(STAGE2);
+      // 스테이지 1: 첫 퀘스트는 황금키(0 XP), 나머지는 힌트 0 (1.5배)
+      await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: s1[0] });
+      for (const q of s1)
+        await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      for (const q of s2.slice(0, 2))
+        await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      const stage1Xp = Number(
+        one(`select sum(earned_xp) from public.user_progress p join public.quests q on q.id = p.quest_id
+              where p.user_id = '${x.id}' and q.stage_id = '${STAGE1}'`),
+      );
+      const before = userRow(x.id);
+      const r2 = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'stage', p_stage_id: STAGE2 });
+      const after2 = userRow(x.id);
+      const r1 = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'stage', p_stage_id: STAGE1 });
+      const after1 = userRow(x.id);
+      for (const r of [r2, r1])
+        if (r.status !== 200)
+          return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
+      return (
+        compare('준비', { stage1Xp: 0 + 5 * 75 + 113 }, { stage1Xp }) ||
+        compare(
+          '스테이지 2 리셋',
+          {
+            total_xp: stage1Xp,
+            golden_keys: before.golden_keys,
+            badges: ['first_code', 'hint_master', 'stage_clear'],
+          },
+          after2,
+        ) ||
+        compare('스테이지 2 리셋 응답', { removed_badges: [], removed_quests: 2 }, r2.json) ||
+        compare('스테이지 1 리셋', { total_xp: 0, level: 1, badges: ['first_code', 'hint_master'] }, after1) ||
+        compare('스테이지 1 리셋 응답', { removed_badges: ['stage_clear'] }, r1.json) || {
+          actual: 'ok',
+          detail: `스테이지 2 리셋 → total_xp ${before.total_xp} → ${stage1Xp}, stage_clear 유지 / 스테이지 1 리셋 → 0, stage_clear 삭제`,
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-8',
+    role: 'service_role',
+    op: 'B12 전체 리셋: 진행·뱃지 삭제, XP 0, 황금키 3 복구',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw8', '전체리셋');
+      await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: Q1 });
+      await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q1, p_submission: submission() });
+      await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q2, p_submission: submission() });
+      const r = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      if (r.status !== 200)
+        return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
+      return (
+        compare('users', { total_xp: 0, level: 1, golden_keys: 3, badge_rows: 0 }, userRow(x.id)) ||
+        compare(
+          'progress',
+          { rows: '0' },
+          { rows: one(`select count(*) from public.user_progress where user_id = '${x.id}'`) },
+        ) || { actual: 'ok', detail: '황금키 2 → 3, XP·뱃지·진행 0' }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-9',
     role: 'authenticated',
-    op: `POST ${RPC} {p_user_id: 본인}`,
-    deny: ['denied'],
-    allow: ['allowed', 'empty'],
-    run: async () =>
-      classifyRead(await rest('POST', RPC, { as: u.alice, body })),
+    op: 'psql INSERT/upsert user_progress {earned_xp: 99999} → 트리거가 0/이전 값으로 (B04-17 의 INSERT 경로)',
+    ...SQLW,
+    run: async () => {
+      const x = await createUser('rw9', '획득XP');
+      const r = psqlAs(
+        'authenticated',
+        x.id,
+        `insert into public.user_progress (user_id, quest_id, earned_xp) values ('${x.id}', '${Q1}', 99999);
+         insert into public.user_progress (user_id, quest_id, earned_xp) values ('${x.id}', '${Q1}', 88888)
+           on conflict (user_id, quest_id) do update set earned_xp = excluded.earned_xp;
+         select 1 from public.user_progress where user_id = '${x.id}' and earned_xp > 0;`,
+      );
+      return classifySqlWrite(r);
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-10',
+    role: 'postgres',
+    op: '00006 재실행: 이전 앱이 완료한 행(earned_xp 0)을 규칙대로 백필, 이미 채운 행·황금키 행은 그대로 (멱등)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw10', '백필');
+      const file = readFileSync(
+        join(HERE, '..', 'migrations', '00006_quest_reward_rpc.sql'),
+        'utf8',
+      );
+      // 이전 앱처럼 사용자 클라이언트 경로로 완료된 행을 postgres 로 직접 만든다 (earned_xp 0)
+      const r = psql(`BEGIN;
+        insert into public.user_progress (user_id, quest_id, status, hints_used, used_golden_key, completed_at) values
+          ('${x.id}', '${Q1}', 'completed', 0, false, now()),
+          ('${x.id}', '${Q2}', 'completed', 1, false, now()),
+          ('${x.id}', '${Q3}', 'completed', 0, true, now()),
+          ('${x.id}', '${Q_LAST1}', 'completed', 3, false, now());
+        update public.user_progress set earned_xp = 1 where user_id = '${x.id}' and quest_id = '${Q_LAST1}';
+        ${file}
+        select string_agg(earned_xp::text, ',' order by q."order") from public.user_progress p
+          join public.quests q on q.id = p.quest_id where p.user_id = '${x.id}';
+        ROLLBACK;`);
+      if (!r.ok) return { actual: 'error', detail: firstLine(r.err) };
+      const got = r.out.split('\n').filter(Boolean).pop();
+      // Q1(1-1) 힌트 0 → 75, Q2(1-2) 힌트 1 → 63, Q3(1-4) 황금키 → 0, Q_LAST1(1-7) 이미 1 → 그대로
+      return (
+        compare('earned_xp (퀘스트 순서)', { v: '75,63,0,1' }, { v: got }) || {
+          actual: 'ok',
+          detail: `${got} (트랜잭션 ROLLBACK)`,
+        }
+      );
+    },
   });
 }
 
@@ -1958,6 +2400,7 @@ async function main() {
   await groupWrite(u);
   await groupAnswer(u);
   await groupRpc(u);
+  await groupReward();
   await groupApp(u);
   await groupStatic();
 

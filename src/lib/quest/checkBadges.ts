@@ -1,147 +1,87 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { BadgeType } from './badges';
 
-interface BadgeCheckContext {
-  supabase: SupabaseClient;
-  userId: string;
-  questId: string;
+/**
+ * 뱃지 판정 규칙 (참조 구현)
+ *
+ * 실제 지급은 DB 함수 `complete_quest`가 같은 트랜잭션에서 합니다(P1-03,
+ * `supabase/migrations/00006_quest_reward_rpc.sql`의 `decide_new_badges`·`has_three_day_streak`).
+ * 이 파일은 규칙을 TS로 적어 둔 것으로, 두 구현은 `supabase/tests/fixtures/reward-rules.json`
+ * 한 표로 대조합니다(vitest `rewardRules.test.ts` + `npm run test:rls`의 RW-1).
+ * 규칙을 바꾸면 SQL·이 파일·표를 함께 고칩니다.
+ */
+export interface BadgeFacts {
+  /** 이미 가진 뱃지 */
+  earned: readonly string[];
+  /** 이번 완료를 포함한 완료 퀘스트 수 */
+  completedCount: number;
+  /** 이번 완료로 이 퀘스트의 스테이지를 모두 완료했는지 */
+  stageCleared: boolean;
+  /** 이 퀘스트가 최종 프로젝트(is_final) 스테이지인지 */
+  isFinalStage: boolean;
+  /** DB의 힌트 사용 수 (요청 본문 값이 아님, B05) */
   hintsUsed: number;
+  /** DB의 황금키 사용 여부 (B11) */
+  usedGoldenKey: boolean;
+  /** 3일 연속 완료 여부 (hasThreeDayStreak) */
+  streak3: boolean;
 }
 
-export async function checkAndAwardBadges(
-  ctx: BadgeCheckContext,
-): Promise<BadgeType[]> {
-  const { supabase, userId, questId, hintsUsed } = ctx;
-
-  // 기존 뱃지 조회
-  const { data: existingBadges } = await supabase
-    .from('user_badges')
-    .select('badge_type')
-    .eq('user_id', userId);
-
-  const earned = new Set(existingBadges?.map((b) => b.badge_type) ?? []);
-  const newBadges: BadgeType[] = [];
+/** 새로 줄 뱃지. 순서는 축하 연출 순서 */
+export function decideNewBadges(facts: BadgeFacts): BadgeType[] {
+  const earned = new Set(facts.earned);
+  const badges: BadgeType[] = [];
 
   // first_code: 첫 퀘스트 완료
-  if (!earned.has('first_code')) {
-    const { count } = await supabase
-      .from('user_progress')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'completed');
-
-    if (count === 1) {
-      newBadges.push('first_code');
-    }
+  if (!earned.has('first_code') && facts.completedCount === 1) {
+    badges.push('first_code');
+  }
+  // hint_master: 힌트 0회 + 황금키 미사용 (B11: 황금키로 정답을 받았으면 힌트 없이 푼 것이 아님)
+  if (
+    !earned.has('hint_master') &&
+    facts.hintsUsed === 0 &&
+    !facts.usedGoldenKey
+  ) {
+    badges.push('hint_master');
+  }
+  // stage_clear: 스테이지 전체 완료
+  if (!earned.has('stage_clear') && facts.stageCleared) {
+    badges.push('stage_clear');
+  }
+  // project_builder: 최종 프로젝트 완료
+  if (!earned.has('project_builder') && facts.isFinalStage) {
+    badges.push('project_builder');
+  }
+  // streak_3: 3일 연속 완료
+  if (!earned.has('streak_3') && facts.streak3) {
+    badges.push('streak_3');
   }
 
-  // hint_master: 힌트 0회로 완료
-  if (!earned.has('hint_master') && hintsUsed === 0) {
-    newBadges.push('hint_master');
-  }
+  return badges;
+}
 
-  // stage_clear: 현재 퀘스트의 스테이지 전체 완료
-  if (!earned.has('stage_clear')) {
-    const { data: quest } = await supabase
-      .from('quests')
-      .select('stage_id')
-      .eq('id', questId)
-      .single();
+const kstDateFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 
-    if (quest) {
-      const { data: stageQuests } = await supabase
-        .from('quests')
-        .select('id')
-        .eq('stage_id', quest.stage_id);
+/** 'YYYY-MM-DD' (KST) → 그 날의 UTC 자정 기준 일 수 */
+function kstDayNumber(iso: string): number {
+  const [y, m, d] = kstDateFormat.format(new Date(iso)).split('-').map(Number);
+  return Date.UTC(y, m - 1, d) / 86_400_000;
+}
 
-      if (stageQuests && stageQuests.length > 0) {
-        const stageQuestIds = stageQuests.map((q) => q.id);
-
-        const { count } = await supabase
-          .from('user_progress')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('status', 'completed')
-          .in('quest_id', stageQuestIds);
-
-        if (count === stageQuestIds.length) {
-          newBadges.push('stage_clear');
-        }
-      }
-    }
-  }
-
-  // project_builder: 최종 프로젝트(is_final 스테이지) 완료
-  if (!earned.has('project_builder')) {
-    const { data: questForProject } = await supabase
-      .from('quests')
-      .select('stage_id, stages!inner(is_final)')
-      .eq('id', questId)
-      .single();
-
-    if (
-      questForProject &&
-      (questForProject.stages as unknown as { is_final: boolean })?.is_final
-    ) {
-      newBadges.push('project_builder');
-    }
-  }
-
-  // streak_3: 3일 연속 퀘스트 완료 (KST 기준)
-  if (!earned.has('streak_3')) {
-    const { data: completions } = await supabase
-      .from('user_progress')
-      .select('completed_at')
-      .eq('user_id', userId)
-      .eq('status', 'completed')
-      .not('completed_at', 'is', null)
-      .order('completed_at', { ascending: false })
-      .limit(50);
-
-    if (completions && completions.length >= 3) {
-      const uniqueDates = [
-        ...new Set(
-          completions.map((c) =>
-            new Date(c.completed_at!).toLocaleDateString('ko-KR', {
-              timeZone: 'Asia/Seoul',
-            }),
-          ),
-        ),
-      ];
-
-      if (uniqueDates.length >= 3) {
-        // KST 날짜를 Date 객체로 변환하여 연속 확인
-        const toKSTDate = (dateStr: string) => {
-          const parts = dateStr.replace(/\./g, '').trim().split(' ');
-          return new Date(
-            parseInt(parts[0]),
-            parseInt(parts[1]) - 1,
-            parseInt(parts[2]),
-          );
-        };
-
-        const recent3 = uniqueDates.slice(0, 3).map(toKSTDate);
-        const day1to2 =
-          (recent3[0].getTime() - recent3[1].getTime()) / (1000 * 60 * 60 * 24);
-        const day2to3 =
-          (recent3[1].getTime() - recent3[2].getTime()) / (1000 * 60 * 60 * 24);
-
-        if (Math.round(day1to2) === 1 && Math.round(day2to3) === 1) {
-          newBadges.push('streak_3');
-        }
-      }
-    }
-  }
-
-  // 새 뱃지 삽입
-  if (newBadges.length > 0) {
-    await supabase.from('user_badges').insert(
-      newBadges.map((badge_type) => ({
-        user_id: userId,
-        badge_type,
-      })),
-    );
-  }
-
-  return newBadges;
+/**
+ * 3일 연속: 완료한 날(KST)을 최근 순으로 3개 뽑아 하루씩 이어지는지.
+ * 이번 완료가 가장 최근이므로 "오늘·어제·그제 모두 완료"와 같습니다.
+ */
+export function hasThreeDayStreak(
+  completedAt: readonly (string | null)[],
+): boolean {
+  const days = [
+    ...new Set(completedAt.filter((c): c is string => !!c).map(kstDayNumber)),
+  ].sort((a, b) => b - a);
+  if (days.length < 3) return false;
+  return days[0] - days[1] === 1 && days[1] - days[2] === 1;
 }

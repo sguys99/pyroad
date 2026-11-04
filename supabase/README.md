@@ -102,15 +102,15 @@ GRANT UPDATE (display_name, avatar_url) ON public.users TO authenticated;
 새 함수는 PostgreSQL 기본값으로 `PUBLIC`에 EXECUTE가 있습니다(운영은 anon·authenticated에도 직접 부여).
 
 ```sql
-CREATE OR REPLACE FUNCTION public.complete_quest(p_user_id uuid, p_quest_id uuid, p_submission text)
+CREATE OR REPLACE FUNCTION public.complete_quest(p_user_id uuid, p_quest_id uuid, p_submission jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''          -- 함수 안에서는 public.users 처럼 스키마를 모두 적음
 AS $$ … $$;
 
-REVOKE EXECUTE ON FUNCTION public.complete_quest(uuid, uuid, text) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.complete_quest(uuid, uuid, text) TO service_role;
+REVOKE EXECUTE ON FUNCTION public.complete_quest(uuid, uuid, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.complete_quest(uuid, uuid, jsonb) TO service_role;
 ```
 
 - `SECURITY DEFINER`는 RLS를 우회하므로 꼭 필요할 때만 씁니다. 쓰면 `SET search_path = ''` + `REVOKE EXECUTE … FROM PUBLIC, anon, authenticated`를 빠뜨리지 않습니다.
@@ -139,6 +139,7 @@ docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
 - 권한·RLS 회귀 점검: `npm run test:rls` (아래 "4. RLS·권한 회귀 테스트")
 - 운영과 같은 legacy 기본값에서도 확인하려면 `npm run test:rls:ci`를 씁니다. 임시 작업 디렉토리에 `config.toml`을 복사해 `project_id`·포트를 바꾸고 `auto_expose_new_tables = true`를 켠 스택을 따로 띄웁니다.
 - 정답 데이터(P1-02): 정답·힌트·`solution_code`는 `quest_answer_keys`(service_role 전용)에 있습니다. `quests`에 정답이 들어오면(seed 등) 분리 트리거가 옮기고, 00005 이후에는 `quests`에서 지웁니다. `db reset` 후 기준값은 퀘스트 44 · `expected_output` 44 · 힌트 44 · `solution_code` 43 + 프로젝트 단계 정답 5(회귀 테스트 `AK-17`). 앱은 `src/lib/quest/answerKeys.ts`로만 읽습니다.
+- 보상(P1-03): 퀘스트 완료·황금키·리셋은 `00006`의 `complete_quest`·`use_golden_key`·`reset_progress`(service_role 전용)가 한 트랜잭션으로 처리합니다. 잠금 순서는 `users` → `user_progress`. 앱은 `src/lib/quest/rewardRpc.ts`로만 부르고, 규칙을 바꾸면 SQL 함수·`src/lib/quest/xp.ts`·`checkBadges.ts`·`tests/fixtures/reward-rules.json`을 함께 고칩니다.
 - B08(해결): `00001` Section 6의 `solution_code` UPDATE는 seed보다 먼저 실행되어 새 DB에서 0건이었습니다. 00001은 운영에 적용한 파일이라 고치지 않고, 같은 내용을 `seed.sql` 끝에 두었습니다.
 
 ## 4. RLS·권한 회귀 테스트 (P1-20)
@@ -167,6 +168,7 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 | `tests/run.sh` | 스택 준비 → 시나리오별 `checks.mjs` 실행 → 요약 |
 | `tests/checks.mjs` | 점검 동작 (무엇을 요청하고 결과를 어떻게 분류하는지) |
 | `tests/expectations.mjs` | **점검별 기대값.** 권한 작업은 보통 여기 한 줄만 바꿈 |
+| `tests/fixtures/reward-rules.json` | XP·레벨·3일 연속·뱃지 규칙 대조표. SQL(`reward` RW-1)과 TS(vitest `rewardRules.test.ts`)가 같은 표를 씀 |
 | `tests/snapshots/*.txt` | 카탈로그 스냅샷: SECURITY DEFINER 함수(anon/authenticated 실행 가능), 테이블·뷰·컬럼 권한, RLS 정책 |
 | `tests/summarize.mjs` | 결과 표 출력, `tests/.results/results.md` 작성 (git 제외) |
 
@@ -178,7 +180,8 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 | `notice` | 공지 쓰기(본인 INSERT·UPDATE·DELETE, psql) 거부, 비로그인 목록·service_role 작성 허용(B02) |
 | `write` | XP·레벨·황금키·코인·별·시도·`earned_xp`·뱃지·진행 상태·`hints_used`·`used_golden_key` 직접 쓰기, 다른 사용자 행 쓰기, `custom_api_keys` 조회(B04·B05·B13) |
 | `answer` | `quests`의 정답 노출(B07), 새 DB의 `solution_code`(B08), `quest_answer_keys` 접근 거부(P1-02 이후 자동 활성화) |
-| `rpc` | `complete_quest`를 anon/authenticated가 부를 수 없음 (P1-03 이후 자동 활성화) |
+| `rpc` | 보상 RPC(`complete_quest`·`use_golden_key`·`reset_progress`)와 규칙 함수를 anon/authenticated가 부를 수 없음 (P1-03) |
+| `reward` | 보상 RPC 동작: TS↔SQL 규칙 대조표(`fixtures/reward-rules.json`), 동시 완료 8회·동시 황금키 5회에 1회만 지급, 힌트·황금키는 DB 값(B05·B11), 스테이지 잠금·채점 미통과 거부, 스테이지 클리어, 리셋 XP 재계산·뱃지(B12), `earned_xp` 클라이언트 쓰기 무시, 00006 백필 재실행 |
 | `app` | 앱이 실제로 보내는 조회·쓰기(월드·프로필·퀘스트 페이지, 뱃지 확인, auto-save, 설정, 게시판, 리셋)와 service_role 경로가 깨지지 않음 |
 | `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정, 스냅샷 3종 |
 

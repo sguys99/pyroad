@@ -10,11 +10,12 @@ import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti } from '@/lib/confetti';
 import { getLevelTitle } from '@/lib/quest/xp';
+import { levelChanged, type QuestCompleteResponse } from '@/lib/quest/rewards';
+import type { BadgeType } from '@/lib/quest/badges';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import type { ValidationResult } from '@/lib/quest/validation';
-import type { BadgeType } from '@/lib/quest/badges';
 import { Button } from '@/components/ui/button';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
@@ -107,6 +108,10 @@ export function QuestShell({
   // 황금키 상태
   const [goldenKeys, setGoldenKeys] = useState(initialGoldenKeys);
   const [isGoldenKeyLoading, setIsGoldenKeyLoading] = useState(false);
+
+  // 실행·채점·완료 요청 중복 방지 (B06). ref 는 렌더 전 연속 클릭도 막고, state 는 버튼 표시용
+  const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 코드 자동 저장 debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -267,25 +272,29 @@ export function QuestShell({
       setRunResult(result);
       setActiveTab('result');
 
-      // 자동 완료 처리
+      // 자동 완료 처리 (황금키를 쓴 퀘스트는 서버가 0 XP로 완료, B05)
       const completeRes = await fetch('/api/quest/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quest_id: quest.id,
           code_submitted: data.solution_code,
-          hints_used: hintsUsed,
-          used_golden_key: true,
+          stdout: result.stdout,
         }),
       });
       const completeData = await completeRes.json();
-
-      if (!completeData.already_completed) {
-        setEarnedXP(0);
-        setUserXP(completeData.total_xp);
-        setUserLevel(completeData.new_level);
-        setNextQuestId(completeData.nextQuestId ?? null);
+      if (!completeRes.ok) {
+        throw new Error(completeData.error);
       }
+      const completion = completeData as QuestCompleteResponse;
+
+      if (!completion.already_completed) {
+        setEarnedXP(completion.xp_gained);
+        setUserXP(completion.total_xp);
+        setUserLevel(completion.level_after);
+      }
+      setGoldenKeys(completion.golden_keys);
+      setNextQuestId(completion.next_quest_id);
       setIsCompleted(true);
       setValidationRes({ passed: true, type: quest.validation_type });
 
@@ -303,20 +312,38 @@ export function QuestShell({
         ticks: 60,
         colors: ['#FFD700', '#FFA500', '#FF8C00'],
       });
-    } catch {
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: 'system', content: '황금키 사용 중 오류가 발생했어요' },
+        {
+          role: 'system',
+          content:
+            err instanceof Error && err.message
+              ? err.message
+              : '황금키 사용 중 오류가 발생했어요',
+        },
       ]);
     } finally {
       setIsGoldenKeyLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goldenKeys, isAiLoading, isGoldenKeyLoading, isCompleted, quest.id, hintsUsed, runCode]);
+  }, [goldenKeys, isAiLoading, isGoldenKeyLoading, isCompleted, quest.id, runCode]);
 
   const handleRun = useCallback(async () => {
-    if (isCodeEmpty || isCompleted) return;
+    if (isCodeEmpty || isCompleted || submittingRef.current) return;
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    try {
+      await runAndSubmit();
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, isCodeEmpty, isCompleted, runCode, quest, hintsUsed]);
 
+  // 실행 → 채점 → 완료 (handleRun 이 중복 실행을 막은 상태에서 부름)
+  async function runAndSubmit() {
     // 초기화
     setValidationRes(null);
     setEarnedXP(null);
@@ -369,7 +396,7 @@ export function QuestShell({
     setValidationRes(vResult);
 
     if (vResult.passed) {
-      // 완료 API 호출
+      // 완료 API 호출 (서버가 다시 채점하고, 힌트 수·황금키 사용은 DB 값으로 보상 계산)
       try {
         const completeRes = await fetch('/api/quest/complete', {
           method: 'POST',
@@ -377,36 +404,52 @@ export function QuestShell({
           body: JSON.stringify({
             quest_id: quest.id,
             code_submitted: code,
-            hints_used: hintsUsed,
+            stdout: result.stdout,
           }),
         });
         const completeData = await completeRes.json();
+        if (!completeRes.ok) {
+          // 완료를 기록하지 못함 → 완료 처리하지 않고 다시 누를 수 있게 둔다 (B06)
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'system',
+              content:
+                completeData.error ??
+                '앗, 기록을 저장하지 못했어요. 한 번 더 눌러 볼까요?',
+            },
+          ]);
+          return;
+        }
+        const completion = completeData as QuestCompleteResponse;
 
-        if (!completeData.already_completed) {
-          setEarnedXP(completeData.earned_xp);
-          setUserXP(completeData.total_xp);
-          setUserLevel(completeData.new_level);
-          setNextQuestId(completeData.nextQuestId ?? null);
+        setNextQuestId(completion.next_quest_id);
+        setGoldenKeys(completion.golden_keys);
+        if (!completion.already_completed) {
+          setEarnedXP(completion.xp_gained);
+          setUserXP(completion.total_xp);
+          setUserLevel(completion.level_after);
 
-          // 축하 시퀀싱
-          const badges: BadgeType[] = completeData.new_badges ?? [];
+          // 축하 시퀀싱 (이번에 새로 일어난 일만)
+          const badges = completion.new_badges;
           setNewBadges(badges);
+          const leveledUp = levelChanged(completion);
 
-          if (completeData.level_changed) {
+          if (leveledUp) {
             setLevelUpInfo({
-              level: completeData.new_level,
-              title: getLevelTitle(completeData.new_level),
+              level: completion.level_after,
+              title: getLevelTitle(completion.level_after),
             });
           }
 
-          if (completeData.isLastQuestInStage) {
+          if (completion.stage_cleared) {
             setStageCompleteInfo({
-              stageTitle: completeData.stageTitle ?? quest.stage.title,
-              stageOrder: completeData.stageOrder ?? quest.stage.order,
-              concepts: completeData.stageConcepts ?? [],
+              stageTitle: completion.stage_cleared.title,
+              stageOrder: completion.stage_cleared.order,
+              concepts: completion.stage_cleared.concepts,
             });
             setTimeout(() => setCelebrationPhase('stage_complete'), 1000);
-          } else if (completeData.level_changed) {
+          } else if (leveledUp) {
             setTimeout(() => setCelebrationPhase('level_up'), 1000);
           } else if (badges.length > 0) {
             setTimeout(() => setCelebrationPhase('badges'), 1000);
@@ -448,8 +491,8 @@ export function QuestShell({
               {
                 type: 'encouragement',
                 quest_id: quest.id,
-                earned_xp: completeData.earned_xp,
-                hints_used: hintsUsed,
+                earned_xp: completion.xp_gained,
+                hints_used: completion.hints_used,
               },
               setStreamingContent,
             );
@@ -492,8 +535,7 @@ export function QuestShell({
           finishStreaming('앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡', true);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, isCodeEmpty, isCompleted, runCode, quest, hintsUsed]);
+  }
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -584,6 +626,7 @@ export function QuestShell({
               onCodeChange={setCode}
               pyodideStatus={pyodideStatus}
               isRunning={isRunning}
+              isSubmitting={isSubmitting || isGoldenKeyLoading}
               onRun={handleRun}
               onRetry={retry}
               runResult={runResult}

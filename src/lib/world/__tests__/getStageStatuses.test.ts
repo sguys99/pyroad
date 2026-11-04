@@ -40,6 +40,7 @@ function makeProgress(questId: string, status: 'completed' | 'in_progress' = 'co
     current_step: null,
     step_submissions: null,
     used_golden_key: false,
+    earned_xp: 0,
   };
 }
 

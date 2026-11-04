@@ -9,6 +9,8 @@ import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti } from '@/lib/confetti';
 import { getLevelTitle } from '@/lib/quest/xp';
+import { levelChanged, type QuestCompleteResponse } from '@/lib/quest/rewards';
+import type { BadgeType } from '@/lib/quest/badges';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type {
   QuestWithStage,
@@ -17,7 +19,6 @@ import type {
 } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import type { ValidationResult } from '@/lib/quest/validation';
-import type { BadgeType } from '@/lib/quest/badges';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { CodePanel } from './CodePanel';
@@ -133,6 +134,15 @@ export function ProjectQuestShell({
   // 황금키 상태
   const [goldenKeys, setGoldenKeys] = useState(initialGoldenKeys);
   const [isGoldenKeyLoading, setIsGoldenKeyLoading] = useState(false);
+
+  // 실행·채점·완료 요청 중복 방지 (B06). ref 는 렌더 전 연속 클릭도 막고, state 는 버튼 표시용.
+  // 단계를 통과하면 다음 단계로 넘어갈 때(advanceToNextStep)까지 잠가 둔다 (같은 단계를 두 번 넘기지 않게)
+  const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const lockSubmit = useCallback((locked: boolean) => {
+    submittingRef.current = locked;
+    setIsSubmitting(locked);
+  }, []);
 
   // 코드 자동 저장 debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -321,27 +331,32 @@ export function ProjectQuestShell({
       const isLastStep = currentStep === totalSteps;
 
       if (isLastStep) {
-        // 최종 단계: 자동 완료
+        // 최종 단계: 자동 완료 (황금키를 쓴 퀘스트는 서버가 0 XP로 완료, B05)
         const completeRes = await fetch('/api/quest/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             quest_id: quest.id,
             code_submitted: data.solution_code,
-            hints_used: totalHintsUsed,
-            used_golden_key: true,
+            stdout: result.stdout,
           }),
         });
         const completeData = await completeRes.json();
-
-        if (!completeData.already_completed) {
-          setEarnedXP(0);
-          setUserXP(completeData.total_xp);
-          setUserLevel(completeData.new_level);
+        if (!completeRes.ok) {
+          throw new Error(completeData.error);
         }
+        const completion = completeData as QuestCompleteResponse;
+
+        if (!completion.already_completed) {
+          setEarnedXP(completion.xp_gained);
+          setUserXP(completion.total_xp);
+          setUserLevel(completion.level_after);
+        }
+        setGoldenKeys(completion.golden_keys);
         setIsProjectComplete(true);
       } else {
-        // 중간 단계: 다음 단계로 진행
+        // 중간 단계: 다음 단계로 진행 (넘어갈 때까지 실행 버튼 잠금)
+        lockSubmit(true);
         setTimeout(() => advanceToNextStep(), 1500);
       }
 
@@ -359,16 +374,22 @@ export function ProjectQuestShell({
         ticks: 60,
         colors: ['#FFD700', '#FFA500', '#FF8C00'],
       });
-    } catch {
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: 'system', content: '황금키 사용 중 오류가 발생했어요' },
+        {
+          role: 'system',
+          content:
+            err instanceof Error && err.message
+              ? err.message
+              : '황금키 사용 중 오류가 발생했어요',
+        },
       ]);
     } finally {
       setIsGoldenKeyLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goldenKeys, isAiLoading, isGoldenKeyLoading, isProjectComplete, quest.id, currentStep, totalSteps, totalHintsUsed, runCode]);
+  }, [goldenKeys, isAiLoading, isGoldenKeyLoading, isProjectComplete, quest.id, currentStep, totalSteps, runCode]);
 
   // 다음 단계로 진행
   const advanceToNextStep = useCallback(() => {
@@ -389,6 +410,7 @@ export function ProjectQuestShell({
     setRunResult(null);
     setValidationRes(null);
     setStepHintsUsed(0);
+    lockSubmit(false);
 
     // 미니 confetti
     fireConfetti({
@@ -418,11 +440,23 @@ export function ProjectQuestShell({
         )
         .then();
     });
-  }, [currentStep, code, stepSubmissions, steps, userId, quest.id, totalHintsUsed]);
+  }, [currentStep, code, stepSubmissions, steps, userId, quest.id, totalHintsUsed, lockSubmit]);
 
   const handleRun = useCallback(async () => {
-    if (isCodeEmpty || isProjectComplete) return;
+    if (isCodeEmpty || isProjectComplete || submittingRef.current) return;
+    lockSubmit(true);
+    let advancing = false;
+    try {
+      advancing = await runAndSubmit();
+    } finally {
+      // 다음 단계로 넘어가는 중이면 advanceToNextStep 이 잠금을 푼다
+      if (!advancing) lockSubmit(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, isCodeEmpty, isProjectComplete, runCode, quest, currentStep, totalSteps, totalHintsUsed, currentStepDef, advanceToNextStep, lockSubmit]);
 
+  // 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가기로 했으면 true
+  async function runAndSubmit(): Promise<boolean> {
     setValidationRes(null);
     setEarnedXP(null);
 
@@ -451,7 +485,7 @@ export function ProjectQuestShell({
         .catch(() => {
           finishStreaming('앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪', true);
         });
-      return;
+      return false;
     }
 
     // 서버 사이드 검증
@@ -503,7 +537,7 @@ export function ProjectQuestShell({
         });
 
       if (isLastStep) {
-        // 프로젝트 완료!
+        // 프로젝트 완료! (서버가 마지막 단계 기준으로 다시 채점하고, 힌트 수·황금키 사용은 DB 값으로 보상 계산)
         try {
           const completeRes = await fetch('/api/quest/complete', {
             method: 'POST',
@@ -511,26 +545,40 @@ export function ProjectQuestShell({
             body: JSON.stringify({
               quest_id: quest.id,
               code_submitted: code,
-              hints_used: totalHintsUsed,
+              stdout: result.stdout,
             }),
           });
           const completeData = await completeRes.json();
+          if (!completeRes.ok) {
+            // 완료를 기록하지 못함 → 완료 처리하지 않고 다시 누를 수 있게 둔다 (B06)
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: 'system',
+                content:
+                  completeData.error ??
+                  '앗, 기록을 저장하지 못했어요. 한 번 더 눌러 볼까요?',
+              },
+            ]);
+            return false;
+          }
+          const completion = completeData as QuestCompleteResponse;
 
-          if (!completeData.already_completed) {
-            setEarnedXP(completeData.earned_xp);
-            setUserXP(completeData.total_xp);
-            setUserLevel(completeData.new_level);
+          setGoldenKeys(completion.golden_keys);
+          if (!completion.already_completed) {
+            setEarnedXP(completion.xp_gained);
+            setUserXP(completion.total_xp);
+            setUserLevel(completion.level_after);
 
-            const badges: BadgeType[] = completeData.new_badges ?? [];
-            setNewBadges(badges);
+            setNewBadges(completion.new_badges);
 
             // 축하 시퀀싱: project_complete → level_up → badges
             setTimeout(() => setCelebrationPhase('project_complete'), 500);
             setLevelUpInfo(
-              completeData.level_changed
+              levelChanged(completion)
                 ? {
-                    level: completeData.new_level,
-                    title: getLevelTitle(completeData.new_level),
+                    level: completion.level_after,
+                    title: getLevelTitle(completion.level_after),
                   }
                 : null,
             );
@@ -541,8 +589,8 @@ export function ProjectQuestShell({
           sendTutorRequest({
             type: 'encouragement',
             quest_id: quest.id,
-            earned_xp: completeData.earned_xp,
-            hints_used: totalHintsUsed,
+            earned_xp: completion.xp_gained,
+            hints_used: completion.hints_used,
           })
             .then((res) => {
               if (!res) return;
@@ -568,8 +616,9 @@ export function ProjectQuestShell({
           ]);
         }
       } else {
-        // 다음 단계로 진행
+        // 다음 단계로 진행 (넘어갈 때까지 실행 버튼 잠금)
         setTimeout(advanceToNextStep, 1500);
+        return true;
       }
     } else {
       // 검증 실패
@@ -593,8 +642,8 @@ export function ProjectQuestShell({
           finishStreaming('앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡', true);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, isCodeEmpty, isProjectComplete, runCode, quest, currentStep, totalSteps, totalHintsUsed, currentStepDef, advanceToNextStep]);
+    return false;
+  }
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -677,6 +726,7 @@ export function ProjectQuestShell({
               onCodeChange={setCode}
               pyodideStatus={pyodideStatus}
               isRunning={isRunning}
+              isSubmitting={isSubmitting || isGoldenKeyLoading}
               onRun={handleRun}
               onRetry={retry}
               runResult={runResult}

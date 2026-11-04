@@ -59,29 +59,29 @@ export const EXPECT = {
   'B04-1': {
     expect: 'known-gap',
     flipIn: 'P1-01',
-    note: '지금은 /api/quest/complete 가 이 경로로 XP 를 씀 → P1-03 RPC 로 옮긴 뒤 회수',
+    note: 'P1-03 이후 앱은 이 경로를 쓰지 않음 (complete_quest·reset_progress RPC). P1-01 ③ 에서 회수',
   },
   'B04-2': {
     expect: 'known-gap',
     flipIn: 'P1-01',
-    note: '지금은 /api/quest/golden-key 가 이 경로로 씀',
+    note: 'P1-03 이후 앱은 이 경로를 쓰지 않음 (use_golden_key RPC). P1-01 ③ 에서 회수',
   },
   'B04-3': { expect: 'deny' },
   'B04-4': {
     expect: 'known-gap',
     flipIn: 'P1-04',
-    note: '지금은 /api/quest/complete 가 이 경로로 완료 처리',
+    note: 'P1-03 이후 앱은 이 경로로 완료하지 않음 (complete_quest RPC). auto-save 의 status 는 P1-04 에서 정리',
   },
   'B04-4b': { expect: 'known-gap', flipIn: 'P1-04' },
   'B04-5': {
     expect: 'known-gap',
     flipIn: 'P1-04',
-    note: '지금은 checkBadges 가 사용자 클라이언트로 INSERT',
+    note: 'P1-03 이후 뱃지는 complete_quest 가 지급 (앱은 INSERT 하지 않음)',
   },
   'B04-5b': {
     expect: 'known-gap',
     flipIn: 'P1-04',
-    note: '지금은 /api/account/reset·delete 가 사용자 클라이언트로 DELETE',
+    note: 'P1-03 이후 앱은 DELETE 하지 않음 (reset_progress RPC, 탈퇴는 admin deleteUser 의 cascade)',
   },
   'B04-6': { expect: 'deny' },
   'B04-7': { expect: 'known-gap', flipIn: 'P1-01' },
@@ -250,6 +250,87 @@ export const EXPECT = {
     requires: 'public.complete_quest()',
     activateIn: 'P1-03',
   },
+  'RPC-3': {
+    expect: 'deny',
+    requires: 'public.use_golden_key()',
+    activateIn: 'P1-03',
+  },
+  'RPC-4': {
+    expect: 'deny',
+    requires: 'public.reset_progress()',
+    activateIn: 'P1-03',
+    note: '다른 사용자 id 로 리셋 시도',
+  },
+  'RPC-5': {
+    expect: 'deny',
+    requires: 'public.reset_progress()',
+    activateIn: 'P1-03',
+  },
+  'RPC-6': {
+    expect: 'deny',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+    note: '보상 규칙 함수·트리거 함수 포함 (모두 service_role 전용)',
+  },
+
+  // ── reward: 보상 RPC 동작 (P1-03, B05·B06·B11·B12) ─────────
+  'RW-1': {
+    expect: 'allow',
+    requires: 'public.quest_xp()',
+    activateIn: 'P1-03',
+    note: 'fixtures/reward-rules.json = SQL. TS 쪽은 vitest rewardRules.test.ts 가 같은 표로 확인',
+  },
+  'RW-2': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+    note: 'B06 동시 완료 → 1회 지급',
+  },
+  'RW-3': {
+    expect: 'allow',
+    requires: 'public.use_golden_key()',
+    activateIn: 'P1-03',
+  },
+  'RW-4': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+    note: 'B05·B11',
+  },
+  'RW-5': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+    note: 'B05 스테이지 잠금 + 채점 미통과',
+  },
+  'RW-6': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+  },
+  'RW-7': {
+    expect: 'allow',
+    requires: 'public.reset_progress()',
+    activateIn: 'P1-03',
+    note: 'B12',
+  },
+  'RW-8': {
+    expect: 'allow',
+    requires: 'public.reset_progress()',
+    activateIn: 'P1-03',
+    note: 'B12',
+  },
+  'RW-9': {
+    expect: 'deny',
+    requires: 'public.user_progress.earned_xp',
+    activateIn: 'P1-03',
+  },
+  'RW-10': {
+    expect: 'allow',
+    requires: 'public.user_progress.earned_xp',
+    activateIn: 'P1-03',
+    note: '런북 ②-확인 뒤 백필 재실행과 같은 동작',
+  },
 
   // ── app: 앱이 실제로 보내는 쿼리 (정상 경로) ────────────────
   'APP-1': { expect: 'allow' },
@@ -294,7 +375,7 @@ export const EXPECT = {
   'APP-W9': { expect: 'deny' },
   'APP-W10': {
     expect: 'allow',
-    note: '/api/account/reset·delete 의 진행 삭제 (사용자 클라이언트)',
+    note: 'P1-03 이후 앱은 쓰지 않음 (reset_progress RPC·admin cascade). P1-04 에서 progress DELETE 정책을 없애면 deny 로',
   },
   'APP-S1': { expect: 'allow' },
   'APP-S2': {
