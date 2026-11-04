@@ -12,6 +12,7 @@ public.user_badges badges_select_own [PERMISSIVE SELECT to authenticated] using 
 public.user_progress progress_insert_own [PERMISSIVE INSERT to authenticated] using (-) check ((( SELECT auth.uid() AS uid) = user_id))
 public.user_progress progress_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check ((( SELECT auth.uid() AS uid) = user_id))
+public.user_public_profiles user_public_profiles_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)
 public.users users_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = id)) check (-)
 public.users users_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = id)) check ((( SELECT auth.uid() AS uid) = id))
 public.worlds worlds_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)

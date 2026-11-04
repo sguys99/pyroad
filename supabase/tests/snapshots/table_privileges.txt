@@ -35,6 +35,8 @@ public.user_progress.current_step column authenticated: INSERT,UPDATE
 public.user_progress.quest_id column authenticated: INSERT,UPDATE
 public.user_progress.step_submissions column authenticated: INSERT,UPDATE
 public.user_progress.user_id column authenticated: INSERT,UPDATE
+public.user_public_profiles (table, rls=on) anon: -
+public.user_public_profiles (table, rls=on) authenticated: SELECT
 public.users (table, rls=on) anon: SELECT
 public.users (table, rls=on) authenticated: SELECT
 public.users.preferred_provider column authenticated: UPDATE

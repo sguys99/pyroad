@@ -39,9 +39,33 @@ export const EXPECT = {
   'B03-11': { expect: 'allow' },
   'VIEW-1': { expect: 'deny', note: '앞으로 만드는 뷰에도 적용' },
   'VIEW-2': {
-    expect: 'known-gap',
-    flipIn: 'P3-13',
-    note: 'user_profiles_public 이 security_invoker 가 아님 (Advisors security_definer_view)',
+    expect: 'deny',
+    note: 'B34 ① 00018: user_profiles_public 은 security_invoker 로 user_public_profiles 를 읽음 (Advisors security_definer_view 0). 앞으로 만드는 뷰에도 적용',
+  },
+  // 공개 프로필 테이블 (B34, 00018)
+  'PP-1': {
+    expect: 'deny',
+    requires: 'public.user_public_profiles',
+    activateIn: 'B34',
+    note: '비로그인은 공개 이름도 못 봄 (B03 과 같음)',
+  },
+  'PP-2': {
+    expect: 'deny',
+    requires: 'public.user_public_profiles',
+    activateIn: 'B34',
+    note: '다른 아이의 공개 이름 바꾸기(사칭)·행 지우기(게시글 연쇄 삭제)·끼워 넣기',
+  },
+  'PP-3': {
+    expect: 'allow',
+    requires: 'public.user_public_profiles',
+    activateIn: 'B34',
+    note: '동기화 트리거: 가입 → 모험가NNNN, 닉네임 변경 → 공개 이름 (P3-11 처럼 authenticated 에 UPDATE (nickname) 을 줘도 트리거가 씀)',
+  },
+  'PP-4': {
+    expect: 'deny',
+    requires: 'public.user_public_profiles',
+    activateIn: 'B34',
+    note: 'users 행이 있는데 공개 프로필 행이 없거나 이름이 다른 사용자 수 = 0 (FK 대상이 없으면 게시판 쓰기가 실패)',
   },
 
   // ── notice: 공지 쓰기 (B02) ────────────────────────────────
@@ -658,6 +682,20 @@ export const EXPECT = {
   },
   'AN-8': { expect: 'deny', requires: 'public.analytics_events', activateIn: 'P1-17' },
 
+  // ── account: 탈퇴 (B28) ────────────────────────────────────
+  'B28-1': {
+    expect: 'deny',
+    note: '사용자를 가리키는 FK 는 모두 ON DELETE CASCADE (board_reports.target_user_id SET NULL 만 의도한 예외), FK 없는 사용자 열 없음',
+  },
+  'B28-2': {
+    expect: 'allow',
+    note: '/api/account/delete 경로(auth.admin.deleteUser + HMAC 분석 기록 삭제) 뒤 public·auth 의 모든 uuid 열과 analytics_events 에 그 사용자 값 0',
+  },
+  'B28-3': {
+    expect: 'deny',
+    note: '클라이언트는 users 를 지울 수 없음 (DELETE 권한·정책 없음, P1-01 00008). 탈퇴는 서버 API 만',
+  },
+
   // ── static: 카탈로그 점검 ─────────────────────────────────
   'ST-1': { expect: 'deny', note: 'public 의 모든 테이블에 RLS' },
   'ST-2': {
@@ -680,6 +718,15 @@ export const EXPECT = {
     expect: 'deny',
     note: 'B34 auth_rls_initplan: auth.uid()/auth.role() 를 (select …) 로 감싸지 않은 정책 수 = 0 (P1-01 users 3 + P1-04 ③ 00011 나머지 16). 새 정책도 감싸서 씀',
   },
+  'ST-7': {
+    expect: 'deny',
+    note: 'B34: supabase db advisors (CLI 내장 splinter) Security·Performance ERROR 0. Phase 1 완료 목표, P12-05 재점검',
+  },
+  'ST-8': {
+    expect: 'deny',
+    note: 'B34: 의도한 WARN(function_search_path_mutable: kst_date, P1-08) 말고 WARN 없음. 새 WARN 은 고치거나 여기 목록에 이유와 함께 추가',
+  },
+  'ST-9': { expect: 'info', note: 'Advisors INFO (unused_index·rls_enabled_no_policy 등) 기록' },
   'SNAP-1': {
     expect: 'snapshot',
     note: 'anon/authenticated 가 실행할 수 있는 SECURITY DEFINER 함수 목록',

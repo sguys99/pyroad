@@ -61,7 +61,8 @@ load_env() {
   export RLS_API_URL="$api"
   RLS_ANON_KEY="$(sed -n 's/^ANON_KEY="\(.*\)"$/\1/p' <<<"$envs")"
   RLS_SERVICE_ROLE_KEY="$(sed -n 's/^SERVICE_ROLE_KEY="\(.*\)"$/\1/p' <<<"$envs")"
-  export RLS_ANON_KEY RLS_SERVICE_ROLE_KEY RLS_DB_CONTAINER RLS_RESULTS="$RESULTS"
+  RLS_DB_URL="$(sed -n 's/^DB_URL="\(.*\)"$/\1/p' <<<"$envs")"   # supabase db advisors 용 (ST-7~9, B34)
+  export RLS_ANON_KEY RLS_SERVICE_ROLE_KEY RLS_DB_CONTAINER RLS_DB_URL RLS_RESULTS="$RESULTS"
   # PostgREST 가 스키마 캐시를 다시 읽을 때까지 대기
   for _ in $(seq 1 30); do
     curl -fsS -o /dev/null -H "apikey: $RLS_ANON_KEY" "$RLS_API_URL/rest/v1/" && return 0

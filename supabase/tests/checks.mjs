@@ -14,6 +14,7 @@
 // 각 점검은 { scenario, group, id, role, op, expect, actual, status } 한 줄을 남깁니다.
 // status: PASS | GAP(known-gap 그대로) | PENDING(requires 객체 없음) | INFO | FAIL
 import { spawnSync } from 'node:child_process';
+import { createHmac } from 'node:crypto';
 import {
   readFileSync,
   writeFileSync,
@@ -630,6 +631,113 @@ async function groupView(u) {
        where c.relkind = 'v' and ${APP_SCHEMA('n')}
          and not coalesce(c.reloptions::text[] && array['security_invoker=true', 'security_invoker=on', 'security_invoker=1'], false)`);
       return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+
+  // ── 공개 프로필 테이블 (B34, 00018): 뷰가 security_invoker 로 읽는 테이블 ──
+  const PPT = '/rest/v1/user_public_profiles';
+  await check({
+    group: 'view',
+    id: 'PP-1',
+    role: 'anon',
+    op: 'GET /user_public_profiles?select=*',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `${PPT}?select=*`)),
+  });
+  await check({
+    group: 'view',
+    id: 'PP-2',
+    role: 'authenticated',
+    op: 'PATCH /user_public_profiles?user_id=eq.<다른 사용자> {public_name} · DELETE …<다른 사용자> · POST {user_id: 새 id}',
+    deny: ['denied', 'no-op'],
+    allow: ['written'],
+    run: async () => {
+      const patch = await classifyWrite(
+        rest('PATCH', `${PPT}?user_id=eq.${u.bob.id}`, {
+          as: u.alice,
+          body: { public_name: '사칭이름' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_public_profiles where user_id = '${u.bob.id}' and public_name = '사칭이름')`,
+      );
+      const del = await classifyWrite(
+        rest('DELETE', `${PPT}?user_id=eq.${u.bob.id}`, {
+          as: u.alice,
+          prefer: 'return=minimal',
+        }),
+        `select not exists (select 1 from public.user_public_profiles where user_id = '${u.bob.id}')`,
+      );
+      const ins = await classifyWrite(
+        rest('POST', PPT, {
+          as: u.alice,
+          body: { user_id: '00000000-0000-0000-0000-0000000000aa', public_name: 'x' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_public_profiles where user_id = '00000000-0000-0000-0000-0000000000aa')`,
+      );
+      const all = [patch, del, ins];
+      const written = all.some((c) => c.actual === 'written');
+      const ok = all.every((c) => WRITE.deny.includes(c.actual));
+      return {
+        actual: written ? 'written' : ok ? 'denied' : 'error',
+        detail: `PATCH ${patch.detail} · DELETE ${del.detail} · POST ${ins.detail}`,
+      };
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'PP-3',
+    role: 'authenticated',
+    op: '동기화 트리거: 가입 → 모험가NNNN · 닉네임 변경(P3-11 처럼 UPDATE (nickname) 을 준 authenticated) → 공개 이름·뷰 · 공개 프로필 직접 UPDATE 거부 · 닉네임 지우면 자리표시자',
+    ...OK,
+    run: async () => {
+      const x = await createUser('pp3', '공개실명');
+      return sqlCheck(`
+        DO $$
+        BEGIN
+          IF (SELECT public_name FROM public.user_public_profiles WHERE user_id = '${x.id}')
+             IS DISTINCT FROM public.placeholder_display_name('${x.id}') THEN
+            RAISE EXCEPTION '가입 직후 공개 이름이 자리표시자가 아님';
+          END IF;
+        END $$;
+        GRANT UPDATE (nickname) ON public.users TO authenticated;
+        SET LOCAL ROLE authenticated;
+        SET LOCAL request.jwt.claims = '{"sub": "${x.id}", "role": "authenticated"}';
+        UPDATE public.users SET nickname = '공개코딩' WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT display_name FROM public.user_profiles_public WHERE id = '${x.id}') IS DISTINCT FROM '공개코딩' THEN
+            RAISE EXCEPTION '닉네임을 바꿨는데 뷰 이름이 그대로';
+          END IF;
+          BEGIN
+            UPDATE public.user_public_profiles SET public_name = '직접' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION '공개 프로필 직접 UPDATE 가 허용됨';
+          EXCEPTION WHEN insufficient_privilege THEN NULL;
+          END;
+        END $$;
+        RESET ROLE;
+        UPDATE public.users SET nickname = NULL WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT public_name FROM public.user_public_profiles WHERE user_id = '${x.id}')
+             IS DISTINCT FROM public.placeholder_display_name('${x.id}') THEN
+            RAISE EXCEPTION '닉네임을 지웠는데 자리표시자로 돌아가지 않음';
+          END IF;
+        END $$;`);
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'PP-4',
+    role: 'postgres',
+    op: 'users 행 중 공개 프로필 행이 없거나 이름 ≠ coalesce(nickname, placeholder_display_name) 인 수',
+    deny: ['0'],
+    allow: (a) => a !== '0' && a !== 'exception',
+    run: () => {
+      const v = one(`select count(*) from public.users u
+        left join public.user_public_profiles p on p.user_id = u.id
+       where p.public_name is distinct from coalesce(u.nickname, public.placeholder_display_name(u.id))`);
+      return { actual: v, detail: `${v}명 / 전체 ${one('select count(*) from public.users')}명` };
     },
   });
 }
@@ -2271,6 +2379,143 @@ async function groupReward() {
   });
 }
 
+// ── account: 탈퇴 (B28) ─────────────────────────────────────
+// 클라이언트에는 users DELETE 권한·정책이 없고(00008), 탈퇴는 /api/account/delete 가 auth.admin.deleteUser 로
+// auth.users 를 지워 public 의 사용자 데이터를 ON DELETE CASCADE 로 함께 지움. 분석 기록은 users 를 참조하지 않아
+// 앱이 HMAC 익명 ID 로 지움(P1-17). 새 사용자 테이블이 FK·cascade 를 빠뜨리면 B28-1·2 가 FAIL
+// 앱의 HMAC 익명 ID (src/lib/analytics/server.ts anonymizeUserId 와 같은 식). 점검 전용 salt
+const AN_SALT = 'rls-test-salt-not-a-secret';
+const analyticsAnonId = (userId) =>
+  createHmac('sha256', AN_SALT)
+    .update(`pyroad:analytics:user:${userId}`)
+    .digest('base64url')
+    .slice(0, 22);
+
+async function groupAccount(u) {
+  await check({
+    group: 'account',
+    id: 'B28-1',
+    role: 'postgres',
+    op: '사용자(auth.users·users·user_public_profiles)를 가리키는 FK 중 ON DELETE CASCADE 가 아닌 것 + FK 없는 사용자 열 (*user_id·reporter_id)',
+    ...NONE,
+    run: () => {
+      const v = one(`with targets as (
+          select r from (values (to_regclass('auth.users')), (to_regclass('public.users')),
+                                (to_regclass('public.user_public_profiles'))) t(r) where r is not null),
+        fk as (
+          select c.conrelid, c.conname, c.confdeltype, a.attname
+            from pg_constraint c
+            join pg_class t on t.oid = c.conrelid join pg_namespace n on n.oid = t.relnamespace
+            join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+           where c.contype = 'f' and c.confrelid in (select r from targets) and ${APP_SCHEMA('n')})
+        select coalesce(string_agg(x, ', ' order by x), '') from (
+          select format('%s.%s %s (on delete %s)', conrelid::regclass, attname, conname, confdeltype) x
+            from fk
+           where confdeltype <> 'c'
+             and not (conrelid = 'public.board_reports'::regclass and attname = 'target_user_id' and confdeltype = 'n')
+          union all
+          select format('%s.%s (users FK 없음)', c.oid::regclass, a.attname)
+            from pg_attribute a
+            join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace
+           where c.relkind in ('r', 'p') and ${APP_SCHEMA('n')} and a.attnum > 0 and not a.attisdropped
+             and (a.attname ~ '(^|_)user_id$' or a.attname = 'reporter_id')
+             and not exists (select 1 from fk where fk.conrelid = c.oid and fk.attname = a.attname)
+        ) s`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+
+  await check({
+    group: 'account',
+    id: 'B28-2',
+    role: 'service_role',
+    op: '탈퇴(/api/account/delete: auth.admin.deleteUser → HMAC 분석 기록 삭제) 뒤 public·auth 의 모든 uuid 열과 analytics_events 에 그 사용자 값이 남지 않음',
+    deny: ['left', 'error'],
+    allow: ['clean'],
+    run: async () => {
+      const x = await createUser('b28', '탈퇴실명');
+      const anonId = analyticsAnonId(x.id);
+      // 사용자 데이터가 들어가는 모든 테이블에 1행 이상 (postgres 로 직접 = 권한과 무관)
+      const fx = psql(`
+        insert into public.user_progress (user_id, quest_id, status, code_submitted) values ('${x.id}', '${Q1}', 'in_progress', 'print(1)');
+        insert into public.user_badges (user_id, badge_type) values ('${x.id}', 'first_code');
+        insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct) values ('${x.id}', '${Q1}', 'first', 1, '{}', false);
+        insert into public.user_api_keys (user_id, provider, key_version, iv, auth_tag, ciphertext) values ('${x.id}', 'openai', 1, 'AAAA', 'AAAA', 'AAAA');
+        insert into public.api_rate_limits (user_id, bucket, minute_start, day) values ('${x.id}', 'tutor:hint', now(), public.kst_today());
+        update public.users set nickname = '탈퇴코딩' where id = '${x.id}';
+        with p as (insert into public.board_posts (user_id, title, content) values ('${x.id}', 'b28 post', 'x') returning id)
+          insert into public.board_comments (post_id, user_id, content) select id, '${u.bob.id}', 'bob on b28 post' from p;
+        insert into public.board_comments (post_id, user_id, content) values ('${u.postId}', '${x.id}', 'b28 on bob post');
+        insert into public.board_reports (reporter_id, target_type, target_id, target_user_id, reason)
+          values ('${x.id}', 'post', '${u.postId}', '${u.bob.id}', 'other');
+        insert into public.board_reports (reporter_id, target_type, target_id, target_user_id, reason)
+          select '${u.bob.id}', 'post', id, '${x.id}', 'abuse' from public.board_posts where user_id = '${x.id}';
+        insert into public.analytics_events (name, actor, anon_id, source, props, device)
+          values ('quest_start', 'user', '${anonId}', 'server', '{}', 'desktop');
+      `);
+      if (!fx.ok) return { actual: 'error', detail: `픽스처: ${firstLine(fx.err)}` };
+      const xPost = one(`select id from public.board_posts where user_id = '${x.id}'`);
+
+      // = src/app/api/account/delete/route.ts: admin.deleteUser → deleteUserAnalytics (HMAC)
+      const del = await rest('DELETE', `/auth/v1/admin/users/${x.id}`, { as: 'service' });
+      const an = await rest(
+        'DELETE',
+        `/rest/v1/analytics_events?actor=eq.user&anon_id=eq.${anonId}`,
+        { as: 'service', prefer: 'return=minimal' },
+      );
+      if (del.status >= 300 || an.status >= 300)
+        return { actual: 'error', detail: `deleteUser ${del.status} · analytics ${an.status}` };
+
+      // 남은 값 찾기: public·auth 의 모든 테이블의 모든 uuid 열 + HMAC 익명 ID + 탈퇴한 아이 글에 달린 다른 아이의 댓글
+      const left = one(`do $$
+        declare r record; n bigint; v text := '';
+        begin
+          for r in select c.oid::regclass as rel, a.attname
+                     from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace s on s.oid = c.relnamespace
+                    where c.relkind in ('r', 'p') and s.nspname in ('public', 'auth')
+                      and a.attnum > 0 and not a.attisdropped and a.atttypid = 'uuid'::regtype
+          loop
+            execute format('select count(*) from %s where %I = $1', r.rel, r.attname) into n using '${x.id}'::uuid;
+            if n > 0 then v := v || format('%s.%s=%s ', r.rel, r.attname, n); end if;
+          end loop;
+          select count(*) into n from public.analytics_events where anon_id = '${anonId}';
+          if n > 0 then v := v || format('analytics_events.anon_id(HMAC)=%s ', n); end if;
+          if exists (select 1 from public.board_comments where post_id = '${xPost}') then
+            v := v || '탈퇴한 아이 글의 댓글 ';
+          end if;
+          perform set_config('b28.left', v, false);
+        end $$;
+        select current_setting('b28.left')`);
+      // 다른 아이가 한 신고 기록은 남고 탈퇴한 아이를 가리키지 않음 (target_user_id SET NULL, 의도)
+      const kept = one(
+        `select count(*) from public.board_reports where reporter_id = '${u.bob.id}' and target_id = '${xPost}' and target_user_id is null`,
+      );
+      return {
+        actual: left.trim() ? 'left' : 'clean',
+        detail: left.trim()
+          ? `남음: ${left.trim()}`
+          : `deleteUser ${del.status} · 모든 uuid 열 0 · HMAC 기록 0 · 다른 아이의 신고 ${kept}건은 target_user_id NULL 로 남음`,
+      };
+    },
+  });
+
+  await check({
+    group: 'account',
+    id: 'B28-3',
+    role: 'authenticated',
+    op: 'DELETE /users?id=eq.<본인> (클라이언트 직접 탈퇴)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('DELETE', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          prefer: 'return=minimal',
+        }),
+        `select not exists (select 1 from public.users where id = '${u.alice.id}')`,
+      ),
+  });
+}
+
 async function groupApp(u) {
   // 앱이 실제로 보내는 PostgREST 쿼리 (src/ 기준, 2026-11-04). 권한 작업 뒤에도 동작해야 함
   // 지금 사용자 클라이언트로 서버 값(XP·완료·뱃지)을 쓰는 경로는 write 그룹의 known-gap 이 함께 기록합니다.
@@ -2673,6 +2918,31 @@ async function groupApp(u) {
   }
 }
 
+// 의도한 Advisors WARN (이름:스키마.객체). 늘릴 때는 이유를 함께 적음
+const ADVISOR_WARN_ALLOWED = [
+  'function_search_path_mutable:public.kst_date', // P1-08: 인라인되도록 SET search_path 대신 pg_catalog. 명시
+];
+/** supabase db advisors 를 로컬 DB(RLS_DB_URL)에 실행 → { rows } | { error } */
+function advisorsReport() {
+  const url = process.env.RLS_DB_URL;
+  if (!url) return { error: 'RLS_DB_URL 없음 (run.sh 로 실행)' };
+  if (!['127.0.0.1', 'localhost', '[::1]'].includes(new URL(url).hostname))
+    return { error: `RLS_DB_URL 이 로컬 주소가 아님 (운영 DB 에는 접속하지 않음)` };
+  const dbUrl = url + (url.includes('?') ? '&' : '?') + 'sslmode=disable';
+  const r = spawnSync(
+    'supabase',
+    ['db', 'advisors', '--db-url', dbUrl, '--type', 'all', '--level', 'info', '-o', 'json'],
+    { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 },
+  );
+  if (r.status !== 0) return { error: `supabase db advisors 실패: ${firstLine(r.stderr || String(r.error ?? ''))}` };
+  try {
+    const out = (r.stdout || '').trim();
+    return { rows: out ? JSON.parse(out) : [] };
+  } catch (e) {
+    return { error: `JSON 해석 실패: ${String(e).split('\n')[0]}` };
+  }
+}
+
 async function groupStatic() {
   await check({
     group: 'static',
@@ -2760,6 +3030,58 @@ async function groupStatic() {
          and not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')
          and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')`);
       return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+
+  // B34: Supabase Advisors 와 같은 규칙(CLI 내장 splinter)을 로컬 DB 에 실행. 운영 Advisors 는 Auth 설정 경고
+  // (auth_leaked_password_protection 등)도 내지만 그건 DB 가 아니라 대시보드 설정이라 여기서는 안 나옴
+  const advisors = advisorsReport();
+  const advRows = (level) =>
+    advisors.rows
+      ? advisors.rows
+          .filter((x) => x.level === level)
+          .map((x) => `${x.name}:${x.metadata?.schema ?? ''}.${x.metadata?.name ?? ''}`)
+          .sort()
+      : [];
+  await check({
+    group: 'static',
+    id: 'ST-7',
+    role: 'postgres',
+    op: 'supabase db advisors (security·performance) ERROR',
+    ...NONE,
+    run: () =>
+      advisors.rows
+        ? { actual: advRows('ERROR').join(',') || 'none', detail: advRows('ERROR').join(', ') || '(없음)' }
+        : { actual: 'error', detail: advisors.error },
+  });
+  await check({
+    group: 'static',
+    id: 'ST-8',
+    role: 'postgres',
+    op: `supabase db advisors WARN (의도한 것 제외: ${ADVISOR_WARN_ALLOWED.join(', ')})`,
+    ...NONE,
+    run: () => {
+      if (!advisors.rows) return { actual: 'error', detail: advisors.error };
+      const v = advRows('WARN').filter((x) => !ADVISOR_WARN_ALLOWED.includes(x));
+      return { actual: v.join(',') || 'none', detail: v.join(', ') || `(없음. 의도한 WARN ${advRows('WARN').length}건)` };
+    },
+  });
+  await check({
+    group: 'static',
+    id: 'ST-9',
+    role: 'postgres',
+    op: 'supabase db advisors INFO (기록)',
+    deny: [],
+    allow: [],
+    run: () => {
+      if (!advisors.rows) return { actual: 'error', detail: advisors.error };
+      const counts = {};
+      for (const x of advRows('INFO')) {
+        const k = x.split(':')[0];
+        counts[k] = (counts[k] ?? 0) + 1;
+      }
+      const v = Object.entries(counts).map(([k, n]) => `${k} ${n}`).join(', ');
+      return { actual: String(advRows('INFO').length), detail: v || '(없음)' };
     },
   });
 
@@ -4245,6 +4567,7 @@ async function main() {
   await groupBoard(u);
   await groupRateLimit(u);
   await groupAnalytics(u);
+  await groupAccount(u);
   await groupApp(u);
   await groupStatic();
 

@@ -120,13 +120,6 @@ export type Database = {
             foreignKeyName: 'api_rate_limits_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'api_rate_limits_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -179,8 +172,8 @@ export type Database = {
             foreignKeyName: 'board_comments_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
+            referencedRelation: 'user_public_profiles';
+            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -227,8 +220,8 @@ export type Database = {
             foreignKeyName: 'board_posts_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
+            referencedRelation: 'user_public_profiles';
+            referencedColumns: ['user_id'];
           },
         ];
       };
@@ -265,21 +258,7 @@ export type Database = {
             foreignKeyName: 'board_reports_reporter_id_fkey';
             columns: ['reporter_id'];
             isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'board_reports_reporter_id_fkey';
-            columns: ['reporter_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'board_reports_target_user_id_fkey';
-            columns: ['target_user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
             referencedColumns: ['id'];
           },
           {
@@ -317,13 +296,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'notices_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
-            referencedColumns: ['id'];
-          },
           {
             foreignKeyName: 'notices_user_id_fkey';
             columns: ['user_id'];
@@ -470,13 +442,6 @@ export type Database = {
             foreignKeyName: 'quiz_attempts_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'quiz_attempts_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -559,13 +524,6 @@ export type Database = {
             foreignKeyName: 'user_api_keys_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_api_keys_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -591,13 +549,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'user_badges_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
-            referencedColumns: ['id'];
-          },
           {
             foreignKeyName: 'user_badges_user_id_fkey';
             columns: ['user_id'];
@@ -674,13 +625,32 @@ export type Database = {
             foreignKeyName: 'user_progress_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'user_profiles_public';
+            referencedRelation: 'users';
             referencedColumns: ['id'];
           },
+        ];
+      };
+      user_public_profiles: {
+        Row: {
+          public_name: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          public_name: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          public_name?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
           {
-            foreignKeyName: 'user_progress_user_id_fkey';
+            foreignKeyName: 'user_public_profiles_user_id_fkey';
             columns: ['user_id'];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -780,15 +750,23 @@ export type Database = {
         };
         Insert: {
           avatar_url?: never;
-          display_name?: never;
+          display_name?: string | null;
           id?: string | null;
         };
         Update: {
           avatar_url?: never;
-          display_name?: never;
+          display_name?: string | null;
           id?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'user_public_profiles_user_id_fkey';
+            columns: ['id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
     Functions: {

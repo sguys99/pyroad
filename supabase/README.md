@@ -95,7 +95,7 @@ GRANT UPDATE (preferred_provider) ON public.users TO authenticated;
 
 - `config.toml`에 `auto_expose_new_tables`를 켜거나 `ALTER DEFAULT PRIVILEGES`로 기본값을 바꾸지 않습니다. 빠뜨린 GRANT가 로컬에서 드러나지 않게 됩니다.
 - **SELECT 컬럼 권한은 회수하지 않습니다.** PostgREST의 `select=*`가 42501로 깨집니다. 숨길 데이터는 별도 테이블로 분리합니다.
-- 뷰는 `WITH (security_invoker = true)`로 만들어 기반 테이블의 RLS를 따르게 하고, 뷰에도 GRANT/REVOKE를 따로 적습니다.
+- 뷰는 `WITH (security_invoker = true)`로 만들어 기반 테이블의 RLS를 따르게 하고, 뷰에도 GRANT/REVOKE를 따로 적습니다. 다른 사용자의 값을 보여 줘야 하는 뷰는 RLS를 우회하는 대신 **보여도 되는 값만 담은 테이블**(+ SELECT 정책)을 읽게 합니다(예: `00018` `user_public_profiles`, Advisors `security_definer_view`, B34). 회귀 `VIEW-2`가 security_invoker가 아닌 뷰를 FAIL로 알려 줍니다.
 - 시퀀스를 쓰는 컬럼(`identity`/`serial`)에 클라이언트가 INSERT하면 `GRANT USAGE ON SEQUENCE …`도 필요합니다. 지금 `public`의 PK는 모두 `gen_random_uuid()`입니다.
 
 ### 함수와 SECURITY DEFINER
@@ -118,6 +118,13 @@ GRANT EXECUTE ON FUNCTION public.complete_quest(uuid, uuid, jsonb) TO service_ro
 - 사용자 id를 인자로 받는 함수는 service_role 전용으로 두고, API Route가 `getUser()`로 확인한 id만 넘깁니다. authenticated에게 열어야 한다면 인자 대신 `(select auth.uid())`를 씁니다.
 - `REVOKE`/`GRANT`에는 인자 타입까지 적습니다(오버로드 구분).
 
+### 사용자 데이터와 탈퇴 (B28)
+
+- 사용자 데이터가 들어가는 새 테이블은 `user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE`로 만듭니다. 탈퇴는 `/api/account/delete`가 `auth.admin.deleteUser`로 `auth.users`를 지우는 것뿐이고, public의 행은 이 cascade로만 지워집니다. 클라이언트에는 `users` DELETE 권한·정책이 없습니다(`00008`).
+- 다른 사용자의 기록에 남는 참조만 `ON DELETE SET NULL`로 둡니다(지금은 `board_reports.target_user_id` 하나: 다른 아이가 한 신고는 남기되 탈퇴한 아이를 가리키지 않음).
+- `users`를 참조할 수 없는 기록(`analytics_events`의 HMAC 익명 ID)은 탈퇴 API가 따로 지웁니다(P1-17 `deleteUserAnalytics`).
+- 회귀 `B28-1`(FK 삭제 규칙 + FK 없는 `*user_id` 열)과 `B28-2`(실제 탈퇴 후 public·auth의 모든 uuid 열과 HMAC 기록에 그 사용자 값 0)가 빠뜨린 테이블을 FAIL로 알려 줍니다.
+
 ### RLS 정책
 
 - `auth.uid()`는 `(select auth.uid())`로 씁니다. 행마다 다시 계산하지 않습니다 (B34 `auth_rls_initplan`).
@@ -135,7 +142,12 @@ docker exec -i supabase_db_pyroad psql -U postgres -v ON_ERROR_STOP=1 -1 < supab
 # 객체 권한 확인
 docker exec -i supabase_db_pyroad psql -U postgres -c "\dp public.*"
 docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
+
+# Supabase Advisors 와 같은 규칙 (B34). 로컬 DB 는 SSL 이 없어 sslmode=disable 필요. --local/--linked 는 쓰지 않음
+supabase db advisors --db-url "postgresql://postgres:postgres@127.0.0.1:54522/postgres?sslmode=disable" --type all --level info
 ```
+
+- Advisors 기준(B34, 00018 이후): **ERROR 0**, WARN은 `function_search_path_mutable`(`kst_date`, 의도) 1건, INFO는 `rls_enabled_no_policy`(서버 전용 테이블 6개, 의도)·`unused_index`(사용량이 적어 생기는 정상 신호). 운영 Advisors는 Auth 설정 경고(`auth_leaked_password_protection` 등)도 내지만 대시보드 설정이라 로컬에서는 나오지 않습니다. 회귀 ST-7~9가 같은 명령으로 확인합니다
 
 - 권한·RLS 회귀 점검: `npm run test:rls` (아래 "4. RLS·권한 회귀 테스트")
 - 운영과 같은 legacy 기본값에서도 확인하려면 `npm run test:rls:ci`를 씁니다. 임시 작업 디렉토리에 `config.toml`을 복사해 `project_id`·포트를 바꾸고 `auto_expose_new_tables = true`를 켠 스택을 따로 띄웁니다.
@@ -149,7 +161,8 @@ docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
 - 가입·로그인 트리거(B24·B16, `00013`): `handle_new_user`는 `display_name`에 자리표시자 `모험가NNNN`(`placeholder_display_name`)을, `avatar_url`에 `''`를 넣고 provider 이름·사진은 복사하지 않습니다(§2.8). 로그인 때 `handle_user_signed_in`(`auth.users.last_sign_in_at` 갱신 트리거)이 `last_login_at`과 `last_login_provider`(`user_metadata.iss`로 판별, `social_login_provider`)를 씁니다. 트리거 함수는 모두 `SET search_path = ''` + anon·authenticated EXECUTE 없음(트리거는 실행 권한 없이도 동작).
 - 사용자 API 키(B13): `user_api_keys`(service_role 전용, `00007`)에 AES-256-GCM 암호문만 있습니다. 앱은 `src/lib/tutor/apiKeys.ts`로만 읽고 쓰며, 서버 env `API_KEY_ENCRYPTION_KEY`(`openssl rand -base64 32`)가 없으면 "내 API 키" 기능만 꺼집니다. 로컬에서 이 기능을 쓰려면 `.env.local`에 아무 테스트 키나 넣습니다(운영 키를 쓰지 않음). `users.custom_api_keys`(평문)는 `00009`(③)가 지웁니다.
 - 게시판 안전장치(P1-18·B19, `00014` ①·`00015` ③): 길이·빈 값은 DB CHECK(`board_posts_title_check` 제목 1~100자, `board_posts_content_check` 내용 1~2,000자, `board_comments_content_check` 댓글 1~500자, 글자 수는 `char_length`, 공백만 있으면 거부). 운영에 위반 행이 있으면 `00014`가 NOT VALID로 추가하므로 런북 "00014 확인"으로 정리 후 VALIDATE. 금칙어·개인정보 필터는 DB가 아니라 서버 모듈(`src/lib/moderation/`, 목록은 `data/*.json`)이라 **쓰기는 API Route(service_role)로만**: `00015`가 `board_posts`·`board_comments`의 anon·authenticated 쓰기 권한과 INSERT·UPDATE·DELETE 정책을 지웁니다(SELECT만). 신고는 `board_reports`(service_role 전용, `UNIQUE(reporter_id, target_type, target_id)`) + `report_board_content`(service_role 전용, 대상 행을 잠그고 서로 다른 신고자 3명이면 `is_hidden`). 숨긴 글·댓글은 SELECT 정책으로 작성자만 보고(숨긴 글의 댓글은 아무도), `is_hidden`·`hidden_at`은 보호 트리거 `board_protect_moderation`이 클라이언트 값을 버립니다. 운영 순서상 ③ `00011`이 board SELECT 정책을 `USING (true)`로 다시 쓰므로 `00015`가 숨김 정책을 다시 만듭니다. 해제·삭제는 런북 "게시판 신고 처리"의 SQL
-- 공개 이름(P1-18, X1): `user_profiles_public.display_name`은 `coalesce(nickname, '모험가NNNN')`(자리표시자는 `placeholder_display_name`과 같은 식을 뷰에 그대로 씀 — `00014`가 `00013`(③)보다 먼저 적용되고, 함수를 부르면 authenticated EXECUTE가 필요하기 때문. 회귀 `VIEW-3`이 대조), `avatar_url`은 NULL입니다. 기존 Google 사용자의 실명(`users.display_name`)은 본인 화면용으로 그대로 두고 뷰로는 나가지 않습니다. 계산 컬럼이라 뷰를 통한 UPDATE는 `0A000`으로 거부됩니다(B03-5·6). `security_invoker` 교체는 P3-13(VIEW-2)
+- 공개 이름(P1-18, X1): `user_profiles_public.display_name`은 `coalesce(nickname, '모험가NNNN')`(자리표시자는 `placeholder_display_name`과 같은 식을 뷰에 그대로 씀 — `00014`가 `00013`(③)보다 먼저 적용되고, 함수를 부르면 authenticated EXECUTE가 필요하기 때문. 회귀 `VIEW-3`이 대조), `avatar_url`은 NULL입니다. 기존 Google 사용자의 실명(`users.display_name`)은 본인 화면용으로 그대로 두고 뷰로는 나가지 않습니다. 계산 컬럼이라 뷰를 통한 UPDATE는 `0A000`으로 거부됩니다(B03-5·6). `00018`(①, B34)부터 이 값은 `user_public_profiles`(아래)에서 읽습니다
+- 공개 프로필(B34, `00018` ①): `user_profiles_public`은 `security_invoker = true` 뷰로 `user_public_profiles(user_id, public_name, updated_at)`를 읽습니다(Advisors ERROR `security_definer_view` 제거). 테이블은 users 1행 = 1행이고 `public_name = coalesce(nickname, 모험가NNNN)`을 동기화 트리거 `sync_user_public_profile`(`AFTER INSERT OR UPDATE OF nickname ON users`, SECURITY DEFINER·`SET search_path = ''`·EXECUTE 없음)이 씁니다. 자리표시자 식은 `placeholder_display_name`과 같은 식을 트리거에 복사(`00018`(①)이 `00013`(③)보다 먼저 적용되기 때문, 회귀 `PP-3`·`PP-4`·`VIEW-3`가 대조). 권한은 authenticated SELECT(정책 `USING (true)` — 게시판에서 원래 모두에게 보이는 이름뿐) + service_role, anon 없음, 클라이언트 쓰기 없음. PostgREST는 뷰의 관계를 원본 테이블 컬럼의 FK로 찾으므로 게시판 FK `board_posts_user_id_fkey`·`board_comments_user_id_fkey`가 이름은 그대로 `user_public_profiles(user_id)`를 가리킵니다(앱의 `user_profiles_public!board_posts_user_id_fkey(display_name)` 임베딩 유지, 탈퇴는 users → user_public_profiles → 게시판 cascade). 다른 테이블(진행·공지 등)에서 `user_profiles_public`을 임베딩할 수는 없습니다. 캐릭터 아바타 등 공개 값을 늘릴 때(P3-13)는 이 테이블에 컬럼을 더하고 트리거·뷰를 함께 고칩니다. **실명·이메일·XP처럼 다른 아이에게 보이면 안 되는 값은 넣지 않습니다**
 - 요청 한도(P1-19, `00016` ①): `api_rate_limits`(service_role 전용, `(user_id, bucket)` 1행에 분 창·하루(KST) 창 카운트) + `consume_rate_limit(p_user_id, p_bucket, p_per_minute, p_per_day)`(service_role 전용 SECURITY DEFINER, `{allowed, retry_after, remaining, scope, denied_minute, denied_today}`). 행을 `FOR UPDATE`로 잠가 동시 요청에도 한도가 정확하고(RL-6), 시각은 잠금 뒤 `clock_timestamp()`로 재며 창은 앞으로만 갑니다. 한도 값은 앱이 넘기므로(env `TUTOR_LIMIT_*`, `src/lib/tutor/rateLimit.ts`) 값을 바꿀 때 마이그레이션이 필요 없습니다. 행이 요청마다 쌓이지 않고(사용자 × 버킷), pg_cron이 없어 그날 첫 요청 때 2일 넘게 안 쓴 행을 최대 200개 지웁니다(SKIP LOCKED). 탈퇴는 cascade. 버킷은 `tutor:<요청 유형>`이고 퀴즈 채점 API(P7-02)도 `quiz:answer`처럼 같은 함수를 씁니다(`^[a-z][a-z0-9_:]{0,47}$`)
 - 분석 이벤트(P1-17, `00017` ①, §12-Q22): `analytics_events`(service_role 전용 SELECT·INSERT·DELETE, **UPDATE 없음** = 기록은 고치지 않음). 익명 ID `anon_id`는 로그인 사용자면 서버가 `HMAC-SHA256(ANALYTICS_SALT, user id)` 앞 22자, 비로그인이면 탭 세션 난수(둘 다 base64url 22자 CHECK)라 `users`를 참조하지 않습니다(탈퇴 삭제는 앱이 HMAC으로). 이름은 형식만(`^[a-z][a-z0-9_]{1,47}$`), 허용 목록·속성 형식은 앱 zod(`src/lib/analytics/schema.ts`)가 정하므로 이벤트를 더할 때 마이그레이션이 필요 없습니다. props 512바이트, `path`는 쿼리 없는 템플릿(CHECK가 `?`·공백 거부), `device`는 4가지 값(UA 원문 거부). "처음 한 번" 이벤트는 `UNIQUE (anon_id, dedupe_key)` + `ON CONFLICT DO NOTHING`. 보존 180일은 `prune_analytics_events(p_retention, p_limit)`(SECURITY DEFINER — `FOR UPDATE SKIP LOCKED`에 UPDATE 권한이 필요해서, service_role 전용, 1일 미만 거부)를 앱이 인스턴스마다 1시간에 한 번 부르고 런북 SQL로도 실행. 비로그인 요청 한도는 users FK가 있는 `consume_rate_limit`을 쓸 수 없어 `api_global_rate_limits` + `consume_global_rate_limit(p_bucket, p_per_minute, p_per_day)`(사용자 없는 버킷 1행, 반환·창 규칙은 `consume_rate_limit`과 같음, service_role 전용). 전체가 행 하나를 잠그므로 초당 수십 건 넘게 몰리는 경로에는 쓰지 않습니다. 설계: [docs/analytics.md](../docs/analytics.md)
 - B08(해결): `00001` Section 6의 `solution_code` UPDATE는 seed보다 먼저 실행되어 새 DB에서 0건이었습니다. 00001은 운영에 적용한 파일이라 고치지 않습니다. P1-02에서 같은 내용을 `seed.sql` 끝에 두었고, P1-12부터는 정답이 `content/`에 있어 생성 seed가 `quest_answer_keys`에 직접 씁니다.
@@ -188,7 +201,7 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 
 | 그룹 | 점검 |
 |---|---|
-| `view` | `user_profiles_public` 비로그인 조회·뷰를 통한 수정/삭제 거부(B03), 모든 뷰의 쓰기 권한 없음, `security_invoker` 아닌 뷰 (공개 이름 규칙은 `board`의 VIEW-3) |
+| `view` | `user_profiles_public` 비로그인 조회·뷰를 통한 수정/삭제 거부(B03), 모든 뷰의 쓰기 권한 없음, `security_invoker` 아닌 뷰 없음(VIEW-2, B34), `user_public_profiles` 비로그인 조회·사칭 수정·삭제·끼워 넣기 거부(PP-1·2)·동기화 트리거(PP-3: 가입·닉네임 변경·P3-11처럼 UPDATE (nickname)을 준 authenticated)·users와 행 일치(PP-4) (공개 이름 규칙은 `board`의 VIEW-3) |
 | `notice` | 공지 쓰기(본인 INSERT·UPDATE·DELETE, psql) 거부, 비로그인 목록·service_role 작성 허용(B02) |
 | `write` | XP·레벨·황금키·코인(P8, PENDING)·별·시도·`earned_xp`·뱃지·진행 상태·`hints_used`·`used_golden_key` 직접 쓰기, 다른 사용자 행 쓰기, 권한 없는 프로필 컬럼·`users` INSERT, `custom_api_keys` 조회, 이전 auto-save payload, 완료 행의 `quest_id` 바꾸기, 진행 행 삭제·상태 되돌리기 뒤 재완료로 XP 반복 획득(B04·B05·B13·P1-01·P1-04) |
 | `apikey` | `user_api_keys` 접근 거부(anon/authenticated 조회·임베딩·쓰기·OpenAPI 노출), service_role 조회·저장, 탈퇴 시 삭제(B13) |
@@ -201,7 +214,8 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 | `board` | P1-18·B19(`00014`·`00015`): 길이·빈 값 CHECK(service_role도 거부 B19-1~5, 경계 B19-6, 브라우저 직접 INSERT B19-7, VALID B19-8), 클라이언트 글·댓글 쓰기 거부(BW-1~6), 숨긴 글·댓글 조회(BH-1~3)·보호 트리거(BH-4, ① 상태 재현), `board_reports`·`report_board_content` 접근 거부(BR-1~4·7)·서버 경로(BR-5)·규칙(BR-6: 중복·본인·3명 숨김), 공개 이름에 실명·사진 없음(VIEW-3) |
 | `ratelimit` | P1-19(`00016`): `api_rate_limits` 조회·카운터 되돌리기·삭제 거부(RL-1~4), `consume_rate_limit` 직접 호출 거부(RL-5·5b, 남의 한도 소진), 동시 20회에 한도 5 정확·하루 한도 정확(RL-6), 분 창 경과 재허용·KST 하루 창·버킷 독립·창을 되돌리지 않음·인자 검증·오래된 행 정리·탈퇴 cascade(RL-7), anon/authenticated 접근 없음(RL-8) |
 | `analytics` | P1-17(`00017`): `analytics_events` 조회 거부(AN-1·2, 다른 아이의 이용 기록)·직접 쓰기 거부(AN-3·4, 지표 부풀리기)·삭제 거부(AN-5), `prune_analytics_events`·`consume_global_rate_limit` 직접 호출 거부(AN-6), 서버 경로: upsert dedupe·CHECK(이름·익명 ID·경로 쿼리·props 크기·기기)·service_role UPDATE 불가·180일 정리·전역 한도(AN-7), anon/authenticated 접근 없음(AN-8) |
-| `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정(SECURITY DEFINER ST-4, 전체 함수 ST-6 — `kst_date`만 예외), `auth.uid()`를 감싸지 않은 정책 0(ST-5, B34), 스냅샷 3종 |
+| `account` | B28: 사용자를 가리키는 FK가 모두 ON DELETE CASCADE(`board_reports.target_user_id` SET NULL만 예외)·FK 없는 사용자 열 없음(B28-1), 탈퇴(`auth.admin.deleteUser` + HMAC 분석 기록 삭제) 뒤 public·auth의 모든 uuid 열에 그 사용자 값 0(B28-2), 클라이언트 `users` DELETE 거부(B28-3) |
+| `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정(SECURITY DEFINER ST-4, 전체 함수 ST-6 — `kst_date`만 예외), `auth.uid()`를 감싸지 않은 정책 0(ST-5, B34), Supabase Advisors(`supabase db advisors`, CLI 내장 규칙) ERROR 0(ST-7)·의도한 WARN(`kst_date`)만(ST-8)·INFO 기록(ST-9), 스냅샷 3종 |
 
 GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 
@@ -218,7 +232,7 @@ GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 ### 권한을 바꾸는 작업을 할 때
 
 1. 마이그레이션을 고치고 `npm run test:rls`를 돌립니다.
-2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 P3-13(VIEW-2)입니다. (P1-02의 B07-2·3, B08-1, P1-01의 B04-1·2·7·8, P1-04의 B04-4·4b·5·5b·11·12·APP-W10, B24의 ST-3·4는 뒤집음)
+2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 없습니다. (P1-02의 B07-2·3, B08-1, P1-01의 B04-1·2·7·8, P1-04의 B04-4·4b·5·5b·11·12·APP-W10, B24의 ST-3·4, B34의 VIEW-2는 뒤집음)
 3. 앱 쿼리를 바꿨다면 `checks.mjs`의 `app` 그룹 요청도 같이 바꿉니다(예: P1-04에서 auto-save payload가 바뀌어 APP-W1을 새 payload로, 이전 payload는 B04-22 deny로).
 4. 권한·정책·SECURITY DEFINER 함수가 바뀌면 스냅샷이 `diff`로 FAIL합니다. 의도한 변경이면 `RLS_UPDATE_SNAPSHOTS=1 npm run test:rls`로 다시 만들고 `git diff supabase/tests/snapshots/`를 리뷰해 같은 커밋에 넣습니다.
 5. 새 테이블·함수를 만들면 대응하는 점검을 `checks.mjs`에 추가하고 기대값을 `expectations.mjs`에 적습니다(기대값이 없으면 FAIL).
