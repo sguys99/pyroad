@@ -2,9 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { getStageStatuses } from '../getStageStatuses';
 import type { Quest, Stage, UserProgress } from '@/lib/types/database';
 
-function makeStage(order: number, quests: Partial<Quest>[] = []): Stage & { quests: Quest[] } {
+function makeStage(
+  order: number,
+  quests: Partial<Quest>[] = [],
+  world = 1,
+): Stage & { quests: Quest[]; world: { order: number } } {
+  const id = world === 1 ? `stage-${order}` : `stage-w${world}-${order}`;
   return {
-    id: `stage-${order}`,
+    id,
+    world_id: `world-${world}`,
+    world: { order: world },
     order,
     title: `스테이지 ${order}`,
     theme_name: `theme-${order}`,
@@ -12,11 +19,14 @@ function makeStage(order: number, quests: Partial<Quest>[] = []): Stage & { ques
     is_final: false,
     created_at: '2026-01-01',
     quests: quests.map((q, i) => ({
-      id: q.id ?? `quest-${order}-${i + 1}`,
-      stage_id: `stage-${order}`,
+      id: q.id ?? `quest-${id}-${i + 1}`,
+      stage_id: id,
       order: q.order ?? i + 1,
       title: `퀘스트 ${order}-${i + 1}`,
       concept: '',
+      quest_type: 'code' as const,
+      quiz_kind: null,
+      is_mobile_friendly: false,
       prompt_skeleton: {} as Quest['prompt_skeleton'],
       validation_type: 'output_match' as const,
       expected_output: '',
@@ -41,6 +51,10 @@ function makeProgress(questId: string, status: 'completed' | 'in_progress' = 'co
     step_submissions: null,
     used_golden_key: false,
     earned_xp: 0,
+    stars: 0,
+    best_stars: 0,
+    attempts: 0,
+    stars_judged_on: null,
   };
 }
 
@@ -100,6 +114,37 @@ describe('getStageStatuses', () => {
     expect(result[0].id).toBe('stage-1');
     expect(result[1].id).toBe('stage-2');
     expect(result[2].id).toBe('stage-3');
+  });
+
+  // P1-08: stages."order" 는 월드 안에서만 유일
+  describe('월드가 여럿일 때 (월드 order, 스테이지 order)', () => {
+    const w1 = [makeStage(1, [{ id: 'a1' }]), makeStage(2, [{ id: 'a2' }])];
+    const w2 = [makeStage(1, [{ id: 'b1' }], 2), makeStage(2, [{ id: 'b2' }], 2)];
+
+    it('월드 순서가 먼저, 그 안에서 스테이지 order', () => {
+      const result = getStageStatuses([w2[1], w1[1], w2[0], w1[0]], []);
+      expect(result.map((s) => s.id)).toEqual([
+        'stage-1',
+        'stage-2',
+        'stage-w2-1',
+        'stage-w2-2',
+      ]);
+    });
+
+    it('2월드의 order 1 스테이지는 1월드 마지막 스테이지를 깨야 열림', () => {
+      const all = [...w1, ...w2];
+      expect(getStageStatuses(all, [makeProgress('a1')])[2].status).toBe('locked');
+      const cleared = getStageStatuses(all, [makeProgress('a1'), makeProgress('a2')]);
+      expect(cleared[2].status).toBe('in_progress');
+      expect(cleared[3].status).toBe('locked');
+    });
+
+    it('world 정보가 없으면 order 만으로 (같은 월드로 봄)', () => {
+      const bare = [makeStage(2, [{ id: 'x2' }]), makeStage(1, [{ id: 'x1' }])].map(
+        (stage) => ({ ...stage, world: undefined }),
+      );
+      expect(getStageStatuses(bare, []).map((s) => s.order)).toEqual([1, 2]);
+    });
   });
 
   it('firstIncompleteQuestId: 첫 미완료 퀘스트 ID 반환', () => {

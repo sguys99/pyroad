@@ -24,7 +24,7 @@ content/
 
 - 이름은 영문 소문자·숫자·하이픈만 씁니다. 앞 두 자리 번호는 YAML의 `order`와 같아야 합니다(빌드가 확인).
 - 순서를 바꾸려면 `order`와 파일 이름 번호를 함께 바꿉니다. 빌드한 seed가 UNIQUE 충돌 없이 순서를 옮깁니다.
-- 빌드가 확인하는 중복: 모든 `id`, 스테이지 `order`(지금은 전체에서 유일), 스테이지 안의 퀘스트 `order`.
+- 빌드가 확인하는 중복: 모든 `id`, 월드 `order`, 월드 안의 스테이지 `order`(DB `UNIQUE(world_id, "order")`, P1-08), 스테이지 안의 퀘스트 `order`.
 
 ## 2. 파일 형식
 
@@ -37,8 +37,9 @@ content/
 | `title` | 화면 이름. 예: `파이썬 섬` |
 | `theme` | 테마 키 (영문 소문자·밑줄) |
 | `description` | 소개 문장 |
+| `unlock_rule` | 월드 해제 규칙. 지금은 `{ type: open }`만 (2월드부터의 규칙은 Phase 10, §12-Q2) |
 
-지금은 검증만 하고 SQL로는 내보내지 않습니다. P1-08에서 `worlds` 테이블이 생기면 빌드가 `slug` 기준으로 업서트하고 `stages.world_id`를 채웁니다.
+빌드가 `worlds`에 `slug` 기준으로 업서트하고(id는 DB가 정함, 1월드는 00012가 만든 고정 id) 그 월드의 스테이지에 `stages.world_id`를 채웁니다(P1-08). 스테이지 순서는 (월드 `order`, 스테이지 `order`)이고, 월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열립니다(Phase 10 전까지).
 
 ### stage.yaml → `stages`
 
@@ -142,7 +143,7 @@ validation:
 
 **DB 저장 형태** (`src/lib/quest/validation.ts`의 `toStoredRule`): 기존 두 칸(`validation_type` + `expected_output`)을 그대로 씁니다. `output_match`·`contains`·`code_check`는 기준 문자열 그대로, `contains_any`·`all`은 기준값 칸에 JSON을 넣고, `code_check` + `whole_word`는 하위 규칙 하나짜리 `all`로 저장합니다. 채점 API(`/api/quest/validate`)는 바꾸지 않아도 됩니다.
 
-> ⚠️ `quests.validation_type`에는 아직 CHECK 제약(`output_match`·`contains`·`code_check`, 00001)이 있습니다. 새 유형(`contains_any`·`all`·`whole_word`)은 **프로젝트 단계**(`prompt_skeleton.steps[]`, jsonb)에는 지금 바로 쓸 수 있지만, **퀘스트 전체 규칙**에 쓰려면 CHECK를 넓히는 마이그레이션이 먼저 필요합니다(P1-08/P1-12). 빌드가 경고로 알려 줍니다.
+> `quests.validation_type` CHECK는 00012(P1-08)부터 `contains_any`·`all`도 받으므로, 새 유형을 프로젝트 단계뿐 아니라 퀘스트 전체 규칙에도 쓸 수 있습니다. 단, 운영에 00012가 적용되기 전에는 그런 콘텐츠의 seed를 적용할 수 없습니다(런북 순서: ① → ② → ③ → seed).
 
 ## 4. 공개 부분에 쓰면 안 되는 것
 

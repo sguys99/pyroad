@@ -187,7 +187,7 @@ export async function prepareTutorCall(
   const [questResult, userProfileResult, userApiKeys, answerKeyRow] = await Promise.all([
     adminClient
       .from('quests')
-      .select('*, stage:stages(id, title, order, theme_name)')
+      .select('*, stage:stages(id, world_id, title, order, theme_name)')
       .eq('id', body.quest_id)
       .single(),
     supabase
@@ -272,10 +272,11 @@ export async function prepareTutorCall(
       skeleton.topic,
     ];
 
-    // 다음 스테이지 제목 조회
+    // 다음 스테이지 제목 조회 (같은 월드 안. stages."order" 는 월드마다 1부터, P1-08)
     const nextStageResult = await adminClient
       .from('stages')
       .select('title')
+      .eq('world_id', q.stage.world_id)
       .eq('order', q.stage.order + 1)
       .maybeSingle();
 

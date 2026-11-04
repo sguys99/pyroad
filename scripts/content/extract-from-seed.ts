@@ -31,6 +31,7 @@ const PYTHON_ISLAND: World = {
   title: '파이썬 섬',
   theme: 'python_island',
   description: 'print()부터 함수까지, 파이썬 기초를 배우는 첫 번째 섬이에요!',
+  unlock_rule: { type: 'open' },
 };
 
 const pad = (n: number) => String(n).padStart(2, '0');

@@ -197,23 +197,33 @@ const slug = z
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, '영문 소문자·숫자·하이픈만 써요');
 
 /**
- * world.yaml. 지금은 검증만 하고 SQL 로는 내보내지 않음.
- * P1-08 에서 worlds 테이블(id, order, slug, title, theme, description, unlock_rule)이 생기면
- * 빌드가 slug 기준으로 업서트하고 stages.world_id 를 채움.
+ * 월드 해제 규칙 (worlds.unlock_rule). 지금은 `open`(처음부터 열림)뿐입니다.
+ * 2월드부터의 규칙(이전 월드 최종 프로젝트 완료 또는 실력 확인 퀴즈, §12-Q2)은 Phase 10 에서 union 에 더합니다.
+ * 그 전까지 월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열립니다 (src/lib/world/stageOrder.ts).
+ */
+export const WorldUnlockRuleSchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('open') }),
+]);
+
+/**
+ * world.yaml → worlds (P1-08). 빌드가 slug 기준으로 업서트하고 stages.world_id 를 채움.
+ * id 는 DB 가 정함 (1월드는 00012 가 고정 id 로 만듦).
  */
 export const WorldSchema = z.strictObject({
   /** 디렉토리 이름과 같아야 함. worlds.slug */
   slug,
+  /** 월드 순서. 전체에서 유일 (worlds."order" UNIQUE) */
   order,
   title: text,
   theme: z.string().regex(/^[a-z0-9_]+$/, '영문 소문자·숫자·밑줄만 써요'),
   description: z.string(),
+  unlock_rule: WorldUnlockRuleSchema,
 });
 
 /** stage.yaml → stages */
 export const StageSchema = z.strictObject({
   id,
-  /** 디렉토리 이름 앞 두 자리(NN-)와 같아야 함. 지금은 전체에서 유일(stages."order" UNIQUE) */
+  /** 디렉토리 이름 앞 두 자리(NN-)와 같아야 함. 월드 안에서 유일(stages (world_id, "order") UNIQUE, P1-08) */
   order,
   title: text,
   theme_name: z.string().regex(/^[a-z0-9_]+$/, '영문 소문자·숫자·밑줄만 써요'),
@@ -222,6 +232,7 @@ export const StageSchema = z.strictObject({
 });
 
 export type World = z.infer<typeof WorldSchema>;
+export type WorldUnlockRule = z.infer<typeof WorldUnlockRuleSchema>;
 export type Stage = z.infer<typeof StageSchema>;
 export type CodeQuest = z.infer<typeof CodeQuestSchema>;
 export type ProjectQuest = z.infer<typeof ProjectQuestSchema>;

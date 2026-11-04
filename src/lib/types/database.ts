@@ -2,9 +2,11 @@
 //
 // 테이블 행 타입은 `database.generated.ts`(supabase gen types, `npm run db:types`로 재생성)에서
 // 가져옵니다. 이 파일은 그 위의 얇은 래퍼로, 생성 타입이 표현하지 못하는 부분만 좁힙니다.
-// - CHECK 제약 컬럼(text) → 문자열 리터럴 유니온 (validation_type, status, badge_type)
+// - CHECK 제약 컬럼(text) → 문자열 리터럴 유니온 (validation_type, quest_type, quiz_kind, status, badge_type)
 // - JSONB 컬럼(Json) → 앱이 쓰는 구조 (prompt_skeleton, step_submissions)
 // 생성 파일은 직접 고치지 말고, 스키마를 바꾼 뒤 `npm run db:types`로 다시 만드세요.
+
+import type { ValidationType } from '@/lib/quest/validation';
 
 import type { Tables } from './database.generated';
 
@@ -16,7 +18,23 @@ export type {
   TablesUpdate,
 } from './database.generated';
 
-export type ValidationType = 'output_match' | 'contains' | 'code_check';
+// quests.validation_type CHECK (00012, P1-08): 프로젝트 단계·퀘스트 전체 규칙 모두 같은 다섯 가지
+export type { ValidationType };
+
+/** quests.quest_type CHECK (00012, P1-08) */
+export type QuestType = 'code' | 'project' | 'quiz' | 'boss';
+
+/** quests.quiz_kind CHECK (00012). quest_type = 'quiz' 일 때만 값이 있음 (P7-01) */
+export type QuizKind = 'multiple_choice' | 'fill_blank' | 'parsons' | 'bug_hunt';
+
+/** worlds.unlock_rule. 지금은 open 뿐 (2월드 규칙 §12-Q2 는 Phase 10) */
+export interface WorldUnlockRule {
+  type: 'open';
+}
+
+export type World = Omit<Tables<'worlds'>, 'unlock_rule'> & {
+  unlock_rule: WorldUnlockRule;
+};
 
 export type Stage = Tables<'stages'>;
 
@@ -24,10 +42,16 @@ export type Stage = Tables<'stages'>;
 // `src/lib/quest/answerKeys.ts`로만 읽으므로 앱 타입에서는 뺍니다 (P1-02).
 export type Quest = Omit<
   Tables<'quests'>,
-  'prompt_skeleton' | 'validation_type' | 'expected_output'
+  | 'prompt_skeleton'
+  | 'validation_type'
+  | 'expected_output'
+  | 'quest_type'
+  | 'quiz_kind'
 > & {
   prompt_skeleton: PromptSkeleton;
   validation_type: ValidationType;
+  quest_type: QuestType;
+  quiz_kind: QuizKind | null;
 };
 
 export type UserProgress = Omit<
@@ -129,7 +153,7 @@ export interface StageWithQuests extends Stage {
 
 /** 서버 라우트(튜터 등)가 읽는 퀘스트. 정답은 들어 있지 않음 (answerKeys.ts로 따로 읽음) */
 export type QuestWithStageServer = Quest & {
-  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'>;
+  stage: Pick<Stage, 'id' | 'world_id' | 'title' | 'order' | 'theme_name'>;
 };
 
 /** 클라이언트에 전달되는 Quest (정답 필드 없음) */

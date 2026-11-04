@@ -19,10 +19,12 @@ export default async function WorldPage() {
   // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
   const [{ user }, stagesResult] = await Promise.all([
     getAuthUser(),
+    // 순서는 (월드 order, 스테이지 order): getStageStatuses 가 world.order 로 정렬 (P1-08, stages."order" 는 월드 안에서만 유일)
     supabase
       .from('stages')
-      .select('id, order, title, theme_name, description, is_final, created_at, quests(id, order)')
-      .order('order', { ascending: true }),
+      .select(
+        'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order)',
+      ),
   ]);
   if (!user) redirect('/');
 

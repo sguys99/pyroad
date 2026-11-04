@@ -67,6 +67,8 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
   }, 120_000);
 
   it('DB 상태 = 빌드한 행 (SQL 이스케이프·jsonb 변환에 손실 없음)', () => {
+    // 1월드는 00012 가 고정 id 로 만들고 seed 가 slug 기준으로 덮어씀 (P1-08)
+    expect(once.worlds).toEqual(rows.worlds);
     expect(once.stages).toEqual(rows.stages);
     // 스냅샷의 stage_order 는 비교용으로 붙인 값이라 행에는 없음
     expect(

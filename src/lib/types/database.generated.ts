@@ -183,8 +183,11 @@ export type Database = {
           created_at: string;
           expected_output: string;
           id: string;
+          is_mobile_friendly: boolean;
           order: number;
           prompt_skeleton: Json;
+          quest_type: string;
+          quiz_kind: string | null;
           stage_id: string;
           title: string;
           validation_type: string;
@@ -195,8 +198,11 @@ export type Database = {
           created_at?: string;
           expected_output?: string;
           id?: string;
+          is_mobile_friendly?: boolean;
           order: number;
           prompt_skeleton?: Json;
+          quest_type?: string;
+          quiz_kind?: string | null;
           stage_id: string;
           title: string;
           validation_type: string;
@@ -207,8 +213,11 @@ export type Database = {
           created_at?: string;
           expected_output?: string;
           id?: string;
+          is_mobile_friendly?: boolean;
           order?: number;
           prompt_skeleton?: Json;
+          quest_type?: string;
+          quiz_kind?: string | null;
           stage_id?: string;
           title?: string;
           validation_type?: string;
@@ -224,6 +233,61 @@ export type Database = {
           },
         ];
       };
+      quiz_attempts: {
+        Row: {
+          answer: Json;
+          attempt_no: number;
+          created_at: string;
+          id: string;
+          is_correct: boolean;
+          mode: string;
+          quest_id: string;
+          user_id: string;
+        };
+        Insert: {
+          answer: Json;
+          attempt_no: number;
+          created_at?: string;
+          id?: string;
+          is_correct: boolean;
+          mode: string;
+          quest_id: string;
+          user_id: string;
+        };
+        Update: {
+          answer?: Json;
+          attempt_no?: number;
+          created_at?: string;
+          id?: string;
+          is_correct?: boolean;
+          mode?: string;
+          quest_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_attempts_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quiz_attempts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_profiles_public';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quiz_attempts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       stages: {
         Row: {
           created_at: string;
@@ -233,6 +297,7 @@ export type Database = {
           order: number;
           theme_name: string;
           title: string;
+          world_id: string;
         };
         Insert: {
           created_at?: string;
@@ -242,6 +307,7 @@ export type Database = {
           order: number;
           theme_name: string;
           title: string;
+          world_id?: string;
         };
         Update: {
           created_at?: string;
@@ -251,8 +317,17 @@ export type Database = {
           order?: number;
           theme_name?: string;
           title?: string;
+          world_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'stages_world_id_fkey';
+            columns: ['world_id'];
+            isOneToOne: false;
+            referencedRelation: 'worlds';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       user_api_keys: {
         Row: {
@@ -340,6 +415,8 @@ export type Database = {
       };
       user_progress: {
         Row: {
+          attempts: number;
+          best_stars: number;
           code_submitted: string | null;
           completed_at: string | null;
           created_at: string;
@@ -348,12 +425,16 @@ export type Database = {
           hints_used: number;
           id: string;
           quest_id: string;
+          stars: number;
+          stars_judged_on: string | null;
           status: string;
           step_submissions: Json | null;
           used_golden_key: boolean;
           user_id: string;
         };
         Insert: {
+          attempts?: number;
+          best_stars?: number;
           code_submitted?: string | null;
           completed_at?: string | null;
           created_at?: string;
@@ -362,12 +443,16 @@ export type Database = {
           hints_used?: number;
           id?: string;
           quest_id: string;
+          stars?: number;
+          stars_judged_on?: string | null;
           status?: string;
           step_submissions?: Json | null;
           used_golden_key?: boolean;
           user_id: string;
         };
         Update: {
+          attempts?: number;
+          best_stars?: number;
           code_submitted?: string | null;
           completed_at?: string | null;
           created_at?: string;
@@ -376,6 +461,8 @@ export type Database = {
           hints_used?: number;
           id?: string;
           quest_id?: string;
+          stars?: number;
+          stars_judged_on?: string | null;
           status?: string;
           step_submissions?: Json | null;
           used_golden_key?: boolean;
@@ -407,37 +494,85 @@ export type Database = {
       };
       users: {
         Row: {
+          avatar_config: Json;
           avatar_url: string | null;
           created_at: string;
           current_level: number;
           display_name: string;
           golden_keys: number;
+          grade: number | null;
           id: string;
           last_login_at: string;
+          last_login_provider: string | null;
+          nickname: string | null;
           preferred_provider: string | null;
+          settings: Json;
           total_xp: number;
         };
         Insert: {
+          avatar_config?: Json;
           avatar_url?: string | null;
           created_at?: string;
           current_level?: number;
           display_name?: string;
           golden_keys?: number;
+          grade?: number | null;
           id: string;
           last_login_at?: string;
+          last_login_provider?: string | null;
+          nickname?: string | null;
           preferred_provider?: string | null;
+          settings?: Json;
           total_xp?: number;
         };
         Update: {
+          avatar_config?: Json;
           avatar_url?: string | null;
           created_at?: string;
           current_level?: number;
           display_name?: string;
           golden_keys?: number;
+          grade?: number | null;
           id?: string;
           last_login_at?: string;
+          last_login_provider?: string | null;
+          nickname?: string | null;
           preferred_provider?: string | null;
+          settings?: Json;
           total_xp?: number;
+        };
+        Relationships: [];
+      };
+      worlds: {
+        Row: {
+          created_at: string;
+          description: string;
+          id: string;
+          order: number;
+          slug: string;
+          theme: string;
+          title: string;
+          unlock_rule: Json;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string;
+          id?: string;
+          order: number;
+          slug: string;
+          theme: string;
+          title: string;
+          unlock_rule?: Json;
+        };
+        Update: {
+          created_at?: string;
+          description?: string;
+          id?: string;
+          order?: number;
+          slug?: string;
+          theme?: string;
+          title?: string;
+          unlock_rule?: Json;
         };
         Relationships: [];
       };
@@ -487,7 +622,13 @@ export type Database = {
         Args: { p_stage_id: string; p_user_id: string };
         Returns: boolean;
       };
+      kst_date: { Args: { p_at: string }; Returns: string };
+      kst_today: { Args: never; Returns: string };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      placeholder_display_name: {
+        Args: { p_user_id: string };
+        Returns: string;
+      };
       quest_xp: {
         Args: {
           p_base: number;
@@ -503,6 +644,10 @@ export type Database = {
       reset_progress: {
         Args: { p_scope: string; p_stage_id?: string; p_user_id: string };
         Returns: Json;
+      };
+      social_login_provider: {
+        Args: { p_iss: string; p_provider: string };
+        Returns: string;
       };
       use_golden_key: {
         Args: { p_quest_id: string; p_step?: number; p_user_id: string };

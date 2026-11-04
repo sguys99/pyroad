@@ -50,6 +50,7 @@ function tree(...stages: [typeof STAGE_1, Quest[]][]): ContentTree {
           title: '파이썬 섬',
           theme: 'python_island',
           description: '',
+          unlock_rule: { type: 'open' },
         },
         stages: stages.map(([stage, quests]) => ({
           file: 'stage.yaml',
@@ -143,21 +144,54 @@ describe('buildRows: 공개/정답 분리', () => {
     expect(warnings).toEqual([]);
   });
 
-  it('퀘스트 전체 규칙에 all 을 쓰면 quests.validation_type CHECK 경고', () => {
+  it('퀘스트 전체 규칙에 all·contains_any 를 써도 경고 없음 (00012 가 quests.validation_type CHECK 를 넓힘)', () => {
     const q = codeQuest();
-    const allRule = parsed({
-      ...q,
-      answer: {
-        ...q.answer,
-        validation: {
-          type: 'all',
-          rules: [{ type: 'contains', expected: '안녕' }],
-        },
-      },
-    });
-    expect(buildRows(tree([STAGE_1, [allRule]])).warnings[0]).toMatch(
-      /quests\.validation_type CHECK\(00001\)/,
+    const withRule = (validation: unknown) =>
+      parsed({ ...q, answer: { ...q.answer, validation } });
+    const { rows: built, warnings: w } = buildRows(
+      tree([
+        STAGE_1,
+        [
+          withRule({
+            type: 'all',
+            rules: [{ type: 'contains', expected: '안녕' }],
+          }),
+        ],
+      ]),
     );
+    expect(w).toEqual([]);
+    expect(built.quests[0].validation_type).toBe('all');
+    expect(
+      buildRows(
+        tree([
+          STAGE_1,
+          [withRule({ type: 'contains_any', expected: ['가', '나'] })],
+        ]),
+      ).warnings,
+    ).toEqual([]);
+  });
+
+  it('월드·퀘스트 유형 행 (P1-08)', () => {
+    expect(rows.worlds).toEqual([
+      {
+        slug: 'python-island',
+        order: 1,
+        title: '파이썬 섬',
+        theme: 'python_island',
+        description: '',
+        unlock_rule: { type: 'open' },
+      },
+    ]);
+    expect(rows.stages.map((s) => s.world)).toEqual([
+      'python-island',
+      'python-island',
+    ]);
+    expect(
+      rows.quests.map((q) => [q.quest_type, q.quiz_kind, q.is_mobile_friendly]),
+    ).toEqual([
+      ['code', null, false],
+      ['project', null, false],
+    ]);
   });
 
   it('공개 행에 정답이 섞이면 예외 (00005 CHECK 와 같은 검사)', () => {
@@ -197,6 +231,7 @@ describe('toSeedSql', () => {
   });
 
   it('멱등 업서트이고 DML 만 있음 (권한·스키마를 바꾸지 않음)', () => {
+    expect(sql.match(/ON CONFLICT \(slug\) DO UPDATE/g)).toHaveLength(1);
     expect(sql.match(/ON CONFLICT \(id\) DO UPDATE/g)).toHaveLength(3);
     expect(sql.match(/ON CONFLICT \(quest_id\) DO UPDATE/g)).toHaveLength(2);
     const code = sql.replace(/^--.*$/gm, '');
@@ -212,8 +247,15 @@ describe('toSeedSql', () => {
   it('머리에 콘텐츠 해시와 개수', () => {
     expect(sql).toContain('콘텐츠 해시: abc123');
     expect(sql).toContain(
-      '스테이지 2 · 퀘스트 2 · 정답 행 2 (solution_code 1 + 프로젝트 단계 2)',
+      '월드 1 · 스테이지 2 · 퀘스트 2 · 정답 행 2 (solution_code 1 + 프로젝트 단계 2)',
     );
+  });
+
+  it('스테이지는 월드 slug 로 world_id 를 찾고, 퀘스트는 유형을 씀 (P1-08)', () => {
+    expect(sql).toContain(
+      "(SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island')",
+    );
+    expect(questInserts[1]).toContain("'project',\n  NULL,\n  FALSE,");
   });
 
   it('같은 입력이면 같은 출력 (생성물 드리프트 검사용)', () => {

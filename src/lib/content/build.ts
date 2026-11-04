@@ -13,14 +13,30 @@ import {
 } from '@/lib/quest/validation';
 
 import type { ContentTree } from './load';
-import { findAnswerKeysInPublic, type Quest, type QuestType } from './schema';
+import {
+  findAnswerKeysInPublic,
+  type Quest,
+  type QuestType,
+  type WorldUnlockRule,
+} from './schema';
 
 // ------------------------------------------------------------
 // 행 타입 (supabase/migrations 의 컬럼과 같은 이름)
 // ------------------------------------------------------------
 
+export interface WorldRow {
+  slug: string;
+  order: number;
+  title: string;
+  theme: string;
+  description: string;
+  unlock_rule: WorldUnlockRule;
+}
+
 export interface StageRow {
   id: string;
+  /** 월드 slug. seed 는 worlds 에서 id 를 찾아 stages.world_id 에 씀 (P1-08) */
+  world: string;
   order: number;
   title: string;
   theme_name: string;
@@ -42,6 +58,11 @@ export interface QuestRow {
   order: number;
   title: string;
   concept: string;
+  quest_type: QuestType;
+  /** 퀴즈 종류 (P7-01). 퀴즈가 아니면 null (00012 quests_quiz_kind_only_for_quiz) */
+  quiz_kind: null;
+  /** 키보드 없이 풀 수 있는지 (Phase 7). 코드·프로젝트 퀘스트는 false */
+  is_mobile_friendly: boolean;
   prompt_skeleton: Record<string, unknown> & { steps?: PublicStep[] };
   validation_type: StoredRule['validation_type'];
   /** 00005 이후 항상 '' (정답은 quest_answer_keys). v0.4 운영 적용 뒤 다음 배포에서 컬럼 삭제 (런북 "적용 뒤 정리") */
@@ -72,6 +93,7 @@ export interface AnswerKeyRow {
 }
 
 export interface ContentRows {
+  worlds: WorldRow[];
   stages: StageRow[];
   quests: QuestRow[];
   answer_keys: AnswerKeyRow[];
@@ -92,26 +114,45 @@ export interface BuildResult {
   warnings: string[];
 }
 
-// 00001 의 quests.validation_type CHECK 가 허용하는 값. 새 유형(contains_any, all)은 프로젝트 단계
-// (prompt_skeleton.steps[], jsonb)에는 쓸 수 있지만, 퀘스트 전체 규칙에 쓰려면 CHECK 를 넓히는 마이그레이션이 필요
-const QUESTS_CHECK_TYPES = new Set(['output_match', 'contains', 'code_check']);
+// quests.validation_type CHECK(00012, P1-08)가 허용하는 값. 새 유형을 더하면 CHECK 를 넓히는 마이그레이션이 먼저 필요
+const QUESTS_CHECK_TYPES = new Set([
+  'output_match',
+  'contains',
+  'contains_any',
+  'code_check',
+  'all',
+]);
 
 // ------------------------------------------------------------
 // 콘텐츠 → 행
 // ------------------------------------------------------------
 
 export function buildRows(tree: ContentTree): BuildResult {
-  const rows: ContentRows = { stages: [], quests: [], answer_keys: [] };
+  const rows: ContentRows = {
+    worlds: [],
+    stages: [],
+    quests: [],
+    answer_keys: [],
+  };
   const meta = new Map<string, QuestMeta>();
   const warnings: string[] = [];
 
   const worlds = [...tree.worlds].sort((a, b) => a.world.order - b.world.order);
   for (const { world, stages } of worlds) {
+    rows.worlds.push({
+      slug: world.slug,
+      order: world.order,
+      title: world.title,
+      theme: world.theme,
+      description: world.description,
+      unlock_rule: { ...world.unlock_rule },
+    });
     for (const { stage, quests } of [...stages].sort(
       (a, b) => a.stage.order - b.stage.order,
     )) {
       rows.stages.push({
         id: stage.id,
+        world: world.slug,
         order: stage.order,
         title: stage.title,
         theme_name: stage.theme_name,
@@ -125,8 +166,8 @@ export function buildRows(tree: ContentTree): BuildResult {
         const { questRow, answerRow } = splitQuest(quest, stage.id);
         if (!QUESTS_CHECK_TYPES.has(questRow.validation_type)) {
           warnings.push(
-            `${file}: 퀘스트 전체 규칙 '${questRow.validation_type}'은 지금 quests.validation_type CHECK(00001)가 막아요. ` +
-              'CHECK 를 넓히는 마이그레이션(P1-08/P1-12)이 먼저 필요해요',
+            `${file}: 퀘스트 전체 규칙 '${questRow.validation_type}'은 quests.validation_type CHECK(00012)가 막아요. ` +
+              'CHECK 를 넓히는 마이그레이션이 먼저 필요해요',
           );
         }
         rows.quests.push(questRow);
@@ -198,6 +239,9 @@ export function splitQuest(
       order: quest.order,
       title: quest.title,
       concept: quest.concept,
+      quest_type: quest.quest_type,
+      quiz_kind: null,
+      is_mobile_friendly: false,
       prompt_skeleton: skeleton,
       validation_type: stored.validation_type,
       expected_output: '',
@@ -256,7 +300,7 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
     '-- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).',
     '-- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.',
     `-- 콘텐츠 해시: ${options.hash}`,
-    `-- 스테이지 ${rows.stages.length} · 퀘스트 ${rows.quests.length} · 정답 행 ${rows.answer_keys.length}` +
+    `-- 월드 ${rows.worlds.length} · 스테이지 ${rows.stages.length} · 퀘스트 ${rows.quests.length} · 정답 행 ${rows.answer_keys.length}` +
       ` (solution_code ${counts.solutions} + 프로젝트 단계 ${counts.steps})`,
     '--',
     "-- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).",
@@ -266,6 +310,7 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
     '--',
     '-- 적용: supabase db reset 이 migrations 다음에 실행합니다. 운영은 SQL Editor 에서 BEGIN; … COMMIT; 으로',
     '--       감싸 실행하고, 00005(③) 뒤에 적용합니다 (docs/release/v0.4-runbook.md "콘텐츠 seed 적용").',
+    '--       worlds·stages.world_id·quests.quest_type 을 쓰므로 00012(P1-08) 이후의 스키마가 필요합니다.',
     '-- ============================================================',
     '',
   );
@@ -273,9 +318,11 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
   out.push(
     '-- ------------------------------------------------------------',
     '-- 1. 순서 충돌 방지',
-    '--    스테이지·퀘스트의 order 를 바꿀 때 UNIQUE 제약(stages."order", quests(stage_id, "order"))에',
-    '--    걸리지 않도록, 이번에 쓸 행의 기존 order 를 잠시 음수로 옮깁니다. 아래 업서트가 제자리로 돌려놓습니다.',
+    '--    월드·스테이지·퀘스트의 order 를 바꿀 때 UNIQUE 제약(worlds."order", stages(world_id, "order"),',
+    '--    quests(stage_id, "order"))에 걸리지 않도록, 이번에 쓸 행의 기존 order 를 잠시 음수로 옮깁니다.',
+    '--    아래 업서트가 제자리로 돌려놓습니다.',
     '-- ------------------------------------------------------------',
+    `UPDATE public.worlds SET "order" = -"order" WHERE "order" > 0 AND slug IN (${idList(rows.worlds.map((w) => w.slug))});`,
     `UPDATE public.stages SET "order" = -"order" WHERE "order" > 0 AND id IN (${idList(rows.stages.map((s) => s.id))});`,
     `UPDATE public.quests SET "order" = -"order" WHERE "order" > 0 AND id IN (${idList(rows.quests.map((q) => q.id))});`,
     '',
@@ -283,38 +330,60 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
 
   out.push(
     '-- ------------------------------------------------------------',
-    '-- 2. 스테이지',
+    '-- 2. 월드 (slug 기준. id 는 DB 가 정함: 1월드는 00012 가 만든 고정 id)',
     '-- ------------------------------------------------------------',
-    'INSERT INTO public.stages (id, "order", title, theme_name, description, is_final)',
+    'INSERT INTO public.worlds (slug, "order", title, theme, description, unlock_rule)',
     'VALUES',
-    rows.stages
+    rows.worlds
       .map(
-        (s) =>
-          `  (${[sqlText(s.id), String(s.order), sqlText(s.title), sqlText(s.theme_name), sqlText(s.description), s.is_final ? 'TRUE' : 'FALSE'].join(', ')})`,
+        (w) =>
+          `  (${[sqlText(w.slug), String(w.order), sqlText(w.title), sqlText(w.theme), sqlText(w.description), `${sqlText(JSON.stringify(w.unlock_rule))}::jsonb`].join(', ')})`,
       )
       .join(',\n'),
-    'ON CONFLICT (id) DO UPDATE SET',
-    '  "order" = EXCLUDED."order", title = EXCLUDED.title, theme_name = EXCLUDED.theme_name,',
-    '  description = EXCLUDED.description, is_final = EXCLUDED.is_final;',
+    'ON CONFLICT (slug) DO UPDATE SET',
+    '  "order" = EXCLUDED."order", title = EXCLUDED.title, theme = EXCLUDED.theme,',
+    '  description = EXCLUDED.description, unlock_rule = EXCLUDED.unlock_rule;',
     '',
   );
 
   out.push(
     '-- ------------------------------------------------------------',
-    '-- 3. 퀘스트 (공개 부분)',
+    '-- 3. 스테이지 (world_id 는 월드 slug 로 찾음. 월드가 없으면 NOT NULL 위반으로 전체 실패)',
+    '-- ------------------------------------------------------------',
+    'INSERT INTO public.stages (id, world_id, "order", title, theme_name, description, is_final)',
+    'VALUES',
+    rows.stages
+      .map(
+        (s) =>
+          `  (${[sqlText(s.id), worldIdOf(s.world), String(s.order), sqlText(s.title), sqlText(s.theme_name), sqlText(s.description), s.is_final ? 'TRUE' : 'FALSE'].join(', ')})`,
+      )
+      .join(',\n'),
+    'ON CONFLICT (id) DO UPDATE SET',
+    '  world_id = EXCLUDED.world_id, "order" = EXCLUDED."order", title = EXCLUDED.title,',
+    '  theme_name = EXCLUDED.theme_name, description = EXCLUDED.description, is_final = EXCLUDED.is_final;',
+    '',
+  );
+
+  out.push(
+    '-- ------------------------------------------------------------',
+    '-- 4. 퀘스트 (공개 부분)',
     '-- ------------------------------------------------------------',
   );
   for (const q of rows.quests) {
     out.push(
       '',
       `-- 퀘스트 ${stageOrder.get(q.stage_id)}-${q.order}: ${oneLine(q.title)}`,
-      'INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)',
+      'INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,',
+      '                           prompt_skeleton, validation_type, expected_output, xp_reward)',
       'VALUES (',
       `  ${sqlText(q.id)},`,
       `  ${sqlText(q.stage_id)},`,
       `  ${q.order},`,
       `  ${sqlText(q.title)},`,
       `  ${sqlText(q.concept)},`,
+      `  ${sqlText(q.quest_type)},`,
+      `  ${q.quiz_kind === null ? 'NULL' : sqlText(q.quiz_kind)},`,
+      `  ${q.is_mobile_friendly ? 'TRUE' : 'FALSE'},`,
       `  ${sqlJson(q.prompt_skeleton)},`,
       `  ${sqlText(q.validation_type)},`,
       `  '',`,
@@ -322,7 +391,8 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
       ')',
       'ON CONFLICT (id) DO UPDATE SET',
       '  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,',
-      '  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,',
+      '  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,',
+      '  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,',
       '  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,',
       '  xp_reward = EXCLUDED.xp_reward;',
     );
@@ -331,7 +401,7 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
 
   out.push(
     '-- ------------------------------------------------------------',
-    '-- 4. 정답 (quest_answer_keys, service_role 전용)',
+    '-- 5. 정답 (quest_answer_keys, service_role 전용)',
     '-- ------------------------------------------------------------',
   );
   for (const q of rows.quests) {
@@ -374,6 +444,10 @@ export function sqlText(value: string): string {
 
 function sqlJson(value: unknown): string {
   return `${sqlText(JSON.stringify(value, null, 2))}::jsonb`;
+}
+
+function worldIdOf(slug: string): string {
+  return `(SELECT w.id FROM public.worlds w WHERE w.slug = ${sqlText(slug)})`;
 }
 
 function idList(ids: string[]): string {
@@ -428,7 +502,8 @@ export interface CheckFixture {
 }
 
 export interface FixtureSource {
-  stages: Pick<StageRow, 'id' | 'order'>[];
+  /** world(월드 slug)가 없으면 python-island (P1-08 전 DB 스냅샷) */
+  stages: (Pick<StageRow, 'id' | 'order'> & { world?: string })[];
   quests: (Pick<QuestRow, 'id' | 'stage_id' | 'order' | 'title'> & {
     validation_type: string;
     prompt_skeleton: unknown;
@@ -441,7 +516,7 @@ export interface FixtureSource {
 
 /**
  * 행(빌드 결과 또는 DB 스냅샷) → 검증용 JSON.
- * 월드는 아직 DB 에 없으므로 `worldOf`로 받습니다(기본: 모두 python-island).
+ * 월드는 스테이지 행의 `world`(slug)에서 읽고, 없으면 `worldOf`(기본: python-island)로 정합니다.
  */
 export function toCheckFixture(
   rows: FixtureSource,
@@ -453,7 +528,11 @@ export function toCheckFixture(
 ): CheckFixture {
   const stageOrder = new Map(rows.stages.map((s) => [s.id, s.order]));
   const answers = new Map(rows.answer_keys.map((k) => [k.quest_id, k]));
-  const worldOf = options.worldOf ?? (() => 'python-island');
+  const stageWorld = new Map(rows.stages.map((s) => [s.id, s.world]));
+  const worldOf = (stageId: string) =>
+    stageWorld.get(stageId) ??
+    options.worldOf?.(stageId) ??
+    'python-island';
 
   const quests = rows.quests
     .map((q): CheckQuest => {

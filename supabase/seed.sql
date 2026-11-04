@@ -2,8 +2,8 @@
 -- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.
 -- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).
 -- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.
--- 콘텐츠 해시: 3d7ac3bc67e54a81
--- 스테이지 7 · 퀘스트 44 · 정답 행 44 (solution_code 43 + 프로젝트 단계 5)
+-- 콘텐츠 해시: 657409cc43793d82
+-- 월드 1 · 스테이지 7 · 퀘스트 44 · 정답 행 44 (solution_code 43 + 프로젝트 단계 5)
 --
 -- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).
 -- - 정답·힌트·solution_code 는 quest_answer_keys(service_role 전용)에 따로 씁니다.
@@ -12,44 +12,61 @@
 --
 -- 적용: supabase db reset 이 migrations 다음에 실행합니다. 운영은 SQL Editor 에서 BEGIN; … COMMIT; 으로
 --       감싸 실행하고, 00005(③) 뒤에 적용합니다 (docs/release/v0.4-runbook.md "콘텐츠 seed 적용").
+--       worlds·stages.world_id·quests.quest_type 을 쓰므로 00012(P1-08) 이후의 스키마가 필요합니다.
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- 1. 순서 충돌 방지
---    스테이지·퀘스트의 order 를 바꿀 때 UNIQUE 제약(stages."order", quests(stage_id, "order"))에
---    걸리지 않도록, 이번에 쓸 행의 기존 order 를 잠시 음수로 옮깁니다. 아래 업서트가 제자리로 돌려놓습니다.
+--    월드·스테이지·퀘스트의 order 를 바꿀 때 UNIQUE 제약(worlds."order", stages(world_id, "order"),
+--    quests(stage_id, "order"))에 걸리지 않도록, 이번에 쓸 행의 기존 order 를 잠시 음수로 옮깁니다.
+--    아래 업서트가 제자리로 돌려놓습니다.
 -- ------------------------------------------------------------
+UPDATE public.worlds SET "order" = -"order" WHERE "order" > 0 AND slug IN ('python-island');
 UPDATE public.stages SET "order" = -"order" WHERE "order" > 0 AND id IN ('a1000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000002', 'a1000000-0000-0000-0000-000000000003', 'a1000000-0000-0000-0000-000000000004', 'a1000000-0000-0000-0000-000000000005', 'a1000000-0000-0000-0000-000000000006', 'a1000000-0000-0000-0000-000000000007');
 UPDATE public.quests SET "order" = -"order" WHERE "order" > 0 AND id IN ('b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000023', 'b1000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000024', 'b1000000-0000-0000-0000-000000000025', 'b1000000-0000-0000-0000-000000000026', 'b1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000027', 'b1000000-0000-0000-0000-000000000006', 'b1000000-0000-0000-0000-000000000028', 'b1000000-0000-0000-0000-000000000007', 'b1000000-0000-0000-0000-000000000029', 'b1000000-0000-0000-0000-000000000008', 'b1000000-0000-0000-0000-000000000030', 'b1000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000010', 'b1000000-0000-0000-0000-000000000011', 'b1000000-0000-0000-0000-000000000031', 'b1000000-0000-0000-0000-000000000032', 'b1000000-0000-0000-0000-000000000012', 'b1000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000033', 'b1000000-0000-0000-0000-000000000034', 'b1000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000015', 'b1000000-0000-0000-0000-000000000035', 'b1000000-0000-0000-0000-000000000036', 'b1000000-0000-0000-0000-000000000016', 'b1000000-0000-0000-0000-000000000017', 'b1000000-0000-0000-0000-000000000037', 'b1000000-0000-0000-0000-000000000018', 'b1000000-0000-0000-0000-000000000038', 'b1000000-0000-0000-0000-000000000039', 'b1000000-0000-0000-0000-000000000040', 'b1000000-0000-0000-0000-000000000019', 'b1000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000041', 'b1000000-0000-0000-0000-000000000021', 'b1000000-0000-0000-0000-000000000042', 'b1000000-0000-0000-0000-000000000043', 'b1000000-0000-0000-0000-000000000044', 'b1000000-0000-0000-0000-000000000022');
 
 -- ------------------------------------------------------------
--- 2. 스테이지
+-- 2. 월드 (slug 기준. id 는 DB 가 정함: 1월드는 00012 가 만든 고정 id)
 -- ------------------------------------------------------------
-INSERT INTO public.stages (id, "order", title, theme_name, description, is_final)
+INSERT INTO public.worlds (slug, "order", title, theme, description, unlock_rule)
 VALUES
-  ('a1000000-0000-0000-0000-000000000001', 1, '파이썬 마을 입구', 'python_village', 'print()와 주석, 기본 입출력을 배워봐요!', FALSE),
-  ('a1000000-0000-0000-0000-000000000002', 2, '변수의 숲', 'variable_forest', '변수 선언, 자료형(int, str, float), 형변환을 배워봐요!', FALSE),
-  ('a1000000-0000-0000-0000-000000000003', 3, '조건의 갈림길', 'condition_crossroad', 'if/elif/else, 비교연산자, 논리연산자를 배워봐요!', FALSE),
-  ('a1000000-0000-0000-0000-000000000004', 4, '반복의 동굴', 'loop_cave', 'for, while, range(), break/continue를 배워봐요!', FALSE),
-  ('a1000000-0000-0000-0000-000000000005', 5, '리스트 호수', 'list_lake', '리스트 생성, 인덱싱, 슬라이싱, append, len을 배워봐요!', FALSE),
-  ('a1000000-0000-0000-0000-000000000006', 6, '함수의 탑', 'function_tower', 'def, 매개변수, return, 내장함수를 배워봐요!', FALSE),
-  ('a1000000-0000-0000-0000-000000000007', 7, '프로젝트 왕국', 'project_kingdom', '배운 모든 것을 모아 프로젝트를 완성해봐요!', TRUE)
-ON CONFLICT (id) DO UPDATE SET
-  "order" = EXCLUDED."order", title = EXCLUDED.title, theme_name = EXCLUDED.theme_name,
-  description = EXCLUDED.description, is_final = EXCLUDED.is_final;
+  ('python-island', 1, '파이썬 섬', 'python_island', 'print()부터 함수까지, 파이썬 기초를 배우는 첫 번째 섬이에요!', '{"type":"open"}'::jsonb)
+ON CONFLICT (slug) DO UPDATE SET
+  "order" = EXCLUDED."order", title = EXCLUDED.title, theme = EXCLUDED.theme,
+  description = EXCLUDED.description, unlock_rule = EXCLUDED.unlock_rule;
 
 -- ------------------------------------------------------------
--- 3. 퀘스트 (공개 부분)
+-- 3. 스테이지 (world_id 는 월드 slug 로 찾음. 월드가 없으면 NOT NULL 위반으로 전체 실패)
+-- ------------------------------------------------------------
+INSERT INTO public.stages (id, world_id, "order", title, theme_name, description, is_final)
+VALUES
+  ('a1000000-0000-0000-0000-000000000001', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 1, '파이썬 마을 입구', 'python_village', 'print()와 주석, 기본 입출력을 배워봐요!', FALSE),
+  ('a1000000-0000-0000-0000-000000000002', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 2, '변수의 숲', 'variable_forest', '변수 선언, 자료형(int, str, float), 형변환을 배워봐요!', FALSE),
+  ('a1000000-0000-0000-0000-000000000003', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 3, '조건의 갈림길', 'condition_crossroad', 'if/elif/else, 비교연산자, 논리연산자를 배워봐요!', FALSE),
+  ('a1000000-0000-0000-0000-000000000004', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 4, '반복의 동굴', 'loop_cave', 'for, while, range(), break/continue를 배워봐요!', FALSE),
+  ('a1000000-0000-0000-0000-000000000005', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 5, '리스트 호수', 'list_lake', '리스트 생성, 인덱싱, 슬라이싱, append, len을 배워봐요!', FALSE),
+  ('a1000000-0000-0000-0000-000000000006', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 6, '함수의 탑', 'function_tower', 'def, 매개변수, return, 내장함수를 배워봐요!', FALSE),
+  ('a1000000-0000-0000-0000-000000000007', (SELECT w.id FROM public.worlds w WHERE w.slug = 'python-island'), 7, '프로젝트 왕국', 'project_kingdom', '배운 모든 것을 모아 프로젝트를 완성해봐요!', TRUE)
+ON CONFLICT (id) DO UPDATE SET
+  world_id = EXCLUDED.world_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  theme_name = EXCLUDED.theme_name, description = EXCLUDED.description, is_final = EXCLUDED.is_final;
+
+-- ------------------------------------------------------------
+-- 4. 퀘스트 (공개 부분)
 -- ------------------------------------------------------------
 
 -- 퀘스트 1-1: 첫 번째 인사
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000001',
   'a1000000-0000-0000-0000-000000000001',
   1,
   '첫 번째 인사',
   'print()',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "print() 함수로 출력하기",
   "learning_goals": [
@@ -68,18 +85,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 1-2: 내 소개를 해볼까?
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000002',
   'a1000000-0000-0000-0000-000000000001',
   2,
   '내 소개를 해볼까?',
   'print() 여러 줄',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "print()를 여러 번 사용하여 여러 줄 출력하기",
   "learning_goals": [
@@ -98,18 +120,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 1-3: 따옴표의 비밀
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000023',
   'a1000000-0000-0000-0000-000000000001',
   3,
   '따옴표의 비밀',
   '작은따옴표, 큰따옴표',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "작은따옴표와 큰따옴표의 차이",
   "learning_goals": [
@@ -128,18 +155,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 1-4: 주석으로 메모하기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000003',
   'a1000000-0000-0000-0000-000000000001',
   4,
   '주석으로 메모하기',
   '주석(#), print()',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "주석(#)의 역할과 사용법",
   "learning_goals": [
@@ -159,18 +191,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 1-5: 특수문자 출력하기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000024',
   'a1000000-0000-0000-0000-000000000001',
   5,
   '특수문자 출력하기',
   '이스케이프 문자 \n',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "이스케이프 문자 \\n으로 줄바꿈하기",
   "learning_goals": [
@@ -189,18 +226,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 1-6: 숫자도 출력해요
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000025',
   'a1000000-0000-0000-0000-000000000001',
   6,
   '숫자도 출력해요',
   'print()로 숫자 출력',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "print()로 숫자 출력하기",
   "learning_goals": [
@@ -219,18 +261,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 1-7: 마을 안내판 만들기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000026',
   'a1000000-0000-0000-0000-000000000001',
   7,
   '마을 안내판 만들기',
   'print() 종합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "print() 종합 활용",
   "learning_goals": [
@@ -251,18 +298,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-1: 마법 상자에 이름 넣기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000004',
   'a1000000-0000-0000-0000-000000000002',
   1,
   '마법 상자에 이름 넣기',
   '변수 선언',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "변수 선언과 값 저장",
   "learning_goals": [
@@ -281,18 +333,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-2: 숫자 상자와 글자 상자
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000005',
   'a1000000-0000-0000-0000-000000000002',
   2,
   '숫자 상자와 글자 상자',
   'int, str 자료형',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "정수(int)와 문자열(str) 자료형",
   "learning_goals": [
@@ -311,18 +368,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-3: 상자 이름 바꾸기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000027',
   'a1000000-0000-0000-0000-000000000002',
   3,
   '상자 이름 바꾸기',
   '변수 재할당',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "변수 재할당 (값 바꾸기)",
   "learning_goals": [
@@ -341,18 +403,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-4: 나이 계산기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000006',
   'a1000000-0000-0000-0000-000000000002',
   4,
   '나이 계산기',
   'int 연산',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "정수 변수의 사칙연산",
   "learning_goals": [
@@ -371,18 +438,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-5: 글자 합치기 마법
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000028',
   'a1000000-0000-0000-0000-000000000002',
   5,
   '글자 합치기 마법',
   '문자열 연결(+)',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "문자열 연결 연산자 +",
   "learning_goals": [
@@ -401,18 +473,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-6: 변신 마법! 형변환
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000007',
   'a1000000-0000-0000-0000-000000000002',
   6,
   '변신 마법! 형변환',
   'str(), int() 형변환',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "자료형 변환 (str -> int, int -> str)",
   "learning_goals": [
@@ -432,18 +509,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 2-7: 자기소개 카드 만들기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000029',
   'a1000000-0000-0000-0000-000000000002',
   7,
   '자기소개 카드 만들기',
   '변수 종합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "변수와 문자열 연결 종합 활용",
   "learning_goals": [
@@ -464,18 +546,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-1: 비밀번호를 맞춰라!
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000008',
   'a1000000-0000-0000-0000-000000000003',
   1,
   '비밀번호를 맞춰라!',
   'if/else',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "if/else 조건문",
   "learning_goals": [
@@ -495,18 +582,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-2: 짝수인지 홀수인지?
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000030',
   'a1000000-0000-0000-0000-000000000003',
   2,
   '짝수인지 홀수인지?',
   'if/else, % 나머지 연산',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "if/else와 나머지 연산자 %",
   "learning_goals": [
@@ -525,18 +617,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-3: 성적표 만들기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000009',
   'a1000000-0000-0000-0000-000000000003',
   3,
   '성적표 만들기',
   'if/elif/else',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "if/elif/else 다중 조건문",
   "learning_goals": [
@@ -555,18 +652,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-4: 놀이공원 입장
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000010',
   'a1000000-0000-0000-0000-000000000003',
   4,
   '놀이공원 입장',
   '비교연산자 (>=, <=, >, <)',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "비교연산자로 조건 만들기",
   "learning_goals": [
@@ -585,18 +687,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-5: 마법사의 조건
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000011',
   'a1000000-0000-0000-0000-000000000003',
   5,
   '마법사의 조건',
   'and/or/not 논리연산자',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "논리연산자 and, or, not",
   "learning_goals": [
@@ -616,18 +723,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-6: 가위바위보 심판
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000031',
   'a1000000-0000-0000-0000-000000000003',
   6,
   '가위바위보 심판',
   '중첩 if문',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "중첩 if문으로 복잡한 조건 처리하기",
   "learning_goals": [
@@ -646,18 +758,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 3-7: 영화관 할인 시스템
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000032',
   'a1000000-0000-0000-0000-000000000003',
   7,
   '영화관 할인 시스템',
   '조건문 종합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "조건문 종합 활용 - 할인 시스템 만들기",
   "learning_goals": [
@@ -678,18 +795,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-1: 숫자 세기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000012',
   'a1000000-0000-0000-0000-000000000004',
   1,
   '숫자 세기',
   'for, range()',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "for 반복문과 range() 함수",
   "learning_goals": [
@@ -709,18 +831,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-2: 구구단 외우기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000013',
   'a1000000-0000-0000-0000-000000000004',
   2,
   '구구단 외우기',
   'for 반복문 활용',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "for 반복문으로 구구단 출력하기",
   "learning_goals": [
@@ -739,18 +866,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-3: 별 찍기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000033',
   'a1000000-0000-0000-0000-000000000004',
   3,
   '별 찍기',
   '문자열 반복(*)',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "문자열 반복 연산자 *",
   "learning_goals": [
@@ -769,18 +901,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-4: 합계 구하기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000034',
   'a1000000-0000-0000-0000-000000000004',
   4,
   '합계 구하기',
   '누적 변수 + for',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "누적 변수와 for 반복문으로 합계 구하기",
   "learning_goals": [
@@ -799,18 +936,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-5: 보물 찾기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000014',
   'a1000000-0000-0000-0000-000000000004',
   5,
   '보물 찾기',
   'while, break',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "while 반복문과 break",
   "learning_goals": [
@@ -830,18 +972,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-6: 짝수만 골라내기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000015',
   'a1000000-0000-0000-0000-000000000004',
   6,
   '짝수만 골라내기',
   'for, if, continue',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "continue로 특정 반복 건너뛰기",
   "learning_goals": [
@@ -861,18 +1008,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-7: 카운트다운
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000035',
   'a1000000-0000-0000-0000-000000000004',
   7,
   '카운트다운',
   'while 감소 반복',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "while 반복문으로 감소하며 반복하기",
   "learning_goals": [
@@ -891,18 +1043,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 4-8: 별 피라미드 만들기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000036',
   'a1000000-0000-0000-0000-000000000004',
   8,
   '별 피라미드 만들기',
   '반복 종합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "for 반복문과 문자열 반복으로 피라미드 만들기",
   "learning_goals": [
@@ -922,18 +1079,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-1: 과일 바구니
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000016',
   'a1000000-0000-0000-0000-000000000005',
   1,
   '과일 바구니',
   '리스트 생성',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "리스트 생성과 출력",
   "learning_goals": [
@@ -953,18 +1115,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-2: 보물 목록 정리
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000017',
   'a1000000-0000-0000-0000-000000000005',
   2,
   '보물 목록 정리',
   '인덱싱, 슬라이싱',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "리스트 인덱싱과 슬라이싱",
   "learning_goals": [
@@ -984,18 +1151,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-3: 리스트 순회하기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000037',
   'a1000000-0000-0000-0000-000000000005',
   3,
   '리스트 순회하기',
   'for + 리스트',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "for 반복문으로 리스트 순회하기",
   "learning_goals": [
@@ -1014,18 +1186,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-4: 친구 목록 관리
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000018',
   'a1000000-0000-0000-0000-000000000005',
   4,
   '친구 목록 관리',
   'append(), len()',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "리스트에 추가하기(append)와 길이 구하기(len)",
   "learning_goals": [
@@ -1044,18 +1221,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-5: 리스트 정렬하기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000038',
   'a1000000-0000-0000-0000-000000000005',
   5,
   '리스트 정렬하기',
   'sort()',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "리스트 정렬하기 sort()",
   "learning_goals": [
@@ -1074,18 +1256,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-6: 리스트 속 검색
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000039',
   'a1000000-0000-0000-0000-000000000005',
   6,
   '리스트 속 검색',
   'in 연산자',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "in 연산자로 리스트에서 값 찾기",
   "learning_goals": [
@@ -1104,18 +1291,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 5-7: 쇼핑 리스트 정리기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000040',
   'a1000000-0000-0000-0000-000000000005',
   7,
   '쇼핑 리스트 정리기',
   '리스트 종합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "리스트 종합 활용 - 쇼핑 리스트 만들기",
   "learning_goals": [
@@ -1137,18 +1329,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-1: 인사하는 함수
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000019',
   'a1000000-0000-0000-0000-000000000006',
   1,
   '인사하는 함수',
   'def, 함수 호출',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "함수 정의(def)와 호출",
   "learning_goals": [
@@ -1168,18 +1365,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-2: 계산기 함수
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000020',
   'a1000000-0000-0000-0000-000000000006',
   2,
   '계산기 함수',
   '매개변수, return',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "매개변수와 return으로 값 돌려주기",
   "learning_goals": [
@@ -1198,18 +1400,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-3: 기본값이 있는 함수
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000041',
   'a1000000-0000-0000-0000-000000000006',
   3,
   '기본값이 있는 함수',
   '기본 매개변수',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "기본 매개변수 (default parameter)",
   "learning_goals": [
@@ -1228,18 +1435,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-4: 최댓값 찾기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000021',
   'a1000000-0000-0000-0000-000000000006',
   4,
   '최댓값 찾기',
   '내장함수 max(), min()',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "파이썬 내장함수 max()와 min()",
   "learning_goals": [
@@ -1259,18 +1471,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-5: 여러 값 돌려주기
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000042',
   'a1000000-0000-0000-0000-000000000006',
   5,
   '여러 값 돌려주기',
   '다중 return (튜플)',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "함수에서 여러 값 돌려주기 (튜플)",
   "learning_goals": [
@@ -1289,18 +1506,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-6: 함수 안의 함수 호출
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000043',
   'a1000000-0000-0000-0000-000000000006',
   6,
   '함수 안의 함수 호출',
   '함수 조합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "함수 조합 (함수의 결과를 다른 함수에 전달)",
   "learning_goals": [
@@ -1319,18 +1541,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 6-7: 성적 분석 프로그램
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000044',
   'a1000000-0000-0000-0000-000000000006',
   7,
   '성적 분석 프로그램',
   '함수 종합',
+  'code',
+  NULL,
+  FALSE,
   '{
   "topic": "함수 종합 활용 - 성적 분석 프로그램",
   "learning_goals": [
@@ -1351,18 +1578,23 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- 퀘스트 7-1: 숫자 맞추기 게임
-INSERT INTO public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type, expected_output, xp_reward)
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000022',
   'a1000000-0000-0000-0000-000000000007',
   1,
   '숫자 맞추기 게임',
   '종합 프로젝트',
+  'project',
+  NULL,
+  FALSE,
   '{
   "topic": "종합 프로젝트: 숫자 맞추기 게임 만들기",
   "learning_goals": [
@@ -1419,12 +1651,13 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
-  concept = EXCLUDED.concept, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
 -- ------------------------------------------------------------
--- 4. 정답 (quest_answer_keys, service_role 전용)
+-- 5. 정답 (quest_answer_keys, service_role 전용)
 -- ------------------------------------------------------------
 
 -- 정답 1-1: 첫 번째 인사

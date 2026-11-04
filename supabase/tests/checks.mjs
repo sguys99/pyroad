@@ -2274,8 +2274,8 @@ async function groupApp(u) {
     ],
     [
       'APP-2',
-      'world/page.tsx stages',
-      '/rest/v1/stages?select=id,order,title,theme_name,description,is_final,created_at,quests(id,order)&order=order.asc',
+      'world/page.tsx stages (P1-08: 월드 order 임베딩, 정렬은 getStageStatuses)',
+      '/rest/v1/stages?select=id,world_id,order,title,theme_name,description,is_final,created_at,world:worlds(order),quests(id,order)',
     ],
     [
       'APP-3',
@@ -2294,8 +2294,8 @@ async function groupApp(u) {
     ],
     [
       'APP-6',
-      'profile/page.tsx stages',
-      '/rest/v1/stages?select=id,order,title,quests(id)&order=order.asc',
+      'profile/page.tsx stages (P1-08: 월드 order 임베딩, 정렬은 sortStages)',
+      '/rest/v1/stages?select=id,order,title,world:worlds(order),quests(id)',
     ],
     [
       'APP-7',
@@ -2340,6 +2340,11 @@ async function groupApp(u) {
       run: async () => {
         const r = await rest('GET', path, { as: u.alice });
         const c = classifyRead(r);
+        if ((id === 'APP-2' || id === 'APP-6') && c.actual === 'allowed') {
+          const bad = r.json.filter((s) => s.world?.order !== 1);
+          if (bad.length)
+            return { actual: 'world-missing', detail: `${bad.length}행에 world.order 없음` };
+        }
         if (id === 'APP-1' && c.actual === 'allowed') {
           const sk = r.json[0].prompt_skeleton;
           if (typeof sk?.starter_code !== 'string')
@@ -2728,6 +2733,22 @@ async function groupStatic() {
       return { actual: v, detail: `${v}개` };
     },
   });
+  await check({
+    group: 'static',
+    id: 'ST-6',
+    role: 'postgres',
+    op: 'search_path 가 고정되지 않은 public 함수 (Advisors function_search_path_mutable. 인라인용 kst_date 는 예외)',
+    ...NONE,
+    run: () => {
+      const v =
+        one(`select coalesce(string_agg(p.proname, ',' order by 1), '')
+        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public' and p.prokind = 'f' and p.proname <> 'kst_date'
+         and not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')
+         and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
 
   const snap = (id, op, name, sql) =>
     check({
@@ -2789,6 +2810,545 @@ async function groupStatic() {
   );
 }
 
+// ── schema: P1-08 스키마 확장 (00012) ─────────────────────────
+// psql 트랜잭션 안에서 검사하고 되돌림. DO 블록이 기대와 다르면 예외 → 'mismatch'
+function sqlCheck(sql) {
+  const r = psql(`BEGIN;\n${sql}\nSELECT 'ok';\nROLLBACK;\n`);
+  if (r.ok) return { actual: 'ok', detail: r.out.split('\n').slice(-1)[0] };
+  return { actual: 'mismatch', detail: firstLine(r.err) };
+}
+const PYTHON_ISLAND = 'c1000000-0000-0000-0000-000000000001';
+const STAGE7 = 'a1000000-0000-0000-0000-000000000007';
+
+async function groupSchema(u) {
+  // 월드: 로그인 사용자만 조회 (stages·quests 와 같은 원칙), 쓰기는 service_role
+  await check({
+    group: 'schema',
+    id: 'WD-1',
+    role: 'anon',
+    op: 'GET /worlds',
+    ...READ,
+    run: async () =>
+      classifyRead(await rest('GET', '/rest/v1/worlds?select=*')),
+  });
+  await check({
+    group: 'schema',
+    id: 'WD-2',
+    role: 'authenticated',
+    op: 'GET /worlds (1월드 python-island)',
+    ...READ,
+    run: async () => {
+      const r = await rest('GET', '/rest/v1/worlds?select=id,slug,order,unlock_rule', {
+        as: u.alice,
+      });
+      const c = classifyRead(r);
+      if (c.actual !== 'allowed') return c;
+      const w = r.json.find((x) => x.slug === 'python-island');
+      return w?.id === PYTHON_ISLAND && w.order === 1 && w.unlock_rule?.type === 'open'
+        ? c
+        : { actual: 'mismatch', detail: JSON.stringify(r.json) };
+    },
+  });
+  await check({
+    group: 'schema',
+    id: 'WD-3',
+    role: 'authenticated',
+    op: 'POST /worlds · PATCH /worlds {title}',
+    ...WRITE,
+    run: async () => {
+      const ins = await classifyWrite(
+        rest('POST', '/rest/v1/worlds', {
+          as: u.alice,
+          body: { slug: 'hack-world', order: 99, title: 'x', theme: 'x' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.worlds where slug = 'hack-world')`,
+      );
+      if (ins.actual === 'written') return ins;
+      const upd = await classifyWrite(
+        rest('PATCH', `/rest/v1/worlds?id=eq.${PYTHON_ISLAND}`, {
+          as: u.alice,
+          body: { title: 'hacked' },
+          prefer: 'return=minimal',
+        }),
+        `select title = 'hacked' from public.worlds where id = '${PYTHON_ISLAND}'`,
+      );
+      return upd.actual === 'written'
+        ? upd
+        : { actual: ins.actual, detail: `POST ${ins.detail} · PATCH ${upd.detail}` };
+    },
+  });
+  await check({
+    group: 'schema',
+    id: 'WD-4',
+    role: 'postgres',
+    op: '스테이지 world_id·quest_type 백필 (7개 → 1월드, 7-1 project · 나머지 code, quiz_kind 없음)',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`DO $$ BEGIN
+        IF (SELECT count(*) FROM public.stages WHERE world_id <> '${PYTHON_ISLAND}') > 0
+           OR (SELECT count(*) FROM public.stages) <> 7 THEN
+          RAISE EXCEPTION 'stages: 1월드가 아닌 스테이지 또는 7개가 아님';
+        END IF;
+        IF (SELECT string_agg(id::text, ',') FROM public.quests WHERE quest_type = 'project') <> '${Q_PROJECT}'
+           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'code') <> 43
+           OR EXISTS (SELECT 1 FROM public.quests WHERE quiz_kind IS NOT NULL OR is_mobile_friendly) THEN
+          RAISE EXCEPTION 'quests: quest_type·quiz_kind·is_mobile_friendly 가 기대와 다름';
+        END IF;
+      END $$;`),
+  });
+  await check({
+    group: 'schema',
+    id: 'WD-5',
+    role: 'postgres',
+    op: '2월드 스테이지(order 1) 추가 → UNIQUE(world_id, order) 허용, 1월드 마지막 스테이지를 깨야 열림, 리셋은 (월드, 스테이지) 순서',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`
+        INSERT INTO public.worlds (id, "order", slug, title, theme)
+        VALUES ('c1000000-0000-0000-0000-0000000000ff', 99, 'rls-world-2', '시험 월드', 'test');
+        INSERT INTO public.stages (id, world_id, "order", title, theme_name)
+        VALUES ('a1000000-0000-0000-0000-0000000000ff', 'c1000000-0000-0000-0000-0000000000ff', 1, '시험 스테이지', 'test');
+        INSERT INTO public.quests (id, stage_id, "order", title, concept, validation_type, quest_type)
+        VALUES ('b1000000-0000-0000-0000-0000000000ff', 'a1000000-0000-0000-0000-0000000000ff', 1, '시험', 'x', 'contains', 'code');
+        DO $$
+        DECLARE
+          v_uid UUID := '${u.dan.id}';
+          v_r   JSONB;
+        BEGIN
+          IF public.is_stage_unlocked(v_uid, 'a1000000-0000-0000-0000-0000000000ff') THEN
+            RAISE EXCEPTION '2월드 첫 스테이지가 처음부터 열림';
+          END IF;
+          INSERT INTO public.user_progress (user_id, quest_id, status, completed_at)
+          SELECT v_uid, q.id, 'completed', now() FROM public.quests q WHERE q.stage_id = '${STAGE7}'
+          ON CONFLICT (user_id, quest_id) DO UPDATE SET status = 'completed';
+          IF NOT public.is_stage_unlocked(v_uid, 'a1000000-0000-0000-0000-0000000000ff') THEN
+            RAISE EXCEPTION '1월드 마지막 스테이지를 깼는데 2월드 첫 스테이지가 잠김';
+          END IF;
+          IF NOT public.is_stage_unlocked(v_uid, '${STAGE1}') THEN
+            RAISE EXCEPTION '1월드 첫 스테이지가 잠김';
+          END IF;
+          INSERT INTO public.user_progress (user_id, quest_id, status, completed_at)
+          VALUES (v_uid, 'b1000000-0000-0000-0000-0000000000ff', 'completed', now());
+          -- 2월드 스테이지 리셋: 1월드 진행은 그대로
+          v_r := public.reset_progress(v_uid, 'stage', 'a1000000-0000-0000-0000-0000000000ff');
+          IF (v_r->>'removed_quests')::int <> 1
+             OR NOT EXISTS (SELECT 1 FROM public.user_progress WHERE user_id = v_uid AND quest_id = '${Q_PROJECT}') THEN
+            RAISE EXCEPTION '2월드 리셋이 1월드 진행을 지움: %', v_r;
+          END IF;
+          -- 1월드 7스테이지 리셋: 뒤의 2월드 스테이지도 함께
+          INSERT INTO public.user_progress (user_id, quest_id, status, completed_at)
+          VALUES (v_uid, 'b1000000-0000-0000-0000-0000000000ff', 'completed', now());
+          v_r := public.reset_progress(v_uid, 'stage', '${STAGE7}');
+          IF jsonb_array_length(v_r->'reset_stages') <> 2
+             OR EXISTS (SELECT 1 FROM public.user_progress WHERE user_id = v_uid AND quest_id = 'b1000000-0000-0000-0000-0000000000ff') THEN
+            RAISE EXCEPTION '1월드 리셋이 뒤 월드 스테이지를 함께 리셋하지 않음: %', v_r;
+          END IF;
+        END $$;`),
+  });
+  await check({
+    group: 'schema',
+    id: 'WD-6',
+    role: 'postgres',
+    op: 'stages UNIQUE: 같은 월드 안 order 중복은 거부',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`DO $$ BEGIN
+        BEGIN
+          INSERT INTO public.stages (world_id, "order", title, theme_name) VALUES ('${PYTHON_ISLAND}', 1, '중복', 'x');
+          RAISE EXCEPTION '같은 월드에 order 1 스테이지가 두 개 들어감';
+        EXCEPTION WHEN unique_violation THEN NULL;
+        END;
+      END $$;`),
+  });
+
+  // 퀴즈 시도: 클라이언트는 쓸 수 없고 본인 것만 읽음
+  one(`insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct) values
+        ('${u.alice.id}', '${Q1}', 'first', 1, '"opt_a"', false),
+        ('${u.bob.id}', '${Q1}', 'first', 1, '"opt_b"', true)`);
+  await check({
+    group: 'schema',
+    id: 'QA-1',
+    role: 'authenticated',
+    op: 'POST /quiz_attempts {is_correct: true} (시도 위조)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/quiz_attempts', {
+          as: u.alice,
+          body: { user_id: u.alice.id, quest_id: Q2, mode: 'first', attempt_no: 1, answer: 'x', is_correct: true },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.quiz_attempts where user_id = '${u.alice.id}' and quest_id = '${Q2}')`,
+      ),
+  });
+  await check({
+    group: 'schema',
+    id: 'QA-2',
+    role: 'authenticated',
+    op: 'PATCH /quiz_attempts {is_correct: true} · DELETE /quiz_attempts (본인 행)',
+    ...WRITE,
+    run: async () => {
+      const upd = await classifyWrite(
+        rest('PATCH', `/rest/v1/quiz_attempts?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { is_correct: true },
+          prefer: 'return=minimal',
+        }),
+        `select coalesce(bool_or(is_correct), false) from public.quiz_attempts where user_id = '${u.alice.id}'`,
+      );
+      if (upd.actual === 'written') return upd;
+      const del = await classifyWrite(
+        rest('DELETE', `/rest/v1/quiz_attempts?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          prefer: 'return=minimal',
+        }),
+        `select not exists (select 1 from public.quiz_attempts where user_id = '${u.alice.id}')`,
+      );
+      return del.actual === 'written'
+        ? del
+        : { actual: upd.actual, detail: `PATCH ${upd.detail} · DELETE ${del.detail}` };
+    },
+  });
+  await check({
+    group: 'schema',
+    id: 'QA-3',
+    role: 'authenticated(psql)',
+    op: 'SET ROLE authenticated; INSERT INTO quiz_attempts',
+    ...SQLW,
+    run: async () =>
+      classifySqlWrite(
+        psqlAs(
+          'authenticated',
+          u.alice.id,
+          `INSERT INTO public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct)
+           VALUES (auth.uid(), '${Q2}', 'first', 1, '"x"', true) RETURNING id;`,
+        ),
+      ),
+  });
+  await check({
+    group: 'schema',
+    id: 'QA-4',
+    role: 'anon',
+    op: 'GET /quiz_attempts',
+    ...READ,
+    run: async () =>
+      classifyRead(await rest('GET', '/rest/v1/quiz_attempts?select=*')),
+  });
+  await check({
+    group: 'schema',
+    id: 'QA-5',
+    role: 'authenticated',
+    op: 'GET /quiz_attempts → 본인 행만 (다른 사용자 시도는 안 보임)',
+    deny: ['others-visible'],
+    allow: ['own-only'],
+    run: async () => {
+      const r = await rest('GET', '/rest/v1/quiz_attempts?select=user_id,mode,attempt_no,is_correct', {
+        as: u.alice,
+      });
+      const c = classifyRead(r);
+      if (c.actual !== 'allowed') return c;
+      return r.json.every((x) => x.user_id === u.alice.id)
+        ? { actual: 'own-only', detail: `rows=${r.json.length}` }
+        : { actual: 'others-visible', detail: `rows=${r.json.length}` };
+    },
+  });
+
+  // 프로필 컬럼: 클라이언트 UPDATE 권한 없음 (UI 를 만드는 P3-11·P2-15 에서 GRANT)
+  const userPatch = (id, op, body, verify) =>
+    check({
+      group: 'schema',
+      id,
+      role: 'authenticated',
+      op,
+      ...WRITE,
+      run: () =>
+        classifyWrite(
+          rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+            as: u.alice,
+            body,
+            prefer: 'return=minimal',
+          }),
+          `select ${verify} from public.users where id = '${u.alice.id}'`,
+        ),
+    });
+  await userPatch('PF-1', 'PATCH /users?id=eq.<본인> {nickname}', { nickname: '파이썬왕' }, `nickname is not distinct from '파이썬왕'`);
+  await userPatch(
+    'PF-2',
+    'PATCH /users?id=eq.<본인> {settings}',
+    { settings: { sound: { muted: true } } },
+    `settings = '{"sound": {"muted": true}}'::jsonb`,
+  );
+  await userPatch(
+    'PF-3',
+    'PATCH /users?id=eq.<본인> {avatar_config, grade}',
+    { avatar_config: { hat: 'crown' }, grade: 3 },
+    `grade is not distinct from 3`,
+  );
+  await userPatch(
+    'PF-4',
+    'PATCH /users?id=eq.<본인> {last_login_provider, last_login_at} (서버 값)',
+    { last_login_provider: 'naver', last_login_at: '2000-01-01T00:00:00Z' },
+    `last_login_provider is not distinct from 'naver'`,
+  );
+  await check({
+    group: 'schema',
+    id: 'PF-5',
+    role: 'postgres',
+    op: '새 사용자 users.settings 기본값 = §2.2 형태 (sound P0-15 · motion auto/system), avatar_config {}',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`DO $$
+      DECLARE v RECORD;
+      BEGIN
+        SELECT settings, avatar_config, nickname, grade INTO v FROM public.users WHERE id = '${u.carol.id}';
+        IF v.settings->'sound'->>'version' <> '1' OR v.settings->'sound'->'sfx'->>'enabled' <> 'true'
+           OR v.settings->'sound'->'bgm'->>'enabled' <> 'false'
+           OR v.settings->'motion' <> '{"tier": "auto", "reduced": "system"}'::jsonb
+           OR v.avatar_config <> '{}'::jsonb OR v.nickname IS NOT NULL OR v.grade IS NOT NULL THEN
+          RAISE EXCEPTION '기본값이 다름: settings=% avatar=% nickname=% grade=%', v.settings, v.avatar_config, v.nickname, v.grade;
+        END IF;
+      END $$;`),
+  });
+
+  // 닉네임 글자 규칙 (§12-Q14): KS X 1001 완성형 2,350자 + 영문·숫자, 2~10자, 대소문자 무시 유일
+  await check({
+    group: 'schema',
+    id: 'NK-1',
+    role: 'postgres',
+    op: "users_nickname_chars 의 한글 = convert_to(…, 'EUC_KR') 가 되는 완성형 (가~힣 11,172자 전수 비교 → 2,350자)",
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`
+        CREATE FUNCTION pg_temp.euckr(t TEXT) RETURNS BOOLEAN LANGUAGE plpgsql AS $f$
+        BEGIN PERFORM convert_to(t, 'EUC_KR'); RETURN true; EXCEPTION WHEN OTHERS THEN RETURN false; END $f$;
+        DO $$
+        DECLARE v_re TEXT; v_ok INT; v_ksx INT; v_diff INT;
+        BEGIN
+          SELECT substring(pg_get_constraintdef(oid) FROM $r$~ '(.*)'::text$r$) INTO v_re
+            FROM pg_constraint WHERE conrelid = 'public.users'::regclass AND conname = 'users_nickname_chars';
+          SELECT count(*) FILTER (WHERE ch ~ v_re), count(*) FILTER (WHERE pg_temp.euckr(ch)),
+                 count(*) FILTER (WHERE (ch ~ v_re) <> pg_temp.euckr(ch))
+            INTO v_ok, v_ksx, v_diff
+            FROM (SELECT chr(cp) AS ch FROM generate_series(44032, 55203) cp) h;
+          IF v_ok <> 2350 OR v_ksx <> 2350 OR v_diff <> 0 THEN
+            RAISE EXCEPTION 'CHECK 허용 %자, EUC-KR %자, 다른 글자 %', v_ok, v_ksx, v_diff;
+          END IF;
+        END $$;`),
+  });
+  await check({
+    group: 'schema',
+    id: 'NK-2',
+    role: 'postgres',
+    op: '닉네임 CHECK: 파이썬꿈나무·Py123·가나 허용 / 똠방·햏·가·😀가·가 나·11자·제로폭 문자 거부',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`DO $$
+      DECLARE v TEXT;
+      BEGIN
+        FOREACH v IN ARRAY ARRAY['파이썬꿈나무', 'Py123', '가나', '모험가1234'] LOOP
+          UPDATE public.users SET nickname = v WHERE id = '${u.carol.id}';
+        END LOOP;
+        FOREACH v IN ARRAY ARRAY['똠방', '햏자', '가', '😀가', '가 나', '가나다라마바사아자차카', E'가\\u200B나', 'ㄱㄴ', '가-나'] LOOP
+          BEGIN
+            UPDATE public.users SET nickname = v WHERE id = '${u.carol.id}';
+            RAISE EXCEPTION '거부해야 할 닉네임이 저장됨: %', v;
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+        END LOOP;
+      END $$;`),
+  });
+  await check({
+    group: 'schema',
+    id: 'NK-3',
+    role: 'postgres',
+    op: '닉네임 유일 (대소문자 무시): PyRoad 가 있으면 pyroad 거부',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`DO $$ BEGIN
+        UPDATE public.users SET nickname = 'PyRoad' WHERE id = '${u.carol.id}';
+        BEGIN
+          UPDATE public.users SET nickname = 'pyroad' WHERE id = '${u.dan.id}';
+          RAISE EXCEPTION '대소문자만 다른 닉네임이 저장됨';
+        EXCEPTION WHEN unique_violation THEN NULL;
+        END;
+      END $$;`),
+  });
+
+  // KST 함수: 경계값 + 인라인 (SET search_path 가 없어 식으로 펼쳐짐)
+  await check({
+    group: 'schema',
+    id: 'KST-1',
+    role: 'postgres',
+    op: 'kst_date 경계값(UTC 15:00 = KST 다음 날)·kst_today = kst_date(now())·인라인(EXPLAIN 에 kst_date 없음)',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () => {
+      const r = sqlCheck(`DO $$ BEGIN
+        IF public.kst_date('2026-11-03 14:59:59.999+00') <> DATE '2026-11-03'
+           OR public.kst_date('2026-11-03 15:00:00+00') <> DATE '2026-11-04'
+           OR public.kst_date('2026-12-31 15:00:00+00') <> DATE '2027-01-01'
+           OR public.kst_today() <> (now() AT TIME ZONE 'Asia/Seoul')::date THEN
+          RAISE EXCEPTION 'KST 날짜가 다름';
+        END IF;
+      END $$;`);
+      if (r.actual !== 'ok') return r;
+      const plan = one(
+        `explain (verbose, costs off) select public.kst_date(created_at) from public.stages`,
+      );
+      return /timezone\('Asia\/Seoul'/.test(plan) && !/kst_date/.test(plan)
+        ? { actual: 'ok', detail: '인라인됨' }
+        : { actual: 'mismatch', detail: plan.split('\n').join(' | ') };
+    },
+  });
+  await check({
+    group: 'schema',
+    id: 'RPC-8',
+    role: 'postgres',
+    op: '00012 함수(KST·스테이지 잠금·리셋·진행 보호 트리거) 중 anon/authenticated 가 EXECUTE 할 수 있는 것',
+    ...NONE,
+    run: () => {
+      const v =
+        one(`select coalesce(string_agg(p.proname, ',' order by p.proname), '')
+        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public'
+         and p.proname in ('kst_date', 'kst_today', 'has_three_day_streak', 'is_stage_unlocked', 'reset_progress',
+                           'user_progress_protect_earned_xp')
+         and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+}
+
+// ── auth: 가입·로그인 트리거 (B24, B16, 00013) ──────────────────
+async function groupAuthTriggers(u) {
+  await check({
+    group: 'auth',
+    id: 'B16-1',
+    role: 'postgres',
+    op: '가입 트리거가 provider 이름(full_name)·사진을 공개 display_name·avatar_url 에 복사하는가 (alice: full_name 김앨리스)',
+    deny: ['not-copied'],
+    allow: ['copied'],
+    run: () => {
+      const v = one(
+        `select display_name || '|' || coalesce(avatar_url, '') from public.users where id = '${u.alice.id}'`,
+      );
+      const [name, avatar] = v.split('|');
+      if (name === '김앨리스') return { actual: 'copied', detail: name };
+      return /^모험가\d{4}$/.test(name) && avatar === ''
+        ? { actual: 'not-copied', detail: `display_name=${name}` }
+        : { actual: 'mismatch', detail: v };
+    },
+  });
+  await check({
+    group: 'auth',
+    id: 'B16-2',
+    role: 'postgres',
+    op: 'Kakao·Naver 가입(auth.users INSERT): 실명·닉네임·사진 미복사, nickname NULL, last_login_provider 정규화, 이메일 없어도 가입',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`
+        INSERT INTO auth.users (id, raw_app_meta_data, raw_user_meta_data, last_sign_in_at) VALUES
+          ('d1000000-0000-0000-0000-0000000000a1', '{"provider": "kakao", "providers": ["kakao"]}',
+           '{"iss": "https://kapi.kakao.com", "name": "홍길동", "full_name": "홍길동", "avatar_url": "https://k.kakaocdn.net/a.jpg"}', now()),
+          ('d1000000-0000-0000-0000-0000000000a2', '{"provider": "custom:naver"}', '{"iss": "https://nid.naver.com"}', NULL),
+          ('d1000000-0000-0000-0000-0000000000a3', '{"provider": "google"}',
+           '{"iss": "https://accounts.google.com", "full_name": "Kim Real", "picture": "https://lh3.googleusercontent.com/x"}', now());
+        DO $$
+        DECLARE v RECORD;
+        BEGIN
+          FOR v IN SELECT u.*, a.raw_app_meta_data->>'provider' AS p
+                     FROM public.users u JOIN auth.users a ON a.id = u.id
+                    WHERE u.id::text LIKE 'd1000000-%' LOOP
+            IF v.display_name !~ '^모험가[0-9]{4}$' OR v.avatar_url <> '' OR v.nickname IS NOT NULL
+               OR v.last_login_provider IS DISTINCT FROM (CASE v.p WHEN 'custom:naver' THEN 'naver' ELSE v.p END)
+               OR v.display_name <> public.placeholder_display_name(v.id) THEN
+              RAISE EXCEPTION '가입 행이 다름: % % % %', v.display_name, v.avatar_url, v.nickname, v.last_login_provider;
+            END IF;
+          END LOOP;
+          IF (SELECT count(*) FROM public.users WHERE id::text LIKE 'd1000000-%') <> 3 THEN
+            RAISE EXCEPTION '가입 행 수가 3이 아님';
+          END IF;
+        END $$;`),
+  });
+  await check({
+    group: 'auth',
+    id: 'B24-1',
+    role: 'postgres',
+    op: '로그인(alice, GoTrue 비밀번호 로그인) 뒤 users.last_login_at = auth.users.last_sign_in_at',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () => {
+      const v = one(
+        `select (u.last_login_at = a.last_sign_in_at)::text || ' ' || coalesce(a.last_sign_in_at::text, 'null')
+           from public.users u join auth.users a on a.id = u.id where u.id = '${u.alice.id}'`,
+      );
+      return v.startsWith('true ')
+        ? { actual: 'ok', detail: v.slice(5) }
+        : { actual: 'mismatch', detail: v };
+    },
+  });
+  await check({
+    group: 'auth',
+    id: 'B24-2',
+    role: 'postgres',
+    op: '로그인 트리거: 이번 로그인 identity 의 iss 로 last_login_provider (연결 계정 Kakao 로그인 → kakao, 모르는 iss → 유지, 메타데이터만 바뀌면 무시)',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: () =>
+      sqlCheck(`DO $$
+      DECLARE
+        v_uid UUID := '${u.dan.id}';
+        v_at  TIMESTAMPTZ := now() + interval '1 minute';
+        v RECORD;
+      BEGIN
+        UPDATE auth.users
+           SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://kapi.kakao.com"}', last_sign_in_at = v_at
+         WHERE id = v_uid;
+        SELECT last_login_at, last_login_provider INTO v FROM public.users WHERE id = v_uid;
+        IF v.last_login_at <> v_at OR v.last_login_provider IS DISTINCT FROM 'kakao' THEN
+          RAISE EXCEPTION 'Kakao 로그인 뒤: % %', v.last_login_at, v.last_login_provider;
+        END IF;
+        UPDATE auth.users
+           SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://unknown.example"}', last_sign_in_at = v_at + interval '1 minute'
+         WHERE id = v_uid;
+        SELECT last_login_at, last_login_provider INTO v FROM public.users WHERE id = v_uid;
+        IF v.last_login_provider IS DISTINCT FROM 'kakao' OR v.last_login_at <> v_at + interval '1 minute' THEN
+          RAISE EXCEPTION '모르는 iss 로그인 뒤: % %', v.last_login_at, v.last_login_provider;
+        END IF;
+        UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://accounts.google.com"}' WHERE id = v_uid;
+        IF (SELECT last_login_provider FROM public.users WHERE id = v_uid) IS DISTINCT FROM 'kakao' THEN
+          RAISE EXCEPTION '로그인 없이 메타데이터만 바뀌었는데 provider 가 바뀜';
+        END IF;
+      END $$;`),
+  });
+  await check({
+    group: 'auth',
+    id: 'RPC-9',
+    role: 'postgres',
+    op: '00013 함수(가입·로그인·상태 보호 트리거, provider·자리표시자 함수) 중 anon/authenticated 가 EXECUTE 할 수 있는 것',
+    ...NONE,
+    run: () => {
+      const v =
+        one(`select coalesce(string_agg(p.proname, ',' order by p.proname), '')
+        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public'
+         and p.proname in ('handle_new_user', 'handle_user_signed_in', 'prevent_status_downgrade',
+                           'social_login_provider', 'placeholder_display_name')
+         and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+}
+
 // ── 실행 ──────────────────────────────────────────────────
 async function main() {
   console.log(`[${scenario}] ${S.label}`);
@@ -2824,6 +3384,8 @@ async function main() {
   await groupApiKeys(u);
   await groupRpc(u);
   await groupReward();
+  await groupSchema(u);
+  await groupAuthTriggers(u);
   await groupApp(u);
   await groupStatic();
 

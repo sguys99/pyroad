@@ -13,6 +13,7 @@ const WORLD = {
   title: '파이썬 섬',
   theme: 'python_island',
   description: '',
+  unlock_rule: { type: 'open' },
 };
 const STAGE = {
   id: 'a1000000-0000-0000-0000-000000000001',

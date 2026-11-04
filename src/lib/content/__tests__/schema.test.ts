@@ -161,6 +161,7 @@ describe('WorldSchema · StageSchema', () => {
         title: '파이썬 섬',
         theme: 'python_island',
         description: '',
+        unlock_rule: { type: 'open' },
       }).ok,
     ).toBe(true);
     expect(
@@ -173,6 +174,23 @@ describe('WorldSchema · StageSchema', () => {
         is_final: false,
       }).ok,
     ).toBe(true);
+  });
+
+  it('unlock_rule 은 필수이고 지금은 open 만 (2월드 규칙은 Phase 10)', () => {
+    const world = {
+      slug: 'python-island',
+      order: 1,
+      title: '파이썬 섬',
+      theme: 'python_island',
+      description: '',
+    };
+    expect(parseWith(WorldSchema, world).ok).toBe(false);
+    expect(
+      parseWith(WorldSchema, {
+        ...world,
+        unlock_rule: { type: 'clear_world', world: 'python-island' },
+      }).ok,
+    ).toBe(false);
   });
 
   it('slug 는 영문 소문자·숫자·하이픈', () => {

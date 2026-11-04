@@ -66,10 +66,12 @@ run(async () => {
     `원본 ${legacyName} · ${a.engine} · 마이그레이션 ${a.migrations.length}개 (${a.migrations.at(-1)}) · ${((performance.now() - t0) / 1000).toFixed(1)}초`,
   );
 
+  const worldSlugs = new Set(rows.worlds.map((w) => w.slug));
   const stageIds = new Set(rows.stages.map((s) => s.id));
   const questIds = new Set(rows.quests.map((q) => q.id));
   const keyOf = keyFn(a.snapshot);
   const only = (s: ContentSnapshot): ContentSnapshot => ({
+    worlds: s.worlds.filter((r) => worldSlugs.has(String(r.slug))),
     stages: s.stages.filter((r) => stageIds.has(String(r.id))),
     quests: s.quests.filter((r) => questIds.has(String(r.id))),
     answer_keys: s.answer_keys.filter((r) => questIds.has(String(r.quest_id))),
@@ -143,6 +145,7 @@ function diffSnapshots(
   keyOf: (id: unknown) => string,
 ): Diff[] {
   return [
+    ...diffTable('worlds', left.worlds, right.worlds, 'slug', keyOf),
     ...diffTable('stages', left.stages, right.stages, 'id', keyOf),
     ...diffTable('quests', left.quests, right.quests, 'id', keyOf),
     ...diffTable(

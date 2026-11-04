@@ -12,6 +12,7 @@ import { PageTransition } from '@/components/shared/PageTransition';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
 import { formatKstDate } from '@/lib/time/kst';
+import { sortStages } from '@/lib/world/stageOrder';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -19,10 +20,10 @@ export default async function ProfilePage() {
   // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
   const [{ user }, stagesResult] = await Promise.all([
     getAuthUser(),
+    // 순서는 (월드 order, 스테이지 order) — 아래 sortStages (P1-08)
     supabase
       .from('stages')
-      .select('id, order, title, quests(id)')
-      .order('order', { ascending: true }),
+      .select('id, order, title, world:worlds(order), quests(id)'),
   ]);
   if (!user) redirect('/');
 
@@ -46,7 +47,7 @@ export default async function ProfilePage() {
 
   const profile = profileResult.data;
   const progress = progressResult.data ?? [];
-  const stages = stagesResult.data ?? [];
+  const stages = sortStages(stagesResult.data ?? []);
   const badges = badgesResult.data ?? [];
 
   if (!profile) redirect('/');

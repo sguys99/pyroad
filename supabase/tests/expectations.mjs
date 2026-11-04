@@ -100,12 +100,14 @@ export const EXPECT = {
   'B04-13': {
     expect: 'deny',
     requires: 'public.users.coins',
-    activateIn: 'P1-08',
+    activateIn: 'P8-03',
+    note: 'coins 는 Phase 8 에서 만듦 (P1-08 범위 아님)',
   },
   'B04-14': {
     expect: 'deny',
     requires: 'public.user_progress.stars',
     activateIn: 'P1-08',
+    note: 'P1-08 00012: 서버 값. ③ 00011 컬럼 권한에 없음 + 보호 트리거(①만 적용된 동안)',
   },
   'B04-15': {
     expect: 'deny',
@@ -402,6 +404,74 @@ export const EXPECT = {
     note: 'record_hint: 코드 퀘스트는 받은 최고 단계, 프로젝트는 누적, 완료 뒤에는 그대로, 새 행은 in_progress',
   },
 
+  // ── schema: P1-08 스키마 확장 (00012) ──────────────────────
+  ...Object.fromEntries(
+    [
+      ['WD-1', 'deny', 'public.worlds', '비로그인은 worlds 권한 없음 (stages·quests 처럼 로그인 사용자만)'],
+      ['WD-2', 'allow', 'public.worlds', '로그인 사용자 월드 조회 (1월드 고정 id c1000000-…-01)'],
+      ['WD-3', 'deny', 'public.worlds', '쓰기는 service_role(콘텐츠 seed)만'],
+      ['WD-4', 'allow', 'public.worlds', '00012 백필 + 콘텐츠 seed 결과'],
+      ['WD-5', 'allow', 'public.worlds', 'is_stage_unlocked·reset_progress 가 (월드 order, 스테이지 order) 순서'],
+      ['WD-6', 'allow', 'public.worlds'],
+      ['QA-1', 'deny', 'public.quiz_attempts', '시도 기록은 채점 RPC(service_role)만 씀'],
+      ['QA-2', 'deny', 'public.quiz_attempts'],
+      ['QA-3', 'deny', 'public.quiz_attempts'],
+      ['QA-4', 'deny', 'public.quiz_attempts'],
+      ['QA-5', 'allow', 'public.quiz_attempts', '본인 시도만 조회 (quiz_attempts_select_own)'],
+      ['PF-1', 'deny', 'public.users.nickname', '지금은 UI 가 없어 UPDATE 권한 없음. P3-11 닉네임 설정에서 GRANT UPDATE (nickname) 와 함께 allow 로'],
+      ['PF-2', 'deny', 'public.users.settings', 'P2-15·P0-15 설정 화면에서 GRANT UPDATE (settings) 와 함께 allow 로'],
+      ['PF-3', 'deny', 'public.users.avatar_config', 'P3-11 캐릭터·학년에서 GRANT UPDATE (avatar_config, grade) 와 함께 allow 로'],
+      ['PF-4', 'deny', 'public.users.last_login_provider', '서버 값 (로그인 트리거 00013)'],
+      ['PF-5', 'allow', 'public.users.settings', '§2.2 settings 기본 형태'],
+      ['NK-1', 'allow', 'public.users.nickname', '§12-Q14: 완성형 2,350자를 DB CHECK 로 정확히 판정'],
+      ['NK-2', 'allow', 'public.users.nickname'],
+      ['NK-3', 'allow', 'public.users.nickname', 'P3-11 중복 확인을 DB 가 보장 (lower(nickname) UNIQUE)'],
+    ].map(([id, expect, requires, note]) => [
+      id,
+      { expect, requires, activateIn: 'P1-08', ...(note ? { note } : {}) },
+    ]),
+  ),
+  'KST-1': {
+    expect: 'allow',
+    requires: 'public.kst_date()',
+    activateIn: 'P1-08',
+    note: 'TS 는 src/lib/time/kst.ts (P1-05)',
+  },
+  'RPC-8': {
+    expect: 'deny',
+    requires: 'public.kst_date()',
+    activateIn: 'P1-08',
+  },
+
+  // ── auth: 가입·로그인 트리거 (B24, B16, 00013) ──────────────
+  'B16-1': {
+    expect: 'deny',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: '§2.8: provider 이름·사진을 공개 필드에 넣지 않음. 00013 전에 가입한 운영 사용자 행은 P3-12·P3-13',
+  },
+  'B16-2': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+  },
+  'B24-1': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+  },
+  'B24-2': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'app_metadata.provider 는 첫 identity 로 고정이라 쓰지 않음 (§2.2, P0-04)',
+  },
+  'RPC-9': {
+    expect: 'deny',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+  },
+
   // ── app: 앱이 실제로 보내는 쿼리 (정상 경로) ────────────────
   'APP-1': { expect: 'allow' },
   'APP-2': { expect: 'allow' },
@@ -465,14 +535,16 @@ export const EXPECT = {
     note: 'anon/authenticated 가 RPC 로 부를 수 있는 SECURITY DEFINER 함수 없음',
   },
   'ST-3': {
-    expect: 'known-gap',
-    flipIn: 'B24',
-    note: 'handle_new_user (트리거라 RPC 호출은 실패하지만 EXECUTE 회수)',
+    expect: 'deny',
+    note: 'B24 ③ 00013: handle_new_user·handle_user_signed_in EXECUTE 회수 (트리거는 권한 없이도 동작: createUser·APP-W1·W2)',
   },
   'ST-4': {
-    expect: 'known-gap',
-    flipIn: 'B24',
-    note: 'handle_new_user 에 search_path 미설정',
+    expect: 'deny',
+    note: 'B24 ③ 00013: SECURITY DEFINER 함수 모두 SET search_path',
+  },
+  'ST-6': {
+    expect: 'deny',
+    note: 'B24 ③ 00013: prevent_status_downgrade 포함 public 함수 모두 search_path 고정. kst_date 는 인라인용 예외 (P1-08)',
   },
   'ST-5': {
     expect: 'deny',

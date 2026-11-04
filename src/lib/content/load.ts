@@ -194,9 +194,9 @@ function checkUniqueness(
     );
     for (const s of w.stages) {
       claim(`id:${s.stage.id}`, s.file, `id(${s.stage.id})`);
-      // stages."order" 는 지금 전체에서 UNIQUE. P1-08 이후 (world_id, order) 로 바뀌면 키에 월드를 넣음
+      // stages."order" 는 월드 안에서 UNIQUE (world_id, "order"), P1-08
       claim(
-        `stage.order:${s.stage.order}`,
+        `stage.order:${w.world.slug}:${s.stage.order}`,
         s.file,
         `스테이지 order(${s.stage.order})`,
       );

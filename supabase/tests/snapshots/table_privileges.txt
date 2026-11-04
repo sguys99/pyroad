@@ -10,6 +10,8 @@ public.quest_answer_keys (table, rls=on) anon: -
 public.quest_answer_keys (table, rls=on) authenticated: -
 public.quests (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.quests (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+public.quiz_attempts (table, rls=on) anon: -
+public.quiz_attempts (table, rls=on) authenticated: SELECT
 public.stages (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.stages (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.user_api_keys (table, rls=on) anon: -
@@ -28,3 +30,5 @@ public.user_progress.user_id column authenticated: INSERT,UPDATE
 public.users (table, rls=on) anon: SELECT
 public.users (table, rls=on) authenticated: SELECT
 public.users.preferred_provider column authenticated: UPDATE
+public.worlds (table, rls=on) anon: -
+public.worlds (table, rls=on) authenticated: SELECT

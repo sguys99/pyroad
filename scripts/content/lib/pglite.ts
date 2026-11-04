@@ -18,7 +18,12 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role NOLOGIN BYPASSRLS; END IF;
 END $$;
 CREATE SCHEMA IF NOT EXISTS auth;
-CREATE TABLE IF NOT EXISTS auth.users (id uuid PRIMARY KEY, raw_user_meta_data jsonb DEFAULT '{}'::jsonb);
+CREATE TABLE IF NOT EXISTS auth.users (
+  id uuid PRIMARY KEY,
+  raw_user_meta_data jsonb DEFAULT '{}'::jsonb,
+  raw_app_meta_data jsonb DEFAULT '{}'::jsonb,
+  last_sign_in_at timestamptz
+);
 CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $f$ SELECT NULL::uuid $f$;
 CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $f$ SELECT 'service_role'::text $f$;
 `;
@@ -33,20 +38,26 @@ export function migrationFiles(upTo?: string): string[] {
 }
 
 export interface ContentSnapshot {
+  worlds: Record<string, unknown>[];
   stages: Record<string, unknown>[];
   quests: Record<string, unknown>[];
   answer_keys: Record<string, unknown>[];
 }
 
 // created_at·updated_at 은 실행 시각이라 비교에서 뺀다. jsonb 는 키 순서가 정규화되어 나온다.
+// stages.world 는 world_id 대신 월드 slug (빌드 행과 같은 모양). 정렬은 (월드 order, 스테이지 order)이고 world_order 는 빼고 내보냄
 const SNAPSHOT_SQL = `
 SELECT json_build_object(
-  'stages', (SELECT coalesce(json_agg(row_to_json(s) ORDER BY s."order"), '[]'::json) FROM (
-    SELECT id, "order", title, theme_name, description, is_final FROM public.stages) s),
-  'quests', (SELECT coalesce(json_agg(row_to_json(q) ORDER BY q.stage_order, q."order"), '[]'::json) FROM (
-    SELECT q.id, q.stage_id, s."order" AS stage_order, q."order", q.title, q.concept,
+  'worlds', (SELECT coalesce(json_agg(row_to_json(w) ORDER BY w."order"), '[]'::json) FROM (
+    SELECT slug, "order", title, theme, description, unlock_rule FROM public.worlds) w),
+  'stages', (SELECT coalesce(json_agg(to_jsonb(s) - 'world_order' ORDER BY s.world_order, s."order"), '[]'::json) FROM (
+    SELECT s.id, w.slug AS world, w."order" AS world_order, s."order", s.title, s.theme_name, s.description, s.is_final
+      FROM public.stages s JOIN public.worlds w ON w.id = s.world_id) s),
+  'quests', (SELECT coalesce(json_agg(to_jsonb(q) - 'world_order' ORDER BY q.world_order, q.stage_order, q."order"), '[]'::json) FROM (
+    SELECT q.id, q.stage_id, w."order" AS world_order, s."order" AS stage_order, q."order", q.title, q.concept,
+           q.quest_type, q.quiz_kind, q.is_mobile_friendly,
            q.prompt_skeleton, q.validation_type, q.expected_output, q.xp_reward
-      FROM public.quests q JOIN public.stages s ON s.id = q.stage_id) q),
+      FROM public.quests q JOIN public.stages s ON s.id = q.stage_id JOIN public.worlds w ON w.id = s.world_id) q),
   'answer_keys', (SELECT coalesce(json_agg(row_to_json(k) ORDER BY k.quest_id), '[]'::json) FROM (
     SELECT quest_id, expected_output, hints, solution_code, steps, quiz_answer
       FROM public.quest_answer_keys) k)
