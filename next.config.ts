@@ -1,11 +1,17 @@
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs/config';
+import {
+  API_CSP,
+  COMMON_SECURITY_HEADERS,
+  buildWorkerCsp,
+} from './src/lib/security/csp';
 
 /**
  * Pyodide 자체 호스팅 (B26, §2.9). `/pyodide/<버전>/`은 버전 경로라 내용이 바뀌지 않으므로 1년 immutable 캐시.
  * Content-Type을 직접 정한다: module Worker의 `import()`는 JS MIME이 아니면 거부하고,
  * wasm은 `application/wasm`이어야 스트리밍 컴파일(instantiateStreaming)을 쓴다.
  * Worker 스크립트(`/workers/*.mjs`)는 배포마다 바뀔 수 있으므로 캐시는 기본값(재검증)으로 둔다.
+ * Worker 스크립트에는 Worker 전용 CSP를 붙인다 (B27, `src/lib/security/csp.ts`).
  */
 const PYODIDE_IMMUTABLE = 'public, max-age=31536000, immutable';
 const PYODIDE_CONTENT_TYPES: Array<[string, string]> = [
@@ -18,8 +24,15 @@ const PYODIDE_CONTENT_TYPES: Array<[string, string]> = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['pyodide'],
+  poweredByHeader: false,
   async headers() {
     return [
+      // 보안 헤더 (B27). 페이지 CSP는 nonce가 필요해서 src/middleware.ts가 붙인다
+      { source: '/:path*', headers: [...COMMON_SECURITY_HEADERS] },
+      {
+        source: '/api/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: API_CSP }],
+      },
       {
         source: '/pyodide/:version/:file*',
         headers: [{ key: 'Cache-Control', value: PYODIDE_IMMUTABLE }],
@@ -32,6 +45,8 @@ const nextConfig: NextConfig = {
         source: '/workers/:file(.*\\.mjs)',
         headers: [
           { key: 'Content-Type', value: 'text/javascript; charset=utf-8' },
+          // Worker는 자기 스크립트 응답의 CSP를 쓴다. 'unsafe-eval' 없음 = Python → Function 우회 차단 (B27, §2.9)
+          { key: 'Content-Security-Policy', value: buildWorkerCsp() },
         ],
       },
     ];
