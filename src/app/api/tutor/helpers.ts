@@ -14,6 +14,12 @@ import {
   buildProjectGuidePrompt,
   buildStageSummaryPrompt,
 } from '@/lib/tutor/prompts';
+import {
+  fetchAnswerKeyRow,
+  hintFor,
+  resolveAnswerKey,
+  type QuestAnswerKey,
+} from '@/lib/quest/answerKeys';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
@@ -35,6 +41,9 @@ const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
 
 // 캐시 대상 타입은 src/lib/tutor/cache.ts의 buildCacheKey가 정한다 (개인화 입력이 없는 타입만)
 
+// 정답(힌트 원문·expected_output)이 필요한 타입만 quest_answer_keys를 읽는다 (P1-02)
+const ANSWER_KEY_TYPES = new Set(['hint_generator', 'code_feedback']);
+
 export interface PreparedTutorCall {
   systemPrompt: string;
   userPrompt: string;
@@ -44,6 +53,8 @@ export interface PreparedTutorCall {
   fast: boolean;
   fallbackProviders: LLMProviderType[];
   quest: QuestWithStageServer;
+  /** hint_generator·code_feedback에서만 채움. 서버 안에서만 쓰고 응답에 넣지 않음 */
+  answerKey: QuestAnswerKey | null;
   body: TutorRequest;
 }
 
@@ -135,8 +146,9 @@ export async function prepareTutorCall(
   // (P1-19) 사용자별 rate limit은 여기에 둔다: 인증·입력 검증 뒤, DB 조회·캐시·LLM 호출 전.
   // 두 라우트(/api/tutor, /api/tutor/stream)가 모두 이 함수를 거치므로 한 곳에서 막을 수 있다.
 
-  // 3. Quest + User Profile 병렬 조회
-  const [questResult, userProfileResult] = await Promise.all([
+  // 3. Quest + User Profile (+ 정답) 병렬 조회
+  const needsAnswerKey = ANSWER_KEY_TYPES.has(body.type);
+  const [questResult, userProfileResult, answerKeyRow] = await Promise.all([
     adminClient
       .from('quests')
       .select('*, stage:stages(id, title, order, theme_name)')
@@ -147,6 +159,9 @@ export async function prepareTutorCall(
       .select('preferred_provider, custom_api_keys')
       .eq('id', user.id)
       .single(),
+    needsAnswerKey
+      ? fetchAnswerKeyRow(adminClient, body.quest_id)
+      : Promise.resolve(null),
   ]);
 
   const { data: quest } = questResult;
@@ -158,6 +173,8 @@ export async function prepareTutorCall(
 
   const q = quest as unknown as QuestWithStageServer;
   const skeleton = q.prompt_skeleton;
+  // quests 행(expected_output·prompt_skeleton)은 quest_answer_keys가 없을 때의 폴백
+  const answerKey = needsAnswerKey ? resolveAnswerKey(answerKeyRow, quest) : null;
 
   // 4. 추가 검증
   if (body.type === 'code_feedback' && !body.execution_result) {
@@ -182,13 +199,12 @@ export async function prepareTutorCall(
     });
   } else if (body.type === 'hint_generator') {
     const hintLevel = body.hint_level as 1 | 2 | 3;
-    const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
     userPrompt = buildHintPrompt({
       topic: skeleton.topic,
       exerciseDescription: skeleton.exercise_description,
       studentCode: body.student_code || '',
       hintLevel,
-      hintReference: skeleton.hints[hintKey],
+      hintReference: answerKey ? hintFor(answerKey.hints, hintLevel) : '',
     });
   } else if (body.type === 'code_feedback') {
     const er = body.execution_result!;
@@ -199,7 +215,7 @@ export async function prepareTutorCall(
       stdout: er.stdout,
       stderr: er.stderr,
       passed: er.passed,
-      expectedOutput: q.expected_output,
+      expectedOutput: answerKey?.expectedOutput ?? '',
     });
   } else if (body.type === 'encouragement') {
     userPrompt = buildEncouragementPrompt({
@@ -265,6 +281,7 @@ export async function prepareTutorCall(
     fast: FAST_TYPES.has(body.type),
     fallbackProviders,
     quest: q,
+    answerKey,
     body,
   };
 }
@@ -353,9 +370,14 @@ function getHintBucket(hintsUsed: number): HintBucket {
 
 // ── buildFallbackMessage ────────────────────────────────────
 
+// 저장된 힌트도 읽지 못했을 때 (정답 데이터 누락)
+const HINT_UNAVAILABLE_MESSAGE =
+  '지금은 힌트를 가져오지 못했어요. 문제를 한 번 더 천천히 읽어 볼까요? 💡';
+
 export function buildFallbackMessage(
   body: TutorRequest,
   quest: QuestWithStageServer,
+  answerKey: QuestAnswerKey | null,
 ): string {
   const skeleton = quest.prompt_skeleton;
 
@@ -363,8 +385,8 @@ export function buildFallbackMessage(
     return skeleton.fallback_text;
   } else if (body.type === 'hint_generator') {
     const hintLevel = body.hint_level as 1 | 2 | 3;
-    const hintKey = `level_${hintLevel}` as keyof typeof skeleton.hints;
-    return skeleton.hints[hintKey];
+    const hint = answerKey ? hintFor(answerKey.hints, hintLevel) : '';
+    return hint || HINT_UNAVAILABLE_MESSAGE;
   } else if (body.type === 'code_feedback') {
     if (!body.execution_result?.passed) {
       return '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';

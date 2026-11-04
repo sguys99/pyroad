@@ -1337,6 +1337,39 @@ async function groupAnswer(u) {
     OPENAPI,
     openapi(u.alice),
   );
+  // 데이터: 모든 퀘스트의 정답이 quest_answer_keys 에 있고 quests 에는 남지 않음 (00005 + seed 정답 보정, B08)
+  //   코드·프로젝트 퀘스트 기준. 퀴즈(P7-01)가 생기면 quiz_answer 기준을 더할 것
+  await check({
+    group: 'answer',
+    id: 'AK-17',
+    role: 'postgres',
+    op: 'quest_answer_keys 데이터: 퀘스트마다 expected_output·hints·정답 코드(또는 모든 단계 정답 코드), quests 에 남은 정답 0',
+    deny: ['separated'],
+    allow: ['left-in-quests', 'missing'],
+    run: () => {
+      const [total, eo, hints, sol, stepSol, left] = one(
+        `select (select count(*) from public.quests),
+                count(*) filter (where k.expected_output <> ''),
+                count(*) filter (where k.hints <> '{}'::jsonb),
+                count(*) filter (where k.solution_code is not null
+                  or (jsonb_typeof(q.prompt_skeleton->'steps') = 'array'
+                      and jsonb_array_length(q.prompt_skeleton->'steps') > 0
+                      and (select count(*) from jsonb_array_elements(k.steps) s where s ? 'solution_code')
+                          = jsonb_array_length(q.prompt_skeleton->'steps'))),
+                (select count(*) from public.quest_answer_keys k2, jsonb_array_elements(k2.steps) s where s ? 'solution_code'),
+                (select count(*) from public.quests
+                  where expected_output <> '' or prompt_skeleton ?| array['hints', 'solution_code']
+                     or jsonb_path_exists(prompt_skeleton, '$.steps[*] ? (exists(@.expected_output) || exists(@.hints) || exists(@.solution_code))'))
+           from public.quests q join public.quest_answer_keys k on k.quest_id = q.id`,
+      )
+        .split('|')
+        .map(Number);
+      const detail = `퀘스트 ${total} · expected_output ${eo} · hints ${hints} · 정답 코드 ${sol} (단계 정답 ${stepSol}) · quests 에 남은 정답 ${left}`;
+      if (left > 0) return { actual: 'left-in-quests', detail };
+      const complete = total > 0 && eo === total && hints === total && sol === total;
+      return { actual: complete ? 'separated' : 'missing', detail };
+    },
+  });
 }
 
 /** solution_code 가 있는 퀘스트 수 (quests 와, 있으면 quest_answer_keys 합산) */
@@ -1729,6 +1762,7 @@ async function groupApp(u) {
   });
 
   // ── 서버(service_role) 경로 ──
+  // 정답은 src/lib/quest/answerKeys.ts 의 fetchAnswerKeyRow 로 읽고(APP-S4), quests 행은 폴백용으로 같이 읽음 (P1-02)
   const svc = [
     [
       'APP-S1',
@@ -1744,6 +1778,11 @@ async function groupApp(u) {
       'APP-S3',
       'api/quest/golden-key/route.ts',
       `/rest/v1/quests?select=id,prompt_skeleton,stage_id&id=eq.${Q1}`,
+    ],
+    [
+      'APP-S4',
+      'lib/quest/answerKeys.ts (validate·golden-key·tutor)',
+      `/rest/v1/quest_answer_keys?select=expected_output,hints,solution_code,steps&quest_id=eq.${Q1}`,
     ],
   ];
   for (const [id, where, path] of svc) {

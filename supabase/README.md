@@ -6,7 +6,8 @@ pyRoad 데이터베이스 스키마와 로컬 Supabase 설정입니다. 배경�
 |---|---|
 | `config.toml` | 로컬 스택 설정 (project_id `pyroad`, 포트 5452x, 필요 없는 서비스 끔) |
 | `migrations/000NN_<설명>.sql` | 스키마 변경. 번호 순서대로 적용 |
-| `seed.sql` | 스테이지·퀘스트 데이터. `db reset` 때 마이그레이션 **다음에** 실행 |
+| `seed.sql` | 스테이지·퀘스트 데이터. `db reset` 때 마이그레이션 **다음에** 실행. 끝의 "정답 코드·시작 코드 보정" 섹션이 00001 Section 6을 다시 적용(B08) |
+| `rollback/` | 마이그레이션을 되돌리는 SQL. **실행 대상이 아님**(CLI·`run.sh`가 읽지 않는 위치). 문제가 생겼을 때 사용자가 직접 실행 |
 | `snippets/` | Studio 스니펫 (git 제외) |
 
 ## 1. 로컬 스택
@@ -137,7 +138,8 @@ docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
 
 - 권한·RLS 회귀 점검: `npm run test:rls` (아래 "4. RLS·권한 회귀 테스트")
 - 운영과 같은 legacy 기본값에서도 확인하려면 `npm run test:rls:ci`를 씁니다. 임시 작업 디렉토리에 `config.toml`을 복사해 `project_id`·포트를 바꾸고 `auto_expose_new_tables = true`를 켠 스택을 따로 띄웁니다.
-- 알려진 차이(B08): `00001` Section 6의 `solution_code` UPDATE가 seed보다 먼저 실행되어, 새 DB에서는 `solution_code`가 0건입니다. P1-02에서 정답 테이블로 옮기며 해결합니다.
+- 정답 데이터(P1-02): 정답·힌트·`solution_code`는 `quest_answer_keys`(service_role 전용)에 있습니다. `quests`에 정답이 들어오면(seed 등) 분리 트리거가 옮기고, 00005 이후에는 `quests`에서 지웁니다. `db reset` 후 기준값은 퀘스트 44 · `expected_output` 44 · 힌트 44 · `solution_code` 43 + 프로젝트 단계 정답 5(회귀 테스트 `AK-17`). 앱은 `src/lib/quest/answerKeys.ts`로만 읽습니다.
+- B08(해결): `00001` Section 6의 `solution_code` UPDATE는 seed보다 먼저 실행되어 새 DB에서 0건이었습니다. 00001은 운영에 적용한 파일이라 고치지 않고, 같은 내용을 `seed.sql` 끝에 두었습니다.
 
 ## 4. RLS·권한 회귀 테스트 (P1-20)
 
@@ -154,7 +156,7 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 | 모드 | 대상 | 시나리오 |
 |---|---|---|
 | 빠른 (`fast`) | 켜져 있는 `supabase_*_pyroad` 스택. 먼저 `npm run db:start`. **DB를 reset하므로 로컬 데이터가 지워짐** | `local`: 저장소 migrations + seed (신규 기본값) |
-| 격리 (`ci`) | 새 임시 스택 `supabase_*_pyroadrls`(포트 54620~)를 띄우고 끝나면 내림. 켜진 pyroad 스택은 건드리지 않음 | `prod_replay`: 핫픽스 전 00001(`git show 2f0a8f3^`) + seed + Section 6 → `00002~`를 `psql -1`로 차례로 적용 (운영 적용 리허설, legacy)<br>`fresh_legacy`: 새 DB, 새 테이블 자동 노출 켜짐 (운영과 같은 기본값)<br>`fresh_newdefault`: 새 DB, 자동 노출 꺼짐 (스택 재시작 1회) |
+| 격리 (`ci`) | 새 임시 스택 `supabase_*_pyroadrls`(포트 54620~)를 띄우고 끝나면 내림. 켜진 pyroad 스택은 건드리지 않음 | `prod_replay`: 핫픽스 전 00001(`git show 2f0a8f3^`) + seed + Section 6 → `00002~`를 `psql -1`로 릴리즈 순서(① 파일 → ③ 파일)대로 적용 (운영 적용 리허설, legacy)<br>`fresh_legacy`: 새 DB, 새 테이블 자동 노출 켜짐 (운영과 같은 기본값)<br>`fresh_newdefault`: 새 DB, 자동 노출 꺼짐 (스택 재시작 1회) |
 
 환경 변수: `RLS_NO_RESET=1`(fast, reset 생략) · `RLS_SKIP_PROD=1` · `RLS_SKIP_NEWDEFAULT=1` · `RLS_PROJECT_ID`·`RLS_PORT_BASE`(ci 임시 스택 이름·포트) · `RLS_KEEP=1`(ci 스택 남기기) · `RLS_UPDATE_SNAPSHOTS=1`(스냅샷 갱신). 종료 코드는 FAIL이 없으면 0, 있으면 1, 환경 문제면 2입니다.
 
@@ -195,7 +197,7 @@ GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 ### 권한을 바꾸는 작업을 할 때
 
 1. 마이그레이션을 고치고 `npm run test:rls`를 돌립니다.
-2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 P1-01(B04-1·2·7·8), P1-02(B07-2·3, B08-1), P1-04(B04-4·4b·5·5b·11·12), B24(ST-3·4), P3-13(VIEW-2)입니다.
+2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 P1-01(B04-1·2·7·8), P1-04(B04-4·4b·5·5b·11·12), B24(ST-3·4), P3-13(VIEW-2)입니다. (P1-02의 B07-2·3, B08-1은 뒤집음)
 3. 앱 쿼리를 바꿨다면 `checks.mjs`의 `app` 그룹 요청도 같이 바꿉니다(예: P1-04에서 auto-save payload가 바뀌면 APP-W1).
 4. 권한·정책·SECURITY DEFINER 함수가 바뀌면 스냅샷이 `diff`로 FAIL합니다. 의도한 변경이면 `RLS_UPDATE_SNAPSHOTS=1 npm run test:rls`로 다시 만들고 `git diff supabase/tests/snapshots/`를 리뷰해 같은 커밋에 넣습니다.
 5. 새 테이블·함수를 만들면 대응하는 점검을 `checks.mjs`에 추가하고 기대값을 `expectations.mjs`에 적습니다(기대값이 없으면 FAIL).
@@ -208,7 +210,8 @@ GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 
 - 운영 DB에는 **사용자가 직접** Phase 끝에 한 번에 적용합니다. 에이전트·CI는 운영에 쓰지 않습니다(Supabase MCP는 읽기 전용).
 - Supabase Dashboard → SQL Editor에서 파일 내용을 `BEGIN;` … `COMMIT;`으로 감싸 실행합니다. 오류가 나면 전체가 롤백됩니다.
-- 순서: ① 파일들 → 앱 배포(Vercel) → 동작 확인 → ③ 파일들. 적용 전후에 `spikes/p0-08-answer-keys/prod_readonly_checks.sql`(SELECT만 있음)로 상태를 확인합니다.
+- 순서: ① 파일들 → 앱 배포(Vercel) → 동작 확인 → ③ 파일들. 각 파일 머리 주석의 "릴리즈 단계"를 따르며, 번호 순서와 단계 순서가 다르면 단계가 우선입니다(`test:rls:ci`의 운영 재현도 같은 순서로 적용). 적용 전후에 `spikes/p0-08-answer-keys/prod_readonly_checks.sql`(SELECT만 있음)로 상태를 확인합니다.
+- 되돌리기는 `rollback/`의 파일을 역순으로(예: 00005 → 00004) 같은 방식(`BEGIN; … COMMIT;`)으로 실행합니다.
 - 운영은 SQL Editor로 적용하므로 `supabase_migrations` 이력이 없습니다. `supabase db push`·`supabase link`로 운영에 적용하지 않습니다.
 
 ## 6. 타입 생성

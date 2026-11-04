@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { QuestWithStageServer } from '@/lib/types/database';
+import {
+  fetchAnswerKeyRow,
+  findStepAnswer,
+  resolveAnswerKey,
+} from '@/lib/quest/answerKeys';
+import type { PromptSkeleton } from '@/lib/types/database';
 
 interface GoldenKeyRequest {
   quest_id: string;
@@ -32,19 +37,17 @@ export async function POST(request: Request) {
     );
   }
 
-  // 1. 유저 황금키 잔여 수 확인 + 퀘스트 조회 — 병렬
+  // 1. 유저 황금키 잔여 수 확인 + 퀘스트 조회 + 정답 조회 — 병렬
+  //    정답 코드는 quest_answer_keys에서 읽는다 (P1-02). quests의 prompt_skeleton은 폴백용
   const adminClient = createAdminClient();
-  const [profileResult, questResult] = await Promise.all([
-    supabase
-      .from('users')
-      .select('golden_keys')
-      .eq('id', user.id)
-      .single(),
+  const [profileResult, questResult, answerKeyRow] = await Promise.all([
+    supabase.from('users').select('golden_keys').eq('id', user.id).single(),
     adminClient
       .from('quests')
       .select('id, prompt_skeleton, stage_id')
       .eq('id', body.quest_id)
       .single(),
+    fetchAnswerKeyRow(adminClient, body.quest_id),
   ]);
 
   const goldenKeys = profileResult.data?.golden_keys ?? 0;
@@ -60,7 +63,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Quest not found' }, { status: 404 });
   }
 
-  const skeleton = (quest as unknown as QuestWithStageServer).prompt_skeleton;
+  const skeleton = quest.prompt_skeleton as unknown as PromptSkeleton;
+  const answerKey = resolveAnswerKey(answerKeyRow, quest);
 
   // 2. solution_code 추출
   let solutionCode: string | undefined;
@@ -68,10 +72,11 @@ export async function POST(request: Request) {
 
   if (skeleton.steps && currentStep > 0) {
     // 프로젝트 퀘스트: 현재 단계의 solution_code
-    const stepDef = skeleton.steps[currentStep - 1];
-    solutionCode = stepDef?.solution_code;
+    solutionCode = answerKey
+      ? findStepAnswer(answerKey, currentStep)?.solution_code
+      : undefined;
   } else {
-    solutionCode = skeleton.solution_code;
+    solutionCode = answerKey?.solutionCode ?? undefined;
   }
 
   if (!solutionCode) {

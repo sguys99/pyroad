@@ -132,14 +132,12 @@ export const EXPECT = {
   // ── answer: 정답 데이터 (B07, B08) ─────────────────────────
   'B07-1': { expect: 'deny' },
   'B07-2': {
-    expect: 'known-gap',
-    flipIn: 'P1-02',
-    note: 'quests.expected_output',
+    expect: 'deny',
+    note: 'quests.expected_output (P1-02: 00005 이후 항상 빈 문자열)',
   },
   'B07-3': {
-    expect: 'known-gap',
-    flipIn: 'P1-02',
-    note: 'quests.prompt_skeleton 의 hints·solution_code·steps',
+    expect: 'deny',
+    note: 'quests.prompt_skeleton 의 hints·solution_code·steps (P1-02: quest_answer_keys 로 이동)',
   },
   'B07-4': {
     expect: 'allow',
@@ -150,9 +148,8 @@ export const EXPECT = {
     note: '운영 재현 시나리오 전용: 운영처럼 solution_code 가 채워졌는지 (44)',
   },
   'B08-1': {
-    expect: 'known-gap',
-    flipIn: 'P1-02',
-    note: '새 DB 에 solution_code 0건 (운영 재현 시나리오에서는 생략)',
+    expect: 'deny',
+    note: '새 DB 에도 solution_code 가 있음 (P1-02: seed.sql 끝의 정답 보정 섹션 → 트리거가 quest_answer_keys 로). 운영 재현 시나리오에서는 생략',
   },
   // quest_answer_keys 가 생기면(P1-02) 자동으로 점검 시작
   'AK-1': {
@@ -235,6 +232,12 @@ export const EXPECT = {
     requires: 'public.quest_answer_keys',
     activateIn: 'P1-02',
   },
+  'AK-17': {
+    expect: 'deny',
+    requires: 'public.quest_answer_keys',
+    activateIn: 'P1-02',
+    note: "'deny' = 정답이 모두 quest_answer_keys 로 분리됨 (기준값: 퀘스트 44 · solution_code 43 + 프로젝트 단계 5)",
+  },
 
   // ── rpc: 서버 전용 함수 (P1-03) ────────────────────────────
   'RPC-1': {
@@ -296,10 +299,15 @@ export const EXPECT = {
   'APP-S1': { expect: 'allow' },
   'APP-S2': {
     expect: 'allow',
-    flipIn: 'P1-02',
-    note: 'P1-02 에서 채점 라우트가 quest_answer_keys 를 읽게 되면 경로를 바꿈',
+    note: '채점 라우트의 quests 조회 (정답은 APP-S4, quests 행은 폴백용). 폴백 제거 때 select 를 줄임',
   },
-  'APP-S3': { expect: 'allow', flipIn: 'P1-02' },
+  'APP-S3': { expect: 'allow', note: '황금키 라우트의 quests 조회 (폴백용)' },
+  'APP-S4': {
+    expect: 'allow',
+    requires: 'public.quest_answer_keys',
+    activateIn: 'P1-02',
+    note: 'answerKeys.ts fetchAnswerKeyRow (채점·황금키·튜터 힌트)',
+  },
 
   // ── static: 카탈로그 점검 ─────────────────────────────────
   'ST-1': { expect: 'deny', note: 'public 의 모든 테이블에 RLS' },

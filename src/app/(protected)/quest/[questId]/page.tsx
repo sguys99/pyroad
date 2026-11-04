@@ -3,11 +3,8 @@ import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
 import { QuestShell } from '@/components/quest/QuestShell';
 import { ProjectQuestShell } from '@/components/quest/ProjectQuestShell';
-import type {
-  QuestWithStage,
-  UserProgress,
-  PromptSkeleton,
-} from '@/lib/types/database';
+import { stripAnswerFields } from '@/lib/quest/answerKeys';
+import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 
 interface Props {
   params: Promise<{ questId: string }>;
@@ -17,7 +14,7 @@ export default async function QuestPage({ params }: Props) {
   const { questId } = await params;
   const supabase = await createClient();
 
-  // getAuthUser()와 user.id 불필요한 quest 쿼리를 병��� 실행
+  // getAuthUser()와 user.id 불필요한 quest 쿼리를 병렬 실행
   const [{ user }, questResult] = await Promise.all([
     getAuthUser(),
     supabase
@@ -49,18 +46,9 @@ export default async function QuestPage({ params }: Props) {
 
   const quest = questResult.data as unknown as QuestWithStage;
 
-  // 클라이언트에 정답/힌트/solution_code 노출 방지
-  quest.prompt_skeleton.hints = { level_1: '', level_2: '', level_3: '' };
-  delete (quest.prompt_skeleton as PromptSkeleton & { solution_code?: string }).solution_code;
-  if (quest.prompt_skeleton.steps) {
-    quest.prompt_skeleton.steps = quest.prompt_skeleton.steps.map(
-      ({ expected_output: _eo, hints: _hints, solution_code: _sc, ...rest }) => ({
-        ...rest,
-        expected_output: '',
-        hints: { level_1: '', level_2: '', level_3: '' },
-      }),
-    );
-  }
+  // 클라이언트에 정답/힌트/solution_code 노출 방지. 정답은 quest_answer_keys에 있지만(P1-02),
+  // ①(00004)만 적용된 DB에서는 quests에도 남아 있으므로 props로 내려보내기 전에 지운다
+  quest.prompt_skeleton = stripAnswerFields(quest.prompt_skeleton);
   const progress = progressResult.data as UserProgress | null;
   const profile = profileResult.data;
 

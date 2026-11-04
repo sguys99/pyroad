@@ -15,6 +15,7 @@
 #   fast  이미 켜진 pyroad 로컬 스택(npm run db:start)에 db reset 후 점검. 개발자 일상용
 #   ci    별도 project id·포트로 임시 스택을 띄워 시나리오를 돌리고 내림. 켜진 pyroad 스택과 무관
 #         ① prod_replay       운영 재현: 핫픽스 전 00001 + seed + Section 6 → 00002~ 를 psql -1 로 적용
+#                             (릴리즈 순서대로: 머리 주석이 "릴리즈 단계: ③" 인 파일은 나머지 파일 뒤에)
 #         ② fresh_legacy      새 DB, 새 테이블 자동 노출 켜짐 (운영과 같은 legacy 기본값)
 #         ③ fresh_newdefault  새 DB, 자동 노출 꺼짐 (CLI 신규 기본값, 스택 재시작 1회)
 #
@@ -176,11 +177,16 @@ if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] && git -C "$REPO" cat-file -e "$PREHOTFIX_RE
   # 운영 데이터처럼 solution_code 채우기 (00001 Section 6 을 seed 뒤에 다시 실행)
   sed -n '/^-- Section 6/,/^-- Section 7/p' "$WORKDIR/00001_prehotfix.sql" >"$WORKDIR/section6.sql"
   apply_sql "$WORKDIR/section6.sql"
-  for pair in "${ALL_MIGRATIONS[@]}"; do
-    f="${pair%%:*}"
-    [[ "$(basename "$f")" == 00001_* ]] && continue
-    log "운영 적용 리허설: $(basename "$f") (psql -1)"
-    apply_sql "$f"
+  # 운영 릴리즈 순서: ① 추가형(단계 표시가 없는 예전 파일 포함) → (앱 배포) → ③ 회수형
+  for stage in 1 3; do
+    for pair in "${ALL_MIGRATIONS[@]}"; do
+      f="${pair%%:*}"
+      [[ "$(basename "$f")" == 00001_* ]] && continue
+      if grep -q '^-- 릴리즈 단계: ③' "$f"; then fstage=3; else fstage=1; fi
+      [[ "$fstage" == "$stage" ]] || continue
+      log "운영 적용 리허설 (단계 $( [[ $stage == 1 ]] && echo ① || echo ③ )): $(basename "$f") (psql -1)"
+      apply_sql "$f"
+    done
   done
   run_checks prod_replay
   log "db reset (legacy): 저장소 마이그레이션 + seed"

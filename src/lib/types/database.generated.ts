@@ -139,6 +139,44 @@ export type Database = {
           },
         ];
       };
+      quest_answer_keys: {
+        Row: {
+          expected_output: string;
+          hints: Json;
+          quest_id: string;
+          quiz_answer: Json | null;
+          solution_code: string | null;
+          steps: Json;
+          updated_at: string;
+        };
+        Insert: {
+          expected_output?: string;
+          hints?: Json;
+          quest_id: string;
+          quiz_answer?: Json | null;
+          solution_code?: string | null;
+          steps?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          expected_output?: string;
+          hints?: Json;
+          quest_id?: string;
+          quiz_answer?: Json | null;
+          solution_code?: string | null;
+          steps?: Json;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quest_answer_keys_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: true;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       quests: {
         Row: {
           concept: string;

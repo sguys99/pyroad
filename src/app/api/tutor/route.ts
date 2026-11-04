@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, fallbackProviders, quest, body } = prepared;
+  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, fallbackProviders, quest, answerKey, body } = prepared;
 
   // 캐시 확인
   const cacheKey = buildCacheKey(body);
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     }
   } else {
     isFallback = true;
-    message = buildFallbackMessage(body, quest);
+    message = buildFallbackMessage(body, quest, answerKey);
   }
 
   const response: TutorResponse = {

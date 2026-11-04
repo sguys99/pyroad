@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { LLMCallOptions, LLMProvider } from '@/lib/tutor/providers/types';
 
+// 00005 이후의 quests 행: 정답 필드 없음 (P1-02)
 const QUEST = {
   id: 'q1',
   title: '변수 상자',
-  expected_output: '10',
+  expected_output: '',
   stage: { id: 's1', title: '시작의 숲', order: 1, theme_name: 'forest' },
   prompt_skeleton: {
     topic: '변수',
@@ -14,25 +15,35 @@ const QUEST = {
     starter_code: '',
     expected_output_hint: '10',
     fallback_text: '변수를 배워 봐요!',
-    hints: {
-      level_1: '저장된 힌트 1',
-      level_2: '저장된 힌트 2',
-      level_3: '저장된 힌트 3',
-    },
   },
+};
+
+const HINTS = {
+  level_1: '저장된 힌트 1',
+  level_2: '저장된 힌트 2',
+  level_3: '저장된 힌트 3',
+};
+const ANSWER_KEY = {
+  expected_output: '10',
+  hints: HINTS,
+  solution_code: 'x = 10\nprint(x)',
+  steps: [],
 };
 
 const mocks = vi.hoisted(() => ({
   createProvider: vi.fn(),
+  // null 이면 quest_answer_keys 가 없는 DB(00004 적용 전)처럼 응답
+  answerKey: { current: null as unknown },
+  quest: { current: null as unknown },
 }));
 
-function chain(data: unknown) {
+function chain(data: unknown, error: unknown = null) {
   const q = {
     select: () => q,
     eq: () => q,
     order: () => q,
-    single: async () => ({ data }),
-    maybeSingle: async () => ({ data }),
+    single: async () => ({ data, error }),
+    maybeSingle: async () => ({ data, error }),
   };
   return q;
 }
@@ -44,7 +55,14 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }));
 vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: () => ({ from: () => chain(QUEST) }),
+  createAdminClient: () => ({
+    from: (table: string) =>
+      table === 'quest_answer_keys'
+        ? mocks.answerKey.current
+          ? chain(mocks.answerKey.current)
+          : chain(null, { code: 'PGRST205', message: 'not found' })
+        : chain(mocks.quest.current),
+  }),
 }));
 vi.mock('@/lib/tutor/providers/factory', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/tutor/providers/factory')>()),
@@ -86,6 +104,8 @@ function echoProvider(
 describe('/api/tutor/stream', () => {
   beforeEach(() => {
     clearTutorCache();
+    mocks.quest.current = QUEST;
+    mocks.answerKey.current = ANSWER_KEY;
     vi.stubEnv('GEMINI_API_KEY', 'server-gemini');
     mocks.createProvider.mockReset();
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -156,6 +176,35 @@ describe('/api/tutor/stream', () => {
       ),
     );
     expect(res).toMatchObject({ text: '저장된 힌트 2', isFallback: true });
+  });
+
+  it('힌트 원문은 quest_answer_keys에서 읽어 프롬프트에 넣는다 (P1-02)', async () => {
+    mocks.createProvider.mockImplementation(() => echoProvider());
+
+    const res = await readText(
+      await POST(
+        post({ type: 'hint_generator', quest_id: 'q1', hint_level: 3 }),
+      ),
+    );
+    expect(res.text).toContain('저장된 힌트 3');
+  });
+
+  it('quest_answer_keys가 없는 DB(00004 적용 전)에서는 quests의 힌트로 폴백한다', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mocks.answerKey.current = null;
+    mocks.quest.current = {
+      ...QUEST,
+      expected_output: '10',
+      prompt_skeleton: { ...QUEST.prompt_skeleton, hints: HINTS },
+    };
+    mocks.createProvider.mockImplementation(() => echoProvider());
+
+    const res = await readText(
+      await POST(
+        post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+      ),
+    );
+    expect(res.text).toContain('저장된 힌트 1');
   });
 
   it('클라이언트가 요청을 끊으면(request.signal) 진행 중인 provider 스트림도 abort된다 (B18)', async () => {
