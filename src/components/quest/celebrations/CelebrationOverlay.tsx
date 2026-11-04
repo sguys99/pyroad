@@ -17,6 +17,12 @@ interface CelebrationOverlayProps {
   autoCloseMs?: number;
   confettiBursts?: ConfettiBurst[];
   backdropClass?: string;
+  /**
+   * 이 값이 바뀔 때만 컨페티·자동 닫힘을 다시 시작한다 (예: 뱃지를 하나씩 넘길 때).
+   * onClose·confettiBursts는 ref로 읽으므로 부모가 다시 그려져 새 함수·배열을 넘겨도
+   * 컨페티가 다시 터지거나 자동 닫힘 타이머가 늘어나지 않는다 (§2.10 축하 오버레이는 셸 재렌더에서 분리)
+   */
+  replayKey?: string | number;
   children: React.ReactNode;
 }
 
@@ -28,15 +34,21 @@ export function CelebrationOverlay({
   autoCloseMs,
   confettiBursts,
   backdropClass = 'bg-black/50',
+  replayKey,
   children,
 }: CelebrationOverlayProps) {
   const shouldReduceMotion = useReducedMotion();
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const burstsRef = useRef(confettiBursts);
+  burstsRef.current = confettiBursts;
 
   useEffect(() => {
     // Confetti 발사 (reduced-motion 시 비활성화, fireConfetti도 한 번 더 확인)
-    if (!shouldReduceMotion && confettiBursts) {
-      for (const burst of confettiBursts) {
+    const bursts = burstsRef.current;
+    if (!shouldReduceMotion && bursts) {
+      for (const burst of bursts) {
         const timer = setTimeout(() => {
           fireConfetti({
             particleCount: burst.particleCount,
@@ -54,7 +66,7 @@ export function CelebrationOverlay({
 
     // 자동 닫힘
     if (autoCloseMs) {
-      const autoClose = setTimeout(onClose, autoCloseMs);
+      const autoClose = setTimeout(() => onCloseRef.current(), autoCloseMs);
       timersRef.current.push(autoClose);
     }
 
@@ -62,7 +74,7 @@ export function CelebrationOverlay({
       for (const t of timersRef.current) clearTimeout(t);
       timersRef.current = [];
     };
-  }, [onClose, autoCloseMs, confettiBursts, shouldReduceMotion]);
+  }, [autoCloseMs, shouldReduceMotion, replayKey]);
 
   return (
     <m.div

@@ -32,7 +32,7 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(editor).toBeVisible({ timeout: 10_000 });
 
     // 5. Pyodide 로딩 대기
-    const runButton = page.getByRole('button', { name: /코드 돌려보기|실행/ });
+    const runButton = page.getByTestId('run-button');
     await expect(runButton).toBeEnabled({ timeout: 30_000 });
 
     // 6. 에디터에 정답 코드 입력 (첫 퀘스트: print("안녕하세요!") 계열)
@@ -45,7 +45,7 @@ test.describe('퀘스트 전체 플로우', () => {
     await runButton.click();
 
     // 8. 결과 패널에 실행 결과 표시 확인
-    const resultPanel = page.locator('[data-testid="result-panel"], [class*="result"], [class*="output"]').first();
+    const resultPanel = page.getByTestId('output-panel').first();
     await expect(resultPanel).toBeVisible({ timeout: 15_000 });
 
     // 9. 결과에 출력값이 포함되어 있는지 확인

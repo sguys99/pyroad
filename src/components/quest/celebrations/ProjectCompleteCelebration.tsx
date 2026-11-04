@@ -94,6 +94,7 @@ export function ProjectCompleteCelebration({
       </m.p>
 
       <m.button
+        data-testid="celebration-cta"
         className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}

@@ -40,7 +40,9 @@ export async function POST(request: Request) {
 
   if (result.ok) {
     message = result.text;
-    isFallback = result.was_fallback ?? false;
+    // AI가 답했으면 다른 provider로 폴백했더라도(was_fallback) "저장된 답변"이 아니다 (B18 남은 문제).
+    // is_fallback 은 서버의 저장된 답변을 보냈을 때만 true (스트림 route 와 같은 뜻)
+    isFallback = false;
 
     // 성공 응답 캐시
     if (cacheKey && message) {

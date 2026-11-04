@@ -14,6 +14,10 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Trophy,
 };
 
+const confettiBursts: ConfettiBurst[] = [
+  { particleCount: 50, spread: 60, origin: { y: 0.6, x: 0.5 } },
+];
+
 interface BadgeEarnedPopupProps {
   badges: BadgeType[];
   onComplete: () => void;
@@ -37,16 +41,14 @@ export function BadgeEarnedPopup({
   const badge = getBadgeDefinition(badges[currentIndex]);
   const Icon = ICON_MAP[badge.icon] ?? Code;
 
-  const confettiBursts: ConfettiBurst[] = [
-    { particleCount: 50, spread: 60, origin: { y: 0.6, x: 0.5 } },
-  ];
-
   return (
     <CelebrationOverlay
       onClose={advance}
       autoCloseMs={3000}
       confettiBursts={confettiBursts}
       backdropClass="bg-black/30"
+      // 뱃지마다 컨페티 + 3초 자동 넘김
+      replayKey={currentIndex}
     >
       <AnimatePresence mode="wait">
         <m.div

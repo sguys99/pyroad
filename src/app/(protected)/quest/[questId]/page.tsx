@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
-import { QuestShell } from '@/components/quest/QuestShell';
-import { ProjectQuestShell } from '@/components/quest/ProjectQuestShell';
+import { QUEST_RENDERERS } from '@/components/quest/questRenderers';
 import { stripAnswerFields } from '@/lib/quest/answerKeys';
+import { getQuestKind } from '@/lib/quest/questKind';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 
 interface Props {
@@ -52,11 +52,13 @@ export default async function QuestPage({ params }: Props) {
   const progress = progressResult.data as UserProgress | null;
   const profile = profileResult.data;
 
-  const isProject = quest.prompt_skeleton.steps != null;
-  const Shell = isProject ? ProjectQuestShell : QuestShell;
+  const Renderer = QUEST_RENDERERS[getQuestKind(quest.prompt_skeleton)];
 
+  // key: 퀘스트를 옮기면(소프트 내비게이션) 퀘스트 상태는 새로 시작하고,
+  // Pyodide Worker는 quest/layout.tsx의 PyodideProvider가 그대로 가지고 있다 (B22)
   return (
-    <Shell
+    <Renderer
+      key={quest.id}
       quest={quest}
       progress={progress}
       userId={user.id}

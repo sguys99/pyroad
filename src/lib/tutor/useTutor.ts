@@ -16,7 +16,11 @@ export const STREAM_IDLE_TIMEOUT_MS = 30_000;
  * 서버는 `request.signal`로 이를 받아 provider SDK 호출을 멈춘다.
  */
 export function useTutor() {
-  const [isLoading, setIsLoading] = useState(false);
+  // 스트림(말풍선) 로딩과 비스트림 요청 수를 따로 센다. 비스트림 요청이 끝나도 진행 중인 스트림의
+  // "생각 중" 표시가 꺼지지 않게 (B18 남은 문제)
+  const [isStreamLoading, setIsStreamLoading] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const isLoading = isStreamLoading || pendingRequests > 0;
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
   const inFlightRef = useRef(new Set<AbortController>());
   const activeStreamRef = useRef<AbortController | null>(null);
@@ -44,7 +48,7 @@ export function useTutor() {
     async (req: TutorRequest): Promise<TutorResponse | null> => {
       const controller = new AbortController();
       inFlightRef.current.add(controller);
-      setIsLoading(true);
+      setPendingRequests((n) => n + 1);
       try {
         const res = await fetch('/api/tutor', {
           method: 'POST',
@@ -63,7 +67,7 @@ export function useTutor() {
         throw new Error('AI 튜터 요청에 실패했습니다');
       } finally {
         inFlightRef.current.delete(controller);
-        if (!controller.signal.aborted) setIsLoading(false);
+        setPendingRequests((n) => n - 1);
       }
     },
     [],
@@ -79,7 +83,7 @@ export function useTutor() {
       const controller = new AbortController();
       activeStreamRef.current = controller;
       inFlightRef.current.add(controller);
-      setIsLoading(true);
+      setIsStreamLoading(true);
 
       let timedOut = false;
       let idleTimer: ReturnType<typeof setTimeout> | undefined;
@@ -112,7 +116,7 @@ export function useTutor() {
           touch,
         );
 
-        // 주의: setIsLoading(false)를 여기서 호출하지 않음.
+        // 주의: setIsLoading(false)를 여기서 호출하지 않음 (스트림 로딩만 끄는 함수).
         // 호출자가 streamingContent를 정리하고 messages를 업데이트한 뒤
         // setIsLoading(false)와 동일 배치에서 처리하도록 함.
         // → 깜빡임 방지를 위해 caller에서 일괄 처리
@@ -138,8 +142,10 @@ export function useTutor() {
   return {
     sendTutorRequest,
     sendTutorStreamRequest,
+    /** 스트림이든 비스트림이든 튜터 요청이 진행 중인지 */
     isLoading,
-    setIsLoading,
+    /** 스트림 로딩 표시를 끈다. 호출자가 말풍선을 정리하는 배치 안에서 부름 (비스트림 요청 수와 무관) */
+    setIsLoading: setIsStreamLoading,
     hasApiKey,
     refreshApiKeyStatus() {
       fetch('/api/settings')

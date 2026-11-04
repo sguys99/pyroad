@@ -233,3 +233,67 @@ describe('useTutor — AbortController (B18)', () => {
     await expect(settled).resolves.toBe('AI 튜터 요청에 실패했습니다');
   });
 });
+
+describe('useTutor — 로딩 표시 (B18 남은 문제)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('비스트림 요청이 끝나도 진행 중인 스트림의 로딩 표시는 꺼지지 않는다', async () => {
+    const base = mockFetch();
+    let resolveJson!: (res: Response) => void;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string, init?: RequestInit) =>
+        url === '/api/tutor'
+          ? new Promise<Response>((r) => (resolveJson = r))
+          : base(url, init),
+      ),
+    );
+    const { result } = renderHook(() => useTutor());
+
+    await act(async () => {
+      void result.current.sendTutorStreamRequest(intro, () => {});
+      await flush();
+    });
+    let json!: Promise<unknown>;
+    await act(async () => {
+      json = result.current.sendTutorRequest({
+        type: 'code_feedback',
+        quest_id: 'q1',
+      });
+      await flush();
+    });
+    expect(result.current.isLoading).toBe(true);
+
+    await act(async () => {
+      resolveJson(Response.json({ message: '잘했어요', is_fallback: false }));
+      await json;
+    });
+    // 스트림은 아직 진행 중
+    expect(result.current.isLoading).toBe(true);
+
+    // 호출자가 스트림 말풍선을 정리하면 꺼짐
+    act(() => result.current.setIsLoading(false));
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('스트림이 없으면 비스트림 요청이 끝날 때 로딩 표시가 꺼진다', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) =>
+        url === '/api/settings'
+          ? Response.json({ has_custom_keys: [] })
+          : Response.json({ message: '잘했어요', is_fallback: false }),
+      ),
+    );
+    const { result } = renderHook(() => useTutor());
+    await act(async () => {
+      await result.current.sendTutorRequest({
+        type: 'code_feedback',
+        quest_id: 'q1',
+      });
+    });
+    expect(result.current.isLoading).toBe(false);
+  });
+});

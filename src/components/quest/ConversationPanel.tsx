@@ -34,6 +34,8 @@ interface ConversationPanelProps {
   goldenKeys: number;
   onGoldenKeyUse: () => void;
   isGoldenKeyLoading?: boolean;
+  /** 실행기가 준비되지 않았거나 실행·채점 중이라 지금은 황금키를 쓸 수 없음 */
+  isGoldenKeyBlocked?: boolean;
 }
 
 /** 이 시간이 지나도 답이 없으면 "조금 오래 걸려요" 문구로 바꿔 아이가 기다릴 수 있게 함 */
@@ -167,8 +169,11 @@ export function ConversationPanel({
   goldenKeys,
   onGoldenKeyUse,
   isGoldenKeyLoading,
+  isGoldenKeyBlocked = false,
 }: ConversationPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const goldenKeyDisabled =
+    isAiLoading || isGoldenKeyLoading || isGoldenKeyBlocked || goldenKeys <= 0;
 
   // 새 메시지 또는 스트리밍 콘텐츠 변경 시 자동 스크롤
   useEffect(() => {
@@ -258,19 +263,15 @@ export function ConversationPanel({
           </TooltipProvider>
           <div className="flex items-center gap-2">
             <m.div
-              whileHover={
-                !(isAiLoading || isGoldenKeyLoading || goldenKeys <= 0) ? { scale: 1.03 } : undefined
-              }
-              whileTap={
-                !(isAiLoading || isGoldenKeyLoading || goldenKeys <= 0) ? { scale: 0.97 } : undefined
-              }
+              whileHover={!goldenKeyDisabled ? { scale: 1.03 } : undefined}
+              whileTap={!goldenKeyDisabled ? { scale: 0.97 } : undefined}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onGoldenKeyUse}
-                disabled={isAiLoading || isGoldenKeyLoading || goldenKeys <= 0}
+                disabled={goldenKeyDisabled}
                 className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
               >
                 <KeyRound className="h-4 w-4" />

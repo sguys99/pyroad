@@ -49,6 +49,8 @@ export function StageCompleteCelebration({
   const [summaryText, setSummaryText] = useState('');
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(true);
+  // 배열 prop은 부모가 다시 그릴 때마다 새로 오므로 문자열로 비교 (요약을 다시 요청하지 않게)
+  const conceptsText = concepts.join(', ');
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +75,7 @@ export function StageCompleteCelebration({
       } catch {
         if (!cancelled) {
           setSummaryText(
-            `스테이지를 모두 완료했어요! ${concepts.join(', ')} 등의 개념을 배웠어요. 대단해요!`,
+            `스테이지를 모두 완료했어요! ${conceptsText} 등의 개념을 배웠어요. 대단해요!`,
           );
           setStreamingContent('');
           setIsStreaming(false);
@@ -84,8 +86,7 @@ export function StageCompleteCelebration({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questId]);
+  }, [questId, conceptsText, sendTutorStreamRequest]);
 
   const displayText = streamingContent || summaryText;
 
@@ -176,6 +177,7 @@ export function StageCompleteCelebration({
 
       {/* CTA */}
       <m.button
+        data-testid="celebration-cta"
         className="mt-2 w-full rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
