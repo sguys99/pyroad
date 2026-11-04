@@ -1,6 +1,7 @@
 import type { BoardPostWithAuthor } from '@/lib/types/database';
 import { DeletePostButton } from './DeletePostButton';
 import Link from 'next/link';
+import { formatKstDate } from '@/lib/time/kst';
 
 interface PostDetailProps {
   post: BoardPostWithAuthor;
@@ -8,7 +9,7 @@ interface PostDetailProps {
 }
 
 export function PostDetail({ post, isOwner }: PostDetailProps) {
-  const date = new Date(post.created_at).toLocaleDateString('ko-KR');
+  const date = formatKstDate(post.created_at);
   const authorName = post.user_profiles_public?.display_name || '익명';
   const isEdited = post.updated_at !== post.created_at;
 

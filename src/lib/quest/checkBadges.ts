@@ -1,3 +1,4 @@
+import { kstDayNumberOf } from '@/lib/time/kst';
 import type { BadgeType } from './badges';
 
 /**
@@ -59,28 +60,15 @@ export function decideNewBadges(facts: BadgeFacts): BadgeType[] {
   return badges;
 }
 
-const kstDateFormat = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'Asia/Seoul',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
-
-/** 'YYYY-MM-DD' (KST) → 그 날의 UTC 자정 기준 일 수 */
-function kstDayNumber(iso: string): number {
-  const [y, m, d] = kstDateFormat.format(new Date(iso)).split('-').map(Number);
-  return Date.UTC(y, m - 1, d) / 86_400_000;
-}
-
 /**
- * 3일 연속: 완료한 날(KST)을 최근 순으로 3개 뽑아 하루씩 이어지는지.
+ * 3일 연속: 완료한 날(KST, `src/lib/time/kst.ts`)을 최근 순으로 3개 뽑아 하루씩 이어지는지.
  * 이번 완료가 가장 최근이므로 "오늘·어제·그제 모두 완료"와 같습니다.
  */
 export function hasThreeDayStreak(
   completedAt: readonly (string | null)[],
 ): boolean {
   const days = [
-    ...new Set(completedAt.filter((c): c is string => !!c).map(kstDayNumber)),
+    ...new Set(completedAt.filter((c): c is string => !!c).map(kstDayNumberOf)),
   ].sort((a, b) => b - a);
   if (days.length < 3) return false;
   return days[0] - days[1] === 1 && days[1] - days[2] === 1;

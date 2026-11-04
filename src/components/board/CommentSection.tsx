@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { BoardCommentWithAuthor } from '@/lib/types/database';
+import { formatKstDate } from '@/lib/time/kst';
 
 interface CommentSectionProps {
   postId: string;
@@ -82,9 +83,7 @@ export function CommentSection({
         <div className="mb-4 flex flex-col gap-3">
           {comments.map((comment) => {
             const isOwner = comment.user_id === currentUserId;
-            const date = new Date(comment.created_at).toLocaleDateString(
-              'ko-KR',
-            );
+            const date = formatKstDate(comment.created_at);
             const authorName =
               comment.user_profiles_public?.display_name || '익명';
 

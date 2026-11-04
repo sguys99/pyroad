@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import type { BoardPostWithAuthor } from '@/lib/types/database';
+import { formatKstDate } from '@/lib/time/kst';
 
 interface BoardCardProps {
   post: BoardPostWithAuthor;
 }
 
 export function BoardCard({ post }: BoardCardProps) {
-  const date = new Date(post.created_at).toLocaleDateString('ko-KR');
+  const date = formatKstDate(post.created_at);
   const authorName = post.user_profiles_public?.display_name || '익명';
 
   return (

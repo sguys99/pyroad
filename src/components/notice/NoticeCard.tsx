@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import type { Notice } from '@/lib/types/database';
+import { formatKstDate } from '@/lib/time/kst';
 
 interface NoticeCardProps {
   notice: Notice;
 }
 
 export function NoticeCard({ notice }: NoticeCardProps) {
-  const date = new Date(notice.created_at).toLocaleDateString('ko-KR');
+  const date = formatKstDate(notice.created_at);
 
   return (
     <Link href={`/notice/${notice.id}`}>
