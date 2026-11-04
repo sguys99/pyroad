@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>P0-05 SW 제어 프로브</title>
+  </head>
+  <body>
+    <h1>Service Worker가 Dedicated Worker 요청을 가로채는지 (Pyodide 없이)</h1>
+    <pre id="out">…</pre>
+    <script type="module">
+      // ?scope=worker|page  — SW scope를 워커 디렉터리(./sw/)로 좁힐지, 페이지까지 넓힐지
+      const scope = new URLSearchParams(location.search).get('scope') === 'page' ? './' : './sw/';
+      const reg = await navigator.serviceWorker.register('./sw.js', { scope });
+      const sw = reg.active || reg.waiting || reg.installing;
+      if (sw.state !== 'activated')
+        await new Promise((r) => sw.addEventListener('statechange', () => sw.state === 'activated' && r()));
+      const result = { scope: reg.scope, pageControlled: !!navigator.serviceWorker.controller };
+      for (const [key, type, order] of [['classic', 'classic', 'xhr-first'], ['module', 'module', 'xhr-first'], ['moduleFetchFirst', 'module', 'fetch-first']]) {
+        const w = new Worker('./sw/probe-worker.js?order=' + order, { type });
+        result[key] = await new Promise((res) => {
+          w.onmessage = (e) => res(e.data);
+          w.onerror = (e) => res({ error: e.message || 'worker error' });
+          setTimeout(() => res({ error: 'timeout' }), 10000);
+        });
+        w.terminate();
+      }
+      window.result = result;
+      document.querySelector('#out').textContent = JSON.stringify(result, null, 2);
+    </script>
+  </body>
+</html>

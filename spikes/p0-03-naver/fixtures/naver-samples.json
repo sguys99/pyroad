@@ -1,0 +1,91 @@
+{
+  "_comment": [
+    "P0-03 Naver login samples. Shapes follow the official docs (developers.naver.com/docs/login/profile, /api, /devguide 3.5) checked 2026-11-03.",
+    "Values are fake. id/sub: apps registered after 2021-05-01 get a per-app BASE64 string of up to 64 chars (pairwise, differs per client_id).",
+    "Every field except response.id can be missing: the user can decline optional items, and the app may request only the 'user identifier'.",
+    "P0-04 (metadata normalization) can reuse userinfo.* as the provider=naver input. With the custom:naver OIDC approach, user_metadata holds only the id_token claims (see supabaseUserMetadata.oidc_user_metadata)."
+  ],
+  "userinfo": {
+    "fullConsent": {
+      "resultcode": "00",
+      "message": "success",
+      "response": {
+        "id": "Zq3mT8xWc1v0nVb7kLp2Rs9dHf4gJy6uEaQo5iNt1Ck",
+        "nickname": "코딩앨리스",
+        "name": "김앨리스",
+        "email": "alice.parent@naver.com",
+        "gender": "F",
+        "age": "30-39",
+        "birthday": "03-14",
+        "profile_image": "https://phinf.pstatic.net/contact/20260101_1/sample_alice.png",
+        "birthyear": "1990",
+        "mobile": "010-0000-0000"
+      }
+    },
+    "noEmail": {
+      "resultcode": "00",
+      "message": "success",
+      "response": {
+        "id": "Bv8pLq2Wn5xZc7Ty0Ua3Hd6Fk9Js1Gm4Er2Oi8Nw5Pq",
+        "nickname": "bob***",
+        "profile_image": "https://ssl.pstatic.net/static/pwe/address/img_profile.png"
+      }
+    },
+    "identifierOnly": {
+      "resultcode": "00",
+      "message": "success",
+      "response": {
+        "id": "Hc4rN7tYq0wPz3Lm6Vb9Xs2Kd5Fg8Ju1Ia4Oe7Ty0Rw"
+      }
+    },
+    "invalidToken": {
+      "resultcode": "024",
+      "message": "Authentication failed / 인증에 실패했습니다."
+    }
+  },
+  "tokenResponse": {
+    "access_token": "AAAAQosjWDJieBiQZc3to9YQp6HDLvrmyKC+6+iZ3gq7qrkqf50ljZC+Lgoqrg",
+    "refresh_token": "c8ceMEJisO4Se7uGisHoX0f5JEii7JnipglQipkOn5Zp3tyP7dHQoP0zNKHUq2gY",
+    "token_type": "bearer",
+    "expires_in": "3600",
+    "id_token": "<RS256 JWT, only when the OIDC endpoint /oauth2/token is used with scope=openid>"
+  },
+  "idTokenClaims": {
+    "iss": "https://nid.naver.com",
+    "sub": "Zq3mT8xWc1v0nVb7kLp2Rs9dHf4gJy6uEaQo5iNt1Ck",
+    "aud": "NAVER_CLIENT_ID",
+    "azp": "NAVER_CLIENT_ID",
+    "exp": 1793700000,
+    "iat": 1793698200,
+    "jti": "b3c1a4e2-0000-4000-8000-000000000000",
+    "nonce": "only-if-sent-in-authorize-request"
+  },
+  "authorizeCallback": {
+    "success": "https://<project-ref>.supabase.co/auth/v1/callback?code=EIc5bFrl4RibFls1&state=<flow-state-uuid>",
+    "userCancelled": "https://<project-ref>.supabase.co/auth/v1/callback?state=<flow-state-uuid>&error=access_denied&error_description=Canceled+By+User"
+  },
+  "supabaseUserMetadata": {
+    "_comment": "Observed (실측) with local GoTrue v2.197.0 + mock Naver, tests/e2e/custom-oidc.e2e.test.ts A-1. user.email is empty, app_metadata.provider = 'custom:naver', identities[0].provider = 'custom:naver', identities[0].id (auth.identities.provider_id) = sub. GoTrue copies the id_token claims as-is; no name/nickname/picture/email.",
+    "oidc_user_metadata": {
+      "aud": [
+        "NAVER_CLIENT_ID"
+      ],
+      "email_verified": false,
+      "exp": 1793700212,
+      "iat": 1793698412,
+      "iss": "https://nid.naver.com",
+      "phone_verified": false,
+      "sub": "Zq3mT8xWc1v0nVb7kLp2Rs9dHf4gJy6uEaQo5iNt1Ck"
+    },
+    "oidc_app_metadata": {
+      "provider": "custom:naver",
+      "providers": [
+        "custom:naver"
+      ]
+    },
+    "handle_new_user_result": {
+      "display_name": "",
+      "avatar_url": ""
+    }
+  }
+}

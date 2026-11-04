@@ -1,0 +1,20 @@
+{
+  "name": "p0-10-og-scratch",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 3110",
+    "build": "next build --turbopack",
+    "build:webpack": "next build",
+    "start": "next start -p 3110"
+  },
+  "dependencies": {
+    "next": "15.5.14",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/react": "^19.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

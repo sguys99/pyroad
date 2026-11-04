@@ -1,0 +1,19 @@
+{
+  "browser": "chromium",
+  "opt": "jspi",
+  "mode": "csp",
+  "ready": {
+    "t": 6173.4,
+    "type": "ready",
+    "ms": 5946,
+    "workerMs": 5759,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "jspi": true,
+      "canRunSync": true
+    }
+  },
+  "runOk": true,
+  "violations": []
+}

@@ -1,0 +1,100 @@
+{
+ "at": "2026-11-03T10:12:54.445Z",
+ "esbuild": "0.25.12",
+ "rows": [
+  {
+   "name": "howler (전체: core + spatial)",
+   "initial": {
+    "min": 36.35,
+    "gzip": 9.94,
+    "brotli": 8.92
+   },
+   "lazy": null
+  },
+  {
+   "name": "howler.core.min.js (spatial 제외)",
+   "initial": {
+    "min": 26.77,
+    "gzip": 8.05,
+    "brotli": 7.22
+   },
+   "lazy": null
+  },
+  {
+   "name": "use-sound 5.0.0 (초기 청크, howler 지연 로드)",
+   "initial": {
+    "min": 1.65,
+    "gzip": 0.84,
+    "brotli": 0.77
+   },
+   "lazy": {
+    "min": 35.93,
+    "gzip": 9.74,
+    "brotli": 8.74
+   }
+  },
+  {
+   "name": "react-sounds 1.0.30",
+   "initial": {
+    "min": 47.27,
+    "gzip": 13.83,
+    "brotli": 12.26
+   },
+   "lazy": null
+  },
+  {
+   "name": "tone 15.1.22 (import *)",
+   "initial": {
+    "min": 340.68,
+    "gzip": 80.97,
+    "brotli": 68
+   },
+   "lazy": null
+  },
+  {
+   "name": "tone 15.1.22 (Player만, tree-shaking)",
+   "initial": {
+    "min": 231.52,
+    "gzip": 59.65,
+    "brotli": 50.73
+   },
+   "lazy": null
+  },
+  {
+   "name": "zzfx 1.4.0 (합성 효과음)",
+   "initial": {
+    "min": 1.66,
+    "gzip": 1.01,
+    "brotli": 0.91
+   },
+   "lazy": null
+  },
+  {
+   "name": "자체 엔진 core (webAudioEngine + settings + platform)",
+   "initial": {
+    "min": 13.68,
+    "gzip": 4.8,
+    "brotli": 4.36
+   },
+   "lazy": null
+  },
+  {
+   "name": "자체 엔진 + React 바인딩 (SoundProvider, hooks)",
+   "initial": {
+    "min": 15.79,
+    "gzip": 5.66,
+    "brotli": 5.13
+   },
+   "lazy": null
+  },
+  {
+   "name": "비교: Howler 어댑터 (howlerEngine + howler)",
+   "initial": {
+    "min": 42.12,
+    "gzip": 11.88,
+    "brotli": 10.68
+   },
+   "lazy": null
+  }
+ ]
+}

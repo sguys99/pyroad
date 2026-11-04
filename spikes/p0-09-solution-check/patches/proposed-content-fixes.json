@@ -1,0 +1,24 @@
+[
+  {
+    "key": "7-1#2",
+    "note": "code_check \"int(\" is already satisfied by step 1's `random.randint(` (carried-over code passes untouched)",
+    "rule": {
+      "validation_type": "all",
+      "rules": [
+        { "validation_type": "code_check", "expected_output": "guess" },
+        { "validation_type": "contains", "expected_output": "추측" }
+      ]
+    }
+  },
+  {
+    "key": "7-1#3",
+    "note": "B09: contains \"보다 커요\" passes only when guess < secret (~45%). Accept any of the three branches; require elif for the concept",
+    "rule": {
+      "validation_type": "all",
+      "rules": [
+        { "validation_type": "code_check", "expected_output": "elif" },
+        { "validation_type": "contains_any", "expected_output": ["커요", "작아요", "정답"] }
+      ]
+    }
+  }
+]

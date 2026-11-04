@@ -1,0 +1,18 @@
+{
+  "name": "spike-p0-03-naver",
+  "private": true,
+  "type": "module",
+  "description": "P0-03 Naver login spike: Supabase custom OIDC provider (custom:naver) + server bridge fallback",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=spec tests/unit/*.test.ts",
+    "lab:up": "sh scripts/lab-up.sh",
+    "test:e2e": "sh scripts/e2e.sh",
+    "lab:down": "sh scripts/lab-down.sh"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.101.0"
+  }
+}

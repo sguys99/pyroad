@@ -1,0 +1,19 @@
+{
+  "browser": "webkit",
+  "opt": "sw",
+  "mode": "csp",
+  "ready": {
+    "t": 9354,
+    "type": "ready",
+    "ms": 9015,
+    "workerMs": 8932,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2",
+      "channel": "ok",
+      "swController": true
+    }
+  },
+  "runOk": true,
+  "violations": []
+}

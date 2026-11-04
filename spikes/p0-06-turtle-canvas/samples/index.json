@@ -1,0 +1,20 @@
+[
+  { "id": "square", "title": "정사각형", "file": "square.py",
+    "rules": [{ "type": "shape", "shape": "regular", "n": 4, "side": 150 }] },
+  { "id": "star", "title": "별 (채우기)", "file": "star.py",
+    "rules": [{ "type": "shape", "shape": "regular", "n": 5, "k": 2, "filled": true }] },
+  { "id": "spiral", "title": "무지개 나선", "file": "spiral.py",
+    "rules": [{ "type": "colors", "min": 6 }, { "type": "segments", "min": 150 }] },
+  { "id": "flower", "title": "원으로 꽃", "file": "flower.py",
+    "rules": [{ "type": "circles", "min": 12, "radius": 70 }] },
+  { "id": "hangul", "title": "한글 쓰기", "file": "hangul.py",
+    "rules": [{ "type": "text", "includes": "안녕" }] },
+  { "id": "race", "title": "거북이 경주", "file": "race.py",
+    "rules": [{ "type": "turtles", "min": 3 }] },
+  { "id": "bars", "title": "막대 그래프", "file": "bars.py",
+    "rules": [{ "type": "shape", "shape": "rectangle" }, { "type": "text", "includes": "딸기" }] },
+  { "id": "forever", "title": "무한 반복 (그림)", "file": "forever.py", "rules": [] },
+  { "id": "forever_silent", "title": "무한 반복 (조용히)", "file": "forever_silent.py", "rules": [] },
+  { "id": "errors", "title": "오타 에러", "file": "errors.py", "rules": [] },
+  { "id": "heavy", "title": "1만 걸음", "file": "heavy.py", "rules": [] }
+]

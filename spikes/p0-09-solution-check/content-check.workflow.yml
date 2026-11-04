@@ -1,0 +1,131 @@
+# DRAFT for P1-15. Do not copy into .github/workflows/ before P1-15.
+#
+# Content check: every quest's solution_code runs in Node Pyodide (same sandbox rules as the browser
+# worker) and must pass the quest's own validation for fixed seeds 0..9 and one unseeded run.
+#
+# Today (spike):  SQL --(PGlite)--> fixtures/quests.json --> check.ts / content.test.ts
+# After P1-11:    content/**/*.yaml --(content:build)--> the same JSON shape --> `npm run test:content`
+#                 (remove the `extract` and `fixture up to date` steps, change working-directory to the repo root)
+#
+# Measured (P0-09, i7-12700K under load avg 30-60 from parallel jobs): 48 units, about 18-25 s for the check step,
+# of which about 7 s is loading Pyodide. npm caching covers Pyodide: the npm package contains the wasm and the stdlib.
+
+name: content-check
+
+on:
+  pull_request:
+    paths:
+      - 'content/**'
+      - 'supabase/**'
+      - 'src/lib/quest/**'
+      - 'src/lib/pyodide/**'
+      - 'public/workers/**'
+      - 'spikes/p0-09-solution-check/**'
+      - 'package-lock.json'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: content-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  solutions:
+    name: solution_code self-check (Pyodide ${{ matrix.pyodide }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # While B26 is open the browser loads 0.27.5 from the CDN and package.json has 0.29.3.
+        # After B26 this becomes ONE version, read from the same place the worker reads it.
+        pyodide: ['0.29.3', '0.27.5']
+    defaults:
+      run:
+        working-directory: spikes/p0-09-solution-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            spikes/p0-09-solution-check/package-lock.json
+
+      # Root deps: pyodide 0.29.3, vitest, and src/lib/quest/validation.ts is imported as-is
+      - name: npm ci (root)
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+
+      # Spike deps: @electric-sql/pglite, tsx, pyodide-0.27.5 (npm alias)
+      - name: npm ci (spike)
+        run: npm ci --no-audit --no-fund
+
+      # Only needed if content ever uses pyodide.loadPackage() (numpy etc.); stdlib-only content never downloads.
+      # The runner would pass loadPyodide({ packageCacheDir: '.cache/pyodide-packages' }).
+      - name: cache Pyodide packages
+        uses: actions/cache@v4
+        with:
+          path: spikes/p0-09-solution-check/.cache/pyodide-packages
+          key: pyodide-pkgs-${{ matrix.pyodide }}-${{ hashFiles('package-lock.json', 'spikes/p0-09-solution-check/package-lock.json') }}
+
+      # SQL -> JSON with an in-memory Postgres (PGlite). Removed after P1-11 (content/ is the source).
+      - name: extract quests from SQL
+        run: node extract.mjs
+
+      - name: fixture must be committed and up to date
+        working-directory: .
+        run: git diff --exit-code -- spikes/p0-09-solution-check/fixtures/quests.json
+
+      - name: run every solution (fresh namespace per run, seeds 0..9 + 1 unseeded)
+        run: npx tsx check.ts --pyodide ${{ matrix.pyodide }} --mode fresh --runs 1 --seeds 10 --json results/ci-${{ matrix.pyodide }}.json
+
+      # Same check as a Vitest suite (the P1-13 shape). Pick one of the two in P1-13; both are shown here.
+      - name: vitest content suite
+        env:
+          PYODIDE_VERSION: ${{ matrix.pyodide }}
+        run: ../../node_modules/.bin/vitest run --config vitest.config.ts --reporter=default --reporter=junit --outputFile.junit=results/junit-${{ matrix.pyodide }}.xml
+
+      - name: upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-check-${{ matrix.pyodide }}
+          path: spikes/p0-09-solution-check/results/
+          if-no-files-found: ignore
+
+  # Optional, slow (about 1-2 min): the REAL public/workers/pyodide-worker.js (shared globals) with 20 unseeded runs per quest.
+  # Catches content that only passes or fails because of leftover state (B15) and estimates flakiness the way students see it.
+  student-like:
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: spikes/p0-09-solution-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            spikes/p0-09-solution-check/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: .
+      - run: npm ci --no-audit --no-fund
+      - run: node extract.mjs
+      - run: npx tsx check.ts --pyodide 0.27.5 --mode prod --runs 20 --seeds 0 --json results/student-like.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-check-student-like
+          path: spikes/p0-09-solution-check/results/
+          if-no-files-found: ignore

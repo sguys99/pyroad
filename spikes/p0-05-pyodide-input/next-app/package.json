@@ -1,0 +1,20 @@
+{
+  "name": "p0-05-next-coi",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next start -p 3105",
+    "dev": "next dev -p 3105"
+  },
+  "dependencies": {
+    "next": "15.5.14",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.0",
+    "@types/react": "19.2.14",
+    "playwright": "^1.62.1",
+    "typescript": "5.9.3"
+  }
+}

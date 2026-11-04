@@ -1,0 +1,113 @@
+{
+ "chromium": {
+  "version": "151.0.7922.34",
+  "predecode": [
+   {
+    "firstStartMs": 58.6,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 18.2,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 8.5,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   }
+  ],
+  "noPredecode": [
+   {
+    "firstStartMs": 18.8,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 12.4,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 13.2,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   }
+  ]
+ },
+ "firefox": {
+  "version": "153.0",
+  "predecode": [
+   {
+    "firstStartMs": 11,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 11,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 11,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   }
+  ],
+  "noPredecode": [
+   {
+    "firstStartMs": 34,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 26,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 36,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   }
+  ]
+ },
+ "webkit": {
+  "version": "26.5",
+  "predecode": [
+   {
+    "firstStartMs": 30,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 29,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 29,
+    "decodedBeforeGesture": 6,
+    "warnings": 0
+   }
+  ],
+  "noPredecode": [
+   {
+    "firstStartMs": 80,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 85,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   },
+   {
+    "firstStartMs": 64,
+    "decodedBeforeGesture": 0,
+    "warnings": 0
+   }
+  ]
+ }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "p0-16-low-spec-spike",
+  "private": true,
+  "type": "module",
+  "description": "P0-16 저사양 자동 감지 스파이크 (앱 코드 아님). detectMotionTier + useMotionTier + Playwright 검증",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "build": "node bench/build.mjs",
+    "test": "node bench/build.mjs && node --test dist/node/motionTier.test.mjs",
+    "serve": "node bench/serve.mjs",
+    "support": "node bench/support.mjs",
+    "validate": "node bench/validate.mjs"
+  },
+  "devDependencies": {
+    "@mdn/browser-compat-data": "8.1.8",
+    "@types/node": "22.15.30",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.6",
+    "canvas-confetti": "1.9.4",
+    "@types/canvas-confetti": "1.9.0",
+    "esbuild": "0.25.12",
+    "playwright-core": "1.62.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "5.9.3"
+  }
+}

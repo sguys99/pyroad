@@ -1,0 +1,31 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:#fff">
+<div id="g" style="display:grid;grid-template-columns:repeat(6,128px);gap:4px"></div>
+<script src="/dist/lottie.min.js"></script>
+<script>
+function patch(d, mode) {
+  for (const l of d.layers) {
+    if (mode >= 1) { l.st ??= 0; l.ks.a ??= { a: 0, k: [0, 0, 0] }; l.ks.r ??= { a: 0, k: 0 }; l.ks.o ??= { a: 0, k: 100 }; l.ks.p ??= { a: 0, k: [64, 64, 0] }; l.ks.s ??= { a: 0, k: [100, 100, 100] }; }
+    if (mode >= 2) {
+      const fix = (prop) => { if (prop && prop.a === 1) for (const k of prop.k) { if (k.e) { k.i ??= { x: [0.5], y: [0.5] }; k.o ??= { x: [0.5], y: [0.5] }; } } };
+      for (const key of Object.keys(l.ks)) fix(l.ks[key]);
+      for (const sh of l.shapes || []) for (const key of Object.keys(sh)) if (typeof sh[key] === 'object') fix(sh[key]);
+    }
+  }
+  return d;
+}
+window.__errs = [];
+window.addEventListener('error', (e) => window.__errs.push(e.message));
+(async () => {
+  const names = ['celebrating','entrance','level-up','project-complete'];
+  const g = document.getElementById('g');
+  for (const mode of [0, 1, 2]) for (const n of names) {
+    const data = patch(await (await fetch('/repo-characters/pybaem/lottie/' + n + '.json')).json(), mode);
+    for (const f of [5, 20, 40]) {
+      const d = document.createElement('div'); d.style.cssText='width:128px;height:128px;outline:1px solid #ddd'; g.appendChild(d);
+      try { const a = lottie.loadAnimation({ container: d, renderer: 'svg', loop: false, autoplay: false, animationData: JSON.parse(JSON.stringify(data)) }); a.goToAndStop(f, true); }
+      catch (e) { window.__errs.push(mode + ' ' + n + ' ' + e.message); }
+    }
+  }
+  document.title = 'done';
+})();
+</script>

@@ -1,0 +1,3378 @@
+{
+  "batches": {
+    "world:4x": {
+      "scene": "world",
+      "rate": 4,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 6.96,
+        "load5": 14.12,
+        "load15": 15.57,
+        "port3107Busy": false,
+        "at": "2026-11-03T13:58:24.177Z",
+        "settled": true,
+        "waitedMin": 0,
+        "label": "frames world 4x"
+      },
+      "loadAfter": {
+        "load1": 6.21,
+        "load5": 12.92,
+        "load15": 15.09,
+        "port3107Busy": false,
+        "at": "2026-11-03T13:59:11.238Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4009,
+          "fps": 56.9,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 33.4,
+          "max": 33.4,
+          "jankPct": 4.8,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 83,
+          "scriptMs": 565,
+          "layoutStyleMs": 833,
+          "heapMB": 5.9,
+          "p95Spread": [
+            16.8,
+            33.3
+          ]
+        },
+        "scroll": {
+          "durMs": 3531,
+          "fps": 56.5,
+          "p50": 16.7,
+          "p95": 33.3,
+          "p99": 33.4,
+          "max": 50,
+          "jankPct": 5.5,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 88.9,
+          "scriptMs": 561,
+          "layoutStyleMs": 653,
+          "heapMB": 5.8,
+          "distPx": 350,
+          "compositorFps": 62.9,
+          "compositorDroppedPct": 0.9,
+          "p95Spread": [
+            16.8,
+            33.4
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 6.96,
+          "idle": {
+            "durMs": 4015,
+            "fps": 57.5,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.4,
+            "max": 33.4,
+            "jankPct": 3.9,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 73.3,
+            "scriptMs": 488,
+            "layoutStyleMs": 704,
+            "heapMB": 5.9
+          },
+          "scroll": {
+            "durMs": 3523,
+            "fps": 56.5,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 33.4,
+            "max": 33.4,
+            "jankPct": 5.5,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 88.9,
+            "scriptMs": 561,
+            "layoutStyleMs": 653,
+            "heapMB": 5.7,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 5,
+              "STATE_PRESENTED_ALL": 204,
+              "STATE_PRESENTED_PARTIAL": 12,
+              "smooth": 10,
+              "STATE_DROPPED": 2,
+              "smoothDropped": 2,
+              "presented": 216,
+              "dropped": 2,
+              "droppedPct": 0.9,
+              "fps": 61.3
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 2,
+          "load1": 6.56,
+          "idle": {
+            "durMs": 4007,
+            "fps": 56.9,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.4,
+            "max": 50,
+            "jankPct": 4.8,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 83,
+            "scriptMs": 565,
+            "layoutStyleMs": 833,
+            "heapMB": 6
+          },
+          "scroll": {
+            "durMs": 3531,
+            "fps": 57.2,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.3,
+            "max": 50,
+            "jankPct": 4.5,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 84.6,
+            "scriptMs": 515,
+            "layoutStyleMs": 620,
+            "heapMB": 5.9,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 4,
+              "STATE_PRESENTED_ALL": 207,
+              "STATE_PRESENTED_PARTIAL": 15,
+              "smooth": 12,
+              "STATE_DROPPED": 2,
+              "smoothDropped": 2,
+              "presented": 222,
+              "dropped": 2,
+              "droppedPct": 0.9,
+              "fps": 62.9
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 3,
+          "load1": 6.31,
+          "idle": {
+            "durMs": 4009,
+            "fps": 55.1,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 33.4,
+            "max": 33.4,
+            "jankPct": 9,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 90.3,
+            "scriptMs": 591,
+            "layoutStyleMs": 884,
+            "heapMB": 5.9
+          },
+          "scroll": {
+            "durMs": 3592,
+            "fps": 47.6,
+            "p50": 16.7,
+            "p95": 33.4,
+            "p99": 50,
+            "max": 50.1,
+            "jankPct": 22.8,
+            "longTasks": 1,
+            "longTaskMs": 51,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 100.6,
+            "scriptMs": 615,
+            "layoutStyleMs": 721,
+            "heapMB": 5.8,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 5,
+              "STATE_PRESENTED_ALL": 170,
+              "STATE_PRESENTED_PARTIAL": 57,
+              "smooth": 48,
+              "STATE_DROPPED": 7,
+              "smoothDropped": 7,
+              "presented": 227,
+              "dropped": 7,
+              "droppedPct": 3,
+              "fps": 63.2
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        }
+      ]
+    },
+    "world:6x": {
+      "scene": "world",
+      "rate": 6,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 6.21,
+        "load5": 12.92,
+        "load15": 15.09,
+        "port3107Busy": false,
+        "at": "2026-11-03T13:59:11.259Z",
+        "settled": true,
+        "waitedMin": 0,
+        "label": "frames world 6x"
+      },
+      "loadAfter": {
+        "load1": 7.52,
+        "load5": 12.07,
+        "load15": 14.66,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:00:09.383Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4073,
+          "fps": 19.2,
+          "p50": 33.3,
+          "p95": 166.7,
+          "p99": 349.9,
+          "max": 450,
+          "jankPct": 71.8,
+          "longTasks": 12,
+          "longTaskMs": 1464,
+          "loaf": 13,
+          "loafBlockingMs": 698,
+          "mainBusyPct": 101.5,
+          "scriptMs": 2086,
+          "layoutStyleMs": 459,
+          "heapMB": 5.5,
+          "p95Spread": [
+            50,
+            183.3
+          ]
+        },
+        "scroll": {
+          "durMs": 4471,
+          "fps": 16.3,
+          "p50": 49.9,
+          "p95": 150,
+          "p99": 516.7,
+          "max": 516.7,
+          "jankPct": 82.2,
+          "longTasks": 25,
+          "longTaskMs": 2281,
+          "loaf": 12,
+          "loafBlockingMs": 869,
+          "mainBusyPct": 101.3,
+          "scriptMs": 1471,
+          "layoutStyleMs": 680,
+          "heapMB": 5.4,
+          "distPx": 362,
+          "compositorFps": 50.3,
+          "compositorDroppedPct": 12.8,
+          "p95Spread": [
+            66.7,
+            183.4
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 6.21,
+          "idle": {
+            "durMs": 4015,
+            "fps": 39.1,
+            "p50": 16.7,
+            "p95": 50,
+            "p99": 116.6,
+            "max": 500,
+            "jankPct": 23.6,
+            "longTasks": 4,
+            "longTaskMs": 590,
+            "loaf": 6,
+            "loafBlockingMs": 422,
+            "loafTop": [
+              "453ms d41beca67e5354f3.js:T,3ed20b08576ff946.js:IntersectionObserverCallback",
+              "108ms d41beca67e5354f3.js:T,add2fe5f713e07df.js:Window.fetch.then",
+              "94ms add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then,add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then"
+            ],
+            "mainBusyPct": 99,
+            "scriptMs": 1137,
+            "layoutStyleMs": 728,
+            "heapMB": 5.5
+          },
+          "scroll": {
+            "durMs": 4471,
+            "fps": 16.3,
+            "p50": 49.9,
+            "p95": 150,
+            "p99": 516.7,
+            "max": 516.7,
+            "jankPct": 82.2,
+            "longTasks": 25,
+            "longTaskMs": 2281,
+            "loaf": 12,
+            "loafBlockingMs": 869,
+            "loafTop": [
+              "501ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "249ms 3ed20b08576ff946.js:IntersectionObserverCallback,a30e174e0578ae92.js:Animation.onfinish",
+              "154ms d41beca67e5354f3.js:T,393df720f381bae3.js:http://localhost:3113/_next/static/chunks/393df720f381bae3.js"
+            ],
+            "mainBusyPct": 100.9,
+            "scriptMs": 1471,
+            "layoutStyleMs": 680,
+            "heapMB": 5.4,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 39,
+              "STATE_PRESENTED_ALL": 71,
+              "STATE_DROPPED": 33,
+              "smooth": 169,
+              "smoothDropped": 33,
+              "STATE_PRESENTED_PARTIAL": 154,
+              "presented": 225,
+              "dropped": 33,
+              "droppedPct": 12.8,
+              "fps": 50.3
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 2,
+          "load1": 6.47,
+          "idle": {
+            "durMs": 4073,
+            "fps": 19.2,
+            "p50": 33.3,
+            "p95": 183.3,
+            "p99": 450,
+            "max": 450,
+            "jankPct": 71.8,
+            "longTasks": 15,
+            "longTaskMs": 1606,
+            "loaf": 13,
+            "loafBlockingMs": 865,
+            "loafTop": [
+              "390ms d41beca67e5354f3.js:T,3ed20b08576ff946.js:IntersectionObserverCallback",
+              "303ms d41beca67e5354f3.js:T",
+              "181ms d41beca67e5354f3.js:T,add2fe5f713e07df.js:Window.fetch.then"
+            ],
+            "mainBusyPct": 103.6,
+            "scriptMs": 2086,
+            "layoutStyleMs": 459,
+            "heapMB": 5.5
+          },
+          "scroll": {
+            "durMs": 5331,
+            "fps": 11.4,
+            "p50": 50,
+            "p95": 183.4,
+            "p99": 1466.6,
+            "max": 1466.6,
+            "jankPct": 91.8,
+            "longTasks": 27,
+            "longTaskMs": 3263,
+            "loaf": 13,
+            "loafBlockingMs": 1764,
+            "loafTop": [
+              "1422ms d41beca67e5354f3.js:co,d41beca67e5354f3.js:ca",
+              "225ms 3ed20b08576ff946.js:IntersectionObserverCallback,a30e174e0578ae92.js:Animation.onfinish",
+              "155ms d41beca67e5354f3.js:T,add2fe5f713e07df.js:Window.fetch.then"
+            ],
+            "mainBusyPct": 101.3,
+            "scriptMs": 2373,
+            "layoutStyleMs": 658,
+            "heapMB": 5.3,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 53,
+              "STATE_PRESENTED_ALL": 60,
+              "STATE_DROPPED": 91,
+              "smooth": 244,
+              "smoothDropped": 91,
+              "STATE_PRESENTED_PARTIAL": 163,
+              "presented": 223,
+              "dropped": 91,
+              "droppedPct": 29,
+              "fps": 41.8
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 3,
+          "load1": 7.38,
+          "idle": {
+            "durMs": 4279,
+            "fps": 18.5,
+            "p50": 33.3,
+            "p95": 166.7,
+            "p99": 349.9,
+            "max": 349.9,
+            "jankPct": 74.7,
+            "longTasks": 12,
+            "longTaskMs": 1464,
+            "loaf": 13,
+            "loafBlockingMs": 698,
+            "loafTop": [
+              "262ms d41beca67e5354f3.js:T",
+              "201ms d41beca67e5354f3.js:T",
+              "165ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 101.5,
+            "scriptMs": 2402,
+            "layoutStyleMs": 406,
+            "heapMB": 5.2
+          },
+          "scroll": {
+            "durMs": 3949,
+            "fps": 34.7,
+            "p50": 16.7,
+            "p95": 66.7,
+            "p99": 116.7,
+            "max": 166.7,
+            "jankPct": 45.3,
+            "longTasks": 9,
+            "longTaskMs": 613,
+            "loaf": 4,
+            "loafBlockingMs": 91,
+            "loafTop": [
+              "137ms 393df720f381bae3.js:http://localhost:3113/_next/static/chunks/393df720f381bae3.js,a30e174e0578ae92.js:y",
+              "86ms a30e174e0578ae92.js:Animation.onfinish",
+              "64ms a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 108.3,
+            "scriptMs": 941,
+            "layoutStyleMs": 795,
+            "heapMB": 5.5,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 24,
+              "STATE_PRESENTED_ALL": 139,
+              "STATE_DROPPED": 20,
+              "smooth": 105,
+              "smoothDropped": 20,
+              "STATE_PRESENTED_PARTIAL": 101,
+              "presented": 240,
+              "dropped": 20,
+              "droppedPct": 7.7,
+              "fps": 60.8
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        }
+      ]
+    },
+    "celebration:4x": {
+      "scene": "celebration",
+      "rate": 4,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 7.52,
+        "load5": 12.07,
+        "load15": 14.66,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:00:09.419Z",
+        "settled": true,
+        "waitedMin": 0,
+        "label": "frames celebration 4x"
+      },
+      "loadAfter": {
+        "load1": 10.53,
+        "load5": 11.98,
+        "load15": 14.42,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:01:26.330Z"
+      },
+      "median": {
+        "stage": {
+          "durMs": 7096,
+          "fps": 33.7,
+          "p50": 16.7,
+          "p95": 116.6,
+          "p99": 200,
+          "max": 316.7,
+          "jankPct": 22.1,
+          "longTasks": 20,
+          "longTaskMs": 1858,
+          "loaf": 16,
+          "loafBlockingMs": 847,
+          "mainBusyPct": 91.9,
+          "scriptMs": 1361,
+          "layoutStyleMs": 1664,
+          "heapMB": 13.5,
+          "compositorFps": 27.1,
+          "compositorDroppedPct": 53.7,
+          "p95Spread": [
+            66.6,
+            116.7
+          ]
+        },
+        "level": {
+          "durMs": 5167,
+          "fps": 48.6,
+          "p50": 16.7,
+          "p95": 33.4,
+          "p99": 66.7,
+          "max": 183.4,
+          "jankPct": 13.9,
+          "longTasks": 3,
+          "longTaskMs": 244,
+          "loaf": 3,
+          "loafBlockingMs": 76,
+          "mainBusyPct": 82.3,
+          "scriptMs": 410,
+          "layoutStyleMs": 1184,
+          "heapMB": 12.7,
+          "compositorFps": 18.5,
+          "compositorDroppedPct": 69.2,
+          "p95Spread": [
+            33.3,
+            49.9
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 7.52,
+          "stage": {
+            "durMs": 7130,
+            "fps": 33,
+            "p50": 16.7,
+            "p95": 116.7,
+            "p99": 266.6,
+            "max": 266.7,
+            "jankPct": 22.1,
+            "longTasks": 23,
+            "longTaskMs": 2297,
+            "loaf": 16,
+            "loafBlockingMs": 1178,
+            "loafTop": [
+              "256ms 632383b0257e9034.js:Worker.onmessage,d41beca67e5354f3.js:T",
+              "249ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "232ms 13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js"
+            ],
+            "mainBusyPct": 93.3,
+            "scriptMs": 1361,
+            "layoutStyleMs": 1739,
+            "heapMB": 13.5,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 9,
+              "STATE_PRESENTED_ALL": 81,
+              "STATE_DROPPED": 226,
+              "STATE_PRESENTED_PARTIAL": 114,
+              "smooth": 326,
+              "smoothDropped": 220,
+              "presented": 195,
+              "dropped": 226,
+              "droppedPct": 53.7,
+              "fps": 27.3
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5167,
+            "fps": 48.6,
+            "p50": 16.7,
+            "p95": 33.4,
+            "p99": 66.7,
+            "max": 183.4,
+            "jankPct": 13.9,
+            "longTasks": 3,
+            "longTaskMs": 244,
+            "loaf": 3,
+            "loafBlockingMs": 76,
+            "loafTop": [
+              "177ms d41beca67e5354f3.js:VoidFunction,a30e174e0578ae92.js:y",
+              "59ms d41beca67e5354f3.js:T",
+              "54ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 81.5,
+            "scriptMs": 410,
+            "layoutStyleMs": 1184,
+            "heapMB": 12.7,
+            "compositor": {
+              "STATE_DROPPED": 213,
+              "smooth": 234,
+              "smoothDropped": 213,
+              "STATE_PRESENTED_ALL": 66,
+              "STATE_PRESENTED_PARTIAL": 29,
+              "presented": 95,
+              "dropped": 213,
+              "droppedPct": 69.2,
+              "fps": 18.4
+            },
+            "sawLevelUp": true
+          }
+        },
+        {
+          "i": 2,
+          "load1": 8.53,
+          "stage": {
+            "durMs": 7096,
+            "fps": 35.7,
+            "p50": 16.7,
+            "p95": 66.6,
+            "p99": 183.4,
+            "max": 349.9,
+            "jankPct": 21.7,
+            "longTasks": 20,
+            "longTaskMs": 1858,
+            "loaf": 13,
+            "loafBlockingMs": 814,
+            "loafTop": [
+              "307ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "254ms 632383b0257e9034.js:Worker.onmessage,d41beca67e5354f3.js:T",
+              "161ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 91.9,
+            "scriptMs": 1336,
+            "layoutStyleMs": 1664,
+            "heapMB": 13.6,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 13,
+              "STATE_PRESENTED_ALL": 98,
+              "STATE_DROPPED": 220,
+              "smooth": 303,
+              "smoothDropped": 220,
+              "STATE_PRESENTED_PARTIAL": 94,
+              "presented": 192,
+              "dropped": 220,
+              "droppedPct": 53.4,
+              "fps": 27.1
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5182,
+            "fps": 44.8,
+            "p50": 16.7,
+            "p95": 49.9,
+            "p99": 66.7,
+            "max": 200,
+            "jankPct": 21.6,
+            "longTasks": 5,
+            "longTaskMs": 374,
+            "loaf": 4,
+            "loafBlockingMs": 104,
+            "loafTop": [
+              "197ms d41beca67e5354f3.js:ca,d41beca67e5354f3.js:VoidFunction",
+              "57ms d41beca67e5354f3.js:T",
+              "53ms "
+            ],
+            "mainBusyPct": 90.6,
+            "scriptMs": 444,
+            "layoutStyleMs": 1267,
+            "heapMB": 12.5,
+            "compositor": {
+              "STATE_DROPPED": 219,
+              "smooth": 246,
+              "smoothDropped": 219,
+              "STATE_PRESENTED_PARTIAL": 33,
+              "STATE_PRESENTED_ALL": 63,
+              "presented": 96,
+              "dropped": 219,
+              "droppedPct": 69.5,
+              "fps": 18.5
+            },
+            "sawLevelUp": true
+          }
+        },
+        {
+          "i": 3,
+          "load1": 9.88,
+          "stage": {
+            "durMs": 7090,
+            "fps": 33.7,
+            "p50": 16.7,
+            "p95": 116.6,
+            "p99": 200,
+            "max": 316.7,
+            "jankPct": 24.3,
+            "longTasks": 17,
+            "longTaskMs": 1734,
+            "loaf": 17,
+            "loafBlockingMs": 847,
+            "loafTop": [
+              "269ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "216ms d41beca67e5354f3.js:T",
+              "174ms 632383b0257e9034.js:Worker.onmessage,d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 91,
+            "scriptMs": 1372,
+            "layoutStyleMs": 1555,
+            "heapMB": 12.3,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 11,
+              "STATE_PRESENTED_ALL": 88,
+              "STATE_DROPPED": 226,
+              "smooth": 320,
+              "smoothDropped": 226,
+              "STATE_PRESENTED_PARTIAL": 104,
+              "presented": 192,
+              "dropped": 226,
+              "droppedPct": 54.1,
+              "fps": 27.1
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5102,
+            "fps": 51.4,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 66.5,
+            "max": 66.7,
+            "jankPct": 11.1,
+            "longTasks": 2,
+            "longTaskMs": 119,
+            "loaf": 1,
+            "loafBlockingMs": 3,
+            "loafTop": [
+              "61ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 82.3,
+            "scriptMs": 355,
+            "layoutStyleMs": 1100,
+            "heapMB": 13.6,
+            "compositor": {
+              "STATE_DROPPED": 190,
+              "smooth": 202,
+              "smoothDropped": 190,
+              "STATE_PRESENTED_ALL": 91,
+              "STATE_PRESENTED_PARTIAL": 26,
+              "presented": 117,
+              "dropped": 190,
+              "droppedPct": 61.9,
+              "fps": 22.9
+            },
+            "sawLevelUp": true
+          }
+        }
+      ]
+    },
+    "celebration:6x": {
+      "scene": "celebration",
+      "rate": 6,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 7.66,
+        "load5": 10.54,
+        "load15": 13.6,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:03:26.956Z",
+        "settled": true,
+        "waitedMin": 2,
+        "label": "frames celebration 6x"
+      },
+      "loadAfter": {
+        "load1": 13.08,
+        "load5": 11.17,
+        "load15": 13.5,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:05:02.556Z"
+      },
+      "median": {
+        "stage": {
+          "durMs": 7269,
+          "fps": 6.6,
+          "p50": 66.6,
+          "p95": 500,
+          "p99": 566.7,
+          "max": 566.7,
+          "jankPct": 92.9,
+          "longTasks": 37,
+          "longTaskMs": 5591,
+          "loaf": 23,
+          "loafBlockingMs": 3476,
+          "mainBusyPct": 99.1,
+          "scriptMs": 2650,
+          "layoutStyleMs": 1592,
+          "heapMB": 12.6,
+          "compositorFps": 22.8,
+          "compositorDroppedPct": 60.8,
+          "p95Spread": [
+            316.6,
+            566.7
+          ]
+        },
+        "level": {
+          "durMs": 5491,
+          "fps": 20.9,
+          "p50": 33.3,
+          "p95": 133.3,
+          "p99": 166.6,
+          "max": 566.6,
+          "jankPct": 82.5,
+          "longTasks": 17,
+          "longTaskMs": 1767,
+          "loaf": 10,
+          "loafBlockingMs": 675,
+          "mainBusyPct": 98.6,
+          "scriptMs": 762,
+          "layoutStyleMs": 1453,
+          "heapMB": 12.8,
+          "compositorFps": 16,
+          "compositorDroppedPct": 74.1,
+          "p95Spread": [
+            66.6,
+            149.9
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 7.66,
+          "stage": {
+            "durMs": 7157,
+            "fps": 13.8,
+            "p50": 33.3,
+            "p95": 316.6,
+            "p99": 483.2,
+            "max": 483.2,
+            "jankPct": 69.7,
+            "longTasks": 34,
+            "longTaskMs": 4229,
+            "loaf": 25,
+            "loafBlockingMs": 2372,
+            "loafTop": [
+              "435ms d41beca67e5354f3.js:T",
+              "418ms 632383b0257e9034.js:TimerHandler:setTimeout,d41beca67e5354f3.js:T",
+              "356ms 632383b0257e9034.js:Window.fetch.then,d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 98.8,
+            "scriptMs": 2079,
+            "layoutStyleMs": 1730,
+            "heapMB": 12.6,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 12,
+              "STATE_PRESENTED_ALL": 38,
+              "STATE_DROPPED": 262,
+              "smooth": 374,
+              "smoothDropped": 262,
+              "STATE_PRESENTED_PARTIAL": 119,
+              "presented": 157,
+              "dropped": 262,
+              "droppedPct": 62.5,
+              "fps": 21.9
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5491,
+            "fps": 29.7,
+            "p50": 16.8,
+            "p95": 66.6,
+            "p99": 133.3,
+            "max": 483.3,
+            "jankPct": 49.7,
+            "longTasks": 17,
+            "longTaskMs": 1440,
+            "loaf": 8,
+            "loafBlockingMs": 429,
+            "loafTop": [
+              "454ms d41beca67e5354f3.js:ca,d41beca67e5354f3.js:VoidFunction",
+              "103ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "91ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 98.6,
+            "scriptMs": 762,
+            "layoutStyleMs": 1453,
+            "heapMB": 13.9,
+            "compositor": {
+              "STATE_DROPPED": 234,
+              "smooth": 276,
+              "smoothDropped": 234,
+              "STATE_PRESENTED_ALL": 43,
+              "STATE_PRESENTED_PARTIAL": 49,
+              "presented": 92,
+              "dropped": 234,
+              "droppedPct": 71.8,
+              "fps": 16.8
+            },
+            "sawLevelUp": true
+          }
+        },
+        {
+          "i": 2,
+          "load1": 7.56,
+          "stage": {
+            "durMs": 7269,
+            "fps": 6.6,
+            "p50": 66.6,
+            "p95": 500,
+            "p99": 566.7,
+            "max": 566.7,
+            "jankPct": 93.8,
+            "longTasks": 37,
+            "longTaskMs": 5591,
+            "loaf": 23,
+            "loafBlockingMs": 3476,
+            "loafTop": [
+              "533ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:cu",
+              "496ms 632383b0257e9034.js:Worker.onmessage,d41beca67e5354f3.js:T",
+              "481ms 13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js"
+            ],
+            "mainBusyPct": 99.1,
+            "scriptMs": 2667,
+            "layoutStyleMs": 1543,
+            "heapMB": 12.6,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 14,
+              "STATE_PRESENTED_ALL": 29,
+              "STATE_DROPPED": 257,
+              "smooth": 388,
+              "smoothDropped": 257,
+              "STATE_PRESENTED_PARTIAL": 137,
+              "presented": 166,
+              "dropped": 257,
+              "droppedPct": 60.8,
+              "fps": 22.8
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5611,
+            "fps": 20.9,
+            "p50": 33.3,
+            "p95": 133.3,
+            "p99": 166.6,
+            "max": 566.6,
+            "jankPct": 85.5,
+            "longTasks": 17,
+            "longTaskMs": 1767,
+            "loaf": 10,
+            "loafBlockingMs": 675,
+            "loafTop": [
+              "517ms d41beca67e5354f3.js:ca,d41beca67e5354f3.js:VoidFunction",
+              "158ms 632383b0257e9034.js:TimerHandler:setTimeout,a30e174e0578ae92.js:y",
+              "122ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 99.2,
+            "scriptMs": 786,
+            "layoutStyleMs": 1507,
+            "heapMB": 12.8,
+            "compositor": {
+              "STATE_DROPPED": 257,
+              "smooth": 300,
+              "smoothDropped": 257,
+              "STATE_PRESENTED_PARTIAL": 50,
+              "STATE_PRESENTED_ALL": 40,
+              "presented": 90,
+              "dropped": 257,
+              "droppedPct": 74.1,
+              "fps": 16
+            },
+            "sawLevelUp": true
+          }
+        },
+        {
+          "i": 3,
+          "load1": 9.14,
+          "stage": {
+            "durMs": 7314,
+            "fps": 5.7,
+            "p50": 83.3,
+            "p95": 566.7,
+            "p99": 650,
+            "max": 650,
+            "jankPct": 92.9,
+            "longTasks": 37,
+            "longTaskMs": 5947,
+            "loaf": 22,
+            "loafBlockingMs": 3639,
+            "loafTop": [
+              "585ms 632383b0257e9034.js:Worker.onmessage,d41beca67e5354f3.js:T",
+              "583ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:Animation.onfinish",
+              "517ms c005939bea489023.js:LockGrantedCallback,c005939bea489023.js:LockManager.request.then"
+            ],
+            "mainBusyPct": 100,
+            "scriptMs": 2650,
+            "layoutStyleMs": 1592,
+            "heapMB": 12.8,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 30,
+              "STATE_PRESENTED_PARTIAL": 155,
+              "smooth": 366,
+              "STATE_DROPPED": 242,
+              "smoothDropped": 222,
+              "STATE_NO_UPDATE_DESIRED": 16,
+              "presented": 185,
+              "dropped": 242,
+              "droppedPct": 56.7,
+              "fps": 25.3
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5425,
+            "fps": 17.9,
+            "p50": 33.4,
+            "p95": 149.9,
+            "p99": 633.3,
+            "max": 633.3,
+            "jankPct": 82.5,
+            "longTasks": 22,
+            "longTaskMs": 2156,
+            "loaf": 13,
+            "loafBlockingMs": 718,
+            "loafTop": [
+              "609ms d41beca67e5354f3.js:ca,d41beca67e5354f3.js:VoidFunction",
+              "144ms d41beca67e5354f3.js:T,:PerformanceObserverCallback",
+              "124ms 632383b0257e9034.js:TimerHandler:setTimeout,632383b0257e9034.js:TimerHandler:setTimeout"
+            ],
+            "mainBusyPct": 95.8,
+            "scriptMs": 750,
+            "layoutStyleMs": 1337,
+            "heapMB": 10.5,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 35,
+              "STATE_DROPPED": 247,
+              "smooth": 287,
+              "smoothDropped": 247,
+              "STATE_PRESENTED_PARTIAL": 46,
+              "presented": 81,
+              "dropped": 247,
+              "droppedPct": 75.3,
+              "fps": 14.9
+            },
+            "sawLevelUp": true
+          }
+        }
+      ]
+    },
+    "landing:4x": {
+      "scene": "landing",
+      "rate": 4,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 16.73,
+        "load5": 13.13,
+        "load15": 13.94,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:07:03.244Z",
+        "settled": false,
+        "waitedMin": 2,
+        "label": "frames landing 4x"
+      },
+      "loadAfter": {
+        "load1": 19.42,
+        "load5": 14.27,
+        "load15": 14.28,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:07:49.640Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4034,
+          "fps": 43.1,
+          "p50": 16.7,
+          "p95": 50.1,
+          "p99": 166.7,
+          "max": 216.6,
+          "jankPct": 15.5,
+          "longTasks": 4,
+          "longTaskMs": 500,
+          "loaf": 6,
+          "loafBlockingMs": 351,
+          "mainBusyPct": 77.1,
+          "scriptMs": 942,
+          "layoutStyleMs": 535,
+          "heapMB": 6,
+          "p95Spread": [
+            50,
+            66.6
+          ]
+        },
+        "scroll": {
+          "durMs": 4607,
+          "fps": 52.3,
+          "p50": 16.7,
+          "p95": 33.4,
+          "p99": 50,
+          "max": 66.7,
+          "jankPct": 12,
+          "longTasks": 1,
+          "longTaskMs": 50,
+          "loaf": 1,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 89.2,
+          "scriptMs": 972,
+          "layoutStyleMs": 315,
+          "heapMB": 6.7,
+          "distPx": 557,
+          "compositorFps": 48.6,
+          "compositorDroppedPct": 8.6,
+          "p95Spread": [
+            33.3,
+            33.4
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 16.73,
+          "idle": {
+            "durMs": 4034,
+            "fps": 43.1,
+            "p50": 16.7,
+            "p95": 50.1,
+            "p99": 166.7,
+            "max": 216.7,
+            "jankPct": 15.5,
+            "longTasks": 4,
+            "longTaskMs": 463,
+            "loaf": 6,
+            "loafBlockingMs": 334,
+            "loafTop": [
+              "229ms d41beca67e5354f3.js:T",
+              "156ms d41beca67e5354f3.js:T,13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js",
+              "92ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:Animation.onfinish"
+            ],
+            "mainBusyPct": 77.1,
+            "scriptMs": 939,
+            "layoutStyleMs": 444,
+            "heapMB": 6
+          },
+          "scroll": {
+            "durMs": 4607,
+            "fps": 52.3,
+            "p50": 16.7,
+            "p95": 33.4,
+            "p99": 50,
+            "max": 66.7,
+            "jankPct": 12,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 1,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "54ms "
+            ],
+            "mainBusyPct": 91.4,
+            "scriptMs": 944,
+            "layoutStyleMs": 330,
+            "heapMB": 6.7,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 212,
+              "STATE_NO_UPDATE_DESIRED": 37,
+              "STATE_DROPPED": 21,
+              "smooth": 21,
+              "smoothDropped": 21,
+              "STATE_PRESENTED_PARTIAL": 12,
+              "presented": 224,
+              "dropped": 21,
+              "droppedPct": 8.6,
+              "fps": 48.6
+            },
+            "distPx": 557
+          }
+        },
+        {
+          "i": 2,
+          "load1": 16.45,
+          "idle": {
+            "durMs": 4021,
+            "fps": 43.3,
+            "p50": 16.7,
+            "p95": 66.6,
+            "p99": 133.3,
+            "max": 183.4,
+            "jankPct": 14.9,
+            "longTasks": 8,
+            "longTaskMs": 606,
+            "loaf": 8,
+            "loafBlockingMs": 351,
+            "loafTop": [
+              "170ms 13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js,a30e174e0578ae92.js:y",
+              "126ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:Animation.onfinish",
+              "117ms d41beca67e5354f3.js:T,:FrameRequestCallback"
+            ],
+            "mainBusyPct": 75.6,
+            "scriptMs": 942,
+            "layoutStyleMs": 549,
+            "heapMB": 6.1
+          },
+          "scroll": {
+            "durMs": 4536,
+            "fps": 55.8,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 33.4,
+            "max": 50,
+            "jankPct": 6.7,
+            "longTasks": 1,
+            "longTaskMs": 50,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 87.3,
+            "scriptMs": 972,
+            "layoutStyleMs": 313,
+            "heapMB": 6.8,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 219,
+              "STATE_NO_UPDATE_DESIRED": 40,
+              "STATE_DROPPED": 11,
+              "smooth": 11,
+              "smoothDropped": 11,
+              "STATE_PRESENTED_PARTIAL": 7,
+              "presented": 226,
+              "dropped": 11,
+              "droppedPct": 4.6,
+              "fps": 49.8
+            },
+            "distPx": 557
+          }
+        },
+        {
+          "i": 3,
+          "load1": 17.94,
+          "idle": {
+            "durMs": 4035,
+            "fps": 41.9,
+            "p50": 16.7,
+            "p95": 50,
+            "p99": 200,
+            "max": 216.6,
+            "jankPct": 16.6,
+            "longTasks": 4,
+            "longTaskMs": 500,
+            "loaf": 5,
+            "loafBlockingMs": 400,
+            "loafTop": [
+              "216ms 13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js",
+              "191ms d41beca67e5354f3.js:T",
+              "106ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 87.4,
+            "scriptMs": 1279,
+            "layoutStyleMs": 535,
+            "heapMB": 6
+          },
+          "scroll": {
+            "durMs": 4731,
+            "fps": 47.8,
+            "p50": 16.7,
+            "p95": 33.4,
+            "p99": 66.7,
+            "max": 99.9,
+            "jankPct": 19,
+            "longTasks": 3,
+            "longTaskMs": 157,
+            "loaf": 1,
+            "loafBlockingMs": 15,
+            "loafTop": [
+              "90ms d41beca67e5354f3.js:co,d41beca67e5354f3.js:co"
+            ],
+            "mainBusyPct": 89.2,
+            "scriptMs": 982,
+            "layoutStyleMs": 315,
+            "heapMB": 6.6,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 190,
+              "STATE_NO_UPDATE_DESIRED": 45,
+              "STATE_DROPPED": 38,
+              "smooth": 38,
+              "smoothDropped": 38,
+              "STATE_PRESENTED_PARTIAL": 17,
+              "presented": 207,
+              "dropped": 38,
+              "droppedPct": 15.5,
+              "fps": 43.8
+            },
+            "distPx": 557
+          }
+        }
+      ]
+    },
+    "landing:6x": {
+      "scene": "landing",
+      "rate": 6,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 19.24,
+        "load5": 15.66,
+        "load15": 14.77,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:09:50.648Z",
+        "settled": false,
+        "waitedMin": 2,
+        "label": "frames landing 6x"
+      },
+      "loadAfter": {
+        "load1": 21.03,
+        "load5": 16.93,
+        "load15": 15.27,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:10:40.989Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4020,
+          "fps": 23.9,
+          "p50": 16.7,
+          "p95": 199.9,
+          "p99": 350,
+          "max": 350,
+          "jankPct": 25.9,
+          "longTasks": 15,
+          "longTaskMs": 1705,
+          "loaf": 12,
+          "loafBlockingMs": 1163,
+          "mainBusyPct": 87.3,
+          "scriptMs": 1775,
+          "layoutStyleMs": 335,
+          "heapMB": 5.6,
+          "p95Spread": [
+            166.7,
+            250
+          ]
+        },
+        "scroll": {
+          "durMs": 4764,
+          "fps": 35.3,
+          "p50": 16.8,
+          "p95": 50.1,
+          "p99": 83.4,
+          "max": 150,
+          "jankPct": 47.6,
+          "longTasks": 6,
+          "longTaskMs": 411,
+          "loaf": 6,
+          "loafBlockingMs": 113,
+          "mainBusyPct": 93.2,
+          "scriptMs": 1205,
+          "layoutStyleMs": 265,
+          "heapMB": 6.3,
+          "distPx": 557,
+          "compositorFps": 36.1,
+          "compositorDroppedPct": 28,
+          "p95Spread": [
+            50,
+            50.1
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 19.24,
+          "idle": {
+            "durMs": 4019,
+            "fps": 23.9,
+            "p50": 16.7,
+            "p95": 250,
+            "p99": 350,
+            "max": 350,
+            "jankPct": 16.7,
+            "longTasks": 16,
+            "longTaskMs": 2116,
+            "loaf": 12,
+            "loafBlockingMs": 1487,
+            "loafTop": [
+              "314ms d41beca67e5354f3.js:T",
+              "313ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "292ms f22a0de60bf1d4df.js:U,3ed20b08576ff946.js:IntersectionObserverCallback"
+            ],
+            "mainBusyPct": 83,
+            "scriptMs": 1729,
+            "layoutStyleMs": 344,
+            "heapMB": 5.6
+          },
+          "scroll": {
+            "durMs": 4813,
+            "fps": 35.3,
+            "p50": 16.8,
+            "p95": 50.1,
+            "p99": 83.3,
+            "max": 116.7,
+            "jankPct": 47.6,
+            "longTasks": 6,
+            "longTaskMs": 411,
+            "loaf": 7,
+            "loafBlockingMs": 86,
+            "loafTop": [
+              "118ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "77ms d41beca67e5354f3.js:co,d41beca67e5354f3.js:ca",
+              "71ms d41beca67e5354f3.js:co,:FrameRequestCallback"
+            ],
+            "mainBusyPct": 91.6,
+            "scriptMs": 1155,
+            "layoutStyleMs": 265,
+            "heapMB": 6.4,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 50,
+              "STATE_PRESENTED_ALL": 146,
+              "STATE_DROPPED": 68,
+              "smooth": 74,
+              "smoothDropped": 68,
+              "STATE_PRESENTED_PARTIAL": 34,
+              "presented": 180,
+              "dropped": 68,
+              "droppedPct": 27.4,
+              "fps": 37.4
+            },
+            "distPx": 557
+          }
+        },
+        {
+          "i": 2,
+          "load1": 23.6,
+          "idle": {
+            "durMs": 4020,
+            "fps": 23.6,
+            "p50": 16.7,
+            "p95": 166.7,
+            "p99": 366.7,
+            "max": 366.7,
+            "jankPct": 31.6,
+            "longTasks": 14,
+            "longTaskMs": 1705,
+            "loaf": 14,
+            "loafBlockingMs": 1163,
+            "loafTop": [
+              "345ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "306ms :PerformanceObserverCallback,d41beca67e5354f3.js:T",
+              "271ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 90.5,
+            "scriptMs": 1935,
+            "layoutStyleMs": 335,
+            "heapMB": 5.6
+          },
+          "scroll": {
+            "durMs": 4607,
+            "fps": 37.6,
+            "p50": 16.7,
+            "p95": 50.1,
+            "p99": 100,
+            "max": 150,
+            "jankPct": 38.7,
+            "longTasks": 4,
+            "longTaskMs": 288,
+            "loaf": 6,
+            "loafBlockingMs": 113,
+            "loafTop": [
+              "142ms d41beca67e5354f3.js:T",
+              "86ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "65ms d41beca67e5354f3.js:co,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 93.2,
+            "scriptMs": 1205,
+            "layoutStyleMs": 263,
+            "heapMB": 6.3,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 76,
+              "STATE_PRESENTED_ALL": 120,
+              "STATE_DROPPED": 67,
+              "smooth": 73,
+              "smoothDropped": 67,
+              "STATE_PRESENTED_PARTIAL": 20,
+              "presented": 140,
+              "dropped": 67,
+              "droppedPct": 32.4,
+              "fps": 30.4
+            },
+            "distPx": 557
+          }
+        },
+        {
+          "i": 3,
+          "load1": 23.07,
+          "idle": {
+            "durMs": 4028,
+            "fps": 27.8,
+            "p50": 16.7,
+            "p95": 199.9,
+            "p99": 266.7,
+            "max": 266.7,
+            "jankPct": 25.9,
+            "longTasks": 15,
+            "longTaskMs": 1614,
+            "loaf": 11,
+            "loafBlockingMs": 1069,
+            "loafTop": [
+              "264ms d41beca67e5354f3.js:T",
+              "250ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "226ms 13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js,d41beca67e5354f3.js:cu"
+            ],
+            "mainBusyPct": 87.3,
+            "scriptMs": 1775,
+            "layoutStyleMs": 324,
+            "heapMB": 5.6
+          },
+          "scroll": {
+            "durMs": 4764,
+            "fps": 35.1,
+            "p50": 16.8,
+            "p95": 50,
+            "p99": 83.4,
+            "max": 233.3,
+            "jankPct": 48.5,
+            "longTasks": 6,
+            "longTaskMs": 487,
+            "loaf": 5,
+            "loafBlockingMs": 167,
+            "loafTop": [
+              "232ms d41beca67e5354f3.js:T",
+              "73ms d41beca67e5354f3.js:co,d41beca67e5354f3.js:co",
+              "59ms "
+            ],
+            "mainBusyPct": 96.8,
+            "scriptMs": 1296,
+            "layoutStyleMs": 365,
+            "heapMB": 6.3,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 51,
+              "STATE_PRESENTED_ALL": 147,
+              "STATE_DROPPED": 67,
+              "smooth": 74,
+              "smoothDropped": 67,
+              "STATE_PRESENTED_PARTIAL": 25,
+              "presented": 172,
+              "dropped": 67,
+              "droppedPct": 28,
+              "fps": 36.1
+            },
+            "distPx": 557
+          }
+        }
+      ]
+    },
+    "landing:1x": {
+      "scene": "landing",
+      "rate": 1,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 20.76,
+        "load5": 20.55,
+        "load15": 17.21,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:13:54.801Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames landing 1x"
+      },
+      "loadAfter": {
+        "load1": 20.34,
+        "load5": 20.61,
+        "load15": 17.38,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:14:34.149Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4013,
+          "fps": 59.6,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 16.8,
+          "max": 33.4,
+          "jankPct": 0.4,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 15.6,
+          "scriptMs": 143,
+          "layoutStyleMs": 81,
+          "heapMB": 6.5,
+          "p95Spread": [
+            16.8,
+            16.8
+          ]
+        },
+        "scroll": {
+          "durMs": 4420,
+          "fps": 59.5,
+          "p50": 16.7,
+          "p95": 16.7,
+          "p99": 16.8,
+          "max": 33.3,
+          "jankPct": 0.4,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 26.2,
+          "scriptMs": 212,
+          "layoutStyleMs": 100,
+          "heapMB": 6.2,
+          "distPx": 557,
+          "compositorFps": 53.3,
+          "compositorDroppedPct": 1.3,
+          "p95Spread": [
+            16.7,
+            16.8
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 20.76,
+          "idle": {
+            "durMs": 4013,
+            "fps": 59.8,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 16.8,
+            "jankPct": 0,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 15.6,
+            "scriptMs": 148,
+            "layoutStyleMs": 83,
+            "heapMB": 6.6
+          },
+          "scroll": {
+            "durMs": 4462,
+            "fps": 59.4,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 0.8,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 31.7,
+            "scriptMs": 264,
+            "layoutStyleMs": 103,
+            "heapMB": 6.3,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 236,
+              "STATE_DROPPED": 3,
+              "smooth": 3,
+              "smoothDropped": 3,
+              "STATE_NO_UPDATE_DESIRED": 31,
+              "presented": 236,
+              "dropped": 3,
+              "droppedPct": 1.3,
+              "fps": 52.9
+            },
+            "distPx": 557
+          }
+        },
+        {
+          "i": 2,
+          "load1": 23.09,
+          "idle": {
+            "durMs": 4013,
+            "fps": 59.6,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 33.4,
+            "jankPct": 0.4,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 15.6,
+            "scriptMs": 143,
+            "layoutStyleMs": 78,
+            "heapMB": 6.5
+          },
+          "scroll": {
+            "durMs": 4420,
+            "fps": 59.5,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 0.4,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 22.5,
+            "scriptMs": 180,
+            "layoutStyleMs": 92,
+            "heapMB": 6.2,
+            "compositor": {
+              "STATE_PRESENTED_ALL": 240,
+              "STATE_NO_UPDATE_DESIRED": 28,
+              "STATE_DROPPED": 1,
+              "smooth": 1,
+              "smoothDropped": 1,
+              "presented": 240,
+              "dropped": 1,
+              "droppedPct": 0.4,
+              "fps": 54.3
+            },
+            "distPx": 557
+          }
+        },
+        {
+          "i": 3,
+          "load1": 22.63,
+          "idle": {
+            "durMs": 4008,
+            "fps": 59.1,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 33.4,
+            "jankPct": 0.8,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 14.9,
+            "scriptMs": 140,
+            "layoutStyleMs": 81,
+            "heapMB": 6.5
+          },
+          "scroll": {
+            "durMs": 4407,
+            "fps": 59.7,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 0.4,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 26.2,
+            "scriptMs": 212,
+            "layoutStyleMs": 100,
+            "heapMB": 6.2,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 28,
+              "STATE_PRESENTED_ALL": 235,
+              "STATE_DROPPED": 3,
+              "smooth": 3,
+              "smoothDropped": 3,
+              "presented": 235,
+              "dropped": 3,
+              "droppedPct": 1.3,
+              "fps": 53.3
+            },
+            "distPx": 557
+          }
+        }
+      ]
+    },
+    "world:1x": {
+      "scene": "world",
+      "rate": 1,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 18.79,
+        "load5": 19.94,
+        "load15": 17.7,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:17:35.225Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames world 1x"
+      },
+      "loadAfter": {
+        "load1": 18.83,
+        "load5": 19.85,
+        "load15": 17.78,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:18:23.257Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4010,
+          "fps": 58.9,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 33.3,
+          "max": 33.4,
+          "jankPct": 1.7,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 30.5,
+          "scriptMs": 148,
+          "layoutStyleMs": 291,
+          "heapMB": 6.3,
+          "p95Spread": [
+            16.7,
+            16.8
+          ]
+        },
+        "scroll": {
+          "durMs": 3493,
+          "fps": 59.6,
+          "p50": 16.7,
+          "p95": 16.7,
+          "p99": 16.8,
+          "max": 16.8,
+          "jankPct": 0,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 43.6,
+          "scriptMs": 202,
+          "layoutStyleMs": 286,
+          "heapMB": 6.2,
+          "distPx": 350,
+          "compositorFps": 60.7,
+          "compositorDroppedPct": 0.9,
+          "p95Spread": [
+            16.7,
+            16.7
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 18.79,
+          "idle": {
+            "durMs": 4012,
+            "fps": 57.3,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.4,
+            "max": 50.1,
+            "jankPct": 3.5,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 29.2,
+            "scriptMs": 146,
+            "layoutStyleMs": 282,
+            "heapMB": 6.3
+          },
+          "scroll": {
+            "durMs": 3493,
+            "fps": 59.6,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 16.8,
+            "jankPct": 0,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 44.7,
+            "scriptMs": 202,
+            "layoutStyleMs": 286,
+            "heapMB": 5.3,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 5,
+              "STATE_PRESENTED_ALL": 212,
+              "STATE_DROPPED": 2,
+              "smooth": 2,
+              "smoothDropped": 2,
+              "presented": 212,
+              "dropped": 2,
+              "droppedPct": 0.9,
+              "fps": 60.7
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 2,
+          "load1": 19.58,
+          "idle": {
+            "durMs": 4010,
+            "fps": 59.3,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 33.4,
+            "jankPct": 0.8,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 31.2,
+            "scriptMs": 165,
+            "layoutStyleMs": 291,
+            "heapMB": 6.3
+          },
+          "scroll": {
+            "durMs": 3533,
+            "fps": 59.4,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 1,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 43.6,
+            "scriptMs": 203,
+            "layoutStyleMs": 292,
+            "heapMB": 6.4,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 5,
+              "STATE_PRESENTED_ALL": 214,
+              "STATE_DROPPED": 3,
+              "smooth": 3,
+              "smoothDropped": 3,
+              "STATE_PRESENTED_PARTIAL": 1,
+              "presented": 215,
+              "dropped": 3,
+              "droppedPct": 1.4,
+              "fps": 60.9
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 3,
+          "load1": 19.31,
+          "idle": {
+            "durMs": 4009,
+            "fps": 58.9,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 33.3,
+            "max": 33.4,
+            "jankPct": 1.7,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 30.5,
+            "scriptMs": 148,
+            "layoutStyleMs": 300,
+            "heapMB": 6.3
+          },
+          "scroll": {
+            "durMs": 3480,
+            "fps": 59.8,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 16.8,
+            "jankPct": 0,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 36,
+            "scriptMs": 167,
+            "layoutStyleMs": 247,
+            "heapMB": 6.2,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 5,
+              "STATE_PRESENTED_ALL": 211,
+              "STATE_DROPPED": 2,
+              "smooth": 2,
+              "smoothDropped": 2,
+              "presented": 211,
+              "dropped": 2,
+              "droppedPct": 0.9,
+              "fps": 60.6
+            },
+            "distPx": 350,
+            "viewport": "1180x820"
+          }
+        }
+      ]
+    },
+    "quest:1x": {
+      "scene": "quest",
+      "rate": 1,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 14.62,
+        "load5": 17.68,
+        "load15": 17.31,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:21:24.341Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames quest 1x"
+      },
+      "loadAfter": {
+        "load1": 12.65,
+        "load5": 16.91,
+        "load15": 17.07,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:21:59.966Z"
+      },
+      "median": {
+        "loadToReady": {
+          "readyMs": 5235,
+          "longTasks": 4,
+          "longTaskMs": 487,
+          "maxLongTaskMs": 232
+        },
+        "idle": {
+          "durMs": 5006,
+          "fps": 59.9,
+          "p50": 16.7,
+          "p95": 16.7,
+          "p99": 16.8,
+          "max": 16.8,
+          "jankPct": 0,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 5.1,
+          "scriptMs": 34,
+          "layoutStyleMs": 11,
+          "heapMB": 10.2,
+          "p95Spread": [
+            16.7,
+            16.7
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 14.62,
+          "loadToReady": {
+            "readyMs": 5529,
+            "longTasks": 5,
+            "longTaskMs": 487,
+            "maxLongTaskMs": 232
+          },
+          "idle": {
+            "durMs": 5010,
+            "fps": 59.9,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 16.8,
+            "jankPct": 0,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 5.9,
+            "scriptMs": 47,
+            "layoutStyleMs": 11,
+            "heapMB": 10.2
+          }
+        },
+        {
+          "i": 2,
+          "load1": 14.48,
+          "loadToReady": {
+            "readyMs": 5235,
+            "longTasks": 4,
+            "longTaskMs": 576,
+            "maxLongTaskMs": 330
+          },
+          "idle": {
+            "durMs": 5006,
+            "fps": 59.9,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 16.8,
+            "jankPct": 0,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 5.1,
+            "scriptMs": 34,
+            "layoutStyleMs": 13,
+            "heapMB": 10.2
+          }
+        },
+        {
+          "i": 3,
+          "load1": 13.78,
+          "loadToReady": {
+            "readyMs": 4645,
+            "longTasks": 3,
+            "longTaskMs": 342,
+            "maxLongTaskMs": 217
+          },
+          "idle": {
+            "durMs": 5006,
+            "fps": 59.9,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 16.8,
+            "jankPct": 0,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 4.1,
+            "scriptMs": 30,
+            "layoutStyleMs": 8,
+            "heapMB": 10.1
+          }
+        }
+      ]
+    },
+    "celebration:1x": {
+      "scene": "celebration",
+      "rate": 1,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 15.28,
+        "load5": 17.09,
+        "load15": 17.11,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:25:01.081Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames celebration 1x"
+      },
+      "loadAfter": {
+        "load1": 16.99,
+        "load5": 17.3,
+        "load15": 17.19,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:26:19.040Z"
+      },
+      "median": {
+        "stage": {
+          "durMs": 7039,
+          "fps": 55.4,
+          "p50": 16.7,
+          "p95": 33.3,
+          "p99": 50,
+          "max": 66.7,
+          "jankPct": 5.1,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 3,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 36.3,
+          "scriptMs": 409,
+          "layoutStyleMs": 610,
+          "heapMB": 12.8,
+          "compositorFps": 30.7,
+          "compositorDroppedPct": 47.3,
+          "p95Spread": [
+            33.2,
+            33.3
+          ]
+        },
+        "level": {
+          "durMs": 5049,
+          "fps": 56.8,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 33.4,
+          "max": 50,
+          "jankPct": 4.2,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 1,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 30,
+          "scriptMs": 155,
+          "layoutStyleMs": 364,
+          "heapMB": 14.2,
+          "compositorFps": 23.1,
+          "compositorDroppedPct": 61.8,
+          "p95Spread": [
+            16.8,
+            33.3
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 15.28,
+          "stage": {
+            "durMs": 7039,
+            "fps": 55.1,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 50,
+            "max": 66.7,
+            "jankPct": 7,
+            "longTasks": 1,
+            "longTaskMs": 51,
+            "loaf": 2,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "82ms 632383b0257e9034.js:Response.json.then,d41beca67e5354f3.js:T",
+              "72ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 36.3,
+            "scriptMs": 346,
+            "layoutStyleMs": 647,
+            "heapMB": 12.8,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 9,
+              "STATE_PRESENTED_ALL": 205,
+              "STATE_PRESENTED_PARTIAL": 11,
+              "smooth": 205,
+              "STATE_DROPPED": 199,
+              "smoothDropped": 199,
+              "presented": 216,
+              "dropped": 199,
+              "droppedPct": 48,
+              "fps": 30.7
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5049,
+            "fps": 56.8,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.4,
+            "max": 50,
+            "jankPct": 4.2,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 1,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "59ms "
+            ],
+            "mainBusyPct": 31.4,
+            "scriptMs": 160,
+            "layoutStyleMs": 387,
+            "heapMB": 14.2,
+            "compositor": {
+              "STATE_DROPPED": 191,
+              "smooth": 191,
+              "smoothDropped": 191,
+              "STATE_PRESENTED_ALL": 112,
+              "STATE_PRESENTED_PARTIAL": 2,
+              "presented": 114,
+              "dropped": 191,
+              "droppedPct": 62.6,
+              "fps": 22.6
+            },
+            "sawLevelUp": true
+          }
+        },
+        {
+          "i": 2,
+          "load1": 16.64,
+          "stage": {
+            "durMs": 7027,
+            "fps": 55.4,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 50,
+            "max": 66.7,
+            "jankPct": 5.1,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 3,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "76ms 13ca74a26f37162f.js:http://localhost:3113/_next/static/chunks/13ca74a26f37162f.js",
+              "69ms d41beca67e5354f3.js:T",
+              "58ms 632383b0257e9034.js:Response.json.then,d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 38,
+            "scriptMs": 409,
+            "layoutStyleMs": 610,
+            "heapMB": 12.8,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 19,
+              "STATE_PRESENTED_ALL": 204,
+              "STATE_PRESENTED_PARTIAL": 10,
+              "smooth": 198,
+              "STATE_DROPPED": 192,
+              "smoothDropped": 192,
+              "presented": 214,
+              "dropped": 192,
+              "droppedPct": 47.3,
+              "fps": 30.5
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5061,
+            "fps": 55.9,
+            "p50": 16.7,
+            "p95": 33.3,
+            "p99": 50,
+            "max": 50,
+            "jankPct": 5.7,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 1,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "55ms d41beca67e5354f3.js:VoidFunction,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 30,
+            "scriptMs": 155,
+            "layoutStyleMs": 364,
+            "heapMB": 14.2,
+            "compositor": {
+              "STATE_DROPPED": 189,
+              "smooth": 189,
+              "smoothDropped": 189,
+              "STATE_PRESENTED_ALL": 116,
+              "STATE_PRESENTED_PARTIAL": 1,
+              "presented": 117,
+              "dropped": 189,
+              "droppedPct": 61.8,
+              "fps": 23.1
+            },
+            "sawLevelUp": true
+          }
+        },
+        {
+          "i": 3,
+          "load1": 18,
+          "stage": {
+            "durMs": 7040,
+            "fps": 56.1,
+            "p50": 16.7,
+            "p95": 33.2,
+            "p99": 50,
+            "max": 66.7,
+            "jankPct": 5.1,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 5,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "56ms ",
+              "54ms d41beca67e5354f3.js:T",
+              "53ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 35.7,
+            "scriptMs": 417,
+            "layoutStyleMs": 588,
+            "heapMB": 12.7,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 19,
+              "STATE_PRESENTED_ALL": 210,
+              "STATE_DROPPED": 182,
+              "STATE_PRESENTED_PARTIAL": 13,
+              "smooth": 189,
+              "smoothDropped": 181,
+              "presented": 223,
+              "dropped": 182,
+              "droppedPct": 44.9,
+              "fps": 31.7
+            },
+            "sawStage": true
+          },
+          "level": {
+            "durMs": 5038,
+            "fps": 57.8,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.3,
+            "max": 33.4,
+            "jankPct": 3.1,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 28,
+            "scriptMs": 121,
+            "layoutStyleMs": 344,
+            "heapMB": 14,
+            "compositor": {
+              "STATE_DROPPED": 187,
+              "smooth": 187,
+              "smoothDropped": 187,
+              "STATE_PRESENTED_ALL": 118,
+              "presented": 118,
+              "dropped": 187,
+              "droppedPct": 61.3,
+              "fps": 23.4
+            },
+            "sawLevelUp": true
+          }
+        }
+      ]
+    },
+    "quest:4x": {
+      "scene": "quest",
+      "rate": 4,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 13.64,
+        "load5": 15.65,
+        "load15": 16.57,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:29:21.738Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames quest 4x"
+      },
+      "loadAfter": {
+        "load1": 12.61,
+        "load5": 15.08,
+        "load15": 16.33,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:30:14.900Z"
+      },
+      "median": {
+        "loadToReady": {
+          "readyMs": 10680,
+          "longTasks": 21,
+          "longTaskMs": 4586,
+          "maxLongTaskMs": 1589
+        },
+        "idle": {
+          "durMs": 5017,
+          "fps": 59.2,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 33.3,
+          "max": 33.4,
+          "jankPct": 1.3,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 24.2,
+          "scriptMs": 158,
+          "layoutStyleMs": 65,
+          "heapMB": 9.8,
+          "p95Spread": [
+            16.8,
+            16.8
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 13.64,
+          "loadToReady": {
+            "readyMs": 11260,
+            "longTasks": 21,
+            "longTaskMs": 4849,
+            "maxLongTaskMs": 1657
+          },
+          "idle": {
+            "durMs": 5017,
+            "fps": 59.6,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 0.3,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 24.2,
+            "scriptMs": 158,
+            "layoutStyleMs": 57,
+            "heapMB": 9.8
+          }
+        },
+        {
+          "i": 2,
+          "load1": 13.85,
+          "loadToReady": {
+            "readyMs": 10680,
+            "longTasks": 20,
+            "longTaskMs": 4586,
+            "maxLongTaskMs": 1589
+          },
+          "idle": {
+            "durMs": 5016,
+            "fps": 59,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.3,
+            "max": 33.4,
+            "jankPct": 1.7,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 27.2,
+            "scriptMs": 199,
+            "layoutStyleMs": 70,
+            "heapMB": 9.6
+          }
+        },
+        {
+          "i": 3,
+          "load1": 13.6,
+          "loadToReady": {
+            "readyMs": 10468,
+            "longTasks": 21,
+            "longTaskMs": 4421,
+            "maxLongTaskMs": 1546
+          },
+          "idle": {
+            "durMs": 5020,
+            "fps": 59.2,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.3,
+            "max": 33.4,
+            "jankPct": 1.3,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 22.8,
+            "scriptMs": 158,
+            "layoutStyleMs": 65,
+            "heapMB": 9.9
+          }
+        }
+      ]
+    },
+    "quest:6x": {
+      "scene": "quest",
+      "rate": 6,
+      "reducedMotion": false,
+      "quiet": {
+        "load1": 14.2,
+        "load5": 15,
+        "load15": 16.09,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:33:16.035Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames quest 6x"
+      },
+      "loadAfter": {
+        "load1": 15.09,
+        "load5": 15.12,
+        "load15": 16.06,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:34:19.628Z"
+      },
+      "median": {
+        "loadToReady": {
+          "readyMs": 14179,
+          "longTasks": 32,
+          "longTaskMs": 8176,
+          "maxLongTaskMs": 2627
+        },
+        "idle": {
+          "durMs": 5017,
+          "fps": 58.4,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 33.4,
+          "max": 50.1,
+          "jankPct": 1.7,
+          "longTasks": 1,
+          "longTaskMs": 64,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 35,
+          "scriptMs": 282,
+          "layoutStyleMs": 60,
+          "heapMB": 9.4,
+          "p95Spread": [
+            16.8,
+            16.8
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 14.2,
+          "loadToReady": {
+            "readyMs": 15298,
+            "longTasks": 33,
+            "longTaskMs": 9166,
+            "maxLongTaskMs": 2858
+          },
+          "idle": {
+            "durMs": 5017,
+            "fps": 58.4,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.4,
+            "max": 50.1,
+            "jankPct": 1.7,
+            "longTasks": 1,
+            "longTaskMs": 64,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 35,
+            "scriptMs": 276,
+            "layoutStyleMs": 60,
+            "heapMB": 9.4
+          }
+        },
+        {
+          "i": 2,
+          "load1": 15.37,
+          "loadToReady": {
+            "readyMs": 14179,
+            "longTasks": 32,
+            "longTaskMs": 8176,
+            "maxLongTaskMs": 2627
+          },
+          "idle": {
+            "durMs": 5016,
+            "fps": 58.6,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.4,
+            "max": 50.1,
+            "jankPct": 1.4,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 35,
+            "scriptMs": 282,
+            "layoutStyleMs": 57,
+            "heapMB": 8.8
+          }
+        },
+        {
+          "i": 3,
+          "load1": 14.4,
+          "loadToReady": {
+            "readyMs": 13515,
+            "longTasks": 27,
+            "longTaskMs": 8092,
+            "maxLongTaskMs": 2499
+          },
+          "idle": {
+            "durMs": 5031,
+            "fps": 57.4,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 50,
+            "max": 66.8,
+            "jankPct": 2.8,
+            "longTasks": 2,
+            "longTaskMs": 107,
+            "loaf": 1,
+            "loafBlockingMs": 0,
+            "loafTop": [
+              "52ms "
+            ],
+            "mainBusyPct": 37.4,
+            "scriptMs": 282,
+            "layoutStyleMs": 89,
+            "heapMB": 9.4
+          }
+        }
+      ]
+    },
+    "world:4x:rm": {
+      "scene": "world",
+      "rate": 4,
+      "reducedMotion": true,
+      "quiet": {
+        "load1": 13.97,
+        "load5": 14.51,
+        "load15": 15.65,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:37:22.609Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames world 4x rm"
+      },
+      "loadAfter": {
+        "load1": 16.36,
+        "load5": 15.04,
+        "load15": 15.76,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:38:17.533Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4023,
+          "fps": 38,
+          "p50": 16.7,
+          "p95": 66.6,
+          "p99": 283.3,
+          "max": 283.4,
+          "jankPct": 19.6,
+          "longTasks": 9,
+          "longTaskMs": 959,
+          "loaf": 7,
+          "loafBlockingMs": 606,
+          "mainBusyPct": 81.6,
+          "scriptMs": 1490,
+          "layoutStyleMs": 441,
+          "heapMB": 5.5,
+          "p95Spread": [
+            50,
+            83.3
+          ]
+        },
+        "scroll": {
+          "durMs": 4140,
+          "fps": 34.3,
+          "p50": 16.7,
+          "p95": 50.1,
+          "p99": 150.1,
+          "max": 950,
+          "jankPct": 15,
+          "longTasks": 4,
+          "longTaskMs": 1099,
+          "loaf": 6,
+          "loafBlockingMs": 896,
+          "mainBusyPct": 77.4,
+          "scriptMs": 1455,
+          "layoutStyleMs": 321,
+          "heapMB": 5.6,
+          "distPx": 362,
+          "compositorFps": 15.9,
+          "compositorDroppedPct": 50.8,
+          "p95Spread": [
+            50,
+            66.8
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 13.97,
+          "idle": {
+            "durMs": 4023,
+            "fps": 37,
+            "p50": 16.7,
+            "p95": 83.3,
+            "p99": 200,
+            "max": 283.4,
+            "jankPct": 20.1,
+            "longTasks": 9,
+            "longTaskMs": 959,
+            "loaf": 10,
+            "loafBlockingMs": 606,
+            "loafTop": [
+              "265ms d41beca67e5354f3.js:T",
+              "183ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "146ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 82.1,
+            "scriptMs": 1585,
+            "layoutStyleMs": 414,
+            "heapMB": 5.5
+          },
+          "scroll": {
+            "durMs": 4279,
+            "fps": 32.5,
+            "p50": 16.7,
+            "p95": 66.8,
+            "p99": 150.1,
+            "max": 1200,
+            "jankPct": 12.9,
+            "longTasks": 7,
+            "longTaskMs": 1556,
+            "loaf": 6,
+            "loafBlockingMs": 1198,
+            "loafTop": [
+              "1193ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "133ms 3ed20b08576ff946.js:IntersectionObserverCallback,d41beca67e5354f3.js:T",
+              "106ms add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then,a30e174e0578ae92.js:y"
+            ],
+            "mainBusyPct": 78.4,
+            "scriptMs": 1573,
+            "layoutStyleMs": 366,
+            "heapMB": 5.6,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 114,
+              "STATE_PRESENTED_ALL": 33,
+              "STATE_DROPPED": 83,
+              "smooth": 108,
+              "smoothDropped": 83,
+              "STATE_PRESENTED_PARTIAL": 35,
+              "presented": 68,
+              "dropped": 83,
+              "droppedPct": 55,
+              "fps": 15.9
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 2,
+          "load1": 15.1,
+          "idle": {
+            "durMs": 4029,
+            "fps": 38,
+            "p50": 16.7,
+            "p95": 50,
+            "p99": 316.6,
+            "max": 416.7,
+            "jankPct": 15.7,
+            "longTasks": 7,
+            "longTaskMs": 1058,
+            "loaf": 7,
+            "loafBlockingMs": 751,
+            "loafTop": [
+              "382ms d41beca67e5354f3.js:T",
+              "263ms d41beca67e5354f3.js:T,a30e174e0578ae92.js:y",
+              "131ms 3ed20b08576ff946.js:IntersectionObserverCallback,d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 79.3,
+            "scriptMs": 1490,
+            "layoutStyleMs": 441,
+            "heapMB": 5.6
+          },
+          "scroll": {
+            "durMs": 4078,
+            "fps": 34.3,
+            "p50": 16.7,
+            "p95": 50.1,
+            "p99": 166.6,
+            "max": 950,
+            "jankPct": 15,
+            "longTasks": 4,
+            "longTaskMs": 1099,
+            "loaf": 6,
+            "loafBlockingMs": 896,
+            "loafTop": [
+              "921ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "145ms 3ed20b08576ff946.js:IntersectionObserverCallback,d41beca67e5354f3.js:T",
+              "112ms add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then,add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then"
+            ],
+            "mainBusyPct": 76.8,
+            "scriptMs": 1415,
+            "layoutStyleMs": 321,
+            "heapMB": 5.6,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 118,
+              "STATE_PRESENTED_ALL": 33,
+              "STATE_DROPPED": 66,
+              "smooth": 95,
+              "smoothDropped": 66,
+              "STATE_PRESENTED_PARTIAL": 36,
+              "presented": 69,
+              "dropped": 66,
+              "droppedPct": 48.9,
+              "fps": 16.9
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 3,
+          "load1": 13.88,
+          "idle": {
+            "durMs": 4017,
+            "fps": 39.3,
+            "p50": 16.7,
+            "p95": 66.6,
+            "p99": 283.3,
+            "max": 283.4,
+            "jankPct": 19.6,
+            "longTasks": 9,
+            "longTaskMs": 890,
+            "loaf": 7,
+            "loafBlockingMs": 472,
+            "loafTop": [
+              "265ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:T",
+              "262ms d41beca67e5354f3.js:T,3ed20b08576ff946.js:IntersectionObserverCallback",
+              "111ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 81.6,
+            "scriptMs": 1474,
+            "layoutStyleMs": 500,
+            "heapMB": 5.4
+          },
+          "scroll": {
+            "durMs": 4140,
+            "fps": 36.2,
+            "p50": 16.7,
+            "p95": 50,
+            "p99": 150,
+            "max": 900.1,
+            "jankPct": 16.7,
+            "longTasks": 3,
+            "longTaskMs": 990,
+            "loaf": 4,
+            "loafBlockingMs": 819,
+            "loafTop": [
+              "857ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "133ms 3ed20b08576ff946.js:IntersectionObserverCallback,a30e174e0578ae92.js:y",
+              "91ms add2fe5f713e07df.js:Window.fetch.then,add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then"
+            ],
+            "mainBusyPct": 77.4,
+            "scriptMs": 1455,
+            "layoutStyleMs": 282,
+            "heapMB": 5.6,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 124,
+              "STATE_PRESENTED_ALL": 36,
+              "STATE_DROPPED": 67,
+              "smooth": 87,
+              "smoothDropped": 67,
+              "STATE_PRESENTED_PARTIAL": 29,
+              "presented": 65,
+              "dropped": 67,
+              "droppedPct": 50.8,
+              "fps": 15.7
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        }
+      ]
+    },
+    "world:6x:rm": {
+      "scene": "world",
+      "rate": 6,
+      "reducedMotion": true,
+      "quiet": {
+        "load1": 16.45,
+        "load5": 16.02,
+        "load15": 16.03,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:41:18.637Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames world 6x rm"
+      },
+      "loadAfter": {
+        "load1": 15.94,
+        "load5": 15.95,
+        "load15": 16.01,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:42:29.361Z"
+      },
+      "median": {
+        "idle": {
+          "durMs": 4723,
+          "fps": 23.3,
+          "p50": 16.7,
+          "p95": 116.7,
+          "p99": 349.9,
+          "max": 583.3,
+          "jankPct": 30.8,
+          "longTasks": 12,
+          "longTaskMs": 2212,
+          "loaf": 11,
+          "loafBlockingMs": 1000,
+          "mainBusyPct": 104.1,
+          "scriptMs": 3300,
+          "layoutStyleMs": 439,
+          "heapMB": 5.2,
+          "p95Spread": [
+            83.4,
+            133.4
+          ]
+        },
+        "scroll": {
+          "durMs": 6392,
+          "fps": 20.5,
+          "p50": 16.7,
+          "p95": 99.9,
+          "p99": 250,
+          "max": 3033.2,
+          "jankPct": 13.2,
+          "longTasks": 10,
+          "longTaskMs": 3892,
+          "loaf": 10,
+          "loafBlockingMs": 3090,
+          "mainBusyPct": 94.1,
+          "scriptMs": 3610,
+          "layoutStyleMs": 406,
+          "heapMB": 5.4,
+          "distPx": 362,
+          "compositorFps": 9.4,
+          "compositorDroppedPct": 77.3,
+          "p95Spread": [
+            83.3,
+            116.6
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 16.45,
+          "idle": {
+            "durMs": 4030,
+            "fps": 32.3,
+            "p50": 16.7,
+            "p95": 83.4,
+            "p99": 266.6,
+            "max": 300,
+            "jankPct": 22.3,
+            "longTasks": 9,
+            "longTaskMs": 1392,
+            "loaf": 11,
+            "loafBlockingMs": 1014,
+            "loafTop": [
+              "294ms d41beca67e5354f3.js:T",
+              "266ms d41beca67e5354f3.js:T",
+              "218ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 104.4,
+            "scriptMs": 2961,
+            "layoutStyleMs": 67,
+            "heapMB": 4.9
+          },
+          "scroll": {
+            "durMs": 6649,
+            "fps": 20.5,
+            "p50": 16.7,
+            "p95": 83.3,
+            "p99": 250,
+            "max": 3299.9,
+            "jankPct": 11.8,
+            "longTasks": 10,
+            "longTaskMs": 4038,
+            "loaf": 10,
+            "loafBlockingMs": 3367,
+            "loafTop": [
+              "3215ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "220ms 3ed20b08576ff946.js:IntersectionObserverCallback,a30e174e0578ae92.js:Animation.onfinish",
+              "125ms :TimerHandler:setInterval,add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then"
+            ],
+            "mainBusyPct": 94.1,
+            "scriptMs": 3645,
+            "layoutStyleMs": 513,
+            "heapMB": 5.5,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 137,
+              "STATE_PRESENTED_ALL": 18,
+              "STATE_DROPPED": 218,
+              "smooth": 253,
+              "smoothDropped": 218,
+              "STATE_PRESENTED_PARTIAL": 40,
+              "presented": 58,
+              "dropped": 218,
+              "droppedPct": 79,
+              "fps": 8.7
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 2,
+          "load1": 16.45,
+          "idle": {
+            "durMs": 4723,
+            "fps": 22.7,
+            "p50": 16.7,
+            "p95": 116.7,
+            "p99": 349.9,
+            "max": 616.6,
+            "jankPct": 30.8,
+            "longTasks": 13,
+            "longTaskMs": 2544,
+            "loaf": 12,
+            "loafBlockingMs": 1000,
+            "loafTop": [
+              "356ms d41beca67e5354f3.js:T",
+              "296ms d41beca67e5354f3.js:T",
+              "248ms :TimerHandler:setInterval,d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 102.3,
+            "scriptMs": 3300,
+            "layoutStyleMs": 439,
+            "heapMB": 6
+          },
+          "scroll": {
+            "durMs": 5950,
+            "fps": 22,
+            "p50": 16.7,
+            "p95": 99.9,
+            "p99": 216.7,
+            "max": 2583.2,
+            "jankPct": 14.5,
+            "longTasks": 10,
+            "longTaskMs": 3282,
+            "loaf": 9,
+            "loafBlockingMs": 2674,
+            "loafTop": [
+              "2493ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "174ms d41beca67e5354f3.js:co,add2fe5f713e07df.js:ReadableStreamDefaultReader.read.then",
+              "165ms 3ed20b08576ff946.js:IntersectionObserverCallback"
+            ],
+            "mainBusyPct": 94.4,
+            "scriptMs": 3167,
+            "layoutStyleMs": 388,
+            "heapMB": 5.4,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 173,
+              "STATE_PRESENTED_ALL": 21,
+              "STATE_DROPPED": 171,
+              "smooth": 213,
+              "smoothDropped": 171,
+              "STATE_PRESENTED_PARTIAL": 46,
+              "presented": 67,
+              "dropped": 171,
+              "droppedPct": 71.8,
+              "fps": 11.3
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        },
+        {
+          "i": 3,
+          "load1": 15.07,
+          "idle": {
+            "durMs": 4797,
+            "fps": 23.3,
+            "p50": 16.7,
+            "p95": 133.4,
+            "p99": 550,
+            "max": 583.3,
+            "jankPct": 31.3,
+            "longTasks": 12,
+            "longTaskMs": 2212,
+            "loaf": 11,
+            "loafBlockingMs": 720,
+            "loafTop": [
+              "239ms d41beca67e5354f3.js:T",
+              "237ms d41beca67e5354f3.js:T",
+              "206ms d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 104.1,
+            "scriptMs": 3376,
+            "layoutStyleMs": 444,
+            "heapMB": 5.2
+          },
+          "scroll": {
+            "durMs": 6392,
+            "fps": 20.2,
+            "p50": 16.7,
+            "p95": 116.6,
+            "p99": 266.7,
+            "max": 3033.2,
+            "jankPct": 13.2,
+            "longTasks": 14,
+            "longTaskMs": 3892,
+            "loaf": 11,
+            "loafBlockingMs": 3090,
+            "loafTop": [
+              "2963ms d41beca67e5354f3.js:T,d41beca67e5354f3.js:co",
+              "233ms 3ed20b08576ff946.js:IntersectionObserverCallback,a30e174e0578ae92.js:y",
+              "140ms d41beca67e5354f3.js:ca,d41beca67e5354f3.js:T"
+            ],
+            "mainBusyPct": 93.4,
+            "scriptMs": 3610,
+            "layoutStyleMs": 406,
+            "heapMB": 5.4,
+            "compositor": {
+              "STATE_NO_UPDATE_DESIRED": 167,
+              "STATE_PRESENTED_ALL": 17,
+              "STATE_DROPPED": 204,
+              "smooth": 242,
+              "smoothDropped": 202,
+              "STATE_PRESENTED_PARTIAL": 43,
+              "presented": 60,
+              "dropped": 204,
+              "droppedPct": 77.3,
+              "fps": 9.4
+            },
+            "distPx": 362,
+            "viewport": "1180x820"
+          }
+        }
+      ]
+    },
+    "quest:4x:rm": {
+      "scene": "quest",
+      "rate": 4,
+      "reducedMotion": true,
+      "quiet": {
+        "load1": 11.74,
+        "load5": 14.56,
+        "load15": 15.51,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:45:30.482Z",
+        "settled": false,
+        "waitedMin": 3,
+        "label": "frames quest 4x rm"
+      },
+      "loadAfter": {
+        "load1": 14.71,
+        "load5": 14.98,
+        "load15": 15.61,
+        "port3107Busy": false,
+        "at": "2026-11-03T14:46:20.785Z"
+      },
+      "median": {
+        "loadToReady": {
+          "readyMs": 9893,
+          "longTasks": 19,
+          "longTaskMs": 4492,
+          "maxLongTaskMs": 1433
+        },
+        "idle": {
+          "durMs": 5017,
+          "fps": 59.4,
+          "p50": 16.7,
+          "p95": 16.8,
+          "p99": 16.8,
+          "max": 33.3,
+          "jankPct": 0.7,
+          "longTasks": 0,
+          "longTaskMs": 0,
+          "loaf": 0,
+          "loafBlockingMs": 0,
+          "mainBusyPct": 22.7,
+          "scriptMs": 155,
+          "layoutStyleMs": 61,
+          "heapMB": 9.7,
+          "p95Spread": [
+            16.7,
+            16.8
+          ]
+        }
+      },
+      "runs": [
+        {
+          "i": 1,
+          "load1": 11.74,
+          "loadToReady": {
+            "readyMs": 9893,
+            "longTasks": 19,
+            "longTaskMs": 4492,
+            "maxLongTaskMs": 1433
+          },
+          "idle": {
+            "durMs": 5015,
+            "fps": 59.4,
+            "p50": 16.7,
+            "p95": 16.7,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 0.7,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 22,
+            "scriptMs": 128,
+            "layoutStyleMs": 84,
+            "heapMB": 9.7
+          }
+        },
+        {
+          "i": 2,
+          "load1": 14.32,
+          "loadToReady": {
+            "readyMs": 10408,
+            "longTasks": 24,
+            "longTaskMs": 5051,
+            "maxLongTaskMs": 1714
+          },
+          "idle": {
+            "durMs": 5021,
+            "fps": 59.4,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 16.8,
+            "max": 33.3,
+            "jankPct": 0.7,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 22.7,
+            "scriptMs": 182,
+            "layoutStyleMs": 60,
+            "heapMB": 9.7
+          }
+        },
+        {
+          "i": 3,
+          "load1": 13.19,
+          "loadToReady": {
+            "readyMs": 9515,
+            "longTasks": 17,
+            "longTaskMs": 3977,
+            "maxLongTaskMs": 1151
+          },
+          "idle": {
+            "durMs": 5017,
+            "fps": 59.4,
+            "p50": 16.7,
+            "p95": 16.8,
+            "p99": 33.3,
+            "max": 33.3,
+            "jankPct": 1,
+            "longTasks": 0,
+            "longTaskMs": 0,
+            "loaf": 0,
+            "loafBlockingMs": 0,
+            "loafTop": [],
+            "mainBusyPct": 22.8,
+            "scriptMs": 155,
+            "layoutStyleMs": 61,
+            "heapMB": 9.6
+          }
+        }
+      ]
+    }
+  },
+  "browser": "156.0.8078.4"
+}

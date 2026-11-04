@@ -1,0 +1,660 @@
+{
+  "results": [
+    {
+      "name": "S1 기본 signInWithOAuth(kakao): GoTrue 가 account_email 을 항상 요청 → 일반 앱은 KOE205",
+      "ok": true
+    },
+    {
+      "name": "S2 options.scopes 로는 account_email 을 뺄 수 없음 (뒤에 덧붙기만 함) → KOE205",
+      "ok": true
+    },
+    {
+      "name": "S3 queryParams.scope 로 scope 를 통째로 덮어쓰면 통과 + email_optional 로 이메일 없이 가입",
+      "ok": true
+    },
+    {
+      "name": "S3b user_metadata 키 집합 (소스 분석과 일치 확인)",
+      "ok": true
+    },
+    {
+      "name": "S3c 토큰 요청은 client_secret_post (본문에 client_id·client_secret, Basic 헤더 없음)",
+      "ok": true
+    },
+    {
+      "name": "S4 email_optional=false 서버: 같은 흐름이 \"Error getting user email\" 로 실패",
+      "ok": true
+    },
+    {
+      "name": "S5 기본 이미지·실명 같은 닉네임 사용자 가입 (email_optional=true)",
+      "ok": true
+    },
+    {
+      "name": "S6 선택 동의를 모두 거부한 사용자도 회원번호만으로 가입",
+      "ok": true
+    },
+    {
+      "name": "S7 같은 Kakao 계정으로 다시 로그인하면 같은 사용자 (AccountExists)",
+      "ok": true
+    },
+    {
+      "name": "S8 사용자가 카카오 동의 화면에서 취소 → 앱 redirect_to 로 error=access_denied",
+      "ok": true
+    },
+    {
+      "name": "S9 (비교) 비즈앱 + 검증된 이메일이면 같은 이메일의 기존 사용자에 자동 연결",
+      "ok": true
+    },
+    {
+      "name": "S10 수동 연결 linkIdentity(kakao): 기존 계정에 이메일 없는 Kakao 를 붙이고, 이후 Kakao 로그인 = 같은 사용자",
+      "ok": true
+    },
+    {
+      "name": "S11 이미 다른 사용자에 묶인 Kakao 계정은 연결 불가 (identity_already_exists)",
+      "ok": true
+    },
+    {
+      "name": "S12 custom:kakao (실제 Kakao issuer 로 OIDC discovery) 생성 → authorize URL 확인 (Kakao 로는 보내지 않음)",
+      "ok": true
+    },
+    {
+      "name": "S13 custom:kakao 는 options.scopes 가 저장된 scope 를 대체 (내장 kakao 는 덧붙임)",
+      "ok": true
+    },
+    {
+      "name": "S14 custom:kakao(OIDC) 콜백: 이메일 없이 가입, parseKakaoIDToken 매핑, 토큰 요청은 Basic 시도 후 client_secret_post 재시도",
+      "ok": true
+    },
+    {
+      "name": "S14b 같은 Kakao 회원번호라도 내장 kakao 와 custom:kakao 는 다른 사용자 (provider 를 바꾸면 계정이 갈라짐)",
+      "ok": true
+    },
+    {
+      "name": "S15 (가정) Kakao 가 실패한 Basic 요청에서도 코드를 소모한다면 custom:kakao 로그인은 매번 실패 → P3 실측 필수",
+      "ok": true
+    }
+  ],
+  "observed": {
+    "S1": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=account_email+profile_image+profile_nickname&state=b865dd0d-c542-4c28-9e82-cdec97d2b162",
+      "kakaoScope": "account_email profile_image profile_nickname",
+      "kakaoParams": [
+        "client_id",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 400,
+      "stage": "kakao-authorize",
+      "error": "KOE205  invalid_scope: 설정하지 않은 동의항목: account_email"
+    },
+    "S2": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=account_email+profile_image+profile_nickname+profile_nickname&state=38b02401-9087-4c23-8c1e-f24cf2b86279",
+      "kakaoScope": "account_email profile_image profile_nickname profile_nickname",
+      "kakaoParams": [
+        "client_id",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 400,
+      "stage": "kakao-authorize",
+      "error": "KOE205  invalid_scope: 설정하지 않은 동의항목: account_email"
+    },
+    "S3": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=kid&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=profile_nickname+profile_image&state=2180dae4-9e54-44e3-85bc-5b23775115d9",
+      "kakaoScope": "profile_nickname profile_image",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?code=6bd8c76f-a9f7-4eae-a8c7-9dad11210996",
+      "stage": "done",
+      "code": "6bd8c76f-a9f7-4eae-a8c7-9dad11210996",
+      "user": {
+        "id": "90556b24-a234-45af-ad33-bd3e98147671",
+        "email": "",
+        "email_confirmed_at": null,
+        "app_metadata": {
+          "provider": "kakao",
+          "providers": [
+            "kakao"
+          ]
+        },
+        "user_metadata": {
+          "avatar_url": "http://k.kakaocdn.net/dn/bXyZ12/btsAbCdEf/AbCdEfGhIjKl/img_640x640.jpg",
+          "email_verified": false,
+          "full_name": "파이썬꿈나무",
+          "iss": "https://kapi.kakao.com",
+          "name": "파이썬꿈나무",
+          "phone_verified": false,
+          "preferred_username": "파이썬꿈나무",
+          "provider_id": "4012345678",
+          "sub": "4012345678",
+          "user_name": "파이썬꿈나무"
+        },
+        "identities": [
+          {
+            "provider": "kakao",
+            "id": "4012345678",
+            "email": null,
+            "identity_data": {
+              "avatar_url": "http://k.kakaocdn.net/dn/bXyZ12/btsAbCdEf/AbCdEfGhIjKl/img_640x640.jpg",
+              "email_verified": false,
+              "full_name": "파이썬꿈나무",
+              "iss": "https://kapi.kakao.com",
+              "name": "파이썬꿈나무",
+              "phone_verified": false,
+              "preferred_username": "파이썬꿈나무",
+              "provider_id": "4012345678",
+              "sub": "4012345678",
+              "user_name": "파이썬꿈나무"
+            }
+          }
+        ]
+      }
+    },
+    "S3b": [
+      "avatar_url",
+      "email_verified",
+      "full_name",
+      "iss",
+      "name",
+      "phone_verified",
+      "preferred_username",
+      "provider_id",
+      "sub",
+      "user_name"
+    ],
+    "S3c": {
+      "type": "token",
+      "host": "kapi.kakao.com",
+      "hasBasicAuthHeader": false,
+      "bodyKeys": [
+        "client_id",
+        "client_secret",
+        "code",
+        "grant_type",
+        "redirect_uri"
+      ],
+      "result": "ok"
+    },
+    "S3c_authorizeParams": [
+      "client_id",
+      "mock_user",
+      "redirect_to",
+      "redirect_uri",
+      "response_type",
+      "scope",
+      "state"
+    ],
+    "S4": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=kid-default&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth-strict%3A9999%2Fcallback&response_type=code&scope=profile_nickname+profile_image&state=705fa6b4-3e3d-49fb-8dc3-e14d8ea2cb51",
+      "kakaoScope": "profile_nickname profile_image",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?error=server_error&error_code=unexpected_failure&error_description=Error+getting+user+email+from+external+provider#error=server_error&error_code=unexpected_failure&error_description=Error+getting+user+email+from+external+provider&sb=",
+      "stage": "app-redirect",
+      "error": "server_error",
+      "error_code": "unexpected_failure",
+      "error_description": "Error getting user email from external provider"
+    },
+    "S5": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=kid-default&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=profile_nickname+profile_image&state=b977f0e8-0f86-4531-8177-ed1613829706",
+      "kakaoScope": "profile_nickname profile_image",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?code=c350f1a9-db77-4fe9-a4f1-376c4e4e3a8f",
+      "stage": "done",
+      "code": "c350f1a9-db77-4fe9-a4f1-376c4e4e3a8f",
+      "user": {
+        "id": "47c77f79-be6f-4e9e-8f5e-1e54fa77a93d",
+        "email": "",
+        "email_confirmed_at": null,
+        "app_metadata": {
+          "provider": "kakao",
+          "providers": [
+            "kakao"
+          ]
+        },
+        "user_metadata": {
+          "avatar_url": "http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg",
+          "email_verified": false,
+          "full_name": "이서연",
+          "iss": "https://kapi.kakao.com",
+          "name": "이서연",
+          "phone_verified": false,
+          "preferred_username": "이서연",
+          "provider_id": "4012345679",
+          "sub": "4012345679",
+          "user_name": "이서연"
+        },
+        "identities": [
+          {
+            "provider": "kakao",
+            "id": "4012345679",
+            "email": null,
+            "identity_data": {
+              "avatar_url": "http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg",
+              "email_verified": false,
+              "full_name": "이서연",
+              "iss": "https://kapi.kakao.com",
+              "name": "이서연",
+              "phone_verified": false,
+              "preferred_username": "이서연",
+              "provider_id": "4012345679",
+              "sub": "4012345679",
+              "user_name": "이서연"
+            }
+          }
+        ]
+      }
+    },
+    "S6": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=kid-noconsent&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=profile_nickname+profile_image&state=1034e63b-e017-473f-bd3e-ff067fd1a2f0",
+      "kakaoScope": "profile_nickname profile_image",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?code=e5b5233c-8fd8-49d6-b20c-20bc26524cc4",
+      "stage": "done",
+      "code": "e5b5233c-8fd8-49d6-b20c-20bc26524cc4",
+      "user": {
+        "id": "70ec92a3-43d9-4dd1-bf18-55c308e8e9aa",
+        "email": "",
+        "email_confirmed_at": null,
+        "app_metadata": {
+          "provider": "kakao",
+          "providers": [
+            "kakao"
+          ]
+        },
+        "user_metadata": {
+          "email_verified": false,
+          "iss": "https://kapi.kakao.com",
+          "phone_verified": false,
+          "provider_id": "4012345680",
+          "sub": "4012345680"
+        },
+        "identities": [
+          {
+            "provider": "kakao",
+            "id": "4012345680",
+            "email": null,
+            "identity_data": {
+              "email_verified": false,
+              "iss": "https://kapi.kakao.com",
+              "phone_verified": false,
+              "provider_id": "4012345680",
+              "sub": "4012345680"
+            }
+          }
+        ]
+      }
+    },
+    "S7": {
+      "id": "90556b24-a234-45af-ad33-bd3e98147671",
+      "last_sign_in_at": "2026-11-03T09:59:18.924083947Z"
+    },
+    "S8": {
+      "gotrueAuthorize": 302,
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=cancel&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=profile_nickname&state=c5dae905-7cf9-48f3-a7f4-7c94276bfe4f",
+      "kakaoScope": "profile_nickname",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?error=access_denied&error_description=User+denied+access#error=access_denied&error_description=User+denied+access&sb=",
+      "stage": "app-redirect",
+      "error": "access_denied",
+      "error_code": null,
+      "error_description": "User denied access"
+    },
+    "S9": {
+      "existingId": "baae84d5-b14f-4ede-aa84-6e62df789e91",
+      "kakaoLoginUserId": "baae84d5-b14f-4ede-aa84-6e62df789e91",
+      "identities": [
+        {
+          "provider": "email",
+          "id": "baae84d5-b14f-4ede-aa84-6e62df789e91",
+          "email": "kid.parent@kakao.com",
+          "identity_data": {
+            "email": "kid.parent@kakao.com",
+            "email_verified": false,
+            "phone_verified": false,
+            "sub": "baae84d5-b14f-4ede-aa84-6e62df789e91"
+          }
+        },
+        {
+          "provider": "kakao",
+          "id": "4012345682",
+          "email": "kid.parent@kakao.com",
+          "identity_data": {
+            "email": "kid.parent@kakao.com",
+            "email_verified": true,
+            "full_name": "coding_parent",
+            "iss": "https://kapi.kakao.com",
+            "name": "coding_parent",
+            "phone_verified": false,
+            "preferred_username": "coding_parent",
+            "provider_id": "4012345682",
+            "sub": "4012345682",
+            "user_name": "coding_parent"
+          }
+        }
+      ]
+    },
+    "S10_link": {
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=kid-link&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=profile_nickname&skip_http_redirect=true&state=808e2550-9006-4499-9435-b524298e1a4f",
+      "kakaoScope": "profile_nickname",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "skip_http_redirect",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?code=61cd65e0-b940-4f02-acfc-7db5ef1f6f71",
+      "stage": "done",
+      "code": "61cd65e0-b940-4f02-acfc-7db5ef1f6f71"
+    },
+    "S10_loginAfterLink": {
+      "id": "8f6d7429-81c3-4e95-8303-2c4a62d7c50c",
+      "email": "google.kid@example.com",
+      "email_confirmed_at": "2026-11-03T09:59:19.874814Z",
+      "app_metadata": {
+        "provider": "email",
+        "providers": [
+          "email",
+          "kakao"
+        ]
+      },
+      "user_metadata": {
+        "email": "google.kid@example.com",
+        "email_verified": false,
+        "full_name": "link_bear",
+        "iss": "https://kapi.kakao.com",
+        "name": "link_bear",
+        "phone_verified": false,
+        "picture": "https://lh3.googleusercontent.com/a/x",
+        "preferred_username": "link_bear",
+        "provider_id": "4012345690",
+        "sub": "4012345690",
+        "user_name": "link_bear"
+      },
+      "identities": [
+        {
+          "provider": "email",
+          "id": "8f6d7429-81c3-4e95-8303-2c4a62d7c50c",
+          "email": "google.kid@example.com",
+          "identity_data": {
+            "email": "google.kid@example.com",
+            "email_verified": false,
+            "phone_verified": false,
+            "sub": "8f6d7429-81c3-4e95-8303-2c4a62d7c50c"
+          }
+        },
+        {
+          "provider": "kakao",
+          "id": "4012345690",
+          "email": null,
+          "identity_data": {
+            "email_verified": false,
+            "full_name": "link_bear",
+            "iss": "https://kapi.kakao.com",
+            "name": "link_bear",
+            "phone_verified": false,
+            "preferred_username": "link_bear",
+            "provider_id": "4012345690",
+            "sub": "4012345690",
+            "user_name": "link_bear"
+          }
+        }
+      ]
+    },
+    "S11": {
+      "kakaoAuthorizeUrl": "https://kapi.kakao.com/oauth/authorize?client_id=mock-rest-api-key&mock_user=kid&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&redirect_uri=http%3A%2F%2Fp004auth%3A9999%2Fcallback&response_type=code&scope=profile_nickname+profile_image&skip_http_redirect=true&state=33be7af9-84ec-4e3f-9fe9-8d7819465adf",
+      "kakaoScope": "profile_nickname profile_image",
+      "kakaoParams": [
+        "client_id",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "skip_http_redirect",
+        "state"
+      ],
+      "kakaoStatus": 302,
+      "callbackStatus": 302,
+      "appRedirect": "http://localhost:3000/auth/callback?error=server_error&error_code=identity_already_exists&error_description=Identity+is+already+linked+to+another+user#error=server_error&error_code=identity_already_exists&error_description=Identity+is+already+linked+to+another+user&sb=",
+      "stage": "app-redirect",
+      "error": "server_error",
+      "error_code": "identity_already_exists",
+      "error_description": "Identity is already linked to another user"
+    },
+    "S12_create": {
+      "status": 201,
+      "body": {
+        "id": "6abe6391-86e6-480d-ab42-e7ed73f8ffc4",
+        "provider_type": "oidc",
+        "identifier": "custom:kakao",
+        "name": "Kakao",
+        "client_id": "mock-rest-api-key",
+        "acceptable_client_ids": [],
+        "scopes": [
+          "openid",
+          "profile_nickname"
+        ],
+        "pkce_enabled": true,
+        "attribute_mapping": {},
+        "custom_claims_allowlist": [],
+        "authorization_params": {},
+        "enabled": true,
+        "email_optional": true,
+        "issuer": "https://kauth.kakao.com",
+        "skip_nonce_check": false,
+        "discovery_document": {
+          "issuer": "https://kauth.kakao.com",
+          "authorization_endpoint": "https://kauth.kakao.com/oauth/authorize",
+          "token_endpoint": "https://kauth.kakao.com/oauth/token",
+          "userinfo_endpoint": "https://kapi.kakao.com/v1/oidc/userinfo",
+          "jwks_uri": "https://kauth.kakao.com/.well-known/jwks.json",
+          "response_types_supported": [
+            "code"
+          ],
+          "grant_types_supported": [
+            "authorization_code",
+            "refresh_token"
+          ],
+          "subject_types_supported": [
+            "pairwise"
+          ]
+        },
+        "created_at": "2026-11-03T09:59:21.860292Z",
+        "updated_at": "2026-11-03T09:59:21.860292Z"
+      }
+    },
+    "S12_authorize": {
+      "host": "kauth.kakao.com",
+      "path": "/oauth/authorize",
+      "scope": "openid profile_nickname",
+      "redirect_uri": "http://p004auth:9999/callback",
+      "code_challenge_method": "S256",
+      "has_code_challenge": true,
+      "params": [
+        "client_id",
+        "code_challenge",
+        "code_challenge_method",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ]
+    },
+    "S13": "openid profile_nickname profile_image",
+    "S14_create": {
+      "status": 201,
+      "pkce_enabled": true,
+      "scopes": [
+        "openid",
+        "profile_nickname"
+      ]
+    },
+    "S14": {
+      "kakaoScope": "openid profile_nickname",
+      "kakaoParams": [
+        "client_id",
+        "code_challenge",
+        "code_challenge_method",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "stage": "done",
+      "code": "2979d5ce-3a92-4f7f-9312-cc3716e4b971",
+      "user": {
+        "id": "29756ad2-0f68-445a-9b8b-9c925c7e424b",
+        "email": "",
+        "email_confirmed_at": null,
+        "app_metadata": {
+          "provider": "custom:kakao-mock",
+          "providers": [
+            "custom:kakao-mock"
+          ]
+        },
+        "user_metadata": {
+          "email_verified": false,
+          "iss": "https://kauth.kakao.com",
+          "name": "파이썬꿈나무",
+          "phone_verified": false,
+          "preferred_username": "파이썬꿈나무",
+          "provider_id": "4012345678",
+          "sub": "4012345678"
+        },
+        "identities": [
+          {
+            "provider": "custom:kakao-mock",
+            "id": "4012345678",
+            "email": null,
+            "identity_data": {
+              "email_verified": false,
+              "iss": "https://kauth.kakao.com",
+              "name": "파이썬꿈나무",
+              "phone_verified": false,
+              "preferred_username": "파이썬꿈나무",
+              "provider_id": "4012345678",
+              "sub": "4012345678"
+            }
+          }
+        ]
+      },
+      "tokenCalls": [
+        {
+          "type": "token",
+          "host": "mock-kauth.p004.test",
+          "hasBasicAuthHeader": true,
+          "bodyKeys": [
+            "code",
+            "code_verifier",
+            "grant_type",
+            "redirect_uri"
+          ],
+          "result": "KOE101"
+        },
+        {
+          "type": "token",
+          "host": "mock-kauth.p004.test",
+          "hasBasicAuthHeader": false,
+          "bodyKeys": [
+            "client_id",
+            "client_secret",
+            "code",
+            "code_verifier",
+            "grant_type",
+            "redirect_uri"
+          ],
+          "pkce": "ok",
+          "result": "ok"
+        }
+      ]
+    },
+    "S15": {
+      "kakaoScope": "openid profile_nickname",
+      "kakaoParams": [
+        "client_id",
+        "code_challenge",
+        "code_challenge_method",
+        "mock_user",
+        "redirect_to",
+        "redirect_uri",
+        "response_type",
+        "scope",
+        "state"
+      ],
+      "stage": "app-redirect",
+      "error": "server_error",
+      "error_code": "unexpected_failure",
+      "error_description": "Unable to exchange external code: bdd1"
+    },
+    "S15_error": "server_error / unexpected_failure / Unable to exchange external code: bdd1"
+  }
+}

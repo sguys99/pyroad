@@ -1,0 +1,232 @@
+{
+  "note": "Next.js 15.5 빌드 출력의 크기(압축 기준 추정치). Turbopack 빌드는 라우트별 값이 공유 청크와 맞지 않을 수 있어 실제 전송량은 lighthouse.json 참고",
+  "buildSeconds": 116,
+  "sharedTotalKB": 214,
+  "shared": [
+    {
+      "chunk": "chunks/3ed20b08576ff946.js",
+      "kb": 17.2
+    },
+    {
+      "chunk": "chunks/62d79ac009629722.js",
+      "kb": 12.2
+    },
+    {
+      "chunk": "chunks/a30e174e0578ae92.js",
+      "kb": 13.7
+    },
+    {
+      "chunk": "chunks/add2fe5f713e07df.js",
+      "kb": 21.9
+    },
+    {
+      "chunk": "chunks/d41beca67e5354f3.js",
+      "kb": 59.2
+    },
+    {
+      "chunk": "chunks/86c1a6487c3280c5.css",
+      "kb": 16
+    },
+    {
+      "chunk": "chunks/c373895b9e9f1882.css",
+      "kb": 51.7
+    },
+    {
+      "chunk": "other shared chunks (total)",
+      "kb": 21.8
+    }
+  ],
+  "middlewareKB": 88.8,
+  "routes": [
+    {
+      "route": "/",
+      "kind": "static",
+      "sizeKB": 24.6,
+      "firstLoadKB": 245
+    },
+    {
+      "route": "/_not-found",
+      "kind": "static",
+      "sizeKB": 0,
+      "firstLoadKB": 145
+    },
+    {
+      "route": "/api/account/delete",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/account/reset",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/board/comments",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/board/comments/[commentId]",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/board/posts",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/board/posts/[postId]",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/notice",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/notice/[noticeId]",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/quest/complete",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/quest/golden-key",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/quest/validate",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/settings",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/tutor",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/api/tutor/stream",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/auth/callback",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/board",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 152
+    },
+    {
+      "route": "/board/[postId]",
+      "kind": "dynamic",
+      "sizeKB": 13.7,
+      "firstLoadKB": 196
+    },
+    {
+      "route": "/board/[postId]/edit",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 153
+    },
+    {
+      "route": "/board/create",
+      "kind": "static",
+      "sizeKB": 0,
+      "firstLoadKB": 153
+    },
+    {
+      "route": "/icon.svg",
+      "kind": "static",
+      "sizeKB": 0,
+      "firstLoadKB": 0
+    },
+    {
+      "route": "/notice",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 152
+    },
+    {
+      "route": "/notice/[noticeId]",
+      "kind": "dynamic",
+      "sizeKB": 12.8,
+      "firstLoadKB": 195
+    },
+    {
+      "route": "/notice/[noticeId]/edit",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 153
+    },
+    {
+      "route": "/notice/create",
+      "kind": "dynamic",
+      "sizeKB": 0,
+      "firstLoadKB": 153
+    },
+    {
+      "route": "/profile",
+      "kind": "dynamic",
+      "sizeKB": 19.9,
+      "firstLoadKB": 269
+    },
+    {
+      "route": "/quest/[questId]",
+      "kind": "dynamic",
+      "sizeKB": 267,
+      "firstLoadKB": 487
+    },
+    {
+      "route": "/settings",
+      "kind": "static",
+      "sizeKB": 15,
+      "firstLoadKB": 169
+    },
+    {
+      "route": "/world",
+      "kind": "dynamic",
+      "sizeKB": 85.3,
+      "firstLoadKB": 239
+    }
+  ],
+  "warnings": [
+    "57:27  Warning: '_eo' is defined but never used.  @typescript-eslint/no-unused-vars",
+    "57:39  Warning: '_hints' is defined but never used.  @typescript-eslint/no-unused-vars",
+    "57:62  Warning: '_sc' is defined but never used.  @typescript-eslint/no-unused-vars",
+    "42:36  Warning: 'align' is assigned a value but never used.  @typescript-eslint/no-unused-vars",
+    "1:36  Warning: 'beforeEach' is defined but never used.  @typescript-eslint/no-unused-vars",
+    "6:10  Warning: 'createMockSupabase' is defined but never used.  @typescript-eslint/no-unused-vars",
+    "7:3  Warning: 'LEVEL_THRESHOLDS' is defined but never used.  @typescript-eslint/no-unused-vars",
+    "8:3  Warning: 'LEVEL_TITLES' is defined but never used.  @typescript-eslint/no-unused-vars"
+  ]
+}

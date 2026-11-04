@@ -1,0 +1,169 @@
+{
+  "browser": "firefox",
+  "opt": "transform",
+  "mode": "plain",
+  "ver": "314.0.7",
+  "ready": {
+    "t": 42347,
+    "type": "ready",
+    "ms": 39598,
+    "workerMs": 37639,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2"
+    }
+  },
+  "cases": {
+    "loop": {
+      "pass": true,
+      "used": 4,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: ask_number, play"
+    },
+    "chain": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: a, b, c"
+    },
+    "method": {
+      "pass": true,
+      "used": 1,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: ask"
+    },
+    "init": {
+      "pass": false,
+      "used": 0,
+      "outcome": "error",
+      "error": "TypeError: __init__() should return None, not 'coroutine'",
+      "notes": "async로 바뀐 함수: __init__"
+    },
+    "alias": {
+      "pass": false,
+      "used": 0,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: 없음"
+    },
+    "lambda": {
+      "pass": false,
+      "used": 0,
+      "outcome": "error",
+      "error": "SyntaxError: 'await' outside async function"
+    },
+    "generator": {
+      "pass": false,
+      "used": 0,
+      "outcome": "error",
+      "error": "TypeError: 'async_generator' object can't be awaited",
+      "notes": "async로 바뀐 함수: answers"
+    },
+    "comprehension": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: 없음"
+    },
+    "recursion": {
+      "pass": true,
+      "used": 2,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: count"
+    },
+    "callback": {
+      "pass": false,
+      "used": 0,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: 없음"
+    },
+    "map": {
+      "pass": false,
+      "used": 0,
+      "outcome": "ok",
+      "notes": "async로 바뀐 함수: 없음"
+    },
+    "collision": {
+      "pass": false,
+      "used": 0,
+      "outcome": "error",
+      "error": "TypeError: 'int' object can't be awaited",
+      "notes": "async로 바뀐 함수: get"
+    },
+    "stdin": {
+      "pass": false,
+      "used": 0,
+      "outcome": "error",
+      "error": "OSError: [Errno 29] I/O error",
+      "notes": "async로 바뀐 함수: 없음"
+    },
+    "errorline": {
+      "pass": true,
+      "used": 2,
+      "outcome": "error",
+      "error": "ValueError: invalid literal for int() with base 10: '열살'",
+      "notes": "async로 바뀐 함수: 없음"
+    }
+  },
+  "latency": {
+    "endToEnd": {
+      "n": 40,
+      "median": 25,
+      "p95": 59,
+      "min": 9
+    },
+    "toWorker": {
+      "n": 39,
+      "median": 2,
+      "p95": 14,
+      "min": 0
+    },
+    "python": {
+      "n": 39,
+      "median": 7,
+      "p95": 26,
+      "min": 1
+    },
+    "toMain": {
+      "n": 39,
+      "median": 7,
+      "p95": 24,
+      "min": 1
+    }
+  },
+  "sleep": {
+    "out": "slept 0.54",
+    "ms": 561
+  },
+  "stopDuringInput": {
+    "how": "graceful",
+    "ms": 268,
+    "stoppedFlag": true,
+    "nextRunOk": true
+  },
+  "stopBusyLoop": {
+    "how": "terminate",
+    "ms": 30153,
+    "reinitMs": 29144,
+    "stoppedFlag": true,
+    "nextRunOk": true
+  },
+  "stopSleepLoop": {
+    "how": "terminate",
+    "ms": 27463,
+    "reinitMs": 26332,
+    "stoppedFlag": true,
+    "nextRunOk": true
+  },
+  "restarts": 2,
+  "afterReload": {
+    "t": 28233,
+    "type": "ready",
+    "ms": 27752,
+    "workerMs": 27291,
+    "info": {
+      "pyodide": "314.0.7",
+      "python": "3.14.2"
+    },
+    "runOk": true
+  }
+}

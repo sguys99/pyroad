@@ -1,0 +1,16 @@
+{
+  "name": "p0-14-korean-fonts-lab",
+  "private": true,
+  "description": "P0-14 한글 웹폰트 로딩 전략 실험용 최소 Next.js 앱 (스크래치 디렉터리에 복사해서 설치·빌드). 측정은 webpack 빌드(build), Turbopack은 라우트 간 font preload 누수 확인용",
+  "scripts": {
+    "build": "next build",
+    "build:turbopack": "next build --turbopack",
+    "start": "next start -p 3114"
+  },
+  "dependencies": {
+    "next": "15.5.14",
+    "pretendard": "1.3.9",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  }
+}

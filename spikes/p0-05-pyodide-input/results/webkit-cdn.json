@@ -1,0 +1,8 @@
+{
+  "browser": "webkit",
+  "ready": {
+    "t": 343.6,
+    "type": "init-error",
+    "error": "Importing a module script failed."
+  }
+}

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>거북이 화가 · P0-06</title>
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="demo.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+        <ellipse cx="14" cy="44" rx="7" ry="5" fill="#A5D6A7" stroke="#2E7D32" stroke-width="2.5"/>
+        <ellipse cx="46" cy="46" rx="7" ry="5" fill="#A5D6A7" stroke="#2E7D32" stroke-width="2.5"/>
+        <circle cx="54" cy="28" r="8" fill="#A5D6A7" stroke="#2E7D32" stroke-width="2.5"/>
+        <ellipse cx="30" cy="32" rx="20" ry="16" fill="#66BB6A" stroke="#2E7D32" stroke-width="2.5"/>
+        <path d="M23 32l4-7h7l4 7-4 7h-7z" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+        <circle cx="56" cy="26" r="2.2" fill="#2b2118"/>
+      </svg>
+      <div>
+        <h1>거북이 화가</h1>
+        <p class="sub">파이썬 turtle로 그림 그리기 · P0-06 스파이크</p>
+      </div>
+    </div>
+    <div class="status" id="status" data-state="loading">
+      <span class="dot"></span><span id="status-text">파이썬 준비 중…</span>
+    </div>
+  </header>
+
+  <main class="studio">
+    <section class="card editor-card" aria-label="코드">
+      <div class="chips" id="samples" role="toolbar" aria-label="예제"></div>
+      <div class="editor-wrap">
+        <div class="editor-tab">내 코드</div>
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="파이썬 코드"></textarea>
+      </div>
+      <div class="controls">
+        <button class="btn btn-run" id="run" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>실행
+        </button>
+        <button class="btn btn-stop" id="stop" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>멈춤
+        </button>
+        <button class="btn btn-skip" id="skip" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v14l9-7zM13 5v14l9-7z"/></svg>바로 완성
+        </button>
+      </div>
+      <div class="speed">
+        <svg class="speed-ico" viewBox="0 0 32 24" aria-hidden="true"><ellipse cx="14" cy="14" rx="9" ry="7" fill="#66BB6A"/><circle cx="25" cy="12" r="4" fill="#A5D6A7"/><ellipse cx="8" cy="20" rx="3" ry="2" fill="#A5D6A7"/><ellipse cx="19" cy="20" rx="3" ry="2" fill="#A5D6A7"/></svg>
+        <input type="range" id="speed" min="0" max="6" step="1" value="2" aria-label="그리는 속도" />
+        <svg class="speed-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="#FFB74D" stroke="#e08a00" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <span class="speed-label" id="speed-label">보통</span>
+      </div>
+      <p class="rm-note" id="rm-note" hidden>움직임 줄이기 설정이 켜져 있어서 바로 그려요. 슬라이더로 바꿀 수 있어요.</p>
+      <div class="console" id="console" aria-live="polite">
+        <div class="bubble-row">
+          <svg class="mascot" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M6 40c8-2 6-12 14-12" stroke="#2E7D32" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M6 40c8-2 6-12 14-12" stroke="#66BB6A" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <ellipse cx="28" cy="22" rx="14" ry="12" fill="#66BB6A" stroke="#2E7D32" stroke-width="2"/>
+            <ellipse cx="30" cy="27" rx="7" ry="5" fill="#A5D6A7"/>
+            <circle cx="23" cy="19" r="4" fill="#fff"/><circle cx="34" cy="19" r="4" fill="#fff"/>
+            <circle cx="24" cy="19.5" r="2.2" fill="#2b2118"/><circle cx="35" cy="19.5" r="2.2" fill="#2b2118"/>
+            <circle cx="19" cy="26" r="2" fill="#FF8A80" opacity=".8"/><circle cx="39" cy="26" r="2" fill="#FF8A80" opacity=".8"/>
+          </svg>
+          <div class="bubble" id="bubble">예제를 고르고 <b>실행</b>을 눌러 보세요!</div>
+        </div>
+        <pre class="out" id="out" hidden></pre>
+        <pre class="err" id="err" hidden></pre>
+      </div>
+    </section>
+
+    <section class="card stage-card" aria-label="그림">
+      <div class="stage-top">
+        <h2 id="art-title">나의 그림</h2>
+        <div class="stage-tools">
+          <button class="tool" id="grid" aria-pressed="false" title="좌표 모눈">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 12h16M12 4v16M4 8h16M4 16h16M8 4v16M16 4v16" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>모눈
+          </button>
+          <button class="tool" id="save" disabled title="PNG로 저장">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>저장
+          </button>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="stage" id="stage"></div>
+      </div>
+      <div class="check" id="check" hidden></div>
+      <p class="meta" id="meta"></p>
+    </section>
+  </main>
+
+  <script type="module" src="demo.js"></script>
+</body>
+</html>

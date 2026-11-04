@@ -1,0 +1,7 @@
+node_modules/
+# 전체 Lighthouse HTML/JSON 보고서와 원시 trace는 작업 디렉터리(스크래치)에만 둔다
+work/
+results/raw/
+*.trace.json
+*.report.html
+*.report.json

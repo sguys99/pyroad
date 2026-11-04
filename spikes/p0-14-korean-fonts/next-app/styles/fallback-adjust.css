@@ -1,0 +1,22 @@
+/* 한글 기준 폴백 보정 (실험: a-next-adj).
+   next/font의 adjustFontFallback은 Arial 기준이라 라틴 글자만 맞춘다. 한글은 스택의 다음 시스템 폰트로 넘어가
+   보정 없이 그려지므로, 시스템 한글 폰트를 local()로 감싸 한글 평균 폭이 웹폰트와 같도록 size-adjust를 건다.
+   값 = 웹폰트 한글 평균 advance / 시스템 폰트 한글 평균 advance (fontkit.py로 계산).
+   여기서는 Android·크롬북 기본 한글 폰트(Noto Sans CJK KR = 0.92em) 기준만 넣었다.
+   Apple SD Gothic Neo(iOS·macOS)·맑은 고딕(Windows)은 각 OS에서 같은 방식으로 값을 구해 별도 @font-face로 추가한다. */
+@font-face {
+  font-family: 'Pretendard KR Fallback';
+  src: local('Noto Sans CJK KR'), local('NotoSansCJKkr-Regular'), local('Noto Sans KR Regular'), local('NotoSansKR-Regular'), local('Noto Sans KR');
+  size-adjust: 93.95%; /* 0.8643 / 0.92 */
+  ascent-override: 101.33%;
+  descent-override: 25.65%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Jua KR Fallback';
+  src: local('Noto Sans CJK KR'), local('NotoSansCJKkr-Regular'), local('Noto Sans KR Regular'), local('NotoSansKR-Regular'), local('Noto Sans KR');
+  size-adjust: 88.3%; /* 0.8124 / 0.92 */
+  ascent-override: 90.6%;
+  descent-override: 22.65%;
+  line-gap-override: 0%;
+}

@@ -49,5 +49,10 @@ supabase/.temp/
 supabase/.branches/
 supabase/snippets/
 
+# Spikes (Phase 0 기술 검증)
+spikes/**/node_modules/
+spikes/**/.next/
+spikes/**/supabase/.temp/
+
 # Misc
 *.pem
