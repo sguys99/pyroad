@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { gradeSubmission } from '@/lib/quest/grade';
 import { completeQuestRpc, rewardError } from '@/lib/quest/rewardRpc';
-import type { QuestCompleteResponse } from '@/lib/quest/rewards';
+import { levelChanged, type QuestCompleteResponse } from '@/lib/quest/rewards';
+import { trackServerEvent } from '@/lib/analytics/server';
 
 /**
  * 퀘스트 완료 (P1-03, B05·B06)
@@ -89,6 +90,22 @@ export async function POST(request: Request) {
     // 월드맵·프로필 페이지의 Router Cache 무효화
     revalidatePath('/world');
     revalidatePath('/profile');
+
+    // 처음 완료만 분석 이벤트로 (P1-17). 값은 모두 DB 함수가 정한 것이라 클라이언트가 바꿀 수 없음
+    trackServerEvent({
+      headers: request.headers,
+      userId: user.id,
+      name: 'quest_complete',
+      props: {
+        quest_id: body.quest_id,
+        hints_used: result.data.hints_used,
+        used_golden_key: result.data.used_golden_key,
+        level_up: levelChanged(result.data),
+        stage_cleared: result.data.stage_cleared !== null,
+      },
+      path: '/quest/[id]',
+      dedupeKey: `quest_complete:${body.quest_id}`,
+    });
   }
 
   return NextResponse.json(result.data);

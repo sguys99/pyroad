@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
+import { headers } from 'next/headers';
+import { trackQuestStart } from '@/lib/analytics/server';
 import { QUEST_RENDERERS } from '@/components/quest/questRenderers';
 import { stripAnswerFields } from '@/lib/quest/answerKeys';
 import { getQuestKind } from '@/lib/quest/questKind';
@@ -65,6 +67,9 @@ export default async function QuestPage({ params }: Props) {
   // ①(00004)만 적용된 DB에서는 quests에도 남아 있으므로 props로 내려보내기 전에 지운다
   quest.prompt_skeleton = stripAnswerFields(quest.prompt_skeleton);
   const profile = profileResult.data;
+
+  // 퀘스트 시작 기록 (P1-17). 응답 뒤 기록되고, DB dedupe로 사용자·퀘스트마다 한 번만 남는다
+  trackQuestStart(await headers(), user.id, quest.id);
 
   const Renderer = QUEST_RENDERERS[getQuestKind(quest.prompt_skeleton)];
 

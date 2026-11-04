@@ -628,6 +628,36 @@ export const EXPECT = {
   },
   'RL-8': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
 
+  // ── analytics: 익명 분석 이벤트 (P1-17, 00017) ─────────────
+  'AN-1': { expect: 'deny', requires: 'public.analytics_events', activateIn: 'P1-17' },
+  'AN-2': {
+    expect: 'deny',
+    requires: 'public.analytics_events',
+    activateIn: 'P1-17',
+    note: '① 00017: analytics_events 는 service_role 전용 (다른 아이의 이용 기록 비공개)',
+  },
+  'AN-3': {
+    expect: 'deny',
+    requires: 'public.analytics_events',
+    activateIn: 'P1-17',
+    note: '클라이언트가 직접 쓰면 퍼널·완료 지표를 부풀림. 브라우저 이벤트는 /api/analytics(zod 허용 목록) 경유',
+  },
+  'AN-4': { expect: 'deny', requires: 'public.analytics_events', activateIn: 'P1-17' },
+  'AN-5': { expect: 'deny', requires: 'public.analytics_events', activateIn: 'P1-17' },
+  'AN-6': {
+    expect: 'deny',
+    requires: 'public.consume_global_rate_limit()',
+    activateIn: 'P1-17',
+    note: 'prune_analytics_events·consume_global_rate_limit 는 service_role 전용 (기록 지우기·비로그인 한도 소진)',
+  },
+  'AN-7': {
+    expect: 'allow',
+    requires: 'public.consume_global_rate_limit()',
+    activateIn: 'P1-17',
+    note: '서버 경로: upsert dedupe(ON CONFLICT DO NOTHING), CHECK, UPDATE 불가, 180일 정리, 전역 한도',
+  },
+  'AN-8': { expect: 'deny', requires: 'public.analytics_events', activateIn: 'P1-17' },
+
   // ── static: 카탈로그 점검 ─────────────────────────────────
   'ST-1': { expect: 'deny', note: 'public 의 모든 테이블에 RLS' },
   'ST-2': {

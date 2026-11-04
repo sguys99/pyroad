@@ -3,6 +3,7 @@
 import { m } from 'framer-motion';
 import { LoginButton } from '@/components/LoginButton';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
+import { track } from '@/lib/analytics/track';
 
 const container = {
   hidden: {},
@@ -62,7 +63,16 @@ export function HeroSection() {
       </m.p>
 
       <m.div variants={fadeUp}>
-        <LoginButton />
+        <LoginButton
+          onBeforeLogin={() =>
+            // OAuth 로 바로 떠나므로 지금 보낸다 (P1-17)
+            track(
+              'landing_cta_click',
+              { cta: 'hero', provider: 'google' },
+              { immediate: true },
+            )
+          }
+        />
       </m.div>
     </m.div>
   );

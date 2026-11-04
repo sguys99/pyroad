@@ -9,6 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          actor: string;
+          anon_id: string;
+          dedupe_key: string | null;
+          device: string;
+          id: string;
+          name: string;
+          occurred_at: string;
+          path: string | null;
+          props: Json;
+          source: string;
+        };
+        Insert: {
+          actor: string;
+          anon_id: string;
+          dedupe_key?: string | null;
+          device?: string;
+          id?: string;
+          name: string;
+          occurred_at?: string;
+          path?: string | null;
+          props?: Json;
+          source: string;
+        };
+        Update: {
+          actor?: string;
+          anon_id?: string;
+          dedupe_key?: string | null;
+          device?: string;
+          id?: string;
+          name?: string;
+          occurred_at?: string;
+          path?: string | null;
+          props?: Json;
+          source?: string;
+        };
+        Relationships: [];
+      };
+      api_global_rate_limits: {
+        Row: {
+          bucket: string;
+          day: string;
+          day_count: number;
+          day_denied: number;
+          minute_count: number;
+          minute_denied: number;
+          minute_start: string;
+          updated_at: string;
+        };
+        Insert: {
+          bucket: string;
+          day: string;
+          day_count?: number;
+          day_denied?: number;
+          minute_count?: number;
+          minute_denied?: number;
+          minute_start: string;
+          updated_at?: string;
+        };
+        Update: {
+          bucket?: string;
+          day?: string;
+          day_count?: number;
+          day_denied?: number;
+          minute_count?: number;
+          minute_denied?: number;
+          minute_start?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       api_rate_limits: {
         Row: {
           bucket: string;
@@ -724,6 +796,10 @@ export type Database = {
         Args: { p_quest_id: string; p_submission: Json; p_user_id: string };
         Returns: Json;
       };
+      consume_global_rate_limit: {
+        Args: { p_bucket: string; p_per_day: number; p_per_minute: number };
+        Returns: Json;
+      };
       consume_rate_limit: {
         Args: {
           p_bucket: string;
@@ -759,6 +835,10 @@ export type Database = {
       placeholder_display_name: {
         Args: { p_user_id: string };
         Returns: string;
+      };
+      prune_analytics_events: {
+        Args: { p_limit?: number; p_retention?: string };
+        Returns: number;
       };
       quest_xp: {
         Args: {

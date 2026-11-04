@@ -3,6 +3,7 @@ import { getCachedResponse, setCachedResponse, buildCacheKey } from '@/lib/tutor
 import { encodeSseEvent } from '@/lib/tutor/sse';
 import { prepareTutorCall, buildFallbackMessage } from '../helpers';
 import { getMaxTokens } from '@/lib/tutor/config';
+import { withHintTracking } from '@/lib/analytics/server';
 
 const SSE_HEADERS = {
   'Content-Type': 'text/event-stream',
@@ -17,7 +18,12 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, fast, fallbackProviders, quest, answerKey, body, recordHint } = prepared;
+  const { systemPrompt, userPrompt, providerType, customApiKey, fast, fallbackProviders, quest, answerKey, body } = prepared;
+  // 힌트를 실제로 보냈을 때 hint_used 분석 이벤트도 남긴다 (P1-17)
+  const recordHint = withHintTracking(prepared.recordHint, request, {
+    questId: body.quest_id,
+    level: body.hint_level,
+  });
 
   // 캐시 히트 → 단일 delta 이벤트로 즉시 전송
   const cacheKey = buildCacheKey(body);

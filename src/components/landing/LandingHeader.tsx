@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { PybaemSvg } from '@/components/characters/PybaemSvg';
 import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
+import { track } from '@/lib/analytics/track';
 
 export function LandingHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -75,7 +76,15 @@ export function LandingHeader() {
             </a>
 
             <button
-              onClick={handleLogin}
+              onClick={() => {
+                // OAuth 로 바로 떠나므로 지금 보낸다 (P1-17)
+                track(
+                  'landing_cta_click',
+                  { cta: 'header', provider: 'google' },
+                  { immediate: true },
+                );
+                void handleLogin();
+              }}
               className="min-h-[44px] rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               로그인

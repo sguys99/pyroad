@@ -3951,6 +3951,241 @@ async function groupRateLimit(u) {
   });
 }
 
+// ── analytics: 익명 분석 이벤트 (P1-17, 00017) ─────────────────
+// 클라이언트가 직접 쓰면 퍼널·완료 지표를 부풀리거나 지울 수 있고, 읽으면 다른 아이의 이용 기록을 볼 수 있음
+const AN_SID = 'AnSidAnSidAnSidAnSid00';
+async function groupAnalytics(u) {
+  const ready = requirementMet('public.analytics_events');
+  if (ready)
+    one(`insert into public.analytics_events (name, actor, anon_id, source, props, device, path)
+         values ('landing_view', 'visitor', '${AN_SID}', 'client', '{}', 'mobile', '/')`);
+  const exists = (where) =>
+    `select exists (select 1 from public.analytics_events where ${where})`;
+  const gone = (where) =>
+    `select not exists (select 1 from public.analytics_events where ${where})`;
+  await check({
+    group: 'analytics',
+    id: 'AN-1',
+    role: 'anon',
+    op: 'GET /analytics_events',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', '/rest/v1/analytics_events?select=*')),
+  });
+  await check({
+    group: 'analytics',
+    id: 'AN-2',
+    role: 'authenticated',
+    op: 'GET /analytics_events (다른 아이의 이용 기록)',
+    ...READ,
+    run: async () =>
+      classifyRead(await rest('GET', '/rest/v1/analytics_events?select=*', { as: u.alice })),
+  });
+  await check({
+    group: 'analytics',
+    id: 'AN-3',
+    role: 'anon',
+    op: 'POST /analytics_events (지표 부풀리기: 가짜 로그인 성공)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/analytics_events', {
+          body: { name: 'login_success', actor: 'user', anon_id: 'FakeFakeFakeFakeFake01', source: 'server', props: {} },
+          prefer: 'return=minimal',
+        }),
+        exists(`anon_id = 'FakeFakeFakeFakeFake01'`),
+      ),
+  });
+  await check({
+    group: 'analytics',
+    id: 'AN-4',
+    role: 'authenticated',
+    op: 'POST /analytics_events (가짜 퀘스트 완료)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/analytics_events', {
+          as: u.alice,
+          body: { name: 'quest_complete', actor: 'user', anon_id: 'FakeFakeFakeFakeFake02', source: 'server', props: {} },
+          prefer: 'return=minimal',
+        }),
+        exists(`anon_id = 'FakeFakeFakeFakeFake02'`),
+      ),
+  });
+  await check({
+    group: 'analytics',
+    id: 'AN-5',
+    role: 'authenticated',
+    op: 'DELETE /analytics_events (기록 지우기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('DELETE', `/rest/v1/analytics_events?anon_id=eq.${AN_SID}`, { as: u.alice, prefer: 'return=minimal' }),
+        gone(`anon_id = '${AN_SID}'`),
+      ),
+  });
+  await check({
+    group: 'analytics',
+    id: 'AN-6',
+    role: 'authenticated',
+    op: 'POST /rpc/prune_analytics_events · /rpc/consume_global_rate_limit (기록 지우기·비로그인 한도 소진)',
+    ...WRITE,
+    run: async () => {
+      one(`update public.analytics_events set occurred_at = now() - interval '2 days' where anon_id = '${AN_SID}'`);
+      const tries = {
+        prune: await classifyWrite(
+          rest('POST', '/rest/v1/rpc/prune_analytics_events', {
+            as: u.alice,
+            body: { p_retention: '1 day', p_limit: 100 },
+          }),
+          gone(`anon_id = '${AN_SID}'`),
+        ),
+        'anon prune': await classifyWrite(
+          rest('POST', '/rest/v1/rpc/prune_analytics_events', { body: { p_retention: '1 day', p_limit: 100 } }),
+          gone(`anon_id = '${AN_SID}'`),
+        ),
+        consume: await classifyWrite(
+          rest('POST', '/rest/v1/rpc/consume_global_rate_limit', {
+            as: u.alice,
+            body: { p_bucket: 'analytics:visitor', p_per_minute: 1000, p_per_day: 1000 },
+          }),
+          `select exists (select 1 from public.api_global_rate_limits where bucket = 'analytics:visitor')`,
+        ),
+      };
+      const outs = Object.values(tries).map((t) => t.actual);
+      const detail = Object.entries(tries).map(([k, t]) => `${k}: ${t.detail}`).join(' · ');
+      if (outs.includes('written')) return { actual: 'written', detail };
+      return { actual: outs.every((a) => WRITE.deny.includes(a)) ? 'denied' : 'error', detail };
+    },
+  });
+
+  // 서버 경로 (service_role): /api/analytics·서버 이벤트가 쓰는 upsert(ON CONFLICT DO NOTHING), CHECK, UPDATE 불가, 보존 정리, 전역 한도
+  await check({
+    group: 'analytics',
+    id: 'AN-7',
+    role: 'service_role',
+    op: 'upsert 로 "처음 한 번" dedupe · CHECK(이름·익명 ID·경로 쿼리·props 512B·기기) 거부 · service_role 도 UPDATE 불가 · 180일 지난 행만 정리 · 인자 검증 · 전역 한도 정확',
+    ...OK,
+    run: async () => {
+      const row = { name: 'quest_start', actor: 'user', anon_id: 'An7An7An7An7An7An7An7A', source: 'server', props: { quest_id: Q1 }, device: 'desktop', path: '/quest/[id]', dedupe_key: `quest_start:${Q1}` };
+      const up = () =>
+        rest('POST', '/rest/v1/analytics_events?on_conflict=anon_id,dedupe_key', {
+          as: 'service',
+          body: [row],
+          prefer: 'resolution=ignore-duplicates,return=minimal',
+        });
+      const r1 = await up();
+      const r2 = await up();
+      const n = one(`select count(*) from public.analytics_events where anon_id = '${row.anon_id}'`);
+      one(`delete from public.analytics_events where anon_id = '${row.anon_id}'`);
+      const dedupe = compare('dedupe', { s1: 201, s2: 201, rows: '1' }, { s1: r1.status, s2: r2.status, rows: n });
+      if (dedupe) return dedupe;
+      return sqlCheck(`
+        SET LOCAL ROLE service_role;
+        DO $$
+        DECLARE
+          v_n INTEGER;
+          r JSONB;
+        BEGIN
+          -- CHECK
+          BEGIN
+            INSERT INTO public.analytics_events (name, actor, anon_id, source) VALUES ('Login Success!', 'user', 'An7An7An7An7An7An7An7B', 'server');
+            RAISE EXCEPTION '이름 형식을 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          BEGIN
+            INSERT INTO public.analytics_events (name, actor, anon_id, source) VALUES ('quest_start', 'user', '11111111-1111-1111-1111-111111111111', 'server');
+            RAISE EXCEPTION 'user id 모양 익명 ID 를 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          BEGIN
+            INSERT INTO public.analytics_events (name, actor, anon_id, source, path) VALUES ('landing_view', 'visitor', 'An7An7An7An7An7An7An7B', 'client', '/?utm_source=x');
+            RAISE EXCEPTION '쿼리가 있는 경로를 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          BEGIN
+            INSERT INTO public.analytics_events (name, actor, anon_id, source, props) VALUES ('landing_view', 'visitor', 'An7An7An7An7An7An7An7B', 'client', jsonb_build_object('x', repeat('a', 600)));
+            RAISE EXCEPTION '큰 props 를 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          BEGIN
+            INSERT INTO public.analytics_events (name, actor, anon_id, source, device) VALUES ('landing_view', 'visitor', 'An7An7An7An7An7An7An7B', 'client', 'Mozilla/5.0 (iPhone)');
+            RAISE EXCEPTION 'UA 원문을 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          -- 기록은 고칠 수 없음
+          BEGIN
+            UPDATE public.analytics_events SET name = 'quest_complete' WHERE anon_id = '${AN_SID}';
+            RAISE EXCEPTION 'service_role 이 UPDATE 함';
+          EXCEPTION WHEN insufficient_privilege THEN NULL;
+          END;
+          -- 보존 정리: 181일 전 2행은 지우고 179일 전 1행은 남김. 한 번에 p_limit 행까지
+          INSERT INTO public.analytics_events (occurred_at, name, actor, anon_id, source) VALUES
+            (now() - interval '181 days', 'landing_view', 'visitor', 'An7OldAn7OldAn7OldAn7A', 'client'),
+            (now() - interval '182 days', 'landing_view', 'visitor', 'An7OldAn7OldAn7OldAn7B', 'client'),
+            (now() - interval '179 days', 'landing_view', 'visitor', 'An7NewAn7NewAn7NewAn7A', 'client');
+          v_n := public.prune_analytics_events(interval '180 days', 1);
+          IF v_n <> 1 OR NOT EXISTS (SELECT 1 FROM public.analytics_events WHERE anon_id = 'An7OldAn7OldAn7OldAn7A') THEN
+            RAISE EXCEPTION '가장 오래된 것부터 1행: %', v_n;
+          END IF;
+          v_n := public.prune_analytics_events();
+          IF v_n < 1 OR EXISTS (SELECT 1 FROM public.analytics_events WHERE anon_id LIKE 'An7Old%')
+             OR NOT EXISTS (SELECT 1 FROM public.analytics_events WHERE anon_id = 'An7NewAn7NewAn7NewAn7A') THEN
+            RAISE EXCEPTION '180일 정리: %', v_n;
+          END IF;
+          BEGIN
+            PERFORM public.prune_analytics_events(interval '1 hour', 10);
+            RAISE EXCEPTION '1일 미만 보존을 받음';
+          EXCEPTION WHEN SQLSTATE 'PT400' THEN NULL;
+          END;
+          -- 전역 한도: 분당 2·하루 3
+          DELETE FROM public.api_global_rate_limits WHERE bucket = 'test:an7';
+          r := public.consume_global_rate_limit('test:an7', 2, 3);
+          IF NOT (r->>'allowed')::boolean OR (r->>'remaining')::int <> 1 THEN RAISE EXCEPTION '첫 요청: %', r; END IF;
+          r := public.consume_global_rate_limit('test:an7', 2, 3);
+          r := public.consume_global_rate_limit('test:an7', 2, 3);
+          IF (r->>'allowed')::boolean OR r->>'scope' <> 'minute' OR (r->>'retry_after')::int NOT BETWEEN 1 AND 60 THEN
+            RAISE EXCEPTION '분 한도: %', r;
+          END IF;
+          UPDATE public.api_global_rate_limits SET minute_start = minute_start - interval '1 minute' WHERE bucket = 'test:an7';
+          r := public.consume_global_rate_limit('test:an7', 2, 3);
+          IF NOT (r->>'allowed')::boolean THEN RAISE EXCEPTION '분 창 경과: %', r; END IF;
+          UPDATE public.api_global_rate_limits SET minute_start = minute_start - interval '1 minute' WHERE bucket = 'test:an7';
+          r := public.consume_global_rate_limit('test:an7', 2, 3);
+          IF (r->>'allowed')::boolean OR r->>'scope' <> 'day' THEN RAISE EXCEPTION '하루 한도: %', r; END IF;
+          BEGIN
+            PERFORM public.consume_global_rate_limit('Bad Bucket', 1, 1);
+            RAISE EXCEPTION '잘못된 버킷을 받음';
+          EXCEPTION WHEN SQLSTATE 'PT400' THEN NULL;
+          END;
+        END $$;
+        RESET ROLE;`);
+    },
+  });
+  await check({
+    group: 'analytics',
+    id: 'AN-8',
+    role: 'postgres',
+    op: '00017 객체 중 anon/authenticated 가 접근할 수 있는 것 (테이블 권한·함수 EXECUTE·정책)',
+    ...NONE,
+    run: () => {
+      const v = one(`select concat_ws(',',
+          (select string_agg(r || ':' || t, ',') from unnest(array['anon', 'authenticated']) r,
+              unnest(array['public.analytics_events', 'public.api_global_rate_limits']) t
+            where has_table_privilege(r, t, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')),
+          (select string_agg(r || ':' || f, ',') from unnest(array['anon', 'authenticated']) r,
+              unnest(array['public.prune_analytics_events(interval, integer)', 'public.consume_global_rate_limit(text, integer, integer)']) f
+            where has_function_privilege(r, f, 'EXECUTE')),
+          (select string_agg('policy:' || policyname, ',') from pg_policies
+            where schemaname = 'public' and tablename in ('analytics_events', 'api_global_rate_limits')))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+  if (ready) {
+    one(`delete from public.analytics_events where anon_id = '${AN_SID}'`);
+    one(`delete from public.api_global_rate_limits where bucket = 'analytics:visitor'`);
+  }
+}
+
 // ── 실행 ──────────────────────────────────────────────────
 async function main() {
   console.log(`[${scenario}] ${S.label}`);
@@ -4009,6 +4244,7 @@ async function main() {
   await groupAuthTriggers(u);
   await groupBoard(u);
   await groupRateLimit(u);
+  await groupAnalytics(u);
   await groupApp(u);
   await groupStatic();
 

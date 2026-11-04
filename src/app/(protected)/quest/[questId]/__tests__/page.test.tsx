@@ -74,6 +74,8 @@ vi.mock('next/navigation', () => ({
   redirect: mocks.redirect,
   notFound: mocks.notFound,
 }));
+vi.mock('next/headers', () => ({ headers: async () => new Headers() }));
+vi.mock('@/lib/analytics/server', () => ({ trackQuestStart: vi.fn() }));
 // 렌더러(클라이언트 컴포넌트)는 불러오지 않고 무엇을 넘겼는지만 본다
 vi.mock('@/components/quest/questRenderers', () => ({
   QUEST_RENDERERS: {

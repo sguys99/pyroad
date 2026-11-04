@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { deleteUserAnalytics } from '@/lib/analytics/server';
 
 export async function DELETE() {
   const supabase = await createClient();
@@ -26,6 +27,9 @@ export async function DELETE() {
       { status: 500 },
     );
   }
+
+  // 분석 이벤트는 users 를 참조하지 않으므로(익명 ID = HMAC) 따로 지운다 (P1-17). 실패해도 탈퇴는 끝난 것으로 둠
+  await deleteUserAnalytics(adminClient, user.id);
 
   return NextResponse.json({ success: true });
 }
