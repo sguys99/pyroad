@@ -4,6 +4,7 @@ import {
 } from './providers/factory';
 import type { LLMProviderType } from './providers/types';
 import { encodeSseEvent, type TutorStreamEvent } from './sse';
+import { captureServerError } from '@/lib/observability/server';
 
 // Anthropic 경량 모델 (quest_intro, encouragement용)
 const FAST_MODEL: Record<string, string> = {
@@ -20,6 +21,22 @@ function delay(ms: number, signal?: AbortSignal): Promise<void> {
       resolve();
     }
     signal?.addEventListener('abort', done, { once: true });
+  });
+}
+
+/**
+ * provider 실패를 Sentry로 보고한다 (P1-16). 폴백으로 학생에게는 답이 가므로 throw되지 않아 따로 보낸다.
+ * 사용자 취소(abort)는 호출하는 쪽에서 거르고, 학생 본인 키의 실패(잘못된 키 등)는 우리가 고칠 수 없어 보내지 않는다.
+ */
+function reportProviderError(
+  error: unknown,
+  providerType: LLMProviderType,
+  mode: 'call' | 'stream',
+  customApiKey?: string,
+) {
+  if (customApiKey) return;
+  captureServerError(error, {
+    tags: { area: 'tutor', provider: providerType, mode },
   });
 }
 
@@ -229,6 +246,7 @@ async function tryStreamProvider(
         `[tutor] ${attempt.providerType} stream failed:`,
         error instanceof Error ? error.message : error,
       );
+      reportProviderError(error, attempt.providerType, 'stream', attempt.customApiKey);
     }
     return { ok: false, text, emitted: text.length > 0 };
   }
@@ -279,6 +297,7 @@ async function attemptOnce(
         `[tutor] ${providerType} call failed:`,
         error instanceof Error ? error.message : error,
       );
+      reportProviderError(error, providerType, 'call', customApiKey);
     }
     return { text: '', ok: false };
   }

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { EXECUTION_TIMEOUT_MS, MAX_OUTPUT_LENGTH } from './constants';
 import { isRunSuccessful } from './runOutcome';
 import type { WorkerRequest, WorkerResponse } from './types';
+import { describeWorkerErrorEvent, reportPyodideWorkerError } from './workerErrorReport';
 
 export type PyodideStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -39,7 +40,11 @@ export function usePyodide() {
         case 'init-status':
           if (msg.status === 'ready') setStatus('ready');
           else if (msg.status === 'loading') setStatus('loading');
-          else if (msg.status === 'error') setStatus('error');
+          else if (msg.status === 'error') {
+            setStatus('error');
+            // 실행기 로딩 실패만 보고 (학생 코드와 무관)
+            reportPyodideWorkerError('init', msg.error);
+          }
           break;
         case 'run-result':
           if (resolverRef.current) {
@@ -54,6 +59,8 @@ export function usePyodide() {
           setIsRunning(false);
           break;
         case 'run-error':
+          // Pyodide 내부 오류 (학생 코드의 Python 오류는 run-result의 stderr로 온다)
+          reportPyodideWorkerError('internal', msg.error);
           if (resolverRef.current) {
             resolverRef.current({
               stdout: '',
@@ -67,7 +74,9 @@ export function usePyodide() {
       }
     };
 
-    worker.onerror = () => {
+    worker.onerror = (event) => {
+      const { message, extra } = describeWorkerErrorEvent(event);
+      reportPyodideWorkerError('worker', message, extra);
       setStatus('error');
       setIsRunning(false);
       if (resolverRef.current) {
