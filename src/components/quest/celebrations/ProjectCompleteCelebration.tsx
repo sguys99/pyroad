@@ -59,8 +59,8 @@ export function ProjectCompleteCelebration({
         <LottieCharacter
           character="pybaem"
           animation="project-complete"
-          size={80}
-          fallbackExpression="celebrating"
+          size={96}
+          expression="celebrating"
         />
       </m.div>
 

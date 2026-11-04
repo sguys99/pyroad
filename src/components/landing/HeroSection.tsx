@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { m } from 'framer-motion';
 import { LoginButton } from '@/components/LoginButton';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
 
 const container = {
@@ -26,8 +24,6 @@ const fadeUp = {
 };
 
 export function HeroSection() {
-  const [entranceDone, setEntranceDone] = useState(false);
-
   return (
     <m.div
       className="flex flex-col items-center gap-6 text-center"
@@ -36,23 +32,15 @@ export function HeroSection() {
       animate="show"
     >
       <m.div variants={fadeUp}>
-        {entranceDone ? (
-          <CharacterAvatar
-            character="pybaem"
-            expression="waving"
-            size="lg"
-            animated
-            onHover="happy"
-          />
-        ) : (
-          <LottieCharacter
-            character="pybaem"
-            animation="entrance"
-            size={128}
-            fallbackExpression="waving"
-            onComplete={() => setEntranceDone(true)}
-          />
-        )}
+        {/* 등장 연출 뒤 숨쉬기, 마우스를 올리면 웃음 (B32: Lottie 대신 정적 SVG + 1회성 연출) */}
+        <LottieCharacter
+          character="pybaem"
+          animation="entrance"
+          size={128}
+          expression="waving"
+          animated
+          onHover="happy"
+        />
       </m.div>
 
       <m.h1

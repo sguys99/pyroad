@@ -102,8 +102,8 @@ export function StageCompleteCelebration({
         <LottieCharacter
           character="pybaem"
           animation="level-up"
-          size={72}
-          fallbackExpression="celebrating"
+          size={88}
+          expression="celebrating"
         />
       </m.div>
 

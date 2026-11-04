@@ -4,14 +4,14 @@ test.describe('캐릭터 시각적 확인', () => {
   test('랜딩 페이지에 파이뱀 캐릭터가 표시된다', async ({ page }) => {
     await page.goto('/');
 
-    // Lottie entrance 또는 SVG waving 중 하나가 존재
+    // B32 이후 Lottie는 그리지 않음(testid 0개). 예전 testid는 회귀 확인용으로 남겨 둠
     const lottie = page.locator('[data-testid="lottie-character-pybaem"]');
     const avatar = page.locator('[data-testid^="character-avatar-pybaem"]');
 
-    // 둘 중 하나가 보이면 통과 (Lottie 로딩 후 SVG로 전환)
+    // 정적 SVG + 1회성 등장 연출(LottieCharacter)
     await expect(lottie.or(avatar).first()).toBeVisible({ timeout: 15_000 });
 
-    // Lottie가 끝나면 waving SVG로 전환
+    // 처음부터 waving 표정
     await expect(
       page.locator('[data-testid="character-avatar-pybaem-waving"]'),
     ).toBeVisible({ timeout: 10_000 });

@@ -100,6 +100,17 @@
   }
 }
 
+/* 캐릭터 숨쉬기: 반복 연출은 CSS transform으로만 (§2.10). reduced-motion이면 그리지 않음 */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes character-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  .character-breathe {
+    animation: character-breathe 3s ease-in-out infinite;
+  }
+}
+
 /* 월드맵 노드 반응형 위치 */
 .world-node {
   left: var(--ml);

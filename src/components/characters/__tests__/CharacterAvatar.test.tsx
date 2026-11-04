@@ -38,6 +38,15 @@ describe('CharacterAvatar', () => {
       expect(svg).toHaveAttribute('height', String(expectedPx));
     });
 
+    it('숫자를 넘기면 그 픽셀 크기로 렌더링한다', () => {
+      const { container } = render(
+        <CharacterAvatar character="pybaem" expression="happy" size={96} />,
+      );
+      const svg = container.querySelector('svg[role="img"]');
+      expect(svg).toHaveAttribute('width', '96');
+      expect(svg).toHaveAttribute('height', '96');
+    });
+
     it('기본 사이즈는 md (64px)', () => {
       const { container } = render(<CharacterAvatar character="pybaem" expression="happy" />);
       const svg = container.querySelector('svg[role="img"]');
@@ -67,6 +76,18 @@ describe('CharacterAvatar', () => {
       expect(
         container.querySelector('[data-testid="character-avatar-pybaem-celebrating"]'),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('숨쉬기 연출', () => {
+    it('animated면 CSS 키프레임 클래스를 쓴다 (§2.10)', () => {
+      const { container } = render(<CharacterAvatar character="pybaem" animated />);
+      expect(container.querySelector('.character-breathe')).toBeInTheDocument();
+    });
+
+    it('animated가 아니면 숨쉬기 클래스가 없다', () => {
+      const { container } = render(<CharacterAvatar character="pybaem" />);
+      expect(container.querySelector('.character-breathe')).not.toBeInTheDocument();
     });
   });
 
