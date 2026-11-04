@@ -1,0 +1,34 @@
+# 퀘스트 1-5: 특수문자 출력하기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000024
+order: 5
+title: 특수문자 출력하기
+concept: 이스케이프 문자 \\n
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 이스케이프 문자 \n으로 줄바꿈하기
+  learning_goals:
+    - \n이 줄바꿈을 뜻하는 특수 문자임을 안다
+    - print() 한 번으로 여러 줄을 출력할 수 있다
+  story_context: 파이썬 마을의 마법 편지지! \n을 쓰면 편지가 두 줄로 나뉘어요.
+  exercise_description: print()를 한 번만 사용하여 "첫째 줄"과 "둘째 줄"을 두 줄로 출력하세요. \n을 사용해요!
+  starter_code: |
+    # print()를 한 번만 사용해서 두 줄로 출력해보세요!
+    # 힌트: \n은 줄바꿈이에요!
+  expected_output_hint: 첫째 줄과 둘째 줄이 각각 다른 줄에 출력되어야 해요
+  fallback_text: \n은 줄바꿈을 뜻하는 특수 문자예요! print("첫째 줄\n둘째 줄") 이렇게 쓰면 두 줄로 나뉘어서 출력돼요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: |-
+      첫째 줄
+      둘째 줄
+  hints:
+    level_1: \n이라는 특별한 글자를 쓰면 그 자리에서 줄이 바뀌어요!
+    level_2: print("첫째 줄\n둘째 줄") 이렇게 \n을 중간에 넣어보세요!
+    level_3: print("___\n___") \n 앞뒤에 각각 문장을 넣어보세요!
+  solution_code: print("첫째 줄\n둘째 줄")

@@ -2,7 +2,13 @@ import { describe, it, expect } from 'vitest';
 import {
   blankCommentsAndStrings,
   codeContains,
+  isValidationRule,
+  parseStoredRule,
+  simplifyRule,
+  toStoredRule,
   validateResult,
+  validateRule,
+  type ValidationRule,
 } from '../validation';
 
 describe('validateResult', () => {
@@ -213,5 +219,237 @@ describe('validateResult', () => {
       });
       expect(result.type).toBe(t);
     }
+  });
+});
+
+// P1-11: 무작위 출력용 contains_any, 여러 규칙 AND인 all (B09·B30, P0-09 patches/proposed-content-fixes.json)
+describe('contains_any · all (P1-11)', () => {
+  const project3: ValidationRule = {
+    type: 'all',
+    rules: [
+      { type: 'code_check', expected: 'elif' },
+      { type: 'contains_any', expected: ['커요', '작아요', '정답'] },
+    ],
+  };
+  const step3Code = [
+    'import random',
+    'secret = random.randint(1, 10)',
+    'guess = int(random.randint(1, 10))',
+    'if guess == secret:',
+    '    print("정답!")',
+    'elif guess < secret:',
+    '    print("비밀 숫자가 추측보다 커요!")',
+    'else:',
+    '    print("비밀 숫자가 추측보다 작아요!")',
+  ].join('\n');
+  const ctx = (stdout: string, studentCode = '') => ({ stdout, studentCode });
+
+  describe('contains_any', () => {
+    const rule: ValidationRule = {
+      type: 'contains_any',
+      expected: ['커요', '작아요', '정답'],
+    };
+
+    it('후보 중 하나라도 출력에 있으면 통과', () => {
+      expect(validateRule(rule, ctx('비밀 숫자가 추측보다 작아요!'))).toBe(
+        true,
+      );
+      expect(validateRule(rule, ctx('정답!'))).toBe(true);
+    });
+
+    it('후보가 하나도 없으면 실패', () => {
+      expect(validateRule(rule, ctx('모르겠어요'))).toBe(false);
+    });
+
+    it('빈 문자열 후보는 무시 (모든 출력을 통과시키지 않음)', () => {
+      expect(
+        validateRule({ type: 'contains_any', expected: [''] }, ctx('아무거나')),
+      ).toBe(false);
+    });
+
+    it('DB 저장 형태(JSON 배열)로도 같은 판정', () => {
+      const stored = toStoredRule(rule);
+      expect(stored).toEqual({
+        validation_type: 'contains_any',
+        expected_output: '["커요","작아요","정답"]',
+      });
+      expect(
+        validateResult({
+          validationType: stored.validation_type,
+          expectedOutput: stored.expected_output,
+          stdout: '더 커요',
+          studentCode: '',
+        }),
+      ).toEqual({ passed: true, type: 'contains_any' });
+    });
+  });
+
+  describe('all', () => {
+    it('B09: 세 갈래 출력 모두 통과 (정답 코드는 random 이라 셋 중 하나만 나옴)', () => {
+      for (const out of [
+        '비밀 숫자가 추측보다 커요!',
+        '비밀 숫자가 추측보다 작아요!',
+        '정답!',
+      ]) {
+        expect(validateRule(project3, ctx(out, step3Code))).toBe(true);
+      }
+    });
+
+    it('B09: 힌트 문구(더 커요!)로 쓴 답도 통과', () => {
+      const hintStyle = step3Code.replace(
+        '비밀 숫자가 추측보다 커요!',
+        '더 커요!',
+      );
+      expect(validateRule(project3, ctx('더 커요!', hintStyle))).toBe(true);
+    });
+
+    it('하위 규칙 하나라도 실패하면 실패 (elif 없는 코드)', () => {
+      const noElif = 'print("더 커요!")';
+      expect(validateRule(project3, ctx('더 커요!', noElif))).toBe(false);
+    });
+
+    it('주석 속 elif 로는 통과 못 함 (B25 엄격 code_check 그대로)', () => {
+      expect(
+        validateRule(
+          project3,
+          ctx('더 커요!', '# elif 쓰면 돼요\nprint("더 커요!")'),
+        ),
+      ).toBe(false);
+    });
+
+    it('하위 규칙이 비면 실패', () => {
+      expect(validateRule({ type: 'all', rules: [] }, ctx('x', 'x'))).toBe(
+        false,
+      );
+    });
+
+    it('중첩 all 도 판정', () => {
+      const nested: ValidationRule = {
+        type: 'all',
+        rules: [project3, { type: 'contains', expected: '!' }],
+      };
+      expect(validateRule(nested, ctx('정답!', step3Code))).toBe(true);
+      expect(validateRule(nested, ctx('정답', step3Code))).toBe(false);
+    });
+
+    it('B30: 이전 단계 코드(randint)만으로는 2단계 수정 규칙을 통과 못 함', () => {
+      const step2: ValidationRule = {
+        type: 'all',
+        rules: [
+          { type: 'code_check', expected: 'guess' },
+          { type: 'contains', expected: '추측' },
+        ],
+      };
+      const step1 =
+        'import random\nsecret = random.randint(1, 10)\nprint(secret)';
+      expect(validateRule(step2, ctx('7', step1))).toBe(false);
+      const solved = `${step1}\nguess = int(random.randint(1, 10))\nprint("추측: " + str(guess))`;
+      expect(validateRule(step2, ctx('7\n추측: 3', solved))).toBe(true);
+    });
+
+    it('DB 저장 형태(JSON 하위 규칙 배열)로 왕복해도 같은 규칙', () => {
+      const stored = toStoredRule(project3);
+      expect(stored.validation_type).toBe('all');
+      expect(JSON.parse(stored.expected_output)).toEqual(project3.rules);
+      expect(
+        parseStoredRule(stored.validation_type, stored.expected_output),
+      ).toEqual(project3);
+      expect(
+        validateResult({
+          validationType: 'all',
+          expectedOutput: stored.expected_output,
+          stdout: '정답!',
+          studentCode: step3Code,
+        }).passed,
+      ).toBe(true);
+    });
+  });
+
+  describe('code_check whole_word (규칙 옵션)', () => {
+    const prevStep = 'secret = random.randint(1, 10)';
+
+    it('규칙의 whole_word 가 randint( 안의 int( 를 무시', () => {
+      expect(
+        validateRule(
+          { type: 'code_check', expected: 'int(' },
+          ctx('', prevStep),
+        ),
+      ).toBe(true);
+      expect(
+        validateRule(
+          { type: 'code_check', expected: 'int(', whole_word: true },
+          ctx('', prevStep),
+        ),
+      ).toBe(false);
+    });
+
+    it('DB 칸이 하나뿐이라 all 하나짜리로 감싸 저장하고, simplifyRule 로 다시 풂', () => {
+      const rule: ValidationRule = {
+        type: 'code_check',
+        expected: 'int(',
+        whole_word: true,
+      };
+      const stored = toStoredRule(rule);
+      expect(stored).toEqual({
+        validation_type: 'all',
+        expected_output:
+          '[{"type":"code_check","expected":"int(","whole_word":true}]',
+      });
+      const back = parseStoredRule(
+        stored.validation_type,
+        stored.expected_output,
+      );
+      expect(back && simplifyRule(back)).toEqual(rule);
+    });
+
+    it('whole_word: false 는 기존 문자열 칸 그대로 저장', () => {
+      expect(
+        toStoredRule({
+          type: 'code_check',
+          expected: 'while',
+          whole_word: false,
+        }),
+      ).toEqual({ validation_type: 'code_check', expected_output: 'while' });
+    });
+  });
+
+  describe('저장 형태가 깨졌으면 불합격 (기준 없이 통과시키지 않음)', () => {
+    it.each([
+      ['contains_any', 'not json'],
+      ['contains_any', '[]'],
+      ['contains_any', '[1, 2]'],
+      ['all', '[]'],
+      ['all', '{"type":"contains","expected":"x"}'],
+      ['all', '[{"type":"unknown","expected":"x"}]'],
+      ['all', '[{"type":"code_check","expected":"x","whole_word":"yes"}]'],
+    ] as const)('%s %s', (validationType, expectedOutput) => {
+      expect(parseStoredRule(validationType, expectedOutput)).toBeNull();
+      expect(
+        validateResult({
+          validationType,
+          expectedOutput,
+          stdout: 'x',
+          studentCode: 'x',
+        }).passed,
+      ).toBe(false);
+    });
+
+    it('너무 깊게 중첩된 all 은 규칙으로 보지 않음', () => {
+      let rule: unknown = { type: 'contains', expected: 'x' };
+      for (let i = 0; i < 6; i++) rule = { type: 'all', rules: [rule] };
+      expect(isValidationRule(rule)).toBe(false);
+    });
+  });
+
+  it('기존 문자열 규칙의 저장 형태는 그대로 (기존 DB 행과 호환)', () => {
+    expect(toStoredRule({ type: 'output_match', expected: 'a\nb' })).toEqual({
+      validation_type: 'output_match',
+      expected_output: 'a\nb',
+    });
+    // 기존 규칙의 기준값은 JSON 처럼 보여도 해석하지 않음
+    expect(parseStoredRule('contains', '["x"]')).toEqual({
+      type: 'contains',
+      expected: '["x"]',
+    });
   });
 });

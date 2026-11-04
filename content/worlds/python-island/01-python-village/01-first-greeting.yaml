@@ -1,0 +1,31 @@
+# 퀘스트 1-1: 첫 번째 인사
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000001
+order: 1
+title: 첫 번째 인사
+concept: print()
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: print() 함수로 출력하기
+  learning_goals:
+    - print() 함수를 사용하여 텍스트를 출력할 수 있다
+    - 따옴표 안에 원하는 텍스트를 넣을 수 있다
+  story_context: 파이썬 마을에 도착한 모험가가 마을 사람들에게 첫 인사를 하는 장면
+  exercise_description: print() 함수를 사용하여 "안녕하세요!"를 출력해보세요
+  starter_code: |
+    # 아래에 코드를 작성해보세요!
+  expected_output_hint: 안녕하세요! 가 출력되어야 해요
+  fallback_text: print()는 화면에 글자를 보여주는 마법 주문이에요! print("안녕하세요!") 이렇게 따옴표 안에 보여주고 싶은 말을 넣으면 돼요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: 안녕하세요!
+  hints:
+    level_1: 화면에 글자를 보여주는 마법 주문이 있어요. 어떤 주문일까요?
+    level_2: print() 안에 따옴표로 감싼 글자를 넣으면 돼요!
+    level_3: print("___") 여기서 ___에 인사말을 넣어보세요!
+  solution_code: print("안녕하세요!")

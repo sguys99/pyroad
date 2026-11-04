@@ -1,0 +1,8 @@
+# 스테이지 1: 파이썬 마을 입구 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000001
+order: 1
+title: 파이썬 마을 입구
+theme_name: python_village
+description: print()와 주석, 기본 입출력을 배워봐요!
+is_final: false

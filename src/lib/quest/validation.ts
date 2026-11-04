@@ -1,16 +1,40 @@
-export type ValidationType = 'output_match' | 'contains' | 'code_check';
+/**
+ * 판정 규칙 유형.
+ * - output_match·contains·code_check: 기준값이 문자열 하나 (기존 규칙)
+ * - contains_any: 출력에 여러 문자열 중 하나라도 있으면 통과 (무작위 출력 퀘스트, B09·P1-11)
+ * - all: 여러 규칙을 모두 통과해야 통과 (예: 코드에 `elif` + 출력에 "커요"·"작아요"·"정답" 중 하나)
+ */
+export type ValidationType =
+  | 'output_match'
+  | 'contains'
+  | 'contains_any'
+  | 'code_check'
+  | 'all';
+
+/**
+ * 판정 규칙 (콘텐츠 원본 `content/**.yaml`의 `answer.validation`, 검증 JSON의 `rule`과 같은 형태).
+ * DB에는 `toStoredRule()`로 바꿔 `validation_type`(공개) + `expected_output`(정답 테이블) 두 칸에 저장한다.
+ */
+export type ValidationRule =
+  | { type: 'output_match'; expected: string }
+  | { type: 'contains'; expected: string }
+  | { type: 'contains_any'; expected: string[] }
+  | { type: 'code_check'; expected: string; whole_word?: boolean }
+  | { type: 'all'; rules: ValidationRule[] };
 
 export interface CodeCheckOptions {
   /**
    * 패턴의 처음·끝 글자가 식별자 글자(영문·숫자·_·한글 등)이면, 바로 옆에 다른
    * 식별자 글자가 붙은 위치는 무시한다. 예: `int(`가 `randint(` 안에서는 걸리지 않음 (B30).
    * 기본값 false(부분 문자열 비교)는 기존 규칙과 같은 동작이다.
+   * 규칙 자체에 `whole_word`가 있으면 그 값이 우선한다.
    */
   wholeWord?: boolean;
 }
 
 export interface ValidationInput {
   validationType: ValidationType;
+  /** DB에 저장된 기준값. contains_any·all은 JSON 문자열 (`toStoredRule` 참고) */
   expectedOutput: string;
   stdout: string;
   studentCode: string;
@@ -29,24 +53,193 @@ interface MatchContext {
   codeCheck?: CodeCheckOptions;
 }
 
-// 규칙 유형별 판정. P1-11에서 contains_any·all을 추가할 때 여기에 항목을 더하고,
-// all은 하위 규칙마다 이 표를 다시 부르면 된다.
-const matchers: Record<
-  ValidationType,
-  (expected: string, ctx: MatchContext) => boolean
-> = {
-  output_match: (expected, { stdout }) => stdout.trim() === expected.trim(),
-  contains: (expected, { stdout }) => stdout.includes(expected),
-  code_check: (expected, { studentCode, codeCheck }) =>
-    codeContains(studentCode, expected, codeCheck),
+type RuleOf<T extends ValidationType> = Extract<ValidationRule, { type: T }>;
+
+// 규칙 유형별 판정. all은 하위 규칙마다 이 표를 다시 부른다.
+const matchers: {
+  [T in ValidationType]: (rule: RuleOf<T>, ctx: MatchContext) => boolean;
+} = {
+  output_match: ({ expected }, { stdout }) => stdout.trim() === expected.trim(),
+  contains: ({ expected }, { stdout }) => stdout.includes(expected),
+  // 빈 문자열 후보는 모든 출력에 들어 있으므로 무시한다 (기준이 비면 통과시키지 않음)
+  contains_any: ({ expected }, { stdout }) =>
+    expected.some(
+      (candidate) => candidate !== '' && stdout.includes(candidate),
+    ),
+  code_check: ({ expected, whole_word }, { studentCode, codeCheck }) =>
+    codeContains(studentCode, expected, {
+      wholeWord: whole_word ?? codeCheck?.wholeWord,
+    }),
+  // 하위 규칙이 없으면 실패 (빈 AND가 모든 답을 통과시키지 않게)
+  all: ({ rules }, ctx) =>
+    rules.length > 0 && rules.every((rule) => matchRule(rule, ctx)),
 };
 
+function matchRule(rule: ValidationRule, ctx: MatchContext): boolean {
+  const match = matchers[rule.type] as (
+    rule: ValidationRule,
+    ctx: MatchContext,
+  ) => boolean;
+  return match(rule, ctx);
+}
+
+/** DB에 저장된 규칙(validation_type + expected_output)으로 판정한다. 기준값이 깨져 있으면 불합격 */
 export function validateResult(input: ValidationInput): ValidationResult {
   const { validationType, expectedOutput, ...ctx } = input;
+  const rule = parseStoredRule(validationType, expectedOutput);
   return {
-    passed: matchers[validationType](expectedOutput, ctx),
+    passed: rule !== null && matchRule(rule, ctx),
     type: validationType,
   };
+}
+
+/** 규칙 객체로 판정한다 (콘텐츠 검증 등 DB를 거치지 않는 곳) */
+export function validateRule(
+  rule: ValidationRule,
+  ctx: Omit<ValidationInput, 'validationType' | 'expectedOutput'>,
+): boolean {
+  return matchRule(rule, ctx);
+}
+
+// ------------------------------------------------------------
+// DB 저장 형태 (P1-11)
+// quests.validation_type(공개)·quest_answer_keys.expected_output(정답) 두 칸은 그대로 두고,
+// 새 규칙은 기준값 칸에 JSON을 넣는다. 그래서 채점 API(/api/quest/validate)는 바꾸지 않아도 된다.
+//   output_match·contains·code_check → 기준값 문자열 그대로 (기존 행과 같음)
+//   contains_any                      → JSON 문자열 배열      예: ["커요","작아요","정답"]
+//   all                               → JSON 하위 규칙 배열    예: [{"type":"code_check","expected":"elif"}, …]
+//   code_check + whole_word           → 칸이 하나뿐이므로 all 하나짜리로 감싼다
+// ------------------------------------------------------------
+
+export interface StoredRule {
+  validation_type: ValidationType;
+  expected_output: string;
+}
+
+export function toStoredRule(rule: ValidationRule): StoredRule {
+  switch (rule.type) {
+    case 'contains_any':
+      return {
+        validation_type: 'contains_any',
+        expected_output: JSON.stringify(rule.expected),
+      };
+    case 'all':
+      return {
+        validation_type: 'all',
+        expected_output: JSON.stringify(rule.rules.map(normalizeRule)),
+      };
+    case 'code_check':
+      if (rule.whole_word) {
+        return {
+          validation_type: 'all',
+          expected_output: JSON.stringify([normalizeRule(rule)]),
+        };
+      }
+      return { validation_type: 'code_check', expected_output: rule.expected };
+    default:
+      return { validation_type: rule.type, expected_output: rule.expected };
+  }
+}
+
+/** 저장 형태 → 규칙. JSON이 깨졌거나 모양이 틀리면 null (채점하지 않음) */
+export function parseStoredRule(
+  validationType: ValidationType,
+  expectedOutput: string,
+): ValidationRule | null {
+  switch (validationType) {
+    case 'output_match':
+    case 'contains':
+    case 'code_check':
+      return { type: validationType, expected: expectedOutput };
+    case 'contains_any': {
+      const list = parseJson(expectedOutput);
+      return isNonEmptyStringList(list)
+        ? { type: 'contains_any', expected: list }
+        : null;
+    }
+    case 'all': {
+      const rules = parseJson(expectedOutput);
+      return Array.isArray(rules) &&
+        rules.length > 0 &&
+        rules.every(isValidationRule)
+        ? { type: 'all', rules }
+        : null;
+    }
+    default:
+      return null;
+  }
+}
+
+/** 하위 규칙이 하나뿐인 all은 그 규칙으로 푼다 (DB에서 콘텐츠로 되돌릴 때, toStoredRule의 반대) */
+export function simplifyRule(rule: ValidationRule): ValidationRule {
+  if (rule.type !== 'all') return rule;
+  const rules = rule.rules.map(simplifyRule);
+  return rules.length === 1 ? rules[0] : { type: 'all', rules };
+}
+
+/** 키 순서를 고정하고 whole_word: false 를 지운 사본 (생성 결과가 매번 같도록) */
+function normalizeRule(rule: ValidationRule): ValidationRule {
+  switch (rule.type) {
+    case 'all':
+      return { type: 'all', rules: rule.rules.map(normalizeRule) };
+    case 'code_check':
+      return rule.whole_word
+        ? { type: 'code_check', expected: rule.expected, whole_word: true }
+        : { type: 'code_check', expected: rule.expected };
+    case 'contains_any':
+      return { type: 'contains_any', expected: [...rule.expected] };
+    default:
+      return { type: rule.type, expected: rule.expected };
+  }
+}
+
+function parseJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+}
+
+function isNonEmptyStringList(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((item) => typeof item === 'string')
+  );
+}
+
+const MAX_RULE_DEPTH = 4;
+
+/** DB에서 읽은 JSON이 규칙 모양인지 확인한다 (콘텐츠 원본은 zod 스키마가 먼저 검사함) */
+export function isValidationRule(
+  value: unknown,
+  depth = 0,
+): value is ValidationRule {
+  if (depth > MAX_RULE_DEPTH || typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const rule = value as Record<string, unknown>;
+  switch (rule.type) {
+    case 'output_match':
+    case 'contains':
+      return typeof rule.expected === 'string';
+    case 'code_check':
+      return (
+        typeof rule.expected === 'string' &&
+        (rule.whole_word === undefined || typeof rule.whole_word === 'boolean')
+      );
+    case 'contains_any':
+      return isNonEmptyStringList(rule.expected);
+    case 'all':
+      return (
+        Array.isArray(rule.rules) &&
+        rule.rules.length > 0 &&
+        rule.rules.every((child) => isValidationRule(child, depth + 1))
+      );
+    default:
+      return false;
+  }
 }
 
 /**
