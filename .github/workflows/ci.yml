@@ -12,7 +12,7 @@ on:
     branches: [main]
   push:
     branches: [main, 'feat/**', 'hotfix/**']
-  # 수동 실행: 무시드 20회·RLS 전체 시나리오·e2e 골격을 아무 브랜치에서나 돌려 볼 때
+  # 수동 실행: 무시드 20회·RLS 전체 시나리오를 아무 브랜치에서나 돌려 볼 때
   workflow_dispatch:
 
 permissions:
@@ -31,8 +31,8 @@ defaults:
     shell: bash
 
 jobs:
-  # ESLint + 타입 검사. next-env.d.ts 는 git 에 없어서(.gitignore) 새 checkout 에서는 `next typegen`으로 먼저 만든다
-  # (없으면 이미지 import 가 TS2307). `prettier --check`는 기존 파일 다수가 맞지 않아 아직 넣지 않음 (docs/ci.md)
+  # ESLint + Prettier + 타입 검사. next-env.d.ts 는 git 에 없어서(.gitignore) 새 checkout 에서는 `next typegen`으로 먼저 만든다
+  # (없으면 이미지 import 가 TS2307). Prettier 제외 대상은 .prettierignore
   lint-typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -46,6 +46,7 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run lint
+      - run: npx prettier --check .
       - run: npx next typegen
       - run: npx tsc --noEmit
 
@@ -209,13 +210,10 @@ jobs:
       - name: 빌드에 들어간 Pyodide 파일 확인
         run: node scripts/pyodide/copy-assets.mjs --check
 
-  # Playwright 스모크 — 골격만 (B29). 지금 e2e 는 운영 계정·이메일 로그인에 의존해 CI 에서 돌릴 수 없음.
-  # TODO(P1-21): 비로그인 스펙을 setup 의존 없는 `public` 프로젝트로 분리하고(로컬 Supabase 전환, PORT 분리) 나면
-  #   - if 를 지워 모든 이벤트에서 돌리고 필수 체크에 추가
-  #   - 마지막 단계를 `npx playwright test --project=public`으로 바꾸고 playwright-report/ 를 아티팩트로 올림
-  # 그때까지는 수동 실행(workflow_dispatch)에서만 브라우저 설치·테스트 인식(--list)까지 확인한다.
+  # e2e 비로그인 스모크 (P1-21, `public` 프로젝트: 랜딩·반응형·reduced-motion·404·CSP·보호 경로). PR 필수 체크 후보.
+  # Supabase 스택 없이 돈다 (E2E_NO_STACK=1: 미들웨어용 자리 값만 넣고, 세션이 없으므로 Supabase 요청이 없음).
+  # 서버는 배포와 같은 `npm run build` + `npm run start` (prebuild 가 Pyodide 자체 호스팅 파일 복사). 설명: e2e/README.md
   e2e-smoke:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -243,5 +241,82 @@ jobs:
       - name: Chromium 시스템 라이브러리
         if: ${{ steps.pw-cache.outputs.cache-hit == 'true' }}
         run: npx playwright install-deps chromium
-      - name: 테스트 인식 확인 (TODO(P1-21) → npx playwright test --project=public)
-        run: npx playwright test --list
+      # build job 과 같은 우회 (Next 15.5 Turbopack + 확장자 없는 Google Fonts 주소, docs/ci.md)
+      - name: Google Fonts CSS 미리 받기
+        run: node scripts/fonts/google-fonts-mock.mjs
+      - name: 비로그인 e2e (빌드 포함)
+        env:
+          E2E_NO_STACK: '1'
+        run: npx playwright test --project=public
+      - name: 리포트 업로드
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-smoke-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # e2e 로그인 시나리오 (P1-21, setup → chromium → teardown). 러너 안에 저장소 config.toml 그대로 Supabase 스택을 띄우고
+  # (migrations + seed.sql), 실행 전용 테스트 사용자를 service_role 로 만들어 세션 쿠키를 주입한다. LLM 키 없음 → 저장된 답변 경로.
+  # 필수 체크는 아님 (시간·안정성을 PR 몇 번 지켜본 뒤 결정, docs/ci.md)
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      # CLI 버전 고정 (rls job 과 같음, supabase/README.md)
+      - uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3.0.1
+        with:
+          version: 2.115.0
+      # 이미지 받기·DB 준비가 오래 걸리므로 npm ci·브라우저 설치와 겹치게 먼저 띄운다
+      - name: Supabase 스택 시작 (백그라운드)
+        run: |
+          supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor \
+            >"$RUNNER_TEMP/supabase-start.log" 2>&1 &
+          echo $! >"$RUNNER_TEMP/supabase-start.pid"
+      - run: npm ci --no-audit --no-fund
+      - name: Playwright 버전
+        id: pw
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >>"$GITHUB_OUTPUT"
+      - name: 브라우저 캐시
+        id: pw-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-chromium
+      - name: Chromium 설치
+        if: ${{ steps.pw-cache.outputs.cache-hit != 'true' }}
+        run: npx playwright install --with-deps chromium
+      - name: Chromium 시스템 라이브러리
+        if: ${{ steps.pw-cache.outputs.cache-hit == 'true' }}
+        run: npx playwright install-deps chromium
+      - name: Google Fonts CSS 미리 받기
+        run: node scripts/fonts/google-fonts-mock.mjs
+      - name: Supabase 스택 준비 대기
+        run: |
+          # 앞 단계에서 띄운 프로세스라 wait 를 못 쓰므로 끝날 때까지 직접 본다
+          pid="$(cat "$RUNNER_TEMP/supabase-start.pid")"
+          while kill -0 "$pid" 2>/dev/null; do sleep 2; done
+          cat "$RUNNER_TEMP/supabase-start.log"
+          supabase status -o env | grep -q '^API_URL=' || { echo '::error::Supabase 스택 시작 실패'; exit 1; }
+      - name: 로그인 e2e (빌드 포함)
+        run: npx playwright test --project=chromium
+      - name: 리포트 업로드
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

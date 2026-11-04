@@ -1,45 +1,53 @@
-import { test, expect } from '@playwright/test';
+// LLM 폴백 (B18 SSE 프로토콜). e2e 서버는 LLM 키를 모두 빈 값으로 띄우므로(support/env.ts) 외부 호출 없이
+// 서버가 저장된 답변을 SSE 로 보낸다: delta → done{is_fallback:true} → 화면에 "저장된 답변" 배지 (P1-21)
+
+import { test, expect } from './support/test';
+import { stage } from './support/content';
+import { outputPanel, setCode, waitForRunner } from './support/quest';
+
+const quest = stage(1).quests[0];
 
 test.describe('LLM 폴백 동작', () => {
-  // 이 테스트는 ANTHROPIC_API_KEY가 없는 환경에서 실행해야 합니다.
-  // 수동 검증 또는 별도 환경 설정이 필요합니다.
-
-  test.skip(
-    !!process.env.ANTHROPIC_API_KEY,
-    'LLM 폴백 테스트는 ANTHROPIC_API_KEY가 없는 환경에서 실행해야 합니다',
-  );
-
   test('API 키 없이 퀘스트 진입 시 폴백 텍스트 표시', async ({ page }) => {
-    await page.goto('/world');
+    const intro = page.waitForResponse(
+      (res) =>
+        res.url().endsWith('/api/tutor/stream') &&
+        res.request().postDataJSON()?.type === 'quest_intro',
+    );
+    await page.goto(`/quest/${quest.id}`);
 
-    // 스테이지 1 클릭
-    const stage1 = page.locator('a[href*="/quest/"], [data-stage-order="1"]').first();
-    await stage1.click({ timeout: 10_000 });
-    await page.waitForURL('**/quest/**', { timeout: 10_000 });
+    // SSE 응답: 저장된 답변으로 정상 완료
+    const res = await intro;
+    expect(res.status()).toBe(200);
+    expect(res.headers()['content-type']).toContain('text/event-stream');
+    const body = await res.text();
+    expect(body).toContain('"is_fallback":true');
 
-    // 대화 패널에 폴백 텍스트가 표시되는지 확인
-    // (LLM 응답 대신 prompt_skeleton.fallback_text가 표시됨)
-    const chatPanel = page.locator('[data-testid="chat-panel"], [class*="chat"], [class*="dialog"]').first();
-    await expect(chatPanel).toBeVisible({ timeout: 15_000 });
-
-    // 폴백 텍스트가 표시됨 (빈 패널이 아닌지 확인)
-    await expect(chatPanel).not.toBeEmpty({ timeout: 10_000 });
+    // 대화 패널에 prompt_skeleton.fallback_text 가 "저장된 답변" 배지와 함께
+    await expect(page.getByText(quest.fallbackText)).toBeVisible();
+    await expect(page.getByText('저장된 답변').first()).toBeVisible();
   });
 
   test('API 키 없이 힌트 요청 시 정적 힌트 표시', async ({ page }) => {
-    await page.goto('/world');
+    await page.goto(`/quest/${quest.id}`);
+    await waitForRunner(page);
+    await expect(page.getByText(quest.fallbackText)).toBeVisible();
 
-    const stage1 = page.locator('a[href*="/quest/"], [data-stage-order="1"]').first();
-    await stage1.click({ timeout: 10_000 });
-    await page.waitForURL('**/quest/**', { timeout: 10_000 });
+    await page.getByRole('button', { name: '힌트 받기' }).click();
+    await expect(page.getByText(quest.hints[0])).toBeVisible();
+    await expect(page.getByText('저장된 답변')).toHaveCount(2);
+  });
 
-    // 힌트 버튼 클릭
-    const hintButton = page.getByRole('button', { name: /힌트/ });
-    await expect(hintButton).toBeVisible({ timeout: 10_000 });
-    await hintButton.click();
+  test('정답 피드백·격려도 저장된 답변으로 이어서 나온다', async ({ page }) => {
+    await page.goto(`/quest/${quest.id}`);
+    await waitForRunner(page);
+    await expect(page.getByText('저장된 답변')).toHaveCount(1);
 
-    // 정적 힌트가 대화 패널에 표시됨
-    const chatPanel = page.locator('[data-testid="chat-panel"], [class*="chat"], [class*="dialog"]').first();
-    await expect(chatPanel).not.toBeEmpty({ timeout: 10_000 });
+    await setCode(page, quest.solution);
+    await page.getByTestId('run-button').click();
+    await expect(outputPanel(page)).toContainText('정답이에요!');
+
+    // 소개 1 + 코드 피드백 1 + 격려 1
+    await expect(page.getByText('저장된 답변')).toHaveCount(3);
   });
 });

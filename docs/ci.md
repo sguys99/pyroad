@@ -12,18 +12,20 @@
 
 | Job | 하는 일 | 실패하면 로컬에서 | 시간 |
 |---|---|---|---|
-| `lint-typecheck` | ESLint, `next typegen`(git에 없는 `next-env.d.ts` 생성) 뒤 `tsc --noEmit` | `npm run lint && npx next typegen && npx tsc --noEmit` | 약 1.5분 |
+| `lint-typecheck` | ESLint, `prettier --check .`(제외 대상은 `.prettierignore`), `next typegen`(git에 없는 `next-env.d.ts` 생성) 뒤 `tsc --noEmit` | `npm run lint && npx prettier --check . && npx next typegen && npx tsc --noEmit` (포맷이 틀리면 `npx prettier --write <파일>`) | 약 1.5분 |
 | `unit` | Vitest 단위 테스트 (`npm test`와 같은 범위) | `npx vitest run` | 약 1분 |
 | `content` | `seed.sql`이 `content/`와 같은지 + 모든 정답 코드를 Pyodide 314로 실행 (시드 0~9 + 무시드 1회). junit 결과를 아티팩트 `content-junit`으로 | `npm run content:build -- --check && npm run test:content` (드리프트면 `npm run content:build` 후 seed 커밋) | 약 20초 |
 | `content-unseeded` | **main push·수동 실행만**. 무시드 20회 | `TEST_CONTENT_UNSEEDED_RUNS=20 npm run test:content` (실패 메시지의 시드로 재현) | 약 30초 |
 | `pyodide` | 자체 호스팅 파일 복사·무결성 + 공용 실행 코어 테스트 | `npm run pyodide:copy && node scripts/pyodide/copy-assets.mjs --check && npm run test:pyodide` | 약 20초 |
 | `rls` | 격리 스택(`pyroadci`, 5482x)으로 RLS·권한 회귀. PR·기능 브랜치는 운영 재현 + legacy, main·수동 실행은 신규 기본값까지 3개 시나리오. 결과 표는 job 요약과 아티팩트 `rls-results`에 | `RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci` (전체는 변수 없이). 켜 둔 개발 스택이면 `npm run test:rls` | 약 4~7분 |
 | `build` | Google Fonts CSS 미리 받기(아래 "Google Fonts 우회") → `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` (러너와 같게: `node scripts/fonts/google-fonts-mock.mjs`가 알려 주는 `NEXT_FONT_GOOGLE_MOCKED_RESPONSES=…`를 붙여 빌드) | 약 3분 |
-| `e2e-smoke` | **골격만, 수동 실행에서만**: Chromium 설치(캐시) + `playwright test --list`. P1-21에서 비로그인 `public` 프로젝트로 바꾸고 켬 | `npx playwright install chromium && npx playwright test --list` | - |
+| `e2e-smoke` | 비로그인 e2e(`public` 프로젝트: 랜딩·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로). Supabase 없이(`E2E_NO_STACK=1`) Google Fonts 우회 → `npm run build` → `npm run start`. 실패하면 리포트·trace를 아티팩트 `e2e-smoke-report`로 | `E2E_NO_STACK=1 npx playwright test --project=public` (`e2e/README.md`) | 로컬 약 2분 (빌드 1.5분 포함) |
+| `e2e` | 로그인 e2e(`setup` → `chromium` → `teardown`). 저장소 `config.toml`로 Supabase 스택을 띄우고(npm ci·브라우저 설치와 겹치게 백그라운드로) 실행 전용 사용자를 service_role로 만들어 쿠키 주입. LLM 키 없음(저장된 답변). 실패하면 아티팩트 `e2e-report` | `npm run db:start && npx playwright test --project=chromium` | 로컬 약 5분 + 빌드 |
 
 - `rls`의 운영 재현은 과거 커밋(`git show e800386:…`)을 읽어서 전체 히스토리로 checkout합니다(`fetch-depth: 0`). 얕은 clone이면 `run.sh`가 조용히 건너뛰므로 CI는 결과 표에 `prod_replay`가 있는지 따로 확인합니다.
 - Supabase CLI는 **2.115.0** 고정(`supabase/README.md`). 로컬에서 격리 모드를 다른 작업과 동시에 돌릴 때는 `RLS_PROJECT_ID`·`RLS_PORT_BASE`를 바꿉니다.
-- `prettier --check`는 아직 넣지 않았습니다. 기존 파일(`src/` 78개, `spikes/` 등 모두 381개)이 맞지 않아서, 한 번에 `npx prettier --write`로 정리한 뒤 `lint-typecheck`에 추가합니다.
+- `prettier --check .`는 P1-21에서 `lint-typecheck`에 넣었습니다(기존 파일은 P1-15 마무리 커밋에서 일괄 정리). 스파이크·생성물·문서(`*.md`)·`supabase/`는 `.prettierignore`로 제외합니다.
+- e2e 재시도는 0입니다(흔들림을 재시도로 가리지 않음). 실패하면 아티팩트의 `test-results/*/trace.zip`을 `npx playwright show-trace`로 봅니다.
 
 ### Google Fonts 우회 (`build`)
 
@@ -36,7 +38,7 @@ GitHub 러너에서는 Google Fonts가 `Noto Sans KR`의 글꼴 주소를 `https
 
 ## 필수 체크 (main 보호 규칙)
 
-`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build`. `content-unseeded`(main 전용)와 `e2e-smoke`(P1-21 전)는 PR에서 돌지 않으므로 넣지 않습니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
+`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build` + **`e2e-smoke`**(P1-21, GitHub에서 PR로 한 번 통과한 뒤 추가). `content-unseeded`는 main 전용이라 넣지 않습니다. `e2e`(로그인)는 PR에서도 돌지만 시간(예상 10분 안팎: 스택 시작 + 빌드 + 테스트 약 5분)과 안정성을 몇 번 지켜본 뒤 필수 체크로 올릴지 정합니다. 너무 느리면 `if:`로 main·수동 실행 전용으로 돌립니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
 
 ## Action 고정
 

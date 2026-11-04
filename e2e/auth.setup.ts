@@ -1,62 +1,85 @@
-import { test as setup } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+// 로그인 스펙의 준비 (P1-21): 로컬 Supabase 에 이번 실행 전용 테스트 사용자를 만들고 세션 쿠키를 저장한다.
+//
+// - 운영 계정·이메일 로그인 화면을 쓰지 않는다 (운영은 Email provider 꺼짐, B34). 사용자는 service_role 의
+//   auth.admin.createUser 로 만들고, 로그인은 @supabase/ssr 로 Node 에서 한 번 해서 앱과 같은 형식의 쿠키를 받는다.
+// - 로그인은 실행마다 1회 (로컬 Auth 로그인 한도 5분 30회). 테스트마다 진행만 되돌린다 (support/test.ts)
+// - 앱 서버가 이 스택을 보는지 확인한다: 쿠키로 /world 가 열려야 하고, CSP connect-src 에 스택 주소가 있어야 함
+//   (다른 스택·운영 env 로 빌드된 서버를 잡으면 여기서 실패)
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const TEST_EMAIL = process.env.E2E_TEST_EMAIL ?? 'test@pyroad.local';
-const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD ?? 'test1234!';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { test as setup, expect } from '@playwright/test';
+import { createServerClient } from '@supabase/ssr';
+import { adminClient, type E2eUser } from './support/admin';
+import {
+  AUTH_DIR,
+  STORAGE_STATE,
+  USER_FILE,
+  requireLocalStack,
+} from './support/env';
 
-setup('authenticate', async ({ page }) => {
-  // Supabase 이메일/비밀번호 로그인으로 세션 획득
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+setup('테스트 사용자 만들고 로그인', async ({ page, baseURL }) => {
+  const stack = requireLocalStack();
+  const admin = adminClient();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: TEST_EMAIL,
-    password: TEST_PASSWORD,
+  // 1. 사용자 (이메일 확인 완료 상태). handle_new_user 트리거가 public.users 행을 만든다
+  const email = `e2e-${Date.now()}-${randomBytes(3).toString('hex')}@e2e.pyroad.test`;
+  const password = randomBytes(18).toString('base64url');
+  const { data: created, error: createError } =
+    await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: 'E2E 모험가' },
+    });
+  if (createError || !created.user) {
+    throw new Error(`[e2e] 테스트 사용자 생성 실패: ${createError?.message}`);
+  }
+  const user: E2eUser = { id: created.user.id, email };
+  mkdirSync(AUTH_DIR, { recursive: true });
+  writeFileSync(USER_FILE, JSON.stringify(user, null, 2));
+
+  // 2. 앱(@supabase/ssr)과 같은 이름·인코딩·청크의 세션 쿠키
+  const jar = new Map<string, string>();
+  const supabase = createServerClient(stack.url, stack.anonKey, {
+    cookies: {
+      getAll: () => [...jar].map(([name, value]) => ({ name, value })),
+      setAll: (cookies) => {
+        for (const { name, value } of cookies) {
+          if (value) jar.set(name, value);
+          else jar.delete(name);
+        }
+      },
+    },
   });
-
-  if (error) {
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (signInError) {
     throw new Error(
-      `E2E 인증 실패: ${error.message}\n` +
-        'Supabase Dashboard에서 이메일 로그인을 활성화하고 테스트 유저를 생성하세요.\n' +
-        'E2E_TEST_EMAIL, E2E_TEST_PASSWORD 환경 변수를 설정하세요.',
+      `[e2e] 로그인 실패: ${signInError.message} (로컬 config.toml 의 Email provider 가 켜져 있어야 함)`,
     );
   }
+  expect(jar.size, '세션 쿠키').toBeGreaterThan(0);
+  await page.context().addCookies(
+    [...jar].map(([name, value]) => ({
+      name,
+      value,
+      url: baseURL!,
+      sameSite: 'Lax' as const,
+    })),
+  );
 
-  const { access_token, refresh_token } = data.session!;
+  // 3. 이 서버가 같은 스택을 보는지
+  const response = await page.goto('/world');
+  await expect(page).toHaveURL(/\/world$/);
+  await expect(page.getByRole('heading', { name: '모험 지도' })).toBeVisible();
+  const csp = response?.headers()['content-security-policy'] ?? '';
+  expect(
+    csp,
+    'CSP connect-src 에 로컬 스택 주소 (서버가 e2e env 로 빌드됐는지)',
+  ).toContain(stack.url);
 
-  // Supabase Auth 쿠키를 브라우저에 세팅
-  await page.goto('http://localhost:3000');
-
-  // Supabase SSR 클라이언트가 사용하는 쿠키 형식으로 세션 주입
-  const cookieValue = JSON.stringify({
-    access_token,
-    refresh_token,
-    expires_at: Math.floor(Date.now() / 1000) + 3600,
-    expires_in: 3600,
-    token_type: 'bearer',
-  });
-
-  // Supabase SSR의 청크 쿠키 설정
-  const projectRef = new URL(SUPABASE_URL).hostname.split('.')[0];
-  const cookieName = `sb-${projectRef}-auth-token`;
-
-  await page.context().addCookies([
-    {
-      name: cookieName,
-      value: cookieValue,
-      domain: 'localhost',
-      path: '/',
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-  ]);
-
-  // 인증 상태로 /world 접근하여 세션 확인
-  await page.goto('http://localhost:3000/world');
-  await page.waitForURL('**/world', { timeout: 10_000 });
-
-  // storageState 저장
-  await page.context().storageState({ path: 'e2e/.auth/user.json' });
+  await page.context().storageState({ path: STORAGE_STATE });
 });
