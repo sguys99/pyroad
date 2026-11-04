@@ -15,7 +15,9 @@
     "db:stop": "supabase stop",
     "db:status": "supabase status",
     "db:reset": "supabase db reset --local",
-    "db:types": "supabase gen types typescript --local --schema public > src/lib/types/database.generated.ts && prettier --write src/lib/types/database.generated.ts"
+    "db:types": "supabase gen types typescript --local --schema public > src/lib/types/database.generated.ts && prettier --write src/lib/types/database.generated.ts",
+    "test:rls": "bash supabase/tests/run.sh fast",
+    "test:rls:ci": "bash supabase/tests/run.sh ci"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

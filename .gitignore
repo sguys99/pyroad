@@ -48,6 +48,7 @@ test-results/
 supabase/.temp/
 supabase/.branches/
 supabase/snippets/
+supabase/tests/.results/
 
 # Spikes (Phase 0 기술 검증)
 spikes/**/node_modules/

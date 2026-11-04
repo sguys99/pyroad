@@ -1,0 +1,3 @@
+# definer_functions: supabase/tests/checks.mjs 가 만든 스냅샷. 직접 고치지 말고
+# 의도한 권한 변경이면 RLS_UPDATE_SNAPSHOTS=1 npm run test:rls 로 다시 만들고 diff 를 리뷰하세요.
+public.handle_new_user() returns trigger | execute: anon,authenticated | search_path 미설정

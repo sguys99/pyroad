@@ -135,18 +135,83 @@ docker exec -i supabase_db_pyroad psql -U postgres -c "\dp public.*"
 docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
 ```
 
-- 권한·RLS 회귀 점검: `bash spikes/p0-08-answer-keys/verify.sh` (P1-20에서 `supabase/tests/`로 옮길 예정. 자체 임시 스택을 5462x 포트로 띄움)
-- 운영과 같은 legacy 기본값에서도 확인하려면 임시 작업 디렉토리에 `config.toml`을 복사해 `project_id`·포트를 바꾸고 `auto_expose_new_tables = true`를 켠 뒤 `supabase db start --workdir <dir>`로 띄웁니다(위 verify.sh가 쓰는 방법).
+- 권한·RLS 회귀 점검: `npm run test:rls` (아래 "4. RLS·권한 회귀 테스트")
+- 운영과 같은 legacy 기본값에서도 확인하려면 `npm run test:rls:ci`를 씁니다. 임시 작업 디렉토리에 `config.toml`을 복사해 `project_id`·포트를 바꾸고 `auto_expose_new_tables = true`를 켠 스택을 따로 띄웁니다.
 - 알려진 차이(B08): `00001` Section 6의 `solution_code` UPDATE가 seed보다 먼저 실행되어, 새 DB에서는 `solution_code`가 0건입니다. P1-02에서 정답 테이블로 옮기며 해결합니다.
 
-## 4. 운영 적용 (사용자 작업)
+## 4. RLS·권한 회귀 테스트 (P1-20)
+
+저장소 마이그레이션과 seed를 적용한 **로컬** DB에 PostgREST(HTTP)와 psql(`SET ROLE anon/authenticated`)로 권한 조작을 시도하고, 기대값과 비교합니다. 운영 DB에는 접속하지 않습니다(API 주소가 `127.0.0.1`/`localhost`가 아니면 중단). 출발점은 P0-08 스파이크(`spikes/p0-08-answer-keys/verify.sh`, 기록용으로 그대로 둠)입니다.
+
+```bash
+npm run test:rls       # 빠른 모드: 켜져 있는 pyroad 스택에 db reset 후 점검 (약 30초)
+npm run test:rls:ci    # 격리 모드: 임시 스택(pyroadrls, 5462x)으로 3개 시나리오 (약 3~4분)
+
+# CI 에서 빠르게 (legacy 시나리오 1개만, 스택 시작 1회)
+RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
+```
+
+| 모드 | 대상 | 시나리오 |
+|---|---|---|
+| 빠른 (`fast`) | 켜져 있는 `supabase_*_pyroad` 스택. 먼저 `npm run db:start`. **DB를 reset하므로 로컬 데이터가 지워짐** | `local`: 저장소 migrations + seed (신규 기본값) |
+| 격리 (`ci`) | 새 임시 스택 `supabase_*_pyroadrls`(포트 54620~)를 띄우고 끝나면 내림. 켜진 pyroad 스택은 건드리지 않음 | `prod_replay`: 핫픽스 전 00001(`git show 2f0a8f3^`) + seed + Section 6 → `00002~`를 `psql -1`로 차례로 적용 (운영 적용 리허설, legacy)<br>`fresh_legacy`: 새 DB, 새 테이블 자동 노출 켜짐 (운영과 같은 기본값)<br>`fresh_newdefault`: 새 DB, 자동 노출 꺼짐 (스택 재시작 1회) |
+
+환경 변수: `RLS_NO_RESET=1`(fast, reset 생략) · `RLS_SKIP_PROD=1` · `RLS_SKIP_NEWDEFAULT=1` · `RLS_PROJECT_ID`·`RLS_PORT_BASE`(ci 임시 스택 이름·포트) · `RLS_KEEP=1`(ci 스택 남기기) · `RLS_UPDATE_SNAPSHOTS=1`(스냅샷 갱신). 종료 코드는 FAIL이 없으면 0, 있으면 1, 환경 문제면 2입니다.
+
+### 파일
+
+| 경로 | 내용 |
+|---|---|
+| `tests/run.sh` | 스택 준비 → 시나리오별 `checks.mjs` 실행 → 요약 |
+| `tests/checks.mjs` | 점검 동작 (무엇을 요청하고 결과를 어떻게 분류하는지) |
+| `tests/expectations.mjs` | **점검별 기대값.** 권한 작업은 보통 여기 한 줄만 바꿈 |
+| `tests/snapshots/*.txt` | 카탈로그 스냅샷: SECURITY DEFINER 함수(anon/authenticated 실행 가능), 테이블·뷰·컬럼 권한, RLS 정책 |
+| `tests/summarize.mjs` | 결과 표 출력, `tests/.results/results.md` 작성 (git 제외) |
+
+### 범위
+
+| 그룹 | 점검 |
+|---|---|
+| `view` | `user_profiles_public` 비로그인 조회·뷰를 통한 수정/삭제 거부(B03), 모든 뷰의 쓰기 권한 없음, `security_invoker` 아닌 뷰 |
+| `notice` | 공지 쓰기(본인 INSERT·UPDATE·DELETE, psql) 거부, 비로그인 목록·service_role 작성 허용(B02) |
+| `write` | XP·레벨·황금키·코인·별·시도·`earned_xp`·뱃지·진행 상태·`hints_used`·`used_golden_key` 직접 쓰기, 다른 사용자 행 쓰기, `custom_api_keys` 조회(B04·B05·B13) |
+| `answer` | `quests`의 정답 노출(B07), 새 DB의 `solution_code`(B08), `quest_answer_keys` 접근 거부(P1-02 이후 자동 활성화) |
+| `rpc` | `complete_quest`를 anon/authenticated가 부를 수 없음 (P1-03 이후 자동 활성화) |
+| `app` | 앱이 실제로 보내는 조회·쓰기(월드·프로필·퀘스트 페이지, 뱃지 확인, auto-save, 설정, 게시판, 리셋)와 service_role 경로가 깨지지 않음 |
+| `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정, 스냅샷 3종 |
+
+GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
+
+### 결과 읽기
+
+| 결과 | 뜻 |
+|---|---|
+| `PASS` | 기대대로 (`deny`는 막힘, `allow`는 동작, `snapshot`은 일치) |
+| `GAP` | `known-gap`: 알려진 구멍이 아직 열려 있음. 통과로 집계하고 `flipIn` 작업 ID별로 따로 보여 줌 |
+| `PENDING` | `requires` 객체(테이블·컬럼·함수)가 아직 없어 건너뜀. 생기면 자동으로 점검 시작 |
+| `INFO` | 참고 기록 |
+| `FAIL` | 기대와 다름. **`known-gap`이 막혀도 FAIL**입니다 (막힌 줄 모르고 지나가지 않게) |
+
+### 권한을 바꾸는 작업을 할 때
+
+1. 마이그레이션을 고치고 `npm run test:rls`를 돌립니다.
+2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 P1-01(B04-1·2·7·8), P1-02(B07-2·3, B08-1), P1-04(B04-4·4b·5·5b·11·12), B24(ST-3·4), P3-13(VIEW-2)입니다.
+3. 앱 쿼리를 바꿨다면 `checks.mjs`의 `app` 그룹 요청도 같이 바꿉니다(예: P1-04에서 auto-save payload가 바뀌면 APP-W1).
+4. 권한·정책·SECURITY DEFINER 함수가 바뀌면 스냅샷이 `diff`로 FAIL합니다. 의도한 변경이면 `RLS_UPDATE_SNAPSHOTS=1 npm run test:rls`로 다시 만들고 `git diff supabase/tests/snapshots/`를 리뷰해 같은 커밋에 넣습니다.
+5. 새 테이블·함수를 만들면 대응하는 점검을 `checks.mjs`에 추가하고 기대값을 `expectations.mjs`에 적습니다(기대값이 없으면 FAIL).
+6. PR 전에 `npm run test:rls:ci`로 legacy 기본값·운영 재현에서도 같은지 확인합니다.
+
+- 점검마다 테스트 사용자를 새로 만들고, 로그인은 1명만 합니다(Auth 로그인 rate limit: 5분에 30회).
+- 격리 모드가 중간에 멈춰 임시 스택이 남았다면 `docker ps --filter name=pyroadrls`로 확인하고, `RLS_KEEP=1`로 돌렸던 경우의 작업 디렉토리에서 `supabase stop --no-backup --workdir <dir>`로 내립니다.
+
+## 5. 운영 적용 (사용자 작업)
 
 - 운영 DB에는 **사용자가 직접** Phase 끝에 한 번에 적용합니다. 에이전트·CI는 운영에 쓰지 않습니다(Supabase MCP는 읽기 전용).
 - Supabase Dashboard → SQL Editor에서 파일 내용을 `BEGIN;` … `COMMIT;`으로 감싸 실행합니다. 오류가 나면 전체가 롤백됩니다.
 - 순서: ① 파일들 → 앱 배포(Vercel) → 동작 확인 → ③ 파일들. 적용 전후에 `spikes/p0-08-answer-keys/prod_readonly_checks.sql`(SELECT만 있음)로 상태를 확인합니다.
 - 운영은 SQL Editor로 적용하므로 `supabase_migrations` 이력이 없습니다. `supabase db push`·`supabase link`로 운영에 적용하지 않습니다.
 
-## 5. 타입 생성
+## 6. 타입 생성
 
 - `src/lib/types/database.generated.ts`: `npm run db:types`가 만드는 파일입니다. 직접 고치지 않습니다.
 - `src/lib/types/database.ts`: 생성 타입 위의 얇은 래퍼입니다. CHECK 제약 컬럼(문자열 유니온)과 JSONB 컬럼 구조처럼 생성 타입이 표현하지 못하는 부분만 좁히고, 앱 코드는 여기서 import합니다.
