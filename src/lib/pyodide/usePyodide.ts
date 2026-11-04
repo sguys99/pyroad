@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { EXECUTION_TIMEOUT_MS, MAX_OUTPUT_LENGTH } from './constants';
+import { isRunSuccessful } from './runOutcome';
 import type { WorkerRequest, WorkerResponse } from './types';
 
 export type PyodideStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -45,7 +46,8 @@ export function usePyodide() {
             resolverRef.current({
               stdout: truncateOutput(msg.stdout),
               stderr: truncateOutput(msg.stderr),
-              success: msg.success,
+              // 경고만 있고 예외가 없으면 성공 (B25)
+              success: isRunSuccessful(msg),
             });
             resolverRef.current = null;
           }
