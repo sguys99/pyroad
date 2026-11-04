@@ -12,11 +12,14 @@ public.quests (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRI
 public.quests (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.stages (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.stages (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+public.user_api_keys (table, rls=on) anon: -
+public.user_api_keys (table, rls=on) authenticated: -
 public.user_badges (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.user_badges (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.user_profiles_public (view, rls=off) anon: -
 public.user_profiles_public (view, rls=off) authenticated: SELECT
 public.user_progress (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.user_progress (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
-public.users (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
-public.users (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+public.users (table, rls=on) anon: SELECT
+public.users (table, rls=on) authenticated: SELECT
+public.users.preferred_provider column authenticated: UPDATE

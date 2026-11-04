@@ -1056,6 +1056,245 @@ async function groupWrite(u) {
         `select exists (select 1 from public.user_progress where user_id = '${u.bob.id}' and quest_id = '${Q3}')`,
       ),
   });
+  // P1-01: users 는 UPDATE (preferred_provider) 만. 허용 컬럼에 서버 값을 섞어도 요청 전체가 거부됨
+  await check({
+    group: 'write',
+    id: 'B04-19',
+    role: 'authenticated',
+    op: 'PATCH /users?id=eq.<본인> {display_name} (UPDATE 권한이 없는 프로필 컬럼)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { display_name: 'renamed-by-client' },
+          prefer: 'return=minimal',
+        }),
+        `select display_name = 'renamed-by-client' from public.users where id = '${u.alice.id}'`,
+      ),
+  });
+  await check({
+    group: 'write',
+    id: 'B04-20',
+    role: 'authenticated',
+    op: 'PATCH /users?id=eq.<본인> {preferred_provider, golden_keys: 77} (허용 컬럼에 서버 값 섞기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { preferred_provider: 'gemini', golden_keys: 77 },
+          prefer: 'return=minimal',
+        }),
+        `select golden_keys = 77 from public.users where id = '${u.alice.id}'`,
+      ),
+  });
+  await check({
+    group: 'write',
+    id: 'B04-21',
+    role: 'authenticated(psql)',
+    op: 'SET ROLE authenticated; INSERT INTO users (id) (가입은 트리거만)',
+    ...SQLW,
+    run: async () =>
+      classifySqlWrite(
+        psqlAs(
+          'authenticated',
+          u.alice.id,
+          `INSERT INTO public.users (id) VALUES (auth.uid()) ON CONFLICT (id) DO UPDATE SET golden_keys = 66 RETURNING id;`,
+        ),
+      ),
+  });
+}
+
+// ── 사용자 API 키 테이블 (B13: service_role 전용, 00007) ──
+async function groupApiKeys(u) {
+  const T = '/rest/v1/user_api_keys';
+  const UK = (id, role, op, cls, run) =>
+    check({ group: 'apikey', id, role, op, ...cls, run });
+  const EMBED = { deny: ['denied', 'error', 'empty'], allow: ['allowed'] };
+  const row = (uid, provider, ct) => ({
+    user_id: uid,
+    provider,
+    key_version: 1,
+    iv: 'AAAAAAAAAAAAAAAA',
+    auth_tag: 'AAAAAAAAAAAAAAAAAAAAAA==',
+    ciphertext: ct,
+  });
+  const exists = (where) =>
+    `select exists (select 1 from public.user_api_keys where ${where})`;
+
+  await UK('UK-1', 'anon', `GET ${T}?select=*`, READ, async () =>
+    classifyRead(await rest('GET', `${T}?select=*`)),
+  );
+  await UK(
+    'UK-2',
+    'authenticated',
+    `GET ${T}?select=*&user_id=eq.<본인> (본인 암호문)`,
+    READ,
+    async () =>
+      classifyRead(
+        await rest('GET', `${T}?select=*&user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+        }),
+      ),
+  );
+  await UK(
+    'UK-3',
+    'authenticated',
+    'GET /users?select=id,user_api_keys(*) (임베딩 우회)',
+    EMBED,
+    async () => {
+      const r = await rest(
+        'GET',
+        `/rest/v1/users?select=id,user_api_keys(*)&id=eq.${u.alice.id}`,
+        { as: u.alice },
+      );
+      const c = classifyRead(r);
+      if (c.actual === 'allowed') {
+        const k = r.json[0]?.user_api_keys;
+        if (!k || (Array.isArray(k) && !k.length))
+          return { actual: 'empty', detail: c.detail };
+      }
+      return c;
+    },
+  );
+  await UK('UK-4', 'authenticated', `POST ${T} {user_id: 본인}`, WRITE, () =>
+    classifyWrite(
+      rest('POST', T, {
+        as: u.alice,
+        body: row(u.alice.id, 'gemini', 'Y2xpZW50'),
+        prefer: 'return=minimal',
+      }),
+      exists(`user_id = '${u.alice.id}' and provider = 'gemini'`),
+    ),
+  );
+  await UK(
+    'UK-5',
+    'authenticated',
+    `PATCH ${T}?user_id=eq.<본인> {ciphertext}`,
+    WRITE,
+    () =>
+      classifyWrite(
+        rest('PATCH', `${T}?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { ciphertext: 'aGFja2Vk' },
+          prefer: 'return=minimal',
+        }),
+        exists(`ciphertext = 'aGFja2Vk'`),
+      ),
+  );
+  await UK('UK-6', 'authenticated', `DELETE ${T}?user_id=eq.<본인>`, WRITE, () =>
+    classifyWrite(
+      rest('DELETE', `${T}?user_id=eq.${u.alice.id}`, {
+        as: u.alice,
+        prefer: 'return=minimal',
+      }),
+      `select not exists (select 1 from public.user_api_keys where user_id = '${u.alice.id}' and provider = 'openai')`,
+    ),
+  );
+  await UK('UK-7', 'anon', `POST ${T} {user_id: 다른 사용자}`, WRITE, () =>
+    classifyWrite(
+      rest('POST', T, {
+        body: row(u.bob.id, 'gemini', 'YW5vbg=='),
+        prefer: 'return=minimal',
+      }),
+      exists(`user_id = '${u.bob.id}' and provider = 'gemini'`),
+    ),
+  );
+  await UK(
+    'UK-8',
+    'authenticated(psql)',
+    'SET ROLE authenticated; SELECT * FROM user_api_keys',
+    READ,
+    async () =>
+      classifySql(
+        psqlAs(
+          'authenticated',
+          u.alice.id,
+          'SELECT * FROM public.user_api_keys LIMIT 1;',
+        ),
+      ),
+  );
+  await UK(
+    'UK-9',
+    'anon(psql)',
+    'SET ROLE anon; SELECT count(*) FROM user_api_keys',
+    READ,
+    async () =>
+      classifySql(
+        psqlAs('anon', null, 'SELECT count(*) FROM public.user_api_keys;'),
+      ),
+  );
+  await UK(
+    'UK-10',
+    'authenticated',
+    'GET /rest/v1/ (OpenAPI 에 user_api_keys 노출)',
+    { deny: ['hidden', 'denied'], allow: ['listed'] },
+    async () => {
+      const r = await rest('GET', '/rest/v1/', {
+        as: u.alice,
+        headers: { Accept: 'application/openapi+json' },
+      });
+      if (r.status === 401 || r.status === 403)
+        return { actual: 'denied', detail: `${r.status}` };
+      const paths = Object.keys(r.json?.paths ?? {});
+      return {
+        actual: paths.includes('/user_api_keys') ? 'listed' : 'hidden',
+        detail: `${r.status} paths=${paths.length}`,
+      };
+    },
+  );
+  await UK(
+    'UK-11',
+    'service_role',
+    `GET ${T}?select=provider,key_version,iv,auth_tag,ciphertext&user_id=eq.<본인> (apiKeys.ts loadUserApiKeys)`,
+    READ,
+    async () =>
+      classifyRead(
+        await rest(
+          'GET',
+          `${T}?select=provider,key_version,iv,auth_tag,ciphertext&user_id=eq.${u.alice.id}`,
+          { as: 'service' },
+        ),
+      ),
+  );
+  await UK(
+    'UK-12',
+    'service_role',
+    `POST ${T}?on_conflict=user_id,provider (upsert, apiKeys.ts saveUserApiKey)`,
+    WRITE,
+    () =>
+      classifyWrite(
+        rest('POST', `${T}?on_conflict=user_id,provider`, {
+          as: 'service',
+          body: { ...row(u.alice.id, 'openai', 'c2VydmljZQ=='), updated_at: new Date().toISOString() },
+          prefer: 'resolution=merge-duplicates,return=minimal',
+        }),
+        exists(`user_id = '${u.alice.id}' and provider = 'openai' and ciphertext = 'c2VydmljZQ=='`),
+      ),
+  );
+  await UK(
+    'UK-13',
+    'service_role',
+    'auth.admin.deleteUser → user_api_keys 행도 삭제 (ON DELETE CASCADE, 탈퇴)',
+    { deny: ['kept'], allow: ['deleted'] },
+    async () => {
+      const x = await createUser('uk13', '탈퇴');
+      one(
+        `insert into public.user_api_keys (user_id, provider, key_version, iv, auth_tag, ciphertext) values ('${x.id}', 'openai', 1, 'AAAA', 'AAAA', 'AAAA')`,
+      );
+      const r = await rest('DELETE', `/auth/v1/admin/users/${x.id}`, {
+        as: 'service',
+      });
+      const left = one(
+        `select count(*) from public.user_api_keys where user_id = '${x.id}'`,
+      );
+      return {
+        actual: left === '0' ? 'deleted' : 'kept',
+        detail: `${r.status} rows=${left}`,
+      };
+    },
+  );
 }
 
 async function groupAnswer(u) {
@@ -1877,7 +2116,7 @@ async function groupApp(u) {
     [
       'APP-4',
       'world/page.tsx users',
-      `/rest/v1/users?select=id,display_name,avatar_url,total_xp,current_level,custom_api_keys&id=eq.${u.alice.id}`,
+      `/rest/v1/users?select=id,display_name,avatar_url,total_xp,current_level&id=eq.${u.alice.id}`,
     ],
     [
       'APP-5',
@@ -2393,12 +2632,17 @@ async function main() {
   one(
     `insert into public.user_badges (user_id, badge_type) values ('${u.alice.id}', 'first_code')`,
   );
+  if (requirementMet('public.user_api_keys'))
+    one(`insert into public.user_api_keys (user_id, provider, key_version, iv, auth_tag, ciphertext) values
+          ('${u.alice.id}', 'openai', 1, 'AAAAAAAAAAAAAAAA', 'AAAAAAAAAAAAAAAAAAAAAA==', 'YWxpY2U='),
+          ('${u.bob.id}', 'openai', 1, 'AAAAAAAAAAAAAAAA', 'AAAAAAAAAAAAAAAAAAAAAA==', 'Ym9i')`);
 
   await groupEnv();
   await groupView(u);
   await groupNotice(u);
   await groupWrite(u);
   await groupAnswer(u);
+  await groupApiKeys(u);
   await groupRpc(u);
   await groupReward();
   await groupApp(u);

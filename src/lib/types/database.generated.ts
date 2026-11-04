@@ -254,6 +254,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_api_keys: {
+        Row: {
+          auth_tag: string;
+          ciphertext: string;
+          created_at: string;
+          iv: string;
+          key_version: number;
+          provider: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          auth_tag: string;
+          ciphertext: string;
+          created_at?: string;
+          iv: string;
+          key_version: number;
+          provider: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          auth_tag?: string;
+          ciphertext?: string;
+          created_at?: string;
+          iv?: string;
+          key_version?: number;
+          provider?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_api_keys_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_profiles_public';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_api_keys_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_badges: {
         Row: {
           badge_type: string;
@@ -362,7 +410,6 @@ export type Database = {
           avatar_url: string | null;
           created_at: string;
           current_level: number;
-          custom_api_keys: Json | null;
           display_name: string;
           golden_keys: number;
           id: string;
@@ -374,7 +421,6 @@ export type Database = {
           avatar_url?: string | null;
           created_at?: string;
           current_level?: number;
-          custom_api_keys?: Json | null;
           display_name?: string;
           golden_keys?: number;
           id: string;
@@ -386,7 +432,6 @@ export type Database = {
           avatar_url?: string | null;
           created_at?: string;
           current_level?: number;
-          custom_api_keys?: Json | null;
           display_name?: string;
           golden_keys?: number;
           id?: string;

@@ -20,6 +20,7 @@ import {
   resolveAnswerKey,
   type QuestAnswerKey,
 } from '@/lib/quest/answerKeys';
+import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
@@ -146,9 +147,9 @@ export async function prepareTutorCall(
   // (P1-19) 사용자별 rate limit은 여기에 둔다: 인증·입력 검증 뒤, DB 조회·캐시·LLM 호출 전.
   // 두 라우트(/api/tutor, /api/tutor/stream)가 모두 이 함수를 거치므로 한 곳에서 막을 수 있다.
 
-  // 3. Quest + User Profile (+ 정답) 병렬 조회
+  // 3. Quest + User Profile + 본인 API 키(B13, 서버에서만 복호화) (+ 정답) 병렬 조회
   const needsAnswerKey = ANSWER_KEY_TYPES.has(body.type);
-  const [questResult, userProfileResult, answerKeyRow] = await Promise.all([
+  const [questResult, userProfileResult, userApiKeys, answerKeyRow] = await Promise.all([
     adminClient
       .from('quests')
       .select('*, stage:stages(id, title, order, theme_name)')
@@ -156,9 +157,10 @@ export async function prepareTutorCall(
       .single(),
     supabase
       .from('users')
-      .select('preferred_provider, custom_api_keys')
+      .select('preferred_provider')
       .eq('id', user.id)
       .single(),
+    loadUserApiKeys(user.id),
     needsAnswerKey
       ? fetchAnswerKeyRow(adminClient, body.quest_id)
       : Promise.resolve(null),
@@ -265,7 +267,7 @@ export async function prepareTutorCall(
   // - 그 외: 서버 무료 티어만 사용, 실패 시 rule-based fallback
   const { providerType, customApiKey } = resolveUserProvider(
     userProfile?.preferred_provider,
-    userProfile?.custom_api_keys,
+    userApiKeys.keys,
   );
   const fallbackProviders = customApiKey ? [FREE_TIER_PROVIDER] : [];
 

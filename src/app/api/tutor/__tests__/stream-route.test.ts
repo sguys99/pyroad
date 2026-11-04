@@ -51,8 +51,12 @@ function chain(data: unknown, error: unknown = null) {
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) },
-    from: () => chain({ preferred_provider: null, custom_api_keys: {} }),
+    from: () => chain({ preferred_provider: null }),
   }),
+}));
+// 본인 API 키 없음 (B13: 키 저장소는 src/lib/tutor/__tests__/apiKeys.test.ts 에서 따로 확인)
+vi.mock('@/lib/tutor/apiKeys', () => ({
+  loadUserApiKeys: async () => ({ enabled: true, keys: {}, unreadable: [] }),
 }));
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({

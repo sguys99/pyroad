@@ -3,6 +3,7 @@ import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
 import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
@@ -26,20 +27,22 @@ export default async function WorldPage() {
   if (!user) redirect('/');
 
   // user.id 필요한 쿼리는 이후 병렬 실행
-  const [progressResult, profileResult, badgesResult] = await Promise.all([
+  const [progressResult, profileResult, badgesResult, apiKeys] = await Promise.all([
     supabase
       .from('user_progress')
       .select('quest_id, status')
       .eq('user_id', user.id),
     supabase
       .from('users')
-      .select('id, display_name, avatar_url, total_xp, current_level, custom_api_keys')
+      .select('id, display_name, avatar_url, total_xp, current_level')
       .eq('id', user.id)
       .single(),
     supabase
       .from('user_badges')
       .select('badge_type, earned_at')
       .eq('user_id', user.id),
+    // 본인 API 키는 service_role 전용 테이블에 있어 서버에서만 확인 (B13)
+    loadUserApiKeys(user.id),
   ]);
 
   const stages = stagesResult.data ?? [];
@@ -49,9 +52,9 @@ export default async function WorldPage() {
 
   const stagesWithStatus = getStageStatuses(stages, progress);
 
-  // API 키 상태 확인: 사용자 커스텀 키 유무만 체크 (서버 기본 키는 무시)
-  const userKeys = (profileResult.data as Record<string, unknown>)?.custom_api_keys as Record<string, string> | undefined;
-  const hasCustomApiKey = userKeys && Object.values(userKeys).some((k) => !!k);
+  // API 키 상태 확인: 사용자 커스텀 키 유무만 체크 (서버 기본 키는 무시).
+  // 서버에 암호화 키가 없어 커스텀 키를 받을 수 없으면 등록 안내도 띄우지 않음
+  const showApiKeyAlert = apiKeys.enabled && Object.keys(apiKeys.keys).length === 0;
 
   return (
     <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6">
@@ -86,7 +89,7 @@ export default async function WorldPage() {
         </div>
       </div>
 
-      {!hasCustomApiKey && <div className="relative z-10"><ApiKeyAlert /></div>}
+      {showApiKeyAlert && <div className="relative z-10"><ApiKeyAlert /></div>}
 
       {profile && (
         <div className="relative z-10 mb-6">

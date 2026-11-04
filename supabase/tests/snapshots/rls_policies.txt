@@ -17,6 +17,5 @@ public.user_progress progress_delete_own [PERMISSIVE DELETE to public] using ((a
 public.user_progress progress_insert_own [PERMISSIVE INSERT to public] using (-) check ((auth.uid() = user_id))
 public.user_progress progress_select_own [PERMISSIVE SELECT to public] using ((auth.uid() = user_id)) check (-)
 public.user_progress progress_update_own [PERMISSIVE UPDATE to public] using ((auth.uid() = user_id)) check (-)
-public.users users_insert_own [PERMISSIVE INSERT to public] using (-) check ((auth.uid() = id))
-public.users users_select_own [PERMISSIVE SELECT to public] using ((auth.uid() = id)) check (-)
-public.users users_update_own [PERMISSIVE UPDATE to public] using ((auth.uid() = id)) check (-)
+public.users users_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = id)) check (-)
+public.users users_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = id)) check ((( SELECT auth.uid() AS uid) = id))

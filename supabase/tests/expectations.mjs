@@ -57,14 +57,12 @@ export const EXPECT = {
 
   // ── write: XP·코인·별·뱃지·진행 상태 직접 쓰기 (B04, B05, B13) ─
   'B04-1': {
-    expect: 'known-gap',
-    flipIn: 'P1-01',
-    note: 'P1-03 이후 앱은 이 경로를 쓰지 않음 (complete_quest·reset_progress RPC). P1-01 ③ 에서 회수',
+    expect: 'deny',
+    note: 'P1-01 ③ 00008: users UPDATE 는 preferred_provider 컬럼만 (XP·레벨은 complete_quest·reset_progress RPC)',
   },
   'B04-2': {
-    expect: 'known-gap',
-    flipIn: 'P1-01',
-    note: 'P1-03 이후 앱은 이 경로를 쓰지 않음 (use_golden_key RPC). P1-01 ③ 에서 회수',
+    expect: 'deny',
+    note: 'P1-01 ③ 00008 (황금키는 use_golden_key RPC)',
   },
   'B04-3': { expect: 'deny' },
   'B04-4': {
@@ -84,11 +82,10 @@ export const EXPECT = {
     note: 'P1-03 이후 앱은 DELETE 하지 않음 (reset_progress RPC, 탈퇴는 admin deleteUser 의 cascade)',
   },
   'B04-6': { expect: 'deny' },
-  'B04-7': { expect: 'known-gap', flipIn: 'P1-01' },
+  'B04-7': { expect: 'deny', note: 'P1-01 ③ 00008 (psql 직접 UPDATE)' },
   'B04-8': {
-    expect: 'known-gap',
-    flipIn: 'P1-01',
-    note: 'B13: custom_api_keys 를 service_role 전용 테이블로 분리',
+    expect: 'deny',
+    note: 'B13 ③ 00009: users.custom_api_keys 컬럼 삭제 (키는 service_role 전용 user_api_keys 에 암호문으로, apikey 그룹 UK-*)',
   },
   'B04-9': { expect: 'deny' },
   'B04-10': { expect: 'deny' },
@@ -128,6 +125,18 @@ export const EXPECT = {
     activateIn: 'P1-03',
   },
   'B04-18': { expect: 'deny' },
+  'B04-19': {
+    expect: 'deny',
+    note: 'P1-01: UPDATE 권한은 앱이 쓰는 preferred_provider 만. 새 프로필 컬럼(nickname·settings 등)은 그 컬럼을 만드는 작업(P1-08·P3)에서 GRANT UPDATE (…) 추가',
+  },
+  'B04-20': {
+    expect: 'deny',
+    note: '허용 컬럼에 서버 값을 섞으면 요청 전체가 42501',
+  },
+  'B04-21': {
+    expect: 'deny',
+    note: 'P1-01: users INSERT 권한·users_insert_own 정책 제거 (가입은 handle_new_user 트리거)',
+  },
 
   // ── answer: 정답 데이터 (B07, B08) ─────────────────────────
   'B07-1': { expect: 'deny' },
@@ -149,7 +158,7 @@ export const EXPECT = {
   },
   'B08-1': {
     expect: 'deny',
-    note: '새 DB 에도 solution_code 가 있음 (P1-02: seed.sql 끝의 정답 보정 섹션 → 트리거가 quest_answer_keys 로). 운영 재현 시나리오에서는 생략',
+    note: '새 DB 에도 solution_code 가 있음 (P1-12부터 content/에서 생성한 seed.sql이 quest_answer_keys 에 직접 씀). 운영 재현 시나리오에서는 생략',
   },
   // quest_answer_keys 가 생기면(P1-02) 자동으로 점검 시작
   'AK-1': {
@@ -238,6 +247,33 @@ export const EXPECT = {
     activateIn: 'P1-02',
     note: "'deny' = 정답이 모두 quest_answer_keys 로 분리됨 (기준값: 퀘스트 44 · solution_code 43 + 프로젝트 단계 5)",
   },
+
+  // ── apikey: 사용자 API 키 테이블 (B13, service_role 전용) ───
+  ...Object.fromEntries(
+    [
+      ['UK-1', 'deny'],
+      ['UK-2', 'deny'],
+      ['UK-3', 'deny'],
+      ['UK-4', 'deny'],
+      ['UK-5', 'deny'],
+      ['UK-6', 'deny'],
+      ['UK-7', 'deny'],
+      ['UK-8', 'deny'],
+      ['UK-9', 'deny'],
+      ['UK-10', 'deny'],
+      ['UK-11', 'allow', '설정·튜터·월드맵 서버 경로'],
+      ['UK-12', 'allow', '/api/settings 키 저장 (서버 경로)'],
+      ['UK-13', 'allow', '탈퇴(/api/account/delete) 시 키도 함께 삭제'],
+    ].map(([id, expect, note]) => [
+      id,
+      {
+        expect,
+        requires: 'public.user_api_keys',
+        activateIn: 'B13',
+        ...(note ? { note } : {}),
+      },
+    ]),
+  ),
 
   // ── rpc: 서버 전용 함수 (P1-03) ────────────────────────────
   'RPC-1': {
@@ -338,8 +374,7 @@ export const EXPECT = {
   'APP-3': { expect: 'allow' },
   'APP-4': {
     expect: 'allow',
-    flipIn: 'P1-01',
-    note: 'B13 으로 custom_api_keys 가 빠지면 앱 쿼리와 함께 이 점검의 select 를 바꿈',
+    note: 'B13 이후 custom_api_keys 를 select 하지 않음 (키 등록 여부는 서버가 user_api_keys 에서 확인)',
   },
   'APP-5': { expect: 'allow' },
   'APP-6': { expect: 'allow' },
@@ -365,7 +400,7 @@ export const EXPECT = {
   },
   'APP-W3': {
     expect: 'allow',
-    note: '/api/settings 의 AI 선택 저장. P1-01 이후에도 허용',
+    note: '/api/settings 의 AI 선택 저장. P1-01 이후 users 에서 클라이언트가 UPDATE 할 수 있는 유일한 컬럼',
   },
   'APP-W4': { expect: 'allow' },
   'APP-W5': { expect: 'allow' },
