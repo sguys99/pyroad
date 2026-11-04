@@ -32,6 +32,8 @@ const ANSWER_KEY = {
 
 const mocks = vi.hoisted(() => ({
   createProvider: vi.fn(),
+  // record_hint RPC (P1-04). 호출 순서를 남겨 done 보다 먼저 기록되는지 확인
+  rpc: vi.fn(),
   // null 이면 quest_answer_keys 가 없는 DB(00004 적용 전)처럼 응답
   answerKey: { current: null as unknown },
   quest: { current: null as unknown },
@@ -60,6 +62,7 @@ vi.mock('@/lib/tutor/apiKeys', () => ({
 }));
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
+    rpc: mocks.rpc,
     from: (table: string) =>
       table === 'quest_answer_keys'
         ? mocks.answerKey.current
@@ -74,6 +77,7 @@ vi.mock('@/lib/tutor/providers/factory', async (importOriginal) => ({
 }));
 
 import { POST } from '../stream/route';
+import { POST as POST_JSON } from '../route';
 import { clearTutorCache } from '@/lib/tutor/cache';
 import { readTutorStream } from '@/lib/tutor/sse';
 
@@ -112,6 +116,8 @@ describe('/api/tutor/stream', () => {
     mocks.answerKey.current = ANSWER_KEY;
     vi.stubEnv('GEMINI_API_KEY', 'server-gemini');
     mocks.createProvider.mockReset();
+    mocks.rpc.mockReset();
+    mocks.rpc.mockResolvedValue({ data: { recorded: true }, error: null });
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -254,5 +260,169 @@ describe('/api/tutor/stream', () => {
     expect(seen[0]?.aborted).toBe(true);
     // 끊긴 요청에는 저장된 답변도 보내지 않음
     expect(rest.done).toBe(true);
+  });
+  describe('힌트 사용 기록 (P1-04, B05)', () => {
+    /** SSE 이벤트를 하나씩 읽으며 그때까지 record_hint 가 불렸는지 남긴다 */
+    async function readEvents(res: Response) {
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      const events: { event: string; rpcCalls: number }[] = [];
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+        for (const part of parts) {
+          events.push({
+            event: part.replace(/^data: /, ''),
+            rpcCalls: mocks.rpc.mock.calls.length,
+          });
+        }
+      }
+      return events;
+    }
+
+    it('힌트를 보내면 서버가 인증된 사용자 id 로 record_hint 를 한 번 부르고, 기록이 끝난 뒤 done 을 보낸다', async () => {
+      mocks.createProvider.mockImplementation(() => ({
+        async call() {
+          return '';
+        },
+        async *callStream() {
+          yield '힌트 ';
+          yield '이어서';
+        },
+      }));
+      let finishRpc: (v: unknown) => void = () => {};
+      mocks.rpc.mockImplementation(
+        () => new Promise((resolve) => (finishRpc = resolve)),
+      );
+
+      const res = await POST(
+        post({
+          type: 'hint_generator',
+          quest_id: 'q1',
+          hint_level: 2,
+          // 클라이언트가 보낸 사용자·힌트 수는 쓰지 않음
+          user_id: 'someone-else',
+          hints_used: 0,
+        }),
+      );
+      const reading = readEvents(res);
+      await vi.waitFor(() => expect(mocks.rpc).toHaveBeenCalledTimes(1));
+      finishRpc({ data: { recorded: true }, error: null });
+      const events = await reading;
+
+      expect(mocks.rpc).toHaveBeenCalledWith('record_hint', {
+        p_user_id: 'u1',
+        p_quest_id: 'q1',
+        p_level: 2,
+      });
+      const done = events.find((e) => e.event.includes('"done"'));
+      expect(done?.rpcCalls).toBe(1);
+      expect(events.filter((e) => e.event.includes('"delta"'))).toHaveLength(2);
+    });
+
+    it('AI가 실패해 저장된 힌트를 보낼 때도 기록한다 (받은 힌트)', async () => {
+      mocks.createProvider.mockImplementation(() => ({
+        async call() {
+          throw new Error('fail');
+        },
+        async *callStream() {
+          throw new Error('fail');
+        },
+      }));
+
+      const res = await readText(
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+        ),
+      );
+      expect(res.text).toBe('저장된 힌트 1');
+      expect(mocks.rpc).toHaveBeenCalledTimes(1);
+    });
+
+    it('기록이 실패해도 힌트는 그대로 보낸다', async () => {
+      mocks.createProvider.mockImplementation(() => echoProvider());
+      mocks.rpc.mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST202', message: 'function not found' },
+      });
+
+      const res = await readText(
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 3 }),
+        ),
+      );
+      expect(res.text).toContain('저장된 힌트 3');
+      expect(console.error).toHaveBeenCalledWith(
+        '[tutor] record_hint 실패:',
+        expect.stringContaining('function not found'),
+      );
+    });
+
+    it('힌트 글자를 보내기 전에 요청이 끊기면 기록하지 않는다', async () => {
+      mocks.createProvider.mockImplementation(() => ({
+        async call() {
+          return '';
+        },
+        async *callStream(
+          _s: string,
+          _u: string,
+          _m: number,
+          options?: LLMCallOptions,
+        ) {
+          await new Promise((_, reject) =>
+            options?.signal?.addEventListener('abort', () =>
+              reject(new Error('aborted')),
+            ),
+          );
+        },
+      }));
+      const client = new AbortController();
+
+      const res = await POST(
+        post(
+          { type: 'hint_generator', quest_id: 'q1', hint_level: 1 },
+          client.signal,
+        ),
+      );
+      const reader = res.body!.getReader();
+      const reading = reader.read();
+      client.abort();
+      expect((await reading).done).toBe(true);
+      expect(mocks.rpc).not.toHaveBeenCalled();
+    });
+
+    it('비스트림 /api/tutor 로 힌트를 받아도 기록한다 (기록을 피하는 우회 경로 없음)', async () => {
+      mocks.createProvider.mockImplementation(() => echoProvider());
+
+      const res = await POST_JSON(
+        post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+      );
+      expect((await res.json()).message).toContain('저장된 힌트 1');
+      expect(mocks.rpc).toHaveBeenCalledWith('record_hint', {
+        p_user_id: 'u1',
+        p_quest_id: 'q1',
+        p_level: 1,
+      });
+    });
+
+    it('힌트가 아닌 요청은 기록하지 않는다', async () => {
+      mocks.createProvider.mockImplementation(() => echoProvider());
+
+      await readText(
+        await POST(
+          post({
+            type: 'code_feedback',
+            quest_id: 'q1',
+            execution_result: { stdout: '', stderr: '', passed: false },
+          }),
+        ),
+      );
+      await readText(await POST(post({ type: 'quest_intro', quest_id: 'q1' })));
+      expect(mocks.rpc).not.toHaveBeenCalled();
+    });
   });
 });

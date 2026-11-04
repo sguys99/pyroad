@@ -146,7 +146,8 @@ export function QuestShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quest.id]);
 
-  // 코드 변경 시 자동 저장 (in_progress)
+  // 코드 변경 시 자동 저장. 진행 저장 컬럼만 보낸다 (P1-04: 상태·힌트 수는 서버만 씀,
+  // 처음 만드는 행의 status 는 DB 기본값 in_progress)
   useEffect(() => {
     if (isCompleted) return;
 
@@ -160,8 +161,6 @@ export function QuestShell({
               user_id: userId,
               quest_id: quest.id,
               code_submitted: code,
-              hints_used: hintsUsed,
-              status: 'in_progress' as const,
             },
             { onConflict: 'user_id,quest_id' },
           )
@@ -185,8 +184,12 @@ export function QuestShell({
     setMessages((prev) => [...prev, hintLabel]);
     setHintsUsed(nextLevel);
 
-    // 힌트를 못 받았으면 횟수를 되돌린다 (AI가 실패해도 서버가 저장된 힌트를 보내므로 드묾)
+    // 힌트 사용 수는 튜터 API 가 힌트 글자를 보내기 시작할 때 서버에서 기록한다 (P1-04, B05).
+    // 글자를 하나도 못 받고 취소·실패했으면 서버도 세지 않았으므로 횟수를 되돌린다
+    // (AI가 실패해도 서버가 저장된 힌트를 보내므로 드묾). 일부라도 받았으면 서버가 셌으므로 그대로 둔다
+    let received = false;
     const undoHint = () => {
+      if (received) return;
       setHintsUsed(nextLevel - 1);
       setMessages((prev) => prev.filter((m) => m !== hintLabel));
     };
@@ -199,7 +202,10 @@ export function QuestShell({
           student_code: code,
           hint_level: nextLevel,
         },
-        setStreamingContent,
+        (text) => {
+          if (text) received = true;
+          setStreamingContent(text);
+        },
       );
       if (!res) {
         // 다른 요청(코드 실행 등)으로 취소됨
@@ -210,27 +216,9 @@ export function QuestShell({
     } catch {
       undoHint();
       finishStreaming(TUTOR_UNAVAILABLE_HINT_MESSAGE, false);
-      return;
     }
-
-    // DB 저장 (fire-and-forget)
-    loadBrowserClient().then((supabase) => {
-      supabase
-        .from('user_progress')
-        .upsert(
-          {
-            user_id: userId,
-            quest_id: quest.id,
-            hints_used: nextLevel,
-            code_submitted: code,
-            status: 'in_progress' as const,
-          },
-          { onConflict: 'user_id,quest_id' },
-        )
-        .then();
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hintsUsed, isAiLoading, isCompleted, quest.id, code, userId]);
+  }, [hintsUsed, isAiLoading, isCompleted, quest.id, code]);
 
   // 황금키 사용 핸들러
   const handleGoldenKeyUse = useCallback(async () => {

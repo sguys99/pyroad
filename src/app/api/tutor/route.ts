@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, fallbackProviders, quest, answerKey, body } = prepared;
+  const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, fallbackProviders, quest, answerKey, body, recordHint } = prepared;
 
   // 캐시 확인
   const cacheKey = buildCacheKey(body);
@@ -49,6 +49,11 @@ export async function POST(request: Request) {
   } else {
     isFallback = true;
     message = buildFallbackMessage(body, quest, answerKey);
+  }
+
+  // 힌트를 내줄 때 hints_used 를 기록 (P1-04, B05). 응답을 받지 못하는(끊긴) 요청은 세지 않음
+  if (recordHint && !request.signal.aborted) {
+    await recordHint();
   }
 
   const response: TutorResponse = {

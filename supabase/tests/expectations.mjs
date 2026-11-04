@@ -66,20 +66,20 @@ export const EXPECT = {
   },
   'B04-3': { expect: 'deny' },
   'B04-4': {
-    expect: 'known-gap',
-    flipIn: 'P1-04',
-    note: 'P1-03 이후 앱은 이 경로로 완료하지 않음 (complete_quest RPC). auto-save 의 status 는 P1-04 에서 정리',
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: user_progress INSERT 는 진행 저장 컬럼만 (완료는 complete_quest RPC)',
   },
-  'B04-4b': { expect: 'known-gap', flipIn: 'P1-04' },
+  'B04-4b': {
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: status·completed_at UPDATE 권한 없음',
+  },
   'B04-5': {
-    expect: 'known-gap',
-    flipIn: 'P1-04',
-    note: 'P1-03 이후 뱃지는 complete_quest 가 지급 (앱은 INSERT 하지 않음)',
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: user_badges 는 SELECT 만 (지급은 complete_quest)',
   },
   'B04-5b': {
-    expect: 'known-gap',
-    flipIn: 'P1-04',
-    note: 'P1-03 이후 앱은 DELETE 하지 않음 (reset_progress RPC, 탈퇴는 admin deleteUser 의 cascade)',
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: user_badges DELETE 권한·정책 없음 (reset_progress RPC, 탈퇴는 admin deleteUser 의 cascade)',
   },
   'B04-6': { expect: 'deny' },
   'B04-7': { expect: 'deny', note: 'P1-01 ③ 00008 (psql 직접 UPDATE)' },
@@ -90,14 +90,12 @@ export const EXPECT = {
   'B04-9': { expect: 'deny' },
   'B04-10': { expect: 'deny' },
   'B04-11': {
-    expect: 'known-gap',
-    flipIn: 'P1-04',
-    note: 'B05: hints_used 는 RPC 전용',
+    expect: 'deny',
+    note: 'P1-04 ③ 00011 (B05): hints_used 는 record_hint RPC 전용 (튜터 API 가 힌트를 보낼 때 기록)',
   },
   'B04-12': {
-    expect: 'known-gap',
-    flipIn: 'P1-04',
-    note: 'B05: used_golden_key 는 RPC 전용',
+    expect: 'deny',
+    note: 'P1-04 ③ 00011 (B05): used_golden_key 는 use_golden_key RPC 전용',
   },
   'B04-13': {
     expect: 'deny',
@@ -136,6 +134,30 @@ export const EXPECT = {
   'B04-21': {
     expect: 'deny',
     note: 'P1-01: users INSERT 권한·users_insert_own 정책 제거 (가입은 handle_new_user 트리거)',
+  },
+  'B04-22': {
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: 이전 앱 auto-save payload(hints_used·status 포함)는 42501. 허용 컬럼에 서버 값을 섞으면 요청 전체가 거부됨',
+  },
+  'B04-23': {
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: upsert 때문에 UPDATE (quest_id) 권한이 있어도 키 고정 트리거가 막음 (완료 행을 다른 퀘스트로 옮기기)',
+  },
+  'B04-24': {
+    expect: 'deny',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+    note: 'P1-04 ③ 00011: progress DELETE 권한·progress_delete_own 정책 제거 → 지우고 다시 완료해 XP 반복 획득 불가',
+  },
+  'B04-25': {
+    expect: 'deny',
+    requires: 'public.complete_quest()',
+    activateIn: 'P1-03',
+    note: 'P1-04 ③ 00011: status 를 되돌리고 다시 완료해 XP 반복 획득 불가',
+  },
+  'B04-26': {
+    expect: 'deny',
+    note: 'P1-04 ③ 00011 (B05): psql 직접 UPDATE hints_used',
   },
 
   // ── answer: 정답 데이터 (B07, B08) ─────────────────────────
@@ -306,7 +328,13 @@ export const EXPECT = {
     expect: 'deny',
     requires: 'public.complete_quest()',
     activateIn: 'P1-03',
-    note: '보상 규칙 함수·트리거 함수 포함 (모두 service_role 전용)',
+    note: '보상 규칙 함수·트리거 함수 포함 (모두 service_role 전용). P1-04 의 record_hint·user_progress_lock_keys 도',
+  },
+  'RPC-7': {
+    expect: 'deny',
+    requires: 'public.record_hint()',
+    activateIn: 'P1-04',
+    note: '힌트 수는 튜터 API(service_role)만 기록',
   },
 
   // ── reward: 보상 RPC 동작 (P1-03, B05·B06·B11·B12) ─────────
@@ -367,6 +395,12 @@ export const EXPECT = {
     activateIn: 'P1-03',
     note: '런북 ②-확인 뒤 백필 재실행과 같은 동작',
   },
+  'RW-11': {
+    expect: 'allow',
+    requires: 'public.record_hint()',
+    activateIn: 'P1-04',
+    note: 'record_hint: 코드 퀘스트는 받은 최고 단계, 프로젝트는 누적, 완료 뒤에는 그대로, 새 행은 in_progress',
+  },
 
   // ── app: 앱이 실제로 보내는 쿼리 (정상 경로) ────────────────
   'APP-1': { expect: 'allow' },
@@ -391,8 +425,7 @@ export const EXPECT = {
   'APP-14': { expect: 'allow', note: '게시글 댓글 작성자 표시' },
   'APP-W1': {
     expect: 'allow',
-    flipIn: 'P1-04',
-    note: '지금 앱 auto-save payload(hints_used·status 포함). P1-04 에서 payload 를 바꾸면 점검도 새 payload 로 교체',
+    note: 'P1-04 이후 QuestShell auto-save payload {user_id, quest_id, code_submitted}. 새 행의 status 는 기본값 in_progress(00010). 이전 payload 는 B04-22',
   },
   'APP-W2': {
     expect: 'allow',
@@ -409,8 +442,8 @@ export const EXPECT = {
   'APP-W8': { expect: 'allow' },
   'APP-W9': { expect: 'deny' },
   'APP-W10': {
-    expect: 'allow',
-    note: 'P1-03 이후 앱은 쓰지 않음 (reset_progress RPC·admin cascade). P1-04 에서 progress DELETE 정책을 없애면 deny 로',
+    expect: 'deny',
+    note: 'P1-04 ③ 00011: 이전 리셋 API 의 경로. 지금 앱은 reset_progress RPC·admin cascade 로만 지움',
   },
   'APP-S1': { expect: 'allow' },
   'APP-S2': {
@@ -442,8 +475,8 @@ export const EXPECT = {
     note: 'handle_new_user 에 search_path 미설정',
   },
   'ST-5': {
-    expect: 'info',
-    note: 'B34 auth_rls_initplan: auth.uid() 를 (select auth.uid()) 로 감싸지 않은 정책 수',
+    expect: 'deny',
+    note: 'B34 auth_rls_initplan: auth.uid()/auth.role() 를 (select …) 로 감싸지 않은 정책 수 = 0 (P1-01 users 3 + P1-04 ③ 00011 나머지 16). 새 정책도 감싸서 씀',
   },
   'SNAP-1': {
     expect: 'snapshot',

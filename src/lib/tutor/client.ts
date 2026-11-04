@@ -108,6 +108,12 @@ export interface TutorStreamOptions extends TutorCallOptions {
   onComplete?: (text: string, providerUsed: LLMProviderType) => void;
   /** 모든 provider가 실패하면 대신 보낼 저장된 답변. 없으면 `error` 이벤트 */
   fallbackText?: string;
+  /**
+   * 내용(비어 있지 않은 첫 delta, 저장된 답변 포함)을 처음 보낼 때 한 번 호출. `done`은 이 Promise가 끝난 뒤에 보낸다.
+   * 힌트 사용 기록용(P1-04): 내용을 받기 시작한 힌트만 센다. done 직전에만 세면 내용을 다 읽고 done 전에 끊어
+   * 기록을 피할 수 있다. 요청이 중간에 취소돼도 이미 시작한 호출은 끝까지 진행된다
+   */
+  onFirstContent?: () => Promise<void> | void;
 }
 
 interface StreamAttempt {
@@ -157,13 +163,25 @@ export function callTutorStream(
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
+      let firstContent: Promise<void> | null = null;
       const send = (event: TutorStreamEvent) => {
         if (abort.signal.aborted) return;
+        if (!firstContent && 'delta' in event && event.delta) {
+          // 기록 실패가 스트림을 깨뜨리지 않게 한다 (호출자가 로그를 남김)
+          firstContent = Promise.resolve()
+            .then(() => options.onFirstContent?.())
+            .catch(() => {});
+        }
         try {
           controller.enqueue(encodeSseEvent(event));
         } catch {
           // 이미 닫힌 스트림 (클라이언트 연결 종료)
         }
+      };
+      // done 을 받은 클라이언트가 새로 고쳐도 기록이 보이게, 기록이 끝난 뒤 done 을 보낸다
+      const sendDone = async (event: Extract<TutorStreamEvent, { done: true }>) => {
+        await firstContent;
+        send(event);
       };
 
       if (requestSignal?.aborted) {
@@ -187,7 +205,7 @@ export function callTutorStream(
 
           if (result.ok) {
             options.onComplete?.(result.text, attempt.providerType);
-            send({ done: true, provider_used: attempt.providerType });
+            await sendDone({ done: true, provider_used: attempt.providerType });
             return;
           }
           // 이미 내보낸 부분 응답은 클라이언트가 버리게 하고 다음 provider로
@@ -196,7 +214,7 @@ export function callTutorStream(
 
         if (options.fallbackText) {
           send({ delta: options.fallbackText });
-          send({ done: true, is_fallback: true });
+          await sendDone({ done: true, is_fallback: true });
         } else {
           send({ error: true });
         }

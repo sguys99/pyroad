@@ -21,6 +21,7 @@ import {
   type QuestAnswerKey,
 } from '@/lib/quest/answerKeys';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
+import { captureServerError } from '@/lib/observability/server';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
@@ -57,6 +58,40 @@ export interface PreparedTutorCall {
   /** hint_generator·code_feedback에서만 채움. 서버 안에서만 쓰고 응답에 넣지 않음 */
   answerKey: QuestAnswerKey | null;
   body: TutorRequest;
+  /**
+   * hint_generator에서만 채움: 힌트 내용을 보내기 시작할 때 한 번 불러 `user_progress.hints_used`를 기록한다
+   * (P1-04, B05). 클라이언트는 hints_used를 쓰지 않는다. 실패해도 던지지 않음(힌트는 그대로 보냄)
+   */
+  recordHint: (() => Promise<void>) | null;
+}
+
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * 힌트 사용 기록 (`record_hint` RPC, service_role 전용, 00010).
+ * 코드 퀘스트는 받은 가장 높은 단계, 프로젝트 퀘스트는 누적 횟수를 DB가 정한다.
+ * 기록에 실패해도 아이에게는 힌트를 보여 준다 (드문 DB 오류로 힌트를 막지 않음). 실패는 로그·Sentry로 남긴다.
+ */
+export async function recordHintUsage(
+  admin: AdminClient,
+  userId: string,
+  questId: string,
+  level: 1 | 2 | 3,
+): Promise<void> {
+  try {
+    const { error } = await admin.rpc('record_hint', {
+      p_user_id: userId,
+      p_quest_id: questId,
+      p_level: level,
+    });
+    if (error) throw new Error(`${error.code ?? ''} ${error.message}`.trim());
+  } catch (error) {
+    console.error(
+      '[tutor] record_hint 실패:',
+      error instanceof Error ? error.message : error,
+    );
+    captureServerError(error, { tags: { area: 'tutor', op: 'record_hint' } });
+  }
 }
 
 function truncate(value: unknown, max: number): string | undefined {
@@ -285,6 +320,16 @@ export async function prepareTutorCall(
     quest: q,
     answerKey,
     body,
+    recordHint:
+      body.type === 'hint_generator'
+        ? () =>
+            recordHintUsage(
+              adminClient,
+              user.id,
+              body.quest_id,
+              body.hint_level as 1 | 2 | 3,
+            )
+        : null,
   };
 }
 

@@ -14,12 +14,17 @@ public.stages (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRI
 public.stages (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.user_api_keys (table, rls=on) anon: -
 public.user_api_keys (table, rls=on) authenticated: -
-public.user_badges (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
-public.user_badges (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+public.user_badges (table, rls=on) anon: SELECT
+public.user_badges (table, rls=on) authenticated: SELECT
 public.user_profiles_public (view, rls=off) anon: -
 public.user_profiles_public (view, rls=off) authenticated: SELECT
-public.user_progress (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
-public.user_progress (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+public.user_progress (table, rls=on) anon: SELECT
+public.user_progress (table, rls=on) authenticated: SELECT
+public.user_progress.code_submitted column authenticated: INSERT,UPDATE
+public.user_progress.current_step column authenticated: INSERT,UPDATE
+public.user_progress.quest_id column authenticated: INSERT,UPDATE
+public.user_progress.step_submissions column authenticated: INSERT,UPDATE
+public.user_progress.user_id column authenticated: INSERT,UPDATE
 public.users (table, rls=on) anon: SELECT
 public.users (table, rls=on) authenticated: SELECT
 public.users.preferred_provider column authenticated: UPDATE

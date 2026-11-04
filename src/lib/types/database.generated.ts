@@ -496,6 +496,10 @@ export type Database = {
         };
         Returns: number;
       };
+      record_hint: {
+        Args: { p_level: number; p_quest_id: string; p_user_id: string };
+        Returns: Json;
+      };
       reset_progress: {
         Args: { p_scope: string; p_stage_id?: string; p_user_id: string };
         Returns: Json;

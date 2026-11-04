@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, fast, fallbackProviders, quest, answerKey, body } = prepared;
+  const { systemPrompt, userPrompt, providerType, customApiKey, fast, fallbackProviders, quest, answerKey, body, recordHint } = prepared;
 
   // 캐시 히트 → 단일 delta 이벤트로 즉시 전송
   const cacheKey = buildCacheKey(body);
@@ -52,6 +52,8 @@ export async function POST(request: Request) {
       },
       // 모든 provider가 실패하면 /api/tutor와 같은 저장된 답변(힌트는 해당 단계 힌트)을 보낸다
       fallbackText: buildFallbackMessage(body, quest, answerKey),
+      // 힌트는 내용을 보내기 시작할 때 hints_used 를 기록 (P1-04, B05). 그 전에 취소·실패하면 세지 않음
+      onFirstContent: recordHint ?? undefined,
     },
   );
 

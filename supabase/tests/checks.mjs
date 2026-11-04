@@ -120,6 +120,13 @@ function psqlAs(role, uid, sql) {
     `BEGIN;\nSET LOCAL ROLE ${role};\nSET LOCAL request.jwt.claims = '${claims}';\n${sql}\nROLLBACK;\n`,
   );
 }
+/** psqlAs 와 같지만 COMMIT (다른 트랜잭션의 RPC 가 결과를 봐야 하는 점검용. 점검 전용 사용자에만 씀) */
+function psqlAsCommit(role, uid, sql) {
+  const claims = JSON.stringify(uid ? { sub: uid, role } : { role });
+  return psql(
+    `BEGIN;\nSET LOCAL ROLE ${role};\nSET LOCAL request.jwt.claims = '${claims}';\n${sql}\nCOMMIT;\n`,
+  );
+}
 function classifySql(r) {
   if (r.ok)
     return {
@@ -1104,6 +1111,115 @@ async function groupWrite(u) {
         ),
       ),
   });
+
+  // ── P1-04: 진행 행은 진행 저장 컬럼만 (00011) ──
+  await check({
+    group: 'write',
+    id: 'B04-22',
+    role: 'authenticated',
+    op: 'POST /user_progress (upsert) {code_submitted, hints_used: 0, status: in_progress} (이전 앱 auto-save payload)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/user_progress?on_conflict=user_id,quest_id', {
+          as: u.alice,
+          body: {
+            user_id: u.alice.id,
+            quest_id: Q1,
+            code_submitted: 'print("old app")',
+            hints_used: 0,
+            status: 'in_progress',
+          },
+          prefer: 'resolution=merge-duplicates,return=minimal',
+        }),
+        `select hints_used = 0 or code_submitted = 'print("old app")' from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q1}'`,
+      ),
+  });
+  // 아래 셋은 점검 전용 사용자로 실제 완료(service_role RPC)한 뒤 시도합니다
+  const completedUser = async (name) => {
+    const x = await createUser(name, name);
+    const r = await rpc('complete_quest', {
+      p_user_id: x.id,
+      p_quest_id: Q1,
+      p_submission: submission(),
+    });
+    if (r.status >= 300)
+      throw new Error(`complete_quest ${r.status} ${JSON.stringify(r.json)}`);
+    return { ...x, xp: userRow(x.id).total_xp };
+  };
+  await check({
+    group: 'write',
+    id: 'B04-23',
+    role: 'authenticated(psql)',
+    op: 'UPDATE user_progress SET quest_id = <다른 퀘스트> WHERE <완료 행> (완료를 다른 퀘스트로 옮기기)',
+    ...SQLW,
+    run: async () => {
+      const x = await completedUser('b0423');
+      return classifySqlWrite(
+        psqlAs(
+          'authenticated',
+          x.id,
+          `UPDATE public.user_progress SET quest_id = '${Q_LAST1}' WHERE user_id = auth.uid() AND quest_id = '${Q1}' RETURNING quest_id;`,
+        ),
+      );
+    },
+  });
+  /** 클라이언트 권한으로 완료 기록을 지우거나 되돌린 뒤 다시 완료 → XP 가 다시 들어오면 구멍 */
+  const replayCheck = (id, op, sql) =>
+    check({
+      group: 'write',
+      id,
+      role: 'authenticated(psql)',
+      op,
+      deny: ['denied'],
+      allow: ['xp-twice', 'written'],
+      run: async () => {
+        const x = await completedUser(id.toLowerCase().replace('-', ''));
+        const w = classifySqlWrite(psqlAsCommit('authenticated', x.id, sql));
+        const again = await rpc('complete_quest', {
+          p_user_id: x.id,
+          p_quest_id: Q1,
+          p_submission: submission(),
+        });
+        const xp = userRow(x.id).total_xp;
+        if (xp > x.xp)
+          return {
+            actual: 'xp-twice',
+            detail: `XP ${x.xp} → ${xp} (쓰기: ${w.actual})`,
+          };
+        if (w.actual === 'written')
+          return { actual: 'written', detail: `쓰기는 됨, XP 그대로 ${xp}` };
+        return {
+          actual: w.actual === 'denied' ? 'denied' : w.actual,
+          detail: `${w.detail}; 다시 완료 → already_completed=${again.json?.already_completed}, XP ${xp}`,
+        };
+      },
+    });
+  await replayCheck(
+    'B04-24',
+    'DELETE FROM user_progress (완료 행) → 다시 complete_quest → XP 한 번만',
+    `DELETE FROM public.user_progress WHERE user_id = auth.uid() AND quest_id = '${Q1}' RETURNING 1;`,
+  );
+  await replayCheck(
+    'B04-25',
+    "UPDATE user_progress SET status = 'in_progress' (완료 되돌리기) → 다시 complete_quest → XP 한 번만",
+    `UPDATE public.user_progress SET status = 'in_progress', completed_at = NULL WHERE user_id = auth.uid() AND quest_id = '${Q1}' RETURNING 1;`,
+  );
+  await check({
+    group: 'write',
+    id: 'B04-26',
+    role: 'authenticated(psql)',
+    op: 'SET ROLE authenticated; UPDATE user_progress SET hints_used = 0 (B05)',
+    ...SQLW,
+    run: async () =>
+      classifySqlWrite(
+        psqlAs(
+          'authenticated',
+          u.alice.id,
+          `UPDATE public.user_progress SET hints_used = 0 WHERE user_id = auth.uid() RETURNING hints_used;`,
+        ),
+      ),
+  });
 }
 
 // ── 사용자 API 키 테이블 (B13: service_role 전용, 00007) ──
@@ -1664,6 +1780,12 @@ async function groupRpc(u) {
       'reset_progress',
       { p_user_id: u.bob.id, p_scope: 'all' },
     ],
+    [
+      'RPC-7',
+      u.alice,
+      'record_hint',
+      { p_user_id: u.alice.id, p_quest_id: Q2, p_level: 1 },
+    ],
   ];
   for (const [id, as, fn, body] of calls) {
     const role = as === 'anon' ? 'anon' : 'authenticated';
@@ -1682,7 +1804,7 @@ async function groupRpc(u) {
     group: 'rpc',
     id: 'RPC-6',
     role: 'postgres',
-    op: '00006 함수(보상 규칙·RPC·트리거) 중 anon/authenticated 가 EXECUTE 할 수 있는 것',
+    op: '00006·00010·00011 함수(보상 규칙·RPC·트리거) 중 anon/authenticated 가 EXECUTE 할 수 있는 것',
     ...NONE,
     run: () => {
       const v =
@@ -1691,7 +1813,7 @@ async function groupRpc(u) {
        where n.nspname = 'public'
          and p.proname in ('quest_xp', 'level_for_xp', 'has_three_day_streak', 'decide_new_badges',
                            'is_stage_unlocked', 'complete_quest', 'use_golden_key', 'reset_progress',
-                           'user_progress_protect_earned_xp')
+                           'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2092,6 +2214,53 @@ async function groupReward() {
       );
     },
   });
+
+  await check({
+    group: 'reward',
+    id: 'RW-11',
+    role: 'service_role',
+    op: 'record_hint (P1-04): 새 행 in_progress · 코드 퀘스트 GREATEST · 프로젝트 누적 · 완료 뒤 그대로 · 잘못된 단계 400',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw11', '힌트기록');
+      const hint = async (qid, level) => {
+        const r = await rpc('record_hint', {
+          p_user_id: x.id,
+          p_quest_id: qid,
+          p_level: level,
+        });
+        return r.status < 300
+          ? r.json
+          : { status: r.status, message: errMsg(r) };
+      };
+      const steps = [];
+      steps.push(['Q1 L2 (새 행)', await hint(Q1, 2), { recorded: true, hints_used: 2, status: 'in_progress' }]);
+      steps.push(['Q1 L1 (낮은 단계)', await hint(Q1, 1), { recorded: false, hints_used: 2 }]);
+      steps.push(['Q1 L3', await hint(Q1, 3), { recorded: true, hints_used: 3 }]);
+      steps.push(['프로젝트 L1', await hint(Q_PROJECT, 1), { hints_used: 1 }]);
+      steps.push(['프로젝트 L1 다음 단계', await hint(Q_PROJECT, 1), { hints_used: 2 }]);
+      steps.push(['L4', await hint(Q1, 4), { status: 400, message: 'invalid_arguments' }]);
+      const done = await rpc('complete_quest', {
+        p_user_id: x.id,
+        p_quest_id: Q1,
+        p_submission: submission(),
+      });
+      // 힌트 3회 → 기본 XP (1-1 은 50)
+      steps.push(['완료', done.json, { hints_used: 3, xp_gained: 50 }]);
+      steps.push(['완료 뒤 L1', await hint(Q1, 1), { recorded: false, hints_used: 3, status: 'completed' }]);
+      for (const [label, got, want] of steps) {
+        const m = compare(label, want, got ?? {});
+        if (m) return m;
+      }
+      const row = progressRow(x.id, Q1);
+      return (
+        compare('Q1 진행 행', { status: 'completed', hints_used: 3, earned_xp: 50 }, row) || {
+          actual: 'ok',
+          detail: `${steps.length}단계 일치`,
+        }
+      );
+    },
+  });
 }
 
 async function groupApp(u) {
@@ -2266,17 +2435,25 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-W1',
     role: 'authenticated',
-    op: 'QuestShell.tsx auto-save → upsert user_progress {code_submitted, hints_used, status: in_progress} (기존 행)',
+    op: 'QuestShell.tsx auto-save → upsert user_progress {code_submitted} (기존 행 → 힌트 수 그대로, 새 행 → status in_progress)',
     ...WRITE,
-    run: () =>
-      classifyWrite(
-        upsert(Q1, {
-          code_submitted: 'print("w1")',
-          hints_used: 1,
-          status: 'in_progress',
-        }),
-        `select code_submitted = 'print("w1")' from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q1}'`,
-      ),
+    run: async () => {
+      // 서버 값(힌트 수·황금키·상태)은 payload 에 없으므로 그대로여야 함
+      const server = `hints_used || ',' || used_golden_key || ',' || status`;
+      const before = one(
+        `select ${server} from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q1}'`,
+      );
+      const existing = await classifyWrite(
+        upsert(Q1, { code_submitted: 'print("w1")' }),
+        `select code_submitted = 'print("w1")' and ${server} = ${sqlStr(before)} from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q1}'`,
+      );
+      if (existing.actual !== 'written')
+        return { ...existing, detail: `기존 행: ${existing.detail}` };
+      return classifyWrite(
+        upsert(Q_LAST1, { code_submitted: 'print("w1 new")' }),
+        `select status = 'in_progress' and hints_used = 0 and code_submitted = 'print("w1 new")' from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q_LAST1}'`,
+      );
+    },
   });
   await check({
     group: 'app',
@@ -2429,7 +2606,7 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-W10',
     role: 'authenticated',
-    op: 'api/account/reset → DELETE /user_progress?user_id=eq.<본인>&quest_id=in.(…)',
+    op: 'DELETE /user_progress?user_id=eq.<본인>&quest_id=in.(…) (이전 api/account/reset 경로)',
     ...WRITE,
     run: () =>
       classifyWrite(
@@ -2542,6 +2719,8 @@ async function groupStatic() {
     id: 'ST-5',
     role: 'postgres',
     op: 'auth.uid()/auth.role() 를 (select …) 로 감싸지 않은 정책 수 (B34)',
+    deny: ['0'],
+    allow: (a) => a !== '0',
     run: () => {
       const v = one(`select count(*) from pg_policies
        where schemaname = 'public'

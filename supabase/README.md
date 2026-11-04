@@ -142,6 +142,7 @@ docker exec -i supabase_db_pyroad psql -U postgres -c "\df+ public.*"
 - 정답 데이터(P1-02): 정답·힌트·`solution_code`는 `quest_answer_keys`(service_role 전용)에 있습니다. 생성 seed(P1-12)는 `quests`에 공개 부분만, `quest_answer_keys`에 정답을 따로 씁니다. 예전 seed처럼 `quests`에 정답이 들어오면 분리 트리거가 옮기고, 00005 이후에는 `quests`에서 지웁니다. `db reset` 후 기준값은 퀘스트 44 · `expected_output` 44 · 힌트 44 · `solution_code` 43 + 프로젝트 단계 정답 5(회귀 테스트 `AK-17`). 앱은 `src/lib/quest/answerKeys.ts`로만 읽습니다.
 - 보상(P1-03): 퀘스트 완료·황금키·리셋은 `00006`의 `complete_quest`·`use_golden_key`·`reset_progress`(service_role 전용)가 한 트랜잭션으로 처리합니다. 잠금 순서는 `users` → `user_progress`. 앱은 `src/lib/quest/rewardRpc.ts`로만 부르고, 규칙을 바꾸면 SQL 함수·`src/lib/quest/xp.ts`·`checkBadges.ts`·`tests/fixtures/reward-rules.json`을 함께 고칩니다.
 - 사용자 권한(P1-01): 클라이언트는 `users`에서 `preferred_provider`만 UPDATE할 수 있고(`00008`, 컬럼 권한) INSERT·DELETE는 없습니다(가입은 `handle_new_user` 트리거). 새 프로필 컬럼을 클라이언트가 고치게 하려면 그 컬럼을 만드는 마이그레이션에서 `GRANT UPDATE (<컬럼>) ON public.users TO authenticated`를 추가하고 회귀 테스트 `B04-19`를 참고합니다.
+- 진행·뱃지 권한(P1-04): 클라이언트는 `user_progress`에 진행 저장 컬럼(`code_submitted`·`current_step`·`step_submissions` + upsert용 `user_id`·`quest_id`)만 INSERT·UPDATE하고(`00011`, 컬럼 권한) DELETE는 없습니다. `user_id`·`quest_id`는 키 고정 트리거(`user_progress_lock_keys`)가 바꾸지 못하게 막습니다. 새 행의 `status`는 기본값 `in_progress`(`00010`). 상태·힌트 수·황금키·`earned_xp`(이후 `stars`·`attempts`)는 RPC 전용이며, 힌트 수는 튜터 API가 `record_hint`(service_role 전용)로 기록합니다. `user_badges`는 SELECT만(지급 `complete_quest`, 삭제 `reset_progress`·탈퇴 cascade). 클라이언트가 쓸 새 진행 컬럼은 그 컬럼을 만드는 마이그레이션에서 `GRANT INSERT (…), UPDATE (…)`를 함께 추가합니다
 - 사용자 API 키(B13): `user_api_keys`(service_role 전용, `00007`)에 AES-256-GCM 암호문만 있습니다. 앱은 `src/lib/tutor/apiKeys.ts`로만 읽고 쓰며, 서버 env `API_KEY_ENCRYPTION_KEY`(`openssl rand -base64 32`)가 없으면 "내 API 키" 기능만 꺼집니다. 로컬에서 이 기능을 쓰려면 `.env.local`에 아무 테스트 키나 넣습니다(운영 키를 쓰지 않음). `users.custom_api_keys`(평문)는 `00009`(③)가 지웁니다.
 - B08(해결): `00001` Section 6의 `solution_code` UPDATE는 seed보다 먼저 실행되어 새 DB에서 0건이었습니다. 00001은 운영에 적용한 파일이라 고치지 않습니다. P1-02에서 같은 내용을 `seed.sql` 끝에 두었고, P1-12부터는 정답이 `content/`에 있어 생성 seed가 `quest_answer_keys`에 직접 씁니다.
 
@@ -181,13 +182,13 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 |---|---|
 | `view` | `user_profiles_public` 비로그인 조회·뷰를 통한 수정/삭제 거부(B03), 모든 뷰의 쓰기 권한 없음, `security_invoker` 아닌 뷰 |
 | `notice` | 공지 쓰기(본인 INSERT·UPDATE·DELETE, psql) 거부, 비로그인 목록·service_role 작성 허용(B02) |
-| `write` | XP·레벨·황금키·코인·별·시도·`earned_xp`·뱃지·진행 상태·`hints_used`·`used_golden_key` 직접 쓰기, 다른 사용자 행 쓰기, 권한 없는 프로필 컬럼·`users` INSERT, `custom_api_keys` 조회(B04·B05·B13·P1-01) |
+| `write` | XP·레벨·황금키·코인·별·시도·`earned_xp`·뱃지·진행 상태·`hints_used`·`used_golden_key` 직접 쓰기, 다른 사용자 행 쓰기, 권한 없는 프로필 컬럼·`users` INSERT, `custom_api_keys` 조회, 이전 auto-save payload, 완료 행의 `quest_id` 바꾸기, 진행 행 삭제·상태 되돌리기 뒤 재완료로 XP 반복 획득(B04·B05·B13·P1-01·P1-04) |
 | `apikey` | `user_api_keys` 접근 거부(anon/authenticated 조회·임베딩·쓰기·OpenAPI 노출), service_role 조회·저장, 탈퇴 시 삭제(B13) |
 | `answer` | `quests`의 정답 노출(B07), 새 DB의 `solution_code`(B08), `quest_answer_keys` 접근 거부(P1-02 이후 자동 활성화) |
-| `rpc` | 보상 RPC(`complete_quest`·`use_golden_key`·`reset_progress`)와 규칙 함수를 anon/authenticated가 부를 수 없음 (P1-03) |
-| `reward` | 보상 RPC 동작: TS↔SQL 규칙 대조표(`fixtures/reward-rules.json`), 동시 완료 8회·동시 황금키 5회에 1회만 지급, 힌트·황금키는 DB 값(B05·B11), 스테이지 잠금·채점 미통과 거부, 스테이지 클리어, 리셋 XP 재계산·뱃지(B12), `earned_xp` 클라이언트 쓰기 무시, 00006 백필 재실행 |
+| `rpc` | 보상 RPC(`complete_quest`·`use_golden_key`·`reset_progress`·`record_hint`)와 규칙 함수를 anon/authenticated가 부를 수 없음 (P1-03·P1-04) |
+| `reward` | 보상 RPC 동작: TS↔SQL 규칙 대조표(`fixtures/reward-rules.json`), 동시 완료 8회·동시 황금키 5회에 1회만 지급, 힌트·황금키는 DB 값(B05·B11), 스테이지 잠금·채점 미통과 거부, 스테이지 클리어, 리셋 XP 재계산·뱃지(B12), `earned_xp` 클라이언트 쓰기 무시, 00006 백필 재실행, `record_hint` 규칙(P1-04) |
 | `app` | 앱이 실제로 보내는 조회·쓰기(월드·프로필·퀘스트 페이지, 뱃지 확인, auto-save, 설정, 게시판, 리셋)와 service_role 경로가 깨지지 않음 |
-| `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정, 스냅샷 3종 |
+| `static` | RLS 꺼진 테이블 없음, RPC로 부를 수 있는 SECURITY DEFINER 없음, `search_path` 미설정, `auth.uid()`를 감싸지 않은 정책 0(ST-5, B34), 스냅샷 3종 |
 
 GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 
@@ -204,8 +205,8 @@ GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 ### 권한을 바꾸는 작업을 할 때
 
 1. 마이그레이션을 고치고 `npm run test:rls`를 돌립니다.
-2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 P1-04(B04-4·4b·5·5b·11·12), B24(ST-3·4), P3-13(VIEW-2)입니다. (P1-02의 B07-2·3, B08-1과 P1-01의 B04-1·2·7·8은 뒤집음)
-3. 앱 쿼리를 바꿨다면 `checks.mjs`의 `app` 그룹 요청도 같이 바꿉니다(예: P1-04에서 auto-save payload가 바뀌면 APP-W1).
+2. 의도대로 막은 점검은 `FAIL … 구멍이 막힘 → 'deny' 로 바꾸세요`로 나옵니다. `expectations.mjs`에서 그 ID의 `expect: 'known-gap'`을 `'deny'`로 바꿉니다. 지금 걸려 있는 작업은 B24(ST-3·4), P3-13(VIEW-2)입니다. (P1-02의 B07-2·3, B08-1, P1-01의 B04-1·2·7·8, P1-04의 B04-4·4b·5·5b·11·12·APP-W10은 뒤집음)
+3. 앱 쿼리를 바꿨다면 `checks.mjs`의 `app` 그룹 요청도 같이 바꿉니다(예: P1-04에서 auto-save payload가 바뀌어 APP-W1을 새 payload로, 이전 payload는 B04-22 deny로).
 4. 권한·정책·SECURITY DEFINER 함수가 바뀌면 스냅샷이 `diff`로 FAIL합니다. 의도한 변경이면 `RLS_UPDATE_SNAPSHOTS=1 npm run test:rls`로 다시 만들고 `git diff supabase/tests/snapshots/`를 리뷰해 같은 커밋에 넣습니다.
 5. 새 테이블·함수를 만들면 대응하는 점검을 `checks.mjs`에 추가하고 기대값을 `expectations.mjs`에 적습니다(기대값이 없으면 FAIL).
 6. PR 전에 `npm run test:rls:ci`로 legacy 기본값·운영 재현에서도 같은지 확인합니다.
