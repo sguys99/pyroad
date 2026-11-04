@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import type { LLMProvider } from './types';
+import type { LLMCallOptions, LLMProvider } from './types';
 
 export class GeminiProvider implements LLMProvider {
   private client: GoogleGenAI;
@@ -14,12 +14,14 @@ export class GeminiProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     maxTokens: number,
+    options?: LLMCallOptions,
   ): Promise<string> {
     const response = await this.client.models.generateContent({
       model: this.model,
       config: {
         systemInstruction: systemPrompt,
         maxOutputTokens: maxTokens,
+        abortSignal: options?.signal,
       },
       contents: userPrompt,
     });
@@ -31,12 +33,15 @@ export class GeminiProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     maxTokens: number,
+    options?: LLMCallOptions,
   ): AsyncIterable<string> {
+    // Gemini SDK의 abortSignal은 클라이언트 쪽 연결만 끊는다 (SDK 문서: 서버 작업 취소·과금 중단은 보장하지 않음)
     const response = await this.client.models.generateContentStream({
       model: this.model,
       config: {
         systemInstruction: systemPrompt,
         maxOutputTokens: maxTokens,
+        abortSignal: options?.signal,
       },
       contents: userPrompt,
     });

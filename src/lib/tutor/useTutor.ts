@@ -1,11 +1,33 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { TutorRequest, TutorResponse } from './types';
+import { readTutorStream } from './sse';
 
+/** 이 시간 동안 서버에서 아무 이벤트도 오지 않으면 실패로 보고 요청을 끊는다 */
+export const STREAM_IDLE_TIMEOUT_MS = 30_000;
+
+/**
+ * AI 튜터 요청 훅.
+ *
+ * 요청 함수는 취소된 경우 `null`을 돌려준다 (에러가 아님). 호출자는 `null`이면 아무것도 하지 않는다.
+ * - 화면에 흘려 쓰는 스트림은 한 번에 하나만: 새 스트림 요청이 오면 이전 스트림을 abort (B18)
+ * - 컴포넌트가 언마운트되면(퀘스트를 떠남) 진행 중인 모든 요청을 abort
+ * 서버는 `request.signal`로 이를 받아 provider SDK 호출을 멈춘다.
+ */
 export function useTutor() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
+  const inFlightRef = useRef(new Set<AbortController>());
+  const activeStreamRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const inFlight = inFlightRef.current;
+    return () => {
+      for (const controller of inFlight) controller.abort();
+      inFlight.clear();
+    };
+  }, []);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -18,111 +40,97 @@ export function useTutor() {
       });
   }, []);
 
-  async function sendTutorRequest(
-    req: TutorRequest,
-  ): Promise<TutorResponse> {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/tutor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: TutorResponse = await res.json();
-      if (data.no_api_key) {
-        setHasApiKey(false);
+  const sendTutorRequest = useCallback(
+    async (req: TutorRequest): Promise<TutorResponse | null> => {
+      const controller = new AbortController();
+      inFlightRef.current.add(controller);
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/tutor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req),
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: TutorResponse = await res.json();
+        if (data.no_api_key) {
+          setHasApiKey(false);
+        }
+        return data;
+      } catch {
+        if (controller.signal.aborted) return null;
+        throw new Error('AI 튜터 요청에 실패했습니다');
+      } finally {
+        inFlightRef.current.delete(controller);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
-      return data;
-    } catch {
-      throw new Error('AI 튜터 요청에 실패했습니다');
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    },
+    [],
+  );
 
   const sendTutorStreamRequest = useCallback(
     async (
       req: TutorRequest,
       onDelta: (fullText: string) => void,
-    ): Promise<TutorResponse> => {
+    ): Promise<TutorResponse | null> => {
+      // 스트리밍 말풍선은 하나뿐이므로 이전 스트림은 끊는다
+      activeStreamRef.current?.abort();
+      const controller = new AbortController();
+      activeStreamRef.current = controller;
+      inFlightRef.current.add(controller);
       setIsLoading(true);
-      let fullText = '';
-      let providerUsed: string | undefined;
+
+      let timedOut = false;
+      let idleTimer: ReturnType<typeof setTimeout> | undefined;
+      const touch = () => {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+          timedOut = true;
+          controller.abort();
+        }, STREAM_IDLE_TIMEOUT_MS);
+      };
 
       try {
+        touch();
         const res = await fetch('/api/tutor/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(req),
+          signal: controller.signal,
         });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         if (!res.body) throw new Error('No response body');
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-
-          // SSE 파싱: "data: {...}\n\n" 형태
-          const lines = buffer.split('\n\n');
-          // 마지막 요소는 불완전할 수 있으므로 buffer에 유지
-          buffer = lines.pop() ?? '';
-
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed.startsWith('data: ')) continue;
-
-            const json = trimmed.slice(6);
-            try {
-              const data = JSON.parse(json) as {
-                delta?: string;
-                done?: boolean;
-                error?: boolean;
-                provider_used?: string;
-              };
-
-              if (data.delta) {
-                fullText += data.delta;
-                onDelta(fullText);
-              } else if (data.error) {
-                throw new Error('스트리밍 에러');
-              }
-              if (data.provider_used) {
-                providerUsed = data.provider_used;
-              }
-              // data.done → 정상 완료, loop가 끝남
-            } catch (e) {
-              if (e instanceof SyntaxError) continue;
-              throw e;
-            }
-          }
-        }
+        // reset 이벤트가 오면 onDelta('')로 말풍선을 비우고 다시 "생각 중" 상태가 된다
+        const result = await readTutorStream(
+          res.body,
+          (fullText) => {
+            if (!controller.signal.aborted) onDelta(fullText);
+          },
+          touch,
+        );
 
         // 주의: setIsLoading(false)를 여기서 호출하지 않음.
         // 호출자가 streamingContent를 정리하고 messages를 업데이트한 뒤
         // setIsLoading(false)와 동일 배치에서 처리하도록 함.
         // → 깜빡임 방지를 위해 caller에서 일괄 처리
-
         return {
-          message: fullText,
-          is_fallback: false,
-          provider_used: providerUsed,
+          message: result.text,
+          is_fallback: result.isFallback,
+          provider_used: result.providerUsed,
         };
       } catch {
-        // 부분 텍스트가 충분하면 그대로 사용
-        if (fullText.length > 50) {
-          return { message: fullText, is_fallback: false };
-        }
+        // 새 요청이나 언마운트로 끊긴 것은 실패가 아님 → 호출자가 에러 문구를 띄우지 않게 null
+        if (controller.signal.aborted && !timedOut) return null;
+        // 부분 텍스트는 쓰지 않는다: 호출자가 준비한 문구로 말풍선 전체를 대신함
         throw new Error('AI 튜터 요청에 실패했습니다');
+      } finally {
+        clearTimeout(idleTimer);
+        inFlightRef.current.delete(controller);
+        if (activeStreamRef.current === controller) activeStreamRef.current = null;
       }
-      // finally에서 setIsLoading(false) 제거 — caller가 직접 관리
     },
     [],
   );

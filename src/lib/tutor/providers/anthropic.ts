@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { LLMProvider } from './types';
+import type { LLMCallOptions, LLMProvider } from './types';
 
 export class AnthropicProvider implements LLMProvider {
   private client: Anthropic;
@@ -24,13 +24,17 @@ export class AnthropicProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     maxTokens: number,
+    options?: LLMCallOptions,
   ): Promise<string> {
-    const response = await this.client.messages.create({
-      model: this.model,
-      max_tokens: maxTokens,
-      system: this.systemParam(systemPrompt),
-      messages: [{ role: 'user', content: userPrompt }],
-    });
+    const response = await this.client.messages.create(
+      {
+        model: this.model,
+        max_tokens: maxTokens,
+        system: this.systemParam(systemPrompt),
+        messages: [{ role: 'user', content: userPrompt }],
+      },
+      { signal: options?.signal },
+    );
 
     const block = response.content[0];
     if (block.type === 'text') return block.text;
@@ -41,13 +45,17 @@ export class AnthropicProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     maxTokens: number,
+    options?: LLMCallOptions,
   ): AsyncIterable<string> {
-    const stream = this.client.messages.stream({
-      model: this.model,
-      max_tokens: maxTokens,
-      system: this.systemParam(systemPrompt),
-      messages: [{ role: 'user', content: userPrompt }],
-    });
+    const stream = this.client.messages.stream(
+      {
+        model: this.model,
+        max_tokens: maxTokens,
+        system: this.systemParam(systemPrompt),
+        messages: [{ role: 'user', content: userPrompt }],
+      },
+      { signal: options?.signal },
+    );
 
     for await (const event of stream) {
       if (

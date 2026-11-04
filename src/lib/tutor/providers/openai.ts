@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { LLMProvider } from './types';
+import type { LLMCallOptions, LLMProvider } from './types';
 
 export class OpenAIProvider implements LLMProvider {
   private client: OpenAI;
@@ -14,15 +14,19 @@ export class OpenAIProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     maxTokens: number,
+    options?: LLMCallOptions,
   ): Promise<string> {
-    const response = await this.client.chat.completions.create({
-      model: this.model,
-      max_completion_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-    });
+    const response = await this.client.chat.completions.create(
+      {
+        model: this.model,
+        max_completion_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      },
+      { signal: options?.signal },
+    );
 
     return response.choices[0]?.message?.content ?? '';
   }
@@ -31,16 +35,20 @@ export class OpenAIProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     maxTokens: number,
+    options?: LLMCallOptions,
   ): AsyncIterable<string> {
-    const stream = await this.client.chat.completions.create({
-      model: this.model,
-      max_completion_tokens: maxTokens,
-      stream: true,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-    });
+    const stream = await this.client.chat.completions.create(
+      {
+        model: this.model,
+        max_completion_tokens: maxTokens,
+        stream: true,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      },
+      { signal: options?.signal },
+    );
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta?.content;

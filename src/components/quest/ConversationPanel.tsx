@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { BookOpen, Info, KeyRound, Lightbulb, MessageCircle } from 'lucide-react';
 import { m, useReducedMotion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -36,8 +36,18 @@ interface ConversationPanelProps {
   isGoldenKeyLoading?: boolean;
 }
 
+/** 이 시간이 지나도 답이 없으면 "조금 오래 걸려요" 문구로 바꿔 아이가 기다릴 수 있게 함 */
+const SLOW_THINKING_MS = 8_000;
+
 function ThinkingIndicator() {
   const shouldReduceMotion = useReducedMotion();
+  const [isSlow, setIsSlow] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsSlow(true), SLOW_THINKING_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex items-start gap-3 px-4">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -62,8 +72,10 @@ function ThinkingIndicator() {
             />
           ))}
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          파이뱀 선생님이 생각 중...
+        <p className="mt-1 text-xs text-muted-foreground" role="status">
+          {isSlow
+            ? '열심히 생각하고 있어요. 조금만 기다려 줘요!'
+            : '파이뱀 선생님이 생각 중...'}
         </p>
       </div>
     </div>

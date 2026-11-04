@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { callTutor } from '@/lib/tutor/client';
 import { getCachedResponse, setCachedResponse, buildCacheKey } from '@/lib/tutor/cache';
 import type { TutorResponse } from '@/lib/tutor/types';
-import { prepareTutorCall, buildFallbackMessage, CACHEABLE_TYPES } from './helpers';
+import { prepareTutorCall, buildFallbackMessage } from './helpers';
 import { getMaxTokens } from '@/lib/tutor/config';
 
 export async function POST(request: Request) {
@@ -15,16 +15,25 @@ export async function POST(request: Request) {
   const { systemPrompt, userPrompt, providerType, customApiKey, hasAnyKey, fast, fallbackProviders, quest, body } = prepared;
 
   // 캐시 확인
-  const cacheable = CACHEABLE_TYPES.has(body.type);
-  if (cacheable) {
-    const cacheKey = buildCacheKey(body.type, body.quest_id);
+  const cacheKey = buildCacheKey(body);
+  if (cacheKey) {
     const cached = getCachedResponse(cacheKey);
     if (cached) {
       return NextResponse.json({ message: cached, is_fallback: false } satisfies TutorResponse);
     }
   }
 
-  const result = await callTutor(systemPrompt, userPrompt, getMaxTokens(body.type, providerType), providerType, customApiKey, fast, fallbackProviders);
+  // 클라이언트가 요청을 끊으면(request.signal) provider 호출·재시도도 멈춘다
+  const result = await callTutor(
+    systemPrompt,
+    userPrompt,
+    getMaxTokens(body.type, providerType),
+    providerType,
+    customApiKey,
+    fast,
+    fallbackProviders,
+    { signal: request.signal },
+  );
 
   let message: string;
   let isFallback: boolean;
@@ -34,8 +43,8 @@ export async function POST(request: Request) {
     isFallback = result.was_fallback ?? false;
 
     // 성공 응답 캐시
-    if (cacheable) {
-      setCachedResponse(buildCacheKey(body.type, body.quest_id), message);
+    if (cacheKey && message) {
+      setCachedResponse(cacheKey, message);
     }
   } else {
     isFallback = true;

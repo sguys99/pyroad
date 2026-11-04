@@ -33,8 +33,7 @@ const MAX_STEP_GOAL_LENGTH = 500;
 // quest_intro, encouragement는 품질보다 속도 우선 → 경량 모델 사용
 const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
 
-// 동일 quest에 대해 동일 프롬프트 → 캐시 가능
-export const CACHEABLE_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
+// 캐시 대상 타입은 src/lib/tutor/cache.ts의 buildCacheKey가 정한다 (개인화 입력이 없는 타입만)
 
 export interface PreparedTutorCall {
   systemPrompt: string;
@@ -132,6 +131,9 @@ export async function prepareTutorCall(
   }
 
   body = sanitizeTutorBody(body);
+
+  // (P1-19) 사용자별 rate limit은 여기에 둔다: 인증·입력 검증 뒤, DB 조회·캐시·LLM 호출 전.
+  // 두 라우트(/api/tutor, /api/tutor/stream)가 모두 이 함수를 거치므로 한 곳에서 막을 수 있다.
 
   // 3. Quest + User Profile 병렬 조회
   const [questResult, userProfileResult] = await Promise.all([

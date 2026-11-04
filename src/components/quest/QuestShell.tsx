@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
 import { useTutor } from '@/lib/tutor/useTutor';
+import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti } from '@/lib/confetti';
 import { getLevelTitle } from '@/lib/quest/xp';
@@ -122,7 +123,8 @@ export function QuestShell({
           { type: 'quest_intro', quest_id: quest.id },
           (text) => { if (!cancelled) setStreamingContent(text); },
         );
-        if (!cancelled) {
+        // null: 퀘스트를 떠나 요청이 취소됨 → 아무것도 하지 않음
+        if (res && !cancelled) {
           finishStreaming(res.message, res.is_fallback, true);
         }
       } catch {
@@ -173,12 +175,16 @@ export function QuestShell({
     if (hintsUsed >= 3 || isAiLoading || isCompleted) return;
 
     const nextLevel = (hintsUsed + 1) as 1 | 2 | 3;
+    const hintLabel: ChatMessage = { role: 'system', content: `힌트 ${nextLevel}/3` };
 
-    setMessages((prev) => [
-      ...prev,
-      { role: 'system', content: `힌트 ${nextLevel}/3` },
-    ]);
+    setMessages((prev) => [...prev, hintLabel]);
     setHintsUsed(nextLevel);
+
+    // 힌트를 못 받았으면 횟수를 되돌린다 (AI가 실패해도 서버가 저장된 힌트를 보내므로 드묾)
+    const undoHint = () => {
+      setHintsUsed(nextLevel - 1);
+      setMessages((prev) => prev.filter((m) => m !== hintLabel));
+    };
 
     try {
       const res = await sendTutorStreamRequest(
@@ -190,9 +196,16 @@ export function QuestShell({
         },
         setStreamingContent,
       );
+      if (!res) {
+        // 다른 요청(코드 실행 등)으로 취소됨
+        undoHint();
+        return;
+      }
       finishStreaming(res.message, res.is_fallback);
     } catch {
-      finishStreaming(quest.prompt_skeleton.fallback_text, true);
+      undoHint();
+      finishStreaming(TUTOR_UNAVAILABLE_HINT_MESSAGE, false);
+      return;
     }
 
     // DB 저장 (fire-and-forget)
@@ -328,7 +341,7 @@ export function QuestShell({
         setStreamingContent,
       )
         .then((res) => {
-          finishStreaming(res.message, res.is_fallback);
+          if (res) finishStreaming(res.message, res.is_fallback);
         })
         .catch(() => {
           finishStreaming('앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪', true);
@@ -427,6 +440,7 @@ export function QuestShell({
               },
               setStreamingContent,
             );
+            if (!feedbackRes) return;
             finishStreaming(feedbackRes.message, feedbackRes.is_fallback);
 
             // 격려 메시지도 스트리밍
@@ -439,6 +453,7 @@ export function QuestShell({
               },
               setStreamingContent,
             );
+            if (!encourageRes) return;
             finishStreaming(encourageRes.message, encourageRes.is_fallback);
           } catch {
             finishStreaming('대단해요! 정답이에요! 🎉', true);
@@ -471,7 +486,7 @@ export function QuestShell({
         setStreamingContent,
       )
         .then((res) => {
-          finishStreaming(res.message, res.is_fallback);
+          if (res) finishStreaming(res.message, res.is_fallback);
         })
         .catch(() => {
           finishStreaming('앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡', true);

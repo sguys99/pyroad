@@ -64,7 +64,8 @@ export function StageCompleteCelebration({
             if (!cancelled) setStreamingContent(delta);
           },
         );
-        if (!cancelled) {
+        // null: 축하 화면을 닫아 요청이 취소됨
+        if (res && !cancelled) {
           setSummaryText(res.message);
           setStreamingContent('');
           setIsStreaming(false);
