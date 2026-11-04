@@ -31,7 +31,11 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/pyodide/PyodideProvider', () => ({
   usePyodideRuntime: () => mocks.runtime,
 }));
-vi.mock('@/lib/tutor/useTutor', () => ({ useTutor: () => mocks.tutor }));
+// TutorRateLimitError 는 실제 클래스를 써서 instanceof 판별까지 확인한다 (P1-19)
+vi.mock('@/lib/tutor/useTutor', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/tutor/useTutor')>()),
+  useTutor: () => mocks.tutor,
+}));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: mocks.refresh, push: vi.fn() }),
 }));
@@ -47,8 +51,11 @@ vi.mock('@/lib/supabase/loadClient', () => ({
   }),
 }));
 
+import { TutorRateLimitError } from '@/lib/tutor/useTutor';
+import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import {
   useQuestSession,
+  tutorFailure,
   AUTO_SAVE_DELAY_MS,
   STEP_ADVANCE_DELAY_MS,
   CELEBRATION_DELAY_MS,
@@ -656,6 +663,46 @@ describe('useQuestSession: 힌트', () => {
     ).toBe(false);
   });
 
+  it('힌트가 아닌 다른 실패면 연결 안내 문구 (힌트는 줄지 않았다고)', async () => {
+    mocks.tutor.sendTutorStreamRequest.mockImplementation(
+      async (req: { type: string }) => {
+        if (req.type === 'hint_generator') throw new Error('fail');
+        return { message: '안내', is_fallback: false };
+      },
+    );
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await result.current.handleHintRequest();
+    });
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'tutor',
+      content: TUTOR_UNAVAILABLE_HINT_MESSAGE,
+      isFallback: false,
+    });
+  });
+
+  it('요청 한도(429)에 걸리면 한도 문구를 보여 주고 힌트 횟수는 되돌린다 (P1-19)', async () => {
+    const limit = '파이뱀 선생님이 잠깐 쉬고 있어요. 17초 뒤에 다시 물어봐요!';
+    mocks.tutor.sendTutorStreamRequest.mockImplementation(
+      async (req: { type: string }) => {
+        if (req.type === 'hint_generator')
+          throw new TutorRateLimitError(limit, 17, 'minute');
+        return { message: '안내', is_fallback: false };
+      },
+    );
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await result.current.handleHintRequest();
+    });
+    expect(result.current.hintsUsed).toBe(0);
+    expect(result.current.totalHintsUsed).toBe(0);
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'tutor',
+      content: limit,
+      isFallback: false,
+    });
+  });
+
   it('프로젝트: 단계 힌트는 다음 단계에서 0부터, 누적 힌트는 이어진다', async () => {
     const { result } = renderHook(() =>
       useQuestSession(options(PROJECT_QUEST, progressRow({ hints_used: 1 }))),
@@ -672,5 +719,68 @@ describe('useQuestSession: 힌트', () => {
     });
     expect(result.current.hintsUsed).toBe(0);
     expect(result.current.totalHintsUsed).toBe(2);
+  });
+});
+
+describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
+  const LIMIT = '파이뱀 선생님이 오늘은 이야기를 많이 해서 쉬고 있어요. 내일 다시 물어봐요! 🌙';
+
+  it('tutorFailure: 한도 오류면 서버 문구(저장된 답변 배지 없음), 그 밖에는 준비한 문구', () => {
+    expect(
+      tutorFailure(new TutorRateLimitError(LIMIT, 3600, 'day'), '준비한 문구'),
+    ).toEqual({ message: LIMIT, isFallback: false });
+    expect(tutorFailure(new Error('HTTP 500'), '준비한 문구')).toEqual({
+      message: '준비한 문구',
+      isFallback: true,
+    });
+  });
+
+  it('오답 피드백이 한도에 걸리면 한도 문구', async () => {
+    routes['/api/quest/validate'] = () => ({ json: { passed: false } });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockImplementation(
+      async (req: { type: string }) => {
+        if (req.type === 'code_feedback')
+          throw new TutorRateLimitError(LIMIT, 3600, 'day');
+        return { message: '안내', is_fallback: false };
+      },
+    );
+    act(() => result.current.setCode('x = 1\nprint(x)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'tutor',
+      content: LIMIT,
+      isFallback: false,
+    });
+  });
+
+  it('오답 피드백이 다른 이유로 실패하면 준비한 문구 (저장된 답변)', async () => {
+    routes['/api/quest/validate'] = () => ({ json: { passed: false } });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockImplementation(
+      async (req: { type: string }) => {
+        if (req.type === 'code_feedback') throw new Error('fail');
+        return { message: '안내', is_fallback: false };
+      },
+    );
+    act(() => result.current.setCode('x = 1\nprint(x)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.messages.at(-1)).toMatchObject({
+      role: 'tutor',
+      isFallback: true,
+    });
+    expect(result.current.messages.at(-1)?.content).not.toBe(LIMIT);
   });
 });

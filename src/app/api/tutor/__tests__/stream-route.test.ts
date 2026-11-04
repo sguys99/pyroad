@@ -51,6 +51,8 @@ const mocks = vi.hoisted(() => ({
   // null 이면 quest_answer_keys 가 없는 DB(00004 적용 전)처럼 응답
   answerKey: { current: null as unknown },
   quest: { current: null as unknown },
+  // 본인 진행 (잠긴 스테이지에서 완료한 퀘스트 복습 판단, B38)
+  progress: { current: null as unknown },
 }));
 
 function chain(data: unknown, error: unknown = null) {
@@ -67,7 +69,10 @@ function chain(data: unknown, error: unknown = null) {
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) },
-    from: () => chain({ preferred_provider: mocks.preferredProvider.current }),
+    from: (table: string) =>
+      table === 'user_progress'
+        ? chain(mocks.progress.current)
+        : chain({ preferred_provider: mocks.preferredProvider.current }),
   }),
 }));
 // 본인 API 키 없음 (B13: 키 저장소는 src/lib/tutor/__tests__/apiKeys.test.ts 에서 따로 확인)
@@ -103,6 +108,7 @@ import { POST } from '../stream/route';
 import { POST as POST_JSON } from '../route';
 import { clearTutorCache } from '@/lib/tutor/cache';
 import { readTutorStream } from '@/lib/tutor/sse';
+import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 
 function post(body: object, signal?: AbortSignal) {
   return new Request('http://localhost/api/tutor/stream', {
@@ -147,6 +153,7 @@ describe('/api/tutor/stream', () => {
     mocks.stageUnlocked.mockResolvedValue({ data: true, error: null });
     mocks.apiKeys.current = {};
     mocks.preferredProvider.current = null;
+    mocks.progress.current = null;
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'info').mockImplementation(() => {});
@@ -500,7 +507,7 @@ describe('/api/tutor/stream', () => {
       }
       expect(mocks.createProvider).not.toHaveBeenCalled();
       expect(mocks.rpc).not.toHaveBeenCalled(); // record_hint
-      expect(mocks.stageUnlocked).not.toHaveBeenCalled(); // 퀘스트까지 가지 않음
+      expect(mocks.stageUnlocked).not.toHaveBeenCalled(); // 잠금 확인·정답 조회까지 가지 않음
       expect(mocks.quota).toHaveBeenCalledWith({
         p_user_id: 'u1',
         p_bucket: 'tutor:hint_generator',
@@ -726,26 +733,74 @@ describe('/api/tutor/stream', () => {
       ]);
     });
 
-    it('잠긴 스테이지의 퀘스트는 막지 않고 info 로 기록', async () => {
-      mocks.createProvider.mockImplementation(() => echoProvider());
-      mocks.stageUnlocked.mockResolvedValue({ data: false, error: null });
-      const res = await readText(
-        await POST(post({ type: 'quest_intro', quest_id: 'q1' })),
-      );
-      expect(res.text).toContain('변수 상자');
-      expect(mocks.stageUnlocked).toHaveBeenCalledWith({
-        p_user_id: 'u1',
-        p_stage_id: 's1',
-      });
-      await vi.waitFor(() =>
+    describe('잠긴 스테이지 (B38)', () => {
+      it('잠긴 스테이지의 퀘스트는 LLM·힌트 기록 없이 403 + 아이용 문구, warning 으로 기록', async () => {
+        mocks.createProvider.mockImplementation(() => echoProvider());
+        mocks.stageUnlocked.mockResolvedValue({ data: false, error: null });
+
+        for (const route of [POST, POST_JSON]) {
+          const res = await route(
+            post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+          );
+          expect(res.status).toBe(403);
+          expect(await res.json()).toEqual({
+            error: 'stage_locked',
+            message: STAGE_LOCKED_MESSAGE,
+          });
+        }
+        expect(mocks.createProvider).not.toHaveBeenCalled();
+        expect(mocks.rpc).not.toHaveBeenCalled(); // record_hint
+        expect(mocks.stageUnlocked).toHaveBeenCalledWith({
+          p_user_id: 'u1',
+          p_stage_id: 's1',
+        });
         expect(abuseLines()).toEqual([
           expect.objectContaining({
-            level: 'info',
+            level: 'warning',
             reason: 'stage_locked',
+            kind: 'hint_generator',
             quest_id: 'invalid',
           }),
-        ]),
-      );
+          expect.objectContaining({ level: 'warning', reason: 'stage_locked' }),
+        ]);
+      });
+
+      it('잠긴 스테이지라도 이미 완료한 퀘스트(복습)는 튜터를 쓸 수 있다', async () => {
+        mocks.createProvider.mockImplementation(() => echoProvider());
+        mocks.stageUnlocked.mockResolvedValue({ data: false, error: null });
+        mocks.progress.current = { status: 'completed' };
+        const res = await readText(
+          await POST(post({ type: 'quest_intro', quest_id: 'q1' })),
+        );
+        expect(res.text).toContain('변수 상자');
+        expect(abuseLines()).toEqual([]);
+      });
+
+      it('열린 스테이지는 진행을 다시 읽지 않는다 (평소 응답 지연 없음)', async () => {
+        mocks.createProvider.mockImplementation(() => echoProvider());
+        mocks.progress.current = { status: 'in_progress' };
+        const res = await readText(
+          await POST(post({ type: 'quest_intro', quest_id: 'q1' })),
+        );
+        expect(res.text).toContain('변수 상자');
+        expect(mocks.stageUnlocked).toHaveBeenCalledTimes(1);
+      });
+
+      it('잠금 확인이 실패하면 막지 않는다 (fail-open, 로그)', async () => {
+        mocks.createProvider.mockImplementation(() => echoProvider());
+        mocks.stageUnlocked.mockResolvedValue({
+          data: null,
+          error: { code: '42883', message: 'function not found' },
+        });
+        const res = await readText(
+          await POST(post({ type: 'quest_intro', quest_id: 'q1' })),
+        );
+        expect(res.text).toContain('변수 상자');
+        expect(console.warn).toHaveBeenCalledWith(
+          '[stageLock] is_stage_unlocked 실패 (tutor):',
+          '42883 function not found',
+        );
+      });
     });
   });
 });

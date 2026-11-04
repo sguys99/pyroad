@@ -33,7 +33,8 @@ import {
   type TutorAbuseReason,
 } from '@/lib/tutor/abuse';
 import { captureServerError } from '@/lib/observability/server';
-import { after } from 'next/server';
+import { checkStageUnlocked } from '@/lib/world/checkStageUnlocked';
+import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
@@ -165,47 +166,21 @@ function overLongFields(body: TutorRequest): string[] {
   return fields;
 }
 
-/**
- * 응답을 보낸 뒤에도 끝까지 실행할 기록 작업 (Vercel 은 `after`가 waitUntil 로 함수를 살려 둠).
- * 요청 밖(단위 테스트)에서는 `after`가 던지므로 그냥 실행한다.
- */
-function runAfterResponse(task: Promise<unknown>): void {
-  const safe = task.catch(() => {});
-  try {
-    after(safe);
-  } catch {
-    void safe;
-  }
-}
+type UserClient = Awaited<ReturnType<typeof createClient>>;
 
-/**
- * 잠긴 스테이지의 퀘스트에 튜터를 부르면 기록만 한다 (P1-19). 막지 않는 이유: 퀘스트 화면이 아직 잠금을 확인하지 않아서
- * 아이가 URL 로 잠긴 퀘스트를 열 수 있고(완료는 complete_quest 가 막음), 소개·힌트는 아이에게 해가 없다.
- * 응답을 기다리게 하지 않도록 LLM 호출과 나란히 돌린다.
- */
-function auditStageLock(
-  admin: AdminClient,
+/** 이 사용자가 퀘스트를 이미 완료했는지 (본인 진행은 RLS 로 읽힘). 읽지 못하면 완료하지 않은 것으로 */
+async function hasCompletedQuest(
+  supabase: UserClient,
   userId: string,
-  quest: QuestWithStageServer,
-  type: TutorRequest['type'],
-): void {
-  runAfterResponse(
-    Promise.resolve(
-      admin.rpc('is_stage_unlocked', { p_user_id: userId, p_stage_id: quest.stage.id }),
-    ).then(({ data, error }) => {
-      if (error) {
-        console.warn('[tutor] is_stage_unlocked 실패:', error.message);
-      } else if (data === false) {
-        reportTutorAbuse({
-          userId,
-          reason: 'stage_locked',
-          level: 'info',
-          type,
-          detail: { quest_id: safeQuestId(quest.id) },
-        });
-      }
-    }),
-  );
+  questId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('user_progress')
+    .select('status')
+    .eq('user_id', userId)
+    .eq('quest_id', questId)
+    .maybeSingle();
+  return data?.status === 'completed';
 }
 
 export async function prepareTutorCall(
@@ -304,6 +279,19 @@ export async function prepareTutorCall(
   }
 
   body = sanitizeTutorBody(body);
+  const questId = body.quest_id;
+
+  // 퀘스트 행은 3~4단계(프로필·한도)와 나란히 미리 받아 둔다. 스테이지 잠금 확인(B38)에는 퀘스트의 스테이지 id 가 필요해
+  // 한 번 더 왕복하지만, 그 왕복이 전에 퀘스트 조회가 쓰던 자리(정답 조회와 나란히)에 들어가므로 전체 대기 시간은 그대로다.
+  // 정답 조회·잠금 확인은 한도를 통과한 요청만 (한도에 걸리면 이 결과는 버림)
+  const questLookup = Promise.resolve(
+    adminClient
+      .from('quests')
+      .select('*, stage:stages(id, world_id, title, order, theme_name)')
+      .eq('id', questId)
+      .single(),
+  );
+  questLookup.catch(() => {});
 
   // 3. 본인 API 키(B13, 서버에서만 복호화) + 선호 provider → 한도 종류(본인 키면 느슨하게)
   const [userProfileResult, userApiKeys] = await Promise.all([
@@ -323,7 +311,7 @@ export async function prepareTutorCall(
     userApiKeys.keys,
   );
 
-  // 4. 사용자별 요청 한도 (P1-19): 퀘스트·정답 조회, 캐시, LLM 호출 전.
+  // 4. 사용자별 요청 한도 (P1-19): 정답 조회·스테이지 잠금 확인, 캐시, LLM 호출 전.
   // 두 라우트(/api/tutor, /api/tutor/stream)가 모두 이 함수를 거치므로 한 곳에서 막는다. 캐시 적중도 센다(rateLimit.ts)
   const quota = await consumeTutorQuota(
     adminClient,
@@ -351,33 +339,41 @@ export async function prepareTutorCall(
     return rateLimitedResponse(quota);
   }
 
-  // 5. Quest (+ 정답) 병렬 조회
+  // 5. Quest → 스테이지 잠금(B38) + 정답 병렬 조회
   const needsAnswerKey = ANSWER_KEY_TYPES.has(body.type);
-  const [questResult, answerKeyRow] = await Promise.all([
-    adminClient
-      .from('quests')
-      .select('*, stage:stages(id, world_id, title, order, theme_name)')
-      .eq('id', body.quest_id)
-      .single(),
-    needsAnswerKey
-      ? fetchAnswerKeyRow(adminClient, body.quest_id)
-      : Promise.resolve(null),
-  ]);
-
-  const { data: quest } = questResult;
+  const { data: quest } = await questLookup;
 
   if (!quest) {
     return reject(404, 'Quest not found', 'quest_not_found', body.type, 'warning', {
-      quest_id: safeQuestId(body.quest_id),
+      quest_id: safeQuestId(questId),
     });
   }
 
   const q = quest as unknown as QuestWithStageServer;
+  const [stageUnlocked, answerKeyRow] = await Promise.all([
+    checkStageUnlocked(adminClient, user.id, q.stage.id, 'tutor'),
+    needsAnswerKey ? fetchAnswerKeyRow(adminClient, questId) : Promise.resolve(null),
+  ]);
+
+  // 잠긴 스테이지면 막는다 (B38). 퀘스트 화면이 잠긴 퀘스트를 열지 않으므로 우리 화면은 보내지 않는 요청이다.
+  // 이미 완료한 퀘스트(복습)는 화면과 같이 허용한다: 잠김일 때만 진행을 한 번 더 읽으므로 평소 응답은 늦어지지 않음
+  if (!stageUnlocked && !(await hasCompletedQuest(supabase, user.id, questId))) {
+    reportTutorAbuse({
+      userId: user.id,
+      reason: 'stage_locked',
+      level: 'warning',
+      type: body.type,
+      detail: { quest_id: safeQuestId(questId) },
+    });
+    return Response.json(
+      { error: 'stage_locked', message: STAGE_LOCKED_MESSAGE },
+      { status: 403 },
+    );
+  }
+
   const skeleton = q.prompt_skeleton;
   // quests 행(expected_output·prompt_skeleton)은 quest_answer_keys가 없을 때의 폴백
   const answerKey = needsAnswerKey ? resolveAnswerKey(answerKeyRow, quest) : null;
-
-  auditStageLock(adminClient, user.id, q, body.type);
 
   // 6. 프롬프트 조립
   let userPrompt: string;

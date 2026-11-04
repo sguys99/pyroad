@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { usePyodideRuntime } from '@/lib/pyodide/PyodideProvider';
 import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
-import { useTutor } from '@/lib/tutor/useTutor';
+import { useTutor, TutorRateLimitError } from '@/lib/tutor/useTutor';
 import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
@@ -103,6 +103,19 @@ const SAVE_FAILED_MESSAGE =
   '앗, 기록을 저장하지 못했어요. 한 번 더 눌러 볼까요?';
 const RUNNER_NOT_READY_FOR_KEY =
   '실행기가 준비되면 황금키를 쓸 수 있어요. 잠시만 기다려 줘요!';
+
+/**
+ * 튜터 요청이 실패했을 때 말풍선에 넣을 문구. 요청 한도(P1-19, 서버 429)면 서버가 준 아이용 한도 문구
+ * ("잠깐 쉬고 있어요. N초 뒤에…")이고 저장된 답변이 아니므로 배지를 달지 않는다. 그 밖의 실패는 준비한 문구
+ */
+export function tutorFailure(
+  error: unknown,
+  failText: string,
+): { message: string; isFallback: boolean } {
+  return error instanceof TutorRateLimitError
+    ? { message: error.message, isFallback: false }
+    : { message: failText, isFallback: true };
+}
 
 type ApiResult<T> = { ok: boolean; data: T & Partial<RewardErrorResponse> };
 
@@ -278,14 +291,20 @@ export function useQuestSession({
     [setIsLoading],
   );
 
-  /** 튜터 답을 말풍선에 흘려 쓴다. 실패하면 준비한 문구. 취소(null)면 아무것도 하지 않음 */
+  /**
+   * 튜터 답을 말풍선에 흘려 쓴다. 실패하면 준비한 문구, 요청 한도(P1-19)에 걸렸으면 한도 문구. 취소(null)면 아무것도 하지 않음.
+   * 실행 피드백(오답·실행 오류)에만 쓴다: 아이가 누른 버튼에 대한 답이라 "왜 선생님이 대답하지 않는지"를 알려 준다
+   */
   const streamTutor = useCallback(
     (req: TutorRequest, failText: string) =>
       sendTutorStreamRequest(req, setStreamingContent)
         .then((res) => {
           if (res) finishStreaming(res.message, res.is_fallback);
         })
-        .catch(() => finishStreaming(failText, true)),
+        .catch((error: unknown) => {
+          const failure = tutorFailure(error, failText);
+          finishStreaming(failure.message, failure.isFallback);
+        }),
     [sendTutorStreamRequest, finishStreaming],
   );
 
@@ -761,9 +780,12 @@ export function useQuestSession({
         return;
       }
       finishStreaming(res.message, res.is_fallback);
-    } catch {
+    } catch (error) {
       undoHint();
-      finishStreaming(TUTOR_UNAVAILABLE_HINT_MESSAGE, false);
+      finishStreaming(
+        tutorFailure(error, TUTOR_UNAVAILABLE_HINT_MESSAGE).message,
+        false,
+      );
     }
   }, [
     stepHints,

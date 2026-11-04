@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Json } from '@/lib/types/database';
 import type { RewardErrorResponse } from './rewards';
+import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -26,10 +27,7 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   quest_not_found: { status: 404, error: '퀘스트를 찾을 수 없어요.' },
   stage_not_found: { status: 404, error: '해당 스테이지를 찾을 수 없어요.' },
   user_not_found: { status: 404, error: '사용자 정보를 찾을 수 없어요.' },
-  stage_locked: {
-    status: 403,
-    error: '아직 열리지 않은 스테이지예요. 앞 스테이지를 먼저 끝내 볼까요?',
-  },
+  stage_locked: { status: 403, error: STAGE_LOCKED_MESSAGE },
   not_passed: {
     status: 422,
     error: '아직 정답이 아니에요. 코드를 다시 돌려 볼까요?',

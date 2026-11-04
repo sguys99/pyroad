@@ -12,8 +12,9 @@ import { captureServerMessage } from '@/lib/observability/server';
  * Vercel 로그의 해시로 런북 "튜터 한도·남용 기록"의 SQL 을 써서 id 를 찾는다.
  *
  * 수준
- * - info: 로그만. 정상 사용에서도 가끔 생길 수 있는 것 (한도 1~2번 초과, 긴 입력 자르기, 잠긴 스테이지 퀘스트를 URL 로 연 경우)
- * - warning: 로그 + Sentry 메시지. 우리 클라이언트로는 생기지 않는 요청, 짧은 시간 반복 초과
+ * - info: 로그만. 정상 사용에서도 가끔 생길 수 있는 것 (한도 1~2번 초과, 긴 입력 자르기)
+ * - warning: 로그 + Sentry 메시지. 우리 클라이언트로는 생기지 않는 요청(잠긴 스테이지의 퀘스트 포함 — 퀘스트 화면이 열지 않음, B38),
+ *   짧은 시간 반복 초과
  *   Sentry 는 사유별로 한 이슈(fingerprint)로 묶이고 같은 사유는 인스턴스마다 10분에 3번까지만 보낸다(P1-16 beforeSend)
  */
 export type TutorAbuseReason =
