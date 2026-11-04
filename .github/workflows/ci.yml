@@ -1,0 +1,242 @@
+# pyRoad CI (P1-15). 설명·로컬 재현 명령: docs/ci.md
+#
+# - job id 가 곧 상태 체크 이름이다 (main 보호 규칙의 필수 체크로 씀, §12-Q19·Q23). 이름을 바꾸면 보호 규칙도 같이 바꿀 것.
+# - 비밀값을 쓰지 않는다 (포크 PR 에서도 그대로 돎). Supabase·Sentry env 없이 빌드된다 (DSN 이 없으면 Sentry 꺼짐).
+# - 서드파티 action 은 커밋 SHA 로 고정하고 뒤에 버전을 주석으로 적는다 (태그는 옮겨질 수 있음).
+#   올릴 때는 `gh api repos/<owner>/<repo>/git/ref/tags/<tag>`로 SHA 를 확인하고 릴리즈 후 2주 지난 버전을 쓴다.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, 'feat/**', 'hotfix/**']
+  # 수동 실행: 무시드 20회·RLS 전체 시나리오·e2e 골격을 아무 브랜치에서나 돌려 볼 때
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 같은 PR·브랜치의 이전 실행은 취소. main 은 커밋마다 끝까지 돌림 (무시드 20회 결과를 커밋별로 남김)
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ESLint + 타입 검사. next-env.d.ts 는 git 에 없어서(.gitignore) 새 checkout 에서는 `next typegen`으로 먼저 만든다
+  # (없으면 이미지 import 가 TS2307). `prettier --check`는 기존 파일 다수가 맞지 않아 아직 넣지 않음 (docs/ci.md)
+  lint-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npx next typegen
+      - run: npx tsc --noEmit
+
+  # 단위 테스트 (npm test 와 같은 범위. *.pyodide.test.ts·*.content.test.ts 는 아래 job 들이 돌림)
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx vitest run
+
+  # 콘텐츠 검증 (§2.4, P1-13). PR 필수 체크 (§12-Q19)
+  # ① supabase/seed.sql 이 content/ 에서 다시 만든 것과 같은지 ② 모든 정답 코드가 Node Pyodide 314 에서 시드 0~9 + 무시드 1회 통과
+  content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: seed.sql 드리프트 검사
+        run: npm run content:build -- --check
+      - name: 정답 자동 검증
+        run: npm run test:content -- --reporter=default --reporter=junit --outputFile.junit=test-results/content-junit.xml
+      - name: 결과 업로드
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: content-junit
+          path: test-results/content-junit.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # main 에서만: 무시드 20회로 드문 흔들림 찾기 (§2.4). 실패 메시지의 시드로 재현 가능
+  content-unseeded:
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: 정답 자동 검증 (무시드 20회)
+        env:
+          TEST_CONTENT_UNSEEDED_RUNS: '20'
+        run: npm run test:content -- --reporter=default --reporter=junit --outputFile.junit=test-results/content-unseeded-junit.xml
+      - name: 결과 업로드
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: content-unseeded-junit
+          path: test-results/content-unseeded-junit.xml
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # Pyodide 실행 코어 (B26·B15·B14): 자체 호스팅 복사본이 npm 패키지와 같은지 + 공용 코어를 실제 Pyodide 314 로 검사
+  pyodide:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # public/pyodide/ 는 git 에 없으므로 복사한 뒤 확인 (npm 버전 ≠ package.json 이면 복사 단계에서 실패)
+      - name: 자체 호스팅 파일 복사·무결성
+        run: |
+          npm run pyodide:copy
+          node scripts/pyodide/copy-assets.mjs --check
+      - run: npm run test:pyodide
+
+  # RLS·권한 회귀 (P1-20). 격리 스택(supabase_*_pyroadci)을 띄워 점검하고 내림. DB 는 러너 안의 Docker 뿐
+  # - PR·기능 브랜치: 운영 재현(prod_replay) + fresh_legacy (RLS_SKIP_NEWDEFAULT=1)
+  # - main push·수동 실행: 3개 시나리오 전체 (+ fresh_newdefault, 스택 재시작 1회)
+  # - prod_replay 는 과거 커밋(2f0a8f3^ 의 00001, e800386 의 seed)을 git show 로 읽으므로 전체 히스토리가 필요하다
+  #   (얕은 clone 이면 run.sh 가 조용히 건너뜀 → 아래에서 실제로 돌았는지 확인)
+  rls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      # 점검 스크립트는 Node 내장 모듈만 써서 npm ci 가 필요 없다
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # CLI 버전 고정 (v3 에서 권한 기본값 설정이 바뀔 수 있음, supabase/README.md)
+      - uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3.0.1
+        with:
+          version: 2.115.0
+      - name: 권한 회귀 테스트
+        env:
+          RLS_PROJECT_ID: pyroadci
+          RLS_PORT_BASE: '54820'
+          RLS_SKIP_NEWDEFAULT: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch') && '0' || '1' }}
+        run: |
+          supabase --version
+          npm run test:rls:ci
+      - name: 운영 재현 시나리오가 돌았는지 확인
+        run: |
+          grep -q '^| prod_replay |' supabase/tests/.results/results.md \
+            || { echo '::error::prod_replay 시나리오가 실행되지 않음 (git 히스토리 확인)'; exit 1; }
+      - name: 결과 요약
+        if: ${{ !cancelled() }}
+        run: |
+          f=supabase/tests/.results/results.md
+          if [[ -f "$f" ]]; then cat "$f" >>"$GITHUB_STEP_SUMMARY"; else echo '결과 파일 없음 (스택 준비 실패, 로그 확인)' >>"$GITHUB_STEP_SUMMARY"; fi
+      - name: 결과 업로드
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rls-results
+          path: supabase/tests/.results/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # 프로덕션 빌드 (prebuild 가 Pyodide 파일을 복사). env 없이 빌드됨: Supabase 클라이언트는 요청 때 env 를 읽고,
+  # Sentry 는 NEXT_PUBLIC_SENTRY_DSN 이 없으면 withSentryConfig 를 적용하지 않음 (next.config.ts)
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: 빌드에 들어간 Pyodide 파일 확인
+        run: node scripts/pyodide/copy-assets.mjs --check
+
+  # Playwright 스모크 — 골격만 (B29). 지금 e2e 는 운영 계정·이메일 로그인에 의존해 CI 에서 돌릴 수 없음.
+  # TODO(P1-21): 비로그인 스펙을 setup 의존 없는 `public` 프로젝트로 분리하고(로컬 Supabase 전환, PORT 분리) 나면
+  #   - if 를 지워 모든 이벤트에서 돌리고 필수 체크에 추가
+  #   - 마지막 단계를 `npx playwright test --project=public`으로 바꾸고 playwright-report/ 를 아티팩트로 올림
+  # 그때까지는 수동 실행(workflow_dispatch)에서만 브라우저 설치·테스트 인식(--list)까지 확인한다.
+  e2e-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Playwright 버전
+        id: pw
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >>"$GITHUB_OUTPUT"
+      - name: 브라우저 캐시
+        id: pw-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-chromium
+      # 저장소 e2e 는 Chromium 만 씀. 캐시가 있어도 시스템 라이브러리(apt)는 매번 설치해야 함
+      - name: Chromium 설치
+        if: ${{ steps.pw-cache.outputs.cache-hit != 'true' }}
+        run: npx playwright install --with-deps chromium
+      - name: Chromium 시스템 라이브러리
+        if: ${{ steps.pw-cache.outputs.cache-hit == 'true' }}
+        run: npx playwright install-deps chromium
+      - name: 테스트 인식 확인 (TODO(P1-21) → npx playwright test --project=public)
+        run: npx playwright test --list

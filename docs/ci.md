@@ -1,0 +1,34 @@
+# CI (GitHub Actions)
+
+워크플로: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (P1-15). 배경은 `docs/4.upgrade-plan.md` §2.4·§2.7·§12-Q19·Q23.
+
+- **언제**: `main` 대상 PR, `main`·`feat/**`·`hotfix/**` push, 수동 실행(Actions 탭 → CI → Run workflow). 같은 PR·브랜치의 이전 실행은 취소되고 `main`은 커밋마다 끝까지 돕니다.
+- **비밀값 없음**: 포크 PR에서도 같은 job이 돕니다. DB는 러너 안의 임시 Docker 스택뿐이고 운영 DB에는 접속하지 않습니다.
+- job 이름이 곧 상태 체크 이름입니다. 이름을 바꾸면 `main` 보호 규칙의 필수 체크도 함께 바꿉니다.
+
+## Job과 로컬 재현
+
+새 checkout과 같게 하려면 먼저 `npm ci`. 시간은 참고값(로컬, 부하 있음)입니다.
+
+| Job | 하는 일 | 실패하면 로컬에서 | 시간 |
+|---|---|---|---|
+| `lint-typecheck` | ESLint, `next typegen`(git에 없는 `next-env.d.ts` 생성) 뒤 `tsc --noEmit` | `npm run lint && npx next typegen && npx tsc --noEmit` | 약 1.5분 |
+| `unit` | Vitest 단위 테스트 (`npm test`와 같은 범위) | `npx vitest run` | 약 1분 |
+| `content` | `seed.sql`이 `content/`와 같은지 + 모든 정답 코드를 Pyodide 314로 실행 (시드 0~9 + 무시드 1회). junit 결과를 아티팩트 `content-junit`으로 | `npm run content:build -- --check && npm run test:content` (드리프트면 `npm run content:build` 후 seed 커밋) | 약 20초 |
+| `content-unseeded` | **main push·수동 실행만**. 무시드 20회 | `TEST_CONTENT_UNSEEDED_RUNS=20 npm run test:content` (실패 메시지의 시드로 재현) | 약 30초 |
+| `pyodide` | 자체 호스팅 파일 복사·무결성 + 공용 실행 코어 테스트 | `npm run pyodide:copy && node scripts/pyodide/copy-assets.mjs --check && npm run test:pyodide` | 약 20초 |
+| `rls` | 격리 스택(`pyroadci`, 5482x)으로 RLS·권한 회귀. PR·기능 브랜치는 운영 재현 + legacy, main·수동 실행은 신규 기본값까지 3개 시나리오. 결과 표는 job 요약과 아티팩트 `rls-results`에 | `RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci` (전체는 변수 없이). 켜 둔 개발 스택이면 `npm run test:rls` | 약 4~7분 |
+| `build` | `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` | 약 3분 |
+| `e2e-smoke` | **골격만, 수동 실행에서만**: Chromium 설치(캐시) + `playwright test --list`. P1-21에서 비로그인 `public` 프로젝트로 바꾸고 켬 | `npx playwright install chromium && npx playwright test --list` | - |
+
+- `rls`의 운영 재현은 과거 커밋(`git show e800386:…`)을 읽어서 전체 히스토리로 checkout합니다(`fetch-depth: 0`). 얕은 clone이면 `run.sh`가 조용히 건너뛰므로 CI는 결과 표에 `prod_replay`가 있는지 따로 확인합니다.
+- Supabase CLI는 **2.115.0** 고정(`supabase/README.md`). 로컬에서 격리 모드를 다른 작업과 동시에 돌릴 때는 `RLS_PROJECT_ID`·`RLS_PORT_BASE`를 바꿉니다.
+- `prettier --check`는 아직 넣지 않았습니다. 기존 파일(`src/` 78개, `spikes/` 등 모두 381개)이 맞지 않아서, 한 번에 `npx prettier --write`로 정리한 뒤 `lint-typecheck`에 추가합니다.
+
+## 필수 체크 (main 보호 규칙)
+
+`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build`. `content-unseeded`(main 전용)와 `e2e-smoke`(P1-21 전)는 PR에서 돌지 않으므로 넣지 않습니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
+
+## Action 고정
+
+서드파티 action은 커밋 SHA로 고정하고 버전을 주석으로 적습니다(태그는 옮겨질 수 있음). 올릴 때는 릴리즈 후 2주 이상 지난 버전의 SHA를 `gh api repos/<owner>/<repo>/git/ref/tags/<tag>`로 확인하고(annotated tag면 한 번 더 `git/tags/<sha>`), 바꾼 뒤 [actionlint](https://github.com/rhysd/actionlint)로 검사합니다.
