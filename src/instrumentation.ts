@@ -2,9 +2,14 @@ import type { Instrumentation } from 'next';
 import { isSentryEnabled } from '@/lib/observability/config';
 
 /**
- * 서버·Edge Sentry 등록 (P1-16). DSN이 없으면 SDK를 불러오지 않는다.
+ * 서버 시작 때 한 번: env 점검 로그(P1-22) + 서버·Edge Sentry 등록(P1-16). DSN이 없으면 SDK를 불러오지 않는다.
  */
 export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { reportServerEnvProblems } = await import('@/lib/env/checkServerEnv');
+    reportServerEnvProblems();
+  }
+
   if (!isSentryEnabled()) return;
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {

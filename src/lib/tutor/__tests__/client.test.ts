@@ -77,6 +77,32 @@ describe('callTutor / callTutorStream — 서버 유료 키 보호', () => {
     expect(vi.mocked(createProvider).mock.calls[0]).toEqual(['openai', 'user-key', undefined]);
   });
 
+  it('서버 키 전역 예산(allowServerKey)은 서버 키 호출에만 묻고, 거부되면 그 provider 를 건너뛴다 (P1-22)', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'server-gemini');
+    vi.mocked(createProvider).mockImplementation((type) =>
+      fakeProvider(type === 'gemini' ? '안녕' : new Error('fail')),
+    );
+    const allowServerKey = vi.fn().mockResolvedValue(false);
+    vi.useFakeTimers();
+
+    // 서버 키 1차 호출이 거부되면 provider 를 만들지도 않는다
+    expect(
+      await callTutor('s', 'u', 100, 'gemini', undefined, false, [], { allowServerKey }),
+    ).toEqual({ text: '', ok: false });
+    expect(createProvider).not.toHaveBeenCalled();
+    expect(allowServerKey).toHaveBeenCalledWith('gemini');
+
+    // 본인 키 1차 호출은 묻지 않고, 서버 키 폴백만 묻는다
+    allowServerKey.mockClear();
+    const promise = callTutor('s', 'u', 100, 'openai', 'user-key', false, ['gemini'], {
+      allowServerKey,
+    });
+    await vi.runAllTimersAsync();
+    expect(await promise).toEqual({ text: '', ok: false });
+    expect(allowServerKey.mock.calls).toEqual([['gemini']]);
+    expect(calledTypes()).toEqual(['openai', 'openai']);
+  });
+
   it('스트리밍도 서버에 무료 티어 키가 없으면 유료 provider를 호출하지 않는다', async () => {
     const text = await new Response(callTutorStream('s', 'u', 100, 'gemini')).text();
     expect(text).toContain('"error":true');

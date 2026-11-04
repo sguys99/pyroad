@@ -52,6 +52,8 @@ export async function POST(request: Request) {
     fallbackProviders,
     {
       signal: request.signal,
+      // 서버 키 전역 예산(P1-22)은 캐시를 지나 실제로 provider 를 부를 때만 센다
+      allowServerKey: prepared.allowServerKey,
       // 끝까지 성공한 한 provider의 전체 답만 캐시 (reset 전의 부분 응답은 들어가지 않음)
       onComplete: (text) => {
         if (cacheKey && text) setCachedResponse(cacheKey, text);

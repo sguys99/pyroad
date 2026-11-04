@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     customApiKey,
     fast,
     fallbackProviders,
-    { signal: request.signal },
+    // 서버 키 전역 예산(P1-22)은 캐시를 지나 실제로 provider 를 부를 때만 센다
+    { signal: request.signal, allowServerKey: prepared.allowServerKey },
   );
 
   let message: string;

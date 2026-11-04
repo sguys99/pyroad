@@ -32,6 +32,7 @@ import {
   type TutorAbuseLevel,
   type TutorAbuseReason,
 } from '@/lib/tutor/abuse';
+import { consumeServerKeyBudget } from '@/lib/tutor/globalBudget';
 import { captureServerError } from '@/lib/observability/server';
 import { checkStageUnlocked } from '@/lib/world/checkStageUnlocked';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
@@ -86,6 +87,8 @@ export interface PreparedTutorCall {
    * (P1-04, B05). 클라이언트는 hints_used를 쓰지 않는다. 실패해도 던지지 않음(힌트는 그대로 보냄)
    */
   recordHint: (() => Promise<void>) | null;
+  /** 서버 키로 provider 를 부르기 직전에 전역 예산을 1 차감한다 (P1-22). callTutor·callTutorStream 의 `allowServerKey` */
+  allowServerKey: (provider: LLMProviderType) => Promise<boolean>;
 }
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -479,6 +482,7 @@ export async function prepareTutorCall(
               body.hint_level as 1 | 2 | 3,
             )
         : null,
+    allowServerKey: (provider) => consumeServerKeyBudget(adminClient, provider),
   };
 }
 

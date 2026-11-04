@@ -3,13 +3,9 @@ import {
   getAvailableProviders,
 } from './providers/factory';
 import type { LLMProviderType } from './providers/types';
+import { FAST_MODELS } from './providers/models';
 import { encodeSseEvent, type TutorStreamEvent } from './sse';
 import { captureServerError } from '@/lib/observability/server';
-
-// Anthropic 경량 모델 (quest_intro, encouragement용)
-const FAST_MODEL: Record<string, string> = {
-  anthropic: 'claude-haiku-4-5-20251001',
-};
 
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
@@ -50,6 +46,11 @@ export interface TutorCallResult {
 export interface TutorCallOptions {
   /** 요청 취소 신호 (route에서 `request.signal`). 취소되면 재시도·폴백 없이 멈춘다 */
   signal?: AbortSignal;
+  /**
+   * 서버 키로 provider 를 부르기 직전에 한 번 묻는다 (서버 키 전역 예산, `globalBudget.ts`). false 면 그 provider 를 건너뛴다.
+   * 본인 키 호출에는 부르지 않는다. 없으면 모두 허용
+   */
+  allowServerKey?: (provider: LLMProviderType) => Promise<boolean>;
 }
 
 export async function callTutor(
@@ -62,12 +63,17 @@ export async function callTutor(
   fallbackProviders: LLMProviderType[] = [],
   options: TutorCallOptions = {},
 ): Promise<TutorCallResult> {
-  const { signal } = options;
+  const { signal, allowServerKey } = options;
   const available = getAvailableProviders();
+  const serverKeyAllowed = async (provider: LLMProviderType) =>
+    !allowServerKey || (await allowServerKey(provider));
 
   // 본인 키도 서버 키도 없는 provider는 호출하지 않음 (다른 유료 provider로 대체 금지)
-  if (customApiKey || available.includes(providerType)) {
-    const modelOverride = fast ? FAST_MODEL[providerType] : undefined;
+  if (
+    customApiKey ||
+    (available.includes(providerType) && (await serverKeyAllowed(providerType)))
+  ) {
+    const modelOverride = fast ? FAST_MODELS[providerType] : undefined;
 
     // 1차 시도 + 재시도
     const result = await attemptWithRetry(
@@ -85,6 +91,7 @@ export async function callTutor(
   // 허용된 폴백 provider만 서버 키로 시도, 그 외에는 rule-based fallback
   for (const fallback of fallbackProviders.filter((p) => available.includes(p))) {
     if (signal?.aborted) break;
+    if (!(await serverKeyAllowed(fallback))) continue;
     const fallbackResult = await attemptOnce(
       fallback,
       systemPrompt,
@@ -148,7 +155,7 @@ export function callTutorStream(
     attempts.push({
       providerType,
       customApiKey,
-      modelOverride: fast ? FAST_MODEL[providerType] : undefined,
+      modelOverride: fast ? FAST_MODELS[providerType] : undefined,
     });
   }
   // 허용된 폴백 provider만 서버 키로 시도
@@ -192,6 +199,15 @@ export function callTutorStream(
 
       try {
         for (const attempt of attempts) {
+          if (abort.signal.aborted) return;
+          // 서버 키 전역 예산을 넘었으면 이 provider 는 건너뛴다 (본인 키는 세지 않음)
+          if (
+            !attempt.customApiKey &&
+            options.allowServerKey &&
+            !(await options.allowServerKey(attempt.providerType))
+          ) {
+            continue;
+          }
           if (abort.signal.aborted) return;
 
           const result = await tryStreamProvider(

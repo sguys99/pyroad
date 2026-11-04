@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import type { LLMCallOptions, LLMProvider } from './types';
+import { resolveModel } from './models';
 
 export class GeminiProvider implements LLMProvider {
   private client: GoogleGenAI;
@@ -7,7 +8,7 @@ export class GeminiProvider implements LLMProvider {
 
   constructor(apiKey: string, model?: string) {
     this.client = new GoogleGenAI({ apiKey });
-    this.model = model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    this.model = resolveModel('gemini', model);
   }
 
   async call(

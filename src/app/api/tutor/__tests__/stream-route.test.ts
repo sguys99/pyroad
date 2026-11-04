@@ -46,6 +46,8 @@ const mocks = vi.hoisted(() => ({
   // consume_rate_limit (P1-19)·is_stage_unlocked 는 따로 받아 record_hint 호출 수에 섞이지 않게
   quota: vi.fn(),
   stageUnlocked: vi.fn(),
+  // consume_global_rate_limit: 서버 키 전역 예산 (P1-22)
+  globalQuota: vi.fn(),
   apiKeys: { current: {} as Record<string, string> },
   preferredProvider: { current: null as string | null },
   // null 이면 quest_answer_keys 가 없는 DB(00004 적용 전)처럼 응답
@@ -90,7 +92,9 @@ vi.mock('@/lib/supabase/admin', () => ({
         ? mocks.quota(args)
         : fn === 'is_stage_unlocked'
           ? mocks.stageUnlocked(args)
-          : mocks.rpc(fn, args),
+          : fn === 'consume_global_rate_limit'
+            ? mocks.globalQuota(args)
+            : mocks.rpc(fn, args),
     from: (table: string) =>
       table === 'quest_answer_keys'
         ? mocks.answerKey.current
@@ -151,6 +155,8 @@ describe('/api/tutor/stream', () => {
     mocks.quota.mockResolvedValue({ data: QUOTA_OK, error: null });
     mocks.stageUnlocked.mockReset();
     mocks.stageUnlocked.mockResolvedValue({ data: true, error: null });
+    mocks.globalQuota.mockReset();
+    mocks.globalQuota.mockResolvedValue({ data: QUOTA_OK, error: null });
     mocks.apiKeys.current = {};
     mocks.preferredProvider.current = null;
     mocks.progress.current = null;
@@ -461,6 +467,108 @@ describe('/api/tutor/stream', () => {
       );
       await readText(await POST(post({ type: 'quest_intro', quest_id: 'q1' })));
       expect(mocks.rpc).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('서버 키 전역 예산 (P1-22)', () => {
+    const DENIED = {
+      allowed: false,
+      retry_after: 30,
+      remaining: 0,
+      scope: 'day',
+      denied_minute: 1,
+      denied_today: 1,
+    };
+
+    it('서버 Gemini 키를 부르기 전에 tutor:gemini:global 버킷을 1 차감한다', async () => {
+      mocks.createProvider.mockImplementation(() => echoProvider());
+      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })));
+      expect(mocks.globalQuota).toHaveBeenCalledTimes(1);
+      expect(mocks.globalQuota).toHaveBeenCalledWith({
+        p_bucket: 'tutor:gemini:global',
+        p_per_minute: 10,
+        p_per_day: 500,
+      });
+    });
+
+    it('예산을 넘으면 provider 를 부르지 않고 저장된 답변(해당 단계 힌트)을 보낸다', async () => {
+      mocks.globalQuota.mockResolvedValue({ data: DENIED, error: null });
+      mocks.createProvider.mockImplementation(() => echoProvider());
+
+      const res = await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 2 }));
+      expect(res.status).toBe(200);
+      expect(await readText(res)).toMatchObject({ text: '저장된 힌트 2', isFallback: true });
+      expect(mocks.createProvider).not.toHaveBeenCalled();
+    });
+
+    it('비스트림 /api/tutor 도 예산을 넘으면 저장된 답변', async () => {
+      mocks.globalQuota.mockResolvedValue({ data: DENIED, error: null });
+      mocks.createProvider.mockImplementation(() => echoProvider());
+
+      const data = await (
+        await POST_JSON(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 3 }))
+      ).json();
+      expect(data).toMatchObject({ message: '저장된 힌트 3', is_fallback: true });
+      expect(mocks.createProvider).not.toHaveBeenCalled();
+    });
+
+    it('env TUTOR_GLOBAL_LIMIT_GEMINI 로 한도를 바꾼다', async () => {
+      vi.stubEnv('TUTOR_GLOBAL_LIMIT_GEMINI', '30/2000');
+      mocks.createProvider.mockImplementation(() => echoProvider());
+      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })));
+      expect(mocks.globalQuota).toHaveBeenCalledWith({
+        p_bucket: 'tutor:gemini:global',
+        p_per_minute: 30,
+        p_per_day: 2000,
+      });
+    });
+
+    it('캐시 적중은 예산을 쓰지 않는다 (서버 키를 부르지 않음)', async () => {
+      mocks.createProvider.mockImplementation(() => echoProvider());
+      await readText(await POST(post({ type: 'quest_intro', quest_id: 'q1' })));
+      await readText(await POST(post({ type: 'quest_intro', quest_id: 'q1' })));
+      expect(mocks.globalQuota).toHaveBeenCalledTimes(1);
+    });
+
+    it('본인 키 호출은 예산을 쓰지 않고, 무료 티어로 폴백할 때만 쓴다', async () => {
+      mocks.apiKeys.current = { openai: 'sk-own' };
+      mocks.preferredProvider.current = 'openai';
+      mocks.createProvider.mockImplementation((type: string) => ({
+        async call() {
+          return '';
+        },
+        async *callStream() {
+          if (type === 'openai') throw new Error('bad key');
+          yield '제미나이';
+        },
+      }));
+
+      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })));
+      expect(mocks.globalQuota).toHaveBeenCalledTimes(1);
+      expect(mocks.createProvider.mock.calls.map((c) => c[0])).toEqual(['openai', 'gemini']);
+
+      mocks.globalQuota.mockClear();
+      mocks.createProvider.mockImplementation(() => echoProvider());
+      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 2 })));
+      expect(mocks.globalQuota).not.toHaveBeenCalled();
+    });
+
+    it('예산 RPC 가 실패하면(00017 미적용 등) 막지 않고 통과시키며 로그를 남긴다 (fail-open)', async () => {
+      mocks.globalQuota.mockResolvedValue({
+        data: null,
+        error: { code: '42883', message: 'function does not exist' },
+      });
+      mocks.createProvider.mockImplementation(() => echoProvider());
+
+      const result = await readText(
+        await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })),
+      );
+      expect(result.isFallback).toBe(false);
+      expect(mocks.createProvider).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith(
+        '[tutor] consume_global_rate_limit 실패:',
+        expect.stringContaining('42883'),
+      );
     });
   });
 
