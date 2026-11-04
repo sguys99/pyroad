@@ -1,13 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { m, useReducedMotion } from 'framer-motion';
-
-// canvas-confetti 모듈 사전 로드 (브라우저에서만)
-const confettiReady =
-  typeof window !== 'undefined'
-    ? import('canvas-confetti').then((m) => m.default)
-    : null;
+import { m, MotionConfig, useReducedMotion } from 'framer-motion';
+import { fireConfetti } from '@/lib/confetti';
 
 export interface ConfettiBurst {
   particleCount: number;
@@ -39,21 +34,19 @@ export function CelebrationOverlay({
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    // Confetti 발사 (reduced-motion 시 비활성화)
+    // Confetti 발사 (reduced-motion 시 비활성화, fireConfetti도 한 번 더 확인)
     if (!shouldReduceMotion && confettiBursts) {
       for (const burst of confettiBursts) {
         const timer = setTimeout(() => {
-          confettiReady?.then((confetti) =>
-            confetti({
-              particleCount: burst.particleCount,
-              spread: burst.spread,
-              origin: burst.origin,
-              ticks: 90,
-              gravity: 2.2,
-              startVelocity: 70,
-              ...(burst.colors ? { colors: burst.colors } : {}),
-            }),
-          );
+          fireConfetti({
+            particleCount: burst.particleCount,
+            spread: burst.spread,
+            origin: burst.origin,
+            ticks: 90,
+            gravity: 2.2,
+            startVelocity: 70,
+            ...(burst.colors ? { colors: burst.colors } : {}),
+          });
         }, burst.delay ?? 0);
         timersRef.current.push(timer);
       }
@@ -89,7 +82,8 @@ export function CelebrationOverlay({
         transition={shouldReduceMotion ? instantConfig : springConfig}
         onClick={(e) => e.stopPropagation()}
       >
-        {children}
+        {/* reduced-motion이면 안쪽 팝·점프 등 transform 연출을 즉시 끝냄 (움직임 0) */}
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
       </m.div>
     </m.div>
   );

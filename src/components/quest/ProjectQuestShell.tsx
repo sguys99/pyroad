@@ -5,7 +5,8 @@ import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
 import { useTutor } from '@/lib/tutor/useTutor';
-import { createClient } from '@/lib/supabase/client';
+import { loadBrowserClient } from '@/lib/supabase/loadClient';
+import { fireConfetti } from '@/lib/confetti';
 import { getLevelTitle } from '@/lib/quest/xp';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type {
@@ -26,12 +27,6 @@ import { LevelUpCelebration } from './celebrations/LevelUpCelebration';
 import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
 import { ProjectCompleteCelebration } from './celebrations/ProjectCompleteCelebration';
 import { ApiKeyBanner } from './ApiKeyBanner';
-
-// canvas-confetti 모듈 사전 로드 (브라우저에서만)
-const confettiReady =
-  typeof window !== 'undefined'
-    ? import('canvas-confetti').then((m) => m.default)
-    : null;
 
 type Tab = 'story' | 'code' | 'result';
 type CelebrationPhase =
@@ -192,22 +187,23 @@ export function ProjectQuestShell({
 
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      const supabase = createClient();
-      supabase
-        .from('user_progress')
-        .upsert(
-          {
-            user_id: userId,
-            quest_id: quest.id,
-            code_submitted: code,
-            hints_used: totalHintsUsed,
-            status: 'in_progress' as const,
-            current_step: currentStep,
-            step_submissions: stepSubmissions,
-          },
-          { onConflict: 'user_id,quest_id' },
-        )
-        .then();
+      loadBrowserClient().then((supabase) => {
+        supabase
+          .from('user_progress')
+          .upsert(
+            {
+              user_id: userId,
+              quest_id: quest.id,
+              code_submitted: code,
+              hints_used: totalHintsUsed,
+              status: 'in_progress' as const,
+              current_step: currentStep,
+              step_submissions: stepSubmissions,
+            },
+            { onConflict: 'user_id,quest_id' },
+          )
+          .then();
+      });
     }, 2000);
 
     return () => {
@@ -245,22 +241,23 @@ export function ProjectQuestShell({
     }
 
     // DB 저장 (fire-and-forget)
-    const supabase = createClient();
-    supabase
-      .from('user_progress')
-      .upsert(
-        {
-          user_id: userId,
-          quest_id: quest.id,
-          hints_used: totalHintsUsed + 1,
-          code_submitted: code,
-          status: 'in_progress' as const,
-          current_step: currentStep,
-          step_submissions: stepSubmissions,
-        },
-        { onConflict: 'user_id,quest_id' },
-      )
-      .then();
+    loadBrowserClient().then((supabase) => {
+      supabase
+        .from('user_progress')
+        .upsert(
+          {
+            user_id: userId,
+            quest_id: quest.id,
+            hints_used: totalHintsUsed + 1,
+            code_submitted: code,
+            status: 'in_progress' as const,
+            current_step: currentStep,
+            step_submissions: stepSubmissions,
+          },
+          { onConflict: 'user_id,quest_id' },
+        )
+        .then();
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepHintsUsed, isAiLoading, isProjectComplete, quest.id, code, userId, currentStep, totalHintsUsed]);
 
@@ -341,14 +338,12 @@ export function ProjectQuestShell({
       );
 
       // Confetti (황금키 전용)
-      confettiReady?.then((confetti) => {
-        confetti({
-          particleCount: 40,
-          spread: 50,
-          origin: { y: 0.6 },
-          ticks: 60,
-          colors: ['#FFD700', '#FFA500', '#FF8C00'],
-        });
+      fireConfetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.6 },
+        ticks: 60,
+        colors: ['#FFD700', '#FFA500', '#FF8C00'],
       });
     } catch {
       setMessages((prev) => [
@@ -382,34 +377,33 @@ export function ProjectQuestShell({
     setStepHintsUsed(0);
 
     // 미니 confetti
-    confettiReady?.then((confetti) => {
-      confetti({
-        particleCount: 40,
-        spread: 50,
-        origin: { y: 0.7 },
-        ticks: 90,
-        gravity: 2.2,
-        startVelocity: 70,
-      });
+    fireConfetti({
+      particleCount: 40,
+      spread: 50,
+      origin: { y: 0.7 },
+      ticks: 90,
+      gravity: 2.2,
+      startVelocity: 70,
     });
 
     // DB 저장
-    const supabase = createClient();
-    supabase
-      .from('user_progress')
-      .upsert(
-        {
-          user_id: userId,
-          quest_id: quest.id,
-          code_submitted: nextCode,
-          hints_used: totalHintsUsed,
-          status: 'in_progress' as const,
-          current_step: nextStep,
-          step_submissions: updatedSubmissions,
-        },
-        { onConflict: 'user_id,quest_id' },
-      )
-      .then();
+    loadBrowserClient().then((supabase) => {
+      supabase
+        .from('user_progress')
+        .upsert(
+          {
+            user_id: userId,
+            quest_id: quest.id,
+            code_submitted: nextCode,
+            hints_used: totalHintsUsed,
+            status: 'in_progress' as const,
+            current_step: nextStep,
+            step_submissions: updatedSubmissions,
+          },
+          { onConflict: 'user_id,quest_id' },
+        )
+        .then();
+    });
   }, [currentStep, code, stepSubmissions, steps, userId, quest.id, totalHintsUsed]);
 
   const handleRun = useCallback(async () => {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -47,7 +47,7 @@ export function AccountManagementSection({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || '탈퇴 처리 중 오류가 발생했습니다.');
       }
-      const supabase = createClient();
+      const supabase = await loadBrowserClient();
       await supabase.auth.signOut();
       router.push('/');
     } catch (err) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import {
   detectInAppBrowser,
   type InAppBrowserInfo,
@@ -24,7 +24,7 @@ export function useGoogleLogin() {
       return;
     }
 
-    const supabase = createClient();
+    const supabase = await loadBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

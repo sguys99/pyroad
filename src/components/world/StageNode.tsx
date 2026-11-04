@@ -123,9 +123,10 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
             {config.label}
           </span>
         </div>
-        <h3 className="text-xs sm:text-sm font-bold text-foreground leading-tight truncate">
+        {/* 버튼 안에는 제목 태그를 둘 수 없어 span으로 둠. 목록 제목은 WorldMap의 h2 (B33) */}
+        <span className="block text-xs sm:text-sm font-bold text-foreground leading-tight truncate">
           {stage.title}
-        </h3>
+        </span>
         {stage.status !== 'locked' && (
           <p className="text-[9px] sm:text-[10px] text-muted-foreground">
             {stage.completedQuestCount}/{stage.totalQuestCount} 퀘스트

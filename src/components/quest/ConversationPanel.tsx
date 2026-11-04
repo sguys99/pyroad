@@ -222,8 +222,8 @@ export function ConversationPanel({
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 힌트: {3 - hintsUsed}/3
                 <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="h-3 w-3 text-muted-foreground/60" />
+                  <TooltipTrigger className="cursor-help" aria-label="힌트 안내">
+                    <Info className="h-3 w-3 text-muted-foreground/60" aria-hidden />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p>힌트는 퀘스트마다 3개씩 제공됩니다.</p>
@@ -234,8 +234,8 @@ export function ConversationPanel({
                 <KeyRound className="h-3 w-3" />
                 황금키: {goldenKeys}/3
                 <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="h-3 w-3 text-amber-600/60" />
+                  <TooltipTrigger className="cursor-help" aria-label="황금키 안내">
+                    <Info className="h-3 w-3 text-amber-600/60" aria-hidden />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p>황금키는 스테이지를 완료하면 3개로 보충됩니다.</p>

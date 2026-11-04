@@ -85,9 +85,9 @@ export default async function ProfilePage() {
             <CharacterAvatar character="pybaem" expression="happy" size="lg" animated />
           </div>
         )}
-        <p className="text-xl font-bold text-foreground">
+        <h1 className="text-xl font-bold text-foreground">
           {profile.display_name}
-        </p>
+        </h1>
         <p className="text-muted-foreground">
           Lv.{profile.current_level} {title}
         </p>

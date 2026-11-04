@@ -84,6 +84,9 @@ export function WorldMap({ stages }: WorldMapProps) {
 
   return (
     <div className="relative w-full aspect-[2/3] sm:aspect-[400/480]">
+      {/* 화면 읽기 프로그램용 목록 제목 (페이지 h1 "모험 지도" 아래 단계, B33) */}
+      <h2 className="sr-only">모험 스테이지</h2>
+
       {/* SVG winding path background */}
       <WindingPath progressFraction={progressFraction} />
 

@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { usePyodide } from '@/lib/pyodide/usePyodide';
 import { useTutor } from '@/lib/tutor/useTutor';
-import { createClient } from '@/lib/supabase/client';
+import { loadBrowserClient } from '@/lib/supabase/loadClient';
+import { fireConfetti } from '@/lib/confetti';
 import { getLevelTitle } from '@/lib/quest/xp';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
@@ -22,11 +23,6 @@ import { QuestStatusBar } from './QuestStatusBar';
 import { LevelUpCelebration } from './celebrations/LevelUpCelebration';
 import { StageCompleteCelebration } from './celebrations/StageCompleteCelebration';
 
-// canvas-confetti 모듈 사전 로드 (브라우저에서만)
-const confettiReady =
-  typeof window !== 'undefined'
-    ? import('canvas-confetti').then((m) => m.default)
-    : null;
 import { BadgeEarnedPopup } from './celebrations/BadgeEarnedPopup';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
@@ -149,20 +145,21 @@ export function QuestShell({
 
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      const supabase = createClient();
-      supabase
-        .from('user_progress')
-        .upsert(
-          {
-            user_id: userId,
-            quest_id: quest.id,
-            code_submitted: code,
-            hints_used: hintsUsed,
-            status: 'in_progress' as const,
-          },
-          { onConflict: 'user_id,quest_id' },
-        )
-        .then();
+      loadBrowserClient().then((supabase) => {
+        supabase
+          .from('user_progress')
+          .upsert(
+            {
+              user_id: userId,
+              quest_id: quest.id,
+              code_submitted: code,
+              hints_used: hintsUsed,
+              status: 'in_progress' as const,
+            },
+            { onConflict: 'user_id,quest_id' },
+          )
+          .then();
+      });
     }, 2000);
 
     return () => {
@@ -199,20 +196,21 @@ export function QuestShell({
     }
 
     // DB 저장 (fire-and-forget)
-    const supabase = createClient();
-    supabase
-      .from('user_progress')
-      .upsert(
-        {
-          user_id: userId,
-          quest_id: quest.id,
-          hints_used: nextLevel,
-          code_submitted: code,
-          status: 'in_progress' as const,
-        },
-        { onConflict: 'user_id,quest_id' },
-      )
-      .then();
+    loadBrowserClient().then((supabase) => {
+      supabase
+        .from('user_progress')
+        .upsert(
+          {
+            user_id: userId,
+            quest_id: quest.id,
+            hints_used: nextLevel,
+            code_submitted: code,
+            status: 'in_progress' as const,
+          },
+          { onConflict: 'user_id,quest_id' },
+        )
+        .then();
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hintsUsed, isAiLoading, isCompleted, quest.id, code, userId]);
 
@@ -285,14 +283,12 @@ export function QuestShell({
       );
 
       // Confetti (황금키 전용 — 작은 규모)
-      confettiReady?.then((confetti) => {
-        confetti({
-          particleCount: 40,
-          spread: 50,
-          origin: { y: 0.6 },
-          ticks: 60,
-          colors: ['#FFD700', '#FFA500', '#FF8C00'],
-        });
+      fireConfetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.6 },
+        ticks: 60,
+        colors: ['#FFD700', '#FFA500', '#FF8C00'],
       });
     } catch {
       setMessages((prev) => [
@@ -406,15 +402,13 @@ export function QuestShell({
         setIsCompleted(true);
 
         // Confetti
-        confettiReady?.then((confetti) => {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            ticks: 90,
-            gravity: 2.2,
-            startVelocity: 70,
-          });
+        fireConfetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          ticks: 90,
+          gravity: 2.2,
+          startVelocity: 70,
         });
 
         // AI 피드백 (성공) — 스트리밍으로 순차 표시
