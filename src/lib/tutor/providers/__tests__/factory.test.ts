@@ -8,7 +8,12 @@ import {
 describe('getUserKeyedProviders', () => {
   it('알 수 없는 provider와 빈 값은 제외', () => {
     expect(
-      getUserKeyedProviders({ openai: 'k1', anthropic: '', foo: 'k2', gemini: 123 }),
+      getUserKeyedProviders({
+        openai: 'k1',
+        anthropic: '',
+        foo: 'k2',
+        gemini: 123,
+      }),
     ).toEqual(['openai']);
   });
 
@@ -40,7 +45,9 @@ describe('resolveUserProvider', () => {
   });
 
   it('본인 키가 있어도 무료 티어를 선호하면 서버 무료 티어 사용', () => {
-    expect(resolveUserProvider(FREE_TIER_PROVIDER, { openai: 'my-key' })).toEqual({
+    expect(
+      resolveUserProvider(FREE_TIER_PROVIDER, { openai: 'my-key' }),
+    ).toEqual({
       providerType: FREE_TIER_PROVIDER,
     });
   });

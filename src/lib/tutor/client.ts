@@ -1,7 +1,4 @@
-import {
-  createProvider,
-  getAvailableProviders,
-} from './providers/factory';
+import { createProvider, getAvailableProviders } from './providers/factory';
 import type { LLMProviderType } from './providers/types';
 import { FAST_MODELS } from './providers/models';
 import { encodeSseEvent, type TutorStreamEvent } from './sse';
@@ -85,11 +82,14 @@ export async function callTutor(
       modelOverride,
       signal,
     );
-    if (result.ok) return { ...result, provider_used: providerType, was_fallback: false };
+    if (result.ok)
+      return { ...result, provider_used: providerType, was_fallback: false };
   }
 
   // 허용된 폴백 provider만 서버 키로 시도, 그 외에는 rule-based fallback
-  for (const fallback of fallbackProviders.filter((p) => available.includes(p))) {
+  for (const fallback of fallbackProviders.filter((p) =>
+    available.includes(p),
+  )) {
     if (signal?.aborted) break;
     if (!(await serverKeyAllowed(fallback))) continue;
     const fallbackResult = await attemptOnce(
@@ -159,7 +159,9 @@ export function callTutorStream(
     });
   }
   // 허용된 폴백 provider만 서버 키로 시도
-  for (const fallback of fallbackProviders.filter((p) => available.includes(p))) {
+  for (const fallback of fallbackProviders.filter((p) =>
+    available.includes(p),
+  )) {
     attempts.push({ providerType: fallback });
   }
 
@@ -186,7 +188,9 @@ export function callTutorStream(
         }
       };
       // done 을 받은 클라이언트가 새로 고쳐도 기록이 보이게, 기록이 끝난 뒤 done 을 보낸다
-      const sendDone = async (event: Extract<TutorStreamEvent, { done: true }>) => {
+      const sendDone = async (
+        event: Extract<TutorStreamEvent, { done: true }>,
+      ) => {
         await firstContent;
         send(event);
       };
@@ -194,7 +198,9 @@ export function callTutorStream(
       if (requestSignal?.aborted) {
         abort.abort(requestSignal.reason);
       } else {
-        requestSignal?.addEventListener('abort', onRequestAbort, { once: true });
+        requestSignal?.addEventListener('abort', onRequestAbort, {
+          once: true,
+        });
       }
 
       try {
@@ -264,7 +270,9 @@ async function tryStreamProvider(
       attempt.customApiKey,
       attempt.modelOverride,
     );
-    const stream = provider.callStream(systemPrompt, userPrompt, maxTokens, { signal });
+    const stream = provider.callStream(systemPrompt, userPrompt, maxTokens, {
+      signal,
+    });
 
     for await (const delta of stream) {
       if (signal.aborted) break;
@@ -280,7 +288,12 @@ async function tryStreamProvider(
         `[tutor] ${attempt.providerType} stream failed:`,
         error instanceof Error ? error.message : error,
       );
-      reportProviderError(error, attempt.providerType, 'stream', attempt.customApiKey);
+      reportProviderError(
+        error,
+        attempt.providerType,
+        'stream',
+        attempt.customApiKey,
+      );
     }
     return { ok: false, text, emitted: text.length > 0 };
   }
@@ -309,7 +322,15 @@ async function attemptWithRetry(
   // 1회 재시도 (1초 후)
   await delay(1000, signal);
   if (signal?.aborted) return result;
-  return attemptOnce(providerType, systemPrompt, userPrompt, maxTokens, customApiKey, modelOverride, signal);
+  return attemptOnce(
+    providerType,
+    systemPrompt,
+    userPrompt,
+    maxTokens,
+    customApiKey,
+    modelOverride,
+    signal,
+  );
 }
 
 async function attemptOnce(
@@ -323,7 +344,9 @@ async function attemptOnce(
 ): Promise<{ text: string; ok: boolean }> {
   try {
     const provider = createProvider(providerType, customApiKey, modelOverride);
-    const text = await provider.call(systemPrompt, userPrompt, maxTokens, { signal });
+    const text = await provider.call(systemPrompt, userPrompt, maxTokens, {
+      signal,
+    });
     return { text, ok: true };
   } catch (error) {
     if (!signal?.aborted) {

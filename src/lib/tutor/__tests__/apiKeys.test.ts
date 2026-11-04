@@ -47,8 +47,16 @@ afterEach(() => {
 describe('키가 없을 때', () => {
   it('API_KEY_ENCRYPTION_KEY 가 없으면 커스텀 키만 꺼지고 DB 에 쓰지 않음', async () => {
     delete process.env.API_KEY_ENCRYPTION_KEY;
-    setState({ users: { [U1]: { preferred_provider: null, custom_api_keys: { openai: OPENAI } } } });
-    expect(await loadUserApiKeys(U1)).toEqual({ enabled: false, keys: {}, unreadable: [] });
+    setState({
+      users: {
+        [U1]: { preferred_provider: null, custom_api_keys: { openai: OPENAI } },
+      },
+    });
+    expect(await loadUserApiKeys(U1)).toEqual({
+      enabled: false,
+      keys: {},
+      unreadable: [],
+    });
     await expect(saveUserApiKey(U1, 'openai', OPENAI)).rejects.toMatchObject({
       reason: 'disabled',
     });
@@ -87,7 +95,9 @@ describe('저장·조회·삭제', () => {
     await saveUserApiKey(U1, 'openai', OPENAI);
     await saveUserApiKey(U1, 'openai', 'sk-proj-new-openai-key-0000');
     expect(mocks.state.user_api_keys).toHaveLength(1);
-    expect((await loadUserApiKeys(U1)).keys.openai).toBe('sk-proj-new-openai-key-0000');
+    expect((await loadUserApiKeys(U1)).keys.openai).toBe(
+      'sk-proj-new-openai-key-0000',
+    );
 
     await deleteUserApiKey(U1, 'openai');
     expect((await loadUserApiKeys(U1)).keys).toEqual({});
@@ -106,7 +116,9 @@ describe('저장·조회·삭제', () => {
   });
 
   it('DB 쓰기 실패는 ApiKeyStoreError(db)', async () => {
-    setState({ failKeyWrites: { code: '42501', message: 'permission denied' } });
+    setState({
+      failKeyWrites: { code: '42501', message: 'permission denied' },
+    });
     const err = await saveUserApiKey(U1, 'openai', OPENAI).catch((e) => e);
     expect(err).toBeInstanceOf(ApiKeyStoreError);
     expect(err.reason).toBe('db');
@@ -120,7 +132,11 @@ describe('평문 이관 (①만 적용된 DB: users.custom_api_keys 가 남아 �
       users: {
         [U1]: {
           preferred_provider: 'openai',
-          custom_api_keys: { openai: OPENAI, anthropic: ANTHROPIC, unknown: 'x' },
+          custom_api_keys: {
+            openai: OPENAI,
+            anthropic: ANTHROPIC,
+            unknown: 'x',
+          },
         },
       },
     });
@@ -137,12 +153,18 @@ describe('평문 이관 (①만 적용된 DB: users.custom_api_keys 가 남아 �
   it('이미 새 테이블에 있는 키는 평문 값으로 덮어쓰지 않음', async () => {
     await saveUserApiKey(U1, 'openai', 'sk-proj-saved-in-new-app-1111');
     mocks.state.users[U1].custom_api_keys = { openai: OPENAI }; // 이전 앱 인스턴스가 늦게 쓴 경우
-    expect((await loadUserApiKeys(U1)).keys.openai).toBe('sk-proj-saved-in-new-app-1111');
+    expect((await loadUserApiKeys(U1)).keys.openai).toBe(
+      'sk-proj-saved-in-new-app-1111',
+    );
     expect(mocks.state.users[U1].custom_api_keys).toEqual({});
   });
 
   it('지운 키가 평문에서 되살아나지 않음', async () => {
-    setState({ users: { [U1]: { preferred_provider: null, custom_api_keys: { openai: OPENAI } } } });
+    setState({
+      users: {
+        [U1]: { preferred_provider: null, custom_api_keys: { openai: OPENAI } },
+      },
+    });
     await deleteUserApiKey(U1, 'openai');
     expect((await loadUserApiKeys(U1)).keys).toEqual({});
     expect(mocks.state.users[U1].custom_api_keys).toEqual({});
@@ -150,7 +172,9 @@ describe('평문 이관 (①만 적용된 DB: users.custom_api_keys 가 남아 �
 
   it('새 테이블 저장에 실패하면 평문을 지우지 않음 (다음에 다시 시도)', async () => {
     setState({
-      users: { [U1]: { preferred_provider: null, custom_api_keys: { openai: OPENAI } } },
+      users: {
+        [U1]: { preferred_provider: null, custom_api_keys: { openai: OPENAI } },
+      },
       failKeyWrites: { code: '57014', message: 'timeout' },
     });
     expect((await loadUserApiKeys(U1)).keys).toEqual({});
@@ -160,9 +184,14 @@ describe('평문 이관 (①만 적용된 DB: users.custom_api_keys 가 남아 �
 
 describe('①+③ DB (00009 로 users.custom_api_keys 가 없음)', () => {
   it('컬럼이 없으면 이관을 건너뛰고 새 테이블만 씀. 이후 조회에서는 다시 묻지 않음', async () => {
-    setState({ users: { [U1]: { preferred_provider: null } }, legacyColumn: false });
+    setState({
+      users: { [U1]: { preferred_provider: null } },
+      legacyColumn: false,
+    });
     await saveUserApiKey(U1, 'gemini', 'AIzaSy-test-gemini-key-4321');
-    expect((await loadUserApiKeys(U1)).keys).toEqual({ gemini: 'AIzaSy-test-gemini-key-4321' });
+    expect((await loadUserApiKeys(U1)).keys).toEqual({
+      gemini: 'AIzaSy-test-gemini-key-4321',
+    });
 
     // 컬럼이 없다는 것을 기억함: 같은 인스턴스에서는 users.custom_api_keys 를 다시 읽지 않음
     mocks.state.legacyColumn = true;

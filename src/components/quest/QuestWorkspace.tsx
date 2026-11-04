@@ -105,7 +105,10 @@ export function QuestWorkspace({
 
         {/* 코드+결과 패널 */}
         <div
-          className={cn('h-full overflow-y-auto', tab === 'story' && 'hidden md:block')}
+          className={cn(
+            'h-full overflow-y-auto',
+            tab === 'story' && 'hidden md:block',
+          )}
         >
           <div className={cn(tab === 'result' && 'hidden md:block')}>
             <CodePanel
@@ -153,7 +156,10 @@ export function QuestWorkspace({
               liveOutput={liveOutput}
             />
             {validation?.passed && nextQuestId && (
-              <Button render={<Link href={`/quest/${nextQuestId}`} />} className="w-full">
+              <Button
+                render={<Link href={`/quest/${nextQuestId}`} />}
+                className="w-full"
+              >
                 다음 퀘스트로 →
               </Button>
             )}

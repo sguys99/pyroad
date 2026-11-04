@@ -46,9 +46,14 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
 
       if (!res.ok) {
         // 서버는 아이용 문구만 보냄 (DB 오류 내용은 서버 로그로, B19). 금칙어는 code: 'moderation'
-        const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          code?: string;
+        };
         setError({
-          message: data.error || '앗, 지금은 저장하지 못했어요. 잠시 뒤에 다시 해 볼까요?',
+          message:
+            data.error ||
+            '앗, 지금은 저장하지 못했어요. 잠시 뒤에 다시 해 볼까요?',
           code: data.code,
         });
         return;

@@ -37,13 +37,18 @@ describe('parseKeyring', () => {
 
   it('길이·형식이 틀리면 ApiKeyConfigError', () => {
     expect(() =>
-      parseKeyring({ API_KEY_ENCRYPTION_KEY: Buffer.alloc(16).toString('base64') }),
+      parseKeyring({
+        API_KEY_ENCRYPTION_KEY: Buffer.alloc(16).toString('base64'),
+      }),
     ).toThrow(ApiKeyConfigError);
-    expect(() => parseKeyring({ API_KEY_ENCRYPTION_KEY: 'not base64!!' })).toThrow(
-      ApiKeyConfigError,
-    );
     expect(() =>
-      parseKeyring({ API_KEY_ENCRYPTION_KEY: KEY_1, API_KEY_ENCRYPTION_KEY_VERSION: '0' }),
+      parseKeyring({ API_KEY_ENCRYPTION_KEY: 'not base64!!' }),
+    ).toThrow(ApiKeyConfigError);
+    expect(() =>
+      parseKeyring({
+        API_KEY_ENCRYPTION_KEY: KEY_1,
+        API_KEY_ENCRYPTION_KEY_VERSION: '0',
+      }),
     ).toThrow(ApiKeyConfigError);
     expect(() =>
       parseKeyring({
@@ -53,7 +58,10 @@ describe('parseKeyring', () => {
       }),
     ).toThrow(/중복/);
     expect(() =>
-      parseKeyring({ API_KEY_ENCRYPTION_KEY: KEY_2, API_KEY_ENCRYPTION_KEY_PREVIOUS: KEY_1 }),
+      parseKeyring({
+        API_KEY_ENCRYPTION_KEY: KEY_2,
+        API_KEY_ENCRYPTION_KEY_PREVIOUS: KEY_1,
+      }),
     ).toThrow(ApiKeyConfigError);
   });
 });
@@ -80,17 +88,27 @@ describe('encryptApiKey / decryptApiKey', () => {
   it('변조 감지: 암호문·태그·IV 중 1비트만 바꿔도 실패', () => {
     const row = encryptApiKey(keyring, USER_A, 'gemini', SECRET);
     expect(() =>
-      decryptApiKey(keyring, USER_A, 'gemini', { ...row, ciphertext: flip(row.ciphertext) }),
+      decryptApiKey(keyring, USER_A, 'gemini', {
+        ...row,
+        ciphertext: flip(row.ciphertext),
+      }),
     ).toThrow();
     expect(() =>
-      decryptApiKey(keyring, USER_A, 'gemini', { ...row, auth_tag: flip(row.auth_tag) }),
+      decryptApiKey(keyring, USER_A, 'gemini', {
+        ...row,
+        auth_tag: flip(row.auth_tag),
+      }),
     ).toThrow();
-    expect(() => decryptApiKey(keyring, USER_A, 'gemini', { ...row, iv: flip(row.iv) })).toThrow();
+    expect(() =>
+      decryptApiKey(keyring, USER_A, 'gemini', { ...row, iv: flip(row.iv) }),
+    ).toThrow();
     // 잘린 태그(짧은 태그로 위조 시도)도 거부
     expect(() =>
       decryptApiKey(keyring, USER_A, 'gemini', {
         ...row,
-        auth_tag: Buffer.from(row.auth_tag, 'base64').subarray(0, 4).toString('base64'),
+        auth_tag: Buffer.from(row.auth_tag, 'base64')
+          .subarray(0, 4)
+          .toString('base64'),
       }),
     ).toThrow();
   });
@@ -119,7 +137,9 @@ describe('encryptApiKey / decryptApiKey', () => {
     expect(newRow.key_version).toBe(2);
     expect(decryptApiKey(rotated, USER_A, 'openai', newRow)).toBe(SECRET);
     // 이전 키만 있는 쪽은 새 버전을 모름
-    expect(() => decryptApiKey(keyring, USER_A, 'openai', newRow)).toThrow(/버전 2/);
+    expect(() => decryptApiKey(keyring, USER_A, 'openai', newRow)).toThrow(
+      /버전 2/,
+    );
   });
 
   it('예외 메시지에 키·원문을 넣지 않음', () => {

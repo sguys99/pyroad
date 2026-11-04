@@ -111,7 +111,9 @@ export function StageNode({ stage }: StageNodeProps) {
       {/* Stage info */}
       <div className="relative z-10 flex-1 min-w-0 text-left">
         <div className="flex items-center gap-0.5">
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground whitespace-nowrap shrink-0">{stage.order}단계</p>
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground whitespace-nowrap shrink-0">
+            {stage.order}단계
+          </p>
           <span
             className={cn(
               'rounded-full px-1 py-px text-[9px] sm:text-[10px] font-semibold shrink-0 whitespace-nowrap',

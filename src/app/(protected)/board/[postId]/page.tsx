@@ -23,9 +23,7 @@ export default async function BoardPostPage({
     getAuthUser(),
     supabase
       .from('board_posts')
-      .select(
-        '*, user_profiles_public!board_posts_user_id_fkey(display_name)',
-      )
+      .select('*, user_profiles_public!board_posts_user_id_fkey(display_name)')
       .eq('id', postId)
       .single(),
     supabase

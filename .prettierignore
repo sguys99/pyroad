@@ -6,3 +6,9 @@ supabase
 docs
 *.md
 .mcp.json
+# 기록용 스파이크와 생성물·테스트 산출물 (P1-06)
+spikes
+build
+public/pyodide
+playwright-report
+test-results

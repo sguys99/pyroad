@@ -160,7 +160,9 @@ interface StageSummaryParams {
 }
 
 export function buildStageSummaryPrompt(params: StageSummaryParams): string {
-  const conceptsList = params.concepts.map((c, i) => `${i + 1}. ${c}`).join('\n');
+  const conceptsList = params.concepts
+    .map((c, i) => `${i + 1}. ${c}`)
+    .join('\n');
 
   return `## 컨텍스트
 - 완료한 스테이지: ${params.stageTitle} (${params.stageOrder}단계)

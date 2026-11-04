@@ -25,7 +25,11 @@ export type { ValidationType };
 export type QuestType = 'code' | 'project' | 'quiz' | 'boss';
 
 /** quests.quiz_kind CHECK (00012). quest_type = 'quiz' 일 때만 값이 있음 (P7-01) */
-export type QuizKind = 'multiple_choice' | 'fill_blank' | 'parsons' | 'bug_hunt';
+export type QuizKind =
+  | 'multiple_choice'
+  | 'fill_blank'
+  | 'parsons'
+  | 'bug_hunt';
 
 /** worlds.unlock_rule. 지금은 open 뿐 (2월드 규칙 §12-Q2 는 Phase 10) */
 export interface WorldUnlockRule {

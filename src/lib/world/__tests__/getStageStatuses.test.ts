@@ -37,7 +37,10 @@ function makeStage(
   };
 }
 
-function makeProgress(questId: string, status: 'completed' | 'in_progress' = 'completed'): UserProgress {
+function makeProgress(
+  questId: string,
+  status: 'completed' | 'in_progress' = 'completed',
+): UserProgress {
   return {
     id: `progress-${questId}`,
     user_id: 'user-1',
@@ -89,8 +92,11 @@ describe('getStageStatuses', () => {
 
   it('연쇄 해제: 스테이지1,2 완료 → 스테이지3=in_progress', () => {
     const progress = [
-      makeProgress('q1-1'), makeProgress('q1-2'),
-      makeProgress('q2-1'), makeProgress('q2-2'), makeProgress('q2-3'),
+      makeProgress('q1-1'),
+      makeProgress('q1-2'),
+      makeProgress('q2-1'),
+      makeProgress('q2-2'),
+      makeProgress('q2-3'),
     ];
     const result = getStageStatuses(stages, progress);
     expect(result[0].status).toBe('completed');
@@ -100,8 +106,11 @@ describe('getStageStatuses', () => {
 
   it('전체 완료', () => {
     const progress = [
-      makeProgress('q1-1'), makeProgress('q1-2'),
-      makeProgress('q2-1'), makeProgress('q2-2'), makeProgress('q2-3'),
+      makeProgress('q1-1'),
+      makeProgress('q1-2'),
+      makeProgress('q2-1'),
+      makeProgress('q2-2'),
+      makeProgress('q2-3'),
       makeProgress('q3-1'),
     ];
     const result = getStageStatuses(stages, progress);
@@ -119,7 +128,10 @@ describe('getStageStatuses', () => {
   // P1-08: stages."order" 는 월드 안에서만 유일
   describe('월드가 여럿일 때 (월드 order, 스테이지 order)', () => {
     const w1 = [makeStage(1, [{ id: 'a1' }]), makeStage(2, [{ id: 'a2' }])];
-    const w2 = [makeStage(1, [{ id: 'b1' }], 2), makeStage(2, [{ id: 'b2' }], 2)];
+    const w2 = [
+      makeStage(1, [{ id: 'b1' }], 2),
+      makeStage(2, [{ id: 'b2' }], 2),
+    ];
 
     it('월드 순서가 먼저, 그 안에서 스테이지 order', () => {
       const result = getStageStatuses([w2[1], w1[1], w2[0], w1[0]], []);
@@ -133,16 +145,22 @@ describe('getStageStatuses', () => {
 
     it('2월드의 order 1 스테이지는 1월드 마지막 스테이지를 깨야 열림', () => {
       const all = [...w1, ...w2];
-      expect(getStageStatuses(all, [makeProgress('a1')])[2].status).toBe('locked');
-      const cleared = getStageStatuses(all, [makeProgress('a1'), makeProgress('a2')]);
+      expect(getStageStatuses(all, [makeProgress('a1')])[2].status).toBe(
+        'locked',
+      );
+      const cleared = getStageStatuses(all, [
+        makeProgress('a1'),
+        makeProgress('a2'),
+      ]);
       expect(cleared[2].status).toBe('in_progress');
       expect(cleared[3].status).toBe('locked');
     });
 
     it('world 정보가 없으면 order 만으로 (같은 월드로 봄)', () => {
-      const bare = [makeStage(2, [{ id: 'x2' }]), makeStage(1, [{ id: 'x1' }])].map(
-        (stage) => ({ ...stage, world: undefined }),
-      );
+      const bare = [
+        makeStage(2, [{ id: 'x2' }]),
+        makeStage(1, [{ id: 'x1' }]),
+      ].map((stage) => ({ ...stage, world: undefined }));
       expect(getStageStatuses(bare, []).map((s) => s.order)).toEqual([1, 2]);
     });
   });

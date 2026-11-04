@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, cleanup, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  act,
+  cleanup,
+  fireEvent,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage } from '@/lib/types/database';
@@ -17,7 +23,10 @@ const mocks = vi.hoisted(() => ({
     retry: vi.fn(),
   },
   tutor: {
-    sendTutorRequest: vi.fn(async () => ({ message: '잘했어요', is_fallback: false })),
+    sendTutorRequest: vi.fn(async () => ({
+      message: '잘했어요',
+      is_fallback: false,
+    })),
     sendTutorStreamRequest: vi.fn(async () => ({
       message: '안녕! 같이 해 볼까?',
       is_fallback: false,
@@ -35,7 +44,10 @@ vi.mock('@/lib/tutor/useTutor', () => ({ useTutor: () => mocks.tutor }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
 }));
-vi.mock('@/lib/confetti', () => ({ fireConfetti: vi.fn(), resetConfetti: vi.fn() }));
+vi.mock('@/lib/confetti', () => ({
+  fireConfetti: vi.fn(),
+  resetConfetti: vi.fn(),
+}));
 vi.mock('@/lib/supabase/loadClient', () => ({
   loadBrowserClient: async () => ({
     from: () => ({ upsert: () => ({ then: () => {} }) }),
@@ -86,8 +98,20 @@ const PROJECT_QUEST = {
   prompt_skeleton: {
     ...CODE_QUEST.prompt_skeleton,
     steps: [
-      { step_number: 1, step_goal: '이름 출력', starter_code: 'name = ___', validation_type: 'exact_match', fallback_text: '' },
-      { step_number: 2, step_goal: '점수 출력', starter_code: '', validation_type: 'exact_match', fallback_text: '' },
+      {
+        step_number: 1,
+        step_goal: '이름 출력',
+        starter_code: 'name = ___',
+        validation_type: 'exact_match',
+        fallback_text: '',
+      },
+      {
+        step_number: 2,
+        step_goal: '점수 출력',
+        starter_code: '',
+        validation_type: 'exact_match',
+        fallback_text: '',
+      },
     ],
   },
 } as unknown as QuestWithStage;
@@ -122,22 +146,34 @@ afterEach(() => {
 
 describe('퀘스트 렌더러 스모크', () => {
   it('유형별 렌더러 등록: 단계가 있으면 ProjectQuest, 없으면 CodeQuest', () => {
-    expect(QUEST_RENDERERS[getQuestKind(CODE_QUEST.prompt_skeleton)]).toBe(CodeQuest);
-    expect(QUEST_RENDERERS[getQuestKind(PROJECT_QUEST.prompt_skeleton)]).toBe(ProjectQuest);
+    expect(QUEST_RENDERERS[getQuestKind(CODE_QUEST.prompt_skeleton)]).toBe(
+      CodeQuest,
+    );
+    expect(QUEST_RENDERERS[getQuestKind(PROJECT_QUEST.prompt_skeleton)]).toBe(
+      ProjectQuest,
+    );
   });
 
   it('CodeQuest: 미션·시작 코드·실행 버튼·빈 출력창을 그리고 튜터 소개를 보여 준다', async () => {
     render(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.getByText('x에 10을 넣어요')).toBeInTheDocument();
     expect(screen.getByLabelText('코드 에디터')).toHaveValue('x = ___');
-    expect(screen.getByTestId('run-button')).toHaveTextContent('코드 돌려보기!');
+    expect(screen.getByTestId('run-button')).toHaveTextContent(
+      '코드 돌려보기!',
+    );
     expect(screen.getByTestId('run-button')).toBeEnabled();
     expect(screen.queryByTestId('stop-button')).toBeNull();
     // 데스크톱 + 모바일 결과 탭
-    expect(screen.getAllByTestId('output-panel')[0]).toHaveAttribute('data-state', 'empty');
+    expect(screen.getAllByTestId('output-panel')[0]).toHaveAttribute(
+      'data-state',
+      'empty',
+    );
     expect(await screen.findByText('안녕! 같이 해 볼까?')).toBeInTheDocument();
     // 퀘스트 → 월드맵은 소프트 내비게이션 링크 (B22)
-    expect(screen.getByRole('link', { name: /월드맵/ })).toHaveAttribute('href', '/world');
+    expect(screen.getByRole('link', { name: /월드맵/ })).toHaveAttribute(
+      'href',
+      '/world',
+    );
   });
 
   it('ProjectQuest: 단계 막대와 첫 단계 시작 코드', async () => {
@@ -176,11 +212,20 @@ describe('퀘스트 렌더러 스모크', () => {
 
     mocks.runtime.isRunning = false;
     await act(async () => {
-      finish({ stdout: '1\n2\n', stderr: '', success: false, isStopped: true, outcome: 'stopped' });
+      finish({
+        stdout: '1\n2\n',
+        stderr: '',
+        success: false,
+        isStopped: true,
+        outcome: 'stopped',
+      });
     });
     rerender(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.queryByTestId('stop-button')).toBeNull();
-    expect(screen.getAllByTestId('output-panel')[0]).toHaveAttribute('data-state', 'stopped');
+    expect(screen.getAllByTestId('output-panel')[0]).toHaveAttribute(
+      'data-state',
+      'stopped',
+    );
     expect(screen.getAllByText('실행을 멈췄어요')[0]).toBeInTheDocument();
   });
 

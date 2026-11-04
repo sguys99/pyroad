@@ -1,4 +1,11 @@
-import { Code, Lightbulb, Map, Flame, Trophy, type LucideIcon } from 'lucide-react';
+import {
+  Code,
+  Lightbulb,
+  Map,
+  Flame,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 import { getBadgeDefinition, type BadgeType } from '@/lib/quest/badges';
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -40,7 +47,9 @@ export function BadgeIcon({ type, earned, size = 'sm' }: BadgeIconProps) {
       }`}
       title={earned ? badge.name : `${badge.name} (미획득)`}
     >
-      <Icon className={`${ICON_SIZE_MAP[size]} ${earned ? 'text-accent' : 'text-muted-foreground'}`} />
+      <Icon
+        className={`${ICON_SIZE_MAP[size]} ${earned ? 'text-accent' : 'text-muted-foreground'}`}
+      />
     </div>
   );
 }

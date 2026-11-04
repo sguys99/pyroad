@@ -12,16 +12,25 @@ export interface FakeKeyRow {
 }
 
 export interface FakeState {
-  users: Record<string, { preferred_provider: string | null; custom_api_keys?: unknown }>;
+  users: Record<
+    string,
+    { preferred_provider: string | null; custom_api_keys?: unknown }
+  >;
   user_api_keys: FakeKeyRow[];
   legacyColumn: boolean;
   /** 설정하면 user_api_keys 쓰기가 이 오류로 실패 */
   failKeyWrites?: { code: string; message: string };
 }
 
-type Result = { data: unknown; error: { code: string; message: string } | null };
+type Result = {
+  data: unknown;
+  error: { code: string; message: string } | null;
+};
 
-const MISSING = { code: '42703', message: 'column users.custom_api_keys does not exist' };
+const MISSING = {
+  code: '42703',
+  message: 'column users.custom_api_keys does not exist',
+};
 
 export function fakeAdmin(state: FakeState) {
   return {
@@ -31,14 +40,16 @@ export function fakeAdmin(state: FakeState) {
       let columns = '*';
       let patch: Record<string, unknown> = {};
 
-      const match = (row: Record<string, unknown>) => filters.every(([c, v]) => row[c] === v);
+      const match = (row: Record<string, unknown>) =>
+        filters.every(([c, v]) => row[c] === v);
 
       function run(): Result {
         if (table === 'users') {
           const touchesLegacy =
             (mode === 'select' && columns.includes('custom_api_keys')) ||
             (mode === 'update' && 'custom_api_keys' in patch);
-          if (touchesLegacy && !state.legacyColumn) return { data: null, error: MISSING };
+          if (touchesLegacy && !state.legacyColumn)
+            return { data: null, error: MISSING };
           const rows = Object.entries(state.users)
             .map(([id, u]) => ({ id, ...u }))
             .filter(match);
@@ -50,7 +61,8 @@ export function fakeAdmin(state: FakeState) {
         }
         if (table === 'user_api_keys') {
           if (mode === 'delete') {
-            if (state.failKeyWrites) return { data: null, error: state.failKeyWrites };
+            if (state.failKeyWrites)
+              return { data: null, error: state.failKeyWrites };
             state.user_api_keys = state.user_api_keys.filter(
               (r) => !match(r as unknown as Record<string, unknown>),
             );
@@ -88,14 +100,17 @@ export function fakeAdmin(state: FakeState) {
           input: FakeKeyRow | FakeKeyRow[],
           opts: { onConflict?: string; ignoreDuplicates?: boolean } = {},
         ): Promise<Result> {
-          if (table !== 'user_api_keys') throw new Error('fakeAdmin: upsert only on user_api_keys');
-          if (state.failKeyWrites) return { data: null, error: state.failKeyWrites };
+          if (table !== 'user_api_keys')
+            throw new Error('fakeAdmin: upsert only on user_api_keys');
+          if (state.failKeyWrites)
+            return { data: null, error: state.failKeyWrites };
           for (const row of Array.isArray(input) ? input : [input]) {
             const i = state.user_api_keys.findIndex(
               (r) => r.user_id === row.user_id && r.provider === row.provider,
             );
             if (i < 0) state.user_api_keys.push({ ...row });
-            else if (!opts.ignoreDuplicates) state.user_api_keys[i] = { ...row };
+            else if (!opts.ignoreDuplicates)
+              state.user_api_keys[i] = { ...row };
           }
           return { data: null, error: null };
         },

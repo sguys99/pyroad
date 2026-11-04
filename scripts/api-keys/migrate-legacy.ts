@@ -17,8 +17,15 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-import { decryptApiKey, parseKeyring, type ApiKeyKeyring } from '@/lib/crypto/apiKeyCipher';
-import { migrateLegacyApiKeys, pickLegacyKeys } from '@/lib/tutor/legacyApiKeys';
+import {
+  decryptApiKey,
+  parseKeyring,
+  type ApiKeyKeyring,
+} from '@/lib/crypto/apiKeyCipher';
+import {
+  migrateLegacyApiKeys,
+  pickLegacyKeys,
+} from '@/lib/tutor/legacyApiKeys';
 import type { Database } from '@/lib/types/database';
 
 const PAGE = 500;
@@ -43,22 +50,35 @@ async function legacyUsers(admin: SupabaseClient<Database>) {
       if (error.code === '42703') return null; // 00009 적용됨
       fail(`users 조회 실패: ${error.code} ${error.message}`);
     }
-    for (const row of (data ?? []) as { id: string; custom_api_keys: unknown }[]) {
+    for (const row of (data ?? []) as {
+      id: string;
+      custom_api_keys: unknown;
+    }[]) {
       const v = row.custom_api_keys;
       const empty =
-        v == null || (typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0);
-      if (!empty) users.push({ id: row.id, providers: Object.keys(pickLegacyKeys(v)) });
+        v == null ||
+        (typeof v === 'object' &&
+          !Array.isArray(v) &&
+          Object.keys(v).length === 0);
+      if (!empty)
+        users.push({ id: row.id, providers: Object.keys(pickLegacyKeys(v)) });
     }
     if (!data || data.length < PAGE) return users;
   }
 }
 
 /** 이미 저장된 암호문이 이 키로 풀리는지 (앱과 같은 키인지) */
-async function verifyKeyring(admin: SupabaseClient<Database>, keyring: ApiKeyKeyring) {
+async function verifyKeyring(
+  admin: SupabaseClient<Database>,
+  keyring: ApiKeyKeyring,
+) {
   const { data, error } = await admin
     .from('user_api_keys')
     .select('user_id, provider, key_version, iv, auth_tag, ciphertext');
-  if (error) fail(`user_api_keys 조회 실패: ${error.code} ${error.message} (00007 적용 여부 확인)`);
+  if (error)
+    fail(
+      `user_api_keys 조회 실패: ${error.code} ${error.message} (00007 적용 여부 확인)`,
+    );
   let bad = 0;
   for (const row of data ?? []) {
     try {
@@ -74,7 +94,8 @@ async function main() {
   const apply = process.argv.includes('--apply');
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) fail('NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 가 필요합니다');
+  if (!url || !serviceKey)
+    fail('NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 가 필요합니다');
 
   let keyring: ApiKeyKeyring | null;
   try {
@@ -82,12 +103,15 @@ async function main() {
   } catch (err) {
     fail(err instanceof Error ? err.message : String(err));
   }
-  if (!keyring) fail('API_KEY_ENCRYPTION_KEY 가 없습니다 (Vercel Production 과 같은 값)');
+  if (!keyring)
+    fail('API_KEY_ENCRYPTION_KEY 가 없습니다 (Vercel Production 과 같은 값)');
 
   const admin = createClient<Database>(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  console.log(`대상: ${new URL(url).host} · 모드: ${apply ? '이관(--apply)' : '확인만'}`);
+  console.log(
+    `대상: ${new URL(url).host} · 모드: ${apply ? '이관(--apply)' : '확인만'}`,
+  );
 
   const check = await verifyKeyring(admin, keyring);
   if (check.bad > 0) {
@@ -107,9 +131,13 @@ async function main() {
     return;
   }
   console.log(`평문 키가 남은 사용자: ${users.length}명`);
-  for (const u of users) console.log(`  - ${shortId(u.id)} ${u.providers.join(', ') || '(알 수 없는 값만)'}`);
+  for (const u of users)
+    console.log(
+      `  - ${shortId(u.id)} ${u.providers.join(', ') || '(알 수 없는 값만)'}`,
+    );
   if (!apply || users.length === 0) {
-    if (!apply && users.length > 0) console.log('옮기려면 --apply 를 붙여 다시 실행하세요');
+    if (!apply && users.length > 0)
+      console.log('옮기려면 --apply 를 붙여 다시 실행하세요');
     return;
   }
 
@@ -129,7 +157,10 @@ async function main() {
   console.log(
     `결과: 실패 ${failed} · 남은 평문 사용자 ${after?.length ?? 0} · user_api_keys ${recheck.total}행 (복호화 실패 ${recheck.bad})`,
   );
-  if (failed > 0 || (after?.length ?? 0) > 0 || recheck.bad > 0) process.exit(1);
+  if (failed > 0 || (after?.length ?? 0) > 0 || recheck.bad > 0)
+    process.exit(1);
 }
 
-main().catch((err) => fail(err instanceof Error ? err.message : String(err), 1));
+main().catch((err) =>
+  fail(err instanceof Error ? err.message : String(err), 1),
+);

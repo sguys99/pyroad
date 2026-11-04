@@ -96,7 +96,10 @@ export function parseKeyring(
       }
       keys.set(
         version,
-        decodeKey(entry.slice(sep + 1), `API_KEY_ENCRYPTION_KEY_PREVIOUS(${version})`),
+        decodeKey(
+          entry.slice(sep + 1),
+          `API_KEY_ENCRYPTION_KEY_PREVIOUS(${version})`,
+        ),
       );
     }
   }
@@ -115,9 +118,14 @@ export function encryptApiKey(
 ): EncryptedApiKey {
   const key = keyring.keys.get(keyring.currentVersion)!;
   const iv = randomBytes(IV_BYTES);
-  const cipher = createCipheriv(ALGORITHM, key, iv, { authTagLength: TAG_BYTES });
+  const cipher = createCipheriv(ALGORITHM, key, iv, {
+    authTagLength: TAG_BYTES,
+  });
   cipher.setAAD(aad(userId, provider));
-  const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+  const ciphertext = Buffer.concat([
+    cipher.update(plaintext, 'utf8'),
+    cipher.final(),
+  ]);
   return {
     key_version: keyring.currentVersion,
     iv: iv.toString('base64'),
@@ -143,7 +151,9 @@ export function decryptApiKey(
   if (iv.length !== IV_BYTES || tag.length !== TAG_BYTES) {
     throw new Error('암호화 필드 형식이 올바르지 않습니다');
   }
-  const decipher = createDecipheriv(ALGORITHM, key, iv, { authTagLength: TAG_BYTES });
+  const decipher = createDecipheriv(ALGORITHM, key, iv, {
+    authTagLength: TAG_BYTES,
+  });
   decipher.setAAD(aad(userId, provider));
   decipher.setAuthTag(tag);
   return Buffer.concat([

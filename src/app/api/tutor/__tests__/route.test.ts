@@ -67,7 +67,10 @@ describe('/api/tutor 의 is_fallback (B18 남은 문제)', () => {
     const data = await (
       await POST(post({ type: 'code_feedback', quest_id: 'q1' }))
     ).json();
-    expect(data).toMatchObject({ message: '저장된 답변이에요', is_fallback: true });
+    expect(data).toMatchObject({
+      message: '저장된 답변이에요',
+      is_fallback: true,
+    });
   });
 
   it('서버 키 전역 예산 확인(allowServerKey)과 요청 signal 을 callTutor 에 넘긴다 (P1-22)', async () => {

@@ -44,15 +44,16 @@ export function StepProgressBar({
               <m.div
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
-                  isCompleted &&
-                    'bg-primary text-primary-foreground',
+                  isCompleted && 'bg-primary text-primary-foreground',
                   isCurrent &&
                     'border-2 border-primary bg-primary/10 text-primary',
                   !isCompleted &&
                     !isCurrent &&
                     'border border-border bg-muted text-muted-foreground',
                 )}
-                animate={isCurrent && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
+                animate={
+                  isCurrent && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}
+                }
                 transition={
                   isCurrent && !shouldReduceMotion
                     ? { repeat: Infinity, duration: 2, ease: 'easeInOut' }

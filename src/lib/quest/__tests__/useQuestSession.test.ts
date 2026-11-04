@@ -215,7 +215,11 @@ beforeEach(() => {
     '/api/quest/validate': () => ({ json: { passed: true } }),
     '/api/quest/complete': () => ({ json: completion() }),
     '/api/quest/golden-key': () => ({
-      json: { solution_code: 'x = 10\nprint(x)', golden_keys: 2, charged: true },
+      json: {
+        solution_code: 'x = 10\nprint(x)',
+        golden_keys: 2,
+        charged: true,
+      },
     }),
   };
   stubFetch();
@@ -251,7 +255,11 @@ describe('useQuestSession: 자동 저장 (P1-04 진행 저장 컬럼만)', () =>
 
     expect(mocks.upserts).toEqual([
       {
-        payload: { user_id: 'u1', quest_id: 'q-code', code_submitted: 'x = 10' },
+        payload: {
+          user_id: 'u1',
+          quest_id: 'q-code',
+          code_submitted: 'x = 10',
+        },
         options: { onConflict: 'user_id,quest_id' },
       },
     ]);
@@ -292,7 +300,9 @@ describe('useQuestSession: 자동 저장 (P1-04 진행 저장 컬럼만)', () =>
 
   it('완료한 퀘스트는 자동 저장하지 않는다', async () => {
     const { result } = renderHook(() =>
-      useQuestSession(options(CODE_QUEST, progressRow({ status: 'completed' }))),
+      useQuestSession(
+        options(CODE_QUEST, progressRow({ status: 'completed' })),
+      ),
     );
     act(() => result.current.setCode('print(1)'));
     await act(async () => {
@@ -455,7 +465,9 @@ describe('useQuestSession: 실행·채점·완료', () => {
 
 describe('useQuestSession: 프로젝트 단계 진행', () => {
   it('단계를 통과하면 1.5초 뒤 통과한 코드로 다음 단계로 간다 (그 사이 고친 코드가 아니라)', async () => {
-    const { result } = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
+    const { result } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
     act(() => result.current.setCode('name = "파이"'));
 
     await act(async () => {
@@ -491,12 +503,15 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
   it('B10 회귀: 황금키로 연 중간 단계는 정답 코드를 저장하고 다음 단계로 간다 (예전 코드 아님)', async () => {
     routes['/api/quest/golden-key'] = (body) => ({
       json: {
-        solution_code: body.current_step === 1 ? 'name = "정답"\nprint(name)' : '',
+        solution_code:
+          body.current_step === 1 ? 'name = "정답"\nprint(name)' : '',
         golden_keys: 2,
         charged: true,
       },
     });
-    const { result } = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
+    const { result } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
     act(() => result.current.setCode('name = ___  # 아직 못 푼 코드'));
 
     await act(async () => {
@@ -533,7 +548,9 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
   });
 
   it('스스로 통과한 단계는 작은 컨페티 (연출 단계 배율과 함께)', async () => {
-    const { result } = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
+    const { result } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
     await act(async () => {
       await result.current.handleRun();
       await vi.advanceTimersByTimeAsync(STEP_ADVANCE_DELAY_MS);
@@ -577,7 +594,12 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
       await vi.advanceTimersByTimeAsync(CELEBRATION_DELAY_MS.project);
     });
     expect(result.current.celebrations).toEqual([
-      { type: 'project_complete', questTitle: '나만의 게임', xpGained: 50, stage: null },
+      {
+        type: 'project_complete',
+        questTitle: '나만의 게임',
+        xpGained: 50,
+        stage: null,
+      },
     ]);
   });
 });
@@ -723,7 +745,8 @@ describe('useQuestSession: 힌트', () => {
 });
 
 describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
-  const LIMIT = '파이뱀 선생님이 오늘은 이야기를 많이 해서 쉬고 있어요. 내일 다시 물어봐요! 🌙';
+  const LIMIT =
+    '파이뱀 선생님이 오늘은 이야기를 많이 해서 쉬고 있어요. 내일 다시 물어봐요! 🌙';
 
   it('tutorFailure: 한도 오류면 서버 문구(저장된 답변 배지 없음), 그 밖에는 준비한 문구', () => {
     expect(

@@ -51,7 +51,10 @@ export function isCustomKeyEnabled(): boolean {
 }
 
 export function isApiKeyProvider(value: unknown): value is LLMProviderType {
-  return typeof value === 'string' && (API_KEY_PROVIDERS as readonly string[]).includes(value);
+  return (
+    typeof value === 'string' &&
+    (API_KEY_PROVIDERS as readonly string[]).includes(value)
+  );
 }
 
 const MAX_API_KEY_LENGTH = 512;
@@ -74,7 +77,10 @@ async function migrateLegacy(
 ) {
   const result = await migrateLegacyApiKeys(admin, keyring, userId);
   if (result.status === 'error') {
-    console.error('[apiKeys] 평문 키 이관 실패 (다음 조회 때 다시 시도):', result.message);
+    console.error(
+      '[apiKeys] 평문 키 이관 실패 (다음 조회 때 다시 시도):',
+      result.message,
+    );
   }
 }
 
@@ -90,7 +96,11 @@ export async function loadUserApiKeys(userId: string): Promise<UserApiKeys> {
     .select('provider, key_version, iv, auth_tag, ciphertext')
     .eq('user_id', userId);
   if (error) {
-    console.error('[apiKeys] user_api_keys 조회 실패:', error.code, error.message);
+    console.error(
+      '[apiKeys] user_api_keys 조회 실패:',
+      error.code,
+      error.message,
+    );
     return { enabled: true, keys: {}, unreadable: [] };
   }
 
@@ -113,13 +123,15 @@ export async function loadUserApiKeys(userId: string): Promise<UserApiKeys> {
 
 /** 클라이언트에 내려보낼 상태: 등록된 provider 와 끝 4자리만 */
 export function toApiKeyStatus(loaded: UserApiKeys) {
-  const registered = API_KEY_PROVIDERS.filter((p) => loaded.keys[p] !== undefined);
+  const registered = API_KEY_PROVIDERS.filter(
+    (p) => loaded.keys[p] !== undefined,
+  );
   return {
     enabled: loaded.enabled,
     registered,
-    masked: Object.fromEntries(registered.map((p) => [p, maskApiKey(loaded.keys[p]!)])) as Partial<
-      Record<LLMProviderType, string>
-    >,
+    masked: Object.fromEntries(
+      registered.map((p) => [p, maskApiKey(loaded.keys[p]!)]),
+    ) as Partial<Record<LLMProviderType, string>>,
     unreadable: loaded.unreadable,
   };
 }
@@ -156,10 +168,14 @@ export async function saveUserApiKey(
     },
     { onConflict: 'user_id,provider' },
   );
-  if (error) throw new ApiKeyStoreError(`save failed: ${error.code ?? ''}`, 'db');
+  if (error)
+    throw new ApiKeyStoreError(`save failed: ${error.code ?? ''}`, 'db');
 }
 
-export async function deleteUserApiKey(userId: string, provider: LLMProviderType): Promise<void> {
+export async function deleteUserApiKey(
+  userId: string,
+  provider: LLMProviderType,
+): Promise<void> {
   const admin = createAdminClient();
   const keyring = getKeyring();
   if (keyring) await migrateLegacy(admin, keyring, userId);
@@ -169,5 +185,6 @@ export async function deleteUserApiKey(userId: string, provider: LLMProviderType
     .delete()
     .eq('user_id', userId)
     .eq('provider', provider);
-  if (error) throw new ApiKeyStoreError(`delete failed: ${error.code ?? ''}`, 'db');
+  if (error)
+    throw new ApiKeyStoreError(`delete failed: ${error.code ?? ''}`, 'db');
 }

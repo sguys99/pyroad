@@ -44,10 +44,7 @@ export function HeroSection() {
         />
       </m.div>
 
-      <m.h1
-        className="text-4xl font-bold text-primary"
-        variants={fadeUp}
-      >
+      <m.h1 className="text-4xl font-bold text-primary" variants={fadeUp}>
         pyRoad
       </m.h1>
 

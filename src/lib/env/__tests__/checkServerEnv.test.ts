@@ -17,7 +17,9 @@ afterEach(() => {
 
 describe('서버 시작 env 점검 (P1-22)', () => {
   it('필수 값이 다 있고 모델 env 가 정상이면 문제 없음', () => {
-    expect(findServerEnvProblems({ ...REQUIRED, GEMINI_MODEL: 'gemini-3.6-flash' })).toEqual({
+    expect(
+      findServerEnvProblems({ ...REQUIRED, GEMINI_MODEL: 'gemini-3.6-flash' }),
+    ).toEqual({
       missing: [],
       warnings: [],
     });
@@ -29,7 +31,10 @@ describe('서버 시작 env 점검 (P1-22)', () => {
       SUPABASE_SERVICE_ROLE_KEY: ' ',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: undefined,
     });
-    expect(missing).toEqual(['NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY']);
+    expect(missing).toEqual([
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+      'SUPABASE_SERVICE_ROLE_KEY',
+    ]);
   });
 
   it('Gemini 키가 없거나 *_MODEL 이 제공 종료 모델이면 경고 (B35)', () => {

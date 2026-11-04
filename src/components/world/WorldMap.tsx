@@ -36,13 +36,13 @@ const NODE_POSITIONS: Array<{
   desktopLeft: string;
   top: string;
 }> = [
-  { mobileLeft: '30%', desktopLeft: '50%', top: '86%' },      // Stage 1 (bottom)
-  { mobileLeft: '15%', desktopLeft: '22%', top: '72.5%' },    // Stage 2
-  { mobileLeft: '45%', desktopLeft: '55%', top: '59%' },      // Stage 3
-  { mobileLeft: '15%', desktopLeft: '22%', top: '45%' },      // Stage 4
-  { mobileLeft: '45%', desktopLeft: '55%', top: '31%' },      // Stage 5
-  { mobileLeft: '15%', desktopLeft: '22%', top: '17.5%' },    // Stage 6
-  { mobileLeft: '30%', desktopLeft: '50%', top: '4%' },       // Stage 7 (top)
+  { mobileLeft: '30%', desktopLeft: '50%', top: '86%' }, // Stage 1 (bottom)
+  { mobileLeft: '15%', desktopLeft: '22%', top: '72.5%' }, // Stage 2
+  { mobileLeft: '45%', desktopLeft: '55%', top: '59%' }, // Stage 3
+  { mobileLeft: '15%', desktopLeft: '22%', top: '45%' }, // Stage 4
+  { mobileLeft: '45%', desktopLeft: '55%', top: '31%' }, // Stage 5
+  { mobileLeft: '15%', desktopLeft: '22%', top: '17.5%' }, // Stage 6
+  { mobileLeft: '30%', desktopLeft: '50%', top: '4%' }, // Stage 7 (top)
 ];
 
 function computeProgressFraction(stages: StageWithStatus[]): number {
@@ -96,26 +96,22 @@ export function WorldMap({ stages }: WorldMapProps) {
       {inProgressIndex >= 0 && (
         <m.div
           className="world-node absolute z-20 pointer-events-none"
-          style={{
-            '--ml': NODE_POSITIONS[inProgressIndex].mobileLeft,
-            '--dl': NODE_POSITIONS[inProgressIndex].desktopLeft,
-            top: NODE_POSITIONS[inProgressIndex].top,
-            transform: 'translate(-50%, -110%)',
-          } as React.CSSProperties}
-          animate={
-            shouldReduceMotion ? undefined : { y: [0, -6, 0] }
+          style={
+            {
+              '--ml': NODE_POSITIONS[inProgressIndex].mobileLeft,
+              '--dl': NODE_POSITIONS[inProgressIndex].desktopLeft,
+              top: NODE_POSITIONS[inProgressIndex].top,
+              transform: 'translate(-50%, -110%)',
+            } as React.CSSProperties
           }
+          animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
           transition={
             shouldReduceMotion
               ? undefined
               : { duration: 2, repeat: Infinity, ease: 'easeInOut' }
           }
         >
-          <CharacterAvatar
-            character="pybaem"
-            expression="happy"
-            size="sm"
-          />
+          <CharacterAvatar character="pybaem" expression="happy" size="sm" />
         </m.div>
       )}
 
@@ -132,12 +128,14 @@ export function WorldMap({ stages }: WorldMapProps) {
             <m.div
               key={stage.id}
               className="world-node absolute z-10"
-              style={{
-                '--ml': pos.mobileLeft,
-                '--dl': pos.desktopLeft,
-                top: pos.top,
-                transform: 'translate(-50%, -50%)',
-              } as React.CSSProperties}
+              style={
+                {
+                  '--ml': pos.mobileLeft,
+                  '--dl': pos.desktopLeft,
+                  top: pos.top,
+                  transform: 'translate(-50%, -50%)',
+                } as React.CSSProperties
+              }
               variants={item}
             >
               <StageNode stage={stage} />

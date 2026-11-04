@@ -31,9 +31,7 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
     setSubmitting(true);
 
     try {
-      const url = isEdit
-        ? `/api/notice/${initialData.id}`
-        : '/api/notice';
+      const url = isEdit ? `/api/notice/${initialData.id}` : '/api/notice';
       const method = isEdit ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {

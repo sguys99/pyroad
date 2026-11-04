@@ -7,9 +7,16 @@ import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
-import type { PybaemExpression, BugBugExpression } from '@/components/characters/expressions';
+import type {
+  PybaemExpression,
+  BugBugExpression,
+} from '@/components/characters/expressions';
 
-function TutorAvatar({ expression = 'happy' }: { expression?: PybaemExpression }) {
+function TutorAvatar({
+  expression = 'happy',
+}: {
+  expression?: PybaemExpression;
+}) {
   return (
     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
       <CharacterAvatar character="pybaem" expression={expression} size="sm" />

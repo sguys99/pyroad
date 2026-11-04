@@ -30,13 +30,61 @@ export const BugBugSvg = memo(function BugBugSvg({
       {/* 다리 (6개) */}
       <g id="legs">
         {/* 왼쪽 다리 */}
-        <line x1="38" y1="68" x2="24" y2="60" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" />
-        <line x1="36" y1="80" x2="20" y2="80" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" />
-        <line x1="38" y1="92" x2="24" y2="100" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" />
+        <line
+          x1="38"
+          y1="68"
+          x2="24"
+          y2="60"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <line
+          x1="36"
+          y1="80"
+          x2="20"
+          y2="80"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <line
+          x1="38"
+          y1="92"
+          x2="24"
+          y2="100"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
         {/* 오른쪽 다리 */}
-        <line x1="90" y1="68" x2="104" y2="60" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" />
-        <line x1="92" y1="80" x2="108" y2="80" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" />
-        <line x1="90" y1="92" x2="104" y2="100" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" />
+        <line
+          x1="90"
+          y1="68"
+          x2="104"
+          y2="60"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <line
+          x1="92"
+          y1="80"
+          x2="108"
+          y2="80"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <line
+          x1="90"
+          y1="92"
+          x2="104"
+          y2="100"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
       </g>
 
       {/* 몸통 (빨간 등딱지) */}
@@ -44,7 +92,14 @@ export const BugBugSvg = memo(function BugBugSvg({
         <ellipse cx="64" cy="80" rx="32" ry="28" fill="#EF5350" />
         <ellipse cx="64" cy="80" rx="32" ry="28" fill="url(#bugBodyGradient)" />
         {/* 등딱지 중앙선 */}
-        <line x1="64" y1="56" x2="64" y2="108" stroke="#C62828" strokeWidth="2" />
+        <line
+          x1="64"
+          y1="56"
+          x2="64"
+          y2="108"
+          stroke="#C62828"
+          strokeWidth="2"
+        />
         {/* 검정 점 */}
         <circle cx="50" cy="70" r="5" fill="#4E342E" />
         <circle cx="78" cy="70" r="5" fill="#4E342E" />
@@ -57,9 +112,21 @@ export const BugBugSvg = memo(function BugBugSvg({
       <g id="head">
         <ellipse cx="64" cy="46" rx="22" ry="18" fill="#4E342E" />
         {/* 더듬이 */}
-        <path d="M52 32 Q48 18 42 14" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" fill="none" />
+        <path
+          d="M52 32 Q48 18 42 14"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
+        />
         <circle cx="41" cy="13" r="4" fill="#FF8A65" />
-        <path d="M76 32 Q80 18 86 14" stroke="#4E342E" strokeWidth="3" strokeLinecap="round" fill="none" />
+        <path
+          d="M76 32 Q80 18 86 14"
+          stroke="#4E342E"
+          strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
+        />
         <circle cx="87" cy="13" r="4" fill="#FF8A65" />
         {/* 볼 터치 */}
         <ellipse cx="50" cy="50" rx="5" ry="3" fill="#FF8A80" opacity="0.5" />
@@ -97,7 +164,13 @@ function SearchingFace() {
     <>
       <g id="eyes">
         {/* 왼쪽 눈 - 찡긋 (감은 눈) */}
-        <path d="M53 42 Q57 38 61 42" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M53 42 Q57 38 61 42"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
         {/* 오른쪽 눈 - 크게 뜸 (집중) */}
         <ellipse cx="74" cy="42" rx="5" ry="5.5" fill="white">
           <animate
@@ -150,12 +223,30 @@ function FixedFace() {
     <>
       <g id="eyes">
         {/* 행복하게 감은 눈 (^_^) */}
-        <path d="M51 42 Q56 37 61 42" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-        <path d="M69 42 Q74 37 79 42" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M51 42 Q56 37 61 42"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M69 42 Q74 37 79 42"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
       <g id="mouth">
         {/* 크게 웃는 입 */}
-        <path d="M56 50 Q64 58 72 50" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <path
+          d="M56 50 Q64 58 72 50"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -167,11 +258,32 @@ function SearchingAccessory() {
   return (
     <>
       {/* 돋보기 */}
-      <circle cx="106" cy="38" r="10" stroke="#FFB300" strokeWidth="3" fill="none" />
+      <circle
+        cx="106"
+        cy="38"
+        r="10"
+        stroke="#FFB300"
+        strokeWidth="3"
+        fill="none"
+      />
       <circle cx="106" cy="38" r="10" fill="#FFECB3" opacity="0.3" />
-      <line x1="99" y1="45" x2="90" y2="54" stroke="#795548" strokeWidth="4" strokeLinecap="round" />
+      <line
+        x1="99"
+        y1="45"
+        x2="90"
+        y2="54"
+        stroke="#795548"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
       {/* 돋보기 반짝임 */}
-      <path d="M102 32 L104 30" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+      <path
+        d="M102 32 L104 30"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
     </>
   );
 }
@@ -191,7 +303,14 @@ function FixedAccessory() {
     <>
       {/* 체크마크 */}
       <circle cx="100" cy="28" r="12" fill="#4CAF50" />
-      <path d="M93 28 L98 33 L107 23" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path
+        d="M93 28 L98 33 L107 23"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
     </>
   );
 }

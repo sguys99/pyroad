@@ -116,12 +116,10 @@ export async function insertAnalyticsRows(
 ): Promise<boolean> {
   if (rows.length === 0) return true;
   try {
-    const { error } = await admin
-      .from('analytics_events')
-      .upsert(rows, {
-        onConflict: 'anon_id,dedupe_key',
-        ignoreDuplicates: true,
-      });
+    const { error } = await admin.from('analytics_events').upsert(rows, {
+      onConflict: 'anon_id,dedupe_key',
+      ignoreDuplicates: true,
+    });
     if (error) throw new Error(`${error.code ?? ''} ${error.message}`.trim());
     return true;
   } catch (error) {

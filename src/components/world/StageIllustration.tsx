@@ -23,7 +23,10 @@ const illustrationMap: Record<string, React.FC<{ className?: string }>> = {
   project_kingdom: ProjectKingdomIllust,
 };
 
-export function StageIllustration({ themeName, className }: StageIllustrationProps) {
+export function StageIllustration({
+  themeName,
+  className,
+}: StageIllustrationProps) {
   const Illustration = illustrationMap[themeName];
   if (!Illustration) return null;
   return <Illustration className={className} />;

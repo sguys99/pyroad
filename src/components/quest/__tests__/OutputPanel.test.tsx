@@ -11,12 +11,18 @@ describe('OutputPanel', () => {
   it('실행 중: 출력 조각을 바로 보여 주고 맨 아래로 스크롤한다', () => {
     const store = createLiveOutputStore();
     render(<OutputPanel result={null} isRunning liveOutput={store} />);
-    expect(screen.getByTestId('output-panel')).toHaveAttribute('data-state', 'running');
+    expect(screen.getByTestId('output-panel')).toHaveAttribute(
+      'data-state',
+      'running',
+    );
     expect(screen.queryByTestId('live-output')).toBeNull();
 
     const pre = () => screen.getByTestId('live-output');
     act(() => store.append('1\n'));
-    Object.defineProperty(pre(), 'scrollHeight', { value: 480, configurable: true });
+    Object.defineProperty(pre(), 'scrollHeight', {
+      value: 480,
+      configurable: true,
+    });
     act(() => store.append('2\n'));
     expect(pre()).toHaveTextContent('1 2');
     expect(pre().scrollTop).toBe(480);
@@ -26,17 +32,28 @@ describe('OutputPanel', () => {
     const store = createLiveOutputStore(4);
     render(<OutputPanel result={null} isRunning liveOutput={store} />);
     act(() => store.append('123456'));
-    expect(screen.getByText('출력이 너무 많아서 앞부분만 보여 줘요.')).toBeInTheDocument();
+    expect(
+      screen.getByText('출력이 너무 많아서 앞부분만 보여 줘요.'),
+    ).toBeInTheDocument();
   });
 
   it('시간 초과: 무한 반복 안내 + 멈추기 전까지의 출력', () => {
     render(
       <OutputPanel
-        result={{ stdout: '0\n1\n', stderr: '', success: false, isTimeout: true, outcome: 'timeout' }}
+        result={{
+          stdout: '0\n1\n',
+          stderr: '',
+          success: false,
+          isTimeout: true,
+          outcome: 'timeout',
+        }}
         isRunning={false}
       />,
     );
-    expect(screen.getByTestId('output-panel')).toHaveAttribute('data-state', 'timeout');
+    expect(screen.getByTestId('output-panel')).toHaveAttribute(
+      'data-state',
+      'timeout',
+    );
     expect(screen.getByText(/무한 반복이 있는지/)).toBeInTheDocument();
     expect(screen.getByText(/0\s+1/)).toBeInTheDocument();
   });
@@ -54,7 +71,10 @@ describe('OutputPanel', () => {
         isRunning={false}
       />,
     );
-    expect(screen.getByTestId('output-panel')).toHaveAttribute('data-state', 'output-limit');
+    expect(screen.getByTestId('output-panel')).toHaveAttribute(
+      'data-state',
+      'output-limit',
+    );
     expect(screen.getByText('앗, 출력이 너무 많아요!')).toBeInTheDocument();
   });
 
@@ -66,7 +86,10 @@ describe('OutputPanel', () => {
         validationResult={{ passed: true }}
       />,
     );
-    expect(screen.getByTestId('output-panel')).toHaveAttribute('data-state', 'success');
+    expect(screen.getByTestId('output-panel')).toHaveAttribute(
+      'data-state',
+      'success',
+    );
     expect(screen.getByText('정답이에요!')).toBeInTheDocument();
   });
 });

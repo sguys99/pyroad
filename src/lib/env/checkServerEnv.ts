@@ -31,7 +31,10 @@ export function findServerEnvProblems(
       'GEMINI_API_KEY 가 없어 튜터는 본인 API 키가 없는 학생에게 저장된 답변만 보냅니다',
     );
   }
-  for (const [type, name] of Object.entries(MODEL_ENV) as [LLMProviderType, string][]) {
+  for (const [type, name] of Object.entries(MODEL_ENV) as [
+    LLMProviderType,
+    string,
+  ][]) {
     const model = env[name]?.trim();
     if (model && isRetiredModel(type, model)) {
       warnings.push(

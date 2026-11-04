@@ -63,7 +63,10 @@ afterEach(() => {
 
 describe('/api/settings (B13, P1-01)', () => {
   it('키 저장 → 응답·DB 어디에도 원문이 없고, 등록 여부와 끝 4자리만 내려감', async () => {
-    const res = await patch({ provider: 'anthropic', api_keys: { anthropic: SECRET } });
+    const res = await patch({
+      provider: 'anthropic',
+      api_keys: { anthropic: SECRET },
+    });
     expect(res.status).toBe(200);
     expect(JSON.stringify(mocks.state.user_api_keys)).not.toContain(SECRET);
 
@@ -86,7 +89,9 @@ describe('/api/settings (B13, P1-01)', () => {
   });
 
   it('모양이 이상한 키·provider 는 400', async () => {
-    expect((await patch({ api_keys: { openai: 'has space key 1234' } })).status).toBe(400);
+    expect(
+      (await patch({ api_keys: { openai: 'has space key 1234' } })).status,
+    ).toBe(400);
     expect((await patch({ provider: 'mistral' })).status).toBe(400);
     expect((await patch({ api_keys: ['x'] })).status).toBe(400);
     expect((await patch({})).status).toBe(400);
@@ -105,7 +110,10 @@ describe('/api/settings (B13, P1-01)', () => {
   });
 
   it('①만 적용된 DB: 평문 키를 첫 조회에서 옮기고 응답에는 마스킹만', async () => {
-    mocks.state.users[U1] = { preferred_provider: 'openai', custom_api_keys: { openai: SECRET } };
+    mocks.state.users[U1] = {
+      preferred_provider: 'openai',
+      custom_api_keys: { openai: SECRET },
+    };
     const body = await (await GET()).json();
     expect(body.has_custom_keys).toEqual(['openai']);
     expect(body.current_provider).toBe('openai');
@@ -116,9 +124,10 @@ describe('/api/settings (B13, P1-01)', () => {
   it('①+③ DB: users.custom_api_keys 가 없어도 저장·조회 동작', async () => {
     mocks.state.users[U1] = { preferred_provider: null };
     mocks.state.legacyColumn = false;
-    expect((await patch({ provider: 'anthropic', api_keys: { anthropic: SECRET } })).status).toBe(
-      200,
-    );
+    expect(
+      (await patch({ provider: 'anthropic', api_keys: { anthropic: SECRET } }))
+        .status,
+    ).toBe(200);
     expect((await (await GET()).json()).has_custom_keys).toEqual(['anthropic']);
   });
 });

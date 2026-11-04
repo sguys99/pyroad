@@ -25,7 +25,9 @@ export function PyodideProvider({
 }) {
   const runtime = usePyodide(options);
   return (
-    <PyodideContext.Provider value={runtime}>{children}</PyodideContext.Provider>
+    <PyodideContext.Provider value={runtime}>
+      {children}
+    </PyodideContext.Provider>
   );
 }
 
@@ -33,7 +35,9 @@ export function PyodideProvider({
 export function usePyodideRuntime(): PyodideRuntime {
   const runtime = useContext(PyodideContext);
   if (!runtime) {
-    throw new Error('usePyodideRuntime은 PyodideProvider 안에서만 쓸 수 있어요');
+    throw new Error(
+      'usePyodideRuntime은 PyodideProvider 안에서만 쓸 수 있어요',
+    );
   }
   return runtime;
 }

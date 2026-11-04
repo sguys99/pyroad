@@ -7,7 +7,10 @@ export function FloatingDecorations() {
   if (shouldReduceMotion) return null;
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
+    <div
+      className="absolute inset-0 overflow-hidden pointer-events-none z-0"
+      aria-hidden
+    >
       {/* Clouds */}
       <div
         className="absolute opacity-30"

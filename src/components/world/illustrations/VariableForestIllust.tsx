@@ -23,8 +23,24 @@ function VariableForestIllustInner({ className }: { className?: string }) {
       <polygon points="56,42 63.5,24 71,42" fill="#66BB6A" />
 
       {/* "x = 5" carved text */}
-      <rect x="33" y="46" width="14" height="8" rx="2" fill="#5D4037" opacity="0.7" />
-      <text x="40" y="52" textAnchor="middle" fontSize="5" fill="#A5D6A7" fontFamily="monospace" fontWeight="bold">
+      <rect
+        x="33"
+        y="46"
+        width="14"
+        height="8"
+        rx="2"
+        fill="#5D4037"
+        opacity="0.7"
+      />
+      <text
+        x="40"
+        y="52"
+        textAnchor="middle"
+        fontSize="5"
+        fill="#A5D6A7"
+        fontFamily="monospace"
+        fontWeight="bold"
+      >
         x=5
       </text>
 

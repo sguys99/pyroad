@@ -36,8 +36,12 @@ export default async function BoardPage({
 
   const boardPosts: BoardPostWithAuthor[] = (posts ?? []).map((post) => ({
     ...post,
-    user_profiles_public: (post as Record<string, unknown>).user_profiles_public as BoardPostWithAuthor['user_profiles_public'],
-    comment_count: ((post as Record<string, unknown>).board_comments as { count: number }[])?.[0]?.count ?? 0,
+    user_profiles_public: (post as Record<string, unknown>)
+      .user_profiles_public as BoardPostWithAuthor['user_profiles_public'],
+    comment_count:
+      (
+        (post as Record<string, unknown>).board_comments as { count: number }[]
+      )?.[0]?.count ?? 0,
   }));
 
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);

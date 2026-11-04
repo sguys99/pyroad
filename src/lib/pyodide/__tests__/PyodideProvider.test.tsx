@@ -2,7 +2,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act, cleanup } from '@testing-library/react';
 import { useEffect } from 'react';
-import { PyodideProvider, usePyodideRuntime, type PyodideRuntime } from '../PyodideProvider';
+import {
+  PyodideProvider,
+  usePyodideRuntime,
+  type PyodideRuntime,
+} from '../PyodideProvider';
 import type { RunResult } from '../usePyodide';
 import type { WorkerRequest, WorkerResponse } from '../types';
 
@@ -104,7 +108,10 @@ describe('PyodideProvider (B22: 퀘스트 레이아웃 단위 Worker 싱글톤)'
       truncated: false,
       ms: 1,
     });
-    await expect(promise).resolves.toMatchObject({ stdout: '1\n', success: true });
+    await expect(promise).resolves.toMatchObject({
+      stdout: '1\n',
+      success: true,
+    });
   });
 
   it('퀘스트 화면을 벗어나면(레이아웃 언마운트) Worker를 종료하고, 늦은 메시지는 무시한다 (B14 세대 가드)', () => {
@@ -120,14 +127,16 @@ describe('PyodideProvider (B22: 퀘스트 레이아웃 단위 Worker 싱글톤)'
     expect(worker.onmessage).toBeNull();
     // 종료된 Worker에 남아 있던 핸들러로 늦게 와도 에러 없이 무시
     expect(() =>
-      handler?.({ data: { type: 'init-status', status: 'ready' } } as MessageEvent<WorkerResponse>),
+      handler?.({
+        data: { type: 'init-status', status: 'ready' },
+      } as MessageEvent<WorkerResponse>),
     ).not.toThrow();
   });
 
   it('Provider 밖에서 쓰면 알아보기 쉬운 에러', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() =>
-      render(<QuestStub id="q1" onRuntime={() => {}} />),
-    ).toThrow(/PyodideProvider/);
+    expect(() => render(<QuestStub id="q1" onRuntime={() => {}} />)).toThrow(
+      /PyodideProvider/,
+    );
   });
 });

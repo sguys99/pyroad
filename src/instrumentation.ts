@@ -6,7 +6,8 @@ import { isSentryEnabled } from '@/lib/observability/config';
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { reportServerEnvProblems } = await import('@/lib/env/checkServerEnv');
+    const { reportServerEnvProblems } =
+      await import('@/lib/env/checkServerEnv');
     reportServerEnvProblems();
   }
 

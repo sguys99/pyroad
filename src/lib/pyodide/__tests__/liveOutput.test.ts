@@ -8,7 +8,10 @@ describe('createLiveOutputStore (실행 중 stdout)', () => {
     store.subscribe(listener);
     store.append('안녕\n');
     store.append('파이뱀\n');
-    expect(store.getSnapshot()).toEqual({ text: '안녕\n파이뱀\n', clipped: false });
+    expect(store.getSnapshot()).toEqual({
+      text: '안녕\n파이뱀\n',
+      clipped: false,
+    });
     expect(listener).toHaveBeenCalledTimes(2);
   });
 

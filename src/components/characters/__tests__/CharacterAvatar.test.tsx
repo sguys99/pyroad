@@ -9,18 +9,30 @@ afterEach(cleanup);
 describe('CharacterAvatar', () => {
   describe('캐릭터별 SVG 렌더링', () => {
     it('pybaem 캐릭터를 렌더링한다', () => {
-      const { container } = render(<CharacterAvatar character="pybaem" expression="happy" />);
-      expect(container.querySelector('svg[aria-label*="파이뱀"]')).toBeInTheDocument();
+      const { container } = render(
+        <CharacterAvatar character="pybaem" expression="happy" />,
+      );
+      expect(
+        container.querySelector('svg[aria-label*="파이뱀"]'),
+      ).toBeInTheDocument();
     });
 
     it('bugbug 캐릭터를 렌더링한다', () => {
-      const { container } = render(<CharacterAvatar character="bugbug" expression="searching" />);
-      expect(container.querySelector('svg[aria-label*="버그버그"]')).toBeInTheDocument();
+      const { container } = render(
+        <CharacterAvatar character="bugbug" expression="searching" />,
+      );
+      expect(
+        container.querySelector('svg[aria-label*="버그버그"]'),
+      ).toBeInTheDocument();
     });
 
     it('byeolttongi 캐릭터를 렌더링한다', () => {
-      const { container } = render(<CharacterAvatar character="byeolttongi" expression="flying" />);
-      expect(container.querySelector('svg[aria-label*="별똥이"]')).toBeInTheDocument();
+      const { container } = render(
+        <CharacterAvatar character="byeolttongi" expression="flying" />,
+      );
+      expect(
+        container.querySelector('svg[aria-label*="별똥이"]'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -48,7 +60,9 @@ describe('CharacterAvatar', () => {
     });
 
     it('기본 사이즈는 md (64px)', () => {
-      const { container } = render(<CharacterAvatar character="pybaem" expression="happy" />);
+      const { container } = render(
+        <CharacterAvatar character="pybaem" expression="happy" />,
+      );
       const svg = container.querySelector('svg[role="img"]');
       expect(svg).toHaveAttribute('width', '64');
     });
@@ -60,7 +74,9 @@ describe('CharacterAvatar', () => {
         <CharacterAvatar character="pybaem" expression="teaching" />,
       );
       expect(
-        container.querySelector('[data-testid="character-avatar-pybaem-teaching"]'),
+        container.querySelector(
+          '[data-testid="character-avatar-pybaem-teaching"]',
+        ),
       ).toBeInTheDocument();
     });
 
@@ -69,31 +85,41 @@ describe('CharacterAvatar', () => {
         <CharacterAvatar character="pybaem" expression="happy" />,
       );
       expect(
-        container.querySelector('[data-testid="character-avatar-pybaem-happy"]'),
+        container.querySelector(
+          '[data-testid="character-avatar-pybaem-happy"]',
+        ),
       ).toBeInTheDocument();
 
       rerender(<CharacterAvatar character="pybaem" expression="celebrating" />);
       expect(
-        container.querySelector('[data-testid="character-avatar-pybaem-celebrating"]'),
+        container.querySelector(
+          '[data-testid="character-avatar-pybaem-celebrating"]',
+        ),
       ).toBeInTheDocument();
     });
   });
 
   describe('숨쉬기 연출', () => {
     it('animated면 CSS 키프레임 클래스를 쓴다 (§2.10)', () => {
-      const { container } = render(<CharacterAvatar character="pybaem" animated />);
+      const { container } = render(
+        <CharacterAvatar character="pybaem" animated />,
+      );
       expect(container.querySelector('.character-breathe')).toBeInTheDocument();
     });
 
     it('animated가 아니면 숨쉬기 클래스가 없다', () => {
       const { container } = render(<CharacterAvatar character="pybaem" />);
-      expect(container.querySelector('.character-breathe')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('.character-breathe'),
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('접근성', () => {
     it('SVG에 role="img"와 aria-label이 설정되어 있다', () => {
-      const { container } = render(<CharacterAvatar character="pybaem" expression="happy" />);
+      const { container } = render(
+        <CharacterAvatar character="pybaem" expression="happy" />,
+      );
       const svg = container.querySelector('svg[role="img"]');
       expect(svg).toBeInTheDocument();
       expect(svg).toHaveAttribute('aria-label');
@@ -102,12 +128,22 @@ describe('CharacterAvatar', () => {
 
   describe('pybaem 표정', () => {
     const expressions = [
-      'happy', 'thinking', 'celebrating', 'encouraging', 'surprised',
-      'teaching', 'waving', 'sleeping', 'confused', 'proud',
+      'happy',
+      'thinking',
+      'celebrating',
+      'encouraging',
+      'surprised',
+      'teaching',
+      'waving',
+      'sleeping',
+      'confused',
+      'proud',
     ] as const;
 
     it.each(expressions)('%s 표정을 렌더링한다', (expr) => {
-      const { container } = render(<CharacterAvatar character="pybaem" expression={expr} />);
+      const { container } = render(
+        <CharacterAvatar character="pybaem" expression={expr} />,
+      );
       expect(container.querySelector('svg[role="img"]')).toBeInTheDocument();
     });
   });
@@ -116,7 +152,9 @@ describe('CharacterAvatar', () => {
     it.each(['searching', 'found', 'fixed'] as const)(
       '%s 표정을 렌더링한다',
       (expr) => {
-        const { container } = render(<CharacterAvatar character="bugbug" expression={expr} />);
+        const { container } = render(
+          <CharacterAvatar character="bugbug" expression={expr} />,
+        );
         expect(container.querySelector('svg[role="img"]')).toBeInTheDocument();
       },
     );
@@ -126,7 +164,9 @@ describe('CharacterAvatar', () => {
     it.each(['flying', 'landing', 'sparkling'] as const)(
       '%s 표정을 렌더링한다',
       (expr) => {
-        const { container } = render(<CharacterAvatar character="byeolttongi" expression={expr} />);
+        const { container } = render(
+          <CharacterAvatar character="byeolttongi" expression={expr} />,
+        );
         expect(container.querySelector('svg[role="img"]')).toBeInTheDocument();
       },
     );

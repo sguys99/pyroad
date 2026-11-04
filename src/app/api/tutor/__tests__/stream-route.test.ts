@@ -482,7 +482,11 @@ describe('/api/tutor/stream', () => {
 
     it('서버 Gemini 키를 부르기 전에 tutor:gemini:global 버킷을 1 차감한다', async () => {
       mocks.createProvider.mockImplementation(() => echoProvider());
-      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })));
+      await readText(
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+        ),
+      );
       expect(mocks.globalQuota).toHaveBeenCalledTimes(1);
       expect(mocks.globalQuota).toHaveBeenCalledWith({
         p_bucket: 'tutor:gemini:global',
@@ -495,9 +499,14 @@ describe('/api/tutor/stream', () => {
       mocks.globalQuota.mockResolvedValue({ data: DENIED, error: null });
       mocks.createProvider.mockImplementation(() => echoProvider());
 
-      const res = await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 2 }));
+      const res = await POST(
+        post({ type: 'hint_generator', quest_id: 'q1', hint_level: 2 }),
+      );
       expect(res.status).toBe(200);
-      expect(await readText(res)).toMatchObject({ text: '저장된 힌트 2', isFallback: true });
+      expect(await readText(res)).toMatchObject({
+        text: '저장된 힌트 2',
+        isFallback: true,
+      });
       expect(mocks.createProvider).not.toHaveBeenCalled();
     });
 
@@ -506,16 +515,25 @@ describe('/api/tutor/stream', () => {
       mocks.createProvider.mockImplementation(() => echoProvider());
 
       const data = await (
-        await POST_JSON(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 3 }))
+        await POST_JSON(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 3 }),
+        )
       ).json();
-      expect(data).toMatchObject({ message: '저장된 힌트 3', is_fallback: true });
+      expect(data).toMatchObject({
+        message: '저장된 힌트 3',
+        is_fallback: true,
+      });
       expect(mocks.createProvider).not.toHaveBeenCalled();
     });
 
     it('env TUTOR_GLOBAL_LIMIT_GEMINI 로 한도를 바꾼다', async () => {
       vi.stubEnv('TUTOR_GLOBAL_LIMIT_GEMINI', '30/2000');
       mocks.createProvider.mockImplementation(() => echoProvider());
-      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })));
+      await readText(
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+        ),
+      );
       expect(mocks.globalQuota).toHaveBeenCalledWith({
         p_bucket: 'tutor:gemini:global',
         p_per_minute: 30,
@@ -543,13 +561,24 @@ describe('/api/tutor/stream', () => {
         },
       }));
 
-      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })));
+      await readText(
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+        ),
+      );
       expect(mocks.globalQuota).toHaveBeenCalledTimes(1);
-      expect(mocks.createProvider.mock.calls.map((c) => c[0])).toEqual(['openai', 'gemini']);
+      expect(mocks.createProvider.mock.calls.map((c) => c[0])).toEqual([
+        'openai',
+        'gemini',
+      ]);
 
       mocks.globalQuota.mockClear();
       mocks.createProvider.mockImplementation(() => echoProvider());
-      await readText(await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 2 })));
+      await readText(
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 2 }),
+        ),
+      );
       expect(mocks.globalQuota).not.toHaveBeenCalled();
     });
 
@@ -561,7 +590,9 @@ describe('/api/tutor/stream', () => {
       mocks.createProvider.mockImplementation(() => echoProvider());
 
       const result = await readText(
-        await POST(post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 })),
+        await POST(
+          post({ type: 'hint_generator', quest_id: 'q1', hint_level: 1 }),
+        ),
       );
       expect(result.isFallback).toBe(false);
       expect(mocks.createProvider).toHaveBeenCalled();

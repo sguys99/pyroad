@@ -124,7 +124,11 @@ function truncate(value: unknown, max: number): string | undefined {
   return typeof value === 'string' ? value.slice(0, max) : undefined;
 }
 
-function toBoundedInt(value: unknown, min: number, max: number): number | undefined {
+function toBoundedInt(
+  value: unknown,
+  min: number,
+  max: number,
+): number | undefined {
   const n = Math.trunc(Number(value));
   if (value == null || !Number.isFinite(n)) return undefined;
   return Math.min(max, Math.max(min, n));
@@ -216,16 +220,30 @@ export async function prepareTutorCall(
   // 2. Body 검증 (크기 → JSON → 필드)
   const declaredLength = Number(request.headers.get('content-length'));
   if (declaredLength > MAX_BODY_BYTES) {
-    return reject(413, 'Body too large', 'body_too_large', undefined, 'warning', {
-      bytes: declaredLength,
-    });
+    return reject(
+      413,
+      'Body too large',
+      'body_too_large',
+      undefined,
+      'warning',
+      {
+        bytes: declaredLength,
+      },
+    );
   }
   let body: TutorRequest;
   try {
     const raw = await request.text();
     const bytes = Buffer.byteLength(raw);
     if (bytes > MAX_BODY_BYTES) {
-      return reject(413, 'Body too large', 'body_too_large', undefined, 'warning', { bytes });
+      return reject(
+        413,
+        'Body too large',
+        'body_too_large',
+        undefined,
+        'warning',
+        { bytes },
+      );
     }
     body = JSON.parse(raw);
   } catch {
@@ -347,20 +365,32 @@ export async function prepareTutorCall(
   const { data: quest } = await questLookup;
 
   if (!quest) {
-    return reject(404, 'Quest not found', 'quest_not_found', body.type, 'warning', {
-      quest_id: safeQuestId(questId),
-    });
+    return reject(
+      404,
+      'Quest not found',
+      'quest_not_found',
+      body.type,
+      'warning',
+      {
+        quest_id: safeQuestId(questId),
+      },
+    );
   }
 
   const q = quest as unknown as QuestWithStageServer;
   const [stageUnlocked, answerKeyRow] = await Promise.all([
     checkStageUnlocked(adminClient, user.id, q.stage.id, 'tutor'),
-    needsAnswerKey ? fetchAnswerKeyRow(adminClient, questId) : Promise.resolve(null),
+    needsAnswerKey
+      ? fetchAnswerKeyRow(adminClient, questId)
+      : Promise.resolve(null),
   ]);
 
   // 잠긴 스테이지면 막는다 (B38). 퀘스트 화면이 잠긴 퀘스트를 열지 않으므로 우리 화면은 보내지 않는 요청이다.
   // 이미 완료한 퀘스트(복습)는 화면과 같이 허용한다: 잠김일 때만 진행을 한 번 더 읽으므로 평소 응답은 늦어지지 않음
-  if (!stageUnlocked && !(await hasCompletedQuest(supabase, user.id, questId))) {
+  if (
+    !stageUnlocked &&
+    !(await hasCompletedQuest(supabase, user.id, questId))
+  ) {
     reportTutorAbuse({
       userId: user.id,
       reason: 'stage_locked',
@@ -376,7 +406,9 @@ export async function prepareTutorCall(
 
   const skeleton = q.prompt_skeleton;
   // quests 행(expected_output·prompt_skeleton)은 quest_answer_keys가 없을 때의 폴백
-  const answerKey = needsAnswerKey ? resolveAnswerKey(answerKeyRow, quest) : null;
+  const answerKey = needsAnswerKey
+    ? resolveAnswerKey(answerKeyRow, quest)
+    : null;
 
   // 6. 프롬프트 조립
   let userPrompt: string;
@@ -591,10 +623,13 @@ export function buildFallbackMessage(
     if (!body.execution_result?.passed) {
       return '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
     }
-    return pickRandom(PASSED_FEEDBACK_POOL[getHintBucket(body.hints_used ?? 0)]);
+    return pickRandom(
+      PASSED_FEEDBACK_POOL[getHintBucket(body.hints_used ?? 0)],
+    );
   } else if (body.type === 'encouragement') {
     const hintBucket = getHintBucket(body.hints_used ?? 0);
-    const xpBucket: XPBucket = (body.earned_xp ?? 0) >= 100 ? 'high' : 'standard';
+    const xpBucket: XPBucket =
+      (body.earned_xp ?? 0) >= 100 ? 'high' : 'standard';
     const template = pickRandom(ENCOURAGEMENT_POOL[hintBucket][xpBucket]);
     return interpolate(template, {
       topic: skeleton.topic,

@@ -46,7 +46,9 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
         strokeLinecap="round"
         pathLength={1}
         strokeDasharray="1"
-        initial={{ strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1 }}
+        initial={{
+          strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1,
+        }}
         animate={{ strokeDashoffset: 1 - progressFraction }}
         transition={
           shouldReduceMotion
@@ -65,7 +67,9 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
         pathLength={1}
         strokeDasharray="1"
         opacity={0.15}
-        initial={{ strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1 }}
+        initial={{
+          strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1,
+        }}
         animate={{ strokeDashoffset: 1 - progressFraction }}
         transition={
           shouldReduceMotion

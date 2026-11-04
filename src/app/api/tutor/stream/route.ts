@@ -1,5 +1,9 @@
 import { callTutorStream } from '@/lib/tutor/client';
-import { getCachedResponse, setCachedResponse, buildCacheKey } from '@/lib/tutor/cache';
+import {
+  getCachedResponse,
+  setCachedResponse,
+  buildCacheKey,
+} from '@/lib/tutor/cache';
 import { encodeSseEvent } from '@/lib/tutor/sse';
 import { prepareTutorCall, buildFallbackMessage } from '../helpers';
 import { getMaxTokens } from '@/lib/tutor/config';
@@ -18,7 +22,17 @@ export async function POST(request: Request) {
     return prepared;
   }
 
-  const { systemPrompt, userPrompt, providerType, customApiKey, fast, fallbackProviders, quest, answerKey, body } = prepared;
+  const {
+    systemPrompt,
+    userPrompt,
+    providerType,
+    customApiKey,
+    fast,
+    fallbackProviders,
+    quest,
+    answerKey,
+    body,
+  } = prepared;
   // 힌트를 실제로 보냈을 때 hint_used 분석 이벤트도 남긴다 (P1-17)
   const recordHint = withHintTracking(prepared.recordHint, request, {
     questId: body.quest_id,

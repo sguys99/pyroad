@@ -30,7 +30,11 @@ export async function GET() {
   }
 
   const [{ data: profile }, apiKeys] = await Promise.all([
-    supabase.from('users').select('preferred_provider').eq('id', user.id).single(),
+    supabase
+      .from('users')
+      .select('preferred_provider')
+      .eq('id', user.id)
+      .single(),
     loadUserApiKeys(user.id),
   ]);
   const status = toApiKeyStatus(apiKeys);
@@ -84,7 +88,11 @@ export async function PATCH(request: Request) {
   const toSave: [LLMProviderType, string][] = [];
   const toDelete: LLMProviderType[] = [];
   if (body.api_keys !== undefined) {
-    if (!body.api_keys || typeof body.api_keys !== 'object' || Array.isArray(body.api_keys)) {
+    if (
+      !body.api_keys ||
+      typeof body.api_keys !== 'object' ||
+      Array.isArray(body.api_keys)
+    ) {
       return NextResponse.json({ error: 'Invalid api_keys' }, { status: 400 });
     }
     for (const [key, value] of Object.entries(body.api_keys)) {
@@ -96,7 +104,11 @@ export async function PATCH(request: Request) {
       const normalized = normalizeApiKeyInput(value);
       if (!normalized) {
         return NextResponse.json(
-          { error: 'API 키 모양이 올바르지 않아요. 복사한 키를 그대로 붙여 넣어 주세요.', code: 'invalid_key' },
+          {
+            error:
+              'API 키 모양이 올바르지 않아요. 복사한 키를 그대로 붙여 넣어 주세요.',
+            code: 'invalid_key',
+          },
           { status: 400 },
         );
       }
@@ -114,11 +126,17 @@ export async function PATCH(request: Request) {
   } catch (err) {
     if (err instanceof ApiKeyStoreError && err.reason === 'disabled') {
       return NextResponse.json(
-        { error: '지금은 내 API 키를 저장할 수 없어요.', code: 'custom_keys_disabled' },
+        {
+          error: '지금은 내 API 키를 저장할 수 없어요.',
+          code: 'custom_keys_disabled',
+        },
         { status: 503 },
       );
     }
-    console.error('[settings] API 키 저장 실패:', err instanceof Error ? err.message : 'unknown');
+    console.error(
+      '[settings] API 키 저장 실패:',
+      err instanceof Error ? err.message : 'unknown',
+    );
     return NextResponse.json({ error: 'Update failed' }, { status: 500 });
   }
 

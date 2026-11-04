@@ -46,7 +46,10 @@ function ProjectKingdomIllustInner({ className }: { className?: string }) {
 
       {/* Main gate */}
       <path d="M 33 72 L 33 54 Q 40 48 47 54 L 47 72 Z" fill="#5D4037" />
-      <path d="M 34.5 72 L 34.5 55 Q 40 50 45.5 55 L 45.5 72 Z" fill="#4E342E" />
+      <path
+        d="M 34.5 72 L 34.5 55 Q 40 50 45.5 55 L 45.5 72 Z"
+        fill="#4E342E"
+      />
 
       {/* Battlements */}
       <rect x="18" y="30" width="3" height="4" rx="0.5" fill="#FFA000" />

@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
-import { PROVIDER_LABELS, type LLMProviderType } from '@/lib/tutor/providers/types';
+import {
+  PROVIDER_LABELS,
+  type LLMProviderType,
+} from '@/lib/tutor/providers/types';
 
 interface SettingsData {
   available_providers: LLMProviderType[];
@@ -21,7 +24,9 @@ interface SettingsData {
 
 async function errorMessage(res: Response, fallback: string) {
   const data = await res.json().catch(() => null);
-  return typeof data?.error === 'string' && /[가-힣]/.test(data.error) ? data.error : fallback;
+  return typeof data?.error === 'string' && /[가-힣]/.test(data.error)
+    ? data.error
+    : fallback;
 }
 
 const PROVIDER_ICONS: Record<LLMProviderType, string> = {
@@ -97,7 +102,9 @@ export default function SettingsPage() {
       }
       setTimeout(() => setSaved(false), 2000);
     } else {
-      setError(await errorMessage(res, '저장에 실패했어요. 다시 시도해주세요.'));
+      setError(
+        await errorMessage(res, '저장에 실패했어요. 다시 시도해주세요.'),
+      );
     }
   }
 
@@ -131,7 +138,9 @@ export default function SettingsPage() {
         setSelected(refreshedData.available_providers[0] ?? 'gemini');
       }
     } else {
-      setError(await errorMessage(res, '삭제에 실패했어요. 다시 시도해주세요.'));
+      setError(
+        await errorMessage(res, '삭제에 실패했어요. 다시 시도해주세요.'),
+      );
     }
   }
 
@@ -211,11 +220,13 @@ export default function SettingsPage() {
       </div>
 
       {/* API 키 입력 카드 */}
-      <div className={`mb-6 rounded-xl border bg-card p-4 shadow-sm ${
-        settings.available_providers.length === 0
-          ? 'border-amber-400 dark:border-amber-600'
-          : 'border-border'
-      }`}>
+      <div
+        className={`mb-6 rounded-xl border bg-card p-4 shadow-sm ${
+          settings.available_providers.length === 0
+            ? 'border-amber-400 dark:border-amber-600'
+            : 'border-border'
+        }`}
+      >
         {settings.available_providers.length === 0 ? (
           <>
             <h2 className="mb-1 text-sm font-bold text-amber-700 dark:text-amber-300">
@@ -237,7 +248,8 @@ export default function SettingsPage() {
         )}
         {!keysEnabled && (
           <p className="mb-3 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-            지금은 내 API 키를 등록할 수 없어요. 기본 AI 튜터는 그대로 쓸 수 있어요.
+            지금은 내 API 키를 등록할 수 없어요. 기본 AI 튜터는 그대로 쓸 수
+            있어요.
           </p>
         )}
         <div className="flex flex-col gap-3">
@@ -288,7 +300,9 @@ export default function SettingsPage() {
           })}
         </div>
         <div className="mt-3 rounded-lg bg-muted/50 p-3">
-          <p className="text-xs font-medium text-muted-foreground mb-1">API 키는 어디서 받나요?</p>
+          <p className="text-xs font-medium text-muted-foreground mb-1">
+            API 키는 어디서 받나요?
+          </p>
           <ul className="text-xs text-muted-foreground space-y-0.5">
             <li>Anthropic: console.anthropic.com</li>
             <li>OpenAI: platform.openai.com/api-keys</li>

@@ -37,34 +37,39 @@ export default async function WorldPage({ searchParams }: Props) {
   if (!user) redirect('/');
 
   // user.id 필요한 쿼리는 이후 병렬 실행
-  const [progressResult, profileResult, badgesResult, apiKeys] = await Promise.all([
-    supabase
-      .from('user_progress')
-      .select('quest_id, status')
-      .eq('user_id', user.id),
-    supabase
-      .from('users')
-      .select('id, display_name, avatar_url, total_xp, current_level')
-      .eq('id', user.id)
-      .single(),
-    supabase
-      .from('user_badges')
-      .select('badge_type, earned_at')
-      .eq('user_id', user.id),
-    // 본인 API 키는 service_role 전용 테이블에 있어 서버에서만 확인 (B13)
-    loadUserApiKeys(user.id),
-  ]);
+  const [progressResult, profileResult, badgesResult, apiKeys] =
+    await Promise.all([
+      supabase
+        .from('user_progress')
+        .select('quest_id, status')
+        .eq('user_id', user.id),
+      supabase
+        .from('users')
+        .select('id, display_name, avatar_url, total_xp, current_level')
+        .eq('id', user.id)
+        .single(),
+      supabase
+        .from('user_badges')
+        .select('badge_type, earned_at')
+        .eq('user_id', user.id),
+      // 본인 API 키는 service_role 전용 테이블에 있어 서버에서만 확인 (B13)
+      loadUserApiKeys(user.id),
+    ]);
 
   const stages = stagesResult.data ?? [];
   const progress = progressResult.data ?? [];
   const profile = profileResult.data as UserProfile | null;
-  const badges = (badgesResult.data ?? []) as Pick<UserBadge, 'badge_type' | 'earned_at'>[];
+  const badges = (badgesResult.data ?? []) as Pick<
+    UserBadge,
+    'badge_type' | 'earned_at'
+  >[];
 
   const stagesWithStatus = getStageStatuses(stages, progress);
 
   // API 키 상태 확인: 사용자 커스텀 키 유무만 체크 (서버 기본 키는 무시).
   // 서버에 암호화 키가 없어 커스텀 키를 받을 수 없으면 등록 안내도 띄우지 않음
-  const showApiKeyAlert = apiKeys.enabled && Object.keys(apiKeys.keys).length === 0;
+  const showApiKeyAlert =
+    apiKeys.enabled && Object.keys(apiKeys.keys).length === 0;
 
   return (
     <>
@@ -100,7 +105,11 @@ export default async function WorldPage({ searchParams }: Props) {
           </div>
         </div>
 
-        {showApiKeyAlert && <div className="relative z-10"><ApiKeyAlert /></div>}
+        {showApiKeyAlert && (
+          <div className="relative z-10">
+            <ApiKeyAlert />
+          </div>
+        )}
 
         {profile && (
           <div className="relative z-10 mb-6">

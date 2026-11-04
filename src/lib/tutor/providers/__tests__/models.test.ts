@@ -65,7 +65,9 @@ afterEach(() => {
 describe('기본 모델·제공 종료 모델 (B35)', () => {
   it('기본 모델은 제공 종료 목록에 없다', () => {
     for (const [type, model] of Object.entries(DEFAULT_MODELS)) {
-      expect(isRetiredModel(type as keyof typeof DEFAULT_MODELS, model)).toBe(false);
+      expect(isRetiredModel(type as keyof typeof DEFAULT_MODELS, model)).toBe(
+        false,
+      );
     }
     expect(isRetiredModel('anthropic', FAST_MODELS.anthropic!)).toBe(false);
   });
@@ -91,12 +93,16 @@ describe('기본 모델·제공 종료 모델 (B35)', () => {
 
   it('env 가 비어 있으면 기본 모델, 있으면 env, 코드가 정한 모델이 가장 우선', () => {
     expect(resolveModel('gemini', undefined, {})).toBe(DEFAULT_MODELS.gemini);
-    expect(resolveModel('gemini', undefined, { GEMINI_MODEL: '  ' })).toBe(DEFAULT_MODELS.gemini);
-    expect(resolveModel('gemini', undefined, { GEMINI_MODEL: 'gemini-3.6-flash' })).toBe(
-      'gemini-3.6-flash',
+    expect(resolveModel('gemini', undefined, { GEMINI_MODEL: '  ' })).toBe(
+      DEFAULT_MODELS.gemini,
     );
     expect(
-      resolveModel('anthropic', 'claude-haiku-5-5', { ANTHROPIC_MODEL: 'claude-sonnet-4-6' }),
+      resolveModel('gemini', undefined, { GEMINI_MODEL: 'gemini-3.6-flash' }),
+    ).toBe('gemini-3.6-flash');
+    expect(
+      resolveModel('anthropic', 'claude-haiku-5-5', {
+        ANTHROPIC_MODEL: 'claude-sonnet-4-6',
+      }),
     ).toBe('claude-haiku-5-5');
   });
 
@@ -114,12 +120,16 @@ describe('기본 모델·제공 종료 모델 (B35)', () => {
     vi.stubEnv('GEMINI_MODEL', 'gemini-2.0-flash-001');
     sdk.geminiGenerate.mockResolvedValue({ text: '답' });
     await new GeminiProvider('k').call('s', 'u', 10);
-    expect(sdk.geminiGenerate.mock.calls[0][0].model).toBe(DEFAULT_MODELS.gemini);
+    expect(sdk.geminiGenerate.mock.calls[0][0].model).toBe(
+      DEFAULT_MODELS.gemini,
+    );
   });
 
   it('404 판별: status 404 만', () => {
     expect(isModelNotFoundError(notFound())).toBe(true);
-    expect(isModelNotFoundError(Object.assign(new Error('x'), { status: 429 }))).toBe(false);
+    expect(
+      isModelNotFoundError(Object.assign(new Error('x'), { status: 429 })),
+    ).toBe(false);
     expect(isModelNotFoundError(new Error('x'))).toBe(false);
     expect(isModelNotFoundError(null)).toBe(false);
   });
@@ -127,7 +137,9 @@ describe('기본 모델·제공 종료 모델 (B35)', () => {
 
 describe('기본 모델에 맞춘 요청 필드 (B35)', () => {
   it('Anthropic Sonnet 5.5 는 between_tools, Haiku 5.5 는 disabled 로 생각을 끈다', async () => {
-    sdk.anthropicCreate.mockResolvedValue({ content: [{ type: 'text', text: '답' }] });
+    sdk.anthropicCreate.mockResolvedValue({
+      content: [{ type: 'text', text: '답' }],
+    });
     sdk.anthropicStream.mockReturnValue(asyncOf([]));
 
     await new AnthropicProvider('k').call('s', 'u', 10);
@@ -136,7 +148,9 @@ describe('기본 모델에 맞춘 요청 필드 (B35)', () => {
       thinking: { type: 'between_tools' },
     });
 
-    await drain(new AnthropicProvider('k', 'claude-haiku-5-5').callStream('s', 'u', 10));
+    await drain(
+      new AnthropicProvider('k', 'claude-haiku-5-5').callStream('s', 'u', 10),
+    );
     expect(sdk.anthropicStream.mock.calls[0][0]).toMatchObject({
       model: 'claude-haiku-5-5',
       thinking: { type: 'disabled' },
@@ -145,9 +159,13 @@ describe('기본 모델에 맞춘 요청 필드 (B35)', () => {
 
   it('env 로 바꾼 다른 Anthropic 모델에는 thinking 을 붙이지 않는다 (모델마다 허용 값이 다름)', async () => {
     vi.stubEnv('ANTHROPIC_MODEL', 'claude-sonnet-4-6');
-    sdk.anthropicCreate.mockResolvedValue({ content: [{ type: 'text', text: '답' }] });
+    sdk.anthropicCreate.mockResolvedValue({
+      content: [{ type: 'text', text: '답' }],
+    });
     await new AnthropicProvider('k').call('s', 'u', 10);
-    expect(sdk.anthropicCreate.mock.calls[0][0].model).toBe('claude-sonnet-4-6');
+    expect(sdk.anthropicCreate.mock.calls[0][0].model).toBe(
+      'claude-sonnet-4-6',
+    );
     expect(sdk.anthropicCreate.mock.calls[0][0]).not.toHaveProperty('thinking');
   });
 
@@ -159,11 +177,15 @@ describe('기본 모델에 맞춘 요청 필드 (B35)', () => {
         { type: 'text', text: '하세요' },
       ],
     });
-    expect(await new AnthropicProvider('k').call('s', 'u', 10)).toBe('안녕하세요');
+    expect(await new AnthropicProvider('k').call('s', 'u', 10)).toBe(
+      '안녕하세요',
+    );
   });
 
   it('OpenAI gpt-6-luna 는 추론을 끄고(reasoning_effort none), 다른 모델에는 붙이지 않는다', async () => {
-    sdk.openaiCreate.mockResolvedValue({ choices: [{ message: { content: '답' } }] });
+    sdk.openaiCreate.mockResolvedValue({
+      choices: [{ message: { content: '답' } }],
+    });
     await new OpenAIProvider('k').call('s', 'u', 10);
     expect(sdk.openaiCreate.mock.calls[0][0]).toMatchObject({
       model: 'gpt-6-luna',
@@ -173,7 +195,9 @@ describe('기본 모델에 맞춘 요청 필드 (B35)', () => {
     sdk.openaiCreate.mockResolvedValue(asyncOf([]));
     await drain(new OpenAIProvider('k', 'gpt-4o').callStream('s', 'u', 10));
     expect(sdk.openaiCreate.mock.calls[1][0].model).toBe('gpt-4o');
-    expect(sdk.openaiCreate.mock.calls[1][0]).not.toHaveProperty('reasoning_effort');
+    expect(sdk.openaiCreate.mock.calls[1][0]).not.toHaveProperty(
+      'reasoning_effort',
+    );
   });
 });
 
@@ -187,10 +211,12 @@ describe('env 모델이 404 면 기본 모델로 다시 부른다 (B35)', () => 
   it('call: 경고 1번 + 기본 모델로 다시 불러 답하고, 그 뒤로는 처음부터 기본 모델', async () => {
     vi.stubEnv('GEMINI_API_KEY', 'server-gemini');
     vi.stubEnv('GEMINI_MODEL', 'gemini-9-gone');
-    sdk.geminiGenerate.mockImplementation(async ({ model }: { model: string }) => {
-      if (model === 'gemini-9-gone') throw notFound();
-      return { text: `${model} 답` };
-    });
+    sdk.geminiGenerate.mockImplementation(
+      async ({ model }: { model: string }) => {
+        if (model === 'gemini-9-gone') throw notFound();
+        return { text: `${model} 답` };
+      },
+    );
     const { createProvider } = await freshFactory();
 
     expect(await createProvider('gemini').call('s', 'u', 10)).toBe(
@@ -208,32 +234,46 @@ describe('env 모델이 404 면 기본 모델로 다시 부른다 (B35)', () => 
 
     // 본인 키(요청마다 새 provider)도 이미 404 를 낸 모델은 다시 시도하지 않는다
     await createProvider('gemini', 'user-key').call('s', 'u', 10);
-    expect(sdk.geminiGenerate.mock.calls.at(-1)![0].model).toBe(DEFAULT_MODELS.gemini);
+    expect(sdk.geminiGenerate.mock.calls.at(-1)![0].model).toBe(
+      DEFAULT_MODELS.gemini,
+    );
   });
 
   it('stream: 내용을 보내기 전 404 면 기본 모델 스트림으로 이어 간다', async () => {
     vi.stubEnv('GEMINI_MODEL', 'gemini-9-gone');
-    sdk.geminiGenerateStream.mockImplementation(async ({ model }: { model: string }) => {
-      if (model === 'gemini-9-gone') throw notFound();
-      return asyncOf([{ text: '기본 ' }, { text: '모델' }]);
-    });
+    sdk.geminiGenerateStream.mockImplementation(
+      async ({ model }: { model: string }) => {
+        if (model === 'gemini-9-gone') throw notFound();
+        return asyncOf([{ text: '기본 ' }, { text: '모델' }]);
+      },
+    );
     const { createProvider } = await freshFactory();
 
-    expect(await drain(createProvider('gemini', 'user-key').callStream('s', 'u', 10))).toBe(
-      '기본 모델',
-    );
+    expect(
+      await drain(
+        createProvider('gemini', 'user-key').callStream('s', 'u', 10),
+      ),
+    ).toBe('기본 모델');
   });
 
   it('404 가 아닌 실패와 기본 모델·코드가 정한 모델의 실패는 그대로 던진다', async () => {
     vi.stubEnv('GEMINI_MODEL', 'gemini-3.6-flash');
-    sdk.geminiGenerate.mockRejectedValue(Object.assign(new Error('quota'), { status: 429 }));
+    sdk.geminiGenerate.mockRejectedValue(
+      Object.assign(new Error('quota'), { status: 429 }),
+    );
     const { createProvider } = await freshFactory();
-    await expect(createProvider('gemini', 'user-key').call('s', 'u', 10)).rejects.toThrow('quota');
+    await expect(
+      createProvider('gemini', 'user-key').call('s', 'u', 10),
+    ).rejects.toThrow('quota');
     expect(sdk.geminiGenerate).toHaveBeenCalledTimes(1);
 
     sdk.anthropicCreate.mockRejectedValue(notFound());
     await expect(
-      createProvider('anthropic', 'user-key', 'claude-haiku-5-5').call('s', 'u', 10),
+      createProvider('anthropic', 'user-key', 'claude-haiku-5-5').call(
+        's',
+        'u',
+        10,
+      ),
     ).rejects.toThrow('model not found');
     expect(sdk.anthropicCreate).toHaveBeenCalledTimes(1);
   });

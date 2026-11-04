@@ -42,16 +42,25 @@ afterEach(() => {
 describe('서버 키 전역 예산 (P1-22)', () => {
   it('Gemini 만 예산이 있고, env "분당/하루"로 바꾸며 형식이 틀리면 기본값', () => {
     const def = SERVER_KEY_BUDGETS.gemini!;
-    expect(getServerKeyBudget('gemini', {})).toEqual({ perMinute: def.perMinute, perDay: def.perDay });
-    expect(getServerKeyBudget('gemini', { TUTOR_GLOBAL_LIMIT_GEMINI: '30 / 3000' })).toEqual({
-      perMinute: 30,
-      perDay: 3000,
-    });
-    expect(getServerKeyBudget('gemini', { TUTOR_GLOBAL_LIMIT_GEMINI: 'lots' })).toEqual({
+    expect(getServerKeyBudget('gemini', {})).toEqual({
       perMinute: def.perMinute,
       perDay: def.perDay,
     });
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('TUTOR_GLOBAL_LIMIT_GEMINI'));
+    expect(
+      getServerKeyBudget('gemini', { TUTOR_GLOBAL_LIMIT_GEMINI: '30 / 3000' }),
+    ).toEqual({
+      perMinute: 30,
+      perDay: 3000,
+    });
+    expect(
+      getServerKeyBudget('gemini', { TUTOR_GLOBAL_LIMIT_GEMINI: 'lots' }),
+    ).toEqual({
+      perMinute: def.perMinute,
+      perDay: def.perDay,
+    });
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('TUTOR_GLOBAL_LIMIT_GEMINI'),
+    );
     expect(getServerKeyBudget('anthropic', {})).toBeNull();
     expect(getServerKeyBudget('openai', {})).toBeNull();
   });
@@ -69,8 +78,12 @@ describe('서버 키 전역 예산 (P1-22)', () => {
   });
 
   it('넘으면 false + Sentry 경고, 로그는 분 창의 첫 거부에만', async () => {
-    expect(await consumeServerKeyBudget(adminWith(denied(1)).admin, 'gemini', {})).toBe(false);
-    expect(await consumeServerKeyBudget(adminWith(denied(2)).admin, 'gemini', {})).toBe(false);
+    expect(
+      await consumeServerKeyBudget(adminWith(denied(1)).admin, 'gemini', {}),
+    ).toBe(false);
+    expect(
+      await consumeServerKeyBudget(adminWith(denied(2)).admin, 'gemini', {}),
+    ).toBe(false);
     expect(console.warn).toHaveBeenCalledTimes(1);
     expect(observed.message).toHaveBeenCalledWith(
       'tutor server key budget exhausted',
@@ -84,13 +97,18 @@ describe('서버 키 전역 예산 (P1-22)', () => {
   it('DB 실패·알 수 없는 응답은 통과시키고(fail-open) 로그·Sentry', async () => {
     expect(
       await consumeServerKeyBudget(
-        adminWith({ data: null, error: { code: '42883', message: 'missing' } }).admin,
+        adminWith({ data: null, error: { code: '42883', message: 'missing' } })
+          .admin,
         'gemini',
         {},
       ),
     ).toBe(true);
     expect(
-      await consumeServerKeyBudget(adminWith({ data: {}, error: null }).admin, 'gemini', {}),
+      await consumeServerKeyBudget(
+        adminWith({ data: {}, error: null }).admin,
+        'gemini',
+        {},
+      ),
     ).toBe(true);
     expect(observed.error).toHaveBeenCalledTimes(2);
   });

@@ -223,7 +223,8 @@ export function useTutor() {
       } finally {
         clearTimeout(idleTimer);
         inFlightRef.current.delete(controller);
-        if (activeStreamRef.current === controller) activeStreamRef.current = null;
+        if (activeStreamRef.current === controller)
+          activeStreamRef.current = null;
       }
     },
     [cooldownError, rateLimited],

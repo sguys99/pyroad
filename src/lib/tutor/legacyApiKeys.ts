@@ -12,7 +12,11 @@ import type { Database } from '@/lib/types/database';
 import { encryptApiKey, type ApiKeyKeyring } from '@/lib/crypto/apiKeyCipher';
 import type { LLMProviderType } from './providers/types';
 
-export const API_KEY_PROVIDERS: readonly LLMProviderType[] = ['anthropic', 'openai', 'gemini'];
+export const API_KEY_PROVIDERS: readonly LLMProviderType[] = [
+  'anthropic',
+  'openai',
+  'gemini',
+];
 
 export type LegacyMigrationResult =
   | { status: 'column-gone' }
@@ -29,11 +33,16 @@ export function resetLegacyColumnState() {
 }
 
 function isMissingColumn(error: { code?: string; message?: string }) {
-  return error.code === '42703' || /custom_api_keys.*does not exist/i.test(error.message ?? '');
+  return (
+    error.code === '42703' ||
+    /custom_api_keys.*does not exist/i.test(error.message ?? '')
+  );
 }
 
 /** 평문 jsonb 에서 알려진 provider 의 비어 있지 않은 문자열 키만 */
-export function pickLegacyKeys(value: unknown): Partial<Record<LLMProviderType, string>> {
+export function pickLegacyKeys(
+  value: unknown,
+): Partial<Record<LLMProviderType, string>> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   const record = value as Record<string, unknown>;
   const out: Partial<Record<LLMProviderType, string>> = {};
@@ -47,7 +56,9 @@ export function pickLegacyKeys(value: unknown): Partial<Record<LLMProviderType, 
 function isEmptyJson(value: unknown) {
   return (
     value == null ||
-    (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
+    (typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0)
   );
 }
 
@@ -76,7 +87,10 @@ export async function migrateLegacyApiKeys(
       legacyColumnGone = true;
       return { status: 'column-gone' };
     }
-    return { status: 'error', message: `users 조회 실패: ${error.code ?? ''} ${error.message}` };
+    return {
+      status: 'error',
+      message: `users 조회 실패: ${error.code ?? ''} ${error.message}`,
+    };
   }
 
   const raw = (data as { custom_api_keys?: unknown } | null)?.custom_api_keys;

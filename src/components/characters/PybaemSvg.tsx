@@ -105,7 +105,16 @@ interface BlinkableEyeProps {
   blinkId: string;
 }
 
-function BlinkableEye({ cx, cy, rx, ry, hlCx, hlCy, hlR, blinkId }: BlinkableEyeProps) {
+function BlinkableEye({
+  cx,
+  cy,
+  rx,
+  ry,
+  hlCx,
+  hlCy,
+  hlR,
+  blinkId,
+}: BlinkableEyeProps) {
   return (
     <>
       <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="#2E7D32">
@@ -137,8 +146,26 @@ function HappyFace() {
     <>
       {/* 눈 */}
       <g id="eyes">
-        <BlinkableEye cx={52} cy={40} rx={5} ry={5.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="happyL" />
-        <BlinkableEye cx={76} cy={40} rx={5} ry={5.5} hlCx={77.5} hlCy={38.5} hlR={2} blinkId="happyR" />
+        <BlinkableEye
+          cx={52}
+          cy={40}
+          rx={5}
+          ry={5.5}
+          hlCx={53.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="happyL"
+        />
+        <BlinkableEye
+          cx={76}
+          cy={40}
+          rx={5}
+          ry={5.5}
+          hlCx={77.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="happyR"
+        />
       </g>
       {/* 입 - 미소 */}
       <g id="mouth">
@@ -178,12 +205,30 @@ function CelebratingFace() {
     <>
       <g id="eyes">
         {/* 눈 - 행복하게 감은 눈 (^_^) */}
-        <path d="M47 40 Q52 35 57 40" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-        <path d="M71 40 Q76 35 81 40" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M47 40 Q52 35 57 40"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M71 40 Q76 35 81 40"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
       <g id="mouth">
         {/* 입 - 크게 웃는 입 */}
-        <path d="M52 50 Q64 62 76 50" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M52 50 Q64 62 76 50"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
         <path d="M54 50 Q64 58 74 50" fill="#FF8A80" opacity="0.3" />
       </g>
     </>
@@ -195,12 +240,36 @@ function EncouragingFace() {
     <>
       <g id="eyes">
         {/* 부드러운 눈 */}
-        <BlinkableEye cx={52} cy={40} rx={5} ry={4.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="encL" />
-        <BlinkableEye cx={76} cy={40} rx={5} ry={4.5} hlCx={77.5} hlCy={38.5} hlR={2} blinkId="encR" />
+        <BlinkableEye
+          cx={52}
+          cy={40}
+          rx={5}
+          ry={4.5}
+          hlCx={53.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="encL"
+        />
+        <BlinkableEye
+          cx={76}
+          cy={40}
+          rx={5}
+          ry={4.5}
+          hlCx={77.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="encR"
+        />
       </g>
       <g id="mouth">
         {/* 따뜻한 미소 */}
-        <path d="M56 52 Q64 57 72 52" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M56 52 Q64 57 72 52"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -211,8 +280,26 @@ function SurprisedFace() {
     <>
       <g id="eyes">
         {/* 큰 눈 */}
-        <BlinkableEye cx={52} cy={39} rx={6} ry={7} hlCx={53.5} hlCy={37} hlR={2.5} blinkId="surL" />
-        <BlinkableEye cx={76} cy={39} rx={6} ry={7} hlCx={77.5} hlCy={37} hlR={2.5} blinkId="surR" />
+        <BlinkableEye
+          cx={52}
+          cy={39}
+          rx={6}
+          ry={7}
+          hlCx={53.5}
+          hlCy={37}
+          hlR={2.5}
+          blinkId="surL"
+        />
+        <BlinkableEye
+          cx={76}
+          cy={39}
+          rx={6}
+          ry={7}
+          hlCx={77.5}
+          hlCy={37}
+          hlR={2.5}
+          blinkId="surR"
+        />
       </g>
       <g id="mouth">
         {/* 놀란 O 입 */}
@@ -228,11 +315,32 @@ function TeachingFace() {
     <>
       <g id="eyes">
         {/* 한쪽 눈 윙크 */}
-        <BlinkableEye cx={52} cy={40} rx={5} ry={5.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="teachL" />
-        <path d="M71 40 Q76 36 81 40" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <BlinkableEye
+          cx={52}
+          cy={40}
+          rx={5}
+          ry={5.5}
+          hlCx={53.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="teachL"
+        />
+        <path
+          d="M71 40 Q76 36 81 40"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
       <g id="mouth">
-        <path d="M56 52 Q64 58 72 52" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M56 52 Q64 58 72 52"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -242,12 +350,36 @@ function WavingFace() {
   return (
     <>
       <g id="eyes">
-        <BlinkableEye cx={52} cy={40} rx={5} ry={5.5} hlCx={53.5} hlCy={38.5} hlR={2} blinkId="waveL" />
-        <BlinkableEye cx={76} cy={40} rx={5} ry={5.5} hlCx={77.5} hlCy={38.5} hlR={2} blinkId="waveR" />
+        <BlinkableEye
+          cx={52}
+          cy={40}
+          rx={5}
+          ry={5.5}
+          hlCx={53.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="waveL"
+        />
+        <BlinkableEye
+          cx={76}
+          cy={40}
+          rx={5}
+          ry={5.5}
+          hlCx={77.5}
+          hlCy={38.5}
+          hlR={2}
+          blinkId="waveR"
+        />
       </g>
       <g id="mouth">
         {/* 활짝 웃는 입 */}
-        <path d="M54 50 Q64 60 74 50" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M54 50 Q64 60 74 50"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -258,12 +390,30 @@ function SleepingFace() {
     <>
       <g id="eyes">
         {/* 감은 눈 */}
-        <path d="M47 42 Q52 38 57 42" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-        <path d="M71 42 Q76 38 81 42" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M47 42 Q52 38 57 42"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M71 42 Q76 38 81 42"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
       <g id="mouth">
         {/* 편안한 입 */}
-        <path d="M58 52 Q64 55 70 52" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <path
+          d="M58 52 Q64 55 70 52"
+          stroke="#2E7D32"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -274,12 +424,36 @@ function ConfusedFace() {
     <>
       <g id="eyes">
         {/* 한쪽 눈이 더 큰 비대칭 */}
-        <BlinkableEye cx={52} cy={40} rx={5} ry={6} hlCx={53} hlCy={38} hlR={2} blinkId="confL" />
-        <BlinkableEye cx={76} cy={40} rx={4} ry={4.5} hlCx={77} hlCy={38.5} hlR={1.5} blinkId="confR" />
+        <BlinkableEye
+          cx={52}
+          cy={40}
+          rx={5}
+          ry={6}
+          hlCx={53}
+          hlCy={38}
+          hlR={2}
+          blinkId="confL"
+        />
+        <BlinkableEye
+          cx={76}
+          cy={40}
+          rx={4}
+          ry={4.5}
+          hlCx={77}
+          hlCy={38.5}
+          hlR={1.5}
+          blinkId="confR"
+        />
       </g>
       <g id="mouth">
         {/* 삐뚤 입 */}
-        <path d="M56 54 Q62 50 70 54" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M56 54 Q62 50 70 54"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -290,12 +464,24 @@ function ProudFace() {
     <>
       <g id="eyes">
         {/* 별 눈 */}
-        <polygon points="52,35 54,39 58,40 55,43 56,47 52,45 48,47 49,43 46,40 50,39" fill="#FFD700" />
-        <polygon points="76,35 78,39 82,40 79,43 80,47 76,45 72,47 73,43 70,40 74,39" fill="#FFD700" />
+        <polygon
+          points="52,35 54,39 58,40 55,43 56,47 52,45 48,47 49,43 46,40 50,39"
+          fill="#FFD700"
+        />
+        <polygon
+          points="76,35 78,39 82,40 79,43 80,47 76,45 72,47 73,43 70,40 74,39"
+          fill="#FFD700"
+        />
       </g>
       <g id="mouth">
         {/* 당당한 미소 */}
-        <path d="M54 50 Q64 60 74 50" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M54 50 Q64 60 74 50"
+          stroke="#2E7D32"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
         <path d="M56 50 Q64 56 72 50" fill="#FF8A80" opacity="0.3" />
       </g>
     </>
@@ -308,7 +494,15 @@ function TeachingAccessory() {
   return (
     <>
       {/* 지팡이/포인터 */}
-      <line x1="96" y1="30" x2="106" y2="16" stroke="#795548" strokeWidth="3" strokeLinecap="round" />
+      <line
+        x1="96"
+        y1="30"
+        x2="106"
+        y2="16"
+        stroke="#795548"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
       <circle cx="107" cy="14" r="3" fill="#FF5722" />
     </>
   );
@@ -346,9 +540,36 @@ function SleepingAccessory() {
   return (
     <>
       {/* Zzz */}
-      <text x="88" y="28" fontSize="14" fill="#7986CB" fontWeight="bold" opacity="0.7">Z</text>
-      <text x="96" y="20" fontSize="11" fill="#7986CB" fontWeight="bold" opacity="0.5">z</text>
-      <text x="102" y="14" fontSize="8" fill="#7986CB" fontWeight="bold" opacity="0.3">z</text>
+      <text
+        x="88"
+        y="28"
+        fontSize="14"
+        fill="#7986CB"
+        fontWeight="bold"
+        opacity="0.7"
+      >
+        Z
+      </text>
+      <text
+        x="96"
+        y="20"
+        fontSize="11"
+        fill="#7986CB"
+        fontWeight="bold"
+        opacity="0.5"
+      >
+        z
+      </text>
+      <text
+        x="102"
+        y="14"
+        fontSize="8"
+        fill="#7986CB"
+        fontWeight="bold"
+        opacity="0.3"
+      >
+        z
+      </text>
     </>
   );
 }
@@ -357,7 +578,16 @@ function ConfusedAccessory() {
   return (
     <>
       {/* 물음표 */}
-      <text x="86" y="26" fontSize="18" fill="#FF9800" fontWeight="bold" opacity="0.8">?</text>
+      <text
+        x="86"
+        y="26"
+        fontSize="18"
+        fill="#FF9800"
+        fontWeight="bold"
+        opacity="0.8"
+      >
+        ?
+      </text>
     </>
   );
 }
@@ -366,7 +596,10 @@ function ProudAccessory() {
   return (
     <>
       {/* 왕관 */}
-      <polygon points="50,22 54,14 58,20 64,10 70,20 74,14 78,22" fill="#FFD700" />
+      <polygon
+        points="50,22 54,14 58,20 64,10 70,20 74,14 78,22"
+        fill="#FFD700"
+      />
       <rect x="50" y="22" width="28" height="4" rx="1" fill="#FFD700" />
       <circle cx="58" cy="16" r="1.5" fill="#E91E63" />
       <circle cx="64" cy="12" r="1.5" fill="#2196F3" />

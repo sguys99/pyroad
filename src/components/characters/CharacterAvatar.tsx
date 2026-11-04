@@ -5,7 +5,13 @@ import { m, AnimatePresence } from 'framer-motion';
 import { PybaemSvg } from './PybaemSvg';
 import { BugBugSvg } from './BugBugSvg';
 import { ByeolttongiSvg } from './ByeolttongiSvg';
-import type { Character, Expression, AvatarSize, BugBugExpression, ByeolttongiExpression } from './expressions';
+import type {
+  Character,
+  Expression,
+  AvatarSize,
+  BugBugExpression,
+  ByeolttongiExpression,
+} from './expressions';
 import { AVATAR_SIZE_MAP } from './expressions';
 
 interface CharacterAvatarProps {
@@ -19,7 +25,10 @@ interface CharacterAvatarProps {
   className?: string;
 }
 
-const hoverSpring = { scale: 1.08, transition: { type: 'spring' as const, stiffness: 400, damping: 17 } };
+const hoverSpring = {
+  scale: 1.08,
+  transition: { type: 'spring' as const, stiffness: 400, damping: 17 },
+};
 const expressionTransitionConfig = { duration: 0.2 };
 const expressionInitial = { opacity: 0, scale: 0.95 };
 const expressionAnimate = { opacity: 1, scale: 1 };
@@ -65,7 +74,14 @@ export const CharacterAvatar = memo(function CharacterAvatar({
   );
 
   if (!onHover) {
-    return <div className={className} data-testid={`character-avatar-${character}-${currentExpression}`}>{content}</div>;
+    return (
+      <div
+        className={className}
+        data-testid={`character-avatar-${character}-${currentExpression}`}
+      >
+        {content}
+      </div>
+    );
   }
 
   return (
@@ -88,10 +104,24 @@ function renderCharacter(
 ) {
   switch (character) {
     case 'pybaem':
-      return <PybaemSvg expression={expression as Parameters<typeof PybaemSvg>[0]['expression']} size={size} />;
+      return (
+        <PybaemSvg
+          expression={
+            expression as Parameters<typeof PybaemSvg>[0]['expression']
+          }
+          size={size}
+        />
+      );
     case 'bugbug':
-      return <BugBugSvg expression={expression as BugBugExpression} size={size} />;
+      return (
+        <BugBugSvg expression={expression as BugBugExpression} size={size} />
+      );
     case 'byeolttongi':
-      return <ByeolttongiSvg expression={expression as ByeolttongiExpression} size={size} />;
+      return (
+        <ByeolttongiSvg
+          expression={expression as ByeolttongiExpression}
+          size={size}
+        />
+      );
   }
 }

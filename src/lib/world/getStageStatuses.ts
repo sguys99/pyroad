@@ -1,8 +1,4 @@
-import type {
-  Stage,
-  StageStatus,
-  StageWithStatus,
-} from '@/lib/types/database';
+import type { Stage, StageStatus, StageWithStatus } from '@/lib/types/database';
 
 import { sortStages, type OrderedStage } from './stageOrder';
 
@@ -31,9 +27,7 @@ export function getStageStatuses(
 ): StageWithStatus[] {
   const sorted = sortStages(stages);
   const completedQuestIds = new Set(
-    userProgress
-      .filter((p) => p.status === 'completed')
-      .map((p) => p.quest_id),
+    userProgress.filter((p) => p.status === 'completed').map((p) => p.quest_id),
   );
 
   let prevStageCompleted = true;
@@ -67,7 +61,8 @@ export function getStageStatuses(
       quests: sortedQuests,
       completedQuestCount: completedCount,
       totalQuestCount: sortedQuests.length,
-      firstIncompleteQuestId: firstIncomplete?.id ?? sortedQuests[0]?.id ?? null,
+      firstIncompleteQuestId:
+        firstIncomplete?.id ?? sortedQuests[0]?.id ?? null,
     };
   });
 }

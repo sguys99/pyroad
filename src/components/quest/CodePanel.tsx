@@ -37,7 +37,9 @@ function CodingTipRotator() {
 
   return (
     <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-      <span className="shrink-0"><CharacterAvatar character="pybaem" expression="teaching" size="sm" /></span>
+      <span className="shrink-0">
+        <CharacterAvatar character="pybaem" expression="teaching" size="sm" />
+      </span>
       <div className="min-h-[20px] flex-1">
         <AnimatePresence mode="wait">
           <m.p
@@ -197,7 +199,8 @@ export function CodePanel({
       </div>
 
       {/* 다시 준비 중이면 깨우는 연출, 처음 불러오는 중이면 코딩 팁 */}
-      {isLoading && (restarting ? <RunnerWakingNotice /> : <CodingTipRotator />)}
+      {isLoading &&
+        (restarting ? <RunnerWakingNotice /> : <CodingTipRotator />)}
 
       {/* 실행 결과 */}
       <OutputPanel
@@ -212,10 +215,18 @@ export function CodePanel({
         <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{
+            delay: 0.5,
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+          }}
           className="mt-2"
         >
-          <Button render={<Link href={`/quest/${nextQuestId}`} />} className="w-full">
+          <Button
+            render={<Link href={`/quest/${nextQuestId}`} />}
+            className="w-full"
+          >
             다음 퀘스트로 →
           </Button>
         </m.div>

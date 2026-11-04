@@ -85,21 +85,27 @@ export function createProvider(
   return provider;
 }
 
-function instantiate(type: LLMProviderType, apiKey: string, model?: string): LLMProvider {
+function instantiate(
+  type: LLMProviderType,
+  apiKey: string,
+  model?: string,
+): LLMProvider {
   const resolved = resolveModel(type, model);
   const fallbackModel = DEFAULT_MODELS[type];
   // 코드가 정한 모델(경량 모델)과 기본 모델은 그대로. env 모델만 404 시 기본 모델로 바꿔 다시 부른다 (B35)
   if (model || resolved === fallbackModel) return build(type, apiKey, resolved);
-  if (notFoundModels.has(`${type}:${resolved}`)) return build(type, apiKey, fallbackModel);
-  return withModelFallback(
-    type,
-    resolved,
-    build(type, apiKey, resolved),
-    () => build(type, apiKey, fallbackModel),
+  if (notFoundModels.has(`${type}:${resolved}`))
+    return build(type, apiKey, fallbackModel);
+  return withModelFallback(type, resolved, build(type, apiKey, resolved), () =>
+    build(type, apiKey, fallbackModel),
   );
 }
 
-function build(type: LLMProviderType, apiKey: string, model: string): LLMProvider {
+function build(
+  type: LLMProviderType,
+  apiKey: string,
+  model: string,
+): LLMProvider {
   switch (type) {
     case 'anthropic':
       return new AnthropicProvider(apiKey, model);
@@ -144,7 +150,8 @@ function withModelFallback(
 
   return {
     async call(systemPrompt, userPrompt, maxTokens, options) {
-      if (fallback) return fallback.call(systemPrompt, userPrompt, maxTokens, options);
+      if (fallback)
+        return fallback.call(systemPrompt, userPrompt, maxTokens, options);
       try {
         return await primary.call(systemPrompt, userPrompt, maxTokens, options);
       } catch (error) {
@@ -155,13 +162,23 @@ function withModelFallback(
     },
     async *callStream(systemPrompt, userPrompt, maxTokens, options) {
       if (fallback) {
-        yield* fallback.callStream(systemPrompt, userPrompt, maxTokens, options);
+        yield* fallback.callStream(
+          systemPrompt,
+          userPrompt,
+          maxTokens,
+          options,
+        );
         return;
       }
       let emitted = false;
       let next: LLMProvider | null = null;
       try {
-        for await (const delta of primary.callStream(systemPrompt, userPrompt, maxTokens, options)) {
+        for await (const delta of primary.callStream(
+          systemPrompt,
+          userPrompt,
+          maxTokens,
+          options,
+        )) {
           emitted = true;
           yield delta;
         }

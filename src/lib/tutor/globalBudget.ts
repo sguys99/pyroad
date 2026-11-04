@@ -2,7 +2,10 @@ import 'server-only';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/types/database';
-import { captureServerError, captureServerMessage } from '@/lib/observability/server';
+import {
+  captureServerError,
+  captureServerMessage,
+} from '@/lib/observability/server';
 import { parseRateLimitEnv, type RateLimit } from './rateLimit';
 import type { LLMProviderType } from './providers/types';
 
