@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useTutor, STREAM_IDLE_TIMEOUT_MS } from '../useTutor';
+import {
+  useTutor,
+  STREAM_IDLE_TIMEOUT_MS,
+  TutorRateLimitError,
+} from '../useTutor';
 import { encodeSseEvent, type TutorStreamEvent } from '../sse';
 import type { TutorRequest } from '../types';
 
@@ -295,5 +299,150 @@ describe('useTutor — 로딩 표시 (B18 남은 문제)', () => {
       });
     });
     expect(result.current.isLoading).toBe(false);
+  });
+});
+
+describe('useTutor — 요청 한도 429 (P1-19)', () => {
+  const hint: TutorRequest = {
+    type: 'hint_generator',
+    quest_id: 'q1',
+    hint_level: 1,
+  };
+  const limited = (retryAfter: number, scope: 'minute' | 'day' = 'minute') =>
+    Response.json(
+      {
+        error: 'rate_limited',
+        message: `서버 문구 ${retryAfter}`,
+        retry_after: retryAfter,
+        scope,
+      },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    );
+
+  function stubFetch(handler: (url: string) => Response | Promise<Response>) {
+    const fetchMock = vi.fn(async (url: string) =>
+      url === '/api/settings'
+        ? Response.json({ has_custom_keys: [] })
+        : handler(url),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    return fetchMock;
+  }
+  const tutorCalls = (fetchMock: ReturnType<typeof stubFetch>) =>
+    fetchMock.mock.calls.filter(([url]) => url !== '/api/settings').length;
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('스트림 429 → 서버 문구·대기 시간을 담은 TutorRateLimitError (호출자의 기존 오류 처리로 힌트 횟수가 되돌아감)', async () => {
+    stubFetch(() => limited(42));
+    const { result } = renderHook(() => useTutor());
+    const onDelta = vi.fn();
+
+    let error: unknown;
+    await act(async () => {
+      error = await result.current
+        .sendTutorStreamRequest(hint, onDelta)
+        .catch((e: unknown) => e);
+    });
+    expect(error).toBeInstanceOf(TutorRateLimitError);
+    expect(error).toMatchObject({
+      message: '서버 문구 42',
+      retryAfterSec: 42,
+      scope: 'minute',
+    });
+    // 힌트 글자를 하나도 받지 않음 → useQuestSession 이 횟수를 되돌림 (B18·P1-04)
+    expect(onDelta).not.toHaveBeenCalled();
+  });
+
+  it('비스트림 429 도 TutorRateLimitError, 본문이 없으면 Retry-After 헤더와 기본 문구', async () => {
+    stubFetch(
+      () =>
+        new Response(null, { status: 429, headers: { 'Retry-After': '75' } }),
+    );
+    const { result } = renderHook(() => useTutor());
+
+    let error: unknown;
+    await act(async () => {
+      error = await result.current
+        .sendTutorRequest({ type: 'code_feedback', quest_id: 'q1' })
+        .catch((e: unknown) => e);
+    });
+    expect(error).toBeInstanceOf(TutorRateLimitError);
+    expect(error).toMatchObject({
+      retryAfterSec: 75,
+      message: '파이뱀 선생님이 잠깐 쉬고 있어요. 2분 뒤에 다시 물어봐요!',
+    });
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('대기 시간 동안 같은 유형은 서버에 보내지 않고 남은 시간으로 바로 실패, 다른 유형·대기 뒤에는 다시 보냄', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-04T10:00:00Z'));
+    let status = 429;
+    const fetchMock = stubFetch(() =>
+      status === 429
+        ? limited(30)
+        : Response.json({ message: '괜찮아요', is_fallback: false }),
+    );
+    const { result } = renderHook(() => useTutor());
+
+    await act(async () => {
+      await result.current.sendTutorRequest(hint).catch(() => {});
+    });
+    expect(tutorCalls(fetchMock)).toBe(1);
+
+    vi.setSystemTime(new Date('2026-11-04T10:00:20Z'));
+    let error: unknown;
+    await act(async () => {
+      error = await result.current
+        .sendTutorStreamRequest(hint, () => {})
+        .catch((e: unknown) => e);
+    });
+    expect(tutorCalls(fetchMock)).toBe(1);
+    expect(error).toMatchObject({
+      retryAfterSec: 10,
+      message: '파이뱀 선생님이 잠깐 쉬고 있어요. 10초 뒤에 다시 물어봐요!',
+    });
+
+    // 다른 유형은 한도가 따로
+    status = 200;
+    await act(async () => {
+      await result.current.sendTutorRequest({
+        type: 'code_feedback',
+        quest_id: 'q1',
+      });
+    });
+    expect(tutorCalls(fetchMock)).toBe(2);
+
+    vi.setSystemTime(new Date('2026-11-04T10:00:31Z'));
+    await act(async () => {
+      await expect(
+        result.current.sendTutorRequest(hint),
+      ).resolves.toMatchObject({
+        message: '괜찮아요',
+      });
+    });
+    expect(tutorCalls(fetchMock)).toBe(3);
+  });
+
+  it('하루 한도: 서버 문구, 대기 중 다시 누르면 "내일" 문구', async () => {
+    stubFetch(() => limited(5000, 'day'));
+    const { result } = renderHook(() => useTutor());
+    let error: unknown;
+    await act(async () => {
+      error = await result.current
+        .sendTutorRequest(hint)
+        .catch((e: unknown) => e);
+    });
+    expect(error).toMatchObject({ scope: 'day', message: '서버 문구 5000' });
+    await act(async () => {
+      error = await result.current
+        .sendTutorRequest(hint)
+        .catch((e: unknown) => e);
+    });
+    expect((error as Error).message).toContain('내일 다시 물어봐요');
   });
 });

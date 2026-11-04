@@ -3706,6 +3706,251 @@ async function groupBoard(u) {
   });
 }
 
+// ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────────
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function groupRateLimit(u) {
+  // 클라이언트가 카운터를 지우거나 0 으로 만들면 한도가 풀리고, RPC 를 직접 부르면 다른 아이의 한도를 다 써 버릴 수 있음
+  one(`insert into public.api_rate_limits (user_id, bucket, minute_start, minute_count, day, day_count)
+       values ('${u.alice.id}', 'tutor:hint_generator', date_trunc('minute', now()), 6, public.kst_today(), 60)
+       on conflict (user_id, bucket) do update set minute_count = 6, day_count = 60`);
+  await check({
+    group: 'ratelimit',
+    id: 'RL-1',
+    role: 'anon',
+    op: 'GET /api_rate_limits',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', '/rest/v1/api_rate_limits?select=*')),
+  });
+  await check({
+    group: 'ratelimit',
+    id: 'RL-2',
+    role: 'authenticated',
+    op: 'GET /api_rate_limits?user_id=eq.<본인> (언제 튜터를 썼는지)',
+    ...READ,
+    run: async () =>
+      classifyRead(await rest('GET', `/rest/v1/api_rate_limits?select=*&user_id=eq.${u.alice.id}`, { as: u.alice })),
+  });
+  await check({
+    group: 'ratelimit',
+    id: 'RL-3',
+    role: 'authenticated',
+    op: 'PATCH /api_rate_limits {day_count: 0} (본인 한도 되돌리기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('PATCH', `/rest/v1/api_rate_limits?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { minute_count: 0, day_count: 0 },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.api_rate_limits where user_id = '${u.alice.id}' and bucket = 'tutor:hint_generator' and day_count = 0)`,
+      ),
+  });
+  await check({
+    group: 'ratelimit',
+    id: 'RL-4',
+    role: 'authenticated',
+    op: 'DELETE /api_rate_limits?user_id=eq.<본인> (카운터 지우기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('DELETE', `/rest/v1/api_rate_limits?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.api_rate_limits where user_id = '${u.alice.id}' and bucket = 'tutor:hint_generator')`,
+      ),
+  });
+  await check({
+    group: 'ratelimit',
+    id: 'RL-5',
+    role: 'authenticated',
+    op: 'POST /rpc/consume_rate_limit {p_user_id: 다른 사람} (남의 한도 소진·우회)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/rpc/consume_rate_limit', {
+          as: u.alice,
+          body: { p_user_id: u.bob.id, p_bucket: 'tutor:quest_intro', p_per_minute: 1000, p_per_day: 1000 },
+        }),
+        `select exists (select 1 from public.api_rate_limits where user_id = '${u.bob.id}' and bucket = 'tutor:quest_intro')`,
+      ),
+  });
+  await check({
+    group: 'ratelimit',
+    id: 'RL-5b',
+    role: 'anon',
+    op: 'POST /rpc/consume_rate_limit (비로그인)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', '/rest/v1/rpc/consume_rate_limit', {
+          body: { p_user_id: u.bob.id, p_bucket: 'tutor:stage_summary', p_per_minute: 1000, p_per_day: 1000 },
+        }),
+        `select exists (select 1 from public.api_rate_limits where user_id = '${u.bob.id}' and bucket = 'tutor:stage_summary')`,
+      ),
+  });
+
+  // 경합: 서로 다른 PostgREST 요청(트랜잭션) 20개가 동시에 와도 한도만큼만 허용 (행 잠금)
+  await check({
+    group: 'ratelimit',
+    id: 'RL-6',
+    role: 'service_role',
+    op: '한도 분당 5 에 동시 20회 → 정확히 5회 허용 · 15회 거부(retry_after 1~60) · 카운트 5, 하루 한도 3 에 동시 10회 → 3회',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rl6', '동시한도');
+      // 분 창 경계에 걸리면 두 창으로 나뉘므로 경계 직전이면 다음 분까지 기다림
+      const sec = new Date().getUTCSeconds();
+      if (sec >= 55) await sleep((61 - sec) * 1000);
+      const burst = (bucket, n, perMinute, perDay) =>
+        Promise.all(
+          Array.from({ length: n }, () =>
+            rpc('consume_rate_limit', { p_user_id: x.id, p_bucket: bucket, p_per_minute: perMinute, p_per_day: perDay }),
+          ),
+        );
+      const rs = await burst('test:minute', 20, 5, 1000);
+      const bad = rs.find((r) => r.status !== 200);
+      if (bad) return { actual: 'error', detail: `${bad.status} ${errMsg(bad)}` };
+      const allowed = rs.filter((r) => r.json.allowed === true);
+      const denied = rs.filter((r) => r.json.allowed === false);
+      const retries = denied.map((r) => r.json.retry_after);
+      const row = one(
+        `select minute_count || ',' || minute_denied || ',' || day_count from public.api_rate_limits where user_id = '${x.id}' and bucket = 'test:minute'`,
+      );
+      const ds = await burst('test:day', 10, 1000, 3);
+      const dayAllowed = ds.filter((r) => r.json.allowed === true).length;
+      const dayScope = [...new Set(ds.filter((r) => !r.json.allowed).map((r) => r.json.scope))].join(',');
+      return (
+        compare(
+          '분 한도',
+          { allowed: 5, denied: 15, scope: 'minute', row: '5,15,5', retry_ok: true },
+          {
+            allowed: allowed.length,
+            denied: denied.length,
+            scope: [...new Set(denied.map((r) => r.json.scope))].join(','),
+            row,
+            retry_ok: retries.every((n) => n >= 1 && n <= 60),
+          },
+        ) ||
+        compare('하루 한도', { allowed: 3, scope: 'day' }, { allowed: dayAllowed, scope: dayScope }) || {
+          actual: 'ok',
+          detail: `분: 20회 중 5 허용(남은 수 ${allowed.map((r) => r.json.remaining).sort().join('·')}), 하루: 10회 중 3 허용`,
+        }
+      );
+    },
+  });
+
+  // 규칙: 창 경과 후 재허용, 하루 창(KST 자정), 버킷 독립, 인자 검증, 기회적 정리, 탈퇴 cascade
+  const stale = await createUser('rl7', '오래된행');
+  await check({
+    group: 'ratelimit',
+    id: 'RL-7',
+    role: 'service_role',
+    op: 'consume_rate_limit 규칙: 분 창이 지나면 다시 허용·하루 한도는 KST 자정까지(scope day)·어제 창은 초기화·버킷 독립·창을 되돌리지 않음·잘못된 인자 PT400·그날 첫 요청이 2일 넘은 행 정리·탈퇴 cascade',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        SET LOCAL ROLE service_role;
+        DO $$
+        DECLARE
+          v_user UUID := '${u.carol.id}';
+          v_other UUID := '${stale.id}';
+          r JSONB;
+          v_midnight INTEGER;
+        BEGIN
+          DELETE FROM public.api_rate_limits WHERE user_id IN (v_user, v_other);
+          r := public.consume_rate_limit(v_user, 'tutor:hint_generator', 2, 3);
+          IF NOT (r->>'allowed')::boolean OR (r->>'remaining')::int <> 1 THEN RAISE EXCEPTION '첫 요청: %', r; END IF;
+          r := public.consume_rate_limit(v_user, 'tutor:hint_generator', 2, 3);
+          IF NOT (r->>'allowed')::boolean OR (r->>'remaining')::int <> 0 THEN RAISE EXCEPTION '두 번째: %', r; END IF;
+          r := public.consume_rate_limit(v_user, 'tutor:hint_generator', 2, 3);
+          IF (r->>'allowed')::boolean OR r->>'scope' <> 'minute' OR (r->>'retry_after')::int NOT BETWEEN 1 AND 60
+             OR (r->>'denied_minute')::int <> 1 THEN
+            RAISE EXCEPTION '분 한도: %', r;
+          END IF;
+          -- 다른 버킷은 따로 셈
+          r := public.consume_rate_limit(v_user, 'tutor:quest_intro', 2, 3);
+          IF NOT (r->>'allowed')::boolean THEN RAISE EXCEPTION '버킷 독립: %', r; END IF;
+
+          -- 분 창이 지남 (시간을 되돌려 흉내) → 다시 허용, 분 거부 수 초기화
+          UPDATE public.api_rate_limits SET minute_start = minute_start - interval '1 minute'
+           WHERE user_id = v_user AND bucket = 'tutor:hint_generator';
+          r := public.consume_rate_limit(v_user, 'tutor:hint_generator', 2, 3);
+          IF NOT (r->>'allowed')::boolean OR (r->>'denied_minute')::int <> 0 OR (r->>'denied_today')::int <> 1 THEN
+            RAISE EXCEPTION '분 창 경과: %', r;
+          END IF;
+
+          -- 하루 3번 다 씀 → 분 창이 지나도 거부, 다음 KST 자정까지
+          UPDATE public.api_rate_limits SET minute_start = minute_start - interval '1 minute'
+           WHERE user_id = v_user AND bucket = 'tutor:hint_generator';
+          r := public.consume_rate_limit(v_user, 'tutor:hint_generator', 2, 3);
+          v_midnight := ceil(extract(epoch FROM ((public.kst_today() + 1)::timestamp AT TIME ZONE 'Asia/Seoul') - clock_timestamp()));
+          IF (r->>'allowed')::boolean OR r->>'scope' <> 'day' OR abs((r->>'retry_after')::int - v_midnight) > 2 THEN
+            RAISE EXCEPTION '하루 한도: % (자정까지 %초)', r, v_midnight;
+          END IF;
+
+          -- 어제 창 → 오늘은 처음부터
+          UPDATE public.api_rate_limits SET day = day - 1 WHERE user_id = v_user AND bucket = 'tutor:hint_generator';
+          r := public.consume_rate_limit(v_user, 'tutor:hint_generator', 2, 3);
+          IF NOT (r->>'allowed')::boolean OR (r->>'denied_today')::int <> 0 THEN RAISE EXCEPTION '하루 창 경과: %', r; END IF;
+
+          -- 늦게 온 요청이 창을 되돌리지 않음 (미래 창이 저장돼 있으면 그대로 셈)
+          UPDATE public.api_rate_limits SET minute_start = date_trunc('minute', clock_timestamp()) + interval '5 minutes', minute_count = 2
+           WHERE user_id = v_user AND bucket = 'tutor:quest_intro';
+          r := public.consume_rate_limit(v_user, 'tutor:quest_intro', 2, 100);
+          IF (r->>'allowed')::boolean THEN RAISE EXCEPTION '창을 되돌림: %', r; END IF;
+
+          -- 인자 검증
+          BEGIN
+            PERFORM public.consume_rate_limit(v_user, 'Bad Bucket!', 1, 1);
+            RAISE EXCEPTION '잘못된 버킷을 받음';
+          EXCEPTION WHEN SQLSTATE 'PT400' THEN NULL;
+          END;
+          BEGIN
+            PERFORM public.consume_rate_limit(v_user, 'tutor:hint_generator', 0, 1);
+            RAISE EXCEPTION '한도 0 을 받음';
+          EXCEPTION WHEN SQLSTATE 'PT400' THEN NULL;
+          END;
+
+          -- 정리: 3일 전에 마지막으로 쓴 행(다른 사용자)은 누군가의 그날 첫 요청 때 지워짐. 1일 전 행은 남음
+          INSERT INTO public.api_rate_limits (user_id, bucket, minute_start, day, updated_at) VALUES
+            (v_other, 'tutor:old', now() - interval '3 days', public.kst_today() - 3, now() - interval '3 days'),
+            (v_other, 'tutor:recent', now() - interval '1 day', public.kst_today() - 1, now() - interval '1 day');
+          r := public.consume_rate_limit(v_user, 'tutor:encouragement', 5, 5);   -- 이 버킷의 첫 요청 = 새 하루
+          IF EXISTS (SELECT 1 FROM public.api_rate_limits WHERE user_id = v_other AND bucket = 'tutor:old') THEN
+            RAISE EXCEPTION '오래된 행을 정리하지 않음';
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM public.api_rate_limits WHERE user_id = v_other AND bucket = 'tutor:recent') THEN
+            RAISE EXCEPTION '최근 행을 지움';
+          END IF;
+        END $$;
+        RESET ROLE;
+        -- 탈퇴하면 카운터도 지워짐 (auth.users → users → api_rate_limits ON DELETE CASCADE)
+        DO $$
+        BEGIN
+          DELETE FROM auth.users WHERE id = '${stale.id}';
+          IF EXISTS (SELECT 1 FROM public.api_rate_limits WHERE user_id = '${stale.id}') THEN
+            RAISE EXCEPTION '탈퇴한 사용자의 카운터가 남음';
+          END IF;
+        END $$;`),
+  });
+  await check({
+    group: 'ratelimit',
+    id: 'RL-8',
+    role: 'postgres',
+    op: '00016 객체 중 anon/authenticated 가 접근할 수 있는 것 (테이블 권한·함수 EXECUTE·정책)',
+    ...NONE,
+    run: () => {
+      const v = one(`select concat_ws(',',
+          case when has_table_privilege('anon', 'public.api_rate_limits', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE') then 'anon:table' end,
+          case when has_table_privilege('authenticated', 'public.api_rate_limits', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE') then 'authenticated:table' end,
+          case when has_function_privilege('anon', 'public.consume_rate_limit(uuid, text, integer, integer)', 'EXECUTE') then 'anon:execute' end,
+          case when has_function_privilege('authenticated', 'public.consume_rate_limit(uuid, text, integer, integer)', 'EXECUTE') then 'authenticated:execute' end,
+          (select string_agg('policy:' || policyname, ',') from pg_policies where schemaname = 'public' and tablename = 'api_rate_limits'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+}
+
 // ── 실행 ──────────────────────────────────────────────────
 async function main() {
   console.log(`[${scenario}] ${S.label}`);
@@ -3763,6 +4008,7 @@ async function main() {
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);
+  await groupRateLimit(u);
   await groupApp(u);
   await groupStatic();
 

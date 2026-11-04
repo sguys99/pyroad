@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      api_rate_limits: {
+        Row: {
+          bucket: string;
+          day: string;
+          day_count: number;
+          day_denied: number;
+          minute_count: number;
+          minute_denied: number;
+          minute_start: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          bucket: string;
+          day: string;
+          day_count?: number;
+          day_denied?: number;
+          minute_count?: number;
+          minute_denied?: number;
+          minute_start: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          bucket?: string;
+          day?: string;
+          day_count?: number;
+          day_denied?: number;
+          minute_count?: number;
+          minute_denied?: number;
+          minute_start?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'api_rate_limits_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_profiles_public';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'api_rate_limits_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       board_comments: {
         Row: {
           content: string;
@@ -671,6 +722,15 @@ export type Database = {
     Functions: {
       complete_quest: {
         Args: { p_quest_id: string; p_submission: Json; p_user_id: string };
+        Returns: Json;
+      };
+      consume_rate_limit: {
+        Args: {
+          p_bucket: string;
+          p_per_day: number;
+          p_per_minute: number;
+          p_user_id: string;
+        };
         Returns: Json;
       };
       decide_new_badges: {

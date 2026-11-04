@@ -21,7 +21,19 @@ import {
   type QuestAnswerKey,
 } from '@/lib/quest/answerKeys';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
+import {
+  consumeTutorQuota,
+  getTutorRateLimit,
+  rateLimitedResponse,
+} from '@/lib/tutor/rateLimit';
+import {
+  reportTutorAbuse,
+  safeQuestId,
+  type TutorAbuseLevel,
+  type TutorAbuseReason,
+} from '@/lib/tutor/abuse';
 import { captureServerError } from '@/lib/observability/server';
+import { after } from 'next/server';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
@@ -37,6 +49,16 @@ const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
 const MAX_OUTPUT_LENGTH = 2000;
 const MAX_STEP_GOAL_LENGTH = 500;
+// 요청 본문 상한. 위 길이 제한(자르기)보다 훨씬 큰 본문은 파싱하지 않고 거부한다 (P1-19).
+// 우리 화면은 코드 전체 + 출력(화면 상한 5,000자)을 보내므로 아이가 아주 긴 코드를 붙여 넣어도 이보다 작다
+const MAX_BODY_BYTES = 64 * 1024;
+// 우리 클라이언트가 보낼 수 있는 출력 길이 (src/lib/pyodide/constants.ts MAX_OUTPUT_LENGTH 5,000 + "잘렸어요" 안내).
+// 서버는 MAX_OUTPUT_LENGTH(2,000)로 자르지만, 이보다 길면 우리 화면이 만든 요청이 아님
+const CLIENT_MAX_OUTPUT_LENGTH = 5_100;
+// 한도 초과가 이만큼 반복되면 경고(Sentry)로 올린다. useTutor 는 429 를 받으면 그 유형을 Retry-After 동안 보내지 않으므로
+// 정상 화면에서는 분 창마다 1~2번(탭 여러 개)이 고작이다
+const REPEAT_DENIED_PER_MINUTE = 5;
+const REPEAT_DENIED_PER_DAY = 100;
 
 // quest_intro, encouragement는 품질보다 속도 우선 → 경량 모델 사용
 const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
@@ -129,6 +151,63 @@ export function sanitizeTutorBody(body: TutorRequest): TutorRequest {
   };
 }
 
+/** 자르기 한도를 넘은 필드 이름 (기록용, P1-19). 출력은 우리 화면의 상한보다 길 때만 (정상 실행도 2,000자는 넘음) */
+function overLongFields(body: TutorRequest): string[] {
+  const fields: string[] = [];
+  const over = (name: string, value: unknown, max: number) => {
+    if (typeof value === 'string' && value.length > max) fields.push(name);
+  };
+  over('student_code', body.student_code, MAX_CODE_LENGTH);
+  over('previous_code', body.previous_code, MAX_CODE_LENGTH);
+  over('step_goal', body.step_goal, MAX_STEP_GOAL_LENGTH);
+  over('stdout', body.execution_result?.stdout, CLIENT_MAX_OUTPUT_LENGTH);
+  over('stderr', body.execution_result?.stderr, CLIENT_MAX_OUTPUT_LENGTH);
+  return fields;
+}
+
+/**
+ * 응답을 보낸 뒤에도 끝까지 실행할 기록 작업 (Vercel 은 `after`가 waitUntil 로 함수를 살려 둠).
+ * 요청 밖(단위 테스트)에서는 `after`가 던지므로 그냥 실행한다.
+ */
+function runAfterResponse(task: Promise<unknown>): void {
+  const safe = task.catch(() => {});
+  try {
+    after(safe);
+  } catch {
+    void safe;
+  }
+}
+
+/**
+ * 잠긴 스테이지의 퀘스트에 튜터를 부르면 기록만 한다 (P1-19). 막지 않는 이유: 퀘스트 화면이 아직 잠금을 확인하지 않아서
+ * 아이가 URL 로 잠긴 퀘스트를 열 수 있고(완료는 complete_quest 가 막음), 소개·힌트는 아이에게 해가 없다.
+ * 응답을 기다리게 하지 않도록 LLM 호출과 나란히 돌린다.
+ */
+function auditStageLock(
+  admin: AdminClient,
+  userId: string,
+  quest: QuestWithStageServer,
+  type: TutorRequest['type'],
+): void {
+  runAfterResponse(
+    Promise.resolve(
+      admin.rpc('is_stage_unlocked', { p_user_id: userId, p_stage_id: quest.stage.id }),
+    ).then(({ data, error }) => {
+      if (error) {
+        console.warn('[tutor] is_stage_unlocked 실패:', error.message);
+      } else if (data === false) {
+        reportTutorAbuse({
+          userId,
+          reason: 'stage_locked',
+          level: 'info',
+          type,
+          detail: { quest_id: safeQuestId(quest.id) },
+        });
+      }
+    }),
+  );
+}
+
 export async function prepareTutorCall(
   request: Request,
 ): Promise<PreparedTutorCall | Response> {
@@ -143,26 +222,50 @@ export async function prepareTutorCall(
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 2. Body 검증
+  // 우리 화면은 보내지 않는 요청을 기록한다 (P1-19). 학생이 쓴 내용은 남기지 않음
+  const reject = (
+    status: number,
+    error: string,
+    reason: TutorAbuseReason,
+    type?: string,
+    level: TutorAbuseLevel = 'warning',
+    detail?: Record<string, string | number | boolean>,
+  ) => {
+    reportTutorAbuse({ userId: user.id, reason, level, type, detail });
+    return Response.json({ error }, { status });
+  };
+
+  // 2. Body 검증 (크기 → JSON → 필드)
+  const declaredLength = Number(request.headers.get('content-length'));
+  if (declaredLength > MAX_BODY_BYTES) {
+    return reject(413, 'Body too large', 'body_too_large', undefined, 'warning', {
+      bytes: declaredLength,
+    });
+  }
   let body: TutorRequest;
   try {
-    body = await request.json();
+    const raw = await request.text();
+    const bytes = Buffer.byteLength(raw);
+    if (bytes > MAX_BODY_BYTES) {
+      return reject(413, 'Body too large', 'body_too_large', undefined, 'warning', { bytes });
+    }
+    body = JSON.parse(raw);
   } catch {
-    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+    return reject(400, 'Invalid JSON', 'invalid_json');
+  }
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    return reject(400, 'Invalid JSON', 'invalid_json');
   }
 
   if (
     !body.type ||
     !VALID_TYPES.includes(body.type as (typeof VALID_TYPES)[number])
   ) {
-    return Response.json({ error: 'Invalid type' }, { status: 400 });
+    return reject(400, 'Invalid type', 'invalid_type', String(body.type));
   }
 
   if (!body.quest_id) {
-    return Response.json(
-      { error: 'quest_id is required' },
-      { status: 400 },
-    );
+    return reject(400, 'quest_id is required', 'missing_quest_id', body.type);
   }
 
   if (body.type === 'hint_generator') {
@@ -170,42 +273,103 @@ export async function prepareTutorCall(
       !body.hint_level ||
       !VALID_HINT_LEVELS.includes(body.hint_level as 1 | 2 | 3)
     ) {
-      return Response.json(
-        { error: 'hint_level (1, 2, or 3) is required for hint_generator' },
-        { status: 400 },
+      return reject(
+        400,
+        'hint_level (1, 2, or 3) is required for hint_generator',
+        'invalid_hint_level',
+        body.type,
       );
     }
   }
 
+  if (body.type === 'code_feedback' && !body.execution_result) {
+    return reject(
+      400,
+      'execution_result is required for code_feedback',
+      'missing_execution_result',
+      body.type,
+    );
+  }
+
+  const tooLong = overLongFields(body);
+  if (tooLong.length > 0) {
+    // 자르고 계속 진행 (B01). 아이가 아주 긴 코드를 붙여 넣는 경우도 있으므로 기록만
+    reportTutorAbuse({
+      userId: user.id,
+      reason: 'input_too_long',
+      level: 'info',
+      type: body.type,
+      detail: { fields: tooLong.join(',') },
+    });
+  }
+
   body = sanitizeTutorBody(body);
 
-  // (P1-19) 사용자별 rate limit은 여기에 둔다: 인증·입력 검증 뒤, DB 조회·캐시·LLM 호출 전.
-  // 두 라우트(/api/tutor, /api/tutor/stream)가 모두 이 함수를 거치므로 한 곳에서 막을 수 있다.
-
-  // 3. Quest + User Profile + 본인 API 키(B13, 서버에서만 복호화) (+ 정답) 병렬 조회
-  const needsAnswerKey = ANSWER_KEY_TYPES.has(body.type);
-  const [questResult, userProfileResult, userApiKeys, answerKeyRow] = await Promise.all([
-    adminClient
-      .from('quests')
-      .select('*, stage:stages(id, world_id, title, order, theme_name)')
-      .eq('id', body.quest_id)
-      .single(),
+  // 3. 본인 API 키(B13, 서버에서만 복호화) + 선호 provider → 한도 종류(본인 키면 느슨하게)
+  const [userProfileResult, userApiKeys] = await Promise.all([
     supabase
       .from('users')
       .select('preferred_provider')
       .eq('id', user.id)
       .single(),
     loadUserApiKeys(user.id),
+  ]);
+
+  // Provider 결정 (서버의 유료 키는 사용하지 않음)
+  // - 본인 키가 있는 사용자: 본인 키로 호출, 실패 시 무료 티어로만 폴백
+  // - 그 외: 서버 무료 티어만 사용, 실패 시 rule-based fallback
+  const { providerType, customApiKey } = resolveUserProvider(
+    userProfileResult.data?.preferred_provider,
+    userApiKeys.keys,
+  );
+
+  // 4. 사용자별 요청 한도 (P1-19): 퀘스트·정답 조회, 캐시, LLM 호출 전.
+  // 두 라우트(/api/tutor, /api/tutor/stream)가 모두 이 함수를 거치므로 한 곳에서 막는다. 캐시 적중도 센다(rateLimit.ts)
+  const quota = await consumeTutorQuota(
+    adminClient,
+    user.id,
+    body.type,
+    getTutorRateLimit(body.type, !!customApiKey),
+  );
+  if (!quota.allowed) {
+    const repeated =
+      quota.deniedMinute >= REPEAT_DENIED_PER_MINUTE ||
+      quota.deniedToday >= REPEAT_DENIED_PER_DAY;
+    reportTutorAbuse({
+      userId: user.id,
+      reason: 'rate_limited',
+      level: repeated ? 'warning' : 'info',
+      type: body.type,
+      detail: {
+        scope: quota.scope ?? 'minute',
+        retry_after: quota.retryAfter,
+        denied_minute: quota.deniedMinute,
+        denied_today: quota.deniedToday,
+        own_key: !!customApiKey,
+      },
+    });
+    return rateLimitedResponse(quota);
+  }
+
+  // 5. Quest (+ 정답) 병렬 조회
+  const needsAnswerKey = ANSWER_KEY_TYPES.has(body.type);
+  const [questResult, answerKeyRow] = await Promise.all([
+    adminClient
+      .from('quests')
+      .select('*, stage:stages(id, world_id, title, order, theme_name)')
+      .eq('id', body.quest_id)
+      .single(),
     needsAnswerKey
       ? fetchAnswerKeyRow(adminClient, body.quest_id)
       : Promise.resolve(null),
   ]);
 
   const { data: quest } = questResult;
-  const { data: userProfile } = userProfileResult;
 
   if (!quest) {
-    return Response.json({ error: 'Quest not found' }, { status: 404 });
+    return reject(404, 'Quest not found', 'quest_not_found', body.type, 'warning', {
+      quest_id: safeQuestId(body.quest_id),
+    });
   }
 
   const q = quest as unknown as QuestWithStageServer;
@@ -213,15 +377,9 @@ export async function prepareTutorCall(
   // quests 행(expected_output·prompt_skeleton)은 quest_answer_keys가 없을 때의 폴백
   const answerKey = needsAnswerKey ? resolveAnswerKey(answerKeyRow, quest) : null;
 
-  // 4. 추가 검증
-  if (body.type === 'code_feedback' && !body.execution_result) {
-    return Response.json(
-      { error: 'execution_result is required for code_feedback' },
-      { status: 400 },
-    );
-  }
+  auditStageLock(adminClient, user.id, q, body.type);
 
-  // 5. 프롬프트 조립
+  // 6. 프롬프트 조립
   let userPrompt: string;
 
   if (body.type === 'quest_intro') {
@@ -298,13 +456,7 @@ export async function prepareTutorCall(
     });
   }
 
-  // 6. Provider 결정 (서버의 유료 키는 사용하지 않음)
-  // - 본인 키가 있는 사용자: 본인 키로 호출, 실패 시 무료 티어로만 폴백
-  // - 그 외: 서버 무료 티어만 사용, 실패 시 rule-based fallback
-  const { providerType, customApiKey } = resolveUserProvider(
-    userProfile?.preferred_provider,
-    userApiKeys.keys,
-  );
+  // 7. 폴백 provider
   const fallbackProviders = customApiKey ? [FREE_TIER_PROVIDER] : [];
 
   const available = getAvailableProviders();

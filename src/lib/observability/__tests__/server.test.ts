@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
 const captureException = vi.fn();
-vi.mock('@sentry/nextjs', () => ({ captureException }));
+const captureMessage = vi.fn();
+vi.mock('@sentry/nextjs', () => ({ captureException, captureMessage }));
 
-import { captureServerError } from '../server';
+import { captureServerError, captureServerMessage } from '../server';
 
 async function settle() {
   for (let i = 0; i < 5; i++)
@@ -13,6 +14,7 @@ async function settle() {
 afterEach(() => {
   vi.unstubAllEnvs();
   captureException.mockClear();
+  captureMessage.mockClear();
 });
 
 describe('captureServerError', () => {
@@ -31,6 +33,29 @@ describe('captureServerError', () => {
       tags: { area: 'tutor' },
       extra: undefined,
       fingerprint: undefined,
+    });
+  });
+});
+
+describe('captureServerMessage', () => {
+  it('DSN이 없으면 SDK를 부르지 않는다', async () => {
+    captureServerMessage('tutor abuse: invalid_type', 'warning');
+    await settle();
+    expect(captureMessage).not.toHaveBeenCalled();
+  });
+
+  it('DSN이 있으면 수준·태그·fingerprint 와 함께 메시지로 보낸다', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', 'https://key@o1.ingest.sentry.io/1');
+    captureServerMessage('tutor abuse: rate_limited', 'warning', {
+      tags: { area: 'tutor' },
+      fingerprint: ['tutor-abuse', 'rate_limited'],
+    });
+    await settle();
+    expect(captureMessage).toHaveBeenCalledWith('tutor abuse: rate_limited', {
+      level: 'warning',
+      tags: { area: 'tutor' },
+      extra: undefined,
+      fingerprint: ['tutor-abuse', 'rate_limited'],
     });
   });
 });

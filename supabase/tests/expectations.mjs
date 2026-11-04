@@ -592,6 +592,42 @@ export const EXPECT = {
     note: 'P1-18 ① 00014: 뷰 이름 = coalesce(nickname, 모험가NNNN), avatar_url NULL. 실명·사진이 있는 기존 사용자도 (X1). 뷰 구조 교체는 P3-13(VIEW-2)',
   },
 
+  // ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────
+  'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
+  'RL-2': {
+    expect: 'deny',
+    requires: 'public.api_rate_limits',
+    activateIn: 'P1-19',
+    note: '① 00016: api_rate_limits 는 service_role 전용 (튜터 사용 시각 비공개)',
+  },
+  'RL-3': {
+    expect: 'deny',
+    requires: 'public.api_rate_limits',
+    activateIn: 'P1-19',
+    note: '클라이언트가 카운터를 0 으로 되돌리면 한도가 풀림',
+  },
+  'RL-4': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
+  'RL-5': {
+    expect: 'deny',
+    requires: 'public.consume_rate_limit()',
+    activateIn: 'P1-19',
+    note: '① 00016: consume_rate_limit 는 service_role 전용 (사용자 id 는 튜터 API 가 getUser() 로). 열리면 남의 한도를 다 써 버릴 수 있음',
+  },
+  'RL-5b': { expect: 'deny', requires: 'public.consume_rate_limit()', activateIn: 'P1-19' },
+  'RL-6': {
+    expect: 'allow',
+    requires: 'public.consume_rate_limit()',
+    activateIn: 'P1-19',
+    note: '동시 요청에서 한도 정확 (행 FOR UPDATE). 튜터 API 의 service_role 경로',
+  },
+  'RL-7': {
+    expect: 'allow',
+    requires: 'public.consume_rate_limit()',
+    activateIn: 'P1-19',
+    note: '창 경과·KST 하루 창·버킷 독립·인자 검증·2일 넘은 행 정리·탈퇴 cascade',
+  },
+  'RL-8': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
+
   // ── static: 카탈로그 점검 ─────────────────────────────────
   'ST-1': { expect: 'deny', note: 'public 의 모든 테이블에 RLS' },
   'ST-2': {

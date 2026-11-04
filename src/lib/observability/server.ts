@@ -24,3 +24,28 @@ export function captureServerError(
       // 관측 실패가 요청 처리를 깨뜨리지 않게 한다
     });
 }
+
+/**
+ * 에러가 아닌 서버 사건을 Sentry 메시지로 보낸다 (예: 튜터 API 남용 의심, P1-19).
+ * `beforeSend`의 스크럽·폭주 제한(같은 fingerprint 10분 3회, 인스턴스 단위)을 그대로 거친다.
+ * 학생 코드·내용은 넣지 않는다 (태그·extra 는 짧은 값만).
+ */
+export function captureServerMessage(
+  message: string,
+  level: 'info' | 'warning' | 'error',
+  context: ErrorReportContext = {},
+): void {
+  if (!isSentryEnabled()) return;
+  void import('@sentry/nextjs')
+    .then((Sentry) => {
+      Sentry.captureMessage(message, {
+        level,
+        tags: context.tags,
+        extra: context.extra,
+        fingerprint: context.fingerprint,
+      });
+    })
+    .catch(() => {
+      // 관측 실패가 요청 처리를 깨뜨리지 않게 한다
+    });
+}
