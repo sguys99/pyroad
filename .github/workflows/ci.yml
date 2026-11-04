@@ -200,6 +200,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
+      # 러너에서는 Google Fonts 가 Noto Sans KR 글꼴 주소를 확장자 없는 /l/font?kit=…&… 모양으로 줘서 Next 15.5 Turbopack 이
+      # `next/font/google queries have exactly one entry`로 깨진다 (vercel/next.js#99114, 15.5.x 에는 수정 없음).
+      # CSS 를 미리 받아 그 주소만 감싸고 NEXT_FONT_GOOGLE_MOCKED_RESPONSES 로 넘긴다. Next 16.4.3+ 로 올리면 지움 (docs/ci.md)
+      - name: Google Fonts CSS 미리 받기
+        run: node scripts/fonts/google-fonts-mock.mjs
       - run: npm run build
       - name: 빌드에 들어간 Pyodide 파일 확인
         run: node scripts/pyodide/copy-assets.mjs --check

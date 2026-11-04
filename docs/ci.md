@@ -18,12 +18,21 @@
 | `content-unseeded` | **main push·수동 실행만**. 무시드 20회 | `TEST_CONTENT_UNSEEDED_RUNS=20 npm run test:content` (실패 메시지의 시드로 재현) | 약 30초 |
 | `pyodide` | 자체 호스팅 파일 복사·무결성 + 공용 실행 코어 테스트 | `npm run pyodide:copy && node scripts/pyodide/copy-assets.mjs --check && npm run test:pyodide` | 약 20초 |
 | `rls` | 격리 스택(`pyroadci`, 5482x)으로 RLS·권한 회귀. PR·기능 브랜치는 운영 재현 + legacy, main·수동 실행은 신규 기본값까지 3개 시나리오. 결과 표는 job 요약과 아티팩트 `rls-results`에 | `RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci` (전체는 변수 없이). 켜 둔 개발 스택이면 `npm run test:rls` | 약 4~7분 |
-| `build` | `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` | 약 3분 |
+| `build` | Google Fonts CSS 미리 받기(아래 "Google Fonts 우회") → `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` (러너와 같게: `node scripts/fonts/google-fonts-mock.mjs`가 알려 주는 `NEXT_FONT_GOOGLE_MOCKED_RESPONSES=…`를 붙여 빌드) | 약 3분 |
 | `e2e-smoke` | **골격만, 수동 실행에서만**: Chromium 설치(캐시) + `playwright test --list`. P1-21에서 비로그인 `public` 프로젝트로 바꾸고 켬 | `npx playwright install chromium && npx playwright test --list` | - |
 
 - `rls`의 운영 재현은 과거 커밋(`git show e800386:…`)을 읽어서 전체 히스토리로 checkout합니다(`fetch-depth: 0`). 얕은 clone이면 `run.sh`가 조용히 건너뛰므로 CI는 결과 표에 `prod_replay`가 있는지 따로 확인합니다.
 - Supabase CLI는 **2.115.0** 고정(`supabase/README.md`). 로컬에서 격리 모드를 다른 작업과 동시에 돌릴 때는 `RLS_PROJECT_ID`·`RLS_PORT_BASE`를 바꿉니다.
 - `prettier --check`는 아직 넣지 않았습니다. 기존 파일(`src/` 78개, `spikes/` 등 모두 381개)이 맞지 않아서, 한 번에 `npx prettier --write`로 정리한 뒤 `lint-typecheck`에 추가합니다.
+
+### Google Fonts 우회 (`build`)
+
+GitHub 러너에서는 Google Fonts가 `Noto Sans KR`의 글꼴 주소를 `https://fonts.gstatic.com/l/font?kit=…&skey=…&v=v40`처럼 **확장자 없이** 줍니다(다른 곳에서도 가끔 그럼). Next 15.5의 Turbopack은 이 주소의 `&`에서 글꼴 옵션을 잘라 `next/font/google queries have exactly one entry`로 빌드가 깨집니다(웹팩도 확장자가 없어 깨짐). [vercel/next.js#99114](https://github.com/vercel/next.js/issues/99114), 수정([#100158](https://github.com/vercel/next.js/pull/100158))은 **16.4.3 이후에만** 있고 15.5.x에는 백포트가 없습니다.
+
+그래서 `build` job은 빌드 전에 `scripts/fonts/google-fonts-mock.mjs`로 Next와 같은 주소·User-Agent로 CSS를 받아, 확장자 없는 주소만 Turbopack 15.5가 원래 주소로 풀어 받도록 감싼 뒤 Next의 `NEXT_FONT_GOOGLE_MOCKED_RESPONSES`로 넘깁니다. 번들러(Turbopack)와 글꼴 파일(빌드 때 gstatic에서 받음)은 Vercel과 같습니다. 글꼴 호출은 `src/`의 `next/font/google` import에서 자동으로 찾으므로 글꼴을 바꿔도 스크립트는 고칠 필요가 없습니다.
+
+- 로컬·Vercel 빌드는 지금처럼 Next가 직접 받습니다. Vercel에서도 같은 에러가 나면(드물게 흔들림) 재배포하거나 이 우회를 `prebuild`로 넓히는 것을 검토합니다.
+- **Next를 16.4.3 이상으로 올리면** `ci.yml`의 "Google Fonts CSS 미리 받기" 단계와 스크립트를 지웁니다(15.x가 아니면 스크립트는 경고만 남기고 아무것도 하지 않음). `next/font/local` 자체 호스팅(P2-10)으로 바꿔도 필요 없어집니다.
 
 ## 필수 체크 (main 보호 규칙)
 
