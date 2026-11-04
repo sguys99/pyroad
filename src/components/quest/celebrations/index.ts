@@ -1,6 +1,6 @@
-export { CelebrationOverlay } from './CelebrationOverlay';
-export type { ConfettiBurst } from './CelebrationOverlay';
-export { LevelUpCelebration } from './LevelUpCelebration';
-export { ProjectCompleteCelebration } from './ProjectCompleteCelebration';
-export { BadgeEarnedPopup } from './BadgeEarnedPopup';
-export { StageCompleteCelebration } from './StageCompleteCelebration';
+export { StageClearCard } from './StageClearCard';
+export { ProjectCompleteCard } from './ProjectCompleteCard';
+export { LevelUpCard } from './LevelUpCard';
+export { BadgesCard } from './BadgesCard';
+export { GoldenKeyCard } from './GoldenKeyCard';
+export { RewardsCard } from './RewardsCard';

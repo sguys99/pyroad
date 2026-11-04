@@ -26,7 +26,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
       ),
     ).toEqual([
       { type: 'stage_clear', stage },
-      { type: 'level_up', level: 2, title: expect.any(String) },
+      { type: 'level_up', level: 2, fromLevel: 1, title: expect.any(String) },
       { type: 'badge', badge: 'first_code' },
       { type: 'badge', badge: 'stage_clear' },
     ]);
@@ -36,16 +36,44 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
     expect(buildCelebrationEvents(base, { kind: 'code', questTitle: '변수' })).toEqual([]);
   });
 
-  it('프로젝트는 항상 프로젝트 완성부터 (스테이지 클리어는 따로 보여 주지 않음)', () => {
+  it('프로젝트가 스테이지 마지막이면 프로젝트 완성 하나에 스테이지 클리어를 담는다 (P1-10)', () => {
     expect(
       buildCelebrationEvents(
         { ...base, stage_cleared: stage, new_badges: ['first_code'] },
         { kind: 'project', questTitle: '나만의 게임' },
       ),
     ).toEqual([
-      { type: 'project_complete', questTitle: '나만의 게임', xpGained: 50 },
+      { type: 'project_complete', questTitle: '나만의 게임', xpGained: 50, stage },
       { type: 'badge', badge: 'first_code' },
     ]);
+  });
+
+  it('스테이지 중간 프로젝트는 stage: null', () => {
+    expect(
+      buildCelebrationEvents(base, { kind: 'project', questTitle: '나만의 게임' }),
+    ).toEqual([
+      { type: 'project_complete', questTitle: '나만의 게임', xpGained: 50, stage: null },
+    ]);
+  });
+
+  it('황금키로 연 퀘스트: 큰 축하 대신 황금키 확인, 스테이지 클리어·뱃지는 그대로 (P1-10)', () => {
+    expect(
+      buildCelebrationEvents(
+        { ...base, xp_gained: 0, used_golden_key: true, stage_cleared: stage, new_badges: ['stage_clear'] },
+        { kind: 'code', questTitle: '변수' },
+      ),
+    ).toEqual([
+      { type: 'golden_key', kind: 'code', questTitle: '변수' },
+      { type: 'stage_clear', stage },
+      { type: 'badge', badge: 'stage_clear' },
+    ]);
+    // 프로젝트에서 한 단계라도 황금키를 썼으면(XP 0) 프로젝트 완성 대신 황금키 확인
+    expect(
+      buildCelebrationEvents(
+        { ...base, xp_gained: 0, used_golden_key: true },
+        { kind: 'project', questTitle: '나만의 게임' },
+      ),
+    ).toEqual([{ type: 'golden_key', kind: 'project', questTitle: '나만의 게임' }]);
   });
 
   it('이미 완료한 퀘스트(already_completed)는 빈 목록', () => {

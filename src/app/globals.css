@@ -125,6 +125,63 @@
   .waking-dot:nth-child(3) { animation-delay: 0.3s; }
 }
 
+/* AI 튜터 생각 중 점 세 개 (P1-10: Framer repeat: Infinity → CSS, §2.10). reduced-motion이면 멈춘 점 */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes thinking-dot {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .thinking-dot {
+    animation: thinking-dot 0.6s ease-in-out infinite;
+  }
+  .thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0.3s; }
+}
+
+/* 축하 시퀀서 (P1-10). 모두 1회성이고 transform·opacity만 움직인다 (§2.10).
+   - 자동 넘김 막대: 카드 아래에서 줄어든다 (멈추면 animation-play-state: paused)
+   - 레벨 숫자 pop + 빛 고리: 카운트업이 끝나면 data-popped가 붙는다 (reduced-motion이면 붙지 않음) */
+.celebration-countdown {
+  transform-origin: left center;
+  animation-name: celebration-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes celebration-countdown {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.celebration-ring {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 7rem;
+  height: 7rem;
+  margin: -3.5rem 0 0 -3.5rem;
+  border-radius: 9999px;
+  border: 4px solid var(--success);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes celebration-pop {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.22); }
+    65% { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+  @keyframes celebration-ring {
+    0% { transform: scale(0.4); opacity: 0.9; }
+    100% { transform: scale(1.7); opacity: 0; }
+  }
+  .celebration-pop[data-popped='true'] {
+    animation: celebration-pop 420ms ease-out;
+  }
+  .celebration-pop[data-popped='true'] .celebration-ring {
+    animation: celebration-ring 700ms ease-out forwards;
+  }
+}
+
 /* 월드맵 노드 반응형 위치 */
 .world-node {
   left: var(--ml);

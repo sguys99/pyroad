@@ -1,8 +1,8 @@
-// 완료 응답(QuestCompleteResponse) → 축하 이벤트 목록 (P1-09).
+// 완료 응답(QuestCompleteResponse) → 축하 이벤트 목록 (P1-09, P1-10).
 //
 // 퀘스트 엔진(useQuestSession)은 "무엇을 축하할지"만 이 목록으로 내보내고, 어떻게 보여 줄지는
-// 화면 쪽(지금은 QuestCelebrations, P1-10부터는 축하 시퀀서)이 정한다.
-// 목록 순서가 보여 줄 순서다. 모두 "이번 요청에서 새로 일어난 일"만 담는다 (P1-03).
+// 축하 시퀀서(`src/lib/celebration/plan.ts` + `QuestCelebrations`)가 정한다: 순서·묶음·자동 넘김·컨페티·효과음.
+// 모두 "이번 요청에서 새로 일어난 일"만 담는다 (P1-03).
 
 import type { BadgeType } from './badges';
 import type { QuestKind } from './questKind';
@@ -15,9 +15,22 @@ import {
 
 export type CelebrationEvent =
   | { type: 'stage_clear'; stage: StageClearInfo }
-  | { type: 'project_complete'; questTitle: string; xpGained: number }
-  | { type: 'level_up'; level: number; title: string }
-  | { type: 'badge'; badge: BadgeType };
+  | {
+      type: 'project_complete';
+      questTitle: string;
+      xpGained: number;
+      /** 프로젝트가 스테이지의 마지막 퀘스트였으면(7-1) 그 스테이지. 축하 하나로 같이 보여 준다 */
+      stage: StageClearInfo | null;
+    }
+  /** 황금키로 연 퀘스트 (XP 0): 큰 축하 대신 가벼운 확인 */
+  | { type: 'golden_key'; kind: QuestKind; questTitle: string }
+  | { type: 'level_up'; level: number; fromLevel: number; title: string }
+  | { type: 'badge'; badge: BadgeType }
+  // Phase 8 자리 (P8-04 코인·P8-05 별): 아직 완료 응답에 없어 만들지 않는다
+  | { type: 'star'; stars: 1 | 2 | 3; gained: number }
+  | { type: 'coin'; amount: number };
+
+export type CelebrationEventType = CelebrationEvent['type'];
 
 export interface CelebrationContext {
   kind: QuestKind;
@@ -25,9 +38,13 @@ export interface CelebrationContext {
 }
 
 /**
- * 축하 순서: (코드) 스테이지 클리어 / (프로젝트) 프로젝트 완성 → 레벨 업 → 뱃지(받은 순서).
- * 이미 완료한 퀘스트(already_completed)는 새로 받은 것이 없으므로 빈 목록.
- * 프로젝트는 지금 화면과 같게 스테이지 클리어를 따로 보여 주지 않는다 (P1-10에서 정함).
+ * 퀘스트 결과(황금키 확인 / 프로젝트 완성 / 스테이지 클리어) → 레벨 업 → 뱃지(받은 순서).
+ * 보여 줄 순서는 시퀀서가 우선순위로 한 번 더 맞춘다 (`planCelebrations`).
+ *
+ * - 이미 완료한 퀘스트(already_completed)는 새로 받은 것이 없으므로 빈 목록.
+ * - 황금키를 쓴 퀘스트(DB의 used_golden_key, 프로젝트는 한 단계라도)는 XP가 0이라 "황금키로 열었어요" 확인만.
+ *   스테이지를 클리어했으면 스테이지 클리어는 따로 축하한다(나머지 퀘스트는 스스로 풀었으므로).
+ * - 프로젝트가 스테이지 마지막이면 프로젝트 완성 하나에 스테이지 클리어를 담는다 (같은 순간을 두 번 축하하지 않게).
  */
 export function buildCelebrationEvents(
   completion: QuestCompleteResponse,
@@ -36,19 +53,25 @@ export function buildCelebrationEvents(
   if (completion.already_completed) return [];
 
   const events: CelebrationEvent[] = [];
-  if (kind === 'project') {
+  const stage = completion.stage_cleared;
+  if (completion.used_golden_key) {
+    events.push({ type: 'golden_key', kind, questTitle });
+    if (stage) events.push({ type: 'stage_clear', stage });
+  } else if (kind === 'project') {
     events.push({
       type: 'project_complete',
       questTitle,
       xpGained: completion.xp_gained,
+      stage,
     });
-  } else if (completion.stage_cleared) {
-    events.push({ type: 'stage_clear', stage: completion.stage_cleared });
+  } else if (stage) {
+    events.push({ type: 'stage_clear', stage });
   }
   if (levelChanged(completion)) {
     events.push({
       type: 'level_up',
       level: completion.level_after,
+      fromLevel: completion.level_before,
       title: getLevelTitle(completion.level_after),
     });
   }

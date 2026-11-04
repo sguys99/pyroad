@@ -35,7 +35,7 @@ vi.mock('@/lib/tutor/useTutor', () => ({ useTutor: () => mocks.tutor }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
 }));
-vi.mock('@/lib/confetti', () => ({ fireConfetti: vi.fn() }));
+vi.mock('@/lib/confetti', () => ({ fireConfetti: vi.fn(), resetConfetti: vi.fn() }));
 vi.mock('@/lib/supabase/loadClient', () => ({
   loadBrowserClient: async () => ({
     from: () => ({ upsert: () => ({ then: () => {} }) }),

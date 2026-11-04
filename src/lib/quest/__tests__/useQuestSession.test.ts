@@ -521,6 +521,22 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
     });
     expect(result.current.isSubmitting).toBe(false);
     expect(result.current.isCompleted).toBe(false);
+    // 황금키로 넘긴 단계에는 단계 통과 컨페티도 없다 (P1-10)
+    expect(mocks.confetti).not.toHaveBeenCalled();
+  });
+
+  it('스스로 통과한 단계는 작은 컨페티 (연출 단계 배율과 함께)', async () => {
+    const { result } = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
+    await act(async () => {
+      await result.current.handleRun();
+      await vi.advanceTimersByTimeAsync(STEP_ADVANCE_DELAY_MS);
+      await flush();
+    });
+    expect(result.current.currentStep).toBe(2);
+    expect(mocks.confetti).toHaveBeenCalledWith(
+      expect.objectContaining({ particleCount: 30 }),
+      { scale: 1 },
+    );
   });
 
   it('다음 단계로 넘어가기 전에 화면을 떠나면 넘어가지 않는다', async () => {
@@ -554,7 +570,7 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
       await vi.advanceTimersByTimeAsync(CELEBRATION_DELAY_MS.project);
     });
     expect(result.current.celebrations).toEqual([
-      { type: 'project_complete', questTitle: '나만의 게임', xpGained: 50 },
+      { type: 'project_complete', questTitle: '나만의 게임', xpGained: 50, stage: null },
     ]);
   });
 });
@@ -562,7 +578,10 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
 // ── 황금키 ─────────────────────────────────────────────────────────────
 
 describe('useQuestSession: 황금키', () => {
-  it('코드 퀘스트: 정답을 에디터에 넣고 실행한 뒤 정답 코드로 완료 (축하 없음)', async () => {
+  it('코드 퀘스트: 정답을 에디터에 넣고 실행한 뒤 정답 코드로 완료 (컨페티 없이 황금키 확인만, P1-10)', async () => {
+    routes['/api/quest/complete'] = () => ({
+      json: completion({ xp_gained: 0, used_golden_key: true }),
+    });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
       await result.current.handleGoldenKeyUse();
@@ -578,7 +597,11 @@ describe('useQuestSession: 황금키', () => {
     expect(result.current.isCompleted).toBe(true);
     expect(result.current.validation?.passed).toBe(true);
     expect(result.current.nextQuestId).toBe('q-next');
-    expect(result.current.celebrations).toEqual([]);
+    expect(result.current.celebrations).toEqual([
+      { type: 'golden_key', kind: 'code', questTitle: '변수 상자' },
+    ]);
+    // 황금키로 연 퀘스트에는 컨페티를 쏘지 않는다 (§2.6: 보상은 학습 행동에만)
+    expect(mocks.confetti).not.toHaveBeenCalled();
     expect(result.current.isSubmitting).toBe(false);
     expect(result.current.isGoldenKeyLoading).toBe(false);
   });

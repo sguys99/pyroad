@@ -4,7 +4,7 @@ import { describe, it, expect, vi } from 'vitest';
 const confettiMock = vi.fn<(options?: unknown) => null>(() => null);
 vi.mock('canvas-confetti', () => ({ default: confettiMock }));
 
-import { fireConfetti } from '../confetti';
+import { createConfettiBudget, fireConfetti } from '../confetti';
 
 describe('fireConfetti', () => {
   it('항상 disableForReducedMotion: true로 발사한다 (B33)', async () => {
@@ -31,5 +31,64 @@ describe('fireConfetti', () => {
     expect(confettiMock.mock.calls[0][0]).toMatchObject({
       disableForReducedMotion: true,
     });
+  });
+});
+
+describe('fireConfetti: 연출 단계·reduced-motion (P1-10)', () => {
+  it('scale(연출 단계 배율)을 곱해 쏘고, 0이면 쏘지 않는다', async () => {
+    confettiMock.mockClear();
+    expect(fireConfetti({ particleCount: 100 }, { scale: 0.3 })).toBe(30);
+    await vi.waitFor(() => expect(confettiMock).toHaveBeenCalledTimes(1));
+    expect(confettiMock.mock.calls[0][0]).toMatchObject({ particleCount: 30 });
+
+    expect(fireConfetti({ particleCount: 100 }, { scale: 0 })).toBe(0);
+    await Promise.resolve();
+    expect(confettiMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('prefers-reduced-motion이면 모듈을 부르지도 않는다', async () => {
+    confettiMock.mockClear();
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('reduce'),
+    })) as unknown as typeof window.matchMedia;
+    try {
+      expect(fireConfetti({ particleCount: 50 })).toBe(0);
+      await Promise.resolve();
+      expect(confettiMock).not.toHaveBeenCalled();
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+});
+
+describe('createConfettiBudget (연속 축하에서 컨페티가 겹쳐 과해지지 않게, P1-10)', () => {
+  it('상한 안에서는 요청한 만큼', () => {
+    const budget = createConfettiBudget(220, 1600);
+    expect(budget.take(100, 0)).toBe(100);
+    expect(budget.take(100, 0)).toBe(100);
+  });
+
+  it('상한을 넘는 만큼은 줄이고, 남은 자리가 너무 적으면 쏘지 않는다', () => {
+    const budget = createConfettiBudget(220, 1600);
+    budget.take(180, 0);
+    expect(budget.take(100, 0)).toBe(40);
+    expect(budget.take(100, 0)).toBe(0);
+  });
+
+  it('떠 있는 파티클은 시간이 지나면 줄어든다 (선형)', () => {
+    const budget = createConfettiBudget(220, 1600);
+    budget.take(200, 0);
+    expect(budget.live(800)).toBeCloseTo(100);
+    expect(budget.take(200, 800)).toBe(120);
+    expect(budget.live(5000)).toBe(0);
+    expect(budget.take(200, 5000)).toBe(200);
+  });
+
+  it('reset 하면 비운다', () => {
+    const budget = createConfettiBudget(220, 1600);
+    budget.take(220, 0);
+    budget.reset();
+    expect(budget.take(50, 0)).toBe(50);
   });
 });

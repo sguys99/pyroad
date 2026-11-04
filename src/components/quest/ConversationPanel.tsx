@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useRef, useState } from 'react';
 import { BookOpen, Info, KeyRound, Lightbulb, MessageCircle } from 'lucide-react';
-import { m, useReducedMotion } from 'framer-motion';
+import { m } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,6 @@ interface ConversationPanelProps {
 const SLOW_THINKING_MS = 8_000;
 
 function ThinkingIndicator() {
-  const shouldReduceMotion = useReducedMotion();
   const [isSlow, setIsSlow] = useState(false);
 
   useEffect(() => {
@@ -57,20 +56,11 @@ function ThinkingIndicator() {
       </div>
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="flex items-center gap-1">
+          {/* 반복 연출은 CSS 키프레임으로 (§2.10). reduced-motion이면 멈춘 점 세 개 */}
           {[0, 1, 2].map((i) => (
-            <m.span
+            <span
               key={i}
-              className="block h-2 w-2 rounded-full bg-primary/50"
-              animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
-              transition={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      duration: 0.6,
-                      repeat: Infinity,
-                      delay: i * 0.15,
-                    }
-              }
+              className="thinking-dot block h-2 w-2 rounded-full bg-primary/50"
             />
           ))}
         </div>

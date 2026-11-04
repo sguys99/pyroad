@@ -10,6 +10,7 @@ import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti } from '@/lib/confetti';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import type {
   ProjectStep,
   QuestWithStage,
@@ -32,7 +33,7 @@ import {
  *
  * 진행 상태·자동 저장·힌트·실행·채점·완료·황금키·보상을 한 곳에서 다루고, 유형별 렌더러
  * (`CodeQuest`, `ProjectQuest`, 이후 Quiz·Boss)는 화면만 그린다. 보상 응답은 축하 이벤트 목록
- * (`celebrations`)으로 내보내고, 화면이 하나씩 보여 준 뒤 `dismissCelebrations`로 지운다 (P1-10 시퀀서가 소비).
+ * (`celebrations`)으로 내보내고, 축하 시퀀서(`QuestCelebrations`, P1-10)가 다 보여 준 뒤 `dismissCelebrations`로 지운다.
  *
  * 코드 퀘스트는 1단계짜리 프로젝트처럼 다룬다. 단계 진행은 `stepRef`로 읽어서, 타이머 뒤에 실행되는
  * 다음 단계 이동이 예전 화면 값(코드·단계)을 잡지 않는다 (B10).
@@ -72,6 +73,27 @@ export const STEP_ADVANCE_DELAY_MS = 1500;
 export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
   code: 1000,
   project: 500,
+};
+
+/**
+ * 퀘스트 화면 안의 컨페티. 뒤이어 축하 카드가 뜰 수 있으므로 카드 컨페티보다 작게 (단계 통과 30 < 정답 80 <
+ * 뱃지·레벨 업·스테이지 클리어, P1-10). 황금키로 연 단계·퀘스트에는 쏘지 않는다 (§2.6: 보상은 학습 행동에만)
+ */
+const STEP_PASS_CONFETTI = {
+  particleCount: 30,
+  spread: 50,
+  origin: { y: 0.7 },
+  ticks: 80,
+  gravity: 2.2,
+  startVelocity: 55,
+};
+const ANSWER_CONFETTI = {
+  particleCount: 80,
+  spread: 70,
+  origin: { y: 0.6 },
+  ticks: 90,
+  gravity: 2.2,
+  startVelocity: 60,
 };
 
 const RUN_ERROR_FEEDBACK =
@@ -184,6 +206,11 @@ export function useQuestSession({
     kind === 'code' ? (progress?.hints_used ?? 0) : 0,
   );
   const [totalHints, setTotalHints] = useState(progress?.hints_used ?? 0);
+
+  // 연출 단계의 파티클 배율 (reduced-motion·minimal이면 0). 콜백 안에서 최신 값을 읽도록 ref
+  const { budget } = useMotionTier();
+  const particleScaleRef = useRef(budget.particles);
+  particleScaleRef.current = budget.particles;
 
   // 완료·보상
   const [isCompleted, setIsCompleted] = useState(
@@ -392,7 +419,11 @@ export function useQuestSession({
    * 넘겨받은 코드와 stepRef의 최신 단계를 쓴다 (B10: 황금키 뒤 예전 코드가 저장되던 문제)
    */
   const advanceStep = useCallback(
-    (fromStep: number, passedCode: string) => {
+    (
+      fromStep: number,
+      passedCode: string,
+      { confetti = true }: { confetti?: boolean } = {},
+    ) => {
       const current = stepRef.current;
       if (!steps || current.step !== fromStep || fromStep >= steps.length) {
         lockSubmit(false);
@@ -418,15 +449,9 @@ export function useQuestSession({
       liveOutput.reset();
       lockSubmit(false);
 
-      // 미니 confetti
-      fireConfetti({
-        particleCount: 40,
-        spread: 50,
-        origin: { y: 0.7 },
-        ticks: 90,
-        gravity: 2.2,
-        startVelocity: 70,
-      });
+      if (confetti) {
+        fireConfetti(STEP_PASS_CONFETTI, { scale: particleScaleRef.current });
+      }
 
       saveProgress({
         code_submitted: nextCode,
@@ -437,26 +462,24 @@ export function useQuestSession({
     [steps, lockSubmit, liveOutput, saveProgress],
   );
 
-  /** 완료 응답을 반영한다. 새로 일어난 일은 축하 이벤트로 (황금키 완료는 지금처럼 축하 없음) */
+  /**
+   * 완료 응답을 반영한다. 새로 일어난 일은 축하 이벤트로 (P1-10 시퀀서가 보여 줌).
+   * 황금키로 연 퀘스트는 큰 축하 대신 "황금키로 열었어요" 확인이 된다 (buildCelebrationEvents)
+   */
   const applyCompletion = useCallback(
-    (
-      completion: QuestCompleteResponse,
-      { celebrate }: { celebrate: boolean },
-    ) => {
+    (completion: QuestCompleteResponse) => {
       setNextQuestId(completion.next_quest_id);
       setGoldenKeys(completion.golden_keys);
       if (!completion.already_completed) {
         setEarnedXP(completion.xp_gained);
         setUserXP(completion.total_xp);
         setUserLevel(completion.level_after);
-        if (celebrate) {
-          const events = buildCelebrationEvents(completion, {
-            kind,
-            questTitle,
-          });
-          if (events.length > 0) {
-            later(() => setCelebrations(events), CELEBRATION_DELAY_MS[kind]);
-          }
+        const events = buildCelebrationEvents(completion, {
+          kind,
+          questTitle,
+        });
+        if (events.length > 0) {
+          later(() => setCelebrations(events), CELEBRATION_DELAY_MS[kind]);
         }
         // 월드맵·프로필이 새 진행을 보이도록 Router Cache를 새로 받는다 (B22: 전체 새로고침 대신)
         router.refresh();
@@ -506,7 +529,7 @@ export function useQuestSession({
           return;
         }
         const completion = res.data;
-        applyCompletion(completion, { celebrate: true });
+        applyCompletion(completion);
 
         if (kind === 'project') {
           askTutor(
@@ -521,14 +544,7 @@ export function useQuestSession({
           return;
         }
 
-        fireConfetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          ticks: 90,
-          gravity: 2.2,
-          startVelocity: 70,
-        });
+        fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
         // AI 피드백 (성공) → 격려 메시지, 차례로 스트리밍. 기다리지 않는다 (실행 버튼 잠금과 무관)
         void (async () => {
           try {
@@ -819,7 +835,10 @@ export function useQuestSession({
       if (step < totalSteps) {
         // 중간 단계: 정답 코드로 다음 단계로 (넘어갈 때까지 실행 버튼 잠금)
         advancing = true;
-        later(() => advanceStep(step, solution), STEP_ADVANCE_DELAY_MS);
+        later(
+          () => advanceStep(step, solution, { confetti: false }),
+          STEP_ADVANCE_DELAY_MS,
+        );
       } else {
         // 마지막 단계·코드 퀘스트: 자동 완료 (황금키를 쓴 퀘스트는 서버가 0 XP로 완료, B05)
         const done = await postJson<QuestCompleteResponse>(
@@ -832,7 +851,7 @@ export function useQuestSession({
         );
         if (!aliveRef.current) return;
         if (!done.ok) throw new Error(done.data.error);
-        applyCompletion(done.data, { celebrate: false });
+        applyCompletion(done.data);
         if (kind === 'code') {
           setValidation({ passed: true, type: questValidationType });
         }
@@ -845,15 +864,6 @@ export function useQuestSession({
           : `정답 코드를 살펴볼까요?\n\n\`\`\`python\n${solution}\n\`\`\`\n\n이 코드는 "${topic}" 개념을 사용해요. 다음 퀘스트에서는 직접 도전해보세요! 💪`,
         false,
       );
-
-      // Confetti (황금키 전용 — 작은 규모)
-      fireConfetti({
-        particleCount: 40,
-        spread: 50,
-        origin: { y: 0.6 },
-        ticks: 60,
-        colors: ['#FFD700', '#FFA500', '#FF8C00'],
-      });
     } catch (err) {
       addSystemMessage(
         err instanceof Error && err.message
