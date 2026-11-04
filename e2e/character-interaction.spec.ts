@@ -32,7 +32,7 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
     // 에디터에 코드 입력 후 실행
     const editor = page.locator('.cm-editor .cm-content');
     await editor.click();
-    await page.keyboard.hotkey('Meta+a');
+    await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.type('print("hello")');
     await runButton.click();
 
@@ -51,7 +51,7 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
     // 첫 퀘스트의 정답 코드 입력
     const editor = page.locator('.cm-editor .cm-content');
     await editor.click();
-    await page.keyboard.hotkey('Meta+a');
+    await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.type('print("안녕하세요!")');
     await runButton.click();
 
@@ -69,7 +69,7 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
     // 일부러 에러 코드 입력
     const editor = page.locator('.cm-editor .cm-content');
     await editor.click();
-    await page.keyboard.hotkey('Meta+a');
+    await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.type('print(undefined_var)');
     await runButton.click();
 

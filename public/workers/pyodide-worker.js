@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-globals */
-
 // Pyodide Web Worker
 // Pyodide WASM을 CDN에서 로드하고, 사용자 Python 코드를 실행한다.
 

@@ -36,10 +36,9 @@ const statusConfig = {
 
 interface StageNodeProps {
   stage: StageWithStatus;
-  align?: 'left' | 'right' | 'center';
 }
 
-export function StageNode({ stage, align = 'center' }: StageNodeProps) {
+export function StageNode({ stage }: StageNodeProps) {
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const config = statusConfig[stage.status];

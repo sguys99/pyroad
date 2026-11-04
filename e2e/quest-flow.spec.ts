@@ -38,7 +38,7 @@ test.describe('퀘스트 전체 플로우', () => {
     // 6. 에디터에 정답 코드 입력 (첫 퀘스트: print("안녕하세요!") 계열)
     // CodeMirror의 내용을 직접 교체
     await editor.locator('.cm-content').click();
-    await page.keyboard.hotkey('Meta+a');
+    await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.type('print("안녕하세요!")');
 
     // 7. "코드 돌려보기!" 버튼 클릭

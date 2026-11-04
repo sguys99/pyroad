@@ -4,8 +4,6 @@ import {
   calculateLevel,
   getLevelTitle,
   getXPProgress,
-  LEVEL_THRESHOLDS,
-  LEVEL_TITLES,
 } from '../xp';
 
 describe('calculateXP', () => {
