@@ -15,6 +15,7 @@ import {
 import type { ContentTree } from './load';
 import {
   findAnswerKeysInPublic,
+  type InputScenario,
   type Quest,
   type QuestType,
   type WorldUnlockRule,
@@ -104,7 +105,13 @@ export interface QuestMeta {
   world: string;
   quest_type: QuestType;
   rule: ValidationRule;
-  steps: { step_number: number; rule: ValidationRule }[];
+  /** 자동 검증 입력 시나리오 (CI 전용, DB 에 쓰지 않음) */
+  scenarios?: InputScenario[];
+  steps: {
+    step_number: number;
+    rule: ValidationRule;
+    scenarios?: InputScenario[];
+  }[];
 }
 
 export interface BuildResult {
@@ -176,11 +183,14 @@ export function buildRows(tree: ContentTree): BuildResult {
           world: world.slug,
           quest_type: quest.quest_type,
           rule: quest.answer.validation,
+          ...(quest.quest_type === 'code' &&
+            quest.answer.scenarios && { scenarios: quest.answer.scenarios }),
           steps:
             quest.quest_type === 'project'
               ? quest.steps.map((s) => ({
                   step_number: s.step_number,
                   rule: s.answer.validation,
+                  ...(s.answer.scenarios && { scenarios: s.answer.scenarios }),
                 }))
               : [],
         });
@@ -468,6 +478,8 @@ export interface CheckStep {
   expected_output: string;
   starter_code: string | null;
   solution_code: string | null;
+  /** input() 입력 시나리오. 콘텐츠에 있을 때만 (빌드에 meta 를 넘긴 경우) */
+  scenarios?: InputScenario[];
 }
 
 export interface CheckQuest {
@@ -485,6 +497,8 @@ export interface CheckQuest {
   starter_code: string | null;
   solution_code: string | null;
   steps: CheckStep[] | null;
+  /** input() 입력 시나리오. 콘텐츠에 있을 때만 (빌드에 meta 를 넘긴 경우) */
+  scenarios?: InputScenario[];
 }
 
 export interface CheckFixture {
@@ -517,6 +531,7 @@ export interface FixtureSource {
 /**
  * 행(빌드 결과 또는 DB 스냅샷) → 검증용 JSON.
  * 월드는 스테이지 행의 `world`(slug)에서 읽고, 없으면 `worldOf`(기본: python-island)로 정합니다.
+ * 입력 시나리오는 DB 에 없으므로 `meta`(buildRows 결과)를 넘길 때만 붙습니다.
  */
 export function toCheckFixture(
   rows: FixtureSource,
@@ -524,15 +539,14 @@ export function toCheckFixture(
     generatedBy: string;
     source: string;
     worldOf?: (stageId: string) => string;
+    meta?: Map<string, Pick<QuestMeta, 'scenarios' | 'steps'>>;
   },
 ): CheckFixture {
   const stageOrder = new Map(rows.stages.map((s) => [s.id, s.order]));
   const answers = new Map(rows.answer_keys.map((k) => [k.quest_id, k]));
   const stageWorld = new Map(rows.stages.map((s) => [s.id, s.world]));
   const worldOf = (stageId: string) =>
-    stageWorld.get(stageId) ??
-    options.worldOf?.(stageId) ??
-    'python-island';
+    stageWorld.get(stageId) ?? options.worldOf?.(stageId) ?? 'python-island';
 
   const quests = rows.quests
     .map((q): CheckQuest => {
@@ -543,6 +557,7 @@ export function toCheckFixture(
         ? sk.steps.map(asRecord)
         : null;
       const so = stageOrder.get(q.stage_id) ?? 0;
+      const meta = options.meta?.get(q.id);
       return {
         id: q.id,
         key: `${so}-${q.order}`,
@@ -566,9 +581,14 @@ export function toCheckFixture(
                 expected_output: strOrNull(a?.expected_output) ?? '',
                 starter_code: strOrNull(s.starter_code),
                 solution_code: strOrNull(a?.solution_code),
+                ...scenariosField(
+                  meta?.steps.find((m) => m.step_number === s.step_number)
+                    ?.scenarios,
+                ),
               };
             })
           : null,
+        ...scenariosField(meta?.scenarios),
       };
     })
     .sort((a, b) => a.stage_order - b.stage_order || a.order - b.order);
@@ -589,6 +609,11 @@ export function toCheckFixture(
     },
     quests,
   };
+}
+
+/** 시나리오가 없으면 키 자체를 빼서 기존 fixture 모양(왕복 비교)과 같게 둔다 */
+function scenariosField(scenarios: InputScenario[] | undefined) {
+  return scenarios?.length ? { scenarios } : {};
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest",
     "test:pyodide": "vitest run --config vitest.pyodide.config.ts",
+    "test:content": "vitest run --config vitest.content.config.ts",
     "test:e2e": "playwright test",
     "optimize:svg": "svgo -f public/characters --recursive",
     "db:start": "supabase start",

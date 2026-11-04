@@ -119,16 +119,34 @@ export const HintsSchema = z.strictObject({
   level_3: text,
 });
 
+/**
+ * 자동 검증(P1-13 `npm run test:content`)이 `input()`에 넣을 입력 시나리오. CI 전용이라 DB 에는 쓰지 않음.
+ * 실행기의 `setStdin` 큐로 한 줄씩 들어가고, 모자라면 EOFError (P11-05에서 기대 출력 등으로 확장)
+ */
+export const InputScenarioSchema = z.strictObject({
+  /** input() 한 번에 한 줄씩 */
+  inputs: z.array(z.string()),
+  /** 정하면 이 시드로만 실행 (입력이 난수에 맞춰져 있을 때). 없으면 시드 0~9 + 무시드 */
+  seed: z.int().min(0).optional(),
+});
+
 /** 코드 퀘스트·프로젝트 단계의 정답 → quest_answer_keys (단계는 steps[]) */
 export const CodeAnswerSchema = z.strictObject({
   validation: ValidationRuleSchema,
   hints: HintsSchema,
   /** 황금키 정답 코드. 자동 검증(P1-13)이 이 코드로 규칙을 통과하는지 확인 */
   solution_code: text,
+  /** 선택. input() 을 쓰는 퀘스트의 자동 검증 입력 (CI 전용) */
+  scenarios: z.array(InputScenarioSchema).min(1).optional(),
 });
 
-/** 프로젝트 퀘스트 전체의 정답. 정답 코드는 단계마다 있으므로 퀘스트 전체에는 없어도 됨 */
-export const ProjectAnswerSchema = CodeAnswerSchema.extend({
+/**
+ * 프로젝트 퀘스트 전체의 정답. 정답 코드는 단계마다 있으므로 퀘스트 전체에는 없어도 됨.
+ * 퀘스트 전체 규칙은 마지막 단계 실행 결과로 확인하므로 입력 시나리오도 단계에만 씀
+ */
+export const ProjectAnswerSchema = CodeAnswerSchema.omit({
+  scenarios: true,
+}).extend({
   solution_code: text.optional(),
 });
 
@@ -234,6 +252,7 @@ export const StageSchema = z.strictObject({
 export type World = z.infer<typeof WorldSchema>;
 export type WorldUnlockRule = z.infer<typeof WorldUnlockRuleSchema>;
 export type Stage = z.infer<typeof StageSchema>;
+export type InputScenario = z.infer<typeof InputScenarioSchema>;
 export type CodeQuest = z.infer<typeof CodeQuestSchema>;
 export type ProjectQuest = z.infer<typeof ProjectQuestSchema>;
 export type Quest = z.infer<typeof QuestSchema>;

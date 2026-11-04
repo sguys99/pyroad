@@ -333,3 +333,69 @@ describe('왕복: 원본 → 행 → 원본, 원본 → YAML → 원본', () => 
     },
   );
 });
+
+describe('입력 시나리오 (input() 퀘스트 자동 검증, P1-13 · P11-05)', () => {
+  const scenarios = [{ inputs: ['3', '5'] }, { inputs: ['abc'], seed: 42 }];
+
+  it('스키마: 코드 퀘스트·프로젝트 단계에만 쓸 수 있고 모르는 키는 오류', () => {
+    expect(
+      parseQuest({
+        ...codeQuest(),
+        answer: { ...codeQuest().answer, scenarios },
+      }).ok,
+    ).toBe(true);
+    const project = projectQuest();
+    project.steps[0].answer = {
+      ...project.steps[0].answer,
+      scenarios,
+    } as never;
+    expect(parseQuest(project).ok).toBe(true);
+    // 퀘스트 전체 규칙은 마지막 단계 실행 결과로 보므로 프로젝트 전체에는 없음
+    expect(
+      parseQuest({
+        ...projectQuest(),
+        answer: { ...projectQuest().answer, scenarios },
+      }).ok,
+    ).toBe(false);
+    expect(
+      parseQuest({
+        ...codeQuest(),
+        answer: { ...codeQuest().answer, scenarios: [{ input: ['3'] }] },
+      }).ok,
+    ).toBe(false);
+  });
+
+  it('DB 행에는 쓰지 않고, meta 를 넘긴 검증 JSON 에만 붙음', () => {
+    const project = projectQuest();
+    project.steps[1].answer = {
+      ...project.steps[1].answer,
+      scenarios,
+    } as never;
+    const { rows, meta } = buildRows(
+      tree(
+        [
+          STAGE_1,
+          [
+            parsed({
+              ...codeQuest(),
+              answer: { ...codeQuest().answer, scenarios },
+            }),
+          ],
+        ],
+        [STAGE_7, [parsed(project)]],
+      ),
+    );
+    expect(JSON.stringify(rows)).not.toContain('inputs');
+    const plain = toCheckFixture(rows, { generatedBy: 't', source: 't' });
+    expect(plain.quests[0]).not.toHaveProperty('scenarios');
+    const fixture = toCheckFixture(rows, {
+      generatedBy: 't',
+      source: 't',
+      meta,
+    });
+    expect(fixture.quests[0].scenarios).toEqual(scenarios);
+    expect(fixture.quests[1]).not.toHaveProperty('scenarios');
+    expect(fixture.quests[1].steps?.[0]).not.toHaveProperty('scenarios');
+    expect(fixture.quests[1].steps?.[1].scenarios).toEqual(scenarios);
+  });
+});

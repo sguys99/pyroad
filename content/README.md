@@ -89,6 +89,7 @@ answer:
 | `answer` | `validation` | 필수 | `type` → `quests.validation_type`(공개), 기준값 → `quest_answer_keys.expected_output` |
 | `answer` | `hints.level_1~3` | 3개 모두 | `quest_answer_keys.hints` |
 | `answer` | `solution_code` | 코드 퀘스트 필수, 프로젝트 전체에는 선택 | `quest_answer_keys.solution_code` |
+| `answer` | `scenarios` | 선택 (`input()` 퀘스트). 프로젝트는 단계에만 | DB에 쓰지 않음. 자동 검증(§6 정답 자동 검증)만 읽음 |
 
 여러 줄 문자열(코드, 여러 줄 출력)은 `|`(끝 줄바꿈 하나 유지) 또는 `|-`(끝 줄바꿈 없음)로 씁니다. `output_match`는 앞뒤 공백을 무시하므로 어느 쪽이든 됩니다. 시작 코드·정답 코드는 학생 에디터에 그대로 들어가므로 끝 줄바꿈을 원래대로 둡니다.
 
@@ -157,7 +158,7 @@ validation:
 2. `id`는 새 UUID: `node -e "console.log(crypto.randomUUID())"`. 한 번 정하면 바꾸지 않습니다.
 3. `npm run content:build`로 검사·생성합니다. 오류는 파일 경로와 필드 위치를 함께 보여 줍니다. 다시 만든 `supabase/seed.sql`을 YAML과 **같은 커밋**에 넣습니다.
 4. 운영 DB에는 다음 릴리즈 때 `supabase/seed.sql`을 SQL Editor로 적용합니다(`docs/release/v0.4-runbook.md` "콘텐츠 seed 적용").
-5. P1-13 이후: `npm run test:content`로 정답 코드가 규칙을 통과하고 시작 코드는 통과하지 않는지 확인합니다.
+5. `npm run test:content`(약 10~30초)로 정답 코드가 규칙을 통과하고 시작 코드는 통과하지 않는지 확인합니다(§6 정답 자동 검증). CI(P1-15)가 생기면 PR 필수 체크가 됩니다(§12-Q19).
 6. 퀘스트를 **지울 때**는 파일만 지우면 DB에서 사라지지 않습니다(빌드는 지우지 않음). 지우면 `user_progress`가 CASCADE로 함께 지워지므로 마이그레이션으로 따로 처리합니다.
 
 ## 6. 명령
@@ -167,6 +168,7 @@ npm run content:build              # 검사 + 생성: supabase/seed.sql (커밋)
 npm run content:build -- --check   # 생성하지 않고, supabase/seed.sql 이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사용)
 npm run content:compare            # 왕복 비교 (아래)
 npm run content:extract -- --stage 1   # seed → content/ YAML 추출 (이관용, --all, --force, --seed-rev)
+npm run test:content               # 정답 자동 검증 (Node Pyodide, 아래 "정답 자동 검증")
 npx vitest run src/lib/content src/lib/quest   # 스키마·빌드·검증기 단위 테스트 (+ PGlite 적용 테스트)
 ```
 
@@ -179,9 +181,56 @@ npx vitest run src/lib/content src/lib/quest   # 스키마·빌드·검증기 �
 | 파일 | 내용 | 커밋 |
 |---|---|---|
 | seed SQL (`supabase/seed.sql`) | 스테이지·`quests`(공개) 업서트 + `quest_answer_keys`(정답) 업서트. DML만 있고 멱등. 머리에 콘텐츠 해시 | **커밋** (`db reset`·RLS 테스트·운영 SQL Editor가 그대로 읽음, PR에서 SQL diff 리뷰, CI는 `--check`로 원본과 어긋남 검사). content/ 를 고친 커밋에 다시 만든 seed 를 함께 넣습니다 |
-| 검증 JSON (`build/content/quests.json`) | 퀘스트마다 `id, key, validation_type, expected_output, starter_code, solution_code, steps[]` (P0-09 fixture 형태, P1-13이 읽음). `validation_type`·`expected_output`은 DB 저장 형태라 `validateResult`에 바로 넣음 | **커밋하지 않음** (원본에서 1초 안에 다시 만들고, 정답을 담은 파생물이라 diff 리뷰 가치가 없음. `test:content`가 먼저 빌드) |
+| 검증 JSON (`build/content/quests.json`) | 퀘스트마다 `id, key, validation_type, expected_output, starter_code, solution_code, steps[]`(+ 있으면 `scenarios`) (P0-09 fixture 형태). `validation_type`·`expected_output`은 DB 저장 형태라 `validateResult`에 바로 넣음 | **커밋하지 않음** (원본에서 1초 안에 다시 만들고, 정답을 담은 파생물이라 diff 리뷰 가치가 없음) |
 
-`--check`는 커밋하는 seed만 비교합니다. 검증 JSON은 git에 없어 CI의 새 checkout에는 파일이 없기 때문이고, 쓰는 쪽(P1-13 `test:content`)이 먼저 빌드합니다.
+`--check`는 커밋하는 seed만 비교합니다. 검증 JSON은 git에 없어 CI의 새 checkout에는 파일이 없기 때문입니다. `test:content`는 이 파일을 읽지 않고 같은 함수(`toCheckFixture`)로 메모리에서 만들어 씁니다(seed.sql도 쓰지 않음).
+
+### 정답 자동 검증 (`npm run test:content`, P1-13)
+
+모든 퀘스트·프로젝트 단계의 정답 코드를 **브라우저와 같은 실행 코어**(`public/workers/pyodide-core.mjs`, Pyodide 314.0.7을 Node `worker_threads`로)에서 실제로 실행하고, 앱과 같은 순서(예외 없이 끝남 → `validateResult`)로 판정합니다. DB·브라우저·네트워크가 필요 없습니다.
+
+| 검사 | 통과 조건 | 실패하면 |
+|---|---|---|
+| ① 정답 | 모든 퀘스트·단계에 `solution_code`와 읽을 수 있는 규칙이 있음 | 정답을 씁니다 |
+| ② 정답 통과 | 정답이 **시드 0~9 + 무시드 1회** 모두에서 통과 (입력 시나리오가 있으면 시나리오마다) | 규칙·기대 출력·정답 중 틀린 쪽을 고칩니다. 일부 시드만 실패하면 무작위 출력이므로 `contains_any`·`all`로 넓힙니다(§3) |
+| ③ 시작 코드 불합격 | 시작 코드를 그대로 실행하면 불합격. 프로젝트 k단계는 화면과 같게 "k-1단계 정답 + 줄바꿈 + k단계 `starter_code`" | 규칙을 좁히거나(`all`로 `code_check` + 출력) 시작 코드에서 답을 뺍니다 (B30) |
+| ④ 무한 루프 없음 | 시작 코드가 5초 안에, 출력 상한에 걸리지 않고 끝남 | 반복 조건을 바꾸는 줄을 빈칸(`count = count - ___`)으로 넣어 바로 오류로 멈추게 합니다 (B31) |
+| ⑤ 프로젝트 전체 규칙 | 마지막 단계 정답이 퀘스트 전체 `answer.validation`도 통과 | 전체 규칙이나 마지막 단계 정답을 맞춥니다 |
+
+```bash
+npm run test:content                                 # PR 필수 체크: 시드 0~9 + 무시드 1회
+TEST_CONTENT_ONLY=7-1,4-7 npm run test:content       # 고친 퀘스트만 (퀘스트 키, 단계 7-1#3, 퀘스트 id)
+TEST_CONTENT_UNSEEDED_RUNS=20 npm run test:content   # main 전용: 무시드 20회 (드물게 흔들리는 콘텐츠)
+TEST_CONTENT_DIR=/tmp/my-content npm run test:content   # 다른 콘텐츠 디렉토리 (기본 content/)
+```
+
+- 그 밖의 env: `TEST_CONTENT_SEEDS`(고정 시드 개수, 기본 10), `TEST_CONTENT_WORKERS`(동시에 띄울 Pyodide 수, 기본 `min(4, CPU-1)`. 1개면 프로세스 최대 RSS 약 220MB, 4개면 약 440MB).
+- **실행마다 시드를 넣습니다.** 실행마다 namespace는 새로 만들지만 `random` 모듈 상태는 남기 때문입니다. "무시드" 실행도 JS에서 뽑은 무작위 시드를 넣고 실패 메시지에 그 값을 적습니다. "시드 N"은 학생 코드 앞에서 `random.seed(N)`을 부른 것과 같습니다.
+- 실패 메시지에는 파일 위치(`… steps[2].answer`), 실패한 시드, 규칙 요약, 하위 규칙별 통과·실패, 기대/실제 출력 차이(`output_match`)나 실제 출력, 재현 명령이 들어 있습니다. 예:
+
+  ```
+  [7-1#3] 숫자 맞추기 게임 3/5단계 — content/worlds/python-island/07-project-kingdom/01-number-guessing-game.yaml steps[2].answer (퀘스트 id …022)
+  정답 코드가 자기 규칙을 통과하지 못했어요: 11회 중 8회 실패 (시드 0~4, 8, 9, 무시드(시드 32703163))
+  규칙: contains "보다 커요"
+  --- 시드 0 ---
+  [실패] contains: 출력에 "보다 커요"가 들어 있어야 해요
+  실제 출력:
+    | 정답!
+  안내: 일부 시드에서만 실패하면 출력이 무작위인 퀘스트예요. … contains_any·all 같은 넓은 규칙을 쓰세요
+  ```
+
+- **입력 시나리오** (`input()` 퀘스트, P11-05에서 확장): `answer.scenarios`(프로젝트는 `steps[].answer.scenarios`)에 적으면 각 시나리오의 `inputs`가 실행기의 `setStdin` 큐로 한 줄씩 들어갑니다. 입력이 모자라면 `EOFError`(실패). `seed`를 적은 시나리오는 그 시드로 한 번만 실행합니다(입력이 비밀 숫자 같은 난수에 맞춰져 있을 때). 시작 코드도 같은 입력으로 실행합니다. `input("프롬프트")`의 프롬프트는 stdout에 찍히고 입력한 글자는 찍히지 않으므로, 프롬프트가 있는 퀘스트는 `output_match` 대신 `contains` 계열을 씁니다.
+
+  ```yaml
+  answer:
+    validation: { type: contains, expected: 통과! }
+    scenarios:
+      - inputs: [열려라]           # 시드 0~9 + 무시드로 실행
+      - inputs: [틀림, 열려라]
+  # 숫자 맞추기처럼 입력이 난수에 맞춰져 있으면: - { inputs: [abc, '50', '75', '82'], seed: 42 }
+  ```
+
+- 시간: 44 퀘스트(48 단위, 실행 1,056회)에 Pyodide 로드 4~13초 + 검사 1~12초(Pyodide 수와 머신 부하에 따라). `npm test`에서는 빠집니다(`*.content.test.ts`, `vitest.config.ts`).
 
 ### 왕복 비교 (`content:compare`)
 

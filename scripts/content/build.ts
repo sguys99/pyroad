@@ -5,7 +5,7 @@
 //   옵션: --seed-out <file> · --json-out <file> · --content <dir>
 //
 // --check 는 커밋하는 seed 만 봅니다. 검증 JSON 은 git 에 없어서(CI 의 새 checkout 에는 파일이 없음)
-// 비교하지 않고, 쓰는 쪽(P1-13 test:content)이 먼저 빌드합니다.
+// 비교하지 않습니다. P1-13 test:content 는 같은 함수(toCheckFixture)로 메모리에서 만들어 씁니다.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
@@ -29,11 +29,12 @@ run(async () => {
   const check = args.has('check');
 
   const tree = loadContent(contentDir);
-  const { rows, warnings } = buildRows(tree);
+  const { rows, meta, warnings } = buildRows(tree);
   const seed = toSeedSql(rows, { hash: tree.hash });
   const fixture = toCheckFixture(rows, {
     generatedBy: 'npm run content:build',
     source: `content/ (${tree.hash})`,
+    meta,
   });
   const json = JSON.stringify(fixture, null, 2) + '\n';
 
