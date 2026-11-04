@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { isRunSuccessful, isWarningOnlyStderr } from '../runOutcome';
+import { MAX_OUTPUT_LENGTH } from '../constants';
+import {
+  isRunSuccessful,
+  isWarningOnlyStderr,
+  truncateOutput,
+} from '../runOutcome';
 
-// 실제 pyodide-worker.js(Pyodide 0.27.5, Node)에서 받은 stderr
+// 예전 pyodide-worker.js(Pyodide 0.27.5, Node)에서 받은 stderr. outcome이 없는 결과의 추측 판정용
 const TRACEBACK_HEAD = [
   'Traceback (most recent call last):',
   '  File "/lib/python312.zip/_pyodide/_base.py", line 523, in eval_code',
@@ -75,5 +80,43 @@ describe('isRunSuccessful', () => {
     expect(
       isRunSuccessful({ success: false, stderr: STDERR.blockedModule }),
     ).toBe(false);
+  });
+});
+
+describe('isRunSuccessful: 워커 v2의 outcome', () => {
+  it('outcome이 ok면 stderr 내용과 상관없이 성공 (학생이 직접 쓴 stderr, 경고)', () => {
+    expect(
+      isRunSuccessful({
+        success: false,
+        stderr: STDERR.studentStderr,
+        outcome: 'ok',
+      }),
+    ).toBe(true);
+    expect(
+      isRunSuccessful({
+        success: false,
+        stderr: STDERR.syntaxWarning,
+        outcome: 'ok',
+      }),
+    ).toBe(true);
+  });
+
+  it.each(['error', 'stopped', 'output-limit', 'timeout'] as const)(
+    'outcome이 %s면 실패',
+    (outcome) => {
+      expect(isRunSuccessful({ success: true, stderr: '', outcome })).toBe(
+        false,
+      );
+    },
+  );
+});
+
+describe('truncateOutput', () => {
+  it('MAX_OUTPUT_LENGTH를 넘으면 자르고 안내를 붙임', () => {
+    const long = 'a'.repeat(MAX_OUTPUT_LENGTH + 1);
+    expect(truncateOutput(long)).toBe(
+      'a'.repeat(MAX_OUTPUT_LENGTH) + '\n\n...출력이 너무 길어서 잘렸어요',
+    );
+    expect(truncateOutput('짧음')).toBe('짧음');
   });
 });

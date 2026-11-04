@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'node',
-    exclude: ['e2e/**', 'node_modules/**', 'spikes/**'],
+    // *.pyodide.test.ts는 실제 Pyodide를 띄우는 느린 테스트라 `npm run test:pyodide`로 따로 돌린다
+    exclude: ['e2e/**', 'node_modules/**', 'spikes/**', '**/*.pyodide.test.ts'],
   },
   resolve: {
     alias: {

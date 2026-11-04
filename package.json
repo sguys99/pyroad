@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/pyodide/copy-assets.mjs",
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/pyodide/copy-assets.mjs",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
+    "test:pyodide": "vitest run --config vitest.pyodide.config.ts",
     "test:e2e": "playwright test",
     "optimize:svg": "svgo -f public/characters --recursive",
     "db:start": "supabase start",
@@ -20,7 +23,8 @@
     "test:rls:ci": "bash supabase/tests/run.sh ci",
     "content:build": "tsx scripts/content/build.ts",
     "content:extract": "tsx scripts/content/extract-from-seed.ts",
-    "content:compare": "tsx scripts/content/compare.ts"
+    "content:compare": "tsx scripts/content/compare.ts",
+    "pyodide:copy": "node scripts/pyodide/copy-assets.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -43,7 +47,7 @@
     "lucide-react": "^1.7.0",
     "next": "^15.5.0",
     "openai": "^6.33.0",
-    "pyodide": "^0.29.3",
+    "pyodide": "314.0.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",

@@ -57,3 +57,6 @@ spikes/**/supabase/.temp/
 
 # Misc
 *.pem
+
+# Pyodide 자체 호스팅 복사본 (scripts/pyodide/copy-assets.mjs가 predev·prebuild에서 만듦, B26)
+public/pyodide/

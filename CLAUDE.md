@@ -7,7 +7,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 - **Frontend**: Next.js 15 (App Router, Turbopack), TypeScript, Tailwind CSS v4, shadcn/ui
 - **Backend (BaaS)**: Supabase (Auth, PostgreSQL, RLS, SSR)
 - **AI/LLM**: 멀티 프로바이더 — Anthropic Claude, OpenAI, Google Gemini (Next.js API Routes에서 호출, `src/lib/tutor/providers/`에서 팩토리 패턴으로 관리)
-- **Code Execution**: Pyodide (브라우저 내 Python WASM, Web Worker — `public/workers/pyodide-worker.js`)
+- **Code Execution**: Pyodide 314.0.7 (브라우저 내 Python WASM, 자체 호스팅 `public/pyodide/<버전>/`은 빌드 전 npm 패키지에서 복사. module Worker `public/workers/pyodide-worker.mjs` + 브라우저·Node 공용 실행 코어 `public/workers/pyodide-core.mjs`)
 - **Editor**: CodeMirror 6
 - **Animation**: Framer Motion, Lottie (lottie-react), canvas-confetti
 - **Markdown**: react-markdown, remark-gfm
