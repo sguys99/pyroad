@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { PybaemSvg } from '@/components/characters/PybaemSvg';
-import { useGoogleLogin } from '@/lib/hooks/useGoogleLogin';
+import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
 
 export function LandingHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { handleLogin, showBrowserGuide, setShowBrowserGuide, browserInfo } =
-    useGoogleLogin();
+    useSocialLogin('google');
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);

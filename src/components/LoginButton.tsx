@@ -2,12 +2,12 @@
 
 import { m } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useGoogleLogin } from '@/lib/hooks/useGoogleLogin';
+import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
 
 export function LoginButton() {
   const { handleLogin, showBrowserGuide, setShowBrowserGuide, browserInfo } =
-    useGoogleLogin();
+    useSocialLogin('google');
 
   return (
     <>
