@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { NextResponse } from 'next/server';
-import { captureServerError } from '@/lib/observability/server';
+import { isUuid, reportServerError } from '@/lib/api/serverError';
 import { MODERATION_MESSAGES, moderateFields } from '@/lib/moderation/filter';
 import { hasVisibleText } from '@/lib/moderation/normalize';
 import { BOARD_LIMITS, charCount } from './limits';
@@ -49,36 +49,14 @@ export function boardError(
   return NextResponse.json({ error, ...extra }, { status });
 }
 
-/** PostgREST 오류 등에서 코드·메시지만 (details 에는 실패한 행 = 아이가 쓴 글이 들어 있어 남기지 않음) */
-function describe(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === 'object') {
-    const e = error as { code?: unknown; message?: unknown };
-    return `${typeof e.code === 'string' ? e.code : ''} ${typeof e.message === 'string' ? e.message : ''}`.trim();
-  }
-  return String(error);
-}
-
-/** DB·서버 오류: 로그 + Sentry, 응답은 일반 문구 (B19) */
+/** DB·서버 오류: 로그 + Sentry, 응답은 일반 문구 (B19). details(아이가 쓴 글)는 남기지 않음 */
 export function boardServerError(error: unknown, op: string) {
-  const message = describe(error);
-  console.error(`[board] ${op} 실패:`, message);
-  captureServerError(
-    error instanceof Error ? error : new Error(`[board] ${op}: ${message}`),
-    {
-      tags: { area: 'board', op },
-    },
-  );
+  reportServerError(error, { area: 'board', op });
   return boardError(500, BOARD_MESSAGES.serverError, { code: 'server' });
 }
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-/** 경로·본문의 id 모양 검사. 아니면 DB 에 보내지 않음 (잘못된 uuid 는 22P02 오류가 되므로) */
-export function isUuid(value: unknown): value is string {
-  return typeof value === 'string' && UUID_RE.test(value);
-}
+/** 게시판 라우트가 쓰던 경로 그대로 (구현은 `@/lib/api/serverError`) */
+export { isUuid };
 
 /** JSON 본문 (객체가 아니면 null) */
 export async function readJsonObject(
