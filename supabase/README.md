@@ -184,7 +184,7 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 | 빠른 (`fast`) | 켜져 있는 `supabase_*_pyroad` 스택. 먼저 `npm run db:start`. **DB를 reset하므로 로컬 데이터가 지워짐** | `local`: 저장소 migrations + seed (신규 기본값) |
 | 격리 (`ci`) | 새 임시 스택 `supabase_*_pyroadrls`(포트 54620~)를 띄우고 끝나면 내림. 켜진 pyroad 스택은 건드리지 않음 | `prod_replay`: 핫픽스 전 00001(`git show 2f0a8f3^`) + 운영 seed(`git show e800386`, 손으로 쓴 예전 seed) + Section 6 → `00002~`를 `psql -1`로 릴리즈 순서(① 파일 → ③ 파일)대로 적용 → 콘텐츠 seed(`seed.sql`) (운영 적용 리허설, legacy)<br>`fresh_legacy`: 새 DB, 새 테이블 자동 노출 켜짐 (운영과 같은 기본값)<br>`fresh_newdefault`: 새 DB, 자동 노출 꺼짐 (스택 재시작 1회) |
 
-환경 변수: `RLS_NO_RESET=1`(fast, reset 생략) · `RLS_SKIP_PROD=1` · `RLS_SKIP_NEWDEFAULT=1` · `RLS_PROJECT_ID`·`RLS_PORT_BASE`(ci 임시 스택 이름·포트) · `RLS_KEEP=1`(ci 스택 남기기) · `RLS_UPDATE_SNAPSHOTS=1`(스냅샷 갱신). 종료 코드는 FAIL이 없으면 0, 있으면 1, 환경 문제면 2입니다.
+환경 변수: `RLS_NO_RESET=1`(fast, reset 생략) · `RLS_SKIP_PROD=1` · `RLS_SKIP_NEWDEFAULT=1` · `RLS_CRLF=1`(ci: `prod_replay`를 운영 붙여넣기 묶음 `scripts/release/build-release-sql.mjs`의 1·2·3번을 **CRLF로 바꾼 사본**으로 파일 그대로 적용하고 `tests/crlf.mjs`로 `\r` 0·LF 적용 결과와 같음을 점검, B39) · `RLS_PROJECT_ID`·`RLS_PORT_BASE`(ci 임시 스택 이름·포트) · `RLS_KEEP=1`(ci 스택 남기기) · `RLS_UPDATE_SNAPSHOTS=1`(스냅샷 갱신). 종료 코드는 FAIL이 없으면 0, 있으면 1, 환경 문제면 2입니다.
 
 ### 파일
 
@@ -192,6 +192,7 @@ RLS_SKIP_PROD=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci
 |---|---|
 | `tests/run.sh` | 스택 준비 → 시나리오별 `checks.mjs` 실행 → 요약 |
 | `tests/checks.mjs` | 점검 동작 (무엇을 요청하고 결과를 어떻게 분류하는지) |
+| `tests/crlf.mjs` | `RLS_CRLF=1` 점검 CR-1~4 (Windows SQL Editor 붙여넣기 CRLF 재현, B39) |
 | `tests/expectations.mjs` | **점검별 기대값.** 권한 작업은 보통 여기 한 줄만 바꿈 |
 | `tests/fixtures/reward-rules.json` | XP·레벨·3일 연속·뱃지 규칙 대조표. SQL(`reward` RW-1)과 TS(vitest `rewardRules.test.ts`)가 같은 표를 씀 |
 | `tests/snapshots/*.txt` | 카탈로그 스냅샷: SECURITY DEFINER 함수(anon/authenticated 실행 가능), 테이블·뷰·컬럼 권한, RLS 정책 |
@@ -245,6 +246,7 @@ GraphQL(`pg_graphql`)은 운영·로컬 모두 없어서 대상이 아닙니다.
 
 - 운영 DB에는 **사용자가 직접** Phase 끝에 한 번에 적용합니다. 에이전트·CI는 운영에 쓰지 않습니다(Supabase MCP는 읽기 전용).
 - Supabase Dashboard → SQL Editor에서 파일 내용을 `BEGIN;` … `COMMIT;`으로 감싸 실행합니다. 오류가 나면 전체가 롤백됩니다.
+- **Windows에서 SQL Editor에 붙여넣으면 줄바꿈이 CRLF로 바뀝니다**(B39). 마이그레이션의 여러 줄 문자열 리터럴이 값·검사에 쓰이면 `\r`이 섞이므로, 그런 리터럴은 CR·LF를 모두 지우거나(00012 `translate(…, E'\r\n', '')`) 한 줄 `E'…\n…'`로 씁니다(seed 생성기). 함수 본문·주석·토큰 사이의 `\r`은 SQL에서 공백이라 무해합니다. 릴리즈 때는 `node scripts/release/build-release-sql.mjs`가 만드는 `release-sql/` 묶음을 붙여 넣습니다(런북 머리)
 - 순서: ① 파일들 → 앱 배포(Vercel) → 동작 확인 → ③ 파일들. 각 파일 머리 주석의 "릴리즈 단계"를 따르며, 번호 순서와 단계 순서가 다르면 단계가 우선입니다(`test:rls:ci`의 운영 재현도 같은 순서로 적용). 적용 전후에 `spikes/p0-08-answer-keys/prod_readonly_checks.sql`(SELECT만 있음)로 상태를 확인합니다.
 - 되돌리기는 `rollback/`의 파일을 역순으로(예: 00005 → 00004) 같은 방식(`BEGIN; … COMMIT;`)으로 실행합니다.
 - 운영은 SQL Editor로 적용하므로 `supabase_migrations` 이력이 없습니다. `supabase db push`·`supabase link`로 운영에 적용하지 않습니다.

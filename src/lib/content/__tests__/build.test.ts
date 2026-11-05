@@ -5,6 +5,7 @@ import {
   assertNoAnswersInPublicRows,
   buildRows,
   splitQuest,
+  sqlText,
   toCheckFixture,
   toSeedSql,
 } from '../build';
@@ -242,6 +243,21 @@ describe('toSeedSql', () => {
 
   it('작은따옴표는 두 번 써서 이스케이프', () => {
     expect(sql).toContain("'print()와 주석을 배워봐요! I''m'");
+  });
+
+  it('B39: 줄바꿈이 있는 값은 한 줄 E 리터럴, 리터럴 안에 실제 줄바꿈 없음 (SQL Editor CRLF 붙여넣기)', () => {
+    expect(sqlText('a\\nb')).toBe("'a\\nb'"); // 제어 문자 없으면 역슬래시 그대로
+    expect(sqlText('나는\n반가워!')).toBe("E'나는\\n반가워!'");
+    expect(sqlText("it's\r\n\t\\n\x01\x7f")).toBe(
+      "E'it''s\\r\\n\\t\\\\n\\x01\\x7f'",
+    );
+    expect(() => sqlText('a\0b')).toThrow(/NUL/);
+    // 줄바꿈은 리터럴 밖(문장·주석 사이)에만: 리터럴 안이면 따옴표 수가 홀수인 줄이 생김
+    const code = sql.replace(/^--.*$/gm, '');
+    for (const line of code.split('\n'))
+      expect(line.replace(/''/g, '').split("'").length % 2, line).toBe(1);
+    // jsonb 는 한 줄 JSON (문자열 안 줄바꿈은 JSON 의 \n 이스케이프 그대로)
+    expect(sql).toContain('"starter_code":"import random\\n"');
   });
 
   it('머리에 콘텐츠 해시와 개수', () => {

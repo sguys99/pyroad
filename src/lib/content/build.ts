@@ -317,6 +317,7 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
     '-- - 정답·힌트·solution_code 는 quest_answer_keys(service_role 전용)에 따로 씁니다.',
     '-- - 다시 실행해도 결과가 같습니다 (ON CONFLICT DO UPDATE). content/ 에 없는 행은 지우지 않습니다.',
     '-- - DML 만 있습니다. 권한(GRANT/REVOKE)은 마이그레이션이 정합니다.',
+    "-- - 문자열·jsonb 값은 모두 한 줄 리터럴입니다 (줄바꿈은 E'…\\n…'). SQL Editor 붙여넣기의 CRLF 에 안전 (B39).",
     '--',
     '-- 적용: supabase db reset 이 migrations 다음에 실행합니다. 운영은 SQL Editor 에서 BEGIN; … COMMIT; 으로',
     '--       감싸 실행하고, 00005(③) 뒤에 적용합니다 (docs/release/v0.4-runbook.md "콘텐츠 seed 적용").',
@@ -445,15 +446,42 @@ function countAnswers(rows: ContentRows) {
   };
 }
 
-/** SQL 문자열 리터럴 (standard_conforming_strings = on: 역슬래시는 그대로, 작은따옴표만 두 번) */
+/**
+ * SQL 문자열 리터럴. 항상 한 줄입니다 (B39).
+ * - 제어 문자가 없으면 표준 리터럴 (standard_conforming_strings = on: 역슬래시는 그대로, 작은따옴표만 두 번)
+ * - 줄바꿈·탭 등 제어 문자가 있으면 이스케이프 리터럴 E'…' (\n·\r·\t·\b·\f·\xHH, 역슬래시는 두 번)
+ * 리터럴 안에 실제 줄바꿈을 두지 않는 이유: Windows 에서 SQL Editor 에 붙여넣으면 줄바꿈이 CRLF 로 바뀌어
+ * 여러 줄 리터럴의 값에 \r 이 섞임(정답 비교가 깨짐). 리터럴 밖(토큰 사이·주석)의 \r 은 SQL 에서 공백이라 무해합니다.
+ */
 export function sqlText(value: string): string {
   if (value.includes('\0'))
     throw new Error('SQL 문자열에 NUL 문자를 넣을 수 없어요');
-  return `'${value.replace(/'/g, "''")}'`;
+  if (!CONTROL_CHAR.test(value)) return `'${value.replace(/'/g, "''")}'`;
+  return `E'${value.replace(E_STRING_SPECIAL, escapeForEString)}'`;
 }
 
+const CONTROL_CHAR = /[\x00-\x1f\x7f]/;
+const E_STRING_SPECIAL = /[\\'\x00-\x1f\x7f]/g;
+const E_STRING_ESCAPES: Record<string, string> = {
+  '\\': '\\\\',
+  "'": "''",
+  '\n': '\\n',
+  '\r': '\\r',
+  '\t': '\\t',
+  '\b': '\\b',
+  '\f': '\\f',
+};
+
+function escapeForEString(ch: string): string {
+  return (
+    E_STRING_ESCAPES[ch] ??
+    `\\x${ch.charCodeAt(0).toString(16).padStart(2, '0')}`
+  );
+}
+
+/** jsonb 리터럴. 한 줄 JSON (문자열 안의 줄바꿈은 JSON 이 \n 으로 이스케이프하므로 제어 문자가 없음) */
 function sqlJson(value: unknown): string {
-  return `${sqlText(JSON.stringify(value, null, 2))}::jsonb`;
+  return `${sqlText(JSON.stringify(value))}::jsonb`;
 }
 
 function worldIdOf(slug: string): string {

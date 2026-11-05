@@ -180,7 +180,7 @@ npx vitest run src/lib/content src/lib/quest   # 스키마·빌드·검증기 �
 
 | 파일 | 내용 | 커밋 |
 |---|---|---|
-| seed SQL (`supabase/seed.sql`) | 스테이지·`quests`(공개) 업서트 + `quest_answer_keys`(정답) 업서트. DML만 있고 멱등. 머리에 콘텐츠 해시 | **커밋** (`db reset`·RLS 테스트·운영 SQL Editor가 그대로 읽음, PR에서 SQL diff 리뷰, CI는 `--check`로 원본과 어긋남 검사). content/ 를 고친 커밋에 다시 만든 seed 를 함께 넣습니다 |
+| seed SQL (`supabase/seed.sql`) | 스테이지·`quests`(공개) 업서트 + `quest_answer_keys`(정답) 업서트. DML만 있고 멱등. 머리에 콘텐츠 해시. 값은 모두 한 줄 리터럴(줄바꿈이 있으면 `E'…\n…'`, jsonb는 한 줄 JSON)이라 SQL Editor 붙여넣기의 CRLF에 안전(B39) | **커밋** (`db reset`·RLS 테스트·운영 SQL Editor가 그대로 읽음, PR에서 SQL diff 리뷰, CI는 `--check`로 원본과 어긋남 검사). content/ 를 고친 커밋에 다시 만든 seed 를 함께 넣습니다 |
 | 검증 JSON (`build/content/quests.json`) | 퀘스트마다 `id, key, validation_type, expected_output, starter_code, solution_code, steps[]`(+ 있으면 `scenarios`) (P0-09 fixture 형태). `validation_type`·`expected_output`은 DB 저장 형태라 `validateResult`에 바로 넣음 | **커밋하지 않음** (원본에서 1초 안에 다시 만들고, 정답을 담은 파생물이라 diff 리뷰 가치가 없음) |
 
 `--check`는 커밋하는 seed만 비교합니다. 검증 JSON은 git에 없어 CI의 새 checkout에는 파일이 없기 때문입니다. `test:content`는 이 파일을 읽지 않고 같은 함수(`toCheckFixture`)로 메모리에서 만들어 씁니다(seed.sql도 쓰지 않음).
