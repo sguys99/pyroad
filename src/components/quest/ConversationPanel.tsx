@@ -153,7 +153,7 @@ function StreamingMessage({ content }: { content: string }) {
         </div>
         <div className="prose prose-sm max-w-none text-foreground prose-p:leading-relaxed whitespace-pre-wrap">
           {content}
-          <span className="inline-block h-4 w-0.5 animate-pulse bg-primary/60 align-text-bottom" />
+          <span className="inline-block h-4 w-0.5 animate-pulse reduced:animate-none bg-primary/60 align-text-bottom" />
         </div>
       </div>
     </div>

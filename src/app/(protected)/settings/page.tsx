@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
+import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
+import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
   type LLMProviderType,
@@ -20,6 +22,8 @@ interface SettingsData {
   unreadable_keys?: LLMProviderType[];
   /** false 면 서버에 암호화 키가 없어 내 API 키를 받을 수 없음 */
   custom_keys_enabled?: boolean;
+  /** 움직임 설정 (users.settings.motion, P2-15) */
+  motion?: MotionSettings;
 }
 
 async function errorMessage(res: Response, fallback: string) {
@@ -144,9 +148,29 @@ export default function SettingsPage() {
     }
   }
 
+  const header = (
+    <>
+      {/* 뒤로가기 */}
+      <div className="mb-6">
+        <Link href="/profile" className="text-sm text-primary underline">
+          ← 프로필로
+        </Link>
+      </div>
+
+      {/* 제목 */}
+      <h1 className="mb-6 text-xl font-bold text-foreground">설정</h1>
+
+      {/* 움직임 (P2-15). 연출 단계 Provider 값이라 서버 응답을 기다리지 않음 */}
+      <MotionSettingsSection serverMotion={settings?.motion} />
+
+      <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
+    </>
+  );
+
   if (!settings) {
     return (
       <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
+        {header}
         <p className="text-center text-muted-foreground">불러오는 중...</p>
       </PageTransition>
     );
@@ -157,19 +181,11 @@ export default function SettingsPage() {
 
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      {/* 뒤로가기 */}
-      <div className="mb-6">
-        <Link href="/profile" className="text-sm text-primary underline">
-          ← 프로필로
-        </Link>
-      </div>
-
-      {/* 제목 */}
-      <h1 className="mb-6 text-xl font-bold text-foreground">AI 튜터 설정</h1>
+      {header}
 
       {/* Provider 선택 카드 */}
       <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
-        <h2 className="mb-3 text-sm font-bold text-foreground">AI 모델 선택</h2>
+        <h3 className="mb-3 text-sm font-bold text-foreground">AI 모델 선택</h3>
         <div className="flex flex-col gap-2">
           {allProviders.map((provider) => {
             const isAvailable = settings.available_providers.includes(provider);
@@ -229,18 +245,18 @@ export default function SettingsPage() {
       >
         {settings.available_providers.length === 0 ? (
           <>
-            <h2 className="mb-1 text-sm font-bold text-amber-700 dark:text-amber-300">
+            <h3 className="mb-1 text-sm font-bold text-amber-700 dark:text-amber-300">
               API 키를 입력해야 AI 튜터를 사용할 수 있어요
-            </h2>
+            </h3>
             <p className="mb-3 text-xs text-amber-600 dark:text-amber-400">
               아래 중 하나의 API 키를 입력하면 AI 튜터가 활성화돼요.
             </p>
           </>
         ) : (
           <>
-            <h2 className="mb-1 text-sm font-bold text-foreground">
+            <h3 className="mb-1 text-sm font-bold text-foreground">
               API 키 설정
-            </h2>
+            </h3>
             <p className="mb-3 text-xs text-muted-foreground">
               자신의 API 키를 입력하면 해당 모델을 사용할 수 있어요.
             </p>
@@ -314,7 +330,7 @@ export default function SettingsPage() {
       {/* 저장 버튼 */}
       <div className="flex flex-col items-center gap-2">
         <Button onClick={handleSave} disabled={saving} size="lg">
-          {saving ? '저장 중...' : '설정 저장'}
+          {saving ? '저장 중...' : 'AI 튜터 설정 저장'}
         </Button>
         {saved && (
           <p className="text-sm font-medium text-primary">저장되었어요!</p>

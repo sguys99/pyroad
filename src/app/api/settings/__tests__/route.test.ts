@@ -131,3 +131,72 @@ describe('/api/settings (B13, P1-01)', () => {
     expect((await (await GET()).json()).has_custom_keys).toEqual(['anthropic']);
   });
 });
+
+describe('/api/settings 움직임 설정 (P2-15)', () => {
+  const SOUND = { version: 1, muted: false, master: 0.8 };
+
+  beforeEach(() => {
+    mocks.state.users[U1] = {
+      preferred_provider: null,
+      custom_api_keys: {},
+      settings: { sound: SOUND, motion: { tier: 'auto', reduced: 'system' } },
+    };
+  });
+
+  it('조회: users.settings.motion 을 돌려줌 (없거나 이상한 값은 기본값)', async () => {
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'auto',
+      reduced: 'system',
+    });
+    mocks.state.users[U1].settings = { motion: { tier: 'turbo', reduced: 1 } };
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'auto',
+      reduced: 'system',
+    });
+    mocks.state.users[U1].settings = {};
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'auto',
+      reduced: 'system',
+    });
+  });
+
+  it('저장: motion 만 바꾸고 다른 설정(sound)은 그대로, 사용자 클라이언트로는 users 를 쓰지 않음', async () => {
+    const res = await patch({ motion: { tier: 'minimal', reduced: 'on' } });
+    expect(res.status).toBe(200);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: SOUND,
+      motion: { tier: 'minimal', reduced: 'on' },
+    });
+    expect(mocks.userUpdates).toEqual([]);
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'minimal',
+      reduced: 'on',
+    });
+  });
+
+  it.each([
+    ['모르는 단계', { tier: 'ultra', reduced: 'system' }],
+    ['모르는 동작 줄이기', { tier: 'auto', reduced: 'maybe' }],
+    ['키 빠짐', { tier: 'lite' }],
+    ['측정값 같은 다른 키', { tier: 'lite', reduced: 'off', measured: 'lite' }],
+    ['객체 아님', 'minimal'],
+    ['배열', ['lite', 'on']],
+  ])('%s → 400, 저장 안 함', async (_label, motion) => {
+    const res = await patch({ motion });
+    expect(res.status).toBe(400);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: SOUND,
+      motion: { tier: 'auto', reduced: 'system' },
+    });
+  });
+
+  it('settings 가 비어 있던 행에도 motion 을 넣음', async () => {
+    mocks.state.users[U1].settings = null;
+    expect(
+      (await patch({ motion: { tier: 'lite', reduced: 'off' } })).status,
+    ).toBe(200);
+    expect(mocks.state.users[U1].settings).toEqual({
+      motion: { tier: 'lite', reduced: 'off' },
+    });
+  });
+});

@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { PybaemExpression } from './expressions';
+import { BLINK_EYE, BLINK_HIGHLIGHT } from './motionClasses';
 
 interface PybaemSvgProps {
   expression?: PybaemExpression;
@@ -102,39 +103,26 @@ interface BlinkableEyeProps {
   hlCx: number;
   hlCy: number;
   hlR: number;
-  blinkId: string;
 }
 
-function BlinkableEye({
-  cx,
-  cy,
-  rx,
-  ry,
-  hlCx,
-  hlCy,
-  hlR,
-  blinkId,
-}: BlinkableEyeProps) {
+function BlinkableEye({ cx, cy, rx, ry, hlCx, hlCy, hlR }: BlinkableEyeProps) {
   return (
     <>
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="#2E7D32">
-        <animate
-          attributeName="ry"
-          values={`${ry};0.5;${ry}`}
-          dur="0.15s"
-          begin={`3s;${blinkId}.end+4s`}
-          id={blinkId}
-        />
-      </ellipse>
-      <circle cx={hlCx} cy={hlCy} r={hlR} fill="white">
-        <animate
-          attributeName="opacity"
-          values="1;0;1"
-          dur="0.15s"
-          begin={`3s;${blinkId}hl.end+4s`}
-          id={`${blinkId}hl`}
-        />
-      </circle>
+      <ellipse
+        cx={cx}
+        cy={cy}
+        rx={rx}
+        ry={ry}
+        fill="#2E7D32"
+        className={BLINK_EYE}
+      />
+      <circle
+        cx={hlCx}
+        cy={hlCy}
+        r={hlR}
+        fill="white"
+        className={BLINK_HIGHLIGHT}
+      />
     </>
   );
 }
@@ -154,7 +142,6 @@ function HappyFace() {
           hlCx={53.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="happyL"
         />
         <BlinkableEye
           cx={76}
@@ -164,7 +151,6 @@ function HappyFace() {
           hlCx={77.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="happyR"
         />
       </g>
       {/* 입 - 미소 */}
@@ -248,7 +234,6 @@ function EncouragingFace() {
           hlCx={53.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="encL"
         />
         <BlinkableEye
           cx={76}
@@ -258,7 +243,6 @@ function EncouragingFace() {
           hlCx={77.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="encR"
         />
       </g>
       <g id="mouth">
@@ -288,7 +272,6 @@ function SurprisedFace() {
           hlCx={53.5}
           hlCy={37}
           hlR={2.5}
-          blinkId="surL"
         />
         <BlinkableEye
           cx={76}
@@ -298,7 +281,6 @@ function SurprisedFace() {
           hlCx={77.5}
           hlCy={37}
           hlR={2.5}
-          blinkId="surR"
         />
       </g>
       <g id="mouth">
@@ -323,7 +305,6 @@ function TeachingFace() {
           hlCx={53.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="teachL"
         />
         <path
           d="M71 40 Q76 36 81 40"
@@ -358,7 +339,6 @@ function WavingFace() {
           hlCx={53.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="waveL"
         />
         <BlinkableEye
           cx={76}
@@ -368,7 +348,6 @@ function WavingFace() {
           hlCx={77.5}
           hlCy={38.5}
           hlR={2}
-          blinkId="waveR"
         />
       </g>
       <g id="mouth">
@@ -432,7 +411,6 @@ function ConfusedFace() {
           hlCx={53}
           hlCy={38}
           hlR={2}
-          blinkId="confL"
         />
         <BlinkableEye
           cx={76}
@@ -442,7 +420,6 @@ function ConfusedFace() {
           hlCx={77}
           hlCy={38.5}
           hlR={1.5}
-          blinkId="confR"
         />
       </g>
       <g id="mouth">

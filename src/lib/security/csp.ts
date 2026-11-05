@@ -9,9 +9,14 @@
  * - **정적 정책**: `script-src 'self' 'unsafe-inline'`. 빌드 때 만든 HTML에는 nonce를 넣을 수 없어서
  *   정적 페이지(`STATIC_PAGE_PATHS`, 지금은 랜딩 `/`만)에 쓴다. 랜딩은 사용자 콘텐츠가 없고 CDN 캐시가 중요하다(§2.10).
  *
+ * 연출 단계 부트 스크립트(`src/lib/motion/boot.ts`)는 루트 레이아웃의 고정 인라인 스크립트라 nonce 정책에 sha256 해시로 허용한다
+ * (루트 레이아웃은 정적 랜딩도 감싸서 요청마다 nonce를 읽을 수 없음). 정적 정책은 해시를 넣지 않는다: 해시가 있으면 `'unsafe-inline'`이 무시된다.
+ *
  * 두 정책 모두 `'unsafe-eval'`이 없다(개발 서버만 예외). 문자열을 코드로 바꾸는 `eval`·`Function`이 막혀야
  * Python → JsProxy → `Function` 우회가 막힌다. Pyodide Worker는 자기 스크립트 응답의 CSP(`buildWorkerCsp`)를 쓴다.
  */
+
+import { MOTION_BOOT_SCRIPT_CSP_SOURCE } from '../motion/boot';
 
 /** Pyodide 버전. `src/lib/pyodide/constants.ts`·`public/workers/pyodide-core.mjs`와 같아야 함 (테스트가 확인) */
 export const CSP_PYODIDE_VERSION = '314.0.7';
@@ -116,7 +121,12 @@ export function buildPageCsp(options: PageCspOptions): string {
   const reportUri = sentryCspReportUri(options.sentryDsn, options.environment);
 
   const scriptSrc = nonce
-    ? ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"]
+    ? [
+        "'self'",
+        `'nonce-${nonce}'`,
+        MOTION_BOOT_SCRIPT_CSP_SOURCE,
+        "'strict-dynamic'",
+      ]
     : ["'self'", "'unsafe-inline'"];
   if (isDev) scriptSrc.push("'unsafe-eval'");
 
@@ -219,6 +229,17 @@ export function isCspReportOnly(
   value: string | undefined = process.env.CSP_REPORT_ONLY,
 ): boolean {
   return value?.trim().toLowerCase() === 'true';
+}
+
+/**
+ * 요청의 페이지 CSP에서 nonce를 꺼낸다 (미들웨어가 요청 헤더로 넘긴 값). 서버 컴포넌트가 직접 쓰는 인라인 스크립트용
+ * (Next는 자기 스크립트에만 nonce를 붙인다). 정적 정책·헤더 없음이면 undefined
+ */
+export function nonceFromCsp(
+  policy: string | null | undefined,
+): string | undefined {
+  const match = policy?.match(/'nonce-([A-Za-z0-9+/=_-]+)'/);
+  return match?.[1];
 }
 
 /** 요청마다 새 nonce (128비트, base64). Edge·Node 모두 Web Crypto를 쓴다 */

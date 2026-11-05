@@ -120,7 +120,7 @@ export function OutputPanel({
       >
         <div className="flex items-center gap-2">
           <TutorAvatar expression="thinking" />
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent motion-reduce:animate-none" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent reduced:animate-none" />
           <span className="text-sm text-muted-foreground">실행 중...</span>
         </div>
         <LiveOutput store={liveOutput} />

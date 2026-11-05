@@ -1,4 +1,4 @@
-// 테스트용 메모리 DB: users(preferred_provider, custom_api_keys) + user_api_keys 만 흉내 냄.
+// 테스트용 메모리 DB: users(preferred_provider, custom_api_keys, settings) + user_api_keys 만 흉내 냄.
 // legacyColumn=false 면 00009 이후처럼 users.custom_api_keys 조회·수정이 42703 을 냄.
 
 export interface FakeKeyRow {
@@ -14,7 +14,12 @@ export interface FakeKeyRow {
 export interface FakeState {
   users: Record<
     string,
-    { preferred_provider: string | null; custom_api_keys?: unknown }
+    {
+      preferred_provider: string | null;
+      custom_api_keys?: unknown;
+      /** users.settings (P2-15 움직임 설정) */
+      settings?: unknown;
+    }
   >;
   user_api_keys: FakeKeyRow[];
   legacyColumn: boolean;

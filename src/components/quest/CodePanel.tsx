@@ -158,17 +158,17 @@ export function CodePanel({
             >
               {isRunning ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin reduced:animate-none" />
                   실행 중...
                 </>
               ) : isSubmitting ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin reduced:animate-none" />
                   정답 확인 중...
                 </>
               ) : isPreparing ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin reduced:animate-none" />
                   준비 중...
                 </>
               ) : (

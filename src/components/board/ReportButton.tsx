@@ -1,7 +1,8 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { m, useReducedMotion } from 'framer-motion';
+import { m } from 'framer-motion';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { Check, Flag } from 'lucide-react';
 import {
   AlertDialog,
@@ -45,7 +46,8 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
   const [error, setError] = useState('');
   const [reported, setReported] = useState(false);
   const groupName = useId();
-  const reduceMotion = useReducedMotion();
+  // 동작 줄이기: 기기 설정 + 사용자 설정 (P2-15)
+  const { reduced: reduceMotion } = useMotionTier();
   const target = TARGET_LABEL[targetType];
 
   function handleOpenChange(next: boolean) {

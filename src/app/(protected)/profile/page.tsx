@@ -224,7 +224,7 @@ export default async function ProfilePage() {
       {/* 설정 / 로그아웃 */}
       <div className="mt-6 flex flex-col items-center gap-3">
         <Link href="/settings" className="text-sm text-primary underline">
-          AI 튜터 설정
+          설정 (움직임 · AI 튜터)
         </Link>
         <LogoutButton />
       </div>

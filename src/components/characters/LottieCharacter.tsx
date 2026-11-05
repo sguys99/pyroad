@@ -4,10 +4,10 @@ import { memo } from 'react';
 import {
   m,
   MotionConfig,
-  useReducedMotion,
   type TargetAndTransition,
   type Transition,
 } from 'framer-motion';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CharacterAvatar } from './CharacterAvatar';
 import type { Character, Expression } from './expressions';
 
@@ -21,7 +21,8 @@ import type { Character, Expression } from './expressions';
  *
  * - 연출은 한 번만 재생 (반복 연출은 `CharacterAvatar animated`의 CSS 숨쉬기만, §2.10)
  * - transform만 움직이므로 서버 렌더링 때도 캐릭터가 보임 (opacity:0으로 시작하지 않음)
- * - reduced-motion이면 `MotionConfig reducedMotion="user"`가 transform 애니메이션을 즉시 끝냄 → 움직임 0
+ * - 동작 줄이기(기기·사용자 설정, P2-15)면 `MotionConfig reducedMotion="always"`가 transform 애니메이션을 즉시 끝냄 → 움직임 0, 표정만
+ * - minimal 단계는 착지 빛 고리(곁가지 이펙트)를 그리지 않음
  */
 export type CharacterMotion =
   | 'entrance'
@@ -109,12 +110,12 @@ export const LottieCharacter = memo(function LottieCharacter({
   animated = false,
   onHover,
 }: LottieCharacterProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const { reduced, budget } = useMotionTier();
   const preset = PRESETS[animation];
-  const showBurst = preset.burstAt !== undefined && !shouldReduceMotion;
+  const showBurst = preset.burstAt !== undefined && budget.springs;
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion={reduced ? 'always' : 'never'}>
       <div
         className="relative inline-flex items-center justify-center"
         style={{ width: size, height: size }}

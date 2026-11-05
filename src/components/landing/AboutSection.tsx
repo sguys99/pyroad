@@ -82,7 +82,7 @@ export function AboutSection() {
           {features.map((feature) => (
             <m.div
               key={feature.title}
-              className="rounded-2xl border border-white/80 bg-white/60 p-5 text-center backdrop-blur-[10px]"
+              className="rounded-2xl border border-white/80 bg-white/60 p-5 text-center backdrop-blur-[10px] no-blur:bg-white/90"
               variants={fadeUp}
             >
               <span className="mx-auto mb-3 block text-3xl leading-none">

@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { MotionProvider } from '@/components/providers/MotionProvider';
+import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
+import { MOTION_BOOT_SCRIPT } from '@/lib/motion/boot';
 import './globals.css';
 
 const notoSansKR = Noto_Sans_KR({
@@ -53,13 +55,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // data-motion·data-reduced는 부트 스크립트가 첫 페인트 전에 붙이므로 서버 HTML과 다르다 → suppressHydrationWarning (P2-15)
   return (
     <html
       lang="ko"
       className={cn('font-sans', notoSansKR.variable, jetbrainsMono.variable)}
+      suppressHydrationWarning
     >
+      <head>
+        {/* 연출 단계 부트 (src/lib/motion/boot.ts). CSP nonce 정책은 이 내용의 sha256 해시로 허용 */}
+        <script dangerouslySetInnerHTML={{ __html: MOTION_BOOT_SCRIPT }} />
+      </head>
       <body>
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          <MotionTierProvider>{children}</MotionTierProvider>
+        </MotionProvider>
       </body>
     </html>
   );

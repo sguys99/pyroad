@@ -5,6 +5,11 @@
  * 속성에는 자유 문자열을 두지 않는다: enum·UUID·정수·불리언만 (아동 개인정보 §2.6). 이름·이메일·코드·출력은 넣지 않는다.
  */
 import type { SocialProvider } from '@/lib/auth/socialLogin';
+import type {
+  MotionTier,
+  MotionTierSetting,
+  ReducedMotionSetting,
+} from '@/lib/motion/tier';
 
 export interface AnalyticsEventProps {
   /** 랜딩 화면을 봄 (전환율 분모) */
@@ -25,6 +30,18 @@ export interface AnalyticsEventProps {
   };
   /** 힌트를 받음 (튜터가 힌트 내용을 보내기 시작할 때, 서버) */
   hint_used: { quest_id: string; level: 1 | 2 | 3 };
+  /**
+   * 연출 단계가 바뀜 (P2-15, 브라우저). cause: measured = 실측 자동 하향, user = 설정에서 바꿈.
+   * setting·reduced: 그때의 움직임·동작 줄이기 설정, elapsed_s: 페이지를 연 뒤 몇 초 만에 (자동 하향 정착 시간, P12-04 임계값 조정용)
+   */
+  motion_tier_change: {
+    from: MotionTier;
+    to: MotionTier;
+    cause: 'measured' | 'user';
+    setting: MotionTierSetting;
+    reduced: ReducedMotionSetting;
+    elapsed_s: number;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -33,6 +50,7 @@ export type AnalyticsEventName = keyof AnalyticsEventProps;
 export const CLIENT_EVENT_NAMES = [
   'landing_view',
   'landing_cta_click',
+  'motion_tier_change',
 ] as const;
 export type ClientEventName = (typeof CLIENT_EVENT_NAMES)[number];
 

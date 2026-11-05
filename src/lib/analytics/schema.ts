@@ -15,6 +15,7 @@ import {
  */
 const provider = z.enum(['google', 'kakao', 'naver']);
 const questId = z.string().uuid();
+const motionTier = z.enum(['full', 'lite', 'minimal']);
 
 export const EVENT_PROPS_SCHEMA = {
   landing_view: z.object({}).strict(),
@@ -43,6 +44,16 @@ export const EVENT_PROPS_SCHEMA = {
       level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
     })
     .strict(),
+  motion_tier_change: z
+    .object({
+      from: motionTier,
+      to: motionTier,
+      cause: z.enum(['measured', 'user']),
+      setting: z.enum(['auto', 'full', 'lite', 'minimal']),
+      reduced: z.enum(['system', 'on', 'off']),
+      elapsed_s: z.number().int().min(0).max(86_400),
+    })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -63,6 +74,13 @@ const clientEvent = z.discriminatedUnion('name', [
       path: z.string().max(200).optional(),
     })
     .strict(),
+  z
+    .object({
+      name: z.literal('motion_tier_change'),
+      props: EVENT_PROPS_SCHEMA.motion_tier_change,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
 ]);
 
 // 스키마가 CLIENT_EVENT_NAMES 를 모두 다루는지 컴파일 때 확인
@@ -70,7 +88,11 @@ type ClientEventSchemaName = z.infer<typeof clientEvent>['name'];
 const _clientNamesCovered: Record<
   (typeof CLIENT_EVENT_NAMES)[number],
   ClientEventSchemaName
-> = { landing_view: 'landing_view', landing_cta_click: 'landing_cta_click' };
+> = {
+  landing_view: 'landing_view',
+  landing_cta_click: 'landing_cta_click',
+  motion_tier_change: 'motion_tier_change',
+};
 void _clientNamesCovered;
 
 /** `POST /api/analytics` 본문: { sid: 탭 세션 난수, events: [...] } */

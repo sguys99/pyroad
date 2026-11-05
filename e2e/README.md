@@ -30,7 +30,7 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 |---|---|
 | `public/*.spec.ts` | 비로그인 (`public` 프로젝트): 랜딩 캐릭터·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로 리다이렉트 |
 | `auth.setup.ts` / `auth.teardown.ts` | 이번 실행 전용 테스트 사용자를 service_role로 만들고 로그인 쿠키를 `e2e/.auth/`에 저장 / 끝나면 사용자 삭제 |
-| `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터 |
+| `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터·움직임 설정(P2-15) |
 | `support/env.ts` | 로컬 스택 찾기, 앱 서버 env 만들기 |
 | `support/admin.ts` | service_role 도우미 (진행 초기화, 앞 퀘스트 완료) |
 | `support/test.ts` | 로그인 스펙의 `test`: 테스트마다 진행 초기화, 끝날 때 쓰기 요청 대기, CSP 위반 감시 |

@@ -84,10 +84,41 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     expect(clientBatchSchema.safeParse(body).success).toBe(false);
   });
 
+  it('연출 단계 변경(P2-15)을 받고, 정해진 값 밖이면 거부', () => {
+    const ok = {
+      from: 'full',
+      to: 'lite',
+      cause: 'measured',
+      setting: 'auto',
+      reduced: 'system',
+      elapsed_s: 4,
+    };
+    expect(
+      clientBatchSchema.safeParse(
+        batch([{ name: 'motion_tier_change', props: ok, path: '/world' }]),
+      ).success,
+    ).toBe(true);
+    for (const bad of [
+      { ...ok, to: 'ultra' },
+      { ...ok, cause: 'static' },
+      { ...ok, elapsed_s: 1.5 },
+      { ...ok, elapsed_s: 90_000 },
+      { ...ok, fps: 24 },
+      { ...ok, device: 'iPad' },
+    ]) {
+      expect(
+        clientBatchSchema.safeParse(
+          batch([{ name: 'motion_tier_change', props: bad }]),
+        ).success,
+      ).toBe(false);
+    }
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'landing_cta_click',
       'landing_view',
+      'motion_tier_change',
     ]);
   });
 });

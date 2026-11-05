@@ -1,6 +1,8 @@
 'use client';
 
-import { m, useReducedMotion } from 'framer-motion';
+import { m } from 'framer-motion';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { EASE } from '@/lib/motion/tokens';
 
 interface WindingPathProps {
   progressFraction: number;
@@ -17,7 +19,9 @@ const PATH_D = [
 ].join(' ');
 
 export function WindingPath({ progressFraction }: WindingPathProps) {
-  const shouldReduceMotion = useReducedMotion();
+  // 길 그리기: minimal·동작 줄이기는 즉시, lite는 70% 길이 (P2-15)
+  const { budget } = useMotionTier();
+  const instant = !budget.springs;
 
   return (
     <svg
@@ -47,13 +51,13 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
         pathLength={1}
         strokeDasharray="1"
         initial={{
-          strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1,
+          strokeDashoffset: instant ? 1 - progressFraction : 1,
         }}
         animate={{ strokeDashoffset: 1 - progressFraction }}
         transition={
-          shouldReduceMotion
+          instant
             ? { duration: 0 }
-            : { duration: 1.5, ease: 'easeOut' }
+            : { duration: 1.5 * budget.effectDuration, ease: EASE.ink }
         }
       />
 
@@ -68,13 +72,13 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
         strokeDasharray="1"
         opacity={0.15}
         initial={{
-          strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1,
+          strokeDashoffset: instant ? 1 - progressFraction : 1,
         }}
         animate={{ strokeDashoffset: 1 - progressFraction }}
         transition={
-          shouldReduceMotion
+          instant
             ? { duration: 0 }
-            : { duration: 1.5, ease: 'easeOut' }
+            : { duration: 1.5 * budget.effectDuration, ease: EASE.ink }
         }
       />
     </svg>

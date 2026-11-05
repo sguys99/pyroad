@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { Lock, X } from 'lucide-react';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 
@@ -14,7 +15,8 @@ export const STAGE_LOCKED_NOTICE_MS = 5_000;
  */
 export function StageLockedNotice() {
   const [open, setOpen] = useState(true);
-  const reduceMotion = useReducedMotion();
+  // 동작 줄이기: 기기 설정 + 사용자 설정 (P2-15)
+  const { reduced: reduceMotion } = useMotionTier();
 
   useEffect(() => {
     try {

@@ -1,6 +1,5 @@
 'use client';
 
-import { m, useReducedMotion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +14,6 @@ export function StepProgressBar({
   totalSteps,
   stepGoals,
 }: StepProgressBarProps) {
-  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="border-b border-border bg-card px-4 py-3">
       <div className="mb-1.5 text-center text-xs font-medium text-muted-foreground">
@@ -41,9 +39,11 @@ export function StepProgressBar({
                   )}
                 />
               )}
-              <m.div
+              {/* 현재 단계 통통은 CSS 대기 루프(.step-pulse, §2.10: Framer repeat: Infinity 금지) */}
+              <div
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
+                  isCurrent && 'step-pulse',
                   isCompleted && 'bg-primary text-primary-foreground',
                   isCurrent &&
                     'border-2 border-primary bg-primary/10 text-primary',
@@ -51,17 +51,9 @@ export function StepProgressBar({
                     !isCurrent &&
                     'border border-border bg-muted text-muted-foreground',
                 )}
-                animate={
-                  isCurrent && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}
-                }
-                transition={
-                  isCurrent && !shouldReduceMotion
-                    ? { repeat: Infinity, duration: 2, ease: 'easeInOut' }
-                    : {}
-                }
               >
                 {isCompleted ? <Check className="h-3.5 w-3.5" /> : step}
-              </m.div>
+              </div>
             </div>
           );
         })}
