@@ -1,6 +1,6 @@
 {
   "title": "pyRoad 모험 그림책",
-  "description": "pyRoad 디자인 시안 AB (P2-04) 인터랙티브 프로토타입: 랜딩 · 월드맵 · 퀘스트 · 모션",
-  "googleFonts": ["Gaegu:wght@700"],
+  "description": "pyRoad 디자인 시안 A×B (P2-04) 인터랙티브 프로토타입: 팝업북 섬 지도 · 종이 게임 버튼 · 손글씨 제목 (랜딩 · 월드맵 · 스테이지 · 퀘스트)",
+  "googleFonts": ["Gaegu:wght@700", "Gowun+Dodum"],
   "inlineFonts": ["sans", "mono"]
 }
