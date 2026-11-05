@@ -3,8 +3,8 @@ import rules from '../../../../supabase/tests/fixtures/reward-rules.json';
 import { calculateXP, calculateLevel } from '../xp';
 import { decideNewBadges, hasThreeDayStreak } from '../checkBadges';
 
-// 보상 규칙 대조 (P1-03): 같은 표를 SQL 쪽(00006 의 quest_xp·level_for_xp·has_three_day_streak·
-// decide_new_badges)은 npm run test:rls 의 RW-1 이 확인합니다. 둘 다 통과하면 TS 와 SQL 이 같은 규칙입니다.
+// 보상 규칙 대조 (P1-03, Q25): 같은 표를 SQL 쪽(00006 의 quest_xp·level_for_xp·has_three_day_streak,
+// 00019 의 decide_new_badges)은 npm run test:rls 의 RW-1 이 확인합니다. 둘 다 통과하면 TS 와 SQL 이 같은 규칙입니다.
 describe('reward-rules.json (TS ↔ SQL 대조표)', () => {
   it.each(rules.xp)(
     'XP: base $base, 힌트 $hints, 황금키 $golden → $xp',

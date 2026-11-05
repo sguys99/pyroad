@@ -815,8 +815,8 @@ export function useQuestSession({
     const step = stepRef.current.step;
     const confirmed = window.confirm(
       kind === 'project'
-        ? '황금키를 사용하면 이 단계의 정답이 공개되고 XP를 받을 수 없어요. 사용할까요?'
-        : '황금키를 사용하면 정답이 공개되고 XP를 받을 수 없어요. 사용할까요?',
+        ? '황금키를 사용하면 이 단계의 정답이 공개되고 XP와 뱃지를 받을 수 없어요. 사용할까요?'
+        : '황금키를 사용하면 정답이 공개되고 XP와 뱃지를 받을 수 없어요. 사용할까요?',
     );
     if (!confirmed) return;
 

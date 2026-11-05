@@ -21,7 +21,7 @@ export interface QuestCompleteResponse {
   total_xp: number;
   level_before: number;
   level_after: number;
-  /** 이번에 새로 받은 뱃지 (축하 순서) */
+  /** 이번에 새로 받은 뱃지 (축하 순서). 황금키를 쓴 퀘스트는 늘 빈 배열 (Q25, 00019) */
   new_badges: BadgeType[];
   /** 이번 완료로 스테이지를 클리어했으면 그 스테이지 */
   stage_cleared: StageClearInfo | null;

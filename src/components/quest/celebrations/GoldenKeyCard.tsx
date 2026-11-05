@@ -44,7 +44,7 @@ export function GoldenKeyCard({
           : '정답 코드를 한 줄씩 읽어 보면 다음에는 혼자서도 열 수 있어요!'}
       </p>
       <p className="text-xs text-muted-foreground/80">
-        황금키로 연 퀘스트는 XP 없이 완료돼요
+        황금키로 연 퀘스트는 XP와 뱃지 없이 완료돼요
       </p>
 
       <CelebrationCta onClick={onNext}>알겠어요</CelebrationCta>

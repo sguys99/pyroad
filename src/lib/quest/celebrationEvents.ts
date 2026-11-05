@@ -44,6 +44,7 @@ export interface CelebrationContext {
  * - 이미 완료한 퀘스트(already_completed)는 새로 받은 것이 없으므로 빈 목록.
  * - 황금키를 쓴 퀘스트(DB의 used_golden_key, 프로젝트는 한 단계라도)는 XP가 0이라 "황금키로 열었어요" 확인만.
  *   스테이지를 클리어했으면 스테이지 클리어는 따로 축하한다(나머지 퀘스트는 스스로 풀었으므로).
+ *   뱃지는 서버가 주지 않으므로(Q25, 00019) 뱃지 카드도 없다.
  * - 프로젝트가 스테이지 마지막이면 프로젝트 완성 하나에 스테이지 클리어를 담는다 (같은 순간을 두 번 축하하지 않게).
  */
 export function buildCelebrationEvents(

@@ -81,7 +81,8 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
     ]);
   });
 
-  it('황금키로 연 퀘스트: 큰 축하 대신 황금키 확인, 스테이지 클리어·뱃지는 그대로 (P1-10)', () => {
+  it('황금키로 연 퀘스트: 큰 축하 대신 황금키 확인, 스테이지 클리어는 그대로 (P1-10)', () => {
+    // 황금키 완료는 서버가 뱃지를 주지 않으므로(Q25, 00019) new_badges 는 늘 비어 있음
     expect(
       buildCelebrationEvents(
         {
@@ -89,14 +90,13 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
           xp_gained: 0,
           used_golden_key: true,
           stage_cleared: stage,
-          new_badges: ['stage_clear'],
+          new_badges: [],
         },
         { kind: 'code', questTitle: '변수' },
       ),
     ).toEqual([
       { type: 'golden_key', kind: 'code', questTitle: '변수' },
       { type: 'stage_clear', stage },
-      { type: 'badge', badge: 'stage_clear' },
     ]);
     // 프로젝트에서 한 단계라도 황금키를 썼으면(XP 0) 프로젝트 완성 대신 황금키 확인
     expect(

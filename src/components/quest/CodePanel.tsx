@@ -125,6 +125,8 @@ export function CodePanel({
   const isReady = pyodideStatus === 'ready';
   const isLoading = pyodideStatus === 'loading';
   const isError = pyodideStatus === 'error';
+  // Worker 를 띄우기 전(idle)과 불러오는 중(loading) 모두 아직 누를 수 없으므로 "준비 중..."
+  const isPreparing = !isReady && !isError;
   const isBusy = isRunning || isSubmitting;
   const canRun = isReady && !isBusy && !isCodeEmpty;
 
@@ -164,7 +166,7 @@ export function CodePanel({
                   <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   정답 확인 중...
                 </>
-              ) : isLoading ? (
+              ) : isPreparing ? (
                 <>
                   <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   준비 중...

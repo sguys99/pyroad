@@ -43,6 +43,26 @@ describe('decideNewBadges', () => {
     ).toEqual([]);
   });
 
+  it('황금키로 완료하면 어떤 뱃지도 주지 않는다 (Q25)', () => {
+    expect(
+      decideNewBadges({
+        ...base,
+        completedCount: 1,
+        hintsUsed: 0,
+        stageCleared: true,
+        isFinalStage: true,
+        streak3: true,
+        usedGoldenKey: true,
+      }),
+    ).toEqual([]);
+  });
+
+  it('stage_clear: 앞서 황금키로 연 퀘스트가 있어도 마지막을 직접 풀어 클리어하면 반환 (Q25)', () => {
+    expect(
+      decideNewBadges({ ...base, completedCount: 5, stageCleared: true }),
+    ).toEqual(['stage_clear']);
+  });
+
   it('stage_clear: 스테이지 전체 완료 시 반환', () => {
     expect(decideNewBadges({ ...base, stageCleared: true })).toEqual([
       'stage_clear',

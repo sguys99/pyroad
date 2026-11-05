@@ -6,6 +6,7 @@ import { completeQuests } from './support/admin';
 import { stage } from './support/content';
 import {
   advanceCelebration,
+  completedNotice,
   outputPanel,
   questHeader,
   runButton,
@@ -146,7 +147,7 @@ test.describe('퀘스트 전체 플로우', () => {
   }) => {
     await completeQuests(e2eUser.id, [quest1]);
     await page.goto(`/quest/${quest1.id}`);
-    await expect(page.getByText('이미 완료한 퀘스트예요!')).toBeVisible();
+    await expect(completedNotice(page)).toBeVisible();
     await waitForRunner(page);
     await expect(runButton(page)).toBeEnabled();
   });

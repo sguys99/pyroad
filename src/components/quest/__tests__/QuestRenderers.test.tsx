@@ -246,4 +246,13 @@ describe('퀘스트 렌더러 스모크', () => {
     render(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.queryByTestId('runner-waking')).toBeNull();
   });
+
+  it('Worker 를 띄우기 전(idle)에도 비활성 버튼은 "준비 중..."으로 보인다', () => {
+    mocks.runtime.status = 'idle';
+    render(<CodeQuest {...props(CODE_QUEST)} />);
+    const button = screen.getByTestId('run-button');
+    expect(button).toHaveTextContent('준비 중...');
+    expect(button).not.toHaveTextContent('코드 돌려보기!');
+    expect(button).toBeDisabled();
+  });
 });

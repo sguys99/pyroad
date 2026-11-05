@@ -443,7 +443,7 @@ describe('QuestCelebrations: 황금키 완료', () => {
     expect(stepKind()).toBe('golden_key');
     expect(screen.getByText('황금키로 문을 열었어요')).toBeInTheDocument();
     expect(
-      screen.getByText('황금키로 연 퀘스트는 XP 없이 완료돼요'),
+      screen.getByText('황금키로 연 퀘스트는 XP와 뱃지 없이 완료돼요'),
     ).toBeInTheDocument();
     expect(screen.getByTestId('celebration-cta')).toHaveTextContent('알겠어요');
     await advance(4400);

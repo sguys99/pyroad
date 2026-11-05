@@ -7,13 +7,22 @@ import { expect, type Locator, type Page } from '@playwright/test';
 /** Pyodide 를 처음 받을 때(자체 호스팅 /pyodide/, 약 10MB)를 감안한 대기 */
 export const RUNNER_READY_TIMEOUT = 60_000;
 
+/**
+ * 실행 버튼. 화면에 보이는 것 하나만: 퀘스트 페이지는 loading.tsx 뒤에 스트리밍되어, 바꿔 끼우는 순간에는
+ * 숨겨진 사본이 잠깐 같이 있어 getByTestId 가 strict mode 위반으로 바로 실패할 수 있다
+ */
 export function runButton(page: Page): Locator {
-  return page.getByTestId('run-button');
+  return page.getByTestId('run-button').filter({ visible: true });
 }
 
 /** 결과 패널. md 이상 화면에서는 코드 패널 안의 것 하나만 보인다 (모바일 결과 탭용 복사본은 숨김) */
 export function outputPanel(page: Page): Locator {
   return page.locator('[data-testid="output-panel"]:visible');
+}
+
+/** 이미 완료한 퀘스트 안내 (복습). runButton 과 같은 이유로 보이는 것만 */
+export function completedNotice(page: Page): Locator {
+  return page.getByText('이미 완료한 퀘스트예요!').filter({ visible: true });
 }
 
 /** 퀘스트 화면 맨 위 (스테이지·퀘스트 제목) */
@@ -23,7 +32,8 @@ export function questHeader(page: Page): Locator {
 
 /**
  * 실행기(Pyodide Worker)가 준비되어 "코드 돌려보기!"를 누를 수 있을 때까지.
- * Worker 를 띄우기 전(idle)에도 버튼 글자는 "코드 돌려보기!"이고 비활성이므로 활성화까지 본다
+ * 준비 전(idle·loading)에는 버튼 글자가 "준비 중..."이라 글자가 바뀌면 준비된 것이지만,
+ * 준비돼도 에디터가 비었으면 같은 글자로 비활성이므로 활성화까지 본다
  */
 export async function waitForRunner(page: Page): Promise<void> {
   const button = runButton(page);

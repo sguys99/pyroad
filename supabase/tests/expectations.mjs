@@ -385,7 +385,19 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.complete_quest()',
     activateIn: 'P1-03',
-    note: 'B05·B11',
+    note: 'B05·B11, Q25(00019): 황금키 첫 완료는 뱃지 없음 → 처음 직접 푼 완료에서 first_code',
+  },
+  'RW-12': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'Q25',
+    note: '00019: 황금키 완료로 스테이지 클리어는 되지만 stage_clear 없음, 황금키 퀘스트가 섞인 스테이지를 직접 풀어 클리어하면 받음',
+  },
+  'RW-13': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'Q25',
+    note: '00019: streak_3 는 직접 푼 완료일만 셈',
   },
   'RW-5': {
     expect: 'allow',

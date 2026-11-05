@@ -2109,25 +2109,26 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-4',
     role: 'service_role',
-    op: 'B05·B11: 힌트 수·황금키는 DB 값 (요청의 hints_used:0·used_golden_key:false 무시)',
+    op: 'B05·B11·Q25: 힌트 수·황금키는 DB 값 (요청의 hints_used:0·used_golden_key:false 무시), 황금키 첫 완료는 뱃지 없음',
     ...OK,
     run: async () => {
       const x = await createUser('rw4', '서버값');
       one(`insert into public.user_progress (user_id, quest_id, status, hints_used) values ('${x.id}', '${Q1}', 'in_progress', 2)`);
       const lie = { code: 'x', passed: true, hints_used: 0, used_golden_key: false };
-      const a = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q1, p_submission: lie });
+      // 첫 완료를 황금키로 (Q25: first_code·hint_master 모두 없음) → 그다음 처음 직접 푼 퀘스트에서 first_code
       const g = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: Q2 });
       const b = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q2, p_submission: lie });
-      for (const r of [a, g, b])
+      const a = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: Q1, p_submission: lie });
+      for (const r of [g, b, a])
         if (r.status !== 200)
           return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
       return (
-        compare('힌트 2회', { xp_gained: 50, new_badges: ['first_code'] }, a.json) ||
         compare('황금키', { xp_gained: 0, new_badges: [], used_golden_key: true }, b.json) ||
+        compare('힌트 2회', { xp_gained: 50, new_badges: ['first_code'] }, a.json) ||
         compare('users', { total_xp: 50, golden_keys: 2, badges: ['first_code'] }, userRow(x.id)) ||
         compare('progress', { earned_xp: 0 }, progressRow(x.id, Q2)) || {
           actual: 'ok',
-          detail: '힌트 2회 → 50 XP(1.5배 아님), 황금키 → 0 XP·hint_master 없음',
+          detail: '황금키 첫 완료 → 0 XP·뱃지 없음, 힌트 2회 → 50 XP(1.5배 아님)·처음 직접 푼 완료라 first_code',
         }
       );
     },
@@ -2373,6 +2374,88 @@ async function groupReward() {
         compare('Q1 진행 행', { status: 'completed', hints_used: 3, earned_xp: 50 }, row) || {
           actual: 'ok',
           detail: `${steps.length}단계 일치`,
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-12',
+    role: 'service_role',
+    op: 'Q25: 황금키로 스테이지 마지막 퀘스트 → 클리어(잠금 해제·황금키 3)는 되고 stage_clear 없음, 다음 스테이지를 직접 풀어 클리어하면 stage_clear',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw12', '황금키클리어');
+      const s1 = stageQuests(STAGE1);
+      const s2 = stageQuests(STAGE2);
+      const done = async (q, golden = false) => {
+        if (golden) {
+          const g = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: q });
+          if (g.status !== 200) throw new Error(`golden ${q}: ${g.status} ${errMsg(g)}`);
+        }
+        const r = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+        if (r.status !== 200) throw new Error(`complete ${q}: ${r.status} ${errMsg(r)}`);
+        return r.json;
+      };
+      let last1, last2, golden2;
+      try {
+        for (const q of s1.slice(0, -1)) await done(q);
+        last1 = await done(s1[s1.length - 1], true);
+        // 스테이지 2: 첫 퀘스트는 황금키, 나머지는 직접 → 마지막을 직접 풀어 클리어
+        golden2 = await done(s2[0], true);
+        for (const q of s2.slice(1)) last2 = await done(q);
+      } catch (e) {
+        return { actual: 'error', detail: e.message };
+      }
+      return (
+        compare(
+          '스테이지 1 마지막 (황금키)',
+          { xp_gained: 0, new_badges: [], golden_keys: 3, used_golden_key: true, stage_order: 1 },
+          { ...last1, stage_order: last1.stage_cleared?.order },
+        ) ||
+        compare('스테이지 2 첫 퀘스트 (황금키)', { xp_gained: 0, new_badges: [], stage_cleared: null }, golden2) ||
+        compare(
+          '스테이지 2 마지막 (직접)',
+          { new_badges: ['stage_clear'], golden_keys: 3, stage_order: 2 },
+          { ...last2, stage_order: last2.stage_cleared?.order },
+        ) ||
+        compare('users', { badges: ['first_code', 'hint_master', 'stage_clear'] }, userRow(x.id)) || {
+          actual: 'ok',
+          detail: `스테이지 1(${s1.length}개, 마지막 황금키) 클리어 → 뱃지 없음 · 스테이지 2(${s2.length}개, 첫 퀘스트 황금키) 직접 클리어 → stage_clear`,
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-13',
+    role: 'service_role',
+    op: 'Q25: 3일 연속은 직접 푼 완료일만 (그제 직접 · 어제 황금키 · 오늘 직접 → streak_3 없음)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw13', '연속');
+      const s1 = stageQuests(STAGE1);
+      const at = (q, daysAgo) =>
+        one(`update public.user_progress set completed_at = now() - interval '${daysAgo} days'
+              where user_id = '${x.id}' and quest_id = '${q}'`);
+      const a = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s1[0], p_submission: submission() });
+      at(s1[0], 2);
+      const g = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: s1[1] });
+      const b = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s1[1], p_submission: submission() });
+      at(s1[1], 1);
+      const c = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s1[2], p_submission: submission() });
+      for (const r of [a, g, b, c])
+        if (r.status !== 200)
+          return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
+      return (
+        compare('그제 (직접)', { new_badges: ['first_code', 'hint_master'] }, a.json) ||
+        compare('어제 (황금키)', { new_badges: [] }, b.json) ||
+        compare('오늘 (직접)', { new_badges: [] }, c.json) ||
+        compare('users', { badges: ['first_code', 'hint_master'] }, userRow(x.id)) || {
+          actual: 'ok',
+          detail: '완료일 3일 연속이지만 어제가 황금키 완료라 streak_3 없음',
         }
       );
     },
