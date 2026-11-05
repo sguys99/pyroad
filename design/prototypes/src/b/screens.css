@@ -1081,6 +1081,14 @@
 .b-here {
   position: absolute;
   z-index: 2;
+  width: 0;
+  height: 0;
+}
+.b-here-in {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
   display: grid;
   justify-items: center;
   transform: translate(-50%, -100%);

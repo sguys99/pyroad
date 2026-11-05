@@ -14,18 +14,22 @@ const QUEST_STARS: (number | null)[][] = STAGES.map((s, i) => {
   return Array.from({ length: n }, () => null);
 });
 
-export function stageStatus(i: number): StageStatus {
-  return i < 2 ? 'done' : i === 2 ? 'current' : 'locked';
+/** 처음 진행 위치 (0부터): 3스테이지 조건의 갈림길. 지도 "해제 보기"가 4스테이지로 옮긴다 */
+export const CURRENT_STAGE = 2;
+
+export function stageStatus(i: number, cur = state.cur): StageStatus {
+  return i < cur ? 'done' : i === cur ? 'current' : 'locked';
 }
-export function questStars(stageIdx: number): (number | null)[] {
-  return QUEST_STARS[stageIdx] ?? [];
+export function questStars(stageIdx: number, cur = state.cur): (number | null)[] {
+  const base = QUEST_STARS[stageIdx] ?? [];
+  if (stageIdx < cur) return base.map((x) => (x === null || x === 0 ? 2 : x));
+  if (stageIdx === cur && stageIdx > CURRENT_STAGE) return base.map((_, k) => (k === 0 ? 0 : null));
+  return base;
 }
-export function stageStars(i: number): { got: number; max: number } {
-  const q = questStars(i);
+export function stageStars(i: number, cur = state.cur): { got: number; max: number } {
+  const q = questStars(i, cur);
   return { got: q.reduce<number>((a, b) => a + (b ?? 0), 0), max: q.length * 3 };
 }
-
-export const CURRENT_STAGE = 2;
 
 /** 가짜 실행으로 채점할 수 있는 퀘스트 (프로토타입). 나머지는 대표 퀘스트 2-1을 보여 준다 */
 export const PLAYABLE: Record<string, { expected: string; wrong: string; answer: string }> = {
@@ -45,6 +49,8 @@ export const PLAYABLE: Record<string, { expected: string; wrong: string; answer:
 };
 
 interface State {
+  /** 지금 스테이지 (0부터) */
+  cur: number;
   coins: number;
   stars: number;
   xp: number;
@@ -57,21 +63,33 @@ interface State {
   /** 고른 퀘스트 "스테이지-퀘스트" */
   quest: string;
   quiz: boolean;
+  /** 축하 오버레이가 떠 있음 (뒤쪽 리그를 멈추는 데 씀) */
+  celebrating: boolean;
 }
 
-const totalStars = STAGES.reduce((a, _s, i) => a + stageStars(i).got, 0);
+const totalStars = STAGES.reduce((a, _s, i) => a + stageStars(i, CURRENT_STAGE).got, 0);
+
+/** 레벨 n → n+1에 필요한 경험치 (시안용 가정, F1·X6은 Phase 8에서 확정) */
+export function xpNeed(level: number) {
+  return 300 + level * 50;
+}
+/** 레벨 칭호 (시안용) */
+export const TITLES: Record<number, string> = { 4: '새싹 모험가', 5: '변수 마법사', 6: '조건 탐험가' };
 
 let state: State = {
+  cur: CURRENT_STAGE,
   coins: SAMPLE_PLAYER.coins,
   stars: totalStars,
-  xp: SAMPLE_PLAYER.xp,
-  xpNext: SAMPLE_PLAYER.xpNext,
+  // 첫 퀘스트 성공(+50)에서 레벨업이 이어지도록 거의 찬 상태로 시작 (P2-05)
+  xp: 470,
+  xpNext: xpNeed(SAMPLE_PLAYER.level),
   level: SAMPLE_PLAYER.level,
   keys: 2,
   sound: true,
   stage: 1,
   quest: '2-1',
   quiz: false,
+  celebrating: false,
 };
 const listeners = new Set<() => void>();
 

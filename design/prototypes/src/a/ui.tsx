@@ -1,11 +1,10 @@
-// 시안 A 공통 컴포넌트 (→ P2-11 근거): 게임 버튼, HUD, 진행바, 별, 대사창, 바텀시트, 토스트, 축하 카드
+// 시안 A 공통 컴포넌트 (→ P2-11 근거): 게임 버튼, HUD, 진행바, 별, 대사창, 바텀시트, 토스트 (축하 카드는 celebration.tsx)
 import { forwardRef, useEffect, useId, useRef, useState, type ReactNode, type Ref } from 'react';
 import { Icon, RewardIcon, type IconName } from '../shared/icons';
 import { getMotion, play, springTiming, useMotion } from '../shared/motion';
 import { goScreen } from '../shared/app';
 import { PybaemRig } from '../shared/rig/PybaemRig';
 import { BugBug, Byeolttongi } from '../shared/characters/Friends';
-import { CELEBRATE_EVENT, flyCoins, type CelebrateDetail } from './celebrate';
 import { setStore, useStore } from './store';
 
 // ───────────── 게임 버튼 (꾹 눌림 + 젤리 복귀)
@@ -95,7 +94,7 @@ export function Progress({ value, max, label, tone = 'green', thin }: { value: n
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <span className={`a-prog a-prog-${tone}${thin ? ' a-prog-thin' : ''}`} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={value}>
-      <span className="a-prog-fill" style={{ width: `${pct}%` }} />
+      <span className="a-prog-fill" data-prog-fill="" style={{ transform: `scaleX(${pct / 100})` }} />
     </span>
   );
 }
@@ -124,17 +123,28 @@ export function Hud({ back, title, sub }: { back?: { label: string; to: string }
             <span className="a-hud-ava" aria-hidden>
               <PybaemRig static state="happy" size={44} framing="avatar" />
             </span>
-            <span className="a-hud-lv" aria-label={`레벨 ${s.level}`}>
+            <span className="a-hud-lv" data-hud-lv="" aria-label={`레벨 ${s.level}`}>
               <span aria-hidden>Lv</span>
-              {s.level}
+              <b data-hud-lv-num="">{s.level}</b>
             </span>
-            <span className="a-hud-xp">
+            <span className="a-hud-xp" data-hud-xp="">
               <span className="a-hud-nick">코딩탐험가</span>
               <Progress value={s.xp} max={s.xpNext} label={`경험치 ${s.xp} / ${s.xpNext}`} tone="lemon" thin />
             </span>
           </div>
         )}
         <div className="a-hud-res">
+          {title && (
+            <span className="a-chip a-chip-lv" data-hud-chip="">
+              <span className="a-hud-lv" data-hud-lv="" aria-label={`레벨 ${s.level}`}>
+                <span aria-hidden>Lv</span>
+                <b data-hud-lv-num="">{s.level}</b>
+              </span>
+              <span className="a-hud-xp" data-hud-xp="">
+                <Progress value={s.xp} max={s.xpNext} label={`경험치 ${s.xp} / ${s.xpNext}`} tone="lemon" thin />
+              </span>
+            </span>
+          )}
           <span className="a-chip a-chip-star" data-hud-chip="">
             <RewardIcon kind="star" size={26} style="A" />
             <span className="a-num" aria-label={`별 ${s.stars}개`}>
@@ -153,6 +163,7 @@ export function Hud({ back, title, sub }: { back?: { label: string; to: string }
             variant="white"
             size="sm"
             round
+            className={title ? 'a-hud-sound-q' : undefined}
             icon={s.sound ? 'sound' : 'soundOff'}
             label={s.sound ? '소리 끄기' : '소리 켜기'}
             pressed={!s.sound}
@@ -223,6 +234,7 @@ export function Dialogue({
   extra,
   className,
   compact,
+  frozen,
 }: {
   speaker: Speaker;
   text: string;
@@ -230,13 +242,15 @@ export function Dialogue({
   extra?: ReactNode;
   className?: string;
   compact?: boolean;
+  /** 축하 오버레이 뒤에 가려졌을 때 리그를 멈춤 (CPU 절약, P2-05 성능) */
+  frozen?: boolean;
 }) {
   const tw = useTypewriter(text);
   const nameId = useId();
   return (
     <section className={`a-dlg a-dlg-${speaker}${compact ? ' a-dlg-compact' : ''}${className ? ' ' + className : ''}`} aria-labelledby={nameId}>
       <div className="a-dlg-portrait">
-        {speaker === 'pybaem' && <PybaemRig state={rigState} talking={!tw.done && rigState !== 'cheer' && rigState !== 'happy'} size={compact ? 124 : 172} framing="avatar" lookAt className="a-dlg-rig" />}
+        {speaker === 'pybaem' && <PybaemRig key={frozen ? 'f' : 'l'} static={frozen} state={rigState} talking={!tw.done && rigState !== 'cheer' && rigState !== 'happy'} size={compact ? 124 : 172} framing="avatar" lookAt className="a-dlg-rig" />}
         {speaker === 'bugbug' && <BugBug style="A" mood="found" size={compact ? 84 : 108} motion="appear-bob" />}
         {speaker === 'star' && <Byeolttongi style="A" mood="sparkling" size={compact ? 84 : 108} motion="appear-bob" />}
       </div>
@@ -342,81 +356,3 @@ export function ToastHost() {
   );
 }
 
-// ───────────── 축하 카드 (celebrate()가 이벤트로 연다)
-
-export function CelebrationLayer({ onNext }: { onNext?: () => void }) {
-  const [d, setD] = useState<CelebrateDetail | null>(null);
-  const card = useRef<HTMLDivElement | null>(null);
-  const coinRef = useRef<HTMLSpanElement | null>(null);
-  const { reduced } = useMotion();
-  useEffect(() => {
-    const on = (e: Event) => setD((e as CustomEvent<CelebrateDetail>).detail);
-    window.addEventListener(CELEBRATE_EVENT, on);
-    return () => window.removeEventListener(CELEBRATE_EVENT, on);
-  }, []);
-  useEffect(() => {
-    if (!d) return;
-    const el = card.current;
-    play(el, [{ transform: 'translateY(30px) scale(0.7)' }, { transform: 'none' }], springTiming('jellyA'), {
-      lite: [{ transform: 'translateY(20px) scale(0.9)' }, { transform: 'none' }],
-    });
-    el?.querySelector<HTMLElement>('.a-btn-primary')?.focus({ preventScroll: true });
-    const stars = el?.querySelectorAll('.a-cel-star.is-on') ?? [];
-    stars.forEach((s, i) => {
-      const a = play(s, [{ transform: 'scale(0) rotate(-40deg)' }, { transform: 'none' }], { ...springTiming('prop'), delay: 260 + i * 180, fill: 'backwards' });
-      void a;
-    });
-    const t = setTimeout(() => {
-      flyCoins(coinRef.current, d.coins);
-      setStore((s) => ({ xp: Math.min(s.xpNext, s.xp + d.xp), stars: s.stars + d.stars }));
-    }, reduced ? 0 : 900);
-    return () => clearTimeout(t);
-  }, [d]);
-  if (!d) return null;
-  const close = () => setD(null);
-  return (
-    <div className="a-cel-wrap" role="dialog" aria-modal="true" aria-labelledby="a-cel-title">
-      <div className="a-scrim a-scrim-strong" onClick={close} aria-hidden />
-      <div ref={card} className="a-cel">
-        <div className="a-cel-burst m-loop" aria-hidden />
-        <div className="a-cel-rig">
-          <PybaemRig state="cheer" size={150} lookAt={false} />
-        </div>
-        <h2 id="a-cel-title" className="a-cel-title">
-          {d.title ?? (d.kind === 'quiz-clear' ? '퀴즈 정답!' : '퀘스트 클리어!')}
-        </h2>
-        <div className="a-cel-stars" role="img" aria-label={`별 3개 중 ${d.stars}개`}>
-          {[0, 1, 2].map((i) => (
-            <span key={i} className={`a-cel-star${i < d.stars ? ' is-on' : ''}${i === 1 ? ' is-mid' : ''}`}>
-              <RewardIcon kind={i < d.stars ? 'star' : 'starEmpty'} size={i === 1 ? 64 : 52} style="A" />
-            </span>
-          ))}
-        </div>
-        <div className="a-cel-rewards">
-          <span className="a-reward">
-            <RewardIcon kind="gem" size={26} style="A" />
-            <b>+{d.xp}</b> 경험치
-          </span>
-          <span className="a-reward" ref={coinRef}>
-            <RewardIcon kind="coin" size={26} style="A" />
-            <b>+{d.coins}</b> 코인
-          </span>
-        </div>
-        <div className="a-cel-actions">
-          <ClayButton variant="white" size="md" icon="map" onClick={() => {
-            close();
-            goScreen('world');
-          }}>
-            지도로
-          </ClayButton>
-          <ClayButton variant="primary" size="md" iconRight="arrowRight" onClick={() => {
-            close();
-            onNext?.();
-          }}>
-            다음 퀘스트
-          </ClayButton>
-        </div>
-      </div>
-    </div>
-  );
-}

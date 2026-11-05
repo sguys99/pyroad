@@ -6,11 +6,11 @@ import { goScreen } from '../shared/app';
 import { BugBug } from '../shared/characters/Friends';
 import { Icon, RewardIcon } from '../shared/icons';
 import { getMotion, play, springTiming } from '../shared/motion';
-import { PybaemRig } from '../shared/rig/PybaemRig';
+import { PybaemRig, PybaemStatic } from '../shared/rig/PybaemRig';
 import { STAGES, quest as getQuest } from '../shared/content';
 import type { RigState } from '../shared/rig/params';
 import { PaperIsland } from './art';
-import { celebrate } from './celebrate';
+import { celebrate, useCelebrating } from './celebrate';
 import { CodeEditor, highlight, type EditorHandle } from './Editor';
 import { BUGGY_CODE, DEFAULT_HINTS, EXPECTED, HINTS, INTRO, KEY_CODE, QUIZ, STAGE_BUILDING, questProgress, shuffle } from './data';
 import { fakeRun, type RunError } from './fakeRun';
@@ -99,6 +99,7 @@ function CodeQuest({ id, wide }: { id: string; wide: boolean }) {
   const editor = useRef<EditorHandle | null>(null);
   const outRef = useRef<HTMLDivElement | null>(null);
   const hintList = HINTS[id] ?? DEFAULT_HINTS;
+  const celebrating = useCelebrating();
 
   const talk = useMemo(() => {
     if (outcome?.kind === 'ok') return { who: '파이뱀', text: '해냈어! 숫자 상자에는 10, 글자 상자에는 "안녕"이 쏙 들어갔어.', state: 'cheer' as RigState };
@@ -246,7 +247,13 @@ function CodeQuest({ id, wide }: { id: string; wide: boolean }) {
     <Dialogue
       who={talk.who}
       text={talk.text}
-      portrait={<PybaemRig style="AB" state={talk.state} talking size={wide ? 132 : 104} framing="avatar" />}
+      portrait={
+        celebrating ? (
+          <PybaemStatic style="AB" state={talk.state} size={wide ? 132 : 104} idPrefix="qdlg" />
+        ) : (
+          <PybaemRig style="AB" state={talk.state} talking size={wide ? 132 : 104} framing="avatar" />
+        )
+      }
     />
   );
 

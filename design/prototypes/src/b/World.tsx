@@ -1,6 +1,6 @@
 // 월드맵 (#world) — 펼쳐지는 보물지도 두루마리. 잉크 길이 그려지고, 통과한 곳에 도장이 쾅, 지금 위치에 파이뱀.
 // 스테이지 차례 (#stage) — 지도 위에 바텀시트(넓은 화면은 책 한 쪽 모양 대화상자)
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject } from 'react';
 import { goScreen } from '../shared/app';
 import { Icon } from '../shared/icons';
 import { PybaemRig } from '../shared/rig/PybaemRig';
@@ -11,6 +11,11 @@ import { Bird, Compass, CoverArt, Landmark, Mountains, TinyTree, Waves, INK, C }
 import { Hud, InkButton, InkProgress, Sheet, Stars } from './ui';
 import { setB, toast, useB } from './state';
 import { drawPath, isLite, isMinimal, isStill, popIn, stampSlam } from './fx';
+import { UnlockLayer, samplePath, segment, type UnlockLayerHandle } from './Signature';
+import { buildUnlock } from './beats';
+import { Scene } from './timeline';
+import { getMotion } from '../shared/motion';
+import type { RigState } from '../shared/rig/params';
 
 type Pt = [number, number];
 interface Layout {
@@ -76,6 +81,7 @@ export function World({ sheet }: { sheet: boolean }) {
     return () => ro.disconnect();
   }, []);
   const stage = useB((s) => s.stage);
+  const mapApi = useRef<{ unlock: () => void } | null>(null);
   const done = PROGRESS.filter((p) => p.status === 'clear').length;
   const stars = PROGRESS.reduce((a, p) => a + p.stars, 0);
   const max = PROGRESS.reduce((a, p) => a + p.max, 0);
@@ -96,12 +102,15 @@ export function World({ sheet }: { sheet: boolean }) {
               <Stars n={1} max={1} size={20} label={false} />
               <b className="b-num">{stars}</b>/{max}
             </span>
+            <InkButton variant="paper" size="sm" icon="unlock" onClick={() => mapApi.current?.unlock()}>
+              해제 보기
+            </InkButton>
             <InkButton variant="primary" size="sm" iconRight="arrowRight" onClick={() => openStage(CURRENT_STAGE)}>
               이어서 하기
             </InkButton>
           </div>
         </div>
-        <ScrollMap key={wide ? 'w' : 't'} layout={wide ? WIDE : TALL} wide={wide} />
+        <ScrollMap key={wide ? 'w' : 't'} layout={wide ? WIDE : TALL} wide={wide} api={mapApi} />
         <NextBooks />
       </main>
       <StageSheet open={sheet} stage={stage} />
@@ -122,8 +131,16 @@ function openStage(n: number) {
 
 // ───────────── 두루마리 지도
 
-function ScrollMap({ layout, wide }: { layout: Layout; wide: boolean }) {
+function ScrollMap({ layout, wide, api }: { layout: Layout; wide: boolean; api: MutableRefObject<{ unlock: () => void } | null> }) {
   const { tier, reduced } = useMotion();
+  // 스테이지 해제 데모 (P2-05): 지금 스테이지 통과 → 다음 스테이지가 열림. 시그니처 모션 장면과 같은 빌더
+  const [open, setOpen] = useState(false);
+  const [armed, setArmed] = useState(false);
+  const [rig, setRig] = useState<RigState>('idle');
+  const [busy, setBusy] = useState(false);
+  const layer = useRef<UnlockLayerHandle | null>(null);
+  const here = useRef<HTMLDivElement | null>(null);
+  const scene = useRef<Scene | null>(null);
   const paper = useRef<HTMLDivElement | null>(null);
   const rollA = useRef<HTMLSpanElement | null>(null);
   const rollB = useRef<HTMLSpanElement | null>(null);
@@ -133,6 +150,40 @@ function ScrollMap({ layout, wide }: { layout: Layout; wide: boolean }) {
   const dDone = useMemo(() => smooth(layout.pts.slice(0, cur + 1)), [layout, cur]);
   const dAll = useMemo(() => smooth(layout.pts), [layout]);
   const dTodo = useMemo(() => smooth(layout.pts.slice(cur)), [layout, cur]);
+  const dNext = useMemo(() => segment(layout.pts, cur), [layout, cur]);
+  const offX = (i: number) => (wide ? -86 : layout.pts[i][0] < layout.w / 2 ? 92 : -92);
+  const prog: StageProgress[] = PROGRESS.map((p, i) =>
+    open && i === cur ? { ...p, status: 'clear' } : open && i === cur + 1 ? { ...p, status: 'current' } : p,
+  );
+  api.current = {
+    unlock: () => {
+      setArmed(true);
+      setOpen(false);
+      here.current?.scrollIntoView({ block: 'center', behavior: isStill() ? 'auto' : 'smooth' });
+      requestAnimationFrame(() => {
+        const e = layer.current?.els();
+        const box = paper.current?.getBoundingClientRect();
+        const plate = nodes.current?.querySelectorAll('.b-node')[cur + 1]?.querySelector<HTMLElement>('.b-node-plate');
+        if (!e || !box || !plate || !here.current) return;
+        const k = box.width / layout.w;
+        const pts = samplePath(e.path, layout.w, box.width);
+        const dOff = (offX(cur + 1) - offX(cur)) * k;
+        pts.forEach((p, i) => (p.x += (dOff * i) / (pts.length - 1)));
+        scene.current?.stop();
+        const sc = new Scene(
+          buildUnlock({ ...e, paper: paper.current!, inkOrigin: '50% 62%', inkSize: '330% 330%', py: here.current, pyPts: pts, plate, onRig: setRig, onOpen: setOpen }, getMotion()),
+        );
+        sc.onEnd = () => {
+          setBusy(false);
+          toast(`${cur + 2}번 스테이지 "${PROGRESS[cur + 1].stage.title}"이(가) 열렸어요! (데모)`, 'good');
+        };
+        scene.current = sc;
+        setBusy(true);
+        sc.play();
+      });
+    },
+  };
+  useEffect(() => () => scene.current?.stop(), []);
 
   // 펼치기 → 잉크 길 → 도장 쾅 → 파이뱀 (지도에 들어올 때 한 번)
   useLayoutEffect(() => {
@@ -192,13 +243,16 @@ function ScrollMap({ layout, wide }: { layout: Layout; wide: boolean }) {
           </svg>
           <div className="b-map-nodes" ref={nodes}>
             {layout.pts.map(([x, y], i) => (
-              <StageNode key={i} p={PROGRESS[i]} style={pct(x, y)} wide={wide} />
+              <StageNode key={i} p={prog[i]} style={pct(x, y)} wide={wide} hideStamp={armed && i === cur} />
             ))}
-            <div className="b-here" data-here style={pct(layout.pts[cur][0] + (wide ? -86 : layout.pts[cur][0] < layout.w / 2 ? 92 : -92), layout.pts[cur][1] + 4)}>
-              <PybaemRig style="B" state="idle" size={wide ? 120 : 96} />
-              <span className="b-here-flag">지금 여기!</span>
+            <div className="b-here" data-here ref={here} style={pct(layout.pts[cur][0] + offX(cur), layout.pts[cur][1] + 4)}>
+              <div className="b-here-in">
+                <PybaemRig style="B" state={rig} size={wide ? 120 : 96} tier={busy && tier === 'full' ? 'lite' : undefined} />
+                <span className="b-here-flag">{open ? '새 곳 도착!' : '지금 여기!'}</span>
+              </div>
             </div>
           </div>
+          <UnlockLayer ref={layer} w={layout.w} h={layout.h} from={layout.pts[cur]} to={layout.pts[cur + 1]} toStage={cur + 2} d={dNext} scale={layout.scale} armed={armed} open={open} />
           <div className="b-map-legend" aria-hidden>
             <span>
               <i className="b-lg-ink" /> 지나온 길
@@ -213,7 +267,7 @@ function ScrollMap({ layout, wide }: { layout: Layout; wide: boolean }) {
   );
 }
 
-function StageNode({ p, style, wide }: { p: StageProgress; style: CSSProperties; wide: boolean }) {
+function StageNode({ p, style, wide, hideStamp }: { p: StageProgress; style: CSSProperties; wide: boolean; hideStamp?: boolean }) {
   const s = p.stage;
   const label = `${s.order}번 스테이지 ${s.title}, ${p.status === 'clear' ? '통과' : p.status === 'current' ? '지금 도전 중' : '잠김'}, 별 ${p.stars}/${p.max}`;
   const rot = [-14, 9, -6, 12, -10, 7, -12][s.order - 1];
@@ -236,7 +290,7 @@ function StageNode({ p, style, wide }: { p: StageProgress; style: CSSProperties;
           )}
         </span>
       </button>
-      {p.status === 'clear' && (
+      {p.status === 'clear' && !hideStamp && (
         <span className="b-stamp b-node-stamp" data-stamp data-rot={rot} style={{ transform: `rotate(${rot}deg)` }} aria-hidden>
           <span>통과</span>
         </span>

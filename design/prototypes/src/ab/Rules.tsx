@@ -1,8 +1,8 @@
-// #motion: 시그니처 모션은 P2-05가 채울 자리 ("준비 중"). 검토용으로 A×B 규칙표와 글꼴 실험을 둔다
+// #motion: 시그니처 모션 무대(P2-05) + 아래 참고 자료(A×B 규칙표, 글꼴 실험)
 import { goScreen } from '../shared/app';
-import { PybaemRig } from '../shared/rig/PybaemRig';
+import { MotionStage } from './MotionStage';
 import { MIX_RULES } from './mixRules';
-import { GameButton, Hud, Ribbon } from './ui';
+import { GameButton, Hud } from './ui';
 
 const PICK = -0.08;
 const TRACKING: [number, number][] = [
@@ -17,25 +17,18 @@ export function Rules() {
     <div className="ab-page ab-rulespage">
       <Hud />
       <main className="ab-section-inner ab-rules-main">
-        <section className="ab-soon" aria-labelledby="ab-soon-title">
-          <PybaemRig style="AB" state="think" size={120} />
-          <div>
-            <Ribbon tone="orange">준비 중</Ribbon>
-            <h1 id="ab-soon-title" className="ab-display ab-h1">
-              시그니처 모션은 다음 작업에서 채워요
-            </h1>
-            <p>스테이지 해제(잉크 길 + 팝업 섬), 퀘스트 성공, 레벨업 연출이 여기에 들어와요 (P2-05). 지금 화면에는 간단한 버전만 있어요.</p>
-            <div className="ab-soon-cta">
-              <GameButton variant="primary" size="md" icon="map" onPress={() => goScreen('world')}>
-                지도에서 섬 눌러 보기
-              </GameButton>
-              <GameButton variant="paper" size="md" icon="code" onPress={() => goScreen('quest')}>
-                퀘스트 성공 보기
-              </GameButton>
-            </div>
+        <MotionStage />
+        <div className="ab-refs">
+          <p className="ab-refs-kicker">참고 자료 (리뷰용)</p>
+          <div className="ab-soon-cta">
+            <GameButton variant="paper" size="sm" icon="map" onPress={() => goScreen('world')}>
+              지도에서 해제 보기
+            </GameButton>
+            <GameButton variant="paper" size="sm" icon="code" onPress={() => goScreen('quest')}>
+              실제 퀘스트에서 성공 보기
+            </GameButton>
           </div>
-        </section>
-
+        </div>
         <section className="ab-rules" aria-labelledby="ab-rules-title">
           <h2 id="ab-rules-title" className="ab-display ab-h2">
             A×B 섞는 규칙표

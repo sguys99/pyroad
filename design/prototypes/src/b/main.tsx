@@ -5,9 +5,11 @@ import { mountPrototype } from '../shared/app';
 import { Landing } from './Landing';
 import { World } from './World';
 import { Quest } from './Quest';
-import { Hud, Toasts, pageTurn } from './ui';
+import { Toasts, pageTurn, paperSlide } from './ui';
+import { MotionScreen } from './Signature';
 import './b.css';
 import './screens.css';
+import './motion.css';
 import { PAPER_FIBER, PAPER_GRAIN } from './paper.gen';
 
 // 종이 질감 타일(미리 만든 PNG)을 CSS 변수로
@@ -33,6 +35,16 @@ const CHAPTER: Record<Screen, { k: string; t: string }> = {
 };
 const ORDER: Screen[] = ['landing', 'world', 'stage', 'quest', 'motion'];
 
+/**
+ * 화면 전환 방식 (P2-05, 사용자 리뷰 P2-06에서 다시 정할 수 있게 상수 하나로)
+ * - 'chapter'   : 책을 펴고 덮을 때(랜딩 ↔ 책 안 화면)만 페이지 넘김 0.8초, 책 안 이동은 종이 미끄러짐 0.34초 (기본)
+ * - 'page-all'  : 모든 큰 화면 이동에 페이지 넘김 (P2-03 처음 버전)
+ * - 'slide-all' : 모두 종이 미끄러짐
+ */
+const SCREEN_TRANSITION: 'chapter' | 'page-all' | 'slide-all' = 'chapter';
+const SLIDE_MS = 340;
+const inBook = (s: Screen) => s !== 'landing';
+
 function App({ screen }: { screen: Screen }) {
   const host = useRef<HTMLDivElement | null>(null);
   const prev = useRef<Screen | null>(null);
@@ -40,11 +52,14 @@ function App({ screen }: { screen: Screen }) {
     const p = prev.current;
     prev.current = screen;
     if (!p || p === screen) return;
-    // 지도 ↔ 차례(바텀시트)는 같은 장이라 넘기지 않는다
+    // 지도 ↔ 차례(바텀시트)는 같은 장이라 전환 없음
     const same = (p === 'world' && screen === 'stage') || (p === 'stage' && screen === 'world');
     if (same) return;
     const dir = ORDER.indexOf(screen) >= ORDER.indexOf(p) ? 1 : -1;
-    pageTurn(host.current, { dir, kicker: CHAPTER[screen].k, title: CHAPTER[screen].t, fixed: true });
+    const chapter = inBook(p) !== inBook(screen);
+    const turn = SCREEN_TRANSITION === 'page-all' || (SCREEN_TRANSITION === 'chapter' && chapter);
+    if (turn) pageTurn(host.current, { dir, kicker: CHAPTER[screen].k, title: CHAPTER[screen].t, fixed: true });
+    else paperSlide(host.current, { dir, ms: SLIDE_MS });
   }, [screen]);
 
   return (
@@ -52,25 +67,10 @@ function App({ screen }: { screen: Screen }) {
       {screen === 'landing' && <Landing />}
       {(screen === 'world' || screen === 'stage') && <World sheet={screen === 'stage'} />}
       {screen === 'quest' && <Quest />}
-      {screen === 'motion' && <MotionSoon />}
+      {screen === 'motion' && <MotionScreen />}
+      <div id="b-layer" className="b-layer" />
       <Toasts />
     </div>
-  );
-}
-
-function MotionSoon() {
-  return (
-    <>
-      <Hud back={{ to: 'world', label: '지도' }} />
-      <main className="b-soon">
-        <div className="b-soon-card b-paper-card">
-          <span className="b-kicker">P2-05에서 채울 자리</span>
-          <h1 className="b-h1">시그니처 모션 준비 중</h1>
-          <p>페이지 넘김 · 잉크 번짐 · 스탬프 쾅을 스테이지 해제, 퀘스트 성공, 레벨업 장면으로 풍성하게 보여 줄 거예요.</p>
-          <p className="b-muted">지금은 지도(잉크 길·스탬프), 퀘스트 성공(스탬프 쾅), 모바일 퀘스트의 쪽 넘김에서 간단한 버전을 볼 수 있어요.</p>
-        </div>
-      </main>
-    </>
   );
 }
 

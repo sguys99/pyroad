@@ -23,17 +23,21 @@ const STAR_TABLE: Record<number, number[]> = {
 /** 모바일 문제 유형(§4)이 들어올 자리: 퀘스트 목록에서 퀴즈 표시를 보여 주려고 몇 개를 퀴즈로 둔다 */
 const QUIZ_SLOTS = new Set(['1-3', '2-3', '3-2', '3-5', '4-3', '5-2']);
 
-export const CURRENT_STAGE = 3;
+let currentStage = 3;
+/** 월드맵 "해제 보기" 데모가 바꾼다 (store.setAb({ current })를 거쳐서) */
+export function setCurrentStage(n: number) {
+  currentStage = n;
+}
 
 export function stageStatus(order: number): StageStatus {
-  return order < CURRENT_STAGE ? 'done' : order === CURRENT_STAGE ? 'current' : 'locked';
+  return order < currentStage ? 'done' : order === currentStage ? 'current' : 'locked';
 }
 
 export function questProgress(stage: number, q: QuestText): QuestProgress {
   const st = stageStatus(stage);
   const kind: QuestKind = q.type === 'project' ? 'project' : QUIZ_SLOTS.has(`${stage}-${q.order}`) ? 'quiz' : 'code';
   if (st === 'locked') return { stage, order: q.order, stars: -1, status: 'locked', kind };
-  const row = STAR_TABLE[stage] ?? [];
+  const row = STAR_TABLE[stage] ?? (st === 'done' ? [2, 2, 2, 2, 2, 2, 2, 2] : []);
   const stars = row[q.order - 1];
   if (stars !== undefined) return { stage, order: q.order, stars, status: 'done', kind };
   if (q.order === row.length + 1) return { stage, order: q.order, stars: 0, status: 'current', kind };

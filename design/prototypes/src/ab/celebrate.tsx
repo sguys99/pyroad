@@ -1,13 +1,12 @@
-// 축하 연출 한 곳 (P2-05에서 풍성하게 바꿀 자리). 지금은 최소한:
-// 종이 카드 등장(A 스프링) → "통과!" 도장 쾅(B) → 별 하나씩 팝 → 보상 숫자 → HUD에 반영
-// 연출 단계: lite 70%·흔들림 없음 / minimal 페이드 / 동작 줄이기 즉시 표시(색·글자로만)
-import { useEffect, useRef, useSyncExternalStore } from 'react';
-import { RewardIcon } from '../shared/icons';
-import { getMotion, play, springTiming, tierDuration } from '../shared/motion';
-import { EASING } from '../shared/tokens';
-import { PybaemRig } from '../shared/rig/PybaemRig';
-import { GameButton, Stars } from './ui';
-import { grant } from './store';
+// 축하 연출 한 곳: 모든 성공 흐름은 celebrate(kind)로 들어온다 (P2-05)
+// #motion 무대와 같은 연출(sig.tsx buildSuccess · buildLevelUp)을 실제 HUD로 날린다.
+// 보상으로 XP가 넘치면 성공 카드가 끝난 뒤 레벨업 카드가 이어진다.
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useMotion } from '../shared/motion';
+import { LevelUpCard, SuccessCard, buildLevelUp, buildSuccess, type HudTarget, type LevelRefs, type SuccessRefs } from './sig';
+import { getAb, grant } from './store';
+import { Timeline } from './timeline';
+import { GameButton } from './ui';
 
 export type CelebrateKind = 'quest' | 'quiz' | 'unlock';
 export interface CelebratePayload {
@@ -34,6 +33,18 @@ export function closeCelebrate() {
   emit();
 }
 
+/** 축하 중이면 true (뒤 화면 리그를 정지 그림으로 바꿔 축하 연출 예산을 지킴) */
+export function useCelebrating() {
+  return useSyncExternalStore(
+    (l) => {
+      ls.add(l);
+      return () => ls.delete(l);
+    },
+    () => current !== null,
+    () => false,
+  );
+}
+
 export function CelebrateLayer() {
   const c = useSyncExternalStore(
     (l) => {
@@ -44,115 +55,130 @@ export function CelebrateLayer() {
     () => current,
   );
   if (!c) return null;
-  return <CelebrateCard key={c.id} kind={c.kind} p={c.p} />;
+  return <CelebrateFlow key={c.id} kind={c.kind} p={c.p} />;
 }
 
-function CelebrateCard({ kind, p }: { kind: CelebrateKind; p: CelebratePayload }) {
-  const card = useRef<HTMLDivElement | null>(null);
-  const stamp = useRef<HTMLDivElement | null>(null);
-  const stars = useRef<HTMLDivElement | null>(null);
-  const rewards = useRef<HTMLDivElement | null>(null);
-  const nextBtn = useRef<HTMLDivElement | null>(null);
+/** 실제 HUD의 코인 칩·경험치 (좁은 화면에서 경험치 바가 숨으면 레벨 배지로) */
+function realHud(): HudTarget {
+  const s = getAb();
+  const coin = document.querySelector('.ab-hud .ab-hud-chip');
+  const bar = document.querySelector<HTMLElement>('.ab-hud .ab-hud-xp');
+  const barVisible = !!bar && getComputedStyle(bar).display !== 'none';
+  return {
+    coin,
+    coinNum: coin?.querySelector('.ab-num') ?? null,
+    xp: barVisible ? bar : document.querySelector('.ab-hud .ab-lv'),
+    xpFill: barVisible ? bar!.querySelector<HTMLElement>('.ab-progress-fill') : null,
+    base: { coins: s.coins, xp: s.xp, xpNext: s.xpNext },
+  };
+}
 
-  useEffect(() => {
-    const m = getMotion();
-    const timers: number[] = [];
-    // 1. 카드: 아래에서 종이가 튀어 오름
-    play(card.current, [{ transform: 'translateY(40px) scale(0.92) rotate(-2deg)' }, { transform: 'none' }], springTiming('body'), {
-      lite: [{ transform: 'translateY(16px)' }, { transform: 'none' }],
+function CelebrateFlow({ kind, p }: { kind: CelebrateKind; p: CelebratePayload }) {
+  const motion = useMotion();
+  const view = { tier: motion.tier, reduced: motion.reduced };
+  const card = useRef<SuccessRefs | null>(null);
+  const lvRef = useRef<LevelRefs | null>(null);
+  const [level, setLevel] = useState<{ from: number; xp: { from: number; next: number; over: number; next2: number } } | null>(null);
+  const [narrow] = useState(() => (document.querySelector('.proto-viewport')?.clientWidth ?? 1000) < 560);
+
+  // 성공 카드
+  useLayoutEffect(() => {
+    const c = card.current;
+    if (!c) return;
+    const before = getAb();
+    const leveled = before.xp + p.xp >= before.xpNext;
+    const tl = new Timeline(view);
+    buildSuccess(tl, c, {
+      at: 0,
+      stars: p.stars,
+      xp: p.xp,
+      coins: p.coins,
+      hud: realHud(),
+      onGrant: () => grant({ xp: p.xp, coins: p.coins, stars: p.stars }, { bump: false }),
     });
-    // 2. 도장 쾅
-    timers.push(
-      window.setTimeout(() => {
-        const el = stamp.current;
-        if (!el) return;
-        el.classList.add('is-on');
-        if (m.reduced) return;
-        if (m.tier === 'minimal') {
-          el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150 });
-          return;
-        }
-        el.animate([{ transform: 'rotate(-12deg) scale(2.2)', opacity: 0.2 }, { transform: 'rotate(-12deg) scale(0.9)', opacity: 1 }], {
-          duration: tierDuration(220),
-          easing: EASING.stampIn,
-        }).finished.then(() => {
-          el.animate([{ transform: 'rotate(-12deg) scale(0.9)' }, { transform: 'rotate(-12deg)' }], springTiming('body'));
-          if (m.tier === 'full') card.current?.animate([{ transform: 'translate(2px, 1px)' }, { transform: 'translate(-2px, -1px)' }, { transform: 'none' }], { duration: 120, easing: 'steps(3)' });
-        });
-      }, m.reduced ? 0 : tierDuration(320)),
-    );
-    // 3. 별 하나씩
-    const starEls = Array.from(stars.current?.querySelectorAll('svg') ?? []);
-    starEls.forEach((s, i) => {
-      timers.push(
-        window.setTimeout(() => {
-          play(s, [{ transform: 'scale(0.2) rotate(-40deg)' }, { transform: 'none' }], springTiming('prop'), { minimal: null });
-        }, m.reduced ? 0 : tierDuration(620 + i * 160)),
-      );
-    });
-    // 4. 보상 → HUD
-    timers.push(
-      window.setTimeout(() => {
-        rewards.current?.classList.add('is-on');
-        play(rewards.current, [{ transform: 'translateY(10px)' }, { transform: 'none' }], springTiming('prop'));
-        grant({ xp: p.xp, coins: p.coins, stars: p.stars });
-      }, m.reduced ? 0 : tierDuration(1150)),
-    );
-    timers.push(window.setTimeout(() => nextBtn.current?.querySelector('button')?.focus({ preventScroll: true }), m.reduced ? 0 : tierDuration(1200)));
-    return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [p]);
+    tl.onFinish = () => {
+      if (leveled)
+        window.setTimeout(
+          () => setLevel({ from: before.level, xp: { from: before.xp, next: before.xpNext, over: before.xp + p.xp - before.xpNext, next2: before.xpNext + 100 } }),
+          view.reduced ? 0 : 500,
+        );
+      else c.cta?.querySelector('button')?.focus({ preventScroll: true });
+    };
+    tl.play(0);
+    return () => tl.dispose(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 레벨업 카드 (XP가 넘쳤을 때 이어서)
+  useLayoutEffect(() => {
+    const r = lvRef.current;
+    if (!level || !r) return;
+    const tl = new Timeline(view);
+    buildLevelUp(tl, r, { at: 0, from: level.from, xp: level.xp });
+    tl.onFinish = () => r.cta?.querySelector('button')?.focus({ preventScroll: true });
+    tl.play(0);
+    return () => tl.dispose(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level]);
 
   return (
     <div className="ab-cele-layer" role="dialog" aria-modal="true" aria-label={`${p.title} 축하`}>
-      <div className="ab-cele-scrim" />
-      <div className="ab-cele" ref={card}>
-        <div className="ab-cele-py">
-          <PybaemRig style="AB" state="cheer" size={150} lookAt={false} />
+      <SuccessCard
+        ref={card}
+        compact={narrow}
+        view={view}
+        kicker={kind === 'quiz' ? '퀴즈 성공' : kind === 'unlock' ? '새 섬 발견' : '퀘스트 클리어'}
+        title={p.title}
+        stars={p.stars}
+        xp={p.xp}
+        coins={p.coins}
+        note={p.note}
+        actions={
+          <>
+            <GameButton
+              variant="primary"
+              size="lg"
+              iconRight="arrowRight"
+              onPress={() => {
+                closeCelebrate();
+                p.onNext?.();
+              }}
+            >
+              {p.nextLabel ?? '다음 퀘스트'}
+            </GameButton>
+            <GameButton
+              variant="paper"
+              size="md"
+              icon="map"
+              onPress={() => {
+                closeCelebrate();
+                p.onMap?.();
+              }}
+            >
+              지도로
+            </GameButton>
+          </>
+        }
+      />
+      {level && (
+        <div className="ab-lv-layer" role="dialog" aria-modal="true" aria-label={`레벨 ${level.from + 1} 달성`}>
+          <div className="ab-sc-scrim is-on" />
+          <LevelUpCard
+            ref={lvRef}
+            from={level.from}
+            view={view}
+            compact={narrow}
+            actions={
+              <GameButton variant="lemon" size="md" icon="check" onPress={() => setLevel(null)}>
+                좋아!
+              </GameButton>
+            }
+          />
         </div>
-        <div className="ab-cele-stamp" ref={stamp} aria-hidden>
-          <span>{kind === 'unlock' ? '열렸다!' : '통과!'}</span>
-        </div>
-        <p className="ab-cele-kicker">{kind === 'quiz' ? '퀴즈 성공' : kind === 'unlock' ? '새 섬 발견' : '퀘스트 클리어'}</p>
-        <h2 className="ab-cele-title">{p.title}</h2>
-        <div className="ab-cele-stars" ref={stars}>
-          <Stars n={p.stars} size={44} />
-        </div>
-        {p.note && <p className="ab-cele-note">{p.note}</p>}
-        <div className="ab-cele-rewards" ref={rewards}>
-          <span className="ab-reward">
-            <RewardIcon kind="gem" style="AB" size={26} />
-            <b>+{p.xp}</b> XP
-          </span>
-          <span className="ab-reward">
-            <RewardIcon kind="coin" style="AB" size={26} />
-            <b>+{p.coins}</b> 코인
-          </span>
-        </div>
-        <div className="ab-cele-actions" ref={nextBtn}>
-          <GameButton
-            variant="primary"
-            size="lg"
-            iconRight="arrowRight"
-            onPress={() => {
-              closeCelebrate();
-              p.onNext?.();
-            }}
-          >
-            {p.nextLabel ?? '다음 퀘스트'}
-          </GameButton>
-          <GameButton
-            variant="paper"
-            size="md"
-            icon="map"
-            onPress={() => {
-              closeCelebrate();
-              p.onMap?.();
-            }}
-          >
-            지도로
-          </GameButton>
-        </div>
-      </div>
+      )}
+      <span className="sr-only" aria-live="polite">
+        {level ? `레벨 ${level.from + 1}이 되었어요` : ''}
+      </span>
     </div>
   );
 }

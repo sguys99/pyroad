@@ -1,5 +1,6 @@
 // 시안 B 공통 컴포넌트 (→ P2-11 근거): 잉크 도장 버튼, 재화 HUD, 별, 말풍선, 시트(바텀시트·대화상자), 토스트, 진행바, 페이지 넘김
 import { useEffect, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon, RewardIcon, type IconName } from '../shared/icons';
 import { goScreen } from '../shared/app';
 import { useMotion } from '../shared/motion';
@@ -173,13 +174,25 @@ export function Bubble({ text, who = '파이뱀', tone = 'tutor', onDone }: { te
     <div className={`b-bubble b-bubble-${tone}`}>
       <span className="b-bubble-who">{who}</span>
       {/* 화면 낭독기는 완성된 문장을 한 번에 읽는다 */}
+      {/* 전체 문장을 처음부터 배치하고 아직 안 나온 글자만 숨긴다 → 말풍선 크기가 그대로라 바깥 레이아웃을 흔들지 않음 */}
       <p className="b-bubble-t" aria-live="polite">
         <span aria-hidden>{shown}</span>
-        <span className="sr-only">{text}</span>
         {!done && <span className="b-caret" aria-hidden />}
+        <span aria-hidden className="b-bubble-rest">
+          {[...text].slice([...shown].length).join('')}
+        </span>
+        <span className="sr-only">{text}</span>
       </p>
     </div>
   );
+}
+
+// ───────────── 위에 뜨는 층 (시트·오버레이). 레이아웃 격리(contain: strict)된 고정 층으로 포털
+// → 시트를 붙여도 화면 전체가 다시 배치되지 않는다 (CPU 4배에서 시트 열기 강제 레이아웃 340ms → 측정은 보고서)
+
+export function Layer({ children }: { children: ReactNode }) {
+  const host = typeof document !== 'undefined' ? document.getElementById('b-layer') : null;
+  return host ? createPortal(children, host) : <>{children}</>;
 }
 
 // ───────────── 시트 (모바일 바텀시트 · 넓은 화면 대화상자)
@@ -226,6 +239,7 @@ export function Sheet({ open, onClose, label, children, wide }: { open: boolean;
   }, [open]);
   if (!open) return null;
   return (
+    <Layer>
     <div className="b-sheet-root">
       <div ref={backRef} className="b-sheet-back" onClick={onClose} aria-hidden />
       <div ref={ref} className={`b-sheet ${wide ? 'b-sheet-wide' : ''}`} role="dialog" aria-modal="true" aria-label={label}>
@@ -236,6 +250,7 @@ export function Sheet({ open, onClose, label, children, wide }: { open: boolean;
         {children}
       </div>
     </div>
+    </Layer>
   );
 }
 
@@ -300,6 +315,31 @@ export function pageTurn(host: HTMLElement | null, opts: { dir?: 1 | -1; title?:
     fill: 'forwards',
   });
   shade.animate([{ opacity: 0 }, { opacity: 0.55, offset: 0.5 }, { opacity: 0 }], { duration: ms, delay: hold });
+  const done = () => wrap.remove();
+  a.finished.then(done, done);
+}
+
+/**
+ * 종이 미끄러짐 (책 안 화면 이동, P2-05): 지난 쪽 종이 한 장이 옆으로 빠져나가며 새 화면이 드러남.
+ * full 340ms out + 새 화면 16px 밀려 들어옴 / lite 200ms 크로스페이드·10px / minimal·동작 줄이기 즉시
+ */
+export function paperSlide(host: HTMLElement | null, opts: { dir?: 1 | -1; ms?: number } = {}) {
+  if (!host || isMinimal()) return;
+  const dir = opts.dir ?? 1;
+  if (isLite()) {
+    host.animate([{ opacity: 0.4, transform: `translateX(${dir * 10}px)` }, { opacity: 1, transform: 'none' }], { duration: 200, easing: EASING.out });
+    return;
+  }
+  const ms = opts.ms ?? 340;
+  const wrap = document.createElement('div');
+  wrap.className = 'b-leaf-wrap is-fixed';
+  wrap.setAttribute('aria-hidden', 'true');
+  const sheet = document.createElement('div');
+  sheet.className = 'b-slide-sheet';
+  wrap.appendChild(sheet);
+  host.appendChild(wrap);
+  const a = sheet.animate([{ transform: 'translateX(0) rotate(0deg)' }, { transform: `translateX(${dir * -104}%) rotate(${dir * -2}deg)` }], { duration: ms, easing: EASING.inOut, fill: 'forwards' });
+  sheet.animate([{ opacity: 1 }, { opacity: 1, offset: 0.7 }, { opacity: 0.6 }], { duration: ms });
   const done = () => wrap.remove();
   a.finished.then(done, done);
 }

@@ -12,7 +12,8 @@ import { matches, runPython, type RunResult } from './fakePython';
 import { MagicBoxScene, Landmark } from './art';
 import { Bubble, Hud, InkButton, Sheet, Stars, pageTurn } from './ui';
 import { getB, setB, toast, useB } from './state';
-import { celebrate, countUp, inkReveal, onCelebrate, popIn } from './fx';
+import { celebrate, inkReveal, onCelebrate, popIn } from './fx';
+import { LevelUpOverlay, RewardRun } from './Signature';
 
 type Tab = 'story' | 'code' | 'result' | 'quiz';
 
@@ -24,6 +25,12 @@ function parseId(id: string) {
 export function Quest() {
   const questId = useB((s) => s.questId);
   return <QuestInner key={questId} questId={questId} />;
+}
+
+/** 보상·레벨업 연출 중에는 뒤에 가려진 파이뱀 리그를 쉬게 (스스로 구독해서 퀘스트 전체가 다시 그려지지 않게) */
+function QuietRig(props: { state: RigState; size: number }) {
+  const quiet = useB((s) => s.celebrating);
+  return <PybaemRig style="B" state={props.state} size={props.size} talking={false} tier={quiet ? 'minimal' : undefined} />;
 }
 
 function QuestInner({ questId }: { questId: string }) {
@@ -234,7 +241,7 @@ function QuestInner({ questId }: { questId: string }) {
               {tab === 'result' && (
                 <div className="b-page b-result-page" ref={paperRef}>
                   <div className="b-result-top">
-                    <PybaemRig style="B" state={py.state} size={92} talking={false} />
+                    <QuietRig state={py.state} size={92} />
                     <Bubble text={py.text} tone={result?.pass ? 'good' : 'tutor'} />
                   </div>
                   <div className="b-result-stampzone">
@@ -327,7 +334,7 @@ function StoryPage({
       {showRig && (
         <div className="b-tutor">
           <div className="b-tutor-rig">
-            <PybaemRig style="B" state={py.state} size={112} talking={false} />
+            <QuietRig state={py.state} size={112} />
           </div>
           <Bubble key={py.text} text={py.text} />
         </div>
@@ -683,22 +690,13 @@ function QuizPage({
 // ───────────── 축하 카드 (최소: 별 + 보상 숫자. P2-05에서 풍성하게)
 
 function RewardSheet({ reward, onClose, title }: { reward: null | { stars: number; xp: number; coins: number }; onClose: () => void; title: string }) {
-  const [coins, setCoins] = useState(0);
-  const [xp, setXp] = useState(0);
-  const starsRef = useRef<HTMLDivElement | null>(null);
+  // 보상 진행은 퀘스트 성공 장면과 같은 빌더(RewardRun). XP가 넘치면 레벨업 오버레이가 이어진다 (P2-05)
+  const [lv, setLv] = useState<null | { lv: number; xp: number; next: number }>(null);
   useEffect(() => {
-    if (!reward) return;
-    setCoins(0);
-    setXp(0);
-    const t = window.setTimeout(() => {
-      starsRef.current?.querySelectorAll('svg').forEach((s, i) => popIn(s, i * 160));
-      countUp(0, reward.coins, 700, setCoins);
-      countUp(0, reward.xp, 700, setXp);
-    }, 120);
-    return () => window.clearTimeout(t);
-  }, [reward]);
+    setB({ celebrating: !!reward });
+    return () => setB({ celebrating: false });
+  }, [!!reward]);
   const finish = (to: 'next' | 'map') => {
-    if (reward) setB((s) => ({ coins: s.coins + reward.coins, xp: Math.min(s.xpNext, s.xp + reward.xp) }));
     onClose();
     if (to === 'map') goScreen('world');
     else {
@@ -706,38 +704,31 @@ function RewardSheet({ reward, onClose, title }: { reward: null | { stars: numbe
       toast('다음 퀘스트: 숫자 상자와 글자 상자', 'good');
     }
   };
+  const levelDone = () => {
+    if (lv) setB({ level: lv.lv + 1, xp: lv.xp + (reward?.xp ?? 0) - lv.next, xpNext: 600 });
+    setLv(null);
+  };
   return (
-    <Sheet open={!!reward} onClose={() => finish('next')} label="퀘스트 통과 보상">
-      {reward && (
-        <div className="b-reward">
-          <span className="b-kicker">퀘스트 통과</span>
-          <h2 className="b-h2">{title}</h2>
-          <div className="b-reward-stars" ref={starsRef}>
-            <Stars n={reward.stars} size={54} />
+    <>
+      <Sheet open={!!reward} onClose={() => finish('next')} label="퀘스트 통과 보상">
+        {reward && (
+          <div className="b-reward">
+            <span className="b-kicker">퀘스트 통과</span>
+            <h2 className="b-h2">{title}</h2>
+            <RewardRun stars={reward.stars} coins={reward.coins} xp={reward.xp} onLevelUp={setLv} />
+            {reward.stars < 3 && <p className="b-muted">힌트 없이 다시 풀면 별을 더 모을 수 있어요. 차례에서 “별 채우기”를 눌러요!</p>}
+            <div className="b-reward-actions">
+              <InkButton variant="primary" size="lg" iconRight="arrowRight" onClick={() => finish('next')} data-autofocus>
+                다음 퀘스트
+              </InkButton>
+              <InkButton variant="paper" icon="map" onClick={() => finish('map')}>
+                지도로
+              </InkButton>
+            </div>
           </div>
-          <div className="b-reward-row">
-            <span className="b-reward-item">
-              <RewardIcon kind="coin" style="B" size={34} />
-              <b className="b-num">+{coins}</b>
-              <span>코인</span>
-            </span>
-            <span className="b-reward-item">
-              <Icon name="sparkle" size={30} strokeWidth={2.2} />
-              <b className="b-num">+{xp}</b>
-              <span>경험치</span>
-            </span>
-          </div>
-          {reward.stars < 3 && <p className="b-muted">힌트 없이 다시 풀면 별을 더 모을 수 있어요. 차례에서 “별 채우기”를 눌러요!</p>}
-          <div className="b-reward-actions">
-            <InkButton variant="primary" size="lg" iconRight="arrowRight" onClick={() => finish('next')} data-autofocus>
-              다음 퀘스트
-            </InkButton>
-            <InkButton variant="paper" icon="map" onClick={() => finish('map')}>
-              지도로
-            </InkButton>
-          </div>
-        </div>
-      )}
-    </Sheet>
+        )}
+      </Sheet>
+      {lv && reward && <LevelUpOverlay from={lv} gain={reward.xp} onDone={levelDone} />}
+    </>
   );
 }

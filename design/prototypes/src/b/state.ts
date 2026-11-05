@@ -19,19 +19,23 @@ export interface BState {
   keys: number;
   muted: boolean;
   toasts: Toast[];
+  /** 보상·레벨업 연출 중: 뒤에 있는 파이뱀 리그를 쉬게 한다 (축하 예산) */
+  celebrating: boolean;
 }
 
 let state: BState = {
   stage: CURRENT_STAGE,
   questId: '2-1',
   coins: SAMPLE_PLAYER.coins,
-  xp: SAMPLE_PLAYER.xp,
+  // 첫 성공(+50)에서 레벨업이 이어지게 다음 레벨 바로 앞 (P2-05 데모)
+  xp: 470,
   xpNext: SAMPLE_PLAYER.xpNext,
   level: SAMPLE_PLAYER.level,
   stars: TOTAL_STARS,
   keys: 2,
   muted: false,
   toasts: [],
+  celebrating: false,
 };
 const ls = new Set<() => void>();
 

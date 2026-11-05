@@ -10,7 +10,9 @@ import { PybaemRig } from '../shared/rig/PybaemRig';
 import { STAGES, WORLD1 } from '../shared/content';
 import { Cloud, Compass, Islet, PaperBoat, PaperIsland, StampMark, WaveRow, WorldArt } from './art';
 import { STAGE_BUILDING, stageStars, stageStatus } from './data';
+import { buildUnlock } from './sig';
 import { getAb, setAb, toast, useAb } from './store';
+import { Timeline } from './timeline';
 import { GameButton, Hud, Progress } from './ui';
 import { StageSheet } from './StageSheet';
 
@@ -51,6 +53,7 @@ function segPath(l: Layout, i: number) {
 export function WorldMap({ withStage = false }: { withStage?: boolean }) {
   const [chapter, setChapter] = useState<0 | 1 | 2>(0);
   const stage = useAb((s) => s.stage);
+  useAb((s) => s.current); // 해제 데모로 지금 스테이지가 바뀌면 다시 그림
   const closeStage = useCallback(() => goScreen('world'), []);
   const totals = STAGES.reduce(
     (a, s) => {
@@ -139,7 +142,11 @@ function IslandMap() {
   const pyRef = useRef<HTMLDivElement | null>(null);
   const pyInner = useRef<HTMLDivElement | null>(null);
   const pyAt = useAb((s) => s.pyAt);
+  const current = useAb((s) => s.current);
   const [hopping, setHopping] = useState(false);
+  /** 해제 데모 중인 섬 번호 (P2-05 스테이지 해제를 실제 지도에서) */
+  const [unlocking, setUnlocking] = useState<number | null>(null);
+  const maskRef = useRef<SVGPathElement | null>(null);
   const { tier, reduced } = useMotion();
 
   useLayoutEffect(() => {
@@ -165,7 +172,7 @@ function IslandMap() {
 
   // 파이뱀 자리 (뛰지 않을 때)
   useLayoutEffect(() => {
-    if (hopping || !pyRef.current || !size.w) return;
+    if (hopping || unlocking || !pyRef.current || !size.w) return;
     const p = islandTop(pyAt - 1);
     pyRef.current.style.transform = `translate(${p.x}px, ${p.y}px)`;
   });
@@ -249,7 +256,60 @@ function IslandMap() {
     });
   };
 
+  // 스테이지 해제 데모: #motion 무대와 같은 buildUnlock을 지도 DOM에 적용
+  useLayoutEffect(() => {
+    if (!unlocking || !box.current) return;
+    const root = box.current;
+    const to = root.querySelector<HTMLElement>(`[data-isle='${unlocking}']`);
+    const from = root.querySelector<HTMLElement>(`[data-isle='${unlocking - 1}']`);
+    if (!to || !from) return;
+    const m = getMotion();
+    const stars = to.querySelector('.ab-isle-stars');
+    const starsHtml = stars?.innerHTML ?? '';
+    to.classList.add('is-asleep');
+    const tl = new Timeline({ tier: m.tier, reduced: m.reduced });
+    buildUnlock(tl, {
+      stamp: from.querySelector('.ab-isle-stamp'),
+      mask: maskRef.current,
+      lock: to.querySelector('.ab-isle-lock'),
+      art: to.querySelector('.ab-isle-art'),
+      awake: (v) => to.classList.toggle('is-asleep', !v),
+      tag: to.querySelector('.ab-isle-tag'),
+      stars,
+      starsText: (v) => stars && (stars.innerHTML = v ? starsHtml : '잠김'),
+      badge: to.querySelector('.ab-um-badge'),
+      py: pyRef.current,
+      pyInner: pyInner.current,
+      pyFrom: islandTop(unlocking - 2),
+      pyTo: islandTop(unlocking - 1),
+      bits: Array.from(to.querySelectorAll<HTMLElement>('.ab-um-bit')),
+    }, { at: 0 });
+    tl.onFinish = () =>
+      window.setTimeout(() => {
+        tl.dispose(false);
+        to.classList.remove('is-asleep');
+        setUnlocking(null);
+        toast(`${STAGES[unlocking - 1].title}이 열렸어요!`, 'good');
+      }, 400);
+    tl.play(0);
+    return () => tl.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unlocking]);
+
+  const playUnlock = () => {
+    if (unlocking || hopping) return;
+    const next = getAb().current + 1;
+    if (next > STAGES.length) return;
+    setAb({ current: next, pyAt: next });
+    setUnlocking(next);
+  };
+  const resetUnlock = () => {
+    if (unlocking) return;
+    setAb({ current: 3, pyAt: 3 });
+  };
+
   const onIsland = (order: number) => {
+    if (unlocking) return;
     const st = stageStatus(order);
     if (st === 'locked') {
       const prev = STAGES.find((s) => s.order === order - 1);
@@ -323,8 +383,19 @@ function IslandMap() {
           {POS[layout].slice(0, -1).map((_, i) => {
             const d = segPath(layout, i);
             const open = stageStatus(i + 2) !== 'locked';
+            const drawing = unlocking === i + 2;
             return (
               <g key={`${layout}${i}`}>
+                {drawing && (
+                  <>
+                    <path d={d} fill="none" stroke="#FFF1CF" strokeWidth={layout === 'wide' ? 22 : 18} strokeLinecap="round" opacity={0.55} />
+                    <path d={d} fill="none" stroke="#24324A" strokeWidth={2.6} strokeLinecap="round" strokeDasharray="1 9" opacity={0.45} />
+                    <mask id="ab-unlock-mask" maskUnits="userSpaceOnUse">
+                      <path ref={maskRef} d={d} fill="none" stroke="#fff" strokeWidth={40} strokeLinecap="round" />
+                    </mask>
+                  </>
+                )}
+                <g mask={drawing ? 'url(#ab-unlock-mask)' : undefined}>
                 <path d={d} fill="none" stroke="#FFF1CF" strokeWidth={layout === 'wide' ? 22 : 18} strokeLinecap="round" opacity={open ? 0.95 : 0.55} />
                 <path
                   ref={(el) => {
@@ -338,6 +409,7 @@ function IslandMap() {
                   strokeDasharray={open ? '2 11' : '1 9'}
                   opacity={open ? 1 : 0.45}
                 />
+                </g>
               </g>
             );
           })}
@@ -362,12 +434,19 @@ function IslandMap() {
                 <PaperIsland kind={STAGE_BUILDING[i]} big={big} locked={st === 'locked'} />
               </span>
               {st === 'done' && <StampMark className="ab-isle-stamp" size={layout === 'wide' ? 58 : 54} />}
-              {st === 'locked' && (
+              {(st === 'locked' || unlocking === s.order) && (
                 <span className="ab-isle-lock">
                   <Icon name="lock" size={22} strokeWidth={2.8} />
                 </span>
               )}
-              <span className="ab-isle-tag">
+              {unlocking === s.order &&
+                Array.from({ length: 5 }, (_, k) => <span key={k} className="ab-um-bit" data-beat style={{ background: ['#FFD24D', '#FF7F66', '#6EC1EA', '#5CCB7A', '#9B7FE0'][k] }} />)}
+              {unlocking === s.order && (
+                <span className="ab-um-badge" data-beat>
+                  열렸어요!
+                </span>
+              )}
+              <span className="ab-isle-tag" {...(unlocking === s.order ? { 'data-beat': '' } : {})}>
                 <span className="ab-isle-no">{s.order}</span>
                 <span className="ab-isle-name">{s.title}</span>
                 <span className="ab-isle-stars">
@@ -382,7 +461,7 @@ function IslandMap() {
           <div className="ab-map-py-inner" ref={pyInner}>
             <PybaemRig style="AB" state={hopping ? 'happy' : 'idle'} size={layout === 'wide' ? 84 : 72} lookAt={false} framing="avatar" tier={reduced ? undefined : tier} />
           </div>
-          {!hopping && <span className="ab-map-here">여기!</span>}
+          {!hopping && !unlocking && <span className="ab-map-here">여기!</span>}
         </div>
       </div>
       <div className="ab-map-legend">
@@ -395,6 +474,15 @@ function IslandMap() {
         <span>
           <Icon name="lock" size={20} strokeWidth={2.6} /> 잠김
         </span>
+        {current < 4 ? (
+          <GameButton variant="lemon" size="sm" icon="unlock" className="ab-map-demo" onPress={playUnlock}>
+            해제 보기 (4번 섬)
+          </GameButton>
+        ) : (
+          <GameButton variant="paper" size="sm" icon="refresh" className="ab-map-demo" onPress={resetUnlock}>
+            다시 잠그기
+          </GameButton>
+        )}
         <GameButton variant="primary" size="md" icon="play" className="ab-map-go" onPress={() => onIsland(getAb().pyAt)}>
           이어서 모험하기
         </GameButton>

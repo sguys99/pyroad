@@ -559,11 +559,17 @@ body {
   line-height: 1.7;
   min-height: 1.7em;
 }
+.b-bubble-t {
+  contain: layout paint;
+}
+.b-bubble-rest {
+  visibility: hidden;
+}
 .b-caret {
   display: inline-block;
   width: 2px;
   height: 1.05em;
-  margin-left: 2px;
+  margin: 0 -2px 0 0;
   vertical-align: -0.15em;
   background: var(--c-text);
   animation: b-caret 0.9s steps(1, end) infinite;
@@ -862,4 +868,33 @@ body {
 }
 .b-soon-card p {
   margin: 0;
+}
+
+/* 종이 미끄러짐 (책 안 화면 이동) */
+.b-slide-sheet {
+  position: absolute;
+  inset: 0;
+  background-color: var(--c-surface);
+  background-image: linear-gradient(-90deg, rgba(59, 47, 37, 0.18), transparent 5%), var(--b-grain), var(--b-fiber);
+  background-size: 100% 100%, 128px 128px, 256px 256px;
+  border-right: 2px solid var(--c-text);
+  box-shadow: 10px 0 22px rgba(59, 47, 37, 0.22);
+  will-change: transform;
+}
+
+/* 시트·오버레이가 뜨는 고정 층: 레이아웃·페인트 격리 */
+.b-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  contain: strict;
+}
+.b-layer > * {
+  pointer-events: auto;
+}
+
+/* 파이뱀 리그는 자기 합성 레이어에서: 리그가 매 프레임 바뀔 때 아래 종이 질감·지도까지 다시 칠하지 않게 (P2-05 측정) */
+.b-app svg[aria-label^='파이뱀 선생님'] {
+  will-change: transform;
 }

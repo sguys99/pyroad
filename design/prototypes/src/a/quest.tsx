@@ -10,7 +10,8 @@ import { BugBug } from '../shared/characters/Friends';
 import { celebrate, jelly } from './celebrate';
 import { runPython, tokenize, type RunResult } from './pyfake';
 import { PLAYABLE, getStore, setStore, useStore } from './store';
-import { CelebrationLayer, ClayButton, Dialogue, Hud, Sheet, Stars, toast, type Speaker } from './ui';
+import { ClayButton, Dialogue, Hud, Sheet, Stars, toast, type Speaker } from './ui';
+import { CelebrationLayer } from './celebration';
 
 const ORDER = Object.keys(PLAYABLE);
 
@@ -146,7 +147,7 @@ function CodeQuest({ qkey }: { qkey: string }) {
   return (
     <main className={`a-qmain a-tab-${tab}`}>
       <div className="a-q-left">
-        <Dialogue speaker={speaker} text={line} rigState={rigState} className="a-q-dlg" />
+        <Dialogue speaker={speaker} text={line} rigState={rigState} className="a-q-dlg" frozen={store.celebrating} />
         <div className="a-qtabs" role="tablist" aria-label="퀘스트 보기">
           {(
             [
@@ -447,6 +448,7 @@ function shuffle<T>(xs: T[]): T[] {
 }
 
 function QuizView() {
+  const { celebrating } = useStore();
   const [round, setRound] = useState(0);
   const opts = useMemo(() => shuffle(QUIZ.options), [round]);
   const [wrong, setWrong] = useState<string[]>([]);
@@ -492,7 +494,7 @@ function QuizView() {
   return (
     <main className="a-qmain a-quiz">
       <div className="a-q-left">
-        <Dialogue speaker={speaker} text={text} rigState={solved === 'ok' ? 'cheer' : solved === 'reveal' ? 'talk' : 'think'} className="a-q-dlg" />
+        <Dialogue speaker={speaker} text={text} rigState={solved === 'ok' ? 'cheer' : solved === 'reveal' ? 'talk' : 'think'} className="a-q-dlg" frozen={celebrating} />
       </div>
       <div className="a-q-right">
         <section className="a-card a-quizcard" aria-labelledby="a-quiz-q">

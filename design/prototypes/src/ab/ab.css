@@ -3130,3 +3130,811 @@
 [data-motion='minimal'] .ab-wob {
   filter: none;
 }
+
+/* ═════════════ P2-05 시그니처 모션 ═════════════ */
+/* 타임라인 비트가 오기 전에는 숨김 (cue가 data-on을 붙임). 투명도 0 시작이 아니라 visibility라 첫 화면 규칙과 무관 */
+[data-beat]:not([data-on]) {
+  visibility: hidden;
+}
+.ab-isle.is-asleep .ab-isle-art {
+  transform: rotateX(58deg);
+  filter: saturate(0.45);
+}
+.ab-um-bit {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 2;
+  width: 11px;
+  height: 13px;
+  border: 2px solid var(--ab-ink);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.ab-um-badge {
+  position: absolute;
+  left: 50%;
+  top: -22%;
+  z-index: 3;
+  transform: translate(-50%, 0);
+  padding: 2px 14px 4px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 999px;
+  background: var(--c-highlight);
+  color: var(--c-on-highlight);
+  box-shadow: 0 3px 0 var(--ab-ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(18px * var(--display-scale));
+  letter-spacing: var(--ab-track);
+  word-spacing: var(--ab-word);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.ab-map-demo {
+  margin-left: auto;
+}
+.ab-map-demo + .ab-map-go {
+  margin-left: 0;
+}
+@container vp (max-width: 560px) {
+  .ab-map-demo {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* 축하 카드 (실제 흐름 + 무대 공용) */
+.ab-cele-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: block;
+  padding: 0;
+  overflow: visible;
+}
+.ab-root:has(.ab-cele-layer) .ab-hud {
+  z-index: 65;
+}
+.ab-sc {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 104px 16px 24px;
+  overflow-y: auto;
+}
+.ab-cele-layer > .ab-sc {
+  position: fixed;
+}
+.ab-sc-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(36, 50, 74, 0.5);
+}
+.ab-cele-layer > .ab-sc > .ab-sc-scrim {
+  position: fixed;
+}
+.ab-sc .ab-cele {
+  transform-origin: 50% 100%;
+}
+.ab-sc.is-compact {
+  padding: 84px 12px 12px;
+}
+.ab-sc.is-compact .ab-cele {
+  width: min(340px, 100%);
+  padding: 54px 16px 14px;
+}
+.ab-sc.is-compact .ab-cele-py {
+  top: -70px;
+}
+.ab-sc.is-compact .ab-cele-stamp {
+  width: 74px;
+  height: 74px;
+  right: 10px;
+  top: 10px;
+}
+.ab-sc.is-compact .ab-cele-stamp span {
+  font-size: calc(19px * var(--display-scale));
+}
+.ab-sc.is-compact .ab-cele-title {
+  font-size: calc(22px * var(--display-scale));
+}
+.ab-sc.is-compact .ab-cele-rewards {
+  margin: 10px 0 14px;
+}
+.ab-sc .ab-cele-stamp {
+  visibility: visible;
+}
+.ab-sc .ab-cele-stamp:not([data-on]) {
+  visibility: hidden;
+}
+.ab-sc-star {
+  position: relative;
+  display: inline-grid;
+}
+.ab-sc-star > .ab-sc-star-empty,
+.ab-sc-star > .ab-sc-star-fill {
+  grid-area: 1 / 1;
+  line-height: 0;
+}
+.ab-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px;
+  border: 2px solid var(--ab-ink);
+  border-radius: 50%;
+  background: var(--c-highlight);
+}
+.ab-splat {
+  position: absolute;
+  right: 60px;
+  top: 60px;
+  width: 0;
+  height: 0;
+}
+.ab-splat i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px;
+  border-radius: 50%;
+  background: var(--c-accent-text);
+}
+.ab-fly {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.ab-cele-layer .ab-fly {
+  position: fixed;
+}
+.ab-fly-coin {
+  position: absolute;
+  line-height: 0;
+  transform: translate(-50%, -50%);
+}
+.ab-lv-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 62;
+  display: grid;
+  place-items: center;
+  padding: 40px 16px 24px;
+  overflow-y: auto;
+}
+.ab-lv-layer > .ab-sc-scrim {
+  position: fixed;
+}
+
+/* 레벨업 카드 */
+.ab-lv-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(460px, 100%);
+  padding: 34px 20px 18px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 24px;
+  background: var(--c-surface);
+  box-shadow: 0 8px 0 var(--ab-ink);
+  text-align: center;
+}
+.ab-lv-card.is-compact {
+  width: min(360px, 100%);
+  padding: 30px 14px 14px;
+  gap: 10px;
+}
+.ab-lv-banner {
+  position: absolute;
+  top: -26px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.ab-lv-banner span {
+  padding: 4px 34px 8px;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  border-top: var(--ab-bw) solid var(--ab-ink);
+  border-bottom: var(--ab-bw) solid var(--ab-ink);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 50%, 100% 100%, 0 100%, 14px 50%);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(28px * var(--display-scale));
+  letter-spacing: var(--ab-track);
+  line-height: 1.1;
+}
+.ab-lv-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 140px;
+  margin-top: 8px;
+}
+.ab-lv-badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 104px;
+}
+.ab-lv-badge-face {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 86px;
+  height: 86px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 50%;
+  background: var(--c-highlight);
+  color: var(--c-on-highlight);
+  box-shadow: 0 5px 0 var(--ab-ink);
+  line-height: 1;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.ab-lv-badge-face small {
+  font-size: 15px;
+  font-weight: 800;
+}
+.ab-lv-badge-face > span {
+  font-size: 36px;
+}
+.ab-lv-badge.is-new .ab-lv-badge-face {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  box-shadow:
+    0 0 0 5px var(--c-highlight),
+    0 0 0 7.5px var(--ab-ink),
+    0 9px 0 4px var(--ab-ink);
+}
+.ab-lv-ribbon {
+  position: absolute;
+  bottom: -4px;
+  width: 24px;
+  height: 44px;
+  border: 2px solid var(--ab-ink);
+  background: var(--c-accent);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+  transform-origin: 50% 0;
+}
+.ab-lv-ribbon.is-l {
+  left: 18px;
+  transform: rotate(-18deg);
+}
+.ab-lv-ribbon.is-r {
+  right: 18px;
+  transform: rotate(18deg);
+  background: var(--c-secondary);
+}
+.ab-lv-py {
+  line-height: 0;
+}
+.ab-lv-star {
+  position: absolute;
+  right: 0;
+  top: -14px;
+  line-height: 0;
+}
+.ab-lv-xp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.ab-lv-bar {
+  flex: 1;
+  height: 20px;
+}
+.ab-lv-bar.is-full {
+  background: var(--c-highlight);
+}
+.ab-lv-bar.is-full .ab-progress-fill {
+  background: var(--c-highlight);
+}
+.ab-lv-bar .ab-progress-fill {
+  transition: none;
+}
+.ab-lv-xp-text {
+  min-width: 7.5em;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-text-muted);
+}
+.ab-lv-title {
+  position: relative;
+  margin-top: 6px;
+  display: grid;
+  padding: 8px 22px 10px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 14px;
+  background: var(--c-warning-soft);
+  box-shadow: 0 4px 0 var(--ab-ink);
+  transform: rotate(-2deg);
+}
+.ab-lv-title-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--c-warning);
+}
+.ab-lv-title-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(26px * var(--display-scale));
+  letter-spacing: var(--ab-track);
+  word-spacing: var(--ab-word);
+  line-height: 1.15;
+}
+.ab-lv-title-stamp {
+  position: absolute;
+  right: -44px;
+  top: -8px;
+  line-height: 0;
+}
+.ab-lv-bubble {
+  position: relative;
+  width: 100%;
+  padding: 18px 14px 10px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 16px;
+  background: var(--c-surface);
+  box-shadow: 0 3px 0 var(--ab-ink);
+  text-align: left;
+}
+.ab-lv-bubble .ab-nametag {
+  position: absolute;
+  top: -16px;
+  left: 12px;
+  font-size: calc(15px * var(--display-scale));
+}
+.ab-lv-bubble p {
+  margin: 0;
+  font-size: 16px;
+}
+.ab-lv-cta {
+  display: grid;
+}
+.ab-confetti {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  z-index: 4;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.ab-confetti-bit {
+  position: absolute;
+  left: -6px;
+  top: -8px;
+  border: 2px solid var(--ab-ink);
+  border-radius: 2px;
+}
+.ab-confetti-bit.is-round {
+  border-radius: 50%;
+}
+
+/* 무대 */
+.ab-stagewrap {
+  padding-bottom: 8px;
+}
+.ab-stage-intro {
+  padding: 8px 0 4px;
+}
+.ab-stage-intro .ab-lead {
+  margin: 8px 0 0;
+}
+.ab-scene {
+  margin-top: 28px;
+  padding: 18px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 24px;
+  background: var(--c-surface);
+  box-shadow: 0 var(--ab-lip) 0 var(--ab-ink);
+}
+.ab-scene-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.ab-scene-sub {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--c-text-muted);
+  max-width: 46em;
+}
+.ab-scene-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ab-scene-btns .ab-btn {
+  margin-bottom: 4px;
+}
+.ab-scene-body {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+}
+@container vp (min-width: 900px) {
+  .ab-scene-body {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+.ab-scene-view {
+  position: relative;
+  height: 560px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: var(--c-bg);
+  background-image: var(--ab-paper);
+  isolation: isolate;
+}
+.ab-scene-view[data-scene='unlock'] {
+  height: 400px;
+}
+.ab-scene-view[data-scene='level'] {
+  height: 680px;
+  background-image:
+    var(--ab-paper),
+    repeating-conic-gradient(from 0deg at 50% 38%, rgba(255, 210, 77, 0.28) 0deg 10deg, transparent 10deg 20deg);
+}
+.ab-scene-side {
+  display: grid;
+  gap: 12px;
+}
+.ab-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border: var(--ab-bw) solid var(--ab-ink);
+  border-radius: 14px;
+  background: var(--c-surface2);
+}
+.ab-seg button {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ab-seg button[aria-pressed='true'] {
+  background: var(--c-surface);
+  color: var(--c-text);
+  box-shadow: inset 0 0 0 2px var(--ab-ink);
+}
+.ab-tier-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--c-text-muted);
+}
+.ab-tier-notes li {
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+.ab-tier-notes li b {
+  color: var(--c-text);
+  margin-right: 4px;
+}
+.ab-tier-notes li.is-on {
+  background: var(--c-warning-soft);
+  color: var(--c-text);
+  box-shadow: inset 3px 0 0 var(--c-warning);
+}
+.ab-tlbar {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 2px dashed var(--c-line);
+}
+.ab-tl-scrub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ab-tl-scrub input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  accent-color: var(--c-primary);
+}
+.ab-tl-total {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.ab-tl-rows {
+  --tl-label: 196px;
+  --tl-ms: 104px;
+  position: relative;
+  display: grid;
+  gap: 3px;
+  margin-top: 8px;
+}
+.ab-tl-row {
+  display: grid;
+  grid-template-columns: var(--tl-label) 1fr var(--tl-ms);
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.ab-tl-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ab-tl-track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--c-surface2);
+}
+.ab-tl-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 6px;
+  background: var(--c-secondary);
+}
+.ab-tl-seg.is-cue {
+  width: 6px;
+  margin-left: -3px;
+  background: var(--c-accent-text);
+}
+.ab-tl-ms {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-text-muted);
+  white-space: nowrap;
+}
+.ab-tl-overlay {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: calc(var(--tl-label) + 8px);
+  right: calc(var(--tl-ms) + 8px);
+  pointer-events: none;
+  z-index: 1;
+}
+.ab-tl-head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  will-change: transform;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--c-error);
+}
+@container vp (max-width: 560px) {
+  .ab-scene {
+    padding: 14px 12px;
+  }
+  .ab-tl-rows {
+    --tl-label: 112px;
+    --tl-ms: 84px;
+  }
+  .ab-tl-row {
+    font-size: 14px;
+  }
+}
+
+/* 해제 무대 */
+.ab-um {
+  position: absolute;
+  inset: 0;
+  background-color: #8fd3f1;
+  background-image:
+    var(--ab-paper),
+    linear-gradient(180deg, #a3dcf4, #78c4ea);
+}
+.ab-um-path {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ab-um-isle {
+  position: absolute;
+  width: min(34%, 230px);
+  display: grid;
+  justify-items: center;
+  perspective: 600px;
+}
+.ab-um-isle.is-from {
+  left: 12%;
+  top: 36%;
+}
+.ab-um-isle.is-to {
+  left: 54%;
+  top: 14%;
+}
+.ab-um-art {
+  display: block;
+  width: 100%;
+  transform-origin: 50% 88%;
+}
+.ab-um-art:not(.is-awake) {
+  transform: rotateX(58deg);
+  filter: saturate(0.45);
+}
+.ab-um-stamp {
+  position: absolute;
+  right: -4%;
+  top: 0;
+}
+.ab-um-lock {
+  z-index: 2;
+}
+.ab-um-py {
+  z-index: 3;
+}
+
+/* 성공 무대 */
+.ab-ss {
+  position: absolute;
+  inset: 0;
+  padding: 0 12px 12px;
+}
+.ab-mockhud {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 -12px 12px;
+  padding: 8px 12px;
+  border-bottom: var(--ab-bw) solid var(--ab-ink);
+  background: var(--c-surface);
+}
+.ab-mockhud-xp {
+  width: 110px;
+}
+.ab-ss-quest {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 12px;
+  align-items: start;
+}
+.ab-ss-code {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 14px;
+  border: 2px solid var(--ab-ink);
+  border-radius: 14px;
+  background: var(--c-code-bg);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--c-code-text);
+  overflow: hidden;
+}
+.ab-ss-run {
+  justify-self: start;
+  pointer-events: none;
+}
+.ab-ss-out {
+  position: relative;
+  grid-column: 1;
+  display: grid;
+  min-height: 72px;
+  padding: 8px 12px;
+  border: 2px dashed var(--c-line-strong);
+  border-radius: 12px;
+  background: var(--c-surface);
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+.ab-ss-out.is-ok {
+  border: 2px solid var(--c-success);
+  background: var(--c-success-soft);
+  color: var(--c-success);
+}
+.ab-ss-ok {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  padding: 0 10px 2px;
+  border: 2px solid var(--c-success);
+  border-radius: 8px;
+  background: var(--c-surface);
+  color: var(--c-success);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(17px * var(--display-scale));
+  letter-spacing: var(--ab-track);
+  transform: rotate(-6deg);
+}
+.ab-ss-py {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  align-self: end;
+  line-height: 0;
+  transform-origin: 50% 100%;
+}
+.ab-ls {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 40px 12px 12px;
+}
+.ab-refs {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: var(--ab-bw) dashed var(--c-line-strong);
+}
+.ab-refs-kicker {
+  margin: 0 0 10px;
+  font-weight: 800;
+  color: var(--c-text-muted);
+}
+@container vp (max-width: 560px) {
+  .ab-um-isle {
+    width: 44%;
+  }
+  .ab-um-isle.is-from {
+    left: 4%;
+    top: 46%;
+  }
+  .ab-um-isle.is-to {
+    left: 48%;
+    top: 16%;
+  }
+  .ab-um .ab-isle-tag {
+    grid-template-columns: auto auto;
+    padding-right: 10px;
+  }
+  .ab-um .ab-isle-no {
+    grid-row: span 2;
+  }
+}
+
+/* 움직이는 섬에는 손그림 흔들림 필터를 끈다 (변형될 때마다 필터를 다시 그려 비쌈, CPU 4배 측정) */
+.ab-um-art .ab-wob,
+.ab-isle.is-asleep .ab-wob {
+  filter: none;
+}
+/* 축하·이동 중인 캐릭터는 종이 결 필터를 끈다.
+   AB 리그의 종이 결은 feTurbulence 2개 + 변위라 몸이 움직일 때마다 매 프레임 다시 그려진다.
+   CPU 4배에서 축하 장면 메인 스레드 대부분이 이 필터 그리기였음 → 연출 중에는 외곽선·광택만 (P2-13에 보고) */
+.ab-sc svg g[filter],
+.ab-lv-card svg g[filter],
+.ab-lv-card svg [filter],
+.ab-um-py svg g[filter],
+.ab-map-py svg g[filter] {
+  filter: none;
+}

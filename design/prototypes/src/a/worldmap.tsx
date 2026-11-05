@@ -1,7 +1,7 @@
 // 월드맵 (#world) + 스테이지 퀘스트 고르기 (#stage = 같은 지도 위에 바텀시트/오른쪽 패널)
 // 바다 위 섬 7개(스테이지 = 섬 위 랜드마크), 섬 사이 나무다리(완료)·징검돌(잠김), 파이뱀이 길을 따라 통통 점프.
 // 넓은 화면(≥900px)은 가로 지도, 좁은 화면은 세로 지도. 둘 다 같은 섬·랜드마크 컴포넌트를 쓴다.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { STAGES } from '../shared/content';
 import { goScreen } from '../shared/app';
 import { Icon, RewardIcon } from '../shared/icons';
@@ -11,8 +11,10 @@ import { CloudShape, tone } from './clay';
 import { Island, LANDMARKS, Landmark, Palm, WorldScene } from './scenes';
 import { CURRENT_STAGE, questStars, setStore, stageStars, stageStatus, useStore } from './store';
 import { ClayButton, Hud, Progress, Sheet, Stars, toast } from './ui';
+import { Seq, burst } from './seq';
+import { EASING } from '../shared/tokens';
 
-interface Layout {
+export interface Layout {
   w: number;
   h: number;
   nodes: [number, number][];
@@ -128,6 +130,42 @@ export function MapScreen({ sheet }: { sheet: boolean }) {
   const done = STAGES.filter((_, i) => stageStatus(i) === 'done').length;
   const allStars = STAGES.reduce((a, _x, i) => a + stageStars(i).got, 0);
   const maxStars = STAGES.reduce((a, _x, i) => a + stageStars(i).max, 0);
+  const mapRef = useRef<MapHandle | null>(null);
+  const [unlock, setUnlock] = useState<{ from: number; to: number } | null>(null);
+  const seqRef = useRef<Seq | null>(null);
+  useEffect(() => () => seqRef.current?.cancel(), []);
+
+  /** 지도에서 스테이지 해제 연출 보기: 3스테이지를 다 깼다고 치고 4스테이지를 연다 (P2-05) */
+  const playUnlock = () => {
+    seqRef.current?.cancel();
+    const from = CURRENT_STAGE;
+    const to = CURRENT_STAGE + 1;
+    setStore({ cur: from });
+    setUnlock({ from, to });
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const h = mapRef.current;
+        if (!h) return;
+        h.setPos(from);
+        h.setCur(from);
+        h.root?.querySelector(`[data-node="${to}"]`)?.scrollIntoView({ block: 'center' });
+        const m = getMotion();
+        const seq = new Seq(m.reduced ? 'reduced' : m.tier, () => {
+          h.setCur(from);
+          h.setPos(from);
+          h.setHop(false);
+        });
+        buildUnlock(seq, h, from, to);
+        seq.onEnd = () => {
+          setStore({ cur: to, stage: to });
+          setUnlock(null);
+          requestAnimationFrame(() => requestAnimationFrame(() => seq.cancel()));
+        };
+        seqRef.current = seq;
+        seq.play();
+      }),
+    );
+  };
 
   return (
     <div className="a-screen a-map-screen" ref={shell}>
@@ -160,7 +198,7 @@ export function MapScreen({ sheet }: { sheet: boolean }) {
           </div>
         </div>
 
-        {width > 0 && <IslandMap key={wide ? 'w' : 't'} L={L} wide={wide} selected={s.stage} sheetOpen={sheet} />}
+        {width > 0 && <IslandMap ref={mapRef} key={wide ? 'w' : 't'} L={L} wide={wide} cur={s.cur} selected={s.stage} sheetOpen={sheet} unlock={unlock} />}
 
         <section className="a-next-worlds" aria-labelledby="a-nw-title">
           <h2 id="a-nw-title" className="a-h2">
@@ -191,11 +229,14 @@ export function MapScreen({ sheet }: { sheet: boolean }) {
             size="lg"
             icon="play"
             onClick={() => {
-              setStore({ stage: CURRENT_STAGE });
+              setStore({ stage: s.cur });
               goScreen('stage');
             }}
           >
-            {STAGES[CURRENT_STAGE].title} 계속하기
+            {STAGES[s.cur].title} 계속하기
+          </ClayButton>
+          <ClayButton variant="white" size="md" icon="unlock" onClick={playUnlock} disabled={unlock !== null}>
+            {s.cur > CURRENT_STAGE ? '해제 연출 다시 보기' : '4스테이지 열기 연출 보기'}
           </ClayButton>
         </div>
       </main>
@@ -229,17 +270,111 @@ export function MapScreen({ sheet }: { sheet: boolean }) {
 
 // ───────────── 섬 지도
 
-function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean; selected: number; sheetOpen: boolean }) {
+export interface MapHandle {
+  root: HTMLDivElement | null;
+  fx: HTMLDivElement | null;
+  /** viewBox 1단위 = k px */
+  k: () => number;
+  /** 노드 중심의 지도 안 px 좌표 */
+  nodePx: (i: number) => { x: number; y: number };
+  hopFrames: (from: number, to: number) => { body: Keyframe[]; shadow: Keyframe[]; dur: number };
+  body: () => HTMLDivElement | null;
+  shadow: () => HTMLDivElement | null;
+  setPos: (i: number) => void;
+  setCur: (i: number) => void;
+  setHop: (v: boolean) => void;
+}
+
+/** 다리 곡선 (2차 베지어): 노드 i → i+1 */
+function bridgeCurve(L: Layout, i: number) {
+  const [ax, ay] = L.nodes[i];
+  const [bx, by] = L.nodes[i + 1];
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len = Math.hypot(dx, dy);
+  const bend = (i % 2 ? 1 : -1) * len * 0.12;
+  const cx = mx + (-dy / len) * bend;
+  const cy = my + (dx / len) * bend;
+  return { a: [ax, ay], c: [cx, cy], b: [bx, by], len, d: `M${ax} ${ay} Q${cx} ${cy} ${bx} ${by}` };
+}
+
+export const IslandMap = forwardRef<
+  MapHandle,
+  {
+    L: Layout;
+    wide: boolean;
+    cur: number;
+    selected?: number;
+    sheetOpen?: boolean;
+    autoHop?: boolean;
+    interactive?: boolean;
+    /** 해제 연출용 겹침 요소를 그린다 (from 스테이지 완료 → to 스테이지 열림) */
+    unlock?: { from: number; to: number } | null;
+    /** 연출 단계 덮어쓰기 (#motion 무대의 비교 토글) */
+    tier?: 'full' | 'lite' | 'minimal';
+    reduced?: boolean;
+  }
+>(function IslandMap({ L, wide, cur: curProp, selected = 0, sheetOpen = false, autoHop = true, interactive = true, unlock = null, tier, reduced }, ref) {
   const box = useRef<HTMLDivElement | null>(null);
+  const fx = useRef<HTMLDivElement | null>(null);
   const width = useWide(box);
   const k = width ? width / L.w : 1;
-  const [pos, setPos] = useState(() => (sheetOpen ? selected : CURRENT_STAGE - 1));
+  const [cur, setCur] = useState(curProp);
+  useEffect(() => setCur(curProp), [curProp]);
+  const [pos, setPos] = useState(() => (sheetOpen ? selected : autoHop ? Math.max(0, curProp - 1) : curProp));
   const [hopping, setHopping] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
   const [shake, setShake] = useState<number | null>(null);
   const body = useRef<HTMLDivElement | null>(null);
   const shadow = useRef<HTMLDivElement | null>(null);
   const motion = useMotion();
+  const kRef = useRef(k);
+  kRef.current = k;
+  const status = (i: number) => stageStatus(i, cur);
+
+  const hopFrames = (from: number, to: number, kk = kRef.current) => {
+    const path: number[] = [];
+    const dir = to > from ? 1 : -1;
+    for (let i = from + dir; dir > 0 ? i <= to : i >= to; i += dir) path.push(i);
+    const pts = [from, ...path].map((i) => L.nodes[i]);
+    const hopMs = tierDuration(path.length > 2 ? 300 : 460);
+    const bodyKf: Keyframe[] = [];
+    const shKf: Keyframe[] = [];
+    const segs = Math.max(1, pts.length - 1);
+    for (let sgi = 0; sgi < pts.length - 1; sgi++) {
+      const [ax, ay] = pts[sgi];
+      const [bx, by] = pts[sgi + 1];
+      const steps = 10;
+      for (let st = sgi === 0 ? 0 : 1; st <= steps; st++) {
+        const u = st / steps;
+        const x = (ax + (bx - ax) * u) * kk;
+        const yBase = (ay + (by - ay) * u) * kk;
+        const arc = Math.sin(Math.PI * u) * (wide ? 90 : 70);
+        const sq = st === steps ? 'scale(1.18, 0.82)' : st === 0 ? 'scale(1.1, 0.9)' : 'scale(0.95, 1.06)';
+        const off = (sgi + u) / segs;
+        bodyKf.push({ transform: `translate(${x}px, ${yBase - arc}px) ${sq}`, offset: off });
+        shKf.push({ transform: `translate(${x}px, ${yBase}px) scale(${1 - Math.sin(Math.PI * u) * 0.45})`, offset: off });
+      }
+    }
+    const [tx, ty] = L.nodes[to];
+    bodyKf[bodyKf.length - 1] = { transform: `translate(${tx * kk}px, ${ty * kk}px)`, offset: 1 };
+    return { body: bodyKf, shadow: shKf, dur: hopMs * segs };
+  };
+
+  useImperativeHandle(ref, () => ({
+    root: box.current,
+    fx: fx.current,
+    k: () => kRef.current,
+    nodePx: (i) => ({ x: L.nodes[i][0] * kRef.current, y: L.nodes[i][1] * kRef.current }),
+    hopFrames: (a, b) => hopFrames(a, b),
+    body: () => body.current,
+    shadow: () => shadow.current,
+    setPos,
+    setCur,
+    setHop: setHopping,
+  }));
 
   /** 파이뱀이 노드를 따라 통통 점프 (transform만). 끝나면 cb */
   const hopTo = (target: number, cb?: () => void) => {
@@ -250,33 +385,10 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
       cb?.();
       return;
     }
-    const path: number[] = [];
-    const dir = target > pos ? 1 : -1;
-    for (let i = pos + dir; dir > 0 ? i <= target : i >= target; i += dir) path.push(i);
-    const pts = [pos, ...path].map((i) => L.nodes[i]);
-    const hopMs = tierDuration(path.length > 2 ? 300 : 420);
-    const bodyKf: Keyframe[] = [];
-    const shKf: Keyframe[] = [];
-    const segs = pts.length - 1;
-    for (let sgi = 0; sgi < segs; sgi++) {
-      const [ax, ay] = pts[sgi];
-      const [bx, by] = pts[sgi + 1];
-      const steps = 8;
-      for (let st = sgi === 0 ? 0 : 1; st <= steps; st++) {
-        const u = st / steps;
-        const x = (ax + (bx - ax) * u) * k;
-        const yBase = (ay + (by - ay) * u) * k;
-        const arc = Math.sin(Math.PI * u) * (wide ? 90 : 70);
-        const sq = st === steps ? 'scale(1.18, 0.82)' : st === 0 ? 'scale(1.1, 0.9)' : 'scale(0.95, 1.06)';
-        const off = (sgi + u) / segs;
-        bodyKf.push({ transform: `translate(${x}px, ${yBase - arc}px) ${sq}`, offset: off });
-        shKf.push({ transform: `translate(${x}px, ${yBase}px) scale(${1 - Math.sin(Math.PI * u) * 0.45})`, offset: off });
-      }
-    }
+    const f = hopFrames(pos, target);
     setHopping(true);
-    const dur = hopMs * segs;
-    body.current.animate(bodyKf, { duration: dur, easing: 'linear', fill: 'forwards' });
-    const a = shadow.current.animate(shKf, { duration: dur, easing: 'linear', fill: 'forwards' });
+    body.current.animate(f.body, { duration: f.dur, easing: 'linear', fill: 'forwards' });
+    const a = shadow.current.animate(f.shadow, { duration: f.dur, easing: 'linear', fill: 'forwards' });
     a.finished
       .then(() => {
         setPos(target);
@@ -284,11 +396,8 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
         requestAnimationFrame(() => {
           body.current?.getAnimations().forEach((x) => x.cancel());
           shadow.current?.getAnimations().forEach((x) => x.cancel());
-          // 착지 젤리
           if (getMotion().tier === 'full') {
-            body.current
-              ?.querySelector('.a-py-squash')
-              ?.animate([{ transform: 'scale(1.2, 0.8)' }, { transform: 'none' }], springTiming('jellyA'));
+            body.current?.querySelector('.a-py-squash')?.animate([{ transform: 'scale(1.2, 0.8)' }, { transform: 'none' }], springTiming('jellyA'));
           }
         });
         cb?.();
@@ -296,17 +405,16 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
       .catch(() => {});
   };
 
-  // 처음 들어오면 변수의 숲 → 조건의 갈림길로 통통 (현재 스테이지로 이동)
+  // 처음 들어오면 한 칸 전 섬 → 지금 섬으로 통통 (현재 스테이지로 이동)
   useEffect(() => {
-    if (!width) return;
-    if (sheetOpen) return;
-    const t = setTimeout(() => hopTo(CURRENT_STAGE), 650);
+    if (!width || sheetOpen || !autoHop) return;
+    const t = setTimeout(() => hopTo(curProp), 650);
     return () => clearTimeout(t);
   }, [width > 0]);
 
   const tap = (i: number) => {
-    const st = stageStatus(i);
-    if (st === 'locked') {
+    if (!interactive) return;
+    if (status(i) === 'locked') {
       setShake(i);
       setTimeout(() => setShake(null), 500);
       toast(`아직 잠겨 있어요! ${STAGES[i - 1]?.title ?? ''}부터 깨 봐요`, 'lock');
@@ -321,22 +429,26 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
 
   const [px, py] = L.nodes[pos];
   const pyStyle = { transform: `translate(${px * k}px, ${py * k}px)` } as CSSProperties;
-  const bridges = useMemo(() => {
-    return L.nodes.slice(1).map(([bx, by], i) => {
-      const [ax, ay] = L.nodes[i];
-      const mx = (ax + bx) / 2;
-      const my = (ay + by) / 2;
-      const dx = bx - ax;
-      const dy = by - ay;
-      const len = Math.hypot(dx, dy);
-      const bend = (i % 2 ? 1 : -1) * len * 0.12;
-      const cx = mx + (-dy / len) * bend;
-      const cy = my + (dx / len) * bend;
-      return { d: `M${ax} ${ay} Q${cx} ${cy} ${bx} ${by}`, done: i + 1 <= CURRENT_STAGE };
-    });
-  }, [L]);
+  const bridges = useMemo(() => L.nodes.slice(1).map((_, i) => bridgeCurve(L, i)), [L]);
+  const planks = useMemo(() => {
+    if (!unlock) return [];
+    const c = bridgeCurve(L, unlock.from);
+    const n = Math.max(6, Math.round(c.len / 30));
+    const out: { x: number; y: number; r: number }[] = [];
+    for (let i = 1; i < n; i++) {
+      const u = i / n;
+      const x = (1 - u) ** 2 * c.a[0] + 2 * (1 - u) * u * c.c[0] + u * u * c.b[0];
+      const y = (1 - u) ** 2 * c.a[1] + 2 * (1 - u) * u * c.c[1] + u * u * c.b[1];
+      const tx = 2 * (1 - u) * (c.c[0] - c.a[0]) + 2 * u * (c.b[0] - c.c[0]);
+      const ty = 2 * (1 - u) * (c.c[1] - c.a[1]) + 2 * u * (c.b[1] - c.c[1]);
+      out.push({ x, y, r: (Math.atan2(ty, tx) * 180) / Math.PI + 90 });
+    }
+    return out;
+  }, [L, unlock?.from]);
 
-  const ringOn = !motion.reduced;
+  const ringOn = !(reduced ?? motion.reduced);
+  const bw = wide ? 22 : 18;
+  const pw = (wide ? 26 : 22) * 0.5;
 
   return (
     <div className={`a-map${wide ? ' a-map-wide' : ' a-map-tall'}`}>
@@ -364,40 +476,82 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
             </g>
           </g>
 
-          {/* 다리·징검돌 */}
-          {bridges.map((b, i) =>
-            b.done ? (
+          {/* 다리(완료)·징검돌(잠김). 해제 연출 구간은 징검돌을 그리고 위에 널빤지를 하나씩 놓는다 */}
+          {bridges.map((b, i) => {
+            const done = i + 1 <= cur && !(unlock && unlock.from === i);
+            return done ? (
               <g key={i}>
-                <path d={b.d} stroke="#A9703D" strokeWidth={wide ? 22 : 18} fill="none" strokeLinecap="round" transform="translate(0 6)" />
-                <path d={b.d} stroke="#D9A066" strokeWidth={wide ? 22 : 18} fill="none" strokeLinecap="round" />
-                <path d={b.d} stroke="#B97E47" strokeWidth={wide ? 22 : 18} fill="none" strokeDasharray="3 11" />
+                <path d={b.d} stroke="#A9703D" strokeWidth={bw} fill="none" strokeLinecap="round" transform="translate(0 6)" />
+                <path d={b.d} stroke="#D9A066" strokeWidth={bw} fill="none" strokeLinecap="round" />
+                <path d={b.d} stroke="#B97E47" strokeWidth={bw} fill="none" strokeDasharray="3 11" />
                 <path d={b.d} stroke="#fff" strokeWidth="3" fill="none" opacity="0.35" strokeLinecap="round" transform="translate(0 -6)" />
               </g>
             ) : (
-              <g key={i}>
+              <g key={i} data-u={unlock && unlock.from === i ? 'stones' : undefined}>
                 <path d={b.d} stroke="#A9B8CA" strokeWidth={wide ? 15 : 13} fill="none" strokeLinecap="round" strokeDasharray="0.1 30" transform="translate(0 4)" />
                 <path d={b.d} stroke="#E3EAF2" strokeWidth={wide ? 15 : 13} fill="none" strokeLinecap="round" strokeDasharray="0.1 30" />
               </g>
-            ),
+            );
+          })}
+          {unlock && (
+            <g data-u="planks">
+              {planks.map((p, i) => (
+                <g key={i} transform={`translate(${p.x} ${p.y}) rotate(${p.r})`}>
+                  <g className="a-u-box a-u-center" data-u-plank="" opacity={0}>
+                    <rect x={-pw} y={-6} width={pw * 2} height={14} rx={4} fill="#A9703D" transform="translate(0 4)" />
+                    <rect x={-pw} y={-6} width={pw * 2} height={14} rx={4} fill="#D9A066" />
+                    <rect x={-pw + 3} y={-4} width={pw * 0.8} height={3} rx={1.5} fill="#fff" opacity="0.4" />
+                  </g>
+                </g>
+              ))}
+            </g>
           )}
 
           {/* 섬 + 랜드마크 */}
           {L.nodes.map(([x, y], i) => {
-            const st = stageStatus(i);
+            const st = status(i);
             const big = i === 6 ? 1.2 : 1;
+            const isTo = unlock?.to === i;
+            const isFrom = unlock?.from === i;
             return (
               <g
                 key={i}
                 className={`a-node-g${hover === i ? ' is-hover' : ''}${shake === i ? ' is-shake' : ''}${st === 'current' ? ' is-current' : ''}`}
               >
-                {st === 'current' && ringOn && <ellipse className="a-node-ring m-loop" cx={x} cy={y + L.ry * 0.3} rx={L.rx * 1.3} ry={L.ry * 1.6} fill="none" stroke="#FFD84D" strokeWidth="6" />}
+                {st === 'current' && ringOn && !isTo && (
+                  <ellipse className="a-node-ring m-loop" cx={x} cy={y + L.ry * 0.3} rx={L.rx * 1.3} ry={L.ry * 1.6} fill="none" stroke="#FFD84D" strokeWidth="6" />
+                )}
                 <Island x={x} y={y} rx={L.rx * big} ry={L.ry * big} seed={i * 3 + 1} locked={st === 'locked'}>
                   <Landmark kind={LANDMARKS[i]} x={x + L.rx * 0.18} y={y - L.ry * 0.05} s={L.lm * big} locked={st === 'locked'} />
                 </Island>
-                {st === 'done' && (
-                  <g transform={`translate(${x - L.rx * 0.62} ${y - L.ry * 0.2})`}>
-                    <path d="M0 0 V-34" stroke="#A9703D" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M0 -34 L22 -27 L0 -20Z" fill="#FFD84D" />
+                {isTo && (
+                  <>
+                    {/* 깨어난 섬: 색 있는 섬을 위에 겹쳐 서서히 드러냄 (필터 없이 색만) */}
+                    <g data-u="wake" className="a-u-box a-u-bottom" opacity={0}>
+                      <Island x={x} y={y} rx={L.rx * big} ry={L.ry * big} seed={i * 3 + 1} />
+                    </g>
+                    <g data-u="landmark" className="a-u-box a-u-bottom" opacity={0}>
+                      <Landmark kind={LANDMARKS[i]} x={x + L.rx * 0.18} y={y - L.ry * 0.05} s={L.lm * big} />
+                    </g>
+                    {/* 자물쇠 */}
+                    <g transform={`translate(${x} ${y - L.ry * 1.6})`}>
+                      <g data-u="lock" className="a-u-box a-u-center">
+                        <path data-u="shackle" className="a-u-box a-u-shackle" d="M-11 -6 V-15 a11 11 0 0 1 22 0 V-6" stroke="#8496AE" strokeWidth="6" fill="none" strokeLinecap="round" />
+                        <rect x="-18" y="-8" width="36" height="30" rx="9" fill="#C98F2A" transform="translate(0 4)" />
+                        <rect x="-18" y="-8" width="36" height="30" rx="9" fill="#FFC93C" />
+                        <ellipse cx="-8" cy="-2" rx="5" ry="2.4" fill="#fff" opacity="0.55" />
+                        <circle cx="0" cy="6" r="4" fill="#8A5A00" />
+                        <rect x="-1.6" y="7" width="3.2" height="7" rx="1.6" fill="#8A5A00" />
+                      </g>
+                    </g>
+                  </>
+                )}
+                {(st === 'done' || isFrom) && (
+                  <g transform={`translate(${x - L.rx * 0.8} ${y + L.ry * 0.05})`}>
+                    <g data-u={isFrom ? 'flag' : undefined} className={isFrom ? 'a-u-box a-u-bottom' : undefined}>
+                      <path d="M0 0 V-34" stroke="#A9703D" strokeWidth="3" strokeLinecap="round" />
+                      <path d="M0 -34 L22 -27 L0 -20Z" fill="#FFD84D" />
+                    </g>
                   </g>
                 )}
               </g>
@@ -412,28 +566,31 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
           </div>
           <div ref={body} className="a-py-body" style={pyStyle}>
             <div className="a-py-squash" style={{ width: L.py, height: L.py, marginLeft: -L.py * 0.5 - L.rx * 0.42 * k, marginTop: -L.py * 0.92 }}>
-              <PybaemRig state={hopping ? 'happy' : 'idle'} size={L.py} lookAt={false} />
+              <PybaemRig state={hopping ? 'happy' : 'idle'} size={L.py} lookAt={false} tier={tier} reducedMotion={reduced} />
             </div>
           </div>
         </div>
 
         {/* 노드 버튼 (글자·접근성) */}
         {L.nodes.map(([x, y], i) => {
-          const st = stageStatus(i);
-          const { got, max } = stageStars(i);
+          const st = status(i);
+          const { got, max } = stageStars(i, cur);
           const stage = STAGES[i];
           const stLabel = st === 'done' ? '완료' : st === 'current' ? '지금 하는 곳' : '잠김';
+          const off = x < -40 || x > L.w + 40;
           return (
             <button
               key={i}
               type="button"
+              data-node={i}
               className={`a-node a-node-${st}`}
-              style={{ left: `${(x / L.w) * 100}%`, top: `${(y / L.h) * 100}%` }}
+              style={{ left: `${(x / L.w) * 100}%`, top: `${(y / L.h) * 100}%`, visibility: off ? 'hidden' : undefined }}
               onClick={() => tap(i)}
-              onPointerEnter={() => setHover(i)}
+              onPointerEnter={() => interactive && setHover(i)}
               onPointerLeave={() => setHover(null)}
-              onFocus={() => setHover(i)}
+              onFocus={() => interactive && setHover(i)}
               onBlur={() => setHover(null)}
+              tabIndex={interactive ? undefined : -1}
               aria-label={`스테이지 ${stage.order} ${stage.title}, ${stLabel}${st !== 'locked' ? `, 별 ${max}개 중 ${got}개` : ''}`}
             >
               <span className="a-node-hit" aria-hidden />
@@ -447,7 +604,12 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
                   </span>
                 )}
               </span>
-              {st === 'current' && (
+              {unlock?.to === i && (
+                <span className="a-opened" data-u="opened" aria-hidden>
+                  열렸어요!
+                </span>
+              )}
+              {st === 'current' && unlock?.to !== i && (
                 <span className="a-here m-loop" aria-hidden>
                   지금 여기!
                 </span>
@@ -455,6 +617,7 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
             </button>
           );
         })}
+        <div className="a-map-fx" ref={fx} aria-hidden />
       </div>
       <div className="a-clouds" aria-hidden>
         <CloudShape className="a-cloud a-cloud-1 m-ambient" w={wide ? 180 : 120} />
@@ -463,6 +626,85 @@ function IslandMap({ L, wide, selected, sheetOpen }: { L: Layout; wide: boolean;
       </div>
     </div>
   );
+});
+
+/**
+ * 스테이지 해제 연출 (P2-05). 지도와 #motion 무대가 함께 쓴다.
+ * 깃발 → 다리 널빤지 하나씩 → 자물쇠 흔들림·열림 → 섬 색이 돌아오며 젤리 → 랜드마크 솟음 → 파이뱀 점프 → 이름표 + "열렸어요!"
+ */
+export function buildUnlock(seq: Seq, h: MapHandle, from: number, to: number) {
+  const root = h.root;
+  if (!root) return;
+  const q = (s: string) => root.querySelector(s);
+  const qa = (s: string) => [...root.querySelectorAll(s)];
+  const fxl = h.fx ?? root;
+
+  // ① 깃발
+  seq.appear(q('[data-u="flag"]'), 0, [{ transform: 'scale(0.2, 0)' }, { transform: 'none' }], { spring: 'prop', liteSpring: 'body' });
+  seq.beat('3스테이지 완료 깃발', 0, seq.moves ? springTiming(seq.mode === 'lite' ? 'body' : 'prop').duration : 150, 'prop / lite body');
+
+  // ② 다리 널빤지
+  const T0 = seq.s(420);
+  const planks = qa('[data-u-plank]');
+  const gap = seq.s(55);
+  planks.forEach((p, i) => {
+    seq.appear(p, seq.moves ? T0 + i * gap : T0, [{ transform: 'translateY(-34px) scale(0.3)' }, { transform: 'none' }], { spring: 'prop', liteSpring: 'face' });
+  });
+  seq.vanish(q('[data-u="stones"]'), T0 + gap * planks.length, [{ opacity: 1 }, { opacity: 0 }], 240);
+  const bridgeEnd = T0 + (seq.moves ? gap * planks.length + 300 : 150);
+  seq.beat(`다리 놓기 (널빤지 ${planks.length}개, ${gap}ms 간격)`, T0, bridgeEnd - T0, 'prop / lite face');
+
+  // ③ 자물쇠
+  const T1 = bridgeEnd;
+  const lock = q('[data-u="lock"]');
+  seq.wiggle(lock, T1, [{ transform: 'rotate(0)' }, { transform: 'rotate(-14deg)' }, { transform: 'rotate(12deg)' }, { transform: 'rotate(-8deg)' }, { transform: 'rotate(5deg)' }, { transform: 'none' }], 420, 'linear');
+  if (seq.moves) seq.anim(q('[data-u="shackle"]'), [{ transform: 'none' }, { transform: 'translateY(-5px) rotate(-30deg)' }], T1 + seq.s(420), { duration: seq.s(160), easing: EASING.backOut });
+  const T1b = T1 + (seq.moves ? seq.s(620) : seq.s(300));
+  seq.vanish(lock, T1b, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-36px) rotate(25deg) scale(0.6)', opacity: 0 }], 360);
+  seq.beat('자물쇠 흔들림 → 열림 → 날아감', T1, T1b + seq.s(360) - T1, 'linear 흔들기 · backOut · out');
+
+  // ④ 섬이 깨어남
+  const T2 = T1b + seq.s(120);
+  const c = h.nodePx(to);
+  seq.appear(q('[data-u="wake"]'), T2, [{ opacity: 0 }, { opacity: 1 }], { duration: 360, easing: EASING.out });
+  seq.squish(q('[data-u="wake"]'), T2 + seq.s(260), 0.8);
+  burst(seq, fxl, c.x, c.y - 20 * h.k(), T2 + seq.s(200), 10, 70);
+  seq.beat('섬 색이 돌아옴 + 젤리 스퀴시 + 반짝이', T2, seq.moves ? seq.s(260) + 90 + springTiming(seq.mode === 'lite' ? 'body' : 'jellyA').duration : 150, 'out 360ms → jellyA');
+
+  // ⑤ 랜드마크 솟음
+  const T3 = T2 + seq.s(420);
+  seq.appear(q('[data-u="landmark"]'), T3, [{ transform: 'translateY(22px) scale(0.5, 0.2)' }, { transform: 'none' }], { spring: 'jellyA', liteSpring: 'body' });
+  seq.beat('랜드마크 솟아오름', T3, seq.moves ? springTiming(seq.mode === 'lite' ? 'body' : 'jellyA').duration : 150, 'jellyA / lite body');
+
+  // ⑥ 파이뱀 점프
+  const T4 = T3 + seq.s(700);
+  let hopEnd = T4;
+  if (seq.moves) {
+    const f = h.hopFrames(from, to);
+    seq.call(T4, () => h.setHop(true));
+    seq.anim(h.body(), f.body, T4, { duration: f.dur, fill: 'forwards' });
+    seq.anim(h.shadow(), f.shadow, T4, { duration: f.dur, fill: 'forwards' });
+    hopEnd = T4 + f.dur;
+    seq.call(hopEnd, () => {
+      h.setPos(to);
+      h.setHop(false);
+    });
+    seq.squish(h.body()?.querySelector('.a-py-squash'), hopEnd, 0.9);
+    seq.beat('파이뱀 점프 이동 + 착지 젤리', T4, f.dur + 90 + springTiming(seq.mode === 'lite' ? 'body' : 'jellyA').duration, 'linear 아크 → jellyA');
+  } else {
+    seq.call(T4, () => h.setPos(to));
+    seq.appear(h.body(), T4, [{ opacity: 0 }, { opacity: 1 }]);
+    hopEnd = T4 + 150;
+    seq.beat('파이뱀 자리 옮김 (점프 없음)', T4, 150, seq.mode === 'minimal' ? '페이드 150ms' : '즉시');
+  }
+
+  // ⑦ 이름표·별 진행
+  const T5 = hopEnd + seq.s(120);
+  seq.call(T5, () => h.setCur(to));
+  const plaque = root.querySelector(`[data-node="${to}"] .a-plaque`);
+  seq.appear(plaque, T5, [{ transform: 'translateX(-50%) scale(0.3)' }, { transform: 'translateX(-50%)' }], { spring: 'prop', liteSpring: 'face', fill: 'forwards' });
+  seq.appear(q('[data-u="opened"]'), T5 + seq.s(220), [{ transform: 'translateY(10px) scale(0.4)' }, { transform: 'none' }], { spring: 'jellyA', liteSpring: 'body' });
+  seq.beat('이름표·별 0/21 + "열렸어요!"', T5, seq.s(220) + (seq.moves ? springTiming('jellyA').duration : 150), 'prop · jellyA');
 }
 
 // ───────────── 스테이지 시트 (퀘스트 고르기·복습, X7)

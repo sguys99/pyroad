@@ -2,7 +2,7 @@
 // 프로토타입 전용: 새로 고치면 처음으로 돌아간다 (보상은 앱에서 서버가 준다, §2.3)
 import { useSyncExternalStore } from 'react';
 import { SAMPLE_PLAYER } from '../shared/content';
-import { DEMO_QUEST, stageStars } from './data';
+import { DEMO_QUEST, setCurrentStage, stageStars } from './data';
 
 export interface AbState {
   nickname: string;
@@ -17,6 +17,8 @@ export interface AbState {
   quest: { stage: number; order: number };
   /** 월드맵에서 파이뱀이 서 있는 스테이지 */
   pyAt: number;
+  /** 지금 모험 중인 스테이지 (월드맵 "해제 보기" 데모로 바뀜) */
+  current: number;
   toast: { id: number; text: string; tone: 'info' | 'lock' | 'good' } | null;
   /** 보상이 막 들어온 HUD 칸 (팝 연출) */
   bump: { id: number; coins?: number; xp?: number; stars?: number } | null;
@@ -27,7 +29,8 @@ const totalStars = [1, 2, 3].reduce((n, s) => n + stageStars(s).got, 0);
 let state: AbState = {
   nickname: SAMPLE_PLAYER.nickname,
   level: SAMPLE_PLAYER.level,
-  xp: SAMPLE_PLAYER.xp,
+  // 레벨업을 바로 볼 수 있게 경험치를 거의 찬 상태로 시작 (퀘스트 성공 +50이면 레벨 5)
+  xp: 470,
   xpNext: SAMPLE_PLAYER.xpNext,
   coins: SAMPLE_PLAYER.coins,
   stars: totalStars,
@@ -36,6 +39,7 @@ let state: AbState = {
   stage: 3,
   quest: DEMO_QUEST,
   pyAt: 3,
+  current: 3,
   toast: null,
   bump: null,
 };
@@ -46,6 +50,7 @@ export function getAb() {
 }
 export function setAb(patch: Partial<AbState> | ((s: AbState) => Partial<AbState>)) {
   const p = typeof patch === 'function' ? patch(state) : patch;
+  if (p.current !== undefined) setCurrentStage(p.current);
   state = { ...state, ...p };
   listeners.forEach((l) => l());
 }
@@ -68,7 +73,7 @@ export function toast(text: string, tone: 'info' | 'lock' | 'good' = 'info') {
 }
 
 /** 보상 지급 (프로토타입): HUD 숫자 + 팝 */
-export function grant(r: { coins?: number; xp?: number; stars?: number }) {
+export function grant(r: { coins?: number; xp?: number; stars?: number }, opt: { bump?: boolean } = {}) {
   setAb((s) => {
     let xp = s.xp + (r.xp ?? 0);
     let level = s.level;
@@ -78,6 +83,6 @@ export function grant(r: { coins?: number; xp?: number; stars?: number }) {
       level += 1;
       xpNext += 100;
     }
-    return { coins: s.coins + (r.coins ?? 0), stars: s.stars + (r.stars ?? 0), xp, level, xpNext, bump: { id: Date.now(), ...r } };
+    return { coins: s.coins + (r.coins ?? 0), stars: s.stars + (r.stars ?? 0), xp, level, xpNext, bump: opt.bump === false ? s.bump : { id: Date.now(), ...r } };
   });
 }
