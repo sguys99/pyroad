@@ -57,6 +57,12 @@ supabase/tests/.results/
 spikes/**/node_modules/
 spikes/**/.next/
 spikes/**/supabase/.temp/
+# Phase 2 디자인 프로토타입 (P2-01): 의존성·스크린샷·폰트 캐시는 커밋하지 않음, dist/*.html은 커밋
+design/prototypes/node_modules/
+design/prototypes/shots/
+design/prototypes/.font-cache/
+design/prototypes/.build/
+!design/prototypes/dist/
 
 # Misc
 *.pem

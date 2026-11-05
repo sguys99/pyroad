@@ -1,0 +1,131 @@
+/* 버그버그·별똥이 CSS 모션 (transform·opacity만, §2.10)
+   - 반복(통통·반짝·더듬이·깜빡임)은 full·lite만. minimal·동작 줄이기에서는 멈춘다
+   - 등장(팝)은 한 번: lite 70% 길이, minimal 페이드, 동작 줄이기는 즉시 */
+.fr {
+  overflow: visible;
+}
+.fr .fr-body,
+.fr .fr-head,
+.fr .fr-antenna-l,
+.fr .fr-antenna-r,
+.fr .fr-twinkle,
+.fr .fr-blink,
+.fr .fr-prop {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.fr .fr-twinkle,
+.fr .fr-blink {
+  transform-origin: 50% 50%;
+}
+
+@keyframes fr-appear {
+  0% {
+    transform: translateY(18px) scale(0.4, 0.3);
+  }
+  55% {
+    transform: translateY(-6px) scale(1.08, 1.12);
+  }
+  75% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes fr-bob {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  45% {
+    transform: translateY(-5px) scale(0.985, 1.02);
+  }
+  90% {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+}
+@keyframes fr-antenna {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+@keyframes fr-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.45) rotate(45deg);
+    opacity: 0.35;
+  }
+}
+@keyframes fr-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes fr-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fr-appear .fr-body {
+  animation: fr-appear 640ms var(--spring-prop, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+}
+.fr-bob:not(.fr-appear) .fr-body {
+  animation: fr-bob 2.4s ease-in-out infinite;
+}
+.fr-appear.fr-bob .fr-body {
+  animation:
+    fr-appear 640ms var(--spring-prop, cubic-bezier(0.34, 1.56, 0.64, 1)) both,
+    fr-bob 2.4s ease-in-out 700ms infinite;
+}
+.fr-bug.fr-bob .fr-antenna-l {
+  animation: fr-antenna 1.6s ease-in-out infinite;
+}
+.fr-bug.fr-bob .fr-antenna-r {
+  animation: fr-antenna 1.6s ease-in-out 0.25s infinite reverse;
+}
+.fr .fr-twinkle {
+  animation: fr-twinkle 1.5s ease-in-out infinite;
+}
+.fr .fr-blink {
+  animation: fr-blink 4.2s linear infinite;
+}
+
+/* B 그림책: 2프레임마다(12fps) 느낌 */
+[data-concept='B'] .fr-bob .fr-body {
+  animation-timing-function: steps(14, jump-none);
+}
+
+/* lite: 일회성은 70% 길이, 반복은 유지 */
+[data-motion='lite'] .fr-appear .fr-body {
+  animation-duration: 450ms;
+}
+/* minimal: 반복 0, 등장은 페이드 */
+[data-motion='minimal'] .fr * {
+  animation: none !important;
+}
+[data-motion='minimal'] .fr-appear {
+  animation: fr-fade-in 150ms linear both;
+}
+/* 동작 줄이기: 움직임 0 (표정·색으로 상태 전달) */
+[data-reduced='true'] .fr,
+[data-reduced='true'] .fr * {
+  animation: none !important;
+}

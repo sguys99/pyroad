@@ -1,0 +1,6 @@
+{
+  "title": "pyRoad 마법 그림책",
+  "description": "pyRoad 디자인 시안 B (P2-03) 인터랙티브 프로토타입: 랜딩 · 월드맵 · 퀘스트 · 모션",
+  "googleFonts": ["Gaegu:wght@700", "Gowun+Dodum"],
+  "inlineFonts": ["mono"]
+}
