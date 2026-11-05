@@ -214,7 +214,8 @@ jobs:
   # Supabase 스택 없이 돈다 (E2E_NO_STACK=1: 미들웨어용 자리 값만 넣고, 세션이 없으므로 Supabase 요청이 없음).
   # 서버는 배포와 같은 `npm run build` + `npm run start` (prebuild 가 Pyodide 자체 호스팅 파일 복사). 설명: e2e/README.md
   e2e-smoke:
-    runs-on: ubuntu-latest
+    # Playwright 1.58은 ubuntu-latest(26.04)를 지원하지 않아 24.04로 고정. Playwright를 올리면 함께 확인
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -263,7 +264,8 @@ jobs:
   # (migrations + seed.sql), 실행 전용 테스트 사용자를 service_role 로 만들어 세션 쿠키를 주입한다. LLM 키 없음 → 저장된 답변 경로.
   # 필수 체크는 아님 (시간·안정성을 PR 몇 번 지켜본 뒤 결정, docs/ci.md)
   e2e:
-    runs-on: ubuntu-latest
+    # Playwright 1.58은 ubuntu-latest(26.04)를 지원하지 않아 24.04로 고정. Playwright를 올리면 함께 확인
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
