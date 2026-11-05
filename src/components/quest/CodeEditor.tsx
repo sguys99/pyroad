@@ -34,22 +34,28 @@ const pyRoadTheme = EditorView.theme({
 });
 
 interface CodeEditorProps {
-  initialCode: string;
+  /**
+   * 에디터에 보일 코드. 타자로 바뀐 값은 onChange로 올라가서 그대로 돌아오고(변화 없음),
+   * 바깥에서 바꾼 값(황금키 정답, 다음 단계 시작 코드)은 에디터 내용을 바꾼다 (P1-09)
+   */
+  value: string;
   onChange: (code: string) => void;
   className?: string;
 }
 
-export function CodeEditor({ initialCode, onChange, className }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, className }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  // 에디터는 처음 마운트할 때 한 번만 만든다. 그 뒤 값은 아래 동기화 effect가 맞춘다
+  const initialValueRef = useRef(value);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const state = EditorState.create({
-      doc: initialCode,
+      doc: initialValueRef.current,
       extensions: [
         basicSetup,
         python(),
@@ -77,9 +83,19 @@ export function CodeEditor({ initialCode, onChange, className }: CodeEditorProps
       view.destroy();
       viewRef.current = null;
     };
-    // initialCode는 최초 마운트 시에만 사용
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 바깥에서 바꾼 값을 에디터에 반영 (내용 전체 교체, 커서는 끝으로)
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    const current = view.state.doc.toString();
+    if (current === value) return;
+    view.dispatch({
+      changes: { from: 0, to: current.length, insert: value },
+      selection: { anchor: value.length },
+    });
+  }, [value]);
 
   return (
     <div

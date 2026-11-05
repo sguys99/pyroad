@@ -23,12 +23,28 @@ function FunctionTowerIllustInner({ className }: { className?: string }) {
       <polygon points="32,14 40,5 48,14" fill="#9C27B0" opacity="0.6" />
 
       {/* Flag on top */}
-      <line x1="40" y1="2" x2="40" y2="-4" stroke="#6D4C41" strokeWidth="1.5" strokeLinecap="round" />
+      <line
+        x1="40"
+        y1="2"
+        x2="40"
+        y2="-4"
+        stroke="#6D4C41"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
       <polygon points="40,-4 50,-1 40,2" fill="#FFD700" />
 
       {/* Windows */}
       <rect x="35" y="18" width="5" height="6" rx="1" fill="#3E2723" />
-      <rect x="36" y="19" width="3" height="4" rx="0.5" fill="#FFF9C4" opacity="0.4" />
+      <rect
+        x="36"
+        y="19"
+        width="3"
+        height="4"
+        rx="0.5"
+        fill="#FFF9C4"
+        opacity="0.4"
+      />
 
       <rect x="33" y="34" width="5" height="5" rx="1" fill="#3E2723" />
       <rect x="42" y="34" width="5" height="5" rx="1" fill="#3E2723" />
@@ -39,7 +55,15 @@ function FunctionTowerIllustInner({ className }: { className?: string }) {
       {/* Door with "def" text */}
       <rect x="35" y="58" width="10" height="14" rx="1.5" fill="#5D4037" />
       <rect x="36.5" y="59.5" width="7" height="11" rx="1" fill="#4E342E" />
-      <text x="40" y="67" textAnchor="middle" fontSize="4.5" fill="#CE93D8" fontFamily="monospace" fontWeight="bold">
+      <text
+        x="40"
+        y="67"
+        textAnchor="middle"
+        fontSize="4.5"
+        fill="#CE93D8"
+        fontFamily="monospace"
+        fontWeight="bold"
+      >
         def
       </text>
 

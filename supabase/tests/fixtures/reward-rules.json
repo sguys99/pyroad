@@ -1,0 +1,57 @@
+{
+  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts·checkBadges.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp·level_for_xp·has_three_day_streak, 00019 의 decide_new_badges, test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침",
+  "xp": [
+    { "base": 50, "hints": 0, "golden": false, "xp": 75 },
+    { "base": 50, "hints": 1, "golden": false, "xp": 63 },
+    { "base": 50, "hints": 2, "golden": false, "xp": 50 },
+    { "base": 50, "hints": 3, "golden": false, "xp": 50 },
+    { "base": 50, "hints": 0, "golden": true, "xp": 0 },
+    { "base": 50, "hints": 2, "golden": true, "xp": 0 },
+    { "base": 75, "hints": 0, "golden": false, "xp": 113 },
+    { "base": 75, "hints": 1, "golden": false, "xp": 94 },
+    { "base": 200, "hints": 0, "golden": false, "xp": 300 },
+    { "base": 200, "hints": 1, "golden": false, "xp": 250 },
+    { "base": 200, "hints": 7, "golden": false, "xp": 200 },
+    { "base": 33, "hints": 0, "golden": false, "xp": 50 },
+    { "base": 33, "hints": 1, "golden": false, "xp": 41 },
+    { "base": 1, "hints": 1, "golden": false, "xp": 1 },
+    { "base": 0, "hints": 0, "golden": false, "xp": 0 }
+  ],
+  "level": [
+    { "total": 0, "level": 1 },
+    { "total": 99, "level": 1 },
+    { "total": 100, "level": 2 },
+    { "total": 299, "level": 2 },
+    { "total": 300, "level": 3 },
+    { "total": 599, "level": 3 },
+    { "total": 600, "level": 4 },
+    { "total": 999, "level": 4 },
+    { "total": 1000, "level": 5 },
+    { "total": 99999, "level": 5 },
+    { "total": -10, "level": 1 }
+  ],
+  "streak": [
+    { "name": "완료 없음", "completed_at": [], "streak": false },
+    { "name": "같은 날 3번", "completed_at": ["2026-11-04T01:00:00Z", "2026-11-04T02:00:00Z", "2026-11-04T03:00:00Z"], "streak": false },
+    { "name": "3일 연속", "completed_at": ["2026-11-04T01:00:00Z", "2026-11-03T01:00:00Z", "2026-11-02T01:00:00Z"], "streak": true },
+    { "name": "하루 건너뜀", "completed_at": ["2026-11-04T01:00:00Z", "2026-11-03T01:00:00Z", "2026-11-01T01:00:00Z"], "streak": false },
+    { "name": "최근 3일만 봄 (예전 연속은 무시)", "completed_at": ["2026-11-10T01:00:00Z", "2026-11-04T01:00:00Z", "2026-11-03T01:00:00Z", "2026-11-02T01:00:00Z"], "streak": false },
+    { "name": "KST 자정 경계: UTC 로는 같은 날이지만 KST 로는 이어진 3일", "completed_at": ["2026-11-03T15:30:00Z", "2026-11-03T14:30:00Z", "2026-11-02T14:30:00Z"], "streak": true },
+    { "name": "KST 자정 경계: UTC 로는 3일이지만 KST 로는 2일", "completed_at": ["2026-11-04T01:00:00Z", "2026-11-03T16:00:00Z", "2026-11-02T16:00:00Z"], "streak": false },
+    { "name": "순서 무관 + null 무시", "completed_at": ["2026-11-02T01:00:00Z", null, "2026-11-04T01:00:00Z", "2026-11-03T01:00:00Z"], "streak": true },
+    { "name": "월 경계", "completed_at": ["2026-12-01T01:00:00Z", "2026-11-30T01:00:00Z", "2026-11-29T01:00:00Z"], "streak": true }
+  ],
+  "badges": [
+    { "name": "첫 완료, 힌트 0", "facts": { "earned": [], "completedCount": 1, "stageCleared": false, "isFinalStage": false, "hintsUsed": 0, "usedGoldenKey": false, "streak3": false }, "badges": ["first_code", "hint_master"] },
+    { "name": "B11·Q25: 황금키 완료는 힌트 0회여도 뱃지 없음", "facts": { "earned": [], "completedCount": 1, "stageCleared": false, "isFinalStage": false, "hintsUsed": 0, "usedGoldenKey": true, "streak3": false }, "badges": [] },
+    { "name": "Q25: 황금키로 먼저 완료한 뒤 처음 직접 푼 퀘스트 (completedCount 는 직접 푼 완료 수)", "facts": { "earned": [], "completedCount": 1, "stageCleared": false, "isFinalStage": false, "hintsUsed": 1, "usedGoldenKey": false, "streak3": false }, "badges": ["first_code"] },
+    { "name": "두 번째 완료, 힌트 1", "facts": { "earned": ["first_code"], "completedCount": 2, "stageCleared": false, "isFinalStage": false, "hintsUsed": 1, "usedGoldenKey": false, "streak3": false }, "badges": [] },
+    { "name": "first_code 없이 두 번째 완료 (count === 1 규칙 유지)", "facts": { "earned": [], "completedCount": 2, "stageCleared": false, "isFinalStage": false, "hintsUsed": 2, "usedGoldenKey": false, "streak3": false }, "badges": [] },
+    { "name": "스테이지 클리어", "facts": { "earned": ["first_code", "hint_master"], "completedCount": 7, "stageCleared": true, "isFinalStage": false, "hintsUsed": 0, "usedGoldenKey": false, "streak3": false }, "badges": ["stage_clear"] },
+    { "name": "이미 있는 뱃지는 다시 주지 않음", "facts": { "earned": ["first_code", "hint_master", "stage_clear", "project_builder", "streak_3"], "completedCount": 1, "stageCleared": true, "isFinalStage": true, "hintsUsed": 0, "usedGoldenKey": false, "streak3": true }, "badges": [] },
+    { "name": "최종 프로젝트 + 스테이지 클리어 + 3일 연속", "facts": { "earned": ["first_code"], "completedCount": 44, "stageCleared": true, "isFinalStage": true, "hintsUsed": 3, "usedGoldenKey": false, "streak3": true }, "badges": ["stage_clear", "project_builder", "streak_3"] },
+    { "name": "Q25: 황금키로 최종 프로젝트 (project_builder 없음)", "facts": { "earned": ["first_code", "stage_clear"], "completedCount": 43, "stageCleared": true, "isFinalStage": true, "hintsUsed": 0, "usedGoldenKey": true, "streak3": false }, "badges": [] },
+    { "name": "Q25: 황금키로 스테이지 마지막 퀘스트 + 3일 연속 (stage_clear·streak_3 없음)", "facts": { "earned": ["first_code"], "completedCount": 6, "stageCleared": true, "isFinalStage": false, "hintsUsed": 2, "usedGoldenKey": true, "streak3": true }, "badges": [] },
+    { "name": "Q25: 앞서 황금키로 연 퀘스트가 있는 스테이지를 직접 풀어 클리어 (stage_clear 받음)", "facts": { "earned": ["first_code", "hint_master"], "completedCount": 5, "stageCleared": true, "isFinalStage": false, "hintsUsed": 1, "usedGoldenKey": false, "streak3": false }, "badges": ["stage_clear"] }
+  ]
+}

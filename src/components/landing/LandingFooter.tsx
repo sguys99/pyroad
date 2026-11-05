@@ -19,7 +19,10 @@ export function LandingFooter() {
             pyRoad
           </span>
           <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
-            <a href="#about" className="hover:text-foreground transition-colors">
+            <a
+              href="#about"
+              className="hover:text-foreground transition-colors"
+            >
               About
             </a>
             <a

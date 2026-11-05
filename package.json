@@ -3,14 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/pyodide/copy-assets.mjs",
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/pyodide/copy-assets.mjs",
     "build": "next build --turbopack",
+    "postbuild": "tsx scripts/security/check-static-pages.ts",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
+    "test:pyodide": "vitest run --config vitest.pyodide.config.ts",
+    "test:content": "vitest run --config vitest.content.config.ts",
     "test:e2e": "playwright test",
-    "optimize:svg": "svgo -f public/characters --recursive"
+    "optimize:svg": "svgo -f public/characters --recursive",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset --local",
+    "db:types": "supabase gen types typescript --local --schema public > src/lib/types/database.generated.ts && prettier --write src/lib/types/database.generated.ts",
+    "test:rls": "bash supabase/tests/run.sh fast",
+    "test:rls:ci": "bash supabase/tests/run.sh ci",
+    "content:build": "tsx scripts/content/build.ts",
+    "content:extract": "tsx scripts/content/extract-from-seed.ts",
+    "content:compare": "tsx scripts/content/compare.ts",
+    "pyodide:copy": "node scripts/pyodide/copy-assets.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -21,6 +37,7 @@
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.40.0",
     "@google/genai": "^1.47.0",
+    "@sentry/nextjs": "^11.10.0",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.0",
     "canvas-confetti": "^1.9.4",
@@ -32,16 +49,18 @@
     "lucide-react": "^1.7.0",
     "next": "^15.5.0",
     "openai": "^6.33.0",
-    "pyodide": "^0.29.3",
+    "pyodide": "314.0.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "shadcn": "^4.1.1",
     "tailwind-merge": "^3.5.0",
-    "tw-animate-css": "^1.4.0"
+    "tw-animate-css": "^1.4.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.0.0",
     "@tailwindcss/typography": "^0.5.19",
@@ -61,7 +80,9 @@
     "prettier": "^3.8.1",
     "svgo": "^4.0.1",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.0",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "yaml": "^2.9.1"
   }
 }

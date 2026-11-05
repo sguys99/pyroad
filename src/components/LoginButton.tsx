@@ -2,12 +2,17 @@
 
 import { m } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useGoogleLogin } from '@/lib/hooks/useGoogleLogin';
+import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
 
-export function LoginButton() {
+interface LoginButtonProps {
+  /** 로그인 흐름을 시작하기 직전에 부름 (예: 랜딩 CTA 분석 이벤트, P1-17) */
+  onBeforeLogin?: () => void;
+}
+
+export function LoginButton({ onBeforeLogin }: LoginButtonProps = {}) {
   const { handleLogin, showBrowserGuide, setShowBrowserGuide, browserInfo } =
-    useGoogleLogin();
+    useSocialLogin('google');
 
   return (
     <>
@@ -16,7 +21,13 @@ export function LoginButton() {
         whileTap={{ scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 400, damping: 17 }}
       >
-        <Button size="lg" onClick={handleLogin}>
+        <Button
+          size="lg"
+          onClick={() => {
+            onBeforeLogin?.();
+            void handleLogin();
+          }}
+        >
           Google로 시작하기 🚀
         </Button>
       </m.div>

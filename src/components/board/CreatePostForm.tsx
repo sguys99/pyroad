@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { BOARD_LIMITS } from '@/lib/board/limits';
+import { BoardFormMessage, type BoardFormError } from './BoardFormMessage';
 
 interface CreatePostFormProps {
   initialData?: { id: string; title: string; content: string };
@@ -13,18 +15,18 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
 
   const [title, setTitle] = useState(initialData?.title ?? '');
   const [content, setContent] = useState(initialData?.content ?? '');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<BoardFormError | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    setError(null);
 
     const trimmedTitle = title.trim();
     const trimmedContent = content.trim();
 
     if (!trimmedTitle || !trimmedContent) {
-      setError('제목과 내용을 모두 입력해주세요.');
+      setError({ message: '제목과 내용을 모두 써 주세요.' });
       return;
     }
 
@@ -43,8 +45,17 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || '오류가 발생했습니다.');
+        // 서버는 아이용 문구만 보냄 (DB 오류 내용은 서버 로그로, B19). 금칙어는 code: 'moderation'
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          code?: string;
+        };
+        setError({
+          message:
+            data.error ||
+            '앗, 지금은 저장하지 못했어요. 잠시 뒤에 다시 해 볼까요?',
+          code: data.code,
+        });
         return;
       }
 
@@ -55,7 +66,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
       }
       router.refresh();
     } catch {
-      setError('네트워크 오류가 발생했습니다.');
+      setError({ message: '인터넷 연결을 확인하고 다시 해 볼까요?' });
     } finally {
       setSubmitting(false);
     }
@@ -63,11 +74,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      {error && (
-        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      )}
+      {error && <BoardFormMessage error={error} />}
 
       <div>
         <label
@@ -79,14 +86,14 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
         <input
           id="title"
           type="text"
-          maxLength={100}
+          maxLength={BOARD_LIMITS.title}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="제목을 입력하세요"
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <p className="mt-1 text-right text-[11px] text-muted-foreground">
-          {title.length}/100
+          {title.length}/{BOARD_LIMITS.title}
         </p>
       </div>
 
@@ -99,7 +106,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
         </label>
         <textarea
           id="content"
-          maxLength={2000}
+          maxLength={BOARD_LIMITS.content}
           rows={8}
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -107,7 +114,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
           className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <p className="mt-1 text-right text-[11px] text-muted-foreground">
-          {content.length}/2000
+          {content.length}/{BOARD_LIMITS.content}
         </p>
       </div>
 
@@ -118,6 +125,9 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
       >
         {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
       </button>
+      <p className="text-center text-[11px] text-muted-foreground">
+        전화번호, 주소, 학교 같은 개인정보와 친구가 속상할 말은 쓰지 않아요.
+      </p>
     </form>
   );
 }

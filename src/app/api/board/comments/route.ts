@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import {
+  BOARD_MESSAGES,
+  boardError,
+  boardServerError,
+  checkCommentInput,
+  readJsonObject,
+} from '@/lib/board/server';
 
+// 댓글 쓰기: 길이·빈 값·금칙어 검사 후 service_role 로 저장 (P1-18, B19).
+// 글이 없거나 숨겨졌는데 남의 글이면 404 (숨긴 글에는 작성자만 댓글을 달 수 있음 = 작성자만 보이므로)
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -8,40 +18,56 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return boardError(401, BOARD_MESSAGES.unauthorized);
   }
 
-  let body: { post_id: string; content: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  const body = await readJsonObject(request);
+  if (!body) {
+    return boardError(400, BOARD_MESSAGES.badRequest, { code: 'validation' });
   }
 
-  const content = body.content?.trim();
-  if (!body.post_id || !content) {
-    return NextResponse.json(
-      { error: '댓글 내용을 입력해주세요.' },
-      { status: 400 },
-    );
+  const checked = checkCommentInput(body);
+  if (!checked.ok) return checked.response;
+  const { postId, content } = checked.value;
+
+  const admin = createAdminClient();
+  const { data: post, error: postError } = await admin
+    .from('board_posts')
+    .select('user_id, is_hidden')
+    .eq('id', postId)
+    .maybeSingle();
+
+  if (postError) return boardServerError(postError, 'comment_post');
+  if (!post || (post.is_hidden && post.user_id !== user.id)) {
+    return boardError(404, BOARD_MESSAGES.postNotFound, { code: 'not_found' });
   }
 
-  if (content.length > 500) {
-    return NextResponse.json(
-      { error: '댓글은 500자 이내로 입력해주세요.' },
-      { status: 400 },
-    );
-  }
-
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('board_comments')
-    .insert({ post_id: body.post_id, user_id: user.id, content })
-    .select()
+    .insert({ post_id: postId, user_id: user.id, content })
+    .select('id, created_at')
     .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !data) {
+    return boardServerError(
+      error ?? new Error('insert 결과 없음'),
+      'comment_create',
+    );
   }
 
-  return NextResponse.json({ ok: true, comment: data });
+  // 화면에 바로 붙일 작성자 이름 (다른 사람에게 보이는 것과 같은 값: 닉네임 → 모험가NNNN). 못 읽어도 저장은 성공
+  const { data: author } = await admin
+    .from('user_profiles_public')
+    .select('display_name')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  return NextResponse.json({
+    ok: true,
+    comment: {
+      id: data.id,
+      created_at: data.created_at,
+      author_name: author?.display_name ?? null,
+    },
+  });
 }

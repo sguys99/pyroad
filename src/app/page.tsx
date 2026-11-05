@@ -2,6 +2,7 @@ import { HeroSection } from '@/components/landing/HeroSection';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { AboutSection } from '@/components/landing/AboutSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { LandingViewTracker } from '@/components/landing/LandingViewTracker';
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
         <AboutSection />
       </main>
       <LandingFooter />
+      <LandingViewTracker />
     </>
   );
 }

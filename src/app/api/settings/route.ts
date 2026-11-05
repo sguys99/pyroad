@@ -3,12 +3,21 @@ import { createClient } from '@/lib/supabase/server';
 import {
   FREE_TIER_PROVIDER,
   getAvailableProviders,
-  getUserKeyedProviders,
   resolveUserProvider,
 } from '@/lib/tutor/providers/factory';
+import {
+  ApiKeyStoreError,
+  deleteUserApiKey,
+  isApiKeyProvider,
+  loadUserApiKeys,
+  normalizeApiKeyInput,
+  saveUserApiKey,
+  toApiKeyStatus,
+} from '@/lib/tutor/apiKeys';
 import type { LLMProviderType } from '@/lib/tutor/providers/types';
 
-const VALID_PROVIDERS: LLMProviderType[] = ['anthropic', 'openai', 'gemini'];
+// 사용자 API 키는 user_api_keys(service_role 전용)에 암호문으로만 저장하고,
+// 응답에는 등록 여부와 끝 4자리만 넣는다 (B13). users 에는 preferred_provider 만 쓴다 (P1-01 UPDATE 컬럼 권한).
 
 export async function GET() {
   const supabase = await createClient();
@@ -20,27 +29,33 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('preferred_provider, custom_api_keys')
-    .eq('id', user.id)
-    .single();
+  const [{ data: profile }, apiKeys] = await Promise.all([
+    supabase
+      .from('users')
+      .select('preferred_provider')
+      .eq('id', user.id)
+      .single(),
+    loadUserApiKeys(user.id),
+  ]);
+  const status = toApiKeyStatus(apiKeys);
 
   // 서버 키로는 무료 티어만 제공 → 유료 provider는 본인 키가 있어야 선택 가능
   const serverProviders = getAvailableProviders().filter(
     (p) => p === FREE_TIER_PROVIDER,
   );
-  const customProviders = getUserKeyedProviders(profile?.custom_api_keys);
-  const allAvailable = [...new Set([...serverProviders, ...customProviders])];
+  const allAvailable = [...new Set([...serverProviders, ...status.registered])];
   const { providerType } = resolveUserProvider(
     profile?.preferred_provider,
-    profile?.custom_api_keys,
+    apiKeys.keys,
   );
 
   return NextResponse.json({
     available_providers: allAvailable,
     current_provider: providerType,
-    has_custom_keys: customProviders,
+    has_custom_keys: status.registered,
+    masked_keys: status.masked,
+    unreadable_keys: status.unreadable,
+    custom_keys_enabled: status.enabled,
   });
 }
 
@@ -54,55 +69,85 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let body: { provider?: string; api_keys?: Record<string, string> };
+  let body: { provider?: unknown; api_keys?: unknown };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const updates: Record<string, unknown> = {};
-
-  if (body.provider) {
-    if (!VALID_PROVIDERS.includes(body.provider as LLMProviderType)) {
+  let provider: LLMProviderType | undefined;
+  if (body.provider !== undefined) {
+    if (!isApiKeyProvider(body.provider)) {
       return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
     }
-    updates.preferred_provider = body.provider;
+    provider = body.provider;
   }
 
-  if (body.api_keys) {
-    // 기존 키와 병합
-    const { data: profile } = await supabase
-      .from('users')
-      .select('custom_api_keys')
-      .eq('id', user.id)
-      .single();
-
-    const existing = (profile?.custom_api_keys ?? {}) as Record<string, string>;
-    const merged = { ...existing };
-
-    for (const [key, value] of Object.entries(body.api_keys)) {
-      if (!VALID_PROVIDERS.includes(key as LLMProviderType)) continue;
-      if (value) {
-        merged[key] = value;
-      } else {
-        delete merged[key];
-      }
+  // 키 변경: { provider: '새 키' } 저장, { provider: '' } 삭제. 알 수 없는 provider 는 무시
+  const toSave: [LLMProviderType, string][] = [];
+  const toDelete: LLMProviderType[] = [];
+  if (body.api_keys !== undefined) {
+    if (
+      !body.api_keys ||
+      typeof body.api_keys !== 'object' ||
+      Array.isArray(body.api_keys)
+    ) {
+      return NextResponse.json({ error: 'Invalid api_keys' }, { status: 400 });
     }
-    updates.custom_api_keys = merged;
+    for (const [key, value] of Object.entries(body.api_keys)) {
+      if (!isApiKeyProvider(key)) continue;
+      if (value === '' || value === null) {
+        toDelete.push(key);
+        continue;
+      }
+      const normalized = normalizeApiKeyInput(value);
+      if (!normalized) {
+        return NextResponse.json(
+          {
+            error:
+              'API 키 모양이 올바르지 않아요. 복사한 키를 그대로 붙여 넣어 주세요.',
+            code: 'invalid_key',
+          },
+          { status: 400 },
+        );
+      }
+      toSave.push([key, normalized]);
+    }
   }
 
-  if (Object.keys(updates).length === 0) {
+  if (!provider && toSave.length === 0 && toDelete.length === 0) {
     return NextResponse.json({ error: 'No updates provided' }, { status: 400 });
   }
 
-  const { error } = await supabase
-    .from('users')
-    .update(updates)
-    .eq('id', user.id);
-
-  if (error) {
+  try {
+    for (const [p, key] of toSave) await saveUserApiKey(user.id, p, key);
+    for (const p of toDelete) await deleteUserApiKey(user.id, p);
+  } catch (err) {
+    if (err instanceof ApiKeyStoreError && err.reason === 'disabled') {
+      return NextResponse.json(
+        {
+          error: '지금은 내 API 키를 저장할 수 없어요.',
+          code: 'custom_keys_disabled',
+        },
+        { status: 503 },
+      );
+    }
+    console.error(
+      '[settings] API 키 저장 실패:',
+      err instanceof Error ? err.message : 'unknown',
+    );
     return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+  }
+
+  if (provider) {
+    const { error } = await supabase
+      .from('users')
+      .update({ preferred_provider: provider })
+      .eq('id', user.id);
+    if (error) {
+      return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ ok: true });

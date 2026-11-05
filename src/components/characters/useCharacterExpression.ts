@@ -6,7 +6,10 @@ import type { RunResult } from '@/lib/pyodide/usePyodide';
  * 키워드-표정 매핑 (우선순위 순서).
  * 첫 번째 매칭된 표정을 반환한다.
  */
-const EXPRESSION_KEYWORDS: { expression: PybaemExpression; keywords: string[] }[] = [
+const EXPRESSION_KEYWORDS: {
+  expression: PybaemExpression;
+  keywords: string[];
+}[] = [
   {
     expression: 'celebrating',
     keywords: ['정답', '대단', '축하', '완벽', '성공', '훌륭', '멋져', '잘했'],
@@ -21,7 +24,16 @@ const EXPRESSION_KEYWORDS: { expression: PybaemExpression; keywords: string[] }[
   },
   {
     expression: 'encouraging',
-    keywords: ['괜찮', '힘내', '할 수 있', '다시', '앗', '오류', '에러', '실수'],
+    keywords: [
+      '괜찮',
+      '힘내',
+      '할 수 있',
+      '다시',
+      '앗',
+      '오류',
+      '에러',
+      '실수',
+    ],
   },
   {
     expression: 'teaching',
@@ -55,12 +67,15 @@ interface OutputExpressionState {
 /**
  * OutputPanel의 실행 상태를 표정으로 매핑한다.
  */
-export function getOutputExpression(state: OutputExpressionState): PybaemExpression {
+export function getOutputExpression(
+  state: OutputExpressionState,
+): PybaemExpression {
   if (state.isRunning) return 'thinking';
   if (!state.result) return 'happy';
   if (state.result.isTimeout) return 'confused';
   if (!state.result.success) return 'encouraging';
   if (state.validationResult?.passed) return 'celebrating';
-  if (state.validationResult && !state.validationResult.passed) return 'teaching';
+  if (state.validationResult && !state.validationResult.passed)
+    return 'teaching';
   return 'happy';
 }

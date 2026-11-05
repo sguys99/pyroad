@@ -1,0 +1,10 @@
+# 월드 1: 파이썬 섬
+# worlds 테이블 (P1-08). 빌드가 slug 기준으로 업서트하고 이 월드의 스테이지에 world_id 를 채웁니다
+
+slug: python-island
+order: 1
+title: 파이썬 섬
+theme: python_island
+description: print()부터 함수까지, 파이썬 기초를 배우는 첫 번째 섬이에요!
+unlock_rule:
+  type: open

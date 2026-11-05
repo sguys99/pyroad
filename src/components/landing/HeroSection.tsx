@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { m } from 'framer-motion';
 import { LoginButton } from '@/components/LoginButton';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
+import { track } from '@/lib/analytics/track';
 
 const container = {
   hidden: {},
@@ -26,8 +25,6 @@ const fadeUp = {
 };
 
 export function HeroSection() {
-  const [entranceDone, setEntranceDone] = useState(false);
-
   return (
     <m.div
       className="flex flex-col items-center gap-6 text-center"
@@ -36,29 +33,18 @@ export function HeroSection() {
       animate="show"
     >
       <m.div variants={fadeUp}>
-        {entranceDone ? (
-          <CharacterAvatar
-            character="pybaem"
-            expression="waving"
-            size="lg"
-            animated
-            onHover="happy"
-          />
-        ) : (
-          <LottieCharacter
-            character="pybaem"
-            animation="entrance"
-            size={128}
-            fallbackExpression="waving"
-            onComplete={() => setEntranceDone(true)}
-          />
-        )}
+        {/* 등장 연출 뒤 숨쉬기, 마우스를 올리면 웃음 (B32: Lottie 대신 정적 SVG + 1회성 연출) */}
+        <LottieCharacter
+          character="pybaem"
+          animation="entrance"
+          size={128}
+          expression="waving"
+          animated
+          onHover="happy"
+        />
       </m.div>
 
-      <m.h1
-        className="text-4xl font-bold text-primary"
-        variants={fadeUp}
-      >
+      <m.h1 className="text-4xl font-bold text-primary" variants={fadeUp}>
         pyRoad
       </m.h1>
 
@@ -74,7 +60,16 @@ export function HeroSection() {
       </m.p>
 
       <m.div variants={fadeUp}>
-        <LoginButton />
+        <LoginButton
+          onBeforeLogin={() =>
+            // OAuth 로 바로 떠나므로 지금 보낸다 (P1-17)
+            track(
+              'landing_cta_click',
+              { cta: 'hero', provider: 'google' },
+              { immediate: true },
+            )
+          }
+        />
       </m.div>
     </m.div>
   );

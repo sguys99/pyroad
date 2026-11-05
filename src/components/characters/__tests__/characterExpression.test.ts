@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { useMessageExpression, getOutputExpression } from '../useCharacterExpression';
+import {
+  useMessageExpression,
+  getOutputExpression,
+} from '../useCharacterExpression';
 
 describe('useMessageExpression', () => {
   const make = (content: string) => ({ role: 'tutor' as const, content });
@@ -8,7 +11,9 @@ describe('useMessageExpression', () => {
     it.each(['정답', '대단', '축하', '완벽', '성공', '훌륭', '멋져', '잘했'])(
       '키워드 "%s" 포함 시 celebrating 반환',
       (keyword) => {
-        expect(useMessageExpression(make(`와, ${keyword}해요!`))).toBe('celebrating');
+        expect(useMessageExpression(make(`와, ${keyword}해요!`))).toBe(
+          'celebrating',
+        );
       },
     );
   });
@@ -35,7 +40,9 @@ describe('useMessageExpression', () => {
     it.each(['괜찮', '힘내', '할 수 있', '다시', '앗', '오류', '에러', '실수'])(
       '키워드 "%s" 포함 시 encouraging 반환',
       (keyword) => {
-        expect(useMessageExpression(make(`${keyword}아요`))).toBe('encouraging');
+        expect(useMessageExpression(make(`${keyword}아요`))).toBe(
+          'encouraging',
+        );
       },
     );
   });
@@ -44,7 +51,9 @@ describe('useMessageExpression', () => {
     it.each(['힌트', '알려', '설명', '방법', '이렇게', '먼저', '다음'])(
       '키워드 "%s" 포함 시 teaching 반환',
       (keyword) => {
-        expect(useMessageExpression(make(`${keyword}를 줄게요`))).toBe('teaching');
+        expect(useMessageExpression(make(`${keyword}를 줄게요`))).toBe(
+          'teaching',
+        );
       },
     );
   });
@@ -53,7 +62,9 @@ describe('useMessageExpression', () => {
     it.each(['생각', '음', '글쎄', '한번'])(
       '키워드 "%s" 포함 시 thinking 반환',
       (keyword) => {
-        expect(useMessageExpression(make(`${keyword}해볼게요`))).toBe('thinking');
+        expect(useMessageExpression(make(`${keyword}해볼게요`))).toBe(
+          'thinking',
+        );
       },
     );
   });
@@ -63,17 +74,23 @@ describe('useMessageExpression', () => {
   });
 
   it('여러 키워드 매칭 시 우선순위가 높은 표정 반환 (celebrating > encouraging)', () => {
-    expect(useMessageExpression(make('정답이에요! 앗 실수가 있었지만 괜찮아요'))).toBe('celebrating');
+    expect(
+      useMessageExpression(make('정답이에요! 앗 실수가 있었지만 괜찮아요')),
+    ).toBe('celebrating');
   });
 });
 
 describe('getOutputExpression', () => {
   it('isRunning=true → thinking', () => {
-    expect(getOutputExpression({ isRunning: true, result: null })).toBe('thinking');
+    expect(getOutputExpression({ isRunning: true, result: null })).toBe(
+      'thinking',
+    );
   });
 
   it('result=null → happy', () => {
-    expect(getOutputExpression({ isRunning: false, result: null })).toBe('happy');
+    expect(getOutputExpression({ isRunning: false, result: null })).toBe(
+      'happy',
+    );
   });
 
   it('timeout → confused', () => {
@@ -89,7 +106,12 @@ describe('getOutputExpression', () => {
     expect(
       getOutputExpression({
         isRunning: false,
-        result: { success: false, stdout: '', stderr: 'SyntaxError', isTimeout: false },
+        result: {
+          success: false,
+          stdout: '',
+          stderr: 'SyntaxError',
+          isTimeout: false,
+        },
       }),
     ).toBe('encouraging');
   });
@@ -98,7 +120,12 @@ describe('getOutputExpression', () => {
     expect(
       getOutputExpression({
         isRunning: false,
-        result: { success: true, stdout: 'Hello', stderr: '', isTimeout: false },
+        result: {
+          success: true,
+          stdout: 'Hello',
+          stderr: '',
+          isTimeout: false,
+        },
         validationResult: { passed: true },
       }),
     ).toBe('celebrating');
@@ -108,7 +135,12 @@ describe('getOutputExpression', () => {
     expect(
       getOutputExpression({
         isRunning: false,
-        result: { success: true, stdout: 'Wrong', stderr: '', isTimeout: false },
+        result: {
+          success: true,
+          stdout: 'Wrong',
+          stderr: '',
+          isTimeout: false,
+        },
         validationResult: { passed: false },
       }),
     ).toBe('teaching');
@@ -118,7 +150,12 @@ describe('getOutputExpression', () => {
     expect(
       getOutputExpression({
         isRunning: false,
-        result: { success: true, stdout: 'Hello', stderr: '', isTimeout: false },
+        result: {
+          success: true,
+          stdout: 'Hello',
+          stderr: '',
+          isTimeout: false,
+        },
       }),
     ).toBe('happy');
   });

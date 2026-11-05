@@ -46,7 +46,8 @@ export function DeletePostButton({ postId }: DeletePostButtonProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>게시글 삭제</AlertDialogTitle>
           <AlertDialogDescription>
-            이 게시글을 삭제하시겠습니까? 댓글도 함께 삭제되며 복구할 수 없습니다.
+            이 게시글을 삭제하시겠습니까? 댓글도 함께 삭제되며 복구할 수
+            없습니다.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

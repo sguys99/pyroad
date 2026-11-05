@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -24,6 +24,7 @@ interface Stage {
 }
 
 interface AccountManagementSectionProps {
+  /** (월드 order, 스테이지 order) 순서로 정렬된 스테이지 (reset_progress 의 "그 뒤 스테이지"와 같은 순서, P1-08) */
   stages: Stage[];
 }
 
@@ -47,7 +48,7 @@ export function AccountManagementSection({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || '탈퇴 처리 중 오류가 발생했습니다.');
       }
-      const supabase = createClient();
+      const supabase = await loadBrowserClient();
       await supabase.auth.signOut();
       router.push('/');
     } catch (err) {
@@ -111,12 +112,13 @@ export function AccountManagementSection({
 
   const isLoading = loading !== null;
 
-  // 특정 스테이지 리셋 시 함께 리셋되는 후속 스테이지 목록 (진행 기록이 있는 것만)
-  const getAffectedStages = (stageOrder: number) =>
-    stages.filter((s) => s.order > stageOrder && s.hasProgress);
+  // 특정 스테이지 리셋 시 함께 리셋되는 후속 스테이지 목록 (진행 기록이 있는 것만).
+  // stages 는 (월드, 스테이지) 순서라 목록에서 뒤에 있는 스테이지가 후속 스테이지 (order 는 월드마다 1부터)
+  const getAffectedStages = (stage: Stage) =>
+    stages.slice(stages.indexOf(stage) + 1).filter((s) => s.hasProgress);
 
   const getResetDescription = (stage: Stage) => {
-    const affected = getAffectedStages(stage.order);
+    const affected = getAffectedStages(stage);
     const baseMsg = `"${stage.title}" 스테이지의 퀘스트 진행이 초기화되고, 해당 경험치가 차감됩니다.`;
     if (affected.length === 0) return baseMsg;
     const affectedNames = affected

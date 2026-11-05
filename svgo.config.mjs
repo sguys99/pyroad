@@ -1,4 +1,4 @@
-export default {
+const config = {
   multipass: true,
   plugins: [
     'preset-default',
@@ -6,3 +6,5 @@ export default {
     { name: 'removeAttrs', params: { attrs: '(data-.*)' } },
   ],
 };
+
+export default config;

@@ -1,17 +1,26 @@
 import Link from 'next/link';
+import { EyeOff } from 'lucide-react';
 import type { BoardPostWithAuthor } from '@/lib/types/database';
+import { formatKstDate } from '@/lib/time/kst';
+import { authorName } from '@/lib/board/display';
 
 interface BoardCardProps {
   post: BoardPostWithAuthor;
 }
 
 export function BoardCard({ post }: BoardCardProps) {
-  const date = new Date(post.created_at).toLocaleDateString('ko-KR');
-  const authorName = post.user_profiles_public?.display_name || '익명';
+  const date = formatKstDate(post.created_at);
 
   return (
     <Link href={`/board/${post.id}`}>
       <div className="rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/50">
+        {post.is_hidden && (
+          // 숨긴 글은 RLS 로 작성자에게만 보임 (00014)
+          <p className="mb-1 inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+            <EyeOff className="size-3" aria-hidden="true" />
+            나만 볼 수 있어요
+          </p>
+        )}
         <h3 className="mb-1 truncate text-sm font-bold text-foreground">
           {post.title}
         </h3>
@@ -19,7 +28,7 @@ export function BoardCard({ post }: BoardCardProps) {
           {post.content}
         </p>
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>{authorName}</span>
+          <span>{authorName(post.user_profiles_public)}</span>
           <div className="flex items-center gap-2">
             <span>{date}</span>
             <span>댓글 {post.comment_count ?? 0}</span>

@@ -1,8 +1,14 @@
 'use client';
 
-import { memo, useEffect, useRef } from 'react';
-import { BookOpen, Info, KeyRound, Lightbulb, MessageCircle } from 'lucide-react';
-import { m, useReducedMotion } from 'framer-motion';
+import { memo, useEffect, useRef, useState } from 'react';
+import {
+  BookOpen,
+  Info,
+  KeyRound,
+  Lightbulb,
+  MessageCircle,
+} from 'lucide-react';
+import { m } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
@@ -34,36 +40,45 @@ interface ConversationPanelProps {
   goldenKeys: number;
   onGoldenKeyUse: () => void;
   isGoldenKeyLoading?: boolean;
+  /** 실행기가 준비되지 않았거나 실행·채점 중이라 지금은 황금키를 쓸 수 없음 */
+  isGoldenKeyBlocked?: boolean;
 }
 
+/** 이 시간이 지나도 답이 없으면 "조금 오래 걸려요" 문구로 바꿔 아이가 기다릴 수 있게 함 */
+const SLOW_THINKING_MS = 8_000;
+
 function ThinkingIndicator() {
-  const shouldReduceMotion = useReducedMotion();
+  const [isSlow, setIsSlow] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsSlow(true), SLOW_THINKING_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex items-start gap-3 px-4">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-        <CharacterAvatar character="pybaem" expression="thinking" size="sm" animated />
+        <CharacterAvatar
+          character="pybaem"
+          expression="thinking"
+          size="sm"
+          animated
+        />
       </div>
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="flex items-center gap-1">
+          {/* 반복 연출은 CSS 키프레임으로 (§2.10). reduced-motion이면 멈춘 점 세 개 */}
           {[0, 1, 2].map((i) => (
-            <m.span
+            <span
               key={i}
-              className="block h-2 w-2 rounded-full bg-primary/50"
-              animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
-              transition={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      duration: 0.6,
-                      repeat: Infinity,
-                      delay: i * 0.15,
-                    }
-              }
+              className="thinking-dot block h-2 w-2 rounded-full bg-primary/50"
             />
           ))}
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          파이뱀 선생님이 생각 중...
+        <p className="mt-1 text-xs text-muted-foreground" role="status">
+          {isSlow
+            ? '열심히 생각하고 있어요. 조금만 기다려 줘요!'
+            : '파이뱀 선생님이 생각 중...'}
         </p>
       </div>
     </div>
@@ -79,7 +94,11 @@ function TutorMessageAvatar({ message }: { message: ChatMessage }) {
   );
 }
 
-const SystemMessage = memo(function SystemMessage({ content }: { content: string }) {
+const SystemMessage = memo(function SystemMessage({
+  content,
+}: {
+  content: string;
+}) {
   return (
     <div className="flex justify-center">
       <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
@@ -96,9 +115,7 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="mb-1 flex items-center gap-2">
           <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-primary">
-            파이뱀 선생님
-          </span>
+          <span className="text-xs font-bold text-primary">파이뱀 선생님</span>
           {msg.isFallback && (
             <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
               저장된 답변
@@ -132,9 +149,7 @@ function StreamingMessage({ content }: { content: string }) {
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="mb-1 flex items-center gap-2">
           <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-primary">
-            파이뱀 선생님
-          </span>
+          <span className="text-xs font-bold text-primary">파이뱀 선생님</span>
         </div>
         <div className="prose prose-sm max-w-none text-foreground prose-p:leading-relaxed whitespace-pre-wrap">
           {content}
@@ -155,8 +170,11 @@ export function ConversationPanel({
   goldenKeys,
   onGoldenKeyUse,
   isGoldenKeyLoading,
+  isGoldenKeyBlocked = false,
 }: ConversationPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const goldenKeyDisabled =
+    isAiLoading || isGoldenKeyLoading || isGoldenKeyBlocked || goldenKeys <= 0;
 
   // 새 메시지 또는 스트리밍 콘텐츠 변경 시 자동 스크롤
   useEffect(() => {
@@ -222,8 +240,14 @@ export function ConversationPanel({
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 힌트: {3 - hintsUsed}/3
                 <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="h-3 w-3 text-muted-foreground/60" />
+                  <TooltipTrigger
+                    className="cursor-help"
+                    aria-label="힌트 안내"
+                  >
+                    <Info
+                      className="h-3 w-3 text-muted-foreground/60"
+                      aria-hidden
+                    />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p>힌트는 퀘스트마다 3개씩 제공됩니다.</p>
@@ -234,8 +258,11 @@ export function ConversationPanel({
                 <KeyRound className="h-3 w-3" />
                 황금키: {goldenKeys}/3
                 <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="h-3 w-3 text-amber-600/60" />
+                  <TooltipTrigger
+                    className="cursor-help"
+                    aria-label="황금키 안내"
+                  >
+                    <Info className="h-3 w-3 text-amber-600/60" aria-hidden />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p>황금키는 스테이지를 완료하면 3개로 보충됩니다.</p>
@@ -246,19 +273,15 @@ export function ConversationPanel({
           </TooltipProvider>
           <div className="flex items-center gap-2">
             <m.div
-              whileHover={
-                !(isAiLoading || isGoldenKeyLoading || goldenKeys <= 0) ? { scale: 1.03 } : undefined
-              }
-              whileTap={
-                !(isAiLoading || isGoldenKeyLoading || goldenKeys <= 0) ? { scale: 0.97 } : undefined
-              }
+              whileHover={!goldenKeyDisabled ? { scale: 1.03 } : undefined}
+              whileTap={!goldenKeyDisabled ? { scale: 0.97 } : undefined}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onGoldenKeyUse}
-                disabled={isAiLoading || isGoldenKeyLoading || goldenKeys <= 0}
+                disabled={goldenKeyDisabled}
                 className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
               >
                 <KeyRound className="h-4 w-4" />

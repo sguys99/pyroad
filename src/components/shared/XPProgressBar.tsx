@@ -23,7 +23,9 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
             <span className="font-bold text-primary">MAX</span>
           </div>
         )}
-        <div className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}>
+        <div
+          className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}
+        >
           <m.div
             className="h-full rounded-full bg-primary"
             initial={{ width: 0 }}
@@ -45,7 +47,9 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
           </span>
         </div>
       )}
-      <div className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}>
+      <div
+        className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}
+      >
         <m.div
           className="h-full rounded-full bg-primary"
           initial={{ width: 0 }}

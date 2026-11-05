@@ -15,6 +15,11 @@ interface InAppBrowserGuideProps {
   browserInfo: InAppBrowserInfo;
 }
 
+/**
+ * 인앱 브라우저에서 **Google 로그인**을 누르면 보이는 안내 (B16).
+ * Google만 웹뷰 OAuth를 막으므로(`disallowed_useragent`) Google 전용입니다.
+ * 카카오·네이버 로그인은 인앱에서 그대로 진행하므로 이 안내를 띄우지 않습니다(`needsExternalBrowser`).
+ */
 export function InAppBrowserGuide({
   isOpen,
   onClose,
@@ -63,9 +68,10 @@ export function InAppBrowserGuide({
           >
             <button
               onClick={onClose}
+              aria-label="닫기"
               className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground hover:bg-muted transition-colors"
             >
-              <X size={18} />
+              <X size={18} aria-hidden="true" />
             </button>
 
             <div className="flex flex-col items-center gap-4 text-center">
@@ -73,12 +79,11 @@ export function InAppBrowserGuide({
 
               <div className="space-y-1.5">
                 <h2 className="text-lg font-bold text-foreground">
-                  앗! 이 브라우저에서는 로그인이 안 돼요
+                  앗! 여기서는 Google 로그인이 안 돼요
                 </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {appName} 내부 브라우저에서는 Google 로그인이
-                  <br />
-                  지원되지 않아요. 외부 브라우저에서 열어주세요!
+                  {appName} 안에서 열린 화면에서는 Google 로그인을
+                  <br />할 수 없어요. 외부 브라우저에서 열어 주세요!
                 </p>
               </div>
 

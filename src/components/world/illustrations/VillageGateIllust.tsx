@@ -9,7 +9,13 @@ function VillageGateIllustInner({ className }: { className?: string }) {
       <ellipse cx="65" cy="73" rx="20" ry="11" fill="#81C784" />
 
       {/* Path leading to gate */}
-      <path d="M 35 80 Q 38 65 40 55" stroke="#D7CCC8" strokeWidth="6" fill="none" strokeLinecap="round" />
+      <path
+        d="M 35 80 Q 38 65 40 55"
+        stroke="#D7CCC8"
+        strokeWidth="6"
+        fill="none"
+        strokeLinecap="round"
+      />
 
       {/* Left house */}
       <rect x="6" y="42" width="16" height="14" rx="1" fill="#FFCC80" />
@@ -24,11 +30,24 @@ function VillageGateIllustInner({ className }: { className?: string }) {
       {/* Gate */}
       <rect x="30" y="34" width="4" height="22" rx="1" fill="#795548" />
       <rect x="46" y="34" width="4" height="22" rx="1" fill="#795548" />
-      <path d="M 30 34 Q 40 24 50 34" stroke="#795548" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+      <path
+        d="M 30 34 Q 40 24 50 34"
+        stroke="#795548"
+        strokeWidth="3.5"
+        fill="none"
+        strokeLinecap="round"
+      />
 
       {/* Gate sign */}
       <rect x="34" y="28" width="12" height="7" rx="1.5" fill="#FFE082" />
-      <text x="40" y="34" textAnchor="middle" fontSize="4.5" fill="#5D4037" fontWeight="bold">
+      <text
+        x="40"
+        y="34"
+        textAnchor="middle"
+        fontSize="4.5"
+        fill="#5D4037"
+        fontWeight="bold"
+      >
         START
       </text>
 

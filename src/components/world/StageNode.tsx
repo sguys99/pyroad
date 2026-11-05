@@ -36,10 +36,9 @@ const statusConfig = {
 
 interface StageNodeProps {
   stage: StageWithStatus;
-  align?: 'left' | 'right' | 'center';
 }
 
-export function StageNode({ stage, align = 'center' }: StageNodeProps) {
+export function StageNode({ stage }: StageNodeProps) {
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const config = statusConfig[stage.status];
@@ -112,7 +111,9 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
       {/* Stage info */}
       <div className="relative z-10 flex-1 min-w-0 text-left">
         <div className="flex items-center gap-0.5">
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground whitespace-nowrap shrink-0">{stage.order}단계</p>
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground whitespace-nowrap shrink-0">
+            {stage.order}단계
+          </p>
           <span
             className={cn(
               'rounded-full px-1 py-px text-[9px] sm:text-[10px] font-semibold shrink-0 whitespace-nowrap',
@@ -123,9 +124,10 @@ export function StageNode({ stage, align = 'center' }: StageNodeProps) {
             {config.label}
           </span>
         </div>
-        <h3 className="text-xs sm:text-sm font-bold text-foreground leading-tight truncate">
+        {/* 버튼 안에는 제목 태그를 둘 수 없어 span으로 둠. 목록 제목은 WorldMap의 h2 (B33) */}
+        <span className="block text-xs sm:text-sm font-bold text-foreground leading-tight truncate">
           {stage.title}
-        </h3>
+        </span>
         {stage.status !== 'locked' && (
           <p className="text-[9px] sm:text-[10px] text-muted-foreground">
             {stage.completedQuestCount}/{stage.totalQuestCount} 퀘스트

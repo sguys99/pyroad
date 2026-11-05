@@ -1,0 +1,43 @@
+# 퀘스트 2-2: 숫자 상자와 글자 상자
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000005
+order: 2
+title: 숫자 상자와 글자 상자
+concept: int, str 자료형
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 정수(int)와 문자열(str) 자료형
+  learning_goals:
+    - 숫자는 따옴표 없이, 글자는 따옴표로 감싸서 저장하는 것을 안다
+    - int와 str이 다른 종류의 상자임을 이해한다
+  story_context: 숲 속 두 종류의 마법 상자를 발견! 숫자 상자와 글자 상자를 구분해봐요.
+  exercise_description: number 변수에 10을, greeting 변수에 "안녕"을 저장하고 각각 print()로 출력하세요
+  starter_code: |-
+    # 숫자와 글자를 각각 변수에 넣어보세요!
+    number = 
+    greeting = 
+    print(number)
+    print(greeting)
+  expected_output_hint: 10과 안녕이 한 줄씩 출력되어야 해요
+  fallback_text: 숫자는 따옴표 없이 number = 10, 글자는 따옴표와 함께 greeting = "안녕" 이렇게 넣어요!
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: |-
+      10
+      안녕
+  hints:
+    level_1: 숫자는 그냥 쓰고, 글자는 따옴표로 감싸야 해요!
+    level_2: number = 10 이렇게 숫자는 따옴표 없이, greeting = "안녕" 이렇게 글자는 따옴표와 함께!
+    level_3: |-
+      number = ___
+      greeting = "___" 숫자와 글자를 각각 넣어보세요!
+  solution_code: |-
+    number = 10
+    greeting = "안녕"
+    print(number)
+    print(greeting)

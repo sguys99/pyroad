@@ -1,0 +1,43 @@
+# 퀘스트 4-1: 숫자 세기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000012
+order: 1
+title: 숫자 세기
+concept: for, range()
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: for 반복문과 range() 함수
+  learning_goals:
+    - for 반복문의 구조를 이해한다
+    - range()로 숫자 범위를 만들 수 있다
+    - 반복문 안의 코드가 여러 번 실행되는 것을 안다
+  story_context: 동굴 입구에서 마법 숫자를 세어야 문이 열려요! 1부터 5까지 세어볼까요?
+  exercise_description: for 반복문과 range()를 사용하여 1부터 5까지 한 줄에 하나씩 출력하세요
+  starter_code: |-
+    # 1부터 5까지 세어보세요!
+    # for 반복문과 range()를 사용해보세요!
+
+    for i in range(__, __):
+        print(i)
+  expected_output_hint: 1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요
+  fallback_text: for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요).
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: |-
+      1
+      2
+      3
+      4
+      5
+  hints:
+    level_1: for는 같은 일을 여러 번 반복해주는 마법이에요! range()에 시작과 끝 숫자를 넣어보세요.
+    level_2: range(1, 6)은 1, 2, 3, 4, 5를 만들어줘요. 6은 포함되지 않아요!
+    level_3: 'for i in range(___, ___): 1부터 5까지 나오려면 시작과 끝에 뭘 넣을까요?'
+  solution_code: |-
+    for i in range(1, 6):
+        print(i)

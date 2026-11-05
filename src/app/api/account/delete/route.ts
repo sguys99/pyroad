@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { deleteUserAnalytics } from '@/lib/analytics/server';
 
 export async function DELETE() {
   const supabase = await createClient();
@@ -12,56 +13,23 @@ export async function DELETE() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // FK 순서대로 삭제: user_badges → user_progress → users
-  const { error: badgesError } = await supabase
-    .from('user_badges')
-    .delete()
-    .eq('user_id', user.id);
-
-  if (badgesError) {
-    return NextResponse.json(
-      { error: '뱃지 삭제 중 오류가 발생했습니다.' },
-      { status: 500 },
-    );
-  }
-
-  const { error: progressError } = await supabase
-    .from('user_progress')
-    .delete()
-    .eq('user_id', user.id);
-
-  if (progressError) {
-    return NextResponse.json(
-      { error: '진행 데이터 삭제 중 오류가 발생했습니다.' },
-      { status: 500 },
-    );
-  }
-
-  const { error: userError } = await supabase
-    .from('users')
-    .delete()
-    .eq('id', user.id);
-
-  if (userError) {
-    return NextResponse.json(
-      { error: '사용자 데이터 삭제 중 오류가 발생했습니다.' },
-      { status: 500 },
-    );
-  }
-
-  // Admin API로 Auth 계정 삭제
+  // Auth 계정을 지우면 public.users(ON DELETE CASCADE)와 그 사용자의 모든 행(진행·뱃지·퀴즈 시도·공개 프로필·
+  // 게시글·댓글·신고·API 키·요청 한도)이 함께 지워집니다. 클라이언트에는 users·user_progress·user_badges DELETE 권한이
+  // 없습니다(P1-01·P1-04, B28). 새 테이블도 users 를 ON DELETE CASCADE 로 참조해야 함 (회귀 B28-1·2, supabase/README.md)
   const adminClient = createAdminClient();
 
-  const { error: authError } = await adminClient.auth.admin.deleteUser(
-    user.id,
-  );
+  const { error: authError } = await adminClient.auth.admin.deleteUser(user.id);
 
   if (authError) {
+    console.error('[Delete API] Auth user delete failed:', authError.message);
     return NextResponse.json(
-      { error: 'Auth 계정 삭제 중 오류가 발생했습니다.' },
+      { error: '탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
       { status: 500 },
     );
   }
+
+  // 분석 이벤트는 users 를 참조하지 않으므로(익명 ID = HMAC) 따로 지운다 (P1-17). 실패해도 탈퇴는 끝난 것으로 둠
+  await deleteUserAnalytics(adminClient, user.id);
 
   return NextResponse.json({ success: true });
 }

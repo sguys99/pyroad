@@ -1,0 +1,37 @@
+# 퀘스트 1-2: 내 소개를 해볼까?
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000002
+order: 2
+title: 내 소개를 해볼까?
+concept: print() 여러 줄
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: print()를 여러 번 사용하여 여러 줄 출력하기
+  learning_goals:
+    - print()를 여러 번 사용하여 여러 줄을 출력할 수 있다
+    - 각 print()가 한 줄씩 출력하는 것을 이해한다
+  story_context: 마을 입구에서 자기소개를 하는 모험가. 마을 사람들이 이름과 인사를 기다리고 있어요!
+  exercise_description: print()를 두 번 사용하여 첫 줄에 "나는 파이썬 모험가!", 둘째 줄에 "반가워!"를 출력하세요
+  starter_code: |
+    # 두 줄을 출력해보세요!
+  expected_output_hint: '두 줄이 출력되어야 해요: 나는 파이썬 모험가! 그리고 반가워!'
+  fallback_text: print()를 두 번 쓰면 두 줄이 나와요! 첫 번째 print()에 첫 번째 문장을, 두 번째 print()에 두 번째 문장을 넣어보세요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: |-
+      나는 파이썬 모험가!
+      반가워!
+  hints:
+    level_1: print()를 한 번 쓰면 한 줄이 나와요. 두 줄을 쓰려면?
+    level_2: print("첫 번째 줄")을 쓰고, 아래에 print("두 번째 줄")을 써보세요!
+    level_3: |-
+      print("___")
+      print("___") 두 줄에 각각 자기소개와 인사를 넣어보세요!
+  solution_code: |-
+    print("나는 파이썬 모험가!")
+    print("반가워!")

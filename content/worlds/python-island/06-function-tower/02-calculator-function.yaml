@@ -1,0 +1,42 @@
+# 퀘스트 6-2: 계산기 함수
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000020
+order: 2
+title: 계산기 함수
+concept: 매개변수, return
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 매개변수와 return으로 값 돌려주기
+  learning_goals:
+    - 함수에 매개변수로 값을 전달할 수 있다
+    - return으로 함수가 결과를 돌려주는 것을 이해한다
+  story_context: 탑의 마법 계산기! 두 숫자를 넣으면 합계를 알려줘요.
+  exercise_description: add라는 함수를 만들어 두 숫자를 받아 합계를 return하고, add(7, 8)의 결과를 출력하세요
+  starter_code: |-
+    # 두 숫자를 더하는 함수를 만들어보세요!
+    def add(a, b):
+        # 두 숫자를 더한 결과를 return 하세요!
+        
+
+    result = add(7, 8)
+    print(result)
+  expected_output_hint: 15 가 출력되어야 해요
+  fallback_text: '매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요.'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: '15'
+  hints:
+    level_1: 함수 이름 옆 괄호 안의 a, b가 매개변수예요. 이 둘을 더하면?
+    level_2: return은 함수가 결과를 돌려주는 거예요. return a + b 이렇게!
+    level_3: return ___ + ___ 두 매개변수를 더해서 돌려주세요!
+  solution_code: |-
+    def add(a, b):
+        return a + b
+
+    result = add(7, 8)
+    print(result)

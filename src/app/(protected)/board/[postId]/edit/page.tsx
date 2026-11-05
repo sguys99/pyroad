@@ -29,7 +29,10 @@ export default async function BoardEditPage({
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       <div className="mb-6">
-        <Link href={`/board/${postId}`} className="text-sm text-primary underline">
+        <Link
+          href={`/board/${postId}`}
+          className="text-sm text-primary underline"
+        >
           ← 돌아가기
         </Link>
       </div>

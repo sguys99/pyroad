@@ -19,13 +19,14 @@ export default async function BoardPage({
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  // getAuthUser()와 게시글 목록 쿼리를 병렬 실행 (user.id 불필��)
+  // getAuthUser()와 게시글 목록 쿼리를 병렬 실행 (user.id 불필요)
+  // 작성자 이름은 user_profiles_public(닉네임 → 모험가NNNN, 00014). 신고로 숨긴 글은 RLS 가 작성자에게만 보여 줌
   const [{ user }, { data: posts, count }] = await Promise.all([
     getAuthUser(),
     supabase
       .from('board_posts')
       .select(
-        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_url), board_comments(count)',
+        '*, user_profiles_public!board_posts_user_id_fkey(display_name), board_comments(count)',
         { count: 'exact' },
       )
       .order('created_at', { ascending: false })
@@ -35,8 +36,12 @@ export default async function BoardPage({
 
   const boardPosts: BoardPostWithAuthor[] = (posts ?? []).map((post) => ({
     ...post,
-    user_profiles_public: (post as Record<string, unknown>).user_profiles_public as BoardPostWithAuthor['user_profiles_public'],
-    comment_count: ((post as Record<string, unknown>).board_comments as { count: number }[])?.[0]?.count ?? 0,
+    user_profiles_public: (post as Record<string, unknown>)
+      .user_profiles_public as BoardPostWithAuthor['user_profiles_public'],
+    comment_count:
+      (
+        (post as Record<string, unknown>).board_comments as { count: number }[]
+      )?.[0]?.count ?? 0,
   }));
 
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);

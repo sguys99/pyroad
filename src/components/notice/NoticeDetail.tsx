@@ -1,6 +1,7 @@
 import type { Notice } from '@/lib/types/database';
 import { DeleteNoticeButton } from './DeleteNoticeButton';
 import Link from 'next/link';
+import { formatKstDate } from '@/lib/time/kst';
 
 interface NoticeDetailProps {
   notice: Notice;
@@ -8,7 +9,7 @@ interface NoticeDetailProps {
 }
 
 export function NoticeDetail({ notice, isAdmin }: NoticeDetailProps) {
-  const date = new Date(notice.created_at).toLocaleDateString('ko-KR');
+  const date = formatKstDate(notice.created_at);
   const isEdited = notice.updated_at !== notice.created_at;
 
   return (

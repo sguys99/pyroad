@@ -11,6 +11,8 @@ import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
+import { formatKstDate } from '@/lib/time/kst';
+import { sortStages } from '@/lib/world/stageOrder';
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -18,10 +20,10 @@ export default async function ProfilePage() {
   // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
   const [{ user }, stagesResult] = await Promise.all([
     getAuthUser(),
+    // 순서는 (월드 order, 스테이지 order) — 아래 sortStages (P1-08)
     supabase
       .from('stages')
-      .select('id, order, title, quests(id)')
-      .order('order', { ascending: true }),
+      .select('id, order, title, world:worlds(order), quests(id)'),
   ]);
   if (!user) redirect('/');
 
@@ -45,7 +47,7 @@ export default async function ProfilePage() {
 
   const profile = profileResult.data;
   const progress = progressResult.data ?? [];
-  const stages = stagesResult.data ?? [];
+  const stages = sortStages(stagesResult.data ?? []);
   const badges = badgesResult.data ?? [];
 
   if (!profile) redirect('/');
@@ -82,12 +84,17 @@ export default async function ProfilePage() {
           />
         ) : (
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
-            <CharacterAvatar character="pybaem" expression="happy" size="lg" animated />
+            <CharacterAvatar
+              character="pybaem"
+              expression="happy"
+              size="lg"
+              animated
+            />
           </div>
         )}
-        <p className="text-xl font-bold text-foreground">
+        <h1 className="text-xl font-bold text-foreground">
           {profile.display_name}
-        </p>
+        </h1>
         <p className="text-muted-foreground">
           Lv.{profile.current_level} {title}
         </p>
@@ -104,15 +111,16 @@ export default async function ProfilePage() {
 
       {/* 뱃지 컬렉션 카드 */}
       <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
-        <h2 className="mb-3 text-sm font-bold text-foreground">
-          뱃지 컬렉션
-        </h2>
+        <h2 className="mb-3 text-sm font-bold text-foreground">뱃지 컬렉션</h2>
         <div className="grid grid-cols-5 gap-3">
           {BADGE_DEFINITIONS.map((badge) => {
             const earned = earnedTypes.has(badge.type);
             const badgeData = badges.find((b) => b.badge_type === badge.type);
             return (
-              <div key={badge.type} className="flex flex-col items-center gap-1">
+              <div
+                key={badge.type}
+                className="flex flex-col items-center gap-1"
+              >
                 <BadgeIcon type={badge.type} earned={earned} size="lg" />
                 <p
                   className={`text-xs font-medium ${earned ? 'text-foreground' : 'text-muted-foreground'}`}
@@ -121,7 +129,7 @@ export default async function ProfilePage() {
                 </p>
                 {earned && badgeData && (
                   <p className="text-[10px] text-muted-foreground">
-                    {new Date(badgeData.earned_at).toLocaleDateString('ko-KR')}
+                    {formatKstDate(badgeData.earned_at, 'dot')}
                   </p>
                 )}
               </div>
@@ -158,7 +166,11 @@ export default async function ProfilePage() {
                 <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-border">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      percent === 100 ? 'bg-primary' : percent > 0 ? 'bg-primary/60' : 'bg-border'
+                      percent === 100
+                        ? 'bg-primary'
+                        : percent > 0
+                          ? 'bg-primary/60'
+                          : 'bg-border'
                     }`}
                     style={{ width: `${percent}%` }}
                   />
@@ -174,18 +186,28 @@ export default async function ProfilePage() {
         <h2 className="mb-3 text-sm font-bold text-foreground">통계</h2>
         <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
           <div>
-            <p className="text-xl font-bold text-primary sm:text-2xl">{totalCompleted}</p>
-            <p className="text-[10px] text-muted-foreground sm:text-xs">완료 퀘스트</p>
+            <p className="text-xl font-bold text-primary sm:text-2xl">
+              {totalCompleted}
+            </p>
+            <p className="text-[10px] text-muted-foreground sm:text-xs">
+              완료 퀘스트
+            </p>
           </div>
           <div>
-            <p className="text-xl font-bold text-primary sm:text-2xl">{totalQuests}</p>
-            <p className="text-[10px] text-muted-foreground sm:text-xs">전체 퀘스트</p>
+            <p className="text-xl font-bold text-primary sm:text-2xl">
+              {totalQuests}
+            </p>
+            <p className="text-[10px] text-muted-foreground sm:text-xs">
+              전체 퀘스트
+            </p>
           </div>
           <div>
             <p className="text-xl font-bold text-primary sm:text-2xl">
               {badges.length}
             </p>
-            <p className="text-[10px] text-muted-foreground sm:text-xs">획득 뱃지</p>
+            <p className="text-[10px] text-muted-foreground sm:text-xs">
+              획득 뱃지
+            </p>
           </div>
         </div>
       </div>

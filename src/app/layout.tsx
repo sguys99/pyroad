@@ -58,7 +58,9 @@ export default function RootLayout({
       lang="ko"
       className={cn('font-sans', notoSansKR.variable, jetbrainsMono.variable)}
     >
-      <body><MotionProvider>{children}</MotionProvider></body>
+      <body>
+        <MotionProvider>{children}</MotionProvider>
+      </body>
     </html>
   );
 }

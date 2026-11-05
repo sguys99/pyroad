@@ -1,0 +1,50 @@
+# 퀘스트 2-7: 자기소개 카드 만들기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000029
+order: 7
+title: 자기소개 카드 만들기
+concept: 변수 종합
+xp_reward: 75
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 변수와 문자열 연결 종합 활용
+  learning_goals:
+    - 여러 변수를 선언하고 값을 저장할 수 있다
+    - 문자열 연결을 사용하여 의미 있는 문장을 만들 수 있다
+    - 변수를 활용하여 자기소개 카드를 완성할 수 있다
+  story_context: 변수의 숲을 떠나기 전에, 지금까지 배운 걸 모아서 멋진 자기소개 카드를 만들어봐요!
+  exercise_description: name, age, school 변수에 각각 값을 저장하고, 문자열 연결로 자기소개를 3줄로 출력하세요
+  starter_code: |
+    # 자기소개 카드를 만들어보세요!
+    name = "파이뱀"
+    age = "10"
+    school = "코딩초등학교"
+
+    # 아래에 print()를 3번 써서 자기소개를 출력하세요!
+  expected_output_hint: '이름: 파이뱀, 나이: 10살, 학교: 코딩초등학교 가 각각 한 줄씩 출력되어야 해요'
+  fallback_text: '변수에 저장한 값과 문자열을 + 로 합쳐서 출력해요! print("이름: " + name) 이렇게요.'
+  is_challenge: true
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: |-
+      이름: 파이뱀
+      나이: 10살
+      학교: 코딩초등학교
+  hints:
+    level_1: print()를 3번 써서 이름, 나이, 학교를 각각 출력해야 해요!
+    level_2: 'print("이름: " + name) 이렇게 문자열과 변수를 + 로 합쳐보세요!'
+    level_3: |-
+      print("이름: " + ___)
+      print("나이: " + ___ + "살")
+      print("학교: " + ___)
+  solution_code: |-
+    name = "파이뱀"
+    age = "10"
+    school = "코딩초등학교"
+    print("이름: " + name)
+    print("나이: " + age + "살")
+    print("학교: " + school)

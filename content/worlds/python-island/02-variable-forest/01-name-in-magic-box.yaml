@@ -1,0 +1,35 @@
+# 퀘스트 2-1: 마법 상자에 이름 넣기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000004
+order: 1
+title: 마법 상자에 이름 넣기
+concept: 변수 선언
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 변수 선언과 값 저장
+  learning_goals:
+    - 변수가 값을 담는 상자임을 이해한다
+    - = 기호로 변수에 값을 저장할 수 있다
+  story_context: 변수의 숲에서 마법 상자에 이름표를 붙이는 모험. 상자에 파이뱀의 이름을 넣어봐요!
+  exercise_description: name이라는 변수에 "파이뱀"을 저장하고 print(name)으로 출력하세요
+  starter_code: |-
+    # 변수에 이름을 넣어보세요!
+    name = 
+    print(name)
+  expected_output_hint: 파이뱀 이 출력되어야 해요
+  fallback_text: 변수는 값을 담는 상자예요! name = "파이뱀" 이렇게 상자에 이름표를 붙이고 값을 넣을 수 있어요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: contains
+    expected: 파이뱀
+  hints:
+    level_1: 변수는 상자에 이름표를 붙이는 거예요. name이라는 상자에 뭘 넣을까요?
+    level_2: = 기호 오른쪽에 따옴표로 감싼 텍스트를 넣으면 돼요!
+    level_3: name = "___" 따옴표 안에 이름을 넣어보세요!
+  solution_code: |-
+    name = "파이뱀"
+    print(name)

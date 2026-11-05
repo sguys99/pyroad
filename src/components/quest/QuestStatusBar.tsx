@@ -1,7 +1,13 @@
 'use client';
 
 import { Star, Lightbulb } from 'lucide-react';
-import { m, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
+import {
+  m,
+  useMotionValue,
+  useTransform,
+  animate,
+  AnimatePresence,
+} from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';

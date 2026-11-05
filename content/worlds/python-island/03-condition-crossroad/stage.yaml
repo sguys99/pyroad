@@ -1,0 +1,8 @@
+# 스테이지 3: 조건의 갈림길 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000003
+order: 3
+title: 조건의 갈림길
+theme_name: condition_crossroad
+description: if/elif/else, 비교연산자, 논리연산자를 배워봐요!
+is_final: false

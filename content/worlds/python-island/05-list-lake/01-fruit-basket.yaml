@@ -1,0 +1,38 @@
+# 퀘스트 5-1: 과일 바구니
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000016
+order: 1
+title: 과일 바구니
+concept: 리스트 생성
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 리스트 생성과 출력
+  learning_goals:
+    - 대괄호 []로 리스트를 만들 수 있다
+    - 리스트에 여러 값을 저장할 수 있다
+    - 리스트 전체를 출력할 수 있다
+  story_context: 호수 옆 과일 가게에서 과일 바구니를 만들어요! 좋아하는 과일을 담아봐요.
+  exercise_description: fruits라는 리스트에 "사과", "바나나", "포도"를 넣고 출력하세요
+  starter_code: |-
+    # 과일 바구니를 만들어보세요!
+    # 대괄호 [] 안에 "사과", "바나나", "포도"를 넣어보세요!
+
+    fruits = []
+    print(fruits)
+  expected_output_hint: 사과, 바나나, 포도가 리스트로 출력되어야 해요
+  fallback_text: 리스트는 여러 값을 한 상자에 담는 거예요! ["사과", "바나나", "포도"] 이렇게 대괄호 안에 쉼표로 구분해서 넣어요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: contains
+    expected: 사과
+  hints:
+    level_1: 리스트는 대괄호 [] 안에 값을 넣어 만들어요!
+    level_2: 각 과일을 따옴표로 감싸고 쉼표로 구분해요! ["사과", "바나나", ...]
+    level_3: fruits = ["___", "___", "___"] 좋아하는 과일 3개를 넣어보세요!
+  solution_code: |-
+    fruits = ["사과", "바나나", "포도"]
+    print(fruits)

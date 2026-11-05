@@ -85,7 +85,13 @@ function FlyingFace() {
       </g>
       <g id="mouth">
         {/* 결의에 찬 입 */}
-        <path d="M59 60 Q64 63 69 60" stroke="#F57F17" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <path
+          d="M59 60 Q64 63 69 60"
+          stroke="#F57F17"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -135,7 +141,13 @@ function LandingFace() {
       </g>
       <g id="mouth">
         {/* 미소 */}
-        <path d="M58 60 Q64 66 70 60" stroke="#F57F17" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <path
+          d="M58 60 Q64 66 70 60"
+          stroke="#F57F17"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
     </>
   );
@@ -146,12 +158,30 @@ function SparklingFace() {
     <>
       <g id="eyes">
         {/* 반짝 눈 (^_^) */}
-        <path d="M51 52 Q56 47 61 52" stroke="#F57F17" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-        <path d="M67 52 Q72 47 77 52" stroke="#F57F17" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        <path
+          d="M51 52 Q56 47 61 52"
+          stroke="#F57F17"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M67 52 Q72 47 77 52"
+          stroke="#F57F17"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
       </g>
       <g id="mouth">
         {/* 활짝 웃는 입 */}
-        <path d="M56 58 Q64 66 72 58" stroke="#F57F17" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <path
+          d="M56 58 Q64 66 72 58"
+          stroke="#F57F17"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
         <path d="M58 58 Q64 63 70 58" fill="#FFB300" opacity="0.3" />
       </g>
     </>
@@ -172,7 +202,12 @@ function FlyingTrail() {
         fill="none"
         opacity="0.6"
       >
-        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1s" repeatCount="indefinite" />
+        <animate
+          attributeName="opacity"
+          values="0.6;0.2;0.6"
+          dur="1s"
+          repeatCount="indefinite"
+        />
       </path>
       <path
         d="M36 96 Q14 112 6 122"
@@ -182,14 +217,29 @@ function FlyingTrail() {
         fill="none"
         opacity="0.4"
       >
-        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.2s" repeatCount="indefinite" />
+        <animate
+          attributeName="opacity"
+          values="0.4;0.1;0.4"
+          dur="1.2s"
+          repeatCount="indefinite"
+        />
       </path>
       {/* 작은 파티클 */}
       <circle cx="22" cy="108" r="2" fill="#FFD54F" opacity="0.5">
-        <animate attributeName="opacity" values="0.5;0;0.5" dur="0.8s" repeatCount="indefinite" />
+        <animate
+          attributeName="opacity"
+          values="0.5;0;0.5"
+          dur="0.8s"
+          repeatCount="indefinite"
+        />
       </circle>
       <circle cx="14" cy="116" r="1.5" fill="#FFE082" opacity="0.3">
-        <animate attributeName="opacity" values="0.3;0;0.3" dur="1s" repeatCount="indefinite" />
+        <animate
+          attributeName="opacity"
+          values="0.3;0;0.3"
+          dur="1s"
+          repeatCount="indefinite"
+        />
       </circle>
     </g>
   );
@@ -199,9 +249,36 @@ function LandingAccessory() {
   return (
     <>
       {/* 착지 이펙트 라인 */}
-      <line x1="42" y1="104" x2="34" y2="110" stroke="#FFB300" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-      <line x1="64" y1="106" x2="64" y2="114" stroke="#FFB300" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-      <line x1="86" y1="104" x2="94" y2="110" stroke="#FFB300" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+      <line
+        x1="42"
+        y1="104"
+        x2="34"
+        y2="110"
+        stroke="#FFB300"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+      <line
+        x1="64"
+        y1="106"
+        x2="64"
+        y2="114"
+        stroke="#FFB300"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+      <line
+        x1="86"
+        y1="104"
+        x2="94"
+        y2="110"
+        stroke="#FFB300"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
     </>
   );
 }
@@ -212,22 +289,42 @@ function SparklingAccessory() {
       {/* 주변 작은 별 4개 - 깜빡 애니메이션 */}
       <g>
         <polygon points="18,30 20,26 22,30 20,34" fill="#FFD54F">
-          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+          <animate
+            attributeName="opacity"
+            values="1;0.3;1"
+            dur="1.5s"
+            repeatCount="indefinite"
+          />
         </polygon>
       </g>
       <g>
         <polygon points="108,24 110,20 112,24 110,28" fill="#FFE082">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
+          <animate
+            attributeName="opacity"
+            values="0.3;1;0.3"
+            dur="1.5s"
+            repeatCount="indefinite"
+          />
         </polygon>
       </g>
       <g>
         <polygon points="14,76 16,72 18,76 16,80" fill="#FFE082">
-          <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.8s" repeatCount="indefinite" />
+          <animate
+            attributeName="opacity"
+            values="0.7;0.2;0.7"
+            dur="1.8s"
+            repeatCount="indefinite"
+          />
         </polygon>
       </g>
       <g>
         <polygon points="112,70 114,66 116,70 114,74" fill="#FFD54F">
-          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="1.3s" repeatCount="indefinite" />
+          <animate
+            attributeName="opacity"
+            values="0.2;0.9;0.2"
+            dur="1.3s"
+            repeatCount="indefinite"
+          />
         </polygon>
       </g>
     </>

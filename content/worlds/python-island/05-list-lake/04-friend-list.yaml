@@ -1,0 +1,41 @@
+# 퀘스트 5-4: 친구 목록 관리
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000018
+order: 4
+title: 친구 목록 관리
+concept: append(), len()
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 리스트에 추가하기(append)와 길이 구하기(len)
+  learning_goals:
+    - append()로 리스트에 새 값을 추가할 수 있다
+    - len()으로 리스트의 길이를 구할 수 있다
+  story_context: 호수 마을에서 새 친구를 만났어요! 친구 목록에 추가하고 몇 명인지 세어봐요.
+  exercise_description: friends 리스트에 "파이뱀"을 append하고, len()으로 친구 수를 출력하세요
+  starter_code: |-
+    # 친구를 추가하고 몇 명인지 세어보세요!
+    friends = ["토끼", "거북이", "다람쥐"]
+
+    # 아래에 "파이뱀"을 추가하고, 친구 수를 출력하세요!
+
+    print()
+  expected_output_hint: 4 가 출력되어야 해요 (3명 + 파이뱀 1명)
+  fallback_text: append()는 리스트 끝에 새 값을 추가해요! len()은 리스트에 몇 개가 있는지 세어줘요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: contains
+    expected: '4'
+  hints:
+    level_1: append()로 리스트에 새 친구를 추가할 수 있어요! friends.append()를 써보세요.
+    level_2: friends.append("파이뱀")으로 추가하고, len(friends)로 몇 명인지 세어보세요!
+    level_3: |-
+      friends.append("___")
+      print(___(friends)) 추가할 이름과 길이를 구하는 함수를 넣어보세요!
+  solution_code: |-
+    friends = ["토끼", "거북이", "다람쥐"]
+    friends.append("파이뱀")
+    print(len(friends))

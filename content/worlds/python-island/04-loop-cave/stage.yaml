@@ -1,0 +1,8 @@
+# 스테이지 4: 반복의 동굴 (stages 테이블)
+
+id: a1000000-0000-0000-0000-000000000004
+order: 4
+title: 반복의 동굴
+theme_name: loop_cave
+description: for, while, range(), break/continue를 배워봐요!
+is_final: false

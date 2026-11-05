@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Play, Loader2, RefreshCw } from 'lucide-react';
+import { Play, Loader2, RefreshCw, Square } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from './CodeEditor';
 import { OutputPanel } from './OutputPanel';
-import type { PyodideStatus, RunResult } from '@/lib/pyodide/usePyodide';
+import type {
+  PyodideRestartReason,
+  PyodideStatus,
+  RunResult,
+} from '@/lib/pyodide/usePyodide';
+import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
 const CODING_TIPS = [
@@ -32,7 +37,9 @@ function CodingTipRotator() {
 
   return (
     <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-      <span className="shrink-0"><CharacterAvatar character="pybaem" expression="teaching" size="sm" /></span>
+      <span className="shrink-0">
+        <CharacterAvatar character="pybaem" expression="teaching" size="sm" />
+      </span>
       <div className="min-h-[20px] flex-1">
         <AnimatePresence mode="wait">
           <m.p
@@ -51,27 +58,66 @@ function CodingTipRotator() {
   );
 }
 
+/**
+ * 시간 초과·멈추기 뒤 Worker를 다시 띄우는 동안 (§2.9 재준비 연출, 2~5초).
+ * 점 세 개는 CSS transform·opacity 반복이고 reduced-motion이면 멈춘 점 (§2.10)
+ */
+export function RunnerWakingNotice() {
+  return (
+    <div
+      role="status"
+      data-testid="runner-waking"
+      className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2"
+    >
+      <span className="shrink-0">
+        <CharacterAvatar character="pybaem" expression="sleeping" size="sm" />
+      </span>
+      <p className="flex items-center text-xs text-foreground">
+        파이뱀이 실행기를 다시 깨우는 중
+        <span aria-hidden className="ml-1 inline-flex items-end gap-0.5">
+          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
+          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
+          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
+        </span>
+      </p>
+    </div>
+  );
+}
+
 interface CodePanelProps {
-  initialCode: string;
+  /** 에디터 코드. 황금키 정답·다음 단계 코드처럼 바깥에서 바꾸면 에디터에도 반영됨 */
+  code: string;
   onCodeChange: (code: string) => void;
   pyodideStatus: PyodideStatus;
+  /** Worker를 다시 띄우는 중이면 그 이유 (재준비 연출) */
+  restarting?: PyodideRestartReason;
   isRunning: boolean;
+  /** 채점·완료 요청 중 (B06: 이 동안 실행 버튼을 다시 누를 수 없음) */
+  isSubmitting?: boolean;
   onRun: () => void;
+  /** 실행 멈추기 (실행 중에만 버튼이 보임) */
+  onStop?: () => void;
   onRetry: () => void;
   runResult: RunResult | null;
+  /** 실행 중 stdout */
+  liveOutput?: LiveOutputStore;
   isCodeEmpty: boolean;
   validationResult?: { passed: boolean } | null;
   nextQuestId?: string | null;
 }
 
 export function CodePanel({
-  initialCode,
+  code,
   onCodeChange,
   pyodideStatus,
+  restarting = null,
   isRunning,
+  isSubmitting = false,
   onRun,
+  onStop,
   onRetry,
   runResult,
+  liveOutput,
   isCodeEmpty,
   validationResult,
   nextQuestId,
@@ -79,12 +125,15 @@ export function CodePanel({
   const isReady = pyodideStatus === 'ready';
   const isLoading = pyodideStatus === 'loading';
   const isError = pyodideStatus === 'error';
-  const canRun = isReady && !isRunning && !isCodeEmpty;
+  // Worker 를 띄우기 전(idle)과 불러오는 중(loading) 모두 아직 누를 수 없으므로 "준비 중..."
+  const isPreparing = !isReady && !isError;
+  const isBusy = isRunning || isSubmitting;
+  const canRun = isReady && !isBusy && !isCodeEmpty;
 
   return (
     <div className="flex flex-col gap-3 p-4">
       {/* 에디터 */}
-      <CodeEditor initialCode={initialCode} onChange={onCodeChange} />
+      <CodeEditor value={code} onChange={onCodeChange} />
 
       {/* Pyodide 상태 + 실행 버튼 */}
       <div className="flex items-center gap-3">
@@ -104,15 +153,22 @@ export function CodePanel({
               disabled={!canRun}
               size="default"
               className="min-w-[140px]"
+              aria-busy={isBusy || undefined}
+              data-testid="run-button"
             >
               {isRunning ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   실행 중...
                 </>
-              ) : isLoading ? (
+              ) : isSubmitting ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  정답 확인 중...
+                </>
+              ) : isPreparing ? (
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
                   준비 중...
                 </>
               ) : (
@@ -125,6 +181,18 @@ export function CodePanel({
           </m.div>
         )}
 
+        {isRunning && onStop && (
+          <Button
+            onClick={onStop}
+            variant="outline"
+            size="default"
+            data-testid="stop-button"
+          >
+            <Square className="mr-1.5 h-4 w-4 fill-current" aria-hidden />
+            멈추기
+          </Button>
+        )}
+
         {isError && (
           <span className="text-xs text-accent-foreground">
             앗, 실행기를 불러오지 못했어요. 다시 시도해 볼까요?
@@ -132,14 +200,16 @@ export function CodePanel({
         )}
       </div>
 
-      {/* Pyodide 로딩 중 코딩 팁 */}
-      {isLoading && <CodingTipRotator />}
+      {/* 다시 준비 중이면 깨우는 연출, 처음 불러오는 중이면 코딩 팁 */}
+      {isLoading &&
+        (restarting ? <RunnerWakingNotice /> : <CodingTipRotator />)}
 
       {/* 실행 결과 */}
       <OutputPanel
         result={runResult}
         isRunning={isRunning}
         validationResult={validationResult}
+        liveOutput={liveOutput}
       />
 
       {/* 다음 퀘스트 버튼 */}
@@ -147,10 +217,18 @@ export function CodePanel({
         <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{
+            delay: 0.5,
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+          }}
           className="mt-2"
         >
-          <Button render={<Link href={`/quest/${nextQuestId}`} />} className="w-full">
+          <Button
+            render={<Link href={`/quest/${nextQuestId}`} />}
+            className="w-full"
+          >
             다음 퀘스트로 →
           </Button>
         </m.div>

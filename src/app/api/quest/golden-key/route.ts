@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { QuestWithStageServer } from '@/lib/types/database';
+import {
+  fetchAnswerKeyRow,
+  findStepAnswer,
+  resolveAnswerKey,
+} from '@/lib/quest/answerKeys';
+import { rewardError, spendGoldenKeyRpc } from '@/lib/quest/rewardRpc';
+import type { GoldenKeyResponse } from '@/lib/quest/rewards';
+import type { PromptSkeleton } from '@/lib/types/database';
 
 interface GoldenKeyRequest {
   quest_id: string;
@@ -32,87 +39,56 @@ export async function POST(request: Request) {
     );
   }
 
-  // 1. 유저 황금키 잔여 수 확인 + 퀘스트 조회 — 병렬
+  // 1. 퀘스트 + 정답 조회 (정답이 없으면 황금키를 차감하지 않고 404)
+  //    정답 코드는 quest_answer_keys에서 읽는다 (P1-02). quests의 prompt_skeleton은 폴백용
   const adminClient = createAdminClient();
-  const [profileResult, questResult] = await Promise.all([
-    supabase
-      .from('users')
-      .select('golden_keys')
-      .eq('id', user.id)
-      .single(),
+  const [questResult, answerKeyRow] = await Promise.all([
     adminClient
       .from('quests')
       .select('id, prompt_skeleton, stage_id')
       .eq('id', body.quest_id)
-      .single(),
+      .maybeSingle(),
+    fetchAnswerKeyRow(adminClient, body.quest_id),
   ]);
-
-  const goldenKeys = profileResult.data?.golden_keys ?? 0;
-  if (goldenKeys <= 0) {
-    return NextResponse.json(
-      { error: '황금키가 부족합니다', golden_keys: 0 },
-      { status: 400 },
-    );
-  }
 
   const quest = questResult.data;
   if (!quest) {
-    return NextResponse.json({ error: 'Quest not found' }, { status: 404 });
+    return rewardError('quest_not_found');
   }
 
-  const skeleton = (quest as unknown as QuestWithStageServer).prompt_skeleton;
+  const skeleton = quest.prompt_skeleton as unknown as PromptSkeleton;
+  const answerKey = resolveAnswerKey(answerKeyRow, quest);
+  const isProject = Array.isArray(skeleton.steps);
+  const currentStep = isProject ? (body.current_step ?? 0) : null;
 
-  // 2. solution_code 추출
-  let solutionCode: string | undefined;
-  const currentStep = body.current_step ?? 0;
-
-  if (skeleton.steps && currentStep > 0) {
-    // 프로젝트 퀘스트: 현재 단계의 solution_code
-    const stepDef = skeleton.steps[currentStep - 1];
-    solutionCode = stepDef?.solution_code;
-  } else {
-    solutionCode = skeleton.solution_code;
-  }
+  // 2. solution_code 추출 (프로젝트 퀘스트는 현재 단계의 정답)
+  const solutionCode = isProject
+    ? answerKey && currentStep
+      ? findStepAnswer(answerKey, currentStep)?.solution_code
+      : undefined
+    : (answerKey?.solutionCode ?? undefined);
 
   if (!solutionCode) {
     return NextResponse.json(
-      { error: '이 퀘스트에는 정답 코드가 준비되지 않았습니다' },
+      {
+        error: '이 퀘스트에는 정답 코드가 준비되지 않았어요',
+        code: 'no_solution',
+      },
       { status: 404 },
     );
   }
 
-  // 3. 기존 진행 상태 확인 (completed 강등 방지)
-  const { data: existingProgress } = await supabase
-    .from('user_progress')
-    .select('status')
-    .eq('user_id', user.id)
-    .eq('quest_id', body.quest_id)
-    .maybeSingle();
+  // 3. 황금키 차감 + used_golden_key 기록 (DB 함수가 잔여 수·스테이지 잠금·완료 여부를 잠금 아래에서 확인, P1-03)
+  const result = await spendGoldenKeyRpc<{
+    golden_keys: number;
+    charged: boolean;
+  }>(adminClient, user.id, body.quest_id, currentStep);
+  if (!result.ok) return result.response;
 
-  const progressStatus =
-    existingProgress?.status === 'completed'
-      ? ('completed' as const)
-      : ('in_progress' as const);
-
-  // 4. 황금키 1개 차감 + user_progress 기록 — 병렬
-  await Promise.all([
-    supabase
-      .from('users')
-      .update({ golden_keys: goldenKeys - 1 })
-      .eq('id', user.id),
-    supabase.from('user_progress').upsert(
-      {
-        user_id: user.id,
-        quest_id: body.quest_id,
-        used_golden_key: true,
-        status: progressStatus,
-      },
-      { onConflict: 'user_id,quest_id' },
-    ),
-  ]);
-
-  return NextResponse.json({
+  const response: GoldenKeyResponse = {
     solution_code: solutionCode,
-    golden_keys: goldenKeys - 1,
-  });
+    golden_keys: result.data.golden_keys,
+    charged: result.data.charged,
+  };
+  return NextResponse.json(response);
 }

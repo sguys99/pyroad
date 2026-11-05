@@ -28,22 +28,21 @@ const item = {
 
 /**
  * Zigzag node positions (bottom-to-top, matching SVG viewBox 0 0 400 600).
- * Each entry: [leftPercent, topPercent, alignment]
+ * Each entry: left position (mobile / desktop) and top position, in percent.
  * Stages are displayed in reverse order (7 at top, 1 at bottom).
  */
 const NODE_POSITIONS: Array<{
   mobileLeft: string;
   desktopLeft: string;
   top: string;
-  align: 'left' | 'right' | 'center';
 }> = [
-  { mobileLeft: '30%', desktopLeft: '50%', top: '86%', align: 'center' },      // Stage 1 (bottom)
-  { mobileLeft: '15%', desktopLeft: '22%', top: '72.5%', align: 'left' },      // Stage 2
-  { mobileLeft: '45%', desktopLeft: '55%', top: '59%', align: 'right' },       // Stage 3
-  { mobileLeft: '15%', desktopLeft: '22%', top: '45%', align: 'left' },        // Stage 4
-  { mobileLeft: '45%', desktopLeft: '55%', top: '31%', align: 'right' },       // Stage 5
-  { mobileLeft: '15%', desktopLeft: '22%', top: '17.5%', align: 'left' },      // Stage 6
-  { mobileLeft: '30%', desktopLeft: '50%', top: '4%', align: 'center' },       // Stage 7 (top)
+  { mobileLeft: '30%', desktopLeft: '50%', top: '86%' }, // Stage 1 (bottom)
+  { mobileLeft: '15%', desktopLeft: '22%', top: '72.5%' }, // Stage 2
+  { mobileLeft: '45%', desktopLeft: '55%', top: '59%' }, // Stage 3
+  { mobileLeft: '15%', desktopLeft: '22%', top: '45%' }, // Stage 4
+  { mobileLeft: '45%', desktopLeft: '55%', top: '31%' }, // Stage 5
+  { mobileLeft: '15%', desktopLeft: '22%', top: '17.5%' }, // Stage 6
+  { mobileLeft: '30%', desktopLeft: '50%', top: '4%' }, // Stage 7 (top)
 ];
 
 function computeProgressFraction(stages: StageWithStatus[]): number {
@@ -84,6 +83,9 @@ export function WorldMap({ stages }: WorldMapProps) {
 
   return (
     <div className="relative w-full aspect-[2/3] sm:aspect-[400/480]">
+      {/* 화면 읽기 프로그램용 목록 제목 (페이지 h1 "모험 지도" 아래 단계, B33) */}
+      <h2 className="sr-only">모험 스테이지</h2>
+
       {/* SVG winding path background */}
       <WindingPath progressFraction={progressFraction} />
 
@@ -94,26 +96,22 @@ export function WorldMap({ stages }: WorldMapProps) {
       {inProgressIndex >= 0 && (
         <m.div
           className="world-node absolute z-20 pointer-events-none"
-          style={{
-            '--ml': NODE_POSITIONS[inProgressIndex].mobileLeft,
-            '--dl': NODE_POSITIONS[inProgressIndex].desktopLeft,
-            top: NODE_POSITIONS[inProgressIndex].top,
-            transform: 'translate(-50%, -110%)',
-          } as React.CSSProperties}
-          animate={
-            shouldReduceMotion ? undefined : { y: [0, -6, 0] }
+          style={
+            {
+              '--ml': NODE_POSITIONS[inProgressIndex].mobileLeft,
+              '--dl': NODE_POSITIONS[inProgressIndex].desktopLeft,
+              top: NODE_POSITIONS[inProgressIndex].top,
+              transform: 'translate(-50%, -110%)',
+            } as React.CSSProperties
           }
+          animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
           transition={
             shouldReduceMotion
               ? undefined
               : { duration: 2, repeat: Infinity, ease: 'easeInOut' }
           }
         >
-          <CharacterAvatar
-            character="pybaem"
-            expression="happy"
-            size="sm"
-          />
+          <CharacterAvatar character="pybaem" expression="happy" size="sm" />
         </m.div>
       )}
 
@@ -130,15 +128,17 @@ export function WorldMap({ stages }: WorldMapProps) {
             <m.div
               key={stage.id}
               className="world-node absolute z-10"
-              style={{
-                '--ml': pos.mobileLeft,
-                '--dl': pos.desktopLeft,
-                top: pos.top,
-                transform: 'translate(-50%, -50%)',
-              } as React.CSSProperties}
+              style={
+                {
+                  '--ml': pos.mobileLeft,
+                  '--dl': pos.desktopLeft,
+                  top: pos.top,
+                  transform: 'translate(-50%, -50%)',
+                } as React.CSSProperties
+              }
               variants={item}
             >
-              <StageNode stage={stage} align={pos.align} />
+              <StageNode stage={stage} />
             </m.div>
           );
         })}

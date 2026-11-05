@@ -1,0 +1,43 @@
+# 퀘스트 3-2: 짝수인지 홀수인지?
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000030
+order: 2
+title: 짝수인지 홀수인지?
+concept: if/else, % 나머지 연산
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: if/else와 나머지 연산자 %
+  learning_goals:
+    - '% 연산자로 나머지를 구할 수 있다'
+    - 짝수/홀수를 판별하는 조건을 만들 수 있다
+  story_context: 갈림길에서 숫자 요정을 만났어요! 숫자가 짝수인지 홀수인지 알려줘야 길을 안내해줘요.
+  exercise_description: number = 7에 대해 짝수인지 홀수인지 판별하여 출력하세요. 짝수면 "짝수", 홀수면 "홀수"를 출력!
+  starter_code: |-
+    # 짝수인지 홀수인지 판별해보세요!
+    number = 7
+
+    if number % 2 == 0:
+        print("짝수")
+    else:
+        print()
+  expected_output_hint: 홀수 가 출력되어야 해요
+  fallback_text: '% 연산자는 나누기의 나머지를 구해요! 7 % 2 = 1 이니까 홀수예요. 짝수는 나머지가 0이에요.'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: 홀수
+  hints:
+    level_1: '% 2로 2로 나눈 나머지를 구해요. 나머지가 0이면 짝수, 아니면 홀수예요!'
+    level_2: 7 % 2 = 1 이니까 짝수가 아니에요. else에서 뭘 출력해야 할까요?
+    level_3: print("___") 짝수가 아닐 때 출력할 단어를 넣어보세요!
+  solution_code: |-
+    number = 7
+
+    if number % 2 == 0:
+        print("짝수")
+    else:
+        print("홀수")

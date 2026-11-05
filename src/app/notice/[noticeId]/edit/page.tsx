@@ -37,7 +37,11 @@ export default async function NoticeEditPage({
       <h1 className="mb-6 text-2xl font-bold text-foreground">공지 수정</h1>
 
       <CreateNoticeForm
-        initialData={{ id: notice.id, title: notice.title, content: notice.content }}
+        initialData={{
+          id: notice.id,
+          title: notice.title,
+          content: notice.content,
+        }}
       />
     </PageTransition>
   );
