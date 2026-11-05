@@ -68,6 +68,16 @@ export interface ReplayOptions {
   migrationsUpTo?: string;
   /** 마이그레이션 다음에 순서대로 실행할 SQL 텍스트 (seed 등) */
   seeds: { name: string; sql: string }[];
+  /**
+   * 마이그레이션·seed 의 줄바꿈을 모두 CRLF 로 바꿔 실행 (B39).
+   * Windows 에서 SQL Editor 에 붙여넣으면 이렇게 바뀌므로, 결과가 LF 로 실행한 것과 같아야 함
+   */
+  crlf?: boolean;
+}
+
+/** 줄바꿈을 모두 CRLF 로 (이미 CRLF 인 줄은 그대로) */
+export function toCrlf(sql: string): string {
+  return sql.replace(/\r?\n/g, '\r\n');
 }
 
 export interface ReplayResult {
@@ -85,11 +95,12 @@ export async function replay(options: ReplayOptions): Promise<ReplayResult> {
     await db.exec(`SET client_min_messages = warning;`);
     await db.exec(SUPABASE_STUB);
     const files = migrationFiles(options.migrationsUpTo);
+    const text = options.crlf ? toCrlf : (sql: string) => sql;
     for (const file of files) {
-      await runStep(db, file, readFileSync(file, 'utf8'));
+      await runStep(db, file, text(readFileSync(file, 'utf8')));
     }
     for (const seed of options.seeds) {
-      await runStep(db, seed.name, seed.sql);
+      await runStep(db, seed.name, text(seed.sql));
     }
     const { rows } = await db.query<{ j: string }>(SNAPSHOT_SQL);
     const engine = (await db.query<{ v: string }>('SELECT version() AS v'))

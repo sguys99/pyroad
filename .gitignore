@@ -12,6 +12,9 @@ out/
 build/
 dist/
 
+# 운영 SQL Editor 붙여넣기 묶음 (scripts/release/build-release-sql.mjs 생성물, B39)
+release-sql/
+
 # Environment
 .env
 .env.local

@@ -350,11 +350,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_nickname_lower_key
 -- 닉네임 글자: KS X 1001 완성형 한글 2,350자 (EUC-KR 0xB0A1~0xC8FE) + A-Z a-z 0-9.
 -- 유니코드 범위 가-힣(11,172자)은 "똠·햏"처럼 제목 폰트에 없는 글자도 받으므로 2,350자를 그대로 나열합니다.
 -- 목록은 PostgreSQL 의 convert_from(<EUC-KR 바이트>, 'EUC_KR')로 만든 것이고, 회귀 테스트 NK-* 가 같은 변환과 비교합니다.
+-- 줄바꿈은 CR·LF 모두 지웁니다(B39): Windows 에서 SQL Editor 에 붙여넣으면 줄바꿈이 CRLF 가 되어 LF 만 지우면 CR 48개가 남음.
 -- (변환 함수를 CHECK 에 직접 쓰지 않는 이유: 범위 밖 글자에 check_violation 대신 변환 오류(22P05)가 나고,
 --  PGlite 등 일부 환경에는 EUC_KR 변환이 없음)
 DO $$
 DECLARE
-  v_hangul TEXT := replace($ksx$
+  v_hangul TEXT := translate($ksx$
 가각간갇갈갉갊감갑값갓갔강갖갗같갚갛개객갠갤갬갭갯갰갱갸갹갼걀걋걍걔걘걜거걱건걷걸걺검겁것겄겅겆겉겊
 겋게겐겔겜겝겟겠겡겨격겪견겯결겸겹겻겼경곁계곈곌곕곗고곡곤곧골곪곬곯곰곱곳공곶과곽관괄괆괌괍괏광괘괜
 괠괩괬괭괴괵괸괼굄굅굇굉교굔굘굡굣구국군굳굴굵굶굻굼굽굿궁궂궈궉권궐궜궝궤궷귀귁귄귈귐귑귓규균귤그극
@@ -402,7 +403,7 @@ DECLARE
 피픽핀필핌핍핏핑하학한할핥함합핫항해핵핸핼햄햅햇했행햐향허헉헌헐헒험헙헛헝헤헥헨헬헴헵헷헹혀혁현혈혐
 협혓혔형혜혠혤혭호혹혼홀홅홈홉홋홍홑화확환활홧황홰홱홴횃횅회획횐횔횝횟횡효횬횰횹횻후훅훈훌훑훔훗훙훠
 훤훨훰훵훼훽휀휄휑휘휙휜휠휨휩휫휭휴휵휸휼흄흇흉흐흑흔흖흗흘흙흠흡흣흥흩희흰흴흼흽힁히힉힌힐힘힙힛힝
-$ksx$, E'\n', '');
+$ksx$, E'\r\n', '');
 BEGIN
   IF char_length(v_hangul) <> 2350
      OR (SELECT count(DISTINCT c) FROM regexp_split_to_table(v_hangul, '') AS c) <> 2350

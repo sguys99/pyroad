@@ -24,6 +24,10 @@
 #   RLS_NO_RESET=1          fast: db reset 생략 (DB 상태를 직접 만든 뒤 점검할 때)
 #   RLS_SKIP_PROD=1         ci: ① 생략 (git 히스토리가 없을 때도 자동 생략)
 #   RLS_SKIP_NEWDEFAULT=1   ci: ③ 생략 (스택 재시작 1회 절약)
+#   RLS_CRLF=1              ci: ① 운영 재현을 운영 붙여넣기 묶음(scripts/release/build-release-sql.mjs 의 1·2·3번)을
+#                           CRLF 로 바꾼 사본으로, 파일 그대로(파일 안의 BEGIN/COMMIT, psql -1 아님) 적용 (B39).
+#                           Windows SQL Editor 붙여넣기 재현. 적용 뒤 \r 이 없는지(CR-1~3), LF 로 적용한 DB 와
+#                           콘텐츠가 같은지(CR-4, db reset 뒤) 점검 (supabase/tests/crlf.mjs)
 #   RLS_PROJECT_ID          ci: 기본 pyroadrls   (컨테이너 supabase_*_<id>)
 #   RLS_PORT_BASE           ci: 기본 54620       (api=+1 db=+2 … config.toml 의 5452x 를 같은 간격으로 옮김)
 #   RLS_WORKDIR             ci: 기본 mktemp -d
@@ -75,6 +79,15 @@ apply_sql() {   # 파일을 한 트랜잭션으로 적용 (운영 SQL Editor 의
   local out rc
   out="$(docker exec -i "$RLS_DB_CONTAINER" psql -U postgres -d postgres -q -v ON_ERROR_STOP=1 -1 <"$1" 2>&1)" && rc=0 || rc=$?
   grep -v 'does not exist, skipping' <<<"$out" || true
+  [[ "$rc" == 0 ]] || die "SQL 적용 실패 ($rc): $1"
+  docker exec -i "$RLS_DB_CONTAINER" psql -U postgres -d postgres -q -c "NOTIFY pgrst, 'reload schema';" >/dev/null
+  sleep 1
+}
+
+apply_sql_as_is() {   # 파일 그대로 적용 (파일 안에 BEGIN; … COMMIT;, SQL Editor 붙여넣기와 같음). NOTICE 는 보여 줌
+  local out rc
+  out="$(docker exec -i "$RLS_DB_CONTAINER" psql -U postgres -d postgres -q -v ON_ERROR_STOP=1 <"$1" 2>&1)" && rc=0 || rc=$?
+  grep -v 'does not exist, skipping' <<<"$out" | tr -d '\r' || true
   [[ "$rc" == 0 ]] || die "SQL 적용 실패 ($rc): $1"
   docker exec -i "$RLS_DB_CONTAINER" psql -U postgres -d postgres -q -c "NOTIFY pgrst, 'reload schema';" >/dev/null
   sleep 1
@@ -184,25 +197,49 @@ if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] \
   # 운영 데이터처럼 solution_code 채우기 (00001 Section 6 을 seed 뒤에 다시 실행)
   sed -n '/^-- Section 6/,/^-- Section 7/p' "$WORKDIR/00001_prehotfix.sql" >"$WORKDIR/section6.sql"
   apply_sql "$WORKDIR/section6.sql"
-  # 운영 릴리즈 순서: ① 추가형(단계 표시가 없는 예전 파일 포함) → (앱 배포) → ③ 회수형
-  for stage in 1 3; do
+  if [[ "${RLS_CRLF:-0}" == 1 ]]; then
+    # Windows SQL Editor 붙여넣기 재현 (B39): 00002 는 운영에 이미 적용됨(LF). 그 뒤는 운영 붙여넣기 묶음 1·2·3번을
+    # CRLF 로 바꾼 사본을 파일 그대로 적용 (런북 ① → ② 앱 배포 → ③ + 콘텐츠 seed → 00009)
     for pair in "${ALL_MIGRATIONS[@]}"; do
       f="${pair%%:*}"
-      [[ "$(basename "$f")" == 00001_* ]] && continue
-      if grep -q '^-- 릴리즈 단계: ③' "$f"; then fstage=3; else fstage=1; fi
-      [[ "$fstage" == "$stage" ]] || continue
-      log "운영 적용 리허설 (단계 $( [[ $stage == 1 ]] && echo ① || echo ③ )): $(basename "$f") (psql -1)"
+      [[ "$(basename "$f")" == 00002_* ]] || continue
+      log "운영 적용 리허설 (이미 운영에 있음): $(basename "$f") (psql -1)"
       apply_sql "$f"
     done
-  done
-  log "운영 적용 리허설 (③ 뒤): 콘텐츠 seed supabase/seed.sql (psql -1)"
-  apply_sql "$REPO/supabase/seed.sql"
-  run_checks prod_replay
+    node "$REPO/scripts/release/build-release-sql.mjs" --out "$WORKDIR/release-crlf" --crlf
+    for f in "$WORKDIR/release-crlf/"{1_먼저실행,2_두번째실행,3_선택}.sql; do
+      grep -q $'\r$' "$f" || die "CRLF 변환 실패: $f"
+      log "운영 적용 리허설 (CRLF 묶음, 파일 그대로): $(basename "$f")"
+      apply_sql_as_is "$f"
+    done
+    run_checks prod_replay
+    log "점검: CRLF 적용 결과에 \\r 없음 (B39)"
+    node "$HERE/crlf.mjs" scan prod_replay "$WORKDIR/crlf-snapshot.json" || FAILED=1
+  else
+    # 운영 릴리즈 순서: ① 추가형(단계 표시가 없는 예전 파일 포함) → (앱 배포) → ③ 회수형
+    for stage in 1 3; do
+      for pair in "${ALL_MIGRATIONS[@]}"; do
+        f="${pair%%:*}"
+        [[ "$(basename "$f")" == 00001_* ]] && continue
+        if grep -q '^-- 릴리즈 단계: ③' "$f"; then fstage=3; else fstage=1; fi
+        [[ "$fstage" == "$stage" ]] || continue
+        log "운영 적용 리허설 (단계 $( [[ $stage == 1 ]] && echo ① || echo ③ )): $(basename "$f") (psql -1)"
+        apply_sql "$f"
+      done
+    done
+    log "운영 적용 리허설 (③ 뒤): 콘텐츠 seed supabase/seed.sql (psql -1)"
+    apply_sql "$REPO/supabase/seed.sql"
+    run_checks prod_replay
+  fi
   log "db reset (legacy): 저장소 마이그레이션 + seed"
   set_migrations "${ALL_MIGRATIONS[@]}"
   cp "$REPO/supabase/seed.sql" "$WORKDIR/supabase/seed.sql"
   supabase db reset --local --workdir "$WORKDIR" --yes >/dev/null 2>&1 || die "db reset 실패"
   load_env "$WORKDIR"
+  if [[ "${RLS_CRLF:-0}" == 1 ]]; then
+    log "점검: CRLF 운영 재현 = LF 로 적용한 DB (B39)"
+    node "$HERE/crlf.mjs" compare prod_replay "$WORKDIR/crlf-snapshot.json" || FAILED=1
+  fi
 else
   log "운영 재현 생략 (RLS_SKIP_PROD 또는 git 히스토리 없음)"
   set_migrations "${ALL_MIGRATIONS[@]}"

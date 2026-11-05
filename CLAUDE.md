@@ -33,7 +33,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 │       ├── pyodide/ tutor/ celebration/ motion/ supabase/ security/ analytics/ observability/
 │       └── moderation/ time/ crypto/ env/ api/ auth/ board/ notice/ world/ types/
 ├── public/                   # characters/, workers/, pyodide/(복사본, git 제외)
-├── scripts/                  # content, pyodide, fonts, security, api-keys
+├── scripts/                  # content, pyodide, fonts, security, api-keys, release(운영 SQL Editor 붙여넣기 묶음)
 ├── supabase/                 # migrations/, rollback/, tests/(RLS 회귀), seed.sql(생성물)
 ├── e2e/                      # Playwright (e2e/README.md)
 ├── docs/                     # 계획서, ci.md, analytics.md, release/(런북), spikes/
@@ -132,6 +132,7 @@ npm run optimize:svg   # public/characters SVG 최적화
 - 모든 테이블·뷰·함수에 GRANT/REVOKE 명시(운영은 새 객체를 anon에 자동 노출, 로컬은 자동 부여 없음). SELECT 컬럼 권한은 회수하지 않음. 뷰는 `security_invoker = true`
 - `SECURITY DEFINER`는 `SET search_path = ''` + `REVOKE EXECUTE … FROM PUBLIC, anon, authenticated`(인자 타입까지)
 - RLS 정책은 `(select auth.uid())` + `TO authenticated`. 사용자 테이블은 `REFERENCES public.users(id) ON DELETE CASCADE` (B28)
+- 운영은 Windows SQL Editor 붙여넣기라 줄바꿈이 CRLF가 됨(B39). 값·검사에 쓰는 문자열 리터럴에 실제 줄바꿈을 두지 않음(`E'…\n…'` 또는 CR·LF 모두 제거). 릴리즈는 `scripts/release/build-release-sql.mjs` 묶음, 확인은 `RLS_CRLF=1 npm run test:rls:ci`
 - 스키마 변경 후 `db:reset` → `db:types` → tsc. 권한 변경은 `test:rls`로 확인하고 `supabase/tests/expectations.mjs` 기대값·스냅샷을 같은 커밋에서 갱신
 
 ### 콘텐츠·퀘스트 엔진·화면

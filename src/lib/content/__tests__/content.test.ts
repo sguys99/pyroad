@@ -50,10 +50,11 @@ describe('커밋한 supabase/seed.sql', () => {
 describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
   let once: ContentSnapshot;
   let twice: ContentSnapshot;
+  let crlf: ContentSnapshot;
 
   beforeAll(async () => {
     const seed = toSeedSql(rows, { hash: tree.hash });
-    const [a, b] = await Promise.all([
+    const [a, b, c] = await Promise.all([
       replay({ seeds: [{ name: 'content seed', sql: seed }] }),
       replay({
         seeds: [
@@ -61,9 +62,14 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
           { name: 'content seed (재실행)', sql: seed },
         ],
       }),
+      replay({
+        crlf: true,
+        seeds: [{ name: 'content seed (CRLF)', sql: seed }],
+      }),
     ]);
     once = a.snapshot;
     twice = b.snapshot;
+    crlf = c.snapshot;
   }, 120_000);
 
   it('DB 상태 = 빌드한 행 (SQL 이스케이프·jsonb 변환에 손실 없음)', () => {
@@ -89,6 +95,20 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
 
   it('다시 실행해도 같음 (멱등)', () => {
     expect(twice).toEqual(once);
+  });
+
+  it('B39: 마이그레이션·seed 를 CRLF 로 바꿔 실행해도 같고 \\r 이 없음 (Windows SQL Editor 붙여넣기)', () => {
+    expect(crlf).toEqual(once);
+    const withCr: string[] = [];
+    const walk = (v: unknown, path: string): void => {
+      if (typeof v === 'string') {
+        if (v.includes('\r')) withCr.push(path);
+      } else if (v && typeof v === 'object') {
+        for (const [k, x] of Object.entries(v)) walk(x, `${path}.${k}`);
+      }
+    };
+    walk(crlf, 'db');
+    expect(withCr).toEqual([]);
   });
 
   it('새 DB 에도 모든 퀘스트의 정답이 있고 quests 에는 정답이 없음 (B07·B08)', () => {
