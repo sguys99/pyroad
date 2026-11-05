@@ -38,7 +38,7 @@ GitHub 러너에서는 Google Fonts가 `Noto Sans KR`의 글꼴 주소를 `https
 
 ## 필수 체크 (main 보호 규칙)
 
-`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build` + **`e2e-smoke`**(P1-21, GitHub에서 PR로 한 번 통과한 뒤 추가). `content-unseeded`는 main 전용이라 넣지 않습니다. `e2e`(로그인)는 PR에서도 돌지만 시간(예상 10분 안팎: 스택 시작 + 빌드 + 테스트 약 5분)과 안정성을 몇 번 지켜본 뒤 필수 체크로 올릴지 정합니다. 너무 느리면 `if:`로 main·수동 실행 전용으로 돌립니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
+`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build` + **`e2e-smoke`**(P1-21, 2026-11-05 첫 통과 뒤 추가). `content-unseeded`는 main 전용이라 넣지 않습니다. `e2e`(로그인)는 PR에서도 돌지만 시간(예상 10분 안팎: 스택 시작 + 빌드 + 테스트 약 5분)과 안정성을 몇 번 지켜본 뒤 필수 체크로 올릴지 정합니다. 너무 느리면 `if:`로 main·수동 실행 전용으로 돌립니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
 
 ## Action 고정
 

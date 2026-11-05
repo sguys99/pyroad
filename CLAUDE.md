@@ -168,7 +168,7 @@ npm run optimize:svg   # public/characters SVG 최적화
 - Phase 종료 시 `feat/phaseN` → `main` PR 1개. 제목: `🎉 feat: Phase N <Phase명> 완료`. 본문은 `.github/pull_request_template.md`를 채운다 (완료한 P/B-ID 목록, DB 스키마·환경 변수 변경, UI 변경 시 360/768/1280 스크린샷).
 - **병합 방식은 Merge commit** (squash 금지). 기존 이력이 PR 병합 커밋 방식이고, 작업별 커밋을 추적·revert하기 위해서다.
 - 마일스톤 태그는 해당 Phase가 `main`에 병합된 뒤 `main`에서 부여: v0.4(Phase 1+3 완료 후, P1-24/P3-20), v0.5(2·4·5·6), v0.6(7·8), v0.7(9), v0.8(10), v0.9(11), v1.0(12). 예: `git tag -a v0.4 -m "..." && git push origin v0.4`.
-- CI가 PR·푸시마다 돈다. `main`은 필수 체크(`lint-typecheck`·`unit`·`content`·`pyodide`·`rls`·`build`, 이후 `e2e-smoke` — 현재 목록은 [docs/ci.md](docs/ci.md))를 통과해야 병합된다. PR 전 로컬에서 `npm run lint`, `npx prettier --check .`, `npx tsc --noEmit`, `npx vitest run`(+ 해당되면 `test:content`·`test:rls:ci`·`test:e2e`).
+- CI가 PR·푸시마다 돈다. `main`은 필수 체크(`lint-typecheck`·`unit`·`content`·`pyodide`·`rls`·`build`·`e2e-smoke` — 목록은 [docs/ci.md](docs/ci.md))를 통과해야 병합된다. PR 전 로컬에서 `npm run lint`, `npx prettier --check .`, `npx tsc --noEmit`, `npx vitest run`(+ 해당되면 `test:content`·`test:rls:ci`·`test:e2e`).
 
 ### 스파이크
 
