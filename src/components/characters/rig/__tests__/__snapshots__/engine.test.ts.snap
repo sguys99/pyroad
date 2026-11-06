@@ -1,0 +1,4337 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`파라미터 스냅샷 (상태별·시간별 geometry) > bugbug: 대기에서 각 상태로 0.25·0.5·1초 1`] = `
+{
+  "appear": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(9.73 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(10.81 19.82) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "6",
+        "ry": "4.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q31.79 61.8 23.04 62.33",
+      },
+      "leg3": {
+        "d": "M90 68 Q93.99 60.19 102.48 57.99",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.86 52.04 C60.07 55.27 67.93 55.27 71.14 52.04 C68.29 59.02 59.71 59.02 56.86 52.04Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.9",
+        "ry": "2.9",
+      },
+      "root": {
+        "transform": "translate(-39.55 -6.88) rotate(0 64 78) translate(64 108) scale(0.973 1.045) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(-3.93 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(63.14 19.55) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "6",
+        "ry": "4.47",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q31.25 62.4 22.58 63.74",
+      },
+      "leg3": {
+        "d": "M90 68 Q93.25 59.85 101.5 56.88",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.85 52.04 C60.07 55.27 67.93 55.27 71.15 52.04 C68.29 59.05 59.71 59.05 56.85 52.04Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.9",
+        "ry": "2.9",
+      },
+      "root": {
+        "transform": "translate(-13.21 0) rotate(0 64 78) translate(64 108) scale(1.05 0.943) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(-13.7 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(59.59 29.43) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "6",
+        "ry": "4.47",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q34.72 59.86 26.45 56.93",
+      },
+      "leg3": {
+        "d": "M90 68 Q96.73 62.37 105.4 63.67",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.85 52.04 C60.07 55.27 67.93 55.27 71.15 52.04 C68.29 59.05 59.71 59.05 56.85 52.04Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.9",
+        "ry": "2.9",
+      },
+      "root": {
+        "transform": "translate(-1.12 0) rotate(0 64 78) translate(64 108) scale(1.094 0.882) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+  },
+  "attack": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(13.56 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(49.62 19.82) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "5.76",
+        "ry": "6.34",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(-6.55 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.34 51.56 C59.79 55.85 68.21 55.85 71.66 51.56 C68.59 60.05 59.41 60.05 56.34 51.56Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.79",
+        "ry": "2.79",
+      },
+      "root": {
+        "transform": "translate(-0.74 2.34) rotate(0 64 78) translate(64 108) scale(1.133 0.854) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(15.63 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(76.79 19.55) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "5.76",
+        "ry": "6.34",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(-5.24 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.33 51.55 C59.78 55.86 68.22 55.86 71.67 51.55 C68.6 60.08 59.4 60.08 56.33 51.55Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.78",
+        "ry": "2.78",
+      },
+      "root": {
+        "transform": "translate(0.45 1.87) rotate(0 64 78) translate(64 108) scale(1.114 0.875) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(7.08 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(60.71 29.43) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "5.76",
+        "ry": "6.34",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(3.62 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.33 51.55 C59.78 55.86 68.22 55.86 71.67 51.55 C68.6 60.08 59.4 60.08 56.33 51.55Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.78",
+        "ry": "2.78",
+      },
+      "root": {
+        "transform": "translate(0 4.53) rotate(0 64 78) translate(64 108) scale(1.199 1.234) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(-21.18 64 56)",
+      },
+    },
+  },
+  "defeat": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(-16.78 52 33)",
+      },
+      "dz0": {
+        "opacity": "0.604",
+        "transform": "translate(50.36 19.82) scale(0.692)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0.004",
+        "rx": "6",
+        "ry": "0.6",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q35.48 59.6 27.51 55.91",
+      },
+      "leg3": {
+        "d": "M90 68 Q96.89 62.57 105.52 64.13",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M57.5 55.05 C60.43 52.59 67.58 52.59 70.5 53.46 C67.9 56.35 60.1 56.35 57.5 55.05Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0.004",
+        "rx": "2.9",
+        "ry": "0.54",
+      },
+      "root": {
+        "transform": "translate(0 -14.35) rotate(178.29 64 78) translate(64 108) scale(0.988 1.023) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(-5.33 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(-34.28 52 33)",
+      },
+      "dz0": {
+        "opacity": "0.582",
+        "transform": "translate(76.34 19.55) scale(0.671)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "6",
+        "ry": "0.53",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q36.61 59.34 29.21 54.63",
+      },
+      "leg3": {
+        "d": "M90 68 Q96.6 62.22 105.3 63.32",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M57.5 55.08 C60.43 52.56 67.58 52.56 70.5 53.48 C67.9 56.34 60.1 56.34 57.5 55.08Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "2.9",
+        "ry": "0.48",
+      },
+      "root": {
+        "transform": "translate(0 -14.01) rotate(170.44 64 78) translate(64 108) scale(0.993 1.015) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(-5.2 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(-32.55 52 33)",
+      },
+      "dz0": {
+        "opacity": "0.997",
+        "transform": "translate(60.71 29.43) scale(0.998)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "6",
+        "ry": "0.53",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q33.88 60.26 25.35 58.21",
+      },
+      "leg3": {
+        "d": "M90 68 Q93.14 59.81 101.35 56.72",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M57.5 55.08 C60.43 52.56 67.58 52.56 70.5 53.48 C67.9 56.34 60.1 56.34 57.5 55.08Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "2.9",
+        "ry": "0.48",
+      },
+      "root": {
+        "transform": "translate(0 -14) rotate(166.68 64 78) translate(64 108) scale(1.002 0.997) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(-5.2 64 56)",
+      },
+    },
+  },
+  "found": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(27.07 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(50.36 19.82) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "7.78",
+        "ry": "8.56",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M61.03 53.5 C62.37 49.98 65.63 49.98 66.97 53.5 C65.78 61.43 62.22 61.43 61.03 53.5Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "3.76",
+        "ry": "3.76",
+      },
+      "root": {
+        "transform": "translate(0 -9) rotate(0 64 78) translate(64 108) scale(0.933 1.1) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(10.54 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(76.34 19.55) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "7.8",
+        "ry": "8.58",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M61.07 53.5 C62.39 49.99 65.61 49.99 66.93 53.5 C65.76 61.44 62.24 61.44 61.07 53.5Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "3.77",
+        "ry": "3.77",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1.039 0.955) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(12.8 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(60.71 29.43) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "7.8",
+        "ry": "8.58",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M61.07 53.5 C62.39 49.99 65.61 49.99 66.93 53.5 C65.76 61.44 62.24 61.44 61.07 53.5Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "3.77",
+        "ry": "3.77",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(0.971 1.037) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+  },
+  "hit": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(-11.79 52 33)",
+      },
+      "dz0": {
+        "opacity": "0.604",
+        "transform": "translate(49.8 19.82) scale(0.692)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0.004",
+        "rx": "6",
+        "ry": "0.6",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(6.15 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M58.74 54.75 C61.11 50.87 66.89 50.87 69.26 52.98 C67.16 59.4 60.84 59.4 58.74 54.75Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0.004",
+        "rx": "2.9",
+        "ry": "0.54",
+      },
+      "root": {
+        "transform": "translate(-0.56 0) rotate(0 64 78) translate(64 108) scale(0.987 1.025) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(-13.04 52 33)",
+      },
+      "dz0": {
+        "opacity": "0.582",
+        "transform": "translate(76.04 19.55) scale(0.671)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "6",
+        "ry": "0.53",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(6 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M58.75 54.77 C61.11 50.84 66.89 50.84 69.25 52.99 C67.15 59.42 60.85 59.42 58.75 54.77Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "2.9",
+        "ry": "0.48",
+      },
+      "root": {
+        "transform": "translate(-0.31 0) rotate(0 64 78) translate(64 108) scale(0.993 1.016) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(-17.32 52 33)",
+      },
+      "dz0": {
+        "opacity": "0.997",
+        "transform": "translate(60.71 29.43) scale(0.998)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "6",
+        "ry": "0.53",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(6 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M58.75 54.77 C61.11 50.84 66.89 50.84 69.25 52.99 C67.15 59.42 60.85 59.42 58.75 54.77Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "2.9",
+        "ry": "0.48",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1.002 0.997) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+  },
+  "idle": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(5.08 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(50.36 19.82) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "6",
+        "ry": "6.6",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M57.5 52.04 C60.43 55.27 67.58 55.27 70.5 52.04 C67.9 57.26 60.1 57.26 57.5 52.04Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.9",
+        "ry": "2.9",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(0.992 1.018) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(4.35 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(76.34 19.55) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "6",
+        "ry": "6.6",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M57.5 52.04 C60.43 55.27 67.58 55.27 70.5 52.04 C67.9 57.26 60.1 57.26 57.5 52.04Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.9",
+        "ry": "2.9",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(0.994 1.015) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(-0.47 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(60.71 29.43) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "6",
+        "ry": "6.6",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.16 60.91 103.89 60.06",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M57.5 52.04 C60.43 55.27 67.58 55.27 70.5 52.04 C67.9 57.26 60.1 57.26 57.5 52.04Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "1",
+        "rx": "2.9",
+        "ry": "2.9",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1.002 0.997) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+  },
+  "makeup": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(11.19 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(50.36 19.82) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0.004",
+        "rx": "6",
+        "ry": "0.6",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q88.68 57.93 94.36 49.51",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.73 51.56 C60 55.85 68 55.85 71.27 51.56 C68.36 60.93 59.64 60.93 56.73 51.56Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0.004",
+        "rx": "2.9",
+        "ry": "0.54",
+      },
+      "root": {
+        "transform": "translate(0 -1.16) rotate(0 64 78) translate(64 108) scale(0.992 1.018) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(11 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(76.34 19.55) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "6",
+        "ry": "0.53",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q83.26 60.4 83.24 50.24",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.72 51.55 C60 55.86 68 55.86 71.28 51.55 C68.37 60.97 59.63 60.97 56.72 51.55Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "2.9",
+        "ry": "0.48",
+      },
+      "root": {
+        "transform": "translate(0 -2.77) rotate(0 64 78) translate(64 108) scale(0.994 1.015) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(8.34 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(60.71 29.43) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "6",
+        "ry": "0.53",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(0 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.84 60.91 24.11 60.06",
+      },
+      "leg3": {
+        "d": "M90 68 Q83.27 60.39 83.26 50.23",
+      },
+      "mag": {
+        "opacity": "0",
+        "transform": "translate(100 48) rotate(0) scale(0)",
+      },
+      "mouth": {
+        "d": "M56.72 51.55 C60 55.86 68 55.86 71.28 51.55 C68.37 60.97 59.63 60.97 56.72 51.55Z",
+      },
+      "pupL": {
+        "cx": "55.5",
+        "cy": "43",
+        "opacity": "0",
+        "rx": "2.9",
+        "ry": "0.48",
+      },
+      "root": {
+        "transform": "translate(0 -3.03) rotate(0 64 78) translate(64 108) scale(1.002 0.997) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+  },
+  "search": {
+    "0.25s": {
+      "antL": {
+        "transform": "rotate(5.08 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(52.79 19.82) scale(0)",
+      },
+      "eyeL": {
+        "cx": "56.09",
+        "cy": "42.95",
+        "opacity": "0.004",
+        "rx": "6.47",
+        "ry": "0.65",
+      },
+      "head": {
+        "transform": "translate(0 -0.4) rotate(2.84 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q33.49 60.48 24.87 58.86",
+      },
+      "leg3": {
+        "d": "M90 68 Q95.77 61.39 104.54 61.32",
+      },
+      "mag": {
+        "opacity": "1",
+        "transform": "translate(103.77 47.8) rotate(7.5) scale(1.142)",
+      },
+      "mouth": {
+        "d": "M61.08 53.28 C63.13 50.71 68.14 50.71 70.19 53.28 C68.37 58.75 62.9 58.75 61.08 53.28Z",
+      },
+      "pupL": {
+        "cx": "57.39",
+        "cy": "42.8",
+        "opacity": "0.004",
+        "rx": "3.13",
+        "ry": "0.58",
+      },
+      "root": {
+        "transform": "translate(2.43 0) rotate(0 64 78) translate(64 108) scale(0.992 1.018) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "0.5s": {
+      "antL": {
+        "transform": "rotate(4.35 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(79.59 19.55) scale(0)",
+      },
+      "eyeL": {
+        "cx": "55.96",
+        "cy": "42.91",
+        "opacity": "0",
+        "rx": "6.48",
+        "ry": "0.57",
+      },
+      "head": {
+        "transform": "translate(0 -0.31) rotate(2.19 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q32.68 61.02 23.93 60.38",
+      },
+      "leg3": {
+        "d": "M90 68 Q95 60.79 103.71 59.75",
+      },
+      "mag": {
+        "opacity": "1",
+        "transform": "translate(102.91 47.65) rotate(5.8) scale(0.981)",
+      },
+      "mouth": {
+        "d": "M61.02 53.26 C63.06 50.65 68.05 50.65 70.09 53.26 C68.27 58.73 62.83 58.73 61.02 53.26Z",
+      },
+      "pupL": {
+        "cx": "56.96",
+        "cy": "42.65",
+        "opacity": "0",
+        "rx": "3.13",
+        "ry": "0.51",
+      },
+      "root": {
+        "transform": "translate(3.25 0) rotate(0 64 78) translate(64 108) scale(0.994 1.015) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+    "1s": {
+      "antL": {
+        "transform": "rotate(-0.47 52 33)",
+      },
+      "dz0": {
+        "opacity": "0",
+        "transform": "translate(59.86 29.43) scale(0)",
+      },
+      "eyeL": {
+        "cx": "54.74",
+        "cy": "43.12",
+        "opacity": "0",
+        "rx": "6.48",
+        "ry": "0.57",
+      },
+      "head": {
+        "transform": "translate(0 0.09) rotate(-3.63 64 62)",
+      },
+      "leg0": {
+        "d": "M38 68 Q33.9 60.25 25.37 58.17",
+      },
+      "leg3": {
+        "d": "M90 68 Q96.11 61.71 104.88 62.11",
+      },
+      "mag": {
+        "opacity": "1",
+        "transform": "translate(95.17 48.45) rotate(-9.7) scale(1)",
+      },
+      "mouth": {
+        "d": "M60.13 53.41 C62.17 50.81 67.16 50.81 69.2 53.41 C67.39 58.89 61.95 58.89 60.13 53.41Z",
+      },
+      "pupL": {
+        "cx": "53.09",
+        "cy": "43.45",
+        "opacity": "0",
+        "rx": "3.13",
+        "ry": "0.51",
+      },
+      "root": {
+        "transform": "translate(-0.86 0) rotate(0 64 78) translate(64 108) scale(1.002 0.997) translate(-64 -108)",
+      },
+      "shellL": {
+        "transform": "rotate(0 64 56)",
+      },
+    },
+  },
+}
+`;
+
+exports[`파라미터 스냅샷 (상태별·시간별 geometry) > bugbug: 정적 포즈 1`] = `
+{
+  "appear": {
+    "antL": {
+      "transform": "rotate(0 52 33)",
+    },
+    "dz0": {
+      "opacity": "0",
+      "transform": "translate(80.99 27.23) scale(0)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "6",
+      "ry": "4.47",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q34.83 59.82 26.6 56.77",
+    },
+    "leg3": {
+      "d": "M90 68 Q96.8 62.46 105.46 63.88",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M56.85 52.04 C60.07 55.27 67.93 55.27 71.15 52.04 C68.29 59.05 59.71 59.05 56.85 52.04Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "2.9",
+      "ry": "2.9",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+  "attack": {
+    "antL": {
+      "transform": "rotate(9.6 52 33)",
+    },
+    "dz0": {
+      "opacity": "0",
+      "transform": "translate(80.99 27.23) scale(0)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "5.76",
+      "ry": "6.34",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q32.84 60.91 24.11 60.06",
+    },
+    "leg3": {
+      "d": "M90 68 Q95.16 60.91 103.89 60.06",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M56.33 51.55 C59.78 55.86 68.22 55.86 71.67 51.55 C68.6 60.08 59.4 60.08 56.33 51.55Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "2.78",
+      "ry": "2.78",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+  "defeat": {
+    "antL": {
+      "transform": "rotate(-30 52 33)",
+    },
+    "dz0": {
+      "opacity": "0.907",
+      "transform": "translate(80.99 27.23) scale(0.928)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "6",
+      "ry": "0.53",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q37.31 59.25 30.3 53.97",
+    },
+    "leg3": {
+      "d": "M90 68 Q97.46 63.38 105.86 65.89",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M57.5 55.08 C60.43 52.56 67.58 52.56 70.5 53.48 C67.9 56.34 60.1 56.34 57.5 55.08Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "2.9",
+      "ry": "0.48",
+    },
+    "root": {
+      "transform": "translate(0 -14) rotate(172 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(-5.2 64 56)",
+    },
+  },
+  "found": {
+    "antL": {
+      "transform": "rotate(16 52 33)",
+    },
+    "dz0": {
+      "opacity": "0",
+      "transform": "translate(80.99 27.23) scale(0)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "7.8",
+      "ry": "8.58",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q32.84 60.91 24.11 60.06",
+    },
+    "leg3": {
+      "d": "M90 68 Q95.16 60.91 103.89 60.06",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M61.08 53.5 C62.39 49.99 65.61 49.99 66.93 53.5 C65.76 61.44 62.25 61.44 61.08 53.5Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "3.77",
+      "ry": "3.77",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(0.97 1.04) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+  "hit": {
+    "antL": {
+      "transform": "rotate(-16.5 52 33)",
+    },
+    "dz0": {
+      "opacity": "0.907",
+      "transform": "translate(80.99 27.23) scale(0.928)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "6",
+      "ry": "0.53",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(6 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q32.84 60.91 24.11 60.06",
+    },
+    "leg3": {
+      "d": "M90 68 Q95.16 60.91 103.89 60.06",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M58.75 54.77 C61.11 50.84 66.89 50.84 69.25 52.99 C67.15 59.42 60.85 59.42 58.75 54.77Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "2.9",
+      "ry": "0.48",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+  "idle": {
+    "antL": {
+      "transform": "rotate(0 52 33)",
+    },
+    "dz0": {
+      "opacity": "0",
+      "transform": "translate(80.99 27.23) scale(0)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "6",
+      "ry": "6.6",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q32.84 60.91 24.11 60.06",
+    },
+    "leg3": {
+      "d": "M90 68 Q95.16 60.91 103.89 60.06",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M57.5 52.04 C60.43 55.27 67.58 55.27 70.5 52.04 C67.9 57.26 60.1 57.26 57.5 52.04Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "1",
+      "rx": "2.9",
+      "ry": "2.9",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+  "makeup": {
+    "antL": {
+      "transform": "rotate(5.6 52 33)",
+    },
+    "dz0": {
+      "opacity": "0",
+      "transform": "translate(80.99 27.23) scale(0)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "6",
+      "ry": "0.53",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q32.84 60.91 24.11 60.06",
+    },
+    "leg3": {
+      "d": "M90 68 Q86.11 58.61 89.42 49.01",
+    },
+    "mag": {
+      "opacity": "0",
+      "transform": "translate(100 48) rotate(0) scale(0)",
+    },
+    "mouth": {
+      "d": "M56.72 51.55 C60 55.86 68 55.86 71.28 51.55 C68.37 60.97 59.63 60.97 56.72 51.55Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "2.9",
+      "ry": "0.48",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+  "search": {
+    "antL": {
+      "transform": "rotate(0 52 33)",
+    },
+    "dz0": {
+      "opacity": "0",
+      "transform": "translate(80.99 27.23) scale(0)",
+    },
+    "eyeL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "6.48",
+      "ry": "0.57",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 62)",
+    },
+    "leg0": {
+      "d": "M38 68 Q33.7 60.35 25.12 58.5",
+    },
+    "leg3": {
+      "d": "M90 68 Q95.95 61.55 104.72 61.73",
+    },
+    "mag": {
+      "opacity": "1",
+      "transform": "translate(100 48) rotate(0) scale(1)",
+    },
+    "mouth": {
+      "d": "M60.69 53.32 C62.73 50.72 67.71 50.72 69.75 53.32 C67.94 58.8 62.5 58.8 60.69 53.32Z",
+    },
+    "pupL": {
+      "cx": "55.5",
+      "cy": "43",
+      "opacity": "0",
+      "rx": "3.13",
+      "ry": "0.51",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 78) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "shellL": {
+      "transform": "rotate(0 64 56)",
+    },
+  },
+}
+`;
+
+exports[`파라미터 스냅샷 (상태별·시간별 geometry) > byeolttongi: 대기에서 각 상태로 0.25·0.5·1초 1`] = `
+{
+  "flyIn": {
+    "0.25s": {
+      "body": {
+        "transform": "rotate(35.2 64 60) scale(1.27 0.879) rotate(-35.2 64 60) rotate(1.22 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M16.92 116 L16.92 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56.98",
+        "cy": "56.52",
+        "opacity": "1",
+        "rx": "4.24",
+        "ry": "4.09",
+      },
+      "mouth": {
+        "d": "M59.94 64.28 C61.96 66.33 66.91 66.33 68.93 64.28 C67.13 67.66 61.74 67.66 59.94 64.28Z",
+      },
+      "move": {
+        "transform": "translate(-47.08 -86.31)",
+      },
+      "star": {
+        "d": "M60.41 21 Q64 14 67.59 21 L76.97 39.32 Q78.94 43.18 83 44.68 L102.3 51.83 Q109.68 54.56 103.66 58.03 L87.93 67.1 Q84.62 69.01 85.46 72.73 L89.5 90.45 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.5 90.45 L42.54 72.73 Q43.38 69.01 40.07 67.1 L24.34 58.03 Q18.32 54.56 25.7 51.83 L45 44.68 Q49.06 43.18 51.03 39.32 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q48.36 56.24 37.2 57.47",
+        "opacity": "0.75",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(40.5) scale(0)",
+      },
+    },
+    "0.5s": {
+      "body": {
+        "transform": "rotate(64.8 64 60) scale(1.221 0.901) rotate(-64.8 64 60) rotate(0.16 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M49.89 116 L49.89 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56.99",
+        "cy": "56.52",
+        "opacity": "1",
+        "rx": "4.23",
+        "ry": "4.07",
+      },
+      "mouth": {
+        "d": "M59.96 64.29 C61.98 66.33 66.9 66.33 68.92 64.29 C67.13 67.66 61.75 67.66 59.96 64.29Z",
+      },
+      "move": {
+        "transform": "translate(-14.11 -41.27)",
+      },
+      "star": {
+        "d": "M60.5 20.93 Q64 14 67.5 20.93 L76.65 39.05 Q78.57 42.85 82.64 44.14 L102 50.24 Q109.4 52.58 103.5 56.41 L88.05 66.45 Q84.81 68.56 85.63 72.34 L89.54 90.34 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.46 90.34 L42.37 72.34 Q43.19 68.56 39.95 66.45 L24.5 56.41 Q18.6 52.58 26 50.24 L45.36 44.14 Q49.43 42.85 51.35 39.05 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q48.48 42.03 27.45 32.47",
+        "opacity": "0.736",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(54) scale(0)",
+      },
+    },
+    "1s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(-0.01 64 60) translate(64 100) scale(1.05 0.929) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 109.58 L64 116.29",
+        "opacity": "0.161",
+      },
+      "eyeL": {
+        "cx": "56.57",
+        "cy": "56.73",
+        "opacity": "1",
+        "rx": "4.39",
+        "ry": "2.86",
+      },
+      "mouth": {
+        "d": "M59.07 63.88 C61.4 66.62 67.11 66.62 69.44 63.88 C67.37 69.25 61.14 69.25 59.07 63.88Z",
+      },
+      "move": {
+        "transform": "translate(0 0.01)",
+      },
+      "star": {
+        "d": "M60.74 20.74 Q64 14 67.26 20.74 L75.81 38.37 Q77.6 42.08 81.65 42.81 L100.93 46.29 Q108.3 47.62 102.8 52.27 L88.41 64.44 Q85.38 67 86.31 70.85 L90.72 89.17 Q92.41 96.18 85.59 92.89 L67.75 84.31 Q64 82.5 60.25 84.31 L42.41 92.89 Q35.59 96.18 37.28 89.17 L41.69 70.85 Q42.62 67 39.59 64.44 L25.2 52.27 Q19.7 47.62 27.07 46.29 L46.35 42.81 Q50.4 42.08 52.19 38.37 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q58.11 41.7 48.66 24.16",
+        "opacity": "0.574",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(81) scale(0)",
+      },
+    },
+  },
+  "give": {
+    "0.25s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(2.01 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "1",
+        "transform": "translate(64 6.43) scale(0.976 0.976)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "55.11",
+        "opacity": "1",
+        "rx": "5.05",
+        "ry": "5.93",
+      },
+      "mouth": {
+        "d": "M58.4 62.97 C60.92 66.67 67.08 66.67 69.6 62.97 C67.36 70.67 60.64 70.67 58.4 62.97Z",
+      },
+      "move": {
+        "transform": "translate(0 -2.15)",
+      },
+      "star": {
+        "d": "M61.48 20.27 Q64 14 66.52 20.27 L73.13 36.66 Q74.52 40.11 78.15 39.32 L95.42 35.54 Q102.02 34.1 98.21 41.24 L88.26 59.93 Q86.17 63.86 86.81 68.26 L89.87 89.21 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.13 89.21 L41.19 68.26 Q41.83 63.86 39.74 59.93 L29.79 41.24 Q25.98 34.1 32.58 35.54 L49.85 39.32 Q53.48 40.11 54.87 36.66 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(40.5) scale(0)",
+      },
+    },
+    "0.5s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0.8 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0.981",
+        "transform": "translate(64 3.46) scale(0.187 1)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "55.1",
+        "opacity": "1",
+        "rx": "5.06",
+        "ry": "5.94",
+      },
+      "mouth": {
+        "d": "M58.4 62.96 C60.92 66.67 67.08 66.67 69.6 62.96 C67.36 70.69 60.64 70.69 58.4 62.96Z",
+      },
+      "move": {
+        "transform": "translate(0 -0.56)",
+      },
+      "star": {
+        "d": "M61.65 20.18 Q64 14 66.35 20.18 L72.48 36.34 Q73.77 39.73 77.24 38.63 L93.7 33.37 Q100 31.36 96.71 38.96 L88.1 58.85 Q86.29 63.03 86.92 67.54 L89.9 89.01 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.1 89.01 L41.08 67.54 Q41.71 63.03 39.9 58.85 L31.29 38.96 Q28 31.36 34.3 33.37 L50.76 38.63 Q54.23 39.73 55.52 36.34 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(54) scale(0)",
+      },
+    },
+    "1s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(-0.75 64 60) translate(64 100) scale(1.001 0.998) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0.937",
+        "transform": "translate(111.01 -51.96) scale(0.735 0.735)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "55.1",
+        "opacity": "1",
+        "rx": "5.06",
+        "ry": "5.94",
+      },
+      "mouth": {
+        "d": "M58.4 62.96 C60.92 66.67 67.08 66.67 69.6 62.96 C67.36 70.69 60.64 70.69 58.4 62.96Z",
+      },
+      "move": {
+        "transform": "translate(0 1.43)",
+      },
+      "star": {
+        "d": "M61.19 20.43 Q64 14 66.81 20.43 L74.18 37.26 Q75.73 40.8 79.58 40.56 L97.91 39.42 Q104.92 38.99 100.35 45.28 L88.4 61.76 Q85.89 65.22 86.57 69.44 L89.8 89.54 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.2 89.54 L41.43 69.44 Q42.11 65.22 39.6 61.76 L27.65 45.28 Q23.08 38.99 30.09 39.42 L48.42 40.56 Q52.27 40.8 53.82 37.26 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(81) scale(0)",
+      },
+    },
+  },
+  "idle": {
+    "0.25s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(3.2 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "56",
+        "opacity": "1",
+        "rx": "4.6",
+        "ry": "5.4",
+      },
+      "mouth": {
+        "d": "M58.4 63.49 C60.92 66.83 67.08 66.83 69.6 63.49 C67.36 68.16 60.64 68.16 58.4 63.49Z",
+      },
+      "move": {
+        "transform": "translate(0 -3.41)",
+      },
+      "star": {
+        "d": "M60.75 20.73 Q64 14 67.25 20.73 L75.75 38.33 Q77.54 42.03 81.59 42.73 L100.85 46.04 Q108.22 47.31 102.71 52.12 L88.3 64.68 Q85.27 67.32 86.04 71.27 L89.65 90.04 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.35 90.04 L41.96 71.27 Q42.73 67.32 39.7 64.68 L25.29 52.12 Q19.78 47.31 27.15 46.04 L46.41 42.73 Q50.46 42.03 52.25 38.33 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(40.5) scale(0)",
+      },
+    },
+    "0.5s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(1.76 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "56",
+        "opacity": "1",
+        "rx": "4.6",
+        "ry": "5.4",
+      },
+      "mouth": {
+        "d": "M58.4 63.49 C60.92 66.83 67.08 66.83 69.6 63.49 C67.36 68.16 60.64 68.16 58.4 63.49Z",
+      },
+      "move": {
+        "transform": "translate(0 -1.24)",
+      },
+      "star": {
+        "d": "M61.07 20.5 Q64 14 66.93 20.5 L74.6 37.52 Q76.21 41.1 80.13 41.1 L98.79 41.08 Q105.93 41.08 101.08 47 L88.41 62.51 Q85.75 65.77 86.45 69.92 L89.77 89.67 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.23 89.67 L41.55 69.92 Q42.25 65.77 39.59 62.51 L26.92 47 Q22.07 41.08 29.21 41.08 L47.87 41.1 Q51.79 41.1 53.4 37.52 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(54) scale(0)",
+      },
+    },
+    "1s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(-1.87 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "56",
+        "opacity": "1",
+        "rx": "4.6",
+        "ry": "5.4",
+      },
+      "mouth": {
+        "d": "M58.4 63.49 C60.92 66.83 67.08 66.83 69.6 63.49 C67.36 68.16 60.64 68.16 58.4 63.49Z",
+      },
+      "move": {
+        "transform": "translate(0 3.56)",
+      },
+      "star": {
+        "d": "M60.77 20.71 Q64 14 67.23 20.71 L75.69 38.28 Q77.47 41.98 81.51 42.63 L100.76 45.76 Q108.11 46.96 102.64 51.83 L88.31 64.56 Q85.3 67.24 86.06 71.19 L89.66 90.02 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.34 90.02 L41.94 71.19 Q42.7 67.24 39.69 64.56 L25.36 51.83 Q19.89 46.96 27.24 45.76 L46.49 42.63 Q50.53 41.98 52.31 38.28 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(81) scale(0)",
+      },
+    },
+  },
+  "land": {
+    "0.25s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(1.22 64 60) translate(64 100) scale(0.994 1.008) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 111.92 L64 117.46",
+        "opacity": "0.437",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "56.99",
+        "opacity": "0.004",
+        "rx": "4.6",
+        "ry": "0.6",
+      },
+      "mouth": {
+        "d": "M57.85 63.32 C60.62 67.03 67.38 67.03 70.15 63.32 C67.69 71.4 60.31 71.4 57.85 63.32Z",
+      },
+      "move": {
+        "transform": "translate(0 -1.3)",
+      },
+      "star": {
+        "d": "M61.44 20.28 Q64 14 66.56 20.28 L73.25 36.73 Q74.66 40.18 78.32 39.45 L95.73 35.98 Q102.38 34.65 98.54 41.29 L88.49 58.68 Q86.38 62.34 87.69 66.35 L93.92 85.45 Q96.31 92.75 88.55 90.29 L68.26 83.85 Q64 82.5 59.74 83.85 L39.45 90.29 Q31.69 92.75 34.08 85.45 L40.31 66.35 Q41.62 62.34 39.51 58.68 L29.46 41.29 Q25.62 34.65 32.27 35.98 L49.68 39.45 Q53.34 40.18 54.75 36.73 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(40.5) scale(0)",
+      },
+    },
+    "0.5s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0.16 64 60) translate(64 100) scale(0.999 1.001) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 114.83 L64 118.92",
+        "opacity": "0.123",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "57",
+        "opacity": "0",
+        "rx": "4.6",
+        "ry": "0.54",
+      },
+      "mouth": {
+        "d": "M57.84 63.32 C60.61 67.03 67.39 67.03 70.16 63.32 C67.7 71.44 60.3 71.44 57.84 63.32Z",
+      },
+      "move": {
+        "transform": "translate(0 -0.11)",
+      },
+      "star": {
+        "d": "M61.52 20.24 Q64 14 66.48 20.24 L72.97 36.58 Q74.34 40.01 77.93 39.14 L95.01 35 Q101.54 33.41 97.91 40.28 L88.41 58.24 Q86.41 62.02 87.7 66.09 L93.84 85.46 Q96.19 92.86 88.46 90.38 L68.25 83.87 Q64 82.5 59.75 83.87 L39.54 90.38 Q31.81 92.86 34.16 85.46 L40.3 66.09 Q41.59 62.02 39.59 58.24 L30.09 40.28 Q26.46 33.41 32.99 35 L50.07 39.14 Q53.66 40.01 55.03 36.58 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(54) scale(0)",
+      },
+    },
+    "1s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(-0.42 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "56.25",
+        "opacity": "1",
+        "rx": "4.6",
+        "ry": "4.19",
+      },
+      "mouth": {
+        "d": "M58.26 63.45 C60.84 66.88 67.16 66.88 69.74 63.45 C67.44 68.97 60.56 68.97 58.26 63.45Z",
+      },
+      "move": {
+        "transform": "translate(0 0.81)",
+      },
+      "star": {
+        "d": "M61.13 20.47 Q64 14 66.87 20.47 L74.4 37.39 Q75.98 40.95 79.87 40.83 L98.38 40.28 Q105.46 40.06 100.78 46.01 L88.54 61.58 Q85.97 64.85 86.93 68.9 L91.48 88.17 Q93.21 95.53 86.2 92.4 L67.86 84.22 Q64 82.5 60.14 84.22 L41.8 92.4 Q34.79 95.53 36.52 88.17 L41.07 68.9 Q42.03 64.85 39.46 61.58 L27.22 46.01 Q22.54 40.06 29.62 40.28 L48.13 40.83 Q52.02 40.95 53.6 37.39 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0",
+        "transform": "translate(16 28) rotate(81) scale(0)",
+      },
+    },
+  },
+  "sparkle": {
+    "0.25s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(92.41 64 60) translate(64 100) scale(1 1.052) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "56.99",
+        "opacity": "0.004",
+        "rx": "4.6",
+        "ry": "0.6",
+      },
+      "mouth": {
+        "d": "M57.74 63.32 C60.55 67.03 67.45 67.03 70.26 63.32 C67.76 71.78 60.24 71.78 57.74 63.32Z",
+      },
+      "move": {
+        "transform": "translate(0 -2.57)",
+      },
+      "star": {
+        "d": "M61.49 20.26 Q64 14 66.51 20.26 L73.07 36.63 Q74.45 40.07 78.06 39.25 L95.26 35.33 Q101.83 33.83 98.07 41.02 L88.25 59.82 Q86.18 63.78 86.82 68.19 L89.87 89.19 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.13 89.19 L41.18 68.19 Q41.82 63.78 39.75 59.82 L29.93 41.02 Q26.17 33.83 32.74 35.33 L49.94 39.25 Q53.55 40.07 54.93 36.63 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0.489",
+        "transform": "translate(16 28) rotate(40.5) scale(0.149)",
+      },
+    },
+    "0.5s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(271.12 64 60) translate(64 100) scale(1 1.055) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "57",
+        "opacity": "0",
+        "rx": "4.6",
+        "ry": "0.54",
+      },
+      "mouth": {
+        "d": "M57.73 63.32 C60.55 67.03 67.45 67.03 70.27 63.32 C67.76 71.82 60.24 71.82 57.73 63.32Z",
+      },
+      "move": {
+        "transform": "translate(0 -0.79)",
+      },
+      "star": {
+        "d": "M61.72 20.14 Q64 14 66.28 20.14 L72.24 36.22 Q73.49 39.6 76.88 38.38 L93.02 32.58 Q99.18 30.37 96.1 38.13 L88.03 58.45 Q86.33 62.72 86.96 67.27 L89.91 88.94 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.09 88.94 L41.04 67.27 Q41.67 62.72 39.97 58.45 L31.9 38.13 Q28.82 30.37 34.98 32.58 L51.12 38.38 Q54.51 39.6 55.76 36.22 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0.571",
+        "transform": "translate(16 28) rotate(54) scale(0.28)",
+      },
+    },
+    "1s": {
+      "body": {
+        "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(-1.12 64 60) translate(64 100) scale(1 1.001) translate(-64 -100)",
+      },
+      "coin": {
+        "opacity": "0",
+        "transform": "translate(132 -52) scale(0 0)",
+      },
+      "dust1": {
+        "d": "M64 116 L64 119.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "56",
+        "cy": "57",
+        "opacity": "0",
+        "rx": "4.6",
+        "ry": "0.54",
+      },
+      "mouth": {
+        "d": "M57.73 63.32 C60.55 67.03 67.45 67.03 70.27 63.32 C67.76 71.82 60.24 71.82 57.73 63.32Z",
+      },
+      "move": {
+        "transform": "translate(0 2.14)",
+      },
+      "star": {
+        "d": "M61.52 20.24 Q64 14 66.48 20.24 L72.98 36.58 Q74.34 40.02 77.93 39.15 L95.02 35.01 Q101.55 33.44 97.87 40.69 L88.23 59.67 Q86.2 63.66 86.84 68.09 L89.88 89.16 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.12 89.16 L41.16 68.09 Q41.8 63.66 39.77 59.67 L30.13 40.69 Q26.45 33.44 32.98 35.01 L50.07 39.15 Q53.66 40.02 55.02 36.58 Z",
+      },
+      "trailOut": {
+        "d": "M64 60 Q64 60 64 60",
+        "opacity": "0",
+      },
+      "tw0": {
+        "opacity": "0.948",
+        "transform": "translate(16 28) rotate(81) scale(0.914)",
+      },
+    },
+  },
+}
+`;
+
+exports[`파라미터 스냅샷 (상태별·시간별 geometry) > byeolttongi: 정적 포즈 1`] = `
+{
+  "flyIn": {
+    "body": {
+      "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+    },
+    "coin": {
+      "opacity": "0",
+      "transform": "translate(64 2) scale(0 0)",
+    },
+    "dust1": {
+      "d": "M64 111.45 L64 117.23",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "56.99",
+      "cy": "56.53",
+      "opacity": "1",
+      "rx": "4.23",
+      "ry": "4.07",
+    },
+    "mouth": {
+      "d": "M59.96 64.29 C61.98 66.33 66.9 66.33 68.92 64.29 C67.13 67.66 61.75 67.66 59.96 64.29Z",
+    },
+    "move": {
+      "transform": "translate(0 0)",
+    },
+    "star": {
+      "d": "M60.49 20.93 Q64 14 67.51 20.93 L76.68 39.08 Q78.61 42.89 82.68 44.2 L102.04 50.42 Q109.43 52.8 103.52 56.6 L88.04 66.52 Q84.79 68.61 85.61 72.39 L89.54 90.35 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.46 90.35 L42.39 72.39 Q43.21 68.61 39.96 66.52 L24.48 56.6 Q18.57 52.8 25.96 50.42 L45.32 44.2 Q49.39 42.89 51.32 39.08 Z",
+    },
+    "trailOut": {
+      "d": "M64 60 Q40 90 14 116",
+      "opacity": "0.75",
+    },
+    "tw0": {
+      "opacity": "0",
+      "transform": "translate(16 28) rotate(12) scale(0)",
+    },
+  },
+  "give": {
+    "body": {
+      "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+    },
+    "coin": {
+      "opacity": "1",
+      "transform": "translate(64 2) scale(1 1)",
+    },
+    "dust1": {
+      "d": "M64 111.45 L64 117.23",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "56",
+      "cy": "55.1",
+      "opacity": "1",
+      "rx": "5.06",
+      "ry": "5.94",
+    },
+    "mouth": {
+      "d": "M58.4 62.96 C60.92 66.67 67.08 66.67 69.6 62.96 C67.36 70.69 60.64 70.69 58.4 62.96Z",
+    },
+    "move": {
+      "transform": "translate(0 0)",
+    },
+    "star": {
+      "d": "M61.59 20.21 Q64 14 66.41 20.21 L72.71 36.45 Q74.04 39.86 77.56 38.87 L94.33 34.13 Q100.74 32.32 97.26 39.76 L88.16 59.23 Q86.25 63.33 86.88 67.8 L89.89 89.08 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.11 89.08 L41.12 67.8 Q41.75 63.33 39.84 59.23 L30.74 39.76 Q27.26 32.32 33.67 34.13 L50.44 38.87 Q53.96 39.86 55.29 36.45 Z",
+    },
+    "trailOut": {
+      "d": "M64 60 Q64 60 64 60",
+      "opacity": "0",
+    },
+    "tw0": {
+      "opacity": "0",
+      "transform": "translate(16 28) rotate(12) scale(0)",
+    },
+  },
+  "idle": {
+    "body": {
+      "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+    },
+    "coin": {
+      "opacity": "0",
+      "transform": "translate(64 2) scale(0 0)",
+    },
+    "dust1": {
+      "d": "M64 111.45 L64 117.23",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "56",
+      "cy": "56",
+      "opacity": "1",
+      "rx": "4.6",
+      "ry": "5.4",
+    },
+    "mouth": {
+      "d": "M58.4 63.49 C60.92 66.83 67.08 66.83 69.6 63.49 C67.36 68.16 60.64 68.16 58.4 63.49Z",
+    },
+    "move": {
+      "transform": "translate(0 0)",
+    },
+    "star": {
+      "d": "M60.94 20.59 Q64 14 67.06 20.59 L75.06 37.83 Q76.74 41.46 80.73 41.73 L99.7 43.02 Q106.94 43.52 101.82 49.01 L88.39 63.37 Q85.57 66.39 86.29 70.46 L89.73 89.82 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.27 89.82 L41.71 70.46 Q42.43 66.39 39.61 63.37 L26.18 49.01 Q21.06 43.52 28.3 43.02 L47.27 41.73 Q51.26 41.46 52.94 37.83 Z",
+    },
+    "trailOut": {
+      "d": "M64 60 Q64 60 64 60",
+      "opacity": "0",
+    },
+    "tw0": {
+      "opacity": "0",
+      "transform": "translate(16 28) rotate(12) scale(0)",
+    },
+  },
+  "land": {
+    "body": {
+      "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+    },
+    "coin": {
+      "opacity": "0",
+      "transform": "translate(64 2) scale(0 0)",
+    },
+    "dust1": {
+      "d": "M64 111.45 L64 117.23",
+      "opacity": "0.488",
+    },
+    "eyeL": {
+      "cx": "56",
+      "cy": "57",
+      "opacity": "0",
+      "rx": "4.6",
+      "ry": "0.54",
+    },
+    "mouth": {
+      "d": "M57.84 63.32 C60.61 67.03 67.39 67.03 70.16 63.32 C67.7 71.44 60.3 71.44 57.84 63.32Z",
+    },
+    "move": {
+      "transform": "translate(0 0)",
+    },
+    "star": {
+      "d": "M61.51 20.25 Q64 14 66.49 20.25 L73.02 36.6 Q74.39 40.04 77.99 39.19 L95.13 35.16 Q101.68 33.62 98.01 40.45 L88.42 58.32 Q86.4 62.08 87.69 66.14 L93.84 85.48 Q96.18 92.87 88.46 90.38 L68.25 83.87 Q64 82.5 59.75 83.87 L39.54 90.38 Q31.82 92.87 34.16 85.48 L40.31 66.14 Q41.6 62.08 39.58 58.32 L29.99 40.45 Q26.32 33.62 32.87 35.16 L50.01 39.19 Q53.61 40.04 54.98 36.6 Z",
+    },
+    "trailOut": {
+      "d": "M64 60 Q64 60 64 60",
+      "opacity": "0",
+    },
+    "tw0": {
+      "opacity": "0",
+      "transform": "translate(16 28) rotate(12) scale(0)",
+    },
+  },
+  "sparkle": {
+    "body": {
+      "transform": "rotate(0 64 60) scale(1 1) rotate(0 64 60) rotate(0 64 60) translate(64 100) scale(1 1) translate(-64 -100)",
+    },
+    "coin": {
+      "opacity": "0",
+      "transform": "translate(64 2) scale(0 0)",
+    },
+    "dust1": {
+      "d": "M64 111.45 L64 117.23",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "56",
+      "cy": "57",
+      "opacity": "0",
+      "rx": "4.6",
+      "ry": "0.54",
+    },
+    "mouth": {
+      "d": "M57.73 63.32 C60.55 67.03 67.45 67.03 70.27 63.32 C67.76 71.83 60.24 71.83 57.73 63.32Z",
+    },
+    "move": {
+      "transform": "translate(0 0)",
+    },
+    "star": {
+      "d": "M61.63 20.19 Q64 14 66.37 20.19 L72.56 36.37 Q73.86 39.78 77.35 38.71 L93.92 33.62 Q100.25 31.68 96.9 39.23 L88.12 58.98 Q86.28 63.13 86.91 67.63 L89.9 89.03 Q91.04 97.21 84.55 93.68 L67.57 84.44 Q64 82.5 60.43 84.44 L43.45 93.68 Q36.96 97.21 38.1 89.03 L41.09 67.63 Q41.72 63.13 39.88 58.98 L31.1 39.23 Q27.75 31.68 34.08 33.62 L50.65 38.71 Q54.14 39.78 55.44 36.37 Z",
+    },
+    "trailOut": {
+      "d": "M64 60 Q64 60 64 60",
+      "opacity": "0",
+    },
+    "tw0": {
+      "opacity": "0.987",
+      "transform": "translate(16 28) rotate(12) scale(0.978)",
+    },
+  },
+}
+`;
+
+exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기에서 각 상태로 0.25·0.5·1초 1`] = `
+{
+  "cheer": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 28.52 Q52 26.92 57 28.52",
+        "opacity": "0.395",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.19",
+        "opacity": "0.004",
+        "rx": "5.4",
+        "ry": "0.61",
+      },
+      "head": {
+        "transform": "translate(0 0.64) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M55.2 50.96 C59.16 53.9 68.84 53.9 72.8 50.96 C69.28 67.63 58.72 67.63 55.2 50.96Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 -9.99) rotate(0 64 108) translate(64 108) scale(0.955 1.07) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(54) scale(0.453)",
+      },
+      "tail": {
+        "d": "M28 84 C12.58 76.21 1.55 57.52 2.94 40.96 C4.3 30.58 10.04 22.38 17 20.07",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 28.5 Q52 26.9 57 28.5",
+        "opacity": "0.4",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.2",
+        "opacity": "0",
+        "rx": "5.4",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 -0.43) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M55.19 50.96 C59.16 53.88 68.84 53.88 72.81 50.96 C69.28 67.75 58.72 67.75 55.19 50.96Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.073 0.918) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(72) scale(0.254)",
+      },
+      "tail": {
+        "d": "M28 84 C17.2 70.6 14.87 49.18 23.03 34.84 C28.6 26.02 37.23 21.15 44.25 22.06",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 28.5 Q52 26.9 57 28.5",
+        "opacity": "0.4",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.2",
+        "opacity": "0",
+        "rx": "5.4",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 -0.85) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M55.19 50.96 C59.16 53.88 68.84 53.88 72.81 50.96 C69.28 67.75 58.72 67.75 55.19 50.96Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.03 0.97) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(108) scale(0.981)",
+      },
+      "tail": {
+        "d": "M28 84 C18.21 69.85 17.46 48.32 26.64 34.62 C32.85 26.23 41.8 22.01 48.73 23.44",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "confused": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.3 Q52 28.7 57 30.3",
+        "opacity": "0.988",
+      },
+      "eyeL": {
+        "cx": "52.76",
+        "cy": "39.29",
+        "opacity": "1",
+        "rx": "5.69",
+        "ry": "6.26",
+      },
+      "head": {
+        "transform": "translate(0 -0.5) rotate(10.33 64 66)",
+      },
+      "mouth": {
+        "d": "M59.44 54.95 C62.51 52.22 70 52.22 73.07 51.47 C70.34 53.02 62.17 53.02 59.44 54.95Z",
+      },
+      "qmark": {
+        "opacity": "1",
+        "transform": "translate(96 20) rotate(-5.3) scale(1.142)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.3 Q52 28.7 57 30.3",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "52.77",
+        "cy": "39.28",
+        "opacity": "1",
+        "rx": "5.7",
+        "ry": "6.27",
+      },
+      "head": {
+        "transform": "translate(0 -0.46) rotate(8.78 64 66)",
+      },
+      "mouth": {
+        "d": "M59.48 55 C62.54 52.18 70.02 52.18 73.08 51.48 C70.36 52.98 62.2 52.98 59.48 55Z",
+      },
+      "qmark": {
+        "opacity": "1",
+        "transform": "translate(96 20) rotate(-8.6) scale(0.981)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.3 Q52 28.7 57 30.3",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "52.77",
+        "cy": "39.28",
+        "opacity": "1",
+        "rx": "5.7",
+        "ry": "6.27",
+      },
+      "head": {
+        "transform": "translate(0 -0.1) rotate(5.77 64 66)",
+      },
+      "mouth": {
+        "d": "M59.48 55 C62.54 52.18 70.02 52.18 73.08 51.48 C70.36 52.98 62.2 52.98 59.48 55Z",
+      },
+      "qmark": {
+        "opacity": "1",
+        "transform": "translate(96 20) rotate(8.6) scale(1)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "dance": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.19",
+        "opacity": "0.004",
+        "rx": "5.4",
+        "ry": "0.61",
+      },
+      "head": {
+        "transform": "translate(0 -0.1) rotate(-2.84 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 60.51 59.2 60.51 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(2.16 -3.09) rotate(4.33 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C15.49 75.49 8.97 59.95 15.95 48.41 C21.18 39.9 30.41 39.59 30.72 45.28",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.2",
+        "opacity": "0",
+        "rx": "5.4",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 -1.24) rotate(-3.52 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 60.55 59.2 60.55 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.019 0.983) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C15.5 75.5 9 60 16 48.5 C21.25 40 30.5 39.75 30.75 45.49",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.2",
+        "opacity": "0",
+        "rx": "5.4",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 -0.91) rotate(3.85 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 60.55 59.2 60.55 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.028 0.966) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C15.5 75.5 9 60 16 48.5 C21.25 40 30.5 39.75 30.75 45.5",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "encourage": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.92 Q52 27.72 57 29.32",
+        "opacity": "0.593",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40.36",
+        "opacity": "1",
+        "rx": "5.12",
+        "ry": "3.55",
+      },
+      "head": {
+        "transform": "translate(0 -0.5) rotate(-5.13 64 66)",
+      },
+      "mouth": {
+        "d": "M55.6 50.96 C59.38 55.47 68.62 55.47 72.4 50.96 C69.04 56.27 58.96 56.27 55.6 50.96Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C15.08 75.08 8.15 58.31 14.31 45.54 C18.92 36.62 27.54 34.47 29.69 38.31",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.92 Q52 27.71 57 29.31",
+        "opacity": "0.6",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40.36",
+        "opacity": "1",
+        "rx": "5.12",
+        "ry": "3.53",
+      },
+      "head": {
+        "transform": "translate(0 -0.46) rotate(-5 64 66)",
+      },
+      "mouth": {
+        "d": "M55.6 50.96 C59.38 55.47 68.62 55.47 72.4 50.96 C69.04 56.27 58.96 56.27 55.6 50.96Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C15.1 75.1 8.2 58.4 14.4 45.7 C19.05 36.79 27.7 34.74 29.75 38.69",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.92 Q52 27.71 57 29.31",
+        "opacity": "0.6",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40.36",
+        "opacity": "1",
+        "rx": "5.12",
+        "ry": "3.53",
+      },
+      "head": {
+        "transform": "translate(0 0.79) rotate(-5 64 66)",
+      },
+      "mouth": {
+        "d": "M55.6 50.96 C59.38 55.47 68.62 55.47 72.4 50.96 C69.04 56.27 58.96 56.27 55.6 50.96Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C15.1 75.1 8.2 58.4 14.4 45.7 C19.05 36.8 27.7 34.75 29.75 38.7",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "happy": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.19",
+        "opacity": "0.004",
+        "rx": "5.4",
+        "ry": "0.61",
+      },
+      "head": {
+        "transform": "translate(0 2.14) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M54.81 50.6 C58.95 55.9 69.05 55.9 73.19 50.6 C69.51 62.68 58.49 62.68 54.81 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 -14.72) rotate(0 64 108) translate(64 108) scale(0.904 1.143) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(54) scale(0.453)",
+      },
+      "tail": {
+        "d": "M28 84 C14.48 76.59 6.19 61.19 11.51 48.44 C15.54 39.28 24.3 37.16 25.99 41.79",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.2",
+        "opacity": "0",
+        "rx": "5.4",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 -3.36) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M54.8 50.6 C58.94 55.9 69.06 55.9 73.2 50.6 C69.52 62.75 58.48 62.75 54.8 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.924 1.12) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(72) scale(0.254)",
+      },
+      "tail": {
+        "d": "M28 84 C16.89 73.35 12.9 56.37 21.38 45.5 C27.68 37.73 36.7 38.05 37.05 43.02",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "41.2",
+        "opacity": "0",
+        "rx": "5.4",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 -2.28) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M54.8 50.6 C58.94 55.9 69.06 55.9 73.2 50.6 C69.52 62.75 58.48 62.75 54.8 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 -12.28) rotate(0 64 108) translate(64 108) scale(0.992 1.014) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(108) scale(0.981)",
+      },
+      "tail": {
+        "d": "M28 84 C16.37 73.92 11.54 57.16 19.47 45.89 C25.37 37.8 34.4 37.68 34.99 42.63",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "idle": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.5) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 56.7 59.2 56.7 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.46) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 56.7 59.2 56.7 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.1) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 56.7 59.2 56.7 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "proud": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "0",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -2.04) rotate(-5.13 64 66)",
+      },
+      "mouth": {
+        "d": "M55.05 50.6 C59.08 55.9 68.92 55.9 72.95 50.6 C69.37 61.59 58.63 61.59 55.05 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.042) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(54) scale(0.453)",
+      },
+      "tail": {
+        "d": "M28 84 C14.97 74.97 7.95 57.9 13.9 44.82 C18.36 35.8 26.82 33.18 29.44 36.57",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "0",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -1.96) rotate(-5 64 66)",
+      },
+      "mouth": {
+        "d": "M55.04 50.6 C59.07 55.9 68.93 55.9 72.96 50.6 C69.38 61.65 58.62 61.65 55.04 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.039) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(72) scale(0.254)",
+      },
+      "tail": {
+        "d": "M28 84 C15 75 8 58 14 44.99 C18.5 35.99 26.99 33.49 29.5 36.99",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "0",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -1.6) rotate(-5 64 66)",
+      },
+      "mouth": {
+        "d": "M55.04 50.6 C59.07 55.9 68.93 55.9 72.96 50.6 C69.38 61.65 58.62 61.65 55.04 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.025) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "1",
+        "transform": "translate(20 14) rotate(108) scale(0.981)",
+      },
+      "tail": {
+        "d": "M28 84 C15 75 8 58 14 45 C18.5 36 27 33.5 29.5 37",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "sad": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 32.11 Q52 25.96 57 27.56",
+        "opacity": "0.988",
+      },
+      "eyeL": {
+        "cx": "51.46",
+        "cy": "41.51",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "4.96",
+      },
+      "head": {
+        "transform": "translate(0 2.77) rotate(7.18 64 66)",
+      },
+      "mouth": {
+        "d": "M57.38 55.49 C60.27 51.1 67.33 51.1 70.22 55.49 C67.65 51.9 59.95 51.9 57.38 55.49Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.03 0.967) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C20.1 94.46 16.15 103.01 8.77 106.34 C3.49 109.62 -1.89 108.54 -1.84 103.22",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 32.12 Q52 25.93 57 27.53",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "51.45",
+        "cy": "41.53",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "4.95",
+      },
+      "head": {
+        "transform": "translate(0 2.73) rotate(7.01 64 66)",
+      },
+      "mouth": {
+        "d": "M57.4 55.55 C60.28 51.05 67.32 51.05 70.2 55.55 C67.64 51.85 59.96 51.85 57.4 55.55Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.03 0.966) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C20 94.01 16 102.03 8.99 105.04 C3.98 108.05 -1.03 107.05 -1.02 102.04",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 32.12 Q52 25.93 57 27.53",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "51.45",
+        "cy": "41.53",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "4.95",
+      },
+      "head": {
+        "transform": "translate(0 2.79) rotate(7 64 66)",
+      },
+      "mouth": {
+        "d": "M57.4 55.55 C60.28 51.05 67.32 51.05 70.2 55.55 C67.64 51.85 59.96 51.85 57.4 55.55Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.031 0.963) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C20 94 16 102 9 105 C4 108 -1 107 -1 102",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "sleep": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "0.004",
+        "rx": "5",
+        "ry": "0.61",
+      },
+      "head": {
+        "transform": "translate(0 1.58) rotate(6.15 64 66)",
+      },
+      "mouth": {
+        "d": "M58.37 52.14 C60.9 54.04 67.1 54.04 69.63 52.14 C67.38 54.84 60.62 54.84 58.37 52.14Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C17.44 82.46 12.15 76.35 14.77 71.02 C16.82 66.97 21.44 67.89 20.16 71.23",
+      },
+      "zzz0": {
+        "opacity": "0.769",
+        "transform": "translate(94.42 21.16) scale(1)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "0",
+        "rx": "5",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 1.38) rotate(6 64 66)",
+      },
+      "mouth": {
+        "d": "M58.4 52.16 C60.92 54.02 67.08 54.02 69.6 52.16 C67.36 54.82 60.64 54.82 58.4 52.16Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.989 1.025) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C17.4 82.3 12.1 76.01 14.85 70.56 C16.99 66.42 21.74 67.37 20.44 70.81",
+      },
+      "zzz0": {
+        "opacity": "0.616",
+        "transform": "translate(93.75 22.49) scale(0.989)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "0",
+        "rx": "5",
+        "ry": "0.55",
+      },
+      "head": {
+        "transform": "translate(0 1.31) rotate(6 64 66)",
+      },
+      "mouth": {
+        "d": "M58.4 52.16 C60.92 54.02 67.08 54.02 69.6 52.16 C67.36 54.82 60.64 54.82 58.4 52.16Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.987 1.028) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C17.4 82.3 12.1 76 14.85 70.55 C17 66.4 21.75 67.35 20.45 70.8",
+      },
+      "zzz0": {
+        "opacity": "0.528",
+        "transform": "translate(93.29 23.43) scale(1)",
+      },
+    },
+  },
+  "surprised": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 27.04 Q52 25.44 57 27.04",
+        "opacity": "0.988",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "6.38",
+        "ry": "7.02",
+      },
+      "head": {
+        "transform": "translate(0 -2.04) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M60.35 53 C61.99 48.67 66.01 48.67 67.65 53 C66.19 62.04 61.81 62.04 60.35 53Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.967 1.047) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C14.87 74.87 7.74 57.49 13.49 44.11 C17.8 34.98 26.11 31.9 29.18 34.83",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 27 Q52 25.4 57 27",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "6.4",
+        "ry": "7.04",
+      },
+      "head": {
+        "transform": "translate(0 -1.96) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M60.4 53 C62.02 48.68 65.98 48.68 67.6 53 C66.16 62.05 61.84 62.05 60.4 53Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.967 1.048) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C14.9 74.9 7.8 57.6 13.6 44.29 C17.95 35.19 26.29 32.24 29.25 35.29",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 27 Q52 25.4 57 27",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "6.4",
+        "ry": "7.04",
+      },
+      "head": {
+        "transform": "translate(0 -1.6) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M60.4 53 C62.02 48.68 65.98 48.68 67.6 53 C66.16 62.05 61.84 62.05 60.4 53Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.973 1.035) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C14.9 74.9 7.8 57.6 13.6 44.3 C17.95 35.2 26.3 32.25 29.25 35.3",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "talk": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.25 Q52 28.65 57 30.25",
+        "opacity": "0.346",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.08) rotate(-0.42 64 66)",
+      },
+      "mouth": {
+        "d": "M56 51.67 C59.6 54.61 68.4 54.61 72 51.67 C68.8 60.56 59.2 60.56 56 51.67Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0.35",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.33) rotate(-0.14 64 66)",
+      },
+      "mouth": {
+        "d": "M56 51.68 C59.6 54.6 68.4 54.6 72 51.68 C68.8 56.96 59.2 56.96 56 51.68Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0.35",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 0.27) rotate(0.49 64 66)",
+      },
+      "mouth": {
+        "d": "M56 51.68 C59.6 54.6 68.4 54.6 72 51.68 C68.8 59.9 59.2 59.9 56 51.68Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "teach": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 29.51 Q52 27.91 57 29.51",
+        "opacity": "0.544",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.5) rotate(-4.1 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 58.33 59.2 58.33 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C18.68 76.2 13.63 64.81 12.41 52.61 C11.16 41.39 11.69 32.12 14.5 23.93",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 29.5 Q52 27.9 57 29.5",
+        "opacity": "0.55",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.46) rotate(-4 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 58.35 59.2 58.35 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C17.66 77.52 11.1 66.85 8.48 54.96 C5.91 44.08 5.44 35.08 7.03 26.98",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 29.5 Q52 27.9 57 29.5",
+        "opacity": "0.55",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.1) rotate(-4 64 66)",
+      },
+      "mouth": {
+        "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 58.35 59.2 58.35 56 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C18.37 76.5 12.94 65.2 11.56 53.12 C10.13 42.03 10.59 33.04 13 25.15",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "think": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.01 Q52 28.41 57 30.01",
+        "opacity": "0.988",
+      },
+      "eyeL": {
+        "cx": "53.63",
+        "cy": "38.22",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(-1.03 -0.37) rotate(-8.3 64 66)",
+      },
+      "mouth": {
+        "d": "M63.95 52.4 C66.02 49.15 71.07 49.15 73.14 52.4 C71.3 56.49 65.79 56.49 63.95 52.4Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.993 1.015) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C18.32 79.47 19.23 67.56 28.55 63.27 C34.79 59.76 40.61 61.11 43.88 59.06",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30 Q52 28.4 57 30",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "53.65",
+        "cy": "38.2",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(-1 -0.29) rotate(-7.9 64 66)",
+      },
+      "mouth": {
+        "d": "M64.04 52.4 C66.09 49.12 71.11 49.12 73.16 52.4 C71.33 56.48 65.87 56.48 64.04 52.4Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.995 1.012) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C18 80 18.01 68 27.01 63.01 C33.01 59.01 39 60.01 42.01 58",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30 Q52 28.4 57 30",
+        "opacity": "1",
+      },
+      "eyeL": {
+        "cx": "53.65",
+        "cy": "38.2",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(-1 -0.06) rotate(-9.23 64 66)",
+      },
+      "mouth": {
+        "d": "M64.04 52.4 C66.09 49.12 71.11 49.12 73.16 52.4 C71.33 56.48 65.87 56.48 64.04 52.4Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.999 1.003) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C18 80 18 68 27 63 C33 59 39 60 42 58",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+  "wave": {
+    "0.25s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0.297",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.5) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M55.21 50.6 C59.17 55.9 68.83 55.9 72.79 50.6 C69.27 61.05 58.73 61.05 55.21 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(54) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C12.83 75.74 2.38 56.72 4.29 40.21 C5.96 29.88 11.95 21.86 18.98 19.76",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(94.42 21.16) scale(0.4)",
+      },
+    },
+    "0.5s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0.3",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.46) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M55.2 50.6 C59.16 55.9 68.84 55.9 72.8 50.6 C69.28 61.1 58.72 61.1 55.2 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(72) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16.41 71.28 12.78 50.04 20.05 35.24 C25.08 26.09 33.39 20.7 40.46 21.19",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.75 22.49) scale(0.4)",
+      },
+    },
+    "1s": {
+      "browL": {
+        "d": "M47 30.5 Q52 28.9 57 30.5",
+        "opacity": "0.3",
+      },
+      "eyeL": {
+        "cx": "52",
+        "cy": "40",
+        "opacity": "1",
+        "rx": "5",
+        "ry": "5.5",
+      },
+      "head": {
+        "transform": "translate(0 -0.1) rotate(0 64 66)",
+      },
+      "mouth": {
+        "d": "M55.2 50.6 C59.16 55.9 68.84 55.9 72.8 50.6 C69.28 61.1 58.72 61.1 55.2 50.6Z",
+      },
+      "qmark": {
+        "opacity": "0",
+        "transform": "translate(96 20) rotate(8.6) scale(0)",
+      },
+      "root": {
+        "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
+      },
+      "spark0": {
+        "opacity": "0",
+        "transform": "translate(20 14) rotate(108) scale(0)",
+      },
+      "tail": {
+        "d": "M28 84 C16.67 71.06 13.47 49.75 21.03 35.1 C26.25 26.05 34.66 20.84 41.71 21.48",
+      },
+      "zzz0": {
+        "opacity": "0",
+        "transform": "translate(93.29 23.43) scale(0.4)",
+      },
+    },
+  },
+}
+`;
+
+exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적 포즈 1`] = `
+{
+  "cheer": {
+    "browL": {
+      "d": "M47 28.5 Q52 26.9 57 28.5",
+      "opacity": "0.4",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "41.2",
+      "opacity": "0",
+      "rx": "5.4",
+      "ry": "0.55",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M55.19 50.96 C59.16 53.88 68.84 53.88 72.81 50.96 C69.28 67.75 58.72 67.75 55.19 50.96Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "1",
+      "transform": "translate(20 14) rotate(13.5) scale(0.927)",
+    },
+    "tail": {
+      "d": "M28 84 C14 74 6 54 10 38 C13 28 20 21 27 20",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "confused": {
+    "browL": {
+      "d": "M47 30.3 Q52 28.7 57 30.3",
+      "opacity": "1",
+    },
+    "eyeL": {
+      "cx": "52.77",
+      "cy": "39.28",
+      "opacity": "1",
+      "rx": "5.7",
+      "ry": "6.27",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(8 64 66)",
+    },
+    "mouth": {
+      "d": "M59.48 55 C62.54 52.18 70.02 52.18 73.08 51.48 C70.36 52.98 62.2 52.98 59.48 55Z",
+    },
+    "qmark": {
+      "opacity": "1",
+      "transform": "translate(96 20) rotate(0) scale(1)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "dance": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "41.2",
+      "opacity": "0",
+      "rx": "5.4",
+      "ry": "0.55",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 60.55 59.2 60.55 56 50.6Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C15.5 75.5 9 60 16 48.5 C21.25 40 30.5 39.75 30.75 45.5",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "encourage": {
+    "browL": {
+      "d": "M47 30.92 Q52 27.71 57 29.31",
+      "opacity": "0.6",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40.36",
+      "opacity": "1",
+      "rx": "5.12",
+      "ry": "3.53",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(-5 64 66)",
+    },
+    "mouth": {
+      "d": "M55.6 50.96 C59.38 55.47 68.62 55.47 72.4 50.96 C69.04 56.27 58.96 56.27 55.6 50.96Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C15.1 75.1 8.2 58.4 14.4 45.7 C19.05 36.8 27.7 34.75 29.75 38.7",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "happy": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "41.2",
+      "opacity": "0",
+      "rx": "5.4",
+      "ry": "0.55",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M54.8 50.6 C58.94 55.9 69.06 55.9 73.2 50.6 C69.52 62.75 58.48 62.75 54.8 50.6Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "1",
+      "transform": "translate(20 14) rotate(13.5) scale(0.927)",
+    },
+    "tail": {
+      "d": "M28 84 C15.3 75.3 8.6 59.2 15.2 47.1 C20.15 38.4 29.1 37.25 30.25 42.1",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "idle": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "1",
+      "rx": "5",
+      "ry": "5.5",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 56.7 59.2 56.7 56 50.6Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "proud": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "0",
+      "rx": "5",
+      "ry": "5.5",
+    },
+    "head": {
+      "transform": "translate(0 -1.5) rotate(-5 64 66)",
+    },
+    "mouth": {
+      "d": "M55.04 50.6 C59.07 55.9 68.93 55.9 72.96 50.6 C69.38 61.65 58.62 61.65 55.04 50.6Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1.02) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "1",
+      "transform": "translate(20 14) rotate(13.5) scale(0.927)",
+    },
+    "tail": {
+      "d": "M28 84 C15 75 8 58 14 45 C18.5 36 27 33.5 29.5 37",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "sad": {
+    "browL": {
+      "d": "M47 32.13 Q52 25.93 57 27.53",
+      "opacity": "1",
+    },
+    "eyeL": {
+      "cx": "51.45",
+      "cy": "41.53",
+      "opacity": "1",
+      "rx": "5",
+      "ry": "4.95",
+    },
+    "head": {
+      "transform": "translate(0 3) rotate(7 64 66)",
+    },
+    "mouth": {
+      "d": "M57.4 55.55 C60.28 51.04 67.32 51.04 70.2 55.55 C67.64 51.85 59.96 51.85 57.4 55.55Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.035 0.955) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C20 94 16 102 9 105 C4 108 -1 107 -1 102",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "sleep": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "0",
+      "rx": "5",
+      "ry": "0.55",
+    },
+    "head": {
+      "transform": "translate(0 2) rotate(6 64 66)",
+    },
+    "mouth": {
+      "d": "M58.4 52.16 C60.92 54.01 67.08 54.01 69.6 52.16 C67.36 54.82 60.64 54.82 58.4 52.16Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C17.4 82.3 12.1 76 14.85 70.55 C17 66.4 21.75 67.35 20.45 70.8",
+    },
+    "zzz0": {
+      "opacity": "0.68",
+      "transform": "translate(94 22) scale(1)",
+    },
+  },
+  "surprised": {
+    "browL": {
+      "d": "M47 27 Q52 25.4 57 27",
+      "opacity": "1",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "1",
+      "rx": "6.4",
+      "ry": "7.04",
+    },
+    "head": {
+      "transform": "translate(0 -1.5) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M60.4 53 C62.02 48.68 65.98 48.68 67.6 53 C66.16 62.05 61.84 62.05 60.4 53Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.975 1.03) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C14.9 74.9 7.8 57.6 13.6 44.3 C17.95 35.2 26.3 32.25 29.25 35.3",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "talk": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0.35",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "1",
+      "rx": "5",
+      "ry": "5.5",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M56 51.68 C59.6 54.6 68.4 54.6 72 51.68 C68.8 55.4 59.2 55.4 56 51.68Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C16 76 10 62 18 52 C24 44 34 46 32 54",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "teach": {
+    "browL": {
+      "d": "M47 29.5 Q52 27.9 57 29.5",
+      "opacity": "0.55",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "1",
+      "rx": "5",
+      "ry": "5.5",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(-4 64 66)",
+    },
+    "mouth": {
+      "d": "M56 50.6 C59.6 55.9 68.4 55.9 72 50.6 C68.8 58.35 59.2 58.35 56 50.6Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C18 77 12 66 10 54 C8 43 8 34 10 26",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "think": {
+    "browL": {
+      "d": "M47 30 Q52 28.4 57 30",
+      "opacity": "1",
+    },
+    "eyeL": {
+      "cx": "53.65",
+      "cy": "38.2",
+      "opacity": "1",
+      "rx": "5",
+      "ry": "5.5",
+    },
+    "head": {
+      "transform": "translate(-1 0) rotate(-9 64 66)",
+    },
+    "mouth": {
+      "d": "M64.04 52.4 C66.09 49.12 71.11 49.12 73.16 52.4 C71.33 56.48 65.87 56.48 64.04 52.4Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C18 80 18 68 27 63 C33 59 39 60 42 58",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+  "wave": {
+    "browL": {
+      "d": "M47 30.5 Q52 28.9 57 30.5",
+      "opacity": "0.3",
+    },
+    "eyeL": {
+      "cx": "52",
+      "cy": "40",
+      "opacity": "1",
+      "rx": "5",
+      "ry": "5.5",
+    },
+    "head": {
+      "transform": "translate(0 0) rotate(0 64 66)",
+    },
+    "mouth": {
+      "d": "M55.2 50.6 C59.16 55.9 68.84 55.9 72.8 50.6 C69.28 61.1 58.72 61.1 55.2 50.6Z",
+    },
+    "qmark": {
+      "opacity": "0",
+      "transform": "translate(96 20) rotate(0) scale(0)",
+    },
+    "root": {
+      "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
+    },
+    "spark0": {
+      "opacity": "0",
+      "transform": "translate(20 14) rotate(13.5) scale(0)",
+    },
+    "tail": {
+      "d": "M28 84 C14 74 6 54 10 38 C13 28 20 21 27 20",
+    },
+    "zzz0": {
+      "opacity": "0",
+      "transform": "translate(94 22) scale(0.4)",
+    },
+  },
+}
+`;

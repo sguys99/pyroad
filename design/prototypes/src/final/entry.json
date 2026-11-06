@@ -1,0 +1,11 @@
+{
+  "title": "pyRoad 최종 시안",
+  "description": "pyRoad 최종 시안 (P2-07 2차): 시안 B 마법 그림책에서 출발해 사용자 리뷰 1·2차를 반영한 인터랙티브 프로토타입 — 단색 바탕·얇은 선·초록 하나와 금색 하나의 절제된 색, Jua 제목·Pretendard 본문, 짧고 건너뛸 수 있는 축하",
+  "googleFonts": [
+    "Jua"
+  ],
+  "inlineFonts": [
+    "sans",
+    "mono"
+  ]
+}

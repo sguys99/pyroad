@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { m } from 'framer-motion';
+import { sec } from '@/lib/motion/tokens';
 import ReactMarkdown from 'react-markdown';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
 import type { MotionBudget } from '@/lib/motion/tier';
@@ -43,7 +44,7 @@ export function StageClearCard({
         <m.h2
           id="celebration-title"
           {...popIn(budget, 0.12, { scale: 0.7, y: 6 })}
-          className="text-3xl font-black text-primary"
+          className="text-3xl font-black text-primary-text"
         >
           Stage {stage.order} 완료!
         </m.h2>
@@ -64,7 +65,9 @@ export function StageClearCard({
                 <p className="mb-1.5 last:mb-0">{children}</p>
               ),
               strong: ({ children }) => (
-                <strong className="font-bold text-primary">{children}</strong>
+                <strong className="font-bold text-primary-text">
+                  {children}
+                </strong>
               ),
             }}
           >
@@ -77,7 +80,11 @@ export function StageClearCard({
         )}
       </m.div>
 
-      <ConceptChips concepts={stage.concepts} budget={budget} delay={0.35} />
+      <ConceptChips
+        concepts={stage.concepts}
+        budget={budget}
+        delay={sec('slow')}
+      />
 
       <CelebrationCta onClick={onNext} wide>
         다음 모험으로!

@@ -1,0 +1,882 @@
+/* 공통 컴포넌트 (P2-11, docs/design/components.md). 시각 기준은 승인된 최종 시안
+   (design/prototypes/src/final/ui.tsx · base.css · refine.css). 값은 모두 토큰 변수(globals.css :root)만 쓴다.
+
+   - @layer components: 컴포넌트에 넘긴 Tailwind 클래스(w-full 등, utilities 층)가 여기 값을 이긴다
+   - 연출 단계는 <html data-motion="full|lite|minimal" data-reduced="true|false">를 본다 (motion-guidelines §4).
+     속성이 없으면(부트 스크립트 실패) full과 같은 일회성 전환만 쓴다. 반복 연출은 없다
+   - 움직임은 transform·opacity만. 동작 줄이기에서는 위치·크기 변화 없이 색으로만 알린다 */
+
+@layer components {
+  /* ───────────────────────── 게임 버튼: 면 + 아랫면(--lip-h 3px), 눌리면 3px 내려감 → jellyB 복귀 */
+  .g-btn {
+    --face: var(--primary);
+    --fg: var(--on-primary);
+    --lip: var(--primary-lip);
+    /* 동작 줄이기에서 눌렀을 때의 면 (움직임 대신 색) */
+    --press: var(--primary-lip);
+    --g-btn-h: 3rem;
+    --g-btn-px: 1.375rem;
+    --g-btn-r: var(--round-m);
+    --g-btn-fs: var(--text-button);
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    flex-shrink: 0;
+    vertical-align: middle;
+    padding: 0 0 var(--lip-h);
+    border: 0;
+    background: none;
+    color: var(--fg);
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .g-btn::before {
+    content: '';
+    position: absolute;
+    inset: var(--lip-h) 0 0 0;
+    z-index: -1;
+    border-radius: var(--g-btn-r);
+    background: var(--lip);
+  }
+  .g-btn-face {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: var(--g-btn-h);
+    /* Jua는 글자 몸이 아래로 치우쳐 위를 조금 더 띄운다 (시안 3px / 1px) */
+    padding: 0.1875rem var(--g-btn-px) 0.0625rem;
+    border-radius: var(--g-btn-r);
+    background: var(--face);
+    color: var(--fg);
+    font-size: var(--g-btn-fs);
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+    transition-property: transform, background-color, color;
+    /* 복귀(손을 뗄 때): 묵직한 B 젤리. 누를 때는 아래 :active가 짧게 덮는다 */
+    transition-duration:
+      var(--spring-jelly-b-dur), var(--dur-instant), var(--dur-instant);
+    transition-timing-function:
+      var(--spring-jelly-b), var(--easing-out), var(--easing-out);
+  }
+  .g-btn-face > svg,
+  .g-btn-icon > svg {
+    width: 1.15em;
+    height: 1.15em;
+    flex: none;
+  }
+  .g-btn-icon {
+    display: inline-flex;
+    margin-top: -0.125rem;
+  }
+  .g-btn[data-size='sm'] {
+    --g-btn-h: 2.8125rem; /* 45 + 아랫면 3 = 48px 터치 */
+    --g-btn-px: 0.875rem;
+    --g-btn-r: var(--round-s);
+    --g-btn-fs: 1rem;
+  }
+  .g-btn[data-size='lg'] {
+    --g-btn-h: 3.375rem;
+    --g-btn-px: 1.75rem;
+    --g-btn-fs: var(--text-button-lg);
+  }
+
+  /* 변형 */
+  .g-btn[data-variant='secondary'] {
+    --face: var(--surface);
+    --fg: var(--text);
+    --lip: var(--surface-lip);
+    --press: var(--surface-lip);
+  }
+  .g-btn[data-variant='reward'] {
+    --face: var(--accent);
+    --fg: var(--on-accent);
+    --lip: var(--accent-lip);
+    --press: var(--accent-lip);
+  }
+  .g-btn[data-variant='danger'] {
+    --face: var(--surface);
+    --fg: var(--error);
+    --lip: var(--surface-lip);
+    --press: var(--error-soft);
+  }
+  /* 흰 면(카드·시트·대화 상자) 위의 흰 버튼은 묻히지 않게 보조 면 색 (시안 refine.css) */
+  [data-surface='raised']
+    .g-btn:is([data-variant='secondary'], [data-variant='danger']) {
+    --face: var(--surface-2);
+  }
+  /* 글자 버튼: 면·아랫면 없이 얇은 실선 밑줄 */
+  .g-btn[data-variant='ghost'] {
+    --face: transparent;
+    --fg: var(--text);
+    --press: var(--surface-2);
+    padding-bottom: 0;
+  }
+  .g-btn[data-variant='ghost']::before {
+    display: none;
+  }
+  .g-btn[data-variant='ghost'] .g-btn-face {
+    min-height: var(--spacing-touch);
+    padding: 0 0.75rem;
+    font-size: var(--text-body);
+    font-weight: 600;
+    text-decoration: underline solid 1px var(--line-strong);
+    text-underline-offset: 4px;
+  }
+  .g-btn[data-variant='ghost'] .g-btn-face {
+    transition-duration: var(--dur-instant);
+  }
+  @media (hover: hover) {
+    .g-btn[data-variant='ghost']:hover .g-btn-face {
+      --fg: var(--primary-text);
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* 상태: 올려놓기(마우스) → 1px 뜸, 누름 → 아랫면만큼 내려감 */
+  @media (hover: hover) {
+    .g-btn:not(:disabled):not([data-loading]):not([data-variant='ghost']):hover
+      .g-btn-face {
+      transform: translateY(-1px);
+    }
+  }
+  /* 누름은 올려놓기(0-6-0)와 명시도가 같아야 뒤에 있는 이쪽이 이긴다 → :not(ghost)를 맞춰 붙임.
+     전에는 0-5-0이라 마우스로 누르면 내려가지 않고 1px 뜬 채였다 (P2-12 e2e에서 발견) */
+  .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading]):not(
+      [data-variant='ghost']
+    )
+    .g-btn-face {
+    transform: translateY(var(--lip-h));
+    transition-duration: var(--dur-instant);
+    transition-timing-function: var(--easing-press);
+  }
+  .g-btn[data-variant='ghost']:is(:active, [data-pressed]):not(:disabled)
+    .g-btn-face {
+    transform: none;
+    background: var(--press);
+  }
+  .g-btn:focus-visible {
+    outline: none;
+  }
+  .g-btn:focus-visible .g-btn-face {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  /* 비활성: 아랫면에 내려앉은 납작한 회색 면 */
+  .g-btn:is(:disabled, [aria-disabled='true']):not([data-loading]) {
+    --face: var(--surface-2);
+    --fg: var(--text-muted);
+    --lip: var(--surface-2);
+    cursor: not-allowed;
+  }
+  [data-surface='raised']
+    .g-btn:is(:disabled, [aria-disabled='true']):not([data-loading]) {
+    --face: var(--surface-2);
+  }
+  .g-btn:is(:disabled, [aria-disabled='true']):not([data-loading]):not(
+      [data-variant='ghost']
+    )
+    .g-btn-face {
+    transform: translateY(var(--lip-h));
+  }
+  .g-btn[data-variant='ghost']:is(:disabled, [aria-disabled='true'])
+    .g-btn-face {
+    text-decoration: none;
+  }
+  /* 색 있는 아이콘(보상 아이콘)도 비활성이면 흐리게 */
+  .g-btn:is(:disabled, [aria-disabled='true']):not([data-loading]) .g-btn-icon {
+    opacity: 0.55;
+  }
+  /* 로딩: 변형 색 그대로 + 바쁨 표시, 누를 수 없음 */
+  .g-btn[data-loading] {
+    cursor: progress;
+  }
+
+  /* 연출 단계: lite는 face 스프링(덜 출렁), minimal은 즉시 */
+  :root[data-motion='lite'] .g-btn-face {
+    transition-duration:
+      var(--spring-face-dur), var(--dur-instant), var(--dur-instant);
+    transition-timing-function:
+      var(--spring-face), var(--easing-out), var(--easing-out);
+  }
+  :root[data-motion='minimal'] .g-btn-face {
+    transition: none;
+  }
+  /* 누르는 동안의 80ms 전환(누름 규칙)도 minimal은 없앤다 (P2-12 e2e) */
+  :root[data-motion='minimal']
+    .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading])
+    .g-btn-face {
+    transition: none;
+  }
+  /* 동작 줄이기: 내려가지 않고 면 색만 진해짐 */
+  :root[data-reduced='true'] .g-btn .g-btn-face {
+    transform: none;
+    transition-property: background-color, color;
+    transition-duration: var(--dur-instant);
+  }
+  /* 올려놓기(0-6-0)·누름(0-5-0) 규칙보다 명시도가 높아야 이긴다 (0-7-0). 비활성의 납작한 모양은 움직임이 아니라 그대로 (P2-12 감사) */
+  :root[data-reduced='true']
+    .g-btn:is(:hover, :active, [data-pressed]):not(:disabled):not(
+      [data-loading]
+    )
+    .g-btn-face {
+    transform: none;
+  }
+  :root[data-reduced='true']
+    .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading])
+    .g-btn-face {
+    background: var(--press);
+  }
+
+  /* ───────────────────────── 아이콘 버튼 (소리 토글·닫기): 둥근 보조 면 48px */
+  .g-icon-btn {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: var(--spacing-touch);
+    height: var(--spacing-touch);
+    border: 0;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+    color: var(--text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--dur-instant) var(--easing-out);
+  }
+  .g-icon-btn > svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  /* sm: 보이는 원은 40px, 누르는 자리는 48px */
+  .g-icon-btn[data-size='sm'] {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: transparent;
+  }
+  .g-icon-btn[data-size='sm']::after {
+    content: '';
+    position: absolute;
+    inset: -0.25rem;
+  }
+  .g-icon-btn[data-size='sm'] > svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  @media (hover: hover) {
+    .g-icon-btn:hover {
+      background: var(--surface-lip);
+    }
+  }
+  .g-icon-btn:is(:active, [data-pressed]) {
+    background: var(--surface-lip);
+  }
+  .g-icon-btn:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* ───────────────────────── 카드: 테두리 없이 면 + 그림자 한 종류 */
+  .g-card-i {
+    transition-property: transform, background-color;
+    transition-duration: var(--spring-body-dur), var(--dur-instant);
+    transition-timing-function: var(--spring-body), var(--easing-out);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (hover: hover) {
+    .g-card-i:hover {
+      transform: translateY(-2px);
+    }
+  }
+  .g-card-i:active {
+    transform: translateY(1px);
+    transition-duration: var(--dur-instant);
+    transition-timing-function: var(--easing-press);
+  }
+  .g-card-i:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  :root[data-motion='lite'] .g-card-i {
+    transition-duration: var(--spring-face-dur), var(--dur-instant);
+    transition-timing-function: var(--spring-face), var(--easing-out);
+  }
+  :root[data-motion='minimal'] .g-card-i {
+    transition: none;
+  }
+  :root[data-reduced='true'] .g-card-i {
+    transform: none;
+    transition: background-color var(--dur-instant) var(--easing-out);
+  }
+  :root[data-reduced='true'] .g-card-i:active {
+    background-color: var(--surface-2);
+  }
+
+  /* ───────────────────────── 덮개 + 모달 (가운데 대화 상자) + 시트 (모바일 아래 → 넓은 화면 가운데)
+     Base UI가 열릴 때 data-starting-style, 닫힐 때 data-ending-style을 붙이고 전환이 끝나길 기다린다 */
+  .g-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--scrim);
+    transition: opacity var(--dur-base) var(--easing-out);
+  }
+  .g-scrim:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .g-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    width: min(28rem, calc(100% - 2rem));
+    height: fit-content;
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-radius: var(--round-l);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-pop);
+    outline: none;
+    transition-property: transform, opacity;
+    transition-duration: var(--spring-body-dur), var(--dur-fast);
+    transition-timing-function: var(--spring-body), var(--easing-out);
+  }
+  /* full: 아래에서 살짝 기울어 떠오름 (시안 Sheet 데스크톱) */
+  .g-modal[data-starting-style] {
+    opacity: 0;
+    transform: translateY(24px) rotate(-1.5deg) scale(0.96);
+  }
+  .g-modal[data-ending-style] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--easing-out);
+  }
+
+  .g-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 50;
+    max-height: calc(100dvh - 2.5rem);
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 1.75rem var(--spacing-gutter)
+      calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    border-radius: var(--round-l) var(--round-l) 0 0;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-pop);
+    outline: none;
+    transition-property: transform, opacity;
+    transition-duration: var(--dur-slow), var(--dur-fast);
+    transition-timing-function: var(--easing-out), var(--easing-out);
+  }
+  .g-sheet:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(100%);
+  }
+  .g-sheet[data-ending-style] {
+    transition-duration: var(--dur-base);
+  }
+  .g-sheet-grip {
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    width: 3.25rem;
+    height: 0.3125rem;
+    margin-left: -1.625rem;
+    border-radius: var(--round-pill);
+    background: var(--line);
+  }
+  @media (min-width: 48rem) {
+    .g-sheet {
+      inset: 0;
+      width: min(35rem, calc(100% - 3rem));
+      height: fit-content;
+      max-height: calc(100dvh - 3rem);
+      margin: auto;
+      padding: 2rem;
+      border-radius: var(--round-l);
+      transition-duration: var(--spring-body-dur), var(--dur-fast);
+      transition-timing-function: var(--spring-body), var(--easing-out);
+    }
+    .g-sheet[data-wide] {
+      width: min(45rem, calc(100% - 3rem));
+    }
+    .g-sheet[data-starting-style] {
+      opacity: 0;
+      transform: translateY(24px) rotate(-1.5deg) scale(0.96);
+    }
+    .g-sheet[data-ending-style] {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+      transition-duration: var(--dur-fast);
+    }
+    .g-sheet-grip {
+      display: none;
+    }
+  }
+
+  /* lite: 짧은 미끄러짐(220ms), 기울임·크기 변화 없음 */
+  :root[data-motion='lite'] :is(.g-modal, .g-sheet) {
+    transition-duration: var(--dur-base), var(--dur-fast);
+    transition-timing-function: var(--easing-out), var(--easing-out);
+  }
+  :root[data-motion='lite'] .g-modal[data-starting-style] {
+    transform: translateY(12px);
+  }
+  /* minimal: 페이드만 */
+  :root[data-motion='minimal'] :is(.g-modal, .g-sheet) {
+    transition: opacity var(--dur-fade) var(--easing-out);
+  }
+  :root[data-motion='minimal']
+    :is(.g-modal, .g-sheet):is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: none;
+  }
+  /* 동작 줄이기: 즉시 (덮개도) */
+  :root[data-reduced='true'] :is(.g-modal, .g-sheet, .g-scrim, .g-tooltip) {
+    transition: none;
+  }
+  :root[data-reduced='true']
+    :is(.g-modal, .g-sheet):is([data-starting-style], [data-ending-style]) {
+    transform: none;
+  }
+  @media (min-width: 48rem) {
+    :root[data-motion='lite'] .g-sheet[data-starting-style] {
+      transform: translateY(12px);
+    }
+  }
+
+  /* ───────────────────────── 툴팁: 짙은 면 + 흰 글자, 짧은 페이드·확대 */
+  .g-tooltip {
+    transform-origin: var(--transform-origin);
+    transition-property: transform, opacity;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--easing-out);
+  }
+  .g-tooltip:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  :root[data-motion='minimal']
+    .g-tooltip:is([data-starting-style], [data-ending-style]) {
+    transform: none;
+  }
+
+  /* ───────────────────────── 토스트: 담백한 쪽지 한 장 (흰 면 + 떠 있는 그림자) */
+  .g-toast-region {
+    position: fixed;
+    left: 50%;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    z-index: 70;
+    display: grid;
+    gap: 0.5rem;
+    width: min(26.25rem, calc(100% - 2rem));
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .g-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--spacing-touch);
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border-radius: var(--round-m);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-pop);
+    pointer-events: auto;
+    transition: opacity var(--dur-fast) var(--easing-out);
+  }
+  .g-toast[data-tone='good'] {
+    background: var(--success-soft);
+  }
+  .g-toast[data-tone='warn'] {
+    background: var(--warning-soft);
+  }
+  .g-toast[data-tone='error'] {
+    background: var(--error-soft);
+  }
+  .g-toast[data-leaving] {
+    opacity: 0;
+  }
+  .g-toast-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+  }
+  .g-toast[data-tone='good'] .g-toast-icon {
+    background: var(--surface);
+    color: var(--success);
+  }
+  .g-toast[data-tone='warn'] .g-toast-icon {
+    background: var(--surface);
+    color: var(--warning);
+  }
+  .g-toast[data-tone='error'] .g-toast-icon {
+    background: var(--surface);
+    color: var(--error);
+  }
+  /* 등장: full은 body 스프링으로 살짝 기울어 올라옴, lite는 짧게, minimal은 페이드, 동작 줄이기는 즉시 */
+  @keyframes g-toast-in {
+    from {
+      transform: translateY(18px) rotate(-2deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes g-toast-in-lite {
+    from {
+      transform: translateY(12px);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes g-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .g-toast {
+    animation: g-toast-in var(--spring-body-dur) var(--spring-body) both;
+  }
+  :root[data-motion='lite'] .g-toast {
+    animation: g-toast-in-lite var(--dur-base) var(--easing-out) both;
+  }
+  :root[data-motion='minimal'] .g-toast {
+    animation: g-fade-in var(--dur-fade) var(--easing-out) both;
+  }
+  :root[data-reduced='true'] .g-toast {
+    animation: none;
+    transition: none;
+  }
+
+  /* ───────────────────────── 세그먼트 탭: 보조 면 알약 + 주색 엄지가 미끄러짐 */
+  .g-seg {
+    position: relative;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    padding: 0.25rem;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+  }
+  .g-seg-thumb {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    width: calc((100% - 0.5rem) / var(--g-seg-n, 1));
+    border-radius: var(--round-pill);
+    background: var(--primary);
+    transform: translateX(calc(100% * var(--g-seg-i, 0)));
+    transition: transform var(--spring-face-dur) var(--spring-face);
+    pointer-events: none;
+  }
+  .g-seg-tab {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: var(--spacing-touch);
+    padding: 0 0.875rem;
+    border: 0;
+    border-radius: var(--round-pill);
+    background: none;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-fast) var(--easing-out);
+  }
+  .g-seg-tab[aria-selected='true'] {
+    color: var(--on-primary);
+  }
+  .g-seg-tab:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  @media (hover: hover) {
+    .g-seg-tab[aria-selected='false']:hover {
+      color: var(--primary-text);
+    }
+  }
+  :root[data-motion='lite'] .g-seg-thumb {
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--easing-out);
+  }
+  :root:is([data-motion='minimal'], [data-reduced='true'])
+    :is(.g-seg-thumb, .g-seg-tab) {
+    transition: none;
+  }
+
+  /* ───────────────────────── 진행바: 보조 면 홈 + 주색 채움 (transform scaleX만 움직임) */
+  .g-prog {
+    position: relative;
+    display: block;
+    height: var(--g-prog-h, 0.625rem);
+    overflow: hidden;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+  }
+  .g-prog[data-size='sm'] {
+    --g-prog-h: 0.375rem;
+  }
+  .g-prog[data-size='lg'] {
+    --g-prog-h: 0.875rem;
+  }
+  [data-surface='raised'] .g-prog {
+    background: var(--surface-2);
+  }
+  .g-prog-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    transform: scaleX(var(--g-prog, 0));
+    background: var(--primary);
+    transition: transform var(--dur-progress) var(--easing-out);
+  }
+  .g-prog[data-tone='reward'] .g-prog-fill {
+    background: var(--accent);
+  }
+  /* 값이 오르면 빛 띠가 채움 위를 한 번 지나간다 (transform·opacity만, full·lite) */
+  .g-prog-shine {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--surface) 55%, transparent),
+      transparent
+    );
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+  @keyframes g-prog-shine {
+    0% {
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(100%);
+    }
+  }
+  :root:not([data-reduced='true']):not([data-motion='minimal'])
+    .g-prog[data-rising='a']
+    .g-prog-shine,
+  :root:not([data-reduced='true']):not([data-motion='minimal'])
+    .g-prog[data-rising='b']
+    .g-prog-shine {
+    animation: g-prog-shine var(--dur-progress) var(--easing-in-out);
+  }
+  /* 같은 키프레임을 다시 걸면 재생되지 않아 이름만 다른 사본을 번갈아 쓴다 */
+  :root:not([data-reduced='true']):not([data-motion='minimal'])
+    .g-prog[data-rising='b']
+    .g-prog-shine {
+    animation-name: g-prog-shine-b;
+  }
+  @keyframes g-prog-shine-b {
+    0% {
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(100%);
+    }
+  }
+  :root[data-motion='lite'] .g-prog-fill {
+    transition-duration: calc(var(--dur-progress) * 0.7);
+  }
+  :root[data-motion='minimal'] .g-prog-fill {
+    transition-duration: var(--dur-fade);
+  }
+  :root[data-reduced='true'] .g-prog-fill {
+    transition: none;
+  }
+
+  /* ───────────────────────── 재화 HUD: 레벨 도장 · XP 바 · 코인 · 별 · 황금키 · 소리 */
+  .g-hud {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .g-seal {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    flex: none;
+    width: var(--spacing-touch);
+    height: var(--spacing-touch);
+    border-radius: var(--round-pill);
+    background: var(--primary);
+    color: var(--on-primary);
+    line-height: 1;
+  }
+  .g-seal-k {
+    font-size: var(--text-caption);
+    line-height: 1;
+  }
+  .g-seal-n {
+    font-size: var(--text-button-lg);
+    line-height: 1;
+    margin-top: 0.0625rem;
+  }
+  .g-seal[data-size='sm'] {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .g-seal[data-size='sm'] .g-seal-n {
+    font-size: var(--text-button);
+  }
+  .g-hud-xp {
+    display: grid;
+    gap: 0.125rem;
+    width: 6rem;
+  }
+  .g-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    padding: 0.125rem 0.75rem 0.125rem 0.375rem;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+    color: var(--text);
+    transition: background-color var(--dur-progress) var(--easing-out);
+  }
+  .g-chip > svg {
+    flex: none;
+  }
+  .g-hud-num {
+    font-size: var(--text-button-lg);
+    line-height: 1;
+    margin-top: 0.125rem;
+    white-space: nowrap;
+  }
+  /* 동작 줄이기: 팝 대신 금색 틴트 면으로 잠깐 (색만) */
+  .g-chip[data-flash] {
+    background: var(--accent-soft);
+    transition-duration: var(--dur-instant);
+  }
+  @media (max-width: 39.99rem) {
+    .g-hud {
+      gap: 0.375rem;
+    }
+    .g-hud-xp {
+      width: 4rem;
+    }
+    .g-chip {
+      gap: 0.125rem;
+      padding: 0.125rem 0.5rem 0.125rem 0.25rem;
+    }
+    .g-hud-num {
+      font-size: var(--text-button);
+    }
+  }
+
+  /* ───────────────────────── 말풍선: 면 + 그림자, 화자 이름표, 꼬리 */
+  .g-bubble {
+    position: relative;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    border-radius: var(--round-m);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-card);
+  }
+  .g-bubble[data-tone='good'] {
+    background: var(--success-soft);
+    box-shadow: none;
+  }
+  .g-bubble[data-tone='bug'] {
+    background: var(--error-soft);
+    box-shadow: none;
+  }
+  .g-bubble[data-tone='quiet'] {
+    background: var(--surface-2);
+    box-shadow: none;
+  }
+  /* 꼬리: 면과 같은 색의 작은 기운 사각형 (그림자 없이) */
+  .g-bubble[data-tail]::before {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 0.875rem;
+    background: inherit;
+  }
+  .g-bubble[data-tail='left']::before {
+    left: -0.5625rem;
+    top: 1.125rem;
+    border-bottom-left-radius: 0.25rem;
+    transform: skewY(28deg) rotate(8deg);
+  }
+  .g-bubble[data-tail='top']::before {
+    left: 1.5rem;
+    top: -0.5rem;
+    border-top-left-radius: 0.25rem;
+    transform: skewX(28deg) rotate(-8deg);
+  }
+  .g-bubble-who {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--primary-text);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .g-bubble[data-tone='bug'] .g-bubble-who {
+    color: var(--error);
+  }
+  .g-bubble-t {
+    margin-top: 0.125rem;
+    contain: layout paint;
+  }
+  /* 타자 효과: 전체 문장을 처음부터 배치하고 아직 안 나온 글자만 숨긴다 → 상자 크기가 흔들리지 않음 */
+  .g-bubble-rest {
+    visibility: hidden;
+  }
+  .g-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    margin-right: -2px;
+    vertical-align: -0.15em;
+    background: currentColor;
+  }
+  @keyframes g-caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  /* 깜빡이는 커서는 바쁨 표시: 동작 줄이기에서만 멈춤 */
+  :root[data-reduced='false'] .g-caret {
+    animation: g-caret 0.9s steps(1, end) infinite;
+  }
+}

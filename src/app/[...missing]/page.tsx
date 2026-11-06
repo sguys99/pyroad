@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+// 앱 화면 웹폰트 (P2-10). 루트 not-found.tsx는 모든 페이지 트리(랜딩 포함)에 들어가므로 거기서 import하지 않는다
+import '@/fonts/app.css';
 
 /**
  * 어느 라우트에도 맞지 않는 주소를 받아 404를 요청마다 렌더한다 (B27).

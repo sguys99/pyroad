@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 interface CreateNoticeFormProps {
   initialData?: { id: string; title: string; content: string };
@@ -62,7 +63,7 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error && (
-        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="rounded-lg bg-error-soft px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       )}
@@ -109,13 +110,9 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
         </p>
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-      >
+      <Button type="submit" loading={submitting}>
         {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
-      </button>
+      </Button>
     </form>
   );
 }

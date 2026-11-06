@@ -5,6 +5,7 @@ import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { Card } from '@/components/ui/card';
 
 interface ProfileSummaryProps {
   profile: UserProfile;
@@ -16,7 +17,7 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
   const earnedTypes = new Set(badges.map((b) => b.badge_type));
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-card border border-border p-4 shadow-sm">
+    <Card className="flex flex-col gap-3">
       {/* 상단: 아바타 + 이름 + XP */}
       <div className="flex items-center gap-4">
         {profile.avatar_url ? (
@@ -41,7 +42,9 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-lg font-bold text-primary">{profile.total_xp}</p>
+          <p className="text-lg font-bold text-primary-text">
+            {profile.total_xp}
+          </p>
           <p className="text-xs text-muted-foreground">XP</p>
         </div>
       </div>
@@ -60,6 +63,6 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
           />
         ))}
       </div>
-    </div>
+    </Card>
   );
 }

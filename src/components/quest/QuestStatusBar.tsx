@@ -1,16 +1,13 @@
 'use client';
 
 import { Star, Lightbulb } from 'lucide-react';
-import {
-  m,
-  useMotionValue,
-  useTransform,
-  animate,
-  AnimatePresence,
-} from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
+import { framerSpring, sec } from '@/lib/motion/tokens';
 import { useEffect, useState } from 'react';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { LevelSeal } from '@/components/ui/hud';
+import { useCountUp } from '@/components/ui/use-count-up';
 
 interface QuestStatusBarProps {
   xp: number;
@@ -19,19 +16,10 @@ interface QuestStatusBarProps {
   earnedXP: number | null;
 }
 
+/** XP 숫자 카운트업 (공통 HUD 훅, P2-11): full 700ms · lite 70% · minimal·동작 줄이기 즉시 */
 function AnimatedXP({ value }: { value: number }) {
-  const motionVal = useMotionValue(0);
-  const display = useTransform(motionVal, (v) => Math.round(v));
-
-  useEffect(() => {
-    const controls = animate(motionVal, value, {
-      duration: 0.8,
-      ease: 'easeOut',
-    });
-    return controls.stop;
-  }, [value, motionVal]);
-
-  return <m.span>{display}</m.span>;
+  const shown = useCountUp(value);
+  return <span className="hud-num min-w-0">{shown}</span>;
 }
 
 function ByeolttongiXPEffect() {
@@ -52,7 +40,7 @@ function ByeolttongiXPEffect() {
           x: 0,
           y: 0,
         }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.4 }}
+        transition={framerSpring('body', { delay: sec('slow') })}
       >
         <CharacterAvatar character="byeolttongi" expression={phase} size="sm" />
       </m.div>
@@ -69,22 +57,23 @@ export function QuestStatusBar({
   const title = getLevelTitle(level);
 
   return (
-    <div className="border-t border-border bg-card px-3 py-2.5 sm:px-4">
+    <div className="border-t border-border bg-card px-3 py-1.5 sm:px-4">
       <div className="flex items-center justify-between text-xs sm:text-sm">
-        <span className="shrink-0 font-medium text-foreground">
-          Lv.{level} {title}
+        <span className="flex shrink-0 items-center gap-2 font-medium text-foreground">
+          <LevelSeal level={level} size="sm" />
+          <span className="max-sm:sr-only">{title}</span>
         </span>
         <div className="flex items-center gap-2 sm:gap-4">
-          <span className="flex items-center gap-1 text-primary">
+          <span className="flex items-center gap-1 text-primary-text">
             <Star className="h-4 w-4" />
             <AnimatedXP value={xp} /> XP
             {earnedXP !== null && (
               <>
                 <m.span
-                  className="ml-1 text-xs font-bold text-primary"
+                  className="ml-1 text-xs font-bold text-primary-text"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: sec('base') }}
                 >
                   +{earnedXP}
                 </m.span>

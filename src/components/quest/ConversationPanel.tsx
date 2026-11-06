@@ -1,17 +1,14 @@
 'use client';
 
 import { memo, useEffect, useRef, useState } from 'react';
-import {
-  BookOpen,
-  Info,
-  KeyRound,
-  Lightbulb,
-  MessageCircle,
-} from 'lucide-react';
-import { m } from 'framer-motion';
+import { BookOpen, Info, Lightbulb, MessageCircle } from 'lucide-react';
+import { DURATION } from '@/lib/motion/tokens';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
+import { RewardIcon } from '@/components/ui/reward-icon';
+import { SpeechBubble } from '@/components/ui/speech-bubble';
+import { useDialogueBlip } from '@/components/sound/useDialogueBlip';
 import {
   Tooltip,
   TooltipContent,
@@ -65,8 +62,8 @@ function ThinkingIndicator() {
           animated
         />
       </div>
-      <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
-        <div className="flex items-center gap-1">
+      <SpeechBubble tail="left" speaker="파이뱀 선생님">
+        <div className="flex items-center gap-1 py-1">
           {/* 반복 연출은 CSS 키프레임으로 (§2.10). reduced-motion이면 멈춘 점 세 개 */}
           {[0, 1, 2].map((i) => (
             <span
@@ -80,7 +77,7 @@ function ThinkingIndicator() {
             ? '열심히 생각하고 있어요. 조금만 기다려 줘요!'
             : '파이뱀 선생님이 생각 중...'}
         </p>
-      </div>
+      </SpeechBubble>
     </div>
   );
 }
@@ -112,16 +109,19 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
   return (
     <div className="flex items-start gap-3">
       <TutorMessageAvatar message={msg} />
-      <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
-        <div className="mb-1 flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-primary">파이뱀 선생님</span>
-          {msg.isFallback && (
-            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+      <SpeechBubble
+        tail="left"
+        speaker="파이뱀 선생님"
+        speakerIcon={<MessageCircle />}
+        badge={
+          msg.isFallback && (
+            <span className="rounded-md bg-surface-2 px-1.5 text-caption font-normal text-muted-foreground">
               저장된 답변
             </span>
-          )}
-        </div>
+          )
+        }
+        className="min-w-0"
+      >
         <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:leading-relaxed prose-code:bg-muted prose-code:px-1 prose-code:rounded prose-hr:border-border prose-pre:bg-muted prose-pre:text-foreground">
           <ReactMarkdown
             remarkPlugins={remarkPlugins}
@@ -130,7 +130,7 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
             {msg.content}
           </ReactMarkdown>
         </div>
-      </div>
+      </SpeechBubble>
     </div>
   );
 });
@@ -141,21 +141,24 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
  * memo를 사용하지 않아 매 delta마다 즉시 렌더링된다.
  */
 function StreamingMessage({ content }: { content: string }) {
+  // 글자가 늘어날 때 작은 블립 (빈도 제한, P2-14). 말하는 중 표시는 깜빡이는 커서가 함께 보여 준다
+  useDialogueBlip(content);
   return (
     <div className="flex items-start gap-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
         <CharacterAvatar character="pybaem" expression="happy" size="sm" />
       </div>
-      <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
-        <div className="mb-1 flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-primary">파이뱀 선생님</span>
-        </div>
+      <SpeechBubble
+        tail="left"
+        speaker="파이뱀 선생님"
+        speakerIcon={<MessageCircle />}
+        className="min-w-0"
+      >
         <div className="prose prose-sm max-w-none text-foreground prose-p:leading-relaxed whitespace-pre-wrap">
           {content}
-          <span className="inline-block h-4 w-0.5 animate-pulse bg-primary/60 align-text-bottom" />
+          <span className="g-caret" aria-hidden />
         </div>
-      </div>
+      </SpeechBubble>
     </div>
   );
 }
@@ -187,9 +190,9 @@ export function ConversationPanel({
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-4 p-4">
           {/* 스토리 배경 */}
-          <div className="rounded-xl bg-secondary/5 border border-secondary/20 p-4">
+          <div className="rounded-xl bg-surface-2 p-4">
             <div className="mb-2 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-secondary-foreground" />
+              <BookOpen className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-bold text-foreground">이야기</h3>
             </div>
             <p className="text-sm leading-relaxed text-foreground">
@@ -235,7 +238,7 @@ export function ConversationPanel({
       {/* 힌트 + 황금키 버튼 (하단 고정) */}
       <div className="border-t border-border bg-background px-4 py-3">
         <div className="flex items-center justify-between">
-          <TooltipProvider delay={200}>
+          <TooltipProvider delay={DURATION.base}>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 힌트: {3 - hintsUsed}/3
@@ -254,15 +257,15 @@ export function ConversationPanel({
                   </TooltipContent>
                 </Tooltip>
               </span>
-              <span className="flex items-center gap-1 text-xs text-amber-600">
-                <KeyRound className="h-3 w-3" />
+              <span className="flex items-center gap-1 text-xs text-accent-text">
+                <RewardIcon kind="key" size={18} />
                 황금키: {goldenKeys}/3
                 <Tooltip>
                   <TooltipTrigger
                     className="cursor-help"
                     aria-label="황금키 안내"
                   >
-                    <Info className="h-3 w-3 text-amber-600/60" aria-hidden />
+                    <Info className="h-3 w-3 text-accent-text/70" aria-hidden />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p>황금키는 스테이지를 완료하면 3개로 보충됩니다.</p>
@@ -272,42 +275,26 @@ export function ConversationPanel({
             </div>
           </TooltipProvider>
           <div className="flex items-center gap-2">
-            <m.div
-              whileHover={!goldenKeyDisabled ? { scale: 1.03 } : undefined}
-              whileTap={!goldenKeyDisabled ? { scale: 0.97 } : undefined}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            {/* 눌림 피드백은 게임 버튼 자체 (P2-11). 힌트 소리(tap)는 세션이 낸다 */}
+            <Button
+              variant="reward"
+              size="sm"
+              onClick={onGoldenKeyUse}
+              disabled={goldenKeyDisabled}
+              icon={<RewardIcon kind="key" size={22} />}
             >
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onGoldenKeyUse}
-                disabled={goldenKeyDisabled}
-                className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
-              >
-                <KeyRound className="h-4 w-4" />
-                {goldenKeys <= 0 ? '키 소진' : '황금키'}
-              </Button>
-            </m.div>
-            <m.div
-              whileHover={
-                !(isAiLoading || hintsUsed >= 3) ? { scale: 1.03 } : undefined
-              }
-              whileTap={
-                !(isAiLoading || hintsUsed >= 3) ? { scale: 0.97 } : undefined
-              }
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              {goldenKeys <= 0 ? '키 소진' : '황금키'}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onHintRequest}
+              disabled={isAiLoading || hintsUsed >= 3}
+              sfx={false}
+              icon={<Lightbulb aria-hidden />}
             >
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onHintRequest}
-                disabled={isAiLoading || hintsUsed >= 3}
-                className="gap-1.5"
-              >
-                <Lightbulb className="h-4 w-4" />
-                {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
-              </Button>
-            </m.div>
+              {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
+            </Button>
           </div>
         </div>
       </div>

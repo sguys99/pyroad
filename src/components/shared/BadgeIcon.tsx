@@ -48,7 +48,7 @@ export function BadgeIcon({ type, earned, size = 'sm' }: BadgeIconProps) {
       title={earned ? badge.name : `${badge.name} (미획득)`}
     >
       <Icon
-        className={`${ICON_SIZE_MAP[size]} ${earned ? 'text-accent' : 'text-muted-foreground'}`}
+        className={`${ICON_SIZE_MAP[size]} ${earned ? 'text-accent-text' : 'text-muted-foreground'}`}
       />
     </div>
   );

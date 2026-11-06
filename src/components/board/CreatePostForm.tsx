@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BOARD_LIMITS } from '@/lib/board/limits';
 import { BoardFormMessage, type BoardFormError } from './BoardFormMessage';
+import { Button } from '@/components/ui/button';
 
 interface CreatePostFormProps {
   initialData?: { id: string; title: string; content: string };
@@ -118,13 +119,9 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
         </p>
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-      >
+      <Button type="submit" loading={submitting}>
         {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
-      </button>
+      </Button>
       <p className="text-center text-[11px] text-muted-foreground">
         전화번호, 주소, 학교 같은 개인정보와 친구가 속상할 말은 쓰지 않아요.
       </p>

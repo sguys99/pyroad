@@ -49,7 +49,7 @@ export default async function BoardPage({
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       <div className="mb-6">
-        <Link href="/world" className="text-sm text-primary underline">
+        <Link href="/world" className="text-sm text-primary-text underline">
           ← 월드맵으로
         </Link>
       </div>
@@ -58,7 +58,7 @@ export default async function BoardPage({
         <h1 className="text-2xl font-bold text-foreground">게시판</h1>
         <Link
           href="/board/create"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip"
         >
           글쓰기
         </Link>

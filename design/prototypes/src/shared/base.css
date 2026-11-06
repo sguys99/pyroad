@@ -1,0 +1,128 @@
+/* 프로토타입 공용 바탕 (모든 진입점이 import)
+   - 단일 라이트 테마: body 배경과 글자색을 명시 (다크 블록 없음)
+   - 좌우 여백은 safe-area 대응 (Artifact 페이지 계약)
+   - 연출 단계·동작 줄이기 분기는 <html data-motion data-reduced> */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--c-bg, #ffffff);
+  color: var(--c-text, #1b2f45);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 17px;
+  line-height: var(--body-lh, 1.7);
+  letter-spacing: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+  margin: 0;
+}
+p {
+  text-wrap: pretty;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+code,
+pre,
+kbd {
+  font-family: var(--font-mono, monospace);
+  font-variant-ligatures: none;
+}
+img,
+svg {
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 3px solid var(--c-secondary, #1f72b8);
+  outline-offset: 2px;
+}
+
+/* ───── 뷰포트 (검토 도구의 전체 폭 / 모바일 390 / 태블릿 820 프레임)
+   시안 CSS는 @media 대신 @container vp (...)로 반응형을 쓴다 → 프레임 보기에서도 맞게 바뀜 */
+.proto-viewport {
+  container-type: inline-size;
+  container-name: vp;
+  position: relative;
+  min-height: 100dvh;
+  --vp-h: 100dvh;
+}
+.proto-stage[data-frame='mobile'],
+.proto-stage[data-frame='tablet'] {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px));
+  background: #d9dde3;
+  background-image: radial-gradient(#c5cad2 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+/* 프레임: transform으로 position:fixed 자식의 기준 상자가 된다 (하단 내비 등이 프레임 안에 붙음) */
+.proto-frame {
+  transform: translateZ(0);
+  overflow: hidden;
+  border-radius: 28px;
+  box-shadow:
+    0 0 0 10px #1f2430,
+    0 24px 60px rgba(20, 24, 33, 0.35);
+  background: var(--c-bg, #fff);
+  flex: none;
+}
+.proto-frame > .proto-scroller {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.proto-frame .proto-viewport {
+  min-height: 100%;
+}
+
+/* ───── 모션 유틸리티 (시안 공용)
+   .m-loop    대기 루프(통통·반짝): minimal·동작 줄이기에서 멈춤
+   .m-ambient 앰비언트(구름·물결·패럴랙스): lite부터 멈춤
+   .m-blur    blur·backdrop-filter: lite부터 끔 */
+[data-motion='minimal'] .m-loop,
+[data-reduced='true'] .m-loop,
+[data-motion='lite'] .m-ambient,
+[data-motion='minimal'] .m-ambient,
+[data-reduced='true'] .m-ambient {
+  animation: none !important;
+}
+[data-motion='lite'] .m-blur,
+[data-motion='minimal'] .m-blur {
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+[data-reduced='true'] *,
+[data-reduced='true'] *::before,
+[data-reduced='true'] *::after {
+  scroll-behavior: auto !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

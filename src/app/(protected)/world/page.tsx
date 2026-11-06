@@ -12,6 +12,8 @@ import { PageTransition } from '@/components/shared/PageTransition';
 import { StageLockedNotice } from '@/components/world/StageLockedNotice';
 import { isStageLockedNotice } from '@/lib/world/stageLock';
 import { LogoutButton } from '@/components/LogoutButton';
+import { SoundToggle } from '@/components/sound/SoundToggle';
+import { WorldBgm } from '@/components/sound/WorldBgm';
 import { User, MessageSquare, Bell } from 'lucide-react';
 import type { UserBadge, UserProfile } from '@/lib/types/database';
 
@@ -80,7 +82,7 @@ export default async function WorldPage({ searchParams }: Props) {
             <Link
               href="/notice"
               aria-label="공지사항"
-              className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+              className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary-soft"
             >
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">공지사항</span>
@@ -88,7 +90,7 @@ export default async function WorldPage({ searchParams }: Props) {
             <Link
               href="/board"
               aria-label="게시판"
-              className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+              className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary-soft"
             >
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">게시판</span>
@@ -96,12 +98,13 @@ export default async function WorldPage({ searchParams }: Props) {
             <Link
               href="/profile"
               aria-label="내 프로필"
-              className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+              className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-primary/10 px-2 sm:px-3 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary-soft"
             >
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">내 프로필</span>
             </Link>
             <LogoutButton />
+            <SoundToggle />
           </div>
         </div>
 
@@ -117,10 +120,13 @@ export default async function WorldPage({ searchParams }: Props) {
           </div>
         )}
 
-        <MapBackground className="rounded-2xl overflow-hidden">
+        <MapBackground world={1} className="rounded-2xl overflow-hidden">
           <WorldMap stages={stagesWithStatus} />
         </MapBackground>
       </PageTransition>
+
+      {/* 월드 BGM: 기본 꺼짐, 설정에서 켠 경우만 (P2-14) */}
+      <WorldBgm id="world1" />
 
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       {isStageLockedNotice(notice) && <StageLockedNotice />}

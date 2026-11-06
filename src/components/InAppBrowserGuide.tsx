@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
-import { Copy, Check, ExternalLink, X } from 'lucide-react';
+import { Copy, Check, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/sheet';
 import { PybaemSvg } from '@/components/characters/PybaemSvg';
 import type { InAppBrowserType } from '@/lib/browser/detectInAppBrowser';
 import { openExternalBrowser } from '@/lib/browser/openExternalBrowser';
@@ -51,84 +51,55 @@ export function InAppBrowserGuide({
   const appName = getAppName(browserInfo.type);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <m.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    <Modal
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      media={<PybaemSvg expression="surprised" size={80} />}
+      align="center"
+      title="앗! 여기서는 Google 로그인이 안 돼요"
+      description={
+        <>
+          {appName} 안에서 열린 화면에서는 Google 로그인을
+          <br />할 수 없어요. 외부 브라우저에서 열어 주세요!
+        </>
+      }
+      className="max-w-sm"
+    >
+      <div className="flex w-full flex-col gap-2.5">
+        <Button
+          size="lg"
+          onClick={handleOpenExternal}
+          icon={<ExternalLink aria-hidden />}
+          className="w-full"
         >
-          <m.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
-          >
-            <button
-              onClick={onClose}
-              aria-label="닫기"
-              className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground hover:bg-muted transition-colors"
-            >
-              <X size={18} aria-hidden="true" />
-            </button>
+          외부 브라우저로 열기
+        </Button>
 
-            <div className="flex flex-col items-center gap-4 text-center">
-              <PybaemSvg expression="surprised" size={80} />
+        <Button
+          variant="secondary"
+          size="lg"
+          onClick={handleCopyUrl}
+          icon={
+            copied ? (
+              <Check aria-hidden className="text-primary-text" />
+            ) : (
+              <Copy aria-hidden />
+            )
+          }
+          className="w-full"
+        >
+          {copied ? '복사 완료!' : 'URL 복사하기'}
+        </Button>
+      </div>
 
-              <div className="space-y-1.5">
-                <h2 className="text-lg font-bold text-foreground">
-                  앗! 여기서는 Google 로그인이 안 돼요
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {appName} 안에서 열린 화면에서는 Google 로그인을
-                  <br />할 수 없어요. 외부 브라우저에서 열어 주세요!
-                </p>
-              </div>
-
-              <div className="flex w-full flex-col gap-2.5">
-                <Button
-                  size="lg"
-                  onClick={handleOpenExternal}
-                  className="w-full gap-2"
-                >
-                  <ExternalLink size={16} />
-                  외부 브라우저로 열기
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleCopyUrl}
-                  className="w-full gap-2"
-                >
-                  {copied ? (
-                    <>
-                      <Check size={16} className="text-green-500" />
-                      복사 완료!
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={16} />
-                      URL 복사하기
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              <p className="text-xs text-muted-foreground/70">
-                Chrome 또는 Safari에서{' '}
-                <span className="font-medium text-foreground">
-                  pyroad.vercel.app
-                </span>
-                을 입력해도 돼요
-              </p>
-            </div>
-          </m.div>
-        </m.div>
-      )}
-    </AnimatePresence>
+      <p className="text-center text-xs text-muted-foreground/70">
+        Chrome 또는 Safari에서{' '}
+        <span className="font-medium text-foreground">pyroad.vercel.app</span>을
+        입력해도 돼요
+      </p>
+    </Modal>
   );
 }
 

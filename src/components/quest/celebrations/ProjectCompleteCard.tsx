@@ -1,6 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
+import { sec } from '@/lib/motion/tokens';
 import { Map } from 'lucide-react';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
 import { useCountUp } from '@/lib/celebration/ticker';
@@ -52,7 +53,7 @@ export function ProjectCompleteCard({
         <m.h2
           id="celebration-title"
           {...popIn(budget, 0.12, { scale: 0.8, y: 8 })}
-          className="text-center text-xl font-black leading-snug text-primary"
+          className="text-center text-xl font-black leading-snug text-primary-text"
         >
           {withObjectParticle(questTitle)}
           <br />
@@ -63,7 +64,7 @@ export function ProjectCompleteCard({
       {xpGained > 0 && (
         <m.p
           {...popIn(budget, 0.3, { scale: 0.8 })}
-          className="rounded-full bg-success/30 px-4 py-1 text-sm font-bold text-success-foreground"
+          className="rounded-full bg-accent-soft px-4 py-1 text-sm font-bold text-accent-text"
         >
           +<span ref={xp.ref}>{xp.initial}</span> XP
         </m.p>
@@ -74,7 +75,7 @@ export function ProjectCompleteCard({
           {...popIn(budget, 0.45, { y: 10, scale: 0.98 })}
           className="flex w-full flex-col items-center gap-2 rounded-2xl bg-primary/10 p-3"
         >
-          <p className="flex items-center gap-1.5 text-sm font-bold text-primary">
+          <p className="flex items-center gap-1.5 text-sm font-bold text-primary-text">
             <Map className="h-4 w-4" aria-hidden />
             Stage {stage.order} · {stage.title} 완료!
           </p>
@@ -84,7 +85,7 @@ export function ProjectCompleteCard({
           <ConceptChips
             concepts={stage.concepts}
             budget={budget}
-            delay={0.55}
+            delay={sec('slow') + sec('fast')}
           />
         </m.div>
       )}

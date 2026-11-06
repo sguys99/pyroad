@@ -23,9 +23,9 @@ export function LandingHeader() {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-(--dur-slow)',
           isScrolled
-            ? 'bg-white/80 backdrop-blur-md shadow-sm'
+            ? 'bg-background/80 backdrop-blur-md no-blur:bg-background/95 shadow-card'
             : 'bg-transparent',
         )}
       >
@@ -35,7 +35,7 @@ export function LandingHeader() {
         >
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-[15px] font-bold tracking-tight text-primary"
+            className="flex items-center gap-1.5 text-[15px] font-bold tracking-tight text-primary-text"
           >
             <PybaemSvg expression="happy" size={32} />
             pyRoad
@@ -85,7 +85,7 @@ export function LandingHeader() {
                 );
                 void handleLogin();
               }}
-              className="min-h-[44px] rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="min-h-[44px] rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground hover:bg-primary-lip transition-colors"
             >
               로그인
             </button>

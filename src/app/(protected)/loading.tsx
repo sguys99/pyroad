@@ -1,6 +1,6 @@
 export default function ProtectedLoading() {
   return (
-    <div className="mx-auto min-h-screen max-w-2xl px-4 py-6 animate-pulse">
+    <div className="mx-auto min-h-screen max-w-2xl px-4 py-6 animate-pulse reduced:animate-none">
       {/* 헤더 스켈레톤 */}
       <div className="mb-6 flex items-center justify-between">
         <div className="h-8 w-32 rounded-lg bg-muted" />

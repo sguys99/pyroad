@@ -1,7 +1,9 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { m, useReducedMotion } from 'framer-motion';
+import { m } from 'framer-motion';
+import { framerSpring } from '@/lib/motion/tokens';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { Check, Flag } from 'lucide-react';
 import {
   AlertDialog,
@@ -45,7 +47,8 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
   const [error, setError] = useState('');
   const [reported, setReported] = useState(false);
   const groupName = useId();
-  const reduceMotion = useReducedMotion();
+  // 동작 줄이기: 기기 설정 + 사용자 설정 (P2-15)
+  const { reduced: reduceMotion } = useMotionTier();
   const target = TARGET_LABEL[targetType];
 
   function handleOpenChange(next: boolean) {
@@ -113,13 +116,11 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
               role="status"
             >
               <m.div
-                className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary"
+                className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary-text"
                 initial={reduceMotion ? false : { scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={
-                  reduceMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 420, damping: 18 }
+                  reduceMotion ? { duration: 0 } : framerSpring('prop')
                 }
               >
                 <Check className="size-6" aria-hidden="true" />
@@ -183,16 +184,16 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
             )}
             <AlertDialogFooter>
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setOpen(false)}
                 disabled={phase === 'sending'}
               >
                 그만두기
               </Button>
               <Button
-                variant="destructive"
+                variant="danger"
                 onClick={submit}
-                disabled={phase === 'sending'}
+                loading={phase === 'sending'}
               >
                 {phase === 'sending' ? '보내는 중…' : '신고하기'}
               </Button>

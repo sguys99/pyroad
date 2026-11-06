@@ -2,10 +2,11 @@
 
 import { useEffect } from 'react';
 import { reportClientError } from '@/lib/observability/client';
+import { COLOR, LINE, RADIUS, SYSTEM_FONT_STACK } from '@/lib/design/tokens';
 
 /**
  * 루트 레이아웃까지 깨졌을 때 보이는 화면. 루트 레이아웃 대신 그려지므로 `<html>`·`<body>`를 직접 두고,
- * 전역 CSS가 없을 수 있어 스타일은 인라인으로 둔다.
+ * 전역 CSS가 없을 수 있어 스타일은 인라인으로 두고, 값은 디자인 토큰 원본(TS)에서 가져온다 (P2-09). 웹폰트도 없을 수 있어 시스템 글꼴
  * 에러는 Sentry로 보고한다 (P1-16, DSN이 없으면 보고하지 않음).
  */
 export default function GlobalError({
@@ -32,9 +33,9 @@ export default function GlobalError({
           alignItems: 'center',
           justifyContent: 'center',
           padding: '16px',
-          background: '#f7faf5',
-          color: '#1f2937',
-          fontFamily: 'system-ui, -apple-system, "Noto Sans KR", sans-serif',
+          background: COLOR.bg,
+          color: COLOR.text,
+          fontFamily: SYSTEM_FONT_STACK,
         }}
       >
         <main style={{ maxWidth: 360, textAlign: 'center' }}>
@@ -59,9 +60,9 @@ export default function GlobalError({
                 minHeight: 44,
                 padding: '0 20px',
                 border: 'none',
-                borderRadius: 12,
-                background: '#1f7a2c',
-                color: '#fff',
+                borderRadius: RADIUS.m,
+                background: COLOR.primary,
+                color: COLOR.onPrimary,
                 fontSize: 16,
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -78,9 +79,10 @@ export default function GlobalError({
                 display: 'inline-flex',
                 alignItems: 'center',
                 padding: '0 20px',
-                borderRadius: 12,
-                border: '2px solid #1f7a2c',
-                color: '#1f7a2c',
+                borderRadius: RADIUS.m,
+                border: `${LINE.ui}px solid ${COLOR.lineStrong}`,
+                background: COLOR.surface,
+                color: COLOR.text,
                 fontSize: 16,
                 fontWeight: 700,
                 textDecoration: 'none',

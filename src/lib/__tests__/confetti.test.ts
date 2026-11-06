@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 
 const confettiMock = vi.fn<(options?: unknown) => null>(() => null);
 vi.mock('canvas-confetti', () => ({ default: confettiMock }));
@@ -56,6 +56,55 @@ describe('fireConfetti: 연출 단계·reduced-motion (P1-10)', () => {
       expect(fireConfetti({ particleCount: 50 })).toBe(0);
       await Promise.resolve();
       expect(confettiMock).not.toHaveBeenCalled();
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+});
+
+describe('fireConfetti: <html data-motion data-reduced> (P2-15)', () => {
+  const html = document.documentElement;
+  afterEach(() => {
+    delete html.dataset.motion;
+    delete html.dataset.reduced;
+    vi.useRealTimers();
+  });
+
+  it('data-motion=lite면 배율을 빠뜨려도 30%를 넘지 않고, minimal이면 쏘지 않는다', async () => {
+    // 앞 테스트의 파티클이 상한에 남지 않게 시간을 넘김
+    vi.useFakeTimers({ now: Date.now(), toFake: ['performance'] });
+    vi.advanceTimersByTime(5000);
+    confettiMock.mockClear();
+    html.dataset.motion = 'lite';
+    expect(fireConfetti({ particleCount: 100 })).toBe(30);
+    expect(fireConfetti({ particleCount: 100 }, { scale: 0.1 })).toBe(10);
+    html.dataset.motion = 'minimal';
+    expect(fireConfetti({ particleCount: 100 })).toBe(0);
+  });
+
+  it('data-reduced=true(사용자 설정 "켜기")면 기기 설정과 상관없이 쏘지 않는다', async () => {
+    confettiMock.mockClear();
+    html.dataset.reduced = 'true';
+    expect(fireConfetti({ particleCount: 50 })).toBe(0);
+    await Promise.resolve();
+    expect(confettiMock).not.toHaveBeenCalled();
+  });
+
+  it('data-reduced=false(사용자 설정 "끄기")면 기기가 동작 줄이기여도 쏜다', async () => {
+    vi.useFakeTimers({ now: Date.now(), toFake: ['performance'] });
+    vi.advanceTimersByTime(10_000);
+    confettiMock.mockClear();
+    html.dataset.reduced = 'false';
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('reduce'),
+    })) as unknown as typeof window.matchMedia;
+    try {
+      expect(fireConfetti({ particleCount: 40 })).toBe(40);
+      await vi.waitFor(() => expect(confettiMock).toHaveBeenCalledTimes(1));
+      expect(confettiMock.mock.calls[0][0]).toMatchObject({
+        disableForReducedMotion: false,
+      });
     } finally {
       window.matchMedia = original;
     }

@@ -2,6 +2,7 @@
 
 import { memo, useState, useMemo } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
+import { framerSpring, jelly, sec } from '@/lib/motion/tokens';
 import { PybaemSvg } from './PybaemSvg';
 import { BugBugSvg } from './BugBugSvg';
 import { ByeolttongiSvg } from './ByeolttongiSvg';
@@ -27,9 +28,9 @@ interface CharacterAvatarProps {
 
 const hoverSpring = {
   scale: 1.08,
-  transition: { type: 'spring' as const, stiffness: 400, damping: 17 },
+  transition: framerSpring(jelly()),
 };
-const expressionTransitionConfig = { duration: 0.2 };
+const expressionTransitionConfig = { duration: sec('base') };
 const expressionInitial = { opacity: 0, scale: 0.95 };
 const expressionAnimate = { opacity: 1, scale: 1 };
 

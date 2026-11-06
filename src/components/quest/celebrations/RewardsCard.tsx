@@ -43,7 +43,7 @@ export function RewardsCard({
                 className={cn(
                   'h-10 w-10',
                   n <= stars.stars
-                    ? 'fill-success text-success'
+                    ? 'fill-accent text-accent-lip'
                     : 'text-muted-foreground/40',
                 )}
               />
@@ -54,7 +54,7 @@ export function RewardsCard({
       {coins > 0 && (
         <m.p
           {...popIn(budget, 0.6, { scale: 0.7 })}
-          className="flex items-center gap-1.5 rounded-full bg-success/30 px-4 py-1 text-sm font-bold text-success-foreground"
+          className="flex items-center gap-1.5 rounded-full bg-accent-soft px-4 py-1 text-sm font-bold text-accent-text"
         >
           <Coins className="h-4 w-4" aria-hidden />+{coins} 코인
         </m.p>

@@ -1,7 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { KeyRound } from 'lucide-react';
+import { RewardIcon } from '@/components/ui/reward-icon';
 import { withObjectParticle } from '@/lib/korean';
 import type { MotionBudget } from '@/lib/motion/tier';
 import type { QuestKind } from '@/lib/quest/questKind';
@@ -29,10 +29,10 @@ export function GoldenKeyCard({
     <>
       <m.span
         {...popIn(budget, 0.08, { rotate: -40, scale: 0.7 })}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-success/35"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-soft"
         aria-hidden
       >
-        <KeyRound className="h-7 w-7 text-amber-700" />
+        <RewardIcon kind="key" size={34} />
       </m.span>
 
       <h2 id="celebration-title" className="text-lg font-bold text-foreground">

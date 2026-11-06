@@ -3,18 +3,12 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
-let reduceMotion = false;
-vi.mock('framer-motion', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('framer-motion')>();
-  return { ...actual, useReducedMotion: () => reduceMotion };
-});
-
 import { LottieCharacter } from '../LottieCharacter';
+import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
-  reduceMotion = false;
 });
 
 describe('LottieCharacter (B32: Lottie 대신 정적 SVG + 1회성 연출)', () => {
@@ -74,19 +68,30 @@ describe('LottieCharacter (B32: Lottie 대신 정적 SVG + 1회성 연출)', () 
   });
 
   it('reduced-motion이면 빛 고리를 그리지 않는다', () => {
-    reduceMotion = true;
-
     const { container } = render(
-      <LottieCharacter
-        character="pybaem"
-        animation="project-complete"
-        size={96}
-      />,
+      <MotionTierProvider reduced="on">
+        <LottieCharacter
+          character="pybaem"
+          animation="project-complete"
+          size={96}
+        />
+      </MotionTierProvider>,
     );
     expect(
       container.querySelector('span[aria-hidden]'),
     ).not.toBeInTheDocument();
     expect(container.querySelector('svg[role="img"]')).toBeInTheDocument();
+  });
+
+  it('minimal 단계면 빛 고리(곁가지 이펙트)를 그리지 않는다 (P2-15)', () => {
+    const { container } = render(
+      <MotionTierProvider tier="minimal">
+        <LottieCharacter character="pybaem" animation="level-up" size={96} />
+      </MotionTierProvider>,
+    );
+    expect(
+      container.querySelector('span[aria-hidden]'),
+    ).not.toBeInTheDocument();
   });
 
   it('animated면 숨쉬기를 CSS 클래스로 건다 (Framer repeat: Infinity 금지, §2.10)', () => {

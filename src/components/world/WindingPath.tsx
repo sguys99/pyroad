@@ -1,6 +1,8 @@
 'use client';
 
-import { m, useReducedMotion } from 'framer-motion';
+import { m } from 'framer-motion';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { EASE, sec } from '@/lib/motion/tokens';
 
 interface WindingPathProps {
   progressFraction: number;
@@ -17,7 +19,9 @@ const PATH_D = [
 ].join(' ');
 
 export function WindingPath({ progressFraction }: WindingPathProps) {
-  const shouldReduceMotion = useReducedMotion();
+  // 길 그리기: minimal·동작 줄이기는 즉시, lite는 70% 길이 (P2-15)
+  const { budget } = useMotionTier();
+  const instant = !budget.springs;
 
   return (
     <svg
@@ -30,7 +34,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
       <path
         d={PATH_D}
         fill="none"
-        stroke="oklch(0.82 0.02 85)"
+        stroke="var(--line)"
         strokeWidth={6}
         strokeLinecap="round"
         strokeDasharray="3 8"
@@ -41,19 +45,19 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
       <m.path
         d={PATH_D}
         fill="none"
-        stroke="oklch(0.6 0.16 145)"
+        stroke="var(--primary)"
         strokeWidth={6}
         strokeLinecap="round"
         pathLength={1}
         strokeDasharray="1"
         initial={{
-          strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1,
+          strokeDashoffset: instant ? 1 - progressFraction : 1,
         }}
         animate={{ strokeDashoffset: 1 - progressFraction }}
         transition={
-          shouldReduceMotion
+          instant
             ? { duration: 0 }
-            : { duration: 1.5, ease: 'easeOut' }
+            : { duration: sec('draw') * budget.effectDuration, ease: EASE.ink }
         }
       />
 
@@ -61,20 +65,20 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
       <m.path
         d={PATH_D}
         fill="none"
-        stroke="oklch(0.6 0.16 145)"
+        stroke="var(--primary)"
         strokeWidth={12}
         strokeLinecap="round"
         pathLength={1}
         strokeDasharray="1"
         opacity={0.15}
         initial={{
-          strokeDashoffset: shouldReduceMotion ? 1 - progressFraction : 1,
+          strokeDashoffset: instant ? 1 - progressFraction : 1,
         }}
         animate={{ strokeDashoffset: 1 - progressFraction }}
         transition={
-          shouldReduceMotion
+          instant
             ? { duration: 0 }
-            : { duration: 1.5, ease: 'easeOut' }
+            : { duration: sec('draw') * budget.effectDuration, ease: EASE.ink }
         }
       />
     </svg>

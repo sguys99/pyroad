@@ -1,28 +1,29 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { m, useReducedMotion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { CheckCircle, Lock, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StageWithStatus } from '@/lib/types/database';
 import { StageIllustration } from './StageIllustration';
+import { useSfx } from '@/components/providers/SoundProvider';
 
 const statusConfig = {
   completed: {
     icon: CheckCircle,
     borderColor: 'border-primary/60',
     bgColor: 'bg-card/90',
-    iconColor: 'text-primary',
+    iconColor: 'text-primary-text',
     label: '완료!',
-    labelClass: 'bg-primary/20 text-primary',
+    labelClass: 'bg-primary-soft text-primary-text',
   },
   in_progress: {
     icon: Play,
-    borderColor: 'border-secondary',
+    borderColor: 'border-accent',
     bgColor: 'bg-card/95',
-    iconColor: 'text-secondary-foreground',
+    iconColor: 'text-accent-text',
     label: '도전하기',
-    labelClass: 'bg-secondary/20 text-secondary-foreground',
+    labelClass: 'bg-accent-soft text-accent-text',
   },
   locked: {
     icon: Lock,
@@ -40,15 +41,17 @@ interface StageNodeProps {
 
 export function StageNode({ stage }: StageNodeProps) {
   const router = useRouter();
-  const shouldReduceMotion = useReducedMotion();
+  const play = useSfx();
   const config = statusConfig[stage.status];
   const Icon = config.icon;
   const isClickable = stage.status !== 'locked';
-  const shouldPulse = stage.status === 'in_progress' && !shouldReduceMotion;
+  // 현재 스테이지 빛 고리는 CSS 대기 루프(.stage-pulse), 완료 반짝임은 앰비언트(.stage-shimmer) — 단계·동작 줄이기는 CSS가 처리 (P2-15)
+  const shouldPulse = stage.status === 'in_progress';
   const isCompleted = stage.status === 'completed';
 
   function handleClick() {
     if (!isClickable || !stage.firstIncompleteQuestId) return;
+    play('tap');
     router.push(`/quest/${stage.firstIncompleteQuestId}`);
   }
 
@@ -58,22 +61,6 @@ export function StageNode({ stage }: StageNodeProps) {
       disabled={!isClickable}
       whileTap={isClickable ? { scale: 0.95 } : undefined}
       whileHover={isClickable ? { scale: 1.05 } : undefined}
-      animate={
-        shouldPulse
-          ? {
-              boxShadow: [
-                '0 0 0 0 rgba(76, 175, 80, 0)',
-                '0 0 12px 4px rgba(76, 175, 80, 0.3)',
-                '0 0 0 0 rgba(76, 175, 80, 0)',
-              ],
-            }
-          : undefined
-      }
-      transition={
-        shouldPulse
-          ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
-          : undefined
-      }
       className={cn(
         'relative flex flex-row items-center gap-2 rounded-xl border-2 px-2.5 py-2 sm:px-3 sm:py-2.5 transition-colors',
         stage.order === 1
@@ -87,18 +74,10 @@ export function StageNode({ stage }: StageNodeProps) {
         isCompleted && 'overflow-hidden',
       )}
     >
-      {/* Shimmer overlay for completed stages */}
-      {isCompleted && (
-        <div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(255,215,0,0.12), transparent)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 3s ease-in-out infinite',
-          }}
-        />
-      )}
+      {shouldPulse && <span aria-hidden className="stage-pulse" />}
+
+      {/* 완료 스테이지 반짝임 (transform만) */}
+      {isCompleted && <span aria-hidden className="stage-shimmer z-0" />}
 
       {/* Illustration */}
       <div className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 shrink-0">
@@ -140,7 +119,7 @@ export function StageNode({ stage }: StageNodeProps) {
         className={cn(
           'relative z-10 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full shrink-0',
           stage.status === 'completed' && 'bg-primary/20',
-          stage.status === 'in_progress' && 'bg-secondary/20',
+          stage.status === 'in_progress' && 'bg-accent-soft',
           stage.status === 'locked' && 'bg-muted-foreground/10',
         )}
       >

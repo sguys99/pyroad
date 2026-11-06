@@ -1,30 +1,38 @@
 'use client';
 
-import { m, useReducedMotion } from 'framer-motion';
+import { m, type Variants } from 'framer-motion';
 import type { StageWithStatus } from '@/lib/types/database';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import type { MotionBudget } from '@/lib/motion/tier';
+import { EASE, sec } from '@/lib/motion/tokens';
 import { StageNode } from './StageNode';
 import { WindingPath } from './WindingPath';
 import { FloatingDecorations } from './FloatingDecorations';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 
-const container = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
+/** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
+function nodeVariants(budget: MotionBudget): {
+  container: Variants;
+  item: Variants;
+} {
+  const k = budget.effectDuration;
+  return {
+    container: {
+      hidden: {},
+      show: {
+        transition: { staggerChildren: 0.1 * k, delayChildren: 0.3 * k },
+      },
     },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, scale: 0.85 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.45, ease: 'easeOut' as const },
-  },
-};
+    item: {
+      hidden: budget.springs ? { opacity: 0, scale: 0.85 } : { opacity: 0 },
+      show: {
+        opacity: 1,
+        scale: 1,
+        transition: { duration: sec('slow') * k, ease: EASE.out },
+      },
+    },
+  };
+}
 
 /**
  * Zigzag node positions (bottom-to-top, matching SVG viewBox 0 0 400 600).
@@ -72,7 +80,8 @@ interface WorldMapProps {
 }
 
 export function WorldMap({ stages }: WorldMapProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const { budget } = useMotionTier();
+  const { container, item } = nodeVariants(budget);
   const sorted = [...stages].sort((a, b) => a.order - b.order);
   const progressFraction = computeProgressFraction(stages);
 
@@ -92,9 +101,9 @@ export function WorldMap({ stages }: WorldMapProps) {
       {/* Floating decorations (clouds, leaves) */}
       <FloatingDecorations />
 
-      {/* Pybaem character at in_progress stage */}
+      {/* 진행 중 스테이지의 파이뱀. 통통은 CSS 대기 루프(.mascot-bob, full·lite, §2.10) */}
       {inProgressIndex >= 0 && (
-        <m.div
+        <div
           className="world-node absolute z-20 pointer-events-none"
           style={
             {
@@ -104,22 +113,18 @@ export function WorldMap({ stages }: WorldMapProps) {
               transform: 'translate(-50%, -110%)',
             } as React.CSSProperties
           }
-          animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
-          transition={
-            shouldReduceMotion
-              ? undefined
-              : { duration: 2, repeat: Infinity, ease: 'easeInOut' }
-          }
         >
-          <CharacterAvatar character="pybaem" expression="happy" size="sm" />
-        </m.div>
+          <div className="mascot-bob">
+            <CharacterAvatar character="pybaem" expression="happy" size="sm" />
+          </div>
+        </div>
       )}
 
       {/* Stage nodes */}
       <m.div
         className="absolute inset-0"
         variants={container}
-        initial="hidden"
+        initial={budget.effectDuration === 0 ? false : 'hidden'}
         animate="show"
       >
         {sorted.map((stage, index) => {

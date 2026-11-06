@@ -1,5 +1,6 @@
 import type { Options } from 'canvas-confetti';
 import type { ConfettiPresetName } from './plan';
+import { COLOR } from '@/lib/design/tokens';
 
 /**
  * 축하 단계별 컨페티 (P1-10). 세기: 스테이지 클리어·프로젝트(180) > 레벨 업(124) > 뱃지(40) > 황금키(0).
@@ -23,9 +24,20 @@ export interface ConfettiBurst extends Pick<
   delay: number;
 }
 
-/** 디자인 토큰(globals.css)에 맞춘 색: primary 초록 · success 금색 · accent 주황 · secondary 하늘 · 산호 */
-const BRAND = ['#4CAF50', '#FFD54F', '#FFB74D', '#87CEEB', '#FF8A80'];
-const GOLD = ['#FFD54F', '#FFC107', '#FFB74D', '#4CAF50'];
+/** 디자인 토큰 색 (canvas라 CSS 변수를 못 써서 TS 원본에서): 초록 + 금색 두 색 계열 (최종 시안 §12-Q31) */
+const BRAND = [
+  COLOR.primary,
+  COLOR.primaryBright,
+  COLOR.accent,
+  COLOR.accentLight,
+  COLOR.w2,
+];
+const GOLD = [
+  COLOR.accent,
+  COLOR.accentLight,
+  COLOR.accentLip,
+  COLOR.primaryBright,
+];
 
 export const CONFETTI_PRESETS: Record<ConfettiPresetName, ConfettiBurst[]> = {
   grand: [

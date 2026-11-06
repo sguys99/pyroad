@@ -810,6 +810,10 @@ export type Database = {
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      patch_user_settings: {
+        Args: { p_patch: Json; p_user_id: string };
+        Returns: boolean;
+      };
       placeholder_display_name: {
         Args: { p_user_id: string };
         Returns: string;
