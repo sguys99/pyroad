@@ -362,6 +362,18 @@ export const EXPECT = {
     activateIn: 'P1-04',
     note: '힌트 수는 튜터 API(service_role)만 기록',
   },
+  'SET-1': {
+    expect: 'deny',
+    requires: 'public.patch_user_settings()',
+    activateIn: 'P2-14',
+    note: '설정(motion·sound) 쓰기는 /api/settings(service_role)만. 클라이언트 settings UPDATE 권한도 없음(PF-2)',
+  },
+  'SET-2': {
+    expect: 'allow',
+    requires: 'public.patch_user_settings()',
+    activateIn: 'P2-14',
+    note: 'P2-15 이월: 읽고-합쳐-쓰기 대신 settings || patch 한 문장 (00020). motion·sound 동시 갱신에도 둘 다 남음',
+  },
 
   // ── reward: 보상 RPC 동작 (P1-03, B05·B06·B11·B12) ─────────
   'RW-1': {

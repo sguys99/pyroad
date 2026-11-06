@@ -12,6 +12,7 @@ import { m } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
+import { useDialogueBlip } from '@/components/sound/useDialogueBlip';
 import {
   Tooltip,
   TooltipContent,
@@ -141,6 +142,8 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
  * memo를 사용하지 않아 매 delta마다 즉시 렌더링된다.
  */
 function StreamingMessage({ content }: { content: string }) {
+  // 글자가 늘어날 때 작은 블립 (빈도 제한, P2-14). 말하는 중 표시는 깜빡이는 커서가 함께 보여 준다
+  useDialogueBlip(content);
   return (
     <div className="flex items-start gap-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">

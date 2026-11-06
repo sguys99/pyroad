@@ -11,6 +11,7 @@ import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { useSfx } from '@/components/providers/SoundProvider';
 import type {
   ProjectStep,
   QuestWithStage,
@@ -224,6 +225,8 @@ export function useQuestSession({
   const { budget } = useMotionTier();
   const particleScaleRef = useRef(budget.particles);
   particleScaleRef.current = budget.particles;
+  // 효과음 (P2-14). 소리는 보조 피드백: 같은 내용을 결과 상자·파이뱀 안내로도 보여 준다
+  const play = useSfx();
 
   // 완료·보상
   const [isCompleted, setIsCompleted] = useState(
@@ -632,8 +635,9 @@ export function useQuestSession({
       // 아이가 멈추기를 눌렀음 → 채점·피드백 없이 끝
       if (result.isStopped) return 'stay';
 
-      // 실행 에러 (구문 에러·시간 초과 등)
+      // 실행 에러 (구문 에러·시간 초과 등). 효과음은 장난스러운 버그버그 소리 (경고 부저 대신, P0-15)
       if (!result.success) {
+        play('bug');
         streamTutor(
           {
             type: 'code_feedback',
@@ -658,6 +662,7 @@ export function useQuestSession({
       });
 
       if (!passed) {
+        play('wrong');
         streamTutor(
           {
             type: 'code_feedback',
@@ -674,6 +679,7 @@ export function useQuestSession({
         return 'stay';
       }
 
+      play('correct');
       if (kind === 'project') {
         // 단계 통과 피드백 (비스트림: 곧 시작할 다음 단계 안내 스트림을 끊지 않게)
         askTutor(
@@ -707,6 +713,7 @@ export function useQuestSession({
       askTutor,
       validate,
       completeWith,
+      play,
     ],
   );
 
@@ -714,6 +721,7 @@ export function useQuestSession({
 
   const handleRun = useCallback(async () => {
     if (isCodeEmpty || isCompleted || submittingRef.current) return;
+    play('run');
     lockSubmit(true);
     let advancing = false;
     try {
@@ -733,6 +741,7 @@ export function useQuestSession({
     runAndGrade,
     later,
     advanceStep,
+    play,
   ]);
 
   // ── 힌트 ────────────────────────────────────────────────────────────
@@ -746,6 +755,7 @@ export function useQuestSession({
       content: `힌트 ${nextLevel}/3`,
     };
 
+    play('tap');
     setMessages((prev) => [...prev, hintLabel]);
     setStepHints(nextLevel);
     setTotalHints((n) => n + 1);
@@ -795,6 +805,7 @@ export function useQuestSession({
     code,
     sendTutorStreamRequest,
     finishStreaming,
+    play,
   ]);
 
   // ── 황금키 ──────────────────────────────────────────────────────────
@@ -855,7 +866,9 @@ export function useQuestSession({
       setTab('result');
 
       if (step < totalSteps) {
-        // 중간 단계: 정답 코드로 다음 단계로 (넘어갈 때까지 실행 버튼 잠금)
+        // 중간 단계: 정답 코드로 다음 단계로 (넘어갈 때까지 실행 버튼 잠금).
+        // 마지막 단계는 황금키 확인 카드가 같은 'unlock' 소리를 내므로 여기서만
+        play('unlock');
         advancing = true;
         later(
           () => advanceStep(step, solution, { confetti: false }),
@@ -915,6 +928,7 @@ export function useQuestSession({
     applyCompletion,
     addSystemMessage,
     finishStreaming,
+    play,
   ]);
 
   // ── 축하 ────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import { CheckCircle, Lock, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StageWithStatus } from '@/lib/types/database';
 import { StageIllustration } from './StageIllustration';
+import { useSfx } from '@/components/providers/SoundProvider';
 
 const statusConfig = {
   completed: {
@@ -40,6 +41,7 @@ interface StageNodeProps {
 
 export function StageNode({ stage }: StageNodeProps) {
   const router = useRouter();
+  const play = useSfx();
   const config = statusConfig[stage.status];
   const Icon = config.icon;
   const isClickable = stage.status !== 'locked';
@@ -49,6 +51,7 @@ export function StageNode({ stage }: StageNodeProps) {
 
   function handleClick() {
     if (!isClickable || !stage.firstIncompleteQuestId) return;
+    play('tap');
     router.push(`/quest/${stage.firstIncompleteQuestId}`);
   }
 

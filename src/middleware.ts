@@ -57,8 +57,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Pyodide 자체 호스팅 파일(/pyodide/)과 Worker 스크립트(/workers/)는 정적 파일이라 세션 갱신이 필요 없다 (B26).
-  // Worker 스크립트의 CSP는 next.config.ts headers가 붙인다 (B27)
+  // Worker 스크립트의 CSP는 next.config.ts headers가 붙인다 (B27). 사운드 파일(/sounds/)도 정적 파일이라 제외 (P2-14)
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|pyodide/|workers/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|pyodide/|workers/|sounds/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

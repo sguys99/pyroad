@@ -12,6 +12,8 @@ import { PageTransition } from '@/components/shared/PageTransition';
 import { StageLockedNotice } from '@/components/world/StageLockedNotice';
 import { isStageLockedNotice } from '@/lib/world/stageLock';
 import { LogoutButton } from '@/components/LogoutButton';
+import { SoundToggle } from '@/components/sound/SoundToggle';
+import { WorldBgm } from '@/components/sound/WorldBgm';
 import { User, MessageSquare, Bell } from 'lucide-react';
 import type { UserBadge, UserProfile } from '@/lib/types/database';
 
@@ -102,6 +104,7 @@ export default async function WorldPage({ searchParams }: Props) {
               <span className="hidden sm:inline">내 프로필</span>
             </Link>
             <LogoutButton />
+            <SoundToggle />
           </div>
         </div>
 
@@ -121,6 +124,9 @@ export default async function WorldPage({ searchParams }: Props) {
           <WorldMap stages={stagesWithStatus} />
         </MapBackground>
       </PageTransition>
+
+      {/* 월드 BGM: 기본 꺼짐, 설정에서 켠 경우만 (P2-14) */}
+      <WorldBgm id="world1" />
 
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       {isStageLockedNotice(notice) && <StageLockedNotice />}

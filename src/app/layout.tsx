@@ -3,6 +3,7 @@ import { Noto_Sans_KR, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
+import { SoundProvider } from '@/components/providers/SoundProvider';
 import { MOTION_BOOT_SCRIPT } from '@/lib/motion/boot';
 import './globals.css';
 
@@ -68,7 +69,9 @@ export default function RootLayout({
       </head>
       <body>
         <MotionProvider>
-          <MotionTierProvider>{children}</MotionTierProvider>
+          <MotionTierProvider>
+            <SoundProvider>{children}</SoundProvider>
+          </MotionTierProvider>
         </MotionProvider>
       </body>
     </html>

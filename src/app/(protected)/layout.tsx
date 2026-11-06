@@ -1,7 +1,9 @@
 import { headers } from 'next/headers';
 import { MotionSettingsSync } from '@/components/providers/MotionSettingsSync';
+import { SoundSettingsSync } from '@/components/providers/SoundSettingsSync';
 import { motionBootSyncScript } from '@/lib/motion/boot';
 import { loadMotionSettings } from '@/lib/motion/server';
+import { loadSoundSettings } from '@/lib/sound/server';
 import { nonceFromCsp } from '@/lib/security/csp';
 
 /**
@@ -19,14 +21,18 @@ export const dynamic = 'force-dynamic';
  *
  * 움직임 설정 (P2-15): 서버 값(`users.settings.motion`)을 본문보다 먼저 nonce 스크립트로 부트에 넘겨
  * 새 기기에서도 첫 화면부터 연출 단계가 맞게 한다. `getAuthUser()`는 요청 안에서 페이지와 한 번만 부른다 (React cache).
+ *
+ * 사운드 설정 (P2-14): 서버 값과 기기 값 중 최신 것을 쓰고, 여기 있는 동안 바꾼 설정을 서버에 저장한다 (`SoundSettingsSync`).
+ * `users.settings`는 움직임 설정과 같은 조회 한 번으로 읽는다.
  */
 export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [motion, requestHeaders] = await Promise.all([
+  const [motion, sound, requestHeaders] = await Promise.all([
     loadMotionSettings(),
+    loadSoundSettings(),
     headers(),
   ]);
   const nonce = nonceFromCsp(requestHeaders.get('content-security-policy'));
@@ -43,6 +49,7 @@ export default async function ProtectedLayout({
           <MotionSettingsSync settings={motion} />
         </>
       )}
+      <SoundSettingsSync settings={sound} />
       {children}
     </main>
   );

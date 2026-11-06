@@ -13,7 +13,8 @@ import {
  * Worker 스크립트(`/workers/*.mjs`)는 배포마다 바뀔 수 있으므로 캐시는 기본값(재검증)으로 둔다.
  * Worker 스크립트에는 Worker 전용 CSP를 붙인다 (B27, `src/lib/security/csp.ts`).
  */
-const PYODIDE_IMMUTABLE = 'public, max-age=31536000, immutable';
+/** 버전 경로·버전 파일 이름 공용 (Pyodide·사운드) */
+const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable';
 const PYODIDE_CONTENT_TYPES: Array<[string, string]> = [
   ['mjs', 'text/javascript; charset=utf-8'],
   ['wasm', 'application/wasm'],
@@ -35,12 +36,18 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/pyodide/:version/:file*',
-        headers: [{ key: 'Cache-Control', value: PYODIDE_IMMUTABLE }],
+        headers: [{ key: 'Cache-Control', value: IMMUTABLE_CACHE }],
       },
       ...PYODIDE_CONTENT_TYPES.map(([ext, type]) => ({
         source: `/pyodide/:version/:file(.*\\.${ext})`,
         headers: [{ key: 'Content-Type', value: type }],
       })),
+      // 사운드 (P2-14): 파일 이름에 버전이 있어(`<id>.v<N>.webm`) 내용이 바뀌지 않으므로 1년 immutable 캐시.
+      // 바꿀 때는 새 버전 파일 + src/lib/sound/manifest.ts 한 줄 (scripts/build-sounds.sh가 같은 이름 덮어쓰기를 막음)
+      {
+        source: '/sounds/:file*',
+        headers: [{ key: 'Cache-Control', value: IMMUTABLE_CACHE }],
+      },
       {
         source: '/workers/:file(.*\\.mjs)',
         headers: [

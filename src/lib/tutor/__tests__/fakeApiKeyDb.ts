@@ -17,7 +17,7 @@ export interface FakeState {
     {
       preferred_provider: string | null;
       custom_api_keys?: unknown;
-      /** users.settings (P2-15 움직임 설정) */
+      /** users.settings (P2-15 움직임·P2-14 사운드 설정) */
       settings?: unknown;
     }
   >;
@@ -39,6 +39,33 @@ const MISSING = {
 
 export function fakeAdmin(state: FakeState) {
   return {
+    /** patch_user_settings (00020): settings || p_patch, 키는 motion·sound 만 */
+    async rpc(fn: string, args: Record<string, unknown>): Promise<Result> {
+      if (fn !== 'patch_user_settings')
+        throw new Error(`fakeAdmin: unknown rpc ${fn}`);
+      const patch = args.p_patch as Record<string, unknown>;
+      if (
+        Object.entries(patch).some(
+          ([k, v]) =>
+            !['motion', 'sound'].includes(k) ||
+            !v ||
+            typeof v !== 'object' ||
+            Array.isArray(v),
+        )
+      )
+        return {
+          data: null,
+          error: { code: 'PT400', message: 'invalid_settings_key' },
+        };
+      const user = state.users[args.p_user_id as string];
+      if (!user) return { data: false, error: null };
+      const current =
+        user.settings && typeof user.settings === 'object'
+          ? (user.settings as Record<string, unknown>)
+          : {};
+      user.settings = { ...current, ...patch };
+      return { data: true, error: null };
+    },
     from(table: string) {
       const filters: [string, unknown][] = [];
       let mode: 'select' | 'update' | 'delete' = 'select';

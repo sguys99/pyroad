@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
+import { SoundSettingsSection } from '@/components/settings/SoundSettingsSection';
 import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
@@ -162,6 +163,8 @@ export default function SettingsPage() {
 
       {/* 움직임 (P2-15). 연출 단계 Provider 값이라 서버 응답을 기다리지 않음 */}
       <MotionSettingsSection serverMotion={settings?.motion} />
+      {/* 소리 (P2-14). 엔진 값이라 서버 응답을 기다리지 않음 (서버 동기화는 로그인 레이아웃) */}
+      <SoundSettingsSection />
 
       <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
     </>
