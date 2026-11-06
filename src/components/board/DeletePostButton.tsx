@@ -53,7 +53,7 @@ export function DeletePostButton({ postId }: DeletePostButtonProps) {
         <AlertDialogFooter>
           <AlertDialogCancel>취소</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant="danger"
             onClick={handleDelete}
             disabled={deleting}
           >

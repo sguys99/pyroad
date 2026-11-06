@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, m } from 'framer-motion';
-import { EASE, sec } from '@/lib/motion/tokens';
-import { useMotionTier } from '@/lib/motion/MotionTierProvider';
-import { Lock, X } from 'lucide-react';
+import { Lock } from 'lucide-react';
+import { Toast, ToastRegion } from '@/components/ui/toast';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 
 /** 이 시간이 지나면 안내가 스스로 닫힌다 */
@@ -16,8 +14,6 @@ export const STAGE_LOCKED_NOTICE_MS = 5_000;
  */
 export function StageLockedNotice() {
   const [open, setOpen] = useState(true);
-  // 동작 줄이기: 기기 설정 + 사용자 설정 (P2-15)
-  const { reduced: reduceMotion } = useMotionTier();
 
   useEffect(() => {
     try {
@@ -31,39 +27,23 @@ export function StageLockedNotice() {
     } catch {
       // 주소를 못 바꿔도 안내는 보여 준다
     }
-    const timer = setTimeout(() => setOpen(false), STAGE_LOCKED_NOTICE_MS);
-    return () => clearTimeout(timer);
   }, []);
 
+  // 공통 토스트 (P2-11): 늘 떠 있는 status 영역 안에 쪽지 한 장. 등장 연출은 단계·동작 줄이기를 따른다
   return (
-    <AnimatePresence>
+    <ToastRegion>
       {open && (
-        <m.div
-          role="status"
-          aria-live="polite"
+        <Toast
+          tone="warn"
+          icon={<Lock className="size-4" aria-hidden="true" />}
+          duration={STAGE_LOCKED_NOTICE_MS}
+          onClose={() => setOpen(false)}
+          closeLabel="안내 닫기"
           data-testid="stage-locked-notice"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: sec('base'), ease: EASE.out }}
-          className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-accent/50 bg-warning-soft px-4 py-3 shadow-pop"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-light text-warning">
-            <Lock className="h-4 w-4" aria-hidden="true" />
-          </span>
-          <p className="flex-1 text-sm font-medium text-foreground">
-            {STAGE_LOCKED_MESSAGE}
-          </p>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="안내 닫기"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-warning transition-colors hover:bg-accent-light"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </m.div>
+          {STAGE_LOCKED_MESSAGE}
+        </Toast>
       )}
-    </AnimatePresence>
+    </ToastRegion>
   );
 }

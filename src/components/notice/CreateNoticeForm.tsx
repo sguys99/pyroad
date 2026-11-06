@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 interface CreateNoticeFormProps {
   initialData?: { id: string; title: string; content: string };
@@ -109,13 +110,9 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
         </p>
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip disabled:opacity-50"
-      >
+      <Button type="submit" loading={submitting}>
         {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
-      </button>
+      </Button>
     </form>
   );
 }

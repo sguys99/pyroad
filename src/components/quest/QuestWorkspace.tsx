@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { QuestSession, QuestTab } from '@/lib/quest/useQuestSession';
 import { Button } from '@/components/ui/button';
+import { SegmentedTabs } from '@/components/ui/tabs';
 import { Square } from 'lucide-react';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
@@ -13,10 +13,10 @@ import { QuestStatusBar } from './QuestStatusBar';
 import { QuestCelebrations } from './QuestCelebrations';
 import { ApiKeyBanner } from './ApiKeyBanner';
 
-const tabs: { key: QuestTab; label: string }[] = [
-  { key: 'story', label: '이야기' },
-  { key: 'code', label: '코드' },
-  { key: 'result', label: '결과' },
+const tabs: { value: QuestTab; label: string }[] = [
+  { value: 'story', label: '이야기' },
+  { value: 'code', label: '코드' },
+  { value: 'result', label: '결과' },
 ];
 
 interface QuestWorkspaceProps {
@@ -62,22 +62,14 @@ export function QuestWorkspace({
         </div>
       )}
 
-      {/* 모바일 탭 바 */}
-      <div className="flex border-b border-border md:hidden">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={cn(
-              'flex-1 py-3 text-center text-sm font-medium transition-colors min-h-[44px]',
-              tab === t.key
-                ? 'border-b-2 border-primary text-primary-text'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* 모바일 탭 바 (세그먼트 탭, P2-11) */}
+      <div className="border-b border-border px-4 py-2 md:hidden">
+        <SegmentedTabs
+          items={tabs}
+          value={tab}
+          onValueChange={setTab}
+          aria-label="퀘스트 화면"
+        />
       </div>
 
       {/* 콘텐츠 영역 */}
@@ -139,10 +131,10 @@ export function QuestWorkspace({
             {runner.isRunning && (
               <Button
                 onClick={session.handleStop}
-                variant="outline"
+                variant="secondary"
+                icon={<Square className="fill-current" aria-hidden />}
                 className="self-start"
               >
-                <Square className="mr-1.5 h-4 w-4 fill-current" aria-hidden />
                 멈추기
               </Button>
             )}
@@ -156,10 +148,7 @@ export function QuestWorkspace({
               liveOutput={liveOutput}
             />
             {validation?.passed && nextQuestId && (
-              <Button
-                render={<Link href={`/quest/${nextQuestId}`} />}
-                className="w-full"
-              >
+              <Button href={`/quest/${nextQuestId}`} className="w-full">
                 다음 퀘스트로 →
               </Button>
             )}

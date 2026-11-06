@@ -1,63 +1,47 @@
 'use client';
 
-import { m } from 'framer-motion';
-import { EASE, sec } from '@/lib/motion/tokens';
 import { getXPProgress } from '@/lib/quest/xp';
+import { ProgressBar } from '@/components/ui/progress-bar';
 
 interface XPProgressBarProps {
   totalXP: number;
   size?: 'sm' | 'md';
 }
 
+/**
+ * 레벨 안에서의 경험치 막대 (월드맵 요약·프로필). 공통 진행바(P2-11, `ProgressBar`)로 그리고,
+ * 화면에 들어올 때 0에서 채워 올라간다(연출 단계·동작 줄이기는 진행바가 따른다)
+ */
 export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
   const { currentLevel, currentLevelXP, nextLevelXP, progressPercent } =
     getXPProgress(totalXP);
-
-  const barHeight = size === 'sm' ? 'h-1.5' : 'h-2.5';
-
-  if (nextLevelXP === null) {
-    return (
-      <div className="flex flex-col gap-1">
-        {size === 'md' && (
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Lv.{currentLevel}</span>
-            <span className="font-bold text-primary-text">MAX</span>
-          </div>
-        )}
-        <div
-          className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}
-        >
-          <m.div
-            className="h-full rounded-full bg-primary"
-            initial={{ width: 0 }}
-            animate={{ width: '100%' }}
-            transition={{ duration: sec('progress'), ease: EASE.out }}
-          />
-        </div>
-      </div>
-    );
-  }
+  const isMax = nextLevelXP === null;
+  const inLevel = totalXP - currentLevelXP;
+  const span = isMax ? 0 : nextLevelXP - currentLevelXP;
 
   return (
     <div className="flex flex-col gap-1">
       {size === 'md' && (
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Lv.{currentLevel}</span>
-          <span>
-            {totalXP - currentLevelXP} / {nextLevelXP - currentLevelXP} XP
-          </span>
+          {isMax ? (
+            <span className="font-bold text-primary-text">MAX</span>
+          ) : (
+            <span>
+              {inLevel} / {span} XP
+            </span>
+          )}
         </div>
       )}
-      <div
-        className={`w-full overflow-hidden rounded-full bg-border ${barHeight}`}
-      >
-        <m.div
-          className="h-full rounded-full bg-primary"
-          initial={{ width: 0 }}
-          animate={{ width: `${progressPercent}%` }}
-          transition={{ duration: sec('progress'), ease: EASE.out }}
-        />
-      </div>
+      <ProgressBar
+        value={isMax ? 100 : progressPercent}
+        max={100}
+        size={size === 'sm' ? 'sm' : 'md'}
+        label="다음 레벨까지 경험치"
+        valueText={isMax ? '최고 레벨' : `${inLevel} / ${span} XP`}
+        animateOnMount
+        data-testid="xp-progress"
+      />
     </div>
   );
 }

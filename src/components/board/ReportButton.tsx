@@ -184,16 +184,16 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
             )}
             <AlertDialogFooter>
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setOpen(false)}
                 disabled={phase === 'sending'}
               >
                 그만두기
               </Button>
               <Button
-                variant="destructive"
+                variant="danger"
                 onClick={submit}
-                disabled={phase === 'sending'}
+                loading={phase === 'sending'}
               >
                 {phase === 'sending' ? '보내는 중…' : '신고하기'}
               </Button>

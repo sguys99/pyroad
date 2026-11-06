@@ -1,17 +1,13 @@
 'use client';
 
 import { Star, Lightbulb } from 'lucide-react';
-import {
-  m,
-  useMotionValue,
-  useTransform,
-  animate,
-  AnimatePresence,
-} from 'framer-motion';
-import { EASE, framerSpring, sec } from '@/lib/motion/tokens';
+import { m, AnimatePresence } from 'framer-motion';
+import { framerSpring, sec } from '@/lib/motion/tokens';
 import { useEffect, useState } from 'react';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { LevelSeal } from '@/components/ui/hud';
+import { useCountUp } from '@/components/ui/use-count-up';
 
 interface QuestStatusBarProps {
   xp: number;
@@ -20,19 +16,10 @@ interface QuestStatusBarProps {
   earnedXP: number | null;
 }
 
+/** XP 숫자 카운트업 (공통 HUD 훅, P2-11): full 700ms · lite 70% · minimal·동작 줄이기 즉시 */
 function AnimatedXP({ value }: { value: number }) {
-  const motionVal = useMotionValue(0);
-  const display = useTransform(motionVal, (v) => Math.round(v));
-
-  useEffect(() => {
-    const controls = animate(motionVal, value, {
-      duration: sec('progress'),
-      ease: EASE.out,
-    });
-    return controls.stop;
-  }, [value, motionVal]);
-
-  return <m.span>{display}</m.span>;
+  const shown = useCountUp(value);
+  return <span className="hud-num min-w-0">{shown}</span>;
 }
 
 function ByeolttongiXPEffect() {
@@ -70,10 +57,11 @@ export function QuestStatusBar({
   const title = getLevelTitle(level);
 
   return (
-    <div className="border-t border-border bg-card px-3 py-2.5 sm:px-4">
+    <div className="border-t border-border bg-card px-3 py-1.5 sm:px-4">
       <div className="flex items-center justify-between text-xs sm:text-sm">
-        <span className="shrink-0 font-medium text-foreground">
-          Lv.{level} {title}
+        <span className="flex shrink-0 items-center gap-2 font-medium text-foreground">
+          <LevelSeal level={level} size="sm" />
+          <span className="max-sm:sr-only">{title}</span>
         </span>
         <div className="flex items-center gap-2 sm:gap-4">
           <span className="flex items-center gap-1 text-primary-text">

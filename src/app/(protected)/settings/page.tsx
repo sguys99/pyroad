@@ -332,7 +332,7 @@ export default function SettingsPage() {
 
       {/* 저장 버튼 */}
       <div className="flex flex-col items-center gap-2">
-        <Button onClick={handleSave} disabled={saving} size="lg">
+        <Button onClick={handleSave} loading={saving} size="lg">
           {saving ? '저장 중...' : 'AI 튜터 설정 저장'}
         </Button>
         {saved && (

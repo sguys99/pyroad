@@ -5,6 +5,7 @@ import { m } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { popIn } from './motion';
 
 /**
@@ -36,20 +37,16 @@ export function CelebrationCta({
   }, []);
 
   return (
-    <m.button
+    // 게임 버튼 (P2-11): 눌림 피드백은 버튼이, 소리는 시퀀서가 낸다
+    <Button
       ref={ref}
-      type="button"
       data-testid="celebration-cta"
-      className={cn(
-        'mt-1 min-h-11 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/40',
-        wide && 'w-full',
-      )}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.96 }}
+      sfx={false}
+      className={cn('mt-1', wide && 'w-full')}
       onClick={onClick}
     >
       {children}
-    </m.button>
+    </Button>
   );
 }
 

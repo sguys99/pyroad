@@ -1,9 +1,7 @@
 'use client';
 
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useSyncExternalStore,
@@ -16,17 +14,15 @@ import {
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import {
   attachUnlockListeners,
-  createNoopEngine,
   getSoundEngine,
   onIdle,
   SERVER_SNAPSHOT,
   type EngineSnapshot,
-  type PlayOptions,
-  type SoundEngine,
   type SoundSettings,
   type SoundSettingsPatch,
 } from '@/lib/sound';
-import { SOUND_MANIFEST, type BgmId, type SfxId } from '@/lib/sound/manifest';
+import { SOUND_MANIFEST, type BgmId } from '@/lib/sound/manifest';
+import { SoundContext, useSfx, useSoundEngine } from './soundContext';
 
 /**
  * 사운드 Provider (§2.5, P0-15 → P2-14). 루트 레이아웃에 하나만 둔다 (`MotionTierProvider` 안쪽). 규칙: docs/design/sound.md
@@ -40,10 +36,8 @@ import { SOUND_MANIFEST, type BgmId, type SfxId } from '@/lib/sound/manifest';
  * 소리는 정보의 유일한 전달 수단이 아니다: 효과음을 거는 곳마다 같은 내용을 글자·색·모양으로도 보여 준다.
  */
 
-type AppEngine = SoundEngine<SfxId, BgmId>;
-
-const NOOP_ENGINE: AppEngine = createNoopEngine<SfxId, BgmId>();
-const SoundContext = createContext<AppEngine>(NOOP_ENGINE);
+// 컨텍스트·`useSfx`는 가벼운 모듈에 있다 (랜딩에 들어가는 게임 버튼용, P2-11). 여기서는 다시 내보낸다
+export { useSfx, useSoundEngine };
 
 export function SoundProvider({ children }: { children: ReactNode }) {
   // 싱글턴이라 렌더 중 불러도 안전 (AudioContext를 만들지 않음, 서버에서는 no-op)
@@ -75,11 +69,6 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Provider가 없으면 아무 소리도 내지 않는 엔진 (단위 테스트·Provider 밖) */
-export function useSoundEngine(): AppEngine {
-  return useContext(SoundContext);
-}
-
 export function useSoundSnapshot(): EngineSnapshot<BgmId> {
   const e = useSoundEngine();
   const subscribe = useCallback((l: () => void) => e.subscribe(l), [e]);
@@ -89,12 +78,6 @@ export function useSoundSnapshot(): EngineSnapshot<BgmId> {
     get,
     () => SERVER_SNAPSHOT as EngineSnapshot<BgmId>,
   );
-}
-
-/** `const play = useSfx(); play('correct')` — 콜백 참조가 바뀌지 않는다 */
-export function useSfx(): (id: SfxId, opts?: PlayOptions) => void {
-  const e = useSoundEngine();
-  return useCallback((id: SfxId, opts?: PlayOptions) => e.play(id, opts), [e]);
 }
 
 // 같은 곡을 원하는 화면이 이어서 마운트되면(월드맵 → 퀘스트) 멈췄다 다시 시작하지 않게 짧게 미뤄서 멈춘다

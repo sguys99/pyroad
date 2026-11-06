@@ -3,6 +3,8 @@
 @import 'shadcn/tailwind.css';
 /* 한글 폴백 보정 @font-face (P2-10, 생성물). 웹폰트 파일은 여기서 싣지 않는다: src/fonts/landing.ts·app.css */
 @import '../fonts/fallbacks.css';
+/* 공통 컴포넌트 (P2-11, docs/design/components.md): 게임 버튼·모달·시트·토스트·탭·진행바·HUD·말풍선 */
+@import '../components/ui/game-ui.css';
 
 @plugin '@tailwindcss/typography';
 

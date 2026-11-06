@@ -41,7 +41,7 @@ export const COLOR = {
   surface: '#FFFFFF',
   /** 보조 면: 칩·결과 상자·눌린 탭·코드 줄 번호 */
   surface2: '#EFECE5',
-  /** 흰 버튼 아랫면 (장식) */
+  /** 흰 버튼 아랫면 (장식). 동작 줄이기에서는 눌린 흰 버튼의 면 (P2-11) */
   surfaceLip: '#DFDAD0',
   /** 장식 구분선 (글자·경계 의미 없음) */
   line: '#E5E1D9',
@@ -482,6 +482,12 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
     use: '오류 10% 면 글자 (bg-destructive/10)',
   },
   { fg: 'onError', bg: 'error', kind: 'text', use: '위험 버튼 글자' },
+  // 공통 컴포넌트 (P2-11, docs/design/components.md)
+  { fg: 'text', bg: 'surfaceLip', kind: 'text', use: '흰 버튼 눌림(동작 줄이기)' },
+  { fg: 'error', bg: 'surface2', kind: 'text', use: '위험 버튼 글자 (흰 면 위 보조 면)' },
+  { fg: 'text', bg: 'successSoft', kind: 'text', use: '토스트·말풍선 (좋아요)' },
+  { fg: 'text', bg: 'warningSoft', kind: 'text', use: '토스트 (주의)' },
+  { fg: 'text', bg: 'errorSoft', kind: 'text', use: '토스트·말풍선 (버그)' },
   { fg: 'lineStrong', bg: 'surface', kind: 'ui', use: '입력 경계' },
   { fg: 'lineStrong', bg: 'bg', kind: 'ui', use: '입력 경계 (배경 위)' },
   {

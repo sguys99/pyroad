@@ -7,6 +7,8 @@ import { LogoutButton } from '@/components/LogoutButton';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
+import { Card } from '@/components/ui/card';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
@@ -101,16 +103,16 @@ export default async function ProfilePage() {
       </div>
 
       {/* XP 프로그레스 카드 */}
-      <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+      <Card className="mb-4">
         <h2 className="mb-3 text-sm font-bold text-foreground">경험치</h2>
         <XPProgressBar totalXP={profile.total_xp} size="md" />
         <p className="mt-2 text-center text-lg font-bold text-primary-text">
           {profile.total_xp} XP
         </p>
-      </div>
+      </Card>
 
       {/* 뱃지 컬렉션 카드 */}
-      <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+      <Card className="mb-4">
         <h2 className="mb-3 text-sm font-bold text-foreground">뱃지 컬렉션</h2>
         <div className="grid grid-cols-5 gap-3">
           {BADGE_DEFINITIONS.map((badge) => {
@@ -136,10 +138,10 @@ export default async function ProfilePage() {
             );
           })}
         </div>
-      </div>
+      </Card>
 
       {/* 스테이지 진행률 카드 */}
-      <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+      <Card className="mb-4">
         <h2 className="mb-3 text-sm font-bold text-foreground">
           스테이지 진행률
         </h2>
@@ -149,10 +151,6 @@ export default async function ProfilePage() {
             const completed = quests.filter((q) =>
               completedQuestIds.has(q.id),
             ).length;
-            const percent =
-              quests.length > 0
-                ? Math.round((completed / quests.length) * 100)
-                : 0;
             return (
               <div key={stage.id}>
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -163,26 +161,22 @@ export default async function ProfilePage() {
                     {completed}/{quests.length} 퀘스트
                   </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-border">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      percent === 100
-                        ? 'bg-primary'
-                        : percent > 0
-                          ? 'bg-primary/60'
-                          : 'bg-border'
-                    }`}
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  value={completed}
+                  max={Math.max(1, quests.length)}
+                  size="sm"
+                  label={`${stage.order}단계 ${stage.title} 진행률`}
+                  valueText={`퀘스트 ${completed}개 / ${quests.length}개`}
+                  className="mt-1"
+                />
               </div>
             );
           })}
         </div>
-      </div>
+      </Card>
 
       {/* 통계 요약 */}
-      <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
+      <Card className="mb-6">
         <h2 className="mb-3 text-sm font-bold text-foreground">통계</h2>
         <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
           <div>
@@ -210,7 +204,7 @@ export default async function ProfilePage() {
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* 계정 관리 */}
       <AccountManagementSection

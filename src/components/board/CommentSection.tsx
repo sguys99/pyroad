@@ -8,6 +8,7 @@ import { authorName } from '@/lib/board/display';
 import { BOARD_LIMITS } from '@/lib/board/limits';
 import { BoardFormMessage, type BoardFormError } from './BoardFormMessage';
 import { ReportButton } from './ReportButton';
+import { Button } from '@/components/ui/button';
 
 interface CommentSectionProps {
   postId: string;
@@ -160,13 +161,15 @@ export function CommentSection({
           aria-label="댓글"
           className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
-        <button
+        <Button
           type="submit"
-          disabled={submitting || !content.trim()}
-          className="self-end rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip disabled:opacity-50"
+          size="sm"
+          disabled={!content.trim()}
+          loading={submitting}
+          className="self-end"
         >
           등록
-        </button>
+        </Button>
       </form>
     </div>
   );

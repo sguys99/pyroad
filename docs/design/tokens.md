@@ -4,6 +4,7 @@
 > - 원본: **`src/lib/design/tokens.ts`** (TS 상수). 화면은 `src/app/globals.css`의 `:root` 변수와 Tailwind `@theme inline`으로 쓴다. 두 곳이 같은지는 `src/lib/design/__tests__/tokens.test.ts`가 globals.css를 읽어 양방향으로 비교한다(빠진 변수·남는 변수·다른 값 모두 실패)
 > - 모션 값의 원본은 `src/lib/motion/tokens.ts`(리그 스프링과 공유, [motion-guidelines](motion-guidelines.md)). 디자인 토큰은 다시 내보내기만 하고 CSS 변수 `--dur-*`·`--easing-*`·`--spring-*`로 옮긴다
 > - 글꼴 파일·스택은 [fonts.md](fonts.md)(P2-10). 여기서는 이름(`FONT_FAMILY`)과 크기 단계만 정한다
+> - 토큰으로 만든 공통 컴포넌트(게임 버튼·카드·모달·시트·토스트·탭·진행바·HUD·말풍선)는 [components.md](components.md)(P2-11)
 
 ## 1. 색
 
@@ -38,13 +39,13 @@
 | `w1`·`w2`·`w3` | `--w1` … · `bg-w2-soft` … | `#A9CF94` · `#B4C8D2` · `#D9C3A3` | decor: 월드 틴트 (§3) |
 | `w1Ink`·`w2Ink`·`w3Ink` | `--w1-ink` … | `#3A7336` · `#6B645B` · `#6B645B` | 월드 표지 글자 (2·3은 중립: 칩마다 다른 색 금지) |
 | `w1Soft`·`w2Soft`·`w3Soft` | `--w1-soft` … | `#EDF3E8` · `#EDF1F3` · `#F4EEE5` | 월드 바탕 |
-| `code*` | `--code-bg` · `--code-keyword` … · `text-code-keyword` | 바탕 `#FFFFFF`, 글자·숫자·함수 `#2E2A25`, 키워드 `#3A7336`, 문자열 `#8A5A00`, 주석 `#7A7268` | P2-18 CodeMirror 테마 |
+| `code*` | `--code-bg` · `--code-keyword` … · `text-code-keyword` | 바탕 `#FFFFFF`, 글자·숫자·함수 `#2E2A25`, 키워드 `#3A7336`, 문자열 `#8A5A00`, 주석 `#7A7268` | CodeMirror 키즈 테마 ([editor.md](editor.md), 틴트 면 위 대비 포함) |
 
 shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--destructive`·`--border`·`--input`·`--ring` …)은 그대로 두고 위 토큰을 가리킨다. 쓰지 않던 `--chart-*`·`--sidebar-*`는 지웠다.
 
 ### 1.1 대비 (WCAG AA, 자동 검사)
 
-`CONTRAST_PAIRS`(47쌍)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.58:1**(초록 글자 on `bg-primary/10`).
+`CONTRAST_PAIRS`(52쌍, P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍 추가)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.58:1**(초록 글자 on `bg-primary/10`).
 
 | 쓰임 | 글자·전경 | 배경 | 대비 | 기준 |
 |---|---|---|---:|---:|
@@ -145,7 +146,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 |---|---|---|
 | 컴포넌트 (기본) | Tailwind 클래스 | `bg-card text-foreground`, `bg-primary text-primary-foreground hover:bg-primary-lip`, `text-primary-text`, `bg-warning-soft text-warning`, `rounded-xl shadow-card`, `text-caption` |
 | CSS·인라인 style | CSS 변수 | `background: var(--world-soft)`, `color-mix(in srgb, var(--accent) 16%, transparent)` |
-| CSS 문자열을 받는 라이브러리 (CodeMirror) | `cssVar('primary')` → `var(--primary)` | `CodeEditor.tsx` 테마 |
+| CSS 문자열을 받는 라이브러리 (CodeMirror) | `cssVar('primary')` → `var(--primary)` | `src/lib/editor/kidsTheme.ts` ([editor.md](editor.md)) |
 | CSS 변수를 못 쓰는 곳 (satori 공유 카드, canvas 컨페티, 루트 오류 화면) | `import { COLOR, RADIUS, FONT_FAMILY } from '@/lib/design/tokens'` | `confettiPresets.ts`, `global-error.tsx` |
 | 모션 | `import { sec, EASE, framerSpring, jelly } from '@/lib/motion/tokens'` (또는 `@/lib/design/tokens`) | `transition={{ duration: sec('base') }}` |
 
