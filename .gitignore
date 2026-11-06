@@ -69,3 +69,6 @@ design/prototypes/.build/
 
 # Pyodide 자체 호스팅 복사본 (scripts/pyodide/copy-assets.mjs가 predev·prebuild에서 만듦, B26)
 public/pyodide/
+
+# Claude Code 에이전트 임시 작업 공간
+.claude/worktrees/

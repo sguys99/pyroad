@@ -18,6 +18,7 @@ const eslintConfig = [
       '.next/**',
       'next-env.d.ts',
       'spikes/**',
+      '.claude/worktrees/**',
       'design/**',
       'public/pyodide/**',
       'playwright-report/**',

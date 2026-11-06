@@ -12,6 +12,7 @@ export default defineConfig({
       'e2e/**',
       'node_modules/**',
       'spikes/**',
+      '.claude/worktrees/**',
       'design/**',
       '**/*.pyodide.test.ts',
       '**/*.content.test.ts',
