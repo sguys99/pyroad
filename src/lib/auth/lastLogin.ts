@@ -124,3 +124,20 @@ export function takeLastLoginFragment(
     cleaned: `${url.pathname}${url.search}`,
   };
 }
+
+/**
+ * 이 수단의 기록이면 지운다 (P3-07: 그 수단의 연결을 끊었으면 그걸로 들어오면 새 계정이 되므로 배지가 잘못 안내함).
+ * 다른 수단의 기록이면 그대로. 저장소가 막혀 있으면 아무것도 하지 않음
+ */
+export function forgetLastLoginIf(
+  provider: SocialProvider,
+  storage: Storage | null = defaultStorage(),
+): void {
+  if (!storage) return;
+  try {
+    if (readLastLogin(storage)?.provider === provider)
+      storage.removeItem(LAST_LOGIN_STORAGE_KEY);
+  } catch {
+    // 무시
+  }
+}

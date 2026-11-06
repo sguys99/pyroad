@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { LegalNav } from '@/components/legal/LegalPageShell';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
 import { SoundSettingsSection } from '@/components/settings/SoundSettingsSection';
+import { LinkedAccountsSection } from '@/components/settings/LinkedAccountsSection';
 import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
@@ -166,6 +167,8 @@ export default function SettingsPage() {
       <MotionSettingsSection serverMotion={settings?.motion} />
       {/* 소리 (P2-14). 엔진 값이라 서버 응답을 기다리지 않음 (서버 동기화는 로그인 레이아웃) */}
       <SoundSettingsSection />
+      {/* 로그인 계정 연결 (P3-07). 세션 identities 를 직접 읽어 서버 응답을 기다리지 않음 */}
+      <LinkedAccountsSection />
 
       <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
     </>

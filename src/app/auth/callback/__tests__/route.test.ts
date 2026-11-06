@@ -410,3 +410,34 @@ describe('GET /auth/callback — 탈퇴 직전 네이버 재인증 (P3-16)', () 
     );
   });
 });
+
+describe('GET /auth/callback — 계정 연결 (P3-07)', () => {
+  const linkNextQ = encodeURIComponent('/settings?linked=kakao');
+
+  it('연결이 끝나면 설정으로, 최근 로그인 배지(#lp=)는 남기지 않음', async () => {
+    exchangeCodeForSession.mockResolvedValueOnce({
+      data: { user: { user_metadata: { iss: 'https://kapi.kakao.com' } } },
+      error: null,
+    });
+    const res = await callback(`code=abc&via=kakao&next=${linkNextQ}`);
+    expect(res.headers.get('location')).toBe(`${origin}/settings?linked=kakao`);
+  });
+
+  it('이미 다른 계정에 묶인 수단이면 안내 → 돌아가기는 /settings ("연결했어요" 표시 없이)', async () => {
+    const res = await callback(
+      `error=invalid_request&error_code=identity_already_exists&via=kakao&next=${linkNextQ}`,
+    );
+    expect(res.headers.get('location')).toBe(
+      `${origin}/auth/error?reason=identity_taken&via=kakao&next=%2Fsettings`,
+    );
+  });
+
+  it('Manual linking이 꺼져 있으면 설정 오류 안내', async () => {
+    const res = await callback(
+      `error=invalid_request&error_code=manual_linking_disabled&via=naver&next=${encodeURIComponent('/settings?linked=naver')}`,
+    );
+    expect(res.headers.get('location')).toBe(
+      `${origin}/auth/error?reason=unavailable&via=naver&next=%2Fsettings`,
+    );
+  });
+});

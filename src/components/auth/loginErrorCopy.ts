@@ -35,7 +35,8 @@ export function loginErrorCopy(
     case 'identity_taken':
       return {
         title: '이미 다른 계정에 연결돼 있어',
-        body: `이 ${name}계정은 다른 pyRoad 계정에서 쓰고 있어. 그 계정으로 로그인하면 거기 기록을 볼 수 있어.`,
+        // 계정 합치기는 v1.0 이후 (§2.8, P3-07). 지금은 운영자에게 문의하는 절차만 있다
+        body: `이 ${name}계정은 다른 pyRoad 계정에서 쓰고 있어. 그 계정으로 로그인하면 거기 기록을 볼 수 있어. 두 계정을 합치는 건 아직 못 해. 꼭 필요하면 어른이 운영자에게 메일로 알려 줘.`,
         rig: 'think',
       };
     case 'expired':

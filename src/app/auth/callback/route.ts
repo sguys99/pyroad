@@ -15,6 +15,7 @@ import {
 } from '@/lib/auth/loginError';
 import { reportServerError } from '@/lib/api/serverError';
 import { revokeNaver } from '@/lib/auth/providerUnlink';
+import { isLinkNext } from '@/lib/auth/accountLinks';
 import {
   isNaverWithdrawNext,
   naverWithdrawResultPath,
@@ -50,7 +51,9 @@ export async function GET(request: Request) {
         { area: 'auth', op: 'callback' },
       );
     }
-    return redirect(loginErrorPath(reason, { next, via }));
+    // 계정 연결(P3-07)이 실패하면 설정으로 돌아가되 "연결했어요" 표시(`?linked=`)는 떼어 낸다
+    const back = isLinkNext(next) ? '/settings' : next;
+    return redirect(loginErrorPath(reason, { next: back, via }));
   };
 
   // provider가 거절·취소했거나 GoTrue가 오류를 붙여 돌려보냄 (code 없음)
@@ -103,6 +106,9 @@ export async function GET(request: Request) {
     }
     return redirect(naverWithdrawResultPath(outcome));
   }
+  // 계정 연결 (P3-07): 새로 붙인 수단은 "최근 로그인"이 아니므로 배지 조각을 남기지 않고 설정으로
+  if (isLinkNext(next)) return redirect(next);
+
   // "최근에 ○○로 로그인했어요" 배지 (P3-08): 방금 쓴 provider를 #lp= 조각으로 넘기면 도착 화면이 이 기기에 저장한다.
   // next는 이미 safeNext를 통과한 같은 출처 경로이고, 조각은 서버로 가지 않는다 (src/lib/auth/lastLogin.ts)
   return redirect(

@@ -257,7 +257,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 <SocialLoginButtons onBeforeLogin={(provider) => track('landing_cta_click', { cta, provider }, { immediate: true })} />
 ```
 
-**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 로그인 계정 연결 4가지(Google만 · 카카오만 · 둘 · 셋) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
 
 **인앱 브라우저 (P3-09)**: 판별은 `detectInAppBrowser(ua?)`(판별표 테스트 `src/lib/browser/__tests__/detectInAppBrowser.test.ts`: 카카오톡·네이버 앱 iOS/Android, 인스타그램, 페이스북, 라인, 밴드, 그 밖 웹뷰, 일반 브라우저).
 - **카카오톡 인앱**: 외부로 보내지 않는다. 카카오 버튼을 맨 위에 크게(`lg`) — 카카오톡 안에서 바로 로그인된다. 최근에 쓴 수단은 그다음
@@ -284,6 +284,8 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - Kakao KOE 오류(동의 화면 설정 문제)는 카카오 화면에서 멈추고 앱으로 돌아오지 않으므로 이 표로는 잡히지 않는다 → 설정·스모크 테스트로 예방(docs/release/v0.4-phase3-providers.md)
 - 분석 이벤트 `login_error {reason}`은 아직 넣지 않았다(이벤트 정의 파일을 다른 작업이 고치는 중) → 후속
 
+**로그인 계정 연결 (P3-07)**: 설정 → "로그인 계정 연결"(`src/components/settings/LinkedAccountsSection.tsx`, 모양만은 `LinkedAccountsList`). 줄마다 브랜드 로고 원(각 사 면 색, `.g-social-chip-*`) + 이름 + "연결됨 · 연결한 날"/"연결 안 됨" + 끊기·연결하기(sm). 이메일·이름·provider 식별자는 보이지 않는다. 규칙(`src/lib/auth/accountLinks.ts`): Google이 있는 계정에 카카오·네이버 붙이기(확인된 방향), 카카오·네이버만 있는 계정에 Google 붙이기(허용, 스모크 L-3), 이메일 없는 계정끼리(카카오 ↔ 네이버)는 막고 "Google을 먼저 연결하면 붙일 수 있어요". 마지막 로그인 수단은 끊기 막힘(화면·`POST /api/account/unlink` 둘 다). 연결은 `useLinkIdentity`(P1-14 헬퍼 인자로 `linkIdentity`, 돌아올 곳 `/settings?linked=<provider>`, 인앱 Google은 시작하지 않고 브라우저 안내), 실패(`identity_already_exists` = "이미 다른 계정에 연결돼 있어" + 합치기는 아직 안 됨 · 어른이 운영자에게 메일)는 P3-10 `/auth/error` → 설정으로. 끊기는 확인 창 → API(우리 쪽 `unlinkIdentity` 먼저, 그다음 Kakao provider unlink, 네이버는 직접 끊기 안내) → 끊은 수단이 "최근에 사용" 기록이면 지움(`forgetLastLoginIf`). 연결 흐름의 콜백은 `#lp=` 배지를 남기지 않는다(새로 붙인 수단은 최근 로그인이 아님).
+
 **최근 로그인 기록 (P3-08)**: `/auth/callback`이 세션 사용자의 `user_metadata.iss`로 provider를 정해(`loginProviderFromUser`) 리다이렉트 주소에 `#lp=<provider>` 조각을 붙이고, 루트 레이아웃의 `LastLoginRecorder`가 `localStorage` `pyroad.lastLogin.v1` = `{ provider, at }`에 저장한 뒤 `history.replaceState`로 조각을 지운다(`src/lib/auth/lastLogin.ts`). 쿼리가 아니라 조각인 이유: 서버·로그·분석으로 가지 않고, 미들웨어가 다시 리다이렉트해도(/world → /onboarding) 브라우저가 조각을 이어 붙인다. 1년 지난 기록은 무시하고 로그아웃해도 지우지 않는다. 쿠키를 쓰지 않으므로 개인정보처리방침 10절 "인증 쿠키만"이 그대로 맞다. UI 힌트일 뿐 인가에 쓰지 않는다.
 
 ## 13. 첫 로그인 온보딩 "모험가 등록증" · 30초 튜토리얼 (P3-11)
@@ -301,6 +303,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 | `GradePicker` | 1~6학년 칩 56px(360폭 3×2, 640~ 한 줄). 고른 칩 = 초록 면 + 흰 글자 5.12 | 라디오 묶음 (같은 키보드) |
 | `GuideMascot` | 라이브 파이뱀(96 · 마지막 쪽 132) + 말풍선(타자 효과). **파이뱀이 아이가 고른 색으로 바뀜**(리그 `palette`, CSS fill 전환) | 리그는 장식, 대사는 글자로 |
 | `OnboardingTutorial` | 위 = "30초 튜토리얼" · 점 4 · 건너뛰기, 장면(초록 틴트 16:10, 640~ 16:9) + 번호 원 + 제목 + 파이뱀 대사 + [이전] [다음/모험 시작!]. 장면 4종(`TutorialScenes`): 지도에서 반짝이는 스테이지 누르기 · `print("안녕!")` 쓰고 ▶ 실행 → 결과 · 힌트·질문 대화 · 별 3개 + "완료" 도장. Pyodide를 불러오지 않는 흉내 | 장면은 장식(`aria-hidden`), 같은 내용을 제목·대사가 글자로. ←→ 키로도 넘김 |
+
 
 **파이뱀 반응**: 약속 다 함 → 기쁨, 닉네임 확인 중 → 생각 · 통과 → 기쁨("“별빛코더”! 정말 멋진 이름이야!") · 규칙 → 갸우뚱 · 중복 → 놀람, 색 고름 → 그 색으로 바뀌며 기쁨 점프(`replay`), 학년 → 설명, 도장 → 놀람 → 쾅 순간 기쁨.
 

@@ -227,3 +227,15 @@
     transition: none;
   }
 }
+
+/* 브랜드 로고 원 (P3-07 설정 "로그인 계정 연결"): 로고는 각 사 면 색 위에 둔다 (네이버 흰 N은 녹색 위, 카카오 말풍선은 노랑 위) */
+@layer components {
+  .g-social-chip-kakao {
+    --chip: #fee500;
+    background: var(--chip);
+  }
+  .g-social-chip-naver {
+    --chip: #03a94d;
+    background: var(--chip);
+  }
+}

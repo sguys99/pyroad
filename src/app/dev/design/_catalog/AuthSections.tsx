@@ -10,6 +10,8 @@ import {
 import { LoginSheet } from '@/components/auth/LoginSheet';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
 import { LoginErrorPanel } from '@/components/auth/LoginErrorPanel';
+import { LinkedAccountsList } from '@/components/settings/LinkedAccountsSection';
+import { accountLinkRows } from '@/lib/auth/accountLinks';
 import {
   LOGIN_ERROR_REASONS,
   type LoginErrorReason,
@@ -90,6 +92,40 @@ const ERROR_SAMPLES: Record<
   unknown: { via: 'google' },
 };
 
+/** 계정 연결 견본 (P3-07): identity 모양만 (이메일·식별자 없음) */
+const ALL_PROVIDERS = ['kakao', 'naver', 'google'] as const;
+const id = (provider: string, created_at: string) => ({ provider, created_at });
+const LINK_SAMPLES: { label: string; note: string; identities: ReturnType<typeof id>[]; busy?: SocialProvider }[] = [
+  {
+    label: 'Google만',
+    note: '카카오·네이버를 붙일 수 있음(확인된 방향). 하나뿐이라 끊기 막힘',
+    identities: [id('google', '2026-11-01T00:00:00Z')],
+  },
+  {
+    label: '카카오만',
+    note: 'Google은 붙일 수 있음(스모크 L-3). 네이버는 이메일 없는 계정끼리라 막고 이유를 글로',
+    identities: [id('kakao', '2026-11-02T00:00:00Z')],
+  },
+  {
+    label: 'Google + 카카오 (카카오 끊는 중)',
+    note: '둘 다 끊을 수 있음. 진행 중에는 다른 버튼 비활성',
+    identities: [
+      id('google', '2026-11-01T00:00:00Z'),
+      id('kakao', '2026-11-03T00:00:00Z'),
+    ],
+    busy: 'kakao',
+  },
+  {
+    label: '셋 다',
+    note: '모두 연결됨 · 연결한 날짜',
+    identities: [
+      id('google', '2026-11-01T00:00:00Z'),
+      id('kakao', '2026-11-03T00:00:00Z'),
+      id('custom:naver', '2026-11-05T00:00:00Z'),
+    ],
+  },
+];
+
 /** 가짜 로그인: 1.6초 바쁨 뒤 결과 (실제 OAuth로 떠나지 않음) */
 function fakeLogin(result: SocialLoginResult) {
   return () =>
@@ -110,7 +146,7 @@ export function SocialLoginSection() {
   return (
     <Section
       id="social-login"
-      kicker="컴포넌트 §12 · P3-05 · P3-08 · P3-09 · P3-10"
+      kicker="컴포넌트 §12 · P3-05 · P3-07~P3-10"
       title="소셜 로그인 버튼 · 로그인 시트"
       // tokens-allow: 브랜드 색 값을 설명하는 글자 (색으로 쓰지 않음)
       description="각 사 브랜드 가이드의 면 색·글자색·로고·문구를 그대로 씁니다(카카오 #FEE500 · 네이버 #03A94D · Google 흰 면 + #747775 테두리). 게임 버튼과 달리 아랫면이 없고, 눌림은 1px 움직임과 얇은 상태 층으로만 알려요. 높이 54px · 반경 12px."
@@ -296,6 +332,26 @@ export function SocialLoginSection() {
               backHref={reason === 'identity_taken' ? '/settings' : null}
               backLabel="설정으로 돌아가기"
             />
+          ))}
+        </div>
+      </Demo>
+      <Demo
+        label="로그인 계정 연결 · 설정 (P3-07)"
+        note="설정 → 로그인 계정 연결. 브랜드 로고 원 + 이름 + 연결됨 · 날짜(이메일·이름·식별자 없음). 연결은 linkIdentity(P1-14 헬퍼), 끊기는 확인 창 → POST /api/account/unlink"
+        data-testid="social-linked-accounts"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          {LINK_SAMPLES.map((sample) => (
+            <div key={sample.label} className="space-y-2">
+              <p className="text-caption font-semibold text-foreground">
+                {sample.label}
+              </p>
+              <p className="text-caption text-muted-foreground">{sample.note}</p>
+              <LinkedAccountsList
+                rows={accountLinkRows(sample.identities, ALL_PROVIDERS)}
+                busy={sample.busy ?? null}
+              />
+            </div>
           ))}
         </div>
       </Demo>
