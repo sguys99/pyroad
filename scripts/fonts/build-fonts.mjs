@@ -2,6 +2,7 @@
 //
 //   npm run fonts:build              # 전부 (원본 받기 → 랜딩 텍스트 서브셋 → 앱 조각 → CSS·폴백·manifest·README)
 //   npm run fonts:build -- --landing # 랜딩 텍스트 서브셋만 (랜딩 문구를 바꿨을 때, 몇 초)
+//   npm run fonts:build -- --share-card # 공유 카드 폰트만 (src/fonts/share-card/, P2-19)
 //
 // 필요: python3 + fontTools 4.63 + brotli (`pip install -r scripts/fonts/requirements.txt`), 네트워크(처음 한 번).
 // 원본은 아래 SOURCES의 고정 주소에서 받아 sha256을 확인하고 node_modules/.cache/pyroad-fonts/에 둔다(커밋하지 않음).
@@ -10,6 +11,8 @@
 // - 제목 Jua (OFL, 예약 이름 없음 → 이름 그대로): 랜딩 텍스트 서브셋 + 앱 unicode-range 조각
 // - 본문 Pretendard Variable → `pyRoad Sans` (예약 이름 "Pretendard"): 랜딩 텍스트 서브셋 + npm 공식 가변 동적 서브셋 92조각의 이름만 바꿈
 // - 코드 D2Coding Regular → `pyRoad Mono` (예약 이름 "D2Coding"): 한자 제외 조각 (퀘스트·에디터 레이아웃에서만 로드)
+// - 공유 카드(next/og satori, P0-10·P2-19): WOFF2를 못 읽어 TTF/OTF. Jua·pyRoad Sans SemiBold는 KS X 1001 2,350자,
+//   pyRoad Sans Bold는 11,172자 전부(대체 폰트). 서버 함수가 고정 경로로 읽으므로 이 폴더에는 카드 폰트만 둔다
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -23,6 +26,7 @@ import {
 } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { shareCardText } from './share-card-chars.mjs';
 import {
   ALWAYS_CHARS,
   LANDING_ENTRIES,
@@ -144,6 +148,14 @@ function prepareSources() {
       'package/dist/web/variable/pretendardvariable-dynamic-subset.css',
     ),
     pretendardOfl: join(pret, 'package/dist/LICENSE.txt'),
+    pretendardSemiBold: join(
+      pret,
+      'package/dist/public/static/Pretendard-SemiBold.otf',
+    ),
+    pretendardBold: join(
+      pret,
+      'package/dist/public/static/Pretendard-Bold.otf',
+    ),
     d2coding: join(d2, 'D2Coding/D2Coding-Ver1.3.2-20180524.ttf'),
     d2codingOfl: paths.d2codingOfl,
   };
@@ -192,6 +204,112 @@ export const FAMILIES = {
     rename: 'D2Coding',
   },
 };
+
+/**
+ * 공유 카드 폰트 (P2-19). `src/fonts/share-card/<dir>/<file>`. 이름 변경 규칙은 앱 폰트와 같다.
+ * `src/lib/share-card/fonts.ts`가 이 경로를 **고정 문자열로** 읽는다(동적 경로면 파일 추적이 폴더 전체를 함수에 넣음, P0-10 §4.6)
+ */
+export const SHARE_CARD_DIR = 'share-card';
+export const SHARE_CARD_FONTS = [
+  {
+    dir: 'jua',
+    file: 'Jua-KS2350.ttf',
+    src: 'jua',
+    range: 'ks2350',
+    family: 'Jua',
+    weight: 400,
+    rename: null,
+    use: '제목·닉네임·큰 숫자',
+  },
+  {
+    dir: 'pyroad-sans',
+    file: 'pyRoadSans-SemiBold-KS2350.otf',
+    src: 'pretendardSemiBold',
+    range: 'ks2350',
+    family: 'pyRoad Sans',
+    weight: 600,
+    rename: 'Pretendard',
+    use: '본문·설명',
+  },
+  {
+    dir: 'pyroad-sans',
+    file: 'pyRoadSans-Bold-Full.otf',
+    src: 'pretendardBold',
+    range: 'full',
+    family: 'pyRoad Sans',
+    weight: 700,
+    rename: 'Pretendard',
+    use: '눈썹 글자·수치 + 대체 폰트(11,172자: 다른 폰트에 없는 글자를 글자 단위로 받침)',
+  },
+];
+
+function buildShareCard(src) {
+  const base = join(OUT, SHARE_CARD_DIR);
+  cleanDir(base);
+  const files = {};
+  for (const f of SHARE_CARD_FONTS) {
+    mkdirSync(join(base, f.dir), { recursive: true });
+    const textFile = join(CACHE, `share-card-${f.range}.txt`);
+    writeFileSync(textFile, shareCardText(f.range));
+    const out = join(base, f.dir, f.file);
+    const r = kit([
+      'subset',
+      src[f.src],
+      out,
+      '--text-file',
+      textFile,
+      '--sfnt',
+      ...(f.rename ? ['--family', f.family, '--rename', f.rename] : []),
+    ]);
+    files[`${SHARE_CARD_DIR}/${f.dir}/${f.file}`] = {
+      family: f.family,
+      weight: f.weight,
+      range: f.range,
+      ...fileInfo(out),
+      chars: r.chars,
+      // 원본 글꼴에 없는 글자 (기호 일부). 카드는 대체 폰트로 그림
+      notInFont: r.missing,
+    };
+    console.log(
+      `  ${f.file}: ${(r.bytes / 1024).toFixed(0)}KB, 글자 ${r.chars}개${r.missing ? `, 원본에 없음: ${r.missing}` : ''}`,
+    );
+  }
+  copyFileSync(src.juaOfl, join(base, 'jua', 'OFL.txt'));
+  copyFileSync(src.pretendardOfl, join(base, 'pyroad-sans', 'OFL.txt'));
+  const total = Object.values(files).reduce((n, x) => n + x.bytes, 0);
+  writeFileSync(
+    join(base, 'README.md'),
+    [
+      '# 공유 카드 폰트 (P2-19)',
+      '',
+      '`next/og`(satori + resvg) 공유 카드 전용입니다. satori는 WOFF2를 읽지 못해 압축 없는 TTF/OTF이고, 서버 함수(`src/lib/share-card/fonts.ts`)가 고정 경로로 읽어 함수에 번들됩니다. 브라우저에는 보내지 않습니다. 구성·다시 만드는 법: [docs/design/share-card.md](../../../docs/design/share-card.md), [docs/design/fonts.md](../../../docs/design/fonts.md)',
+      '',
+      '| 파일 | 글꼴 이름 · 굵기 | 글자 | 쓰임 | 원본 |',
+      '|---|---|---|---|---|',
+      ...SHARE_CARD_FONTS.map((f) => {
+        const info = files[`${SHARE_CARD_DIR}/${f.dir}/${f.file}`];
+        const origin =
+          f.src === 'jua'
+            ? `Jua 1.001 (${SOURCES.jua.url})`
+            : `npm \`pretendard\` 1.3.9 \`dist/public/static/${f.src === 'pretendardBold' ? 'Pretendard-Bold' : 'Pretendard-SemiBold'}.otf\``;
+        return `| \`${f.dir}/${f.file}\` (${(info.bytes / 1024).toFixed(0)}KB) | \`${f.family}\` ${f.weight} | ${f.range === 'full' ? '현대 한글 11,172자' : 'KS X 1001 완성형 2,350자'} + 호환 자모 + ASCII + 카드 기호 | ${f.use} | ${origin} |`;
+      }),
+      '',
+      `합계 ${(total / 1024).toFixed(0)}KB.`,
+      '',
+      '## 바꾼 것 (OFL "수정본")',
+      '',
+      '- 서브셋(위 글자 범위), 힌팅 제거, 레이아웃 기능과 저작권·라이선스 name 레코드(0·13·14)는 그대로. CFF(OTF)는 서브루틴을 풀지 않음.',
+      '- name 테이블 버전(nameID 5) 끝에 `; pyRoad subset`.',
+      '- Pretendard는 OFL 예약 이름 때문에 글꼴 이름이 들어가는 name 레코드를 `pyRoad Sans`로 바꿈. Jua는 예약 이름이 없어 그대로.',
+      '- 라이선스 전문은 폴더마다 `OFL.txt`(원본 배포본 그대로).',
+      '',
+      '파일은 모두 `npm run fonts:build -- --share-card`가 만든 생성물입니다. 직접 고치지 마세요.',
+      '',
+    ].join('\n'),
+  );
+  return { dir: SHARE_CARD_DIR, bytes: total, files };
+}
 
 function writeFamilyCss(key, faces) {
   const f = FAMILIES[key];
@@ -311,18 +429,32 @@ function fileInfo(path) {
 
 function main() {
   const landingOnly = process.argv.includes('--landing');
+  const shareCardOnly = process.argv.includes('--share-card');
   const manifestPath = join(OUT, 'manifest.json');
   const prev = existsSync(manifestPath)
     ? JSON.parse(readFileSync(manifestPath, 'utf8'))
     : null;
-  if (landingOnly && !prev) {
+  if ((landingOnly || shareCardOnly) && !prev) {
     throw new Error(
-      'manifest.json이 없어요. 처음에는 --landing 없이 실행하세요',
+      'manifest.json이 없어요. 처음에는 --landing·--share-card 없이 실행하세요',
     );
   }
 
   console.log('[1/4] 원본 준비');
   const src = prepareSources();
+
+  if (shareCardOnly) {
+    console.log('[공유 카드] TTF/OTF 서브셋');
+    const manifest = { ...prev, shareCard: buildShareCard(src) };
+    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+    execFileSync(
+      'npx',
+      ['prettier', '--write', '--log-level', 'warn', 'src/fonts/manifest.json'],
+      { cwd: ROOT, stdio: 'inherit' },
+    );
+    console.log(`done → ${relative(ROOT, join(OUT, SHARE_CARD_DIR))}`);
+    return;
+  }
 
   console.log('[2/4] 랜딩 텍스트 서브셋');
   const landing = collectLandingText();
@@ -357,7 +489,11 @@ function main() {
 
   let families = prev?.families ?? {};
   let metrics = prev?.metrics;
+  let shareCard = prev?.shareCard;
   if (!landingOnly) {
+    console.log('[공유 카드] TTF/OTF 서브셋');
+    shareCard = buildShareCard(src);
+
     console.log('[3/4] 앱 unicode-range 조각');
     const commands = {
       jua: (dir) => [
@@ -459,6 +595,7 @@ function main() {
     families,
     metrics,
     systemKrFonts: SYSTEM_KR_FONTS,
+    shareCard,
   };
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 

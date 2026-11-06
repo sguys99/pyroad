@@ -7,13 +7,16 @@
 // 3. 이름을 바꿔야 하는 글꼴(OFL 예약 이름)의 name 테이블에 원래 이름이 남지 않았는지
 // 4. 글꼴 폴더마다 OFL.txt·README.md가 있는지
 // 5. 앱 코드가 외부 폰트(Google Fonts·jsDelivr 등)나 next/font/google을 쓰지 않는지
+// 6. 공유 카드 폰트(src/fonts/share-card/, TTF/OTF, P2-19): manifest 해시·남는 파일·예약 이름·OFL.txt, 그리고
+//    닉네임 허용 글자(§12-Q14: 완성형 2,350자 + 영문·숫자)가 모든 카드 폰트에, 11,172자가 대체 폰트에 있는지
 
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ROOT, collectLandingText } from './landing-text.mjs';
-import { inspectWoff2 } from './woff2.mjs';
+import { allHangul, nicknameChars } from './share-card-chars.mjs';
+import { inspectSfnt, inspectWoff2 } from './woff2.mjs';
 
 const FONTS = join(ROOT, 'src/fonts');
 const REBUILD_LANDING = 'npm run fonts:build -- --landing';
@@ -56,6 +59,83 @@ export function findReservedNames(names, reserved) {
   return Object.entries(names)
     .filter(([id]) => !KEEP_NAME_IDS.has(Number(id)))
     .filter(([, value]) => reserved.some((r) => value.includes(r)));
+}
+
+/**
+ * 공유 카드 폰트 하나에서 빠진 글자. 모든 카드 폰트는 닉네임 허용 글자를, `full` 범위는 현대 한글 11,172자를 다 가져야 한다
+ * @param {Set<number>} codepoints
+ * @param {'ks2350' | 'full'} range
+ */
+export function findMissingShareCardChars(codepoints, range) {
+  const want =
+    range === 'full' ? [...nicknameChars(), ...allHangul()] : nicknameChars();
+  return [...new Set(want)].filter((ch) => !codepoints.has(ch.codePointAt(0)));
+}
+
+function checkShareCard(manifest, errors) {
+  const sc = manifest.shareCard;
+  if (!sc) {
+    errors.push(
+      'manifest.json에 shareCard가 없음. npm run fonts:build -- --share-card',
+    );
+    return;
+  }
+  const base = join(FONTS, sc.dir);
+  const listed = Object.keys(sc.files);
+  const onDisk = existsSync(base)
+    ? walk(base)
+        .filter((p) => /\.(ttf|otf|woff2?)$/.test(p))
+        .map((p) => relative(FONTS, p))
+    : [];
+  for (const f of onDisk) {
+    if (!sc.files[f])
+      errors.push(
+        `manifest에 없는 공유 카드 폰트: src/fonts/${f} (이 폴더는 함수에 통째로 번들될 수 있어 카드 폰트만 둠)`,
+      );
+  }
+  const dirs = new Set();
+  for (const file of listed) {
+    const info = sc.files[file];
+    const p = join(FONTS, file);
+    dirs.add(file.split('/').slice(0, -1).join('/'));
+    if (!existsSync(p)) {
+      errors.push(`공유 카드 폰트가 없음: src/fonts/${file}`);
+      continue;
+    }
+    const buf = readFileSync(p);
+    if (sha256(buf) !== info.sha256) {
+      errors.push(
+        `manifest와 다른 공유 카드 폰트: src/fonts/${file}. npm run fonts:build -- --share-card`,
+      );
+    }
+    const { codepoints, names } = inspectSfnt(buf);
+    const family = names[16] ?? names[1];
+    if (family !== info.family) {
+      errors.push(
+        `src/fonts/${file}: 글꼴 이름이 ${info.family}가 아님 (${family})`,
+      );
+    }
+    for (const { family: renamed, reserved } of Object.values(RESERVED_NAMES)) {
+      if (renamed !== info.family) continue;
+      const left = findReservedNames(names, reserved);
+      if (left.length)
+        errors.push(
+          `src/fonts/${file}: 예약 이름이 남음 ${JSON.stringify(left)}`,
+        );
+    }
+    const missing = findMissingShareCardChars(codepoints, info.range);
+    if (missing.length) {
+      errors.push(
+        `src/fonts/${file}: 닉네임·카드 글자 ${missing.length}개가 없음 (${missing.slice(0, 20).join('')}…)`,
+      );
+    }
+  }
+  for (const d of dirs) {
+    if (!existsSync(join(FONTS, d, 'OFL.txt')))
+      errors.push(`src/fonts/${d}/OFL.txt가 없음 (OFL 고지)`);
+  }
+  if (!existsSync(join(base, 'README.md')))
+    errors.push(`src/fonts/${sc.dir}/README.md가 없음`);
 }
 
 function walk(dir, out = []) {
@@ -134,7 +214,10 @@ function main() {
   }
   const onDisk = walk(FONTS)
     .filter((p) => p.endsWith('.woff2'))
-    .map((p) => relative(FONTS, p));
+    .map((p) => relative(FONTS, p))
+    .filter(
+      (f) => !f.startsWith(`${manifest.shareCard?.dir ?? 'share-card'}/`),
+    );
   for (const file of onDisk) {
     if (!expected.has(file))
       errors.push(`manifest에 없는 폰트 파일: src/fonts/${file}`);
@@ -168,6 +251,9 @@ function main() {
     }
   }
 
+  // 6. 공유 카드 폰트
+  checkShareCard(manifest, errors);
+
   // 5. 외부 폰트
   const codeFiles = walk(join(ROOT, 'src')).filter((p) =>
     /\.(tsx?|css|mjs|js)$/.test(p),
@@ -195,7 +281,9 @@ function main() {
     `[fonts:check] 통과: 랜딩 글자 ${landing.chars.length}개(모듈 ${landing.files.length}개) · 랜딩 서브셋 ${landingKb.toFixed(1)}KB · ` +
       `조각 ${Object.values(manifest.families)
         .map((f) => `${f.family} ${f.faces}`)
-        .join(', ')}`,
+        .join(
+          ', ',
+        )} · 공유 카드 TTF/OTF ${Object.keys(manifest.shareCard.files).length}개 ${(manifest.shareCard.bytes / 1024).toFixed(0)}KB`,
   );
 }
 

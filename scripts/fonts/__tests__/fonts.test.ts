@@ -2,12 +2,14 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ROOT, collectLandingText } from '../landing-text.mjs';
-import { inspectWoff2 } from '../woff2.mjs';
+import { inspectSfnt, inspectWoff2 } from '../woff2.mjs';
 import {
   EXTERNAL_FONT_PATTERNS,
   findMissingLandingChars,
+  findMissingShareCardChars,
   findReservedNames,
 } from '../check.mjs';
+import { nicknameChars } from '../share-card-chars.mjs';
 import { classifyFontFaces, findPreloadLeaks } from '../check-build.mjs';
 
 const fontFile = (p: string) => readFileSync(join(ROOT, 'src/fonts', p));
@@ -104,5 +106,24 @@ describe('글꼴 토큰 (globals.css)', () => {
     for (const old of ['--font-heading', '--font-noto', '--font-jetbrains']) {
       expect(css).not.toContain(old);
     }
+  });
+});
+
+describe('공유 카드 폰트 검사 (P2-19)', () => {
+  it('빠진 닉네임 글자를 찾는다 (2,350자 + 영문·숫자, full은 11,172자까지)', () => {
+    const ks = new Set(nicknameChars().map((c: string) => c.codePointAt(0)!));
+    expect(findMissingShareCardChars(ks, 'ks2350')).toEqual([]);
+    expect(findMissingShareCardChars(ks, 'full')).toHaveLength(11172 - 2350);
+    ks.delete('가'.codePointAt(0)!);
+    ks.delete('7'.codePointAt(0)!);
+    expect(findMissingShareCardChars(ks, 'ks2350')).toEqual(['가', '7']);
+  });
+
+  it('TTF/OTF의 cmap과 이름을 읽는다', () => {
+    const jua = inspectSfnt(fontFile('share-card/jua/Jua-KS2350.ttf'));
+    expect(jua.names[1]).toBe('Jua');
+    expect(jua.codepoints.has('똠'.codePointAt(0)!)).toBe(false);
+    expect(jua.codepoints.has('힝'.codePointAt(0)!)).toBe(true);
+    expect(() => inspectSfnt(fontFile('jua/Jua-landing.woff2'))).toThrow();
   });
 });

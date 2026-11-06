@@ -9,7 +9,7 @@
 
 | 종류 | 배포 위치 | 출처 | 라이선스 | 우리 의무 | 절 |
 |---|---|---|---|---|---|
-| 웹폰트 3종 | `src/fonts/*` → `/_next/static/media/*.woff2` | Jua · Pretendard(→ pyRoad Sans) · D2Coding(→ pyRoad Mono) | SIL OFL 1.1 | 저작권·라이선스 고지 동봉, 예약 이름이 있으면 수정본 이름 변경, 폰트 단독 판매 금지 | §2 |
+| 웹폰트 3종 | `src/fonts/*` → `/_next/static/media/*.woff2` (공유 카드용 TTF/OTF `src/fonts/share-card/`는 서버 함수 안에만) | Jua · Pretendard(→ pyRoad Sans) · D2Coding(→ pyRoad Mono) | SIL OFL 1.1 | 저작권·라이선스 고지 동봉, 예약 이름이 있으면 수정본 이름 변경, 폰트 단독 판매 금지 | §2 |
 | 효과음 12종 | `public/sounds/sfx/` | Kenney | CC0 1.0 | 없음 (출처 기록, 크레딧 권장) | §3.2 |
 | 배경음악 3곡 | `public/sounds/bgm/` | OpenGameArt 작가 3명 | CC0 1.0 | 없음 (출처 기록) | §3.3 |
 | 종이 결 타일 2장 | `public/textures/` | 자체 생성 (코드) | 저장소 라이선스 | 없음 | §4 |
@@ -43,13 +43,14 @@
 |---|---|---|---|---|---|---|
 | `Jua` (`src/fonts/jua/`) | Jua 1.001 (upstream googlefonts/jua) | github.com/google/fonts `ofl/jua` @ `cbe7e8d` `Jua-Regular.ttf` | `769677ae…79f898` | Copyright 2018 The Jua Project Authors / "The BM JUA Project Authors" | 없음 | 랜딩 텍스트 서브셋 1개 + unicode-range 조각 86개, 힌팅 제거, nameID 5에 `; pyRoad subset`. 이름 유지 |
 | `pyRoad Sans` (`src/fonts/pyroad-sans/`) | Pretendard Variable 1.3.9 (내부 1.309) | npm `pretendard` 1.3.9 tgz (github.com/orioncactus/pretendard) | `0ffc240c…b3bd53` | Copyright (c) 2021, Kil Hyung-jin / © 2023 Kil Hyung-jin | **"Pretendard"** | 공식 가변 동적 서브셋 92조각 + 랜딩 텍스트 서브셋, 힌팅 제거, **이름을 `pyRoad Sans`로** |
+| 공유 카드 `Jua`·`pyRoad Sans` (`src/fonts/share-card/`) | 위 Jua 1.001 + Pretendard 1.3.9 **정적** `Pretendard-SemiBold.otf`·`Pretendard-Bold.otf` (같은 npm tgz의 `dist/public/static/`) | 위와 같음 (같은 `SOURCES` 해시) | 위와 같음 | 위와 같음 | Pretendard: **"Pretendard"** | P2-19: satori가 WOFF2를 못 읽어 압축 없는 TTF/OTF. `jua/Jua-KS2350.ttf`(KS X 1001 2,350자), `pyroad-sans/pyRoadSans-SemiBold-KS2350.otf`(2,350자), `pyroad-sans/pyRoadSans-Bold-Full.otf`(11,172자, 대체 폰트), 각각 ASCII·현대 호환 자모·카드 기호 포함, 힌팅 제거, CFF 서브루틴 유지, Pretendard는 **이름을 `pyRoad Sans`로**. 하위 폴더마다 `OFL.txt` + 폴더 `README.md`. 서버 함수에만 번들(브라우저로 안 보냄) |
 | `pyRoad Mono` (`src/fonts/pyroad-mono/`) | D2Coding 1.3.2 (Build 20180524), 리거처 없는 Regular | github.com/naver/d2codingfont 릴리스 VER1.3.2 zip (OFL.txt는 저장소 `48d2941`) | `0f1c9192…0b24e6` | Copyright (c) 2015, NAVER Corporation / NHN Corporation, FONTRIX | **"D2Coding"·"D2Coding-Bold"** | 한자·가나 뺀 조각 109개, 힌팅 제거, **이름을 `pyRoad Mono`로** |
 
 - 받은 날: 2026-11-06 (P2-10). 전체 해시는 각 폴더 README와 `manifest.json`.
 - **배포 형태와 OFL 고지**: 앱은 woff2를 `/_next/static/media/`로 내보내고 `OFL.txt`는 웹에 올라가지 않습니다. 대신 모든 woff2 파일의 name 테이블에 저작권(nameID 0)과 라이선스 설명·주소(13·14)가 들어 있습니다(2026-11-06 fontTools로 확인). OFL §2는 고지를 "사용자가 쉽게 볼 수 있는 메타데이터"로 넣는 것을 허용하지만 요구하는 것은 저작권 고지 **와 라이선스 전문**이고, name 테이블에는 전문이 아니라 라이선스 이름·주소만 있습니다. 웹폰트 CDN(Google Fonts 등)도 같은 방식이라 관행상 통용되지만 엄밀하지 않으므로, 앱 고지 화면(§8)에서 OFL 전문을 보여 주는 것으로 보완합니다. 저장소(공개)에는 폴더마다 `OFL.txt`가 있습니다.
   - D2Coding의 nameID 14 주소(`dev.naver.com/…`)는 지금 열리지 않습니다. 원문 그대로 두는 것이 원칙이라 고치지 않고, 고지 화면에서 OFL 전문을 보여 주면 해결됩니다.
 - **지금 쓰지 않는 폰트**: Gaegu·Gowun Dodum(시안 B, §12-Q31에서 제외), Noto Sans KR·JetBrains Mono(P2-10에서 제거), Cafe24 써라운드(§1). 프로토타입에서 쓴 것은 §6.
-- **공유 카드(P9-07)** 폰트를 만들면: 같은 `fontkit.py`로 KS X 1001 서브셋 TTF/OTF를 만들고 이름 변경 규칙을 지키며, 운영 전용 폰트 폴더에 `OFL.txt`를 함께 두고 이 표에 행을 추가합니다. 공유 카드 아이콘은 자체 SVG(이모지·Twemoji 없음), Lucide 아이콘 path를 쓰면 ISC 고지(§5).
+- **공유 카드 폰트**(P2-19, 위 표 넷째 행): 같은 `fontkit.py`(`subset --sfnt`)로 만들고 이름 변경 규칙을 지킵니다. 카드 PNG에는 글리프 모양만 들어가고 폰트 파일은 배포되지 않습니다(서버 함수 안). 공유 카드 아이콘·메달·로고 표시는 자체 SVG(`src/lib/share-card/icons.ts`, 이모지·Twemoji·Lucide path 없음).
 
 ## 3. 사운드
 

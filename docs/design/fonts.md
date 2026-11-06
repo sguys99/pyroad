@@ -13,6 +13,7 @@
 | `--font-mono` (`font-mono`) | **pyRoad Mono** = D2Coding Regular 이름 변경 | naver/d2-coding-font 1.3.2 | 싣지 않음 (랜딩에 코드 없음) | 한자·가나 뺀 조각 109개 (957KB), **퀘스트 화면에서만** | `src/fonts/pyroad-mono/` |
 
 - Gaegu·Gowun Dodum·Noto Sans KR·JetBrains Mono는 쓰지 않습니다(§12-Q28).
+- **공유 카드**(`next/og`, P2-19)는 브라우저 폰트가 아니라 서버 함수에 번들하는 TTF/OTF 3개(`src/fonts/share-card/`: Jua KS X 1001 2,350자, pyRoad Sans 600 2,350자, pyRoad Sans 700 11,172자 = 대체 폰트, 합계 2.9MB)를 씁니다. 자세한 것은 [share-card.md](share-card.md) §6.
 - **랜딩**(`src/app/page.tsx`)은 `src/fonts/landing.ts`의 `next/font/local` 두 개(제목·본문)만 import합니다. 랜딩 문구에 쓰인 글자 + ASCII만 담은 파일이라 첫 페인트와 거의 동시에 브랜드 폰트로 그려집니다. 앱 조각 CSS는 싣지 않습니다(렌더 차단 CSS 예산).
 - **앱 화면**은 `src/fonts/app.css`(Jua + pyRoad Sans 조각)를 `(protected)/layout.tsx`·`notice/layout.tsx`·`[...missing]/page.tsx`에서 import합니다. 화면에 나온 글자가 든 조각만 받으므로 닉네임·튜터 답변처럼 미리 모르는 글자도 그립니다. 루트 레이아웃·루트 `not-found.tsx`에서 import하면 랜딩에도 실리니 넣지 마세요.
 - **코드 글꼴**은 `(protected)/quest/layout.tsx`에서만 `pyroad-mono/pyroad-mono.css`를 import합니다. 퀘스트 밖에서 `font-mono`는 시스템 고정폭으로 그려집니다.
@@ -60,7 +61,8 @@ src/fonts/
 ├── manifest.json         # 생성물: 원본 주소·해시, 랜딩 글자, 파일 해시, 메트릭
 ├── jua/                  # Jua-landing.woff2, jua.css, slices/, OFL.txt, README.md
 ├── pyroad-sans/          # pyRoadSans-landing.woff2, pyroad-sans.css, slices/, OFL.txt, README.md
-└── pyroad-mono/          # pyroad-mono.css, slices/, OFL.txt, README.md
+├── pyroad-mono/          # pyroad-mono.css, slices/, OFL.txt, README.md
+└── share-card/           # 공유 카드 TTF/OTF (서버 전용): jua/, pyroad-sans/ (각 OFL.txt) + README.md
 ```
 
 `landing.ts`·`app.css` 말고는 모두 생성물입니다. 직접 고치지 마세요.
@@ -68,6 +70,7 @@ src/fonts/
 ```bash
 pip install -r scripts/fonts/requirements.txt   # fontTools 4.63 + brotli (처음 한 번)
 npm run fonts:build -- --landing                # 랜딩 문구를 바꿨을 때: 랜딩 서브셋만 (몇 초)
+npm run fonts:build -- --share-card             # 공유 카드 TTF/OTF만 (약 13초)
 npm run fonts:build                             # 전부 (원본 받기 → 서브셋 → 조각 → CSS·폴백·README·manifest, 20코어 약 30초)
 npm run fonts:check                             # 검사 (Node만, prebuild·CI)
 ```
@@ -75,7 +78,8 @@ npm run fonts:check                             # 검사 (Node만, prebuild·CI)
 - 원본은 `scripts/fonts/build-fonts.mjs`의 `SOURCES`에 **주소·sha256을 고정**하고 `node_modules/.cache/pyroad-fonts/`에 받습니다(커밋하지 않음, `FONT_CACHE`로 바꿀 수 있음). 해시가 다르면 멈춥니다.
 - 서브셋·조각은 `scripts/fonts/fontkit.py`(fontTools, `python3 -P -E`로 실행): 힌팅 제거, 레이아웃 기능·저작권·라이선스 name 레코드 유지, `--family`면 이름 변경. 조각 묶음은 npm `pretendard`의 가변 동적 서브셋 CSS를 기준으로 하고, 거기 없는 글자(D2Coding의 라틴 확장·그리스·키릴·괘선 등)는 코드포인트 순 160자씩 나눕니다. `unicode-range`에는 실제 글리프가 있는 글자만 적습니다.
 - **랜딩 글자 모으기**(`scripts/fonts/landing-text.mjs`): `src/app/page.tsx`에서 `@/`·상대 경로 import를 따라가 닿는 모든 모듈의 문자열·JSX 텍스트를 TypeScript AST로 모읍니다(주석·타입 import 제외). 화면에 안 나오는 문자열도 섞이지만 거의 ASCII라 크기 영향이 없습니다. 랜딩 구조를 바꾸면(P4) `LANDING_ENTRIES`를 확인합니다.
-- **검사**: `fonts:check`는 랜딩 글자가 모두 서브셋에 있는지(원본 글꼴에 아예 없는 이모지 등은 manifest `notInFont`만 허용), 파일 해시, 예약 이름 잔존, `OFL.txt`·README, 앱 코드의 외부 폰트(`next/font/google`·Google Fonts·jsDelivr)를 봅니다. 랜딩 문구를 바꾸고 서브셋을 안 만들면 실패 메시지가 `npm run fonts:build -- --landing`을 안내합니다. postbuild의 `scripts/fonts/check-build.mjs`는 라우트별 font preload·CSS를 보고 아래 예산을 확인합니다.
+- 서브셋 명령 `fontkit.py subset --sfnt`는 WOFF2 대신 압축 없는 TTF/OTF를 냅니다(satori는 WOFF2를 못 읽음). CFF(OTF)는 서브루틴을 풀면 커져서 그대로 둡니다. 공유 카드 글자 범위는 `scripts/fonts/share-card-chars.mjs`(KS X 1001 2,350자 = EUC-KR 한글 영역 디코딩, 닉네임 허용 글자와 같은 집합).
+- **검사**: `fonts:check`는 랜딩 글자가 모두 서브셋에 있는지(원본 글꼴에 아예 없는 이모지 등은 manifest `notInFont`만 허용), 파일 해시, 예약 이름 잔존, `OFL.txt`·README, 앱 코드의 외부 폰트(`next/font/google`·Google Fonts·jsDelivr), 그리고 공유 카드 폰트(manifest 해시·남는 파일·예약 이름·`OFL.txt`·닉네임 허용 글자 2,350자 + 영문·숫자가 세 파일 모두에, 11,172자가 대체 폰트에 있는지)를 봅니다. 랜딩 문구를 바꾸고 서브셋을 안 만들면 실패 메시지가 `npm run fonts:build -- --landing`을 안내합니다. postbuild의 `scripts/fonts/check-build.mjs`는 라우트별 font preload·CSS를 보고 아래 예산을 확인합니다.
 
 ## 4. 예산과 실측 (2026-11-06, `npm run build` Turbopack)
 
@@ -103,4 +107,4 @@ npm run fonts:check                             # 검사 (Node만, prebuild·CI)
 
 - **iOS·macOS Apple SD Gothic Neo 폴백 보정**: 한글 폭을 못 재서 보정 없이 둡니다. 실기기에서 FOUT·CLS를 보고 값을 넣습니다(P0-14 남은 리스크와 같음).
 - D2Coding 1.3.3~1.4.0(2026-07~10)이 새로 나왔습니다. 메트릭·글리프 차이를 확인하기 전까지 P0-14·P2-01에서 잰 1.3.2를 씁니다.
-- 공유 카드(`next/og`, P6)는 KS X 1001 서브셋 + Pretendard 전체가 따로 필요합니다(P0-10). 같은 `fontkit.py`로 만들고 이름 변경 규칙을 지킵니다.
+- 공유 카드 폰트는 P2-19에서 만들었습니다([share-card.md](share-card.md) §6). 이미지 라우트·파일 추적 설정은 P9-07.

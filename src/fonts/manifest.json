@@ -393,5 +393,38 @@
       ],
       "hangulAdvance": 0.92
     }
-  ]
+  ],
+  "shareCard": {
+    "dir": "share-card",
+    "bytes": 2970632,
+    "files": {
+      "share-card/jua/Jua-KS2350.ttf": {
+        "family": "Jua",
+        "weight": 400,
+        "range": "ks2350",
+        "bytes": 1329040,
+        "sha256": "d3a3a9157339300159e9dc7900985e77e798612634e5b43a6db662f8056f91e1",
+        "chars": 2498,
+        "notInFont": "`·×–—‘’…←↑→↓「」『』・"
+      },
+      "share-card/pyroad-sans/pyRoadSans-SemiBold-KS2350.otf": {
+        "family": "pyRoad Sans",
+        "weight": 600,
+        "range": "ks2350",
+        "bytes": 363600,
+        "sha256": "b59fb153657180e69ee4611de580eeadd75c7ece14b838fbb47f9cdccc640024",
+        "chars": 2515,
+        "notInFont": ""
+      },
+      "share-card/pyroad-sans/pyRoadSans-Bold-Full.otf": {
+        "family": "pyRoad Sans",
+        "weight": 700,
+        "range": "full",
+        "bytes": 1277992,
+        "sha256": "e07efeace201171701aa828b4d1340dbd49b321795226cc8bf2e34dc7307fb81",
+        "chars": 11337,
+        "notInFont": ""
+      }
+    }
+  }
 }

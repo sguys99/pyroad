@@ -156,3 +156,33 @@ export function inspectWoff2(buf) {
     names: readNames(tables.get('name')),
   };
 }
+
+/**
+ * 압축 없는 TTF/OTF(sfnt)의 테이블 (P2-19 공유 카드 폰트). 오프셋 테이블 → 테이블 레코드(태그·오프셋·길이)
+ * @returns {Map<string, Buffer>}
+ */
+export function readSfntTables(buf) {
+  const version = buf.readUInt32BE(0);
+  if (version !== 0x00010000 && buf.toString('latin1', 0, 4) !== 'OTTO') {
+    throw new Error('TTF/OTF 파일이 아님');
+  }
+  const numTables = buf.readUInt16BE(4);
+  const tables = new Map();
+  for (let i = 0; i < numTables; i++) {
+    const r = 12 + i * 16;
+    const tag = buf.toString('latin1', r, r + 4);
+    const offset = buf.readUInt32BE(r + 8);
+    const length = buf.readUInt32BE(r + 12);
+    tables.set(tag, buf.subarray(offset, offset + length));
+  }
+  return tables;
+}
+
+/** TTF/OTF 파일 하나의 코드포인트 집합과 이름 */
+export function inspectSfnt(buf) {
+  const tables = readSfntTables(buf);
+  return {
+    codepoints: readCmapCodepoints(tables.get('cmap')),
+    names: readNames(tables.get('name')),
+  };
+}

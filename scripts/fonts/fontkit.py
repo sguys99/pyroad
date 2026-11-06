@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """pyRoad 웹폰트 도구 (P2-10, fontTools). `scripts/fonts/build-fonts.mjs`가 부른다.
 
-  python3 -P -E fontkit.py subset  <src> <out.woff2> --text-file F [--family NAME --rename OLD,OLD2]
+  python3 -P -E fontkit.py subset  <src> <out.woff2> --text-file F [--family NAME --rename OLD,OLD2] [--sfnt]
   python3 -P -E fontkit.py slice   <src> <outdir> --ranges <ref.css> --prefix P [--no-hanja] [--family NAME --rename OLD]
   python3 -P -E fontkit.py rewrap  <ref.css> <outdir> --prefix P --family NAME --rename OLD   # 공식 동적 서브셋 조각의 이름만 바꿈
   python3 -P -E fontkit.py metrics <font>...                                                   # 폴백 보정용 메트릭
 
 모든 명령은 결과를 JSON 한 줄로 stdout에 낸다 (Node 쪽이 CSS·manifest를 씀).
+
+- `subset --sfnt`: WOFF2 대신 압축 없는 TTF/OTF로 저장한다(공유 카드 satori는 WOFF2를 못 읽음, P0-10·P2-19).
+  CFF(OTF)는 서브루틴을 풀면 오히려 커져서 그대로 둔다.
 
 - 서브셋은 힌팅 제거(구글 폰트 조각과 같음), 레이아웃 기능 전부 유지(kern, ccmp, Pretendard tnum 등),
   저작권·라이선스 name 레코드(0·13·14) 유지 → OFL 고지 의무.
@@ -90,11 +93,11 @@ def mark_version(font: TTFont) -> None:
                 name.setName(s + VERSION_SUFFIX, 5, rec.platformID, rec.platEncID, rec.langID)
 
 
-def subset_font(font: TTFont, cps: set[int]) -> TTFont:
+def subset_font(font: TTFont, cps: set[int], flavor: str | None = "woff2") -> TTFont:
     opts = ftsubset.Options()
-    opts.flavor = "woff2"
+    opts.flavor = flavor
     opts.hinting = False
-    opts.desubroutinize = True
+    opts.desubroutinize = flavor is not None
     opts.layout_features = ["*"]
     opts.name_IDs = ["*"]
     opts.name_languages = ["*"]
@@ -104,15 +107,15 @@ def subset_font(font: TTFont, cps: set[int]) -> TTFont:
     sub = ftsubset.Subsetter(options=opts)
     sub.populate(unicodes=sorted(cps))
     sub.subset(font)
-    font.flavor = "woff2"
+    font.flavor = flavor
     return font
 
 
-def finish(font: TTFont, family: str | None, olds: list[str]) -> None:
+def finish(font: TTFont, family: str | None, olds: list[str], flavor: str | None = "woff2") -> None:
     if family:
         rename(font, family, olds)
     mark_version(font)
-    font.flavor = "woff2"
+    font.flavor = flavor
 
 
 def range_str(cps) -> str:
@@ -173,8 +176,9 @@ def cmd_subset(a):
     font = load(a.src)
     have = set(font.getBestCmap())
     missing = sorted(c for c in want - have if c > 0x20 and not chr(c).isspace())
-    subset_font(font, want & have)
-    finish(font, a.family, a.rename.split(",") if a.rename else [])
+    flavor = None if a.sfnt else "woff2"
+    subset_font(font, want & have, flavor)
+    finish(font, a.family, a.rename.split(",") if a.rename else [], flavor)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     font.save(a.out)
     print(json.dumps({
@@ -298,6 +302,7 @@ def main():
     s.add_argument("--text-file", required=True)
     s.add_argument("--family")
     s.add_argument("--rename")
+    s.add_argument("--sfnt", action="store_true", help="WOFF2 대신 TTF/OTF (공유 카드)")
     s.set_defaults(fn=cmd_subset)
     c = sp.add_parser("slice")
     c.add_argument("src")

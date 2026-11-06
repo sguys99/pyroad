@@ -24,6 +24,7 @@
     "assets:raster": "node scripts/assets/raster.mjs",
     "assets:lottie": "node scripts/assets/check-lottie.mjs",
     "assets:license": "node scripts/assets/license.mjs",
+    "share-card:render": "tsx --tsconfig scripts/share-card/tsconfig.json scripts/share-card/render-samples.tsx",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:status": "supabase status",

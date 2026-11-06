@@ -67,7 +67,7 @@ npm run assets:textures -- --check # 파일이 정의와 같은 그림인지 (�
 - 색은 잉크 갈색 하나(`#5C462A`)에 인덱스마다 투명도만 다른 팔레트 PNG입니다(최대 불투명도 grain 11%, fiber 4%). 다른 색이 필요하면(다크 모드 등) 같은 파일을 CSS `mask-image`로 쓰고 배경색을 칠합니다.
 - PNG를 고른 이유: WebP 무손실은 8~10%만 작고(1.9KB·6.6KB), 공유 카드(satori + resvg)가 PNG를 확실히 그립니다(P0-10). 한 파일을 웹과 카드가 같이 씁니다.
 - 바꿀 때: `TEXTURES`의 값·알고리즘을 바꾸고 **version을 올린 뒤** 다시 생성. 옛 파일은 한 릴리즈 뒤에 지웁니다.
-- 공유 카드(P2-19): 라우트 핸들러가 `readFile(join(process.cwd(), 'public/textures/paper-grain.v1.png'))`처럼 **고정 경로**로 읽어 data URI로 배경에 반복합니다(동적 경로는 파일 추적이 폴더 전체를 함수에 넣음: P0-10 §4.6). satori `backgroundRepeat` 동작은 P2-19에서 확인합니다.
+- 공유 카드(P2-19): 라우트 핸들러가 `readFile(join(process.cwd(), 'public/textures/paper-grain.v1.png'))`처럼 **고정 경로**로 읽어 data URI로 배경에 반복합니다(동적 경로는 파일 추적이 폴더 전체를 함수에 넣음: P0-10 §4.6). satori `backgroundRepeat`는 P2-19에서 확인: `repeat`(기본)·`repeat-x`·`no-repeat` 모두 CSS대로 동작하고 이음매 없이 반복되지만, 1200×630 전면에 깔면 카드 PNG가 11KB → 117KB로 커지고 렌더가 약 100ms 늘어 지금 카드는 단색 바탕을 씁니다([share-card.md](share-card.md) §5).
 
 ### 3.2 그린 그림 (sharp)
 
@@ -85,7 +85,7 @@ npm run assets:raster -- --check   # 원본·출력이 기록과 같은지·예�
 |---|---|---|---|---|---|
 | `hero` | 480 · 800 · 1200 | WebP (AVIF는 선택) | `public/images/` | 파일당 80KB, **800w 50KB**, 형식별 세트 합 **150KB** | 모바일 360~430px × 2배 ≈ 800px, 데스크톱 두 단 560px × 2배 ≈ 1200px. 모바일이 실제로 받는 800w 50KB는 Slow 4G(약 200KB/s)에서 0.25초라 랜딩 LCP 2.5초·JS 250KB·폰트 150KB 예산(§2.10) 옆에 얹힘 |
 | `still` | 320 · 640 | WebP | `public/images/` | 파일당 40KB, 합 60KB | 빈 상태·안내 카드 같은 작은 그림, 2배 밀도까지 |
-| `card-bg` | 1200(×630 고정) | PNG(팔레트, quality 90) | `assets/share-card/` (public 밖, 서버가 파일로 읽음) | 100KB | P0-10 §4.2·P2-19: satori+resvg가 PNG를 확실히 그림, 장당 100KB |
+| `card-bg` | 1200(×630 고정) | PNG(팔레트, quality 90) | `assets/share-card/` (public 밖, 서버가 파일로 읽음) | 100KB | P0-10 §4.2·P2-19: satori+resvg가 PNG를 확실히 그림, 장당 100KB. **P2-19 템플릿은 단색 바탕이라 아직 없음** |
 | `texture` | 256 | PNG | `public/textures/` | 10KB | 스캔한 수채·종이처럼 생성기로 못 만드는 타일 |
 
 - 기본 품질: WebP 78(`effort 6`, `smartSubsample`), AVIF 52, PNG 팔레트 quality 90. 그림책 일러스트는 넓은 평면 + 선이라 WebP 78에서 경계 번짐이 눈에 띄지 않습니다. AVIF는 WebP보다 40~50% 작지만(시험 그림 1200w: WebP 20.6KB, AVIF 9.2KB) 인코딩이 느리고 파일 수가 두 배라, WebP 세트가 예산을 넘을 때만 켭니다.
