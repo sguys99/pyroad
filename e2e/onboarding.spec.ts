@@ -53,6 +53,14 @@ async function newUser(): Promise<{
   };
 }
 
+/** 나이 단계 (P3-15): 해를 고르고 다음으로 */
+async function passAge(page: Page, year: string) {
+  await expect(page.getByTestId('onboarding-step-age')).toBeVisible();
+  await page.locator(`[data-year="${year}"]`).click();
+  await expect(page.getByTestId('age-result')).toBeVisible();
+  await page.getByTestId('onboarding-next').click();
+}
+
 async function openAs(
   browser: Browser,
   baseURL: string,
@@ -106,6 +114,18 @@ test('새 사용자: 관문 → 약속 → 닉네임(규칙·중복·추천) →
   ).toContainText('동의해야');
   await page.getByTestId('agreement-all').check();
   await page.getByTestId('onboarding-next').click();
+
+  // 1½. 나이 (P3-15): 2016년생 = 만 14세 미만 → 보호자 단계. 이번에는 "나중에" (제한 모드)
+  await expect(page.getByTestId('onboarding-step-age')).toBeVisible();
+  await expect(page.getByTestId('onboarding-next')).toBeDisabled();
+  await page.locator('[data-year="2016"]').click();
+  await expect(page.getByTestId('age-result')).toHaveAttribute(
+    'data-band',
+    'under14',
+  );
+  await page.getByTestId('onboarding-next').click();
+  await expect(page.getByTestId('onboarding-step-guardian')).toBeVisible();
+  await page.getByTestId('guardian-later').click();
 
   // 2. 닉네임
   await expect(page.getByTestId('onboarding-step-nickname')).toBeVisible();
@@ -171,6 +191,7 @@ test('새 사용자: 관문 → 약속 → 닉네임(규칙·중복·추천) →
   await expect(card).toContainText(myName);
   await expect(card).toContainText('노을주황');
   await expect(card).toContainText('비밀');
+  await expect(page.getByTestId('onboarding-restricted')).toBeVisible();
   // 연출 중 아무 데나 누르면 끝 상태로 (§12-Q28)
   await page.mouse.click(5, 5);
   await expect(page.getByRole('img', { name: '등록 도장' })).toBeVisible();
@@ -192,14 +213,21 @@ test('새 사용자: 관문 → 약속 → 닉네임(규칙·중복·추천) →
   // DB: 한 번에 저장됨 (닉네임·스킨·학년 없음·완료 시각·동의 2건)
   const { data: row } = await admin
     .from('users')
-    .select('nickname, grade, avatar_config, onboarded_at')
+    .select(
+      'nickname, grade, avatar_config, onboarded_at, age_band, guardian_consented_at, consent_deadline',
+    )
     .eq('id', me.id)
     .single();
   expect(row).toMatchObject({
     nickname: myName,
     grade: null,
     avatar_config: { skin: 'sunset' },
+    // P3-15: 결과만 저장(태어난 해 없음), 보호자 동의 전 → 기한 30일
+    age_band: 'under14',
+    guardian_consented_at: null,
   });
+  expect(row?.consent_deadline).toBeTruthy();
+  expect(JSON.stringify(row)).not.toContain('2016');
   expect(row?.onboarded_at).toBeTruthy();
   const { count } = await admin
     .from('user_agreements')
@@ -221,6 +249,43 @@ test('새 사용자: 관문 → 약속 → 닉네임(규칙·중복·추천) →
   // 끝낸 아이는 온보딩으로 돌아가지 않음
   await page.goto('/onboarding');
   await expect(page).toHaveURL(/\/world$/);
+
+  // 제한 모드 (P3-15): 띠 + 게시판 글쓰기 자리는 안내 → 나중에 보호자 동의 → 풀림
+  await expect(page.getByTestId('consent-banner')).toBeVisible();
+  await page.goto('/board/create');
+  await expect(page.getByTestId('restricted-notice')).toBeVisible();
+  await page.getByTestId('restricted-notice-cta').click();
+  await expect(page).toHaveURL(/\/onboarding\/guardian$/);
+  await page.getByTestId('guardian-submit').click();
+  await expect(
+    page.getByTestId('guardian-panel').getByRole('alert'),
+  ).toBeVisible();
+  await page.getByTestId('guardian-panel').getByTestId('agreement-all').check();
+  await page.getByTestId('guardian-relation-father').click();
+  await page.getByTestId('guardian-submit').click();
+  await expect(page.getByTestId('guardian-done')).toBeVisible();
+  await page.getByTestId('guardian-done-cta').click();
+  await expect(page).toHaveURL(/\/world$/);
+  await expect(page.getByTestId('consent-banner')).toHaveCount(0);
+  const { data: consented } = await admin
+    .from('users')
+    .select('guardian_consented_at, consent_deadline')
+    .eq('id', me.id)
+    .single();
+  expect(consented?.guardian_consented_at).toBeTruthy();
+  expect(consented?.consent_deadline).toBeNull();
+  const { data: rows } = await admin
+    .from('user_agreements')
+    .select('item, method, relation')
+    .eq('user_id', me.id)
+    .eq('method', 'guardian_in_person');
+  expect(rows?.map((r) => r.item).sort()).toEqual([
+    'guardian_attest',
+    'guardian_privacy',
+  ]);
+  expect(rows?.every((r) => r.relation === 'father')).toBe(true);
+  await page.goto('/board/create');
+  await expect(page.getByTestId('restricted-notice')).toHaveCount(0);
   expect(violations).toEqual([]);
 });
 
@@ -265,6 +330,7 @@ test('동작 줄이기: 도장은 처음부터 제자리(움직임 0), 튜토리
   await expect(page.locator('html')).toHaveAttribute('data-reduced', 'true');
   await page.getByTestId('agreement-all').check();
   await page.getByTestId('onboarding-next').click();
+  await passAge(page, 'older');
   await expect(page.getByTestId('nickname-hint')).toHaveAttribute(
     'data-status',
     'ok',
@@ -328,6 +394,7 @@ test('기존 사용자(P3-12): 반가운 말 + 바뀐 점, 예전 닉네임 그�
   ).toBeVisible();
   await page.getByTestId('agreement-all').check();
   await page.getByTestId('onboarding-next').click();
+  await passAge(page, 'older');
 
   await expect(page.getByTestId('nickname-input')).toHaveValue(oldName);
   await expect(page.getByTestId('nickname-hint')).toHaveAttribute(
@@ -364,5 +431,51 @@ test('기존 사용자(P3-12): 반가운 말 + 바뀐 점, 예전 닉네임 그�
     .eq('user_id', me.id)
     .eq('status', 'completed');
   expect(count).toBe(1);
+  expect(violations).toEqual([]);
+});
+
+test('보호자와 함께 온보딩 중에 동의 (P3-15): 모름 = 만 14세 미만 → 보호자 단계에서 동의 → 제한 없음', async ({
+  browser,
+  baseURL,
+}) => {
+  const admin = adminClient();
+  const me = await newUser();
+  const { page, violations } = await openAs(browser, baseURL!, me.cookies, {
+    reducedMotion: 'reduce',
+  });
+  await page.goto('/onboarding');
+  await page.getByTestId('agreement-all').check();
+  await page.getByTestId('onboarding-next').click();
+  await passAge(page, 'unknown');
+  await expect(page.getByTestId('onboarding-step-guardian')).toBeVisible();
+  // 필수를 빼고 누르면 안내, 단계에 머묾
+  await page.getByTestId('onboarding-next').click();
+  await expect(page.getByTestId('onboarding-step-guardian')).toBeVisible();
+  await page.getByTestId('guardian-panel').getByTestId('agreement-all').check();
+  await page.getByTestId('guardian-relation-mother').click();
+  await page.getByTestId('onboarding-next').click();
+  await expect(page.getByTestId('nickname-hint')).toHaveAttribute(
+    'data-status',
+    'ok',
+  );
+  await page.getByTestId('onboarding-next').click();
+  await page.locator('[data-skin="green"]').click();
+  await page.getByTestId('onboarding-next').click();
+  await page.getByTestId('grade-skip').click();
+  await expect(page.getByTestId('onboarding-step-stamp')).toBeVisible();
+  await expect(page.getByTestId('onboarding-restricted')).toHaveCount(0);
+  const { data: row } = await admin
+    .from('users')
+    .select('age_band, guardian_consented_at, consent_deadline')
+    .eq('id', me.id)
+    .single();
+  expect(row?.age_band).toBe('under14');
+  expect(row?.guardian_consented_at).toBeTruthy();
+  expect(row?.consent_deadline).toBeNull();
+  const { count } = await admin
+    .from('user_agreements')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', me.id);
+  expect(count).toBe(4);
   expect(violations).toEqual([]);
 });

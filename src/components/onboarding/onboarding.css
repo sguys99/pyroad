@@ -398,6 +398,115 @@
     height: 0.875rem;
   }
 
+  /* ───────────────────────── 나이 확인 (P3-15): 태어난 해 · 달 · 생일 */
+  .ob-years {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .ob-years {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .ob-year,
+  .ob-month {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    min-height: 3rem;
+    padding: 0 0.5rem;
+    border: 0;
+    border-radius: var(--round-m);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: var(--text-small);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--easing-out),
+      color var(--dur-fast) var(--easing-out);
+  }
+  .ob-year .font-display {
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+  .ob-year[data-wide] {
+    grid-column: span 3;
+  }
+  @media (min-width: 640px) {
+    .ob-year[data-wide] {
+      grid-column: span 2;
+    }
+  }
+  @media (hover: hover) {
+    :is(.ob-year, .ob-month):not([data-selected]):hover {
+      background: var(--line);
+    }
+  }
+  :is(.ob-year, .ob-month)[data-selected] {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  .ob-months {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .ob-months {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  .ob-month.font-display {
+    font-size: 1.125rem;
+    font-weight: 400;
+  }
+  .ob-bd {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 22rem;
+  }
+  /* 이어지는 질문: 위 답 아래로 붙음 (한 번 떠오름, 동작 줄이기는 그대로) */
+  :root[data-reduced='false']:not([data-motion='minimal']) .ob-follow {
+    animation: ob-follow var(--dur-base) var(--easing-out) both;
+  }
+  .ob-age-result {
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--round-m);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-size: var(--text-small);
+    font-weight: 650;
+  }
+  .ob-age-result[data-band='under14'] {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+
+  /* 도장 쪽: 보호자 동의 전 안내 (P3-15) */
+  .ob-restricted-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 0.875rem;
+    border-radius: var(--round-m);
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: var(--text-small);
+    line-height: 1.6;
+  }
+  .ob-restricted-note > svg {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.1875rem;
+    color: var(--accent-text);
+  }
+
   /* ───────────────────────── 학년 칩 */
   .ob-grades {
     display: grid;
@@ -1037,6 +1146,11 @@
   }
 }
 
+@keyframes ob-follow {
+  from {
+    transform: translateY(0.5rem);
+  }
+}
 @keyframes ob-ring {
   from {
     transform: scale(0.9);

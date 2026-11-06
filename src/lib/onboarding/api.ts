@@ -7,7 +7,8 @@
  */
 import type { NicknameError } from '@/lib/profile/nicknameRules';
 import type { SkinId } from '@/lib/avatar/skins';
-import type { AgreementRecord } from '@/lib/legal/agreements';
+import type { AgreementRecord, GuardianRelation } from '@/lib/legal/agreements';
+import type { AgeAnswer } from '@/lib/consent/age';
 
 export const NICKNAME_CHECK_ENDPOINT = '/api/profile/nickname';
 export const ONBOARDING_ENDPOINT = '/api/onboarding';
@@ -39,19 +40,54 @@ export interface OnboardingRequest {
   grade: number | null;
   /** `toAgreementRecords(AGREEMENT_ITEMS, state)` 그대로 */
   agreements: AgreementRecord[];
+  /** 나이 확인 답 (P3-15). 서버가 다시 계산하고 결과만 저장 */
+  age: AgeAnswer;
+  /** 보호자가 함께 동의했을 때 (만 14세 미만), 아니면 null = 나중에 (제한 모드) */
+  guardian: GuardianConsentRequest | null;
 }
+
+/** 보호자 동의 (P3-15): `toAgreementRecords(GUARDIAN_AGREEMENT_ITEMS, state)` + 관계(선택) */
+export interface GuardianConsentRequest {
+  agreements: AgreementRecord[];
+  relation: GuardianRelation | null;
+}
+
+export const GUARDIAN_CONSENT_ENDPOINT = '/api/consent/guardian';
+
+export type GuardianConsentResponse =
+  | { ok: true }
+  | {
+      ok: false;
+      error:
+        | 'invalid_body'
+        | 'guardian_agreements_required'
+        | 'not_under14'
+        | 'rate_limited'
+        | 'unauthorized'
+        | 'server_error';
+      message: string;
+    };
+
+export const GUARDIAN_AGREEMENTS_REQUIRED_MESSAGE =
+  '보호자 동의 항목을 모두 체크해 주세요.';
 
 export type OnboardingErrorCode =
   | 'invalid_body'
   | 'invalid_nickname'
   | 'nickname_taken'
   | 'agreements_required'
+  | 'guardian_agreements_required'
   | 'rate_limited'
   | 'unauthorized'
   | 'server_error';
 
 export type OnboardingResponse =
-  | { ok: true; first: boolean }
+  | {
+      ok: true;
+      first: boolean;
+      /** 만 14세 미만 + 보호자 동의 전 → 제한 모드 (P3-15) */
+      restricted: boolean;
+    }
   | {
       ok: false;
       error: OnboardingErrorCode;

@@ -15,6 +15,7 @@ import {
   ArrowRight,
   BookOpen,
   ChevronLeft,
+  HeartHandshake,
   Rocket,
   Sparkles,
 } from 'lucide-react';
@@ -35,11 +36,14 @@ import {
 } from '@/lib/celebration/onboardingFx';
 import {
   AGREEMENT_ITEMS,
+  GUARDIAN_AGREEMENT_ITEMS,
   emptyAgreementState,
   hasRequiredAgreements,
   isAllAgreed,
   toAgreementRecords,
   type AgreementState,
+  type GuardianAgreementId,
+  type GuardianRelation,
 } from '@/lib/legal/agreements';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import {
@@ -67,7 +71,14 @@ import { RegistrationCard, type CardField } from './RegistrationCard';
 import { SkinPicker } from './SkinPicker';
 import { StepDots } from './StepDots';
 import { useNicknameCheck } from './useNicknameCheck';
+import { AgeCheck, ageResultOf } from './AgeCheck';
+import { GuardianConsentPanel } from '@/components/consent/GuardianConsentPanel';
+import type { AgeAnswer, AgeBand } from '@/lib/consent/age';
 import {
+  AGE_RESULT_LINE,
+  GUARDIAN_DONE_LINE,
+  GUARDIAN_LATER_LINE,
+  RESTRICTED_FINALE_NOTE,
   RETURNING_NEWS,
   RETURNING_NICKNAME_KEPT,
   RETURNING_NICKNAME_RENAME,
@@ -131,8 +142,27 @@ export function OnboardingFlow({
   const router = useRouter();
   const { budget } = useMotionTier();
   const play = useSfx();
-  const steps = useMemo(() => buildOnboardingSteps(), []);
-  const [stepId, setStepId] = useState<OnboardingStepId>(steps[0].id);
+  // 1½. 나이 확인 · 보호자 동의 (P3-15) — 답에 따라 단계 목록이 바뀜 (보호자 칸)
+  const [age, setAge] = useState<Partial<AgeAnswer>>({});
+  const ageResult = ageResultOf(age);
+  const band: AgeBand | null =
+    ageResult && 'band' in ageResult ? ageResult.band : null;
+  const [guardianState, setGuardianState] = useState<
+    AgreementState<GuardianAgreementId>
+  >(() => emptyAgreementState(GUARDIAN_AGREEMENT_ITEMS));
+  const [relation, setRelation] = useState<GuardianRelation | null>(null);
+  const [guardianTried, setGuardianTried] = useState(false);
+  /** 보호자가 지금 동의함 · 나중에 하기로 함 · 아직 */
+  const [guardianDecision, setGuardianDecision] = useState<
+    'agreed' | 'later' | null
+  >(null);
+  const [restricted, setRestricted] = useState(false);
+
+  const steps = useMemo(
+    () => buildOnboardingSteps({ guardian: band === 'under14' }),
+    [band],
+  );
+  const [stepId, setStepId] = useState<OnboardingStepId>('agree');
   const [phase, setPhase] = useState<Phase>('form');
 
   // 1. 약속
@@ -318,6 +348,18 @@ export function OnboardingFlow({
       skin,
       grade: gradeValue,
       agreements: toAgreementRecords(AGREEMENT_ITEMS, agreements),
+      // 나이 답은 서버가 다시 계산만 하고 저장하지 않음 (결과만 저장)
+      age: { year: 'unknown', ...age } as AgeAnswer,
+      guardian:
+        band === 'under14' && guardianDecision === 'agreed'
+          ? {
+              agreements: toAgreementRecords(
+                GUARDIAN_AGREEMENT_ITEMS,
+                guardianState,
+              ),
+              relation,
+            }
+          : null,
     };
     let data: OnboardingResponse | null = null;
     try {
@@ -332,6 +374,7 @@ export function OnboardingFlow({
     }
     setSaving(false);
     if (data?.ok) {
+      setRestricted(data.restricted === true);
       goTo('stamp');
       return;
     }
@@ -350,6 +393,11 @@ export function OnboardingFlow({
           setAgreeTried(true);
           goTo('agree');
           return;
+        case 'guardian_agreements_required':
+          setGuardianTried(true);
+          setGuardianDecision(null);
+          goTo('guardian');
+          return;
         default:
           setSaveError(data.message);
           return;
@@ -363,6 +411,16 @@ export function OnboardingFlow({
       case 'agree':
         setAgreeTried(true);
         if (hasRequiredAgreements(AGREEMENT_ITEMS, agreements)) goNext();
+        return;
+      case 'age':
+        if (band) goNext();
+        return;
+      case 'guardian':
+        setGuardianTried(true);
+        if (hasRequiredAgreements(GUARDIAN_AGREEMENT_ITEMS, guardianState)) {
+          setGuardianDecision('agreed');
+          goNext();
+        }
         return;
       case 'nickname':
         if (canLeaveNickname) goNext();
@@ -423,6 +481,18 @@ export function OnboardingFlow({
     mascotState = 'happy';
     line = '좋아, 약속 완료! 이제 이름을 정하러 가 볼까?';
   }
+  if (stepId === 'age' && band && !reaction) {
+    mascotState = band === 'under14' ? 'encourage' : 'happy';
+    line = AGE_RESULT_LINE[band];
+  }
+  if (
+    stepId === 'guardian' &&
+    !reaction &&
+    hasRequiredAgreements(GUARDIAN_AGREEMENT_ITEMS, guardianState)
+  ) {
+    mascotState = 'happy';
+    line = GUARDIAN_DONE_LINE;
+  }
   if (stepId === 'nickname' && !reaction && returning && previousNickname) {
     line =
       previousNickname === 'kept'
@@ -465,6 +535,27 @@ export function OnboardingFlow({
               showRequiredError={agreeTried}
             />
           </>
+        );
+      case 'age':
+        return (
+          <AgeCheck
+            value={age}
+            onChange={(next) => {
+              setAge(next);
+              // 답이 바뀌면 보호자 결정도 다시 (만 14세 이상이 되면 보호자 칸이 사라짐)
+              setGuardianDecision(null);
+            }}
+          />
+        );
+      case 'guardian':
+        return (
+          <GuardianConsentPanel
+            value={guardianState}
+            onChange={setGuardianState}
+            relation={relation}
+            onRelation={setRelation}
+            showRequiredError={guardianTried}
+          />
         );
       case 'nickname':
         return (
@@ -511,6 +602,8 @@ export function OnboardingFlow({
 
   const primaryLabel: Record<OnboardingStepId, string> = {
     agree: '약속할게요',
+    age: '다음',
+    guardian: '보호자로서 동의합니다',
     nickname: '이 이름으로 할래요',
     skin: isSubmitStep(steps, 'skin') ? '등록증 완성하기' : '이 색으로 할래요',
     grade: '등록증 완성하기',
@@ -519,6 +612,7 @@ export function OnboardingFlow({
   const primaryDisabled =
     (stepId === 'nickname' && !canLeaveNickname) ||
     (stepId === 'skin' && !skin) ||
+    (stepId === 'age' && !band) ||
     (stepId === 'grade' && grade == null);
 
   const actions = (
@@ -531,6 +625,19 @@ export function OnboardingFlow({
         >
           {saveError}
         </p>
+      )}
+      {stepId === 'guardian' && (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setGuardianDecision('later');
+            setReaction({ state: 'encourage', line: GUARDIAN_LATER_LINE });
+            goNext();
+          }}
+          data-testid="guardian-later"
+        >
+          나중에 보호자와 함께 할게요
+        </Button>
       )}
       {stepId === 'grade' && (
         <Button
@@ -645,6 +752,15 @@ export function OnboardingFlow({
             >
               {text.title}
             </h1>
+            {restricted && (
+              <p
+                className="ob-restricted-note"
+                data-testid="onboarding-restricted"
+              >
+                <HeartHandshake aria-hidden />
+                <span>{RESTRICTED_FINALE_NOTE}</span>
+              </p>
+            )}
             {returning && (
               <p className="ob-desc text-center" data-testid="onboarding-kept">
                 {totalXp > 0

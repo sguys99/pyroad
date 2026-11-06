@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { LoggedInShell } from '@/components/providers/LoggedInShell';
 // 온보딩 전용 스타일: 랜딩 렌더 차단 CSS 예산(§2.10)에 넣지 않으려고 globals.css 대신 여기서
 import '@/components/onboarding/onboarding.css';
+import '@/components/consent/consent.css';
 
 export const metadata: Metadata = {
   title: '모험가 등록',

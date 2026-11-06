@@ -493,6 +493,7 @@ export type Database = {
           agreed_at: string;
           item: string;
           method: string;
+          relation: string | null;
           user_id: string;
           version: string;
         };
@@ -500,6 +501,7 @@ export type Database = {
           agreed_at?: string;
           item: string;
           method: string;
+          relation?: string | null;
           user_id: string;
           version: string;
         };
@@ -507,6 +509,7 @@ export type Database = {
           agreed_at?: string;
           item?: string;
           method?: string;
+          relation?: string | null;
           user_id?: string;
           version?: string;
         };
@@ -693,13 +696,17 @@ export type Database = {
       };
       users: {
         Row: {
+          age_band: string | null;
+          age_checked_at: string | null;
           avatar_config: Json;
           avatar_url: string | null;
+          consent_deadline: string | null;
           created_at: string;
           current_level: number;
           display_name: string;
           golden_keys: number;
           grade: number | null;
+          guardian_consented_at: string | null;
           id: string;
           last_login_at: string;
           last_login_provider: string | null;
@@ -710,13 +717,17 @@ export type Database = {
           total_xp: number;
         };
         Insert: {
+          age_band?: string | null;
+          age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
           display_name?: string;
           golden_keys?: number;
           grade?: number | null;
+          guardian_consented_at?: string | null;
           id: string;
           last_login_at?: string;
           last_login_provider?: string | null;
@@ -727,13 +738,17 @@ export type Database = {
           total_xp?: number;
         };
         Update: {
+          age_band?: string | null;
+          age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
           display_name?: string;
           golden_keys?: number;
           grade?: number | null;
+          guardian_consented_at?: string | null;
           id?: string;
           last_login_at?: string;
           last_login_provider?: string | null;
@@ -813,8 +828,11 @@ export type Database = {
     Functions: {
       complete_onboarding: {
         Args: {
+          p_age_band: string;
           p_agreements: Json;
           p_grade: number;
+          p_guardian_agreements: Json;
+          p_guardian_relation: string;
           p_method: string;
           p_nickname: string;
           p_skin: string;
@@ -866,6 +884,10 @@ export type Database = {
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      list_expired_unconsented: {
+        Args: { p_limit: number };
+        Returns: string[];
+      };
       patch_user_settings: {
         Args: { p_patch: Json; p_user_id: string };
         Returns: boolean;
@@ -886,6 +908,15 @@ export type Database = {
           p_used_golden_key: boolean;
         };
         Returns: number;
+      };
+      record_guardian_consent: {
+        Args: {
+          p_agreements: Json;
+          p_method: string;
+          p_relation: string;
+          p_user_id: string;
+        };
+        Returns: Json;
       };
       record_hint: {
         Args: { p_level: number; p_quest_id: string; p_user_id: string };

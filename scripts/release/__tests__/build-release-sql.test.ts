@@ -88,6 +88,10 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       phase3.indexOf('-- ===== 00021 ====='),
     );
     expect(phase3).toMatch(/complete_onboarding/);
+    // 00024(P3-15)는 00023 뒤 (complete_onboarding 을 9인자로 다시 정의)
+    expect(phase3.indexOf('-- ===== 00024 =====')).toBeGreaterThan(
+      phase3.indexOf('-- ===== 00023 ====='),
+    );
     expect(phase3).not.toContain('-- ===== 00022 =====');
   });
 

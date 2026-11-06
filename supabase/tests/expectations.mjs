@@ -584,9 +584,9 @@ export const EXPECT = {
   'APP-12': { expect: 'allow' },
   'APP-15': {
     expect: 'allow',
-    requires: 'public.users.onboarded_at',
-    activateIn: 'P3-11',
-    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문)',
+    requires: 'public.users.age_band',
+    activateIn: 'P3-15',
+    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문 + 보호자 동의 상태, P3-11·P3-15)',
   },
   'APP-13': {
     expect: 'allow',
@@ -719,6 +719,31 @@ export const EXPECT = {
     requires: 'public.complete_onboarding()',
     activateIn: 'P3-11',
     note: '① 00023 complete_onboarding 한 트랜잭션 · avatar_config 합치기 · 처음 시각 유지 · 23505 롤백',
+  },
+  // 만 14세 미만 법정대리인 동의 (P3-15, ① 00024)
+  'GC-1': {
+    expect: 'deny',
+    requires: 'public.users.age_band',
+    activateIn: 'P3-15',
+    note: '나이 확인 결과·동의 시각·파기 기한은 클라이언트가 못 바꿈 (③ 00008 UPDATE 는 preferred_provider 만)',
+  },
+  'GC-2': {
+    expect: 'deny',
+    requires: 'public.record_guardian_consent()',
+    activateIn: 'P3-15',
+    note: '보호자 동의 기록·파기 대상 목록은 service_role 전용 (/api/consent/guardian · /api/cron/purge-unconsented)',
+  },
+  'GC-3': {
+    expect: 'allow',
+    requires: 'public.record_guardian_consent()',
+    activateIn: 'P3-15',
+    note: '① 00024 complete_onboarding 9인자: 결과만 저장·한 번 정하면 그대로, 미동의 30일 기한, 보호자 동의 method guardian_in_person',
+  },
+  'GC-4': {
+    expect: 'allow',
+    requires: 'public.list_expired_unconsented()',
+    activateIn: 'P3-15',
+    note: '파기 대상은 기한 지난 미동의 만 14세 미만만',
   },
   'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
   'RL-2': {

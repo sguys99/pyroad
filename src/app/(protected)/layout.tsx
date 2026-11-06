@@ -1,6 +1,11 @@
 import { redirect } from 'next/navigation';
 import { LoggedInShell } from '@/components/providers/LoggedInShell';
 import { loadOwnUserRow } from '@/lib/supabase/ownUserRow';
+// 보호자 동의 띠·안내 스타일 (P3-15): 랜딩 CSS 예산 밖
+import '@/components/consent/consent.css';
+import { consentStatus } from '@/lib/consent/status';
+import { ConsentProvider } from '@/components/consent/ConsentProvider';
+import { ConsentBanner } from '@/components/consent/ConsentBanner';
 
 /**
  * 로그인 화면은 모두 요청마다 렌더한다: 페이지 CSP의 nonce를 서버 렌더 때 넣어야 하기 때문이다 (B27).
@@ -19,6 +24,9 @@ export const dynamic = 'force-dynamic';
  * TODO(P3-12): 기존 사용자(닉네임이 이미 있거나 학습 기록이 있는 아이)는 지금은 새 사용자와 같이 온보딩 전체를 거친다.
  *   P3-12에서 "닉네임 확인 + 약관 동의"만 받는 짧은 흐름으로 나누고, 그 전까지 자리표시자 "모험가1234"로 표시한다.
  *
+ * 보호자 동의 (P3-15): 만 14세 미만 + 동의 전이면 제한 모드. 상태는 같은 조회로 읽어 `ConsentProvider`로 넘기고(게시판 화면이
+ * 글쓰기 자리를 안내로 바꿈), 맨 위 `ConsentBanner`가 안내·파기 7일 전 경고를 보인다. 실제로 막는 것은 게시판 API(`guardianWriteGate`).
+ *
  * 로그인 화면 틀(`<main>`, 움직임·사운드 설정 동기화, 앱 웹폰트)은 `LoggedInShell` — `/onboarding`과 같이 쓴다.
  */
 export default async function ProtectedLayout({
@@ -28,5 +36,14 @@ export default async function ProtectedLayout({
 }) {
   const row = await loadOwnUserRow();
   if (row && row.onboardedAt === null) redirect('/onboarding');
-  return <LoggedInShell>{children}</LoggedInShell>;
+  // 보호자 동의 상태 (P3-15): 같은 조회 결과로. 모르면 null → 띠·안내 없음 (막는 것은 서버 API)
+  const consent = row?.consent ? consentStatus(row.consent) : null;
+  return (
+    <LoggedInShell>
+      <ConsentProvider status={consent}>
+        <ConsentBanner />
+        {children}
+      </ConsentProvider>
+    </LoggedInShell>
+  );
 }

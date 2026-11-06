@@ -36,10 +36,12 @@ setup('테스트 사용자 만들고 로그인', async ({ page, baseURL }) => {
     throw new Error(`[e2e] 테스트 사용자 생성 실패: ${createError?.message}`);
   }
   const user: E2eUser = { id: created.user.id, email };
-  // 온보딩(P3-11)은 끝낸 사용자로: 안 하면 모든 로그인 화면이 /onboarding 으로 간다. 온보딩 자체는 onboarding.spec.ts 가 새 사용자로
+  // 온보딩(P3-11)은 끝낸 만 14세 이상 사용자로: 안 하면 모든 로그인 화면이 /onboarding 으로 가고(P3-11),
+  // 나이 확인 결과가 없으면 제한 모드라 게시판 쓰기가 막힌다(P3-15). 온보딩·보호자 동의 자체는 onboarding.spec.ts 가 새 사용자로
+  const now = new Date().toISOString();
   const { error: onboardError } = await admin
     .from('users')
-    .update({ onboarded_at: new Date().toISOString() })
+    .update({ onboarded_at: now, age_band: '14plus', age_checked_at: now })
     .eq('id', user.id);
   if (onboardError) {
     throw new Error(

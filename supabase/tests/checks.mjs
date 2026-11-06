@@ -2800,8 +2800,8 @@ async function groupApp(u) {
     ],
     [
       'APP-15',
-      '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 (P3-11 loadOwnUserRow)',
-      `/rest/v1/users?select=settings,onboarded_at&id=eq.${u.alice.id}`,
+      '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 + 보호자 동의 상태 (P3-11·P3-15 loadOwnUserRow)',
+      `/rest/v1/users?select=settings,onboarded_at,age_band,guardian_consented_at,consent_deadline&id=eq.${u.alice.id}`,
     ],
   ];
   // 보고서에 매번 바뀌는 uuid 가 남지 않게 자리표시자로 바꿈
@@ -4523,6 +4523,9 @@ async function groupOnboarding(u) {
             p_grade: null,
             p_agreements: [{ item: 'terms', version: T }],
             p_method: 'self',
+            p_age_band: '14plus',
+            p_guardian_agreements: null,
+            p_guardian_relation: null,
           },
         }),
         `select exists (select 1 from public.users where id = '${u.alice.id}' and (nickname = 'Hacker01' or onboarded_at is not null))`,
@@ -4578,6 +4581,9 @@ async function groupOnboarding(u) {
           { item: 'privacy', version: T },
         ],
         p_method: 'self',
+        p_age_band: '14plus',
+        p_guardian_agreements: null,
+        p_guardian_relation: null,
       });
       const r1 = await rpc('complete_onboarding', args(x.id, 'ObCheck01'));
       if (r1.status !== 200 || r1.json?.first !== true) return { actual: 'error', detail: `1차 ${r1.status} ${JSON.stringify(r1.json)}` };
@@ -4621,6 +4627,159 @@ async function groupOnboarding(u) {
           self: self.json,
         },
       ) ?? { actual: 'ok', detail: 'RPC 한 번에 저장·롤백·동기화 확인' }
+      );
+    },
+  });
+}
+
+// ── consent: 만 14세 미만 법정대리인 동의 (P3-15, ① 00024) ──────────
+async function groupConsent(u) {
+  const T = '2026-11-06';
+  const G = [
+    { item: 'guardian_privacy', version: T },
+    { item: 'guardian_attest', version: T },
+  ];
+  await check({
+    group: 'consent',
+    id: 'GC-1',
+    role: 'authenticated',
+    op: 'PATCH /users {age_band: 14plus, guardian_consented_at, consent_deadline: null} (제한 모드·파기 기한 스스로 풀기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { age_band: '14plus', guardian_consented_at: new Date().toISOString(), consent_deadline: null },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.users where id = '${u.alice.id}' and (age_band = '14plus' or guardian_consented_at is not null))`,
+      ),
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-2',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/record_guardian_consent · list_expired_unconsented (보호자 동의 꾸미기·파기 대상 훑기)',
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        for (const [fn, body] of [
+          ['record_guardian_consent', { p_user_id: u.alice.id, p_agreements: G, p_relation: null, p_method: 'guardian_in_person' }],
+          ['list_expired_unconsented', { p_limit: 10 }],
+        ]) {
+          const r = await rest('POST', `/rest/v1/rpc/${fn}`, { as, body });
+          if (r.status < 300) return { actual: 'allowed', detail: `${fn} ${r.status}` };
+          if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+            return { actual: 'error', detail: `${fn} ${r.status} ${errCode(r)} ${errMsg(r)}` };
+        }
+      }
+      const written = one(`select guardian_consented_at is not null from public.users where id = '${u.alice.id}'`);
+      return written === 't' ? { actual: 'allowed', detail: '동의가 기록됨' } : { actual: 'denied', detail: '모두 거부' };
+    },
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-3',
+    role: 'service_role',
+    op: 'complete_onboarding 나이·보호자: 미동의 만 14세 미만 = 제한 + 기한 30일 / 결과는 한 번 정하면 그대로 / 보호자 동의 함께 = 기한 없음·관계 기록 / record_guardian_consent 로 나중에 해제 / 만 14세 이상은 409',
+    ...OK,
+    run: async () => {
+      const kid = await createUser('gc3a', '동의전아이');
+      const kid2 = await createUser('gc3b', '동의한아이');
+      const teen = await createUser('gc3c', '열다섯');
+      const base = (id, nick, band, guardian = null, relation = null) => ({
+        p_user_id: id,
+        p_nickname: nick,
+        p_skin: 'sky',
+        p_grade: null,
+        p_agreements: [{ item: 'terms', version: T }, { item: 'privacy', version: T }],
+        p_method: 'self',
+        p_age_band: band,
+        p_guardian_agreements: guardian,
+        p_guardian_relation: relation,
+      });
+      const r1 = await rpc('complete_onboarding', base(kid.id, 'GcKid01', 'under14'));
+      const kidState = one(`select age_band || '|' || (guardian_consented_at is null) || '|' ||
+                            (consent_deadline between now() + interval '29 days 23 hours' and now() + interval '30 days 1 hour')
+                            from public.users where id = '${kid.id}'`);
+      const deadline1 = one(`select consent_deadline from public.users where id = '${kid.id}'`);
+      // 다시 불러 만 14세 이상이라고 해도 결과·기한은 그대로
+      await rpc('complete_onboarding', base(kid.id, 'GcKid01', '14plus'));
+      const kidAgain = one(`select age_band || '|' || (consent_deadline = '${deadline1}') from public.users where id = '${kid.id}'`);
+      const r2 = await rpc('complete_onboarding', base(kid2.id, 'GcKid02', 'under14', G, 'mother'));
+      const kid2State = one(`select (guardian_consented_at is not null) || '|' || (consent_deadline is null) || '|' ||
+                             (select count(*) from public.user_agreements where user_id = '${kid2.id}' and method = 'guardian_in_person' and relation = 'mother')
+                             from public.users where id = '${kid2.id}'`);
+      await rpc('complete_onboarding', base(teen.id, 'GcTeen01', '14plus', G, 'father'));
+      const teenState = one(`select age_band || '|' || (consent_deadline is null) || '|' ||
+                             (select count(*) from public.user_agreements where user_id = '${teen.id}' and method = 'guardian_in_person')
+                             from public.users where id = '${teen.id}'`);
+      const teenLater = await rpc('record_guardian_consent', { p_user_id: teen.id, p_agreements: G, p_relation: null, p_method: 'guardian_in_person' });
+      const badRel = await rpc('record_guardian_consent', { p_user_id: kid.id, p_agreements: G, p_relation: 'uncle', p_method: 'guardian_in_person' });
+      const later = await rpc('record_guardian_consent', { p_user_id: kid.id, p_agreements: G, p_relation: 'other', p_method: 'guardian_in_person' });
+      const kidLater = one(`select (guardian_consented_at is not null) || '|' || (consent_deadline is null) from public.users where id = '${kid.id}'`);
+      return (
+        compare(
+          'GC-3',
+          {
+            r1: true,
+            kidState: 'under14|true|true',
+            kidAgain: 'under14|true',
+            r2: false,
+            kid2State: 'true|true|2',
+            teenState: '14plus|true|0',
+            teenLater: 'PT409',
+            badRel: 'PT400',
+            later: 200,
+            kidLater: 'true|true',
+          },
+          {
+            r1: r1.json?.restricted,
+            kidState,
+            kidAgain,
+            r2: r2.json?.restricted,
+            kid2State,
+            teenState,
+            teenLater: String(errCode(teenLater)),
+            badRel: String(errCode(badRel)),
+            later: later.status,
+            kidLater,
+          },
+        ) ?? { actual: 'ok', detail: '제한·기한·결과 고정·보호자 기록·나중 동의 확인' }
+      );
+    },
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-4',
+    role: 'service_role',
+    op: 'list_expired_unconsented: 기한 지난 미동의 만 14세 미만만 (동의함·기한 남음·만 14세 이상·확인 전 제외)',
+    ...OK,
+    run: async () => {
+      const ids = {};
+      for (const [k, band, consented, days] of [
+        ['expired', 'under14', false, -1],
+        ['consented', 'under14', true, -1],
+        ['future', 'under14', false, 5],
+        ['teen', '14plus', false, -1],
+        ['unknown', null, false, -1],
+      ]) {
+        const x = await createUser(`gc4${k}`, '파기점검');
+        ids[k] = x.id;
+        one(`update public.users set age_band = ${band ? `'${band}'` : 'null'},
+               guardian_consented_at = ${consented ? 'now()' : 'null'},
+               consent_deadline = now() + interval '${days} days'
+             where id = '${x.id}'`);
+      }
+      const r = await rpc('list_expired_unconsented', { p_limit: 500 });
+      const listed = Array.isArray(r.json) ? r.json : [];
+      const got = Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, listed.includes(id)]));
+      return (
+        compare('GC-4', { expired: true, consented: false, future: false, teen: false, unknown: false }, got) ?? {
+          actual: 'ok',
+          detail: `대상 ${listed.length}`,
+        }
       );
     },
   });
@@ -5165,6 +5324,7 @@ async function main() {
   await groupBoard(u);
   await groupRateLimit(u);
   await groupOnboarding(u);
+  await groupConsent(u);
   await groupAnalytics(u);
   await groupAccount(u);
   await groupApp(u);

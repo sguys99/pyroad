@@ -8,6 +8,7 @@ import '@/fonts/app.css';
 import '@/fonts/pyroad-mono/pyroad-mono.css';
 // 온보딩 조각(P3-11)은 globals.css 밖 스타일 (랜딩 CSS 예산)
 import '@/components/onboarding/onboarding.css';
+import '@/components/consent/consent.css';
 import { DesignCatalog, type ReducedChoice, type TierChoice } from './DesignCatalog';
 
 export const metadata: Metadata = {

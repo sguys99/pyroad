@@ -5,7 +5,7 @@
 // 하나라도 실패하면 그 파일 전체가 되돌려집니다 (마이그레이션의 자기 검증 예외 포함).
 //   v0.4         → release-sql/              1_먼저실행.sql(①) · 2_두번째실행.sql(③ + seed) · 3_선택.sql(00009)   v0.4-runbook.md
 //   v0.5-phase2  → release-sql/v0.5-phase2/  1_먼저실행.sql(① 00020)                                            v0.5-runbook.md
-//   v0.4-phase3  → release-sql/v0.4-phase3/  1_먼저실행.sql(① 00021·00023) · 2_두번째실행.sql(③ 00022)         v0.4-runbook.md "Phase 3 병합"
+//   v0.4-phase3  → release-sql/v0.4-phase3/  1_먼저실행.sql(① 00021·00023·00024) · 2_두번째실행.sql(③ 00022)   v0.4-runbook.md "Phase 3 병합"
 // 새 마이그레이션은 RELEASES 의 그 릴리즈 묶음과 런북 표에 함께 넣습니다. 어느 묶음에도 없으면 오류(단위 테스트가 CI 에서 잡음).
 //
 // Windows 에서 SQL Editor 에 붙여넣으면 줄바꿈이 모두 CRLF 로 바뀝니다. 마이그레이션·seed 는 CRLF 에 안전하게 써 두었고(B39),
@@ -99,10 +99,10 @@ export const RELEASES = [
         file: '1_먼저실행.sql',
         stage: 1,
         head: [
-          '-- pyRoad v0.4 (Phase 3 병합) 운영 적용 1/2: ① 추가형 마이그레이션 (00021 public_avatar_skin · 00023 onboarding)',
+          '-- pyRoad v0.4 (Phase 3 병합) 운영 적용 1/2: ① 추가형 마이그레이션 (00021 public_avatar_skin · 00023 onboarding · 00024 guardian_consent)',
           '-- feat/phase3 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.4-runbook.md "Phase 3 병합"',
         ],
-        parts: ['00021', '00023'],
+        parts: ['00021', '00023', '00024'],
       },
       {
         file: '2_두번째실행.sql',

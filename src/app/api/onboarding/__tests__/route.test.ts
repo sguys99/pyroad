@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AGREEMENT_ITEMS, toAgreementRecords } from '@/lib/legal/agreements';
+import {
+  AGREEMENT_ITEMS,
+  GUARDIAN_AGREEMENT_ITEMS,
+  toAgreementRecords,
+} from '@/lib/legal/agreements';
 
 const mocks = vi.hoisted(() => ({
   user: { id: '11111111-1111-1111-1111-111111111111' } as { id: string } | null,
@@ -45,6 +49,8 @@ const body = (over: Record<string, unknown> = {}) => ({
   skin: 'berry',
   grade: 4,
   agreements: ALL,
+  age: { year: 2016 },
+  guardian: null,
   ...over,
 });
 
@@ -84,7 +90,11 @@ describe('POST /api/onboarding (P3-11)', () => {
   it('검사한 값으로 complete_onboarding 한 번 + 처음이면 onboarding_complete (닉네임 없이)', async () => {
     const res = await post(body({ nickname: ' 용감한여우 ' }));
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, first: true });
+    expect(await res.json()).toEqual({
+      ok: true,
+      first: true,
+      restricted: false,
+    });
     const call = mocks.rpc.mock.calls.find(
       (c) => c[0] === 'complete_onboarding',
     );
@@ -98,6 +108,9 @@ describe('POST /api/onboarding (P3-11)', () => {
         version: i.version,
       })),
       p_method: 'self',
+      p_age_band: 'under14',
+      p_guardian_agreements: null,
+      p_guardian_relation: null,
     });
     expect(mocks.trackServerEvent).toHaveBeenCalledTimes(1);
     const ev = mocks.trackServerEvent.mock.calls[0][0];
@@ -116,6 +129,56 @@ describe('POST /api/onboarding (P3-11)', () => {
       skin: 'berry',
       grade_given: true,
       returning: true,
+    });
+  });
+
+  it('나이: 서버가 다시 계산해 결과만 넘김 (태어난 해는 RPC 에 가지 않음), 모름 = 만 14세 미만', async () => {
+    await post(body({ age: { year: 1990 } }));
+    await post(body({ age: { year: 'unknown' } }));
+    const calls = mocks.rpc.mock.calls.filter(
+      (c) => c[0] === 'complete_onboarding',
+    );
+    expect(calls.map((c) => c[1].p_age_band)).toEqual(['14plus', 'under14']);
+    expect(JSON.stringify(calls)).not.toContain('1990');
+  });
+
+  it('만 14세 미만 + 보호자 동의 → 보호자 기록·관계, 빠지면 400, 만 14세 이상이면 보호자 기록은 무시', async () => {
+    const G = toAgreementRecords(GUARDIAN_AGREEMENT_ITEMS, {
+      guardian_privacy: true,
+      guardian_attest: true,
+    });
+    expect(
+      (await post(body({ guardian: { agreements: G, relation: 'mother' } })))
+        .status,
+    ).toBe(200);
+    const call = mocks.rpc.mock.calls.find(
+      (c) => c[0] === 'complete_onboarding',
+    );
+    expect(call?.[1]).toMatchObject({
+      p_age_band: 'under14',
+      p_guardian_agreements: GUARDIAN_AGREEMENT_ITEMS.map((i) => ({
+        item: i.id,
+        version: i.version,
+      })),
+      p_guardian_relation: 'mother',
+    });
+    const partial = await post(
+      body({ guardian: { agreements: G.slice(0, 1), relation: null } }),
+    );
+    expect(partial.status).toBe(400);
+    expect((await partial.json()).error).toBe('guardian_agreements_required');
+    mocks.rpc.mockClear();
+    await post(
+      body({
+        age: { year: 'older' },
+        guardian: { agreements: G, relation: 'father' },
+      }),
+    );
+    expect(
+      mocks.rpc.mock.calls.find((c) => c[0] === 'complete_onboarding')?.[1],
+    ).toMatchObject({
+      p_age_band: '14plus',
+      p_guardian_agreements: null,
     });
   });
 

@@ -3,9 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { reportServerError } from '@/lib/api/serverError';
 import { trackServerEvent } from '@/lib/analytics/server';
+import { ageBand } from '@/lib/consent/age';
 import { validateNickname } from '@/lib/profile/nickname';
 import {
   AGREEMENTS_REQUIRED_MESSAGE,
+  GUARDIAN_AGREEMENTS_REQUIRED_MESSAGE,
   NICKNAME_RATE_LIMITED_MESSAGE,
   NICKNAME_TAKEN_MESSAGE,
   ONBOARDING_SERVER_ERROR_MESSAGE,
@@ -16,12 +18,17 @@ import {
   completeOnboarding,
   consumeProfileQuota,
   findFreeSuggestion,
+  guardianRecords,
   parseOnboardingRequest,
+  type CompleteOnboardingInput,
   wasReturningUser,
 } from '@/lib/onboarding/server';
 
 /**
- * 첫 로그인 온보딩 저장 (P3-11). `POST /api/onboarding { nickname, skin, grade, agreements }`
+ * 첫 로그인 온보딩 저장 (P3-11·P3-15). `POST /api/onboarding { nickname, skin, grade, agreements, age, guardian }`
+ *
+ * 나이(P3-15): `age`(태어난 해·달·생일 지남)를 서버가 KST 오늘로 다시 계산해 결과(under14·14plus)만 저장한다. 답은 저장·로그하지 않는다.
+ * 만 14세 미만이고 `guardian`(보호자 항목 전부 + 관계 선택)이 오면 보호자 동의까지 마침, 없으면 제한 모드 + 30일 기한.
  *
  * 클라이언트가 보낸 값을 믿지 않고 모두 다시 검사한 뒤(닉네임 규칙·금칙어 `validateNickname`, 스킨 id, 학년 1~6,
  * 필수 동의·지금 문서 버전) service_role RPC `complete_onboarding`(00023) 한 번으로 닉네임·스킨(avatar_config 에 합침)·
@@ -100,6 +107,25 @@ export async function POST(request: Request) {
     );
   }
 
+  // 나이 확인 (P3-15): 답을 KST 오늘로 다시 계산해 결과만 넘긴다. 더 물어야 하는 상태(날짜 경계 등)·모름 = 만 14세 미만
+  const age = ageBand(input.age);
+  const band = 'band' in age ? age.band : 'under14';
+  let guardian: CompleteOnboardingInput['guardian'] = null;
+  if (band === 'under14' && input.guardian) {
+    const records = guardianRecords(input.guardian.agreements);
+    if (!records) {
+      return reply(
+        {
+          ok: false,
+          error: 'guardian_agreements_required',
+          message: GUARDIAN_AGREEMENTS_REQUIRED_MESSAGE,
+        },
+        400,
+      );
+    }
+    guardian = { agreements: records, relation: input.guardian.relation };
+  }
+
   const admin = createAdminClient();
   const quota = await consumeProfileQuota(admin, user.id, 'profile:onboarding');
   if (!quota.allowed) {
@@ -119,6 +145,8 @@ export async function POST(request: Request) {
     skin: input.skin,
     grade: input.grade,
     agreements,
+    ageBand: band,
+    guardian,
   });
 
   if (!result.ok) {
@@ -168,5 +196,8 @@ export async function POST(request: Request) {
     });
   }
 
-  return reply({ ok: true, first: result.first }, 200);
+  return reply(
+    { ok: true, first: result.first, restricted: result.restricted },
+    200,
+  );
 }

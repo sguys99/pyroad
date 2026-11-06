@@ -46,6 +46,7 @@ import {
 } from './_catalog/ExtraSections';
 import { LegalSection } from './_catalog/LegalSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
+import { ConsentSection } from './_catalog/ConsentSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -100,6 +101,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['sound', '효과음'],
       ['legal', '약관 동의'],
       ['onboarding', '온보딩·튜토리얼'],
+      ['consent', '보호자 동의'],
     ],
   },
 ];
@@ -198,6 +200,7 @@ export function DesignCatalog({
               <SoundSection />
               <LegalSection />
               <OnboardingSection />
+              <ConsentSection />
             </div>
           </div>
         </div>

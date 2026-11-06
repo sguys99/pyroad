@@ -4,7 +4,14 @@ import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Json } from '@/lib/types/database';
 import { SKIN_IDS, type SkinId } from '@/lib/avatar/skins';
-import { AGREEMENT_ITEMS } from '@/lib/legal/agreements';
+import {
+  AGREEMENT_ITEMS,
+  GUARDIAN_AGREEMENT_ITEMS,
+  GUARDIAN_RELATIONS,
+  type AgreementItem,
+  type GuardianRelation,
+} from '@/lib/legal/agreements';
+import type { AgeBand } from '@/lib/consent/age';
 import { NICKNAME_MAX_LENGTH, validateNickname } from '@/lib/profile/nickname';
 import { suggestNickname, type Rng } from '@/lib/profile/nicknameSuggest';
 import { captureServerError } from '@/lib/observability/server';
@@ -20,23 +27,51 @@ import { onboardingVariant } from './returning';
 type Admin = SupabaseClient<Database>;
 
 /** 요청 본문 (zod strict: 정해 둔 키 밖의 값이 오면 거부) */
+const agreementRecords = z
+  .array(
+    z
+      .object({
+        id: z.string().max(32),
+        version: z.string().max(32),
+        agreed: z.boolean(),
+      })
+      .strict(),
+  )
+  .max(8);
+
+const relation = z.enum(
+  GUARDIAN_RELATIONS.map((r) => r.id) as [
+    GuardianRelation,
+    ...GuardianRelation[],
+  ],
+);
+
+/** 보호자 동의 (P3-15): 보호자 항목 기록 + 관계(선택). 보호자 이름·연락처는 받지 않음 */
+export const guardianConsentSchema = z
+  .object({ agreements: agreementRecords, relation: relation.nullable() })
+  .strict();
+
+/** 요청 본문 (zod strict: 정해 둔 키 밖의 값이 오면 거부) */
 export const onboardingRequestSchema = z
   .object({
     // 글자 규칙은 validateNickname 이 본다. 여기서는 터무니없이 긴 값만 막음
     nickname: z.string().max(64),
     skin: z.enum(SKIN_IDS),
     grade: z.number().int().min(1).max(6).nullable(),
-    agreements: z
-      .array(
-        z
-          .object({
-            id: z.string().max(32),
-            version: z.string().max(32),
-            agreed: z.boolean(),
-          })
-          .strict(),
-      )
-      .max(8),
+    agreements: agreementRecords,
+    // 나이 확인 답 (P3-15). 서버가 KST 오늘로 다시 계산하고 결과만 저장 — 태어난 해·달은 저장·기록하지 않음
+    age: z
+      .object({
+        year: z.union([
+          z.number().int().min(1900).max(2200),
+          z.literal('older'),
+          z.literal('unknown'),
+        ]),
+        month: z.number().int().min(1).max(12).optional(),
+        birthdayPassed: z.boolean().optional(),
+      })
+      .strict(),
+    guardian: guardianConsentSchema.nullable(),
   })
   .strict();
 
@@ -54,12 +89,26 @@ export function parseOnboardingRequest(
 export function agreedRecords(
   records: OnboardingRequest['agreements'],
 ): { item: string; version: string }[] | null {
-  const known = new Map(AGREEMENT_ITEMS.map((i) => [i.id as string, i]));
+  return agreedRecordsFor(AGREEMENT_ITEMS, records);
+}
+
+/** 보호자 동의 기록 (P3-15): 보호자 항목 모두(필수)를 지금 버전으로. 아니면 null */
+export function guardianRecords(
+  records: OnboardingRequest['agreements'],
+): { item: string; version: string }[] | null {
+  return agreedRecordsFor(GUARDIAN_AGREEMENT_ITEMS, records);
+}
+
+function agreedRecordsFor(
+  items: readonly AgreementItem[],
+  records: OnboardingRequest['agreements'],
+): { item: string; version: string }[] | null {
+  const known = new Map(items.map((i) => [i.id as string, i]));
   for (const r of records) {
     const item = known.get(r.id);
     if (!item || r.version !== item.version) return null;
   }
-  for (const item of AGREEMENT_ITEMS) {
+  for (const item of items) {
     if (!item.required) continue;
     if (!records.some((r) => r.id === item.id && r.agreed)) return null;
   }
@@ -78,11 +127,16 @@ export const NICKNAME_CHECK_LIMIT: RateLimit = { perMinute: 30, perDay: 300 };
 /** 온보딩 저장: 중복으로 다시 누르는 것까지 분당 10. env `PROFILE_LIMIT_ONBOARDING` */
 export const ONBOARDING_SAVE_LIMIT: RateLimit = { perMinute: 10, perDay: 60 };
 
-export type ProfileBucket = 'profile:nickname' | 'profile:onboarding';
+export type ProfileBucket =
+  | 'profile:nickname'
+  | 'profile:onboarding'
+  | 'profile:guardian';
 
 const LIMIT_ENV: Record<ProfileBucket, [string, RateLimit]> = {
   'profile:nickname': ['PROFILE_LIMIT_NICKNAME', NICKNAME_CHECK_LIMIT],
   'profile:onboarding': ['PROFILE_LIMIT_ONBOARDING', ONBOARDING_SAVE_LIMIT],
+  // 보호자 동의 (P3-15): 저장과 같은 한도
+  'profile:guardian': ['PROFILE_LIMIT_ONBOARDING', ONBOARDING_SAVE_LIMIT],
 };
 
 /**
@@ -222,10 +276,16 @@ export interface CompleteOnboardingInput {
   skin: SkinId;
   grade: number | null;
   agreements: { item: string; version: string }[];
+  ageBand: AgeBand;
+  /** 보호자 동의 기록 (만 14세 미만이고 보호자가 함께 동의했을 때만) */
+  guardian: {
+    agreements: { item: string; version: string }[];
+    relation: GuardianRelation | null;
+  } | null;
 }
 
 export type CompleteOnboardingResult =
-  | { ok: true; first: boolean }
+  | { ok: true; first: boolean; restricted: boolean }
   | { ok: false; reason: 'taken' | 'error'; error?: unknown };
 
 /** `complete_onboarding`(00023): 닉네임·스킨·학년·완료 시각 + 동의 기록을 한 트랜잭션에 */
@@ -242,12 +302,44 @@ export async function completeOnboarding(
     p_grade: input.grade as number,
     p_agreements: input.agreements as unknown as Json,
     p_method: 'self',
+    p_age_band: input.ageBand,
+    p_guardian_agreements: (input.guardian?.agreements ??
+      null) as unknown as Json,
+    p_guardian_relation: (input.guardian?.relation ?? null) as string,
   });
   if (error) {
     // 닉네임 유일 인덱스(users_nickname_lower_key) 위반 = 그사이 다른 친구가 먼저 씀
     if (error.code === '23505') return { ok: false, reason: 'taken' };
     return { ok: false, reason: 'error', error };
   }
-  const row = (data ?? {}) as { first?: unknown };
-  return { ok: true, first: row.first === true };
+  const row = (data ?? {}) as { first?: unknown; restricted?: unknown };
+  return {
+    ok: true,
+    first: row.first === true,
+    restricted: row.restricted === true,
+  };
+}
+
+export type GuardianConsentResult =
+  | { ok: true; first: boolean }
+  | { ok: false; reason: 'not_under14' | 'error'; error?: unknown };
+
+/** `record_guardian_consent`(00024): 나중에 보호자 동의 (제한 모드 → 해제). 방법은 보호자가 이 화면에서 함께 (Q35) */
+export async function recordGuardianConsent(
+  admin: Admin,
+  userId: string,
+  agreements: { item: string; version: string }[],
+  relation: GuardianRelation | null,
+): Promise<GuardianConsentResult> {
+  const { data, error } = await admin.rpc('record_guardian_consent', {
+    p_user_id: userId,
+    p_agreements: agreements as unknown as Json,
+    p_relation: relation as string,
+    p_method: 'guardian_in_person',
+  });
+  if (error) {
+    if (error.code === 'PT409') return { ok: false, reason: 'not_under14' };
+    return { ok: false, reason: 'error', error };
+  }
+  return { ok: true, first: (data as { first?: unknown })?.first === true };
 }

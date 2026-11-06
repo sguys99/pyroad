@@ -1,11 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AGREEMENT_ITEMS, toAgreementRecords } from '@/lib/legal/agreements';
+import {
+  AGREEMENT_ITEMS,
+  GUARDIAN_AGREEMENT_ITEMS,
+  toAgreementRecords,
+} from '@/lib/legal/agreements';
 import { validateNickname } from '@/lib/profile/nickname';
 import {
   agreedRecords,
   completeOnboarding,
   consumeProfileQuota,
   findFreeSuggestion,
+  guardianRecords,
   parseOnboardingRequest,
   suggestionCandidates,
 } from '../server';
@@ -21,7 +26,14 @@ function seq(...values: number[]) {
 }
 
 describe('parseOnboardingRequest — zod strict', () => {
-  const ok = { nickname: '용감한여우', skin: 'sky', grade: 3, agreements: ALL };
+  const ok = {
+    nickname: '용감한여우',
+    skin: 'sky',
+    grade: 3,
+    agreements: ALL,
+    age: { year: 2016 },
+    guardian: null,
+  };
   it('정상 값과 학년 건너뜀(null)', () => {
     expect(parseOnboardingRequest(ok)).toEqual(ok);
     expect(parseOnboardingRequest({ ...ok, grade: null })?.grade).toBeNull();
@@ -30,7 +42,23 @@ describe('parseOnboardingRequest — zod strict', () => {
     ['모르는 스킨', { ...ok, skin: 'gold' }],
     ['학년 7', { ...ok, grade: 7 }],
     ['학년 소수', { ...ok, grade: 2.5 }],
-    ['학년 빠짐', { nickname: 'a', skin: 'sky', agreements: ALL }],
+    [
+      '학년 빠짐',
+      {
+        nickname: 'a',
+        skin: 'sky',
+        agreements: ALL,
+        age: { year: 2016 },
+        guardian: null,
+      },
+    ],
+    ['나이 답 빠짐', { ...ok, age: undefined }],
+    ['나이 답에 생일(일)까지', { ...ok, age: { year: 2012, day: 3 } }],
+    [
+      '보호자 이름 같은 다른 키',
+      { ...ok, guardian: { agreements: [], relation: null, name: '김엄마' } },
+    ],
+    ['모르는 관계', { ...ok, guardian: { agreements: [], relation: 'uncle' } }],
     ['정해지지 않은 키(실명)', { ...ok, realName: '김민준' }],
     ['동의 기록에 다른 키', { ...ok, agreements: [{ ...ALL[0], at: 'x' }] }],
     ['닉네임이 터무니없이 김', { ...ok, nickname: 'a'.repeat(65) }],
@@ -61,6 +89,27 @@ describe('agreedRecords — 필수 동의를 지금 버전으로', () => {
     expect(
       agreedRecords([...ALL, { id: 'marketing', version: 'x', agreed: true }]),
     ).toBeNull();
+  });
+});
+
+describe('guardianRecords — 보호자 항목을 모두 지금 버전으로 (P3-15)', () => {
+  const G = toAgreementRecords(GUARDIAN_AGREEMENT_ITEMS, {
+    guardian_privacy: true,
+    guardian_attest: true,
+  });
+  it('모두 체크 → 기록, 하나라도 빠지거나 아이용 약관 항목이면 null', () => {
+    expect(guardianRecords(G)).toEqual(
+      GUARDIAN_AGREEMENT_ITEMS.map((i) => ({ item: i.id, version: i.version })),
+    );
+    expect(
+      guardianRecords(
+        toAgreementRecords(GUARDIAN_AGREEMENT_ITEMS, {
+          guardian_privacy: true,
+          guardian_attest: false,
+        }),
+      ),
+    ).toBeNull();
+    expect(guardianRecords(ALL)).toBeNull();
   });
 });
 
@@ -134,6 +183,8 @@ describe('completeOnboarding — RPC 결과', () => {
     skin: 'sky' as const,
     grade: null,
     agreements: [{ item: 'terms', version: 'v' }],
+    ageBand: 'under14' as const,
+    guardian: null,
   };
   it('성공 → first, 23505 → taken, 그 밖 → error', async () => {
     const ok = {
@@ -142,10 +193,18 @@ describe('completeOnboarding — RPC 결과', () => {
     expect(await completeOnboarding(ok as never, 'u', input)).toEqual({
       ok: true,
       first: true,
+      restricted: false,
     });
     expect(ok.rpc.mock.calls[0]).toMatchObject([
       'complete_onboarding',
-      { p_user_id: 'u', p_grade: null, p_method: 'self' },
+      {
+        p_user_id: 'u',
+        p_grade: null,
+        p_method: 'self',
+        p_age_band: 'under14',
+        p_guardian_agreements: null,
+        p_guardian_relation: null,
+      },
     ]);
     const dup = {
       rpc: vi.fn(async () => ({ data: null, error: { code: '23505' } })),

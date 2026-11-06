@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { RestrictedNotice } from '@/components/consent/RestrictedNotice';
+import { useRestricted } from '@/components/consent/ConsentProvider';
 import { EyeOff } from 'lucide-react';
 import type { BoardCommentWithAuthor } from '@/lib/types/database';
 import { formatKstDate } from '@/lib/time/kst';
@@ -22,6 +24,7 @@ export function CommentSection({
   comments: initialComments,
   currentUserId,
 }: CommentSectionProps) {
+  const restricted = useRestricted();
   const [comments, setComments] = useState(initialComments);
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -159,29 +162,34 @@ export function CommentSection({
       )}
 
       {error && <BoardFormMessage error={error} className="mb-2" />}
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <textarea
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-            if (error) setError(null);
-          }}
-          maxLength={BOARD_LIMITS.comment}
-          rows={2}
-          placeholder="댓글을 작성하세요"
-          aria-label="댓글"
-          className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-        <Button
-          type="submit"
-          size="sm"
-          disabled={!content.trim()}
-          loading={submitting}
-          className="self-end"
-        >
-          등록
-        </Button>
-      </form>
+      {restricted ? (
+        // 제한 모드(P3-15): 댓글 입력 대신 보호자 동의 안내 (서버도 403)
+        <RestrictedNotice what="댓글을 달려면" compact />
+      ) : (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <textarea
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (error) setError(null);
+            }}
+            maxLength={BOARD_LIMITS.comment}
+            rows={2}
+            placeholder="댓글을 작성하세요"
+            aria-label="댓글"
+            className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!content.trim()}
+            loading={submitting}
+            className="self-end"
+          >
+            등록
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

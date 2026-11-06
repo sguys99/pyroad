@@ -20,6 +20,18 @@ const NEW: Record<OnboardingStepId, StepCopy> = {
     line: '안녕! 나는 파이뱀이야. 모험을 떠나기 전에 약속부터 하자!',
     mascot: 'wave',
   },
+  age: {
+    title: '몇 년에 태어났어요?',
+    desc: '만 14세가 안 된 친구는 보호자 동의가 필요해서 물어봐요. 태어난 해는 저장하지 않고, 결과만 기억해요.',
+    line: '몇 년에 태어났는지 알려 줄래? 잘 모르면 "잘 모르겠어요"를 눌러도 돼!',
+    mascot: 'teach',
+  },
+  guardian: {
+    title: '보호자 동의',
+    desc: '이 단계는 보호자님이 읽고 체크해 주세요.',
+    line: '이제 보호자님 차례야! 옆에 계신 어른께 화면을 보여 드려.',
+    mascot: 'wave',
+  },
   nickname: {
     title: '내 이름 정하기',
     desc: '게시판과 프로필에서 친구들에게 보이는 별명이에요. 진짜 이름이나 학교 이름은 쓰지 마세요.',
@@ -89,3 +101,18 @@ export const RETURNING_NICKNAME_KEPT =
   '예전에 쓰던 별명이 그대로 있어. 그대로 써도 되고 바꿔도 돼!';
 export const RETURNING_NICKNAME_RENAME =
   '예전 별명은 새 규칙에 맞지 않아서 새로 정해야 해. 하나 골라 뒀어!';
+
+/** 나이 확인 결과에 따른 파이뱀 대사 (P3-15) */
+export const AGE_RESULT_LINE = {
+  under14: '알려 줘서 고마워! 다음은 보호자님과 함께 하는 단계야.',
+  '14plus': '고마워! 바로 이름을 정하러 가자.',
+} as const;
+
+/** 보호자 단계 파이뱀 대사: 다 체크했을 때 / 나중에 하기로 했을 때 */
+export const GUARDIAN_DONE_LINE = '보호자님, 고맙습니다! 이제 같이 모험하자!';
+export const GUARDIAN_LATER_LINE =
+  '괜찮아! 공부는 바로 할 수 있어. 게시판 글쓰기는 보호자님과 함께 동의한 뒤에 하자.';
+
+/** 도장 쪽: 보호자 동의 전(제한 모드)일 때 한 줄 */
+export const RESTRICTED_FINALE_NOTE =
+  '보호자 동의 전이라 게시판 글쓰기는 잠시 쉬어요. 30일 안에 보호자와 함께 "보호자 동의하기"를 해 주세요.';

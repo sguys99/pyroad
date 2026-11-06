@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { guardianWriteGate } from '@/lib/consent/server';
 import {
   BOARD_MESSAGES,
   boardError,
@@ -71,6 +72,9 @@ export async function PATCH(
   const { postId } = await params;
   const owned = await loadOwnedPost(postId);
   if (!owned.ok) return owned.response;
+  // 제한 모드(P3-15): 고치기도 다른 사람에게 보이는 쓰기라 막음. 지우기(DELETE)는 그대로 허용
+  const consentBlock = await guardianWriteGate(owned.userId, owned.admin);
+  if (consentBlock) return consentBlock;
 
   const body = await readJsonObject(request);
   if (!body) {

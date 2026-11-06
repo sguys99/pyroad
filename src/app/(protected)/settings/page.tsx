@@ -9,6 +9,7 @@ import { LegalNav } from '@/components/legal/LegalPageShell';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
 import { SoundSettingsSection } from '@/components/settings/SoundSettingsSection';
 import { LinkedAccountsSection } from '@/components/settings/LinkedAccountsSection';
+import { GuardianConsentStatus } from '@/components/consent/GuardianConsentStatus';
 import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
@@ -169,6 +170,8 @@ export default function SettingsPage() {
       <SoundSettingsSection />
       {/* 로그인 계정 연결 (P3-07). 세션 identities 를 직접 읽어 서버 응답을 기다리지 않음 */}
       <LinkedAccountsSection />
+      {/* 보호자 동의 (P3-15). 로그인 레이아웃 ConsentProvider 값, 모르면 그리지 않음 */}
+      <GuardianConsentStatus />
 
       <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
     </>

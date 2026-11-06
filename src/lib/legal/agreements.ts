@@ -43,6 +43,45 @@ export const AGREEMENT_ITEMS: readonly AgreementItem<AgreementId>[] = [
   },
 ];
 
+export type GuardianAgreementId = 'guardian_privacy' | 'guardian_attest';
+
+/**
+ * 만 14세 미만 아동의 법정대리인 동의 (P3-15, §12-Q35 "보호자와 함께 이 화면에서 동의"). 모두 필수.
+ * 기록은 `user_agreements`에 `method = 'guardian_in_person'`으로 (이메일 발송 방식은 Phase 12, P12-06).
+ * 보호자의 이름·연락처는 받지 않는다 (보호자 관계는 선택: 부·모·기타).
+ */
+export const GUARDIAN_AGREEMENT_ITEMS: readonly AgreementItem<GuardianAgreementId>[] =
+  [
+    {
+      id: 'guardian_privacy',
+      title: '만 14세 미만 아동 개인정보 수집·이용 법정대리인 동의',
+      label: '아이의 개인정보 수집·이용에 동의합니다',
+      required: true,
+      version: PRIVACY_VERSION,
+      href: '/privacy#children',
+    },
+    {
+      id: 'guardian_attest',
+      title: '법정대리인 확인',
+      label: '저는 이 어린이의 법정대리인(보호자)이며 위 내용에 동의합니다',
+      required: true,
+      version: TERMS_VERSION,
+      href: '/terms#children',
+    },
+  ];
+
+/** 보호자와 아이의 관계 (선택). 그 밖의 보호자 정보는 받지 않는다 */
+export const GUARDIAN_RELATIONS = [
+  { id: 'mother', label: '엄마' },
+  { id: 'father', label: '아빠' },
+  { id: 'other', label: '그 밖의 보호자' },
+] as const;
+export type GuardianRelation = (typeof GUARDIAN_RELATIONS)[number]['id'];
+
+export function isGuardianRelation(v: unknown): v is GuardianRelation {
+  return GUARDIAN_RELATIONS.some((r) => r.id === v);
+}
+
 /** 항목 id → 체크 여부 */
 export type AgreementState<Id extends string = string> = Record<Id, boolean>;
 
