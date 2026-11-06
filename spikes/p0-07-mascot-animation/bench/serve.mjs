@@ -27,7 +27,7 @@ const MOUNTS = [
   ['/dist/', join(root, 'dist')],
   ['/assets/', join(root, 'assets')],
   ['/results/', join(root, 'results')],
-  ['/repo-characters/', join(repo, 'public/characters')],
+  ['/repo-characters/pybaem/lottie/', join(repo, 'scripts/assets/__tests__/fixtures/b32')],
   ['/', join(root, 'demo')],
 ];
 

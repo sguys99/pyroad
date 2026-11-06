@@ -242,6 +242,9 @@ jobs:
       - name: Chromium 시스템 라이브러리
         if: ${{ steps.pw-cache.outputs.cache-hit == 'true' }}
         run: npx playwright install-deps chromium
+      # 에셋 검사 (P2-16): SVG 최적화·종이 결 타일·래스터 기록·Lottie 구조 + lottie_light 실제 렌더(B32). Chromium 이 있는 job 이라 여기서 돈다
+      - name: 에셋 검사
+        run: npm run assets:check
       # build job 과 같은 우회 (Next 15.5 Turbopack + 확장자 없는 Google Fonts 주소, docs/ci.md)
       - name: Google Fonts CSS 미리 받기
         run: node scripts/fonts/google-fonts-mock.mjs

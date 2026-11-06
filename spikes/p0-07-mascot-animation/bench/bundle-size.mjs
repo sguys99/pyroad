@@ -51,7 +51,7 @@ const wasm = [
   ['rive.wasm (@rive-app/webgl2)', 'node_modules/@rive-app/webgl2/rive.wasm'],
 ].map(([name, p]) => ({ name, ...measure(readFileSync(join(root, p))) }));
 const assets = [
-  ['저장소 Lottie 4종 합계 (도형 플레이스홀더)', ['celebrating', 'entrance', 'level-up', 'project-complete'].map((n) => join(root, `../../public/characters/pybaem/lottie/${n}.json`))],
+  ['저장소 Lottie 4종 합계 (도형 플레이스홀더)', ['celebrating', 'entrance', 'level-up', 'project-complete'].map((n) => join(root, `../../scripts/assets/__tests__/fixtures/b32/${n}.json`))],
   ['리그→Lottie 굽기: 7상태 전체 (466프레임)', [join(root, 'assets/generated/pybaem-rig-baked.json')]],
   ['리그→Lottie 굽기: 춤 구간만 (60프레임)', [join(root, 'assets/generated/pybaem-rig-baked-dance-only.json')]],
   ['리그→Lottie 굽기: 대기 구간만 (96프레임)', [join(root, 'assets/generated/pybaem-rig-baked-idle-only.json')]],

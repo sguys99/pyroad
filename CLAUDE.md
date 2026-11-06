@@ -9,8 +9,8 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 - **AI/LLM**: 멀티 프로바이더 (`src/lib/tutor/providers/`, 팩토리). 서버 키는 Gemini 무료 티어만, Anthropic·OpenAI는 학생 본인 키(암호화 저장)로만
 - **Code Execution**: Pyodide 314.0.7 자체 호스팅(`public/pyodide/`, predev·prebuild가 복사) + module Worker `public/workers/pyodide-worker.mjs`. 실행 로직은 공용 코어 `pyodide-core.mjs`(브라우저·Node 테스트 공용)
 - **Editor**: CodeMirror 6
-- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. Lottie는 안 씀(B32, `lottie-react`는 미사용 의존성, Phase 6에서 `lottie_light`로 재도입 예정)
-- **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO
+- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. Lottie는 안 씀(B32, `lottie-react`는 미사용 의존성, Phase 6에서 `lottie_light`로 재도입 예정). 일회성 Lottie는 `public/animations/` + `assets:check` 렌더 검사 통과 필수
+- **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO / **에셋**: [docs/design/assets.md](docs/design/assets.md) (래스터는 정지 그림만, sharp·버전 파일 이름)
 - **관측·분석**: Sentry(DSN 없으면 꺼짐, 지연 로드, 최소 수집), 자체 분석 `track()` + `analytics_events` ([docs/analytics.md](docs/analytics.md))
 - **Tooling**: npm, ESLint (Flat Config), Prettier, Vitest, Playwright, PGlite·tsx(스크립트)
 - **Deploy**: Vercel / **CI**: GitHub Actions ([docs/ci.md](docs/ci.md))
@@ -32,8 +32,8 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 │       ├── content/          # 콘텐츠 zod 스키마·빌드
 │       ├── pyodide/ tutor/ celebration/ motion/ supabase/ security/ analytics/ observability/
 │       └── moderation/ time/ crypto/ env/ api/ auth/ board/ notice/ world/ types/
-├── public/                   # characters/, workers/, pyodide/(복사본, git 제외)
-├── scripts/                  # content, pyodide, fonts, security, api-keys, release(운영 SQL Editor 붙여넣기 묶음)
+├── public/                   # sounds/, textures/, workers/, pyodide/(복사본, git 제외). images/·animations/는 에셋 파이프라인 생성물
+├── scripts/                  # content, pyodide, fonts, security, api-keys, assets(에셋 파이프라인), build-sounds.sh, release(운영 SQL Editor 붙여넣기 묶음)
 ├── supabase/                 # migrations/, rollback/, tests/(RLS 회귀), seed.sql(생성물)
 ├── e2e/                      # Playwright (e2e/README.md)
 ├── docs/                     # 계획서, ci.md, analytics.md, release/(런북), spikes/
@@ -91,7 +91,8 @@ npm run test:content   # 모든 정답 코드 실행 검증
 npm run test:rls       # 켜진 로컬 스택 db reset 후 RLS·권한 회귀
 npm run test:rls:ci    # 격리 임시 스택, 3개 시나리오 (3~4분)
 npm run test:e2e       # Playwright (PORT 3100, 로그인 스펙은 db:start 필요)
-npm run optimize:svg   # public/characters SVG 최적화
+npm run assets:check   # 에셋 검사 (SVG·종이 결 타일·래스터·Lottie 렌더, docs/design/assets.md)
+npm run assets:svg     # public/ SVG 최적화 (assets:textures·assets:raster는 생성)
 ```
 
 ## Claude 에이전트 목록

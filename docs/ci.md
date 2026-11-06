@@ -19,13 +19,17 @@
 | `pyodide` | 자체 호스팅 파일 복사·무결성 + 공용 실행 코어 테스트 | `npm run pyodide:copy && node scripts/pyodide/copy-assets.mjs --check && npm run test:pyodide` | 약 20초 |
 | `rls` | 격리 스택(`pyroadci`, 5482x)으로 RLS·권한 회귀. PR·기능 브랜치는 운영 재현 + legacy, main·수동 실행은 신규 기본값까지 3개 시나리오. 결과 표는 job 요약과 아티팩트 `rls-results`에 | `RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci` (전체는 변수 없이). 켜 둔 개발 스택이면 `npm run test:rls` | 약 4~7분 |
 | `build` | Google Fonts CSS 미리 받기(아래 "Google Fonts 우회") → `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` (러너와 같게: `node scripts/fonts/google-fonts-mock.mjs`가 알려 주는 `NEXT_FONT_GOOGLE_MOCKED_RESPONSES=…`를 붙여 빌드) | 약 3분 |
-| `e2e-smoke` | 비로그인 e2e(`public` 프로젝트: 랜딩·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로). Supabase 없이(`E2E_NO_STACK=1`) Google Fonts 우회 → `npm run build` → `npm run start`. 실패하면 리포트·trace를 아티팩트 `e2e-smoke-report`로 | `E2E_NO_STACK=1 npx playwright test --project=public` (`e2e/README.md`) | 로컬 약 2분 (빌드 1.5분 포함) |
+| `e2e-smoke` | **에셋 검사**(`npm run assets:check`, P2-16: SVG 최적화·종이 결 타일·래스터 기록·Lottie 구조 + `lottie_light` 실제 렌더, 아래 "에셋 검사") → 비로그인 e2e(`public` 프로젝트: 랜딩·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로). Supabase 없이(`E2E_NO_STACK=1`) Google Fonts 우회 → `npm run build` → `npm run start`. 실패하면 리포트·trace를 아티팩트 `e2e-smoke-report`로 | `npm run assets:check && E2E_NO_STACK=1 npx playwright test --project=public` (`e2e/README.md`) | 로컬 약 2분 (빌드 1.5분 포함, 에셋 검사 약 5초) |
 | `e2e` | 로그인 e2e(`setup` → `chromium` → `teardown`). 저장소 `config.toml`로 Supabase 스택을 띄우고(npm ci·브라우저 설치와 겹치게 백그라운드로) 실행 전용 사용자를 service_role로 만들어 쿠키 주입. LLM 키 없음(저장된 답변). 실패하면 아티팩트 `e2e-report` | `npm run db:start && npx playwright test --project=chromium` | 로컬 약 5분 + 빌드 |
 
 - `rls`의 운영 재현은 과거 커밋(`git show e800386:…`)을 읽어서 전체 히스토리로 checkout합니다(`fetch-depth: 0`). 얕은 clone이면 `run.sh`가 조용히 건너뛰므로 CI는 결과 표에 `prod_replay`가 있는지 따로 확인합니다.
 - Supabase CLI는 **2.115.0** 고정(`supabase/README.md`). 로컬에서 격리 모드를 다른 작업과 동시에 돌릴 때는 `RLS_PROJECT_ID`·`RLS_PORT_BASE`를 바꿉니다.
 - `prettier --check .`는 P1-21에서 `lint-typecheck`에 넣었습니다(기존 파일은 P1-15 마무리 커밋에서 일괄 정리). 스파이크·생성물·문서(`*.md`)·`supabase/`는 `.prettierignore`로 제외합니다.
 - e2e 재시도는 0입니다(흔들림을 재시도로 가리지 않음). 실패하면 아티팩트의 `test-results/*/trace.zip`을 `npx playwright show-trace`로 봅니다.
+
+### 에셋 검사 (`e2e-smoke`)
+
+`npm run assets:check`(`scripts/assets/check.mjs`)가 SVG(`public/**/*.svg`가 SVGO 결과와 같은지·`<text>`·래스터·SMIL 금지·크기), 종이 결 타일(`public/textures`가 생성기와 같은 그림인지), 래스터 정지 그림(`raster.lock.json`과 원본·출력 해시·예산), Lottie(`public/animations` 구조 검사 + Chromium에서 `lottie_light`로 6프레임 렌더해 빈 화면이면 실패, B32)를 한 번에 봅니다. Lottie 렌더는 매번 검사기 자체 시험(정상 파일은 그려지고 B32 파일은 비어야 함)을 먼저 돌려 lottie-web·Chromium을 올려도 검사기가 망가지지 않았는지 확인합니다. Chromium이 필요해서 별도 job 대신 이미 Chromium을 설치하는 `e2e-smoke`에 단계로 넣었습니다(체크 이름은 그대로). 실패하면 로컬에서 `npm run assets:check`(브라우저 없이 `-- --no-render`), 고치는 법은 [docs/design/assets.md](design/assets.md). 사운드 검사(`bash scripts/build-sounds.sh check`)는 ffmpeg가 필요해 CI에 넣지 않습니다.
 
 ### Google Fonts 우회 (`build`)
 

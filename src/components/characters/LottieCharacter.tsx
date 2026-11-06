@@ -14,7 +14,7 @@ import type { Character, Expression } from './expressions';
 /**
  * 축하·등장 자리의 캐릭터.
  *
- * B32: `public/characters/pybaem/lottie/*.json`이 lottie-web에서 아무것도 그리지 않아
+ * B32: 옛 `public/characters/pybaem/lottie/*.json`(P2-16에서 검사기 시험 자료 `scripts/assets/__tests__/fixtures/b32/`로 옮김)이 lottie-web에서 아무것도 그리지 않아
  * Lottie 재생을 그만두고, 표정이 있는 정적 `CharacterAvatar`에 Framer Motion 1회성 연출을 입힘.
  * 이름과 `animation` 값은 예전 Lottie 파일 이름을 그대로 써서 호출부를 바꾸지 않음.
  * P6-08·P6-13에서 SVG 리그로 교체 (P0-07).
