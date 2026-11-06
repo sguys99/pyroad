@@ -74,7 +74,8 @@ export function LinkedAccountsList({
         return (
           <li
             key={row.provider}
-            className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-2 p-3"
+            // 로고 | 이름 + 상태(아래로 쌓음) | 버튼. 막힌 이유·마지막 수단 안내는 줄 전체 폭으로 맨 아래 (360px에서 좁은 칸에 갇히지 않게)
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl bg-surface-2 p-3"
             data-provider={row.provider}
             data-state={row.state}
           >
@@ -92,25 +93,29 @@ export function LinkedAccountsList({
             >
               <Mark className="size-5" />
             </span>
-            <div className="min-w-0 flex-1">
+            {/* @container: 이 칸이 좁으면(360px 화면) 날짜를 "연결됨" 아래 줄로, 넓으면 한 줄 "연결됨 · 날짜" */}
+            <div className="@container min-w-0">
               <p className="text-base font-bold text-foreground">{name}</p>
-              <p className="text-small text-muted-foreground">
-                {row.state === 'linked' ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Check aria-hidden className="size-4 text-primary-text" />
+              {row.state === 'linked' ? (
+                // "✓ 연결됨"과 날짜는 각각 끊기지 않는 덩어리
+                <p className="flex flex-col items-start gap-x-1 text-small text-muted-foreground @[13rem]:flex-row @[13rem]:items-center">
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                    <Check
+                      aria-hidden
+                      className="size-4 shrink-0 text-primary-text"
+                    />
                     연결됨
-                    {row.linkedAt && ` · ${formatKstDate(row.linkedAt, 'dot')}`}
                   </span>
-                ) : row.state === 'blocked' ? (
-                  'Google을 먼저 연결하면 붙일 수 있어요'
-                ) : (
-                  '연결 안 됨'
-                )}
-              </p>
-              {row.state === 'linked' && !row.canUnlink && (
-                <p className="text-small text-muted-foreground">
-                  로그인할 방법이 하나뿐이라 끊을 수 없어요
+                  {/* 글자로 읽을 때 띄어쓰기 (flex 안의 공백 글자 노드는 그려지지 않음) */}{' '}
+                  {row.linkedAt && (
+                    <span className="whitespace-nowrap">
+                      <span className="hidden @[13rem]:inline">· </span>
+                      {formatKstDate(row.linkedAt, 'dot')}
+                    </span>
+                  )}
                 </p>
+              ) : (
+                <p className="text-small text-muted-foreground">연결 안 됨</p>
               )}
             </div>
             {row.state === 'linked' ? (
@@ -140,6 +145,14 @@ export function LinkedAccountsList({
               >
                 연결하기
               </Button>
+            )}
+            {(row.state === 'blocked' ||
+              (row.state === 'linked' && !row.canUnlink)) && (
+              <p className="col-span-3 text-small text-muted-foreground">
+                {row.state === 'blocked'
+                  ? 'Google을 먼저 연결하면 붙일 수 있어요'
+                  : '로그인할 방법이 하나뿐이라 끊을 수 없어요'}
+              </p>
             )}
           </li>
         );
