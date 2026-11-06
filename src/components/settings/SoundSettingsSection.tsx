@@ -73,7 +73,7 @@ function Switch({
       >
         <span
           className={cn(
-            'absolute left-0.5 h-6 w-6 rounded-full shadow-sm transition-transform',
+            'absolute left-0.5 h-6 w-6 rounded-full shadow-sm transition-transform reduced:transition-none',
             checked
               ? 'translate-x-6 bg-primary-foreground'
               : 'translate-x-0 bg-muted-foreground',

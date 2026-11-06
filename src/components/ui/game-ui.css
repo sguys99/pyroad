@@ -145,7 +145,11 @@
       transform: translateY(-1px);
     }
   }
-  .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading])
+  /* 누름은 올려놓기(0-6-0)와 명시도가 같아야 뒤에 있는 이쪽이 이긴다 → :not(ghost)를 맞춰 붙임.
+     전에는 0-5-0이라 마우스로 누르면 내려가지 않고 1px 뜬 채였다 (P2-12 e2e에서 발견) */
+  .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading]):not(
+      [data-variant='ghost']
+    )
     .g-btn-face {
     transform: translateY(var(--lip-h));
     transition-duration: var(--dur-instant);
@@ -203,11 +207,25 @@
   :root[data-motion='minimal'] .g-btn-face {
     transition: none;
   }
+  /* 누르는 동안의 80ms 전환(누름 규칙)도 minimal은 없앤다 (P2-12 e2e) */
+  :root[data-motion='minimal']
+    .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading])
+    .g-btn-face {
+    transition: none;
+  }
   /* 동작 줄이기: 내려가지 않고 면 색만 진해짐 */
   :root[data-reduced='true'] .g-btn .g-btn-face {
     transform: none;
     transition-property: background-color, color;
     transition-duration: var(--dur-instant);
+  }
+  /* 올려놓기(0-6-0)·누름(0-5-0) 규칙보다 명시도가 높아야 이긴다 (0-7-0). 비활성의 납작한 모양은 움직임이 아니라 그대로 (P2-12 감사) */
+  :root[data-reduced='true']
+    .g-btn:is(:hover, :active, [data-pressed]):not(:disabled):not(
+      [data-loading]
+    )
+    .g-btn-face {
+    transform: none;
   }
   :root[data-reduced='true']
     .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading])
@@ -255,7 +273,7 @@
       background: var(--surface-lip);
     }
   }
-  .g-icon-btn:active {
+  .g-icon-btn:is(:active, [data-pressed]) {
     background: var(--surface-lip);
   }
   .g-icon-btn:focus-visible {

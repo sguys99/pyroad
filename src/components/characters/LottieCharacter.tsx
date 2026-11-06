@@ -138,7 +138,8 @@ export const LottieCharacter = memo(function LottieCharacter({
         <m.div
           className="relative"
           style={{ transformOrigin: preset.origin }}
-          initial={preset.initial}
+          // minimal·동작 줄이기(스프링 없음): 점프·등장 없이 마지막 자세로 바로 (P2-12 감사)
+          initial={budget.springs ? preset.initial : false}
           animate={preset.animate}
           transition={preset.transition}
         >

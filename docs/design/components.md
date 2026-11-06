@@ -3,7 +3,7 @@
 > - 시각 기준: 사용자가 승인한 최종 시안(§12-Q31) `design/prototypes/src/final/ui.tsx`·`reward.tsx`·`base.css`·`refine.css` (2차 수정: 테두리 없는 면 + 버튼 아랫면 3px, 그림자 한 종류, 반경 10/14/20, 중립 + 초록 + 금색)
 > - 코드: `src/components/ui/` — `button.tsx`(Button·IconButton) · `card.tsx` · `alert-dialog.tsx`(확인 모달) · `sheet.tsx`(Sheet·Modal) · `toast.tsx` · `tabs.tsx` · `progress-bar.tsx` · `hud.tsx` · `speech-bubble.tsx` · `reward-icon.tsx` · `tooltip.tsx` · `use-count-up.ts`. 스타일은 `game-ui.css`(`globals.css`가 `@layer components`로 불러옴, 넘긴 Tailwind 클래스가 이김)
 > - 값은 모두 토큰([tokens.md](tokens.md))만 쓴다(`npm run tokens:check`, CSS 계약 테스트 `src/components/ui/__tests__/game-ui-css.test.ts`). 모션은 [motion-guidelines.md](motion-guidelines.md)의 단계(full / lite / minimal)와 동작 줄이기(별개 축)를 따른다: CSS는 `<html data-motion data-reduced>`, JS는 `useMotionTier().budget`
-> - P2-12 카탈로그(`/dev/design`)는 각 절 끝의 **대표 상태** 목록을 그대로 진열한다
+> - P2-12 카탈로그(`/dev/design`, [catalog.md](catalog.md))는 각 절 끝의 **대표 상태** 목록을 그대로 진열한다. 단계별 대체는 그 페이지 위 막대에서 바꿔 보고 e2e(`design-catalog.spec.ts`)가 검사한다
 
 ## 0. 공통 규칙
 
@@ -63,7 +63,7 @@
 
 **접근성**: 네이티브 `<button>`(또는 링크), 글자가 이름. 키보드 Space·Enter에도 눌림 모양(`data-pressed`). 로딩 중 `aria-busy`, 비활성은 `disabled`.
 
-`IconButton`: `label`(필수 `aria-label`) · `size` `md`(48 보조 면 원) / `sm`(투명 40 원 + 48 누르는 자리). HUD 소리 토글, 시트·토스트 닫기.
+`IconButton`: `label`(필수 `aria-label`) · `size` `md`(48 보조 면 원) / `sm`(투명 40 원 + 48 누르는 자리) · `pressed`(눌린 모양 고정, 카탈로그용). HUD 소리 토글, 시트·토스트 닫기.
 
 ```tsx
 <Button size="lg" icon={<Play aria-hidden />} loading={running} sfx={false}>코드 돌려보기!</Button>

@@ -188,7 +188,7 @@ function SequenceChrome({
             <li
               key={i}
               className={cn(
-                'h-2 rounded-full transition-[width,background-color] duration-(--dur-base)',
+                'h-2 rounded-full transition-[width,background-color] duration-(--dur-base) reduced:transition-none',
                 i === index ? 'w-5 bg-on-scrim' : 'w-2',
                 i < index ? 'bg-on-scrim/70' : i > index && 'bg-on-scrim/35',
               )}

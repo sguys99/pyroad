@@ -346,11 +346,12 @@
 /* 흐림이 꺼지는 단계(lite 이하)에서 반투명 배경을 더 불투명하게: no-blur:bg-white/95 */
 @custom-variant no-blur (&:where(:root:not([data-motion='full']) *));
 
-/* lite 이하: 흐림 끔 (불투명 배경으로 대체되도록 bg 알파는 컴포넌트에서 높게), 큰 그림자는 단색 오프셋 */
+/* lite 이하: 흐림 끔 (불투명 배경으로 대체되도록 bg 알파는 컴포넌트에서 높게), 큰 그림자는 단색 오프셋.
+   -webkit- 접두 선언을 같이 쓰지 않는다: Lightning CSS가 둘을 한 속성으로 합쳐 접두 쪽만 남겨서 Chromium에서 흐림이
+   꺼지지 않았다(P2-12 e2e에서 발견). 접두는 빌드가 브라우저 목록에 맞춰 붙인다 */
 :root:not([data-motion='full']) .m-blur,
 :root:not([data-motion='full']) [class*='backdrop-blur'] {
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 :root:not([data-motion='full']) .m-blur {
   filter: none !important;
@@ -618,6 +619,16 @@
   }
 }
 
+/* 코드 에디터 커서 깜빡임(CodeMirror 기본 .cm-cursorLayer 무한 반복)은 입력 위치를 알리는 기능 신호라 단계와 무관하게 두고,
+   동작 줄이기에서만 멈춘다(커서는 늘 보이는 상태로). 다른 바쁨 표시와 같은 규칙 (P2-12) */
+/* CodeMirror 규칙(.ͼ1.cm-focused > .cm-scroller > .cm-cursorLayer, 0-4-0)이 나중에 주입되므로 명시도를 더 높인다 */
+:root[data-reduced='true']
+  .cm-editor.cm-focused
+  > .cm-scroller
+  > .cm-cursorLayer {
+  animation: none;
+}
+
 /* .m-loop·.m-ambient: 컴포넌트가 자기 animation을 걸고 조건 밖에서는 멈춘다 (P2-09·P2-13이 쓸 공용 클래스) */
 .m-loop,
 .m-ambient {
@@ -677,10 +688,12 @@
     opacity: 0;
   }
 }
-:root[data-reduced='false'] .celebration-pop[data-popped='true'] {
+/* minimal은 스프링·바운스 없음(단계표 "일회성 이펙트 = 페이드만") → 팝·고리도 없이 숫자만 (P2-12 감사) */
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .celebration-pop[data-popped='true'] {
   animation: celebration-pop 420ms var(--easing-out);
 }
-:root[data-reduced='false']
+:root[data-reduced='false']:not([data-motion='minimal'])
   .celebration-pop[data-popped='true']
   .celebration-ring {
   animation: celebration-ring var(--dur-page) var(--easing-out) forwards;

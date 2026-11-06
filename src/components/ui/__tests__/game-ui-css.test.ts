@@ -29,7 +29,7 @@ describe('game-ui.css 연출 단계', () => {
   it('버튼: 누르면 아랫면(--lip-h)만큼 내려가고, 복귀는 jellyB · lite face · minimal 즉시', () => {
     expect(
       rule(
-        '.g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading]) .g-btn-face',
+        ".g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading]):not( [data-variant='ghost'] ) .g-btn-face",
       ),
     ).toContain('translateY(var(--lip-h))');
     expect(rule('.g-btn-face')).toContain('var(--spring-jelly-b)');
@@ -50,6 +50,12 @@ describe('game-ui.css 연출 단계', () => {
         ":root[data-reduced='true'] .g-btn:is(:active, [data-pressed]):not(:disabled):not([data-loading]) .g-btn-face",
       ),
     ).toContain('background: var(--press)');
+    // 올려놓기·누름 규칙보다 명시도가 높은 움직임 0 규칙 (P2-12)
+    expect(
+      rule(
+        ":root[data-reduced='true'] .g-btn:is(:hover, :active, [data-pressed]):not(:disabled):not( [data-loading] ) .g-btn-face",
+      ),
+    ).toContain('transform: none');
   });
 
   it('모달·시트·덮개·툴팁: 동작 줄이기는 전환 없음, minimal은 페이드만', () => {

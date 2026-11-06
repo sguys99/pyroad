@@ -220,12 +220,15 @@ export interface IconButtonProps extends Omit<
   label: string;
   /** md: 48px 원 · sm: 40px 원(누르는 자리는 48px) */
   size?: 'md' | 'sm';
+  /** 눌린 모양으로 고정 (카탈로그·미리 보기용, P2-12) */
+  pressed?: boolean;
 }
 
 /** 아이콘만 있는 둥근 버튼: HUD 소리 토글, 시트·토스트 닫기 (`.g-icon-btn`) */
 function IconButton({
   label,
   size = 'md',
+  pressed = false,
   className,
   type = 'button',
   children,
@@ -236,6 +239,7 @@ function IconButton({
       type={type}
       aria-label={label}
       data-size={size}
+      data-pressed={pressed || undefined}
       className={cn('g-icon-btn', className)}
       {...props}
     >
