@@ -1,4 +1,4 @@
-// 청취 검수 목록 (P2-14). 출처 표 원본: docs/design/sound-sources.md
+// 청취 검수 목록 (P2-14). 출처 표 원본: docs/assets-license.md §3
 // 쓰임 설명은 앱 매니페스트(src/lib/sound/manifest.ts SFX_USES)를 그대로 쓴다
 
 export interface SfxItem {

@@ -1,11 +1,12 @@
 // 에셋 검사 한 번에 (P2-16). CI `e2e-smoke` job이 Chromium을 설치한 뒤 돌린다 (docs/ci.md).
 //
-//   npm run assets:check                 # SVG·종이 결 타일·래스터·Lottie(구조 + 렌더)
+//   npm run assets:check                 # SVG·종이 결 타일·래스터·Lottie(구조 + 렌더)·라이선스 기록
 //   npm run assets:check -- --no-render  # 브라우저 없이 (Lottie 렌더 검사만 뺌)
 //
 // 하나라도 실패하면 exit 1. 사운드는 따로: bash scripts/build-sounds.sh check (docs/design/sound.md)
 
 import { runLottie } from './check-lottie.mjs';
+import { runLicense } from './license.mjs';
 import { runRaster } from './raster.mjs';
 import { runSvg } from './svg.mjs';
 import { runTextures } from './textures.mjs';
@@ -19,6 +20,7 @@ const steps = [
     `Lottie (public/animations${render ? ', 렌더 포함' : ', 구조만'})`,
     () => runLottie({ render }),
   ],
+  ['라이선스 기록 (docs/assets-license.md, P2-17)', () => runLicense()],
 ];
 
 let failed = 0;

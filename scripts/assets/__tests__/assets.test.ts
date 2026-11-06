@@ -30,6 +30,13 @@ import {
   sourceProblems,
 } from '../lib/raster.mjs';
 import { inspectLottie, judgeRender, sampleFrames } from '../lib/lottie.mjs';
+import {
+  licenseProblems,
+  mediaImports,
+  requiredKeys,
+  versionedKey,
+} from '../lib/license.mjs';
+import { runLicense } from '../license.mjs';
 import { idFromOutputName, runRaster } from '../raster.mjs';
 import { runSvg, svgRuleProblems } from '../svg.mjs';
 import { runTextures } from '../textures.mjs';
@@ -434,5 +441,88 @@ describe('Lottie 구조 검사', () => {
     expect(judgeRender(one).blank).toBe(true); // 한 프레임만 그려짐
     const moving = blank.map((f, i) => ({ ratio: 0.05, hash: i }));
     expect(judgeRender(moving)).toMatchObject({ blank: false, still: false });
+  });
+});
+
+describe('라이선스 기록 (P2-17)', () => {
+  it('버전 붙은 파일의 열쇠는 확장자·폭을 뺀 이름', () => {
+    expect(versionedKey('tap.v1.m4a')).toBe('tap.v1');
+    expect(versionedKey('hero-island-800w.v2.webp')).toBe('hero-island.v2');
+    expect(versionedKey('og-image.png')).toBe('og-image');
+  });
+
+  it('src의 정적 import 중 그림·소리 파일만 저장소 경로로', () => {
+    const code = [
+      "import a from '@/../img/2.world-map.png';",
+      "import b from './art/cloud.svg';",
+      "import { x } from '@/lib/x';",
+      "import c from 'some-pkg/icon.png';",
+      "const d = import('../sounds/ding.webm');",
+    ].join('\n');
+    expect(mediaImports(code, 'src/components/landing/About.tsx')).toEqual([
+      'img/2.world-map.png',
+      'src/components/landing/art/cloud.svg',
+      'src/components/sounds/ding.webm',
+    ]);
+  });
+
+  it('빠진 기록과 오래된 기록을 잡는다', () => {
+    const items = requiredKeys({
+      publicFiles: [
+        'public/sounds/sfx/tap.v1.webm',
+        'public/sounds/sfx/tap.v1.m4a',
+        'public/images/hero-800w.v1.webp',
+        'public/og-image.png',
+        'public/icons/star.svg',
+        'public/pyodide/314.0.7/pyodide.mjs',
+        'public/workers/pyodide-worker.mjs',
+      ],
+      fontDirs: ['src/fonts/jua'],
+      appFiles: ['src/app/icon.svg', 'src/app/layout.tsx'],
+      srcImports: ['img/2.world-map.png'],
+    });
+    const exists = (p: string) =>
+      [
+        'src/fonts/jua',
+        'src/app/icon.svg',
+        'public/og-image.png',
+        'img/2.world-map.png',
+      ].includes(p);
+    const full = [
+      '`tap.v1` `hero.v1` `public/og-image.png` `public/icons/`',
+      '`src/fonts/jua/` `src/app/icon.svg` `img/2.world-map.png`',
+      '`<id>.v<N>` `src/fonts/<이름>/` `public/animations/<id>.v1.json`',
+    ].join('\n');
+    expect(licenseProblems(full, items, exists)).toEqual({
+      missing: [],
+      stale: [],
+    });
+
+    const partial = full
+      .replace('`tap.v1` ', '')
+      .replace('`public/icons/`', '`public/icons/old.svg` `bgm.v2`');
+    const { missing, stale } = licenseProblems(partial, items, exists);
+    expect(missing).toEqual([
+      'public/sounds/sfx/tap.v1.webm → `tap.v1`',
+      'public/sounds/sfx/tap.v1.m4a → `tap.v1`',
+      'public/icons/star.svg → `public/icons/star.svg`',
+    ]);
+    expect(stale).toEqual(['`public/icons/old.svg`', '`bgm.v2`']);
+  });
+
+  it('저장소 폴더를 훑어 검사한다', () => {
+    const root = tmp();
+    mkdirSync(join(root, 'docs'), { recursive: true });
+    mkdirSync(join(root, 'public/textures'), { recursive: true });
+    mkdirSync(join(root, 'src/fonts/jua'), { recursive: true });
+    writeFileSync(join(root, 'public/textures/paper.v1.png'), 'x');
+    writeFileSync(join(root, 'docs/assets-license.md'), '`src/fonts/jua/`');
+    expect(runLicense({ root })).toBe(false);
+    writeFileSync(
+      join(root, 'docs/assets-license.md'),
+      '`src/fonts/jua/` `paper.v1`',
+    );
+    expect(runLicense({ root })).toBe(true);
+    expect(existsSync(join(root, 'docs/assets-license.md'))).toBe(true);
   });
 });

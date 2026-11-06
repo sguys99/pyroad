@@ -1,7 +1,7 @@
 import type { SoundManifest } from './types';
 
 /**
- * pyRoad 효과음 12종 + 월드 BGM 3곡 (P0-15 → P2-14). 출처·라이선스: docs/design/sound-sources.md, 규칙: docs/design/sound.md
+ * pyRoad 효과음 12종 + 월드 BGM 3곡 (P0-15 → P2-14). 출처·라이선스: docs/assets-license.md §3, 규칙: docs/design/sound.md
  *
  * 파일은 `scripts/build-sounds.sh`가 만든 `public/sounds/{sfx,bgm}/<id>.v<N>.{webm,m4a}`이고 `/sounds/*`는 1년 immutable 캐시다.
  * **소리를 바꾸려면** 스크립트의 원본·버전을 바꿔 새 파일(v2 …)을 만들고 아래 한 줄의 버전 숫자만 바꾼다

@@ -22,6 +22,7 @@
     "assets:textures": "node scripts/assets/textures.mjs",
     "assets:raster": "node scripts/assets/raster.mjs",
     "assets:lottie": "node scripts/assets/check-lottie.mjs",
+    "assets:license": "node scripts/assets/license.mjs",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:status": "supabase status",

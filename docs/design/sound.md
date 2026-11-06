@@ -1,6 +1,6 @@
 # 사운드 가이드 (P2-14)
 
-> 근거: [P0-15](../spikes/P0-15-sound.md) · 계획서 §2.5 사운드 · §12-Q8 · 출처 표: [sound-sources.md](sound-sources.md)
+> 근거: [P0-15](../spikes/P0-15-sound.md) · 계획서 §2.5 사운드 · §12-Q8 · 출처·라이선스: [assets-license.md §3](../assets-license.md#3-사운드)
 
 ## 구조
 
@@ -58,7 +58,7 @@ scripts/build-sounds.sh   원본 → 정규화·인코딩
 - 이름: `<id>.v<N>.webm` + `<id>.v<N>.m4a`. MP3 금지 (WebKit 앞뒤 패딩).
 - 효과음: 모노 48kHz, 앞 무음 제거, 역할별 RMS(탭·블립 -24, 피드백 -19~-23, 징글 -18), 리미터 -1.5dBFS, Opus 64k / AAC 96k.
 - BGM: 스테레오 48kHz, 60~75초 루프 목표, 이음매 256샘플 크로스페이드, -16 LUFS, true peak -1.5dBTP 근처, Opus 96k / AAC 128k. 디코드 후 메모리는 곡당 약 28MB(75초)라 지금 곡만 보관.
-- 출처는 CC0(Kenney, OpenGameArt CC0)만. 출처 URL·작가·라이선스·받은 날짜를 [sound-sources.md](sound-sources.md)에 적는다.
+- 출처는 CC0(Kenney, OpenGameArt CC0)만. 출처 URL·작가·라이선스·받은 날짜·원본 sha256을 [assets-license.md §3](../assets-license.md#3-사운드)에 적는다(파일 열쇠 `<id>.v<N>`, `npm run assets:license`가 확인).
 
 ## 소리 바꾸는 방법
 
@@ -71,7 +71,7 @@ scripts/build-sounds.sh   원본 → 정규화·인코딩
    ```
 3. `src/lib/sound/manifest.ts`에서 그 소리 한 줄의 버전 숫자만 바꾼다 (`sfx('wrong', 2)`). `npx vitest run src/lib/sound`가 파일이 있는지 확인한다.
 4. 쓰지 않게 된 옛 버전 파일은 지운다 (배포된 적이 있으면 한 릴리즈 뒤에).
-5. [sound-sources.md](sound-sources.md) 표와 청취 검수 보드(`design/prototypes/src/sound-review/data.ts`)를 고친다.
+5. [assets-license.md §3](../assets-license.md#3-사운드) 표(열쇠를 새 버전으로)와 청취 검수 보드(`design/prototypes/src/sound-review/data.ts`)를 고친다.
 
 ## 청취 검수 보드
 

@@ -1,6 +1,6 @@
 # 웹폰트 (P2-10)
 
-> 근거: [P0-14 한글 웹폰트 로딩 전략](../spikes/P0-14-korean-fonts.md), 계획서 §2.5·§2.10, §12-Q15·Q27·Q28. 라이선스 목록 전체는 P2-17(`docs/assets-license.md`)에서 정리합니다.
+> 근거: [P0-14 한글 웹폰트 로딩 전략](../spikes/P0-14-korean-fonts.md), 계획서 §2.5·§2.10, §12-Q15·Q27·Q28. 라이선스 정본은 [`docs/assets-license.md`](../assets-license.md) §2(P2-17)입니다.
 
 ## 1. 구성
 
@@ -91,15 +91,12 @@ npm run fonts:check                             # 검사 (Node만, prebuild·CI)
 - 앱 화면에서 실제로 받은 조각(1280px, 첫 방문): 월드맵 Jua 4 + pyRoad Sans 10, 퀘스트 1-1 Jua 7 + pyRoad Sans 16 + pyRoad Mono 7.
 - 저장소 용량: 폰트 파일 합계 약 4.6MB(§12-Q27 예상 3~6MB 안).
 
-## 5. 라이선스 (P2-17에 넘길 표)
+## 5. 라이선스
 
-| 글꼴 (앱 이름) | 버전 | 출처 | 라이선스 | 변경 사항 | 파일 위치 |
-|---|---|---|---|---|---|
-| Jua (`Jua`) | 1.001 | github.com/google/fonts `ofl/jua` @ `cbe7e8d` (upstream googlefonts/jua) | SIL OFL 1.1, 예약 이름 없음 (Copyright 2018 The Jua Project Authors) | 서브셋(랜딩 텍스트 + unicode-range 조각), 힌팅 제거, 이름 유지 | `src/fonts/jua/` (+ `OFL.txt`) |
-| Pretendard Variable (`pyRoad Sans`) | 1.3.9 | npm `pretendard` 1.3.9 (github.com/orioncactus/pretendard) | SIL OFL 1.1, 예약 이름 "Pretendard" (Copyright 2021 Kil Hyung-jin) | 공식 동적 서브셋 92조각 이름 변경, 랜딩 텍스트 서브셋, 이름을 `pyRoad Sans`로 | `src/fonts/pyroad-sans/` (+ `OFL.txt`) |
-| D2Coding (`pyRoad Mono`) | 1.3.2 (20180524), Regular 기본판 | github.com/naver/d2-coding-font 릴리스 VER1.3.2 (OFL.txt는 저장소 `48d2941`) | SIL OFL 1.1, 예약 이름 "D2Coding"·"D2Coding-Bold" (Copyright 2015 NAVER Corp.) | 한자·가나 제외 조각 109개, 힌팅 제거, 이름을 `pyRoad Mono`로 | `src/fonts/pyroad-mono/` (+ `OFL.txt`) |
+출처·버전·원본 해시·저작권자·예약 이름·바꾼 것은 [`docs/assets-license.md`](../assets-license.md) §2(정본)에 있습니다. 요점만:
 
-- OFL 조건: 폰트만 따로 판매 금지, 재배포 때 저작권 고지 + OFL 전문 동봉(폴더마다 `OFL.txt`), 수정본(서브셋 포함)에 예약 이름 쓰지 않기(→ 이름 변경). 바꾼 이름이 name 테이블에 남았는지는 `fonts:check`가 봅니다. 저작권·상표 고지(nameID 0·7)는 원문 그대로 둡니다.
+- 셋 다 SIL OFL 1.1. 폴더마다 `OFL.txt`(원본 그대로)와 README. 예약 이름이 있는 Pretendard·D2Coding은 수정본(서브셋·조각)이라 이름을 `pyRoad Sans`·`pyRoad Mono`로 바꿨고, Jua는 예약 이름이 없어 그대로입니다. 저작권·상표·라이선스 name 레코드(0·7·13·14)는 원문 그대로 둡니다(`fonts:check`가 예약 이름 잔존을 봄).
+- 폰트 폴더를 추가·삭제하면 `docs/assets-license.md`의 표도 고칩니다(`npm run assets:license`가 `src/fonts/<이름>/`마다 기록을 확인).
 - 디자인 프로토타입(`design/prototypes/`)의 base64 서브셋도 같은 규칙입니다(§12-Q27).
 
 ## 6. 남은 일

@@ -9,7 +9,7 @@
 # 파일 이름에 버전(v1, v2 …)이 붙고 `/sounds/*` 는 1년 immutable 캐시라서, 이미 있는 파일을 다른 내용으로 덮어쓰지 않는다
 # (내용이 다르면 실패 → 버전을 올리고 src/lib/sound/manifest.ts 한 줄을 바꾼다). 교체 방법: docs/design/sound.md
 #
-# sfx: Kenney CC0 팩(https://kenney.nl/assets 또는 OpenGameArt의 Kenney 업로드, 출처는 docs/design/sound-sources.md)을
+# sfx: Kenney CC0 팩(https://kenney.nl/assets 또는 OpenGameArt의 Kenney 업로드, 출처·원본 sha256은 docs/assets-license.md §3)을
 #   ex-<팩>/ 이름으로 푼 상위 디렉토리. 팩 안의 폴더 구조는 상관없이 파일 이름(확장자 제외)으로 찾는다 (.ogg > .wav > .mp3).
 #   처리: 모노 48kHz → 앞 무음 제거(-55dB) → 역할별 RMS 목표로 gain → 리미터 -1.5dBFS → Opus 64k(.webm) / AAC 96k(.m4a)
 #   MP3는 만들지 않는다 (WebKit 앞뒤 패딩 23~32ms, P0-15 §4.4).

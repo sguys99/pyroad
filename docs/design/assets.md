@@ -18,7 +18,7 @@
 
 - **버전 붙은 이름 = 1년 immutable 캐시.** `/images/*`·`/textures/*`·`/animations/*`는 `/sounds/*`와 같이 `Cache-Control: public, max-age=31536000, immutable`(`next.config.ts` `VERSIONED_ASSET_DIRS`)이고 미들웨어(세션 갱신)를 타지 않습니다(`src/middleware.ts` matcher). 그래서 **내용을 바꾸면 반드시 버전을 올리고**, 같은 이름을 다른 내용으로 덮어쓰려 하면 스크립트가 멈춥니다. 옛 버전 파일은 경고만 내고 남겨 두니, 배포된 적이 있으면 한 릴리즈 뒤에 지웁니다.
 - 이 세 폴더에는 파이프라인 생성물만 둡니다. 손으로 넣은 파일·버전 없는 이름은 `assets:check`가 실패시킵니다.
-- **라이선스**: 받은 에셋(이미지·Lottie·사운드·폰트)은 출처 URL·작가·라이선스·받은 날짜를 기록합니다. 정본은 P2-17의 [`docs/assets-license.md`](../assets-license.md)(X14)이고, 그 전까지 사운드는 [sound-sources.md](sound-sources.md)에 있습니다. 자체 생성물(리그·종이 결 타일·`valid-pop.json`)은 저장소 라이선스를 따릅니다.
+- **라이선스**: 받은 에셋(이미지·Lottie·사운드·폰트)은 출처 URL·작가·라이선스·받은 날짜·원본 해시를 [`docs/assets-license.md`](../assets-license.md)(X14, P2-17)에 **같은 커밋에서** 기록합니다. 허용·금지 라이선스와 생성 도구·Lottie 기록 양식도 거기 있습니다. 배포 파일이 문서에 없으면 `assets:check`의 "라이선스 기록" 단계가 실패합니다. 자체 생성물(리그·종이 결 타일·`valid-pop.json`)은 저장소 라이선스(Apache 2.0)를 따릅니다.
 
 ## 1. 캐릭터: 리그 코드
 
@@ -113,7 +113,7 @@ npm run assets:lottie -- --no-render                    # 브라우저 없이 �
 
 B32의 옛 Lottie 4종(`public/characters/pybaem/lottie/*.json`, 앱 사용처 0)은 이 검사로 **구조(레이어마다 `st`·`ks.a` 누락, 이징 없는 키프레임 14~30개)와 렌더(6프레임 모두 0%) 둘 다 실패**합니다. 앱에서 지우고 검사기의 회귀 시험 자료로 `scripts/assets/__tests__/fixtures/b32/`에 옮겼습니다(P0-07 스파이크 데모 경로도 함께 수정).
 
-받은 Lottie를 넣는 순서: ① 라이선스 확인(상업 이용·수정 가능, 단독 재배포 금지 조건 기록 → `docs/assets-license.md`) ② `check-lottie.mjs <파일>`로 검사, 실패하면 After Effects/LottieFiles 에디터에서 다시 내보내거나 다른 에셋 ③ `public/animations/<id>.v1.json`으로 복사 ④ `npm run assets:check`.
+받은 Lottie를 넣는 순서: ① 라이선스 확인·기록([`docs/assets-license.md`](../assets-license.md) §7.4: LottieFiles 무료 에셋은 Lottie Simple License — 상업 이용·수정 가능, 배포본에 같은 조건이 따라가야 함) ② `check-lottie.mjs <파일>`로 검사, 실패하면 After Effects/LottieFiles 에디터에서 다시 내보내거나 다른 에셋 ③ `public/animations/<id>.v1.json`으로 복사 ④ `npm run assets:check`(라이선스 기록 포함).
 
 ## 5. 사운드
 

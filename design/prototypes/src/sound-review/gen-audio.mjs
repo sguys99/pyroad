@@ -2,7 +2,7 @@
 //   node src/sound-review/gen-audio.mjs && node build.mjs sound-review
 // - 효과음: public/sounds/sfx/<id>.v<N>.webm (가장 높은 버전) + P0-15 초안 wrong·bug (spikes/p0-15-sound/sounds) 비교용
 // - 배경음악 후보: .build/sound-review-bgm/<w1a…w3b>.webm (scripts/build-sounds.sh bgm-preview, Opus 48k).
-//   원본 주소는 docs/design/sound-sources.md. 없으면 그 후보는 "파일 없음"으로 표시
+//   원본 주소는 docs/assets-license.md §3. 없으면 그 후보는 "파일 없음"으로 표시
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
