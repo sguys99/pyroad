@@ -1,0 +1,6 @@
+{
+  "title": "pyRoad 최종 시안",
+  "description": "pyRoad 최종 시안 (P2-07): 시안 B 마법 그림책에 사용자 피드백(잉크 가볍게·화면 단순하게·Jua 제목·Pretendard 본문·짧고 건너뛸 수 있는 축하)을 반영한 인터랙티브 프로토타입",
+  "googleFonts": ["Jua"],
+  "inlineFonts": ["sans", "mono"]
+}

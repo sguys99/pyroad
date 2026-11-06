@@ -1,0 +1,642 @@
+/* 최종 시안 덮어쓰기 (P2-07, 사용자 리뷰 1차 §12-Q28)
+   ① 잉크 선 가볍게: 경계 1.5px 회갈색(--f-ink), 장식 테두리는 면 색으로 대신, 오프셋 종이층·해칭·진한 그림자 제거
+   ② 화면 단순하게: 장식 요소를 덜고 한 화면의 주인공을 분명하게
+   1차 스타일(screens.css·motion.css)을 복사해 온 뒤 여기서만 덮는다 → 1차와 비교가 쉽다 */
+
+/* ───── 공통 */
+.f-app {
+  background-image: var(--b-grain);
+  background-size: 128px 128px;
+}
+.f-kicker {
+  font-size: 15px;
+  color: var(--c-accent-text);
+}
+.f-h1 {
+  font-size: 30px;
+}
+.f-h2 {
+  font-size: 25px;
+}
+.f-h3 {
+  font-size: 20px;
+}
+.f-topnav {
+  border-bottom: 1px solid var(--c-line);
+  background-color: color-mix(in srgb, var(--c-bg) 92%, transparent);
+}
+
+/* ───── 랜딩 */
+.f-hero {
+  gap: 24px 48px;
+}
+.f-hero-t {
+  font-size: 36px;
+  line-height: 1.2;
+}
+@container vp (min-width: 600px) {
+  .f-hero-t {
+    font-size: 46px;
+  }
+}
+.f-hero-stage {
+  aspect-ratio: 560 / 440;
+}
+.f-hero-art {
+  position: absolute;
+  inset: 0;
+}
+.f-hero-art img,
+.f-hero-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.f-hero-py {
+  left: 30%;
+  bottom: 2%;
+  width: 41%;
+}
+.f-hero-bubble {
+  right: 0;
+  top: 2%;
+}
+.f-login {
+  border-top: 0;
+  padding-top: 0;
+}
+.f-social {
+  border: var(--f-lw) solid var(--c-line);
+  box-shadow: none;
+  border-radius: 12px;
+}
+.f-social-kakao {
+  border-color: #fee500;
+}
+.f-sec {
+  padding-top: 64px;
+}
+.f-notebook-card {
+  border: 1px solid var(--c-line);
+  border-radius: 18px;
+  box-shadow: var(--b-shadow);
+}
+.f-try-label {
+  font-size: 17px;
+}
+.f-try-line {
+  border: var(--f-lw) solid var(--c-line-strong);
+}
+.f-try-out {
+  border: 0;
+  background: var(--c-surface2);
+}
+.f-try-stamp {
+  width: 84px;
+  height: 84px;
+}
+
+/* 그림책 3권: 표지 테두리·겹친 종이 그림자 빼고 면 색 */
+.f-shelf {
+  gap: 20px;
+}
+.f-book-cover {
+  border: 0;
+  border-radius: 6px 16px 16px 6px;
+  box-shadow: 0 6px 18px rgba(62, 52, 43, 0.12);
+  background-image: var(--b-fiber), linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 12px, transparent 12px);
+  padding: 12px 14px 16px 24px;
+}
+.f-cover-art {
+  border: 0;
+  border-radius: 8px;
+}
+.f-book-band {
+  border: 0;
+  top: 0;
+  font-size: 15px;
+}
+.f-book-clasp {
+  border: 0;
+  box-shadow: 0 2px 6px rgba(62, 52, 43, 0.2);
+}
+.f-book-t {
+  font-size: 24px;
+}
+@container vp (max-width: 679px) {
+  /* 모바일: 표지를 가로 한 줄 카드로 (세로로 길게 쌓이지 않게) */
+  .f-book-cover {
+    grid-template-columns: 112px 1fr;
+    align-items: center;
+    column-gap: 14px;
+  }
+  .f-book-cover .f-cover-art {
+    grid-row: span 2;
+  }
+  .f-book-t {
+    margin-top: 0;
+    align-self: end;
+  }
+  .f-book-sub {
+    align-self: start;
+  }
+}
+
+/* 세 친구: 한 줄 소개 */
+.f-friends-sec .f-h3 {
+  margin-bottom: 12px;
+}
+.f-friends {
+  display: grid;
+  gap: 10px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container vp (min-width: 760px) {
+  .f-friends {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.f-friend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: none !important;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  text-align: left;
+  justify-items: start;
+}
+.f-friend > svg {
+  flex: none;
+  border-radius: 50%;
+  background: var(--c-surface2);
+}
+.f-friend > span {
+  display: grid;
+}
+.f-friend-name {
+  margin: 0;
+  font-size: 19px;
+}
+.f-friend-role {
+  font-size: 15px;
+  color: var(--c-text-muted);
+}
+
+/* 보호자 안내: 줄 공책·도장·점선 상자 빼고 3단 글 */
+.f-letter {
+  background-image: none;
+  border: 0;
+  border-radius: 20px;
+  box-shadow: none;
+  background: var(--c-surface2);
+}
+.f-letter-col {
+  border: 0;
+  padding: 0;
+  background: none;
+}
+.f-letter-ic {
+  border: 0;
+  background: var(--c-surface);
+}
+.f-footer {
+  border-top: 1px solid var(--c-line);
+  background: transparent;
+}
+
+/* ───── 보물지도 */
+.f-world-head {
+  padding-left: 0;
+  margin-bottom: 20px;
+}
+.f-world-title .f-h1 {
+  font-size: 28px;
+}
+.f-scroll.is-x .f-roller {
+  width: 18px;
+  border: 0;
+  border-radius: 9px;
+  top: -8px;
+  bottom: -8px;
+  background: linear-gradient(90deg, #a07a52, #d6b48a 45%, #b38a5e 75%, #8c6845);
+}
+.f-scroll.is-y .f-roller {
+  height: 18px;
+  border: 0;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #a07a52, #d6b48a 45%, #b38a5e 75%, #8c6845);
+}
+.f-roller::before,
+.f-roller::after {
+  display: none;
+}
+.f-scroll.is-x {
+  padding: 0 14px;
+}
+.f-map-paper {
+  border: 0;
+  border-radius: 4px;
+  background-color: #f5ead3;
+  box-shadow:
+    inset 0 0 40px rgba(160, 120, 70, 0.16),
+    0 8px 24px rgba(62, 52, 43, 0.1);
+}
+.f-node-plate {
+  border: 0;
+  box-shadow: 0 2px 8px rgba(62, 52, 43, 0.14);
+  font-size: 17px;
+}
+.f-node.is-locked .f-node-plate {
+  border: 0;
+  box-shadow: none;
+  background: rgba(242, 234, 219, 0.92);
+}
+.f-node.is-current .f-node-plate {
+  border: 0;
+}
+.f-node.is-current::before {
+  border-width: 2px;
+  opacity: 0.6;
+}
+.f-node-meta {
+  background: transparent;
+}
+.f-here-flag {
+  border: 0;
+  box-shadow: 0 2px 6px rgba(62, 52, 43, 0.18);
+  font-size: 15px;
+}
+.f-node.is-tall .f-node-plate {
+  font-size: 15px;
+}
+/* 다음 권: 작게 한 줄 */
+.f-next {
+  margin-top: 36px;
+}
+.f-next .f-h2 {
+  font-size: 20px;
+}
+.f-next-book {
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  padding: 12px;
+  border: 0;
+  box-shadow: none;
+  background: var(--c-surface2);
+}
+.f-next-cover {
+  border: 0;
+  padding: 6px 6px 6px 12px;
+}
+.f-next-cover .f-book-band {
+  display: none;
+}
+.f-next-info .f-h3 {
+  font-size: 18px;
+}
+.f-next-info p {
+  display: none;
+}
+.f-next-cover .f-book-clasp {
+  width: 30px;
+  height: 36px;
+  margin-top: -18px;
+  right: -10px;
+}
+@container vp (max-width: 340px) {
+  .f-next-book {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 스테이지 차례: 점선 지시선·두꺼운 테두리 빼기 */
+.f-toc-art {
+  border: 0;
+}
+.f-toc-chest {
+  border: 0;
+  background: var(--c-warning-soft);
+}
+.f-toc-dots {
+  display: none;
+}
+.f-toc-row {
+  border-bottom: 1px solid var(--c-line);
+  border-radius: 10px;
+}
+.f-toc-no {
+  border: var(--f-lw) solid var(--c-line);
+  border-radius: 50%;
+  font-size: 16px;
+}
+.f-toc-row.is-locked .f-toc-no {
+  border-style: dashed;
+}
+.f-toc-main {
+  flex: 1;
+}
+
+/* ───── 퀘스트: 가죽 표지·쪽 번호·겹친 종이 가장자리 빼고, 왼쪽 쪽은 글 위주 */
+.f-quest-crumb {
+  display: none;
+}
+.f-quest-bar {
+  justify-content: flex-end;
+}
+.f-seg {
+  border: 0;
+  background: var(--c-surface2);
+  border-radius: 24px;
+}
+.f-seg button {
+  border-radius: 20px;
+}
+.f-spread {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(62, 52, 43, 0.1);
+  grid-template-columns: 1fr 1fr;
+}
+.f-spread-l,
+.f-spread-r {
+  border: 0;
+  box-shadow: none;
+}
+.f-spread-l {
+  border-radius: 20px 0 0 20px;
+  background-color: var(--c-surface);
+}
+.f-spread-r {
+  border-radius: 0 20px 20px 0;
+  background-color: var(--c-surface);
+}
+.f-spread-l::after {
+  width: 36px;
+  background: linear-gradient(90deg, transparent, rgba(140, 110, 78, 0.1));
+}
+.f-spread-r::after {
+  width: 36px;
+  background: linear-gradient(-90deg, transparent, rgba(140, 110, 78, 0.1));
+}
+.f-spread-spine {
+  display: none;
+}
+.f-page {
+  padding: 26px 30px 32px;
+}
+.f-story-t {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.f-story-art {
+  border: 0;
+  border-radius: 14px;
+  transform: none;
+  max-height: 150px;
+  margin-bottom: 14px;
+}
+.f-story-art .f-quest-art {
+  height: 150px;
+  object-fit: cover;
+}
+.f-story-p {
+  font-size: 17px;
+}
+.f-task {
+  border: 0;
+  background: var(--c-w1-soft);
+  border-radius: 14px;
+  padding: 26px 16px 14px;
+}
+.f-task-k {
+  border: 0;
+  transform: translateY(-55%);
+  font-size: 15px;
+  border-radius: 10px;
+}
+.f-tutor-rig {
+  width: 96px;
+}
+.f-hints {
+  border-top: 1px solid var(--c-line);
+}
+.f-hints-head {
+  gap: 6px 12px;
+}
+.f-hints-k {
+  order: 3;
+  flex-basis: 100%;
+  font-size: 14px;
+}
+.f-hints-btns {
+  align-items: center;
+}
+.f-keybtn {
+  text-decoration: none;
+  color: var(--c-warning);
+}
+.f-keybtn[disabled] {
+  opacity: 0.5;
+}
+.f-note {
+  border: 0;
+  border-radius: 10px;
+  transform: none;
+  box-shadow: none;
+}
+.f-note::before {
+  display: none;
+}
+.f-notebook-t {
+  font-size: 20px;
+}
+.f-editor {
+  border: var(--f-lw) solid var(--c-line-strong);
+  border-radius: 14px;
+  box-shadow: none;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--b-lh) - 1px), #e7eef3 calc(var(--b-lh) - 1px), #e7eef3 var(--b-lh));
+}
+.f-gutter {
+  border-right: 1px solid color-mix(in srgb, var(--c-accent) 45%, transparent);
+}
+.f-slip {
+  border: 0;
+  border-radius: 12px;
+  background: var(--c-surface2);
+  box-shadow: none;
+}
+.f-keys {
+  border: 0;
+  background: var(--c-surface2);
+  border-radius: 14px;
+}
+.f-key {
+  border: 1px solid var(--c-line);
+  box-shadow: 0 2px 0 var(--c-line);
+}
+.f-ribbon-tab {
+  border: 0;
+  background: var(--c-surface2);
+}
+.f-page-host {
+  border: 0;
+  border-radius: 6px 6px 18px 18px;
+  box-shadow: 0 8px 24px rgba(62, 52, 43, 0.1);
+}
+.f-choice {
+  border: var(--f-lw) solid var(--c-line-strong);
+  box-shadow: none;
+  border-radius: 14px;
+}
+.f-choice-n {
+  border: 0;
+}
+.f-quiz-code {
+  border: var(--f-lw) solid var(--c-line);
+}
+.f-explain {
+  border: 0;
+  border-radius: 14px;
+}
+.f-quiz-try {
+  border: 0;
+}
+.f-reward-item {
+  border: 0;
+  background: var(--c-surface2);
+  border-radius: 14px;
+}
+
+/* 건너뛰기 안내 (축하 재생 중) */
+.fm-skip,
+.f-skip-hint {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 9;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(62, 52, 43, 0.72);
+  color: #fffdf8;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* ───── 시그니처 모션 무대 */
+.fm-card {
+  border: 0;
+  border-radius: 20px;
+  box-shadow: var(--b-shadow);
+}
+.fm-no {
+  border: 0;
+  width: 40px;
+  height: 40px;
+  font-size: 21px;
+}
+.fm-seg {
+  border: 0;
+  background: var(--c-surface2);
+  border-radius: 22px;
+}
+.fm-seg button {
+  border-radius: 18px;
+}
+.fm-note {
+  border-left-width: 3px;
+  background: var(--c-surface2);
+  border-radius: 0 10px 10px 0;
+}
+.fm-tl-bar {
+  border: var(--f-lw) solid var(--c-line-strong);
+}
+.fm-tl-beat {
+  border: 0;
+}
+.fm-ul,
+.fm-lv {
+  border: 0;
+  border-radius: 14px;
+}
+.fm-plate {
+  border: 0;
+  box-shadow: 0 2px 8px rgba(62, 52, 43, 0.14);
+}
+.fm-plate.is-locked {
+  box-shadow: none;
+}
+.fm-hud {
+  border: 0;
+  background: var(--c-surface2);
+  border-radius: 14px;
+}
+.fm-plus {
+  border: 0;
+}
+.fm-book {
+  border: 0;
+  background: var(--c-surface2);
+  border-radius: 16px;
+  padding: 6px;
+}
+.fm-lpage,
+.fm-rpage {
+  border: 0;
+}
+.fm-lpage-art {
+  border: 0;
+  border-radius: 10px;
+  transform: none;
+}
+.fm-leaf-front,
+.fm-leaf-back {
+  border: 0;
+  box-shadow: inset 1px 0 0 var(--c-line);
+}
+.fm-nb-code {
+  border: var(--f-lw) solid var(--c-line);
+}
+.fm-nb-slip {
+  border: 0;
+  border-radius: 10px;
+}
+.fm-reward {
+  border: 0;
+  background: var(--c-surface2);
+}
+.fm-under-say {
+  border: 0;
+}
+.fm-lv-card {
+  transform: rotate(-2deg);
+}
+.fm-lv-sticker {
+  border: 0;
+  box-shadow: none;
+}
+.fm-conf i {
+  border: 0;
+}
+.f-ul-lock {
+  border: 0;
+}
+.f-ul-banner {
+  border-width: 1.5px;
+  border-style: solid;
+}
+.fm-over-card {
+  box-shadow: 0 20px 50px rgba(62, 52, 43, 0.25);
+}
+.f-story-art {
+  background: #eaf1da;
+  display: flex;
+  justify-content: center;
+}
