@@ -23,6 +23,8 @@ export type BadgeIcon =
 export interface ShareCardAvatar {
   /** 꾸미기 (P9-04 `avatar_config`). 지금은 파이뱀만 */
   costume?: Costume;
+  /** 파이뱀 스킨 id (`avatar_config.skin`, P3-13·§12-Q34). 없으면 기본 숲초록 */
+  skin?: string | null;
 }
 
 interface Base {

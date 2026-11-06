@@ -23,6 +23,8 @@ import {
 } from '@/components/characters/rig/MascotRig';
 import type { RigHandle } from '@/components/characters/rig/LiveRig';
 import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/profile/UserAvatar';
+import { PYBAEM_SKINS, skinPalette } from '@/lib/avatar/skins';
 import { CodeSample, Demo, Section } from './ui';
 
 function StateButtons<S extends string>({
@@ -195,6 +197,53 @@ export function RigSection() {
               별똥이 건네기
             </figcaption>
           </figure>
+        </div>
+      </Demo>
+      <Demo
+        label="파이뱀 스킨 (공개 아바타, P3-13)"
+        note="users.avatar_config.skin → user_public_profiles.avatar_skin. 팔레트 덮어쓰기(src/lib/avatar/skins.ts), NULL·모르는 값은 숲초록"
+        data-testid="rig-skins"
+      >
+        <div className="flex flex-wrap items-end gap-4">
+          {PYBAEM_SKINS.map((skin) => (
+            <figure
+              key={skin.id}
+              className="flex flex-col items-center gap-1"
+              data-skin={skin.id}
+            >
+              <PybaemStatic
+                state="happy"
+                size={96}
+                palette={skinPalette(skin.id)}
+                label={`파이뱀 - ${skin.name}`}
+              />
+              <figcaption className="text-caption text-muted-foreground">
+                {skin.name} · {skin.id}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </Demo>
+      <Demo
+        label="UserAvatar (게시판 32 · 월드맵 48 · 프로필 96)"
+        note="장식(aria-hidden), 이름은 옆에 글자로. provider 프로필 사진은 쓰지 않음 (§2.6)"
+        data-testid="user-avatar-demo"
+      >
+        <div className="flex flex-col gap-3">
+          {PYBAEM_SKINS.map((skin, i) => (
+            <div key={skin.id} className="flex items-center gap-3">
+              <UserAvatar skin={skin.id} size={96} />
+              <UserAvatar skin={skin.id} size={48} />
+              <span className="flex items-center gap-2 text-body">
+                <UserAvatar skin={skin.id} size={32} />
+                {i === 0 ? '모험가0448' : `코딩친구${i}`}
+              </span>
+            </div>
+          ))}
+          <span className="flex items-center gap-2 text-body">
+            <UserAvatar skin={null} size={32} />
+            스킨 없음(NULL) → 숲초록
+          </span>
         </div>
       </Demo>
       <CodeSample

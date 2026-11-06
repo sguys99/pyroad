@@ -632,16 +632,19 @@ export type Database = {
       };
       user_public_profiles: {
         Row: {
+          avatar_skin: string | null;
           public_name: string;
           updated_at: string;
           user_id: string;
         };
         Insert: {
+          avatar_skin?: string | null;
           public_name: string;
           updated_at?: string;
           user_id: string;
         };
         Update: {
+          avatar_skin?: string | null;
           public_name?: string;
           updated_at?: string;
           user_id?: string;
@@ -744,16 +747,19 @@ export type Database = {
     Views: {
       user_profiles_public: {
         Row: {
+          avatar_skin: string | null;
           avatar_url: string | null;
           display_name: string | null;
           id: string | null;
         };
         Insert: {
+          avatar_skin?: string | null;
           avatar_url?: never;
           display_name?: string | null;
           id?: string | null;
         };
         Update: {
+          avatar_skin?: string | null;
           avatar_url?: never;
           display_name?: string | null;
           id?: string | null;
@@ -822,6 +828,7 @@ export type Database = {
         Args: { p_limit?: number; p_retention?: string };
         Returns: number;
       };
+      public_avatar_skin: { Args: { p_avatar_config: Json }; Returns: string };
       quest_xp: {
         Args: {
           p_base: number;

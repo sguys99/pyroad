@@ -14,10 +14,17 @@ import {
   type PybaemState,
 } from '@/components/characters/rig';
 import type { Costume } from '@/components/characters/rig/costumes';
+import { skinPalette } from '@/lib/avatar/skins';
 import { serializeSvg, svgDataUri } from './svg';
 
 export type CardCharacter =
-  | { id: 'pybaem'; state: PybaemState; costume?: Costume }
+  | {
+      id: 'pybaem';
+      state: PybaemState;
+      costume?: Costume;
+      /** 공개 아바타 스킨 (P3-13). 없으면 기본 숲초록 */
+      skin?: string | null;
+    }
   | { id: 'bugbug'; state: BugBugState }
   | { id: 'byeolttongi'; state: ByeolttongiState };
 
@@ -36,6 +43,7 @@ export function characterSvg(c: CardCharacter, idPrefix?: string): string {
           ...common,
           state: c.state,
           costume: c.costume,
+          palette: c.skin ? skinPalette(c.skin) : undefined,
         })
       : c.id === 'bugbug'
         ? createElement(BugBugStatic, { ...common, state: c.state })

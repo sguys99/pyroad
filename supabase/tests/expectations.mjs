@@ -29,7 +29,10 @@ export const EXPECT = {
   // ── view: 뷰를 통한 조회·쓰기 (B03) ────────────────────────
   'B03-1': { expect: 'deny' },
   'B03-2': { expect: 'deny' },
-  'B03-3': { expect: 'allow', note: '게시판 작성자 표시' },
+  'B03-3': {
+    expect: 'allow',
+    note: '게시판 작성자 표시. 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin (P3-13 ① 00021)',
+  },
   'B03-4': { expect: 'deny' },
   'B03-5': { expect: 'deny' },
   'B03-6': { expect: 'deny' },
@@ -66,6 +69,18 @@ export const EXPECT = {
     requires: 'public.user_public_profiles',
     activateIn: 'B34',
     note: 'users 행이 있는데 공개 프로필 행이 없거나 이름이 다른 사용자 수 = 0 (FK 대상이 없으면 게시판 쓰기가 실패)',
+  },
+  'PP-5': {
+    expect: 'allow',
+    requires: 'public.user_public_profiles.avatar_skin',
+    activateIn: 'P3-13',
+    note: '① 00021: 공개 아바타 = avatar_config.skin 을 동기화 트리거가 6종 id 만 복사 (모르는 값·다른 키는 공개 안 됨, 직접 쓰기 거부, CHECK)',
+  },
+  'NM-1': {
+    expect: 'allow',
+    requires: 'public.placeholder_display_name()',
+    activateIn: 'P3-13',
+    note: '③ 00022: 기존 사용자 users.display_name 실명 → 모험가NNNN, avatar_url 사진 → 빈 값 (되돌릴 수 없음, 닉네임은 그대로)',
   },
 
   // ── notice: 공지 쓰기 (B02) ────────────────────────────────
@@ -557,7 +572,7 @@ export const EXPECT = {
   'APP-3': { expect: 'allow' },
   'APP-4': {
     expect: 'allow',
-    note: 'B13 이후 custom_api_keys 를 select 하지 않음 (키 등록 여부는 서버가 user_api_keys 에서 확인)',
+    note: 'B13 이후 custom_api_keys 를 select 하지 않음. P3-13: display_name·avatar_url 대신 user_public_profiles(public_name, avatar_skin) 임베딩 (src/lib/avatar/ownProfile.ts)',
   },
   'APP-5': { expect: 'allow' },
   'APP-6': { expect: 'allow' },

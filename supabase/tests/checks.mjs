@@ -484,7 +484,7 @@ async function groupView(u) {
     group: 'view',
     id: 'B03-3',
     role: 'authenticated',
-    op: 'GET /user_profiles_public?select=* → 컬럼은 id·display_name·avatar_url 뿐',
+    op: 'GET /user_profiles_public?select=* → 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin 뿐 (P3-13)',
     ...READ,
     run: async () => {
       const r = await rest('GET', '/rest/v1/user_profiles_public?select=*', {
@@ -493,7 +493,7 @@ async function groupView(u) {
       const c = classifyRead(r);
       if (c.actual !== 'allowed') return c;
       const keys = Object.keys(r.json[0]).sort().join(',');
-      return keys === 'avatar_url,display_name,id'
+      return keys === 'avatar_skin,avatar_url,display_name,id'
         ? { actual: 'allowed', detail: `rows=${r.json.length}, cols=${keys}` }
         : { actual: 'extra-columns', detail: keys };
     },
@@ -738,6 +738,89 @@ async function groupView(u) {
         left join public.user_public_profiles p on p.user_id = u.id
        where p.public_name is distinct from coalesce(u.nickname, public.placeholder_display_name(u.id))`);
       return { actual: v, detail: `${v}명 / 전체 ${one('select count(*) from public.users')}명` };
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'PP-5',
+    role: 'authenticated',
+    op: '공개 아바타 동기화 (P3-13, 00021): avatar_config.skin(P3-11 처럼 UPDATE (avatar_config) 를 준 authenticated) → avatar_skin·뷰 · 모르는 값·다른 키는 공개 안 됨 · 직접 UPDATE 거부 · CHECK',
+    ...OK,
+    run: async () => {
+      const x = await createUser('pp5', '공개스킨');
+      return sqlCheck(`
+        GRANT UPDATE (avatar_config) ON public.users TO authenticated;
+        SET LOCAL ROLE authenticated;
+        SET LOCAL request.jwt.claims = '{"sub": "${x.id}", "role": "authenticated"}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_skin FROM public.user_profiles_public WHERE id = '${x.id}') IS NOT NULL THEN
+            RAISE EXCEPTION '가입 직후 스킨이 NULL 이 아님';
+          END IF;
+        END $$;
+        UPDATE public.users SET avatar_config = '{"skin": "sky", "hat": "crown"}' WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_skin FROM public.user_profiles_public WHERE id = '${x.id}') IS DISTINCT FROM 'sky'
+             OR (SELECT avatar_url FROM public.user_profiles_public WHERE id = '${x.id}') IS NOT NULL THEN
+            RAISE EXCEPTION '스킨을 골랐는데 뷰 avatar_skin 이 sky 가 아님 (또는 사진이 보임)';
+          END IF;
+          BEGIN
+            UPDATE public.user_public_profiles SET avatar_skin = 'berry' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION '공개 프로필 avatar_skin 직접 UPDATE 가 허용됨';
+          EXCEPTION WHEN insufficient_privilege THEN NULL;
+          END;
+        END $$;
+        UPDATE public.users SET avatar_config = '{"skin": "<b>gold</b>"}' WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_skin FROM public.user_profiles_public WHERE id = '${x.id}') IS NOT NULL THEN
+            RAISE EXCEPTION '모르는 스킨 값이 공개됨';
+          END IF;
+        END $$;
+        RESET ROLE;
+        DO $$
+        BEGIN
+          BEGIN
+            UPDATE public.user_public_profiles SET avatar_skin = 'gold' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION 'CHECK 가 모르는 스킨을 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          IF EXISTS (SELECT 1 FROM public.users u JOIN public.user_public_profiles p ON p.user_id = u.id
+                      WHERE p.avatar_skin IS DISTINCT FROM public.public_avatar_skin(u.avatar_config)) THEN
+            RAISE EXCEPTION '공개 스킨이 avatar_config 와 다른 행이 있음';
+          END IF;
+        END $$;`);
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'NM-1',
+    role: 'postgres',
+    op: '기존 사용자 실명·사진 정리 (P3-13 ③ 00022): 옛 트리거가 복사한 display_name·avatar_url 행에 00022 를 다시 적용 → 자리표시자·빈 값, 닉네임·공개 이름은 그대로',
+    ...OK,
+    run: async () => {
+      const x = await createUser('nm1', '정실명');
+      const mig = readFileSync(
+        join(HERE, '../migrations/00022_clear_legacy_real_names.sql'),
+        'utf8',
+      );
+      return sqlCheck(`
+        UPDATE public.users SET display_name = '정실명', avatar_url = 'https://lh3.googleusercontent.com/a/nm1', nickname = '정리확인'
+         WHERE id = '${x.id}';
+        ${mig}
+        DO $$
+        BEGIN
+          IF EXISTS (SELECT 1 FROM public.users
+                      WHERE display_name IS DISTINCT FROM public.placeholder_display_name(id)
+                         OR avatar_url IS DISTINCT FROM '') THEN
+            RAISE EXCEPTION '실명·사진이 남은 행이 있음';
+          END IF;
+          IF (SELECT nickname FROM public.users WHERE id = '${x.id}') IS DISTINCT FROM '정리확인'
+             OR (SELECT display_name FROM public.user_profiles_public WHERE id = '${x.id}') IS DISTINCT FROM '정리확인' THEN
+            RAISE EXCEPTION '닉네임·공개 이름이 바뀜';
+          END IF;
+        END $$;`);
     },
   });
 }
@@ -2677,8 +2760,8 @@ async function groupApp(u) {
     ],
     [
       'APP-4',
-      'world/page.tsx users',
-      `/rest/v1/users?select=id,display_name,avatar_url,total_xp,current_level&id=eq.${u.alice.id}`,
+      'world·profile users + 공개 프로필 (P3-13 OWN_PROFILE_SELECT: 실명·사진 컬럼 안 읽음)',
+      `/rest/v1/users?select=id,total_xp,current_level,user_public_profiles(public_name,avatar_skin)&id=eq.${u.alice.id}`,
     ],
     [
       'APP-5',
@@ -2738,6 +2821,11 @@ async function groupApp(u) {
           if (bad.length)
             return { actual: 'world-missing', detail: `${bad.length}행에 world.order 없음` };
         }
+        if (id === 'APP-4' && c.actual === 'allowed') {
+          const pub = r.json[0]?.user_public_profiles;
+          if (!pub || typeof pub.public_name !== 'string' || !('avatar_skin' in pub))
+            return { actual: 'profile-missing', detail: JSON.stringify(r.json[0]).slice(0, 160) };
+        }
         if (id === 'APP-1' && c.actual === 'allowed') {
           const sk = r.json[0].prompt_skeleton;
           if (typeof sk?.starter_code !== 'string')
@@ -2777,12 +2865,12 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-13',
     role: 'authenticated',
-    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18)',
+    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name,avatar_skin),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18·P3-13)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name),board_comments(count)&order=created_at.desc&offset=0&limit=10',
+        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name,avatar_skin),board_comments(count)&order=created_at.desc&offset=0&limit=10',
         { as: u.alice, prefer: 'count=exact' },
       );
       const c = classifyRead(r);
@@ -2796,6 +2884,8 @@ async function groupApp(u) {
       // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
       if (!/^모험가\d{4}$/.test(name))
         return { actual: 'real-name', detail: name };
+      if (!('avatar_skin' in r.json[0].user_profiles_public))
+        return { actual: 'avatar-missing', detail: JSON.stringify(r.json[0].user_profiles_public) };
       return c;
     },
   });
@@ -2803,12 +2893,12 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-14',
     role: 'authenticated',
-    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name)',
+    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name,avatar_skin)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name)&post_id=eq.${u.postId}&order=created_at.asc`,
+        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name,avatar_skin)&post_id=eq.${u.postId}&order=created_at.asc`,
         { as: u.alice },
       );
       const c = classifyRead(r);
@@ -2822,6 +2912,8 @@ async function groupApp(u) {
       // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
       if (!/^모험가\d{4}$/.test(name))
         return { actual: 'real-name', detail: name };
+      if (!('avatar_skin' in r.json[0].user_profiles_public))
+        return { actual: 'avatar-missing', detail: JSON.stringify(r.json[0].user_profiles_public) };
       return c;
     },
   });

@@ -5,6 +5,7 @@ import { EyeOff } from 'lucide-react';
 import type { BoardCommentWithAuthor } from '@/lib/types/database';
 import { formatKstDate } from '@/lib/time/kst';
 import { authorName } from '@/lib/board/display';
+import { UserAvatar } from '@/components/profile/UserAvatar';
 import { BOARD_LIMITS } from '@/lib/board/limits';
 import { BoardFormMessage, type BoardFormError } from './BoardFormMessage';
 import { ReportButton } from './ReportButton';
@@ -43,7 +44,12 @@ export function CommentSection({
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         code?: string;
-        comment?: { id: string; created_at: string; author_name?: string };
+        comment?: {
+          id: string;
+          created_at: string;
+          author_name?: string;
+          author_skin?: string | null;
+        };
       };
       if (!res.ok || !data.comment) {
         // 금칙어·개인정보면 code: 'moderation' (P1-18). 쓴 내용은 지우지 않고 고칠 수 있게 둠
@@ -65,6 +71,7 @@ export function CommentSection({
         hidden_at: null,
         user_profiles_public: {
           display_name: data.comment.author_name ?? null,
+          avatar_skin: data.comment.author_skin ?? null,
         },
       };
       setComments((prev) => [...prev, newComment]);
@@ -113,6 +120,10 @@ export function CommentSection({
               >
                 <div className="mb-1 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <UserAvatar
+                      skin={comment.user_profiles_public?.avatar_skin}
+                      size={32}
+                    />
                     <span>{authorName(comment.user_profiles_public)}</span>
                     <span>{date}</span>
                     {comment.is_hidden && (

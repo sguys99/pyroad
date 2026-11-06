@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { LogoutButton } from '@/components/LogoutButton';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
@@ -11,7 +10,8 @@ import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { UserAvatar } from '@/components/profile/UserAvatar';
+import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
 import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
 import { formatKstDate } from '@/lib/time/kst';
 import { sortStages } from '@/lib/world/stageOrder';
@@ -33,7 +33,7 @@ export default async function ProfilePage() {
   const [profileResult, progressResult, badgesResult] = await Promise.all([
     supabase
       .from('users')
-      .select('id, display_name, avatar_url, total_xp, current_level')
+      .select(OWN_PROFILE_SELECT)
       .eq('id', user.id)
       .single(),
     supabase
@@ -47,7 +47,7 @@ export default async function ProfilePage() {
       .eq('user_id', user.id),
   ]);
 
-  const profile = profileResult.data;
+  const profile = profileResult.data ? toOwnProfile(profileResult.data) : null;
   const progress = progressResult.data ?? [];
   const stages = sortStages(stagesResult.data ?? []);
   const badges = badgesResult.data ?? [];
@@ -76,27 +76,9 @@ export default async function ProfilePage() {
 
       {/* 헤더 */}
       <div className="mb-6 flex flex-col items-center gap-3">
-        {profile.avatar_url ? (
-          <Image
-            src={profile.avatar_url}
-            alt="아바타"
-            width={96}
-            height={96}
-            className="h-24 w-24 rounded-full"
-          />
-        ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
-            <CharacterAvatar
-              character="pybaem"
-              expression="happy"
-              size="lg"
-              animated
-            />
-          </div>
-        )}
-        <h1 className="text-xl font-bold text-foreground">
-          {profile.display_name}
-        </h1>
+        {/* 내 파이뱀 (공개 아바타, 게시판과 같은 모습). 이름은 아래 글자로 */}
+        <UserAvatar skin={profile.skin} size={96} />
+        <h1 className="text-xl font-bold text-foreground">{profile.name}</h1>
         <p className="text-muted-foreground">
           Lv.{profile.current_level} {title}
         </p>

@@ -44,7 +44,8 @@ describe('추천 닉네임 목록', () => {
     expect(failures).toEqual([]);
     // 조합끼리 겹치지 않음 (같은 이름이 두 번 나오지 않게)
     expect(bases.size).toBe(NICKNAME_ADJECTIVES.length * NICKNAME_NOUNS.length);
-  });
+    // 40,400개 전수 검사: 혼자 1.4초쯤이지만 전체 실행에서 다른 파일과 겹치면 기본 5초를 넘음
+  }, 30_000);
 
   it('가장 긴 조합 + 숫자 2개도 10글자 이하', () => {
     const longest =

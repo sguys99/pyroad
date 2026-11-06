@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { EyeOff } from 'lucide-react';
 import { formatKstDate } from '@/lib/time/kst';
 import { authorName } from '@/lib/board/display';
+import { UserAvatar } from '@/components/profile/UserAvatar';
 
 interface PostDetailProps {
   post: BoardPostWithAuthor;
@@ -29,6 +30,7 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
       )}
       <h1 className="mb-2 text-lg font-bold text-foreground">{post.title}</h1>
       <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+        <UserAvatar skin={post.user_profiles_public?.avatar_skin} size={32} />
         <span>{authorName(post.user_profiles_public)}</span>
         <span>{date}</span>
         {isEdited && <span>(수정됨)</span>}

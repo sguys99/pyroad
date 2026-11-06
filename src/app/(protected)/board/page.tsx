@@ -20,13 +20,13 @@ export default async function BoardPage({
   const to = from + PAGE_SIZE - 1;
 
   // getAuthUser()와 게시글 목록 쿼리를 병렬 실행 (user.id 불필요)
-  // 작성자 이름은 user_profiles_public(닉네임 → 모험가NNNN, 00014). 신고로 숨긴 글은 RLS 가 작성자에게만 보여 줌
+  // 작성자 이름·아바타는 user_profiles_public(닉네임 → 모험가NNNN + 파이뱀 스킨, 00018·00021). 신고로 숨긴 글은 RLS 가 작성자에게만 보여 줌
   const [{ user }, { data: posts, count }] = await Promise.all([
     getAuthUser(),
     supabase
       .from('board_posts')
       .select(
-        '*, user_profiles_public!board_posts_user_id_fkey(display_name), board_comments(count)',
+        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_skin), board_comments(count)',
         { count: 'exact' },
       )
       .order('created_at', { ascending: false })

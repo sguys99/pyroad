@@ -294,14 +294,19 @@ describe('PATCH·DELETE /api/board/posts/[postId]', () => {
 });
 
 describe('/api/board/comments', () => {
-  it('정상 댓글 저장 + 작성자 표시 이름(닉네임 → 모험가NNNN)', async () => {
+  it('정상 댓글 저장 + 작성자 표시 이름(닉네임 → 모험가NNNN)·아바타 스킨', async () => {
     mocks.rows.board_posts = { user_id: U2, is_hidden: false };
-    mocks.rows.user_profiles_public = { display_name: '모험가1234' };
+    mocks.rows.user_profiles_public = {
+      display_name: '모험가1234',
+      avatar_skin: 'violet',
+    };
     const res = await createComment(
       req({ post_id: POST_ID, content: '저도 궁금해요' }),
     );
     expect(res.status).toBe(200);
-    expect((await res.json()).comment.author_name).toBe('모험가1234');
+    const { comment } = await res.json();
+    expect(comment.author_name).toBe('모험가1234');
+    expect(comment.author_skin).toBe('violet');
     expect(writes()).toMatchObject([
       {
         table: 'board_comments',

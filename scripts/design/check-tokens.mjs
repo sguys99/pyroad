@@ -35,6 +35,11 @@ export const ALLOW = [
     why: '캐릭터 고유색·그림 글자 (리그 팔레트·레거시 캐릭터 SVG, docs/design/rig.md). 리그 B 그림자만 토큰과 같은 값',
   },
   {
+    path: 'src/lib/avatar/skins.ts',
+    rules: ['color'],
+    why: '파이뱀 스킨 팔레트 = 캐릭터 고유색 (공개 아바타, P3-13·§12-Q34). 리그 팔레트와 같은 성격',
+  },
+  {
     path: 'src/components/world/illustrations/',
     rules: ['color', 'size'],
     why: '월드 일러스트 원화 (Phase 5 월드맵 개편에서 월드 틴트 + 면 색의 진한 톤 선으로 다시 그림)',

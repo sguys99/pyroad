@@ -55,10 +55,10 @@ export async function POST(request: Request) {
     );
   }
 
-  // 화면에 바로 붙일 작성자 이름 (다른 사람에게 보이는 것과 같은 값: 닉네임 → 모험가NNNN). 못 읽어도 저장은 성공
+  // 화면에 바로 붙일 작성자 이름·아바타 (다른 사람에게 보이는 것과 같은 값: 닉네임 → 모험가NNNN, 파이뱀 스킨). 못 읽어도 저장은 성공
   const { data: author } = await admin
     .from('user_profiles_public')
-    .select('display_name')
+    .select('display_name, avatar_skin')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       id: data.id,
       created_at: data.created_at,
       author_name: author?.display_name ?? null,
+      author_skin: author?.avatar_skin ?? null,
     },
   });
 }
