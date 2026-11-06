@@ -21,9 +21,14 @@ export interface AnalyticsEventProps {
   login_success: { provider: SocialProvider | 'unknown'; new_user: boolean };
   /**
    * 첫 로그인 온보딩을 마침 (P3-11, `/api/onboarding`, 서버). 사용자당 1번(dedupe).
-   * skin: 고른 파이뱀 색(6종 id), grade_given: 학년을 골랐는지 (학년 값·닉네임은 보내지 않음)
+   * skin: 고른 파이뱀 색(6종 id), grade_given: 학년을 골랐는지 (학년 값·닉네임은 보내지 않음),
+   * returning: 온보딩 전에 학습한 기존 사용자였는지 (P3-12, 서버가 경험치·진행 행으로 판별)
    */
-  onboarding_complete: { skin: SkinId; grade_given: boolean };
+  onboarding_complete: {
+    skin: SkinId;
+    grade_given: boolean;
+    returning: boolean;
+  };
   /** 퀘스트에 처음 들어옴 (퀘스트마다 사용자당 1번, 서버) */
   quest_start: { quest_id: string };
   /** 퀘스트를 처음 완료함 (퀘스트마다 사용자당 1번, 완료 API·서버) */

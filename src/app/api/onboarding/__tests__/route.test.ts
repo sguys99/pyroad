@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   trackServerEvent: vi.fn(),
   reportServerError: vi.fn(),
+  xp: 0,
+  progress: 0,
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -14,7 +16,18 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }));
 vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: () => ({ rpc: mocks.rpc }),
+  createAdminClient: () => ({
+    rpc: mocks.rpc,
+    // wasReturningUser (P3-12): users.total_xp · user_progress 행 수
+    from: (table: string) => ({
+      select: () => ({
+        eq: () =>
+          table === 'users'
+            ? { maybeSingle: async () => ({ data: { total_xp: mocks.xp } }) }
+            : Promise.resolve({ count: mocks.progress }),
+      }),
+    }),
+  }),
 }));
 vi.mock('@/lib/analytics/server', () => ({
   trackServerEvent: mocks.trackServerEvent,
@@ -58,6 +71,8 @@ beforeEach(() => {
   mocks.rpc.mockReset();
   mocks.trackServerEvent.mockClear();
   mocks.reportServerError.mockClear();
+  mocks.xp = 0;
+  mocks.progress = 0;
   rpcReplies({
     consume_rate_limit: { data: { allowed: true }, error: null },
     complete_onboarding: { data: { first: true }, error: null },
@@ -88,10 +103,20 @@ describe('POST /api/onboarding (P3-11)', () => {
     const ev = mocks.trackServerEvent.mock.calls[0][0];
     expect(ev).toMatchObject({
       name: 'onboarding_complete',
-      props: { skin: 'berry', grade_given: true },
+      props: { skin: 'berry', grade_given: true, returning: false },
       dedupeKey: 'onboarding_complete',
     });
     expect(JSON.stringify(ev.props)).not.toContain('여우');
+  });
+
+  it('기존 사용자(진행 행이 있음)면 returning: true (P3-12)', async () => {
+    mocks.progress = 3;
+    expect((await post(body())).status).toBe(200);
+    expect(mocks.trackServerEvent.mock.calls[0][0].props).toEqual({
+      skin: 'berry',
+      grade_given: true,
+      returning: true,
+    });
   });
 
   it('다시 저장(first=false)이면 이벤트 없음', async () => {

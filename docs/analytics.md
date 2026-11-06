@@ -27,7 +27,7 @@
 | `landing_view` | 브라우저 `track()` — `src/components/landing/LandingViewTracker.tsx` (`src/app/page.tsx`) | 없음 | 랜딩을 열 때 | 볼 때마다 |
 | `landing_cta_click` | 브라우저 `track(…, { immediate: true })` — `HeroSection`(→ `LoginButton` `onBeforeLogin`), `LandingHeader` | `cta`: `hero`·`header`, `provider`: `google`·`kakao`·`naver` | 로그인 버튼을 누른 직후(OAuth로 떠나기 전에 바로 전송) | 누를 때마다 |
 | `login_success` | 서버 — `src/app/auth/callback/route.ts` | `provider`: `google`·`kakao`·`naver`·`unknown`, `new_user`: 가입 직후 첫 로그인 | 코드 교환 성공 뒤 | 로그인마다. `new_user=true`는 사용자당 1번(dedupe) |
-| `onboarding_complete` | 서버 — `src/app/api/onboarding/route.ts` (P3-11) | `skin`: 파이뱀 색 6종 id(`green`·`sky`·`sunset`·`berry`·`violet`·`sunny`), `grade_given`: 학년을 골랐는지(학년 값·닉네임은 보내지 않음) | `complete_onboarding` RPC가 처음 온보딩을 마친 것으로 처리했을 때 | 사용자당 1번(dedupe) |
+| `onboarding_complete` | 서버 — `src/app/api/onboarding/route.ts` (P3-11) | `skin`: 파이뱀 색 6종 id(`green`·`sky`·`sunset`·`berry`·`violet`·`sunny`), `grade_given`: 학년을 골랐는지(학년 값·닉네임은 보내지 않음), `returning`: 온보딩 전부터 학습하던 기존 사용자였는지(P3-12, 서버가 경험치·진행 행으로 판별) | `complete_onboarding` RPC가 처음 온보딩을 마친 것으로 처리했을 때 | 사용자당 1번(dedupe) |
 | `quest_start` | 서버 — 퀘스트 페이지 서버 컴포넌트 `trackQuestStart()` (**아래 4. 연결 대기**) | `quest_id` | 퀘스트에 처음 들어올 때. 잠긴 스테이지로 돌려보낼 때는 기록하지 않음 | 사용자·퀘스트마다 1번(dedupe) |
 | `quest_complete` | 서버 — `src/app/api/quest/complete/route.ts` | `quest_id`, `hints_used`(0~99), `used_golden_key`, `level_up`, `stage_cleared` | `complete_quest` RPC가 **처음** 완료로 처리했을 때(값은 모두 DB 함수가 정한 것) | 사용자·퀘스트마다 1번 |
 | `hint_used` | 서버 — `src/app/api/tutor/route.ts`·`stream/route.ts`의 `withHintTracking()` (`record_hint` 경로) | `quest_id`, `level`(1~3) | 튜터가 힌트 내용을 보내기 시작한 때(`record_hint`와 같은 시점, 끊긴 요청은 세지 않음) | 받을 때마다 |

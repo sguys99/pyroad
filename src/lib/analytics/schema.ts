@@ -30,7 +30,11 @@ export const EVENT_PROPS_SCHEMA = {
     })
     .strict(),
   onboarding_complete: z
-    .object({ skin: z.enum(SKIN_IDS), grade_given: z.boolean() })
+    .object({
+      skin: z.enum(SKIN_IDS),
+      grade_given: z.boolean(),
+      returning: z.boolean(),
+    })
     .strict(),
   quest_start: z.object({ quest_id: questId }).strict(),
   quest_complete: z

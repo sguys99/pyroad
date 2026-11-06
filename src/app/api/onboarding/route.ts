@@ -17,6 +17,7 @@ import {
   consumeProfileQuota,
   findFreeSuggestion,
   parseOnboardingRequest,
+  wasReturningUser,
 } from '@/lib/onboarding/server';
 
 /**
@@ -152,11 +153,16 @@ export async function POST(request: Request) {
   }
 
   if (result.first) {
+    const returning = await wasReturningUser(admin, user.id);
     trackServerEvent({
       headers: request.headers,
       userId: user.id,
       name: 'onboarding_complete',
-      props: { skin: input.skin, grade_given: input.grade !== null },
+      props: {
+        skin: input.skin,
+        grade_given: input.grade !== null,
+        returning,
+      },
       path: '/onboarding',
       dedupeKey: 'onboarding_complete',
     });

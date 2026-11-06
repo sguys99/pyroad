@@ -10,6 +10,7 @@ import { suggestNickname, type Rng } from '@/lib/profile/nicknameSuggest';
 import { captureServerError } from '@/lib/observability/server';
 import { parseRateLimitEnv, type RateLimit } from '@/lib/tutor/rateLimit';
 import type { OnboardingRequest } from './api';
+import { onboardingVariant } from './returning';
 
 /**
  * 온보딩 서버 도우미 (P3-11): 요청 검사, 동의 확인, 닉네임 중복·추천, 요청 한도, 저장 RPC.
@@ -182,6 +183,36 @@ export async function findFreeSuggestion(
     );
   }
   return undefined;
+}
+
+// ── 기존 사용자 (P3-12) ───────────────────────────────────────
+
+/**
+ * 온보딩을 마친 직후 분석용: 이 아이가 온보딩 전부터 학습하던 기존 사용자였는지 (경험치·진행 행).
+ * 닉네임은 방금 저장했으므로 신호로 쓰지 않는다. DB 오류면 false (분석 값일 뿐)
+ */
+export async function wasReturningUser(
+  admin: Admin,
+  userId: string,
+): Promise<boolean> {
+  try {
+    const [user, progress] = await Promise.all([
+      admin.from('users').select('total_xp').eq('id', userId).maybeSingle(),
+      admin
+        .from('user_progress')
+        .select('quest_id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+    ]);
+    return (
+      onboardingVariant({
+        totalXp: user.data?.total_xp,
+        progressCount: progress.count,
+        nickname: null,
+      }) === 'returning'
+    );
+  } catch {
+    return false;
+  }
 }
 
 // ── 저장 ────────────────────────────────────────────────────

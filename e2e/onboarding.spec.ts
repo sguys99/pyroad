@@ -7,7 +7,8 @@
 import { randomBytes } from 'node:crypto';
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { createServerClient } from '@supabase/ssr';
-import { adminClient } from './support/admin';
+import { adminClient, completeQuests } from './support/admin';
+import { stage } from './support/content';
 import { requireLocalStack } from './support/env';
 import { watchCspViolations } from './support/test';
 
@@ -296,4 +297,72 @@ test('동작 줄이기: 도장은 처음부터 제자리(움직임 0), 튜토리
         .filter((a) => a.playState === 'running').length,
   );
   expect(sceneAnims).toBe(0);
+});
+
+test('기존 사용자(P3-12): 반가운 말 + 바뀐 점, 예전 닉네임 그대로, 튜토리얼 없이 바로 이어서, 경험치·진행 그대로', async ({
+  browser,
+  baseURL,
+}) => {
+  const admin = adminClient();
+  const me = await newUser();
+  // 온보딩 전부터 학습하던 아이: 첫 퀘스트 완료(서버 완료 RPC) + 예전 닉네임
+  const quest = stage(1).quests[0];
+  await completeQuests(me.id, [quest]);
+  const oldName = `예전${(randomBytes(2).readUInt16BE() % 9000) + 1000}`;
+  await admin.from('users').update({ nickname: oldName }).eq('id', me.id);
+  const { data: before } = await admin
+    .from('users')
+    .select('total_xp, current_level')
+    .eq('id', me.id)
+    .single();
+  expect(before!.total_xp).toBeGreaterThan(0);
+
+  const { page, violations } = await openAs(browser, baseURL!, me.cookies, {
+    reducedMotion: 'reduce',
+  });
+  await page.goto('/world');
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page.getByTestId('onboarding-news')).toContainText('그대로예요');
+  await expect(
+    page.getByRole('heading', { name: '새 약속 확인하기' }),
+  ).toBeVisible();
+  await page.getByTestId('agreement-all').check();
+  await page.getByTestId('onboarding-next').click();
+
+  await expect(page.getByTestId('nickname-input')).toHaveValue(oldName);
+  await expect(page.getByTestId('nickname-hint')).toHaveAttribute(
+    'data-status',
+    'ok',
+  );
+  await page.getByTestId('onboarding-next').click();
+  await page.locator('[data-skin="violet"]').click();
+  await page.getByTestId('onboarding-next').click();
+  await page.getByTestId('grade-skip').click();
+
+  await expect(page.getByTestId('onboarding-kept')).toContainText(
+    `${before!.total_xp} XP`,
+  );
+  await expect(page.getByTestId('onboarding-tutorial-offer')).toBeVisible();
+  await expect(page.getByTestId('onboarding-next')).toHaveText(/이미 알아요/);
+  await page.getByTestId('onboarding-next').click();
+  await expect(page).toHaveURL(/\/world$/);
+
+  const { data: after } = await admin
+    .from('users')
+    .select('total_xp, current_level, nickname, onboarded_at')
+    .eq('id', me.id)
+    .single();
+  expect(after).toMatchObject({
+    total_xp: before!.total_xp,
+    current_level: before!.current_level,
+    nickname: oldName,
+  });
+  expect(after!.onboarded_at).toBeTruthy();
+  const { count } = await admin
+    .from('user_progress')
+    .select('quest_id', { count: 'exact', head: true })
+    .eq('user_id', me.id)
+    .eq('status', 'completed');
+  expect(count).toBe(1);
+  expect(violations).toEqual([]);
 });

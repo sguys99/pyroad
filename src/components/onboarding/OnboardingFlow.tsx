@@ -11,7 +11,13 @@ import {
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronLeft, Rocket } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  ChevronLeft,
+  Rocket,
+  Sparkles,
+} from 'lucide-react';
 import type { RigHandle } from '@/components/characters/rig/LiveRig';
 import type { PybaemState } from '@/components/characters/rig';
 import { AgreementChecklist } from '@/components/legal/AgreementChecklist';
@@ -61,6 +67,14 @@ import { RegistrationCard, type CardField } from './RegistrationCard';
 import { SkinPicker } from './SkinPicker';
 import { StepDots } from './StepDots';
 import { useNicknameCheck } from './useNicknameCheck';
+import {
+  RETURNING_NEWS,
+  RETURNING_NICKNAME_KEPT,
+  RETURNING_NICKNAME_RENAME,
+  stampLine,
+  stepCopy,
+} from './copy';
+import type { OnboardingVariant } from '@/lib/onboarding/returning';
 
 type AgreementId = (typeof AGREEMENT_ITEMS)[number]['id'];
 
@@ -74,45 +88,15 @@ export interface OnboardingFlowProps {
   issuedOn: string;
   /** 끝나고 갈 곳 */
   doneHref?: string;
+  /** 새 사용자 · 기존 사용자(P3-12: 반가운 말, 튜토리얼은 고를 수 있게) */
+  variant?: OnboardingVariant;
+  /** 기존 사용자의 예전 닉네임: kept = 그대로 채움, rename = 새 규칙에 맞지 않아 새로 추천함 */
+  previousNickname?: 'kept' | 'rename' | null;
+  /** 기존 사용자의 지금 경험치 (도장 단계에서 "그대로예요" 안내) */
+  totalXp?: number;
 }
 
 type Phase = 'form' | 'turning' | 'tutorial' | 'leaving';
-
-const STEP_TEXT: Record<
-  OnboardingStepId,
-  { title: string; desc: ReactNode; line: string; mascot: PybaemState }
-> = {
-  agree: {
-    title: '모험 약속',
-    desc: "pyRoad에서 안전하고 즐겁게 지내기 위한 약속이에요. '보기'를 누르면 내용을 읽을 수 있어요.",
-    line: '안녕! 나는 파이뱀이야. 모험을 떠나기 전에 약속부터 하자!',
-    mascot: 'wave',
-  },
-  nickname: {
-    title: '내 이름 정하기',
-    desc: '게시판과 프로필에서 친구들에게 보이는 별명이에요. 진짜 이름이나 학교 이름은 쓰지 마세요.',
-    line: '친구들이 부를 별명을 지어 줘. 진짜 이름은 비밀로 하고!',
-    mascot: 'idle',
-  },
-  skin: {
-    title: '내 파이뱀 색 고르기',
-    desc: '고른 색 파이뱀이 게시판과 프로필에서 나를 대신해 보여요. 나중에 꾸미기에서 바꿀 수 있어요.',
-    line: '나는 어떤 색이면 좋을까? 마음에 드는 색을 골라 줘!',
-    mascot: 'idle',
-  },
-  grade: {
-    title: '몇 학년이에요?',
-    desc: '알맞은 퀘스트를 고를 때 참고만 해요. 다른 친구에게는 보이지 않고, 안 골라도 괜찮아요.',
-    line: '몇 학년인지 알려 줄래? 말하기 싫으면 건너뛰어도 돼!',
-    mascot: 'teach',
-  },
-  stamp: {
-    title: '모험가 등록 완료!',
-    desc: '이제 모험을 떠날 준비가 다 됐어요.',
-    line: '',
-    mascot: 'cheer',
-  },
-};
 
 const CARD_FOCUS: Partial<Record<OnboardingStepId, CardField>> = {
   nickname: 'nickname',
@@ -138,7 +122,12 @@ export function OnboardingFlow({
   initialGrade,
   issuedOn,
   doneHref = '/world',
+  variant = 'new',
+  previousNickname = null,
+  totalXp = 0,
 }: OnboardingFlowProps) {
+  const copy = stepCopy(variant);
+  const returning = variant === 'returning';
   const router = useRouter();
   const { budget } = useMotionTier();
   const play = useSfx();
@@ -194,7 +183,7 @@ export function OnboardingFlow({
 
   const index = stepIndex(steps, stepId);
   const prev = prevStepId(steps, stepId);
-  const text = STEP_TEXT[stepId];
+  const text = copy[stepId];
   const shownSkin: SkinId = skin ?? getSkin(null).id;
   const nicknameRules = checkNicknameRules(nickname);
   const allAgreed = isAllAgreed(AGREEMENT_ITEMS, agreements);
@@ -302,8 +291,13 @@ export function OnboardingFlow({
     });
   };
 
+  const [leavingForm, setLeavingForm] = useState(false);
   const leave = () => {
-    setPhase('leaving');
+    if (phase === 'tutorial') setPhase('leaving');
+    else {
+      skipFx();
+      setLeavingForm(true);
+    }
     router.replace(doneHref);
   };
 
@@ -383,7 +377,9 @@ export function OnboardingFlow({
         void submit(grade ?? null);
         return;
       case 'stamp':
-        goTutorial();
+        // 기존 사용자는 놀이 방법을 이미 알므로 바로 이어서 (튜토리얼은 옆 버튼, P3-12)
+        if (returning) leave();
+        else goTutorial();
         return;
     }
   };
@@ -427,9 +423,18 @@ export function OnboardingFlow({
     mascotState = 'happy';
     line = '좋아, 약속 완료! 이제 이름을 정하러 가 볼까?';
   }
+  if (stepId === 'nickname' && !reaction && returning && previousNickname) {
+    line =
+      previousNickname === 'kept'
+        ? RETURNING_NICKNAME_KEPT
+        : RETURNING_NICKNAME_RENAME;
+  }
   if (stepId === 'stamp') {
     mascotState = impacted ? 'happy' : 'surprised';
-    line = `${nicknameRules.ok ? nicknameRules.nickname : nickname}, 모험가 등록 완료! 이제 진짜 모험을 떠나 보자!`;
+    line = stampLine(
+      variant,
+      nicknameRules.ok ? nicknameRules.nickname : nickname,
+    );
   }
 
   const onPickSkin = (next: SkinId) => {
@@ -447,11 +452,19 @@ export function OnboardingFlow({
     switch (stepId) {
       case 'agree':
         return (
-          <AgreementChecklist<AgreementId>
-            value={agreements}
-            onChange={setAgreements}
-            showRequiredError={agreeTried}
-          />
+          <>
+            {returning && (
+              <p className="ob-news" data-testid="onboarding-news">
+                <Sparkles aria-hidden className="ob-news-icon" />
+                <span>{RETURNING_NEWS}</span>
+              </p>
+            )}
+            <AgreementChecklist<AgreementId>
+              value={agreements}
+              onChange={setAgreements}
+              showRequiredError={agreeTried}
+            />
+          </>
         );
       case 'nickname':
         return (
@@ -501,7 +514,7 @@ export function OnboardingFlow({
     nickname: '이 이름으로 할래요',
     skin: isSubmitStep(steps, 'skin') ? '등록증 완성하기' : '이 색으로 할래요',
     grade: '등록증 완성하기',
-    stamp: '모험 떠나기!',
+    stamp: returning ? '이미 알아요, 이어서 모험!' : '모험 떠나기!',
   };
   const primaryDisabled =
     (stepId === 'nickname' && !canLeaveNickname) ||
@@ -532,11 +545,22 @@ export function OnboardingFlow({
           건너뛰기
         </Button>
       )}
+      {stepId === 'stamp' && returning && (
+        <Button
+          variant="secondary"
+          onClick={goTutorial}
+          disabled={phase !== 'form' || leavingForm}
+          icon={<BookOpen aria-hidden />}
+          data-testid="onboarding-tutorial-offer"
+        >
+          30초 튜토리얼 볼래요
+        </Button>
+      )}
       <Button
         size="lg"
         onClick={primary}
         disabled={primaryDisabled || phase !== 'form'}
-        loading={saving}
+        loading={saving || leavingForm}
         iconRight={
           stepId === 'stamp' ? (
             <Rocket aria-hidden />
@@ -621,6 +645,13 @@ export function OnboardingFlow({
             >
               {text.title}
             </h1>
+            {returning && (
+              <p className="ob-desc text-center" data-testid="onboarding-kept">
+                {totalXp > 0
+                  ? `지금까지 모은 경험치 ${totalXp.toLocaleString('ko-KR')} XP와 기록은 그대로예요.`
+                  : text.desc}
+              </p>
+            )}
             <RegistrationCard
               ref={cardRef}
               stampRef={stampRef}
