@@ -9,6 +9,11 @@ import {
 } from '@/components/auth/SocialLoginButtons';
 import { LoginSheet } from '@/components/auth/LoginSheet';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
+import { LoginErrorPanel } from '@/components/auth/LoginErrorPanel';
+import {
+  LOGIN_ERROR_REASONS,
+  type LoginErrorReason,
+} from '@/lib/auth/loginError';
 import type { InAppBrowserInfo } from '@/lib/browser/detectInAppBrowser';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { SocialLoginResult } from '@/lib/hooks/useSocialLogin';
@@ -71,6 +76,20 @@ const KAKAOTALK: InAppBrowserInfo = {
   isIOS: false,
 };
 
+/** 사유별 견본: 시도한 provider·인앱 (P3-10 "다른 방법" 한마디가 보이게 고른 값) */
+const ERROR_SAMPLES: Record<
+  LoginErrorReason,
+  { via: SocialProvider | null; inApp?: boolean }
+> = {
+  cancelled: { via: 'kakao' },
+  identity_taken: { via: 'google' },
+  expired: { via: 'google', inApp: true },
+  reused: { via: null },
+  other_browser: { via: 'naver' },
+  unavailable: { via: 'naver' },
+  unknown: { via: 'google' },
+};
+
 /** 가짜 로그인: 1.6초 바쁨 뒤 결과 (실제 OAuth로 떠나지 않음) */
 function fakeLogin(result: SocialLoginResult) {
   return () =>
@@ -86,11 +105,12 @@ export function SocialLoginSection() {
   const [recent, setRecent] = useState<SocialProvider>('naver');
   const [replay, setReplay] = useState(0);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [errorSheet, setErrorSheet] = useState<LoginErrorReason | null>(null);
 
   return (
     <Section
       id="social-login"
-      kicker="컴포넌트 §12 · P3-05 · P3-08 · P3-09"
+      kicker="컴포넌트 §12 · P3-05 · P3-08 · P3-09 · P3-10"
       title="소셜 로그인 버튼 · 로그인 시트"
       // tokens-allow: 브랜드 색 값을 설명하는 글자 (색으로 쓰지 않음)
       description="각 사 브랜드 가이드의 면 색·글자색·로고·문구를 그대로 씁니다(카카오 #FEE500 · 네이버 #03A94D · Google 흰 면 + #747775 테두리). 게임 버튼과 달리 아랫면이 없고, 눌림은 1px 움직임과 얇은 상태 층으로만 알려요. 높이 54px · 반경 12px."
@@ -225,6 +245,60 @@ export function SocialLoginSection() {
           />
         </Demo>
       </div>
+      <Demo
+        label="로그인 실패 안내 · 시트 (P3-10)"
+        note="랜딩에서 시작한 로그인이 실패하면 /?login_error=<사유>&via=<provider>로 돌아와 시트가 저절로 열린다. 사유별 파이뱀 표정·제목·설명 + (해당할 때만) 다른 방법 한마디, 버튼은 그대로. expired는 카카오톡 인앱 + Google 실패 견본"
+        data-testid="social-error-sheet"
+      >
+        <div className="flex flex-wrap gap-2">
+          {LOGIN_ERROR_REASONS.map((reason) => (
+            <Button
+              key={reason}
+              size="sm"
+              variant="secondary"
+              sfx={false}
+              onClick={() => setErrorSheet(reason)}
+              data-testid={`open-error-sheet-${reason}`}
+            >
+              {reason}
+            </Button>
+          ))}
+        </div>
+        <LoginSheet
+          open={errorSheet !== null}
+          onOpenChange={(o) => {
+            if (!o) setErrorSheet(null);
+          }}
+          lastUsed={null}
+          notice={
+            errorSheet
+              ? { reason: errorSheet, via: ERROR_SAMPLES[errorSheet].via }
+              : null
+          }
+          browser={
+            errorSheet && ERROR_SAMPLES[errorSheet].inApp ? KAKAOTALK : undefined
+          }
+          preview={fakeLogin('external-browser')}
+        />
+      </Demo>
+      <Demo
+        label="로그인 실패 안내 · 화면 /auth/error (P3-10)"
+        note="랜딩 밖에서 시작한 흐름(설정의 계정 연결 등 next가 있음)이 실패하면 이 패널 화면. 정지 파이뱀(움직임 없음) + 돌아가기(next) + 처음 화면으로"
+        data-testid="social-error-panels"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          {LOGIN_ERROR_REASONS.map((reason) => (
+            <LoginErrorPanel
+              key={reason}
+              reason={reason}
+              via={ERROR_SAMPLES[reason].via}
+              headingLevel="h2"
+              backHref={reason === 'identity_taken' ? '/settings' : null}
+              backLabel="설정으로 돌아가기"
+            />
+          ))}
+        </div>
+      </Demo>
       <CodeSample
         code={`// 랜딩 CTA: 누르면 로그인 시트 (시트 모듈은 그때 불러옴)\n<LoginSheetButton cta="hero" size="lg" iconRight={<Rocket aria-hidden />}>모험 시작하기</LoginSheetButton>\n\n// 버튼 묶음만: 호출은 provider마다 useSocialLogin(provider)\n<SocialLoginButtons onBeforeLogin={(p) => track('landing_cta_click', { cta, provider: p })} />`}
       />

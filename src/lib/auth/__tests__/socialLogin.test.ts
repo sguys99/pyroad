@@ -15,14 +15,14 @@ describe('getOAuthCredentials (P1-14)', () => {
   it('Google: 내장 provider, 기존 /auth/callback 그대로 (추가 옵션 없음)', () => {
     expect(getOAuthCredentials('google', { origin })).toEqual({
       provider: 'google',
-      options: { redirectTo: `${origin}/auth/callback` },
+      options: { redirectTo: `${origin}/auth/callback?via=google` },
     });
   });
 
   it('Kakao: 내장 kakao + queryParams.scope로 덮어쓰기, options.scopes는 쓰지 않음', () => {
     const creds = getOAuthCredentials('kakao', { origin });
     expect(creds.provider).toBe('kakao');
-    expect(creds.options?.redirectTo).toBe(`${origin}/auth/callback`);
+    expect(creds.options?.redirectTo).toBe(`${origin}/auth/callback?via=kakao`);
     expect(creds.options?.queryParams).toEqual({ scope: KAKAO_SCOPE });
     expect(creds.options).not.toHaveProperty('scopes');
   });
@@ -44,7 +44,7 @@ describe('getOAuthCredentials (P1-14)', () => {
     expect(NAVER_PROVIDER_ID).toBe('custom:naver');
     expect(getOAuthCredentials('naver', { origin })).toEqual({
       provider: 'custom:naver',
-      options: { redirectTo: `${origin}/auth/callback` },
+      options: { redirectTo: `${origin}/auth/callback?via=naver` },
     });
   });
 
@@ -78,6 +78,8 @@ describe('getOAuthCredentials (P1-14)', () => {
     expect(redirect.origin).toBe(origin);
     expect(redirect.pathname).toBe('/auth/callback');
     expect(redirect.searchParams.get('next')).toBe('/settings?tab=account');
+    // 실패 안내용 시도 provider (P3-10)
+    expect(redirect.searchParams.get('via')).toBe('kakao');
   });
 });
 

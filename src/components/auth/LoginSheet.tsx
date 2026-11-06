@@ -8,6 +8,8 @@ import { track } from '@/lib/analytics/track';
 import { cn } from '@/lib/utils';
 import { readLastLogin } from '@/lib/auth/lastLogin';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
+import type { LoginErrorReason } from '@/lib/auth/loginError';
+import { loginErrorCopy } from './loginErrorCopy';
 import {
   SocialLoginButtons,
   type SocialLoginButtonsProps,
@@ -30,6 +32,13 @@ export interface LoginSheetProps {
    * 카탈로그·테스트는 값을 직접 준다(null = 기록 없음)
    */
   lastUsed?: SocialProvider | null;
+  /**
+   * 방금 실패한 로그인 (P3-10, 랜딩 `LandingLoginError`가 주소에서 읽어 줌). 있으면 파이뱀 표정·제목·설명이 그 사유의
+   * 안내로 바뀌고(`loginErrorCopy`), 버튼 위에 "다른 방법" 한마디가 붙는다. 버튼은 그대로라 바로 다시 해 볼 수 있다
+   */
+  notice?: { reason: LoginErrorReason; via: SocialProvider | null } | null;
+  /** 인앱 판별 결과를 직접 줌 (카탈로그·테스트, `SocialLoginButtons.browser`) */
+  browser?: SocialLoginButtonsProps['browser'];
 }
 
 /** 시트 설명에 쓰는 짧은 이름 ("카카오로 들어왔어") */
@@ -42,6 +51,7 @@ const SHORT_NAME: Record<SocialProvider, string> = {
 /**
  * 로그인 시트 (P3-05). 모바일은 아래에서 올라오는 시트, 768px 이상은 가운데 대화 상자(`Sheet`).
  * 손 흔드는 파이뱀(리그 `wave`, 연출 단계·동작 줄이기를 따름) + 질문 + 소셜 로그인 버튼 3종 + 공개 정보 안내 한 줄.
+ * 로그인이 방금 실패했으면(P3-10 `notice`) 사유별 표정·제목·설명 + "다른 방법" 한마디, 버튼은 그대로(바로 다시 해 보기).
  * 이 기기에서 최근에 쓴 수단이 있으면(P3-08) 그 버튼이 맨 위 + "최근에 사용" 이름표, 설명은 같은 계정으로 들어오라는 한마디.
  *
  * 랜딩 첫 화면에는 싣지 않는다: `LoginSheetButton`이 누를 때(올려놓기·포커스 때 미리) 이 모듈을 불러온다 (§2.10).
@@ -54,6 +64,8 @@ export function LoginSheet({
   preview,
   className,
   lastUsed: lastUsedProp,
+  notice = null,
+  browser,
 }: LoginSheetProps) {
   const [stored, setStored] = useState<SocialProvider | null>(null);
   useEffect(() => {
@@ -62,6 +74,7 @@ export function LoginSheet({
       setStored(readLastLogin()?.provider ?? null);
   }, [open, lastUsedProp]);
   const lastUsed = lastUsedProp === undefined ? stored : lastUsedProp;
+  const copy = notice ? loginErrorCopy(notice.reason, notice.via) : null;
 
   return (
     <Sheet
@@ -70,7 +83,7 @@ export function LoginSheet({
       align="center"
       media={
         <PybaemRig
-          state="wave"
+          state={copy?.rig ?? 'wave'}
           size={112}
           framing="avatar"
           label=""
@@ -81,15 +94,17 @@ export function LoginSheet({
       // 좁은 화면(320px)에서 한 낱말만 다음 줄로 떨어지지 않게 줄 길이를 고르게
       title={
         <span className="block text-balance">
-          어떤 계정으로 모험을 시작할까?
+          {copy?.title ?? '어떤 계정으로 모험을 시작할까?'}
         </span>
       }
       description={
         <span className="block text-balance" data-testid="login-sheet-hint">
-          {lastUsed
-            ? // 같은 수단으로 들어와야 같은 계정 (자동 연결 없음, §2.8 · P3-07)
-              `지난번엔 ${SHORT_NAME[lastUsed]}로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!`
-            : '가지고 있는 계정 하나를 골라 줘.'}
+          {copy
+            ? copy.body
+            : lastUsed
+              ? // 같은 수단으로 들어와야 같은 계정 (자동 연결 없음, §2.8 · P3-07)
+                `지난번엔 ${SHORT_NAME[lastUsed]}로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!`
+              : '가지고 있는 계정 하나를 골라 줘.'}
         </span>
       }
       data-testid="login-sheet"
@@ -98,6 +113,8 @@ export function LoginSheet({
       <SocialLoginButtons
         className="mt-1"
         lastUsed={lastUsed}
+        failure={notice}
+        browser={browser}
         preview={preview}
         // 인앱 안내 대화 상자도 body로 포털되므로 같은 글꼴 변수를 넘긴다 (P3-09)
         portalClassName={className}

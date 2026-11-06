@@ -66,3 +66,39 @@ describe('LoginSheet', () => {
     expect(order()).toEqual(['kakao', 'naver', 'google']);
   });
 });
+
+describe('LoginSheet 실패 안내 (P3-10)', () => {
+  it('사유별 제목·설명으로 바뀌고 버튼은 그대로 (바로 다시 해 보기)', () => {
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        lastUsed={null}
+        notice={{ reason: 'cancelled', via: 'kakao' }}
+      />,
+    );
+    expect(
+      screen.getByRole('dialog', { name: '카카오 로그인을 그만뒀구나' }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('login-sheet-hint')).toHaveTextContent(
+      '마음이 바뀌면 아래에서 다시 골라 줘',
+    );
+    expect(order()).toEqual(['kakao', 'naver', 'google']);
+    // 취소에는 "다른 방법" 한마디가 없다
+    expect(screen.queryByTestId('login-error-hint')).toBeNull();
+  });
+
+  it('설정 오류면 다른 계정을 권하는 한마디', () => {
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        lastUsed={null}
+        notice={{ reason: 'unavailable', via: 'naver' }}
+      />,
+    );
+    expect(screen.getByTestId('login-error-hint')).toHaveTextContent(
+      '카카오·Google 계정이 있으면 그걸로 들어가 봐.',
+    );
+  });
+});

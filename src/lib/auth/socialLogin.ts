@@ -63,6 +63,8 @@ export function getOAuthCredentials(
 ): SignInWithOAuthCredentials {
   const callback = new URL('/auth/callback', origin);
   if (next) callback.searchParams.set('next', next);
+  // 실패했을 때 어떤 수단이었는지 안내에 쓴다 (P3-10, `via`). 성공 판별은 세션의 iss로 하므로 이 값은 UI 힌트로만 쓴다
+  callback.searchParams.set('via', provider);
 
   const options: NonNullable<SignInWithOAuthCredentials['options']> = {
     redirectTo: callback.toString(),

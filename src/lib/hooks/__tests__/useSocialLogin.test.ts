@@ -66,7 +66,9 @@ describe('useSocialLogin (P1-14, B16)', () => {
     expect(openExternalBrowser).not.toHaveBeenCalled();
     expect(signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?via=google`,
+      },
     });
   });
 

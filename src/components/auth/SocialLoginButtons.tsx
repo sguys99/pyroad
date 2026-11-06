@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CircleAlert, ExternalLink } from 'lucide-react';
+import { CircleAlert, ExternalLink, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import { orderProviders } from '@/lib/auth/providerOrder';
@@ -17,6 +17,8 @@ import {
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
 import { SocialLoginButton } from './SocialLoginButton';
 import { SOCIAL_PENDING } from './brandMarks';
+import { loginErrorHint } from './loginErrorCopy';
+import type { LoginErrorReason } from '@/lib/auth/loginError';
 
 /** 기본 순서: 카카오(카카오톡 인앱 사용자가 가장 많음) → 네이버 → Google. 인앱·최근 로그인에 따라 `orderProviders`가 바꾼다 */
 export const DEFAULT_SOCIAL_ORDER: readonly SocialProvider[] = [
@@ -50,6 +52,11 @@ export interface SocialLoginButtonsProps {
   preview?: (provider: SocialProvider) => Promise<SocialLoginResult>;
   /** 인앱 판별 결과를 직접 줌 (카탈로그·테스트). 주지 않으면 마운트 뒤 `detectInAppBrowser()` */
   browser?: InAppBrowserInfo;
+  /**
+   * 방금 실패한 로그인 (P3-10). 있으면 버튼 위에 "다른 방법으로 들어가기" 한마디(`loginErrorHint`, 해당할 때만).
+   * 제목·설명·표정은 시트(`LoginSheet notice`)가 바꾼다
+   */
+  failure?: { reason: LoginErrorReason; via: SocialProvider | null } | null;
   /** 인앱 안내 대화 상자에 더할 클래스 (랜딩 서브셋 글꼴 변수, body로 포털되므로) */
   portalClassName?: string;
   className?: string;
@@ -75,6 +82,7 @@ export function SocialLoginButtons({
   preview,
   browser,
   portalClassName,
+  failure = null,
   className,
 }: SocialLoginButtonsProps) {
   const [pending, setPending] = useState<SocialProvider | null>(null);
@@ -102,6 +110,13 @@ export function SocialLoginButtons({
   const ordered = orderProviders(providers, [primary, lastUsed]);
   // 인앱에서도 바로 되는 수단 (Google 안내에서 대신 고르기)
   const inAppFriendly = ordered.filter((p) => p !== 'google');
+  const hint = failure
+    ? loginErrorHint(failure.reason, {
+        via: failure.via,
+        inApp: info?.type ?? null,
+        available: providers,
+      })
+    : null;
 
   useEffect(() => {
     if (!browser) setDetected(detectInAppBrowser());
@@ -142,6 +157,18 @@ export function SocialLoginButtons({
       className={cn('mx-auto grid w-full max-w-sm gap-2.5', className)}
       data-inapp={info?.isInApp ? (info.type ?? 'unknown') : undefined}
     >
+      {hint && (
+        <p
+          className="flex items-start gap-2 rounded-xl bg-accent-soft px-3 py-2.5 text-small text-foreground"
+          data-testid="login-error-hint"
+        >
+          <Lightbulb
+            aria-hidden
+            className="mt-0.5 size-4 shrink-0 text-accent-text"
+          />
+          {hint}
+        </p>
+      )}
       <div
         role="group"
         aria-label="로그인할 계정 고르기"

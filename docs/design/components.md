@@ -257,7 +257,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 <SocialLoginButtons onBeforeLogin={(provider) => track('landing_cta_click', { cta, provider }, { immediate: true })} />
 ```
 
-**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
 
 **인앱 브라우저 (P3-09)**: 판별은 `detectInAppBrowser(ua?)`(판별표 테스트 `src/lib/browser/__tests__/detectInAppBrowser.test.ts`: 카카오톡·네이버 앱 iOS/Android, 인스타그램, 페이스북, 라인, 밴드, 그 밖 웹뷰, 일반 브라우저).
 - **카카오톡 인앱**: 외부로 보내지 않는다. 카카오 버튼을 맨 위에 크게(`lg`) — 카카오톡 안에서 바로 로그인된다. 최근에 쓴 수단은 그다음
@@ -265,6 +265,24 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **네이버**는 인앱 WebView에서도 되므로 외부로 보내지 않는다. Android(크롬·인앱)에서는 `queryParams: { appscheme: 'true' }`로 "네이버 앱으로 자동로그인" 버튼을 켠다(`NAVER_APPSCHEME_ON_ANDROID`, iOS는 값 없이도 보임). 실 앱 스모크 N-8에서 확인하고 문제가 있으면 상수만 끈다
 - **공용 기기 모드** `prompt: 'login'`(네이버는 로그아웃 API가 없어 다음 사람에게 세션이 남음)은 아직 붙이지 않는다: 공용 기기를 고를 자리(로그인 화면 옵션·설정)가 생길 때(P4-09 로그인 모달 검토) `getOAuthCredentials`에 provider별로 추가
 - **버튼 숨기기** `NEXT_PUBLIC_LOGIN_PROVIDERS=kakao,google`: 네이버 검수 전 배포용(docs/release/v0.4-phase3-providers.md §7)
+
+**로그인 실패 안내 (P3-10)**: `/auth/callback`이 `error`·`error_code`·`error_description`(코드가 없는 콜백 포함)과 교환 오류(`exchangeCodeForSession`의 `code`·`name`)를 사유 enum 하나로 바꾼다(`src/lib/auth/loginError.ts`). 원문은 주소·화면·분석에 싣지 않고, 설정 오류·모르는 오류만 코드 이름으로 `reportServerError`(Sentry, area `auth` op `callback`).
+
+| 사유 | 들어오는 값 | 파이뱀 | 제목 · 설명 (via = 시도한 provider, 로그인 버튼이 `redirectTo`에 `?via=`로 붙임) |
+|---|---|---|---|
+| `cancelled` | `access_denied` (취소·동의 거부) | encourage | "[카카오 ]로그인을 그만뒀구나" · "괜찮아! 취소하거나 동의하지 않으면 들어갈 수 없어. 마음이 바뀌면 아래에서 다시 골라 줘." |
+| `identity_taken` | `identity_already_exists` (계정 연결 P3-07) | think | "이미 다른 계정에 연결돼 있어" · "이 [Google ]계정은 다른 pyRoad 계정에서 쓰고 있어. 그 계정으로 로그인하면 거기 기록을 볼 수 있어." |
+| `expired` | `bad_oauth_state`(Site URL `/`로 옴) · `bad_oauth_callback` · `flow_state_expired` | confused | "로그인 시간이 지났어" · "너무 오래 걸렸거나 주소가 바뀌었어. 처음부터 다시 해 볼까?" |
+| `reused` | `flow_state_already_used` · `flow_state_not_found` | think | "이미 끝난 로그인이야" · "같은 로그인 화면을 두 번 열었어. 버튼을 한 번 더 눌러 줘." (첫 요청이 이미 로그인시켰으면 안내 없이 `next`로) |
+| `other_browser` | PKCE verifier 없음 `pkce_code_verifier_not_found` · `bad_code_verifier` | confused | "처음 그 화면에서 다시 해 줘" · "로그인을 시작한 곳과 지금 화면이 달라. 처음 버튼을 누른 브라우저나 앱에서 다시 눌러 줘." |
+| `unavailable` | `server_error`("Error getting user email") · `provider_disabled` · `oauth_provider_not_supported` · `unexpected_failure` · `manual_linking_disabled` | sad | "지금은 [네이버 ]로그인을 쓸 수 없어" · "다른 방법으로 들어가 볼래? 계속 안 되면 어른에게 알려 줘." |
+| `unknown` | 그 밖 (code·error 모두 없음, 옛 `?error=auth`) | sad | "앗, 로그인이 잘 안 됐어" · "잠시 뒤에 다시 해 볼까? 다른 방법으로 들어가도 돼." |
+
+- **어디로**: 랜딩에서 시작한 로그인(기본 `next`)은 `/?login_error=<사유>&via=<provider>` → `LandingLoginError`가 로그인 시트를 저절로 열어(`LoginSheet notice`) 표정·제목·설명을 바꾸고 주소에서 그 키를 지운다. 버튼이 바로 아래라 "다시 해 볼까?"는 버튼을 누르는 것. GoTrue가 콜백을 거치지 않고 Site URL로 바로 보낸 `?error=…&error_code=bad_oauth_state`(조각으로 온 값 포함)도 같은 표로 읽는다. 랜딩 밖에서 시작한 흐름(설정의 계정 연결처럼 `next`가 있음)은 `/auth/error?reason=…&via=…&next=…` 화면(`LoginErrorPanel`: 정지 파이뱀 + 돌아가기 `next` + 처음 화면으로, `next`는 다시 `safeNext`)
+- **다른 방법 한마디** `loginErrorHint` (금색 옅은 면 + 전구): 카카오톡 인앱에서 Google이 실패 → "카카오톡에서는 카카오 로그인이 가장 빨라! 노란 카카오 버튼을 눌러 봐." · 네이버가 다른 브라우저 문제 → "네이버 앱으로 넘어가지 말고, 이 화면에서 아이디로 로그인해 봐." · 설정 오류·모르는 오류 → "카카오·Google 계정이 있으면 그걸로 들어가 봐."(보이는 provider만). 취소·재전송에는 없음
+- 연출: 시트는 기존 단계 규칙(리그 표정 전환, 동작 줄이기 = 정지 표정), `/auth/error`는 정지 그림이라 움직임이 없다
+- Kakao KOE 오류(동의 화면 설정 문제)는 카카오 화면에서 멈추고 앱으로 돌아오지 않으므로 이 표로는 잡히지 않는다 → 설정·스모크 테스트로 예방(docs/release/v0.4-phase3-providers.md)
+- 분석 이벤트 `login_error {reason}`은 아직 넣지 않았다(이벤트 정의 파일을 다른 작업이 고치는 중) → 후속
 
 **최근 로그인 기록 (P3-08)**: `/auth/callback`이 세션 사용자의 `user_metadata.iss`로 provider를 정해(`loginProviderFromUser`) 리다이렉트 주소에 `#lp=<provider>` 조각을 붙이고, 루트 레이아웃의 `LastLoginRecorder`가 `localStorage` `pyroad.lastLogin.v1` = `{ provider, at }`에 저장한 뒤 `history.replaceState`로 조각을 지운다(`src/lib/auth/lastLogin.ts`). 쿼리가 아니라 조각인 이유: 서버·로그·분석으로 가지 않고, 미들웨어가 다시 리다이렉트해도(/world → /onboarding) 브라우저가 조각을 이어 붙인다. 1년 지난 기록은 무시하고 로그아웃해도 지우지 않는다. 쿠키를 쓰지 않으므로 개인정보처리방침 10절 "인증 쿠키만"이 그대로 맞다. UI 힌트일 뿐 인가에 쓰지 않는다.
 
