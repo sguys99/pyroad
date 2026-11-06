@@ -239,9 +239,19 @@ describe('그 밖의 헤더', () => {
     });
   });
 
-  it('정적 정책 경로는 랜딩만', () => {
-    expect(isStaticPagePath('/')).toBe(true);
-    for (const p of ['/notice', '/board', '/world', '/quest/1-1', '/nope']) {
+  it('정적 정책 경로는 랜딩과 법적 고지(P3-14)만', () => {
+    for (const p of ['/', '/terms', '/privacy', '/licenses', '/terms/']) {
+      expect(isStaticPagePath(p)).toBe(true);
+    }
+    for (const p of [
+      '/notice',
+      '/board',
+      '/world',
+      '/quest/1-1',
+      '/nope',
+      '/terms/x',
+      '/privacy-old',
+    ]) {
       expect(isStaticPagePath(p)).toBe(false);
     }
   });

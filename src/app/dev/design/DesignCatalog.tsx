@@ -43,6 +43,7 @@ import {
   ShareCardSection,
   SoundSection,
 } from './_catalog/ExtraSections';
+import { LegalSection } from './_catalog/LegalSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -94,6 +95,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['editor', '코드 에디터'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
+      ['legal', '약관 동의'],
     ],
   },
 ];
@@ -189,6 +191,7 @@ export function DesignCatalog({
               <EditorSection />
               <ShareCardSection />
               <SoundSection />
+              <LegalSection />
             </div>
           </div>
         </div>

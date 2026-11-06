@@ -12,7 +12,7 @@
 
 | Job | 하는 일 | 실패하면 로컬에서 | 시간 |
 |---|---|---|---|
-| `lint-typecheck` | ESLint, `prettier --check .`(제외 대상은 `.prettierignore`), **폰트 검사**(`npm run fonts:check`, P2-10: 아래 "폰트 검사"), **디자인 토큰 검사**(`npm run tokens:check`, P2-09: 아래 "디자인 토큰 검사"), `next typegen`(git에 없는 `next-env.d.ts` 생성) 뒤 `tsc --noEmit` | `npm run lint && npx prettier --check . && npm run fonts:check && npm run tokens:check && npx next typegen && npx tsc --noEmit` (포맷이 틀리면 `npx prettier --write <파일>`) | 약 1.5분 |
+| `lint-typecheck` | ESLint, `prettier --check .`(제외 대상은 `.prettierignore`), **폰트 검사**(`npm run fonts:check`, P2-10: 아래 "폰트 검사"), **디자인 토큰 검사**(`npm run tokens:check`, P2-09: 아래 "디자인 토큰 검사"), **오픈소스 고지 검사**(`npm run licenses:check`, P3-14: 아래 "오픈소스 고지 검사"), `next typegen`(git에 없는 `next-env.d.ts` 생성) 뒤 `tsc --noEmit` | `npm run lint && npx prettier --check . && npm run fonts:check && npm run tokens:check && npm run licenses:check && npx next typegen && npx tsc --noEmit` (포맷이 틀리면 `npx prettier --write <파일>`) | 약 1.5분 |
 | `unit` | Vitest 단위 테스트 (`npm test`와 같은 범위) | `npx vitest run` | 약 1분 |
 | `content` | `seed.sql`이 `content/`와 같은지 + 모든 정답 코드를 Pyodide 314로 실행 (시드 0~9 + 무시드 1회). junit 결과를 아티팩트 `content-junit`으로 | `npm run content:build -- --check && npm run test:content` (드리프트면 `npm run content:build` 후 seed 커밋) | 약 20초 |
 | `content-unseeded` | **main push·수동 실행만**. 무시드 20회 | `TEST_CONTENT_UNSEEDED_RUNS=20 npm run test:content` (실패 메시지의 시드로 재현) | 약 30초 |
@@ -43,6 +43,12 @@
 
 - `npm run tokens:check`(`scripts/design/check-tokens.mjs`, Node + TypeScript AST): `src/`의 색 리터럴(hex·rgb·oklch)·Tailwind 고정 팔레트 클래스(`text-green-600`·`bg-white`), 장식 전용 토큰을 글자색으로 쓴 것(`text-primary` → `text-primary-text`), `font-family` 직접 지정, 컴포넌트의 Framer `duration`·`stiffness` 숫자와 Tailwind `duration-300`을 찾습니다. 14px 미만 글자(`text-xs` 등)는 레거시 기준표(`scripts/design/tokens-baseline.json`)보다 늘면 실패합니다. 예외 목록과 고치는 법은 [design/tokens.md](design/tokens.md) §5.
 - 토큰 값 자체(TS 원본 ↔ `globals.css`)와 WCAG 대비는 `unit` job의 `src/lib/design/__tests__/tokens.test.ts`가 검사합니다.
+
+### 오픈소스 고지 검사 (`lint-typecheck`)
+
+- `npm run licenses:check`(`scripts/licenses/build-licenses.mjs --check`, Node만, 1초 안): `/licenses` 화면 데이터 `src/lib/legal/licenses.generated.json`(커밋하는 생성물)이 지금 `node_modules`(= `package-lock.json`)의 운영 의존성 라이선스·저작권 줄과 `scripts/licenses/notices.mjs`(Pyodide·글꼴·사운드)로 다시 만든 것과 같은지 봅니다. `dependencies`만 따라가고 플랫폼별 optional 패키지는 보지 않으므로 운영체제와 상관없이 결과가 같습니다.
+- **의존성을 바꿔(npm install·업데이트) 실패하면** 로컬에서 `npm run licenses:build` 후 생성물을 같은 커밋에 넣습니다. Pyodide 판을 올리면 생성기가 멈추고 `scripts/licenses/texts/`의 MPL·CPython·Emscripten 전문을 새 판으로 바꾸라고 알려 줍니다.
+- 같은 비교를 `unit` job의 `scripts/licenses/__tests__/licenses.test.ts`도 합니다(로컬 `npx vitest run`에서 먼저 보이게).
 ## 필수 체크 (main 보호 규칙)
 
 `lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build` + **`e2e-smoke`**(P1-21, 2026-11-05 첫 통과 뒤 추가). `content-unseeded`는 main 전용이라 넣지 않습니다. `e2e`(로그인)는 PR에서도 돌지만 시간(예상 10분 안팎: 스택 시작 + 빌드 + 테스트 약 5분)과 안정성을 몇 번 지켜본 뒤 필수 체크로 올릴지 정합니다. 너무 느리면 `if:`로 main·수동 실행 전용으로 돌립니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).

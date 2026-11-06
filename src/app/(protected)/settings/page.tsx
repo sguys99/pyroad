@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
+import { LegalNav } from '@/components/legal/LegalPageShell';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
 import { SoundSettingsSection } from '@/components/settings/SoundSettingsSection';
 import type { MotionSettings } from '@/lib/motion/tier';
@@ -342,6 +343,9 @@ export default function SettingsPage() {
           <p className="text-sm font-medium text-destructive">{error}</p>
         )}
       </div>
+
+      {/* 법적 고지 (P3-14) */}
+      <LegalNav className="mt-10 flex justify-center border-t border-line pt-4" />
     </PageTransition>
   );
 }

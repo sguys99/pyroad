@@ -105,6 +105,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'editor',
       'share-card',
       'sound',
+      'legal',
     ]) {
       await expect(page.locator(`section#${id}`)).toHaveCount(1);
     }

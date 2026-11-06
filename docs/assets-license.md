@@ -213,6 +213,8 @@ LottieFiles 무료 애니메이션의 약관은 **Lottie Simple License (FL 9.13
 
 ## 8. 앱 안 고지 화면이 필요한가
 
+> **2026-11-06 P3-14로 만듦 (§12-Q33)**: 비로그인 정적 페이지 `/licenses`가 아래 "P12-06에 넘길 항목" ①~④를 보여 줍니다. 데이터는 `npm run licenses:build`(`scripts/licenses/build-licenses.mjs`)가 운영 의존성의 라이선스 파일과 `scripts/licenses/notices.mjs`(Pyodide·CPython·Emscripten 전문, 폰트 3종 OFL 전문과 원래 이름, 사운드 작가 크레딧)로 만들어 커밋하고, CI `licenses:check`가 드리프트를 잡습니다([ci.md](ci.md)). 에셋을 바꾸면 이 문서와 `notices.mjs`를 같은 커밋에서 고칩니다(단위 테스트가 작가·주소가 이 문서에 있는지 확인). 아래 판단은 기록으로 남깁니다.
+
 | 의무 | 지금 충족 방법 | 충분한가 |
 |---|---|---|
 | OFL 1.1 (폰트 3종): 사본마다 저작권 고지 + 라이선스 | woff2 name 테이블(0·13·14: 저작권 + 라이선스 이름·주소), 공개 저장소 폴더마다 `OFL.txt` | 관행상 통용되지만 앱 사본에는 OFL 전문이 없음 → 고지 화면에서 전문을 보여 주면 확실 |

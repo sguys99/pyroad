@@ -48,6 +48,7 @@
 | 기타 | `#editor` | `/dev/editor` 점검 페이지 링크(오류 줄 포함) |
 | | `#share-card` | `SHARE_CARD_SAMPLES` 10장을 운영과 같은 엔진(next/og)으로 요청 때 그린 PNG(`/dev/design/share-card/<id>`, 개발 전용·운영 404). 커밋된 PNG는 `docs/design/img/share-card/`라 서빙되지 않으므로 라우트로 대신했다(템플릿을 고치면 바로 보임) |
 | | `#sound` | 효과음 12종 재생 버튼(첫 탭 뒤, 꺼져 있으면 안내) + 별 1→3 상승음 |
+| | `#legal` 약관 동의 (P3-14) | `AgreementChecklist`(`src/components/legal/`) 처음·일부(모두 동의 중간 상태)·모두 동의·"다음"과 함께(필수 안내 + `toAgreementRecords()` 기록 미리보기), 법적 고지 링크 `LegalNav` |
 
 포커스(Tab)·올려놓기(마우스)는 고정 상태로 만들지 않았다: 직접 해 본다. 360폭 HUD 전체 줄은 넘쳐서 그 칸만 가로 스크롤(§5).
 
