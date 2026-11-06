@@ -130,6 +130,7 @@ kenney.nl 쪽 팩 주소: `https://kenney.nl/assets/{interface-sounds,rpg-audio,
 | 래스터 정지 그림 | `public/images/`, `assets/share-card/` | — | — | **아직 없음.** 넣으면 원본 `assets-src/raster/`와 함께 이 절에 행 추가(§7) |
 | 일회성 Lottie 이펙트 | `public/animations/` | — | — | **아직 없음.** 넣으면 §7.4 양식 |
 | UI 아이콘 | 번들 (`lucide-react` 1.7.0) | Lucide (lucide.dev) | ISC | §5 |
+| 소셜 로그인 로고 (카카오 말풍선 심볼 · 네이버 N · Google G) | 번들 (인라인 SVG 컴포넌트 `src/components/auth/brandMarks.tsx`, P3-05) | 카카오: 카카오 디벨로퍼스 리소스 미리 보기 `https://developers.kakao.com/tool/images/resource/preview/login-complete-ko.svg`(받은 날 2026-11-06, sha256 `ab90ab44616f14a671844cd991b3fbb33277f42c5bb2cc5a9422344a854c9398`)의 말풍선 경로 그대로. 네이버: 공식 버튼 애셋 `https://developers.naver.com/inc/devcenter/downloads/bi/NAVER_login_KR.zip`(2026-11-06, sha256 `e589e3c1daf62cfcb6c38906856b953ae955c97d1411b3c3ce85d29e61c4471c`)의 `NAVER_login_Light_KR_green_wide_H56.png`에서 N 경계를 재어 80칸 격자로 옮김. Google: GIS 버튼 라이브러리(`accounts.google.com/gsi/button` → `credential_button_library`, 2026-11-06)가 그리는 4색 G 경로 그대로 | 각 사 **상표**. 오픈 라이선스가 아니라 각 사 로그인 버튼 가이드(카카오 로그인 디자인 가이드, 네이버 로그인 버튼 사용 가이드, Sign in with Google 브랜딩 가이드)가 허락한 **로그인 버튼 용도로만** 씀 | 형태·비율·색을 바꾸지 않고 로그인 버튼 밖(장식·홍보)에 쓰지 않음. 저장소 Apache 2.0 대상이 아님. `/licenses` 고지 대상 아님(상표 사용, 저작물 라이선스 아님). 가이드 값·어긋남은 [components.md](design/components.md) §12 |
 | 시안·검수 보드 아이콘 | `design/prototypes/src/shared/icons.tsx` | 자체 (24px 격자 path를 직접 그림) | 저장소 라이선스 | 앱에 배포 안 함 |
 
 ## 5. 배포하는 제3자 런타임 파일 (에셋 성격)

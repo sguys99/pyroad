@@ -1,0 +1,177 @@
+/* 소셜 로그인 버튼 3종 (P3-05, docs/design/components.md §12). globals.css가 game-ui.css 다음에 불러온다.
+
+   브랜드 버튼은 게임 버튼(.g-btn)과 다르다: 각 사 가이드가 정한 면 색·글자색·로고를 그대로 쓰고 아랫면(lip)을 붙이지 않는다
+   (카카오: 규정 밖 색 금지 → 진한 노랑 아랫면도 안 됨, Google: 흰 면 + 1px 테두리 고정). 그래서
+   - 브랜드 색은 pyRoad 토큰이 아니라 이 파일의 provider별 사용자 정의 속성이다 (테마가 바뀌어도 그대로, tokens.md §6)
+   - 눌림·올려놓기는 면 위에 얇은 상태 층(::after, 짙은 중립 5% / 10%)과 1px 움직임으로만 알린다 (Material 상태 층과 같은 방식)
+   - 연출 단계: full = face 스프링 · lite = 짧게 · minimal = 즉시 · 동작 줄이기 = 움직이지 않고 상태 층 색만
+
+   가이드 확인 (2026-11-06):
+   - 카카오 https://developers.kakao.com/docs/latest/ko/kakaologin/design-guide : 컨테이너 #FEE500, 심볼 #000000,
+     레이블 #000000 85%, radius 12px, 레이블 세로 길이 ≤ 컨테이너 높이 1/3, 가로로 늘리면 심볼+레이블 묶음은 가운데 유지
+   - 네이버 https://developers.naver.com/docs/login/bi/bi.md : 지정 녹색이 #03C75A → #03A94D로 바뀜(배경 #03A94D,
+     로고·레이블 #FFFFFF), N 로고 완성형 16px 이상, 레이블은 로고 높이보다 작게, 가운데 정렬이면 로고-레이블 8px
+   - Google https://developers.google.com/identity/branding-guidelines : 밝은 테마 면 #FFFFFF, 1px 안쪽 테두리 #747775,
+     글자 #1F1F1F, 크기를 바꿀 때 비율 유지, 다른 버튼보다 덜 눈에 띄게 두지 않음 */
+
+@layer components {
+  .g-social {
+    --social-bg: transparent;
+    --social-fg: var(--text);
+    --social-stroke: transparent;
+    /* 카카오 가이드 radius 12px (세 버튼 같게). pyRoad 반경 토큰(10/14)이 아닌 브랜드 값 */
+    --social-r: 12px;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 네이버 가이드: 가운데 정렬이면 로고-레이블 간격 8px */
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    /* 54px: 게임 버튼 lg 면과 같은 높이, 터치 48px 이상. 레이블(19px 글자의 한글 높이 약 15px)이 높이의 1/3(18px)을 넘지 않음 */
+    min-height: 3.375rem;
+    /* 양옆 40px: 오른쪽 바쁨 표시(끝에서 16px + 20px) 자리. 가장 긴 글자(네이버 로그인)도 320px 화면 시트 안에 들어감 */
+    padding: 0 2.5rem;
+    border: 0;
+    border-radius: var(--social-r);
+    background: var(--social-bg);
+    /* Google 1px 테두리는 안쪽(inside)이라 크기를 바꾸지 않는 inset 그림자로 */
+    box-shadow: inset 0 0 0 var(--line-w) var(--social-stroke);
+    color: var(--social-fg);
+    /* 19px 굵게: 네이버 흰 글자(#03A94D 위 3.1:1)가 WCAG 큰 글자(14pt 굵게 = 18.67px) 기준 AA를 넘는 크기 */
+    font-size: var(--text-h3);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--spring-face-dur) var(--spring-face);
+  }
+  .g-social[data-provider='kakao'] {
+    --social-bg: #fee500;
+    --social-fg: rgb(0 0 0 / 0.85);
+  }
+  .g-social[data-provider='naver'] {
+    --social-bg: #03a94d;
+    --social-fg: #ffffff;
+  }
+  .g-social[data-provider='google'] {
+    --social-bg: #ffffff;
+    --social-fg: #1f1f1f;
+    --social-stroke: #747775;
+  }
+
+  /* 상태 층: 브랜드 면 색은 그대로 두고 그 위에 짙은 중립을 얇게 (isolate 안의 z-index -1 = 면 위·글자 아래) */
+  .g-social::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--text);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-fast) var(--easing-out);
+  }
+
+  .g-social-mark {
+    display: inline-flex;
+    flex: none;
+  }
+  .g-social-mark > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  /* 로고 크기: 카카오 말풍선은 글자 높이 정도, 네이버 N은 완성형 16px 이상 + 글자보다 크게, Google G는 GIS 버튼과 같은 18~20px */
+  .g-social[data-provider='kakao'] .g-social-mark {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .g-social[data-provider='naver'] .g-social-mark {
+    width: 1.0625rem;
+    height: 1.0625rem;
+  }
+  .g-social[data-provider='google'] .g-social-mark {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  /* 바쁨 표시는 오른쪽 끝에 따로: 로고·글자 자리가 움직이지 않는다 (로고는 늘 보여야 함) */
+  .g-social-busy {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: -0.625rem;
+  }
+  .g-social-busy > svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 상태: 올려놓기 1px 뜸 + 5% · 누름 1px 내려앉음·살짝 작아짐 + 10% */
+  @media (hover: hover) {
+    .g-social:not(:disabled):not([data-loading]):hover {
+      transform: translateY(-1px);
+    }
+    .g-social:not(:disabled):not([data-loading]):hover::after {
+      opacity: 0.05;
+    }
+  }
+  .g-social[data-hover]:not(:disabled):not([data-loading]) {
+    transform: translateY(-1px);
+  }
+  .g-social[data-hover]:not(:disabled):not([data-loading])::after {
+    opacity: 0.05;
+  }
+  .g-social:is(:active, [data-pressed]):not(:disabled):not([data-loading]) {
+    transform: translateY(1px) scale(0.985);
+    transition-duration: var(--dur-instant);
+    transition-timing-function: var(--easing-press);
+  }
+  .g-social:is(:active, [data-pressed]):not(:disabled):not(
+      [data-loading]
+    )::after {
+    opacity: 0.1;
+    transition-duration: var(--dur-instant);
+  }
+  .g-social:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  /* 로딩: 면·로고 그대로 + 오른쪽 바쁨 표시. 누를 수 없음 */
+  .g-social[data-loading] {
+    cursor: progress;
+  }
+  /* 비활성(다른 버튼이 로그인 중이거나 쓸 수 없음): 브랜드 색을 바꾸지 않고 흐리게 */
+  .g-social:disabled:not([data-loading]) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* 연출 단계 */
+  :root[data-motion='lite'] .g-social {
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--easing-out);
+  }
+  :root[data-motion='minimal'] .g-social,
+  :root[data-motion='minimal'] .g-social::after {
+    transition: none;
+  }
+  /* 동작 줄이기: 위치·크기 변화 0, 상태 층 색만 (명시도는 올려놓기·누름 규칙보다 높게) */
+  :root[data-reduced='true'] .g-social,
+  :root[data-reduced='true']
+    .g-social:is(:hover, :active, [data-hover], [data-pressed]):not(
+      :disabled
+    ):not([data-loading]) {
+    transform: none;
+    transition: none;
+  }
+}

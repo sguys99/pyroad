@@ -215,15 +215,58 @@ props: `items`(`{ value, label, icon?, panelId? }[]`) · `value` · `onValueChan
 
 shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px(14.24:1), 반경 10, `shadow-pop`. 등장 `.g-tooltip`(§0 표).
 
-## 12. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
+## 12. 소셜 로그인 버튼 `SocialLoginButton` · `SocialLoginButtons` · 로그인 시트 `LoginSheet` · `LoginSheetButton` (P3-05)
+
+**용도**: 카카오·네이버·Google 로그인. 코드 `src/components/auth/` (스타일 `social-login.css`, 로고·문구 `brandMarks.tsx`). 로그인 호출은 provider마다 **`useSocialLogin(provider)`(P1-14 헬퍼)로만** 한다(버튼이 Supabase를 직접 부르지 않음).
+
+게임 버튼과 다른 점: 각 사 가이드가 면 색·글자색·로고를 정해 두어 **아랫면(lip)을 붙이지 않는다**(카카오는 규정 밖 색 금지라 진한 노랑 아랫면도 안 됨, Google은 흰 면 + 1px 테두리 고정). 그래서 브랜드 색은 pyRoad 토큰이 아니라 `social-login.css`의 provider별 사용자 정의 속성이고(테마를 바꿔도 그대로, [tokens.md](tokens.md) §6), 눌림은 1px 움직임 + 얇은 상태 층으로만 알린다.
+
+| provider | 면 | 글자 | 로고 | 문구 | 가이드 (2026-11-06 확인) |
+|---|---|---|---|---|---|
+| 카카오 | `#FEE500` | `#000000` 85% (대비 12.5:1) | 말풍선 심볼 `#000000`, 20px | 카카오 로그인 (가이드 완성형) | [카카오 로그인 디자인 가이드](https://developers.kakao.com/docs/latest/ko/kakaologin/design-guide): radius 12px, 레이블 높이 ≤ 컨테이너 1/3, 늘리면 심볼+레이블 묶음은 가운데, 심볼 형태·비율·색 변경 금지. 심볼 경로는 카카오 리소스 미리 보기 SVG에서 떼어 옴 |
+| 네이버 | **`#03A94D`** | `#FFFFFF` (대비 3.09:1 → 19px 굵게 = WCAG 큰 글자 AA. 옛 `#03C75A`였다면 2.25:1로 미달) | N 로고 `#FFFFFF`, 17px | 네이버 로그인 (공식 애셋 문구) | [네이버 로그인 버튼 사용 가이드](https://developers.naver.com/docs/login/bi/bi.md): 지정 녹색이 `#03C75A` → `#03A94D`로 바뀜(계획서의 `#03C75A`는 옛 값), 로고·레이블 흰색(**Phase 2의 "글자색 확인" = 흰색**), N 로고 완성형 16px 이상, 레이블은 로고 높이보다 작게, 가운데 정렬이면 간격 8px. N 경로는 공식 PNG 애셋(4배)에서 재어 옮김 |
+| Google | `#FFFFFF` + 1px 안쪽 테두리 `#747775` | `#1F1F1F` (16.5:1), 테두리 4.5:1 | 4색 G, 20px | Google로 로그인 | [Sign in with Google 브랜딩 가이드](https://developers.google.com/identity/branding-guidelines): 밝은 테마 색, 문구 현지화 허용, 비율 유지, 다른 버튼보다 덜 눈에 띄게 두지 않음. G는 GIS 버튼 라이브러리가 지금 그리는 4색 경로 그대로 |
+
+**어긋남과 이유**
+- 글꼴: 카카오는 "OS 기본 시스템 서체", Google은 Google Sans Medium을 권하지만 세 버튼 모두 pyRoad Sans 700(Pretendard, 시스템 한글 고딕과 같은 계열)으로 통일했다. Google Sans는 자체 호스팅할 수 있는 라이선스가 아니다.
+- Google G: 브랜딩 페이지의 새 다운로드 묶음은 그라디언트 "super G"(Figma 내보내기, `foreignObject` 원뿔 그라디언트 + 흐림 필터)다. Safari의 `foreignObject` 렌더 차이와 무게 때문에, Google이 GIS 공식 버튼에서 **지금도 그리는** 4색 G 경로를 썼다(2026-11-06 `credential_button_library`에서 확인). GIS가 바꾸면 따라 바꾼다.
+- Google 문구: GIS 기본 한국어 "Google 계정으로 로그인"은 320px 화면 시트(안쪽 288px)에서 한 줄에 들어가지 않아 같은 뜻의 "Google로 로그인"을 쓴다(가이드: 현지화 허용, Google 자격 증명으로 로그인함이 분명할 것).
+- 크기: 세 버튼 높이 54px(게임 버튼 lg 면과 같음, 터치 48 이상), 반경 12px(카카오 규정을 세 버튼에 같게). 네이버 기본 애셋 반경(약 8px)과 다르지만 네이버 가이드는 반경을 정하지 않는다.
+- 상태 층: 올려놓기·눌림 때 면 위에 짙은 중립(`--text`) 5%·10%를 얹는다. 면 색 자체는 바꾸지 않는다.
+
+| 상태 | 모양 |
+|---|---|
+| 기본 | 로고 + 글자 묶음 가운데, 19px 굵게 |
+| 올려놓기(마우스) | 1px 뜸 + 상태 층 5% |
+| 눌림 | 1px 내려앉음 · 98.5% + 10% (full = face 스프링 · lite = 짧게 · minimal = 즉시 · 동작 줄이기 = 움직임 0, 색만) |
+| 로딩 | 로고·글자 그대로 + 오른쪽 끝 바쁨 표시(`animate-spin reduced:animate-none`), `aria-busy`, 누를 수 없음 |
+| 비활성 | 브랜드 색 그대로 45%로 흐리게 |
+| 포커스 | 2px `--ring` + 2px 간격 |
+| 오류 (묶음) | 버튼을 되살리고 아래에 "앗, 로그인을 시작하지 못했어요…" (`role="alert"`, 오류색 글자) |
+
+**props**
+- `SocialLoginButton`: `provider` · `loading` · `disabled` · `sfx`(기본 `tap`) · `pressed`·`hovered`(카탈로그 고정) + 나머지 `<button>` 속성. 모양만, 호출 없음.
+- `SocialLoginButtons`: `providers`(기본 카카오 → 네이버 → Google, `DEFAULT_SOCIAL_ORDER`) · `onBeforeLogin(provider)`(분석 이벤트) · `preview(provider)`(카탈로그용 가짜 로그인) · `className`. 하나를 누르면 그 버튼만 바쁨·나머지 비활성(두 번 눌림 막음), 결과 `redirecting`이면 바쁨 유지, `external-browser`·`browser-guide`면 되살림, `error`면 되살리고 오류 문구. bfcache로 돌아오면(`pageshow`) 바쁨을 푼다. Google은 인앱에서 `InAppBrowserGuide`(B16).
+- `LoginSheet`: `open` · `onOpenChange` · `cta`(`hero`·`header`, provider를 고를 때 `landing_cta_click`) · `preview` · `className`. `Sheet` + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 질문 + 버튼 + "이름·사진은 다른 친구에게 보이지 않아요".
+- `LoginSheetButton`: 게임 버튼 props + `cta`. 누르면 시트를 연다. 시트 모듈은 `next/dynamic`으로 올려놓기·포커스 때 미리 받고 누를 때 그린다(첫 화면 JS 밖). 시트는 body로 포털되므로 **랜딩 서브셋 글꼴 변수**(`displayLanding`·`sansLanding`)를 시트 상자에 직접 넘긴다(안 넘기면 제목이 Jua가 아니라 시스템 글꼴).
+
+```tsx
+<LoginSheetButton cta="hero" size="lg" iconRight={<Rocket aria-hidden />}>모험 시작하기</LoginSheetButton>
+<SocialLoginButtons onBeforeLogin={(provider) => track('landing_cta_click', { cta, provider }, { immediate: true })} />
+```
+
+**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+
+## 13. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
 |---|---|
-| Button | 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), Google로 시작하기(랜딩), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
+| Button | 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
 | IconButton | HUD 소리 토글(`SoundToggle`), 시트·토스트 닫기 |
 | Card | 월드맵 프로필 요약, 프로필 카드 4개, 계정 관리 |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
+| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05) |
 | Toast | 잠긴 스테이지 안내(B38) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
 | ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률 |

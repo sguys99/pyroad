@@ -28,14 +28,14 @@
     "fonts": {
       "jua": {
         "file": "jua/Jua-landing.woff2",
-        "bytes": 45272,
-        "sha256": "510517f5cda186fb881dd2c4219e247f50c2ce97f35bc19702923eb0799730ee",
+        "bytes": 45276,
+        "sha256": "821e9e54f138597b383c4977103351f5739fa3b4b5e0af8f1a6060cdb44f590e",
         "notInFont": "`©·×→≤️🏆🐍💻🗺"
       },
       "sans": {
         "file": "pyroad-sans/pyRoadSans-landing.woff2",
-        "bytes": 77720,
-        "sha256": "c578c8e4986482ba994a12561282e6a2a39046a66732fb22c1886351ed6444d7",
+        "bytes": 77540,
+        "sha256": "402dcc684d8d030828199be650358e7340a87c8257d4720cc9d206ee8c00388f",
         "notInFont": "️🏆🐍💻🗺"
       }
     }

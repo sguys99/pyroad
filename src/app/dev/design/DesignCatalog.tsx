@@ -38,6 +38,7 @@ import {
   TooltipSection,
 } from './_catalog/FeedbackSections';
 import { RigSection } from './_catalog/RigSection';
+import { SocialLoginSection } from './_catalog/AuthSections';
 import {
   EditorSection,
   ShareCardSection,
@@ -86,6 +87,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['bubble', '말풍선'],
       ['reward', '보상 아이콘'],
       ['tooltip', '툴팁'],
+      ['social-login', '소셜 로그인'],
     ],
   },
   { group: '캐릭터', items: [['rig', '마스코트 리그']] },
@@ -187,6 +189,7 @@ export function DesignCatalog({
               <BubbleSection />
               <RewardSection />
               <TooltipSection />
+              <SocialLoginSection />
               <RigSection />
               <EditorSection />
               <ShareCardSection />

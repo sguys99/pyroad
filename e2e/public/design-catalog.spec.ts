@@ -101,6 +101,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'bubble',
       'reward',
       'tooltip',
+      'social-login',
       'rig',
       'editor',
       'share-card',
