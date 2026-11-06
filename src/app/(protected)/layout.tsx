@@ -5,6 +5,8 @@ import { motionBootSyncScript } from '@/lib/motion/boot';
 import { loadMotionSettings } from '@/lib/motion/server';
 import { loadSoundSettings } from '@/lib/sound/server';
 import { nonceFromCsp } from '@/lib/security/csp';
+// 앱 화면 웹폰트(제목 Jua·본문 pyRoad Sans 조각). 랜딩에는 싣지 않으려고 루트가 아닌 여기서 import (P2-10)
+import '@/fonts/app.css';
 
 /**
  * 로그인 화면은 모두 요청마다 렌더한다: 페이지 CSP의 nonce를 서버 렌더 때 넣어야 하기 때문이다 (B27).

@@ -34,7 +34,8 @@ export default function GlobalError({
           padding: '16px',
           background: '#f7faf5',
           color: '#1f2937',
-          fontFamily: 'system-ui, -apple-system, "Noto Sans KR", sans-serif',
+          fontFamily:
+            'system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif',
         }}
       >
         <main style={{ maxWidth: 360, textAlign: 'center' }}>

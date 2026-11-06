@@ -143,7 +143,7 @@ export function buildPageCsp(options: PageCspOptions): string {
     ['style-src', ["'self'", "'unsafe-inline'"]],
     // next/image는 /_next/image를 거치므로 외부 이미지 출처가 필요 없다. data:·blob:은 SVG·캔버스 저장용
     ['img-src', ["'self'", 'data:', 'blob:']],
-    // next/font는 빌드 때 받아 /_next/static/media에서 제공한다 (자체 호스팅, §2.5)
+    // 폰트는 src/fonts/를 빌드가 /_next/static/media로 내보내 우리 도메인에서 제공한다 (자체 호스팅, P2-10·§2.5)
     ['font-src', ["'self'"]],
     ['connect-src', connectSrc],
     // Pyodide module Worker(/workers/) + canvas-confetti·lottie-web이 Blob URL로 만드는 Worker

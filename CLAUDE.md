@@ -10,6 +10,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 - **Code Execution**: Pyodide 314.0.7 자체 호스팅(`public/pyodide/`, predev·prebuild가 복사) + module Worker `public/workers/pyodide-worker.mjs`. 실행 로직은 공용 코어 `pyodide-core.mjs`(브라우저·Node 테스트 공용)
 - **Editor**: CodeMirror 6
 - **Animation**: Framer Motion, CSS keyframes, canvas-confetti. Lottie는 안 씀(B32, `lottie-react`는 미사용 의존성, Phase 6에서 `lottie_light`로 재도입 예정). 일회성 Lottie는 `public/animations/` + `assets:check` 렌더 검사 통과 필수
+- **Fonts**: 자체 호스팅 `src/fonts/` — 제목 Jua · 본문 pyRoad Sans(Pretendard) · 코드 pyRoad Mono(D2Coding, 퀘스트만). 랜딩은 텍스트 서브셋, 앱은 unicode-range 조각. `fonts:build`·`fonts:check` ([docs/design/fonts.md](docs/design/fonts.md))
 - **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO / **에셋**: [docs/design/assets.md](docs/design/assets.md) (래스터는 정지 그림만, sharp·버전 파일 이름)
 - **관측·분석**: Sentry(DSN 없으면 꺼짐, 지연 로드, 최소 수집), 자체 분석 `track()` + `analytics_events` ([docs/analytics.md](docs/analytics.md))
 - **Tooling**: npm, ESLint (Flat Config), Prettier, Vitest, Playwright, PGlite·tsx(스크립트)

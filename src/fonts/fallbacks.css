@@ -1,0 +1,49 @@
+/* 한글 폴백 보정 (P2-10, P0-14 §4.2). 생성물: npm run fonts:build — 직접 고치지 마세요.
+ * next/font의 폴백 보정은 라틴(Arial) 기준이라 한글은 보정 없이 시스템 폰트로 그려진다.
+ * 그래서 시스템 한글 폰트를 local()로 감싸 한글 평균 폭이 웹폰트와 같도록 size-adjust를 건다.
+ * 값 = 웹폰트 한글 평균 폭 / 시스템 폰트 한글 평균 폭, ascent·descent는 웹폰트 값 / size-adjust.
+ * 그 기기에 없는 local() 글꼴은 건너뛰므로 기기마다 맞는 한 벌만 쓰인다. */
+@font-face {
+  font-family: 'Jua Fallback Malgun';
+  src: local('Malgun Gothic'), local('맑은 고딕'), local('MalgunGothic');
+  size-adjust: 81.42%;
+  ascent-override: 98.25%;
+  descent-override: 24.56%;
+  line-gap-override: 0%;
+  unicode-range:
+    U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+@font-face {
+  font-family: 'Jua Fallback Noto';
+  src:
+    local('Noto Sans CJK KR'), local('NotoSansCJKkr-Regular'),
+    local('Noto Sans KR'), local('NotoSansKR-Regular');
+  size-adjust: 88.5%;
+  ascent-override: 90.39%;
+  descent-override: 22.6%;
+  line-gap-override: 0%;
+  unicode-range:
+    U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+@font-face {
+  font-family: 'pyRoad Sans Fallback Malgun';
+  src: local('Malgun Gothic'), local('맑은 고딕'), local('MalgunGothic');
+  size-adjust: 86.43%;
+  ascent-override: 110.17%;
+  descent-override: 27.91%;
+  line-gap-override: 0%;
+  unicode-range:
+    U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+@font-face {
+  font-family: 'pyRoad Sans Fallback Noto';
+  src:
+    local('Noto Sans CJK KR'), local('NotoSansCJKkr-Regular'),
+    local('Noto Sans KR'), local('NotoSansKR-Regular');
+  size-adjust: 93.94%;
+  ascent-override: 101.36%;
+  descent-override: 25.68%;
+  line-gap-override: 0%;
+  unicode-range:
+    U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}

@@ -126,9 +126,10 @@ test.describe('사운드 설정 (P2-14)', () => {
     await page.goto('/world');
     const toggle = page.getByTestId('sound-toggle');
     await expect(toggle).toHaveAccessibleName('소리 끄기');
+    // 행간 1.7(17px → 28.9px) 때문에 위치가 소수 px이면 상자 크기가 47.999…로 잡힌다 → 반올림해 비교 (P2-10)
     const box = await toggle.boundingBox();
-    expect(box?.width).toBeGreaterThanOrEqual(48);
-    expect(box?.height).toBeGreaterThanOrEqual(48);
+    expect(Math.round(box?.width ?? 0)).toBeGreaterThanOrEqual(48);
+    expect(Math.round(box?.height ?? 0)).toBeGreaterThanOrEqual(48);
     await toggle.click();
     await expect(toggle).toHaveAccessibleName('소리 켜기');
     await expect

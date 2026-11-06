@@ -1,16 +1,31 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+/* 한글 폴백 보정 @font-face (P2-10, 생성물). 웹폰트 파일은 여기서 싣지 않는다: src/fonts/landing.ts·app.css */
+@import '../fonts/fallbacks.css';
 
 @plugin '@tailwindcss/typography';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: var(--font-sans);
+  /* 글꼴 토큰 (P2-10, §12-Q15·Q28, docs/design/fonts.md). 모두 자체 호스팅, Google Fonts·CDN 없음.
+   * 맨 앞 var(--font-*-landing, …)은 랜딩에서만 채워지는 텍스트 서브셋(src/fonts/landing.ts), 다른 화면에서는 조각 글꼴 이름으로 풀린다.
+   * 그래서 CSS에서는 var(--font-sans)·var(--font-display) 대신 font-sans·font-display 유틸리티(@apply)를 쓴다 (:root에서 미리 풀림).
+   * 웹폰트 다음은 한글 폭을 웹폰트에 맞춘 시스템 폰트(fallbacks.css: Windows 맑은 고딕·Android Noto), 그다음 보정 없는 시스템 폰트
+   * (iOS·macOS Apple SD Gothic Neo 등). 제목 = Jua, 본문 = pyRoad Sans(Pretendard), 코드 = pyRoad Mono(D2Coding, 퀘스트 화면만) */
+  --font-display:
+    var(--font-display-landing, 'Jua'), 'Jua', 'Jua Fallback Malgun',
+    'Jua Fallback Noto', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR',
+    'Noto Sans CJK KR', system-ui, sans-serif;
   --font-sans:
-    var(--font-noto), 'Noto Sans KR', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace;
+    var(--font-sans-landing, 'pyRoad Sans'), 'pyRoad Sans',
+    'pyRoad Sans Fallback Malgun', 'pyRoad Sans Fallback Noto',
+    'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR',
+    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    'pyRoad Mono', 'D2Coding', 'NanumGothicCoding', ui-monospace,
+    'SFMono-Regular', Menlo, Consolas, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -470,5 +485,30 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+  }
+  /* 본문 읽기 기본값 (P0-14 §4.7, 8~12세): 17px · 행간 1.7 · 자간 0 · 어절 단위 줄바꿈.
+     크기는 rem이라 브라우저 글자 크기 설정을 따른다. 크기·행간을 정한 유틸리티(text-sm 등)가 있으면 그쪽이 우선 */
+  body {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    letter-spacing: 0;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  /* 제목은 Jua. 굵기가 하나뿐이지만 @font-face를 굵기 범위로 선언해 font-bold여도 합성 굵게가 생기지 않는다.
+     var(--font-display)가 아니라 @apply로 값을 펼친다: :root의 변수는 거기서 한 번 풀려 상속되므로
+     랜딩 래퍼에만 있는 --font-display-landing을 못 본다 */
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+  /* 코드 글꼴은 리거처 없이 (P0-14 §4.6) */
+  code,
+  kbd,
+  samp,
+  pre {
+    @apply font-mono;
+    font-variant-ligatures: none;
   }
 }
