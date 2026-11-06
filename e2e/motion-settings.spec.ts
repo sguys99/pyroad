@@ -85,6 +85,9 @@ test.describe('움직임 설정 (P2-15)', () => {
   }) => {
     await page.goto('/settings');
     const section = page.getByTestId('motion-settings');
+    // CI 장비가 느리면 자동 감지가 minimal로 내려가 깜빡임까지 꺼지므로 단계를 고정한다
+    await section.locator('label', { hasText: '풍성하게' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-motion', 'full');
     const reducedOptions = section.getByTestId('motion-reduced-options');
     await reducedOptions.locator('label', { hasText: '켜기' }).click();
     await expect(
@@ -93,13 +96,14 @@ test.describe('움직임 설정 (P2-15)', () => {
     await expect(page.locator('html')).toHaveAttribute('data-reduced', 'true');
     await expect(section.getByRole('status')).toHaveText('저장했어요!');
 
+    // 표정이 바뀌며 미리 보기가 다시 그려지는 동안 떨어져 나간 요소를 읽지 않도록 재시도
     const preview = section.locator('.character-breathe').first();
-    expect(
-      await preview.evaluate((el) => getComputedStyle(el).animationName),
-    ).toBe('none');
+    await expect
+      .poll(() => preview.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('none');
     const eye = section.locator('.char-blink-eye').first();
-    expect(await eye.evaluate((el) => getComputedStyle(el).animationName)).toBe(
-      'char-blink-eye-slow',
-    );
+    await expect
+      .poll(() => eye.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('char-blink-eye-slow');
   });
 });
