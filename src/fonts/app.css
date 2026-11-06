@@ -1,6 +1,6 @@
 /* 앱 화면 웹폰트 (P2-10): 제목 Jua + 본문 pyRoad Sans의 unicode-range 조각.
  * 화면에 나온 글자가 든 조각만 받으므로 닉네임·튜터 답변처럼 미리 알 수 없는 글자도 모두 그린다.
  * 랜딩(`/`)에는 싣지 않는다(렌더 차단 CSS 예산 §2.10): 랜딩은 src/fonts/landing.ts의 텍스트 서브셋을 쓴다.
- * import하는 곳: (protected)/layout.tsx, notice/layout.tsx, not-found.tsx. 코드 글꼴은 quest/layout.tsx의 pyroad-mono.css */
+ * import하는 곳: components/providers/LoggedInShell.tsx((protected)·onboarding 레이아웃), notice/layout.tsx, not-found.tsx. 코드 글꼴은 quest/layout.tsx의 pyroad-mono.css */
 @import './jua/jua.css';
 @import './pyroad-sans/pyroad-sans.css';

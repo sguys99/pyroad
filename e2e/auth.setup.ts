@@ -36,6 +36,16 @@ setup('테스트 사용자 만들고 로그인', async ({ page, baseURL }) => {
     throw new Error(`[e2e] 테스트 사용자 생성 실패: ${createError?.message}`);
   }
   const user: E2eUser = { id: created.user.id, email };
+  // 온보딩(P3-11)은 끝낸 사용자로: 안 하면 모든 로그인 화면이 /onboarding 으로 간다. 온보딩 자체는 onboarding.spec.ts 가 새 사용자로
+  const { error: onboardError } = await admin
+    .from('users')
+    .update({ onboarded_at: new Date().toISOString() })
+    .eq('id', user.id);
+  if (onboardError) {
+    throw new Error(
+      `[e2e] 테스트 사용자 온보딩 표시 실패: ${onboardError.message}`,
+    );
+  }
   mkdirSync(AUTH_DIR, { recursive: true });
   writeFileSync(USER_FILE, JSON.stringify(user, null, 2));
 

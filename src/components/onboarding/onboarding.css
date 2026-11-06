@@ -1,0 +1,1119 @@
+/* 첫 로그인 온보딩 "모험가 등록증"과 30초 튜토리얼 (P3-11, docs/design/components.md §13).
+   랜딩 렌더 차단 CSS 예산(§2.10)에 넣지 않으려고 globals.css가 아니라 온보딩 레이아웃·카탈로그가 불러온다 (@layer components 는 같은 층).
+
+   최종 시안 B(§12-Q31): 단색 바탕 한 톤, 테두리 없는 면 + 그림자 한 종류, 반경 10/14/20, 초록 + 금색만.
+   테두리는 입력칸 1px(`line-strong`)뿐이고 칸 구분은 옅은 선(`line`). 색·길이·곡선은 모두 토큰 변수.
+
+   연출 (모두 1회성, transform·opacity만. 반복은 튜토리얼 지도 "지금 여기" 고리 하나 `.m-loop`):
+   - 도장·쪽 넘김·주사위·색 칸 톡은 WAAPI(`src/lib/celebration/onboardingFx.ts`)
+   - 튜토리얼 장면은 아래 키프레임. lite는 길이·지연 70%(`--ob-k`), minimal·동작 줄이기는 연출 없이 끝 상태
+   - 파이뱀 몸 색이 바뀔 때 fill 전환(색 변화라 동작 줄이기에서도 이동은 없지만 즉시로 맞춤) */
+
+@layer components {
+  /* ───────────────────────── 쪽(페이지) */
+  .ob-page {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    padding: 0 1rem calc(2.5rem + env(safe-area-inset-bottom));
+    overflow-x: clip;
+  }
+  .ob-page[data-phase='turning'] {
+    pointer-events: none;
+  }
+  .ob-sheet {
+    max-width: 66rem;
+    margin: 0 auto;
+    transform-origin: left center;
+    backface-visibility: hidden;
+  }
+
+  /* 위 막대: 뒤로 · 진행 점 · (빈 칸) */
+  .ob-top {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+    align-items: center;
+    min-height: 4.25rem;
+    max-width: 36rem;
+    margin: 0 auto;
+  }
+  .ob-top-spacer {
+    width: 3rem;
+  }
+
+  /* ───────────────────────── 진행 점 */
+  .ob-dots {
+    justify-self: center;
+  }
+  .ob-dots-row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin: 0;
+    padding: 0 0.5rem;
+    list-style: none;
+  }
+  .ob-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--round-pill);
+    background: var(--line);
+    transition:
+      transform var(--dur-base) var(--easing-out),
+      background-color var(--dur-fast) var(--easing-out);
+  }
+  .ob-dot[data-state='done'],
+  .ob-dot[data-state='now'] {
+    background: var(--primary);
+  }
+  .ob-dot[data-state='now'] {
+    transform: scaleX(2.4);
+  }
+  .ob-dot[data-gold] {
+    background: var(--accent-light);
+  }
+  .ob-dot[data-gold]:is([data-state='done'], [data-state='now']) {
+    background: var(--accent);
+  }
+
+  /* ───────────────────────── 넓은 화면: 안내 + 등록증 */
+  .ob-layout {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .ob-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 36rem;
+    margin: 0 auto;
+    min-width: 0;
+  }
+  .ob-aside {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .ob-layout {
+      grid-template-columns: minmax(0, 36rem) 21rem;
+      justify-content: center;
+      align-items: start;
+      gap: 3.5rem;
+      padding-top: 0.5rem;
+    }
+    .ob-main {
+      margin: 0;
+    }
+    .ob-aside {
+      display: block;
+      position: sticky;
+      top: 1.5rem;
+      padding-top: 7rem;
+    }
+    .ob-card.ob-compact-card {
+      display: none;
+    }
+    /* 위 막대(뒤로·진행 점)를 내용 두 칸 폭에 맞춤 */
+    .ob-sheet {
+      max-width: 60.5rem;
+    }
+    .ob-top {
+      max-width: none;
+    }
+  }
+
+  /* ───────────────────────── 안내: 파이뱀 + 말풍선 */
+  .ob-guide {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 6rem;
+  }
+  .ob-guide-rig {
+    flex: none;
+    width: 6rem;
+    height: 6rem;
+    margin-left: -0.25rem;
+  }
+  .ob-guide[data-size='lg'] .ob-guide-rig {
+    width: 8.25rem;
+    height: 8.25rem;
+  }
+  .ob-guide-bubble {
+    max-width: 26rem;
+  }
+  /* 고른 색으로 몸이 바뀔 때 부드럽게 (fill·stroke만, 리그가 속성을 바꿈) */
+  .ob-guide-rig svg :is(path, ellipse, circle, rect),
+  .ob-card-portrait svg :is(path, ellipse, circle, rect) {
+    transition:
+      fill var(--dur-slow) var(--easing-out),
+      stroke var(--dur-slow) var(--easing-out);
+  }
+  :root[data-reduced='true'] :is(.ob-guide-rig, .ob-card-portrait) svg * {
+    transition: none;
+  }
+
+  /* ───────────────────────── 단계 판 */
+  .ob-panel {
+    border-radius: var(--round-l);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    padding: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .ob-panel {
+      padding: 1.75rem;
+    }
+  }
+  .ob-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-h2);
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .ob-title:focus {
+    outline: none;
+  }
+  .ob-optional {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0 0.5rem;
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 650;
+    line-height: 1.5;
+  }
+  .ob-desc {
+    margin: 0.375rem 0 1.25rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+    line-height: 1.6;
+  }
+
+  /* 버튼 줄: 좁은 화면은 꽉 찬 주 버튼, 넓으면 오른쪽 */
+  .ob-actions {
+    display: grid;
+    gap: 0.625rem;
+  }
+  .ob-actions .ob-primary {
+    width: 100%;
+  }
+  @media (min-width: 640px) {
+    .ob-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    .ob-actions .ob-primary {
+      width: auto;
+      min-width: 15rem;
+    }
+  }
+  .ob-save-error {
+    flex-basis: 100%;
+    color: var(--error);
+    font-size: var(--text-small);
+    font-weight: 650;
+  }
+
+  /* ───────────────────────── 닉네임 입력 */
+  .ob-label {
+    display: block;
+    color: var(--text);
+    font-size: var(--text-caption);
+    font-weight: 700;
+  }
+  .ob-input {
+    position: relative;
+  }
+  .ob-input-field {
+    width: 100%;
+    height: 3.75rem;
+    padding: 0 4.5rem 0 1rem;
+    border: var(--line-w) solid var(--line-strong);
+    border-radius: var(--round-m);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.375rem;
+    line-height: 1;
+    transition:
+      border-color var(--dur-fast) var(--easing-out),
+      color var(--dur-fast) var(--easing-out);
+  }
+  .ob-input-field:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  .ob-input[data-tone='ok'] .ob-input-field {
+    border-color: var(--primary);
+  }
+  .ob-input[data-tone='warn'] .ob-input-field {
+    border-color: var(--warning);
+  }
+  .ob-input-field[data-rolling] {
+    color: var(--text-muted);
+  }
+  .ob-input-count {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .ob-input-count[data-over] {
+    color: var(--warning);
+    font-weight: 700;
+  }
+  /* 안내 한 줄: 두 줄 높이를 미리 잡아 아래 버튼이 흔들리지 않게 */
+  .ob-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    min-height: 3rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+    line-height: 1.6;
+  }
+  .ob-hint[data-tone='ok'] {
+    color: var(--primary-text);
+    font-weight: 650;
+  }
+  .ob-hint[data-tone='warn'] {
+    color: var(--warning);
+    font-weight: 650;
+  }
+  .ob-hint-icon {
+    display: inline-flex;
+    flex: none;
+    margin-top: 0.1875rem;
+  }
+  .ob-hint-icon > svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  /* ───────────────────────── 파이뱀 색 칸 */
+  .ob-swatches {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+  @media (min-width: 640px) {
+    .ob-swatches {
+      gap: 0.875rem;
+    }
+  }
+  .ob-swatch {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+    min-height: 7.25rem;
+    padding: 0.75rem 0.25rem 0.75rem;
+    border: 0;
+    border-radius: var(--round-m);
+    background: var(--surface-2);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: inset 0 0 0 2px transparent;
+    transition:
+      background-color var(--dur-fast) var(--easing-out),
+      box-shadow var(--dur-fast) var(--easing-out);
+  }
+  @media (hover: hover) {
+    .ob-swatch:not([data-selected]):hover {
+      box-shadow: inset 0 0 0 2px var(--line);
+    }
+  }
+  .ob-swatch[data-selected] {
+    background: var(--primary-soft);
+    box-shadow: inset 0 0 0 2px var(--primary);
+  }
+  .ob-swatch-art {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .ob-swatch-name {
+    font-size: var(--text-small);
+    font-weight: 650;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .ob-swatch-check {
+    position: absolute;
+    top: 0.4375rem;
+    right: 0.4375rem;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--round-pill);
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  .ob-swatch-check > svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  /* ───────────────────────── 학년 칩 */
+  .ob-grades {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+  @media (min-width: 640px) {
+    .ob-grades {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  .ob-grade {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.125rem;
+    height: 3.5rem;
+    border: 0;
+    border-radius: var(--round-m);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 1.5rem;
+    line-height: 3.5rem;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--easing-out),
+      color var(--dur-fast) var(--easing-out);
+  }
+  .ob-grade-unit {
+    font-size: var(--text-caption);
+  }
+  @media (hover: hover) {
+    .ob-grade:not([data-selected]):hover {
+      background: var(--line);
+    }
+  }
+  .ob-grade[data-selected] {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+
+  /* ───────────────────────── 모험가 등록증 */
+  .ob-card {
+    position: relative;
+    border-radius: var(--round-l);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    padding: 1.25rem 1.25rem 1rem;
+  }
+  .ob-card-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+  .ob-card-portrait {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: var(--round-pill);
+    background: var(--w1-soft);
+    overflow: hidden;
+  }
+  .ob-card-portrait[data-size='sm'] {
+    width: 2.75rem;
+    height: 2.75rem;
+    background: var(--surface-2);
+  }
+  .ob-card-fields {
+    display: grid;
+    min-width: 0;
+    margin: 1rem 0 0;
+  }
+  .ob-field {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border-bottom: var(--line-w) solid var(--line);
+    transition: background-color var(--dur-fast) var(--easing-out);
+  }
+  .ob-field:last-child {
+    border-bottom-color: transparent;
+  }
+  .ob-field[data-focus] {
+    border-radius: var(--round-s);
+    border-bottom-color: transparent;
+    background: var(--primary-soft);
+  }
+  .ob-field dt {
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 600;
+  }
+  .ob-field dd {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-small);
+    font-weight: 650;
+  }
+  .ob-field dd[data-empty] {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .ob-card-name {
+    font-size: var(--text-h3);
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--text);
+  }
+  .ob-field .ob-card-name {
+    font-size: 1.125rem;
+  }
+  .ob-card-name[data-empty] {
+    color: var(--text-muted);
+  }
+  .ob-swatch-dot {
+    display: inline-block;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: var(--round-pill);
+  }
+  .ob-card-foot {
+    margin-top: 0.75rem;
+    padding: 0 0.625rem;
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+  }
+
+  /* 좁은 화면 위 띠 */
+  .ob-card-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem 0.625rem 0.625rem;
+    border-radius: var(--round-m);
+  }
+  .ob-card-compact .ob-card-name {
+    font-size: 1.125rem;
+  }
+  .ob-card-compact .ob-stamp {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  /* ───────────────────────── 도장 (도장 = 완료 기록) */
+  .ob-stamp {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    align-content: center;
+    flex: none;
+    width: 4rem;
+    height: 4rem;
+    border: 2px dashed var(--line);
+    border-radius: var(--round-pill);
+    color: var(--text-muted);
+  }
+  .ob-stamp[data-size='lg'] {
+    width: 5.25rem;
+    height: 5.25rem;
+  }
+  .ob-stamp-slot {
+    font-size: var(--text-caption);
+    font-weight: 600;
+  }
+  .ob-stamp[data-stamped] {
+    border: 2.5px solid var(--accent-text);
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+  .ob-stamp-star {
+    width: 1rem;
+    height: 1rem;
+    fill: var(--accent);
+    stroke: var(--accent-text);
+    stroke-width: 1.5;
+  }
+  .ob-stamp-text {
+    font-size: 1.0625rem;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+  }
+  .ob-stamp[data-size='lg'] .ob-stamp-star {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  .ob-stamp[data-size='lg'] .ob-stamp-text {
+    font-size: 1.375rem;
+  }
+  .ob-splat {
+    position: absolute;
+    z-index: 5;
+    border-radius: var(--round-pill);
+    background: var(--accent);
+    pointer-events: none;
+  }
+
+  /* ───────────────────────── 마지막 쪽: 도장 */
+  .ob-finale {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 28rem;
+    margin: 0 auto;
+  }
+  .ob-finale-guide {
+    width: 100%;
+  }
+  .ob-finale-card {
+    width: 100%;
+    box-shadow: var(--elev-pop);
+  }
+  .ob-finale .ob-actions {
+    width: 100%;
+    display: grid;
+    justify-content: stretch;
+  }
+  .ob-finale .ob-actions .ob-primary {
+    width: 100%;
+  }
+
+  /* ───────────────────────── 튜토리얼 */
+  .ob-tut {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 36rem;
+    margin: 0 auto;
+    transform-origin: right center;
+  }
+  .ob-tut-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    min-height: 4.25rem;
+  }
+  .ob-tut-top > :last-child {
+    justify-self: end;
+  }
+  .ob-tut-stage {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--round-l);
+    background: var(--w1-soft);
+    overflow: hidden;
+  }
+  @media (min-width: 640px) {
+    .ob-tut-stage {
+      aspect-ratio: 16 / 9;
+    }
+  }
+  .ob-tut-title {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: var(--text-h2);
+    line-height: 1.3;
+  }
+  .ob-tut-title:focus {
+    outline: none;
+  }
+  .ob-tut-num {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--round-pill);
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: 1.125rem;
+  }
+  .ob-tut-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .ob-tut-actions > :last-child {
+    flex: 1 1 auto;
+  }
+  @media (min-width: 640px) {
+    .ob-tut-actions > :last-child {
+      flex: 0 1 16rem;
+    }
+  }
+
+  /* ───────────────────────── 튜토리얼 장면 공통 */
+  .ob-scene {
+    --ob-k: 1;
+    position: absolute;
+    inset: 0;
+  }
+  :root[data-motion='lite'] .ob-scene {
+    --ob-k: 0.7;
+  }
+
+  /* 1. 지도 */
+  .ob-map-path {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--primary-bright);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 15;
+  }
+  .ob-node {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin: -1.5rem 0 0 -1.5rem;
+    border-radius: var(--round-pill);
+  }
+  .ob-node > svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .ob-node[data-state='done'] {
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 var(--lip-h) 0 var(--primary-lip);
+  }
+  .ob-node[data-state='now'] {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: -1.75rem 0 0 -1.75rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 var(--lip-h) 0 var(--accent-lip);
+    font-size: 1.375rem;
+    animation: ob-pop calc(420ms * var(--ob-k)) var(--easing-back-out)
+      calc(1100ms * var(--ob-k)) both;
+  }
+  .ob-node[data-state='locked'] {
+    background: var(--surface);
+    color: var(--text-muted);
+    box-shadow: 0 var(--lip-h) 0 var(--surface-lip);
+  }
+  .ob-node-ring {
+    position: absolute;
+    inset: -0.375rem;
+    border: 3px solid var(--accent);
+    border-radius: var(--round-pill);
+    opacity: 0.55;
+    animation: ob-ring 2.4s var(--easing-out) infinite;
+  }
+  .ob-tap {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0.5rem 0 0 0.25rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-pop);
+    animation: ob-tap-in calc(1100ms * var(--ob-k)) var(--easing-in-out)
+      calc(250ms * var(--ob-k)) both;
+  }
+  .ob-tap > svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  .ob-map-tag {
+    position: absolute;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    color: var(--text);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    white-space: nowrap;
+    transform: translate(-50%, -3.75rem);
+    animation: ob-tag calc(380ms * var(--ob-k)) var(--easing-back-out)
+      calc(1300ms * var(--ob-k)) both;
+  }
+
+  /* 2. 코드 */
+  .ob-scene-code,
+  .ob-scene-hint,
+  .ob-scene-reward {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  @media (min-width: 640px) {
+    .ob-scene-code,
+    .ob-scene-hint,
+    .ob-scene-reward {
+      padding: 1.5rem 2rem;
+    }
+  }
+  .ob-mini-editor {
+    border-radius: var(--round-m);
+    background: var(--code-bg);
+    box-shadow: var(--elev-card);
+    overflow: hidden;
+  }
+  .ob-mini-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4375rem 0.75rem;
+    background: var(--surface-2);
+  }
+  .ob-mini-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--round-pill);
+    background: var(--line);
+  }
+  .ob-mini-file {
+    margin-left: 0.375rem;
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 600;
+  }
+  .ob-mini-code {
+    display: flex;
+    gap: 0.875rem;
+    padding: 0.875rem;
+    color: var(--code-text);
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+  .ob-mini-ln {
+    color: var(--text-muted);
+  }
+  .ob-mini-typed {
+    display: inline-block;
+    white-space: pre;
+    animation: ob-type calc(900ms * var(--ob-k)) steps(13, end)
+      calc(250ms * var(--ob-k)) both;
+  }
+  .ob-mini-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .ob-mini-run {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex: none;
+    height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: var(--round-m);
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 var(--lip-h) 0 var(--primary-lip);
+    font-size: 1.125rem;
+    animation: ob-press calc(320ms * var(--ob-k)) var(--easing-press)
+      calc(1250ms * var(--ob-k)) both;
+  }
+  .ob-mini-run > svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    fill: currentColor;
+  }
+  .ob-mini-out {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 1;
+    min-width: 0;
+    padding: 0 0.875rem;
+    border-radius: var(--round-m);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    animation: ob-rise calc(420ms * var(--ob-k)) var(--easing-back-out)
+      calc(1550ms * var(--ob-k)) both;
+  }
+  .ob-mini-out-k {
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 600;
+  }
+  .ob-mini-out-v {
+    font-size: 1.125rem;
+  }
+  .ob-mini-out-ok {
+    width: 1.375rem;
+    height: 1.375rem;
+    margin-left: auto;
+    color: var(--primary-text);
+    animation: ob-pop-in calc(380ms * var(--ob-k)) var(--easing-back-out)
+      calc(1850ms * var(--ob-k)) both;
+  }
+
+  /* 3. 힌트·질문 */
+  .ob-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .ob-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2.5rem;
+    padding: 0 0.875rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    box-shadow: 0 var(--lip-h) 0 var(--surface-lip);
+    font-size: var(--text-small);
+    font-weight: 650;
+  }
+  .ob-chip > svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  .ob-chip[data-kind='hint'] > svg {
+    fill: var(--accent-light);
+    color: var(--accent-text);
+  }
+  .ob-chip[data-kind='hint'] {
+    animation: ob-pop calc(420ms * var(--ob-k)) var(--easing-back-out)
+      calc(200ms * var(--ob-k)) both;
+  }
+  .ob-chat-q {
+    align-self: flex-end;
+    max-width: 80%;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--round-m) var(--round-m) 0.25rem var(--round-m);
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: var(--text-small);
+    font-weight: 600;
+    animation: ob-slide-r calc(360ms * var(--ob-k)) var(--easing-out)
+      calc(600ms * var(--ob-k)) both;
+  }
+  .ob-chat-a {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    max-width: 92%;
+    animation: ob-slide-l calc(360ms * var(--ob-k)) var(--easing-out)
+      calc(1200ms * var(--ob-k)) both;
+  }
+  .ob-chat-face {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .ob-chat-a-t {
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--round-m) var(--round-m) var(--round-m) 0.25rem;
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    font-size: var(--text-small);
+  }
+
+  /* 4. 별·도장 */
+  .ob-scene-reward {
+    align-items: center;
+  }
+  .ob-quest-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: min(100%, 21rem);
+    padding: 1rem 1.25rem;
+    border-radius: var(--round-l);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+  }
+  .ob-quest-stars {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.375rem;
+  }
+  .ob-star {
+    display: inline-flex;
+    animation: ob-star calc(420ms * var(--ob-k)) var(--easing-back-out)
+      calc((300ms + var(--i) * 220ms) * var(--ob-k)) both;
+  }
+  .ob-quest-stamp {
+    animation: ob-stamp-in calc(220ms * var(--ob-k)) var(--easing-stamp-in)
+      calc(1150ms * var(--ob-k)) both;
+  }
+  .ob-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 600;
+  }
+  .ob-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .ob-legend-stamp {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--accent-text);
+    border-radius: var(--round-pill);
+    background: var(--accent-soft);
+  }
+
+  /* minimal·동작 줄이기: 장면 연출 없이 끝 상태 (고리 반복도 없음) */
+  :root:is([data-reduced='true'], [data-motion='minimal']) .ob-scene *,
+  :root:is([data-reduced='true'], [data-motion='minimal']) .ob-scene {
+    animation: none !important;
+  }
+  :root[data-reduced='true'] .ob-dot,
+  :root[data-reduced='true'] .ob-field,
+  :root[data-reduced='true'] .ob-swatch,
+  :root[data-reduced='true'] .ob-grade {
+    transition: none;
+  }
+}
+
+@keyframes ob-ring {
+  from {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes ob-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes ob-tap-in {
+  0% {
+    transform: translate(150%, 130%);
+    opacity: 0;
+  }
+  55% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  72% {
+    transform: translate(0, 0) scale(0.84);
+  }
+  88% {
+    transform: translate(0, 0) scale(1.04);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* 이름표는 글자라 투명도 없이 크기로만 (튜토리얼 첫 장면은 서버 렌더 첫 화면일 수 있음, §2.10) */
+@keyframes ob-tag {
+  from {
+    transform: translate(-50%, -2.75rem) scale(0.3);
+  }
+}
+@keyframes ob-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes ob-press {
+  0%,
+  100% {
+    transform: none;
+  }
+  45% {
+    transform: translateY(var(--lip-h)) scale(0.97);
+  }
+}
+@keyframes ob-rise {
+  from {
+    transform: translateY(0.625rem) scale(0.92);
+    opacity: 0;
+  }
+}
+@keyframes ob-pop-in {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+@keyframes ob-slide-r {
+  from {
+    transform: translateX(1.5rem);
+    opacity: 0;
+  }
+}
+@keyframes ob-slide-l {
+  from {
+    transform: translateX(-1.5rem);
+    opacity: 0;
+  }
+}
+@keyframes ob-star {
+  from {
+    transform: scale(0) rotate(-35deg);
+    opacity: 0;
+  }
+}
+@keyframes ob-stamp-in {
+  from {
+    transform: scale(2.2) rotate(-22deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(-8deg);
+    opacity: 1;
+  }
+}

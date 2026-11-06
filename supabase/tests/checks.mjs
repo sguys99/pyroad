@@ -2798,6 +2798,11 @@ async function groupApp(u) {
       'checkBadges.ts quests',
       `/rest/v1/quests?select=stage_id,stages!inner(is_final)&id=eq.${Q1}`,
     ],
+    [
+      'APP-15',
+      '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 (P3-11 loadOwnUserRow)',
+      `/rest/v1/users?select=settings,onboarded_at&id=eq.${u.alice.id}`,
+    ],
   ];
   // 보고서에 매번 바뀌는 uuid 가 남지 않게 자리표시자로 바꿈
   const shortPath = (path) =>
@@ -4455,6 +4460,172 @@ async function groupBoard(u) {
   });
 }
 
+// ── onboarding: 첫 로그인 온보딩 (P3-11, ① 00023) ──────────────
+async function groupOnboarding(u) {
+  const AG = '/rest/v1/user_agreements';
+  const T = '2026-11-06';
+  // 동의 기록은 법적 기록: 클라이언트가 읽거나 지우거나 끼워 넣으면 안 됨 (service_role 전용)
+  one(`insert into public.user_agreements (user_id, item, version, method) values ('${u.alice.id}', 'terms', '${T}', 'self')
+       on conflict do nothing`);
+  await check({
+    group: 'onboarding',
+    id: 'OB-1',
+    role: 'anon',
+    op: 'GET /user_agreements',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `${AG}?select=*`)),
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-2',
+    role: 'authenticated',
+    op: 'GET /user_agreements?user_id=eq.<본인> · DELETE (동의 기록 읽기·지우기)',
+    ...WRITE,
+    run: async () => {
+      const read = classifyRead(await rest('GET', `${AG}?select=*&user_id=eq.${u.alice.id}`, { as: u.alice }));
+      if (read.actual === 'allowed') return { actual: 'written', detail: `읽힘: ${read.detail}` };
+      return classifyWrite(
+        rest('DELETE', `${AG}?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.user_agreements where user_id = '${u.alice.id}' and item = 'terms')`,
+      );
+    },
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-3',
+    role: 'authenticated',
+    op: 'POST /user_agreements {user_id: 다른 사람} (남의 동의를 꾸며 넣기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', AG, {
+          as: u.alice,
+          body: { user_id: u.bob.id, item: 'privacy', version: T, method: 'guardian_in_person' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_agreements where user_id = '${u.bob.id}' and item = 'privacy')`,
+      ),
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-4',
+    role: 'authenticated',
+    op: 'POST /rpc/complete_onboarding · PATCH /users {nickname, onboarded_at} (금칙어 검사·동의 없이 온보딩 끝내기)',
+    ...WRITE,
+    run: async () => {
+      const r = await classifyWrite(
+        rest('POST', '/rest/v1/rpc/complete_onboarding', {
+          as: u.alice,
+          body: {
+            p_user_id: u.alice.id,
+            p_nickname: 'Hacker01',
+            p_skin: 'sky',
+            p_grade: null,
+            p_agreements: [{ item: 'terms', version: T }],
+            p_method: 'self',
+          },
+        }),
+        `select exists (select 1 from public.users where id = '${u.alice.id}' and (nickname = 'Hacker01' or onboarded_at is not null))`,
+      );
+      if (r.actual === 'written') return r;
+      return classifyWrite(
+        rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { nickname: 'Hacker02', onboarded_at: new Date().toISOString() },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.users where id = '${u.alice.id}' and (nickname = 'Hacker02' or onboarded_at is not null))`,
+      );
+    },
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-5',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/is_nickname_taken (다른 아이 닉네임 훑기)',
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        const r = await rest('POST', '/rest/v1/rpc/is_nickname_taken', {
+          as,
+          body: { p_nickname: '캐롤코딩', p_user_id: u.alice.id },
+        });
+        if (r.status < 300) return { actual: 'allowed', detail: `${as === 'anon' ? 'anon' : 'auth'} ${r.status} ${JSON.stringify(r.json)}` };
+        if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+          return { actual: 'error', detail: `${r.status} ${errCode(r)} ${errMsg(r)}` };
+      }
+      return { actual: 'denied', detail: '둘 다 거부' };
+    },
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-6',
+    role: 'service_role',
+    op: 'complete_onboarding: 닉네임·학년·스킨(다른 키 유지)·완료 시각·동의 한 번에 / 다시 불러도 처음 시각 유지 / 닉네임 중복 23505 면 동의도 안 남음 / 공개 프로필 스킨 동기화 / is_nickname_taken 대소문자·본인 제외',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ob6', '온보딩점검');
+      const y = await createUser('ob6b', '온보딩중복');
+      one(`update public.users set avatar_config = '{"hat":"party"}' where id = '${x.id}'`);
+      const args = (id, nickname) => ({
+        p_user_id: id,
+        p_nickname: nickname,
+        p_skin: 'violet',
+        p_grade: 3,
+        p_agreements: [
+          { item: 'terms', version: T },
+          { item: 'privacy', version: T },
+        ],
+        p_method: 'self',
+      });
+      const r1 = await rpc('complete_onboarding', args(x.id, 'ObCheck01'));
+      if (r1.status !== 200 || r1.json?.first !== true) return { actual: 'error', detail: `1차 ${r1.status} ${JSON.stringify(r1.json)}` };
+      const row = one(`select nickname || '|' || grade || '|' || (avatar_config->>'skin') || '|' || (avatar_config->>'hat') || '|' ||
+                         (onboarded_at is not null) || '|' || (select count(*) from public.user_agreements where user_id = '${x.id}') || '|' ||
+                         coalesce((select avatar_skin from public.user_public_profiles where user_id = '${x.id}'), '-')
+                         from public.users where id = '${x.id}'`);
+      const firstAt = one(`select onboarded_at from public.users where id = '${x.id}'`);
+      const firstAgreed = one(`select max(agreed_at) from public.user_agreements where user_id = '${x.id}'`);
+      const r2 = await rpc('complete_onboarding', { ...args(x.id, 'ObCheck02'), p_grade: null });
+      const again = one(`select (onboarded_at = '${firstAt}') || '|' || coalesce(grade::text, 'null') || '|' || nickname
+                         || '|' || (select max(agreed_at) = '${firstAgreed}' from public.user_agreements where user_id = '${x.id}')
+                         from public.users where id = '${x.id}'`);
+      const dup = await rpc('complete_onboarding', args(y.id, 'obcheck02'));
+      const yState = one(`select (onboarded_at is null) || '|' || (select count(*) from public.user_agreements where user_id = '${y.id}')
+                          from public.users where id = '${y.id}'`);
+      const bad = await rpc('complete_onboarding', { ...args(y.id, 'ObCheck03'), p_agreements: [] });
+      const taken = await rpc('is_nickname_taken', { p_nickname: 'OBCHECK02', p_user_id: y.id });
+      const self = await rpc('is_nickname_taken', { p_nickname: 'obcheck02', p_user_id: x.id });
+      return (
+        compare(
+        'OB-6',
+        {
+          row: 'ObCheck01|3|violet|party|true|2|violet',
+          second: '200 false',
+          again: 'true|null|ObCheck02|true',
+          dup: '409 23505',
+          yState: 'true|0',
+          bad: 'PT400',
+          taken: true,
+          self: false,
+        },
+        {
+          row,
+          second: `${r2.status} ${r2.json?.first}`,
+          again,
+          dup: `${dup.status} ${errCode(dup)}`,
+          yState,
+          bad: String(errCode(bad)),
+          taken: taken.json,
+          self: self.json,
+        },
+      ) ?? { actual: 'ok', detail: 'RPC 한 번에 저장·롤백·동기화 확인' }
+      );
+    },
+  });
+}
+
 // ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────────
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -4993,6 +5164,7 @@ async function main() {
   await groupAuthTriggers(u);
   await groupBoard(u);
   await groupRateLimit(u);
+  await groupOnboarding(u);
   await groupAnalytics(u);
   await groupAccount(u);
   await groupApp(u);

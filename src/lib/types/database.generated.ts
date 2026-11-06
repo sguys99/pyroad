@@ -488,6 +488,38 @@ export type Database = {
           },
         ];
       };
+      user_agreements: {
+        Row: {
+          agreed_at: string;
+          item: string;
+          method: string;
+          user_id: string;
+          version: string;
+        };
+        Insert: {
+          agreed_at?: string;
+          item: string;
+          method: string;
+          user_id: string;
+          version: string;
+        };
+        Update: {
+          agreed_at?: string;
+          item?: string;
+          method?: string;
+          user_id?: string;
+          version?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_agreements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_api_keys: {
         Row: {
           auth_tag: string;
@@ -672,6 +704,7 @@ export type Database = {
           last_login_at: string;
           last_login_provider: string | null;
           nickname: string | null;
+          onboarded_at: string | null;
           preferred_provider: string | null;
           settings: Json;
           total_xp: number;
@@ -688,6 +721,7 @@ export type Database = {
           last_login_at?: string;
           last_login_provider?: string | null;
           nickname?: string | null;
+          onboarded_at?: string | null;
           preferred_provider?: string | null;
           settings?: Json;
           total_xp?: number;
@@ -704,6 +738,7 @@ export type Database = {
           last_login_at?: string;
           last_login_provider?: string | null;
           nickname?: string | null;
+          onboarded_at?: string | null;
           preferred_provider?: string | null;
           settings?: Json;
           total_xp?: number;
@@ -776,6 +811,17 @@ export type Database = {
       };
     };
     Functions: {
+      complete_onboarding: {
+        Args: {
+          p_agreements: Json;
+          p_grade: number;
+          p_method: string;
+          p_nickname: string;
+          p_skin: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       complete_quest: {
         Args: { p_quest_id: string; p_submission: Json; p_user_id: string };
         Returns: Json;
@@ -807,6 +853,10 @@ export type Database = {
       };
       has_three_day_streak: {
         Args: { p_completed_at: string[] };
+        Returns: boolean;
+      };
+      is_nickname_taken: {
+        Args: { p_nickname: string; p_user_id: string };
         Returns: boolean;
       };
       is_stage_unlocked: {

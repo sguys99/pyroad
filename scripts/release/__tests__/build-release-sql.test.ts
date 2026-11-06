@@ -78,6 +78,17 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
     expect(phase2).toMatch(/patch_user_settings/);
     expect(phase2.endsWith('\nCOMMIT;\n')).toBe(true);
     expect(phase2).not.toContain('\r');
+    // Phase 3 ①: 00021 다음 00023(온보딩, P3-11). ③ 00022 는 2_두번째실행
+    const phase3 = readFileSync(
+      join(out, 'v0.4-phase3', '1_먼저실행.sql'),
+      'utf8',
+    );
+    expect(phase3.indexOf('-- ===== 00021 =====')).toBeGreaterThan(0);
+    expect(phase3.indexOf('-- ===== 00023 =====')).toBeGreaterThan(
+      phase3.indexOf('-- ===== 00021 ====='),
+    );
+    expect(phase3).toMatch(/complete_onboarding/);
+    expect(phase3).not.toContain('-- ===== 00022 =====');
   });
 
   it('--release 로 고른 릴리즈만, --crlf 면 모든 줄바꿈이 CRLF', () => {

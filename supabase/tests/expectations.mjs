@@ -582,6 +582,12 @@ export const EXPECT = {
   'APP-10': { expect: 'allow' },
   'APP-11': { expect: 'allow' },
   'APP-12': { expect: 'allow' },
+  'APP-15': {
+    expect: 'allow',
+    requires: 'public.users.onboarded_at',
+    activateIn: 'P3-11',
+    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문)',
+  },
   'APP-13': {
     expect: 'allow',
     note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
@@ -687,6 +693,33 @@ export const EXPECT = {
   },
 
   // ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────
+  // 첫 로그인 온보딩 (P3-11, ① 00023)
+  'OB-1': { expect: 'deny', requires: 'public.user_agreements', activateIn: 'P3-11' },
+  'OB-2': {
+    expect: 'deny',
+    requires: 'public.user_agreements',
+    activateIn: 'P3-11',
+    note: '약관 동의 기록은 service_role 전용 (본인도 읽기·지우기 불가, 법적 기록)',
+  },
+  'OB-3': { expect: 'deny', requires: 'public.user_agreements', activateIn: 'P3-11' },
+  'OB-4': {
+    expect: 'deny',
+    requires: 'public.complete_onboarding()',
+    activateIn: 'P3-11',
+    note: '닉네임·완료 시각은 /api/onboarding(금칙어 검사) → service_role RPC 로만. users UPDATE 는 ③ 00008 그대로 preferred_provider 만',
+  },
+  'OB-5': {
+    expect: 'deny',
+    requires: 'public.is_nickname_taken()',
+    activateIn: 'P3-11',
+    note: '중복 확인은 /api/profile/nickname(사용자별 한도) 경유만',
+  },
+  'OB-6': {
+    expect: 'allow',
+    requires: 'public.complete_onboarding()',
+    activateIn: 'P3-11',
+    note: '① 00023 complete_onboarding 한 트랜잭션 · avatar_config 합치기 · 처음 시각 유지 · 23505 롤백',
+  },
   'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
   'RL-2': {
     expect: 'deny',

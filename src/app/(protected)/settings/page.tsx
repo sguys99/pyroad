@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { Compass, X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
 import { LegalNav } from '@/components/legal/LegalPageShell';
@@ -344,8 +344,21 @@ export default function SettingsPage() {
         )}
       </div>
 
+      {/* 30초 튜토리얼 다시 보기 (P3-11) */}
+      <div className="mt-10 flex justify-center">
+        <Button
+          href="/onboarding/tutorial"
+          variant="secondary"
+          size="sm"
+          icon={<Compass aria-hidden />}
+          data-testid="settings-tutorial"
+        >
+          튜토리얼 다시 보기
+        </Button>
+      </div>
+
       {/* 법적 고지 (P3-14) */}
-      <LegalNav className="mt-10 flex justify-center border-t border-line pt-4" />
+      <LegalNav className="mt-6 flex justify-center border-t border-line pt-4" />
     </PageTransition>
   );
 }

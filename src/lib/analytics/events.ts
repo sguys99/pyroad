@@ -5,6 +5,7 @@
  * 속성에는 자유 문자열을 두지 않는다: enum·UUID·정수·불리언만 (아동 개인정보 §2.6). 이름·이메일·코드·출력은 넣지 않는다.
  */
 import type { SocialProvider } from '@/lib/auth/socialLogin';
+import type { SkinId } from '@/lib/avatar/skins';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -18,6 +19,11 @@ export interface AnalyticsEventProps {
   landing_cta_click: { cta: 'hero' | 'header'; provider: SocialProvider };
   /** 로그인 성공 (`/auth/callback`, 서버). new_user: 이번이 가입 */
   login_success: { provider: SocialProvider | 'unknown'; new_user: boolean };
+  /**
+   * 첫 로그인 온보딩을 마침 (P3-11, `/api/onboarding`, 서버). 사용자당 1번(dedupe).
+   * skin: 고른 파이뱀 색(6종 id), grade_given: 학년을 골랐는지 (학년 값·닉네임은 보내지 않음)
+   */
+  onboarding_complete: { skin: SkinId; grade_given: boolean };
   /** 퀘스트에 처음 들어옴 (퀘스트마다 사용자당 1번, 서버) */
   quest_start: { quest_id: string };
   /** 퀘스트를 처음 완료함 (퀘스트마다 사용자당 1번, 완료 API·서버) */
@@ -56,6 +62,7 @@ export type ClientEventName = (typeof CLIENT_EVENT_NAMES)[number];
 
 export const SERVER_EVENT_NAMES = [
   'login_success',
+  'onboarding_complete',
   'quest_start',
   'quest_complete',
   'hint_used',

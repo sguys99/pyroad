@@ -29,8 +29,15 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 보호 경로: 미인증 → / 리다이렉트
-  const protectedPaths = ['/world', '/quest', '/profile', '/board', '/settings'];
+  // 보호 경로: 미인증 → / 리다이렉트. /onboarding(P3-11)은 (protected) 밖이지만 로그인이 필요함
+  const protectedPaths = [
+    '/world',
+    '/quest',
+    '/profile',
+    '/board',
+    '/settings',
+    '/onboarding',
+  ];
   const isProtected = protectedPaths.some((p) =>
     request.nextUrl.pathname.startsWith(p),
   );
