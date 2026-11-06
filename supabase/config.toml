@@ -191,6 +191,7 @@ enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
+# pyRoad: 운영은 ON(P3-02, 계정 연결 P3-07). 로컬은 P3-07 구현·e2e 때 함께 켭니다(바꾸면 스택 재시작 필요).
 enable_manual_linking = false
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
 minimum_password_length = 6
@@ -352,6 +353,32 @@ url = ""
 skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
+
+# pyRoad: Kakao 로그인 (P3-01·P3-02, docs/release/v0.4-phase3-providers.md §8).
+# 기본은 꺼 둡니다(enabled = false) → 로컬 스택·CI·e2e 는 Kakao 없이 지금처럼 동작합니다.
+# 실제 Kakao 앱으로 로컬에서 시험할 때만: 아래를 enabled = true 로 바꾸고(커밋하지 않음), 셸에 키를 넣은 채 스택을 다시 띄웁니다.
+#   export SUPABASE_AUTH_EXTERNAL_KAKAO_CLIENT_ID=<REST API 키>
+#   export SUPABASE_AUTH_EXTERNAL_KAKAO_SECRET=<클라이언트 시크릿>   # 비밀값: 저장소·채팅에 남기지 않음
+#   npm run db:stop && npm run db:start
+# Kakao 콘솔의 리다이렉트 URI에 http://127.0.0.1:54521/auth/v1/callback 추가 (api 포트 54521).
+# email_optional = true 는 필수: 끄면 이메일 없는 Kakao 사용자 가입이 실패합니다(P0-04 §4.2).
+# 요청 범위(scope)는 여기서 정하지 않습니다. 내장 Kakao 는 account_email 을 항상 요청해 KOE205 가 나므로
+# 앱이 queryParams.scope 로 덮어씁니다(src/lib/auth/socialLogin.ts 의 KAKAO_SCOPE, 계획서 §2.8).
+[auth.external.kakao]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_KAKAO_CLIENT_ID)"
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_KAKAO_SECRET)"
+redirect_uri = ""
+url = ""
+skip_nonce_check = false
+email_optional = true
+
+# pyRoad: Naver 는 Supabase 커스텀 OIDC provider(custom:naver)라 이 파일에 설정 항목이 없습니다(CLI 2.115.0).
+# 로컬에서 시험할 때만 켜진 스택에 admin API 로 만듭니다(docs/release/v0.4-phase3-providers.md §6·§8):
+#   SUPABASE_URL=http://127.0.0.1:54521 SUPABASE_SERVICE_ROLE_KEY=<npm run db:status 의 service_role 키> \
+#   NAVER_CLIENT_ID=… NAVER_CLIENT_SECRET=… node spikes/p0-03-naver/scripts/create-naver-provider.ts
+# provider 는 auth 스키마(DB)에 저장되므로 db:reset 하면 지워져 다시 만들어야 합니다.
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
