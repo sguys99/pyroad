@@ -152,6 +152,19 @@ describe('개인정보처리방침 10절 = 코드의 브라우저 저장 (P3-08)
   });
 });
 
+describe('개인정보처리방침 파기 절차 = 탈퇴 때 provider 연결 해제 (P3-16)', () => {
+  it('카카오 unlink·네이버 재확인 후 해제, 실패 시 직접 해제 방법, 토큰 미저장', () => {
+    const text = fullText(PRIVACY);
+    expect(text).toContain('카카오 로그인 연결 끊기를 카카오에 요청');
+    expect(text).toContain(
+      '네이버로 한 번 더 확인하여 네이버 로그인 연결을 해제',
+    );
+    expect(text).toContain('연결된 서비스 관리');
+    expect(text).toContain('네이버 토큰은 저장하지 않습니다');
+    expect(text).not.toContain('TODO');
+  });
+});
+
 describe('날짜 표기', () => {
   it('YYYY-MM-DD → 한국어 날짜 (시간대와 무관)', () => {
     expect(formatLegalDate('2026-11-06')).toBe('2026년 11월 6일');

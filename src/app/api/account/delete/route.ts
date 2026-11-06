@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { deleteUserAnalytics } from '@/lib/analytics/server';
+import { unlinkAllKakao } from '@/lib/auth/providerUnlink';
 
 export async function DELETE() {
   const supabase = await createClient();
@@ -18,6 +19,17 @@ export async function DELETE() {
   // 없습니다(P1-01·P1-04, B28). 새 테이블도 users 를 ON DELETE CASCADE 로 참조해야 함 (회귀 B28-1·2, supabase/README.md)
   const adminClient = createAdminClient();
 
+  // provider 쪽 연결 끊기 (P3-16, §2.8): Auth 삭제 전에. Supabase deleteUser 는 provider 에 알리지 않는다.
+  // - Kakao: 어드민 키로 identity 회원번호마다 unlink. 실패·키 없음이어도 탈퇴는 계속 (기록만, src/lib/auth/providerUnlink.ts)
+  // - Naver: 토큰을 저장하지 않으므로 여기서는 못 한다. 탈퇴 화면이 직전에 네이버 재인증을 받아 /auth/callback 이 폐기한다
+  // identities 는 세션 사용자 값을 쓰고, 없으면 관리자 API 로 다시 읽는다
+  let identities = user.identities;
+  if (!identities) {
+    const { data } = await adminClient.auth.admin.getUserById(user.id);
+    identities = data?.user?.identities;
+  }
+  const kakao = await unlinkAllKakao(identities);
+
   const { error: authError } = await adminClient.auth.admin.deleteUser(user.id);
 
   if (authError) {
@@ -31,5 +43,6 @@ export async function DELETE() {
   // 분석 이벤트는 users 를 참조하지 않으므로(익명 ID = HMAC) 따로 지운다 (P1-17). 실패해도 탈퇴는 끝난 것으로 둠
   await deleteUserAnalytics(adminClient, user.id);
 
-  return NextResponse.json({ success: true });
+  // unlinked: provider 쪽 연결 끊기 결과 (화면 안내용, 식별자 없음)
+  return NextResponse.json({ success: true, unlinked: { kakao } });
 }

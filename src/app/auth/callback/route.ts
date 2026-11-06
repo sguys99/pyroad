@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { safeNext } from '@/lib/auth/safeNext';
-import { trackLoginSuccess } from '@/lib/analytics/server';
+import { isNewUser, trackLoginSuccess } from '@/lib/analytics/server';
 import { loginProviderFromUser } from '@/lib/auth/loginProvider';
 import { withLastLoginFragment } from '@/lib/auth/lastLogin';
 import {
@@ -14,6 +14,12 @@ import {
   type LoginErrorReason,
 } from '@/lib/auth/loginError';
 import { reportServerError } from '@/lib/api/serverError';
+import { revokeNaver } from '@/lib/auth/providerUnlink';
+import {
+  isNaverWithdrawNext,
+  naverWithdrawResultPath,
+  type NaverWithdrawOutcome,
+} from '@/lib/auth/withdrawIntent';
 
 /**
  * OAuth 콜백 (Supabase PKCE). 성공하면 `next`(B23 `safeNext`)로, 실패·취소·동의 거부면 사유별 친근한 안내로 (P3-10).
@@ -80,6 +86,23 @@ export async function GET(request: Request) {
 
   // 로그인 성공 (P1-17). 서버가 직접 기록하고 리다이렉트를 기다리게 하지 않음
   if (data?.user) trackLoginSuccess(request.headers, data.user);
+
+  // 탈퇴 직전 네이버 재인증 (P3-16, src/lib/auth/withdrawIntent.ts): 방금 받은 네이버 토큰으로 연동을 해제하고 탈퇴 확인으로.
+  // 토큰은 이 요청 안에서만 쓰고 저장·기록하지 않는다. 삭제는 여기서 하지 않는다(확인 창 → DELETE /api/account/delete)
+  if (isNaverWithdrawNext(next)) {
+    const provider = loginProviderFromUser(data?.user);
+    let outcome: NaverWithdrawOutcome;
+    // 네이버가 아니거나 방금 새로 만들어진 계정이면(다른 네이버 계정으로 로그인) 폐기하지 않는다
+    if (!data?.user || provider !== 'naver' || isNewUser(data.user)) {
+      outcome = 'mismatch';
+    } else {
+      outcome = await revokeNaver({
+        refreshToken: data.session?.provider_refresh_token,
+        accessToken: data.session?.provider_token,
+      });
+    }
+    return redirect(naverWithdrawResultPath(outcome));
+  }
   // "최근에 ○○로 로그인했어요" 배지 (P3-08): 방금 쓴 provider를 #lp= 조각으로 넘기면 도착 화면이 이 기기에 저장한다.
   // next는 이미 safeNext를 통과한 같은 출처 경로이고, 조각은 서버로 가지 않는다 (src/lib/auth/lastLogin.ts)
   return redirect(

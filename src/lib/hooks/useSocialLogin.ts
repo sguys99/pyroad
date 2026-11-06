@@ -30,7 +30,11 @@ export type SocialLoginResult =
  * 소셜 로그인 버튼용 훅 (P1-14). provider별 호출 옵션은 `@/lib/auth/socialLogin`에만 있습니다.
  * 인앱 브라우저의 외부 전환은 Google일 때만 합니다(B16). 안내 모달(`InAppBrowserGuide`)도 Google 전용입니다.
  */
-export function useSocialLogin(provider: SocialProvider) {
+export function useSocialLogin(
+  provider: SocialProvider,
+  /** 로그인 뒤 갈 같은 출처 경로 (예: 탈퇴 직전 네이버 재인증 `NAVER_WITHDRAW_NEXT`, P3-16). `/auth/callback`이 `safeNext`로 검사 */
+  { next }: { next?: string } = {},
+) {
   const [showBrowserGuide, setShowBrowserGuide] = useState(false);
   const [browserInfo, setBrowserInfo] = useState<InAppBrowserInfo | null>(null);
 
@@ -52,6 +56,7 @@ export function useSocialLogin(provider: SocialProvider) {
       const { error } = await supabase.auth.signInWithOAuth(
         getOAuthCredentials(provider, {
           origin: window.location.origin,
+          next,
           device: info,
         }),
       );
@@ -60,7 +65,7 @@ export function useSocialLogin(provider: SocialProvider) {
       // 클라이언트 청크를 못 받았거나(오프라인) 인가 URL을 만들지 못함
       return 'error';
     }
-  }, [provider]);
+  }, [provider, next]);
 
   return { handleLogin, showBrowserGuide, setShowBrowserGuide, browserInfo };
 }

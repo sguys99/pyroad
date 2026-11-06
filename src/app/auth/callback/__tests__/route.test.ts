@@ -1,27 +1,34 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const { exchangeCodeForSession, getUser, reportServerError, analyticsDb } =
-  vi.hoisted(() => ({
-    exchangeCodeForSession: vi.fn<
-      (code: string) => Promise<{
-        data?: { user: Record<string, unknown> | null };
-        error: (Error & { code?: string }) | null;
-      }>
-    >(async () => ({
-      error: null,
-    })),
-    getUser: vi.fn<
-      () => Promise<{ data: { user: Record<string, unknown> | null } }>
-    >(async () => ({ data: { user: null } })),
-    reportServerError: vi.fn(),
-    analyticsDb: { current: null as unknown as FakeAnalyticsDb },
-  }));
+const {
+  exchangeCodeForSession,
+  getUser,
+  reportServerError,
+  revokeNaver,
+  analyticsDb,
+} = vi.hoisted(() => ({
+  exchangeCodeForSession: vi.fn<
+    (code: string) => Promise<{
+      data?: { user: Record<string, unknown> | null };
+      error: (Error & { code?: string }) | null;
+    }>
+  >(async () => ({
+    error: null,
+  })),
+  getUser: vi.fn<
+    () => Promise<{ data: { user: Record<string, unknown> | null } }>
+  >(async () => ({ data: { user: null } })),
+  reportServerError: vi.fn(),
+  revokeNaver: vi.fn(async () => 'ok' as const),
+  analyticsDb: { current: null as unknown as FakeAnalyticsDb },
+}));
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
     auth: { exchangeCodeForSession, getUser },
   })),
 }));
 vi.mock('@/lib/api/serverError', () => ({ reportServerError }));
+vi.mock('@/lib/auth/providerUnlink', () => ({ revokeNaver }));
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => analyticsDb.current.client,
 }));
@@ -329,5 +336,77 @@ describe('GET /auth/callback — 실패·취소·동의 거부 사유 (P3-10)', 
     });
     await location('code=abc');
     expect(reportServerError).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /auth/callback — 탈퇴 직전 네이버 재인증 (P3-16)', () => {
+  const NAVER_USER = {
+    id: 'u1',
+    user_metadata: { iss: 'https://nid.naver.com' },
+    created_at: '2026-01-01T00:00:00Z',
+    last_sign_in_at: '2026-11-06T00:00:00Z',
+  };
+  const withdraw = `code=abc&via=naver&next=${encodeURIComponent('/profile?withdraw=naver')}`;
+
+  it('네이버 기존 사용자면 세션의 provider 토큰으로 폐기하고 결과와 함께 프로필로 (삭제는 하지 않음)', async () => {
+    exchangeCodeForSession.mockResolvedValueOnce({
+      data: {
+        user: NAVER_USER,
+        session: { provider_refresh_token: 'rt', provider_token: 'at' },
+      },
+      error: null,
+    } as never);
+    revokeNaver.mockResolvedValueOnce('ok');
+    const res = await callback(withdraw);
+    expect(revokeNaver).toHaveBeenCalledWith({
+      refreshToken: 'rt',
+      accessToken: 'at',
+    });
+    expect(res.headers.get('location')).toBe(
+      `${origin}/profile?withdraw=naver&naver=ok`,
+    );
+  });
+
+  it.each([
+    [
+      '네이버가 아닌 로그인',
+      { ...NAVER_USER, user_metadata: { iss: 'https://accounts.google.com' } },
+    ],
+    // 다른 네이버 계정으로 로그인해 새 계정이 막 만들어짐
+    [
+      '방금 만들어진 계정',
+      { ...NAVER_USER, created_at: '2026-11-06T00:00:00Z' },
+    ],
+  ])('%s → 폐기하지 않고 mismatch', async (_, user) => {
+    exchangeCodeForSession.mockResolvedValueOnce({
+      data: { user, session: { provider_refresh_token: 'rt' } },
+      error: null,
+    } as never);
+    const res = await callback(withdraw);
+    expect(revokeNaver).not.toHaveBeenCalled();
+    expect(res.headers.get('location')).toBe(
+      `${origin}/profile?withdraw=naver&naver=mismatch`,
+    );
+  });
+
+  it('평범한 로그인(next 없음)에서는 폐기하지 않음', async () => {
+    exchangeCodeForSession.mockResolvedValueOnce({
+      data: { user: NAVER_USER, session: { provider_refresh_token: 'rt' } },
+      error: null,
+    } as never);
+    await callback('code=abc');
+    expect(revokeNaver).not.toHaveBeenCalled();
+  });
+
+  it('재인증을 취소하면 /auth/error → 돌아가기가 탈퇴 화면(next) 그대로', async () => {
+    expect(
+      (
+        await callback(
+          `error=access_denied&via=naver&next=${encodeURIComponent('/profile?withdraw=naver')}`,
+        )
+      ).headers.get('location'),
+    ).toBe(
+      `${origin}/auth/error?reason=cancelled&via=naver&next=%2Fprofile%3Fwithdraw%3Dnaver`,
+    );
   });
 });
