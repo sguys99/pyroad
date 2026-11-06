@@ -2,7 +2,7 @@
 
 import { m } from 'framer-motion';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
-import { EASE } from '@/lib/motion/tokens';
+import { EASE, sec } from '@/lib/motion/tokens';
 
 interface WindingPathProps {
   progressFraction: number;
@@ -34,7 +34,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
       <path
         d={PATH_D}
         fill="none"
-        stroke="oklch(0.82 0.02 85)"
+        stroke="var(--line)"
         strokeWidth={6}
         strokeLinecap="round"
         strokeDasharray="3 8"
@@ -45,7 +45,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
       <m.path
         d={PATH_D}
         fill="none"
-        stroke="oklch(0.6 0.16 145)"
+        stroke="var(--primary)"
         strokeWidth={6}
         strokeLinecap="round"
         pathLength={1}
@@ -57,7 +57,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
         transition={
           instant
             ? { duration: 0 }
-            : { duration: 1.5 * budget.effectDuration, ease: EASE.ink }
+            : { duration: sec('draw') * budget.effectDuration, ease: EASE.ink }
         }
       />
 
@@ -65,7 +65,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
       <m.path
         d={PATH_D}
         fill="none"
-        stroke="oklch(0.6 0.16 145)"
+        stroke="var(--primary)"
         strokeWidth={12}
         strokeLinecap="round"
         pathLength={1}
@@ -78,7 +78,7 @@ export function WindingPath({ progressFraction }: WindingPathProps) {
         transition={
           instant
             ? { duration: 0 }
-            : { duration: 1.5 * budget.effectDuration, ease: EASE.ink }
+            : { duration: sec('draw') * budget.effectDuration, ease: EASE.ink }
         }
       />
     </svg>

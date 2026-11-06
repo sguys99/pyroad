@@ -74,7 +74,9 @@ describe('모션 토큰 (무드보드 §6, P2-09와 공유)', () => {
       b: 'jellyB',
       ab: 'jellyAB',
     });
-    expect(jelly()).toBe(JELLY_BY_CONCEPT[DEFAULT_CONCEPT]);
+    // 최종 시안 B (§12-Q31, P2-09)
+    expect(DEFAULT_CONCEPT).toBe('b');
+    expect(jelly()).toBe('jellyB');
   });
 
   it('단계에 맞는 길이·전환: lite 70%, minimal 페이드, reduced 즉시', () => {

@@ -51,6 +51,9 @@ jobs:
       # 실패하면 로컬에서 `npm run fonts:build -- --landing` 후 src/fonts/ 변경을 커밋 (docs/design/fonts.md)
       - name: 폰트 검사
         run: npm run fonts:check
+      # 디자인 토큰 검사 (P2-09): 컴포넌트의 색 리터럴·고정 팔레트 클래스·font-family·모션 숫자, 14px 미만 글자 증가 (docs/design/tokens.md §5)
+      - name: 디자인 토큰 검사 (하드코딩 색·글꼴·모션)
+        run: npm run tokens:check
       - run: npx next typegen
       - run: npx tsc --noEmit
 

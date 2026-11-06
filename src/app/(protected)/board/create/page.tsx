@@ -6,7 +6,7 @@ export default function BoardCreatePage() {
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       <div className="mb-6">
-        <Link href="/board" className="text-sm text-primary underline">
+        <Link href="/board" className="text-sm text-primary-text underline">
           ← 게시판으로
         </Link>
       </div>

@@ -2,7 +2,7 @@
 
 import { m } from 'framer-motion';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
-import { DURATION, EASE } from '@/lib/motion/tokens';
+import { EASE, sec } from '@/lib/motion/tokens';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -29,7 +29,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
       initial={slide ? { opacity: 0, y: 12 } : { opacity: 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: (slide ? 300 : DURATION.fast) / 1000,
+        duration: sec(slide ? 'slow' : 'fast'),
         ease: EASE.out,
       }}
     >

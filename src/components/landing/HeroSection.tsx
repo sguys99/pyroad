@@ -1,6 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
+import { EASE, sec } from '@/lib/motion/tokens';
 import { LoginButton } from '@/components/LoginButton';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
 import { track } from '@/lib/analytics/track';
@@ -20,7 +21,7 @@ const fadeUp = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' as const },
+    transition: { duration: sec('slow'), ease: EASE.out },
   },
 };
 
@@ -44,7 +45,7 @@ export function HeroSection() {
         />
       </m.div>
 
-      <m.h1 className="text-4xl font-bold text-primary" variants={fadeUp}>
+      <m.h1 className="text-4xl font-bold text-primary-text" variants={fadeUp}>
         pyRoad
       </m.h1>
 

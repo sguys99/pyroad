@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react';
 import { m } from 'framer-motion';
+import { framerSpring } from '@/lib/motion/tokens';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { Check, Flag } from 'lucide-react';
 import {
@@ -115,13 +116,11 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
               role="status"
             >
               <m.div
-                className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary"
+                className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary-text"
                 initial={reduceMotion ? false : { scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={
-                  reduceMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 420, damping: 18 }
+                  reduceMotion ? { duration: 0 } : framerSpring('prop')
                 }
               >
                 <Check className="size-6" aria-hidden="true" />

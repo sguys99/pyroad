@@ -39,7 +39,7 @@ const LEAVES: Array<{
       right: '15%',
       width: 8,
       height: 8,
-      background: '#81C784',
+      background: 'var(--primary-bright)',
       opacity: 0.5,
     },
     dur: '18s',
@@ -51,7 +51,7 @@ const LEAVES: Array<{
       left: '20%',
       width: 6,
       height: 6,
-      background: '#A5D6A7',
+      background: 'var(--w1)',
       opacity: 0.4,
     },
     dur: '22s',
@@ -68,7 +68,7 @@ export function FloatingDecorations() {
       {CLOUDS.map((cloud, i) => (
         <div
           key={`cloud-${i}`}
-          className={`float-cloud absolute bg-white ${cloud.opacity}`}
+          className={`float-cloud absolute bg-card ${cloud.opacity}`}
           style={
             {
               ...cloud.style,

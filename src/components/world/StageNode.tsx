@@ -13,17 +13,17 @@ const statusConfig = {
     icon: CheckCircle,
     borderColor: 'border-primary/60',
     bgColor: 'bg-card/90',
-    iconColor: 'text-primary',
+    iconColor: 'text-primary-text',
     label: '완료!',
-    labelClass: 'bg-primary/20 text-primary',
+    labelClass: 'bg-primary-soft text-primary-text',
   },
   in_progress: {
     icon: Play,
-    borderColor: 'border-secondary',
+    borderColor: 'border-accent',
     bgColor: 'bg-card/95',
-    iconColor: 'text-secondary-foreground',
+    iconColor: 'text-accent-text',
     label: '도전하기',
-    labelClass: 'bg-secondary/20 text-secondary-foreground',
+    labelClass: 'bg-accent-soft text-accent-text',
   },
   locked: {
     icon: Lock,
@@ -119,7 +119,7 @@ export function StageNode({ stage }: StageNodeProps) {
         className={cn(
           'relative z-10 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full shrink-0',
           stage.status === 'completed' && 'bg-primary/20',
-          stage.status === 'in_progress' && 'bg-secondary/20',
+          stage.status === 'in_progress' && 'bg-accent-soft',
           stage.status === 'locked' && 'bg-muted-foreground/10',
         )}
       >

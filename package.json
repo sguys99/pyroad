@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "assets:check": "node scripts/assets/check.mjs",
     "fonts:build": "node scripts/fonts/build-fonts.mjs",
+    "tokens:check": "node scripts/design/check-tokens.mjs",
     "fonts:check": "node scripts/fonts/check.mjs",
     "assets:svg": "node scripts/assets/svg.mjs",
     "assets:textures": "node scripts/assets/textures.mjs",

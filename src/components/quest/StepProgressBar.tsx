@@ -46,7 +46,7 @@ export function StepProgressBar({
                   isCurrent && 'step-pulse',
                   isCompleted && 'bg-primary text-primary-foreground',
                   isCurrent &&
-                    'border-2 border-primary bg-primary/10 text-primary',
+                    'border-2 border-primary bg-primary/10 text-primary-text',
                   !isCompleted &&
                     !isCurrent &&
                     'border border-border bg-muted text-muted-foreground',

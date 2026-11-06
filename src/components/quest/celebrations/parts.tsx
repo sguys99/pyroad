@@ -93,7 +93,7 @@ export function ConceptChips({
         <m.li
           key={concept}
           {...popIn(budget, delay + i * 0.05, { y: 6, scale: 0.85 })}
-          className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+          className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-text"
         >
           <CheckCircle className="h-3 w-3" aria-hidden />
           {concept}

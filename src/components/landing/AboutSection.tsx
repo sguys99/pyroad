@@ -1,6 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
+import { EASE, sec } from '@/lib/motion/tokens';
 import Image from 'next/image';
 import worldMapImg from '@/../img/2.world-map.png';
 import learningPageImg from '@/../img/3.learning-page.png';
@@ -47,7 +48,7 @@ const fadeUp = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' as const },
+    transition: { duration: sec('slow'), ease: EASE.out },
   },
 };
 
@@ -63,7 +64,7 @@ export function AboutSection() {
       >
         {/* 서비스 소개 */}
         <m.h2
-          className="mb-3 text-center text-xl font-bold text-primary"
+          className="mb-3 text-center text-xl font-bold text-primary-text"
           variants={fadeUp}
         >
           pyRoad를 소개해요
@@ -82,13 +83,13 @@ export function AboutSection() {
           {features.map((feature) => (
             <m.div
               key={feature.title}
-              className="rounded-2xl border border-white/80 bg-white/60 p-5 text-center backdrop-blur-[10px] no-blur:bg-white/90"
+              className="rounded-2xl bg-card/70 p-5 text-center shadow-card backdrop-blur-[10px] no-blur:bg-card"
               variants={fadeUp}
             >
               <span className="mx-auto mb-3 block text-3xl leading-none">
                 {feature.emoji}
               </span>
-              <h3 className="mb-1 text-[13px] font-bold text-primary">
+              <h3 className="mb-1 text-[13px] font-bold text-primary-text">
                 {feature.title}
               </h3>
               <p className="whitespace-pre-line text-[11px] leading-relaxed text-muted-foreground">
@@ -100,7 +101,7 @@ export function AboutSection() {
 
         {/* 스크린샷 갤러리 */}
         <m.h3
-          className="mb-6 text-center text-base font-bold text-primary"
+          className="mb-6 text-center text-base font-bold text-primary-text"
           variants={fadeUp}
         >
           이렇게 생겼어요
@@ -108,7 +109,7 @@ export function AboutSection() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {screenshots.map((shot) => (
             <m.div key={shot.caption} variants={fadeUp}>
-              <div className="overflow-hidden rounded-2xl border border-white/60 shadow-lg">
+              <div className="overflow-hidden rounded-2xl shadow-pop">
                 <Image
                   src={shot.src}
                   alt={shot.alt}

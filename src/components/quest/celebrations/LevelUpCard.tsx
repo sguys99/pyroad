@@ -69,7 +69,7 @@ export function LevelUpCard({
       <span
         ref={popRef}
         aria-hidden
-        className="celebration-pop relative inline-flex items-baseline gap-1 text-primary"
+        className="celebration-pop relative inline-flex items-baseline gap-1 text-primary-text"
       >
         <span className="celebration-ring" />
         <span className="text-2xl font-black">Lv.</span>

@@ -163,7 +163,7 @@ export function CommentSection({
         <button
           type="submit"
           disabled={submitting || !content.trim()}
-          className="self-end rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="self-end rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip disabled:opacity-50"
         >
           등록
         </button>

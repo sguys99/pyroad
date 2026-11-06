@@ -32,7 +32,7 @@ export function SoundToggle({ className }: { className?: string }) {
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         muted
           ? 'bg-muted text-muted-foreground hover:bg-muted/80'
-          : 'bg-primary/10 text-primary hover:bg-primary/20',
+          : 'bg-primary/10 text-primary-text hover:bg-primary-soft',
         className,
       )}
     >

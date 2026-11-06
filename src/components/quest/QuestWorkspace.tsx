@@ -57,7 +57,7 @@ export function QuestWorkspace({
 
       {/* 완료 배너 */}
       {session.isCompleted && (
-        <div className="bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
+        <div className="bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary-text">
           {completedBanner}
         </div>
       )}
@@ -71,7 +71,7 @@ export function QuestWorkspace({
             className={cn(
               'flex-1 py-3 text-center text-sm font-medium transition-colors min-h-[44px]',
               tab === t.key
-                ? 'border-b-2 border-primary text-primary'
+                ? 'border-b-2 border-primary text-primary-text'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
+import { framerSpring } from '@/lib/motion/tokens';
 import { Copy, Check, ExternalLink, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PybaemSvg } from '@/components/characters/PybaemSvg';
@@ -57,14 +58,14 @@ export function InAppBrowserGuide({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm no-blur:bg-scrim p-4"
         >
           <m.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            transition={framerSpring('body')}
+            className="relative w-full max-w-sm rounded-2xl bg-card p-6 shadow-pop"
           >
             <button
               onClick={onClose}
@@ -105,7 +106,7 @@ export function InAppBrowserGuide({
                 >
                   {copied ? (
                     <>
-                      <Check size={16} className="text-green-500" />
+                      <Check size={16} className="text-primary-text" />
                       복사 완료!
                     </>
                   ) : (

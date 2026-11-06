@@ -38,7 +38,7 @@ function VariableForestIllustInner({ className }: { className?: string }) {
         textAnchor="middle"
         fontSize="5"
         fill="#A5D6A7"
-        fontFamily="monospace"
+        className="font-mono"
         fontWeight="bold"
       >
         x=5

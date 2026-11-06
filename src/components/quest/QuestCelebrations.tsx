@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useRef } from 'react';
 import { AnimatePresence, MotionConfig, m } from 'framer-motion';
+import { sec } from '@/lib/motion/tokens';
 import { X } from 'lucide-react';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import {
@@ -104,7 +105,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
   // 화면을 떠나면 떠 있는 컨페티도 지운다
   useEffect(() => resetConfetti, []);
 
-  const fade = reduced ? { duration: 0 } : { duration: 0.2 };
+  const fade = reduced ? { duration: 0 } : { duration: sec('base') };
 
   return (
     <MotionConfig reducedMotion={reduced ? 'always' : 'never'}>
@@ -114,12 +115,12 @@ export const QuestCelebrations = memo(function QuestCelebrations({
             key="celebration-backdrop"
             data-testid="celebration-overlay"
             data-reduced={reduced ? 'true' : 'false'}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/45 p-4"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-scrim p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{
               opacity: 0,
-              transition: reduced ? { duration: 0 } : { duration: 0.18 },
+              transition: reduced ? { duration: 0 } : { duration: sec('fast') },
             }}
             transition={fade}
             onClick={next}
@@ -127,7 +128,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
             {/* 카드 뒤를 은은하게 밝히는 정적 조명 (흐림 필터 없이, lite에서도 그대로) */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.16),transparent_55%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,color-mix(in_srgb,var(--on-scrim)_16%,transparent),transparent_55%)]"
             />
 
             <SequenceChrome
@@ -187,9 +188,9 @@ function SequenceChrome({
             <li
               key={i}
               className={cn(
-                'h-2 rounded-full transition-[width,background-color] duration-200',
-                i === index ? 'w-5 bg-white' : 'w-2',
-                i < index ? 'bg-white/70' : i > index && 'bg-white/35',
+                'h-2 rounded-full transition-[width,background-color] duration-(--dur-base)',
+                i === index ? 'w-5 bg-on-scrim' : 'w-2',
+                i < index ? 'bg-on-scrim/70' : i > index && 'bg-on-scrim/35',
               )}
             />
           ))}
@@ -204,7 +205,7 @@ function SequenceChrome({
           e.stopPropagation();
           onSkip();
         }}
-        className="flex min-h-9 min-w-20 items-center justify-end gap-1 whitespace-nowrap rounded-full px-2 text-xs font-medium text-white/85 outline-none hover:text-white focus-visible:ring-2 focus-visible:ring-white/70"
+        className="flex min-h-9 min-w-20 items-center justify-end gap-1 whitespace-nowrap rounded-full px-2 text-xs font-medium text-on-scrim outline-none focus-visible:ring-2 focus-visible:ring-on-scrim/70"
       >
         {total > 1 ? '모두 닫기' : '닫기'}
         <X className="h-3.5 w-3.5" aria-hidden />

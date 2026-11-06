@@ -3,6 +3,7 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { CheckCircle, Hand, Terminal } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
+import { sec } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
@@ -32,7 +33,7 @@ function BugBugHelper({ expression }: { expression: BugBugExpression }) {
         initial={{ opacity: 0, x: 8 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 8 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
+        transition={{ duration: sec('base'), delay: sec('base') }}
         className="flex h-6 w-6 shrink-0 items-center justify-center"
       >
         <CharacterAvatar character="bugbug" expression={expression} size="sm" />
@@ -275,10 +276,10 @@ export function OutputPanel({
                 : 'happy'
           }
         />
-        <CheckCircle className="h-5 w-5 text-primary" />
+        <CheckCircle className="h-5 w-5 text-primary-text" />
         <span className="font-bold text-foreground">실행 결과</span>
         {validationResult?.passed && (
-          <span className="rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-bold text-primary">
+          <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary-text">
             정답이에요!
           </span>
         )}

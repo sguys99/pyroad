@@ -4,7 +4,7 @@ import { m, type Variants } from 'framer-motion';
 import type { StageWithStatus } from '@/lib/types/database';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import type { MotionBudget } from '@/lib/motion/tier';
-import { EASE } from '@/lib/motion/tokens';
+import { EASE, sec } from '@/lib/motion/tokens';
 import { StageNode } from './StageNode';
 import { WindingPath } from './WindingPath';
 import { FloatingDecorations } from './FloatingDecorations';
@@ -28,7 +28,7 @@ function nodeVariants(budget: MotionBudget): {
       show: {
         opacity: 1,
         scale: 1,
-        transition: { duration: 0.45 * k, ease: EASE.out },
+        transition: { duration: sec('slow') * k, ease: EASE.out },
       },
     },
   };

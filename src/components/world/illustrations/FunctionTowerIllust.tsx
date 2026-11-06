@@ -61,7 +61,7 @@ function FunctionTowerIllustInner({ className }: { className?: string }) {
         textAnchor="middle"
         fontSize="4.5"
         fill="#CE93D8"
-        fontFamily="monospace"
+        className="font-mono"
         fontWeight="bold"
       >
         def

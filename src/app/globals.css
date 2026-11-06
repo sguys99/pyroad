@@ -26,87 +26,306 @@
   --font-mono:
     'pyRoad Mono', 'D2Coding', 'NanumGothicCoding', ui-monospace,
     'SFMono-Regular', Menlo, Consolas, monospace;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-success-foreground: var(--success-foreground);
-  --color-success: var(--success);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
+  /* 색 (값은 :root, Tailwind 클래스 bg-surface-2 · text-primary-text · bg-world-soft …) */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-lip: var(--surface-lip);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
   --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
+  --color-on-primary: var(--on-primary);
+  --color-primary-lip: var(--primary-lip);
+  --color-primary-text: var(--primary-text);
+  --color-primary-bright: var(--primary-bright);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-lip: var(--accent-lip);
+  --color-accent-light: var(--accent-light);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-soft: var(--error-soft);
+  --color-on-scrim: var(--on-scrim);
+  --color-w1: var(--w1);
+  --color-w1-ink: var(--w1-ink);
+  --color-w1-soft: var(--w1-soft);
+  --color-w2: var(--w2);
+  --color-w2-ink: var(--w2-ink);
+  --color-w2-soft: var(--w2-soft);
+  --color-w3: var(--w3);
+  --color-w3-ink: var(--w3-ink);
+  --color-w3-soft: var(--w3-soft);
+  --color-code-bg: var(--code-bg);
+  --color-code-text: var(--code-text);
+  --color-code-comment: var(--code-comment);
+  --color-code-keyword: var(--code-keyword);
+  --color-code-string: var(--code-string);
+  --color-code-number: var(--code-number);
+  --color-code-func: var(--code-func);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-scrim: var(--scrim);
+  --color-world: var(--world);
+  --color-world-ink: var(--world-ink);
+  --color-world-soft: var(--world-soft);
+  /* 반경: Tailwind 이름을 세 단계로 (sm·md 10, lg·xl 14, 2xl 이상 20) */
+  --radius-sm: var(--round-s);
+  --radius-md: var(--round-s);
+  --radius-lg: var(--round-m);
+  --radius-xl: var(--round-m);
+  --radius-2xl: var(--round-l);
+  --radius-3xl: var(--round-l);
+  --radius-4xl: var(--round-l);
+  /* 그림자: shadow-card · shadow-pop (기본 이름도 둘 중 하나로) */
+  --shadow-card: var(--elev-card);
+  --shadow-pop: var(--elev-pop);
+  --shadow-2xs: var(--elev-card);
+  --shadow-xs: var(--elev-card);
+  --shadow-sm: var(--elev-card);
+  --shadow-md: var(--elev-card);
+  --shadow-lg: var(--elev-pop);
+  --shadow-xl: var(--elev-pop);
+  --shadow-2xl: var(--elev-pop);
+  /* 타이포 스케일 (text-h1 · text-body · text-caption …). 14px 미만 금지 */
+  --text-hero: 2.125rem;
+  --text-hero--line-height: 1.22;
+  --text-hero--letter-spacing: -0.01em;
+  --text-hero-wide: 2.625rem;
+  --text-hero-wide--line-height: 1.22;
+  --text-hero-wide--letter-spacing: -0.01em;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 1.25;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.3;
+  --text-h3: 1.1875rem;
+  --text-h3--line-height: 1.35;
+  --text-button: 1.125rem;
+  --text-button--line-height: 1;
+  --text-button-lg: 1.25rem;
+  --text-button-lg--line-height: 1;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.7;
+  --text-small: 0.9375rem;
+  --text-small--line-height: 1.6;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.5;
+  --text-kicker: 0.875rem;
+  --text-kicker--line-height: 1.5;
+  --text-kicker--letter-spacing: 0.02em;
+  --text-kicker--font-weight: 650;
+  --text-code: 1rem;
+  --text-code--line-height: 1.6;
+  /* 간격 4px 단위, 터치 타겟 48px(min-h-touch), 모바일 여백 16px(px-gutter) */
+  --spacing: 0.25rem;
+  --spacing-touch: 3rem;
+  --spacing-gutter: 1rem;
+  /* 모션: ease-out · ease-press …, transition 기본 길이·곡선 */
+  --ease-out: var(--easing-out);
+  --ease-in-out: var(--easing-in-out);
+  --ease-press: var(--easing-press);
+  --ease-back-out: var(--easing-back-out);
+  --ease-stamp-in: var(--easing-stamp-in);
+  --ease-ink: var(--easing-ink);
+  --ease-page: var(--easing-page);
+  --default-transition-duration: var(--dur-fast);
+  --default-transition-timing-function: var(--easing-out);
 }
 
+/* ── 디자인 토큰 (P2-09, docs/design/tokens.md) ─────────────────────────────────────
+   원본은 src/lib/design/tokens.ts. 값을 바꾸면 두 곳을 같이 고친다 (src/lib/design/__tests__/tokens.test.ts가 비교).
+   최종 시안(§12-Q31) 기준. 컴포넌트에는 색·글꼴·duration을 직접 쓰지 않는다 → npm run tokens:check */
 :root {
-  /* pyRoad 아동 친화 색상 팔레트 */
-  --background: oklch(0.97 0.01 85); /* 밝은 크림/베이지 #FFF8E7 */
-  --foreground: oklch(0.3 0.04 50); /* 진한 갈색 #3E2723 */
-  --card: oklch(0.99 0.005 85); /* 밝은 흰색 */
-  --card-foreground: oklch(0.3 0.04 50); /* 진한 갈색 */
-  --popover: oklch(0.99 0.005 85);
-  --popover-foreground: oklch(0.3 0.04 50);
-  --primary: oklch(0.6 0.16 145); /* 따뜻한 녹색 #4CAF50 */
-  --primary-foreground: oklch(0.99 0 0); /* 흰색 */
-  --secondary: oklch(0.78 0.08 230); /* 하늘색 #87CEEB */
-  --secondary-foreground: oklch(0.25 0.03 50); /* 진한 갈색 */
-  --muted: oklch(0.94 0.01 85); /* 연한 크림 */
-  --muted-foreground: oklch(0.5 0.03 50); /* 중간 갈색 */
-  --accent: oklch(0.78 0.12 65); /* 파스텔 주황 #FFB74D */
-  --accent-foreground: oklch(0.25 0.03 50); /* 진한 갈색 */
-  --destructive: oklch(0.65 0.18 25); /* 부드러운 빨강 */
-  --success: oklch(0.82 0.15 90); /* 밝은 금색 #FFD700 */
-  --success-foreground: oklch(0.3 0.04 50); /* 진한 갈색 */
-  --border: oklch(0.88 0.02 85); /* 연한 크림 보더 */
-  --input: oklch(0.88 0.02 85);
-  --ring: oklch(0.6 0.16 145); /* Primary 녹색과 동일 */
-  --chart-1: oklch(0.6 0.16 145); /* 녹색 */
-  --chart-2: oklch(0.78 0.08 230); /* 하늘색 */
-  --chart-3: oklch(0.82 0.15 90); /* 금색 */
-  --chart-4: oklch(0.78 0.12 65); /* 주황 */
-  --chart-5: oklch(0.65 0.18 25); /* 빨강 */
-  --radius: 0.75rem;
-  --sidebar: oklch(0.96 0.01 85);
-  --sidebar-foreground: oklch(0.3 0.04 50);
-  --sidebar-primary: oklch(0.6 0.16 145);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.01 85);
-  --sidebar-accent-foreground: oklch(0.3 0.04 50);
-  --sidebar-border: oklch(0.88 0.02 85);
-  --sidebar-ring: oklch(0.6 0.16 145);
+  /* 중립: 단색 바탕 한 톤, 면은 흰색·옅은 회색 차이로만 (line은 장식 구분선, line-strong은 입력 경계 3:1) */
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --surface-2: #efece5;
+  --surface-lip: #dfdad0;
+  --line: #e5e1d9;
+  --line-strong: #8e877c;
+  --text: #2e2a25;
+  --text-muted: #6b645b;
+  /* 주색: 브랜드 초록 하나. 초록 글자는 --primary-text (AA), lip·bright는 장식 전용. 보조색은 파랑 없이 짙은 중립(포커스 링) */
+  --primary: #3e7b3a;
+  --on-primary: #ffffff;
+  --primary-lip: #2f5f2c;
+  --primary-text: #3a7336;
+  --primary-bright: #a9d38f;
+  --primary-soft: #e8f0e3;
+  --secondary: #2e2a25;
+  --on-secondary: #ffffff;
+  /* 강조색: 금색 하나 (별·코인·도장·"지금 여기"). --accent·lip·light는 장식 전용, 금색 글자는 --accent-text */
+  --accent: #f0b43c;
+  --on-accent: #2e2a25;
+  --accent-lip: #c48a1a;
+  --accent-light: #fbe3a6;
+  --accent-text: #8a5a00;
+  --accent-soft: #fbf1dc;
+  /* 의미색: 성공 = 초록 글자, 경고 = 금색 글자, 오류 */
+  --success: #3a7336;
+  --success-soft: #e8f0e3;
+  --warning: #8a5a00;
+  --warning-soft: #fbf1dc;
+  --error: #b3402f;
+  --on-error: #ffffff;
+  --error-soft: #fbeae6;
+  /* 덮개 (축하·대화 상자 뒤) */
+  --on-scrim: #ffffff;
+  --scrim: rgb(46 42 37 / 0.65);
+  /* 월드 틴트 (지도·표지 배경만 옅게). 지금 월드는 아래 --world*, [data-world]가 바꾼다 */
+  --w1: #a9cf94;
+  --w1-ink: #3a7336;
+  --w1-soft: #edf3e8;
+  --w2: #b4c8d2;
+  --w2-ink: #6b645b;
+  --w2-soft: #edf1f3;
+  --w3: #d9c3a3;
+  --w3-ink: #6b645b;
+  --w3-soft: #f4eee5;
+  --world: var(--w1);
+  --world-ink: var(--w1-ink);
+  --world-soft: var(--w1-soft);
+  /* 코드: 키워드 초록 · 문자열 금색 글자 · 주석 회색 (P2-18 CodeMirror 테마) */
+  --code-bg: #ffffff;
+  --code-text: #2e2a25;
+  --code-comment: #7a7268;
+  --code-keyword: #3a7336;
+  --code-string: #8a5a00;
+  --code-number: #2e2a25;
+  --code-func: #2e2a25;
+  /* shadcn/ui 이름은 유지하고 새 토큰을 가리킨다 */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary-foreground: var(--on-primary);
+  --secondary-foreground: var(--on-secondary);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-muted);
+  --accent-foreground: var(--on-accent);
+  --destructive: var(--error);
+  --destructive-foreground: var(--on-error);
+  --success-foreground: var(--on-primary);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--secondary);
+  /* 반경 10 / 14 / 20 / 원형 (--radius는 shadcn 기준값) */
+  --round-s: 10px;
+  --round-m: 14px;
+  --round-l: 20px;
+  --round-pill: 9999px;
+  --radius: var(--round-m);
+  /* 그림자: 기본 한 종류 + 떠 있는 층(시트·토스트·오버레이) */
+  --elev-card: 0 1px 2px rgb(46 42 37 / 0.06), 0 4px 14px rgb(46 42 37 / 0.06);
+  --elev-pop: 0 12px 32px rgb(46 42 37 / 0.14);
+  /* 선: 테두리는 입력·코드 상자 1px만, 버튼은 아랫면 3px, 포커스 링 2px */
+  --line-w: 1px;
+  --lip-h: 3px;
+  --focus-w: 2px;
+  --focus-offset: 2px;
+  /* 모션 (원본 src/lib/motion/tokens.ts): 길이 · easing · 스프링 linear() + 정착 시간 */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-fade: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 360ms;
+  --dur-page: 700ms;
+  --dur-progress: 700ms;
+  --dur-draw: 1500ms;
+  --dur-celebrate: 1200ms;
+  --easing-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --easing-press: cubic-bezier(0.3, 0, 0.5, 1);
+  --easing-back-out: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --easing-stamp-in: cubic-bezier(0.55, 0, 0.9, 0.3);
+  --easing-ink: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --easing-page: cubic-bezier(0.45, 0.05, 0.25, 1);
+  /* CSS 스프링: transition-timing-function: var(--spring-prop); transition-duration: var(--spring-prop-dur). 값은 springTiming()이 만든 것 */
+  /* prettier-ignore */
+  --spring-face: linear(0, 0.029, 0.141, 0.21, 0.283, 0.356, 0.495, 0.558, 0.617, 0.67, 0.759, 0.797, 0.83, 0.858, 0.903, 0.921, 0.936, 0.949, 0.968, 0.976, 0.981, 0.986, 0.993, 0.995, 0.997, 0.999, 1, 1.001, 1.001, 1.001, 1.002, 1.002, 1.002, 1.001, 1.001, 1.001, 1.001, 1.001, 1.001, 1.001, 1);
+  --spring-face-dur: 418ms;
+  /* prettier-ignore */
+  --spring-body: linear(0, 0.039, 0.116, 0.27, 0.382, 0.494, 0.598, 0.735, 0.812, 0.876, 0.927, 0.967, 1.009, 1.027, 1.038, 1.044, 1.046, 1.044, 1.04, 1.035, 1.028, 1.023, 1.018, 1.014, 1.01, 1.005, 1.003, 1.001, 1, 0.999, 0.998, 0.998, 0.998, 0.998, 0.998, 0.998, 0.999, 0.999, 0.999, 0.999, 1);
+  --spring-body-dur: 743ms;
+  /* prettier-ignore */
+  --spring-envelope: linear(0, 0.023, 0.09, 0.156, 0.252, 0.325, 0.42, 0.486, 0.566, 0.621, 0.684, 0.726, 0.775, 0.806, 0.841, 0.864, 0.89, 0.906, 0.924, 0.935, 0.948, 0.956, 0.963, 0.97, 0.975, 0.98, 0.983, 0.987, 0.989, 0.991, 0.992, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 0.998, 0.999, 0.999, 1);
+  --spring-envelope-dur: 1160ms;
+  /* prettier-ignore */
+  --spring-prop: linear(0, 0.065, 0.2, 0.37, 0.551, 0.721, 0.868, 1.017, 1.09, 1.134, 1.152, 1.151, 1.135, 1.112, 1.085, 1.057, 1.033, 1.012, 0.996, 0.985, 0.978, 0.976, 0.978, 0.981, 0.985, 0.989, 0.993, 0.996, 0.999, 1.001, 1.003, 1.003, 1.004, 1.003, 1.003, 1.002, 1.001, 1.001, 1, 1, 1);
+  --spring-prop-dur: 1027ms;
+  /* prettier-ignore */
+  --spring-jelly-a: linear(0, 0.314, 0.869, 1.325, 1.489, 1.367, 1.103, 0.826, 0.763, 0.834, 0.964, 1.074, 1.115, 1.089, 1.027, 0.97, 0.945, 0.954, 0.982, 1.011, 1.027, 1.021, 1.007, 0.993, 0.987, 0.989, 0.996, 1.002, 1.006, 1.006, 1.003, 0.999, 0.997, 0.997, 0.999, 1.001, 1.001, 1.001, 1.001, 1, 1);
+  --spring-jelly-a-dur: 1360ms;
+  /* prettier-ignore */
+  --spring-jelly-ab: linear(0, 0.185, 0.402, 0.759, 0.968, 1.189, 1.264, 1.282, 1.246, 1.154, 1.053, 0.996, 0.939, 0.921, 0.921, 0.933, 0.961, 0.98, 1.005, 1.016, 1.023, 1.022, 1.018, 1.01, 1.004, 0.998, 0.995, 0.993, 0.994, 0.995, 0.998, 0.999, 1.001, 1.002, 1.002, 1.002, 1.001, 1.001, 1, 1, 1);
+  --spring-jelly-ab-dur: 852ms;
+  /* prettier-ignore */
+  --spring-jelly-b: linear(0, 0.092, 0.259, 0.356, 0.551, 0.73, 0.876, 0.985, 1.025, 1.079, 1.104, 1.108, 1.098, 1.089, 1.069, 1.048, 1.029, 1.013, 1.007, 0.997, 0.991, 0.989, 0.988, 0.989, 0.99, 0.993, 0.995, 0.997, 0.998, 0.999, 1, 1.001, 1.001, 1.001, 1.001, 1.001, 1.001, 1.001, 1, 1, 1);
+  --spring-jelly-b-dur: 602ms;
 }
 
-/* 다크 모드: MVP에서 제외 */
+/* 월드 테마 (§6 "같은 디자인 시스템 위에서 배경·지도만 교체"): 월드 틴트 3개만 바꾼다.
+   <section data-world="2"> 안에서 bg-world-soft · text-world-ink · bg-world/40 등이 월드 2 색이 된다. 속성이 없으면 월드 1 */
+[data-world='1'] {
+  --world: var(--w1);
+  --world-ink: var(--w1-ink);
+  --world-soft: var(--w1-soft);
+}
+[data-world='2'] {
+  --world: var(--w2);
+  --world-ink: var(--w2-ink);
+  --world-soft: var(--w2-soft);
+}
+[data-world='3'] {
+  --world: var(--w3);
+  --world-ink: var(--w3-ink);
+  --world-soft: var(--w3-soft);
+}
+
+/* HUD 숫자 (P0-14): Jua에는 tnum이 없어 카운트업 때 숫자 폭이 흔들린다 → 고정 폭 숫자 + 최소 폭 상자, 오른쪽 정렬 */
+@utility hud-num {
+  display: inline-block;
+  min-width: 3.2ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* 키보드 포커스 링 2px (색 = --ring 짙은 중립, 배경·카드 위 3:1 이상) */
+@utility focus-ring {
+  &:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+}
+
+/* 다크 모드: 범위 밖 (MVP 제외, P2-09 판단). .dark 변수를 두지 않는다. 다시 하면 :root 색 토큰만 .dark에서 덮고
+   CONTRAST_PAIRS를 다크 값으로 한 번 더 검사한다 (컴포넌트의 dark: 색 클래스는 쓰지 않음) */
 
 /* ── 연출 단계 (P2-15, docs/design/motion-guidelines.md) ─────────────────────────────
    <html data-motion="full|lite|minimal" data-reduced="true|false">는 부트 스크립트(src/lib/motion/boot.ts)가
@@ -135,7 +354,7 @@
   filter: none !important;
 }
 :root:not([data-motion='full']) .m-shadow {
-  box-shadow: 0 4px 0 rgb(0 0 0 / 0.12) !important;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--foreground) 12%, transparent) !important;
 }
 
 @keyframes character-breathe {
@@ -297,7 +516,7 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  box-shadow: 0 0 12px 4px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 12px 4px color-mix(in srgb, var(--primary) 30%, transparent);
   opacity: 0;
   pointer-events: none;
 }
@@ -308,7 +527,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 215, 0, 0.12),
+    color-mix(in srgb, var(--accent) 16%, transparent),
     transparent
   );
   transform: translateX(-100%);
@@ -428,7 +647,7 @@
   height: 7rem;
   margin: -3.5rem 0 0 -3.5rem;
   border-radius: 9999px;
-  border: 4px solid var(--success);
+  border: 4px solid var(--accent);
   opacity: 0;
   pointer-events: none;
 }
@@ -457,12 +676,12 @@
   }
 }
 :root[data-reduced='false'] .celebration-pop[data-popped='true'] {
-  animation: celebration-pop 420ms ease-out;
+  animation: celebration-pop 420ms var(--easing-out);
 }
 :root[data-reduced='false']
   .celebration-pop[data-popped='true']
   .celebration-ring {
-  animation: celebration-ring 700ms ease-out forwards;
+  animation: celebration-ring var(--dur-page) var(--easing-out) forwards;
 }
 
 /* 월드맵 노드 반응형 위치 */

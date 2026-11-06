@@ -164,7 +164,7 @@ function CategoryRow({
       <div className="flex items-center gap-3">
         <span
           aria-hidden
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary-text"
         >
           {icon}
         </span>
@@ -333,7 +333,7 @@ export function SoundSettingsSection() {
         aria-live="polite"
         className={cn(
           'mt-3 min-h-6 text-base font-medium',
-          status === 'error' ? 'text-red-700' : 'text-foreground',
+          status === 'error' ? 'text-destructive' : 'text-foreground',
         )}
         data-testid="sound-save-status"
       >

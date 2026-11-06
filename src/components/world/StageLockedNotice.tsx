@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
+import { EASE, sec } from '@/lib/motion/tokens';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { Lock, X } from 'lucide-react';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
@@ -44,20 +45,20 @@ export function StageLockedNotice() {
           initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 shadow-lg dark:border-amber-700 dark:bg-amber-950"
+          transition={{ duration: sec('base'), ease: EASE.out }}
+          className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-accent/50 bg-warning-soft px-4 py-3 shadow-pop"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-light text-warning">
             <Lock className="h-4 w-4" aria-hidden="true" />
           </span>
-          <p className="flex-1 text-sm font-medium text-amber-900 dark:text-amber-100">
+          <p className="flex-1 text-sm font-medium text-foreground">
             {STAGE_LOCKED_MESSAGE}
           </p>
           <button
             type="button"
             onClick={() => setOpen(false)}
             aria-label="안내 닫기"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-amber-700 transition-colors hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-900"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-warning transition-colors hover:bg-accent-light"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>

@@ -7,6 +7,7 @@ import {
   type TargetAndTransition,
   type Transition,
 } from 'framer-motion';
+import { EASE, framerSpring, sec } from '@/lib/motion/tokens';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CharacterAvatar } from './CharacterAvatar';
 import type { Character, Expression } from './expressions';
@@ -77,9 +78,9 @@ const PRESETS: Record<CharacterMotion, MotionPreset> = {
     initial: { y: 18, scale: 0.86, rotate: 0 },
     animate: { y: 0, scale: 1, rotate: [0, -7, 6, -3, 0] },
     transition: {
-      y: { type: 'spring', stiffness: 260, damping: 15, delay: 0.2 },
-      scale: { type: 'spring', stiffness: 260, damping: 15, delay: 0.2 },
-      rotate: { duration: 0.9, delay: 0.75, ease: 'easeInOut' },
+      y: framerSpring('prop', { delay: sec('base') }),
+      scale: framerSpring('prop', { delay: sec('base') }),
+      rotate: { duration: sec('page'), delay: sec('page'), ease: EASE.inOut },
     },
     origin: '50% 90%',
   },
@@ -128,9 +129,9 @@ export const LottieCharacter = memo(function LottieCharacter({
             initial={{ scale: 0.4, opacity: 0 }}
             animate={{ scale: [0.4, 1.6], opacity: [0, 1, 0] }}
             transition={{
-              duration: 0.8,
+              duration: sec('page'),
               delay: preset.burstAt,
-              ease: 'easeOut',
+              ease: EASE.out,
             }}
           />
         )}

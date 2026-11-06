@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Play, Loader2, RefreshCw, Square } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
+import { framerSpring, jelly, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from './CodeEditor';
 import { OutputPanel } from './OutputPanel';
@@ -48,7 +49,7 @@ function CodingTipRotator() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: sec('base') }}
           >
             {CODING_TIPS[tipIndex]}
           </m.p>
@@ -146,7 +147,7 @@ export function CodePanel({
           <m.div
             whileHover={canRun ? { scale: 1.03 } : undefined}
             whileTap={canRun ? { scale: 0.97 } : undefined}
-            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            transition={framerSpring(jelly())}
           >
             <Button
               onClick={onRun}
@@ -217,12 +218,7 @@ export function CodePanel({
         <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.5,
-            type: 'spring',
-            stiffness: 300,
-            damping: 20,
-          }}
+          transition={framerSpring('body', { delay: sec('slow') })}
           className="mt-2"
         >
           <Button

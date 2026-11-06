@@ -67,7 +67,7 @@ export default async function ProfilePage() {
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       {/* 뒤로가기 */}
       <div className="mb-6">
-        <Link href="/world" className="text-sm text-primary underline">
+        <Link href="/world" className="text-sm text-primary-text underline">
           ← 월드맵으로
         </Link>
       </div>
@@ -104,7 +104,7 @@ export default async function ProfilePage() {
       <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
         <h2 className="mb-3 text-sm font-bold text-foreground">경험치</h2>
         <XPProgressBar totalXP={profile.total_xp} size="md" />
-        <p className="mt-2 text-center text-lg font-bold text-primary">
+        <p className="mt-2 text-center text-lg font-bold text-primary-text">
           {profile.total_xp} XP
         </p>
       </div>
@@ -186,7 +186,7 @@ export default async function ProfilePage() {
         <h2 className="mb-3 text-sm font-bold text-foreground">통계</h2>
         <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
           <div>
-            <p className="text-xl font-bold text-primary sm:text-2xl">
+            <p className="text-xl font-bold text-primary-text sm:text-2xl">
               {totalCompleted}
             </p>
             <p className="text-[10px] text-muted-foreground sm:text-xs">
@@ -194,7 +194,7 @@ export default async function ProfilePage() {
             </p>
           </div>
           <div>
-            <p className="text-xl font-bold text-primary sm:text-2xl">
+            <p className="text-xl font-bold text-primary-text sm:text-2xl">
               {totalQuests}
             </p>
             <p className="text-[10px] text-muted-foreground sm:text-xs">
@@ -202,7 +202,7 @@ export default async function ProfilePage() {
             </p>
           </div>
           <div>
-            <p className="text-xl font-bold text-primary sm:text-2xl">
+            <p className="text-xl font-bold text-primary-text sm:text-2xl">
               {badges.length}
             </p>
             <p className="text-[10px] text-muted-foreground sm:text-xs">
@@ -223,7 +223,7 @@ export default async function ProfilePage() {
 
       {/* 설정 / 로그아웃 */}
       <div className="mt-6 flex flex-col items-center gap-3">
-        <Link href="/settings" className="text-sm text-primary underline">
+        <Link href="/settings" className="text-sm text-primary-text underline">
           설정 (움직임 · AI 튜터)
         </Link>
         <LogoutButton />

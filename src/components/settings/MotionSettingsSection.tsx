@@ -156,14 +156,14 @@ function MotionPreview({ reduced }: { reduced: boolean }) {
   return (
     <div
       aria-hidden
-      className="relative mb-4 flex h-28 items-end justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-b from-sky-100 to-emerald-50"
+      className="relative mb-4 flex h-28 items-end justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-b from-w2-soft to-w1-soft"
     >
       <div
-        className="float-cloud absolute left-4 top-3 h-4 w-12 rounded-full bg-white/90"
+        className="float-cloud absolute left-4 top-3 h-4 w-12 rounded-full bg-card/90"
         style={{ '--ambient-dur': '9s' } as React.CSSProperties}
       />
       <div
-        className="float-cloud absolute right-6 top-8 h-3 w-9 rounded-full bg-white/80"
+        className="float-cloud absolute right-6 top-8 h-3 w-9 rounded-full bg-card/80"
         style={
           {
             '--ambient-dur': '12s',
@@ -174,7 +174,7 @@ function MotionPreview({ reduced }: { reduced: boolean }) {
       <svg
         className="absolute left-[22%] top-6 h-5 w-5"
         viewBox="0 0 20 20"
-        fill="#F9A825"
+        fill="var(--accent)"
       >
         <polygon
           points="10,0 13,7 20,10 13,13 10,20 7,13 0,10 7,7"
@@ -184,7 +184,7 @@ function MotionPreview({ reduced }: { reduced: boolean }) {
       <svg
         className="absolute right-[24%] top-3 h-4 w-4"
         viewBox="0 0 20 20"
-        fill="#FBC02D"
+        fill="var(--accent-lip)"
       >
         <polygon
           points="10,0 13,7 20,10 13,13 10,20 7,13 0,10 7,7"
@@ -336,7 +336,7 @@ export function MotionSettingsSection({
         aria-live="polite"
         className={cn(
           'mt-3 min-h-6 text-base font-medium',
-          status === 'error' ? 'text-red-700' : 'text-foreground',
+          status === 'error' ? 'text-destructive' : 'text-foreground',
         )}
       >
         {status === 'saving' && '저장하는 중…'}

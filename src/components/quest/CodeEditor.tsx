@@ -7,10 +7,15 @@ import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
 import { basicSetup } from 'codemirror';
 import { cn } from '@/lib/utils';
+import { cssVar } from '@/lib/design/tokens';
 
 // 글꼴은 pyRoad Mono(D2Coding, 한글 = 영문 2칸) 토큰만 쓴다 (P2-10). CodeMirror 기본 테마가 `.cm-scroller`에
 // `monospace`를 직접 넣으므로 거기도 덮는다. 리거처는 끈다(`!=`가 한 글자처럼 보이지 않게, P0-14 §4.6).
 // D2Coding은 짝수 px에서만 한글 2칸이 정확히 맞는다(15px는 3px 어긋남, P2-01). 키즈 테마는 P2-18
+// 색은 디자인 토큰 CSS 변수(cssVar)를 가리킨다 → 토큰 값이 바뀌어도 여기는 그대로 (P2-09)
+const tint = (name: Parameters<typeof cssVar>[0], pct: number) =>
+  `color-mix(in srgb, ${cssVar(name)} ${pct}%, transparent)`;
+
 const pyRoadTheme = EditorView.theme({
   '&': {
     fontSize: '14px',
@@ -21,22 +26,22 @@ const pyRoadTheme = EditorView.theme({
     fontFamily: 'var(--font-mono)',
   },
   '.cm-content': {
-    caretColor: 'oklch(0.6 0.16 145)',
+    caretColor: cssVar('primary'),
     padding: '8px 0',
   },
   '.cm-gutters': {
-    backgroundColor: 'oklch(0.94 0.01 85)',
-    borderRight: '1px solid oklch(0.88 0.02 85)',
-    color: 'oklch(0.6 0.02 85)',
+    backgroundColor: cssVar('surface2'),
+    borderRight: `var(--line-w) solid ${cssVar('line')}`,
+    color: cssVar('textMuted'),
   },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-    backgroundColor: 'oklch(0.6 0.16 145 / 0.15) !important',
+    backgroundColor: `${tint('primary', 18)} !important`,
   },
   '.cm-activeLine': {
-    backgroundColor: 'oklch(0.6 0.16 145 / 0.05)',
+    backgroundColor: tint('primary', 6),
   },
   '.cm-activeLineGutter': {
-    backgroundColor: 'oklch(0.6 0.16 145 / 0.1)',
+    backgroundColor: tint('primary', 10),
   },
 });
 

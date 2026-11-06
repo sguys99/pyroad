@@ -37,7 +37,7 @@ export default async function NoticePage({
       <div className="mb-6">
         <Link
           href={user ? '/world' : '/'}
-          className="text-sm text-primary underline"
+          className="text-sm text-primary-text underline"
         >
           {user ? '← 월드맵으로' : '← 홈으로'}
         </Link>
@@ -48,7 +48,7 @@ export default async function NoticePage({
         {isAdmin && (
           <Link
             href="/notice/create"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip"
           >
             공지 작성
           </Link>

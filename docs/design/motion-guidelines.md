@@ -88,7 +88,7 @@ P2-09가 CSS 토큰(`--spring-<이름>`·`--spring-<이름>-dur`·`--dur-<이름
 | `jellyAB` | 500 | 16 | 0.36 | 852ms | A×B 젤리 | A×B 종이 버튼 |
 | `jellyB` | 480 | 24 | 0.55 | 602ms | B 착지 | B 묵직한 복귀 |
 
-**시안별 젤리** (`JELLY_BY_CONCEPT`, 확정 전): A = `jellyA`, B = `jellyB`, A×B = `jellyAB`. 기본값 `DEFAULT_CONCEPT = 'ab'` → `jelly()` = `jellyAB`. A(1.36초 잔떨림)는 연속 탭에서 산만하고 B는 젤리 느낌이 약해 중간을 임시로 골랐습니다. P2-08 결정 뒤 P2-09에서 확정합니다.
+**시안별 젤리** (`JELLY_BY_CONCEPT`): A = `jellyA`, B = `jellyB`, A×B = `jellyAB`. 최종 시안이 B(§12-Q31)라 기본값 `DEFAULT_CONCEPT = 'b'` → `jelly()` = `jellyB`(ζ 0.55, 602ms, 리그 B 스타일과 같음, P2-09). P2-15 동안은 임시로 A×B였습니다. CSS 변수(`--dur-*`·`--easing-*`·`--spring-*`)와 Tailwind 쓰는 법은 [tokens.md](tokens.md) §2.3.
 
 ### 5.2 길이 · easing
 
@@ -96,9 +96,12 @@ P2-09가 CSS 토큰(`--spring-<이름>`·`--spring-<이름>-dur`·`--dur-<이름
 |---|---|---|
 | `DURATION.instant` | 80ms | 색·눌림 상태 |
 | `DURATION.fast` | 140ms | 툴팁, 작은 페이드, lite 페이지 전환 |
+| `DURATION.fade` | 150ms | minimal 단계의 짧은 페이드 (`springOrFade`, P2-09) |
 | `DURATION.base` | 220ms | 일반 전환, 스탬프 내려찍기 |
 | `DURATION.slow` | 360ms | 화면 안 큰 요소, lite 잉크 |
 | `DURATION.page` | 700ms | B 페이지 넘김 |
+| `DURATION.progress` | 700ms | 진행 막대 채우기·숫자 카운트업 (P2-09) |
+| `DURATION.draw` | 1,500ms | 지도 길 그리기 (P2-09) |
 | `DURATION.celebrate` | 1,200ms | 축하 카드 한 장 (시퀀서 단위) |
 | `EASING.out` | `cubic-bezier(0.22, 1, 0.36, 1)` | 등장 |
 | `EASING.inOut` | `cubic-bezier(0.65, 0, 0.35, 1)` | 이동 (코인 → HUD) |

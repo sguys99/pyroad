@@ -9,6 +9,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { m } from 'framer-motion';
+import { DURATION, framerSpring, jelly } from '@/lib/motion/tokens';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
@@ -115,8 +116,10 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
       <TutorMessageAvatar message={msg} />
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="mb-1 flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-primary">파이뱀 선생님</span>
+          <MessageCircle className="h-4 w-4 text-primary-text" />
+          <span className="text-xs font-bold text-primary-text">
+            파이뱀 선생님
+          </span>
           {msg.isFallback && (
             <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
               저장된 답변
@@ -151,8 +154,10 @@ function StreamingMessage({ content }: { content: string }) {
       </div>
       <div className="rounded-xl rounded-tl-none bg-primary/5 border border-primary/20 px-4 py-3">
         <div className="mb-1 flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-primary">파이뱀 선생님</span>
+          <MessageCircle className="h-4 w-4 text-primary-text" />
+          <span className="text-xs font-bold text-primary-text">
+            파이뱀 선생님
+          </span>
         </div>
         <div className="prose prose-sm max-w-none text-foreground prose-p:leading-relaxed whitespace-pre-wrap">
           {content}
@@ -190,9 +195,9 @@ export function ConversationPanel({
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-4 p-4">
           {/* 스토리 배경 */}
-          <div className="rounded-xl bg-secondary/5 border border-secondary/20 p-4">
+          <div className="rounded-xl bg-surface-2 p-4">
             <div className="mb-2 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-secondary-foreground" />
+              <BookOpen className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-bold text-foreground">이야기</h3>
             </div>
             <p className="text-sm leading-relaxed text-foreground">
@@ -238,7 +243,7 @@ export function ConversationPanel({
       {/* 힌트 + 황금키 버튼 (하단 고정) */}
       <div className="border-t border-border bg-background px-4 py-3">
         <div className="flex items-center justify-between">
-          <TooltipProvider delay={200}>
+          <TooltipProvider delay={DURATION.base}>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 힌트: {3 - hintsUsed}/3
@@ -257,7 +262,7 @@ export function ConversationPanel({
                   </TooltipContent>
                 </Tooltip>
               </span>
-              <span className="flex items-center gap-1 text-xs text-amber-600">
+              <span className="flex items-center gap-1 text-xs text-accent-text">
                 <KeyRound className="h-3 w-3" />
                 황금키: {goldenKeys}/3
                 <Tooltip>
@@ -265,7 +270,7 @@ export function ConversationPanel({
                     className="cursor-help"
                     aria-label="황금키 안내"
                   >
-                    <Info className="h-3 w-3 text-amber-600/60" aria-hidden />
+                    <Info className="h-3 w-3 text-accent-text/70" aria-hidden />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p>황금키는 스테이지를 완료하면 3개로 보충됩니다.</p>
@@ -278,14 +283,14 @@ export function ConversationPanel({
             <m.div
               whileHover={!goldenKeyDisabled ? { scale: 1.03 } : undefined}
               whileTap={!goldenKeyDisabled ? { scale: 0.97 } : undefined}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              transition={framerSpring(jelly())}
             >
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onGoldenKeyUse}
                 disabled={goldenKeyDisabled}
-                className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
+                className="gap-1.5 border-accent text-accent-text hover:bg-accent-soft"
               >
                 <KeyRound className="h-4 w-4" />
                 {goldenKeys <= 0 ? '키 소진' : '황금키'}
@@ -298,7 +303,7 @@ export function ConversationPanel({
               whileTap={
                 !(isAiLoading || hintsUsed >= 3) ? { scale: 0.97 } : undefined
               }
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              transition={framerSpring(jelly())}
             >
               <Button
                 variant="outline"

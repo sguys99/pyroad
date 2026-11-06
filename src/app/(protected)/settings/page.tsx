@@ -153,7 +153,7 @@ export default function SettingsPage() {
     <>
       {/* 뒤로가기 */}
       <div className="mb-6">
-        <Link href="/profile" className="text-sm text-primary underline">
+        <Link href="/profile" className="text-sm text-primary-text underline">
           ← 프로필로
         </Link>
       </div>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold ${
                     isSelected
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
@@ -242,16 +242,16 @@ export default function SettingsPage() {
       <div
         className={`mb-6 rounded-xl border bg-card p-4 shadow-sm ${
           settings.available_providers.length === 0
-            ? 'border-amber-400 dark:border-amber-600'
+            ? 'border-accent'
             : 'border-border'
         }`}
       >
         {settings.available_providers.length === 0 ? (
           <>
-            <h3 className="mb-1 text-sm font-bold text-amber-700 dark:text-amber-300">
+            <h3 className="mb-1 text-sm font-bold text-warning">
               API 키를 입력해야 AI 튜터를 사용할 수 있어요
             </h3>
-            <p className="mb-3 text-xs text-amber-600 dark:text-amber-400">
+            <p className="mb-3 text-xs text-warning">
               아래 중 하나의 API 키를 입력하면 AI 튜터가 활성화돼요.
             </p>
           </>
@@ -307,7 +307,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={() => handleDeleteKey(provider)}
                       disabled={saving}
-                      className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-error-soft hover:text-destructive"
                       title="API 키 삭제"
                     >
                       <X className="h-4 w-4" />
@@ -336,7 +336,7 @@ export default function SettingsPage() {
           {saving ? '저장 중...' : 'AI 튜터 설정 저장'}
         </Button>
         {saved && (
-          <p className="text-sm font-medium text-primary">저장되었어요!</p>
+          <p className="text-sm font-medium text-primary-text">저장되었어요!</p>
         )}
         {error && (
           <p className="text-sm font-medium text-destructive">{error}</p>

@@ -1,6 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
+import { framerSpring, jelly } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
@@ -19,7 +20,7 @@ export function LoginButton({ onBeforeLogin }: LoginButtonProps = {}) {
       <m.div
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+        transition={framerSpring(jelly())}
       >
         <Button
           size="lg"

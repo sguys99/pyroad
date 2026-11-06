@@ -5,7 +5,8 @@
  *   새 스프링을 만들지 않는 것이 원칙 (무드보드 §6.1)
  * - P2-09가 CSS 토큰(`--spring-<이름>`·`--spring-<이름>-dur`·`--dur-<이름>`)으로 옮길 때 이 값을 그대로 쓴다.
  *   CSS `linear()` easing은 `springTiming()`이 같은 스프링을 샘플링해서 만든다 (시안 `design/prototypes/src/shared/motion.ts`와 같은 계산)
- * - 시안(A·B·A×B)이 확정 전이라 젤리는 시안별 표(`JELLY_BY_CONCEPT`)로 두고 기본값만 고른다 (P2-08 결정 뒤 P2-09에서 확정)
+ * - 젤리는 시안별 표(`JELLY_BY_CONCEPT`). 최종 시안이 B(§12-Q31)라 기본값은 B 젤리(P2-09)
+ * - 디자인 토큰 원본 `@/lib/design/tokens`가 이 파일을 다시 내보내고, globals.css의 `--dur-*`·`--easing-*`·`--spring-*` 변수와 같은지 검사한다
  * - 연출 단계·reduced-motion 대체는 `tier.ts`의 `MotionBudget`을 함께 본다: `tierDuration()`, `springOrFade()`
  */
 import type { MotionBudget } from './tier';
@@ -44,10 +45,10 @@ export const JELLY_BY_CONCEPT: Record<DesignConcept, SpringName> = {
   ab: 'jellyAB',
 };
 /**
- * 기본 시안 젤리. 시안 확정 전 임시값으로 A×B(중간 출렁임 ζ≈0.36, 852ms)를 고른다:
- * A(1.36초 잔떨림)는 연속 탭에서 산만하고 B(ζ≈0.55)는 "젤리" 느낌이 약하다. P2-09에서 확정 시안으로 바꾼다
+ * 기본 시안 젤리: 최종 시안 B(§12-Q31) → jellyB(ζ≈0.55 묵직, 602ms). 리그 B 스타일(`STYLE_RULES.B.jelly`)과 같다.
+ * P2-15 동안은 확정 전 임시값으로 A×B였다 (P2-09에서 B로)
  */
-export const DEFAULT_CONCEPT: DesignConcept = 'ab';
+export const DEFAULT_CONCEPT: DesignConcept = 'b';
 
 export function jelly(concept: DesignConcept = DEFAULT_CONCEPT): SpringName {
   return JELLY_BY_CONCEPT[concept];
@@ -59,17 +60,28 @@ export const DURATION = {
   instant: 80,
   /** 툴팁, 작은 페이드 */
   fast: 140,
+  /** minimal 단계의 짧은 페이드 (`springOrFade`) */
+  fade: 150,
   /** 일반 전환, 스탬프 내려찍기 */
   base: 220,
   /** 화면 안 큰 요소, lite 잉크 */
   slow: 360,
   /** B 페이지 넘김 */
   page: 700,
+  /** 진행 막대 채우기·숫자 카운트업 */
+  progress: 700,
+  /** 지도 길 그리기 (잉크로 선을 긋는 한 번) */
+  draw: 1500,
   /** 축하 카드 한 장 (시퀀서 단위) */
   celebrate: 1200,
 } as const;
 
 export type DurationName = keyof typeof DURATION;
+
+/** Framer Motion은 초 단위: `transition={{ duration: sec('base') }}` */
+export function sec(name: DurationName): number {
+  return DURATION[name] / 1000;
+}
 
 /** CSS cubic-bezier 문자열 */
 export const EASING = {
@@ -141,7 +153,7 @@ export function springOrFade(
   if (budget.effectDuration === 0) return { duration: 0, ease: EASE.out };
   if (!budget.springs)
     return {
-      duration: 0.15,
+      duration: sec('fade'),
       ease: EASE.out,
       delay: delaySec * budget.effectDuration,
     };

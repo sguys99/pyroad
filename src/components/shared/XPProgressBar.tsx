@@ -1,6 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
+import { EASE, sec } from '@/lib/motion/tokens';
 import { getXPProgress } from '@/lib/quest/xp';
 
 interface XPProgressBarProps {
@@ -20,7 +21,7 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
         {size === 'md' && (
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Lv.{currentLevel}</span>
-            <span className="font-bold text-primary">MAX</span>
+            <span className="font-bold text-primary-text">MAX</span>
           </div>
         )}
         <div
@@ -30,7 +31,7 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
             className="h-full rounded-full bg-primary"
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={{ duration: sec('progress'), ease: EASE.out }}
           />
         </div>
       </div>
@@ -54,7 +55,7 @@ export function XPProgressBar({ totalXP, size = 'sm' }: XPProgressBarProps) {
           className="h-full rounded-full bg-primary"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: sec('progress'), ease: EASE.out }}
         />
       </div>
     </div>

@@ -41,7 +41,9 @@ export function ProfileSummary({ profile, badges }: ProfileSummaryProps) {
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-lg font-bold text-primary">{profile.total_xp}</p>
+          <p className="text-lg font-bold text-primary-text">
+            {profile.total_xp}
+          </p>
           <p className="text-xs text-muted-foreground">XP</p>
         </div>
       </div>

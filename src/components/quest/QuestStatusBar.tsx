@@ -8,6 +8,7 @@ import {
   animate,
   AnimatePresence,
 } from 'framer-motion';
+import { EASE, framerSpring, sec } from '@/lib/motion/tokens';
 import { useEffect, useState } from 'react';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
@@ -25,8 +26,8 @@ function AnimatedXP({ value }: { value: number }) {
 
   useEffect(() => {
     const controls = animate(motionVal, value, {
-      duration: 0.8,
-      ease: 'easeOut',
+      duration: sec('progress'),
+      ease: EASE.out,
     });
     return controls.stop;
   }, [value, motionVal]);
@@ -52,7 +53,7 @@ function ByeolttongiXPEffect() {
           x: 0,
           y: 0,
         }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.4 }}
+        transition={framerSpring('body', { delay: sec('slow') })}
       >
         <CharacterAvatar character="byeolttongi" expression={phase} size="sm" />
       </m.div>
@@ -75,16 +76,16 @@ export function QuestStatusBar({
           Lv.{level} {title}
         </span>
         <div className="flex items-center gap-2 sm:gap-4">
-          <span className="flex items-center gap-1 text-primary">
+          <span className="flex items-center gap-1 text-primary-text">
             <Star className="h-4 w-4" />
             <AnimatedXP value={xp} /> XP
             {earnedXP !== null && (
               <>
                 <m.span
-                  className="ml-1 text-xs font-bold text-primary"
+                  className="ml-1 text-xs font-bold text-primary-text"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: sec('base') }}
                 >
                   +{earnedXP}
                 </m.span>

@@ -49,7 +49,7 @@ function ListLakeIllustInner({ className }: { className?: string }) {
         fontSize="8"
         fill="#01579B"
         opacity="0.5"
-        fontFamily="monospace"
+        className="font-mono"
         fontWeight="bold"
       >
         [
@@ -60,7 +60,7 @@ function ListLakeIllustInner({ className }: { className?: string }) {
         fontSize="8"
         fill="#01579B"
         opacity="0.5"
-        fontFamily="monospace"
+        className="font-mono"
         fontWeight="bold"
       >
         ]
@@ -144,7 +144,7 @@ function ListLakeIllustInner({ className }: { className?: string }) {
         fontSize="7"
         fill="#01579B"
         opacity="0.4"
-        fontFamily="monospace"
+        className="font-mono"
         fontWeight="bold"
       >
         [
@@ -155,7 +155,7 @@ function ListLakeIllustInner({ className }: { className?: string }) {
         fontSize="7"
         fill="#01579B"
         opacity="0.4"
-        fontFamily="monospace"
+        className="font-mono"
         fontWeight="bold"
       >
         ]

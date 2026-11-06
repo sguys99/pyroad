@@ -62,7 +62,7 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error && (
-        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="rounded-lg bg-error-soft px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       )}
@@ -112,7 +112,7 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
       <button
         type="submit"
         disabled={submitting}
-        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip disabled:opacity-50"
       >
         {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
       </button>
