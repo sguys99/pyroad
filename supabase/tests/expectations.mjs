@@ -514,6 +514,37 @@ export const EXPECT = {
     activateIn: 'B24',
     note: 'app_metadata.provider 는 첫 identity 로 고정이라 쓰지 않음 (§2.2, P0-04)',
   },
+  // P3-06: 실측 메타데이터 모양(P0-03·P0-04)으로 가입·로그인 (00013 동작 고정)
+  'SU-1': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06: Google·Kakao(동의/미동의)·custom:kakao·custom:naver(id_token 클레임만)·모르는 OIDC·email 가입. 이메일 없어도 가입, 공개 필드는 자리표시자뿐',
+  },
+  'SU-2': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06: provider·iss 정규화 표. src/lib/auth 의 TS 정규화(providerFromIssuer 등)와 같은 값이어야 함',
+  },
+  'SU-3': {
+    expect: 'deny',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06·§2.8: 트리거는 provider·iss 만 읽음. 이메일·실명·닉네임·사진은 읽지도 않음 (온보딩 제안값은 클라이언트가 만들고 DB 에 저장하지 않음)',
+  },
+  'SU-4': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06: 소셜이 아닌 provider 는 NULL (모르는 값을 그대로 넣으면 CHECK 위반으로 가입 실패)',
+  },
+  'LG-1': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06·P3-08: 연결 계정은 로그인한 identity 의 iss 로. 로그인 트리거는 last_login_* 만 바꿈',
+  },
   'RPC-9': {
     expect: 'deny',
     requires: 'public.handle_user_signed_in()',

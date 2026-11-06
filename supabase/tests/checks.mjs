@@ -3805,6 +3805,201 @@ async function groupAuthTriggers(u) {
         END IF;
       END $$;`),
   });
+
+  // P3-06: GoTrue 가 실제로 만드는 모양(spikes/p0-04-kakao/e2e/observed S3·S6·S14, docs/spikes/P0-03 §4)으로 가입·로그인
+  await check({
+    group: 'auth',
+    id: 'SU-1',
+    role: 'postgres',
+    op: '가입(실측 메타데이터 7종: Google·Kakao 동의/미동의·custom:kakao·custom:naver id_token 클레임만·이름 모르는 OIDC·email) → 모험가NNNN, 사진 빈 값, nickname NULL, provider 정규화(모르면 NULL), 메타데이터 값이 공개 필드·공개 프로필·뷰에 없음',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        CREATE TEMP TABLE su1 (id UUID, email TEXT, app JSONB, meta JSONB, signed TIMESTAMPTZ, want TEXT) ON COMMIT DROP;
+        INSERT INTO su1 VALUES
+          ('d2000000-0000-0000-0000-000000000001', 'su1-kid@gmail.example',
+           '{"provider": "google", "providers": ["google"]}',
+           '{"iss": "https://accounts.google.com", "sub": "1098765", "provider_id": "1098765", "name": "김실명", "full_name": "김실명",
+             "picture": "https://lh3.googleusercontent.com/a/su1", "avatar_url": "https://lh3.googleusercontent.com/a/su1",
+             "email": "su1-kid@gmail.example", "email_verified": true, "phone_verified": false}', now(), 'google'),
+          ('d2000000-0000-0000-0000-000000000002', NULL,
+           '{"provider": "kakao", "providers": ["kakao"]}',
+           '{"iss": "https://kapi.kakao.com", "sub": "4012345678", "provider_id": "4012345678", "name": "파이썬꿈나무",
+             "full_name": "파이썬꿈나무", "user_name": "파이썬꿈나무", "preferred_username": "파이썬꿈나무",
+             "avatar_url": "http://k.kakaocdn.net/dn/su1/img_640x640.jpg", "email_verified": false, "phone_verified": false}', now(), 'kakao'),
+          ('d2000000-0000-0000-0000-000000000003', NULL,
+           '{"provider": "kakao", "providers": ["kakao"]}',
+           '{"iss": "https://kapi.kakao.com", "sub": "4012345680", "provider_id": "4012345680", "email_verified": false, "phone_verified": false}',
+           NULL, 'kakao'),
+          ('d2000000-0000-0000-0000-000000000004', NULL,
+           '{"provider": "custom:kakao", "providers": ["custom:kakao"]}',
+           '{"iss": "https://kauth.kakao.com", "sub": "4012345681", "provider_id": "4012345681", "name": "카카오별명",
+             "preferred_username": "카카오별명", "email_verified": false, "phone_verified": false}', now(), 'kakao'),
+          ('d2000000-0000-0000-0000-000000000005', NULL,
+           '{"provider": "custom:naver", "providers": ["custom:naver"]}',
+           '{"iss": "https://nid.naver.com", "sub": "naver-pairwise-su1", "provider_id": "naver-pairwise-su1", "aud": ["naver-client"],
+             "exp": 1893456000, "iat": 1893452400, "email_verified": false, "phone_verified": false}', now(), 'naver'),
+          ('d2000000-0000-0000-0000-000000000006', NULL,
+           '{"provider": "custom:kakao-mock", "providers": ["custom:kakao-mock"]}',
+           '{"iss": "https://kauth.kakao.com", "sub": "4012345682", "name": "모의카카오"}', now(), 'kakao'),
+          ('d2000000-0000-0000-0000-000000000007', NULL,
+           '{"provider": "custom:other", "providers": ["custom:other"]}',
+           '{"iss": "https://idp.example", "sub": "x1", "name": "다른곳실명", "picture": "https://idp.example/p.png"}', now(), NULL),
+          ('d2000000-0000-0000-0000-000000000008', 'su1-email@example.com',
+           '{"provider": "email", "providers": ["email"]}', '{"full_name": "이메일실명"}', NULL, NULL);
+        INSERT INTO auth.users (id, email, raw_app_meta_data, raw_user_meta_data, last_sign_in_at)
+          SELECT id, email, app, meta, signed FROM su1;
+        DO $$
+        DECLARE v RECORD;
+        BEGIN
+          FOR v IN SELECT s.*, u.display_name, u.avatar_url, u.nickname, u.last_login_provider, u.last_login_at,
+                          p.public_name, pv.display_name AS view_name, pv.avatar_url AS view_avatar
+                     FROM su1 s
+                     LEFT JOIN public.users u ON u.id = s.id
+                     LEFT JOIN public.user_public_profiles p ON p.user_id = s.id
+                     LEFT JOIN public.user_profiles_public pv ON pv.id = s.id LOOP
+            IF v.display_name IS NULL OR v.public_name IS NULL THEN
+              RAISE EXCEPTION '% (%): users·공개 프로필 행이 없음', v.id, v.app ->> 'provider';
+            END IF;
+            IF v.display_name !~ '^모험가[0-9]{4}$' OR v.display_name <> public.placeholder_display_name(v.id)
+               OR v.public_name <> v.display_name OR v.view_name IS DISTINCT FROM v.display_name THEN
+              RAISE EXCEPTION '% (%): 이름이 자리표시자가 아님 % / % / %', v.id, v.app ->> 'provider',
+                v.display_name, v.public_name, v.view_name;
+            END IF;
+            IF coalesce(v.avatar_url, '') <> '' OR v.view_avatar IS NOT NULL OR v.nickname IS NOT NULL THEN
+              RAISE EXCEPTION '% (%): 사진·닉네임이 채워짐 % % %', v.id, v.app ->> 'provider', v.avatar_url, v.view_avatar, v.nickname;
+            END IF;
+            IF v.last_login_provider IS DISTINCT FROM v.want THEN
+              RAISE EXCEPTION '% (%): last_login_provider % (기대 %)', v.id, v.app ->> 'provider', v.last_login_provider, v.want;
+            END IF;
+            IF v.last_login_at IS NULL OR (v.signed IS NOT NULL AND v.last_login_at <> v.signed) THEN
+              RAISE EXCEPTION '% (%): last_login_at % (last_sign_in_at %)', v.id, v.app ->> 'provider', v.last_login_at, v.signed;
+            END IF;
+            IF EXISTS (SELECT 1 FROM jsonb_each_text(v.meta) e
+                        WHERE e.value <> '' AND e.value IN (v.display_name, v.public_name, coalesce(v.avatar_url, ''))) THEN
+              RAISE EXCEPTION '% (%): provider 메타데이터 값이 공개 필드에 들어감', v.id, v.app ->> 'provider';
+            END IF;
+          END LOOP;
+        END $$;`),
+  });
+  await check({
+    group: 'auth',
+    id: 'SU-2',
+    role: 'postgres',
+    op: 'social_login_provider(provider, iss) 표: google·kakao·custom:kakao·custom:naver(대소문자·공백 무시), provider 를 모르면 iss, 둘 다 모르면 NULL. 결과는 모두 users_last_login_provider_check 통과',
+    ...OK,
+    run: () =>
+      sqlCheck(`DO $$
+      DECLARE v RECORD;
+      BEGIN
+        FOR v IN SELECT * FROM (VALUES
+            ('google', NULL, 'google'), (' Google ', NULL, 'google'),
+            ('kakao', NULL, 'kakao'), ('custom:kakao', NULL, 'kakao'),
+            ('naver', NULL, 'naver'), ('custom:naver', NULL, 'naver'), ('CUSTOM:NAVER', NULL, 'naver'),
+            (NULL, 'https://accounts.google.com', 'google'),
+            (NULL, 'https://kapi.kakao.com', 'kakao'), (NULL, 'https://kauth.kakao.com', 'kakao'),
+            (NULL, 'https://nid.naver.com', 'naver'),
+            ('custom:kakao-mock', 'https://kauth.kakao.com', 'kakao'),
+            ('google', 'https://kapi.kakao.com', 'google'),
+            ('email', NULL, NULL), ('phone', NULL, NULL), ('anonymous', NULL, NULL),
+            ('github', 'https://github.com', NULL), ('custom:other', 'https://idp.example', NULL),
+            ('', '', NULL), (NULL, NULL, NULL)
+          ) AS t(p, iss, want) LOOP
+          IF public.social_login_provider(v.p, v.iss) IS DISTINCT FROM v.want THEN
+            RAISE EXCEPTION 'social_login_provider(%, %) = % (기대 %)', v.p, v.iss, public.social_login_provider(v.p, v.iss), v.want;
+          END IF;
+        END LOOP;
+        IF (SELECT pg_get_constraintdef(oid) FROM pg_constraint
+             WHERE conrelid = 'public.users'::regclass AND conname = 'users_last_login_provider_check')
+           !~ 'google.*kakao.*naver' THEN
+          RAISE EXCEPTION 'users_last_login_provider_check 가 google·kakao·naver 가 아님';
+        END IF;
+      END $$;`),
+  });
+  await check({
+    group: 'auth',
+    id: 'SU-3',
+    role: 'postgres',
+    op: 'handle_new_user·handle_user_signed_in 본문이 이메일·이름·사진 메타데이터(email, full_name, name, nickname, picture, avatar_url …)를 읽는가',
+    ...NONE,
+    run: () => {
+      const v = one(`select coalesce(string_agg(p.proname || ':' || m[1], ', ' order by p.proname), '')
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+        cross join lateral regexp_matches(p.prosrc,
+          '(NEW\\.email|->>?\\s*''(?:email|full_name|name|nickname|user_name|preferred_username|picture|avatar_url)'')', 'g') m
+       where n.nspname = 'public' and p.proname in ('handle_new_user', 'handle_user_signed_in')`);
+      return v ? { actual: 'reads', detail: v } : { actual: 'none', detail: '(없음)' };
+    },
+  });
+  await check({
+    group: 'auth',
+    id: 'SU-4',
+    role: 'postgres',
+    op: 'GoTrue 실제 가입·비밀번호 로그인(alice, provider email) → last_login_provider NULL (google·kakao·naver 가 아니면 비움, CHECK 위반 없이 가입·로그인)',
+    ...OK,
+    run: () => {
+      const v = one(
+        `select coalesce(u.last_login_provider, 'null') || ' ' || coalesce(a.raw_app_meta_data ->> 'provider', '?')
+           from public.users u join auth.users a on a.id = u.id where u.id = '${u.alice.id}'`,
+      );
+      return v.startsWith('null ')
+        ? { actual: 'ok', detail: v.slice(5) }
+        : { actual: 'mismatch', detail: v };
+    },
+  });
+  await check({
+    group: 'auth',
+    id: 'LG-1',
+    role: 'postgres',
+    op: '연결 계정(Google 가입 + Kakao·Naver 연결, app_metadata.provider 는 google 고정) 로그인마다 GoTrue 처럼 identity_data 병합 + last_sign_in_at → kakao → naver → google → custom:kakao(kauth) kakao. 이름·사진·닉네임·공개 이름은 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        INSERT INTO auth.users (id, email, raw_app_meta_data, raw_user_meta_data, last_sign_in_at) VALUES
+          ('d3000000-0000-0000-0000-000000000001', 'lg1-kid@gmail.example',
+           '{"provider": "google", "providers": ["google", "kakao", "custom:naver"]}',
+           '{"iss": "https://accounts.google.com", "sub": "g-lg1", "name": "김실명", "full_name": "김실명",
+             "picture": "https://lh3.googleusercontent.com/a/lg1", "email": "lg1-kid@gmail.example"}', now() - interval '1 day');
+        UPDATE public.users SET nickname = 'Lg1Kid' WHERE id = 'd3000000-0000-0000-0000-000000000001';
+        DO $$
+        DECLARE
+          v_uid  UUID := 'd3000000-0000-0000-0000-000000000001';
+          v_at   TIMESTAMPTZ := now();
+          v_step RECORD;
+          v      RECORD;
+          i      INT := 0;
+        BEGIN
+          IF (SELECT last_login_provider FROM public.users WHERE id = v_uid) IS DISTINCT FROM 'google' THEN
+            RAISE EXCEPTION 'Google 가입 직후가 google 이 아님';
+          END IF;
+          FOR v_step IN SELECT * FROM (VALUES
+              (1, '{"iss": "https://kapi.kakao.com", "sub": "4012345690", "provider_id": "4012345690", "name": "카카오닉",
+                    "full_name": "카카오닉", "avatar_url": "http://k.kakaocdn.net/dn/lg1.jpg"}'::jsonb, 'kakao'),
+              (2, '{"iss": "https://nid.naver.com", "sub": "naver-lg1", "provider_id": "naver-lg1", "aud": ["naver-client"]}'::jsonb, 'naver'),
+              (3, '{"iss": "https://accounts.google.com", "sub": "g-lg1", "name": "김실명", "picture": "https://lh3.googleusercontent.com/a/lg1"}'::jsonb, 'google'),
+              (4, '{"iss": "https://kauth.kakao.com", "sub": "4012345690", "provider_id": "4012345690", "name": "카카오닉"}'::jsonb, 'kakao')
+            ) AS t(n, identity_data, want) ORDER BY n LOOP
+            i := i + 1;
+            UPDATE auth.users
+               SET raw_user_meta_data = raw_user_meta_data || v_step.identity_data,
+                   last_sign_in_at    = v_at + make_interval(mins => i)
+             WHERE id = v_uid;
+            SELECT u.*, p.public_name INTO v
+              FROM public.users u JOIN public.user_public_profiles p ON p.user_id = u.id WHERE u.id = v_uid;
+            IF v.last_login_provider IS DISTINCT FROM v_step.want OR v.last_login_at <> v_at + make_interval(mins => i) THEN
+              RAISE EXCEPTION '로그인 %: % % (기대 %)', v_step.n, v.last_login_provider, v.last_login_at, v_step.want;
+            END IF;
+            IF v.display_name <> public.placeholder_display_name(v_uid) OR coalesce(v.avatar_url, '') <> ''
+               OR v.nickname IS DISTINCT FROM 'Lg1Kid' OR v.public_name IS DISTINCT FROM 'Lg1Kid' THEN
+              RAISE EXCEPTION '로그인 %: 공개 필드가 바뀜 % % % %', v_step.n, v.display_name, v.avatar_url, v.nickname, v.public_name;
+            END IF;
+          END LOOP;
+          IF (SELECT raw_app_meta_data ->> 'provider' FROM auth.users WHERE id = v_uid) <> 'google' THEN
+            RAISE EXCEPTION '전제 깨짐: app_metadata.provider 가 google 이 아님';
+          END IF;
+        END $$;`),
+  });
   await check({
     group: 'auth',
     id: 'RPC-9',
