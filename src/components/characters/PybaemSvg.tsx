@@ -516,37 +516,21 @@ function CelebratingAccessory() {
 function SleepingAccessory() {
   return (
     <>
-      {/* Zzz */}
-      <text
-        x="88"
-        y="28"
-        fontSize="14"
-        fill="#7986CB"
-        fontWeight="bold"
-        opacity="0.7"
+      {/* Zzz: 글자(<text>) 대신 경로 — 공유 카드 직렬화기(P0-10)가 글꼴 없이도 그린다 */}
+      <g
+        fill="none"
+        stroke="#7986CB"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
-        Z
-      </text>
-      <text
-        x="96"
-        y="20"
-        fontSize="11"
-        fill="#7986CB"
-        fontWeight="bold"
-        opacity="0.5"
-      >
-        z
-      </text>
-      <text
-        x="102"
-        y="14"
-        fontSize="8"
-        fill="#7986CB"
-        fontWeight="bold"
-        opacity="0.3"
-      >
-        z
-      </text>
+        <path d="M89 18 H97 L89 27 H97" strokeWidth="2.4" opacity="0.7" />
+        <path
+          d="M97.5 12.5 H103.5 L97.5 19 H103.5"
+          strokeWidth="2"
+          opacity="0.5"
+        />
+        <path d="M103 8 H107 L103 12.5 H107" strokeWidth="1.6" opacity="0.3" />
+      </g>
     </>
   );
 }
@@ -554,17 +538,17 @@ function SleepingAccessory() {
 function ConfusedAccessory() {
   return (
     <>
-      {/* 물음표 */}
-      <text
-        x="86"
-        y="26"
-        fontSize="18"
-        fill="#FF9800"
-        fontWeight="bold"
-        opacity="0.8"
-      >
-        ?
-      </text>
+      {/* 물음표: 글자 대신 경로 (P0-10) */}
+      <g opacity="0.8">
+        <path
+          d="M87.6 12.2 C87.6 7.4 96.4 7 96.4 12.4 C96.4 15.6 92.4 16.2 92.4 19.8"
+          stroke="#FF9800"
+          strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle cx="92.4" cy="24.4" r="2" fill="#FF9800" />
+      </g>
     </>
   );
 }

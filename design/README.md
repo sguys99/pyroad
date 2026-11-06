@@ -49,7 +49,9 @@ design/prototypes/
 │   ├── moodboard/     ← P2-01 무드보드 → dist/moodboard.html
 │   ├── a/             ← P2-02 시안 A 모험 섬 (시안 에이전트가 채울 곳)
 │   ├── b/             ← P2-03 시안 B 마법 그림책
-│   └── ab/            ← P2-04 A×B 혼합
+│   ├── ab/            ← P2-04 A×B 혼합
+│   ├── rig-review/    ← P2-13 마스코트 리그 리뷰 (앱 src/components/characters/rig/를 상대 경로로 import, strips.mjs·bench.mjs)
+│   └── sound-review/  ← P2-14 소리 청취 검수 (앱 src/lib/sound/ 엔진, `node src/sound-review/gen-audio.mjs` 뒤 빌드, 오디오 data URI 약 4.7MB)
 └── dist/              ← 빌드 결과 (커밋)
 ```
 
