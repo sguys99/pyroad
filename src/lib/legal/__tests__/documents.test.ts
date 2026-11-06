@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LEGAL_LINKS, LEGAL_OPERATOR, formatLegalDate } from '../meta';
 import { PRIVACY } from '../privacy';
 import { TERMS } from '../terms';
+import { LAST_LOGIN_STORAGE_KEY } from '@/lib/auth/lastLogin';
 import type { LegalBlock, LegalDocument, LegalInline } from '../types';
 
 // 약관·개인정보처리방침 문서 (P3-14): 구조, 쉬운 말 요약, 안쪽 링크, 코드와 맞아야 하는 사실
@@ -138,6 +139,16 @@ describe('개인정보처리방침이 코드와 맞는 사실을 담는다', () 
     expect(row('카카오')).not.toContain('이메일');
     expect(row('네이버')).not.toContain('이메일');
     expect(row('Google')).toContain('이메일');
+  });
+});
+
+describe('개인정보처리방침 10절 = 코드의 브라우저 저장 (P3-08)', () => {
+  it('최근 로그인 수단은 쿠키가 아니라 웹 저장소(pyroad.lastLogin.v1)에, 쿠키는 인증 쿠키만', () => {
+    const cookies = PRIVACY.sections.find((s) => s.id === 'cookies')!;
+    const text = cookies.blocks.map(blockText).join('\n');
+    expect(LAST_LOGIN_STORAGE_KEY).toBe('pyroad.lastLogin.v1');
+    expect(text).toMatch(/웹 저장소:[^\n]*최근에 사용한 로그인 수단/);
+    expect(text).toContain('인증 쿠키만 사용합니다');
   });
 });
 

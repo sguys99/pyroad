@@ -124,7 +124,8 @@ describe('GET /auth/callback — 로그인 성공 분석 이벤트 (P1-17)', () 
     const res = await callback('code=abc', {
       'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile',
     });
-    expect(res.headers.get('location')).toBe(`${origin}/world`);
+    // 최근 로그인 배지 조각이 붙는다 (P3-08)
+    expect(res.headers.get('location')).toBe(`${origin}/world#lp=google`);
     await vi.waitFor(() => expect(analyticsDb.current.rows).toHaveLength(1));
     expect(analyticsDb.current.rows[0]).toEqual({
       name: 'login_success',
@@ -159,5 +160,52 @@ describe('GET /auth/callback — 로그인 성공 분석 이벤트 (P1-17)', () 
     await callback('code=abc');
     await new Promise((r) => setTimeout(r, 10));
     expect(analyticsDb.current.upserts).toHaveLength(0);
+  });
+});
+
+describe('GET /auth/callback — 최근 로그인 배지 #lp= (P3-08)', () => {
+  const withUser = (user: Record<string, unknown>) =>
+    exchangeCodeForSession.mockResolvedValueOnce({
+      data: { user },
+      error: null,
+    });
+
+  it.each([
+    ['https://kapi.kakao.com', 'kakao'],
+    ['https://nid.naver.com', 'naver'],
+    ['https://accounts.google.com', 'google'],
+  ])('user_metadata.iss %s → 리다이렉트 주소에 #lp=%s', async (iss, lp) => {
+    withUser({ user_metadata: { iss }, identities: [] });
+    const res = await callback(
+      `code=abc&next=${encodeURIComponent('/settings?tab=account')}`,
+    );
+    expect(res.headers.get('location')).toBe(
+      `${origin}/settings?tab=account#lp=${lp}`,
+    );
+  });
+
+  it('공격 next는 여전히 /world (조각만 붙음)', async () => {
+    withUser({ user_metadata: { iss: 'https://kapi.kakao.com' } });
+    const res = await callback(
+      `code=abc&next=${encodeURIComponent('//evil.com')}`,
+    );
+    expect(res.headers.get('location')).toBe(`${origin}/world#lp=kakao`);
+  });
+
+  it('provider를 모르면(iss 없음 + 연결 2개) 조각 없이', async () => {
+    withUser({
+      user_metadata: {},
+      identities: [{ provider: 'google' }, { provider: 'kakao' }],
+    });
+    const res = await callback('code=abc');
+    expect(res.headers.get('location')).toBe(`${origin}/world`);
+  });
+
+  it('next에 이미 조각이 있으면 건드리지 않음', async () => {
+    withUser({ user_metadata: { iss: 'https://accounts.google.com' } });
+    const res = await callback(
+      `code=abc&next=${encodeURIComponent('/notice#top')}`,
+    );
+    expect(res.headers.get('location')).toBe(`${origin}/notice#top`);
   });
 });
