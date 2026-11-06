@@ -103,6 +103,20 @@ describe('useSocialLogin (P1-14, B16)', () => {
     expect(result.outcome).toBe('browser-guide');
   });
 
+  it('Android에서 네이버는 appscheme=true를 붙여 인앱에서 그대로 로그인 (P3-09)', async () => {
+    detectInAppBrowser.mockReturnValue(KAKAOTALK);
+    await login('naver');
+    expect(openExternalBrowser).not.toHaveBeenCalled();
+    expect(signInWithOAuth).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: 'custom:naver',
+        options: expect.objectContaining({
+          queryParams: { appscheme: 'true' },
+        }),
+      }),
+    );
+  });
+
   it.each(['kakao', 'naver'] as const)(
     '카카오톡 인앱에서 %s는 외부 전환 없이 인앱에서 로그인',
     async (provider) => {

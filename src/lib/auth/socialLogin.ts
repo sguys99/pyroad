@@ -29,6 +29,15 @@ export const KAKAO_SCOPE: string = '';
  */
 export const NAVER_PROVIDER_ID = 'custom:naver';
 
+/**
+ * 네이버 "네이버 앱으로 자동로그인" (P3-09 결정, P0-03 §4.7). Android(크롬·인앱 WebView)는 SDK 없이 웹으로 로그인할 때
+ * `appscheme=true`를 줘야 이 버튼이 보이고, iOS는 주지 않아도 모든 모바일 브라우저에 보인다.
+ * 그래서 **Android일 때만** 붙인다. 앱이 없거나 버튼이 무반응이어도 같은 화면의 아이디·비밀번호 로그인은 그대로 된다.
+ * OIDC authorize(`custom:naver`)에서 동작하는지는 실 앱 스모크 N-8(docs/release/v0.4-phase3-providers.md §9)로 확인하고,
+ * 문제가 있으면 이 값을 false로 바꾼다(다른 코드는 그대로).
+ */
+export const NAVER_APPSCHEME_ON_ANDROID = true;
+
 const PROVIDER_IDS: Record<
   SocialProvider,
   SignInWithOAuthCredentials['provider']
@@ -43,12 +52,14 @@ interface OAuthOptionsInput {
   origin: string;
   /** 로그인 뒤 갈 같은 출처 경로. `/auth/callback`이 `safeNext`로 다시 검사합니다(B23). */
   next?: string;
+  /** 기기 (P3-09): Android면 네이버에 `appscheme=true` (`NAVER_APPSCHEME_ON_ANDROID`) */
+  device?: Pick<InAppBrowserInfo, 'isAndroid'>;
 }
 
 /** provider별 `signInWithOAuth`·`linkIdentity` 인자. redirectTo는 기존 `/auth/callback` 흐름 그대로입니다. */
 export function getOAuthCredentials(
   provider: SocialProvider,
-  { origin, next }: OAuthOptionsInput,
+  { origin, next, device }: OAuthOptionsInput,
 ): SignInWithOAuthCredentials {
   const callback = new URL('/auth/callback', origin);
   if (next) callback.searchParams.set('next', next);
@@ -59,6 +70,11 @@ export function getOAuthCredentials(
   if (provider === 'kakao') {
     options.queryParams = { scope: KAKAO_SCOPE };
   }
+  if (provider === 'naver' && NAVER_APPSCHEME_ON_ANDROID && device?.isAndroid) {
+    options.queryParams = { appscheme: 'true' };
+  }
+  // 공용 기기 모드 `prompt: 'login'`(네이버는 로그아웃 API가 없어 다음 사람에게 세션이 남음)은 아직 붙이지 않는다:
+  // 공용 기기를 고를 자리(설정·로그인 화면 옵션)가 생길 때 여기에 provider별로 추가한다 (P3-09 결정, Phase 4 P4-09 검토)
 
   return { provider: PROVIDER_IDS[provider], options };
 }

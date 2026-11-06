@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, type ComponentProps } from 'react';
+import { useId, useState, type ComponentProps } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
+import { lastLoginBadgeText } from '@/lib/auth/loginProvider';
 // 가벼운 컨텍스트 모듈: 랜딩에서 사운드 매니페스트를 끌고 오지 않게 (button.tsx와 같음)
 import { useSfx } from '@/components/providers/soundContext';
 import { SOCIAL_LABEL, SOCIAL_MARK } from './brandMarks';
@@ -21,6 +22,16 @@ export interface SocialLoginButtonProps extends Omit<
   pressed?: boolean;
   /** 올려놓은 모양으로 고정 (카탈로그용) */
   hovered?: boolean;
+  /**
+   * 이 기기에서 최근에 쓴 로그인 수단 (P3-08): 오른쪽 위에 금색 "최근에 사용" 이름표 + 낭독기용 설명
+   * ("최근에 카카오로 로그인했어요", `aria-describedby`). 버튼 이름(브랜드 문구)은 그대로
+   */
+  recent?: boolean;
+  /**
+   * lg: 60px 높이 + 큰 글자·로고 (P3-09, 카카오톡 인앱의 카카오 버튼처럼 그 화면에서 가장 쉬운 수단). 기본 md 54px.
+   * 비율을 함께 키워 카카오 가이드(레이블 높이 ≤ 1/3)를 지킨다
+   */
+  size?: 'md' | 'lg';
 }
 
 /**
@@ -36,6 +47,8 @@ export function SocialLoginButton({
   sfx = true,
   pressed: forcePressed = false,
   hovered = false,
+  recent = false,
+  size = 'md',
   disabled,
   className,
   type = 'button',
@@ -53,62 +66,85 @@ export function SocialLoginButton({
   const play = useSfx();
   const inactive = !!disabled || loading;
   const Mark = SOCIAL_MARK[provider];
+  const recentId = useId();
+  const describedBy =
+    cn(props['aria-describedby'], recent && recentId) || undefined;
 
   return (
-    <button
-      type={type}
-      {...props}
-      data-provider={provider}
-      data-loading={loading || undefined}
-      data-pressed={pressed || forcePressed || undefined}
-      data-hover={hovered || undefined}
-      aria-busy={loading || undefined}
-      // 로딩 중에도 disabled: 떠나는 중이라 다시 누를 일이 없고 두 번 눌림을 막는다 (진행 중 안내는 묶음의 status 영역)
-      disabled={inactive}
-      className={cn('g-social font-sans', className)}
-      onClick={(e) => {
-        if (inactive) return;
-        if (sfx) play('tap');
-        onClick?.(e);
-      }}
-      onPointerDown={(e) => {
-        if (!inactive && e.button === 0) setPressed(true);
-        onPointerDown?.(e);
-      }}
-      onPointerUp={(e) => {
-        setPressed(false);
-        onPointerUp?.(e);
-      }}
-      onPointerLeave={(e) => {
-        setPressed(false);
-        onPointerLeave?.(e);
-      }}
-      onPointerCancel={(e) => {
-        setPressed(false);
-        onPointerCancel?.(e);
-      }}
-      onKeyDown={(e) => {
-        if (!inactive && (e.key === ' ' || e.key === 'Enter')) setPressed(true);
-        onKeyDown?.(e);
-      }}
-      onKeyUp={(e) => {
-        if (e.key === ' ' || e.key === 'Enter') setPressed(false);
-        onKeyUp?.(e);
-      }}
-      onBlur={(e) => {
-        setPressed(false);
-        onBlur?.(e);
-      }}
-    >
-      <span className="g-social-mark">
-        <Mark />
-      </span>
-      <span>{SOCIAL_LABEL[provider]}</span>
-      {loading && (
-        <span className="g-social-busy">
-          <Loader2 aria-hidden className="animate-spin reduced:animate-none" />
+    <>
+      <button
+        type={type}
+        {...props}
+        data-provider={provider}
+        data-size={size === 'lg' ? 'lg' : undefined}
+        data-loading={loading || undefined}
+        data-pressed={pressed || forcePressed || undefined}
+        data-hover={hovered || undefined}
+        aria-busy={loading || undefined}
+        aria-describedby={describedBy}
+        data-recent={recent || undefined}
+        // 로딩 중에도 disabled: 떠나는 중이라 다시 누를 일이 없고 두 번 눌림을 막는다 (진행 중 안내는 묶음의 status 영역)
+        disabled={inactive}
+        className={cn('g-social font-sans', className)}
+        onClick={(e) => {
+          if (inactive) return;
+          if (sfx) play('tap');
+          onClick?.(e);
+        }}
+        onPointerDown={(e) => {
+          if (!inactive && e.button === 0) setPressed(true);
+          onPointerDown?.(e);
+        }}
+        onPointerUp={(e) => {
+          setPressed(false);
+          onPointerUp?.(e);
+        }}
+        onPointerLeave={(e) => {
+          setPressed(false);
+          onPointerLeave?.(e);
+        }}
+        onPointerCancel={(e) => {
+          setPressed(false);
+          onPointerCancel?.(e);
+        }}
+        onKeyDown={(e) => {
+          if (!inactive && (e.key === ' ' || e.key === 'Enter'))
+            setPressed(true);
+          onKeyDown?.(e);
+        }}
+        onKeyUp={(e) => {
+          if (e.key === ' ' || e.key === 'Enter') setPressed(false);
+          onKeyUp?.(e);
+        }}
+        onBlur={(e) => {
+          setPressed(false);
+          onBlur?.(e);
+        }}
+      >
+        <span className="g-social-mark">
+          <Mark />
+        </span>
+        <span>{SOCIAL_LABEL[provider]}</span>
+        {/* 그림 이름표는 장식(이름에 섞이지 않게 aria-hidden), 같은 뜻의 문장은 버튼 밖에서 설명으로 읽는다 */}
+        {recent && (
+          <span className="g-social-recent" aria-hidden>
+            최근에 사용
+          </span>
+        )}
+        {loading && (
+          <span className="g-social-busy">
+            <Loader2
+              aria-hidden
+              className="animate-spin reduced:animate-none"
+            />
+          </span>
+        )}
+      </button>
+      {recent && (
+        <span id={recentId} className="sr-only">
+          {lastLoginBadgeText(provider)}
         </span>
       )}
-    </button>
+    </>
   );
 }

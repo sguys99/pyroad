@@ -4,8 +4,10 @@ import {
   needsExternalBrowser,
   KAKAO_SCOPE,
   NAVER_PROVIDER_ID,
+  NAVER_APPSCHEME_ON_ANDROID,
   type SocialProvider,
 } from '../socialLogin';
+import { parseLoginProviders } from '../enabledProviders';
 
 const origin = 'https://pyroad.vercel.app';
 
@@ -46,6 +48,27 @@ describe('getOAuthCredentials (P1-14)', () => {
     });
   });
 
+  it('Naver: Android면 "네이버 앱으로 자동로그인" appscheme=true, iOS·PC는 붙이지 않음 (P3-09)', () => {
+    expect(NAVER_APPSCHEME_ON_ANDROID).toBe(true);
+    expect(
+      getOAuthCredentials('naver', { origin, device: { isAndroid: true } })
+        .options?.queryParams,
+    ).toEqual({ appscheme: 'true' });
+    expect(
+      getOAuthCredentials('naver', { origin, device: { isAndroid: false } })
+        .options?.queryParams,
+    ).toBeUndefined();
+    // 다른 provider에는 영향 없음 (Kakao scope 덮어쓰기는 그대로, Google은 옵션 없음)
+    expect(
+      getOAuthCredentials('kakao', { origin, device: { isAndroid: true } })
+        .options?.queryParams,
+    ).toEqual({ scope: KAKAO_SCOPE });
+    expect(
+      getOAuthCredentials('google', { origin, device: { isAndroid: true } })
+        .options?.queryParams,
+    ).toBeUndefined();
+  });
+
   it('next를 주면 콜백 쿼리에 인코딩해서 붙임 (계정 연결 후 /settings 복귀 등)', () => {
     const creds = getOAuthCredentials('kakao', {
       origin,
@@ -71,5 +94,31 @@ describe('needsExternalBrowser (B16)', () => {
     expect(
       providers.filter((p) => needsExternalBrowser(p, { isInApp: false })),
     ).toEqual([]);
+  });
+});
+
+describe('parseLoginProviders (P3-09, NEXT_PUBLIC_LOGIN_PROVIDERS)', () => {
+  it('비우거나 알아볼 값이 없으면 세 개 모두 (오타로 버튼이 사라지지 않게)', () => {
+    expect(parseLoginProviders(undefined)).toEqual([
+      'kakao',
+      'naver',
+      'google',
+    ]);
+    expect(parseLoginProviders('')).toEqual(['kakao', 'naver', 'google']);
+    expect(parseLoginProviders('github, ,')).toEqual([
+      'kakao',
+      'naver',
+      'google',
+    ]);
+  });
+
+  it('고른 것만, 순서는 기본 순서(카카오 → 네이버 → Google), 대소문자·공백·원래 이름 허용', () => {
+    expect(parseLoginProviders('google,kakao')).toEqual(['kakao', 'google']);
+    expect(parseLoginProviders(' Kakao , GOOGLE ')).toEqual([
+      'kakao',
+      'google',
+    ]);
+    expect(parseLoginProviders('custom:naver')).toEqual(['naver']);
+    expect(parseLoginProviders('kakao,kakao,typo')).toEqual(['kakao']);
   });
 });

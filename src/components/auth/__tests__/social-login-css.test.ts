@@ -95,3 +95,19 @@ describe('social-login.css 연출 단계', () => {
     expect(reduced.slice(0, reduced.indexOf('}'))).toContain('transform: none');
   });
 });
+
+describe('최근 로그인 이름표 (P3-08)', () => {
+  it('금색 알약 + 흰 테두리, 등장은 단계별 (동작 줄이기는 없음)', () => {
+    const r = rule('.g-social-recent');
+    expect(r).toContain('background: var(--accent)');
+    expect(r).toContain('color: var(--on-accent)');
+    expect(r).toContain('font-size: var(--text-caption)'); // 14px 미만 금지
+    expect(r).toContain('var(--spring-prop)');
+    expect(rule(":root[data-motion='minimal'] .g-social-recent")).toContain(
+      'g-fade-in',
+    );
+    expect(rule(":root[data-reduced='true'] .g-social-recent")).toContain(
+      'animation: none',
+    );
+  });
+});

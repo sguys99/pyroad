@@ -181,3 +181,34 @@ describe('SocialLoginButtons', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('최근에 쓴 로그인 수단 (P3-08)', () => {
+  it('lastUsed 버튼을 맨 위로, 금색 이름표는 장식이고 문장은 설명으로 읽는다', () => {
+    render(<SocialLoginButtons lastUsed="google" />);
+    const order = screen
+      .getAllByRole('button')
+      .map((b) => b.getAttribute('data-provider'));
+    expect(order).toEqual(['google', 'kakao', 'naver']);
+
+    const google = screen.getByRole('button', { name: 'Google로 로그인' });
+    expect(google).toHaveAttribute('data-recent', 'true');
+    expect(google).toHaveAccessibleDescription('최근에 Google로 로그인했어요');
+    expect(google.querySelector('.g-social-recent')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+    // 다른 버튼에는 이름표 없음
+    expect(button('kakao')).not.toHaveAttribute('data-recent');
+    expect(button('kakao')).not.toHaveAttribute('aria-describedby');
+  });
+
+  it('보이지 않는 provider면 순서·이름표 없음', () => {
+    render(
+      <SocialLoginButtons providers={['kakao', 'google']} lastUsed="naver" />,
+    );
+    expect(
+      screen.getAllByRole('button').map((b) => b.getAttribute('data-provider')),
+    ).toEqual(['kakao', 'google']);
+    expect(document.querySelector('[data-recent]')).toBeNull();
+  });
+});

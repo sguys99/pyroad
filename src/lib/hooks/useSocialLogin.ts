@@ -50,7 +50,10 @@ export function useSocialLogin(provider: SocialProvider) {
     try {
       const supabase = await loadBrowserClient();
       const { error } = await supabase.auth.signInWithOAuth(
-        getOAuthCredentials(provider, { origin: window.location.origin }),
+        getOAuthCredentials(provider, {
+          origin: window.location.origin,
+          device: info,
+        }),
       );
       return error ? 'error' : 'redirecting';
     } catch {

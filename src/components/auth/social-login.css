@@ -101,6 +101,20 @@
     width: 1.25rem;
     height: 1.25rem;
   }
+  /* 큰 버튼 (P3-09, 카카오톡 인앱의 카카오): 60px · 21px 글자 · 로고도 같은 비율. 레이블 한글 높이 약 17px ≤ 60/3 */
+  .g-social[data-size='lg'] {
+    min-height: 3.75rem;
+    font-size: 1.3125rem;
+  }
+  .g-social[data-size='lg'] .g-social-mark {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  .g-social[data-size='lg'][data-provider='naver'] .g-social-mark {
+    width: 1.1875rem;
+    height: 1.1875rem;
+  }
+
   /* 바쁨 표시는 오른쪽 끝에 따로: 로고·글자 자리가 움직이지 않는다 (로고는 늘 보여야 함) */
   .g-social-busy {
     position: absolute;
@@ -114,6 +128,44 @@
   .g-social-busy > svg {
     width: 100%;
     height: 100%;
+  }
+
+  /* 최근에 쓴 로그인 수단 이름표 (P3-08): 금색 알약을 오른쪽 위 모서리에 걸쳐 단다(브랜드 면을 덮지 않게 위로 8px 나옴).
+     흰 테두리 2px로 카카오 노랑 위에서도 떨어져 보이게. 등장: full = prop 스프링 팝 · lite = 짧게 · minimal = 페이드 · 동작 줄이기 = 없음 */
+  .g-social-recent {
+    position: absolute;
+    top: -0.5rem;
+    right: 0.75rem;
+    z-index: 1;
+    padding: 0.0625rem 0.625rem;
+    border-radius: var(--round-pill);
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow:
+      0 0 0 2px var(--surface),
+      var(--elev-card);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    line-height: 1.4;
+    pointer-events: none;
+    transform-origin: 80% 100%;
+    animation: g-social-recent-in var(--spring-prop-dur) var(--spring-prop) both;
+  }
+  @keyframes g-social-recent-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.375rem) scale(0.6);
+    }
+  }
+  :root[data-motion='lite'] .g-social-recent {
+    animation-duration: var(--dur-base);
+    animation-timing-function: var(--easing-out);
+  }
+  :root[data-motion='minimal'] .g-social-recent {
+    animation: g-fade-in var(--dur-fade) var(--easing-out) both;
+  }
+  :root[data-reduced='true'] .g-social-recent {
+    animation: none;
   }
 
   /* 상태: 올려놓기 1px 뜸 + 5% · 누름 1px 내려앉음·살짝 작아짐 + 10% */

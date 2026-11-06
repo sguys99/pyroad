@@ -243,11 +243,13 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 | 비활성 | 브랜드 색 그대로 45%로 흐리게 |
 | 포커스 | 2px `--ring` + 2px 간격 |
 | 오류 (묶음) | 버튼을 되살리고 아래에 "앗, 로그인을 시작하지 못했어요…" (`role="alert"`, 오류색 글자) |
+| 큰 버튼 `size="lg"` (P3-09) | 60px · 21px 글자 · 로고도 같은 비율(카카오 레이블 높이 ≤ 1/3 유지). 카카오톡 인앱의 카카오 버튼 |
+| 최근에 사용 (P3-08) | 그 버튼이 맨 위 + 오른쪽 위 모서리에 금색 알약 "최근에 사용"(`accent`/`onAccent` 7.66:1, 14px 굵게, 흰 테두리 2px, 위로 8px 나와 브랜드 면을 거의 덮지 않음). 등장 full = prop 스프링 팝 · lite = 220ms · minimal = 페이드 · 동작 줄이기 = 없음. 알약은 `aria-hidden`, 낭독기는 버튼 밖 문장 "최근에 ○○로 로그인했어요"를 `aria-describedby`로 읽음(버튼 이름은 브랜드 문구 그대로) |
 
 **props**
-- `SocialLoginButton`: `provider` · `loading` · `disabled` · `sfx`(기본 `tap`) · `pressed`·`hovered`(카탈로그 고정) + 나머지 `<button>` 속성. 모양만, 호출 없음.
-- `SocialLoginButtons`: `providers`(기본 카카오 → 네이버 → Google, `DEFAULT_SOCIAL_ORDER`) · `onBeforeLogin(provider)`(분석 이벤트) · `preview(provider)`(카탈로그용 가짜 로그인) · `className`. 하나를 누르면 그 버튼만 바쁨·나머지 비활성(두 번 눌림 막음), 결과 `redirecting`이면 바쁨 유지, `external-browser`·`browser-guide`면 되살림, `error`면 되살리고 오류 문구. bfcache로 돌아오면(`pageshow`) 바쁨을 푼다. Google은 인앱에서 `InAppBrowserGuide`(B16).
-- `LoginSheet`: `open` · `onOpenChange` · `cta`(`hero`·`header`, provider를 고를 때 `landing_cta_click`) · `preview` · `className`. `Sheet` + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 질문 + 버튼 + "이름·사진은 다른 친구에게 보이지 않아요".
+- `SocialLoginButton`: `provider` · `loading` · `disabled` · `sfx`(기본 `tap`) · `recent`(최근에 사용 이름표, P3-08) · `size`(`md` 54px / `lg` 60px, P3-09) · `pressed`·`hovered`(카탈로그 고정) + 나머지 `<button>` 속성. 모양만, 호출 없음.
+- `SocialLoginButtons`: `providers`(기본 `NEXT_PUBLIC_LOGIN_PROVIDERS`로 켠 것, 비우면 카카오 → 네이버 → Google 모두, P3-09) · `lastUsed`(P3-08: 맨 위로 + 이름표) · `onBeforeLogin(provider)`(분석 이벤트) · `preview(provider)`(카탈로그용 가짜 로그인) · `browser`(인앱 판별 결과를 직접 줌, 카탈로그·테스트) · `portalClassName`(인앱 안내 대화 상자 글꼴 변수) · `className`. 순서는 `orderProviders(providers, [카카오톡 인앱이면 kakao, lastUsed])`. 하나를 누르면 그 버튼만 바쁨·나머지 비활성(두 번 눌림 막음), 결과 `redirecting`이면 바쁨 유지, `external-browser`·`browser-guide`면 되살림, `error`면 되살리고 오류 문구. bfcache로 돌아오면(`pageshow`) 바쁨을 푼다. 인앱 처리(P3-09)는 아래 "인앱 브라우저".
+- `LoginSheet`: `open` · `onOpenChange` · `cta`(`hero`·`header`, provider를 고를 때 `landing_cta_click`) · `preview` · `className` · `lastUsed`(주지 않으면 열 때마다 이 기기 저장값 `readLastLogin()`, P3-08). 최근 기록이 있으면 설명이 "지난번엔 ○○로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!"로 바뀐다(자동 계정 연결이 없어서, §2.8). `Sheet` + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 질문 + 버튼 + "이름·사진은 다른 친구에게 보이지 않아요".
 - `LoginSheetButton`: 게임 버튼 props + `cta`. 누르면 시트를 연다. 시트 모듈은 `next/dynamic`으로 올려놓기·포커스 때 미리 받고 누를 때 그린다(첫 화면 JS 밖). 시트는 body로 포털되므로 **랜딩 서브셋 글꼴 변수**(`displayLanding`·`sansLanding`)를 시트 상자에 직접 넘긴다(안 넘기면 제목이 Jua가 아니라 시스템 글꼴).
 
 ```tsx
@@ -255,7 +257,16 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 <SocialLoginButtons onBeforeLogin={(provider) => track('landing_cta_click', { cta, provider }, { immediate: true })} />
 ```
 
-**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+
+**인앱 브라우저 (P3-09)**: 판별은 `detectInAppBrowser(ua?)`(판별표 테스트 `src/lib/browser/__tests__/detectInAppBrowser.test.ts`: 카카오톡·네이버 앱 iOS/Android, 인스타그램, 페이스북, 라인, 밴드, 그 밖 웹뷰, 일반 브라우저).
+- **카카오톡 인앱**: 외부로 보내지 않는다. 카카오 버튼을 맨 위에 크게(`lg`) — 카카오톡 안에서 바로 로그인된다. 최근에 쓴 수단은 그다음
+- **Google**만 누를 때 외부 브라우저로 보낸다(`needsExternalBrowser`, `signInWithOAuth` **전에**: PKCE verifier 쿠키가 시작한 브라우저에 남으므로). 인앱이면 버튼 아래 "Google 로그인은 Chrome·Safari 같은 브라우저에서 열려요" 한 줄. 외부 브라우저를 열었으면 "브라우저를 열었어요. 거기서 Google 로그인을 한 번 더 눌러 줘!", 열 수 없는 인앱(iOS 인스타그램 등)이면 `InAppBrowserGuide`: provider별 문구("앗! 여기서는 Google 로그인이 안 돼요" + 앱 이름 + 막는 이유) · 브라우저에서 열기 · 주소 복사 · **이 앱 안에서 바로 되는 카카오·네이버 버튼**(누르면 안내를 닫고 그 수단으로 로그인). 안내도 body로 포털되므로 랜딩 서브셋 글꼴 변수를 `portalClassName`으로 받는다
+- **네이버**는 인앱 WebView에서도 되므로 외부로 보내지 않는다. Android(크롬·인앱)에서는 `queryParams: { appscheme: 'true' }`로 "네이버 앱으로 자동로그인" 버튼을 켠다(`NAVER_APPSCHEME_ON_ANDROID`, iOS는 값 없이도 보임). 실 앱 스모크 N-8에서 확인하고 문제가 있으면 상수만 끈다
+- **공용 기기 모드** `prompt: 'login'`(네이버는 로그아웃 API가 없어 다음 사람에게 세션이 남음)은 아직 붙이지 않는다: 공용 기기를 고를 자리(로그인 화면 옵션·설정)가 생길 때(P4-09 로그인 모달 검토) `getOAuthCredentials`에 provider별로 추가
+- **버튼 숨기기** `NEXT_PUBLIC_LOGIN_PROVIDERS=kakao,google`: 네이버 검수 전 배포용(docs/release/v0.4-phase3-providers.md §7)
+
+**최근 로그인 기록 (P3-08)**: `/auth/callback`이 세션 사용자의 `user_metadata.iss`로 provider를 정해(`loginProviderFromUser`) 리다이렉트 주소에 `#lp=<provider>` 조각을 붙이고, 루트 레이아웃의 `LastLoginRecorder`가 `localStorage` `pyroad.lastLogin.v1` = `{ provider, at }`에 저장한 뒤 `history.replaceState`로 조각을 지운다(`src/lib/auth/lastLogin.ts`). 쿼리가 아니라 조각인 이유: 서버·로그·분석으로 가지 않고, 미들웨어가 다시 리다이렉트해도(/world → /onboarding) 브라우저가 조각을 이어 붙인다. 1년 지난 기록은 무시하고 로그아웃해도 지우지 않는다. 쿠키를 쓰지 않으므로 개인정보처리방침 10절 "인증 쿠키만"이 그대로 맞다. UI 힌트일 뿐 인가에 쓰지 않는다.
 
 ## 13. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
