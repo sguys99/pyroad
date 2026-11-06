@@ -39,8 +39,13 @@ export async function GET(request: Request) {
     const forwardedHost = request.headers.get('x-forwarded-host');
     const isLocalEnv = process.env.NODE_ENV === 'development';
     if (isLocalEnv) return NextResponse.redirect(`${origin}${path}`);
-    if (forwardedHost)
-      return NextResponse.redirect(`https://${forwardedHost}${path}`);
+    if (forwardedHost) {
+      // 프록시가 알려 준 스킴을 따른다 (Vercel = https). 로컬 `next start`(e2e)는 Next가 http로 채운다 — 전에는 https로 고정해
+      // 로컬 운영 빌드에서 콜백 뒤 https://localhost 로 가 버렸다 (P3-17 e2e에서 발견). 값이 없거나 이상하면 https
+      const proto = request.headers.get('x-forwarded-proto');
+      const scheme = proto === 'http' || proto === 'https' ? proto : 'https';
+      return NextResponse.redirect(`${scheme}://${forwardedHost}${path}`);
+    }
     return NextResponse.redirect(`${origin}${path}`);
   };
 

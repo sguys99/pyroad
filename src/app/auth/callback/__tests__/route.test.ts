@@ -441,3 +441,27 @@ describe('GET /auth/callback — 계정 연결 (P3-07)', () => {
     );
   });
 });
+
+describe('GET /auth/callback — 프록시 스킴 (P3-17)', () => {
+  it('x-forwarded-proto를 따른다 (로컬 next start = http, 없으면 https)', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    try {
+      const local = await callback('error=access_denied&via=kakao', {
+        'x-forwarded-host': 'localhost:3100',
+        'x-forwarded-proto': 'http',
+      });
+      expect(local.headers.get('location')).toBe(
+        'http://localhost:3100/?login_error=cancelled&via=kakao',
+      );
+      const odd = await callback('error=access_denied', {
+        'x-forwarded-host': 'pyroad.vercel.app',
+        'x-forwarded-proto': 'javascript',
+      });
+      expect(odd.headers.get('location')).toBe(
+        'https://pyroad.vercel.app/?login_error=cancelled',
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});
