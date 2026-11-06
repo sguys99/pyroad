@@ -1,4 +1,5 @@
-// 시안 B 마법 그림책 인터랙티브 프로토타입 (P2-03)
+// 최종 시안 인터랙티브 프로토타입 (P2-07, 시안 B에서 출발 → 사용자 리뷰 1차·2차 반영)
+// 2차: 바탕 질감 없음(단색), 선 얇게(면 + 얕은 깊이), 색은 중립 + 초록 하나 + 금색 하나 — refine.css·tokens.ts
 // 화면: #landing 랜딩 · #world 보물지도 · #stage 스테이지 차례(지도 위 바텀시트) · #quest 책 펼침 퀘스트 · #motion 준비 중
 import { useLayoutEffect, useRef } from 'react';
 import { mountPrototype } from '../shared/app';
@@ -11,12 +12,8 @@ import './base.css';
 import './screens.css';
 import './motion.css';
 import './final.css';
-import { PAPER_FIBER, PAPER_GRAIN } from './paper.gen';
+import './refine.css';
 import { applyFinalTokens } from './tokens';
-
-// 종이 질감 타일(미리 만든 PNG)을 CSS 변수로
-document.documentElement.style.setProperty('--b-grain', PAPER_GRAIN);
-document.documentElement.style.setProperty('--b-fiber', PAPER_FIBER);
 
 const SCREENS = [
   { id: 'landing', label: '랜딩' },
@@ -81,7 +78,7 @@ function App({ screen }: { screen: Screen }) {
 mountPrototype<Screen>({
   concept: 'B',
   name: 'pyRoad 최종 시안',
-  subtitle: 'P2-07 · B 기반 (가볍게·단순하게)',
+  subtitle: 'P2-07 2차 · 단색 바탕·얇은 선·절제된 색',
   screens: SCREENS,
   defaultScreen: 'landing',
   render: (screen) => <App screen={screen} />,

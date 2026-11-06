@@ -9,10 +9,12 @@ import {
   ByeolttongiStatic,
   PYBAEM,
   PYBAEM_EXPRESSION_STATE,
+  PYBAEM_PALETTES,
   PYBAEM_STATES,
   PybaemStatic,
   RIG_STYLES,
   RigStatic,
+  STYLE_RULES,
   type RigDef,
 } from '..';
 import { RigView } from '../LiveRig';
@@ -70,13 +72,22 @@ describe('정지 그림 (공유 카드·아바타·SSR, P0-10)', () => {
     }
   });
 
-  it('B·A×B 종이 결 필터는 filters={false}(작은 아바타·lite 이하)면 빠진다', () => {
-    expect(renderToStaticMarkup(<PybaemStatic style="B" />)).toContain(
+  it('A×B 종이 결 필터는 filters={false}(작은 아바타·lite 이하)면 빠진다', () => {
+    expect(renderToStaticMarkup(<PybaemStatic style="AB" />)).toContain(
       '<filter',
     );
     expect(
-      renderToStaticMarkup(<PybaemStatic style="B" filters={false} />),
+      renderToStaticMarkup(<PybaemStatic style="AB" filters={false} />),
     ).not.toContain('<filter');
+  });
+
+  it('B는 종이 결 필터 없이 몸색 톤의 얇은 외곽선 (P2-07 2차)', () => {
+    const svg = renderToStaticMarkup(<PybaemStatic style="B" />);
+    expect(svg).not.toContain('<filter');
+    expect(svg).toContain(`stroke="${PYBAEM_PALETTES.B.outline}"`);
+    expect(svg).toContain(`stroke-width="${STYLE_RULES.B.outline}"`);
+    // 눈·입은 짙은 잉크 그대로 (표정이 읽히게)
+    expect(svg).toContain(`fill="${PYBAEM_PALETTES.B.ink}"`);
   });
 
   it('눈꺼풀 clipPath는 슬플 때만 건다', () => {

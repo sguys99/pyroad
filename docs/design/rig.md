@@ -51,7 +51,7 @@ ref.current?.poke(); ref.current?.replay();
 ```
 
 - **지연 로드**: 첫 화면은 `PybaemStatic`(서버에서 그림)으로 두고 `next/dynamic(() => import('…/MascotRig'), { ssr: false, loading: () => <PybaemStatic … /> })`로 바꿔도 **같은 모습**입니다. 라이브 리그의 첫 렌더가 같은 `staticGeo()`를 쓰고, 테스트가 두 마크업이 같은지 확인합니다(`static.test.tsx`).
-- **스타일**: `style`을 생략하면 `DEFAULT_RIG_STYLE`(지금 `'AB'`). 시안 확정(P2-06~08) 뒤 `style.ts` 한 줄만 바꿉니다.
+- **스타일**: `style`을 생략하면 `DEFAULT_RIG_STYLE`(**`'B'`**, P2-06 사용자 리뷰에서 B 방향 확정·P2-07 2차에서 바꿈).
 - **팔레트·코스튬**: `palette={{ body: '#4FC3F7' }}`(스킨), `costume={{ hat: 'party', glasses: 'round', cape: '#E53935', bg: 'island' }}`(파이뱀). 표정 소품(별 눈·물음표·Zzz)과 코스튬은 서로 다른 슬롯이라 겹치지 않습니다(P0-10).
 - **접근성**: `role="img"` + `aria-label="파이뱀 선생님 - 기쁨"`. `label=""`이면 장식(`aria-hidden`).
 - `<text>`·`<foreignObject>`·래스터 `<image>`를 쓰지 않습니다(공유 카드 직렬화기, P0-10). 예전 `PybaemSvg`의 "Zzz"·"?"도 경로로 바꿨습니다.
@@ -130,9 +130,9 @@ ref.current?.poke(); ref.current?.replay();
 
 | | A 모험 섬 | B 그림책 | A×B |
 |---|---|---|---|
-| 외곽선 | 없음 | 잉크 갈색 2.2 | 남색 2.6 |
+| 외곽선 | 없음 | **몸색 진한 톤 1.1** (P2-07 2차, 1차는 잉크 갈색 2.2). 소품·다리·더듬이는 제 색, 눈·입은 짙은 잉크 그대로 (`tonal`) | 남색 2.6 (모든 부위 같은 잉크) |
 | 광택 | 단색 + 그늘·빛·하이라이트 도형 | 없음 (배 줄무늬) | 있음 |
-| 종이 결 필터 | 없음 | 변위 2.6 + 선 떨림 8fps | 변위 1.5, 떨림 없음 |
+| 종이 결 필터 | 없음 | **없음** (1차 변위 2.6 + 선 떨림 8fps) | 변위 1.5, 떨림 없음 |
 | 렌더 | 60fps | 12fps 계단 | 60fps |
 | 착지 젤리 | `jellyA` k520 c10 (ζ 0.22) | `jellyB` k480 c24 (ζ 0.55) | `jellyAB` k500 c16 (ζ 0.36) |
 

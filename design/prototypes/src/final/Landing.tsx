@@ -1,7 +1,8 @@
 // 랜딩 (#landing): 히어로(살아 있는 파이뱀 + 보물지도) · 소셜 로그인 자리 · 30초 체험(X4) · 그림책 3권 · 캐릭터 · 보호자 안내(X5) · 푸터
 import { useRef, useState } from 'react';
 import { goScreen } from '../shared/app';
-import { Icon, RewardIcon, type IconName } from '../shared/icons';
+import { Icon, type IconName } from '../shared/icons';
+import { RewardIcon } from './reward';
 import { PybaemRig, PybaemStatic } from './rig';
 import { BugBug, Byeolttongi } from './rig';
 import { STAGES, WORLD1 } from '../shared/content';

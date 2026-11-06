@@ -46,7 +46,7 @@ export const PYBAEM_PALETTES: Record<RigStyle, PybaemPalette> = {
     outline: 'none',
     shadow: '#1B5E20',
   },
-  /** B 그림책: 세이지·크림·잉크 갈색 */
+  /** B 그림책: 세이지·크림. 외곽선은 몸색(#9CCB80)의 진한 톤, 눈·입(ink)은 짙은 갈색 그대로 (P2-07 2차) */
   B: {
     body: '#9CCB80',
     bodyDark: '#77A862',
@@ -56,8 +56,8 @@ export const PYBAEM_PALETTES: Record<RigStyle, PybaemPalette> = {
     cheek: '#F2879B',
     cheekAlpha: '0.84',
     tongue: '#E07A6C',
-    outline: '#3B2F25',
-    shadow: '#6B5A45',
+    outline: '#5F804E',
+    shadow: '#8E877C',
   },
   /** A×B: A의 선명한 초록 + 남색 잉크 외곽선 */
   AB: {
@@ -96,7 +96,8 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
   const inked = rules.outline > 0;
   const ol = outlineOf(style, pal.outline);
   const paper = usesPaper(props);
-  const propInk = inked ? pal.outline : undefined;
+  // 소품(반짝이·모자·망토·물음표)에 잉크를 두르나: 몸색 톤 외곽선(B)이면 소품은 제 색
+  const propInk = inked && !rules.tonal ? pal.outline : undefined;
 
   const defs = (
     <>
@@ -187,7 +188,12 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
             rx="28"
             ry="17"
             fill={pal.belly}
-            {...(inked ? { stroke: pal.outline, strokeWidth: 1.4 } : {})}
+            {...(inked
+              ? {
+                  stroke: pal.outline,
+                  strokeWidth: Math.min(1.4, rules.outline),
+                }
+              : {})}
           />
           {inked && !rules.gloss && (
             <path
@@ -195,7 +201,7 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
               stroke={pal.outline}
               strokeWidth="1"
               fill="none"
-              opacity="0.45"
+              opacity={rules.tonal ? 0.3 : 0.45}
             />
           )}
           {rules.gloss && (
@@ -270,7 +276,7 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
                   ref={r(`star${s}`)}
                   d={STAR_EYE}
                   fill="#FFD54F"
-                  stroke={inked ? pal.outline : '#F9A825'}
+                  stroke={propInk ?? '#E0A021'}
                   strokeWidth="1.2"
                   strokeLinejoin="round"
                   {...a(`star${s}`)}
@@ -364,7 +370,7 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
             </g>
           ))}
           <g ref={r('qmark')} {...a('qmark')}>
-            {inked && (
+            {propInk && (
               <path
                 d={QMARK}
                 fill="none"
@@ -385,7 +391,7 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
               cy="6.4"
               r="2.1"
               fill="#FB8C00"
-              {...(inked ? { stroke: pal.outline, strokeWidth: 1.1 } : {})}
+              {...(propInk ? { stroke: propInk, strokeWidth: 1.1 } : {})}
             />
           </g>
         </g>

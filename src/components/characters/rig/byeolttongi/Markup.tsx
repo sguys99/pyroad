@@ -56,8 +56,9 @@ export const BYEOLTTONGI_PALETTES: Record<RigStyle, ByeolttongiPalette> = {
     cheek: '#F2879B',
     cheekAlpha: '0.6',
     tongue: '#E07A6C',
-    outline: '#3B2F25',
-    shadow: '#6B5A45',
+    /** 몸(#F2C14E)의 진한 톤 (P2-07 2차). 반짝이·코인도 같은 금색 톤 선 */
+    outline: '#A97C24',
+    shadow: '#8E877C',
     trail: '#E9B949',
     trailCore: '#FFF6D8',
     coin: '#F2C14E',

@@ -7,8 +7,8 @@
 export type RigStyle = 'A' | 'B' | 'AB';
 export const RIG_STYLES: readonly RigStyle[] = ['A', 'B', 'AB'];
 
-/** 기본 스타일. 시안 확정 전 임시값 A×B (`src/lib/motion/tokens.ts`의 `DEFAULT_CONCEPT = 'ab'`와 같음) */
-export const DEFAULT_RIG_STYLE: RigStyle = 'AB';
+/** 기본 스타일. 사용자 리뷰(P2-06, §12-Q28)에서 B(그림책) 방향으로 확정 */
+export const DEFAULT_RIG_STYLE: RigStyle = 'B';
 
 export const STYLE_LABEL: Record<RigStyle, string> = {
   A: 'A 모험 섬',
@@ -19,6 +19,11 @@ export const STYLE_LABEL: Record<RigStyle, string> = {
 export interface StyleRules {
   /** 잉크 외곽선 두께 (0 = 외곽선 없음) */
   outline: number;
+  /**
+   * 외곽선을 "몸 면 색의 진한 톤"으로 쓰나 (P2-07 2차, B). 켜면 팔레트 `outline`이 몸색의 진한 톤이고,
+   * 소품(반짝이·모자)·다리·더듬이는 잉크를 두르지 않고 제 색을 쓴다. 끄면 모든 부위에 같은 잉크 선(A×B)
+   */
+  tonal: boolean;
   /** 종이 결·선 흔들림 필터 (`feDisplacementMap` 기본 변위). 연출 단계가 lite 이하면 필터 자체를 뺀다 */
   paper: number;
   /** 선 떨림: 필터 seed를 바꾸는 주기(fps). 0이면 고정 */
@@ -34,22 +39,26 @@ export interface StyleRules {
 export const STYLE_RULES: Record<RigStyle, StyleRules> = {
   A: {
     outline: 0,
+    tonal: false,
     paper: 0,
     boilFps: 0,
     renderInterval: 0,
     gloss: true,
     jelly: 'jellyA',
   },
+  /** B 그림책 (P2-07 2차 "선이 굵어 투박"): 외곽선 2.2 잉크 갈색 → 1.1 몸색 진한 톤, 종이 결·선 떨림 없음. 12fps 리듬·젤리는 그대로 */
   B: {
-    outline: 2.2,
-    paper: 2.6,
-    boilFps: 8,
+    outline: 1.1,
+    tonal: true,
+    paper: 0,
+    boilFps: 0,
     renderInterval: 1 / 12,
     gloss: false,
     jelly: 'jellyB',
   },
   AB: {
     outline: 2.6,
+    tonal: false,
     paper: 1.5,
     boilFps: 0,
     renderInterval: 0,

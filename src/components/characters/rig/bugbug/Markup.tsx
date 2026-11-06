@@ -71,8 +71,9 @@ export const BUGBUG_PALETTES: Record<RigStyle, BugBugPalette> = {
     tongue: '#E8927C',
     cheek: '#F2879B',
     cheekAlpha: '0.75',
-    outline: '#3B2F25',
-    shadow: '#6B5A45',
+    /** 등딱지(#C8553D)의 진한 톤 (P2-07 2차). 다리·더듬이는 잉크 대신 제 색(leg·head) */
+    outline: '#8C3B2B',
+    shadow: '#8E877C',
     under: '#3B2F25',
     wing: '#EAF1F4',
   },
@@ -118,10 +119,17 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
   const rules = STYLE_RULES[style];
   const inked = rules.outline > 0;
   const ol = outlineOf(style, pal.outline);
-  const thin = inked ? { stroke: pal.outline, strokeWidth: 1.2 } : {};
+  const thin = inked
+    ? rules.tonal
+      ? { stroke: pal.shellDark, strokeWidth: 0.8, strokeOpacity: 0.45 }
+      : { stroke: pal.outline, strokeWidth: 1.2 }
+    : {};
   const paper = usesPaper(props);
-  const propInk = inked ? pal.outline : undefined;
-  const legW = inked ? 3.4 : 3.2;
+  // 다리·더듬이·소품을 잉크색으로 그리나 (몸색 톤 외곽선이면 제 색)
+  const lineInk = inked && !rules.tonal ? pal.outline : undefined;
+  // 소품 선: 잉크(A×B) / 몸색 톤(B)이면 차분한 금갈색 / 없음(A)이면 밝은 금색
+  const propInk = lineInk ?? (rules.tonal ? '#B78A3E' : undefined);
+  const legW = lineInk ? 3.4 : 3.2;
 
   const half = (side: 'L' | 'R') => (
     <g ref={r(`shell${side}`)} {...a(`shell${side}`)}>
@@ -200,7 +208,7 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
         <g ref={r('root')} {...a('root')}>
           {/* 다리 */}
           <g
-            stroke={inked ? pal.outline : pal.leg}
+            stroke={lineInk ?? pal.leg}
             strokeWidth={legW}
             strokeLinecap="round"
             fill="none"
@@ -239,7 +247,7 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
               <g key={s} ref={r(`ant${s}`)} {...a(`ant${s}`)}>
                 <path
                   d={s === 'L' ? 'M52 33 Q48 18 42 14' : 'M76 33 Q80 18 86 14'}
-                  stroke={inked ? pal.outline : pal.head}
+                  stroke={lineInk ?? pal.head}
                   strokeWidth="3"
                   strokeLinecap="round"
                   fill="none"

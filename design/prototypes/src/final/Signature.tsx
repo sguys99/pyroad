@@ -1,13 +1,14 @@
 // 시안 B 시그니처 모션 (P2-05): #motion 무대 + 실제 흐름에서 쓰는 조각(해제 레이어·보상 진행·레벨업 오버레이)
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject, type ReactNode } from 'react';
-import { Icon, RewardIcon } from '../shared/icons';
+import { Icon } from '../shared/icons';
+import { RewardIcon } from './reward';
 import { PybaemRig, PybaemStatic } from './rig';
 import { Byeolttongi } from './rig';
 import { useMotion } from '../shared/motion';
 import type { PybaemState as RigState } from '../../../../src/components/characters/rig/pybaem/params';
 import { Scene, attachSkip, type BeatInfo, type M, type SceneSpec, type Tier } from './timeline';
 import { buildLevelUp, buildSuccess, buildUnlock } from './beats';
-import { Landmark, MagicBoxScene, TinyTree, Mountains, INK, C } from './art';
+import { Landmark, MagicBoxScene, TinyTree, Mountains, INK, ROAD, C, tone } from './art';
 import { Hud, InkButton, Layer, Stars } from './ui';
 import { getB, setB } from './state';
 
@@ -96,7 +97,7 @@ export const UnlockLayer = forwardRef<
   return (
     <div className={`f-ul ${armed ? 'is-armed' : ''} ${lockIdle ? 'is-lockidle' : ''}`} aria-hidden>
       <svg viewBox={`0 0 ${w} ${h}`} className="f-ul-svg">
-        <path ref={path} d={d} fill="none" stroke={INK} strokeWidth={4} strokeLinecap="round" className="f-ul-road" />
+        <path ref={path} d={d} fill="none" stroke={ROAD} strokeWidth={4} strokeLinecap="round" className="f-ul-road" />
       </svg>
       {/* 잉크 번짐 레이어: 랜드마크 둘레 작은 상자 (마스크 중심이 크기와 상관없이 고정되게) */}
       <div
@@ -424,8 +425,8 @@ function UnlockStage({ api, m }: { api: MutableRefObject<StageApi | null>; m: M 
   return (
     <div className="fm-ul" ref={paper}>
       <svg viewBox={`0 0 ${UL.w} ${UL.h}`} className="fm-ul-map" aria-hidden>
-        <path d="M0 0 H600 V40 C520 60 460 30 380 50 C300 70 240 40 160 56 C90 70 40 50 0 64Z" fill="#CFE0E6" />
-        <path d="M600 40 C520 60 460 30 380 50 C300 70 240 40 160 56 C90 70 40 50 0 64" fill="none" stroke={INK} strokeWidth="2" />
+        <path d="M0 0 H600 V40 C520 60 460 30 380 50 C300 70 240 40 160 56 C90 70 40 50 0 64Z" fill={C.waterLight} />
+        <path d="M600 40 C520 60 460 30 380 50 C300 70 240 40 160 56 C90 70 40 50 0 64" fill="none" stroke={tone(C.waterLight, 0.86)} strokeWidth="1.2" />
         <Mountains x={150} y={150} s={1.1} />
         <Mountains x={380} y={250} s={0.9} />
         <TinyTree x={40} y={170} s={1.2} />
@@ -433,8 +434,8 @@ function UnlockStage({ api, m }: { api: MutableRefObject<StageApi | null>; m: M 
         <TinyTree x={250} y={290} s={1} />
         <path d={`${d12} ${d23.replace('M', 'L').split(' C')[0]}`} fill="none" stroke={C.sand} strokeWidth="20" strokeLinecap="round" opacity="0.75" />
         <path d={d23} fill="none" stroke={C.sand} strokeWidth="20" strokeLinecap="round" opacity="0.75" />
-        <path d={d12} fill="none" stroke={INK} strokeWidth="5" strokeLinecap="round" />
-        <path d={d23} fill="none" stroke="#8A7356" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="2 9" />
+        <path d={d12} fill="none" stroke={ROAD} strokeWidth="4" strokeLinecap="round" />
+        <path d={d23} fill="none" stroke={INK} strokeWidth="2.2" strokeLinecap="round" strokeDasharray="2 9" />
         {UL.pts.map(([x, y], i) => (
           <g key={i} transform={`translate(${x} ${y + 6}) scale(${UL.scale})`}>
             <Landmark stage={i + 2} mode={i === 2 ? 'pencil' : 'ink'} />

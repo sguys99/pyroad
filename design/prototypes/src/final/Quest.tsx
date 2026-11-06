@@ -2,7 +2,8 @@
 // 모바일: 한 쪽씩 넘기는 구조 (이야기 → 공책 → 결과), 코드 키보드 툴바, "퀴즈로 보기" 토글
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { goScreen } from '../shared/app';
-import { Icon, RewardIcon } from '../shared/icons';
+import { Icon } from '../shared/icons';
+import { RewardIcon } from './reward';
 import { PybaemRig } from './rig';
 import { BugBug } from './rig';
 import { quest as questText, STAGES } from '../shared/content';
@@ -315,7 +316,7 @@ function StoryPage({
           <MagicBoxScene />
         ) : (
           <svg viewBox="-160 -120 320 140" className="f-quest-art" aria-hidden>
-            <rect x="-160" y="-120" width="320" height="140" fill="#EAF1DA" />
+            <rect x="-560" y="-120" width="1120" height="140" fill="#EDF3E8" />
             <Landmark stage={stage} mode="ink" />
           </svg>
         )}

@@ -1,58 +1,57 @@
-// 시안 B 삽화 (잉크 선 + 수채 번짐). 필터 없이 "어긋난 수채 면 + 잉크 선"으로 그린다 → 렌더 비용 낮음.
-// - 잠긴 곳은 연필 스케치(점선, 채움 없음) → 클리어하면 잉크와 물감이 입혀진다 (진행 = 지도가 완성되는 보상)
-// - 유치해 보이지 않게: 눈·볼터치 같은 의인화 없이, 탐험 지도·판화 느낌의 굵은 잉크 선과 해칭
-import type { ReactNode, SVGProps } from 'react';
-import { HERO_WASH } from './wash.gen';
+// 최종 시안 삽화 (P2-07 2차). 필터·래스터 없이 평평한 면 + 얇은 선.
+// - 선 규칙(2차): 면마다 "그 면 색의 진한 톤"으로 1px 안팎(tone()), 세부 선은 옅은 회갈색. 수채 번짐·해칭 없음
+// - 색: 중립(나무·돌) + 초록 계열(주색) + 금색(강조) + 아주 옅은 물빛 하나. 빨강·주황·파랑 원색 없음
+// - 잠긴 곳은 연필 스케치(점선, 채움 없음) → 클리어하면 색이 입혀진다 (진행 = 지도가 완성되는 보상)
+import type { SVGProps } from 'react';
 
-// 최종 시안: 잉크를 따뜻한 회갈색으로, 선 1.6px 안팎 (1차 #3B2F25 · 2~2.4px)
-export const INK = '#7A6A59';
-const PENCIL = '#A89884';
-const LW = 0.72; // 1차 선 굵기에 곱하는 배율
+/** 세부 선(채움 없는 선·새·물결)과 반투명 그늘. 굵은 잉크 선 대신 옅은 회갈색 */
+export const INK = '#A39A8C';
+/** 지도에 그려지는 진행 길 (주색) */
+export const ROAD = '#3E7B3A';
+const PENCIL = '#B3AA9C';
+const LW = 0.5; // 1차 선 굵기(2.2 기준)에 곱하는 배율 → 기본 1.1
 export const C = {
-  paper: '#FFFBF2',
-  cream: '#F8F1E3',
-  sand: '#E9D3A6',
-  wood: '#B98A57',
-  woodDark: '#8C6239',
-  stone: '#CDBB98',
-  stoneDark: '#A8916B',
-  sage: '#9CCB80',
-  forest: '#7FA85F',
-  olive: '#4A7330',
-  terra: '#D9774F',
-  roof: '#C8623F',
-  water: '#8DB7CF',
-  waterLight: '#BFD8E4',
-  mustard: '#F2C14E',
-  brass: '#C98A4B',
+  paper: '#FFFFFF',
+  cream: '#F7F3EA',
+  sand: '#EDE4D3',
+  wood: '#CDAE86',
+  woodDark: '#A3835F',
+  stone: '#DDD4C5',
+  stoneDark: '#BBAE99',
+  sage: '#B5D6A2',
+  forest: '#8CBB74',
+  olive: '#5E9550',
+  terra: '#E9B657', // 1차 주황(#D9774F) → 금색 계열
+  roof: '#D9A548',
+  water: '#BCD0DA',
+  waterLight: '#DDE8ED',
+  mustard: '#F0B43C', // = accent
+  brass: '#D6B07A',
+  mark: '#8A5A00', // 보물 X·강조 표시 (= accentText)
 };
 
+/** 면 색의 진한 톤 (외곽선용): RGB를 0.74배 */
+export function tone(hex: string, k = 0.74): string {
+  if (!hex.startsWith('#') || hex.length !== 7) return INK;
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (v: number) => Math.round(v * k).toString(16).padStart(2, '0');
+  return `#${ch((n >> 16) & 255)}${ch((n >> 8) & 255)}${ch(n & 255)}`;
+}
+
 type Mode = 'ink' | 'pencil';
-/** 선 스타일: 잉크(채움 + 굵은 선) / 연필(채움 없음 + 점선) */
+/** 선 스타일: 색(채움 + 면 색의 진한 톤 1px 안팎) / 연필(채움 없음 + 점선) */
 function st(mode: Mode, fill: string, w = 2.2): SVGProps<SVGPathElement> {
   return mode === 'ink'
-    ? { fill, stroke: INK, strokeWidth: w * LW, strokeLinejoin: 'round', strokeLinecap: 'round' }
+    ? { fill, stroke: fill === 'none' ? INK : tone(fill), strokeWidth: w * LW, strokeLinejoin: 'round', strokeLinecap: 'round' }
     : { fill: 'none', stroke: PENCIL, strokeWidth: 1.5, strokeDasharray: '4 4', strokeLinejoin: 'round', strokeLinecap: 'round', opacity: 0.75 };
 }
-/** 수채 번짐: 같은 모양을 살짝 어긋나게 옅게 한 번 더 (판화의 판 어긋남 느낌) */
-function Wash({ d, color, dx = 3, dy = 3, o = 0.38, mode }: { d: string; color: string; dx?: number; dy?: number; o?: number; mode: Mode }) {
-  if (mode === 'pencil') return null;
-  return <path d={d} fill={color} opacity={o} transform={`translate(${dx} ${dy})`} />;
+/** 수채 번짐 (2차: 그리지 않음 — 판 어긋남이 난잡해 보임. 호출부는 그대로 둔다) */
+function Wash(_: { d: string; color: string; dx?: number; dy?: number; o?: number; mode: Mode }) {
+  return null;
 }
-/** 해칭(그림자 빗금) */
-function Hatch({ x, y, w, h, n = 4, mode }: { x: number; y: number; w: number; h: number; n?: number; mode: Mode }) {
-  // 최종 시안: 해칭(그림자 빗금)을 뺀다 — 선이 무거워 보이는 주원인 (사용자 리뷰 Q28 ①)
-  if (mode === 'pencil' || LW < 1) return null;
-  const lines = [];
-  for (let i = 0; i < n; i++) {
-    const t = (i + 0.5) / n;
-    lines.push(<path key={i} d={`M${x + w * t - 3} ${y + h} L${x + w * t + 3} ${y}`} />);
-  }
-  return (
-    <g stroke={INK} strokeWidth={0.86} strokeLinecap="round" opacity={0.55}>
-      {lines}
-    </g>
-  );
+/** 해칭 (1차 최종에서 뺌) */
+function Hatch(_: { x: number; y: number; w: number; h: number; n?: number; mode: Mode }) {
+  return null;
 }
 
 // ───────────── 스테이지 랜드마크 7종 (바닥 중앙 = 0,0 · 대략 폭 120 × 높이 100)
@@ -127,7 +126,7 @@ function Forest({ mode }: { mode: Mode }) {
       <path d="M-34 0 v-18 h26 v18z" {...st(mode, C.brass, 2)} />
       <path d="M-36 -18 h30 v-6 h-30z" {...st(mode, C.woodDark, 2)} />
       <path d="M-8 -14 l10 4 -2 7 -10 -3z" {...st(mode, C.paper, 1.4)} />
-      {mode === 'ink' && <path d="M-22 -34 l2 -6 2 6 6 2 -6 2 -2 6 -2 -6 -6 -2z" fill={C.mustard} stroke={INK} strokeWidth="0.86" />}
+      {mode === 'ink' && <path d="M-22 -34 l2 -6 2 6 6 2 -6 2 -2 6 -2 -6 -6 -2z" fill={C.mustard} stroke={tone(C.mustard)} strokeWidth="0.6" />}
     </g>
   );
 }
@@ -154,7 +153,7 @@ function Cave({ mode }: { mode: Mode }) {
       <Wash d={mt} color={C.stoneDark} mode={mode} />
       <path d={mt} {...st(mode, C.stone)} />
       <path d="M2 -92 L-6 -74 L4 -78 L10 -70 L14 -78 L26 -58" {...st(mode, C.paper, 1.8)} />
-      <path d="M-22 0 C-22 -30 22 -30 22 0 Z" {...st(mode, mode === 'ink' ? '#4A3A2C' : 'none', 2.2)} />
+      <path d="M-22 0 C-22 -30 22 -30 22 0 Z" {...st(mode, mode === 'ink' ? '#8B7F70' : 'none', 2.2)} />
       <Hatch x={-50} y={-34} w={22} h={30} n={4} mode={mode} />
       <Hatch x={34} y={-30} w={20} h={26} n={3} mode={mode} />
       <path d="M-10 -20 l3 6 3 -6 M4 -22 l3 7 3 -7" {...st(mode, 'none', 1.4)} />
@@ -204,58 +203,34 @@ function Castle({ mode }: { mode: Mode }) {
       <path d="M-12 0 v-18 a12 12 0 0 1 24 0 v18z" {...st(mode, mode === 'ink' ? C.woodDark : 'none', 2)} />
       <Hatch x={-56} y={-56} w={12} h={50} n={3} mode={mode} />
       {/* 보물 표시 X */}
-      <path d="M62 -10 l12 12 M74 -10 l-12 12" stroke={mode === 'ink' ? '#A4452A' : PENCIL} strokeWidth={mode === 'ink' ? 4 : 2} strokeLinecap="round" />
+      <path d="M62 -10 l12 12 M74 -10 l-12 12" stroke={mode === 'ink' ? C.mark : PENCIL} strokeWidth={mode === 'ink' ? 4 : 2} strokeLinecap="round" />
     </g>
   );
 }
 
 // ───────────── 지도 장식
 
-export function Compass({ x, y, r = 46 }: { x: number; y: number; r?: number }) {
-  const pt = (a: number, rr: number) => `${x + Math.sin(a) * rr} ${y - Math.cos(a) * rr}`;
-  const star = (rot: number, long: number, short: number, fillA: string, fillB: string) => {
-    const out: ReactNode[] = [];
-    for (let i = 0; i < 4; i++) {
-      const a = rot + (i * Math.PI) / 2;
-      out.push(<path key={`a${i}`} d={`M${x} ${y} L${pt(a - 0.38, short)} L${pt(a, long)} Z`} fill={fillA} stroke={INK} strokeWidth="1.15" strokeLinejoin="round" />);
-      out.push(<path key={`b${i}`} d={`M${x} ${y} L${pt(a + 0.38, short)} L${pt(a, long)} Z`} fill={fillB} stroke={INK} strokeWidth="1.15" strokeLinejoin="round" />);
-    }
-    return out;
-  };
-  return (
-    <g aria-hidden>
-      <circle cx={x} cy={y} r={r} fill="none" stroke={INK} strokeWidth="1.01" opacity="0.7" />
-      <circle cx={x} cy={y} r={r - 6} fill="none" stroke={INK} strokeWidth="0.72" strokeDasharray="1.5 4" opacity="0.7" />
-      {star(Math.PI / 4, r * 0.62, r * 0.18, C.paper, C.sand)}
-      {star(0, r * 0.95, r * 0.22, C.paper, '#A4452A')}
-      <circle cx={x} cy={y} r="4" fill={C.mustard} stroke={INK} strokeWidth="1.15" />
-      {/* N */}
-      <path d={`M${x - 5} ${y - r - 6} v-13 l10 13 v-13`} fill="none" stroke={INK} strokeWidth="1.58" strokeLinecap="round" strokeLinejoin="round" />
-    </g>
-  );
-}
-
 export function Mountains({ x, y, s = 1, o = 1 }: { x: number; y: number; s?: number; o?: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`} opacity={o} aria-hidden>
-      <path d="M0 0 L22 -38 L32 -26 L46 -52 L70 0" fill={C.cream} stroke={INK} strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M46 -52 L40 -38 L48 -40 L54 -32" fill="none" stroke={INK} strokeWidth="1.01" strokeLinejoin="round" />
-      <path d="M52 -10 l6 -14 M58 -6 l6 -14 M30 -6 l4 -10" stroke={INK} strokeWidth="0.79" opacity="0.5" strokeLinecap="round" />
+      <path d="M0 0 L22 -38 L32 -26 L46 -52 L70 0" fill={C.cream} stroke={tone(C.cream)} strokeWidth="0.91" strokeLinejoin="round" />
+      <path d="M46 -52 L40 -38 L48 -40 L54 -32" fill="none" stroke={INK} strokeWidth="0.71" strokeLinejoin="round" />
+      <path d="M52 -10 l6 -14 M58 -6 l6 -14 M30 -6 l4 -10" stroke={INK} strokeWidth="0.55" opacity="0.5" strokeLinecap="round" />
     </g>
   );
 }
 export function Waves({ x, y, n = 3, s = 1 }: { x: number; y: number; n?: number; s?: number }) {
   const d = Array.from({ length: n }, (_, i) => `M${i * 22} ${(i % 2) * 8} q5 -5 10 0 q5 5 10 0`).join(' ');
-  return <path d={d} transform={`translate(${x} ${y}) scale(${s})`} fill="none" stroke="#2F6A90" strokeWidth="1.3" strokeLinecap="round" opacity="0.75" aria-hidden />;
+  return <path d={d} transform={`translate(${x} ${y}) scale(${s})`} fill="none" stroke="#8FA8B4" strokeWidth="0.91" strokeLinecap="round" opacity="0.75" aria-hidden />;
 }
 export function Bird({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
-  return <path d={`M${x} ${y} q${6 * s} ${-6 * s} ${12 * s} 0 q${6 * s} ${-6 * s} ${12 * s} 0`} fill="none" stroke={INK} strokeWidth="1.15" strokeLinecap="round" aria-hidden />;
+  return <path d={`M${x} ${y} q${6 * s} ${-6 * s} ${12 * s} 0 q${6 * s} ${-6 * s} ${12 * s} 0`} fill="none" stroke={INK} strokeWidth="0.8" strokeLinecap="round" aria-hidden />;
 }
 export function TinyTree({ x, y, s = 1, c = C.forest }: { x: number; y: number; s?: number; c?: string }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`} aria-hidden>
-      <path d="M0 -26 L9 -8 L-9 -8 Z" fill={c} stroke={INK} strokeWidth="1.08" strokeLinejoin="round" />
-      <path d="M0 -8 v8" stroke={INK} strokeWidth="1.08" />
+      <path d="M0 -26 L9 -8 L-9 -8 Z" fill={c} stroke={tone(c)} strokeWidth="0.76" strokeLinejoin="round" />
+      <path d="M0 -8 v8" stroke={INK} strokeWidth="0.76" />
     </g>
   );
 }
@@ -266,39 +241,39 @@ export function CoverArt({ book }: { book: 1 | 2 | 3 }) {
   if (book === 1)
     return (
       <svg viewBox="0 0 200 140" aria-hidden className="f-cover-art">
-        <rect width="200" height="140" fill="#EAF1DA" />
-        <circle cx="150" cy="36" r="18" fill={C.mustard} opacity="0.8" stroke={INK} strokeWidth="1.01" />
+        <rect width="200" height="140" fill="#EDF3E8" />
+        <circle cx="150" cy="36" r="18" fill={C.mustard} opacity="0.8" stroke={tone(C.mustard)} strokeWidth="0.71" />
         <Mountains x={8} y={92} s={1.1} o={0.9} />
-        <path d="M0 104 C40 92 80 98 120 92 C150 88 180 94 200 90 V140 H0Z" fill={C.sage} stroke={INK} strokeWidth="1.3" />
+        <path d="M0 104 C40 92 80 98 120 92 C150 88 180 94 200 90 V140 H0Z" fill={C.sage} stroke={tone(C.sage)} strokeWidth="0.91" />
         <g transform="translate(118 108)">
           <Landmark stage={2} mode="ink" />
         </g>
-        <path d="M18 132 C50 118 70 128 92 116" fill="none" stroke={INK} strokeWidth="1.87" strokeLinecap="round" strokeDasharray="0.1 7" />
+        <path d="M18 132 C50 118 70 128 92 116" fill="none" stroke={INK} strokeWidth="1.31" strokeLinecap="round" strokeDasharray="0.1 7" />
       </svg>
     );
   if (book === 2)
     return (
       <svg viewBox="0 0 200 140" aria-hidden className="f-cover-art">
-        <rect width="200" height="140" fill="#E2EEF4" />
-        <circle cx="44" cy="34" r="16" fill={C.mustard} opacity="0.75" stroke={INK} strokeWidth="1.01" />
+        <rect width="200" height="140" fill="#EDF1F3" />
+        <circle cx="44" cy="34" r="16" fill={C.mustard} opacity="0.75" stroke={tone(C.mustard)} strokeWidth="0.71" />
         <Bird x={120} y={30} />
         <Bird x={142} y={42} s={0.7} />
-        <path d="M0 84 C30 78 60 88 100 82 C140 76 170 86 200 80 V140 H0Z" fill={C.water} opacity="0.8" stroke={INK} strokeWidth="1.3" />
+        <path d="M0 84 C30 78 60 88 100 82 C140 76 170 86 200 80 V140 H0Z" fill={C.water} opacity="0.8" stroke={tone(C.water)} strokeWidth="0.91" />
         <Waves x={14} y={104} n={3} />
         <Waves x={120} y={118} n={3} />
         {/* 종이배 */}
-        <path d="M70 84 h56 l-10 16 h-36z" fill={C.paper} stroke={INK} strokeWidth="1.44" strokeLinejoin="round" />
-        <path d="M98 84 v-40 l26 34 h-26" fill={C.terra} stroke={INK} strokeWidth="1.44" strokeLinejoin="round" />
-        <path d="M96 50 l-18 28 h18" fill={C.paper} stroke={INK} strokeWidth="1.44" strokeLinejoin="round" />
+        <path d="M70 84 h56 l-10 16 h-36z" fill={C.paper} stroke={tone(C.paper)} strokeWidth="1.01" strokeLinejoin="round" />
+        <path d="M98 84 v-40 l26 34 h-26" fill={C.terra} stroke={tone(C.terra)} strokeWidth="1.01" strokeLinejoin="round" />
+        <path d="M96 50 l-18 28 h18" fill={C.paper} stroke={tone(C.paper)} strokeWidth="1.01" strokeLinejoin="round" />
         {/* 고래 꼬리 */}
-        <path d="M160 96 c-4 -12 -14 -14 -20 -18 c8 0 16 4 20 10 c4 -6 12 -10 20 -10 c-6 4 -16 6 -20 18z" fill="#6B8FA6" stroke={INK} strokeWidth="1.3" strokeLinejoin="round" />
+        <path d="M160 96 c-4 -12 -14 -14 -20 -18 c8 0 16 4 20 10 c4 -6 12 -10 20 -10 c-6 4 -16 6 -20 18z" fill="#A9BFCA" stroke={INK} strokeWidth="0.91" strokeLinejoin="round" />
       </svg>
     );
   return (
     <svg viewBox="0 0 200 140" aria-hidden className="f-cover-art">
-      <rect width="200" height="140" fill="#F5E4CD" />
+      <rect width="200" height="140" fill="#F4EEE5" />
       {/* 설계도 격자 */}
-      <g stroke="#86501F" strokeWidth="0.58" opacity="0.25">
+      <g stroke="#BBAE99" strokeWidth="0.42" opacity="0.4">
         {Array.from({ length: 10 }, (_, i) => (
           <path key={`v${i}`} d={`M${i * 20 + 10} 0 V140`} />
         ))}
@@ -307,12 +282,12 @@ export function CoverArt({ book }: { book: 1 | 2 | 3 }) {
         ))}
       </g>
       <Gear x={62} y={78} r={30} teeth={10} c={C.brass} />
-      <Gear x={112} y={50} r={18} teeth={8} c="#D9A066" />
+      <Gear x={112} y={50} r={18} teeth={8} c={C.wood} />
       {/* 전구 */}
-      <path d="M150 74 a20 20 0 1 1 20 0 v10 h-20z" fill={C.mustard} stroke={INK} strokeWidth="1.44" strokeLinejoin="round" />
-      <path d="M150 88 h20 M152 94 h16" stroke={INK} strokeWidth="1.44" strokeLinecap="round" />
-      <path d="M160 44 v-10 M140 52 l-7 -6 M180 52 l7 -6" stroke={INK} strokeWidth="1.44" strokeLinecap="round" />
-      <path d="M20 124 h160" stroke={INK} strokeWidth="1.15" strokeDasharray="6 4" />
+      <path d="M150 74 a20 20 0 1 1 20 0 v10 h-20z" fill={C.mustard} stroke={tone(C.mustard)} strokeWidth="1.01" strokeLinejoin="round" />
+      <path d="M150 88 h20 M152 94 h16" stroke={INK} strokeWidth="1.01" strokeLinecap="round" />
+      <path d="M160 44 v-10 M140 52 l-7 -6 M180 52 l7 -6" stroke={INK} strokeWidth="1.01" strokeLinecap="round" />
+      <path d="M20 124 h160" stroke={INK} strokeWidth="0.8" strokeDasharray="6 4" />
     </svg>
   );
 }
@@ -328,8 +303,8 @@ export function Gear({ x, y, r, teeth, c }: { x: number; y: number; r: number; t
   }
   return (
     <g>
-      <path d={d + 'Z'} fill={c} stroke={INK} strokeWidth="1.44" strokeLinejoin="round" />
-      <circle cx={x} cy={y} r={r * 0.35} fill={C.paper} stroke={INK} strokeWidth="1.44" />
+      <path d={d + 'Z'} fill={c} stroke={tone(c)} strokeWidth="1.01" strokeLinejoin="round" />
+      <circle cx={x} cy={y} r={r * 0.35} fill={C.paper} stroke={tone(C.paper)} strokeWidth="1.01" />
     </g>
   );
 }
@@ -339,8 +314,9 @@ export function Gear({ x, y, r, teeth, c }: { x: number; y: number; r: number; t
 export function MagicBoxScene() {
   return (
     <svg viewBox="0 0 320 170" className="f-quest-art" role="img" aria-label="숲 속 빈터에 이름표를 기다리는 마법 상자가 놓여 있어요">
-      <rect width="320" height="170" fill="#EAF1DA" />
-      <path d="M0 118 C60 108 120 116 180 110 C230 104 280 112 320 106 V170 H0Z" fill={C.sage} stroke={INK} strokeWidth="1.44" />
+      {/* 넓은 칸에서도 끝이 잘려 보이지 않게 바탕·땅을 viewBox 밖 양옆까지 길게 (뷰포트가 넓으면 보임) */}
+      <rect x="-240" width="800" height="170" fill="#EDF3E8" />
+      <path d="M-240 120 C-120 112 -60 122 0 118 C60 108 120 116 180 110 C230 104 280 112 320 106 C400 98 480 110 560 104 V170 H-240Z" fill={C.sage} />
       <g transform="translate(40 120) scale(0.9)">
         <Landmark stage={2} mode="ink" />
       </g>
@@ -351,17 +327,17 @@ export function MagicBoxScene() {
       {/* 상자 */}
       <g transform="translate(176 136)">
         <ellipse cx="22" cy="2" rx="52" ry="8" fill={INK} opacity="0.14" />
-        <path d="M-20 0 v-40 h84 v40z" fill={C.brass} stroke={INK} strokeWidth="1.73" strokeLinejoin="round" />
-        <path d="M-12 -40 v40 M56 -40 v40" stroke={INK} strokeWidth="1.15" opacity="0.6" />
-        <path d="M-26 -40 L-18 -58 H70 L78 -40 Z" fill={C.woodDark} stroke={INK} strokeWidth="1.73" strokeLinejoin="round" />
-        <path d="M14 -46 h16 v14 h-16z" fill={C.mustard} stroke={INK} strokeWidth="1.44" />
+        <path d="M-20 0 v-40 h84 v40z" fill={C.brass} stroke={tone(C.brass)} strokeWidth="1.21" strokeLinejoin="round" />
+        <path d="M-12 -40 v40 M56 -40 v40" stroke={INK} strokeWidth="0.8" opacity="0.6" />
+        <path d="M-26 -40 L-18 -58 H70 L78 -40 Z" fill={C.woodDark} stroke={tone(C.woodDark)} strokeWidth="1.21" strokeLinejoin="round" />
+        <path d="M14 -46 h16 v14 h-16z" fill={C.mustard} stroke={tone(C.mustard)} strokeWidth="1.01" />
         {/* 빈 이름표 (아직 이름이 없음) */}
-        <path d="M58 -24 L92 -34 L98 -14 L64 -4 Z" fill={C.paper} stroke={INK} strokeWidth="1.44" strokeLinejoin="round" />
+        <path d="M58 -24 L92 -34 L98 -14 L64 -4 Z" fill={C.paper} stroke={tone(C.paper)} strokeWidth="1.01" strokeLinejoin="round" />
         <circle cx="64" cy="-15" r="2.4" fill={INK} />
-        <path d="M70 -18 l20 -6" stroke={PENCIL} strokeWidth="1.15" strokeDasharray="3 3" />
-        <path d="M58 -14 c-6 2 -10 -2 -14 -6" fill="none" stroke={INK} strokeWidth="1.01" />
+        <path d="M70 -18 l20 -6" stroke={PENCIL} strokeWidth="0.8" strokeDasharray="3 3" />
+        <path d="M58 -14 c-6 2 -10 -2 -14 -6" fill="none" stroke={INK} strokeWidth="0.71" />
       </g>
-      <g fill={C.mustard} stroke={INK} strokeWidth="0.94">
+      <g fill={C.mustard} stroke={tone(C.mustard)} strokeWidth="0.66">
         <path d="M150 64 l3 -8 3 8 8 3 -8 3 -3 8 -3 -8 -8 -3z" />
         <path d="M262 52 l2 -6 2 6 6 2 -6 2 -2 6 -2 -6 -6 -2z" />
       </g>
@@ -369,75 +345,37 @@ export function MagicBoxScene() {
   );
 }
 
-// ───────────── 랜딩 히어로: 찢은 보물지도 조각
-
-export function HeroMap() {
-  return (
-    <svg viewBox="0 0 520 420" className="f-hero-map" aria-hidden>
-      <defs>
-        <clipPath id="bHeroClip">
-          <path d="M18 34 L60 22 L110 30 L170 16 L240 28 L300 14 L370 26 L430 12 L500 30 L506 110 L496 190 L510 270 L498 350 L506 404 L430 396 L360 410 L290 398 L210 412 L140 398 L70 410 L14 396 L22 320 L10 240 L24 160 L12 90 Z" />
-        </clipPath>
-      </defs>
-      <g clipPath="url(#bHeroClip)">
-        <rect width="520" height="420" fill="#F3E7CC" />
-        {/* 바다 */}
-        <path d="M0 0 H520 V120 C470 140 430 110 380 128 C330 146 300 120 250 134 C190 150 140 120 90 140 C50 156 20 140 0 150 Z" fill="#CFE0E6" />
-        <Waves x={300} y={60} n={4} />
-        <Waves x={60} y={84} n={3} s={0.9} />
-        <Waves x={190} y={40} n={2} s={0.8} />
-        {/* 땅 */}
-        <path d="M0 150 C20 140 50 156 90 140 C140 120 190 150 250 134 C300 120 330 146 380 128 C430 110 470 140 520 120 V420 H0Z" fill="#EAE0C2" />
-        <Mountains x={300} y={226} s={1.4} />
-        <Mountains x={380} y={250} s={1} />
-        <TinyTree x={66} y={250} s={1.4} />
-        <TinyTree x={90} y={262} s={1.1} c={C.olive} />
-        <TinyTree x={48} y={276} s={1.2} c={C.olive} />
-        <TinyTree x={430} y={330} s={1.3} />
-        <TinyTree x={456} y={344} s={1} c={C.olive} />
-        {/* 잉크 길 */}
-        <path className="f-hero-path" d="M40 380 C110 360 120 300 190 300 C260 300 250 360 320 350 C390 340 400 290 450 270" fill="none" stroke={INK} strokeWidth="3.24" strokeLinecap="round" strokeDasharray="0.1 12" />
-        <g transform="translate(456 266)">
-          <path d="M-12 -12 l24 24 M12 -12 l-24 24" stroke="#A4452A" strokeWidth="4.32" strokeLinecap="round" />
-        </g>
-        <g transform="translate(120 214) scale(0.8)">
-          <Landmark stage={1} mode="ink" />
-        </g>
-        <g transform="translate(250 230) scale(0.7)">
-          <Landmark stage={6} mode="ink" />
-        </g>
-        <Compass x={440} y={180} r={34} />
-        <Bird x={150} y={70} />
-        <Bird x={176} y={86} s={0.7} />
-      </g>
-      <path
-        d="M18 34 L60 22 L110 30 L170 16 L240 28 L300 14 L370 26 L430 12 L500 30 L506 110 L496 190 L510 270 L498 350 L506 404 L430 396 L360 410 L290 398 L210 412 L140 398 L70 410 L14 396 L22 320 L10 240 L24 160 L12 90 Z"
-        fill="none"
-        stroke={INK}
-        strokeWidth="1.87"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-// ───────────── 최종 시안 히어로: 미리 만든 수채 워시(PNG, 정지 그림만 래스터) + 가벼운 잉크 선 몇 개
+// ───────────── 최종 시안 히어로 (2차): 평평한 언덕 두 겹 + 점선 길 + 랜드마크 둘. 수채 워시·래스터 없음
+// 정지 그림(히어로·공유 카드)은 나중에 일러스트레이터 래스터로 바꿀 수 있는 자리 (§12-Q28) — 이 SVG가 자리 표시
 
 export function HeroArt() {
   return (
     <div className="f-hero-art" aria-hidden>
-      <img src={HERO_WASH} alt="" width={560} height={440} decoding="async" />
       <svg viewBox="0 0 560 440" className="f-hero-lines">
-        <path d="M44 398 C140 372 200 330 280 318 C360 306 420 270 486 236" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeDasharray="0.1 11" />
-        <g transform="translate(150 300) scale(0.62)">
+        <defs>
+          <clipPath id="fHeroPanel">
+            <rect x="12" y="40" width="536" height="388" rx="28" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#fHeroPanel)">
+          <rect x="12" y="40" width="536" height="388" fill="#EEF3E9" />
+          <circle cx="448" cy="118" r="34" fill="#FBF1DC" />
+          <path d="M12 318 C90 262 190 250 290 268 C390 286 470 246 548 204 V428 H12 Z" fill="#DFEBD6" />
+          <path d="M12 366 C120 326 230 336 330 350 C420 362 490 340 548 316 V428 H12 Z" fill="#CFE3C2" />
+        </g>
+        <path d="M60 396 C150 372 210 336 290 322 C370 308 426 276 488 244" fill="none" stroke={ROAD} strokeWidth="3" strokeLinecap="round" strokeDasharray="0.1 11" opacity="0.7" />
+        <g transform="translate(160 330) scale(0.6)">
           <Landmark stage={1} mode="ink" />
         </g>
-        <g transform="translate(360 262) scale(0.55)">
+        <g transform="translate(372 290) scale(0.52)">
           <Landmark stage={6} mode="ink" />
         </g>
-        <path d="M480 222 l14 14 M494 222 l-14 14" stroke="#A4452A" strokeWidth="3.4" strokeLinecap="round" />
-        <Bird x={120} y={92} s={0.9} />
-        <Bird x={146} y={106} s={0.6} />
+        <TinyTree x={84} y={352} s={1.2} c={C.forest} />
+        <TinyTree x={104} y={360} s={0.9} c={C.olive} />
+        <TinyTree x={512} y={300} s={1.1} c={C.forest} />
+        <path d="M482 228 l12 12 M494 228 l-12 12" stroke={C.mark} strokeWidth="2.6" strokeLinecap="round" />
+        <Bird x={118} y={150} s={0.9} />
+        <Bird x={144} y={164} s={0.6} />
       </svg>
     </div>
   );

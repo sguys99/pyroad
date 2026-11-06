@@ -7,7 +7,7 @@ import { PybaemRig } from './rig';
 import { useMotion } from '../shared/motion';
 import { EASING } from '../shared/tokens';
 import { CHEST_GOAL, CURRENT_STAGE, PROGRESS, stageQuests, type QuestEntry, type StageProgress } from './data';
-import { Bird, CoverArt, Landmark, Mountains, TinyTree, Waves, INK, C } from './art';
+import { Bird, CoverArt, Landmark, Mountains, TinyTree, Waves, INK, ROAD, C, tone } from './art';
 import { Hud, InkButton, InkProgress, Sheet, Stars } from './ui';
 import { setB, toast, useB } from './state';
 import { drawPath, isLite, isMinimal, isStill, popIn, stampSlam } from './fx';
@@ -231,8 +231,8 @@ function ScrollMap({ layout, wide, api }: { layout: Layout; wide: boolean; api: 
             <MapBackdrop layout={layout} wide={wide} />
             {/* 길: 모래 바탕 → 지난 길(잉크) → 남은 길(연필 점선) */}
             <path d={dAll} fill="none" stroke={C.sand} strokeWidth={wide ? 22 : 18} strokeLinecap="round" opacity="0.7" />
-            <path d={dTodo} fill="none" stroke="#8A7356" strokeWidth="2.6" strokeLinecap="round" strokeDasharray="2 10" opacity="0.9" />
-            <path ref={donePath} d={dDone} fill="none" stroke={INK} strokeWidth={wide ? 4 : 3.5} strokeLinecap="round" className="f-road-ink" />
+            <path d={dTodo} fill="none" stroke={INK} strokeWidth="2.4" strokeLinecap="round" strokeDasharray="2 10" opacity="0.9" />
+            <path ref={donePath} d={dDone} fill="none" stroke={ROAD} strokeWidth={wide ? 4 : 3.5} strokeLinecap="round" className="f-road-ink" />
             <path d={dDone} fill="none" stroke={C.paper} strokeWidth="1.6" strokeLinecap="round" strokeDasharray="10 14" opacity="0.9" />
             {layout.pts.map(([x, y], i) => {
               const p = PROGRESS[i];
@@ -298,16 +298,16 @@ function MapBackdrop({ layout, wide }: { layout: Layout; wide: boolean }) {
   if (wide)
     return (
       <g aria-hidden>
-        <path d="M0 0 H760 C720 40 660 60 600 50 C520 36 470 90 400 80 C330 70 300 120 230 110 C160 100 110 150 40 140 C20 138 8 150 0 160 Z" fill="#DCE9EE" />
-        <path d="M760 0 C720 40 660 60 600 50 C520 36 470 90 400 80 C330 70 300 120 230 110 C160 100 110 150 40 140 C20 138 8 150 0 160" fill="none" stroke={INK} strokeWidth="1.4" />
+        <path d="M0 0 H760 C720 40 660 60 600 50 C520 36 470 90 400 80 C330 70 300 120 230 110 C160 100 110 150 40 140 C20 138 8 150 0 160 Z" fill={C.waterLight} />
+        <path d="M760 0 C720 40 660 60 600 50 C520 36 470 90 400 80 C330 70 300 120 230 110 C160 100 110 150 40 140 C20 138 8 150 0 160" fill="none" stroke={tone(C.waterLight, 0.86)} strokeWidth="1" />
         <Waves x={110} y={50} n={3} />
         <Waves x={420} y={26} n={2} />
         <g transform="translate(210 52)">
-          <path d="M0 18 h44 l-8 12 h-28z" fill={C.paper} stroke={INK} strokeWidth="1.4" strokeLinejoin="round" />
-          <path d="M22 18 v-30 l18 26 h-18" fill={C.terra} stroke={INK} strokeWidth="1.4" strokeLinejoin="round" />
+          <path d="M0 18 h44 l-8 12 h-28z" fill={C.paper} stroke={tone(C.paper)} strokeWidth="1.4" strokeLinejoin="round" />
+          <path d="M22 18 v-30 l18 26 h-18" fill={C.terra} stroke={tone(C.terra)} strokeWidth="1.4" strokeLinejoin="round" />
         </g>
-        <path d="M1200 560 C1140 570 1110 620 1060 640 C1010 660 990 700 960 720 H1200 Z" fill="#DCE9EE" />
-        <path d="M1200 560 C1140 570 1110 620 1060 640 C1010 660 990 700 960 720" fill="none" stroke={INK} strokeWidth="1.4" />
+        <path d="M1200 560 C1140 570 1110 620 1060 640 C1010 660 990 700 960 720 H1200 Z" fill={C.waterLight} />
+        <path d="M1200 560 C1140 570 1110 620 1060 640 C1010 660 990 700 960 720" fill="none" stroke={tone(C.waterLight, 0.86)} strokeWidth="1" />
         <Mountains x={480} y={290} s={1.3} o={0.8} />
         <Mountains x={770} y={235} s={1.1} o={0.8} />
         {[
@@ -324,8 +324,8 @@ function MapBackdrop({ layout, wide }: { layout: Layout; wide: boolean }) {
     );
   return (
     <g aria-hidden>
-      <path d="M0 0 H400 V60 C350 80 300 70 250 90 C190 112 140 90 80 110 C40 122 16 116 0 124 Z" fill="#DCE9EE" />
-      <path d="M400 60 C350 80 300 70 250 90 C190 112 140 90 80 110 C40 122 16 116 0 124" fill="none" stroke={INK} strokeWidth="1.4" />
+      <path d="M0 0 H400 V60 C350 80 300 70 250 90 C190 112 140 90 80 110 C40 122 16 116 0 124 Z" fill={C.waterLight} />
+      <path d="M400 60 C350 80 300 70 250 90 C190 112 140 90 80 110 C40 122 16 116 0 124" fill="none" stroke={tone(C.waterLight, 0.86)} strokeWidth="1" />
       <Waves x={50} y={44} n={2} />
       <Mountains x={20} y={620} s={1} o={0.8} />
       <Mountains x={250} y={770} s={0.9} o={0.8} />
@@ -453,10 +453,10 @@ function StageSheet({ open, stage }: { open: boolean; stage: number }) {
 function ChestIcon({ open }: { open: boolean }) {
   return (
     <svg viewBox="0 0 64 56" width="56" height="49" aria-hidden className="f-chest">
-      <path d="M6 26 h52 v24 h-52z" fill={C.brass} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />
-      <path d={open ? 'M6 26 L10 6 H54 L58 26' : 'M6 26 C6 10 58 10 58 26 Z'} fill={C.woodDark} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />
-      <path d="M26 24 h12 v12 h-12z" fill={C.mustard} stroke={INK} strokeWidth="2.2" />
-      <path d="M14 26 v24 M50 26 v24" stroke={INK} strokeWidth="1.6" opacity="0.6" />
+      <path d="M6 26 h52 v24 h-52z" fill={C.brass} stroke={tone(C.brass)} strokeWidth="1.4" strokeLinejoin="round" />
+      <path d={open ? 'M6 26 L10 6 H54 L58 26' : 'M6 26 C6 10 58 10 58 26 Z'} fill={C.woodDark} stroke={tone(C.woodDark)} strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M26 24 h12 v12 h-12z" fill={C.mustard} stroke={tone(C.mustard)} strokeWidth="1.4" />
+      <path d="M14 26 v24 M50 26 v24" stroke={tone(C.brass)} strokeWidth="1.2" opacity="0.6" />
     </svg>
   );
 }

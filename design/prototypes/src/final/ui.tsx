@@ -1,7 +1,8 @@
 // 시안 B 공통 컴포넌트 (→ P2-11 근거): 잉크 도장 버튼, 재화 HUD, 별, 말풍선, 시트(바텀시트·대화상자), 토스트, 진행바, 페이지 넘김
 import { useEffect, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Icon, RewardIcon, type IconName } from '../shared/icons';
+import { Icon, type IconName } from '../shared/icons';
+import { RewardIcon } from './reward';
 import { goScreen } from '../shared/app';
 import { useMotion } from '../shared/motion';
 import { EASING } from '../shared/tokens';
@@ -135,10 +136,10 @@ export function LogoMark({ size = 34 }: { size?: number }) {
   // 책 + 길: 펼친 책 위로 잉크 길이 굽이친다
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="f-logomark">
-      <path d="M4 10c5-2 11-2 16 2 5-4 11-4 16-2v22c-5-2-11-2-16 2-5-4-11-4-16-2z" fill="#FFFBF2" stroke="#3B2F25" strokeWidth="2.4" strokeLinejoin="round" />
-      <path d="M20 12v22" stroke="#3B2F25" strokeWidth="2" />
-      <path d="M8 27c3-5 7 0 9-5M23 20c3 4 6-3 10 1" fill="none" stroke="#A4452A" strokeWidth="2.6" strokeLinecap="round" strokeDasharray="0.1 4.2" />
-      <path d="M30 13l3 3m0-3l-3 3" stroke="#A4452A" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M4 10c5-2 11-2 16 2 5-4 11-4 16-2v22c-5-2-11-2-16 2-5-4-11-4-16-2z" fill="#FFFFFF" stroke="#2E2A25" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M20 12v22" stroke="#2E2A25" strokeWidth="1.8" />
+      <path d="M8 27c3-5 7 0 9-5M23 20c3 4 6-3 10 1" fill="none" stroke="#3E7B3A" strokeWidth="2.6" strokeLinecap="round" strokeDasharray="0.1 4.2" />
+      <path d="M30 13l3 3m0-3l-3 3" stroke="#8A5A00" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
