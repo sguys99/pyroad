@@ -48,7 +48,7 @@
 
 - **D2Coding은 짝수 px만** 씁니다(14·16·18·20). 반각이 0.5em이라 홀수 px에서는 반올림으로 한글 2칸이 어긋납니다. 실측(Chromium, P2-10): 16px에서 `가`/`a` 폭 비 2.000, 주석 `#` 열 차이 0px / 15px에서 1.875, 4px 어긋남 / 14px 2.000, 0px (P2-01에서 처음 발견).
 - 리거처 없음: CodeMirror 테마에 `fontVariantLigatures: 'none'`(`!=`가 한 글자처럼 보이지 않게). CodeMirror 기본 테마가 `.cm-scroller`에 `monospace`를 직접 넣으므로 거기도 `var(--font-mono)`를 줍니다.
-- 지금 에디터는 14px입니다. 키즈 테마(기본 16px, 14~20px 조절, 행간 1.6)는 P2-18.
+- 에디터는 기본 16px, 14·16·18·20px 네 단계 조절, 행간 1.6입니다(P2-18, [editor.md](editor.md)). 한글 주석 정렬은 e2e `editor-alignment.spec.ts`가 단계마다 실제 렌더로 0px인지 잽니다.
 - 파이썬 `f"{x:<6}"` 패딩은 글자 **수** 기준이라 D2Coding에서도 한글 표가 어긋납니다(P0-14 §4.6).
 
 ## 3. 파일과 다시 만드는 법

@@ -163,6 +163,8 @@ export function serverEnv(
     NEXT_PUBLIC_SUPABASE_ANON_KEY: s.anonKey,
     SUPABASE_SERVICE_ROLE_KEY: s.serviceRoleKey,
     NEXT_TELEMETRY_DISABLED: '1',
+    // 테스트 전용 페이지(/dev/editor, P2-18). 운영 배포에는 없는 값이라 거기서는 404
+    PYROAD_TEST_PAGES: '1',
     PORT: String(port),
   };
 }

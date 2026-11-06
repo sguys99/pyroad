@@ -1,49 +1,69 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { EditorView, keymap, lineNumbers } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
-import { defaultKeymap, indentWithTab } from '@codemirror/commands';
+import {
+  EditorView,
+  keymap,
+  lineNumbers,
+  highlightActiveLineGutter,
+  highlightSpecialChars,
+  drawSelection,
+  dropCursor,
+  rectangularSelection,
+  crosshairCursor,
+  highlightActiveLine,
+} from '@codemirror/view';
+import { Compartment, EditorState } from '@codemirror/state';
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  indentWithTab,
+} from '@codemirror/commands';
+import { bracketMatching, indentOnInput } from '@codemirror/language';
+import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+  completionKeymap,
+} from '@codemirror/autocomplete';
 import { python } from '@codemirror/lang-python';
-import { basicSetup } from 'codemirror';
 import { cn } from '@/lib/utils';
-import { cssVar } from '@/lib/design/tokens';
+import { codeFontSizeTheme, kidsTheme } from '@/lib/editor/kidsTheme';
+import { errorLineExtension, setErrorLine } from '@/lib/editor/errorLine';
+import { useCodeFontSize } from '@/lib/editor/useCodeFontSize';
+import { CodeFontSizeControl } from './CodeFontSizeControl';
 
-// 글꼴은 pyRoad Mono(D2Coding, 한글 = 영문 2칸) 토큰만 쓴다 (P2-10). CodeMirror 기본 테마가 `.cm-scroller`에
-// `monospace`를 직접 넣으므로 거기도 덮는다. 리거처는 끈다(`!=`가 한 글자처럼 보이지 않게, P0-14 §4.6).
-// D2Coding은 짝수 px에서만 한글 2칸이 정확히 맞는다(15px는 3px 어긋남, P2-01). 키즈 테마는 P2-18
-// 색은 디자인 토큰 CSS 변수(cssVar)를 가리킨다 → 토큰 값이 바뀌어도 여기는 그대로 (P2-09)
-const tint = (name: Parameters<typeof cssVar>[0], pct: number) =>
-  `color-mix(in srgb, ${cssVar(name)} ${pct}%, transparent)`;
-
-const pyRoadTheme = EditorView.theme({
-  '&': {
-    fontSize: '14px',
-    fontFamily: 'var(--font-mono)',
-    fontVariantLigatures: 'none',
-  },
-  '.cm-scroller': {
-    fontFamily: 'var(--font-mono)',
-  },
-  '.cm-content': {
-    caretColor: cssVar('primary'),
-    padding: '8px 0',
-  },
-  '.cm-gutters': {
-    backgroundColor: cssVar('surface2'),
-    borderRight: `var(--line-w) solid ${cssVar('line')}`,
-    color: cssVar('textMuted'),
-  },
-  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-    backgroundColor: `${tint('primary', 18)} !important`,
-  },
-  '.cm-activeLine': {
-    backgroundColor: tint('primary', 6),
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: tint('primary', 10),
-  },
-});
+// 키즈 테마·글꼴·글자 크기 규칙은 src/lib/editor/ (P2-18, docs/design/editor.md).
+// 구성은 `codemirror`의 basicSetup에서 접기 칸(▸)만 뺀 것: 시안의 공책에는 접기가 없고 아이에게는 잡음이다.
+// 줄 바꿈(lineWrapping)은 하지 않는다(최종 시안과 같이 가로 스크롤): 좁은 화면에서 한글 주석이 글자 중간에서 꺾여
+// 주석 정렬이 깨지고, 꺾인 줄이 0칸에서 시작해 파이썬 들여쓰기처럼 보인다
+const setup = [
+  lineNumbers(),
+  highlightActiveLineGutter(),
+  highlightSpecialChars(),
+  history(),
+  drawSelection(),
+  dropCursor(),
+  EditorState.allowMultipleSelections.of(true),
+  indentOnInput(),
+  bracketMatching(),
+  closeBrackets(),
+  autocompletion(),
+  rectangularSelection(),
+  crosshairCursor(),
+  highlightActiveLine(),
+  highlightSelectionMatches(),
+  keymap.of([
+    ...closeBracketsKeymap,
+    indentWithTab,
+    ...defaultKeymap,
+    ...searchKeymap,
+    ...historyKeymap,
+    ...completionKeymap,
+  ]),
+];
 
 interface CodeEditorProps {
   /**
@@ -52,16 +72,26 @@ interface CodeEditorProps {
    */
   value: string;
   onChange: (code: string) => void;
+  /** 실행 오류가 난 줄(1부터). 바뀔 때마다 그 줄을 표시하고, 학생이 코드를 고치기 시작하면 지운다 */
+  errorLine?: number | null;
   className?: string;
 }
 
-export function CodeEditor({ value, onChange, className }: CodeEditorProps) {
+export function CodeEditor({
+  value,
+  onChange,
+  errorLine = null,
+  className,
+}: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   // 에디터는 처음 마운트할 때 한 번만 만든다. 그 뒤 값은 아래 동기화 effect가 맞춘다
   const initialValueRef = useRef(value);
+  const fontSizeCompartment = useRef(new Compartment());
+  const { size: fontSize, change: changeFontSize } = useCodeFontSize();
+  const initialFontSizeRef = useRef(fontSize);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -69,13 +99,15 @@ export function CodeEditor({ value, onChange, className }: CodeEditorProps) {
     const state = EditorState.create({
       doc: initialValueRef.current,
       extensions: [
-        basicSetup,
+        setup,
         python(),
-        keymap.of([indentWithTab, ...defaultKeymap]),
         EditorState.tabSize.of(4),
-        EditorView.lineWrapping,
-        pyRoadTheme,
-        lineNumbers(),
+        kidsTheme(),
+        fontSizeCompartment.current.of(
+          codeFontSizeTheme(initialFontSizeRef.current),
+        ),
+        errorLineExtension(),
+        EditorView.contentAttributes.of({ 'aria-label': '파이썬 코드' }),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChangeRef.current(update.state.doc.toString());
@@ -109,13 +141,25 @@ export function CodeEditor({ value, onChange, className }: CodeEditorProps) {
     });
   }, [value]);
 
+  // 글자 크기 (기기 저장소 값은 마운트 직후 들어온다)
+  useEffect(() => {
+    viewRef.current?.dispatch({
+      effects: fontSizeCompartment.current.reconfigure(
+        codeFontSizeTheme(fontSize),
+      ),
+    });
+  }, [fontSize]);
+
+  useEffect(() => {
+    viewRef.current?.dispatch({ effects: setErrorLine.of(errorLine) });
+  }, [errorLine]);
+
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        'overflow-hidden rounded-lg border border-border [&_.cm-editor]:max-h-[400px] [&_.cm-editor]:min-h-[200px] [&_.cm-scroller]:overflow-auto',
-        className,
-      )}
-    />
+    <div className={cn('flex flex-col gap-2', className)}>
+      <div className="flex justify-end">
+        <CodeFontSizeControl size={fontSize} onChange={changeFontSize} />
+      </div>
+      <div ref={containerRef} data-testid="code-editor" />
+    </div>
   );
 }

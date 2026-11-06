@@ -7,6 +7,7 @@ import { m, AnimatePresence } from 'framer-motion';
 import { framerSpring, jelly, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from './CodeEditor';
+import { errorLineFromStderr } from '@/lib/editor/errorLine';
 import { OutputPanel } from './OutputPanel';
 import type {
   PyodideRestartReason,
@@ -133,8 +134,14 @@ export function CodePanel({
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      {/* 에디터 */}
-      <CodeEditor value={code} onChange={onCodeChange} />
+      {/* 에디터 (오류가 난 줄은 traceback에서 찾아 표시, P2-18) */}
+      <CodeEditor
+        value={code}
+        onChange={onCodeChange}
+        errorLine={
+          runResult?.hadException ? errorLineFromStderr(runResult.stderr) : null
+        }
+      />
 
       {/* Pyodide 상태 + 실행 버튼 */}
       <div className="flex items-center gap-3">
