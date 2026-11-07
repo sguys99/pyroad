@@ -10,7 +10,11 @@ import {
   findReservedNames,
 } from '../check.mjs';
 import { nicknameChars } from '../share-card-chars.mjs';
-import { classifyFontFaces, findPreloadLeaks } from '../check-build.mjs';
+import {
+  classifyFontFaces,
+  findPreloadLeaks,
+  staticFile,
+} from '../check-build.mjs';
 
 const fontFile = (p: string) => readFileSync(join(ROOT, 'src/fonts', p));
 
@@ -125,5 +129,20 @@ describe('공유 카드 폰트 검사 (P2-19)', () => {
     expect(jua.codepoints.has('똠'.codePointAt(0)!)).toBe(false);
     expect(jua.codepoints.has('힝'.codePointAt(0)!)).toBe(true);
     expect(() => inspectSfnt(fontFile('jua/Jua-landing.woff2'))).toThrow();
+  });
+});
+
+describe('빌드 검사 정적 파일 경로 (B42)', () => {
+  it('Vercel이 붙이는 ?dpl= 쿼리와 해시를 떼고 .next/static 파일로 본다', () => {
+    const plain = staticFile('/_next/static/chunks/a1b2.css');
+    expect(staticFile('/_next/static/chunks/a1b2.css?dpl=dpl_F6FZzgpV')).toBe(
+      plain,
+    );
+    expect(staticFile('/_next/static/media/x.woff2#iefix')).toBe(
+      staticFile('/_next/static/media/x.woff2'),
+    );
+    expect(plain.endsWith(join('.next', 'static', 'chunks', 'a1b2.css'))).toBe(
+      true,
+    );
   });
 });
