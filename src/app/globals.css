@@ -5,6 +5,8 @@
 @import '../fonts/fallbacks.css';
 /* 공통 컴포넌트 (P2-11, docs/design/components.md): 게임 버튼·모달·시트·토스트·탭·진행바·HUD·말풍선 */
 @import '../components/ui/game-ui.css';
+/* 소셜 로그인 버튼 3종 (P3-05): 브랜드 가이드 색 (토큰 아님, docs/design/tokens.md §6) */
+@import '../components/auth/social-login.css';
 
 @plugin '@tailwindcss/typography';
 

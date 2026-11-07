@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { PybaemSvg } from '@/components/characters/PybaemSvg';
 
@@ -43,6 +44,35 @@ export function LandingFooter() {
             </a>
           </div>
         </div>
+        {/* 법적 고지 (P3-14). 문구를 바꾸면 랜딩 글자 서브셋을 다시 만든다: npm run fonts:build -- --landing */}
+        <nav aria-label="약관과 정책" className="mb-3">
+          <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-caption text-muted-foreground">
+            <li>
+              <Link
+                href="/terms"
+                className="inline-flex min-h-10 items-center transition-colors hover:text-foreground"
+              >
+                이용약관
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/privacy"
+                className="inline-flex min-h-10 items-center font-semibold text-foreground transition-colors hover:text-primary-text"
+              >
+                개인정보처리방침
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/licenses"
+                className="inline-flex min-h-10 items-center transition-colors hover:text-foreground"
+              >
+                오픈소스 고지
+              </Link>
+            </li>
+          </ul>
+        </nav>
         <div className="border-t border-primary/5 pt-3 text-center text-[11px] text-muted-foreground/60">
           © 2026 pyRoad. 초등학생을 위한 파이썬 학습 플랫폼
         </div>

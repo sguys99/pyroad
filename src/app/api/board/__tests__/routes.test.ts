@@ -294,14 +294,19 @@ describe('PATCH·DELETE /api/board/posts/[postId]', () => {
 });
 
 describe('/api/board/comments', () => {
-  it('정상 댓글 저장 + 작성자 표시 이름(닉네임 → 모험가NNNN)', async () => {
+  it('정상 댓글 저장 + 작성자 표시 이름(닉네임 → 모험가NNNN)·아바타 스킨', async () => {
     mocks.rows.board_posts = { user_id: U2, is_hidden: false };
-    mocks.rows.user_profiles_public = { display_name: '모험가1234' };
+    mocks.rows.user_profiles_public = {
+      display_name: '모험가1234',
+      avatar_skin: 'violet',
+    };
     const res = await createComment(
       req({ post_id: POST_ID, content: '저도 궁금해요' }),
     );
     expect(res.status).toBe(200);
-    expect((await res.json()).comment.author_name).toBe('모험가1234');
+    const { comment } = await res.json();
+    expect(comment.author_name).toBe('모험가1234');
+    expect(comment.author_skin).toBe('violet');
     expect(writes()).toMatchObject([
       {
         table: 'board_comments',
@@ -462,5 +467,67 @@ describe('POST /api/board/reports', () => {
         )
       ).status,
     ).toBe(401);
+  });
+});
+
+describe('제한 모드 (P3-15): 만 14세 미만 + 보호자 동의 전', () => {
+  const pending = {
+    age_band: 'under14',
+    guardian_consented_at: null,
+    consent_deadline: '2026-12-06T00:00:00Z',
+  };
+
+  it('글·고치기·댓글은 403 guardian_consent, DB 에 쓰지 않음', async () => {
+    mocks.rows.users = pending;
+    mocks.rows.board_posts = { id: POST_ID, user_id: U1, is_hidden: false };
+    const responses = [
+      await createPost(req({ title: '질문', content: '내용' })),
+      await patchPost(req({ title: '고침' }, 'PATCH'), postParams()),
+      await createComment(req({ post_id: POST_ID, content: '댓글' })),
+    ];
+    for (const res of responses) {
+      expect(res.status).toBe(403);
+      const json = await res.json();
+      expect(json.code).toBe('guardian_consent');
+      expect(json.error).toContain('보호자');
+    }
+    expect(writes()).toEqual([]);
+    expect(mocks.rpcCalls).toEqual([]);
+  });
+
+  it('신고는 제한 모드에서도 받음 (공개되지 않고, 해로운 글을 알릴 수 있어야 함)', async () => {
+    mocks.rows.users = pending;
+    mocks.rpcResult = { result: 'reported', hidden: false };
+    const res = await report(
+      req({ target_type: 'post', target_id: POST_ID, reason: 'abuse' }),
+    );
+    expect(res.status).toBe(200);
+    expect(mocks.rpcCalls.map((c) => c.fn)).toContain('report_board_content');
+  });
+
+  it('내 글 지우기는 제한 모드에서도 됨 (개인정보를 지울 수 있게)', async () => {
+    mocks.rows.users = pending;
+    mocks.rows.board_posts = { id: POST_ID, user_id: U1, is_hidden: false };
+    const res = await deletePost(req(undefined, 'DELETE'), postParams());
+    expect(res.status).toBe(200);
+  });
+
+  it('나이 확인 결과가 없어도 제한(안전한 쪽), 만 14세 이상·동의 마침은 그대로', async () => {
+    mocks.rows.users = {
+      age_band: null,
+      guardian_consented_at: null,
+      consent_deadline: null,
+    };
+    expect(
+      (await createPost(req({ title: '질문', content: '내용' }))).status,
+    ).toBe(403);
+    mocks.rows.users = {
+      age_band: 'under14',
+      guardian_consented_at: '2026-11-06T00:00:00Z',
+      consent_deadline: null,
+    };
+    expect(
+      (await createPost(req({ title: '질문', content: '내용' }))).status,
+    ).toBe(200);
   });
 });

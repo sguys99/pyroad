@@ -15,12 +15,17 @@ export interface InAppBrowserInfo {
   isIOS: boolean;
 }
 
-export function detectInAppBrowser(): InAppBrowserInfo {
-  if (typeof navigator === 'undefined') {
-    return { isInApp: false, type: null, isAndroid: false, isIOS: false };
+/**
+ * 인앱 브라우저(앱 안의 웹뷰) 판별 (B16, P3-09). `ua`를 주면 그 값으로(테스트·서버), 없으면 `navigator.userAgent`.
+ * 판별표와 실제 UA 예시는 `__tests__/detectInAppBrowser.test.ts`.
+ */
+export function detectInAppBrowser(ua?: string): InAppBrowserInfo {
+  if (ua === undefined) {
+    if (typeof navigator === 'undefined') {
+      return { isInApp: false, type: null, isAndroid: false, isIOS: false };
+    }
+    ua = navigator.userAgent;
   }
-
-  const ua = navigator.userAgent;
 
   const isAndroid = /Android/i.test(ua);
   const isIOS = /iPhone|iPad|iPod/i.test(ua);

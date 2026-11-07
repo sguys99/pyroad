@@ -4,14 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { PybaemSvg } from '@/components/characters/PybaemSvg';
-import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
-import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
-import { track } from '@/lib/analytics/track';
+import { LoginSheetButton } from '@/components/auth/LoginSheetButton';
 
 export function LandingHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { handleLogin, showBrowserGuide, setShowBrowserGuide, browserInfo } =
-    useSocialLogin('google');
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -31,7 +27,7 @@ export function LandingHeader() {
       >
         <nav
           aria-label="메인 네비게이션"
-          className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3"
+          className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6"
         >
           <Link
             href="/"
@@ -41,10 +37,11 @@ export function LandingHeader() {
             pyRoad
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* 좁은 화면(320~390px)에서 로그인 버튼이 화면 밖으로 밀리지 않게: 간격을 줄이고 About(같은 화면 아래 절)은 sm부터 */}
+          <div className="flex items-center gap-1 sm:gap-4">
             <a
               href="#about"
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+              className="hidden sm:flex min-h-[44px] min-w-[44px] items-center justify-center text-[13px] text-muted-foreground hover:text-foreground transition-colors"
             >
               About
             </a>
@@ -75,31 +72,13 @@ export function LandingHeader() {
               <span className="hidden sm:inline">GitHub</span>
             </a>
 
-            <button
-              onClick={() => {
-                // OAuth 로 바로 떠나므로 지금 보낸다 (P1-17)
-                track(
-                  'landing_cta_click',
-                  { cta: 'header', provider: 'google' },
-                  { immediate: true },
-                );
-                void handleLogin();
-              }}
-              className="min-h-[44px] rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground hover:bg-primary-lip transition-colors"
-            >
+            {/* 로그인 시트(카카오·네이버·Google)를 연다 (P3-05) */}
+            <LoginSheetButton cta="header" size="sm" sfx={false}>
               로그인
-            </button>
+            </LoginSheetButton>
           </div>
         </nav>
       </header>
-
-      {browserInfo && (
-        <InAppBrowserGuide
-          isOpen={showBrowserGuide}
-          onClose={() => setShowBrowserGuide(false)}
-          browserInfo={browserInfo}
-        />
-      )}
     </>
   );
 }

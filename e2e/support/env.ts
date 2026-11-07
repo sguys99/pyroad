@@ -168,3 +168,11 @@ export function serverEnv(
     PORT: String(port),
   };
 }
+
+/**
+ * 앱 서버가 보는 Supabase 주소 (스택이 없으면 자리 값). 비로그인 스펙이 GoTrue authorize 이동을 가로챌 때 쓴다
+ * (P3-17 support/oauthMock.ts: 가로채므로 스택이 꺼져 있어도 됨)
+ */
+export function appSupabaseUrl(): string {
+  return (resolveLocalStack() ?? NO_STACK_PLACEHOLDER).url;
+}

@@ -488,6 +488,41 @@ export type Database = {
           },
         ];
       };
+      user_agreements: {
+        Row: {
+          agreed_at: string;
+          item: string;
+          method: string;
+          relation: string | null;
+          user_id: string;
+          version: string;
+        };
+        Insert: {
+          agreed_at?: string;
+          item: string;
+          method: string;
+          relation?: string | null;
+          user_id: string;
+          version: string;
+        };
+        Update: {
+          agreed_at?: string;
+          item?: string;
+          method?: string;
+          relation?: string | null;
+          user_id?: string;
+          version?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_agreements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_api_keys: {
         Row: {
           auth_tag: string;
@@ -632,16 +667,19 @@ export type Database = {
       };
       user_public_profiles: {
         Row: {
+          avatar_skin: string | null;
           public_name: string;
           updated_at: string;
           user_id: string;
         };
         Insert: {
+          avatar_skin?: string | null;
           public_name: string;
           updated_at?: string;
           user_id: string;
         };
         Update: {
+          avatar_skin?: string | null;
           public_name?: string;
           updated_at?: string;
           user_id?: string;
@@ -658,49 +696,64 @@ export type Database = {
       };
       users: {
         Row: {
+          age_band: string | null;
+          age_checked_at: string | null;
           avatar_config: Json;
           avatar_url: string | null;
+          consent_deadline: string | null;
           created_at: string;
           current_level: number;
           display_name: string;
           golden_keys: number;
           grade: number | null;
+          guardian_consented_at: string | null;
           id: string;
           last_login_at: string;
           last_login_provider: string | null;
           nickname: string | null;
+          onboarded_at: string | null;
           preferred_provider: string | null;
           settings: Json;
           total_xp: number;
         };
         Insert: {
+          age_band?: string | null;
+          age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
           display_name?: string;
           golden_keys?: number;
           grade?: number | null;
+          guardian_consented_at?: string | null;
           id: string;
           last_login_at?: string;
           last_login_provider?: string | null;
           nickname?: string | null;
+          onboarded_at?: string | null;
           preferred_provider?: string | null;
           settings?: Json;
           total_xp?: number;
         };
         Update: {
+          age_band?: string | null;
+          age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
           display_name?: string;
           golden_keys?: number;
           grade?: number | null;
+          guardian_consented_at?: string | null;
           id?: string;
           last_login_at?: string;
           last_login_provider?: string | null;
           nickname?: string | null;
+          onboarded_at?: string | null;
           preferred_provider?: string | null;
           settings?: Json;
           total_xp?: number;
@@ -744,16 +797,19 @@ export type Database = {
     Views: {
       user_profiles_public: {
         Row: {
+          avatar_skin: string | null;
           avatar_url: string | null;
           display_name: string | null;
           id: string | null;
         };
         Insert: {
+          avatar_skin?: string | null;
           avatar_url?: never;
           display_name?: string | null;
           id?: string | null;
         };
         Update: {
+          avatar_skin?: string | null;
           avatar_url?: never;
           display_name?: string | null;
           id?: string | null;
@@ -770,6 +826,20 @@ export type Database = {
       };
     };
     Functions: {
+      complete_onboarding: {
+        Args: {
+          p_age_band: string;
+          p_agreements: Json;
+          p_grade: number;
+          p_guardian_agreements: Json;
+          p_guardian_relation: string;
+          p_method: string;
+          p_nickname: string;
+          p_skin: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       complete_quest: {
         Args: { p_quest_id: string; p_submission: Json; p_user_id: string };
         Returns: Json;
@@ -803,6 +873,10 @@ export type Database = {
         Args: { p_completed_at: string[] };
         Returns: boolean;
       };
+      is_nickname_taken: {
+        Args: { p_nickname: string; p_user_id: string };
+        Returns: boolean;
+      };
       is_stage_unlocked: {
         Args: { p_stage_id: string; p_user_id: string };
         Returns: boolean;
@@ -810,6 +884,10 @@ export type Database = {
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      list_expired_unconsented: {
+        Args: { p_limit: number };
+        Returns: string[];
+      };
       patch_user_settings: {
         Args: { p_patch: Json; p_user_id: string };
         Returns: boolean;
@@ -822,6 +900,7 @@ export type Database = {
         Args: { p_limit?: number; p_retention?: string };
         Returns: number;
       };
+      public_avatar_skin: { Args: { p_avatar_config: Json }; Returns: string };
       quest_xp: {
         Args: {
           p_base: number;
@@ -829,6 +908,15 @@ export type Database = {
           p_used_golden_key: boolean;
         };
         Returns: number;
+      };
+      record_guardian_consent: {
+        Args: {
+          p_agreements: Json;
+          p_method: string;
+          p_relation: string;
+          p_user_id: string;
+        };
+        Returns: Json;
       };
       record_hint: {
         Args: { p_level: number; p_quest_id: string; p_user_id: string };

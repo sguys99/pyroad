@@ -54,6 +54,10 @@ jobs:
       # 디자인 토큰 검사 (P2-09): 컴포넌트의 색 리터럴·고정 팔레트 클래스·font-family·모션 숫자, 14px 미만 글자 증가 (docs/design/tokens.md §5)
       - name: 디자인 토큰 검사 (하드코딩 색·글꼴·모션)
         run: npm run tokens:check
+      # 오픈소스 고지 드리프트 (P3-14): /licenses 데이터(커밋한 생성물)가 package-lock·notices.mjs와 같은지.
+      # 실패하면 로컬에서 `npm run licenses:build` 후 src/lib/legal/licenses.generated.json을 커밋 (docs/ci.md)
+      - name: 오픈소스 고지 검사
+        run: npm run licenses:check
       - run: npx next typegen
       - run: npx tsc --noEmit
 

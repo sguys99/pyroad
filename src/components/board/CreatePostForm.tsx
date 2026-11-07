@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { BOARD_LIMITS } from '@/lib/board/limits';
 import { BoardFormMessage, type BoardFormError } from './BoardFormMessage';
 import { Button } from '@/components/ui/button';
+import { RestrictedNotice } from '@/components/consent/RestrictedNotice';
+import { useRestricted } from '@/components/consent/ConsentProvider';
 
 interface CreatePostFormProps {
   initialData?: { id: string; title: string; content: string };
@@ -13,6 +15,7 @@ interface CreatePostFormProps {
 export function CreatePostForm({ initialData }: CreatePostFormProps) {
   const router = useRouter();
   const isEdit = !!initialData;
+  const restricted = useRestricted();
 
   const [title, setTitle] = useState(initialData?.title ?? '');
   const [content, setContent] = useState(initialData?.content ?? '');
@@ -71,6 +74,15 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // 제한 모드(P3-15): 글쓰기·고치기 대신 보호자 동의 안내 (서버도 403)
+  if (restricted) {
+    return (
+      <RestrictedNotice
+        what={isEdit ? '글을 고치려면' : '게시판에 글을 쓰려면'}
+      />
+    );
   }
 
   return (

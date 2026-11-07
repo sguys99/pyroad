@@ -12,12 +12,17 @@ test.describe('캐릭터 시각적 확인', () => {
     await expect(avatar.first()).toBeVisible();
   });
 
-  test('프로필 페이지에 파이뱀 캐릭터가 표시된다', async ({ page }) => {
+  test('프로필 페이지에 내 파이뱀 아바타가 표시된다 (사진 없음, P3-13)', async ({
+    page,
+  }) => {
     await page.goto('/profile');
     await expect(page).toHaveURL(/\/profile$/);
 
-    const avatar = page.locator('[data-testid^="character-avatar-pybaem"]');
+    // 공개 아바타 = 고른 색의 파이뱀(UserAvatar). 스킨을 안 골랐으면 기본 숲초록
+    const avatar = page.getByTestId('user-avatar');
     await expect(avatar.first()).toBeVisible();
+    await expect(avatar.first()).toHaveAttribute('data-skin', 'green');
+    await expect(page.locator('img[alt="아바타"]')).toHaveCount(0);
   });
 
   test('로그인한 사용자가 랜딩을 열면 월드맵으로 간다', async ({ page }) => {

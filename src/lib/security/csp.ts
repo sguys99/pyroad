@@ -7,7 +7,8 @@
  * - **nonce 정책** (기본): `script-src 'nonce-…' 'strict-dynamic'`. 동적 렌더 페이지(로그인 화면, 게시판·공지·퀘스트처럼
  *   사용자 글·마크다운·튜터 답변을 보여 주는 곳)는 어차피 요청마다 렌더하므로 비용이 없다.
  * - **정적 정책**: `script-src 'self' 'unsafe-inline'`. 빌드 때 만든 HTML에는 nonce를 넣을 수 없어서
- *   정적 페이지(`STATIC_PAGE_PATHS`, 지금은 랜딩 `/`만)에 쓴다. 랜딩은 사용자 콘텐츠가 없고 CDN 캐시가 중요하다(§2.10).
+ *   정적 페이지(`STATIC_PAGE_PATHS`: 랜딩 `/`, 법적 고지 `/terms`·`/privacy`·`/licenses`)에 쓴다.
+ *   모두 사용자 콘텐츠가 없고 CDN 캐시가 중요하다(§2.10).
  *
  * 연출 단계 부트 스크립트(`src/lib/motion/boot.ts`)는 루트 레이아웃의 고정 인라인 스크립트라 nonce 정책에 sha256 해시로 허용한다
  * (루트 레이아웃은 정적 랜딩도 감싸서 요청마다 nonce를 읽을 수 없음). 정적 정책은 해시를 넣지 않는다: 해시가 있으면 `'unsafe-inline'`이 무시된다.
@@ -29,7 +30,13 @@ export const PYODIDE_CDN_PREFIX = `https://cdn.jsdelivr.net/pyodide/v${CSP_PYODI
  * 새 정적 페이지가 생기면 `scripts/security/check-static-pages.ts`(postbuild)가 빌드를 실패시킨다:
  * 이 목록에 넣거나(사용자 콘텐츠가 없을 때만) 동적 렌더로 바꿔야 한다.
  */
-export const STATIC_PAGE_PATHS: readonly string[] = ['/'];
+export const STATIC_PAGE_PATHS: readonly string[] = [
+  '/',
+  // 법적 고지 (P3-14): 코드에 적힌 문서와 빌드 때 만든 고지 데이터만 보여 준다
+  '/terms',
+  '/privacy',
+  '/licenses',
+];
 
 /** 정적 정책을 받는 경로인지. 끝의 `/`는 무시 */
 export function isStaticPagePath(pathname: string): boolean {

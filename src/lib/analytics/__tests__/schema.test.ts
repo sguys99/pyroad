@@ -36,7 +36,9 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
           ? { provider: 'google', new_user: true }
           : name === 'hint_used'
             ? { quest_id: QUEST, level: 1 }
-            : { quest_id: QUEST };
+            : name === 'onboarding_complete'
+              ? { skin: 'sky', grade_given: true, returning: false }
+              : { quest_id: QUEST };
       expect(
         clientBatchSchema.safeParse(batch([{ name, props }])).success,
       ).toBe(false);
@@ -137,6 +139,13 @@ describe('parseEventProps — 서버 이벤트 속성', () => {
     expect(
       parseEventProps('hint_used', { quest_id: QUEST, level: 3 }),
     ).not.toBeNull();
+    expect(
+      parseEventProps('onboarding_complete', {
+        skin: 'berry',
+        grade_given: false,
+        returning: true,
+      }),
+    ).not.toBeNull();
   });
 
   it.each([
@@ -144,6 +153,25 @@ describe('parseEventProps — 서버 이벤트 속성', () => {
     ['quest_start', { quest_id: QUEST, email: 'a@b.c' }],
     ['hint_used', { quest_id: QUEST, level: 4 }],
     ['login_success', { provider: 'google', new_user: true, nickname: '철수' }],
+    // 온보딩: 닉네임·학년 값은 보내지 않음 (P3-11), 스킨은 6종 id 만
+    [
+      'onboarding_complete',
+      {
+        skin: 'sky',
+        grade_given: true,
+        returning: false,
+        nickname: '용감한여우',
+      },
+    ],
+    [
+      'onboarding_complete',
+      { skin: 'sky', grade_given: true, returning: false, grade: 3 },
+    ],
+    [
+      'onboarding_complete',
+      { skin: 'gold', grade_given: false, returning: false },
+    ],
+    ['onboarding_complete', { skin: 'sky', grade_given: false }],
     [
       'quest_complete',
       {

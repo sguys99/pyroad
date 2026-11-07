@@ -29,7 +29,10 @@ export const EXPECT = {
   // ── view: 뷰를 통한 조회·쓰기 (B03) ────────────────────────
   'B03-1': { expect: 'deny' },
   'B03-2': { expect: 'deny' },
-  'B03-3': { expect: 'allow', note: '게시판 작성자 표시' },
+  'B03-3': {
+    expect: 'allow',
+    note: '게시판 작성자 표시. 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin (P3-13 ① 00021)',
+  },
   'B03-4': { expect: 'deny' },
   'B03-5': { expect: 'deny' },
   'B03-6': { expect: 'deny' },
@@ -66,6 +69,18 @@ export const EXPECT = {
     requires: 'public.user_public_profiles',
     activateIn: 'B34',
     note: 'users 행이 있는데 공개 프로필 행이 없거나 이름이 다른 사용자 수 = 0 (FK 대상이 없으면 게시판 쓰기가 실패)',
+  },
+  'PP-5': {
+    expect: 'allow',
+    requires: 'public.user_public_profiles.avatar_skin',
+    activateIn: 'P3-13',
+    note: '① 00021: 공개 아바타 = avatar_config.skin 을 동기화 트리거가 6종 id 만 복사 (모르는 값·다른 키는 공개 안 됨, 직접 쓰기 거부, CHECK)',
+  },
+  'NM-1': {
+    expect: 'allow',
+    requires: 'public.placeholder_display_name()',
+    activateIn: 'P3-13',
+    note: '③ 00022: 기존 사용자 users.display_name 실명 → 모험가NNNN, avatar_url 사진 → 빈 값 (되돌릴 수 없음, 닉네임은 그대로)',
   },
 
   // ── notice: 공지 쓰기 (B02) ────────────────────────────────
@@ -514,6 +529,37 @@ export const EXPECT = {
     activateIn: 'B24',
     note: 'app_metadata.provider 는 첫 identity 로 고정이라 쓰지 않음 (§2.2, P0-04)',
   },
+  // P3-06: 실측 메타데이터 모양(P0-03·P0-04)으로 가입·로그인 (00013 동작 고정)
+  'SU-1': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06: Google·Kakao(동의/미동의)·custom:kakao·custom:naver(id_token 클레임만)·모르는 OIDC·email 가입. 이메일 없어도 가입, 공개 필드는 자리표시자뿐',
+  },
+  'SU-2': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06: provider·iss 정규화 표. src/lib/auth 의 TS 정규화(providerFromIssuer 등)와 같은 값이어야 함',
+  },
+  'SU-3': {
+    expect: 'deny',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06·§2.8: 트리거는 provider·iss 만 읽음. 이메일·실명·닉네임·사진은 읽지도 않음 (온보딩 제안값은 클라이언트가 만들고 DB 에 저장하지 않음)',
+  },
+  'SU-4': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06: 소셜이 아닌 provider 는 NULL (모르는 값을 그대로 넣으면 CHECK 위반으로 가입 실패)',
+  },
+  'LG-1': {
+    expect: 'allow',
+    requires: 'public.handle_user_signed_in()',
+    activateIn: 'B24',
+    note: 'P3-06·P3-08: 연결 계정은 로그인한 identity 의 iss 로. 로그인 트리거는 last_login_* 만 바꿈',
+  },
   'RPC-9': {
     expect: 'deny',
     requires: 'public.handle_user_signed_in()',
@@ -526,7 +572,7 @@ export const EXPECT = {
   'APP-3': { expect: 'allow' },
   'APP-4': {
     expect: 'allow',
-    note: 'B13 이후 custom_api_keys 를 select 하지 않음 (키 등록 여부는 서버가 user_api_keys 에서 확인)',
+    note: 'B13 이후 custom_api_keys 를 select 하지 않음. P3-13: display_name·avatar_url 대신 user_public_profiles(public_name, avatar_skin) 임베딩 (src/lib/avatar/ownProfile.ts)',
   },
   'APP-5': { expect: 'allow' },
   'APP-6': { expect: 'allow' },
@@ -536,6 +582,12 @@ export const EXPECT = {
   'APP-10': { expect: 'allow' },
   'APP-11': { expect: 'allow' },
   'APP-12': { expect: 'allow' },
+  'APP-15': {
+    expect: 'allow',
+    requires: 'public.users.age_band',
+    activateIn: 'P3-15',
+    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문 + 보호자 동의 상태, P3-11·P3-15)',
+  },
   'APP-13': {
     expect: 'allow',
     note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
@@ -641,6 +693,58 @@ export const EXPECT = {
   },
 
   // ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────
+  // 첫 로그인 온보딩 (P3-11, ① 00023)
+  'OB-1': { expect: 'deny', requires: 'public.user_agreements', activateIn: 'P3-11' },
+  'OB-2': {
+    expect: 'deny',
+    requires: 'public.user_agreements',
+    activateIn: 'P3-11',
+    note: '약관 동의 기록은 service_role 전용 (본인도 읽기·지우기 불가, 법적 기록)',
+  },
+  'OB-3': { expect: 'deny', requires: 'public.user_agreements', activateIn: 'P3-11' },
+  'OB-4': {
+    expect: 'deny',
+    requires: 'public.complete_onboarding()',
+    activateIn: 'P3-11',
+    note: '닉네임·완료 시각은 /api/onboarding(금칙어 검사) → service_role RPC 로만. users UPDATE 는 ③ 00008 그대로 preferred_provider 만',
+  },
+  'OB-5': {
+    expect: 'deny',
+    requires: 'public.is_nickname_taken()',
+    activateIn: 'P3-11',
+    note: '중복 확인은 /api/profile/nickname(사용자별 한도) 경유만',
+  },
+  'OB-6': {
+    expect: 'allow',
+    requires: 'public.complete_onboarding()',
+    activateIn: 'P3-11',
+    note: '① 00023 complete_onboarding 한 트랜잭션 · avatar_config 합치기 · 처음 시각 유지 · 23505 롤백',
+  },
+  // 만 14세 미만 법정대리인 동의 (P3-15, ① 00024)
+  'GC-1': {
+    expect: 'deny',
+    requires: 'public.users.age_band',
+    activateIn: 'P3-15',
+    note: '나이 확인 결과·동의 시각·파기 기한은 클라이언트가 못 바꿈 (③ 00008 UPDATE 는 preferred_provider 만)',
+  },
+  'GC-2': {
+    expect: 'deny',
+    requires: 'public.record_guardian_consent()',
+    activateIn: 'P3-15',
+    note: '보호자 동의 기록·파기 대상 목록은 service_role 전용 (/api/consent/guardian · /api/cron/purge-unconsented)',
+  },
+  'GC-3': {
+    expect: 'allow',
+    requires: 'public.record_guardian_consent()',
+    activateIn: 'P3-15',
+    note: '① 00024 complete_onboarding 9인자: 결과만 저장·한 번 정하면 그대로, 미동의 30일 기한, 보호자 동의 method guardian_in_person',
+  },
+  'GC-4': {
+    expect: 'allow',
+    requires: 'public.list_expired_unconsented()',
+    activateIn: 'P3-15',
+    note: '파기 대상은 기한 지난 미동의 만 14세 미만만',
+  },
   'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
   'RL-2': {
     expect: 'deny',

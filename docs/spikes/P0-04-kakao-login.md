@@ -310,6 +310,8 @@ for (const id of user.identities ?? []) {
 
 ### Kakao Developers 설정 체크리스트 (P3-01)
 
+> Phase 3 실행용 최신 절차(2025 콘솔 개편·동의항목 없음 우선·어드민 키 사용 가능 API·스모크 표): [v0.4-phase3-providers.md](../release/v0.4-phase3-providers.md)
+
 1. [ ] developers.kakao.com → 앱 만들기 (앱 이름 "pyRoad", 아이콘 등록: 동의 화면에 표시). **비즈앱 전환은 하지 않음**
 2. [ ] [앱] > [플랫폼 키] > [REST API 키]
    - [ ] 리다이렉트 URI: `https://<project-ref>.supabase.co/auth/v1/callback` (대시보드 Kakao provider 화면의 Callback URL을 그대로 복사, 한 글자도 다르면 KOE006). 로컬 CLI용 `http://localhost:54321/auth/v1/callback`은 필요할 때만

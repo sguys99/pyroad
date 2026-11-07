@@ -23,13 +23,15 @@ export default async function BoardPostPage({
     getAuthUser(),
     supabase
       .from('board_posts')
-      .select('*, user_profiles_public!board_posts_user_id_fkey(display_name)')
+      .select(
+        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_skin)',
+      )
       .eq('id', postId)
       .single(),
     supabase
       .from('board_comments')
       .select(
-        '*, user_profiles_public!board_comments_user_id_fkey(display_name)',
+        '*, user_profiles_public!board_comments_user_id_fkey(display_name, avatar_skin)',
       )
       .eq('post_id', postId)
       .order('created_at', { ascending: true }),

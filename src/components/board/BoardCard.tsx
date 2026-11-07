@@ -3,6 +3,7 @@ import { EyeOff } from 'lucide-react';
 import type { BoardPostWithAuthor } from '@/lib/types/database';
 import { formatKstDate } from '@/lib/time/kst';
 import { authorName } from '@/lib/board/display';
+import { UserAvatar } from '@/components/profile/UserAvatar';
 
 interface BoardCardProps {
   post: BoardPostWithAuthor;
@@ -28,7 +29,15 @@ export function BoardCard({ post }: BoardCardProps) {
           {post.content}
         </p>
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>{authorName(post.user_profiles_public)}</span>
+          <span className="flex min-w-0 items-center gap-1.5">
+            <UserAvatar
+              skin={post.user_profiles_public?.avatar_skin}
+              size={32}
+            />
+            <span className="truncate">
+              {authorName(post.user_profiles_public)}
+            </span>
+          </span>
           <div className="flex items-center gap-2">
             <span>{date}</span>
             <span>댓글 {post.comment_count ?? 0}</span>

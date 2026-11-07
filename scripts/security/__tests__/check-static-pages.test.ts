@@ -14,6 +14,7 @@ describe('정적 페이지 ↔ CSP 정적 정책 목록 (B27)', () => {
         ['/', BUILT_IN_NOT_FOUND, '/icon.svg'],
         html(['/', BUILT_IN_NOT_FOUND]),
         {
+          allowed: ['/'],
           hasCatchAll: true,
         },
       ),
@@ -42,20 +43,36 @@ describe('정적 페이지 ↔ CSP 정적 정책 목록 (B27)', () => {
 
   it('HTML이 아닌 정적 라우트(아이콘)는 무시', () => {
     expect(
-      checkStaticPages(['/', '/icon.svg'], html(['/']), { hasCatchAll: true }),
+      checkStaticPages(['/', '/icon.svg'], html(['/']), {
+        allowed: ['/'],
+        hasCatchAll: true,
+      }),
     ).toEqual({ unlisted: [], notStatic: [] });
   });
 
   it('랜딩이 동적 렌더가 되면 경고 대상', () => {
     expect(
       checkStaticPages([BUILT_IN_NOT_FOUND], html([BUILT_IN_NOT_FOUND]), {
+        allowed: ['/'],
         hasCatchAll: true,
       }).notStatic,
     ).toEqual(['/']);
   });
 
+  it('법적 고지 페이지(P3-14)까지 모두 정적이면 기본 목록(STATIC_PAGE_PATHS)으로 통과', () => {
+    const legal = ['/terms', '/privacy', '/licenses'];
+    expect(
+      checkStaticPages(
+        ['/', ...legal, BUILT_IN_NOT_FOUND],
+        html(['/', ...legal, BUILT_IN_NOT_FOUND]),
+        { hasCatchAll: true },
+      ),
+    ).toEqual({ unlisted: [], notStatic: [] });
+  });
+
   it('HTML 파일 이름', () => {
     expect(htmlFileFor('/')).toBe('index.html');
     expect(htmlFileFor('/_not-found')).toBe('_not-found.html');
+    expect(htmlFileFor('/privacy')).toBe('privacy.html');
   });
 });

@@ -3,6 +3,7 @@ import { LandingHeader } from '@/components/landing/LandingHeader';
 import { AboutSection } from '@/components/landing/AboutSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { LandingViewTracker } from '@/components/landing/LandingViewTracker';
+import { LandingLoginError } from '@/components/auth/LandingLoginError';
 import { displayLanding, sansLanding } from '@/fonts/landing';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +24,8 @@ export default function Home() {
       </main>
       <LandingFooter />
       <LandingViewTracker />
+      {/* 로그인 실패·취소로 돌아오면 로그인 시트를 열어 안내 (P3-10) */}
+      <LandingLoginError />
     </div>
   );
 }

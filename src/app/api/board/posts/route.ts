@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { guardianWriteGate } from '@/lib/consent/server';
 import {
   BOARD_MESSAGES,
   boardError,
@@ -20,6 +21,10 @@ export async function POST(request: Request) {
   if (!user) {
     return boardError(401, BOARD_MESSAGES.unauthorized);
   }
+
+  // 제한 모드(만 14세 미만 + 보호자 동의 전, P3-15): 다른 사람에게 보이는 쓰기는 막음
+  const consentBlock = await guardianWriteGate(user.id);
+  if (consentBlock) return consentBlock;
 
   const body = await readJsonObject(request);
   if (!body) {

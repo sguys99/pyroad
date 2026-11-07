@@ -60,19 +60,31 @@ interface PatternRule {
   regex: RegExp;
 }
 
-function wordRules(groups: Partial<Record<string, string[]>>): WordRule[] {
+function wordRules(
+  groups: Partial<Record<string, string[]>>,
+  keepTense = false,
+): WordRule[] {
   return Object.entries(groups).flatMap(([category, words]) =>
     (words ?? []).map((source) => ({
       category: category as WordCategory,
-      chars: Array.from(compactKorean(source)),
+      chars: Array.from(compactKorean(source, { keepTense })),
       source,
     })),
   );
 }
 
 const KOREAN_WORDS = wordRules(bannedWords.words);
+/**
+ * 된소리를 접지 않고 비교하는 금칙어 (data `tense`). 접으면 일상어와 같아지는 말:
+ * 찐따 → "진다"(가진다·이긴다), 씹년 → "십년", 씹새 → "십세(기)", 좆 ← "쫒아가"(쫓아가 오타), 짱깨 → "시장게임", 딸딸이 → "달달이".
+ * 띄어쓰기·숫자·자모 풀어 쓰기·초성 섞기·늘여 쓰기·ㅐ/ㅔ 우회는 그대로 잡고, 된소리를 예사소리로 바꾼 우회만 놓아 줍니다.
+ */
+const TENSE_WORDS = wordRules(bannedWords.tense, true);
 const CHOSEONG_WORDS = wordRules(bannedWords.choseong);
 const ALLOW_WORDS = bannedWords.allow.map((w) => Array.from(compactKorean(w)));
+const ALLOW_WORDS_TENSE = bannedWords.allow.map((w) =>
+  Array.from(compactKorean(w, { keepTense: true })),
+);
 const ENGLISH_SUBSTRING = Object.entries(bannedWords.english.substring).flatMap(
   ([category, words]) =>
     words.map((w) => ({ category: category as WordCategory, word: w })),
@@ -144,9 +156,9 @@ function findWord(
 }
 
 /** 허용 단어(시발점 등)가 차지한 자리를 표시해서 금칙어 비교에서 뺌 */
-function allowMask(units: KoreanUnit[]): boolean[] {
+function allowMask(units: KoreanUnit[], allowWords: string[][]): boolean[] {
   const blocked = new Array<boolean>(units.length).fill(false);
-  for (const allow of ALLOW_WORDS) {
+  for (const allow of allowWords) {
     for (let i = 0; i + allow.length <= units.length; i++) {
       if (allow.every((ch, k) => units[i + k].ch === ch)) {
         for (let k = 0; k < allow.length; k++) blocked[i + k] = true;
@@ -167,11 +179,18 @@ export function moderateText(text: string): ModerationResult {
       return { ok: false, category: p.category, ruleId: p.id };
   }
 
-  // 2. 한글 금칙어
+  // 2. 한글 금칙어 (tense 목록은 된소리를 살린 단위로 따로 비교)
   const units = koreanUnits(text);
-  const blocked = allowMask(units);
+  const blocked = allowMask(units, ALLOW_WORDS);
+  const tenseUnits = koreanUnits(text, { keepTense: true });
   const word =
     findWord(units, blocked, KOREAN_WORDS, true) ??
+    findWord(
+      tenseUnits,
+      allowMask(tenseUnits, ALLOW_WORDS_TENSE),
+      TENSE_WORDS,
+      true,
+    ) ??
     findWord(units, blocked, CHOSEONG_WORDS, false);
   if (word)
     return {

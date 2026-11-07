@@ -26,6 +26,16 @@ describe('compactKorean (P1-18 금칙어 정규화)', () => {
     expect(compactKorean(input)).toBe(expected);
   });
 
+  it('keepTense: 된소리는 그대로, 나머지 정규화는 같게', () => {
+    expect(compactKorean('찐따')).toBe('진다');
+    expect(compactKorean('찐따', { keepTense: true })).toBe('찐따');
+    expect(compactKorean('찐 1 따', { keepTense: true })).toBe('찐따');
+    expect(compactKorean('ㅉㅣㄴㄸㅏ', { keepTense: true })).toBe('찐따');
+    expect(compactKorean('찌인따', { keepTense: true })).toBe('찐따');
+    expect(compactKorean('짱깨', { keepTense: true })).toBe('짱께');
+    expect(compactKorean('가진다', { keepTense: true })).toBe('가진다');
+  });
+
   it('보이지 않는 글자·한글 채움 문자를 끼워 넣어도 같음', () => {
     const zwsp = String.fromCharCode(0x200b);
     const filler = String.fromCharCode(0x3164);

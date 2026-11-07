@@ -9,7 +9,8 @@ export default defineConfig({
     // 실제 Pyodide를 띄우는 느린 테스트는 따로 돌린다:
     // *.pyodide.test.ts → `npm run test:pyodide`, *.content.test.ts → `npm run test:content` (P1-13)
     exclude: [
-      'e2e/**',
+      // Playwright 스펙은 제외. e2e 도우미의 순수 함수 단위 테스트(e2e/support/__tests__/*.test.ts)는 여기서 돈다 (P3-17)
+      'e2e/**/*.spec.ts',
       'node_modules/**',
       'spikes/**',
       '.claude/worktrees/**',

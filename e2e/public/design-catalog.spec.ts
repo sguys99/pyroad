@@ -101,10 +101,12 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'bubble',
       'reward',
       'tooltip',
+      'social-login',
       'rig',
       'editor',
       'share-card',
       'sound',
+      'legal',
     ]) {
       await expect(page.locator(`section#${id}`)).toHaveCount(1);
     }
@@ -343,24 +345,26 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       await openCatalog(page, mode);
 
       // 시트 (넓은 화면 = 가운데 상자): 동작 줄이기는 전환 없이 바로, minimal은 페이드만
+      // 전환 속성은 누르기 **전에** transitionrun 으로 모은다: 보이는지 확인한 뒤에 getAnimations 로 보면 minimal 페이드(150ms)가
+      // 이미 끝나 있는 일이 있었다 (P3-17 전체 실행에서 3번 중 1번 실패)
+      await page.evaluate(() => {
+        const w = window as unknown as { __sheetTransitions: Set<string> };
+        w.__sheetTransitions = new Set();
+        document.addEventListener('transitionrun', (e) => {
+          const el = e.target as Element | null;
+          if (el?.closest?.('[data-testid="sheet-popup"]') === el)
+            w.__sheetTransitions.add(e.propertyName);
+        });
+      });
       await page.getByTestId('open-sheet').click();
       const sheet = page.getByTestId('sheet-popup');
       await expect(sheet).toBeVisible();
-      // 등장 전환은 다음 프레임에 시작하므로 300ms 동안 본 전환 속성을 모은다
-      const props = await sheet.evaluate(
-        (el) =>
-          new Promise<string[]>((resolve) => {
-            const seen = new Set<string>();
-            const t0 = performance.now();
-            const tick = () => {
-              for (const a of el.getAnimations()) {
-                if (a instanceof CSSTransition) seen.add(a.transitionProperty);
-              }
-              if (performance.now() - t0 < 300) requestAnimationFrame(tick);
-              else resolve([...seen].sort());
-            };
-            tick();
-          }),
+      await page.waitForTimeout(400);
+      const props = await page.evaluate(() =>
+        [
+          ...(window as unknown as { __sheetTransitions: Set<string> })
+            .__sheetTransitions,
+        ].sort(),
       );
       if (mode.reduced === 'on') expect(props, mode.name).toEqual([]);
       else if (mode.tier === 'minimal') expect(props).toEqual(['opacity']);

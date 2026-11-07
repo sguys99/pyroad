@@ -484,7 +484,7 @@ async function groupView(u) {
     group: 'view',
     id: 'B03-3',
     role: 'authenticated',
-    op: 'GET /user_profiles_public?select=* → 컬럼은 id·display_name·avatar_url 뿐',
+    op: 'GET /user_profiles_public?select=* → 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin 뿐 (P3-13)',
     ...READ,
     run: async () => {
       const r = await rest('GET', '/rest/v1/user_profiles_public?select=*', {
@@ -493,7 +493,7 @@ async function groupView(u) {
       const c = classifyRead(r);
       if (c.actual !== 'allowed') return c;
       const keys = Object.keys(r.json[0]).sort().join(',');
-      return keys === 'avatar_url,display_name,id'
+      return keys === 'avatar_skin,avatar_url,display_name,id'
         ? { actual: 'allowed', detail: `rows=${r.json.length}, cols=${keys}` }
         : { actual: 'extra-columns', detail: keys };
     },
@@ -738,6 +738,89 @@ async function groupView(u) {
         left join public.user_public_profiles p on p.user_id = u.id
        where p.public_name is distinct from coalesce(u.nickname, public.placeholder_display_name(u.id))`);
       return { actual: v, detail: `${v}명 / 전체 ${one('select count(*) from public.users')}명` };
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'PP-5',
+    role: 'authenticated',
+    op: '공개 아바타 동기화 (P3-13, 00021): avatar_config.skin(P3-11 처럼 UPDATE (avatar_config) 를 준 authenticated) → avatar_skin·뷰 · 모르는 값·다른 키는 공개 안 됨 · 직접 UPDATE 거부 · CHECK',
+    ...OK,
+    run: async () => {
+      const x = await createUser('pp5', '공개스킨');
+      return sqlCheck(`
+        GRANT UPDATE (avatar_config) ON public.users TO authenticated;
+        SET LOCAL ROLE authenticated;
+        SET LOCAL request.jwt.claims = '{"sub": "${x.id}", "role": "authenticated"}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_skin FROM public.user_profiles_public WHERE id = '${x.id}') IS NOT NULL THEN
+            RAISE EXCEPTION '가입 직후 스킨이 NULL 이 아님';
+          END IF;
+        END $$;
+        UPDATE public.users SET avatar_config = '{"skin": "sky", "hat": "crown"}' WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_skin FROM public.user_profiles_public WHERE id = '${x.id}') IS DISTINCT FROM 'sky'
+             OR (SELECT avatar_url FROM public.user_profiles_public WHERE id = '${x.id}') IS NOT NULL THEN
+            RAISE EXCEPTION '스킨을 골랐는데 뷰 avatar_skin 이 sky 가 아님 (또는 사진이 보임)';
+          END IF;
+          BEGIN
+            UPDATE public.user_public_profiles SET avatar_skin = 'berry' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION '공개 프로필 avatar_skin 직접 UPDATE 가 허용됨';
+          EXCEPTION WHEN insufficient_privilege THEN NULL;
+          END;
+        END $$;
+        UPDATE public.users SET avatar_config = '{"skin": "<b>gold</b>"}' WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_skin FROM public.user_profiles_public WHERE id = '${x.id}') IS NOT NULL THEN
+            RAISE EXCEPTION '모르는 스킨 값이 공개됨';
+          END IF;
+        END $$;
+        RESET ROLE;
+        DO $$
+        BEGIN
+          BEGIN
+            UPDATE public.user_public_profiles SET avatar_skin = 'gold' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION 'CHECK 가 모르는 스킨을 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          IF EXISTS (SELECT 1 FROM public.users u JOIN public.user_public_profiles p ON p.user_id = u.id
+                      WHERE p.avatar_skin IS DISTINCT FROM public.public_avatar_skin(u.avatar_config)) THEN
+            RAISE EXCEPTION '공개 스킨이 avatar_config 와 다른 행이 있음';
+          END IF;
+        END $$;`);
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'NM-1',
+    role: 'postgres',
+    op: '기존 사용자 실명·사진 정리 (P3-13 ③ 00022): 옛 트리거가 복사한 display_name·avatar_url 행에 00022 를 다시 적용 → 자리표시자·빈 값, 닉네임·공개 이름은 그대로',
+    ...OK,
+    run: async () => {
+      const x = await createUser('nm1', '정실명');
+      const mig = readFileSync(
+        join(HERE, '../migrations/00022_clear_legacy_real_names.sql'),
+        'utf8',
+      );
+      return sqlCheck(`
+        UPDATE public.users SET display_name = '정실명', avatar_url = 'https://lh3.googleusercontent.com/a/nm1', nickname = '정리확인'
+         WHERE id = '${x.id}';
+        ${mig}
+        DO $$
+        BEGIN
+          IF EXISTS (SELECT 1 FROM public.users
+                      WHERE display_name IS DISTINCT FROM public.placeholder_display_name(id)
+                         OR avatar_url IS DISTINCT FROM '') THEN
+            RAISE EXCEPTION '실명·사진이 남은 행이 있음';
+          END IF;
+          IF (SELECT nickname FROM public.users WHERE id = '${x.id}') IS DISTINCT FROM '정리확인'
+             OR (SELECT display_name FROM public.user_profiles_public WHERE id = '${x.id}') IS DISTINCT FROM '정리확인' THEN
+            RAISE EXCEPTION '닉네임·공개 이름이 바뀜';
+          END IF;
+        END $$;`);
     },
   });
 }
@@ -2677,8 +2760,8 @@ async function groupApp(u) {
     ],
     [
       'APP-4',
-      'world/page.tsx users',
-      `/rest/v1/users?select=id,display_name,avatar_url,total_xp,current_level&id=eq.${u.alice.id}`,
+      'world·profile users + 공개 프로필 (P3-13 OWN_PROFILE_SELECT: 실명·사진 컬럼 안 읽음)',
+      `/rest/v1/users?select=id,total_xp,current_level,user_public_profiles(public_name,avatar_skin)&id=eq.${u.alice.id}`,
     ],
     [
       'APP-5',
@@ -2715,6 +2798,11 @@ async function groupApp(u) {
       'checkBadges.ts quests',
       `/rest/v1/quests?select=stage_id,stages!inner(is_final)&id=eq.${Q1}`,
     ],
+    [
+      'APP-15',
+      '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 + 보호자 동의 상태 (P3-11·P3-15 loadOwnUserRow)',
+      `/rest/v1/users?select=settings,onboarded_at,age_band,guardian_consented_at,consent_deadline&id=eq.${u.alice.id}`,
+    ],
   ];
   // 보고서에 매번 바뀌는 uuid 가 남지 않게 자리표시자로 바꿈
   const shortPath = (path) =>
@@ -2737,6 +2825,11 @@ async function groupApp(u) {
           const bad = r.json.filter((s) => s.world?.order !== 1);
           if (bad.length)
             return { actual: 'world-missing', detail: `${bad.length}행에 world.order 없음` };
+        }
+        if (id === 'APP-4' && c.actual === 'allowed') {
+          const pub = r.json[0]?.user_public_profiles;
+          if (!pub || typeof pub.public_name !== 'string' || !('avatar_skin' in pub))
+            return { actual: 'profile-missing', detail: JSON.stringify(r.json[0]).slice(0, 160) };
         }
         if (id === 'APP-1' && c.actual === 'allowed') {
           const sk = r.json[0].prompt_skeleton;
@@ -2777,12 +2870,12 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-13',
     role: 'authenticated',
-    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18)',
+    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name,avatar_skin),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18·P3-13)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name),board_comments(count)&order=created_at.desc&offset=0&limit=10',
+        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name,avatar_skin),board_comments(count)&order=created_at.desc&offset=0&limit=10',
         { as: u.alice, prefer: 'count=exact' },
       );
       const c = classifyRead(r);
@@ -2796,6 +2889,8 @@ async function groupApp(u) {
       // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
       if (!/^모험가\d{4}$/.test(name))
         return { actual: 'real-name', detail: name };
+      if (!('avatar_skin' in r.json[0].user_profiles_public))
+        return { actual: 'avatar-missing', detail: JSON.stringify(r.json[0].user_profiles_public) };
       return c;
     },
   });
@@ -2803,12 +2898,12 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-14',
     role: 'authenticated',
-    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name)',
+    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name,avatar_skin)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name)&post_id=eq.${u.postId}&order=created_at.asc`,
+        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name,avatar_skin)&post_id=eq.${u.postId}&order=created_at.asc`,
         { as: u.alice },
       );
       const c = classifyRead(r);
@@ -2822,6 +2917,8 @@ async function groupApp(u) {
       // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
       if (!/^모험가\d{4}$/.test(name))
         return { actual: 'real-name', detail: name };
+      if (!('avatar_skin' in r.json[0].user_profiles_public))
+        return { actual: 'avatar-missing', detail: JSON.stringify(r.json[0].user_profiles_public) };
       return c;
     },
   });
@@ -3805,6 +3902,201 @@ async function groupAuthTriggers(u) {
         END IF;
       END $$;`),
   });
+
+  // P3-06: GoTrue 가 실제로 만드는 모양(spikes/p0-04-kakao/e2e/observed S3·S6·S14, docs/spikes/P0-03 §4)으로 가입·로그인
+  await check({
+    group: 'auth',
+    id: 'SU-1',
+    role: 'postgres',
+    op: '가입(실측 메타데이터 7종: Google·Kakao 동의/미동의·custom:kakao·custom:naver id_token 클레임만·이름 모르는 OIDC·email) → 모험가NNNN, 사진 빈 값, nickname NULL, provider 정규화(모르면 NULL), 메타데이터 값이 공개 필드·공개 프로필·뷰에 없음',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        CREATE TEMP TABLE su1 (id UUID, email TEXT, app JSONB, meta JSONB, signed TIMESTAMPTZ, want TEXT) ON COMMIT DROP;
+        INSERT INTO su1 VALUES
+          ('d2000000-0000-0000-0000-000000000001', 'su1-kid@gmail.example',
+           '{"provider": "google", "providers": ["google"]}',
+           '{"iss": "https://accounts.google.com", "sub": "1098765", "provider_id": "1098765", "name": "김실명", "full_name": "김실명",
+             "picture": "https://lh3.googleusercontent.com/a/su1", "avatar_url": "https://lh3.googleusercontent.com/a/su1",
+             "email": "su1-kid@gmail.example", "email_verified": true, "phone_verified": false}', now(), 'google'),
+          ('d2000000-0000-0000-0000-000000000002', NULL,
+           '{"provider": "kakao", "providers": ["kakao"]}',
+           '{"iss": "https://kapi.kakao.com", "sub": "4012345678", "provider_id": "4012345678", "name": "파이썬꿈나무",
+             "full_name": "파이썬꿈나무", "user_name": "파이썬꿈나무", "preferred_username": "파이썬꿈나무",
+             "avatar_url": "http://k.kakaocdn.net/dn/su1/img_640x640.jpg", "email_verified": false, "phone_verified": false}', now(), 'kakao'),
+          ('d2000000-0000-0000-0000-000000000003', NULL,
+           '{"provider": "kakao", "providers": ["kakao"]}',
+           '{"iss": "https://kapi.kakao.com", "sub": "4012345680", "provider_id": "4012345680", "email_verified": false, "phone_verified": false}',
+           NULL, 'kakao'),
+          ('d2000000-0000-0000-0000-000000000004', NULL,
+           '{"provider": "custom:kakao", "providers": ["custom:kakao"]}',
+           '{"iss": "https://kauth.kakao.com", "sub": "4012345681", "provider_id": "4012345681", "name": "카카오별명",
+             "preferred_username": "카카오별명", "email_verified": false, "phone_verified": false}', now(), 'kakao'),
+          ('d2000000-0000-0000-0000-000000000005', NULL,
+           '{"provider": "custom:naver", "providers": ["custom:naver"]}',
+           '{"iss": "https://nid.naver.com", "sub": "naver-pairwise-su1", "provider_id": "naver-pairwise-su1", "aud": ["naver-client"],
+             "exp": 1893456000, "iat": 1893452400, "email_verified": false, "phone_verified": false}', now(), 'naver'),
+          ('d2000000-0000-0000-0000-000000000006', NULL,
+           '{"provider": "custom:kakao-mock", "providers": ["custom:kakao-mock"]}',
+           '{"iss": "https://kauth.kakao.com", "sub": "4012345682", "name": "모의카카오"}', now(), 'kakao'),
+          ('d2000000-0000-0000-0000-000000000007', NULL,
+           '{"provider": "custom:other", "providers": ["custom:other"]}',
+           '{"iss": "https://idp.example", "sub": "x1", "name": "다른곳실명", "picture": "https://idp.example/p.png"}', now(), NULL),
+          ('d2000000-0000-0000-0000-000000000008', 'su1-email@example.com',
+           '{"provider": "email", "providers": ["email"]}', '{"full_name": "이메일실명"}', NULL, NULL);
+        INSERT INTO auth.users (id, email, raw_app_meta_data, raw_user_meta_data, last_sign_in_at)
+          SELECT id, email, app, meta, signed FROM su1;
+        DO $$
+        DECLARE v RECORD;
+        BEGIN
+          FOR v IN SELECT s.*, u.display_name, u.avatar_url, u.nickname, u.last_login_provider, u.last_login_at,
+                          p.public_name, pv.display_name AS view_name, pv.avatar_url AS view_avatar
+                     FROM su1 s
+                     LEFT JOIN public.users u ON u.id = s.id
+                     LEFT JOIN public.user_public_profiles p ON p.user_id = s.id
+                     LEFT JOIN public.user_profiles_public pv ON pv.id = s.id LOOP
+            IF v.display_name IS NULL OR v.public_name IS NULL THEN
+              RAISE EXCEPTION '% (%): users·공개 프로필 행이 없음', v.id, v.app ->> 'provider';
+            END IF;
+            IF v.display_name !~ '^모험가[0-9]{4}$' OR v.display_name <> public.placeholder_display_name(v.id)
+               OR v.public_name <> v.display_name OR v.view_name IS DISTINCT FROM v.display_name THEN
+              RAISE EXCEPTION '% (%): 이름이 자리표시자가 아님 % / % / %', v.id, v.app ->> 'provider',
+                v.display_name, v.public_name, v.view_name;
+            END IF;
+            IF coalesce(v.avatar_url, '') <> '' OR v.view_avatar IS NOT NULL OR v.nickname IS NOT NULL THEN
+              RAISE EXCEPTION '% (%): 사진·닉네임이 채워짐 % % %', v.id, v.app ->> 'provider', v.avatar_url, v.view_avatar, v.nickname;
+            END IF;
+            IF v.last_login_provider IS DISTINCT FROM v.want THEN
+              RAISE EXCEPTION '% (%): last_login_provider % (기대 %)', v.id, v.app ->> 'provider', v.last_login_provider, v.want;
+            END IF;
+            IF v.last_login_at IS NULL OR (v.signed IS NOT NULL AND v.last_login_at <> v.signed) THEN
+              RAISE EXCEPTION '% (%): last_login_at % (last_sign_in_at %)', v.id, v.app ->> 'provider', v.last_login_at, v.signed;
+            END IF;
+            IF EXISTS (SELECT 1 FROM jsonb_each_text(v.meta) e
+                        WHERE e.value <> '' AND e.value IN (v.display_name, v.public_name, coalesce(v.avatar_url, ''))) THEN
+              RAISE EXCEPTION '% (%): provider 메타데이터 값이 공개 필드에 들어감', v.id, v.app ->> 'provider';
+            END IF;
+          END LOOP;
+        END $$;`),
+  });
+  await check({
+    group: 'auth',
+    id: 'SU-2',
+    role: 'postgres',
+    op: 'social_login_provider(provider, iss) 표: google·kakao·custom:kakao·custom:naver(대소문자·공백 무시), provider 를 모르면 iss, 둘 다 모르면 NULL. 결과는 모두 users_last_login_provider_check 통과',
+    ...OK,
+    run: () =>
+      sqlCheck(`DO $$
+      DECLARE v RECORD;
+      BEGIN
+        FOR v IN SELECT * FROM (VALUES
+            ('google', NULL, 'google'), (' Google ', NULL, 'google'),
+            ('kakao', NULL, 'kakao'), ('custom:kakao', NULL, 'kakao'),
+            ('naver', NULL, 'naver'), ('custom:naver', NULL, 'naver'), ('CUSTOM:NAVER', NULL, 'naver'),
+            (NULL, 'https://accounts.google.com', 'google'),
+            (NULL, 'https://kapi.kakao.com', 'kakao'), (NULL, 'https://kauth.kakao.com', 'kakao'),
+            (NULL, 'https://nid.naver.com', 'naver'),
+            ('custom:kakao-mock', 'https://kauth.kakao.com', 'kakao'),
+            ('google', 'https://kapi.kakao.com', 'google'),
+            ('email', NULL, NULL), ('phone', NULL, NULL), ('anonymous', NULL, NULL),
+            ('github', 'https://github.com', NULL), ('custom:other', 'https://idp.example', NULL),
+            ('', '', NULL), (NULL, NULL, NULL)
+          ) AS t(p, iss, want) LOOP
+          IF public.social_login_provider(v.p, v.iss) IS DISTINCT FROM v.want THEN
+            RAISE EXCEPTION 'social_login_provider(%, %) = % (기대 %)', v.p, v.iss, public.social_login_provider(v.p, v.iss), v.want;
+          END IF;
+        END LOOP;
+        IF (SELECT pg_get_constraintdef(oid) FROM pg_constraint
+             WHERE conrelid = 'public.users'::regclass AND conname = 'users_last_login_provider_check')
+           !~ 'google.*kakao.*naver' THEN
+          RAISE EXCEPTION 'users_last_login_provider_check 가 google·kakao·naver 가 아님';
+        END IF;
+      END $$;`),
+  });
+  await check({
+    group: 'auth',
+    id: 'SU-3',
+    role: 'postgres',
+    op: 'handle_new_user·handle_user_signed_in 본문이 이메일·이름·사진 메타데이터(email, full_name, name, nickname, picture, avatar_url …)를 읽는가',
+    ...NONE,
+    run: () => {
+      const v = one(`select coalesce(string_agg(p.proname || ':' || m[1], ', ' order by p.proname), '')
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+        cross join lateral regexp_matches(p.prosrc,
+          '(NEW\\.email|->>?\\s*''(?:email|full_name|name|nickname|user_name|preferred_username|picture|avatar_url)'')', 'g') m
+       where n.nspname = 'public' and p.proname in ('handle_new_user', 'handle_user_signed_in')`);
+      return v ? { actual: 'reads', detail: v } : { actual: 'none', detail: '(없음)' };
+    },
+  });
+  await check({
+    group: 'auth',
+    id: 'SU-4',
+    role: 'postgres',
+    op: 'GoTrue 실제 가입·비밀번호 로그인(alice, provider email) → last_login_provider NULL (google·kakao·naver 가 아니면 비움, CHECK 위반 없이 가입·로그인)',
+    ...OK,
+    run: () => {
+      const v = one(
+        `select coalesce(u.last_login_provider, 'null') || ' ' || coalesce(a.raw_app_meta_data ->> 'provider', '?')
+           from public.users u join auth.users a on a.id = u.id where u.id = '${u.alice.id}'`,
+      );
+      return v.startsWith('null ')
+        ? { actual: 'ok', detail: v.slice(5) }
+        : { actual: 'mismatch', detail: v };
+    },
+  });
+  await check({
+    group: 'auth',
+    id: 'LG-1',
+    role: 'postgres',
+    op: '연결 계정(Google 가입 + Kakao·Naver 연결, app_metadata.provider 는 google 고정) 로그인마다 GoTrue 처럼 identity_data 병합 + last_sign_in_at → kakao → naver → google → custom:kakao(kauth) kakao. 이름·사진·닉네임·공개 이름은 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        INSERT INTO auth.users (id, email, raw_app_meta_data, raw_user_meta_data, last_sign_in_at) VALUES
+          ('d3000000-0000-0000-0000-000000000001', 'lg1-kid@gmail.example',
+           '{"provider": "google", "providers": ["google", "kakao", "custom:naver"]}',
+           '{"iss": "https://accounts.google.com", "sub": "g-lg1", "name": "김실명", "full_name": "김실명",
+             "picture": "https://lh3.googleusercontent.com/a/lg1", "email": "lg1-kid@gmail.example"}', now() - interval '1 day');
+        UPDATE public.users SET nickname = 'Lg1Kid' WHERE id = 'd3000000-0000-0000-0000-000000000001';
+        DO $$
+        DECLARE
+          v_uid  UUID := 'd3000000-0000-0000-0000-000000000001';
+          v_at   TIMESTAMPTZ := now();
+          v_step RECORD;
+          v      RECORD;
+          i      INT := 0;
+        BEGIN
+          IF (SELECT last_login_provider FROM public.users WHERE id = v_uid) IS DISTINCT FROM 'google' THEN
+            RAISE EXCEPTION 'Google 가입 직후가 google 이 아님';
+          END IF;
+          FOR v_step IN SELECT * FROM (VALUES
+              (1, '{"iss": "https://kapi.kakao.com", "sub": "4012345690", "provider_id": "4012345690", "name": "카카오닉",
+                    "full_name": "카카오닉", "avatar_url": "http://k.kakaocdn.net/dn/lg1.jpg"}'::jsonb, 'kakao'),
+              (2, '{"iss": "https://nid.naver.com", "sub": "naver-lg1", "provider_id": "naver-lg1", "aud": ["naver-client"]}'::jsonb, 'naver'),
+              (3, '{"iss": "https://accounts.google.com", "sub": "g-lg1", "name": "김실명", "picture": "https://lh3.googleusercontent.com/a/lg1"}'::jsonb, 'google'),
+              (4, '{"iss": "https://kauth.kakao.com", "sub": "4012345690", "provider_id": "4012345690", "name": "카카오닉"}'::jsonb, 'kakao')
+            ) AS t(n, identity_data, want) ORDER BY n LOOP
+            i := i + 1;
+            UPDATE auth.users
+               SET raw_user_meta_data = raw_user_meta_data || v_step.identity_data,
+                   last_sign_in_at    = v_at + make_interval(mins => i)
+             WHERE id = v_uid;
+            SELECT u.*, p.public_name INTO v
+              FROM public.users u JOIN public.user_public_profiles p ON p.user_id = u.id WHERE u.id = v_uid;
+            IF v.last_login_provider IS DISTINCT FROM v_step.want OR v.last_login_at <> v_at + make_interval(mins => i) THEN
+              RAISE EXCEPTION '로그인 %: % % (기대 %)', v_step.n, v.last_login_provider, v.last_login_at, v_step.want;
+            END IF;
+            IF v.display_name <> public.placeholder_display_name(v_uid) OR coalesce(v.avatar_url, '') <> ''
+               OR v.nickname IS DISTINCT FROM 'Lg1Kid' OR v.public_name IS DISTINCT FROM 'Lg1Kid' THEN
+              RAISE EXCEPTION '로그인 %: 공개 필드가 바뀜 % % % %', v_step.n, v.display_name, v.avatar_url, v.nickname, v.public_name;
+            END IF;
+          END LOOP;
+          IF (SELECT raw_app_meta_data ->> 'provider' FROM auth.users WHERE id = v_uid) <> 'google' THEN
+            RAISE EXCEPTION '전제 깨짐: app_metadata.provider 가 google 이 아님';
+          END IF;
+        END $$;`),
+  });
   await check({
     group: 'auth',
     id: 'RPC-9',
@@ -4165,6 +4457,331 @@ async function groupBoard(u) {
           END IF;
         END $$;
         RESET ROLE;`),
+  });
+}
+
+// ── onboarding: 첫 로그인 온보딩 (P3-11, ① 00023) ──────────────
+async function groupOnboarding(u) {
+  const AG = '/rest/v1/user_agreements';
+  const T = '2026-11-06';
+  // 동의 기록은 법적 기록: 클라이언트가 읽거나 지우거나 끼워 넣으면 안 됨 (service_role 전용)
+  one(`insert into public.user_agreements (user_id, item, version, method) values ('${u.alice.id}', 'terms', '${T}', 'self')
+       on conflict do nothing`);
+  await check({
+    group: 'onboarding',
+    id: 'OB-1',
+    role: 'anon',
+    op: 'GET /user_agreements',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `${AG}?select=*`)),
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-2',
+    role: 'authenticated',
+    op: 'GET /user_agreements?user_id=eq.<본인> · DELETE (동의 기록 읽기·지우기)',
+    ...WRITE,
+    run: async () => {
+      const read = classifyRead(await rest('GET', `${AG}?select=*&user_id=eq.${u.alice.id}`, { as: u.alice }));
+      if (read.actual === 'allowed') return { actual: 'written', detail: `읽힘: ${read.detail}` };
+      return classifyWrite(
+        rest('DELETE', `${AG}?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.user_agreements where user_id = '${u.alice.id}' and item = 'terms')`,
+      );
+    },
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-3',
+    role: 'authenticated',
+    op: 'POST /user_agreements {user_id: 다른 사람} (남의 동의를 꾸며 넣기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('POST', AG, {
+          as: u.alice,
+          body: { user_id: u.bob.id, item: 'privacy', version: T, method: 'guardian_in_person' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_agreements where user_id = '${u.bob.id}' and item = 'privacy')`,
+      ),
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-4',
+    role: 'authenticated',
+    op: 'POST /rpc/complete_onboarding · PATCH /users {nickname, onboarded_at} (금칙어 검사·동의 없이 온보딩 끝내기)',
+    ...WRITE,
+    run: async () => {
+      const r = await classifyWrite(
+        rest('POST', '/rest/v1/rpc/complete_onboarding', {
+          as: u.alice,
+          body: {
+            p_user_id: u.alice.id,
+            p_nickname: 'Hacker01',
+            p_skin: 'sky',
+            p_grade: null,
+            p_agreements: [{ item: 'terms', version: T }],
+            p_method: 'self',
+            p_age_band: '14plus',
+            p_guardian_agreements: null,
+            p_guardian_relation: null,
+          },
+        }),
+        `select exists (select 1 from public.users where id = '${u.alice.id}' and (nickname = 'Hacker01' or onboarded_at is not null))`,
+      );
+      if (r.actual === 'written') return r;
+      return classifyWrite(
+        rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { nickname: 'Hacker02', onboarded_at: new Date().toISOString() },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.users where id = '${u.alice.id}' and (nickname = 'Hacker02' or onboarded_at is not null))`,
+      );
+    },
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-5',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/is_nickname_taken (다른 아이 닉네임 훑기)',
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        const r = await rest('POST', '/rest/v1/rpc/is_nickname_taken', {
+          as,
+          body: { p_nickname: '캐롤코딩', p_user_id: u.alice.id },
+        });
+        if (r.status < 300) return { actual: 'allowed', detail: `${as === 'anon' ? 'anon' : 'auth'} ${r.status} ${JSON.stringify(r.json)}` };
+        if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+          return { actual: 'error', detail: `${r.status} ${errCode(r)} ${errMsg(r)}` };
+      }
+      return { actual: 'denied', detail: '둘 다 거부' };
+    },
+  });
+  await check({
+    group: 'onboarding',
+    id: 'OB-6',
+    role: 'service_role',
+    op: 'complete_onboarding: 닉네임·학년·스킨(다른 키 유지)·완료 시각·동의 한 번에 / 다시 불러도 처음 시각 유지 / 닉네임 중복 23505 면 동의도 안 남음 / 공개 프로필 스킨 동기화 / is_nickname_taken 대소문자·본인 제외',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ob6', '온보딩점검');
+      const y = await createUser('ob6b', '온보딩중복');
+      one(`update public.users set avatar_config = '{"hat":"party"}' where id = '${x.id}'`);
+      const args = (id, nickname) => ({
+        p_user_id: id,
+        p_nickname: nickname,
+        p_skin: 'violet',
+        p_grade: 3,
+        p_agreements: [
+          { item: 'terms', version: T },
+          { item: 'privacy', version: T },
+        ],
+        p_method: 'self',
+        p_age_band: '14plus',
+        p_guardian_agreements: null,
+        p_guardian_relation: null,
+      });
+      const r1 = await rpc('complete_onboarding', args(x.id, 'ObCheck01'));
+      if (r1.status !== 200 || r1.json?.first !== true) return { actual: 'error', detail: `1차 ${r1.status} ${JSON.stringify(r1.json)}` };
+      const row = one(`select nickname || '|' || grade || '|' || (avatar_config->>'skin') || '|' || (avatar_config->>'hat') || '|' ||
+                         (onboarded_at is not null) || '|' || (select count(*) from public.user_agreements where user_id = '${x.id}') || '|' ||
+                         coalesce((select avatar_skin from public.user_public_profiles where user_id = '${x.id}'), '-')
+                         from public.users where id = '${x.id}'`);
+      const firstAt = one(`select onboarded_at from public.users where id = '${x.id}'`);
+      const firstAgreed = one(`select max(agreed_at) from public.user_agreements where user_id = '${x.id}'`);
+      const r2 = await rpc('complete_onboarding', { ...args(x.id, 'ObCheck02'), p_grade: null });
+      const again = one(`select (onboarded_at = '${firstAt}') || '|' || coalesce(grade::text, 'null') || '|' || nickname
+                         || '|' || (select max(agreed_at) = '${firstAgreed}' from public.user_agreements where user_id = '${x.id}')
+                         from public.users where id = '${x.id}'`);
+      const dup = await rpc('complete_onboarding', args(y.id, 'obcheck02'));
+      const yState = one(`select (onboarded_at is null) || '|' || (select count(*) from public.user_agreements where user_id = '${y.id}')
+                          from public.users where id = '${y.id}'`);
+      const bad = await rpc('complete_onboarding', { ...args(y.id, 'ObCheck03'), p_agreements: [] });
+      const taken = await rpc('is_nickname_taken', { p_nickname: 'OBCHECK02', p_user_id: y.id });
+      const self = await rpc('is_nickname_taken', { p_nickname: 'obcheck02', p_user_id: x.id });
+      return (
+        compare(
+        'OB-6',
+        {
+          row: 'ObCheck01|3|violet|party|true|2|violet',
+          second: '200 false',
+          again: 'true|null|ObCheck02|true',
+          dup: '409 23505',
+          yState: 'true|0',
+          bad: 'PT400',
+          taken: true,
+          self: false,
+        },
+        {
+          row,
+          second: `${r2.status} ${r2.json?.first}`,
+          again,
+          dup: `${dup.status} ${errCode(dup)}`,
+          yState,
+          bad: String(errCode(bad)),
+          taken: taken.json,
+          self: self.json,
+        },
+      ) ?? { actual: 'ok', detail: 'RPC 한 번에 저장·롤백·동기화 확인' }
+      );
+    },
+  });
+}
+
+// ── consent: 만 14세 미만 법정대리인 동의 (P3-15, ① 00024) ──────────
+async function groupConsent(u) {
+  const T = '2026-11-06';
+  const G = [
+    { item: 'guardian_privacy', version: T },
+    { item: 'guardian_attest', version: T },
+  ];
+  await check({
+    group: 'consent',
+    id: 'GC-1',
+    role: 'authenticated',
+    op: 'PATCH /users {age_band: 14plus, guardian_consented_at, consent_deadline: null} (제한 모드·파기 기한 스스로 풀기)',
+    ...WRITE,
+    run: () =>
+      classifyWrite(
+        rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { age_band: '14plus', guardian_consented_at: new Date().toISOString(), consent_deadline: null },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.users where id = '${u.alice.id}' and (age_band = '14plus' or guardian_consented_at is not null))`,
+      ),
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-2',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/record_guardian_consent · list_expired_unconsented (보호자 동의 꾸미기·파기 대상 훑기)',
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        for (const [fn, body] of [
+          ['record_guardian_consent', { p_user_id: u.alice.id, p_agreements: G, p_relation: null, p_method: 'guardian_in_person' }],
+          ['list_expired_unconsented', { p_limit: 10 }],
+        ]) {
+          const r = await rest('POST', `/rest/v1/rpc/${fn}`, { as, body });
+          if (r.status < 300) return { actual: 'allowed', detail: `${fn} ${r.status}` };
+          if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+            return { actual: 'error', detail: `${fn} ${r.status} ${errCode(r)} ${errMsg(r)}` };
+        }
+      }
+      const written = one(`select guardian_consented_at is not null from public.users where id = '${u.alice.id}'`);
+      return written === 't' ? { actual: 'allowed', detail: '동의가 기록됨' } : { actual: 'denied', detail: '모두 거부' };
+    },
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-3',
+    role: 'service_role',
+    op: 'complete_onboarding 나이·보호자: 미동의 만 14세 미만 = 제한 + 기한 30일 / 결과는 한 번 정하면 그대로 / 보호자 동의 함께 = 기한 없음·관계 기록 / record_guardian_consent 로 나중에 해제 / 만 14세 이상은 409',
+    ...OK,
+    run: async () => {
+      const kid = await createUser('gc3a', '동의전아이');
+      const kid2 = await createUser('gc3b', '동의한아이');
+      const teen = await createUser('gc3c', '열다섯');
+      const base = (id, nick, band, guardian = null, relation = null) => ({
+        p_user_id: id,
+        p_nickname: nick,
+        p_skin: 'sky',
+        p_grade: null,
+        p_agreements: [{ item: 'terms', version: T }, { item: 'privacy', version: T }],
+        p_method: 'self',
+        p_age_band: band,
+        p_guardian_agreements: guardian,
+        p_guardian_relation: relation,
+      });
+      const r1 = await rpc('complete_onboarding', base(kid.id, 'GcKid01', 'under14'));
+      const kidState = one(`select age_band || '|' || (guardian_consented_at is null) || '|' ||
+                            (consent_deadline between now() + interval '29 days 23 hours' and now() + interval '30 days 1 hour')
+                            from public.users where id = '${kid.id}'`);
+      const deadline1 = one(`select consent_deadline from public.users where id = '${kid.id}'`);
+      // 다시 불러 만 14세 이상이라고 해도 결과·기한은 그대로
+      await rpc('complete_onboarding', base(kid.id, 'GcKid01', '14plus'));
+      const kidAgain = one(`select age_band || '|' || (consent_deadline = '${deadline1}') from public.users where id = '${kid.id}'`);
+      const r2 = await rpc('complete_onboarding', base(kid2.id, 'GcKid02', 'under14', G, 'mother'));
+      const kid2State = one(`select (guardian_consented_at is not null) || '|' || (consent_deadline is null) || '|' ||
+                             (select count(*) from public.user_agreements where user_id = '${kid2.id}' and method = 'guardian_in_person' and relation = 'mother')
+                             from public.users where id = '${kid2.id}'`);
+      await rpc('complete_onboarding', base(teen.id, 'GcTeen01', '14plus', G, 'father'));
+      const teenState = one(`select age_band || '|' || (consent_deadline is null) || '|' ||
+                             (select count(*) from public.user_agreements where user_id = '${teen.id}' and method = 'guardian_in_person')
+                             from public.users where id = '${teen.id}'`);
+      const teenLater = await rpc('record_guardian_consent', { p_user_id: teen.id, p_agreements: G, p_relation: null, p_method: 'guardian_in_person' });
+      const badRel = await rpc('record_guardian_consent', { p_user_id: kid.id, p_agreements: G, p_relation: 'uncle', p_method: 'guardian_in_person' });
+      const later = await rpc('record_guardian_consent', { p_user_id: kid.id, p_agreements: G, p_relation: 'other', p_method: 'guardian_in_person' });
+      const kidLater = one(`select (guardian_consented_at is not null) || '|' || (consent_deadline is null) from public.users where id = '${kid.id}'`);
+      return (
+        compare(
+          'GC-3',
+          {
+            r1: true,
+            kidState: 'under14|true|true',
+            kidAgain: 'under14|true',
+            r2: false,
+            kid2State: 'true|true|2',
+            teenState: '14plus|true|0',
+            teenLater: 'PT409',
+            badRel: 'PT400',
+            later: 200,
+            kidLater: 'true|true',
+          },
+          {
+            r1: r1.json?.restricted,
+            kidState,
+            kidAgain,
+            r2: r2.json?.restricted,
+            kid2State,
+            teenState,
+            teenLater: String(errCode(teenLater)),
+            badRel: String(errCode(badRel)),
+            later: later.status,
+            kidLater,
+          },
+        ) ?? { actual: 'ok', detail: '제한·기한·결과 고정·보호자 기록·나중 동의 확인' }
+      );
+    },
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-4',
+    role: 'service_role',
+    op: 'list_expired_unconsented: 기한 지난 미동의 만 14세 미만만 (동의함·기한 남음·만 14세 이상·확인 전 제외)',
+    ...OK,
+    run: async () => {
+      const ids = {};
+      for (const [k, band, consented, days] of [
+        ['expired', 'under14', false, -1],
+        ['consented', 'under14', true, -1],
+        ['future', 'under14', false, 5],
+        ['teen', '14plus', false, -1],
+        ['unknown', null, false, -1],
+      ]) {
+        const x = await createUser(`gc4${k}`, '파기점검');
+        ids[k] = x.id;
+        one(`update public.users set age_band = ${band ? `'${band}'` : 'null'},
+               guardian_consented_at = ${consented ? 'now()' : 'null'},
+               consent_deadline = now() + interval '${days} days'
+             where id = '${x.id}'`);
+      }
+      const r = await rpc('list_expired_unconsented', { p_limit: 500 });
+      const listed = Array.isArray(r.json) ? r.json : [];
+      const got = Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, listed.includes(id)]));
+      return (
+        compare('GC-4', { expired: true, consented: false, future: false, teen: false, unknown: false }, got) ?? {
+          actual: 'ok',
+          detail: `대상 ${listed.length}`,
+        }
+      );
+    },
   });
 }
 
@@ -4706,6 +5323,8 @@ async function main() {
   await groupAuthTriggers(u);
   await groupBoard(u);
   await groupRateLimit(u);
+  await groupOnboarding(u);
+  await groupConsent(u);
   await groupAnalytics(u);
   await groupAccount(u);
   await groupApp(u);

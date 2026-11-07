@@ -63,7 +63,12 @@ export function LevelUpCard(d: LevelUpCardData) {
       stage={
         <Stage
           world={world}
-          hero={{ id: 'pybaem', state: 'cheer', costume: d.avatar?.costume }}
+          hero={{
+            id: 'pybaem',
+            state: 'cheer',
+            costume: d.avatar?.costume,
+            skin: d.avatar?.skin,
+          }}
           guest={{ id: 'byeolttongi', state: 'sparkle' }}
         />
       }
@@ -139,7 +144,12 @@ export function StageClearCard(d: StageClearCardData) {
       stage={
         <Stage
           world={d.world}
-          hero={{ id: 'pybaem', state: 'proud', costume: d.avatar?.costume }}
+          hero={{
+            id: 'pybaem',
+            state: 'proud',
+            costume: d.avatar?.costume,
+            skin: d.avatar?.skin,
+          }}
         />
       }
     >
@@ -205,7 +215,12 @@ export function AchievementCard(d: AchievementCardData) {
       stage={
         <Stage
           world={d.world ?? 1}
-          hero={{ id: 'pybaem', state: 'happy', costume: d.avatar?.costume }}
+          hero={{
+            id: 'pybaem',
+            state: 'happy',
+            costume: d.avatar?.costume,
+            skin: d.avatar?.skin,
+          }}
           guest={guest}
         />
       }
@@ -300,7 +315,12 @@ export function WeeklyCard(d: WeeklyCardData) {
       stage={
         <Stage
           world={d.world ?? 1}
-          hero={{ id: 'pybaem', state: 'teach', costume: d.avatar?.costume }}
+          hero={{
+            id: 'pybaem',
+            state: 'teach',
+            costume: d.avatar?.costume,
+            skin: d.avatar?.skin,
+          }}
         />
       }
     >

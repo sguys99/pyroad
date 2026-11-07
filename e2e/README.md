@@ -29,12 +29,15 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 | 경로 | 내용 |
 |---|---|
 | `public/*.spec.ts` | 비로그인 (`public` 프로젝트): 랜딩 캐릭터·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로 리다이렉트, 코드 에디터 한글 주석 정렬·글자 크기·오류 줄(`editor-alignment.spec.ts`, 테스트 전용 페이지 `/dev/editor` — 서버 env `PYROAD_TEST_PAGES=1`을 `support/env.ts`가 넣음, 운영 404), 컴포넌트 카탈로그 `/dev/design`과 연출 단계 대체 검사(`design-catalog.spec.ts`, P2-12: 단계마다 무한 반복 애니메이션 허용 목록·흐림·리그 DOM 쓰기·버튼 눌림·카운트업·시트·토스트) |
+| `public/social-login.spec.ts` | 비로그인: 로그인 실패 안내(취소·설정 오류 → 진짜 `/auth/callback` → 랜딩 시트가 저절로 열림, GoTrue가 Site URL로 바로 보낸 `bad_oauth_state`), 인앱 브라우저(카카오톡 Android: 카카오 맨 위·크게·Google 안내 한 줄·네이버 `appscheme`, iOS 인스타그램: Google → 안내 + 카카오 버튼). 스택 없이 돎 (P3-17) |
+| `social-login.spec.ts` | 로그인: 카카오·네이버·Google 세 갈래 로그인 시트 → (목업) provider → 온보딩 관문(새 사용자) / 월드맵(온보딩 끝낸 사용자), 최근 로그인 저장(`pyroad.lastLogin.v1`)과 로그아웃 뒤 "최근에 사용" 배지. 새 로컬 사용자 4명(로그인 4번) (P3-17) |
 | `auth.setup.ts` / `auth.teardown.ts` | 이번 실행 전용 테스트 사용자를 service_role로 만들고 로그인 쿠키를 `e2e/.auth/`에 저장 / 끝나면 사용자 삭제 |
 | `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터·움직임 설정(P2-15)·월드맵·퀘스트 연출 단계 대체(`motion-tiers.spec.ts`, P2-12) |
 | `support/env.ts` | 로컬 스택 찾기, 앱 서버 env 만들기 |
 | `support/admin.ts` | service_role 도우미 (진행 초기화, 앞 퀘스트 완료) |
 | `support/test.ts` | 로그인 스펙의 `test`: 테스트마다 진행 초기화, 끝날 때 쓰기 요청 대기, CSP 위반 감시 |
 | `support/motion.ts` | 연출 단계 대체 검사 공용: 돌고 있는 무한 반복 애니메이션 수집, minimal·동작 줄이기 허용 목록(근거 포함), 흐림 요소 수 (P2-12, [docs/design/catalog.md](../docs/design/catalog.md)) |
+| `support/oauthMock.ts` · `support/socialUsers.ts` | 소셜 로그인 목업 (아래 절) · 목업 로그인에 쓰는 로컬 사용자 만들기·지우기. 순수 함수 단위 테스트는 `support/__tests__/`(vitest, Playwright는 무시) |
 | `support/quest.ts` · `support/content.ts` | 퀘스트 화면 조작, `content/` YAML에서 퀘스트 id·정답·힌트 읽기 (하드코딩하지 않음) |
 
 ## 앱 서버 env
@@ -50,3 +53,32 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 - 같은 작업 트리에서 다른 `next build`/`next dev`와 동시에 돌리지 마세요 (`.next/`를 같이 씀).
 - 로그인 스펙은 테스트 사용자 한 명을 테스트마다 초기화하며 쓰므로 `workers: 1`입니다. 재시도는 0 — 흔들리면 고칩니다.
 - 로그인은 실행마다 한 번 (로컬 Auth 로그인 한도: 5분에 30회).
+
+## 소셜 로그인 목업 (P3-17)
+
+실제 Kakao·Naver·Google 없이 로그인 화면부터 월드맵까지를 브라우저로 시험합니다. CI에서도 그대로 돕니다(외부 호출 없음, 추가 컨테이너 없음).
+
+**어떻게**: 로그인 버튼은 `signInWithOAuth`(P1-14 헬퍼)로 GoTrue `…/auth/v1/authorize?provider=…`로 이동합니다. Playwright가 이 이동을 가로채(`installOAuthMock`)
+1. **요청을 검사**합니다 — 앱이 실제로 만든 값: provider 이름(`custom:naver`), PKCE `code_challenge`(S256), `redirect_to` = 같은 출처 `/auth/callback` + `via`, Kakao scope 덮어쓰기(빈 `scope=`, KOE205 방지), Android에서만 네이버 `appscheme=true`. 어긋나면 `mock.problems()`가 이유를 돌려줍니다
+2. **provider 결과를 흉내 냅니다**: `success` = 미리 만든 로컬 사용자로 비밀번호 로그인한 세션 쿠키를 넣고 콜백 성공 때와 같은 주소(`next` + `#lp=<provider>`)로 302 · `cancel` = 진짜 `/auth/callback?…&error=access_denied` · `server_error` = 진짜 콜백에 "Error getting user email" · `bad_state` = Site URL `/`에 `error_code=bad_oauth_state`
+
+**시험하지 않는 것과 대신 확인하는 곳**
+
+| 빠진 부분 | 대신 |
+|---|---|
+| provider ↔ GoTrue 토큰 교환, identity 생성(이메일 없는 Kakao·Naver 가입) | 실 앱 스모크 K-·N-·L- ([docs/release/v0.4-phase3-providers.md](../docs/release/v0.4-phase3-providers.md) §9), 스파이크 실험실 `spikes/p0-04-kakao/e2e`(실제 GoTrue + Kakao 목업)·`spikes/p0-03-naver`(테스트 CA + Naver 목업) |
+| `/auth/callback`의 code 교환 **성공** 경로(세션 사용자의 iss → `#lp=`) | 콜백 단위 테스트 `src/app/auth/callback/__tests__/route.test.ts`. e2e는 그 뒤(`#lp=` 저장·관문·배지)만 |
+| `NEXT_PUBLIC_LOGIN_PROVIDERS`로 네이버 숨기기 | 빌드 때 고정되는 값이라 서버를 따로 빌드해야 함 → 단위 테스트(`parseLoginProviders`, `SocialLoginButtons.inapp.test.tsx`) |
+
+**왜 이 방식인가 (검토한 대안)**
+- *로컬 GoTrue의 Kakao provider를 목업 서버로 돌리기*(`[auth.external.kakao] url`, P0-04 실험실과 같은 방식): provider 왕복까지 진짜지만, 목업을 Supabase 도커 네트워크에 붙이고 `config.toml`의 Kakao를 켜야 해서(개발자가 실제 Kakao 앱으로 시험하는 로컬 설정과 충돌) 스택 재시작·CI 단계가 늘어납니다. Naver(커스텀 OIDC)는 GoTrue가 https + 공인 IP만 허용해 테스트 CA 실험실 없이는 안 됩니다
+- *매직 링크 PKCE로 진짜 code 만들기*: CI 스택은 메일 서버(mailpit)를 끄고 띄우고, 로컬 메일 발송 한도(시간당 2통)에 걸립니다
+- 그래서 세 provider에 같은 방식(앱 경계에서 가로채기)을 쓰고, 빠진 부분은 위 표의 테스트로 메웁니다
+
+**돌리기**
+```bash
+npx playwright test --project=public e2e/public/social-login.spec.ts   # 스택 없이 (CI e2e-smoke와 같음)
+npm run db:start && npx playwright test --project=chromium e2e/social-login.spec.ts   # 로그인 경로 (setup·teardown 자동)
+```
+새 로컬 사용자를 4명 만들고(로그인 4번, 로컬 한도 5분 30회 안) 끝나면 지웁니다. 로그인 경로는 온보딩 관문(P3-11, 마이그레이션 00023)이 적용된 DB가 필요합니다.
+
