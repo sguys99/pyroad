@@ -140,6 +140,7 @@
 - **`ToastRegion`은 늘 떠 있는 `role="status"` `aria-live="polite"` 영역**: 화면에 먼저 두고 그 안에 `Toast`를 넣어야 낭독기가 새 알림을 읽는다.
 - `Toast` props: `tone` · `icon`(36 원) · `duration`(ms, 기본 4000, 0이면 저절로 안 닫힘; 끝나기 140ms 전 흐려짐) · `onClose`(있으면 닫기 버튼, 바로 닫힘) · `closeLabel`.
 - 여러 개: `const { toasts, show, dismiss } = useToastQueue(3)` + `<ToastViewport toasts={toasts} onDismiss={dismiss} />`.
+- 버튼 하나 (P4-11): `action={<Button size="sm">추가하기</Button>}` — 글 뒤, 닫기 앞. 행동을 고를 때까지 남아야 하므로 `duration={0}`과 함께 쓴다(월드맵 "홈 화면에 추가" 쪽지).
 
 **대표 상태**: 4 tone × {아이콘 있음/없음} × {닫기 버튼 있음/없음}, 두 줄 문구, 쌓인 3개, 360폭.
 
@@ -324,6 +325,11 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 도장 연출 중 화면 어디든 누르거나 Enter·Space·Esc → 끝 상태(§12-Q28). 연출 길이·곡선은 토큰(`DURATION`·`EASING`·`springTiming`)만.
 
 **대표 상태** (카탈로그 `#onboarding`): 등록증 빈 칸·칸 강조·10자 닉네임 + 학년 비밀 + 도장, 위 띠 빈/찍힘, 도장 빈 자리·md·lg + 다시 찍기, 진행 점 5단계, 색 고르기 + 안내 파이뱀, 학년 칩, 닉네임 처음·확인 중·통과·규칙·중복 + 추천, 튜토리얼 장면 4종 + 다시 재생.
+
+## 13-1. 앱 아이콘 · 홈 화면에 추가 (P4-11)
+
+- 아이콘: `src/lib/pwa/iconArt.tsx` 한 벌(브랜드 초록 면 + 파이뱀 리그 정지 그림 + 언덕·금색 반짝이, 글자 없음)을 `next/og`로 빌드 때 PNG 생성. 파비콘 `/icon`(32, 얼굴만) · `/apple-icon`(180, 불투명) · manifest `/pwa/icon-192.v1.png`·`icon-512.v1.png`·`maskable-512.v1.png`(그림은 가운데 80% 원 안). 그림을 바꾸면 `PWA_ICON_VERSION`을 올린다.
+- 안내: 월드맵 쪽지 `InstallHint`(공통 토스트 + `action`, 서로 다른 날 3번째 방문부터, 닫으면 30일) · 설정 `InstallAppSection`(늘 있음). 안드로이드는 브라우저 설치 창(`beforeinstallprompt`, `InstallPromptCatcher`가 로그인 화면에서 잡음), iOS는 그림 안내 시트 `IosInstallGuide`(공유 → 홈 화면에 추가 → 추가). 데스크톱·이미 설치·앱 안 브라우저는 쪽지 없음. 판별은 `src/lib/pwa/install.ts`. 카탈로그 `#pwa`.
 
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 

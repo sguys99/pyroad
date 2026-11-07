@@ -124,7 +124,7 @@ describe('middleware 페이지 CSP (B27)', () => {
   });
 });
 
-describe('middleware matcher (B26·P2-16·P4-10)', () => {
+describe('middleware matcher (B26·P2-16·P4-10·P4-11)', () => {
   // Next는 matcher를 경로 전체에 맞춘다 (path-to-regexp → ^…$)
   async function matches(path: string) {
     vi.resetModules();
@@ -133,16 +133,29 @@ describe('middleware matcher (B26·P2-16·P4-10)', () => {
   }
 
   it('페이지·API는 미들웨어를 거친다', async () => {
-    for (const path of ['/', '/world', '/terms', '/notice', '/api/quest']) {
+    for (const path of [
+      '/',
+      '/world',
+      '/terms',
+      '/notice',
+      '/api/quest',
+      // 이름이 icon으로 시작해도 아이콘 라우트가 아니면 거친다
+      '/iconography',
+    ]) {
       expect(await matches(path), path).toBe(true);
     }
   });
 
-  it('정적 파일과 빌드 때 만든 메타데이터 파일(공유 미리보기·robots·sitemap)은 건너뛴다', async () => {
+  it('정적 파일과 빌드 때 만든 메타데이터 파일(공유 미리보기·robots·sitemap·매니페스트·아이콘)은 건너뛴다', async () => {
     for (const path of [
       '/opengraph-image',
       '/robots.txt',
       '/sitemap.xml',
+      '/manifest.webmanifest',
+      '/icon',
+      '/icon/small',
+      '/apple-icon',
+      '/pwa/icon-192.v1.png',
       '/icon.svg',
       '/pyodide/314.0.7/pyodide.mjs',
       '/sounds/sfx/tap.v1.webm',

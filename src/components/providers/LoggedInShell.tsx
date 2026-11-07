@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { MotionSettingsSync } from '@/components/providers/MotionSettingsSync';
 import { SoundSettingsSync } from '@/components/providers/SoundSettingsSync';
+import { InstallPromptCatcher } from '@/components/pwa/InstallPromptCatcher';
 import { motionBootSyncScript } from '@/lib/motion/boot';
 import { loadMotionSettings } from '@/lib/motion/server';
 import { loadSoundSettings } from '@/lib/sound/server';
@@ -16,6 +17,7 @@ import '@/fonts/app.css';
  * - 움직임 설정 (P2-15): 서버 값(`users.settings.motion`)을 본문보다 먼저 nonce 스크립트로 부트에 넘겨
  *   새 기기에서도 첫 화면부터 연출 단계가 맞게 한다. 조회는 요청 안에서 한 번 (`loadOwnUserRow`, React cache)
  * - 사운드 설정 (P2-14): 서버 값과 기기 값 중 최신 것을 쓰고, 여기 있는 동안 바꾼 설정을 서버에 저장한다 (`SoundSettingsSync`)
+ * - 홈 화면에 추가 (P4-11): 안드로이드 설치 창 이벤트 잡기 (`InstallPromptCatcher`, 그리는 것 없음)
  *
  * 쓰는 레이아웃은 `export const dynamic = 'force-dynamic'`이어야 한다: 페이지 CSP의 nonce를 서버 렌더 때 넣기 때문 (B27)
  */
@@ -44,6 +46,8 @@ export async function LoggedInShell({
         </>
       )}
       <SoundSettingsSync settings={sound} />
+      {/* 홈 화면에 추가 (P4-11): 브라우저 설치 창 이벤트를 어느 로그인 화면에서든 잡아 둔다 */}
+      <InstallPromptCatcher />
       {children}
     </main>
   );

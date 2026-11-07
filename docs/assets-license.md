@@ -125,7 +125,7 @@ kenney.nl 쪽 팩 주소: `https://kenney.nl/assets/{interface-sounds,rpg-audio,
 |---|---|---|---|---|
 | 캐릭터 파이뱀·버그버그·별똥이 (+ 표정·코스튬) | `src/components/characters/rig/` (코드) | 자체 제작 | 저장소 라이선스 | SVG 파일 없이 리그 코드가 원본(P0-07, [rig.md](design/rig.md)). 이미지 생성 도구는 무드보드 참고용으로만 씀(배포 안 함) |
 | 종이 결 타일 | `paper-grain.v1`, `paper-fiber.v1` (`public/textures/`) | 자체 생성: `scripts/assets/lib/textures.mjs` (시드 고정 PRNG, 시안 B `gen-paper.py`를 옮김) | 저장소 라이선스 | 스캔·사진 소재 없음. `assets:textures --check`가 생성기와 같은 그림인지 확인 |
-| 파비콘 | `src/app/icon.svg` | 자체 (SVG 안 `<text>` 🐍 한 글자) | 저장소 라이선스 | 그림 파일을 싣지 않고 보는 기기의 이모지 글꼴로 그려짐. Phase 4 브랜드 아이콘으로 교체 예정 |
+| 앱 아이콘 (파비콘 · 홈 화면 · manifest) | `src/app/icon.tsx` → `/icon`(32), `src/app/apple-icon.tsx` → `/apple-icon`(180), `src/app/pwa/[file]/route.tsx` → `/pwa/icon-192.v1.png`·`icon-512`·`maskable-512` (모두 빌드 때 생성, P4-11) | 자체: 파이뱀 리그 정지 그림 + 언덕·반짝이 SVG 코드(`src/lib/pwa/iconArt.tsx`) | 저장소 라이선스 | 글자·이모지·외부 그림 없음. 옛 파비콘 src/app/icon.svg(SVG 안 `<text>` 🐍, 보는 기기의 이모지 글꼴로 그려지던 것)는 P4-11에서 지움 |
 | 공유 미리보기 이미지 | `src/app/opengraph-image.tsx` → `/opengraph-image` (1200×630 PNG, 빌드 때 생성) | 자체: 공유 카드 틀(`src/lib/share-card/site.tsx`) + 파이뱀 리그 정지 그림 + 지도 SVG(코드) | 저장소 라이선스 | 글자는 공유 카드 폰트 Jua·pyRoad Sans(OFL, §2)로 그림. 이모지·외부 그림 없음. 옛 스크린샷 public/og-image.png(810×411, 옛 마스코트·🚀 시스템 이모지가 보이던 것)는 P4-10에서 지움 |
 | 랜딩 소개 스크린샷 | `img/2.world-map.png`, `img/3.learning-page.png` (`src/components/landing/AboutSection.tsx`가 import → `/_next/static/media/`) | 자체: 옛 앱 화면 스크린샷 (2026-04-04) | 저장소 라이선스 | 월드맵 그림에 **실명 계정 이름과 출처를 모르는 프로필 사진**, 시스템 이모지(성·탑 등)가 보임 → §10-1. `img/1.landing-page.png`는 README 전용(앱 미사용) |
 | 래스터 정지 그림 | `public/images/`, `assets/share-card/` | — | — | **아직 없음.** 넣으면 원본 `assets-src/raster/`와 함께 이 절에 행 추가(§7) |

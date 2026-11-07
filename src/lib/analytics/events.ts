@@ -53,6 +53,17 @@ export interface AnalyticsEventProps {
     reduced: ReducedMotionSetting;
     elapsed_s: number;
   };
+  /**
+   * "홈 화면에 추가" 안내를 씀 (P4-11, 브라우저). via: 월드맵 쪽지·설정 화면, platform: 안드로이드 설치 창·iOS 그림 안내,
+   * result: accepted·dismissed = 안드로이드 설치 창에서 고른 것, guide = iOS 안내를 엶 (iOS는 실제로 추가했는지 알 수 없음)
+   */
+  pwa_install_prompt: {
+    via: 'world' | 'settings';
+    platform: 'android' | 'ios';
+    result: 'accepted' | 'dismissed' | 'guide';
+  };
+  /** 브라우저가 앱 설치를 알림 (`appinstalled`, Chromium만. P4-11) */
+  pwa_installed: Record<string, never>;
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -62,6 +73,8 @@ export const CLIENT_EVENT_NAMES = [
   'landing_view',
   'landing_cta_click',
   'motion_tier_change',
+  'pwa_install_prompt',
+  'pwa_installed',
 ] as const;
 export type ClientEventName = (typeof CLIENT_EVENT_NAMES)[number];
 

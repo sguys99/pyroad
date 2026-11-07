@@ -62,6 +62,14 @@ export const EVENT_PROPS_SCHEMA = {
       elapsed_s: z.number().int().min(0).max(86_400),
     })
     .strict(),
+  pwa_install_prompt: z
+    .object({
+      via: z.enum(['world', 'settings']),
+      platform: z.enum(['android', 'ios']),
+      result: z.enum(['accepted', 'dismissed', 'guide']),
+    })
+    .strict(),
+  pwa_installed: z.object({}).strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -89,6 +97,20 @@ const clientEvent = z.discriminatedUnion('name', [
       path: z.string().max(200).optional(),
     })
     .strict(),
+  z
+    .object({
+      name: z.literal('pwa_install_prompt'),
+      props: EVENT_PROPS_SCHEMA.pwa_install_prompt,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('pwa_installed'),
+      props: EVENT_PROPS_SCHEMA.pwa_installed.default({}),
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
 ]);
 
 // 스키마가 CLIENT_EVENT_NAMES 를 모두 다루는지 컴파일 때 확인
@@ -100,6 +122,8 @@ const _clientNamesCovered: Record<
   landing_view: 'landing_view',
   landing_cta_click: 'landing_cta_click',
   motion_tier_change: 'motion_tier_change',
+  pwa_install_prompt: 'pwa_install_prompt',
+  pwa_installed: 'pwa_installed',
 };
 void _clientNamesCovered;
 

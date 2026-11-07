@@ -47,6 +47,7 @@ import {
 import { LegalSection } from './_catalog/LegalSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
+import { PwaSection } from './_catalog/PwaSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -102,6 +103,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['legal', '약관 동의'],
       ['onboarding', '온보딩·튜토리얼'],
       ['consent', '보호자 동의'],
+      ['pwa', '앱 아이콘·홈 화면'],
     ],
   },
 ];
@@ -201,6 +203,7 @@ export function DesignCatalog({
               <LegalSection />
               <OnboardingSection />
               <ConsentSection />
+              <PwaSection />
             </div>
           </div>
         </div>

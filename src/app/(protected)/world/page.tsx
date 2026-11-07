@@ -10,6 +10,7 @@ import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
 import { MapBackground } from '@/components/world/MapBackground';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { StageLockedNotice } from '@/components/world/StageLockedNotice';
+import { InstallHint } from '@/components/pwa/InstallHint';
 import { isStageLockedNotice } from '@/lib/world/stageLock';
 import { LogoutButton } from '@/components/LogoutButton';
 import { SoundToggle } from '@/components/sound/SoundToggle';
@@ -132,7 +133,8 @@ export default async function WorldPage({ searchParams }: Props) {
       <WorldBgm id="world1" />
 
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
-      {isStageLockedNotice(notice) && <StageLockedNotice />}
+      {/* 홈 화면에 추가 쪽지 (P4-11): 다른 안내가 떠 있으면 띄우지 않음 (아래 가운데 자리를 같이 씀) */}
+      {isStageLockedNotice(notice) ? <StageLockedNotice /> : <InstallHint />}
     </>
   );
 }

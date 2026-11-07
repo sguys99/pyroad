@@ -23,6 +23,7 @@ import { IconButton } from '@/components/ui/button';
  * - 자동 닫힘: `duration`(ms) 뒤 `onClose`. 끝나기 직전 짧게 흐려진다(`DURATION.fast`). 닫기 버튼은 바로 닫는다
  * - 연출(`game-ui.css` `.g-toast`): full = body 스프링으로 살짝 기울어 올라옴 · lite = 짧게 · minimal = 페이드 · 동작 줄이기 = 즉시
  * - 여러 개를 쌓아 띄울 때는 `useToastQueue()` + `ToastViewport`
+ * - `action`: 글 뒤에 작은 버튼 하나 (P4-11 홈 화면에 추가 쪽지). 저절로 닫히지 않게 `duration={0}`과 함께 쓴다
  */
 export type ToastTone = 'info' | 'good' | 'warn' | 'error';
 
@@ -54,6 +55,8 @@ interface ToastProps extends Omit<ComponentProps<'div'>, 'children'> {
   /** 닫힘 (자동·닫기 버튼). 없으면 닫기 버튼도 없다 */
   onClose?: () => void;
   closeLabel?: string;
+  /** 글 뒤 버튼 하나 (예: "추가하기", P4-11). 작은 버튼(`size="sm"`)을 넣는다 */
+  action?: ReactNode;
 }
 
 function Toast({
@@ -63,6 +66,7 @@ function Toast({
   duration = TOAST_DEFAULT_MS,
   onClose,
   closeLabel = '닫기',
+  action,
   className,
   ...props
 }: ToastProps) {
@@ -97,6 +101,7 @@ function Toast({
         </span>
       )}
       <p className="min-w-0 flex-1 py-1.5 text-small font-medium">{children}</p>
+      {action && <span className="flex flex-none items-center">{action}</span>}
       {onClose && (
         <IconButton label={closeLabel} size="sm" onClick={() => onClose()}>
           <X aria-hidden strokeWidth={2.4} />

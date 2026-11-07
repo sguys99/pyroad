@@ -116,11 +116,42 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     }
   });
 
+  it('홈 화면에 추가 안내(P4-11)를 받고, 정해진 값 밖이면 거부', () => {
+    const ok = { via: 'world', platform: 'ios', result: 'guide' };
+    expect(
+      clientBatchSchema.safeParse(
+        batch([
+          { name: 'pwa_install_prompt', props: ok, path: '/world' },
+          { name: 'pwa_installed', props: {} },
+        ]),
+      ).success,
+    ).toBe(true);
+    for (const bad of [
+      { ...ok, via: 'landing' },
+      { ...ok, platform: 'desktop' },
+      { ...ok, result: 'maybe' },
+      { ...ok, ua: 'iPhone' },
+    ]) {
+      expect(
+        clientBatchSchema.safeParse(
+          batch([{ name: 'pwa_install_prompt', props: bad }]),
+        ).success,
+      ).toBe(false);
+    }
+    expect(
+      clientBatchSchema.safeParse(
+        batch([{ name: 'pwa_installed', props: { standalone: true } }]),
+      ).success,
+    ).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',
+      'pwa_install_prompt',
+      'pwa_installed',
     ]);
   });
 });
