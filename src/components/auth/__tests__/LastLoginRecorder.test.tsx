@@ -13,7 +13,11 @@ afterEach(() => {
 });
 
 describe('LastLoginRecorder', () => {
-  it('#lp=kakao → 저장하고 조각을 지운다 (경로·쿼리·history.state 유지)', () => {
+  it('#lp=kakao → 저장하고 조각을 지운다 (경로·쿼리·history.state 유지), 로그인 시도 기록도 지운다 (B43)', () => {
+    window.sessionStorage.setItem(
+      'pyroad.loginAttempt.v1',
+      JSON.stringify({ provider: 'kakao', at: Date.now() }),
+    );
     window.history.replaceState({ keep: 1 }, '', '/world?tab=map#lp=kakao');
     render(<LastLoginRecorder />);
     expect(
@@ -24,6 +28,7 @@ describe('LastLoginRecorder', () => {
     );
     expect(window.location.hash).toBe('');
     expect(window.history.state).toEqual({ keep: 1 });
+    expect(window.sessionStorage.getItem('pyroad.loginAttempt.v1')).toBeNull();
   });
 
   it('모르는 값은 저장하지 않고 조각만 지운다', () => {

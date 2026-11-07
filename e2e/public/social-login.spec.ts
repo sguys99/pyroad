@@ -85,7 +85,7 @@ test.describe('실패·취소 안내 (P3-10)', () => {
 
       await expect(page.getByRole('dialog', { name: title })).toBeVisible();
       expect(mock.problems()).toEqual([]);
-      // login_error·via 는 주소에서 지워진다
+      // login_error 는 주소에서 지워진다 (시도한 수단은 sessionStorage, B43)
       await expect
         .poll(() => page.evaluate(() => window.location.search))
         .toBe('');

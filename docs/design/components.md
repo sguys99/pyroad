@@ -268,7 +268,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 **로그인 실패 안내 (P3-10)**: `/auth/callback`이 `error`·`error_code`·`error_description`(코드가 없는 콜백 포함)과 교환 오류(`exchangeCodeForSession`의 `code`·`name`)를 사유 enum 하나로 바꾼다(`src/lib/auth/loginError.ts`). 원문은 주소·화면·분석에 싣지 않고, 설정 오류·모르는 오류만 코드 이름으로 `reportServerError`(Sentry, area `auth` op `callback`).
 
-| 사유 | 들어오는 값 | 파이뱀 | 제목 · 설명 (via = 시도한 provider, 로그인 버튼이 `redirectTo`에 `?via=`로 붙임) |
+| 사유 | 들어오는 값 | 파이뱀 | 제목 · 설명 (via = 시도한 provider. 로그인 버튼이 누르기 직전 sessionStorage `pyroad.loginAttempt.v1`에 적고 안내가 읽음 — `redirectTo`에는 싣지 않음, B43) |
 |---|---|---|---|
 | `cancelled` | `access_denied` (취소·동의 거부) | encourage | "[카카오 ]로그인을 그만뒀구나" · "괜찮아! 취소하거나 동의하지 않으면 들어갈 수 없어. 마음이 바뀌면 아래에서 다시 골라 줘." |
 | `identity_taken` | `identity_already_exists` (계정 연결 P3-07) | think | "이미 다른 계정에 연결돼 있어" · "이 [Google ]계정은 다른 pyRoad 계정에서 쓰고 있어. 그 계정으로 로그인하면 거기 기록을 볼 수 있어." |
@@ -278,7 +278,8 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 | `unavailable` | `server_error`("Error getting user email") · `provider_disabled` · `oauth_provider_not_supported` · `unexpected_failure` · `manual_linking_disabled` | sad | "지금은 [네이버 ]로그인을 쓸 수 없어" · "다른 방법으로 들어가 볼래? 계속 안 되면 어른에게 알려 줘." |
 | `unknown` | 그 밖 (code·error 모두 없음, 옛 `?error=auth`) | sad | "앗, 로그인이 잘 안 됐어" · "잠시 뒤에 다시 해 볼까? 다른 방법으로 들어가도 돼." |
 
-- **어디로**: 랜딩에서 시작한 로그인(기본 `next`)은 `/?login_error=<사유>&via=<provider>` → `LandingLoginError`가 로그인 시트를 저절로 열어(`LoginSheet notice`) 표정·제목·설명을 바꾸고 주소에서 그 키를 지운다. 버튼이 바로 아래라 "다시 해 볼까?"는 버튼을 누르는 것. GoTrue가 콜백을 거치지 않고 Site URL로 바로 보낸 `?error=…&error_code=bad_oauth_state`(조각으로 온 값 포함)도 같은 표로 읽는다. 랜딩 밖에서 시작한 흐름(설정의 계정 연결처럼 `next`가 있음)은 `/auth/error?reason=…&via=…&next=…` 화면(`LoginErrorPanel`: 정지 파이뱀 + 돌아가기 `next` + 처음 화면으로, `next`는 다시 `safeNext`)
+- **redirectTo는 쿼리 없는 `/auth/callback`** (B43): Supabase Redirect URLs는 쿼리까지 비교하므로 `?via=`를 붙이면 정확한 주소만 등록된 운영에서 Site URL로 샜다. 시도한 수단은 sessionStorage로 옮김. `?next=`는 계정 연결·탈퇴 재인증만(Redirect URLs `https://pyroad.vercel.app/**` 필요)
+- **어디로**: 랜딩에서 시작한 로그인(기본 `next`)은 `/?login_error=<사유>` → `LandingLoginError`가 로그인 시트를 저절로 열어(`LoginSheet notice`) 표정·제목·설명을 바꾸고 주소에서 그 키를 지운다. 버튼이 바로 아래라 "다시 해 볼까?"는 버튼을 누르는 것. GoTrue가 콜백을 거치지 않고 Site URL로 바로 보낸 `?error=…&error_code=bad_oauth_state`(조각으로 온 값 포함)도 같은 표로 읽는다. 랜딩 밖에서 시작한 흐름(설정의 계정 연결처럼 `next`가 있음)은 `/auth/error?reason=…&next=…` 화면(`AuthErrorView` → `LoginErrorPanel`: 정지 파이뱀 + 돌아가기 `next` + 처음 화면으로, `next`는 다시 `safeNext`)
 - **다른 방법 한마디** `loginErrorHint` (금색 옅은 면 + 전구): 카카오톡 인앱에서 Google이 실패 → "카카오톡에서는 카카오 로그인이 가장 빨라! 노란 카카오 버튼을 눌러 봐." · 네이버가 다른 브라우저 문제 → "네이버 앱으로 넘어가지 말고, 이 화면에서 아이디로 로그인해 봐." · 설정 오류·모르는 오류 → "카카오·Google 계정이 있으면 그걸로 들어가 봐."(보이는 provider만). 취소·재전송에는 없음
 - 연출: 시트는 기존 단계 규칙(리그 표정 전환, 동작 줄이기 = 정지 표정), `/auth/error`는 정지 그림이라 움직임이 없다
 - Kakao KOE 오류(동의 화면 설정 문제)는 카카오 화면에서 멈추고 앱으로 돌아오지 않으므로 이 표로는 잡히지 않는다 → 설정·스모크 테스트로 예방(docs/release/v0.4-phase3-providers.md)

@@ -59,7 +59,7 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 실제 Kakao·Naver·Google 없이 로그인 화면부터 월드맵까지를 브라우저로 시험합니다. CI에서도 그대로 돕니다(외부 호출 없음, 추가 컨테이너 없음).
 
 **어떻게**: 로그인 버튼은 `signInWithOAuth`(P1-14 헬퍼)로 GoTrue `…/auth/v1/authorize?provider=…`로 이동합니다. Playwright가 이 이동을 가로채(`installOAuthMock`)
-1. **요청을 검사**합니다 — 앱이 실제로 만든 값: provider 이름(`custom:naver`), PKCE `code_challenge`(S256), `redirect_to` = 같은 출처 `/auth/callback` + `via`, Kakao scope 덮어쓰기(빈 `scope=`, KOE205 방지), Android에서만 네이버 `appscheme=true`. 어긋나면 `mock.problems()`가 이유를 돌려줍니다
+1. **요청을 검사**합니다 — 앱이 실제로 만든 값: provider 이름(`custom:naver`), PKCE `code_challenge`(S256), `redirect_to` = 같은 출처 `/auth/callback` 그대로(쿼리 없음, B43 — 계정 연결·탈퇴 재인증만 `?next=`), Kakao scope 덮어쓰기(빈 `scope=`, KOE205 방지), Android에서만 네이버 `appscheme=true`. 어긋나면 `mock.problems()`가 이유를 돌려줍니다
 2. **provider 결과를 흉내 냅니다**: `success` = 미리 만든 로컬 사용자로 비밀번호 로그인한 세션 쿠키를 넣고 콜백 성공 때와 같은 주소(`next` + `#lp=<provider>`)로 302 · `cancel` = 진짜 `/auth/callback?…&error=access_denied` · `server_error` = 진짜 콜백에 "Error getting user email" · `bad_state` = Site URL `/`에 `error_code=bad_oauth_state`
 
 **시험하지 않는 것과 대신 확인하는 곳**

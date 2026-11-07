@@ -20,6 +20,7 @@ vi.mock('@/lib/browser/detectInAppBrowser', () => ({ detectInAppBrowser }));
 vi.mock('@/lib/browser/openExternalBrowser', () => ({ openExternalBrowser }));
 
 import { useSocialLogin, type SocialLoginResult } from '../useSocialLogin';
+import { LOGIN_ATTEMPT_STORAGE_KEY } from '@/lib/auth/loginAttempt';
 
 const KAKAOTALK: InAppBrowserInfo = {
   isInApp: true,
@@ -42,6 +43,7 @@ const NORMAL: InAppBrowserInfo = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.sessionStorage.clear();
   openExternalBrowser.mockReturnValue(true);
 });
 
@@ -67,7 +69,7 @@ describe('useSocialLogin (P1-14, B16)', () => {
     expect(signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?via=google`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
   });
@@ -134,4 +136,18 @@ describe('useSocialLogin (P1-14, B16)', () => {
       );
     },
   );
+
+  it('signInWithOAuth 직전에 시도한 수단을 이 탭에 적는다 (B43), 외부 브라우저로 넘길 때는 적지 않음', async () => {
+    detectInAppBrowser.mockReturnValue(NORMAL);
+    await login('kakao');
+    expect(
+      JSON.parse(window.sessionStorage.getItem(LOGIN_ATTEMPT_STORAGE_KEY)!)
+        .provider,
+    ).toBe('kakao');
+
+    window.sessionStorage.clear();
+    detectInAppBrowser.mockReturnValue(KAKAOTALK);
+    await login('google');
+    expect(window.sessionStorage.getItem(LOGIN_ATTEMPT_STORAGE_KEY)).toBeNull();
+  });
 });

@@ -26,6 +26,7 @@ const KAKAOTALK = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.sessionStorage.clear();
   detectInAppBrowser.mockReturnValue(NORMAL);
 });
 
@@ -44,6 +45,12 @@ describe('useLinkIdentity', () => {
     const redirect = new URL(creds.options.redirectTo);
     expect(redirect.pathname).toBe('/auth/callback');
     expect(redirect.searchParams.get('next')).toBe('/settings?linked=kakao');
+    // 시도한 수단은 주소가 아니라 이 탭에 (B43)
+    expect(redirect.searchParams.has('via')).toBe(false);
+    expect(
+      JSON.parse(window.sessionStorage.getItem('pyroad.loginAttempt.v1')!)
+        .provider,
+    ).toBe('kakao');
   });
 
   it('인앱에서 Google은 시작하지 않음 (세션이 앱 안에만 있음)', async () => {

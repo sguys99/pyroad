@@ -2,7 +2,7 @@
 // 실패 안내·인앱 브라우저는 스택 없이 도는 e2e/public/social-login.spec.ts (CI e2e-smoke).
 //
 // provider 왕복은 Playwright가 GoTrue authorize 이동을 가로채 흉내 낸다(support/oauthMock.ts — 방식과 한계는 e2e/README.md "소셜 로그인 목업").
-// 앱이 보내는 authorize 요청(provider 이름·PKCE·redirect_to·via·Kakao scope·Android 네이버 appscheme)은 진짜이고 매번 검사한다.
+// 앱이 보내는 authorize 요청(provider 이름·PKCE·쿼리 없는 redirect_to·Kakao scope·Android 네이버 appscheme)은 진짜이고 매번 검사한다.
 // 로그인 상태를 쓰지 않으므로 공용 사용자의 storageState를 비우고, 성공 시나리오마다 새 로컬 사용자를 만든다(로그인 4번).
 
 import { test, expect, type Page } from '@playwright/test';

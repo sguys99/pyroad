@@ -261,7 +261,7 @@ describe('GET /auth/callback — 실패·취소·동의 거부 사유 (P3-10)', 
     ['error=unauthorized_client', 'unknown'],
   ])('%s → %s', async (query, reason) => {
     expect(await location(`${query}&via=kakao`)).toBe(
-      `${origin}/?login_error=${reason}&via=kakao`,
+      `${origin}/?login_error=${reason}`,
     );
     expect(exchangeCodeForSession).not.toHaveBeenCalled();
   });
@@ -282,7 +282,7 @@ describe('GET /auth/callback — 실패·취소·동의 거부 사유 (P3-10)', 
       error: authError(code, name),
     });
     expect(await location('code=abc&via=google')).toBe(
-      `${origin}/?login_error=${reason}&via=google`,
+      `${origin}/?login_error=${reason}`,
     );
   });
 
@@ -302,7 +302,7 @@ describe('GET /auth/callback — 실패·취소·동의 거부 사유 (P3-10)', 
         `error=invalid_request&error_code=identity_already_exists&via=naver&next=${encodeURIComponent('/settings?tab=account')}`,
       ),
     ).toBe(
-      `${origin}/auth/error?reason=identity_taken&via=naver&next=%2Fsettings%3Ftab%3Daccount`,
+      `${origin}/auth/error?reason=identity_taken&next=%2Fsettings%3Ftab%3Daccount`,
     );
     // 공격 next는 /world → 랜딩 안내
     expect(
@@ -312,7 +312,7 @@ describe('GET /auth/callback — 실패·취소·동의 거부 사유 (P3-10)', 
     ).toBe(`${origin}/?login_error=cancelled`);
   });
 
-  it('via는 짧은 이름 3종만 (모르는 값은 버림)', async () => {
+  it('주소의 via는 쓰지 않는다 (B43: 시도한 수단은 안내 화면이 sessionStorage에서 읽음)', async () => {
     expect(await location('error=access_denied&via=github')).toBe(
       `${origin}/?login_error=cancelled`,
     );
@@ -406,7 +406,7 @@ describe('GET /auth/callback — 탈퇴 직전 네이버 재인증 (P3-16)', () 
         )
       ).headers.get('location'),
     ).toBe(
-      `${origin}/auth/error?reason=cancelled&via=naver&next=%2Fprofile%3Fwithdraw%3Dnaver`,
+      `${origin}/auth/error?reason=cancelled&next=%2Fprofile%3Fwithdraw%3Dnaver`,
     );
   });
 });
@@ -428,7 +428,7 @@ describe('GET /auth/callback — 계정 연결 (P3-07)', () => {
       `error=invalid_request&error_code=identity_already_exists&via=kakao&next=${linkNextQ}`,
     );
     expect(res.headers.get('location')).toBe(
-      `${origin}/auth/error?reason=identity_taken&via=kakao&next=%2Fsettings`,
+      `${origin}/auth/error?reason=identity_taken&next=%2Fsettings`,
     );
   });
 
@@ -437,7 +437,7 @@ describe('GET /auth/callback — 계정 연결 (P3-07)', () => {
       `error=invalid_request&error_code=manual_linking_disabled&via=naver&next=${encodeURIComponent('/settings?linked=naver')}`,
     );
     expect(res.headers.get('location')).toBe(
-      `${origin}/auth/error?reason=unavailable&via=naver&next=%2Fsettings`,
+      `${origin}/auth/error?reason=unavailable&next=%2Fsettings`,
     );
   });
 });
@@ -451,7 +451,7 @@ describe('GET /auth/callback — 프록시 스킴 (P3-17)', () => {
         'x-forwarded-proto': 'http',
       });
       expect(local.headers.get('location')).toBe(
-        'http://localhost:3100/?login_error=cancelled&via=kakao',
+        'http://localhost:3100/?login_error=cancelled',
       );
       const odd = await callback('error=access_denied', {
         'x-forwarded-host': 'pyroad.vercel.app',

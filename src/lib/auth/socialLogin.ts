@@ -56,15 +56,17 @@ interface OAuthOptionsInput {
   device?: Pick<InAppBrowserInfo, 'isAndroid'>;
 }
 
-/** provider별 `signInWithOAuth`·`linkIdentity` 인자. redirectTo는 기존 `/auth/callback` 흐름 그대로입니다. */
+/** provider별 `signInWithOAuth`·`linkIdentity` 인자. redirectTo는 `next`가 없으면 정확히 `${origin}/auth/callback`입니다 (B43). */
 export function getOAuthCredentials(
   provider: SocialProvider,
   { origin, next, device }: OAuthOptionsInput,
 ): SignInWithOAuthCredentials {
+  // redirectTo는 쿼리 없는 `/auth/callback`이 기본이다 (B43). Supabase는 Redirect URLs를 쿼리까지 비교하므로, 쿼리를 붙이면
+  // 정확한 주소(`https://pyroad.vercel.app/auth/callback`)만 등록된 환경에서 맞지 않아 Site URL로 새어 나간다.
+  // 시도한 수단은 주소가 아니라 sessionStorage에 둔다(`loginAttempt.ts`). `next`는 꼭 필요한 흐름(계정 연결 /settings,
+  // 탈퇴 재인증)만 붙이고, 그 흐름은 Redirect URLs의 `https://pyroad.vercel.app/**`가 있어야 한다(providers 문서 §2)
   const callback = new URL('/auth/callback', origin);
   if (next) callback.searchParams.set('next', next);
-  // 실패했을 때 어떤 수단이었는지 안내에 쓴다 (P3-10, `via`). 성공 판별은 세션의 iss로 하므로 이 값은 UI 힌트로만 쓴다
-  callback.searchParams.set('via', provider);
 
   const options: NonNullable<SignInWithOAuthCredentials['options']> = {
     redirectTo: callback.toString(),

@@ -9,6 +9,7 @@ import {
   type LoginErrorReason,
 } from '@/lib/auth/loginError';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
+import { takeLoginAttempt } from '@/lib/auth/loginAttempt';
 
 // 실패해서 돌아왔을 때만 시트 모듈을 불러온다 (첫 화면 JS 밖, §2.10)
 const LoginSheet = dynamic(
@@ -38,7 +39,9 @@ export function LandingLoginError() {
     } catch {
       // 주소를 못 지워도 안내는 보여 준다
     }
-    setNotice({ reason: taken.reason, via: taken.via });
+    // 시도한 수단: 예전 주소의 `via`가 있으면 그것, 없으면 로그인 직전에 적어 둔 값 (B43). 모르면 이름 없는 안내
+    const attempted = takeLoginAttempt();
+    setNotice({ reason: taken.reason, via: taken.via ?? attempted });
     setOpen(true);
   }, []);
 
