@@ -6,7 +6,7 @@ import { isLoginErrorReason, parseVia } from '@/lib/auth/loginError';
 import { safeNext } from '@/lib/auth/safeNext';
 
 export const metadata: Metadata = {
-  title: '로그인 안내 - pyRoad',
+  title: '로그인 안내',
   robots: { index: false, follow: false },
 };
 

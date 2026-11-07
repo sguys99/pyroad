@@ -30,7 +30,7 @@ import {
   normalizeNickname,
 } from './text';
 
-const STAGE_H = CARD.height - PAD * 2;
+export const STAGE_H = CARD.height - PAD * 2;
 
 export function CardFrame({
   stage,
@@ -91,6 +91,12 @@ export interface StageProps {
   guest?: CardCharacter;
   /** 무대 위에 올리는 것 (메달 등). 캐릭터 다음에 그려 위에 온다 */
   overlay?: ReactNode;
+  /** 무대 바탕 그림 (사이트 OG의 지도 등). 언덕 다음, 반짝이·캐릭터 전에 그린다 */
+  backdrop?: ReactNode;
+  /** 기본 언덕을 그릴지 (바탕 그림이 자기 땅을 그리면 끔) */
+  ground?: boolean;
+  /** 주인공 왼쪽 위치 (기본 가운데) */
+  heroLeft?: number;
 }
 
 /**
@@ -108,6 +114,9 @@ export function Stage({
   heroSize = 480,
   guest,
   overlay,
+  backdrop,
+  ground = true,
+  heroLeft,
 }: StageProps) {
   const w = worldPalette(world);
   return (
@@ -123,17 +132,20 @@ export function Stage({
       }}
     >
       {/* 언덕 (월드 틴트를 옅게, 무대 아래쪽) */}
-      <div
-        style={{
-          position: 'absolute',
-          left: -80,
-          right: -80,
-          bottom: -260,
-          height: 400,
-          borderRadius: 9999,
-          backgroundColor: w.ground,
-        }}
-      />
+      {ground ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: -80,
+            right: -80,
+            bottom: -260,
+            height: 400,
+            borderRadius: 9999,
+            backgroundColor: w.ground,
+          }}
+        />
+      ) : null}
+      {backdrop}
       {SPARKLES.map((s, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -163,7 +175,7 @@ export function Stage({
         alt=""
         style={{
           position: 'absolute',
-          left: (STAGE_W - heroSize) / 2,
+          left: heroLeft ?? (STAGE_W - heroSize) / 2,
           bottom: -6,
         }}
       />

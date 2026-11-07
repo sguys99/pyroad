@@ -123,3 +123,31 @@ describe('middleware 페이지 CSP (B27)', () => {
     );
   });
 });
+
+describe('middleware matcher (B26·P2-16·P4-10)', () => {
+  // Next는 matcher를 경로 전체에 맞춘다 (path-to-regexp → ^…$)
+  async function matches(path: string) {
+    vi.resetModules();
+    const { config } = await import('@/middleware');
+    return config.matcher.some((m) => new RegExp(`^${m}$`).test(path));
+  }
+
+  it('페이지·API는 미들웨어를 거친다', async () => {
+    for (const path of ['/', '/world', '/terms', '/notice', '/api/quest']) {
+      expect(await matches(path), path).toBe(true);
+    }
+  });
+
+  it('정적 파일과 빌드 때 만든 메타데이터 파일(공유 미리보기·robots·sitemap)은 건너뛴다', async () => {
+    for (const path of [
+      '/opengraph-image',
+      '/robots.txt',
+      '/sitemap.xml',
+      '/icon.svg',
+      '/pyodide/314.0.7/pyodide.mjs',
+      '/sounds/sfx/tap.v1.webm',
+    ]) {
+      expect(await matches(path), path).toBe(false);
+    }
+  });
+});

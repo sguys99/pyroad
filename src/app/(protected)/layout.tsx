@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { LoggedInShell } from '@/components/providers/LoggedInShell';
 import { loadOwnUserRow } from '@/lib/supabase/ownUserRow';
@@ -12,6 +13,9 @@ import { ConsentBanner } from '@/components/consent/ConsentBanner';
  * (설정·글쓰기처럼 서버 데이터가 없는 화면도 빌드 때 HTML로 굳히면 nonce가 없어 스크립트가 막힌다)
  */
 export const dynamic = 'force-dynamic';
+
+/** 로그인 화면은 검색에 내보내지 않는다 (P4-10). robots.txt도 같은 경로를 막는다(`src/lib/seo/site.ts`) */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 /**
  * 인증 검증은 src/lib/supabase/middleware.ts에서 처리합니다.

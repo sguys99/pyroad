@@ -123,7 +123,7 @@
 - **함수 번들**: `next.config.ts` `outputFileTracingIncludes`에 `'/api/share-cards/[id]/image': ['./src/fonts/share-card/**']`. 예상 크기 ≈ `@vercel/og` 2.98MB + 카드 폰트 2.97MB + 라우트 청크 약 1MB ≈ **7MB**(Node 함수 한도 250MB, P0-10 실측 9.6MB보다 작음). 빌드 뒤 `route.js.nft.json`에 폰트 3개만 들어갔는지 확인. `src/fonts/share-card/`에는 카드 폰트만 둔다(`fonts:check`가 남는 파일을 막음).
 - **미들웨어** matcher에서 `/share`·`/api/share-cards` 제외(P0-10 §7).
 - **스냅샷 비교 테스트**: 샘플 PNG(`docs/design/img/share-card/`)를 기준으로 satori·resvg 버전이 바뀌면 모양 차이를 잡는다(Next 업그레이드 리스크, P0-10 §7).
-- **P4-10** 사이트 OG 이미지도 같은 틀·폰트(`CardFrame`·`loadShareCardFonts`)로.
+- **P4-10** ✅ 사이트 OG 이미지도 같은 틀·폰트(`CardFrame`·`Stage`·`loadShareCardFonts`)로: `src/lib/share-card/site.tsx`(`SiteOgCard`) → `src/app/opengraph-image.tsx`(`force-static`, 빌드 때 한 번 생성, 런타임 함수·폰트 파일 추적 없음). 무대는 월드 1 틴트에 지도(먼·가까운 언덕, 점선 잉크 길 → 금색 X, 깃발 탑, 나무, 해) + 손 흔드는 파이뱀, 글은 "무료 · 설치 없이 웹에서" / "파이뱀과 떠나는 파이썬 모험"(둘째 줄 형광펜) / "퀘스트를 깨며 진짜 파이썬 코드를 배워요". `Stage`에 `backdrop`(바탕 그림)·`ground`(기본 언덕 끄기)·`heroLeft`를 더함. 샘플 [site-og](img/share-card/site-og.png) · [가이드](img/share-card/guide/site-og.png), `npm run share-card:render -- --only=site-og`
 - **P2-12 카탈로그**는 이 문서의 샘플 PNG를 링크하면 된다(개발 전용 미리보기 라우트는 만들지 않음: 운영 번들에 폰트를 싣지 않으려고).
 
 ## 9. 고치는 법
