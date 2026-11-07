@@ -68,7 +68,8 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      testIgnore: /public\//,
+      // e2e/support/__tests__ 는 vitest 단위 테스트 (P3-17)
+      testIgnore: [/public\//, /__tests__\//],
       use: {
         ...devices['Desktop Chrome'],
         storageState: STORAGE_STATE,

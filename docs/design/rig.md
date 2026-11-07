@@ -52,7 +52,7 @@ ref.current?.poke(); ref.current?.replay();
 
 - **지연 로드**: 첫 화면은 `PybaemStatic`(서버에서 그림)으로 두고 `next/dynamic(() => import('…/MascotRig'), { ssr: false, loading: () => <PybaemStatic … /> })`로 바꿔도 **같은 모습**입니다. 라이브 리그의 첫 렌더가 같은 `staticGeo()`를 쓰고, 테스트가 두 마크업이 같은지 확인합니다(`static.test.tsx`).
 - **스타일**: `style`을 생략하면 `DEFAULT_RIG_STYLE`(**`'B'`**, P2-06 사용자 리뷰에서 B 방향 확정·P2-07 2차에서 바꿈).
-- **팔레트·코스튬**: `palette={{ body: '#4FC3F7' }}`(스킨), `costume={{ hat: 'party', glasses: 'round', cape: '#E53935', bg: 'island' }}`(파이뱀). 표정 소품(별 눈·물음표·Zzz)과 코스튬은 서로 다른 슬롯이라 겹치지 않습니다(P0-10).
+- **팔레트·코스튬**: `palette={skinPalette('sky')}`(스킨, §6½), `costume={{ hat: 'party', glasses: 'round', cape: '#E53935', bg: 'island' }}`(파이뱀). 표정 소품(별 눈·물음표·Zzz)과 코스튬은 서로 다른 슬롯이라 겹치지 않습니다(P0-10).
 - **접근성**: `role="img"` + `aria-label="파이뱀 선생님 - 기쁨"`. `label=""`이면 장식(`aria-hidden`).
 - `<text>`·`<foreignObject>`·래스터 `<image>`를 쓰지 않습니다(공유 카드 직렬화기, P0-10). 예전 `PybaemSvg`의 "Zzz"·"?"도 경로로 바꿨습니다.
 
@@ -193,6 +193,25 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 - 바쁜 장면(3종) 6×는 54~56fps로 60을 조금 못 지킵니다. 저사양에서 P0-16 감지가 lite로 내리면 59.8fps입니다.
 - **첫 프레임 생성 비용**: 마운트 때는 정적 geometry 마크업만 그리고(React 한 번), 엔진·IntersectionObserver는 **다음 rAF**에 만듭니다. 그래서 축하 카드처럼 큰 화면이 뜨는 첫 프레임의 긴 작업에 리그 생성이 끼지 않습니다(P2-05 측정에서 지적). 좌표 측정(`getBoundingClientRect`)은 포인터가 움직일 때 rAF당 한 번만.
 - **멈춤**: 화면 밖(IntersectionObserver)·숨긴 탭(`visibilitychange`)·가려짐(`checkVisibility` visibility·opacity, 2초마다 확인)·`paused` prop(모달 뒤·접힌 패널).
+
+## 6½. 파이뱀 스킨 · 사용자 아바타 (P3-13, §12-Q34)
+
+공개 아바타는 아이가 고른 **파이뱀 색** 하나입니다(provider 프로필 사진은 쓰지 않음, §2.6). 스킨 = 팔레트 덮어쓰기라 Phase 9 꾸미기(F6)·공유 카드도 같은 값을 씁니다.
+
+| id | 이름 | 몸 `body` | 외곽선 `outline` | 배 `belly` | 볼 `cheek` |
+|---|---|---|---|---|---|
+| `green` (기본) | 숲초록 | `#9CCB80` | `#5F804E` | `#EAF1CF` | `#F2879B` ×0.84 |
+| `sky` | 하늘파랑 | `#88BCE2` | `#4C7596` | `#E9F2F8` | `#F2879B` ×0.84 |
+| `sunset` | 노을주황 | `#E08B57` | `#94532B` | `#FBEBDD` | `#E8657A` ×0.82 |
+| `berry` | 딸기분홍 | `#F2B3C4` | `#A45C70` | `#FDF0F3` | `#E45A7C` ×0.85 |
+| `violet` | 보라별 | `#9580CB` | `#594888` | `#EEEAF8` | `#F2879B` ×0.84 |
+| `sunny` | 햇살노랑 | `#F3DA7A` | `#9A7F22` | `#FDF8E2` | `#F08A86` ×0.84 |
+
+- 원본: `src/lib/avatar/skins.ts`(`SKIN_IDS`·`PYBAEM_SKINS`·`getSkin`·`isSkinId`·`skinPalette`·`skinFromAvatarConfig`). 스타일 B 기준이고 `ink`(눈·입)·바닥 그림자는 모든 스킨이 같습니다. 외곽선은 몸색의 진한 톤(`tonal`), 분홍 몸(`berry`)은 볼이 묻히지 않게 더 진한 분홍
+- 구분: 색상만이 아니라 **밝기를 벌렸습니다**(몸 L\* 노랑 87 · 분홍 79 · 초록 77 · 파랑 74 · 주황 66 · 보라 58). 색각 시뮬레이션(Machado 2009 적·녹·청황 이상)에서 모든 쌍의 몸색 ΔE ≥ 15를 단위 테스트가 지킵니다(`src/lib/avatar/__tests__/skins.test.ts`). 32px에서도 서로 다르게 보이는지 리뷰 시트로 확인
+- 저장·공개: `users.avatar_config.skin` → 동기화 트리거가 6종 id만 `user_public_profiles.avatar_skin`으로 복사(모르는 값은 NULL = 숲초록, ① 00021). id 목록은 마이그레이션의 `ARRAY[…]`와 같아야 하고(테스트가 대조) 한번 쓴 id는 바꾸지 않습니다
+- 그리기: `UserAvatar`(`src/components/profile/UserAvatar.tsx`, 32 게시판 · 48 월드맵 요약 · 96 프로필) = 둥근 `surface-2` 칩 + 칩과 같은 크기의 `PybaemStatic` idle(4% 위로). 장식(`aria-hidden`)이고 이름은 옆에 글자로. 공유 카드는 `avatar.skin`
+- 색은 캐릭터 고유색이라 토큰이 아닙니다(tokens.md §6 예외 `src/lib/avatar/skins.ts`)
 
 ## 7. 캐릭터 추가 방법
 

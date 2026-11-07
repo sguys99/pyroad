@@ -75,10 +75,11 @@ export type UserBadge = Omit<Tables<'user_badges'>, 'badge_type'> & {
     | 'streak_3';
 };
 
-export type UserProfile = Pick<
-  Tables<'users'>,
-  'id' | 'display_name' | 'avatar_url' | 'total_xp' | 'current_level'
->;
+/**
+ * 내 화면의 프로필 (P3-13). 이름·아바타는 공개 프로필(닉네임 → 모험가NNNN, 파이뱀 스킨)에서.
+ * `users.display_name`(옛 실명)·`avatar_url`(provider 사진)은 읽지 않음 — `src/lib/avatar/ownProfile.ts`
+ */
+export type { OwnProfile as UserProfile } from '@/lib/avatar/ownProfile';
 
 export interface HintLevels {
   level_1: string;
@@ -134,9 +135,11 @@ export type BoardPost = Tables<'board_posts'>;
 
 export type BoardComment = Tables<'board_comments'>;
 
-/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public, 00014: 닉네임 → 모험가NNNN. 실명·사진 없음) */
+/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public: 닉네임 → 모험가NNNN + 파이뱀 스킨, 00018·00021. 실명·사진 없음) */
 export interface BoardAuthor {
   display_name: string | null;
+  /** 공개 아바타 스킨 id (NULL = 기본). 이전 응답·낙관적 갱신에서는 없을 수 있음 */
+  avatar_skin?: string | null;
 }
 
 export interface BoardPostWithAuthor extends BoardPost {

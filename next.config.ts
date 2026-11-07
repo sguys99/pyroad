@@ -66,11 +66,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
-    ],
-  },
+  // 외부 이미지 출처 없음: provider 프로필 사진(lh3.googleusercontent.com)은 쓰지 않고 파이뱀 아바타로 그림 (P3-13, §2.6)
   experimental: {
     optimizePackageImports: [
       'framer-motion',

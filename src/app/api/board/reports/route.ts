@@ -33,6 +33,8 @@ export async function POST(request: Request) {
     return boardError(401, BOARD_MESSAGES.unauthorized);
   }
 
+  // 제한 모드(P3-15)에서도 신고는 받는다: 다른 사람에게 보이지 않고, 아이가 해로운 글을 알릴 수 있어야 하므로
+
   const body = await readJsonObject(request);
   const targetType = body?.target_type;
   const targetId = body?.target_id;

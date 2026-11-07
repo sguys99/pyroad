@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
 import { SoundProvider } from '@/components/providers/SoundProvider';
+import { LastLoginRecorder } from '@/components/auth/LastLoginRecorder';
 import { MOTION_BOOT_SCRIPT } from '@/lib/motion/boot';
 import './globals.css';
 
@@ -55,6 +56,8 @@ export default function RootLayout({
         <MotionProvider>
           <MotionTierProvider>
             <SoundProvider>{children}</SoundProvider>
+            {/* 로그인 직후 #lp= 조각 → 최근 로그인 배지 저장 (P3-08). 그리는 것 없음 */}
+            <LastLoginRecorder />
           </MotionTierProvider>
         </MotionProvider>
       </body>

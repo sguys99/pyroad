@@ -1,12 +1,11 @@
-import { headers } from 'next/headers';
-import { MotionSettingsSync } from '@/components/providers/MotionSettingsSync';
-import { SoundSettingsSync } from '@/components/providers/SoundSettingsSync';
-import { motionBootSyncScript } from '@/lib/motion/boot';
-import { loadMotionSettings } from '@/lib/motion/server';
-import { loadSoundSettings } from '@/lib/sound/server';
-import { nonceFromCsp } from '@/lib/security/csp';
-// 앱 화면 웹폰트(제목 Jua·본문 pyRoad Sans 조각). 랜딩에는 싣지 않으려고 루트가 아닌 여기서 import (P2-10)
-import '@/fonts/app.css';
+import { redirect } from 'next/navigation';
+import { LoggedInShell } from '@/components/providers/LoggedInShell';
+import { loadOwnUserRow } from '@/lib/supabase/ownUserRow';
+// 보호자 동의 띠·안내 스타일 (P3-15): 랜딩 CSS 예산 밖
+import '@/components/consent/consent.css';
+import { consentStatus } from '@/lib/consent/status';
+import { ConsentProvider } from '@/components/consent/ConsentProvider';
+import { ConsentBanner } from '@/components/consent/ConsentBanner';
 
 /**
  * 로그인 화면은 모두 요청마다 렌더한다: 페이지 CSP의 nonce를 서버 렌더 때 넣어야 하기 때문이다 (B27).
@@ -18,41 +17,33 @@ export const dynamic = 'force-dynamic';
  * 인증 검증은 src/lib/supabase/middleware.ts에서 처리합니다.
  * 미들웨어가 미인증 사용자를 이미 리다이렉트하므로 여기서 중복 호출하지 않습니다.
  *
- * 로그인 화면(월드맵·퀘스트·프로필·설정·게시판)의 본문 랜드마크 `<main>`은 여기서 한 번만 둡니다 (B33).
- * 각 페이지에서 `<main>`을 또 쓰지 마세요.
+ * 온보딩 관문 (P3-11): 첫 로그인 온보딩(약관 동의·닉네임·파이뱀 색·학년)을 마치지 않은(`users.onboarded_at` NULL) 사용자는
+ * 어떤 로그인 화면으로 와도 `/onboarding`으로 보낸다. 조회는 움직임·사운드 설정과 같은 한 번(`loadOwnUserRow`, React cache)이라
+ * 요청마다 DB 호출이 늘지 않는다. 미들웨어에 두지 않은 이유: 미들웨어는 정적 파일 밖 모든 요청에서 돌아 그때마다 DB를 부르게 됨.
+ * 값을 모르면(조회 실패·00023 미적용) 막지 않는다 — 관문은 안내이고, 저장 권한은 `/api/onboarding`이 따로 지킨다.
+ * TODO(P3-12): 기존 사용자(닉네임이 이미 있거나 학습 기록이 있는 아이)는 지금은 새 사용자와 같이 온보딩 전체를 거친다.
+ *   P3-12에서 "닉네임 확인 + 약관 동의"만 받는 짧은 흐름으로 나누고, 그 전까지 자리표시자 "모험가1234"로 표시한다.
  *
- * 움직임 설정 (P2-15): 서버 값(`users.settings.motion`)을 본문보다 먼저 nonce 스크립트로 부트에 넘겨
- * 새 기기에서도 첫 화면부터 연출 단계가 맞게 한다. `getAuthUser()`는 요청 안에서 페이지와 한 번만 부른다 (React cache).
+ * 보호자 동의 (P3-15): 만 14세 미만 + 동의 전이면 제한 모드. 상태는 같은 조회로 읽어 `ConsentProvider`로 넘기고(게시판 화면이
+ * 글쓰기 자리를 안내로 바꿈), 맨 위 `ConsentBanner`가 안내·파기 7일 전 경고를 보인다. 실제로 막는 것은 게시판 API(`guardianWriteGate`).
  *
- * 사운드 설정 (P2-14): 서버 값과 기기 값 중 최신 것을 쓰고, 여기 있는 동안 바꾼 설정을 서버에 저장한다 (`SoundSettingsSync`).
- * `users.settings`는 움직임 설정과 같은 조회 한 번으로 읽는다.
+ * 로그인 화면 틀(`<main>`, 움직임·사운드 설정 동기화, 앱 웹폰트)은 `LoggedInShell` — `/onboarding`과 같이 쓴다.
  */
 export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [motion, sound, requestHeaders] = await Promise.all([
-    loadMotionSettings(),
-    loadSoundSettings(),
-    headers(),
-  ]);
-  const nonce = nonceFromCsp(requestHeaders.get('content-security-policy'));
+  const row = await loadOwnUserRow();
+  if (row && row.onboardedAt === null) redirect('/onboarding');
+  // 보호자 동의 상태 (P3-15): 같은 조회 결과로. 모르면 null → 띠·안내 없음 (막는 것은 서버 API)
+  const consent = row?.consent ? consentStatus(row.consent) : null;
   return (
-    <main>
-      {motion && (
-        <>
-          <script
-            nonce={nonce}
-            // 브라우저가 nonce 속성 값을 숨겨(nonce hiding) 하이드레이션 때 달라 보임
-            suppressHydrationWarning
-            dangerouslySetInnerHTML={{ __html: motionBootSyncScript(motion) }}
-          />
-          <MotionSettingsSync settings={motion} />
-        </>
-      )}
-      <SoundSettingsSync settings={sound} />
-      {children}
-    </main>
+    <LoggedInShell>
+      <ConsentProvider status={consent}>
+        <ConsentBanner />
+        {children}
+      </ConsentProvider>
+    </LoggedInShell>
   );
 }

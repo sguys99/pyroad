@@ -16,6 +16,7 @@ import { SoundToggle } from '@/components/sound/SoundToggle';
 import { WorldBgm } from '@/components/sound/WorldBgm';
 import { User, MessageSquare, Bell } from 'lucide-react';
 import type { UserBadge, UserProfile } from '@/lib/types/database';
+import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
 
 interface Props {
   // notice=stage-locked: 잠긴 스테이지의 퀘스트를 URL 로 열어 돌아옴 (B38, 퀘스트 페이지 가드)
@@ -47,7 +48,7 @@ export default async function WorldPage({ searchParams }: Props) {
         .eq('user_id', user.id),
       supabase
         .from('users')
-        .select('id, display_name, avatar_url, total_xp, current_level')
+        .select(OWN_PROFILE_SELECT)
         .eq('id', user.id)
         .single(),
       supabase
@@ -60,7 +61,9 @@ export default async function WorldPage({ searchParams }: Props) {
 
   const stages = stagesResult.data ?? [];
   const progress = progressResult.data ?? [];
-  const profile = profileResult.data as UserProfile | null;
+  const profile: UserProfile | null = profileResult.data
+    ? toOwnProfile(profileResult.data)
+    : null;
   const badges = (badgesResult.data ?? []) as Pick<
     UserBadge,
     'badge_type' | 'earned_at'

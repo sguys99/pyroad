@@ -1,10 +1,10 @@
 'use client';
 
 import { m } from 'framer-motion';
+import { Rocket } from 'lucide-react';
 import { EASE, sec } from '@/lib/motion/tokens';
-import { LoginButton } from '@/components/LoginButton';
+import { LoginSheetButton } from '@/components/auth/LoginSheetButton';
 import { LottieCharacter } from '@/components/characters/LottieCharacter';
-import { track } from '@/lib/analytics/track';
 
 const container = {
   hidden: {},
@@ -61,16 +61,14 @@ export function HeroSection() {
       </m.p>
 
       <m.div variants={fadeUp}>
-        <LoginButton
-          onBeforeLogin={() =>
-            // OAuth 로 바로 떠나므로 지금 보낸다 (P1-17)
-            track(
-              'landing_cta_click',
-              { cta: 'hero', provider: 'google' },
-              { immediate: true },
-            )
-          }
-        />
+        {/* 로그인 시트(카카오·네이버·Google)를 연다. 분석 이벤트는 provider를 고를 때 (P3-05, P1-17) */}
+        <LoginSheetButton
+          cta="hero"
+          size="lg"
+          iconRight={<Rocket aria-hidden />}
+        >
+          모험 시작하기
+        </LoginSheetButton>
       </m.div>
     </m.div>
   );

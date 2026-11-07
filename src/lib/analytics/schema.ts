@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SKIN_IDS } from '@/lib/avatar/skins';
 import {
   ANON_ID_RE,
   CLIENT_EVENT_NAMES,
@@ -26,6 +27,13 @@ export const EVENT_PROPS_SCHEMA = {
     .object({
       provider: z.enum(['google', 'kakao', 'naver', 'unknown']),
       new_user: z.boolean(),
+    })
+    .strict(),
+  onboarding_complete: z
+    .object({
+      skin: z.enum(SKIN_IDS),
+      grade_given: z.boolean(),
+      returning: z.boolean(),
     })
     .strict(),
   quest_start: z.object({ quest_id: questId }).strict(),

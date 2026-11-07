@@ -163,13 +163,18 @@ function composeJamoRuns(units: KoreanUnit[]): KoreanUnit[] {
   return out;
 }
 
-function plainSyllable(ch: string): string {
+/**
+ * 된소리 → 예사소리, ㅐ/ㅔ·ㅒ/ㅖ 통일. keepTense 면 된소리는 그대로 두고 모음만 통일한다
+ * (된소리를 접으면 일상어와 겹치는 금칙어용: 찐따 → "진다", 씹년 → "십년", 좆 ← "쫒아가". filter.ts·data 의 tense 목록)
+ */
+function plainSyllable(ch: string, keepTense = false): string {
+  const consonant = (c: string) => (keepTense ? c : (PLAIN_CONSONANT[c] ?? c));
   const p = decompose(ch);
-  if (!p) return PLAIN_CONSONANT[ch] ?? ch;
+  if (!p) return consonant(ch);
   return compose({
-    cho: PLAIN_CONSONANT[p.cho] ?? p.cho,
+    cho: consonant(p.cho),
     jung: SIMILAR_VOWEL[p.jung] ?? p.jung,
-    jong: p.jong ? (PLAIN_CONSONANT[p.jong] ?? p.jong) : '',
+    jong: p.jong ? consonant(p.jong) : '',
   });
 }
 
@@ -200,11 +205,19 @@ function collapseElongation(units: KoreanUnit[]): KoreanUnit[] {
   return out;
 }
 
+export interface KoreanUnitsOptions {
+  /** 된소리를 예사소리로 접지 않음 (tense 금칙어 비교용). 기본 false */
+  keepTense?: boolean;
+}
+
 /**
  * 한글 비교 단위 목록: 한글(음절·호환 자모)만 남기고(띄어쓰기·숫자·영문·기호는 사라짐) 자모 조합 → 된소리·모음 통일 → 늘여 쓰기 접기.
- * "시 발"·"시1발"·"ㅅㅣ발"이 모두 "시발"과 같아진다.
+ * "시 발"·"시1발"·"ㅅㅣ발"이 모두 "시발"과 같아진다. keepTense 면 된소리 통일만 건너뛴다("찐 따"·"ㅉㅣㄴ따" → "찐따").
  */
-export function koreanUnits(text: string): KoreanUnit[] {
+export function koreanUnits(
+  text: string,
+  { keepTense = false }: KoreanUnitsOptions = {},
+): KoreanUnit[] {
   const units: KoreanUnit[] = [];
   unicodeFold(text)
     .split(/\s+/)
@@ -218,14 +231,17 @@ export function koreanUnits(text: string): KoreanUnit[] {
     });
   const composed = composeJamoRuns(units).map((u) => ({
     ...u,
-    ch: plainSyllable(u.ch),
+    ch: plainSyllable(u.ch, keepTense),
   }));
   return collapseElongation(composed);
 }
 
 /** koreanUnits 를 문자열로 (금칙어 목록 정규화·테스트용) */
-export function compactKorean(text: string): string {
-  return koreanUnits(text)
+export function compactKorean(
+  text: string,
+  options?: KoreanUnitsOptions,
+): string {
+  return koreanUnits(text, options)
     .map((u) => u.ch)
     .join('');
 }
