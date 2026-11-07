@@ -55,7 +55,7 @@ describe('랜딩 글자 검사', () => {
 
   it('랜딩 페이지에서 import를 따라가며 문구를 모은다', () => {
     const { files, chars } = collectLandingText();
-    expect(files).toContain('src/components/landing/HeroSection.tsx');
+    expect(files).toContain('src/components/landing/hero/HeroSection.tsx');
     expect(files).not.toContain('src/app/(protected)/layout.tsx');
     for (const ch of '파이썬 모험') {
       if (ch !== ' ') expect(chars).toContain(ch);

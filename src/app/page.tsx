@@ -1,26 +1,45 @@
-import { HeroSection } from '@/components/landing/HeroSection';
 import { LandingHeader } from '@/components/landing/LandingHeader';
-import { AboutSection } from '@/components/landing/AboutSection';
+import { HeroSection } from '@/components/landing/hero/HeroSection';
+import { TrialSection } from '@/components/landing/sections/TrialSection';
+import { WorldsSection } from '@/components/landing/sections/WorldsSection';
+import { FunShowcaseSection } from '@/components/landing/sections/FunShowcaseSection';
+import { FriendsSection } from '@/components/landing/sections/FriendsSection';
+import { ParentsSection } from '@/components/landing/sections/ParentsSection';
+import { FaqSection } from '@/components/landing/sections/FaqSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { LandingViewTracker } from '@/components/landing/LandingViewTracker';
 import { LandingLoginError } from '@/components/auth/LandingLoginError';
+import { StructuredData } from '@/components/landing/StructuredData';
 import { displayLanding, sansLanding } from '@/fonts/landing';
 import { cn } from '@/lib/utils';
+import '@/components/landing/landing.css';
 
+/**
+ * 랜딩 (Phase 4, 최종 시안 `design/prototypes/src/final/Landing.tsx` 구성).
+ * 헤더 → 히어로 → 30초 체험(#try) → 세계관(#worlds) → 재미 쇼케이스(#fun) → 캐릭터(#friends) → 보호자(#parents) → FAQ(#faq) → 푸터.
+ * 정적 렌더 페이지(`STATIC_PAGE_PATHS`): cookies()·headers() 같은 동적 API를 쓰지 않는다 (§2.10).
+ */
 export default function Home() {
   return (
-    // 랜딩 텍스트 서브셋을 --font-display·--font-sans 맨 앞에 끼운다 (P2-10). contents라 레이아웃에는 영향 없음
+    // 랜딩 텍스트 서브셋을 --font-display·--font-sans 맨 앞에 끼운다 (P2-10)
     <div
       className={cn(
-        'contents font-sans',
+        'landing font-sans',
         displayLanding.variable,
         sansLanding.variable,
       )}
     >
+      {/* 검색엔진용 JSON-LD 데이터 블록 (P4-10). 실행 스크립트가 아니라 CSP와 무관 */}
+      <StructuredData />
       <LandingHeader />
-      <main className="flex flex-col items-center justify-start pt-[20vh] px-8">
+      <main>
         <HeroSection />
-        <AboutSection />
+        <TrialSection />
+        <WorldsSection />
+        <FunShowcaseSection />
+        <FriendsSection />
+        <ParentsSection />
+        <FaqSection />
       </main>
       <LandingFooter />
       <LandingViewTracker />

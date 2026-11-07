@@ -1,0 +1,2 @@
+/* 랜딩 `#try` 섹션 전용 스타일 (TrialSection.tsx가 import). 클래스 접두사 `ld-trial-`, 값은 토큰 변수만.
+   공통 섹션 틀(.ld-sec*)·헤더는 ../landing.css, 연출 단계는 <html data-motion data-reduced>를 본다 */
