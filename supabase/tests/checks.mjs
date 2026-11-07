@@ -1902,6 +1902,12 @@ async function groupRpc(u) {
       'record_hint',
       { p_user_id: u.alice.id, p_quest_id: Q2, p_level: 1 },
     ],
+    [
+      'SET-1',
+      u.alice,
+      'patch_user_settings',
+      { p_user_id: u.alice.id, p_patch: { sound: { muted: true } } },
+    ],
   ];
   for (const [id, as, fn, body] of calls) {
     const role = as === 'anon' ? 'anon' : 'authenticated';
@@ -1932,6 +1938,57 @@ async function groupRpc(u) {
                            'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+  await check({
+    group: 'rpc',
+    id: 'SET-2',
+    role: 'service_role',
+    op: 'patch_user_settings (P2-14, 00020): motion·sound 를 동시에 바꿔도 둘 다 남음 · 다른 키 400 · 없는 사용자 false',
+    deny: ['mismatch', 'error'],
+    allow: ['ok'],
+    run: async () => {
+      const x = await createUser('rpc9', '설정갱신');
+      const motion = { tier: 'minimal', reduced: 'on' };
+      const sound = {
+        version: 1,
+        muted: true,
+        master: 0.5,
+        sfx: { enabled: false, volume: 0.3 },
+        bgm: { enabled: true, volume: 0.2 },
+        voice: { enabled: true, volume: 0.9 },
+        updatedAt: 1,
+      };
+      // 앱이 두 절을 연달아 바꾸는 상황: 두 요청을 동시에 보냄 (읽고-합쳐-쓰기였다면 한쪽이 사라질 수 있음)
+      const [a, b] = await Promise.all([
+        rpc('patch_user_settings', { p_user_id: x.id, p_patch: { motion } }),
+        rpc('patch_user_settings', { p_user_id: x.id, p_patch: { sound } }),
+      ]);
+      if (a.status !== 200 || b.status !== 200 || a.json !== true || b.json !== true)
+        return { actual: 'error', detail: `${a.status}/${b.status} ${errMsg(a)} ${errMsg(b)}` };
+      const bad = await rpc('patch_user_settings', { p_user_id: x.id, p_patch: { theme: { dark: true } } });
+      const notObj = await rpc('patch_user_settings', { p_user_id: x.id, p_patch: { sound: 1 } });
+      const missing = await rpc('patch_user_settings', {
+        p_user_id: '00000000-0000-0000-0000-00000000dead',
+        p_patch: { motion },
+      });
+      // jsonb 는 키 순서를 바꾸므로 DB 에서 jsonb 로 비교
+      const same = one(
+        `select settings = ${sqlStr(JSON.stringify({ motion, sound }))}::jsonb from public.users where id = '${x.id}'`,
+      );
+      return (
+        (same === 't'
+          ? null
+          : {
+              actual: 'mismatch',
+              detail: one(`select settings::text from public.users where id = '${x.id}'`),
+            }) ||
+        compare(
+          '거부',
+          { bad: 400, badMsg: 'invalid_settings_key', notObj: 400, missing: false },
+          { bad: bad.status, badMsg: errMsg(bad), notObj: notObj.status, missing: missing.json },
+        ) || { actual: 'ok', detail: 'motion·sound 둘 다 남음, 다른 키·객체 아닌 값 거부' }
+      );
     },
   });
 }

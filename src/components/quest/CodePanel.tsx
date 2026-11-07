@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Play, Loader2, RefreshCw, Square } from 'lucide-react';
+import { Play, RefreshCw, Square } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
+import { framerSpring, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from './CodeEditor';
+import { errorLineFromStderr } from '@/lib/editor/errorLine';
 import { OutputPanel } from './OutputPanel';
 import type {
   PyodideRestartReason,
@@ -48,7 +49,7 @@ function CodingTipRotator() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: sec('base') }}
           >
             {CODING_TIPS[tipIndex]}
           </m.p>
@@ -132,63 +133,54 @@ export function CodePanel({
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      {/* 에디터 */}
-      <CodeEditor value={code} onChange={onCodeChange} />
+      {/* 에디터 (오류가 난 줄은 traceback에서 찾아 표시, P2-18) */}
+      <CodeEditor
+        value={code}
+        onChange={onCodeChange}
+        errorLine={
+          runResult?.hadException ? errorLineFromStderr(runResult.stderr) : null
+        }
+      />
 
       {/* Pyodide 상태 + 실행 버튼 */}
       <div className="flex items-center gap-3">
         {isError ? (
-          <Button onClick={onRetry} variant="outline" size="sm">
-            <RefreshCw className="mr-1.5 h-4 w-4" />
+          <Button
+            onClick={onRetry}
+            variant="secondary"
+            size="sm"
+            icon={<RefreshCw aria-hidden />}
+          >
             실행기 다시 불러오기
           </Button>
         ) : (
-          <m.div
-            whileHover={canRun ? { scale: 1.03 } : undefined}
-            whileTap={canRun ? { scale: 0.97 } : undefined}
-            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          // 눌림 피드백은 게임 버튼 자체(아랫면 3px → jellyB 복귀, P2-11). 실행 소리는 세션이 낸다(run)
+          <Button
+            onClick={onRun}
+            disabled={!canRun}
+            loading={isBusy || isPreparing}
+            sfx={false}
+            icon={<Play aria-hidden />}
+            className="min-w-[140px]"
+            data-testid="run-button"
           >
-            <Button
-              onClick={onRun}
-              disabled={!canRun}
-              size="default"
-              className="min-w-[140px]"
-              aria-busy={isBusy || undefined}
-              data-testid="run-button"
-            >
-              {isRunning ? (
-                <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
-                  실행 중...
-                </>
-              ) : isSubmitting ? (
-                <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
-                  정답 확인 중...
-                </>
-              ) : isPreparing ? (
-                <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin motion-reduce:animate-none" />
-                  준비 중...
-                </>
-              ) : (
-                <>
-                  <Play className="mr-1.5 h-4 w-4" />
-                  코드 돌려보기!
-                </>
-              )}
-            </Button>
-          </m.div>
+            {isRunning
+              ? '실행 중...'
+              : isSubmitting
+                ? '정답 확인 중...'
+                : isPreparing
+                  ? '준비 중...'
+                  : '코드 돌려보기!'}
+          </Button>
         )}
 
         {isRunning && onStop && (
           <Button
             onClick={onStop}
-            variant="outline"
-            size="default"
+            variant="secondary"
+            icon={<Square className="fill-current" aria-hidden />}
             data-testid="stop-button"
           >
-            <Square className="mr-1.5 h-4 w-4 fill-current" aria-hidden />
             멈추기
           </Button>
         )}
@@ -217,18 +209,10 @@ export function CodePanel({
         <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.5,
-            type: 'spring',
-            stiffness: 300,
-            damping: 20,
-          }}
+          transition={framerSpring('body', { delay: sec('slow') })}
           className="mt-2"
         >
-          <Button
-            render={<Link href={`/quest/${nextQuestId}`} />}
-            className="w-full"
-          >
+          <Button href={`/quest/${nextQuestId}`} className="w-full">
             다음 퀘스트로 →
           </Button>
         </m.div>

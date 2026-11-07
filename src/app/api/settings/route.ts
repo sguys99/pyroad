@@ -15,9 +15,23 @@ import {
   toApiKeyStatus,
 } from '@/lib/tutor/apiKeys';
 import type { LLMProviderType } from '@/lib/tutor/providers/types';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { reportServerError } from '@/lib/api/serverError';
+import { motionSettingsSchema } from '@/lib/motion/schema';
+import { motionFromUserSettings } from '@/lib/motion/server';
+import type { MotionSettings } from '@/lib/motion/tier';
+import { soundSettingsSchema } from '@/lib/sound/schema';
+import { soundFromUserSettings } from '@/lib/sound/server';
+import type { SoundSettings } from '@/lib/sound/types';
+import type { Json } from '@/lib/types/database';
 
 // 사용자 API 키는 user_api_keys(service_role 전용)에 암호문으로만 저장하고,
 // 응답에는 등록 여부와 끝 4자리만 넣는다 (B13). users 에는 preferred_provider 만 쓴다 (P1-01 UPDATE 컬럼 권한).
+//
+// 움직임 `motion`(P2-15)·사운드 `sound`(P2-14) 설정: users.settings 는 클라이언트 UPDATE 권한이 없으므로(P1-01, 00008)
+// 클라이언트 직접 쓰기를 열지 않고 여기서 zod strict 로 검사한 뒤 service_role RPC `patch_user_settings`(00020)로
+// 보낸 키만 `settings || patch` 한 문장으로 바꾼다. 읽고-합쳐-쓰기를 하지 않으므로 motion·sound 를 연달아(동시에) 바꿔도
+// 한쪽이 사라지지 않는다.
 
 export async function GET() {
   const supabase = await createClient();
@@ -32,7 +46,7 @@ export async function GET() {
   const [{ data: profile }, apiKeys] = await Promise.all([
     supabase
       .from('users')
-      .select('preferred_provider')
+      .select('preferred_provider, settings')
       .eq('id', user.id)
       .single(),
     loadUserApiKeys(user.id),
@@ -56,7 +70,29 @@ export async function GET() {
     masked_keys: status.masked,
     unreadable_keys: status.unreadable,
     custom_keys_enabled: status.enabled,
+    motion: motionFromUserSettings(profile?.settings),
+    sound: soundFromUserSettings(profile?.settings),
   });
+}
+
+/** users.settings 의 motion·sound 키만 원자적으로 바꾼다 (00020 patch_user_settings) */
+async function patchUserSettings(
+  userId: string,
+  patch: { motion?: MotionSettings; sound?: SoundSettings },
+): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc('patch_user_settings', {
+    p_user_id: userId,
+    p_patch: patch as unknown as Json,
+  });
+  if (error || data !== true) {
+    reportServerError(error ?? new Error('user row missing'), {
+      area: 'settings',
+      op: 'patch settings',
+    });
+    return false;
+  }
+  return true;
 }
 
 export async function PATCH(request: Request) {
@@ -69,7 +105,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let body: { provider?: unknown; api_keys?: unknown };
+  let body: {
+    provider?: unknown;
+    api_keys?: unknown;
+    motion?: unknown;
+    sound?: unknown;
+  };
   try {
     body = await request.json();
   } catch {
@@ -116,7 +157,31 @@ export async function PATCH(request: Request) {
     }
   }
 
-  if (!provider && toSave.length === 0 && toDelete.length === 0) {
+  let motion: MotionSettings | undefined;
+  if (body.motion !== undefined) {
+    const parsed = motionSettingsSchema.safeParse(body.motion);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid motion' }, { status: 400 });
+    }
+    motion = parsed.data;
+  }
+
+  let sound: SoundSettings | undefined;
+  if (body.sound !== undefined) {
+    const parsed = soundSettingsSchema.safeParse(body.sound);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid sound' }, { status: 400 });
+    }
+    sound = parsed.data;
+  }
+
+  if (
+    !provider &&
+    !motion &&
+    !sound &&
+    toSave.length === 0 &&
+    toDelete.length === 0
+  ) {
     return NextResponse.json({ error: 'No updates provided' }, { status: 400 });
   }
 
@@ -137,6 +202,16 @@ export async function PATCH(request: Request) {
       '[settings] API 키 저장 실패:',
       err instanceof Error ? err.message : 'unknown',
     );
+    return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+  }
+
+  if (
+    (motion || sound) &&
+    !(await patchUserSettings(user.id, {
+      ...(motion && { motion }),
+      ...(sound && { sound }),
+    }))
+  ) {
     return NextResponse.json({ error: 'Update failed' }, { status: 500 });
   }
 

@@ -1,0 +1,893 @@
+/* 시안 B 마법 그림책 — 바탕·타이포·공통 컴포넌트 (P2-03 → P2-11 근거)
+   - 색은 모두 토큰(--c-*). hex는 장식 전용(나무 손잡이·도장 그림자 등)에만
+   - 종이 질감은 미리 만든 PNG 타일(--b-grain, --b-fiber, gen-paper.py). 실시간 SVG 필터 없음
+   - 반복 연출은 transform·opacity만, 12fps 계단(steps)으로 손그림 리듬. .m-loop/.m-ambient로 단계 분기 */
+
+:root {
+  --b-ink: var(--c-text);
+  --b-r: 16px 14px 16px 14px; /* 종이 모서리 (1차보다 덜 비뚤어지게) */
+  --b-r-s: 10px 9px 10px 9px;
+  --b-line: 1.5px;
+  --b-shadow: 0 2px 0 rgba(62, 52, 43, 0.06), 0 6px 18px rgba(62, 52, 43, 0.06); /* 낮고 부드러운 그림자 (1차의 오프셋 종이층 대신) */
+  --b-title-ls: -0.01em; /* Jua는 0~-0.01em이 자연스럽다 (Gaegu의 -0.06em 보정 불필요) */
+  --b-hero-ls: -0.02em;
+  --b-title-ws: 0;
+  --b-label-ls: 0;
+  --b-label-ws: 0;
+  --b-hud-h: 68px;
+  --b-gutter: max(16px, env(safe-area-inset-left, 0px));
+  --b-gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --b-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --b-ease-press: cubic-bezier(0.3, 0, 0.5, 1);
+}
+
+body {
+  background-color: var(--c-bg);
+}
+.f-app {
+  position: relative;
+  min-height: var(--vp-h);
+  background-color: var(--c-bg);
+  background-image: var(--b-grain), var(--b-fiber);
+  background-size: 128px 128px, 256px 256px;
+  font-size: 17px;
+  overflow-x: clip;
+}
+
+/* ───── 타이포 */
+.f-h1,
+.f-h2,
+.f-h3,
+.f-hero-t,
+.f-logo-t {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: var(--b-title-ls);
+  word-spacing: var(--b-title-ws);
+  line-height: 1.15;
+  color: var(--c-text);
+}
+.f-h1 {
+  font-size: calc(30px * var(--display-scale));
+}
+.f-h2 {
+  font-size: calc(26px * var(--display-scale));
+}
+.f-h3 {
+  font-size: calc(21px * var(--display-scale));
+}
+.f-kicker {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(15px * var(--display-scale));
+  letter-spacing: var(--b-label-ls);
+  word-spacing: var(--b-label-ws);
+  color: var(--c-accent-text);
+  line-height: 1.3;
+}
+.f-muted {
+  color: var(--c-text-muted);
+}
+.f-good {
+  color: var(--c-success);
+}
+.f-num {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+/* 강조: Gowun Dodum은 400 하나 → 굵게 대신 겨자 형광펜 밑줄 */
+.f-ink-mark {
+  background-image: linear-gradient(transparent 62%, color-mix(in srgb, var(--c-highlight) 70%, transparent) 62%, color-mix(in srgb, var(--c-highlight) 70%, transparent) 92%, transparent 92%);
+  padding: 0 0.08em;
+}
+.f-textbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--c-text-muted);
+  font-size: 16px;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--c-line-strong);
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+.f-textbtn:hover {
+  color: var(--c-accent-text);
+}
+
+/* ───── 종이 카드 (겹친 종이 한 장 + 잉크 테두리) */
+.f-paper-card {
+  position: relative;
+  isolation: isolate;
+  background: var(--c-surface);
+  border: var(--f-lw) solid var(--f-ink);
+  border-radius: var(--b-r);
+  padding: 22px;
+  box-shadow: var(--b-shadow);
+}
+.f-paper-card::before {
+  display: none;
+  content: '';
+  position: absolute;
+  inset: 6px -6px -7px 5px;
+  z-index: -1;
+  background: var(--c-surface2);
+  border: var(--f-lw) solid var(--f-ink);
+  border-radius: var(--b-r);
+  transform: rotate(1.2deg);
+}
+
+/* ───── 잉크 도장 버튼: 잉크 테두리 앞면 + 아래로 어긋난 종이 한 장(아랫면) */
+.f-btn {
+  --face: var(--c-primary);
+  --fg: var(--c-on-primary);
+  --lip: var(--c-primary-lip);
+  position: relative;
+  display: inline-flex;
+  padding: 0 0 5px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  isolation: isolate;
+}
+.f-btn::before {
+  /* 아랫면: 테두리 없이 진한 면 색 4px (1차의 잉크 테두리 종이층 대신) */
+  content: '';
+  position: absolute;
+  inset: 5px 0 0 0;
+  z-index: -1;
+  background: var(--lip);
+  border-radius: var(--b-r);
+}
+.f-btn-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 47px;
+  padding: 3px 22px 1px;
+  background: var(--face);
+  color: var(--fg);
+  border-radius: var(--b-r);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform var(--dur-instant) var(--b-ease-press), background-color var(--dur-instant);
+}
+.f-btn-face svg {
+  flex: none;
+  margin-top: -2px;
+}
+.f-btn:hover .f-btn-face {
+  transform: translateY(-1px) rotate(-0.5deg);
+}
+.f-btn:active .f-btn-face {
+  transform: translateY(5px);
+  transition-duration: 70ms;
+}
+.f-btn:focus-visible {
+  outline: none;
+}
+.f-btn:focus-visible .f-btn-face {
+  outline: 3px solid var(--c-secondary);
+  outline-offset: 3px;
+}
+.f-btn[disabled] {
+  cursor: not-allowed;
+}
+.f-btn[disabled] .f-btn-face {
+  background: var(--c-surface2);
+  color: var(--c-text-muted);
+  transform: translateY(3px);
+}
+.f-btn[disabled]::before {
+  background: var(--c-surface2);
+}
+.f-btn-lg .f-btn-face {
+  min-height: 56px;
+  padding: 3px 28px 1px;
+  font-size: 21px;
+}
+.f-btn-sm {
+  padding-bottom: 4px;
+}
+.f-btn-sm::before {
+  inset: 4px 0 0 0;
+}
+.f-btn-sm .f-btn-face {
+  min-height: 44px;
+  padding: 2px 14px 0;
+  font-size: 17px;
+}
+.f-btn-sm:active .f-btn-face {
+  transform: translateY(4px);
+}
+.f-btn-secondary {
+  --face: var(--c-secondary);
+  --fg: var(--c-on-secondary);
+  --lip: var(--c-secondary-lip);
+}
+.f-btn-paper {
+  --face: var(--c-surface);
+  --fg: var(--c-text);
+  --lip: #e3d7c2;
+}
+.f-btn-paper .f-btn-face {
+  box-shadow: inset 0 0 0 var(--f-lw) var(--f-ink);
+}
+.f-btn-gold {
+  --face: var(--c-highlight);
+  --fg: var(--c-on-highlight);
+  --lip: #c99a35;
+}
+/* 동작 줄이기: 내려가지 않고 색만 아랫면 색으로 / minimal: 즉시 */
+[data-reduced='true'] .f-btn:hover .f-btn-face,
+[data-reduced='true'] .f-btn:active .f-btn-face {
+  transform: none;
+}
+[data-reduced='true'] .f-btn:active .f-btn-face {
+  background: var(--lip);
+  color: var(--c-on-primary);
+}
+[data-reduced='true'] .f-btn-paper:active .f-btn-face,
+[data-reduced='true'] .f-btn-gold:active .f-btn-face {
+  color: var(--c-text);
+}
+[data-motion='minimal'] .f-btn-face {
+  transition: none;
+}
+
+/* ───── 로고 */
+.f-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  color: var(--c-text);
+  text-decoration: none;
+}
+.f-logo-t {
+  font-size: calc(24px * var(--display-scale));
+  letter-spacing: -0.02em;
+}
+
+/* ───── 재화 HUD (종이 띠 + 잉크 밑줄) */
+.f-hud {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background-color: var(--c-surface);
+  background-image: var(--b-grain);
+  background-size: 128px 128px;
+  border-bottom: 1px solid var(--c-line);
+  box-shadow: 0 2px 10px rgba(62, 52, 43, 0.05);
+}
+.f-hud-in {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 1280px;
+  min-height: var(--b-hud-h);
+  margin: 0 auto;
+  padding: 8px var(--b-gutter-r) 8px var(--b-gutter);
+}
+.f-hud-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 14px 0 8px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--c-surface2);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(17px * var(--display-scale));
+  letter-spacing: var(--b-label-ls);
+  cursor: pointer;
+}
+.f-hud-back:hover {
+  background: var(--c-surface2);
+}
+.f-hud-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(18px * var(--display-scale));
+  letter-spacing: var(--b-title-ls);
+}
+.f-hud-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.f-hud-lv {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.f-seal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--c-accent-text);
+  color: var(--c-on-primary);
+  border: var(--f-lw) solid var(--f-ink);
+  box-shadow: inset 0 0 0 3px rgba(255, 253, 248, 0.28);
+}
+.f-seal::before {
+  /* 밀랍 흘러내림 (최종 시안에서는 뺌) */
+  display: none;
+  content: '';
+  position: absolute;
+  right: -3px;
+  bottom: 2px;
+  width: 12px;
+  height: 14px;
+  border-radius: 50% 50% 50% 60%;
+  background: var(--c-accent-text);
+  border: var(--f-lw) solid var(--f-ink);
+  z-index: -1;
+}
+.f-seal-n {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  margin-top: 2px;
+}
+.f-seal-n::before {
+  content: 'Lv';
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-align: center;
+  margin-bottom: -2px;
+}
+.f-hud-xp {
+  display: grid;
+  gap: 2px;
+}
+.f-hud-xp-k {
+  font-size: 14px;
+  color: var(--c-text-muted);
+  line-height: 1.2;
+}
+.f-xpbar,
+.f-prog {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 10px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--c-surface2);
+  box-shadow: inset 0 0 0 1px var(--c-line);
+  overflow: hidden;
+}
+.f-xpbar-fill,
+.f-prog-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 5px, rgba(255, 251, 242, 0.28) 5px 8px),
+    var(--c-primary);
+  transition: transform var(--dur-slow) var(--b-ease-out);
+}
+.f-prog-gold .f-prog-fill {
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 5px, rgba(255, 251, 242, 0.4) 5px 8px),
+    var(--c-highlight);
+}
+.f-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 2px 12px 2px 6px;
+  border-radius: 22px;
+  background: var(--c-surface2);
+}
+.f-chip .f-num {
+  white-space: nowrap;
+  min-width: 3.2ch;
+  text-align: right;
+  font-size: 22px;
+  line-height: 1;
+  margin-top: 2px;
+}
+.f-chip .f-num-s {
+  min-width: 1.2ch;
+}
+.f-hud-sound {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--c-surface2);
+  cursor: pointer;
+}
+.f-hud-sound[aria-pressed='true'] {
+  background: var(--c-surface2);
+  color: var(--c-text-muted);
+}
+@container vp (max-width: 719px) {
+  .f-hud-in {
+    gap: 6px;
+  }
+  .f-hud-stats {
+    gap: 6px;
+  }
+  .f-hud-back-t,
+  .f-hud-title,
+  .f-chip-key,
+  .f-logo-t {
+    display: none;
+  }
+  .f-hud-back {
+    padding: 0;
+    justify-content: center;
+  }
+  /* XP 바는 HUD 아래 가장자리를 따라 가늘게 */
+  .f-hud-xp {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+  }
+  .f-hud-xp-k {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+  .f-hud .f-xpbar {
+    width: 100%;
+    height: 6px;
+    border-width: 0 0 0 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .f-seal {
+    width: 42px;
+    height: 42px;
+  }
+  .f-chip {
+    padding: 2px 8px 2px 4px;
+  }
+  .f-chip .f-num {
+    font-size: 20px;
+  }
+}
+@container vp (max-width: 379px) {
+  .f-hud-in,
+  .f-hud-stats {
+    gap: 4px;
+  }
+  .f-chip {
+    gap: 2px;
+    padding: 2px 6px 2px 3px;
+  }
+  .f-chip svg {
+    width: 22px;
+    height: 22px;
+  }
+  .f-chip .f-num {
+    min-width: 0;
+    font-size: 19px;
+  }
+  .f-chip-star .f-num {
+    min-width: 2ch;
+  }
+}
+
+/* ───── 별 */
+.f-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  vertical-align: middle;
+}
+
+/* ───── 말풍선 (손으로 오린 종이 + 꼬리) */
+.f-bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px 12px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: 16px 14px 16px 6px;
+  box-shadow: 0 2px 8px rgba(62, 52, 43, 0.05);
+}
+.f-bubble::before {
+  content: '';
+  position: absolute;
+  left: -11px;
+  top: 22px;
+  width: 18px;
+  height: 16px;
+  background: inherit;
+  border-left: 1px solid var(--c-line);
+  border-bottom: 1px solid var(--c-line);
+  transform: skewY(28deg) rotate(8deg);
+  border-radius: 0 0 0 4px;
+}
+.f-bubble-who {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(15px * var(--display-scale));
+  letter-spacing: var(--b-label-ls);
+  color: var(--c-primary-text);
+  line-height: 1.2;
+}
+.f-bubble-bug .f-bubble-who {
+  color: var(--c-accent-text);
+}
+.f-bubble-bug {
+  background: var(--c-error-soft);
+  border-color: transparent;
+}
+.f-bubble-good {
+  background: var(--c-success-soft);
+  border-color: transparent;
+}
+.f-bubble-t {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.7;
+  min-height: 1.7em;
+}
+.f-bubble-t {
+  contain: layout paint;
+}
+.f-bubble-rest {
+  visibility: hidden;
+}
+.f-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin: 0 -2px 0 0;
+  vertical-align: -0.15em;
+  background: var(--c-text);
+  animation: f-caret 0.9s steps(1, end) infinite;
+}
+@keyframes f-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ───── 시트 (모바일 바텀시트 · 넓은 화면 대화상자) */
+.f-sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.f-sheet-back {
+  position: absolute;
+  inset: 0;
+  background: rgba(46, 34, 24, 0.45);
+}
+.f-sheet {
+  position: relative;
+  width: 100%;
+  max-height: calc(var(--vp-h) - 40px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 26px var(--b-gutter-r) calc(24px + env(safe-area-inset-bottom, 0px)) var(--b-gutter);
+  background-color: var(--c-surface);
+  background-image: var(--b-grain);
+  background-size: 128px 128px;
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 30px rgba(62, 52, 43, 0.12);
+}
+.f-sheet-grip {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 52px;
+  height: 5px;
+  margin-left: -26px;
+  border-radius: 3px;
+  background: var(--c-line-strong);
+}
+.f-sheet-x {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--c-surface2);
+  cursor: pointer;
+}
+@container vp (min-width: 720px) {
+  .f-sheet-root {
+    align-items: center;
+    padding: 24px;
+  }
+  .f-sheet {
+    width: min(560px, 100%);
+    max-height: calc(var(--vp-h) - 48px);
+    padding: 32px 32px 28px;
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(62, 52, 43, 0.18);
+  }
+  .f-sheet-wide {
+    width: min(720px, 100%);
+  }
+  .f-sheet-grip {
+    display: none;
+  }
+}
+
+/* ───── 토스트 (찢은 쪽지) */
+.f-toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 70;
+  display: grid;
+  gap: 8px;
+  width: min(420px, calc(100% - 32px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.f-toast {
+  padding: 12px 16px;
+  background: var(--c-surface);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(62, 52, 43, 0.14);
+  font-size: 16px;
+  animation: f-toast-in var(--spring-body-dur) var(--spring-body) both;
+}
+.f-toast-good {
+  background: var(--c-success-soft);
+}
+.f-toast-warn {
+  background: var(--c-warning-soft);
+}
+@keyframes f-toast-in {
+  from {
+    transform: translateY(18px) rotate(-2deg);
+  }
+  to {
+    transform: none;
+  }
+}
+[data-motion='minimal'] .f-toast,
+[data-reduced='true'] .f-toast {
+  animation: none;
+}
+
+/* ───── 도장 (통과·정답) */
+.f-stamp {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--c-accent-text);
+  color: var(--c-accent-text);
+  background: color-mix(in srgb, var(--c-surface) 72%, transparent);
+  pointer-events: none;
+  /* 도장 잉크 거친 결: 종이 결 타일을 마스크로 (정지 요소라 비용 없음) */
+  -webkit-mask-image: linear-gradient(#000, #000), var(--b-grain);
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#000, #000), var(--b-grain);
+  mask-composite: exclude;
+  -webkit-mask-size: 100% 100%, 64px 64px;
+  mask-size: 100% 100%, 64px 64px;
+}
+.f-stamp span {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: var(--b-label-ls);
+  line-height: 1;
+  padding: 2px 2px 0;
+}
+.f-stamp-big {
+  width: 112px;
+  height: 112px;
+  border-width: 2.5px;
+}
+.f-stamp-big span {
+  font-size: 32px;
+}
+.f-splat {
+  position: absolute;
+  z-index: 5;
+  border-radius: 50%;
+  background: var(--c-accent-text);
+  pointer-events: none;
+}
+
+/* ───── 태그 */
+.f-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 1px 8px 0;
+  border: 1.6px solid currentColor;
+  border-radius: 6px 4px 7px 4px;
+  font-size: 14px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.f-tag-code {
+  color: var(--c-secondary);
+  background: var(--c-w2-soft);
+}
+.f-tag-quiz {
+  color: var(--c-w3-ink);
+  background: var(--c-w3-soft);
+}
+.f-tag-project {
+  color: var(--c-accent-text);
+  background: var(--c-surface);
+}
+.f-tag-challenge {
+  color: var(--c-warning);
+  background: var(--c-warning-soft);
+}
+.f-tag-now {
+  color: var(--c-on-primary);
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+}
+.f-tag-review {
+  color: var(--c-success);
+  background: var(--c-success-soft);
+}
+
+/* ───── 페이지 넘김 장 */
+.f-leaf-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  perspective: 1600px;
+  pointer-events: none;
+  overflow: hidden;
+}
+.f-leaf-wrap.is-fixed {
+  position: fixed;
+  z-index: 80;
+}
+.f-leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  background-color: var(--c-surface);
+  background-image: linear-gradient(90deg, rgba(62, 52, 43, 0.16), transparent 7%), var(--b-grain), var(--b-fiber);
+  background-size: 100% 100%, 128px 128px, 256px 256px;
+  border-left: var(--f-lw) solid var(--f-ink);
+  box-shadow: -10px 0 24px rgba(62, 52, 43, 0.25);
+  will-change: transform;
+}
+.f-leaf-back {
+  transform-origin: right center;
+  background-image: linear-gradient(-90deg, rgba(62, 52, 43, 0.16), transparent 7%), var(--b-grain), var(--b-fiber);
+  border-left: 0;
+  border-right: var(--f-lw) solid var(--f-ink);
+}
+.f-leaf-shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(90deg, rgba(62, 52, 43, 0.5), rgba(62, 52, 43, 0.05) 60%, rgba(255, 255, 255, 0.2));
+}
+.f-leaf-in {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.f-leaf-k {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(18px * var(--display-scale));
+  color: var(--c-accent-text);
+  letter-spacing: var(--b-label-ls);
+}
+.f-leaf-t {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(46px * var(--display-scale));
+  letter-spacing: var(--b-hero-ls);
+  word-spacing: var(--b-title-ws);
+  line-height: 1.1;
+}
+.f-leaf-orn {
+  width: 160px;
+  height: 14px;
+  background:
+    radial-gradient(circle at 50% 50%, var(--c-accent-text) 3px, transparent 3.5px) center / 14px 14px no-repeat,
+    linear-gradient(var(--c-text), var(--c-text)) left center / 64px 2px no-repeat,
+    linear-gradient(var(--c-text), var(--c-text)) right center / 64px 2px no-repeat;
+}
+
+/* ───── 준비 중 */
+.f-soon {
+  display: grid;
+  place-items: center;
+  min-height: calc(var(--vp-h) - var(--b-hud-h));
+  padding: 32px var(--b-gutter-r) 64px var(--b-gutter);
+}
+.f-soon-card {
+  max-width: 34em;
+  display: grid;
+  gap: 8px;
+}
+.f-soon-card p {
+  margin: 0;
+}
+
+/* 종이 미끄러짐 (책 안 화면 이동) */
+.f-slide-sheet {
+  position: absolute;
+  inset: 0;
+  background-color: var(--c-surface);
+  background-image: linear-gradient(-90deg, rgba(62, 52, 43, 0.18), transparent 5%), var(--b-grain), var(--b-fiber);
+  background-size: 100% 100%, 128px 128px, 256px 256px;
+  border-right: var(--f-lw) solid var(--f-ink);
+  box-shadow: 10px 0 22px rgba(62, 52, 43, 0.22);
+  will-change: transform;
+}
+
+/* 시트·오버레이가 뜨는 고정 층: 레이아웃·페인트 격리 */
+.f-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  contain: strict;
+}
+.f-layer > * {
+  pointer-events: auto;
+}
+
+/* 파이뱀 리그는 자기 합성 레이어에서: 리그가 매 프레임 바뀔 때 아래 종이 질감·지도까지 다시 칠하지 않게 (P2-05 측정) */
+.f-app svg[aria-label^='파이뱀 선생님'] {
+  will-change: transform;
+}

@@ -28,12 +28,13 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 
 | 경로 | 내용 |
 |---|---|
-| `public/*.spec.ts` | 비로그인 (`public` 프로젝트): 랜딩 캐릭터·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로 리다이렉트 |
+| `public/*.spec.ts` | 비로그인 (`public` 프로젝트): 랜딩 캐릭터·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로 리다이렉트, 코드 에디터 한글 주석 정렬·글자 크기·오류 줄(`editor-alignment.spec.ts`, 테스트 전용 페이지 `/dev/editor` — 서버 env `PYROAD_TEST_PAGES=1`을 `support/env.ts`가 넣음, 운영 404), 컴포넌트 카탈로그 `/dev/design`과 연출 단계 대체 검사(`design-catalog.spec.ts`, P2-12: 단계마다 무한 반복 애니메이션 허용 목록·흐림·리그 DOM 쓰기·버튼 눌림·카운트업·시트·토스트) |
 | `auth.setup.ts` / `auth.teardown.ts` | 이번 실행 전용 테스트 사용자를 service_role로 만들고 로그인 쿠키를 `e2e/.auth/`에 저장 / 끝나면 사용자 삭제 |
-| `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터 |
+| `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터·움직임 설정(P2-15)·월드맵·퀘스트 연출 단계 대체(`motion-tiers.spec.ts`, P2-12) |
 | `support/env.ts` | 로컬 스택 찾기, 앱 서버 env 만들기 |
 | `support/admin.ts` | service_role 도우미 (진행 초기화, 앞 퀘스트 완료) |
 | `support/test.ts` | 로그인 스펙의 `test`: 테스트마다 진행 초기화, 끝날 때 쓰기 요청 대기, CSP 위반 감시 |
+| `support/motion.ts` | 연출 단계 대체 검사 공용: 돌고 있는 무한 반복 애니메이션 수집, minimal·동작 줄이기 허용 목록(근거 포함), 흐림 요소 수 (P2-12, [docs/design/catalog.md](../docs/design/catalog.md)) |
 | `support/quest.ts` · `support/content.ts` | 퀘스트 화면 조작, `content/` YAML에서 퀘스트 id·정답·힌트 읽기 (하드코딩하지 않음) |
 
 ## 앱 서버 env

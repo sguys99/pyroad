@@ -1,6 +1,6 @@
 export default function QuestLoading() {
   return (
-    <div className="flex h-screen flex-col animate-pulse">
+    <div className="flex h-screen flex-col animate-pulse reduced:animate-none">
       {/* 퀘스트 헤더 스켈레톤 */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
         <div className="h-8 w-8 rounded bg-muted" />

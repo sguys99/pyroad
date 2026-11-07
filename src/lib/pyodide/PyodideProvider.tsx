@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
+import { useSamplingPause } from '@/lib/motion/MotionTierProvider';
 import { usePyodide, type UsePyodideOptions } from './usePyodide';
 
 export type PyodideRuntime = ReturnType<typeof usePyodide>;
@@ -14,6 +15,9 @@ const PyodideContext = createContext<PyodideRuntime | null>(null);
  * 레이아웃은 그대로라 Worker와 불러온 Pyodide를 다시 쓰고, 퀘스트 화면을 벗어나면(월드맵 등)
  * 레이아웃이 언마운트되면서 Worker를 terminate한다. 격리 헤더(COOP/COEP)를 쓰지 않으므로
  * 소프트 내비게이션 제약이 없다(P0-05). 늦은 이벤트는 usePyodide의 세대 번호로 계속 무시된다(B14).
+ *
+ * Pyodide 로딩·초기화(재준비 포함)와 코드 실행 동안은 연출 단계 실측을 멈춘다 (P2-15, P0-16 §4.4):
+ * Worker에서 돌아도 저사양 기기에서는 CPU를 나눠 써 프레임이 끊기는데, 그것을 "이 기기는 연출이 무겁다"로 잘못 읽지 않게.
  */
 export function PyodideProvider({
   children,
@@ -24,6 +28,7 @@ export function PyodideProvider({
   options?: UsePyodideOptions;
 }) {
   const runtime = usePyodide(options);
+  useSamplingPause(runtime.status === 'loading' || runtime.isRunning);
   return (
     <PyodideContext.Provider value={runtime}>
       {children}

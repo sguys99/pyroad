@@ -9,12 +9,9 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { LazyMotion, domAnimation } from 'framer-motion';
+import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
 
 let reduceMotion = false;
-vi.mock('framer-motion', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('framer-motion')>();
-  return { ...actual, useReducedMotion: () => reduceMotion };
-});
 
 import { ReportButton } from '../ReportButton';
 import { BoardFormMessage } from '../BoardFormMessage';
@@ -25,7 +22,9 @@ const fetchMock = vi.fn();
 function renderButton() {
   return render(
     <LazyMotion features={domAnimation}>
-      <ReportButton targetType="post" targetId={POST_ID} />
+      <MotionTierProvider reduced={reduceMotion ? 'on' : 'off'}>
+        <ReportButton targetType="post" targetId={POST_ID} />
+      </MotionTierProvider>
     </LazyMotion>,
   );
 }

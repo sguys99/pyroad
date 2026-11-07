@@ -28,7 +28,7 @@ export default async function NoticeEditPage({
       <div className="mb-6">
         <Link
           href={`/notice/${noticeId}`}
-          className="text-sm text-primary underline"
+          className="text-sm text-primary-text underline"
         >
           ← 돌아가기
         </Link>

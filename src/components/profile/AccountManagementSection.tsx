@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -128,7 +129,7 @@ export function AccountManagementSection({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <Card>
       <h2 className="mb-4 text-sm font-bold text-foreground">계정 관리</h2>
 
       {/* 진행 현황 리셋 */}
@@ -143,7 +144,7 @@ export function AccountManagementSection({
             className="mb-3 w-full"
             render={
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 className="w-full"
                 disabled={isLoading}
@@ -163,7 +164,7 @@ export function AccountManagementSection({
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
               <AlertDialogAction
-                variant="destructive"
+                variant="danger"
                 onClick={() =>
                   setConfirmAction({
                     action: handleResetAll,
@@ -188,9 +189,9 @@ export function AccountManagementSection({
                 disabled={isLoading}
                 render={
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
-                    className="w-full text-xs"
+                    className="w-full [&>.g-btn-face]:py-2 [&>.g-btn-face]:leading-tight [&>.g-btn-face]:whitespace-normal"
                     disabled={isLoading}
                   />
                 }
@@ -213,7 +214,7 @@ export function AccountManagementSection({
                     취소
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    variant="destructive"
+                    variant="danger"
                     onClick={() =>
                       setConfirmAction({
                         action: () => handleResetStage(stage.id),
@@ -247,7 +248,7 @@ export function AccountManagementSection({
             disabled={isLoading}
             render={
               <Button
-                variant="destructive"
+                variant="danger"
                 size="sm"
                 className="w-full"
                 disabled={isLoading}
@@ -267,7 +268,7 @@ export function AccountManagementSection({
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
               <AlertDialogAction
-                variant="destructive"
+                variant="danger"
                 onClick={() =>
                   setConfirmAction({
                     action: handleDelete,
@@ -303,7 +304,7 @@ export function AccountManagementSection({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
+              variant="danger"
               onClick={async () => {
                 await confirmAction?.action();
                 setConfirmAction(null);
@@ -315,6 +316,6 @@ export function AccountManagementSection({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Card>
   );
 }

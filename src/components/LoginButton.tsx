@@ -1,6 +1,5 @@
 'use client';
 
-import { m } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useSocialLogin } from '@/lib/hooks/useSocialLogin';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
@@ -16,21 +15,16 @@ export function LoginButton({ onBeforeLogin }: LoginButtonProps = {}) {
 
   return (
     <>
-      <m.div
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      {/* 눌림 피드백은 게임 버튼 자체 (아랫면 3px → jellyB 복귀, P2-11) */}
+      <Button
+        size="lg"
+        onClick={() => {
+          onBeforeLogin?.();
+          void handleLogin();
+        }}
       >
-        <Button
-          size="lg"
-          onClick={() => {
-            onBeforeLogin?.();
-            void handleLogin();
-          }}
-        >
-          Google로 시작하기 🚀
-        </Button>
-      </m.div>
+        Google로 시작하기 🚀
+      </Button>
 
       {browserInfo && (
         <InAppBrowserGuide

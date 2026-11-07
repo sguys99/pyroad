@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { BugBugExpression } from './expressions';
+import { BLINK_EYE, BLINK_HIGHLIGHT } from './motionClasses';
 
 interface BugBugSvgProps {
   expression?: BugBugExpression;
@@ -172,24 +173,21 @@ function SearchingFace() {
           fill="none"
         />
         {/* 오른쪽 눈 - 크게 뜸 (집중) */}
-        <ellipse cx="74" cy="42" rx="5" ry="5.5" fill="white">
-          <animate
-            attributeName="ry"
-            values="5.5;0.5;5.5"
-            dur="0.15s"
-            begin="4s;searchBlink.end+5s"
-            id="searchBlink"
-          />
-        </ellipse>
-        <circle cx="75" cy="41" r="2" fill="#4E342E">
-          <animate
-            attributeName="opacity"
-            values="1;0;1"
-            dur="0.15s"
-            begin="4s;searchBlinkH.end+5s"
-            id="searchBlinkH"
-          />
-        </circle>
+        <ellipse
+          cx="74"
+          cy="42"
+          rx="5"
+          ry="5.5"
+          fill="white"
+          className={BLINK_EYE}
+        />
+        <circle
+          cx="75"
+          cy="41"
+          r="2"
+          fill="#4E342E"
+          className={BLINK_HIGHLIGHT}
+        />
       </g>
       <g id="mouth">
         {/* 살짝 벌린 입 - 집중 */}

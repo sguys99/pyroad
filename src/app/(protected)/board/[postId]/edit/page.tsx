@@ -31,7 +31,7 @@ export default async function BoardEditPage({
       <div className="mb-6">
         <Link
           href={`/board/${postId}`}
-          className="text-sm text-primary underline"
+          className="text-sm text-primary-text underline"
         >
           ← 돌아가기
         </Link>

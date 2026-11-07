@@ -4,13 +4,15 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 
 ## 기술 스택
 
-- **Frontend**: Next.js 15 (App Router, Turbopack), TypeScript, Tailwind CSS v4, shadcn/ui
+- **Frontend**: Next.js 15 (App Router, Turbopack), TypeScript, Tailwind CSS v4, Base UI. 공통 게임 UI는 `src/components/ui/`(shadcn 기본 버튼 등은 대체됨, [docs/design/components.md](docs/design/components.md))
 - **Backend (BaaS)**: Supabase (Auth, PostgreSQL, RLS, SSR). 로컬 Supabase CLI는 2.115.0 고정
 - **AI/LLM**: 멀티 프로바이더 (`src/lib/tutor/providers/`, 팩토리). 서버 키는 Gemini 무료 티어만, Anthropic·OpenAI는 학생 본인 키(암호화 저장)로만
 - **Code Execution**: Pyodide 314.0.7 자체 호스팅(`public/pyodide/`, predev·prebuild가 복사) + module Worker `public/workers/pyodide-worker.mjs`. 실행 로직은 공용 코어 `pyodide-core.mjs`(브라우저·Node 테스트 공용)
-- **Editor**: CodeMirror 6
-- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. Lottie는 안 씀(B32, `lottie-react`는 미사용 의존성, Phase 6에서 `lottie_light`로 재도입 예정)
-- **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO
+- **Editor**: CodeMirror 6 + 키즈 테마 `src/lib/editor/` (pyRoad Mono, 14~20px 짝수만, [docs/design/editor.md](docs/design/editor.md))
+- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. 마스코트는 SVG 리그 `src/components/characters/rig/`(기본 스타일 B, [docs/design/rig.md](docs/design/rig.md)). Lottie는 지금 재생하지 않음(B32, `lottie-react`는 미사용 의존성). 일회성 이펙트만 Phase 6에 `lottie_light`로, `public/animations/` + `assets:check` 렌더 검사 통과 필수
+- **Sound**: 자체 Web Audio 래퍼 `src/lib/sound/` + `SoundProvider`(`useSfx`·`useBgm`). 파일은 `public/sounds/`(`scripts/build-sounds.sh`, 버전 파일 이름·immutable 캐시, [docs/design/sound.md](docs/design/sound.md))
+- **Fonts**: 자체 호스팅 `src/fonts/` — 제목 Jua · 본문 pyRoad Sans(Pretendard) · 코드 pyRoad Mono(D2Coding, 퀘스트만). 랜딩은 텍스트 서브셋, 앱은 unicode-range 조각. `fonts:build`·`fonts:check` ([docs/design/fonts.md](docs/design/fonts.md))
+- **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO / **에셋**: [docs/design/assets.md](docs/design/assets.md) (래스터는 정지 그림만, sharp·버전 파일 이름)
 - **관측·분석**: Sentry(DSN 없으면 꺼짐, 지연 로드, 최소 수집), 자체 분석 `track()` + `analytics_events` ([docs/analytics.md](docs/analytics.md))
 - **Tooling**: npm, ESLint (Flat Config), Prettier, Vitest, Playwright, PGlite·tsx(스크립트)
 - **Deploy**: Vercel / **CI**: GitHub Actions ([docs/ci.md](docs/ci.md))
@@ -25,18 +27,22 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 │   │   ├── (protected)/      # 인증 필요 페이지 (world, quest, profile, settings, board)
 │   │   ├── api/              # API Routes (tutor, quest, board, notice, account, settings, analytics)
 │   │   ├── auth/             # Auth 콜백
+│   │   ├── dev/              # 테스트 전용 /dev/design(컴포넌트 카탈로그)·/dev/editor, 운영 404
 │   │   └── notice/           # 공지 (비로그인 열람)
-│   ├── components/           # quest/(렌더러·celebrations), characters/, ui/(shadcn), board, landing, world …
+│   ├── components/           # quest/(렌더러·celebrations), characters/(rig/), ui/(게임 UI 공통), providers/, sound/, board, landing, world …
+│   ├── fonts/                # 자체 호스팅 웹폰트 (fonts:build 생성물, 커밋)
 │   └── lib/
 │       ├── quest/            # useQuestSession, answerKeys(서버 전용), rewardRpc, validation
 │       ├── content/          # 콘텐츠 zod 스키마·빌드
-│       ├── pyodide/ tutor/ celebration/ motion/ supabase/ security/ analytics/ observability/
+│       ├── design/(토큰 원본) motion/ sound/ editor/ share-card/ celebration/
+│       ├── pyodide/ tutor/ supabase/ security/ analytics/ observability/
 │       └── moderation/ time/ crypto/ env/ api/ auth/ board/ notice/ world/ types/
-├── public/                   # characters/, workers/, pyodide/(복사본, git 제외)
-├── scripts/                  # content, pyodide, fonts, security, api-keys, release(운영 SQL Editor 붙여넣기 묶음)
+├── public/                   # sounds/, textures/, workers/, pyodide/(복사본, git 제외). images/·animations/는 에셋 파이프라인 생성물
+├── scripts/                  # content, pyodide, fonts, security, api-keys, assets(에셋 파이프라인), build-sounds.sh, release(운영 SQL Editor 붙여넣기 묶음)
 ├── supabase/                 # migrations/, rollback/, tests/(RLS 회귀), seed.sql(생성물)
+├── design/                   # Phase 2 디자인 시안 프로토타입 (앱 코드 아님, 자체 package.json, design/README.md)
 ├── e2e/                      # Playwright (e2e/README.md)
-├── docs/                     # 계획서, ci.md, analytics.md, release/(런북), spikes/
+├── docs/                     # 계획서, ci.md, analytics.md, design/(디자인 시스템), assets-license.md, release/(런북), spikes/
 ├── spikes/                   # Phase 0 스파이크 코드
 └── img/                      # 스크린샷 에셋
 ```
@@ -64,7 +70,7 @@ npm run db:start | db:status | db:reset | db:types | db:stop   # Docker, 포트 
 
 ```bash
 npm run dev          # Turbopack (predev: Pyodide 복사)
-npm run build        # prebuild: Pyodide 복사, postbuild: 정적 페이지 CSP 검사
+npm run build        # prebuild: Pyodide 복사·fonts:check, postbuild: 정적 페이지 CSP·폰트 preload 검사
 ```
 
 ### 콘텐츠 ([content/README.md](content/README.md))
@@ -91,7 +97,17 @@ npm run test:content   # 모든 정답 코드 실행 검증
 npm run test:rls       # 켜진 로컬 스택 db reset 후 RLS·권한 회귀
 npm run test:rls:ci    # 격리 임시 스택, 3개 시나리오 (3~4분)
 npm run test:e2e       # Playwright (PORT 3100, 로그인 스펙은 db:start 필요)
-npm run optimize:svg   # public/characters SVG 최적화
+```
+
+### 디자인·에셋 ([docs/design/](docs/design/))
+
+```bash
+npm run tokens:check       # 색·글꼴·모션 하드코딩, 14px 미만 글자 증가 검사 (CI)
+npm run fonts:check        # 폰트 파일·랜딩 서브셋 검사 (CI·prebuild). 랜딩 문구를 바꾸면 fonts:build -- --landing
+npm run fonts:build        # src/fonts/ 생성 (python3 + fontTools, scripts/fonts/requirements.txt)
+npm run assets:check       # 에셋 검사 (SVG·종이 결 타일·래스터·Lottie 렌더·라이선스 기록, CI)
+npm run assets:svg         # public/ SVG 최적화 (assets:textures·assets:raster는 생성)
+npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 ```
 
 ## Claude 에이전트 목록
@@ -132,17 +148,22 @@ npm run optimize:svg   # public/characters SVG 최적화
 - 모든 테이블·뷰·함수에 GRANT/REVOKE 명시(운영은 새 객체를 anon에 자동 노출, 로컬은 자동 부여 없음). SELECT 컬럼 권한은 회수하지 않음. 뷰는 `security_invoker = true`
 - `SECURITY DEFINER`는 `SET search_path = ''` + `REVOKE EXECUTE … FROM PUBLIC, anon, authenticated`(인자 타입까지)
 - RLS 정책은 `(select auth.uid())` + `TO authenticated`. 사용자 테이블은 `REFERENCES public.users(id) ON DELETE CASCADE` (B28)
-- 운영은 Windows SQL Editor 붙여넣기라 줄바꿈이 CRLF가 됨(B39). 값·검사에 쓰는 문자열 리터럴에 실제 줄바꿈을 두지 않음(`E'…\n…'` 또는 CR·LF 모두 제거). 릴리즈는 `scripts/release/build-release-sql.mjs` 묶음, 확인은 `RLS_CRLF=1 npm run test:rls:ci`
+- 운영은 Windows SQL Editor 붙여넣기라 줄바꿈이 CRLF가 됨(B39). 값·검사에 쓰는 문자열 리터럴에 실제 줄바꿈을 두지 않음(`E'…\n…'` 또는 CR·LF 모두 제거). 릴리즈는 `scripts/release/build-release-sql.mjs` 묶음(새 마이그레이션은 그 `RELEASES`와 런북 표에 추가), 확인은 `RLS_CRLF=1 npm run test:rls:ci`
 - 스키마 변경 후 `db:reset` → `db:types` → tsc. 권한 변경은 `test:rls`로 확인하고 `supabase/tests/expectations.mjs` 기대값·스냅샷을 같은 커밋에서 갱신
 
-### 콘텐츠·퀘스트 엔진·화면
+### 콘텐츠·퀘스트 엔진·화면·디자인
 
 - 퀘스트 원본은 `content/`. `supabase/seed.sql`은 생성물이라 직접 고치지 않음
 - 퀘스트 화면은 `useQuestSession`(진행·저장·힌트·실행·채점·완료·축하) + `src/components/quest/questRenderers.ts`의 유형별 렌더러. 렌더러에 세션 로직을 복제하지 않음
 - Worker 프로토콜 `run / stdout / stderr / input-request / answer / stop / done`, 실행 로직은 `pyodide-core.mjs`에만. 보안 경계는 JS 쪽 (§2.9)
 - AI 튜터 프로바이더는 `src/lib/tutor/providers/factory.ts`로만 추가
 - 축하는 `src/lib/celebration/` 시퀀서, 컨페티는 `src/lib/confetti.ts`의 `fireConfetti()`만
-- 반복 연출은 CSS transform·opacity만(Framer `repeat: Infinity`·SMIL 금지), reduced-motion과 연출 단계(`src/lib/motion/`) 존중 (§2.10)
+- 색·글꼴·반경·그림자·모션은 토큰만: 원본 `src/lib/design/tokens.ts`(모션은 `src/lib/motion/tokens.ts`) → `globals.css`(드리프트·대비 AA 테스트). 컴포넌트에 하드코딩 금지(`tokens:check`, 예외는 [docs/design/tokens.md](docs/design/tokens.md) §6)
+- 버튼·카드·모달·시트·토스트·탭·HUD 등은 `src/components/ui/` 공통 컴포넌트로. 새 컴포넌트·상태는 `/dev/design` 카탈로그(`src/app/dev/design/_catalog/`)에도 진열
+- 반복 연출은 CSS transform·opacity만(Framer `repeat: Infinity`·SMIL 금지). 연출 단계 full/lite/minimal과 동작 줄이기는 JS `useMotionTier().budget`, CSS `<html data-motion data-reduced>`(`@media prefers-reduced-motion` 대신). 대체 동작은 e2e `design-catalog.spec.ts`·`motion-tiers.spec.ts`가 검사 ([docs/design/motion-guidelines.md](docs/design/motion-guidelines.md), §2.10)
+- 캐릭터 연출은 리그(`MascotRig`·포즈 표)로. 효과음은 `useSfx`, 소리만으로 정보를 주지 않음
+- 받은 에셋(폰트·사운드·이미지·Lottie)은 출처·라이선스·원본 해시를 `docs/assets-license.md`에 같은 커밋에서 기록(`assets:check`가 확인)
+- 테스트 전용 페이지는 `/dev/*` + `isTestPagesEnabled()`(`src/lib/env/testPages.ts`, 개발 서버 또는 `PYROAD_TEST_PAGES=1`, 동적 렌더). 운영 env에는 `PYROAD_TEST_PAGES`를 넣지 않음
 - 날짜·스트릭은 KST `src/lib/time/kst.ts` (SQL `public.kst_date()`). 실행 환경 TZ에 기대지 않음
 - CSP(`src/lib/security/csp.ts`): `'unsafe-eval'` 금지. 새 페이지가 정적으로 굳으면 postbuild가 실패 → 동적 렌더로 하거나 공개 페이지만 `STATIC_PAGE_PATHS`에. 외부 출처 추가 시 CSP·테스트도 수정
 

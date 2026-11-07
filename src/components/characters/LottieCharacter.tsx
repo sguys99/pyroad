@@ -4,24 +4,26 @@ import { memo } from 'react';
 import {
   m,
   MotionConfig,
-  useReducedMotion,
   type TargetAndTransition,
   type Transition,
 } from 'framer-motion';
+import { EASE, framerSpring, sec } from '@/lib/motion/tokens';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CharacterAvatar } from './CharacterAvatar';
 import type { Character, Expression } from './expressions';
 
 /**
  * 축하·등장 자리의 캐릭터.
  *
- * B32: `public/characters/pybaem/lottie/*.json`이 lottie-web에서 아무것도 그리지 않아
+ * B32: 옛 `public/characters/pybaem/lottie/*.json`(P2-16에서 검사기 시험 자료 `scripts/assets/__tests__/fixtures/b32/`로 옮김)이 lottie-web에서 아무것도 그리지 않아
  * Lottie 재생을 그만두고, 표정이 있는 정적 `CharacterAvatar`에 Framer Motion 1회성 연출을 입힘.
  * 이름과 `animation` 값은 예전 Lottie 파일 이름을 그대로 써서 호출부를 바꾸지 않음.
  * P6-08·P6-13에서 SVG 리그로 교체 (P0-07).
  *
  * - 연출은 한 번만 재생 (반복 연출은 `CharacterAvatar animated`의 CSS 숨쉬기만, §2.10)
  * - transform만 움직이므로 서버 렌더링 때도 캐릭터가 보임 (opacity:0으로 시작하지 않음)
- * - reduced-motion이면 `MotionConfig reducedMotion="user"`가 transform 애니메이션을 즉시 끝냄 → 움직임 0
+ * - 동작 줄이기(기기·사용자 설정, P2-15)면 `MotionConfig reducedMotion="always"`가 transform 애니메이션을 즉시 끝냄 → 움직임 0, 표정만
+ * - minimal 단계는 착지 빛 고리(곁가지 이펙트)를 그리지 않음
  */
 export type CharacterMotion =
   | 'entrance'
@@ -76,9 +78,9 @@ const PRESETS: Record<CharacterMotion, MotionPreset> = {
     initial: { y: 18, scale: 0.86, rotate: 0 },
     animate: { y: 0, scale: 1, rotate: [0, -7, 6, -3, 0] },
     transition: {
-      y: { type: 'spring', stiffness: 260, damping: 15, delay: 0.2 },
-      scale: { type: 'spring', stiffness: 260, damping: 15, delay: 0.2 },
-      rotate: { duration: 0.9, delay: 0.75, ease: 'easeInOut' },
+      y: framerSpring('prop', { delay: sec('base') }),
+      scale: framerSpring('prop', { delay: sec('base') }),
+      rotate: { duration: sec('page'), delay: sec('page'), ease: EASE.inOut },
     },
     origin: '50% 90%',
   },
@@ -109,12 +111,12 @@ export const LottieCharacter = memo(function LottieCharacter({
   animated = false,
   onHover,
 }: LottieCharacterProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const { reduced, budget } = useMotionTier();
   const preset = PRESETS[animation];
-  const showBurst = preset.burstAt !== undefined && !shouldReduceMotion;
+  const showBurst = preset.burstAt !== undefined && budget.springs;
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion={reduced ? 'always' : 'never'}>
       <div
         className="relative inline-flex items-center justify-center"
         style={{ width: size, height: size }}
@@ -127,16 +129,17 @@ export const LottieCharacter = memo(function LottieCharacter({
             initial={{ scale: 0.4, opacity: 0 }}
             animate={{ scale: [0.4, 1.6], opacity: [0, 1, 0] }}
             transition={{
-              duration: 0.8,
+              duration: sec('page'),
               delay: preset.burstAt,
-              ease: 'easeOut',
+              ease: EASE.out,
             }}
           />
         )}
         <m.div
           className="relative"
           style={{ transformOrigin: preset.origin }}
-          initial={preset.initial}
+          // minimal·동작 줄이기(스프링 없음): 점프·등장 없이 마지막 자세로 바로 (P2-12 감사)
+          initial={budget.springs ? preset.initial : false}
           animate={preset.animate}
           transition={preset.transition}
         >

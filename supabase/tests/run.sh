@@ -24,7 +24,7 @@
 #   RLS_NO_RESET=1          fast: db reset 생략 (DB 상태를 직접 만든 뒤 점검할 때)
 #   RLS_SKIP_PROD=1         ci: ① 생략 (git 히스토리가 없을 때도 자동 생략)
 #   RLS_SKIP_NEWDEFAULT=1   ci: ③ 생략 (스택 재시작 1회 절약)
-#   RLS_CRLF=1              ci: ① 운영 재현을 운영 붙여넣기 묶음(scripts/release/build-release-sql.mjs 의 1·2·3번)을
+#   RLS_CRLF=1              ci: ① 운영 재현을 운영 붙여넣기 묶음(scripts/release/build-release-sql.mjs 의 모든 릴리즈, 순서대로)을
 #                           CRLF 로 바꾼 사본으로, 파일 그대로(파일 안의 BEGIN/COMMIT, psql -1 아님) 적용 (B39).
 #                           Windows SQL Editor 붙여넣기 재현. 적용 뒤 \r 이 없는지(CR-1~3), LF 로 적용한 DB 와
 #                           콘텐츠가 같은지(CR-4, db reset 뒤) 점검 (supabase/tests/crlf.mjs)
@@ -198,18 +198,19 @@ if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] \
   sed -n '/^-- Section 6/,/^-- Section 7/p' "$WORKDIR/00001_prehotfix.sql" >"$WORKDIR/section6.sql"
   apply_sql "$WORKDIR/section6.sql"
   if [[ "${RLS_CRLF:-0}" == 1 ]]; then
-    # Windows SQL Editor 붙여넣기 재현 (B39): 00002 는 운영에 이미 적용됨(LF). 그 뒤는 운영 붙여넣기 묶음 1·2·3번을
-    # CRLF 로 바꾼 사본을 파일 그대로 적용 (런북 ① → ② 앱 배포 → ③ + 콘텐츠 seed → 00009)
+    # Windows SQL Editor 붙여넣기 재현 (B39): 00002 는 운영에 이미 적용됨(LF). 그 뒤는 릴리즈마다의 운영 붙여넣기 묶음을
+    # CRLF 로 바꾼 사본을 릴리즈 순서대로 파일 그대로 적용 (v0.4: ① → ② 앱 배포 → ③ + 콘텐츠 seed → 00009, v0.5-phase2: ① 00020 …)
     for pair in "${ALL_MIGRATIONS[@]}"; do
       f="${pair%%:*}"
       [[ "$(basename "$f")" == 00002_* ]] || continue
       log "운영 적용 리허설 (이미 운영에 있음): $(basename "$f") (psql -1)"
       apply_sql "$f"
     done
-    node "$REPO/scripts/release/build-release-sql.mjs" --out "$WORKDIR/release-crlf" --crlf
-    for f in "$WORKDIR/release-crlf/"{1_먼저실행,2_두번째실행,3_선택}.sql; do
+    mapfile -t RELEASE_FILES < <(node "$REPO/scripts/release/build-release-sql.mjs" --out "$WORKDIR/release-crlf" --crlf --list)
+    [[ "${#RELEASE_FILES[@]}" -gt 0 ]] || die "운영 붙여넣기 묶음을 만들지 못함 (scripts/release/build-release-sql.mjs)"
+    for f in "${RELEASE_FILES[@]}"; do
       grep -q $'\r$' "$f" || die "CRLF 변환 실패: $f"
-      log "운영 적용 리허설 (CRLF 묶음, 파일 그대로): $(basename "$f")"
+      log "운영 적용 리허설 (CRLF 묶음, 파일 그대로): ${f#"$WORKDIR/release-crlf/"}"
       apply_sql_as_is "$f"
     done
     run_checks prod_replay

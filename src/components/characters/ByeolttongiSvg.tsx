@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { ByeolttongiExpression } from './expressions';
+import { BLINK_EYE, BLINK_HIGHLIGHT, twinkle } from './motionClasses';
 
 interface ByeolttongiSvgProps {
   expression?: ByeolttongiExpression;
@@ -102,42 +103,36 @@ function LandingFace() {
     <>
       <g id="eyes">
         {/* 밝은 눈 */}
-        <ellipse cx="56" cy="52" rx="5" ry="5.5" fill="#F57F17">
-          <animate
-            attributeName="ry"
-            values="5.5;0.5;5.5"
-            dur="0.15s"
-            begin="3s;landBlinkL.end+4s"
-            id="landBlinkL"
-          />
-        </ellipse>
-        <circle cx="57.5" cy="50.5" r="2" fill="white">
-          <animate
-            attributeName="opacity"
-            values="1;0;1"
-            dur="0.15s"
-            begin="3s;landBlinkLH.end+4s"
-            id="landBlinkLH"
-          />
-        </circle>
-        <ellipse cx="72" cy="52" rx="5" ry="5.5" fill="#F57F17">
-          <animate
-            attributeName="ry"
-            values="5.5;0.5;5.5"
-            dur="0.15s"
-            begin="3s;landBlinkR.end+4s"
-            id="landBlinkR"
-          />
-        </ellipse>
-        <circle cx="73.5" cy="50.5" r="2" fill="white">
-          <animate
-            attributeName="opacity"
-            values="1;0;1"
-            dur="0.15s"
-            begin="3s;landBlinkRH.end+4s"
-            id="landBlinkRH"
-          />
-        </circle>
+        <ellipse
+          cx="56"
+          cy="52"
+          rx="5"
+          ry="5.5"
+          fill="#F57F17"
+          className={BLINK_EYE}
+        />
+        <circle
+          cx="57.5"
+          cy="50.5"
+          r="2"
+          fill="white"
+          className={BLINK_HIGHLIGHT}
+        />
+        <ellipse
+          cx="72"
+          cy="52"
+          rx="5"
+          ry="5.5"
+          fill="#F57F17"
+          className={BLINK_EYE}
+        />
+        <circle
+          cx="73.5"
+          cy="50.5"
+          r="2"
+          fill="white"
+          className={BLINK_HIGHLIGHT}
+        />
       </g>
       <g id="mouth">
         {/* 미소 */}
@@ -201,14 +196,8 @@ function FlyingTrail() {
         strokeLinecap="round"
         fill="none"
         opacity="0.6"
-      >
-        <animate
-          attributeName="opacity"
-          values="0.6;0.2;0.6"
-          dur="1s"
-          repeatCount="indefinite"
-        />
-      </path>
+        {...twinkle(0.6, 0.2, 1)}
+      />
       <path
         d="M36 96 Q14 112 6 122"
         stroke="#FFE082"
@@ -216,31 +205,25 @@ function FlyingTrail() {
         strokeLinecap="round"
         fill="none"
         opacity="0.4"
-      >
-        <animate
-          attributeName="opacity"
-          values="0.4;0.1;0.4"
-          dur="1.2s"
-          repeatCount="indefinite"
-        />
-      </path>
+        {...twinkle(0.4, 0.1, 1.2)}
+      />
       {/* 작은 파티클 */}
-      <circle cx="22" cy="108" r="2" fill="#FFD54F" opacity="0.5">
-        <animate
-          attributeName="opacity"
-          values="0.5;0;0.5"
-          dur="0.8s"
-          repeatCount="indefinite"
-        />
-      </circle>
-      <circle cx="14" cy="116" r="1.5" fill="#FFE082" opacity="0.3">
-        <animate
-          attributeName="opacity"
-          values="0.3;0;0.3"
-          dur="1s"
-          repeatCount="indefinite"
-        />
-      </circle>
+      <circle
+        cx="22"
+        cy="108"
+        r="2"
+        fill="#FFD54F"
+        opacity="0.5"
+        {...twinkle(0.5, 0, 0.8)}
+      />
+      <circle
+        cx="14"
+        cy="116"
+        r="1.5"
+        fill="#FFE082"
+        opacity="0.3"
+        {...twinkle(0.3, 0, 1)}
+      />
     </g>
   );
 }
@@ -288,44 +271,32 @@ function SparklingAccessory() {
     <>
       {/* 주변 작은 별 4개 - 깜빡 애니메이션 */}
       <g>
-        <polygon points="18,30 20,26 22,30 20,34" fill="#FFD54F">
-          <animate
-            attributeName="opacity"
-            values="1;0.3;1"
-            dur="1.5s"
-            repeatCount="indefinite"
-          />
-        </polygon>
+        <polygon
+          points="18,30 20,26 22,30 20,34"
+          fill="#FFD54F"
+          {...twinkle(1, 0.3, 1.5)}
+        />
       </g>
       <g>
-        <polygon points="108,24 110,20 112,24 110,28" fill="#FFE082">
-          <animate
-            attributeName="opacity"
-            values="0.3;1;0.3"
-            dur="1.5s"
-            repeatCount="indefinite"
-          />
-        </polygon>
+        <polygon
+          points="108,24 110,20 112,24 110,28"
+          fill="#FFE082"
+          {...twinkle(0.3, 1, 1.5)}
+        />
       </g>
       <g>
-        <polygon points="14,76 16,72 18,76 16,80" fill="#FFE082">
-          <animate
-            attributeName="opacity"
-            values="0.7;0.2;0.7"
-            dur="1.8s"
-            repeatCount="indefinite"
-          />
-        </polygon>
+        <polygon
+          points="14,76 16,72 18,76 16,80"
+          fill="#FFE082"
+          {...twinkle(0.7, 0.2, 1.8)}
+        />
       </g>
       <g>
-        <polygon points="112,70 114,66 116,70 114,74" fill="#FFD54F">
-          <animate
-            attributeName="opacity"
-            values="0.2;0.9;0.2"
-            dur="1.3s"
-            repeatCount="indefinite"
-          />
-        </polygon>
+        <polygon
+          points="112,70 114,66 116,70 114,74"
+          fill="#FFD54F"
+          {...twinkle(0.2, 0.9, 1.3)}
+        />
       </g>
     </>
   );

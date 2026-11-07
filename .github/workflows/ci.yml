@@ -47,6 +47,13 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run lint
       - run: npx prettier --check .
+      # 폰트 검사 (P2-10): 랜딩 문구 글자가 모두 랜딩 텍스트 서브셋에 있는지 + 폰트 파일·manifest·OFL·외부 폰트 없음.
+      # 실패하면 로컬에서 `npm run fonts:build -- --landing` 후 src/fonts/ 변경을 커밋 (docs/design/fonts.md)
+      - name: 폰트 검사
+        run: npm run fonts:check
+      # 디자인 토큰 검사 (P2-09): 컴포넌트의 색 리터럴·고정 팔레트 클래스·font-family·모션 숫자, 14px 미만 글자 증가 (docs/design/tokens.md §5)
+      - name: 디자인 토큰 검사 (하드코딩 색·글꼴·모션)
+        run: npm run tokens:check
       - run: npx next typegen
       - run: npx tsc --noEmit
 
@@ -201,11 +208,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
-      # 러너에서는 Google Fonts 가 Noto Sans KR 글꼴 주소를 확장자 없는 /l/font?kit=…&… 모양으로 줘서 Next 15.5 Turbopack 이
-      # `next/font/google queries have exactly one entry`로 깨진다 (vercel/next.js#99114, 15.5.x 에는 수정 없음).
-      # CSS 를 미리 받아 그 주소만 감싸고 NEXT_FONT_GOOGLE_MOCKED_RESPONSES 로 넘긴다. Next 16.4.3+ 로 올리면 지움 (docs/ci.md)
-      - name: Google Fonts CSS 미리 받기
-        run: node scripts/fonts/google-fonts-mock.mjs
+      # 폰트는 저장소의 src/fonts/에서 자체 호스팅한다 (P2-10). 빌드에 네트워크가 필요 없고, postbuild 가 라우트별 font preload·랜딩 폰트 예산을 확인
       - run: npm run build
       - name: 빌드에 들어간 Pyodide 파일 확인
         run: node scripts/pyodide/copy-assets.mjs --check
@@ -242,9 +245,9 @@ jobs:
       - name: Chromium 시스템 라이브러리
         if: ${{ steps.pw-cache.outputs.cache-hit == 'true' }}
         run: npx playwright install-deps chromium
-      # build job 과 같은 우회 (Next 15.5 Turbopack + 확장자 없는 Google Fonts 주소, docs/ci.md)
-      - name: Google Fonts CSS 미리 받기
-        run: node scripts/fonts/google-fonts-mock.mjs
+      # 에셋 검사 (P2-16): SVG 최적화·종이 결 타일·래스터 기록·Lottie 구조 + lottie_light 실제 렌더(B32) + 라이선스 기록(P2-17). Chromium 이 있는 job 이라 여기서 돈다
+      - name: 에셋 검사
+        run: npm run assets:check
       - name: 비로그인 e2e (빌드 포함)
         env:
           E2E_NO_STACK: '1'
@@ -301,8 +304,6 @@ jobs:
       - name: Chromium 시스템 라이브러리
         if: ${{ steps.pw-cache.outputs.cache-hit == 'true' }}
         run: npx playwright install-deps chromium
-      - name: Google Fonts CSS 미리 받기
-        run: node scripts/fonts/google-fonts-mock.mjs
       - name: Supabase 스택 준비 대기
         run: |
           # 앞 단계에서 띄운 프로세스라 wait 를 못 쓰므로 끝날 때까지 직접 본다

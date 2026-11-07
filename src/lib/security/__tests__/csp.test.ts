@@ -13,10 +13,12 @@ import {
   cspHeaderName,
   isCspReportOnly,
   isStaticPagePath,
+  nonceFromCsp,
   originOf,
   parseSentryDsn,
   sentryCspReportUri,
 } from '../csp';
+import { MOTION_BOOT_SCRIPT_CSP_SOURCE } from '@/lib/motion/boot';
 
 const SUPABASE_URL = 'https://abcdefghijklmnop.supabase.co';
 const DSN =
@@ -45,18 +47,27 @@ describe('페이지 CSP (B27)', () => {
     expect(parse(policy)['script-src']).not.toContain("'unsafe-eval'");
   });
 
-  it('nonce 정책: nonce + strict-dynamic, unsafe-inline 없음', () => {
+  it('nonce 정책: nonce + 연출 단계 부트 스크립트 해시 + strict-dynamic, unsafe-inline 없음', () => {
     const d = parse(buildPageCsp({ ...prod, nonce: 'abc123==' }));
     expect(d['script-src']).toEqual([
       "'self'",
       "'nonce-abc123=='",
+      MOTION_BOOT_SCRIPT_CSP_SOURCE,
       "'strict-dynamic'",
     ]);
   });
 
-  it('정적 정책(nonce 없음): self + unsafe-inline', () => {
+  it('정적 정책(nonce 없음): self + unsafe-inline (해시를 넣으면 unsafe-inline이 무시되므로 넣지 않음)', () => {
     const d = parse(buildPageCsp(prod));
     expect(d['script-src']).toEqual(["'self'", "'unsafe-inline'"]);
+  });
+
+  it('nonceFromCsp: 요청 CSP에서 nonce만 꺼낸다', () => {
+    expect(nonceFromCsp(buildPageCsp({ ...prod, nonce: 'abc+/12==' }))).toBe(
+      'abc+/12==',
+    );
+    expect(nonceFromCsp(buildPageCsp(prod))).toBeUndefined();
+    expect(nonceFromCsp(null)).toBeUndefined();
   });
 
   it('공통 지시어', () => {

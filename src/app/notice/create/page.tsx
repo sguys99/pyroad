@@ -10,7 +10,7 @@ export default async function NoticeCreatePage() {
   return (
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
       <div className="mb-6">
-        <Link href="/notice" className="text-sm text-primary underline">
+        <Link href="/notice" className="text-sm text-primary-text underline">
           ← 공지사항으로
         </Link>
       </div>

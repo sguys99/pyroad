@@ -1,0 +1,268 @@
+/* 소리 검수 보드 (P2-14). 단일 라이트 테마, 대비 AA (본문 #2b2118 on #fffaf0 ≈ 15:1, 보조 #5c4a3a ≈ 8:1) */
+:root {
+  --sr-bg: #fffaf0;
+  --sr-surface: #ffffff;
+  --sr-line: #e6dccb;
+  --sr-text: #2b2118;
+  --sr-muted: #5c4a3a;
+  --sr-primary: #1f7a3a; /* 흰 글자 5.4:1 */
+  --sr-primary-soft: #e3f3e7;
+  --sr-change: #a3361e; /* 흰 글자 6.4:1 */
+  --sr-change-soft: #fbe8e1;
+  --sr-focus: #1d4ed8;
+  color-scheme: light;
+}
+html,
+body {
+  margin: 0;
+  background: var(--sr-bg);
+  color: var(--sr-text);
+  font-family: 'pyRoad Sans', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+.sr-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px));
+}
+.sr-hero h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+.sr-kicker {
+  margin: 0;
+  font-weight: 700;
+  color: var(--sr-primary);
+}
+.sr-tips {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+  color: var(--sr-muted);
+}
+.sr-warn {
+  color: var(--sr-change);
+  font-weight: 700;
+}
+.sr-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--sr-line);
+  border-radius: 12px;
+  background: var(--sr-surface);
+  font-size: 15px;
+}
+h2 {
+  margin: 40px 0 4px;
+  font-size: 24px;
+}
+.sr-sub {
+  margin: 0 0 16px;
+  color: var(--sr-muted);
+}
+.sr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+}
+.sr-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid var(--sr-line);
+  border-radius: 16px;
+  background: var(--sr-surface);
+  transition: border-color 0.15s;
+}
+.sr-card[data-verdict='good'],
+.sr-card[data-chosen='true'] {
+  border-color: var(--sr-primary);
+}
+.sr-card[data-verdict='change'] {
+  border-color: var(--sr-change);
+}
+.sr-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.sr-card h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+}
+.sr-card code,
+.sr-sub code {
+  font-size: 15px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #f3ede2;
+}
+.sr-meta,
+.sr-src {
+  font-size: 15px;
+  color: var(--sr-muted);
+}
+.sr-when,
+.sr-note,
+.sr-src {
+  margin: 0;
+}
+.sr-note {
+  font-size: 15px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f7f1e6;
+}
+.sr-src a {
+  color: var(--sr-focus);
+}
+.sr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--sr-focus);
+  outline-offset: 2px;
+}
+.sr-play {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sr-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+}
+.sr-play:active {
+  transform: scale(0.97);
+}
+.sr-btn {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 2px solid var(--sr-line);
+  border-radius: 999px;
+  background: var(--sr-surface);
+  color: var(--sr-text);
+}
+.sr-btn[aria-pressed='true'] {
+  border-color: var(--sr-primary);
+}
+.sr-verdicts {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+.sr-chip {
+  flex: 1;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 2px solid currentColor;
+  background: var(--sr-surface);
+  font-weight: 700;
+}
+.sr-good {
+  color: var(--sr-primary);
+}
+.sr-change {
+  color: var(--sr-change);
+}
+/* 고른 상태: 색 + 채움 + 체크 글자 (색만으로 구분하지 않음) */
+.sr-good[aria-pressed='true'] {
+  background: var(--sr-primary);
+  border-color: var(--sr-primary);
+  color: #fff;
+}
+.sr-change[aria-pressed='true'] {
+  background: var(--sr-change);
+  border-color: var(--sr-change);
+  color: #fff;
+}
+.sr-chip[aria-pressed='true']::before {
+  content: '✓ ';
+}
+.sr-pick-btn[aria-pressed='true']::before {
+  content: '';
+}
+.sr-memo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+  color: var(--sr-muted);
+  flex: 1;
+  min-width: min(100%, 220px);
+}
+.sr-memo input {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 2px solid var(--sr-line);
+  border-radius: 10px;
+  font: inherit;
+  color: var(--sr-text);
+  background: #fff;
+}
+.sr-world {
+  margin-top: 24px;
+}
+.sr-world-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+.sr-pick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--sr-primary-soft);
+  color: var(--sr-primary);
+  font-size: 16px;
+}
+.sr-world-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+.sr-world-foot .sr-chip {
+  flex: 0 0 auto;
+}
+.sr-summary textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--sr-line);
+  border-radius: 12px;
+  font: 15px/1.6 ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  color: var(--sr-text);
+  background: #fff;
+  resize: vertical;
+}
+.sr-copied {
+  font-weight: 700;
+}

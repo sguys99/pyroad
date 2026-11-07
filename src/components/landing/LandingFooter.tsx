@@ -14,7 +14,7 @@ export function LandingFooter() {
     <footer className="w-full border-t border-primary/10 px-6 py-5">
       <div className="mx-auto max-w-4xl">
         <div className="mb-3 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-semibold text-primary">
+          <span className="flex items-center gap-1.5 text-[13px] font-semibold text-primary-text">
             <PybaemSvg expression="happy" size={28} />
             pyRoad
           </span>

@@ -131,3 +131,159 @@ describe('/api/settings (B13, P1-01)', () => {
     expect((await (await GET()).json()).has_custom_keys).toEqual(['anthropic']);
   });
 });
+
+describe('/api/settings 움직임 설정 (P2-15)', () => {
+  const SOUND = { version: 1, muted: false, master: 0.8 };
+
+  beforeEach(() => {
+    mocks.state.users[U1] = {
+      preferred_provider: null,
+      custom_api_keys: {},
+      settings: { sound: SOUND, motion: { tier: 'auto', reduced: 'system' } },
+    };
+  });
+
+  it('조회: users.settings.motion 을 돌려줌 (없거나 이상한 값은 기본값)', async () => {
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'auto',
+      reduced: 'system',
+    });
+    mocks.state.users[U1].settings = { motion: { tier: 'turbo', reduced: 1 } };
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'auto',
+      reduced: 'system',
+    });
+    mocks.state.users[U1].settings = {};
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'auto',
+      reduced: 'system',
+    });
+  });
+
+  it('저장: motion 만 바꾸고 다른 설정(sound)은 그대로, 사용자 클라이언트로는 users 를 쓰지 않음', async () => {
+    const res = await patch({ motion: { tier: 'minimal', reduced: 'on' } });
+    expect(res.status).toBe(200);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: SOUND,
+      motion: { tier: 'minimal', reduced: 'on' },
+    });
+    expect(mocks.userUpdates).toEqual([]);
+    expect((await (await GET()).json()).motion).toEqual({
+      tier: 'minimal',
+      reduced: 'on',
+    });
+  });
+
+  it.each([
+    ['모르는 단계', { tier: 'ultra', reduced: 'system' }],
+    ['모르는 동작 줄이기', { tier: 'auto', reduced: 'maybe' }],
+    ['키 빠짐', { tier: 'lite' }],
+    ['측정값 같은 다른 키', { tier: 'lite', reduced: 'off', measured: 'lite' }],
+    ['객체 아님', 'minimal'],
+    ['배열', ['lite', 'on']],
+  ])('%s → 400, 저장 안 함', async (_label, motion) => {
+    const res = await patch({ motion });
+    expect(res.status).toBe(400);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: SOUND,
+      motion: { tier: 'auto', reduced: 'system' },
+    });
+  });
+
+  it('settings 가 비어 있던 행에도 motion 을 넣음', async () => {
+    mocks.state.users[U1].settings = null;
+    expect(
+      (await patch({ motion: { tier: 'lite', reduced: 'off' } })).status,
+    ).toBe(200);
+    expect(mocks.state.users[U1].settings).toEqual({
+      motion: { tier: 'lite', reduced: 'off' },
+    });
+  });
+});
+
+describe('/api/settings 사운드 설정 (P2-14)', () => {
+  const MOTION = { tier: 'auto', reduced: 'system' };
+  const SOUND = {
+    version: 1,
+    muted: false,
+    master: 0.8,
+    sfx: { enabled: true, volume: 0.7 },
+    bgm: { enabled: false, volume: 0.4 },
+    voice: { enabled: true, volume: 0.9 },
+    updatedAt: 0,
+  };
+  const changed = (over: Record<string, unknown> = {}) => ({
+    ...SOUND,
+    sfx: { enabled: false, volume: 0.5 },
+    updatedAt: 1_762_300_000_000,
+    ...over,
+  });
+
+  beforeEach(() => {
+    mocks.state.users[U1] = {
+      preferred_provider: null,
+      custom_api_keys: {},
+      settings: { sound: SOUND, motion: MOTION },
+    };
+  });
+
+  it('조회: users.settings.sound 를 정규화해서 돌려줌 (없으면 null)', async () => {
+    expect((await (await GET()).json()).sound).toEqual(SOUND);
+    mocks.state.users[U1].settings = {
+      sound: { ...SOUND, master: 'loud', sfx: { enabled: 'yes' } },
+    };
+    expect((await (await GET()).json()).sound).toEqual(SOUND);
+    mocks.state.users[U1].settings = { motion: MOTION };
+    expect((await (await GET()).json()).sound).toBeNull();
+  });
+
+  it('저장: sound 만 바꾸고 motion 은 그대로, 사용자 클라이언트로는 users 를 쓰지 않음', async () => {
+    expect((await patch({ sound: changed() })).status).toBe(200);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: changed(),
+      motion: MOTION,
+    });
+    expect(mocks.userUpdates).toEqual([]);
+  });
+
+  it('motion 과 sound 를 연달아·동시에 바꿔도 둘 다 남음 (원자적 갱신, 00020)', async () => {
+    const motion = { tier: 'minimal', reduced: 'on' };
+    const [a, b] = await Promise.all([
+      patch({ motion }),
+      patch({ sound: changed() }),
+    ]);
+    expect([a.status, b.status]).toEqual([200, 200]);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: changed(),
+      motion,
+    });
+    // 한 요청에 둘 다
+    const both = { sound: changed({ muted: true }), motion: MOTION };
+    expect((await patch(both)).status).toBe(200);
+    expect(mocks.state.users[U1].settings).toEqual(both);
+  });
+
+  it.each([
+    ['볼륨 범위 밖', changed({ master: 1.5 })],
+    ['모르는 키', { ...changed(), theme: 'dark' }],
+    ['카테고리 모양', changed({ bgm: { enabled: true } })],
+    [
+      '카테고리에 다른 키',
+      changed({ sfx: { enabled: true, volume: 1, pan: 0 } }),
+    ],
+    ['버전', changed({ version: 2 })],
+    ['먼 미래 시각', changed({ updatedAt: Date.now() + 10 * 86_400_000 })],
+    ['객체 아님', 'mute'],
+  ])('%s → 400, 저장 안 함', async (_label, sound) => {
+    expect((await patch({ sound })).status).toBe(400);
+    expect(mocks.state.users[U1].settings).toEqual({
+      sound: SOUND,
+      motion: MOTION,
+    });
+  });
+
+  it('사용자 행이 없으면 500 (조용히 성공하지 않음)', async () => {
+    delete mocks.state.users[U1];
+    expect((await patch({ sound: changed() })).status).toBe(500);
+  });
+});

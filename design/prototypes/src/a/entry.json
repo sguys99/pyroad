@@ -1,0 +1,6 @@
+{
+  "title": "pyRoad 모험 섬",
+  "description": "pyRoad 디자인 시안 A (P2-02) 인터랙티브 프로토타입: 랜딩 · 월드맵 · 퀘스트 · 모션",
+  "googleFonts": ["Jua"],
+  "inlineFonts": ["sans", "mono"]
+}

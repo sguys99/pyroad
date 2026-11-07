@@ -1,0 +1,6 @@
+{
+  "title": "pyRoad 무드보드",
+  "description": "pyRoad Phase 2 디자인 무드보드 (P2-01): 시안 A 모험 섬 · B 마법 그림책 · A×B 혼합의 팔레트·대비, 타이포, 캐릭터, 모션, 월드별 비주얼",
+  "googleFonts": ["Jua", "Gaegu:wght@400;700", "Gowun+Dodum"],
+  "inlineFonts": ["sans", "mono"]
+}

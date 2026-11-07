@@ -1,4 +1,4 @@
-// 테스트용 메모리 DB: users(preferred_provider, custom_api_keys) + user_api_keys 만 흉내 냄.
+// 테스트용 메모리 DB: users(preferred_provider, custom_api_keys, settings) + user_api_keys 만 흉내 냄.
 // legacyColumn=false 면 00009 이후처럼 users.custom_api_keys 조회·수정이 42703 을 냄.
 
 export interface FakeKeyRow {
@@ -14,7 +14,12 @@ export interface FakeKeyRow {
 export interface FakeState {
   users: Record<
     string,
-    { preferred_provider: string | null; custom_api_keys?: unknown }
+    {
+      preferred_provider: string | null;
+      custom_api_keys?: unknown;
+      /** users.settings (P2-15 움직임·P2-14 사운드 설정) */
+      settings?: unknown;
+    }
   >;
   user_api_keys: FakeKeyRow[];
   legacyColumn: boolean;
@@ -34,6 +39,33 @@ const MISSING = {
 
 export function fakeAdmin(state: FakeState) {
   return {
+    /** patch_user_settings (00020): settings || p_patch, 키는 motion·sound 만 */
+    async rpc(fn: string, args: Record<string, unknown>): Promise<Result> {
+      if (fn !== 'patch_user_settings')
+        throw new Error(`fakeAdmin: unknown rpc ${fn}`);
+      const patch = args.p_patch as Record<string, unknown>;
+      if (
+        Object.entries(patch).some(
+          ([k, v]) =>
+            !['motion', 'sound'].includes(k) ||
+            !v ||
+            typeof v !== 'object' ||
+            Array.isArray(v),
+        )
+      )
+        return {
+          data: null,
+          error: { code: 'PT400', message: 'invalid_settings_key' },
+        };
+      const user = state.users[args.p_user_id as string];
+      if (!user) return { data: false, error: null };
+      const current =
+        user.settings && typeof user.settings === 'object'
+          ? (user.settings as Record<string, unknown>)
+          : {};
+      user.settings = { ...current, ...patch };
+      return { data: true, error: null };
+    },
     from(table: string) {
       const filters: [string, unknown][] = [];
       let mode: 'select' | 'update' | 'delete' = 'select';
