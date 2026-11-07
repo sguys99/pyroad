@@ -71,8 +71,13 @@ function readClientManifest(route) {
   return files.map((f) => (typeof f === 'string' ? f : f.path));
 }
 
-function staticFile(urlPath) {
-  return join(NEXT, urlPath.replace(/^\/_next\//, ''));
+/**
+ * `/_next/static/...` 주소 → `.next/static/...` 파일 경로.
+ * Vercel은 Skew Protection으로 정적 자산 주소에 `?dpl=<배포 ID>`를 붙이므로 쿼리·해시는 떼고 본다 (B42).
+ */
+export function staticFile(urlPath) {
+  const path = urlPath.replace(/[?#].*$/, '');
+  return join(NEXT, path.replace(/^\/_next\//, ''));
 }
 
 function main() {
@@ -126,7 +131,7 @@ function main() {
   }
   // 랜딩이 받을 수 있는 폰트 = preload + 랜딩 CSS가 가리키는 파일 전부 (최악)
   const fontFiles = new Set([
-    ...preloads,
+    ...preloads.map((u) => u.replace(/[?#].*$/, '')),
     ...landingFaces.files.map((u) =>
       u.replace(/^\.\.\/media\//, '/_next/static/media/'),
     ),
