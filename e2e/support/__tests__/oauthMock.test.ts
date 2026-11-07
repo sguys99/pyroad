@@ -39,7 +39,8 @@ describe('parseAuthorizeRequest · checkAuthorizeRequest', () => {
     (provider) => {
       const req = parseAuthorizeRequest(authorizeUrl(provider));
       expect(req.provider).toBe(provider);
-      expect(req.via).toBe(provider);
+      // B43: 쿼리 없는 콜백 주소 그대로
+      expect(req.redirectTo).toBe(`${BASE}/auth/callback`);
       expect(checkAuthorizeRequest(req, { baseURL: BASE, provider })).toEqual(
         [],
       );
@@ -71,10 +72,7 @@ describe('parseAuthorizeRequest · checkAuthorizeRequest', () => {
     const url = new URL(authorizeUrl('kakao'));
     url.searchParams.delete('code_challenge');
     url.searchParams.delete('scope');
-    url.searchParams.set(
-      'redirect_to',
-      'https://evil.test/auth/callback?via=kakao',
-    );
+    url.searchParams.set('redirect_to', 'https://evil.test/auth/callback');
     const problems = checkAuthorizeRequest(parseAuthorizeRequest(url.href), {
       baseURL: BASE,
       provider: 'kakao',
@@ -86,6 +84,29 @@ describe('parseAuthorizeRequest · checkAuthorizeRequest', () => {
         'Kakao scope 덮어쓰기 null (기대 빈 값, KOE205 방지)',
       ]),
     );
+  });
+});
+
+describe('redirect_to 정확 일치 (B43)', () => {
+  it('평범한 로그인에 쿼리가 붙으면 문제 (예전 ?via=)', () => {
+    const url = new URL(authorizeUrl('google'));
+    url.searchParams.set('redirect_to', `${BASE}/auth/callback?via=google`);
+    expect(
+      checkAuthorizeRequest(parseAuthorizeRequest(url.href), {
+        baseURL: BASE,
+        provider: 'google',
+      }),
+    ).toEqual(['redirect_to에 next 말고 다른 값이 붙음: ?via=google']);
+  });
+
+  it('계정 연결처럼 next가 있는 흐름은 ?next= 하나만 허용', () => {
+    const req = parseAuthorizeRequest(
+      authorizeUrl('kakao', { next: '/settings?linked=kakao' }),
+    );
+    expect(req.next).toBe('/settings?linked=kakao');
+    expect(
+      checkAuthorizeRequest(req, { baseURL: BASE, provider: 'kakao' }),
+    ).toEqual([]);
   });
 });
 
@@ -107,7 +128,7 @@ describe('mockRedirectLocation', () => {
     ).toBe(`${BASE}/settings#lp=kakao`);
   });
 
-  it('cancel·server_error: 진짜 콜백 주소에 provider 오류를 붙임 (via 유지)', () => {
+  it('cancel·server_error: 진짜 콜백 주소에 provider 오류를 붙임', () => {
     const cancel = new URL(
       mockRedirectLocation(
         'cancel',
@@ -116,7 +137,7 @@ describe('mockRedirectLocation', () => {
       ),
     );
     expect(cancel.pathname).toBe('/auth/callback');
-    expect(cancel.searchParams.get('via')).toBe('naver');
+    expect(cancel.searchParams.has('via')).toBe(false);
     expect(cancel.searchParams.get('error')).toBe('access_denied');
 
     const server = new URL(

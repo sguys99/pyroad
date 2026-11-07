@@ -32,6 +32,7 @@ import { LandingLoginError } from '../LandingLoginError';
 
 afterEach(() => {
   cleanup();
+  window.sessionStorage.clear();
   window.history.replaceState(null, '', '/');
 });
 
@@ -69,5 +70,28 @@ describe('LandingLoginError', () => {
     render(<LandingLoginError />);
     expect(screen.queryByTestId('fake-sheet')).toBeNull();
     expect(window.location.search).toBe('?ref=a');
+  });
+
+  it('주소에 via가 없으면 로그인 직전에 적어 둔 수단으로 (B43), 한 번 쓰면 지운다', async () => {
+    window.sessionStorage.setItem(
+      'pyroad.loginAttempt.v1',
+      JSON.stringify({ provider: 'kakao', at: Date.now() }),
+    );
+    window.history.replaceState(null, '', '/?login_error=cancelled');
+    render(<LandingLoginError />);
+    expect(await screen.findByTestId('fake-sheet')).toHaveAttribute(
+      'data-via',
+      'kakao',
+    );
+    expect(window.sessionStorage.getItem('pyroad.loginAttempt.v1')).toBeNull();
+  });
+
+  it('시도 기록이 없으면 이름 없는 안내 (via 빈 값)', async () => {
+    window.history.replaceState(null, '', '/?login_error=cancelled');
+    render(<LandingLoginError />);
+    expect(await screen.findByTestId('fake-sheet')).toHaveAttribute(
+      'data-via',
+      '',
+    );
   });
 });

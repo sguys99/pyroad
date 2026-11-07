@@ -2,7 +2,8 @@
 //
 // 어떻게: 앱이 `signInWithOAuth`(P1-14 헬퍼)로 이동하는 GoTrue `…/auth/v1/authorize?provider=…` 요청을 Playwright가 가로챈다.
 // - 요청 자체는 진짜다: provider 이름(`custom:naver`), PKCE(`code_challenge`, S256), `redirect_to`(같은 출처 `/auth/callback`
-//   + `via`), Kakao scope 덮어쓰기(`scope=` 빈 값), Android 네이버 `appscheme`를 검사(`checkAuthorizeRequest`)한다
+//   — `next`가 없는 로그인은 **쿼리 없는 콜백 주소 그대로**(B43: Supabase Redirect URLs는 쿼리까지 비교)), Kakao scope 덮어쓰기
+//   (`scope=` 빈 값), Android 네이버 `appscheme`를 검사(`checkAuthorizeRequest`)한다
 // - 그 뒤 provider 쪽 결과를 흉내 낸다:
 //   success      → 미리 만든 로컬 사용자로 세션 쿠키를 넣고, `/auth/callback`이 성공했을 때 보낼 주소(`next` + `#lp=<provider>`)로 302
 //   cancel       → 진짜 `/auth/callback?…&error=access_denied` (취소·동의 거부: 콜백의 P3-10 사유 처리를 그대로 탄다)
@@ -33,8 +34,7 @@ export interface AuthorizeRequest {
   provider: MockProvider | null;
   /** 앱 콜백 주소 (`redirect_to`) */
   redirectTo: string | null;
-  /** redirect_to 의 via·next */
-  via: string | null;
+  /** redirect_to 의 next (계정 연결·탈퇴 재인증만) */
   next: string | null;
   codeChallenge: string | null;
   codeChallengeMethod: string | null;
@@ -48,12 +48,10 @@ export function parseAuthorizeRequest(url: string): AuthorizeRequest {
   const q = u.searchParams;
   const rawProvider = q.get('provider');
   const redirectTo = q.get('redirect_to');
-  let via: string | null = null;
   let next: string | null = null;
   if (redirectTo) {
     try {
       const r = new URL(redirectTo);
-      via = r.searchParams.get('via');
       next = r.searchParams.get('next');
     } catch {
       // checkAuthorizeRequest가 문제로 보고
@@ -63,7 +61,6 @@ export function parseAuthorizeRequest(url: string): AuthorizeRequest {
     rawProvider,
     provider: rawProvider ? (GOTRUE_PROVIDER[rawProvider] ?? null) : null,
     redirectTo,
-    via,
     next,
     codeChallenge: q.get('code_challenge'),
     codeChallengeMethod: q.get('code_challenge_method'),
@@ -100,8 +97,20 @@ export function checkAuthorizeRequest(
       problems.push(`redirect_to 출처 ${r.origin}`);
     if (r.pathname !== '/auth/callback')
       problems.push(`redirect_to 경로 ${r.pathname}`);
+    // B43: 평범한 로그인은 쿼리 없이 (정확한 주소만 등록된 Redirect URLs에서도 맞게). next 흐름만 ?next= 하나
+    const keys = [...r.searchParams.keys()];
+    if (keys.some((k) => k !== 'next') || r.hash)
+      problems.push(
+        `redirect_to에 next 말고 다른 값이 붙음: ${r.search}${r.hash}`,
+      );
+    else if (
+      !r.searchParams.has('next') &&
+      req.redirectTo !== `${new URL(baseURL).origin}/auth/callback`
+    )
+      problems.push(
+        `redirect_to가 콜백 주소와 정확히 같지 않음: ${req.redirectTo}`,
+      );
   }
-  if (req.via !== provider) problems.push(`via ${req.via} (기대 ${provider})`);
   if (provider === 'kakao' && req.scope !== '')
     problems.push(
       `Kakao scope 덮어쓰기 ${JSON.stringify(req.scope)} (기대 빈 값, KOE205 방지)`,

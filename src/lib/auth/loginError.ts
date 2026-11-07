@@ -5,7 +5,7 @@ import type { SocialProvider } from './socialLogin';
  * 로그인 실패·취소·동의 거부를 아이에게 보여 줄 **사유 enum** (P3-10). 서버(`/auth/callback`)와 랜딩이 같은 표를 쓴다.
  *
  * provider·GoTrue가 준 원문(`error_description` 등)은 화면·주소·분석에 넘기지 않는다: 영어이고, 내부 사정이 섞일 수 있다.
- * 주소에는 이 enum과 시도한 provider(`via`)만 싣는다.
+ * 주소에는 이 enum만 싣는다. 시도한 provider는 sessionStorage(`loginAttempt.ts`, B43)이고, 예전 주소의 `via`는 읽기만 한다.
  *
  * | 사유 | 들어오는 값 |
  * |---|---|
@@ -30,7 +30,7 @@ export type LoginErrorReason = (typeof LOGIN_ERROR_REASONS)[number];
 
 /** 주소 쿼리 키: `/?login_error=cancelled&via=kakao` */
 export const LOGIN_ERROR_PARAM = 'login_error';
-/** 시도한 provider (로그인 버튼이 redirectTo에 붙임, `getOAuthCredentials`) */
+/** 예전 주소의 시도한 provider (B43 전에는 redirectTo에 붙였음). 지금은 읽기만 한다 */
 export const LOGIN_VIA_PARAM = 'via';
 
 export function isLoginErrorReason(value: unknown): value is LoginErrorReason {

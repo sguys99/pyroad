@@ -9,6 +9,7 @@ import {
   type SocialProvider,
 } from '@/lib/auth/socialLogin';
 import { linkNext } from '@/lib/auth/accountLinks';
+import { rememberLoginAttempt } from '@/lib/auth/loginAttempt';
 
 /**
  * 계정 연결 결과 (P3-07).
@@ -27,6 +28,8 @@ export function useLinkIdentity() {
     async (provider: SocialProvider): Promise<LinkIdentityResult> => {
       const info = detectInAppBrowser();
       if (needsExternalBrowser(provider, info)) return 'external-only';
+      // 실패 안내(/auth/error)가 어떤 수단이었는지 알 수 있게 (B43)
+      rememberLoginAttempt(provider);
       try {
         const supabase = await loadBrowserClient();
         const { error } = await supabase.auth.linkIdentity(

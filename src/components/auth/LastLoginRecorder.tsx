@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { takeLastLoginFragment, writeLastLogin } from '@/lib/auth/lastLogin';
+import { clearLoginAttempt } from '@/lib/auth/loginAttempt';
 
 /**
  * 로그인 직후 도착한 화면에서 `#lp=<provider>`(P3-08, `/auth/callback`이 붙임)를 이 기기에 저장하고 주소에서 지운다.
@@ -13,6 +14,8 @@ export function LastLoginRecorder() {
     const taken = takeLastLoginFragment(window.location.href);
     if (!taken) return;
     if (taken.provider) writeLastLogin(taken.provider);
+    // 로그인이 끝났으니 시도 기록은 지운다 (B43, 다음 오류 안내에 섞이지 않게)
+    clearLoginAttempt();
     try {
       window.history.replaceState(window.history.state, '', taken.cleaned);
     } catch {

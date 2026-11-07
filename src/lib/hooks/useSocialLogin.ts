@@ -7,6 +7,7 @@ import {
   type InAppBrowserInfo,
 } from '@/lib/browser/detectInAppBrowser';
 import { openExternalBrowser } from '@/lib/browser/openExternalBrowser';
+import { rememberLoginAttempt } from '@/lib/auth/loginAttempt';
 import {
   getOAuthCredentials,
   needsExternalBrowser,
@@ -51,6 +52,8 @@ export function useSocialLogin(
       return 'external-browser';
     }
 
+    // 실패 안내가 어떤 수단이었는지 알 수 있게 (주소에 싣지 않음, B43)
+    rememberLoginAttempt(provider);
     try {
       const supabase = await loadBrowserClient();
       const { error } = await supabase.auth.signInWithOAuth(

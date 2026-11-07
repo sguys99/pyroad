@@ -15,14 +15,14 @@ describe('getOAuthCredentials (P1-14)', () => {
   it('Google: 내장 provider, 기존 /auth/callback 그대로 (추가 옵션 없음)', () => {
     expect(getOAuthCredentials('google', { origin })).toEqual({
       provider: 'google',
-      options: { redirectTo: `${origin}/auth/callback?via=google` },
+      options: { redirectTo: `${origin}/auth/callback` },
     });
   });
 
   it('Kakao: 내장 kakao + queryParams.scope로 덮어쓰기, options.scopes는 쓰지 않음', () => {
     const creds = getOAuthCredentials('kakao', { origin });
     expect(creds.provider).toBe('kakao');
-    expect(creds.options?.redirectTo).toBe(`${origin}/auth/callback?via=kakao`);
+    expect(creds.options?.redirectTo).toBe(`${origin}/auth/callback`);
     expect(creds.options?.queryParams).toEqual({ scope: KAKAO_SCOPE });
     expect(creds.options).not.toHaveProperty('scopes');
   });
@@ -44,7 +44,7 @@ describe('getOAuthCredentials (P1-14)', () => {
     expect(NAVER_PROVIDER_ID).toBe('custom:naver');
     expect(getOAuthCredentials('naver', { origin })).toEqual({
       provider: 'custom:naver',
-      options: { redirectTo: `${origin}/auth/callback?via=naver` },
+      options: { redirectTo: `${origin}/auth/callback` },
     });
   });
 
@@ -69,6 +69,18 @@ describe('getOAuthCredentials (P1-14)', () => {
     ).toBeUndefined();
   });
 
+  it.each(['google', 'kakao', 'naver'] as const)(
+    '%s: next가 없으면 redirectTo는 쿼리 없는 콜백 주소 그대로 (B43: Redirect URLs 정확 일치)',
+    (provider) => {
+      for (const isAndroid of [false, true]) {
+        expect(
+          getOAuthCredentials(provider, { origin, device: { isAndroid } })
+            .options?.redirectTo,
+        ).toBe(`${origin}/auth/callback`);
+      }
+    },
+  );
+
   it('next를 주면 콜백 쿼리에 인코딩해서 붙임 (계정 연결 후 /settings 복귀 등)', () => {
     const creds = getOAuthCredentials('kakao', {
       origin,
@@ -78,8 +90,8 @@ describe('getOAuthCredentials (P1-14)', () => {
     expect(redirect.origin).toBe(origin);
     expect(redirect.pathname).toBe('/auth/callback');
     expect(redirect.searchParams.get('next')).toBe('/settings?tab=account');
-    // 실패 안내용 시도 provider (P3-10)
-    expect(redirect.searchParams.get('via')).toBe('kakao');
+    // 시도한 수단은 주소에 싣지 않는다 (B43: Redirect URLs 쿼리 비교)
+    expect(redirect.searchParams.has('via')).toBe(false);
   });
 });
 

@@ -6,7 +6,6 @@ import { loginProviderFromUser } from '@/lib/auth/loginProvider';
 import { withLastLoginFragment } from '@/lib/auth/lastLogin';
 import {
   loginErrorPath,
-  parseVia,
   reasonFromExchangeError,
   reasonFromRedirectParams,
   safeCode,
@@ -32,8 +31,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   // B23: 같은 출처의 경로만 허용 (`//evil.com`·`https://…`·`/\evil.com` 등은 /world로)
   const next = safeNext(searchParams.get('next'));
-  // 시도한 provider (로그인 버튼이 redirectTo에 붙임). 실패 안내에만 쓰는 UI 힌트
-  const via = parseVia(searchParams.get('via'));
+  // 시도한 provider는 더 이상 주소로 오지 않는다(B43: redirectTo를 쿼리 없는 콜백으로 고정). 안내 화면이 sessionStorage에서 읽는다
 
   const redirect = (path: string) => {
     const forwardedHost = request.headers.get('x-forwarded-host');
@@ -58,7 +56,7 @@ export async function GET(request: Request) {
     }
     // 계정 연결(P3-07)이 실패하면 설정으로 돌아가되 "연결했어요" 표시(`?linked=`)는 떼어 낸다
     const back = isLinkNext(next) ? '/settings' : next;
-    return redirect(loginErrorPath(reason, { next: back, via }));
+    return redirect(loginErrorPath(reason, { next: back }));
   };
 
   // provider가 거절·취소했거나 GoTrue가 오류를 붙여 돌려보냄 (code 없음)
