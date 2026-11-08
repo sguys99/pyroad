@@ -1,2 +1,222 @@
 /* 랜딩 `#friends` 섹션 전용 스타일 (FriendsSection.tsx가 import). 클래스 접두사 `ld-friends-`, 값은 토큰 변수만.
-   공통 섹션 틀(.ld-sec*)·헤더는 ../landing.css, 연출 단계는 <html data-motion data-reduced>를 본다 */
+   공통 섹션 틀(.ld-sec*)·헤더는 ../landing.css, 연출 단계는 <html data-motion data-reduced>를 본다:
+   - 캐릭터 움직임(인사·반응·대기 루프)은 리그가 연출 단계를 따른다 (minimal: 대기 루프 없음, 동작 줄이기: 표정만)
+   - 반짝이 터짐: full·lite (FriendsCast가 budget.particles로 거름)
+   - 마우스를 올리면 살짝 뜸: full·lite, 동작 줄이기 아님
+   시안: 카드 테두리·원형 배경 없이 "한 줄 소개". 좁은 화면은 그림 왼쪽 + 글 오른쪽 줄, 768px부터 3단(말풍선 → 그림 → 이름 → 역할) */
+
+@layer components {
+  .ld-friends-list {
+    display: grid;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* 좁은 화면: [그림 | 이름 / 역할 / 말풍선] */
+  .ld-friends-item {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    grid-template-areas:
+      'art name'
+      'art role'
+      'art say';
+    grid-template-rows: auto auto 1fr;
+    column-gap: 0.75rem;
+    align-items: start;
+  }
+  .ld-friends-name {
+    grid-area: name;
+    color: var(--text);
+    font-size: var(--text-h2);
+    font-weight: 400;
+    line-height: var(--text-h2--line-height);
+  }
+  .ld-friends-role {
+    grid-area: role;
+    margin-top: 0.125rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    text-wrap: balance;
+  }
+  .ld-friends-art {
+    grid-area: art;
+    align-self: center;
+  }
+  .ld-friends-btn {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--round-l);
+    background: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--dur-base) var(--easing-out);
+  }
+  .ld-friends-btn:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  .ld-friends-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .ld-friends-say {
+    grid-area: say;
+    margin-top: 0.75rem;
+  }
+  .ld-friends-say .g-bubble {
+    padding: 0.625rem 0.875rem;
+  }
+  .ld-friends-say .g-bubble-t {
+    margin-top: 0;
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+
+  /* 768px부터: 3단, 말풍선이 그림 위 (꼬리는 아래 가운데) */
+  @media (min-width: 768px) {
+    .ld-friends-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .ld-friends-item {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'say'
+        'art'
+        'name'
+        'role';
+      /* 말풍선 자리는 세 줄 높이로 고정: 대사가 바뀌어도 그림이 밀리지 않는다 */
+      grid-template-rows: 6.25rem auto auto auto;
+      justify-items: center;
+      text-align: center;
+    }
+    /* 리그 무대(stage) 그림은 위에 점프할 여백이 있어 말풍선 쪽으로 당긴다 */
+    .ld-friends-art {
+      width: min(100%, 12rem);
+      margin-top: -1.75rem;
+    }
+    .ld-friends-say {
+      align-self: end;
+      justify-self: stretch;
+      display: flex;
+      justify-content: center;
+      margin: 0;
+    }
+    .ld-friends-say .g-bubble {
+      max-width: 16rem;
+      text-align: center;
+    }
+    .ld-friends-say .g-bubble[data-tail]::before {
+      left: calc(50% - 0.5rem);
+      top: auto;
+      bottom: -0.4375rem;
+      border-radius: 0 0 0.25rem;
+      transform: rotate(45deg);
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+    .ld-friends-name {
+      margin-top: 0.25rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .ld-friends-list {
+      gap: 2.5rem;
+    }
+    /* 넓은 단: 대사가 두 줄 안에 들어가 말풍선 자리를 줄이고 그림을 키운다 */
+    .ld-friends-item {
+      grid-template-rows: 4.75rem auto auto auto;
+    }
+    .ld-friends-art {
+      width: min(100%, 15rem);
+      margin-top: -2.25rem;
+    }
+  }
+
+  /* 반짝이 터짐: 누를 때마다 다시 그려진다 (key) */
+  .ld-friends-burst {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .ld-friends-burst i {
+    position: absolute;
+    left: -0.4375rem;
+    top: -0.4375rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    background: var(--accent);
+    clip-path: polygon(
+      50% 0,
+      62% 38%,
+      100% 50%,
+      62% 62%,
+      50% 100%,
+      38% 62%,
+      0 50%,
+      38% 38%
+    );
+    opacity: 0;
+  }
+  .ld-friends-burst i:nth-child(1) {
+    --bx: -3.5rem;
+    --by: -2.25rem;
+  }
+  .ld-friends-burst i:nth-child(2) {
+    --bx: -1.25rem;
+    --by: -4rem;
+    background: var(--primary-bright);
+  }
+  .ld-friends-burst i:nth-child(3) {
+    --bx: 1.75rem;
+    --by: -3.75rem;
+  }
+  .ld-friends-burst i:nth-child(4) {
+    --bx: 3.75rem;
+    --by: -1.5rem;
+    background: var(--accent-light);
+  }
+  .ld-friends-burst i:nth-child(5) {
+    --bx: -3rem;
+    --by: 0.75rem;
+    background: var(--primary-bright);
+  }
+  .ld-friends-item[data-friend='bugbug'] .ld-friends-burst i:nth-child(odd) {
+    background: var(--error);
+  }
+}
+
+@keyframes ld-friends-burst {
+  0% {
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--bx), var(--by)) scale(1) rotate(120deg);
+    opacity: 0;
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) {
+  .ld-friends-burst i {
+    animation: ld-friends-burst var(--dur-page) var(--easing-out) both;
+  }
+  @media (hover: hover) {
+    .ld-friends-btn:hover {
+      transform: translateY(-0.25rem);
+    }
+  }
+}

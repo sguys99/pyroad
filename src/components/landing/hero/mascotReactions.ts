@@ -47,7 +47,7 @@ export const REACTIONS: readonly MascotReaction[] = [
   },
   {
     state: 'proud',
-    line: '퀘스트를 깨면 반짝이는 별을 모을 수 있어!',
+    line: '퀘스트를 깨면 경험치가 쑥쑥 올라가!',
     sfx: 'star',
     rate: 1.26,
     hold: 2200,
