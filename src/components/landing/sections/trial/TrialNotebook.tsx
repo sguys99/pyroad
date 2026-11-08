@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -173,6 +174,8 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  /** 값이 바뀐 직후(같은 이벤트 안) 놓을 커서. rAF로 미루면 그사이 친 글자 앞으로 커서가 되돌아간다 */
+  const pendingCaret = useRef<[number, number] | null>(null);
   const outRef = useRef<HTMLDivElement>(null);
   const valRef = useRef<HTMLSpanElement>(null);
   const stampRef = useRef<HTMLDivElement>(null);
@@ -346,6 +349,16 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
     }
   };
 
+  // 보조 키·자동 교정이 바꾼 값이 DOM에 들어간 바로 그때 커서를 놓는다 (다음 키 입력보다 먼저)
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    const caret = pendingCaret.current;
+    if (!el || !caret) return;
+    pendingCaret.current = null;
+    el.setSelectionRange(caret[0], caret[1]);
+    syncScroll(el);
+  }, [code]);
+
   /** 보조 키: 커서 자리에 글자를 넣고 입력칸에 그대로 둔다 */
   const insert = (text: string) => {
     const el = inputRef.current;
@@ -355,13 +368,10 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
     const e = el.selectionEnd ?? s;
     const next = code.slice(0, s) + text + code.slice(e);
     if (next.length > MAX_CODE_LENGTH) return;
+    el.focus();
+    pendingCaret.current = [s + text.length, s + text.length];
     setCode(next);
     setHanded(false);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(s + text.length, s + text.length);
-      syncScroll(el);
-    });
   };
 
   const tryChip = (chip: string) => {
@@ -482,17 +492,15 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
                 const raw = el.value;
                 // 휴대폰 둥근 따옴표·전각 괄호는 코드용 글자로 (글자 수는 같아 커서를 되돌릴 수 있다)
                 const fixed = autoCorrect(raw);
+                const s = el.selectionStart;
+                const en = el.selectionEnd;
+                if (fixed !== raw && s !== null && en !== null) {
+                  pendingCaret.current = [s, en];
+                }
                 setCode(fixed);
                 setHanded(false);
                 touch();
-                const s = el.selectionStart;
-                const en = el.selectionEnd;
-                requestAnimationFrame(() => {
-                  if (fixed !== raw && s !== null && en !== null) {
-                    el.setSelectionRange(s, en);
-                  }
-                  syncScroll(el);
-                });
+                requestAnimationFrame(() => syncScroll(el));
               }}
               onScroll={(e) => syncScroll(e.currentTarget)}
               onSelect={(e) => syncScroll(e.currentTarget)}
