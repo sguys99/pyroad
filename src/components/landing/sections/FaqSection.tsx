@@ -41,7 +41,12 @@ export function FaqSection() {
                 {item.more && (
                   <>
                     {' '}
-                    <Link href={item.more.href} className="ld-faq-more">
+                    <Link
+                      href={item.more.href}
+                      // 앱 CSS를 쓰는 약관 화면이라 미리 받지 않음 (P4-13, LandingFooter 참고)
+                      prefetch={false}
+                      className="ld-faq-more"
+                    >
                       {item.more.label} 보기
                     </Link>
                   </>

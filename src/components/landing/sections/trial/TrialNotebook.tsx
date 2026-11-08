@@ -18,7 +18,11 @@ import { track } from '@/lib/analytics/track';
 // 해석기(`runMiniPython`)는 첫 JS에 싣지 않고 공책이 화면 근처에 오거나 처음 주문을 걸 때 받는다 (P4-12)
 import type { MiniResult } from '@/lib/landing/miniPython';
 import { MAX_CODE_LENGTH, autoCorrect } from '@/lib/landing/miniPython/input';
-import { NO_PRINT_HINT, explain } from '@/lib/landing/miniPython/messages';
+import {
+  NO_PRINT_HINT,
+  bugbugLine,
+  explain,
+} from '@/lib/landing/miniPython/messages';
 import {
   DEMO_CODE,
   DEMO_OUTPUT,
@@ -395,9 +399,10 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
       };
     }
     if (!result.ok) {
+      // 안내 문장은 결과 칸에만. 버그버그는 짧은 한마디로 결과 칸을 가리킨다 (P4-13: 같은 문장 두 번 금지)
       return {
         who: 'bugbug' as const,
-        line: `히히, 버그 찾았다! ${explain(result.error)}`,
+        line: bugbugLine(result.error.kind, talk),
       };
     }
     if (!result.printed) {
@@ -412,7 +417,7 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
       state: 'happy' as const,
       line: `"${clip(shown(result.out))}" 잘 들렸어! 방금 진짜 파이썬 주문을 걸었어.`,
     };
-  }, [demo, mode, said, result]);
+  }, [demo, mode, said, result, talk]);
 
   const outState = !shownResult
     ? 'empty'

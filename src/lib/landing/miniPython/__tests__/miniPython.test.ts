@@ -7,6 +7,7 @@ import {
   runMiniPython,
   type MiniResult,
 } from '..';
+import { bugbugLine } from '../messages';
 import { pyFloatRepr } from '../values';
 import { closeToPrint, koreanKeyboardTo } from '../typos';
 
@@ -356,6 +357,18 @@ describe('아이용 안내', () => {
     expect(!r.ok && explain(r.error)).toContain('pirnt');
     const q = runMiniPython('print(안녕)');
     expect(!q.ok && explain(q.error)).toContain('print("안녕")');
+  });
+  it('버그버그 한마디는 결과 칸 안내를 되풀이하지 않고, 다시 틀리면 다른 말 (P4-13)', () => {
+    for (const kind of MINI_ERROR_KINDS) {
+      const a = bugbugLine(kind, 0);
+      const b = bugbugLine(kind, 1);
+      expect(a, kind).toContain('결과 칸');
+      expect(b, kind).not.toBe(a);
+      expect(bugbugLine(kind, 2), kind).toBe(a);
+      const text = explain({ kind, pyType: null, pyMessage: '', detail: 'x' });
+      expect(a).not.toContain(text);
+      expect([...a].length, kind).toBeLessThanOrEqual(26);
+    }
   });
   it('긴 이름은 줄여서 말한다', () => {
     const r = runMiniPython('print(가나다라마바사아자차카타파하)');

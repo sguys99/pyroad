@@ -203,12 +203,18 @@ test.describe('랜딩 30초 체험 (P4-03)', () => {
       'data-who',
       'bugbug',
     );
+    // 안내 문장은 결과 칸에만, 버그버그는 결과 칸을 가리키는 짧은 한마디 (P4-13: 같은 문장 두 번 금지)
+    const bubble = page.getByTestId('trial-bubble');
+    await expect(bubble).toContainText('결과 칸을 봐');
+    await expect(bubble).not.toContainText('따옴표를 열었으면');
     await expect(page.getByTestId('trial-cta')).toHaveCount(0);
 
     await input.fill('pirnt("안녕")');
     await input.press('Enter');
     await expect(out).toContainText('NameError');
     await expect(out).toContainText('pirnt 대신 print');
+    await expect(bubble).toContainText('결과 칸을 봐');
+    await expect(bubble).not.toContainText('pirnt 대신');
 
     await input.fill('print("하" * 3)');
     await page.getByTestId('trial-run').click();
