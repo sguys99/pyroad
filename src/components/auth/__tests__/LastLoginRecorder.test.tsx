@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
 import { LAST_LOGIN_STORAGE_KEY } from '@/lib/auth/lastLogin';
+import { SHARED_DEVICE_STORAGE_KEY } from '@/lib/auth/sharedDevice';
 import { LastLoginRecorder } from '../LastLoginRecorder';
 
 // 로그인 직후 #lp= 조각을 저장하고 주소에서 지운다 (P3-08)
@@ -43,5 +44,17 @@ describe('LastLoginRecorder', () => {
     render(<LastLoginRecorder />);
     expect(window.localStorage.getItem(LAST_LOGIN_STORAGE_KEY)).toBeNull();
     expect(window.location.hash).toBe('#top');
+  });
+
+  it('공용 기기로 표시된 기기는 기록하지 않고 같은 수단의 옛 기록도 지운다 (P4-09)', () => {
+    window.localStorage.setItem(SHARED_DEVICE_STORAGE_KEY, '1');
+    window.localStorage.setItem(
+      LAST_LOGIN_STORAGE_KEY,
+      JSON.stringify({ provider: 'kakao', at: new Date().toISOString() }),
+    );
+    window.history.replaceState(null, '', '/world#lp=kakao');
+    render(<LastLoginRecorder />);
+    expect(window.localStorage.getItem(LAST_LOGIN_STORAGE_KEY)).toBeNull();
+    expect(window.location.hash).toBe('');
   });
 });

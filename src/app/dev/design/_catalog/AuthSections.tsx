@@ -13,6 +13,8 @@ import {
   type LoginSheetContext,
 } from '@/components/auth/LoginSheet';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
+import { SharedDeviceCheck } from '@/components/auth/SharedDeviceCheck';
+import { sharedLogoutMessage } from '@/components/LogoutButton';
 import { LoginErrorPanel } from '@/components/auth/LoginErrorPanel';
 import { LinkedAccountsList } from '@/components/settings/LinkedAccountsSection';
 import { accountLinkRows } from '@/lib/auth/accountLinks';
@@ -147,6 +149,7 @@ export function SocialLoginSection() {
   const [replay, setReplay] = useState(0);
   const [guideOpen, setGuideOpen] = useState(false);
   const [errorSheet, setErrorSheet] = useState<LoginErrorReason | null>(null);
+  const [sharedDemo, setSharedDemo] = useState(false);
 
   return (
     <Section
@@ -232,6 +235,21 @@ export function SocialLoginSection() {
           />
           <p className="text-caption text-muted-foreground">
             마지막으로 누른 버튼: {last ?? '없음'}
+          </p>
+        </Demo>
+        <Demo
+          label="공용 기기 체크 (P4-09, §12-Q44)"
+          note="시트 버튼 아래. 켜면 이 기기에 기억(pyroad.sharedDevice.v1)하고 카카오·네이버는 prompt=login, Google은 prompt=select_account로 매번 다시 묻는다. 최근 로그인 기록은 앞 사람 것이라 안 씀, 카카오톡 인앱에서는 숨김. 로그아웃하면 아래 안내(이 견본은 저장하지 않음)"
+          surface="card"
+          data-testid="social-shared-device"
+        >
+          <SharedDeviceCheck
+            checked={sharedDemo}
+            onCheckedChange={setSharedDemo}
+          />
+          <p className="rounded-xl bg-surface-2 px-3 py-2.5 text-small text-foreground">
+            <span className="font-semibold">로그아웃했어!</span>{' '}
+            {sharedLogoutMessage('naver')}
           </p>
         </Demo>
         <Demo

@@ -1,8 +1,13 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { LAST_LOGIN_STORAGE_KEY } from '@/lib/auth/lastLogin';
+import {
+  SHARED_DEVICE_STORAGE_KEY,
+  resetSharedDeviceMemory,
+} from '@/lib/auth/sharedDevice';
+import { track } from '@/lib/analytics/track';
 
 // 로그인 시트 (P3-05 · P3-08): 이 기기의 최근 로그인 수단을 읽어 맨 위 + 이름표 + 같은 계정 안내
 
@@ -35,7 +40,11 @@ const order = () =>
     .map((b) => b.getAttribute('data-provider'))
     .filter(Boolean);
 
-beforeEach(() => window.localStorage.clear());
+beforeEach(() => {
+  window.localStorage.clear();
+  resetSharedDeviceMemory();
+  vi.mocked(track).mockClear();
+});
 afterEach(cleanup);
 
 describe('LoginSheet', () => {
@@ -207,6 +216,88 @@ describe('LoginSheet 숨긴 provider (P4-09)', () => {
     expect(order()).toEqual(['kakao', 'google']);
     expect(screen.getByTestId('login-sheet-hint')).toHaveTextContent(
       LOGIN_SHEET_FIRST_HINT,
+    );
+  });
+});
+
+describe('LoginSheet 공용 기기 체크 (P4-09, §12-Q44)', () => {
+  const KAKAOTALK = {
+    isInApp: true,
+    type: 'kakaotalk' as const,
+    isAndroid: true,
+    isIOS: false,
+  };
+  const NORMAL = { isInApp: false, type: null, isAndroid: false, isIOS: false };
+
+  it('기본 꺼짐, 켜면 이 기기에 기억하고 최근 로그인 기록은 쓰지 않는다(앞 사람 것)', () => {
+    window.localStorage.setItem(
+      LAST_LOGIN_STORAGE_KEY,
+      JSON.stringify({ provider: 'naver', at: new Date().toISOString() }),
+    );
+    render(<LoginSheet open onOpenChange={() => {}} browser={NORMAL} />);
+    const check = screen.getByRole('checkbox', {
+      name: '학교·도서관 컴퓨터예요',
+    });
+    expect(check).not.toBeChecked();
+    expect(check).toHaveAccessibleDescription(
+      '다음 사람이 내 계정으로 들어오지 않게 매번 다시 물어봐요',
+    );
+    expect(order()[0]).toBe('naver');
+
+    fireEvent.click(check);
+    expect(check).toBeChecked();
+    expect(window.localStorage.getItem(SHARED_DEVICE_STORAGE_KEY)).toBe('1');
+    expect(order()).toEqual(['kakao', 'naver', 'google']);
+    expect(screen.getByTestId('login-sheet-hint')).toHaveTextContent(
+      LOGIN_SHEET_FIRST_HINT,
+    );
+
+    fireEvent.click(check);
+    expect(window.localStorage.getItem(SHARED_DEVICE_STORAGE_KEY)).toBeNull();
+  });
+
+  it('저장된 표시를 열 때 읽는다', () => {
+    window.localStorage.setItem(SHARED_DEVICE_STORAGE_KEY, '1');
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        browser={NORMAL}
+        lastUsed={null}
+      />,
+    );
+    expect(screen.getByTestId('shared-device-check')).toBeChecked();
+  });
+
+  it('카카오톡 인앱에서는 숨긴다 (그 사람 휴대폰, 카카오 prompt=login 미지원)', () => {
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        browser={KAKAOTALK}
+        lastUsed={null}
+      />,
+    );
+    expect(screen.queryByTestId('shared-device')).toBeNull();
+  });
+
+  it('분석 landing_cta_click에 shared(불리언)만 더한다', async () => {
+    window.localStorage.setItem(SHARED_DEVICE_STORAGE_KEY, '1');
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        cta="hero"
+        browser={NORMAL}
+        lastUsed={null}
+        preview={async () => 'error'}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('social-login-kakao'));
+    expect(track).toHaveBeenCalledWith(
+      'landing_cta_click',
+      { cta: 'hero', provider: 'kakao', shared: true },
+      { immediate: true },
     );
   });
 });

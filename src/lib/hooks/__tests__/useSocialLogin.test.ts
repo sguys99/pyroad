@@ -21,6 +21,7 @@ vi.mock('@/lib/browser/openExternalBrowser', () => ({ openExternalBrowser }));
 
 import { useSocialLogin, type SocialLoginResult } from '../useSocialLogin';
 import { LOGIN_ATTEMPT_STORAGE_KEY } from '@/lib/auth/loginAttempt';
+import { SHARED_DEVICE_STORAGE_KEY } from '@/lib/auth/sharedDevice';
 
 const KAKAOTALK: InAppBrowserInfo = {
   isInApp: true,
@@ -44,6 +45,7 @@ const NORMAL: InAppBrowserInfo = {
 beforeEach(() => {
   vi.clearAllMocks();
   window.sessionStorage.clear();
+  window.localStorage.clear();
   openExternalBrowser.mockReturnValue(true);
 });
 
@@ -149,5 +151,38 @@ describe('useSocialLogin (P1-14, B16)', () => {
     detectInAppBrowser.mockReturnValue(KAKAOTALK);
     await login('google');
     expect(window.sessionStorage.getItem(LOGIN_ATTEMPT_STORAGE_KEY)).toBeNull();
+  });
+});
+
+describe('useSocialLogin 공용 기기 모드 (P4-09)', () => {
+  it('이 기기가 공용 기기로 표시돼 있으면 누르는 순간 읽어 provider별 prompt를 붙인다', async () => {
+    detectInAppBrowser.mockReturnValue(NORMAL);
+    window.localStorage.setItem(SHARED_DEVICE_STORAGE_KEY, '1');
+    await login('kakao');
+    expect(signInWithOAuth).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        provider: 'kakao',
+        options: expect.objectContaining({
+          queryParams: { scope: '', prompt: 'login' },
+        }),
+      }),
+    );
+    await login('google');
+    expect(signInWithOAuth).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          queryParams: { prompt: 'select_account' },
+        }),
+      }),
+    );
+  });
+
+  it('표시가 없으면 그대로 (기본 꺼짐)', async () => {
+    detectInAppBrowser.mockReturnValue(NORMAL);
+    await login('naver');
+    expect(signInWithOAuth).toHaveBeenLastCalledWith({
+      provider: 'custom:naver',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
   });
 });

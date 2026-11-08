@@ -52,14 +52,41 @@ interface OAuthOptionsInput {
   origin: string;
   /** 로그인 뒤 갈 같은 출처 경로. `/auth/callback`이 `safeNext`로 다시 검사합니다(B23). */
   next?: string;
-  /** 기기 (P3-09): Android면 네이버에 `appscheme=true` (`NAVER_APPSCHEME_ON_ANDROID`) */
-  device?: Pick<InAppBrowserInfo, 'isAndroid'>;
+  /**
+   * 기기 (P3-09): Android면 네이버에 `appscheme=true` (`NAVER_APPSCHEME_ON_ANDROID`).
+   * `type === 'kakaotalk'`이면 카카오 `prompt=login`을 붙이지 않는다(카카오톡 인앱 브라우저에서는 제공하지 않음)
+   */
+  device?: Pick<InAppBrowserInfo, 'isAndroid'> &
+    Partial<Pick<InAppBrowserInfo, 'type'>>;
+  /** 공용 기기 모드 (P4-09, `sharedDevice.ts`): provider가 매번 다시 로그인·계정 선택을 묻게 한다 (`SHARED_DEVICE_PARAMS`) */
+  sharedDevice?: boolean;
 }
+
+/**
+ * 공용 기기 모드에서 provider별로 더하는 인가 파라미터 (P4-09, §12-Q44). 확인 (2026-11-08):
+ * - Kakao `prompt=login`: "기존 사용자 인증 여부와 상관없이 카카오계정 로그인 화면을 출력하여 다시 인증"
+ *   (developers.kakao.com REST API 인가 코드 받기). **카카오톡 인앱 브라우저에서는 제공하지 않음** → 그때는 빼고 보낸다
+ * - Naver(OIDC `custom:naver`) `prompt=login`: OIDC discovery `https://nid.naver.com/.well-known/openid-configuration`의
+ *   `prompt_values_supported`가 `none·login·consent`. (`auth_type=reauthenticate`는 예전 `/oauth2.0/authorize` 파라미터라 쓰지 않음.)
+ *   "네이버 앱으로 자동로그인"(`appscheme`)은 앱에 남은 로그인으로 들어가 버리므로 공용 기기에서는 붙이지 않는다
+ * - Google `prompt=select_account`: Google OIDC 문서의 `prompt` 값은 `none`·`consent`·`select_account`뿐이다(`login` 없음,
+ *   안 적힌 값은 오류가 날 수 있음). 비밀번호를 다시 묻지는 않지만 앞 사람 계정으로 **저절로** 들어가지 않고 계정을 고르게 한다.
+ *   그래서 로그아웃 때 "Google 사이트에서도 로그아웃" 안내를 함께 한다(`LogoutButton`)
+ * 실제 동작은 실기기 스모크 N-9(+K·G 같은 칸)로 확인한다 (docs/release/v0.4-phase3-providers.md)
+ */
+export const SHARED_DEVICE_PARAMS: Record<
+  SocialProvider,
+  Record<string, string>
+> = {
+  kakao: { prompt: 'login' },
+  naver: { prompt: 'login' },
+  google: { prompt: 'select_account' },
+};
 
 /** provider별 `signInWithOAuth`·`linkIdentity` 인자. redirectTo는 `next`가 없으면 정확히 `${origin}/auth/callback`입니다 (B43). */
 export function getOAuthCredentials(
   provider: SocialProvider,
-  { origin, next, device }: OAuthOptionsInput,
+  { origin, next, device, sharedDevice = false }: OAuthOptionsInput,
 ): SignInWithOAuthCredentials {
   // redirectTo는 쿼리 없는 `/auth/callback`이 기본이다 (B43). Supabase는 Redirect URLs를 쿼리까지 비교하므로, 쿼리를 붙이면
   // 정확한 주소(`https://pyroad.vercel.app/auth/callback`)만 등록된 환경에서 맞지 않아 Site URL로 새어 나간다.
@@ -71,14 +98,22 @@ export function getOAuthCredentials(
   const options: NonNullable<SignInWithOAuthCredentials['options']> = {
     redirectTo: callback.toString(),
   };
-  if (provider === 'kakao') {
-    options.queryParams = { scope: KAKAO_SCOPE };
+  // 인가 URL 쿼리는 한 객체에 모아 합친다 (카카오 scope 덮어쓰기와 공용 기기 prompt가 서로 지우지 않게)
+  const query: Record<string, string> = {};
+  if (provider === 'kakao') query.scope = KAKAO_SCOPE;
+  if (
+    provider === 'naver' &&
+    NAVER_APPSCHEME_ON_ANDROID &&
+    device?.isAndroid &&
+    !sharedDevice
+  ) {
+    query.appscheme = 'true';
   }
-  if (provider === 'naver' && NAVER_APPSCHEME_ON_ANDROID && device?.isAndroid) {
-    options.queryParams = { appscheme: 'true' };
+  // 공용 기기 모드 (P4-09): 매번 다시 로그인·계정 선택. 카카오톡 인앱의 카카오는 prompt=login을 지원하지 않아 뺀다
+  if (sharedDevice && !(provider === 'kakao' && device?.type === 'kakaotalk')) {
+    Object.assign(query, SHARED_DEVICE_PARAMS[provider]);
   }
-  // 공용 기기 모드 `prompt: 'login'`(네이버는 로그아웃 API가 없어 다음 사람에게 세션이 남음)은 아직 붙이지 않는다:
-  // 공용 기기를 고를 자리(설정·로그인 화면 옵션)가 생길 때 여기에 provider별로 추가한다 (P3-09 결정, Phase 4 P4-09 검토)
+  if (Object.keys(query).length > 0) options.queryParams = query;
 
   return { provider: PROVIDER_IDS[provider], options };
 }

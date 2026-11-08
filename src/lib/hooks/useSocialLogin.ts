@@ -8,6 +8,7 @@ import {
 } from '@/lib/browser/detectInAppBrowser';
 import { openExternalBrowser } from '@/lib/browser/openExternalBrowser';
 import { rememberLoginAttempt } from '@/lib/auth/loginAttempt';
+import { readSharedDevice } from '@/lib/auth/sharedDevice';
 import {
   getOAuthCredentials,
   needsExternalBrowser,
@@ -30,6 +31,7 @@ export type SocialLoginResult =
 /**
  * 소셜 로그인 버튼용 훅 (P1-14). provider별 호출 옵션은 `@/lib/auth/socialLogin`에만 있습니다.
  * 인앱 브라우저의 외부 전환은 Google일 때만 합니다(B16). 안내 모달(`InAppBrowserGuide`)도 Google 전용입니다.
+ * 공용 기기 표시(`readSharedDevice`, P4-09)가 켜져 있으면 provider가 매번 다시 묻게 합니다.
  */
 export function useSocialLogin(
   provider: SocialProvider,
@@ -61,6 +63,8 @@ export function useSocialLogin(
           origin: window.location.origin,
           next,
           device: info,
+          // 공용 기기 모드 (P4-09): 누르는 순간의 이 기기 표시를 읽는다 (로그인 시트의 체크가 저장)
+          sharedDevice: readSharedDevice(),
         }),
       );
       return error ? 'error' : 'redirecting';

@@ -5,6 +5,7 @@ import {
   KAKAO_SCOPE,
   NAVER_PROVIDER_ID,
   NAVER_APPSCHEME_ON_ANDROID,
+  SHARED_DEVICE_PARAMS,
   type SocialProvider,
 } from '../socialLogin';
 import { parseLoginProviders } from '../enabledProviders';
@@ -92,6 +93,69 @@ describe('getOAuthCredentials (P1-14)', () => {
     expect(redirect.searchParams.get('next')).toBe('/settings?tab=account');
     // 시도한 수단은 주소에 싣지 않는다 (B43: Redirect URLs 쿼리 비교)
     expect(redirect.searchParams.has('via')).toBe(false);
+  });
+});
+
+describe('getOAuthCredentials 공용 기기 모드 (P4-09, §12-Q44)', () => {
+  const query = (
+    provider: SocialProvider,
+    extra: Partial<Parameters<typeof getOAuthCredentials>[1]> = {},
+  ) =>
+    getOAuthCredentials(provider, { origin, sharedDevice: true, ...extra })
+      .options?.queryParams;
+
+  it('provider별 근거 있는 값: 카카오·네이버 prompt=login, Google prompt=select_account(login은 문서에 없음)', () => {
+    expect(SHARED_DEVICE_PARAMS).toEqual({
+      kakao: { prompt: 'login' },
+      naver: { prompt: 'login' },
+      google: { prompt: 'select_account' },
+    });
+  });
+
+  it('카카오: scope 덮어쓰기와 합친다 (scope 키가 빠지면 KOE205)', () => {
+    expect(query('kakao')).toEqual({ scope: KAKAO_SCOPE, prompt: 'login' });
+    const q = new URLSearchParams(query('kakao')).toString();
+    expect(q).toBe(`scope=${encodeURIComponent(KAKAO_SCOPE)}&prompt=login`);
+  });
+
+  it('카카오톡 인앱의 카카오는 prompt=login을 빼고 scope만 (카카오톡 인앱 브라우저에서는 제공하지 않음)', () => {
+    expect(
+      query('kakao', { device: { isAndroid: true, type: 'kakaotalk' } }),
+    ).toEqual({ scope: KAKAO_SCOPE });
+    // 다른 인앱(인스타그램 등)에서는 붙인다
+    expect(
+      query('kakao', { device: { isAndroid: true, type: 'instagram' } }),
+    ).toEqual({ scope: KAKAO_SCOPE, prompt: 'login' });
+  });
+
+  it('네이버: prompt=login, Android여도 앱 자동로그인(appscheme)은 붙이지 않음', () => {
+    expect(query('naver')).toEqual({ prompt: 'login' });
+    expect(query('naver', { device: { isAndroid: true } })).toEqual({
+      prompt: 'login',
+    });
+  });
+
+  it('Google: prompt=select_account', () => {
+    expect(query('google')).toEqual({ prompt: 'select_account' });
+  });
+
+  it('꺼져 있으면(기본) 예전과 같다', () => {
+    expect(
+      getOAuthCredentials('google', { origin, sharedDevice: false }).options,
+    ).toEqual({ redirectTo: `${origin}/auth/callback` });
+    expect(
+      getOAuthCredentials('naver', { origin, device: { isAndroid: true } })
+        .options?.queryParams,
+    ).toEqual({ appscheme: 'true' });
+  });
+
+  it('redirectTo는 그대로 (B43)', () => {
+    for (const p of ['google', 'kakao', 'naver'] as const) {
+      expect(
+        getOAuthCredentials(p, { origin, sharedDevice: true }).options
+          ?.redirectTo,
+      ).toBe(`${origin}/auth/callback`);
+    }
   });
 });
 

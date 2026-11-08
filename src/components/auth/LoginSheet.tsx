@@ -9,6 +9,12 @@ import type { AnalyticsEventProps } from '@/lib/analytics/events';
 import { cn } from '@/lib/utils';
 import { readLastLogin } from '@/lib/auth/lastLogin';
 import { ENABLED_LOGIN_PROVIDERS } from '@/lib/auth/enabledProviders';
+import { readSharedDevice, writeSharedDevice } from '@/lib/auth/sharedDevice';
+import {
+  detectInAppBrowser,
+  type InAppBrowserInfo,
+} from '@/lib/browser/detectInAppBrowser';
+import { SharedDeviceCheck } from './SharedDeviceCheck';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { LoginErrorReason } from '@/lib/auth/loginError';
 import { loginErrorCopy } from './loginErrorCopy';
@@ -94,6 +100,8 @@ const SHORT_NAME: Record<SocialProvider, string> = {
  * 머리: 손 흔드는 파이뱀(리그 `wave`, 연출 단계·동작 줄이기를 따름) + 맥락별 제목(`context`: 히어로·헤더·체험) + 한마디.
  * 이 기기에서 최근에 쓴 수단이 있으면(P3-08) 그 버튼이 맨 위 + 금색 "최근에 사용" 이름표(full은 한 번 살랑), 한마디는
  * 같은 계정으로 들어오라는 말. 기록이 없으면 "어떤 걸로 들어가도 돼. 다음에도 같은 걸로!"
+ * 버튼 아래 공용 기기 체크 "학교·도서관 컴퓨터예요"(P4-09, §12-Q44): 켜면 이 기기에 기억하고 provider가 매번 다시 묻게 하며
+ * (`getOAuthCredentials`), 최근 로그인 기록은 앞 사람 것이라 쓰지 않는다. 카카오톡 인앱에서는 숨긴다.
  * 아래: 공개 정보 안내 + 보호자 동의 안내(만 14세 미만, P3-15) 두 줄.
  * 로그인이 방금 실패했으면(P3-10 `notice`) 사유별 표정·제목·설명 + "다른 방법" 한마디, 버튼은 그대로(바로 다시 해 보기).
  *
@@ -113,17 +121,33 @@ export function LoginSheet({
   browser,
 }: LoginSheetProps) {
   const [stored, setStored] = useState<SocialProvider | null>(null);
+  // 공용 기기 표시 (P4-09): 이 기기 저장값, 열 때마다 다시 읽는다
+  const [shared, setShared] = useState(false);
+  // 인앱 판별 (서버·첫 렌더는 일반 브라우저, 마운트 뒤). 버튼 묶음에도 넘겨 한 번만 판별
+  const [detected, setDetected] = useState<InAppBrowserInfo | null>(null);
   useEffect(() => {
+    if (!browser) setDetected(detectInAppBrowser());
+  }, [browser]);
+  const info = browser ?? detected ?? undefined;
+  useEffect(() => {
+    if (!open) return;
     // 열 때마다 다시 읽는다 (다른 탭에서 로그인했을 수 있음). 저장소를 못 쓰면 null
-    if (open && lastUsedProp === undefined)
+    if (lastUsedProp === undefined)
       setStored(readLastLogin()?.provider ?? null);
+    setShared(readSharedDevice());
   }, [open, lastUsedProp]);
   const remembered = lastUsedProp === undefined ? stored : lastUsedProp;
-  // 지난번 수단이 지금 숨겨져 있으면(예: 네이버 검수 전 `NEXT_PUBLIC_LOGIN_PROVIDERS`) 없는 버튼을 가리키지 않게 기록 없음으로 본다
+  // 기록 없음으로 보는 때:
+  // - 지난번 수단이 지금 숨겨져 있으면(예: 네이버 검수 전 `NEXT_PUBLIC_LOGIN_PROVIDERS`) 없는 버튼을 가리키지 않게
+  // - 공용 기기면 그 기록은 앞 사람 것이라 (P4-09)
   const lastUsed =
-    remembered && (providers ?? ENABLED_LOGIN_PROVIDERS).includes(remembered)
+    remembered &&
+    !shared &&
+    (providers ?? ENABLED_LOGIN_PROVIDERS).includes(remembered)
       ? remembered
       : null;
+  // 카카오톡 인앱은 그 사람 휴대폰의 카카오톡이고, 카카오 재로그인(prompt=login)도 제공하지 않아 체크를 숨긴다
+  const showShared = info?.type !== 'kakaotalk';
   const copy = notice ? loginErrorCopy(notice.reason, notice.via) : null;
   const ctx = context ?? loginSheetContextOf(cta);
 
@@ -168,16 +192,29 @@ export function LoginSheet({
         providers={providers}
         lastUsed={lastUsed}
         failure={notice}
-        browser={browser}
+        browser={info}
         preview={preview}
         // 인앱 안내 대화 상자도 body로 포털되므로 같은 글꼴 변수를 넘긴다 (P3-09)
         portalClassName={className}
         onBeforeLogin={(provider) => {
           // OAuth 로 바로 떠나므로 지금 보낸다 (P1-17)
           if (cta)
-            track('landing_cta_click', { cta, provider }, { immediate: true });
+            track(
+              'landing_cta_click',
+              { cta, provider, shared: showShared && shared },
+              { immediate: true },
+            );
         }}
       />
+      {showShared && (
+        <SharedDeviceCheck
+          checked={shared}
+          onCheckedChange={(next) => {
+            writeSharedDevice(next);
+            setShared(next);
+          }}
+        />
+      )}
       {/* 두 줄 안내: 아이콘은 글자 안에 놓아(inline) 좁은 화면에서 줄이 바뀌어도 첫 낱말 옆에 붙어 있게 */}
       <ul
         className="mx-auto grid w-full max-w-sm gap-1 border-t border-line pt-3 text-center text-caption text-balance text-muted-foreground"
