@@ -12,14 +12,14 @@ pyRoad 앱이 자체 호스팅하는 웹폰트입니다 (P2-10). 구성·다시 
 
 ## 바꾼 것 (OFL "수정본")
 
-- 서브셋: 랜딩 텍스트 서브셋 1개 + unicode-range 조각(기준 묶음은 npm `pretendard` 1.3.9 가변 동적 서브셋 CSS, 실제 글리프가 있는 글자만 적음).
+- 서브셋: 랜딩 텍스트 서브셋 1개(제목 글꼴 자리에 쓰인 글자만, P4-12) + unicode-range 조각(기준 묶음은 npm `pretendard` 1.3.9 가변 동적 서브셋 CSS, 실제 글리프가 있는 글자만 적음).
 - 힌팅 제거, 레이아웃 기능(kern 등)과 저작권·라이선스 name 레코드(0·13·14)는 그대로 둠.
 - name 테이블 버전(nameID 5) 끝에 `; pyRoad subset`을 붙임.
 - 예약 이름(Reserved Font Name)이 없어 글꼴 이름은 그대로 둠.
 
 ## 파일
 
-- `Jua-landing.woff2`: 랜딩 텍스트 서브셋 (랜딩 문구에 쓰인 글자 + ASCII). `src/fonts/landing.ts`가 `next/font/local`로 preload
+- `Jua-landing.woff2`: 랜딩 텍스트 서브셋 (제목 글꼴 자리(`font-display`·h1~h3)에 쓰인 랜딩 글자 + 숫자·문장부호). `src/fonts/landing.ts`가 `next/font/local`로 preload
 - `jua.css` + `slices/`: unicode-range 조각. 화면에 나온 글자가 든 조각만 받음
 - `OFL.txt`: 라이선스 전문 (원본 배포본 그대로)
 

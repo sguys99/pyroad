@@ -2,7 +2,9 @@
 //
 //   npm run fonts:check
 //
-// 1. 랜딩 문구의 모든 글자가 랜딩 텍스트 서브셋(Jua·pyRoad Sans)에 있는지 (원본 글꼴에 없는 이모지 등은 manifest에 기록된 것만 허용)
+// 1. 랜딩 문구 글자가 랜딩 텍스트 서브셋에 있는지: 제목 글꼴 자리 글자 → Jua, 모든 글자 → pyRoad Sans (P4-12).
+//    원본 글꼴에 없는 이모지 등은 manifest에 기록된 것만 허용. 서브셋 합계가 예산(150KB)을 넘으면 실패, preload 목표(100KB)를 넘으면 경고.
+//    `src/fonts/landing.ts`의 굵기 선언이 서브셋의 굵기 축과 같은지
 // 2. src/fonts/의 폰트 파일이 manifest와 같은지 (손으로 고친 파일·빠진 조각·CSS가 가리키지 않는 파일)
 // 3. 이름을 바꿔야 하는 글꼴(OFL 예약 이름)의 name 테이블에 원래 이름이 남지 않았는지
 // 4. 글꼴 폴더마다 OFL.txt·README.md가 있는지
@@ -15,6 +17,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ROOT, collectLandingText } from './landing-text.mjs';
+import { LANDING_FONT_BUDGET, LANDING_PRELOAD_TARGET } from './check-build.mjs';
 import { allHangul, nicknameChars } from './share-card-chars.mjs';
 import { inspectSfnt, inspectWoff2 } from './woff2.mjs';
 
@@ -52,6 +55,17 @@ export function findMissingLandingChars(chars, codepoints, notInFont) {
   return chars.filter(
     (ch) => !codepoints.has(ch.codePointAt(0)) && !allowed.has(ch),
   );
+}
+
+/**
+ * `src/fonts/landing.ts`에서 서브셋 파일(`jua/Jua-landing.woff2`)을 쓰는 localFont 호출의 `weight` 값
+ * @returns {string | null}
+ */
+export function findDeclaredWeight(source, file) {
+  const at = source.indexOf(`'./${file}'`);
+  if (at < 0) return null;
+  const call = source.slice(at, source.indexOf('})', at));
+  return call.match(/weight:\s*'([^']+)'/)?.[1] ?? null;
 }
 
 /** name 레코드에 남은 예약 이름 [nameID, 값] 목록 */
@@ -158,10 +172,16 @@ function main() {
   }
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
-  // 1. 랜딩 글자
+  // 1. 랜딩 글자: 제목(Jua) 서브셋은 제목 자리 글자, 본문(pyRoad Sans) 서브셋은 랜딩 글자 전부를 가져야 한다 (P4-12)
   const landing = collectLandingText(manifest.landing.entries);
-  const prevChars = new Set([...manifest.landing.chars]);
-  const added = landing.chars.filter((c) => !prevChars.has(c));
+  const want = { display: landing.displayChars, all: landing.chars };
+  const recorded = {
+    display: new Set([...(manifest.landing.displayChars ?? '')]),
+    all: new Set([...manifest.landing.chars]),
+  };
+  const added = new Set();
+  const landingTs = readFileSync(join(FONTS, 'landing.ts'), 'utf8');
+  let landingBytes = 0;
   for (const [key, info] of Object.entries(manifest.landing.fonts)) {
     const path = join(FONTS, info.file);
     if (!existsSync(path)) {
@@ -169,28 +189,48 @@ function main() {
       continue;
     }
     const buf = readFileSync(path);
+    landingBytes += buf.length;
     if (sha256(buf) !== info.sha256) {
       errors.push(
         `src/fonts/${info.file}가 manifest와 다름 (손으로 고쳤거나 manifest를 안 커밋함). ${REBUILD_LANDING}`,
       );
     }
+    const covers = info.covers ?? 'all';
     const { codepoints } = inspectWoff2(buf);
     const missing = findMissingLandingChars(
-      landing.chars,
+      want[covers],
       codepoints,
       info.notInFont,
     );
     if (missing.length) {
       errors.push(
-        `랜딩 문구에 서브셋(${key}: src/fonts/${info.file})에 없는 글자가 있어요: ${missing.join(' ')}\n` +
+        `랜딩 ${covers === 'display' ? '제목 글꼴 자리' : '문구'}에 서브셋(${key}: src/fonts/${info.file})에 없는 글자가 있어요: ${missing.join(' ')}\n` +
           `    → 랜딩 문구가 바뀌었으면 ${REBUILD_LANDING} 를 실행하고 src/fonts/ 변경을 같은 커밋에 넣으세요.`,
       );
     }
+    for (const c of want[covers]) if (!recorded[covers].has(c)) added.add(c);
+    // landing.ts의 굵기 선언이 서브셋의 굵기(가변 축 범위)와 같은지
+    const declared = findDeclaredWeight(landingTs, info.file);
+    if (declared !== info.weight) {
+      errors.push(
+        `src/fonts/landing.ts의 ${info.file} 굵기 '${declared}'가 서브셋 굵기 '${info.weight}'와 다름 (build-fonts.mjs FAMILIES.landingSubset)`,
+      );
+    }
   }
-  if (!errors.length && added.length) {
+  if (!errors.length && added.size) {
     // 글자는 서브셋에 있지만(우연히 겹침) manifest 기록과 다르면 알려만 준다
     console.warn(
-      `[fonts:check] 랜딩 글자 기록(manifest)에 없는 글자 ${added.join('')} — 서브셋에는 있음. 다음에 ${REBUILD_LANDING}`,
+      `[fonts:check] 랜딩 글자 기록(manifest)에 없는 글자 ${[...added].join('')} — 서브셋에는 있음. 다음에 ${REBUILD_LANDING}`,
+    );
+  }
+  // 크기: 빌드 전에 미리 (빌드 뒤 check-build가 실제 전송량으로 다시 봄)
+  if (landingBytes > LANDING_FONT_BUDGET) {
+    errors.push(
+      `랜딩 서브셋 합계 ${(landingBytes / 1024).toFixed(1)}KB > 예산 ${LANDING_FONT_BUDGET / 1024}KB (§2.10). 본문 글자 수를 줄이거나 docs/design/fonts.md §4를 보세요`,
+    );
+  } else if (landingBytes > LANDING_PRELOAD_TARGET) {
+    console.warn(
+      `[fonts:check] 경고: 랜딩 서브셋 합계 ${(landingBytes / 1024).toFixed(1)}KB > preload 목표 ${LANDING_PRELOAD_TARGET / 1024}KB (예산 ${LANDING_FONT_BUDGET / 1024}KB)`,
     );
   }
 
@@ -274,11 +314,11 @@ function main() {
     );
     process.exit(1);
   }
-  const landingKb =
-    Object.values(manifest.landing.fonts).reduce((n, f) => n + f.bytes, 0) /
-    1024;
   console.log(
-    `[fonts:check] 통과: 랜딩 글자 ${landing.chars.length}개(모듈 ${landing.files.length}개) · 랜딩 서브셋 ${landingKb.toFixed(1)}KB · ` +
+    `[fonts:check] 통과: 랜딩 글자 ${landing.chars.length}개·제목 ${landing.displayChars.length}개(모듈 ${landing.files.length}개) · ` +
+      `랜딩 서브셋 ${Object.entries(manifest.landing.fonts)
+        .map(([k, f]) => `${k} ${(f.bytes / 1024).toFixed(1)}`)
+        .join(' + ')} = ${(landingBytes / 1024).toFixed(1)}KB · ` +
       `조각 ${Object.values(manifest.families)
         .map((f) => `${f.family} ${f.faces}`)
         .join(

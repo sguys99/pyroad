@@ -13,14 +13,14 @@ pyRoad 앱이 자체 호스팅하는 웹폰트입니다 (P2-10). 구성·다시 
 ## 바꾼 것 (OFL "수정본")
 
 - 조각: npm `pretendard` 1.3.9의 공식 가변 동적 서브셋(`dist/web/variable/woff2-dynamic-subset/`) 92개를 글리프는 그대로 두고 이름만 바꿔 다시 저장.
-- 랜딩 텍스트 서브셋: `dist/public/variable/PretendardVariable.ttf`에서 랜딩 글자만 남김 (가변 축 wght 45~920 유지).
+- 랜딩 텍스트 서브셋: `dist/public/variable/PretendardVariable.ttf`에서 랜딩 글자만 남기고, 가변 축을 wght 400~700으로 좁히고(fontTools instancer), OpenType 기능은 브라우저 기본 기능 + tnum만 남김 (P4-12).
 - 힌팅 제거, 레이아웃 기능(kern 등)과 저작권·라이선스 name 레코드(0·13·14)는 그대로 둠.
 - name 테이블 버전(nameID 5) 끝에 `; pyRoad subset`을 붙임.
 - OFL 예약 이름 때문에 글꼴 이름이 들어가는 name 레코드(1·3·4·6·16·17·21·25·256 이상)를 `pyRoad Sans`로 바꿈. 저작권·상표·제작사·디자이너·URL·라이선스 레코드는 원문 그대로.
 
 ## 파일
 
-- `pyRoadSans-landing.woff2`: 랜딩 텍스트 서브셋 (랜딩 문구에 쓰인 글자 + ASCII). `src/fonts/landing.ts`가 `next/font/local`로 preload
+- `pyRoadSans-landing.woff2`: 랜딩 텍스트 서브셋 (랜딩 문구 글자 전부 + ASCII, 굵기 400~700). `src/fonts/landing.ts`가 `next/font/local`로 preload
 - `pyroad-sans.css` + `slices/`: unicode-range 조각. 화면에 나온 글자가 든 조각만 받음
 - `OFL.txt`: 라이선스 전문 (원본 배포본 그대로)
 

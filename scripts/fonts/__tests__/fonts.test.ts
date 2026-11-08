@@ -1,10 +1,18 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ROOT, collectLandingText } from '../landing-text.mjs';
+import {
+  ROOT,
+  collectDisplayText,
+  collectLandingText,
+  cssFontClasses,
+  parseModule,
+  subsetText,
+} from '../landing-text.mjs';
 import { inspectSfnt, inspectWoff2 } from '../woff2.mjs';
 import {
   EXTERNAL_FONT_PATTERNS,
+  findDeclaredWeight,
   findMissingLandingChars,
   findMissingShareCardChars,
   findReservedNames,
@@ -12,8 +20,11 @@ import {
 import { nicknameChars } from '../share-card-chars.mjs';
 import {
   classifyFontFaces,
+  findMissingGlyphs,
   findPreloadLeaks,
+  fontFamilyRules,
   staticFile,
+  textByFont,
 } from '../check-build.mjs';
 
 const fontFile = (p: string) => readFileSync(join(ROOT, 'src/fonts', p));
@@ -54,12 +65,31 @@ describe('랜딩 글자 검사', () => {
   });
 
   it('랜딩 페이지에서 import를 따라가며 문구를 모은다', () => {
-    const { files, chars } = collectLandingText();
+    const { files, chars, displayChars, dynamicFiles } = collectLandingText();
     expect(files).toContain('src/components/landing/hero/HeroSection.tsx');
     expect(files).not.toContain('src/app/(protected)/layout.tsx');
+    // 로그인 시트는 동적 import로만 닿는다
+    expect(dynamicFiles).toContain('src/components/auth/LoginSheet.tsx');
     for (const ch of '파이썬 모험') {
       if (ch !== ' ') expect(chars).toContain(ch);
     }
+    // 제목 글자는 히어로 제목을 담고, 본문 글자의 부분집합이며 훨씬 적다 (P4-12)
+    for (const ch of '모험지도') expect(displayChars).toContain(ch);
+    const all = new Set(chars);
+    expect(displayChars.every((c: string) => all.has(c))).toBe(true);
+    expect(displayChars.length).toBeLessThan(chars.length * 0.6);
+  });
+
+  it('서브셋 글자열: 본문은 ASCII 전부, 제목은 숫자·문장부호 + 나온 영문의 대·소문자만', () => {
+    const r = { chars: ['가', 'z'], displayChars: ['가', 'p'] };
+    const sans = subsetText('all', r);
+    expect(sans).toContain('~');
+    expect(sans).toContain('Q');
+    expect(sans).toContain('가');
+    const display = subsetText('display', r);
+    for (const ch of '0189!?p가P ') expect(display).toContain(ch);
+    expect(display).not.toContain('Q');
+    expect(display).not.toContain('z');
   });
 
   it('외부 폰트 출처를 잡는다', () => {
@@ -73,7 +103,127 @@ describe('랜딩 글자 검사', () => {
   });
 });
 
+describe('제목 글꼴 자리 찾기 (P4-12)', () => {
+  const display = (
+    sources: Record<string, string>,
+    cssClasses?: ReturnType<typeof cssFontClasses>,
+  ) =>
+    collectDisplayText(
+      Object.entries(sources).map(([f, src]) => parseModule(f, src)),
+      { cssClasses },
+    ).join('|');
+
+  it('h1~h3·font-display 아래 글자만, 안쪽 font-sans·숨은 속성·비교식은 뺀다', () => {
+    const got = display({
+      'a.tsx': `
+        export function A({ x }) {
+          return (
+            <main>
+              <h1 aria-label="숨김">제목<span className="font-sans">본문안</span></h1>
+              <p className={cn('lead', ok && 'font-display')}>표시글</p>
+              <p>그냥본문</p>
+              <h2 className="font-sans">산스제목</h2>
+              <h3>{x === '비교' ? '참' : '거짓'}</h3>
+            </main>
+          );
+        }`,
+    });
+    for (const t of ['제목', '표시글', '참', '거짓']) expect(got).toContain(t);
+    for (const t of ['숨김', '본문안', '그냥본문', '산스제목', '비교'])
+      expect(got).not.toContain(t);
+  });
+
+  it('props·children·{...props}·데이터 속성·객체 조회를 따라간다', () => {
+    const got = display({
+      'ui.tsx': `
+        function Shell({ title, description }) {
+          return <div><h2>{title}</h2><p>{description}</p></div>;
+        }
+        export function Sheet({ wide, ...props }) { return <Shell {...props} />; }
+        export function Btn({ children, icon }) {
+          return <button><span className="font-display">{children}</span></button>;
+        }`,
+      'page.tsx': `
+        const FRIENDS = [{ name: '파이뱀', line: '대사는본문' }];
+        const HEADINGS = { hero: '시트제목' };
+        export function Page({ ctx }) {
+          return (
+            <>
+              <Sheet title={HEADINGS[ctx]} description="설명은본문" />
+              <Btn>눌러봐</Btn>
+              {FRIENDS.map((f) => <h3 key={f.name}>{f.name}</h3>)}
+            </>
+          );
+        }`,
+    });
+    for (const t of ['시트제목', '눌러봐', '파이뱀']) expect(got).toContain(t);
+    for (const t of ['설명은본문', '대사는본문']) expect(got).not.toContain(t);
+  });
+
+  it('CSS에서 @apply font-display한 클래스도 제목 자리로 본다', () => {
+    const css = cssFontClasses(`
+      @layer components {
+        .ld-x { @apply font-display; color: red; }
+        .ld-y:hover, .ld-z { @apply font-sans; }
+      }`);
+    expect([...css.display]).toEqual(['ld-x']);
+    expect([...css.sans].sort()).toEqual(['ld-y', 'ld-z']);
+    const got = display(
+      {
+        'a.tsx': `export const A = () => <div><p className="ld-x">씨에스에스</p><p>아님</p></div>;`,
+      },
+      css,
+    );
+    expect(got).toContain('씨에스에스');
+    expect(got).not.toContain('아님');
+  });
+});
+
 describe('빌드 뒤 확인', () => {
+  it('렌더된 HTML 글자를 CSS 캐스케이드대로 제목·본문으로 나눈다 (P4-12)', async () => {
+    const css = `@layer theme,base,components,utilities;
+      @layer base{html,:host{font-family:ui-sans-serif}html{font-family:var(--font-sans-landing,"pyRoad Sans"),"pyRoad Sans"}h1,h2,h3{font-family:var(--font-display-landing,"Jua"),"Jua"}code{font-family:pyRoad Mono,monospace}}
+      @layer utilities{.font-display{font-family:var(--font-display-landing,"Jua"),"Jua"}.font-sans{font-family:var(--font-sans-landing,"pyRoad Sans")}}`;
+    const rules = fontFamilyRules(css);
+    expect(rules.map((r) => `${r.selector}:${r.kind}:${r.layer}`)).toEqual([
+      'html:other:1',
+      ':host:other:1',
+      'html:sans:1',
+      'h1:display:1',
+      'h2:display:1',
+      'h3:display:1',
+      'code:mono:1',
+      '.font-display:display:3',
+      '.font-sans:sans:3',
+    ]);
+    const html = `<html><body><div class="landing">
+      <h1>제목<span class="font-sans">작은</span></h1>
+      <h2 class="font-sans">산스</h2>
+      <p>본문 <b class="font-display">굵게</b> <code>x</code></p>
+      <span class="sr-only">숨김</span><script>var s="스크립트"</script>
+    </div></body></html>`;
+    const used = await textByFont(html, rules);
+    expect(used.display.text.replace(/\s/g, '')).toBe('제목굵게');
+    expect(used.sans.text.replace(/\s/g, '')).toBe('작은산스본문');
+    expect(used.mono.text).toBe('x');
+
+    const cps = new Set([...'제목'].map((c) => c.codePointAt(0)!));
+    expect(findMissingGlyphs(used.display, cps, '')).toEqual({
+      missing: ['굵', '게'],
+      samples: ['굵게'],
+    });
+    expect(findMissingGlyphs(used.display, cps, '굵게').missing).toEqual([]);
+  });
+
+  it('landing.ts의 굵기 선언을 서브셋 파일별로 읽는다', () => {
+    const src = readFileSync(join(ROOT, 'src/fonts/landing.ts'), 'utf8');
+    expect(findDeclaredWeight(src, 'jua/Jua-landing.woff2')).toBe('100 900');
+    expect(
+      findDeclaredWeight(src, 'pyroad-sans/pyRoadSans-landing.woff2'),
+    ).toBe('400 700');
+    expect(findDeclaredWeight(src, 'nope.woff2')).toBeNull();
+  });
+
   it('랜딩이 아닌 라우트의 preload를 누수로 본다', () => {
     expect(
       findPreloadLeaks({
