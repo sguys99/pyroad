@@ -1,81 +1,68 @@
 import Link from 'next/link';
-import { Mail } from 'lucide-react';
-import { PybaemSvg } from '@/components/characters/PybaemSvg';
+import { LEGAL_LINKS, LEGAL_OPERATOR } from '@/lib/legal/meta';
+import { LogoMark } from './LogoMark';
 
-function GitHubIcon({ size = 13 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z" />
-    </svg>
-  );
-}
+/** 바닥 글 링크. 개인정보처리방침은 법(개인정보 보호법 제30조)에 따라 눈에 띄게 굵게 */
+const LINKS: readonly { href: string; label: string; strong?: boolean }[] = [
+  ...LEGAL_LINKS.filter((l) => l.href !== '/licenses').map((l) => ({
+    ...l,
+    strong: l.href === '/privacy',
+  })),
+  { href: '/notice', label: '공지사항' },
+  ...LEGAL_LINKS.filter((l) => l.href === '/licenses'),
+];
 
+/**
+ * 랜딩 바닥 글 (P4-08, 최종 시안 `Footer`): 로고 · 약관·방침·공지·오픈소스 고지·문의 · 저작권 한 줄.
+ * 서버 컴포넌트, 값은 토큰 유틸리티만. 로고 마크 색은 landing.css(`ld-logomark-*`).
+ *
+ * - 문의는 약관·처리방침에 적힌 연락처(`LEGAL_OPERATOR.email`)와 같은 메일 주소
+ * - 예전 `#about`(없는 앵커)·GitHub 링크는 뺐다: 아이가 보는 화면에서 바깥 개발 사이트로 나가는 길을 두지 않는다.
+ *   오픈소스 정보는 `/licenses`에 있다
+ * - 링크 터치 대상 44px. 문구를 바꾸면 `npm run fonts:build -- --landing` → `npm run fonts:check`
+ */
 export function LandingFooter() {
+  const link =
+    'inline-flex min-h-11 items-center rounded-sm px-2.5 text-small transition-colors hover:text-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
   return (
-    <footer className="w-full border-t border-primary/10 px-6 py-5">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-semibold text-primary-text">
-            <PybaemSvg expression="happy" size={28} />
-            pyRoad
+    <footer className="border-t border-line bg-bg">
+      <div className="mx-auto flex max-w-[72rem] flex-col gap-4 px-gutter py-8 md:flex-row md:flex-wrap md:items-center md:justify-between md:px-8">
+        <div className="flex flex-wrap items-center gap-x-3">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center gap-2 rounded-sm text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            aria-label="pyRoad 처음 화면"
+          >
+            <LogoMark size={28} />
+            <span className="font-display text-h3 leading-none">pyRoad</span>
+          </Link>
+          <span className="text-small text-text-muted">
+            초등학생을 위한 파이썬 모험
           </span>
-          <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
-            <a
-              href="#about"
-              className="hover:text-foreground transition-colors"
-            >
-              About
-            </a>
-            <a
-              href="https://github.com/sguys99/pyroad"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:text-foreground transition-colors"
-            >
-              <GitHubIcon />
-              GitHub
-            </a>
-            <a
-              href="mailto:sguys99@gmail.com"
-              className="flex items-center gap-1 hover:text-foreground transition-colors"
-            >
-              <Mail size={13} />
-              Contact
-            </a>
-          </div>
         </div>
-        {/* 법적 고지 (P3-14). 문구를 바꾸면 랜딩 글자 서브셋을 다시 만든다: npm run fonts:build -- --landing */}
-        <nav aria-label="약관과 정책" className="mb-3">
-          <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-caption text-muted-foreground">
+        <nav aria-label="사이트 정보" className="-mx-2.5">
+          <ul className="flex flex-wrap items-center">
+            {LINKS.map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  className={`${link} ${l.strong ? 'font-bold text-text' : 'text-text-muted'}`}
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
             <li>
-              <Link
-                href="/terms"
-                className="inline-flex min-h-10 items-center transition-colors hover:text-foreground"
+              <a
+                href={`mailto:${LEGAL_OPERATOR.email}`}
+                className={`${link} text-text-muted`}
               >
-                이용약관
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/privacy"
-                className="inline-flex min-h-10 items-center font-semibold text-foreground transition-colors hover:text-primary-text"
-              >
-                개인정보처리방침
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/licenses"
-                className="inline-flex min-h-10 items-center transition-colors hover:text-foreground"
-              >
-                오픈소스 고지
-              </Link>
+                문의하기
+              </a>
             </li>
           </ul>
         </nav>
-        <div className="border-t border-primary/5 pt-3 text-center text-[11px] text-muted-foreground/60">
-          © 2026 pyRoad. 초등학생을 위한 파이썬 학습 플랫폼
-        </div>
+        <p className="w-full text-caption text-text-muted">© 2026 pyRoad</p>
       </div>
     </footer>
   );

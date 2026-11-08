@@ -1,16 +1,62 @@
+import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
+import { serializeJsonLd } from '@/lib/seo/structuredData';
 import { LandingSection } from '../LandingSection';
+import { buildFaqStructuredData, FAQ } from './faq/faq';
 import './faq.css';
 
 /**
- * 랜딩 `#faq` 섹션 — 자리 표시(stub, P4-01 뼈대). 담당: P4-08 FAQ (푸터는 LandingFooter).
+ * 랜딩 `#faq` 자주 묻는 질문 (P4-08). 서버 컴포넌트, 클라이언트 JS 없음.
  *
- * 연결 규칙:
- * - 앵커 id `faq`는 바꾸지 않는다 (헤더·히어로 바로가기와 e2e가 가리킴). 제목 id는 `faq-title`
- * - 틀은 `LandingSection`(여백·kicker·제목·설명·scroll-margin). 이 섹션 전용 스타일은 옆의 `faq.css`에만,
- *   클래스 접두사는 `ld-faq-`. 하위 컴포넌트는 `sections/faq/` 폴더에
- * - 무거운 연출·모듈은 `WhenVisible`(또는 `useInView`) + `next/dynamic`으로 화면에 들어올 때 불러온다
+ * - 아코디언은 기본 `<details>`/`<summary>`: JS 없이 열리고, 키보드(Tab·Enter·Space)와 화면 낭독기("펼침/접힘")가 그대로 된다
+ * - 열고 닫힐 때 높이 애니메이션은 full만(`::details-content` + `interpolate-size`, 지원하지 않는 브라우저는 즉시).
+ *   화살표 회전은 full·lite, minimal·동작 줄이기는 즉시 (faq.css)
+ * - 같은 질문·답으로 FAQPage JSON-LD를 섹션 안에 싣는다 (데이터 블록이라 CSP와 무관, StructuredData.tsx와 같은 방식)
+ * - 문구는 `faq/faq.ts`(근거 주석과 함께). 앵커 id `faq`·제목 id `faq-title`은 바꾸지 않는다
  * - 문구를 바꾸면 `npm run fonts:build -- --landing` → `npm run fonts:check`
  */
 export function FaqSection() {
-  return <LandingSection id="faq" kicker="궁금한 점" title="자주 묻는 질문" />;
+  return (
+    <LandingSection
+      id="faq"
+      kicker="궁금한 점"
+      title="자주 묻는 질문"
+      width="narrow"
+    >
+      <div className="ld-faq-list">
+        {FAQ.map((item) => (
+          <details
+            key={item.id}
+            className="ld-faq-item"
+            data-testid={`faq-${item.id}`}
+          >
+            <summary className="ld-faq-q">
+              <span>{item.q}</span>
+              <ChevronDown aria-hidden className="ld-faq-chev" />
+            </summary>
+            <div className="ld-faq-a">
+              <p>
+                {item.a}
+                {item.more && (
+                  <>
+                    {' '}
+                    <Link href={item.more.href} className="ld-faq-more">
+                      {item.more.label} 보기
+                    </Link>
+                  </>
+                )}
+              </p>
+            </div>
+          </details>
+        ))}
+      </div>
+      <script
+        type="application/ld+json"
+        // 값은 코드 상수뿐이고 serializeJsonLd가 <·>·&를 이스케이프한다
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd(buildFaqStructuredData(FAQ)),
+        }}
+      />
+    </LandingSection>
+  );
 }
