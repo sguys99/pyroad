@@ -149,7 +149,12 @@
     line-height: 1.4;
     pointer-events: none;
     transform-origin: 80% 100%;
-    animation: g-social-recent-in var(--spring-prop-dur) var(--spring-prop) both;
+    /* full (P4-09): 팝 등장 + 시트가 자리 잡은 뒤 금색 리본처럼 한 번 살랑 (rotate 속성이라 팝의 transform과 겹치지 않음).
+       살랑은 1회뿐이고 채우기 없음(none): 기다리는 동안·끝난 뒤는 제자리 */
+    animation:
+      g-social-recent-in var(--spring-prop-dur) var(--spring-prop) both,
+      g-social-recent-wiggle var(--spring-jelly-ab-dur) var(--easing-in-out)
+        var(--dur-page) 1 none;
   }
   @keyframes g-social-recent-in {
     from {
@@ -157,9 +162,24 @@
       transform: translateY(0.375rem) scale(0.6);
     }
   }
+  @keyframes g-social-recent-wiggle {
+    0%,
+    100% {
+      rotate: 0deg;
+    }
+    20% {
+      rotate: -7deg;
+    }
+    45% {
+      rotate: 5deg;
+    }
+    70% {
+      rotate: -2deg;
+    }
+  }
+  /* lite: 짧은 팝만 (살랑 없음) */
   :root[data-motion='lite'] .g-social-recent {
-    animation-duration: var(--dur-base);
-    animation-timing-function: var(--easing-out);
+    animation: g-social-recent-in var(--dur-base) var(--easing-out) both;
   }
   :root[data-motion='minimal'] .g-social-recent {
     animation: g-fade-in var(--dur-fade) var(--easing-out) both;

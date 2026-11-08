@@ -1,11 +1,12 @@
 'use client';
 
-import type { ReactElement, ReactNode } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/ui/button';
+import { useBackToClose } from '@/components/ui/use-back-to-close';
 
 /**
  * 바텀시트 · 모달 (P2-11, docs/design/components.md §4). 최종 시안 `Sheet`: 모바일은 아래에서 올라오는 시트(손잡이 표시),
@@ -13,8 +14,9 @@ import { IconButton } from '@/components/ui/button';
  *
  * - Base UI Dialog: 포커스 가두기 · Esc · 덮개 누르면 닫기 · 바깥 스크롤 잠금 · 닫으면 연 버튼으로 포커스 복귀 · `role="dialog"` + `aria-modal`
  * - 덮개 `bg-scrim`, 흰 면 + `shadow-pop`, 반경 20(시트는 위 모서리만). 안의 흰 버튼은 보조 면 색(`data-surface="raised"`)
- * - 연출(`game-ui.css` `.g-sheet`·`.g-modal`): full = 시트는 아래에서 미끄러져 올라옴(360ms out) / 대화 상자는 살짝 기울어 떠오름
- *   (body 스프링) · lite = 220ms · minimal = 페이드 · 동작 줄이기 = 즉시. 끌어서 닫기는 없다(닫기 버튼·Esc·덮개)
+ * - 연출(`game-ui.css` `.g-sheet`·`.g-modal`): full = 시트는 아래에서 body 스프링으로 올라옴(P4-09, 넘침은 아래 치마 면이 가림) /
+ *   대화 상자는 살짝 기울어 커지며 떠오름(body 스프링) · lite = 220ms · minimal = 페이드 · 동작 줄이기 = 즉시.
+ *   끌어서 닫기는 없다(닫기 버튼·Esc·덮개, `closeOnBack`이면 기기 뒤로 가기도)
  * - `title`은 항상 있어야 한다(대화 상자 이름). 보이지 않게 하려면 `hideTitle`
  */
 interface DialogShellProps {
@@ -39,6 +41,11 @@ interface DialogShellProps {
   className?: string;
   /** 처음 포커스를 줄 요소 (기본: 첫 번째 포커스 가능한 요소) */
   initialFocus?: DialogPrimitive.Popup.Props['initialFocus'];
+  /**
+   * 기기·브라우저 뒤로 가기로 닫기 (P4-09, `useBackToClose`). 열릴 때 같은 주소로 기록 항목을 하나 쌓고, 뒤로 가기면 닫는다.
+   * 화면을 떠나지 않아야 하는 겹창(랜딩 로그인 시트)에 켠다
+   */
+  closeOnBack?: boolean;
   'data-testid'?: string;
 }
 
@@ -60,14 +67,20 @@ function DialogShell({
   showClose = true,
   className,
   initialFocus,
+  closeOnBack = false,
   'data-testid': testId,
 }: DialogShellProps & { kind: 'sheet' | 'modal'; wide?: boolean }) {
+  // 열림 상태는 늘 여기서 안다(뒤로 가기 닫기가 지금 열렸는지 알아야 함). `open`을 주면 그 값, 아니면 내부 상태
+  const [innerOpen, setInnerOpen] = useState(defaultOpen ?? false);
+  const isOpen = open ?? innerOpen;
+  const setOpen = (next: boolean) => {
+    if (open === undefined) setInnerOpen(next);
+    onOpenChange?.(next);
+  };
+  useBackToClose(isOpen, () => setOpen(false), closeOnBack);
+
   return (
-    <DialogPrimitive.Root
-      open={open}
-      defaultOpen={defaultOpen}
-      onOpenChange={(next) => onOpenChange?.(next)}
-    >
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(next) => setOpen(next)}>
       {trigger && <DialogPrimitive.Trigger render={trigger} />}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="g-scrim" />
@@ -103,11 +116,10 @@ function DialogShell({
               align === 'center' ? 'px-12 text-center' : showClose && 'pr-12',
             )}
           >
+            {/* 글자색은 상자(`--text`)에서 물려받는다: cn(tailwind-merge)이 `text-h2`와 `text-foreground`를 같은 무리로 보고
+                크기를 지워 버린다(제목이 17px로 나오던 문제, P4-09) */}
             <DialogPrimitive.Title
-              className={cn(
-                'font-display text-h2 text-foreground',
-                hideTitle && 'sr-only',
-              )}
+              className={cn('font-display text-h2', hideTitle && 'sr-only')}
             >
               {title}
             </DialogPrimitive.Title>

@@ -374,17 +374,23 @@
     border-radius: var(--round-l) var(--round-l) 0 0;
     background: var(--surface);
     color: var(--text);
-    box-shadow: var(--elev-pop);
+    /* 둘째 그림자 = 아래 "치마" 면: 스프링이 살짝 넘쳐 올라갈 때(4%대) 화면 아래 틈을 같은 면 색으로 가린다 (P4-09).
+       바깥 그림자라 상자 overflow에 잘리지 않고, 쉴 때는 화면 밖이라 보이지 않는다 */
+    box-shadow:
+      var(--elev-pop),
+      0 2.5rem 0 var(--surface);
     outline: none;
+    /* full: 아래에서 body 스프링으로 올라와 한 번 살짝 튕기고 멈춤 (P4-09). 닫힐 때는 짧게 미끄러져 내려감 */
     transition-property: transform, opacity;
-    transition-duration: var(--dur-slow), var(--dur-fast);
-    transition-timing-function: var(--easing-out), var(--easing-out);
+    transition-duration: var(--spring-body-dur), var(--dur-fast);
+    transition-timing-function: var(--spring-body), var(--easing-out);
   }
   .g-sheet:is([data-starting-style], [data-ending-style]) {
     transform: translateY(100%);
   }
   .g-sheet[data-ending-style] {
     transition-duration: var(--dur-base);
+    transition-timing-function: var(--easing-out);
   }
   .g-sheet-grip {
     position: absolute;
@@ -405,6 +411,7 @@
       margin: auto;
       padding: 2rem;
       border-radius: var(--round-l);
+      box-shadow: var(--elev-pop);
       transition-duration: var(--spring-body-dur), var(--dur-fast);
       transition-timing-function: var(--spring-body), var(--easing-out);
     }

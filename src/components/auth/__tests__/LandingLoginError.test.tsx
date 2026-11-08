@@ -9,23 +9,22 @@ vi.mock('@/fonts/landing', () => ({
   displayLanding: { variable: '__variable_d1' },
   sansLanding: { variable: '__variable_s1' },
 }));
-// next/dynamic 대신 바로 그리는 가짜 시트
-vi.mock('next/dynamic', () => ({
-  default: () =>
-    function FakeSheet(props: {
-      open: boolean;
-      notice: { reason: string; via: string | null };
-      className?: string;
-    }) {
-      return props.open ? (
-        <div
-          data-testid="fake-sheet"
-          data-reason={props.notice.reason}
-          data-via={props.notice.via ?? ''}
-          className={props.className}
-        />
-      ) : null;
-    },
+// 늦게 불러오는 시트 모듈 대신 바로 그리는 가짜 시트 (useLazyLoginSheet가 import('./LoginSheet')로 받음)
+vi.mock('../LoginSheet', () => ({
+  LoginSheet: function FakeSheet(props: {
+    open: boolean;
+    notice: { reason: string; via: string | null };
+    className?: string;
+  }) {
+    return props.open ? (
+      <div
+        data-testid="fake-sheet"
+        data-reason={props.notice.reason}
+        data-via={props.notice.via ?? ''}
+        className={props.className}
+      />
+    ) : null;
+  },
 }));
 
 import { LandingLoginError } from '../LandingLoginError';

@@ -24,7 +24,7 @@
 | 버튼 올려놓기(마우스) | 1px 뜸 | 1px | 1px(즉시) | 없음 |
 | 누를 수 있는 카드 | 2px 뜸 · 1px 내려앉음, body 스프링 | face 스프링 | 즉시 | 움직임 0, 누르면 보조 면 색 |
 | 모달·시트(넓은 화면) | 아래 24px · -1.5° · 96%에서 떠오름(body 스프링), 덮개 220ms 페이드 | 12px 미끄러짐 220ms | 페이드 150ms | 즉시(덮개도) |
-| 바텀시트(모바일) | 아래에서 올라옴 360ms out | 220ms | 페이드 | 즉시 |
+| 바텀시트(모바일) | 아래에서 body 스프링으로 올라옴(넘침은 아래 치마 면이 가림, P4-09), 닫힘 220ms | 220ms | 페이드 | 즉시 |
 | 툴팁 | 95% → 100% + 페이드 140ms | 같음 | 페이드만 | 즉시 |
 | 토스트 | 18px 아래 · -2°에서 body 스프링 | 12px 220ms | 페이드 150ms | 즉시 |
 | 탭 엄지 | face 스프링 | 220ms out | 즉시 | 즉시 |
@@ -120,9 +120,12 @@
 | `footer` | 버튼 줄 (모바일 세로 역순) |
 | `closeLabel` · `showClose` | 오른쪽 위 48px 닫기 버튼 (기본 "닫기") |
 | `initialFocus` | 처음 포커스 (기본 첫 포커스 가능한 요소) |
+| `closeOnBack` | 기기·브라우저 뒤로 가기로 닫기 (P4-09, `use-back-to-close.ts`): 열면 같은 주소로 기록 항목 하나(지금 `history.state` 복사), 뒤로 가기면 닫히고 화면은 그대로, 다른 방법으로 닫으면 그 항목을 거둠. 랜딩 로그인 시트가 켬 |
 | `wide` (Sheet) | 넓은 화면 45rem |
 
 시트 안에서 닫는 버튼: `<SheetClose render={<Button variant="secondary" />}>그만두기</SheetClose>`. 끌어서 닫기는 넣지 않았다(선택 항목, 닫기 버튼·Esc·덮개로 충분, 필요하면 Base UI Drawer 검토).
+
+주의 (P4-09): **처음부터 `open`인 채로 마운트하면 Base UI가 등장 전환을 건너뛴다.** 늦게 불러와 여는 시트는 닫힌 채 한 번 그린 다음 프레임에 연다(`useLazyLoginSheet`). 제목 글자색은 상자에서 물려받는다: `cn`(tailwind-merge)이 `text-h2`·`text-foreground` 같은 크기 토큰과 색을 한 무리로 보고 앞의 것을 지운다(제목이 17px로 나오던 원인).
 
 **대표 상태**: Sheet 360(아래 시트·손잡이) · 1280(가운데) · wide · 긴 내용 스크롤, Modal 기본·media+가운데. 열리는 중(full·lite·minimal)·동작 줄이기.
 
@@ -250,15 +253,15 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 **props**
 - `SocialLoginButton`: `provider` · `loading` · `disabled` · `sfx`(기본 `tap`) · `recent`(최근에 사용 이름표, P3-08) · `size`(`md` 54px / `lg` 60px, P3-09) · `pressed`·`hovered`(카탈로그 고정) + 나머지 `<button>` 속성. 모양만, 호출 없음.
 - `SocialLoginButtons`: `providers`(기본 `NEXT_PUBLIC_LOGIN_PROVIDERS`로 켠 것, 비우면 카카오 → 네이버 → Google 모두, P3-09) · `lastUsed`(P3-08: 맨 위로 + 이름표) · `onBeforeLogin(provider)`(분석 이벤트) · `preview(provider)`(카탈로그용 가짜 로그인) · `browser`(인앱 판별 결과를 직접 줌, 카탈로그·테스트) · `portalClassName`(인앱 안내 대화 상자 글꼴 변수) · `className`. 순서는 `orderProviders(providers, [카카오톡 인앱이면 kakao, lastUsed])`. 하나를 누르면 그 버튼만 바쁨·나머지 비활성(두 번 눌림 막음), 결과 `redirecting`이면 바쁨 유지, `external-browser`·`browser-guide`면 되살림, `error`면 되살리고 오류 문구. bfcache로 돌아오면(`pageshow`) 바쁨을 푼다. 인앱 처리(P3-09)는 아래 "인앱 브라우저".
-- `LoginSheet`: `open` · `onOpenChange` · `cta`(`hero`·`header`, provider를 고를 때 `landing_cta_click`) · `preview` · `className` · `lastUsed`(주지 않으면 열 때마다 이 기기 저장값 `readLastLogin()`, P3-08). 최근 기록이 있으면 설명이 "지난번엔 ○○로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!"로 바뀐다(자동 계정 연결이 없어서, §2.8). `Sheet` + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 질문 + 버튼 + "이름·사진은 다른 친구에게 보이지 않아요".
-- `LoginSheetButton`: 게임 버튼 props + `cta`. 누르면 시트를 연다. 시트 모듈은 `next/dynamic`으로 올려놓기·포커스 때 미리 받고 누를 때 그린다(첫 화면 JS 밖). 시트는 body로 포털되므로 **랜딩 서브셋 글꼴 변수**(`displayLanding`·`sansLanding`)를 시트 상자에 직접 넘긴다(안 넘기면 제목이 Jua가 아니라 시스템 글꼴).
+- `LoginSheet`: `open` · `onOpenChange` · `cta`(분석 스키마 `landing_cta_click.cta` 값, provider를 고를 때 보냄) · `context`(머리말, P4-09: `hero` "어떤 계정으로 모험을 시작할까?" · `header` "어떤 계정으로 들어갈까?" · `trial` "모험을 저장하려면 로그인!", 주지 않으면 `cta`로) · `heading`(제목 직접) · `providers`(카탈로그) · `preview` · `className` · `lastUsed`(주지 않으면 열 때마다 이 기기 저장값 `readLastLogin()`, P3-08, 지금 숨긴 수단이면 기록 없음으로 봄). 최근 기록이 있으면 한마디가 "지난번엔 ○○로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!"(자동 계정 연결이 없어서, §2.8), 없으면 "어떤 걸로 들어가도 돼. 다음에도 같은 걸로 들어와 줘!"(X3). `Sheet`(`closeOnBack`) + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 제목 + 한마디 + 버튼 + 안내 두 줄("이름·사진은 다른 친구에게 보이지 않아요" · "만 14세가 안 된 친구는 들어온 뒤 보호자님과 함께 동의해요", P3-15). 최근 이름표는 full에서 팝 뒤 한 번 살랑(`rotate`, 1회), lite는 짧은 팝만.
+- `LoginSheetButton`: 게임 버튼 props + `cta` · `context` · `heading`. 누르면 시트를 연다. 시트 모듈은 `useLazyLoginSheet`로 올려놓기·포커스 때 미리 받고, 누르면 닫힌 채 그린 뒤 다음 프레임에 연다(첫 열림에도 등장 연출, 첫 화면 JS 밖). 체험 성공 CTA(P4-03)는 `cta="trial"`(스키마에 값이 들어간 뒤) 또는 `cta="hero" context="trial"`. 시트는 body로 포털되므로 **랜딩 서브셋 글꼴 변수**(`displayLanding`·`sansLanding`)를 시트 상자에 직접 넘긴다(안 넘기면 제목이 Jua가 아니라 시스템 글꼴).
 
 ```tsx
 <LoginSheetButton cta="hero" size="lg" iconRight={<Rocket aria-hidden />}>모험 시작하기</LoginSheetButton>
 <SocialLoginButtons onBeforeLogin={(provider) => track('landing_cta_click', { cta, provider }, { immediate: true })} />
 ```
 
-**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 로그인 계정 연결 4가지(Google만 · 카카오만 · 둘 · 셋) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 로그인 계정 연결 4가지(Google만 · 카카오만 · 둘 · 셋) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(히어로 · 헤더 · 체험 성공 머리말, 기록 없음 · 최근 = 카카오, 세 provider, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`. 반응형·포커스 복귀·Esc·뒤로 가기·단계별 등장은 e2e `login-modal.spec.ts`.
 
 **인앱 브라우저 (P3-09)**: 판별은 `detectInAppBrowser(ua?)`(판별표 테스트 `src/lib/browser/__tests__/detectInAppBrowser.test.ts`: 카카오톡·네이버 앱 iOS/Android, 인스타그램, 페이스북, 라인, 밴드, 그 밖 웹뷰, 일반 브라우저).
 - **카카오톡 인앱**: 외부로 보내지 않는다. 카카오 버튼을 맨 위에 크게(`lg`) — 카카오톡 안에서 바로 로그인된다. 최근에 쓴 수단은 그다음

@@ -22,7 +22,12 @@ vi.mock('@/lib/hooks/useSocialLogin', () => ({
   }),
 }));
 
-import { LoginSheet } from '../LoginSheet';
+import {
+  LOGIN_SHEET_FIRST_HINT,
+  LOGIN_SHEET_GUARDIAN_NOTE,
+  LoginSheet,
+  loginSheetContextOf,
+} from '../LoginSheet';
 
 const order = () =>
   screen
@@ -34,12 +39,22 @@ beforeEach(() => window.localStorage.clear());
 afterEach(cleanup);
 
 describe('LoginSheet', () => {
-  it('기록이 없으면 기본 순서와 기본 안내', () => {
+  it('기록이 없으면 기본 순서와 "아무거나, 다음에도 같은 걸로" 안내 (P3-08 X3)', () => {
     render(<LoginSheet open onOpenChange={() => {}} />);
     expect(order()).toEqual(['kakao', 'naver', 'google']);
     expect(screen.getByTestId('login-sheet-hint')).toHaveTextContent(
-      '가지고 있는 계정 하나를 골라 줘.',
+      LOGIN_SHEET_FIRST_HINT,
     );
+  });
+
+  it('공개 정보 + 보호자 동의(만 14세 미만, P3-15) 두 줄', () => {
+    render(<LoginSheet open onOpenChange={() => {}} lastUsed={null} />);
+    const notes = screen.getByTestId('login-sheet-notes');
+    expect(notes).toHaveTextContent('이름·사진은 다른 친구에게 보이지 않아요');
+    expect(screen.getByTestId('login-sheet-guardian')).toHaveTextContent(
+      LOGIN_SHEET_GUARDIAN_NOTE,
+    );
+    expect(LOGIN_SHEET_GUARDIAN_NOTE).toContain('만 14세');
   });
 
   it('이 기기 저장값(네이버)을 열 때 읽어 맨 위 + 같은 계정 안내', () => {
@@ -99,6 +114,99 @@ describe('LoginSheet 실패 안내 (P3-10)', () => {
     );
     expect(screen.getByTestId('login-error-hint')).toHaveTextContent(
       '카카오·Google 계정이 있으면 그걸로 들어가 봐.',
+    );
+  });
+});
+
+describe('LoginSheet 맥락별 머리말 (P4-09)', () => {
+  const title = (name: string) => screen.getByRole('dialog', { name });
+
+  it('cta로 맥락을 고른다: hero · header · trial', () => {
+    expect(loginSheetContextOf('hero')).toBe('hero');
+    expect(loginSheetContextOf('header')).toBe('header');
+    expect(loginSheetContextOf('trial')).toBe('trial');
+    expect(loginSheetContextOf(undefined)).toBe('hero');
+  });
+
+  it('히어로(기본)', () => {
+    render(
+      <LoginSheet open onOpenChange={() => {}} cta="hero" lastUsed={null} />,
+    );
+    expect(title('어떤 계정으로 모험을 시작할까?')).toBeInTheDocument();
+  });
+
+  it('헤더', () => {
+    render(
+      <LoginSheet open onOpenChange={() => {}} cta="header" lastUsed={null} />,
+    );
+    expect(title('어떤 계정으로 들어갈까?')).toBeInTheDocument();
+  });
+
+  it('체험 성공 (context=trial), 최근 로그인 안내는 그대로', () => {
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        cta="hero"
+        context="trial"
+        lastUsed="kakao"
+      />,
+    );
+    expect(title('모험을 저장하려면 로그인!')).toBeInTheDocument();
+    expect(screen.getByTestId('login-sheet-hint')).toHaveTextContent(
+      '지난번엔 카카오로 들어왔어',
+    );
+  });
+
+  it('heading을 주면 그 제목, 실패 안내가 있으면 실패 제목이 먼저', () => {
+    const { unmount } = render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        heading="별 3개! 저장하러 가자"
+        lastUsed={null}
+      />,
+    );
+    expect(title('별 3개! 저장하러 가자')).toBeInTheDocument();
+    unmount();
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        heading="별 3개! 저장하러 가자"
+        lastUsed={null}
+        notice={{ reason: 'cancelled', via: 'kakao' }}
+      />,
+    );
+    expect(title('카카오 로그인을 그만뒀구나')).toBeInTheDocument();
+  });
+
+  it('providers를 주면 그것만 (카탈로그)', () => {
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        lastUsed={null}
+        providers={['google']}
+      />,
+    );
+    expect(order()).toEqual(['google']);
+  });
+});
+
+describe('LoginSheet 숨긴 provider (P4-09)', () => {
+  it('지난번 수단이 지금 목록에 없으면 기록 없음 안내 (없는 버튼을 가리키지 않음)', () => {
+    render(
+      <LoginSheet
+        open
+        onOpenChange={() => {}}
+        lastUsed="naver"
+        providers={['kakao', 'google']}
+      />,
+    );
+    expect(order()).toEqual(['kakao', 'google']);
+    expect(screen.getByTestId('login-sheet-hint')).toHaveTextContent(
+      LOGIN_SHEET_FIRST_HINT,
     );
   });
 });
