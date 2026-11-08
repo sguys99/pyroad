@@ -1,2 +1,409 @@
 /* 랜딩 `#try` 섹션 전용 스타일 (TrialSection.tsx가 import). 클래스 접두사 `ld-trial-`, 값은 토큰 변수만.
-   공통 섹션 틀(.ld-sec*)·헤더는 ../landing.css, 연출 단계는 <html data-motion data-reduced>를 본다 */
+   공통 섹션 틀(.ld-sec*)·헤더는 ../landing.css, 연출 단계는 <html data-motion data-reduced>를 본다.
+   - 공책(시안 B "나의 첫 공책"): 흰 면 + 줄 번호 칸 + 결과 칸. 코드 글자는 font-mono = 랜딩에서는 시스템 고정폭
+     (pyRoad Mono는 퀘스트 화면에서만 싣는다, fonts.md §1)
+   - 데모 글자는 입력칸 위 겹 레이어(.ld-trial-ghost, aria-hidden)에만 그린다
+   - 1회성 연출(잉크 번짐·팝·방울·도장·흔들림)은 trial/trialFx.ts(WAAPI), 여기는 반복 없는 CSS만 + 커서 깜빡임(.g-caret)
+   - 성공 반짝이는 히어로 파이뱀과 같은 `.hero-burst`(hero.css)를 쓰고 자리만 여기서 잡는다 (연출 언어 통일) */
+
+@layer components {
+  /* 좁은 화면: 공책 → (첫 성공 뒤) 로그인 카드 → 추천 주문 → 마스코트. 카드가 결과 바로 아래에 와서
+     스크롤을 옮기지 않아도 보인다. 넓은 화면: 왼쪽 공책·추천 주문, 오른쪽 마스코트·로그인 카드 */
+  .ld-trial {
+    display: grid;
+    grid-template-areas:
+      'card'
+      'buddy';
+    gap: 1rem;
+  }
+  .ld-trial[data-won] {
+    grid-template-areas:
+      'card'
+      'cta'
+      'chips'
+      'buddy';
+  }
+  @media (min-width: 900px) {
+    .ld-trial {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      grid-template-areas: 'card buddy';
+      align-items: center;
+      gap: 1.25rem 2.5rem;
+    }
+    .ld-trial[data-won] {
+      grid-template-areas:
+        'card buddy'
+        'chips cta';
+    }
+    .ld-trial[data-won] .ld-trial-chips,
+    .ld-trial[data-won] .ld-trial-cta {
+      align-self: start;
+    }
+  }
+
+  /* ───────────── 파이뱀 + 말풍선 */
+  /* 좁은 화면은 공책 아래 (말풍선 줄 수가 바뀌어도 공책·결과가 밀리지 않게). 높이를 잡아 아래 섹션도 덜 흔들림 */
+  .ld-trial-buddy {
+    grid-area: buddy;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.25rem 0.875rem;
+    min-height: 8rem;
+  }
+  .ld-trial-py {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .ld-trial-burst {
+    top: 34%;
+  }
+  .ld-trial-say {
+    min-width: 0;
+  }
+  .ld-trial-py-svg {
+    width: 6.5rem;
+    height: auto;
+    overflow: visible;
+  }
+  @media (min-width: 640px) {
+    .ld-trial-py-svg {
+      width: 8.5rem;
+    }
+  }
+  @media (min-width: 900px) {
+    .ld-trial-py-svg {
+      width: 11.5rem;
+    }
+  }
+  .ld-trial-bubble {
+    justify-self: start;
+    max-width: 22rem;
+    text-wrap: balance;
+  }
+
+  /* 체험 성공 뒤 로그인 카드 (자리는 위 격자). 나타날 때 한 번 톡 (full·lite 위치, minimal 페이드, 동작 줄이기 없음) */
+  .ld-trial-cta {
+    grid-area: cta;
+    display: grid;
+    justify-items: start;
+    gap: 0.25rem;
+    padding: 1rem 1.125rem 1.125rem;
+    border-radius: var(--round-l);
+    background: var(--accent-soft);
+  }
+  .ld-trial-cta-t {
+    color: var(--text);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+  }
+  .ld-trial-cta-d {
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+  :root[data-reduced='false']:is([data-motion='full'], [data-motion='lite'])
+    .ld-trial-cta {
+    animation: ld-trial-rise var(--spring-body-dur) var(--spring-body) both;
+  }
+  :root[data-reduced='false'][data-motion='minimal'] .ld-trial-cta {
+    animation: ld-trial-fade var(--dur-fade) var(--easing-out) both;
+  }
+  @keyframes ld-trial-rise {
+    from {
+      transform: translateY(0.75rem) scale(0.96);
+      opacity: 0;
+    }
+  }
+  @keyframes ld-trial-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* ───────────── 공책 카드 */
+  .ld-trial-card {
+    grid-area: card;
+    position: relative;
+    padding: 1rem;
+    border-radius: var(--round-l);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+  }
+  @media (min-width: 640px) {
+    .ld-trial-card {
+      padding: 1.25rem 1.375rem 1.375rem;
+    }
+  }
+  .ld-trial-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.625rem;
+    color: var(--text);
+    font-size: 1.0625rem;
+    line-height: 1.4;
+  }
+  .ld-trial-label svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke-width: 2.4;
+  }
+
+  /* 한 줄: 줄 번호 칸 | 입력칸 (+ 데모 겹 레이어) */
+  .ld-trial-line {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    border: var(--line-w) solid var(--line-strong);
+    border-radius: var(--round-s);
+    background: var(--surface);
+  }
+  .ld-trial-line:focus-within {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  .ld-trial-no {
+    display: grid;
+    place-items: center;
+    border-right: var(--line-w) solid var(--line);
+    color: var(--code-comment);
+    font-size: 1rem;
+    user-select: none;
+  }
+  .ld-trial-field {
+    position: relative;
+    min-width: 0;
+  }
+  .ld-trial-input,
+  .ld-trial-ghost {
+    padding: 0 0.875rem;
+    color: var(--code-text);
+    font-size: 1.125rem;
+    font-variant-ligatures: none;
+    letter-spacing: 0;
+  }
+  /* 입력칸 글자는 투명(커서·선택만 보임), 글자는 아래 색칠 겹 레이어가 같은 자리에 그린다 */
+  .ld-trial-input {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    min-height: 3.5rem;
+    border: 0;
+    border-radius: 0 var(--round-s) var(--round-s) 0;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--code-text);
+    outline: none;
+  }
+  .ld-trial-input:read-only {
+    cursor: default;
+  }
+  .ld-trial-ghost {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: pre;
+    pointer-events: none;
+  }
+  .ld-trial-ghost-in {
+    display: inline-block;
+  }
+  .ld-trial-str {
+    color: var(--code-string);
+  }
+  .ld-trial-caret {
+    width: 2px;
+    height: 1.25em;
+    margin: 0 -1px;
+    vertical-align: middle;
+    color: var(--primary);
+  }
+  /* 치는 동안은 커서가 깜빡이지 않는다 (진짜 에디터처럼). 멈춰 있을 때만 깜빡임 */
+  .ld-trial-ghost[data-typing] .g-caret {
+    animation: none;
+  }
+
+  /* 넘겨받은 직후: 입력칸 둘레 금색 고리 (full·lite는 세 번 조여 들며 나타남, 그 뒤 정지) */
+  .ld-trial-line::after {
+    content: '';
+    position: absolute;
+    inset: -0.3125rem;
+    border: 2px solid var(--accent);
+    border-radius: calc(var(--round-s) + 0.3125rem);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ld-trial-line[data-turn]::after {
+    opacity: 1;
+  }
+  .ld-trial-line[data-turn]:focus-within::after {
+    opacity: 0;
+  }
+  :root[data-reduced='false']:is([data-motion='full'], [data-motion='lite'])
+    .ld-trial-line[data-turn]::after {
+    animation: ld-trial-ring var(--dur-page) var(--easing-out) 3;
+  }
+  @keyframes ld-trial-ring {
+    from {
+      transform: scale(1.06, 1.3);
+      opacity: 0;
+    }
+  }
+
+  .ld-trial-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-top: 0.875rem;
+  }
+
+  /* 결과 칸 */
+  .ld-trial-out {
+    position: relative;
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 0.125rem;
+    min-height: 4.75rem;
+    margin-top: 0.875rem;
+    padding: 0.625rem 0.875rem 0.75rem;
+    border-radius: var(--round-s);
+    background: var(--surface-2);
+  }
+  .ld-trial-out[data-state='err'] {
+    background: var(--error-soft);
+  }
+  .ld-trial-out-k {
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    line-height: 1.5;
+  }
+  /* 결과 글자는 본문 글꼴 (시스템 고정폭에는 한글이 없어 섞이면 띄어 보임) */
+  .ld-trial-out-v {
+    display: inline-block;
+    color: var(--text);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    transform-origin: 0.5em 100%;
+  }
+  .ld-trial-out-empty {
+    color: var(--text-muted);
+    line-height: 1.9;
+  }
+  .ld-trial-out-e {
+    color: var(--error);
+  }
+  /* 진짜 파이썬 오류 이름 (SyntaxError 등): 작은 꼬리표 */
+  .ld-trial-err-name {
+    display: inline-block;
+    margin-right: 0.375rem;
+    padding: 0 0.375rem;
+    border-radius: var(--round-s);
+    background: var(--surface);
+    font-size: var(--text-caption);
+    line-height: 1.6;
+    vertical-align: 0.0625rem;
+  }
+
+  /* "첫 주문!" 도장: 금색 글자 한 겹 고리 (시안 .f-stamp). 기울기는 trialFx TRIAL_STAMP_DEG와 같게 */
+  .ld-trial-stamp {
+    position: absolute;
+    top: -1.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 5.25rem;
+    height: 5.25rem;
+    border: 2px solid var(--accent-text);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    color: var(--accent-text);
+    font-size: 1.1875rem;
+    line-height: 1;
+    pointer-events: none;
+    transform: rotate(-9deg);
+  }
+
+  /* 휴대폰 보조 키 " ( ) — 손가락 화면에서만 */
+  .ld-trial-keys {
+    display: none;
+    gap: 0.375rem;
+    margin-left: auto;
+  }
+  @media (pointer: coarse) {
+    .ld-trial-keys {
+      display: flex;
+    }
+  }
+  .ld-trial-key {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: var(--line-w) solid var(--line-strong);
+    border-radius: var(--round-s);
+    background: var(--surface);
+    color: var(--code-text);
+    font-size: 1.125rem;
+    touch-action: manipulation;
+  }
+  .ld-trial-key:active {
+    background: var(--surface-2);
+  }
+  .ld-trial-key:focus-visible,
+  .ld-trial-chip:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* 성공 뒤 추천 주문 */
+  .ld-trial-chips {
+    grid-area: chips;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.25rem;
+  }
+  .ld-trial-chips-k {
+    flex-basis: 100%;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+  }
+  .ld-trial-chip {
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    border: var(--line-w) solid var(--line-strong);
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    color: var(--code-text);
+    font-size: var(--text-caption);
+    white-space: nowrap;
+    transition: background-color var(--dur-fast) var(--easing-out);
+  }
+  .ld-trial-chip:hover {
+    background: var(--primary-soft);
+  }
+  /* 결과가 튀어나올 때 잉크 방울 (trialFx.ts dots, 일회성 DOM) */
+  .ld-trial-dot {
+    position: absolute;
+    z-index: 3;
+    border-radius: 50%;
+    background: var(--primary-bright);
+    pointer-events: none;
+  }
+  .ld-trial-dot[data-tone='gold'] {
+    background: var(--accent);
+  }
+}

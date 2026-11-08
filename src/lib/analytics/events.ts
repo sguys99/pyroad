@@ -6,6 +6,7 @@
  */
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { SkinId } from '@/lib/avatar/skins';
+import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -15,8 +16,22 @@ import type {
 export interface AnalyticsEventProps {
   /** 랜딩 화면을 봄 (전환율 분모) */
   landing_view: Record<string, never>;
-  /** 랜딩의 로그인 버튼을 누름. cta: 어느 버튼인지 */
-  landing_cta_click: { cta: 'hero' | 'header'; provider: SocialProvider };
+  /** 랜딩의 로그인 버튼을 누름. cta: 어느 버튼인지 (trial = 30초 체험 성공 뒤 "모험을 저장하려면 로그인!", P4-03) */
+  landing_cta_click: {
+    cta: 'hero' | 'header' | 'trial';
+    provider: SocialProvider;
+    /** 공용 기기 체크를 켜고 골랐나 (P4-09, §12-Q44). 예전 번들은 보내지 않음 */
+    shared?: boolean;
+  };
+  /** 랜딩 30초 체험 공책을 처음 만짐 (글자를 고치거나 주문을 걺, 페이지당 1번, P4-03) */
+  trial_start: Record<string, never>;
+  /**
+   * 체험 공책에서 주문을 걺 (P4-03). result: ok(찍힘) · no_print(print 없이 식만) · 오류 종류(`MINI_ERROR_KINDS`).
+   * 아이가 쓴 코드·출력은 보내지 않는다
+   */
+  trial_run: { result: TrialRunResult };
+  /** 체험 공책에서 처음 성공함 (페이지당 1번, P4-03). runs: 몇 번째 주문에서 (1~99) */
+  trial_success: { runs: number };
   /** 로그인 성공 (`/auth/callback`, 서버). new_user: 이번이 가입 */
   login_success: { provider: SocialProvider | 'unknown'; new_user: boolean };
   /**
@@ -68,6 +83,9 @@ export interface AnalyticsEventProps {
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
 
+/** `trial_run.result` 값 */
+export type TrialRunResult = 'ok' | 'no_print' | MiniErrorKind;
+
 /** 브라우저가 `/api/analytics`로 보낼 수 있는 이벤트. 나머지는 서버만 기록한다 (클라이언트가 지표를 부풀리지 못하게) */
 export const CLIENT_EVENT_NAMES = [
   'landing_view',
@@ -75,6 +93,9 @@ export const CLIENT_EVENT_NAMES = [
   'motion_tier_change',
   'pwa_install_prompt',
   'pwa_installed',
+  'trial_start',
+  'trial_run',
+  'trial_success',
 ] as const;
 export type ClientEventName = (typeof CLIENT_EVENT_NAMES)[number];
 
