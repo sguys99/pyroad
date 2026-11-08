@@ -29,8 +29,8 @@
     "fonts": {
       "jua": {
         "file": "jua/Jua-landing.woff2",
-        "bytes": 26544,
-        "sha256": "8cc41563281d7b7911ab7371597bff2396ae396337cd869b048ec4486bc3df61",
+        "bytes": 26588,
+        "sha256": "777a4fc478aae878f6a21195d4aa64d5cbdcad9d146be5e495b0ddf472d8fe0c",
         "covers": "display",
         "weight": "100 900",
         "features": "*",
@@ -38,8 +38,8 @@
       },
       "sans": {
         "file": "pyroad-sans/pyRoadSans-landing.woff2",
-        "bytes": 55212,
-        "sha256": "281ce744a49ec5437c22f333608f33760a68c0491d6525eb74af12b79c0a21e2",
+        "bytes": 55148,
+        "sha256": "07c6f7f4582f8a5f17b2409241f42aceedb59fc78bd765b43a552ee18c9f90bc",
         "covers": "all",
         "weight": "400 700",
         "features": "default,tnum",
