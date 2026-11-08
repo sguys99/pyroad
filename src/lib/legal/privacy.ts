@@ -494,5 +494,11 @@ export const PRIVACY: LegalDocument = {
       ],
     },
   ],
-  history: [{ date: PRIVACY_VERSION, note: '처음 만듦' }],
+  history: [
+    {
+      date: PRIVACY_VERSION,
+      note: '웹 저장소 항목에 공용 기기 표시(학교·도서관 컴퓨터)와 로그인 방식 추가',
+    },
+    { date: '2026-11-06', note: '처음 만듦' },
+  ],
 };
