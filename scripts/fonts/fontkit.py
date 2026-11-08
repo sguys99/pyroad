@@ -2,12 +2,15 @@
 """pyRoad 웹폰트 도구 (P2-10, fontTools). `scripts/fonts/build-fonts.mjs`가 부른다.
 
   python3 -P -E fontkit.py subset  <src> <out.woff2> --text-file F [--family NAME --rename OLD,OLD2] [--sfnt]
+                                   [--features default,tnum] [--wght 400:700]
   python3 -P -E fontkit.py slice   <src> <outdir> --ranges <ref.css> --prefix P [--no-hanja] [--family NAME --rename OLD]
   python3 -P -E fontkit.py rewrap  <ref.css> <outdir> --prefix P --family NAME --rename OLD   # 공식 동적 서브셋 조각의 이름만 바꿈
   python3 -P -E fontkit.py metrics <font>...                                                   # 폴백 보정용 메트릭
 
 모든 명령은 결과를 JSON 한 줄로 stdout에 낸다 (Node 쪽이 CSS·manifest를 씀).
 
+- `subset --features`·`--wght`(P4-12): 랜딩 본문 서브셋은 브라우저가 기본으로 켜는 기능 + tnum만 남기고(ss01~·case 같은
+  대체 글리프가 빠짐), 가변 축을 랜딩이 쓰는 굵기(400~700)로 좁힌다(fontTools instancer, 서브셋 뒤에 해서 빠름).
 - `subset --sfnt`: WOFF2 대신 압축 없는 TTF/OTF로 저장한다(공유 카드 satori는 WOFF2를 못 읽음, P0-10·P2-19).
   CFF(OTF)는 서브루틴을 풀면 오히려 커져서 그대로 둔다.
 
@@ -37,6 +40,7 @@ logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
 
 from fontTools import subset as ftsubset
 from fontTools.ttLib import TTFont
+from fontTools.varLib import instancer
 
 # 이름을 바꾸지 않는(원문 유지) name ID: 저작권·상표·제작사·디자이너·설명·URL·라이선스
 KEEP_NAME_IDS = {0, 7, 8, 9, 10, 11, 12, 13, 14}
@@ -93,12 +97,27 @@ def mark_version(font: TTFont) -> None:
                 name.setName(s + VERSION_SUFFIX, 5, rec.platformID, rec.platEncID, rec.langID)
 
 
-def subset_font(font: TTFont, cps: set[int], flavor: str | None = "woff2") -> TTFont:
+def layout_features(spec: str | None) -> list[str]:
+    """`--features` 값 → fontTools 기능 목록. 없으면 전부("*"), `default`는 fontTools 기본 목록(브라우저가 기본으로 켜는
+    kern·liga·calt·ccmp·locl·mark 등), 그 밖의 이름은 더함. 예: `default,tnum`"""
+    if not spec:
+        return ["*"]
+    out: list[str] = []
+    for f in spec.split(","):
+        f = f.strip()
+        if f == "default":
+            out += list(ftsubset.Options().layout_features)
+        elif f:
+            out.append(f)
+    return sorted(set(out))
+
+
+def subset_font(font: TTFont, cps: set[int], flavor: str | None = "woff2", features: list[str] | None = None) -> TTFont:
     opts = ftsubset.Options()
     opts.flavor = flavor
     opts.hinting = False
     opts.desubroutinize = flavor is not None
-    opts.layout_features = ["*"]
+    opts.layout_features = features or ["*"]
     opts.name_IDs = ["*"]
     opts.name_languages = ["*"]
     opts.notdef_outline = True
@@ -177,7 +196,11 @@ def cmd_subset(a):
     have = set(font.getBestCmap())
     missing = sorted(c for c in want - have if c > 0x20 and not chr(c).isspace())
     flavor = None if a.sfnt else "woff2"
-    subset_font(font, want & have, flavor)
+    subset_font(font, want & have, None if a.wght else flavor, layout_features(a.features))
+    if a.wght:
+        # 가변 축을 좁힌다 (L3 partial instancing, P4-12). 기본값 400에서 가는 쪽 마스터(45)를 버리면 gvar가 반으로 준다
+        lo, hi = (float(x) for x in a.wght.split(":"))
+        font = instancer.instantiateVariableFont(font, {"wght": (lo, hi)})
     finish(font, a.family, a.rename.split(",") if a.rename else [], flavor)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     font.save(a.out)
@@ -303,6 +326,8 @@ def main():
     s.add_argument("--family")
     s.add_argument("--rename")
     s.add_argument("--sfnt", action="store_true", help="WOFF2 대신 TTF/OTF (공유 카드)")
+    s.add_argument("--features", help="남길 OpenType 기능 (예: default,tnum). 없으면 전부")
+    s.add_argument("--wght", help="가변 wght 축을 MIN:MAX로 좁힘 (예: 400:700)")
     s.set_defaults(fn=cmd_subset)
     c = sp.add_parser("slice")
     c.add_argument("src")

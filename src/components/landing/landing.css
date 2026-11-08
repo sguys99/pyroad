@@ -1,0 +1,217 @@
+/* 랜딩 공통 (P4-01): 헤더 · 섹션 틀(LandingSection) · 지연 로드 자리. `src/app/page.tsx`가 import한다.
+   - 섹션별 모양은 각 섹션 옆 CSS(`sections/*.css`)에. 여기에는 여러 섹션이 같이 쓰는 것만 둔다
+   - 값은 토큰 변수만 (globals.css :root). 글꼴은 CSS font-family 대신 마크업의 font-display·font-sans 클래스 (tokens:check)
+   - 연출 단계는 <html data-motion data-reduced>를 본다
+   - @layer components: 섹션에 붙인 Tailwind 유틸리티 클래스가 여기 값을 이긴다 */
+
+@layer components {
+  .landing {
+    /* 고정 헤더 높이: 섹션 앵커가 헤더 밑에 숨지 않게 scroll-margin에 쓴다 */
+    --ld-header-h: 4rem;
+    --ld-max: 72rem;
+    --ld-gutter: var(--spacing-gutter);
+    overflow-x: clip;
+  }
+  @media (min-width: 768px) {
+    .landing {
+      --ld-gutter: 2rem;
+    }
+  }
+
+  /* ───────────── 헤더: 맨 위에서는 투명, 내려가면 바탕색 면 (full만 흐림) */
+  .ld-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 40;
+    height: var(--ld-header-h);
+    transition:
+      background-color var(--dur-base) var(--easing-out),
+      box-shadow var(--dur-base) var(--easing-out);
+  }
+  .ld-header[data-scrolled='true'] {
+    background-color: var(--bg);
+    box-shadow: 0 1px 0 var(--line);
+  }
+  :root[data-motion='full'] .ld-header[data-scrolled='true'] {
+    background-color: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px) saturate(1.2);
+  }
+  .ld-header-in {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 100%;
+    max-width: var(--ld-max);
+    margin: 0 auto;
+    padding: 0 var(--ld-gutter);
+  }
+  .ld-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    margin-right: auto;
+    border-radius: var(--round-s);
+    color: var(--text);
+    font-size: 1.375rem;
+    line-height: 1;
+    text-decoration: none;
+  }
+  .ld-logo svg {
+    flex-shrink: 0;
+  }
+  .ld-nav {
+    display: flex;
+    align-items: center;
+  }
+  .ld-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.625rem;
+    border-radius: var(--round-s);
+    color: var(--text);
+    font-size: var(--text-small);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-fast) var(--easing-out);
+  }
+  .ld-nav a:hover {
+    color: var(--primary-text);
+  }
+  .ld-nav a:focus-visible,
+  .ld-logo:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  /* 좁은 화면: 로그인 버튼이 밀리지 않게 "보호자 안내"는 640px부터, "30초 체험"은 360px부터 */
+  .ld-nav [data-wide] {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .ld-nav [data-wide] {
+      display: inline-flex;
+    }
+    .ld-nav a {
+      padding: 0 0.875rem;
+    }
+  }
+  @media (max-width: 359px) {
+    .ld-nav {
+      display: none;
+    }
+  }
+
+  /* 로고 마크: 펼친 책 위로 잉크 길 (시안 LogoMark, 색은 토큰) */
+  .ld-logomark-page {
+    fill: var(--surface);
+    stroke: var(--text);
+  }
+  .ld-logomark-spine {
+    stroke: var(--text);
+  }
+  .ld-logomark-road {
+    fill: none;
+    stroke: var(--primary);
+  }
+  .ld-logomark-x {
+    stroke: var(--accent-text);
+  }
+
+  /* ───────────── 섹션 틀 (LandingSection): 위아래 여백 · 가운데 폭 · 머리글(kicker + 제목 + 설명) */
+  .ld-sec {
+    position: relative;
+    padding: 4rem 0;
+    scroll-margin-top: var(--ld-header-h);
+  }
+  @media (min-width: 768px) {
+    .ld-sec {
+      padding: 5.5rem 0;
+    }
+  }
+  .ld-sec[data-tone='surface'] {
+    background: var(--surface);
+  }
+  .ld-sec[data-tone='soft'] {
+    background: var(--world-soft);
+  }
+  .ld-sec-in {
+    max-width: var(--ld-max);
+    margin: 0 auto;
+    padding: 0 var(--ld-gutter);
+  }
+  .ld-sec[data-width='narrow'] .ld-sec-in {
+    max-width: 48rem;
+  }
+  .ld-sec-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 40rem;
+    margin-bottom: 2rem;
+  }
+  .ld-sec[data-align='center'] .ld-sec-head {
+    align-items: center;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .ld-kicker {
+    color: var(--primary-text);
+    font-size: var(--text-kicker);
+    font-weight: var(--text-kicker--font-weight);
+    letter-spacing: var(--text-kicker--letter-spacing);
+    line-height: var(--text-kicker--line-height);
+  }
+  .ld-h2 {
+    color: var(--text);
+    font-size: var(--text-h1);
+    font-weight: 400;
+    line-height: var(--text-h1--line-height);
+    text-wrap: balance;
+  }
+  @media (min-width: 768px) {
+    .ld-h2 {
+      font-size: calc(var(--text-h1) * 1.15);
+    }
+  }
+  /* 바로가기로 온 제목에 포커스가 가도 링이 튀지 않게 (키보드 포커스 이동용 tabindex=-1) */
+  .ld-h2:focus {
+    outline: none;
+  }
+  .ld-lead {
+    color: var(--text-muted);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    text-wrap: pretty;
+  }
+
+  /* 형광펜 강조: 금색 띠가 글자 아래에 깔린다 (등장 연출은 hero.css) */
+  .ld-ink-mark {
+    position: relative;
+    z-index: 0;
+    white-space: nowrap;
+  }
+  .ld-ink-mark::after {
+    content: '';
+    position: absolute;
+    inset: 58% -0.08em 0.04em;
+    z-index: -1;
+    border-radius: 0.2em;
+    background: var(--accent-light);
+    transform-origin: left center;
+  }
+
+  /* 늦게 오는 섹션 CSS (P4-12, `deferredCss.ts`): 첫 화면 밖 섹션(세계관·쇼케이스·친구·보호자·FAQ)의 CSS는 렌더 차단 CSS에서 빼고
+     하이드레이션 즈음 받는다. 오기 전에 그 자리로 스크롤해도 깨진 모습 대신 빈 자리가 보이도록 본문(머리글 밖)을 숨기고,
+     각 섹션 CSS가 `[data-deferred-css='<이름>'] { --ld-css: visible }`로 드러낸다. 머리글(눈썹·제목·설명)은 이 파일 스타일이라 늘 보인다.
+     :where()로 명시도 0 → 섹션 CSS의 visibility 규칙을 막지 않는다. 자바스크립트가 없으면 page.tsx의 <noscript>가 드러낸다 */
+  :where(.ld-sec[data-deferred-css] > .ld-sec-in > :not(.ld-sec-head)) {
+    visibility: var(--ld-css, hidden);
+  }
+
+  /* 지연 로드 자리 (WhenVisible): 내용이 오기 전 높이를 잡아 둔다 → 레이아웃 흔들림 없음 */
+  .ld-lazy[data-pending='true'] {
+    min-height: var(--ld-lazy-h, 12rem);
+  }
+}

@@ -1,0 +1,548 @@
+/* 랜딩 히어로 (P4-01): 풀스크린 월드 일러스트 + 다층 패럴랙스 + 마스코트. HeroSection.tsx가 import한다.
+   값은 토큰 변수만 (색은 color-mix로 토큰에서 만든다). 연출 단계는 <html data-motion data-reduced>를 본다:
+   - 등장(한 번): full·lite (lite는 짧게), minimal·동작 줄이기 없음. 보이는 상태에서 transform만 (첫 화면 글자 opacity 0 없음)
+   - 패럴랙스(포인터·스크롤, HeroParallax가 --hx·--hy·--hs를 씀): full만
+   - 앰비언트(구름·물결·깃발·반짝임): full만
+   - 마스코트 반짝이 터짐: full·lite. 동작 줄이기는 표정·말풍선만 (리그가 위치·크기 0)
+   앰비언트와 반짝이 터짐 규칙은 `hero-ambient.css`에 있다: 첫 페인트에 필요 없어 렌더 차단 CSS에서 빼고 늦게 받는다 (P4-12) */
+
+@layer components {
+  .hero {
+    /* 하늘: 위는 옅은 물빛, 수평선 쪽은 섬 틴트 + 해 근처 금빛 */
+    --hero-sky-top: color-mix(in srgb, var(--w2-soft) 60%, var(--surface));
+    --hero-sky-bottom: color-mix(in srgb, var(--w1-soft) 70%, var(--w2-soft));
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: max(38rem, 100svh);
+    overflow: clip;
+    background:
+      radial-gradient(
+        ellipse 42% 36% at 74% 20%,
+        var(--accent-soft),
+        transparent 70%
+      ),
+      linear-gradient(180deg, var(--hero-sky-top), var(--hero-sky-bottom) 64%);
+  }
+  @media (min-width: 900px) {
+    .hero {
+      min-height: clamp(40rem, 100svh, 62rem);
+    }
+  }
+
+  /* ───────────── 장면: 레이어 상자. 모바일은 아래 58%(위는 글자), 900px부터 화면 전체 */
+  .hero-scene {
+    position: absolute;
+    inset: auto 0 0;
+    height: 58%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  /* 키 작은 폰(320×568 등): 장면을 낮춰 성이 버튼 뒤로 숨지 않게 */
+  @media (max-width: 599px) and (max-height: 700px) {
+    .hero-scene {
+      height: 50%;
+    }
+  }
+  /* 태블릿 세로: 글자 아래 빈 하늘이 남지 않게 장면을 더 높이, 해·구름도 보인다 */
+  @media (min-width: 600px) {
+    .hero-scene {
+      height: 68%;
+    }
+  }
+  @media (min-width: 900px) {
+    .hero-scene {
+      inset: 0;
+      height: auto;
+    }
+  }
+  /* 폰: 글자 뒤로 겹치는 해·큰 구름은 뺀다 (하늘 빛은 .hero 배경의 금빛 원이 대신) */
+  @media (max-width: 599px) {
+    .hero-scene [data-wide] {
+      display: none;
+    }
+  }
+  /* 패럴랙스로 움직여도 가장자리가 비지 않게 양옆·위아래로 조금 넘친다 */
+  .hero-layer {
+    position: absolute;
+    inset: -2.5rem -2.5rem -1.5rem;
+  }
+  .hero-layer-in {
+    position: absolute;
+    inset: 0;
+  }
+  /* 16:9 그림을 높이에 맞추고 오른쪽 아래 기준으로 자른다 → 성·파이뱀(오른쪽)이 모든 폭에서 보인다 */
+  .hero-art {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    width: auto;
+    min-width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: visible;
+  }
+
+  /* 깊이: 포인터 이동량(--px·--py)과 스크롤 속도(--sk, 클수록 느리게 = 멀리) */
+  .hero-par {
+    --depth: 0;
+    --sk: 0;
+  }
+  .hero-layer[data-layer='sky'] {
+    --depth: 0.35;
+    --sk: 0.42;
+  }
+  .hero-layer[data-layer='far'] {
+    --depth: 1;
+    --sk: 0.34;
+  }
+  .hero-layer[data-layer='mid'] {
+    --depth: 2.2;
+    --sk: 0.24;
+  }
+  .hero-layer[data-layer='near'],
+  .hero-buddy {
+    --depth: 3.6;
+    --sk: 0.12;
+  }
+  .hero-layer[data-layer='decor'] {
+    --depth: 6;
+    --sk: -0.08;
+  }
+  :root[data-reduced='false'][data-motion='full'] .hero-par {
+    transform: translate3d(
+      calc(var(--hx, 0) * var(--depth) * -7px),
+      calc(var(--hy, 0) * var(--depth) * -4px + var(--hs, 0) * var(--sk) * 1px),
+      0
+    );
+    will-change: transform;
+  }
+
+  /* ───────────── 그림 재질: 면 색(--f) + 그 진한 톤 선 1.1px */
+  .hero .hm {
+    fill: var(--f);
+    stroke: color-mix(in srgb, var(--f) 70%, var(--text));
+    stroke-width: 1.1;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .hero .hm-ink,
+  .hero .hm-wave,
+  .hero .hm-mark,
+  .hero .hm-road {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .hero .hm-ink {
+    stroke: color-mix(in srgb, var(--line-strong) 75%, transparent);
+    stroke-width: 1;
+  }
+  .hero .hm-ink-soft {
+    stroke: color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  .hero .hm-ink-leaf {
+    stroke: color-mix(in srgb, var(--primary-lip) 45%, transparent);
+  }
+  .hero .hm-wave {
+    stroke: color-mix(in srgb, var(--w2) 60%, var(--text-muted));
+    stroke-width: 1.1;
+    opacity: 0.7;
+  }
+  .hero .hm-mark {
+    stroke: var(--accent-text);
+    stroke-width: 3;
+  }
+  .hero .hm-road {
+    stroke: var(--primary);
+    stroke-width: 3.4;
+    stroke-dasharray: 0.1 10;
+    opacity: 0.8;
+  }
+  .hero .hm-shadow {
+    fill: var(--line-strong);
+    opacity: 0.14;
+  }
+  .hero .hm-sun-halo {
+    fill: var(--accent-soft);
+  }
+  .hm-sun {
+    --f: var(--accent-light);
+  }
+  .hm-cloud {
+    --f: var(--surface);
+  }
+  .hero .hm-cloud {
+    stroke: color-mix(in srgb, var(--surface-lip) 70%, transparent);
+  }
+  .hm-paper {
+    --f: var(--surface);
+  }
+  .hm-sea {
+    --f: color-mix(in srgb, var(--w2) 42%, var(--w2-soft));
+  }
+  .hm-mount {
+    --f: color-mix(in srgb, var(--surface-2) 70%, var(--w2-soft));
+  }
+  .hm-hill-far {
+    --f: color-mix(in srgb, var(--w1) 45%, var(--w2-soft));
+  }
+  .hm-sand {
+    --f: color-mix(in srgb, var(--w3) 55%, var(--surface));
+  }
+  .hm-hill {
+    --f: color-mix(in srgb, var(--w1) 62%, var(--w1-soft));
+  }
+  .hm-hill-2 {
+    --f: color-mix(in srgb, var(--w1) 88%, var(--w1-soft));
+  }
+  .hm-meadow {
+    --f: color-mix(in srgb, var(--w1) 82%, var(--primary));
+  }
+  .hm-sage {
+    --f: color-mix(in srgb, var(--primary-bright) 80%, var(--w1-soft));
+  }
+  .hm-forest {
+    --f: color-mix(in srgb, var(--primary) 42%, var(--w1));
+  }
+  .hm-olive {
+    --f: color-mix(in srgb, var(--primary) 62%, var(--w1));
+  }
+  .hm-leaf {
+    --f: color-mix(in srgb, var(--primary) 70%, var(--w1));
+  }
+  .hm-wood {
+    --f: var(--w3);
+  }
+  .hm-wood-dark {
+    --f: color-mix(in srgb, var(--w3) 66%, var(--text));
+  }
+  .hm-stone {
+    --f: color-mix(in srgb, var(--surface-2) 70%, var(--surface-lip));
+  }
+  .hm-roof {
+    --f: color-mix(in srgb, var(--accent) 72%, var(--accent-lip));
+  }
+  .hm-gold {
+    --f: var(--accent);
+  }
+
+  /* ───────────── 글자 */
+  .hero-in {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: var(--ld-max);
+    margin: 0 auto;
+    padding: calc(var(--ld-header-h) + 1.25rem) var(--ld-gutter) 0;
+    pointer-events: none;
+  }
+  @media (min-width: 900px) {
+    .hero-in {
+      justify-content: center;
+      padding-bottom: 5rem;
+    }
+  }
+  .hero-copy {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 34rem;
+    pointer-events: auto;
+  }
+  /* 글자 뒤 옅은 하늘빛 번짐: 그림 위에서도 부제가 읽히게 (흐림 필터 없이 그라디언트만) */
+  .hero-copy::before {
+    content: '';
+    position: absolute;
+    inset: -3rem -5rem -3rem -4rem;
+    z-index: -1;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--hero-sky-top) 92%, transparent) 55%,
+      transparent
+    );
+    pointer-events: none;
+  }
+  .hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+    padding: 0.3125rem 0.875rem 0.3125rem 0.625rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    color: var(--primary-text);
+    font-size: var(--text-kicker);
+    font-weight: var(--text-kicker--font-weight);
+    letter-spacing: var(--text-kicker--letter-spacing);
+    line-height: var(--text-kicker--line-height);
+  }
+  .hero-kicker svg {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  .hero-pin {
+    fill: var(--accent);
+    stroke: var(--accent-lip);
+  }
+  .hero-pin-dot {
+    fill: var(--surface);
+  }
+  .hero-title {
+    color: var(--text);
+    font-size: var(--text-hero);
+    font-weight: 400;
+    line-height: var(--text-hero--line-height);
+    letter-spacing: var(--text-hero--letter-spacing);
+  }
+  @media (min-width: 600px) {
+    .hero-title {
+      font-size: var(--text-hero-wide);
+    }
+  }
+  @media (min-width: 1200px) {
+    .hero-title {
+      font-size: calc(var(--text-hero-wide) * 1.18);
+    }
+  }
+  .hero-sub {
+    max-width: 30rem;
+    margin-top: 0.875rem;
+    color: var(--text-muted);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    text-wrap: pretty;
+  }
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  /* 좁은 화면: 두 버튼을 한 줄에 반씩 (그림 자리를 남긴다) */
+  @media (max-width: 479px) {
+    .hero-copy,
+    .hero-cta {
+      width: 100%;
+    }
+    .hero-cta {
+      flex-wrap: nowrap;
+      gap: 0.625rem;
+    }
+    .hero-cta > .g-btn {
+      flex: 1 1 0;
+      min-width: 0;
+      --g-btn-px: 0.75rem;
+    }
+  }
+
+  /* 아래 가장자리: 그림이 페이지 바탕으로 부드럽게 이어지는 물결 (움직이지 않음) */
+  .hero-edge {
+    position: absolute;
+    inset: auto 0 -1px;
+    z-index: 1;
+    width: 100%;
+    height: clamp(1.25rem, 3.5vw, 2.75rem);
+    fill: var(--bg);
+    pointer-events: none;
+  }
+
+  /* ───────────── 파이뱀 + 말풍선 */
+  .hero-buddy {
+    position: absolute;
+    right: 4%;
+    bottom: 1.5rem;
+    z-index: 3;
+    width: clamp(9.5rem, 40vw, 12rem);
+  }
+  @media (min-width: 600px) {
+    .hero-buddy {
+      right: 8%;
+      width: clamp(11rem, 26vw, 15rem);
+    }
+  }
+  @media (min-width: 900px) {
+    .hero-buddy {
+      right: clamp(2rem, 13vw, 15rem);
+      bottom: 6%;
+      width: clamp(13rem, 20vw, 17.5rem);
+    }
+  }
+  .hero-buddy-in {
+    position: relative;
+  }
+  .hero-mascot {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--round-l);
+    background: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hero-mascot:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  .hero-mascot-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* 말풍선: 파이뱀 머리 왼쪽, 꼬리는 오른쪽(파이뱀 쪽) */
+  .hero-say {
+    position: absolute;
+    right: 74%;
+    bottom: 30%;
+    width: max-content;
+    max-width: min(15rem, 52vw);
+  }
+  @media (min-width: 900px) {
+    .hero-say {
+      right: 76%;
+      bottom: 62%;
+      max-width: 16.5rem;
+    }
+  }
+  .hero-say .g-bubble {
+    box-shadow: var(--elev-pop);
+  }
+  .hero-say .g-bubble[data-tail]::before {
+    left: auto;
+    right: -0.5rem;
+    top: auto;
+    bottom: 1rem;
+    border-radius: 0 0 0.25rem;
+    transform: skewY(-28deg) rotate(-8deg);
+  }
+  .hero-say .g-bubble-t {
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+  @media (min-width: 900px) {
+    .hero-say .g-bubble-t {
+      font-size: var(--text-body);
+      line-height: 1.55;
+    }
+  }
+  /* 처음 몇 초는 "눌러 봐" 힌트 (손가락 대신 작은 점 고리) */
+  .hero-poke-hint {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -1.375rem 0 0 -1.375rem;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* 반복 연출 대상 기준점 (SVG 안 요소는 자기 상자 기준) */
+  .hero .ha-cloud,
+  .hero .ha-wave,
+  .hero .ha-boat,
+  .hero .ha-flag,
+  .hero .ha-spark,
+  .hero .ha-bird,
+  .hero .ha-leaf,
+  .hero .ha-glow {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .hero .ha-flag {
+    transform-origin: left center;
+  }
+  .hero .ha-flag[data-dir='-1'] {
+    transform-origin: right center;
+  }
+  .hero .ha-boat {
+    transform-origin: center bottom;
+  }
+}
+
+/* ───────────── 등장 (한 번): full·lite. 보이는 상태에서 transform만 */
+@keyframes hero-settle {
+  from {
+    transform: translate3d(0, var(--settle-y, 1.5rem), 0) scale(1.025);
+  }
+}
+@keyframes hero-rise {
+  from {
+    transform: translate3d(0, 0.875rem, 0);
+  }
+}
+@keyframes hero-ink {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes hero-buddy-in {
+  0% {
+    transform: translate3d(0, 2.5rem, 0) scale(0.92);
+  }
+  60% {
+    transform: translate3d(0, -0.375rem, 0) scale(1.02);
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) {
+  .hero-layer-in {
+    animation: hero-settle 1100ms var(--easing-out) both;
+  }
+  .hero-layer-in[data-i='0'] {
+    --settle-y: 0.5rem;
+  }
+  .hero-layer-in[data-i='1'] {
+    --settle-y: 1rem;
+    animation-delay: 60ms;
+  }
+  .hero-layer-in[data-i='2'] {
+    --settle-y: 1.75rem;
+    animation-delay: 120ms;
+  }
+  .hero-layer-in[data-i='3'] {
+    --settle-y: 2.5rem;
+    animation-delay: 180ms;
+  }
+  .hero-layer-in[data-i='4'] {
+    --settle-y: 3.5rem;
+    animation-delay: 220ms;
+  }
+  .hero-copy > * {
+    animation: hero-rise var(--dur-page) var(--easing-out) both;
+  }
+  .hero-copy > :nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .hero-copy > :nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .hero-copy > :nth-child(4) {
+    animation-delay: 210ms;
+  }
+  .hero-title .ld-ink-mark::after {
+    animation: hero-ink var(--dur-page) var(--easing-ink) 520ms both;
+  }
+  .hero-buddy-in {
+    animation: hero-buddy-in 900ms var(--easing-out) 260ms both;
+  }
+}
+:root[data-reduced='false'][data-motion='lite'] {
+  .hero-layer-in,
+  .hero-buddy-in {
+    animation-duration: var(--dur-page);
+  }
+}

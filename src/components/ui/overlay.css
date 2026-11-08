@@ -1,0 +1,149 @@
+/* 덮개 + 모달 + 시트 (P2-11, docs/design/components.md). game-ui.css에서 떼어 냄 (P4-12): `sheet.tsx`·`alert-dialog.tsx`·축하 오버레이(`QuestCelebrations.tsx`, 덮개만)가 import한다.
+   규칙(토큰 변수만 · 연출 단계 · transform·opacity만)은 game-ui.css 머리 주석과 같다. globals.css(game-ui.css)보다 늘 뒤에 온다 */
+
+@layer components {
+  /* ───────────────────────── 덮개 + 모달 (가운데 대화 상자) + 시트 (모바일 아래 → 넓은 화면 가운데)
+     Base UI가 열릴 때 data-starting-style, 닫힐 때 data-ending-style을 붙이고 전환이 끝나길 기다린다 */
+  .g-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--scrim);
+    transition: opacity var(--dur-base) var(--easing-out);
+  }
+  .g-scrim:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  .g-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    width: min(28rem, calc(100% - 2rem));
+    height: fit-content;
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-radius: var(--round-l);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-pop);
+    outline: none;
+    transition-property: transform, opacity;
+    transition-duration: var(--spring-body-dur), var(--dur-fast);
+    transition-timing-function: var(--spring-body), var(--easing-out);
+  }
+  /* full: 아래에서 살짝 기울어 떠오름 (시안 Sheet 데스크톱) */
+  .g-modal[data-starting-style] {
+    opacity: 0;
+    transform: translateY(24px) rotate(-1.5deg) scale(0.96);
+  }
+  .g-modal[data-ending-style] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--easing-out);
+  }
+
+  .g-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 50;
+    max-height: calc(100dvh - 2.5rem);
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 1.75rem var(--spacing-gutter)
+      calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    border-radius: var(--round-l) var(--round-l) 0 0;
+    background: var(--surface);
+    color: var(--text);
+    /* 둘째 그림자 = 아래 "치마" 면: 스프링이 살짝 넘쳐 올라갈 때(4%대) 화면 아래 틈을 같은 면 색으로 가린다 (P4-09).
+       바깥 그림자라 상자 overflow에 잘리지 않고, 쉴 때는 화면 밖이라 보이지 않는다 */
+    box-shadow:
+      var(--elev-pop),
+      0 2.5rem 0 var(--surface);
+    outline: none;
+    /* full: 아래에서 body 스프링으로 올라와 한 번 살짝 튕기고 멈춤 (P4-09). 닫힐 때는 짧게 미끄러져 내려감 */
+    transition-property: transform, opacity;
+    transition-duration: var(--spring-body-dur), var(--dur-fast);
+    transition-timing-function: var(--spring-body), var(--easing-out);
+  }
+  .g-sheet:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(100%);
+  }
+  .g-sheet[data-ending-style] {
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--easing-out);
+  }
+  .g-sheet-grip {
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    width: 3.25rem;
+    height: 0.3125rem;
+    margin-left: -1.625rem;
+    border-radius: var(--round-pill);
+    background: var(--line);
+  }
+  @media (min-width: 48rem) {
+    .g-sheet {
+      inset: 0;
+      width: min(35rem, calc(100% - 3rem));
+      height: fit-content;
+      max-height: calc(100dvh - 3rem);
+      margin: auto;
+      padding: 2rem;
+      border-radius: var(--round-l);
+      box-shadow: var(--elev-pop);
+      transition-duration: var(--spring-body-dur), var(--dur-fast);
+      transition-timing-function: var(--spring-body), var(--easing-out);
+    }
+    .g-sheet[data-wide] {
+      width: min(45rem, calc(100% - 3rem));
+    }
+    .g-sheet[data-starting-style] {
+      opacity: 0;
+      transform: translateY(24px) rotate(-1.5deg) scale(0.96);
+    }
+    .g-sheet[data-ending-style] {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+      transition-duration: var(--dur-fast);
+    }
+    .g-sheet-grip {
+      display: none;
+    }
+  }
+
+  /* lite: 짧은 미끄러짐(220ms), 기울임·크기 변화 없음 */
+  :root[data-motion='lite'] :is(.g-modal, .g-sheet) {
+    transition-duration: var(--dur-base), var(--dur-fast);
+    transition-timing-function: var(--easing-out), var(--easing-out);
+  }
+  :root[data-motion='lite'] .g-modal[data-starting-style] {
+    transform: translateY(12px);
+  }
+  /* minimal: 페이드만 */
+  :root[data-motion='minimal'] :is(.g-modal, .g-sheet) {
+    transition: opacity var(--dur-fade) var(--easing-out);
+  }
+  :root[data-motion='minimal']
+    :is(.g-modal, .g-sheet):is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: none;
+  }
+  /* 동작 줄이기: 즉시 (덮개도) */
+  :root[data-reduced='true'] :is(.g-modal, .g-sheet, .g-scrim) {
+    transition: none;
+  }
+  :root[data-reduced='true']
+    :is(.g-modal, .g-sheet):is([data-starting-style], [data-ending-style]) {
+    transform: none;
+  }
+  @media (min-width: 48rem) {
+    :root[data-motion='lite'] .g-sheet[data-starting-style] {
+      transform: translateY(12px);
+    }
+  }
+}

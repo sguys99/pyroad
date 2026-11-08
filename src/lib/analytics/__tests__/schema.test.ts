@@ -52,11 +52,26 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     ['학생 코드', { cta: 'hero', provider: 'google', code: 'print(1)' }],
     ['정해지지 않은 값', { cta: 'footer', provider: 'google' }],
     ['provider 자유 문자열', { cta: 'hero', provider: 'kid@example.com' }],
+    ['shared 문자열', { cta: 'hero', provider: 'google', shared: 'yes' }],
   ])('속성에 %s 가 있으면 묶음 전체를 거부', (_label, props) => {
     expect(
       clientBatchSchema.safeParse(batch([{ name: 'landing_cta_click', props }]))
         .success,
     ).toBe(false);
+  });
+
+  it('landing_cta_click 공용 기기 표시 shared (P4-09): 불리언만, 없어도 됨', () => {
+    for (const props of [
+      { cta: 'hero', provider: 'kakao', shared: true },
+      { cta: 'header', provider: 'naver', shared: false },
+      { cta: 'trial', provider: 'google' },
+    ]) {
+      expect(
+        clientBatchSchema.safeParse(
+          batch([{ name: 'landing_cta_click', props }]),
+        ).success,
+      ).toBe(true);
+    }
   });
 
   it('landing_view 에 아무 속성도 붙일 수 없다', () => {
@@ -116,12 +131,74 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     }
   });
 
+  it('홈 화면에 추가 안내(P4-11)를 받고, 정해진 값 밖이면 거부', () => {
+    const ok = { via: 'world', platform: 'ios', result: 'guide' };
+    expect(
+      clientBatchSchema.safeParse(
+        batch([
+          { name: 'pwa_install_prompt', props: ok, path: '/world' },
+          { name: 'pwa_installed', props: {} },
+        ]),
+      ).success,
+    ).toBe(true);
+    for (const bad of [
+      { ...ok, via: 'landing' },
+      { ...ok, platform: 'desktop' },
+      { ...ok, result: 'maybe' },
+      { ...ok, ua: 'iPhone' },
+    ]) {
+      expect(
+        clientBatchSchema.safeParse(
+          batch([{ name: 'pwa_install_prompt', props: bad }]),
+        ).success,
+      ).toBe(false);
+    }
+    expect(
+      clientBatchSchema.safeParse(
+        batch([{ name: 'pwa_installed', props: { standalone: true } }]),
+      ).success,
+    ).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',
+      'pwa_install_prompt',
+      'pwa_installed',
+      'trial_run',
+      'trial_start',
+      'trial_success',
     ]);
+  });
+
+  it('30초 체험 이벤트 (P4-03): 결과 종류·횟수만, 코드·출력은 거부', () => {
+    const ok = (events: unknown[]) =>
+      clientBatchSchema.safeParse(batch(events)).success;
+    expect(
+      ok([
+        { name: 'trial_start' },
+        { name: 'trial_run', props: { result: 'ok' } },
+        { name: 'trial_run', props: { result: 'unterminated_string' } },
+        { name: 'trial_run', props: { result: 'no_print' } },
+        { name: 'trial_success', props: { runs: 1 } },
+        {
+          name: 'landing_cta_click',
+          props: { cta: 'trial', provider: 'kakao' },
+        },
+      ]),
+    ).toBe(true);
+    expect(ok([{ name: 'trial_run', props: { result: 'what' } }])).toBe(false);
+    expect(
+      ok([{ name: 'trial_run', props: { result: 'ok', code: 'print(1)' } }]),
+    ).toBe(false);
+    expect(ok([{ name: 'trial_run', props: { result: 'ok', out: '1' } }])).toBe(
+      false,
+    );
+    expect(ok([{ name: 'trial_success', props: { runs: 0 } }])).toBe(false);
+    expect(ok([{ name: 'trial_success', props: { runs: 1.5 } }])).toBe(false);
+    expect(ok([{ name: 'trial_start', props: { x: 1 } }])).toBe(false);
   });
 });
 

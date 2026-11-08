@@ -1,0 +1,206 @@
+/* 히어로 앰비언트·반짝이 (P4-01 hero.css에서 떼어 냄, P4-12). 첫 페인트에 필요 없는 장식 연출이라 렌더 차단 CSS에서 빼고
+   아래쪽 섹션 CSS와 함께 늦게 받는다(`../deferredStyles.ts`) → 구름·물결·깃발 같은 반복 연출은 하이드레이션 즈음 시작한다.
+   반짝이 터짐(.hero-burst)은 누른 뒤에만 그려지고, 공책 옆 파이뱀(`.ld-trial-burst`)도 같이 쓴다.
+   연출 단계 규칙은 hero.css 머리 주석과 같다 (앰비언트 = full만, 반짝이 = full·lite) */
+
+@layer components {
+  /* 반짝이 터짐: 누를 때마다 다시 그려진다 (key) */
+  .hero-burst {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .hero-burst i {
+    position: absolute;
+    left: -0.5rem;
+    top: -0.5rem;
+    width: 1rem;
+    height: 1rem;
+    background: var(--accent);
+    clip-path: polygon(
+      50% 0,
+      62% 38%,
+      100% 50%,
+      62% 62%,
+      50% 100%,
+      38% 62%,
+      0 50%,
+      38% 38%
+    );
+    opacity: 0;
+  }
+  .hero-burst i:nth-child(1) {
+    --bx: -5.5rem;
+    --by: -3rem;
+  }
+  .hero-burst i:nth-child(2) {
+    --bx: -2.5rem;
+    --by: -5.75rem;
+  }
+  .hero-burst i:nth-child(3) {
+    --bx: 1.5rem;
+    --by: -6rem;
+    background: var(--primary-bright);
+  }
+  .hero-burst i:nth-child(4) {
+    --bx: 4.75rem;
+    --by: -3.5rem;
+  }
+  .hero-burst i:nth-child(5) {
+    --bx: 5.5rem;
+    --by: 0.5rem;
+    background: var(--accent-light);
+  }
+  .hero-burst i:nth-child(6) {
+    --bx: -5rem;
+    --by: 1rem;
+    background: var(--primary-bright);
+  }
+}
+
+/* ───────────── 앰비언트: full만 */
+@keyframes ha-drift {
+  50% {
+    transform: translateX(2.25rem);
+  }
+}
+@keyframes ha-bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes ha-boat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(2deg);
+  }
+}
+@keyframes ha-flag {
+  0%,
+  100% {
+    transform: scaleX(1) skewY(0deg);
+  }
+  50% {
+    transform: scaleX(0.72) skewY(8deg);
+  }
+}
+@keyframes ha-twinkle {
+  0%,
+  100% {
+    transform: scale(0.55) rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.1) rotate(45deg);
+    opacity: 1;
+  }
+}
+@keyframes ha-glow {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes ha-leaf {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(5rem, 9rem) rotate(160deg);
+    opacity: 0;
+  }
+}
+@keyframes ha-hint {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+:root[data-reduced='false'][data-motion='full'] {
+  .hero .ha-cloud {
+    animation: ha-drift 38s ease-in-out infinite;
+  }
+  .hero g:nth-of-type(3) > .ha-cloud {
+    animation-duration: 46s;
+    animation-delay: -12s;
+  }
+  .hero g:nth-of-type(4) > .ha-cloud {
+    animation-duration: 30s;
+    animation-delay: -20s;
+  }
+  .hero g:nth-of-type(5) > .ha-cloud {
+    animation-duration: 54s;
+    animation-delay: -6s;
+  }
+  .hero .ha-wave {
+    animation: ha-bob 4.2s ease-in-out infinite;
+  }
+  .hero g:nth-of-type(even) > .ha-wave {
+    animation-delay: -2.1s;
+  }
+  .hero .ha-bird {
+    animation: ha-bob 2.6s ease-in-out infinite;
+  }
+  .hero .ha-boat {
+    animation: ha-boat 5.5s ease-in-out infinite;
+  }
+  .hero .ha-flag {
+    animation: ha-flag 1.4s ease-in-out infinite;
+  }
+  .hero .ha-spark {
+    animation: ha-twinkle 2.4s ease-in-out infinite;
+  }
+  .hero g:nth-of-type(odd) > .ha-spark {
+    animation-delay: -1.2s;
+  }
+  .hero .ha-glow {
+    animation: ha-glow 3s ease-in-out infinite;
+  }
+  .hero .ha-leaf {
+    animation: ha-leaf 13s linear infinite;
+  }
+  .hero g:nth-last-of-type(2) > .ha-leaf {
+    animation-delay: -5s;
+  }
+  .hero g:nth-last-of-type(1) > .ha-leaf {
+    animation-delay: -9s;
+    animation-duration: 16s;
+  }
+  .hero-poke-hint {
+    animation: ha-hint 1.6s var(--easing-out) 1.6s 3;
+  }
+}
+
+/* ───────────── 마스코트 반짝이 터짐: full·lite (minimal·동작 줄이기는 그리지 않음 — HeroMascot이 budget.particles로 거름) */
+@keyframes hero-burst {
+  0% {
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--bx), var(--by)) scale(1) rotate(120deg);
+    opacity: 0;
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) .hero-burst i {
+  animation: hero-burst var(--dur-page) var(--easing-out) both;
+}

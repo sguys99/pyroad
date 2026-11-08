@@ -25,7 +25,11 @@ describe('LegalDocumentView', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: doc.title }),
       ).toBeInTheDocument();
-      expect(screen.getByText(/시행일 2026년 11월 6일/)).toBeInTheDocument();
+      // 시행일은 문서마다 다름(처리방침 2026-11-08 개정, §12-Q45)
+      const [y, m, d] = doc.effectiveDate.split('-').map(Number);
+      expect(
+        screen.getByText(new RegExp(`시행일 ${y}년 ${m}월 ${d}일`)),
+      ).toBeInTheDocument();
       const summary = screen.getByRole('region', { name: '쉬운 말 요약' });
       expect(within(summary).getAllByRole('listitem')).toHaveLength(
         doc.summary.length,

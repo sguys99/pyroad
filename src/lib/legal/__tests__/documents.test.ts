@@ -3,6 +3,7 @@ import { LEGAL_LINKS, LEGAL_OPERATOR, formatLegalDate } from '../meta';
 import { PRIVACY } from '../privacy';
 import { TERMS } from '../terms';
 import { LAST_LOGIN_STORAGE_KEY } from '@/lib/auth/lastLogin';
+import { SHARED_DEVICE_STORAGE_KEY } from '@/lib/auth/sharedDevice';
 import type { LegalBlock, LegalDocument, LegalInline } from '../types';
 
 // 약관·개인정보처리방침 문서 (P3-14): 구조, 쉬운 말 요약, 안쪽 링크, 코드와 맞아야 하는 사실
@@ -149,6 +150,13 @@ describe('개인정보처리방침 10절 = 코드의 브라우저 저장 (P3-08)
     expect(LAST_LOGIN_STORAGE_KEY).toBe('pyroad.lastLogin.v1');
     expect(text).toMatch(/웹 저장소:[^\n]*최근에 사용한 로그인 수단/);
     expect(text).toContain('인증 쿠키만 사용합니다');
+  });
+
+  it('공용 기기 표시(P4-09, pyroad.sharedDevice.v1)도 웹 저장소 문장에 있다', () => {
+    const cookies = PRIVACY.sections.find((s) => s.id === 'cookies')!;
+    const text = cookies.blocks.map(blockText).join('\n');
+    expect(SHARED_DEVICE_STORAGE_KEY).toBe('pyroad.sharedDevice.v1');
+    expect(text).toMatch(/웹 저장소:[^\n]*공용 기기 표시/);
   });
 });
 

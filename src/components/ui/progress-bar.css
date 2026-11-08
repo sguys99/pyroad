@@ -1,0 +1,91 @@
+/* 진행바 (P2-11, docs/design/components.md). game-ui.css에서 떼어 냄 (P4-12): `progress-bar.tsx`가 import한다.
+   규칙(토큰 변수만 · 연출 단계 · transform·opacity만)은 game-ui.css 머리 주석과 같다. globals.css(game-ui.css)보다 늘 뒤에 온다 */
+
+@layer components {
+  /* ───────────────────────── 진행바: 보조 면 홈 + 주색 채움 (transform scaleX만 움직임) */
+  .g-prog {
+    position: relative;
+    display: block;
+    height: var(--g-prog-h, 0.625rem);
+    overflow: hidden;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+  }
+  .g-prog[data-size='sm'] {
+    --g-prog-h: 0.375rem;
+  }
+  .g-prog[data-size='lg'] {
+    --g-prog-h: 0.875rem;
+  }
+  [data-surface='raised'] .g-prog {
+    background: var(--surface-2);
+  }
+  .g-prog-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    transform: scaleX(var(--g-prog, 0));
+    background: var(--primary);
+    transition: transform var(--dur-progress) var(--easing-out);
+  }
+  .g-prog[data-tone='reward'] .g-prog-fill {
+    background: var(--accent);
+  }
+  /* 값이 오르면 빛 띠가 채움 위를 한 번 지나간다 (transform·opacity만, full·lite) */
+  .g-prog-shine {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--surface) 55%, transparent),
+      transparent
+    );
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+  @keyframes g-prog-shine {
+    0% {
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(100%);
+    }
+  }
+  :root:not([data-reduced='true']):not([data-motion='minimal'])
+    .g-prog[data-rising='a']
+    .g-prog-shine,
+  :root:not([data-reduced='true']):not([data-motion='minimal'])
+    .g-prog[data-rising='b']
+    .g-prog-shine {
+    animation: g-prog-shine var(--dur-progress) var(--easing-in-out);
+  }
+  /* 같은 키프레임을 다시 걸면 재생되지 않아 이름만 다른 사본을 번갈아 쓴다 */
+  :root:not([data-reduced='true']):not([data-motion='minimal'])
+    .g-prog[data-rising='b']
+    .g-prog-shine {
+    animation-name: g-prog-shine-b;
+  }
+  @keyframes g-prog-shine-b {
+    0% {
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(100%);
+    }
+  }
+  :root[data-motion='lite'] .g-prog-fill {
+    transition-duration: calc(var(--dur-progress) * 0.7);
+  }
+  :root[data-motion='minimal'] .g-prog-fill {
+    transition-duration: var(--dur-fade);
+  }
+  :root[data-reduced='true'] .g-prog-fill {
+    transition: none;
+  }
+}

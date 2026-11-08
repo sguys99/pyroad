@@ -2,6 +2,7 @@
 //
 //   npm run share-card:render                       # 샘플 PNG → docs/design/img/share-card/ + 렌더 시간 표
 //   npm run share-card:render -- --only=weekly      # id에 이 글자가 든 샘플만
+//   npm run share-card:render -- --only=site-og     # 사이트 공유 미리보기 그림만 (P4-10, src/app/opengraph-image.tsx와 같은 그림)
 //   npm run share-card:render -- --lab=<폴더>       # backgroundRepeat 실험 이미지 (커밋하지 않음)
 //
 // JSX를 react-jsx로 돌리려고 `scripts/share-card/tsconfig.json`을 쓴다 (루트는 Next용 `jsx: preserve`).
@@ -18,6 +19,7 @@ import { COLOR } from '@/lib/design/tokens';
 import { renderShareCard } from '@/lib/share-card/cards';
 import { loadShareCardFonts } from '@/lib/share-card/fonts';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
+import { SiteOgCard } from '@/lib/share-card/site';
 import { CARD, SAFE } from '@/lib/share-card/tokens';
 
 const ROOT = process.cwd();
@@ -150,6 +152,22 @@ async function main() {
     }
     console.log(
       `${s.id}: ${(cold.buf.length / 1024).toFixed(0)}KB, ${cold.ms.toFixed(0)}ms, warm ${warm[1].toFixed(0)}ms`,
+    );
+  }
+  // 사이트 공유 미리보기 (P4-10). 운영은 빌드 때 한 번 정적으로 만든다
+  if (!only || 'site-og'.includes(only)) {
+    const el = <SiteOgCard />;
+    const { buf, ms } = await png(el);
+    writeFileSync(join(OUT, 'site-og.png'), buf);
+    writeFileSync(
+      join(OUT, 'guide', 'site-og.png'),
+      (await png(withGuide(el))).buf,
+    );
+    rows.push(
+      `| \`site-og\` | 사이트 OG (P4-10) | ${(buf.length / 1024).toFixed(0)}KB | ${ms.toFixed(0)} | - |`,
+    );
+    console.log(
+      `site-og: ${(buf.length / 1024).toFixed(0)}KB, ${ms.toFixed(0)}ms`,
     );
   }
   console.log(

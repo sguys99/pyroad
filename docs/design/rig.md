@@ -261,6 +261,6 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 | 축하 `celebrations/LevelUpCard.tsx`·`StageClearCard.tsx`·`ProjectCompleteCard.tsx` | `LottieCharacter`(B32 대체, Framer 1회 점프) | `PybaemRig state="happy"→"cheer"`, 코인은 `ByeolttongiRig state="flyIn"→"give"` + `onCue('reward')` | P6-08·P6-13 |
 | 월드맵 `WorldMap.tsx` 현재 스테이지 | `CharacterAvatar` + `.mascot-bob` | `PybaemRig size={56} lookAt={false}` (대기 루프는 리그가) | P5 |
 | 헤더·프로필·HUD 아바타 (`LandingHeader`·`ProfileSummary`·`QuestStatusBar`·`profile/page.tsx`) | `CharacterAvatar` | `PybaemStatic size={32~64} filters={false}` (서버 렌더 가능) | P4·P9-05 |
-| 랜딩 `HeroSection.tsx` | `LottieCharacter` | `PybaemStatic` SSR → `next/dynamic` `PybaemRig` | P4 |
+| 랜딩 히어로 `landing/hero/HeroMascot.tsx` | ~~`LottieCharacter`~~ | **완료**: `PybaemStatic` SSR → 한가할 때 `import()`한 `PybaemRig`로 교체(누르면 반응·마우스 인사) | P4-01 |
 | 공유 카드 (next/og) | — | `PybaemStatic`을 P0-10 직렬화기로 | P10 |
 | `CharacterAvatar`·`LottieCharacter`·`*Svg.tsx`·`motionClasses.ts` | 기존 | 위 교체가 끝나면 삭제 (`expressions.ts` 타입은 유지) | P6 끝 |

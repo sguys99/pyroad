@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { LegalNav } from '@/components/legal/LegalPageShell';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
 import { SoundSettingsSection } from '@/components/settings/SoundSettingsSection';
+import { InstallAppSection } from '@/components/settings/InstallAppSection';
 import { LinkedAccountsSection } from '@/components/settings/LinkedAccountsSection';
 import { GuardianConsentStatus } from '@/components/consent/GuardianConsentStatus';
 import type { MotionSettings } from '@/lib/motion/tier';
@@ -168,6 +169,8 @@ export default function SettingsPage() {
       <MotionSettingsSection serverMotion={settings?.motion} />
       {/* 소리 (P2-14). 엔진 값이라 서버 응답을 기다리지 않음 (서버 동기화는 로그인 레이아웃) */}
       <SoundSettingsSection />
+      {/* 홈 화면에 추가 (P4-11). 기기 판별은 브라우저에서, 데스크톱이면 그리지 않음 */}
+      <InstallAppSection />
       {/* 로그인 계정 연결 (P3-07). 세션 identities 를 직접 읽어 서버 응답을 기다리지 않음 */}
       <LinkedAccountsSection />
       {/* 보호자 동의 (P3-15). 로그인 레이아웃 ConsentProvider 값, 모르면 그리지 않음 */}

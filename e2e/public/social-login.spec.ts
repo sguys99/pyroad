@@ -25,7 +25,7 @@ test.afterEach(() => {
 
 async function openSheet(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /모험 시작하기/ }).click();
+  await page.getByRole('button', { name: /모험 시작/ }).click();
   const sheet = page.getByTestId('login-sheet');
   await expect(sheet).toBeVisible();
   return sheet;
@@ -162,6 +162,54 @@ test.describe('인앱 브라우저 (P3-09)', () => {
       await expect(page.getByTestId('inapp-guide-kakao')).toBeVisible();
       // Google은 signInWithOAuth 전에 멈춘다 (PKCE verifier가 이 웹뷰에 남지 않게)
       expect(mock.requests).toHaveLength(0);
+    } finally {
+      await context.close();
+    }
+  });
+});
+
+test.describe('공용 기기 모드 (P4-09, §12-Q44)', () => {
+  for (const provider of ['kakao', 'google'] as const) {
+    test(`${provider}: "학교·도서관 컴퓨터예요"를 켜면 authorize에 provider별 prompt, 이 기기에 기억`, async ({
+      page,
+      baseURL,
+    }) => {
+      violations = await watchCspViolations(page);
+      const mock = await installOAuthMock(page, {
+        supabaseUrl: appSupabaseUrl(),
+        baseURL: baseURL!,
+        provider,
+        outcome: 'cancel',
+        shared: true,
+      });
+      const sheet = await openSheet(page);
+      const check = sheet.getByRole('checkbox', {
+        name: '학교·도서관 컴퓨터예요',
+      });
+      await expect(check).not.toBeChecked();
+      await check.check();
+      await sheet.getByTestId(`social-login-${provider}`).click();
+
+      // 취소 → 진짜 콜백 → 랜딩 시트가 저절로 다시 열림
+      await expect(
+        page.getByRole('dialog', { name: /로그인을 그만뒀구나/ }),
+      ).toBeVisible();
+      await expect.poll(() => mock.requests.length).toBe(1);
+      expect(mock.problems(), 'kakao는 scope와 prompt=login이 함께').toEqual(
+        [],
+      );
+      // 기억: 다시 열어도 켜져 있다
+      await expect(
+        page.getByTestId('login-sheet').getByTestId('shared-device-check'),
+      ).toBeChecked();
+    });
+  }
+
+  test('카카오톡 인앱에서는 체크를 숨긴다', async ({ browser }) => {
+    const { context, page } = await mobileContext(browser, UA.kakaoAndroid);
+    try {
+      await openSheet(page);
+      await expect(page.getByTestId('shared-device')).toHaveCount(0);
     } finally {
       await context.close();
     }

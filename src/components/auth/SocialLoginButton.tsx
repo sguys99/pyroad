@@ -8,6 +8,8 @@ import { lastLoginBadgeText } from '@/lib/auth/loginProvider';
 // 가벼운 컨텍스트 모듈: 랜딩에서 사운드 매니페스트를 끌고 오지 않게 (button.tsx와 같음)
 import { useSfx } from '@/components/providers/soundContext';
 import { SOCIAL_LABEL, SOCIAL_MARK } from './brandMarks';
+// 브랜드 버튼 모양 (P4-12: 전역 CSS가 아니라 쓰는 곳에서 → 랜딩에서는 로그인 시트와 함께 늦게 온다)
+import './social-login.css';
 
 export interface SocialLoginButtonProps extends Omit<
   ComponentProps<'button'>,

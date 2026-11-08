@@ -15,6 +15,7 @@
 | 세션당 완료 퀘스트 수 (3개 이상) | 정식 측정은 `user_progress`. 이벤트로는 30분 간격 세션 근사 (SQL 5) | `quest_complete`, 그 밖의 서버 이벤트 | 처음 완료만 기록하므로 다시 풀기는 세지 않습니다 |
 | 모바일 세션 비율 (측정 시작) | 날짜별 기기 유형 비율 (SQL 3) | 모든 이벤트의 `device` | iPadOS Safari는 Mac으로 보고하므로 `desktop`으로 셉니다. 퀴즈(모바일 퀘스트) 완료율은 Phase 7에서 `quest_complete`에 퀘스트 유형이 생기면 같은 방식으로 |
 | 힌트 사용 (보상 설계·난이도 조정 참고) | 퀘스트별 힌트 단계 분포, 시작 대비 힌트 비율 (SQL 6) | `hint_used`, `quest_start` | |
+| 30초 체험 → 로그인 전환 (P4-03) | 날짜별 `랜딩 세션 → 체험을 만진 세션 → 체험 성공 세션 → 체험 CTA에서 로그인을 고른 세션` (SQL 8). 오류 종류 분포로 어디서 막히는지 | `landing_view`, `trial_start`, `trial_run`, `trial_success`, `landing_cta_click(cta=trial)` | 같은 탭 세션(`sid`) 안에서는 이어서 셉니다. 로그인 성공(`login_success`)은 사용자 ID라 체험 세션과 잇지 않습니다(위 랜딩 전환과 같은 한계) |
 
 이 도구는 **제품 개선용 합계**를 보는 곳입니다. 특정 아이의 행동을 들여다보거나 보상·제재 판단에 쓰지 않습니다.
 
@@ -25,15 +26,20 @@
 | 이름 | 기록하는 곳 | 속성 | 언제 | 횟수 |
 |---|---|---|---|---|
 | `landing_view` | 브라우저 `track()` — `src/components/landing/LandingViewTracker.tsx` (`src/app/page.tsx`) | 없음 | 랜딩을 열 때 | 볼 때마다 |
-| `landing_cta_click` | 브라우저 `track(…, { immediate: true })` — `HeroSection`(→ `LoginButton` `onBeforeLogin`), `LandingHeader` | `cta`: `hero`·`header`, `provider`: `google`·`kakao`·`naver` | 로그인 버튼을 누른 직후(OAuth로 떠나기 전에 바로 전송) | 누를 때마다 |
+| `landing_cta_click` | 브라우저 `track(…, { immediate: true })` — `HeroSection`(→ `LoginButton` `onBeforeLogin`), `LandingHeader` | `cta`: `hero`·`header`·`trial`(30초 체험 성공 뒤 "모험을 저장하려면 로그인!", P4-03), `provider`: `google`·`kakao`·`naver`, `shared`(선택, 불리언): 공용 기기 체크 "학교·도서관 컴퓨터예요"를 켜고 골랐는지(P4-09) | 로그인 버튼을 누른 직후(OAuth로 떠나기 전에 바로 전송) | 누를 때마다 |
+| `trial_start` | 브라우저 `track()` — `src/components/landing/sections/trial/TrialNotebook.tsx` (P4-03) | 없음 | 랜딩 30초 체험 공책을 처음 만질 때(글자를 고치거나·보조 키·추천 주문·"주문 걸기"). 데모가 자동으로 치는 것은 세지 않음 | 페이지당 1번 |
+| `trial_run` | 브라우저 `track()` — 같은 곳 (P4-03) | `result`: `ok`(찍힘)·`no_print`(print 없이 식만)·오류 종류(`src/lib/landing/miniPython/errors.ts`의 `MINI_ERROR_KINDS`: `unterminated_string`·`unclosed_paren`·`print_typo`·`unquoted_text`·`zero_division`·`str_plus_number`·`unsupported` 등 21가지). **아이가 쓴 코드·출력은 보내지 않음** | "주문 걸기"(또는 Enter·추천 주문)를 누를 때 | 누를 때마다 |
+| `trial_success` | 브라우저 `track()` — 같은 곳 (P4-03) | `runs`: 몇 번째 주문에서 처음 성공했나(1~99 정수) | 체험 공책에서 처음 print 결과가 나왔을 때 | 페이지당 1번 |
 | `login_success` | 서버 — `src/app/auth/callback/route.ts` | `provider`: `google`·`kakao`·`naver`·`unknown`, `new_user`: 가입 직후 첫 로그인 | 코드 교환 성공 뒤 | 로그인마다. `new_user=true`는 사용자당 1번(dedupe) |
 | `onboarding_complete` | 서버 — `src/app/api/onboarding/route.ts` (P3-11) | `skin`: 파이뱀 색 6종 id(`green`·`sky`·`sunset`·`berry`·`violet`·`sunny`), `grade_given`: 학년을 골랐는지(학년 값·닉네임은 보내지 않음), `returning`: 온보딩 전부터 학습하던 기존 사용자였는지(P3-12, 서버가 경험치·진행 행으로 판별) | `complete_onboarding` RPC가 처음 온보딩을 마친 것으로 처리했을 때 | 사용자당 1번(dedupe) |
 | `quest_start` | 서버 — 퀘스트 페이지 서버 컴포넌트 `trackQuestStart()` (**아래 4. 연결 대기**) | `quest_id` | 퀘스트에 처음 들어올 때. 잠긴 스테이지로 돌려보낼 때는 기록하지 않음 | 사용자·퀘스트마다 1번(dedupe) |
 | `quest_complete` | 서버 — `src/app/api/quest/complete/route.ts` | `quest_id`, `hints_used`(0~99), `used_golden_key`, `level_up`, `stage_cleared` | `complete_quest` RPC가 **처음** 완료로 처리했을 때(값은 모두 DB 함수가 정한 것) | 사용자·퀘스트마다 1번 |
 | `hint_used` | 서버 — `src/app/api/tutor/route.ts`·`stream/route.ts`의 `withHintTracking()` (`record_hint` 경로) | `quest_id`, `level`(1~3) | 튜터가 힌트 내용을 보내기 시작한 때(`record_hint`와 같은 시점, 끊긴 요청은 세지 않음) | 받을 때마다 |
 | `motion_tier_change` | 브라우저 `track()` — `src/lib/motion/MotionTierProvider.tsx` (P2-15) | `from`·`to`: `full`·`lite`·`minimal`(바뀌기 전·후 적용 단계), `cause`: `measured`(실측 자동 하향)·`user`(설정 화면에서 바꿈·"다시 재 보기"), `setting`: `auto`·`full`·`lite`·`minimal`(그때의 움직임 설정), `reduced`: `system`·`on`·`off`(그때의 동작 줄이기 설정), `elapsed_s`: 페이지를 연 뒤 초(0~86400 정수) | 자동 하향은 실측 샘플러가 한 단계 내릴 때(페이지당 최대 2번, 내려간 단계는 기기에 저장되어 다음 세션은 그 단계에서 시작하므로 반복되지 않음). 사용자는 설정을 고를 때 | 바뀔 때마다 |
+| `pwa_install_prompt` | 브라우저 `track()` — `src/components/pwa/useInstallFlow.ts` (P4-11) | `via`: `world`(월드맵 쪽지)·`settings`(설정 화면), `platform`: `android`(브라우저 설치 창)·`ios`(그림 안내), `result`: `accepted`·`dismissed`(안드로이드 설치 창에서 고른 것)·`guide`(iOS 안내를 엶 — iOS는 실제로 추가했는지 알 수 없음) | "홈 화면에 추가" 버튼을 눌러 설치 창에서 고르거나 iOS 안내를 열 때 | 누를 때마다 |
+| `pwa_installed` | 브라우저 `track()` — `src/lib/pwa/installPrompt.ts` (P4-11) | 없음 | 브라우저가 `appinstalled`를 보낼 때(Chromium만, iOS는 알 수 없음) | 설치할 때마다 |
 
-- **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
+- **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`·`pwa_install_prompt`·`pwa_installed`·`trial_start`·`trial_run`·`trial_success`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
 - 새 이벤트를 더할 때: `events.ts`(타입·이름) → `schema.ts`(strict 스키마) → 이 표. DB는 이름 형식(`^[a-z][a-z0-9_]{1,47}$`)·크기만 보므로 마이그레이션이 필요 없습니다.
 - `motion_tier_change`는 **기기 성능 분포로 연출 단계 임계값을 조정**하려는 것입니다(P12-04: 놓친 프레임 25%, 창 4개 중 3개). 프레임 수치·화면 크기·기기 모델 같은 지문 정보는 보내지 않고 단계 이름과 경과 초만 보냅니다. `device`(서버가 UA로 판별한 유형)와 함께 보면 "태블릿에서 자동 하향이 얼마나 자주, 몇 초 만에 일어나는지"를 알 수 있습니다(SQL 7). 클라이언트 이벤트라 부풀릴 수 있지만 보상·지표 판정에 쓰지 않는 진단용입니다.
 
@@ -228,4 +234,19 @@ select props->>'cause' as cause, device,
   from public.analytics_events
  where name = 'motion_tier_change' and occurred_at >= now() - interval '28 days'
  group by 1, 2, 3 order by events desc;
+
+-- 8. 30초 체험 퍼널 (P4-03, 날짜별 탭 세션 수, 최근 28일) + 오류 종류 분포
+select public.kst_date(occurred_at) as day,
+       count(distinct anon_id) filter (where name = 'landing_view')  as landing_sessions,
+       count(distinct anon_id) filter (where name = 'trial_start')   as trial_sessions,
+       count(distinct anon_id) filter (where name = 'trial_success') as success_sessions,
+       count(distinct anon_id) filter (where name = 'landing_cta_click' and props->>'cta' = 'trial') as trial_cta_sessions
+  from public.analytics_events
+ where occurred_at >= now() - interval '28 days'
+ group by 1 order by 1 desc;
+
+select props->>'result' as result, count(*) as runs, count(distinct anon_id) as sessions
+  from public.analytics_events
+ where name = 'trial_run' and occurred_at >= now() - interval '28 days'
+ group by 1 order by runs desc;
 ```

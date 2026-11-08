@@ -1,43 +1,17 @@
-import type { Metadata } from 'next';
-import { MotionProvider } from '@/components/providers/MotionProvider';
+import type { Metadata, Viewport } from 'next';
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
 import { SoundProvider } from '@/components/providers/SoundProvider';
 import { LastLoginRecorder } from '@/components/auth/LastLoginRecorder';
 import { MOTION_BOOT_SCRIPT } from '@/lib/motion/boot';
+import { rootMetadata, rootViewport } from '@/lib/seo/metadata';
 import './globals.css';
 
-const SITE_URL = 'https://pyroad.vercel.app';
-
-export const metadata: Metadata = {
-  title: 'pyRoad - 파이썬 모험의 시작',
-  description:
-    '파이뱀 선생님과 함께 퀘스트를 깨며 파이썬을 배우는 초등학생 전용 웹 학습 플랫폼',
-  metadataBase: new URL(SITE_URL),
-  openGraph: {
-    title: 'pyRoad - 파이썬 모험의 시작',
-    description:
-      '파이뱀 선생님과 함께 퀘스트를 깨며 파이썬을 배우는 초등학생 전용 웹 학습 플랫폼',
-    url: SITE_URL,
-    siteName: 'pyRoad',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'pyRoad - 파이뱀 선생님과 파이썬 모험',
-      },
-    ],
-    locale: 'ko_KR',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'pyRoad - 파이썬 모험의 시작',
-    description:
-      '파이뱀 선생님과 함께 퀘스트를 깨며 파이썬을 배우는 초등학생 전용 웹 학습 플랫폼',
-    images: ['/og-image.png'],
-  },
-};
+/**
+ * 사이트 기본 메타데이터 (P4-10, `src/lib/seo/`). 하위 페이지 제목은 "%s - pyRoad" 틀.
+ * 공유 미리보기 그림은 `src/app/opengraph-image.tsx`(빌드 때 정적 생성)가 붙는다.
+ */
+export const metadata: Metadata = rootMetadata();
+export const viewport: Viewport = rootViewport;
 
 export default function RootLayout({
   children,
@@ -53,13 +27,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: MOTION_BOOT_SCRIPT }} />
       </head>
       <body>
-        <MotionProvider>
-          <MotionTierProvider>
-            <SoundProvider>{children}</SoundProvider>
-            {/* 로그인 직후 #lp= 조각 → 최근 로그인 배지 저장 (P3-08). 그리는 것 없음 */}
-            <LastLoginRecorder />
-          </MotionTierProvider>
-        </MotionProvider>
+        {/* Framer LazyMotion(MotionProvider)은 루트에 두지 않는다: Framer를 쓰는 화면 틀(LoggedInShell·공지)만 (P4-12) */}
+        <MotionTierProvider>
+          <SoundProvider>{children}</SoundProvider>
+          {/* 로그인 직후 #lp= 조각 → 최근 로그인 배지 저장 (P3-08). 그리는 것 없음 */}
+          <LastLoginRecorder />
+        </MotionTierProvider>
       </body>
     </html>
   );

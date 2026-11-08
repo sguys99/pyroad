@@ -28,11 +28,12 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { shareCardText } from './share-card-chars.mjs';
 import {
-  ALWAYS_CHARS,
   LANDING_ENTRIES,
   ROOT,
   collectLandingText,
+  subsetText,
 } from './landing-text.mjs';
+import { LANDING_FONT_BUDGET, LANDING_PRELOAD_TARGET } from './check-build.mjs';
 
 const CACHE =
   process.env.FONT_CACHE ?? join(ROOT, 'node_modules/.cache/pyroad-fonts');
@@ -179,6 +180,8 @@ export const FAMILIES = {
     // 굵기 하나뿐인 글꼴을 굵기 범위로 선언해 `font-bold` 제목도 가짜 굵게(합성) 없이 Jua 그대로 그린다
     weight: '100 900',
     landing: 'Jua-landing.woff2',
+    // 랜딩 서브셋: 제목 글꼴 자리에 쓰인 글자만 (P4-12). 영문은 제목에 나온 글자만(landing-text.mjs subsetText)
+    landingSubset: { covers: 'display' },
     version: '1.001 (google/fonts ofl/jua)',
     license: 'SIL OFL 1.1 (예약 이름 없음)',
     rename: null,
@@ -189,6 +192,9 @@ export const FAMILIES = {
     prefix: 'pyRoadSans',
     weight: '45 920',
     landing: 'pyRoadSans-landing.woff2',
+    // 랜딩 서브셋: 랜딩 글자 전부 + ASCII, 굵기 축 400~700만(랜딩이 쓰는 굵기), 기본 기능 + tnum만 (P4-12).
+    // 굵기를 바꾸면 src/fonts/landing.ts의 weight도 같이 (fonts:check가 비교)
+    landingSubset: { covers: 'all', wght: '400 700', features: 'default,tnum' },
     version: 'Pretendard Variable 1.3.9 (내부 버전 1.309)',
     license: 'SIL OFL 1.1 (예약 이름 "Pretendard")',
     rename: 'Pretendard Variable,Pretendard',
@@ -405,7 +411,11 @@ function writeReadme(key, src, extra) {
     '',
     ...(f.landing
       ? [
-          `- \`${f.landing}\`: 랜딩 텍스트 서브셋 (랜딩 문구에 쓰인 글자 + ASCII). \`src/fonts/landing.ts\`가 \`next/font/local\`로 preload`,
+          `- \`${f.landing}\`: 랜딩 텍스트 서브셋 (${
+            f.landingSubset.covers === 'display'
+              ? '제목 글꼴 자리(`font-display`·h1~h3)에 쓰인 랜딩 글자 + 숫자·문장부호'
+              : `랜딩 문구 글자 전부 + ASCII, 굵기 ${(f.landingSubset.wght ?? f.weight).replace(' ', '~')}`
+          }). \`src/fonts/landing.ts\`가 \`next/font/local\`로 preload`,
         ]
       : []),
     `- \`${f.dir}.css\` + \`slices/\`: unicode-range 조각. 화면에 나온 글자가 든 조각만 받음`,
@@ -458,14 +468,15 @@ function main() {
 
   console.log('[2/4] 랜딩 텍스트 서브셋');
   const landing = collectLandingText();
-  const textFile = join(CACHE, 'landing-text.txt');
-  writeFileSync(textFile, ALWAYS_CHARS + landing.chars.join(''));
   const landingFonts = {};
   for (const [key, from] of [
     ['jua', src.jua],
     ['sans', src.pretendardTtf],
   ]) {
     const f = FAMILIES[key];
+    const opt = f.landingSubset;
+    const textFile = join(CACHE, `landing-text-${key}.txt`);
+    writeFileSync(textFile, subsetText(opt.covers, landing));
     mkdirSync(join(OUT, f.dir), { recursive: true });
     const out = join(OUT, f.dir, f.landing);
     const r = kit([
@@ -474,11 +485,17 @@ function main() {
       out,
       '--text-file',
       textFile,
+      ...(opt.features ? ['--features', opt.features] : []),
+      ...(opt.wght ? ['--wght', opt.wght.replace(' ', ':')] : []),
       ...(f.rename ? ['--family', f.family, '--rename', f.rename] : []),
     ]);
     landingFonts[key] = {
       file: `${f.dir}/${f.landing}`,
       ...fileInfo(out),
+      // 어느 글자를 담나: display = 제목 글꼴 자리 글자(landing.displayChars), all = 랜딩 글자 전부(landing.chars)
+      covers: opt.covers,
+      weight: opt.wght ?? f.weight,
+      features: opt.features ?? '*',
       // 원본 글꼴에 없어 서브셋에 넣을 수 없는 글자 (이모지 등). 시스템 폰트로 그려짐
       notInFont: r.missing,
     };
@@ -486,6 +503,17 @@ function main() {
       `  ${f.family}: ${(r.bytes / 1024).toFixed(1)}KB, 글자 ${r.chars}개${r.missing ? `, 원본에 없음: ${r.missing}` : ''}`,
     );
   }
+  const landingBytes = Object.values(landingFonts).reduce(
+    (n, x) => n + x.bytes,
+    0,
+  );
+  console.log(
+    `  합계 ${(landingBytes / 1024).toFixed(1)}KB / 예산 ${LANDING_FONT_BUDGET / 1024}KB (preload 목표 ${LANDING_PRELOAD_TARGET / 1024}KB)`,
+  );
+  if (landingBytes > LANDING_PRELOAD_TARGET)
+    console.warn(
+      `  경고: 랜딩 서브셋이 preload 목표 ${LANDING_PRELOAD_TARGET / 1024}KB를 넘음 — 본문 글자 수를 확인하세요 (docs/design/fonts.md §4)`,
+    );
 
   let families = prev?.families ?? {};
   let metrics = prev?.metrics;
@@ -563,19 +591,21 @@ function main() {
     copyFileSync(src.juaOfl, join(OUT, FAMILIES.jua.dir, 'OFL.txt'));
     copyFileSync(src.pretendardOfl, join(OUT, FAMILIES.sans.dir, 'OFL.txt'));
     copyFileSync(src.d2codingOfl, join(OUT, FAMILIES.mono.dir, 'OFL.txt'));
-    writeReadme('jua', 'jua', [
-      '- 서브셋: 랜딩 텍스트 서브셋 1개 + unicode-range 조각(기준 묶음은 npm `pretendard` 1.3.9 가변 동적 서브셋 CSS, 실제 글리프가 있는 글자만 적음).',
-    ]);
-    writeReadme('sans', 'pretendard', [
-      '- 조각: npm `pretendard` 1.3.9의 공식 가변 동적 서브셋(`dist/web/variable/woff2-dynamic-subset/`) 92개를 글리프는 그대로 두고 이름만 바꿔 다시 저장.',
-      '- 랜딩 텍스트 서브셋: `dist/public/variable/PretendardVariable.ttf`에서 랜딩 글자만 남김 (가변 축 wght 45~920 유지).',
-    ]);
-    writeReadme('mono', 'd2coding', [
-      '- 원본: 릴리스 zip의 `D2Coding/D2Coding-Ver1.3.2-20180524.ttf` (리거처 없는 기본판 Regular). OFL.txt는 zip에 없어 저장소(`naver/d2-coding-font` ' +
-        `\`${D2_REPO_COMMIT.slice(0, 7)}\`)의 OFL.txt를 그대로 씀.`,
-      '- 서브셋: 한자·가나를 뺀 unicode-range 조각(기준 묶음은 npm `pretendard` 가변 동적 서브셋 CSS, 그 밖의 글자는 코드포인트 순 160자씩).',
-    ]);
   }
+
+  // README (랜딩 서브셋 설명이 들어가서 --landing에서도 다시 씀)
+  writeReadme('jua', 'jua', [
+    '- 서브셋: 랜딩 텍스트 서브셋 1개(제목 글꼴 자리에 쓰인 글자만, P4-12) + unicode-range 조각(기준 묶음은 npm `pretendard` 1.3.9 가변 동적 서브셋 CSS, 실제 글리프가 있는 글자만 적음).',
+  ]);
+  writeReadme('sans', 'pretendard', [
+    '- 조각: npm `pretendard` 1.3.9의 공식 가변 동적 서브셋(`dist/web/variable/woff2-dynamic-subset/`) 92개를 글리프는 그대로 두고 이름만 바꿔 다시 저장.',
+    '- 랜딩 텍스트 서브셋: `dist/public/variable/PretendardVariable.ttf`에서 랜딩 글자만 남기고, 가변 축을 wght 400~700으로 좁히고(fontTools instancer), OpenType 기능은 브라우저 기본 기능 + tnum만 남김 (P4-12).',
+  ]);
+  writeReadme('mono', 'd2coding', [
+    '- 원본: 릴리스 zip의 `D2Coding/D2Coding-Ver1.3.2-20180524.ttf` (리거처 없는 기본판 Regular). OFL.txt는 zip에 없어 저장소(`naver/d2-coding-font` ' +
+      `\`${D2_REPO_COMMIT.slice(0, 7)}\`)의 OFL.txt를 그대로 씀.`,
+    '- 서브셋: 한자·가나를 뺀 unicode-range 조각(기준 묶음은 npm `pretendard` 가변 동적 서브셋 CSS, 그 밖의 글자는 코드포인트 순 160자씩).',
+  ]);
 
   console.log('[4/4] manifest');
   const manifest = {
@@ -590,6 +620,7 @@ function main() {
     landing: {
       entries: LANDING_ENTRIES,
       chars: landing.chars.join(''),
+      displayChars: landing.displayChars.join(''),
       fonts: landingFonts,
     },
     families,

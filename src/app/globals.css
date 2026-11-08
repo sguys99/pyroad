@@ -1,12 +1,39 @@
-@import 'tailwindcss';
+/* 모든 화면 공통 CSS (루트 레이아웃). 랜딩 `/`에서는 이 파일 전체가 렌더 차단 CSS다 (예산 15KB gzip, §2.10·P4-12).
+ *
+ * Tailwind 유틸리티는 랜딩이 닿는 소스만 훑는다 (아래 @source). 앱 화면만 쓰는 유틸리티는 `./app.css`(앱 화면 틀이 import)에 있다.
+ * 랜딩 트리(정적·동적 import 모두, 로그인 시트 포함)가 새 파일·폴더를 import하면 여기 @source에도 더한다 —
+ * `src/app/__tests__/tailwind-sources.test.ts`가 랜딩 import 그래프의 모든 파일이 아래 목록 안에 있는지 확인한다.
+ * 여러 화면이 같이 쓰는 폴더(ui·characters)는 랜딩이 쓰는 파일만 적는다 (폴더째 넣으면 약 1.4KB gzip 늘어남) */
+@import 'tailwindcss' source(none);
+@source '../app/layout.tsx';
+@source '../app/page.tsx';
+@source '../app/not-found.tsx';
+@source '../app/global-error.tsx';
+@source '../components/landing';
+@source '../components/auth';
+@source '../components/providers';
+@source '../components/InAppBrowserGuide.tsx';
+@source '../components/ui/button.tsx';
+@source '../components/ui/speech-bubble.tsx';
+@source '../components/ui/sheet.tsx';
+@source '../components/ui/hud.tsx';
+@source '../components/ui/progress-bar.tsx';
+@source '../components/ui/reward-icon.tsx';
+@source '../components/ui/use-back-to-close.ts';
+@source '../components/ui/use-count-up.ts';
+@source '../components/characters/rig';
+@source '../components/characters/motionClasses.ts';
+@source '../components/characters/PybaemSvg.tsx';
+@source '../lib';
+@source '../fonts/landing.ts';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 /* 한글 폴백 보정 @font-face (P2-10, 생성물). 웹폰트 파일은 여기서 싣지 않는다: src/fonts/landing.ts·app.css */
 @import '../fonts/fallbacks.css';
-/* 공통 컴포넌트 (P2-11, docs/design/components.md): 게임 버튼·모달·시트·토스트·탭·진행바·HUD·말풍선 */
+/* 공통 컴포넌트 (P2-11, docs/design/components.md): 게임 버튼·아이콘 버튼·말풍선.
+ * 카드·툴팁·모달·시트·토스트·탭·진행바·HUD는 그 컴포넌트 파일이 import한다 (P4-12: 랜딩 첫 화면에 쓰지 않는 것은 렌더 차단 CSS에서 뺌).
+ * 소셜 로그인 버튼(social-login.css)도 그 버튼 컴포넌트가 import한다 (로그인 시트와 함께 늦게 온다) */
 @import '../components/ui/game-ui.css';
-/* 소셜 로그인 버튼 3종 (P3-05): 브랜드 가이드 색 (토큰 아님, docs/design/tokens.md §6) */
-@import '../components/auth/social-login.css';
 
 @plugin '@tailwindcss/typography';
 
@@ -362,51 +389,6 @@
   box-shadow: 0 4px 0 color-mix(in srgb, var(--foreground) 12%, transparent) !important;
 }
 
-@keyframes character-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
-@keyframes mascot-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-@keyframes step-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-/* 현재 스테이지 빛 고리: 미리 그린 그림자 층의 opacity만 (box-shadow 자체를 움직이지 않음) */
-@keyframes stage-pulse {
-  0%,
-  100% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@keyframes stage-shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
 /* 눈 깜빡임: 4.2초에 한 번 0.15초 (예전 SVG SMIL과 같은 박자), 느린 깜빡임은 7초에 한 번 0.4초 */
 @keyframes char-blink-eye {
   0%,
@@ -458,103 +440,12 @@
     opacity: var(--twinkle-to, 0.3);
   }
 }
-@keyframes float-cloud {
-  0% {
-    transform: translateX(-10%);
-  }
-  50% {
-    transform: translateX(10%);
-  }
-  100% {
-    transform: translateX(-10%);
-  }
-}
-@keyframes drift-leaf {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0.7;
-  }
-  25% {
-    transform: translate(15px, 30px) rotate(45deg);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translate(-10px, 60px) rotate(90deg);
-    opacity: 0.7;
-  }
-  75% {
-    transform: translate(20px, 90px) rotate(135deg);
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate(0, 120px) rotate(180deg);
-    opacity: 0;
-  }
-}
-@keyframes waking-dot {
-  0%,
-  60%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-  30% {
-    transform: translateY(-4px);
-    opacity: 1;
-  }
-}
-@keyframes thinking-dot {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
 .char-blink-eye {
   transform-box: fill-box;
   transform-origin: center;
 }
-.stage-pulse {
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  box-shadow: 0 0 12px 4px color-mix(in srgb, var(--primary) 30%, transparent);
-  opacity: 0;
-  pointer-events: none;
-}
-.stage-shimmer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--accent) 16%, transparent),
-    transparent
-  );
-  transform: translateX(-100%);
-}
-
 /* 대기 루프: full·lite */
 :root[data-reduced='false']:not([data-motion='minimal']) {
-  /* 캐릭터 숨쉬기 (CharacterAvatar animated) */
-  .character-breathe {
-    animation: character-breathe 3s ease-in-out infinite;
-  }
-  /* 월드맵 파이뱀 통통 */
-  .mascot-bob {
-    animation: mascot-bob 2s ease-in-out infinite;
-  }
-  /* 퀘스트 단계 표시의 현재 단계 */
-  .step-pulse {
-    animation: step-pulse 2s ease-in-out infinite;
-  }
-  .stage-pulse {
-    animation: stage-pulse 2s ease-in-out infinite;
-  }
   .char-blink-eye {
     animation: char-blink-eye 4.2s linear 3s infinite;
   }
@@ -581,134 +472,15 @@
 
 /* 앰비언트: full만 */
 :root[data-reduced='false'][data-motion='full'] {
-  .float-cloud {
-    animation: float-cloud var(--ambient-dur, 25s) ease-in-out infinite;
-    animation-delay: var(--ambient-delay, 0s);
-  }
-  .drift-leaf {
-    animation: drift-leaf var(--ambient-dur, 18s) linear infinite;
-    animation-delay: var(--ambient-delay, 0s);
-  }
-  .stage-shimmer {
-    animation: stage-shimmer 3s ease-in-out infinite;
-  }
   .m-ambient {
     animation-play-state: running;
   }
-}
-
-/* 바쁨 표시: 동작 줄이기만 끔 (minimal에서도 "기다리는 중"은 알려야 함) */
-:root[data-reduced='false'] {
-  /* 실행기 다시 깨우는 중 점 세 개 (P1-09) */
-  .waking-dot {
-    animation: waking-dot 1.2s ease-in-out infinite;
-  }
-  .waking-dot:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  .waking-dot:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  /* AI 튜터 생각 중 점 세 개 (P1-10: Framer repeat: Infinity → CSS) */
-  .thinking-dot {
-    animation: thinking-dot 0.6s ease-in-out infinite;
-  }
-  .thinking-dot:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  .thinking-dot:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-}
-
-/* 코드 에디터 커서 깜빡임(CodeMirror 기본 .cm-cursorLayer 무한 반복)은 입력 위치를 알리는 기능 신호라 단계와 무관하게 두고,
-   동작 줄이기에서만 멈춘다(커서는 늘 보이는 상태로). 다른 바쁨 표시와 같은 규칙 (P2-12) */
-/* CodeMirror 규칙(.ͼ1.cm-focused > .cm-scroller > .cm-cursorLayer, 0-4-0)이 나중에 주입되므로 명시도를 더 높인다 */
-:root[data-reduced='true']
-  .cm-editor.cm-focused
-  > .cm-scroller
-  > .cm-cursorLayer {
-  animation: none;
 }
 
 /* .m-loop·.m-ambient: 컴포넌트가 자기 animation을 걸고 조건 밖에서는 멈춘다 (P2-09·P2-13이 쓸 공용 클래스) */
 .m-loop,
 .m-ambient {
   animation-play-state: paused;
-}
-
-/* 축하 시퀀서 (P1-10). 모두 1회성이고 transform·opacity만 움직인다 (§2.10).
-   - 자동 넘김 막대: 카드 아래에서 줄어든다 (멈추면 animation-play-state: paused)
-   - 레벨 숫자 pop + 빛 고리: 카운트업이 끝나면 data-popped가 붙는다 (동작 줄이기면 붙지 않음, 붙어도 움직이지 않음) */
-.celebration-countdown {
-  transform-origin: left center;
-  animation-name: celebration-countdown;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-@keyframes celebration-countdown {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-.celebration-ring {
-  position: absolute;
-  left: 50%;
-  top: 55%;
-  width: 7rem;
-  height: 7rem;
-  margin: -3.5rem 0 0 -3.5rem;
-  border-radius: 9999px;
-  border: 4px solid var(--accent);
-  opacity: 0;
-  pointer-events: none;
-}
-@keyframes celebration-pop {
-  0% {
-    transform: scale(1);
-  }
-  35% {
-    transform: scale(1.22);
-  }
-  65% {
-    transform: scale(0.96);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-@keyframes celebration-ring {
-  0% {
-    transform: scale(0.4);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(1.7);
-    opacity: 0;
-  }
-}
-/* minimal은 스프링·바운스 없음(단계표 "일회성 이펙트 = 페이드만") → 팝·고리도 없이 숫자만 (P2-12 감사) */
-:root[data-reduced='false']:not([data-motion='minimal'])
-  .celebration-pop[data-popped='true'] {
-  animation: celebration-pop 420ms var(--easing-out);
-}
-:root[data-reduced='false']:not([data-motion='minimal'])
-  .celebration-pop[data-popped='true']
-  .celebration-ring {
-  animation: celebration-ring var(--dur-page) var(--easing-out) forwards;
-}
-
-/* 월드맵 노드 반응형 위치 */
-.world-node {
-  left: var(--ml);
-}
-@media (min-width: 640px) {
-  .world-node {
-    left: var(--dl);
-  }
 }
 
 @layer base {

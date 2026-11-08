@@ -19,10 +19,11 @@ export const LEGAL_OPERATOR = {
 /** 이용약관 버전 */
 export const TERMS_VERSION = '2026-11-06';
 /** 개인정보처리방침 버전 */
-export const PRIVACY_VERSION = '2026-11-06';
+export const PRIVACY_VERSION = '2026-11-08';
 
 export const TERMS_EFFECTIVE_DATE = '2026-11-06';
-export const PRIVACY_EFFECTIVE_DATE = '2026-11-06';
+// 2026-11-08 개정(§12-Q45): 운영 배포일이 정해지면 시행일을 그날로 맞추고 공지 (v0.5 런북 "Phase 4 병합")
+export const PRIVACY_EFFECTIVE_DATE = '2026-11-08';
 
 /** 법적 고지 페이지 (비로그인 열람, 정적 렌더 — `src/lib/security/csp.ts`의 STATIC_PAGE_PATHS) */
 export const LEGAL_LINKS = [

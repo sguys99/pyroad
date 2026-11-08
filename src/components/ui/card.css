@@ -1,0 +1,41 @@
+/* 카드 (P2-11, docs/design/components.md). game-ui.css에서 떼어 냄 (P4-12): `card.tsx`가 import한다.
+   규칙(토큰 변수만 · 연출 단계 · transform·opacity만)은 game-ui.css 머리 주석과 같다. globals.css(game-ui.css)보다 늘 뒤에 온다 */
+
+@layer components {
+  /* ───────────────────────── 카드: 테두리 없이 면 + 그림자 한 종류 */
+  .g-card-i {
+    transition-property: transform, background-color;
+    transition-duration: var(--spring-body-dur), var(--dur-instant);
+    transition-timing-function: var(--spring-body), var(--easing-out);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (hover: hover) {
+    .g-card-i:hover {
+      transform: translateY(-2px);
+    }
+  }
+  .g-card-i:active {
+    transform: translateY(1px);
+    transition-duration: var(--dur-instant);
+    transition-timing-function: var(--easing-press);
+  }
+  .g-card-i:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  :root[data-motion='lite'] .g-card-i {
+    transition-duration: var(--spring-face-dur), var(--dur-instant);
+    transition-timing-function: var(--spring-face), var(--easing-out);
+  }
+  :root[data-motion='minimal'] .g-card-i {
+    transition: none;
+  }
+  :root[data-reduced='true'] .g-card-i {
+    transform: none;
+    transition: background-color var(--dur-instant) var(--easing-out);
+  }
+  :root[data-reduced='true'] .g-card-i:active {
+    background-color: var(--surface-2);
+  }
+}

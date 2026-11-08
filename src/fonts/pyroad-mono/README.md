@@ -5,7 +5,7 @@ pyRoad 앱이 자체 호스팅하는 웹폰트입니다 (P2-10). 구성·다시 
 | 항목 | 값 |
 |---|---|
 | 원본 | D2Coding 1.3.2 (Build 20180524), 리거처 없는 기본판 Regular |
-| 받은 곳 | https://github.com/naver/d2codingfont/releases/download/VER1.3.2/D2Coding-Ver1.3.2-20180524.zip |
+| 받은 곳 | https://github.com/naver/d2-coding-font/releases/download/VER1.3.2/D2Coding-Ver1.3.2-20180524.zip |
 | 원본 sha256 | `0f1c9192eac7d56329dddc620f9f1666b707e9c8ed38fe1f988d0ae3e30b24e6` |
 | 라이선스 | SIL OFL 1.1 (예약 이름 "D2Coding", "D2Coding-Bold") — 전문은 같은 폴더의 [OFL.txt](OFL.txt) |
 | 글꼴 이름 | `pyRoad Mono` (원래 이름 "D2Coding"에서 바꿈) |

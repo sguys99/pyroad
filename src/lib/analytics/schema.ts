@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SKIN_IDS } from '@/lib/avatar/skins';
+import { MINI_ERROR_KINDS } from '@/lib/landing/miniPython/errors';
 import {
   ANON_ID_RE,
   CLIENT_EVENT_NAMES,
@@ -21,8 +22,18 @@ const motionTier = z.enum(['full', 'lite', 'minimal']);
 export const EVENT_PROPS_SCHEMA = {
   landing_view: z.object({}).strict(),
   landing_cta_click: z
-    .object({ cta: z.enum(['hero', 'header']), provider })
+    .object({
+      cta: z.enum(['hero', 'header', 'trial']),
+      provider,
+      // 공용 기기 체크 (P4-09). 선택: 배포 전 번들이 보낸 이벤트도 받는다
+      shared: z.boolean().optional(),
+    })
     .strict(),
+  trial_start: z.object({}).strict(),
+  trial_run: z
+    .object({ result: z.enum(['ok', 'no_print', ...MINI_ERROR_KINDS]) })
+    .strict(),
+  trial_success: z.object({ runs: z.number().int().min(1).max(99) }).strict(),
   login_success: z
     .object({
       provider: z.enum(['google', 'kakao', 'naver', 'unknown']),
@@ -62,6 +73,14 @@ export const EVENT_PROPS_SCHEMA = {
       elapsed_s: z.number().int().min(0).max(86_400),
     })
     .strict(),
+  pwa_install_prompt: z
+    .object({
+      via: z.enum(['world', 'settings']),
+      platform: z.enum(['android', 'ios']),
+      result: z.enum(['accepted', 'dismissed', 'guide']),
+    })
+    .strict(),
+  pwa_installed: z.object({}).strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -89,6 +108,41 @@ const clientEvent = z.discriminatedUnion('name', [
       path: z.string().max(200).optional(),
     })
     .strict(),
+  z
+    .object({
+      name: z.literal('pwa_install_prompt'),
+      props: EVENT_PROPS_SCHEMA.pwa_install_prompt,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('pwa_installed'),
+      props: EVENT_PROPS_SCHEMA.pwa_installed.default({}),
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('trial_start'),
+      props: EVENT_PROPS_SCHEMA.trial_start.default({}),
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('trial_run'),
+      props: EVENT_PROPS_SCHEMA.trial_run,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('trial_success'),
+      props: EVENT_PROPS_SCHEMA.trial_success,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
 ]);
 
 // 스키마가 CLIENT_EVENT_NAMES 를 모두 다루는지 컴파일 때 확인
@@ -100,6 +154,11 @@ const _clientNamesCovered: Record<
   landing_view: 'landing_view',
   landing_cta_click: 'landing_cta_click',
   motion_tier_change: 'motion_tier_change',
+  pwa_install_prompt: 'pwa_install_prompt',
+  pwa_installed: 'pwa_installed',
+  trial_start: 'trial_start',
+  trial_run: 'trial_run',
+  trial_success: 'trial_success',
 };
 void _clientNamesCovered;
 

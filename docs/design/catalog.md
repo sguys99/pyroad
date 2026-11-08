@@ -74,7 +74,7 @@
 | `spin` | 로딩 스피너(버튼 `loading`·실행 중), `reduced:animate-none` |
 | `pulse` | 화면 로딩 스켈레톤, `reduced:animate-none` |
 | `waking-dot` · `thinking-dot` | 실행기 깨우는 중 · AI 튜터 생각 중 점 세 개 |
-| `cm-blink` · `cm-blink2` | 코드 에디터 커서 = 입력 위치 신호(CodeMirror 기본). 동작 줄이기에서는 멈추고 늘 보이게(globals.css, P2-12 추가) |
+| `cm-blink` · `cm-blink2` | 코드 에디터 커서 = 입력 위치 신호(CodeMirror 기본). 동작 줄이기에서는 멈추고 늘 보이게(app.css — P4-12에서 globals.css에서 옮김, P2-12 추가) |
 
 **동작 줄이기 허용 목록** (§12-Q26 "몸은 멈추고 느린 눈 깜빡임만", minimal이면 이것도 없음): `char-blink-eye-slow` · `char-blink-highlight-slow`.
 
@@ -115,7 +115,7 @@
 | `world/StageNode.tsx` · `characters/CharacterAvatar.tsx` | 올려놓기·누름 크기 변화(1.05·0.95·1.08) | Phase 5 월드맵 |
 | `quest/CodePanel.tsx` · `QuestStatusBar.tsx` · `OutputPanel.tsx` | 팁 y 이동·다음 버튼 등장·별똥이·"+XP"·버그버그 x 이동 (스프링) | Phase 4 퀘스트 (`springOrFade`·`tierDuration`) |
 | `board/ReportButton.tsx` | 체크 아이콘 팝 (`reduced`만 봄) | `budget.springs`로 |
-| `landing/HeroSection.tsx` · `AboutSection.tsx` | 차례로 떠오르기. Hero는 첫 화면 글자를 `opacity: 0`으로 서버 렌더(§4 규칙 5 위반), 동작 줄이기에서도 opacity 페이드 | 랜딩 개편 |
+| ~~`landing/HeroSection.tsx` · `AboutSection.tsx`~~ | ~~차례로 떠오르기. Hero는 첫 화면 글자를 `opacity: 0`으로 서버 렌더~~ → P4-01에서 삭제. 새 히어로(`landing/hero/`)는 보이는 상태에서 CSS transform만, minimal·동작 줄이기는 등장 없음 | 해결 (P4-01) |
 | `quest/CodePanel.tsx` 코딩 팁 회전 | 실행기 로딩 중 3.5초마다 Framer 페이드 (유한, 동작 줄이기에서 opacity만) | Phase 4 |
 | `components/ui/hud.tsx` `CurrencyHud` | 360폭에서 코인·별·키·소리를 모두 넣으면 약 380px로 넘침 (카탈로그 칸은 가로 스크롤) | HUD 개편 때 칸 줄이기(키는 퀘스트만·XP 바 접기 등) |
-| 패럴랙스 | `budget.parallax`를 쓰는 곳이 아직 없음 | Phase 5 지도 |
+| 패럴랙스 | 랜딩 히어로가 처음 사용(P4-01 `HeroParallax`: full만, CSS `.hero-par`). 월드맵은 아직 | Phase 5 지도 |

@@ -398,6 +398,21 @@ export function themeCssVars(): Record<string, string> {
   return vars;
 }
 
+/**
+ * `@theme` 변수 이름에서 Tailwind 유틸리티 값 이름을 뽑는다: `--text-small` → `small`, `--shadow-card` → `card`.
+ * `--text-small--line-height`처럼 `--`가 한 번 더 붙은 하위 값은 뺀다. `cn()`이 쓰는 `THEME_NAMES`(`./themeNames`)가
+ * 이것과 같은지 테스트가 확인한다 (B44, P4-12)
+ */
+export function themeScale(
+  prefix: string,
+  vars: Record<string, string> = themeCssVars(),
+): string[] {
+  const head = `--${prefix}-`;
+  return Object.keys(vars)
+    .filter((k) => k.startsWith(head) && !k.slice(head.length).includes('--'))
+    .map((k) => k.slice(head.length));
+}
+
 // ───────────────────────────── 대비 (WCAG 2.x)
 
 /** text = 본문 4.5:1, large = 큰 글자(24px 또는 18.66px 굵게) 3:1, ui = 경계·아이콘·포커스 3:1 */

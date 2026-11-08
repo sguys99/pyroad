@@ -30,6 +30,8 @@ import { BadgesCard } from './celebrations/BadgesCard';
 import { GoldenKeyCard } from './celebrations/GoldenKeyCard';
 import { RewardsCard } from './celebrations/RewardsCard';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import '@/components/ui/overlay.css';
 interface QuestCelebrationsProps {
   /** 아직 보여 주지 않은 축하 (useQuestSession.celebrations) */
   events: CelebrationEvent[];

@@ -1,12 +1,16 @@
 import { headers } from 'next/headers';
+import { MotionProvider } from '@/components/providers/MotionProvider';
 import { MotionSettingsSync } from '@/components/providers/MotionSettingsSync';
 import { SoundSettingsSync } from '@/components/providers/SoundSettingsSync';
+import { InstallPromptCatcher } from '@/components/pwa/InstallPromptCatcher';
 import { motionBootSyncScript } from '@/lib/motion/boot';
 import { loadMotionSettings } from '@/lib/motion/server';
 import { loadSoundSettings } from '@/lib/sound/server';
 import { nonceFromCsp } from '@/lib/security/csp';
 // 앱 화면 웹폰트(제목 Jua·본문 pyRoad Sans 조각). 랜딩에는 싣지 않으려고 루트가 아닌 여기서 import (P2-10)
 import '@/fonts/app.css';
+// 앱 화면 전용 유틸리티·연출 CSS (P4-12: 루트 globals.css는 랜딩이 닿는 소스만 훑는다)
+import '@/app/app.css';
 
 /**
  * 로그인 화면 공용 틀 (서버 컴포넌트). `(protected)/layout.tsx`(월드맵·퀘스트·프로필·설정·게시판)와
@@ -16,6 +20,8 @@ import '@/fonts/app.css';
  * - 움직임 설정 (P2-15): 서버 값(`users.settings.motion`)을 본문보다 먼저 nonce 스크립트로 부트에 넘겨
  *   새 기기에서도 첫 화면부터 연출 단계가 맞게 한다. 조회는 요청 안에서 한 번 (`loadOwnUserRow`, React cache)
  * - 사운드 설정 (P2-14): 서버 값과 기기 값 중 최신 것을 쓰고, 여기 있는 동안 바꾼 설정을 서버에 저장한다 (`SoundSettingsSync`)
+ * - 홈 화면에 추가 (P4-11): 안드로이드 설치 창 이벤트 잡기 (`InstallPromptCatcher`, 그리는 것 없음)
+ * - Framer `m.*`용 `MotionProvider`(LazyMotion)는 루트가 아니라 여기서 감싼다 (P4-12: 랜딩 첫 JS에서 Framer 빼기)
  *
  * 쓰는 레이아웃은 `export const dynamic = 'force-dynamic'`이어야 한다: 페이지 CSP의 nonce를 서버 렌더 때 넣기 때문 (B27)
  */
@@ -44,7 +50,9 @@ export async function LoggedInShell({
         </>
       )}
       <SoundSettingsSync settings={sound} />
-      {children}
+      {/* 홈 화면에 추가 (P4-11): 브라우저 설치 창 이벤트를 어느 로그인 화면에서든 잡아 둔다 */}
+      <InstallPromptCatcher />
+      <MotionProvider>{children}</MotionProvider>
     </main>
   );
 }

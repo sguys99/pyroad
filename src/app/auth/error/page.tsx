@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 // 앱 화면 웹폰트 (P2-10). 랜딩이 아니라 여기서 import
 import '@/fonts/app.css';
+// 앱 화면 전용 유틸리티·연출 CSS (P4-12: 루트 globals.css는 랜딩이 닿는 소스만 훑는다)
+import '@/app/app.css';
 import { AuthErrorView } from '@/components/auth/AuthErrorView';
 import { isLoginErrorReason, parseVia } from '@/lib/auth/loginError';
 import { safeNext } from '@/lib/auth/safeNext';
 
 export const metadata: Metadata = {
-  title: '로그인 안내 - pyRoad',
+  title: '로그인 안내',
   robots: { index: false, follow: false },
 };
 

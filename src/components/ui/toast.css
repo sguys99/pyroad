@@ -1,0 +1,101 @@
+/* 토스트 (P2-11, docs/design/components.md). game-ui.css에서 떼어 냄 (P4-12): `toast.tsx`가 import한다.
+   규칙(토큰 변수만 · 연출 단계 · transform·opacity만)은 game-ui.css 머리 주석과 같다. globals.css(game-ui.css)보다 늘 뒤에 온다 */
+
+@layer components {
+  /* ───────────────────────── 토스트: 담백한 쪽지 한 장 (흰 면 + 떠 있는 그림자) */
+  .g-toast-region {
+    position: fixed;
+    left: 50%;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    z-index: 70;
+    display: grid;
+    gap: 0.5rem;
+    width: min(26.25rem, calc(100% - 2rem));
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .g-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--spacing-touch);
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border-radius: var(--round-m);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--elev-pop);
+    pointer-events: auto;
+    transition: opacity var(--dur-fast) var(--easing-out);
+  }
+  .g-toast[data-tone='good'] {
+    background: var(--success-soft);
+  }
+  .g-toast[data-tone='warn'] {
+    background: var(--warning-soft);
+  }
+  .g-toast[data-tone='error'] {
+    background: var(--error-soft);
+  }
+  .g-toast[data-leaving] {
+    opacity: 0;
+  }
+  .g-toast-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+  }
+  .g-toast[data-tone='good'] .g-toast-icon {
+    background: var(--surface);
+    color: var(--success);
+  }
+  .g-toast[data-tone='warn'] .g-toast-icon {
+    background: var(--surface);
+    color: var(--warning);
+  }
+  .g-toast[data-tone='error'] .g-toast-icon {
+    background: var(--surface);
+    color: var(--error);
+  }
+  /* 등장: full은 body 스프링으로 살짝 기울어 올라옴, lite는 짧게, minimal은 페이드, 동작 줄이기는 즉시 */
+  @keyframes g-toast-in {
+    from {
+      transform: translateY(18px) rotate(-2deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes g-toast-in-lite {
+    from {
+      transform: translateY(12px);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes g-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .g-toast {
+    animation: g-toast-in var(--spring-body-dur) var(--spring-body) both;
+  }
+  :root[data-motion='lite'] .g-toast {
+    animation: g-toast-in-lite var(--dur-base) var(--easing-out) both;
+  }
+  :root[data-motion='minimal'] .g-toast {
+    animation: g-fade-in var(--dur-fade) var(--easing-out) both;
+  }
+  :root[data-reduced='true'] .g-toast {
+    animation: none;
+    transition: none;
+  }
+}

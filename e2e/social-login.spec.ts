@@ -24,7 +24,7 @@ test.afterAll(async () => {
 
 async function openSheet(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /모험 시작하기/ }).click();
+  await page.getByRole('button', { name: /모험 시작/ }).click();
   const sheet = page.getByTestId('login-sheet');
   await expect(sheet).toBeVisible();
   return sheet;

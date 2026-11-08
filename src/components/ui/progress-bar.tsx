@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { cn } from '@/lib/utils';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './progress-bar.css';
 /**
  * 진행바 (P2-11, docs/design/components.md §7). 최종 시안 `InkProgress`·XP 바: 보조 면 홈 + 주색(또는 금색) 채움.
  *

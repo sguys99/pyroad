@@ -15,12 +15,23 @@ const BASE = 'http://localhost:3100';
 /** supabase-js가 만드는 authorize 주소와 같은 모양 */
 function authorizeUrl(
   provider: 'kakao' | 'naver' | 'google',
-  { android = false, next }: { android?: boolean; next?: string } = {},
+  {
+    android = false,
+    next,
+    shared = false,
+    kakaotalk = false,
+  }: {
+    android?: boolean;
+    next?: string;
+    shared?: boolean;
+    kakaotalk?: boolean;
+  } = {},
 ): string {
   const creds = getOAuthCredentials(provider, {
     origin: BASE,
     next,
-    device: { isAndroid: android },
+    device: { isAndroid: android, type: kakaotalk ? 'kakaotalk' : null },
+    sharedDevice: shared,
   });
   const q = new URLSearchParams({
     provider: creds.provider,
@@ -163,5 +174,52 @@ describe('mockRedirectLocation', () => {
     ).toBe(
       `${BASE}/?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+missing`,
     );
+  });
+});
+
+describe('공용 기기 모드 prompt (P4-09)', () => {
+  it.each(['kakao', 'naver', 'google'] as const)(
+    '%s: 앱의 진짜 인자는 공용 기기 규칙을 통과하고, 표시 없이 검사하면 걸린다',
+    (provider) => {
+      for (const android of [false, true]) {
+        const req = parseAuthorizeRequest(
+          authorizeUrl(provider, { shared: true, android }),
+        );
+        expect(
+          checkAuthorizeRequest(req, {
+            baseURL: BASE,
+            provider,
+            android,
+            shared: true,
+          }),
+        ).toEqual([]);
+        expect(
+          checkAuthorizeRequest(req, { baseURL: BASE, provider, android }),
+        ).not.toEqual([]);
+      }
+    },
+  );
+
+  it('카카오톡 인앱의 카카오는 prompt 없이 scope만', () => {
+    const req = parseAuthorizeRequest(
+      authorizeUrl('kakao', { shared: true, android: true, kakaotalk: true }),
+    );
+    expect(req.prompt).toBeNull();
+    expect(
+      checkAuthorizeRequest(req, {
+        baseURL: BASE,
+        provider: 'kakao',
+        android: true,
+        shared: true,
+        kakaotalk: true,
+      }),
+    ).toEqual([]);
+  });
+
+  it('공용 기기가 아닌데 prompt가 붙으면 문제', () => {
+    const req = parseAuthorizeRequest(authorizeUrl('google', { shared: true }));
+    expect(
+      checkAuthorizeRequest(req, { baseURL: BASE, provider: 'google' }),
+    ).toContain('prompt "select_account" (기대 null, shared=false)');
   });
 });

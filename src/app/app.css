@@ -1,0 +1,282 @@
+/* 앱 화면 공통 CSS (P4-12). 랜딩 `/`에는 싣지 않는다 (렌더 차단 CSS 예산 15KB gzip, §2.10).
+ *
+ * - Tailwind 유틸리티: `src/` 전체를 훑은 것 = 앱 화면이 쓰는 모든 유틸리티. 루트 `globals.css`는 랜딩이 닿는 소스만 훑으므로
+ *   여기와 겹치는 것이 있다(같은 규칙이라 무해). 여기는 늘 globals.css 뒤에 오므로 Tailwind 순서(뒤가 이김)가 그대로 지켜진다
+ * - 테마·변형(@custom-variant)·@utility는 globals.css를 `@reference`로 가져와 쓴다(다시 내보내지 않음)
+ * - 앱 화면만 쓰는 반복 연출(월드맵·퀘스트·축하)도 여기
+ *
+ * import하는 곳 = 앱 화면 웹폰트(`@/fonts/app.css`)와 같은 곳: LoggedInShell((protected)·onboarding), notice/layout,
+ * (legal)/layout, [...missing]/page, auth/error/page, dev 페이지. 새 앱 화면 틀을 만들면 둘 다 import한다
+ * (빠뜨리면 그 화면에서 앱 전용 유틸리티가 빠진다 — postbuild `check-build`가 주요 라우트를 확인) */
+@reference './globals.css';
+@import 'tailwindcss/utilities.css' layer(utilities) source('..');
+
+/* 이 파일이 실렸다는 표시 (postbuild check-build가 앱 라우트에는 있고 랜딩에는 없는지 본다) */
+:root {
+  --pyroad-app-css: 1;
+}
+
+/* ── 앱 화면 반복 연출 (값·단계 규칙은 globals.css 머리 주석 "연출 단계" 표와 같다) */
+@keyframes character-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes step-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+/* 현재 스테이지 빛 고리: 미리 그린 그림자 층의 opacity만 (box-shadow 자체를 움직이지 않음) */
+@keyframes stage-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes stage-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float-cloud {
+  0% {
+    transform: translateX(-10%);
+  }
+  50% {
+    transform: translateX(10%);
+  }
+  100% {
+    transform: translateX(-10%);
+  }
+}
+@keyframes drift-leaf {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translate(15px, 30px) rotate(45deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(-10px, 60px) rotate(90deg);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(20px, 90px) rotate(135deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(0, 120px) rotate(180deg);
+    opacity: 0;
+  }
+}
+@keyframes waking-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+@keyframes thinking-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.stage-pulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  box-shadow: 0 0 12px 4px color-mix(in srgb, var(--primary) 30%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.stage-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    transparent
+  );
+  transform: translateX(-100%);
+}
+
+/* 대기 루프: full·lite */
+:root[data-reduced='false']:not([data-motion='minimal']) {
+  /* 캐릭터 숨쉬기 (CharacterAvatar animated) */
+  .character-breathe {
+    animation: character-breathe 3s ease-in-out infinite;
+  }
+  /* 월드맵 파이뱀 통통 */
+  .mascot-bob {
+    animation: mascot-bob 2s ease-in-out infinite;
+  }
+  /* 퀘스트 단계 표시의 현재 단계 */
+  .step-pulse {
+    animation: step-pulse 2s ease-in-out infinite;
+  }
+  .stage-pulse {
+    animation: stage-pulse 2s ease-in-out infinite;
+  }
+}
+
+/* 앰비언트: full만 */
+:root[data-reduced='false'][data-motion='full'] {
+  .float-cloud {
+    animation: float-cloud var(--ambient-dur, 25s) ease-in-out infinite;
+    animation-delay: var(--ambient-delay, 0s);
+  }
+  .drift-leaf {
+    animation: drift-leaf var(--ambient-dur, 18s) linear infinite;
+    animation-delay: var(--ambient-delay, 0s);
+  }
+  .stage-shimmer {
+    animation: stage-shimmer 3s ease-in-out infinite;
+  }
+}
+
+/* 바쁨 표시: 동작 줄이기만 끔 (minimal에서도 "기다리는 중"은 알려야 함) */
+:root[data-reduced='false'] {
+  /* 실행기 다시 깨우는 중 점 세 개 (P1-09) */
+  .waking-dot {
+    animation: waking-dot 1.2s ease-in-out infinite;
+  }
+  .waking-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .waking-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  /* AI 튜터 생각 중 점 세 개 (P1-10: Framer repeat: Infinity → CSS) */
+  .thinking-dot {
+    animation: thinking-dot 0.6s ease-in-out infinite;
+  }
+  .thinking-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .thinking-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+/* 코드 에디터 커서 깜빡임(CodeMirror 기본 .cm-cursorLayer 무한 반복)은 입력 위치를 알리는 기능 신호라 단계와 무관하게 두고,
+   동작 줄이기에서만 멈춘다(커서는 늘 보이는 상태로). 다른 바쁨 표시와 같은 규칙 (P2-12) */
+/* CodeMirror 규칙(.ͼ1.cm-focused > .cm-scroller > .cm-cursorLayer, 0-4-0)이 나중에 주입되므로 명시도를 더 높인다 */
+:root[data-reduced='true']
+  .cm-editor.cm-focused
+  > .cm-scroller
+  > .cm-cursorLayer {
+  animation: none;
+}
+
+/* 축하 시퀀서 (P1-10). 모두 1회성이고 transform·opacity만 움직인다 (§2.10).
+   - 자동 넘김 막대: 카드 아래에서 줄어든다 (멈추면 animation-play-state: paused)
+   - 레벨 숫자 pop + 빛 고리: 카운트업이 끝나면 data-popped가 붙는다 (동작 줄이기면 붙지 않음, 붙어도 움직이지 않음) */
+.celebration-countdown {
+  transform-origin: left center;
+  animation-name: celebration-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes celebration-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.celebration-ring {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 7rem;
+  height: 7rem;
+  margin: -3.5rem 0 0 -3.5rem;
+  border-radius: 9999px;
+  border: 4px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes celebration-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.22);
+  }
+  65% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes celebration-ring {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+/* minimal은 스프링·바운스 없음(단계표 "일회성 이펙트 = 페이드만") → 팝·고리도 없이 숫자만 (P2-12 감사) */
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .celebration-pop[data-popped='true'] {
+  animation: celebration-pop 420ms var(--easing-out);
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .celebration-pop[data-popped='true']
+  .celebration-ring {
+  animation: celebration-ring var(--dur-page) var(--easing-out) forwards;
+}
+
+/* 월드맵 노드 반응형 위치 */
+.world-node {
+  left: var(--ml);
+}
+@media (min-width: 640px) {
+  .world-node {
+    left: var(--dl);
+  }
+}

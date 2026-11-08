@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { displayLanding, sansLanding } from '@/fonts/landing';
 import { cn } from '@/lib/utils';
 import {
@@ -10,12 +9,8 @@ import {
 } from '@/lib/auth/loginError';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import { takeLoginAttempt } from '@/lib/auth/loginAttempt';
-
-// 실패해서 돌아왔을 때만 시트 모듈을 불러온다 (첫 화면 JS 밖, §2.10)
-const LoginSheet = dynamic(
-  () => import('./LoginSheet').then((m) => m.LoginSheet),
-  { ssr: false },
-);
+// 실패해서 돌아왔을 때만 시트 모듈을 불러온다 (첫 화면 JS 밖, §2.10). 닫힌 채 그린 뒤 열어 등장 연출이 돈다 (P4-09)
+import { useLazyLoginSheet } from './useLazyLoginSheet';
 
 /**
  * 랜딩: 로그인이 실패·취소되어 돌아오면(P3-10) 로그인 시트를 저절로 열어 파이뱀이 사유를 알려 주고, 바로 아래 버튼으로
@@ -29,7 +24,7 @@ export function LandingLoginError() {
     reason: LoginErrorReason;
     via: SocialProvider | null;
   } | null>(null);
-  const [open, setOpen] = useState(false);
+  const { Sheet, open, setOpen, show } = useLazyLoginSheet();
 
   useEffect(() => {
     const taken = takeLoginErrorFromUrl(window.location.href);
@@ -42,12 +37,12 @@ export function LandingLoginError() {
     // 시도한 수단: 예전 주소의 `via`가 있으면 그것, 없으면 로그인 직전에 적어 둔 값 (B43). 모르면 이름 없는 안내
     const attempted = takeLoginAttempt();
     setNotice({ reason: taken.reason, via: taken.via ?? attempted });
-    setOpen(true);
-  }, []);
+    show();
+  }, [show]);
 
-  if (!notice) return null;
+  if (!notice || !Sheet) return null;
   return (
-    <LoginSheet
+    <Sheet
       open={open}
       onOpenChange={setOpen}
       notice={notice}

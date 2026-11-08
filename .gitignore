@@ -72,3 +72,6 @@ public/pyodide/
 
 # Claude Code 에이전트 임시 작업 공간
 .claude/worktrees/
+
+# Python 바이트코드 (scripts/fonts/fontkit.py 등)
+__pycache__/

@@ -7,7 +7,7 @@
     "dev": "next dev --turbopack",
     "prebuild": "node scripts/pyodide/copy-assets.mjs && node scripts/fonts/check.mjs",
     "build": "next build --turbopack",
-    "postbuild": "tsx scripts/security/check-static-pages.ts && node scripts/fonts/check-build.mjs",
+    "postbuild": "tsx scripts/security/check-static-pages.ts && node scripts/fonts/check-build.mjs && node scripts/perf/check-landing-budget.mjs",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

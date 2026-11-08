@@ -1,0 +1,85 @@
+/* 재화 HUD (P2-11, docs/design/components.md). game-ui.css에서 떼어 냄 (P4-12): `hud.tsx`가 import한다.
+   규칙(토큰 변수만 · 연출 단계 · transform·opacity만)은 game-ui.css 머리 주석과 같다. globals.css(game-ui.css)보다 늘 뒤에 온다 */
+
+@layer components {
+  /* ───────────────────────── 재화 HUD: 레벨 도장 · XP 바 · 코인 · 별 · 황금키 · 소리 */
+  .g-hud {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .g-seal {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    flex: none;
+    width: var(--spacing-touch);
+    height: var(--spacing-touch);
+    border-radius: var(--round-pill);
+    background: var(--primary);
+    color: var(--on-primary);
+    line-height: 1;
+  }
+  .g-seal-k {
+    font-size: var(--text-caption);
+    line-height: 1;
+  }
+  .g-seal-n {
+    font-size: var(--text-button-lg);
+    line-height: 1;
+    margin-top: 0.0625rem;
+  }
+  .g-seal[data-size='sm'] {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .g-seal[data-size='sm'] .g-seal-n {
+    font-size: var(--text-button);
+  }
+  .g-hud-xp {
+    display: grid;
+    gap: 0.125rem;
+    width: 6rem;
+  }
+  .g-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    padding: 0.125rem 0.75rem 0.125rem 0.375rem;
+    border-radius: var(--round-pill);
+    background: var(--surface-2);
+    color: var(--text);
+    transition: background-color var(--dur-progress) var(--easing-out);
+  }
+  .g-chip > svg {
+    flex: none;
+  }
+  .g-hud-num {
+    font-size: var(--text-button-lg);
+    line-height: 1;
+    margin-top: 0.125rem;
+    white-space: nowrap;
+  }
+  /* 동작 줄이기: 팝 대신 금색 틴트 면으로 잠깐 (색만) */
+  .g-chip[data-flash] {
+    background: var(--accent-soft);
+    transition-duration: var(--dur-instant);
+  }
+  @media (max-width: 39.99rem) {
+    .g-hud {
+      gap: 0.375rem;
+    }
+    .g-hud-xp {
+      width: 4rem;
+    }
+    .g-chip {
+      gap: 0.125rem;
+      padding: 0.125rem 0.5rem 0.125rem 0.25rem;
+    }
+    .g-hud-num {
+      font-size: var(--text-button);
+    }
+  }
+}

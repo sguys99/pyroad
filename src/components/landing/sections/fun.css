@@ -1,0 +1,726 @@
+/* 랜딩 `#fun` 재미 요소 쇼케이스 (P4-05, FunShowcaseSection.tsx가 import). 클래스 접두사 `ld-fun-`, 값은 토큰 변수만.
+   공통 섹션 틀(.ld-sec*)은 ../landing.css. 연출 단계는 <html data-motion data-reduced>를 본다:
+   - 장면 하나 = 한 번 도는 CSS 애니메이션(transform·opacity만, 길이 --ld-fun-t). 무한 반복(infinite)은 없다.
+     반복은 FunShowcase의 재생 순서표가 맡는다: full = 화면 안 장면을 하나씩 차례로 계속, lite = 한 번씩만
+   - minimal·동작 줄이기: 애니메이션을 걸지 않는다(아래 조건 선택자 밖) → 대표 정지 그림 + 카드 글자
+   - 재생 중이 아닌 카드(data-active 없음)는 animation-play-state: paused (화면 밖 = 멈춤)
+   그림 재질(.hm 면 + 진한 톤 선)은 히어로·세계관과 같다(면 색 `hm-*`는 hero.css 전역 정의) */
+
+@layer components {
+  /* 이 CSS가 도착했다는 표시: 오기 전에는 섹션 본문이 숨겨져 있다 (landing.css "늦게 오는 섹션 CSS", P4-12) */
+  [data-deferred-css='fun'] {
+    --ld-css: visible;
+  }
+
+  .ld-fun {
+    /* 장면 한 번 길이 = funData.ts SCENE_MS (축하 카드 2.5장) */
+    --ld-fun-t: calc(var(--dur-celebrate) * 2.5);
+  }
+  .ld-fun .hm {
+    fill: var(--f);
+    stroke: color-mix(in srgb, var(--f) 70%, var(--text));
+    stroke-width: 1.1;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ───────────── 목록: 좁은 화면은 가로로 넘기는 카드(목록 안에서만 스크롤, 페이지는 넘치지 않음), 640px부터 격자 */
+  .ld-fun-list {
+    display: flex;
+    gap: 1rem;
+    margin: 0 calc(-1 * var(--ld-gutter));
+    padding: 0.5rem var(--ld-gutter) 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--ld-gutter);
+    scrollbar-width: thin;
+    list-style: none;
+  }
+  .ld-fun-list:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+    border-radius: var(--round-m);
+  }
+  .ld-fun-card {
+    position: relative;
+    flex: 0 0 min(80%, 18.5rem);
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    padding: 0.5rem 0.5rem 1rem;
+    border-radius: var(--round-l);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+    scroll-snap-align: start;
+  }
+  @media (min-width: 640px) {
+    .ld-fun-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+    }
+    .ld-fun-card:last-child {
+      grid-column: span 2;
+    }
+  }
+  @media (min-width: 900px) {
+    .ld-fun-list {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .ld-fun-card,
+    .ld-fun-card:last-child {
+      grid-column: span 2;
+    }
+    .ld-fun-card:nth-child(n + 4) {
+      grid-column: span 3;
+    }
+  }
+
+  /* ───────────── 카드: 무대(장면) + 제목 + 한 줄 */
+  .ld-fun-stage {
+    --ld-fun-tint: var(--primary-soft);
+    position: relative;
+    height: 11rem;
+    overflow: hidden;
+    border-radius: var(--round-m);
+    background: var(--ld-fun-tint);
+  }
+  [data-scene='coin'] > .ld-fun-stage {
+    --ld-fun-tint: var(--accent-soft);
+  }
+  [data-scene='dress'] > .ld-fun-stage {
+    --ld-fun-tint: var(--w2-soft);
+  }
+  [data-scene='share'] > .ld-fun-stage {
+    --ld-fun-tint: var(--w3-soft);
+  }
+  [data-scene='boss'] > .ld-fun-stage {
+    --ld-fun-tint: var(--error-soft);
+  }
+  .ld-fun-lazy {
+    height: 100%;
+  }
+  .ld-fun-soon {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1;
+    padding: 0.0625rem 0.625rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    color: var(--accent-text);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    line-height: var(--text-caption--line-height);
+  }
+  .ld-fun-title {
+    margin-top: 0.625rem;
+    padding-inline: 0.5rem;
+    color: var(--text);
+    font-size: calc(var(--text-h3) * 1.1);
+    font-weight: 400;
+    line-height: var(--text-h3--line-height);
+  }
+  .ld-fun-line {
+    padding-inline: 0.5rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    text-wrap: pretty;
+  }
+
+  /* ───────────── 장면 틀: 무대 가운데 14×10rem 상자 (모든 화면 폭에서 같은 구도) */
+  .ld-fun-scene {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  .ld-fun-core {
+    position: relative;
+    width: 14rem;
+    height: 10rem;
+  }
+  .ld-fun-core > * {
+    position: absolute;
+  }
+  .ld-fun-card:not([data-active]) .ld-fun-scene * {
+    animation-play-state: paused;
+  }
+  .ld-fun-spark {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: var(--accent);
+    stroke: var(--accent-lip);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    overflow: visible;
+  }
+
+  /* 레벨 */
+  .ld-fun-hudbox {
+    top: 4rem;
+    left: 0;
+    right: 0;
+    width: fit-content;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem 0.5rem 0.5rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    box-shadow: var(--elev-card);
+  }
+  .ld-fun-xpbar {
+    width: 7rem;
+  }
+  .ld-fun-lvup {
+    top: 1rem;
+    left: 0;
+    right: 0;
+    width: fit-content;
+    margin-inline: auto;
+    padding: 0.25rem 0.875rem;
+    border-radius: var(--round-pill);
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: var(--text-h3);
+    line-height: 1.3;
+    opacity: 0;
+  }
+  .ld-fun-xp {
+    top: 7.5rem;
+    right: 2.25rem;
+    color: var(--primary-text);
+    font-size: var(--text-button);
+    line-height: 1.3;
+    opacity: 0;
+  }
+  .ld-fun-s1,
+  .ld-fun-s2,
+  .ld-fun-s3 {
+    transform: scale(0);
+  }
+  .ld-fun-s1 {
+    top: 3.25rem;
+    left: 0.75rem;
+  }
+  .ld-fun-s2 {
+    top: 2.75rem;
+    left: 3.5rem;
+  }
+  .ld-fun-s3 {
+    top: 6.75rem;
+    left: 0.5rem;
+  }
+
+  /* 코인 */
+  .ld-fun-core > .ld-fun-chip {
+    top: 0.25rem;
+    right: 0;
+  }
+  .ld-fun-chest {
+    left: 1rem;
+    bottom: 0.5rem;
+    width: 4rem;
+    height: 3.25rem;
+    overflow: visible;
+  }
+  .ld-fun-lid {
+    transform-box: fill-box;
+    transform-origin: 0% 100%;
+  }
+  .ld-fun-coin {
+    --dx: 0rem;
+    left: 2.4rem;
+    bottom: 2.5rem;
+    display: block;
+    line-height: 0;
+    opacity: 0;
+  }
+  .ld-fun-coin[data-i='1'] {
+    --dx: 0.75rem;
+  }
+  .ld-fun-coin[data-i='2'] {
+    --dx: -0.75rem;
+  }
+
+  /* 꾸미기 */
+  .ld-fun-pybaem {
+    top: 0.25rem;
+    left: 0;
+    right: 0;
+    width: 6rem;
+    margin-inline: auto;
+    line-height: 0;
+    transform-origin: 50% 90%;
+  }
+  .ld-fun-burst {
+    top: 0.25rem;
+    left: 0;
+    right: 0;
+    width: 6rem;
+    height: 6rem;
+    margin-inline: auto;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    opacity: 0;
+  }
+  .ld-fun-swatches {
+    bottom: 0.5rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .ld-fun-swatch {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--surface);
+    border-radius: var(--round-pill);
+  }
+  .ld-fun-swatch[data-on] {
+    outline: 2px solid var(--text);
+    outline-offset: 1px;
+  }
+
+  /* 자랑하기: 공유 카드 미니어처 */
+  .ld-fun-card-mini {
+    top: 1.75rem;
+    left: 2.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 9.5rem;
+    height: 6rem;
+    padding: 0.375rem 0.625rem 0.375rem 0.25rem;
+    border-radius: var(--round-m);
+    background: var(--surface);
+    box-shadow: var(--elev-pop);
+    transform: rotate(-4deg);
+  }
+  .ld-fun-card-mini > svg {
+    flex: none;
+  }
+  .ld-fun-card-copy {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .ld-fun-card-copy b {
+    color: var(--text);
+    font-size: var(--text-button);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .ld-fun-whoosh {
+    top: 1.25rem;
+    right: 0.75rem;
+    display: grid;
+    gap: 0.375rem;
+    transform: rotate(-30deg);
+  }
+  .ld-fun-whoosh i {
+    display: block;
+    width: 2rem;
+    height: 2px;
+    border-radius: var(--round-pill);
+    background: var(--line-strong);
+    opacity: 0;
+  }
+  .ld-fun-whoosh i:nth-child(2) {
+    margin-left: 0.75rem;
+  }
+
+  /* 보스 배틀 */
+  .ld-fun-hero {
+    left: 0.25rem;
+    bottom: 0.5rem;
+    line-height: 0;
+  }
+  .ld-fun-boss {
+    right: 0;
+    bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: 6.5rem;
+  }
+  .ld-fun-hp {
+    width: 5.5rem;
+  }
+  .ld-fun .ld-fun-hp .g-prog-fill {
+    background: var(--error);
+  }
+  .ld-fun-bug {
+    line-height: 0;
+  }
+  .ld-fun-impact {
+    position: absolute;
+    left: 50%;
+    bottom: 2rem;
+    width: 3rem;
+    height: 3rem;
+    margin-left: -1.5rem;
+    border: 3px solid var(--accent);
+    border-radius: var(--round-pill);
+    opacity: 0;
+  }
+  .ld-fun-shot {
+    left: 4.25rem;
+    bottom: 3rem;
+    line-height: 0;
+    opacity: 0;
+  }
+
+  /* ───────────── 한 번 도는 장면 애니메이션 (full·lite, 재생 중 data-on). minimal·동작 줄이기는 이 조건 밖 */
+  @keyframes ld-fun-float {
+    0% {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    6% {
+      opacity: 1;
+      transform: none;
+    }
+    26% {
+      opacity: 1;
+      transform: translateY(-1.25rem);
+    }
+    34%,
+    100% {
+      opacity: 0;
+      transform: translateY(-1.5rem);
+    }
+  }
+  @keyframes ld-fun-pop {
+    0%,
+    28% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    34% {
+      opacity: 1;
+      transform: scale(1.12);
+    }
+    40%,
+    78% {
+      opacity: 1;
+      transform: none;
+    }
+    88%,
+    100% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+  @keyframes ld-fun-twinkle {
+    0%,
+    28% {
+      transform: scale(0);
+    }
+    36% {
+      transform: scale(1.2) rotate(20deg);
+    }
+    52%,
+    100% {
+      transform: scale(0) rotate(45deg);
+    }
+  }
+  @keyframes ld-fun-lid {
+    0%,
+    4% {
+      transform: none;
+    }
+    10%,
+    36% {
+      transform: rotate(-28deg);
+    }
+    48%,
+    100% {
+      transform: none;
+    }
+  }
+  @keyframes ld-fun-coin {
+    0%,
+    6% {
+      opacity: 0;
+      transform: translate(0, 0.5rem) scale(0.5);
+    }
+    12% {
+      opacity: 1;
+      transform: translate(var(--dx), -1.75rem) scale(1.05);
+    }
+    20% {
+      transform: translate(calc(var(--dx) + 0.5rem), -2.5rem) scale(1);
+    }
+    40% {
+      opacity: 1;
+      transform: translate(6rem, -5.05rem) scale(0.8);
+    }
+    44%,
+    100% {
+      opacity: 0;
+      transform: translate(6rem, -5.05rem) scale(0.5);
+    }
+  }
+  @keyframes ld-fun-squash {
+    0% {
+      transform: scale(1.14, 0.84);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  @keyframes ld-fun-burst {
+    0% {
+      opacity: 0.9;
+      transform: scale(0.4);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+  @keyframes ld-fun-fly {
+    0%,
+    100% {
+      opacity: 1;
+      transform: rotate(-4deg);
+    }
+    14% {
+      transform: translateY(-0.375rem) rotate(-7deg) scale(1.04);
+    }
+    40% {
+      opacity: 1;
+    }
+    48% {
+      opacity: 0;
+      transform: translate(8rem, -5rem) rotate(16deg) scale(0.3);
+    }
+    60% {
+      opacity: 0;
+      transform: translateY(0.5rem) rotate(-4deg) scale(0.85);
+    }
+    74% {
+      opacity: 1;
+      transform: rotate(-4deg) scale(1.04);
+    }
+    82% {
+      transform: rotate(-4deg);
+    }
+  }
+  @keyframes ld-fun-whoosh {
+    0%,
+    26% {
+      opacity: 0;
+      transform: translateX(-1rem);
+    }
+    32% {
+      opacity: 1;
+    }
+    48%,
+    100% {
+      opacity: 0;
+      transform: translateX(1rem);
+    }
+  }
+  @keyframes ld-fun-shot {
+    0%,
+    6% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    8% {
+      opacity: 1;
+      transform: none;
+    }
+    19% {
+      opacity: 1;
+      transform: translate(6.25rem, -0.25rem) rotate(90deg);
+    }
+    20%,
+    42% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    44% {
+      opacity: 1;
+      transform: none;
+    }
+    55% {
+      opacity: 1;
+      transform: translate(6.25rem, -0.25rem) rotate(90deg);
+    }
+    56%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+  @keyframes ld-fun-shake {
+    0%,
+    19%,
+    28%,
+    55%,
+    64%,
+    100% {
+      transform: none;
+    }
+    21%,
+    57% {
+      transform: translateX(-0.3rem) rotate(-5deg);
+    }
+    23%,
+    59% {
+      transform: translateX(0.3rem) rotate(4deg);
+    }
+    25%,
+    61% {
+      transform: translateX(-0.15rem) rotate(-2deg);
+    }
+  }
+  @keyframes ld-fun-impact {
+    0%,
+    19%,
+    55% {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    21%,
+    57% {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+    27%,
+    63%,
+    100% {
+      opacity: 0;
+      transform: scale(1.5);
+    }
+  }
+
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    :is(
+      .ld-fun-xp,
+      .ld-fun-lvup,
+      .ld-fun-s1,
+      .ld-fun-s2,
+      .ld-fun-s3,
+      .ld-fun-lid,
+      .ld-fun-coin,
+      .ld-fun-card-mini,
+      .ld-fun-whoosh i,
+      .ld-fun-shot,
+      .ld-fun-bug,
+      .ld-fun-impact
+    ) {
+    animation-duration: var(--ld-fun-t);
+    animation-timing-function: var(--easing-out);
+    animation-fill-mode: both;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-xp {
+    animation-name: ld-fun-float;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-lvup {
+    animation-name: ld-fun-pop;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    :is(.ld-fun-s1, .ld-fun-s2, .ld-fun-s3) {
+    animation-name: ld-fun-twinkle;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-s2 {
+    animation-delay: calc(var(--ld-fun-t) * 0.03);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-s3 {
+    animation-delay: calc(var(--ld-fun-t) * 0.06);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-lid {
+    animation-name: ld-fun-lid;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-coin {
+    animation-name: ld-fun-coin;
+    animation-timing-function: var(--easing-in-out);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-coin[data-i='1'] {
+    animation-delay: calc(var(--ld-fun-t) * 0.04);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-coin[data-i='2'] {
+    animation-delay: calc(var(--ld-fun-t) * 0.08);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-card-mini {
+    animation-name: ld-fun-fly;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-whoosh
+    i {
+    animation-name: ld-fun-whoosh;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-whoosh
+    i:nth-child(2) {
+    animation-delay: calc(var(--ld-fun-t) * 0.03);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-whoosh
+    i:nth-child(3) {
+    animation-delay: calc(var(--ld-fun-t) * 0.06);
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-shot {
+    animation-name: ld-fun-shot;
+    animation-timing-function: linear;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-bug {
+    animation-name: ld-fun-shake;
+    animation-timing-function: linear;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-impact {
+    animation-name: ld-fun-impact;
+  }
+  /* 꾸미기: 색이 바뀔 때마다 (재생 중에만, 짧게) */
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-pybaem {
+    animation: ld-fun-squash var(--spring-body-dur) var(--spring-body) both;
+  }
+  :root[data-reduced='false']:not([data-motion='minimal'])
+    .ld-fun-scene[data-on]
+    .ld-fun-burst {
+    animation: ld-fun-burst var(--dur-slow) var(--easing-out) both;
+  }
+}

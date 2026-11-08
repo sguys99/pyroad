@@ -6,6 +6,8 @@ import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './overlay.css';
 /**
  * 확인 모달 (P2-11, docs/design/components.md §3). Base UI AlertDialog(포커스 가두기·Esc·바깥 스크롤 잠금·
  * `role="alertdialog"`)에 최종 시안 모양을 입힌 것. 덮개는 `bg-scrim`, 상자는 흰 면 + `shadow-pop` + 반경 20.

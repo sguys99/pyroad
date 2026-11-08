@@ -1,7 +1,7 @@
 # 공통 컴포넌트 (P2-11)
 
 > - 시각 기준: 사용자가 승인한 최종 시안(§12-Q31) `design/prototypes/src/final/ui.tsx`·`reward.tsx`·`base.css`·`refine.css` (2차 수정: 테두리 없는 면 + 버튼 아랫면 3px, 그림자 한 종류, 반경 10/14/20, 중립 + 초록 + 금색)
-> - 코드: `src/components/ui/` — `button.tsx`(Button·IconButton) · `card.tsx` · `alert-dialog.tsx`(확인 모달) · `sheet.tsx`(Sheet·Modal) · `toast.tsx` · `tabs.tsx` · `progress-bar.tsx` · `hud.tsx` · `speech-bubble.tsx` · `reward-icon.tsx` · `tooltip.tsx` · `use-count-up.ts`. 스타일은 `game-ui.css`(`globals.css`가 `@layer components`로 불러옴, 넘긴 Tailwind 클래스가 이김)
+> - 코드: `src/components/ui/` — `button.tsx`(Button·IconButton) · `card.tsx` · `alert-dialog.tsx`(확인 모달) · `sheet.tsx`(Sheet·Modal) · `toast.tsx` · `tabs.tsx` · `progress-bar.tsx` · `hud.tsx` · `speech-bubble.tsx` · `reward-icon.tsx` · `tooltip.tsx` · `use-count-up.ts`. 스타일은 `game-ui.css`(버튼·아이콘 버튼·말풍선, `globals.css`가 `@layer components`로 불러옴, 넘긴 Tailwind 클래스가 이김)와 컴포넌트가 직접 import하는 조각 `card.css`·`tooltip.css`·`overlay.css`(덮개·모달·시트)·`toast.css`·`tabs.css`·`progress-bar.css`·`hud.css`(P4-12: 랜딩 렌더 차단 CSS 예산)
 > - 값은 모두 토큰([tokens.md](tokens.md))만 쓴다(`npm run tokens:check`, CSS 계약 테스트 `src/components/ui/__tests__/game-ui-css.test.ts`). 모션은 [motion-guidelines.md](motion-guidelines.md)의 단계(full / lite / minimal)와 동작 줄이기(별개 축)를 따른다: CSS는 `<html data-motion data-reduced>`, JS는 `useMotionTier().budget`
 > - P2-12 카탈로그(`/dev/design`, [catalog.md](catalog.md))는 각 절 끝의 **대표 상태** 목록을 그대로 진열한다. 단계별 대체는 그 페이지 위 막대에서 바꿔 보고 e2e(`design-catalog.spec.ts`)가 검사한다
 
@@ -24,7 +24,7 @@
 | 버튼 올려놓기(마우스) | 1px 뜸 | 1px | 1px(즉시) | 없음 |
 | 누를 수 있는 카드 | 2px 뜸 · 1px 내려앉음, body 스프링 | face 스프링 | 즉시 | 움직임 0, 누르면 보조 면 색 |
 | 모달·시트(넓은 화면) | 아래 24px · -1.5° · 96%에서 떠오름(body 스프링), 덮개 220ms 페이드 | 12px 미끄러짐 220ms | 페이드 150ms | 즉시(덮개도) |
-| 바텀시트(모바일) | 아래에서 올라옴 360ms out | 220ms | 페이드 | 즉시 |
+| 바텀시트(모바일) | 아래에서 body 스프링으로 올라옴(넘침은 아래 치마 면이 가림, P4-09), 닫힘 220ms | 220ms | 페이드 | 즉시 |
 | 툴팁 | 95% → 100% + 페이드 140ms | 같음 | 페이드만 | 즉시 |
 | 토스트 | 18px 아래 · -2°에서 body 스프링 | 12px 220ms | 페이드 150ms | 즉시 |
 | 탭 엄지 | face 스프링 | 220ms out | 즉시 | 즉시 |
@@ -120,9 +120,12 @@
 | `footer` | 버튼 줄 (모바일 세로 역순) |
 | `closeLabel` · `showClose` | 오른쪽 위 48px 닫기 버튼 (기본 "닫기") |
 | `initialFocus` | 처음 포커스 (기본 첫 포커스 가능한 요소) |
+| `closeOnBack` | 기기·브라우저 뒤로 가기로 닫기 (P4-09, `use-back-to-close.ts`): 열면 같은 주소로 기록 항목 하나(지금 `history.state` 복사), 뒤로 가기면 닫히고 화면은 그대로, 다른 방법으로 닫으면 그 항목을 거둠. 랜딩 로그인 시트가 켬 |
 | `wide` (Sheet) | 넓은 화면 45rem |
 
 시트 안에서 닫는 버튼: `<SheetClose render={<Button variant="secondary" />}>그만두기</SheetClose>`. 끌어서 닫기는 넣지 않았다(선택 항목, 닫기 버튼·Esc·덮개로 충분, 필요하면 Base UI Drawer 검토).
+
+주의 (P4-09): **처음부터 `open`인 채로 마운트하면 Base UI가 등장 전환을 건너뛴다.** 늦게 불러와 여는 시트는 닫힌 채 한 번 그린 다음 프레임에 연다(`useLazyLoginSheet`). 제목 글자색은 상자에서 물려받는다: `cn`(tailwind-merge)이 `text-h2`·`text-foreground` 같은 크기 토큰과 색을 한 무리로 보고 앞의 것을 지운다(제목이 17px로 나오던 원인).
 
 **대표 상태**: Sheet 360(아래 시트·손잡이) · 1280(가운데) · wide · 긴 내용 스크롤, Modal 기본·media+가운데. 열리는 중(full·lite·minimal)·동작 줄이기.
 
@@ -140,6 +143,7 @@
 - **`ToastRegion`은 늘 떠 있는 `role="status"` `aria-live="polite"` 영역**: 화면에 먼저 두고 그 안에 `Toast`를 넣어야 낭독기가 새 알림을 읽는다.
 - `Toast` props: `tone` · `icon`(36 원) · `duration`(ms, 기본 4000, 0이면 저절로 안 닫힘; 끝나기 140ms 전 흐려짐) · `onClose`(있으면 닫기 버튼, 바로 닫힘) · `closeLabel`.
 - 여러 개: `const { toasts, show, dismiss } = useToastQueue(3)` + `<ToastViewport toasts={toasts} onDismiss={dismiss} />`.
+- 버튼 하나 (P4-11): `action={<Button size="sm">추가하기</Button>}` — 글 뒤, 닫기 앞. 행동을 고를 때까지 남아야 하므로 `duration={0}`과 함께 쓴다(월드맵 "홈 화면에 추가" 쪽지).
 
 **대표 상태**: 4 tone × {아이콘 있음/없음} × {닫기 버튼 있음/없음}, 두 줄 문구, 쌓인 3개, 360폭.
 
@@ -217,7 +221,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 ## 12. 소셜 로그인 버튼 `SocialLoginButton` · `SocialLoginButtons` · 로그인 시트 `LoginSheet` · `LoginSheetButton` (P3-05)
 
-**용도**: 카카오·네이버·Google 로그인. 코드 `src/components/auth/` (스타일 `social-login.css`, 로고·문구 `brandMarks.tsx`). 로그인 호출은 provider마다 **`useSocialLogin(provider)`(P1-14 헬퍼)로만** 한다(버튼이 Supabase를 직접 부르지 않음).
+**용도**: 카카오·네이버·Google 로그인. 코드 `src/components/auth/` (스타일 `social-login.css` — 버튼 컴포넌트가 import, 로고·문구 `brandMarks.tsx`). 로그인 호출은 provider마다 **`useSocialLogin(provider)`(P1-14 헬퍼)로만** 한다(버튼이 Supabase를 직접 부르지 않음).
 
 게임 버튼과 다른 점: 각 사 가이드가 면 색·글자색·로고를 정해 두어 **아랫면(lip)을 붙이지 않는다**(카카오는 규정 밖 색 금지라 진한 노랑 아랫면도 안 됨, Google은 흰 면 + 1px 테두리 고정). 그래서 브랜드 색은 pyRoad 토큰이 아니라 `social-login.css`의 provider별 사용자 정의 속성이고(테마를 바꿔도 그대로, [tokens.md](tokens.md) §6), 눌림은 1px 움직임 + 얇은 상태 층으로만 알린다.
 
@@ -249,21 +253,21 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 **props**
 - `SocialLoginButton`: `provider` · `loading` · `disabled` · `sfx`(기본 `tap`) · `recent`(최근에 사용 이름표, P3-08) · `size`(`md` 54px / `lg` 60px, P3-09) · `pressed`·`hovered`(카탈로그 고정) + 나머지 `<button>` 속성. 모양만, 호출 없음.
 - `SocialLoginButtons`: `providers`(기본 `NEXT_PUBLIC_LOGIN_PROVIDERS`로 켠 것, 비우면 카카오 → 네이버 → Google 모두, P3-09) · `lastUsed`(P3-08: 맨 위로 + 이름표) · `onBeforeLogin(provider)`(분석 이벤트) · `preview(provider)`(카탈로그용 가짜 로그인) · `browser`(인앱 판별 결과를 직접 줌, 카탈로그·테스트) · `portalClassName`(인앱 안내 대화 상자 글꼴 변수) · `className`. 순서는 `orderProviders(providers, [카카오톡 인앱이면 kakao, lastUsed])`. 하나를 누르면 그 버튼만 바쁨·나머지 비활성(두 번 눌림 막음), 결과 `redirecting`이면 바쁨 유지, `external-browser`·`browser-guide`면 되살림, `error`면 되살리고 오류 문구. bfcache로 돌아오면(`pageshow`) 바쁨을 푼다. 인앱 처리(P3-09)는 아래 "인앱 브라우저".
-- `LoginSheet`: `open` · `onOpenChange` · `cta`(`hero`·`header`, provider를 고를 때 `landing_cta_click`) · `preview` · `className` · `lastUsed`(주지 않으면 열 때마다 이 기기 저장값 `readLastLogin()`, P3-08). 최근 기록이 있으면 설명이 "지난번엔 ○○로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!"로 바뀐다(자동 계정 연결이 없어서, §2.8). `Sheet` + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 질문 + 버튼 + "이름·사진은 다른 친구에게 보이지 않아요".
-- `LoginSheetButton`: 게임 버튼 props + `cta`. 누르면 시트를 연다. 시트 모듈은 `next/dynamic`으로 올려놓기·포커스 때 미리 받고 누를 때 그린다(첫 화면 JS 밖). 시트는 body로 포털되므로 **랜딩 서브셋 글꼴 변수**(`displayLanding`·`sansLanding`)를 시트 상자에 직접 넘긴다(안 넘기면 제목이 Jua가 아니라 시스템 글꼴).
+- `LoginSheet`: `open` · `onOpenChange` · `cta`(분석 스키마 `landing_cta_click.cta` 값, provider를 고를 때 보냄) · `context`(머리말, P4-09: `hero` "어떤 계정으로 모험을 시작할까?" · `header` "어떤 계정으로 들어갈까?" · `trial` "모험을 저장하려면 로그인!", 주지 않으면 `cta`로) · `heading`(제목 직접) · `providers`(카탈로그) · `preview` · `className` · `lastUsed`(주지 않으면 열 때마다 이 기기 저장값 `readLastLogin()`, P3-08, 지금 숨긴 수단이면 기록 없음으로 봄). 최근 기록이 있으면 한마디가 "지난번엔 ○○로 들어왔어. 같은 계정으로 들어와야 모험이 이어져!"(자동 계정 연결이 없어서, §2.8), 없으면 "어떤 걸로 들어가도 돼. 다음에도 같은 걸로 들어와 줘!"(X3). `Sheet`(`closeOnBack`) + 손 흔드는 파이뱀(`PybaemRig state="wave"`, 닫혀 있으면 `paused`) + 제목 + 한마디 + 버튼 + 안내 두 줄("이름·사진은 다른 친구에게 보이지 않아요" · "만 14세가 안 된 친구는 들어온 뒤 보호자님과 함께 동의해요", P3-15). 최근 이름표는 full에서 팝 뒤 한 번 살랑(`rotate`, 1회), lite는 짧은 팝만.
+- `LoginSheetButton`: 게임 버튼 props + `cta` · `context` · `heading`. 누르면 시트를 연다. 시트 모듈은 `useLazyLoginSheet`로 올려놓기·포커스 때 미리 받고, 누르면 닫힌 채 그린 뒤 다음 프레임에 연다(첫 열림에도 등장 연출, 첫 화면 JS 밖). 체험 성공 CTA(P4-03)는 `cta="trial"`(스키마에 값이 들어간 뒤) 또는 `cta="hero" context="trial"`. 시트는 body로 포털되므로 **랜딩 서브셋 글꼴 변수**(`displayLanding`·`sansLanding`)를 시트 상자에 직접 넘긴다(안 넘기면 제목이 Jua가 아니라 시스템 글꼴).
 
 ```tsx
 <LoginSheetButton cta="hero" size="lg" iconRight={<Rocket aria-hidden />}>모험 시작하기</LoginSheetButton>
 <SocialLoginButtons onBeforeLogin={(provider) => track('landing_cta_click', { cta, provider }, { immediate: true })} />
 ```
 
-**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 로그인 계정 연결 4가지(Google만 · 카카오만 · 둘 · 셋) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(기록 없음 · 최근 = 카카오, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`.
+**대표 상태**: 세 버튼 × {기본, 올려놓기, 눌림, 로딩(누른 버튼 + 나머지 비활성), 비활성} + 흰 면 위 + 최근에 사용(세 provider 바꿔 보기·다시 보기) + 카카오톡 인앱(카카오 크게 + Google 안내 한 줄) + 인앱 Google 안내 대화 상자 + 로그인 실패 사유 7종(시트 · `/auth/error` 패널) + 로그인 계정 연결 4가지(Google만 · 카카오만 · 둘 · 셋) + 눌러 보기(가짜 로그인 → 오류) + 로그인 시트(히어로 · 헤더 · 체험 성공 머리말, 기록 없음 · 최근 = 카카오, 세 provider, 360 아래 시트 · 768 이상 가운데). 카탈로그 `#social-login`. 반응형·포커스 복귀·Esc·뒤로 가기·단계별 등장은 e2e `login-modal.spec.ts`.
 
 **인앱 브라우저 (P3-09)**: 판별은 `detectInAppBrowser(ua?)`(판별표 테스트 `src/lib/browser/__tests__/detectInAppBrowser.test.ts`: 카카오톡·네이버 앱 iOS/Android, 인스타그램, 페이스북, 라인, 밴드, 그 밖 웹뷰, 일반 브라우저).
 - **카카오톡 인앱**: 외부로 보내지 않는다. 카카오 버튼을 맨 위에 크게(`lg`) — 카카오톡 안에서 바로 로그인된다. 최근에 쓴 수단은 그다음
 - **Google**만 누를 때 외부 브라우저로 보낸다(`needsExternalBrowser`, `signInWithOAuth` **전에**: PKCE verifier 쿠키가 시작한 브라우저에 남으므로). 인앱이면 버튼 아래 "Google 로그인은 Chrome·Safari 같은 브라우저에서 열려요" 한 줄. 외부 브라우저를 열었으면 "브라우저를 열었어요. 거기서 Google 로그인을 한 번 더 눌러 줘!", 열 수 없는 인앱(iOS 인스타그램 등)이면 `InAppBrowserGuide`: provider별 문구("앗! 여기서는 Google 로그인이 안 돼요" + 앱 이름 + 막는 이유) · 브라우저에서 열기 · 주소 복사 · **이 앱 안에서 바로 되는 카카오·네이버 버튼**(누르면 안내를 닫고 그 수단으로 로그인). 안내도 body로 포털되므로 랜딩 서브셋 글꼴 변수를 `portalClassName`으로 받는다
 - **네이버**는 인앱 WebView에서도 되므로 외부로 보내지 않는다. Android(크롬·인앱)에서는 `queryParams: { appscheme: 'true' }`로 "네이버 앱으로 자동로그인" 버튼을 켠다(`NAVER_APPSCHEME_ON_ANDROID`, iOS는 값 없이도 보임). 실 앱 스모크 N-8에서 확인하고 문제가 있으면 상수만 끈다
-- **공용 기기 모드** `prompt: 'login'`(네이버는 로그아웃 API가 없어 다음 사람에게 세션이 남음)은 아직 붙이지 않는다: 공용 기기를 고를 자리(로그인 화면 옵션·설정)가 생길 때(P4-09 로그인 모달 검토) `getOAuthCredentials`에 provider별로 추가
+- **공용 기기 모드** (P4-09, §12-Q44): 로그인 시트 버튼 아래 체크 `SharedDeviceCheck` "학교·도서관 컴퓨터예요" + 한 줄 설명(진짜 체크박스, 이름은 제목만·설명은 `aria-describedby`, 줄 전체 48px). 기본 꺼짐, 이 기기 `localStorage` `pyroad.sharedDevice.v1`(`src/lib/auth/sharedDevice.ts`, 저장소가 막히면 이 페이지 안에서만). 켜면 `getOAuthCredentials(…, { sharedDevice })`가 카카오·네이버 `prompt=login`, Google `prompt=select_account`(`SHARED_DEVICE_PARAMS`, 근거는 그 주석), 네이버 `appscheme`은 빼고, 카카오 scope 덮어쓰기와 한 객체로 합친다. 카카오톡 인앱에서는 체크를 숨기고 카카오 `prompt`도 뺀다(미지원). 켜져 있으면 최근 로그인 기록을 쓰지도(시트) 남기지도(`LastLoginRecorder`) 않는다. 로그아웃(`LogoutButton`)하면 "○○ 사이트에서도 로그아웃해 줘" 안내 창(`sharedLogoutMessage`) → "알겠어"로 처음 화면. 분석 `landing_cta_click.shared`(불리언)
 - **버튼 숨기기** `NEXT_PUBLIC_LOGIN_PROVIDERS=kakao,google`: 네이버 검수 전 배포용(docs/release/v0.4-phase3-providers.md §7)
 
 **로그인 실패 안내 (P3-10)**: `/auth/callback`이 `error`·`error_code`·`error_description`(코드가 없는 콜백 포함)과 교환 오류(`exchangeCodeForSession`의 `code`·`name`)를 사유 enum 하나로 바꾼다(`src/lib/auth/loginError.ts`). 원문은 주소·화면·분석에 싣지 않고, 설정 오류·모르는 오류만 코드 이름으로 `reportServerError`(Sentry, area `auth` op `callback`).
@@ -324,6 +328,11 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 도장 연출 중 화면 어디든 누르거나 Enter·Space·Esc → 끝 상태(§12-Q28). 연출 길이·곡선은 토큰(`DURATION`·`EASING`·`springTiming`)만.
 
 **대표 상태** (카탈로그 `#onboarding`): 등록증 빈 칸·칸 강조·10자 닉네임 + 학년 비밀 + 도장, 위 띠 빈/찍힘, 도장 빈 자리·md·lg + 다시 찍기, 진행 점 5단계, 색 고르기 + 안내 파이뱀, 학년 칩, 닉네임 처음·확인 중·통과·규칙·중복 + 추천, 튜토리얼 장면 4종 + 다시 재생.
+
+## 13-1. 앱 아이콘 · 홈 화면에 추가 (P4-11)
+
+- 아이콘: `src/lib/pwa/iconArt.tsx` 한 벌(브랜드 초록 면 + 파이뱀 리그 정지 그림 + 언덕·금색 반짝이, 글자 없음)을 `next/og`로 빌드 때 PNG 생성. 파비콘 `/icon`(32, 얼굴만) · `/apple-icon`(180, 불투명) · manifest `/pwa/icon-192.v1.png`·`icon-512.v1.png`·`maskable-512.v1.png`(그림은 가운데 80% 원 안). 그림을 바꾸면 `PWA_ICON_VERSION`을 올린다.
+- 안내: 월드맵 쪽지 `InstallHint`(공통 토스트 + `action`, 서로 다른 날 3번째 방문부터, 닫으면 30일) · 설정 `InstallAppSection`(늘 있음). 안드로이드는 브라우저 설치 창(`beforeinstallprompt`, `InstallPromptCatcher`가 로그인 화면에서 잡음), iOS는 그림 안내 시트 `IosInstallGuide`(공유 → 홈 화면에 추가 → 추가). 데스크톱·이미 설치·앱 안 브라우저는 쪽지 없음. 판별은 `src/lib/pwa/install.ts`. 카탈로그 `#pwa`.
 
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 

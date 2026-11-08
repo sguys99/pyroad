@@ -374,14 +374,18 @@ export function SheetSection() {
       id="sheet"
       kicker="컴포넌트 §4"
       title="바텀시트 · 모달"
-      description="모바일(768px 미만)은 아래에서 올라오는 시트(손잡이), 넓은 화면은 가운데 상자. full은 기울어 떠오름(body 스프링) · lite 짧은 미끄러짐 · minimal 페이드 · 동작 줄이기 즉시."
+      description="모바일(768px 미만)은 아래에서 올라오는 시트(손잡이), 넓은 화면은 가운데 상자. full은 시트가 body 스프링으로 올라옴(넘침은 아래 치마 면이 가림)·상자는 기울어 커지며 떠오름 · lite 짧은 미끄러짐 · minimal 페이드 · 동작 줄이기 즉시. closeOnBack이면 기기 뒤로 가기로도 닫힘(아래 '뒤로 가기로 닫기')."
     >
       <Demo label="열어 보기" note="Sheet · Sheet wide · 긴 내용 스크롤 · Modal · Modal media+가운데">
         <div className="flex flex-wrap gap-3">
           <Sheet
             title="스테이지 3 · 반복의 숲"
             description="별 2개 / 3개를 모았어요."
-            trigger={<Button variant="secondary" sfx={false} data-testid="open-sheet" />}
+            trigger={
+              <Button variant="secondary" sfx={false} data-testid="open-sheet">
+                시트
+              </Button>
+            }
             footer={
               <>
                 <SheetClose render={<Button variant="secondary" sfx={false} />}>
@@ -398,14 +402,33 @@ export function SheetSection() {
             wide
             title="넓은 시트"
             description="768px 이상에서 45rem"
-            trigger={<Button variant="secondary" sfx={false} />}
+            trigger={
+              <Button variant="secondary" sfx={false}>
+                넓은 시트
+              </Button>
+            }
           >
             <p>퀘스트 고르기처럼 칸이 많은 내용에 써요.</p>
           </Sheet>
           <Sheet
+            closeOnBack
+            title="뒤로 가기로 닫기"
+            description="열면 같은 주소로 기록을 하나 쌓고, 기기 뒤로 가기를 누르면 화면을 떠나지 않고 닫혀요 (P4-09)"
+            trigger={
+              <Button variant="secondary" sfx={false} data-testid="open-sheet-back">
+                뒤로 가기로 닫기
+              </Button>
+            }
+            data-testid="sheet-back-popup"
+          />
+          <Sheet
             title="긴 내용"
             description="안에서 스크롤돼요 (바깥은 잠김)"
-            trigger={<Button variant="secondary" sfx={false} />}
+            trigger={
+              <Button variant="secondary" sfx={false}>
+                긴 내용
+              </Button>
+            }
           >
             <ol className="space-y-2 text-small">
               {LONG_LINES.map((l) => (
@@ -416,7 +439,11 @@ export function SheetSection() {
           <Modal
             title="저장했어요"
             description="늘 가운데 상자 (28rem)"
-            trigger={<Button variant="secondary" sfx={false} data-testid="open-modal" />}
+            trigger={
+              <Button variant="secondary" sfx={false} data-testid="open-modal">
+                모달
+              </Button>
+            }
             footer={
               <SheetClose render={<Button sfx={false} />}>확인</SheetClose>
             }
@@ -426,7 +453,11 @@ export function SheetSection() {
             description="인앱 브라우저에서는 로그인이 막힐 수 있어요."
             align="center"
             media={<PybaemStatic state="think" size={120} framing="stage" label="" />}
-            trigger={<Button variant="secondary" sfx={false} />}
+            trigger={
+              <Button variant="secondary" sfx={false}>
+                모달 + 그림
+              </Button>
+            }
           />
         </div>
       </Demo>

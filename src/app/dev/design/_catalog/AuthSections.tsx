@@ -7,8 +7,14 @@ import {
   DEFAULT_SOCIAL_ORDER,
   SocialLoginButtons,
 } from '@/components/auth/SocialLoginButtons';
-import { LoginSheet } from '@/components/auth/LoginSheet';
+import {
+  LOGIN_SHEET_HEADINGS,
+  LoginSheet,
+  type LoginSheetContext,
+} from '@/components/auth/LoginSheet';
 import { InAppBrowserGuide } from '@/components/InAppBrowserGuide';
+import { SharedDeviceCheck } from '@/components/auth/SharedDeviceCheck';
+import { sharedLogoutMessage } from '@/components/LogoutButton';
 import { LoginErrorPanel } from '@/components/auth/LoginErrorPanel';
 import { LinkedAccountsList } from '@/components/settings/LinkedAccountsSection';
 import { accountLinkRows } from '@/lib/auth/accountLinks';
@@ -137,11 +143,13 @@ function fakeLogin(result: SocialLoginResult) {
 export function SocialLoginSection() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetLast, setSheetLast] = useState<SocialProvider | null>(null);
+  const [sheetContext, setSheetContext] = useState<LoginSheetContext>('hero');
   const [last, setLast] = useState<SocialProvider | null>(null);
   const [recent, setRecent] = useState<SocialProvider>('naver');
   const [replay, setReplay] = useState(0);
   const [guideOpen, setGuideOpen] = useState(false);
   const [errorSheet, setErrorSheet] = useState<LoginErrorReason | null>(null);
+  const [sharedDemo, setSharedDemo] = useState(false);
 
   return (
     <Section
@@ -164,7 +172,7 @@ export function SocialLoginSection() {
         ))}
         <Demo
           label="최근에 사용 (P3-08)"
-          note="이 기기에서 최근에 쓴 수단이 맨 위로 + 금색 이름표(full 팝 · lite 짧게 · minimal 페이드 · 동작 줄이기 없음). 낭독기는 '최근에 ○○로 로그인했어요'를 설명으로 읽어요"
+          note="이 기기에서 최근에 쓴 수단이 맨 위로 + 금색 이름표(full 팝 + 한 번 살랑 · lite 짧은 팝 · minimal 페이드 · 동작 줄이기 없음). 낭독기는 '최근에 ○○로 로그인했어요'를 설명으로 읽어요"
           data-testid="social-state-recent"
         >
           <div className="flex flex-wrap gap-2">
@@ -230,26 +238,51 @@ export function SocialLoginSection() {
           </p>
         </Demo>
         <Demo
-          label="로그인 시트"
-          note="모바일은 아래 시트, 768px 이상은 가운데 상자. 손 흔드는 파이뱀(리그 wave) + 질문 + 버튼 3종 + 공개 정보 안내. 버튼은 가짜 로그인(1.6초 뒤 되살아남)"
+          label="공용 기기 체크 (P4-09, §12-Q44)"
+          note="시트 버튼 아래. 켜면 이 기기에 기억(pyroad.sharedDevice.v1)하고 카카오·네이버는 prompt=login, Google은 prompt=select_account로 매번 다시 묻는다. 최근 로그인 기록은 앞 사람 것이라 안 씀, 카카오톡 인앱에서는 숨김. 로그아웃하면 아래 안내(이 견본은 저장하지 않음)"
+          surface="card"
+          data-testid="social-shared-device"
+        >
+          <SharedDeviceCheck
+            checked={sharedDemo}
+            onCheckedChange={setSharedDemo}
+          />
+          <p className="rounded-xl bg-surface-2 px-3 py-2.5 text-small text-foreground">
+            <span className="font-semibold">로그아웃했어!</span>{' '}
+            {sharedLogoutMessage('naver')}
+          </p>
+        </Demo>
+        <Demo
+          label="로그인 시트 · 모달 (P3-05 → P4-09)"
+          note="768px 미만은 아래에서 body 스프링으로 올라오는 시트, 이상은 살짝 커지며 떠오르는 가운데 상자. 뒤로 가기·Esc·덮개·닫기로 닫히고 연 버튼으로 포커스 복귀. 손 흔드는 파이뱀 + 맥락별 제목(히어로·헤더·체험) + 한마디 + 버튼 3종 + 공개 정보·보호자 동의 안내. 버튼은 가짜 로그인(1.6초 뒤 되살아남)"
+          data-testid="social-login-sheet-demo"
         >
           <div className="flex flex-wrap gap-3">
-            <Button
-              variant="secondary"
-              sfx={false}
-              onClick={() => {
-                setSheetLast(null);
-                setSheetOpen(true);
-              }}
-              data-testid="open-login-sheet"
-            >
-              로그인 시트 열기
-            </Button>
+            {(Object.keys(LOGIN_SHEET_HEADINGS) as LoginSheetContext[]).map(
+              (ctx) => (
+                <Button
+                  key={ctx}
+                  variant="secondary"
+                  sfx={false}
+                  onClick={() => {
+                    setSheetLast(null);
+                    setSheetContext(ctx);
+                    setSheetOpen(true);
+                  }}
+                  data-testid={
+                    ctx === 'hero' ? 'open-login-sheet' : `open-login-sheet-${ctx}`
+                  }
+                >
+                  {ctx === 'hero' ? '히어로' : ctx === 'header' ? '헤더' : '체험 성공'}
+                </Button>
+              ),
+            )}
             <Button
               variant="secondary"
               sfx={false}
               onClick={() => {
                 setSheetLast('kakao');
+                setSheetContext('hero');
                 setSheetOpen(true);
               }}
               data-testid="open-login-sheet-recent"
@@ -276,7 +309,9 @@ export function SocialLoginSection() {
           <LoginSheet
             open={sheetOpen}
             onOpenChange={setSheetOpen}
+            context={sheetContext}
             lastUsed={sheetLast}
+            providers={ALL_PROVIDERS}
             preview={fakeLogin('external-browser')}
           />
         </Demo>
@@ -356,7 +391,7 @@ export function SocialLoginSection() {
         </div>
       </Demo>
       <CodeSample
-        code={`// 랜딩 CTA: 누르면 로그인 시트 (시트 모듈은 그때 불러옴)\n<LoginSheetButton cta="hero" size="lg" iconRight={<Rocket aria-hidden />}>모험 시작하기</LoginSheetButton>\n\n// 버튼 묶음만: 호출은 provider마다 useSocialLogin(provider)\n<SocialLoginButtons onBeforeLogin={(p) => track('landing_cta_click', { cta, provider: p })} />`}
+        code={`// 랜딩 CTA: 누르면 로그인 시트 (시트 모듈은 그때 불러옴, 닫힌 채 그린 뒤 열어 등장 연출)\n<LoginSheetButton cta="hero" size="lg" iconRight={<Rocket aria-hidden />}>모험 시작하기</LoginSheetButton>\n\n// 30초 체험 성공 CTA (P4-03, 분석 스키마에 trial이 들어간 뒤): 머리말 "모험을 저장하려면 로그인!"\n<LoginSheetButton cta="trial" size="lg">모험 저장하기</LoginSheetButton>\n\n// 버튼 묶음만: 호출은 provider마다 useSocialLogin(provider)\n<SocialLoginButtons onBeforeLogin={(p) => track('landing_cta_click', { cta, provider: p })} />`}
       />
     </Section>
   );

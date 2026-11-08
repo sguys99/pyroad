@@ -3,7 +3,7 @@
 // 어떻게: 앱이 `signInWithOAuth`(P1-14 헬퍼)로 이동하는 GoTrue `…/auth/v1/authorize?provider=…` 요청을 Playwright가 가로챈다.
 // - 요청 자체는 진짜다: provider 이름(`custom:naver`), PKCE(`code_challenge`, S256), `redirect_to`(같은 출처 `/auth/callback`
 //   — `next`가 없는 로그인은 **쿼리 없는 콜백 주소 그대로**(B43: Supabase Redirect URLs는 쿼리까지 비교)), Kakao scope 덮어쓰기
-//   (`scope=` 빈 값), Android 네이버 `appscheme`를 검사(`checkAuthorizeRequest`)한다
+//   (`scope=` 빈 값), Android 네이버 `appscheme`, 공용 기기 모드 `prompt`(P4-09)를 검사(`checkAuthorizeRequest`)한다
 // - 그 뒤 provider 쪽 결과를 흉내 낸다:
 //   success      → 미리 만든 로컬 사용자로 세션 쿠키를 넣고, `/auth/callback`이 성공했을 때 보낼 주소(`next` + `#lp=<provider>`)로 302
 //   cancel       → 진짜 `/auth/callback?…&error=access_denied` (취소·동의 거부: 콜백의 P3-10 사유 처리를 그대로 탄다)
@@ -41,7 +41,19 @@ export interface AuthorizeRequest {
   /** Kakao scope 덮어쓰기 (null = 키 없음, '' = 빈 값) */
   scope: string | null;
   appscheme: string | null;
+  /** 공용 기기 모드의 재로그인·계정 선택 (P4-09, null = 없음) */
+  prompt: string | null;
 }
+
+/**
+ * 공용 기기 모드에서 provider가 받아야 할 prompt (P4-09, §12-Q44). 앱 상수(`SHARED_DEVICE_PARAMS`)를 가져다 쓰지 않고
+ * 따로 적어 둔다: 앱 값이 바뀌면 여기서 걸리게 (근거는 src/lib/auth/socialLogin.ts 주석)
+ */
+export const EXPECTED_SHARED_PROMPT: Record<MockProvider, string> = {
+  kakao: 'login',
+  naver: 'login',
+  google: 'select_account',
+};
 
 export function parseAuthorizeRequest(url: string): AuthorizeRequest {
   const u = new URL(url);
@@ -66,12 +78,15 @@ export function parseAuthorizeRequest(url: string): AuthorizeRequest {
     codeChallengeMethod: q.get('code_challenge_method'),
     scope: q.get('scope'),
     appscheme: q.get('appscheme'),
+    prompt: q.get('prompt'),
   };
 }
 
 /**
  * 앱이 보낸 authorize 요청이 P1-14·P3-09·P3-10 규칙대로인지. 문제 목록(빈 배열이면 통과)
- * @param expect.android Android 기기면 네이버에 appscheme=true가 있어야 함
+ * @param expect.android Android 기기면 네이버에 appscheme=true가 있어야 함 (공용 기기 모드면 없어야 함)
+ * @param expect.shared 공용 기기 모드: provider별 prompt가 있어야 함 (카카오톡 인앱의 카카오는 없음)
+ * @param expect.kakaotalk 카카오톡 인앱 (카카오 prompt=login 미지원)
  */
 export function checkAuthorizeRequest(
   req: AuthorizeRequest,
@@ -79,7 +94,15 @@ export function checkAuthorizeRequest(
     baseURL,
     provider,
     android = false,
-  }: { baseURL: string; provider: MockProvider; android?: boolean },
+    shared = false,
+    kakaotalk = false,
+  }: {
+    baseURL: string;
+    provider: MockProvider;
+    android?: boolean;
+    shared?: boolean;
+    kakaotalk?: boolean;
+  },
 ): string[] {
   const problems: string[] = [];
   if (req.provider !== provider)
@@ -117,11 +140,21 @@ export function checkAuthorizeRequest(
     );
   if (provider !== 'kakao' && req.scope !== null)
     problems.push(`${provider}에 scope 덮어쓰기가 붙음`);
-  const wantAppscheme = provider === 'naver' && android;
+  const wantAppscheme = provider === 'naver' && android && !shared;
   if (wantAppscheme && req.appscheme !== 'true')
     problems.push('Android 네이버에 appscheme=true 없음');
   if (!wantAppscheme && req.appscheme !== null)
-    problems.push(`appscheme이 붙음 (${provider}, android=${android})`);
+    problems.push(
+      `appscheme이 붙음 (${provider}, android=${android}, shared=${shared})`,
+    );
+  const wantPrompt =
+    shared && !(provider === 'kakao' && kakaotalk)
+      ? EXPECTED_SHARED_PROMPT[provider]
+      : null;
+  if (req.prompt !== wantPrompt)
+    problems.push(
+      `prompt ${JSON.stringify(req.prompt)} (기대 ${JSON.stringify(wantPrompt)}, shared=${shared})`,
+    );
   return problems;
 }
 
@@ -177,6 +210,8 @@ export async function installOAuthMock(
     provider,
     outcome,
     android = false,
+    shared = false,
+    kakaotalk = false,
     signIn,
   }: {
     supabaseUrl: string;
@@ -184,6 +219,10 @@ export async function installOAuthMock(
     provider: MockProvider;
     outcome: MockOutcome;
     android?: boolean;
+    /** 공용 기기 체크를 켜고 누름 (P4-09) */
+    shared?: boolean;
+    /** 카카오톡 인앱 UA */
+    kakaotalk?: boolean;
     signIn?: () => Promise<{ name: string; value: string }[]>;
   },
 ): Promise<OAuthMockHandle> {
@@ -221,6 +260,8 @@ export async function installOAuthMock(
             baseURL,
             provider,
             android,
+            shared,
+            kakaotalk,
           }),
   };
 }
