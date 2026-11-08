@@ -1,7 +1,7 @@
 # 공통 컴포넌트 (P2-11)
 
 > - 시각 기준: 사용자가 승인한 최종 시안(§12-Q31) `design/prototypes/src/final/ui.tsx`·`reward.tsx`·`base.css`·`refine.css` (2차 수정: 테두리 없는 면 + 버튼 아랫면 3px, 그림자 한 종류, 반경 10/14/20, 중립 + 초록 + 금색)
-> - 코드: `src/components/ui/` — `button.tsx`(Button·IconButton) · `card.tsx` · `alert-dialog.tsx`(확인 모달) · `sheet.tsx`(Sheet·Modal) · `toast.tsx` · `tabs.tsx` · `progress-bar.tsx` · `hud.tsx` · `speech-bubble.tsx` · `reward-icon.tsx` · `tooltip.tsx` · `use-count-up.ts`. 스타일은 `game-ui.css`(`globals.css`가 `@layer components`로 불러옴, 넘긴 Tailwind 클래스가 이김)
+> - 코드: `src/components/ui/` — `button.tsx`(Button·IconButton) · `card.tsx` · `alert-dialog.tsx`(확인 모달) · `sheet.tsx`(Sheet·Modal) · `toast.tsx` · `tabs.tsx` · `progress-bar.tsx` · `hud.tsx` · `speech-bubble.tsx` · `reward-icon.tsx` · `tooltip.tsx` · `use-count-up.ts`. 스타일은 `game-ui.css`(버튼·아이콘 버튼·말풍선, `globals.css`가 `@layer components`로 불러옴, 넘긴 Tailwind 클래스가 이김)와 컴포넌트가 직접 import하는 조각 `card.css`·`tooltip.css`·`overlay.css`(덮개·모달·시트)·`toast.css`·`tabs.css`·`progress-bar.css`·`hud.css`(P4-12: 랜딩 렌더 차단 CSS 예산)
 > - 값은 모두 토큰([tokens.md](tokens.md))만 쓴다(`npm run tokens:check`, CSS 계약 테스트 `src/components/ui/__tests__/game-ui-css.test.ts`). 모션은 [motion-guidelines.md](motion-guidelines.md)의 단계(full / lite / minimal)와 동작 줄이기(별개 축)를 따른다: CSS는 `<html data-motion data-reduced>`, JS는 `useMotionTier().budget`
 > - P2-12 카탈로그(`/dev/design`, [catalog.md](catalog.md))는 각 절 끝의 **대표 상태** 목록을 그대로 진열한다. 단계별 대체는 그 페이지 위 막대에서 바꿔 보고 e2e(`design-catalog.spec.ts`)가 검사한다
 
@@ -221,7 +221,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 ## 12. 소셜 로그인 버튼 `SocialLoginButton` · `SocialLoginButtons` · 로그인 시트 `LoginSheet` · `LoginSheetButton` (P3-05)
 
-**용도**: 카카오·네이버·Google 로그인. 코드 `src/components/auth/` (스타일 `social-login.css`, 로고·문구 `brandMarks.tsx`). 로그인 호출은 provider마다 **`useSocialLogin(provider)`(P1-14 헬퍼)로만** 한다(버튼이 Supabase를 직접 부르지 않음).
+**용도**: 카카오·네이버·Google 로그인. 코드 `src/components/auth/` (스타일 `social-login.css` — 버튼 컴포넌트가 import, 로고·문구 `brandMarks.tsx`). 로그인 호출은 provider마다 **`useSocialLogin(provider)`(P1-14 헬퍼)로만** 한다(버튼이 Supabase를 직접 부르지 않음).
 
 게임 버튼과 다른 점: 각 사 가이드가 면 색·글자색·로고를 정해 두어 **아랫면(lip)을 붙이지 않는다**(카카오는 규정 밖 색 금지라 진한 노랑 아랫면도 안 됨, Google은 흰 면 + 1px 테두리 고정). 그래서 브랜드 색은 pyRoad 토큰이 아니라 `social-login.css`의 provider별 사용자 정의 속성이고(테마를 바꿔도 그대로, [tokens.md](tokens.md) §6), 눌림은 1px 움직임 + 얇은 상태 층으로만 알린다.
 

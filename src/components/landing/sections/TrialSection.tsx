@@ -1,5 +1,7 @@
 import { LandingSection } from '../LandingSection';
+import { PybaemStatic } from '@/components/characters/rig/RigStatic';
 import { TrialNotebook } from './trial/TrialNotebook';
+import { TRIAL_BUDDY_FIRST_STATE, TRIAL_BUDDY_SIZE } from './trial/buddyStill';
 import './trial.css';
 
 /**
@@ -21,7 +23,19 @@ export function TrialSection() {
         '공책의 "안녕!"을 다른 말로 고치고 "주문 걸기"를 눌러 보세요. 파이뱀이 그대로 말해 줘요.'
       }
     >
-      <TrialNotebook />
+      {/* 파이뱀 정지 그림은 서버에서 그려 넘긴다: 리그 코드가 첫 JS에 실리지 않는다 (P4-12) */}
+      <TrialNotebook
+        still={
+          <PybaemStatic
+            state={TRIAL_BUDDY_FIRST_STATE}
+            size={TRIAL_BUDDY_SIZE}
+            framing="stage"
+            label=""
+            className="ld-trial-py-svg"
+            idPrefix="trial-py"
+          />
+        }
+      />
     </LandingSection>
   );
 }

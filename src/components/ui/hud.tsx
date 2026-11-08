@@ -9,6 +9,8 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { useCountUp } from '@/components/ui/use-count-up';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './hud.css';
 /**
  * 재화 HUD (P2-11, docs/design/components.md §8). 최종 시안 `Hud`: 레벨 도장 · XP 바 · 코인 · 별 · (퀘스트에서만) 황금키 · 소리 토글 자리.
  *

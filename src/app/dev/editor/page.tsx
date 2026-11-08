@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { isTestPagesEnabled } from '@/lib/env/testPages';
 // 코드 글꼴 조각은 퀘스트 레이아웃에서만 싣는다. 이 페이지는 같은 에디터를 로그인 없이 재려고 같은 CSS를 싣는다
 import '@/fonts/pyroad-mono/pyroad-mono.css';
+// 앱 화면 전용 유틸리티 (P4-12)
+import '@/app/app.css';
 import { EditorLab } from './EditorLab';
 
 export const metadata: Metadata = {

@@ -1,0 +1,23 @@
+/* 툴팁 (P2-11, docs/design/components.md). game-ui.css에서 떼어 냄 (P4-12): `tooltip.tsx`가 import한다.
+   규칙(토큰 변수만 · 연출 단계 · transform·opacity만)은 game-ui.css 머리 주석과 같다. globals.css(game-ui.css)보다 늘 뒤에 온다 */
+
+@layer components {
+  /* ───────────────────────── 툴팁: 짙은 면 + 흰 글자, 짧은 페이드·확대 */
+  .g-tooltip {
+    transform-origin: var(--transform-origin);
+    transition-property: transform, opacity;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--easing-out);
+  }
+  .g-tooltip:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  :root[data-motion='minimal']
+    .g-tooltip:is([data-starting-style], [data-ending-style]) {
+    transform: none;
+  }
+  :root[data-reduced='true'] .g-tooltip {
+    transition: none;
+  }
+}

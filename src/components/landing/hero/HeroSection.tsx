@@ -2,7 +2,9 @@ import { ArrowRight, Code } from 'lucide-react';
 import { LoginSheetButton } from '@/components/auth/LoginSheetButton';
 import { ScrollButton } from '../ScrollLink';
 import { HeroArt } from './HeroArt';
+import { PybaemStatic } from '@/components/characters/rig/RigStatic';
 import { HeroMascot } from './HeroMascot';
+import { HERO_MASCOT_SIZE } from './mascotReactions';
 import { HeroParallax } from './HeroParallax';
 import './hero.css';
 
@@ -70,7 +72,18 @@ export function HeroSection() {
         </div>
       </div>
 
-      <HeroMascot />
+      {/* 정지 그림은 여기(서버)서 그려 넘긴다: 리그 코드가 첫 JS에 실리지 않는다 (P4-12) */}
+      <HeroMascot
+        still={
+          <PybaemStatic
+            state="idle"
+            size={HERO_MASCOT_SIZE}
+            framing="stage"
+            label=""
+            className="hero-mascot-svg"
+          />
+        }
+      />
       <HeroParallax targetId="hero" />
 
       <svg

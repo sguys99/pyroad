@@ -36,6 +36,8 @@ const EXTS = ['.tsx', '.ts', '.jsx', '.js', '.mjs'];
  */
 export const NON_TEXT_MODULES = new Set([
   'src/lib/design/tokens.ts',
+  // cn()용 Tailwind 테마 이름(`text: ['small', …]`). 이름이 `text`라 제목 자리로 따라가 Jua 서브셋에 영문을 늘렸다 (P4-12)
+  'src/lib/design/themeNames.ts',
   'src/lib/motion/detect.ts',
 ]);
 
@@ -782,7 +784,13 @@ export function collectLandingText(entries = LANDING_ENTRIES) {
     .filter(({ file }) => !NON_TEXT_MODULES.has(relative(ROOT, file)))
     .flatMap(({ sf }) => textPieces(sf))
     .join('\n');
-  const displayText = collectDisplayText(modules, { cssClasses }).join('\n');
+  // 글자로 그려지지 않는 모듈(NON_TEXT_MODULES)은 제목 자리 추적에서도 뺀다: 이름이 같은 값(`text`·`title`)을 따라가 엉뚱한 글자가 들어온다
+  const textModules = modules.filter(
+    ({ file }) => !NON_TEXT_MODULES.has(relative(ROOT, file)),
+  );
+  const displayText = collectDisplayText(textModules, { cssClasses }).join(
+    '\n',
+  );
   const chars = uniqueChars(text);
   // 제목 글자는 본문 글자의 부분집합 (숨은 자리에서 잘못 들어온 글자 방지)
   const all = new Set(chars);

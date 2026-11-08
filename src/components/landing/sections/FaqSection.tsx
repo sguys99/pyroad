@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { serializeJsonLd } from '@/lib/seo/structuredData';
 import { LandingSection } from '../LandingSection';
 import { buildFaqStructuredData, FAQ } from './faq/faq';
-import './faq.css';
+// 스타일 `faq.css`는 여기서 import하지 않는다: 첫 화면 밖이라 렌더 차단 CSS에서 빼고 `../deferredCss.ts`가 늦게 받는다 (P4-12)
 
 /**
  * 랜딩 `#faq` 자주 묻는 질문 (P4-08). 서버 컴포넌트, 클라이언트 JS 없음.
@@ -19,6 +19,7 @@ export function FaqSection() {
   return (
     <LandingSection
       id="faq"
+      deferredCss="faq"
       kicker="궁금한 점"
       title="자주 묻는 질문"
       width="narrow"

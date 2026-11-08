@@ -5,7 +5,7 @@ import {
 } from '@/components/characters/rig';
 import { LandingSection } from '../LandingSection';
 import { FriendsCast } from './friends/FriendsCast';
-import './friends.css';
+// 스타일 `friends.css`는 여기서 import하지 않는다: 첫 화면 밖이라 렌더 차단 CSS에서 빼고 `../deferredCss.ts`가 늦게 받는다 (P4-12)
 
 const STILL = {
   size: 168,
@@ -28,6 +28,7 @@ export function FriendsSection() {
   return (
     <LandingSection
       id="friends"
+      deferredCss="friends"
       kicker="함께하는 친구들"
       title="함께 모험할 세 친구"
       lead="퀘스트 길에서 늘 만나는 친구들이야. 콕 눌러 봐!"

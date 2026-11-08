@@ -1,4 +1,5 @@
-/* 소셜 로그인 버튼 3종 (P3-05, docs/design/components.md §12). globals.css가 game-ui.css 다음에 불러온다.
+/* 소셜 로그인 버튼 3종 (P3-05, docs/design/components.md §12). 이 버튼을 그리는 컴포넌트(SocialLoginButton·설정 LinkedAccountsSection)가
+   import한다 → 랜딩에서는 로그인 시트와 함께 늦게 온다 (P4-12: 렌더 차단 CSS에서 뺌). globals.css(game-ui.css)보다 늘 뒤에 온다.
 
    브랜드 버튼은 게임 버튼(.g-btn)과 다르다: 각 사 가이드가 정한 면 색·글자색·로고를 그대로 쓰고 아랫면(lip)을 붙이지 않는다
    (카카오: 규정 밖 색 금지 → 진한 노랑 아랫면도 안 됨, Google: 흰 면 + 1px 테두리 고정). 그래서

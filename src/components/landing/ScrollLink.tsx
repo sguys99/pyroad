@@ -3,6 +3,7 @@
 import type { ComponentProps, MouseEvent } from 'react';
 import { Button, type ButtonProps } from '@/components/ui/button';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { loadDeferredCss, needsDeferredCss } from './deferredCss';
 import { scrollToSection } from './scrollToSection';
 
 function useJump(target: string) {
@@ -10,6 +11,15 @@ function useJump(target: string) {
   return (e: MouseEvent) => {
     // 새 탭·창으로 열기는 그대로 둔다
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    // 아래쪽 섹션 CSS가 아직이면(P4-12) 받은 뒤 스크롤: 높이가 바뀌기 전에 가면 엉뚱한 곳에 멈춘다
+    if (needsDeferredCss(document.getElementById(target))) {
+      e.preventDefault();
+      void loadDeferredCss().then(
+        () => scrollToSection(target, reduced),
+        () => scrollToSection(target, reduced),
+      );
+      return;
+    }
     if (scrollToSection(target, reduced)) e.preventDefault();
   };
 }

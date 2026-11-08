@@ -18,7 +18,7 @@
 | `content-unseeded` | **main push·수동 실행만**. 무시드 20회 | `TEST_CONTENT_UNSEEDED_RUNS=20 npm run test:content` (실패 메시지의 시드로 재현) | 약 30초 |
 | `pyodide` | 자체 호스팅 파일 복사·무결성 + 공용 실행 코어 테스트 | `npm run pyodide:copy && node scripts/pyodide/copy-assets.mjs --check && npm run test:pyodide` | 약 20초 |
 | `rls` | 격리 스택(`pyroadci`, 5482x)으로 RLS·권한 회귀. PR·기능 브랜치는 운영 재현 + legacy, main·수동 실행은 신규 기본값까지 3개 시나리오. 결과 표는 job 요약과 아티팩트 `rls-results`에 | `RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci` (전체는 변수 없이). 켜 둔 개발 스택이면 `npm run test:rls` | 약 4~7분 |
-| `build` | `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐. 폰트는 저장소에서 자체 호스팅이라 네트워크 불필요. prebuild가 폰트 검사, postbuild가 정적 페이지 CSP·라우트별 font preload·랜딩 폰트 예산 확인) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` | 약 3분 |
+| `build` | `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐. 폰트는 저장소에서 자체 호스팅이라 네트워크 불필요. prebuild가 폰트 검사, postbuild가 정적 페이지 CSP·라우트별 font preload·랜딩 폰트 예산·랜딩 JS·CSS 바이트 예산 확인) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` | 약 3분 |
 | `e2e-smoke` | **에셋 검사**(`npm run assets:check`, P2-16: SVG 최적화·종이 결 타일·래스터 기록·Lottie 구조 + `lottie_light` 실제 렌더 + 라이선스 기록(P2-17), 아래 "에셋 검사") → 비로그인 e2e(`public` 프로젝트: 랜딩·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로·코드 에디터 한글 주석 정렬 P2-18·컴포넌트 카탈로그와 연출 단계 대체 검사 `design-catalog.spec.ts` P2-12·소셜 로그인 실패 안내와 인앱 브라우저 `social-login.spec.ts` P3-17 — GoTrue authorize 이동을 가로채는 목업이라 provider·스택 없이 돎). Supabase 없이(`E2E_NO_STACK=1`) `npm run build` → `npm run start`. 실패하면 리포트·trace를 아티팩트 `e2e-smoke-report`로 | `npm run assets:check && E2E_NO_STACK=1 npx playwright test --project=public` (`e2e/README.md`) | 로컬 약 2분 (빌드 1.5분 포함, 에셋 검사 약 5초) |
 | `e2e` | 로그인 e2e(`setup` → `chromium` → `teardown`). 저장소 `config.toml`로 Supabase 스택을 띄우고(npm ci·브라우저 설치와 겹치게 백그라운드로) 실행 전용 사용자를 service_role로 만들어 쿠키 주입. LLM 키 없음(저장된 답변). 월드맵·퀘스트의 연출 단계 대체 검사(`motion-tiers.spec.ts`, P2-12) 포함. 실패하면 아티팩트 `e2e-report` | `npm run db:start && npx playwright test --project=chromium` | 로컬 약 5분 + 빌드 |
 
@@ -36,7 +36,11 @@
 폰트는 `src/fonts/`에서 자체 호스팅합니다(P2-10, [docs/design/fonts.md](design/fonts.md)). 그래서 예전의 "Google Fonts 우회"(Next 15.5 Turbopack이 확장자 없는 Google Fonts 주소에서 깨지는 문제, vercel/next.js#99114를 피하려고 `scripts/fonts/google-fonts-mock.mjs`로 CSS를 미리 받던 단계)는 지웠습니다.
 
 - `npm run fonts:check`(`scripts/fonts/check.mjs`, Node만): 랜딩 문구 글자가 모두 랜딩 텍스트 서브셋에 있는지, 폰트 파일이 `src/fonts/manifest.json`과 같은지, 이름을 바꾼 글꼴(`pyRoad Sans`·`pyRoad Mono`)에 예약 이름이 남지 않았는지, 폴더마다 `OFL.txt`가 있는지, 앱 코드에 외부 폰트(`next/font/google`·Google Fonts·jsDelivr)가 없는지. `lint-typecheck`의 단계이자 `prebuild`라 Vercel 빌드에서도 돕니다. **랜딩 문구를 바꿔 실패하면** 로컬에서 `npm run fonts:build -- --landing`(Python fontTools 필요) 후 `src/fonts/` 변경을 같은 커밋에 넣습니다.
-- `scripts/fonts/check-build.mjs`(postbuild): 랜딩이 아닌 라우트에 font preload가 붙으면(Turbopack 누수), 랜딩 preload가 2개를 넘으면, 랜딩 CSS에 앱 조각이 실리면, 랜딩 폰트가 150KB를 넘으면, 코드 글꼴 조각이 퀘스트 밖에 실리면 실패. 랜딩 렌더 차단 CSS 15KB 초과는 경고만(P4-12).
+- `scripts/fonts/check-build.mjs`(postbuild): 랜딩이 아닌 라우트에 font preload가 붙으면(Turbopack 누수), 랜딩 preload가 2개를 넘으면, 랜딩 CSS에 앱 조각이 실리면, 랜딩 폰트가 150KB를 넘으면, 코드 글꼴 조각이 퀘스트 밖에 실리면, 앱 화면 CSS(`src/app/app.css`)가 앱 라우트에 없거나 랜딩에 실리면 실패.
+
+### 랜딩 바이트 예산 (postbuild, P4-12)
+
+`scripts/perf/check-landing-budget.mjs`(`build` job·Vercel 빌드): 랜딩 첫 JS(gzip) 250KB·렌더 차단 CSS(gzip) 15KB를 넘거나, 글자가 든 요소를 인라인 `opacity:0`으로 서버 렌더하면 실패(§2.10 "바이트 예산은 차단"), 95%를 넘으면 경고. 넘었을 때 고치는 법은 [perf/P4-12-landing.md](perf/P4-12-landing.md) §4. 다른 빌드 폴더는 `BUDGET_CHECK_NEXT_DIR=<경로>/.next`.
 
 
 ### 디자인 토큰 검사 (`lint-typecheck`)

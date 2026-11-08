@@ -112,7 +112,8 @@ test.describe('랜딩 히어로 (P4-01)', () => {
           .evaluate((el) => getComputedStyle(el).transform),
       )
       .not.toBe('none');
-    expect(await heroLoops(page)).toContain('ha-drift');
+    // 앰비언트 규칙은 늦게 오는 CSS(hero-ambient.css, P4-12)라 붙을 때까지 기다린다
+    await expect.poll(() => heroLoops(page)).toContain('ha-drift');
   });
 
   for (const mode of [

@@ -7,8 +7,7 @@
 // - 랜딩 font preload가 랜딩 텍스트 서브셋 2개(제목·본문)를 넘음 (굵기마다 따로 preload 등)
 // - 랜딩 CSS에 앱 조각(unicode-range) @font-face가 들어감 / 랜딩 폰트 전송이 예산(150KB, §2.10)을 넘음
 // - 코드 글꼴(pyRoad Mono) 조각 CSS가 퀘스트 밖 라우트에 실림, 앱 조각 CSS가 앱 화면에 없음
-// 경고만
-// - 랜딩 렌더 차단 CSS(gzip)가 예산(15KB, §2.10 · P4-12)을 넘음 — 지금은 Tailwind 기본 CSS가 대부분이라 P4-12에서 줄인다
+// 렌더 차단 CSS 크기는 보고만 한다. 예산(15KB, §2.10)은 scripts/perf/check-landing-budget.mjs가 실패로 막는다 (P4-12)
 
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -23,8 +22,9 @@ const NEXT = process.env.FONTS_CHECK_NEXT_DIR ?? join(ROOT, '.next');
 export const LANDING_FONT_BUDGET = 150 * 1024;
 /** 첫 화면 preload 목표 (경고만, P4-12). 문구가 늘어도 LANDING_FONT_BUDGET 안에 머물 여유 */
 export const LANDING_PRELOAD_TARGET = 100 * 1024;
-export const LANDING_CSS_BUDGET = 15 * 1024;
 export const LANDING_PRELOAD_MAX = 2;
+/** src/app/app.css에 든 표시 (앱 라우트에 실렸는지 확인용) */
+export const APP_CSS_MARKER = '--pyroad-app-css';
 const LANDING_PAGE = '[project]/src/app/page';
 
 /** 보고할 라우트 (client-reference manifest 경로 → 이름) */
@@ -371,11 +371,6 @@ async function main() {
           '    → npm run fonts:build -- --landing 후 다시 빌드. 그래도 남으면 scripts/fonts/landing-text.mjs가 그 자리를 못 찾는 것 (node scripts/fonts/landing-text.mjs --why)',
       );
   }
-  if (cssGzip > LANDING_CSS_BUDGET) {
-    warnings.push(
-      `랜딩 렌더 차단 CSS ${(cssGzip / 1024).toFixed(1)}KB(gzip) > 예산 ${LANDING_CSS_BUDGET / 1024}KB — P4-12에서 줄임`,
-    );
-  }
 
   // 라우트별 CSS (Turbopack client-reference manifest). 구조가 바뀌어 못 읽으면 경고만
   const rows = [];
@@ -389,9 +384,11 @@ async function main() {
     }
     const faces = { slices: {}, files: 0 };
     let gz = 0;
+    let appCss = false;
     for (const f of files) {
       const css = readFileSync(join(NEXT, f), 'utf8');
       gz += gzipSync(css, { level: 9 }).length;
+      if (css.includes(APP_CSS_MARKER)) appCss = true;
       const c = classifyFontFaces(css);
       for (const [fam, n] of Object.entries(c.slices))
         faces.slices[fam] = (faces.slices[fam] ?? 0) + n;
@@ -408,6 +405,15 @@ async function main() {
       errors.push(`${name}: 퀘스트 밖인데 pyRoad Mono 조각 CSS가 실림`);
     if (name !== '/' && !hasApp)
       errors.push(`${name}: 앱 조각 CSS(Jua·pyRoad Sans)가 없음`);
+    // 앱 화면 유틸리티 CSS (src/app/app.css, P4-12): 앱 라우트에는 있고 랜딩에는 없어야 한다
+    if (name !== '/' && !appCss)
+      errors.push(
+        `${name}: 앱 화면 CSS(src/app/app.css)가 없음 — 그 화면 틀에서 '@/app/app.css'를 import하세요`,
+      );
+    if (name === '/' && appCss)
+      errors.push(
+        '/: 랜딩에 앱 화면 CSS(src/app/app.css)가 실림 (렌더 차단 CSS 예산)',
+      );
     rows.push(
       `  ${name.padEnd(17)} preload ${preloadCount} · CSS ${files.length}개 ${(gz / 1024).toFixed(1)}KB(gzip) · ` +
         `조각 ${

@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/ui/button';
 import { useBackToClose } from '@/components/ui/use-back-to-close';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './overlay.css';
 /**
  * 바텀시트 · 모달 (P2-11, docs/design/components.md §4). 최종 시안 `Sheet`: 모바일은 아래에서 올라오는 시트(손잡이 표시),
  * 넓은 화면(768px 이상)은 가운데 대화 상자. `Modal`은 화면 크기와 상관없이 가운데 대화 상자.

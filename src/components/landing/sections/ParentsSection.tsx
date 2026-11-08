@@ -9,7 +9,7 @@ import {
   WORLD1_STAGES,
   type LetterColumn,
 } from './parents/parents';
-import './parents.css';
+// 스타일 `parents.css`는 여기서 import하지 않는다: 첫 화면 밖이라 렌더 차단 CSS에서 빼고 `../deferredCss.ts`가 늦게 받는다 (P4-12)
 
 const ICON: Record<LetterColumn['id'], typeof ShieldCheck> = {
   safety: ShieldCheck,
@@ -33,6 +33,7 @@ export function ParentsSection() {
   return (
     <LandingSection
       id="parents"
+      deferredCss="parents"
       tone="surface"
       kicker="보호자께"
       title="아이가 안심하고 배우도록 만들었어요"

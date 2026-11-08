@@ -1,7 +1,7 @@
 import { LandingSection } from '../LandingSection';
 import { FunShowcase } from './fun/FunShowcase';
 import { FUN_SCENES } from './fun/funData';
-import './fun.css';
+// 스타일 `fun.css`는 여기서 import하지 않는다: 첫 화면 밖이라 렌더 차단 CSS에서 빼고 `../deferredCss.ts`가 늦게 받는다 (P4-12)
 
 /**
  * 랜딩 `#fun` 재미 요소 쇼케이스 (P4-05): 레벨 · 코인 · 꾸미기 · 자랑하기 · 보스 배틀을 짧은 장면(약 3초)으로 보여 준다.
@@ -16,6 +16,7 @@ export function FunShowcaseSection() {
   return (
     <LandingSection
       id="fun"
+      deferredCss="fun"
       kicker="퀘스트 말고도 재미가 가득"
       title="모험이 더 신나는 이유"
       lead="'곧 열려요'는 지금 만들고 있는 기능이에요."

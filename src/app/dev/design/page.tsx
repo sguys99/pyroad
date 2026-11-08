@@ -5,6 +5,8 @@ import { isTestPagesEnabled } from '@/lib/env/testPages';
 import { isMotionTier } from '@/lib/motion/tier';
 // 앱 화면 웹폰트(제목 Jua·본문 pyRoad Sans 조각)와 코드 글꼴. 루트 레이아웃은 웹폰트를 싣지 않는다 (P2-10)
 import '@/fonts/app.css';
+// 앱 화면 전용 유틸리티·연출 CSS (P4-12: 루트 globals.css는 랜딩이 닿는 소스만 훑는다)
+import '@/app/app.css';
 import '@/fonts/pyroad-mono/pyroad-mono.css';
 // 온보딩 조각(P3-11)은 globals.css 밖 스타일 (랜딩 CSS 예산)
 import '@/components/onboarding/onboarding.css';

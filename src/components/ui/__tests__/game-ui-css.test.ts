@@ -5,7 +5,21 @@ import { describe, expect, it } from 'vitest';
 // 공통 컴포넌트 CSS (P2-11)의 연출 단계 분기 계약. jsdom은 CSS를 계산하지 않으므로 규칙이 있는지를 글자로 확인한다.
 // 단계표: docs/design/components.md "모션 단계별 동작"
 
-const CSS = readFileSync(join(__dirname, '../game-ui.css'), 'utf8')
+/** 전역 game-ui.css + 컴포넌트가 직접 import하는 조각 CSS (P4-12에서 나눔) */
+const PARTS = {
+  'game-ui.css': null,
+  'card.css': ['card.tsx'],
+  'tooltip.css': ['tooltip.tsx'],
+  'overlay.css': ['sheet.tsx', 'alert-dialog.tsx'],
+  'toast.css': ['toast.tsx'],
+  'tabs.css': ['tabs.tsx'],
+  'progress-bar.css': ['progress-bar.tsx'],
+  'hud.css': ['hud.tsx'],
+} as const;
+
+const CSS = Object.keys(PARTS)
+  .map((f) => readFileSync(join(__dirname, '..', f), 'utf8'))
+  .join('\n')
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s+/g, ' ');
 
@@ -18,12 +32,20 @@ function rule(selector: string): string {
 }
 
 describe('game-ui.css 연출 단계', () => {
-  it('globals.css가 컴포넌트 CSS를 불러온다', () => {
+  it('globals.css는 game-ui.css만, 나머지 조각은 그 컴포넌트가 불러온다 (P4-12)', () => {
     const globals = readFileSync(
       join(__dirname, '../../../app/globals.css'),
       'utf8',
     );
     expect(globals).toContain("@import '../components/ui/game-ui.css'");
+    for (const [css, users] of Object.entries(PARTS)) {
+      if (!users) continue;
+      expect(globals).not.toContain(css);
+      for (const user of users) {
+        const src = readFileSync(join(__dirname, '..', user), 'utf8');
+        expect(src, `${user} → ${css}`).toContain(`import './${css}';`);
+      }
+    }
   });
 
   it('버튼: 누르면 아랫면(--lip-h)만큼 내려가고, 복귀는 jellyB · lite face · minimal 즉시', () => {
@@ -60,10 +82,11 @@ describe('game-ui.css 연출 단계', () => {
 
   it('모달·시트·덮개·툴팁: 동작 줄이기는 전환 없음, minimal은 페이드만', () => {
     expect(
-      rule(
-        ":root[data-reduced='true'] :is(.g-modal, .g-sheet, .g-scrim, .g-tooltip)",
-      ),
+      rule(":root[data-reduced='true'] :is(.g-modal, .g-sheet, .g-scrim)"),
     ).toContain('transition: none');
+    expect(rule(":root[data-reduced='true'] .g-tooltip")).toContain(
+      'transition: none',
+    );
     expect(
       rule(":root[data-motion='minimal'] :is(.g-modal, .g-sheet)"),
     ).toContain('transition: opacity var(--dur-fade)');

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { MotionProvider } from '@/components/providers/MotionProvider';
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
 import { SoundProvider } from '@/components/providers/SoundProvider';
 import { LastLoginRecorder } from '@/components/auth/LastLoginRecorder';
@@ -28,13 +27,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: MOTION_BOOT_SCRIPT }} />
       </head>
       <body>
-        <MotionProvider>
-          <MotionTierProvider>
-            <SoundProvider>{children}</SoundProvider>
-            {/* 로그인 직후 #lp= 조각 → 최근 로그인 배지 저장 (P3-08). 그리는 것 없음 */}
-            <LastLoginRecorder />
-          </MotionTierProvider>
-        </MotionProvider>
+        {/* Framer LazyMotion(MotionProvider)은 루트에 두지 않는다: Framer를 쓰는 화면 틀(LoggedInShell·공지)만 (P4-12) */}
+        <MotionTierProvider>
+          <SoundProvider>{children}</SoundProvider>
+          {/* 로그인 직후 #lp= 조각 → 최근 로그인 배지 저장 (P3-08). 그리는 것 없음 */}
+          <LastLoginRecorder />
+        </MotionTierProvider>
       </body>
     </html>
   );

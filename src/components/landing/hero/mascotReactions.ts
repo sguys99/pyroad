@@ -16,6 +16,9 @@ export interface MascotReaction {
 }
 
 /** 처음 말풍선 (서버 렌더) */
+/** 히어로 파이뱀 크기 (px). 서버가 그리는 정지 그림(HeroSection)과 라이브 리그(HeroMascot)가 같이 쓴다 */
+export const HERO_MASCOT_SIZE = 280;
+
 export const GREETING = '안녕, 모험가! 나는 파이뱀이야. 나를 콕 눌러 볼래?';
 
 export const REACTIONS: readonly MascotReaction[] = [

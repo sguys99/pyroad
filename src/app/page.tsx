@@ -8,9 +8,11 @@ import { ParentsSection } from '@/components/landing/sections/ParentsSection';
 import { FaqSection } from '@/components/landing/sections/FaqSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { LandingViewTracker } from '@/components/landing/LandingViewTracker';
+import { LandingDeferredCss } from '@/components/landing/LandingDeferredCss';
 import { LandingLoginError } from '@/components/auth/LandingLoginError';
 import { StructuredData } from '@/components/landing/StructuredData';
 import { displayLanding, sansLanding } from '@/fonts/landing';
+import { LANDING_INSTALL_GUARD_SCRIPT } from '@/lib/pwa/landingInstallGuard';
 import { cn } from '@/lib/utils';
 import '@/components/landing/landing.css';
 
@@ -31,6 +33,10 @@ export default function Home() {
     >
       {/* 검색엔진용 JSON-LD 데이터 블록 (P4-10). 실행 스크립트가 아니라 CSP와 무관 */}
       <StructuredData />
+      {/* 비로그인 방문자에게 안드로이드 자동 설치 띠를 띄우지 않는다 (P4-11: 설치 안내는 로그인 뒤에만). 정적 CSP 'unsafe-inline' */}
+      <script
+        dangerouslySetInnerHTML={{ __html: LANDING_INSTALL_GUARD_SCRIPT }}
+      />
       <LandingHeader />
       <main>
         <HeroSection />
@@ -43,6 +49,11 @@ export default function Home() {
       </main>
       <LandingFooter />
       <LandingViewTracker />
+      {/* 아래쪽 섹션 CSS를 늦게 받는다 (P4-12, 렌더 차단 CSS 예산). 자바스크립트가 없으면 CSS 없이라도 본문을 보인다 */}
+      <LandingDeferredCss />
+      <noscript>
+        <style>{'.ld-sec{--ld-css:visible}'}</style>
+      </noscript>
       {/* 로그인 실패·취소로 돌아오면 로그인 시트를 열어 안내 (P3-10) */}
       <LandingLoginError />
     </div>

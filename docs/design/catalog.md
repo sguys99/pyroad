@@ -74,7 +74,7 @@
 | `spin` | 로딩 스피너(버튼 `loading`·실행 중), `reduced:animate-none` |
 | `pulse` | 화면 로딩 스켈레톤, `reduced:animate-none` |
 | `waking-dot` · `thinking-dot` | 실행기 깨우는 중 · AI 튜터 생각 중 점 세 개 |
-| `cm-blink` · `cm-blink2` | 코드 에디터 커서 = 입력 위치 신호(CodeMirror 기본). 동작 줄이기에서는 멈추고 늘 보이게(globals.css, P2-12 추가) |
+| `cm-blink` · `cm-blink2` | 코드 에디터 커서 = 입력 위치 신호(CodeMirror 기본). 동작 줄이기에서는 멈추고 늘 보이게(app.css — P4-12에서 globals.css에서 옮김, P2-12 추가) |
 
 **동작 줄이기 허용 목록** (§12-Q26 "몸은 멈추고 느린 눈 깜빡임만", minimal이면 이것도 없음): `char-blink-eye-slow` · `char-blink-highlight-slow`.
 

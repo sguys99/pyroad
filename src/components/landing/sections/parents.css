@@ -5,6 +5,11 @@
    시안 `f-letter`: 흰 면 띠(tone=surface) 위에 바탕색 "편지" 한 장, 3단 글. 테두리·도장·줄 공책 없음 */
 
 @layer components {
+  /* 이 CSS가 도착했다는 표시: 오기 전에는 섹션 본문이 숨겨져 있다 (landing.css "늦게 오는 섹션 CSS", P4-12) */
+  [data-deferred-css='parents'] {
+    --ld-css: visible;
+  }
+
   /* ───────────── 편지 */
   .ld-parents-letter {
     padding: 1.5rem 1.25rem 1.25rem;

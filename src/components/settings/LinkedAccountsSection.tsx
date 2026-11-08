@@ -27,6 +27,8 @@ import { forgetLastLoginIf } from '@/lib/auth/lastLogin';
 import { formatKstDate } from '@/lib/time/kst';
 import type { IdentityLike } from '@/lib/auth/loginProvider';
 import type { SocialProvider } from '@/lib/auth/socialLogin';
+// 브랜드 버튼 모양 (P4-12: 전역 CSS가 아니라 쓰는 곳에서 → 랜딩 렌더 차단 CSS에서 빠짐)
+import '@/components/auth/social-login.css';
 
 const NAME: Record<SocialProvider, string> = {
   google: 'Google',

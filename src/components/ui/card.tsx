@@ -3,6 +3,8 @@ import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './card.css';
 /**
  * 카드 (P2-11, docs/design/components.md §2). 최종 시안: 테두리 없이 흰 면 + 그림자 한 종류(`shadow-card`).
  * - 반경: m = 14px(기본, 작은 카드) · l = 20px(큰 카드·패널)

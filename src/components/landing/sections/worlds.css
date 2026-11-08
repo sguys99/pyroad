@@ -10,6 +10,11 @@
    월드 2·3에만 있는 면 색(`hm-sea-deep`·`hm-whale`)과 격자는 아래 `.ld-worlds` 안에 둔다 */
 
 @layer components {
+  /* 이 CSS가 도착했다는 표시: 오기 전에는 섹션 본문이 숨겨져 있다 (landing.css "늦게 오는 섹션 CSS", P4-12) */
+  [data-deferred-css='worlds'] {
+    --ld-css: visible;
+  }
+
   /* ───────────── 그림 재질 (히어로와 같은 모양) */
   .ld-worlds .hm {
     fill: var(--f);

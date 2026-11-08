@@ -1,5 +1,7 @@
 // 법적 고지 페이지도 앱 화면 웹폰트를 쓴다 (P2-10). 랜딩에는 싣지 않으려고 루트가 아닌 여기서 import
 import '@/fonts/app.css';
+// 앱 화면 전용 유틸리티·연출 CSS (P4-12: 루트 globals.css는 랜딩이 닿는 소스만 훑는다)
+import '@/app/app.css';
 
 /**
  * `/terms` · `/privacy` · `/licenses` (P3-14). 비로그인 열람, 사용자 콘텐츠가 없어 빌드 때 정적 HTML로 굳는다

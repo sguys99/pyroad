@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 import { DURATION } from '@/lib/motion/tokens';
 import { IconButton } from '@/components/ui/button';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './toast.css';
 /**
  * 토스트 (P2-11, docs/design/components.md §5). 최종 시안의 담백한 쪽지: 흰 면(또는 의미색 틴트) + `shadow-pop` + 반경 14,
  * 화면 아래 가운데. 짧은 알림 한 줄 + (선택) 아이콘 · 닫기 버튼.

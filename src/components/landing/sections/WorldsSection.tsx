@@ -2,7 +2,7 @@ import { LandingSection } from '../LandingSection';
 import { WorldsMap } from './worlds/WorldsMap';
 import { countWorldContent } from './worlds/worldStats';
 import { WORLD_PREVIEWS } from './worlds/worldsData';
-import './worlds.css';
+// 스타일 `worlds.css`는 여기서 import하지 않는다: 첫 화면 밖이라 렌더 차단 CSS에서 빼고 `../deferredCss.ts`가 늦게 받는다 (P4-12)
 
 /**
  * 랜딩 `#worlds` 세계관 섹션 (P4-04): 월드 1·2·3 미리보기 — 스크롤에 맞춰 두루마리 지도가 펼쳐진다.
@@ -18,6 +18,7 @@ export function WorldsSection() {
   return (
     <LandingSection
       id="worlds"
+      deferredCss="worlds"
       kicker="한 월드씩 열리는 모험"
       title="세 개의 월드가 기다려요"
       lead="파이썬 섬에서 출발해 바다를 건너 도시까지! 지도는 한 월드씩 펼쳐져요."

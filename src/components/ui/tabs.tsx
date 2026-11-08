@@ -10,6 +10,8 @@ import {
 
 import { cn } from '@/lib/utils';
 
+// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
+import './tabs.css';
 /**
  * 세그먼트 탭 (P2-11, docs/design/components.md §6). 최종 시안 `.f-seg`: 보조 면 알약 안에서 주색 엄지가 고른 칸으로 미끄러진다.
  *

@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import { Code, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,14 +15,10 @@ import type { PybaemState } from '@/components/characters/rig';
 import { useSfx } from '@/components/providers/soundContext';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { track } from '@/lib/analytics/track';
-import {
-  MAX_CODE_LENGTH,
-  NO_PRINT_HINT,
-  autoCorrect,
-  explain,
-  runMiniPython,
-  type MiniResult,
-} from '@/lib/landing/miniPython';
+// 해석기(`runMiniPython`)는 첫 JS에 싣지 않고 공책이 화면 근처에 오거나 처음 주문을 걸 때 받는다 (P4-12)
+import type { MiniResult } from '@/lib/landing/miniPython';
+import { MAX_CODE_LENGTH, autoCorrect } from '@/lib/landing/miniPython/input';
+import { NO_PRINT_HINT, explain } from '@/lib/landing/miniPython/messages';
 import {
   DEMO_CODE,
   DEMO_OUTPUT,
@@ -37,6 +34,7 @@ import {
 } from './useDemoPlayer';
 import { inkReveal, popOut, shake, stampConfetti, stampSlam } from './trialFx';
 import { TrialBuddy } from './TrialBuddy';
+import { TRIAL_BUDDY_FIRST_STATE } from './buddyStill';
 import { TrialCta } from './TrialCta';
 import { highlightSegments, splitSegments, type Segment } from './highlight';
 
@@ -51,6 +49,20 @@ function Segments({ segs }: { segs: Segment[] }) {
       <span key={i}>{s.text}</span>
     ),
   );
+}
+
+type RunMini = (typeof import('@/lib/landing/miniPython'))['runMiniPython'];
+let runnerLoad: Promise<RunMini> | null = null;
+/** 미니 해석기 모듈을 한 번만 받는다 (실패하면 다음에 다시) */
+function loadRunner(): Promise<RunMini> {
+  runnerLoad ??= import('@/lib/landing/miniPython').then(
+    (m) => m.runMiniPython,
+    (e: unknown) => {
+      runnerLoad = null;
+      throw e;
+    },
+  );
+  return runnerLoad;
 }
 
 /**
@@ -132,7 +144,7 @@ const BUDDY_STATE: Record<Mode, PybaemState> = {
  * - 공책을 누르거나(포인터) 키보드로 들어오면 데모를 바로 끝내고 넘겨준다
  * - 데모 글자는 `aria-hidden` 겹 레이어에만 그린다 (입력칸은 그동안 비어 있음) → 한 글자씩 읽히지 않고, 끝나면 한 번 알림
  */
-export function TrialNotebook() {
+export function TrialNotebook({ still }: { still: ReactNode }) {
   const { budget } = useMotionTier();
   const play = useSfx();
 
@@ -236,11 +248,27 @@ export function TrialNotebook() {
     if (demo) handOff();
   };
 
+  /** 받아 둔 해석기 (처음 받기 전에는 null) */
+  const runner = useRef<RunMini | null>(null);
+  const prefetchRunner = useCallback(() => {
+    void loadRunner().then(
+      (fn) => {
+        runner.current = fn;
+      },
+      () => {},
+    );
+  }, []);
+  // 공책 줄이 화면에 들어오면(데모를 볼 즈음) 미리 받는다. 손이 먼저 닿으면 그때 (touch)
+  useEffect(() => {
+    if (lineVisible) prefetchRunner();
+  }, [lineVisible, prefetchRunner]);
+
   /** 아이가 처음 공책을 만짐 (분석 `trial_start`, 페이지당 1번) */
   const touch = () => {
     if (touched.current) return;
     touched.current = true;
     track('trial_start', {});
+    prefetchRunner();
   };
 
   /** 입력칸이 옆으로 스크롤되면 겹 레이어도 같이 민다 */
@@ -255,6 +283,22 @@ export function TrialNotebook() {
   const run = (src: string = code) => {
     if (demo) return;
     touch();
+    if (runner.current) {
+      runWith(runner.current, src);
+      return;
+    }
+    void loadRunner().then(
+      (fn) => {
+        runner.current = fn;
+        runWith(fn, src);
+      },
+      () => {
+        // 해석기를 못 받으면(오프라인 등) 말없이 두고 다음 누름에 다시 받는다
+      },
+    );
+  };
+
+  const runWith = (runMiniPython: RunMini, src: string) => {
     const r = runMiniPython(src);
     runs.current += 1;
     const success = r.ok && r.printed;
@@ -346,7 +390,7 @@ export function TrialNotebook() {
     if (said === 'turn' || !result) {
       return {
         who: 'pybaem' as const,
-        state: 'encourage' as const,
+        state: TRIAL_BUDDY_FIRST_STATE,
         line: LINES.turn,
       };
     }
@@ -528,6 +572,7 @@ export function TrialNotebook() {
       {buddy.who === 'bugbug' ? (
         <TrialBuddy
           who="bugbug"
+          still={still}
           line={buddy.line}
           lineKey={talk}
           typing={talk > 0}
@@ -535,6 +580,7 @@ export function TrialNotebook() {
       ) : (
         <TrialBuddy
           who="pybaem"
+          still={still}
           state={buddy.state}
           line={buddy.line}
           lineKey={talk}

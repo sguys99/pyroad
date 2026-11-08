@@ -1,7 +1,7 @@
 # 모션 가이드라인 (P2-15)
 
 > - 근거: [P0-16 저사양 감지](../spikes/P0-16-low-spec-detection.md) §4.5 단계표 · [P0-07 마스코트 리그](../spikes/P0-07-mascot-animation.md) · [P2-01 무드보드](P2-01-moodboard.md) §2.3·§6 · 계획서 §2.5 "연출 단계", §2.10 규칙, §12-Q26
-> - 코드: `src/lib/motion/` (`tier.ts` 단계표·정책 · `detect.ts` 감지 · `browser.ts` 저장소·rAF · `boot.ts` 첫 페인트 전 부트 · `tokens.ts` 모션 토큰 · `MotionTierProvider.tsx` `useMotionTier()`), CSS `src/app/globals.css` "연출 단계" 절, 설정 화면 `src/components/settings/MotionSettingsSection.tsx`
+> - 코드: `src/lib/motion/` (`tier.ts` 단계표·정책 · `detect.ts` 감지 · `browser.ts` 저장소·rAF · `boot.ts` 첫 페인트 전 부트 · `tokens.ts` 모션 토큰 · `MotionTierProvider.tsx` `useMotionTier()`), CSS `src/app/globals.css` "연출 단계" 절(앱 화면만 쓰는 반복 연출 — 월드맵·퀘스트·축하·에디터 커서 — 은 `src/app/app.css`, P4-12), 설정 화면 `src/components/settings/MotionSettingsSection.tsx`
 > - 모든 연출은 **연출 단계(full / lite / minimal)** 와 **동작 줄이기(reduced-motion, 별개의 축)** 를 따릅니다. 새 연출을 만들기 전에 §6 체크리스트를 보세요.
 
 ## 1. 단계는 어떻게 정해지나

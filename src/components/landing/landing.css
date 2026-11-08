@@ -202,6 +202,14 @@
     transform-origin: left center;
   }
 
+  /* 늦게 오는 섹션 CSS (P4-12, `deferredCss.ts`): 첫 화면 밖 섹션(세계관·쇼케이스·친구·보호자·FAQ)의 CSS는 렌더 차단 CSS에서 빼고
+     하이드레이션 즈음 받는다. 오기 전에 그 자리로 스크롤해도 깨진 모습 대신 빈 자리가 보이도록 본문(머리글 밖)을 숨기고,
+     각 섹션 CSS가 `[data-deferred-css='<이름>'] { --ld-css: visible }`로 드러낸다. 머리글(눈썹·제목·설명)은 이 파일 스타일이라 늘 보인다.
+     :where()로 명시도 0 → 섹션 CSS의 visibility 규칙을 막지 않는다. 자바스크립트가 없으면 page.tsx의 <noscript>가 드러낸다 */
+  :where(.ld-sec[data-deferred-css] > .ld-sec-in > :not(.ld-sec-head)) {
+    visibility: var(--ld-css, hidden);
+  }
+
   /* 지연 로드 자리 (WhenVisible): 내용이 오기 전 높이를 잡아 둔다 → 레이아웃 흔들림 없음 */
   .ld-lazy[data-pending='true'] {
     min-height: var(--ld-lazy-h, 12rem);

@@ -89,12 +89,12 @@ npm run fonts:check                             # 검사 (Node만, prebuild·CI)
 
 | 라우트 | font preload | 렌더 차단 CSS (gzip) | 실리는 조각 CSS |
 |---|---|---|---|
-| `/` 랜딩 | 2 (Jua·pyRoad Sans 랜딩 서브셋) | 19.4KB (폰트 선언은 local 폴백 4개 + 서브셋 2개) | 없음 |
+| `/` 랜딩 | 2 (Jua·pyRoad Sans 랜딩 서브셋) | 19.4KB → P4-12 뒤 **13.6KB** (폰트 선언은 local 폴백 4개 + 서브셋 2개) | 없음 |
 | `/world` · `/settings` · `/notice` | 0 | 38.0KB | Jua 86 + pyRoad Sans 92 |
 | `/quest/[questId]` | 0 | 50.9KB | + pyRoad Mono 109 |
 
 - (P2-10 당시) **랜딩 폰트 전송 105KB / 예산 150KB**(§2.10, 요청 2개, CLS 0, Playwright 측정). 랜딩 글자 238개(한글 음절 152개). 넘으면 postbuild 실패.
-- 랜딩 렌더 차단 CSS 19.4KB는 예산 15KB를 넘지만 대부분 Tailwind·shadcn 기본 CSS입니다(예전 Noto Sans KR `@font-face` 249개는 빠짐). 줄이는 일은 P4-12. postbuild는 경고만 냅니다.
+- 랜딩 렌더 차단 CSS: 19.4KB(P2-10) → 랜딩 개편 뒤 34.9KB → P4-12에서 13.6KB(예산 15KB). Tailwind를 랜딩 소스만 훑고 아래쪽 섹션 CSS를 늦게 받는다 — [perf/P4-12-landing.md](../perf/P4-12-landing.md). 넘으면 postbuild(`scripts/perf/check-landing-budget.mjs`)가 실패합니다.
 - Turbopack 누수 없음: `next-font-manifest`에서 랜딩만 preload가 있고, 코드 글꼴 조각은 퀘스트 라우트에만 실립니다. 다른 라우트에 preload가 붙거나 랜딩 preload가 2개를 넘으면 postbuild가 실패합니다(Next를 올릴 때 다시 확인).
 - 앱 화면에서 실제로 받은 조각(1280px, 첫 방문): 월드맵 Jua 4 + pyRoad Sans 10, 퀘스트 1-1 Jua 7 + pyRoad Sans 16 + pyRoad Mono 7.
 - 저장소 용량: 폰트 파일 합계 약 4.6MB(§12-Q27 예상 3~6MB 안).

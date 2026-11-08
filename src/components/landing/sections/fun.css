@@ -7,6 +7,11 @@
    그림 재질(.hm 면 + 진한 톤 선)은 히어로·세계관과 같다(면 색 `hm-*`는 hero.css 전역 정의) */
 
 @layer components {
+  /* 이 CSS가 도착했다는 표시: 오기 전에는 섹션 본문이 숨겨져 있다 (landing.css "늦게 오는 섹션 CSS", P4-12) */
+  [data-deferred-css='fun'] {
+    --ld-css: visible;
+  }
+
   .ld-fun {
     /* 장면 한 번 길이 = funData.ts SCENE_MS (축하 카드 2.5장) */
     --ld-fun-t: calc(var(--dur-celebrate) * 2.5);

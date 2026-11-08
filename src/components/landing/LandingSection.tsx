@@ -16,6 +16,11 @@ export interface LandingSectionProps {
   /** 본문 폭: wide(72rem) · narrow(48rem, FAQ·편지글) */
   width?: 'wide' | 'narrow';
   className?: string;
+  /**
+   * 이 섹션 CSS가 늦게 오는 묶음(`deferredStyles.ts`)에 있으면 그 이름 (P4-12). 붙이면 CSS가 오기 전에는 본문(머리글 밖)을 숨기고,
+   * 그 CSS의 `[data-deferred-css='<이름>'] { --ld-css: visible }`가 드러낸다 (landing.css "늦게 오는 섹션 CSS")
+   */
+  deferredCss?: string;
   children?: ReactNode;
 }
 
@@ -35,6 +40,7 @@ export function LandingSection({
   align = 'start',
   width = 'wide',
   className,
+  deferredCss,
   children,
 }: LandingSectionProps) {
   const titleId = `${id}-title`;
@@ -45,6 +51,7 @@ export function LandingSection({
       data-tone={tone}
       data-align={align}
       data-width={width}
+      data-deferred-css={deferredCss}
       className={cn('ld-sec', className)}
     >
       <div className="ld-sec-in">

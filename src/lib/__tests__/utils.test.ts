@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { FONT_FAMILY, themeCssVars } from '@/lib/design/tokens';
-import { cn, themeScale } from '@/lib/utils';
+import { FONT_FAMILY, themeCssVars, themeScale } from '@/lib/design/tokens';
+import { THEME_NAMES } from '@/lib/design/themeNames';
+import { cn } from '@/lib/utils';
 
 // cn()이 프로젝트 토큰 유틸리티를 아는지 (B44): 글자 크기 + 색이 둘 다 남고, 같은 그룹끼리는 뒤가 이긴다
 
@@ -53,9 +54,18 @@ describe('themeScale: 토큰 원본에서 이름 뽑기', () => {
     expect(new Set(eases)).toEqual(new Set(inCss('ease')));
   });
 
-  it('토큰을 더하면 자동으로 따라온다 (목록을 손으로 적지 않음)', () => {
+  it('토큰을 더하면 자동으로 따라온다', () => {
     const vars = { ...themeCssVars(), '--text-giant': '3rem' };
     expect(themeScale('text', vars)).toContain('giant');
+  });
+
+  it('cn()이 쓰는 이름 목록(THEME_NAMES)이 토큰 원본과 같다 (P4-12: 원본을 첫 JS에 싣지 않으려고 따로 둠)', () => {
+    expect([...THEME_NAMES.text]).toEqual(sizes);
+    expect([...THEME_NAMES.shadow]).toEqual(shadows);
+    expect([...THEME_NAMES.radius]).toEqual(radii);
+    expect([...THEME_NAMES.spacing]).toEqual(spacings);
+    expect([...THEME_NAMES.ease]).toEqual(eases);
+    expect([...THEME_NAMES.font]).toEqual(Object.keys(FONT_FAMILY));
   });
 });
 
