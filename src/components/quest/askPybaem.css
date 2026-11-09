@@ -1,0 +1,280 @@
+/* "파이뱀에게 물어보기" + 대화 (P6-10, AskPybaem.tsx·ConversationPanel.tsx). 최종 시안 톤: 테두리 없는 면, 그림자 한 종류,
+   주색 초록 하나. 값은 토큰 변수만 */
+
+/* ───────────── 물어보기 줄: 대사창 아래 옅은 회색 면 하나 (얼굴 · 이름 + 새 이야기 수 · 미리 보기 · 꺾쇠) */
+.qa {
+  margin: -0.25rem 0 1.25rem;
+}
+.qa-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--spacing-touch);
+  padding: 0.625rem 0.875rem 0.625rem 0.625rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--easing-out);
+}
+@media (hover: hover) {
+  .qa-row:hover {
+    background: var(--surface-lip);
+  }
+}
+.qa-row:active {
+  background: var(--surface-lip);
+}
+.qa-row:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+/* 펼친 동안 줄과 대화가 한 덩어리: 아래 모서리를 펴고 대화 면에 이어 붙임 */
+.qa[data-open] .qa-row {
+  border-radius: var(--round-m) var(--round-m) 0 0;
+}
+.qa-face {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+}
+.qa-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.125rem;
+}
+.qa-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  font-weight: 700;
+}
+.qa-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  padding: 0 0.375rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--text-caption);
+  line-height: 1;
+}
+/* 미리 보기: 두 줄까지 */
+.qa-sub {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  overflow-wrap: anywhere;
+}
+.qa[data-open] .qa-sub,
+.qa-row:not([data-unread]) .qa-sub {
+  -webkit-line-clamp: 1;
+}
+.qa-row[data-unread] .qa-sub {
+  color: var(--text);
+}
+.qa-chev {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--text-muted);
+  transition: transform var(--dur-fast) var(--easing-out);
+}
+/* 데스크톱은 아래로 펼침(꺾쇠가 위로), 모바일은 시트라 오른쪽을 가리킴 */
+@media (max-width: 63.99rem) {
+  .qa-chev {
+    transform: rotate(-90deg);
+  }
+}
+@media (min-width: 64rem) {
+  .qa[data-open] .qa-chev {
+    transform: rotate(180deg);
+  }
+}
+.qa-dots,
+.qc-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.qa-dots .thinking-dot,
+.qc-dots .thinking-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--round-pill);
+  background: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.qa-dots .thinking-dot:last-of-type {
+  margin-right: 0.25rem;
+}
+
+/* ───────────── 데스크톱: 이야기 쪽 안에서 펼침. 높이를 묶어 해 볼 일 카드를 밀어내지 않고 대화 안에서만 스크롤 */
+.qa-panel {
+  padding: 0.25rem 0.75rem 0.75rem;
+  border-radius: 0 0 var(--round-m) var(--round-m);
+  background: var(--surface-2);
+}
+.qa-panel .qc-log {
+  max-height: min(24rem, 48vh);
+}
+
+/* ───────────── 모바일: 바텀시트. 대화만 스크롤, 질문 줄은 아래 고정 (안전 영역은 시트가 띄움) */
+.g-sheet.qa-sheet {
+  height: min(40rem, calc(100dvh - 2.5rem));
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.qa-sheet .qc {
+  flex: 1;
+  min-height: 0;
+}
+.qa-sheet .qc-log {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ───────────── 대화 */
+.qc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.qc-loading {
+  padding: 1rem 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  text-align: center;
+}
+.qc-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.75rem 0.25rem 0.25rem;
+  border-radius: var(--round-s);
+}
+.qc-log:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.qc-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-width: 0;
+}
+.qc-row > .g-bubble {
+  max-width: calc(100% - 2.5rem);
+}
+.qc-face {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0.125rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+}
+/* 내 질문: 오른쪽, 옅은 주색 면, 꼬리 쪽 모서리만 덜 둥글게 */
+.qc-row-me {
+  justify-content: flex-end;
+}
+.qc-me {
+  max-width: 80%;
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--round-m) var(--round-m) 0.25rem var(--round-m);
+  background: var(--primary-soft);
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  font-weight: 600;
+}
+.qc-system {
+  align-self: center;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  text-align: center;
+}
+.qc-badge {
+  margin-left: 0.25rem;
+  padding: 0 0.375rem;
+  border-radius: var(--round-s);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 500;
+}
+.qc-stream {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: var(--text-small);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.qc-md {
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+.qc-dots-t {
+  margin-left: 0.375rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+/* 정해진 질문 줄 */
+.qc-ask {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+/* 기본 튜터 안내: 대화 맨 위 옅은 쪽지 (예전 책 위 노란 띠) */
+.qc-key {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--round-s);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+.qc-key svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.125rem;
+}
+.qc-key a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+:root:is([data-motion='minimal'], [data-reduced='true'])
+  :is(.qa-row, .qa-chev) {
+  transition: none;
+}

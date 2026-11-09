@@ -8,14 +8,13 @@ import { ArrowRight, Square } from 'lucide-react';
 import { worldPath } from '@/lib/world/worldBook';
 import { stageDots } from '@/lib/quest/stageProgress';
 import { QuestHeader } from './QuestHeader';
-import { ConversationPanel } from './ConversationPanel';
+import { AskPybaem } from './AskPybaem';
 import { StoryPage } from './StoryPage';
 import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { QuestCelebrations } from './QuestCelebrations';
-import { ApiKeyBanner } from './ApiKeyBanner';
 import './questWorkspace.css';
 
 // 모바일 번호 탭 ①이야기 ②공책 ③결과 (시안 f-ribbons). 패널 id는 aria-controls
@@ -42,7 +41,7 @@ interface QuestWorkspaceProps {
 
 /**
  * 코드를 쓰는 퀘스트(코드·프로젝트)의 공통 화면 (P1-09 → P6-01 책 펼침, 최종 시안 Quest.tsx):
- * 헤더 · [왼쪽 쪽 이야기(StoryPage: 해 볼 일 체크리스트·파이뱀 대사창·튜터 대화) | 오른쪽 쪽 공책(에디터·실행·결과)] · 상태바 · 축하.
+ * 헤더 · [왼쪽 쪽 이야기(StoryPage: 해 볼 일 체크리스트·파이뱀 대사창·물어보기(튜터 대화, P6-10)·힌트) | 오른쪽 쪽 공책(에디터·실행·결과)] · 상태바 · 축하.
  * lg(1024px) 이상은 흰 책 한 장을 펼친 두 쪽(쪽마다 따로 스크롤), 그 아래는 ①이야기 ②공책 ③결과 번호 탭으로 한 쪽씩
  */
 export function QuestWorkspace({
@@ -95,8 +94,7 @@ export function QuestWorkspace({
 
       {belowHeader}
 
-      {/* API 키 미설정 배너 */}
-      {session.hasApiKey === false && <ApiKeyBanner />}
+      {/* API 키 미설정 안내는 파이뱀 대화 안으로 옮김 (P6-10, AskPybaem → ApiKeyBanner) */}
 
       {/* 완료 배너 */}
       {session.isCompleted && (
@@ -126,6 +124,12 @@ export function QuestWorkspace({
         >
           <StoryPage
             session={session}
+            ask={
+              <AskPybaem
+                session={session}
+                hintPending={notes.some((n) => n.pending)}
+              />
+            }
             action={
               <Button
                 onClick={() => setTab('code')}
@@ -150,12 +154,6 @@ export function QuestWorkspace({
               totalHintsUsed={session.totalHintsUsed}
               usedGoldenKey={session.usedGoldenKey}
               isCompleted={session.isCompleted}
-            />
-            <ConversationPanel
-              messages={session.messages}
-              isAiLoading={session.isAiLoading}
-              streamingContent={session.streamingContent}
-              hintPending={notes.some((n) => n.pending)}
             />
           </StoryPage>
         </div>

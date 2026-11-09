@@ -170,7 +170,12 @@ describe('퀘스트 렌더러 스모크', () => {
       'data-state',
       'empty',
     );
-    expect(await screen.findByText('안녕! 같이 해 볼까?')).toBeInTheDocument();
+    // 튜터 소개는 닫힌 "파이뱀에게 물어보기" 줄에 미리 보기 + 새 이야기 수 (P6-10)
+    const ask = screen.getByTestId('ask-pybaem');
+    expect(
+      await within(ask).findByText('안녕! 같이 해 볼까?'),
+    ).toBeInTheDocument();
+    expect(within(ask).getByTestId('ask-unread')).toHaveTextContent('1');
     // 퀘스트 → 월드맵은 소프트 내비게이션 링크 (B22)
     expect(screen.getByRole('link', { name: /월드맵/ })).toHaveAttribute(
       'href',
@@ -181,6 +186,11 @@ describe('퀘스트 렌더러 스모크', () => {
   it('ProjectQuest: 단계 막대와 첫 단계 시작 코드', async () => {
     render(<ProjectQuest {...props(PROJECT_QUEST)} />);
     expect(screen.getByLabelText('코드 에디터')).toHaveValue('name = ___');
+    // 단계 시작 알림은 대화에 (P6-10: 열면 지연 로드)
+    await within(screen.getByTestId('ask-pybaem')).findByText(
+      '안녕! 같이 해 볼까?',
+    );
+    fireEvent.click(screen.getByTestId('ask-pybaem'));
     expect(await screen.findByText('단계 1/2: 이름 출력')).toBeInTheDocument();
     expect(screen.getByTestId('run-button')).toBeInTheDocument();
   });

@@ -100,6 +100,17 @@ const ANSWER_CONFETTI = {
 const RUN_ERROR_FEEDBACK =
   '앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪';
 const WRONG_ANSWER_FEEDBACK = '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
+/**
+ * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10). 자유 입력 대신 정해진 질문만: 이미 있는 튜터 유형으로 답하므로
+ * 새 프롬프트·금칙어 검사가 필요 없다. what = 퀘스트(프로젝트는 지금 단계) 설명, why = 마지막 실행 결과 설명
+ */
+export const ASK_QUESTIONS = {
+  what: '무엇을 하면 돼요?',
+  why: '왜 이렇게 나왔어요?',
+} as const;
+export type AskQuestion = keyof typeof ASK_QUESTIONS;
+const ASK_FAILED =
+  '지금은 파이뱀이 대답하기 어려워요. 조금 뒤에 다시 물어봐 줘요!';
 const SAVE_FAILED_MESSAGE =
   '앗, 기록을 저장하지 못했어요. 한 번 더 눌러 볼까요?';
 const RUNNER_NOT_READY_FOR_KEY =
@@ -216,6 +227,8 @@ export function useQuestSession({
   // AI 튜터
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [streamingContent, setStreamingContent] = useState('');
+  // 마지막으로 돌린 코드 ("왜 이렇게 나왔어요?"는 그 코드 그대로일 때만 묻는다)
+  const [lastRunCode, setLastRunCode] = useState<string | null>(null);
   // 힌트: 화면의 "힌트 n/3"은 단계마다(코드 퀘스트는 퀘스트 전체), 상태바는 누적
   const [stepHints, setStepHints] = useState(
     kind === 'code' ? (progress?.hints_used ?? 0) : 0,
@@ -645,6 +658,7 @@ export function useQuestSession({
       const result = await runCode(codeToRun, { onStdout: liveOutput.append });
       if (!aliveRef.current) return 'stay';
       setRunResult(result);
+      setLastRunCode(result.isStopped ? null : codeToRun);
       setTab('result');
 
       // 아이가 멈추기를 눌렀음 → 채점·피드백 없이 끝
@@ -829,6 +843,59 @@ export function useQuestSession({
     play,
   ]);
 
+  // ── 물어보기 (P6-10) ─────────────────────────────────────────────────
+
+  const canAskWhy = !!runResult && lastRunCode === code;
+  const handleAsk = useCallback(
+    (question: AskQuestion) => {
+      if (isAiLoading || (question === 'why' && (!canAskWhy || !runResult)))
+        return;
+      play('tap');
+      addMessage({ role: 'student', content: ASK_QUESTIONS[question] });
+      let req: TutorRequest;
+      if (question === 'why' && runResult) {
+        req = {
+          type: 'code_feedback',
+          quest_id: questId,
+          student_code: code,
+          execution_result: {
+            stdout: runResult.stdout,
+            stderr: runResult.success ? '' : runResult.stderr,
+            passed: !!validation?.passed,
+          },
+        };
+      } else if (kind === 'project' && stepGoal !== undefined) {
+        req = {
+          type: 'project_guide',
+          quest_id: questId,
+          current_step: currentStep,
+          total_steps: totalSteps,
+          step_goal: stepGoal,
+          previous_code: previousStepCode,
+        };
+      } else {
+        req = { type: 'quest_intro', quest_id: questId };
+      }
+      streamTutor(req, ASK_FAILED);
+    },
+    [
+      isAiLoading,
+      canAskWhy,
+      runResult,
+      validation,
+      code,
+      kind,
+      questId,
+      stepGoal,
+      currentStep,
+      totalSteps,
+      previousStepCode,
+      addMessage,
+      streamTutor,
+      play,
+    ],
+  );
+
   // ── 황금키 ──────────────────────────────────────────────────────────
 
   // 실행기가 준비되지 않았거나 다른 실행·채점 중이면 쓰지 않는다: 키를 차감한 뒤 정답 실행이 실패하면
@@ -988,6 +1055,10 @@ export function useQuestSession({
     /** 보상 계산에 쓰는 누적 힌트 수 (DB hints_used와 같음) */
     totalHintsUsed: totalHints,
     handleHintRequest,
+    /** "파이뱀에게 물어보기" 질문 (P6-10) */
+    handleAsk,
+    /** 마지막 실행 결과가 지금 코드의 것인지 ("왜 이렇게 나왔어요?") */
+    canAskWhy,
 
     goldenKeys,
     usedGoldenKey,

@@ -21,7 +21,7 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
   });
 
   test('대화 패널에 파이뱀 아바타가 표시된다', async ({ page }) => {
-    // ConversationPanel의 채팅 아바타 확인
+    // 물어보기 줄(AskPybaem)의 파이뱀 얼굴 — 닫혀 있어도 보임 (P6-10)
     const avatar = page.locator('[data-testid^="character-avatar-pybaem"]');
     await expect(avatar.first()).toBeVisible({ timeout: 15_000 });
   });

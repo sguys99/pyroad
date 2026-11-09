@@ -6,6 +6,7 @@ import { stage } from './support/content';
 import {
   advanceCelebration,
   completedNotice,
+  openTutorChat,
   outputPanel,
   waitForRunner,
 } from './support/quest';
@@ -60,7 +61,6 @@ test.describe('황금키', () => {
       quest.solution,
     );
     await expect(outputPanel(page)).toContainText('정답이에요!');
-    await expect(page.getByText('🔑 황금키를 사용했어요!')).toBeVisible();
 
     // 큰 축하 대신 작은 확인 카드 (컨페티 없음)
     const card = page.getByTestId('celebration-step-golden_key');
@@ -78,6 +78,11 @@ test.describe('황금키', () => {
     await advanceCelebration(page, 'golden_key');
     await expect(page.getByTestId('celebration-overlay')).toBeHidden();
     await expect(page.getByTestId('celebration-step-badges')).toHaveCount(0);
+
+    // 황금키 알림은 파이뱀 대화에 (P6-10: 닫혀 있으면 물어보기 줄에 새 이야기 수)
+    await expect(page.getByTestId('ask-unread')).toBeVisible();
+    const chat = await openTutorChat(page);
+    await expect(chat.getByText('🔑 황금키를 사용했어요!')).toBeVisible();
 
     // 서버가 차감·0 XP 로 완료
     await expect(goldenKeys(page, 2)).toBeVisible();

@@ -3,7 +3,12 @@
 
 import { test, expect } from './support/test';
 import { stage } from './support/content';
-import { outputPanel, setCode, waitForRunner } from './support/quest';
+import {
+  openTutorChat,
+  outputPanel,
+  setCode,
+  waitForRunner,
+} from './support/quest';
 
 const quest = stage(1).quests[0];
 
@@ -23,15 +28,18 @@ test.describe('LLM 폴백 동작', () => {
     const body = await res.text();
     expect(body).toContain('"is_fallback":true');
 
-    // 대화 패널에 prompt_skeleton.fallback_text 가 "저장된 답변" 배지와 함께
-    await expect(page.getByText(quest.fallbackText)).toBeVisible();
-    await expect(page.getByText('저장된 답변').first()).toBeVisible();
+    // 닫힌 물어보기 줄에 새 이야기 1 (P6-10) → 열면 prompt_skeleton.fallback_text 가 "저장된 답변" 배지와 함께
+    await expect(page.getByTestId('ask-unread')).toHaveText(/^1/);
+    const chat = await openTutorChat(page);
+    await expect(chat.getByText(quest.fallbackText)).toBeVisible();
+    await expect(chat.getByText('저장된 답변').first()).toBeVisible();
   });
 
   test('API 키 없이 힌트 요청 시 정적 힌트 표시', async ({ page }) => {
     await page.goto(`/quest/${quest.id}`);
     await waitForRunner(page);
-    await expect(page.getByText(quest.fallbackText)).toBeVisible();
+    const chat = await openTutorChat(page);
+    await expect(chat.getByText(quest.fallbackText)).toBeVisible();
 
     await page.getByRole('button', { name: '힌트 받기' }).click();
     await expect(page.getByText(quest.hints[0])).toBeVisible();
@@ -41,6 +49,7 @@ test.describe('LLM 폴백 동작', () => {
   test('정답 피드백·격려도 저장된 답변으로 이어서 나온다', async ({ page }) => {
     await page.goto(`/quest/${quest.id}`);
     await waitForRunner(page);
+    await openTutorChat(page);
     await expect(page.getByText('저장된 답변')).toHaveCount(1);
 
     await setCode(page, quest.solution);

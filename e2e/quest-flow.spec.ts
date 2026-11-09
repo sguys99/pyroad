@@ -8,6 +8,7 @@ import {
   advanceCelebration,
   completedNotice,
   openStageSheet,
+  openTutorChat,
   outputPanel,
   questHeader,
   runButton,
@@ -62,7 +63,9 @@ test.describe('퀘스트 전체 플로우', () => {
     const task = page.getByRole('region', { name: '해 볼 일' });
     await expect(task.getByRole('listitem').first()).toBeVisible();
     await expect(page.getByTestId('quest-dialogue')).toContainText('파이뱀');
-    await expect(page.getByText('파이뱀 선생님').first()).toBeVisible();
+    // 튜터 소개는 "파이뱀에게 물어보기"를 열면 대화에 (P6-10)
+    const chat = await openTutorChat(page);
+    await expect(chat.getByTestId('chat-tutor').first()).toBeVisible();
 
     // 4~7. 에디터 + 실행기 준비 → 정답 실행
     await expect(page.locator('.cm-editor')).toBeVisible();

@@ -218,9 +218,6 @@
   align-self: flex-end;
   margin-bottom: 1.5rem;
 }
-.qs-chat {
-  margin-top: 0.25rem;
-}
 
 @media (min-width: 64rem) {
   .qs-title {

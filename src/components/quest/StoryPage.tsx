@@ -97,9 +97,11 @@ export function tutorLine(session: QuestSession): {
 
 interface StoryPageProps {
   session: QuestSession;
+  /** 대사창 바로 아래 "파이뱀에게 물어보기" (P6-10, AskPybaem) */
+  ask?: React.ReactNode;
   /** 대사창 바로 아래 (모바일 "공책 펼치기") */
   action?: React.ReactNode;
-  /** 그 아래 (힌트·황금키 줄 P6-09 + 튜터 대화, P6-10이 다시 그림) */
+  /** 그 아래 (힌트·황금키 줄 P6-09) */
   children?: React.ReactNode;
 }
 
@@ -108,7 +110,7 @@ interface StoryPageProps {
  * 눈썹(N권 · 스테이지 · 퀘스트 번호) + 제목(Jua) + 스테이지 삽화 + 이야기 + "해 볼 일" 체크리스트 + 파이뱀 대사창.
  * 해 볼 일 카드는 서버에서 그린 그대로 보이는 첫 화면 큰 요소(LCP, P6-16) — 숨겼다 나타나는 연출을 걸지 않는다
  */
-export function StoryPage({ session, action, children }: StoryPageProps) {
+export function StoryPage({ session, ask, action, children }: StoryPageProps) {
   const { quest } = session;
   const { stage } = quest;
   const sk = quest.prompt_skeleton;
@@ -191,8 +193,9 @@ export function StoryPage({ session, action, children }: StoryPageProps) {
         )}
       />
 
+      {ask}
       {action}
-      {children && <div className="qs-chat">{children}</div>}
+      {children}
     </article>
   );
 }

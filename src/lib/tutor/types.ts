@@ -32,7 +32,8 @@ export interface TutorResponse {
 }
 
 export interface ChatMessage {
-  role: 'tutor' | 'system';
+  /** student = 아이가 "파이뱀에게 물어보기"에서 고른 질문 (P6-10, 오른쪽 말풍선) */
+  role: 'tutor' | 'system' | 'student';
   content: string;
   isFallback?: boolean;
   /** 힌트 쪽지 (P6-09): 이야기 쪽 쪽지로 보이고 대화 기록에는 나오지 않음. system = 꺼내는 중 표시, tutor = 힌트 내용 */

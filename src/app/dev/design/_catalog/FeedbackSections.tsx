@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Bug, Plus, RotateCcw, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bug, MessageCircle, Plus, RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -23,6 +23,14 @@ import { SoundToggle } from '@/components/sound/SoundToggle';
 import { QuestHeader } from '@/components/quest/QuestHeader';
 import { StageProgress } from '@/components/quest/StageProgress';
 import { QuestHints } from '@/components/quest/QuestHints';
+import { AskPybaem } from '@/components/quest/AskPybaem';
+import { MotionProvider } from '@/components/providers/MotionProvider';
+import {
+  ASK_QUESTIONS,
+  type AskQuestion,
+  type QuestSession,
+} from '@/lib/quest/useQuestSession';
+import type { ChatMessage } from '@/lib/tutor/types';
 import { stageDots, type StageQuestDot } from '@/lib/quest/stageProgress';
 import { CodeSample, Demo, Labeled, Section } from './ui';
 
@@ -328,6 +336,99 @@ const DIALOGUE_LINES = [
   '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!',
 ];
 
+// 파이뱀에게 물어보기 견본 (P6-10): 가짜 세션으로 질문 → 생각 중 → 흐르는 글자 → 답, 닫힌 채 말이 오면 배지·미리 보기
+const DEMO_CHAT: ChatMessage[] = [
+  {
+    role: 'tutor',
+    content:
+      '`print()`는 화면에 글자를 보여 주는 **마법 주문**이에요! 따옴표 안에 보여 주고 싶은 말을 넣어 봐요.',
+    isFallback: true,
+  },
+  { role: 'system', content: '🔑 황금키를 사용했어요!' },
+];
+const DEMO_ANSWER: Record<AskQuestion, string> = {
+  what: '해 볼 일은 두 가지예요. 먼저 print() 괄호 안에 "안녕하세요!"를 넣고, 코드 돌려보기를 눌러 나온 글자를 확인해요.',
+  why: '나온 글자가 hello였어요. 해 볼 일은 "안녕하세요!"를 보여 주는 거니까 따옴표 안 글자를 바꿔 볼까요?',
+};
+
+function TutorChatDemo() {
+  const [messages, setMessages] = useState(DEMO_CHAT);
+  const [loading, setLoading] = useState(false);
+  const [stream, setStream] = useState('');
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const at = (ms: number, fn: () => void) =>
+    timers.current.push(setTimeout(fn, ms));
+
+  /** 생각 중 1.2초 → 한 글자씩 흘려 쓰기 → 답 */
+  const reply = (answer: string) => {
+    setLoading(true);
+    const chars = [...answer];
+    chars.forEach((_, i) =>
+      at(1200 + i * 30, () => setStream(chars.slice(0, i + 1).join(''))),
+    );
+    at(1400 + chars.length * 30, () => {
+      setStream('');
+      setLoading(false);
+      setMessages((m) => [...m, { role: 'tutor', content: answer }]);
+    });
+  };
+  const session = {
+    messages,
+    isAiLoading: loading,
+    streamingContent: stream,
+    hasApiKey: false,
+    canAskWhy: true,
+    handleAsk: (q: AskQuestion) => {
+      setMessages((m) => [...m, { role: 'student', content: ASK_QUESTIONS[q] }]);
+      reply(DEMO_ANSWER[q]);
+    },
+  } as unknown as QuestSession;
+
+  return (
+    <MotionProvider>
+      <Demo
+        label="파이뱀에게 물어보기 (AskPybaem + ConversationPanel, P6-10)"
+        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼(자유 입력 없음). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
+        surface="card"
+        data-testid="tutor-chat-demo"
+      >
+        <div className="max-w-xl">
+          <AskPybaem session={session} hintPending={false} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            sfx={false}
+            icon={<MessageCircle aria-hidden />}
+            disabled={loading}
+            onClick={() => reply(DEMO_ANSWER.why)}
+            data-testid="tutor-chat-arrive"
+          >
+            파이뱀이 말하기 (닫힌 채로 보면 배지)
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            sfx={false}
+            icon={<RotateCcw aria-hidden />}
+            onClick={() => {
+              timers.current.forEach(clearTimeout);
+              setStream('');
+              setLoading(false);
+              setMessages(DEMO_CHAT);
+            }}
+          >
+            처음부터
+          </Button>
+        </div>
+        <CodeSample code={`<AskPybaem session={session} hintPending={notes.some((n) => n.pending)} />  // StoryPage ask 자리`} />
+      </Demo>
+    </MotionProvider>
+  );
+}
+
 export function BubbleSection() {
   const [round, setRound] = useState(0);
   return (
@@ -395,6 +496,7 @@ export function BubbleSection() {
           )}
         />
       </Demo>
+      <TutorChatDemo />
       <div className="grid gap-4 sm:grid-cols-2">
         {BUBBLE_TONES.map((tone) => (
           <Demo key={tone} label={tone} note="꼬리 left · top · none">

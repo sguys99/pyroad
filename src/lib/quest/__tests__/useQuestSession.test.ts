@@ -59,6 +59,7 @@ import {
   AUTO_SAVE_DELAY_MS,
   STEP_ADVANCE_DELAY_MS,
   CELEBRATION_DELAY_MS,
+  ASK_QUESTIONS,
   type QuestSessionOptions,
 } from '../useQuestSession';
 
@@ -821,5 +822,72 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
       isFallback: true,
     });
     expect(result.current.messages.at(-1)?.content).not.toBe(LIMIT);
+  });
+});
+
+describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
+  it('what: 질문 말풍선 + 퀘스트 소개 요청, 프로젝트는 지금 단계 안내', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      result.current.handleAsk('what');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'quest_intro',
+      quest_id: 'q-code',
+    });
+    expect(result.current.messages.slice(-2)).toMatchObject([
+      { role: 'student', content: ASK_QUESTIONS.what },
+      { role: 'tutor', content: '안내', isFallback: false },
+    ]);
+
+    const project = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      project.result.current.handleAsk('what');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toMatchObject({
+      type: 'project_guide',
+      current_step: 1,
+      step_goal: '이름 출력',
+    });
+  });
+
+  it('why: 돌린 코드 그대로일 때만, 그 실행 결과로 묻는다', async () => {
+    routes['/api/quest/validate'] = () => ({ json: { passed: false } });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    expect(result.current.canAskWhy).toBe(false);
+    act(() => result.current.setCode('x = 1\nprint(x)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.canAskWhy).toBe(true);
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      result.current.handleAsk('why');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'code_feedback',
+      quest_id: 'q-code',
+      student_code: 'x = 1\nprint(x)',
+      execution_result: { stdout: '10\n', stderr: '', passed: false },
+    });
+
+    // 코드를 고치면 그 결과는 지금 코드의 것이 아님
+    act(() => result.current.setCode('x = 2\nprint(x)'));
+    expect(result.current.canAskWhy).toBe(false);
   });
 });
