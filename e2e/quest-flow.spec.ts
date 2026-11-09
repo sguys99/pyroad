@@ -47,6 +47,14 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(page).toHaveURL(new RegExp(`/quest/${quest1.id}$`));
     await expect(questHeader(page)).toContainText(quest1.title);
 
+    // 헤더 스테이지 진행 점(P6-02): 퀘스트마다 점 하나, 지금 퀘스트는 aria-current="step"
+    const progress = page.getByTestId('stage-progress');
+    const dots = progress.locator('.sp-dot');
+    await expect(dots).toHaveCount(stage1.quests.length);
+    await expect(progress).toContainText(`1/${stage1.quests.length}`);
+    await expect(dots.first()).toHaveAttribute('aria-current', 'step');
+    await expect(dots.first()).toHaveAttribute('data-state', 'todo');
+
     // 3. 이야기 쪽(P6-01): 제목 · 해 볼 일 체크리스트 · 파이뱀 대사창 + 튜터 소개
     await expect(
       page.getByRole('heading', { level: 1, name: quest1.title }),
@@ -68,6 +76,8 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(output).toContainText('정답이에요!');
     // 통과하면 해 볼 일이 모두 체크된다
     await expect(task.locator('li:not([data-done])')).toHaveCount(0);
+    // 통과하면 지금 점이 바로 완료로 (세션 상태)
+    await expect(dots.first()).toHaveAttribute('data-state', 'done');
 
     // 축하 시퀀서: 첫 퀘스트 뱃지 카드 → CTA 로 닫힘
     await expect(page.getByTestId('celebration-overlay')).toBeVisible();
@@ -86,6 +96,9 @@ test.describe('퀘스트 전체 플로우', () => {
     await page.getByRole('link', { name: '다음 퀘스트로 →' }).first().click();
     await expect(page).toHaveURL(new RegExp(`/quest/${quest2.id}$`));
     await expect(questHeader(page)).toContainText(quest2.title);
+    // 다음 퀘스트: 1번 점은 끝냄(서버 진행), 지금 표시는 2번으로
+    await expect(dots.first()).toHaveAttribute('data-state', 'done');
+    await expect(dots.nth(1)).toHaveAttribute('aria-current', 'step');
     expect(
       await page.evaluate(
         () => (window as unknown as { __e2eSoftNav?: boolean }).__e2eSoftNav,

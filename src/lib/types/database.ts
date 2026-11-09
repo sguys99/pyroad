@@ -8,6 +8,7 @@
 
 import type { ValidationType } from '@/lib/quest/validation';
 import type { BgmId } from '@/lib/sound/manifest';
+import type { StageQuestDot } from '@/lib/quest/stageProgress';
 
 import type { Tables } from './database.generated';
 
@@ -178,6 +179,10 @@ export type QuestWithStage = QuestClientSafe & {
     /** bgm: 그 월드 map.yaml 곡 (P5-11, 퀘스트 헤더 BGM). 서버가 붙임, 지도 없는 월드면 null */
     /** no: 그림책 N권 (퀘스트 눈썹 "1권 · …", P6-01). 서버가 붙임 */
     world?: { slug: string; bgm?: BgmId | null; no?: number } | null;
+    /** 헤더 진행 점(P6-02): 이 스테이지 퀘스트와 내 완료 여부. 서버가 붙임 */
+    quests?: StageQuestDot[];
+    /** 스테이지가 열려 있는지 (false = 잠긴 스테이지의 완료 퀘스트 복습, B38) */
+    unlocked?: boolean;
   };
 };
 

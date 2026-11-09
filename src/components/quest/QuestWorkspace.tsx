@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { SegmentedTabs } from '@/components/ui/tabs';
 import { ArrowRight, NotebookPen, Square } from 'lucide-react';
 import { worldPath } from '@/lib/world/worldBook';
+import { stageDots } from '@/lib/quest/stageProgress';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { StoryPage } from './StoryPage';
@@ -60,6 +61,12 @@ export function QuestWorkspace({
         stageTitle={quest.stage.title}
         stageOrder={quest.stage.order}
         questTitle={quest.title}
+        dots={stageDots(
+          quest.stage.quests ?? [],
+          quest.id,
+          session.isCompleted,
+          quest.stage.unlocked,
+        )}
       />
 
       {belowHeader}

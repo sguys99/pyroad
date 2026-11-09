@@ -26,7 +26,7 @@ export default async function QuestPage({ params }: Props) {
     supabase
       .from('quests')
       .select(
-        'id, stage_id, order, title, concept, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name, world:worlds(slug))',
+        'id, stage_id, order, title, concept, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name, world:worlds(slug), quests(id, order, title))',
       )
       .eq('id', questId)
       .single(),
@@ -34,14 +34,17 @@ export default async function QuestPage({ params }: Props) {
   if (!user) redirect('/');
 
   // user.id 필요한 쿼리는 이후 병렬 실행. 스테이지 잠금(B38)도 함께 확인해 응답이 늦어지지 않게 한다
+  // 진행은 이 스테이지 퀘스트 전부를 한 번에 읽는다: 이 퀘스트 진행 + 헤더 진행 점(P6-02)
   const stageId = questResult.data?.stage_id;
+  const stageQuestIds = (
+    questResult.data?.stage as { quests?: { id: string }[] } | null
+  )?.quests?.map((q) => q.id) ?? [questId];
   const [progressResult, profileResult, stageUnlocked] = await Promise.all([
     supabase
       .from('user_progress')
       .select('*')
       .eq('user_id', user.id)
-      .eq('quest_id', questId)
-      .maybeSingle(),
+      .in('quest_id', stageQuestIds),
     supabase
       .from('users')
       .select('total_xp, current_level, golden_keys')
@@ -54,7 +57,8 @@ export default async function QuestPage({ params }: Props) {
 
   if (!questResult.data) notFound();
 
-  const progress = progressResult.data as UserProgress | null;
+  const progressRows = (progressResult.data ?? []) as UserProgress[];
+  const progress = progressRows.find((p) => p.quest_id === questId) ?? null;
 
   // 잠긴 스테이지의 퀘스트를 URL 로 열면 월드맵으로 돌려보내고 안내한다 (B38). 완료·황금키·튜터는 서버가 따로 막는다.
   // 이미 완료한 퀘스트는 복습할 수 있게 둔다 (콘텐츠가 바뀌어 앞 스테이지에 새 퀘스트가 생겨도 완료한 것은 다시 볼 수 있게)
@@ -76,6 +80,15 @@ export default async function QuestPage({ params }: Props) {
     world.bgm = worlds[index]?.map?.bgm ?? null;
     if (index >= 0) world.no = index + 1;
   }
+  // 헤더 스테이지 진행 점 (P6-02): 퀘스트마다 내 완료 여부, 잠긴 스테이지 복습이면 안 끝낸 점은 잠김
+  const done = new Set(
+    progressRows.filter((p) => p.status === 'completed').map((p) => p.quest_id),
+  );
+  quest.stage.quests = (quest.stage.quests ?? []).map((q) => ({
+    ...q,
+    completed: done.has(q.id),
+  }));
+  quest.stage.unlocked = stageUnlocked;
   const profile = profileResult.data;
 
   // 퀘스트 시작 기록 (P1-17). 응답 뒤 기록되고, DB dedupe로 사용자·퀘스트마다 한 번만 남는다

@@ -20,7 +20,26 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { SoundToggle } from '@/components/sound/SoundToggle';
+import { QuestHeader } from '@/components/quest/QuestHeader';
+import { StageProgress } from '@/components/quest/StageProgress';
+import { stageDots, type StageQuestDot } from '@/lib/quest/stageProgress';
 import { CodeSample, Demo, Labeled, Section } from './ui';
+
+// 스테이지 진행 점 견본 (P6-02): 7개 중 1·2 끝냄, 지금 3번
+const STAGE_QUESTS: StageQuestDot[] = [
+  '첫 인사',
+  '두 줄 쓰기',
+  '숫자 계산',
+  '따옴표 친구',
+  '이름표 붙이기',
+  '틀린 곳 찾기',
+  '마을 잔치',
+].map((title, i) => ({
+  id: `demo-q${i + 1}`,
+  order: i + 1,
+  title,
+  completed: i < 2,
+}));
 
 // ───────────────────────────── 진행바
 
@@ -87,7 +106,49 @@ export function ProgressSection() {
         </Demo>
       </div>
       <CodeSample code={`<ProgressBar value={xp} max={200} label="다음 레벨까지 경험치" valueText={\`\${xp} / 200 XP\`} />`} />
+      <StageProgressDemo />
     </Section>
+  );
+}
+
+function StageProgressDemo() {
+  const [passed, setPassed] = useState(false);
+  const dots = stageDots(STAGE_QUESTS, 'demo-q3', passed);
+  return (
+    <>
+      <Demo
+        label="스테이지 진행 점 (StageProgress, P6-02)"
+        note="퀘스트 헤더 오른쪽. 초록 = 끝냄 · 회색 = 아직 · 긴 알약 = 지금(안 끝냈으면 금색, 통과하면 초록). 열린 점은 그 퀘스트 링크, 좁은 화면은 제목 대신 점과 3/7"
+        data-testid="stage-progress-demo"
+      >
+        <div className="overflow-hidden rounded-xl ring-1 ring-border">
+          <QuestHeader
+            worldHref="#"
+            bgm={null}
+            stageTitle="파이썬 마을"
+            stageOrder={1}
+            questTitle="숫자 계산"
+            dots={dots}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <Labeled label="잠긴 스테이지 복습 (안 끝낸 점 잠김)">
+            <StageProgress
+              dots={stageDots(STAGE_QUESTS, 'demo-q1', false, false)}
+            />
+          </Labeled>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setPassed((p) => !p)}
+            icon={passed ? <RotateCcw aria-hidden /> : <Plus aria-hidden />}
+          >
+            {passed ? '되돌리기' : '3번 통과하기'}
+          </Button>
+        </div>
+      </Demo>
+      <CodeSample code={`<QuestHeader … dots={stageDots(quest.stage.quests ?? [], quest.id, session.isCompleted, quest.stage.unlocked)} />`} />
+    </>
   );
 }
 
