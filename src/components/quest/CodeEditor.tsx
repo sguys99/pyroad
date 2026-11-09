@@ -1,6 +1,12 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import {
+  useRef,
+  useEffect,
+  useImperativeHandle,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {
   EditorView,
   keymap,
@@ -65,6 +71,13 @@ const setup = [
   ]),
 ];
 
+/** 바깥에서 에디터를 다루는 손잡이 (P6-04 모바일 코드 키보드가 커서 자리에 글자를 넣는다) */
+export interface CodeEditorHandle {
+  /** 선택 영역을 text로 바꾸고 커서를 text 안 caret 자리(기본: 끝)에 둔 뒤 포커스 */
+  insert: (text: string, caret?: number) => void;
+  focus: () => void;
+}
+
 interface CodeEditorProps {
   /**
    * 에디터에 보일 코드. 타자로 바뀐 값은 onChange로 올라가서 그대로 돌아오고(변화 없음),
@@ -74,6 +87,11 @@ interface CodeEditorProps {
   onChange: (code: string) => void;
   /** 실행 오류가 난 줄(1부터). 바뀔 때마다 그 줄을 표시하고, 학생이 코드를 고치기 시작하면 지운다 */
   errorLine?: number | null;
+  /** 머리 줄 왼쪽 (공책 제목). 글자 크기 버튼과 한 줄에 놓인다 */
+  title?: ReactNode;
+  /** 머리 줄에서 글자 크기 버튼 앞 (처음 코드로 등) */
+  actions?: ReactNode;
+  ref?: Ref<CodeEditorHandle>;
   className?: string;
 }
 
@@ -81,6 +99,9 @@ export function CodeEditor({
   value,
   onChange,
   errorLine = null,
+  title,
+  actions,
+  ref,
   className,
 }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -154,9 +175,31 @@ export function CodeEditor({
     viewRef.current?.dispatch({ effects: setErrorLine.of(errorLine) });
   }, [errorLine]);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      insert(text, caret = text.length) {
+        const view = viewRef.current;
+        if (!view) return;
+        const { from } = view.state.selection.main;
+        view.dispatch({
+          ...view.state.replaceSelection(text),
+          selection: { anchor: from + caret },
+          scrollIntoView: true,
+          userEvent: 'input.type',
+        });
+        view.focus();
+      },
+      focus: () => viewRef.current?.focus(),
+    }),
+    [],
+  );
+
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-1">
+        {title && <div className="mr-auto min-w-0">{title}</div>}
+        {actions}
         <CodeFontSizeControl size={fontSize} onChange={changeFontSize} />
       </div>
       <div ref={containerRef} data-testid="code-editor" />

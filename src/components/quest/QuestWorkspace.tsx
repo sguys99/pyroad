@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
 import { Button } from '@/components/ui/button';
 import { SegmentedTabs } from '@/components/ui/tabs';
-import { ArrowRight, NotebookPen, Square } from 'lucide-react';
+import { ArrowRight, Square } from 'lucide-react';
 import { worldPath } from '@/lib/world/worldBook';
 import { stageDots } from '@/lib/quest/stageProgress';
 import { QuestHeader } from './QuestHeader';
@@ -134,13 +134,10 @@ export function QuestWorkspace({
           )}
         >
           <div className={cn(tab === 'result' && 'max-lg:hidden')}>
-            <h2 className="qw-notebook-t font-display">
-              <NotebookPen aria-hidden />
-              나의 주문 공책
-            </h2>
             <CodePanel
               code={session.code}
               onCodeChange={session.setCode}
+              starterCode={session.starterCode}
               pyodideStatus={runner.status}
               restarting={runner.restarting}
               isRunning={runner.isRunning}

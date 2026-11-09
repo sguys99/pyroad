@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Play, RefreshCw, Square } from 'lucide-react';
+import { useState, useEffect, type Ref } from 'react';
+import dynamic from 'next/dynamic';
+import { NotebookPen, Play, RefreshCw, RotateCcw, Square } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { framerSpring, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
-import { CodeEditor } from './CodeEditor';
+import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { errorLineFromStderr } from '@/lib/editor/errorLine';
 import { OutputPanel } from './OutputPanel';
 import type {
@@ -85,10 +86,67 @@ export function RunnerWakingNotice() {
   );
 }
 
+/** 공책 머리 제목 (P6-03) */
+export function NotebookTitle() {
+  return (
+    <h2 className="qw-notebook-t font-display">
+      <NotebookPen aria-hidden />
+      나의 주문 공책
+    </h2>
+  );
+}
+
+const ResetCodeDialog = dynamic(() => import('./ResetCodeDialog'), {
+  ssr: false,
+});
+
+/**
+ * "처음 코드로" (P6-03, 시안 NotebookPage 머리). 지금 코드가 시작 코드와 같으면 꺼 두고,
+ * 다르면 고친 코드가 사라지므로 한 번 묻는다. 좁은 쪽(24rem 미만)에서는 글자를 숨기고 아이콘만 (questWorkspace.css)
+ */
+export function ResetCodeButton({
+  changed,
+  onReset,
+}: {
+  changed: boolean;
+  onReset: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  // 한 번 열면 계속 붙여 둔다 (닫히는 연출·포커스 돌려주기)
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        icon={<RotateCcw aria-hidden />}
+        disabled={!changed}
+        aria-label="처음 코드로"
+        aria-haspopup="dialog"
+        className="qw-reset"
+        data-testid="reset-code"
+        onClick={() => {
+          setLoaded(true);
+          setOpen(true);
+        }}
+      >
+        <span className="qw-reset-label">처음 코드로</span>
+      </Button>
+      {loaded && (
+        <ResetCodeDialog open={open} onOpenChange={setOpen} onReset={onReset} />
+      )}
+    </>
+  );
+}
+
 interface CodePanelProps {
   /** 에디터 코드. 황금키 정답·다음 단계 코드처럼 바깥에서 바꾸면 에디터에도 반영됨 */
   code: string;
   onCodeChange: (code: string) => void;
+  /** "처음 코드로"가 돌아갈 코드. 주면 공책 머리에 제목과 버튼을 그린다 */
+  starterCode?: string;
+  /** 에디터 손잡이 (P6-04 코드 키보드가 커서 자리에 넣기) */
+  editorRef?: Ref<CodeEditorHandle>;
   pyodideStatus: PyodideStatus;
   /** Worker를 다시 띄우는 중이면 그 이유 (재준비 연출) */
   restarting?: PyodideRestartReason;
@@ -110,6 +168,8 @@ interface CodePanelProps {
 export function CodePanel({
   code,
   onCodeChange,
+  starterCode,
+  editorRef,
   pyodideStatus,
   restarting = null,
   isRunning,
@@ -137,6 +197,16 @@ export function CodePanel({
       <CodeEditor
         value={code}
         onChange={onCodeChange}
+        ref={editorRef}
+        title={starterCode !== undefined && <NotebookTitle />}
+        actions={
+          starterCode !== undefined && (
+            <ResetCodeButton
+              changed={code !== starterCode}
+              onReset={() => onCodeChange(starterCode)}
+            />
+          )
+        }
         errorLine={
           runResult?.hadException ? errorLineFromStderr(runResult.stderr) : null
         }

@@ -133,6 +133,11 @@ export const KIDS_THEME_SPEC: Record<string, Record<string, string>> = {
   '.cm-activeLine': {
     backgroundColor: tint('primary', TINT.activeLine),
   },
+  // 에디터를 떠나면(실행 버튼을 누른 뒤 등) 활성 줄 표시를 끈다: 커서가 없는데 줄만 칠해져 있으면 잡음 (P6-03)
+  '&:not(.cm-focused) .cm-activeLine, &:not(.cm-focused) .cm-activeLineGutter':
+    {
+      backgroundColor: 'transparent',
+    },
 
   // 선택 영역: 옅은 초록 틴트. 포커스 중에는 선택된 글자를 모두 본문색으로 (틴트 위 11.5:1)
   '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {

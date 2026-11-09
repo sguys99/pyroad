@@ -187,6 +187,12 @@
     .g-btn-face {
     transform: translateY(var(--lip-h));
   }
+  /* 글자 버튼은 꺼져도 면 없이 흐린 글자만 (회색 면이 생기면 다른 버튼처럼 보인다, P6-03) */
+  .g-btn[data-variant='ghost']:is(:disabled, [aria-disabled='true']):not(
+      [data-loading]
+    ) {
+    --face: transparent;
+  }
   .g-btn[data-variant='ghost']:is(:disabled, [aria-disabled='true'])
     .g-btn-face {
     text-decoration: none;

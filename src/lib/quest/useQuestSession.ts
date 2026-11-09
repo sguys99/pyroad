@@ -947,6 +947,8 @@ export function useQuestSession({
 
     code,
     setCode,
+    /** "처음 코드로"가 돌아갈 코드: 이번 단계를 처음 열었을 때의 코드 (저장된 코드 제외) */
+    starterCode: initialCode(quest, steps, stepState, null),
     isCodeEmpty,
     tab,
     setTab,

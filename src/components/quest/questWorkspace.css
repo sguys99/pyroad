@@ -69,12 +69,12 @@
   }
 }
 
-/* ───────────── 오른쪽 쪽: 공책 제목 */
+/* ───────────── 오른쪽 쪽: 공책 머리 한 줄 = 제목 · 처음 코드로 · 글자 크기 (P6-03, CodePanel·CodeEditor) */
 .qw-notebook-t {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.875rem;
+  white-space: nowrap;
   font-size: var(--text-h3);
   line-height: var(--text-h3--line-height);
   color: var(--text);
@@ -83,6 +83,20 @@
   width: 1.375rem;
   height: 1.375rem;
   color: var(--primary-text);
+}
+/* 좁은 쪽(360px 화면 = 쪽 안 폭 약 18rem)에서도 한 줄: 제목 아이콘을 빼고 처음 코드로는 아이콘만(이름은 aria-label) */
+@container (max-width: 24rem) {
+  .qw-notebook-t svg {
+    display: none;
+  }
+  .qw-reset-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 /* ───────────── 왼쪽 쪽: 이야기 */

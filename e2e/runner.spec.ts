@@ -88,10 +88,32 @@ test.describe('Python 실행기', () => {
   test('오류가 나면 에러 메시지를 보여 주고 다시 실행할 수 있다', async ({
     page,
   }) => {
-    await runCode(page, 'print(undefined_var)');
+    await runCode(page, 'x = 1\nprint(undefined_var)');
     const output = outputPanel(page);
     await expect(output).toHaveAttribute('data-state', 'error');
     await expect(output).toContainText('NameError');
     await expect(runButton(page)).toBeEnabled();
+
+    // 오류가 난 줄(2)에 띠·줄 번호 표시, 고치기 시작하면 사라진다 (P2-18·P6-03)
+    const errLine = page.locator('.cm-line[data-error-line]:visible');
+    await expect(errLine).toHaveText('print(undefined_var)');
+    await expect(
+      page.locator('.cm-gutterElement.cm-errorLineGutter:visible'),
+    ).toHaveText('2');
+    await errLine.click();
+    await page.keyboard.insertText(' ');
+    await expect(errLine).toHaveCount(0);
+
+    // "처음 코드로": 물어본 뒤 시작 코드로 돌아가고 버튼이 꺼진다 (P6-03)
+    const reset = page.getByTestId('reset-code').filter({ visible: true });
+    await reset.click();
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: '처음 코드로' })
+      .click();
+    await expect(reset).toBeDisabled();
+    await expect(page.locator('.cm-content:visible')).not.toContainText(
+      'undefined_var',
+    );
   });
 });
