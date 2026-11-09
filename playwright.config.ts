@@ -21,12 +21,16 @@ const BASE_URL = `http://localhost:${PORT}`;
 const SERVER_MODE = process.env.E2E_SERVER === 'dev' ? 'dev' : 'prod';
 const CI = !!process.env.CI;
 
+// 테스트 월드(e2e/fixtures/content, Q48·P5-01)의 지도 설정·DB 행을 build/e2e/ 에 만든다. 운영 seed·커밋 생성물은 그대로
+const FIXTURES = 'npm run content:build -- --fixtures e2e/fixtures/content';
+
 function serverCommand(): string {
-  if (SERVER_MODE === 'dev') return `npm run dev -- --port ${PORT}`;
+  if (SERVER_MODE === 'dev')
+    return `${FIXTURES} && npm run dev -- --port ${PORT}`;
   const start = `npm run start -- --port ${PORT}`;
   return process.env.E2E_SKIP_BUILD === '1'
-    ? start
-    : `npm run build && ${start}`;
+    ? `${FIXTURES} && ${start}`
+    : `${FIXTURES} && npm run build && ${start}`;
 }
 
 export default defineConfig({

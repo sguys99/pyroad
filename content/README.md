@@ -200,6 +200,7 @@ validation:
 ```bash
 npm run content:build              # 검사 + 생성: supabase/seed.sql·src/lib/world/worlds.generated.ts (커밋), build/content/quests.json (git 제외)
 npm run content:build -- --check   # 생성하지 않고, 커밋하는 생성물이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사용)
+npm run content:build -- --fixtures e2e/fixtures/content   # e2e 테스트 월드(P5-01): content/와 합쳐 검사하고 테스트 월드만 build/e2e/worlds.json·rows.json에 (운영 seed·생성물 그대로, Playwright가 서버 띄울 때 실행)
 npm run content:compare            # 왕복 비교 (아래)
 npm run content:extract -- --stage 1   # seed → content/ YAML 추출 (이관용, --all, --force, --seed-rev)
 npm run test:content               # 정답 자동 검증 (Node Pyodide, 아래 "정답 자동 검증")

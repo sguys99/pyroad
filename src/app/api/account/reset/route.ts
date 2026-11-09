@@ -58,7 +58,8 @@ export async function POST(request: Request) {
   );
   if (!result.ok) return result.response;
 
-  revalidatePath('/world');
+  revalidatePath('/world', 'layout'); // /world/[slug] 포함 (P5-01)
+  revalidatePath('/worlds');
   revalidatePath('/profile');
 
   const data = result.data;

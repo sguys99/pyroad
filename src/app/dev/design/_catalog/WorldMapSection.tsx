@@ -12,6 +12,32 @@ import '@/components/world/map/worldMap.css';
 import type { WorldId } from '@/lib/design/tokens';
 import type { StageWithStatus } from '@/lib/types/database';
 import { WORLDS } from '@/lib/world/worlds';
+import { WorldBook } from '@/components/world/book/WorldBook';
+import { WorldMapHead } from '@/components/world/book/WorldMapHead';
+import type { BookSummary } from '@/lib/world/worldBook';
+
+// 월드 책 표지 상태 4종 (P5-01): 모험 중 · 다 읽음 · 잠김 · 준비 중
+const BOOK = (
+  order: number,
+  title: string,
+  status: BookSummary['status'],
+  done: number,
+): BookSummary => ({
+  slug: `sample-book-${order}-${status}`,
+  title,
+  order,
+  status,
+  completedStages: done,
+  totalStages: 7,
+  completedQuests: done * 6,
+  totalQuests: 42,
+});
+const BOOKS: [book: BookSummary, unlock: string, current?: boolean][] = [
+  [BOOK(1, '파이썬 섬', 'open', 2), '', true],
+  [BOOK(1, '파이썬 섬', 'cleared', 7), ''],
+  [BOOK(2, '코드 바다', 'locked', 0), '파이썬 섬을 다 모험하면 열려요'],
+  [BOOK(3, '메이커 시티', 'coming_soon', 0), '코드 바다를 다 모험하면 열려요'],
+];
 import { CodeSample, Demo, Section } from './ui';
 
 // 월드 1 스테이지 견본: 1·2 완료, 3 진행 중, 나머지 잠김 (시안 #world 와 같은 진행)
@@ -249,6 +275,26 @@ export function WorldMapSection() {
           </Demo>
         ))}
       </div>
+      <Demo
+        label="월드 책 표지 4종 · 지도 머리 (P5-01)"
+        note="책장(/worlds)·지도 아래 다음 권 미리 보기가 같이 써요. 모험 중(책갈피 = 지금 읽는 책) · 다 읽었어요 · 잠김(자물쇠, 채도 낮춘 정지 그림) · 준비 중(모래시계). 열린 책은 카드 전체가 지도 링크: full은 표지가 지도 자리로 펼쳐지는 View Transition, lite는 짧은 페이드, minimal·동작 줄이기·미지원 브라우저는 그냥 이동. 360px 아래는 가로 카드, 640px부터 세로 표지"
+        data-testid="world-books"
+      >
+        <WorldMapHead
+          slug="sample"
+          title="파이썬 섬"
+          no={1}
+          completedStages={2}
+          totalStages={7}
+        />
+        <ol className="wb-shelf">
+          {BOOKS.map(([book, unlock, current]) => (
+            <li key={book.slug}>
+              <WorldBook book={book} no={book.order} unlock={unlock} current={current} heading="h3" />
+            </li>
+          ))}
+        </ol>
+      </Demo>
       <CodeSample
         code={`<WorldMap stages={stages} map={world.map} theme={world.theme} world={world.order} scrollToCurrent />`}
       />

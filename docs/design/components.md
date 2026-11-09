@@ -373,6 +373,19 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 **대표 상태**: 진행 중(완료 2 · 지금 차례 · 하는 중 · 퀴즈 · 휴대폰 추천) · 통과(모두 다시 하기) · 보스 스테이지 — 카탈로그 "월드 지도" 절 `stage-sheet-demo`, 지도 견본의 열린 노드를 눌러도 뜸.
 
+## 13-4. 월드 책 `WorldBook` · 지도 머리 `WorldMapHead` · 다음 권 `NextBooks` · 잠긴 책 `LockedBook` · 책장 `WorldShelf` (P5-01)
+
+월드 = 그림책 한 권(Q2·Q48·Q50). 코드 `src/components/world/book/`, 모양 `worldBook.css`(`.wb-*`), 문구는 순수 함수 `src/lib/world/worldBook.ts`(`unlockText`·`bookNo`·`worldPath`·`toBook`, 단위 테스트). 시안 `World.tsx` 머리(f-world-head)·`NextBooks`(f-next)·랜딩 책 표지(f-book, refine.css)를 옮김. 표지 그림은 랜딩 세계관 `WorldCoverArt`를 그대로 쓰고, 재질 CSS는 책장 범위(`.wb-art`)로 복사(랜딩 CSS를 import하면 Turbopack이 랜딩 글꼴 preload를 앱 라우트에 붙여 `fonts:build-check`가 실패).
+
+- **주소**: `/world` = 진행 중 월드 지도(리다이렉트 없이 같은 `WorldMapScreen`), `/world/[slug]` = 그 월드(없는 slug는 404 화면, 잠김·준비 중은 지도 대신 `LockedBook` — 서버 판정), `/worlds` = 책장. 모두 `(protected)`(미들웨어 `/world` 접두), 동적 렌더
+- **책 카드 상태 4종**: 모험 중(초록 띠, 진행바 + "스테이지 2/7 · 퀘스트 12/44" + "지도 펼치기") · 다 읽었어요(체크) · 잠겨 있어요(자물쇠 걸쇠 + 채도 낮춘 정지 그림) · 준비 중(모래시계). 지금 모험 중인 월드는 금색 책갈피 "지금 읽는 책". 왼쪽 월드 색 책등, 줄마다 나무 선반. 360px 아래 가로 카드(그림 | 글), 640px 2권, 1024px 3권. 열린 책은 카드 전체가 지도 링크(`CardButton`), 잠긴 책은 누를 수 없음. 상태는 글자·아이콘으로도
+- **해제 조건**: "파이썬 섬을 다 모험하면 열려요"(받침 조사 `withObjectParticle`). 앞 월드가 준비 중이면 건너뛰고 그 앞의 진짜 월드 기준(`unlock.previousWorld`는 바로 앞이라 그대로 쓰지 않음). 준비 중은 "지금 만들고 있어요." 앞에 붙임
+- **지도 머리**: kicker "그림책 N권" + h1 "<월드> 모험 지도" + "n/7 스테이지 통과" + 보조 버튼 "월드 바꾸기"(`/worlds`). 지도 아래 "다음 권 미리 보기"(뒤 월드 두 권까지, 같은 책 카드) + "책장 전체 보기". 상단 HUD 줄은 P5-07
+- **책 ↔ 지도 전환**(`bookTransition.ts`): View Transitions API가 있으면 full = 누른 표지와 새 화면의 지도(`.world-map`)에 같은 `view-transition-name: world-book`을 붙여 표지가 지도 자리로 펼쳐짐(반대로 "월드 바꾸기"는 지도가 그 월드 표지로 접힘), 길이 `--dur-page`·`--easing-page`. lite = 짧은 교차 페이드(`--dur-fast`), minimal·동작 줄이기·미지원 브라우저 = 그냥 이동(새 화면 등장은 `PageTransition` 규칙). 새 화면 렌더는 최대 2.5초 기다리고 끝나면 이름·`<html data-book-vt>`를 거둠. 수정 키·가운데 클릭은 브라우저 기본. 반복 연출 없음
+- **BGM**: 각 지도 화면은 그 월드 `map.yaml`의 `bgm`(크로스페이드는 P5-11). 퀘스트 → 월드맵 링크는 그 퀘스트의 월드 지도(`worldPath`)
+- **e2e 테스트 월드**: `content:build -- --fixtures e2e/fixtures/content`가 `build/e2e/worlds.json`·`rows.json`을 만들고, 테스트 페이지가 켜진 서버에 `PYROAD_E2E_WORLDS`가 있을 때만 `serverWorlds()`가 월드 목록 뒤에 더함(운영 seed·커밋 생성물은 그대로). 스펙 `e2e/world-select.spec.ts`가 DB에 행을 넣고 지움
+- **카탈로그**: "월드 지도" 절의 "월드 책 표지 4종 · 지도 머리"
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |

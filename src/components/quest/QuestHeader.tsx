@@ -6,12 +6,15 @@ import { SoundToggle } from '@/components/sound/SoundToggle';
 import { WorldBgm } from '@/components/sound/WorldBgm';
 
 interface QuestHeaderProps {
+  /** 돌아갈 월드 지도 (`worldPath`, P5-01) */
+  worldHref: string;
   stageTitle: string;
   stageOrder: number;
   questTitle: string;
 }
 
 export function QuestHeader({
+  worldHref,
   stageTitle,
   stageOrder,
   questTitle,
@@ -20,7 +23,7 @@ export function QuestHeader({
     <header className="flex min-w-0 items-center gap-2 border-b border-border bg-background px-4 py-2 sm:gap-3">
       {/* 소프트 내비게이션 (B22). 완료 후 새 진행은 useQuestSession이 router.refresh()로 받아 둠 */}
       <Link
-        href="/world"
+        href={worldHref}
         className="flex min-h-[44px] shrink-0 items-center gap-1 text-sm font-medium text-primary-text hover:underline"
       >
         <ArrowLeft className="h-4 w-4" />

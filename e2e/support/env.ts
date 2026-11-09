@@ -165,6 +165,8 @@ export function serverEnv(
     NEXT_TELEMETRY_DISABLED: '1',
     // 테스트 전용 페이지(/dev/editor, P2-18). 운영 배포에는 없는 값이라 거기서는 404
     PYROAD_TEST_PAGES: '1',
+    // 테스트 월드 지도 설정 (Q48, P5-01): webServer 명령이 먼저 `content:build -- --fixtures`로 만든다 (src/lib/world/serverWorlds.ts)
+    PYROAD_E2E_WORLDS: join(REPO_ROOT, 'build/e2e/worlds.json'),
     PORT: String(port),
   };
 }

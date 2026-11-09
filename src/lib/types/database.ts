@@ -172,7 +172,10 @@ export type QuestWithStageServer = Quest & {
 export type QuestClientSafe = Quest;
 
 export type QuestWithStage = QuestClientSafe & {
-  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'>;
+  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'> & {
+    /** 이 퀘스트의 월드: 월드맵 복귀 링크가 그 월드 지도(`/world/<slug>`)로 (P5-01). 모르면 `/world` */
+    world?: { slug: string } | null;
+  };
 };
 
 export interface StageWithStatus extends Stage {

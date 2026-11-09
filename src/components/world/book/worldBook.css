@@ -1,0 +1,418 @@
+/* 월드 = 그림책 (P5-01): 월드 책장(/worlds) 표지 카드 · 지도 머리 · 다음 권 미리 보기 · 잠긴 책 안내 · 책 ↔ 지도 전환.
+   WorldCover.tsx가 import한다. 접두사 `wb-`, 값은 토큰 변수만. 연출 단계는 <html data-motion data-reduced>를 본다:
+   - 표지 들림(올려놓기): CardButton(.g-card-i)이 단계별로 맡는다. 여기서는 그림만 살짝 확대(full만)
+   - 책 ↔ 지도 전환(View Transitions, bookTransition.ts가 <html data-book-vt>를 붙임): morph(full) = 표지가 지도 자리로 펼쳐짐,
+     fade(lite) = 짧은 교차 페이드, minimal·동작 줄이기·미지원 브라우저 = 전환 없음(페이지 등장 PageTransition 규칙)
+   반복 연출 없음 */
+
+@layer components {
+  /* ───────────── 표지 그림 재질: 랜딩 세계관 표지(WorldCoverArt)를 그대로 쓰므로 랜딩 hero.css(면 색 --f)·worlds.css(.ld-worlds .hm)와
+     같은 값을 책장 범위로 다시 건다. 랜딩 CSS를 import하면 Turbopack이 랜딩 글꼴 preload를 앱 라우트에 붙여서(fonts:build-check) 복사.
+     shortcut: 값이 랜딩과 중복, 랜딩 그림 색을 바꾸면 여기도 같이 — 세 번째로 쓰는 곳이 생기면 공용 CSS로 떼어 낼 것 */
+  .wb-art .hm-sun {
+    --f: var(--accent-light);
+  }
+  .wb-art .hm-cloud {
+    --f: var(--surface);
+  }
+  .wb-art .hm-paper {
+    --f: var(--surface);
+  }
+  .wb-art .hm-sea {
+    --f: color-mix(in srgb, var(--w2) 42%, var(--w2-soft));
+  }
+  .wb-art .hm-mount {
+    --f: color-mix(in srgb, var(--surface-2) 70%, var(--w2-soft));
+  }
+  .wb-art .hm-hill-far {
+    --f: color-mix(in srgb, var(--w1) 45%, var(--w2-soft));
+  }
+  .wb-art .hm-sand {
+    --f: color-mix(in srgb, var(--w3) 55%, var(--surface));
+  }
+  .wb-art .hm-hill {
+    --f: color-mix(in srgb, var(--w1) 62%, var(--w1-soft));
+  }
+  .wb-art .hm-hill-2 {
+    --f: color-mix(in srgb, var(--w1) 88%, var(--w1-soft));
+  }
+  .wb-art .hm-meadow {
+    --f: color-mix(in srgb, var(--w1) 82%, var(--primary));
+  }
+  .wb-art .hm-sage {
+    --f: color-mix(in srgb, var(--primary-bright) 80%, var(--w1-soft));
+  }
+  .wb-art .hm-forest {
+    --f: color-mix(in srgb, var(--primary) 42%, var(--w1));
+  }
+  .wb-art .hm-olive {
+    --f: color-mix(in srgb, var(--primary) 62%, var(--w1));
+  }
+  .wb-art .hm-leaf {
+    --f: color-mix(in srgb, var(--primary) 70%, var(--w1));
+  }
+  .wb-art .hm-wood {
+    --f: var(--w3);
+  }
+  .wb-art .hm-wood-dark {
+    --f: color-mix(in srgb, var(--w3) 66%, var(--text));
+  }
+  .wb-art .hm-stone {
+    --f: color-mix(in srgb, var(--surface-2) 70%, var(--surface-lip));
+  }
+  .wb-art .hm-roof {
+    --f: color-mix(in srgb, var(--accent) 72%, var(--accent-lip));
+  }
+  .wb-art .hm-gold {
+    --f: var(--accent);
+  }
+
+  .wb-art .hm {
+    fill: var(--f);
+    stroke: color-mix(in srgb, var(--f) 70%, var(--text));
+    stroke-width: 1.1;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .wb-art .hm-ink,
+  .wb-art .hm-wave,
+  .wb-art .hm-mark,
+  .wb-art .hm-road {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .wb-art .hm-ink {
+    stroke: color-mix(in srgb, var(--line-strong) 75%, transparent);
+    stroke-width: 1;
+  }
+  .wb-art .hm-wave {
+    stroke: color-mix(in srgb, var(--w2) 60%, var(--text-muted));
+    stroke-width: 1.1;
+    opacity: 0.7;
+  }
+  .wb-art .hm-mark {
+    stroke: var(--accent-text);
+    stroke-width: 2.4;
+  }
+  .wb-art .hm-road {
+    stroke: var(--primary);
+    stroke-width: 3;
+    stroke-dasharray: 0.1 9;
+    opacity: 0.8;
+  }
+  .wb-art .hm-shadow {
+    fill: var(--line-strong);
+    opacity: 0.14;
+  }
+  .wb-art .hm-sun-halo {
+    fill: var(--accent-soft);
+  }
+  .wb-art .hm-cloud {
+    stroke: color-mix(in srgb, var(--surface-lip) 70%, transparent);
+  }
+  .wb-art .hm-sea-deep {
+    --f: color-mix(in srgb, var(--w2) 70%, var(--w2-soft));
+  }
+  .wb-art .hm-whale {
+    --f: color-mix(in srgb, var(--w2) 78%, var(--text-muted));
+  }
+  .wb-art .ld-worlds-sky {
+    fill: var(--world-soft);
+  }
+  .wb-art .ld-worlds-grid {
+    fill: none;
+    stroke: color-mix(in srgb, var(--w3) 70%, var(--text-muted));
+    stroke-width: 0.6;
+    opacity: 0.35;
+    vector-effect: non-scaling-stroke;
+  }
+  .wb-art .ld-worlds-dash {
+    stroke-dasharray: 6 4;
+  }
+
+  /* ───────────── 표지: 그림 + 권 띠 + 상태 (잠기면 채도를 낮춘 정지 그림 + 자물쇠 걸쇠) */
+  .wb-cover {
+    position: relative;
+    aspect-ratio: 10 / 7;
+    overflow: hidden;
+    border-radius: var(--round-m);
+    background: var(--world-soft);
+  }
+  .wb-cover svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: transform var(--spring-face-dur) var(--spring-face);
+  }
+  :root[data-reduced='false'][data-motion='full'] .wb-book:hover .wb-cover svg {
+    transform: scale(1.04);
+  }
+  .wb-book[data-status='locked'] .wb-cover svg,
+  .wb-book[data-status='coming_soon'] .wb-cover svg {
+    filter: saturate(0.35) brightness(0.98);
+  }
+  .wb-band {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: var(--round-pill);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    color: var(--text);
+    font-size: var(--text-caption);
+    font-weight: 700;
+  }
+  .wb-clasp {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    color: var(--text-muted);
+  }
+
+  /* ───────────── 책 카드: 흰 면 + 왼쪽 책등(월드 색 띠). 좁은 화면은 가로 한 줄(그림 | 글), 640px부터 세로 표지 */
+  .wb-book {
+    position: relative;
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    align-items: center;
+    align-content: start;
+    gap: 0.875rem;
+    height: 100%;
+    padding: 0.75rem 0.875rem 0.75rem 1.25rem;
+  }
+  /* 책등: 왼쪽 월드 색 띠 (잠긴 책은 옅게) */
+  .wb-book::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.375rem;
+    border-radius: var(--round-l) 0 0 var(--round-l);
+    background: var(--world);
+  }
+  .wb-book[data-status='locked']::before,
+  .wb-book[data-status='coming_soon']::before {
+    background: color-mix(in srgb, var(--world) 40%, var(--surface-2));
+  }
+  .wb-book .wb-band {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .wb-book {
+      grid-template-columns: 1fr;
+      align-items: start;
+      padding: 0.75rem 0.75rem 1rem 1.25rem;
+    }
+    .wb-book .wb-band {
+      display: block;
+    }
+  }
+  .wb-info {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .wb-kicker {
+    color: var(--text-muted);
+    font-size: var(--text-kicker);
+    font-weight: 650;
+    letter-spacing: 0.02em;
+  }
+  .wb-status {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: var(--round-pill);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    background: var(--surface-2);
+    color: var(--text-muted);
+  }
+  .wb-status[data-status='open'] {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+  }
+  .wb-status[data-status='cleared'] {
+    background: var(--success-soft);
+    color: var(--text);
+  }
+  .wb-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+  .wb-note svg {
+    flex: none;
+    margin-top: 0.2em;
+  }
+  .wb-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--primary-text);
+    font-weight: 700;
+  }
+  /* 지금 읽는 책: 표지 위 책갈피 리본 */
+  .wb-mark {
+    position: absolute;
+    top: -0.25rem;
+    right: 1rem;
+    z-index: 1;
+    padding: 0.5rem 0.375rem 0.75rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    line-height: 1.2;
+    writing-mode: vertical-rl;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 100%,
+      50% calc(100% - 0.375rem),
+      0 100%
+    );
+  }
+
+  /* ───────────── 책장: 한 줄 1 → 2(640px) → 3(1024px)권, 줄마다 아래 선반 */
+  .wb-shelf {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+  .wb-shelf > li {
+    position: relative;
+    padding-bottom: 0.875rem;
+  }
+  .wb-shelf > li::after {
+    content: '';
+    position: absolute;
+    inset: auto -0.5rem 0;
+    height: 0.5rem;
+    border-radius: var(--round-s);
+    background: color-mix(in srgb, var(--w3) 55%, var(--surface));
+    box-shadow: 0 0.25rem 0 color-mix(in srgb, var(--w3) 80%, var(--text));
+  }
+  @media (min-width: 640px) {
+    .wb-shelf {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.75rem 1.25rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .wb-shelf {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* ───────────── 지도 머리 (시안 f-world-head): 왼쪽 권·제목, 오른쪽 진행 + 월드 바꾸기 */
+  .wb-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+  .wb-head-side {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.875rem;
+    color: var(--text-muted);
+    font-size: var(--text-small);
+  }
+  .wb-head-side b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ───────────── 다음 권 미리 보기 (시안 f-next): 작은 가로 카드 */
+  .wb-next {
+    margin-top: 2.25rem;
+  }
+  .wb-next-row {
+    display: grid;
+    gap: 0.875rem;
+  }
+  @media (min-width: 768px) {
+    .wb-next-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .wb-next .wb-book {
+    grid-template-columns: 6rem 1fr;
+    align-items: center;
+    padding: 0.625rem 0.75rem 0.625rem 1.125rem;
+  }
+  .wb-next .wb-band {
+    display: none;
+  }
+  .wb-next .wb-clasp {
+    top: 50%;
+    right: 0.375rem;
+    width: 2rem;
+    height: 2rem;
+    margin-top: -1rem;
+  }
+
+  /* ───────────── 잠긴 책 안내 (/world/[slug]가 잠겼거나 준비 중) */
+  .wb-locked {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 44rem;
+    margin: 1rem auto 0;
+    padding: 1rem;
+  }
+  .wb-locked .wb-book {
+    padding: 0;
+    grid-template-columns: 1fr;
+  }
+  .wb-locked .wb-book::before {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .wb-locked {
+      grid-template-columns: 16rem 1fr;
+      align-items: center;
+      padding: 1.5rem;
+    }
+  }
+
+  /* ───────────── 책 ↔ 지도 전환 (View Transitions, 한 번만) */
+  :root[data-book-vt]::view-transition-old(root),
+  :root[data-book-vt]::view-transition-new(root) {
+    animation-duration: var(--dur-base);
+    animation-timing-function: var(--easing-out);
+  }
+  :root[data-book-vt='fade']::view-transition-old(root),
+  :root[data-book-vt='fade']::view-transition-new(root) {
+    animation-duration: var(--dur-fast);
+  }
+  :root[data-book-vt='morph']::view-transition-group(world-book) {
+    animation-duration: var(--dur-page);
+    animation-timing-function: var(--easing-page);
+  }
+  :root[data-book-vt='morph']::view-transition-old(world-book),
+  :root[data-book-vt='morph']::view-transition-new(world-book) {
+    height: 100%;
+    animation-duration: var(--dur-page);
+    animation-timing-function: var(--easing-page);
+  }
+}

@@ -6,7 +6,7 @@ import { OWN_PROFILE_SELECT } from '@/lib/avatar/ownProfile';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 
 import { toWorldMapData, type WorldMapData } from './mapData';
-import { WORLDS } from './worlds';
+import { serverWorlds } from './serverWorlds';
 
 /**
  * 월드맵(`/world`) 서버 데이터를 한 번의 병렬 묶음으로 읽는다 (P5-13). 로그인 안 했으면 null.
@@ -17,12 +17,13 @@ import { WORLDS } from './worlds';
  *
  * 캐시: 하지 않는다. 공개 콘텐츠(worlds·stages·quests)도 RLS 가 authenticated 전용이라 캐시하려면 service_role 로 읽어야 하고,
  * seed 배포 뒤 오래된 목록이 남을 위험이 있는데, 로컬에서 쿼리 하나가 약 2ms 이고 getUser 와 병렬이라 줄어드는 시간이 없다
- * (측정: docs/perf/P5-13-world-data.md). 월드 지도 설정(WORLDS)은 빌드 생성물이라 캐시가 필요 없다.
+ * (측정: docs/perf/P5-13-world-data.md). 월드 지도 설정(WORLDS, e2e 는 serverWorlds 가 테스트 월드를 더함)은 빌드 생성물이라 캐시가 필요 없다.
  * 사용자 데이터는 절대 캐시하지 않는다.
  *
  * 최신 유지(무효화) 규칙 — 로그인 화면은 `force-dynamic`이고 Next 15 Router Cache 의 동적 페이지 staleTime 은 0 이라
  * `/world` 로 이동할 때마다 새로 렌더한다. 화면에 머문 채 바뀌는 경우만 따로 처리한다:
  * - 퀘스트 완료·황금키 마지막 단계(완료 API): `/api/quest/complete` 의 revalidatePath('/world','/profile') + `useQuestSession` 의 router.refresh()
+ * - 같은 데이터를 `/world/[slug]`·`/worlds`(P5-01)도 읽는다. 무효화 경로는 `/world`(layout, 하위 월드 포함)·`/worlds`
  * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh()
  * - 설정·API 키·닉네임 변경: 다른 화면에서 일어나고 `/world` 로 돌아올 때 새로 렌더됨 (별도 무효화 없음)
  * - 콘텐츠(seed): 캐시가 없으니 다음 요청부터 반영
@@ -60,6 +61,6 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       badges: badges.data ?? [],
       apiKeys,
     },
-    WORLDS,
+    serverWorlds(),
   );
 }
