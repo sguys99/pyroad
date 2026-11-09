@@ -64,10 +64,6 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
       current_level: 2,
       user_public_profiles: { public_name: '파이', avatar_skin: null },
     },
-    badges: [
-      { user_id: ME, badge_type: 'first_code', earned_at: '2026-11-08' },
-      { user_id: OTHER, badge_type: 'streak_3', earned_at: '2026-11-08' },
-    ],
     apiKeys: { enabled: true, keys: {} },
     ...over,
   };
@@ -102,19 +98,16 @@ describe('toWorldMapData (P5-13)', () => {
     });
   });
 
-  it('남의 진행·뱃지·프로필은 버린다', () => {
+  it('남의 진행·프로필은 버린다', () => {
     const data = toWorldMapData(ME, raw(), WORLDS);
     // 남의 q2 완료가 섞였으면 s1 이 클리어돼 s2 가 열렸을 것
     expect(data.progress.current?.stages.map((s) => s.status)).toEqual([
       'in_progress',
       'locked',
     ]);
-    expect(data.badges).toEqual([
-      { badge_type: 'first_code', earned_at: '2026-11-08' },
-    ]);
     expect(data.completedAt).toEqual(['2026-11-08T01:00:00Z']);
     expect(
-      toWorldMapData(OTHER, raw({ progress: [], badges: [] }), WORLDS).profile,
+      toWorldMapData(OTHER, raw({ progress: [] }), WORLDS).profile,
     ).toBeNull();
   });
 

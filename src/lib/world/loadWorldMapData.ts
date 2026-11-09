@@ -11,7 +11,7 @@ import { serverWorlds } from './serverWorlds';
 /**
  * 월드맵(`/world`) 서버 데이터를 한 번의 병렬 묶음으로 읽는다 (P5-13). 로그인 안 했으면 null.
  *
- * 왕복: 전에는 getUser → (진행·프로필·뱃지·API 키) 2단계였다. 지금은 사용자 테이블(users·user_progress·user_badges)을
+ * 왕복: 전에는 getUser → (진행·프로필·뱃지·API 키) 2단계였다. 지금은 사용자 테이블(users·user_progress)을
  * user.id 필터 없이 RLS(본인 행만, `(select auth.uid())`)에 맡겨 getUser 와 같이 보내고, service_role 로 읽는 API 키만
  * 확인한 user.id 로 getUser 뒤에 잇는다. 결과는 getUser 가 사용자를 확인한 뒤에만 쓰고, 행은 그 id 로 한 번 더 거른다.
  *
@@ -31,27 +31,24 @@ import { serverWorlds } from './serverWorlds';
  */
 export async function loadWorldMapData(): Promise<WorldMapData | null> {
   const supabase = await createClient();
-  const [{ user }, apiKeys, stages, progress, profile, badges] =
-    await Promise.all([
-      getAuthUser(),
-      // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
-      getAuthUser().then(({ user }) =>
-        user ? loadUserApiKeys(user.id) : null,
+  const [{ user }, apiKeys, stages, progress, profile] = await Promise.all([
+    getAuthUser(),
+    // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
+    getAuthUser().then(({ user }) => (user ? loadUserApiKeys(user.id) : null)),
+    // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08)
+    supabase
+      .from('stages')
+      .select(
+        'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, quest_type, is_mobile_friendly)',
       ),
-      // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08)
-      supabase
-        .from('stages')
-        .select(
-          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, quest_type, is_mobile_friendly)',
-        ),
-      supabase
-        .from('user_progress')
-        .select(
-          'user_id, quest_id, status, best_stars, completed_at, used_golden_key',
-        ),
-      supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
-      supabase.from('user_badges').select('user_id, badge_type, earned_at'),
-    ]);
+    supabase
+      .from('user_progress')
+      .select(
+        'user_id, quest_id, status, best_stars, completed_at, used_golden_key',
+      ),
+    supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
+    // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
+  ]);
   if (!user) return null;
 
   return toWorldMapData(
@@ -60,7 +57,6 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       stages: stages.data ?? [],
       progress: progress.data ?? [],
       profile: profile.data,
-      badges: badges.data ?? [],
       apiKeys,
     },
     serverWorlds(),

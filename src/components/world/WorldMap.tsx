@@ -17,12 +17,12 @@ import { ToastViewport, useToastQueue } from '@/components/ui/toast';
 import { StageSheet } from './StageSheet';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
-import { mapRoute, nodePercent } from '@/lib/world/worlds';
+import { mapRoute, markerSide, nodePercent } from '@/lib/world/worlds';
 import './map/worldMap.css';
 
 /**
  * i번째 노드 자리: 레이아웃마다 CSS 변수로 넘기고 .world-node(worldMap.css)가 지도 폭에 맞는 쪽을 씀.
- * --wdx·--tdx: 지금 위치 파이뱀이 노드의 어느 쪽에 설지(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽)
+ * --wdx·--tdx: 지금 위치 파이뱀이 노드의 어느 쪽에 설지(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, 잘리면 반대쪽)
  */
 function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
   const { wide, tall } = map.layouts;
@@ -33,8 +33,12 @@ function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
     '--wt': w.top,
     '--tl': t.left,
     '--tt': t.top,
-    '--wdx': -1,
-    '--tdx': tall.nodes[i][0] < tall.width / 2 ? 1 : -1,
+    '--wdx': markerSide(wide, wide.nodes[i][0], -1),
+    '--tdx': markerSide(
+      tall,
+      tall.nodes[i][0],
+      tall.nodes[i][0] < tall.width / 2 ? 1 : -1,
+    ),
   } as React.CSSProperties;
 }
 

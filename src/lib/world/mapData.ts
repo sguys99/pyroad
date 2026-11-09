@@ -7,7 +7,6 @@ import {
   type OwnProfile,
   type OwnProfileRow,
 } from '@/lib/avatar/ownProfile';
-import type { UserBadge } from '@/lib/types/database';
 
 import { getWorldStatuses, type WorldsProgress } from './getStageStatuses';
 import type { WorldInfo } from './worlds';
@@ -35,12 +34,6 @@ export interface ProgressRow {
   used_golden_key: boolean;
 }
 
-export interface BadgeRow {
-  user_id: string;
-  badge_type: string;
-  earned_at: string;
-}
-
 /** 스테이지 시트의 퀘스트 한 줄: 공개 열 + 내 진행 (진행이 없으면 status null, 별 0) */
 export interface StageQuestItem extends QuestListRow {
   status: string | null;
@@ -50,7 +43,6 @@ export interface StageQuestItem extends QuestListRow {
 export interface WorldMapData {
   /** HUD(P5-07): 닉네임·아바타·레벨·XP */
   profile: OwnProfile | null;
-  badges: Pick<UserBadge, 'badge_type' | 'earned_at'>[];
   /** 월드·스테이지 상태, 현재 월드, 이어하기, 열린 스테이지 (P5-12) */
   progress: WorldsProgress;
   /** 스테이지 id → 퀘스트 목록 (order 순, P5-06 바텀시트) */
@@ -66,7 +58,6 @@ export interface WorldMapRaw {
   stages: StageRow[];
   progress: ProgressRow[];
   profile: OwnProfileRow | null;
-  badges: BadgeRow[];
   /** loadUserApiKeys 결과 (조회 못 했으면 null → 안내 안 띄움) */
   apiKeys: { enabled: boolean; keys: object } | null;
 }
@@ -100,12 +91,6 @@ export function toWorldMapData(
       raw.profile && raw.profile.id === userId
         ? toOwnProfile(raw.profile)
         : null,
-    badges: raw.badges
-      .filter((b) => b.user_id === userId)
-      .map(({ badge_type, earned_at }) => ({
-        badge_type: badge_type as UserBadge['badge_type'],
-        earned_at,
-      })),
     progress: getWorldStatuses(worlds, raw.stages, progress),
     questsByStage,
     completedAt: progress.flatMap((p) =>

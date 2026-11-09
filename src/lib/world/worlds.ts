@@ -88,3 +88,21 @@ export function nodePercent(
 }
 
 const round = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * 지금 위치 파이뱀(`.wn-here`, worldMap.css)의 크기 (지도 단위): 노드에서 떨어진 거리 · 반폭 · 노드 위 높이.
+ * 반폭은 "지금 여기!" 칩(약 108px)을 가장 작은 지도 단위(가로 지도 900px ÷ 1200 = 0.75px)로 잰 값이라 넉넉하다
+ */
+export const HERE_MARKER = { offset: 92, half: 80, height: 130 } as const;
+
+/** 파이뱀이 노드의 어느 쪽(-1 왼쪽, 1 오른쪽)에 설지: 바라는 쪽이 지도 밖으로 잘리면 반대쪽 */
+export function markerSide(
+  layout: MapLayout,
+  x: number,
+  prefer: -1 | 1,
+): -1 | 1 {
+  const c = x + prefer * HERE_MARKER.offset;
+  const fits =
+    c - HERE_MARKER.half >= 0 && c + HERE_MARKER.half <= layout.width;
+  return fits ? prefer : prefer === 1 ? -1 : 1;
+}

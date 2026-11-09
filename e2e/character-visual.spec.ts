@@ -7,9 +7,11 @@ test.describe('캐릭터 시각적 확인', () => {
     await page.goto('/world');
     await expect(page).toHaveURL(/\/world$/);
 
-    // in_progress 스테이지 근처 파이뱀 아바타
-    const avatar = page.locator('[data-testid^="character-avatar-pybaem"]');
-    await expect(avatar.first()).toBeVisible();
+    // 지금 위치(진행 중 스테이지) 큰 파이뱀 + "지금 여기!" (P5-04 CurrentMarker, 정지 리그 그림)
+    const here = page.getByTestId('world-current-marker');
+    await expect(here).toBeVisible();
+    await expect(here.locator('svg').first()).toBeVisible();
+    await expect(here).toContainText('지금 여기!');
   });
 
   test('프로필 페이지에 내 파이뱀 아바타가 표시된다 (사진 없음, P3-13)', async ({

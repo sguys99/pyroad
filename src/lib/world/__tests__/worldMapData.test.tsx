@@ -13,7 +13,14 @@ import { toWorldInfos } from '@/lib/content/build';
 import { loadContent } from '@/lib/content/load';
 import type { StageWithStatus } from '@/lib/types/database';
 
-import { mapPath, mapRoute, nodePercent, WORLDS } from '../worlds';
+import {
+  HERE_MARKER,
+  mapPath,
+  mapRoute,
+  markerSide,
+  nodePercent,
+  WORLDS,
+} from '../worlds';
 
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
@@ -154,5 +161,34 @@ describe('mapPath', () => {
         [104, 1080],
       ),
     ).toEqual({ left: '26%', top: '91.53%' });
+  });
+});
+
+describe('지금 위치 파이뱀이 지도 밖으로 잘리지 않음 (P5-10)', () => {
+  it('첫 스테이지(지도 왼쪽 끝)에서는 오른쪽에 선다', () => {
+    const wide = WORLDS[0].map!.layouts.wide;
+    expect(markerSide(wide, wide.nodes[0][0], -1)).toBe(1);
+    expect(markerSide(wide, wide.nodes[3][0], -1)).toBe(-1);
+  });
+
+  it('모든 월드(+ 테스트 월드) × 가로·세로 지도 × 모든 노드', () => {
+    const worlds = toWorldInfos(loadContent(contentWithFixture()));
+    let checked = 0;
+    for (const w of worlds) {
+      if (!w.map) continue;
+      for (const [name, layout] of Object.entries(w.map.layouts)) {
+        for (const [x, y] of layout.nodes) {
+          // WorldMap nodeVars 와 같은 바라는 쪽: 가로는 왼쪽, 세로는 지도 가운데 쪽
+          const prefer = name === 'wide' ? -1 : x < layout.width / 2 ? 1 : -1;
+          const c = x + markerSide(layout, x, prefer) * HERE_MARKER.offset;
+          const where = `${w.slug} ${name} (${x}, ${y})`;
+          expect(c - HERE_MARKER.half, where).toBeGreaterThanOrEqual(0);
+          expect(c + HERE_MARKER.half, where).toBeLessThanOrEqual(layout.width);
+          expect(y - HERE_MARKER.height, where).toBeGreaterThanOrEqual(0);
+          checked++;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(14);
   });
 });

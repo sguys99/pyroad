@@ -144,7 +144,7 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
  */
 export function CurrentMarker() {
   return (
-    <div className="wn-here" aria-hidden>
+    <div className="wn-here" aria-hidden data-testid="world-current-marker">
       <div className="mascot-bob">
         <PybaemStatic state="happy" size={120} framing="stage" label="" />
       </div>

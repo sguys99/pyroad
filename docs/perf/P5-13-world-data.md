@@ -5,7 +5,7 @@
 
 ## 1. 결론
 
-`/world`의 서버 데이터는 `loadWorldMapData()` 하나가 **한 번의 병렬 묶음**으로 읽습니다. 전에는 `getUser` → (진행·프로필·뱃지·API 키) 2단계였는데, 사용자 테이블은 user.id 필터 대신 RLS(본인 행만)에 맡겨 `getUser`와 같이 보내고, service_role로 읽는 API 키만 확인한 id로 `getUser` 뒤에 잇습니다. 쿼리 수는 같고(Auth 1 + PostgREST 4 + API 키 1) 직렬 단계가 하나 줄었습니다.
+`/world`의 서버 데이터는 `loadWorldMapData()` 하나가 **한 번의 병렬 묶음**으로 읽습니다. 전에는 `getUser` → (진행·프로필·뱃지·API 키) 2단계였는데, 사용자 테이블은 user.id 필터 대신 RLS(본인 행만)에 맡겨 `getUser`와 같이 보내고, service_role로 읽는 API 키만 확인한 id로 `getUser` 뒤에 잇습니다. 쿼리 수는 같고(Auth 1 + PostgREST 4 + API 키 1) 직렬 단계가 하나 줄었습니다. (P5-10: 월드맵이 뱃지를 쓰지 않아 `user_badges` 조회를 빼 PostgREST 3)
 
 공개 콘텐츠(worlds·stages·quests)는 **캐시하지 않습니다.** 이유는 셋입니다.
 

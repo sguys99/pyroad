@@ -72,7 +72,7 @@ layouts:
 - **빌드가 확인**: 두 레이아웃 모두 노드 수 = 스테이지 수, 노드가 `width × height` 안, 모르는 키 없음, 스테이지가 있는 월드에 `map.yaml`이 있음.
 - 테마 키는 `world.yaml`의 `theme`, 노드의 랜드마크 그림은 `stage.yaml`의 `theme_name`을 씁니다(따로 적지 않음).
 - 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`는 먼 레이어, `mountains`·`tree`는 중간 레이어에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
-- 좌표를 정할 때는 확정 시안 `design/prototypes/src/final/World.tsx`의 `WIDE`·`TALL`을 참고합니다. 지금 노드 카드가 넓어서(P5-04 전) 양 끝 노드는 지도 가장자리에서 120 이상 떨어뜨립니다.
+- 좌표를 정할 때는 확정 시안 `design/prototypes/src/final/World.tsx`의 `WIDE`·`TALL`을 참고합니다. 지금 노드 카드가 넓어서(P5-04 전) 양 끝 노드는 지도 가장자리에서 120 이상 떨어뜨립니다. 노드 `y`는 130 이상(지금 위치 파이뱀이 노드 위에 섬). 파이뱀은 가장자리에 가까우면 노드 반대쪽에 서고(`markerSide`), 단위 테스트가 모든 월드·노드에서 잘리지 않는지 확인합니다.
 - 테스트용 2번째 월드: `e2e/fixtures/content/worlds/test-meadow/`(스테이지 3개). 단위 테스트(`src/lib/world/__tests__/worldMapData.test.tsx`)가 `content/`에 이 디렉토리를 더해 지도가 나오는지 확인합니다.
 
 ### stage.yaml → `stages`
