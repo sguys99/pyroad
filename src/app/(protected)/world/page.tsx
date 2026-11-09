@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
 import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
-import { MapBackground } from '@/components/world/MapBackground';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { StageLockedNotice } from '@/components/world/StageLockedNotice';
 import { InstallHint } from '@/components/pwa/InstallHint';
@@ -78,12 +77,13 @@ export default async function WorldPage({ searchParams }: Props) {
         )}
 
         {current && currentMap && (
-          <MapBackground
+          <WorldMap
+            stages={current.stages}
+            map={currentMap}
+            theme={current.world.theme}
             world={current.world.order as WorldId}
-            className="rounded-2xl overflow-hidden"
-          >
-            <WorldMap stages={current.stages} map={currentMap} />
-          </MapBackground>
+            scrollToCurrent
+          />
         )}
       </PageTransition>
 

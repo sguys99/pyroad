@@ -270,24 +270,3 @@
   .celebration-ring {
   animation: celebration-ring var(--dur-page) var(--easing-out) forwards;
 }
-
-/* 월드맵: 좁은 화면은 세로 지도(tall), lg 부터 가로 지도(wide). 비율·노드 위치는 map.yaml (P5-03) */
-.world-map {
-  aspect-ratio: var(--tall-ratio);
-  max-width: 420px;
-  margin-inline: auto;
-}
-.world-node {
-  left: var(--tl);
-  top: var(--tt);
-}
-@media (min-width: 1024px) {
-  .world-map {
-    aspect-ratio: var(--wide-ratio);
-    max-width: none;
-  }
-  .world-node {
-    left: var(--wl);
-    top: var(--wt);
-  }
-}

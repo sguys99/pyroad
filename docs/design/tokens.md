@@ -137,7 +137,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 </section>
 ```
 
-- 지금은 월드맵 바탕 `MapBackground world={1}`이 쓴다(격자·빗금을 걷어 낸 옅은 틴트 한 겹). Phase 5 월드맵 개편은 같은 변수로 지도·표지를 그린다.
+- 월드 지도(P5-02 `WorldMap world={order}`, `src/components/world/map/worldMap.css`)가 종이 바탕·나무·풀 재질을 `--world*`와 섞어 그린다 → `data-world`만 바꾸면 지도 틴트가 바뀐다. 바다·모래 길은 월드와 상관없이 `--w2`·`--w3`.
 - TS에서 월드별 값이 필요하면 `WORLD_THEMES[id]`(토큰 이름) → `COLOR[...]`.
 
 ## 4. 쓰는 법

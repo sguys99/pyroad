@@ -13,7 +13,7 @@ import { toWorldInfos } from '@/lib/content/build';
 import { loadContent } from '@/lib/content/load';
 import type { StageWithStatus } from '@/lib/types/database';
 
-import { mapPath, nodePercent, WORLDS } from '../worlds';
+import { mapPath, mapRoute, nodePercent, WORLDS } from '../worlds';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@/components/providers/SoundProvider', () => ({
@@ -127,6 +127,22 @@ describe('mapPath', () => {
 
   it('노드가 하나뿐이면 길 없음', () => {
     expect(mapPath([[1, 1]], 'catmull_rom')).toBe('');
+  });
+
+  it('mapRoute: 지난 길·남은 길은 전체 길의 조각을 지금 노드에서 나눈 것', () => {
+    const all = mapPath(pts, 'catmull_rom');
+    const r = mapRoute(pts, 'catmull_rom', 1);
+    expect(r.all).toBe(all);
+    expect(r.done).toBe('M0 0 C16.67 0 83.33 -16.67 100 0');
+    expect(r.todo.startsWith('M100 0 C')).toBe(true);
+    expect(r.done + r.todo.slice('M100 0'.length)).toBe(all);
+    expect(mapRoute(pts, 'catmull_rom', 0).done).toBe('');
+    expect(mapRoute(pts, 'catmull_rom', -1).todo).toBe(all);
+    expect(mapRoute(pts, 'straight', 2)).toEqual({
+      all: 'M0 0 L100 0 L100 100',
+      done: 'M0 0 L100 0 L100 100',
+      todo: '',
+    });
   });
 
   it('nodePercent', () => {

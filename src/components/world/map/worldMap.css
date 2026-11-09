@@ -1,0 +1,211 @@
+/* 월드 지도 (P5-02): 종이 결 두루마리 지도 + 깊이별 레이어. WorldMap.tsx가 import한다. 값은 토큰 변수만.
+   - 레이아웃: 지도를 담은 상자(.wm, 컨테이너) 폭 900px부터 가로 지도(wide), 그 아래는 세로로 긴 지도(tall, 최대 560px). 시안과 같은 기준
+   - 패럴랙스(먼 곳·중간 레이어, WorldMap이 --ms를 씀): full + 동작 줄이기 꺼짐만. lite·minimal·동작 줄이기는 정지 배경
+   - 앰비언트(물결·새·배 클래스 wm-wave·wm-bird·wm-boat)는 P5-09. 여기서는 정적 그림만 */
+
+.wm {
+  container-type: inline-size;
+  /* 재질 바탕색 (월드 틴트를 섞어 data-world가 바꾸면 따라간다) */
+  --wm-land: color-mix(in srgb, var(--world-soft) 62%, var(--surface-2));
+  --wm-ink: color-mix(in srgb, var(--line-strong) 72%, var(--surface));
+  --wm-pencil: color-mix(in srgb, var(--line-strong) 58%, var(--surface));
+  --wm-sea: color-mix(in srgb, var(--w2) 34%, var(--w2-soft));
+  --wm-sand: color-mix(in srgb, var(--w3) 48%, var(--surface));
+}
+
+/* 종이: 월드 틴트 바탕 + 섬유 결 타일 한 겹 + 가장자리 그을림 (assets.md §3.1). 잔 입자(paper-grain)까지 깔면
+   최종 시안보다 지저분해 보여 섬유만 */
+.world-map {
+  position: relative;
+  aspect-ratio: var(--tall-ratio);
+  max-width: 560px;
+  margin-inline: auto;
+  overflow: clip;
+  border-radius: var(--round-m);
+  background-color: var(--wm-land);
+  background-image: url('/textures/paper-fiber.v1.png');
+  background-size: 256px 256px;
+  box-shadow:
+    inset 0 0 40px color-mix(in srgb, var(--w3) 38%, transparent),
+    var(--elev-card);
+}
+.world-node {
+  left: var(--tl);
+  top: var(--tt);
+}
+.wm-art[data-layout='wide'] {
+  display: none;
+}
+@container (min-width: 900px) {
+  .world-map {
+    aspect-ratio: var(--wide-ratio);
+    max-width: none;
+  }
+  .world-node {
+    left: var(--wl);
+    top: var(--wt);
+  }
+  .wm-art[data-layout='wide'] {
+    display: block;
+  }
+  .wm-art[data-layout='tall'] {
+    display: none;
+  }
+}
+
+/* ───────────── 레이어: 같은 viewBox를 지도 상자에 겹친다. 넘치는 그림(지도 밖 바다)은 종이가 자른다 */
+.wm-art,
+.wm-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.wm-layer[data-layer='far'] {
+  --sk: 0.08;
+}
+.wm-layer[data-layer='mid'] {
+  --sk: 0.035;
+}
+/* --ms: 화면 가운데에서 지도 가운데까지(px). 아래로 스크롤하면 커지고, 먼 레이어일수록 덜 따라 올라간다 */
+:root[data-reduced='false'][data-motion='full'] .wm-par {
+  transform: translate3d(0, calc(var(--ms, 0) * var(--sk) * 1px), 0);
+  will-change: transform;
+}
+
+/* ───────────── 재질: 면 색(--f) + 그 진한 톤 선 1px (시안 tone()) */
+.wm-art .wm-f {
+  fill: var(--f);
+  stroke: color-mix(in srgb, var(--f) 70%, var(--text));
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.wm-art .wm-l,
+.wm-art .wm-wave,
+.wm-art .wm-coast,
+.wm-art .wm-mark,
+.wm-art [class^='wm-road'] {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wm-art .wm-l,
+.wm-art .wm-wave,
+.wm-art .wm-coast {
+  vector-effect: non-scaling-stroke;
+}
+.wm-art .wm-l {
+  stroke: var(--wm-ink);
+  stroke-width: 0.9;
+}
+.wm-art .wm-l-soft {
+  opacity: 0.5;
+}
+.wm-art .wm-l-dot {
+  stroke-dasharray: 2 5;
+}
+.wm-art .wm-wave {
+  stroke: color-mix(in srgb, var(--w2) 62%, var(--text-muted));
+  stroke-width: 0.9;
+  opacity: 0.75;
+}
+.wm-art .wm-sea {
+  fill: var(--wm-sea);
+}
+.wm-art .wm-coast {
+  stroke: color-mix(in srgb, var(--wm-sea) 80%, var(--text-muted));
+  stroke-width: 1;
+}
+.wm-art .wm-shadow {
+  fill: var(--wm-ink);
+  opacity: 0.14;
+}
+.wm-art .wm-mark {
+  stroke: var(--accent-text);
+  stroke-width: 4;
+}
+
+.wm-paper {
+  --f: var(--surface);
+}
+.wm-cream {
+  --f: color-mix(in srgb, var(--w3-soft) 70%, var(--surface));
+}
+.wm-sand {
+  --f: var(--wm-sand);
+}
+.wm-wood {
+  --f: var(--w3);
+}
+.wm-wood-dark {
+  --f: color-mix(in srgb, var(--w3) 66%, var(--text));
+}
+.wm-brass {
+  --f: color-mix(in srgb, var(--w3) 70%, var(--accent));
+}
+.wm-stone {
+  --f: color-mix(in srgb, var(--surface-2) 60%, var(--surface-lip));
+}
+.wm-cave {
+  --f: color-mix(in srgb, var(--text-muted) 80%, var(--surface));
+}
+.wm-roof {
+  --f: color-mix(in srgb, var(--accent) 72%, var(--accent-lip));
+}
+.wm-gold {
+  --f: var(--accent);
+}
+.wm-sail {
+  --f: color-mix(in srgb, var(--accent) 70%, var(--w3));
+}
+.wm-water {
+  --f: var(--wm-sea);
+}
+.wm-sage {
+  --f: color-mix(in srgb, var(--primary-bright) 75%, var(--world-soft));
+}
+.wm-forest {
+  --f: color-mix(in srgb, var(--primary) 38%, var(--world));
+}
+.wm-olive {
+  --f: color-mix(in srgb, var(--primary) 66%, var(--world));
+}
+
+/* 잠긴 곳: 연필 스케치 (채움 없음 + 점선). 클리어하면 색이 입혀진다 */
+.wm-art .wm-pencil .wm-f,
+.wm-art .wm-pencil .wm-l,
+.wm-art .wm-pencil .wm-mark {
+  fill: none;
+  stroke: var(--wm-pencil);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+  opacity: 0.8;
+}
+.wm-art .wm-pencil .wm-ink-only {
+  display: none;
+}
+
+/* ───────────── 길: 모래 바탕 → 남은 길(연필 점선) → 지난 길(잉크 + 종이 점선) */
+.wm-art .wm-road-sand {
+  stroke: var(--wm-sand);
+  opacity: 0.8;
+}
+.wm-art .wm-road-todo {
+  stroke: var(--wm-ink);
+  stroke-width: 2.4;
+  stroke-dasharray: 2 10;
+  opacity: 0.9;
+}
+.wm-art .wm-road-ink {
+  stroke: var(--primary);
+}
+.wm-art .wm-road-stitch {
+  stroke: var(--surface);
+  stroke-width: 1.6;
+  stroke-dasharray: 10 14;
+  opacity: 0.9;
+}

@@ -118,4 +118,4 @@
 | ~~`landing/HeroSection.tsx` · `AboutSection.tsx`~~ | ~~차례로 떠오르기. Hero는 첫 화면 글자를 `opacity: 0`으로 서버 렌더~~ → P4-01에서 삭제. 새 히어로(`landing/hero/`)는 보이는 상태에서 CSS transform만, minimal·동작 줄이기는 등장 없음 | 해결 (P4-01) |
 | `quest/CodePanel.tsx` 코딩 팁 회전 | 실행기 로딩 중 3.5초마다 Framer 페이드 (유한, 동작 줄이기에서 opacity만) | Phase 4 |
 | `components/ui/hud.tsx` `CurrencyHud` | 360폭에서 코인·별·키·소리를 모두 넣으면 약 380px로 넘침 (카탈로그 칸은 가로 스크롤) | HUD 개편 때 칸 줄이기(키는 퀘스트만·XP 바 접기 등) |
-| 패럴랙스 | 랜딩 히어로가 처음 사용(P4-01 `HeroParallax`: full만, CSS `.hero-par`). 월드맵은 아직 | Phase 5 지도 |
+| ~~패럴랙스~~ | 랜딩 히어로(P4-01 `HeroParallax`, CSS `.hero-par`)와 월드 지도(P5-02 `WorldMap` 스크롤 `--ms`, CSS `.wm-par`) 모두 full만. 카탈로그 "월드 지도" 절 | 해결 (P5-02) |

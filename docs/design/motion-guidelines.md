@@ -38,7 +38,7 @@
 | 일회성 이펙트 (팝·코인·별) | `springs` · `effectDuration` | 스프링·바운스 | **70% 길이** | 페이드만 (150ms) | 즉시(0) + 색·글자·표정 |
 | 파티클·컨페티 | `particles` | 100% | **30%** | 0 | 0 |
 | 앰비언트 (구름·물결·반짝임) | `ambient` · CSS `.m-ambient` | 켬 | **끔** (정지 배경) | 끔 | 끔 |
-| 패럴랙스 (지도 레이어) | `parallax` | 켬 | **끔** | 끔 | 끔 |
+| 패럴랙스 (지도 레이어) | `parallax` | 켬 (랜딩 히어로 포인터·스크롤 `.hero-par` · 월드 지도 스크롤 `.wm-par`) | **끔** (정지 배경) | 끔 | 끔 |
 | `filter: blur`·`backdrop-filter` | `blur` · CSS `.m-blur` | 허용 | **끔** (불투명 배경) | 끔 | 단계 따름 |
 | 큰 그림자 | `bigShadow` · CSS `.m-shadow` | 허용 | 단색 오프셋 | 단색 오프셋 | 단계 따름 |
 | 페이지 전환 | `pageTransition` | slide (올라오며 페이드) | **fade** (짧게, 유지) | none | none |
@@ -136,6 +136,9 @@ Framer용 배열은 `EASE.<이름>`. 단계 보정은 `tierDuration(ms, budget)`
 | 월드맵 | 완료 스테이지 반짝임 | `background-position` 반복 → `.stage-shimmer` translateX (앰비언트) |
 | 월드맵 | 노드 등장·길 그리기 | 단계별: lite 70%, minimal 페이드·즉시, 동작 줄이기 즉시 |
 | 월드맵 | 노드 `backdrop-blur-sm` | lite부터 꺼짐 (배경 알파 0.9~0.95라 대비 유지) |
+| 월드맵 (P5-02) | 지도 레이어 패럴랙스 | 먼 곳(바다·물결·배·새, 깊이 0.08)·중간(산·나무, 0.035) SVG 레이어만 스크롤 따라 transform(`.wm-par`, full만). 길·랜드마크·노드는 고정이라 노드 자리는 어긋나지 않음. 스크롤할 때만 rAF 1번(passive), 멈추면 0. 측정(개발 서버, CPU 4배 감속): 대기 메인 스레드 0.7~0.9%, 스크롤 rAF p95 18.5ms |
+| 월드맵 (P5-02) | 지난 길 그리기 | 잉크 길을 전체 길의 조각(`mapRoute`)으로 따로 그려 지금 노드에 정확히 닿음. full 1.5초 · lite 70% · minimal·동작 줄이기 즉시, 종이 점선은 그린 뒤 페이드 |
+| 월드맵 (P5-02) | 물결·새·배 | 정지 그림만(클래스 `wm-wave`·`wm-bird`·`wm-boat` 자리), 반복 연출은 P5-09 |
 | 퀘스트 | 단계 표시 현재 단계 | Framer `repeat: Infinity` → `.step-pulse` |
 | 퀘스트 | Pyodide 로딩·실행 | 실측 판정 멈춤 |
 | 축하 | 컨페티·카드·레벨 pop | `fireConfetti`가 `<html>` 속성 상한, 카드 연출은 기존 `budget` 그대로, 레벨 pop은 `[data-reduced]` |

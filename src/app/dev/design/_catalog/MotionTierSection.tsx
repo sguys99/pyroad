@@ -255,8 +255,8 @@ export function MotionTierSection() {
       <p className="text-caption text-muted-foreground">
         일회성 연출(버튼 눌림·시트 등장·카운트업·진행바 빛 띠·토스트)은 각
         컴포넌트 절에서, 마스코트 리그는 아래 &ldquo;마스코트 리그&rdquo;에서
-        단계별로 확인합니다. 패럴랙스는 지도 개편(Phase 5) 때 생기는 연출이라
-        아직 쓰는 곳이 없습니다.
+        단계별로 확인합니다. 패럴랙스는 &ldquo;월드 지도&rdquo; 절에서 스크롤해
+        보세요 (full만).
       </p>
     </Section>
   );
