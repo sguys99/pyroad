@@ -47,9 +47,13 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(page).toHaveURL(new RegExp(`/quest/${quest1.id}$`));
     await expect(questHeader(page)).toContainText(quest1.title);
 
-    // 3. 이야기·미션과 튜터 소개
-    await expect(page.getByRole('heading', { name: '이야기' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: '미션' })).toBeVisible();
+    // 3. 이야기 쪽(P6-01): 제목 · 해 볼 일 체크리스트 · 파이뱀 대사창 + 튜터 소개
+    await expect(
+      page.getByRole('heading', { level: 1, name: quest1.title }),
+    ).toBeVisible();
+    const task = page.getByRole('region', { name: '해 볼 일' });
+    await expect(task.getByRole('listitem').first()).toBeVisible();
+    await expect(page.getByTestId('quest-dialogue')).toContainText('파이뱀');
     await expect(page.getByText('파이뱀 선생님').first()).toBeVisible();
 
     // 4~7. 에디터 + 실행기 준비 → 정답 실행
@@ -62,6 +66,8 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(output).toHaveAttribute('data-state', 'success');
     await expect(output).toContainText('안녕하세요');
     await expect(output).toContainText('정답이에요!');
+    // 통과하면 해 볼 일이 모두 체크된다
+    await expect(task.locator('li:not([data-done])')).toHaveCount(0);
 
     // 축하 시퀀서: 첫 퀘스트 뱃지 카드 → CTA 로 닫힘
     await expect(page.getByTestId('celebration-overlay')).toBeVisible();

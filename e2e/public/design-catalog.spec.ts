@@ -397,6 +397,14 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       await expect(
         page.getByTestId('bubble-typing').getByTestId('bubble-caret'),
       ).toHaveCount(want.caret ? 1 : 0);
+      // 대사창(P6-01): 같은 대체 + 누르면 남은 글자를 한 번에
+      const dialogue = page.getByTestId('dialogue-box');
+      if (want.caret) {
+        await expect(dialogue).toHaveAttribute('data-typing', '');
+        await dialogue.click();
+      }
+      await expect(dialogue).not.toHaveAttribute('data-typing');
+      await expect(dialogue.locator('.g-bubble-rest')).toHaveText('');
     }
   });
 });

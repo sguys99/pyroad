@@ -1,0 +1,219 @@
+/* 퀘스트 화면 책 펼침 (P6-01, QuestWorkspace.tsx·StoryPage.tsx). 최종 시안 final.css·refine.css·screens.css `.f-spread`·`.f-story`·`.f-task`를
+   토큰으로 옮김: 흰 쪽 두 장 + 그림자 한 종류 + 가운데 접힘 그늘만 아주 옅게, 카드·말풍선 테두리 없음. 값은 토큰 변수만 */
+
+/* ───────────── 틀: 모바일은 번호 탭 + 한 쪽, lg부터 한 장의 책 */
+.qw-tabs {
+  padding: 0.75rem var(--spacing-gutter) 0;
+}
+.qw-tab-n {
+  display: inline-grid;
+  place-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: var(--round-pill);
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: var(--text-caption);
+  line-height: 1;
+}
+.qw-book {
+  flex: 1;
+  min-height: 0;
+  padding: 0.75rem var(--spacing-gutter);
+}
+.qw-page {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  container-type: inline-size;
+  padding: 1.25rem 1.125rem 1.5rem;
+  border-radius: var(--round-l);
+  background: var(--surface);
+  box-shadow: var(--elev-card);
+}
+
+@media (min-width: 64rem) {
+  .qw-book {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding: 1rem 1.5rem 1.25rem;
+  }
+  /* 두 쪽이 한 장: 바깥 모서리만 둥글게, 그림자는 책 전체에 한 번 */
+  .qw-page {
+    position: relative;
+    padding: 1.75rem 2rem 2rem;
+    box-shadow: none;
+  }
+  .qw-page-l {
+    border-radius: var(--round-l) 0 0 var(--round-l);
+    box-shadow: var(--elev-card);
+    clip-path: inset(-2rem 0 -2rem -2rem);
+    /* 책등 쪽으로 종이가 휘는 그늘 */
+    background-image: linear-gradient(
+      270deg,
+      color-mix(in srgb, var(--text) 4%, transparent),
+      transparent 1.25rem
+    );
+  }
+  .qw-page-r {
+    border-radius: 0 var(--round-l) var(--round-l) 0;
+    box-shadow: var(--elev-card);
+    clip-path: inset(-2rem -2rem -2rem 0);
+    background-image: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--text) 4%, transparent),
+      transparent 1.25rem
+    );
+  }
+}
+
+/* ───────────── 오른쪽 쪽: 공책 제목 */
+.qw-notebook-t {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  color: var(--text);
+}
+.qw-notebook-t svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: var(--primary-text);
+}
+
+/* ───────────── 왼쪽 쪽: 이야기 */
+.qs {
+  display: flex;
+  flex-direction: column;
+}
+.qs-kicker {
+  color: var(--primary-text);
+  font-size: var(--text-kicker);
+  font-weight: var(--text-kicker--font-weight);
+  letter-spacing: var(--text-kicker--letter-spacing);
+  line-height: var(--text-kicker--line-height);
+}
+.qs-title {
+  margin: 0.25rem 0 0.875rem;
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  color: var(--text);
+  text-wrap: balance;
+}
+.qs-art {
+  position: relative;
+  aspect-ratio: 400 / 132;
+  max-height: 10rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  border-radius: var(--round-m);
+  background: var(--world-soft);
+}
+.qs-art .wm-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.qs-story {
+  margin: 0 0 1.5rem;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--text);
+}
+
+/* 해 볼 일: 옅은 주색 면 + 위 가장자리에 반쯤 걸친 이름표, 항목은 체크 상자 */
+.qs-task {
+  position: relative;
+  margin: 0.5rem 0 1.25rem;
+  padding: 1.5rem 1rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--primary-soft);
+}
+.qs-task-k {
+  position: absolute;
+  top: 0;
+  left: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  transform: translateY(-50%);
+}
+.qs-checks {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.qs-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.qs-box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin-top: 0.1875rem;
+  border-radius: 0.375rem;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px
+    color-mix(in srgb, var(--primary) 45%, transparent);
+  transition:
+    background-color var(--dur-fast) var(--easing-out),
+    box-shadow var(--dur-fast) var(--easing-out);
+}
+.qs-box svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.qs-check[data-done] .qs-box {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: none;
+}
+.qs-check[data-done] {
+  color: var(--text-muted);
+}
+.qs-check[data-current] {
+  font-weight: 700;
+}
+.qs-check[data-current] .qs-box {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.qs-tutor {
+  margin-bottom: 1.25rem;
+}
+.qs-next {
+  align-self: flex-end;
+  margin-bottom: 1.5rem;
+}
+.qs-chat {
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 64rem) {
+  .qs-title {
+    font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+  }
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .qs-box {
+  transition: none;
+}

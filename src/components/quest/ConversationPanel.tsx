@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useRef, useState } from 'react';
-import { BookOpen, Info, Lightbulb, MessageCircle } from 'lucide-react';
+import { Info, Lightbulb, MessageCircle } from 'lucide-react';
 import { DURATION } from '@/lib/motion/tokens';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -15,7 +15,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { PromptSkeleton } from '@/lib/types/database';
 import type { ChatMessage } from '@/lib/tutor/types';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { useMessageExpression } from '@/components/characters/useCharacterExpression';
@@ -28,7 +27,6 @@ const markdownComponents = {
 };
 
 interface ConversationPanelProps {
-  promptSkeleton: PromptSkeleton;
   messages: ChatMessage[];
   isAiLoading: boolean;
   streamingContent?: string;
@@ -164,7 +162,6 @@ function StreamingMessage({ content }: { content: string }) {
 }
 
 export function ConversationPanel({
-  promptSkeleton,
   messages,
   isAiLoading,
   streamingContent,
@@ -175,69 +172,44 @@ export function ConversationPanel({
   isGoldenKeyLoading,
   isGoldenKeyBlocked = false,
 }: ConversationPanelProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
   const goldenKeyDisabled =
     isAiLoading || isGoldenKeyLoading || isGoldenKeyBlocked || goldenKeys <= 0;
 
-  // 새 메시지 또는 스트리밍 콘텐츠 변경 시 자동 스크롤
+  // 새 메시지·스트리밍이면 대화 상자 안에서만 끝으로. 이야기 쪽 전체(해 볼 일 카드)는 움직이지 않는다 (P6-01)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const log = logRef.current;
+    log?.scrollTo?.({ top: log.scrollHeight, behavior: 'smooth' });
   }, [messages.length, isAiLoading, streamingContent]);
 
+  // 힌트·황금키 줄이 위, 대화 기록이 아래 (시안: 힌트 버튼 아래에 쪽지가 쌓임)
+  const log = (
+    <div
+      ref={logRef}
+      className="flex max-h-[28rem] flex-col gap-4 overflow-y-auto"
+    >
+      {/* 채팅 메시지 목록 */}
+      {messages.map((msg, idx) => {
+        if (msg.role === 'system') {
+          return <SystemMessage key={idx} content={msg.content} />;
+        }
+        return <TutorMessage key={idx} msg={msg} />;
+      })}
+
+      {/* 스트리밍 중이면 plain text로 부분 텍스트 표시, 아니면 로딩 인디케이터 */}
+      {streamingContent ? (
+        <StreamingMessage content={streamingContent} />
+      ) : isAiLoading ? (
+        <ThinkingIndicator />
+      ) : null}
+    </div>
+  );
+
   return (
-    <div className="flex h-full flex-col">
-      {/* 스크롤 가능한 콘텐츠 영역 */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col gap-4 p-4">
-          {/* 스토리 배경 */}
-          <div className="rounded-xl bg-surface-2 p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-bold text-foreground">이야기</h3>
-            </div>
-            <p className="text-sm leading-relaxed text-foreground">
-              {promptSkeleton.story_context}
-            </p>
-          </div>
-
-          {/* 과제 설명 */}
-          <div className="rounded-xl bg-accent/10 border border-accent/30 p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-accent-foreground" />
-              <h3 className="font-bold text-foreground">미션</h3>
-            </div>
-            <p className="text-sm leading-relaxed text-foreground">
-              {promptSkeleton.exercise_description}
-            </p>
-            {promptSkeleton.expected_output_hint && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                예상 결과: {promptSkeleton.expected_output_hint}
-              </p>
-            )}
-          </div>
-
-          {/* 채팅 메시지 목록 */}
-          {messages.map((msg, idx) => {
-            if (msg.role === 'system') {
-              return <SystemMessage key={idx} content={msg.content} />;
-            }
-            return <TutorMessage key={idx} msg={msg} />;
-          })}
-
-          {/* 스트리밍 중이면 plain text로 부분 텍스트 표시, 아니면 로딩 인디케이터 */}
-          {streamingContent ? (
-            <StreamingMessage content={streamingContent} />
-          ) : isAiLoading ? (
-            <ThinkingIndicator />
-          ) : null}
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* 힌트 + 황금키 버튼 (하단 고정) */}
-      <div className="border-t border-border bg-background px-4 py-3">
-        <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4">
+      {/* 힌트 + 황금키 버튼 */}
+      <div className="border-t border-line pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <TooltipProvider delay={DURATION.base}>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -298,6 +270,7 @@ export function ConversationPanel({
           </div>
         </div>
       </div>
+      {log}
     </div>
   );
 }

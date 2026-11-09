@@ -11,6 +11,8 @@ import {
   LevelSeal,
 } from '@/components/ui/hud';
 import { SpeechBubble, type BubbleTone } from '@/components/ui/speech-bubble';
+import { DialogueBox } from '@/components/ui/dialogue-box';
+import { PybaemRig } from '@/components/characters/rig/MascotRig';
 import { RewardIcon, Stars, type RewardKind } from '@/components/ui/reward-icon';
 import {
   Tooltip,
@@ -188,6 +190,12 @@ const SPEAKER: Record<BubbleTone, string> = {
 const TYPING_TEXT =
   '반복문은 같은 일을 여러 번 하게 해 줘. for i in range(3): 을 쓰면 세 번 반복해!';
 
+const DIALOGUE_LINES = [
+  '이야기를 읽고 해 볼 일을 확인해요. 공책에 주문을 써서 "코드 돌려보기"를 눌러 봐요!',
+  '돌아가긴 했는데 나온 글자가 조금 달라요. 해 볼 일을 다시 읽어 봐요!',
+  '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!',
+];
+
 export function BubbleSection() {
   const [round, setRound] = useState(0);
   return (
@@ -234,6 +242,27 @@ export function BubbleSection() {
           </SpeechBubble>
         </Demo>
       </div>
+      <Demo
+        label="대사창 (DialogueBox, P6-01)"
+        note="캐릭터 + 말풍선 + 타자. 누르거나 Enter·Space면 남은 글자를 한 번에, 낭독기는 대사가 바뀔 때 전체 문장을 한 번. 글자가 나오는 동안 리그가 말해요"
+        data-testid="dialogue-box-demo"
+      >
+        <DialogueBox
+          key={round}
+          speaker="파이뱀"
+          text={DIALOGUE_LINES[round % DIALOGUE_LINES.length]}
+          tone={round % DIALOGUE_LINES.length === 2 ? 'good' : 'tutor'}
+          data-testid="dialogue-box"
+          character={(speaking) => (
+            <PybaemRig
+              state={round % DIALOGUE_LINES.length === 2 ? 'cheer' : 'talk'}
+              talking={speaking}
+              size={96}
+              label=""
+            />
+          )}
+        />
+      </Demo>
       <div className="grid gap-4 sm:grid-cols-2">
         {BUBBLE_TONES.map((tone) => (
           <Demo key={tone} label={tone} note="꼬리 left · top · none">
@@ -252,7 +281,7 @@ export function BubbleSection() {
           </Demo>
         ))}
       </div>
-      <CodeSample code={`<SpeechBubble speaker="파이뱀 선생님" text={line} typing onTypingDone={next} />\n<SpeechBubble tone="bug" speaker="버그버그">…</SpeechBubble>`} />
+      <CodeSample code={`<DialogueBox speaker="파이뱀" text={line} character={(speaking) => <PybaemRig state="talk" talking={speaking} size={96} label="" />} />\n<SpeechBubble speaker="파이뱀 선생님" text={line} typing onTypingDone={next} />\n<SpeechBubble tone="bug" speaker="버그버그">…</SpeechBubble>`} />
     </Section>
   );
 }

@@ -208,6 +208,22 @@ props: `items`(`{ value, label, icon?, panelId? }[]`) · `value` · `onValueChan
 
 **대표 상태**: 4 tone × 꼬리 3종, 타자 중(커서)·끝, 긴 대사 두 줄 이상, 배지 있는 이름표, 360폭.
 
+### 9-1. 대사창 `DialogueBox` (P6-01)
+
+게임 대사창: 왼쪽 캐릭터 칸(6rem, 좁은 쪽 4.5rem, 리그는 칸 폭에 맞춰 줄어듦) + 말풍선(`SpeechBubble` 꼬리 left) + 타자 효과. 퀘스트 이야기 쪽의 파이뱀 대사가 처음 쓰는 곳.
+
+| prop | 설명 |
+|---|---|
+| `text` | 대사. 바뀌면 처음부터 다시 타자 |
+| `speaker` · `tone` | 이름표, 말풍선 tone |
+| `character(speaking)` | 캐릭터를 그리는 함수. 글자가 나오는 동안 `speaking=true` → 리그 `talking`에 넘김 |
+
+- 넘기기: 대사창을 누르거나(탭·클릭) 포커스한 채 Enter·Space → 남은 글자를 한 번에(`useTyping().skip`). 타자 중에만 `tabindex=0`·`data-typing`
+- minimal·동작 줄이기는 처음부터 전체 문장. 낭독기는 글자 조각을 숨기고 `aria-live="polite"` 전체 문장을 대사가 바뀔 때 한 번만
+- 효과음 자리: 블립은 P6-14가 `useDialogueBlip(shown)`으로 (컴포넌트 주석)
+
+**대표 상태**: 타자 중(커서)·넘긴 뒤·끝, `good` tone(통과), 360폭.
+
 ## 10. 보상 아이콘 `RewardIcon` · `Stars`
 
 시안 `reward.tsx`를 옮김: 금색 하나(`accent`) + 그 진한 톤 1px 안팎(`accentLip`) + 밝은 쪽(`accentLight`), 빈 별은 `line` + 옅은 `lineStrong`. 색은 Tailwind 토큰 클래스(`fill-accent` …)라 이모지·하드코딩 색이 없다. `kind` `coin`·`star`·`starEmpty`·`key`, `size`(px, 보기 상자 32), `label`이 있으면 `role="img"`, 없으면 장식.

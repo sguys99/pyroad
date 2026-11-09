@@ -68,10 +68,14 @@ export default async function QuestPage({ params }: Props) {
   // ①(00004)만 적용된 DB에서는 quests에도 남아 있으므로 props로 내려보내기 전에 지운다
   quest.prompt_skeleton = stripAnswerFields(quest.prompt_skeleton);
   // 헤더 BGM = 이 퀘스트가 속한 월드의 곡 (P5-11, 월드맵과 같은 곡이면 이어서 재생)
+  // 눈썹 "N권"은 지도 머리와 같은 셈(bookNo: order 순 목록의 자리, P6-01)
   const world = quest.stage.world;
-  if (world)
-    world.bgm =
-      serverWorlds().find((w) => w.slug === world.slug)?.map?.bgm ?? null;
+  if (world) {
+    const worlds = serverWorlds();
+    const index = worlds.findIndex((w) => w.slug === world.slug);
+    world.bgm = worlds[index]?.map?.bgm ?? null;
+    if (index >= 0) world.no = index + 1;
+  }
   const profile = profileResult.data;
 
   // 퀘스트 시작 기록 (P1-17). 응답 뒤 기록되고, DB dedupe로 사용자·퀘스트마다 한 번만 남는다

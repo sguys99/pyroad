@@ -176,7 +176,8 @@ export type QuestWithStage = QuestClientSafe & {
   stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'> & {
     /** 이 퀘스트의 월드: 월드맵 복귀 링크가 그 월드 지도(`/world/<slug>`)로 (P5-01). 모르면 `/world` */
     /** bgm: 그 월드 map.yaml 곡 (P5-11, 퀘스트 헤더 BGM). 서버가 붙임, 지도 없는 월드면 null */
-    world?: { slug: string; bgm?: BgmId | null } | null;
+    /** no: 그림책 N권 (퀘스트 눈썹 "1권 · …", P6-01). 서버가 붙임 */
+    world?: { slug: string; bgm?: BgmId | null; no?: number } | null;
   };
 };
 

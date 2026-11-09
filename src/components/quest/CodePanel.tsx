@@ -132,7 +132,7 @@ export function CodePanel({
   const canRun = isReady && !isBusy && !isCodeEmpty;
 
   return (
-    <div className="flex flex-col gap-3 p-4">
+    <div className="flex flex-col gap-3">
       {/* 에디터 (오류가 난 줄은 traceback에서 찾아 표시, P2-18) */}
       <CodeEditor
         value={code}
