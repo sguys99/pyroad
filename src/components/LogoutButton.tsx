@@ -27,7 +27,12 @@ export function sharedLogoutMessage(provider: SocialProvider | null): string {
   return `pyRoad에서는 나왔어. 학교·도서관 컴퓨터라면 브라우저에서 ${site}에도 들어가서 로그아웃해 줘. 그래야 다음 친구가 내 계정으로 들어오지 못해!`;
 }
 
-export function LogoutButton() {
+/** `pill`: 작은 알약(프로필) · `menu`: 월드맵 HUD 메뉴 시트의 넓은 버튼 (P5-07) */
+export function LogoutButton({
+  variant = 'pill',
+}: {
+  variant?: 'pill' | 'menu';
+}) {
   const router = useRouter();
   // 공용 기기 모드였으면 로그아웃 뒤 안내를 띄우고, 닫으면 처음 화면으로
   const [sharedNotice, setSharedNotice] = useState<{
@@ -53,14 +58,25 @@ export function LogoutButton() {
 
   return (
     <>
-      <button
-        onClick={handleLogout}
-        aria-label="로그아웃"
-        className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-error-soft px-2 sm:px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
-      >
-        <LogOut className="h-4 w-4" />
-        <span className="hidden sm:inline">로그아웃</span>
-      </button>
+      {variant === 'menu' ? (
+        <Button
+          variant="danger"
+          icon={<LogOut aria-hidden />}
+          onClick={handleLogout}
+          className="w-full"
+        >
+          로그아웃
+        </Button>
+      ) : (
+        <button
+          onClick={handleLogout}
+          aria-label="로그아웃"
+          className="inline-flex items-center gap-0.5 sm:gap-1.5 rounded-full bg-error-soft px-2 sm:px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">로그아웃</span>
+        </button>
+      )}
       {sharedNotice && (
         <Modal
           open

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { PageTransition } from '@/components/shared/PageTransition';
 import { WorldShelf } from '@/components/world/book/WorldShelf';
+import { WorldHudBar } from '@/components/world/WorldHudBar';
 import { loadWorldMapData } from '@/lib/world/loadWorldMapData';
 
 export const metadata: Metadata = { title: '모험 책장' };
@@ -12,11 +13,14 @@ export default async function WorldsPage() {
   const data = await loadWorldMapData();
   if (!data) redirect('/');
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6 lg:max-w-5xl">
-      <WorldShelf
-        worlds={data.progress.worlds}
-        current={data.progress.current?.world.slug ?? null}
-      />
-    </PageTransition>
+    <>
+      <WorldHudBar data={data} />
+      <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6 lg:max-w-5xl">
+        <WorldShelf
+          worlds={data.progress.worlds}
+          current={data.progress.current?.world.slug ?? null}
+        />
+      </PageTransition>
+    </>
   );
 }

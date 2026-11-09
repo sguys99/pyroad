@@ -46,7 +46,9 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
         ),
       supabase
         .from('user_progress')
-        .select('user_id, quest_id, status, best_stars, completed_at'),
+        .select(
+          'user_id, quest_id, status, best_stars, completed_at, used_golden_key',
+        ),
       supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
       supabase.from('user_badges').select('user_id, badge_type, earned_at'),
     ]);

@@ -31,6 +31,8 @@ export interface ProgressRow {
   status: string;
   best_stars: number;
   completed_at: string | null;
+  /** 황금키로 완료 → 스트릭에서 뺀다 (3일 뱃지와 같은 규칙, Q25) */
+  used_golden_key: boolean;
 }
 
 export interface BadgeRow {
@@ -53,7 +55,7 @@ export interface WorldMapData {
   progress: WorldsProgress;
   /** 스테이지 id → 퀘스트 목록 (order 순, P5-06 바텀시트) */
   questsByStage: Record<string, StageQuestItem[]>;
-  /** 완료 시각들. HUD 스트릭(P5-07)은 이것을 KST 날짜(`src/lib/time/kst.ts`)로 세어 만든다 */
+  /** 직접 푼(황금키 아님) 완료 시각들. HUD 스트릭(P5-07, `src/lib/time/streak.ts`)이 KST 날짜로 센다 */
   completedAt: string[];
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
   showApiKeyAlert: boolean;
@@ -107,7 +109,9 @@ export function toWorldMapData(
     progress: getWorldStatuses(worlds, raw.stages, progress),
     questsByStage,
     completedAt: progress.flatMap((p) =>
-      p.status === 'completed' && p.completed_at ? [p.completed_at] : [],
+      p.status === 'completed' && p.completed_at && !p.used_golden_key
+        ? [p.completed_at]
+        : [],
     ),
     // 사용자 커스텀 키 유무만 본다 (서버 기본 키는 무시)
     showApiKeyAlert:

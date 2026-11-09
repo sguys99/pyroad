@@ -188,7 +188,7 @@ props: `items`(`{ value, label, icon?, panelId? }[]`) · `value` · `onValueChan
 <CurrencyHud level={3} xp={{ value: 40, max: 100 }} coins={1280} stars={14} keys={2} end={<SoundToggle />} />
 ```
 
-지금 앱에는 코인·별 재화가 없어 `CurrencyHud` 전체는 아직 화면에 없다(Phase 4~6 HUD 개편에서). 퀘스트 상태바가 `LevelSeal`(sm 40px)·`useCountUp`을, 월드맵·퀘스트 헤더가 소리 토글(`IconButton`)을 쓴다.
+지금 앱에는 코인·별 재화가 없어 `CurrencyHud` 전체는 아직 화면에 없다(Phase 8~9에서 값 연결). 퀘스트 상태바가 `LevelSeal`(sm 40px)·`useCountUp`을, 월드맵·책장 HUD(§13-5 `WorldHud`)가 `LevelSeal`·`ProgressBar`·소리 토글을 쓴다.
 
 **대표 상태**: 전체(코인·별·키·소리) 1280·360, 키 없음(월드맵), 큰 수(12,345 → 1.2만), 값 오름 순간(팝·카운트업)·동작 줄이기(금색 틴트), LevelSeal md·sm·두 자리.
 
@@ -380,23 +380,37 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **주소**: `/world` = 진행 중 월드 지도(리다이렉트 없이 같은 `WorldMapScreen`), `/world/[slug]` = 그 월드(없는 slug는 404 화면, 잠김·준비 중은 지도 대신 `LockedBook` — 서버 판정), `/worlds` = 책장. 모두 `(protected)`(미들웨어 `/world` 접두), 동적 렌더
 - **책 카드 상태 4종**: 모험 중(초록 띠, 진행바 + "스테이지 2/7 · 퀘스트 12/44" + "지도 펼치기") · 다 읽었어요(체크) · 잠겨 있어요(자물쇠 걸쇠 + 채도 낮춘 정지 그림) · 준비 중(모래시계). 지금 모험 중인 월드는 금색 책갈피 "지금 읽는 책". 왼쪽 월드 색 책등, 줄마다 나무 선반. 360px 아래 가로 카드(그림 | 글), 640px 2권, 1024px 3권. 열린 책은 카드 전체가 지도 링크(`CardButton`), 잠긴 책은 누를 수 없음. 상태는 글자·아이콘으로도
 - **해제 조건**: "파이썬 섬을 다 모험하면 열려요"(받침 조사 `withObjectParticle`). 앞 월드가 준비 중이면 건너뛰고 그 앞의 진짜 월드 기준(`unlock.previousWorld`는 바로 앞이라 그대로 쓰지 않음). 준비 중은 "지금 만들고 있어요." 앞에 붙임
-- **지도 머리**: kicker "그림책 N권" + h1 "<월드> 모험 지도" + "n/7 스테이지 통과" + 보조 버튼 "월드 바꾸기"(`/worlds`). 지도 아래 "다음 권 미리 보기"(뒤 월드 두 권까지, 같은 책 카드) + "책장 전체 보기". 상단 HUD 줄은 P5-07
+- **지도 머리**: kicker "그림책 N권" + h1 "<월드> 모험 지도" + "n/7 스테이지 통과" + 보조 버튼 "월드 바꾸기"(`/worlds`). 지도 아래 "다음 권 미리 보기"(뒤 월드 두 권까지, 같은 책 카드) + "책장 전체 보기". 상단 HUD는 §13-5
 - **책 ↔ 지도 전환**(`bookTransition.ts`): View Transitions API가 있으면 full = 누른 표지와 새 화면의 지도(`.world-map`)에 같은 `view-transition-name: world-book`을 붙여 표지가 지도 자리로 펼쳐짐(반대로 "월드 바꾸기"는 지도가 그 월드 표지로 접힘), 길이 `--dur-page`·`--easing-page`. lite = 짧은 교차 페이드(`--dur-fast`), minimal·동작 줄이기·미지원 브라우저 = 그냥 이동(새 화면 등장은 `PageTransition` 규칙). 새 화면 렌더는 최대 2.5초 기다리고 끝나면 이름·`<html data-book-vt>`를 거둠. 수정 키·가운데 클릭은 브라우저 기본. 반복 연출 없음
 - **BGM**: 각 지도 화면은 그 월드 `map.yaml`의 `bgm`(크로스페이드는 P5-11). 퀘스트 → 월드맵 링크는 그 퀘스트의 월드 지도(`worldPath`)
 - **e2e 테스트 월드**: `content:build -- --fixtures e2e/fixtures/content`가 `build/e2e/worlds.json`·`rows.json`을 만들고, 테스트 페이지가 켜진 서버에 `PYROAD_E2E_WORLDS`가 있을 때만 `serverWorlds()`가 월드 목록 뒤에 더함(운영 seed·커밋 생성물은 그대로). 스펙 `e2e/world-select.spec.ts`가 DB에 행을 넣고 지움
 - **카탈로그**: "월드 지도" 절의 "월드 책 표지 4종 · 지도 머리"
+
+## 13-5. 월드맵 HUD `WorldHud` (P5-07, Q47)
+
+월드맵(`/world`·`/world/[slug]`)과 책장(`/worlds`) 위에 붙어 따라오는(sticky) 얇은 바. 코드 `src/components/world/WorldHud.tsx`(클라이언트) + `WorldHudBar.tsx`(서버: 월드맵 데이터 → 값, 스트릭 계산), 모양 `worldHud.css`(`.wh-*`). 시안 `Hud`(ui.tsx)에서 로고 대신 내 아바타·닉네임.
+
+- **순서**: 아바타(현재 스킨, 32) + 닉네임(→ `/profile`, 이름 "닉네임, 내 프로필") · `LevelSeal` + XP 바("다음 레벨까지 경험치", 최고 레벨은 "최고 레벨") · 스트릭 불꽃 · 곧 열려요(코인·오늘의 미션·상점) · 소리 토글 · 메뉴
+- **실제 값**: 닉네임·스킨·레벨·XP·스트릭. **곧 열려요**(Q47): 점선 알약 안에 흐린 아이콘 버튼 셋(1024px부터 "곧 열려요" 금색 글자, 랜딩 soon 배지 톤). 누르면 쪽지 "상점은 곧 열려요! 조금만 기다려 줘." Phase 8~9에서 칩을 `HudCounter`로 바꿔 값만 연결
+- **스트릭**(`src/lib/time/streak.ts` `currentStreak`): 직접 푼(황금키 아님) 완료 시각의 KST 날짜로 오늘부터 거꾸로 센다. 오늘 아직 안 풀었으면 어제까지 이어진 일수를 유지(`today: false`). 3일 뱃지(`has_three_day_streak`)와 같은 정의 — 단위 테스트가 `reward-rules.json` 표로 대조. 0일은 꺼진 회색 불꽃("불꽃이 꺼져 있어요"), 1일 이상은 금색 불꽃 + 노란 틴트("3일 연속 모험 중"). 누르면 쪽지(0일: "오늘 퀘스트를 하나 풀면 불꽃이 켜져요!", 오늘 아직: "오늘도 풀면 4일이 돼요.")
+- **메뉴**: `IconButton` "메뉴" → `Sheet` "메뉴"(공지사항·게시판 링크 버튼, 로그아웃 `LogoutButton variant="menu"`). 포커스 가두기·Esc·연 버튼으로 복귀는 공통 시트
+- **반응형**: 640px 미만은 한 줄 약 59px — 칸 사이 4px, 도장 40, XP 바는 바 아래 4px 띠(글자 "경험치"는 숨김), 곧 열려요 셋은 버튼 하나("코인·오늘의 미션·상점, 곧 열려요"), 불꽃은 숫자만, 닉네임 줄임표. 640px 이상 65px. 숫자는 고정 폭(`tabular-nums`)
+- **겹침**: HUD z 40 < 시트·모달 덮개 50 < 토스트 70. HUD 쪽지는 바 바로 아래 가운데(아래 가운데 InstallHint·잠긴 스테이지 쪽지와 안 겹침). ConsentBanner는 HUD 위 흐름에 있고, 스크롤하면 HUD만 붙음
+- **연출**: 등장 한 번(full = 0.5rem 내려오며 `--dur-base`, lite = 페이드 `--dur-fast`, minimal·동작 줄이기 = 없음). 레벨이 오르면 `LevelSeal` 팝, XP 바는 빛 띠(공통 컴포넌트 그대로). 반복 없음
+- 옛 `ProfileSummary` 카드(아바타·Lv·XP·뱃지 5개)는 HUD와 겹쳐 지웠다. 뱃지는 프로필 화면에 있음
+- **카탈로그**: "월드 지도" 절의 "월드맵 HUD (P5-07)" — 스트릭 0·1·7일, 긴 닉네임, 최고 레벨
 
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
 |---|---|
 | Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
-| IconButton | HUD 소리 토글(`SoundToggle`), 시트·토스트 닫기 |
-| Card | 월드맵 프로필 요약, 프로필 카드 4개, 계정 관리 |
+| IconButton | HUD 소리 토글(`SoundToggle`)·메뉴(`WorldHud`), 시트·토스트 닫기 |
+| Card | 프로필 카드 4개, 계정 관리 |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
-| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06) |
-| Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04) |
+| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06), 월드맵 HUD 메뉴(P5-07) |
+| Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04), HUD 불꽃·곧 열려요 쪽지(P5-07) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
 | ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률, 스테이지 차례 시트 진행 요약 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |

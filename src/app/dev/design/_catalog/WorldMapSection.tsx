@@ -15,6 +15,7 @@ import { WORLDS } from '@/lib/world/worlds';
 import { WorldBook } from '@/components/world/book/WorldBook';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import type { BookSummary } from '@/lib/world/worldBook';
+import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 
 // 월드 책 표지 상태 4종 (P5-01): 모험 중 · 다 읽음 · 잠김 · 준비 중
 const BOOK = (
@@ -184,6 +185,14 @@ function NodeTile({ stage }: { stage: StageWithStatus }) {
   );
 }
 
+// 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨
+const HUDS: [string, WorldHudProps][] = [
+  ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, streak: { days: 0, today: false } }],
+  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 180, level: 2, streak: { days: 1, today: true } }],
+  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 720, level: 4, streak: { days: 7, today: false } }],
+  ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 1500, level: 5, streak: { days: 12, today: true } }],
+];
+
 export function WorldMapSection() {
   const island = WORLDS.find((w) => w.map);
   if (!island?.map) return null;
@@ -275,6 +284,20 @@ export function WorldMapSection() {
           </Demo>
         ))}
       </div>
+      <Demo
+        label="월드맵 HUD (P5-07)"
+        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 곧 열려요(코인·오늘의 미션·상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 640px 미만: XP 바는 아래 가는 띠, 곧 열려요는 버튼 하나, 닉네임 줄임표. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
+        data-testid="world-hud-demo"
+      >
+        <div data-hud-demo className="grid gap-3">
+          {HUDS.map(([label, props]) => (
+            <div key={label} className="grid gap-1">
+              <span className="text-caption text-muted-foreground">{label}</span>
+              <WorldHud {...props} />
+            </div>
+          ))}
+        </div>
+      </Demo>
       <Demo
         label="월드 책 표지 4종 · 지도 머리 (P5-01)"
         note="책장(/worlds)·지도 아래 다음 권 미리 보기가 같이 써요. 모험 중(책갈피 = 지금 읽는 책) · 다 읽었어요 · 잠김(자물쇠, 채도 낮춘 정지 그림) · 준비 중(모래시계). 열린 책은 카드 전체가 지도 링크: full은 표지가 지도 자리로 펼쳐지는 View Transition, lite는 짧은 페이드, minimal·동작 줄이기·미지원 브라우저는 그냥 이동. 360px 아래는 가로 카드, 640px부터 세로 표지"

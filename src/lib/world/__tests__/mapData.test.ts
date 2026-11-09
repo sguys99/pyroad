@@ -38,6 +38,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
         status: 'completed',
         best_stars: 3,
         completed_at: '2026-11-08T01:00:00Z',
+        used_golden_key: false,
       },
       {
         user_id: ME,
@@ -45,6 +46,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
         status: 'in_progress',
         best_stars: 0,
         completed_at: null,
+        used_golden_key: false,
       },
       // RLS 가 막지만, 섞여 와도 무시돼야 함
       {
@@ -53,6 +55,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
         status: 'completed',
         best_stars: 2,
         completed_at: '2026-11-08T02:00:00Z',
+        used_golden_key: false,
       },
     ],
     profile: {
@@ -113,6 +116,19 @@ describe('toWorldMapData (P5-13)', () => {
     expect(
       toWorldMapData(OTHER, raw({ progress: [], badges: [] }), WORLDS).profile,
     ).toBeNull();
+  });
+
+  it('황금키로 완료한 시각은 스트릭에서 뺀다', () => {
+    const base = raw();
+    const data = toWorldMapData(
+      ME,
+      {
+        ...base,
+        progress: base.progress.map((p) => ({ ...p, used_golden_key: true })),
+      },
+      WORLDS,
+    );
+    expect(data.completedAt).toEqual([]);
   });
 
   it('HUD 프로필과 API 키 안내', () => {
