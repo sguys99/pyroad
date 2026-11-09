@@ -238,6 +238,10 @@ export function useQuestSession({
   const [userLevel, setUserLevel] = useState(initialLevel);
   const [goldenKeys, setGoldenKeys] = useState(initialGoldenKeys);
   const [isGoldenKeyLoading, setIsGoldenKeyLoading] = useState(false);
+  // 이 퀘스트에 황금키를 썼는지 (DB used_golden_key와 같음 → 완료 XP 0, 보상 미리 보기)
+  const [usedGoldenKey, setUsedGoldenKey] = useState(
+    progress?.used_golden_key ?? false,
+  );
   const [celebrations, setCelebrations] = useState<CelebrationEvent[]>([]);
 
   // 실행·채점·완료(황금키 포함) 요청 중복 방지 (B06). ref 는 렌더 전 연속 클릭도 막고, state 는 버튼 표시용.
@@ -285,10 +289,20 @@ export function useQuestSession({
 
   /** 스트리밍 말풍선을 정리하고 답을 대화에 넣는다 (한 배치로 처리해 깜빡임 없음) */
   const finishStreaming = useCallback(
-    (message: string, isFallback: boolean, replace = false) => {
+    (
+      message: string,
+      isFallback: boolean,
+      replace = false,
+      hint?: ChatMessage['hint'],
+    ) => {
       setStreamingContent('');
       setIsLoading(false);
-      const msg: ChatMessage = { role: 'tutor', content: message, isFallback };
+      const msg: ChatMessage = {
+        role: 'tutor',
+        content: message,
+        isFallback,
+        hint,
+      };
       setMessages((prev) => (replace ? [msg] : [...prev, msg]));
     },
     [setIsLoading],
@@ -750,9 +764,12 @@ export function useQuestSession({
     if (stepHints >= MAX_HINTS_PER_STEP || isAiLoading || isCompleted) return;
 
     const nextLevel = (stepHints + 1) as 1 | 2 | 3;
+    // 이야기 쪽 힌트 쪽지 (P6-09). 단계가 바뀌면 그 단계 쪽지만 보인다
+    const hint = { level: nextLevel, step: stepRef.current.step };
     const hintLabel: ChatMessage = {
       role: 'system',
       content: `힌트 ${nextLevel}/3`,
+      hint,
     };
 
     play('tap');
@@ -789,12 +806,15 @@ export function useQuestSession({
         undoHint();
         return;
       }
-      finishStreaming(res.message, res.is_fallback);
+      finishStreaming(res.message, res.is_fallback, false, hint);
     } catch (error) {
       undoHint();
+      // 일부라도 받았으면 쪽지가 남아 있으니 실패 안내도 그 쪽지에
       finishStreaming(
         tutorFailure(error, TUTOR_UNAVAILABLE_HINT_MESSAGE).message,
         false,
+        false,
+        received ? hint : undefined,
       );
     }
   }, [
@@ -823,13 +843,8 @@ export function useQuestSession({
       return;
     }
 
+    // 확인은 화면의 황금키 확인 창(QuestHints)이 미리 받는다 (P6-09)
     const step = stepRef.current.step;
-    const confirmed = window.confirm(
-      kind === 'project'
-        ? '황금키를 사용하면 이 단계의 정답이 공개되고 XP와 뱃지를 받을 수 없어요. 사용할까요?'
-        : '황금키를 사용하면 정답이 공개되고 XP와 뱃지를 받을 수 없어요. 사용할까요?',
-    );
-    if (!confirmed) return;
 
     lockSubmit(true);
     setIsGoldenKeyLoading(true);
@@ -850,6 +865,7 @@ export function useQuestSession({
 
       const solution = key.data.solution_code;
       setGoldenKeys(key.data.golden_keys);
+      setUsedGoldenKey(true);
       // 에디터에도 정답 코드가 보인다 (CodeEditor가 바깥 값 변경을 반영)
       setCode(solution);
       addSystemMessage(
@@ -968,11 +984,12 @@ export function useQuestSession({
     hasApiKey,
     /** "힌트 n/3"에 쓰는 이번 단계 힌트 수 */
     hintsUsed: stepHints,
-    /** 상태바에 쓰는 누적 힌트 수 */
+    /** 보상 계산에 쓰는 누적 힌트 수 (DB hints_used와 같음) */
     totalHintsUsed: totalHints,
     handleHintRequest,
 
     goldenKeys,
+    usedGoldenKey,
     isGoldenKeyLoading,
     /** 황금키 버튼을 막을지 (실행기가 준비되지 않았거나 실행·채점 중) */
     isGoldenKeyBlocked: !isRunnerFree,

@@ -223,7 +223,6 @@ beforeEach(() => {
     }),
   };
   stubFetch();
-  vi.spyOn(window, 'confirm').mockReturnValue(true);
 });
 
 afterEach(() => {
@@ -624,6 +623,7 @@ describe('useQuestSession: 황금키', () => {
       stdout: '10\n',
     });
     expect(result.current.isCompleted).toBe(true);
+    expect(result.current.usedGoldenKey).toBe(true);
     expect(result.current.validation?.passed).toBe(true);
     expect(result.current.nextQuestId).toBe('q-next');
     expect(result.current.celebrations).toEqual([
@@ -647,26 +647,42 @@ describe('useQuestSession: 황금키', () => {
     await act(async () => {
       await result.current.handleGoldenKeyUse();
     });
-    expect(window.confirm).not.toHaveBeenCalled();
     expect(callsTo('/api/quest/golden-key')).toHaveLength(0);
     expect(result.current.isCompleted).toBe(false);
     expect(result.current.messages.at(-1)?.role).toBe('system');
-  });
-
-  it('확인 창에서 취소하면 아무것도 하지 않는다', async () => {
-    vi.mocked(window.confirm).mockReturnValue(false);
-    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
-    await act(async () => {
-      await result.current.handleGoldenKeyUse();
-    });
-    expect(callsTo('/api/quest/golden-key')).toHaveLength(0);
-    expect(result.current.isSubmitting).toBe(false);
   });
 });
 
 // ── 힌트 ──────────────────────────────────────────────────────────────
 
 describe('useQuestSession: 힌트', () => {
+  it('받은 힌트는 단계·번호가 붙은 쪽지 메시지로 남는다 (P6-09)', async () => {
+    mocks.tutor.sendTutorStreamRequest.mockImplementation(
+      async (req: { type: string }) =>
+        req.type === 'hint_generator'
+          ? { message: 'print()를 써 봐요', is_fallback: true }
+          : { message: '안내', is_fallback: false },
+    );
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    // 퀘스트 소개가 대화를 채운 뒤
+    await act(async () => {
+      await flush();
+    });
+    await act(async () => {
+      await result.current.handleHintRequest();
+    });
+    const notes = result.current.messages.filter((m) => m.hint);
+    expect(notes).toEqual([
+      { role: 'system', content: '힌트 1/3', hint: { level: 1, step: 1 } },
+      {
+        role: 'tutor',
+        content: 'print()를 써 봐요',
+        isFallback: true,
+        hint: { level: 1, step: 1 },
+      },
+    ]);
+  });
+
   it('힌트 글자를 하나도 못 받고 실패하면 횟수와 라벨을 되돌린다', async () => {
     mocks.tutor.sendTutorStreamRequest.mockImplementation(
       async (req: { type: string }) => {

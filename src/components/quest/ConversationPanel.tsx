@@ -1,20 +1,11 @@
 'use client';
 
 import { memo, useEffect, useRef, useState } from 'react';
-import { Info, Lightbulb, MessageCircle } from 'lucide-react';
-import { DURATION } from '@/lib/motion/tokens';
+import { MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Button } from '@/components/ui/button';
-import { RewardIcon } from '@/components/ui/reward-icon';
 import { SpeechBubble } from '@/components/ui/speech-bubble';
 import { useDialogueBlip } from '@/components/sound/useDialogueBlip';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import type { ChatMessage } from '@/lib/tutor/types';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { useMessageExpression } from '@/components/characters/useCharacterExpression';
@@ -30,13 +21,8 @@ interface ConversationPanelProps {
   messages: ChatMessage[];
   isAiLoading: boolean;
   streamingContent?: string;
-  hintsUsed: number;
-  onHintRequest: () => void;
-  goldenKeys: number;
-  onGoldenKeyUse: () => void;
-  isGoldenKeyLoading?: boolean;
-  /** 실행기가 준비되지 않았거나 실행·채점 중이라 지금은 황금키를 쓸 수 없음 */
-  isGoldenKeyBlocked?: boolean;
+  /** 힌트를 받는 중: 흘러 들어오는 글자는 이야기 쪽 힌트 쪽지가 보여 준다 (P6-09) */
+  hintPending?: boolean;
 }
 
 /** 이 시간이 지나도 답이 없으면 "조금 오래 걸려요" 문구로 바꿔 아이가 기다릴 수 있게 함 */
@@ -165,16 +151,9 @@ export function ConversationPanel({
   messages,
   isAiLoading,
   streamingContent,
-  hintsUsed,
-  onHintRequest,
-  goldenKeys,
-  onGoldenKeyUse,
-  isGoldenKeyLoading,
-  isGoldenKeyBlocked = false,
+  hintPending = false,
 }: ConversationPanelProps) {
   const logRef = useRef<HTMLDivElement>(null);
-  const goldenKeyDisabled =
-    isAiLoading || isGoldenKeyLoading || isGoldenKeyBlocked || goldenKeys <= 0;
 
   // 새 메시지·스트리밍이면 대화 상자 안에서만 끝으로. 이야기 쪽 전체(해 볼 일 카드)는 움직이지 않는다 (P6-01)
   useEffect(() => {
@@ -182,14 +161,15 @@ export function ConversationPanel({
     log?.scrollTo?.({ top: log.scrollHeight, behavior: 'smooth' });
   }, [messages.length, isAiLoading, streamingContent]);
 
-  // 힌트·황금키 줄이 위, 대화 기록이 아래 (시안: 힌트 버튼 아래에 쪽지가 쌓임)
-  const log = (
+  // 힌트는 이야기 쪽 쪽지(QuestHints)로 따로 보여 주므로 대화 기록에는 넣지 않는다 (P6-09)
+  return (
     <div
       ref={logRef}
       className="flex max-h-[28rem] flex-col gap-4 overflow-y-auto"
     >
       {/* 채팅 메시지 목록 */}
       {messages.map((msg, idx) => {
+        if (msg.hint) return null;
         if (msg.role === 'system') {
           return <SystemMessage key={idx} content={msg.content} />;
         }
@@ -197,80 +177,11 @@ export function ConversationPanel({
       })}
 
       {/* 스트리밍 중이면 plain text로 부분 텍스트 표시, 아니면 로딩 인디케이터 */}
-      {streamingContent ? (
+      {hintPending ? null : streamingContent ? (
         <StreamingMessage content={streamingContent} />
       ) : isAiLoading ? (
         <ThinkingIndicator />
       ) : null}
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col gap-4">
-      {/* 힌트 + 황금키 버튼 */}
-      <div className="border-t border-line pt-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <TooltipProvider delay={DURATION.base}>
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                힌트: {3 - hintsUsed}/3
-                <Tooltip>
-                  <TooltipTrigger
-                    className="cursor-help"
-                    aria-label="힌트 안내"
-                  >
-                    <Info
-                      className="h-3 w-3 text-muted-foreground/60"
-                      aria-hidden
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p>힌트는 퀘스트마다 3개씩 제공됩니다.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </span>
-              <span className="flex items-center gap-1 text-xs text-accent-text">
-                <RewardIcon kind="key" size={18} />
-                황금키: {goldenKeys}/3
-                <Tooltip>
-                  <TooltipTrigger
-                    className="cursor-help"
-                    aria-label="황금키 안내"
-                  >
-                    <Info className="h-3 w-3 text-accent-text/70" aria-hidden />
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p>황금키는 스테이지를 완료하면 3개로 보충됩니다.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </span>
-            </div>
-          </TooltipProvider>
-          <div className="flex items-center gap-2">
-            {/* 눌림 피드백은 게임 버튼 자체 (P2-11). 힌트 소리(tap)는 세션이 낸다 */}
-            <Button
-              variant="reward"
-              size="sm"
-              onClick={onGoldenKeyUse}
-              disabled={goldenKeyDisabled}
-              icon={<RewardIcon kind="key" size={22} />}
-            >
-              {goldenKeys <= 0 ? '키 소진' : '황금키'}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onHintRequest}
-              disabled={isAiLoading || hintsUsed >= 3}
-              sfx={false}
-              icon={<Lightbulb aria-hidden />}
-            >
-              {hintsUsed >= 3 ? '힌트 모두 사용' : '힌트 받기'}
-            </Button>
-          </div>
-        </div>
-      </div>
-      {log}
     </div>
   );
 }

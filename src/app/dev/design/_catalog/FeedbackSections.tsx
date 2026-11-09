@@ -22,6 +22,7 @@ import {
 import { SoundToggle } from '@/components/sound/SoundToggle';
 import { QuestHeader } from '@/components/quest/QuestHeader';
 import { StageProgress } from '@/components/quest/StageProgress';
+import { QuestHints } from '@/components/quest/QuestHints';
 import { stageDots, type StageQuestDot } from '@/lib/quest/stageProgress';
 import { CodeSample, Demo, Labeled, Section } from './ui';
 
@@ -148,6 +149,76 @@ function StageProgressDemo() {
         </div>
       </Demo>
       <CodeSample code={`<QuestHeader … dots={stageDots(quest.stage.quests ?? [], quest.id, session.isCompleted, quest.stage.unlocked)} />`} />
+    </>
+  );
+}
+
+// 힌트·황금키 견본 (P6-09): 저장된 힌트처럼 쪽지가 하나씩 열림. 별 안내는 SHOW_STARS가 꺼져 있어도 여기서 확인
+const DEMO_HINTS = [
+  '`print()` 괄호 안에 보여 주고 싶은 글자를 넣어요.',
+  '글자는 따옴표로 감싸야 해요. 예: `"안녕"`',
+  '`print("안녕하세요!")` 처럼 써 봐요.',
+];
+
+function QuestHintsDemo() {
+  const [hints, setHints] = useState(0);
+  const [keys, setKeys] = useState(3);
+  const [usedKey, setUsedKey] = useState(false);
+  const [done, setDone] = useState(false);
+  const common = {
+    kind: 'code' as const,
+    hintsUsed: hints,
+    notes: DEMO_HINTS.slice(0, hints).map((text, i) => ({
+      level: i + 1,
+      text,
+    })),
+    onHint: () => setHints((h) => Math.min(h + 1, 3)),
+    hintBusy: false,
+    goldenKeys: keys,
+    onGoldenKey: () => {
+      setKeys((k) => k - 1);
+      setUsedKey(true);
+      setDone(true);
+    },
+    keyBlocked: false,
+    xpReward: 50,
+    totalHintsUsed: hints,
+    usedGoldenKey: usedKey,
+    isCompleted: done,
+  };
+  return (
+    <>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Demo
+          label="힌트·황금키 (QuestHints, P6-09) · 지금 화면 = XP 안내"
+          note="이야기 쪽 대사창 아래. 버튼에 남은 횟수, 쓰기 전에 받을 XP가 어떻게 바뀌는지(힌트 0회 1.5배 · 1회 1.25배 · 그 외 기본 · 황금키 0, 서버 quest_xp와 같은 규칙). 황금키는 확인 창(결과·남는 키·다시 채우는 때). 쪽지 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+          surface="card"
+          data-testid="quest-hints-demo"
+        >
+          <QuestHints {...common} showStars={false} />
+        </Demo>
+        <Demo
+          label="같은 줄 · 별 안내 (SHOW_STARS 켜면, P8-05)"
+          note="별 규칙 F3: 힌트 0회 ★★★ · 1회 ★★ · 그 외·황금키 ★. 두 견본은 같은 상태를 공유해요"
+          surface="card"
+        >
+          <QuestHints {...common} showStars />
+        </Demo>
+      </div>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => {
+          setHints(0);
+          setKeys(3);
+          setUsedKey(false);
+          setDone(false);
+        }}
+        icon={<RotateCcw aria-hidden />}
+      >
+        처음부터
+      </Button>
+      <CodeSample code={`<QuestHints kind={session.kind} hintsUsed={session.hintsUsed} notes={hintNotes(session.messages, session.currentStep, session.streamingContent)} … xpReward={quest.xp_reward} totalHintsUsed={session.totalHintsUsed} usedGoldenKey={session.usedGoldenKey} />`} />
     </>
   );
 }
@@ -390,6 +461,7 @@ export function RewardSection() {
         </Demo>
       </div>
       <CodeSample code={`<RewardIcon kind="coin" size={26} label="코인" />\n<Stars n={2} max={3} />`} />
+      <QuestHintsDemo />
     </Section>
   );
 }

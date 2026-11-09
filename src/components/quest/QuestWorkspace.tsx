@@ -10,6 +10,7 @@ import { stageDots } from '@/lib/quest/stageProgress';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { StoryPage } from './StoryPage';
+import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel, RunnerWakingNotice } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
@@ -52,6 +53,11 @@ export function QuestWorkspace({
 }: QuestWorkspaceProps) {
   const { quest, tab, setTab, runner, runResult, validation, liveOutput } =
     session;
+  const notes = hintNotes(
+    session.messages,
+    session.currentStep,
+    session.streamingContent,
+  );
 
   return (
     <div className="flex h-dvh flex-col bg-bg">
@@ -112,16 +118,26 @@ export function QuestWorkspace({
               </Button>
             }
           >
+            <QuestHints
+              kind={session.kind}
+              hintsUsed={session.hintsUsed}
+              notes={notes}
+              onHint={session.handleHintRequest}
+              hintBusy={session.isAiLoading}
+              goldenKeys={session.goldenKeys}
+              onGoldenKey={session.handleGoldenKeyUse}
+              keyBlocked={session.isAiLoading || session.isGoldenKeyBlocked}
+              keyLoading={session.isGoldenKeyLoading}
+              xpReward={quest.xp_reward}
+              totalHintsUsed={session.totalHintsUsed}
+              usedGoldenKey={session.usedGoldenKey}
+              isCompleted={session.isCompleted}
+            />
             <ConversationPanel
               messages={session.messages}
               isAiLoading={session.isAiLoading}
               streamingContent={session.streamingContent}
-              hintsUsed={session.hintsUsed}
-              onHintRequest={session.handleHintRequest}
-              goldenKeys={session.goldenKeys}
-              onGoldenKeyUse={session.handleGoldenKeyUse}
-              isGoldenKeyLoading={session.isGoldenKeyLoading}
-              isGoldenKeyBlocked={session.isGoldenKeyBlocked}
+              hintPending={notes.some((n) => n.pending)}
             />
           </StoryPage>
         </div>
@@ -192,7 +208,6 @@ export function QuestWorkspace({
       <QuestStatusBar
         xp={session.userXP}
         level={session.userLevel}
-        hintsUsed={session.totalHintsUsed}
         earnedXP={session.earnedXP}
       />
 

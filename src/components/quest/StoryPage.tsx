@@ -88,7 +88,7 @@ interface StoryPageProps {
   session: QuestSession;
   /** 대사창 바로 아래 (모바일 "공책 펼치기") */
   action?: React.ReactNode;
-  /** 그 아래 (지금은 튜터 대화·힌트·황금키, P6-09·P6-10이 다시 그림) */
+  /** 그 아래 (힌트·황금키 줄 P6-09 + 튜터 대화, P6-10이 다시 그림) */
   children?: React.ReactNode;
 }
 

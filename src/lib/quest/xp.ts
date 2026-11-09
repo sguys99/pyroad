@@ -22,6 +22,19 @@ export function calculateXP(
   return baseXP;
 }
 
+/**
+ * 코드·프로젝트 퀘스트의 별 (F3·§12-Q17, 최종 시안 Quest.tsx maxStars): 황금키 1 / 힌트 0회 3 / 1회 2 / 그 외 1.
+ * 지금은 힌트·황금키 안내의 미리 보기에만 쓴다(SHOW_STARS가 꺼져 있어 화면엔 XP). 서버 판정은 P8-05에서 같은 규칙으로
+ */
+export function codeQuestStars(
+  hintsUsed: number,
+  usedGoldenKey: boolean,
+): 1 | 2 | 3 {
+  if (usedGoldenKey) return 1;
+  if (hintsUsed === 0) return 3;
+  return hintsUsed === 1 ? 2 : 1;
+}
+
 export function calculateLevel(totalXP: number): number {
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
     if (totalXP >= LEVEL_THRESHOLDS[i]) return i + 1;

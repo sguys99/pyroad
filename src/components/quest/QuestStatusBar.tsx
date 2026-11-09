@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Lightbulb } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { framerSpring, sec } from '@/lib/motion/tokens';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,6 @@ import { useCountUp } from '@/components/ui/use-count-up';
 interface QuestStatusBarProps {
   xp: number;
   level: number;
-  hintsUsed: number;
   earnedXP: number | null;
 }
 
@@ -48,12 +47,7 @@ function ByeolttongiXPEffect() {
   );
 }
 
-export function QuestStatusBar({
-  xp,
-  level,
-  hintsUsed,
-  earnedXP,
-}: QuestStatusBarProps) {
+export function QuestStatusBar({ xp, level, earnedXP }: QuestStatusBarProps) {
   const title = getLevelTitle(level);
 
   return (
@@ -80,10 +74,6 @@ export function QuestStatusBar({
                 <ByeolttongiXPEffect />
               </>
             )}
-          </span>
-          <span className="flex items-center gap-1 text-muted-foreground">
-            <Lightbulb className="h-4 w-4" />
-            힌트: {hintsUsed}/3
           </span>
         </div>
       </div>

@@ -238,7 +238,7 @@ describe('퀘스트 렌더러 스모크', () => {
     );
     expect(screen.getByTestId('run-button')).toHaveTextContent('준비 중...');
     // 실행기가 준비되지 않았으면 황금키도 막힘 (P1-03 보고)
-    expect(screen.getByRole('button', { name: '황금키' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /황금키 쓰기/ })).toBeDisabled();
   });
 
   it('처음 불러올 때는 깨우는 연출 대신 코딩 팁', () => {
