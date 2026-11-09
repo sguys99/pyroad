@@ -1,4 +1,5 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
+import { isKnownWorldSlug, worldSlugOf } from '@/lib/world/knownWorldSlug';
 import { updateSession } from '@/lib/supabase/middleware';
 import {
   CSP_REPORT_GROUP,
@@ -42,7 +43,18 @@ function applyPageCsp(request: NextRequest): string | null {
 export async function middleware(request: NextRequest) {
   // updateSession이 `NextResponse.next({ request })`로 요청 헤더를 넘기므로 그 전에 넣는다
   const policy = applyPageCsp(request);
-  const response = await updateSession(request);
+  let response = await updateSession(request);
+  // 없는 월드 주소는 진짜 404 상태로 (로그인 사용자만 여기까지 옴 — 비로그인은 위에서 / 로 보냄, P5-14).
+  // 짝 없는 경로로 바꿔 쓰면 루트 not-found 화면이 404로 그려진다. 없는 퀘스트는 DB 조회가 필요해 페이지에 맡김(200 + noindex)
+  const slug = worldSlugOf(request.nextUrl.pathname);
+  if (slug !== null && response.status === 200 && !isKnownWorldSlug(slug)) {
+    const notFound = NextResponse.rewrite(
+      new URL('/_world-not-found', request.url),
+      { request: { headers: request.headers } },
+    );
+    response.cookies.getAll().forEach((c) => notFound.cookies.set(c));
+    response = notFound;
+  }
   if (policy) {
     response.headers.set(cspHeader, policy);
     if (reportUri) {

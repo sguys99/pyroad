@@ -206,10 +206,6 @@
   font-weight: 700;
   white-space: nowrap;
 }
-.ss-act[data-primary] {
-  background: var(--primary);
-  color: var(--on-primary);
-}
 .ss-go {
   color: var(--text-muted);
 }

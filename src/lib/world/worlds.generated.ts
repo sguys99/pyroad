@@ -102,7 +102,7 @@ export const WORLDS: readonly WorldInfo[] = [
             [108, 790],
             [292, 640],
             [112, 495],
-            [290, 350],
+            [290, 364],
             [180, 200]
           ],
           "decorations": [

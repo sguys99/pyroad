@@ -28,7 +28,7 @@ export function NextBooks({
         </h2>
         <Link
           href="/worlds"
-          className="inline-flex min-h-touch items-center gap-0.5 text-small font-bold text-primary-text hover:underline"
+          className="focus-ring inline-flex min-h-touch items-center gap-0.5 rounded-sm text-small font-bold text-primary-text hover:underline"
         >
           책장 전체 보기
           <ChevronRight className="size-4" aria-hidden />

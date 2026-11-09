@@ -25,7 +25,7 @@ export function WorldShelf({
     <>
       <Link
         href="/world"
-        className="mb-4 inline-flex min-h-touch items-center gap-1 text-small font-bold text-primary-text hover:underline"
+        className="focus-ring mb-4 inline-flex min-h-touch items-center gap-1 rounded-sm text-small font-bold text-primary-text hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden />
         모험 지도로

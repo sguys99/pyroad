@@ -67,6 +67,8 @@ function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
  * 주소는 history.pushState로만 바꿔(Next가 useSearchParams에 맞춤) 서버 렌더를 다시 하지 않는다.
  * `questsByStage`가 없으면(카탈로그 틴트 견본) 열린 노드를 눌러도 아무것도 하지 않는다
  */
+const STAGE_ENTRY = 'pyroadStageSheet';
+
 function useOpenStage(
   stages: StageWithStatus[],
   questsByStage?: Record<string, StageQuestItem[]>,
@@ -75,8 +77,6 @@ function useOpenStage(
   const params = useSearchParams();
   const { toasts, show, dismiss } = useToastQueue(1);
   const play = useSfx();
-  // 이 화면에서 쌓은 기록 항목이면 닫을 때 거둔다(뒤로 가기를 한 번 더 눌러야 떠나는 일이 없게)
-  const pushed = useRef(false);
   const id = questsByStage ? params.get('stage') : null;
   const current =
     stages.find((s) => s.id === id && s.status !== 'locked') ?? null;
@@ -98,12 +98,12 @@ function useOpenStage(
     play('tap');
     const url = new URL(window.location.href);
     url.searchParams.set('stage', stage.id);
-    window.history.pushState(null, '', url);
-    pushed.current = true;
+    // 표시는 기록 항목 state에 둔다: 퀘스트에서 뒤로 와 다시 그려져도 남아 있다 (Next는 사용자 state 키를 보존)
+    window.history.pushState({ [STAGE_ENTRY]: true }, '', url);
   };
   const close = () => {
-    if (pushed.current) {
-      pushed.current = false;
+    // 이 화면이 쌓은 기록 항목이면 거둔다: 그 자리에 /world를 덮으면 앞 항목과 겹쳐 뒤로 가기를 한 번 더 눌러야 떠남 (P5-14)
+    if (window.history.state?.[STAGE_ENTRY]) {
       window.history.back();
       return;
     }

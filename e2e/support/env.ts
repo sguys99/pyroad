@@ -7,7 +7,7 @@
 //   없으면 `supabase status -o env --workdir <E2E_SUPABASE_WORKDIR | 저장소>`를 읽는다. 로컬 주소가 아니면 중단한다 (운영 DB 금지).
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 export const REPO_ROOT = resolve(__dirname, '../..');
@@ -167,6 +167,10 @@ export function serverEnv(
     PYROAD_TEST_PAGES: '1',
     // 테스트 월드 지도 설정 (Q48, P5-01): webServer 명령이 먼저 `content:build -- --fixtures`로 만든다 (src/lib/world/serverWorlds.ts)
     PYROAD_E2E_WORLDS: join(REPO_ROOT, 'build/e2e/worlds.json'),
+    // 미들웨어의 없는 월드 404(P5-14)가 테스트 월드를 지나 보내게 (Edge라 위 파일을 못 읽음)
+    PYROAD_E2E_WORLD_SLUGS: readdirSync(
+      join(REPO_ROOT, 'e2e/fixtures/content/worlds'),
+    ).join(','),
     PORT: String(port),
   };
 }

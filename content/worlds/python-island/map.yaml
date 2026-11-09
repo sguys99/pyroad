@@ -2,6 +2,7 @@
 # 좌표는 레이아웃의 viewBox(0 0 width height) 기준. nodes 의 i번째 = i+1번 스테이지 (스테이지 수와 같아야 함)
 # 확정 시안 design/prototypes/src/final/World.tsx 의 WIDE·TALL 그대로 (P5-04에서 노드가 작은 이름표가 되어 원래 값으로 되돌림).
 # 7번(보스)만 랜드마크가 1.15배 + 왕관이라 위가 잘리지 않게 조금 아래로 (wide 120 → 160, tall 175 → 200)
+# 6번은 세로 지도에서 조금 아래로 (tall 350 → 364): 지금 위치 깃발이 보스의 "잠김"에 걸리지 않게 (P5-14, 320~360px)
 
 bgm: world1
 path: catmull_rom
@@ -46,7 +47,7 @@ layouts:
       - [108, 790]
       - [292, 640]
       - [112, 495]
-      - [290, 350]
+      - [290, 364]
       - [180, 200]
     decorations:
       - { kind: waves, x: 50, y: 44 }

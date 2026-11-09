@@ -115,8 +115,9 @@ test.describe('월드 선택 (P5-01)', () => {
     await expect(page.getByTestId('world-locked')).toContainText('잠겨 있어요');
     await expect(page.locator('.world-map')).toHaveCount(0);
 
-    // 404 화면 (상태 코드는 로그인 화면 loading.tsx 스트리밍 때문에 200 — 퀘스트 페이지의 없는 퀘스트와 같음)
-    await page.goto('/world/no-such-world');
+    // 404 화면 + 진짜 404 상태 (미들웨어가 slug를 거름, P5-14)
+    const res = await page.goto('/world/no-such-world');
+    expect(res?.status()).toBe(404);
     await expect(
       page.getByRole('heading', { name: '길을 찾을 수 없어요' }),
     ).toBeVisible();
