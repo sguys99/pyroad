@@ -7,7 +7,9 @@ export interface TutorRequest {
     | 'code_feedback'
     | 'encouragement'
     | 'project_guide'
-    | 'stage_summary';
+    | 'stage_summary'
+    /** "개념만 알려 줘요" (P6-10, §12-Q58): 퀘스트 데이터로만 만드는 개념 설명 */
+    | 'concept_explain';
   quest_id: string;
   student_code?: string;
   hint_level?: 1 | 2 | 3;

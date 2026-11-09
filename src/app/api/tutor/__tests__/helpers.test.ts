@@ -60,6 +60,17 @@ describe('buildFallbackMessage', () => {
     });
   });
 
+  describe('concept_explain — 학습 주제·목표만 (P6-10, Q58)', () => {
+    it('주제와 목표 목록, 정답·힌트 원문은 없음', () => {
+      const body: TutorRequest = { type: 'concept_explain', quest_id: 'q' };
+      const msg = buildFallbackMessage(body, quest, answerKey);
+      expect(msg).toContain('print() 함수로 출력하기');
+      expect(msg).toContain('- print() 사용');
+      expect(msg).not.toContain('안녕하세요');
+      expect(msg).not.toContain('힌트 1단계');
+    });
+  });
+
   describe('hint_generator — 기존 동작 유지', () => {
     it.each([1, 2, 3] as const)('level_%i 힌트를 반환', (level) => {
       const body: TutorRequest = {

@@ -203,3 +203,27 @@ ${params.hintsUsed === 0 ? '3. 힌트 없이 스스로 해냈다고 특별히 �
 
 ⚠️ 응답은 반드시 300자 이내로 작성하세요.`;
 }
+
+interface ConceptExplainParams {
+  questTitle: string;
+  topic: string;
+  learningGoals: string[];
+}
+
+/** "힌트 말고 개념만 알려 줘요" (P6-10, §12-Q58): 과제 풀이 없이 개념만. 학생 입력이 없어 캐시 가능 */
+export function buildConceptExplainPrompt(
+  params: ConceptExplainParams,
+): string {
+  return `## 컨텍스트
+- 퀘스트: ${params.questTitle}
+- 학습 주제: ${params.topic}
+- 학습 목표: ${params.learningGoals.join(', ')}
+
+## 지시
+학생이 "힌트 말고 개념만 알려 줘요"라고 물었어요.
+1. "${params.topic}" 개념이 무엇인지 일상생활 비유로 쉽게 설명해주세요
+2. 과제와 상관없는 아주 짧은 예시 코드 하나로 보여주세요 (과제의 정답이나 정답과 비슷한 코드는 절대 쓰지 마세요)
+3. 과제를 어떻게 풀지는 말하지 말고, 스스로 해 보도록 응원하며 마무리하세요
+
+⚠️ 응답은 반드시 400자 이내로 작성하세요.`;
+}

@@ -41,6 +41,8 @@ export const TUTOR_RATE_LIMITS: Record<TutorType, RateLimit & { env: string }> =
     project_guide: { env: 'TUTOR_LIMIT_GUIDE', perMinute: 6, perDay: 40 },
     // 스테이지 클리어 때 1번 (1월드 스테이지 7개). 클리어 화면을 다시 열어도 넉넉하게
     stage_summary: { env: 'TUTOR_LIMIT_SUMMARY', perMinute: 3, perDay: 20 },
+    // "개념만 알려 줘요" 버튼 (P6-10). 퀘스트마다 한두 번이면 충분, 캐시 적중도 셈
+    concept_explain: { env: 'TUTOR_LIMIT_CONCEPT', perMinute: 4, perDay: 40 },
   };
 
 /**

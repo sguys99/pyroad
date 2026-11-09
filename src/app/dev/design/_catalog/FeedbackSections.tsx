@@ -348,6 +348,8 @@ const DEMO_CHAT: ChatMessage[] = [
   { role: 'system', content: '🔑 황금키를 사용했어요!' },
 ];
 const DEMO_ANSWER: Record<AskQuestion, string> = {
+  concept:
+    '`print()`는 괄호 안의 것을 화면에 보여 주는 주문이에요. 칠판에 글씨를 쓰는 것과 비슷해요! 예: `print("사과")` → 사과',
   what: '해 볼 일은 두 가지예요. 먼저 print() 괄호 안에 "안녕하세요!"를 넣고, 코드 돌려보기를 눌러 나온 글자를 확인해요.',
   why: '나온 글자가 hello였어요. 해 볼 일은 "안녕하세요!"를 보여 주는 거니까 따옴표 안 글자를 바꿔 볼까요?',
 };
@@ -393,7 +395,7 @@ function TutorChatDemo() {
     <MotionProvider>
       <Demo
         label="파이뱀에게 물어보기 (AskPybaem + ConversationPanel, P6-10)"
-        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼(자유 입력 없음). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
+        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼 3개(무엇을 하면 돼요? = 지금 할 일 · 개념만 · 왜 이렇게 나왔어요?, 자유 입력은 P9-17). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
         surface="card"
         data-testid="tutor-chat-demo"
       >

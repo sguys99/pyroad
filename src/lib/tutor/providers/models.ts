@@ -18,7 +18,7 @@ export const DEFAULT_MODELS: Record<LLMProviderType, string> = {
   openai: 'gpt-6-luna',
 };
 
-/** 속도 우선 유형(quest_intro·encouragement·stage_summary)에 쓰는 경량 모델. 없는 provider는 기본 모델 */
+/** 속도 우선 유형(quest_intro·encouragement·stage_summary·concept_explain)에 쓰는 경량 모델. 없는 provider는 기본 모델 */
 export const FAST_MODELS: Partial<Record<LLMProviderType, string>> = {
   anthropic: 'claude-haiku-5-5',
 };

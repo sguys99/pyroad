@@ -925,7 +925,7 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
 });
 
 describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
-  it('what: 질문 말풍선 + 퀘스트 소개 요청, 프로젝트는 지금 단계 안내', async () => {
+  it('what: 소개를 되풀이하지 않고 LLM 없이 지금 할 일만, 프로젝트는 지금 단계 (Q58)', async () => {
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
       await flush();
@@ -935,29 +935,44 @@ describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
       result.current.handleAsk('what');
       await flush();
     });
-    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
-      type: 'quest_intro',
-      quest_id: 'q-code',
-    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
     expect(result.current.messages.slice(-2)).toMatchObject([
       { role: 'student', content: ASK_QUESTIONS.what },
-      { role: 'tutor', content: '안내', isFallback: false },
+      { role: 'tutor' },
     ]);
+    expect(result.current.messages.at(-1)?.content).toContain('지금 할 일');
 
     const project = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
     await act(async () => {
       await flush();
     });
-    mocks.tutor.sendTutorStreamRequest.mockClear();
     await act(async () => {
       project.result.current.handleAsk('what');
       await flush();
     });
-    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toMatchObject({
-      type: 'project_guide',
-      current_step: 1,
-      step_goal: '이름 출력',
+    expect(project.result.current.messages.at(-1)?.content).toMatch(
+      /1\/2단계.*이름 출력/,
+    );
+  });
+
+  it('concept: 이 퀘스트 개념 설명(concept_explain) 요청 (Q58)', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
     });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      result.current.handleAsk('concept');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'concept_explain',
+      quest_id: 'q-code',
+    });
+    expect(result.current.messages.slice(-2)).toMatchObject([
+      { role: 'student', content: ASK_QUESTIONS.concept },
+      { role: 'tutor', content: '안내' },
+    ]);
   });
 
   it('why: 돌린 코드 그대로일 때만, 그 실행 결과로 묻는다', async () => {

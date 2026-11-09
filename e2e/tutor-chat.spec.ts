@@ -22,7 +22,7 @@ async function gotoQuest(page: Page) {
   await expect(page.getByTestId('ask-unread')).toHaveText(/^1/);
 }
 
-/** "무엇을 하면 돼요?" → 내 말풍선 → 파이뱀 답(저장된 답변) */
+/** "무엇을 하면 돼요?"(지금 할 일) → "개념만 알려 줘요"(저장된 답변) */
 async function askWhat(page: Page) {
   const chat = await openTutorChat(page);
   // 키가 없는 아이에게 기본 튜터 안내 (예전 책 위 띠)
@@ -31,13 +31,41 @@ async function askWhat(page: Page) {
   // 아직 실행하지 않았으면 "왜 이렇게 나왔어요?"는 없음
   await expect(chat.getByTestId('ask-why')).toHaveCount(0);
 
+  // 무엇을 하면 돼요? = 소개 되풀이가 아니라 해 볼 일 + 지금 상태 (LLM 요청 없음, Q58)
+  let streamed = 0;
+  const count = (req: { url(): string }) => {
+    if (req.url().endsWith('/api/tutor/stream')) streamed++;
+  };
+  page.on('request', count);
   await chat.getByTestId('ask-what').click();
   await expect(chat.getByTestId('chat-student')).toHaveText(
     /무엇을 하면 돼요\?/,
   );
   await expect(chat.getByTestId('chat-tutor')).toHaveCount(2);
+  const todo = chat.getByTestId('chat-tutor').last();
+  await expect(todo).toContainText('지금 할 일');
+  await expect(todo).toContainText('코드 돌려보기');
+  await expect(todo).not.toContainText(quest.fallbackText);
+  page.off('request', count);
+  expect(streamed).toBe(0);
+
+  // 개념만 알려 줘요 = concept_explain (키 없음 → 학습 주제로 만든 저장된 답변)
+  const concept = page.waitForResponse(
+    (res) =>
+      res.url().endsWith('/api/tutor/stream') &&
+      res.request().postDataJSON()?.type === 'concept_explain',
+  );
+  await chat.getByTestId('ask-concept').click();
+  expect((await concept).status()).toBe(200);
+  await expect(chat.getByTestId('chat-student').last()).toHaveText(
+    /개념만 알려 줘요/,
+  );
+  await expect(chat.getByTestId('chat-tutor')).toHaveCount(3);
   await expect(chat.getByTestId('chat-tutor').last()).toContainText(
     '저장된 답변',
+  );
+  await expect(chat.getByTestId('chat-tutor').last()).toContainText(
+    '배우는 개념은',
   );
   await expect(chat.getByTestId('ask-what')).toBeEnabled();
   // 펼친 동안 온 말은 읽은 것

@@ -24,6 +24,7 @@ import type {
   RewardErrorResponse,
 } from './rewards';
 import { getQuestKind, type QuestKind } from './questKind';
+import { nowTodoText } from './nowTodo';
 import {
   buildCelebrationEvents,
   type CelebrationEvent,
@@ -107,11 +108,13 @@ const ANSWER_CONFETTI = {
 };
 
 /**
- * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10). 자유 입력 대신 정해진 질문만: 이미 있는 튜터 유형으로 답하므로
- * 새 프롬프트·금칙어 검사가 필요 없다. what = 퀘스트(프로젝트는 지금 단계) 설명, why = 마지막 실행 결과 설명
+ * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10, §12-Q58). 자유 입력은 아동 안전 검토 뒤로 미루고(P9-17) 정해진 질문만:
+ * what = 지금 할 일(해 볼 일 + 지금 상태, LLM 없이 `nowTodoText`) · concept = 이 퀘스트 개념만(`concept_explain`) ·
+ * why = 마지막 실행 결과 설명(`code_feedback`, 결과가 지금 코드의 것일 때만)
  */
 export const ASK_QUESTIONS = {
   what: '무엇을 하면 돼요?',
+  concept: '힌트 말고 개념만 알려 줘요',
   why: '왜 이렇게 나왔어요?',
 } as const;
 export type AskQuestion = keyof typeof ASK_QUESTIONS;
@@ -849,6 +852,31 @@ export function useQuestSession({
         return;
       play('tap');
       addMessage({ role: 'student', content: ASK_QUESTIONS[question] });
+      if (question === 'what') {
+        // 소개(quest_intro)를 되풀이하지 않고 지금 할 일만 짧게 (P6-10 추가)
+        addMessage({
+          role: 'tutor',
+          content: nowTodoText({
+            task:
+              kind === 'project' && stepGoal !== undefined
+                ? stepGoal
+                : quest.prompt_skeleton.exercise_description,
+            expected:
+              kind === 'project'
+                ? undefined
+                : quest.prompt_skeleton.expected_output_hint,
+            step:
+              kind === 'project'
+                ? { n: currentStep, total: totalSteps }
+                : undefined,
+            runResult,
+            runIsCurrent: canAskWhy,
+            passed: !!validation?.passed,
+            isCompleted,
+          }),
+        });
+        return;
+      }
       let req: TutorRequest;
       if (question === 'why' && runResult) {
         req = {
@@ -861,17 +889,8 @@ export function useQuestSession({
             passed: !!validation?.passed,
           },
         };
-      } else if (kind === 'project' && stepGoal !== undefined) {
-        req = {
-          type: 'project_guide',
-          quest_id: questId,
-          current_step: currentStep,
-          total_steps: totalSteps,
-          step_goal: stepGoal,
-          previous_code: previousStepCode,
-        };
       } else {
-        req = { type: 'quest_intro', quest_id: questId };
+        req = { type: 'concept_explain', quest_id: questId };
       }
       streamTutor(req, ASK_FAILED);
     },
@@ -880,13 +899,14 @@ export function useQuestSession({
       canAskWhy,
       runResult,
       validation,
+      isCompleted,
       code,
       kind,
+      quest,
       questId,
       stepGoal,
       currentStep,
       totalSteps,
-      previousStepCode,
       addMessage,
       streamTutor,
       play,

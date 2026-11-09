@@ -38,6 +38,9 @@ describe('buildCacheKey — 개인화 입력이 있는 응답은 캐시하지 �
     expect(buildCacheKey({ type: 'stage_summary', quest_id: 'q1' })).toBe(
       'stage_summary:q1',
     );
+    expect(buildCacheKey({ type: 'concept_explain', quest_id: 'q1' })).toBe(
+      'concept_explain:q1',
+    );
     expect(buildCacheKey({ type: 'quest_intro', quest_id: 'q2' })).not.toBe(
       buildCacheKey(studentA),
     );
