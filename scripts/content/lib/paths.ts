@@ -21,3 +21,9 @@ export const LEGACY_SEED_REV = '9b88cea';
 /** 빌드 기본 출력. seed 는 커밋하는 생성물, 검증 JSON 은 git 제외 `build/` (정답을 담은 파생물) */
 export const DEFAULT_SEED_OUT = SEED_SQL;
 export const DEFAULT_JSON_OUT = resolve(REPO_ROOT, 'build/content/quests.json');
+
+/** 월드 목록·지도 모듈 (P5-03). seed 처럼 커밋하는 생성물이고 `--check`가 드리프트 검사 */
+export const WORLDS_MODULE = resolve(
+  REPO_ROOT,
+  'src/lib/world/worlds.generated.ts',
+);

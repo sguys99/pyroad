@@ -17,3 +17,5 @@ playwright-report
 test-results
 # /licenses 고지 생성물 (npm run licenses:build, P3-14). JSON.stringify 형식 그대로 --check로 비교
 src/lib/legal/licenses.generated.json
+# 월드 목록·지도 생성물 (npm run content:build, P5-03). --check 가 생성 형식 그대로 비교
+src/lib/world/worlds.generated.ts

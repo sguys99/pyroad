@@ -1,0 +1,10 @@
+# 월드 2: 코드 바다 (이름은 가칭, §5·Q48). 스테이지는 Phase 10 에서 추가 — 그 전까지 "준비 중" 표지
+# 이름은 여기 한 곳에서만 바꿉니다 (랜딩·월드 선택 화면은 src/lib/world/worlds.generated.ts 를 읽음)
+
+slug: code-sea
+order: 2
+title: 코드 바다
+theme: code_sea
+description: 문자열·딕셔너리·랜덤으로 더 큰 문제를 풀어요.
+unlock_rule:
+  type: previous_world_cleared

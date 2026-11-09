@@ -18,6 +18,11 @@ import { WorldBgm } from '@/components/sound/WorldBgm';
 import { User, MessageSquare, Bell } from 'lucide-react';
 import type { UserBadge, UserProfile } from '@/lib/types/database';
 import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
+import { WORLDS } from '@/lib/world/worlds';
+import type { WorldId } from '@/lib/design/tokens';
+
+// 지금은 스테이지가 있는 첫 월드의 지도만 (월드별 주소 /world/[slug]·월드 선택은 P5-01, 월드 단위 상태는 P5-12)
+const CURRENT_WORLD = WORLDS.find((w) => w.ready && w.map);
 
 interface Props {
   // notice=stage-locked: 잠긴 스테이지의 퀘스트를 URL 로 열어 돌아옴 (B38, 퀘스트 페이지 가드)
@@ -79,7 +84,7 @@ export default async function WorldPage({ searchParams }: Props) {
 
   return (
     <>
-      <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6">
+      <PageTransition className="mx-auto min-h-screen max-w-2xl px-4 py-6 lg:max-w-5xl">
         <div className="relative z-10 mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">모험 지도</h1>
           <div className="flex items-center gap-2">
@@ -124,13 +129,18 @@ export default async function WorldPage({ searchParams }: Props) {
           </div>
         )}
 
-        <MapBackground world={1} className="rounded-2xl overflow-hidden">
-          <WorldMap stages={stagesWithStatus} />
-        </MapBackground>
+        {CURRENT_WORLD?.map && (
+          <MapBackground
+            world={CURRENT_WORLD.order as WorldId}
+            className="rounded-2xl overflow-hidden"
+          >
+            <WorldMap stages={stagesWithStatus} map={CURRENT_WORLD.map} />
+          </MapBackground>
+        )}
       </PageTransition>
 
       {/* 월드 BGM: 기본 꺼짐, 설정에서 켠 경우만 (P2-14) */}
-      <WorldBgm id="world1" />
+      {CURRENT_WORLD?.map && <WorldBgm id={CURRENT_WORLD.map.bgm} />}
 
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       {/* 홈 화면에 추가 쪽지 (P4-11): 다른 안내가 떠 있으면 띄우지 않음 (아래 가운데 자리를 같이 씀) */}

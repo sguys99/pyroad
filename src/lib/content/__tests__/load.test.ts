@@ -15,6 +15,15 @@ const WORLD = {
   description: '',
   unlock_rule: { type: 'open' },
 };
+/** 스테이지 1개짜리 월드의 지도 (P5-03) */
+const MAP = {
+  bgm: 'world1',
+  path: 'catmull_rom',
+  layouts: {
+    wide: { width: 1200, height: 720, node_scale: 1, nodes: [[130, 600]] },
+    tall: { width: 400, height: 1180, node_scale: 0.82, nodes: [[104, 1080]] },
+  },
+};
 const STAGE = {
   id: 'a1000000-0000-0000-0000-000000000001',
   order: 1,
@@ -49,10 +58,12 @@ describe('loadContent', () => {
   it('정상 구조를 읽고 해시를 만듦', () => {
     const dir = makeContent({
       'world.yaml': WORLD,
+      'map.yaml': MAP,
       '01-python-village/stage.yaml': STAGE,
       '01-python-village/01-first-greeting.yaml': codeQuest(),
     });
     const tree = loadContent(dir);
+    expect(tree.worlds[0].map?.layouts.tall.nodes).toEqual([[104, 1080]]);
     expect(tree.worlds[0].stages[0].quests[0].quest.title).toBe('첫 번째 인사');
     expect(tree.hash).toMatch(/^[0-9a-f]{16}$/);
     expect(loadContent(dir).hash).toBe(tree.hash);
@@ -102,11 +113,81 @@ describe('loadContent', () => {
   it('월드 slug 가 디렉토리 이름과 다르면 오류', () => {
     const dir = makeContent({
       'world.yaml': { ...WORLD, slug: 'code-sea' },
+      'map.yaml': MAP,
       '01-python-village/stage.yaml': STAGE,
       '01-python-village/01-first-greeting.yaml': codeQuest(),
     });
     expect(problemsOf(dir)).toEqual([
       'worlds/python-island/world.yaml: slug(code-sea)가 디렉토리 이름(python-island)과 달라요',
     ]);
+  });
+});
+
+describe('map.yaml (P5-03)', () => {
+  const stage2 = {
+    ...STAGE,
+    id: 'a1000000-0000-0000-0000-000000000002',
+    order: 2,
+  };
+  const quest2 = { ...codeQuest(), id: 'b1000000-0000-0000-0000-000000000002' };
+
+  it('레이아웃의 노드 수가 스테이지 수와 다르면 실패', () => {
+    const dir = makeContent({
+      'world.yaml': WORLD,
+      'map.yaml': MAP,
+      '01-python-village/stage.yaml': STAGE,
+      '01-python-village/01-first-greeting.yaml': codeQuest(),
+      '02-variable-forest/stage.yaml': stage2,
+      '02-variable-forest/01-first-greeting.yaml': quest2,
+    });
+    expect(problemsOf(dir)).toEqual([
+      'worlds/python-island/map.yaml layouts.wide.nodes: 노드 1개가 스테이지 수(2)와 달라요',
+      'worlds/python-island/map.yaml layouts.tall.nodes: 노드 1개가 스테이지 수(2)와 달라요',
+    ]);
+  });
+
+  it('스테이지가 있는데 map.yaml 이 없으면 실패', () => {
+    const dir = makeContent({
+      'world.yaml': WORLD,
+      '01-python-village/stage.yaml': STAGE,
+      '01-python-village/01-first-greeting.yaml': codeQuest(),
+    });
+    expect(problemsOf(dir)).toEqual([
+      'worlds/python-island/map.yaml: 스테이지가 있는 월드는 지도 설정(map.yaml)이 있어야 해요',
+    ]);
+  });
+
+  it('스테이지가 없는 "준비 중" 월드는 world.yaml 만으로 됨', () => {
+    const dir = makeContent({
+      'world.yaml': {
+        ...WORLD,
+        unlock_rule: { type: 'previous_world_cleared' },
+      },
+    });
+    const [world] = loadContent(dir).worlds;
+    expect(world.map).toBeNull();
+    expect(world.stages).toEqual([]);
+  });
+
+  const problemsWithMap = (map: unknown) =>
+    problemsOf(
+      makeContent({
+        'world.yaml': WORLD,
+        'map.yaml': map,
+        '01-python-village/stage.yaml': STAGE,
+        '01-python-village/01-first-greeting.yaml': codeQuest(),
+      }),
+    ).join('\n');
+  const withWide = (wide: object) => ({
+    ...MAP,
+    layouts: { ...MAP.layouts, wide: { ...MAP.layouts.wide, ...wide } },
+  });
+
+  it('지도 밖 노드·모르는 키·없는 BGM 은 실패', () => {
+    expect(problemsWithMap(withWide({ nodes: [[1300, 600]] }))).toContain(
+      'layouts.wide.nodes[0]: 노드가 지도(1200×720) 밖에 있어요',
+    );
+    expect(problemsWithMap(withWide({ extra: 1 }))).toMatch(/extra/);
+    expect(problemsWithMap({ ...MAP, bgm: 'world9' })).toMatch(/bgm/);
   });
 });

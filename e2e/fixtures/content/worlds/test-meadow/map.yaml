@@ -1,0 +1,23 @@
+# 테스트 월드 지도: 스테이지 3개 = 레이아웃마다 노드 3개
+bgm: world2
+path: catmull_rom
+
+layouts:
+  wide:
+    width: 1000
+    height: 500
+    node_scale: 1
+    nodes:
+      - [200, 400]
+      - [500, 250]
+      - [800, 100]
+    decorations:
+      - { kind: tree, x: 100, y: 100 }
+  tall:
+    width: 400
+    height: 900
+    node_scale: 0.8
+    nodes:
+      - [120, 800]
+      - [280, 450]
+      - [200, 100]

@@ -14,6 +14,7 @@
 import { z } from 'zod/v4';
 
 import type { ValidationRule } from '@/lib/quest/validation';
+import { SOUND_MANIFEST, type BgmId } from '@/lib/sound/manifest';
 
 const text = z.string().min(1, '비어 있으면 안 돼요');
 /** 시작 코드: 프로젝트 단계처럼 빈 문자열도 허용 */
@@ -215,12 +216,15 @@ const slug = z
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, '영문 소문자·숫자·하이픈만 써요');
 
 /**
- * 월드 해제 규칙 (worlds.unlock_rule). 지금은 `open`(처음부터 열림)뿐입니다.
- * 2월드부터의 규칙(이전 월드 최종 프로젝트 완료 또는 실력 확인 퀴즈, §12-Q2)은 Phase 10 에서 union 에 더합니다.
- * 그 전까지 월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열립니다 (src/lib/world/stageOrder.ts).
+ * 월드 해제 규칙 (worlds.unlock_rule).
+ * - `open`: 처음부터 열림 (1월드)
+ * - `previous_world_cleared`: 이전 월드를 끝내면 열림 (§12-Q2·Q48). 지금 스테이지 잠금은 이 규칙과 같은 결과를
+ *   순서로 냄(월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열림, src/lib/world/stageOrder.ts).
+ *   "실력 확인 퀴즈"로 바로 여는 규칙은 Phase 10(P10-03)에서 union 에 더합니다.
  */
 export const WorldUnlockRuleSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('open') }),
+  z.strictObject({ type: z.literal('previous_world_cleared') }),
 ]);
 
 /**
@@ -249,6 +253,60 @@ export const StageSchema = z.strictObject({
   is_final: z.boolean(),
 });
 
+// ------------------------------------------------------------
+// 월드 지도 (map.yaml, P5-03). DB 에 쓰지 않고 content:build 가 src/lib/world/worlds.generated.ts 로 만듦
+// ------------------------------------------------------------
+
+const point = z.tuple([z.number().min(0), z.number().min(0)]);
+
+/** 지도 장식 (그림 종류는 지도 컴포넌트가 정함, P5-02) */
+export const MapDecorationSchema = z.strictObject({
+  kind: z.enum(['tree', 'mountains', 'waves', 'bird', 'boat']),
+  x: z.number(),
+  y: z.number(),
+  /** 크기 배율. 없으면 1 */
+  scale: z.number().positive().optional(),
+});
+
+/** 한 레이아웃: viewBox(0 0 width height) 좌표계. nodes[i] = i+1번 스테이지 중심 */
+export const MapLayoutSchema = z
+  .strictObject({
+    width: z.number().positive(),
+    height: z.number().positive(),
+    /** 노드 옆 랜드마크 그림 배율 (시안 WIDE 1, TALL 0.82) */
+    node_scale: z.number().positive(),
+    nodes: z.array(point),
+    decorations: z.array(MapDecorationSchema).optional(),
+  })
+  .superRefine((layout, ctx) => {
+    layout.nodes.forEach(([x, y], i) => {
+      if (x > layout.width || y > layout.height) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['nodes', i],
+          message: `노드가 지도(${layout.width}×${layout.height}) 밖에 있어요`,
+        });
+      }
+    });
+  });
+
+const BGM_IDS = Object.keys(SOUND_MANIFEST.bgm) as [BgmId, ...BgmId[]];
+
+/** map.yaml: 월드 지도 설정. 테마 키는 world.yaml 의 theme, 랜드마크는 stage.yaml 의 theme_name 을 씀 */
+export const WorldMapSchema = z.strictObject({
+  /** 월드 BGM id (src/lib/sound/manifest.ts) */
+  bgm: z.enum(BGM_IDS),
+  /** 노드 사이 길 모양. catmull_rom = 부드러운 손그림 곡선(시안 smooth), straight = 직선 */
+  path: z.enum(['catmull_rom', 'straight']),
+  /** 넓은 화면(가로 지도)과 좁은 화면(세로로 긴 지도). 노드 수는 둘 다 스테이지 수와 같아야 함 */
+  layouts: z.strictObject({
+    wide: MapLayoutSchema,
+    tall: MapLayoutSchema,
+  }),
+});
+
+export type WorldMapConfig = z.infer<typeof WorldMapSchema>;
+export type MapLayout = z.infer<typeof MapLayoutSchema>;
 export type World = z.infer<typeof WorldSchema>;
 export type WorldUnlockRule = z.infer<typeof WorldUnlockRuleSchema>;
 export type Stage = z.infer<typeof StageSchema>;

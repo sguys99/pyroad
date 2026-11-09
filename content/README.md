@@ -11,15 +11,18 @@
 ```
 content/
 └── worlds/
-    └── python-island/                 # 월드 slug (worlds.slug, P1-08)
-        ├── world.yaml
-        ├── 01-python-village/         # NN-<영문 슬러그>, NN = stage.yaml 의 order
-        │   ├── stage.yaml
-        │   ├── 01-first-greeting.yaml # NN-<영문 슬러그>.yaml, NN = 퀘스트 order
-        │   └── …
-        └── 07-project-kingdom/
-            ├── stage.yaml
-            └── 01-number-guessing-game.yaml
+    ├── python-island/                 # 월드 slug (worlds.slug, P1-08)
+    │   ├── world.yaml
+    │   ├── map.yaml                   # 지도 설정 (P5-03). 스테이지가 있는 월드는 필수
+    │   ├── 01-python-village/         # NN-<영문 슬러그>, NN = stage.yaml 의 order
+    │   │   ├── stage.yaml
+    │   │   ├── 01-first-greeting.yaml # NN-<영문 슬러그>.yaml, NN = 퀘스트 order
+    │   │   └── …
+    │   └── 07-project-kingdom/
+    │       ├── stage.yaml
+    │       └── 01-number-guessing-game.yaml
+    ├── code-sea/world.yaml            # 월드 2 "준비 중" (스테이지 없음, Q48)
+    └── maker-city/world.yaml          # 월드 3 "준비 중"
 ```
 
 - 이름은 영문 소문자·숫자·하이픈만 씁니다. 앞 두 자리 번호는 YAML의 `order`와 같아야 합니다(빌드가 확인).
@@ -34,12 +37,42 @@ content/
 |---|---|
 | `slug` | 디렉토리 이름과 같음. 예: `python-island` |
 | `order` | 월드 순서 |
-| `title` | 화면 이름. 예: `파이썬 섬` |
+| `title` | 화면 이름. 예: `파이썬 섬`. 랜딩·월드맵이 모두 여기서 읽으므로 가칭은 이 한 곳만 고칩니다 |
 | `theme` | 테마 키 (영문 소문자·밑줄) |
 | `description` | 소개 문장 |
-| `unlock_rule` | 월드 해제 규칙. 지금은 `{ type: open }`만 (2월드부터의 규칙은 Phase 10, §12-Q2) |
+| `unlock_rule` | 월드 해제 규칙. `{ type: open }`(처음부터 열림) 또는 `{ type: previous_world_cleared }`(이전 월드를 끝내면 열림, §12-Q2·Q48). 실력 확인 퀴즈 규칙은 P10-03 |
+
+스테이지 디렉토리가 없는 월드는 **"준비 중"** 표지가 됩니다(`ready: false`, 랜딩·월드 선택 화면). 스테이지를 넣으면 `map.yaml`도 함께 씁니다.
 
 빌드가 `worlds`에 `slug` 기준으로 업서트하고(id는 DB가 정함, 1월드는 00012가 만든 고정 id) 그 월드의 스테이지에 `stages.world_id`를 채웁니다(P1-08). 스테이지 순서는 (월드 `order`, 스테이지 `order`)이고, 월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열립니다(Phase 10 전까지).
+
+### map.yaml → 앱 지도 (DB 에 쓰지 않음, P5-03)
+
+월드 지도의 노드 좌표·길·장식입니다. 빌드가 `world.yaml`(이름·테마·해제 규칙)과 합쳐 `src/lib/world/worlds.generated.ts`를 만들고, 월드맵(`WorldMap`)이 그 값을 그대로 씁니다. **코드를 고치지 않고 월드 디렉토리만 더하면 지도가 나옵니다.**
+
+```yaml
+bgm: world1            # 월드 BGM id (src/lib/sound/manifest.ts 의 bgm 키)
+path: catmull_rom      # 노드를 잇는 길: catmull_rom(부드러운 곡선, 시안 smooth) | straight
+layouts:
+  wide:                # 넓은 화면(lg 이상): 가로 지도
+    width: 1200        # viewBox 0 0 width height
+    height: 720
+    node_scale: 1      # 노드 옆 랜드마크 그림 배율
+    nodes:             # i번째 = i+1번 스테이지 중심 [x, y]
+      - [170, 600]
+      - …
+    decorations:       # 선택. kind: tree | mountains | waves | bird | boat, scale 선택
+      - { kind: tree, x: 70, y: 430, scale: 1.2 }
+  tall:                # 좁은 화면: 세로로 긴 지도 (같은 키)
+    width: 400
+    height: 1180
+    …
+```
+
+- **빌드가 확인**: 두 레이아웃 모두 노드 수 = 스테이지 수, 노드가 `width × height` 안, 모르는 키 없음, 스테이지가 있는 월드에 `map.yaml`이 있음.
+- 테마 키는 `world.yaml`의 `theme`, 노드의 랜드마크 그림은 `stage.yaml`의 `theme_name`을 씁니다(따로 적지 않음).
+- 좌표를 정할 때는 확정 시안 `design/prototypes/src/final/World.tsx`의 `WIDE`·`TALL`을 참고합니다. 지금 노드 카드가 넓어서(P5-04 전) 양 끝 노드는 지도 가장자리에서 120 이상 떨어뜨립니다.
+- 테스트용 2번째 월드: `e2e/fixtures/content/worlds/test-meadow/`(스테이지 3개). 단위 테스트(`src/lib/world/__tests__/worldMapData.test.tsx`)가 `content/`에 이 디렉토리를 더해 지도가 나오는지 확인합니다.
 
 ### stage.yaml → `stages`
 
@@ -164,8 +197,8 @@ validation:
 ## 6. 명령
 
 ```bash
-npm run content:build              # 검사 + 생성: supabase/seed.sql (커밋), build/content/quests.json (git 제외)
-npm run content:build -- --check   # 생성하지 않고, supabase/seed.sql 이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사용)
+npm run content:build              # 검사 + 생성: supabase/seed.sql·src/lib/world/worlds.generated.ts (커밋), build/content/quests.json (git 제외)
+npm run content:build -- --check   # 생성하지 않고, 커밋하는 생성물이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사용)
 npm run content:compare            # 왕복 비교 (아래)
 npm run content:extract -- --stage 1   # seed → content/ YAML 추출 (이관용, --all, --force, --seed-rev)
 npm run test:content               # 정답 자동 검증 (Node Pyodide, 아래 "정답 자동 검증")
@@ -181,6 +214,7 @@ npx vitest run src/lib/content src/lib/quest   # 스키마·빌드·검증기 �
 | 파일 | 내용 | 커밋 |
 |---|---|---|
 | seed SQL (`supabase/seed.sql`) | 스테이지·`quests`(공개) 업서트 + `quest_answer_keys`(정답) 업서트. DML만 있고 멱등. 머리에 콘텐츠 해시. 값은 모두 한 줄 리터럴(줄바꿈이 있으면 `E'…\n…'`, jsonb는 한 줄 JSON)이라 SQL Editor 붙여넣기의 CRLF에 안전(B39) | **커밋** (`db reset`·RLS 테스트·운영 SQL Editor가 그대로 읽음, PR에서 SQL diff 리뷰, CI는 `--check`로 원본과 어긋남 검사). content/ 를 고친 커밋에 다시 만든 seed 를 함께 넣습니다 |
+| 월드 모듈 (`src/lib/world/worlds.generated.ts`) | 월드마다 `slug·order·title·theme·unlock_rule·ready·map`. 앱(월드맵·랜딩)이 import (P5-03). TS 인 까닭은 랜딩 글꼴 서브셋 수집기가 TS 모듈만 따라가기 때문 | **커밋** (`--check`·`content.test.ts`가 원본과 비교, prettier 제외) |
 | 검증 JSON (`build/content/quests.json`) | 퀘스트마다 `id, key, validation_type, expected_output, starter_code, solution_code, steps[]`(+ 있으면 `scenarios`) (P0-09 fixture 형태). `validation_type`·`expected_output`은 DB 저장 형태라 `validateResult`에 바로 넣음 | **커밋하지 않음** (원본에서 1초 안에 다시 만들고, 정답을 담은 파생물이라 diff 리뷰 가치가 없음) |
 
 `--check`는 커밋하는 seed만 비교합니다. 검증 JSON은 git에 없어 CI의 새 checkout에는 파일이 없기 때문입니다. `test:content`는 이 파일을 읽지 않고 같은 함수(`toCheckFixture`)로 메모리에서 만들어 씁니다(seed.sql도 쓰지 않음).

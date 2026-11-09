@@ -31,9 +31,9 @@ export type QuizKind =
   | 'parsons'
   | 'bug_hunt';
 
-/** worlds.unlock_rule. 지금은 open 뿐 (2월드 규칙 §12-Q2 는 Phase 10) */
+/** worlds.unlock_rule (원본 스키마 src/lib/content/schema.ts WorldUnlockRuleSchema, §12-Q2·Q48) */
 export interface WorldUnlockRule {
-  type: 'open';
+  type: 'open' | 'previous_world_cleared';
 }
 
 export type World = Omit<Tables<'worlds'>, 'unlock_rule'> & {

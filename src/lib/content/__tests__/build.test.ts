@@ -53,6 +53,7 @@ function tree(...stages: [typeof STAGE_1, Quest[]][]): ContentTree {
           description: '',
           unlock_rule: { type: 'open' },
         },
+        map: null,
         stages: stages.map(([stage, quests]) => ({
           file: 'stage.yaml',
           stage,
