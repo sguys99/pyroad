@@ -32,6 +32,13 @@
 .world-node {
   left: var(--tl);
   top: var(--tt);
+  --dx: var(--tdx);
+}
+/* 노드 크기 단위 (P5-04): --u = 지도 1단위(px, 지도 폭 기준 cqi), --ns = 랜드마크 배율. WorldMap이 레이아웃마다 넘긴다 */
+.world-map {
+  container-type: inline-size;
+  --u: var(--tu);
+  --ns: var(--tns);
 }
 .wm-art[data-layout='wide'] {
   display: none;
@@ -44,6 +51,9 @@
   .world-node {
     left: var(--wl);
     top: var(--wt);
+    --u: var(--wu);
+    --ns: var(--wns);
+    --dx: var(--wdx);
   }
   .wm-art[data-layout='wide'] {
     display: block;
@@ -208,4 +218,244 @@
   stroke-width: 1.6;
   stroke-dasharray: 10 14;
   opacity: 0.9;
+}
+
+/* ───────────── 스테이지 노드 (P5-04, StageNode.tsx). 시안 .f-node: 랜드마크(지도 그림) + 알약 이름표 + 별 합계 + 도장.
+   노드 원점(크기 0) = 랜드마크 바닥 가운데. 랜드마크 높이 ≈ 100단위 × 배율(--lm) */
+.wn {
+  position: absolute;
+  width: 0;
+  height: 0;
+  --s: 1;
+  --lm: calc(var(--u) * var(--ns) * var(--s));
+}
+.wn[data-boss] {
+  --s: 1.15; /* MapArt BOSS_SCALE */
+}
+/* 버튼 = 랜드마크 위쪽부터 이름표·별까지 한 덩어리 (터치 영역이 넉넉하다) */
+.wn-hit {
+  position: absolute;
+  left: 0;
+  top: calc(var(--lm) * -96);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: max(96px, calc(var(--lm) * 120));
+  padding: calc(var(--lm) * 96 - 4px) 4px 4px;
+  border: 0;
+  background: none;
+  transform: translateX(-50%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.wn-hit:focus-visible {
+  outline: none;
+}
+.wn-plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 3px 12px 3px 3px;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--elev-card);
+  font-weight: 700;
+  font-size: var(--text-small);
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.wn-hit:hover .wn-plate {
+  transform: translateY(-2px);
+}
+.wn-hit:focus-visible .wn-plate {
+  outline: 3px solid var(--secondary);
+  outline-offset: 3px;
+}
+.wn-no {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--surface);
+  font-size: var(--text-caption);
+}
+.wn-crown {
+  width: 18px;
+  height: 18px;
+  margin-right: -2px;
+  color: var(--accent-text);
+}
+.wn-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: var(--round-pill);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--text);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* 진행률 링: 번호 원 둘레 (진행 중만). 트랙은 옅게, 채운 쪽은 금색 */
+.wn-prog {
+  position: absolute;
+  inset: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+.wn-prog circle {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.wn-prog-track {
+  stroke: color-mix(in srgb, var(--on-primary) 35%, transparent);
+}
+.wn-prog-bar {
+  stroke: var(--accent);
+}
+
+/* 진행 중 = 지금 위치: 초록 이름표 */
+.wn[data-state='open'] .wn-plate,
+.wn[data-state='current'] .wn-plate {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--elev-pop);
+}
+.wn[data-state='open'] .wn-no,
+.wn[data-state='current'] .wn-no {
+  background: var(--on-primary);
+  color: var(--primary-text);
+}
+.wn[data-state='open'] .wn-crown,
+.wn[data-state='current'] .wn-crown {
+  color: var(--accent);
+}
+/* 보스: 금색 번호 원 + 금색 테 */
+.wn[data-boss] .wn-no {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.wn[data-boss] .wn-plate {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    var(--elev-card);
+}
+/* 잠김: 그림자 없는 옅은 면 + 흐린 글자 (text-muted / surface-2 = AA) */
+.wn[data-state='locked'] .wn-plate {
+  background: color-mix(in srgb, var(--surface-2) 94%, transparent);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+.wn[data-state='locked'] .wn-no {
+  background: var(--text-muted);
+  color: var(--surface);
+}
+.wn[data-state='locked'] .wn-meta {
+  color: var(--text-muted);
+}
+.wn[data-state='locked'][data-boss] .wn-plate {
+  box-shadow: 0 0 0 1.5px var(--line-strong);
+}
+.wn[data-state='locked'] .wn-crown {
+  color: var(--text-muted);
+}
+
+/* 지금 도전 중 랜드마크 둘레 점선 고리. 대기 루프(full·lite)에서 천천히 숨쉬고, minimal·동작 줄이기는 정지 */
+.wn-ring {
+  position: absolute;
+  left: calc(var(--lm) * -64);
+  top: calc(var(--lm) * -108);
+  width: calc(var(--lm) * 128);
+  height: calc(var(--lm) * 128);
+  border: 2px dashed var(--primary);
+  border-radius: 50%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+@keyframes wn-ring {
+  0%,
+  100% {
+    transform: scale(0.94) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.04) rotate(8deg);
+    opacity: 0.3;
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) .wn-ring {
+  animation: wn-ring 3s ease-in-out infinite;
+}
+
+/* 통과 도장: 랜드마크 왼쪽 위, 손으로 찍은 기울기(--rot) */
+.wn-stamp {
+  position: absolute;
+  left: calc(var(--lm) * -62);
+  top: calc(var(--lm) * -104);
+  display: grid;
+  place-items: center;
+  width: max(44px, calc(var(--lm) * 56));
+  height: max(44px, calc(var(--lm) * 56));
+  border: 2px solid var(--accent-text);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--accent-text);
+  font-size: var(--text-caption);
+  line-height: 1;
+  transform: rotate(var(--rot, -10deg));
+  pointer-events: none;
+}
+
+/* 지금 위치: 큰 파이뱀 + "지금 여기!" 칩. 노드 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽)에 선다 */
+.wn-here {
+  position: absolute;
+  left: calc(var(--dx) * var(--u) * 92);
+  top: calc(var(--u) * 6);
+  display: grid;
+  justify-items: center;
+  width: max-content;
+  transform: translate(-50%, -100%);
+}
+.wn-here svg {
+  display: block;
+  width: max(72px, calc(var(--u) * 116));
+  height: auto;
+}
+.wn-here-flag {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  padding: 4px 12px;
+  border-radius: var(--round-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--elev-pop);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+@container (min-width: 900px) {
+  .wn-plate {
+    min-height: 34px;
+    font-size: 1rem;
+  }
+  .wn-no {
+    width: 28px;
+    height: 28px;
+  }
 }

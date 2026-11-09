@@ -310,21 +310,40 @@ const LANDMARKS: Record<string, () => ReactNode> = {
   project_kingdom: Castle,
 };
 
+/** 보스(마지막) 스테이지 랜드마크 배율. 노드 이름표 자리도 같은 값(worldMap.css `--s`) */
+const BOSS_SCALE = 1.15;
+
+/** 보스 표시: 랜드마크 위 왕관 (어느 랜드마크든 위쪽 -112 근처) */
+function BossCrown() {
+  return (
+    <g transform="translate(0 -108)">
+      <F m="gold" d="M-18 0 L-22 -20 L-10 -10 L0 -26 L10 -10 L22 -20 L18 0 Z" />
+      <F m="roof" d="M-3 -9 h6 v6 h-6z" />
+    </g>
+  );
+}
+
 export function Landmark({
   theme,
   pencil,
+  boss,
 }: {
   theme: string;
   pencil?: boolean;
+  boss?: boolean;
 }) {
   const Body = LANDMARKS[theme];
   if (!Body) return null;
   return (
-    <g className={pencil ? 'wm-pencil' : undefined}>
+    <g
+      className={pencil ? 'wm-pencil' : undefined}
+      transform={boss ? `scale(${BOSS_SCALE})` : undefined}
+    >
       {!pencil && (
         <ellipse className="wm-shadow" cx="0" cy="2" rx="52" ry="9" />
       )}
       <Body />
+      {boss && <BossCrown />}
     </g>
   );
 }
@@ -360,8 +379,8 @@ export interface MapArtProps {
   layout: MapLayout;
   /** world.yaml theme */
   theme: string;
-  /** 스테이지 theme_name·잠김, 노드 순서대로 */
-  landmarks: ReadonlyArray<{ theme: string; locked: boolean }>;
+  /** 스테이지 theme_name·잠김·보스(is_final), 노드 순서대로. 랜드마크는 여기서만 그린다(노드는 이름표만, P5-04) */
+  landmarks: ReadonlyArray<{ theme: string; locked: boolean; boss?: boolean }>;
   /** 길 전체 · 남은 길(연필 점선). 지난 길(잉크)은 그리기 연출 때문에 children 으로 받는다 */
   route: { all: string; todo: string };
   children?: ReactNode;
@@ -406,6 +425,7 @@ export function MapArt({
               <Landmark
                 theme={landmarks[i].theme}
                 pencil={landmarks[i].locked}
+                boss={landmarks[i].boss}
               />
             </g>
           ) : null,

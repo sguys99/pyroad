@@ -138,6 +138,7 @@ Framer용 배열은 `EASE.<이름>`. 단계 보정은 `tierDuration(ms, budget)`
 | 월드맵 | 노드 `backdrop-blur-sm` | lite부터 꺼짐 (배경 알파 0.9~0.95라 대비 유지) |
 | 월드맵 (P5-02) | 지도 레이어 패럴랙스 | 먼 곳(바다·물결·배·새, 깊이 0.08)·중간(산·나무, 0.035) SVG 레이어만 스크롤 따라 transform(`.wm-par`, full만). 길·랜드마크·노드는 고정이라 노드 자리는 어긋나지 않음. 스크롤할 때만 rAF 1번(passive), 멈추면 0. 측정(개발 서버, CPU 4배 감속): 대기 메인 스레드 0.7~0.9%, 스크롤 rAF p95 18.5ms |
 | 월드맵 (P5-02) | 지난 길 그리기 | 잉크 길을 전체 길의 조각(`mapRoute`)으로 따로 그려 지금 노드에 정확히 닿음. full 1.5초 · lite 70% · minimal·동작 줄이기 즉시, 종이 점선은 그린 뒤 페이드 |
+| 월드맵 (P5-04) | 스테이지 노드 | 카드 빛 고리(`.stage-pulse`)·반짝임(`.stage-shimmer`)·`backdrop-blur` 대신 지금 노드 점선 고리 `wn-ring`(대기 루프, transform·opacity) + 파이뱀 `.mascot-bob`. 등장은 노드 → 파이뱀 차례(기존 단계 규칙). 도장·링은 정지 그림 |
 | 월드맵 (P5-02) | 물결·새·배 | 정지 그림만(클래스 `wm-wave`·`wm-bird`·`wm-boat` 자리), 반복 연출은 P5-09 |
 | 퀘스트 | 단계 표시 현재 단계 | Framer `repeat: Infinity` → `.step-pulse` |
 | 퀘스트 | Pyodide 로딩·실행 | 실측 판정 멈춤 |

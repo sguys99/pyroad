@@ -20,13 +20,13 @@ export const WORLDS: readonly WorldInfo[] = [
           "height": 720,
           "node_scale": 1,
           "nodes": [
-            [170, 600],
+            [130, 600],
             [330, 470],
             [540, 580],
             [660, 360],
             [880, 500],
             [960, 300],
-            [1040, 120]
+            [1100, 160]
           ],
           "decorations": [
             {
@@ -97,13 +97,13 @@ export const WORLDS: readonly WorldInfo[] = [
           "height": 1180,
           "node_scale": 0.82,
           "nodes": [
-            [130, 1080],
+            [104, 1080],
             [292, 930],
             [108, 790],
             [292, 640],
             [112, 495],
             [290, 350],
-            [180, 175]
+            [180, 200]
           ],
           "decorations": [
             {

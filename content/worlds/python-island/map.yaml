@@ -1,7 +1,7 @@
 # 월드 1 지도 설정 (P5-03). 작성법: content/README.md "map.yaml"
 # 좌표는 레이아웃의 viewBox(0 0 width height) 기준. nodes 의 i번째 = i+1번 스테이지 (스테이지 수와 같아야 함)
-# 출발점: 확정 시안 design/prototypes/src/final/World.tsx 의 WIDE·TALL. 지금 노드 카드가 넓어서(P5-04 전)
-# 양 끝 노드(wide 1·7번, tall 1번)만 지도 밖으로 나가지 않게 조금 안쪽으로 옮김
+# 확정 시안 design/prototypes/src/final/World.tsx 의 WIDE·TALL 그대로 (P5-04에서 노드가 작은 이름표가 되어 원래 값으로 되돌림).
+# 7번(보스)만 랜드마크가 1.15배 + 왕관이라 위가 잘리지 않게 조금 아래로 (wide 120 → 160, tall 175 → 200)
 
 bgm: world1
 path: catmull_rom
@@ -13,13 +13,13 @@ layouts:
     height: 720
     node_scale: 1
     nodes:
-      - [170, 600]
+      - [130, 600]
       - [330, 470]
       - [540, 580]
       - [660, 360]
       - [880, 500]
       - [960, 300]
-      - [1040, 120]
+      - [1100, 160]
     decorations:
       - { kind: waves, x: 110, y: 50 }
       - { kind: waves, x: 420, y: 26 }
@@ -39,13 +39,13 @@ layouts:
     height: 1180
     node_scale: 0.82
     nodes:
-      - [130, 1080]
+      - [104, 1080]
       - [292, 930]
       - [108, 790]
       - [292, 640]
       - [112, 495]
       - [290, 350]
-      - [180, 175]
+      - [180, 200]
     decorations:
       - { kind: waves, x: 50, y: 44 }
       - { kind: mountains, x: 20, y: 620 }

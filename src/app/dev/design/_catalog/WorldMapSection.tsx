@@ -2,6 +2,9 @@
 
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { WorldMap } from '@/components/world/WorldMap';
+import { StageNode } from '@/components/world/StageNode';
+import { Landmark } from '@/components/world/map/MapArt';
+import '@/components/world/map/worldMap.css';
 import type { WorldId } from '@/lib/design/tokens';
 import type { StageWithStatus } from '@/lib/types/database';
 import { WORLDS } from '@/lib/world/worlds';
@@ -31,9 +34,67 @@ const SAMPLE: StageWithStatus[] = STAGES.map(([title, theme], i) => ({
   completedQuestCount: i < 2 ? 6 : i === 2 ? 2 : 0,
   totalQuestCount: 6,
   firstIncompleteQuestId: null, // 견본이라 눌러도 퀘스트로 가지 않음
-  stars: 0,
+  stars: i < 2 ? 17 - i * 2 : i === 2 ? 5 : 0,
   maxStars: 18,
 }));
+
+// 노드 상태 5종 (P5-04): 잠김 · 열림(아직 0개) · 진행 중(링) · 통과(도장) · 보스(큰 랜드마크 + 왕관)
+const NODE_STATES: [label: string, stage: StageWithStatus][] = [
+  ['잠김', { ...SAMPLE[3] }],
+  [
+    '열림',
+    { ...SAMPLE[3], status: 'in_progress', completedQuestCount: 0, stars: 0 },
+  ],
+  ['진행 중 (링 2/6)', SAMPLE[2]],
+  ['통과', SAMPLE[1]],
+  [
+    '보스',
+    {
+      ...SAMPLE[6],
+      status: 'in_progress',
+      completedQuestCount: 4,
+      stars: 10,
+    },
+  ],
+];
+
+/** 노드 하나 + 그 랜드마크 (지도 대신 작은 종이 한 장). 지도 1단위 = 1px */
+function NodeTile({ stage }: { stage: StageWithStatus }) {
+  const boss = stage.is_final;
+  return (
+    // .wm 은 inline-size 컨테이너라 폭을 직접 줘야 한다
+    <div className="wm" style={{ width: 200 }}>
+      <div
+        className="world-map"
+        style={
+          {
+            '--tall-ratio': '200 / 250',
+            '--tu': 'calc(100cqi / 200)',
+            '--tns': 1,
+          } as React.CSSProperties
+        }
+      >
+        <div className="wm-art">
+          <svg className="wm-layer" viewBox="0 0 200 250" aria-hidden>
+            <g transform="translate(100 186)">
+              <Landmark
+                theme={stage.theme_name}
+                pencil={stage.status === 'locked'}
+                boss={boss}
+              />
+            </g>
+          </svg>
+        </div>
+        <div
+          className="world-node absolute"
+          style={{ '--tl': '50%', '--tt': '72%' } as React.CSSProperties}
+        >
+          <StageNode stage={stage} onOpen={() => {}} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function WorldMapSection() {
   const island = WORLDS.find((w) => w.map);
@@ -43,7 +104,7 @@ export function WorldMapSection() {
     <MotionProvider>
     <Section
       id="world-map"
-      kicker="월드 (P5-02)"
+      kicker="월드 (P5-02·P5-04)"
       title="월드 지도"
       description="두루마리 보물지도: 종이 결 바탕 + 깊이별 SVG 레이어(먼 곳·중간·길). 바탕 그림은 world.yaml theme, 장식은 map.yaml decorations, 랜드마크는 스테이지 theme_name으로 그려요. 지도 폭 900px부터 가로 지도, 그 아래는 세로로 긴 지도. 패럴랙스(스크롤)는 full만, lite·minimal·동작 줄이기는 정지 배경. 잠긴 곳은 연필 스케치."
     >
@@ -58,6 +119,22 @@ export function WorldMapSection() {
           theme={island.theme}
           world={island.order as WorldId}
         />
+      </Demo>
+      <Demo
+        label="스테이지 노드 상태 5종 (P5-04)"
+        note="랜드마크는 지도가 한 번만 그리고(잠김 = 연필 스케치), 노드는 버튼 + 알약 이름표 + 별 합계. 진행 중은 초록 이름표 + 번호 원 둘레 진행률 링 + 점선 고리(대기 루프 full·lite), 통과는 도장, 보스(is_final)는 큰 랜드마크 + 왕관 + 금색 번호. 잠긴 노드를 누르면 안내 쪽지"
+        data-testid="world-node-states"
+      >
+        <div className="flex flex-wrap gap-4">
+          {NODE_STATES.map(([label, stage]) => (
+            <figure key={label} className="grid justify-items-center gap-1">
+              <NodeTile stage={stage} />
+              <figcaption className="text-caption text-text-muted">
+                {label}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </Demo>
       <div className="grid gap-4 md:grid-cols-2">
         {WORLDS.filter((w) => !w.map).map((w) => (

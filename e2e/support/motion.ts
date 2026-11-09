@@ -39,6 +39,7 @@ export const IDLE_LOOPS = [
   'mascot-bob',
   'step-pulse',
   'stage-pulse',
+  'wn-ring',
   'char-blink-eye',
   'char-blink-highlight',
   'char-twinkle',

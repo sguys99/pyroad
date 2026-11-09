@@ -334,6 +334,26 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - 아이콘: `src/lib/pwa/iconArt.tsx` 한 벌(브랜드 초록 면 + 파이뱀 리그 정지 그림 + 언덕·금색 반짝이, 글자 없음)을 `next/og`로 빌드 때 PNG 생성. 파비콘 `/icon`(32, 얼굴만) · `/apple-icon`(180, 불투명) · manifest `/pwa/icon-192.v1.png`·`icon-512.v1.png`·`maskable-512.v1.png`(그림은 가운데 80% 원 안). 그림을 바꾸면 `PWA_ICON_VERSION`을 올린다.
 - 안내: 월드맵 쪽지 `InstallHint`(공통 토스트 + `action`, 서로 다른 날 3번째 방문부터, 닫으면 30일) · 설정 `InstallAppSection`(늘 있음). 안드로이드는 브라우저 설치 창(`beforeinstallprompt`, `InstallPromptCatcher`가 로그인 화면에서 잡음), iOS는 그림 안내 시트 `IosInstallGuide`(공유 → 홈 화면에 추가 → 추가). 데스크톱·이미 설치·앱 안 브라우저는 쪽지 없음. 판별은 `src/lib/pwa/install.ts`. 카탈로그 `#pwa`.
 
+## 13-2. 월드맵 스테이지 노드 `StageNode` · 지금 위치 `CurrentMarker` (P5-04)
+
+시안 `design/prototypes/src/final/World.tsx` `StageNode`·`.f-here`를 옮김. 코드 `src/components/world/StageNode.tsx`, 모양 `src/components/world/map/worldMap.css`(`.wn*`).
+
+- **랜드마크는 지도가 한 번만 그린다**: `MapArt` 길 레이어가 스테이지 `theme_name` 랜드마크를 그리고(잠김 = 연필 스케치, 열림 = 색), 노드는 그 위의 투명한 버튼 + 알약 이름표(번호 원 + 이름) + 별 합계(`stars`/`maxStars`) + 도장이다. 예전 카드 아이콘(`StageIllustration`·`illustrations/`)은 지웠다
+- **크기 단위**: 노드·도장·파이뱀은 지도 1단위(`--u` = `100cqi / 레이아웃 폭`, `.world-map`이 컨테이너)와 랜드마크 배율(`--ns` = `node_scale`, 보스는 `--s` 1.15)로 잡아 지도와 같이 커지고 작아진다. 글자는 고정(이름표 15px · 넓은 지도 16px, 별·잠김·칩 14px)
+- **상태**(`data-state`): `locked` 옅은 면 + `text-muted`(surface-2 위 AA) + "🔒 잠김" · `open` 진행 중인데 아직 0개 · `current` 진행 중 · `clear` 통과 도장(손으로 찍은 기울기). `open`·`current`는 초록 이름표 + 번호 원 둘레 **진행률 링**(완료 퀘스트/전체, 금색 호) + 랜드마크 둘레 점선 고리
+- **보스**(`is_final`, `data-boss`): 지도 랜드마크 1.15배 + 왕관(MapArt `BossCrown`), 이름표에 왕관 아이콘 + 금색 번호 원 + 금색 테. 데이터만 보고 정한다
+- **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(P5-05)에서 걷게 하려면 라이브 `PybaemRig`로 바꾼다
+- **누르기**: 노드 전체가 `<button>`(가로 96px 이상 · 랜드마크부터 별까지, 포커스는 이름표에 3px 링). `aria-label` = "3단계 조건의 갈림길, 도전 중, 지금 여기, 별 5/24, 퀘스트 2/8 완료"(보스는 "(보스 스테이지)"). 잠긴 노드는 `aria-disabled`라 포커스·탭이 되고 누르면 안내 쪽지("2단계를 통과하면 열려요"). 동작은 `WorldMap`의 `useOpenStage()` 한 곳 — P5-06 바텀시트는 여기만 바꾼다
+
+| 연출 | full | lite | minimal | 동작 줄이기 |
+|---|---|---|---|---|
+| 등장 (노드 → 파이뱀 차례) | 85% → 100% + 페이드, 0.1초 간격 | 70% 길이 | 페이드만 | 즉시 |
+| 파이뱀 통통 `.mascot-bob` | 돎 | 돎 | 정지 | 정지 |
+| 지금 노드 고리 `wn-ring` (transform·opacity) | 돎 | 돎 | 정지(옅은 고리만) | 정지 |
+| 이름표 올려놓기 | 2px 뜸 | 같음 | 같음 | 같음(전환 140ms) |
+
+**대표 상태**: 잠김 · 열림 · 진행 중(링) · 통과(도장) · 보스 — 카탈로그 "월드 지도" 절 `world-node-states`, 지도 견본은 1·2 통과 · 3 진행 중.
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
@@ -344,7 +364,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
 | Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05) |
-| Toast | 잠긴 스테이지 안내(B38) |
+| Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
 | ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |

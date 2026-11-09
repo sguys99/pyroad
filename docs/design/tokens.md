@@ -169,7 +169,6 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | `src/lib/design/tokens.ts` | color · font | 토큰 원본 |
 | `src/components/characters/**` | color · size | 캐릭터 고유색(리그 팔레트 `PYBAEM_PALETTES` 등, 레거시 캐릭터 SVG, 감정 후광 `PYBAEM_HALO`)과 그림 속 글자. 파이뱀 몸 `#9CCB80`·외곽선 `#5F804E`은 토큰과 별개. 리그 B 바닥 그림자만 `lineStrong`과 같은 값이고 테스트가 확인한다 |
 | `src/lib/avatar/skins.ts` | color | 파이뱀 스킨 6색(공개 아바타, P3-13·§12-Q34). 리그 팔레트 덮어쓰기라 캐릭터 고유색과 같은 성격 |
-| `src/components/world/illustrations/**` | color · size | 월드 일러스트 원화. Phase 5 월드맵 개편에서 월드 틴트 + 면 색의 진한 톤 선으로 다시 그린다 |
 | `src/lib/motion/**` | motion | 모션 토큰 원본·연출 단계표 |
 | `src/lib/celebration/**` | motion | 축하 시퀀서·컨페티 박자표(ms 타임라인). 색은 토큰 import |
 | 줄 주석 `// tokens-allow: <이유>` (그 줄 또는 바로 윗줄) | 전부 | 브랜드 가이드 색·외부가 정한 색. 이유를 꼭 쓴다. 지금: 소셜 로그인 로고 SVG 색(`src/components/auth/brandMarks.tsx`: 카카오 심볼 `#000000`, 네이버 N `#FFFFFF`, Google G 4색, P3-05) |

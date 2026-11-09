@@ -2,7 +2,7 @@
 -- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.
 -- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).
 -- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.
--- 콘텐츠 해시: f10ba6dae74d8c00
+-- 콘텐츠 해시: 2918b77369b5e5ec
 -- 월드 3 · 스테이지 7 · 퀘스트 44 · 정답 행 44 (solution_code 43 + 프로젝트 단계 5)
 --
 -- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).

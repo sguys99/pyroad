@@ -77,10 +77,11 @@ test.describe('앱 화면 연출 단계 대체 (P2-12)', () => {
       ).toBeVisible();
       const world = await check(page, mode, '월드맵');
       if (mode.tier === 'full' && mode.reduced === 'off') {
-        // 검사가 실제로 무언가를 잡는지: 구름(앰비언트)·현재 스테이지 통통(대기 루프)·노드 흐림
+        // 검사가 실제로 무언가를 잡는지: 구름(앰비언트)·파이뱀 통통·지금 노드 고리(대기 루프). 노드 이름표는 흐림 없음(P5-04)
         expect(world.names.some((n) => AMBIENT.includes(n))).toBe(true);
-        expect(world.names.some((n) => IDLE_LOOPS.includes(n))).toBe(true);
-        expect(world.blurred).toBeGreaterThan(0);
+        expect(world.names).toEqual(
+          expect.arrayContaining(['mascot-bob', 'wn-ring']),
+        );
       }
       if (mode.tier === 'lite' && mode.reduced === 'off') {
         expect(world.names.filter((n) => AMBIENT.includes(n))).toEqual([]);

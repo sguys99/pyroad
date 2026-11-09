@@ -1,21 +1,28 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { m, type Variants } from 'framer-motion';
+import { Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import type { WorldId } from '@/lib/design/tokens';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { EASE, sec } from '@/lib/motion/tokens';
-import { StageNode } from './StageNode';
+import { CurrentMarker, StageNode } from './StageNode';
 import { FloatingDecorations } from './FloatingDecorations';
 import { MapArt, type LayoutName } from './map/MapArt';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { ToastViewport, useToastQueue } from '@/components/ui/toast';
+import { useSfx } from '@/components/providers/SoundProvider';
 import type { WorldMapConfig } from '@/lib/content/schema';
 import { mapRoute, nodePercent } from '@/lib/world/worlds';
 import './map/worldMap.css';
 
-/** i번째 노드 자리: 레이아웃마다 CSS 변수로 넘기고 .world-node(worldMap.css)가 지도 폭에 맞는 쪽을 씀 */
+/**
+ * i번째 노드 자리: 레이아웃마다 CSS 변수로 넘기고 .world-node(worldMap.css)가 지도 폭에 맞는 쪽을 씀.
+ * --wdx·--tdx: 지금 위치 파이뱀이 노드의 어느 쪽에 설지(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽)
+ */
 function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
   const { wide, tall } = map.layouts;
   const w = nodePercent(wide, wide.nodes[i]);
@@ -25,7 +32,32 @@ function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
     '--wt': w.top,
     '--tl': t.left,
     '--tt': t.top,
+    '--wdx': -1,
+    '--tdx': tall.nodes[i][0] < tall.width / 2 ? 1 : -1,
   } as React.CSSProperties;
+}
+
+/**
+ * 노드를 눌렀을 때 (한 곳에 모음 — 스테이지 바텀시트 P5-06은 여기만 바꾼다).
+ * 열린 스테이지는 첫 미완료 퀘스트로, 잠긴 스테이지는 안내 쪽지
+ */
+function useOpenStage() {
+  const router = useRouter();
+  const play = useSfx();
+  const { toasts, show, dismiss } = useToastQueue(1);
+  const open = (stage: StageWithStatus) => {
+    if (stage.status === 'locked') {
+      show(`${stage.order - 1}단계를 통과하면 열려요`, {
+        tone: 'warn',
+        icon: <Lock className="size-4" />,
+      });
+      return;
+    }
+    if (!stage.firstIncompleteQuestId) return;
+    play('tap');
+    router.push(`/quest/${stage.firstIncompleteQuestId}`);
+  };
+  return { open, toasts, dismiss };
 }
 
 /** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
@@ -114,6 +146,10 @@ export function WorldMap({
   const { budget } = useMotionTier();
   const { container, item } = nodeVariants(budget);
   const box = useRef<HTMLDivElement>(null);
+  const { open, toasts, dismiss } = useOpenStage();
+  // 안내 쪽지는 fixed라 transform이 걸린 페이지 틀(PageTransition) 밖, body에 둔다
+  const [portal, setPortal] = useState<HTMLElement | null>(null);
+  useEffect(() => setPortal(document.body), []);
   const sorted = [...stages].sort((a, b) => a.order - b.order);
 
   const inProgressIndex = sorted.findIndex((s) => s.status === 'in_progress');
@@ -125,6 +161,7 @@ export function WorldMap({
   const landmarks = sorted.map((s) => ({
     theme: s.theme_name,
     locked: s.status === 'locked',
+    boss: s.is_final,
   }));
 
   useMapParallax(box, budget.parallax);
@@ -194,6 +231,11 @@ export function WorldMap({
           {
             '--wide-ratio': `${wide.width} / ${wide.height}`,
             '--tall-ratio': `${tall.width} / ${tall.height}`,
+            // 지도 1단위(px) · 랜드마크 배율: 노드·도장·파이뱀 크기를 랜드마크와 같이 맞춘다 (worldMap.css)
+            '--wu': `calc(100cqi / ${wide.width})`,
+            '--tu': `calc(100cqi / ${tall.width})`,
+            '--wns': wide.node_scale,
+            '--tns': tall.node_scale,
           } as React.CSSProperties
         }
       >
@@ -207,27 +249,7 @@ export function WorldMap({
         {/* 앰비언트 구름·나뭇잎 (full만). 지도 그림의 반복 연출은 P5-09 */}
         <FloatingDecorations />
 
-        {/* 진행 중 스테이지의 파이뱀. 통통은 CSS 대기 루프(.mascot-bob, full·lite, §2.10) */}
-        {inProgressIndex >= 0 && (
-          <div
-            className="world-node absolute z-20 pointer-events-none"
-            style={{
-              ...nodeVars(map, inProgressIndex),
-              // 노드 카드 위쪽 가장자리(카드 높이의 절반쯤) 위에 올라앉게
-              transform: 'translate(-50%, calc(-100% - 2.25rem))',
-            }}
-          >
-            <div className="mascot-bob">
-              <CharacterAvatar
-                character="pybaem"
-                expression="happy"
-                size="sm"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Stage nodes */}
+        {/* 스테이지 노드 + 지금 위치 (차례로 등장, 파이뱀은 마지막) */}
         <m.div
           className="absolute inset-0"
           variants={container}
@@ -239,15 +261,29 @@ export function WorldMap({
               key={stage.id}
               className="world-node absolute z-10"
               data-current={index === inProgressIndex || undefined}
-              // 노드 중심을 좌표에 맞춤. transform 문자열은 등장 variants 의 scale 이 덮어써서 x·y 로 줌
-              style={{ ...nodeVars(map, index), x: '-50%', y: '-50%' }}
+              // 크기 0인 점(랜드마크 바닥 가운데). 등장 scale 도 이 점을 중심으로
+              style={nodeVars(map, index)}
               variants={item}
             >
-              <StageNode stage={stage} />
+              <StageNode stage={stage} onOpen={open} />
             </m.div>
           ))}
+          {inProgressIndex >= 0 && (
+            <m.div
+              className="world-node absolute z-20 pointer-events-none"
+              style={nodeVars(map, inProgressIndex)}
+              variants={item}
+            >
+              <CurrentMarker />
+            </m.div>
+          )}
         </m.div>
       </div>
+      {portal &&
+        createPortal(
+          <ToastViewport toasts={toasts} onDismiss={dismiss} />,
+          portal,
+        )}
     </div>
   );
 }
