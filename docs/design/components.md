@@ -120,6 +120,7 @@
 | `footer` | 버튼 줄 (모바일 세로 역순) |
 | `closeLabel` · `showClose` | 오른쪽 위 48px 닫기 버튼 (기본 "닫기") |
 | `initialFocus` | 처음 포커스 (기본 첫 포커스 가능한 요소) |
+| `finalFocus` | 닫은 뒤 포커스 (기본: 열기 전 포커스 요소). 주소로 열린 겹창처럼 연 버튼이 없을 때 준다 (P5-06 스테이지 시트 → 노드) |
 | `closeOnBack` | 기기·브라우저 뒤로 가기로 닫기 (P4-09, `use-back-to-close.ts`): 열면 같은 주소로 기록 항목 하나(지금 `history.state` 복사), 뒤로 가기면 닫히고 화면은 그대로, 다른 방법으로 닫으면 그 항목을 거둠. 랜딩 로그인 시트가 켬 |
 | `wide` (Sheet) | 넓은 화면 45rem |
 
@@ -338,12 +339,12 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 시안 `design/prototypes/src/final/World.tsx` `StageNode`·`.f-here`를 옮김. 코드 `src/components/world/StageNode.tsx`, 모양 `src/components/world/map/worldMap.css`(`.wn*`).
 
-- **랜드마크는 지도가 한 번만 그린다**: `MapArt` 길 레이어가 스테이지 `theme_name` 랜드마크를 그리고(잠김 = 연필 스케치, 열림 = 색), 노드는 그 위의 투명한 버튼 + 알약 이름표(번호 원 + 이름) + 별 합계(`stars`/`maxStars`) + 도장이다. 예전 카드 아이콘(`StageIllustration`·`illustrations/`)은 지웠다
+- **랜드마크는 지도가 한 번만 그린다**: `MapArt` 길 레이어가 스테이지 `theme_name` 랜드마크를 그리고(잠김 = 연필 스케치, 열림 = 색), 노드는 그 위의 투명한 버튼 + 알약 이름표(번호 원 + 이름) + 별 합계(`stars`/`maxStars`) + 도장이다. **별이 기록되기 전(Q51, `SHOW_STARS = false`)에는 별 대신 완료 퀘스트 수("3/7", 통과면 초록 체크)**. 예전 카드 아이콘(`StageIllustration`·`illustrations/`)은 지웠다
 - **크기 단위**: 노드·도장·파이뱀은 지도 1단위(`--u` = `100cqi / 레이아웃 폭`, `.world-map`이 컨테이너)와 랜드마크 배율(`--ns` = `node_scale`, 보스는 `--s` 1.15)로 잡아 지도와 같이 커지고 작아진다. 글자는 고정(이름표 15px · 넓은 지도 16px, 별·잠김·칩 14px)
 - **상태**(`data-state`): `locked` 옅은 면 + `text-muted`(surface-2 위 AA) + "🔒 잠김" · `open` 진행 중인데 아직 0개 · `current` 진행 중 · `clear` 통과 도장(손으로 찍은 기울기). `open`·`current`는 초록 이름표 + 번호 원 둘레 **진행률 링**(완료 퀘스트/전체, 금색 호) + 랜드마크 둘레 점선 고리
 - **보스**(`is_final`, `data-boss`): 지도 랜드마크 1.15배 + 왕관(MapArt `BossCrown`), 이름표에 왕관 아이콘 + 금색 번호 원 + 금색 테. 데이터만 보고 정한다
 - **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(P5-05)에서 걷게 하려면 라이브 `PybaemRig`로 바꾼다
-- **누르기**: 노드 전체가 `<button>`(가로 96px 이상 · 랜드마크부터 별까지, 포커스는 이름표에 3px 링). `aria-label` = "3단계 조건의 갈림길, 도전 중, 지금 여기, 별 5/24, 퀘스트 2/8 완료"(보스는 "(보스 스테이지)"). 잠긴 노드는 `aria-disabled`라 포커스·탭이 되고 누르면 안내 쪽지("2단계를 통과하면 열려요"). 동작은 `WorldMap`의 `useOpenStage()` 한 곳 — P5-06 바텀시트는 여기만 바꾼다
+- **누르기**: 노드 전체가 `<button>`(가로 96px 이상 · 랜드마크부터 별까지, 포커스는 이름표에 3px 링). `aria-label` = "3단계 조건의 갈림길, 도전 중, 지금 여기, 퀘스트 2/8 완료"(SHOW_STARS면 "별 5/24" 추가)(보스는 "(보스 스테이지)"). 잠긴 노드는 `aria-disabled`라 포커스·탭이 되고 누르면 안내 쪽지("2단계를 통과하면 열려요"). 동작은 `WorldMap`의 `useOpenStage()` 한 곳 — 열린 노드는 차례 시트(13-3)
 
 | 연출 | full | lite | minimal | 동작 줄이기 |
 |---|---|---|---|---|
@@ -354,6 +355,24 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 **대표 상태**: 잠김 · 열림 · 진행 중(링) · 통과(도장) · 보스 — 카탈로그 "월드 지도" 절 `world-node-states`, 지도 견본은 1·2 통과 · 3 진행 중.
 
+## 13-3. 스테이지 차례 시트 `StageSheet` (P5-06)
+
+시안 `World.tsx` `StageSheet`(#stage, `.f-toc*`)를 옮김. 코드 `src/components/world/StageSheet.tsx`, 모양 `stageSheet.css`(`.ss*`). 틀은 공통 `Sheet wide`(768px 미만 바텀시트 + 손잡이, 이상 가운데 대화 상자).
+
+- **넓은 화면은 책 한 쪽**: 종이 결(`paper-fiber`) + 왼쪽 묶음 쪽 그늘. 머리는 랜드마크 그림(지도와 같은 `Landmark`, 재질은 `.wm`·`.wm-art` 규칙) 왼쪽 + "N단계 · 지금 모험 중/통과한 곳" + 제목(대화 상자 이름) + 설명
+- **진행 요약**: "퀘스트 2/7 완료" + `ProgressBar sm`. `SHOW_STARS`(Q51)면 별 합계도
+- **차례**: 퀘스트마다 줄 전체가 `<Link>`(56px 이상). 번호 원(완료면 체크) · 제목 · 유형 태그(코드 `Code2` · 퀴즈 `MessageCircleQuestion` · 보스 `Crown` — 보스는 `quest_type: boss` 또는 마지막 스테이지의 마지막 퀘스트) · 상태 태그(완료 · 지금 차례 · 하는 중 · 아직) · `is_mobile_friendly`면 "휴대폰 추천"(768 미만에서 진한 칩, 이상은 옅게). 끝: 완료 = "다시 하기"(SHOW_STARS면 별 0~3도), 첫 미완료 = 초록 "이어하기/시작!"(줄도 초록 면 + 왼쪽 띠, `aria-current="step"`), 나머지 = 화살표. 열린 스테이지 안 퀘스트는 서버 가드(B38, 스테이지 단위)상 모두 열리므로 건너뛰어 열 수 있다
+- **주 버튼**: 첫 미완료 퀘스트 "N번 퀘스트 시작하기/이어하기"(`stage-sheet-start`), 시트 아래에 붙어(sticky) 차례가 길어도 보인다. 다 끝낸 스테이지는 없음
+- **열기·닫기**(`WorldMap` `useOpenStage`): 열면 `?stage=<id>`를 `history.pushState`로 남긴다(서버 렌더 없음). 기기 뒤로 가기 = 닫기, 시트에서 퀘스트로 갔다 뒤로 오면 시트가 다시 열려 있음. 닫기 버튼·Esc·덮개로 닫으면 이 화면이 쌓은 항목은 `history.back()`, 주소로 열린 경우는 `replaceState`로 지움. 닫으면 그 노드로 포커스(`finalFocus`). 잠긴 노드는 시트 대신 안내 쪽지. `questsByStage`를 안 주면(카탈로그 틴트 견본) 열지 않음
+- 효과음 없음(탭 소리는 P5-11)
+
+| 연출 | full | lite | minimal | 동작 줄이기 |
+|---|---|---|---|---|
+| 시트 | 공통 Sheet와 같음 (스프링으로 올라옴 / 기울어 떠오름) | 220ms | 페이드 | 즉시 |
+| 차례 줄 등장 `ss-in` (transform·opacity, 한 번) | body 스프링, 45ms 간격 | 220ms, 25ms 간격 | 페이드 | 없음 |
+
+**대표 상태**: 진행 중(완료 2 · 지금 차례 · 하는 중 · 퀴즈 · 휴대폰 추천) · 통과(모두 다시 하기) · 보스 스테이지 — 카탈로그 "월드 지도" 절 `stage-sheet-demo`, 지도 견본의 열린 노드를 눌러도 뜸.
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
@@ -363,10 +382,10 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 | Card | 월드맵 프로필 요약, 프로필 카드 4개, 계정 관리 |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
-| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05) |
+| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06) |
 | Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
-| ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률 |
+| ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률, 스테이지 차례 시트 진행 요약 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |
 | SpeechBubble | 튜터 대사·스트리밍·생각 중 |
 | RewardIcon | 황금키 버튼·남은 개수, 황금키 확인 카드 |

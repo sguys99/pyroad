@@ -15,7 +15,8 @@ import { User, MessageSquare, Bell } from 'lucide-react';
 import type { WorldId } from '@/lib/design/tokens';
 
 interface Props {
-  // notice=stage-locked: 잠긴 스테이지의 퀘스트를 URL 로 열어 돌아옴 (B38, 퀘스트 페이지 가드)
+  // notice=stage-locked: 잠긴 스테이지의 퀘스트를 URL 로 열어 돌아옴 (B38, 퀘스트 페이지 가드).
+  // stage=<id>(열린 차례 시트, P5-06)는 WorldMap 이 브라우저에서만 읽는다
   searchParams: Promise<{ notice?: string | string[] }>;
 }
 
@@ -82,6 +83,7 @@ export default async function WorldPage({ searchParams }: Props) {
             map={currentMap}
             theme={current.world.theme}
             world={current.world.order as WorldId}
+            questsByStage={data.questsByStage}
             scrollToCurrent
           />
         )}

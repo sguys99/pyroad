@@ -64,6 +64,18 @@ export function stageButton(page: Page, stageTitle: string): Locator {
   return page.getByRole('button', { name: new RegExp(stageTitle) });
 }
 
+/** 스테이지 노드를 눌러 차례 시트를 연다 (P5-06). 주소에 ?stage= 가 남는다 */
+export async function openStageSheet(
+  page: Page,
+  stageTitle: string,
+): Promise<Locator> {
+  await stageButton(page, stageTitle).click();
+  const sheet = page.getByTestId('stage-sheet');
+  await expect(sheet).toBeVisible();
+  await expect(page).toHaveURL(/[?&]stage=/);
+  return sheet;
+}
+
 /**
  * 축하 카드 하나를 CTA 로 넘긴다. 카드 위에 마우스를 올려 자동 넘김을 멈추고,
  * 등장 직후(MIN_DWELL_MS)에는 넘기기가 무시되므로 카드가 사라질 때까지 다시 누른다

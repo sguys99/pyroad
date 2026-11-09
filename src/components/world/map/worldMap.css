@@ -459,3 +459,8 @@
     height: 28px;
   }
 }
+
+/* 통과 노드의 완료 체크 (별 대신 퀘스트 수, Q51) */
+.wn-check {
+  color: var(--success);
+}

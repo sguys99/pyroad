@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { m, type Variants } from 'framer-motion';
 import { Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
@@ -14,7 +14,8 @@ import { CurrentMarker, StageNode } from './StageNode';
 import { FloatingDecorations } from './FloatingDecorations';
 import { MapArt, type LayoutName } from './map/MapArt';
 import { ToastViewport, useToastQueue } from '@/components/ui/toast';
-import { useSfx } from '@/components/providers/SoundProvider';
+import { StageSheet } from './StageSheet';
+import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
 import { mapRoute, nodePercent } from '@/lib/world/worlds';
 import './map/worldMap.css';
@@ -38,13 +39,27 @@ function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
 }
 
 /**
- * 노드를 눌렀을 때 (한 곳에 모음 — 스테이지 바텀시트 P5-06은 여기만 바꾼다).
- * 열린 스테이지는 첫 미완료 퀘스트로, 잠긴 스테이지는 안내 쪽지
+ * 노드를 눌렀을 때 (한 곳에 모음). 열린 스테이지는 차례 시트(P5-06), 잠긴 스테이지는 안내 쪽지.
+ * 열린 시트는 주소 `?stage=<id>`에 남긴다: 기기 뒤로 가기로 닫히고, 시트에서 퀘스트로 갔다 돌아오면 시트가 다시 열려 있다.
+ * 주소는 history.pushState로만 바꿔(Next가 useSearchParams에 맞춤) 서버 렌더를 다시 하지 않는다.
+ * `questsByStage`가 없으면(카탈로그 틴트 견본) 열린 노드를 눌러도 아무것도 하지 않는다
  */
-function useOpenStage() {
-  const router = useRouter();
-  const play = useSfx();
+function useOpenStage(
+  stages: StageWithStatus[],
+  questsByStage?: Record<string, StageQuestItem[]>,
+  world?: WorldId,
+) {
+  const params = useSearchParams();
   const { toasts, show, dismiss } = useToastQueue(1);
+  // 이 화면에서 쌓은 기록 항목이면 닫을 때 거둔다(뒤로 가기를 한 번 더 눌러야 떠나는 일이 없게)
+  const pushed = useRef(false);
+  const id = questsByStage ? params.get('stage') : null;
+  const current =
+    stages.find((s) => s.id === id && s.status !== 'locked') ?? null;
+  // 닫히는 연출 동안 내용이 남게 마지막 스테이지를 들고 있는다
+  const [shown, setShown] = useState(current);
+  if (current && current !== shown) setShown(current);
+
   const open = (stage: StageWithStatus) => {
     if (stage.status === 'locked') {
       show(`${stage.order - 1}단계를 통과하면 열려요`, {
@@ -53,11 +68,38 @@ function useOpenStage() {
       });
       return;
     }
-    if (!stage.firstIncompleteQuestId) return;
-    play('tap');
-    router.push(`/quest/${stage.firstIncompleteQuestId}`);
+    if (!questsByStage) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('stage', stage.id);
+    window.history.pushState(null, '', url);
+    pushed.current = true;
   };
-  return { open, toasts, dismiss };
+  const close = () => {
+    if (pushed.current) {
+      pushed.current = false;
+      window.history.back();
+      return;
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('stage');
+    window.history.replaceState(null, '', url);
+  };
+  const sheet = (
+    <StageSheet
+      stage={shown}
+      quests={(shown && questsByStage?.[shown.id]) || []}
+      open={!!current}
+      world={world}
+      onOpenChange={(next) => !next && close()}
+      // 주소로 열린 시트(퀘스트에서 돌아옴)도 닫으면 그 노드로 포커스
+      finalFocus={() =>
+        document.querySelector<HTMLElement>(
+          `[data-stage-id="${shown?.id}"] .wn-hit`,
+        )
+      }
+    />
+  );
+  return { open, sheet, toasts, dismiss };
 }
 
 /** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
@@ -131,6 +173,8 @@ interface WorldMapProps {
   theme?: string;
   /** 월드 번호 → data-world (지도 틴트) */
   world?: WorldId;
+  /** 스테이지 id → 퀘스트 목록 (loadWorldMapData). 있으면 열린 노드를 눌러 차례 시트를 연다 (P5-06) */
+  questsByStage?: Record<string, StageQuestItem[]>;
   /** 처음 열 때 지금 스테이지가 화면 밖이면 그쪽으로 스크롤 (세로로 긴 모바일 지도). 월드맵 페이지만 */
   scrollToCurrent?: boolean;
 }
@@ -140,13 +184,18 @@ export function WorldMap({
   map,
   theme = '',
   world,
+  questsByStage,
   scrollToCurrent,
 }: WorldMapProps) {
   const { wide, tall } = map.layouts;
   const { budget } = useMotionTier();
   const { container, item } = nodeVariants(budget);
   const box = useRef<HTMLDivElement>(null);
-  const { open, toasts, dismiss } = useOpenStage();
+  const { open, sheet, toasts, dismiss } = useOpenStage(
+    stages,
+    questsByStage,
+    world,
+  );
   // 안내 쪽지는 fixed라 transform이 걸린 페이지 틀(PageTransition) 밖, body에 둔다
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   useEffect(() => setPortal(document.body), []);
@@ -279,6 +328,7 @@ export function WorldMap({
           )}
         </m.div>
       </div>
+      {sheet}
       {portal &&
         createPortal(
           <ToastViewport toasts={toasts} onDismiss={dismiss} />,

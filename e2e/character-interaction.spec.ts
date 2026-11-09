@@ -1,6 +1,11 @@
 import { test, expect } from './support/test';
 import { stage } from './support/content';
-import { questHeader, runCode, stageButton } from './support/quest';
+import {
+  openStageSheet,
+  questHeader,
+  runCode,
+  stageButton,
+} from './support/quest';
 
 const stage1 = stage(1);
 const quest = stage1.quests[0];
@@ -9,7 +14,8 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
   test.beforeEach(async ({ page }) => {
     // 월드맵에서 첫 번째 접근 가능한 퀘스트로 진입
     await page.goto('/world');
-    await stageButton(page, stage1.title).click();
+    await openStageSheet(page, stage1.title);
+    await page.getByTestId('stage-sheet-start').click();
     await expect(page).toHaveURL(new RegExp(`/quest/${quest.id}$`));
   });
 

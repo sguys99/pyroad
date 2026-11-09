@@ -1,6 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { MotionProvider } from '@/components/providers/MotionProvider';
+import { Button } from '@/components/ui/button';
+import { StageSheet } from '@/components/world/StageSheet';
+import type { StageQuestItem } from '@/lib/world/mapData';
 import { WorldMap } from '@/components/world/WorldMap';
 import { StageNode } from '@/components/world/StageNode';
 import { Landmark } from '@/components/world/map/MapArt';
@@ -57,6 +61,64 @@ const NODE_STATES: [label: string, stage: StageWithStatus][] = [
     },
   ],
 ];
+
+// 차례 시트 견본 퀘스트 (P5-06): 완료 2 · 하는 중 1 · 아직, 퀴즈·휴대폰 추천 섞음. 보스 스테이지는 마지막 퀘스트가 보스
+const QUEST_TITLES = [
+  'if로 길 고르기',
+  '참과 거짓',
+  'else 문 열기',
+  '비교 퀴즈',
+  'elif 여러 갈래',
+  '조건 합치기',
+];
+const SAMPLE_QUESTS: Record<string, StageQuestItem[]> = Object.fromEntries(
+  SAMPLE.map((stage, si) => [
+    stage.id,
+    QUEST_TITLES.map((title, i) => ({
+      id: `${stage.id}-q${i + 1}`,
+      order: i + 1,
+      title,
+      quest_type: i === 3 ? 'quiz' : 'code',
+      is_mobile_friendly: i === 3,
+      status:
+        si < 2 || i < 2 ? 'completed' : si === 2 && i === 2 ? 'in_progress' : null,
+      best_stars: si < 2 || i < 2 ? 3 - (i % 2) : 0,
+    })),
+  ]),
+);
+const BOSS_STAGE: StageWithStatus = {
+  ...SAMPLE[6],
+  status: 'in_progress',
+  completedQuestCount: 0,
+  stars: 0,
+  description: '배운 것을 모두 모아 숫자 맞히기 게임을 만들어요.',
+};
+
+/** 시트만 따로 열어 보기 (주소를 바꾸지 않음) */
+function SheetPreview({
+  label,
+  stage,
+  quests,
+}: {
+  label: string;
+  stage: StageWithStatus;
+  quests: StageQuestItem[];
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button variant="secondary" sfx={false} onClick={() => setOpen(true)}>
+        {label}
+      </Button>
+      <StageSheet
+        stage={stage}
+        quests={quests}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
+  );
+}
 
 /** 노드 하나 + 그 랜드마크 (지도 대신 작은 종이 한 장). 지도 1단위 = 1px */
 function NodeTile({ stage }: { stage: StageWithStatus }) {
@@ -118,7 +180,41 @@ export function WorldMapSection() {
           map={island.map}
           theme={island.theme}
           world={island.order as WorldId}
+          questsByStage={SAMPLE_QUESTS}
         />
+      </Demo>
+      <Demo
+        label="스테이지 차례 시트 (P5-06)"
+        note="열린 노드를 누르면 떠요(위 지도에서도, 주소에 ?stage= 가 남아 뒤로 가기로 닫힘). 768px 미만 바텀시트, 이상 책 한 쪽. 완료 = 다시 하기, 첫 미완료 = 강조 줄 + 아래 주 버튼, 유형 태그 코드·퀴즈·보스, 휴대폰 추천(휴대폰 화면에서 진하게). 별은 Q51로 숨기고 퀘스트 수만(SHOW_STARS). 줄은 차례로 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+        data-testid="stage-sheet-demo"
+      >
+        <div className="flex flex-wrap gap-3">
+          <SheetPreview
+            label="진행 중 스테이지"
+            stage={{ ...SAMPLE[2], description: '갈림길에서 조건으로 길을 골라요.' }}
+            quests={SAMPLE_QUESTS[SAMPLE[2].id]}
+          />
+          <SheetPreview
+            label="통과한 스테이지"
+            stage={SAMPLE[1]}
+            quests={SAMPLE_QUESTS[SAMPLE[1].id]}
+          />
+          <SheetPreview
+            label="보스 스테이지"
+            stage={BOSS_STAGE}
+            quests={[
+              {
+                id: 'boss-q1',
+                order: 1,
+                title: '숫자 맞히기 게임',
+                quest_type: 'project',
+                is_mobile_friendly: false,
+                status: null,
+                best_stars: 0,
+              },
+            ]}
+          />
+        </div>
       </Demo>
       <Demo
         label="스테이지 노드 상태 5종 (P5-04)"

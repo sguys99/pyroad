@@ -27,11 +27,11 @@ const base: StageWithStatus = {
 };
 
 describe('StageNode (P5-04)', () => {
-  it('진행 중: 상태·별·진행이 이름에, 번호 원 둘레 진행률 링', () => {
+  it('진행 중: 상태·진행이 이름에(별은 Q51로 숨김), 번호 원 둘레 진행률 링', () => {
     const { container } = render(<StageNode stage={base} onOpen={() => {}} />);
     const btn = screen.getByRole('button');
     expect(btn.getAttribute('aria-label')).toBe(
-      '3단계 조건의 갈림길, 도전 중, 지금 여기, 별 5/24, 퀘스트 2/8 완료',
+      '3단계 조건의 갈림길, 도전 중, 지금 여기, 퀘스트 2/8 완료',
     );
     expect(container.querySelector('.wn')?.getAttribute('data-state')).toBe(
       'current',
@@ -40,7 +40,9 @@ describe('StageNode (P5-04)', () => {
       container.querySelector('.wn-prog-bar')?.getAttribute('stroke-dasharray'),
     ).toBe('0.25 1');
     expect(container.querySelector('.wn-ring')).not.toBeNull();
-    expect(container.textContent).toContain('5/24');
+    // 별 대신 완료 퀘스트 수 (SHOW_STARS = false, P8-05에서 켬)
+    expect(container.textContent).toContain('2/8');
+    expect(container.textContent).not.toContain('5/24');
   });
 
   it('통과: 도장, 링 없음 / 열림: 퀘스트 0개', () => {
@@ -51,6 +53,7 @@ describe('StageNode (P5-04)', () => {
       />,
     );
     expect(container.querySelector('.wn-stamp')?.textContent).toBe('통과');
+    expect(container.querySelector('.wn-check')).not.toBeNull();
     expect(container.querySelector('.wn-prog')).toBeNull();
     expect(
       stageNodeLabel({ ...base, completedQuestCount: 0 }).split(', ')[1],

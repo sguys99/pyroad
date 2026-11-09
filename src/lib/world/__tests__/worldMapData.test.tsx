@@ -15,7 +15,9 @@ import type { StageWithStatus } from '@/lib/types/database';
 
 import { mapPath, mapRoute, nodePercent, WORLDS } from '../worlds';
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/components/providers/SoundProvider', () => ({
   useSfx: () => () => {},
 }));

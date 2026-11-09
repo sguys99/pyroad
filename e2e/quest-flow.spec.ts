@@ -7,6 +7,7 @@ import { stage } from './support/content';
 import {
   advanceCelebration,
   completedNotice,
+  openStageSheet,
   outputPanel,
   questHeader,
   runButton,
@@ -37,8 +38,12 @@ test.describe('퀘스트 전체 플로우', () => {
     const first = stageButton(page, stage1.title);
     await expect(first).toBeEnabled();
 
-    // 2. 스테이지 1 클릭 → 첫 퀘스트
-    await first.click();
+    // 2. 스테이지 1 클릭 → 차례 시트(P5-06) → 첫 퀘스트
+    const sheet = await openStageSheet(page, stage1.title);
+    await expect(sheet.getByTestId('stage-sheet-start')).toHaveText(
+      /1번 퀘스트 시작하기/,
+    );
+    await sheet.getByTestId('stage-sheet-start').click();
     await expect(page).toHaveURL(new RegExp(`/quest/${quest1.id}$`));
     await expect(questHeader(page)).toContainText(quest1.title);
 
@@ -155,4 +160,54 @@ test.describe('퀘스트 전체 플로우', () => {
     await waitForRunner(page);
     await expect(runButton(page)).toBeEnabled();
   });
+
+  for (const [label, viewport] of [
+    ['넓은 화면', { width: 1280, height: 800 }],
+    ['휴대폰', { width: 360, height: 740 }],
+  ] as const) {
+    test(`${label}: 시트에서 완료한 퀘스트를 다시 하고, 돌아오면 시트가 다시 열려 있다 (P5-06)`, async ({
+      page,
+      e2eUser,
+    }) => {
+      await page.setViewportSize(viewport);
+      await completeQuests(e2eUser.id, [quest1]);
+      await page.goto('/world');
+
+      const sheet = await openStageSheet(page, stage1.title);
+      await expect(sheet).toHaveAttribute('role', 'dialog');
+      // 완료한 1번은 다시 하기, 2번이 지금 차례(주 버튼 이어하기), 뒤 퀘스트도 링크(건너뛰어 열기)
+      const replay = sheet.getByRole('link', {
+        name: new RegExp(`${quest1.title}.*다시 하기`),
+      });
+      await expect(replay).toBeVisible();
+      await expect(sheet.getByTestId('stage-sheet-start')).toHaveText(
+        /2번 퀘스트 이어하기/,
+      );
+      await expect(
+        sheet.getByRole('link', { name: new RegExp(lastQuest.title) }),
+      ).toHaveAttribute('href', `/quest/${lastQuest.id}`);
+
+      // 다시 하기 → 복습 화면 (B38 가드는 완료 퀘스트를 막지 않음)
+      await replay.click();
+      await expect(page).toHaveURL(new RegExp(`/quest/${quest1.id}$`));
+      await expect(completedNotice(page)).toBeVisible();
+
+      // 뒤로 가기 → 지도 + 같은 시트
+      await page.goBack();
+      await expect(page).toHaveURL(new RegExp(`/world\\?stage=${stage1.id}$`));
+      await expect(page.getByTestId('stage-sheet')).toBeVisible();
+
+      // Esc 로 닫으면 주소에서 stage 를 지우고 포커스는 노드로
+      await page.keyboard.press('Escape');
+      await expect(page.getByTestId('stage-sheet')).toBeHidden();
+      await expect(page).toHaveURL(/\/world$/);
+      await expect(stageButton(page, stage1.title)).toBeFocused();
+
+      // 다시 열고 기기 뒤로 가기 → 시트만 닫히고 지도에 머문다
+      await openStageSheet(page, stage1.title);
+      await page.goBack();
+      await expect(page.getByTestId('stage-sheet')).toBeHidden();
+      await expect(page).toHaveURL(/\/world$/);
+    });
+  }
 });

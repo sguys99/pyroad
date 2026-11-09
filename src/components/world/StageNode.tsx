@@ -1,13 +1,14 @@
 'use client';
 
-import { Crown, Lock } from 'lucide-react';
+import { Check, Crown, Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import { Stars } from '@/components/ui/reward-icon';
 import { PybaemStatic } from '@/components/characters/rig';
+import { SHOW_STARS } from '@/lib/world/flags';
 
 /**
  * 스테이지 노드 (P5-04, 시안 `design/prototypes/src/final/World.tsx` StageNode).
- * 랜드마크 그림은 지도(MapArt 길 레이어)가 한 번만 그리고, 노드는 그 위의 투명한 버튼 + 이름표 + 별 합계 + 도장이다.
+ * 랜드마크 그림은 지도(MapArt 길 레이어)가 한 번만 그리고, 노드는 그 위의 투명한 버튼 + 이름표 + 별 합계(별 전에는 완료 퀘스트 수, Q51) + 도장이다.
  * 크기는 지도 단위(`--u` = 지도 폭 1단위, `--ns` = 랜드마크 배율, worldMap.css)로 잡아 랜드마크와 같이 커지고 작아진다.
  *
  * - 노드 전체가 버튼 하나(랜드마크 + 이름표 + 별). 잠긴 노드도 포커스·탭이 되고(`aria-disabled`) 누르면 안내를 띄운다
@@ -30,14 +31,14 @@ const STATE_TEXT: Record<NodeState, string> = {
   clear: '통과',
 };
 
-/** 화면 낭독기용 이름: 단계·이름·상태·별·진행 */
+/** 화면 낭독기용 이름: 단계·이름·상태·(별)·진행. 별은 SHOW_STARS일 때만 (Q51) */
 export function stageNodeLabel(stage: StageWithStatus): string {
   const parts = [
     `${stage.order}단계 ${stage.title}${stage.is_final ? ' (보스 스테이지)' : ''}`,
     STATE_TEXT[nodeState(stage)],
   ];
   if (stage.status !== 'locked') {
-    parts.push(`별 ${stage.stars}/${stage.maxStars}`);
+    if (SHOW_STARS) parts.push(`별 ${stage.stars}/${stage.maxStars}`);
     parts.push(
       `퀘스트 ${stage.completedQuestCount}/${stage.totalQuestCount} 완료`,
     );
@@ -65,6 +66,7 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
   return (
     <div
       className="wn"
+      data-stage-id={stage.id}
       data-state={state}
       data-boss={stage.is_final || undefined}
     >
@@ -103,10 +105,18 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
             <>
               <Lock className="size-3.5" strokeWidth={2.6} /> 잠김
             </>
-          ) : (
+          ) : SHOW_STARS ? (
             <>
               <Stars n={1} max={1} size={16} label={false} /> {stage.stars}/
               {stage.maxStars}
+            </>
+          ) : (
+            // 별이 기록되기 전(Q51): 완료 체크 + 퀘스트 수
+            <>
+              {state === 'clear' && (
+                <Check className="wn-check size-3.5" strokeWidth={3} />
+              )}
+              {stage.completedQuestCount}/{stage.totalQuestCount}
             </>
           )}
         </span>
