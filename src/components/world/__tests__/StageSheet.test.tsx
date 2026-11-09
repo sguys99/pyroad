@@ -41,6 +41,7 @@ const q = (
   id: `q${order}`,
   order,
   title: `퀘스트${order}`,
+  concept: `개념${order}`,
   quest_type: 'code',
   is_mobile_friendly: false,
   status: null,
@@ -106,6 +107,11 @@ describe('StageSheet', () => {
       '2번 퀘스트 이어하기',
     );
     expect(screen.getByText('휴대폰 추천')).toBeInTheDocument();
+    // 배울 개념 한 줄은 보이고, 줄 이름에도 들어간다 (P5-06 추가)
+    expect(screen.getByText('개념3')).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: /퀘스트3, 배울 개념\s*개념3/ }),
+    ).toBeInTheDocument();
     expect(screen.getByText('퀴즈')).toBeInTheDocument();
     // SHOW_STARS = false (Q51): 별 그림 없음
     expect(screen.queryByRole('img', { name: /별 \d개/ })).toBeNull();

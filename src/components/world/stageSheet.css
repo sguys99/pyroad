@@ -146,6 +146,15 @@
   font-weight: 700;
   line-height: 1.35;
 }
+/* 배울 개념 한 줄: 길면 줄임표 (줄 높이가 늘지 않게) */
+.ss-c {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 .ss-tags {
   display: flex;
   flex-wrap: wrap;

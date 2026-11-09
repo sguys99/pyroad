@@ -123,20 +123,21 @@ const NODE_STATES: [label: string, stage: StageWithStatus][] = [
 
 // 차례 시트 견본 퀘스트 (P5-06): 완료 2 · 하는 중 1 · 아직, 퀴즈·휴대폰 추천 섞음. 보스 스테이지는 마지막 퀘스트가 보스
 const QUEST_TITLES = [
-  'if로 길 고르기',
-  '참과 거짓',
-  'else 문 열기',
-  '비교 퀴즈',
-  'elif 여러 갈래',
-  '조건 합치기',
+  ['if로 길 고르기', 'if 조건문'],
+  ['참과 거짓', 'True, False'],
+  ['else 문 열기', 'if-else'],
+  ['비교 퀴즈', '비교 연산자 ==, !=, <, >'],
+  ['elif 여러 갈래', 'if-elif-else 여러 갈래로 나누기와 들여쓰기'],
+  ['조건 합치기', 'and, or, not'],
 ];
 const SAMPLE_QUESTS: Record<string, StageQuestItem[]> = Object.fromEntries(
   SAMPLE.map((stage, si) => [
     stage.id,
-    QUEST_TITLES.map((title, i) => ({
+    QUEST_TITLES.map(([title, concept], i) => ({
       id: `${stage.id}-q${i + 1}`,
       order: i + 1,
       title,
+      concept,
       quest_type: i === 3 ? 'quiz' : 'code',
       is_mobile_friendly: i === 3,
       status:
@@ -363,6 +364,7 @@ export function WorldMapSection() {
                 id: 'boss-q1',
                 order: 1,
                 title: '숫자 맞히기 게임',
+                concept: '종합 프로젝트',
                 quest_type: 'project',
                 is_mobile_friendly: false,
                 status: null,

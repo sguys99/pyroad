@@ -17,6 +17,8 @@ export interface QuestListRow {
   id: string;
   order: number;
   title: string;
+  /** 이 퀘스트가 다루는 개념 한 줄 (공개 열, 시트 미리 보기) */
+  concept: string;
   quest_type: string;
   is_mobile_friendly: boolean;
 }
@@ -131,6 +133,7 @@ export function toWorldMapData(
         id: q.id,
         order: q.order,
         title: q.title,
+        concept: q.concept,
         quest_type: q.quest_type,
         is_mobile_friendly: q.is_mobile_friendly,
         status: mine.get(q.id)?.status ?? null,

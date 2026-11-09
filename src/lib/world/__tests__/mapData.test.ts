@@ -27,6 +27,7 @@ const stage = (id: string, order: number, questIds: string[]) => ({
       id: qid,
       order: i + 1,
       title: `퀘스트 ${qid}`,
+      concept: `개념 ${qid}`,
       quest_type: 'code',
       is_mobile_friendly: i === 0,
     }))
@@ -86,6 +87,7 @@ describe('toWorldMapData (P5-13)', () => {
         id: 'q1',
         order: 1,
         title: '퀘스트 q1',
+        concept: '개념 q1',
         quest_type: 'code',
         is_mobile_friendly: true,
         status: 'completed',
@@ -95,6 +97,7 @@ describe('toWorldMapData (P5-13)', () => {
         id: 'q2',
         order: 2,
         title: '퀘스트 q2',
+        concept: '개념 q2',
         quest_type: 'code',
         is_mobile_friendly: false,
         status: 'in_progress',
