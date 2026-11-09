@@ -48,6 +48,8 @@ export interface QuestReward {
   /** 다음 퀘스트 주소. 없으면(스테이지 끝) 지도가 주 버튼 */
   nextHref: string | null;
   mapHref: string;
+  /** 이미 통과한 퀘스트를 다시 푼 복습 (Q57): 머리가 "복습 완료", 보상 숫자 없음 */
+  review?: boolean;
   /** 카탈로그용: 플래그와 상관없이 별·코인 보이기 */
   forceStarsCoins?: boolean;
 }
@@ -135,6 +137,7 @@ export function RewardStrip({
       className="qx"
       data-testid="quest-reward"
       data-done={done || undefined}
+      data-review={reward.review || undefined}
       aria-labelledby="quest-reward-title"
     >
       <div className="qx-head">
@@ -142,7 +145,7 @@ export function RewardStrip({
           <PybaemStatic state="cheer" size={56} label="" filters={false} />
         </span>
         <div className="qx-title">
-          <p className="qx-k">퀘스트 통과</p>
+          <p className="qx-k">{reward.review ? '복습 완료' : '퀘스트 통과'}</p>
           <h2 id="quest-reward-title" className="qx-t font-display">
             {reward.title}
           </h2>

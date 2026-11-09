@@ -70,6 +70,19 @@ describe('QuestHints (P6-09)', () => {
     );
   });
 
+  it('방금 통과·예전에 통과·복습 통과를 다르게 말한다 (Q57)', () => {
+    const { rerender } = render(
+      <QuestHints {...base} isCompleted completion="just" />,
+    );
+    const note = screen.getByTestId('quest-reward-preview');
+    expect(note).toHaveTextContent('통과해서 보상을 받았어요');
+    expect(note).not.toHaveTextContent('예전에');
+    rerender(<QuestHints {...base} isCompleted completion="before" />);
+    expect(note).toHaveTextContent('예전에 통과한 퀘스트예요');
+    rerender(<QuestHints {...base} isCompleted completion="review" />);
+    expect(note).toHaveTextContent('복습 완료');
+  });
+
   it('hintNotes: 이번 단계 쪽지만, 받는 중이면 흘러 들어오는 글자', () => {
     const notes = hintNotes(
       [

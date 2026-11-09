@@ -61,9 +61,12 @@ export function tutorLine(session: QuestSession): {
   if (validation?.passed && (session.isCompleted || !session.steps?.length))
     return {
       state: 'cheer',
-      text: session.steps?.length
-        ? '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!'
-        : '해냈어요! 나온 글자가 해 볼 일과 딱 맞아요. 통과 도장 쾅!',
+      text:
+        session.completion === 'review'
+          ? '복습 완료! 예전에 배운 주문을 잘 기억하고 있네요. 통과 도장 쾅!'
+          : session.steps?.length
+            ? '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!'
+            : '해냈어요! 나온 글자가 해 볼 일과 딱 맞아요. 통과 도장 쾅!',
     };
   if (validation?.passed)
     return {
@@ -88,7 +91,10 @@ export function tutorLine(session: QuestSession): {
   if (session.isCompleted)
     return {
       state: 'wave',
-      text: '이미 통과한 퀘스트예요. 다시 풀어 보며 복습해 봐요!',
+      text:
+        session.completion === 'just'
+          ? '방금 통과했어요! 한 번 더 돌려 보면 복습이 돼요.'
+          : '예전에 통과한 퀘스트예요. 다시 돌려 보며 복습해 봐요! 처음부터 풀고 싶으면 "처음 코드로"를 눌러요.',
     };
   return {
     state: 'idle',

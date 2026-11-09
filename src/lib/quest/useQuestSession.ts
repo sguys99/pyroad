@@ -43,6 +43,12 @@ import {
 
 export type QuestTab = 'story' | 'code' | 'result';
 
+/**
+ * 완료한 퀘스트의 지금 모습 (§12-Q57): just = 이번에 처음 통과해 보상을 받음 · before = 예전에 통과(복습 전) ·
+ * review = 이미 통과한 퀘스트를 다시 풀어 통과(보상 없음, 완료 API를 부르지 않음)
+ */
+export type QuestCompletion = 'just' | 'before' | 'review';
+
 export interface QuestSessionOptions {
   quest: QuestWithStage;
   progress: UserProgress | null;
@@ -260,6 +266,9 @@ export function useQuestSession({
     progress?.used_golden_key ?? false,
   );
   const [celebrations, setCelebrations] = useState<CelebrationEvent[]>([]);
+  // 복습 (Q57): 이번 세션에 처음 통과했는지 · 마지막으로 채점한 실행이 이미 완료한 퀘스트였는지
+  const [justCompleted, setJustCompleted] = useState(false);
+  const [reviewRun, setReviewRun] = useState(false);
 
   // 실행·채점·완료(황금키 포함) 요청 중복 방지 (B06). ref 는 렌더 전 연속 클릭도 막고, state 는 버튼 표시용.
   // 단계를 통과하면 다음 단계로 넘어갈 때까지 잠가 둔다 (같은 단계를 두 번 넘기지 않게)
@@ -524,6 +533,7 @@ export function useQuestSession({
       setNextQuestId(completion.next_quest_id);
       setGoldenKeys(completion.golden_keys);
       if (!completion.already_completed) {
+        setJustCompleted(true);
         setEarnedXP(completion.xp_gained);
         setUserXP(completion.total_xp);
         setUserLevel(completion.level_after);
@@ -651,11 +661,19 @@ export function useQuestSession({
     ],
   );
 
-  /** 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance' */
+  /**
+   * 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance'.
+   * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고, 보상은 처음 한 번뿐이라 완료 API·튜터를 부르지 않는다
+   */
   const runAndGrade = useCallback(
-    async (codeToRun: string, step: number): Promise<'advance' | 'stay'> => {
+    async (
+      codeToRun: string,
+      step: number,
+      review: boolean,
+    ): Promise<'advance' | 'stay'> => {
       setValidation(null);
       setEarnedXP(null);
+      setReviewRun(review);
       liveOutput.reset();
 
       const result = await runCode(codeToRun, { onStdout: liveOutput.append });
@@ -712,6 +730,10 @@ export function useQuestSession({
       }
 
       play('correct');
+      if (review) {
+        fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
+        return 'stay';
+      }
       if (kind === 'project') {
         // 단계 통과 피드백 (비스트림: 곧 시작할 다음 단계 안내 스트림을 끊지 않게)
         askTutor(
@@ -752,13 +774,13 @@ export function useQuestSession({
   const isCodeEmpty = !code.trim();
 
   const handleRun = useCallback(async () => {
-    if (isCodeEmpty || isCompleted || submittingRef.current) return;
+    if (isCodeEmpty || submittingRef.current) return;
     play('run');
     lockSubmit(true);
     let advancing = false;
     try {
       const step = stepRef.current.step;
-      advancing = (await runAndGrade(code, step)) === 'advance';
+      advancing = (await runAndGrade(code, step, isCompleted)) === 'advance';
       // 넘어갈 때까지 실행 버튼은 잠긴 채 (advanceStep 이 푼다)
       if (advancing)
         later(() => advanceStep(step, code), STEP_ADVANCE_DELAY_MS);
@@ -1071,6 +1093,14 @@ export function useQuestSession({
     handleGoldenKeyUse,
 
     isCompleted,
+    /** 완료했으면 방금 통과·예전에 통과·복습 통과 중 무엇인지 (Q57), 아니면 null */
+    completion: (!isCompleted
+      ? null
+      : reviewRun && validation?.passed
+        ? 'review'
+        : justCompleted
+          ? 'just'
+          : 'before') as QuestCompletion | null,
     nextQuestId,
     earnedXP,
     userXP,

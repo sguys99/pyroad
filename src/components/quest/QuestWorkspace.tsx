@@ -71,18 +71,33 @@ export function QuestWorkspace({
   };
   // 퀘스트를 마친 그 실행이면 결과 쪽지 아래 성공 장면 (P6-08). 다음 퀘스트가 없으면(스테이지 끝) 지도가 주 버튼
   const worldHref = worldPath(quest.stage.world?.slug);
+  const dots = stageDots(
+    quest.stage.quests ?? [],
+    quest.id,
+    session.isCompleted,
+    quest.stage.unlocked,
+  );
+  // 복습(Q57)은 완료 API를 부르지 않아 서버의 다음 퀘스트가 없으면 스테이지 차례의 바로 다음 (열린 것만)
+  const nextQuestId =
+    session.nextQuestId ??
+    dots
+      .slice(dots.findIndex((d) => d.current) + 1)
+      .find((d) => d.state !== 'locked')?.id ??
+    null;
+  const review = session.completion === 'review';
   const reward: QuestReward | null =
     validation?.passed && session.isCompleted
       ? {
           title: quest.title,
-          xp: session.earnedXP ?? 0,
+          xp: review ? 0 : (session.earnedXP ?? 0),
+          review,
           stars: codeQuestStars(session.totalHintsUsed, session.usedGoldenKey),
-          note: session.usedGoldenKey
-            ? '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.'
-            : undefined,
-          nextHref: session.nextQuestId
-            ? `/quest/${session.nextQuestId}`
-            : null,
+          note: review
+            ? '보상은 처음 통과할 때 한 번만 받아요. 복습으로 주문이 더 단단해졌어요!'
+            : session.usedGoldenKey
+              ? '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.'
+              : undefined,
+          nextHref: nextQuestId ? `/quest/${nextQuestId}` : null,
           mapHref: worldHref,
         }
       : null;
@@ -100,12 +115,7 @@ export function QuestWorkspace({
         stageTitle={quest.stage.title}
         stageOrder={quest.stage.order}
         questTitle={quest.title}
-        dots={stageDots(
-          quest.stage.quests ?? [],
-          quest.id,
-          session.isCompleted,
-          quest.stage.unlocked,
-        )}
+        dots={dots}
       />
 
       {belowHeader}
@@ -170,6 +180,7 @@ export function QuestWorkspace({
               totalHintsUsed={session.totalHintsUsed}
               usedGoldenKey={session.usedGoldenKey}
               isCompleted={session.isCompleted}
+              completion={session.completion}
             />
           </StoryPage>
         </div>

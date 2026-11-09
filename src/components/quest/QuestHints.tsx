@@ -21,10 +21,19 @@ import { calculateXP, codeQuestStars } from '@/lib/quest/xp';
 import { SHOW_STARS } from '@/lib/world/flags';
 import type { ChatMessage } from '@/lib/tutor/types';
 import type { QuestKind } from '@/lib/quest/questKind';
+import type { QuestCompletion } from '@/lib/quest/useQuestSession';
 import './questHints.css';
 
 const MAX_HINTS = 3;
 const remarkPlugins = [remarkGfm];
+
+/** 완료한 퀘스트의 보상 줄 (Q57): 막 통과한 직후에 "이미 통과한 퀘스트"라고 하지 않게 */
+export const COMPLETED_NOTE: Record<QuestCompletion, string> = {
+  just: '통과해서 보상을 받았어요! 한 번 더 돌려 보면 복습이 돼요.',
+  before:
+    '예전에 통과한 퀘스트예요. 다시 풀면 복습이 되고, 보상은 처음 한 번만 받아요.',
+  review: '복습 완료! 보상은 처음 한 번만 받아서 이번엔 XP가 없어요.',
+};
 
 export interface HintNoteData {
   level: number;
@@ -79,6 +88,8 @@ interface QuestHintsProps {
   totalHintsUsed: number;
   usedGoldenKey: boolean;
   isCompleted: boolean;
+  /** 완료했으면 방금·예전·복습 중 무엇인지 (세션 `completion`, 없으면 예전에 통과) */
+  completion?: QuestCompletion | null;
   /** 별로 안내 (기본 SHOW_STARS, Q51·Q52로 지금은 꺼져 XP로 안내) */
   showStars?: boolean;
 }
@@ -103,6 +114,7 @@ export function QuestHints({
   totalHintsUsed,
   usedGoldenKey,
   isCompleted,
+  completion,
   showStars = SHOW_STARS,
 }: QuestHintsProps) {
   const [confirming, setConfirming] = useState(false);
@@ -157,7 +169,7 @@ export function QuestHints({
 
       <p className="qh-reward" data-testid="quest-reward-preview">
         {isCompleted ? (
-          '이미 통과한 퀘스트예요. 보상은 처음 한 번만 받아요.'
+          COMPLETED_NOTE[completion ?? 'before']
         ) : (
           <>
             <span className="qh-reward-now">

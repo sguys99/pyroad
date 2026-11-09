@@ -419,6 +419,52 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(mocks.refresh).not.toHaveBeenCalled();
   });
 
+  it('완료한 퀘스트를 다시 풀면 복습: 실행·채점·컨페티는 하고 완료 API·튜터는 부르지 않는다 (Q57)', async () => {
+    const { result } = renderHook(() =>
+      useQuestSession(
+        options(
+          CODE_QUEST,
+          progressRow({ status: 'completed', code_submitted: 'print(10)' }),
+        ),
+      ),
+    );
+    await act(async () => {
+      await flush();
+    });
+    expect(result.current.completion).toBe('before');
+    // 첫 진입은 저장된 코드 그대로
+    expect(result.current.code).toBe('print(10)');
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(mocks.runtime.runCode).toHaveBeenCalledTimes(1);
+    expect(callsTo('/api/quest/validate')).toHaveLength(1);
+    expect(callsTo('/api/quest/complete')).toHaveLength(0);
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+    expect(mocks.confetti).toHaveBeenCalledTimes(1);
+    expect(result.current.validation?.passed).toBe(true);
+    expect(result.current.completion).toBe('review');
+    expect(result.current.earnedXP).toBeNull();
+  });
+
+  it('처음 통과하면 completion은 just, 그다음 다시 풀어 통과하면 review', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    expect(result.current.completion).toBeNull();
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.completion).toBe('just');
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(callsTo('/api/quest/complete')).toHaveLength(1);
+    expect(result.current.completion).toBe('review');
+  });
+
   it('완료 기록에 실패하면 완료하지 않고 다시 누를 수 있다 (B06)', async () => {
     routes['/api/quest/complete'] = () => ({
       status: 500,

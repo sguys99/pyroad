@@ -107,6 +107,10 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(page.getByTestId('quest-dialogue')).toContainText(
       '통과 도장 쾅',
     );
+    // 막 통과한 직후 이야기 쪽 보상 줄은 "예전에 통과"가 아니라 방금 받았다고 (Q57)
+    await expect(page.getByTestId('quest-reward-preview')).toContainText(
+      '통과해서 보상을 받았어요',
+    );
 
     // 축하 시퀀서: 첫 퀘스트 뱃지 카드 → CTA 로 닫힘
     await expect(page.getByTestId('celebration-overlay')).toBeVisible();
@@ -221,8 +225,38 @@ test.describe('퀘스트 전체 플로우', () => {
     await completeQuests(e2eUser.id, [quest1]);
     await page.goto(`/quest/${quest1.id}`);
     await expect(completedNotice(page)).toBeVisible();
+    await expect(page.getByTestId('quest-reward-preview')).toContainText(
+      '예전에 통과한 퀘스트예요',
+    );
     await waitForRunner(page);
     await expect(runButton(page)).toBeEnabled();
+
+    // 복습 (Q57): 실행·채점·도장은 그대로, 완료 API는 부르지 않고 보상 띠 대신 "복습 완료"(XP 없음) + 다음 퀘스트
+    const completeCalls: string[] = [];
+    page.on('request', (req) => {
+      if (req.url().endsWith('/api/quest/complete'))
+        completeCalls.push(req.url());
+    });
+    await runCode(page, quest1.solution);
+    const output = outputPanel(page);
+    await expect(output).toHaveAttribute('data-verdict', 'pass');
+    await expect(output.locator('.qx-stamp')).toHaveText('통과!');
+    const reward = page.locator('[data-testid="quest-reward"]:visible');
+    await expect(reward).toHaveAttribute('data-review', 'true');
+    await expect(reward).toContainText('복습 완료');
+    await expect(reward.getByTestId('reward-xp')).toHaveCount(0);
+    await expect(
+      reward.getByRole('link', { name: '다음 퀘스트' }),
+    ).toHaveAttribute('href', `/quest/${quest2.id}`);
+    await expect(page.getByTestId('quest-dialogue')).toContainText('복습 완료');
+    await expect(page.getByTestId('quest-reward-preview')).toContainText(
+      '복습 완료',
+    );
+    // 상태바에 받은 XP(+N)가 붙지 않음
+    await expect(page.locator('span', { hasText: /^\+[1-9]\d*$/ })).toHaveCount(
+      0,
+    );
+    expect(completeCalls).toEqual([]);
   });
 
   for (const [label, viewport] of [

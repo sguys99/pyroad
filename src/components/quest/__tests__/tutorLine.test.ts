@@ -33,3 +33,22 @@ describe('tutorLine 성공 (P6-08)', () => {
     );
   });
 });
+
+describe('tutorLine 완료한 퀘스트 (Q57)', () => {
+  it('복습으로 통과하면 복습 완료, 통과 전엔 방금/예전을 구분', () => {
+    const passed = {
+      validation: { passed: true, type: 'output_match' as const },
+      runResult: ok as QuestSession['runResult'],
+      isCompleted: true,
+    };
+    expect(
+      tutorLine(session({ ...passed, completion: 'review' })).text,
+    ).toContain('복습 완료');
+    expect(
+      tutorLine(session({ isCompleted: true, completion: 'just' })).text,
+    ).toContain('방금 통과');
+    expect(
+      tutorLine(session({ isCompleted: true, completion: 'before' })).text,
+    ).toContain('예전에 통과');
+  });
+});

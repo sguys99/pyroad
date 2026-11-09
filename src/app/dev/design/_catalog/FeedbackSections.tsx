@@ -193,6 +193,7 @@ function QuestHintsDemo() {
     totalHintsUsed: hints,
     usedGoldenKey: usedKey,
     isCompleted: done,
+    completion: done ? ('just' as const) : null,
   };
   return (
     <>
