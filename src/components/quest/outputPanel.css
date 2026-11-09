@@ -75,10 +75,6 @@
 .qo-chip[data-tone='live'] {
   color: var(--primary-text);
 }
-.qo-bug {
-  display: inline-grid;
-  place-items: center;
-}
 
 /* 나온 글자 줄: 줄마다 흰 종이 카드 (긴 출력은 쪽지 안에서 스크롤) */
 .qo-lines {
@@ -269,4 +265,50 @@
 }
 :root[data-reduced='true'] .qo-slip {
   transition: none;
+}
+
+/* 오류 쪽지 아래 버그버그 (P6-07, BugbugAside.tsx): 캐릭터 + 말풍선 한 줄. lg 미만은 파이뱀 설명 쪽지가 한 줄 더 */
+.qo-bug-aside {
+  display: grid;
+  gap: 0.5rem;
+}
+.qo-bug-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+.qo-bug-rig {
+  flex: none;
+  display: inline-grid;
+  place-items: end center;
+  width: 4.5rem;
+}
+.qo-bug-rig-tutor {
+  width: 4.5rem;
+  padding-bottom: 0.25rem;
+}
+/* 파이뱀 설명 쪽지: 이야기 쪽 대사창이 보이는 책 펼침(lg↑)에서는 숨김 */
+@media (min-width: 64rem) {
+  .qo-bug-explain {
+    display: none;
+  }
+}
+.qo-bug-bubble {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* 고친 뒤 화해 인사: 잠깐 보였다가 스르르 (OutputPanel이 FIX_BYE_MS 뒤 내림). 동작 줄이기는 그냥 사라짐 */
+@keyframes qo-bye {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+:root[data-reduced='false'] .qo-bug-bye {
+  animation: qo-bye calc(var(--dur-celebrate) * 2.5) var(--easing-in-out) both;
 }

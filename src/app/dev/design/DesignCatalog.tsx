@@ -43,6 +43,7 @@ import {
   EditorSection,
   RunControlsSection,
   OutputPanelSection,
+  ErrorStagingSection,
   ShareCardSection,
   SoundSection,
 } from './_catalog/ExtraSections';
@@ -104,6 +105,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['editor', '코드 에디터'],
       ['run-controls', '실행 버튼'],
       ['output-slip', '결과 쪽지'],
+      ['error-staging', '실패 연출'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
@@ -207,6 +209,7 @@ export function DesignCatalog({
               <EditorSection />
               <RunControlsSection />
               <OutputPanelSection />
+              <ErrorStagingSection />
               <ShareCardSection />
               <SoundSection />
               <LegalSection />

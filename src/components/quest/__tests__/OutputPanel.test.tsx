@@ -135,7 +135,6 @@ describe('OutputPanel', () => {
         result={{ stdout: '1\n', stderr, success: false, hadException: true }}
         isRunning={false}
         onShowErrorLine={onShow}
-        errorAside={<p>P6-07 자리</p>}
       />,
     );
     expect(screen.getByTestId('output-panel')).toHaveAttribute(
@@ -147,9 +146,43 @@ describe('OutputPanel', () => {
     );
     expect(screen.getByTestId('bugbug-helper')).toBeInTheDocument();
     expect(screen.getByText('오류 메시지 전체 보기')).toBeInTheDocument();
-    expect(screen.getByText('P6-07 자리')).toBeInTheDocument();
+    // P6-07: 버그버그 한마디 + (lg 미만) 파이뱀 쉬운 설명
+    expect(screen.getByTestId('bugbug-aside')).toHaveTextContent(
+      '히히, 2번째 줄에 숨었지!',
+    );
+    expect(screen.getByTestId('error-explain')).toHaveTextContent(
+      '2번째 줄을 봐요. y 라는 이름은 처음 봐요.',
+    );
     fireEvent.click(screen.getByTestId('show-error-line'));
     expect(onShow).toHaveBeenCalledWith(2);
+  });
+
+  it('오류 다음 실행이 끝까지 돌면 버그버그 화해 인사가 잠깐 나왔다 사라진다 (P6-07)', () => {
+    vi.useFakeTimers();
+    const err = {
+      stdout: '',
+      stderr: 'NameError: x',
+      success: false,
+      hadException: true,
+    };
+    const ok = {
+      stdout: 'a\n',
+      stderr: '',
+      success: true,
+      outcome: 'ok' as const,
+    };
+    const { rerender } = render(<OutputPanel result={err} isRunning={false} />);
+    expect(screen.queryByTestId('bugbug-makeup')).toBeNull();
+    // 실행 중에는 이전 결과가 그대로 들어온다
+    rerender(<OutputPanel result={err} isRunning />);
+    rerender(<OutputPanel result={ok} isRunning={false} />);
+    expect(screen.getByTestId('bugbug-makeup')).toHaveTextContent('화해하자');
+    act(() => vi.advanceTimersByTime(3000));
+    expect(screen.queryByTestId('bugbug-makeup')).toBeNull();
+    // 오류 없이 이어진 성공에는 나오지 않음
+    rerender(<OutputPanel result={{ ...ok }} isRunning={false} />);
+    expect(screen.queryByTestId('bugbug-makeup')).toBeNull();
+    vi.useRealTimers();
   });
 
   it('실행이 끝나도 실시간으로 나온 줄은 그대로 (다시 튀지 않음)', () => {

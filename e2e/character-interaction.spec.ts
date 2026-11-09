@@ -2,6 +2,7 @@ import { test, expect } from './support/test';
 import { stage } from './support/content';
 import {
   openStageSheet,
+  outputPanel,
   questHeader,
   runCode,
   stageButton,
@@ -57,12 +58,56 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
     // 에러 시 파이뱀은 대사창에서 다독임 (P6-06: 결과 쪽지에는 파이뱀 얼굴을 두지 않음)
     const output = page.getByTestId('output-panel').first();
     await expect(output).toHaveAttribute('data-state', 'error');
-    await expect(page.getByTestId('quest-dialogue')).toContainText(
-      '버그는 고치라고',
+    // P6-07: 생각 박자 뒤 줄 번호와 함께 쉬운 설명 (LLM 없이 규칙표)
+    const dialogue = page.getByTestId('quest-dialogue');
+    await expect(dialogue).toContainText('버그는 고치라고');
+    await expect(dialogue).toContainText(
+      '1번째 줄을 봐요. undefined_var 라는 이름은 처음 봐요.',
     );
 
-    // BugBug 디버깅 헬퍼 등장 확인
+    // 버그버그가 오류 쪽지 아래에 나타나 한마디 (빨간 경고 없음)
     await expect(output.getByTestId('bugbug-helper')).toBeVisible();
+    await expect(output.getByTestId('bugbug-aside')).toContainText(
+      '히히, 1번째 줄에 숨었지!',
+    );
+    // 데스크톱은 설명이 이야기 쪽 대사창에만 (결과 쪽 파이뱀 쪽지는 lg 미만 전용)
+    await expect(output.getByTestId('error-explain')).toBeHidden();
+
+    // 고쳐서 다시 돌리면 버그버그가 화해하고 사라진다
+    await runCode(page, quest.solution);
+    await expect(output).toHaveAttribute('data-verdict', 'pass');
+    await expect(output.getByTestId('bugbug-aside')).toHaveCount(0);
+  });
+
+  test('출력이 다르면 버그버그 없이 파이뱀이 갸우뚱 격려 (P6-07)', async ({
+    page,
+  }) => {
+    await runCode(page, 'print("다른 글자")');
+    const output = page.getByTestId('output-panel').first();
+    await expect(output).toHaveAttribute('data-verdict', 'diff');
+    await expect(output.getByTestId('bugbug-helper')).toHaveCount(0);
+    await expect(page.getByTestId('quest-dialogue')).toContainText(
+      '나온 글자가 조금 달라요',
+    );
+  });
+
+  test('모바일: 결과 쪽에서 버그버그 + 파이뱀 설명 쪽지가 함께 보인다 (P6-07)', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 760 });
+    await page.getByRole('tab', { name: /공책/ }).click();
+    await runCode(page, 'print(undefined_var)');
+    // 실행하면 결과 쪽으로 넘어감 (Q55). 이야기 쪽 대사창은 안 보이므로 설명을 결과 쪽에 한 번 더
+    await expect(page.getByRole('tab', { name: /결과/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    const output = outputPanel(page);
+    await expect(output).toHaveAttribute('data-state', 'error');
+    await expect(output.getByTestId('bugbug-helper')).toBeVisible();
+    await expect(output.getByTestId('error-explain')).toContainText(
+      'undefined_var 라는 이름은 처음 봐요',
+    );
   });
 });
 

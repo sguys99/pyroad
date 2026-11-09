@@ -3,6 +3,7 @@
 import {
   useEffect,
   useRef,
+  useState,
   useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
@@ -21,7 +22,8 @@ import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { ValidationType } from '@/lib/quest/validation';
 import { errorLineFromStderr } from '@/lib/editor/errorLine';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import { DURATION } from '@/lib/motion/tokens';
+import { BugbugAside, BugbugMakeup } from './BugbugAside';
 import {
   POP_LINES,
   errorSummary,
@@ -158,13 +160,26 @@ function Chip({
   );
 }
 
-/** 오류 때 쪽지 머리의 작은 버그버그 (등장 연출·파이뱀 설명은 P6-07이 errorAside 자리에) */
-function BugBugHelper() {
-  return (
-    <span data-testid="bugbug-helper" className="qo-bug">
-      <CharacterAvatar character="bugbug" expression="found" size="sm" />
-    </span>
-  );
+/** 고친 뒤 화해 인사를 보여 주는 시간 (CSS qo-bye = --dur-celebrate × 2.5와 같게) */
+const FIX_BYE_MS = DURATION.celebrate * 2.5;
+
+/**
+ * 직전 결과가 오류였고 이번 실행은 끝까지 돌았으면 잠깐 true ("버그를 고쳤어요" 화해 인사).
+ * 실행 중에도 이전 결과가 그대로라 실행 결과가 바뀐 순간만 본다
+ */
+function useBugFixed(result: RunResult | null): boolean {
+  const [seen, setSeen] = useState(result);
+  const [fixed, setFixed] = useState(false);
+  if (result !== seen) {
+    setSeen(result);
+    setFixed(!!seen?.hadException && !!result?.success);
+  }
+  useEffect(() => {
+    if (!fixed) return;
+    const t = setTimeout(() => setFixed(false), FIX_BYE_MS);
+    return () => clearTimeout(t);
+  }, [fixed]);
+  return fixed;
 }
 
 export interface OutputPanelProps {
@@ -180,8 +195,6 @@ export interface OutputPanelProps {
   onShowErrorLine?: (line: number) => void;
   /** 결과 쪽 안에서 Worker를 다시 띄우는 중 (모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄) */
   restarting?: boolean;
-  /** 오류 쪽지 아래 자리 (P6-07: 버그버그 등장·파이뱀 설명) */
-  errorAside?: ReactNode;
 }
 
 /**
@@ -198,8 +211,8 @@ export function OutputPanel({
   goal,
   onShowErrorLine,
   restarting = false,
-  errorAside,
 }: OutputPanelProps) {
+  const bugFixed = useBugFixed(result);
   if (isRunning) {
     return (
       <Slip
@@ -293,14 +306,11 @@ export function OutputPanel({
         text={result.stdout}
         tone="bug"
         chip={
-          <>
-            <BugBugHelper />
-            <Chip tone="bug" icon={<Search aria-hidden />}>
-              여기를 한번 살펴볼까요?
-            </Chip>
-          </>
+          <Chip tone="bug" icon={<Search aria-hidden />}>
+            여기를 한번 살펴볼까요?
+          </Chip>
         }
-        after={errorAside}
+        after={<BugbugAside stderr={result.stderr} />}
       >
         <div className="qo-err" data-testid="output-error">
           {line && <span className="qo-err-line">{line}번째 줄</span>}
@@ -348,19 +358,22 @@ export function OutputPanel({
         ) : null
       }
       after={
-        diff && (
-          <div className="qo-compare" data-testid="output-compare">
-            {goal && (
-              <div className="qo-goal">
-                <span className="qo-k">해 볼 일에서 나와야 하는 모습</span>
-                <p>{goal}</p>
-              </div>
-            )}
-            <p className="qo-tip">
-              {mismatchTip(validationResult.type, result.stdout)}
-            </p>
-          </div>
-        )
+        <>
+          {bugFixed && <BugbugMakeup />}
+          {diff && (
+            <div className="qo-compare" data-testid="output-compare">
+              {goal && (
+                <div className="qo-goal">
+                  <span className="qo-k">해 볼 일에서 나와야 하는 모습</span>
+                  <p>{goal}</p>
+                </div>
+              )}
+              <p className="qo-tip">
+                {mismatchTip(validationResult.type, result.stdout)}
+              </p>
+            </div>
+          )}
+        </>
       }
     >
       {!outputLines(result.stdout).length && (

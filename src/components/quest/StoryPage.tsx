@@ -7,6 +7,8 @@ import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
 import { Landmark } from '@/components/world/map/MapArt';
 import { worldTint } from '@/lib/world/worldBook';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
+import { explainError } from '@/lib/quest/errorExplain';
+import { useThinkBeat } from './useThinkBeat';
 import '@/components/world/map/worldMap.css';
 
 // 첫 화면은 서버에서 그린 정지 그림, 라이브 리그는 나중에 (rig.md 지연 로드, P6-16 번들 예산)
@@ -45,7 +47,11 @@ export function missionItems(session: QuestSession): MissionItem[] {
     .map((text) => ({ text, done }));
 }
 
-/** 파이뱀 대사 + 자세. 성공·오류 연출은 P6-07·P6-08이 다듬는다 */
+/**
+ * 파이뱀 대사 + 자세 (성공 연출은 P6-08). 세 경우를 다르게 (P6-07):
+ * 오류 = 버그버그가 결과 쪽지에 나타나고 파이뱀은 생각(`think`) → 설명(`teach` + 말하기)으로 쉬운 설명 ·
+ * 출력이 다름 = 버그버그 없이 갸우뚱(`confused`) 격려 · 시간 초과 = 차분한 격려(`encourage`)
+ */
 export function tutorLine(session: QuestSession): {
   state: PybaemState;
   text: string;
@@ -63,12 +69,17 @@ export function tutorLine(session: QuestSession): {
     };
   if (runResult?.hadException)
     return {
-      state: 'think',
-      text: '괜찮아요, 버그는 고치라고 있는 거예요. 결과에 나온 단서를 같이 볼까요?',
+      state: 'teach',
+      text: `괜찮아요, 버그는 고치라고 있는 거예요. ${explainError(runResult.stderr).text}`,
+    };
+  if (runResult?.isTimeout || runResult?.outcome === 'output-limit')
+    return {
+      state: 'encourage',
+      text: '주문이 끝나지 않고 계속 돌았어요. 반복이 언젠가 멈추는지 같이 살펴봐요. 천천히 해도 괜찮아요!',
     };
   if (validation)
     return {
-      state: 'think',
+      state: 'confused',
       text: '돌아가긴 했는데 나온 글자가 조금 달라요. 해 볼 일을 다시 읽어 봐요!',
     };
   if (session.isCompleted)
@@ -103,7 +114,18 @@ export function StoryPage({ session, action, children }: StoryPageProps) {
   const sk = quest.prompt_skeleton;
   const no = stage.world?.no;
   const items = missionItems(session);
-  const line = tutorLine(session);
+  const said = tutorLine(session);
+  // 오류면 먼저 생각하는 박자 (minimal 짧게 · 동작 줄이기는 바로 설명)
+  const thinking = useThinkBeat(
+    session.runResult,
+    !!session.runResult?.hadException,
+  );
+  const line = thinking
+    ? {
+        state: 'think' as const,
+        text: '음… 어디 보자. 버그버그가 어디 숨었을까?',
+      }
+    : said;
 
   return (
     <article className="qs" aria-labelledby="quest-title">

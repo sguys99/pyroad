@@ -257,7 +257,7 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 | 화면 | 지금 | 바꿀 것 | 항목 |
 |---|---|---|---|
 | 대화 패널 `ConversationPanel.tsx` | `CharacterAvatar` + 키워드 표정 | `PybaemRig expression={useMessageExpression(m)} talking={streaming}` | P6-01 |
-| 출력 패널 `OutputPanel.tsx` (실행 결과 표정) | `CharacterAvatar` `getOutputExpression()` | `PybaemRig expression=…`, 에러는 `BugBugRig state="appear"→"search"` (P6-07) | P6-07 |
+| 출력 패널 `OutputPanel.tsx` (실행 결과 표정) | `CharacterAvatar` `getOutputExpression()` | **완료**: 파이뱀은 이야기 쪽 대사창(P6-01·P6-07 `think`→`teach`), 에러는 결과 쪽지 아래 `BugbugAside` `BugBugRig state="appear"`(lite·minimal·동작 줄이기 `found`) → 고치면 `makeup` | P6-07 |
 | 축하 `celebrations/LevelUpCard.tsx`·`StageClearCard.tsx`·`ProjectCompleteCard.tsx` | `LottieCharacter`(B32 대체, Framer 1회 점프) | `PybaemRig state="happy"→"cheer"`, 코인은 `ByeolttongiRig state="flyIn"→"give"` + `onCue('reward')` | P6-08·P6-13 |
 | 월드맵 `WorldMap.tsx` 현재 스테이지 | `CharacterAvatar` + `.mascot-bob` | `PybaemRig size={56} lookAt={false}` (대기 루프는 리그가) | P5 |
 | 헤더·프로필·HUD 아바타 (`LandingHeader`·`ProfileSummary`·`QuestStatusBar`·`profile/page.tsx`) | `CharacterAvatar` | `PybaemStatic size={32~64} filters={false}` (서버 렌더 가능) | P4·P9-05 |

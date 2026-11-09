@@ -35,6 +35,12 @@ import CodeKeyboard from '@/components/quest/CodeKeyboard';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { OutputPanel } from '@/components/quest/OutputPanel';
 import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
+import type { RunResult } from '@/lib/pyodide/usePyodide';
+import type { QuestSession } from '@/lib/quest/useQuestSession';
+import { DialogueBox } from '@/components/ui/dialogue-box';
+import { PybaemRig } from '@/components/characters/rig/MascotRig';
+import { tutorLine } from '@/components/quest/StoryPage';
+import { useThinkBeat } from '@/components/quest/useThinkBeat';
 import { CodeSample, Demo, Section } from './ui';
 
 /** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다 */
@@ -252,7 +258,7 @@ export function OutputPanelSection() {
     },
     {
       label: '오류',
-      note: '옅은 빨강 면 · 몇 번째 줄 + 마지막 한 줄 · 줄로 가기 · 전체 메시지는 접음. 버그버그 등장·설명은 P6-07',
+      note: '옅은 빨강 면 · 몇 번째 줄 + 마지막 한 줄 · 줄로 가기 · 전체 메시지는 접음. 아래에 버그버그 등장(P6-07, 아래 절)',
       node: (
         <OutputPanel
           result={{
@@ -331,6 +337,169 @@ export function OutputPanelSection() {
       </div>
       <CodeSample
         code={`<OutputPanel result={runResult} isRunning={runner.isRunning} validationResult={validation}\n  liveOutput={liveOutput} goal={goal} onShowErrorLine={showErrorLine} />`}
+      />
+    </Section>
+  );
+}
+
+const STAGE_ERR: RunResult = {
+  stdout: '마법 상자 준비!\n',
+  stderr: SLIP_ERR,
+  success: false,
+  hadException: true,
+};
+const STAGE_DIFF: RunResult = {
+  stdout: '안녕하세요\n',
+  stderr: '',
+  success: true,
+  outcome: 'ok',
+};
+const STAGE_TIMEOUT: RunResult = {
+  stdout: '0\n1\n2\n',
+  stderr: '',
+  success: false,
+  isTimeout: true,
+  outcome: 'timeout',
+};
+
+/** 앱과 같은 대사 고르기(tutorLine) + 오류면 생각 박자(useThinkBeat). 견본이라 세션 대신 필요한 값만 */
+function StagedTutor({
+  result,
+  validation = null,
+  round,
+}: {
+  result: RunResult;
+  validation?: QuestSession['validation'];
+  round: number;
+}) {
+  const said = tutorLine({
+    runResult: result,
+    validation,
+    isCompleted: false,
+    steps: null,
+  } as unknown as QuestSession);
+  const thinking = useThinkBeat(`${round}`, !!result.hadException);
+  const line = thinking
+    ? { state: 'think' as const, text: '음… 어디 보자. 버그버그가 어디 숨었을까?' }
+    : said;
+  return (
+    <DialogueBox
+      speaker="파이뱀"
+      text={line.text}
+      data-testid="staging-dialogue"
+      character={(speaking) => (
+        <PybaemRig state={line.state} talking={speaking} size={96} label="" />
+      )}
+    />
+  );
+}
+
+/** 고친 뒤: 오류 → (다시 돌림) → 끝까지 돎. 버그버그가 화해하고 사라진다 */
+function FixDemo() {
+  const [fixed, setFixed] = useState(false);
+  return (
+    <div className="space-y-3">
+      <Button
+        onClick={() => setFixed((f) => !f)}
+        variant="secondary"
+        size="sm"
+        sfx={false}
+        data-testid="staging-fix"
+      >
+        {fixed ? '다시 버그 내기' : '고쳐서 다시 돌리기'}
+      </Button>
+      <OutputPanel
+        result={
+          fixed
+            ? { stdout: '마법 상자 준비!\n상자 열기!\n', stderr: '', success: true, outcome: 'ok' }
+            : STAGE_ERR
+        }
+        isRunning={false}
+        validationResult={fixed ? { passed: true } : null}
+      />
+    </div>
+  );
+}
+
+/** 실패 연출 세 갈래 (P6-07): 오류 · 출력이 다름 · 시간 초과 + 고친 뒤 화해 */
+export function ErrorStagingSection() {
+  const [round, setRound] = useState(0);
+  const cases = [
+    {
+      label: '오류 (버그버그 등장 + 파이뱀 생각 → 설명)',
+      note: 'full: 버그버그가 옆에서 통통 뛰어 들어옴 · lite: 제자리 깜짝 점프 · minimal·동작 줄이기: 움직임 없이 표정·후광 색만. 파이뱀은 생각 박자 뒤 쉬운 설명(동작 줄이기는 바로). lg 미만에서는 결과 쪽에 파이뱀 설명 쪽지가 한 줄 더',
+      result: STAGE_ERR,
+      validation: null,
+      testId: 'staging-error',
+    },
+    {
+      label: '출력이 다름 (버그버그 없음)',
+      note: '파이뱀 갸우뚱(confused) + 격려. 결과 쪽지는 금색 견줘 보기',
+      result: STAGE_DIFF,
+      validation: { passed: false, type: 'output_match' as const },
+      testId: 'staging-diff',
+    },
+    {
+      label: '시간 초과 (무한 반복)',
+      note: '파이뱀 격려(encourage) + 반복이 멈추는지 살펴보자는 차분한 말',
+      result: STAGE_TIMEOUT,
+      validation: null,
+      testId: 'staging-timeout',
+    },
+  ];
+  return (
+    <Section
+      id="error-staging"
+      kicker="퀘스트 (P6-07)"
+      title="실패 연출 · 버그버그와 파이뱀"
+      description="빨간 경고 대신 캐릭터가 알려 줘요. 오류는 파이썬 오류 문장을 아이 말로 바꾼 규칙표(src/lib/quest/errorExplain.ts, LLM 호출 없음)로 줄 번호와 함께 설명해요. 성공 연출은 P6-08."
+    >
+      <Button
+        onClick={() => setRound((r) => r + 1)}
+        variant="secondary"
+        size="sm"
+        sfx={false}
+        icon={<RotateCcw aria-hidden />}
+        data-testid="staging-replay"
+      >
+        다시 보기
+      </Button>
+      <div className="mt-4 grid gap-4">
+        {cases.map((c) => (
+          <Demo
+            key={`${c.testId}-${round}`}
+            label={c.label}
+            note={c.note}
+            surface="card"
+            data-testid={c.testId}
+          >
+            <div className="grid items-start gap-4 md:grid-cols-2">
+              <StagedTutor
+                result={c.result}
+                validation={c.validation}
+                round={round}
+              />
+              <OutputPanel
+                result={c.result}
+                isRunning={false}
+                validationResult={c.validation}
+                goal="안녕하세요! 가 출력되어야 해요"
+                onShowErrorLine={noop}
+              />
+            </div>
+          </Demo>
+        ))}
+        <Demo
+          label="고친 뒤 (화해)"
+          note="오류 다음 실행이 끝까지 돌면 버그버그가 화해 인사를 하고 3초 뒤 스르르 사라져요(동작 줄이기는 바로)"
+          surface="card"
+          data-testid="staging-fixed"
+        >
+          <FixDemo />
+        </Demo>
+      </div>
+      <CodeSample
+        code={`// OutputPanel 오류 → <BugbugAside stderr={result.stderr} /> (errorAside 자리)\n// StoryPage: tutorLine(session) + useThinkBeat(runResult, hadException)\nexplainError(stderr) // { type, line, text: '3번째 줄을 봐요. …' }`}
       />
     </Section>
   );
