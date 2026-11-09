@@ -3,6 +3,8 @@
 import { Library } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { ContinueButton } from '@/components/world/ContinueCta';
+import type { ContinueTarget } from '@/lib/world/mapData';
 
 import { useBookNavigate } from './bookTransition';
 import './worldBook.css';
@@ -14,11 +16,13 @@ interface WorldMapHeadProps {
   no: number;
   completedStages: number;
   totalStages: number;
+  /** 이어하기 CTA (P5-10). 없으면(열린 퀘스트를 다 깸) 버튼 없음 */
+  continueTarget?: ContinueTarget | null;
 }
 
 /**
  * 지도 머리 (P5-01, 시안 f-world-head "그림책 1권 · 숲 마을 모험 지도"): 권·월드 이름 + 통과한 스테이지 + "월드 바꾸기".
- * 월드 바꾸기는 책장(/worlds)으로 가며 지도가 이 월드 표지로 접히는 전환(full). 상단 HUD 버튼은 P5-07 범위라 그대로
+ * 월드 바꾸기는 책장(/worlds)으로 가며 지도가 이 월드 표지로 접히는 전환(full). 맨 오른쪽은 이어하기 주 버튼(P5-10)
  */
 export function WorldMapHead({
   slug,
@@ -26,6 +30,7 @@ export function WorldMapHead({
   no,
   completedStages,
   totalStages,
+  continueTarget,
 }: WorldMapHeadProps) {
   const go = useBookNavigate();
   const map = () => document.querySelector<HTMLElement>('.world-map');
@@ -57,6 +62,9 @@ export function WorldMapHead({
         >
           월드 바꾸기
         </Button>
+        {continueTarget && (
+          <ContinueButton target={continueTarget} place="head" />
+        )}
       </div>
     </div>
   );

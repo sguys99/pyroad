@@ -32,6 +32,8 @@ export interface ProgressRow {
   completed_at: string | null;
   /** 황금키로 완료 → 스트릭에서 뺀다 (3일 뱃지와 같은 규칙, Q25) */
   used_golden_key: boolean;
+  /** 행이 생긴 때 = 그 퀘스트에서 처음 코드를 고친 때(자동 저장). 이어하기가 "가장 최근에 시작한 퀘스트"를 고른다 */
+  created_at: string;
 }
 
 /** 스테이지 시트의 퀘스트 한 줄: 공개 열 + 내 진행 (진행이 없으면 status null, 별 0) */
@@ -49,9 +51,55 @@ export interface WorldMapData {
   questsByStage: Record<string, StageQuestItem[]>;
   /** 직접 푼(황금키 아님) 완료 시각들. HUD 스트릭(P5-07, `src/lib/time/streak.ts`)이 KST 날짜로 센다 */
   completedAt: string[];
+  /** 이어하기 CTA 대상 (P5-10). 열린 퀘스트를 다 깼으면 null */
+  continueTarget: ContinueTarget | null;
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
   showApiKeyAlert: boolean;
   // P5-05 잠금 해제 본 기록(Q49)은 테이블이 생기면 여기에 더한다 (progress.unlockedStageIds 와 비교)
+}
+
+/** 이어하기 CTA (P5-10) */
+export interface ContinueTarget {
+  questId: string;
+  questTitle: string;
+  stageOrder: number;
+  stageTitle: string;
+  /** recent: 가장 최근에 시작한 미완료 퀘스트 · next: 다음 차례 · start: 진행이 하나도 없음("모험 시작하기") */
+  kind: 'recent' | 'next' | 'start';
+}
+
+/**
+ * "지난번에 하던 퀘스트" (P5-10): 열린 스테이지의 미완료 퀘스트 중 진행 행이 가장 늦게 생긴 것, 없으면 다음 차례
+ * (현재 스테이지의 첫 미완료 `continueQuestId`). 잠긴 스테이지 퀘스트는 고르지 않는다(퀘스트 페이지 가드 B38과 같은 판정).
+ * shortcut: user_progress 에 updated_at 이 없어 "마지막으로 손댄"이 아니라 "마지막으로 시작한" 퀘스트다. 정확히 하려면 updated_at 열 + 트리거
+ */
+export function pickContinue(
+  progress: WorldsProgress,
+  rows: readonly ProgressRow[],
+  questsByStage: Record<string, StageQuestItem[]>,
+): ContinueTarget | null {
+  const stageOf = new Map(
+    progress.worlds
+      .flatMap((w) => w.stages)
+      .filter((s) => s.status !== 'locked')
+      .flatMap((s) =>
+        (questsByStage[s.id] ?? []).map((q) => [q.id, s] as const),
+      ),
+  );
+  const recent = rows
+    .filter((r) => r.status !== 'completed' && stageOf.has(r.quest_id))
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))[0];
+  const questId = recent?.quest_id ?? progress.current?.continueQuestId;
+  const stage = questId ? stageOf.get(questId) : undefined;
+  const quest = stage && questsByStage[stage.id].find((q) => q.id === questId);
+  if (!stage || !quest) return null;
+  return {
+    questId: quest.id,
+    questTitle: quest.title,
+    stageOrder: stage.order,
+    stageTitle: stage.title,
+    kind: recent ? 'recent' : rows.length === 0 ? 'start' : 'next',
+  };
 }
 
 export interface WorldMapRaw {
@@ -86,13 +134,15 @@ export function toWorldMapData(
       }));
   }
 
+  const worldsProgress = getWorldStatuses(worlds, raw.stages, progress);
   return {
     profile:
       raw.profile && raw.profile.id === userId
         ? toOwnProfile(raw.profile)
         : null,
-    progress: getWorldStatuses(worlds, raw.stages, progress),
+    progress: worldsProgress,
     questsByStage,
+    continueTarget: pickContinue(worldsProgress, progress, questsByStage),
     completedAt: progress.flatMap((p) =>
       p.status === 'completed' && p.completed_at && !p.used_golden_key
         ? [p.completed_at]

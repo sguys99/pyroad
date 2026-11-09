@@ -160,8 +160,21 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     ).toBe(false);
   });
 
+  it('이어하기 CTA(P5-10): 종류·자리만, 퀘스트 id 등 다른 값은 거부', () => {
+    const ok = { kind: 'recent', place: 'float' };
+    const parse = (props: unknown) =>
+      clientBatchSchema.safeParse(
+        batch([{ name: 'continue_click', props, path: '/world' }]),
+      ).success;
+    expect(parse(ok)).toBe(true);
+    expect(parse({ ...ok, kind: 'later' })).toBe(false);
+    expect(parse({ ...ok, place: 'hud' })).toBe(false);
+    expect(parse({ ...ok, quest_id: 'q1' })).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
+      'continue_click',
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',

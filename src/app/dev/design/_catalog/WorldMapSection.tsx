@@ -16,6 +16,30 @@ import { WorldBook } from '@/components/world/book/WorldBook';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
+import { ContinueButton } from '@/components/world/ContinueCta';
+import type { ContinueTarget } from '@/lib/world/mapData';
+
+// 이어하기 CTA (P5-10): 하다 만 퀘스트 · 다음 차례 · 진행 0 · 긴 퀘스트 이름
+const CTA = (
+  kind: ContinueTarget['kind'],
+  questTitle: string,
+  stageOrder = 3,
+): ContinueTarget => ({
+  questId: 'sample',
+  questTitle,
+  stageOrder,
+  stageTitle: '조건의 갈림길',
+  kind,
+});
+const CTAS: [label: string, target: ContinueTarget][] = [
+  ['하다 만 퀘스트 (recent)', CTA('recent', '따옴표의 비밀')],
+  ['다음 차례 (next)', CTA('next', '만약에 비가 온다면')],
+  ['진행 0 (start)', CTA('start', '파이뱀에게 인사하기', 1)],
+  [
+    '긴 퀘스트 이름 (줄임표)',
+    CTA('recent', '반복문으로 별 모양 피라미드를 아주 높이 쌓아 보기', 4),
+  ],
+];
 
 // 월드 책 표지 상태 4종 (P5-01): 모험 중 · 다 읽음 · 잠김 · 준비 중
 const BOOK = (
@@ -299,6 +323,23 @@ export function WorldMapSection() {
         </div>
       </Demo>
       <Demo
+        label="이어하기 CTA (P5-10)"
+        note="지도 머리 오른쪽 주 버튼(1024px 이상은 이것만) + 1024px 미만은 머리 버튼이 HUD 밑으로 지나가면 아래 가운데 떠 있는 버튼(파이뱀 얼굴). 대상: 열린 스테이지에서 가장 늦게 시작한 미완료 퀘스트 → 없으면 다음 차례 → 진행 0이면 '모험 시작하기'. 다 깼으면 없음. 아래 가운데 쪽지가 뜨면 떠 있는 버튼은 비켜 줌. full 미끄러져 올라옴 · minimal 페이드 · 동작 줄이기 즉시"
+        data-testid="continue-cta-demo"
+      >
+        <div className="grid gap-4">
+          {CTAS.map(([label, target]) => (
+            <div key={label} className="flex flex-wrap items-center gap-3">
+              <span className="w-44 text-caption text-muted-foreground">
+                {label}
+              </span>
+              <ContinueButton target={target} place="head" />
+              <ContinueButton target={target} place="float" />
+            </div>
+          ))}
+        </div>
+      </Demo>
+      <Demo
         label="월드 책 표지 4종 · 지도 머리 (P5-01)"
         note="책장(/worlds)·지도 아래 다음 권 미리 보기가 같이 써요. 모험 중(책갈피 = 지금 읽는 책) · 다 읽었어요 · 잠김(자물쇠, 채도 낮춘 정지 그림) · 준비 중(모래시계). 열린 책은 카드 전체가 지도 링크: full은 표지가 지도 자리로 펼쳐지는 View Transition, lite는 짧은 페이드, minimal·동작 줄이기·미지원 브라우저는 그냥 이동. 360px 아래는 가로 카드, 640px부터 세로 표지"
         data-testid="world-books"
@@ -309,6 +350,7 @@ export function WorldMapSection() {
           no={1}
           completedStages={2}
           totalStages={7}
+          continueTarget={CTAS[0][1]}
         />
         <ol className="wb-shelf">
           {BOOKS.map(([book, unlock, current]) => (

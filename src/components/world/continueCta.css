@@ -1,0 +1,94 @@
+/* 월드맵 이어하기 CTA (P5-10, docs/design/components.md §13-6). `ContinueCta.tsx`가 import한다.
+   토큰 변수만 · 떠 있는 버튼의 들고 나기는 transform·opacity 한 번(반복 없음), minimal은 페이드, 동작 줄이기는 즉시.
+   겹침: z 30 < HUD 40 < 시트·모달 덮개 50 < 토스트 70 */
+
+@layer components {
+  /* 주 버튼 두 줄: "이어서 하기" + "3단계 · 퀘스트 이름" */
+  .wc-btn {
+    --g-btn-h: 3.25rem;
+    --g-btn-px: 1.125rem;
+    max-width: 100%;
+  }
+  /* 좁은 화면: 머리 버튼은 한 줄을 다 쓴다 (통과 수·월드 바꾸기 아래) */
+  @media (max-width: 39.99rem) {
+    .wc-btn[data-continue='head'] {
+      flex: 1 1 100%;
+    }
+  }
+  .wc-text {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    text-align: left;
+  }
+  .wc-sub {
+    overflow: hidden;
+    max-width: 15rem;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    opacity: 0.9;
+  }
+  .wc-face {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-left: -0.5rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+  }
+  .wc-face svg {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* 모바일·태블릿: 아래 가운데 떠 있는 버튼 (머리 버튼이 지나가면 나타남) */
+  .wc-float {
+    position: fixed;
+    /* left 50% 로 두면 줄어드는 폭이 화면 절반이 되어 보조 줄이 잘린다 → 양쪽 0 + 가운데 맞춤 */
+    left: 0;
+    right: 0;
+    width: max-content;
+    margin-inline: auto;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    max-width: calc(100% - 2rem);
+    border-radius: var(--round-m);
+    box-shadow: var(--elev-pop);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(140%);
+    transition:
+      transform var(--dur-base) var(--easing-out),
+      opacity var(--dur-fast) var(--easing-out),
+      visibility 0s linear var(--dur-base);
+  }
+  .wc-float[data-show] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      transform var(--dur-base) var(--easing-out),
+      opacity var(--dur-fast) var(--easing-out),
+      visibility 0s;
+  }
+  /* 아래 가운데 쪽지(토스트)가 떠 있으면 같은 자리라 비켜 준다 */
+  body:has(.g-toast) .wc-float[data-show] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(140%);
+  }
+  .wc-float .wc-sub {
+    max-width: 12rem;
+  }
+}
+
+:root[data-motion='minimal'] .wc-float {
+  transform: none;
+}
+:root[data-reduced='true'] .wc-float {
+  transform: none;
+  transition: none;
+}

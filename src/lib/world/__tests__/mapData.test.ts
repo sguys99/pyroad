@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { toWorldMapData, type WorldMapRaw } from '../mapData';
+import {
+  pickContinue,
+  toWorldMapData,
+  type ProgressRow,
+  type WorldMapRaw,
+} from '../mapData';
 import { WORLDS } from '../worlds';
 
 const ME = 'user-me';
@@ -39,6 +44,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
         best_stars: 3,
         completed_at: '2026-11-08T01:00:00Z',
         used_golden_key: false,
+        created_at: '2026-11-08T00:00:00Z',
       },
       {
         user_id: ME,
@@ -47,6 +53,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
         best_stars: 0,
         completed_at: null,
         used_golden_key: false,
+        created_at: '2026-11-08T00:00:00Z',
       },
       // RLS 가 막지만, 섞여 와도 무시돼야 함
       {
@@ -56,6 +63,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
         best_stars: 2,
         completed_at: '2026-11-08T02:00:00Z',
         used_golden_key: false,
+        created_at: '2026-11-08T00:00:00Z',
       },
     ],
     profile: {
@@ -147,5 +155,80 @@ describe('toWorldMapData (P5-13)', () => {
     expect(
       toWorldMapData(ME, raw({ apiKeys: null }), WORLDS).showApiKeyAlert,
     ).toBe(false);
+  });
+});
+
+describe('이어하기 대상 pickContinue (P5-10)', () => {
+  const stages = [stage('s1', 1, ['q1', 'q2', 'q3']), stage('s2', 2, ['q4'])];
+  const row = (
+    quest_id: string,
+    status: string,
+    created_at = '2026-11-08T00:00:00Z',
+  ): ProgressRow => ({
+    user_id: ME,
+    quest_id,
+    status,
+    best_stars: 0,
+    completed_at: status === 'completed' ? created_at : null,
+    used_golden_key: false,
+    created_at,
+  });
+  const pick = (progress: ProgressRow[]) =>
+    toWorldMapData(ME, { ...raw(), stages, progress }, WORLDS).continueTarget;
+
+  it('진행이 하나도 없으면 첫 퀘스트로 "모험 시작하기"', () => {
+    expect(pick([])).toEqual({
+      questId: 'q1',
+      questTitle: '퀘스트 q1',
+      stageOrder: 1,
+      stageTitle: '스테이지 1',
+      kind: 'start',
+    });
+  });
+
+  it('하던 퀘스트가 없으면 다음 차례 (현재 스테이지 첫 미완료)', () => {
+    expect(pick([row('q1', 'completed')])).toMatchObject({
+      questId: 'q2',
+      kind: 'next',
+    });
+  });
+
+  it('하다 만 퀘스트가 있으면 차례보다 그 퀘스트, 여럿이면 가장 늦게 시작한 것', () => {
+    expect(
+      pick([row('q1', 'completed'), row('q3', 'in_progress')]),
+    ).toMatchObject({ questId: 'q3', kind: 'recent' });
+    expect(
+      pick([
+        row('q1', 'completed'),
+        row('q3', 'in_progress', '2026-11-08T03:00:00Z'),
+        row('q2', 'in_progress', '2026-11-08T05:00:00Z'),
+      ]),
+    ).toMatchObject({ questId: 'q2', kind: 'recent' });
+  });
+
+  it('잠긴 스테이지의 퀘스트는 가리키지 않는다 (진행 행이 남아 있어도)', () => {
+    expect(
+      pick([
+        row('q1', 'completed'),
+        row('q4', 'in_progress', '2026-11-09T00:00:00Z'),
+      ]),
+    ).toMatchObject({ questId: 'q2', kind: 'next', stageOrder: 1 });
+  });
+
+  it('다음 스테이지로 넘어가면 그 스테이지 차례', () => {
+    expect(
+      pick(['q1', 'q2', 'q3'].map((q) => row(q, 'completed'))),
+    ).toMatchObject({ questId: 'q4', stageOrder: 2, kind: 'next' });
+  });
+
+  it('열린 퀘스트를 다 깼으면 없음', () => {
+    expect(
+      pick(['q1', 'q2', 'q3', 'q4'].map((q) => row(q, 'completed'))),
+    ).toBeNull();
+  });
+
+  it('스테이지가 없으면 없음', () => {
+    const empty = toWorldMapData(ME, { ...raw(), stages: [] }, WORLDS);
+    expect(pickContinue(empty.progress, [], {})).toBeNull();
   });
 });

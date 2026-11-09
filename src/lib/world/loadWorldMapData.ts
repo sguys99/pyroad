@@ -44,7 +44,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
     supabase
       .from('user_progress')
       .select(
-        'user_id, quest_id, status, best_stars, completed_at, used_golden_key',
+        'user_id, quest_id, status, best_stars, completed_at, used_golden_key, created_at',
       ),
     supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
     // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음

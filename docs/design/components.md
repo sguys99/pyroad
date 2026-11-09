@@ -343,7 +343,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **크기 단위**: 노드·도장·파이뱀은 지도 1단위(`--u` = `100cqi / 레이아웃 폭`, `.world-map`이 컨테이너)와 랜드마크 배율(`--ns` = `node_scale`, 보스는 `--s` 1.15)로 잡아 지도와 같이 커지고 작아진다. 글자는 고정(이름표 15px · 넓은 지도 16px, 별·잠김·칩 14px)
 - **상태**(`data-state`): `locked` 옅은 면 + `text-muted`(surface-2 위 AA) + "🔒 잠김" · `open` 진행 중인데 아직 0개 · `current` 진행 중 · `clear` 통과 도장(손으로 찍은 기울기). `open`·`current`는 초록 이름표 + 번호 원 둘레 **진행률 링**(완료 퀘스트/전체, 금색 호) + 랜드마크 둘레 점선 고리
 - **보스**(`is_final`, `data-boss`): 지도 랜드마크 1.15배 + 왕관(MapArt `BossCrown`), 이름표에 왕관 아이콘 + 금색 번호 원 + 금색 테. 데이터만 보고 정한다
-- **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(P5-05)에서 걷게 하려면 라이브 `PybaemRig`로 바꾼다
+- **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`. 그쪽이 지도 밖으로 잘리면 반대쪽 — `markerSide`, P5-10, 모든 월드·노드 단위 테스트, `data-testid="world-current-marker"`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(P5-05)에서 걷게 하려면 라이브 `PybaemRig`로 바꾼다
 - **누르기**: 노드 전체가 `<button>`(가로 96px 이상 · 랜드마크부터 별까지, 포커스는 이름표에 3px 링). `aria-label` = "3단계 조건의 갈림길, 도전 중, 지금 여기, 퀘스트 2/8 완료"(SHOW_STARS면 "별 5/24" 추가)(보스는 "(보스 스테이지)"). 잠긴 노드는 `aria-disabled`라 포커스·탭이 되고 누르면 안내 쪽지("2단계를 통과하면 열려요"). 동작은 `WorldMap`의 `useOpenStage()` 한 곳 — 열린 노드는 차례 시트(13-3)
 
 | 연출 | full | lite | minimal | 동작 줄이기 |
@@ -400,11 +400,23 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - 옛 `ProfileSummary` 카드(아바타·Lv·XP·뱃지 5개)는 HUD와 겹쳐 지웠다. 뱃지는 프로필 화면에 있음
 - **카탈로그**: "월드 지도" 절의 "월드맵 HUD (P5-07)" — 스트릭 0·1·7일, 긴 닉네임, 최고 레벨
 
+## 13-6. 이어하기 CTA `ContinueButton` · `ContinueFloat` (P5-10)
+
+"지난번에 하던 퀘스트 계속하기". 코드 `src/components/world/ContinueCta.tsx`(클라이언트), 모양 `continueCta.css`(`.wc-*`), 대상 고르기는 순수 함수 `pickContinue`(`src/lib/world/mapData.ts`, 단위 테스트). 시안 `World.tsx` 머리 오른쪽 "이어서 하기 >".
+
+- **대상**: 열린 스테이지의 미완료 퀘스트 중 진행 행(`user_progress`, 처음 코드를 고칠 때 자동 저장으로 생김)이 가장 늦게 생긴 것(`recent`) → 없으면 다음 차례 = 현재 스테이지의 첫 미완료(`next`) → 진행 행이 하나도 없으면 같은 첫 퀘스트를 "모험 시작하기"(`start`). 잠긴 스테이지 퀘스트는 진행 행이 남아 있어도 고르지 않음(퀘스트 페이지 가드 B38과 같은 판정). 열린 퀘스트를 다 깼으면 버튼 없음(다음 권은 지도 아래 "다음 권 미리 보기"·"월드 바꾸기"가 안내). `user_progress`에 `updated_at`이 없어 "마지막으로 손댄"이 아니라 "마지막으로 시작한" 퀘스트
+- **모양**: 주 버튼 두 줄 — 첫 줄 "이어서 하기"/"모험 시작하기"(Jua), 보조 줄 "3단계 · 퀘스트 이름"(본문 글꼴 캡션, 길면 줄임표) + 오른쪽 꺾쇠. 낭독 이름 "이어서 하기: 3단계 따옴표의 비밀". 주소 `/quest/<id>`
+- **자리**: 지도 머리 오른쪽(월드 바꾸기 다음, 모든 폭). 1024px 미만(세로 지도)은 머리 버튼이 HUD 밑으로 지나가면 아래 가운데 떠 있는 버튼(`ContinueFloat`, 왼쪽에 흰 원 속 파이뱀 얼굴)이 나타나고, 머리가 다시 보이면 숨음. 숨었을 때 `inert`. 페이지 아래 여백 7rem으로 다음 권 미리 보기를 가리지 않음
+- **겹침**: 떠 있는 버튼 z 30 < HUD 40 < 시트·모달 덮개 50 < 토스트 70. 아래 가운데 쪽지(InstallHint·잠긴 스테이지 B38·잠긴 노드)가 떠 있으면 같은 자리라 비켜 줌(`body:has(.g-toast)`), 쪽지가 닫히면 돌아옴. ConsentBanner는 맨 위라 겹치지 않음
+- **연출**: 떠 있는 버튼 들고 나기 한 번 — full·lite = 아래에서 미끄러져 올라옴(`--dur-base`) + 페이드, minimal = 페이드만, 동작 줄이기 = 즉시. 반복 없음
+- **분석**: `continue_click { kind: recent|next|start, place: head|float }` ([docs/analytics.md](../analytics.md)). 퀘스트 id는 보내지 않음
+- **카탈로그**: "월드 지도" 절의 "이어하기 CTA (P5-10)" — recent·next·start·긴 이름 × 머리·떠 있는 버튼. e2e `world-continue.spec.ts`
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
 |---|---|
-| Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
+| Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 월드맵 이어하기(`ContinueButton`, P5-10), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
 | IconButton | HUD 소리 토글(`SoundToggle`)·메뉴(`WorldHud`), 시트·토스트 닫기 |
 | Card | 프로필 카드 4개, 계정 관리 |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
