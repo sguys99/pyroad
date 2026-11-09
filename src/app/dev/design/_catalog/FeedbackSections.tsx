@@ -356,6 +356,7 @@ function TutorChatDemo() {
   const [messages, setMessages] = useState(DEMO_CHAT);
   const [loading, setLoading] = useState(false);
   const [stream, setStream] = useState('');
+  const [askOpen, setAskOpen] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   const at = (ms: number, fn: () => void) =>
@@ -380,6 +381,8 @@ function TutorChatDemo() {
     streamingContent: stream,
     hasApiKey: false,
     canAskWhy: true,
+    askOpen,
+    setAskOpen,
     handleAsk: (q: AskQuestion) => {
       setMessages((m) => [...m, { role: 'student', content: ASK_QUESTIONS[q] }]);
       reply(DEMO_ANSWER[q]);

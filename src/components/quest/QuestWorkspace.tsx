@@ -101,6 +101,8 @@ export function QuestWorkspace({
           mapHref: worldHref,
         }
       : null;
+  // 결과가 지금 코드의 것일 때만 "파이뱀에게 더 물어보기" (고친 코드로는 그 결과를 물을 수 없음)
+  const askTutor = session.canAskWhy ? session.askAboutRun : undefined;
   const notes = hintNotes(
     session.messages,
     session.currentStep,
@@ -212,6 +214,7 @@ export function QuestWorkspace({
               reward={reward}
               goal={goal}
               onShowErrorLine={showErrorLine}
+              onAskTutor={askTutor}
             />
           </div>
 
@@ -241,6 +244,7 @@ export function QuestWorkspace({
               onShowErrorLine={showErrorLine}
               restarting={!!runner.restarting && runner.status === 'loading'}
               reward={reward}
+              onAskTutor={askTutor}
             />
           </div>
         </div>

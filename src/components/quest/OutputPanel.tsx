@@ -15,8 +15,10 @@ import {
   Hand,
   Hourglass,
   Loader2,
+  MessageCircleQuestion,
   Search,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
@@ -203,6 +205,23 @@ export interface OutputPanelProps {
   restarting?: boolean;
   /** 퀘스트를 마쳤으면(완료 응답 뒤) 성공 장면: 도장 쾅 + 보상 띠 + 다음 퀘스트 (P6-08) */
   reward?: QuestReward | null;
+  /** 오류·출력이 다를 때 "파이뱀에게 더 물어보기" (Q56: AI 피드백은 자동으로 부르지 않고 이 버튼으로만) */
+  onAskTutor?: () => void;
+}
+
+function AskMore({ onAsk }: { onAsk: () => void }) {
+  return (
+    <Button
+      variant="secondary"
+      size="sm"
+      icon={<MessageCircleQuestion aria-hidden />}
+      onClick={onAsk}
+      className="qo-ask"
+      data-testid="ask-more"
+    >
+      파이뱀에게 더 물어보기
+    </Button>
+  );
 }
 
 /**
@@ -220,6 +239,7 @@ export function OutputPanel({
   onShowErrorLine,
   restarting = false,
   reward = null,
+  onAskTutor,
 }: OutputPanelProps) {
   const bugFixed = useBugFixed(result);
   const passed = !isRunning && !!result?.success && !!validationResult?.passed;
@@ -322,7 +342,12 @@ export function OutputPanel({
             여기를 한번 살펴볼까요?
           </Chip>
         }
-        after={<BugbugAside stderr={result.stderr} />}
+        after={
+          <BugbugAside
+            stderr={result.stderr}
+            action={onAskTutor && <AskMore onAsk={onAskTutor} />}
+          />
+        }
       >
         <div className="qo-err" data-testid="output-error">
           {line && <span className="qo-err-line">{line}번째 줄</span>}
@@ -386,6 +411,7 @@ export function OutputPanel({
               <p className="qo-tip">
                 {mismatchTip(validationResult.type, result.stdout)}
               </p>
+              {onAskTutor && <AskMore onAsk={onAskTutor} />}
             </div>
           )}
         </>

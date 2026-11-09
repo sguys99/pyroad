@@ -482,6 +482,51 @@ describe('useQuestSession: 실행·채점·완료', () => {
     });
   });
 
+  it('오류·오답 실행은 AI 피드백을 자동으로 부르지 않고, 더 물어보기를 누르면 대화를 열고 그 결과로 묻는다 (Q56)', async () => {
+    const ERR = 'Traceback\nNameError: name x is not defined';
+    mocks.runtime.runCode.mockResolvedValue({
+      stdout: '',
+      stderr: ERR,
+      success: false,
+      hadException: true,
+      outcome: 'error',
+    });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    act(() => result.current.setCode('print(x)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+
+    // 출력이 다름도 자동 호출 없음
+    mocks.runtime.runCode.mockResolvedValue(OK_RUN);
+    routes['/api/quest/validate'] = () => ({ json: { passed: false } });
+    act(() => result.current.setCode('print(1)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+
+    expect(result.current.askOpen).toBe(false);
+    await act(async () => {
+      result.current.askAboutRun();
+      await flush();
+    });
+    expect(result.current.askOpen).toBe(true);
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'code_feedback',
+      quest_id: 'q-code',
+      student_code: 'print(1)',
+      execution_result: { stdout: '10\n', stderr: '', passed: false },
+    });
+  });
+
   it('멈추기로 끝난 실행은 채점·튜터 피드백을 하지 않는다', async () => {
     mocks.runtime.runCode.mockResolvedValue({
       stdout: '1\n',
@@ -821,7 +866,7 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
     });
   });
 
-  it('오답 피드백이 한도에 걸리면 한도 문구', async () => {
+  it('더 물어본 오답 피드백이 한도에 걸리면 한도 문구', async () => {
     routes['/api/quest/validate'] = () => ({ json: { passed: false } });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
@@ -839,6 +884,10 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
       await result.current.handleRun();
       await flush();
     });
+    await act(async () => {
+      result.current.askAboutRun();
+      await flush();
+    });
     expect(result.current.messages.at(-1)).toEqual({
       role: 'tutor',
       content: LIMIT,
@@ -846,7 +895,7 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
     });
   });
 
-  it('오답 피드백이 다른 이유로 실패하면 준비한 문구 (저장된 답변)', async () => {
+  it('더 물어본 오답 피드백이 다른 이유로 실패하면 준비한 문구 (저장된 답변)', async () => {
     routes['/api/quest/validate'] = () => ({ json: { passed: false } });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
@@ -861,6 +910,10 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
     act(() => result.current.setCode('x = 1\nprint(x)'));
     await act(async () => {
       await result.current.handleRun();
+      await flush();
+    });
+    await act(async () => {
+      result.current.askAboutRun();
       await flush();
     });
     expect(result.current.messages.at(-1)).toMatchObject({

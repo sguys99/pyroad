@@ -29,7 +29,14 @@ const BugBugRig = dynamic(
  * 쉬운 설명은 이야기 쪽 파이뱀 대사창이 하고, 이야기 쪽이 안 보이는 lg 미만에서만 여기 파이뱀 쪽지로 한 번 더 보여 준다.
  * 효과음 자리(P6-14): 등장 순간 `useSfx` 'bug' (지금은 세션이 결과를 받자마자 재생)
  */
-export function BugbugAside({ stderr }: { stderr: string }) {
+export function BugbugAside({
+  stderr,
+  action,
+}: {
+  stderr: string;
+  /** 설명 아래 "파이뱀에게 더 물어보기" (Q56: AI 피드백은 아이가 원할 때만) */
+  action?: React.ReactNode;
+}) {
   const { tier, reduced } = useMotionTier();
   const { line, text } = explainError(stderr);
   const state: BugBugState = !reduced && tier === 'full' ? 'appear' : 'found';
@@ -60,6 +67,7 @@ export function BugbugAside({ stderr }: { stderr: string }) {
           {text}
         </SpeechBubble>
       </div>
+      {action}
     </div>
   );
 }

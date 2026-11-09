@@ -237,13 +237,14 @@ export function OutputPanelSection() {
     },
     {
       label: '출력이 다름',
-      note: '금색 면 · 공개 안내(해 볼 일)와 견줘 보기 + 규칙 유형별 살펴볼 거리. 정답 기준값은 보여 주지 않음',
+      note: '금색 면 · 공개 안내(해 볼 일)와 견줘 보기 + 규칙 유형별 살펴볼 거리 + "파이뱀에게 더 물어보기"(Q56). 정답 기준값은 보여 주지 않음',
       node: (
         <OutputPanel
           result={{ ...ok, stdout: '안녕하세요\n' }}
           isRunning={false}
           validationResult={{ passed: false, type: 'output_match' }}
           goal="안녕하세요! 가 출력되어야 해요"
+          onAskTutor={noop}
         />
       ),
     },
@@ -261,7 +262,7 @@ export function OutputPanelSection() {
     },
     {
       label: '오류',
-      note: '옅은 빨강 면 · 몇 번째 줄 + 마지막 한 줄 · 줄로 가기 · 전체 메시지는 접음. 아래에 버그버그 등장(P6-07, 아래 절)',
+      note: '옅은 빨강 면 · 몇 번째 줄 + 마지막 한 줄 · 줄로 가기 · 전체 메시지는 접음. 아래에 버그버그 등장(P6-07, 아래 절) + "파이뱀에게 더 물어보기"(Q56: AI 피드백은 누를 때만)',
       node: (
         <OutputPanel
           result={{
@@ -272,6 +273,7 @@ export function OutputPanelSection() {
           }}
           isRunning={false}
           onShowErrorLine={noop}
+          onAskTutor={noop}
         />
       ),
     },

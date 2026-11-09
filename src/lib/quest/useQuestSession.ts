@@ -106,9 +106,6 @@ const ANSWER_CONFETTI = {
   startVelocity: 60,
 };
 
-const RUN_ERROR_FEEDBACK =
-  '앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪';
-const WRONG_ANSWER_FEEDBACK = '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
 /**
  * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10). 자유 입력 대신 정해진 질문만: 이미 있는 튜터 유형으로 답하므로
  * 새 프롬프트·금칙어 검사가 필요 없다. what = 퀘스트(프로젝트는 지금 단계) 설명, why = 마지막 실행 결과 설명
@@ -336,7 +333,7 @@ export function useQuestSession({
 
   /**
    * 튜터 답을 말풍선에 흘려 쓴다. 실패하면 준비한 문구, 요청 한도(P1-19)에 걸렸으면 한도 문구. 취소(null)면 아무것도 하지 않음.
-   * 실행 피드백(오답·실행 오류)에만 쓴다: 아이가 누른 버튼에 대한 답이라 "왜 선생님이 대답하지 않는지"를 알려 준다
+   * "파이뱀에게 물어보기" 질문에만 쓴다 (Q56부터 실행 피드백도 버튼으로만): 아이가 누른 버튼에 대한 답이라 "왜 선생님이 대답하지 않는지"를 알려 준다
    */
   const streamTutor = useCallback(
     (req: TutorRequest, failText: string) =>
@@ -685,22 +682,10 @@ export function useQuestSession({
       // 아이가 멈추기를 눌렀음 → 채점·피드백 없이 끝
       if (result.isStopped) return 'stay';
 
-      // 실행 에러 (구문 에러·시간 초과 등). 효과음은 장난스러운 버그버그 소리 (경고 부저 대신, P0-15)
+      // 실행 에러 (구문 에러·시간 초과 등). 효과음은 장난스러운 버그버그 소리 (경고 부저 대신, P0-15).
+      // AI 피드백은 자동으로 부르지 않는다 (§12-Q56): 규칙표 설명(errorExplain)이 바로 보이고, 더 묻고 싶으면 askAboutRun
       if (!result.success) {
         play('bug');
-        streamTutor(
-          {
-            type: 'code_feedback',
-            quest_id: questId,
-            student_code: codeToRun,
-            execution_result: {
-              stdout: result.stdout,
-              stderr: result.stderr,
-              passed: false,
-            },
-          },
-          RUN_ERROR_FEEDBACK,
-        );
         return 'stay';
       }
 
@@ -711,21 +696,9 @@ export function useQuestSession({
         type: steps?.[step - 1]?.validation_type ?? questValidationType,
       });
 
+      // 출력이 다름: 결과 쪽지 견줘 보기 + 대사창이 바로 안내하고, AI 피드백은 버튼으로만 (Q56)
       if (!passed) {
         play('wrong');
-        streamTutor(
-          {
-            type: 'code_feedback',
-            quest_id: questId,
-            student_code: codeToRun,
-            execution_result: {
-              stdout: result.stdout,
-              stderr: '',
-              passed: false,
-            },
-          },
-          WRONG_ANSWER_FEEDBACK,
-        );
         return 'stay';
       }
 
@@ -763,7 +736,6 @@ export function useQuestSession({
       totalSteps,
       liveOutput,
       runCode,
-      streamTutor,
       askTutor,
       validate,
       completeWith,
@@ -920,6 +892,13 @@ export function useQuestSession({
       play,
     ],
   );
+
+  // 결과 쪽지의 "파이뱀에게 더 물어보기" (Q56): 대화를 펼치고 그 실행 결과로 묻는다
+  const [askOpen, setAskOpen] = useState(false);
+  const askAboutRun = useCallback(() => {
+    setAskOpen(true);
+    handleAsk('why');
+  }, [handleAsk]);
 
   // ── 황금키 ──────────────────────────────────────────────────────────
 
@@ -1084,6 +1063,11 @@ export function useQuestSession({
     handleAsk,
     /** 마지막 실행 결과가 지금 코드의 것인지 ("왜 이렇게 나왔어요?") */
     canAskWhy,
+    /** "파이뱀에게 물어보기" 대화가 펼쳐져 있는지 (결과 쪽지 버튼이 열 수 있게 세션에 둠) */
+    askOpen,
+    setAskOpen,
+    /** 결과 쪽지 "파이뱀에게 더 물어보기": 대화를 열고 마지막 실행으로 code_feedback (Q56) */
+    askAboutRun,
 
     goldenKeys,
     usedGoldenKey,

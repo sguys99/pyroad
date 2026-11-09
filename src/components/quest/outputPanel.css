@@ -235,6 +235,11 @@
   line-height: var(--text-small--line-height);
 }
 
+/* "파이뱀에게 더 물어보기" (Q56): 견줘 보기·버그버그 설명 아래 왼쪽 */
+.qo-ask {
+  justify-self: start;
+}
+
 /* 줄 카드 등장 (일회성): full = body 스프링으로 차례로 튀어나옴, lite = 짧게, minimal·동작 줄이기 = 없음(바로 보임) */
 @keyframes qo-pop {
   from {

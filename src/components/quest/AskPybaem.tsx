@@ -56,7 +56,8 @@ export function AskPybaem({ session, hintPending }: AskPybaemProps) {
     () => window.matchMedia?.(DESKTOP_QUERY).matches ?? false,
     () => false,
   );
-  const [open, setOpen] = useState(false);
+  // 결과 쪽지의 "파이뱀에게 더 물어보기"(Q56)도 열 수 있게 세션 상태
+  const { askOpen: open, setAskOpen: setOpen } = session;
 
   // 파이뱀 말 + 알림(단계 시작·황금키·저장 실패). 아이 질문과 힌트 쪽지는 세지 않음
   const said = messages.filter((m) => m.role !== 'student' && !m.hint);

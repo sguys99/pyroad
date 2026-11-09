@@ -110,6 +110,8 @@ interface CodePanelProps {
   goal?: string;
   /** 결과 쪽지의 "N번째 줄 보러 가기" */
   onShowErrorLine?: (line: number) => void;
+  /** 결과 쪽지 "파이뱀에게 더 물어보기" (Q56) */
+  onAskTutor?: () => void;
 }
 
 export function CodePanel({
@@ -131,6 +133,7 @@ export function CodePanel({
   reward,
   goal,
   onShowErrorLine,
+  onAskTutor,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const showKeyboard = useSyncExternalStore(
@@ -186,6 +189,7 @@ export function CodePanel({
         goal={goal}
         onShowErrorLine={onShowErrorLine}
         reward={reward}
+        onAskTutor={onAskTutor}
       />
     </div>
   );
