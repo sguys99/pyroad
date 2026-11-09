@@ -12,7 +12,6 @@ import { ConversationPanel } from './ConversationPanel';
 import { StoryPage } from './StoryPage';
 import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel } from './CodePanel';
-import { RunnerWakingNotice } from './RunControls';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { QuestCelebrations } from './QuestCelebrations';
@@ -54,6 +53,24 @@ export function QuestWorkspace({
 }: QuestWorkspaceProps) {
   const { quest, tab, setTab, runner, runResult, validation, liveOutput } =
     session;
+  // 결과 쪽지에서 견줘 볼 공개 안내 (P6-06): 프로젝트는 지금 단계 목표, 코드 퀘스트는 expected_output_hint
+  const goal = session.steps?.length
+    ? session.steps[session.currentStep - 1]?.step_goal
+    : quest.prompt_skeleton.expected_output_hint;
+  // 오류 줄로: 모바일은 공책 쪽으로 넘기고, 에디터에 표시된 오류 줄(P2-18)을 화면 가운데로
+  const showErrorLine = () => {
+    setTab('code');
+    requestAnimationFrame(() => {
+      const row = document.querySelector<HTMLElement>(
+        '#quest-page-notebook [data-error-line]',
+      );
+      row?.scrollIntoView({ block: 'center' });
+      row
+        ?.closest('.cm-editor')
+        ?.querySelector<HTMLElement>('.cm-content')
+        ?.focus({ preventScroll: true });
+    });
+  };
   const notes = hintNotes(
     session.messages,
     session.currentStep,
@@ -168,6 +185,8 @@ export function QuestWorkspace({
               isCodeEmpty={session.isCodeEmpty}
               validationResult={validation}
               nextQuestId={nextQuestId}
+              goal={goal}
+              onShowErrorLine={showErrorLine}
             />
           </div>
 
@@ -188,14 +207,14 @@ export function QuestWorkspace({
                 멈추기
               </Button>
             )}
-            {runner.restarting && runner.status === 'loading' && (
-              <RunnerWakingNotice reason={runner.restarting} />
-            )}
             <OutputPanel
               result={runResult}
               isRunning={runner.isRunning}
               validationResult={validation}
               liveOutput={liveOutput}
+              goal={goal}
+              onShowErrorLine={showErrorLine}
+              restarting={!!runner.restarting && runner.status === 'loading'}
             />
             {validation?.passed && nextQuestId && (
               <Button href={`/quest/${nextQuestId}`} className="w-full">

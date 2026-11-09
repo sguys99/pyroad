@@ -67,13 +67,25 @@ test.describe('퀘스트 전체 플로우', () => {
     // 4~7. 에디터 + 실행기 준비 → 정답 실행
     await expect(page.locator('.cm-editor')).toBeVisible();
     await expect(outputPanel(page)).toHaveAttribute('data-state', 'empty');
+    const output = outputPanel(page);
+
+    // 결과 쪽지(P6-06): 돌아갔지만 글자가 다르면 "조금 달라요" + 공개 안내(해 볼 일)와 견줘 보기. 정답 기준값은 없음
+    await runCode(page, 'print("틀린 글자")');
+    await expect(output).toHaveAttribute('data-verdict', 'diff');
+    await expect(output).toContainText('조금 달라요');
+    await expect(output.locator('.qo-line')).toHaveText(['틀린 글자']);
+    await expect(output.getByTestId('output-compare')).toContainText(
+      quest1.expectedHint,
+    );
+
     await runCode(page, quest1.solution);
 
-    // 8~9. 결과 패널: 출력 + 정답
-    const output = outputPanel(page);
+    // 8~9. 결과 패널: 출력 + 정답 (견줘 보기는 사라짐)
     await expect(output).toHaveAttribute('data-state', 'success');
+    await expect(output).toHaveAttribute('data-verdict', 'pass');
     await expect(output).toContainText('안녕하세요');
     await expect(output).toContainText('정답이에요!');
+    await expect(output.getByTestId('output-compare')).toHaveCount(0);
     // 통과하면 해 볼 일이 모두 체크된다
     await expect(task.locator('li:not([data-done])')).toHaveCount(0);
     // 통과하면 지금 점이 바로 완료로 (세션 상태)

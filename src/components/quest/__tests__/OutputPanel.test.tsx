@@ -1,11 +1,23 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from 'vitest';
-import { render, screen, cleanup, act } from '@testing-library/react';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import {
+  render,
+  screen,
+  cleanup,
+  act,
+  fireEvent,
+  within,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { OutputPanel } from '../OutputPanel';
 import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
 
 afterEach(cleanup);
+
+const lineTexts = (list: HTMLElement) =>
+  within(list)
+    .getAllByRole('listitem')
+    .map((li) => li.textContent);
 
 describe('OutputPanel', () => {
   it('실행 중: 출력 조각을 바로 보여 주고 맨 아래로 스크롤한다', () => {
@@ -24,7 +36,7 @@ describe('OutputPanel', () => {
       configurable: true,
     });
     act(() => store.append('2\n'));
-    expect(pre()).toHaveTextContent('1 2');
+    expect(lineTexts(pre())).toEqual(['1', '2']);
     expect(pre().scrollTop).toBe(480);
   });
 
@@ -55,7 +67,7 @@ describe('OutputPanel', () => {
       'timeout',
     );
     expect(screen.getByText(/무한 반복이 있는지/)).toBeInTheDocument();
-    expect(screen.getByText(/0\s+1/)).toBeInTheDocument();
+    expect(lineTexts(screen.getByRole('list'))).toEqual(['0', '1']);
   });
 
   it('출력 상한(B15)으로 멈춤: 끝없는 print 안내', () => {
@@ -78,18 +90,103 @@ describe('OutputPanel', () => {
     expect(screen.getByText('앗, 출력이 너무 많아요!')).toBeInTheDocument();
   });
 
-  it('성공·정답은 그대로', () => {
+  it('통과: 줄마다 카드 + "통과! 정답이에요!" 딱지, 견줘 보기는 없음', () => {
     render(
       <OutputPanel
         result={{ stdout: '10\n', stderr: '', success: true, outcome: 'ok' }}
         isRunning={false}
         validationResult={{ passed: true }}
+        goal="10 이 출력되어야 해요"
+      />,
+    );
+    const panel = screen.getByTestId('output-panel');
+    expect(panel).toHaveAttribute('data-state', 'success');
+    expect(panel).toHaveAttribute('data-verdict', 'pass');
+    expect(screen.getByText('통과! 정답이에요!')).toBeInTheDocument();
+    expect(lineTexts(screen.getByRole('list'))).toEqual(['10']);
+    expect(screen.queryByTestId('output-compare')).toBeNull();
+  });
+
+  it('출력이 다름: 공개 안내(해 볼 일)와 규칙 유형별 살펴볼 거리로 견줘 본다', () => {
+    render(
+      <OutputPanel
+        result={{ stdout: '안녕\n', stderr: '', success: true, outcome: 'ok' }}
+        isRunning={false}
+        validationResult={{ passed: false, type: 'output_match' }}
+        goal="안녕하세요! 가 출력되어야 해요"
+      />,
+    );
+    expect(screen.getByTestId('output-panel')).toHaveAttribute(
+      'data-verdict',
+      'diff',
+    );
+    expect(screen.getByText('조금 달라요')).toBeInTheDocument();
+    const compare = screen.getByTestId('output-compare');
+    expect(compare).toHaveTextContent('안녕하세요! 가 출력되어야 해요');
+    expect(compare).toHaveTextContent('한 글자씩 견줘 봐요');
+  });
+
+  it('오류: 몇 번째 줄 · 마지막 한 줄 요약, 줄로 가기, 전체 메시지는 접어 둠', () => {
+    const onShow = vi.fn();
+    const stderr =
+      'Traceback (most recent call last):\n  File "<exec>", line 2, in <module>\nNameError: name \'y\' is not defined\n';
+    render(
+      <OutputPanel
+        result={{ stdout: '1\n', stderr, success: false, hadException: true }}
+        isRunning={false}
+        onShowErrorLine={onShow}
+        errorAside={<p>P6-07 자리</p>}
       />,
     );
     expect(screen.getByTestId('output-panel')).toHaveAttribute(
       'data-state',
-      'success',
+      'error',
     );
-    expect(screen.getByText('정답이에요!')).toBeInTheDocument();
+    expect(screen.getByTestId('output-error')).toHaveTextContent(
+      "2번째 줄NameError: name 'y' is not defined",
+    );
+    expect(screen.getByTestId('bugbug-helper')).toBeInTheDocument();
+    expect(screen.getByText('오류 메시지 전체 보기')).toBeInTheDocument();
+    expect(screen.getByText('P6-07 자리')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('show-error-line'));
+    expect(onShow).toHaveBeenCalledWith(2);
+  });
+
+  it('실행이 끝나도 실시간으로 나온 줄은 그대로 (다시 튀지 않음)', () => {
+    const store = createLiveOutputStore();
+    const { rerender } = render(
+      <OutputPanel result={null} isRunning liveOutput={store} />,
+    );
+    act(() => store.append('a\n'));
+    const first = screen.getByRole('listitem');
+    rerender(
+      <OutputPanel
+        result={{ stdout: 'a\nb\n', stderr: '', success: true, outcome: 'ok' }}
+        isRunning={false}
+        liveOutput={store}
+      />,
+    );
+    const items = screen.getAllByRole('listitem');
+    expect(items[0]).toBe(first);
+    expect(items.map((li) => li.textContent)).toEqual(['a', 'b']);
+  });
+
+  it('결과 쪽 재준비는 쪽지 안 한 줄로', () => {
+    render(
+      <OutputPanel
+        result={{
+          stdout: '',
+          stderr: '',
+          success: false,
+          isStopped: true,
+          outcome: 'stopped',
+        }}
+        isRunning={false}
+        restarting
+      />,
+    );
+    expect(screen.getByTestId('runner-waking-inline')).toHaveTextContent(
+      '다시 펼치는 중',
+    );
   });
 });

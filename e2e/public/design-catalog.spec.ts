@@ -105,6 +105,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'rig',
       'editor',
       'run-controls',
+      'output-slip',
       'share-card',
       'sound',
       'legal',
@@ -338,10 +339,15 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
     page,
   }) => {
     const expected = {
-      full: { toast: 'g-toast-in', shine: true, caret: true },
-      lite: { toast: 'g-toast-in-lite', shine: true, caret: true },
-      minimal: { toast: 'g-fade-in', shine: false, caret: false },
-      reduced: { toast: 'none', shine: false, caret: false },
+      full: { toast: 'g-toast-in', shine: true, caret: true, pop: 'qo-pop' },
+      lite: {
+        toast: 'g-toast-in-lite',
+        shine: true,
+        caret: true,
+        pop: 'qo-pop-lite',
+      },
+      minimal: { toast: 'g-fade-in', shine: false, caret: false, pop: 'none' },
+      reduced: { toast: 'none', shine: false, caret: false, pop: 'none' },
     };
     for (const mode of MOTION_MODES.slice(0, 4)) {
       const want = expected[mode.reduced === 'on' ? 'reduced' : mode.tier];
@@ -408,6 +414,16 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       }
       await expect(dialogue).not.toHaveAttribute('data-typing');
       await expect(dialogue.locator('.g-bubble-rest')).toHaveText('');
+
+      // 결과 쪽지 줄 카드 등장 (P6-06): full 스프링 · lite 짧게 · minimal·동작 줄이기 없음, 긴 출력은 앞 12줄만
+      const slipLine = page
+        .locator('section#output-slip [data-verdict="pass"] .qo-line')
+        .first();
+      await expect(slipLine).toHaveClass(/qo-pop/);
+      expect(
+        await slipLine.evaluate((el) => getComputedStyle(el).animationName),
+        `${mode.name} 줄 카드`,
+      ).toBe(want.pop);
     }
   });
 });

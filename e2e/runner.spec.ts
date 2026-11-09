@@ -147,10 +147,14 @@ test.describe('Python 실행기', () => {
     await expect(output).toHaveAttribute('data-state', 'error');
     await expect(output).toContainText('NameError');
     await expect(runButton(page)).toBeEnabled();
+    // 결과 쪽지(P6-06): 몇 번째 줄 + 마지막 한 줄 요약, 그 줄로 가기
+    await expect(output.getByTestId('output-error')).toContainText('2번째 줄');
 
     // 오류가 난 줄(2)에 띠·줄 번호 표시, 고치기 시작하면 사라진다 (P2-18·P6-03)
     const errLine = page.locator('.cm-line[data-error-line]:visible');
     await expect(errLine).toHaveText('print(undefined_var)');
+    await output.getByTestId('show-error-line').click();
+    await expect(errLine).toBeInViewport();
     await expect(
       page.locator('.cm-gutterElement.cm-errorLineGutter:visible'),
     ).toHaveText('2');

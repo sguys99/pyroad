@@ -37,30 +37,29 @@ test.describe('퀘스트 캐릭터 표정 변화', () => {
     await expect(thinkingOrResult.first()).toBeVisible();
   });
 
-  test('코드 실행 성공 시 celebrating 표정이 표시된다', async ({ page }) => {
+  test('코드 실행 성공 시 통과 쪽지 + 파이뱀 축하 대사', async ({ page }) => {
     // 첫 퀘스트의 정답 코드 입력
     await runCode(page, quest.solution);
 
-    // 결과 패널의 파이뱀이 축하 표정 (정답)
+    // 결과 쪽지는 통과, 파이뱀은 이야기 쪽 대사창에서 축하 (P6-06: 결과 쪽지에는 파이뱀 얼굴을 두지 않음)
     const output = page.getByTestId('output-panel').first();
     await expect(output).toHaveAttribute('data-state', 'success');
-    await expect(
-      output.getByTestId('character-avatar-pybaem-celebrating'),
-    ).toBeVisible();
+    await expect(output).toHaveAttribute('data-verdict', 'pass');
+    await expect(page.getByTestId('quest-dialogue')).toContainText('해냈어요');
   });
 
-  test('코드 실행 오류 시 encouraging 표정 + BugBug가 표시된다', async ({
+  test('코드 실행 오류 시 파이뱀 다독임 + BugBug가 표시된다', async ({
     page,
   }) => {
     // 일부러 에러 코드 입력
     await runCode(page, 'print(undefined_var)');
 
-    // 에러 시 encouraging 표정 확인
+    // 에러 시 파이뱀은 대사창에서 다독임 (P6-06: 결과 쪽지에는 파이뱀 얼굴을 두지 않음)
     const output = page.getByTestId('output-panel').first();
     await expect(output).toHaveAttribute('data-state', 'error');
-    await expect(
-      output.getByTestId('character-avatar-pybaem-encouraging'),
-    ).toBeVisible();
+    await expect(page.getByTestId('quest-dialogue')).toContainText(
+      '버그는 고치라고',
+    );
 
     // BugBug 디버깅 헬퍼 등장 확인
     await expect(output.getByTestId('bugbug-helper')).toBeVisible();

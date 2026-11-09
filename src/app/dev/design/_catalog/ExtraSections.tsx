@@ -1,7 +1,13 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Code2, ExternalLink, Music, Volume2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Code2,
+  ExternalLink,
+  Music,
+  RotateCcw,
+  Volume2,
+} from 'lucide-react';
 import {
   useSfx,
   useSoundSettings,
@@ -27,6 +33,8 @@ import {
 } from '@/components/quest/CodeEditor';
 import CodeKeyboard from '@/components/quest/CodeKeyboard';
 import { MotionProvider } from '@/components/providers/MotionProvider';
+import { OutputPanel } from '@/components/quest/OutputPanel';
+import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
 import { CodeSample, Demo, Section } from './ui';
 
 /** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다 */
@@ -173,6 +181,158 @@ export function RunControlsSection() {
       />
     </Section>
     </MotionProvider>
+  );
+}
+
+const SLIP_ERR =
+  'Traceback (most recent call last):\n  File "<exec>", line 3, in <module>\nNameError: name \'nmae\' is not defined\n';
+
+/** 실행 중 견본: 줄이 하나씩 흘러 들어온다 */
+function LiveSlipDemo() {
+  const [store] = useState(() => createLiveOutputStore());
+  useEffect(() => {
+    store.reset();
+    const timers = ['반복 0', '반복 1', '반복 2'].map((line, i) =>
+      setTimeout(() => store.append(`${line}\n`), (i + 1) * 600),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [store]);
+  return <OutputPanel result={null} isRunning liveOutput={store} />;
+}
+
+/** 결과 쪽지 견본 (P6-06). "다시 튀어나오기"로 줄 카드 등장 연출을 다시 본다 */
+export function OutputPanelSection() {
+  const [round, setRound] = useState(0);
+  const ok = { stderr: '', success: true, outcome: 'ok' as const };
+  const states = [
+    {
+      label: '아직 안 돌림',
+      note: '옅은 회색 쪽지 · 안내 한 줄',
+      node: <OutputPanel result={null} isRunning={false} />,
+    },
+    {
+      label: '실행 중 (실시간 출력)',
+      note: '돌아가는 중 딱지(바쁨 표시) · 줄이 오는 대로 카드로',
+      node: <LiveSlipDemo />,
+    },
+    {
+      label: '통과',
+      note: '초록 면 · "통과! 정답이에요!" 딱지 · 줄마다 흰 카드',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '나는 파이썬 모험가!\n반가워!\n' }}
+          isRunning={false}
+          validationResult={{ passed: true }}
+        />
+      ),
+    },
+    {
+      label: '출력이 다름',
+      note: '금색 면 · 공개 안내(해 볼 일)와 견줘 보기 + 규칙 유형별 살펴볼 거리. 정답 기준값은 보여 주지 않음',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '안녕하세요\n' }}
+          isRunning={false}
+          validationResult={{ passed: false, type: 'output_match' }}
+          goal="안녕하세요! 가 출력되어야 해요"
+        />
+      ),
+    },
+    {
+      label: '출력이 다름 · 아무것도 안 나옴',
+      note: 'print를 빠뜨렸을 때',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '' }}
+          isRunning={false}
+          validationResult={{ passed: false, type: 'output_match' }}
+          goal="2026 이 출력되어야 해요"
+        />
+      ),
+    },
+    {
+      label: '오류',
+      note: '옅은 빨강 면 · 몇 번째 줄 + 마지막 한 줄 · 줄로 가기 · 전체 메시지는 접음. 버그버그 등장·설명은 P6-07',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '마법 상자 준비!\n',
+            stderr: SLIP_ERR,
+            success: false,
+            hadException: true,
+          }}
+          isRunning={false}
+          onShowErrorLine={noop}
+        />
+      ),
+    },
+    {
+      label: '시간 초과',
+      note: '차분한 회색 · 멈추기 전까지 나온 글자',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '0\n1\n2\n',
+            stderr: '',
+            success: false,
+            isTimeout: true,
+            outcome: 'timeout',
+          }}
+          isRunning={false}
+        />
+      ),
+    },
+    {
+      label: '멈춤 · 결과 쪽에서 재준비',
+      note: '모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '반복 0\n반복 1\n',
+            stderr: '',
+            success: false,
+            isStopped: true,
+            outcome: 'stopped',
+          }}
+          isRunning={false}
+          restarting
+        />
+      ),
+    },
+  ];
+  return (
+    <Section
+      id="output-slip"
+      kicker="퀘스트 (P6-06)"
+      title="결과 쪽지 · 나온 글자"
+      description="공책 쪽 결과(OutputPanel). 나온 글자는 줄마다 흰 카드로 튀어나와요: full은 body 스프링으로 차례로(앞 12줄만), lite는 짧게, minimal·동작 줄이기는 바로 보여요. 출력이 다를 때는 정답 기준값(서버 전용) 대신 해 볼 일의 공개 안내와 규칙 유형별 살펴볼 거리로 견줘 봐요."
+    >
+      <Button
+        onClick={() => setRound((r) => r + 1)}
+        variant="secondary"
+        size="sm"
+        sfx={false}
+        icon={<RotateCcw aria-hidden />}
+        data-testid="output-slip-replay"
+      >
+        다시 튀어나오기
+      </Button>
+      <div className="mt-4 grid items-start gap-4 md:grid-cols-2">
+        {states.map((s) => (
+          <Demo
+            key={`${s.label}-${round}`}
+            label={s.label}
+            note={s.note}
+            surface="card"
+          >
+            {s.node}
+          </Demo>
+        ))}
+      </div>
+      <CodeSample
+        code={`<OutputPanel result={runResult} isRunning={runner.isRunning} validationResult={validation}\n  liveOutput={liveOutput} goal={goal} onShowErrorLine={showErrorLine} />`}
+      />
+    </Section>
   );
 }
 

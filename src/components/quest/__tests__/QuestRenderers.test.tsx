@@ -6,6 +6,7 @@ import {
   act,
   cleanup,
   fireEvent,
+  within,
 } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
@@ -206,7 +207,11 @@ describe('퀘스트 렌더러 스모크', () => {
     expect(stop).toHaveTextContent('멈추기');
 
     act(() => onStdout('1\n2\n'));
-    expect(screen.getAllByTestId('live-output')[0]).toHaveTextContent('1 2');
+    expect(
+      within(screen.getAllByTestId('live-output')[0])
+        .getAllByRole('listitem')
+        .map((li) => li.textContent),
+    ).toEqual(['1', '2']);
 
     fireEvent.click(stop);
     expect(mocks.runtime.stop).toHaveBeenCalledTimes(1);

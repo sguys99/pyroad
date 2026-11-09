@@ -8,7 +8,7 @@ import { framerSpring, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { errorLineFromStderr } from '@/lib/editor/errorLine';
-import { OutputPanel } from './OutputPanel';
+import { OutputPanel, type OutputPanelProps } from './OutputPanel';
 import type {
   PyodideRestartReason,
   PyodideStatus,
@@ -105,8 +105,12 @@ interface CodePanelProps {
   /** 실행 중 stdout */
   liveOutput?: LiveOutputStore;
   isCodeEmpty: boolean;
-  validationResult?: { passed: boolean } | null;
+  validationResult?: OutputPanelProps['validationResult'];
   nextQuestId?: string | null;
+  /** 결과 쪽지 견줘 보기에 쓰는 공개 안내 (P6-06) */
+  goal?: string;
+  /** 결과 쪽지의 "N번째 줄 보러 가기" */
+  onShowErrorLine?: (line: number) => void;
 }
 
 export function CodePanel({
@@ -126,6 +130,8 @@ export function CodePanel({
   isCodeEmpty,
   validationResult,
   nextQuestId,
+  goal,
+  onShowErrorLine,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const showKeyboard = useSyncExternalStore(
@@ -178,6 +184,8 @@ export function CodePanel({
         isRunning={isRunning}
         validationResult={validationResult}
         liveOutput={liveOutput}
+        goal={goal}
+        onShowErrorLine={onShowErrorLine}
       />
 
       {/* 다음 퀘스트 버튼 */}
