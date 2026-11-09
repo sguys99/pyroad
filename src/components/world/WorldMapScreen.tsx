@@ -4,7 +4,7 @@ import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { StageLockedNotice } from '@/components/world/StageLockedNotice';
 import { InstallHint } from '@/components/pwa/InstallHint';
-import { WorldBgm } from '@/components/sound/WorldBgm';
+import { PrefetchBgm, WorldBgm } from '@/components/sound/WorldBgm';
 import { LockedBook } from '@/components/world/book/LockedBook';
 import { NextBooks } from '@/components/world/book/NextBooks';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
@@ -96,6 +96,7 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
 
       {/* 월드 BGM: 기본 꺼짐, 설정에서 켠 경우만 (P2-14). 곡은 그 월드의 map.yaml bgm */}
       {map && <WorldBgm id={map.bgm} />}
+      {map && <PrefetchBgm ids={[map.bgm]} />}
 
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       {/* 홈 화면에 추가 쪽지 (P4-11): 다른 안내가 떠 있으면 띄우지 않음 (아래 가운데 자리를 같이 씀) */}

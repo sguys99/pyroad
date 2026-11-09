@@ -374,3 +374,46 @@ describe('배경음악', () => {
     expect(engine.getSnapshot().playingBgm).toBeNull();
   });
 });
+
+describe('BGM 미리 받기 prefetchBgm (P5-11 추가)', () => {
+  const bgmLoads = () =>
+    loads.mock.calls.filter(([u]) => u.includes('world')).map(([u]) => u);
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('BGM 설정이 꺼져 있으면(기본) 받지 않는다', async () => {
+    make();
+    engine.prefetchBgm(['world1', 'world2']);
+    await flush();
+    expect(bgmLoads()).toEqual([]);
+  });
+
+  it('켜져 있으면 곡마다 한 번만 받고 디코드하지 않는다(제스처 전에도)', async () => {
+    make({ settings: { bgm: { enabled: true, volume: 0.4 } } });
+    engine.prefetchBgm(['world1', 'world2']);
+    engine.prefetchBgm(['world1']);
+    await flush();
+    expect(bgmLoads()).toEqual([src('world1')[0], src('world2')[0]]);
+    expect(FakeAudioContext.instances).toHaveLength(0);
+  });
+
+  it('데이터 절약 모드·2G 연결이면 받지 않는다', async () => {
+    make({ settings: { bgm: { enabled: true, volume: 0.4 } } });
+    vi.stubGlobal('navigator', { connection: { saveData: true } });
+    engine.prefetchBgm(['world1']);
+    vi.stubGlobal('navigator', { connection: { effectiveType: '2g' } });
+    engine.prefetchBgm(['world2']);
+    await flush();
+    expect(bgmLoads()).toEqual([]);
+  });
+
+  it('이미 재생 중(디코드한) 곡은 다시 받지 않는다', async () => {
+    await unlocked({ settings: { bgm: { enabled: true, volume: 0.4 } } });
+    engine.playBgm('world1');
+    await flush();
+    loads.mockClear();
+    engine.prefetchBgm(['world1']);
+    await flush();
+    expect(bgmLoads()).toEqual([]);
+  });
+});

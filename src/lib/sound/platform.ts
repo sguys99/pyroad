@@ -80,6 +80,15 @@ export function prefersSaveData(): boolean {
   return c?.saveData === true;
 }
 
+/** 데이터 절약 모드이거나 2G급 느린 연결이면 큰 파일(BGM) 미리 받기를 건너뛴다 */
+export function prefersLightNetwork(): boolean {
+  if (typeof navigator === 'undefined' || prefersSaveData()) return true;
+  const type = (
+    navigator as unknown as { connection?: { effectiveType?: string } }
+  ).connection?.effectiveType;
+  return type === 'slow-2g' || type === '2g';
+}
+
 export function onIdle(fn: () => void, timeout = 2000): void {
   if (typeof window === 'undefined') return;
   const w = window as unknown as {

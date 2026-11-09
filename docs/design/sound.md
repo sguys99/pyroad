@@ -52,6 +52,8 @@ scripts/build-sounds.sh   원본 → 정규화·인코딩
 
 확인용 훅: `<html data-bgm="원하는 곡" data-bgm-playing="실제로 나는 곡">` (SoundProvider, e2e `world-select.spec.ts`).
 
+**미리 받기** (`PrefetchBgm` → 엔진 `prefetchBgm(ids)`, P5-11 추가): 첫 재생의 받기+디코드 1~2초 무음을 줄이려고 지도는 그 월드 곡, 책장은 진행 중 월드 곡 + 그 뒤 열린 월드 곡을 유휴 시간(`requestIdleCallback`, 없으면 setTimeout)에 **파일만** 받아 HTTP 캐시(immutable)에 둔다. 디코드하지 않으므로 "디코드 버퍼는 지금 곡만" 규칙과 메모리는 그대로이고, 첫 재생은 캐시에서 받아 디코드만 한다. BGM 설정이 꺼져 있거나(기본)·연출 단계가 BGM을 막았거나·데이터 절약(`saveData`)·2G급 느린 연결이면 받지 않고, 곡마다 한 번만(이미 디코드 중·재생 중인 곡도 건너뜀). 랜딩·퀘스트 화면은 미리 받지 않음.
+
 ### 음량 표
 
 실효 gain = 마스터(0.8) × 카테고리(효과음 0.7 · BGM 0.4) × 파일 보정 × 이번 재생 보정. 파일은 역할별 RMS로 정규화돼 있어 보정은 미세 조정만.

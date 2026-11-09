@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useBgm, useSoundEngine } from '@/components/providers/SoundProvider';
+import { onIdle } from '@/lib/sound';
 import type { BgmId } from '@/lib/sound/manifest';
 
 /**
@@ -24,5 +25,23 @@ export function KeepWorldBgm({ fallback }: { fallback: BgmId | null }) {
     () => (engine.getSnapshot().desiredBgm as BgmId | null) ?? fallback,
   );
   useBgm(id);
+  return null;
+}
+
+/**
+ * 지도·책장(P5-11 추가): 유휴 시간에 이 곡들의 파일만 미리 받아 둔다(디코드 안 함) → 첫 재생의 1~2초 무음을 줄인다.
+ * BGM 설정이 꺼져 있으면(기본)·데이터 절약·느린 연결이면 엔진이 받지 않고, 곡마다 한 번만 받는다 (`prefetchBgm`).
+ */
+export function PrefetchBgm({ ids }: { ids: readonly (BgmId | null)[] }) {
+  const engine = useSoundEngine();
+  const key = ids.filter(Boolean).join(',');
+  useEffect(() => {
+    if (!key) return;
+    let live = true;
+    onIdle(() => live && engine.prefetchBgm(key.split(',') as BgmId[]), 5000);
+    return () => {
+      live = false;
+    };
+  }, [engine, key]);
   return null;
 }

@@ -137,6 +137,8 @@ export interface SoundEngine<
   unlock(): void;
   /** 제스처 전: 자주 쓰는 효과음(core)을 미리 디코드해 둔다 (OfflineAudioContext, 제스처 불필요) */
   prefetch(): void;
+  /** BGM 파일을 HTTP 캐시에만 미리 받아 둔다(디코드 안 함). BGM 설정이 켜져 있고 데이터 절약·느린 연결이 아닐 때만, 곡마다 한 번 */
+  prefetchBgm(ids: readonly B[]): void;
   /** unlock 뒤: 지정한(없으면 전체) 효과음을 디코드해 둔다 */
   preload(ids?: readonly S[]): Promise<void>;
   play(id: S, opts?: PlayOptions): void;
