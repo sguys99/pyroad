@@ -18,7 +18,8 @@ export type CelebrationSfx =
   | 'levelup'
   | 'unlock'
   | 'star'
-  | 'coin';
+  | 'coin'
+  | 'chest';
 
 export interface CelebrationSoundPort {
   /** rate: 재생 속도(=피치). 뱃지를 차례로 보여 줄 때 1 → 1.26 → 1.5 */

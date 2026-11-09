@@ -1,0 +1,527 @@
+/* 축하 오버레이 카드 (P6-13, 최종 시안 Signature.tsx LevelUpOverlay·motion.css `.fm-lv`·`.fm-over`를 앱 토큰으로).
+   한 가지 카드 껍데기: 흰 면 · 반경 l · 그림자 한 종류(elev-pop) · 테두리 없음. 제목만 Jua, 금색은 보상(뱃지·열쇠·별·코인·상자·칭호)에만.
+   카드 안 연출은 모두 1회성 CSS(transform·opacity만, §2.10) — `.cel-card:not([data-settled])`일 때만 걸리므로
+   건너뛰기(탭·Enter·Space·Esc)는 data-settled 한 번으로 모든 요소가 끝 모습(=애니메이션 없는 기본 스타일)이 된다.
+   단계: full = 스프링, lite = 같은 박자 70%(--cel-t), minimal·동작 줄이기 = 카드 안 움직임 없음. 값은 토큰 변수만 */
+
+/* ───── 껍데기 */
+.cel-card {
+  --cel-t: 1;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 24rem;
+  max-height: calc(100dvh - 6rem);
+  margin-inline: auto;
+  padding: 1.75rem 1.5rem 1.5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--round-l);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--elev-pop);
+  text-align: center;
+}
+.cel-card[data-kind='golden_key'] {
+  max-width: 21rem;
+}
+:root[data-motion='lite'] .cel-card {
+  --cel-t: 0.7;
+}
+
+/* 머리글 (Pretendard 작은 글자) · 제목 (Jua) · 보조 줄 */
+.cel-k {
+  margin: 0;
+  color: var(--primary-text);
+  font-size: var(--text-kicker);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+}
+.cel-k[data-gold] {
+  color: var(--accent-text);
+}
+.cel-head {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+.cel-t {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-h1);
+  font-weight: 400;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.cel-t[data-size='m'] {
+  font-size: var(--text-h2);
+}
+.cel-sub {
+  margin: 0;
+  max-width: 22em;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  text-wrap: pretty;
+}
+
+/* 옅은 회색 쪽지 (정리 글·스테이지 띠) */
+.cel-slip {
+  display: grid;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+  text-align: left;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.cel-slip-k {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+.cel-slip-body {
+  max-height: 9.5rem;
+  overflow-y: auto;
+}
+.cel-slip-body p {
+  margin: 0 0 0.375rem;
+}
+.cel-slip-body p:last-child {
+  margin-bottom: 0;
+}
+.cel-slip-body strong {
+  color: var(--primary-text);
+}
+
+/* 배운 개념 칩 */
+.cel-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 1.75rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--round-pill);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.cel-chip svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* 버튼 줄: 주 버튼 하나 + (있으면) 보조 하나 */
+.cel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+.cel-actions[data-wide] > * {
+  flex: 1 1 100%;
+}
+
+/* "누르면 건너뛰기" (연출 중에만, 시안 .f-skip-hint) */
+.cel-skip {
+  position: absolute;
+  right: 0.625rem;
+  top: 0.625rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  pointer-events: none;
+}
+.cel-card[data-settled] .cel-skip {
+  display: none;
+}
+
+/* 자동 넘김 막대 (카드 아래, 멈추면 animation-play-state: paused) */
+.celebration-countdown {
+  position: absolute;
+  inset: auto 1.5rem 0.5rem;
+  height: 0.25rem;
+  border-radius: var(--round-pill);
+  background: var(--primary-soft);
+  transform-origin: left center;
+  animation-name: celebration-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes celebration-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* ───── 스테이지 클리어: 금색 "클리어" 도장이 카드 오른쪽 위에 쾅 (stampSlam, 끝 모습 = rotate(-8deg)) */
+.cel-stamp {
+  position: absolute;
+  z-index: 2;
+  right: 1rem;
+  top: 1rem;
+  display: grid;
+  place-items: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  border: 2.5px solid var(--accent-text);
+  border-radius: var(--round-pill);
+  color: var(--accent-text);
+  font-size: var(--text-body);
+  line-height: 1;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.cel-card .ob-splat {
+  position: absolute;
+  z-index: 3;
+  border-radius: var(--round-pill);
+  background: var(--accent);
+  pointer-events: none;
+}
+/* 도장이 있는 카드는 스크롤바 없이도 오른쪽 위가 비게 */
+.cel-card[data-kind='stage_clear'] .cel-skip {
+  right: auto;
+  left: 0.625rem;
+}
+
+/* ───── 레벨 업: 초록 도장(Lv + 숫자) + 빛 고리, 새 칭호는 금색 도장 글씨 */
+.cel-seal-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.cel-seal {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  line-height: 1;
+}
+.cel-seal-lv {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.cel-seal-n {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+.cel-ring {
+  position: absolute;
+  inset: -0.25rem;
+  border: 4px solid var(--accent);
+  border-radius: var(--round-pill);
+  opacity: 0;
+  pointer-events: none;
+}
+.cel-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+}
+.cel-titlecard {
+  display: grid;
+  justify-items: center;
+  padding: 0.375rem 1.25rem 0.5rem;
+  border: 1.5px solid var(--accent-text);
+  border-radius: var(--round-s);
+  color: var(--accent-text);
+  transform: rotate(-2deg);
+}
+.cel-titlecard small {
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.cel-titlecard b {
+  font-size: var(--text-h3);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* ───── 뱃지 · 황금키 · 보상: 금색 메달 */
+.cel-medals {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+  gap: 1rem 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cel-medal-item {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.375rem;
+}
+.cel-medal {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--round-pill);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.cel-medal svg {
+  width: 2rem;
+  height: 2rem;
+}
+.cel-medal[data-size='l'] {
+  width: 5rem;
+  height: 5rem;
+}
+.cel-medal[data-size='l'] svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.cel-medal-name {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: 1.3;
+}
+.cel-medal-desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: 1.35;
+}
+
+/* 받은 것 한 줄 (XP·코인·황금키): 옅은 회색 알약 */
+.cel-gains {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cel-gain {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 3rem;
+  padding: 0.25rem 1rem 0.25rem 0.5rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+.cel-gain b {
+  color: var(--text);
+  font-size: var(--text-h3);
+  font-weight: 800;
+  line-height: 1;
+}
+.cel-xp {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--text-caption);
+  font-weight: 800;
+}
+
+/* ───── 보물상자 (Phase 8, SHOW_CHEST): 뚜껑이 들썩 → 열림, 안에서 보상이 톡 */
+.cel-chest {
+  width: 6.5rem;
+  height: 5.25rem;
+  overflow: visible;
+}
+.cel-chest-body {
+  fill: var(--accent-text);
+}
+.cel-chest-band {
+  fill: var(--accent);
+}
+.cel-chest-inner {
+  fill: var(--accent-light);
+}
+/* 끝 모습 = 열린 뚜껑 */
+.cel-chest-lid {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  transform: rotate(-28deg);
+}
+
+/* ───── 1회성 등장 (transform만, 글자는 처음부터 보임). 지연은 style --d(ms, full 기준) × --cel-t */
+@keyframes cel-pop {
+  from {
+    transform: scale(0.55);
+  }
+}
+@keyframes cel-rise {
+  from {
+    transform: translateY(0.75rem);
+  }
+}
+@keyframes cel-turn {
+  from {
+    transform: rotate(-40deg) scale(0.7);
+  }
+}
+@keyframes cel-tilt-in {
+  from {
+    transform: rotate(-12deg) scale(0.6);
+  }
+}
+@keyframes cel-lid {
+  0%,
+  30% {
+    transform: none;
+  }
+  38% {
+    transform: rotate(-6deg);
+  }
+  46% {
+    transform: rotate(2deg);
+  }
+  54% {
+    transform: none;
+  }
+}
+@keyframes cel-lid-open {
+  from {
+    transform: none;
+  }
+}
+@keyframes cel-seal-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.18);
+  }
+  65% {
+    transform: scale(0.96);
+  }
+}
+@keyframes cel-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  :is(.cel-pop, .cel-rise, .cel-turn, .cel-tilt) {
+  animation-delay: calc(var(--d, 0ms) * var(--cel-t));
+  animation-fill-mode: both;
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-pop {
+  animation-name: cel-pop;
+  animation-duration: var(--spring-prop-dur);
+  animation-timing-function: var(--spring-prop);
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-rise {
+  animation-name: cel-rise;
+  animation-duration: var(--spring-body-dur);
+  animation-timing-function: var(--spring-body);
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-turn {
+  animation-name: cel-turn;
+  animation-duration: var(--spring-prop-dur);
+  animation-timing-function: var(--spring-prop);
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-tilt {
+  animation-name: cel-tilt-in;
+  animation-duration: var(--spring-prop-dur);
+  animation-timing-function: var(--spring-prop);
+}
+/* 칭호 도장은 끝 모습이 기울어져 있으므로 기울기를 지키는 키프레임 */
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-titlecard.cel-tilt {
+  animation-name: cel-titlecard-in;
+}
+@keyframes cel-titlecard-in {
+  from {
+    transform: rotate(-12deg) scale(0.6);
+  }
+  to {
+    transform: rotate(-2deg);
+  }
+}
+/* 레벨 숫자가 새 레벨에 닿는 순간 (data-popped) 도장 팝 + 빛 고리 */
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-seal-wrap[data-popped]
+  .cel-seal {
+  animation: cel-seal-pop 420ms var(--easing-out);
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-seal-wrap[data-popped]
+  .cel-ring {
+  animation: cel-ring var(--dur-page) var(--easing-out) forwards;
+}
+/* 상자: 들썩(full만) → 열림 */
+:root[data-reduced='false'][data-motion='full']
+  .cel-card:not([data-settled])
+  .cel-chest-lid {
+  animation:
+    cel-lid 900ms var(--easing-out) both,
+    cel-lid-open var(--spring-prop-dur) var(--spring-prop) 820ms both;
+}
+:root[data-reduced='false'][data-motion='lite']
+  .cel-card:not([data-settled])
+  .cel-chest-lid {
+  animation: cel-lid-open var(--spring-prop-dur) var(--spring-prop) 300ms both;
+}
+
+/* ───── 오버레이 뒤 퀘스트 화면은 조용히 (P6-13, backdropQuiet.ts): 책 펼침 안 CSS 애니메이션 멈춤 */
+:root[data-celebrating] .qw-book *,
+:root[data-celebrating] .qw-book *::before,
+:root[data-celebrating] .qw-book *::after {
+  animation-play-state: paused;
+}

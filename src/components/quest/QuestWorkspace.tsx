@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useSyncExternalStore } from 'react';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
 import { Button } from '@/components/ui/button';
@@ -16,8 +18,36 @@ import { OutputPanel } from './OutputPanel';
 import type { QuestReward } from './QuestSuccess';
 import { codeQuestStars } from '@/lib/quest/xp';
 import { QuestStatusBar } from './QuestStatusBar';
-import { QuestCelebrations } from './QuestCelebrations';
 import './questWorkspace.css';
+
+// 축하 오버레이 (P6-13): 받은 축하가 있을 때만 그린다. 첫 로드 JS에서 빼고, 실행을 처음 누를 때 미리 받아 둔다
+const loadCelebrations = () =>
+  import('./QuestCelebrations').then((m) => m.QuestCelebrations);
+const QuestCelebrations = dynamic(loadCelebrations, { ssr: false });
+
+/**
+ * 축하 편지함만 구독하는 자리 (P6-13). 이벤트가 오고 비워질 때 이 컴포넌트만 다시 그려지고 퀘스트 셸은 그대로다.
+ * 받은 축하가 없으면 아무것도 그리지 않는다(오버레이 chunk·DOM 없음)
+ */
+function CelebrationLayer({
+  session,
+  worldHref,
+}: {
+  session: QuestSession;
+  worldHref: string;
+}) {
+  const store = session.celebrationStore;
+  const events = useSyncExternalStore(store.subscribe, store.get, store.get);
+  if (events.length === 0) return null;
+  return (
+    <QuestCelebrations
+      events={events}
+      questId={session.quest.id}
+      worldHref={worldHref}
+      onDismiss={store.dismiss}
+    />
+  );
+}
 
 // 모바일 번호 탭 ①이야기 ②공책 ③결과 (시안 f-ribbons). 패널 id는 aria-controls
 const tabs = (['story', 'code', 'result'] as const).map((value, i) => ({
@@ -103,6 +133,13 @@ export function QuestWorkspace({
       : null;
   // 결과가 지금 코드의 것일 때만 "파이뱀에게 더 물어보기" (고친 코드로는 그 결과를 물을 수 없음)
   const askTutor = session.canAskWhy ? session.askAboutRun : undefined;
+  // 실행기가 준비되면 쉬는 틈에 오버레이 chunk를 미리 받아 둔다 (정답 순간에 내려받기·해석이 겹치지 않게)
+  useEffect(() => {
+    if (runner.status !== 'ready') return;
+    const ric = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 1));
+    const id = ric(() => void loadCelebrations());
+    return () => (window.cancelIdleCallback ?? clearTimeout)(id);
+  }, [runner.status]);
   const notes = hintNotes(
     session.messages,
     session.currentStep,
@@ -257,12 +294,8 @@ export function QuestWorkspace({
         earnedXP={session.earnedXP}
       />
 
-      {/* 축하 오버레이 (셸 재렌더와 분리, §2.10) */}
-      <QuestCelebrations
-        events={session.celebrations}
-        questId={quest.id}
-        onDismiss={session.dismissCelebrations}
-      />
+      {/* 축하 오버레이 (셸 재렌더와 분리·memo, 평소엔 chunk도 DOM도 없음, §2.10) */}
+      <CelebrationLayer session={session} worldHref={worldHref} />
     </div>
   );
 }

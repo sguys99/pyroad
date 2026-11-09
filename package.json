@@ -34,6 +34,7 @@
     "db:types": "supabase gen types typescript --local --schema public > src/lib/types/database.generated.ts && prettier --write src/lib/types/database.generated.ts",
     "test:rls": "bash supabase/tests/run.sh fast",
     "perf:world": "tsx scripts/perf/world-map-bench.ts",
+    "perf:celebration": "tsx scripts/perf/quest-celebration-bench.ts",
     "test:rls:ci": "bash supabase/tests/run.sh ci",
     "content:build": "tsx scripts/content/build.ts",
     "content:extract": "tsx scripts/content/extract-from-seed.ts",

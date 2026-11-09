@@ -28,7 +28,15 @@ export type CelebrationEvent =
   | { type: 'badge'; badge: BadgeType }
   // Phase 8 자리 (P8-04 코인·P8-05 별): 아직 완료 응답에 없어 만들지 않는다
   | { type: 'star'; stars: 1 | 2 | 3; gained: number }
-  | { type: 'coin'; amount: number };
+  | { type: 'coin'; amount: number }
+  // Phase 8 자리 (§3 F11 스테이지 보물상자, `SHOW_CHEST`): 별 합계 목표를 채우면 상자 개봉 + 내용 공개
+  | {
+      type: 'chest';
+      stageTitle: string;
+      /** 채운 별 목표 (예: 15) */
+      goal: number;
+      contents: { coins: number; goldenKeys: number };
+    };
 
 export type CelebrationEventType = CelebrationEvent['type'];
 

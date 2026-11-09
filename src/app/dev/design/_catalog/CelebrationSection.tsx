@@ -1,0 +1,304 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Play, RotateCcw } from 'lucide-react';
+import { MotionProvider } from '@/components/providers/MotionProvider';
+import { Button } from '@/components/ui/button';
+import { QuestCelebrations } from '@/components/quest/QuestCelebrations';
+import { StageClearCard } from '@/components/quest/celebrations/StageClearCard';
+import { LevelUpCard } from '@/components/quest/celebrations/LevelUpCard';
+import { BadgesCard } from '@/components/quest/celebrations/BadgesCard';
+import { GoldenKeyCard } from '@/components/quest/celebrations/GoldenKeyCard';
+import { ProjectCompleteCard } from '@/components/quest/celebrations/ProjectCompleteCard';
+import { RewardsCard } from '@/components/quest/celebrations/RewardsCard';
+import { ChestCard } from '@/components/quest/celebrations/ChestCard';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import {
+  introMs,
+  planCelebrations,
+  type CelebrationStep,
+} from '@/lib/celebration/plan';
+import { tierDuration } from '@/lib/motion/tokens';
+import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
+import { CodeSample, Section } from './ui';
+
+const noop = () => {};
+const HERE = '/dev/design#celebrations';
+const STAGE = {
+  stage_id: 'cat-s1',
+  order: 1,
+  title: '시작의 숲',
+  concepts: ['print', '문자열', '변수'],
+};
+const SUMMARY =
+  '**print**로 화면에 글자를 보여 주고, **변수**라는 상자에 값을 넣어 다시 꺼내 쓰는 법을 배웠어요. 다음 숲에서도 쓸 거예요!';
+
+/** 실제 오버레이로 띄우는 묶음 (보물상자는 SHOW_CHEST가 꺼져 있어 시퀀서가 건너뜀 → 아래 견본으로만) */
+const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
+  {
+    id: 'stage',
+    label: '스테이지 마지막 퀘스트',
+    events: [
+      { type: 'stage_clear', stage: STAGE },
+      { type: 'level_up', level: 3, fromLevel: 2, title: '숲 마을 탐험가' },
+      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: 'stage_clear' },
+    ],
+  },
+  {
+    id: 'golden',
+    label: '황금키로 연 퀘스트',
+    events: [{ type: 'golden_key', kind: 'code', questTitle: '변수 상자' }],
+  },
+  {
+    id: 'phase8',
+    label: '별·코인 (Phase 8)',
+    events: [
+      { type: 'star', stars: 3, gained: 3 },
+      { type: 'coin', amount: 25 },
+    ],
+  },
+];
+
+/** 오버레이 견본: 카드 한 장을 연출 단계대로 그린다. "다시 보기"로 처음부터, introMs 뒤 끝 상태 */
+function CardSample({
+  kind,
+  label,
+  round,
+  children,
+}: {
+  kind: string;
+  label: string;
+  round: number;
+  children: (settled: boolean) => React.ReactNode;
+}) {
+  return (
+    <figure className="m-0 grid min-w-0 content-start gap-2">
+      <figcaption className="text-caption font-semibold text-muted-foreground">
+        {label}
+      </figcaption>
+      <div
+        className="rounded-2xl bg-scrim px-3 py-6"
+        data-testid={`catalog-cel-${kind}`}
+      >
+        <SettledCard key={round} kind={kind}>
+          {children}
+        </SettledCard>
+      </div>
+    </figure>
+  );
+}
+
+function SettledCard({
+  kind,
+  children,
+}: {
+  kind: string;
+  children: (settled: boolean) => React.ReactNode;
+}) {
+  const { budget } = useMotionTier();
+  const ms = budget.springs
+    ? tierDuration(introMs(CATALOG_STEPS[kind]), budget)
+    : 0;
+  const [settled, setSettled] = useState(ms === 0);
+  useEffect(() => {
+    if (ms === 0) return;
+    const t = setTimeout(() => setSettled(true), ms);
+    return () => clearTimeout(t);
+  }, [ms]);
+  return (
+    // 견본도 실제 오버레이처럼 누르면 끝 모습 (키보드 건너뛰기는 실제 오버레이 버튼으로)
+    <div
+      className="cel-card"
+      data-kind={kind}
+      data-settled={settled || ms === 0 || undefined}
+      onClick={() => setSettled(true)}
+    >
+      {children(settled || ms === 0)}
+    </div>
+  );
+}
+
+const first = (events: CelebrationEvent[]) => planCelebrations(events)[0];
+/** 견본마다 등장 연출 길이를 실제 시퀀서와 같게 (introMs) */
+const CATALOG_STEPS: Record<string, CelebrationStep> = {
+  stage_clear: first([{ type: 'stage_clear', stage: STAGE }]),
+  level_up: first([
+    { type: 'level_up', level: 3, fromLevel: 2, title: '숲 마을 탐험가' },
+  ]),
+  badges: first([
+    { type: 'badge', badge: 'first_code' },
+    { type: 'badge', badge: 'stage_clear' },
+    { type: 'badge', badge: 'hint_master' },
+  ]),
+  golden_key: first([
+    { type: 'golden_key', kind: 'code', questTitle: '변수 상자' },
+  ]),
+  project_complete: first([
+    {
+      type: 'project_complete',
+      questTitle: '나만의 소개 카드',
+      xpGained: 120,
+      stage: { ...STAGE, order: 7, title: '마을 축제' },
+    },
+  ]),
+  rewards: first([
+    { type: 'star', stars: 2, gained: 2 },
+    { type: 'coin', amount: 25 },
+  ]),
+  // 보물상자는 시퀀서가 SHOW_CHEST로 거르므로 단계를 직접 만든다 (카드 견본 전용)
+  chest: {
+    kind: 'chest',
+    id: 'catalog-chest',
+    event: {
+      type: 'chest',
+      stageTitle: '시작의 숲',
+      goal: 15,
+      contents: { coins: 40, goldenKeys: 1 },
+    },
+  },
+};
+
+/** 축하 오버레이 (P6-13): 카드 7종 견본 + 실제 오버레이 */
+export function CelebrationSection() {
+  const [round, setRound] = useState(0);
+  const [events, setEvents] = useState<CelebrationEvent[]>([]);
+  const { budget } = useMotionTier();
+  return (
+    <MotionProvider>
+      <Section
+        id="celebrations"
+        kicker="퀘스트 (P6-13)"
+        title="축하 오버레이"
+        description="스테이지 클리어 · 레벨 업 · 업적(뱃지) · 황금키 · 프로젝트 완성 · 별·코인 · 보물상자. 같은 카드 껍데기(흰 면, 테두리 없음, 그림자 한 종류)에 제목만 Jua, 금색은 보상에만. 카드 안 연출은 1회성 CSS(transform만)라 등장 중 아무 데나 누르거나 Enter·Space·Esc면 끝 모습으로 건너뛰고, 그다음 Enter·Space는 다음 카드, Esc는 모두 닫기. 스테이지를 끝낸 카드는 맨 뒤에 와서 “지도에서 새 길 보기”가 월드맵 해제 연출로 이어져요. 별·코인(Q52)과 보물상자(SHOW_CHEST)는 Phase 8까지 화면에서 숨기고 여기서만 보여요."
+      >
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => setRound((r) => r + 1)}
+            variant="secondary"
+            size="sm"
+            sfx={false}
+            icon={<RotateCcw aria-hidden />}
+            data-testid="celebration-replay"
+          >
+            다시 보기
+          </Button>
+          {SEQUENCES.map((s) => (
+            <Button
+              key={s.id}
+              onClick={() => setEvents(s.events)}
+              size="sm"
+              sfx={false}
+              icon={<Play aria-hidden />}
+              data-testid={`celebration-open-${s.id}`}
+            >
+              {s.label}
+            </Button>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <CardSample kind="level_up" label="레벨 업" round={round}>
+            {(settled) => (
+              <LevelUpCard
+                level={3}
+                fromLevel={2}
+                title="숲 마을 탐험가"
+                budget={budget}
+                settled={settled}
+                onNext={noop}
+              />
+            )}
+          </CardSample>
+          <CardSample kind="badges" label="업적 (뱃지 3개)" round={round}>
+            {() => (
+              <BadgesCard
+                badges={['first_code', 'stage_clear', 'hint_master']}
+                onNext={noop}
+              />
+            )}
+          </CardSample>
+          <CardSample kind="stage_clear" label="스테이지 클리어" round={round}>
+            {(settled) => (
+              <StageClearCard
+                stage={STAGE}
+                questId="catalog"
+                budget={budget}
+                settled={settled}
+                worldHref={HERE}
+                onNext={noop}
+                summary={SUMMARY}
+              />
+            )}
+          </CardSample>
+          <CardSample kind="golden_key" label="황금키 확인" round={round}>
+            {() => (
+              <GoldenKeyCard kind="code" questTitle="변수 상자" onNext={noop} />
+            )}
+          </CardSample>
+          <CardSample
+            kind="project_complete"
+            label="프로젝트 완성 + 스테이지 끝"
+            round={round}
+          >
+            {(settled) => (
+              <ProjectCompleteCard
+                questTitle="나만의 소개 카드"
+                xpGained={120}
+                stage={{ ...STAGE, order: 7, title: '마을 축제' }}
+                budget={budget}
+                settled={settled}
+                worldHref={HERE}
+                onNext={noop}
+              />
+            )}
+          </CardSample>
+          <CardSample kind="rewards" label="별·코인 (Phase 8, Q52)" round={round}>
+            {(settled) => (
+              <RewardsCard
+                stars={{ stars: 2, gained: 2 }}
+                coins={25}
+                budget={budget}
+                settled={settled}
+                onNext={noop}
+              />
+            )}
+          </CardSample>
+          <CardSample
+            kind="chest"
+            label="보물상자 (Phase 8, SHOW_CHEST 꺼짐)"
+            round={round}
+          >
+            {(settled) => (
+              <ChestCard
+                stageTitle="시작의 숲"
+                goal={15}
+                contents={{ coins: 40, goldenKeys: 1 }}
+                budget={budget}
+                settled={settled}
+                onNext={noop}
+              />
+            )}
+          </CardSample>
+        </div>
+
+        <CodeSample
+          code={`// QuestWorkspace: 받은 축하가 있을 때만 지연 로드 + memo\n{session.celebrations.length > 0 && (\n  <QuestCelebrations events={session.celebrations} questId={quest.id}\n    worldHref={worldHref} onDismiss={session.dismissCelebrations} />\n)}\n// 순서: 황금키 → 레벨 업 → 뱃지 → 별·코인 → 보물상자 → 스테이지를 끝낸 카드(지도로)`}
+        />
+
+        {/* 카탈로그 절은 쌓임 맥락 안이라 실제 화면처럼 body에 띄운다 (위 고정 막대보다 위) */}
+        {events.length > 0 &&
+          createPortal(
+            <QuestCelebrations
+              events={events}
+              questId="catalog"
+              worldHref={HERE}
+              onDismiss={() => setEvents([])}
+            />,
+            document.body,
+          )}
+      </Section>
+    </MotionProvider>
+  );
+}

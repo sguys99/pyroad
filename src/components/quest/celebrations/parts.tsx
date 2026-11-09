@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import { m } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 import type { MotionBudget } from '@/lib/motion/tier';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { useCountUp } from '@/lib/celebration/ticker';
@@ -25,28 +24,41 @@ export const CTA_FOCUS_DELAY_MS = 320;
 export function CelebrationCta({
   children,
   onClick,
-  wide = false,
+  href,
+  icon,
+  variant,
+  testId = 'celebration-cta',
+  focus = true,
 }: {
   children: React.ReactNode;
-  onClick: () => void;
-  wide?: boolean;
+  onClick?: () => void;
+  /** 화면을 떠나는 버튼 (스테이지 클리어 → 월드맵) */
+  href?: string;
+  icon?: React.ReactNode;
+  variant?: 'secondary' | 'ghost';
+  testId?: string;
+  /** 카드가 뜬 뒤 포커스를 받는 버튼 (카드마다 하나) */
+  focus?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   useEffect(() => {
+    if (!focus) return;
     const timer = setTimeout(
       () => ref.current?.focus({ preventScroll: true }),
       CTA_FOCUS_DELAY_MS,
     );
     return () => clearTimeout(timer);
-  }, []);
+  }, [focus]);
 
   return (
     // 게임 버튼 (P2-11): 눌림 피드백은 버튼이, 소리는 시퀀서가 낸다
     <Button
       ref={ref}
-      data-testid="celebration-cta"
+      data-testid={testId}
       sfx={false}
-      className={cn('mt-1', wide && 'w-full')}
+      href={href}
+      icon={icon}
+      variant={variant}
       onClick={onClick}
     >
       {children}
@@ -54,51 +66,45 @@ export function CelebrationCta({
   );
 }
 
-/** 카드 맨 위 작은 머리글 ("레벨 업!", "뱃지 획득!") */
+/** 카드 맨 위 작은 머리글 ("레벨 업!", "새 뱃지"). 보상 카드는 금색 */
 export function Kicker({
   children,
-  className,
+  gold = false,
 }: {
   children: React.ReactNode;
-  className?: string;
+  gold?: boolean;
 }) {
   return (
-    <p
-      className={cn(
-        'text-xs font-bold tracking-wide text-muted-foreground',
-        className,
-      )}
-    >
+    <p className="cel-k" data-gold={gold || undefined}>
       {children}
     </p>
   );
 }
 
-/** 배운 개념 칩: 하나씩 톡톡 (transform만) */
+/** 1회성 등장 지연 (ms, full 기준. CSS가 lite에서 70%로 줄인다) */
+export const delayStyle = (ms: number) =>
+  ({ '--d': `${ms}ms` }) as React.CSSProperties;
+
+/** 배운 개념 칩: 하나씩 톡톡 (CSS transform만) */
 export function ConceptChips({
   concepts,
-  budget,
-  delay,
+  delayMs,
 }: {
   concepts: string[];
-  budget: MotionBudget;
-  delay: number;
+  delayMs: number;
 }) {
   if (concepts.length === 0) return null;
   return (
-    <ul
-      className="flex flex-wrap justify-center gap-1.5"
-      aria-label="배운 개념"
-    >
+    <ul className="cel-chips" aria-label="배운 개념">
       {concepts.map((concept, i) => (
-        <m.li
+        <li
           key={concept}
-          {...popIn(budget, delay + i * 0.05, { y: 6, scale: 0.85 })}
-          className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-text"
+          className="cel-chip cel-pop"
+          style={delayStyle(delayMs + i * 50)}
         >
-          <CheckCircle className="h-3 w-3" aria-hidden />
+          <CheckCircle aria-hidden />
           {concept}
-        </m.li>
+        </li>
       ))}
     </ul>
   );
@@ -210,14 +216,18 @@ export function CelebrationMascot({
   size = 96,
   jumpAtMs = 600,
   budget,
+  settled = false,
 }: {
   size?: number;
   /** 카드 등장 기준 점프 시작 (ms, full 기준 — lite는 70%) */
   jumpAtMs?: number;
   budget: MotionBudget;
+  /** 건너뛰었으면 바로 끝 자세(`happy`) */
+  settled?: boolean;
 }) {
-  const at = Math.round(jumpAtMs * budget.effectDuration);
-  const [jumped, setJumped] = useState(at === 0);
+  const at = settled ? 0 : Math.round(jumpAtMs * budget.effectDuration);
+  const [timerJumped, setJumped] = useState(at === 0);
+  const jumped = timerJumped || at === 0;
   useEffect(() => {
     if (jumped) return;
     const t = setTimeout(() => setJumped(true), at);

@@ -90,6 +90,20 @@ export async function openStageSheet(
 }
 
 /**
+ * 앞 축하 카드를 Enter 로 넘겨(연출 중이면 첫 Enter 는 끝 상태로, P6-13) 맨 뒤 스테이지 클리어 카드까지 간다.
+ * 돌려주는 것은 그 카드
+ */
+export async function toStageClear(page: Page): Promise<Locator> {
+  const card = page.getByTestId('celebration-step-stage_clear');
+  await expect(page.getByTestId('celebration-overlay')).toBeVisible();
+  await expect(async () => {
+    if (!(await card.isVisible())) await page.keyboard.press('Enter');
+    await expect(card).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 20_000 });
+  return card;
+}
+
+/**
  * 축하 카드 하나를 CTA 로 넘긴다. 카드 위에 마우스를 올려 자동 넘김을 멈추고,
  * 등장 직후(MIN_DWELL_MS)에는 넘기기가 무시되므로 카드가 사라질 때까지 다시 누른다
  * (이 카드의 CTA 만 누르므로 다음 카드를 건너뛰지 않음)

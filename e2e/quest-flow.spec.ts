@@ -14,6 +14,7 @@ import {
   runButton,
   runCode,
   stageButton,
+  toStageClear,
   waitForRunner,
 } from './support/quest';
 
@@ -153,7 +154,7 @@ test.describe('퀘스트 전체 플로우', () => {
     ).toHaveLength(1);
   });
 
-  test('스테이지 마지막 퀘스트를 풀면 축하가 차례로 나오고 "모두 닫기"로 한 번에 닫힌다', async ({
+  test('스테이지 마지막 퀘스트를 풀면 축하가 차례로 나오고(스테이지 클리어가 맨 뒤) "모두 닫기"로 한 번에 닫힌다', async ({
     page,
     e2eUser,
   }) => {
@@ -164,21 +165,37 @@ test.describe('퀘스트 전체 플로우', () => {
     await runCode(page, lastQuest.solution);
     await expect(outputPanel(page)).toContainText('정답이에요!');
 
-    // 스테이지 클리어가 먼저, 뒤에 레벨 업·뱃지가 이어진다 (점 표시 "축하 N개 중 1번째")
+    // 레벨 업·뱃지가 먼저, 스테이지 클리어는 맨 뒤 (P6-13, 점 표시 "축하 N개 중 1번째")
     const overlay = page.getByTestId('celebration-overlay');
-    await expect(
-      page.getByTestId('celebration-step-stage_clear'),
-    ).toBeVisible();
     await expect(
       overlay.getByRole('list', { name: /축하 \d+개 중 1번째/ }),
     ).toBeVisible();
-    await expect(page.getByTestId('celebration-cta')).toBeVisible();
+    await expect(page.getByTestId('celebration-step-stage_clear')).toHaveCount(
+      0,
+    );
+    // 뒤 화면은 조용히 (덮개 뒤 리그 정지·책 펼침 CSS 애니메이션 멈춤)
+    await expect(page.locator('html')).toHaveAttribute('data-celebrating', '');
+    // 대화 상자: 받은 것을 한 줄로 읽어 줌
+    await expect(overlay.getByTestId('celebration-live')).not.toBeEmpty();
 
+    const stageCard = await toStageClear(page);
+    await expect(overlay.getByTestId('celebration-live')).toContainText(
+      '클리어',
+    );
     // 축하 카드의 파이뱀은 리그 (B32 LottieCharacter 대체)
     await expect(
-      page.getByTestId('celebration-mascot').locator('svg'),
+      stageCard.getByTestId('celebration-mascot').locator('svg'),
     ).toBeVisible();
-    await overlay.getByRole('button', { name: '모두 닫기' }).click();
+    // 주 버튼은 지도로(해제 연출은 world-unlock 스펙), 보조 "여기 있을래요"
+    await expect(stageCard.getByTestId('celebration-map-cta')).toHaveAttribute(
+      'href',
+      /\/world/,
+    );
+    await expect(stageCard.getByTestId('celebration-cta')).toHaveText(
+      '여기 있을래요',
+    );
+    await overlay.getByRole('button', { name: /모두 닫기|닫기/ }).click();
+    await expect(page.locator('html')).not.toHaveAttribute('data-celebrating');
     await expect(overlay).toBeHidden();
     // 스테이지 끝: 다음 퀘스트 대신 지도로
     const reward = page.locator('[data-testid="quest-reward"]:visible');

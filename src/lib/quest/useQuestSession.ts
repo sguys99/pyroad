@@ -25,6 +25,7 @@ import type {
 } from './rewards';
 import { getQuestKind, type QuestKind } from './questKind';
 import { nowTodoText } from './nowTodo';
+import { createCelebrationStore } from '@/lib/celebration/celebrationStore';
 import {
   buildCelebrationEvents,
   type CelebrationEvent,
@@ -35,7 +36,8 @@ import {
  *
  * 진행 상태·자동 저장·힌트·실행·채점·완료·황금키·보상을 한 곳에서 다루고, 유형별 렌더러
  * (`CodeQuest`, `ProjectQuest`, 이후 Quiz·Boss)는 화면만 그린다. 보상 응답은 축하 이벤트 목록
- * (`celebrations`)으로 내보내고, 축하 시퀀서(`QuestCelebrations`, P1-10)가 다 보여 준 뒤 `dismissCelebrations`로 지운다.
+ * (`celebrationStore`, P6-13: React 상태가 아닌 바깥 저장소 — 넣고 비울 때 셸이 다시 그려지지 않게)로 내보내고,
+ * 축하 시퀀서(`QuestCelebrations`, P1-10)가 다 보여 준 뒤 `dismissCelebrations`로 지운다.
  *
  * 코드 퀘스트는 1단계짜리 프로젝트처럼 다룬다. 단계 진행은 `stepRef`로 읽어서, 타이머 뒤에 실행되는
  * 다음 단계 이동이 예전 화면 값(코드·단계)을 잡지 않는다 (B10).
@@ -265,7 +267,7 @@ export function useQuestSession({
   const [usedGoldenKey, setUsedGoldenKey] = useState(
     progress?.used_golden_key ?? false,
   );
-  const [celebrations, setCelebrations] = useState<CelebrationEvent[]>([]);
+  const [celebrationStore] = useState(createCelebrationStore);
   // 복습 (Q57): 이번 세션에 처음 통과했는지 · 마지막으로 채점한 실행이 이미 완료한 퀘스트였는지
   const [justCompleted, setJustCompleted] = useState(false);
   const [reviewRun, setReviewRun] = useState(false);
@@ -542,14 +544,17 @@ export function useQuestSession({
           questTitle,
         });
         if (events.length > 0) {
-          later(() => setCelebrations(events), CELEBRATION_DELAY_MS[kind]);
+          later(
+            () => celebrationStore.push(events),
+            CELEBRATION_DELAY_MS[kind],
+          );
         }
         // 월드맵·프로필이 새 진행을 보이도록 Router Cache를 새로 받는다 (B22: 전체 새로고침 대신)
         router.refresh();
       }
       setIsCompleted(true);
     },
-    [kind, questTitle, later, router],
+    [kind, questTitle, later, router, celebrationStore],
   );
 
   /** 서버 채점 (프로젝트는 단계 기준). 요청이 실패하면 통과하지 않은 것으로 */
@@ -1042,9 +1047,7 @@ export function useQuestSession({
   // ── 축하 ────────────────────────────────────────────────────────────
 
   /** 앞에서부터 count개의 축하를 보여 줬다 */
-  const dismissCelebrations = useCallback((count: number) => {
-    setCelebrations((prev) => prev.slice(count));
-  }, []);
+  const dismissCelebrations = celebrationStore.dismiss;
 
   return {
     kind,
@@ -1111,7 +1114,12 @@ export function useQuestSession({
     userLevel,
 
     /** 아직 보여 주지 않은 축하 이벤트 (보여 줄 순서) */
-    celebrations,
+    /** 축하 받은 편지함 (오버레이만 구독, P6-13) */
+    celebrationStore,
+    /** 지금 편지함 내용 (읽는 순간 값. 화면은 celebrationStore를 구독) */
+    get celebrations(): CelebrationEvent[] {
+      return celebrationStore.get();
+    },
     dismissCelebrations,
   };
 }

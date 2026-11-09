@@ -42,7 +42,6 @@ import { PybaemRig } from '@/components/characters/rig/MascotRig';
 import { tutorLine } from '@/components/quest/StoryPage';
 import { HAPPY_MS, useThinkBeat } from '@/components/quest/useThinkBeat';
 import { CelebrationMascot } from '@/components/quest/celebrations/parts';
-import { RewardsCard } from '@/components/quest/celebrations/RewardsCard';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CodeSample, Demo, Section } from './ui';
 
@@ -630,18 +629,12 @@ export function SuccessStagingSection() {
           <Demo
             key={`card-${round}`}
             label="축하 카드 파이뱀 (B32 LottieCharacter → 리그)"
-            note="뿌듯(proud)으로 나타났다가 기쁨 점프(happy: 웅크림 → 두 번 + 착지 젤리). 반복 점프는 오버레이에서 쓰지 않음. 아래는 Phase 8 별·코인 카드"
+            note="뿌듯(proud)으로 나타났다가 기쁨 점프(happy: 웅크림 → 두 번 + 착지 젤리). 반복 점프는 오버레이에서 쓰지 않음. 축하 카드 전체는 #celebrations"
             surface="card"
             data-testid="success-card"
           >
-            <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-3xl bg-card px-6 pb-7 pt-6 text-center shadow-pop">
+            <div className="flex justify-center">
               <CelebrationMascot size={96} budget={budget} />
-              <RewardsCard
-                stars={{ stars: 3, gained: 3 }}
-                coins={25}
-                budget={budget}
-                onNext={noop}
-              />
             </div>
           </Demo>
         </div>

@@ -108,6 +108,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'output-slip',
       'error-staging',
       'success-staging',
+      'celebrations',
       'share-card',
       'sound',
       'legal',
@@ -517,6 +518,76 @@ test.describe('성공 연출 (P6-08)', () => {
         'data-rig-state',
         'cheer',
         { timeout: 3_000 },
+      );
+    });
+  }
+});
+
+test.describe('축하 오버레이 (P6-13)', () => {
+  for (const mode of MOTION_MODES) {
+    test(`${mode.name}: 카드 7종 견본, 실제 오버레이는 연출 중 Esc로 끝 상태 → Enter로 다음 → 맨 뒤 스테이지 클리어`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const section = page.locator('section#celebrations');
+      await section.scrollIntoViewIfNeeded();
+      for (const kind of [
+        'level_up',
+        'badges',
+        'stage_clear',
+        'golden_key',
+        'project_complete',
+        'rewards',
+        'chest',
+      ]) {
+        await expect(section.getByTestId(`catalog-cel-${kind}`)).toBeVisible();
+      }
+      // 견본도 연출이 끝나면 끝 모습 (보물상자는 열린 뚜껑)
+      await expect(
+        section.getByTestId('catalog-cel-chest').locator('.cel-card'),
+      ).toHaveAttribute('data-settled', 'true', { timeout: 5_000 });
+
+      await page.getByTestId('celebration-open-stage').click();
+      const overlay = page.getByTestId('celebration-overlay');
+      const level = overlay.getByTestId('celebration-step-level_up');
+      await expect(level).toBeVisible();
+      await expect(
+        page.getByRole('dialog', { name: '레벨 3 달성' }),
+      ).toBeVisible();
+      if (mode.tier === 'full' && mode.reduced === 'off') {
+        // 등장 연출 중: 카드 안 1회성 애니메이션이 돈다 → Esc 한 번에 끝 상태(돌고 있는 애니메이션 0), 오버레이는 그대로
+        await expect(level).not.toHaveAttribute('data-settled', /.*/);
+        await page.keyboard.press('Escape');
+        await expect(level).toHaveAttribute('data-settled', 'true');
+        expect(
+          await level.evaluate(
+            (el) =>
+              el
+                .getAnimations({ subtree: true })
+                .filter(
+                  (a) => a instanceof CSSAnimation && a.playState === 'running',
+                ).length,
+          ),
+        ).toBe(0);
+      } else {
+        // lite는 짧게 끝나고, minimal·동작 줄이기는 처음부터 끝 상태
+        await expect(level).toHaveAttribute('data-settled', 'true', {
+          timeout: mode.tier === 'lite' && mode.reduced === 'off' ? 3_000 : 500,
+        });
+      }
+      await expect(overlay.getByTestId('celebration-cta')).toBeFocused();
+      const stage = overlay.getByTestId('celebration-step-stage_clear');
+      await expect(async () => {
+        if (!(await stage.isVisible())) await page.keyboard.press('Enter');
+        await expect(stage).toBeVisible({ timeout: 500 });
+      }).toPass({ timeout: 15_000 });
+      await expect(stage.getByTestId('celebration-map-cta')).toBeFocused();
+      // 닫으면 연 버튼으로 포커스 복귀, 뒤 화면 조용히 해제
+      await overlay.getByRole('button', { name: '모두 닫기' }).click();
+      await expect(overlay).toHaveCount(0);
+      await expect(page.getByTestId('celebration-open-stage')).toBeFocused();
+      await expect(page.locator('html')).not.toHaveAttribute(
+        'data-celebrating',
       );
     });
   }
