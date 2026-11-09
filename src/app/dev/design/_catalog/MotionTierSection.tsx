@@ -11,6 +11,7 @@ import {
   type MotionBudget,
 } from '@/lib/motion/tier';
 import { Demo, Section } from './ui';
+import '@/components/world/map/worldMap.css';
 
 /** 단계표 줄 이름 (docs/design/motion-guidelines.md §2) */
 const BUDGET_ROWS: [keyof MotionBudget, string][] = [
@@ -192,6 +193,22 @@ export function MotionTierSection() {
           </span>
         </LoopTile>
         <LoopTile
+          label="월드 지도 앰비언트 (P5-09)"
+          rule="full만 · 구름 흐름·물결·배 까딱·새 날기+날갯짓·반짝임·나뭇잎. 지도 밖·탭 숨김이면 멈춤"
+          testId="tile-map-ambient"
+        >
+          <span className="wm-a-cloud inline-block h-5 w-16 rounded-full bg-surface" />
+          <span className="wm-a-wave inline-block h-1 w-12 rounded-full bg-secondary" />
+          <span className="wm-a-boat inline-block size-6 rounded-b-xl bg-accent" />
+          <span className="wm-a-bird inline-block text-foreground">
+            <svg className="h-2 w-6" viewBox="0 -6 24 8" aria-hidden>
+              <path d="M0 0q6-6 12 0q6-6 12 0" fill="none" stroke="currentColor" />
+            </svg>
+          </span>
+          <span className="wm-a-spark inline-block size-3 rounded-sm bg-accent" />
+          <span className="wm-a-leaf inline-block size-3 rounded-tl-full rounded-br-full bg-primary-bright" />
+        </LoopTile>
+        <LoopTile
           label="바쁨 표시"
           rule="기능 신호라 minimal에서도 돎 · 동작 줄이기에서만 멈춤"
           testId="tile-busy"
@@ -255,8 +272,8 @@ export function MotionTierSection() {
       <p className="text-caption text-muted-foreground">
         일회성 연출(버튼 눌림·시트 등장·카운트업·진행바 빛 띠·토스트)은 각
         컴포넌트 절에서, 마스코트 리그는 아래 &ldquo;마스코트 리그&rdquo;에서
-        단계별로 확인합니다. 패럴랙스는 지도 개편(Phase 5) 때 생기는 연출이라
-        아직 쓰는 곳이 없습니다.
+        단계별로 확인합니다. 패럴랙스는 &ldquo;월드 지도&rdquo; 절에서 스크롤해
+        보세요 (full만).
       </p>
     </Section>
   );

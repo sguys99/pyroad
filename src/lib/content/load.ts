@@ -2,6 +2,7 @@
 //
 // 구조 (§2.4)
 //   content/worlds/<world-slug>/world.yaml
+//   content/worlds/<world-slug>/map.yaml           (지도 설정, P5-03. 스테이지가 있는 월드는 필수)
 //   content/worlds/<world-slug>/<NN>-<stage-slug>/stage.yaml
 //   content/worlds/<world-slug>/<NN>-<stage-slug>/<NN>-<quest-slug>.yaml
 // NN(두 자리)은 YAML 안의 order 와 같아야 합니다. 정렬·탐색용이고, 원본 값은 YAML 의 order 입니다.
@@ -15,10 +16,12 @@ import {
   parseQuest,
   parseWith,
   StageSchema,
+  WorldMapSchema,
   WorldSchema,
   type Quest,
   type Stage,
   type World,
+  type WorldMapConfig,
 } from './schema';
 
 export interface LoadedQuest {
@@ -35,6 +38,8 @@ export interface LoadedStage {
 export interface LoadedWorld {
   file: string;
   world: World;
+  /** map.yaml. 스테이지가 없는 "준비 중" 월드는 없어도 됨 */
+  map: WorldMapConfig | null;
   stages: LoadedStage[];
 }
 
@@ -73,6 +78,34 @@ export function loadContent(contentDir: string): ContentTree {
       );
       return undefined;
     }
+  };
+
+  /** map.yaml 검사: 레이아웃마다 노드 수 = 스테이지 수 (P5-03) */
+  const loadMap = (
+    mapFile: string,
+    stageCount: number,
+  ): WorldMapConfig | null => {
+    if (!existsSync(mapFile)) {
+      if (stageCount > 0) {
+        problems.push(
+          `${rel(mapFile)}: 스테이지가 있는 월드는 지도 설정(map.yaml)이 있어야 해요`,
+        );
+      }
+      return null;
+    }
+    const map = parseWith(WorldMapSchema, readYaml(mapFile));
+    if (!map.ok) {
+      problems.push(...map.errors.map((e) => `${rel(mapFile)} ${e}`));
+      return null;
+    }
+    for (const [name, layout] of Object.entries(map.value.layouts)) {
+      if (layout.nodes.length !== stageCount) {
+        problems.push(
+          `${rel(mapFile)} layouts.${name}.nodes: 노드 ${layout.nodes.length}개가 스테이지 수(${stageCount})와 달라요`,
+        );
+      }
+    }
+    return map.value;
   };
 
   const worldsDir = join(contentDir, 'worlds');
@@ -155,7 +188,8 @@ export function loadContent(contentDir: string): ContentTree {
       }
       stages.push({ file: stageFile, stage: stage.value, quests });
     }
-    worlds.push({ file: worldFile, world: world.value, stages });
+    const map = loadMap(join(worldDir, 'map.yaml'), stages.length);
+    worlds.push({ file: worldFile, world: world.value, map, stages });
   }
 
   if (worlds.length === 0) problems.push('월드가 하나도 없어요');

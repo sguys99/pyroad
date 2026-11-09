@@ -1,0 +1,11 @@
+# 테스트 전용 2번째 월드 (P5-03, Q48). 실제 콘텐츠가 아님: content/ 가 아니라 여기 있어서 seed·앱에 들어가지 않음
+# 단위 테스트(src/lib/world/__tests__/worldMapData.test.tsx)가 content/ 와 합쳐 "데이터만 추가하면 지도가 나온다"를 확인.
+# e2e 에서 2개 월드 지도를 띄울 때도 이 디렉토리를 씀 (P5-01 이후)
+
+slug: test-meadow
+order: 9 # 실제 월드 order 와 겹치지 않게
+title: 테스트 들판
+theme: test_meadow
+description: 지도 데이터화 검증용 월드예요.
+unlock_rule:
+  type: previous_world_cleared

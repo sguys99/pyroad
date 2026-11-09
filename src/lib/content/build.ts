@@ -6,6 +6,7 @@
 //   quest_answer_keys : 정답. service_role 전용 (00004)
 // 검증용 JSON 은 행에서 만듭니다. 그래서 같은 함수를 원본 DB 스냅샷에도 적용해 왕복 비교를 할 수 있습니다.
 
+import type { WorldInfo } from '@/lib/world/worlds';
 import {
   toStoredRule,
   type StoredRule,
@@ -656,4 +657,41 @@ function asArray(value: unknown): unknown[] {
 
 function strOrNull(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
+}
+
+// ------------------------------------------------------------
+// 월드 목록·지도 → 앱이 import 하는 TS 모듈 (P5-03)
+// ------------------------------------------------------------
+
+/**
+ * world.yaml + map.yaml → `src/lib/world/worlds.generated.ts` 소스.
+ * 지도는 DB 가 아니라 앱 번들로 갑니다(서버·클라이언트 어디서나 import). 이름·준비 여부도 여기 한 곳에서 읽습니다.
+ * `ready` 는 스테이지가 있는지에서 나옴 (없으면 "준비 중", 랜딩 worldsData 와 같은 뜻).
+ * TS 로 만드는 까닭: 랜딩 글꼴 서브셋 수집기(scripts/fonts/landing-text.mjs)가 TS 모듈만 따라감.
+ */
+export function toWorldInfos(tree: ContentTree): WorldInfo[] {
+  return [...tree.worlds]
+    .sort((a, b) => a.world.order - b.world.order)
+    .map(({ world, map, stages }) => ({
+      slug: world.slug,
+      order: world.order,
+      title: world.title,
+      theme: world.theme,
+      unlock_rule: world.unlock_rule,
+      ready: stages.length > 0,
+      map,
+    }));
+}
+
+export function toWorldsModule(tree: ContentTree): string {
+  const json = JSON.stringify(toWorldInfos(tree), null, 2)
+    // 좌표 [x, y] 는 한 줄로 (리뷰하기 쉽게)
+    .replace(/\[\s+(-?[\d.]+),\s+(-?[\d.]+)\s+\]/g, '[$1, $2]');
+  return [
+    '// 생성물: npm run content:build (content/worlds/*/world.yaml·map.yaml, P5-03). 직접 고치지 않습니다.',
+    "import type { WorldInfo } from './worlds';",
+    '',
+    `export const WORLDS: readonly WorldInfo[] = ${json};`,
+    '',
+  ].join('\n');
 }

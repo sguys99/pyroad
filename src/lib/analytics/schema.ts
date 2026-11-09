@@ -81,6 +81,12 @@ export const EVENT_PROPS_SCHEMA = {
     })
     .strict(),
   pwa_installed: z.object({}).strict(),
+  continue_click: z
+    .object({
+      kind: z.enum(['recent', 'next', 'start']),
+      place: z.enum(['head', 'float']),
+    })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -124,6 +130,13 @@ const clientEvent = z.discriminatedUnion('name', [
     .strict(),
   z
     .object({
+      name: z.literal('continue_click'),
+      props: EVENT_PROPS_SCHEMA.continue_click,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
       name: z.literal('trial_start'),
       props: EVENT_PROPS_SCHEMA.trial_start.default({}),
       path: z.string().max(200).optional(),
@@ -156,6 +169,7 @@ const _clientNamesCovered: Record<
   motion_tier_change: 'motion_tier_change',
   pwa_install_prompt: 'pwa_install_prompt',
   pwa_installed: 'pwa_installed',
+  continue_click: 'continue_click',
   trial_start: 'trial_start',
   trial_run: 'trial_run',
   trial_success: 'trial_success',

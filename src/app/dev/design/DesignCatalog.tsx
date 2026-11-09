@@ -48,6 +48,7 @@ import { LegalSection } from './_catalog/LegalSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
 import { PwaSection } from './_catalog/PwaSection';
+import { WorldMapSection } from './_catalog/WorldMapSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -73,6 +74,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['type', '글자'],
       ['shape', '반경·그림자·간격·선'],
       ['worlds', '월드 테마'],
+      ['world-map', '월드 지도'],
       ['motion-tokens', '모션 토큰'],
     ],
   },
@@ -183,6 +185,7 @@ export function DesignCatalog({
               <TypeSection />
               <ShapeSection />
               <WorldSection />
+              <WorldMapSection />
               <MotionTokenSection />
               <ButtonSection />
               <CardSection />

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { worldPath } from '@/lib/world/worldBook';
 import {
   useQuestSession,
   type QuestSessionOptions,
@@ -27,7 +28,10 @@ export function CodeQuest(props: QuestSessionOptions) {
               {' · '}
             </>
           )}
-          <Link href="/world" className="underline">
+          <Link
+            href={worldPath(session.quest.stage.world?.slug)}
+            className="underline"
+          >
             월드맵으로 돌아가기
           </Link>
         </>

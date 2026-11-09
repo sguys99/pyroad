@@ -270,13 +270,3 @@
   .celebration-ring {
   animation: celebration-ring var(--dur-page) var(--easing-out) forwards;
 }
-
-/* 월드맵 노드 반응형 위치 */
-.world-node {
-  left: var(--ml);
-}
-@media (min-width: 640px) {
-  .world-node {
-    left: var(--dl);
-  }
-}

@@ -34,6 +34,7 @@ export function createNoopEngine<
     onUserSettings: () => noop,
     unlock: noop,
     prefetch: noop,
+    prefetchBgm: noop,
     preload: () => Promise.resolve(),
     play: noop,
     playBgm: noop,

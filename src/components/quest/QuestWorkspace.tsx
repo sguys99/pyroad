@@ -5,6 +5,7 @@ import type { QuestSession, QuestTab } from '@/lib/quest/useQuestSession';
 import { Button } from '@/components/ui/button';
 import { SegmentedTabs } from '@/components/ui/tabs';
 import { Square } from 'lucide-react';
+import { worldPath } from '@/lib/world/worldBook';
 import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { CodePanel, RunnerWakingNotice } from './CodePanel';
@@ -45,6 +46,8 @@ export function QuestWorkspace({
   return (
     <div className="flex h-dvh flex-col bg-background">
       <QuestHeader
+        worldHref={worldPath(quest.stage.world?.slug)}
+        bgm={quest.stage.world?.bgm ?? null}
         stageTitle={quest.stage.title}
         stageOrder={quest.stage.order}
         questTitle={quest.title}

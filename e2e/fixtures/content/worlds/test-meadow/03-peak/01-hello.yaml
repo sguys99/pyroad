@@ -1,0 +1,24 @@
+id: d9000000-0000-0000-0000-000000000003
+order: 1
+title: 테스트 퀘스트 3
+concept: print()
+xp_reward: 10
+quest_type: code
+prompt:
+  topic: 출력하기
+  learning_goals:
+    - print() 를 쓸 수 있다
+  story_context: 테스트 들판에 왔어요
+  exercise_description: 안녕을 출력해 보세요
+  starter_code: ''
+  expected_output_hint: 안녕
+  fallback_text: print("안녕")
+answer:
+  validation:
+    type: output_match
+    expected: 안녕
+  hints:
+    level_1: 출력 주문
+    level_2: print()
+    level_3: print("___")
+  solution_code: print("안녕")

@@ -30,8 +30,19 @@ export const REDUCED_ALLOW: Record<string, string> = {
   'char-blink-highlight-slow': '느린 눈 깜빡임의 눈 반짝임 (§12-Q26)',
 };
 
-/** 앰비언트: full만 (lite부터 정지 배경) */
-export const AMBIENT = ['float-cloud', 'drift-leaf', 'stage-shimmer'];
+/** 앰비언트: full만 (lite부터 정지 배경). wm-*는 월드 지도 (P5-09, worldMap.css) */
+export const AMBIENT = [
+  'float-cloud',
+  'drift-leaf',
+  'stage-shimmer',
+  'wm-cloud',
+  'wm-wave',
+  'wm-boat',
+  'wm-bird',
+  'wm-flap',
+  'wm-spark',
+  'wm-leaf',
+];
 
 /** 대기 루프: full·lite만 */
 export const IDLE_LOOPS = [
@@ -39,6 +50,7 @@ export const IDLE_LOOPS = [
   'mascot-bob',
   'step-pulse',
   'stage-pulse',
+  'wn-ring',
   'char-blink-eye',
   'char-blink-highlight',
   'char-twinkle',

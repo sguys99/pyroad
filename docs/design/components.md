@@ -120,6 +120,7 @@
 | `footer` | 버튼 줄 (모바일 세로 역순) |
 | `closeLabel` · `showClose` | 오른쪽 위 48px 닫기 버튼 (기본 "닫기") |
 | `initialFocus` | 처음 포커스 (기본 첫 포커스 가능한 요소) |
+| `finalFocus` | 닫은 뒤 포커스 (기본: 열기 전 포커스 요소). 주소로 열린 겹창처럼 연 버튼이 없을 때 준다 (P5-06 스테이지 시트 → 노드) |
 | `closeOnBack` | 기기·브라우저 뒤로 가기로 닫기 (P4-09, `use-back-to-close.ts`): 열면 같은 주소로 기록 항목 하나(지금 `history.state` 복사), 뒤로 가기면 닫히고 화면은 그대로, 다른 방법으로 닫으면 그 항목을 거둠. 랜딩 로그인 시트가 켬 |
 | `wide` (Sheet) | 넓은 화면 45rem |
 
@@ -187,7 +188,7 @@ props: `items`(`{ value, label, icon?, panelId? }[]`) · `value` · `onValueChan
 <CurrencyHud level={3} xp={{ value: 40, max: 100 }} coins={1280} stars={14} keys={2} end={<SoundToggle />} />
 ```
 
-지금 앱에는 코인·별 재화가 없어 `CurrencyHud` 전체는 아직 화면에 없다(Phase 4~6 HUD 개편에서). 퀘스트 상태바가 `LevelSeal`(sm 40px)·`useCountUp`을, 월드맵·퀘스트 헤더가 소리 토글(`IconButton`)을 쓴다.
+지금 앱에는 코인·별 재화가 없어 `CurrencyHud` 전체는 아직 화면에 없다(Phase 8~9에서 값 연결). 퀘스트 상태바가 `LevelSeal`(sm 40px)·`useCountUp`을, 월드맵·책장 HUD(§13-5 `WorldHud`)가 `LevelSeal`·`ProgressBar`·소리 토글을 쓴다.
 
 **대표 상태**: 전체(코인·별·키·소리) 1280·360, 키 없음(월드맵), 큰 수(12,345 → 1.2만), 값 오름 순간(팝·카운트업)·동작 줄이기(금색 틴트), LevelSeal md·sm·두 자리.
 
@@ -334,19 +335,135 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - 아이콘: `src/lib/pwa/iconArt.tsx` 한 벌(브랜드 초록 면 + 파이뱀 리그 정지 그림 + 언덕·금색 반짝이, 글자 없음)을 `next/og`로 빌드 때 PNG 생성. 파비콘 `/icon`(32, 얼굴만) · `/apple-icon`(180, 불투명) · manifest `/pwa/icon-192.v1.png`·`icon-512.v1.png`·`maskable-512.v1.png`(그림은 가운데 80% 원 안). 그림을 바꾸면 `PWA_ICON_VERSION`을 올린다.
 - 안내: 월드맵 쪽지 `InstallHint`(공통 토스트 + `action`, 서로 다른 날 3번째 방문부터, 닫으면 30일) · 설정 `InstallAppSection`(늘 있음). 안드로이드는 브라우저 설치 창(`beforeinstallprompt`, `InstallPromptCatcher`가 로그인 화면에서 잡음), iOS는 그림 안내 시트 `IosInstallGuide`(공유 → 홈 화면에 추가 → 추가). 데스크톱·이미 설치·앱 안 브라우저는 쪽지 없음. 판별은 `src/lib/pwa/install.ts`. 카탈로그 `#pwa`.
 
+## 13-2. 월드맵 스테이지 노드 `StageNode` · 지금 위치 `CurrentMarker` (P5-04)
+
+시안 `design/prototypes/src/final/World.tsx` `StageNode`·`.f-here`를 옮김. 코드 `src/components/world/StageNode.tsx`, 모양 `src/components/world/map/worldMap.css`(`.wn*`).
+
+- **랜드마크는 지도가 한 번만 그린다**: `MapArt` 길 레이어가 스테이지 `theme_name` 랜드마크를 그리고(잠김 = 연필 스케치, 열림 = 색), 노드는 그 위의 투명한 버튼 + 알약 이름표(번호 원 + 이름) + 별 합계(`stars`/`maxStars`) + 도장이다. **별이 기록되기 전(Q51, `SHOW_STARS = false`)에는 별 대신 완료 퀘스트 수("3/7", 통과면 초록 체크)**. 예전 카드 아이콘(`StageIllustration`·`illustrations/`)은 지웠다
+- **크기 단위**: 노드·도장·파이뱀은 지도 1단위(`--u` = `100cqi / 레이아웃 폭`, `.world-map`이 컨테이너)와 랜드마크 배율(`--ns` = `node_scale`, 보스는 `--s` 1.15)로 잡아 지도와 같이 커지고 작아진다. 글자는 고정(이름표 15px · 넓은 지도 16px, 별·잠김·칩 14px)
+- **상태**(`data-state`): `locked` 옅은 면 + `text-muted`(surface-2 위 AA) + "🔒 잠김" · `open` 진행 중인데 아직 0개 · `current` 진행 중 · `clear` 통과 도장(손으로 찍은 기울기). `open`·`current`는 초록 이름표 + 번호 원 둘레 **진행률 링**(완료 퀘스트/전체, 금색 호) + 랜드마크 둘레 점선 고리
+- **보스**(`is_final`, `data-boss`): 지도 랜드마크 1.15배 + 왕관(MapArt `BossCrown`), 이름표에 왕관 아이콘 + 금색 번호 원 + 금색 테. 데이터만 보고 정한다
+- **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`. 그쪽이 지도 밖으로 잘리면 반대쪽 — `markerSide`, P5-10, 모든 월드·노드 단위 테스트, `data-testid="world-current-marker"`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(§13-7) 동안은 `live`로 라이브 `PybaemRig`(next/dynamic, 기쁨 → 응원)를 쓰고 칩이 "새 곳 도착!"
+- **누르기**: 노드 전체가 `<button>`(가로 96px 이상 · 랜드마크부터 별까지, 포커스는 이름표에 3px 링). `aria-label` = "3단계 조건의 갈림길, 도전 중, 지금 여기, 퀘스트 2/8 완료"(SHOW_STARS면 "별 5/24" 추가)(보스는 "(보스 스테이지)"). 잠긴 노드는 `aria-disabled`라 포커스·탭이 되고 누르면 안내 쪽지("2단계를 통과하면 열려요"). 동작은 `WorldMap`의 `useOpenStage()` 한 곳 — 열린 노드는 차례 시트(13-3)
+
+| 연출 | full | lite | minimal | 동작 줄이기 |
+|---|---|---|---|---|
+| 등장 (노드 → 파이뱀 차례) | 85% → 100% + 페이드, 0.1초 간격 | 70% 길이 | 페이드만 | 즉시 |
+| 파이뱀 통통 `.mascot-bob` | 돎 | 돎 | 정지 | 정지 |
+| 지금 노드 고리 `wn-ring` (transform·opacity) | 돎 | 돎 | 정지(옅은 고리만) | 정지 |
+| 이름표 올려놓기 | 2px 뜸 | 같음 | 같음 | 같음(전환 140ms) |
+
+**대표 상태**: 잠김 · 열림 · 진행 중(링) · 통과(도장) · 보스 — 카탈로그 "월드 지도" 절 `world-node-states`, 지도 견본은 1·2 통과 · 3 진행 중.
+
+## 13-3. 스테이지 차례 시트 `StageSheet` (P5-06)
+
+시안 `World.tsx` `StageSheet`(#stage, `.f-toc*`)를 옮김. 코드 `src/components/world/StageSheet.tsx`, 모양 `stageSheet.css`(`.ss*`). 틀은 공통 `Sheet wide`(768px 미만 바텀시트 + 손잡이, 이상 가운데 대화 상자).
+
+- **넓은 화면은 책 한 쪽**: 종이 결(`paper-fiber`) + 왼쪽 묶음 쪽 그늘. 머리는 랜드마크 그림(지도와 같은 `Landmark`, 재질은 `.wm`·`.wm-art` 규칙) 왼쪽 + "N단계 · 지금 모험 중/통과한 곳" + 제목(대화 상자 이름) + 설명
+- **진행 요약**: "퀘스트 2/7 완료" + `ProgressBar sm`. `SHOW_STARS`(Q51)면 별 합계도
+- **차례**: 퀘스트마다 줄 전체가 `<Link>`(56px 이상). 번호 원(완료면 체크) · 제목 · 배울 개념 한 줄(`quests.concept` 공개 열, `--text-caption` 옅은 글자, 길면 줄임표라 줄 높이가 늘지 않음, 줄 이름에 ", 배울 개념 …"으로 들어가 스크린리더도 같은 단서로 복습할 퀘스트를 고름 — 정답·힌트는 쓰지 않음) · 유형 태그(코드 `Code2` · 퀴즈 `MessageCircleQuestion` · 보스 `Crown` — 보스는 `quest_type: boss` 또는 마지막 스테이지의 마지막 퀘스트) · 상태 태그(완료 · 지금 차례 · 하는 중 · 아직) · `is_mobile_friendly`면 "휴대폰 추천"(768 미만에서 진한 칩, 이상은 옅게). 끝: 완료 = "다시 하기"(SHOW_STARS면 별 0~3도), 첫 미완료 = 줄만 강조(초록 면 + 왼쪽 띠 + "지금 차례" 태그, `aria-current="step"`)하고 끝은 화살표 — 시작·이어하기 버튼은 시트 아래 주 버튼 하나뿐(P5-14: 줄 안 "이어하기"와 중복 제거), 나머지 = 화살표. 열린 스테이지 안 퀘스트는 서버 가드(B38, 스테이지 단위)상 모두 열리므로 건너뛰어 열 수 있다
+- **주 버튼**: 첫 미완료 퀘스트 "N번 퀘스트 시작하기/이어하기"(`stage-sheet-start`), 시트 아래에 붙어(sticky) 차례가 길어도 보인다. 다 끝낸 스테이지는 없음
+- **열기·닫기**(`WorldMap` `useOpenStage`): 열면 `?stage=<id>`를 `history.pushState`로 남긴다(서버 렌더 없음). 기기 뒤로 가기 = 닫기, 시트에서 퀘스트로 갔다 뒤로 오면 시트가 다시 열려 있음. 닫기 버튼·Esc·덮개로 닫으면 이 화면이 쌓은 항목은 `history.back()`, 주소로 열린 경우는 `replaceState`로 지움. 닫으면 그 노드로 포커스(`finalFocus`). 잠긴 노드는 시트 대신 안내 쪽지. `questsByStage`를 안 주면(카탈로그 틴트 견본) 열지 않음
+- 효과음 없음(탭 소리는 P5-11)
+
+| 연출 | full | lite | minimal | 동작 줄이기 |
+|---|---|---|---|---|
+| 시트 | 공통 Sheet와 같음 (스프링으로 올라옴 / 기울어 떠오름) | 220ms | 페이드 | 즉시 |
+| 차례 줄 등장 `ss-in` (transform·opacity, 한 번) | body 스프링, 45ms 간격 | 220ms, 25ms 간격 | 페이드 | 없음 |
+
+**대표 상태**: 진행 중(완료 2 · 지금 차례 · 하는 중 · 퀴즈 · 휴대폰 추천) · 통과(모두 다시 하기) · 보스 스테이지 — 카탈로그 "월드 지도" 절 `stage-sheet-demo`, 지도 견본의 열린 노드를 눌러도 뜸.
+
+## 13-4. 월드 책 `WorldBook` · 지도 머리 `WorldMapHead` · 다음 권 `NextBooks` · 잠긴 책 `LockedBook` · 책장 `WorldShelf` (P5-01)
+
+월드 = 그림책 한 권(Q2·Q48·Q50). 코드 `src/components/world/book/`, 모양 `worldBook.css`(`.wb-*`), 문구는 순수 함수 `src/lib/world/worldBook.ts`(`unlockText`·`bookNo`·`worldPath`·`toBook`, 단위 테스트). 시안 `World.tsx` 머리(f-world-head)·`NextBooks`(f-next)·랜딩 책 표지(f-book, refine.css)를 옮김. 표지 그림은 랜딩 세계관 `WorldCoverArt`를 그대로 쓰고, 재질 CSS는 책장 범위(`.wb-art`)로 복사(랜딩 CSS를 import하면 Turbopack이 랜딩 글꼴 preload를 앱 라우트에 붙여 `fonts:build-check`가 실패).
+
+- **주소**: `/world` = 진행 중 월드 지도(리다이렉트 없이 같은 `WorldMapScreen`), `/world/[slug]` = 그 월드(없는 slug는 404 화면, 잠김·준비 중은 지도 대신 `LockedBook` — 서버 판정), `/worlds` = 책장. 모두 `(protected)`(미들웨어 `/world` 접두), 동적 렌더
+- **책 카드 상태 4종**: 모험 중(초록 띠, 진행바 + "스테이지 2/7 · 퀘스트 12/44" + "지도 펼치기") · 다 읽었어요(체크) · 잠겨 있어요(자물쇠 걸쇠 + 채도 낮춘 정지 그림) · 준비 중(모래시계). 지금 모험 중인 월드는 금색 책갈피 "지금 읽는 책". 왼쪽 월드 색 책등, 줄마다 나무 선반. 360px 아래 가로 카드(그림 | 글), 640px 2권, 1024px 3권. 열린 책은 카드 전체가 지도 링크(`CardButton`), 잠긴 책은 누를 수 없음. 상태는 글자·아이콘으로도
+- **해제 조건**: "파이썬 섬을 다 모험하면 열려요"(받침 조사 `withObjectParticle`). 앞 월드가 준비 중이면 건너뛰고 그 앞의 진짜 월드 기준(`unlock.previousWorld`는 바로 앞이라 그대로 쓰지 않음). 준비 중은 "지금 만들고 있어요." 앞에 붙임
+- **지도 머리**: kicker "그림책 N권" + h1 "<월드> 모험 지도" + "n/7 스테이지 통과" + 보조 버튼 "월드 바꾸기"(`/worlds`). 지도 아래 "다음 권 미리 보기"(뒤 월드 두 권까지, 같은 책 카드) + "책장 전체 보기". 상단 HUD는 §13-5
+- **책 ↔ 지도 전환**(`bookTransition.ts`): View Transitions API가 있으면 full = 누른 표지와 새 화면의 지도(`.world-map`)에 같은 `view-transition-name: world-book`을 붙여 표지가 지도 자리로 펼쳐짐(반대로 "월드 바꾸기"는 지도가 그 월드 표지로 접힘), 길이 `--dur-page`·`--easing-page`. lite = 짧은 교차 페이드(`--dur-fast`), minimal·동작 줄이기·미지원 브라우저 = 그냥 이동(새 화면 등장은 `PageTransition` 규칙). 새 화면 렌더는 최대 2.5초 기다리고 끝나면 이름·`<html data-book-vt>`를 거둠. 수정 키·가운데 클릭은 브라우저 기본. 반복 연출 없음
+- **BGM**: 각 지도 화면은 그 월드 `map.yaml`의 `bgm`(크로스페이드는 P5-11). 퀘스트 → 월드맵 링크는 그 퀘스트의 월드 지도(`worldPath`)
+- **e2e 테스트 월드**: `content:build -- --fixtures e2e/fixtures/content`가 `build/e2e/worlds.json`·`rows.json`을 만들고, 테스트 페이지가 켜진 서버에 `PYROAD_E2E_WORLDS`가 있을 때만 `serverWorlds()`가 월드 목록 뒤에 더함(운영 seed·커밋 생성물은 그대로). 스펙 `e2e/world-select.spec.ts`가 DB에 행을 넣고 지움
+- **새로 열렸어요**(P5-05): 열린 월드의 첫 스테이지가 아직 잠금 해제 연출을 못 본(본 기록에 없는) 스테이지면 책장의 상태 칩이 금색 "새로 열렸어요!"(`fresh`, 자물쇠 열린 아이콘). 그 지도를 열어 연출을 보면 사라짐
+- **카탈로그**: "월드 지도" 절의 "월드 책 표지 5종 · 지도 머리"
+
+## 13-5. 월드맵 HUD `WorldHud` (P5-07, Q47)
+
+월드맵(`/world`·`/world/[slug]`)과 책장(`/worlds`) 위에 붙어 따라오는(sticky) 얇은 바. 코드 `src/components/world/WorldHud.tsx`(클라이언트) + `WorldHudBar.tsx`(서버: 월드맵 데이터 → 값, 스트릭 계산), 모양 `worldHud.css`(`.wh-*`). 시안 `Hud`(ui.tsx)에서 로고 대신 내 아바타·닉네임.
+
+- **순서**: 아바타(현재 스킨, 32) + 닉네임(→ `/profile`, 이름 "닉네임, 내 프로필") · `LevelSeal` + XP 바("다음 레벨까지 경험치", 최고 레벨은 "최고 레벨") · 스트릭 불꽃 · 곧 열려요(코인·오늘의 미션·상점) · 소리 토글 · 메뉴
+- **실제 값**: 닉네임·스킨·레벨·XP·스트릭. **곧 열려요**(Q47): 점선 알약 안에 흐린 아이콘 버튼 셋(1024px부터 "곧 열려요" 금색 글자, 랜딩 soon 배지 톤). 누르면 쪽지 "상점은 곧 열려요! 조금만 기다려 줘." Phase 8~9에서 칩을 `HudCounter`로 바꿔 값만 연결
+- **스트릭**(`src/lib/time/streak.ts` `currentStreak`): 직접 푼(황금키 아님) 완료 시각의 KST 날짜로 오늘부터 거꾸로 센다. 오늘 아직 안 풀었으면 어제까지 이어진 일수를 유지(`today: false`). 3일 뱃지(`has_three_day_streak`)와 같은 정의 — 단위 테스트가 `reward-rules.json` 표로 대조. 0일은 꺼진 회색 불꽃("불꽃이 꺼져 있어요"), 1일 이상은 금색 불꽃 + 노란 틴트("3일 연속 모험 중"). 누르면 쪽지(0일: "오늘 퀘스트를 하나 풀면 불꽃이 켜져요!", 오늘 아직: "오늘도 풀면 4일이 돼요.")
+- **메뉴**: `IconButton` "메뉴" → `Sheet` "메뉴"(공지사항·게시판 링크 버튼, 로그아웃 `LogoutButton variant="menu"`). 포커스 가두기·Esc·연 버튼으로 복귀는 공통 시트
+- **반응형**: 640px 미만은 한 줄 약 59px — 칸 사이 4px, 도장 40, XP 바는 바 아래 4px 띠(글자 "경험치"는 숨김), 곧 열려요 셋은 버튼 하나("코인·오늘의 미션·상점, 곧 열려요"), 불꽃은 숫자만, 닉네임 줄임표. 640px 이상 65px. 숫자는 고정 폭(`tabular-nums`)
+- **겹침**: HUD z 40 < 시트·모달 덮개 50 < 토스트 70. HUD 쪽지는 바 바로 아래 가운데(아래 가운데 InstallHint·잠긴 스테이지 쪽지와 안 겹침). ConsentBanner는 HUD 위 흐름에 있고, 스크롤하면 HUD만 붙음
+- **연출**: 등장 한 번(full = 0.5rem 내려오며 `--dur-base`, lite = 페이드 `--dur-fast`, minimal·동작 줄이기 = 없음). 레벨이 오르면 `LevelSeal` 팝, XP 바는 빛 띠(공통 컴포넌트 그대로). 반복 없음
+- 옛 `ProfileSummary` 카드(아바타·Lv·XP·뱃지 5개)는 HUD와 겹쳐 지웠다. 뱃지는 프로필 화면에 있음
+- **카탈로그**: "월드 지도" 절의 "월드맵 HUD (P5-07)" — 스트릭 0·1·7일, 긴 닉네임, 최고 레벨
+
+## 13-6. 이어하기 CTA `ContinueButton` · `ContinueFloat` (P5-10)
+
+"지난번에 하던 퀘스트 계속하기". 코드 `src/components/world/ContinueCta.tsx`(클라이언트), 모양 `continueCta.css`(`.wc-*`), 대상 고르기는 순수 함수 `pickContinue`(`src/lib/world/mapData.ts`, 단위 테스트). 시안 `World.tsx` 머리 오른쪽 "이어서 하기 >".
+
+- **대상**: 열린 스테이지의 미완료 퀘스트 중 진행 행(`user_progress`, 처음 코드를 고칠 때 자동 저장으로 생김)이 가장 늦게 생긴 것(`recent`) → 없으면 다음 차례 = 현재 스테이지의 첫 미완료(`next`) → 진행 행이 하나도 없으면 같은 첫 퀘스트를 "모험 시작하기"(`start`). 잠긴 스테이지 퀘스트는 진행 행이 남아 있어도 고르지 않음(퀘스트 페이지 가드 B38과 같은 판정). 열린 퀘스트를 다 깼으면 버튼 없음(다음 권은 지도 아래 "다음 권 미리 보기"·"월드 바꾸기"가 안내). `user_progress`에 `updated_at`이 없어 "마지막으로 손댄"이 아니라 "마지막으로 시작한" 퀘스트
+- **모양**: 주 버튼 두 줄 — 첫 줄 "이어서 하기"/"모험 시작하기"(Jua), 보조 줄 "3단계 · 퀘스트 이름"(본문 글꼴 캡션, 길면 줄임표) + 오른쪽 꺾쇠. 낭독 이름 "이어서 하기: 3단계 따옴표의 비밀". 주소 `/quest/<id>`
+- **자리**: 지도 머리 오른쪽(월드 바꾸기 다음, 모든 폭). 1024px 미만(세로 지도)은 머리 버튼이 HUD 밑으로 지나가면 아래 가운데 떠 있는 버튼(`ContinueFloat`, 왼쪽에 흰 원 속 파이뱀 얼굴)이 나타나고, 머리가 다시 보이면 숨음. 숨었을 때 `inert`. 페이지 아래 여백 7rem으로 다음 권 미리 보기를 가리지 않음
+- **겹침**: 떠 있는 버튼 z 30 < HUD 40 < 시트·모달 덮개 50 < 토스트 70. 아래 가운데 쪽지(InstallHint·잠긴 스테이지 B38·잠긴 노드)가 떠 있으면 같은 자리라 비켜 줌(`body:has(.g-toast)`), 쪽지가 닫히면 돌아옴. ConsentBanner는 맨 위라 겹치지 않음
+- **연출**: 떠 있는 버튼 들고 나기 한 번 — full·lite = 아래에서 미끄러져 올라옴(`--dur-base`) + 페이드, minimal = 페이드만, 동작 줄이기 = 즉시. 반복 없음
+- **분석**: `continue_click { kind: recent|next|start, place: head|float }` ([docs/analytics.md](../analytics.md)). 퀘스트 id는 보내지 않음
+- **카탈로그**: "월드 지도" 절의 "이어하기 CTA (P5-10)" — recent·next·start·긴 이름 × 머리·떠 있는 버튼. e2e `world-continue.spec.ts`
+
+## 13-7. 잠금 해제 연출 `useStageUnlock` · `UnlockLayer` (P5-05, Q49)
+
+Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재생하고 본 기록을 서버에 남긴다. 코드: 흐름 `src/components/world/unlock/useStageUnlock.ts`, 겹 `UnlockLayer.tsx`·`unlock.css`(`.wu-*`), 박자표 `src/lib/celebration/unlockFx.ts`, 비교 규칙 `src/lib/world/unlockSeen.ts`(단위 테스트), 쓰기 `POST /api/world/unlocks` → service_role RPC `record_seen_unlocks`(00025, 열린 스테이지만). 시안 `Signature.tsx` UnlockLayer·`beats.ts` buildUnlock·`World.tsx` 해제 데모.
+
+- **언제**: 월드맵 데이터가 본 기록(`user_seen_unlocks`)과 지금 열린 스테이지(`unlockedStageIds`)를 비교(`planUnlocks`). 이 지도에서 새로 열린 것 중 가장 뒤 스테이지 하나를 연출하고(`pickUnlockIndex`), 이 지도의 새 스테이지를 모두 기록. 다른 월드의 새 스테이지는 그 지도를 열 때
+- **기존 사용자**: 기록이 하나도 없으면(배포 전부터 있던 사용자·새 사용자) 지금 열린 스테이지를 **연출 없이** 모두 기록 → 배포 직후 연출이 줄줄이 나오지 않음. 진행 리셋(`/api/account/reset`)은 기록도 지워 다시 열 때 연출이 나옴. 본 기록을 못 읽으면(00025 전 DB) 연출·기록 모두 없음
+- **한 번만**: 끝나면(건너뛰어도) 기록 저장. 실패해도 화면은 그대로(다음 방문에 한 번 더 나올 수 있음). 같은 세션에서 다시 오면 저장 전이어도 다시 틀지 않음(모듈 `handled`)
+- **연출 전 모습**: 새 노드는 잠김 모습(연필 스케치 + "잠김" 이름표), 지난 길은 이전 노드까지, 이전 노드 도장은 아직 없음, 파이뱀은 이전 노드 옆. 연출 중 열림 큐에서 실제 상태로 바뀌고, 끝나면 효과를 걷어 React가 그린 실제 자리와 맞음
+- **화면 밖**: 새 노드가 화면 밖이면 먼저 그쪽으로 부드럽게 스크롤한 뒤 시작. 노드 차례 등장은 생략(연출이 주인공)
+- **건너뛰기**: 재생 중 화면 어디든 누르거나 Enter·Space·Esc → 끝 상태(시안 attachSkip). 그 누름의 click은 삼켜 밑의 노드·버튼이 같이 눌리지 않음
+- **문구·접근성**: 끝나면 토스트 "새 스테이지가 열렸어요! 2단계 변수의 숲"(지도의 `ToastViewport`, `role=status` → 낭독기 한 번). 겹은 모두 `aria-hidden`·누름 통과. 효과음 자리 `sfx('unlock')`(자물쇠 깨질 때, P5-11이 정리)
+- **책장**: 새로 열린 월드는 상태 칩 "새로 열렸어요!"(§13-4)
+
+| 박자 | full (약 3.5초) | lite (약 2.2초) | minimal · 동작 줄이기 |
+|---|---|---|---|
+| 통과 도장 쾅 | 2.3배 → 0.9배 220ms(stampIn) + body 안착 + 지도 떨림(steps 3) + 잉크 튐 6 | 160ms + face 안착 | 끝 상태로 바로 (도장·길·컬러 랜드마크·열린 이름표·파이뱀 새 자리) + 문구 토스트 |
+| 잉크 길 | 650ms ink | 360ms | 〃 |
+| 자물쇠 | 흔들흔들 420ms → 반으로 깨져 떨어짐 460ms + 조각 5 | 바로 깨짐 300ms | 〃 |
+| 스케치 → 컬러 | 잉크 방울 280ms → 얼룩 마스크 600ms | 둥근 번짐 360ms | 〃 |
+| 파이뱀 | 길 따라 깡충 2번 720ms + 착지 눌림, 라이브 리그 기쁨 → 응원 | 미끄러져 500ms | 〃 (정지 그림) |
+| 열림 | 이름표 팝(body) + "열렸어요!" 도장(2.4초 뒤 흐려짐) | 이름표 팝(face) + 도장 | 도장 없음 |
+
+**대표 상태**: 카탈로그 "월드 지도" 절 `world-unlock-demo`의 "해제 보기 (데모)"(2단계 통과 → 3단계 열림, 기록 안 보냄, 누를 때마다 처음부터). e2e `world-unlock.spec.ts`.
+
+## 13-8. 동행 펫 슬롯 `PetSlot` (P5-08, 그림은 Phase 9)
+
+지도 위 지금 위치 파이뱀을 따라다닐 펫의 **자리만** 먼저 정해 둔 것. 코드: `src/components/world/PetSlot.tsx`(`PetConfig`·`PetSlot`), 자리 계산 `src/lib/world/worlds.ts`(`PET_SLOT`·`petOffset`), 스타일 `worldMap.css`(`.wn-pet`·`.wu-pet-walker`), 이동 `unlockFx.ts`(`pet`·`petWalk`·`PET_LAG`).
+
+- **데이터**: `WorldMap`의 `pet?: PetConfig | null` (`{ id, art? }`). 지금 운영은 항상 `null` → DOM 없음. `users.avatar_config`에는 아직 펫 자리가 없어 DB는 그대로(Phase 9가 `avatar_config.pet`(id)을 더하고 id → 그림 표를 만들면 `art` 대신 씀). `art`는 Phase 9 전 카탈로그 견본 전용
+- **자리**: 지금 위치 파이뱀과 같은 노드 겹(`.world-node.z-20`)에서 파이뱀보다 **먼저** 그려 파이뱀 뒤에 섬(노드 z-10 위). 가로 위치는 노드에서 `--px` 지도 단위 = 파이뱀 쪽(`markerSide`)으로 `92 + 48`(파이뱀 발치 바깥쪽). 바닥은 파이뱀과 같은 선(노드 + 6단위)
+- **크기**: 폭 `max(28px, 44 × --u)`(파이뱀 116의 약 40%), 높이는 그림 비율. 그림은 `svg` 폭 100%
+- **잘림 방지**: `petOffset`이 바깥 자리가 지도 폭(반폭 22단위)을 넘으면 노드 쪽 `92 − 48`(파이뱀 몸 뒤로 반쯤 가림)으로. 파이뱀이 이미 지도 안(`HERE_MARKER`)이고 펫은 그보다 낮아 위아래는 따로 검사하지 않음. 모든 월드 × 가로·세로 × 노드를 단위 테스트가 확인
+- **대기**: `.mascot-bob`(파이뱀과 엇박자 −0.6초), full·lite만 (motion-guidelines 허용 목록)
+- **잠금 해제 이동**(§13-7 ⑤): full은 파이뱀보다 `PET_LAG` 160ms 늦게 같은 길(`samplePath`)을 작게 3번 깡충(높이 14), lite는 파이뱀과 같이 500ms 미끄러짐, minimal·동작 줄이기는 연출 없이 새 자리로 바로. 첫 스테이지(길 없음)는 파이뱀처럼 톡 나타남. 이동 중 서는 자리 차이(`--px` 이전 → 새)는 길을 따라 고르게 옮김
+- **접근성**: `aria-hidden`(장식), 누름 없음
+
+**대표 상태**: 카탈로그 "월드 지도" 절 `world-pet-demo`(견본 알 + "해제 보기"). e2e `design-catalog.spec.ts` "동행 펫 슬롯".
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
 |---|---|
-| Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
-| IconButton | HUD 소리 토글(`SoundToggle`), 시트·토스트 닫기 |
-| Card | 월드맵 프로필 요약, 프로필 카드 4개, 계정 관리 |
+| Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 월드맵 이어하기(`ContinueButton`, P5-10), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
+| IconButton | HUD 소리 토글(`SoundToggle`)·메뉴(`WorldHud`), 시트·토스트 닫기 |
+| Card | 프로필 카드 4개, 계정 관리 |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
-| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05) |
-| Toast | 잠긴 스테이지 안내(B38) |
+| Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06), 월드맵 HUD 메뉴(P5-07) |
+| Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04), HUD 불꽃·곧 열려요 쪽지(P5-07), 잠금 해제 문구(P5-05) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
-| ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률 |
+| ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률, 스테이지 차례 시트 진행 요약 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |
 | SpeechBubble | 튜터 대사·스트리밍·생각 중 |
 | RewardIcon | 황금키 버튼·남은 개수, 황금키 확인 카드 |

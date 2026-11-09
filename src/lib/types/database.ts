@@ -7,6 +7,7 @@
 // 생성 파일은 직접 고치지 말고, 스키마를 바꾼 뒤 `npm run db:types`로 다시 만드세요.
 
 import type { ValidationType } from '@/lib/quest/validation';
+import type { BgmId } from '@/lib/sound/manifest';
 
 import type { Tables } from './database.generated';
 
@@ -31,9 +32,9 @@ export type QuizKind =
   | 'parsons'
   | 'bug_hunt';
 
-/** worlds.unlock_rule. 지금은 open 뿐 (2월드 규칙 §12-Q2 는 Phase 10) */
+/** worlds.unlock_rule (원본 스키마 src/lib/content/schema.ts WorldUnlockRuleSchema, §12-Q2·Q48) */
 export interface WorldUnlockRule {
-  type: 'open';
+  type: 'open' | 'previous_world_cleared';
 }
 
 export type World = Omit<Tables<'worlds'>, 'unlock_rule'> & {
@@ -172,7 +173,11 @@ export type QuestWithStageServer = Quest & {
 export type QuestClientSafe = Quest;
 
 export type QuestWithStage = QuestClientSafe & {
-  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'>;
+  stage: Pick<Stage, 'id' | 'title' | 'order' | 'theme_name'> & {
+    /** 이 퀘스트의 월드: 월드맵 복귀 링크가 그 월드 지도(`/world/<slug>`)로 (P5-01). 모르면 `/world` */
+    /** bgm: 그 월드 map.yaml 곡 (P5-11, 퀘스트 헤더 BGM). 서버가 붙임, 지도 없는 월드면 null */
+    world?: { slug: string; bgm?: BgmId | null } | null;
+  };
 };
 
 export interface StageWithStatus extends Stage {
@@ -181,4 +186,8 @@ export interface StageWithStatus extends Stage {
   completedQuestCount: number;
   totalQuestCount: number;
   firstIncompleteQuestId: string | null;
+  /** user_progress.best_stars 합 (P5-12) */
+  stars: number;
+  /** 퀘스트 수 × 3 */
+  maxStars: number;
 }

@@ -55,6 +55,18 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     engine.setBgmAllowed(budget.bgm);
   }, [engine, budget.bgm]);
 
+  // 디버그·e2e 훅: <html data-bgm(원하는 곡) data-bgm-playing(실제로 나는 곡)>. 화면 정보가 아니라 확인용
+  useEffect(() => {
+    const sync = () => {
+      const { desiredBgm, playingBgm } = engine.getSnapshot();
+      const d = document.documentElement.dataset;
+      d.bgm = desiredBgm ?? '';
+      d.bgmPlaying = playingBgm ?? '';
+    };
+    sync();
+    return engine.subscribe(sync);
+  }, [engine]);
+
   const celebration = useMemo<CelebrationSoundPort>(
     () => ({ play: (id, opts) => engine.play(id, opts) }),
     [engine],

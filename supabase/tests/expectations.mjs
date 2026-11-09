@@ -582,6 +582,12 @@ export const EXPECT = {
   'APP-10': { expect: 'allow' },
   'APP-11': { expect: 'allow' },
   'APP-12': { expect: 'allow' },
+  'APP-16': {
+    expect: 'allow',
+    requires: 'public.user_seen_unlocks',
+    activateIn: 'P5-05',
+    note: '월드맵 서버 조회의 본 기록 (본인 행만 돌아옴)',
+  },
   'APP-15': {
     expect: 'allow',
     requires: 'public.users.age_band',
@@ -719,6 +725,26 @@ export const EXPECT = {
     requires: 'public.complete_onboarding()',
     activateIn: 'P3-11',
     note: '① 00023 complete_onboarding 한 트랜잭션 · avatar_config 합치기 · 처음 시각 유지 · 23505 롤백',
+  },
+  // 잠금 해제 연출 본 기록 (P5-05, ① 00025)
+  'UL-1': { expect: 'deny', requires: 'public.user_seen_unlocks', activateIn: 'P5-05' },
+  'UL-2': {
+    expect: 'deny',
+    requires: 'public.user_seen_unlocks',
+    activateIn: 'P5-05',
+    note: '본인 행만 (RLS (select auth.uid()))',
+  },
+  'UL-3': {
+    expect: 'deny',
+    requires: 'public.record_seen_unlocks()',
+    activateIn: 'P5-05',
+    note: '쓰기는 /api/world/unlocks → service_role RPC 만 (잠긴 스테이지는 is_stage_unlocked 로 거름). authenticated 는 SELECT 만',
+  },
+  'UL-4': {
+    expect: 'allow',
+    requires: 'public.record_seen_unlocks()',
+    activateIn: 'P5-05',
+    note: '① 00025 record_seen_unlocks: 열린 스테이지만 · ON CONFLICT DO NOTHING · 상한 256 · users ON DELETE CASCADE',
   },
   // 만 14세 미만 법정대리인 동의 (P3-15, ① 00024)
   'GC-1': {

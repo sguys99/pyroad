@@ -67,7 +67,8 @@ const sqlLit = (s) => `'${s.replace(/'/g, "''")}'`;
 // 콘텐츠 테이블(시각 컬럼 제외)과 닉네임 CHECK·users 기본값. 정렬을 고정해 JSON 으로 비교
 const SNAPSHOT_SQL = `
 SELECT json_build_object(
-  'worlds', (SELECT json_agg(to_jsonb(x) - 'created_at' - 'updated_at' ORDER BY x.slug) FROM public.worlds x),
+  -- 월드 2·3(P5-03 seed)의 id 는 gen_random_uuid() 기본값이라 DB마다 다름 → slug 로 비교 (1월드 고정 id 는 stages.world_id 가 비교됨, P5-14)
+  'worlds', (SELECT json_agg(to_jsonb(x) - 'id' - 'created_at' - 'updated_at' ORDER BY x.slug) FROM public.worlds x),
   'stages', (SELECT json_agg(to_jsonb(x) - 'created_at' - 'updated_at' ORDER BY x.id) FROM public.stages x),
   'quests', (SELECT json_agg(to_jsonb(x) - 'created_at' - 'updated_at' ORDER BY x.id) FROM public.quests x),
   'quest_answer_keys', (SELECT json_agg(to_jsonb(x) - 'created_at' - 'updated_at' ORDER BY x.quest_id)

@@ -4,11 +4,14 @@
  */
 
 export class FakeParam {
+  /** linearRampToValueAtTime 기록 [목표값, 끝 시각(초)] — 크로스페이드 검사용 */
+  ramps: Array<[number, number]> = [];
   constructor(public value: number) {}
   setValueAtTime(v: number) {
     this.value = v;
   }
-  linearRampToValueAtTime(v: number) {
+  linearRampToValueAtTime(v: number, t: number) {
+    this.ramps.push([v, t]);
     this.value = v;
   }
   setTargetAtTime(v: number) {

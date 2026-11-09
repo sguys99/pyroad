@@ -74,3 +74,17 @@ export function stage(order: number): E2eStage {
   if (!found) throw new Error(`[e2e] 스테이지 ${order} 가 content/ 에 없음`);
   return found;
 }
+
+/** 첫 월드의 모든 퀘스트(코드·프로젝트) id. 월드를 다 깬 상태를 만들 때 (P5-01) */
+export function allQuestIds(): string[] {
+  return readdirSync(WORLD_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .flatMap((d) => {
+      const dir = join(WORLD_DIR, d.name);
+      return readdirSync(dir)
+        .filter((f) => f.endsWith('.yaml') && f !== 'stage.yaml')
+        .map(
+          (f) => (parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml).id,
+        );
+    });
+}

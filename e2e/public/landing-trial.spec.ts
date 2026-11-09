@@ -252,7 +252,10 @@ test.describe('랜딩 30초 체험 (P4-03)', () => {
     await page.keyboard.press('Tab');
     const input = page.getByLabel('파이썬 한 줄');
     await expect(input).toBeFocused();
-    await page.keyboard.press('End');
+    // macOS Chromium은 입력칸에서 End가 커서를 옮기지 않는다 (줄 끝 = ⌘→)
+    await page.keyboard.press(
+      process.platform === 'darwin' ? 'Meta+ArrowRight' : 'End',
+    );
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.type(' 파이뱀');

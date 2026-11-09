@@ -43,6 +43,8 @@ interface DialogShellProps {
   className?: string;
   /** 처음 포커스를 줄 요소 (기본: 첫 번째 포커스 가능한 요소) */
   initialFocus?: DialogPrimitive.Popup.Props['initialFocus'];
+  /** 닫은 뒤 포커스를 돌려줄 요소 (기본: 열기 전에 포커스가 있던 요소). 주소로 열린 겹창은 연 버튼이 없어 직접 준다 */
+  finalFocus?: DialogPrimitive.Popup.Props['finalFocus'];
   /**
    * 기기·브라우저 뒤로 가기로 닫기 (P4-09, `useBackToClose`). 열릴 때 같은 주소로 기록 항목을 하나 쌓고, 뒤로 가기면 닫는다.
    * 화면을 떠나지 않아야 하는 겹창(랜딩 로그인 시트)에 켠다
@@ -69,6 +71,7 @@ function DialogShell({
   showClose = true,
   className,
   initialFocus,
+  finalFocus,
   closeOnBack = false,
   'data-testid': testId,
 }: DialogShellProps & { kind: 'sheet' | 'modal'; wide?: boolean }) {
@@ -92,6 +95,7 @@ function DialogShell({
           data-wide={wide || undefined}
           data-testid={testId}
           initialFocus={initialFocus}
+          finalFocus={finalFocus}
           className={cn(
             kind === 'sheet' ? 'g-sheet' : 'g-modal p-6',
             'flex flex-col gap-4',

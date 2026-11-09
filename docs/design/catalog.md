@@ -27,7 +27,7 @@
 
 | 묶음 | 절 (anchor) | 내용 |
 |---|---|---|
-| 연출 | `#motion` 연출 단계 견본 | 단계표(`MOTION_BUDGETS` full·lite·minimal·동작 줄이기 + "지금" 줄) · 앱과 **같은 클래스**의 반복 연출 견본(대기 루프 `.mascot-bob`·`.character-breathe`·`.step-pulse`·`.stage-pulse`, 앰비언트 `.float-cloud`·`.drift-leaf`·`.stage-shimmer`, 바쁨 `.waking-dot`·`.thinking-dot`·`animate-spin`·`animate-pulse`, 눈 깜빡임 `.char-blink-*`·`.char-twinkle`), 흐림·큰 그림자. 칸마다 "돌고 있는 반복 연출 수"를 e2e와 같은 기준으로 센다 |
+| 연출 | `#motion` 연출 단계 견본 | 단계표(`MOTION_BUDGETS` full·lite·minimal·동작 줄이기 + "지금" 줄) · 앱과 **같은 클래스**의 반복 연출 견본(대기 루프 `.mascot-bob`·`.character-breathe`·`.step-pulse`·`.stage-pulse`, 앰비언트 `.float-cloud`·`.drift-leaf`·`.stage-shimmer`, 월드 지도 앰비언트 `.wm-a-cloud`·`.wm-a-wave`·`.wm-a-boat`·`.wm-a-bird`·`.wm-a-spark`·`.wm-a-leaf`(P5-09), 바쁨 `.waking-dot`·`.thinking-dot`·`animate-spin`·`animate-pulse`, 눈 깜빡임 `.char-blink-*`·`.char-twinkle`), 흐림·큰 그림자. 칸마다 "돌고 있는 반복 연출 수"를 e2e와 같은 기준으로 센다 |
 | 토큰 | `#colors` 색 | 토큰 원본(`COLOR`)의 이름·hex·CSS 변수·쓰임 + 바탕·카드 위 대비를 `contrastRatio`로 그 자리에서 계산, `CONTRAST_PAIRS` 52쌍 표(견본 글자·기준·대비) |
 | | `#type` 글자 | `TYPE` 12단계 견본(Jua 제목·버튼 / pyRoad Sans 본문·캡션·눈썹 / pyRoad Mono 코드) + HUD 숫자 `.hud-num` |
 | | `#shape` 반경·그림자·간격·선 | `RADIUS`·`SHADOW`·`SPACE`·`LINE` |
@@ -61,7 +61,7 @@
 | 단계 | 기대 |
 |---|---|
 | full | 검사가 실제로 잡는지: 앰비언트·대기 루프가 돌고, 흐림 요소가 있다 |
-| lite | 앰비언트(`float-cloud`·`drift-leaf`·`stage-shimmer`) 0개, 대기 루프는 돎, 흐림 요소 0개, `.m-shadow`는 단색 오프셋 |
+| lite | 앰비언트(`float-cloud`·`drift-leaf`·`stage-shimmer`·`wm-*` 지도 앰비언트) 0개, 대기 루프는 돎, 흐림 요소 0개, `.m-shadow`는 단색 오프셋 |
 | minimal | 아래 **minimal 허용 목록** 밖 0개 (대기 루프 0개, 바쁨 표시는 돎) · 흐림 0개 |
 | 동작 줄이기 (full) | 아래 **동작 줄이기 허용 목록** 밖 0개 |
 | minimal + 동작 줄이기 | 0개 |
@@ -118,4 +118,4 @@
 | ~~`landing/HeroSection.tsx` · `AboutSection.tsx`~~ | ~~차례로 떠오르기. Hero는 첫 화면 글자를 `opacity: 0`으로 서버 렌더~~ → P4-01에서 삭제. 새 히어로(`landing/hero/`)는 보이는 상태에서 CSS transform만, minimal·동작 줄이기는 등장 없음 | 해결 (P4-01) |
 | `quest/CodePanel.tsx` 코딩 팁 회전 | 실행기 로딩 중 3.5초마다 Framer 페이드 (유한, 동작 줄이기에서 opacity만) | Phase 4 |
 | `components/ui/hud.tsx` `CurrencyHud` | 360폭에서 코인·별·키·소리를 모두 넣으면 약 380px로 넘침 (카탈로그 칸은 가로 스크롤) | HUD 개편 때 칸 줄이기(키는 퀘스트만·XP 바 접기 등) |
-| 패럴랙스 | 랜딩 히어로가 처음 사용(P4-01 `HeroParallax`: full만, CSS `.hero-par`). 월드맵은 아직 | Phase 5 지도 |
+| ~~패럴랙스~~ | 랜딩 히어로(P4-01 `HeroParallax`, CSS `.hero-par`)와 월드 지도(P5-02 `WorldMap` 스크롤 `--ms`, CSS `.wm-par`) 모두 full만. 카탈로그 "월드 지도" 절 | 해결 (P5-02) |

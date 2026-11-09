@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { resetProgressRpc } from '@/lib/quest/rewardRpc';
+import { reportServerError } from '@/lib/api/serverError';
 
 /**
  * 진행 리셋 (P1-03, B12)
@@ -58,7 +59,17 @@ export async function POST(request: Request) {
   );
   if (!result.ok) return result.response;
 
-  revalidatePath('/world');
+  // 잠금 해제 본 기록(P5-05)도 지운다: 다음 방문에 지금 열린 스테이지를 조용히 다시 기록하고, 다시 여는 스테이지는 연출이 나옴.
+  // 실패해도 리셋은 끝났으므로 로그만 (연출이 안 나올 뿐)
+  const { error: seenError } = await createAdminClient()
+    .from('user_seen_unlocks')
+    .delete()
+    .eq('user_id', user.id);
+  if (seenError)
+    reportServerError(seenError, { area: 'account', op: 'reset seen unlocks' });
+
+  revalidatePath('/world', 'layout'); // /world/[slug] 포함 (P5-01)
+  revalidatePath('/worlds');
   revalidatePath('/profile');
 
   const data = result.data;

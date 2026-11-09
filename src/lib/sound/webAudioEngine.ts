@@ -9,6 +9,7 @@ import {
   canPlayUrl,
   getAudioContextCtor,
   onIdle,
+  prefersLightNetwork,
   prefersSaveData,
   setAudioSessionType,
   type AudioContextCtor,
@@ -140,6 +141,8 @@ export class WebAudioEngine<
   private readonly buffers = new Map<S, AudioBuffer>();
   private readonly decoding = new Map<S, Promise<AudioBuffer | null>>();
   private readonly bgmBuffers = new Map<B, Promise<AudioBuffer | null>>();
+  /** prefetchBgm 으로 받았거나 받는 중인 곡 (중복 요청 방지) */
+  private readonly bgmFetched = new Set<B>();
   private readonly voices = new Map<S, Voice[]>();
   private totalVoices = 0;
   private slots: BgmSlot[] = [];
@@ -718,6 +721,25 @@ export class WebAudioEngine<
     if (slot.stopTimer) clearTimeout(slot.stopTimer);
     if (fadeMs <= 0) stop();
     else slot.stopTimer = setTimeout(stop, fadeMs + 50);
+  }
+
+  /**
+   * BGM 파일을 받아 HTTP 캐시(`/sounds/*` immutable)에만 데워 둔다 (P5-11 추가). 디코드하지 않으므로 메모리에 남지 않고,
+   * 첫 재생 때 `loadBgmBuffer`의 fetch 가 캐시에서 바로 받아 디코드만 한다. 버퍼 보관 규칙("현재 곡만")은 그대로.
+   * BGM 이 꺼져 있거나(기본) 연출 단계가 막았거나, 데이터 절약·느린 연결이면 받지 않는다. 곡마다 한 번만.
+   */
+  prefetchBgm(ids: readonly B[]): void {
+    if (this.disposed || !this.bgmAllowed || prefersLightNetwork()) return;
+    if (effectiveGain(this.settings, 'bgm') === 0) return;
+    for (const id of ids) {
+      const def = this.manifest.bgm[id];
+      // 이미 받았거나 디코드 중·디코드된 곡(재생 중)은 건너뜀
+      if (!def || this.bgmFetched.has(id) || this.bgmBuffers.has(id)) continue;
+      const src = def.src.find(this.canPlay);
+      if (!src) continue;
+      this.bgmFetched.add(id);
+      this.loadBytes(src).catch(() => this.bgmFetched.delete(id));
+    }
   }
 
   private loadBgmBuffer(id: B): Promise<AudioBuffer | null> {

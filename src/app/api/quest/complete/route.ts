@@ -88,7 +88,8 @@ export async function POST(request: Request) {
 
   if (!result.data.already_completed) {
     // 월드맵·프로필 페이지의 Router Cache 무효화
-    revalidatePath('/world');
+    revalidatePath('/world', 'layout'); // /world/[slug] 포함 (P5-01)
+    revalidatePath('/worlds');
     revalidatePath('/profile');
 
     // 처음 완료만 분석 이벤트로 (P1-17). 값은 모두 DB 함수가 정한 것이라 클라이언트가 바꿀 수 없음

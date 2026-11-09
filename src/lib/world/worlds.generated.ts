@@ -1,0 +1,178 @@
+// 생성물: npm run content:build (content/worlds/*/world.yaml·map.yaml, P5-03). 직접 고치지 않습니다.
+import type { WorldInfo } from './worlds';
+
+export const WORLDS: readonly WorldInfo[] = [
+  {
+    "slug": "python-island",
+    "order": 1,
+    "title": "파이썬 섬",
+    "theme": "python_island",
+    "unlock_rule": {
+      "type": "open"
+    },
+    "ready": true,
+    "map": {
+      "bgm": "world1",
+      "path": "catmull_rom",
+      "layouts": {
+        "wide": {
+          "width": 1200,
+          "height": 720,
+          "node_scale": 1,
+          "nodes": [
+            [130, 600],
+            [330, 470],
+            [540, 580],
+            [660, 360],
+            [880, 500],
+            [960, 300],
+            [1100, 160]
+          ],
+          "decorations": [
+            {
+              "kind": "waves",
+              "x": 110,
+              "y": 50
+            },
+            {
+              "kind": "waves",
+              "x": 420,
+              "y": 26
+            },
+            {
+              "kind": "boat",
+              "x": 210,
+              "y": 52
+            },
+            {
+              "kind": "mountains",
+              "x": 480,
+              "y": 290,
+              "scale": 1.3
+            },
+            {
+              "kind": "mountains",
+              "x": 770,
+              "y": 235,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 70,
+              "y": 430,
+              "scale": 1.2
+            },
+            {
+              "kind": "tree",
+              "x": 230,
+              "y": 655,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 790,
+              "y": 650,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 1150,
+              "y": 480,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 890,
+              "y": 175
+            },
+            {
+              "kind": "bird",
+              "x": 650,
+              "y": 140
+            }
+          ]
+        },
+        "tall": {
+          "width": 400,
+          "height": 1180,
+          "node_scale": 0.82,
+          "nodes": [
+            [104, 1080],
+            [292, 930],
+            [108, 790],
+            [292, 640],
+            [112, 495],
+            [290, 364],
+            [180, 200]
+          ],
+          "decorations": [
+            {
+              "kind": "waves",
+              "x": 50,
+              "y": 44
+            },
+            {
+              "kind": "mountains",
+              "x": 20,
+              "y": 620
+            },
+            {
+              "kind": "mountains",
+              "x": 250,
+              "y": 770,
+              "scale": 0.9
+            },
+            {
+              "kind": "tree",
+              "x": 40,
+              "y": 960,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 350,
+              "y": 1040
+            },
+            {
+              "kind": "tree",
+              "x": 30,
+              "y": 300
+            },
+            {
+              "kind": "tree",
+              "x": 360,
+              "y": 520
+            }
+          ]
+        }
+      },
+      "ambient": {
+        "clouds": true,
+        "sparkles": true,
+        "weather": "leaves"
+      }
+    }
+  },
+  {
+    "slug": "code-sea",
+    "order": 2,
+    "title": "코드 바다",
+    "theme": "code_sea",
+    "unlock_rule": {
+      "type": "previous_world_cleared"
+    },
+    "ready": false,
+    "map": null
+  },
+  {
+    "slug": "maker-city",
+    "order": 3,
+    "title": "메이커 시티",
+    "theme": "maker_city",
+    "unlock_rule": {
+      "type": "previous_world_cleared"
+    },
+    "ready": false,
+    "map": null
+  }
+];

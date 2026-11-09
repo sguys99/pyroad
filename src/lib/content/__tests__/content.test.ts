@@ -7,12 +7,21 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { validateRule } from '@/lib/quest/validation';
 
-import { CONTENT_DIR, SEED_SQL } from '../../../../scripts/content/lib/paths';
+import {
+  CONTENT_DIR,
+  SEED_SQL,
+  WORLDS_MODULE,
+} from '../../../../scripts/content/lib/paths';
 import {
   replay,
   type ContentSnapshot,
 } from '../../../../scripts/content/lib/pglite';
-import { buildRows, toSeedSql, type ContentRows } from '../build';
+import {
+  buildRows,
+  toSeedSql,
+  toWorldsModule,
+  type ContentRows,
+} from '../build';
 import { loadContent, type ContentTree } from '../load';
 
 let tree: ContentTree;
@@ -26,7 +35,12 @@ beforeAll(() => {
 describe('content/ 원본', () => {
   it('스키마·이름·중복 검사를 통과하고 경고가 없음', () => {
     expect(buildRows(tree).warnings).toEqual([]);
-    expect(tree.worlds.map((w) => w.world.slug)).toEqual(['python-island']);
+    // 월드 2·3 은 world.yaml 만 있는 "준비 중" 표지 (Q48)
+    expect(rows.worlds.map((w) => w.slug)).toEqual([
+      'python-island',
+      'code-sea',
+      'maker-city',
+    ]);
   });
 
   it('모든 퀘스트·단계에 정답 코드가 있음', () => {
@@ -44,6 +58,12 @@ describe('커밋한 supabase/seed.sql', () => {
     expect(readFileSync(SEED_SQL, 'utf8')).toBe(
       toSeedSql(rows, { hash: tree.hash }),
     );
+  });
+});
+
+describe('커밋한 src/lib/world/worlds.generated.ts', () => {
+  it('content/ 생성물과 같음 (다르면 npm run content:build 로 다시 만들어 함께 커밋)', () => {
+    expect(readFileSync(WORLDS_MODULE, 'utf8')).toBe(toWorldsModule(tree));
   });
 });
 

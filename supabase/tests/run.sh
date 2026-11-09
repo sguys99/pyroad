@@ -182,7 +182,9 @@ start_stack() {
 
 log "임시 스택 $PROJECT_ID · api $((PORT_BASE + 1)) db $((PORT_BASE + 2)) · $WORKDIR"
 init_project legacy
-mapfile -t ALL_MIGRATIONS < <(repo_migrations)
+# macOS 기본 bash 3.2에는 mapfile이 없어 while read로 (P5-14)
+ALL_MIGRATIONS=()
+while IFS= read -r line; do ALL_MIGRATIONS+=("$line"); done < <(repo_migrations)
 
 # ① 운영 재현
 if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] \
@@ -206,7 +208,8 @@ if [[ "${RLS_SKIP_PROD:-0}" != 1 ]] \
       log "운영 적용 리허설 (이미 운영에 있음): $(basename "$f") (psql -1)"
       apply_sql "$f"
     done
-    mapfile -t RELEASE_FILES < <(node "$REPO/scripts/release/build-release-sql.mjs" --out "$WORKDIR/release-crlf" --crlf --list)
+    RELEASE_FILES=()
+    while IFS= read -r line; do RELEASE_FILES+=("$line"); done < <(node "$REPO/scripts/release/build-release-sql.mjs" --out "$WORKDIR/release-crlf" --crlf --list)
     [[ "${#RELEASE_FILES[@]}" -gt 0 ]] || die "운영 붙여넣기 묶음을 만들지 못함 (scripts/release/build-release-sql.mjs)"
     for f in "${RELEASE_FILES[@]}"; do
       grep -q $'\r$' "$f" || die "CRLF 변환 실패: $f"

@@ -1,0 +1,147 @@
+/* 잠금 해제 연출 겹 (P5-05, 시안 motion.css .f-ul-*). 값은 토큰 변수만. 움직임은 unlockFx.ts(WAAPI, 1회성),
+   여기는 연출 전 모습(숨김)과 자리만. 크기 단위는 노드와 같이 --lm(지도 1단위 × 랜드마크 배율, worldMap.css) */
+
+.wu-fx {
+  --lm: calc(var(--u) * var(--ns));
+  pointer-events: none;
+}
+
+/* 새로 긋는 길: pathLength 1 → dashoffset 1 이면 안 보임. 그 위 종이 점선은 다 그은 뒤 나타남 */
+.wm-art .wu-road {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.wm-art .wu-stitch {
+  opacity: 0;
+}
+
+/* 스케치 → 컬러: 번짐 마스크가 퍼질 때만 보임 */
+.wu-ink {
+  visibility: hidden;
+}
+
+/* 연출 전: 이전 노드의 통과 도장은 아직 안 찍힘 (도장 쾅이 WAAPI 로 덮어씀) */
+.world-node[data-unlock='from'] .wn-stamp {
+  opacity: 0;
+}
+
+/* 잉크 튐: 통과 도장 가운데에서 */
+.wu-splats {
+  position: absolute;
+  left: calc(var(--lm) * -62 + max(22px, calc(var(--lm) * 28)));
+  top: calc(var(--lm) * -104 + max(22px, calc(var(--lm) * 28)));
+}
+.wu-splat {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-text);
+  opacity: 0;
+}
+
+/* 자물쇠: 랜드마크 가운데쯤. 두 반쪽은 같은 배지를 반씩 잘라 겹친 것 (깨질 때 따로 떨어짐) */
+.wu-lock {
+  position: absolute;
+  left: 0;
+  top: calc(var(--lm) * -60);
+  width: max(38px, calc(var(--lm) * 46));
+  height: max(38px, calc(var(--lm) * 46));
+  translate: -50% -50%;
+}
+.wu-lock-half {
+  position: absolute;
+  inset: 0;
+}
+.wu-lock-half[data-side='l'] {
+  clip-path: polygon(0 0, 54% 0, 44% 100%, 0 100%);
+}
+.wu-lock-half[data-side='r'] {
+  clip-path: polygon(54% 0, 100% 0, 100% 100%, 44% 100%);
+}
+.wu-lock-face {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--elev-pop);
+}
+.wu-lock-face svg {
+  width: 52%;
+  height: 52%;
+}
+.wu-shard {
+  position: absolute;
+  left: calc(50% - 4px);
+  top: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 70%, 20% 100%);
+  opacity: 0;
+}
+
+/* 잉크 방울: 자물쇠 위로 떨어짐 (full) */
+.wu-drop {
+  position: absolute;
+  left: -8px;
+  top: calc(var(--lm) * -60 - 8px);
+  width: 16px;
+  height: 16px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--text);
+  opacity: 0;
+}
+
+/* "열렸어요!" 도장: 가로 지도는 파이뱀 반대쪽 위, 세로 지도는 이름표 아래 */
+.wu-banner {
+  position: absolute;
+  left: 0;
+  top: calc(var(--lm) * 10 + 56px);
+  padding: 4px 12px 2px;
+  border: 1.5px solid var(--accent-text);
+  border-radius: var(--round-s);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--accent-text);
+  box-shadow: var(--elev-card);
+  font-size: var(--text-body);
+  line-height: 1.3;
+  white-space: nowrap;
+  translate: -50% 0;
+  transform: rotate(-5deg);
+  opacity: 0;
+}
+@container (min-width: 900px) {
+  .wu-banner {
+    left: calc(var(--dx) * var(--lm) * -58);
+    top: calc(var(--lm) * -128);
+  }
+}
+
+/* 끝: 자물쇠는 사라지고 도장은 잠깐 남았다가 흐려짐 (1회성 opacity). 동작 줄이기·minimal 은 도장 없이 문구(토스트)만 */
+.wu-fx.is-done .wu-lock,
+.wu-fx.is-done .wu-drop {
+  display: none;
+}
+.wu-fx.is-done .wu-banner {
+  opacity: 1;
+  animation: wu-banner-out var(--dur-slow) var(--ease-out)
+    calc(var(--dur-celebrate) * 2) forwards;
+}
+@keyframes wu-banner-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* 파이뱀을 옮기는 겹 (크기 0, 노드 자리). 안의 .wn-here 가 노드 옆에 선다 */
+.wu-walker {
+  position: absolute;
+  left: 0;
+  top: 0;
+}

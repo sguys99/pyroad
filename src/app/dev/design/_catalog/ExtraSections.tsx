@@ -1,9 +1,20 @@
 'use client';
 
-import { Code2, ExternalLink, Volume2 } from 'lucide-react';
-import { useSfx } from '@/components/providers/SoundProvider';
-import { useSoundSettings } from '@/components/providers/SoundProvider';
-import { SFX_USES, STAR_RATES, type SfxId } from '@/lib/sound/manifest';
+import { useState } from 'react';
+import { Code2, ExternalLink, Music, Volume2 } from 'lucide-react';
+import {
+  useSfx,
+  useSoundSettings,
+  useSoundSnapshot,
+} from '@/components/providers/SoundProvider';
+import { WorldBgm } from '@/components/sound/WorldBgm';
+import {
+  SFX_USES,
+  SOFT_TAP,
+  STAR_RATES,
+  type BgmId,
+  type SfxId,
+} from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
 import { Button } from '@/components/ui/button';
 import { CodeSample, Demo, Section } from './ui';
@@ -127,7 +138,55 @@ export function SoundSection() {
           별 세 개
         </Button>
       </Demo>
+      <Demo label="지도 노드 (P5-11)" note="열린 노드·차례 퀘스트는 탭, 잠긴 노드는 같은 탭을 작고 낮게(경고음 없음, 안내는 쪽지 글자)">
+        <div className="flex flex-wrap gap-3">
+          <Button variant="secondary" size="sm" sfx={false} onClick={() => play('tap')}>
+            열린 노드
+          </Button>
+          <Button variant="secondary" size="sm" sfx={false} onClick={() => play('tap', SOFT_TAP)}>
+            잠긴 노드
+          </Button>
+          <Button variant="secondary" size="sm" sfx={false} onClick={() => play('unlock')}>
+            자물쇠 깨짐
+          </Button>
+        </div>
+      </Demo>
+      <WorldBgmDemo />
       <CodeSample code={`const play = useSfx();\nplay('correct');\nplay('star', { rate: STAR_RATES[2] });`} />
     </Section>
+  );
+}
+
+const BGM_IDS: BgmId[] = ['world1', 'world2', 'world3'];
+
+/** 월드를 옮길 때 800ms 크로스페이드 (P5-11). 설정에서 배경음악을 켜야 들린다 */
+function WorldBgmDemo() {
+  const [bgm, setBgm] = useState<BgmId | null>(null);
+  const { playingBgm, settings } = useSoundSnapshot();
+  return (
+    <Demo
+      label="월드 BGM 크로스페이드 (P5-11)"
+      note={`곡을 바꾸면 800ms 동안 겹쳐 바뀌고, 디코드한 곡은 지금 곡만 남겨요. 배경음악 ${settings.bgm.enabled ? '켜짐' : '꺼짐(설정에서 켜야 들림)'} · 지금 나는 곡: ${playingBgm ?? '없음'}`}
+    >
+      <div className="flex flex-wrap gap-3">
+        {BGM_IDS.map((id) => (
+          <Button
+            key={id}
+            variant={bgm === id ? 'primary' : 'secondary'}
+            size="sm"
+            sfx={false}
+            icon={<Music aria-hidden />}
+            aria-pressed={bgm === id}
+            onClick={() => setBgm(id)}
+          >
+            {id}
+          </Button>
+        ))}
+        <Button variant="ghost" size="sm" sfx={false} onClick={() => setBgm(null)}>
+          끄기
+        </Button>
+      </div>
+      <WorldBgm id={bgm} />
+    </Demo>
   );
 }

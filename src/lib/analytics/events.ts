@@ -79,6 +79,14 @@ export interface AnalyticsEventProps {
   };
   /** 브라우저가 앱 설치를 알림 (`appinstalled`, Chromium만. P4-11) */
   pwa_installed: Record<string, never>;
+  /**
+   * 월드맵 이어하기 CTA를 누름 (P5-10, 브라우저). kind: recent(하다 만 퀘스트)·next(다음 차례)·start(진행 0, 모험 시작하기),
+   * place: head(지도 머리)·float(모바일 아래 떠 있는 버튼). 실제 퀘스트 진입은 서버 quest_start 로 센다
+   */
+  continue_click: {
+    kind: 'recent' | 'next' | 'start';
+    place: 'head' | 'float';
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -88,6 +96,7 @@ export type TrialRunResult = 'ok' | 'no_print' | MiniErrorKind;
 
 /** 브라우저가 `/api/analytics`로 보낼 수 있는 이벤트. 나머지는 서버만 기록한다 (클라이언트가 지표를 부풀리지 못하게) */
 export const CLIENT_EVENT_NAMES = [
+  'continue_click',
   'landing_view',
   'landing_cta_click',
   'motion_tier_change',

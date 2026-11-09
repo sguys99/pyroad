@@ -1,0 +1,275 @@
+/* 스테이지 차례 시트 (P5-06, StageSheet.tsx). 시안 final.css·refine.css `.f-toc*`를 토큰으로 옮김.
+   틀(덮개·바텀시트·대화 상자·열림 연출)은 공통 overlay.css `.g-sheet`, 여기는 안쪽 모양과 줄 차례 등장만.
+   768px 미만 바텀시트, 이상은 책 한 쪽(종이 결 + 왼쪽 묶음 그늘) */
+
+/* 머리: 랜드마크 그림 왼쪽 + 제목 오른쪽 (Sheet의 media 칸·제목 칸을 격자로 나란히) */
+.g-sheet.ss {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.875rem;
+  row-gap: 1rem;
+}
+.g-sheet.ss > * {
+  grid-column: 1 / -1;
+}
+.g-sheet.ss > div:has(> .ss-art) {
+  grid-column: 1;
+}
+.g-sheet.ss > div:has(> .ss-art) + div {
+  grid-column: 2;
+  padding-right: 3rem;
+}
+.ss-art {
+  position: relative;
+  width: 5.5rem;
+  aspect-ratio: 170 / 190;
+  border-radius: var(--round-m);
+  background: var(--world-soft);
+}
+.ss-kicker {
+  display: block;
+  margin-bottom: 0.125rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+@media (min-width: 48rem) {
+  /* 책 한 쪽: 종이 결 + 왼쪽 묶음 쪽 그늘 */
+  .g-sheet.ss {
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    column-gap: 1.25rem;
+    padding: 2rem 2.25rem 1.75rem 2.75rem;
+    background-image:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--text) 9%, transparent),
+        transparent 1.25rem
+      ),
+      url('/textures/paper-fiber.v1.png');
+    background-size:
+      100% 100%,
+      256px 256px;
+  }
+  .ss-art {
+    width: 7.5rem;
+  }
+}
+
+/* 진행 요약 */
+.ss-sum {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--accent-soft);
+}
+.ss-sum-txt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.ss-num {
+  font-size: var(--text-h3);
+}
+.ss-sum-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+}
+
+.ss-k {
+  margin-bottom: -0.5rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+/* 차례 */
+.ss-list {
+  display: grid;
+  gap: 0.25rem;
+}
+.ss-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--round-s);
+  color: var(--text);
+  transition: background-color var(--dur-fast) var(--easing-out);
+}
+.ss-row:hover {
+  background: var(--bg);
+}
+.ss-row:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: 1px;
+}
+.ss-row[data-state='now'] {
+  background: var(--primary-soft);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+.ss-no {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-weight: 700;
+}
+.ss-row[data-state='done'] .ss-no {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.ss-row[data-state='now'] .ss-no {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.ss-row[data-kind='boss'] .ss-no {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.ss-main {
+  display: grid;
+  flex: 1;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.ss-t {
+  font-weight: 700;
+  line-height: 1.35;
+}
+/* 배울 개념 한 줄: 길면 줄임표 (줄 높이가 늘지 않게) */
+.ss-c {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ss-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.ss-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.ss-tag[data-kind='boss'] {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.ss-tag[data-state='done'] {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.ss-tag[data-state='now'] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+/* 휴대폰 추천: 좁은 화면(휴대폰)에서는 진하게 눈에 띄게, 넓은 화면은 옅게 */
+.ss-tag[data-mobile] {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+@media (min-width: 48rem) {
+  .ss-tag[data-mobile] {
+    background: var(--surface-2);
+    color: var(--text-muted);
+  }
+}
+.ss-end {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ss-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  font-size: var(--text-small);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ss-go {
+  color: var(--text-muted);
+}
+/* 주 버튼 줄은 차례가 길어도 늘 보이게 시트 아래에 붙인다 */
+.g-sheet.ss > div:has(> .ss-cta) {
+  position: sticky;
+  bottom: calc(-1.5rem - env(safe-area-inset-bottom, 0px));
+  margin: -0.5rem calc(-1 * var(--spacing-gutter))
+    calc(-1.5rem - env(safe-area-inset-bottom, 0px));
+  padding: 0.75rem var(--spacing-gutter)
+    calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  box-shadow: 0 -1px 0 var(--line);
+}
+.g-sheet.ss .ss-cta {
+  width: 100%;
+}
+@media (min-width: 40rem) {
+  .g-sheet.ss .ss-cta {
+    width: auto;
+  }
+}
+@media (min-width: 48rem) {
+  .g-sheet.ss > div:has(> .ss-cta) {
+    bottom: -1.75rem;
+    margin: -0.5rem -2.25rem -1.75rem -2.75rem;
+    padding: 0.75rem 2.25rem 1.75rem 2.75rem;
+    background: var(--surface) url('/textures/paper-fiber.v1.png') 0 0 / 256px
+      256px;
+  }
+}
+
+/* 줄 차례 등장 (시트가 올라오는 동안 위에서부터): full 스프링 / lite 짧게 / minimal 페이드 / 동작 줄이기 즉시 */
+@keyframes ss-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+@keyframes ss-fade {
+  from {
+    opacity: 0;
+  }
+}
+:root[data-motion='full'] .ss-li {
+  animation: ss-in var(--spring-body-dur) var(--spring-body) both;
+  animation-delay: calc(120ms + min(var(--i), 8) * 45ms);
+}
+:root[data-motion='lite'] .ss-li {
+  animation: ss-in var(--dur-base) var(--easing-out) both;
+  animation-delay: calc(60ms + min(var(--i), 8) * 25ms);
+}
+:root[data-motion='minimal'] .ss-li {
+  animation: ss-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .ss-li {
+  animation: none;
+}

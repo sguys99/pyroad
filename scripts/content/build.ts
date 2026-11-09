@@ -1,16 +1,34 @@
-// content/ → (a) seed SQL, (b) 검증용 JSON (P1-11, §2.4)
+// content/ → (a) seed SQL, (b) 검증용 JSON, (c) 월드 목록·지도 모듈 (P1-11, P5-03, §2.4)
 //
-//   npm run content:build                      # supabase/seed.sql (커밋하는 생성물), build/content/quests.json (git 제외)
-//   npm run content:build -- --check           # 쓰지 않고, supabase/seed.sql 이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사)
-//   옵션: --seed-out <file> · --json-out <file> · --content <dir>
+//   npm run content:build                      # supabase/seed.sql·src/lib/world/worlds.generated.ts (커밋하는 생성물), build/content/quests.json (git 제외)
+//   npm run content:build -- --check           # 쓰지 않고, 커밋하는 생성물이 content/ 와 다르면 종료 코드 1 (CI 드리프트 검사)
+//   옵션: --seed-out <file> · --json-out <file> · --worlds-out <file> · --content <dir>
+//   npm run content:build -- --fixtures e2e/fixtures/content
+//                                              # e2e 테스트 월드(Q48, P5-01): content/ 에 픽스처 월드를 더해 검증하고, 픽스처 월드만
+//                                              # build/e2e/worlds.json(지도 설정)·rows.json(DB 행)에 씀. 커밋하는 생성물·운영 seed 는 건드리지 않음
 //
-// --check 는 커밋하는 seed 만 봅니다. 검증 JSON 은 git 에 없어서(CI 의 새 checkout 에는 파일이 없음)
+// --check 는 커밋하는 생성물(seed·월드 모듈)만 봅니다. 검증 JSON 은 git 에 없어서(CI 의 새 checkout 에는 파일이 없음)
 // 비교하지 않습니다. P1-13 test:content 는 같은 함수(toCheckFixture)로 메모리에서 만들어 씁니다.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, relative, resolve } from 'node:path';
 
-import { buildRows, toCheckFixture, toSeedSql } from '@/lib/content/build';
+import {
+  buildRows,
+  toCheckFixture,
+  toSeedSql,
+  toWorldInfos,
+  toWorldsModule,
+} from '@/lib/content/build';
 import { loadContent } from '@/lib/content/load';
 
 import { parseArgs, run } from './lib/args';
@@ -19,6 +37,7 @@ import {
   DEFAULT_JSON_OUT,
   DEFAULT_SEED_OUT,
   REPO_ROOT,
+  WORLDS_MODULE,
 } from './lib/paths';
 
 run(async () => {
@@ -26,7 +45,10 @@ run(async () => {
   const contentDir = resolve(REPO_ROOT, args.get('content') ?? CONTENT_DIR);
   const seedOut = resolve(REPO_ROOT, args.get('seed-out') ?? DEFAULT_SEED_OUT);
   const jsonOut = resolve(REPO_ROOT, args.get('json-out') ?? DEFAULT_JSON_OUT);
+  const worldsOut = resolve(REPO_ROOT, args.get('worlds-out') ?? WORLDS_MODULE);
   const check = args.has('check');
+  const fixtures = args.get('fixtures');
+  if (fixtures) return buildFixtures(contentDir, resolve(REPO_ROOT, fixtures));
 
   const tree = loadContent(contentDir);
   const { rows, meta, warnings } = buildRows(tree);
@@ -37,6 +59,7 @@ run(async () => {
     meta,
   });
   const json = JSON.stringify(fixture, null, 2) + '\n';
+  const worldsModule = toWorldsModule(tree);
 
   for (const w of warnings) console.warn(`경고: ${w}`);
   const { counts } = fixture.meta;
@@ -46,18 +69,26 @@ run(async () => {
   );
 
   if (check) {
-    const name = relative(REPO_ROOT, seedOut);
-    const current = existsSync(seedOut) ? readFileSync(seedOut, 'utf8') : null;
-    if (current === seed) {
-      console.log(`같음: ${name}`);
-      return;
+    let drift = false;
+    for (const [file, expected] of [
+      [seedOut, seed],
+      [worldsOut, worldsModule],
+    ] as const) {
+      const name = relative(REPO_ROOT, file);
+      const current = existsSync(file) ? readFileSync(file, 'utf8') : null;
+      if (current === expected) {
+        console.log(`같음: ${name}`);
+        continue;
+      }
+      drift = true;
+      console.log(
+        `다름: ${name}${current === null ? ' (파일 없음)' : firstDiff(current, expected)}`,
+      );
     }
-    console.log(
-      `다름: ${name}${current === null ? ' (파일 없음)' : firstDiff(current, seed)}`,
-    );
+    if (!drift) return;
     console.error(
       '생성물이 content/ 와 달라요. content/ 를 고쳤다면 npm run content:build 를 실행해 다시 만들고 함께 커밋하세요 ' +
-        '(seed.sql 을 직접 고쳤다면 그 내용을 content/ 로 옮기세요)',
+        '(생성물을 직접 고쳤다면 그 내용을 content/ 로 옮기세요)',
     );
     return 1;
   }
@@ -65,12 +96,48 @@ run(async () => {
   for (const [file, text] of [
     [seedOut, seed],
     [jsonOut, json],
+    [worldsOut, worldsModule],
   ] as const) {
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, text);
     console.log(`썼어요: ${relative(REPO_ROOT, file)}`);
   }
 });
+
+/** content/ 복사본에 픽스처 월드 디렉토리를 더해 함께 검증하고, 픽스처 월드의 지도 설정·DB 행만 build/e2e/ 에 쓴다 */
+function buildFixtures(contentDir: string, fixturesDir: string) {
+  const dir = mkdtempSync(join(tmpdir(), 'pyroad-content-'));
+  cpSync(contentDir, dir, { recursive: true });
+  cpSync(join(fixturesDir, 'worlds'), join(dir, 'worlds'), { recursive: true });
+  const slugs = new Set(readdirSync(join(fixturesDir, 'worlds')));
+
+  const tree = loadContent(dir);
+  const { rows } = buildRows(tree);
+  const stageIds = new Set(
+    rows.stages.filter((s) => slugs.has(s.world)).map((s) => s.id),
+  );
+  const questIds = new Set(
+    rows.quests.filter((q) => stageIds.has(q.stage_id)).map((q) => q.id),
+  );
+  const out = resolve(REPO_ROOT, 'build/e2e');
+  mkdirSync(out, { recursive: true });
+  writeFileSync(
+    join(out, 'worlds.json'),
+    JSON.stringify(toWorldInfos(tree).filter((w) => slugs.has(w.slug))),
+  );
+  writeFileSync(
+    join(out, 'rows.json'),
+    JSON.stringify({
+      worlds: rows.worlds.filter((w) => slugs.has(w.slug)),
+      stages: rows.stages.filter((s) => stageIds.has(s.id)),
+      quests: rows.quests.filter((q) => questIds.has(q.id)),
+      answer_keys: rows.answer_keys.filter((k) => questIds.has(k.quest_id)),
+    }),
+  );
+  console.log(
+    `썼어요: build/e2e/worlds.json·rows.json (픽스처 월드 ${[...slugs].join(', ')})`,
+  );
+}
 
 /** 처음 다른 줄 번호 (CI 로그에서 어디가 어긋났는지 바로 보이게) */
 function firstDiff(current: string, expected: string): string {

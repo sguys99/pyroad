@@ -38,7 +38,7 @@
 | 일회성 이펙트 (팝·코인·별) | `springs` · `effectDuration` | 스프링·바운스 | **70% 길이** | 페이드만 (150ms) | 즉시(0) + 색·글자·표정 |
 | 파티클·컨페티 | `particles` | 100% | **30%** | 0 | 0 |
 | 앰비언트 (구름·물결·반짝임) | `ambient` · CSS `.m-ambient` | 켬 | **끔** (정지 배경) | 끔 | 끔 |
-| 패럴랙스 (지도 레이어) | `parallax` | 켬 | **끔** | 끔 | 끔 |
+| 패럴랙스 (지도 레이어) | `parallax` | 켬 (랜딩 히어로 포인터·스크롤 `.hero-par` · 월드 지도 스크롤 `.wm-par`) | **끔** (정지 배경) | 끔 | 끔 |
 | `filter: blur`·`backdrop-filter` | `blur` · CSS `.m-blur` | 허용 | **끔** (불투명 배경) | 끔 | 단계 따름 |
 | 큰 그림자 | `bigShadow` · CSS `.m-shadow` | 허용 | 단색 오프셋 | 단색 오프셋 | 단계 따름 |
 | 페이지 전환 | `pageTransition` | slide (올라오며 페이드) | **fade** (짧게, 유지) | none | none |
@@ -130,12 +130,17 @@ Framer용 배열은 `EASE.<이름>`. 단계 보정은 `tierDuration(ms, budget)`
 
 | 화면 | 연출 | 바꾼 것 |
 |---|---|---|
-| 월드맵 | 구름·나뭇잎 | 인라인 animation + JS reduced 분기 → `.float-cloud`·`.drift-leaf` (앰비언트, full만) |
+| 월드맵 | 구름·나뭇잎 | 인라인 animation + JS reduced 분기 → `.float-cloud`·`.drift-leaf` (앰비언트, full만). P5-09에서 지도 안 조각(`wm-cloud`·`wm-leaf`)으로 대체 |
 | 월드맵 | 현재 스테이지 파이뱀 통통 | Framer `repeat: Infinity` → `.mascot-bob` (대기 루프) |
 | 월드맵 | 현재 스테이지 빛 | Framer `boxShadow` 반복 → `.stage-pulse` 그림자 층 opacity (대기 루프) |
 | 월드맵 | 완료 스테이지 반짝임 | `background-position` 반복 → `.stage-shimmer` translateX (앰비언트) |
 | 월드맵 | 노드 등장·길 그리기 | 단계별: lite 70%, minimal 페이드·즉시, 동작 줄이기 즉시 |
 | 월드맵 | 노드 `backdrop-blur-sm` | lite부터 꺼짐 (배경 알파 0.9~0.95라 대비 유지) |
+| 월드맵 (P5-02) | 지도 레이어 패럴랙스 | 먼 곳(바다·물결·배·새, 깊이 0.08)·중간(산·나무, 0.035) SVG 레이어만 스크롤 따라 transform(`.wm-par`, full만). 길·랜드마크·노드는 고정이라 노드 자리는 어긋나지 않음. 스크롤할 때만 rAF 1번(passive), 멈추면 0. 측정(개발 서버, CPU 4배 감속): 대기 메인 스레드 0.7~0.9%, 스크롤 rAF p95 18.5ms |
+| 월드맵 (P5-02) | 지난 길 그리기 | 잉크 길을 전체 길의 조각(`mapRoute`)으로 따로 그려 지금 노드에 정확히 닿음. full 1.5초 · lite 70% · minimal·동작 줄이기 즉시, 종이 점선은 그린 뒤 페이드 |
+| 월드맵 (P5-04) | 스테이지 노드 | 카드 빛 고리(`.stage-pulse`)·반짝임(`.stage-shimmer`)·`backdrop-blur` 대신 지금 노드 점선 고리 `wn-ring`(대기 루프, transform·opacity) + 파이뱀 `.mascot-bob`. 등장은 노드 → 파이뱀 차례(기존 단계 규칙). 도장·링은 정지 그림 |
+| 월드맵 (P5-09) | 지도 앰비언트 | 아래 표. P2-15의 구름·나뭇잎(`FloatingDecorations`, 지도 위 흰 막대)은 지금 지도 그림과 어울리지 않아 지우고 지도 안 조각으로 대체. 움직이는 것은 큰 SVG 안이 아니라 **작은 SVG 조각(HTML 상자 `.wm-sprite`)** — SVG 안 요소의 transform은 레이어 전체를 다시 칠하지만 HTML 상자의 transform·opacity는 컴포지터가 처리. `:root[data-reduced='false'][data-motion='full']`에서만, lite·minimal·동작 줄이기는 같은 자리 정지 그림(반짝임·나뭇잎은 숨김). 지도가 화면 밖이거나 탭이 숨으면 `data-amb-off` → paused(IntersectionObserver + visibilitychange). 상한: 종류별 `AMBIENT_CAP`(구름 3·반짝임 5·나뭇잎 3) + 물결·배·새 장식 = 가로 지도 16개·세로 지도 11개. `will-change` 없음. 켜고 끄기는 map.yaml `ambient: { clouds, sparkles, weather: none\|leaves }`. 측정(prod 빌드, CPU 4배, headless Chrome): 대기 메인 스레드 full 1.4%(360)·1.9%(1280) / lite 0.9·1.1%, 스크롤 rAF p95 18.5ms, 컴포지터 60fps |
+| 월드맵 (P5-05) | 잠금 해제 연출 (시그니처) | 새로 열린 스테이지에서 한 번만(본 기록 서버 저장, Q49). 박자표 `src/lib/celebration/unlockFx.ts`(시안 `beats.ts` buildUnlock): 이전 노드 통과 도장 쾅 → 잉크 길(stroke-dashoffset) → 자물쇠 흔들흔들 → 잉크 방울 → 스케치가 컬러로(얼룩 마스크 `inkMask.ts`) + 자물쇠가 반으로 깨져 떨어짐 → 파이뱀이 길을 따라 깡충(`samplePath`) → 이름표 팝 + "열렸어요!" 도장 → 문구 토스트. full 약 3.5초 · lite 약 2.2초(흔들림·방울·조각·지도 떨림 없음, 둥근 번짐, 미끄러져 이동) · **minimal·동작 줄이기는 박자 없이 끝 상태로 바로 + 문구 토스트(낭독기 한 번)**. 모든 WAAPI를 처음에 delay로 한꺼번에 만들고(컴포지터), 메인 스레드는 상태 큐 4개(setTimeout)뿐. 길·마스크 외에는 transform·opacity. 화면 밖이면 먼저 스크롤, 누르거나 Enter·Space·Esc면 끝 상태로(첫 누름의 click은 삼킴). 연출 동안 파이뱀은 라이브 리그(`PybaemRig`, next/dynamic, full도 lite 리그 — 시안 rigTier) |
 | 퀘스트 | 단계 표시 현재 단계 | Framer `repeat: Infinity` → `.step-pulse` |
 | 퀘스트 | Pyodide 로딩·실행 | 실측 판정 멈춤 |
 | 축하 | 컨페티·카드·레벨 pop | `fireConfetti`가 `<html>` 속성 상한, 카드 연출은 기존 `budget` 그대로, 레벨 pop은 `[data-reduced]` |
@@ -143,3 +148,14 @@ Framer용 배열은 `EASE.<이름>`. 단계 보정은 `tierDuration(ms, budget)`
 | 캐릭터 | 축하 점프·빛 고리 | `MotionConfig`가 사용자 설정까지, minimal은 빛 고리 없음 |
 | 공통 | 페이지 전환 | full slide · lite fade · minimal·동작 줄이기 없음 |
 | 공통 | 로딩 점·스피너·스켈레톤 | 동작 줄이기만 멈춤 (`reduced:` 변형) |
+
+### 월드 지도 앰비언트 (P5-09, `worldMap.css` 앰비언트 절)
+
+| 요소 | 클래스 · keyframes | 움직임 | 주기 | 레이어 |
+|---|---|---|---|---|
+| 구름 | `.wm-a-cloud` · `wm-cloud` | 좌우로 자기 폭의 ±24% 흐름(왕복) | 64초, 조각마다 -21초씩 엇갈림 | 먼 곳(패럴랙스 0.08, 길·랜드마크 아래) |
+| 물결 | `.wm-a-wave` · `wm-wave` | 옆으로 8% 일렁이며 opacity 0.55↔1 | 5초 | 먼 곳 |
+| 배 | `.wm-a-boat` · `wm-boat` | 선체 기준 ±4° 까딱 + 살짝 위아래 | 4.6초 | 먼 곳 |
+| 새 | `.wm-a-bird` · `wm-bird` (바깥 상자) + `wm-flap` (안쪽 svg) | 대각선으로 천천히 날아갔다 돌아옴 + scaleY 날갯짓 (transform을 상자 둘로 나눔) | 18초 왕복 · 0.9초 | 먼 곳 |
+| 반짝임 | `.wm-a-spark` · `wm-spark` | 대부분 꺼져 있다가 잠깐 커지며 45° 돌고 사라짐 | 4.2초, -1.1초씩 엇갈림 | 바다(물결 옆, 먼 곳)·길 위(짝수 번째 길 조각 가운데, 길 레이어) |
+| 나뭇잎 (날씨 `leaves`) | `.wm-a-leaf` · `wm-leaf` | 나타나 대각선 아래로 떨어지며 220° 돌고 사라짐 | 15초, -5초씩 엇갈림 | 길 위 |
