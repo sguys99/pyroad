@@ -72,6 +72,8 @@ describe('월드 지도 데이터 (P5-03)', () => {
         completedQuestCount: 0,
         totalQuestCount: 1,
         firstIncompleteQuestId: order < 3 ? `q${order}` : null,
+        stars: 0,
+        maxStars: 3,
       }),
     );
     const { container } = render(

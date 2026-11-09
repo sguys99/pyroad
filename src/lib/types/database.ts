@@ -181,4 +181,8 @@ export interface StageWithStatus extends Stage {
   completedQuestCount: number;
   totalQuestCount: number;
   firstIncompleteQuestId: string | null;
+  /** user_progress.best_stars 합 (P5-12) */
+  stars: number;
+  /** 퀘스트 수 × 3 */
+  maxStars: number;
 }

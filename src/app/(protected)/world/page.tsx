@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import { getWorldStatuses } from '@/lib/world/getStageStatuses';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
@@ -21,9 +21,6 @@ import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
 import { WORLDS } from '@/lib/world/worlds';
 import type { WorldId } from '@/lib/design/tokens';
 
-// 지금은 스테이지가 있는 첫 월드의 지도만 (월드별 주소 /world/[slug]·월드 선택은 P5-01, 월드 단위 상태는 P5-12)
-const CURRENT_WORLD = WORLDS.find((w) => w.ready && w.map);
-
 interface Props {
   // notice=stage-locked: 잠긴 스테이지의 퀘스트를 URL 로 열어 돌아옴 (B38, 퀘스트 페이지 가드)
   searchParams: Promise<{ notice?: string | string[] }>;
@@ -36,7 +33,7 @@ export default async function WorldPage({ searchParams }: Props) {
   // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
   const [{ user }, stagesResult] = await Promise.all([
     getAuthUser(),
-    // 순서는 (월드 order, 스테이지 order): getStageStatuses 가 world.order 로 정렬 (P1-08, stages."order" 는 월드 안에서만 유일)
+    // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08, stages."order" 는 월드 안에서만 유일)
     supabase
       .from('stages')
       .select(
@@ -50,7 +47,7 @@ export default async function WorldPage({ searchParams }: Props) {
     await Promise.all([
       supabase
         .from('user_progress')
-        .select('quest_id, status')
+        .select('quest_id, status, best_stars')
         .eq('user_id', user.id),
       supabase
         .from('users')
@@ -75,7 +72,9 @@ export default async function WorldPage({ searchParams }: Props) {
     'badge_type' | 'earned_at'
   >[];
 
-  const stagesWithStatus = getStageStatuses(stages, progress);
+  // 진행 중 월드의 지도만 (Q50, P5-12). 월드별 주소 /world/[slug]·월드 선택은 P5-01
+  const current = getWorldStatuses(WORLDS, stages, progress).current;
+  const currentMap = current?.world.map;
 
   // API 키 상태 확인: 사용자 커스텀 키 유무만 체크 (서버 기본 키는 무시).
   // 서버에 암호화 키가 없어 커스텀 키를 받을 수 없으면 등록 안내도 띄우지 않음
@@ -129,18 +128,18 @@ export default async function WorldPage({ searchParams }: Props) {
           </div>
         )}
 
-        {CURRENT_WORLD?.map && (
+        {current && currentMap && (
           <MapBackground
-            world={CURRENT_WORLD.order as WorldId}
+            world={current.world.order as WorldId}
             className="rounded-2xl overflow-hidden"
           >
-            <WorldMap stages={stagesWithStatus} map={CURRENT_WORLD.map} />
+            <WorldMap stages={current.stages} map={currentMap} />
           </MapBackground>
         )}
       </PageTransition>
 
       {/* 월드 BGM: 기본 꺼짐, 설정에서 켠 경우만 (P2-14) */}
-      {CURRENT_WORLD?.map && <WorldBgm id={CURRENT_WORLD.map.bgm} />}
+      {currentMap && <WorldBgm id={currentMap.bgm} />}
 
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       {/* 홈 화면에 추가 쪽지 (P4-11): 다른 안내가 떠 있으면 띄우지 않음 (아래 가운데 자리를 같이 씀) */}
