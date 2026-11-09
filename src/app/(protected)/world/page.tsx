@@ -1,9 +1,6 @@
-import { createClient } from '@/lib/supabase/server';
-import { getAuthUser } from '@/lib/supabase/auth';
+import { loadWorldMapData } from '@/lib/world/loadWorldMapData';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getWorldStatuses } from '@/lib/world/getStageStatuses';
-import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import { WorldMap } from '@/components/world/WorldMap';
 import { ProfileSummary } from '@/components/world/ProfileSummary';
 import { ApiKeyAlert } from '@/components/world/ApiKeyAlert';
@@ -16,9 +13,6 @@ import { LogoutButton } from '@/components/LogoutButton';
 import { SoundToggle } from '@/components/sound/SoundToggle';
 import { WorldBgm } from '@/components/sound/WorldBgm';
 import { User, MessageSquare, Bell } from 'lucide-react';
-import type { UserBadge, UserProfile } from '@/lib/types/database';
-import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
-import { WORLDS } from '@/lib/world/worlds';
 import type { WorldId } from '@/lib/design/tokens';
 
 interface Props {
@@ -28,58 +22,13 @@ interface Props {
 
 export default async function WorldPage({ searchParams }: Props) {
   const { notice } = await searchParams;
-  const supabase = await createClient();
-
-  // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
-  const [{ user }, stagesResult] = await Promise.all([
-    getAuthUser(),
-    // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08, stages."order" 는 월드 안에서만 유일)
-    supabase
-      .from('stages')
-      .select(
-        'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order)',
-      ),
-  ]);
-  if (!user) redirect('/');
-
-  // user.id 필요한 쿼리는 이후 병렬 실행
-  const [progressResult, profileResult, badgesResult, apiKeys] =
-    await Promise.all([
-      supabase
-        .from('user_progress')
-        .select('quest_id, status, best_stars')
-        .eq('user_id', user.id),
-      supabase
-        .from('users')
-        .select(OWN_PROFILE_SELECT)
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('user_badges')
-        .select('badge_type, earned_at')
-        .eq('user_id', user.id),
-      // 본인 API 키는 service_role 전용 테이블에 있어 서버에서만 확인 (B13)
-      loadUserApiKeys(user.id),
-    ]);
-
-  const stages = stagesResult.data ?? [];
-  const progress = progressResult.data ?? [];
-  const profile: UserProfile | null = profileResult.data
-    ? toOwnProfile(profileResult.data)
-    : null;
-  const badges = (badgesResult.data ?? []) as Pick<
-    UserBadge,
-    'badge_type' | 'earned_at'
-  >[];
+  const data = await loadWorldMapData();
+  if (!data) redirect('/');
+  const { profile, badges, showApiKeyAlert } = data;
 
   // 진행 중 월드의 지도만 (Q50, P5-12). 월드별 주소 /world/[slug]·월드 선택은 P5-01
-  const current = getWorldStatuses(WORLDS, stages, progress).current;
+  const current = data.progress.current;
   const currentMap = current?.world.map;
-
-  // API 키 상태 확인: 사용자 커스텀 키 유무만 체크 (서버 기본 키는 무시).
-  // 서버에 암호화 키가 없어 커스텀 키를 받을 수 없으면 등록 안내도 띄우지 않음
-  const showApiKeyAlert =
-    apiKeys.enabled && Object.keys(apiKeys.keys).length === 0;
 
   return (
     <>
