@@ -83,7 +83,8 @@ export const KIDS_THEME_SPEC: Record<string, Record<string, string>> = {
     border: `var(--line-w) solid ${cssVar('lineStrong')}`,
     borderRadius: 'var(--round-m)',
     overflow: 'hidden',
-    minHeight: '200px',
+    // 짧은 시작 코드(2~3줄)에도 빈 칸이 크지 않게 약 6줄 (시안 f-editor, P6-05에서 200px → 11rem)
+    minHeight: '11rem',
     maxHeight: '400px',
     fontFamily: 'var(--font-mono)',
     fontVariantLigatures: 'none',

@@ -14,7 +14,7 @@
 
 ## 1. 모양
 
-- 상자: 흰 면(`codeBg`) + 1px `lineStrong` 테두리 + 반경 `--round-m`(14). 그림자 없음. 높이 200~400px, 넘치면 상자 안에서 스크롤.
+- 상자: 흰 면(`codeBg`) + 1px `lineStrong` 테두리 + 반경 `--round-m`(14). 그림자 없음. 높이 11rem(176px, 약 6줄)~400px, 넘치면 상자 안에서 스크롤.
 - 줄 번호: `surface2` 면 + `textMuted` 숫자, 오른쪽 1px `line` 구분선. 활성 줄 번호는 본문색 + 옅은 초록.
 - 포커스: 앱 공용 포커스 링과 같은 2px `secondary` + 간격 2px(`--focus-w`·`--focus-offset`).
 - 커서: 2px 본문색. 깜빡임은 CodeMirror 기본(1.2초 주기 opacity)이고 연출 단계와 상관없이 둡니다(입력 위치를 알리는 기능 신호). **동작 줄이기에서만 멈추고 늘 보이게** 합니다(`app.css`, P2-12, e2e `motion-tiers`).

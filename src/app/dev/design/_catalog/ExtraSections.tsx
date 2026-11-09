@@ -17,6 +17,11 @@ import {
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
 import { Button } from '@/components/ui/button';
+import {
+  RunControls,
+  RunnerLoading,
+} from '@/components/quest/RunControls';
+import { MotionProvider } from '@/components/providers/MotionProvider';
 import { CodeSample, Demo, Section } from './ui';
 
 export function EditorSection() {
@@ -43,6 +48,107 @@ export function EditorSection() {
         </div>
       </Demo>
     </Section>
+  );
+}
+
+const noop = () => {};
+
+/** 실행 줄 견본 (P6-05). 공책 쪽처럼 흰 면 위, 폭은 쪽 안 폭과 같은 컨테이너 기준 */
+export function RunControlsSection() {
+  const states = [
+    {
+      label: '준비됨',
+      note: '큰 초록 버튼 · 아랫면 3px · 재생 아이콘',
+      props: { status: 'ready' as const, isRunning: false },
+    },
+    {
+      label: '처음 준비 중 · 불러오기',
+      note: 'Worker가 알린 단계만 · 지금 칸은 흐르는 조각(바쁨 표시) · 팁이 바뀜',
+      props: {
+        status: 'loading' as const,
+        loadStage: 'download' as const,
+        isRunning: false,
+      },
+    },
+    {
+      label: '처음 준비 중 · 점검',
+      note: 'Pyodide를 띄운 뒤 네트워크 API 지우기 등 (짧음)',
+      props: {
+        status: 'loading' as const,
+        loadStage: 'setup' as const,
+        isRunning: false,
+      },
+    },
+    {
+      label: '실행 중',
+      note: '초록 면 + 스피너 + 빛 띠(full·lite). 멈추기 옆에',
+      props: { status: 'ready' as const, isRunning: true },
+    },
+    {
+      label: '정답 확인 중',
+      note: '채점·완료 요청 동안 다시 못 누름 (B06)',
+      props: { status: 'ready' as const, isRunning: false, isSubmitting: true },
+    },
+    {
+      label: '다시 준비 중 (무한 루프를 멈춘 뒤)',
+      note: 'Worker를 다시 띄우는 2~5초 (§2.9)',
+      props: {
+        status: 'loading' as const,
+        restarting: 'stop' as const,
+        loadStage: 'download' as const,
+        isRunning: false,
+      },
+    },
+    {
+      label: '빈 공책',
+      note: '준비됐지만 코드가 없으면 납작한 회색 면',
+      props: { status: 'ready' as const, isRunning: false, isCodeEmpty: true },
+    },
+    {
+      label: '실행기 오류',
+      note: '다시 불러오기 + 안내',
+      props: { status: 'error' as const, isRunning: false },
+    },
+  ];
+  // 팁이 Framer m.* 라 LazyMotion 이 필요하다 (앱은 LoggedInShell 이 감쌈)
+  return (
+    <MotionProvider>
+    <Section
+      id="run-controls"
+      kicker="퀘스트 (P6-05)"
+      title="실행 버튼 · 실행기 준비"
+      description="공책 쪽 실행 줄(RunControls). 진행률 숫자는 지어내지 않고 Worker가 알려 주는 단계(불러오기 → 점검 → 준비 끝)만 보여 줘요. 흐르는 조각·점 세 개는 바쁨 표시라 minimal에서도 돌고, 실행 중 빛 띠는 full·lite만, 동작 줄이기는 모두 멈추고 글자·색으로만 알려요. 8초가 넘으면 팁 대신 '처음 한 번은 오래 걸려요' 안내."
+    >
+      <div className="grid items-start gap-4 md:grid-cols-2">
+        {states.map((s) => (
+          <Demo
+            key={s.label}
+            label={s.label}
+            note={s.note}
+            surface="card"
+            className="@container"
+          >
+            <RunControls
+              {...s.props}
+              onRun={noop}
+              onStop={noop}
+              onRetry={noop}
+            />
+          </Demo>
+        ))}
+        <Demo
+          label="첫 방문이 느릴 때"
+          note="Slow 4G 첫 방문 34초 실측 → 8초 뒤 안내로 바뀜"
+          surface="card"
+        >
+          <RunnerLoading stage="download" slow />
+        </Demo>
+      </div>
+      <CodeSample
+        code={`<RunControls status={runner.status} restarting={runner.restarting} loadStage={runner.loadStage}\n  isRunning={runner.isRunning} isSubmitting={isSubmitting} isCodeEmpty={isCodeEmpty}\n  onRun={handleRun} onStop={handleStop} onRetry={runner.retry} />`}
+      />
+    </Section>
+    </MotionProvider>
   );
 }
 

@@ -41,6 +41,7 @@ import { RigSection } from './_catalog/RigSection';
 import { SocialLoginSection } from './_catalog/AuthSections';
 import {
   EditorSection,
+  RunControlsSection,
   ShareCardSection,
   SoundSection,
 } from './_catalog/ExtraSections';
@@ -100,6 +101,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
     group: '기타',
     items: [
       ['editor', '코드 에디터'],
+      ['run-controls', '실행 버튼'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
@@ -201,6 +203,7 @@ export function DesignCatalog({
               <SocialLoginSection />
               <RigSection />
               <EditorSection />
+              <RunControlsSection />
               <ShareCardSection />
               <SoundSection />
               <LegalSection />

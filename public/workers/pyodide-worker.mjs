@@ -94,7 +94,8 @@ async function load({ source, indexURL }) {
 async function init() {
   if (initStarted) return;
   initStarted = true;
-  post({ type: 'init-status', status: 'loading' });
+  // 단계(P6-05): download = 파일 받기·파이썬 띄우기(대부분의 시간), setup = 실행기 안전 장치. 바이트 진행률은 loadPyodide가 주지 않는다
+  post({ type: 'init-status', status: 'loading', stage: 'download' });
   const t0 = performance.now();
   try {
     let pyodide = null;
@@ -110,6 +111,7 @@ async function init() {
       }
     }
     if (!pyodide) throw new Error(errors.join(' / '));
+    post({ type: 'init-status', status: 'loading', stage: 'setup' });
 
     runtime = createRuntime(pyodide, { post });
     const jspi = await runtime.canRunSync();

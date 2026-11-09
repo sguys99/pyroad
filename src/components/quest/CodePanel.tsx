@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, type Ref } from 'react';
+import { useState, type Ref } from 'react';
 import dynamic from 'next/dynamic';
-import { NotebookPen, Play, RefreshCw, RotateCcw, Square } from 'lucide-react';
-import { m, AnimatePresence } from 'framer-motion';
+import { NotebookPen, RotateCcw } from 'lucide-react';
+import { m } from 'framer-motion';
 import { framerSpring, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
@@ -15,76 +15,8 @@ import type {
   RunResult,
 } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
-
-const CODING_TIPS = [
-  'print()로 화면에 글자를 보여줄 수 있어요!',
-  '변수는 상자와 같아요 — 값을 담아둘 수 있답니다!',
-  '들여쓰기(스페이스 4칸)는 파이썬에서 아주 중요해요!',
-  'if문으로 조건에 따라 다른 일을 할 수 있어요!',
-  'for문으로 같은 일을 여러 번 반복할 수 있어요!',
-  '# 뒤에 쓰는 글은 메모예요. 컴퓨터는 읽지 않아요!',
-  'input()으로 사용자에게 질문을 할 수 있어요!',
-];
-
-function CodingTipRotator() {
-  const [tipIndex, setTipIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTipIndex((prev) => (prev + 1) % CODING_TIPS.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-      <span className="shrink-0">
-        <CharacterAvatar character="pybaem" expression="teaching" size="sm" />
-      </span>
-      <div className="min-h-[20px] flex-1">
-        <AnimatePresence mode="wait">
-          <m.p
-            key={tipIndex}
-            className="text-xs text-foreground"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: sec('base') }}
-          >
-            {CODING_TIPS[tipIndex]}
-          </m.p>
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-}
-
-/**
- * 시간 초과·멈추기 뒤 Worker를 다시 띄우는 동안 (§2.9 재준비 연출, 2~5초).
- * 점 세 개는 CSS transform·opacity 반복이고 reduced-motion이면 멈춘 점 (§2.10)
- */
-export function RunnerWakingNotice() {
-  return (
-    <div
-      role="status"
-      data-testid="runner-waking"
-      className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2"
-    >
-      <span className="shrink-0">
-        <CharacterAvatar character="pybaem" expression="sleeping" size="sm" />
-      </span>
-      <p className="flex items-center text-xs text-foreground">
-        파이뱀이 실행기를 다시 깨우는 중
-        <span aria-hidden className="ml-1 inline-flex items-end gap-0.5">
-          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
-          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
-          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
-        </span>
-      </p>
-    </div>
-  );
-}
+import type { PyodideLoadStage } from '@/lib/pyodide/types';
+import { RunControls } from './RunControls';
 
 /** 공책 머리 제목 (P6-03) */
 export function NotebookTitle() {
@@ -150,6 +82,8 @@ interface CodePanelProps {
   pyodideStatus: PyodideStatus;
   /** Worker를 다시 띄우는 중이면 그 이유 (재준비 연출) */
   restarting?: PyodideRestartReason;
+  /** 처음 준비 단계 (준비 연출의 단계 칸) */
+  loadStage?: PyodideLoadStage | null;
   isRunning: boolean;
   /** 채점·완료 요청 중 (B06: 이 동안 실행 버튼을 다시 누를 수 없음) */
   isSubmitting?: boolean;
@@ -172,6 +106,7 @@ export function CodePanel({
   editorRef,
   pyodideStatus,
   restarting = null,
+  loadStage = null,
   isRunning,
   isSubmitting = false,
   onRun,
@@ -183,16 +118,9 @@ export function CodePanel({
   validationResult,
   nextQuestId,
 }: CodePanelProps) {
-  const isReady = pyodideStatus === 'ready';
-  const isLoading = pyodideStatus === 'loading';
-  const isError = pyodideStatus === 'error';
-  // Worker 를 띄우기 전(idle)과 불러오는 중(loading) 모두 아직 누를 수 없으므로 "준비 중..."
-  const isPreparing = !isReady && !isError;
-  const isBusy = isRunning || isSubmitting;
-  const canRun = isReady && !isBusy && !isCodeEmpty;
-
   return (
-    <div className="flex flex-col gap-3">
+    // 공책 → 실행 줄 → 결과 간격은 시안 f-run-row·f-result (16px)
+    <div className="flex flex-col gap-4">
       {/* 에디터 (오류가 난 줄은 traceback에서 찾아 표시, P2-18) */}
       <CodeEditor
         value={code}
@@ -212,59 +140,18 @@ export function CodePanel({
         }
       />
 
-      {/* Pyodide 상태 + 실행 버튼 */}
-      <div className="flex items-center gap-3">
-        {isError ? (
-          <Button
-            onClick={onRetry}
-            variant="secondary"
-            size="sm"
-            icon={<RefreshCw aria-hidden />}
-          >
-            실행기 다시 불러오기
-          </Button>
-        ) : (
-          // 눌림 피드백은 게임 버튼 자체(아랫면 3px → jellyB 복귀, P2-11). 실행 소리는 세션이 낸다(run)
-          <Button
-            onClick={onRun}
-            disabled={!canRun}
-            loading={isBusy || isPreparing}
-            sfx={false}
-            icon={<Play aria-hidden />}
-            className="min-w-[140px]"
-            data-testid="run-button"
-          >
-            {isRunning
-              ? '실행 중...'
-              : isSubmitting
-                ? '정답 확인 중...'
-                : isPreparing
-                  ? '준비 중...'
-                  : '코드 돌려보기!'}
-          </Button>
-        )}
-
-        {isRunning && onStop && (
-          <Button
-            onClick={onStop}
-            variant="secondary"
-            icon={<Square className="fill-current" aria-hidden />}
-            data-testid="stop-button"
-          >
-            멈추기
-          </Button>
-        )}
-
-        {isError && (
-          <span className="text-xs text-accent-foreground">
-            앗, 실행기를 불러오지 못했어요. 다시 시도해 볼까요?
-          </span>
-        )}
-      </div>
-
-      {/* 다시 준비 중이면 깨우는 연출, 처음 불러오는 중이면 코딩 팁 */}
-      {isLoading &&
-        (restarting ? <RunnerWakingNotice /> : <CodingTipRotator />)}
+      {/* 실행 버튼 + 준비·재준비·오류 안내 (P6-05) */}
+      <RunControls
+        status={pyodideStatus}
+        restarting={restarting}
+        loadStage={loadStage}
+        isRunning={isRunning}
+        isSubmitting={isSubmitting}
+        isCodeEmpty={isCodeEmpty}
+        onRun={onRun}
+        onStop={onStop}
+        onRetry={onRetry}
+      />
 
       {/* 실행 결과 */}
       <OutputPanel

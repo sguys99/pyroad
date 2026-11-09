@@ -11,7 +11,8 @@ import { QuestHeader } from './QuestHeader';
 import { ConversationPanel } from './ConversationPanel';
 import { StoryPage } from './StoryPage';
 import { QuestHints, hintNotes } from './QuestHints';
-import { CodePanel, RunnerWakingNotice } from './CodePanel';
+import { CodePanel } from './CodePanel';
+import { RunnerWakingNotice } from './RunControls';
 import { OutputPanel } from './OutputPanel';
 import { QuestStatusBar } from './QuestStatusBar';
 import { QuestCelebrations } from './QuestCelebrations';
@@ -156,6 +157,7 @@ export function QuestWorkspace({
               starterCode={session.starterCode}
               pyodideStatus={runner.status}
               restarting={runner.restarting}
+              loadStage={runner.loadStage}
               isRunning={runner.isRunning}
               isSubmitting={session.isSubmitting}
               onRun={session.handleRun}
@@ -187,7 +189,7 @@ export function QuestWorkspace({
               </Button>
             )}
             {runner.restarting && runner.status === 'loading' && (
-              <RunnerWakingNotice />
+              <RunnerWakingNotice reason={runner.restarting} />
             )}
             <OutputPanel
               result={runResult}

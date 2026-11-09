@@ -114,6 +114,18 @@ describe('usePyodide: 준비', () => {
     expect(result.current.runtimeInfo?.source).toBe('self');
   });
 
+  it('준비 단계: 띄우자마자 download, Worker가 알린 setup, 준비되면 null (P6-05)', () => {
+    const { result } = renderHook(() => usePyodide());
+    expect(result.current.loadStage).toBe('download');
+    latest().emit({ type: 'init-status', status: 'loading', stage: 'setup' });
+    expect(result.current.loadStage).toBe('setup');
+    // 단계 없는 loading(Node 실행기와 같은 옛 메시지)은 단계를 바꾸지 않음
+    latest().emit({ type: 'init-status', status: 'loading' });
+    expect(result.current.loadStage).toBe('setup');
+    latest().ready();
+    expect(result.current.loadStage).toBeNull();
+  });
+
   it('로딩 실패는 error 상태 + Sentry 보고', () => {
     const { result } = renderHook(() => usePyodide());
     latest().emit({

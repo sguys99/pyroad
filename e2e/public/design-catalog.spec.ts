@@ -104,6 +104,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'social-login',
       'rig',
       'editor',
+      'run-controls',
       'share-card',
       'sound',
       'legal',
@@ -203,7 +204,7 @@ test.describe('연출 단계 대체: 반복 연출 (P2-12)', () => {
         // 검사가 실제로 무언가를 잡는지 (견본이 돌고 있음). 흐림은 움직임이 아니라 단계를 따른다
         if (mode.reduced === 'off') {
           expect(names).toEqual(
-            expect.arrayContaining([...AMBIENT, 'mascot-bob']),
+            expect.arrayContaining([...AMBIENT, 'mascot-bob', 'qr-sweep']),
           );
         }
         expect(blurred).toBeGreaterThan(0);
@@ -223,7 +224,9 @@ test.describe('연출 단계 대체: 반복 연출 (P2-12)', () => {
       if (mode.tier === 'minimal' && mode.reduced === 'off') {
         expect(names.filter((n) => IDLE_LOOPS.includes(n))).toEqual([]);
         // 바쁨 표시는 기능 신호라 계속 돈다
-        expect(names).toEqual(expect.arrayContaining(['waking-dot', 'spin']));
+        expect(names).toEqual(
+          expect.arrayContaining(['waking-dot', 'spin', 'qr-busy']),
+        );
         expect(names.every((n) => n in MINIMAL_ALLOW)).toBe(true);
       }
     });

@@ -1,5 +1,6 @@
 // 실행기 (P1-09·B26): 자체 호스팅 Pyodide Worker 의 실시간 출력·멈추기·재준비 (P1-21)
 
+import type { Page } from '@playwright/test';
 import { test, expect } from './support/test';
 import { stage } from './support/content';
 import {
@@ -11,10 +12,59 @@ import {
 
 const quest = stage(1).quests[0];
 
+/**
+ * 실행 줄(RunControls)이 거친 상태를 페이지가 열릴 때부터 모은다 (P6-05). 준비가 빠르면 눈으로 보기 전에 끝나므로
+ * 화면을 기다리지 않고 `data-runner-state`·`data-load-stage` 변화를 기록해 둔다
+ */
+async function recordRunnerStates(
+  page: Page,
+): Promise<() => Promise<string[]>> {
+  await page.addInitScript(() => {
+    const seen: string[] = [];
+    (window as unknown as { __runnerStates: string[] }).__runnerStates = seen;
+    const note = () => {
+      for (const el of document.querySelectorAll('.qr[data-runner-state]')) {
+        const v = `${el.getAttribute('data-runner-state')}:${el.getAttribute('data-load-stage') ?? '-'}`;
+        if (seen.at(-1) !== v) seen.push(v);
+      }
+    };
+    new MutationObserver(note).observe(document, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['data-runner-state', 'data-load-stage'],
+    });
+  });
+  return () =>
+    page.evaluate(
+      () => (window as unknown as { __runnerStates: string[] }).__runnerStates,
+    );
+}
+
 test.describe('Python 실행기', () => {
+  let runnerStates: () => Promise<string[]>;
   test.beforeEach(async ({ page }) => {
+    runnerStates = await recordRunnerStates(page);
     await page.goto(`/quest/${quest.id}`);
     await waitForRunner(page);
+  });
+
+  test('처음에는 준비 단계를 보여 주고, 준비되면 안내가 사라진다 (P6-05)', async ({
+    page,
+  }) => {
+    // Worker 단계: 불러오기(download) → 안전 점검(setup) → 준비됨. 진행률 숫자는 지어내지 않는다
+    const states = await runnerStates();
+    expect(states[0], states.join(' → ')).toMatch(/^preparing:/);
+    expect(states).toContain('preparing:download');
+    expect(states).toContain('preparing:setup');
+    expect(states.at(-1)).toBe('ready:-');
+    expect(states.indexOf('preparing:download')).toBeLessThan(
+      states.indexOf('preparing:setup'),
+    );
+    await expect(
+      page.locator('[data-testid="runner-loading"]:visible'),
+    ).toBeHidden();
+    await expect(runButton(page)).toHaveText('코드 돌려보기');
   });
 
   test('Pyodide 는 자체 호스팅 경로에서 받는다 (B26)', async ({
@@ -70,17 +120,21 @@ test.describe('Python 실행기', () => {
     const output = outputPanel(page);
     await expect(output).toHaveAttribute('data-state', 'running');
 
+    await expect(runButton(page)).toHaveText('실행 중...');
     await page.getByTestId('stop-button').click();
-    // CPU 루프는 Worker 가 stop 에 답하지 못해 다시 띄운다 (재준비 연출)
-    await expect(
-      page.locator('[data-testid="runner-waking"]:visible'),
-    ).toBeVisible();
+    // CPU 루프는 Worker 가 stop 에 답하지 못해 다시 띄운다 (재준비 연출, P6-05)
+    const waking = page.locator('[data-testid="runner-waking"]:visible');
+    await expect(waking).toBeVisible();
+    await expect(waking).toContainText('주문 공책을 다시 펼치는 중');
     await expect(output).toHaveAttribute('data-state', 'stopped');
 
     await waitForRunner(page);
-    await expect(
-      page.locator('[data-testid="runner-waking"]:visible'),
-    ).toBeHidden();
+    await expect(waking).toBeHidden();
+    // 실행 중 → 재준비(버튼 "다시 준비 중...", 못 누름) → 준비됨. 재준비는 처음 준비 안내(팁)를 다시 보이지 않는다
+    const states = (await runnerStates()).join(' → ');
+    expect(states).toMatch(
+      /running:- → restarting:download( → restarting:setup)? → ready:-$/,
+    );
     await runCode(page, quest.solution);
     await expect(output).toHaveAttribute('data-state', 'success');
   });

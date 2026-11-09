@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   runtime: {
     status: 'ready' as 'idle' | 'loading' | 'ready' | 'error',
     restarting: null as 'timeout' | 'stop' | null,
+    loadStage: null as 'download' | 'setup' | null,
     isRunning: false,
     generation: 1,
     runtimeInfo: null,
@@ -130,9 +131,11 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn();
   mocks.runtime.status = 'ready';
   mocks.runtime.restarting = null;
+  mocks.runtime.loadStage = null;
   mocks.runtime.isRunning = false;
   mocks.runtime.runCode.mockReset();
   mocks.runtime.stop.mockReset();
+  mocks.runtime.retry.mockReset();
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => Response.json({ passed: false })),
@@ -158,9 +161,7 @@ describe('퀘스트 렌더러 스모크', () => {
     render(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.getByText('x에 10을 넣어요')).toBeInTheDocument();
     expect(screen.getByLabelText('코드 에디터')).toHaveValue('x = ___');
-    expect(screen.getByTestId('run-button')).toHaveTextContent(
-      '코드 돌려보기!',
-    );
+    expect(screen.getByTestId('run-button')).toHaveTextContent('코드 돌려보기');
     expect(screen.getByTestId('run-button')).toBeEnabled();
     expect(screen.queryByTestId('stop-button')).toBeNull();
     // 데스크톱 + 모바일 결과 탭
@@ -234,17 +235,50 @@ describe('퀘스트 렌더러 스모크', () => {
     mocks.runtime.restarting = 'timeout';
     render(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.getAllByTestId('runner-waking')[0]).toHaveTextContent(
-      '파이뱀이 실행기를 다시 깨우는 중',
+      '파이뱀이 주문 공책을 다시 펼치는 중',
     );
-    expect(screen.getByTestId('run-button')).toHaveTextContent('준비 중...');
+    expect(screen.getAllByTestId('runner-waking')[0]).toHaveTextContent(
+      '너무 오래 걸려서',
+    );
+    expect(screen.getByTestId('run-button')).toHaveTextContent(
+      '다시 준비 중...',
+    );
+    expect(screen.getByTestId('run-button')).toBeDisabled();
+    expect(screen.queryByTestId('runner-loading')).toBeNull();
     // 실행기가 준비되지 않았으면 황금키도 막힘 (P1-03 보고)
     expect(screen.getByRole('button', { name: /황금키 쓰기/ })).toBeDisabled();
   });
 
-  it('처음 불러올 때는 깨우는 연출 대신 코딩 팁', () => {
+  it('처음 불러올 때는 깨우는 연출 대신 준비 단계와 코딩 팁', () => {
     mocks.runtime.status = 'loading';
-    render(<CodeQuest {...props(CODE_QUEST)} />);
+    mocks.runtime.loadStage = 'download';
+    const { rerender } = render(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.queryByTestId('runner-waking')).toBeNull();
+    const panel = screen.getByTestId('runner-loading');
+    expect(panel).toHaveTextContent('파이썬을 불러오는 중');
+    expect(panel).toHaveTextContent('알고 있나요?');
+    expect(panel.querySelector('[data-step="current"]')).toHaveTextContent(
+      '불러오기',
+    );
+
+    // Worker가 setup 단계를 알리면 첫 칸은 채워지고 둘째 칸이 지금 칸
+    mocks.runtime.loadStage = 'setup';
+    rerender(<CodeQuest {...props(CODE_QUEST)} />);
+    expect(panel.querySelector('[data-step="done"]')).toHaveTextContent(
+      '불러오기',
+    );
+    expect(panel.querySelector('[data-step="current"]')).toHaveTextContent(
+      '점검',
+    );
+  });
+
+  it('실행기를 못 불러오면 다시 불러오기 버튼과 안내', () => {
+    mocks.runtime.status = 'error';
+    render(<CodeQuest {...props(CODE_QUEST)} />);
+    expect(screen.queryByTestId('run-button')).toBeNull();
+    expect(screen.getByRole('alert')).toHaveTextContent('불러오지 못했어요');
+    fireEvent.click(screen.getByTestId('runner-retry'));
+    expect(mocks.runtime.retry).toHaveBeenCalledTimes(1);
   });
 
   it('Worker 를 띄우기 전(idle)에도 비활성 버튼은 "준비 중..."으로 보인다', () => {

@@ -173,6 +173,7 @@ export function useQuestSession({
   const {
     status: runnerStatus,
     restarting,
+    loadStage,
     isRunning,
     runCode,
     stop,
@@ -969,7 +970,7 @@ export function useQuestSession({
     tab,
     setTab,
 
-    runner: { status: runnerStatus, restarting, isRunning, retry },
+    runner: { status: runnerStatus, restarting, loadStage, isRunning, retry },
     runResult,
     liveOutput,
     validation,
