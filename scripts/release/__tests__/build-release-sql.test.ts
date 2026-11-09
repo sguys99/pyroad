@@ -69,6 +69,7 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       join('v0.5-phase2', '1_먼저실행.sql'),
       join('v0.4-phase3', '1_먼저실행.sql'),
       join('v0.4-phase3', '2_두번째실행.sql'),
+      join('v0.5-phase5', '1_먼저실행.sql'),
     ]);
     const phase2 = readFileSync(
       join(out, 'v0.5-phase2', '1_먼저실행.sql'),

@@ -24,31 +24,38 @@ import { serverWorlds } from './serverWorlds';
  * `/world` 로 이동할 때마다 새로 렌더한다. 화면에 머문 채 바뀌는 경우만 따로 처리한다:
  * - 퀘스트 완료·황금키 마지막 단계(완료 API): `/api/quest/complete` 의 revalidatePath('/world','/profile') + `useQuestSession` 의 router.refresh()
  * - 같은 데이터를 `/world/[slug]`·`/worlds`(P5-01)도 읽는다. 무효화 경로는 `/world`(layout, 하위 월드 포함)·`/worlds`
- * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh()
+ * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh() (본 기록도 지움, P5-05)
+ * - 잠금 해제 본 기록(P5-05): `/api/world/unlocks` 는 무효화하지 않는다. 지도가 기록을 보낸 뒤에는 이 화면에서 다시 쓰지 않고,
+ *   다음 방문은 새로 렌더하며, 같은 세션의 중복 재생은 화면 쪽(useStageUnlock)이 막는다
  * - 설정·API 키·닉네임 변경: 다른 화면에서 일어나고 `/world` 로 돌아올 때 새로 렌더됨 (별도 무효화 없음)
  * - 콘텐츠(seed): 캐시가 없으니 다음 요청부터 반영
  * 새 쓰기 API 가 월드맵에 보이는 값을 바꾸면 위 목록에 더하고, 화면에 머문 채 바뀌면 router.refresh() 를 부른다.
  */
 export async function loadWorldMapData(): Promise<WorldMapData | null> {
   const supabase = await createClient();
-  const [{ user }, apiKeys, stages, progress, profile] = await Promise.all([
-    getAuthUser(),
-    // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
-    getAuthUser().then(({ user }) => (user ? loadUserApiKeys(user.id) : null)),
-    // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08)
-    supabase
-      .from('stages')
-      .select(
-        'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, quest_type, is_mobile_friendly)',
+  const [{ user }, apiKeys, stages, progress, profile, seen] =
+    await Promise.all([
+      getAuthUser(),
+      // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
+      getAuthUser().then(({ user }) =>
+        user ? loadUserApiKeys(user.id) : null,
       ),
-    supabase
-      .from('user_progress')
-      .select(
-        'user_id, quest_id, status, best_stars, completed_at, used_golden_key, created_at',
-      ),
-    supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
-    // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
-  ]);
+      // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08)
+      supabase
+        .from('stages')
+        .select(
+          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, quest_type, is_mobile_friendly)',
+        ),
+      supabase
+        .from('user_progress')
+        .select(
+          'user_id, quest_id, status, best_stars, completed_at, used_golden_key, created_at',
+        ),
+      supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
+      // 잠금 해제 연출 본 기록 (P5-05, 00025). 실패하면(00025 전 DB) null → 연출·기록을 하지 않음
+      supabase.from('user_seen_unlocks').select('user_id, stage_id'),
+      // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
+    ]);
   if (!user) return null;
 
   return toWorldMapData(
@@ -58,6 +65,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       progress: progress.data ?? [],
       profile: profile.data,
       apiKeys,
+      seen: seen.error ? null : seen.data,
     },
     serverWorlds(),
   );

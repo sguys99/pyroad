@@ -2799,6 +2799,11 @@ async function groupApp(u) {
       `/rest/v1/quests?select=stage_id,stages!inner(is_final)&id=eq.${Q1}`,
     ],
     [
+      'APP-16',
+      'loadWorldMapData.ts user_seen_unlocks (P5-05: 본인 행만, RLS 에 맡겨 user_id 필터 없음)',
+      '/rest/v1/user_seen_unlocks?select=user_id,stage_id',
+    ],
+    [
       'APP-15',
       '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 + 보호자 동의 상태 (P3-11·P3-15 loadOwnUserRow)',
       `/rest/v1/users?select=settings,onboarded_at,age_band,guardian_consented_at,consent_deadline&id=eq.${u.alice.id}`,
@@ -2830,6 +2835,10 @@ async function groupApp(u) {
           const pub = r.json[0]?.user_public_profiles;
           if (!pub || typeof pub.public_name !== 'string' || !('avatar_skin' in pub))
             return { actual: 'profile-missing', detail: JSON.stringify(r.json[0]).slice(0, 160) };
+        }
+        if (id === 'APP-16' && c.actual === 'allowed') {
+          const others = r.json.filter((x) => x.user_id !== u.alice.id);
+          if (others.length) return { actual: 'leak', detail: `남의 행 ${others.length}` };
         }
         if (id === 'APP-1' && c.actual === 'allowed') {
           const sk = r.json[0].prompt_skeleton;
@@ -4785,6 +4794,82 @@ async function groupConsent(u) {
   });
 }
 
+// ── seen-unlocks: 잠금 해제 연출 본 기록 (P5-05, ① 00025) ──────────
+async function groupSeenUnlocks(u) {
+  const SU = '/rest/v1/user_seen_unlocks';
+  await check({
+    group: 'seen-unlocks',
+    id: 'UL-1',
+    role: 'anon',
+    op: 'GET /user_seen_unlocks',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `${SU}?select=*`)),
+  });
+  await check({
+    group: 'seen-unlocks',
+    id: 'UL-2',
+    role: 'authenticated',
+    op: 'GET /user_seen_unlocks?user_id=eq.<다른 사람> (남의 기록 읽기)',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', `${SU}?select=*&user_id=eq.${u.bob.id}`, { as: u.alice })),
+  });
+  await check({
+    group: 'seen-unlocks',
+    id: 'UL-3',
+    role: 'authenticated',
+    op: 'POST /user_seen_unlocks {잠긴 스테이지} · DELETE 본인 행 · POST /rpc/record_seen_unlocks (클라이언트 직접 쓰기)',
+    ...WRITE,
+    run: async () => {
+      const ins = await classifyWrite(
+        rest('POST', SU, { as: u.alice, body: { user_id: u.alice.id, stage_id: STAGE7 }, prefer: 'return=minimal' }),
+        `select exists (select 1 from public.user_seen_unlocks where user_id = '${u.alice.id}' and stage_id = '${STAGE7}')`,
+      );
+      if (ins.actual === 'written') return ins;
+      const del = await classifyWrite(
+        rest('DELETE', `${SU}?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.user_seen_unlocks where user_id = '${u.alice.id}' and stage_id = '${STAGE1}')`,
+      );
+      if (del.actual === 'written') return del;
+      return classifyWrite(
+        rest('POST', '/rest/v1/rpc/record_seen_unlocks', {
+          as: u.alice,
+          body: { p_user_id: u.bob.id, p_stage_ids: [STAGE2] },
+        }),
+        `select exists (select 1 from public.user_seen_unlocks where user_id = '${u.bob.id}' and stage_id = '${STAGE2}')`,
+      );
+    },
+  });
+  await check({
+    group: 'seen-unlocks',
+    id: 'UL-4',
+    role: 'service_role',
+    op: 'record_seen_unlocks: 열린 스테이지만 기록 · 없는 id 무시 · 다시 불러도 처음 시각 유지 · 256개 넘으면 PT400 · 탈퇴하면 함께 지워짐',
+    ...OK,
+    run: async () => {
+      const x = await createUser('su4', '해제기록');
+      const ghost = 'a1000000-0000-0000-0000-0000000000ff';
+      const r1 = await rpc('record_seen_unlocks', { p_user_id: x.id, p_stage_ids: [STAGE1, STAGE2, ghost] });
+      const firstAt = one(`select seen_at from public.user_seen_unlocks where user_id = '${x.id}' and stage_id = '${STAGE1}'`);
+      // 스테이지 1 을 모두 완료하면 스테이지 2 가 열려 기록됨
+      for (const q of stageQuests(STAGE1)) await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      const r2 = await rpc('record_seen_unlocks', { p_user_id: x.id, p_stage_ids: [STAGE1, STAGE2] });
+      const rows = one(`select string_agg(stage_id::text, ',' order by stage_id) || '|' ||
+                         bool_and(stage_id <> '${STAGE1}' or seen_at = '${firstAt}')
+                         from public.user_seen_unlocks where user_id = '${x.id}'`);
+      const big = await rpc('record_seen_unlocks', { p_user_id: x.id, p_stage_ids: Array.from({ length: 257 }, () => STAGE1) });
+      one(`delete from public.users where id = '${x.id}'`);
+      const left = one(`select count(*) from public.user_seen_unlocks where user_id = '${x.id}'`);
+      return (
+        compare(
+          'UL-4',
+          { r1: '200 1', r2: '200 1', rows: `${STAGE1},${STAGE2}|true`, big: 'PT400', left: '0' },
+          { r1: `${r1.status} ${r1.json}`, r2: `${r2.status} ${r2.json}`, rows, big: String(errCode(big)), left },
+        ) ?? { actual: 'ok', detail: '잠긴 스테이지 2 는 처음에 기록 안 됨 → 해제 뒤 기록, 처음 시각 유지, CASCADE' }
+      );
+    },
+  });
+}
+
 // ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────────
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -5311,6 +5396,11 @@ async function main() {
           ('${u.alice.id}', 'openai', 1, 'AAAAAAAAAAAAAAAA', 'AAAAAAAAAAAAAAAAAAAAAA==', 'YWxpY2U='),
           ('${u.bob.id}', 'openai', 1, 'AAAAAAAAAAAAAAAA', 'AAAAAAAAAAAAAAAAAAAAAA==', 'Ym9i')`);
 
+  // 해제 연출 본 기록 (P5-05, ① 00025): 앨리스·밥 모두 첫 스테이지를 봄 → 본인 행만 보여야 함 (UL-2, APP-16)
+  if (requirementMet('public.user_seen_unlocks'))
+    one(`insert into public.user_seen_unlocks (user_id, stage_id) values
+          ('${u.alice.id}', '${STAGE1}'), ('${u.bob.id}', '${STAGE1}') on conflict do nothing`);
+
   await groupEnv();
   await groupView(u);
   await groupNotice(u);
@@ -5325,6 +5415,7 @@ async function main() {
   await groupRateLimit(u);
   await groupOnboarding(u);
   await groupConsent(u);
+  await groupSeenUnlocks(u);
   await groupAnalytics(u);
   await groupAccount(u);
   await groupApp(u);

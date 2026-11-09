@@ -3,8 +3,10 @@
 import { Check, Crown, Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import { Stars } from '@/components/ui/reward-icon';
-import { PybaemStatic } from '@/components/characters/rig';
+import dynamic from 'next/dynamic';
+import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
 import { SHOW_STARS } from '@/lib/world/flags';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 
 /**
  * 스테이지 노드 (P5-04, 시안 `design/prototypes/src/final/World.tsx` StageNode).
@@ -138,17 +140,51 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
   );
 }
 
+// 잠금 해제 연출(P5-05) 동안만 라이브 리그를 불러온다. 불러오는 동안은 같은 모습의 정지 그림
+const PybaemRig = dynamic(
+  () =>
+    import('@/components/characters/rig/MascotRig').then((m) => m.PybaemRig),
+  {
+    ssr: false,
+    loading: () => (
+      <PybaemStatic state="happy" size={120} framing="stage" label="" />
+    ),
+  },
+);
+
 /**
- * 지금 위치: 큰 파이뱀 + "지금 여기!" 칩. 정지 리그 그림(엔진 없음)에 CSS 대기 루프 `.mascot-bob`(full·lite)만.
- * 잠금 해제 연출(P5-05)에서 걷게 하려면 여기를 라이브 `PybaemRig`(MascotRig, next/dynamic)로 바꾼다
+ * 지금 위치: 큰 파이뱀 + "지금 여기!" 칩. 평소에는 정지 리그 그림(엔진 없음)에 CSS 대기 루프 `.mascot-bob`(full·lite)만.
+ * 잠금 해제 연출(P5-05)은 `live`로 라이브 `PybaemRig`(상태 기쁨 → 응원)를 쓰고 칩 글자를 바꾼다
  */
-export function CurrentMarker() {
+export function CurrentMarker({
+  live,
+  state = 'happy',
+  flag = '지금 여기!',
+}: {
+  live?: boolean;
+  state?: PybaemState;
+  flag?: string;
+}) {
+  // 리그의 선 떨림(SVG 변위 필터)은 비싸서 연출 동안 full 도 lite 로 (시안 rigTier: 도장·길이 주인공)
+  const { tier } = useMotionTier();
   return (
     <div className="wn-here" aria-hidden data-testid="world-current-marker">
       <div className="mascot-bob">
-        <PybaemStatic state="happy" size={120} framing="stage" label="" />
+        {live ? (
+          <PybaemRig
+            state={state}
+            size={120}
+            framing="stage"
+            label=""
+            tier={tier === 'full' ? 'lite' : tier}
+            lookAt={false}
+            pokeable={false}
+          />
+        ) : (
+          <PybaemStatic state="happy" size={120} framing="stage" label="" />
+        )}
       </div>
-      <span className="wn-here-flag">지금 여기!</span>
+      <span className="wn-here-flag">{flag}</span>
     </div>
   );
 }

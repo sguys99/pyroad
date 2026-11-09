@@ -7,6 +7,7 @@ import {
   springTiming,
   tierDuration,
 } from '@/lib/motion/tokens';
+import { INK_BLOT, INK_ROUND } from '@/lib/motion/inkMask';
 
 /**
  * 30초 체험 공책 연출 (P4-02, 시안 `fx.ts` inkReveal·popIn을 앱 방식으로). 모두 1회성 WAAPI, transform·opacity·mask만.
@@ -17,12 +18,6 @@ import {
  * | 결과 잉크 번짐 | 잉크 얼룩 마스크가 퍼짐 (page 700ms, ink 곡선) | 둥근 마스크 360ms×0.7 | 페이드 150ms | 없음 (바로 보임) |
  * | 결과 글자 팝 | 아래에서 튀어 올라 prop 스프링(통통) + 잉크 방울 6개 | face 스프링, 작게 | 페이드 | 없음 |
  */
-
-/** 잉크 얼룩 모양 마스크 (필터 없이 모양으로 번짐 → 저사양에서도 가벼움). 마스크라 색은 의미 없음 */
-const BLOT = `url("data:image/svg+xml,${encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 8 C63 6 70 18 80 20 C93 23 95 38 90 48 C86 57 96 66 89 77 C82 88 66 84 57 92 C48 99 36 92 28 86 C17 79 6 74 9 60 C11 50 3 42 9 32 C16 20 33 22 38 14 C42 9 45 9 50 8Z'/><circle cx='93' cy='22' r='4'/><circle cx='8' cy='84' r='3'/><circle cx='84' cy='94' r='2.5'/></svg>",
-)}")`;
-const ROUND = 'radial-gradient(circle, black 49%, transparent 50%)';
 
 const canAnimate = (el: Element | null): el is HTMLElement =>
   !!el && typeof (el as HTMLElement).animate === 'function';
@@ -61,7 +56,7 @@ export function inkReveal(
   );
   const d = Math.ceil(far * (lite ? 2.1 : 2.6));
   const s = el.style as MaskStyle;
-  s.maskImage = s.webkitMaskImage = lite ? ROUND : BLOT;
+  s.maskImage = s.webkitMaskImage = lite ? INK_ROUND : INK_BLOT;
   s.maskRepeat = s.webkitMaskRepeat = 'no-repeat';
   const clear = () => {
     s.maskImage = s.webkitMaskImage = '';

@@ -140,6 +140,7 @@ Framer용 배열은 `EASE.<이름>`. 단계 보정은 `tierDuration(ms, budget)`
 | 월드맵 (P5-02) | 지난 길 그리기 | 잉크 길을 전체 길의 조각(`mapRoute`)으로 따로 그려 지금 노드에 정확히 닿음. full 1.5초 · lite 70% · minimal·동작 줄이기 즉시, 종이 점선은 그린 뒤 페이드 |
 | 월드맵 (P5-04) | 스테이지 노드 | 카드 빛 고리(`.stage-pulse`)·반짝임(`.stage-shimmer`)·`backdrop-blur` 대신 지금 노드 점선 고리 `wn-ring`(대기 루프, transform·opacity) + 파이뱀 `.mascot-bob`. 등장은 노드 → 파이뱀 차례(기존 단계 규칙). 도장·링은 정지 그림 |
 | 월드맵 (P5-02) | 물결·새·배 | 정지 그림만(클래스 `wm-wave`·`wm-bird`·`wm-boat` 자리), 반복 연출은 P5-09 |
+| 월드맵 (P5-05) | 잠금 해제 연출 (시그니처) | 새로 열린 스테이지에서 한 번만(본 기록 서버 저장, Q49). 박자표 `src/lib/celebration/unlockFx.ts`(시안 `beats.ts` buildUnlock): 이전 노드 통과 도장 쾅 → 잉크 길(stroke-dashoffset) → 자물쇠 흔들흔들 → 잉크 방울 → 스케치가 컬러로(얼룩 마스크 `inkMask.ts`) + 자물쇠가 반으로 깨져 떨어짐 → 파이뱀이 길을 따라 깡충(`samplePath`) → 이름표 팝 + "열렸어요!" 도장 → 문구 토스트. full 약 3.5초 · lite 약 2.2초(흔들림·방울·조각·지도 떨림 없음, 둥근 번짐, 미끄러져 이동) · **minimal·동작 줄이기는 박자 없이 끝 상태로 바로 + 문구 토스트(낭독기 한 번)**. 모든 WAAPI를 처음에 delay로 한꺼번에 만들고(컴포지터), 메인 스레드는 상태 큐 4개(setTimeout)뿐. 길·마스크 외에는 transform·opacity. 화면 밖이면 먼저 스크롤, 누르거나 Enter·Space·Esc면 끝 상태로(첫 누름의 click은 삼킴). 연출 동안 파이뱀은 라이브 리그(`PybaemRig`, next/dynamic, full도 lite 리그 — 시안 rigTier) |
 | 퀘스트 | 단계 표시 현재 단계 | Framer `repeat: Infinity` → `.step-pulse` |
 | 퀘스트 | Pyodide 로딩·실행 | 실측 판정 멈춤 |
 | 축하 | 컨페티·카드·레벨 pop | `fireConfetti`가 `<html>` 속성 상한, 카드 연출은 기존 `budget` 그대로, 레벨 pop은 `[data-reduced]` |

@@ -694,6 +694,39 @@ export type Database = {
           },
         ];
       };
+      user_seen_unlocks: {
+        Row: {
+          seen_at: string;
+          stage_id: string;
+          user_id: string;
+        };
+        Insert: {
+          seen_at?: string;
+          stage_id: string;
+          user_id: string;
+        };
+        Update: {
+          seen_at?: string;
+          stage_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_seen_unlocks_stage_id_fkey';
+            columns: ['stage_id'];
+            isOneToOne: false;
+            referencedRelation: 'stages';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_seen_unlocks_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       users: {
         Row: {
           age_band: string | null;
@@ -921,6 +954,10 @@ export type Database = {
       record_hint: {
         Args: { p_level: number; p_quest_id: string; p_user_id: string };
         Returns: Json;
+      };
+      record_seen_unlocks: {
+        Args: { p_stage_ids: string[]; p_user_id: string };
+        Returns: number;
       };
       report_board_content: {
         Args: {

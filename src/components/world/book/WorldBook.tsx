@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Check, Hourglass, Lock } from 'lucide-react';
+import { ArrowRight, Check, Hourglass, Lock, LockOpen } from 'lucide-react';
 
 import { WorldCoverArt } from '@/components/landing/sections/worlds/WorldCoverArt';
 import { Card, CardButton } from '@/components/ui/card';
@@ -48,6 +48,8 @@ interface WorldBookProps {
   current?: boolean;
   /** 제목 단계: 책장은 h2, 지도 아래 다음 권은 h3 */
   heading?: 'h2' | 'h3';
+  /** 새로 열린 월드 (첫 스테이지의 잠금 해제 연출을 아직 못 봄, P5-05): 상태 칩이 "새로 열렸어요!" */
+  fresh?: boolean;
 }
 
 /**
@@ -61,6 +63,7 @@ export function WorldBook({
   unlock,
   current = false,
   heading: H = 'h2',
+  fresh = false,
 }: WorldBookProps) {
   const go = useBookNavigate();
   const { slug, title, order, status } = book;
@@ -74,9 +77,14 @@ export function WorldBook({
       <div className="wb-info">
         <span className="wb-kicker">그림책 {no}권</span>
         <H className="font-display text-h3 text-foreground">{title}</H>
-        <span className="wb-status" data-status={status}>
+        <span
+          className="wb-status"
+          data-status={status}
+          data-fresh={fresh || undefined}
+        >
           {status === 'cleared' && <Check className="size-3.5" aria-hidden />}
-          {STATUS_LABEL[status]}
+          {fresh && <LockOpen className="size-3.5" aria-hidden />}
+          {fresh ? '새로 열렸어요!' : STATUS_LABEL[status]}
         </span>
         {openable ? (
           <>

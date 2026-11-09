@@ -9,6 +9,7 @@ import {
 } from '@/lib/avatar/ownProfile';
 
 import { getWorldStatuses, type WorldsProgress } from './getStageStatuses';
+import { planUnlocks, type UnlockPlan } from './unlockSeen';
 import type { WorldInfo } from './worlds';
 
 /** 스테이지 시트(P5-06)가 보여 줄 퀘스트 열 (DB 조회 그대로라 quest_type 은 string) */
@@ -55,7 +56,8 @@ export interface WorldMapData {
   continueTarget: ContinueTarget | null;
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
   showApiKeyAlert: boolean;
-  // P5-05 잠금 해제 본 기록(Q49)은 테이블이 생기면 여기에 더한다 (progress.unlockedStageIds 와 비교)
+  /** 잠금 해제 연출 (P5-05, Q49): 본 기록과 지금 열린 스테이지 비교. 본 기록을 못 읽었으면 null (연출·기록 없음) */
+  unlocks: UnlockPlan | null;
 }
 
 /** 이어하기 CTA (P5-10) */
@@ -108,6 +110,8 @@ export interface WorldMapRaw {
   profile: OwnProfileRow | null;
   /** loadUserApiKeys 결과 (조회 못 했으면 null → 안내 안 띄움) */
   apiKeys: { enabled: boolean; keys: object } | null;
+  /** user_seen_unlocks 본인 행 (P5-05). 조회 실패(00025 전 DB 등)면 null */
+  seen: Array<{ user_id: string; stage_id: string }> | null;
 }
 
 export function toWorldMapData(
@@ -147,6 +151,11 @@ export function toWorldMapData(
       p.status === 'completed' && p.completed_at && !p.used_golden_key
         ? [p.completed_at]
         : [],
+    ),
+    unlocks: planUnlocks(
+      worldsProgress.unlockedStageIds,
+      raw.seen &&
+        raw.seen.filter((r) => r.user_id === userId).map((r) => r.stage_id),
     ),
     // 사용자 커스텀 키 유무만 본다 (서버 기본 키는 무시)
     showApiKeyAlert:

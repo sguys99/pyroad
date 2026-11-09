@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
 import { m, type Variants } from 'framer-motion';
-import { Lock } from 'lucide-react';
+import { Lock, LockOpen } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import type { WorldId } from '@/lib/design/tokens';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
@@ -17,7 +17,20 @@ import { ToastViewport, useToastQueue } from '@/components/ui/toast';
 import { StageSheet } from './StageSheet';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
-import { mapRoute, markerSide, nodePercent } from '@/lib/world/worlds';
+import {
+  mapRoute,
+  mapSegment,
+  markerSide,
+  nodePercent,
+} from '@/lib/world/worlds';
+import type { UnlockPlan } from '@/lib/world/unlockSeen';
+import { useStageUnlock } from './unlock/useStageUnlock';
+import {
+  UnlockInk,
+  UnlockMarks,
+  UnlockRoad,
+  UnlockSplats,
+} from './unlock/UnlockLayer';
 import './map/worldMap.css';
 
 /**
@@ -103,7 +116,7 @@ function useOpenStage(
       }
     />
   );
-  return { open, sheet, toasts, dismiss };
+  return { open, sheet, toasts, show, dismiss };
 }
 
 /** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
@@ -181,6 +194,10 @@ interface WorldMapProps {
   questsByStage?: Record<string, StageQuestItem[]>;
   /** 처음 열 때 지금 스테이지가 화면 밖이면 그쪽으로 스크롤 (세로로 긴 모바일 지도). 월드맵 페이지만 */
   scrollToCurrent?: boolean;
+  /** 잠금 해제 연출 (P5-05): 본 기록과 비교한 새로 열린 스테이지 (loadWorldMapData). 없으면 연출·기록 없음 */
+  unlocks?: UnlockPlan | null;
+  /** 카탈로그 데모: 기록을 보내지 않고 다시 틀 수 있음 */
+  unlockDemo?: boolean;
 }
 
 export function WorldMap({
@@ -190,12 +207,14 @@ export function WorldMap({
   world,
   questsByStage,
   scrollToCurrent,
+  unlocks,
+  unlockDemo,
 }: WorldMapProps) {
   const { wide, tall } = map.layouts;
   const { budget } = useMotionTier();
   const { container, item } = nodeVariants(budget);
   const box = useRef<HTMLDivElement>(null);
-  const { open, sheet, toasts, dismiss } = useOpenStage(
+  const { open, sheet, toasts, show, dismiss } = useOpenStage(
     stages,
     questsByStage,
     world,
@@ -203,7 +222,27 @@ export function WorldMap({
   // 안내 쪽지는 fixed라 transform이 걸린 페이지 틀(PageTransition) 밖, body에 둔다
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   useEffect(() => setPortal(document.body), []);
-  const sorted = [...stages].sort((a, b) => a.order - b.order);
+  const real = [...stages].sort((a, b) => a.order - b.order);
+
+  // 잠금 해제 연출 (P5-05): 연출이 끝나기 전에는 새 스테이지를 잠긴 모습으로, 파이뱀은 이전 노드에 둔다
+  const unlock = useStageUnlock({
+    sorted: real,
+    map,
+    plan: unlocks,
+    demo: unlockDemo,
+    box,
+    onOpened: (stage) =>
+      show(`새 스테이지가 열렸어요! ${stage.order}단계 ${stage.title}`, {
+        tone: 'good',
+        icon: <LockOpen className="size-4" />,
+      }),
+  });
+  const hold = unlock.active && !unlock.open;
+  const sorted = hold
+    ? real.map((s, i) =>
+        i === unlock.target ? { ...s, status: 'locked' as const } : s,
+      )
+    : real;
 
   const inProgressIndex = sorted.findIndex((s) => s.status === 'in_progress');
   // 잉크 길 끝: 진행 중 스테이지, 없으면 마지막으로 완료한 스테이지
@@ -217,23 +256,36 @@ export function WorldMap({
     boss: s.is_final,
   }));
 
+  // 지금 위치 파이뱀: 연출 중에는 이전 노드(첫 스테이지면 새 노드)에서 출발
+  const markerIndex = unlock.active
+    ? unlock.from >= 0
+      ? unlock.from
+      : unlock.target
+    : inProgressIndex;
+
   useMapParallax(box, budget.parallax);
 
+  const unlocking = unlock.target >= 0;
   useEffect(() => {
-    if (!scrollToCurrent) return;
+    if (!scrollToCurrent || unlocking) return;
     const node = box.current?.querySelector('[data-current]');
     if (!node) return;
     const r = node.getBoundingClientRect();
     if (r.top < 0 || r.bottom > window.innerHeight)
       node.scrollIntoView({ block: 'center' });
-  }, [scrollToCurrent]);
+  }, [scrollToCurrent, unlocking]);
 
   // 지난 길 그리기: minimal·동작 줄이기는 즉시, lite는 70% 길이 (P2-15)
   const instant = !budget.springs;
   const draw = sec('draw') * budget.effectDuration;
   const art = (name: LayoutName) => {
     const layout = map.layouts[name];
-    const route = mapRoute(layout.nodes, map.path, cur);
+    // 연출 중에는 지난 길이 이전 노드에서 멈추고, 새 조각은 연출이 긋는다
+    const route = mapRoute(
+      layout.nodes,
+      map.path,
+      unlock.active && unlock.from >= 0 ? unlock.from : cur,
+    );
     const w = name === 'wide' ? 4 : 3.5;
     return (
       <MapArt
@@ -271,6 +323,12 @@ export function WorldMap({
             />
           </>
         )}
+        {unlock.active && unlock.from >= 0 && (
+          <UnlockRoad
+            d={mapSegment(layout.nodes, map.path, unlock.from)}
+            width={w}
+          />
+        )}
       </MapArt>
     );
   };
@@ -298,6 +356,14 @@ export function WorldMap({
         {/* 지도 그림: 레이아웃마다 하나씩, 지도 폭에 맞는 쪽만 보임 */}
         {art('tall')}
         {art('wide')}
+        {unlock.active && (
+          <UnlockInk
+            map={map}
+            index={unlock.target}
+            theme={real[unlock.target].theme_name}
+            boss={real[unlock.target].is_final}
+          />
+        )}
 
         {/* 앰비언트 구름·나뭇잎 (full만). 지도 그림의 반복 연출은 P5-09 */}
         <FloatingDecorations />
@@ -306,7 +372,7 @@ export function WorldMap({
         <m.div
           className="absolute inset-0"
           variants={container}
-          initial={budget.effectDuration === 0 ? false : 'hidden'}
+          initial={budget.effectDuration === 0 || unlocking ? false : 'hidden'}
           animate="show"
         >
           {sorted.map((stage, index) => (
@@ -314,6 +380,15 @@ export function WorldMap({
               key={stage.id}
               className="world-node absolute z-10"
               data-current={index === inProgressIndex || undefined}
+              data-unlock={
+                unlock.active
+                  ? index === unlock.from
+                    ? 'from'
+                    : index === unlock.target
+                      ? 'to'
+                      : undefined
+                  : undefined
+              }
               // 크기 0인 점(랜드마크 바닥 가운데). 등장 scale 도 이 점을 중심으로
               style={nodeVars(map, index)}
               variants={item}
@@ -321,16 +396,31 @@ export function WorldMap({
               <StageNode stage={stage} onOpen={open} />
             </m.div>
           ))}
-          {inProgressIndex >= 0 && (
+          {markerIndex >= 0 && (
             <m.div
               className="world-node absolute z-20 pointer-events-none"
-              style={nodeVars(map, inProgressIndex)}
+              style={nodeVars(map, markerIndex)}
               variants={item}
             >
-              <CurrentMarker />
+              <div className="wu-walker">
+                <CurrentMarker
+                  live={unlocking && budget.mascot !== 'still'}
+                  state={unlock.rig}
+                  flag={unlocking && unlock.open ? '새 곳 도착!' : undefined}
+                />
+              </div>
             </m.div>
           )}
         </m.div>
+        {unlock.active && unlock.from >= 0 && (
+          <UnlockSplats style={nodeVars(map, unlock.from)} />
+        )}
+        {unlocking && (unlock.active || budget.springs) && (
+          <UnlockMarks
+            style={nodeVars(map, unlock.target)}
+            done={!unlock.active}
+          />
+        )}
       </div>
       {sheet}
       {portal &&

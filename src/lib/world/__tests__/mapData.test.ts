@@ -73,6 +73,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
       user_public_profiles: { public_name: '파이', avatar_skin: null },
     },
     apiKeys: { enabled: true, keys: {} },
+    seen: [],
     ...over,
   };
 }
@@ -230,5 +231,43 @@ describe('이어하기 대상 pickContinue (P5-10)', () => {
   it('스테이지가 없으면 없음', () => {
     const empty = toWorldMapData(ME, { ...raw(), stages: [] }, WORLDS);
     expect(pickContinue(empty.progress, [], {})).toBeNull();
+  });
+});
+
+describe('toWorldMapData 잠금 해제 본 기록 (P5-05)', () => {
+  it('기록이 없으면 지금 열린 스테이지를 조용히 기록', () => {
+    expect(toWorldMapData(ME, raw(), WORLDS).unlocks).toEqual({
+      silent: true,
+      stageIds: ['s1'],
+    });
+  });
+
+  it('남의 행은 무시하고, 본 기록과 비교해 새로 열린 스테이지만', () => {
+    const done = raw({
+      progress: [
+        ...raw().progress,
+        {
+          user_id: ME,
+          quest_id: 'q2',
+          status: 'completed',
+          best_stars: 0,
+          completed_at: '2026-11-08T03:00:00Z',
+          used_golden_key: false,
+          created_at: '2026-11-08T00:00:00Z',
+        },
+      ].filter((p) => !(p.user_id === ME && p.status === 'in_progress')),
+      seen: [
+        { user_id: ME, stage_id: 's1' },
+        { user_id: OTHER, stage_id: 's2' },
+      ],
+    });
+    expect(toWorldMapData(ME, done, WORLDS).unlocks).toEqual({
+      silent: false,
+      stageIds: ['s2'],
+    });
+  });
+
+  it('본 기록을 읽지 못했으면(00025 전 DB) null', () => {
+    expect(toWorldMapData(ME, raw({ seen: null }), WORLDS).unlocks).toBeNull();
   });
 });

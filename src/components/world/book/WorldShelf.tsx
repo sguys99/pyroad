@@ -13,10 +13,13 @@ import { WorldBook } from './WorldBook';
 export function WorldShelf({
   worlds,
   current,
+  fresh = [],
 }: {
   worlds: readonly WorldWithStatus[];
   /** 지금 모험 중인 월드 slug (책갈피) */
   current: string | null;
+  /** 새로 열렸는데 아직 연출을 못 본 스테이지 id (P5-05). 월드의 첫 스테이지가 있으면 "새로 열렸어요!" */
+  fresh?: readonly string[];
 }) {
   return (
     <>
@@ -44,6 +47,11 @@ export function WorldShelf({
               no={i + 1}
               unlock={unlockText(worlds, i)}
               current={w.world.slug === current}
+              fresh={
+                w.status === 'open' &&
+                !!w.stages[0] &&
+                fresh.includes(w.stages[0].id)
+              }
             />
           </li>
         ))}

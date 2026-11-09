@@ -343,7 +343,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **크기 단위**: 노드·도장·파이뱀은 지도 1단위(`--u` = `100cqi / 레이아웃 폭`, `.world-map`이 컨테이너)와 랜드마크 배율(`--ns` = `node_scale`, 보스는 `--s` 1.15)로 잡아 지도와 같이 커지고 작아진다. 글자는 고정(이름표 15px · 넓은 지도 16px, 별·잠김·칩 14px)
 - **상태**(`data-state`): `locked` 옅은 면 + `text-muted`(surface-2 위 AA) + "🔒 잠김" · `open` 진행 중인데 아직 0개 · `current` 진행 중 · `clear` 통과 도장(손으로 찍은 기울기). `open`·`current`는 초록 이름표 + 번호 원 둘레 **진행률 링**(완료 퀘스트/전체, 금색 호) + 랜드마크 둘레 점선 고리
 - **보스**(`is_final`, `data-boss`): 지도 랜드마크 1.15배 + 왕관(MapArt `BossCrown`), 이름표에 왕관 아이콘 + 금색 번호 원 + 금색 테. 데이터만 보고 정한다
-- **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`. 그쪽이 지도 밖으로 잘리면 반대쪽 — `markerSide`, P5-10, 모든 월드·노드 단위 테스트, `data-testid="world-current-marker"`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(P5-05)에서 걷게 하려면 라이브 `PybaemRig`로 바꾼다
+- **지금 위치** `CurrentMarker`: 진행 중 스테이지 옆(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, `--dx`. 그쪽이 지도 밖으로 잘리면 반대쪽 — `markerSide`, P5-10, 모든 월드·노드 단위 테스트, `data-testid="world-current-marker"`)에 큰 파이뱀(`PybaemStatic` 정지 리그, 엔진 없음) + "지금 여기!" 금색 칩. 잠금 해제 연출(§13-7) 동안은 `live`로 라이브 `PybaemRig`(next/dynamic, 기쁨 → 응원)를 쓰고 칩이 "새 곳 도착!"
 - **누르기**: 노드 전체가 `<button>`(가로 96px 이상 · 랜드마크부터 별까지, 포커스는 이름표에 3px 링). `aria-label` = "3단계 조건의 갈림길, 도전 중, 지금 여기, 퀘스트 2/8 완료"(SHOW_STARS면 "별 5/24" 추가)(보스는 "(보스 스테이지)"). 잠긴 노드는 `aria-disabled`라 포커스·탭이 되고 누르면 안내 쪽지("2단계를 통과하면 열려요"). 동작은 `WorldMap`의 `useOpenStage()` 한 곳 — 열린 노드는 차례 시트(13-3)
 
 | 연출 | full | lite | minimal | 동작 줄이기 |
@@ -384,7 +384,8 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **책 ↔ 지도 전환**(`bookTransition.ts`): View Transitions API가 있으면 full = 누른 표지와 새 화면의 지도(`.world-map`)에 같은 `view-transition-name: world-book`을 붙여 표지가 지도 자리로 펼쳐짐(반대로 "월드 바꾸기"는 지도가 그 월드 표지로 접힘), 길이 `--dur-page`·`--easing-page`. lite = 짧은 교차 페이드(`--dur-fast`), minimal·동작 줄이기·미지원 브라우저 = 그냥 이동(새 화면 등장은 `PageTransition` 규칙). 새 화면 렌더는 최대 2.5초 기다리고 끝나면 이름·`<html data-book-vt>`를 거둠. 수정 키·가운데 클릭은 브라우저 기본. 반복 연출 없음
 - **BGM**: 각 지도 화면은 그 월드 `map.yaml`의 `bgm`(크로스페이드는 P5-11). 퀘스트 → 월드맵 링크는 그 퀘스트의 월드 지도(`worldPath`)
 - **e2e 테스트 월드**: `content:build -- --fixtures e2e/fixtures/content`가 `build/e2e/worlds.json`·`rows.json`을 만들고, 테스트 페이지가 켜진 서버에 `PYROAD_E2E_WORLDS`가 있을 때만 `serverWorlds()`가 월드 목록 뒤에 더함(운영 seed·커밋 생성물은 그대로). 스펙 `e2e/world-select.spec.ts`가 DB에 행을 넣고 지움
-- **카탈로그**: "월드 지도" 절의 "월드 책 표지 4종 · 지도 머리"
+- **새로 열렸어요**(P5-05): 열린 월드의 첫 스테이지가 아직 잠금 해제 연출을 못 본(본 기록에 없는) 스테이지면 책장의 상태 칩이 금색 "새로 열렸어요!"(`fresh`, 자물쇠 열린 아이콘). 그 지도를 열어 연출을 보면 사라짐
+- **카탈로그**: "월드 지도" 절의 "월드 책 표지 5종 · 지도 머리"
 
 ## 13-5. 월드맵 HUD `WorldHud` (P5-07, Q47)
 
@@ -412,6 +413,30 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **분석**: `continue_click { kind: recent|next|start, place: head|float }` ([docs/analytics.md](../analytics.md)). 퀘스트 id는 보내지 않음
 - **카탈로그**: "월드 지도" 절의 "이어하기 CTA (P5-10)" — recent·next·start·긴 이름 × 머리·떠 있는 버튼. e2e `world-continue.spec.ts`
 
+## 13-7. 잠금 해제 연출 `useStageUnlock` · `UnlockLayer` (P5-05, Q49)
+
+Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재생하고 본 기록을 서버에 남긴다. 코드: 흐름 `src/components/world/unlock/useStageUnlock.ts`, 겹 `UnlockLayer.tsx`·`unlock.css`(`.wu-*`), 박자표 `src/lib/celebration/unlockFx.ts`, 비교 규칙 `src/lib/world/unlockSeen.ts`(단위 테스트), 쓰기 `POST /api/world/unlocks` → service_role RPC `record_seen_unlocks`(00025, 열린 스테이지만). 시안 `Signature.tsx` UnlockLayer·`beats.ts` buildUnlock·`World.tsx` 해제 데모.
+
+- **언제**: 월드맵 데이터가 본 기록(`user_seen_unlocks`)과 지금 열린 스테이지(`unlockedStageIds`)를 비교(`planUnlocks`). 이 지도에서 새로 열린 것 중 가장 뒤 스테이지 하나를 연출하고(`pickUnlockIndex`), 이 지도의 새 스테이지를 모두 기록. 다른 월드의 새 스테이지는 그 지도를 열 때
+- **기존 사용자**: 기록이 하나도 없으면(배포 전부터 있던 사용자·새 사용자) 지금 열린 스테이지를 **연출 없이** 모두 기록 → 배포 직후 연출이 줄줄이 나오지 않음. 진행 리셋(`/api/account/reset`)은 기록도 지워 다시 열 때 연출이 나옴. 본 기록을 못 읽으면(00025 전 DB) 연출·기록 모두 없음
+- **한 번만**: 끝나면(건너뛰어도) 기록 저장. 실패해도 화면은 그대로(다음 방문에 한 번 더 나올 수 있음). 같은 세션에서 다시 오면 저장 전이어도 다시 틀지 않음(모듈 `handled`)
+- **연출 전 모습**: 새 노드는 잠김 모습(연필 스케치 + "잠김" 이름표), 지난 길은 이전 노드까지, 이전 노드 도장은 아직 없음, 파이뱀은 이전 노드 옆. 연출 중 열림 큐에서 실제 상태로 바뀌고, 끝나면 효과를 걷어 React가 그린 실제 자리와 맞음
+- **화면 밖**: 새 노드가 화면 밖이면 먼저 그쪽으로 부드럽게 스크롤한 뒤 시작. 노드 차례 등장은 생략(연출이 주인공)
+- **건너뛰기**: 재생 중 화면 어디든 누르거나 Enter·Space·Esc → 끝 상태(시안 attachSkip). 그 누름의 click은 삼켜 밑의 노드·버튼이 같이 눌리지 않음
+- **문구·접근성**: 끝나면 토스트 "새 스테이지가 열렸어요! 2단계 변수의 숲"(지도의 `ToastViewport`, `role=status` → 낭독기 한 번). 겹은 모두 `aria-hidden`·누름 통과. 효과음 자리 `sfx('unlock')`(자물쇠 깨질 때, P5-11이 정리)
+- **책장**: 새로 열린 월드는 상태 칩 "새로 열렸어요!"(§13-4)
+
+| 박자 | full (약 3.5초) | lite (약 2.2초) | minimal · 동작 줄이기 |
+|---|---|---|---|
+| 통과 도장 쾅 | 2.3배 → 0.9배 220ms(stampIn) + body 안착 + 지도 떨림(steps 3) + 잉크 튐 6 | 160ms + face 안착 | 끝 상태로 바로 (도장·길·컬러 랜드마크·열린 이름표·파이뱀 새 자리) + 문구 토스트 |
+| 잉크 길 | 650ms ink | 360ms | 〃 |
+| 자물쇠 | 흔들흔들 420ms → 반으로 깨져 떨어짐 460ms + 조각 5 | 바로 깨짐 300ms | 〃 |
+| 스케치 → 컬러 | 잉크 방울 280ms → 얼룩 마스크 600ms | 둥근 번짐 360ms | 〃 |
+| 파이뱀 | 길 따라 깡충 2번 720ms + 착지 눌림, 라이브 리그 기쁨 → 응원 | 미끄러져 500ms | 〃 (정지 그림) |
+| 열림 | 이름표 팝(body) + "열렸어요!" 도장(2.4초 뒤 흐려짐) | 이름표 팝(face) + 도장 | 도장 없음 |
+
+**대표 상태**: 카탈로그 "월드 지도" 절 `world-unlock-demo`의 "해제 보기 (데모)"(2단계 통과 → 3단계 열림, 기록 안 보냄, 누를 때마다 처음부터). e2e `world-unlock.spec.ts`.
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
@@ -422,7 +447,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
 | Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06), 월드맵 HUD 메뉴(P5-07) |
-| Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04), HUD 불꽃·곧 열려요 쪽지(P5-07) |
+| Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04), HUD 불꽃·곧 열려요 쪽지(P5-07), 잠금 해제 문구(P5-05) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
 | ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률, 스테이지 차례 시트 진행 요약 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |

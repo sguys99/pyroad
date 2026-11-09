@@ -57,10 +57,17 @@ const BOOK = (
   completedQuests: done * 6,
   totalQuests: 42,
 });
-const BOOKS: [book: BookSummary, unlock: string, current?: boolean][] = [
+const BOOKS: [
+  book: BookSummary,
+  unlock: string,
+  current?: boolean,
+  fresh?: boolean,
+][] = [
   [BOOK(1, '파이썬 섬', 'open', 2), '', true],
   [BOOK(1, '파이썬 섬', 'cleared', 7), ''],
   [BOOK(2, '코드 바다', 'locked', 0), '파이썬 섬을 다 모험하면 열려요'],
+  // 막 열린 월드 (P5-05): 첫 스테이지 해제 연출을 아직 못 봄
+  [BOOK(2, '코드 바다', 'open', 0), '', false, true],
   [BOOK(3, '메이커 시티', 'coming_soon', 0), '코드 바다를 다 모험하면 열려요'],
 ];
 import { CodeSample, Demo, Section } from './ui';
@@ -144,6 +151,47 @@ const BOSS_STAGE: StageWithStatus = {
   stars: 0,
   description: '배운 것을 모두 모아 숫자 맞히기 게임을 만들어요.',
 };
+
+// 잠금 해제 데모 (P5-05): 2단계까지 통과 → 3단계가 막 열림 (아직 퀘스트 0개)
+const SAMPLE_UNLOCKED: StageWithStatus[] = SAMPLE.map((s, i) =>
+  i === 2 ? { ...s, completedQuestCount: 0, stars: 0 } : s,
+);
+
+/** 지도 + "해제 보기" 버튼: 누를 때마다 지도를 새로 그려 연출을 처음부터 (기록은 보내지 않음) */
+function UnlockDemo({
+  map,
+  theme,
+  world,
+}: {
+  map: NonNullable<(typeof WORLDS)[number]['map']>;
+  theme: string;
+  world: WorldId;
+}) {
+  const [run, setRun] = useState(0);
+  return (
+    <div className="grid gap-3">
+      <div>
+        <Button
+          variant="secondary"
+          sfx={false}
+          onClick={() => setRun((n) => n + 1)}
+          data-testid="unlock-demo-play"
+        >
+          해제 보기 (데모)
+        </Button>
+      </div>
+      <WorldMap
+        key={run}
+        stages={SAMPLE_UNLOCKED}
+        map={map}
+        theme={theme}
+        world={world}
+        unlocks={run ? { silent: false, stageIds: ['sample-3'] } : null}
+        unlockDemo
+      />
+    </div>
+  );
+}
 
 /** 시트만 따로 열어 보기 (주소를 바꾸지 않음) */
 function SheetPreview({
@@ -240,6 +288,17 @@ export function WorldMapSection() {
           theme={island.theme}
           world={island.order as WorldId}
           questsByStage={SAMPLE_QUESTS}
+        />
+      </Demo>
+      <Demo
+        label="잠금 해제 연출 (P5-05)"
+        note="새로 열린 스테이지에서 한 번만: 이전 노드 통과 도장 쾅 → 잉크 길 → 자물쇠가 흔들리다 깨짐 → 잉크 방울이 떨어져 스케치가 컬러로 → 파이뱀이 길을 따라 깡충 2번 → 이름표 팝 + '열렸어요!' 도장 + 문구 토스트. 화면 밖이면 먼저 스크롤, 누르거나 Enter·Space·Esc면 끝 상태로. full 약 3.5초 · lite 약 2.2초(흔들림·방울·조각 없음, 둥근 번짐, 미끄러져 이동) · minimal·동작 줄이기는 바로 끝 상태 + 문구만. 본 기록은 서버(user_seen_unlocks, 데모는 저장 안 함)"
+        data-testid="world-unlock-demo"
+      >
+        <UnlockDemo
+          map={island.map}
+          theme={island.theme}
+          world={island.order as WorldId}
         />
       </Demo>
       <Demo
@@ -340,8 +399,8 @@ export function WorldMapSection() {
         </div>
       </Demo>
       <Demo
-        label="월드 책 표지 4종 · 지도 머리 (P5-01)"
-        note="책장(/worlds)·지도 아래 다음 권 미리 보기가 같이 써요. 모험 중(책갈피 = 지금 읽는 책) · 다 읽었어요 · 잠김(자물쇠, 채도 낮춘 정지 그림) · 준비 중(모래시계). 열린 책은 카드 전체가 지도 링크: full은 표지가 지도 자리로 펼쳐지는 View Transition, lite는 짧은 페이드, minimal·동작 줄이기·미지원 브라우저는 그냥 이동. 360px 아래는 가로 카드, 640px부터 세로 표지"
+        label="월드 책 표지 5종 · 지도 머리 (P5-01·P5-05)"
+        note="책장(/worlds)·지도 아래 다음 권 미리 보기가 같이 써요. 모험 중(책갈피 = 지금 읽는 책) · 새로 열렸어요(첫 스테이지 해제 연출을 아직 못 본 월드, P5-05) · 다 읽었어요 · 잠김(자물쇠, 채도 낮춘 정지 그림) · 준비 중(모래시계). 열린 책은 카드 전체가 지도 링크: full은 표지가 지도 자리로 펼쳐지는 View Transition, lite는 짧은 페이드, minimal·동작 줄이기·미지원 브라우저는 그냥 이동. 360px 아래는 가로 카드, 640px부터 세로 표지"
         data-testid="world-books"
       >
         <WorldMapHead
@@ -353,9 +412,9 @@ export function WorldMapSection() {
           continueTarget={CTAS[0][1]}
         />
         <ol className="wb-shelf">
-          {BOOKS.map(([book, unlock, current]) => (
+          {BOOKS.map(([book, unlock, current, fresh]) => (
             <li key={book.slug}>
-              <WorldBook book={book} no={book.order} unlock={unlock} current={current} heading="h3" />
+              <WorldBook book={book} no={book.order} unlock={unlock} current={current} fresh={fresh} heading="h3" />
             </li>
           ))}
         </ol>

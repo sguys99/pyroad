@@ -247,6 +247,11 @@
     background: var(--success-soft);
     color: var(--text);
   }
+  /* 새로 열린 월드 (P5-05) */
+  .wb-status[data-fresh] {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
   .wb-note {
     display: flex;
     align-items: flex-start;

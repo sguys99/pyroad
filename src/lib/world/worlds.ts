@@ -76,6 +76,16 @@ export function mapRoute(
   };
 }
 
+/** i번째 노드 → i+1번째 노드 한 조각 (잠금 해제 연출이 새로 긋는 길, P5-05). 전체 길(mapPath)의 그 조각과 같은 곡선 */
+export function mapSegment(
+  points: readonly MapPoint[],
+  curve: WorldMapConfig['path'],
+  i: number,
+): string {
+  const seg = mapPath(points, curve).split(/ (?=[CL])/)[i + 1];
+  return seg ? `M${points[i][0]} ${points[i][1]} ${seg}` : '';
+}
+
 /** 노드 위치를 지도 상자에 대한 백분율로 (absolute 배치용) */
 export function nodePercent(
   layout: MapLayout,

@@ -76,6 +76,7 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
               theme={entry.world.theme}
               world={worldTint(entry.world.order)}
               questsByStage={data.questsByStage}
+              unlocks={data.unlocks}
               scrollToCurrent
             />
             <NextBooks worlds={worlds} slug={entry.world.slug} />

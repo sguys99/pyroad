@@ -48,6 +48,7 @@ function check<T>(
 /**
  * 진행·뱃지·XP·황금키를 처음 상태로 (`reset_progress(…, 'all')`, 앱의 전체 리셋과 같은 RPC)
  * + 튜터 요청 한도 카운터 삭제 (같은 사용자가 1분 안에 퀘스트를 여러 번 열면 소개 한도 8회/분에 걸림)
+ * + 잠금 해제 본 기록 삭제 (P5-05)
  */
 export async function resetUser(userId: string): Promise<void> {
   const db = adminClient();
@@ -58,6 +59,11 @@ export async function resetUser(userId: string): Promise<void> {
   check(
     'api_rate_limits 삭제',
     await db.from('api_rate_limits').delete().eq('user_id', userId),
+  );
+  // 잠금 해제 본 기록 (P5-05): 앱의 진행 리셋과 같게 지운다 → 다음 첫 방문은 연출 없이 조용히 기록
+  check(
+    'user_seen_unlocks 삭제',
+    await db.from('user_seen_unlocks').delete().eq('user_id', userId),
   );
 }
 

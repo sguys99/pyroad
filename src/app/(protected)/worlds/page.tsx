@@ -19,6 +19,7 @@ export default async function WorldsPage() {
         <WorldShelf
           worlds={data.progress.worlds}
           current={data.progress.current?.world.slug ?? null}
+          fresh={data.unlocks?.silent ? [] : data.unlocks?.stageIds}
         />
       </PageTransition>
     </>
