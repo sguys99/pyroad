@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react';
 import { m } from 'framer-motion';
 import { sec } from '@/lib/motion/tokens';
 import ReactMarkdown from 'react-markdown';
-import { LottieCharacter } from '@/components/characters/LottieCharacter';
 import type { MotionBudget } from '@/lib/motion/tier';
 import type { StageClearInfo } from '@/lib/quest/rewards';
 import { useTutor } from '@/lib/tutor/useTutor';
-import { CelebrationCta, ConceptChips, Kicker } from './parts';
+import {
+  CelebrationCta,
+  CelebrationMascot,
+  ConceptChips,
+  Kicker,
+} from './parts';
 import { popIn } from './motion';
 
 interface StageClearCardProps {
@@ -32,12 +36,7 @@ export function StageClearCard({
 
   return (
     <>
-      <LottieCharacter
-        character="pybaem"
-        animation="level-up"
-        size={88}
-        expression="celebrating"
-      />
+      <CelebrationMascot size={88} budget={budget} />
 
       <div className="flex flex-col items-center gap-0.5">
         <Kicker>스테이지 클리어!</Kicker>

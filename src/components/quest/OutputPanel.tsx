@@ -25,6 +25,12 @@ import { errorLineFromStderr } from '@/lib/editor/errorLine';
 import { DURATION } from '@/lib/motion/tokens';
 import { BugbugAside, BugbugMakeup } from './BugbugAside';
 import {
+  PassStamp,
+  RewardStrip,
+  useSuccessRun,
+  type QuestReward,
+} from './QuestSuccess';
+import {
   POP_LINES,
   errorSummary,
   mismatchTip,
@@ -195,6 +201,8 @@ export interface OutputPanelProps {
   onShowErrorLine?: (line: number) => void;
   /** 결과 쪽 안에서 Worker를 다시 띄우는 중 (모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄) */
   restarting?: boolean;
+  /** 퀘스트를 마쳤으면(완료 응답 뒤) 성공 장면: 도장 쾅 + 보상 띠 + 다음 퀘스트 (P6-08) */
+  reward?: QuestReward | null;
 }
 
 /**
@@ -211,8 +219,12 @@ export function OutputPanel({
   goal,
   onShowErrorLine,
   restarting = false,
+  reward = null,
 }: OutputPanelProps) {
   const bugFixed = useBugFixed(result);
+  const passed = !isRunning && !!result?.success && !!validationResult?.passed;
+  const success = passed && !!reward;
+  const successDone = useSuccessRun(success, result);
   if (isRunning) {
     return (
       <Slip
@@ -340,7 +352,6 @@ export function OutputPanel({
   }
 
   // 돌아감: 통과 / 출력이 다름 / (채점 전)
-  const passed = validationResult?.passed;
   const diff = validationResult && !validationResult.passed;
   return (
     <Slip
@@ -359,6 +370,10 @@ export function OutputPanel({
       }
       after={
         <>
+          {/* 보상 띠가 쪽지 바로 아래 (도장이 띠의 빈 모서리로 걸침), 고친 뒤 화해 인사는 그 아래 */}
+          {success && reward && (
+            <RewardStrip reward={reward} done={successDone} />
+          )}
           {bugFixed && <BugbugMakeup />}
           {diff && (
             <div className="qo-compare" data-testid="output-compare">
@@ -379,6 +394,7 @@ export function OutputPanel({
       {!outputLines(result.stdout).length && (
         <p className="qo-empty">(아무것도 나오지 않았어요)</p>
       )}
+      {success && <PassStamp done={successDone} />}
     </Slip>
   );
 }

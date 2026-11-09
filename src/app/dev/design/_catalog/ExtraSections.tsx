@@ -40,7 +40,10 @@ import type { QuestSession } from '@/lib/quest/useQuestSession';
 import { DialogueBox } from '@/components/ui/dialogue-box';
 import { PybaemRig } from '@/components/characters/rig/MascotRig';
 import { tutorLine } from '@/components/quest/StoryPage';
-import { useThinkBeat } from '@/components/quest/useThinkBeat';
+import { HAPPY_MS, useThinkBeat } from '@/components/quest/useThinkBeat';
+import { CelebrationMascot } from '@/components/quest/celebrations/parts';
+import { RewardsCard } from '@/components/quest/celebrations/RewardsCard';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CodeSample, Demo, Section } from './ui';
 
 /** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다 */
@@ -452,7 +455,7 @@ export function ErrorStagingSection() {
       id="error-staging"
       kicker="퀘스트 (P6-07)"
       title="실패 연출 · 버그버그와 파이뱀"
-      description="빨간 경고 대신 캐릭터가 알려 줘요. 오류는 파이썬 오류 문장을 아이 말로 바꾼 규칙표(src/lib/quest/errorExplain.ts, LLM 호출 없음)로 줄 번호와 함께 설명해요. 성공 연출은 P6-08."
+      description="빨간 경고 대신 캐릭터가 알려 줘요. 오류는 파이썬 오류 문장을 아이 말로 바꾼 규칙표(src/lib/quest/errorExplain.ts, LLM 호출 없음)로 줄 번호와 함께 설명해요. 성공 연출은 아래 #success-staging."
     >
       <Button
         onClick={() => setRound((r) => r + 1)}
@@ -502,6 +505,149 @@ export function ErrorStagingSection() {
         code={`// OutputPanel 오류 → <BugbugAside stderr={result.stderr} /> (errorAside 자리)\n// StoryPage: tutorLine(session) + useThinkBeat(runResult, hadException)\nexplainError(stderr) // { type, line, text: '3번째 줄을 봐요. …' }`}
       />
     </Section>
+  );
+}
+
+const STAGE_PASS: RunResult = {
+  stdout: '안녕하세요!\n마법 상자 준비!\n',
+  stderr: '',
+  success: true,
+  outcome: 'ok',
+};
+const STAGE_PASS_CHECK = { passed: true, type: 'output_match' as const };
+
+/** 이야기 쪽 파이뱀 성공 박자: 기쁨 점프(happy) → 응원(cheer). StoryPage와 같은 tutorLine + useThinkBeat(HAPPY_MS) */
+function SuccessTutor({ round }: { round: number }) {
+  const said = tutorLine({
+    runResult: STAGE_PASS,
+    validation: STAGE_PASS_CHECK,
+    isCompleted: true,
+    steps: null,
+  } as unknown as QuestSession);
+  const jumping = useThinkBeat(`${round}`, true, HAPPY_MS);
+  const state = jumping ? 'happy' : said.state;
+  return (
+    <DialogueBox
+      speaker="파이뱀"
+      text={said.text}
+      tone="good"
+      data-testid="success-dialogue"
+      character={(speaking) => (
+        <span data-rig-state={state} data-testid="success-pybaem">
+          <PybaemRig state={state} talking={speaking} size={96} label="" />
+        </span>
+      )}
+    />
+  );
+}
+
+/** 성공 연출 (P6-08): 도장 쾅 · 보상 띠 · 파이뱀 happy → cheer · 축하 카드 리그 */
+export function SuccessStagingSection() {
+  const [round, setRound] = useState(0);
+  const { budget } = useMotionTier();
+  const reward = {
+    title: '첫 번째 인사',
+    xp: 45,
+    stars: 2 as const,
+    coins: 20,
+    nextHref: '/dev/design#success-staging',
+    mapHref: '/dev/design#success-staging',
+  };
+  return (
+    <MotionProvider>
+      <Section
+        id="success-staging"
+        kicker="퀘스트 (P6-08)"
+        title="성공 연출 · 통과 도장과 보상"
+        description="정답이면 결과 쪽지에 금색 “통과!” 도장이 쾅 찍히고(온보딩 도장과 같은 stampSlam), 아래 보상 띠에서 별 1→3이 스프링으로 톡톡 · XP·코인이 0부터 올라가요(약 1.6초, lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 모습으로 건너뛰어요. 이야기 쪽 파이뱀은 기쁨 점프(happy) 뒤 응원(cheer). 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0. Q52: 실제 화면은 별·코인을 SHOW_STARS·SHOW_COINS로 숨겨 XP만 — 여기서는 켜서 보여 줘요."
+      >
+        <Button
+          onClick={() => setRound((r) => r + 1)}
+          variant="secondary"
+          size="sm"
+          sfx={false}
+          icon={<RotateCcw aria-hidden />}
+          data-testid="success-replay"
+        >
+          다시 보기
+        </Button>
+        <div className="mt-4 grid gap-4">
+          <Demo
+            key={`full-${round}`}
+            label="별·코인을 켠 모습 (Phase 8, 플래그 켬)"
+            note="도장 → 별 1→3 팝 → XP·코인 카운트업 → 다음 퀘스트 · 지도로"
+            surface="card"
+            data-testid="success-flags-on"
+          >
+            <div className="grid items-start gap-4 md:grid-cols-2">
+              <SuccessTutor round={round} />
+              <OutputPanel
+                result={STAGE_PASS}
+                isRunning={false}
+                validationResult={STAGE_PASS_CHECK}
+                reward={{ ...reward, forceStarsCoins: true }}
+              />
+            </div>
+          </Demo>
+          <div className="grid items-start gap-4 md:grid-cols-2">
+            <Demo
+              key={`real-${round}`}
+              label="지금 실제 화면 (XP만)"
+              note="서버가 준 XP만 올라가요. 좁은 화면(lg 미만)은 띠 머리에 파이뱀 얼굴"
+              surface="card"
+              data-testid="success-real"
+            >
+              <OutputPanel
+                result={STAGE_PASS}
+                isRunning={false}
+                validationResult={STAGE_PASS_CHECK}
+                reward={reward}
+              />
+            </Demo>
+            <Demo
+              key={`end-${round}`}
+              label="스테이지 마지막 퀘스트 · 황금 열쇠"
+              note="다음 퀘스트가 없으면 지도가 주 버튼(스테이지 클리어 축하는 오버레이가 먼저). 황금 열쇠로 연 퀘스트는 XP 대신 한 줄"
+              surface="card"
+              data-testid="success-stage-end"
+            >
+              <OutputPanel
+                result={STAGE_PASS}
+                isRunning={false}
+                validationResult={STAGE_PASS_CHECK}
+                reward={{
+                  title: '마을 입구 지도 완성',
+                  xp: 0,
+                  note: '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.',
+                  nextHref: null,
+                  mapHref: '/dev/design#success-staging',
+                }}
+              />
+            </Demo>
+          </div>
+          <Demo
+            key={`card-${round}`}
+            label="축하 카드 파이뱀 (B32 LottieCharacter → 리그)"
+            note="뿌듯(proud)으로 나타났다가 기쁨 점프(happy: 웅크림 → 두 번 + 착지 젤리). 반복 점프는 오버레이에서 쓰지 않음. 아래는 Phase 8 별·코인 카드"
+            surface="card"
+            data-testid="success-card"
+          >
+            <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-3xl bg-card px-6 pb-7 pt-6 text-center shadow-pop">
+              <CelebrationMascot size={96} budget={budget} />
+              <RewardsCard
+                stars={{ stars: 3, gained: 3 }}
+                coins={25}
+                budget={budget}
+                onNext={noop}
+              />
+            </div>
+          </Demo>
+        </div>
+        <CodeSample
+          code={`// QuestWorkspace: 완료한 그 실행이면\n<OutputPanel … reward={{ xp: earnedXP, stars, nextHref, mapHref }} />\n// → <PassStamp>(쪽지 위) + <RewardStrip>(쪽지 아래), useSuccessRun(…)으로 건너뛰기\n// StoryPage: tutorLine → 'cheer', useThinkBeat(runResult, cheer, HAPPY_MS) 동안 'happy'`}
+        />
+      </Section>
+    </MotionProvider>
   );
 }
 

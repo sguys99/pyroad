@@ -94,6 +94,20 @@ test.describe('퀘스트 전체 플로우', () => {
     // 통과하면 지금 점이 바로 완료로 (세션 상태)
     await expect(dots.first()).toHaveAttribute('data-state', 'done');
 
+    // 성공 장면 (P6-08): 결과 쪽지에 "통과!" 도장 + 아래 보상 띠. 별·코인은 Q52로 숨기고 XP만.
+    // 장면 중에 Esc를 누르면 끝 상태(받은 XP 그대로)로 건너뛴다
+    const reward = page.locator('[data-testid="quest-reward"]:visible');
+    await expect(reward).toBeVisible();
+    await expect(output.locator('.qx-stamp')).toHaveText('통과!');
+    await expect(reward.getByTestId('reward-stars')).toHaveCount(0);
+    await expect(reward.getByTestId('reward-coins')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(reward).toHaveAttribute('data-done', 'true');
+    // 이야기 쪽 파이뱀: 통과 도장 대사
+    await expect(page.getByTestId('quest-dialogue')).toContainText(
+      '통과 도장 쾅',
+    );
+
     // 축하 시퀀서: 첫 퀘스트 뱃지 카드 → CTA 로 닫힘
     await expect(page.getByTestId('celebration-overlay')).toBeVisible();
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -102,13 +116,19 @@ test.describe('퀘스트 전체 플로우', () => {
 
     // XP 반영 (상태바: 받은 XP 만큼 오르고 +N 표시. 힌트 0회 보너스 등 계산은 단위 테스트 몫)
     await expect(page.getByText(/^\s*[1-9]\d* XP/)).toBeVisible();
-    await expect(page.getByText(/^\+[1-9]\d*$/)).toBeVisible();
+    // 상태바의 +N (보상 띠 숫자는 글자 조각으로 나뉘어 있어 span 하나로는 걸리지 않음)
+    const gained = page.locator('span', { hasText: /^\+[1-9]\d*$/ });
+    await expect(gained).toBeVisible();
+    // 보상 띠의 XP 카운트업은 서버가 준 XP에서 끝난다 (상태바 +N과 같음)
+    await expect(reward.getByTestId('reward-xp-count')).toHaveText(
+      (await gained.innerText()).slice(1),
+    );
 
     // 다음 퀘스트로: <Link> 소프트 이동 (전체 새로고침 없음) + Pyodide Worker 그대로 (B22)
     await page.evaluate(() => {
       (window as unknown as { __e2eSoftNav: boolean }).__e2eSoftNav = true;
     });
-    await page.getByRole('link', { name: '다음 퀘스트로 →' }).first().click();
+    await reward.getByRole('link', { name: '다음 퀘스트' }).click();
     await expect(page).toHaveURL(new RegExp(`/quest/${quest2.id}$`));
     await expect(questHeader(page)).toContainText(quest2.title);
     // 다음 퀘스트: 1번 점은 끝냄(서버 진행), 지금 표시는 2번으로
@@ -150,8 +170,18 @@ test.describe('퀘스트 전체 플로우', () => {
     ).toBeVisible();
     await expect(page.getByTestId('celebration-cta')).toBeVisible();
 
+    // 축하 카드의 파이뱀은 리그 (B32 LottieCharacter 대체)
+    await expect(
+      page.getByTestId('celebration-mascot').locator('svg'),
+    ).toBeVisible();
     await overlay.getByRole('button', { name: '모두 닫기' }).click();
     await expect(overlay).toBeHidden();
+    // 스테이지 끝: 다음 퀘스트 대신 지도로
+    const reward = page.locator('[data-testid="quest-reward"]:visible');
+    await expect(reward.getByTestId('back-to-map')).toBeVisible();
+    await expect(reward.getByRole('link', { name: '다음 퀘스트' })).toHaveCount(
+      0,
+    );
 
     // 월드맵: 다음 스테이지가 열림
     await page.goto('/world');

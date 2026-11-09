@@ -106,6 +106,8 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'editor',
       'run-controls',
       'output-slip',
+      'error-staging',
+      'success-staging',
       'share-card',
       'sound',
       'legal',
@@ -468,6 +470,54 @@ test.describe('동행 펫 슬롯 (P5-08)', () => {
       );
       await page.waitForTimeout(400);
       await near();
+    });
+  }
+});
+
+test.describe('성공 연출 (P6-08)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 도장·별·카운트업이 단계를 따르고, Esc로 끝 상태로 건너뛴다`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('success-flags-on');
+      await demo.scrollIntoViewIfNeeded();
+      await page.getByTestId('success-replay').click();
+      const strip = demo.getByTestId('quest-reward');
+      const xp = strip.getByTestId('reward-xp-count');
+      await expect(strip).toBeVisible();
+      await expect(strip.getByTestId('reward-stars')).toHaveAccessibleName(
+        '별 2개 / 3개',
+      );
+      await expect(strip.getByTestId('reward-coins')).toBeVisible();
+      const stampAnims = () =>
+        demo.locator('.qx-stamp').evaluate((el) => el.getAnimations().length);
+
+      if (mode.tier === 'full' && mode.reduced === 'off') {
+        // 진행 중: 숫자가 아직 끝 값 전, 도장은 내려찍는 중 → Esc 한 번에 끝 값·끝 모습
+        await expect(strip).not.toHaveAttribute('data-done', /.*/);
+        expect(await xp.innerText()).not.toBe('45');
+        expect(await stampAnims()).toBeGreaterThan(0);
+        await page.keyboard.press('Escape');
+        await expect(strip).toHaveAttribute('data-done', 'true');
+        await expect(xp).toHaveText('45');
+        expect(await stampAnims()).toBe(0);
+        // 축하 카드 파이뱀(리그, B32 대체): 뿌듯 → 기쁨 점프
+        await expect(
+          page.getByTestId('success-card').getByTestId('celebration-mascot'),
+        ).toHaveAttribute('data-rig-state', 'happy');
+      } else {
+        // minimal·동작 줄이기: 처음부터 끝 값 (minimal 도장은 페이드, 동작 줄이기는 움직임 0)
+        await expect(strip).toHaveAttribute('data-done', 'true');
+        await expect(xp).toHaveText('45');
+        if (mode.reduced === 'on') expect(await stampAnims()).toBe(0);
+      }
+      // 이야기 쪽 파이뱀: 기쁨 점프 뒤 응원
+      await expect(page.getByTestId('success-pybaem')).toHaveAttribute(
+        'data-rig-state',
+        'cheer',
+        { timeout: 3_000 },
+      );
     });
   }
 });

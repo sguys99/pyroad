@@ -204,6 +204,108 @@ describe('OutputPanel', () => {
     expect(items.map((li) => li.textContent)).toEqual(['a', 'b']);
   });
 
+  describe('성공 장면 (P6-08)', () => {
+    const ok = {
+      stdout: '안녕하세요\n',
+      stderr: '',
+      success: true,
+      outcome: 'ok' as const,
+    };
+    const reward = {
+      title: '첫 번째 인사',
+      xp: 30,
+      stars: 2 as const,
+      coins: 15,
+      nextHref: '/quest/q2',
+      mapHref: '/world',
+    };
+
+    it('퀘스트를 마치면 도장 + XP 보상 띠 + 다음 퀘스트. 별·코인은 플래그가 꺼져 있어 숨김 (Q52)', () => {
+      render(
+        <OutputPanel
+          result={ok}
+          isRunning={false}
+          validationResult={{ passed: true }}
+          reward={reward}
+        />,
+      );
+      expect(document.querySelector('.qx-stamp')).toHaveTextContent('통과!');
+      const strip = screen.getByTestId('quest-reward');
+      expect(within(strip).getByTestId('reward-xp')).toHaveTextContent('30');
+      expect(within(strip).queryByTestId('reward-stars')).toBeNull();
+      expect(within(strip).queryByTestId('reward-coins')).toBeNull();
+      expect(
+        within(strip).getByRole('link', { name: '다음 퀘스트' }),
+      ).toHaveAttribute('href', '/quest/q2');
+      expect(within(strip).getByRole('link', { name: '지도로' })).toBeTruthy();
+    });
+
+    it('스테이지 끝(다음 퀘스트 없음)은 지도가 주 버튼, 별·코인은 켜면 보임', () => {
+      render(
+        <OutputPanel
+          result={ok}
+          isRunning={false}
+          validationResult={{ passed: true }}
+          reward={{ ...reward, nextHref: null, forceStarsCoins: true }}
+        />,
+      );
+      expect(screen.getByTestId('back-to-map')).toHaveAttribute(
+        'href',
+        '/world',
+      );
+      expect(screen.queryByRole('link', { name: '다음 퀘스트' })).toBeNull();
+      expect(screen.getByTestId('reward-stars')).toHaveAccessibleName(
+        '별 2개 / 3개',
+      );
+      expect(screen.getByTestId('reward-coins')).toHaveTextContent('15');
+    });
+
+    it('누르거나 Enter·Esc·Space면 끝 상태로 건너뛰고, 아니면 1.6초 뒤 끝난다', () => {
+      vi.useFakeTimers();
+      const { rerender } = render(
+        <OutputPanel
+          result={ok}
+          isRunning={false}
+          validationResult={{ passed: true }}
+          reward={reward}
+        />,
+      );
+      const strip = screen.getByTestId('quest-reward');
+      expect(strip).not.toHaveAttribute('data-done');
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(strip).toHaveAttribute('data-done');
+      expect(screen.getByTestId('reward-xp-count')).toHaveTextContent('30');
+
+      // 새 실행 결과면 새 장면 → 시간이 다 되면 끝
+      rerender(
+        <OutputPanel
+          result={{ ...ok }}
+          isRunning={false}
+          validationResult={{ passed: true }}
+          reward={reward}
+        />,
+      );
+      expect(screen.getByTestId('quest-reward')).not.toHaveAttribute(
+        'data-done',
+      );
+      act(() => vi.advanceTimersByTime(1600));
+      expect(screen.getByTestId('quest-reward')).toHaveAttribute('data-done');
+      vi.useRealTimers();
+    });
+
+    it('통과했어도 아직 완료 전(보상 없음)·단계 통과면 장면 없음', () => {
+      render(
+        <OutputPanel
+          result={ok}
+          isRunning={false}
+          validationResult={{ passed: true }}
+        />,
+      );
+      expect(screen.queryByTestId('quest-reward')).toBeNull();
+      expect(document.querySelector('.qx-stamp')).toBeNull();
+    });
+  });
+
   it('결과 쪽 재준비는 쪽지 안 한 줄로', () => {
     render(
       <OutputPanel

@@ -3,12 +3,16 @@
 import { m } from 'framer-motion';
 import { sec } from '@/lib/motion/tokens';
 import { Map } from 'lucide-react';
-import { LottieCharacter } from '@/components/characters/LottieCharacter';
 import { useCountUp } from '@/lib/celebration/ticker';
 import { withObjectParticle } from '@/lib/korean';
 import type { MotionBudget } from '@/lib/motion/tier';
 import type { StageClearInfo } from '@/lib/quest/rewards';
-import { CelebrationCta, ConceptChips, Kicker } from './parts';
+import {
+  CelebrationCta,
+  CelebrationMascot,
+  ConceptChips,
+  Kicker,
+} from './parts';
 import { popIn } from './motion';
 
 interface ProjectCompleteCardProps {
@@ -41,12 +45,7 @@ export function ProjectCompleteCard({
 
   return (
     <>
-      <LottieCharacter
-        character="pybaem"
-        animation="project-complete"
-        size={96}
-        expression="celebrating"
-      />
+      <CelebrationMascot size={96} budget={budget} />
 
       <div className="flex flex-col items-center gap-1">
         <Kicker>프로젝트 완성!</Kicker>

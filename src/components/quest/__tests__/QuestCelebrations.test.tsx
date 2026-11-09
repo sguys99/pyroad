@@ -201,7 +201,9 @@ describe('QuestCelebrations: 큐 순서·묶음', () => {
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(600);
     expect(stepKind()).toBe('rewards');
-    expect(screen.getByText('+10 코인')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '코인 10개' }),
+    ).toBeInTheDocument();
     await advance(DWELL);
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(600);

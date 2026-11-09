@@ -104,7 +104,7 @@
 | **동작 줄이기에서 버튼이 1px·3px 움직임** | 움직임 0 규칙(0-4-0)이 올려놓기·누름 규칙에 짐 → `:root[data-reduced='true'] .g-btn:is(:hover, :active, [data-pressed])…` (0-7-0) |
 | minimal에서 누르는 동안 80ms 전환 | minimal 누름 규칙 추가 (즉시) |
 | minimal에서 레벨업 숫자 팝·빛 고리 | `.celebration-pop` 조건에 `:not([data-motion='minimal'])` (단계표: minimal은 바운스 없음) |
-| minimal에서 축하 캐릭터 점프·등장 스프링 (`LottieCharacter`) | 스프링이 없으면 `initial={false}`로 마지막 자세 |
+| minimal에서 축하 캐릭터 점프·등장 스프링 (`LottieCharacter`, P6-08에서 리그 `CelebrationMascot`으로 바뀜 — 리그가 단계를 따름) | 스프링이 없으면 `initial={false}`로 마지막 자세 |
 | 동작 줄이기에서 코드 에디터 커서 깜빡임 | `.cm-cursorLayer` 애니메이션 끔 (커서는 보임) |
 | 동작 줄이기에서 설정 소리 토글 손잡이·축하 쪽 점 크기 전환 | `reduced:transition-none` |
 

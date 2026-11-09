@@ -8,7 +8,7 @@ import { Landmark } from '@/components/world/map/MapArt';
 import { worldTint } from '@/lib/world/worldBook';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
 import { explainError } from '@/lib/quest/errorExplain';
-import { useThinkBeat } from './useThinkBeat';
+import { HAPPY_MS, useThinkBeat } from './useThinkBeat';
 import '@/components/world/map/worldMap.css';
 
 // 첫 화면은 서버에서 그린 정지 그림, 라이브 리그는 나중에 (rig.md 지연 로드, P6-16 번들 예산)
@@ -48,7 +48,7 @@ export function missionItems(session: QuestSession): MissionItem[] {
 }
 
 /**
- * 파이뱀 대사 + 자세 (성공 연출은 P6-08). 세 경우를 다르게 (P6-07):
+ * 파이뱀 대사 + 자세. 성공 = 응원(`cheer`, 처음엔 기쁨 점프 `happy`, P6-08). 실패 세 경우를 다르게 (P6-07):
  * 오류 = 버그버그가 결과 쪽지에 나타나고 파이뱀은 생각(`think`) → 설명(`teach` + 말하기)으로 쉬운 설명 ·
  * 출력이 다름 = 버그버그 없이 갸우뚱(`confused`) 격려 · 시간 초과 = 차분한 격려(`encourage`)
  */
@@ -57,10 +57,13 @@ export function tutorLine(session: QuestSession): {
   text: string;
 } {
   const { validation, runResult } = session;
-  if (validation?.passed && session.isCompleted)
+  // 성공 (P6-08): 응원 자세. 처음 잠깐은 StoryPage가 기쁨 점프(`happy`)로 바꿔 보여 줌 (useThinkBeat + HAPPY_MS)
+  if (validation?.passed && (session.isCompleted || !session.steps?.length))
     return {
       state: 'cheer',
-      text: '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!',
+      text: session.steps?.length
+        ? '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!'
+        : '해냈어요! 나온 글자가 해 볼 일과 딱 맞아요. 통과 도장 쾅!',
     };
   if (validation?.passed)
     return {
@@ -122,12 +125,20 @@ export function StoryPage({ session, ask, action, children }: StoryPageProps) {
     session.runResult,
     !!session.runResult?.hadException,
   );
+  // 통과하면 먼저 기쁨 점프(happy: 웅크림 → 점프 두 번 + 젤리) 뒤 응원(cheer). 동작 줄이기는 바로 응원
+  const jumping = useThinkBeat(
+    session.runResult,
+    said.state === 'cheer',
+    HAPPY_MS,
+  );
   const line = thinking
     ? {
         state: 'think' as const,
         text: '음… 어디 보자. 버그버그가 어디 숨었을까?',
       }
-    : said;
+    : jumping
+      ? { ...said, state: 'happy' as const }
+      : said;
 
   return (
     <article className="qs" aria-labelledby="quest-title">
@@ -181,7 +192,7 @@ export function StoryPage({ session, ask, action, children }: StoryPageProps) {
         className="qs-tutor"
         speaker="파이뱀"
         text={line.text}
-        tone={line.state === 'cheer' ? 'good' : 'tutor'}
+        tone={line.state === 'cheer' || jumping ? 'good' : 'tutor'}
         data-testid="quest-dialogue"
         character={(speaking) => (
           <PybaemRig

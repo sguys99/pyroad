@@ -1,11 +1,8 @@
 'use client';
 
-import { m } from 'framer-motion';
-import { Coins, Star } from 'lucide-react';
 import type { MotionBudget } from '@/lib/motion/tier';
-import { cn } from '@/lib/utils';
-import { CelebrationCta, Kicker } from './parts';
-import { popIn } from './motion';
+import { RewardIcon } from '@/components/ui/reward-icon';
+import { CelebrationCta, CountUp, Kicker, StarRow } from './parts';
 
 interface RewardsCardProps {
   stars: { stars: 1 | 2 | 3; gained: number } | null;
@@ -15,8 +12,9 @@ interface RewardsCardProps {
 }
 
 /**
- * 별·코인 (Phase 8 자리: P8-04·P8-05가 이벤트를 만들기 시작하면 쓰인다). 별은 1→3 차례로 팝.
- * 디자인은 P6-08(별 1→3·코인 스프링 팝, 카운트업)에서 다시 정한다.
+ * 별·코인 (Phase 8 자리: P8-04·P8-05가 이벤트를 만들기 시작하면 쓰인다).
+ * 퀘스트 결과 쪽 보상 띠(P6-08 `RewardStrip`)와 같은 조각: 별 1→3 prop 스프링 팝(`StarRow`) → 코인 카운트업(`CountUp`).
+ * 효과음은 시퀀서가 낸다(`STEP_SPECS.rewards`, 별 상승음 rate는 P6-14)
  */
 export function RewardsCard({
   stars,
@@ -24,6 +22,7 @@ export function RewardsCard({
   budget,
   onNext,
 }: RewardsCardProps) {
+  const animate = budget.springs && budget.effectDuration > 0;
   return (
     <>
       <Kicker>보상</Kicker>
@@ -33,31 +32,22 @@ export function RewardsCard({
           .join(', ')}
       </h2>
       {stars && (
-        <div className="flex gap-1" aria-hidden>
-          {[1, 2, 3].map((n) => (
-            <m.span
-              key={n}
-              {...popIn(budget, 0.1 + n * 0.15, { scale: 0.3, rotate: -30 })}
-            >
-              <Star
-                className={cn(
-                  'h-10 w-10',
-                  n <= stars.stars
-                    ? 'fill-accent text-accent-lip'
-                    : 'text-muted-foreground/40',
-                )}
-              />
-            </m.span>
-          ))}
-        </div>
+        <StarRow stars={stars.stars} budget={budget} settled={!animate} />
       )}
       {coins > 0 && (
-        <m.p
-          {...popIn(budget, 0.6, { scale: 0.7 })}
-          className="flex items-center gap-1.5 rounded-full bg-accent-soft px-4 py-1 text-sm font-bold text-accent-text"
-        >
-          <Coins className="h-4 w-4" aria-hidden />+{coins} 코인
-        </m.p>
+        <p className="flex items-center gap-1.5 rounded-full bg-accent-soft py-1 pl-2 pr-4 text-h3 font-bold text-accent-text">
+          <RewardIcon kind="coin" size={28} />
+          <b>
+            +
+            <CountUp
+              to={coins}
+              durationMs={700 * budget.effectDuration}
+              delayMs={(stars ? 650 : 250) * budget.effectDuration}
+              animate={animate}
+            />
+          </b>
+          <span className="text-small">코인</span>
+        </p>
       )}
       <CelebrationCta onClick={onNext}>좋아요!</CelebrationCta>
     </>

@@ -3,8 +3,6 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { NotebookPen, RotateCcw } from 'lucide-react';
-import { m } from 'framer-motion';
-import { framerSpring, sec } from '@/lib/motion/tokens';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { errorLineFromStderr } from '@/lib/editor/errorLine';
@@ -106,7 +104,8 @@ interface CodePanelProps {
   liveOutput?: LiveOutputStore;
   isCodeEmpty: boolean;
   validationResult?: OutputPanelProps['validationResult'];
-  nextQuestId?: string | null;
+  /** 퀘스트를 마쳤을 때 결과 쪽지 아래 성공 장면·다음 퀘스트 (P6-08) */
+  reward?: OutputPanelProps['reward'];
   /** 결과 쪽지 견줘 보기에 쓰는 공개 안내 (P6-06) */
   goal?: string;
   /** 결과 쪽지의 "N번째 줄 보러 가기" */
@@ -129,7 +128,7 @@ export function CodePanel({
   liveOutput,
   isCodeEmpty,
   validationResult,
-  nextQuestId,
+  reward,
   goal,
   onShowErrorLine,
 }: CodePanelProps) {
@@ -186,21 +185,8 @@ export function CodePanel({
         liveOutput={liveOutput}
         goal={goal}
         onShowErrorLine={onShowErrorLine}
+        reward={reward}
       />
-
-      {/* 다음 퀘스트 버튼 */}
-      {validationResult?.passed && nextQuestId && (
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={framerSpring('body', { delay: sec('slow') })}
-          className="mt-2"
-        >
-          <Button href={`/quest/${nextQuestId}`} className="w-full">
-            다음 퀘스트로 →
-          </Button>
-        </m.div>
-      )}
     </div>
   );
 }

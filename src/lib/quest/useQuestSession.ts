@@ -70,9 +70,12 @@ export const MAX_HINTS_PER_STEP = 3;
 export const AUTO_SAVE_DELAY_MS = 2000;
 /** 단계 통과(또는 황금키) 뒤 다음 단계로 넘어가기까지 (통과 표시를 잠깐 보여 줌) */
 export const STEP_ADVANCE_DELAY_MS = 1500;
-/** 완료 컨페티를 본 뒤 축하 오버레이를 띄우기까지 */
+/**
+ * 완료 컨페티를 본 뒤 축하 오버레이를 띄우기까지. 코드 퀘스트는 결과 쪽 성공 장면(도장 → XP 카운트업, 약 1.6초 —
+ * `QuestSuccess.SUCCESS_RUN_MS`)을 끝까지 본 다음 (P6-08)
+ */
 export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
-  code: 1000,
+  code: 1800,
   project: 500,
 };
 

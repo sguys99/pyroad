@@ -34,6 +34,24 @@ describe('fireConfetti', () => {
   });
 });
 
+describe('fireConfetti: pyroad:confetti 알림 (P6-08, e2e 단계별 파티클 수)', () => {
+  it('쏜 수와 요청한 수를 알리고, 쏘지 않은 0도 알린다', () => {
+    const seen: unknown[] = [];
+    const on = (e: Event) => seen.push((e as CustomEvent).detail);
+    window.addEventListener('pyroad:confetti', on);
+    try {
+      fireConfetti({ particleCount: 20 }, { scale: 0.5 });
+      fireConfetti({ particleCount: 20 }, { scale: 0 });
+    } finally {
+      window.removeEventListener('pyroad:confetti', on);
+    }
+    expect(seen).toEqual([
+      { requested: 20, fired: 10 },
+      { requested: 20, fired: 0 },
+    ]);
+  });
+});
+
 describe('fireConfetti: 연출 단계·reduced-motion (P1-10)', () => {
   it('scale(연출 단계 배율)을 곱해 쏘고, 0이면 쏘지 않는다', async () => {
     confettiMock.mockClear();

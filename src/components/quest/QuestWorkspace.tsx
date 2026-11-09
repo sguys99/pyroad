@@ -13,6 +13,8 @@ import { StoryPage } from './StoryPage';
 import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
+import type { QuestReward } from './QuestSuccess';
+import { codeQuestStars } from '@/lib/quest/xp';
 import { QuestStatusBar } from './QuestStatusBar';
 import { QuestCelebrations } from './QuestCelebrations';
 import './questWorkspace.css';
@@ -35,8 +37,6 @@ interface QuestWorkspaceProps {
   belowHeader?: React.ReactNode;
   /** 완료했을 때 위에 띄우는 배너 내용 */
   completedBanner: React.ReactNode;
-  /** 정답이면 보여 줄 "다음 퀘스트로" 대상 (코드 퀘스트) */
-  nextQuestId?: string | null;
 }
 
 /**
@@ -48,7 +48,6 @@ export function QuestWorkspace({
   session,
   belowHeader,
   completedBanner,
-  nextQuestId = null,
 }: QuestWorkspaceProps) {
   const { quest, tab, setTab, runner, runResult, validation, liveOutput } =
     session;
@@ -70,6 +69,23 @@ export function QuestWorkspace({
         ?.focus({ preventScroll: true });
     });
   };
+  // 퀘스트를 마친 그 실행이면 결과 쪽지 아래 성공 장면 (P6-08). 다음 퀘스트가 없으면(스테이지 끝) 지도가 주 버튼
+  const worldHref = worldPath(quest.stage.world?.slug);
+  const reward: QuestReward | null =
+    validation?.passed && session.isCompleted
+      ? {
+          title: quest.title,
+          xp: session.earnedXP ?? 0,
+          stars: codeQuestStars(session.totalHintsUsed, session.usedGoldenKey),
+          note: session.usedGoldenKey
+            ? '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.'
+            : undefined,
+          nextHref: session.nextQuestId
+            ? `/quest/${session.nextQuestId}`
+            : null,
+          mapHref: worldHref,
+        }
+      : null;
   const notes = hintNotes(
     session.messages,
     session.currentStep,
@@ -79,7 +95,7 @@ export function QuestWorkspace({
   return (
     <div className="flex h-dvh flex-col bg-bg">
       <QuestHeader
-        worldHref={worldPath(quest.stage.world?.slug)}
+        worldHref={worldHref}
         bgm={quest.stage.world?.bgm ?? null}
         stageTitle={quest.stage.title}
         stageOrder={quest.stage.order}
@@ -96,8 +112,8 @@ export function QuestWorkspace({
 
       {/* API 키 미설정 안내는 파이뱀 대화 안으로 옮김 (P6-10, AskPybaem → ApiKeyBanner) */}
 
-      {/* 완료 배너 */}
-      {session.isCompleted && (
+      {/* 완료 배너 (방금 마친 퀘스트는 결과 쪽 보상 띠가 대신 안내) */}
+      {session.isCompleted && !reward && (
         <div className="bg-primary-soft px-4 py-2 text-center text-small font-medium text-primary-text">
           {completedBanner}
         </div>
@@ -182,7 +198,7 @@ export function QuestWorkspace({
               liveOutput={liveOutput}
               isCodeEmpty={session.isCodeEmpty}
               validationResult={validation}
-              nextQuestId={nextQuestId}
+              reward={reward}
               goal={goal}
               onShowErrorLine={showErrorLine}
             />
@@ -213,12 +229,8 @@ export function QuestWorkspace({
               goal={goal}
               onShowErrorLine={showErrorLine}
               restarting={!!runner.restarting && runner.status === 'loading'}
+              reward={reward}
             />
-            {validation?.passed && nextQuestId && (
-              <Button href={`/quest/${nextQuestId}`} className="w-full">
-                다음 퀘스트로 →
-              </Button>
-            )}
           </div>
         </div>
       </div>

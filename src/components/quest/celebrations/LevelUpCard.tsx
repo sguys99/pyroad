@@ -2,10 +2,9 @@
 
 import { useCallback, useRef } from 'react';
 import { m } from 'framer-motion';
-import { LottieCharacter } from '@/components/characters/LottieCharacter';
 import { useCountUp } from '@/lib/celebration/ticker';
 import type { MotionBudget } from '@/lib/motion/tier';
-import { CelebrationCta, Kicker } from './parts';
+import { CelebrationCta, CelebrationMascot, Kicker } from './parts';
 import { popIn } from './motion';
 
 interface LevelUpCardProps {
@@ -18,7 +17,7 @@ interface LevelUpCardProps {
   onPop?: () => void;
 }
 
-/** 카운트업 시작 (카드 등장 기준). 끝나는 순간 파이뱀이 점프를 시작한다 (LottieCharacter level-up 0.6초 + 웅크림) */
+/** 카운트업 시작 (카드 등장 기준). 숫자가 새 레벨에 닿는 순간 파이뱀이 기쁨 점프(`happy`)를 시작한다 */
 const COUNT_DELAY_MS = 500;
 
 /**
@@ -43,10 +42,11 @@ export function LevelUpCard({
   }, []);
 
   const from = Math.min(fromLevel, level);
+  const countMs = Math.min(300 * (level - from), 900);
   const count = useCountUp<HTMLSpanElement>({
     from,
     to: level,
-    durationMs: Math.min(300 * (level - from), 900) * budget.effectDuration,
+    durationMs: countMs * budget.effectDuration,
     delayMs: COUNT_DELAY_MS * budget.effectDuration,
     animate,
     onDone: animate ? handleDone : undefined,
@@ -54,11 +54,10 @@ export function LevelUpCard({
 
   return (
     <>
-      <LottieCharacter
-        character="pybaem"
-        animation="level-up"
+      <CelebrationMascot
         size={96}
-        expression="celebrating"
+        budget={budget}
+        jumpAtMs={COUNT_DELAY_MS + countMs}
       />
 
       <Kicker>레벨 업!</Kicker>

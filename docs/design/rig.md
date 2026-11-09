@@ -258,9 +258,10 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 |---|---|---|---|
 | 대화 패널 `ConversationPanel.tsx` | `CharacterAvatar` + 키워드 표정 | `PybaemRig expression={useMessageExpression(m)} talking={streaming}` | P6-01 |
 | 출력 패널 `OutputPanel.tsx` (실행 결과 표정) | `CharacterAvatar` `getOutputExpression()` | **완료**: 파이뱀은 이야기 쪽 대사창(P6-01·P6-07 `think`→`teach`), 에러는 결과 쪽지 아래 `BugbugAside` `BugBugRig state="appear"`(lite·minimal·동작 줄이기 `found`) → 고치면 `makeup` | P6-07 |
-| 축하 `celebrations/LevelUpCard.tsx`·`StageClearCard.tsx`·`ProjectCompleteCard.tsx` | `LottieCharacter`(B32 대체, Framer 1회 점프) | `PybaemRig state="happy"→"cheer"`, 코인은 `ByeolttongiRig state="flyIn"→"give"` + `onCue('reward')` | P6-08·P6-13 |
+| 축하 `celebrations/LevelUpCard.tsx`·`StageClearCard.tsx`·`ProjectCompleteCard.tsx` | ~~`LottieCharacter`~~ | **완료(P6-08)**: `CelebrationMascot`(`celebrations/parts.tsx`) = 지연 로드 `PybaemRig` `proud` → `jumpAtMs`에 `happy`(점프 두 번 + 젤리, 오버레이에서는 반복 `cheer` 안 씀). 남은 것: 코인 `ByeolttongiRig state="flyIn"→"give"` + `onCue('reward')` | P6-08·P6-13 |
+| 퀘스트 성공 (이야기 쪽 대사창) | `cheer` 고정 | **완료(P6-08)**: 통과하면 `happy` 1.6초(lite 70%, 동작 줄이기 0) → `cheer` (`useThinkBeat(…, HAPPY_MS)`) | P6-08 |
 | 월드맵 `WorldMap.tsx` 현재 스테이지 | `CharacterAvatar` + `.mascot-bob` | `PybaemRig size={56} lookAt={false}` (대기 루프는 리그가) | P5 |
 | 헤더·프로필·HUD 아바타 (`LandingHeader`·`ProfileSummary`·`QuestStatusBar`·`profile/page.tsx`) | `CharacterAvatar` | `PybaemStatic size={32~64} filters={false}` (서버 렌더 가능) | P4·P9-05 |
 | 랜딩 히어로 `landing/hero/HeroMascot.tsx` | ~~`LottieCharacter`~~ | **완료**: `PybaemStatic` SSR → 한가할 때 `import()`한 `PybaemRig`로 교체(누르면 반응·마우스 인사) | P4-01 |
 | 공유 카드 (next/og) | — | `PybaemStatic`을 P0-10 직렬화기로 | P10 |
-| `CharacterAvatar`·`LottieCharacter`·`*Svg.tsx`·`motionClasses.ts` | 기존 | 위 교체가 끝나면 삭제 (`expressions.ts` 타입은 유지) | P6 끝 |
+| `CharacterAvatar`·`*Svg.tsx`·`motionClasses.ts` | 기존 (`LottieCharacter`는 P6-08에서 삭제) | 위 교체가 끝나면 삭제 (`expressions.ts` 타입은 유지) | P6 끝 |

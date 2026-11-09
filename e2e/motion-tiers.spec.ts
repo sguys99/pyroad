@@ -121,6 +121,14 @@ test.describe('앱 화면 연출 단계 대체 (P2-12)', () => {
         expect(world.names.some((n) => IDLE_LOOPS.includes(n))).toBe(true);
       }
 
+      // 컨페티 알림(fireConfetti → pyroad:confetti)을 모은다 (P6-08)
+      await page.addInitScript(() => {
+        const w = window as unknown as { __confetti: unknown[] };
+        w.__confetti = [];
+        window.addEventListener('pyroad:confetti', (e) =>
+          w.__confetti.push((e as CustomEvent).detail),
+        );
+      });
       await page.goto(`/quest/${quest.id}`);
       await expect(questHeader(page)).toContainText(quest.title);
       await check(page, mode, '퀘스트');
@@ -139,6 +147,38 @@ test.describe('앱 화면 연출 단계 대체 (P2-12)', () => {
         await expect(bug.locator('svg')).toBeVisible();
         expect(await transformWrites(page, 1000)).toBe(0);
       }
+
+      // 성공 연출 (P6-08): 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0 (B33).
+      // 보상 띠는 minimal·동작 줄이기면 처음부터 끝 모습
+      await runCode(page, quest.solution);
+      const reward = page.locator('[data-testid="quest-reward"]:visible');
+      await expect(reward).toBeVisible();
+      if (mode.tier === 'minimal' || mode.reduced === 'on') {
+        await expect(reward).toHaveAttribute('data-done', 'true');
+      }
+      const confetti = await page.evaluate(
+        () =>
+          (
+            window as unknown as {
+              __confetti: Array<{ requested: number; fired: number }>;
+            }
+          ).__confetti,
+      );
+      const scale =
+        mode.reduced === 'on'
+          ? 0
+          : { full: 1, lite: 0.3, minimal: 0 }[mode.tier];
+      expect(confetti, '정답 컨페티 80개 요청').toContainEqual({
+        requested: 80,
+        fired: Math.round(80 * scale),
+      });
+      if (scale === 0) {
+        expect(
+          confetti.every((c) => c.fired === 0),
+          '컨페티 0',
+        ).toBe(true);
+      }
+      await check(page, mode, '퀘스트 성공');
     });
   }
 });
