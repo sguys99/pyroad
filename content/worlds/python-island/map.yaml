@@ -5,6 +5,8 @@
 
 bgm: world1
 path: catmull_rom
+# 앰비언트 (P5-09, full에서만 움직임): 월드 1은 구름·반짝임·나뭇잎 몇 장으로 절제
+ambient: { clouds: true, sparkles: true, weather: leaves }
 
 layouts:
   # 넓은 화면: 가로 지도

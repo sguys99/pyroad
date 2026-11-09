@@ -11,7 +11,6 @@ import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { EASE, sec } from '@/lib/motion/tokens';
 import { CurrentMarker, StageNode } from './StageNode';
-import { FloatingDecorations } from './FloatingDecorations';
 import { MapArt, type LayoutName } from './map/MapArt';
 import { ToastViewport, useToastQueue } from '@/components/ui/toast';
 import { StageSheet } from './StageSheet';
@@ -187,6 +186,38 @@ function useMapParallax(
   }, [ref, on]);
 }
 
+/**
+ * 앰비언트 쉬기 (P5-09): 지도가 화면 밖이거나 탭이 숨으면 `data-amb-off` → worldMap.css가 앰비언트를 paused.
+ * 앰비언트가 꺼진 단계(lite 이하)에서는 아무것도 붙이지 않는다
+ */
+function useAmbientPause(
+  ref: React.RefObject<HTMLDivElement | null>,
+  on: boolean,
+) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!on || !el) return;
+    let visible = true;
+    const apply = () =>
+      el.toggleAttribute('data-amb-off', !visible || document.hidden);
+    // 없는 환경(jsdom·아주 오래된 브라우저)은 탭 숨김만 본다
+    const io =
+      typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(([e]) => {
+            visible = e.isIntersecting;
+            apply();
+          })
+        : null;
+    io?.observe(el);
+    document.addEventListener('visibilitychange', apply);
+    return () => {
+      io?.disconnect();
+      document.removeEventListener('visibilitychange', apply);
+      el.removeAttribute('data-amb-off');
+    };
+  }, [ref, on]);
+}
+
 interface WorldMapProps {
   stages: StageWithStatus[];
   /** 월드 지도 설정 (content/worlds/<slug>/map.yaml, P5-03). 노드 수 = 스테이지 수는 빌드가 확인 */
@@ -272,6 +303,7 @@ export function WorldMap({
     : inProgressIndex;
 
   useMapParallax(box, budget.parallax);
+  useAmbientPause(box, budget.ambient);
 
   const unlocking = unlock.target >= 0;
   useEffect(() => {
@@ -303,6 +335,8 @@ export function WorldMap({
         theme={theme}
         landmarks={landmarks}
         route={route}
+        curve={map.path}
+        ambient={map.ambient}
       >
         {route.done && (
           <>
@@ -372,9 +406,6 @@ export function WorldMap({
             boss={real[unlock.target].is_final}
           />
         )}
-
-        {/* 앰비언트 구름·나뭇잎 (full만). 지도 그림의 반복 연출은 P5-09 */}
-        <FloatingDecorations />
 
         {/* 스테이지 노드 + 지금 위치 (차례로 등장, 파이뱀은 마지막) */}
         <m.div

@@ -7,12 +7,20 @@
  *   랜드마크는 스테이지 `theme_name`. 새 월드는 `THEME_BASE`에 바탕 하나만 더하면 되고, 없으면 종이 바탕 + 장식만 그린다
  * - 색은 worldMap.css 재질 클래스(`wm-*`, 토큰 color-mix)만. 땅·나무는 `--world*`를 섞어 `data-world`가 바꾸면 월드 틴트를 따른다
  * - 잠긴 스테이지 랜드마크는 연필 스케치(`.wm-pencil`: 채움 없음 + 점선), 열린 곳은 색 (진행 = 지도가 완성되는 보상)
- * - 앰비언트 대상(물결·새·배)은 클래스로 표시만 해 둔다(`wm-wave`·`wm-bird`·`wm-boat`) — 움직임은 P5-09
+ * - 앰비언트(P5-09): 움직이는 것(물결·배·새 + map.yaml `ambient`의 구름·반짝임·나뭇잎)은 큰 SVG 안이 아니라 **작은 SVG 조각
+ *   (`Sprite`, HTML 상자)** 으로 레이어 위에 얹는다. SVG 안 요소의 transform 애니메이션은 레이어 전체를 다시 칠하지만, HTML 상자의
+ *   transform·opacity 애니메이션은 컴포지터가 처리한다. 움직임은 worldMap.css(full만), lite 이하는 같은 자리의 정지 그림
  * - 훅 없음, 전부 장식이라 `aria-hidden` (스테이지 목록은 노드 버튼이 읽힌다)
  */
 
 import type { ReactNode } from 'react';
-import type { MapLayout } from '@/lib/content/schema';
+import type {
+  MapAmbient,
+  MapLayout,
+  WorldMapConfig,
+} from '@/lib/content/schema';
+import { ambientPlan } from '@/lib/world/ambient';
+import type { MapPoint } from '@/lib/world/worlds';
 
 export type LayoutName = 'wide' | 'tall';
 
@@ -62,39 +70,94 @@ function Tree({
   );
 }
 
-function Waves({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
-  const d = Array.from(
-    { length: 3 },
-    (_, i) => `M${i * 22} ${(i % 2) * 8}q5-5 10 0q5 5 10 0`,
-  ).join('');
+// ───────────── 움직이는 조각 (앰비언트, P5-09). 좌표는 바닥 기준 (0,0), box = 조각 viewBox [x, y, w, h]
+
+const pct = (n: number) => `${Math.round(n * 10000) / 100}%`;
+
+/** 지도 좌표 (x,y)에 놓는 작은 SVG. 크기는 지도 폭 비율이라 지도와 같이 커진다. `--i`는 조각마다 박자를 엇갈리게 */
+function Sprite({
+  layout,
+  at: [x, y],
+  s = 1,
+  box: [bx, by, bw, bh],
+  cls,
+  i,
+  children,
+}: {
+  layout: MapLayout;
+  at: MapPoint;
+  s?: number;
+  box: [number, number, number, number];
+  cls: string;
+  i: number;
+  children: ReactNode;
+}) {
   return (
-    <g transform={at(x, y, s)}>
-      <path className="wm-wave" d={d} />
-    </g>
+    <span
+      className={`wm-sprite ${cls}`}
+      style={
+        {
+          left: pct((x + bx * s) / layout.width),
+          top: pct((y + by * s) / layout.height),
+          width: pct((bw * s) / layout.width),
+          '--i': i,
+        } as React.CSSProperties
+      }
+    >
+      <svg viewBox={`${bx} ${by} ${bw} ${bh}`} focusable="false">
+        {children}
+      </svg>
+    </span>
   );
 }
 
-function Bird({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
-  return (
-    <g transform={at(x, y, s)}>
-      <path className="wm-l wm-bird" d="M0 0q6-6 12 0q6-6 12 0" />
-    </g>
-  );
-}
-
-function Boat({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
-  return (
-    <g transform={at(x, y, s)}>
-      <g className="wm-boat">
-        <F m="paper" d="M0 18 h44 l-8 12 h-28z" />
-        <F m="sail" d="M22 18 v-30 l18 26 h-18" />
-      </g>
-    </g>
-  );
-}
+const WAVES_D = Array.from(
+  { length: 3 },
+  (_, i) => `M${i * 22} ${(i % 2) * 8}q5-5 10 0q5 5 10 0`,
+).join('');
+const CLOUD_D =
+  'M14 36C2 36 2 22 14 22C14 10 32 6 40 16C46 4 70 4 74 18C86 12 100 20 96 30C108 30 108 36 100 36Z';
+const SPARK_D = 'M0 -8L2 -2L8 0L2 2L0 8L-2 2L-8 0L-2 -2Z';
+const LEAF_D = 'M0 0C5 -6 13 -6 16 0C13 6 5 6 0 0Z';
 
 type Decoration = NonNullable<MapLayout['decorations']>[number];
 const FAR_KINDS = new Set<Decoration['kind']>(['waves', 'boat', 'bird']);
+
+/** 먼 곳의 움직이는 장식 (물결·배·새). 새는 날기(바깥)와 날갯짓(안쪽 svg)을 다른 상자에 걸어 transform이 겹치지 않게 */
+function FarSprite({
+  d,
+  i,
+  layout,
+}: {
+  d: Decoration;
+  i: number;
+  layout: MapLayout;
+}) {
+  const p = { layout, at: [d.x, d.y] as MapPoint, s: d.scale, i };
+  switch (d.kind) {
+    case 'waves':
+      return (
+        <Sprite {...p} box={[-2, -5, 70, 17]} cls="wm-a-wave">
+          <path className="wm-wave" d={WAVES_D} />
+        </Sprite>
+      );
+    case 'boat':
+      return (
+        <Sprite {...p} box={[-2, -14, 48, 46]} cls="wm-a-boat wm-boat">
+          <F m="paper" d="M0 18 h44 l-8 12 h-28z" />
+          <F m="sail" d="M22 18 v-30 l18 26 h-18" />
+        </Sprite>
+      );
+    case 'bird':
+      return (
+        <Sprite {...p} box={[-2, -6, 28, 8]} cls="wm-a-bird">
+          <path className="wm-l wm-bird" d="M0 0q6-6 12 0q6-6 12 0" />
+        </Sprite>
+      );
+    default:
+      return null;
+  }
+}
 
 function Deco({ d, i }: { d: Decoration; i: number }) {
   const p = { x: d.x, y: d.y, s: d.scale };
@@ -103,12 +166,8 @@ function Deco({ d, i }: { d: Decoration; i: number }) {
       return <Mountains {...p} />;
     case 'tree':
       return <Tree {...p} tone={i % 2 ? 'olive' : 'forest'} />;
-    case 'waves':
-      return <Waves {...p} />;
-    case 'bird':
-      return <Bird {...p} />;
-    case 'boat':
-      return <Boat {...p} />;
+    default:
+      return null; // 물결·배·새는 FarSprite
   }
 }
 
@@ -383,6 +442,9 @@ export interface MapArtProps {
   landmarks: ReadonlyArray<{ theme: string; locked: boolean; boss?: boolean }>;
   /** 길 전체 · 남은 길(연필 점선). 지난 길(잉크)은 그리기 연출 때문에 children 으로 받는다 */
   route: { all: string; todo: string };
+  /** 길 모양 (반짝임을 길 위에 놓으려고) · map.yaml ambient (P5-09) */
+  curve: WorldMapConfig['path'];
+  ambient?: MapAmbient;
   children?: ReactNode;
 }
 
@@ -393,18 +455,52 @@ export function MapArt({
   theme,
   landmarks,
   route,
+  curve,
+  ambient,
   children,
 }: MapArtProps) {
   const decos = layout.decorations ?? [];
   const wide = name === 'wide';
+  const amb = ambientPlan(layout, curve, ambient);
+  const spark = (pt: MapPoint, i: number) => (
+    <Sprite
+      key={`s${i}`}
+      layout={layout}
+      at={pt}
+      box={[-9, -9, 18, 18]}
+      cls="wm-a-spark"
+      i={i}
+    >
+      <F m="gold" d={SPARK_D} />
+    </Sprite>
+  );
   return (
     <div className="wm-art" data-layout={name}>
       <Layer name="far" layout={layout} par>
         {THEME_BASE[theme]?.(name, layout)}
-        {decos.map((d, i) =>
-          FAR_KINDS.has(d.kind) ? <Deco key={i} d={d} i={i} /> : null,
-        )}
       </Layer>
+      {/* 먼 곳의 움직이는 조각: 먼 레이어와 같은 깊이로 패럴랙스 */}
+      <div className="wm-layer wm-par wm-amb" data-layer="far">
+        {amb.clouds.map((pt, i) => (
+          <Sprite
+            key={`c${i}`}
+            layout={layout}
+            at={pt}
+            s={layout.node_scale}
+            box={[0, 0, 108, 40]}
+            cls="wm-a-cloud"
+            i={i}
+          >
+            <F m="paper" d={CLOUD_D} />
+          </Sprite>
+        ))}
+        {decos.map((d, i) =>
+          FAR_KINDS.has(d.kind) ? (
+            <FarSprite key={i} d={d} i={i} layout={layout} />
+          ) : null,
+        )}
+        {amb.seaSparks.map(spark)}
+      </div>
       <Layer name="mid" layout={layout} par>
         {decos.map((d, i) =>
           FAR_KINDS.has(d.kind) ? null : <Deco key={i} d={d} i={i} />,
@@ -431,6 +527,24 @@ export function MapArt({
           ) : null,
         )}
       </Layer>
+      {(amb.roadSparks.length > 0 || amb.leaves.length > 0) && (
+        <div className="wm-layer wm-amb">
+          {amb.roadSparks.map((pt, i) => spark(pt, i + amb.seaSparks.length))}
+          {amb.leaves.map((pt, i) => (
+            <Sprite
+              key={`l${i}`}
+              layout={layout}
+              at={pt}
+              s={1.4 * layout.node_scale}
+              box={[-1, -7, 18, 14]}
+              cls="wm-a-leaf"
+              i={i}
+            >
+              <F m={i % 2 ? 'olive' : 'sage'} d={LEAF_D} />
+            </Sprite>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

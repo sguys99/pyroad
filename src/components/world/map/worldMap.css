@@ -1,7 +1,7 @@
 /* 월드 지도 (P5-02): 종이 결 두루마리 지도 + 깊이별 레이어. WorldMap.tsx가 import한다. 값은 토큰 변수만.
    - 레이아웃: 지도를 담은 상자(.wm, 컨테이너) 폭 900px부터 가로 지도(wide), 그 아래는 세로로 긴 지도(tall, 최대 560px). 시안과 같은 기준
    - 패럴랙스(먼 곳·중간 레이어, WorldMap이 --ms를 씀): full + 동작 줄이기 꺼짐만. lite·minimal·동작 줄이기는 정지 배경
-   - 앰비언트(물결·새·배 클래스 wm-wave·wm-bird·wm-boat)는 P5-09. 여기서는 정적 그림만 */
+   - 앰비언트(P5-09, 아래 "앰비언트" 절): 구름·물결·배·새·반짝임·나뭇잎. full + 동작 줄이기 꺼짐만, 화면 밖·탭 숨김이면 멈춤 */
 
 .wm {
   container-type: inline-size;
@@ -85,6 +85,138 @@
 :root[data-reduced='false'][data-motion='full'] .wm-par {
   transform: translate3d(0, calc(var(--ms, 0) * var(--sk) * 1px), 0);
   will-change: transform;
+}
+
+/* ───────────── 앰비언트 (P5-09). 움직이는 것은 작은 SVG 조각(.wm-sprite, HTML 상자)이라 transform·opacity가 컴포지터에서 돈다.
+   조각마다 박자는 --i(순번)로 엇갈린다. will-change는 걸지 않는다(돌 때만 브라우저가 층을 만든다).
+   상한: 한 레이아웃에 16개 안팎(ambient.ts AMBIENT_CAP + 물결·배·새 장식). 안 보이는 레이아웃은 display:none이라 돌지 않는다 */
+.wm-sprite {
+  position: absolute;
+  display: block;
+}
+.wm-sprite > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.wm-a-cloud {
+  opacity: 0.85;
+}
+/* 반짝임·나뭇잎은 움직일 때만 보인다 (정지 배경에서는 없음) */
+.wm-a-spark,
+.wm-a-leaf {
+  opacity: 0;
+}
+:root[data-reduced='false'][data-motion='full'] {
+  .wm-a-cloud {
+    animation: wm-cloud 64s ease-in-out calc(var(--i, 0) * -21s) infinite
+      alternate;
+  }
+  .wm-a-wave {
+    animation: wm-wave 5s ease-in-out calc(var(--i, 0) * -1.3s) infinite;
+  }
+  .wm-a-boat {
+    transform-origin: 50% 70%;
+    animation: wm-boat 4.6s ease-in-out infinite;
+  }
+  /* 새: 바깥 상자는 날아가고 안쪽 svg는 날갯짓 (transform을 한 요소에 겹치지 않게) */
+  .wm-a-bird {
+    animation: wm-bird 18s ease-in-out infinite alternate;
+  }
+  .wm-a-bird > svg {
+    transform-origin: 50% 80%;
+    animation: wm-flap 0.9s ease-in-out infinite;
+  }
+  .wm-a-spark {
+    animation: wm-spark 4.2s ease-in-out calc(var(--i, 0) * -1.1s) infinite;
+  }
+  .wm-a-leaf {
+    animation: wm-leaf 15s linear calc(var(--i, 0) * -5s) infinite;
+  }
+}
+/* 화면 밖·탭 숨김 (WorldMap useAmbientPause). 위 full 규칙보다 명시도가 같거나 높고 뒤에 있어야 이긴다 */
+:root .world-map[data-amb-off] .wm-amb .wm-sprite,
+:root .world-map[data-amb-off] .wm-amb .wm-sprite > svg {
+  animation-play-state: paused;
+}
+@keyframes wm-cloud {
+  from {
+    transform: translateX(-24%);
+  }
+  to {
+    transform: translateX(24%);
+  }
+}
+@keyframes wm-wave {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(8%);
+    opacity: 1;
+  }
+}
+@keyframes wm-boat {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-4%);
+  }
+}
+@keyframes wm-bird {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(220%, -160%);
+  }
+}
+@keyframes wm-flap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+/* 대부분 꺼져 있다가 잠깐 반짝 (밀도 낮게) */
+@keyframes wm-spark {
+  0%,
+  62%,
+  100% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  76% {
+    transform: scale(1) rotate(45deg);
+    opacity: 1;
+  }
+  90% {
+    transform: scale(0.5) rotate(90deg);
+    opacity: 0;
+  }
+}
+@keyframes wm-leaf {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(48px, 150px) rotate(220deg);
+    opacity: 0;
+  }
 }
 
 /* ───────────── 재질: 면 색(--f) + 그 진한 톤 선 1px (시안 tone()) */

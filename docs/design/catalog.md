@@ -27,7 +27,7 @@
 
 | 묶음 | 절 (anchor) | 내용 |
 |---|---|---|
-| 연출 | `#motion` 연출 단계 견본 | 단계표(`MOTION_BUDGETS` full·lite·minimal·동작 줄이기 + "지금" 줄) · 앱과 **같은 클래스**의 반복 연출 견본(대기 루프 `.mascot-bob`·`.character-breathe`·`.step-pulse`·`.stage-pulse`, 앰비언트 `.float-cloud`·`.drift-leaf`·`.stage-shimmer`, 바쁨 `.waking-dot`·`.thinking-dot`·`animate-spin`·`animate-pulse`, 눈 깜빡임 `.char-blink-*`·`.char-twinkle`), 흐림·큰 그림자. 칸마다 "돌고 있는 반복 연출 수"를 e2e와 같은 기준으로 센다 |
+| 연출 | `#motion` 연출 단계 견본 | 단계표(`MOTION_BUDGETS` full·lite·minimal·동작 줄이기 + "지금" 줄) · 앱과 **같은 클래스**의 반복 연출 견본(대기 루프 `.mascot-bob`·`.character-breathe`·`.step-pulse`·`.stage-pulse`, 앰비언트 `.float-cloud`·`.drift-leaf`·`.stage-shimmer`, 월드 지도 앰비언트 `.wm-a-cloud`·`.wm-a-wave`·`.wm-a-boat`·`.wm-a-bird`·`.wm-a-spark`·`.wm-a-leaf`(P5-09), 바쁨 `.waking-dot`·`.thinking-dot`·`animate-spin`·`animate-pulse`, 눈 깜빡임 `.char-blink-*`·`.char-twinkle`), 흐림·큰 그림자. 칸마다 "돌고 있는 반복 연출 수"를 e2e와 같은 기준으로 센다 |
 | 토큰 | `#colors` 색 | 토큰 원본(`COLOR`)의 이름·hex·CSS 변수·쓰임 + 바탕·카드 위 대비를 `contrastRatio`로 그 자리에서 계산, `CONTRAST_PAIRS` 52쌍 표(견본 글자·기준·대비) |
 | | `#type` 글자 | `TYPE` 12단계 견본(Jua 제목·버튼 / pyRoad Sans 본문·캡션·눈썹 / pyRoad Mono 코드) + HUD 숫자 `.hud-num` |
 | | `#shape` 반경·그림자·간격·선 | `RADIUS`·`SHADOW`·`SPACE`·`LINE` |
@@ -61,7 +61,7 @@
 | 단계 | 기대 |
 |---|---|
 | full | 검사가 실제로 잡는지: 앰비언트·대기 루프가 돌고, 흐림 요소가 있다 |
-| lite | 앰비언트(`float-cloud`·`drift-leaf`·`stage-shimmer`) 0개, 대기 루프는 돎, 흐림 요소 0개, `.m-shadow`는 단색 오프셋 |
+| lite | 앰비언트(`float-cloud`·`drift-leaf`·`stage-shimmer`·`wm-*` 지도 앰비언트) 0개, 대기 루프는 돎, 흐림 요소 0개, `.m-shadow`는 단색 오프셋 |
 | minimal | 아래 **minimal 허용 목록** 밖 0개 (대기 루프 0개, 바쁨 표시는 돎) · 흐림 0개 |
 | 동작 줄이기 (full) | 아래 **동작 줄이기 허용 목록** 밖 0개 |
 | minimal + 동작 줄이기 | 0개 |

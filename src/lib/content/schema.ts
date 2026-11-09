@@ -290,6 +290,16 @@ export const MapLayoutSchema = z
     });
   });
 
+/** 지도 앰비언트 (P5-09). 움직임은 연출 단계 full에서만, 그 밖에는 정지 그림. 없으면 모두 끔 */
+export const MapAmbientSchema = z.strictObject({
+  /** 먼 레이어 구름 흐름 */
+  clouds: z.boolean(),
+  /** 바다(물결 옆)·길 위 반짝임 몇 점 */
+  sparkles: z.boolean(),
+  /** 날씨. leaves = 나뭇잎 몇 장이 천천히 떨어짐 */
+  weather: z.enum(['none', 'leaves']),
+});
+
 const BGM_IDS = Object.keys(SOUND_MANIFEST.bgm) as [BgmId, ...BgmId[]];
 
 /** map.yaml: 월드 지도 설정. 테마 키는 world.yaml 의 theme, 랜드마크는 stage.yaml 의 theme_name 을 씀 */
@@ -303,10 +313,12 @@ export const WorldMapSchema = z.strictObject({
     wide: MapLayoutSchema,
     tall: MapLayoutSchema,
   }),
+  ambient: MapAmbientSchema.optional(),
 });
 
 export type WorldMapConfig = z.infer<typeof WorldMapSchema>;
 export type MapLayout = z.infer<typeof MapLayoutSchema>;
+export type MapAmbient = z.infer<typeof MapAmbientSchema>;
 export type World = z.infer<typeof WorldSchema>;
 export type WorldUnlockRule = z.infer<typeof WorldUnlockRuleSchema>;
 export type Stage = z.infer<typeof StageSchema>;

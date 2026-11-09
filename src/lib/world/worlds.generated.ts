@@ -145,6 +145,11 @@ export const WORLDS: readonly WorldInfo[] = [
             }
           ]
         }
+      },
+      "ambient": {
+        "clouds": true,
+        "sparkles": true,
+        "weather": "leaves"
       }
     }
   },

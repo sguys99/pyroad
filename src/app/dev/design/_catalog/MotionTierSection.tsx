@@ -11,6 +11,7 @@ import {
   type MotionBudget,
 } from '@/lib/motion/tier';
 import { Demo, Section } from './ui';
+import '@/components/world/map/worldMap.css';
 
 /** 단계표 줄 이름 (docs/design/motion-guidelines.md §2) */
 const BUDGET_ROWS: [keyof MotionBudget, string][] = [
@@ -190,6 +191,22 @@ export function MotionTierSection() {
           <span className="relative inline-block h-10 w-24 overflow-hidden rounded-xl bg-accent-soft">
             <span className="stage-shimmer" />
           </span>
+        </LoopTile>
+        <LoopTile
+          label="월드 지도 앰비언트 (P5-09)"
+          rule="full만 · 구름 흐름·물결·배 까딱·새 날기+날갯짓·반짝임·나뭇잎. 지도 밖·탭 숨김이면 멈춤"
+          testId="tile-map-ambient"
+        >
+          <span className="wm-a-cloud inline-block h-5 w-16 rounded-full bg-surface" />
+          <span className="wm-a-wave inline-block h-1 w-12 rounded-full bg-secondary" />
+          <span className="wm-a-boat inline-block size-6 rounded-b-xl bg-accent" />
+          <span className="wm-a-bird inline-block text-foreground">
+            <svg className="h-2 w-6" viewBox="0 -6 24 8" aria-hidden>
+              <path d="M0 0q6-6 12 0q6-6 12 0" fill="none" stroke="currentColor" />
+            </svg>
+          </span>
+          <span className="wm-a-spark inline-block size-3 rounded-sm bg-accent" />
+          <span className="wm-a-leaf inline-block size-3 rounded-tl-full rounded-br-full bg-primary-bright" />
         </LoopTile>
         <LoopTile
           label="바쁨 표시"
