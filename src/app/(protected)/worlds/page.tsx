@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { PageTransition } from '@/components/shared/PageTransition';
+import { KeepWorldBgm } from '@/components/sound/WorldBgm';
 import { WorldShelf } from '@/components/world/book/WorldShelf';
 import { WorldHudBar } from '@/components/world/WorldHudBar';
 import { loadWorldMapData } from '@/lib/world/loadWorldMapData';
@@ -22,6 +23,8 @@ export default async function WorldsPage() {
           fresh={data.unlocks?.silent ? [] : data.unlocks?.stageIds}
         />
       </PageTransition>
+      {/* 책장 BGM: 지금 흐르는 월드 곡을 이어 감, 없으면 진행 중 월드 곡 (P5-11, 기본 꺼짐) */}
+      <KeepWorldBgm fallback={data.progress.current?.world.map?.bgm ?? null} />
     </>
   );
 }

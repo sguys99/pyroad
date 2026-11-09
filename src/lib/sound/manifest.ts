@@ -45,7 +45,8 @@ export const SOUND_MANIFEST: SoundManifest<SfxId, BgmId> = {
     coin: { src: sfx('coin', 1), core: true, maxVoices: 6 },
     star: { src: sfx('star', 1), core: true, maxVoices: 3 },
     levelup: { src: sfx('levelup', 1) },
-    unlock: { src: sfx('unlock', 1) },
+    // 잠금 해제 연출 한 번에 한 번 (건너뛰기·연달아 열림에도 겹치지 않게)
+    unlock: { src: sfx('unlock', 1), maxVoices: 1 },
     chest: { src: sfx('chest', 1) },
     run: { src: sfx('run', 1), core: true },
     bug: { src: sfx('bug', 1) },
@@ -64,12 +65,18 @@ export const SOUND_MANIFEST: SoundManifest<SfxId, BgmId> = {
   },
 };
 
+/** 잠긴 노드를 눌렀을 때: 경고음 대신 같은 탭을 작고 낮게 (P5-11). 안내는 쪽지 글자가 한다 */
+export const SOFT_TAP = { gain: 0.45, rate: 0.84 } as const;
+
 /** 별 1→3 상승음: 같은 소리를 장3화음 비율로 (도-미-솔) */
 export const STAR_RATES = [1, 2 ** (4 / 12), 2 ** (7 / 12)] as const;
 
 /** 언제 나는 소리인지 (문서·청취 검수 페이지·테스트용. 화면에서 소리가 유일한 정보 전달 수단이 되지 않게 함께 보여 줄 시각 피드백 포함) */
 export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
-  tap: { name: '탭', when: '주요 버튼(힌트·지도 단계·소리 켜기)을 누를 때' },
+  tap: {
+    name: '탭',
+    when: '주요 버튼(힌트·소리 켜기)·지도 노드·차례 퀘스트를 누를 때 (잠긴 노드는 작고 낮게)',
+  },
   correct: { name: '정답', when: '코드가 정답일 때 (초록 결과 상자와 함께)' },
   wrong: {
     name: '오답',
@@ -78,7 +85,10 @@ export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
   coin: { name: '코인', when: '보상 카드에서 코인·XP가 올라갈 때' },
   star: { name: '별', when: '뱃지가 하나씩 나올 때 (음이 1→3 올라감)' },
   levelup: { name: '레벨업', when: '레벨이 오를 때 (레벨업 카드)' },
-  unlock: { name: '해제', when: '황금키를 쓸 때 · 새 단계가 열릴 때' },
+  unlock: {
+    name: '해제',
+    when: '황금키를 쓸 때 · 지도에서 자물쇠가 깨지며 새 단계가 열릴 때',
+  },
   chest: { name: '보물상자', when: '보물상자를 열 때 (Phase 6 이후)' },
   run: { name: '실행', when: '실행 버튼을 누를 때' },
   bug: {

@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { SoundToggle } from '@/components/sound/SoundToggle';
 import { WorldBgm } from '@/components/sound/WorldBgm';
+import type { BgmId } from '@/lib/sound/manifest';
 
 interface QuestHeaderProps {
   /** 돌아갈 월드 지도 (`worldPath`, P5-01) */
   worldHref: string;
+  /** 이 퀘스트가 속한 월드의 BGM (P5-11). 모르면 null(선언 안 함) */
+  bgm: BgmId | null;
   stageTitle: string;
   stageOrder: number;
   questTitle: string;
@@ -15,6 +18,7 @@ interface QuestHeaderProps {
 
 export function QuestHeader({
   worldHref,
+  bgm,
   stageTitle,
   stageOrder,
   questTitle,
@@ -37,9 +41,9 @@ export function QuestHeader({
       <span className="min-w-0 truncate text-sm font-medium text-foreground">
         {questTitle}
       </span>
-      {/* HUD 음소거 토글 + 월드 BGM(기본 꺼짐) (P2-14). 퀘스트를 옮겨도 같은 곡이 끊기지 않음 */}
+      {/* HUD 음소거 토글 + 그 월드 BGM(기본 꺼짐, P5-11). 월드맵·다른 퀘스트로 옮겨도 같은 곡이면 끊기지 않음 */}
       <SoundToggle className="ml-auto" />
-      <WorldBgm id="world1" />
+      <WorldBgm id={bgm} />
     </header>
   );
 }

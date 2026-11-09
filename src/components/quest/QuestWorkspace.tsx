@@ -47,6 +47,7 @@ export function QuestWorkspace({
     <div className="flex h-dvh flex-col bg-background">
       <QuestHeader
         worldHref={worldPath(quest.stage.world?.slug)}
+        bgm={quest.stage.world?.bgm ?? null}
         stageTitle={quest.stage.title}
         stageOrder={quest.stage.order}
         questTitle={quest.title}

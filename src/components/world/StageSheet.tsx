@@ -16,6 +16,7 @@ import type { StageQuestItem } from '@/lib/world/mapData';
 import { SHOW_STARS } from '@/lib/world/flags';
 import { Sheet } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { useSfx } from '@/components/providers/soundContext';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Stars } from '@/components/ui/reward-icon';
 import { Landmark } from './map/MapArt';
@@ -98,6 +99,7 @@ export function StageSheet({
   finalFocus,
   world,
 }: StageSheetProps) {
+  const play = useSfx();
   if (!stage) return null;
   const rows = questRows(stage, quests);
   const next = rows.find((r) => r.state === 'now');
@@ -141,7 +143,6 @@ export function StageSheet({
           <Button
             href={`/quest/${next.id}`}
             size="lg"
-            sfx={false}
             iconRight={<ArrowRight aria-hidden />}
             className="ss-cta"
             data-testid="stage-sheet-start"
@@ -185,6 +186,7 @@ export function StageSheet({
             >
               <Link
                 href={`/quest/${q.id}`}
+                onClick={() => play('tap')}
                 className="ss-row"
                 data-state={q.state}
                 data-kind={q.kind}

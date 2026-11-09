@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import type { PybaemState } from '@/components/characters/rig';
-import { useSfx } from '@/components/providers/soundContext';
+import { useSfx, useSoundEngine } from '@/components/providers/soundContext';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import {
   playUnlock,
@@ -29,6 +29,8 @@ import { HERE_MARKER } from '@/lib/world/worlds';
  * - 끝나면(건너뛰어도) 문구 토스트 한 번(화면 낭독기도 읽음) + 기록 저장. 저장이 실패해도 화면은 그대로(다음 방문에 다시 나올 수 있음)
  * - 같은 세션에서 다시 오면(퀘스트 갔다 뒤로) 저장이 끝나기 전이어도 다시 틀지 않는다 (모듈 `handled`)
  * - 재생 중 화면 어디든 누르거나 Enter·Space·Esc → 끝 상태로 (시안 attachSkip, 첫 누름은 건너뛰기만 하고 삼킴)
+ * - 소리(P5-11): `unlock` 한 번. full·lite 는 자물쇠가 깨지는 순간, 그 전에 건너뛰면 건너뛸 때, minimal·동작 줄이기는
+ *   끝 상태로 바뀔 때. 연출 단계와 무관하게 사용자 소리 설정만 따른다(첫 제스처 전이면 엔진이 버림). 같은 내용은 토스트 글자로도
  */
 
 const handled = new Set<string>();
@@ -67,6 +69,13 @@ export function useStageUnlock({
 }: Options) {
   const { budget } = useMotionTier();
   const sfx = useSfx();
+  const engine = useSoundEngine();
+  const chimed = useRef(false);
+  const chime = useCallback(() => {
+    if (chimed.current) return;
+    chimed.current = true;
+    sfx('unlock');
+  }, [sfx]);
   // 처음 그릴 때 한 번 정한다 (기록을 보낸 뒤 서버 데이터가 바뀌어도 이번 방문의 연출은 그대로)
   const [target] = useState(() => {
     if (!plan || plan.silent) return -1;
@@ -97,11 +106,17 @@ export function useStageUnlock({
   const finishAll = useCallback(() => {
     if (ended.current || target < 0) return;
     ended.current = true;
+    chime();
     setOpen(true);
     setPhase('done');
     latest.current.onOpened(latest.current.sorted[target]);
     if (!demo) record(mine.current);
-  }, [demo, target]);
+  }, [chime, demo, target]);
+
+  // 연출이 있으면 해제 소리를 미리 디코드 (core 가 아니라 늦으면 버려짐)
+  useEffect(() => {
+    if (target >= 0) void engine.preload(['unlock']);
+  }, [engine, target]);
 
   // 조용한 기록 (기록이 하나도 없는 사용자)
   useEffect(() => {
@@ -200,14 +215,14 @@ export function useStageUnlock({
       },
       budget,
       {
-        lock: () => sfx('unlock'), // 효과음 자리 (P5-11 이 소리·타이밍을 정리)
+        lock: chime, // 자물쇠가 깨지는 순간 (건너뛰면 finish 가 바로 부름)
         walk: () => setRig('happy'),
         land: () => setRig('cheer'),
         open: () => setOpen(true),
       },
     );
     void scene.current.done.then(finishAll);
-    // budget·sfx 가 바뀌어도 재생 중인 연출은 그대로 둔다
+    // budget·chime 이 바뀌어도 재생 중인 연출은 그대로 둔다
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 

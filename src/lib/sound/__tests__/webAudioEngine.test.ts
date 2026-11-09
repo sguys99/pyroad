@@ -37,6 +37,7 @@ function memoryStorage(initial: SoundSettings | null = null) {
 }
 
 let engine: WebAudioEngine<S, B>;
+const loads = vi.fn(fakeLoadBytes);
 let storage: ReturnType<typeof memoryStorage>;
 
 function make(
@@ -53,7 +54,7 @@ function make(
       opts.ctor === false
         ? null
         : (FakeAudioContext as unknown as typeof AudioContext),
-    loadBytes: fakeLoadBytes,
+    loadBytes: loads,
     canPlay: () => true,
     listenVisibility: false,
     audioSessionType: null,
@@ -79,6 +80,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   FakeAudioContext.instances = [];
   FakeAudioContext.resumeHangs = false;
+  loads.mockClear();
 });
 afterEach(() => {
   engine?.dispose();
@@ -156,7 +158,7 @@ describe('효과음', () => {
       storage,
       audioContextCtor: FakeAudioContext as unknown as typeof AudioContext,
       createOfflineContext: () => offline as unknown as BaseAudioContext,
-      loadBytes: fakeLoadBytes,
+      loadBytes: loads,
       canPlay: () => true,
       listenVisibility: false,
       audioSessionType: null,
@@ -294,6 +296,43 @@ describe('배경음악', () => {
     vi.advanceTimersByTime(900);
     await flush();
     expect(ctx().playing('world1')).toHaveLength(0);
+  });
+
+  it('크로스페이드 gain 램프: 새 곡 슬롯 0 → 1, 이전 곡 슬롯 → 0 (둘 다 800ms)', async () => {
+    await unlocked({ settings: { bgm: { enabled: true, volume: 0.4 } } });
+    // master·sfx·bgm·voice 다음 BGM 슬롯 둘
+    const [, , , , a, b] = ctx().gains as FakeGain[];
+    engine.playBgm('world1', { fadeMs: 800 });
+    await flush();
+    expect(a.gain.ramps.at(-1)).toEqual([1, 0.8]);
+    engine.playBgm('world2', { fadeMs: 800 });
+    await flush();
+    expect(a.gain.ramps.at(-1)).toEqual([0, 0.8]);
+    expect(b.gain.ramps.at(-1)).toEqual([1, 0.8]);
+    expect(a.gain.value).toBe(0);
+    expect(b.gain.value).toBe(1);
+  });
+
+  it('디코드한 BGM은 지금 월드 곡만 보관: 이전 곡은 페이드 뒤 버리고, 돌아오면 다시 받음', async () => {
+    await unlocked({ settings: { bgm: { enabled: true, volume: 0.4 } } });
+    const bgmLoads = (id: string) =>
+      loads.mock.calls.filter(([u]) => u.includes(`/${id}.`)).length;
+    engine.playBgm('world1');
+    await flush();
+    engine.playBgm('world2');
+    await flush();
+    vi.advanceTimersByTime(900);
+    await flush();
+    expect(bgmLoads('world2')).toBe(1);
+    // 이전 곡(world1)은 버려져 돌아오면 다시 받고, 그 사이 world2 는 페이드 뒤 버린다
+    engine.playBgm('world1');
+    await flush();
+    expect(bgmLoads('world1')).toBe(2);
+    expect(ctx().playing('world1')).toHaveLength(1);
+    vi.advanceTimersByTime(900);
+    engine.playBgm('world2');
+    await flush();
+    expect(bgmLoads('world2')).toBe(2);
   });
 
   it('페이드아웃 중에 같은 곡을 다시 원하면 처음부터 다시 시작하지 않고 이어서', async () => {

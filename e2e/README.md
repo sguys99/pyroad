@@ -33,7 +33,7 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 | `social-login.spec.ts` | 로그인: 카카오·네이버·Google 세 갈래 로그인 시트 → (목업) provider → 온보딩 관문(새 사용자) / 월드맵(온보딩 끝낸 사용자), 최근 로그인 저장(`pyroad.lastLogin.v1`)과 로그아웃 뒤 "최근에 사용" 배지. 새 로컬 사용자 4명(로그인 4번) (P3-17) |
 | `auth.setup.ts` / `auth.teardown.ts` | 이번 실행 전용 테스트 사용자를 service_role로 만들고 로그인 쿠키를 `e2e/.auth/`에 저장 / 끝나면 사용자 삭제 |
 | `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터·움직임 설정(P2-15)·월드맵·퀘스트 연출 단계 대체(`motion-tiers.spec.ts`, P2-12) |
-| `world-select.spec.ts` | 월드 선택(P5-01): 지도 머리 → 월드 바꾸기 → 책장 → 월드 지도, 잠김·준비 중 안내, 없는 월드 404 화면, 테스트 월드(`fixtures/content/worlds/test-meadow`)를 DB에 넣고 월드 1을 다 깨면 두 번째 월드 지도가 열림. `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷도. 테스트 월드 지도 설정은 Playwright가 서버를 띄우기 전에 `content:build -- --fixtures`로 `build/e2e/`에 만들고 서버 env `PYROAD_E2E_WORLDS`로 읽힘 |
+| `world-select.spec.ts` | 월드 선택(P5-01): 월드 BGM(P5-11, `<html data-bgm data-bgm-playing>`로 제스처 전 무음 → 지도·책장·다른 월드·그 퀘스트 곡 전환), 지도 머리 → 월드 바꾸기 → 책장 → 월드 지도, 잠김·준비 중 안내, 없는 월드 404 화면, 테스트 월드(`fixtures/content/worlds/test-meadow`)를 DB에 넣고 월드 1을 다 깨면 두 번째 월드 지도가 열림. `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷도. 테스트 월드 지도 설정은 Playwright가 서버를 띄우기 전에 `content:build -- --fixtures`로 `build/e2e/`에 만들고 서버 env `PYROAD_E2E_WORLDS`로 읽힘 |
 | `world-continue.spec.ts` | 월드맵 이어하기 CTA(P5-10): 진행 0 → "모험 시작하기"(첫 퀘스트), 하다 만 퀘스트(진행 행) → 다음 차례보다 그 퀘스트, 360px에서 지도를 내리면 아래 떠 있는 버튼(잠긴 노드 쪽지가 뜨면 비켜 줌). `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷 |
 | `support/env.ts` | 로컬 스택 찾기, 앱 서버 env 만들기 |
 | `support/admin.ts` | service_role 도우미 (진행 초기화, 앞 퀘스트 완료) |

@@ -13,6 +13,8 @@ import { EASE, sec } from '@/lib/motion/tokens';
 import { CurrentMarker, StageNode } from './StageNode';
 import { MapArt, type LayoutName } from './map/MapArt';
 import { ToastViewport, useToastQueue } from '@/components/ui/toast';
+import { useSfx } from '@/components/providers/soundContext';
+import { SOFT_TAP } from '@/lib/sound/manifest';
 import { StageSheet } from './StageSheet';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
@@ -72,6 +74,7 @@ function useOpenStage(
 ) {
   const params = useSearchParams();
   const { toasts, show, dismiss } = useToastQueue(1);
+  const play = useSfx();
   // 이 화면에서 쌓은 기록 항목이면 닫을 때 거둔다(뒤로 가기를 한 번 더 눌러야 떠나는 일이 없게)
   const pushed = useRef(false);
   const id = questsByStage ? params.get('stage') : null;
@@ -83,6 +86,8 @@ function useOpenStage(
 
   const open = (stage: StageWithStatus) => {
     if (stage.status === 'locked') {
+      // 잠긴 노드: 경고음 대신 작고 낮은 탭 (안내는 쪽지 글자가 함, P5-11)
+      play('tap', SOFT_TAP);
       show(`${stage.order - 1}단계를 통과하면 열려요`, {
         tone: 'warn',
         icon: <Lock className="size-4" />,
@@ -90,6 +95,7 @@ function useOpenStage(
       return;
     }
     if (!questsByStage) return;
+    play('tap');
     const url = new URL(window.location.href);
     url.searchParams.set('stage', stage.id);
     window.history.pushState(null, '', url);

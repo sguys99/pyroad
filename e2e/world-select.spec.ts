@@ -13,7 +13,7 @@ import {
   removeFixtureWorlds,
 } from './support/admin';
 import { allQuestIds, stage } from './support/content';
-import { stageButton } from './support/quest';
+import { openStageSheet, stageButton } from './support/quest';
 
 const stage1 = stage(1);
 async function setTier(userId: string, tier: 'auto' | 'full' | 'minimal') {
@@ -150,6 +150,59 @@ test.describe('월드 선택 (P5-01)', () => {
     await expect(book(page, 'python-island')).toContainText('다 읽었어요');
     await expect(book(page, 'test-meadow')).toContainText('모험 중');
     await expect(book(page, 'test-meadow')).toContainText('지금 읽는 책');
+  });
+
+  test('월드 BGM (P5-11): 지도에서 월드를 바꾸면 곡이 바뀌고, 책장·퀘스트는 그 월드 곡을 이어 감', async ({
+    page,
+    e2eUser,
+  }) => {
+    await completeQuests(
+      e2eUser.id,
+      allQuestIds().map((id) => ({ id, solution: '' })),
+    );
+    // 배경음악 켬 (기본 꺼짐). 기기 값이 서버 값보다 늦게 바뀐 것으로
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'pyroad.sound.v1',
+        JSON.stringify({
+          version: 1,
+          muted: false,
+          master: 0.8,
+          sfx: { enabled: true, volume: 0.7 },
+          bgm: { enabled: true, volume: 0.4 },
+          voice: { enabled: true, volume: 0.9 },
+          updatedAt: Date.now(),
+        }),
+      );
+    });
+    const html = page.locator('html');
+    await page.goto('/world/python-island');
+    await expect(html).toHaveAttribute('data-bgm', 'world1');
+    // 첫 사용자 동작 전에는 재생하지 않는다 (자동재생 금지)
+    await expect(html).toHaveAttribute('data-bgm-playing', '');
+    await page.getByRole('heading', { level: 1 }).click();
+    await expect(html).toHaveAttribute('data-bgm-playing', 'world1');
+
+    // 책장은 흐르던 곡을 이어 감 (클라이언트 내비게이션)
+    await page.getByRole('link', { name: '월드 바꾸기' }).click();
+    await expect(page).toHaveURL(/\/worlds$/);
+    await page.waitForTimeout(300); // 앞 화면이 곡을 놓는 대기(120ms)보다 길게
+    await expect(html).toHaveAttribute('data-bgm', 'world1');
+    await expect(html).toHaveAttribute('data-bgm-playing', 'world1');
+
+    // 다른 월드 지도 → 그 월드 곡(test-meadow map.yaml bgm: world2)으로 크로스페이드
+    await book(page, 'test-meadow').click();
+    await expect(page).toHaveURL(/\/world\/test-meadow$/);
+    await expect(html).toHaveAttribute('data-bgm', 'world2');
+    await expect(html).toHaveAttribute('data-bgm-playing', 'world2');
+
+    // 그 월드 퀘스트 헤더도 같은 곡 (서버가 퀘스트의 월드 곡을 붙임)
+    const sheet = await openStageSheet(page, '테스트 스테이지 1');
+    await sheet.getByTestId('stage-sheet-start').click();
+    await expect(page).toHaveURL(/\/quest\//);
+    await page.waitForTimeout(300);
+    await expect(html).toHaveAttribute('data-bgm', 'world2');
+    await expect(html).toHaveAttribute('data-bgm-playing', 'world2');
   });
 
   // 스크린샷 (보고용): E2E_SHOTS=<폴더> 일 때만. 360·768·1280 × full·minimal

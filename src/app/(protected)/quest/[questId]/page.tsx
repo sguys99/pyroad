@@ -9,6 +9,7 @@ import { stripAnswerFields } from '@/lib/quest/answerKeys';
 import { getQuestKind } from '@/lib/quest/questKind';
 import { checkStageUnlocked } from '@/lib/world/checkStageUnlocked';
 import { STAGE_LOCKED_REDIRECT } from '@/lib/world/stageLock';
+import { serverWorlds } from '@/lib/world/serverWorlds';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 
 interface Props {
@@ -66,6 +67,11 @@ export default async function QuestPage({ params }: Props) {
   // 클라이언트에 정답/힌트/solution_code 노출 방지. 정답은 quest_answer_keys에 있지만(P1-02),
   // ①(00004)만 적용된 DB에서는 quests에도 남아 있으므로 props로 내려보내기 전에 지운다
   quest.prompt_skeleton = stripAnswerFields(quest.prompt_skeleton);
+  // 헤더 BGM = 이 퀘스트가 속한 월드의 곡 (P5-11, 월드맵과 같은 곡이면 이어서 재생)
+  const world = quest.stage.world;
+  if (world)
+    world.bgm =
+      serverWorlds().find((w) => w.slug === world.slug)?.map?.bgm ?? null;
   const profile = profileResult.data;
 
   // 퀘스트 시작 기록 (P1-17). 응답 뒤 기록되고, DB dedupe로 사용자·퀘스트마다 한 번만 남는다
