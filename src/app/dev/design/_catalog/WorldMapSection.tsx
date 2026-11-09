@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { StageSheet } from '@/components/world/StageSheet';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import { WorldMap } from '@/components/world/WorldMap';
+import type { PetConfig } from '@/components/world/PetSlot';
 import { StageNode } from '@/components/world/StageNode';
 import { Landmark } from '@/components/world/map/MapArt';
 import '@/components/world/map/worldMap.css';
@@ -157,15 +158,38 @@ const SAMPLE_UNLOCKED: StageWithStatus[] = SAMPLE.map((s, i) =>
   i === 2 ? { ...s, completedQuestCount: 0, stars: 0 } : s,
 );
 
+// 동행 펫 슬롯 견본 (P5-08): 진짜 펫 그림은 Phase 9. 슬롯이 따라다니는지 보이려는 토큰 색 알 하나
+const SAMPLE_PET: PetConfig = {
+  id: 'sample-egg',
+  art: (
+    <svg viewBox="0 0 44 48" focusable="false">
+      <ellipse cx="22" cy="45" rx="14" ry="3" fill="var(--text)" opacity="0.15" />
+      <path
+        d="M22 3C12 3 5 19 5 29a17 17 0 0 0 34 0C39 19 32 3 22 3Z"
+        fill="var(--surface)"
+        stroke="var(--text)"
+        strokeWidth="2.5"
+      />
+      <path d="m22 12 2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6Z" fill="var(--accent)" />
+      <circle cx="13" cy="33" r="3" fill="var(--primary)" opacity="0.7" />
+      <circle cx="30" cy="36" r="2.4" fill="var(--primary)" opacity="0.7" />
+    </svg>
+  ),
+};
+
 /** 지도 + "해제 보기" 버튼: 누를 때마다 지도를 새로 그려 연출을 처음부터 (기록은 보내지 않음) */
 function UnlockDemo({
   map,
   theme,
   world,
+  pet,
+  playId = 'unlock-demo-play',
 }: {
   map: NonNullable<(typeof WORLDS)[number]['map']>;
   theme: string;
   world: WorldId;
+  pet?: PetConfig;
+  playId?: string;
 }) {
   const [run, setRun] = useState(0);
   return (
@@ -175,7 +199,7 @@ function UnlockDemo({
           variant="secondary"
           sfx={false}
           onClick={() => setRun((n) => n + 1)}
-          data-testid="unlock-demo-play"
+          data-testid={playId}
         >
           해제 보기 (데모)
         </Button>
@@ -188,6 +212,7 @@ function UnlockDemo({
         world={world}
         unlocks={run ? { silent: false, stageIds: ['sample-3'] } : null}
         unlockDemo
+        pet={pet}
       />
     </div>
   );
@@ -299,6 +324,19 @@ export function WorldMapSection() {
           map={island.map}
           theme={island.theme}
           world={island.order as WorldId}
+        />
+      </Demo>
+      <Demo
+        label="동행 펫 슬롯 (P5-08)"
+        note="펫이 설 자리만 먼저 마련했어요(그림은 Phase 9, 운영 지도는 아직 펫 없음). 견본 알이 파이뱀 발치 바깥쪽 뒤에 서고, 지도 밖이면 노드 쪽으로. 해제 연출에서 full은 0.16초 늦게 같은 길을 작게 깡충, lite는 같이 미끄러짐, minimal·동작 줄이기는 바로 새 자리"
+        data-testid="world-pet-demo"
+      >
+        <UnlockDemo
+          map={island.map}
+          theme={island.theme}
+          world={island.order as WorldId}
+          pet={SAMPLE_PET}
+          playId="pet-demo-play"
         />
       </Demo>
       <Demo

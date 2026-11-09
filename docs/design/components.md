@@ -437,6 +437,20 @@ Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재
 
 **대표 상태**: 카탈로그 "월드 지도" 절 `world-unlock-demo`의 "해제 보기 (데모)"(2단계 통과 → 3단계 열림, 기록 안 보냄, 누를 때마다 처음부터). e2e `world-unlock.spec.ts`.
 
+## 13-8. 동행 펫 슬롯 `PetSlot` (P5-08, 그림은 Phase 9)
+
+지도 위 지금 위치 파이뱀을 따라다닐 펫의 **자리만** 먼저 정해 둔 것. 코드: `src/components/world/PetSlot.tsx`(`PetConfig`·`PetSlot`), 자리 계산 `src/lib/world/worlds.ts`(`PET_SLOT`·`petOffset`), 스타일 `worldMap.css`(`.wn-pet`·`.wu-pet-walker`), 이동 `unlockFx.ts`(`pet`·`petWalk`·`PET_LAG`).
+
+- **데이터**: `WorldMap`의 `pet?: PetConfig | null` (`{ id, art? }`). 지금 운영은 항상 `null` → DOM 없음. `users.avatar_config`에는 아직 펫 자리가 없어 DB는 그대로(Phase 9가 `avatar_config.pet`(id)을 더하고 id → 그림 표를 만들면 `art` 대신 씀). `art`는 Phase 9 전 카탈로그 견본 전용
+- **자리**: 지금 위치 파이뱀과 같은 노드 겹(`.world-node.z-20`)에서 파이뱀보다 **먼저** 그려 파이뱀 뒤에 섬(노드 z-10 위). 가로 위치는 노드에서 `--px` 지도 단위 = 파이뱀 쪽(`markerSide`)으로 `92 + 48`(파이뱀 발치 바깥쪽). 바닥은 파이뱀과 같은 선(노드 + 6단위)
+- **크기**: 폭 `max(28px, 44 × --u)`(파이뱀 116의 약 40%), 높이는 그림 비율. 그림은 `svg` 폭 100%
+- **잘림 방지**: `petOffset`이 바깥 자리가 지도 폭(반폭 22단위)을 넘으면 노드 쪽 `92 − 48`(파이뱀 몸 뒤로 반쯤 가림)으로. 파이뱀이 이미 지도 안(`HERE_MARKER`)이고 펫은 그보다 낮아 위아래는 따로 검사하지 않음. 모든 월드 × 가로·세로 × 노드를 단위 테스트가 확인
+- **대기**: `.mascot-bob`(파이뱀과 엇박자 −0.6초), full·lite만 (motion-guidelines 허용 목록)
+- **잠금 해제 이동**(§13-7 ⑤): full은 파이뱀보다 `PET_LAG` 160ms 늦게 같은 길(`samplePath`)을 작게 3번 깡충(높이 14), lite는 파이뱀과 같이 500ms 미끄러짐, minimal·동작 줄이기는 연출 없이 새 자리로 바로. 첫 스테이지(길 없음)는 파이뱀처럼 톡 나타남. 이동 중 서는 자리 차이(`--px` 이전 → 새)는 길을 따라 고르게 옮김
+- **접근성**: `aria-hidden`(장식), 누름 없음
+
+**대표 상태**: 카탈로그 "월드 지도" 절 `world-pet-demo`(견본 알 + "해제 보기"). e2e `design-catalog.spec.ts` "동행 펫 슬롯".
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |

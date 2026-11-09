@@ -116,3 +116,18 @@ export function markerSide(
     c - HERE_MARKER.half >= 0 && c + HERE_MARKER.half <= layout.width;
   return fits ? prefer : prefer === 1 ? -1 : 1;
 }
+
+/**
+ * 동행 펫 자리(P5-08 슬롯, 그림은 Phase 9)의 크기 (지도 단위): 파이뱀 자리에서 바깥쪽으로 떨어진 거리 · 반폭 · 높이.
+ * 펫은 파이뱀 발치 바깥쪽(파이뱀 뒤)에 서고, 바깥이 지도 밖이면 노드 쪽(파이뱀 몸 뒤로 반쯤 가림)으로
+ */
+export const PET_SLOT = { gap: 48, half: 22, height: 44 } as const;
+
+/** 펫 가운데가 노드에서 떨어진 거리 (지도 단위, 부호 = 방향). side 는 markerSide 결과 */
+export function petOffset(layout: MapLayout, x: number, side: -1 | 1): number {
+  const outer = side * (HERE_MARKER.offset + PET_SLOT.gap);
+  const c = x + outer;
+  return c - PET_SLOT.half >= 0 && c + PET_SLOT.half <= layout.width
+    ? outer
+    : side * (HERE_MARKER.offset - PET_SLOT.gap);
+}

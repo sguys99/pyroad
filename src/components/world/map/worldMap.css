@@ -33,6 +33,7 @@
   left: var(--tl);
   top: var(--tt);
   --dx: var(--tdx);
+  --px: var(--tpx);
 }
 /* 노드 크기 단위 (P5-04): --u = 지도 1단위(px, 지도 폭 기준 cqi), --ns = 랜드마크 배율. WorldMap이 레이아웃마다 넘긴다 */
 .world-map {
@@ -54,6 +55,7 @@
     --u: var(--wu);
     --ns: var(--wns);
     --dx: var(--wdx);
+    --px: var(--wpx);
   }
   .wm-art[data-layout='wide'] {
     display: block;
@@ -448,6 +450,27 @@
   line-height: 1.2;
   white-space: nowrap;
   transform: translateX(-50%);
+}
+/* 동행 펫 자리 (P5-08 슬롯): 파이뱀 발치 바깥쪽(--px, petOffset), 파이뱀 뒤(먼저 그림). 크기는 지도 단위 44 */
+.wu-pet-walker {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.wn-pet {
+  position: absolute;
+  left: calc(var(--px) * var(--u));
+  top: calc(var(--u) * 6);
+  width: max(28px, calc(var(--u) * 44));
+  transform: translate(-50%, -100%);
+}
+.wn-pet .mascot-bob {
+  animation-delay: -0.6s; /* 파이뱀과 엇박자로 */
+}
+.wn-pet svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 @container (min-width: 900px) {
   .wn-plate {

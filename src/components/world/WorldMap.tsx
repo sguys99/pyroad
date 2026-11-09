@@ -22,7 +22,9 @@ import {
   mapSegment,
   markerSide,
   nodePercent,
+  petOffset,
 } from '@/lib/world/worlds';
+import { PetSlot, type PetConfig } from './PetSlot';
 import type { UnlockPlan } from '@/lib/world/unlockSeen';
 import { useStageUnlock } from './unlock/useStageUnlock';
 import {
@@ -36,22 +38,25 @@ import './map/worldMap.css';
 /**
  * i번째 노드 자리: 레이아웃마다 CSS 변수로 넘기고 .world-node(worldMap.css)가 지도 폭에 맞는 쪽을 씀.
  * --wdx·--tdx: 지금 위치 파이뱀이 노드의 어느 쪽에 설지(가로 지도는 왼쪽, 세로 지도는 지도 가운데 쪽, 잘리면 반대쪽)
+ * --wpx·--tpx: 동행 펫 자리(노드에서 지도 단위, P5-08 petOffset)
  */
 function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
   const { wide, tall } = map.layouts;
   const w = nodePercent(wide, wide.nodes[i]);
   const t = nodePercent(tall, tall.nodes[i]);
+  const wx = wide.nodes[i][0];
+  const tx = tall.nodes[i][0];
+  const wdx = markerSide(wide, wx, -1);
+  const tdx = markerSide(tall, tx, tx < tall.width / 2 ? 1 : -1);
   return {
     '--wl': w.left,
     '--wt': w.top,
     '--tl': t.left,
     '--tt': t.top,
-    '--wdx': markerSide(wide, wide.nodes[i][0], -1),
-    '--tdx': markerSide(
-      tall,
-      tall.nodes[i][0],
-      tall.nodes[i][0] < tall.width / 2 ? 1 : -1,
-    ),
+    '--wdx': wdx,
+    '--tdx': tdx,
+    '--wpx': petOffset(wide, wx, wdx),
+    '--tpx': petOffset(tall, tx, tdx),
   } as React.CSSProperties;
 }
 
@@ -198,6 +203,8 @@ interface WorldMapProps {
   unlocks?: UnlockPlan | null;
   /** 카탈로그 데모: 기록을 보내지 않고 다시 틀 수 있음 */
   unlockDemo?: boolean;
+  /** 동행 펫 (P5-08 슬롯). 운영은 아직 null(그림·데이터는 Phase 9), 카탈로그만 견본 */
+  pet?: PetConfig | null;
 }
 
 export function WorldMap({
@@ -209,6 +216,7 @@ export function WorldMap({
   scrollToCurrent,
   unlocks,
   unlockDemo,
+  pet,
 }: WorldMapProps) {
   const { wide, tall } = map.layouts;
   const { budget } = useMotionTier();
@@ -402,6 +410,8 @@ export function WorldMap({
               style={nodeVars(map, markerIndex)}
               variants={item}
             >
+              {/* 펫이 먼저(파이뱀 뒤에 그려짐) */}
+              <PetSlot pet={pet} />
               <div className="wu-walker">
                 <CurrentMarker
                   live={unlocking && budget.mascot !== 'still'}

@@ -15,7 +15,7 @@ import { INK_BLOT, INK_ROUND } from '@/lib/motion/inkMask';
  * | ② 잉크 길 | 650ms (ink 곡선) | 360ms |
  * | ③ 자물쇠 | 흔들흔들 420ms → 반으로 깨져 떨어짐 + 조각 5 | 바로 깨짐 300ms |
  * | ④ 랜드마크 깨어남 | 잉크 방울 톡 → 얼룩 마스크로 스케치가 컬러로 600ms | 둥근 번짐 360ms |
- * | ⑤ 파이뱀 이동 | 길을 따라 깡충 2번 720ms + 착지 눌림 | 미끄러져 500ms |
+ * | ⑤ 파이뱀 이동 | 길을 따라 깡충 2번 720ms + 착지 눌림 (펫은 160ms 늦게 작게 3번) | 미끄러져 500ms (펫도 같이) |
  * | ⑥ 열림 | 이름표 팝(body) + "열렸어요!" 도장 | 이름표 팝(face) + 도장 160ms |
  *
  * minimal·동작 줄이기는 이 함수를 부르지 않는다: 화면이 끝 상태로 바로 바뀌고 문구(토스트)만 (useStageUnlock).
@@ -42,6 +42,9 @@ export interface UnlockEls {
   /** 지금 위치 파이뱀을 옮기는 겹 + 길 위 점들 (처음 자리 기준 px). 비면 이동 없이 열릴 때 톡 나타남 */
   walker: HTMLElement | null;
   walk: ReadonlyArray<{ x: number; y: number }>;
+  /** 동행 펫 겹 (P5-08, 없으면 null) + 펫 자리 기준 길 위 점들. full 은 PET_LAG 늦게 작게 깡충, lite 는 파이뱀과 같이 */
+  pet?: HTMLElement | null;
+  petWalk?: ReadonlyArray<{ x: number; y: number }>;
   /** 새 스테이지 이름표 (열릴 때 팝) */
   plate: HTMLElement | null;
   banner: HTMLElement | null;
@@ -103,6 +106,9 @@ export function hopFrames(
   kf.push({ transform: `translate(${last.x}px, ${last.y}px)`, offset: 1 });
   return kf;
 }
+
+/** 동행 펫이 파이뱀 뒤를 따라오는 지연 (full, ms). 끝 시각(total)보다 짧아 연출 안에 도착 */
+export const PET_LAG = 160;
 
 export function playUnlock(
   e: UnlockEls,
@@ -314,14 +320,34 @@ export function playUnlock(
   cue(wakeAt, cues.lock);
   const wakeEnd = wakeAt + wakeDur;
 
-  // ⑤ 파이뱀 이동
+  // ⑤ 파이뱀 이동 (동행 펫은 같은 길을 따라옴, P5-08)
   const walkAt = wakeEnd - (lite ? 100 : 200);
   let walkEnd = walkAt;
-  if (e.walker && e.walk.length > 1) {
-    const last = e.walk[e.walk.length - 1];
-    if (lite) {
+  const move = (
+    el: HTMLElement | null | undefined,
+    pts: ReadonlyArray<{ x: number; y: number }>,
+    lag: number,
+    hops: number,
+    height: number,
+  ) => {
+    if (pts.length < 2) {
+      // 월드의 첫 스테이지: 걸어올 길이 없어 열릴 때 톡 나타남
       a(
-        e.walker,
+        el,
+        [
+          { transform: 'translateY(12px) scale(0.6)', opacity: 0 },
+          { transform: 'none', opacity: 1 },
+        ],
+        walkAt + lag,
+        body.duration,
+        body.easing,
+      );
+      return 200;
+    }
+    if (lite) {
+      const last = pts[pts.length - 1];
+      a(
+        el,
         [
           { transform: 'translate(0px, 0px)' },
           { transform: `translate(${last.x}px, ${last.y}px)` },
@@ -330,26 +356,16 @@ export function playUnlock(
         500,
         EASING.out,
       );
-      walkEnd = walkAt + 500;
-    } else {
-      a(e.walker, hopFrames(e.walk), walkAt, 720, 'linear');
-      walkEnd = walkAt + 720;
+      return 500;
     }
-    cue(walkAt, cues.walk);
-  } else if (e.walker) {
-    // 월드의 첫 스테이지: 걸어올 길이 없어 열릴 때 톡 나타남
-    a(
-      e.walker,
-      [
-        { transform: 'translateY(12px) scale(0.6)', opacity: 0 },
-        { transform: 'none', opacity: 1 },
-      ],
-      walkAt,
-      body.duration,
-      body.easing,
-    );
-    walkEnd = walkAt + 200;
+    a(el, hopFrames(pts, hops, height), walkAt + lag, 720, 'linear');
+    return 720;
+  };
+  if (e.walker) {
+    walkEnd = walkAt + move(e.walker, e.walk, 0, 2, 26);
+    if (e.walk.length > 1) cue(walkAt, cues.walk);
   }
+  if (e.pet) move(e.pet, e.petWalk ?? [], lite ? 0 : PET_LAG, 3, 14);
   cue(walkEnd, cues.land);
 
   // ⑥ 열림: 이름표 팝 + "열렸어요!" 도장

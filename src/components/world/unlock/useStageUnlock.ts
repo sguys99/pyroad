@@ -160,15 +160,20 @@ export function useStageUnlock({
     // 파이뱀은 노드 옆(--dx 쪽)에 선다: 이전 노드와 새 노드에서 서는 쪽이 다르면 이동 중에 같이 옮긴다
     const dx = (sel: string) =>
       Number(getComputedStyle(q(sel) ?? root).getPropertyValue('--dx')) || 0;
-    let walk: { x: number; y: number }[] = [];
-    if (road && from >= 0) {
-      walk = samplePath(road, k);
-      const shift =
-        (dx("[data-unlock='to']") - dx("[data-unlock='from']")) *
-        HERE_MARKER.offset *
-        k;
-      walk.forEach((p, i) => (p.x += (shift * i) / (walk.length - 1)));
-    }
+    const px = (sel: string) =>
+      Number(getComputedStyle(q(sel) ?? root).getPropertyValue('--px')) || 0;
+    // 노드 사이 길 + 두 노드에서 서는 자리 차이(지도 단위)를 이동하면서 고르게 옮긴다
+    const along = (shift: number) => {
+      if (!road || from < 0) return [];
+      const pts = samplePath(road, k);
+      pts.forEach((p, i) => (p.x += (shift * k * i) / (pts.length - 1)));
+      return pts;
+    };
+    const to = "[data-unlock='to']";
+    const fromSel = "[data-unlock='from']";
+    const walk = along((dx(to) - dx(fromSel)) * HERE_MARKER.offset);
+    // 동행 펫(P5-08)도 같은 길, 자리 차이만 펫 것으로
+    const petWalk = along(px(to) - px(fromSel));
     const [x, y] = layout.nodes[target];
     const ns = layout.node_scale;
 
@@ -188,6 +193,8 @@ export function useStageUnlock({
         inkAt: { x: x * k, y: (y - 44 * ns) * k, size: 300 * ns * k },
         walker: q<HTMLElement>('.wu-walker'),
         walk,
+        pet: q<HTMLElement>('.wu-pet-walker'),
+        petWalk,
         plate: q<HTMLElement>(`[data-unlock='to'] .wn-plate`),
         banner: q<HTMLElement>('.wu-banner'),
       },

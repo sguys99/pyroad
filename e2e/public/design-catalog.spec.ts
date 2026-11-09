@@ -400,3 +400,47 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
     }
   });
 });
+
+test.describe('동행 펫 슬롯 (P5-08)', () => {
+  for (const mode of MOTION_MODES.filter((m) =>
+    ['full', 'lite', '동작 줄이기(full)'].includes(m.name),
+  )) {
+    test(`${mode.name}: 견본 펫이 파이뱀 곁에 서고 해제 뒤에도 따라와 지도 안에 있다`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('world-pet-demo');
+      // 운영과 같은 지도 견본에는 펫이 없다
+      await expect(
+        page.getByTestId('world-map-1').getByTestId('world-pet'),
+      ).toHaveCount(0);
+      const pet = demo.getByTestId('world-pet');
+      const marker = demo.getByTestId('world-current-marker');
+      await demo.scrollIntoViewIfNeeded();
+
+      const near = async () => {
+        const map = (await demo.locator('.world-map').boundingBox())!;
+        const p = (await pet.boundingBox())!;
+        const m = (await marker.boundingBox())!;
+        expect(p.x).toBeGreaterThanOrEqual(map.x - 1);
+        expect(p.x + p.width).toBeLessThanOrEqual(map.x + map.width + 1);
+        // 파이뱀 발치 옆 (가로로 파이뱀 폭 안팎, 바닥 높이가 비슷)
+        expect(Math.abs(p.x + p.width / 2 - (m.x + m.width / 2))).toBeLessThan(
+          m.width,
+        );
+        expect(Math.abs(p.y + p.height - (m.y + m.height))).toBeLessThan(40);
+      };
+      await expect(pet).toBeVisible();
+      await near();
+      await demo.getByTestId('pet-demo-play').click();
+      await expect(page.getByText('새 스테이지가 열렸어요! 3단계')).toBeVisible(
+        {
+          timeout: 15_000,
+        },
+      );
+      await page.waitForTimeout(400);
+      await near();
+    });
+  }
+});

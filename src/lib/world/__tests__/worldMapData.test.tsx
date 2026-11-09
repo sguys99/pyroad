@@ -19,6 +19,8 @@ import {
   mapRoute,
   markerSide,
   nodePercent,
+  PET_SLOT,
+  petOffset,
   WORLDS,
 } from '../worlds';
 
@@ -85,11 +87,13 @@ describe('월드 지도 데이터 (P5-03)', () => {
         maxStars: 3,
       }),
     );
-    const { container } = render(
+    const { container, rerender } = render(
       <MotionConfig reducedMotion="always" transition={{ duration: 0 }}>
         <WorldMap stages={stages} map={map} />
       </MotionConfig>,
     );
+    // 동행 펫 슬롯 (P5-08): 펫이 없으면(운영 지금) DOM 없음
+    expect(container.querySelector('[data-testid="world-pet"]')).toBeNull();
 
     const nodes = [
       ...container.querySelectorAll<HTMLElement>('.world-node.z-10'),
@@ -111,6 +115,28 @@ describe('월드 지도 데이터 (P5-03)', () => {
     expect(viewBoxes).toEqual(
       expect.arrayContaining(['0 0 400 900', '0 0 1000 500']),
     );
+
+    // 펫이 있으면 지금 위치 파이뱀과 같은 겹에서 파이뱀보다 먼저(뒤에) 그려지고, 노드마다 펫 자리 변수
+    rerender(
+      <MotionConfig reducedMotion="always" transition={{ duration: 0 }}>
+        <WorldMap
+          stages={stages}
+          map={map}
+          pet={{ id: 'sample', art: <i data-testid="pet-art" /> }}
+        />
+      </MotionConfig>,
+    );
+    const pet = container.querySelector('[data-testid="world-pet"]')!;
+    expect(pet.getAttribute('data-pet')).toBe('sample');
+    expect(pet.querySelector('[data-testid="pet-art"]')).not.toBeNull();
+    const marker = container.querySelector(
+      '[data-testid="world-current-marker"]',
+    )!;
+    expect(
+      pet.compareDocumentPosition(marker) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(nodes[0].style.getPropertyValue('--wpx')).not.toBe('');
+    expect(nodes[0].style.getPropertyValue('--tpx')).not.toBe('');
   });
 });
 
@@ -164,6 +190,22 @@ describe('mapPath', () => {
   });
 });
 
+describe('동행 펫 자리 petOffset (P5-08)', () => {
+  const layout = { width: 1000, height: 500, node_scale: 1, nodes: [] };
+  it('보통은 파이뱀 바깥쪽(파이뱀 뒤)', () => {
+    expect(petOffset(layout, 500, -1)).toBe(
+      -(HERE_MARKER.offset + PET_SLOT.gap),
+    );
+    expect(petOffset(layout, 500, 1)).toBe(HERE_MARKER.offset + PET_SLOT.gap);
+  });
+  it('바깥이 지도 밖이면 노드 쪽', () => {
+    expect(petOffset(layout, 940, 1)).toBe(HERE_MARKER.offset - PET_SLOT.gap);
+    expect(petOffset(layout, 60, -1)).toBe(
+      -(HERE_MARKER.offset - PET_SLOT.gap),
+    );
+  });
+});
+
 describe('지금 위치 파이뱀이 지도 밖으로 잘리지 않음 (P5-10)', () => {
   it('첫 스테이지(지도 왼쪽 끝)에서는 오른쪽에 선다', () => {
     const wide = WORLDS[0].map!.layouts.wide;
@@ -185,6 +227,13 @@ describe('지금 위치 파이뱀이 지도 밖으로 잘리지 않음 (P5-10)',
           expect(c - HERE_MARKER.half, where).toBeGreaterThanOrEqual(0);
           expect(c + HERE_MARKER.half, where).toBeLessThanOrEqual(layout.width);
           expect(y - HERE_MARKER.height, where).toBeGreaterThanOrEqual(0);
+          // 동행 펫 자리(P5-08)도 지도 안
+          const side = markerSide(layout, x, prefer);
+          const pc = x + petOffset(layout, x, side);
+          expect(pc - PET_SLOT.half, `pet ${where}`).toBeGreaterThanOrEqual(0);
+          expect(pc + PET_SLOT.half, `pet ${where}`).toBeLessThanOrEqual(
+            layout.width,
+          );
           checked++;
         }
       }
