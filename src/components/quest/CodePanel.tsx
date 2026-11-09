@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type Ref } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { NotebookPen, RotateCcw } from 'lucide-react';
 import { m } from 'framer-motion';
@@ -26,6 +26,18 @@ export function NotebookTitle() {
       나의 주문 공책
     </h2>
   );
+}
+
+// 코드 키보드(P6-04)는 좁은 화면(lg 미만)이나 터치 화면에서만 받는다 — 넓은 화면 + 마우스는 첫 로드 JS +0.
+// 자리(.ck-slot 높이)는 같은 조건의 CSS가 미리 잡아 불러온 뒤 실행 버튼이 밀리지 않는다 (questWorkspace.css)
+const KEYBOARD_QUERY = '(max-width: 63.99rem), (pointer: coarse)';
+const CodeKeyboard = dynamic(() => import('./CodeKeyboard'), { ssr: false });
+
+// matchMedia가 없는 환경(jsdom)은 넓은 화면으로 본다
+function subscribeKeyboardQuery(onChange: () => void) {
+  const mq = window.matchMedia?.(KEYBOARD_QUERY);
+  mq?.addEventListener('change', onChange);
+  return () => mq?.removeEventListener('change', onChange);
 }
 
 const ResetCodeDialog = dynamic(() => import('./ResetCodeDialog'), {
@@ -77,8 +89,6 @@ interface CodePanelProps {
   onCodeChange: (code: string) => void;
   /** "처음 코드로"가 돌아갈 코드. 주면 공책 머리에 제목과 버튼을 그린다 */
   starterCode?: string;
-  /** 에디터 손잡이 (P6-04 코드 키보드가 커서 자리에 넣기) */
-  editorRef?: Ref<CodeEditorHandle>;
   pyodideStatus: PyodideStatus;
   /** Worker를 다시 띄우는 중이면 그 이유 (재준비 연출) */
   restarting?: PyodideRestartReason;
@@ -103,7 +113,6 @@ export function CodePanel({
   code,
   onCodeChange,
   starterCode,
-  editorRef,
   pyodideStatus,
   restarting = null,
   loadStage = null,
@@ -118,6 +127,13 @@ export function CodePanel({
   validationResult,
   nextQuestId,
 }: CodePanelProps) {
+  const editorRef = useRef<CodeEditorHandle>(null);
+  const showKeyboard = useSyncExternalStore(
+    subscribeKeyboardQuery,
+    () => window.matchMedia?.(KEYBOARD_QUERY).matches ?? false,
+    () => false,
+  );
+
   return (
     // 공책 → 실행 줄 → 결과 간격은 시안 f-run-row·f-result (16px)
     <div className="flex flex-col gap-4">
@@ -139,6 +155,9 @@ export function CodePanel({
           runResult?.hadException ? errorLineFromStderr(runResult.stderr) : null
         }
       />
+      <div className="ck-slot">
+        {showKeyboard && <CodeKeyboard editor={editorRef} />}
+      </div>
 
       {/* 실행 버튼 + 준비·재준비·오류 안내 (P6-05) */}
       <RunControls

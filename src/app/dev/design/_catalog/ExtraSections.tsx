@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Code2, ExternalLink, Music, Volume2 } from 'lucide-react';
 import {
   useSfx,
@@ -21,8 +21,25 @@ import {
   RunControls,
   RunnerLoading,
 } from '@/components/quest/RunControls';
+import {
+  CodeEditor,
+  type CodeEditorHandle,
+} from '@/components/quest/CodeEditor';
+import CodeKeyboard from '@/components/quest/CodeKeyboard';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { CodeSample, Demo, Section } from './ui';
+
+/** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다 */
+function CodeKeyboardDemo() {
+  const editor = useRef<CodeEditorHandle>(null);
+  const [code, setCode] = useState('# 아래에 코드를 작성해보세요!\n');
+  return (
+    <div className="flex max-w-sm flex-col gap-2" data-testid="catalog-code-keyboard">
+      <CodeEditor ref={editor} value={code} onChange={setCode} />
+      <CodeKeyboard editor={editor} />
+    </div>
+  );
+}
 
 export function EditorSection() {
   return (
@@ -46,6 +63,13 @@ export function EditorSection() {
             오류 줄 3 표시
           </Button>
         </div>
+      </Demo>
+      <Demo
+        label="모바일 코드 키보드 (P6-04)"
+        note="주문(초록)·기호는 띠를 옆으로 넘기고, 커서 ← →는 오른쪽에 고정. 눌러도 에디터 포커스·폰 키보드를 뺏지 않음. 화살표 키로 키 사이 이동"
+        surface="card"
+      >
+        <CodeKeyboardDemo />
       </Demo>
     </Section>
   );

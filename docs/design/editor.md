@@ -91,7 +91,7 @@
 - 좁은 쪽: 퀘스트 쪽(`.qw-page`, 컨테이너) 안 폭이 24rem 미만이면(360px 화면 ≈ 18rem) 제목 아이콘을 빼고 "처음 코드로"는 아이콘만 보입니다(이름은 `aria-label`로 그대로). 모든 버튼은 48px 터치 영역 그대로.
 - "처음 코드로": 세션의 `starterCode`(이번 단계를 처음 열었을 때 코드. 프로젝트는 이전 단계 코드 + 이번 단계 시작 코드, 저장된 코드는 제외)로 되돌립니다. 지금 코드와 같으면 꺼지고, 다르면 고친 코드가 사라지므로 확인 창("그대로 두기" / "처음 코드로")을 띄웁니다. 확인 창 모듈은 처음 누를 때 받습니다(`next/dynamic`, 퀘스트 첫 로드 JS에 넣지 않음 — 넣으면 약 10.7KB gzip).
 - 되돌리면 문서가 바뀌므로 오류 줄 표시도 지워집니다.
-- 바깥 손잡이: `CodeEditor`의 `ref`는 `CodeEditorHandle { insert(text, caret?), focus() }`. `insert`는 선택 영역을 바꾸고 커서를 `caret` 자리(기본 끝)에 둔 뒤 포커스합니다(P6-04 코드 키보드 툴바용, `CodePanel`의 `editorRef`로 넘김).
+- 바깥 손잡이: `CodeEditor`의 `ref`는 `CodeEditorHandle { insert(text, caret?), moveCursor(±1), undo(), focus() }`. `insert`는 선택 영역을 바꾸고 커서를 `caret` 자리(기본 끝)에 둔 뒤 포커스하며, 한 번 = 되돌리기 한 번입니다(`isolateHistory`). 커서는 처음에 코드 끝에 있습니다. `CodePanel`이 안에서 만들어 코드 키보드(P6-04)에 넘깁니다.
 
 ## 5. 오류 줄
 
@@ -105,6 +105,6 @@
 
 ## 7. 범위 밖
 
-- **모바일 코드 키보드 툴바**(`(` `)` `:` `"` `=` `Tab` `print` 같은 자주 쓰는 토큰 줄, §12-Q3 C안): **P6-04**(Phase 6 퀘스트 화면 개편), 모바일 문제 유형은 Phase 7. 시안의 `.f-keys`가 출발점이고, 넣기는 §4의 `CodeEditorHandle.insert`를 씁니다.
+- **모바일 코드 키보드 툴바**(§12-Q3 C안): P6-04에서 `src/components/quest/CodeKeyboard.tsx`로 완료. lg 미만 또는 터치 화면에서만 지연 로드, 키 목록·순서의 근거(1월드 1~2스테이지 정답 코드)는 파일 머리 주석, e2e `code-keyboard.spec.ts`. 모바일 문제 유형은 Phase 7.
 - 통과 도장 같은 공책 장식: P6-06·P6-08.
 - 다크 모드: 앱 전체가 범위 밖([tokens.md](tokens.md)).

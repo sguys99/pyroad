@@ -42,14 +42,51 @@ describe('ResetCodeButton', () => {
   });
 });
 
-describe('CodeEditorHandle.insert (P6-04 코드 키보드 연결점)', () => {
-  it('커서 자리에 글자를 넣고 caret 자리로 커서를 옮긴다', () => {
+describe('CodeEditorHandle (P6-04 코드 키보드 연결점)', () => {
+  it('커서는 코드 끝에서 시작하고, 커서 자리에 넣은 뒤 caret 자리로 옮긴다', () => {
     const onChange = vi.fn();
     const ref = createRef<CodeEditorHandle>();
     render(<CodeEditor ref={ref} value="ab" onChange={onChange} />);
     ref.current!.insert('print()', 6);
-    expect(onChange).toHaveBeenLastCalledWith('print()ab');
+    expect(onChange).toHaveBeenLastCalledWith('abprint()');
     ref.current!.insert('x');
-    expect(onChange).toHaveBeenLastCalledWith('print(x)ab');
+    expect(onChange).toHaveBeenLastCalledWith('abprint(x)');
+    // 커서 옮기기 → 닫는 괄호 뒤에 넣기, 되돌리기
+    ref.current!.moveCursor(1);
+    ref.current!.insert('!');
+    expect(onChange).toHaveBeenLastCalledWith('abprint(x)!');
+    ref.current!.moveCursor(-1);
+    ref.current!.insert('#');
+    expect(onChange).toHaveBeenLastCalledWith('abprint(x)#!');
+    ref.current!.undo();
+    expect(onChange).toHaveBeenLastCalledWith('abprint(x)!');
+  });
+});
+
+describe('CodeKeyboard (P6-04)', () => {
+  it('키를 누르면 에디터에 넣고, 화살표 키로 키 사이를 옮겨 다닌다', async () => {
+    const { default: CodeKeyboard } = await import('../CodeKeyboard');
+    const onChange = vi.fn();
+    const ref = createRef<CodeEditorHandle>();
+    render(
+      <>
+        <CodeEditor ref={ref} value="" onChange={onChange} />
+        <CodeKeyboard editor={ref} />
+      </>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'print 주문 넣기' }));
+    fireEvent.click(screen.getByRole('button', { name: '따옴표 한 쌍 넣기' }));
+    expect(onChange).toHaveBeenLastCalledWith('print("")');
+
+    const toolbar = screen.getByRole('toolbar', { name: '코드 키보드' });
+    const keys = Array.from(toolbar.querySelectorAll('button'));
+    expect(keys.filter((k) => k.tabIndex === 0)).toHaveLength(1);
+    keys[0].focus();
+    fireEvent.keyDown(toolbar, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(keys[1]);
+    fireEvent.keyDown(toolbar, { key: 'End' });
+    expect(document.activeElement).toBe(keys[keys.length - 1]);
+    expect(keys[keys.length - 1].tabIndex).toBe(0);
+    expect(keys[0].tabIndex).toBe(-1);
   });
 });

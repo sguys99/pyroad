@@ -231,3 +231,15 @@
 :root:is([data-motion='minimal'], [data-reduced='true']) .qs-box {
   transition: none;
 }
+
+/* 코드 키보드 자리 (P6-04, CodePanel·CodeKeyboard). CodePanel의 KEYBOARD_QUERY와 같은 조건에서만 키보드 높이만큼 */
+.ck-slot {
+  display: none;
+}
+@media (max-width: 63.99rem), (pointer: coarse) {
+  .ck-slot {
+    display: block;
+    min-height: 3.5rem;
+    margin-top: -0.25rem;
+  }
+}

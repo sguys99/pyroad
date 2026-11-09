@@ -21,10 +21,14 @@ import {
 } from '@codemirror/view';
 import { Compartment, EditorState } from '@codemirror/state';
 import {
+  cursorCharLeft,
+  cursorCharRight,
   defaultKeymap,
   history,
   historyKeymap,
   indentWithTab,
+  isolateHistory,
+  undo as undoCommand,
 } from '@codemirror/commands';
 import { bracketMatching, indentOnInput } from '@codemirror/language';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
@@ -75,6 +79,9 @@ const setup = [
 export interface CodeEditorHandle {
   /** 선택 영역을 text로 바꾸고 커서를 text 안 caret 자리(기본: 끝)에 둔 뒤 포커스 */
   insert: (text: string, caret?: number) => void;
+  /** 커서를 한 글자 왼쪽(-1)·오른쪽(1)으로. 모바일에서 손가락으로 커서 옮기기가 어려워서 */
+  moveCursor: (dir: -1 | 1) => void;
+  undo: () => void;
   focus: () => void;
 }
 
@@ -119,6 +126,8 @@ export function CodeEditor({
 
     const state = EditorState.create({
       doc: initialValueRef.current,
+      // 커서는 끝에서 시작 (값 동기화와 같음): 에디터를 누르기 전에 코드 키보드로 넣어도 시작 코드 뒤에 붙는다
+      selection: { anchor: initialValueRef.current.length },
       extensions: [
         setup,
         python(),
@@ -187,7 +196,21 @@ export function CodeEditor({
           selection: { anchor: from + caret },
           scrollIntoView: true,
           userEvent: 'input.type',
+          // 키 한 번 = 되돌리기 한 번 (빠르게 누른 키들이 한 덩어리로 지워지지 않게)
+          annotations: isolateHistory.of('full'),
         });
+        view.focus();
+      },
+      moveCursor(dir) {
+        const view = viewRef.current;
+        if (!view) return;
+        (dir < 0 ? cursorCharLeft : cursorCharRight)(view);
+        view.focus();
+      },
+      undo() {
+        const view = viewRef.current;
+        if (!view) return;
+        undoCommand(view);
         view.focus();
       },
       focus: () => viewRef.current?.focus(),
