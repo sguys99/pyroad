@@ -27,7 +27,7 @@ export default async function QuestPage({ params }: Props) {
     supabase
       .from('quests')
       .select(
-        'id, stage_id, order, title, concept, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name, world:worlds(slug), quests(id, order, title))',
+        'id, stage_id, order, title, concept, quest_type, quiz_kind, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name, world:worlds(slug), quests(id, order, title))',
       )
       .eq('id', questId)
       .single(),
@@ -98,7 +98,8 @@ export default async function QuestPage({ params }: Props) {
   // 퀘스트 시작 기록 (P1-17). 응답 뒤 기록되고, DB dedupe로 사용자·퀘스트마다 한 번만 남는다
   trackQuestStart(await headers(), user.id, quest.id);
 
-  const Renderer = QUEST_RENDERERS[getQuestKind(quest.prompt_skeleton)];
+  const Renderer =
+    QUEST_RENDERERS[getQuestKind(quest.prompt_skeleton, quest.quest_type)];
 
   // key: 퀘스트를 옮기면(소프트 내비게이션) 퀘스트 상태는 새로 시작하고,
   // Pyodide Worker는 quest/layout.tsx의 PyodideProvider가 그대로 가지고 있다 (B22)

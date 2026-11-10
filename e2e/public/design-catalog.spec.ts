@@ -108,6 +108,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'output-slip',
       'error-staging',
       'success-staging',
+      'quiz',
       'celebrations',
       'share-card',
       'sound',

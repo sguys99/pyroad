@@ -54,6 +54,7 @@ import { ConsentSection } from './_catalog/ConsentSection';
 import { PwaSection } from './_catalog/PwaSection';
 import { WorldMapSection } from './_catalog/WorldMapSection';
 import { CelebrationSection } from './_catalog/CelebrationSection';
+import { QuizSection } from './_catalog/QuizSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -109,6 +110,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['output-slip', '결과 쪽지'],
       ['error-staging', '실패 연출'],
       ['success-staging', '성공 연출'],
+      ['quiz', '퀴즈 틀·객관식'],
       ['celebrations', '축하 오버레이'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
@@ -215,6 +217,7 @@ export function DesignCatalog({
               <OutputPanelSection />
               <ErrorStagingSection />
               <SuccessStagingSection />
+              <QuizSection />
               <CelebrationSection />
               <ShareCardSection />
               <SoundSection />

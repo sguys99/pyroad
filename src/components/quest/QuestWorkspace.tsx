@@ -30,11 +30,12 @@ const QuestCelebrations = dynamic(loadCelebrations, { ssr: false });
  * 축하 편지함만 구독하는 자리 (P6-13). 이벤트가 오고 비워질 때 이 컴포넌트만 다시 그려지고 퀘스트 셸은 그대로다.
  * 받은 축하가 없으면 아무것도 그리지 않는다(오버레이 chunk·DOM 없음)
  */
-function CelebrationLayer({
+export function CelebrationLayer({
   session,
   worldHref,
 }: {
-  session: QuestSession;
+  /** 퀴즈 세션(useQuizSession, P7-03)도 같은 편지함을 씀 */
+  session: Pick<QuestSession, 'celebrationStore' | 'quest'>;
   worldHref: string;
 }) {
   const store = session.celebrationStore;

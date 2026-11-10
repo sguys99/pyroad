@@ -90,6 +90,8 @@ export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
   code: 1800,
   // 마지막 단계도 같은 성공 장면(도장 → XP)을 본 뒤 프로젝트 완성 카드 (P6-12, 전에는 500ms라 장면을 덮음)
   project: 1800,
+  // 퀴즈도 정답 도장 → 보상 띠를 본 뒤 (P7-03, useQuizSession)
+  quiz: 1800,
 };
 
 /**
@@ -104,7 +106,7 @@ const STEP_PASS_CONFETTI = {
   gravity: 2.2,
   startVelocity: 55,
 };
-const ANSWER_CONFETTI = {
+export const ANSWER_CONFETTI = {
   particleCount: 80,
   spread: 70,
   origin: { y: 0.6 },

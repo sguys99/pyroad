@@ -53,7 +53,9 @@ export interface QuestReward {
   mapHref: string;
   /** 이미 통과한 퀘스트를 다시 푼 복습 (Q57): 머리가 "복습 완료", 보상 숫자 없음 */
   review?: boolean;
-  /** 카탈로그용: 플래그와 상관없이 별·코인 보이기 */
+  /** 띠 머리 눈썹 글자 (기본: "퀘스트 통과"·복습이면 "복습 완료"). 퀴즈는 "퀴즈 통과"·"연습 완료" 등 (P7-03) */
+  kicker?: string;
+  /** 플래그와 상관없이 별·코인 보이기: 카탈로그, 그리고 서버가 별을 판정하는 퀴즈(P7-03) */
   forceStarsCoins?: boolean;
 }
 
@@ -200,7 +202,9 @@ export function RewardStrip({
           <PybaemStatic state="cheer" size={56} label="" filters={false} />
         </span>
         <div className="qx-title">
-          <p className="qx-k">{reward.review ? '복습 완료' : '퀘스트 통과'}</p>
+          <p className="qx-k">
+            {reward.kicker ?? (reward.review ? '복습 완료' : '퀘스트 통과')}
+          </p>
           <h2 id="quest-reward-title" className="qx-t font-display">
             {reward.title}
           </h2>
