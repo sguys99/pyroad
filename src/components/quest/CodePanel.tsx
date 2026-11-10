@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useSyncExternalStore } from 'react';
+import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { NotebookPen, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import type {
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { PyodideLoadStage } from '@/lib/pyodide/types';
 import { RunControls } from './RunControls';
+import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
 
 /** 공책 머리 제목 (P6-03) */
 export function NotebookTitle() {
@@ -26,17 +27,9 @@ export function NotebookTitle() {
   );
 }
 
-// 코드 키보드(P6-04)는 좁은 화면(lg 미만)이나 터치 화면에서만 받는다 — 넓은 화면 + 마우스는 첫 로드 JS +0.
+// 코드 키보드(P6-04)는 좁은 화면(lg 미만)이나 터치 화면에서만 받는다(`usePhoneLike`) — 넓은 화면 + 마우스는 첫 로드 JS +0.
 // 자리(.ck-slot 높이)는 같은 조건의 CSS가 미리 잡아 불러온 뒤 실행 버튼이 밀리지 않는다 (questWorkspace.css)
-const KEYBOARD_QUERY = '(max-width: 63.99rem), (pointer: coarse)';
 const CodeKeyboard = dynamic(() => import('./CodeKeyboard'), { ssr: false });
-
-// matchMedia가 없는 환경(jsdom)은 넓은 화면으로 본다
-function subscribeKeyboardQuery(onChange: () => void) {
-  const mq = window.matchMedia?.(KEYBOARD_QUERY);
-  mq?.addEventListener('change', onChange);
-  return () => mq?.removeEventListener('change', onChange);
-}
 
 const ResetCodeDialog = dynamic(() => import('./ResetCodeDialog'), {
   ssr: false,
@@ -141,11 +134,7 @@ export function CodePanel({
   stage,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
-  const showKeyboard = useSyncExternalStore(
-    subscribeKeyboardQuery,
-    () => window.matchMedia?.(KEYBOARD_QUERY).matches ?? false,
-    () => false,
-  );
+  const showKeyboard = usePhoneLike();
 
   return (
     // 공책 → 실행 줄 → 결과 간격은 시안 f-run-row·f-result (16px)

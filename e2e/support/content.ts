@@ -30,6 +30,8 @@ export interface E2eStage {
   quests: E2eQuest[];
   /** 퀴즈(보너스, P7-12)까지 센 퀘스트 수. 헤더 스테이지 진행 점은 퀴즈도 하나씩 */
   questCount: number;
+  /** 퀴즈(보너스) order 순 — 폰 퀴즈 추천(P7-11) */
+  quizzes: { id: string; order: number; title: string }[];
 }
 
 interface QuestYaml {
@@ -86,6 +88,10 @@ export function stages(): E2eStage[] {
         title: stage.title,
         quests,
         questCount: all.length,
+        quizzes: all
+          .filter((q) => q.quest_type === 'quiz')
+          .map(({ id, order, title }) => ({ id, order, title }))
+          .sort((a, b) => a.order - b.order),
       };
     })
     .sort((a, b) => a.order - b.order);

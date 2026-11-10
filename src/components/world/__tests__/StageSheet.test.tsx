@@ -43,6 +43,7 @@ const q = (
   title: `퀘스트${order}`,
   concept: `개념${order}`,
   quest_type: 'code',
+  quiz_kind: null,
   is_mobile_friendly: false,
   status: null,
   best_stars: 0,
@@ -52,7 +53,11 @@ const q = (
 const quests = [
   q(1, { status: 'completed', best_stars: 3 }),
   q(2, { status: 'in_progress' }),
-  q(3, { quest_type: 'quiz', is_mobile_friendly: true }),
+  q(3, {
+    quest_type: 'quiz',
+    quiz_kind: 'fill_blank',
+    is_mobile_friendly: true,
+  }),
   q(4, { status: 'in_progress' }),
 ];
 
@@ -106,13 +111,18 @@ describe('StageSheet', () => {
     expect(screen.getByTestId('stage-sheet-start')).toHaveTextContent(
       '2번 퀘스트 이어하기',
     );
-    expect(screen.getByText('휴대폰 추천')).toBeInTheDocument();
+    // 넓은 화면(jsdom 은 matchMedia 없음)에는 폰 표시 없음 (P7-11)
+    expect(screen.queryByText('폰에서 하기 좋아요')).toBeNull();
     // 배울 개념 한 줄은 보이고, 줄 이름에도 들어간다 (P5-06 추가)
     expect(screen.getByText('개념3')).toBeVisible();
     expect(
       screen.getByRole('link', { name: /퀘스트3, 배울 개념\s*개념3/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText('퀴즈')).toBeInTheDocument();
+    // 퀴즈: 종류 이름 + 보너스 안내 (P7-11)
+    expect(screen.getByText('퀴즈 · 빈칸 채우기')).toBeInTheDocument();
+    expect(screen.getByTestId('stage-sheet-bonus')).toHaveTextContent(
+      '퀴즈는 보너스예요 — 안 풀어도 다음 스테이지가 열려요',
+    );
     // SHOW_STARS = false (Q51): 별 그림 없음
     expect(screen.queryByRole('img', { name: /별 \d개/ })).toBeNull();
 
@@ -146,5 +156,42 @@ describe('StageSheet', () => {
     expect(await screen.findByTestId('stage-sheet-start')).toHaveTextContent(
       '1번 퀘스트 시작하기',
     );
+  });
+
+  it('폰(좁은 화면·터치): 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요", 푼 퀴즈는 별(SHOW_STARS 와 상관없이)', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: true,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+    try {
+      render(
+        <StageSheet
+          stage={stage}
+          quests={[
+            q(1, { status: 'completed', best_stars: 3 }),
+            q(2, {
+              quest_type: 'quiz',
+              quiz_kind: 'bug_hunt',
+              is_mobile_friendly: true,
+              status: 'completed',
+              best_stars: 2,
+            }),
+          ]}
+          open
+          onOpenChange={() => {}}
+        />,
+      );
+      await screen.findByRole('dialog');
+      expect(screen.getByText('폰에서 하기 좋아요')).toBeInTheDocument();
+      // 코드 퀘스트 별은 숨김(Q51), 퀴즈 별만
+      expect(screen.getAllByRole('img', { name: /별 \d개/ })).toHaveLength(1);
+      expect(
+        screen.getByRole('img', { name: '별 2개 / 3개' }),
+      ).toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

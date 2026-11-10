@@ -20,6 +20,8 @@ export interface QuestListRow {
   /** 이 퀘스트가 다루는 개념 한 줄 (공개 열, 시트 미리 보기) */
   concept: string;
   quest_type: string;
+  /** 퀴즈 종류 (퀴즈만, 공개 열). 시트 아이콘·폰 퀴즈 추천(P7-11) */
+  quiz_kind: string | null;
   is_mobile_friendly: boolean;
 }
 
@@ -135,6 +137,7 @@ export function toWorldMapData(
         title: q.title,
         concept: q.concept,
         quest_type: q.quest_type,
+        quiz_kind: q.quiz_kind,
         is_mobile_friendly: q.is_mobile_friendly,
         status: mine.get(q.id)?.status ?? null,
         best_stars: mine.get(q.id)?.best_stars ?? 0,

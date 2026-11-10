@@ -9,6 +9,7 @@ import {
   MessageCircleQuestion,
   RotateCcw,
   Smartphone,
+  Sparkles,
 } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import type { WorldId } from '@/lib/design/tokens';
@@ -19,7 +20,10 @@ import { Button } from '@/components/ui/button';
 import { useSfx } from '@/components/providers/soundContext';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Stars } from '@/components/ui/reward-icon';
+import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
+import { isQuizKind, QUIZ_KIND_LABEL } from '@/lib/world/phoneQuiz';
 import { Landmark } from './map/MapArt';
+import { QUIZ_KIND_ICON } from './PhoneQuizPick';
 import './map/worldMap.css';
 import './stageSheet.css';
 
@@ -28,9 +32,11 @@ import './stageSheet.css';
  * 열린 스테이지 노드를 누르면 뜬다: 768px 미만 바텀시트, 이상 책 한 쪽 모양 대화 상자(공통 `Sheet wide`).
  *
  * - 머리: 랜드마크 그림 + "N단계 · 상태" + 제목·설명, 진행 요약(완료 퀘스트 수 막대, SHOW_STARS면 별 합계도)
- * - 차례: 퀘스트마다 순서·제목·배울 개념 한 줄(줄임표)·유형(코드·퀴즈·보스)·상태(완료·하는 중·아직)·휴대폰 추천. 줄 전체가 퀘스트 링크
+ * - 차례: 퀘스트마다 순서·제목·배울 개념 한 줄(줄임표)·유형(코드·퀴즈·보스)·상태(완료·하는 중·아직)·폰에서 하기 좋아요(P7-11). 줄 전체가 퀘스트 링크
  *   열린 스테이지 안 퀘스트는 서버 규칙상 모두 열린다(B38 가드는 스테이지 단위) → 건너뛰어 열어도 된다
  * - 완료 퀘스트는 "다시 하기"(복습), 첫 미완료 퀘스트는 강조 줄("지금 차례") + 아래 주 버튼 "시작하기/이어하기" 하나 (P5-14: 줄 안 버튼과 중복 제거)
+ * - 퀴즈(P7-11, §12-Q3 C): 유형 태그 "퀴즈 · 종류" + 종류 아이콘, 풀었으면 별(퀴즈 별은 지금도 기록됨 → SHOW_STARS 와 상관없이),
+ *   목록 아래 "보너스" 안내 한 줄(잠금·클리어 계산에서 빠짐, `countsForClear`). 휴대폰·태블릿(`usePhoneLike`)이면 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요"
  * - 줄 차례 등장은 CSS(`stageSheet.css`, 연출 단계별). 효과음은 넣지 않음(P5-11)
  */
 
@@ -100,6 +106,7 @@ export function StageSheet({
   world,
 }: StageSheetProps) {
   const play = useSfx();
+  const phone = usePhoneLike();
   if (!stage) return null;
   const rows = questRows(stage, quests);
   const next = rows.find((r) => r.state === 'now');
@@ -177,7 +184,14 @@ export function StageSheet({
       <h3 className="ss-k">차례</h3>
       <ol className="ss-list">
         {rows.map((q, i) => {
-          const { label, Icon } = KIND[q.kind];
+          const quizKind =
+            q.kind === 'quiz' && isQuizKind(q.quiz_kind) ? q.quiz_kind : null;
+          const { label, Icon } = quizKind
+            ? {
+                label: `퀴즈 · ${QUIZ_KIND_LABEL[quizKind]}`,
+                Icon: QUIZ_KIND_ICON[quizKind],
+              }
+            : KIND[q.kind];
           return (
             <li
               key={q.id}
@@ -223,14 +237,14 @@ export function StageSheet({
                     <span className="ss-tag" data-state={q.state}>
                       {STATE_TEXT[q.state]}
                     </span>
-                    {q.is_mobile_friendly && (
+                    {q.is_mobile_friendly && phone && (
                       <span className="ss-tag" data-mobile>
                         <Smartphone
                           aria-hidden
                           className="size-3.5"
                           strokeWidth={2.6}
                         />
-                        휴대폰 추천
+                        폰에서 하기 좋아요
                       </span>
                     )}
                   </span>
@@ -238,7 +252,10 @@ export function StageSheet({
                 <span className="ss-end">
                   {q.state === 'done' ? (
                     <>
-                      {SHOW_STARS && <Stars n={q.best_stars} size={18} />}
+                      {/* 코드 퀘스트 별은 P8-05부터 기록(SHOW_STARS), 퀴즈 별은 P7부터 기록·XP 기준이라 늘 보인다 */}
+                      {(SHOW_STARS || q.kind === 'quiz') && (
+                        <Stars n={q.best_stars} size={18} />
+                      )}
                       <span className="ss-act">
                         <RotateCcw
                           aria-hidden
@@ -261,6 +278,13 @@ export function StageSheet({
           );
         })}
       </ol>
+      {rows.some((r) => r.kind === 'quiz') && (
+        // 퀴즈는 스테이지 잠금·클리어 계산에서 빠진다 (countsForClear, §12-Q60)
+        <p className="ss-bonus" data-testid="stage-sheet-bonus">
+          <Sparkles aria-hidden className="size-4" strokeWidth={2.4} />
+          퀴즈는 보너스예요 — 안 풀어도 다음 스테이지가 열려요
+        </p>
+      )}
     </Sheet>
   );
 }

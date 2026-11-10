@@ -4,6 +4,8 @@ export interface StageQuestDot {
   order: number;
   title: string;
   completed: boolean;
+  /** 퀘스트 유형: 코드 퀘스트의 폰 퀴즈 쪽지(P7-11)가 이 스테이지 퀴즈를 센다 */
+  quest_type?: string;
 }
 
 /** done 끝냄 · todo 아직(열림) · locked 열 수 없음 */

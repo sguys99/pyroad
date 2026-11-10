@@ -9,6 +9,7 @@ import { LockedBook } from '@/components/world/book/LockedBook';
 import { NextBooks } from '@/components/world/book/NextBooks';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import { ContinueFloat } from '@/components/world/ContinueCta';
+import { PhoneQuizPick } from '@/components/world/PhoneQuizPick';
 import { cn } from '@/lib/utils';
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
 import type { WorldMapData } from '@/lib/world/mapData';
@@ -69,6 +70,12 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
               completedStages={entry.completedStageCount}
               totalStages={entry.stages.length}
               continueTarget={cta}
+            />
+            {/* 폰에서는 이어하기(코드 퀘스트) 아래 퀴즈 하나를 보조로 권함 (P7-11, 휴대폰·태블릿에서만 그려짐) */}
+            <PhoneQuizPick
+              stages={entry.stages}
+              questsByStage={data.questsByStage}
+              continueQuestId={cta?.questId}
             />
             <WorldMap
               stages={entry.stages}
