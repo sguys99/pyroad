@@ -22,6 +22,19 @@ prompt:
     for i in range(1, 10):
         print()
   expected_output_hint: 2 x 1 = 2 부터 2 x 9 = 18 까지 출력되어야 해요
+  checklist:
+    - 'print( ) 안에 2, "x", i, "=", 2*i 를 차례로 넣어요'
+    - '2 x 1 = 2 부터 2 x 9 = 18 까지 나오는지 봐요'
+  example_output: |-
+    2 x 1 = 2
+    2 x 2 = 4
+    2 x 3 = 6
+    2 x 4 = 8
+    2 x 5 = 10
+    2 x 6 = 12
+    2 x 7 = 14
+    2 x 8 = 16
+    2 x 9 = 18
   fallback_text: for i in range(1, 10)으로 i가 1부터 9까지 바뀌면서 2 * i를 계산해요! print(2, "x", i, "=", 2*i)로 예쁘게 출력할 수 있어요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

@@ -27,6 +27,11 @@ prompt:
     result = 
     print(result)
   expected_output_hint: 7 이 출력되어야 해요 (3*2=6, 6+1=7)
+  checklist:
+    - 'double(3)을 add_one( ) 안에 넣어요'
+    - '그 결과를 result 에 넣고 보여 줘요'
+  example_output: |-
+    7
   fallback_text: double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

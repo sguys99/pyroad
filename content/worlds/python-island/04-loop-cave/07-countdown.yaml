@@ -26,6 +26,15 @@ prompt:
         # count를 1씩 줄여보세요! ___ 에 알맞은 숫자를 넣어요
         count = count - ___
   expected_output_hint: 5, 4, 3, 2, 1이 한 줄씩 출력되어야 해요
+  checklist:
+    - '빈칸 ___ 에 1을 넣어 count 를 하나씩 줄여요'
+    - '5부터 1까지 한 줄씩 나오는지 봐요'
+  example_output: |-
+    5
+    4
+    3
+    2
+    1
   fallback_text: count = 5에서 시작해서, 반복할 때마다 count = count - 1로 1씩 줄여가요. count가 0이 되면 멈춰요!
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

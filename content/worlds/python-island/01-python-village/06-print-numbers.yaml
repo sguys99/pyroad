@@ -19,6 +19,11 @@ prompt:
     # 숫자 2026을 출력해보세요!
     # 힌트: 따옴표 없이 숫자만 넣으면 돼요!
   expected_output_hint: 2026 이 출력되어야 해요
+  checklist:
+    - 'print( ) 안에 2026 을 넣어요'
+    - '따옴표 없이 숫자만 써요'
+  example_output: |-
+    2026
   fallback_text: print() 안에 따옴표 없이 숫자를 넣으면 숫자가 그대로 출력돼요! print(2026) 이렇게요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

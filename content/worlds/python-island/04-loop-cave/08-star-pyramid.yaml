@@ -25,6 +25,15 @@ prompt:
     for i in range(1, 6):
         print()
   expected_output_hint: '* 부터 ***** 까지 피라미드가 출력되어야 해요'
+  checklist:
+    - 'print( ) 안에 "*" * i 를 넣어요'
+    - '줄마다 별이 하나씩 늘어나는지 봐요'
+  example_output: |-
+    *
+    **
+    ***
+    ****
+    *****
   fallback_text: for i in range(1, 6)으로 i가 1, 2, 3, 4, 5가 되면서 "*" * i로 별이 1개, 2개, 3개, 4개, 5개 출력돼요!
   is_challenge: true
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)

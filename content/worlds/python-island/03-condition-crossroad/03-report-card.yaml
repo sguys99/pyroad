@@ -26,6 +26,11 @@ prompt:
     else:
         print("등급: C")
   expected_output_hint: '등급: B 가 출력되어야 해요'
+  checklist:
+    - 'elif 아래 print( ) 안에 "등급: B"를 넣어요'
+    - '85점이 어느 칸에 들어가는지 생각해 봐요'
+  example_output: |-
+    등급: B
   fallback_text: elif는 "그렇지 않고 만약 ~라면"이에요! 위의 조건이 안 맞으면 다음 elif 조건을 확인해요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

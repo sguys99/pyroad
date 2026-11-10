@@ -20,6 +20,14 @@ prompt:
     # 마을 안내판을 만들어보세요!
     # 주석 1줄 + print() 3줄로 완성!
   expected_output_hint: '=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 가 각각 한 줄씩 출력되어야 해요'
+  checklist:
+    - '# 으로 메모를 한 줄 써요'
+    - 'print( )를 세 번 써요'
+    - '=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 를 차례로 보여 줘요'
+  example_output: |-
+    === 파이썬 마을 ===
+    인구: 2026명
+    환영합니다!
   fallback_text: 주석으로 설명을 달고, print()를 3번 사용해서 안내판을 만들어요! 각 줄에 다른 내용을 넣어보세요.
   is_challenge: true
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)

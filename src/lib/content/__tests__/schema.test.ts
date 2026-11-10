@@ -110,6 +110,28 @@ describe('QuestSchema', () => {
     ]);
   });
 
+  it('해 볼 일·예시 출력 (P7-17): 코드 퀘스트·프로젝트 단계는 필수, 예시는 정답 규칙을 통과해야 함', () => {
+    const q = codeQuest();
+    expect(errorsOf({ ...q, prompt: without(q.prompt, 'checklist') })).toEqual([
+      'prompt.checklist: Invalid input: expected array, received undefined',
+    ]);
+    expect(
+      errorsOf({ ...q, prompt: { ...q.prompt, example_output: '안녕' } }),
+    ).toEqual([
+      'prompt.example_output: 예시 출력이 정답 규칙을 통과하지 않아요 (output_match 면 기준값과 똑같이 써요)',
+    ]);
+    const p = projectQuest();
+    p.steps[1].prompt.example_output = '아무 말';
+    expect(errorsOf(p)).toEqual([
+      'steps[1].prompt.example_output: 예시 출력이 정답 규칙을 통과하지 않아요 (output_match 면 기준값과 똑같이 써요)',
+    ]);
+    // 프로젝트는 단계마다 써서 퀘스트 전체에는 둘 수 없음
+    const top = projectQuest();
+    expect(
+      errorsOf({ ...top, prompt: { ...top.prompt, checklist: ['a'] } }),
+    ).toEqual(['prompt: Unrecognized key: "checklist"']);
+  });
+
   it('id 는 UUID 형식 (기존 b1000000-… 형식 허용)', () => {
     expect(errorsOf({ ...codeQuest(), id: 'quest-1' })[0]).toMatch(
       /^id: UUID 형식/,

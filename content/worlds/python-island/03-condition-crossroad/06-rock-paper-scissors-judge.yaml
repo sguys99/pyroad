@@ -28,6 +28,11 @@ prompt:
         else:
             print("졌다!")
   expected_output_hint: 이겼다! 가 출력되어야 해요
+  checklist:
+    - '안쪽 if 아래 print( ) 안에 "이겼다!"를 넣어요'
+    - '가위와 보일 때 어느 줄이 돌아가는지 따라가 봐요'
+  example_output: |-
+    이겼다!
   fallback_text: if 안에 또 if를 쓸 수 있어요! 가위가 보를 이기니까, player가 가위이고 computer가 보이면 이긴 거예요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

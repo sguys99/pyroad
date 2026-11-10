@@ -22,6 +22,11 @@ prompt:
     result = 
     print(result)
   expected_output_hint: 파이썬 이 출력되어야 해요
+  checklist:
+    - 'result 에 first + second 를 넣어요'
+    - 'print(result)로 합친 글자를 보여 줘요'
+  example_output: |-
+    파이썬
   fallback_text: 문자열끼리 + 를 쓰면 이어붙여져요! "파이" + "썬" = "파이썬"이 돼요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

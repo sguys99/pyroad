@@ -21,6 +21,11 @@ prompt:
     treasures = ["금화", "은화", "다이아몬드", "루비"]
     print(treasures[__])
   expected_output_hint: 다이아몬드 가 출력되어야 해요
+  checklist:
+    - 'treasures[ ] 빈칸에 다이아몬드의 번호를 넣어요'
+    - '번호는 0부터 센다는 걸 기억해요'
+  example_output: |-
+    다이아몬드
   fallback_text: 리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

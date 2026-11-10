@@ -23,6 +23,11 @@ prompt:
 
     print()
   expected_output_hint: 4 가 출력되어야 해요 (3명 + 파이뱀 1명)
+  checklist:
+    - 'friends.append( )로 "파이뱀"을 더해요'
+    - 'print( ) 안에 len(friends)를 넣어 친구 수를 보여 줘요'
+  example_output: |-
+    4
   fallback_text: append()는 리스트 끝에 새 값을 추가해요! len()은 리스트에 몇 개가 있는지 세어줘요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

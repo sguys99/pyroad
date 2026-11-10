@@ -27,6 +27,12 @@ prompt:
     print(small)
     print(big)
   expected_output_hint: 1과 9가 각각 한 줄씩 출력되어야 해요
+  checklist:
+    - 'return 뒤에 smallest, biggest 를 쉼표로 이어 써요'
+    - '작은 수와 큰 수가 한 줄씩 나오는지 봐요'
+  example_output: |-
+    1
+    9
   fallback_text: return 뒤에 쉼표로 여러 값을 쓰면 한 번에 돌려줄 수 있어요! small, big = min_max(1, 9, 5) 이렇게 받으면 돼요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

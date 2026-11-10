@@ -24,6 +24,14 @@ prompt:
 
     # 아래에 print()를 3번 써서 자기소개를 출력하세요!
   expected_output_hint: '이름: 파이뱀, 나이: 10살, 학교: 코딩초등학교 가 각각 한 줄씩 출력되어야 해요'
+  checklist:
+    - 'print( )를 세 번 써요'
+    - '+ 로 "이름: " 과 name 을 이어 붙여요'
+    - '나이 뒤에는 살, 학교 줄도 같은 방법으로 써요'
+  example_output: |-
+    이름: 파이뱀
+    나이: 10살
+    학교: 코딩초등학교
   fallback_text: '변수에 저장한 값과 문자열을 + 로 합쳐서 출력해요! print("이름: " + name) 이렇게요.'
   is_challenge: true
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)

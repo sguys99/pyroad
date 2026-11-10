@@ -101,6 +101,10 @@ export interface HintLevels {
 export interface ProjectStep {
   step_number: number;
   step_goal: string;
+  /** 해 볼 일 (P7-17). 콘텐츠 빌드 전 행에는 없을 수 있음 */
+  checklist?: string[];
+  /** 공개 예시 출력 (P7-17) */
+  example_output?: string;
   starter_code: string;
   validation_type: ValidationType;
   fallback_text: string;
@@ -113,6 +117,10 @@ export interface PromptSkeleton {
   exercise_description: string;
   starter_code: string;
   expected_output_hint: string;
+  /** 해 볼 일 (P7-17, 코드 퀘스트만. 프로젝트는 단계마다). 콘텐츠 빌드 전 행에는 없을 수 있음 */
+  checklist?: string[];
+  /** 공개 예시 출력 (P7-17, 코드 퀘스트만) */
+  example_output?: string;
   fallback_text: string;
   steps?: ProjectStep[];
 }

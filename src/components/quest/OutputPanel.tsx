@@ -16,6 +16,7 @@ import {
   Hourglass,
   Loader2,
   MessageCircleQuestion,
+  PencilLine,
   Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ import {
 } from './QuestSuccess';
 import {
   POP_LINES,
+  compareLines,
   errorSummary,
   mismatchTip,
   outputLines,
@@ -197,8 +199,11 @@ export interface OutputPanelProps {
   validationResult?: { passed: boolean; type?: ValidationType } | null;
   /** 실행 중 stdout (P1-09). 없으면 실행 중 표시만 */
   liveOutput?: LiveOutputStore;
-  /** 공개된 "나와야 하는 모습" 안내 (코드 퀘스트 expected_output_hint · 프로젝트 단계 목표). 출력이 다를 때 견줘 보기에 */
-  goal?: string;
+  /**
+   * 공개 예시 출력 (P7-17, 코드 퀘스트 · 프로젝트 지금 단계의 example_output). 출력이 다를 때 견줘 보기에.
+   * compare: 결과가 정해진 퀘스트(output_match)면 줄 단위로 견줌, 아니면(무작위·포함 검사) 예시만 보여 줌
+   */
+  example?: { text: string; compare: boolean };
   /** 오류 줄로 가기 (모바일은 공책 쪽으로 넘김) */
   onShowErrorLine?: (line: number) => void;
   /** 결과 쪽 안에서 Worker를 다시 띄우는 중 (모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄) */
@@ -207,6 +212,75 @@ export interface OutputPanelProps {
   reward?: QuestReward | null;
   /** 오류·출력이 다를 때 "파이뱀에게 더 물어보기" (Q56: AI 피드백은 자동으로 부르지 않고 이 버튼으로만) */
   onAskTutor?: () => void;
+}
+
+/**
+ * 예시 출력과 견줘 보기 (P7-17). 줄 비교면 같은 줄은 ✓, 다른 줄은 연필 표시 + "내 글자"를 바로 아래에
+ * (색만으로 알리지 않고 아이콘·글자 병행). 무작위·포함 검사 퀘스트는 "예시"라고 밝히고 줄 비교 없이 보여 줌
+ */
+function ExampleCompare({
+  example,
+  stdout,
+}: {
+  example: { text: string; compare: boolean };
+  stdout: string;
+}) {
+  if (!example.compare)
+    return (
+      <div className="qo-goal" data-testid="output-example">
+        <span className="qo-k">이런 모양이면 돼요 · 예시</span>
+        <ol className="qo-cmp">
+          {outputLines(example.text.trim()).map((line, i) => (
+            <li key={i} className="qo-cmp-row">
+              <span className="qo-cmp-text font-mono">{line || ' '}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="qo-tip">
+          예시일 뿐이라 숫자나 말이 조금 달라도 괜찮아요.
+        </p>
+      </div>
+    );
+  const rows = compareLines(example.text, stdout);
+  const same = rows.filter((row) => row.same).length;
+  return (
+    <div className="qo-goal" data-testid="output-example" data-compare>
+      <span className="qo-k">
+        이런 모양이면 돼요 · {rows.length}줄 중 {same}줄 같아요
+      </span>
+      <ol className="qo-cmp">
+        {rows.map((row, i) => (
+          <li key={i} className="qo-cmp-row" data-same={row.same || undefined}>
+            <span className="qo-cmp-mark" aria-hidden>
+              {row.same ? <Check strokeWidth={3} /> : <PencilLine />}
+            </span>
+            <span className="qo-cmp-body">
+              <span className="qo-cmp-text font-mono">
+                {row.example ?? (
+                  <span className="qo-cmp-none font-sans">
+                    (예시에는 없는 줄)
+                  </span>
+                )}
+              </span>
+              <span className="sr-only">
+                {row.same ? ' (같아요)' : ' (달라요) '}
+              </span>
+              {!row.same && (
+                <span className="qo-cmp-mine">
+                  내 글자{' '}
+                  {row.actual === null ? (
+                    <span className="qo-cmp-none font-sans">(안 나왔어요)</span>
+                  ) : (
+                    <span className="font-mono">{row.actual || ' '}</span>
+                  )}
+                </span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 }
 
 function AskMore({ onAsk }: { onAsk: () => void }) {
@@ -228,14 +302,14 @@ function AskMore({ onAsk }: { onAsk: () => void }) {
  * 결과 쪽지 (P6-06, 최종 시안 ResultSlip "나온 글자"):
  * 아직 안 돌림 · 실행 중 실시간 출력 · 통과 · 출력이 다름(공개 안내와 견줘 보기) · 오류(줄로 가기) · 시간 초과 · 멈춤 · 출력 상한.
  * 출력 줄은 쪽지 카드로 튀어나온다(full 스프링 차례로 · lite 짧게 · minimal·동작 줄이기 없음).
- * 정답 기준값은 서버 전용이라(§2.3) 줄 단위 비교는 하지 않고 공개 안내 + 규칙 유형별 살펴볼 거리만 보여 준다
+ * 정답 기준값은 서버 전용이라(§2.3) 공개 예시 출력(P7-17)과 견줘 보고 규칙 유형별 살펴볼 거리를 보여 준다
  */
 export function OutputPanel({
   result,
   isRunning,
   validationResult,
   liveOutput,
-  goal,
+  example,
   onShowErrorLine,
   restarting = false,
   reward = null,
@@ -402,11 +476,8 @@ export function OutputPanel({
           {bugFixed && <BugbugMakeup />}
           {diff && (
             <div className="qo-compare" data-testid="output-compare">
-              {goal && (
-                <div className="qo-goal">
-                  <span className="qo-k">해 볼 일에서 나와야 하는 모습</span>
-                  <p>{goal}</p>
-                </div>
+              {example && (
+                <ExampleCompare example={example} stdout={result.stdout} />
               )}
               <p className="qo-tip">
                 {mismatchTip(validationResult.type, result.stdout)}

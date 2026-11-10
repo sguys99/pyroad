@@ -23,6 +23,11 @@ prompt:
 
     print(numbers)
   expected_output_hint: '[1, 1, 3, 4, 5] 가 출력되어야 해요'
+  checklist:
+    - 'numbers.sort( )로 작은 수부터 줄 세워요'
+    - 'print(numbers)로 보여 줘요'
+  example_output: |-
+    [1, 1, 3, 4, 5]
   fallback_text: sort()는 리스트를 작은 수부터 큰 수 순서로 정리해줘요! numbers.sort() 이렇게 쓰면 돼요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

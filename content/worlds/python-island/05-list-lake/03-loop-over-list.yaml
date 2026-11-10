@@ -26,6 +26,13 @@ prompt:
 
     \    "
   expected_output_hint: 빨강, 초록, 파랑이 한 줄씩 출력되어야 해요
+  checklist:
+    - 'for 아래에 print(color)를 써요'
+    - '그 줄은 네 칸 들여 써요'
+  example_output: |-
+    빨강
+    초록
+    파랑
   fallback_text: 'for color in colors: 라고 쓰면 colors 리스트에서 하나씩 꺼내서 color 변수에 넣어줘요! 첫 번째는 빨강, 두 번째는 초록, 세 번째는 파랑이에요.'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

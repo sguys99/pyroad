@@ -31,6 +31,14 @@ prompt:
 
     # 나이, 할인율, 가격을 출력하세요!
   expected_output_hint: '나이: 10살, 할인율: 50%, 가격: 5000원 이 각각 출력되어야 해요'
+  checklist:
+    - 'if 로 13세 미만인지, 평일인지 살펴서 discount 를 정해요'
+    - 'final_price 로 할인된 가격을 구해요'
+    - '나이·할인율·가격을 한 줄씩 보여 줘요'
+  example_output: |-
+    나이: 10살
+    할인율: 50%
+    가격: 5000원
   fallback_text: if 안에 또 if를 쓸 수 있어요! 먼저 나이로 어린이인지 확인하고, 그 안에서 평일인지 주말인지 확인해요.
   is_challenge: true
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)

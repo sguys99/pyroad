@@ -33,6 +33,13 @@ prompt:
     print("평균: " + str(avg))
     print("등급: " + g)
   expected_output_hint: '평균: 85.0 과 등급: B 가 출력되어야 해요'
+  checklist:
+    - 'average 에서 세 점수를 더해 3으로 나눠 return 해요'
+    - 'grade 에서 if·elif·else 로 등급을 return 해요'
+    - '평균과 등급이 한 줄씩 나오는지 봐요'
+  example_output: |-
+    평균: 85.0
+    등급: B
   fallback_text: average 함수로 평균을 구하고, grade 함수로 등급을 판정해요! 두 함수를 조합하면 성적 분석 프로그램이 완성돼요.
   is_challenge: true
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)

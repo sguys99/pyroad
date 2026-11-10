@@ -23,6 +23,16 @@ prompt:
     for i in range(__, __):
         print(i)
   expected_output_hint: 1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요
+  checklist:
+    - 'range( ) 빈칸에 시작 숫자와 끝 숫자를 넣어요'
+    - '끝 숫자는 하나 더 크게 써요'
+    - '1부터 5까지 한 줄씩 나오는지 봐요'
+  example_output: |-
+    1
+    2
+    3
+    4
+    5
   fallback_text: for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요).
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

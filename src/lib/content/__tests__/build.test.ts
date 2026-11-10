@@ -103,6 +103,8 @@ describe('buildRows: 공개/정답 분리', () => {
       'exercise_description',
       'starter_code',
       'expected_output_hint',
+      'checklist',
+      'example_output',
       'fallback_text',
     ]);
   });
@@ -130,6 +132,8 @@ describe('buildRows: 공개/정답 분리', () => {
       {
         step_number: 1,
         step_goal: '비밀 숫자 만들기',
+        checklist: ['randint 로 비밀 숫자를 만들어요'],
+        example_output: '7',
         starter_code: 'import random\n',
         validation_type: 'code_check',
         fallback_text: 'random.randint(1, 10)',
@@ -137,6 +141,8 @@ describe('buildRows: 공개/정답 분리', () => {
       {
         step_number: 2,
         step_goal: '비교하기',
+        checklist: ['if·elif·else 로 견줘요'],
+        example_output: '비밀 숫자가 더 커요!',
         starter_code: '',
         validation_type: 'all',
         fallback_text: 'if/elif/else',
@@ -174,7 +180,7 @@ describe('buildRows: 공개/정답 분리', () => {
       buildRows(
         tree([
           STAGE_1,
-          [withRule({ type: 'contains_any', expected: ['가', '나'] })],
+          [withRule({ type: 'contains_any', expected: ['안녕', '나'] })],
         ]),
       ).warnings,
     ).toEqual([]);
@@ -333,7 +339,11 @@ describe('왕복: 원본 → 행 → 원본, 원본 → YAML → 원본', () => 
       ...codeQuest(),
       answer: {
         ...codeQuest().answer,
-        validation: { type: 'code_check', expected: 'int(', whole_word: true },
+        validation: {
+          type: 'code_check',
+          expected: 'print(',
+          whole_word: true,
+        },
       },
     }),
   ];

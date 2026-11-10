@@ -18,6 +18,12 @@ prompt:
   starter_code: |
     # 아래에 코드를 작성해보세요!
   expected_output_hint: 안녕하세요! 가 출력되어야 해요
+  checklist:
+    - 'print( )를 써요'
+    - '따옴표 안에 안녕하세요! 를 넣어요'
+    - '코드를 돌려서 인사가 나오는지 봐요'
+  example_output: |-
+    안녕하세요!
   fallback_text: print()는 화면에 글자를 보여주는 마법 주문이에요! print("안녕하세요!") 이렇게 따옴표 안에 보여주고 싶은 말을 넣으면 돼요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

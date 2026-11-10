@@ -25,6 +25,12 @@ prompt:
 
     print(total)
   expected_output_hint: 55 가 출력되어야 해요 (1+2+3+...+10 = 55)
+  checklist:
+    - '반복 안에서 total = total + i 를 써요'
+    - '그 줄은 for 안쪽으로 들여 써요'
+    - '마지막에 total 을 보여 줘요'
+  example_output: |-
+    55
   fallback_text: total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

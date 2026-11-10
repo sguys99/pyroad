@@ -24,6 +24,15 @@ prompt:
             
         print(i)
   expected_output_hint: 2, 4, 6, 8, 10이 한 줄씩 출력되어야 해요
+  checklist:
+    - '홀수일 때 continue 를 써서 건너뛰어요'
+    - '짝수만 한 줄씩 나오는지 봐요'
+  example_output: |-
+    2
+    4
+    6
+    8
+    10
   fallback_text: '% 는 나머지를 구하는 연산자예요! i % 2 != 0은 홀수라는 뜻이에요. continue를 만나면 아래 코드를 건너뛰고 다음 반복으로 가요.'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

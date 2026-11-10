@@ -23,6 +23,12 @@ prompt:
     result = 
     print(result)
   expected_output_hint: 123이 출력되어야 해요
+  checklist:
+    - 'int( )로 a와 b를 숫자로 바꿔요'
+    - '두 숫자를 더해 result 에 넣어요'
+    - 'result 를 보여 줘요'
+  example_output: |-
+    123
   fallback_text: '"100"은 글자예요. int("100")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요.'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:
