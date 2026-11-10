@@ -252,6 +252,9 @@ test.describe('퀘스트 전체 플로우', () => {
     const locked = stageButton(page, stage2.title);
     await expect(locked).toBeDisabled(); // aria-disabled: 포커스·탭은 되고 이동만 막음 (P5-04)
     await expect(locked).toHaveAccessibleName(/잠김/);
+    // 오늘의 퀴즈 카드(P7-10)로 "지금 여기" 노드가 첫 화면 아래라 지도가 들어오자마자 그 노드로 스크롤한다.
+    // force 클릭은 안정 대기가 없어 그 스크롤 전에 좌표를 잡으면 빗나감 → 노드가 다 보인 뒤(= 자리 잡기 끝) 누른다 (B51)
+    await expect(page.locator('[data-current]')).toBeInViewport({ ratio: 1 });
     await locked.click({ force: true });
     await expect(
       page.getByRole('status').getByText('1단계를 통과하면 열려요'),
