@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => ({
     runCode: vi.fn(),
     stop: vi.fn(),
     retry: vi.fn(),
+    start: vi.fn(),
   },
   tutor: {
     sendTutorRequest: vi.fn(async () => ({

@@ -225,7 +225,10 @@ export function useQuestSession({
     runCode,
     stop,
     retry,
+    start: startRunner,
   } = usePyodideRuntime();
+  // 공용 Worker는 lazy (PyodideProvider): 코드 퀘스트는 들어오자마자 준비
+  useEffect(() => startRunner(), [startRunner]);
   const {
     sendTutorRequest,
     sendTutorStreamRequest,

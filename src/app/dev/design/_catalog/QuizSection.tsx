@@ -9,6 +9,9 @@ import {
   type QuizPanelProps,
 } from '@/components/quest/quiz/QuizPanel';
 import { quizLine } from '@/components/quest/quiz/QuizQuest';
+import { QuizTryRunView } from '@/components/quest/quiz/QuizTryRun';
+import { PyodideProvider } from '@/lib/pyodide/PyodideProvider';
+import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuizPrompt } from '@/lib/quest/questKind';
 import type {
   QuizAnswerResponse,
@@ -335,8 +338,10 @@ function FillBlankDemos() {
  */
 export function QuizSection() {
   const [round, setRound] = useState(0);
+  // 견본의 "직접 실행해 보기"는 진짜 실행기 (lazy: 누르기 전엔 Pyodide를 받지 않음, P7-07)
   return (
     <MotionProvider>
+      <PyodideProvider>
       <Section
         id="quiz"
         kicker="퀘스트 (P7-03)"
@@ -484,7 +489,9 @@ export function QuizSection() {
         <FillBlankDemos />
         <BugHuntDemos />
         <ParsonsDemos />
+        <TryRunDemos />
       </Section>
+      </PyodideProvider>
     </MotionProvider>
   );
 }
@@ -781,6 +788,94 @@ function ParsonsDemos() {
               })}
             />
           </div>
+        </Demo>
+      </div>
+    </div>
+  );
+}
+
+/** "직접 실행해 보기" 상태 견본용 실행기 (진짜 Worker 대신 고정 상태) */
+function stillRunner(
+  status: 'loading' | 'ready',
+  stdout = '',
+): Parameters<typeof QuizTryRunView>[0]['runtime'] {
+  return {
+    status,
+    restarting: null,
+    loadStage: status === 'loading' ? 'download' : null,
+    isRunning: false,
+    runCode: async (): Promise<RunResult> => ({
+      stdout,
+      stderr: '',
+      success: true,
+    }),
+    stop: () => {},
+    retry: () => {},
+  };
+}
+const TRY_CODE = QUIZ_PREDICT.kind === 'multiple_choice' ? QUIZ_PREDICT.code! : '';
+const TRY_EDITED = 'for i in range(5):\n    print(i)';
+
+/** 정답 뒤 "직접 실행해 보기" (P7-07, §12-Q60 4b 코드 바꿔 보기) */
+function TryRunDemos() {
+  return (
+    <div className="mt-8 space-y-4" data-testid="quiz-try-demos">
+      <h3 id="quiz-try" className="mb-2 text-h3 font-display">
+        직접 실행해 보기 (P7-07)
+      </h3>
+      <p className="text-small text-muted-foreground">
+        정답(또는 정답 공개) 뒤 채점 쪽지 아래 버튼. 맞힌 답으로 조립한 코드(출력 예측형 객관식은 문제 코드, 빈칸은 채운 코드, 순서는
+        정답 순서 + 들여쓰기, 버그 찾기는 고친 줄)가 공책 에디터에 들어가고, 코드 퀘스트와 같은 실행 줄·결과 쪽지로 돌려요. 실행기는 이
+        버튼을 누를 때 처음 불러와요. 도전 문구는 코드에서 자동(숫자 → 글자 → 한 줄). 바꿔 돌려도 채점·보상과 무관, &quot;처음
+        코드로&quot;로 되돌리기. 문제 코드가 없는 객관식은 버튼 없음.
+      </p>
+      <div className="grid items-start gap-4 md:grid-cols-2">
+        <Demo
+          label="버튼 (정답 뒤) — 진짜 실행기"
+          note="누르면 Pyodide를 이때 처음 받아요"
+          surface="card"
+          data-testid="quiz-try-button"
+        >
+          <div className="@container">
+            <Still
+              value={PREDICT_ANSWER}
+              submitted={PREDICT_ANSWER}
+              result={response({
+                correct: true,
+                stars: 3,
+                best_stars: 3,
+                xp_awarded: 30,
+                explanation: 'range(3)은 0, 1, 2 세 번 돌아요.',
+              })}
+            />
+          </div>
+        </Demo>
+        <Demo label="열림 · 실행기 불러오는 중" surface="card" data-testid="quiz-try-loading">
+          <QuizTryRunView code={TRY_CODE} kind="multiple_choice" runtime={stillRunner('loading')} />
+        </Demo>
+        <Demo label="출력" surface="card" data-testid="quiz-try-output">
+          <QuizTryRunView
+            code={TRY_CODE}
+            kind="multiple_choice"
+            runtime={stillRunner('ready', '0\n1\n2\n')}
+            initial={{ result: { stdout: '0\n1\n2\n', stderr: '', success: true } }}
+          />
+        </Demo>
+        <Demo
+          label="코드 바꿔 실행"
+          note="range(5)로 바꿔 돌림 · 처음 코드로가 켜짐"
+          surface="card"
+          data-testid="quiz-try-edited"
+        >
+          <QuizTryRunView
+            code={TRY_CODE}
+            kind="multiple_choice"
+            runtime={stillRunner('ready', '0\n1\n2\n3\n4\n')}
+            initial={{
+              code: TRY_EDITED,
+              result: { stdout: '0\n1\n2\n3\n4\n', stderr: '', success: true },
+            }}
+          />
         </Demo>
       </div>
     </div>

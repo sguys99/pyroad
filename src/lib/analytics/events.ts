@@ -7,6 +7,7 @@
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { SkinId } from '@/lib/avatar/skins';
 import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
+import type { QuizKind } from '@/lib/content/schema';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -87,6 +88,11 @@ export interface AnalyticsEventProps {
     kind: 'recent' | 'next' | 'start';
     place: 'head' | 'float';
   };
+  /**
+   * 퀴즈를 맞힌 뒤(또는 정답 공개 뒤) "직접 실행해 보기" 칸에서 코드를 돌림 (P7-07, 브라우저). kind: 퀴즈 종류,
+   * edited: 처음 코드에서 바꿔 돌렸는지. 코드·출력·퀘스트 id는 보내지 않는다 (채점·보상과 무관한 놀이)
+   */
+  quiz_try_run: { kind: QuizKind; edited: boolean };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -102,6 +108,7 @@ export const CLIENT_EVENT_NAMES = [
   'motion_tier_change',
   'pwa_install_prompt',
   'pwa_installed',
+  'quiz_try_run',
   'trial_start',
   'trial_run',
   'trial_success',

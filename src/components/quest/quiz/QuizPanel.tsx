@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
-import { Check, Lightbulb, RotateCcw, Sparkles, X } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { Check, Lightbulb, Play, RotateCcw, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { QuizKind, QuizPrompt } from '@/lib/quest/questKind';
 import type {
@@ -15,6 +16,7 @@ import {
   useSuccessRun,
   type QuestReward,
 } from '../QuestSuccess';
+import { quizRunCode } from '@/lib/quest/quizCode';
 import { QUIZ_INPUTS } from './quizInputs';
 import type { QuizInputDef } from './types';
 import '../outputPanel.css';
@@ -24,6 +26,16 @@ import './quiz.css';
 /** 한 회차에 틀릴 수 있는 수 (3번째 오답이면 정답 공개, 00026) */
 export const QUIZ_TRIES = 3;
 export const PRACTICE_NOTE = '내일 다시 도전하면 별을 더 모을 수 있어요';
+
+// "직접 실행해 보기" 칸(에디터·실행기)은 누를 때 불러옴 — 퀴즈 첫 화면 JS·Pyodide 를 늘리지 않음 (P7-07)
+const QuizTryRun = dynamic(() => import('./QuizTryRun'), {
+  ssr: false,
+  loading: () => (
+    <p className="qz-try-wait" role="status">
+      실행 칸을 펼치는 중이에요…
+    </p>
+  ),
+});
 
 export interface QuizPanelProps {
   title: string;
@@ -87,6 +99,20 @@ export function QuizPanel(p: QuizPanelProps) {
   useEffect(() => {
     if (result) live.current?.scrollIntoView?.({ block: 'nearest' });
   }, [result]);
+  // 정답(또는 공개) 뒤 돌려 볼 코드: 맞힌 제출값 / 공개된 정답으로 조립 (정답을 새로 받지 않음)
+  const tryCode =
+    result && ended
+      ? quizRunCode(
+          p.quiz,
+          status === 'revealed'
+            ? (result.revealed?.answer ?? null)
+            : p.submitted,
+        )
+      : null;
+  // 이 채점 결과에서 열었는지 (다시 풀면 닫힘)
+  const [triedFor, setTriedFor] = useState<QuizAnswerResponse | null>(null);
+  const tryOpen = !!result && triedFor === result;
+  const tryId = useId();
   const canSubmit =
     !!def && !result && def.isComplete(p.value as never, p.quiz as never);
 
@@ -151,6 +177,25 @@ export function QuizPanel(p: QuizPanelProps) {
       <div aria-live="polite" className="qz-live" ref={live}>
         {result && <Verdict result={result} status={status} done={done} />}
       </div>
+
+      {tryCode && (
+        <div className="qz-try-wrap">
+          <Button
+            variant="secondary"
+            size="md"
+            icon={<Play aria-hidden />}
+            aria-expanded={tryOpen}
+            aria-controls={tryId}
+            onClick={() => setTriedFor(tryOpen ? null : result)}
+            data-testid="quiz-try-toggle"
+          >
+            {tryOpen ? '실행 칸 접기' : '직접 실행해 보기'}
+          </Button>
+          <div id={tryId}>
+            {tryOpen && <QuizTryRun code={tryCode} kind={p.quiz.kind} />}
+          </div>
+        </div>
+      )}
 
       {result && ended && (
         <RewardStrip

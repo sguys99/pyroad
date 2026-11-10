@@ -27,7 +27,8 @@ export function PyodideProvider({
   /** 테스트용 (시간 초과·멈추기 대기 시간) */
   options?: UsePyodideOptions;
 }) {
-  const runtime = usePyodide(options);
+  // 퀴즈 화면은 Pyodide를 받지 않게 lazy: 코드 퀘스트(useQuestSession)는 들어오자마자, 퀴즈는 "직접 실행해 보기"에서 start() (P7-07)
+  const runtime = usePyodide({ lazy: true, ...options });
   useSamplingPause(runtime.status === 'loading' || runtime.isRunning);
   return (
     <PyodideContext.Provider value={runtime}>

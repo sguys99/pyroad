@@ -337,6 +337,60 @@
   transition: none;
 }
 
+/* ───── 직접 실행해 보기 (P7-07): 채점 쪽지 바로 아래 버튼 → 펼치는 실행 칸(공책 CodePanel 그대로).
+   칸 머리는 도전 문구 한 줄(쪽지 면 + 반짝 아이콘) + 놀이 안내. 펼칠 때 한 번 톡 (lite 짧게 · minimal 페이드 · 동작 줄이기 없음) */
+.qz-try-wrap {
+  display: grid;
+  /* 코드 키보드 띠(가로 스크롤)가 칸을 넓히지 않게 */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.qz-try-wrap > button {
+  width: 100%;
+}
+.qz-try {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  animation: qz-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+.qz-try-dare {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 700;
+  line-height: var(--text-body--line-height);
+}
+.qz-try-dare > svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  color: var(--accent-text);
+}
+.qz-try-note,
+.qz-try-wait {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+:root[data-motion='lite'] .qz-try {
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-try {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-try {
+  animation: none;
+}
+
 /* ───── 행동 줄: 고르는 동안은 쪽 아래에 붙어 늘 보임, 채점 뒤에는 쪽지 바로 아래 제자리 */
 .qz-actions {
   position: sticky;

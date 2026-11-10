@@ -172,6 +172,17 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     expect(parse({ ...ok, quest_id: 'q1' })).toBe(false);
   });
 
+  it('퀴즈 직접 실행(P7-07): 종류·바꿨는지만, 코드는 거부', () => {
+    const ok = { kind: 'parsons', edited: true };
+    const parse = (props: unknown) =>
+      clientBatchSchema.safeParse(
+        batch([{ name: 'quiz_try_run', props, path: '/quest/x' }]),
+      ).success;
+    expect(parse(ok)).toBe(true);
+    expect(parse({ ...ok, kind: 'boss' })).toBe(false);
+    expect(parse({ ...ok, code: 'print(1)' })).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'continue_click',
@@ -180,6 +191,7 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
       'motion_tier_change',
       'pwa_install_prompt',
       'pwa_installed',
+      'quiz_try_run',
       'trial_run',
       'trial_start',
       'trial_success',

@@ -87,6 +87,12 @@ export const EVENT_PROPS_SCHEMA = {
       place: z.enum(['head', 'float']),
     })
     .strict(),
+  quiz_try_run: z
+    .object({
+      kind: z.enum(['multiple_choice', 'fill_blank', 'parsons', 'bug_hunt']),
+      edited: z.boolean(),
+    })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -137,6 +143,13 @@ const clientEvent = z.discriminatedUnion('name', [
     .strict(),
   z
     .object({
+      name: z.literal('quiz_try_run'),
+      props: EVENT_PROPS_SCHEMA.quiz_try_run,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
       name: z.literal('trial_start'),
       props: EVENT_PROPS_SCHEMA.trial_start.default({}),
       path: z.string().max(200).optional(),
@@ -170,6 +183,7 @@ const _clientNamesCovered: Record<
   pwa_install_prompt: 'pwa_install_prompt',
   pwa_installed: 'pwa_installed',
   continue_click: 'continue_click',
+  quiz_try_run: 'quiz_try_run',
   trial_start: 'trial_start',
   trial_run: 'trial_run',
   trial_success: 'trial_success',
