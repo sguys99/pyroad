@@ -9,7 +9,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['**/*.content.test.ts'],
-    exclude: ['e2e/**', 'node_modules/**', 'spikes/**'],
+    exclude: ['e2e/**', 'node_modules/**', 'spikes/**', '.claude/worktrees/**'],
     // 각 테스트는 미리 예약한 자기 단위의 실행 결과를 기다림
     testTimeout: 120_000,
     hookTimeout: 180_000,

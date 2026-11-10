@@ -9,7 +9,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['**/*.pyodide.test.ts'],
-    exclude: ['e2e/**', 'node_modules/**', 'spikes/**'],
+    exclude: ['e2e/**', 'node_modules/**', 'spikes/**', '.claude/worktrees/**'],
     testTimeout: 60_000,
     hookTimeout: 120_000,
   },
