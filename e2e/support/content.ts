@@ -13,6 +13,8 @@ export interface E2eQuest {
   order: number;
   title: string;
   solution: string;
+  /** 처음 코드 (공책 첫 내용) */
+  starter: string;
   fallbackText: string;
   /** 공개 안내 "나와야 하는 모습" (결과 쪽지 견줘 보기, P6-06) */
   expectedHint: string;
@@ -31,7 +33,11 @@ interface QuestYaml {
   order: number;
   title: string;
   quest_type: string;
-  prompt: { fallback_text: string; expected_output_hint: string };
+  prompt: {
+    fallback_text: string;
+    expected_output_hint: string;
+    starter_code?: string;
+  };
   answer: {
     solution_code?: string;
     hints: { level_1: string; level_2: string; level_3: string };
@@ -57,6 +63,7 @@ export function stages(): E2eStage[] {
           order: q.order,
           title: q.title,
           solution: (q.answer.solution_code ?? '').trim(),
+          starter: (q.prompt.starter_code ?? '').trim(),
           fallbackText: q.prompt.fallback_text.trim(),
           expectedHint: q.prompt.expected_output_hint.trim(),
           hints: [

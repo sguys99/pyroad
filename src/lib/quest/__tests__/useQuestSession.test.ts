@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
   upserts: [] as Array<{ payload: Record<string, unknown>; options: unknown }>,
   refresh: vi.fn(),
   confetti: vi.fn(),
+  resetConfetti: vi.fn(),
 }));
 
 vi.mock('@/lib/pyodide/PyodideProvider', () => ({
@@ -36,10 +37,16 @@ vi.mock('@/lib/tutor/useTutor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/tutor/useTutor')>()),
   useTutor: () => mocks.tutor,
 }));
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: mocks.refresh, push: vi.fn() }),
+// Next의 useRouter처럼 같은 객체 (렌더마다 새 객체면 router를 deps로 둔 effect가 매번 정리됨)
+const router = vi.hoisted(() => ({
+  refresh: (): void => {},
+  push: (): void => {},
 }));
-vi.mock('@/lib/confetti', () => ({ fireConfetti: mocks.confetti }));
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
+vi.mock('@/lib/confetti', () => ({
+  fireConfetti: mocks.confetti,
+  resetConfetti: mocks.resetConfetti,
+}));
 vi.mock('@/lib/supabase/loadClient', () => ({
   loadBrowserClient: async () => ({
     from: () => ({
@@ -211,7 +218,9 @@ beforeEach(() => {
   mocks.tutor.setIsLoading.mockReset();
   mocks.upserts.length = 0;
   mocks.refresh.mockReset();
+  router.refresh = mocks.refresh;
   mocks.confetti.mockReset();
+  mocks.resetConfetti.mockReset();
   routes = {
     '/api/quest/validate': () => ({ json: { passed: true } }),
     '/api/quest/complete': () => ({ json: completion() }),
@@ -1030,5 +1039,119 @@ describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
     // 코드를 고치면 그 결과는 지금 코드의 것이 아님
     act(() => result.current.setCode('x = 2\nprint(x)'));
     expect(result.current.canAskWhy).toBe(false);
+  });
+});
+
+// ── 퀘스트 사이 이동 (P6-15) ───────────────────────────────────────────
+// 퀘스트 페이지는 렌더러를 key={quest.id}로 다시 마운트한다. 앞 퀘스트 세션이 남긴 예약·늦은 응답·컨페티가
+// 다음 퀘스트 화면에 나타나지 않는지 (unmount 뒤 아무 일도 일어나지 않아야 함)
+
+describe('useQuestSession: 퀘스트를 떠나면 앞 퀘스트의 일이 남지 않는다 (P6-15)', () => {
+  it('축하 지연 중에 떠나면 축하가 쌓이지 않고, 떠 있는 컨페티를 지운다', async () => {
+    routes['/api/quest/complete'] = () => ({
+      json: completion({ new_badges: ['first_code'] }),
+    });
+    const { result, unmount } = renderHook(() =>
+      useQuestSession(options(CODE_QUEST)),
+    );
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(mocks.confetti).toHaveBeenCalled();
+    const store = result.current.celebrationStore;
+    unmount();
+    expect(mocks.resetConfetti).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(CELEBRATION_DELAY_MS.code * 2);
+    expect(store.get()).toEqual([]);
+  });
+
+  it('완료 응답이 떠난 뒤에 오면 축하·Router Cache 새로 받기를 하지 않는다', async () => {
+    let answer!: () => void;
+    const gate = new Promise<void>((resolve) => (answer = resolve));
+    const fetchMock = vi.mocked(fetch);
+    const real = fetchMock.getMockImplementation()!;
+    fetchMock.mockImplementation(async (url, init) => {
+      if (url === '/api/quest/complete') await gate;
+      return real(url, init);
+    });
+    routes['/api/quest/complete'] = () => ({
+      json: completion({ new_badges: ['first_code'] }),
+    });
+    const { result, unmount } = renderHook(() =>
+      useQuestSession(options(CODE_QUEST)),
+    );
+    let run!: Promise<unknown>;
+    act(() => {
+      run = result.current.handleRun();
+    });
+    await act(flush);
+    const store = result.current.celebrationStore;
+    unmount();
+    answer();
+    await run;
+    await vi.advanceTimersByTimeAsync(CELEBRATION_DELAY_MS.code * 2);
+    expect(store.get()).toEqual([]);
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+
+  it('진행을 바꾼 퀘스트를 떠날 때만 Router Cache를 새로 받는다 (뒤로 가면 저장한 코드가 보이게)', async () => {
+    const untouched = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(AUTO_SAVE_DELAY_MS);
+      await flush();
+    });
+    untouched.unmount();
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    const edited = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    act(() => edited.result.current.setCode('x = 10'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(AUTO_SAVE_DELAY_MS);
+      await flush();
+    });
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    edited.unmount();
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+
+    const hinted = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await hinted.result.current.handleHintRequest();
+    });
+    hinted.unmount();
+    expect(mocks.refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it('새 퀘스트 세션은 앞 세션과 상태를 나누지 않는다 (코드·결과·힌트·대화·축하 저장소)', async () => {
+    const a = renderHook(() =>
+      useQuestSession(options(CODE_QUEST, progressRow({ hints_used: 2 }))),
+    );
+    act(() => a.result.current.setCode('print("A")'));
+    await act(async () => {
+      await a.result.current.handleRun();
+    });
+    const storeA = a.result.current.celebrationStore;
+    a.unmount();
+
+    const QUEST_B = {
+      ...CODE_QUEST,
+      id: 'q-b',
+      prompt_skeleton: {
+        ...CODE_QUEST.prompt_skeleton,
+        starter_code: 'y = ___',
+      },
+    } as unknown as QuestWithStage;
+    const b = renderHook(() => useQuestSession(options(QUEST_B)));
+    const s = b.result.current;
+    expect(s.code).toBe('y = ___');
+    expect(s.runResult).toBeNull();
+    expect(s.validation).toBeNull();
+    expect(s.isCompleted).toBe(false);
+    expect(s.hintsUsed).toBe(0);
+    expect(s.tab).toBe('story');
+    expect(s.askOpen).toBe(false);
+    expect(s.celebrationStore).not.toBe(storeA);
+    expect(s.celebrations).toEqual([]);
+    expect(s.stepCleared).toBeNull();
+    b.unmount();
   });
 });

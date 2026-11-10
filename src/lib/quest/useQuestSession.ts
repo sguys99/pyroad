@@ -9,7 +9,7 @@ import { useTutor, TutorRateLimitError } from '@/lib/tutor/useTutor';
 import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
-import { fireConfetti } from '@/lib/confetti';
+import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { useSfx } from '@/components/providers/SoundProvider';
 import type {
@@ -303,8 +303,21 @@ export function useQuestSession({
       aliveRef.current = false;
       for (const timer of timers) clearTimeout(timer);
       timers.clear();
+      // 정답·단계 통과 컨페티가 다음 퀘스트 위로 떨어지지 않게 (P6-15)
+      resetConfetti();
     };
   }, []);
+
+  // 진행을 서버에 쓴 퀘스트(코드 자동 저장·힌트·황금키)를 떠나면 Router Cache를 새로 받는다 (P6-15).
+  // 뒤로/앞으로는 캐시된 페이지 데이터를 그대로 다시 쓰므로, 안 그러면 돌아왔을 때 처음 들어온 때의 코드·힌트 수가 보인다
+  const wroteRef = useRef(false);
+  const [entry] = useState(() => ({ code, stepState }));
+  useEffect(
+    () => () => {
+      if (wroteRef.current) router.refresh();
+    },
+    [router],
+  );
 
   // 퀘스트를 떠날 때 돌던 코드를 멈춘다 (Worker는 레이아웃이 계속 가지고 있으므로 다음 퀘스트가 바로 쓸 수 있게)
   useEffect(() => stop, [stop]);
@@ -467,6 +480,9 @@ export function useQuestSession({
   useEffect(() => {
     if (isCompleted) return;
     const timer = setTimeout(() => {
+      // 들어온 그대로를 다시 저장하는 것은 바뀐 것이 아님
+      if (code !== entry.code || stepState !== entry.stepState)
+        wroteRef.current = true;
       saveProgress(
         kind === 'project'
           ? {
@@ -478,7 +494,7 @@ export function useQuestSession({
       );
     }, AUTO_SAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [code, isCompleted, kind, stepState, saveProgress]);
+  }, [code, isCompleted, kind, stepState, saveProgress, entry]);
 
   // ── 단계·완료 ───────────────────────────────────────────────────────
 
@@ -818,6 +834,7 @@ export function useQuestSession({
     };
 
     play('tap');
+    wroteRef.current = true;
     setMessages((prev) => [...prev, hintLabel]);
     setStepHints(nextLevel);
     setTotalHints((n) => n + 1);
@@ -970,6 +987,7 @@ export function useQuestSession({
 
     lockSubmit(true);
     setIsGoldenKeyLoading(true);
+    wroteRef.current = true;
     let advancing = false;
 
     try {
