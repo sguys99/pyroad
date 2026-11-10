@@ -762,6 +762,7 @@ export const EXPECT = {
   'QZ-7': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '다음 날 review, 늘어난 별만 XP' },
   'QZ-8': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: 'jsonb = (@> 금지), 모양·유형 거부' },
   'QZ-9': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '스테이지 잠금 + 퀴즈는 보너스 (Q60)' },
+  'QZ-10': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'B50', note: '00027: 리셋 범위의 quiz_attempts 삭제 (오늘의 퀴즈 완료가 남지 않음)' },
   // 만 14세 미만 법정대리인 동의 (P3-15, ① 00024)
   'GC-1': {
     expect: 'deny',

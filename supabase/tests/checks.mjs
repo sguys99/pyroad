@@ -5234,6 +5234,41 @@ async function groupQuiz(u) {
         );
       },
     });
+    await check({
+      group: 'quiz',
+      id: 'QZ-10',
+      role: 'service_role',
+      op: 'B50 reset_progress 가 퀴즈 시도 기록도 지움: 뒤 스테이지 리셋은 그대로 · 전체 리셋 → 0 · 다시 first · 그 스테이지 리셋 → 0',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz10', '퀴즈리셋');
+        const reset = (scope, stage = null) =>
+          rpc('reset_progress', { p_user_id: x.id, p_scope: scope, p_stage_id: stage });
+        const count = () => one(`select count(*) from public.quiz_attempts where user_id = '${x.id}'`);
+        const a = await quiz(x.id, QZ_WRONG[0]);
+        const r2 = await reset('stage', STAGE2);
+        const afterStage2 = count();
+        const rAll = await reset('all');
+        const afterAll = count();
+        const again = await quiz(x.id, QZ_WRONG[0]);
+        const r1 = await reset('stage', STAGE1);
+        for (const r of [r2, rAll, r1])
+          if (r.status !== 200) return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
+        return (
+          compare(
+            '퀴즈 리셋',
+            { first: 'first 1', afterStage2: '1', afterAll: '0', again: 'first 1', afterStage1: '0' },
+            {
+              first: `${a.json?.mode} ${a.json?.attempt_no}`,
+              afterStage2,
+              afterAll,
+              again: `${again.json?.mode} ${again.json?.attempt_no}`,
+              afterStage1: count(),
+            },
+          ) || { actual: 'ok', detail: '오답 1번 → 스테이지 2 리셋 1행 · 전체 리셋 0행 → 다시 first 1번째 → 스테이지 1 리셋 0행' }
+        );
+      },
+    });
   } finally {
     if (ready) one(`delete from public.quests where id in ('${QZ_MC}', '${QZ_PARSONS}', '${QZ_LOCKED}')`);
   }

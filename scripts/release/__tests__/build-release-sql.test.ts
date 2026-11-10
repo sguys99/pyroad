@@ -95,6 +95,16 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       phase3.indexOf('-- ===== 00023 ====='),
     );
     expect(phase3).not.toContain('-- ===== 00022 =====');
+    // Phase 7 ①: 00026(퀴즈 채점) 다음 00027(reset_progress 가 퀴즈 시도 기록도 지움, B50)
+    const phase7 = readFileSync(
+      join(out, 'v0.6-phase7', '1_먼저실행.sql'),
+      'utf8',
+    );
+    expect(phase7.indexOf('-- ===== 00026 =====')).toBeGreaterThan(0);
+    expect(phase7.indexOf('-- ===== 00027 =====')).toBeGreaterThan(
+      phase7.indexOf('-- ===== 00026 ====='),
+    );
+    expect(phase7).toMatch(/DELETE FROM public\.quiz_attempts/);
   });
 
   it('--release 로 고른 릴리즈만, --crlf 면 모든 줄바꿈이 CRLF', () => {
