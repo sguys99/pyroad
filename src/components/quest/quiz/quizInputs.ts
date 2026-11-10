@@ -1,5 +1,6 @@
 import type { QuizKind } from '@/lib/quest/questKind';
 import { multipleChoiceInput } from './MultipleChoice';
+import { parsonsInput } from './Parsons';
 import type { QuizInputDef } from './types';
 
 /**
@@ -8,4 +9,5 @@ import type { QuizInputDef } from './types';
  */
 export const QUIZ_INPUTS: { [K in QuizKind]?: QuizInputDef<K> } = {
   multiple_choice: multipleChoiceInput,
+  parsons: parsonsInput,
 };

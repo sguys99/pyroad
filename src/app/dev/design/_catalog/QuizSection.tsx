@@ -343,7 +343,138 @@ export function QuizSection() {
             </div>
           </Demo>
         </div>
+        <ParsonsDemos />
       </Section>
     </MotionProvider>
+  );
+}
+
+/** 순서 맞추기 (P7-05). 들여쓰기 단계까지 정하는 구구단 견본 */
+const QUIZ_PARSONS: QuizPrompt = {
+  kind: 'parsons',
+  question: '구구단 2단을 보여 주는 코드가 되도록 줄을 맞춰 보자',
+  indent: true,
+  lines: [
+    { id: 'ln-m2xa', code: 'print(2, "x", i, "=", 2 * i)' },
+    { id: 'ln-f5tb', code: 'print("2단 끝!")' },
+    { id: 'ln-q8wd', code: 'for i in range(1, 10):' },
+  ],
+};
+const PARSONS_ANSWER = [
+  { id: 'ln-q8wd', indent: 0 },
+  { id: 'ln-m2xa', indent: 1 },
+  { id: 'ln-f5tb', indent: 0 },
+];
+const PARSONS_WRONG = [
+  { id: 'ln-q8wd', indent: 0 },
+  { id: 'ln-m2xa', indent: 1 },
+  { id: 'ln-f5tb', indent: 1 },
+];
+
+/** 직접 정렬해 보기: 이 자리 채점 (순서·들여쓰기 모두 맞아야) */
+function LiveParsons() {
+  const [value, setValue] = useState<QuizAnswerValue | null>(null);
+  const [graded, setGraded] = useState<QuizAnswerResponse | null>(null);
+  const [submitted, setSubmitted] = useState<QuizAnswerValue | null>(null);
+  const submit = () => {
+    const correct = JSON.stringify(value) === JSON.stringify(PARSONS_ANSWER);
+    setSubmitted(value);
+    setGraded(
+      response({
+        correct,
+        stars: correct ? 3 : 0,
+        best_stars: correct ? 3 : 0,
+        xp_awarded: correct ? 30 : 0,
+        explanation: correct ? 'for 안의 줄만 한 칸 들여 써요.' : null,
+      }),
+    );
+  };
+  return (
+    <div className="@container">
+      <QuizPanel
+        {...base}
+        title="구구단 줄 맞추기"
+        quiz={QUIZ_PARSONS}
+        value={value}
+        onChange={graded ? () => {} : setValue}
+        status={quizStatus(graded)}
+        result={graded}
+        submitted={submitted}
+        misses={[]}
+        mode="first"
+        onSubmit={submit}
+        onRetry={() => {
+          setGraded(null);
+          setValue(null);
+        }}
+      />
+    </div>
+  );
+}
+
+function ParsonsDemos() {
+  const q = { ...base, title: '구구단 줄 맞추기', quiz: QUIZ_PARSONS };
+  return (
+    <div className="mt-8 space-y-4" data-testid="quiz-parsons">
+      <h3 className="font-display text-h3">순서 맞추기 (P7-05)</h3>
+      <p className="max-w-3xl text-small text-muted-foreground">
+        아래 줄 조각을 누르면 내 코드 맨 아래에 붙고, 내 코드의 줄을 누르면
+        돌아가요. 손잡이를 끌거나 위/아래 버튼으로 순서를, 들여쓰기 퀴즈면 ← →
+        버튼으로 0~4칸을 정해요(점선 안내선). 틀리면 어느 줄인지는 알려 주지
+        않고 &quot;어딘가 순서가 달라요&quot;, 정답 공개는 정답 순서로.
+      </p>
+      <div className="grid items-start gap-4 md:grid-cols-2">
+        <Demo
+          label="직접 맞춰 보기 (들여쓰기)"
+          note="for → print(한 칸) → print(0칸)"
+          surface="card"
+          data-testid="quiz-parsons-live"
+        >
+          <LiveParsons />
+        </Demo>
+        <Demo label="반쯤 쌓음" surface="card" data-testid="quiz-parsons-partial">
+          <div className="@container">
+            <Still {...q} value={PARSONS_ANSWER.slice(0, 2)} />
+          </div>
+        </Demo>
+        <Demo
+          label="오답 (제출 순서 그대로)"
+          note="어느 줄이 틀렸는지는 정답이라 표시 안 함"
+          surface="card"
+          data-testid="quiz-parsons-wrong"
+        >
+          <div className="@container">
+            <Still
+              {...q}
+              value={PARSONS_WRONG}
+              submitted={PARSONS_WRONG}
+              result={response({})}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="공개 (정답 순서)"
+          surface="card"
+          data-testid="quiz-parsons-revealed"
+        >
+          <div className="@container">
+            <Still
+              {...q}
+              submitted={PARSONS_WRONG}
+              result={response({
+                attempt_no: 3,
+                stars: 1,
+                best_stars: 1,
+                xp_awarded: 10,
+                revealed: {
+                  answer: PARSONS_ANSWER,
+                  explanation: 'for 안의 줄만 한 칸 들여 써요.',
+                },
+              })}
+            />
+          </div>
+        </Demo>
+      </div>
+    </div>
   );
 }
