@@ -44,7 +44,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       supabase
         .from('stages')
         .select(
-          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, concept, quest_type, is_mobile_friendly)',
+          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, concept, quest_type, quiz_kind, is_mobile_friendly)',
         ),
       supabase
         .from('user_progress')

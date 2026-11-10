@@ -186,7 +186,7 @@
   background: var(--primary);
   color: var(--on-primary);
 }
-/* 휴대폰 추천: 좁은 화면(휴대폰)에서는 진하게 눈에 띄게, 넓은 화면은 옅게 */
+/* "폰에서 하기 좋아요" (P7-11): 휴대폰·태블릿(usePhoneLike)에서만 그려짐. 휴대폰은 진하게, 태블릿 폭은 옅게 */
 .ss-tag[data-mobile] {
   background: var(--secondary);
   color: var(--on-secondary);
@@ -196,6 +196,21 @@
     background: var(--surface-2);
     color: var(--text-muted);
   }
+}
+/* 퀴즈 보너스 안내 한 줄 (P7-11) */
+.ss-bonus {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.ss-bonus svg {
+  flex: none;
+  color: var(--accent);
 }
 .ss-end {
   display: inline-flex;

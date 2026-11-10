@@ -27,7 +27,7 @@ export default async function QuestPage({ params }: Props) {
     supabase
       .from('quests')
       .select(
-        'id, stage_id, order, title, concept, quest_type, quiz_kind, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name, world:worlds(slug), quests(id, order, title))',
+        'id, stage_id, order, title, concept, quest_type, quiz_kind, prompt_skeleton, validation_type, xp_reward, created_at, stage:stages(id, title, order, theme_name, world:worlds(slug), quests(id, order, title, quest_type))',
       )
       .eq('id', questId)
       .single(),

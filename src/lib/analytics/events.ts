@@ -93,6 +93,11 @@ export interface AnalyticsEventProps {
    * edited: 처음 코드에서 바꿔 돌렸는지. 코드·출력·퀘스트 id는 보내지 않는다 (채점·보상과 무관한 놀이)
    */
   quiz_try_run: { kind: QuizKind; edited: boolean };
+  /**
+   * 폰 퀴즈 추천 (P7-11, 브라우저). place: world(월드맵 이어하기 아래 쪽지)·quest(코드 퀘스트 첫 진입 쪽지),
+   * action: show(보임, 화면에 들어올 때 1번)·click(퀴즈로 감). 퀘스트 id·제목은 보내지 않는다
+   */
+  phone_quiz_pick: { place: 'world' | 'quest'; action: 'show' | 'click' };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -106,6 +111,7 @@ export const CLIENT_EVENT_NAMES = [
   'landing_view',
   'landing_cta_click',
   'motion_tier_change',
+  'phone_quiz_pick',
   'pwa_install_prompt',
   'pwa_installed',
   'quiz_try_run',

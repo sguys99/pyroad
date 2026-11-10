@@ -69,8 +69,16 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/** 코드 퀘스트 폰 퀴즈 쪽지(P7-11) "본 기록" 키 (`src/components/quest/PhoneQuizNote.tsx`) */
+export const PHONE_QUIZ_NOTE_KEY = 'pyroad.phoneQuizNote';
+
 export const test = base.extend<
-  { resetProgress: void; cspGuard: void; settle: void },
+  {
+    resetProgress: void;
+    cspGuard: void;
+    settle: void;
+    quietPhoneQuizNote: void;
+  },
   { e2eUser: E2eUser }
 >({
   e2eUser: [
@@ -89,6 +97,19 @@ export const test = base.extend<
   settle: [
     async ({ page }, use) => {
       await settleWrites(page, () => use());
+    },
+    { auto: true },
+  ],
+  // 좁은 화면 퀘스트 스펙에서 폰 퀴즈 쪽지(아래 가운데 토스트)가 실행 버튼·키보드를 가리지 않게 "봤음"으로 시작.
+  // 쪽지를 보는 테스트는 자기 init 스크립트(이 뒤에 실행됨)로 키를 지운다
+  quietPhoneQuizNote: [
+    async ({ page }, use) => {
+      await page.addInitScript((key) => {
+        try {
+          localStorage.setItem(key, '1');
+        } catch {}
+      }, PHONE_QUIZ_NOTE_KEY);
+      await use();
     },
     { auto: true },
   ],

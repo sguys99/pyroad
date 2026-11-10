@@ -29,6 +29,7 @@ const stage = (id: string, order: number, questIds: string[]) => ({
       title: `퀘스트 ${qid}`,
       concept: `개념 ${qid}`,
       quest_type: 'code',
+      quiz_kind: null,
       is_mobile_friendly: i === 0,
     }))
     .reverse(),
@@ -89,6 +90,7 @@ describe('toWorldMapData (P5-13)', () => {
         title: '퀘스트 q1',
         concept: '개념 q1',
         quest_type: 'code',
+        quiz_kind: null,
         is_mobile_friendly: true,
         status: 'completed',
         best_stars: 3,
@@ -99,6 +101,7 @@ describe('toWorldMapData (P5-13)', () => {
         title: '퀘스트 q2',
         concept: '개념 q2',
         quest_type: 'code',
+        quiz_kind: null,
         is_mobile_friendly: false,
         status: 'in_progress',
         best_stars: 0,
