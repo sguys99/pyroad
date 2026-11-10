@@ -419,6 +419,9 @@ const Q2 = 'b1000000-0000-0000-0000-000000000002'; // 1-2
 const Q3 = 'b1000000-0000-0000-0000-000000000003'; // 1-4
 const Q_PROJECT = 'b1000000-0000-0000-0000-000000000022'; // 7-1 프로젝트
 const STAGE1 = 'a1000000-0000-0000-0000-000000000001';
+/** 콘텐츠 seed(생성물)의 quest_type 별 퀘스트 수. 기대값을 숫자로 박지 않고 seed 에서 셈 (build.ts 가 quest_type 을 한 줄에 씀) */
+const seedQuestCount = (type) =>
+  readFileSync(join(HERE, '..', 'seed.sql'), 'utf8').match(new RegExp(`^  '${type}',\\r?$`, 'gm'))?.length ?? 0;
 
 // ── 그룹 ──────────────────────────────────────────────────
 async function groupEnv() {
@@ -1674,12 +1677,12 @@ async function groupAnswer(u) {
       group: 'answer',
       id: 'B08-1',
       role: 'postgres',
-      op: '새 DB (마이그레이션 → seed) 에서 solution_code 가 있는 퀘스트 수',
+      op: '새 DB (마이그레이션 → seed) 에서 solution_code 가 있는 코드·프로젝트 퀘스트 수 (퀴즈는 정답 코드가 없음)',
       deny: ['present'],
       allow: ['missing'],
       run: () => {
         const n = solutionCount();
-        const total = one('select count(*) from public.quests');
+        const total = one(`select count(*) from public.quests where quest_type <> 'quiz'`);
         return {
           actual: n === '0' ? 'missing' : n === total ? 'present' : 'partial',
           detail: `${total}개 중 ${n}개`,
@@ -1892,20 +1895,20 @@ async function groupAnswer(u) {
     openapi(u.alice),
   );
   // 데이터: 모든 퀘스트의 정답이 quest_answer_keys 에 있고 quests 에는 남지 않음 (00005 + seed 정답 보정, B08)
-  //   코드·프로젝트 퀘스트 기준. 퀴즈(P7-01)가 생기면 quiz_answer 기준을 더할 것
+  //   코드·프로젝트 퀘스트는 expected_output·hints·정답 코드, 퀴즈(P7-01)는 quiz_answer (B49)
   await check({
     group: 'answer',
     id: 'AK-17',
     role: 'postgres',
-    op: 'quest_answer_keys 데이터: 퀘스트마다 expected_output·hints·정답 코드(또는 모든 단계 정답 코드), quests 에 남은 정답 0',
+    op: 'quest_answer_keys 데이터: 코드·프로젝트 퀘스트마다 expected_output·hints·정답 코드(또는 모든 단계 정답 코드), 퀴즈마다 quiz_answer, quests 에 남은 정답 0',
     deny: ['separated'],
     allow: ['left-in-quests', 'missing'],
     run: () => {
-      const [total, eo, hints, sol, stepSol, left] = one(
-        `select (select count(*) from public.quests),
-                count(*) filter (where k.expected_output <> ''),
-                count(*) filter (where k.hints <> '{}'::jsonb),
-                count(*) filter (where k.solution_code is not null
+      const [total, eo, hints, sol, stepSol, left, quizTotal, quizKey] = one(
+        `select (select count(*) from public.quests where quest_type <> 'quiz'),
+                count(*) filter (where q.quest_type <> 'quiz' and k.expected_output <> ''),
+                count(*) filter (where q.quest_type <> 'quiz' and k.hints <> '{}'::jsonb),
+                count(*) filter (where q.quest_type <> 'quiz' and k.solution_code is not null
                   or (jsonb_typeof(q.prompt_skeleton->'steps') = 'array'
                       and jsonb_array_length(q.prompt_skeleton->'steps') > 0
                       and (select count(*) from jsonb_array_elements(k.steps) s where s ? 'solution_code')
@@ -1913,14 +1916,17 @@ async function groupAnswer(u) {
                 (select count(*) from public.quest_answer_keys k2, jsonb_array_elements(k2.steps) s where s ? 'solution_code'),
                 (select count(*) from public.quests
                   where expected_output <> '' or prompt_skeleton ?| array['hints', 'solution_code']
-                     or jsonb_path_exists(prompt_skeleton, '$.steps[*] ? (exists(@.expected_output) || exists(@.hints) || exists(@.solution_code))'))
+                     or jsonb_path_exists(prompt_skeleton, '$.steps[*] ? (exists(@.expected_output) || exists(@.hints) || exists(@.solution_code))')),
+                (select count(*) from public.quests where quest_type = 'quiz'),
+                count(*) filter (where q.quest_type = 'quiz' and k.quiz_answer is not null)
            from public.quests q join public.quest_answer_keys k on k.quest_id = q.id`,
       )
         .split('|')
         .map(Number);
-      const detail = `퀘스트 ${total} · expected_output ${eo} · hints ${hints} · 정답 코드 ${sol} (단계 정답 ${stepSol}) · quests 에 남은 정답 ${left}`;
+      const detail = `코드·프로젝트 ${total} · expected_output ${eo} · hints ${hints} · 정답 코드 ${sol} (단계 정답 ${stepSol}) · 퀴즈 ${quizTotal} · quiz_answer ${quizKey} · quests 에 남은 정답 ${left}`;
       if (left > 0) return { actual: 'left-in-quests', detail };
-      const complete = total > 0 && eo === total && hints === total && sol === total;
+      const complete =
+        total > 0 && eo === total && hints === total && sol === total && quizKey === quizTotal;
       return { actual: complete ? 'separated' : 'missing', detail };
     },
   });
@@ -2119,9 +2125,10 @@ const progressRow = (uid, qid) => {
   );
   return v ? JSON.parse(v) : null;
 };
+// complete_quest 로 끝내는 퀘스트 (코드·프로젝트). 퀴즈는 보너스라 submit_quiz_answer 로만 풀고 클리어 계산에서 빠짐 (00026, Q60)
 const stageQuests = (stageId) =>
   one(
-    `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}'`,
+    `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}' and quest_type <> 'quiz'`,
   ).split(',');
 
 async function groupReward() {
@@ -2332,7 +2339,8 @@ async function groupReward() {
         ) ||
         compare(
           'stage_cleared',
-          { stage_id: STAGE1, order: 1, concepts: qs.length },
+          // concepts 는 스테이지의 모든 퀘스트(퀴즈 포함) 개념 (complete_quest 의 stage_cleared)
+          { stage_id: STAGE1, order: 1, concepts: Number(one(`select count(*) from public.quests where stage_id = '${STAGE1}'`)) },
           { ...last.json.stage_cleared, concepts: last.json.stage_cleared?.concepts?.length },
         ) ||
         compare('스테이지 2 황금키', { status: 200 }, { status: unlocked.status }) || {
@@ -3464,7 +3472,7 @@ async function groupSchema(u) {
     group: 'schema',
     id: 'WD-4',
     role: 'postgres',
-    op: '스테이지 world_id·quest_type 백필 (7개 → 1월드, 7-1 project · 나머지 code, quiz_kind 없음)',
+    op: '스테이지 world_id·quest_type 백필 (7개 → 1월드, 7-1 project · code·quiz 는 seed 와 같은 수, quiz_kind·모바일은 퀴즈만)',
     deny: ['mismatch', 'error'],
     allow: ['ok'],
     run: () =>
@@ -3474,8 +3482,10 @@ async function groupSchema(u) {
           RAISE EXCEPTION 'stages: 1월드가 아닌 스테이지 또는 7개가 아님';
         END IF;
         IF (SELECT string_agg(id::text, ',') FROM public.quests WHERE quest_type = 'project') <> '${Q_PROJECT}'
-           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'code') <> 43
-           OR EXISTS (SELECT 1 FROM public.quests WHERE quiz_kind IS NOT NULL OR is_mobile_friendly) THEN
+           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'code') <> ${seedQuestCount('code')}
+           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'quiz') <> ${seedQuestCount('quiz')}
+           OR EXISTS (SELECT 1 FROM public.quests
+                       WHERE (quiz_kind IS NOT NULL) <> (quest_type = 'quiz') OR is_mobile_friendly <> (quest_type = 'quiz')) THEN
           RAISE EXCEPTION 'quests: quest_type·quiz_kind·is_mobile_friendly 가 기대와 다름';
         END IF;
       END $$;`),
@@ -4872,7 +4882,7 @@ async function groupSeenUnlocks(u) {
 }
 
 // ── quiz: 퀴즈 채점 RPC (P7-02, ① 00026) ───────────────────────
-// 시드에는 퀴즈가 아직 없어(P7-12) 점검용 퀴즈를 postgres 로 만들고 끝에 지움 (다른 그룹의 stageQuests 와 겹치지 않게 맨 뒤에서)
+// 시드 퀴즈(P7-12)와 별개로 정답을 아는 점검용 퀴즈를 postgres 로 만들고 끝에 지움 (다른 그룹 점검과 겹치지 않게 맨 뒤에서)
 const QZ_MC = 'd7000000-0000-0000-0000-000000000001'; // 스테이지 1, 객관식
 const QZ_PARSONS = 'd7000000-0000-0000-0000-000000000002'; // 스테이지 1, 순서 맞추기 (정답 2개)
 const QZ_LOCKED = 'd7000000-0000-0000-0000-000000000003'; // 스테이지 2, 객관식
@@ -5193,9 +5203,7 @@ async function groupQuiz(u) {
         const x = await createUser('qz9', '보너스');
         const locked = await quiz(x.id, QZ_RIGHT, QZ_LOCKED);
         const lockedRows = one(`select count(*) from public.quiz_attempts where user_id = '${x.id}'`);
-        const codeQuests = one(
-          `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${STAGE1}' and quest_type <> 'quiz'`,
-        ).split(',');
+        const codeQuests = stageQuests(STAGE1);
         let last;
         for (const q of codeQuests) {
           last = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });

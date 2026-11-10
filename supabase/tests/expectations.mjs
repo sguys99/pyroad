@@ -221,7 +221,7 @@ export const EXPECT = {
   },
   'B08-1': {
     expect: 'deny',
-    note: '새 DB 에도 solution_code 가 있음 (P1-12부터 content/에서 생성한 seed.sql이 quest_answer_keys 에 직접 씀). 운영 재현 시나리오에서는 생략',
+    note: '새 DB 에도 solution_code 가 있음 (P1-12부터 content/에서 생성한 seed.sql이 quest_answer_keys 에 직접 씀). 코드·프로젝트 퀘스트 기준, 퀴즈는 정답 코드가 없어 뺌 (B49). 운영 재현 시나리오에서는 생략',
   },
   // quest_answer_keys 가 생기면(P1-02) 자동으로 점검 시작
   'AK-1': {
@@ -308,7 +308,7 @@ export const EXPECT = {
     expect: 'deny',
     requires: 'public.quest_answer_keys',
     activateIn: 'P1-02',
-    note: "'deny' = 정답이 모두 quest_answer_keys 로 분리됨 (기준값: 퀘스트 44 · solution_code 43 + 프로젝트 단계 5)",
+    note: "'deny' = 정답이 모두 quest_answer_keys 로 분리됨 (기준값: 코드·프로젝트 44 · solution_code 43 + 프로젝트 단계 5, 퀴즈는 quiz_answer. B49)",
   },
 
   // ── apikey: 사용자 API 키 테이블 (B13, service_role 전용) ───
@@ -436,12 +436,13 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.complete_quest()',
     activateIn: 'P1-03',
+    note: '스테이지 1 의 코드 퀘스트만 complete_quest (퀴즈는 보너스, B49)',
   },
   'RW-7': {
     expect: 'allow',
     requires: 'public.reset_progress()',
     activateIn: 'P1-03',
-    note: 'B12',
+    note: 'B12. 스테이지 1 XP 는 코드 퀘스트만 (퀴즈 XP 는 별×10, B49)',
   },
   'RW-8': {
     expect: 'allow',
@@ -473,7 +474,7 @@ export const EXPECT = {
       ['WD-1', 'deny', 'public.worlds', '비로그인은 worlds 권한 없음 (stages·quests 처럼 로그인 사용자만)'],
       ['WD-2', 'allow', 'public.worlds', '로그인 사용자 월드 조회 (1월드 고정 id c1000000-…-01)'],
       ['WD-3', 'deny', 'public.worlds', '쓰기는 service_role(콘텐츠 seed)만'],
-      ['WD-4', 'allow', 'public.worlds', '00012 백필 + 콘텐츠 seed 결과'],
+      ['WD-4', 'allow', 'public.worlds', '00012 백필 + 콘텐츠 seed 결과 (code·quiz 수는 seed.sql 에서 셈, B49)'],
       ['WD-5', 'allow', 'public.worlds', 'is_stage_unlocked·reset_progress 가 (월드 order, 스테이지 order) 순서'],
       ['WD-6', 'allow', 'public.worlds'],
       ['QA-1', 'deny', 'public.quiz_attempts', '시도 기록은 채점 RPC(service_role)만 씀'],
