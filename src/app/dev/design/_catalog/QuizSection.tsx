@@ -482,7 +482,176 @@ export function QuizSection() {
         </div>
 
         <FillBlankDemos />
+        <BugHuntDemos />
       </Section>
     </MotionProvider>
+  );
+}
+
+/** 버그 찾기 (P7-06): 줄은 코드 순서, 수정안은 서버가 섞은 순서 */
+const QUIZ_BUG: QuizPrompt = {
+  kind: 'bug_hunt',
+  question: '버그버그가 숨은 줄을 찾아 고쳐 볼까?',
+  lines: [
+    { id: 'ln-x5pc', code: 'name = "파이"' },
+    { id: 'ln-h7jq', code: 'for i in range(3)' },
+    { id: 'ln-q2vw', code: '    print(name, i)' },
+  ],
+  fixes: [
+    { id: 'fx-e4kr', code: 'for i in range[3]' },
+    { id: 'fx-b7nd', code: 'for i in range(3):' },
+    { id: 'fx-m9ts', code: 'for i in range(3);' },
+  ],
+};
+const BUG_ANSWER = { line: 'ln-h7jq', fix: 'fx-b7nd' };
+const BUG_WHY = 'for 줄 끝에는 콜론(:)이 꼭 있어야 해요.';
+
+/** 이 자리에서 채점 (회차 3번, 3번째 오답이면 정답 공개) */
+function LiveBugHunt() {
+  const [value, setValue] = useState<QuizAnswerValue | null>(null);
+  const [graded, setGraded] = useState<{
+    r: QuizAnswerResponse;
+    v: QuizAnswerValue;
+  } | null>(null);
+  const [misses, setMisses] = useState<QuizAnswerValue[]>([]);
+  const submit = () => {
+    if (value == null || typeof value !== 'object' || !('line' in value))
+      return;
+    const attempt = misses.length + 1;
+    const correct =
+      value.line === BUG_ANSWER.line && value.fix === BUG_ANSWER.fix;
+    const stars = correct ? 4 - attempt : attempt === 3 ? 1 : 0;
+    setGraded({
+      v: value,
+      r: response({
+        correct,
+        attempt_no: attempt,
+        stars,
+        best_stars: stars,
+        xp_awarded: stars * 10,
+        explanation: correct ? BUG_WHY : null,
+        revealed:
+          !correct && attempt === 3
+            ? { answer: BUG_ANSWER, explanation: BUG_WHY }
+            : null,
+      }),
+    });
+    if (!correct && attempt < 3) setMisses((m) => [...m, value]);
+  };
+  const retry = () => {
+    if (graded?.r.correct || graded?.r.revealed) setMisses([]);
+    setValue(null);
+    setGraded(null);
+  };
+  return (
+    <div className="@container max-w-xl">
+      <Still
+        quiz={QUIZ_BUG}
+        title="버그 잡기"
+        value={value}
+        onChange={graded ? () => {} : setValue}
+        result={graded?.r ?? null}
+        submitted={graded?.v ?? null}
+        misses={misses}
+        onSubmit={submit}
+        onRetry={retry}
+      />
+    </div>
+  );
+}
+
+function BugHuntDemos() {
+  const [round, setRound] = useState(0);
+  const picked = { line: 'ln-h7jq', fix: '' };
+  const wrong = { line: 'ln-h7jq', fix: 'fx-m9ts' };
+  return (
+    <>
+      <h3 id="quiz-bughunt" className="mt-8 mb-2 text-h3 font-display">
+        버그 찾기 (P7-06)
+      </h3>
+      <p className="mb-4 text-small text-text-muted">
+        ① 코드 줄(줄 번호 + 코드, 줄마다 큰 탭 자리)에서 버그 줄을 탭 → 벌레
+        표시 + 그 줄 바로 아래 수정안 쪽지 ② 수정안 카드를 고르면 원래 줄
+        취소선 + 고친 줄 미리보기. 다른 줄을 고르면 수정안은 비워요. 줄·수정안
+        모두 라디오 그룹.
+      </p>
+      <Demo
+        key={round}
+        label="직접 풀어 보기 (이 자리 채점)"
+        note="2번 줄 + 콜론 수정안이 정답. 3번째도 틀리면 정답 공개"
+        surface="card"
+        data-testid="quiz-bughunt-live"
+      >
+        <button
+          type="button"
+          className="text-small font-semibold text-primary-text underline"
+          onClick={() => setRound((r) => r + 1)}
+        >
+          처음부터
+        </button>
+        <LiveBugHunt />
+      </Demo>
+      <div className="mt-4 grid items-start gap-4 md:grid-cols-2">
+        <Demo
+          label="① 줄 고름 → 수정안 쪽지"
+          surface="card"
+          data-testid="quiz-bughunt-line"
+        >
+          <div className="@container">
+            <Still quiz={QUIZ_BUG} value={picked} />
+          </div>
+        </Demo>
+        <Demo
+          label="② 수정안 고름 → 미리보기"
+          note="같은 줄에서 틀렸던 수정안은 흐리게"
+          surface="card"
+          data-testid="quiz-bughunt-fix"
+        >
+          <div className="@container">
+            <Still
+              quiz={QUIZ_BUG}
+              value={BUG_ANSWER}
+              misses={[{ line: 'ln-h7jq', fix: 'fx-e4kr' }]}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="오답"
+          note="제출한 줄·수정만, 정답은 알려 주지 않음"
+          surface="card"
+          data-testid="quiz-bughunt-wrong"
+        >
+          <div className="@container">
+            <Still
+              quiz={QUIZ_BUG}
+              value={wrong}
+              submitted={wrong}
+              misses={[wrong]}
+              result={response({})}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="공개 (3번째 오답)"
+          note="정답 줄 + 정답 수정안, 제출한 줄은 고른 줄"
+          surface="card"
+          data-testid="quiz-bughunt-revealed"
+        >
+          <div className="@container">
+            <Still
+              quiz={QUIZ_BUG}
+              submitted={{ line: 'ln-q2vw', fix: 'fx-e4kr' }}
+              result={response({
+                attempt_no: 3,
+                stars: 1,
+                best_stars: 1,
+                xp_awarded: 10,
+                revealed: { answer: BUG_ANSWER, explanation: BUG_WHY },
+              })}
+            />
+          </div>
+        </Demo>
+      </div>
+    </>
   );
 }

@@ -528,3 +528,192 @@
   :is(.qz-fb-slot, .qz-fb-chip) {
   transition: none;
 }
+
+/* ───── 버그 찾기 (P7-06): 단계 안내 + 버그버그 → 코드 줄 목록(코드 면 위 큰 탭 줄) → 고른 줄 바로 아래 펼쳐지는 수정안 쪽지.
+   고른 줄은 원래 줄 취소선 + 고친 줄 미리보기. 상태 색·꼬리표는 객관식 보기와 같은 규칙 */
+.qz-bh {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.qz-bh-guide {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.qz-bh-face {
+  flex: none;
+  display: grid;
+}
+.qz-bh-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: var(--text-small--line-height);
+}
+.qz-bh-steps > [data-on] {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.qz-bh-lines {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.375rem;
+  border: 0;
+  border-radius: var(--round-m);
+  background: var(--code-bg);
+  box-shadow: inset 0 0 0 var(--line-w) var(--line);
+}
+.qz-bh-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--round-s);
+  color: var(--code-text);
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--easing-out),
+    box-shadow var(--dur-fast) var(--easing-out),
+    opacity var(--dur-base) var(--easing-out);
+}
+.qz-bh-line:has(.qz-opt-input:focus-visible) {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: 0;
+}
+@media (hover: hover) {
+  .qz-bh-line[data-mark='none']:hover:has(.qz-opt-input:enabled) {
+    background: var(--surface-2);
+  }
+}
+.qz-bh-no {
+  flex: none;
+  min-width: 1.25rem;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.qz-bh-code {
+  flex: 1;
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.qz-bh-del {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+.qz-bh-del .qz-code {
+  text-decoration: inherit;
+}
+.qz-bh-ins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+.qz-bh-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  box-shadow: none;
+}
+.qz-bh-tag {
+  justify-self: start;
+}
+.qz-bh-line[data-mark='none'] .qz-bh-mark {
+  visibility: hidden;
+}
+/* 고른 줄: 주색 테 + 벌레 표시 */
+.qz-bh-line[data-mark='selected'] {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.qz-bh-line[data-mark='selected'] .qz-bh-mark {
+  background: var(--primary);
+}
+.qz-bh-line:is([data-mark='correct'], [data-mark='answer']) {
+  background: var(--success-soft);
+  box-shadow: inset 0 0 0 2px var(--success);
+}
+.qz-bh-line:is([data-mark='correct'], [data-mark='answer']) .qz-bh-mark {
+  background: var(--success);
+}
+.qz-bh-line:is([data-mark='correct'], [data-mark='answer']) .qz-bh-tag,
+.qz-bh-ins:is([data-mark='correct'], [data-mark='answer']) .qz-opt-tag {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.qz-bh-line[data-mark='wrong'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.qz-bh-line[data-mark='wrong'] .qz-bh-mark {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.qz-bh-line[data-mark='wrong'] .qz-bh-tag,
+.qz-bh-ins[data-mark='wrong'] .qz-opt-tag {
+  background: var(--surface);
+  color: var(--accent-text);
+}
+.qz:not([data-status='answering']) .qz-bh-line[data-mark='none'] {
+  opacity: 0.7;
+  cursor: default;
+}
+/* 수정안 쪽지: 고른 줄 바로 아래 흰 쪽지로 펼쳐짐 (줄 번호 폭만큼 들여서 어느 줄인지 이어 보이게) */
+.qz-bh-sheet {
+  display: grid;
+  gap: 0.625rem;
+  min-width: 0;
+  margin: 0.25rem 0 0.5rem 1.75rem;
+  padding: 0.75rem 0.75rem calc(0.75rem + var(--lip-h));
+  border: 0;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+.qz-bh-legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.125rem;
+  padding: 0;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+}
+.qz-bh-sheet .qz-opt {
+  min-height: 2.75rem;
+}
+:root[data-motion='minimal'] .qz-bh-sheet {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-bh-sheet {
+  animation: none;
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .qz-bh-line {
+  transition: none;
+}
