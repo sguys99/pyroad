@@ -717,12 +717,9 @@ export function useQuestSession({
       // 아이가 멈추기를 눌렀음 → 채점·피드백 없이 끝
       if (result.isStopped) return 'stay';
 
-      // 실행 에러 (구문 에러·시간 초과 등). 효과음은 장난스러운 버그버그 소리 (경고 부저 대신, P0-15).
+      // 실행 에러 (구문 에러·시간 초과 등). 효과음 'bug'는 결과 쪽지에 버그버그가 들어오는 순간 (`BugbugAside`, P6-14).
       // AI 피드백은 자동으로 부르지 않는다 (§12-Q56): 규칙표 설명(errorExplain)이 바로 보이고, 더 묻고 싶으면 askAboutRun
-      if (!result.success) {
-        play('bug');
-        return 'stay';
-      }
+      if (!result.success) return 'stay';
 
       const passed = await validate(codeToRun, result.stdout, step);
       if (!aliveRef.current) return 'stay';
@@ -737,7 +734,7 @@ export function useQuestSession({
         return 'stay';
       }
 
-      play('correct');
+      // 퀘스트를 마친 통과의 'correct'는 결과 쪽지 "통과!" 도장이 닿는 순간 (`PassStamp`, P6-14). 여기서는 프로젝트 중간 단계만
       if (review) {
         fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
         return 'stay';
@@ -757,7 +754,10 @@ export function useQuestSession({
           },
           '대단해요! 이 단계를 통과했어요! 🎉',
         );
-        if (step < totalSteps) return 'advance';
+        if (step < totalSteps) {
+          play('correct');
+          return 'advance';
+        }
       }
 
       await completeWith(codeToRun, result.stdout);

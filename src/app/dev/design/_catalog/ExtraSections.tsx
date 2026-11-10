@@ -22,6 +22,7 @@ import {
   type SfxId,
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
+import { rewardSfx } from '@/lib/celebration/rewardSfx';
 import { Button } from '@/components/ui/button';
 import {
   RunControls,
@@ -771,6 +772,45 @@ export function SoundSection() {
         >
           별 세 개
         </Button>
+      </Demo>
+      <Demo
+        label="퀘스트 박자 (P6-14)"
+        note="보상 띠와 같은 rewardSfx 예약: 별 1→3(0.45초부터 0.15초 간격) 뒤 코인 카운트업 동안 coin 최대 6번(동시 상한 6). 대사 블립은 #bubble 대사창(다시 타자)에서, 정답은 #success-staging 도장, bug는 #error-staging 버그버그 등장 때"
+      >
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="reward"
+            size="sm"
+            sfx={false}
+            data-testid="sfx-reward-run"
+            onClick={() =>
+              rewardSfx({
+                stars: 3,
+                coins: 40,
+                starsAtMs: 450,
+                starGapMs: 150,
+                countAtMs: 640,
+                countMs: 700,
+              }).forEach((c) =>
+                window.setTimeout(() => play(c.id, { rate: c.rate }), c.at),
+              )
+            }
+          >
+            별 셋 + 코인 카운트업
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            sfx={false}
+            onClick={() =>
+              rewardSfx({ stars: 3, coins: 40 }).forEach((c) =>
+                play(c.id, { rate: c.rate }),
+              )
+            }
+          >
+            움직임 없음 (화음 + 코인 한 번)
+          </Button>
+        </div>
       </Demo>
       <Demo label="지도 노드 (P5-11)" note="열린 노드·차례 퀘스트는 탭, 잠긴 노드는 같은 탭을 작고 낮게(경고음 없음, 안내는 쪽지 글자)">
         <div className="flex flex-wrap gap-3">

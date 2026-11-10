@@ -22,7 +22,7 @@ import {
   type SoundSettingsPatch,
 } from '@/lib/sound';
 import { SOUND_MANIFEST, type BgmId } from '@/lib/sound/manifest';
-import { SoundContext, useSfx, useSoundEngine } from './soundContext';
+import { playSfx, SoundContext, useSfx, useSoundEngine } from './soundContext';
 
 /**
  * 사운드 Provider (§2.5, P0-15 → P2-14). 루트 레이아웃에 하나만 둔다 (`MotionTierProvider` 안쪽). 규칙: docs/design/sound.md
@@ -68,7 +68,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   }, [engine]);
 
   const celebration = useMemo<CelebrationSoundPort>(
-    () => ({ play: (id, opts) => engine.play(id, opts) }),
+    () => ({ play: (id, opts) => playSfx(engine, id, opts) }),
     [engine],
   );
 

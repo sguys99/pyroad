@@ -68,8 +68,8 @@ export const SOUND_MANIFEST: SoundManifest<SfxId, BgmId> = {
 /** 잠긴 노드를 눌렀을 때: 경고음 대신 같은 탭을 작고 낮게 (P5-11). 안내는 쪽지 글자가 한다 */
 export const SOFT_TAP = { gain: 0.45, rate: 0.84 } as const;
 
-/** 별 1→3 상승음: 같은 소리를 장3화음 비율로 (도-미-솔) */
-export const STAR_RATES = [1, 2 ** (4 / 12), 2 ** (7 / 12)] as const;
+/** 별 1→3 상승음: 같은 소리를 장3화음 비율로 (도-미-솔, 2^(4/12)≈1.26 · 2^(7/12)≈1.5) */
+export const STAR_RATES = [1, 1.26, 1.5] as const;
 
 /** 언제 나는 소리인지 (문서·청취 검수 페이지·테스트용. 화면에서 소리가 유일한 정보 전달 수단이 되지 않게 함께 보여 줄 시각 피드백 포함) */
 export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
@@ -77,13 +77,19 @@ export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
     name: '탭',
     when: '주요 버튼(힌트·소리 켜기)·지도 노드·차례 퀘스트를 누를 때 (잠긴 노드는 작고 낮게)',
   },
-  correct: { name: '정답', when: '코드가 정답일 때 (초록 결과 상자와 함께)' },
+  correct: {
+    name: '정답',
+    when: '"통과!" 도장이 결과 쪽지에 닿을 때 (프로젝트 중간 단계는 통과 순간)',
+  },
   wrong: {
     name: '오답',
     when: '실행은 됐지만 답이 다를 때 (작고 부드럽게, 파이뱀 안내와 함께)',
   },
-  coin: { name: '코인', when: '보상 카드에서 코인·XP가 올라갈 때' },
-  star: { name: '별', when: '뱃지가 하나씩 나올 때 (음이 1→3 올라감)' },
+  coin: {
+    name: '코인',
+    when: '코인 숫자가 올라가는 동안 짧게 여러 번 (최대 6번)',
+  },
+  star: { name: '별', when: '별·뱃지가 하나씩 톡 튈 때 (음이 1→3 올라감)' },
   levelup: { name: '레벨업', when: '레벨이 오를 때 (레벨업 카드)' },
   unlock: {
     name: '해제',
@@ -97,7 +103,7 @@ export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
   },
   blip: {
     name: '대사 블립',
-    when: '파이뱀이 말하는 글자가 나올 때 (작게, 띄엄띄엄)',
+    when: '대사창 글자가 나올 때 2~3글자마다 (작게, 넘기면 조용히)',
   },
   celebrate: { name: '축하', when: '스테이지·프로젝트를 깼을 때 (축하 카드)' },
 };

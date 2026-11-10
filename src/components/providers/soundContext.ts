@@ -20,8 +20,22 @@ export function useSoundEngine(): AppEngine {
   return useContext(SoundContext);
 }
 
+/**
+ * 효과음 한 번 + 확인용 `pyroad:sfx` 이벤트(`{ id, rate }`, P6-14: e2e가 박자를 잰다 — `pyroad:confetti`와 같은 방식).
+ * 이벤트는 요청 기록이라 설정으로 꺼져 있거나 첫 탭 전이어도 나간다
+ */
+export function playSfx(e: AppEngine, id: SfxId, opts?: PlayOptions): void {
+  e.play(id, opts);
+  window.dispatchEvent(
+    new CustomEvent('pyroad:sfx', { detail: { id, rate: opts?.rate } }),
+  );
+}
+
 /** `const play = useSfx(); play('correct')` — 콜백 참조가 바뀌지 않는다 */
 export function useSfx(): (id: SfxId, opts?: PlayOptions) => void {
   const e = useSoundEngine();
-  return useCallback((id: SfxId, opts?: PlayOptions) => e.play(id, opts), [e]);
+  return useCallback(
+    (id: SfxId, opts?: PlayOptions) => playSfx(e, id, opts),
+    [e],
+  );
 }

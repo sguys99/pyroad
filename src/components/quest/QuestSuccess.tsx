@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { ArrowRight, Map } from 'lucide-react';
 import { PybaemStatic } from '@/components/characters/rig';
+import { useSfx } from '@/components/providers/SoundProvider';
+import { isShown } from '@/components/sound/isShown';
 import { Button } from '@/components/ui/button';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { stampSlam, type FxHandle } from '@/lib/celebration/onboardingFx';
+import { rewardSfx } from '@/lib/celebration/rewardSfx';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { tierDuration } from '@/lib/motion/tokens';
 import { SHOW_COINS, SHOW_STARS } from '@/lib/world/flags';
@@ -89,19 +92,30 @@ export function useSuccessRun(active: boolean, key: unknown): boolean {
  */
 export function PassStamp({ done }: { done: boolean }) {
   const { budget } = useMotionTier();
+  const play = useSfx();
   const ref = useRef<HTMLDivElement>(null);
   const fx = useRef<FxHandle | null>(null);
   const budgetRef = useRef(budget);
 
   useEffect(() => {
     const el = ref.current;
+    // 정답 'correct'는 도장이 종이에 닿는 순간 (건너뛰면 그때, 동작 줄이기는 바로). 화면을 떠나며 끝낼 때는 울리지 않음
+    // 숨은 쪽 쪽지(넓은/좁은 화면 중 하나)는 울리지 않음. 다음 틱에 내서 개발 모드 이중 마운트의 첫 소리는 취소된다
+    let live = true;
+    let t: ReturnType<typeof setTimeout> | undefined;
     fx.current = stampSlam(el, {
       budget: budgetRef.current,
       paper: el?.parentElement,
-      // 효과음 자리(P6-14): 도장이 닿는 순간 — 정답 'correct'는 지금 세션이 채점 직후 재생
+      onImpact: () => {
+        if (live) t = setTimeout(() => isShown(el) && play('correct'));
+      },
     });
-    return () => fx.current?.finish();
-  }, []);
+    return () => {
+      live = false;
+      clearTimeout(t);
+      fx.current?.finish();
+    };
+  }, [play]);
   useEffect(() => {
     if (done) fx.current?.finish();
   }, [done]);
@@ -111,6 +125,35 @@ export function PassStamp({ done }: { done: boolean }) {
       통과!
     </div>
   );
+}
+
+/**
+ * 보상 띠의 별·코인 소리 (P6-14, 숫자·별이 같은 정보를 보여 줌): 나타날 때 한 번 예약하고, 장면 도중 건너뛰면(`done`) 남은 소리를 끊는다.
+ * 처음부터 끝 모습(동작 줄이기)이면 0ms 소리로 한 번은 울린다. 숨은 쪽 띠는 조용히. XP 카운트업은 소리 없음(코인만)
+ */
+function useRewardSfx(
+  host: RefObject<HTMLElement | null>,
+  done: boolean,
+  cues: () => ReturnType<typeof rewardSfx>,
+) {
+  const play = useSfx();
+  const cuesRef = useRef(cues);
+  const doneAtMount = useRef(done);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => {
+    timers.current = cuesRef
+      .current()
+      .map((c) =>
+        setTimeout(
+          () => isShown(host.current) && play(c.id, { rate: c.rate }),
+          c.at,
+        ),
+      );
+    return () => timers.current.forEach(clearTimeout);
+  }, [host, play]);
+  useEffect(() => {
+    if (done && !doneAtMount.current) timers.current.forEach(clearTimeout);
+  }, [done]);
 }
 
 /**
@@ -131,9 +174,21 @@ export function RewardStrip({
     reward.forceStarsCoins || SHOW_COINS ? Math.max(0, reward.coins ?? 0) : 0;
   const countMs = tierDuration(COUNT_MS, budget);
   const countAt = tierDuration(COUNT_AT_MS, budget);
+  const strip = useRef<HTMLElement>(null);
+  useRewardSfx(strip, done, () =>
+    rewardSfx({
+      stars: showStars ? (reward.stars ?? 0) : 0,
+      coins,
+      starsAtMs: animate ? STARS_AT_S * 1000 * budget.effectDuration : 0,
+      starGapMs: animate ? 150 * budget.effectDuration : 0,
+      countAtMs: animate ? countAt + tierDuration(120, budget) : 0,
+      countMs: animate ? countMs : 0,
+    }),
+  );
 
   return (
     <section
+      ref={strip}
       className="qx"
       data-testid="quest-reward"
       data-done={done || undefined}
@@ -183,7 +238,6 @@ export function RewardStrip({
             </li>
           )}
           {coins > 0 && (
-            // 효과음 자리(P6-14): 숫자가 오르는 동안 'coin'을 짧게 여러 번(동시 최대 6)
             <li className="qx-item" data-testid="reward-coins">
               <RewardIcon kind="coin" size={30} />
               <b className="qx-num">

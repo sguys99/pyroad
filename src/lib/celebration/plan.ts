@@ -19,7 +19,12 @@ import type { StageClearInfo } from '@/lib/quest/rewards';
 import { SHOW_CHEST } from '@/lib/world/flags';
 import { getBadgeDefinition } from '@/lib/quest/badges';
 import { withObjectParticle } from '@/lib/korean';
+import type { MotionBudget } from '@/lib/motion/tier';
+import { STAR_RATES } from '@/lib/sound/manifest';
+import { rewardSfx, type SfxCue } from './rewardSfx';
 import type { CelebrationSfx } from './sound';
+
+export { rewardSfx, type SfxCue };
 
 type EventOf<T extends CelebrationEventType> = Extract<
   CelebrationEvent,
@@ -81,11 +86,28 @@ export const STEP_SPECS: Record<CelebrationStepKind, StepSpec> = {
 export const BADGE_FIRST_AT_S = 0.15;
 export const BADGE_STAGGER_S = 0.18;
 
-/** 단계별 효과음 예약 (ms). 뱃지는 하나씩 등장할 때마다 음을 올려 가며 (1 → 1.26 → 1.5, P0-15) */
-const STAR_RATES = [1, 1.26, 1.5];
+/** 보상 카드 박자 (RewardsCard 연출과 효과음이 같은 값을 씀). 움직임이 없으면 모두 0 */
+export function rewardsCardTiming(
+  hasStars: boolean,
+  budget: Pick<MotionBudget, 'springs' | 'effectDuration'>,
+) {
+  const k = budget.springs ? budget.effectDuration : 0;
+  return {
+    starsAtMs: 0,
+    starGapMs: 150 * k,
+    countAtMs: (hasStars ? 650 : 250) * k,
+    countMs: 700 * k,
+  };
+}
+
+/** 단계별 효과음 예약 (ms). 뱃지는 하나씩 등장할 때마다 음을 올려 가며 (1 → 1.26 → 1.5, P0-15), 보상은 `rewardSfx` */
 export function sfxSchedule(
   step: CelebrationStep,
-): Array<{ id: CelebrationSfx; at: number; rate?: number }> {
+  budget: Pick<MotionBudget, 'springs' | 'effectDuration'> = {
+    springs: true,
+    effectDuration: 1,
+  },
+): SfxCue[] {
   const id = STEP_SPECS[step.kind].sfx;
   if (!id) return [];
   if (step.kind === 'badges') {
@@ -94,6 +116,13 @@ export function sfxSchedule(
       at: Math.round((BADGE_FIRST_AT_S + i * BADGE_STAGGER_S) * 1000),
       rate: STAR_RATES[i % STAR_RATES.length],
     }));
+  }
+  if (step.kind === 'rewards') {
+    return rewardSfx({
+      stars: step.stars?.stars ?? 0,
+      coins: step.coins,
+      ...rewardsCardTiming(!!step.stars, budget),
+    });
   }
   return [{ id, at: 150 }];
 }

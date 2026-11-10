@@ -6,7 +6,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SpeechBubble } from '@/components/ui/speech-bubble';
 import { Button } from '@/components/ui/button';
-import { useDialogueBlip } from '@/components/sound/useDialogueBlip';
 import type { ChatMessage } from '@/lib/tutor/types';
 import { ASK_QUESTIONS, type AskQuestion } from '@/lib/quest/useQuestSession';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
@@ -131,8 +130,7 @@ const TutorMessage = memo(function TutorMessage({ msg }: { msg: ChatMessage }) {
  * 화면 낭독기는 다 쓴 답만 읽는다(AskPybaem의 aria-live) — 늘어나는 글자는 aria-hidden
  */
 function StreamingMessage({ content }: { content: string }) {
-  // 글자가 늘어날 때 작은 블립 (빈도 제한, P2-14)
-  useDialogueBlip(content);
+  // 블립 없음 (P6-14): 긴 답 스트리밍 내내 울리지 않게, 블립은 대사창(DialogueBox) 한 줄 대사만
   return (
     <div className="qc-row" data-testid="chat-streaming">
       <TutorFace expression="teaching" />

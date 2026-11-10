@@ -1,11 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
 import {
   BugBugStatic,
   PybaemStatic,
   type BugBugState,
 } from '@/components/characters/rig';
+import { useSfx } from '@/components/providers/SoundProvider';
+import { isShown } from '@/components/sound/isShown';
 import { SpeechBubble } from '@/components/ui/speech-bubble';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { bugbugTaunt, explainError } from '@/lib/quest/errorExplain';
@@ -27,7 +30,8 @@ const BugBugRig = dynamic(
  * 등장 = full: 옆에서 통통 뛰어 들어옴(`appear` → 자동 대기) · lite: 제자리 깜짝 점프 한 번(`found`) ·
  * minimal·동작 줄이기: 리그가 움직임 없이 표정·후광 색만(§12-Q26). 화면 밖·숨긴 탭에서는 리그가 스스로 멈춘다.
  * 쉬운 설명은 이야기 쪽 파이뱀 대사창이 하고, 이야기 쪽이 안 보이는 lg 미만에서만 여기 파이뱀 쪽지로 한 번 더 보여 준다.
- * 효과음 자리(P6-14): 등장 순간 `useSfx` 'bug' (지금은 세션이 결과를 받자마자 재생)
+ * 효과음: 들어오는 순간(마운트) 장난스러운 'bug' 한 번 (P6-14, 경고 부저 대신). 실행할 때마다 쪽지가 '돌아가는 중'으로 바뀌었다가
+ * 다시 그려지므로 오류가 날 때마다 한 번씩. 시간 초과·멈춤은 버그버그가 없으니 소리도 없음
  */
 export function BugbugAside({
   stderr,
@@ -38,10 +42,17 @@ export function BugbugAside({
   action?: React.ReactNode;
 }) {
   const { tier, reduced } = useMotionTier();
+  const play = useSfx();
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // 다음 틱에: 개발 모드 이중 마운트는 첫 예약이 취소되고, 숨은 쪽 쪽지(넓은/좁은 화면 중 하나)는 울리지 않음
+    const t = setTimeout(() => isShown(root.current) && play('bug'));
+    return () => clearTimeout(t);
+  }, [play]);
   const { line, text } = explainError(stderr);
   const state: BugBugState = !reduced && tier === 'full' ? 'appear' : 'found';
   return (
-    <div className="qo-bug-aside" data-testid="bugbug-aside">
+    <div ref={root} className="qo-bug-aside" data-testid="bugbug-aside">
       <div className="qo-bug-row">
         <span
           className="qo-bug-rig"

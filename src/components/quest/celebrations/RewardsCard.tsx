@@ -1,5 +1,6 @@
 'use client';
 
+import { rewardsCardTiming } from '@/lib/celebration/plan';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { CelebrationCta, CountUp, Kicker, StarRow } from './parts';
@@ -15,7 +16,7 @@ interface RewardsCardProps {
 /**
  * 별·코인 (Phase 8 자리: P8-04·P8-05가 이벤트를 만들기 시작하면 쓰인다, §12-Q52).
  * 퀘스트 결과 쪽 보상 띠(P6-08 `RewardStrip`)와 같은 조각: 별 1→3 prop 스프링 팝(`StarRow`) → 코인 카운트업(`CountUp`).
- * 효과음은 시퀀서가 낸다(`STEP_SPECS.rewards`, 별 상승음 rate는 P6-14)
+ * 효과음은 시퀀서가 같은 박자(`rewardsCardTiming`)로 낸다: 별마다 'star' rate 1 → 1.26 → 1.5, 숫자가 오르는 동안 'coin' 여러 번(`sfxSchedule`)
  */
 export function RewardsCard({
   stars,
@@ -25,6 +26,7 @@ export function RewardsCard({
   onNext,
 }: RewardsCardProps) {
   const animate = budget.springs && budget.effectDuration > 0 && !settled;
+  const timing = rewardsCardTiming(!!stars, budget);
   return (
     <>
       <div className="cel-head">
@@ -44,8 +46,8 @@ export function RewardsCard({
               +
               <CountUp
                 to={coins}
-                durationMs={700 * budget.effectDuration}
-                delayMs={(stars ? 650 : 250) * budget.effectDuration}
+                durationMs={timing.countMs}
+                delayMs={timing.countAtMs}
                 animate={animate}
               />
             </b>

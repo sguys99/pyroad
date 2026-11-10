@@ -1,7 +1,8 @@
 'use client';
 
-import type { KeyboardEvent, ReactNode } from 'react';
+import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 
+import { useDialogueBlip } from '@/components/sound/useDialogueBlip';
 import { cn } from '@/lib/utils';
 import { SpeechBubble, useTyping, type BubbleTone } from './speech-bubble';
 import './dialogue-box.css';
@@ -13,7 +14,7 @@ import './dialogue-box.css';
  * - minimal·동작 줄이기는 처음부터 전체 문장(`useTyping`)
  * - 화면 낭독기: 글자 조각은 숨기고, 전체 문장을 `aria-live="polite"`로 대사가 바뀔 때 한 번만 읽는다
  * - 캐릭터는 `character(speaking)`로 받는다: 글자가 나오는 동안 speaking=true (리그 `talking`에 넘기면 입이 움직임)
- * - 효과음 자리(P6-14): 대사 블립은 여기서 `useDialogueBlip(shown)`으로 (2~3글자마다, 낮은 볼륨)
+ * - 효과음(P6-14): 글자가 나오는 동안 2~3글자마다 낮은 블립(`useDialogueBlip`). 넘기면·처음부터 다 보이면·안 보이는 쪽이면 조용히
  */
 interface DialogueBoxProps {
   /** 대사 (바뀌면 처음부터 다시 타자) */
@@ -35,6 +36,8 @@ export function DialogueBox({
   'data-testid': testId,
 }: DialogueBoxProps) {
   const { shown, rest, done, skip } = useTyping(text, true);
+  const root = useRef<HTMLDivElement>(null);
+  useDialogueBlip(shown, !done, root);
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (done || (e.key !== 'Enter' && e.key !== ' ')) return;
@@ -44,6 +47,7 @@ export function DialogueBox({
 
   return (
     <div
+      ref={root}
       className={cn('g-dialogue', className)}
       data-typing={done ? undefined : ''}
       data-testid={testId}

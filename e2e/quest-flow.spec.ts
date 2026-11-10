@@ -32,6 +32,21 @@ test.describe('퀘스트 전체 플로우', () => {
       if (w.url().includes('pyodide-worker')) pyodideWorkers.push(w.url());
     });
 
+    // 효과음 요청 기록 (useSfx·시퀀서 → pyroad:sfx, P6-14): 소리가 그림과 같은 박자에 한 번씩 나는지
+    await page.addInitScript(() => {
+      const w = window as unknown as { __sfx: string[] };
+      w.__sfx = [];
+      window.addEventListener('pyroad:sfx', (e) =>
+        w.__sfx.push((e as CustomEvent<{ id: string }>).detail.id),
+      );
+    });
+    const sfx = async () =>
+      page.evaluate(() => (window as unknown as { __sfx: string[] }).__sfx);
+    const clearSfx = () =>
+      page.evaluate(() => {
+        (window as unknown as { __sfx: string[] }).__sfx = [];
+      });
+
     // 1. 월드맵: 첫 스테이지는 열려 있다
     await page.goto('/world');
     await expect(
@@ -82,6 +97,18 @@ test.describe('퀘스트 전체 플로우', () => {
       quest1.expectedHint,
     );
 
+    // 대사창 글자가 나오는 동안 블립 (2~3글자마다)
+    expect(await sfx()).toContain('blip');
+
+    // 에러: 'bug'는 결과 쪽지에 버그버그가 들어올 때 (세션이 채점 직후 따로 울리지 않음)
+    await clearSfx();
+    await runCode(page, 'print(undefined_var)');
+    await expect(page.getByTestId('bugbug-helper').first()).toBeVisible();
+    // 블립은 대사창이 새 대사를 치는 동안 섞여 들어오므로 빼고 본다
+    const beats = async () => (await sfx()).filter((id) => id !== 'blip');
+    await expect.poll(beats).toEqual(['run', 'bug']);
+
+    await clearSfx();
     await runCode(page, quest1.solution);
 
     // 8~9. 결과 패널: 출력 + 정답 (견줘 보기는 사라짐)
@@ -100,6 +127,11 @@ test.describe('퀘스트 전체 플로우', () => {
     const reward = page.locator('[data-testid="quest-reward"]:visible');
     await expect(reward).toBeVisible();
     await expect(output.locator('.qx-stamp')).toHaveText('통과!');
+    // 정답 'correct'는 도장이 닿는 순간 한 번 (채점 직후 세션이 또 울리지 않음)
+    await expect
+      .poll(async () => (await sfx()).filter((id) => id === 'correct'))
+      .toEqual(['correct']);
+    expect(await sfx()).not.toContain('bug');
     await expect(reward.getByTestId('reward-stars')).toHaveCount(0);
     await expect(reward.getByTestId('reward-coins')).toHaveCount(0);
     await page.keyboard.press('Escape');

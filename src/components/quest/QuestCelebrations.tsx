@@ -316,7 +316,7 @@ function StepFrame({
         fireBurst(burst, b),
       );
     }
-    for (const cue of sfxSchedule(s)) {
+    for (const cue of sfxSchedule(s, b)) {
       at(cue.at, () => snd.play(cue.id, { rate: cue.rate }));
     }
     return () => timers.forEach(clearTimeout);

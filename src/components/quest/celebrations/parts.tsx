@@ -113,7 +113,7 @@ export function ConceptChips({
 /**
  * 별 1→3 스프링 팝 (P6-08, Q52: 화면에서는 `SHOW_STARS`가 켜질 때만 — 지금은 카탈로그에서 확인).
  * 받은 별은 빈 별 자리 위로 하나씩 톡(prop 스프링, 회전하며), 못 받은 별은 빈 별 그대로. `settled`면 움직임 없이 끝 모습.
- * 효과음 자리(P6-14): 별이 톡 튈 때마다 `useSfx` 'star' — rate `STAR_RATES[i]`(1 → 1.26 → 1.5)
+ * 효과음은 쓰는 쪽이 같은 박자로 낸다(`rewardSfx`: 별마다 'star' rate 1 → 1.26 → 1.5) — 여기서 내면 카드·띠가 두 번 울림
  */
 export function StarRow({
   stars,
