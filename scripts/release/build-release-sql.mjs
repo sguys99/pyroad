@@ -146,6 +146,21 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v0.6-phase8',
+    dir: 'v0.6-phase8',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.6 (Phase 8 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00028 level_curve)',
+          '-- feat/phase8 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.6-runbook.md "Phase 8 병합"',
+        ],
+        parts: ['00028'],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];

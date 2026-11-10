@@ -74,7 +74,7 @@ function response(over: Partial<QuizAnswerResponse>): QuizAnswerResponse {
     stars: 0,
     best_stars: 0,
     xp_awarded: 0,
-    total_xp: 120,
+    total_xp: 230,
     level_before: 2,
     level_after: 2,
     explanation: null,

@@ -19,7 +19,7 @@ export const SHARE_CARD_SAMPLES: ShareCardSample[] = [
       kind: 'levelup',
       nickname: '코딩왕민준',
       level: 12,
-      title: '숲 마을 탐험가',
+      title: '리스트 정리왕',
     },
   },
   {

@@ -21,6 +21,7 @@ import {
 } from '@/lib/celebration/plan';
 import { tierDuration } from '@/lib/motion/tokens';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
+import { getLevelTitle } from '@/lib/quest/xp';
 import { CodeSample, Section } from './ui';
 
 const noop = () => {};
@@ -41,7 +42,7 @@ const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
     label: '스테이지 마지막 퀘스트',
     events: [
       { type: 'stage_clear', stage: STAGE },
-      { type: 'level_up', level: 3, fromLevel: 2, title: '숲 마을 탐험가' },
+      { type: 'level_up', level: 3, fromLevel: 2, title: getLevelTitle(3) },
       { type: 'badge', badge: 'first_code' },
       { type: 'badge', badge: 'stage_clear' },
     ],
@@ -64,11 +65,14 @@ const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
 /** 오버레이 견본: 카드 한 장을 연출 단계대로 그린다. "다시 보기"로 처음부터, introMs 뒤 끝 상태 */
 function CardSample({
   kind,
+  variant,
   label,
   round,
   children,
 }: {
   kind: string;
+  /** 같은 카드의 다른 견본 (data-testid 구분) */
+  variant?: string;
   label: string;
   round: number;
   children: (settled: boolean) => React.ReactNode;
@@ -80,7 +84,7 @@ function CardSample({
       </figcaption>
       <div
         className="rounded-2xl bg-scrim px-3 py-6"
-        data-testid={`catalog-cel-${kind}`}
+        data-testid={`catalog-cel-${kind}${variant ? `-${variant}` : ''}`}
       >
         <SettledCard key={round} kind={kind}>
           {children}
@@ -125,7 +129,7 @@ const first = (events: CelebrationEvent[]) => planCelebrations(events)[0];
 const CATALOG_STEPS: Record<string, CelebrationStep> = {
   stage_clear: first([{ type: 'stage_clear', stage: STAGE }]),
   level_up: first([
-    { type: 'level_up', level: 3, fromLevel: 2, title: '숲 마을 탐험가' },
+    { type: 'level_up', level: 3, fromLevel: 2, title: getLevelTitle(3) },
   ]),
   badges: first([
     { type: 'badge', badge: 'first_code' },
@@ -204,7 +208,24 @@ export function CelebrationSection() {
               <LevelUpCard
                 level={3}
                 fromLevel={2}
-                title="숲 마을 탐험가"
+                title={getLevelTitle(3)}
+                budget={budget}
+                settled={settled}
+                onNext={noop}
+              />
+            )}
+          </CardSample>
+          <CardSample
+            kind="level_up"
+            variant="big"
+            label="레벨 업 · 5레벨마다 큰 칭호 (금색 도장)"
+            round={round}
+          >
+            {(settled) => (
+              <LevelUpCard
+                level={10}
+                fromLevel={9}
+                title={getLevelTitle(10)}
                 budget={budget}
                 settled={settled}
                 onNext={noop}

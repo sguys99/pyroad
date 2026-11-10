@@ -312,9 +312,9 @@ function NodeTile({ stage }: { stage: StageWithStatus }) {
 // 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨
 const HUDS: [string, WorldHudProps][] = [
   ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, streak: { days: 0, today: false } }],
-  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 180, level: 2, streak: { days: 1, today: true } }],
-  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 720, level: 4, streak: { days: 7, today: false } }],
-  ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 1500, level: 5, streak: { days: 12, today: true } }],
+  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 280, level: 2, streak: { days: 1, today: true } }],
+  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 1000, level: 4, streak: { days: 7, today: false } }],
+  ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 31500, level: 50, streak: { days: 12, today: true } }],
 ];
 
 export function WorldMapSection() {

@@ -426,6 +426,12 @@ export const EXPECT = {
     activateIn: 'Q25',
     note: '00019: streak_3 는 직접 푼 완료일만 셈',
   },
+  'RW-14': {
+    expect: 'allow',
+    requires: 'public.users_sync_level()',
+    activateIn: 'P8-01',
+    note: 'B20 (00028): current_level 은 트리거가 level_for_xp(total_xp) 로만 정함',
+  },
   'RW-5': {
     expect: 'allow',
     requires: 'public.complete_quest()',

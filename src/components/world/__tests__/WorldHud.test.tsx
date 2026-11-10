@@ -20,7 +20,7 @@ afterEach(cleanup);
 const props: WorldHudProps = {
   name: '파이',
   skin: 'green',
-  totalXp: 180, // Lv 2 (100~300) → 80 / 200
+  totalXp: 280, // Lv 2 (200~490) → 80 / 290
   level: 2,
   streak: { days: 3, today: true },
 };
@@ -34,7 +34,7 @@ describe('WorldHud', () => {
     expect(screen.getByText('레벨 2')).toBeInTheDocument();
     expect(
       screen.getByRole('progressbar', { name: '다음 레벨까지 경험치' }),
-    ).toHaveAttribute('aria-valuetext', '80 / 200 XP');
+    ).toHaveAttribute('aria-valuetext', '80 / 290 XP');
     expect(
       screen.getByRole('button', { name: '3일 연속 모험 중' }),
     ).toHaveAttribute('data-on');

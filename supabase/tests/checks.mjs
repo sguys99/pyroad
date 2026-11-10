@@ -2609,6 +2609,27 @@ async function groupReward() {
       );
     },
   });
+
+  await check({
+    group: 'reward',
+    id: 'RW-14',
+    role: 'service_role',
+    op: 'B20 (00028): users.current_level 은 total_xp 에서만 — 다른 레벨을 써도 트리거가 level_for_xp(total_xp) 로 맞춤',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw14', '레벨');
+      one(`update public.users set total_xp = 3480, current_level = 2 where id = '${x.id}'`);
+      const a = one(`select current_level from public.users where id = '${x.id}'`);
+      one(`update public.users set current_level = 50 where id = '${x.id}'`);
+      const b = one(`select current_level from public.users where id = '${x.id}'`);
+      return (
+        compare('3480 XP 에 Lv 2 를 써도 / Lv 50 만 바꿔도', { a: '10', b: '10' }, { a, b }) || {
+          actual: 'ok',
+          detail: '3480 XP → Lv 10 (쓴 값 2·50 무시)',
+        }
+      );
+    },
+  });
 }
 
 // ── account: 탈퇴 (B28) ─────────────────────────────────────

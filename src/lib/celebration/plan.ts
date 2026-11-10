@@ -19,6 +19,7 @@ import type { StageClearInfo } from '@/lib/quest/rewards';
 import { SHOW_CHEST } from '@/lib/world/flags';
 import { getBadgeDefinition } from '@/lib/quest/badges';
 import { withObjectParticle } from '@/lib/korean';
+import { isMilestoneLevel } from '@/lib/quest/xp';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { STAR_RATES } from '@/lib/sound/manifest';
 import { rewardSfx, type SfxCue } from './rewardSfx';
@@ -200,7 +201,7 @@ export function stepSummary(step: CelebrationStep): string {
         .filter(Boolean)
         .join(' ');
     case 'level_up':
-      return `레벨 업! 레벨 ${step.event.level} 달성, 새 칭호 ${step.event.title}.`;
+      return `레벨 업! 레벨 ${step.event.level} 달성, ${isMilestoneLevel(step.event.level) ? '큰 칭호' : '새 칭호'} ${step.event.title}.`;
     case 'badges':
       return `새 뱃지: ${step.badges.map((b) => getBadgeDefinition(b).name).join(', ')}.`;
     case 'rewards':
