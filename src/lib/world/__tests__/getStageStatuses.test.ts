@@ -197,6 +197,31 @@ describe('getStageStatuses', () => {
     expect(stage2.completedQuestCount).toBe(2);
     expect(stage2.totalQuestCount).toBe(3);
   });
+
+  it('퀴즈는 보너스: 잠금·클리어·수·이어하기에서 빠지고 별에는 들어감 (§12-Q60)', () => {
+    const withQuiz = [
+      makeStage(1, [
+        { id: 'c1' },
+        { id: 'z1', quest_type: 'quiz', quiz_kind: 'multiple_choice' },
+        { id: 'c2' },
+      ]),
+      makeStage(2, [{ id: 'c3' }]),
+    ];
+    const result = getStageStatuses(withQuiz, [
+      makeProgress('c1'),
+      makeProgress('c2', 'completed', { best_stars: 2 }),
+    ]);
+    expect(result[0].status).toBe('completed');
+    expect(result[0].completedQuestCount).toBe(2);
+    expect(result[0].totalQuestCount).toBe(2);
+    expect(result[0].quests.map((q) => q.id)).toEqual(['c1', 'z1', 'c2']);
+    expect(result[0].maxStars).toBe(9);
+    expect(result[0].stars).toBe(2);
+    expect(result[1].status).toBe('in_progress');
+
+    const partial = getStageStatuses(withQuiz, [makeProgress('c1')]);
+    expect(partial[0].firstIncompleteQuestId).toBe('c2');
+  });
 });
 
 // P5-12: 월드 단위 상태

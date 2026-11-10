@@ -5,6 +5,7 @@ import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Json } from '@/lib/types/database';
 import type { RewardErrorResponse } from './rewards';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
+import { reportServerError } from '@/lib/api/serverError';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -24,6 +25,8 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   invalid_arguments: { status: 400, error: '요청이 올바르지 않아요.' },
   invalid_step: { status: 400, error: '단계 정보가 올바르지 않아요.' },
   submission_too_large: { status: 413, error: '코드가 너무 길어요.' },
+  answer_too_large: { status: 413, error: '답이 너무 길어요.' },
+  not_quiz: { status: 400, error: '퀴즈 문제가 아니에요.' },
   quest_not_found: { status: 404, error: '퀘스트를 찾을 수 없어요.' },
   stage_not_found: { status: 404, error: '해당 스테이지를 찾을 수 없어요.' },
   user_not_found: { status: 404, error: '사용자 정보를 찾을 수 없어요.' },
@@ -59,15 +62,16 @@ function fromRpcError(
   error: PostgrestError,
 ): NextResponse<RewardErrorResponse> {
   if (RPC_ERRORS[error.message]) return rewardError(error.message);
-  console.error(`[rewardRpc] ${fn} 실패:`, {
-    code: error.code,
-    message: error.message,
-  });
+  reportServerError(error, { area: 'rewardRpc', op: fn });
   return rewardError('server_error', 500);
 }
 
 async function callRpc<T>(
-  fn: 'complete_quest' | 'use_golden_key' | 'reset_progress',
+  fn:
+    | 'complete_quest'
+    | 'use_golden_key'
+    | 'reset_progress'
+    | 'submit_quiz_answer',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -115,6 +119,22 @@ export function resetProgressRpc<T>(
       p_user_id: userId,
       p_scope: scope.type,
       ...(scope.type === 'stage' && { p_stage_id: scope.stageId }),
+    }),
+  );
+}
+
+/** 퀴즈 채점 (P7-02, 00026). answer 는 API 가 zod 로 확인한 정규형 그대로 */
+export function submitQuizAnswerRpc<T>(
+  admin: AdminClient,
+  userId: string,
+  questId: string,
+  answer: Json,
+) {
+  return callRpc<T>('submit_quiz_answer', () =>
+    admin.rpc('submit_quiz_answer', {
+      p_user_id: userId,
+      p_quest_id: questId,
+      p_answer: answer,
     }),
   );
 }

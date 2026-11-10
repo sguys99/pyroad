@@ -6,7 +6,13 @@ import type { WorldInfo } from './worlds';
 interface QuestMinimal {
   id: string;
   order: number;
+  /** 'quiz' 는 보너스라 잠금·클리어 계산에서 뺌 (§12-Q60). 없으면 코드 퀘스트로 봄 */
+  quest_type?: string;
 }
+
+/** 스테이지 잠금·클리어에 드는 퀘스트인지. 퀴즈는 보너스 (SQL is_stage_unlocked 00026 과 같은 규칙) */
+export const countsForClear = (q: { quest_type?: string }) =>
+  q.quest_type !== 'quiz';
 
 interface StageWithQuests extends Stage, OrderedStage {
   quests: QuestMinimal[];
@@ -28,6 +34,8 @@ export const MAX_STARS_PER_QUEST = 3;
  * 그래서 월드 해제 규칙 previous_world_cleared 도 이 순서로 나옵니다 (스테이지 없는 "준비 중" 월드는 건너뜀).
  * 서버 규칙 supabase/migrations/00012 의 is_stage_unlocked 와 같아야 합니다 (RLS 회귀 WD-5가 월드 간 잠금 확인).
  * 황금키로 넘긴 퀘스트도 status 'completed' 라 완료로 셉니다 (별은 best_stars 그대로).
+ * 퀴즈(quest_type 'quiz')는 보너스라 완료 수·총 수·클리어·firstIncompleteQuestId 에서 뺍니다 (00026, §12-Q60).
+ * 별(stars·maxStars)은 모으는 수집 기록이라 퀴즈도 넣습니다 (퀴즈 별이 실제로 쌓이는 첫 유형).
  */
 export function getStageStatuses(
   stages: StageWithQuests[],
@@ -45,11 +53,12 @@ export function getStageStatuses(
 
   return sorted.map((stage, index) => {
     const sortedQuests = [...stage.quests].sort((a, b) => a.order - b.order);
-    const completedCount = sortedQuests.filter((q) =>
+    const required = sortedQuests.filter(countsForClear);
+    const completedCount = required.filter((q) =>
       completedQuestIds.has(q.id),
     ).length;
     const allCompleted =
-      completedCount === sortedQuests.length && sortedQuests.length > 0;
+      completedCount === required.length && required.length > 0;
 
     let status: StageStatus;
     if (index === 0) {
@@ -60,9 +69,7 @@ export function getStageStatuses(
       status = allCompleted ? 'completed' : 'in_progress';
     }
 
-    const firstIncomplete = sortedQuests.find(
-      (q) => !completedQuestIds.has(q.id),
-    );
+    const firstIncomplete = required.find((q) => !completedQuestIds.has(q.id));
 
     prevStageCompleted = allCompleted;
 
@@ -71,7 +78,7 @@ export function getStageStatuses(
       status,
       quests: sortedQuests,
       completedQuestCount: completedCount,
-      totalQuestCount: sortedQuests.length,
+      totalQuestCount: required.length,
       firstIncompleteQuestId:
         firstIncomplete?.id ?? sortedQuests[0]?.id ?? null,
       stars: sortedQuests.reduce(

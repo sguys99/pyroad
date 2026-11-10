@@ -746,6 +746,21 @@ export const EXPECT = {
     activateIn: 'P5-05',
     note: '① 00025 record_seen_unlocks: 열린 스테이지만 · ON CONFLICT DO NOTHING · 상한 256 · users ON DELETE CASCADE',
   },
+  // 퀴즈 채점 RPC (P7-02, ① 00026). 점검용 퀴즈는 checks.mjs groupQuiz 가 만들고 지움
+  'QZ-1': { expect: 'deny', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: 'anon 직접 채점 거부' },
+  'QZ-2': {
+    expect: 'deny',
+    requires: 'public.submit_quiz_answer()',
+    activateIn: 'P7-02',
+    note: 'authenticated 직접 채점 거부 (rate limit 우회·사칭·정답 오라클, §2.3)',
+  },
+  'QZ-3': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '동시 제출 직렬화 (FOR UPDATE)' },
+  'QZ-4': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '별 3/2/1 · 별×10 XP (Q60)' },
+  'QZ-5': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '오답 응답에 정답 없음, 3번째 오답 공개 + ⭐1' },
+  'QZ-6': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '같은 날 practice' },
+  'QZ-7': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '다음 날 review, 늘어난 별만 XP' },
+  'QZ-8': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: 'jsonb = (@> 금지), 모양·유형 거부' },
+  'QZ-9': { expect: 'allow', requires: 'public.submit_quiz_answer()', activateIn: 'P7-02', note: '스테이지 잠금 + 퀴즈는 보너스 (Q60)' },
   // 만 14세 미만 법정대리인 동의 (P3-15, ① 00024)
   'GC-1': {
     expect: 'deny',

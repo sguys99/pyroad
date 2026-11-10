@@ -138,16 +138,27 @@ function toInt(value: unknown): number {
  * DB 호출이 실패하면(00016 미적용, 일시 오류) **통과시킨다**(fail-open). 한도 때문에 튜터 전체가 멈추지 않게 하고,
  * 실패는 로그·Sentry(같은 에러 10분 3회 제한, P1-16)로 알린다. 입력으로 RPC 를 실패하게 만들 수는 없다(id·유형은 서버가 정함).
  */
-export async function consumeTutorQuota(
+export function consumeTutorQuota(
   admin: SupabaseClient<Database>,
   userId: string,
   type: TutorType,
   limit: RateLimit,
 ): Promise<QuotaResult> {
+  return consumeRateLimit(admin, userId, `tutor:${type}`, limit, 'tutor');
+}
+
+/** 범용: 버킷 이름(`<영역>:<종류>`)으로 한도 1 차감. 퀴즈 채점(`quiz:answer`, P7-02)도 씀. 실패 처리는 위와 같음 */
+export async function consumeRateLimit(
+  admin: SupabaseClient<Database>,
+  userId: string,
+  bucket: string,
+  limit: RateLimit,
+  area: string,
+): Promise<QuotaResult> {
   try {
     const { data, error } = await admin.rpc('consume_rate_limit', {
       p_user_id: userId,
-      p_bucket: `tutor:${type}`,
+      p_bucket: bucket,
       p_per_minute: limit.perMinute,
       p_per_day: limit.perDay,
     });
@@ -168,10 +179,10 @@ export async function consumeTutorQuota(
     };
   } catch (error) {
     console.error(
-      '[tutor] consume_rate_limit 실패:',
+      `[${area}] consume_rate_limit 실패:`,
       error instanceof Error ? error.message : error,
     );
-    captureServerError(error, { tags: { area: 'tutor', op: 'rate_limit' } });
+    captureServerError(error, { tags: { area, op: 'rate_limit' } });
     return FAIL_OPEN;
   }
 }
