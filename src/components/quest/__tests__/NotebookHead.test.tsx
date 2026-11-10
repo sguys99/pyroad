@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
 import { createRef } from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, cleanup, fireEvent, screen } from '@testing-library/react';
+import {
+  render,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { CodeEditor, type CodeEditorHandle } from '../CodeEditor';
 import { ResetCodeButton } from '../CodePanel';
 
@@ -42,11 +48,18 @@ describe('ResetCodeButton', () => {
   });
 });
 
+/** CodeMirror는 마운트 뒤 동적 import로 온다 (P6-16) */
+const editorReady = (c: HTMLElement) =>
+  waitFor(() => expect(c.querySelector('.cm-editor')).not.toBeNull());
+
 describe('CodeEditorHandle (P6-04 코드 키보드 연결점)', () => {
-  it('커서는 코드 끝에서 시작하고, 커서 자리에 넣은 뒤 caret 자리로 옮긴다', () => {
+  it('커서는 코드 끝에서 시작하고, 커서 자리에 넣은 뒤 caret 자리로 옮긴다', async () => {
     const onChange = vi.fn();
     const ref = createRef<CodeEditorHandle>();
-    render(<CodeEditor ref={ref} value="ab" onChange={onChange} />);
+    const { container } = render(
+      <CodeEditor ref={ref} value="ab" onChange={onChange} />,
+    );
+    await editorReady(container);
     ref.current!.insert('print()', 6);
     expect(onChange).toHaveBeenLastCalledWith('abprint()');
     ref.current!.insert('x');
@@ -68,12 +81,13 @@ describe('CodeKeyboard (P6-04)', () => {
     const { default: CodeKeyboard } = await import('../CodeKeyboard');
     const onChange = vi.fn();
     const ref = createRef<CodeEditorHandle>();
-    render(
+    const { container } = render(
       <>
         <CodeEditor ref={ref} value="" onChange={onChange} />
         <CodeKeyboard editor={ref} />
       </>,
     );
+    await editorReady(container);
     fireEvent.click(screen.getByRole('button', { name: 'print 주문 넣기' }));
     fireEvent.click(screen.getByRole('button', { name: '따옴표 한 쌍 넣기' }));
     expect(onChange).toHaveBeenLastCalledWith('print("")');

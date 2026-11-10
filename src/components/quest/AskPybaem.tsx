@@ -59,13 +59,15 @@ export function AskPybaem({ session, hintPending }: AskPybaemProps) {
   // 결과 쪽지의 "파이뱀에게 더 물어보기"(Q56)도 열 수 있게 세션 상태
   const { askOpen: open, setAskOpen: setOpen } = session;
 
-  // 파이뱀 말 + 알림(단계 시작·황금키·저장 실패). 아이 질문과 힌트 쪽지는 세지 않음
+  // 미리 보기 = 파이뱀 말 + 알림(단계 시작·황금키·저장 실패). 아이 질문과 힌트 쪽지는 빼고
   const said = messages.filter((m) => m.role !== 'student' && !m.hint);
   const last = said.at(-1);
+  // 배지 = 파이뱀의 새 답만 (알림까지 세면 프로젝트 단계마다 쌓여 15개를 넘었음, P6-16)
+  const replies = said.filter((m) => m.role === 'tutor').length;
   // 펼쳐 둔 동안 들어온 말은 읽은 것으로 (렌더 중 갱신: 효과 없이 같은 값으로 수렴)
   const [seen, setSeen] = useState(0);
-  if (open && seen !== said.length) setSeen(said.length);
-  const unread = open ? 0 : Math.max(0, said.length - seen);
+  if (open && seen !== replies) setSeen(replies);
+  const unread = open ? 0 : Math.max(0, replies - seen);
 
   const busy = isAiLoading && !hintPending;
   const expression = useMessageExpression(last ?? EMPTY);

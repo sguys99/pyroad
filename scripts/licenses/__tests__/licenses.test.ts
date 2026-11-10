@@ -70,7 +70,7 @@ function fakeRepo(
 describe('패키지 모으기 (dependencies만 따라감)', () => {
   it('중첩 node_modules를 node 규칙대로 찾고, optional·peer·타입·빌드 도구·제외 목록은 따라가지 않는다', () => {
     const root = fakeRepo(
-      { a: '1', shadcn: '1', 'lottie-react': '1' },
+      { a: '1', shadcn: '1', pyodide: '1' },
       {
         'node_modules/a': {
           json: {
@@ -97,20 +97,20 @@ describe('패키지 모으기 (dependencies만 따라감)', () => {
             dependencies: { cli: '1' },
           },
         },
-        'node_modules/lottie-react': {
-          json: { name: 'lottie-react', version: '2.0.0', license: 'MIT' },
+        'node_modules/pyodide': {
+          json: { name: 'pyodide', version: '1.0.0', license: 'MPL-2.0' },
         },
       },
     );
     const { packages, skipped } = collectPackages(root, {
-      dependencies: { a: '1', shadcn: '1', 'lottie-react': '1' },
+      dependencies: { a: '1', shadcn: '1', pyodide: '1' },
     });
     expect(packages.map((p) => `${p.name}@${p.version}`)).toEqual([
       'a@1.0.0',
       'b@2.0.0',
       'shadcn@4.0.0', // 자신만 (cli는 따라가지 않음 → 없어도 오류 아님)
     ]);
-    expect(skipped).toEqual(['@types/x', 'lottie-react', 'rollup']);
+    expect(skipped).toEqual(['@types/x', 'pyodide', 'rollup']);
   });
 
   it('dependencies에 있는데 설치되지 않은 패키지는 오류 (npm ci 안내)', () => {

@@ -627,6 +627,34 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
     expect(mocks.upserts.at(-1)!.payload).toMatchObject({ current_step: 2 });
   });
 
+  it('단계 통과는 박자 전에 저장: 박자 중에 떠나도 다음 단계가 남는다 (P6-16)', async () => {
+    const { result, unmount } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
+    // 고친 직후 실행: 고친 코드의 자동 저장 타이머가 박자 중에 남아 있다
+    act(() => result.current.setCode('name = "파이"'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.stepCleared).toBe(1);
+    expect(result.current.currentStep).toBe(1);
+    expect(mocks.upserts.at(-1)!.payload).toEqual({
+      user_id: 'u1',
+      quest_id: 'q-proj',
+      code_submitted: 'name = "파이"\nscore = ___',
+      current_step: 2,
+      step_submissions: { '1': 'name = "파이"' },
+    });
+    // 박자 중 자동 저장 타이머가 예전 단계로 덮어쓰지 않는다
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(AUTO_SAVE_DELAY_MS);
+      await flush();
+    });
+    expect(mocks.upserts.at(-1)!.payload).toMatchObject({ current_step: 2 });
+    unmount();
+  });
+
   it('B10 회귀: 황금키로 연 중간 단계는 정답 코드를 저장하고 다음 단계로 간다 (예전 코드 아님)', async () => {
     routes['/api/quest/golden-key'] = (body) => ({
       json: {

@@ -21,6 +21,7 @@ import {
   resolveAnswerKey,
   type QuestAnswerKey,
 } from '@/lib/quest/answerKeys';
+import { explainError } from '@/lib/quest/errorExplain';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import {
   consumeTutorQuota,
@@ -647,6 +648,10 @@ export function buildFallbackMessage(
     return hint || HINT_UNAVAILABLE_MESSAGE;
   } else if (body.type === 'code_feedback') {
     if (!body.execution_result?.passed) {
+      // 오류가 났으면 키 없는 아이도 결과 쪽지·대사창과 같은 쉬운 설명을 받는다 (P6-07 규칙표, P6-16)
+      const stderr = body.execution_result?.stderr?.trim();
+      if (stderr)
+        return `${explainError(stderr).text} 고쳐서 다시 돌려 봐요! 💡`;
       return '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
     }
     return pickRandom(

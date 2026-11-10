@@ -278,6 +278,7 @@ export function QuestWorkspace({
               loadStage={runner.loadStage}
               isRunning={runner.isRunning}
               isSubmitting={session.isSubmitting}
+              stepping={session.stepCleared != null}
               onRun={session.handleRun}
               onStop={session.handleStop}
               onRetry={runner.retry}

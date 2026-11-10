@@ -1,79 +1,22 @@
 'use client';
 
 import {
-  useRef,
   useEffect,
   useImperativeHandle,
+  useRef,
+  useState,
   type ReactNode,
   type Ref,
 } from 'react';
-import {
-  EditorView,
-  keymap,
-  lineNumbers,
-  highlightActiveLineGutter,
-  highlightSpecialChars,
-  drawSelection,
-  dropCursor,
-  rectangularSelection,
-  crosshairCursor,
-  highlightActiveLine,
-} from '@codemirror/view';
-import { Compartment, EditorState } from '@codemirror/state';
-import {
-  cursorCharLeft,
-  cursorCharRight,
-  defaultKeymap,
-  history,
-  historyKeymap,
-  indentWithTab,
-  isolateHistory,
-  undo as undoCommand,
-} from '@codemirror/commands';
-import { bracketMatching, indentOnInput } from '@codemirror/language';
-import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
-import {
-  autocompletion,
-  closeBrackets,
-  closeBracketsKeymap,
-  completionKeymap,
-} from '@codemirror/autocomplete';
-import { python } from '@codemirror/lang-python';
 import { cn } from '@/lib/utils';
-import { codeFontSizeTheme, kidsTheme } from '@/lib/editor/kidsTheme';
-import { errorLineExtension, setErrorLine } from '@/lib/editor/errorLine';
-import { keyboardInset } from '@/lib/editor/keyboardInset';
+import type { EditorController } from '@/lib/editor/createEditor';
+import { CODE_LINE_HEIGHT } from '@/lib/editor/fontSize';
 import { useCodeFontSize } from '@/lib/editor/useCodeFontSize';
 import { CodeFontSizeControl } from './CodeFontSizeControl';
+import './codeEditor.css';
 
-// 키즈 테마·글꼴·글자 크기 규칙은 src/lib/editor/ (P2-18, docs/design/editor.md).
-// 구성은 `codemirror`의 basicSetup에서 접기 칸(▸)만 뺀 것: 시안의 공책에는 접기가 없고 아이에게는 잡음이다.
-// 줄 바꿈(lineWrapping)은 하지 않는다(최종 시안과 같이 가로 스크롤): 좁은 화면에서 한글 주석이 글자 중간에서 꺾여
-// 주석 정렬이 깨지고, 꺾인 줄이 0칸에서 시작해 파이썬 들여쓰기처럼 보인다
-const setup = [
-  lineNumbers(),
-  highlightActiveLineGutter(),
-  highlightSpecialChars(),
-  history(),
-  drawSelection(),
-  dropCursor(),
-  EditorState.allowMultipleSelections.of(true),
-  indentOnInput(),
-  bracketMatching(),
-  closeBrackets(),
-  rectangularSelection(),
-  crosshairCursor(),
-  highlightActiveLine(),
-  highlightSelectionMatches(),
-  keymap.of([
-    ...closeBracketsKeymap,
-    indentWithTab,
-    ...defaultKeymap,
-    ...searchKeymap,
-    ...historyKeymap,
-    ...completionKeymap,
-  ]),
-];
+// CodeMirror 구성은 src/lib/editor/createEditor.ts. 마운트한 뒤 동적 import로 받아 첫 로드 JS에서 뺀다 (P6-16):
+// 받기 전(서버 HTML·하이드레이션 직후)에는 같은 코드를 같은 글꼴·크기의 글자로 보여 주고, 에디터가 오면 바꾼다
 
 /** 바깥에서 에디터를 다루는 손잡이 (P6-04 모바일 코드 키보드가 커서 자리에 글자를 넣는다) */
 export interface CodeEditorHandle {
@@ -114,124 +57,58 @@ export function CodeEditor({
   className,
 }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
+  const editorRef = useRef<EditorController | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
-  // 에디터는 처음 마운트할 때 한 번만 만든다. 그 뒤 값은 아래 동기화 effect가 맞춘다
-  const initialValueRef = useRef(value);
-  const fontSizeCompartment = useRef(new Compartment());
   const { size: fontSize, change: changeFontSize } = useCodeFontSize();
-  const initialFontSizeRef = useRef(fontSize);
+  // 에디터가 도착했을 때의 최신 값 (그 사이 바뀐 값·글자 크기·오류 줄도 그대로 시작)
+  const latestRef = useRef({ value, fontSize, errorLine });
+  latestRef.current = { value, fontSize, errorLine };
 
+  // 에디터는 처음 마운트할 때 한 번만 만든다. 그 뒤 값은 아래 동기화 effect가 맞춘다
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const state = EditorState.create({
-      doc: initialValueRef.current,
-      // 커서는 끝에서 시작 (값 동기화와 같음): 에디터를 누르기 전에 코드 키보드로 넣어도 시작 코드 뒤에 붙는다
-      selection: { anchor: initialValueRef.current.length },
-      extensions: [
-        setup,
-        // 터치 화면: 자동 완성 목록은 눌러서 고르고 Enter는 늘 줄바꿈 (폰 키보드 Enter가 목록을 골라 줄이 안 바뀌던 문제, P6-04 메모 → P6-11).
-        // 기본 키맵을 끄면 setup의 defaultKeymap Enter(줄바꿈)가 completionKeymap Enter보다 먼저다. Esc로 닫기는 그대로
-        autocompletion({
-          defaultKeymap: !window.matchMedia?.('(pointer: coarse)').matches,
-        }),
-        // 폰 키보드 + 코드 키보드가 가린 만큼 커서 줄을 위로 (P6-11, CodeKeyboard가 잼)
-        EditorView.scrollMargins.of(() => ({ bottom: keyboardInset() })),
-        python(),
-        EditorState.tabSize.of(4),
-        kidsTheme(),
-        fontSizeCompartment.current.of(
-          codeFontSizeTheme(initialFontSizeRef.current),
-        ),
-        errorLineExtension(),
-        EditorView.contentAttributes.of({ 'aria-label': '파이썬 코드' }),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            onChangeRef.current(update.state.doc.toString());
-          }
-        }),
-      ],
+    let alive = true;
+    import('@/lib/editor/createEditor').then(({ createEditor }) => {
+      if (!alive || !containerRef.current) return;
+      const l = latestRef.current;
+      editorRef.current = createEditor(containerRef.current, {
+        doc: l.value,
+        fontSize: l.fontSize,
+        errorLine: l.errorLine,
+        onChange: (code) => onChangeRef.current(code),
+      });
+      setLoaded(true);
     });
-
-    const view = new EditorView({
-      state,
-      parent: containerRef.current,
-    });
-
-    viewRef.current = view;
-
     return () => {
-      view.destroy();
-      viewRef.current = null;
+      alive = false;
+      editorRef.current?.destroy();
+      editorRef.current = null;
     };
   }, []);
 
   // 바깥에서 바꾼 값을 에디터에 반영 (내용 전체 교체, 커서는 끝으로)
   useEffect(() => {
-    const view = viewRef.current;
-    if (!view) return;
-    const current = view.state.doc.toString();
-    if (current === value) return;
-    view.dispatch({
-      changes: { from: 0, to: current.length, insert: value },
-      selection: { anchor: value.length },
-    });
+    editorRef.current?.setValue(value);
   }, [value]);
 
   // 글자 크기 (기기 저장소 값은 마운트 직후 들어온다)
   useEffect(() => {
-    viewRef.current?.dispatch({
-      effects: fontSizeCompartment.current.reconfigure(
-        codeFontSizeTheme(fontSize),
-      ),
-    });
+    editorRef.current?.setFontSize(fontSize);
   }, [fontSize]);
 
   useEffect(() => {
-    viewRef.current?.dispatch({ effects: setErrorLine.of(errorLine) });
+    editorRef.current?.setErrorLine(errorLine);
   }, [errorLine]);
 
   useImperativeHandle(
     ref,
     () => ({
-      insert(text, caret = text.length) {
-        const view = viewRef.current;
-        if (!view) return;
-        const { from } = view.state.selection.main;
-        view.dispatch({
-          ...view.state.replaceSelection(text),
-          selection: { anchor: from + caret },
-          scrollIntoView: true,
-          userEvent: 'input.type',
-          // 키 한 번 = 되돌리기 한 번 (빠르게 누른 키들이 한 덩어리로 지워지지 않게)
-          annotations: isolateHistory.of('full'),
-        });
-        view.focus();
-      },
-      moveCursor(dir) {
-        const view = viewRef.current;
-        if (!view) return;
-        (dir < 0 ? cursorCharLeft : cursorCharRight)(view);
-        view.focus();
-      },
-      undo() {
-        const view = viewRef.current;
-        if (!view) return;
-        undoCommand(view);
-        view.focus();
-      },
-      focus: () => viewRef.current?.focus(),
-      revealCursor() {
-        const view = viewRef.current;
-        if (!view) return;
-        view.dispatch({
-          effects: EditorView.scrollIntoView(view.state.selection.main.head, {
-            y: 'nearest',
-          }),
-        });
-      },
+      insert: (text, caret) => editorRef.current?.insert(text, caret),
+      moveCursor: (dir) => editorRef.current?.moveCursor(dir),
+      undo: () => editorRef.current?.undo(),
+      focus: () => editorRef.current?.focus(),
+      revealCursor: () => editorRef.current?.revealCursor(),
     }),
     [],
   );
@@ -244,7 +121,20 @@ export function CodeEditor({
         {actions}
         <CodeFontSizeControl size={fontSize} onChange={changeFontSize} />
       </div>
-      <div ref={containerRef} data-testid="code-editor" />
+      <div
+        ref={containerRef}
+        data-testid="code-editor"
+        data-editor-loading={loaded ? undefined : ''}
+      >
+        {!loaded && (
+          <pre
+            className="ce-static font-mono"
+            style={{ fontSize, lineHeight: CODE_LINE_HEIGHT }}
+          >
+            {value}
+          </pre>
+        )}
+      </div>
     </div>
   );
 }

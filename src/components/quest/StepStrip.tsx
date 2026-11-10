@@ -87,7 +87,7 @@ export function StepStrip({
             onClick={onSkip}
             data-testid="step-skip"
           >
-            다음 단계로
+            <span className="qp-skip-t">다음 단계로</span>
             <ArrowRight aria-hidden />
           </button>
         )}

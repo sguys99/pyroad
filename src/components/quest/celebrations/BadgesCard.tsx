@@ -39,6 +39,7 @@ export function BadgesCard({ badges, onNext }: BadgesCardProps) {
 
       <ul
         className="cel-medals"
+        data-many={single ? undefined : ''}
         style={{ '--n': Math.min(badges.length, 3) } as React.CSSProperties}
       >
         {badges.map((type, i) => {

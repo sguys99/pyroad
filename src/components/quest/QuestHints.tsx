@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Lightbulb } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import {
@@ -25,7 +23,8 @@ import type { QuestCompletion } from '@/lib/quest/useQuestSession';
 import './questHints.css';
 
 const MAX_HINTS = 3;
-const remarkPlugins = [remarkGfm];
+// 받은 힌트가 있을 때만 받는다. 오기 전에는 같은 글자를 그대로 보여 줌 (P6-16)
+const HintMarkdown = lazy(() => import('./HintMarkdown'));
 
 /** 완료한 퀘스트의 보상 줄 (Q57): 막 통과한 직후에 "이미 통과한 퀘스트"라고 하지 않게 */
 export const COMPLETED_NOTE: Record<QuestCompletion, string> = {
@@ -219,9 +218,13 @@ export function QuestHints({
                 )
               ) : (
                 <div className="qh-note-body prose prose-sm max-w-none text-foreground prose-p:my-1 prose-code:rounded prose-code:bg-surface prose-code:before:content-none prose-code:after:content-none prose-code:px-1 prose-pre:bg-surface prose-pre:text-foreground">
-                  <ReactMarkdown remarkPlugins={remarkPlugins}>
-                    {note.text}
-                  </ReactMarkdown>
+                  <Suspense
+                    fallback={
+                      <p className="whitespace-pre-wrap">{note.text}</p>
+                    }
+                  >
+                    <HintMarkdown text={note.text} />
+                  </Suspense>
                 </div>
               )}
             </li>

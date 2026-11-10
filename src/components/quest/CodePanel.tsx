@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { NotebookPen, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
-import { errorLineFromStderr } from '@/lib/editor/errorLine';
+import { errorLineFromStderr } from '@/lib/editor/stderrLine';
 import { OutputPanel, type OutputPanelProps } from './OutputPanel';
 import type {
   PyodideRestartReason,
@@ -95,6 +95,8 @@ interface CodePanelProps {
   isRunning: boolean;
   /** 채점·완료 요청 중 (B06: 이 동안 실행 버튼을 다시 누를 수 없음) */
   isSubmitting?: boolean;
+  /** 프로젝트 단계 통과 박자 중 (실행 버튼이 "정답 확인 중"에 머물지 않게, P6-16) */
+  stepping?: boolean;
   onRun: () => void;
   /** 실행 멈추기 (실행 중에만 버튼이 보임) */
   onStop?: () => void;
@@ -125,6 +127,7 @@ export function CodePanel({
   loadStage = null,
   isRunning,
   isSubmitting = false,
+  stepping = false,
   onRun,
   onStop,
   onRetry,
@@ -177,6 +180,7 @@ export function CodePanel({
         loadStage={loadStage}
         isRunning={isRunning}
         isSubmitting={isSubmitting}
+        stepping={stepping}
         isCodeEmpty={isCodeEmpty}
         onRun={onRun}
         onStop={onStop}

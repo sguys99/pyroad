@@ -49,6 +49,23 @@
   width: 1rem;
   height: 1rem;
 }
+/* 좁은 쪽(360px 화면): 박자 동안 눈썹이 "N단계 통과!"로 길어지고 건너뛰기가 붙어 칸 막대가 거의 사라지므로
+   건너뛰기는 화살표만(이름은 그대로 낭독) (P6-16) */
+@container (max-width: 24rem) {
+  .qp-skip {
+    justify-content: center;
+    min-width: 44px;
+    padding: 0;
+  }
+  .qp-skip-t {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
 .qp-skip:hover {
   background: var(--primary-soft);
 }

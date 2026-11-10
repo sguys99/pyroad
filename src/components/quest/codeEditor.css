@@ -1,0 +1,24 @@
+/* 에디터가 오기 전 같은 자리에 보이는 코드 글자 (P6-16). kidsTheme 코드 상자와 같은 면·테두리·높이·글꼴로 그려
+   CodeMirror가 들어와도 자리가 바뀌지 않는다. 줄 번호 칸 자리는 왼쪽 옅은 면으로만 */
+.ce-static {
+  margin: 0;
+  min-height: 11rem;
+  max-height: 400px;
+  overflow: auto;
+  padding: 12px 14px 12px calc(2ch + 36px);
+  border: var(--line-w) solid var(--color-line-strong);
+  border-radius: var(--round-m);
+  background:
+    linear-gradient(
+        to right,
+        var(--color-surface-2) calc(2ch + 24px),
+        var(--color-line) calc(2ch + 24px) calc(2ch + 25px),
+        transparent 0
+      )
+      no-repeat,
+    var(--color-code-bg);
+  color: var(--color-code-text);
+  font-variant-ligatures: none;
+  white-space: pre;
+  tab-size: 4;
+}

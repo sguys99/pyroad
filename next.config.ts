@@ -72,7 +72,6 @@ const nextConfig: NextConfig = {
       'framer-motion',
       'lucide-react',
       'canvas-confetti',
-      'lottie-react',
       '@codemirror/view',
       '@codemirror/state',
       '@codemirror/lang-python',

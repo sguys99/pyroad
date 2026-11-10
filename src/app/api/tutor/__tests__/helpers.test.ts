@@ -106,6 +106,23 @@ describe('buildFallbackMessage', () => {
         '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡',
       );
     });
+
+    it('오류가 났으면 결과 쪽지와 같은 쉬운 설명 (P6-16)', () => {
+      const body: TutorRequest = {
+        type: 'code_feedback',
+        quest_id: 'q',
+        execution_result: {
+          stdout: '',
+          stderr:
+            'Traceback (most recent call last):\n  File "<exec>", line 2, in <module>\nNameError: name \'nmae\' is not defined\n',
+          passed: false,
+        },
+      };
+      const msg = buildFallbackMessage(body, quest, answerKey);
+      expect(msg.startsWith('2번째 줄을 봐요.')).toBe(true);
+      expect(msg).toContain('nmae');
+      expect(msg).not.toContain('Traceback');
+    });
   });
 
   describe('code_feedback (passed=true) — 맥락별 메시지 풀', () => {

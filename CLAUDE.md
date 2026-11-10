@@ -9,7 +9,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 - **AI/LLM**: 멀티 프로바이더 (`src/lib/tutor/providers/`, 팩토리). 서버 키는 Gemini 무료 티어만, Anthropic·OpenAI는 학생 본인 키(암호화 저장)로만
 - **Code Execution**: Pyodide 314.0.7 자체 호스팅(`public/pyodide/`, predev·prebuild가 복사) + module Worker `public/workers/pyodide-worker.mjs`. 실행 로직은 공용 코어 `pyodide-core.mjs`(브라우저·Node 테스트 공용)
 - **Editor**: CodeMirror 6 + 키즈 테마 `src/lib/editor/` (pyRoad Mono, 14~20px 짝수만, [docs/design/editor.md](docs/design/editor.md))
-- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. 마스코트는 SVG 리그 `src/components/characters/rig/`(기본 스타일 B, [docs/design/rig.md](docs/design/rig.md)). Lottie는 지금 재생하지 않음(B32, `lottie-react`는 미사용 의존성). 일회성 이펙트만 Phase 6에 `lottie_light`로, `public/animations/` + `assets:check` 렌더 검사 통과 필수
+- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. 마스코트는 SVG 리그 `src/components/characters/rig/`(기본 스타일 B, [docs/design/rig.md](docs/design/rig.md)). Lottie는 지금 재생하지 않음(B32, `lottie-react`는 P6-16에서 지움 — `lottie-web`은 `assets:check` 렌더 검사용 devDependency). 일회성 이펙트만 Phase 6에 `lottie_light`로, `public/animations/` + `assets:check` 렌더 검사 통과 필수
 - **Sound**: 자체 Web Audio 래퍼 `src/lib/sound/` + `SoundProvider`(`useSfx`·`useBgm`). 파일은 `public/sounds/`(`scripts/build-sounds.sh`, 버전 파일 이름·immutable 캐시, [docs/design/sound.md](docs/design/sound.md))
 - **Fonts**: 자체 호스팅 `src/fonts/` — 제목 Jua · 본문 pyRoad Sans(Pretendard) · 코드 pyRoad Mono(D2Coding, 퀘스트만). 랜딩은 텍스트 서브셋, 앱은 unicode-range 조각. `fonts:build`·`fonts:check` ([docs/design/fonts.md](docs/design/fonts.md))
 - **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO / **에셋**: [docs/design/assets.md](docs/design/assets.md) (래스터는 정지 그림만, sharp·버전 파일 이름)

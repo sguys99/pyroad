@@ -18,6 +18,7 @@ import './runControls.css';
  * 실행 줄의 상태 (P6-05). 버튼 글자·아래 안내 상자·`data-runner-state`(e2e)가 이 값 하나를 따른다
  * - preparing: 처음 불러오는 중(idle 포함) · restarting: 무한 루프를 멈춘 뒤 Worker를 다시 띄우는 중(§2.9, 2~5초)
  * - running: 실행 중(멈추기) · checking: 채점·완료 요청 중 · ready · error: 실행기를 못 불러옴(다시 불러오기)
+ * - stepping: 프로젝트 단계 통과 박자(P6-12) 동안. 잠금은 그대로라 못 누르지만 "정답 확인 중"이 아니라 쉬는 버튼 (P6-16)
  */
 export type RunnerState =
   | 'preparing'
@@ -25,6 +26,7 @@ export type RunnerState =
   | 'ready'
   | 'running'
   | 'checking'
+  | 'stepping'
   | 'error';
 
 export function runnerState({
@@ -32,15 +34,18 @@ export function runnerState({
   restarting,
   isRunning,
   isSubmitting,
+  stepping = false,
 }: {
   status: PyodideStatus;
   restarting: PyodideRestartReason;
   isRunning: boolean;
   isSubmitting: boolean;
+  stepping?: boolean;
 }): RunnerState {
   if (status === 'error') return 'error';
   if (isRunning) return 'running';
   if (status !== 'ready') return restarting ? 'restarting' : 'preparing';
+  if (stepping) return 'stepping';
   return isSubmitting ? 'checking' : 'ready';
 }
 
@@ -50,6 +55,7 @@ const LABEL: Record<Exclude<RunnerState, 'error'>, string> = {
   ready: '코드 돌려보기',
   running: '실행 중...',
   checking: '정답 확인 중...',
+  stepping: '코드 돌려보기',
 };
 
 const CODING_TIPS = [
@@ -222,6 +228,8 @@ interface RunControlsProps {
   isSubmitting?: boolean;
   /** 에디터가 비었으면 준비돼도 누를 수 없음 */
   isCodeEmpty?: boolean;
+  /** 프로젝트 단계 통과 박자 중 (누를 수 없음, 바쁨 표시 없음) */
+  stepping?: boolean;
   onRun: () => void;
   onStop?: () => void;
   onRetry: () => void;
@@ -239,11 +247,18 @@ export function RunControls({
   isRunning,
   isSubmitting = false,
   isCodeEmpty = false,
+  stepping = false,
   onRun,
   onStop,
   onRetry,
 }: RunControlsProps) {
-  const state = runnerState({ status, restarting, isRunning, isSubmitting });
+  const state = runnerState({
+    status,
+    restarting,
+    isRunning,
+    isSubmitting,
+    stepping,
+  });
   // 준비 중은 아직 못 누르는 납작한 회색 면 + 스피너, 실행·채점 중은 초록 면 그대로 바쁨 (게임 버튼 loading)
   const waiting = state === 'preparing' || state === 'restarting';
   const working = state === 'running' || state === 'checking';
@@ -270,7 +285,7 @@ export function RunControls({
           // 눌림 피드백은 게임 버튼 자체(아랫면 3px → jellyB 복귀, P2-11). 실행 소리는 세션이 낸다(run)
           <Button
             onClick={onRun}
-            disabled={waiting || isCodeEmpty}
+            disabled={waiting || isCodeEmpty || state === 'stepping'}
             loading={working}
             size="lg"
             sfx={false}

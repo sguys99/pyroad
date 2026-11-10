@@ -5,7 +5,12 @@ import type { Page } from '@playwright/test';
 import { test, expect } from './support/test';
 import { completeQuests } from './support/admin';
 import { projectQuest, stages } from './support/content';
-import { outputPanel, runCode, waitForRunner } from './support/quest';
+import {
+  outputPanel,
+  runButton,
+  runCode,
+  waitForRunner,
+} from './support/quest';
 
 const project = projectQuest();
 
@@ -44,6 +49,11 @@ test.describe('프로젝트 퀘스트', () => {
     await expect(strip(page)).toContainText(project.steps[1].goal);
     await expect(checks.nth(0)).toHaveAttribute('data-done');
     await expect(checks.nth(1)).toHaveAttribute('data-current');
+    // 박자 동안 실행 버튼은 "정답 확인 중"에 머물지 않고 쉬는 버튼 (P6-16)
+    await expect(
+      page.locator('.qr[data-runner-state]').first(),
+    ).toHaveAttribute('data-runner-state', 'stepping');
+    await expect(runButton(page)).toHaveText(/코드 돌려보기/);
     await strip(page).getByTestId('step-skip').click();
     await expect(strip(page)).not.toHaveAttribute('data-beat', 'pass');
     await expect(strip(page)).toContainText(`단계 2/${total}`);
@@ -108,6 +118,9 @@ test.describe('프로젝트 퀘스트', () => {
     );
     // 결과 쪽 맨 위에도 단계 띠 (박자·건너뛰기)
     await expect(strip(page)).toContainText('1단계 통과!');
+    // 360에서도 박자 중 칸 막대가 줄지 않게 건너뛰기는 화살표만 (P6-16)
+    const track = strip(page).locator('.qp-track');
+    expect((await track.boundingBox())!.width).toBeGreaterThan(100);
     await strip(page).getByTestId('step-skip').click();
     await expect(page.getByRole('tab', { name: /공책/ })).toHaveAttribute(
       'aria-selected',

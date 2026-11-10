@@ -1,5 +1,5 @@
 import type { RunResult } from '@/lib/pyodide/usePyodide';
-import { errorLineFromStderr } from '@/lib/editor/errorLine';
+import { errorLineFromStderr } from '@/lib/editor/stderrLine';
 
 export interface NowTodoInput {
   /** 지금 할 일 (코드 퀘스트 = 과제 설명, 프로젝트 = 지금 단계 목표) */

@@ -190,6 +190,8 @@ describe('퀘스트 렌더러 스모크', () => {
     await within(screen.getByTestId('ask-pybaem')).findByText(
       '안녕! 같이 해 볼까?',
     );
+    // 배지는 파이뱀의 답만 센다 — 단계 시작 알림은 빼고 (P6-16)
+    expect(screen.getByTestId('ask-unread')).toHaveTextContent('1');
     fireEvent.click(screen.getByTestId('ask-pybaem'));
     expect(await screen.findByText('단계 1/2: 이름 출력')).toBeInTheDocument();
     expect(screen.getByTestId('run-button')).toBeInTheDocument();

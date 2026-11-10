@@ -40,9 +40,10 @@
   min-height: 44px;
   border-radius: var(--round-pill);
 }
-@media (min-width: 40rem) {
+/* 누르는 자리 24px 이상(WCAG 2.5.8, Lighthouse target-size). 360~383px 폰은 8점이 한 줄에 들도록 18px 그대로 (P6-16) */
+@media (min-width: 24rem) {
   .sp-dot {
-    width: 1.25rem;
+    width: 1.5rem;
   }
 }
 .sp-dot[data-current] {

@@ -156,6 +156,25 @@ async function postJson<T>(url: string, body: object): Promise<ApiResult<T>> {
 }
 
 /** 이전 단계 코드 아래에 다음 단계 시작 코드를 붙인다 */
+/** fromStep(= current.step)을 passedCode로 통과한 뒤의 단계 상태와 공책 코드 */
+function stepAfter(
+  steps: ProjectStep[],
+  current: { step: number; submissions: Record<string, string> },
+  passedCode: string,
+) {
+  const nextStep = current.step + 1;
+  return {
+    next: {
+      step: nextStep,
+      submissions: {
+        ...current.submissions,
+        [String(current.step)]: passedCode,
+      },
+    },
+    nextCode: appendStarter(passedCode, steps[nextStep - 1].starter_code),
+  };
+}
+
 function appendStarter(code: string, starter: string): string {
   if (code && starter) return code + '\n' + starter;
   return code || starter;
@@ -480,6 +499,8 @@ export function useQuestSession({
   useEffect(() => {
     if (isCompleted) return;
     const timer = setTimeout(() => {
+      // 단계 통과 박자 중이면 박자가 이미 다음 단계를 저장했다 — 예전 단계로 덮어쓰지 않게 (P6-16)
+      if (pendingAdvanceRef.current) return;
       // 들어온 그대로를 다시 저장하는 것은 바뀐 것이 아님
       if (code !== entry.code || stepState !== entry.stepState)
         wroteRef.current = true;
@@ -513,16 +534,9 @@ export function useQuestSession({
         lockSubmit(false);
         return;
       }
-      const submissions = {
-        ...current.submissions,
-        [String(fromStep)]: passedCode,
-      };
-      const nextStep = fromStep + 1;
-      const nextCode = appendStarter(
-        passedCode,
-        steps[nextStep - 1].starter_code,
-      );
-      const next = { step: nextStep, submissions };
+      const { next, nextCode } = stepAfter(steps, current, passedCode);
+      const nextStep = next.step;
+      const submissions = next.submissions;
       stepRef.current = next;
 
       setStepState(next);
@@ -561,9 +575,19 @@ export function useQuestSession({
       };
       pendingAdvanceRef.current = go;
       setStepCleared(step);
+      // 통과는 박자를 기다리지 않고 바로 저장한다: 박자 중에 떠나도 다음에 다음 단계에서 시작 (박자는 그림만, P6-16)
+      const current = stepRef.current;
+      if (steps && current.step === step && step < steps.length) {
+        const { next, nextCode } = stepAfter(steps, current, passedCode);
+        saveProgress({
+          code_submitted: nextCode,
+          current_step: next.step,
+          step_submissions: next.submissions,
+        });
+      }
       later(go, STEP_ADVANCE_DELAY_MS);
     },
-    [advanceStep, later],
+    [advanceStep, later, steps, saveProgress],
   );
   const skipStepBeat = useCallback(() => pendingAdvanceRef.current?.(), []);
 

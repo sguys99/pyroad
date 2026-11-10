@@ -1,7 +1,7 @@
 // 파이썬 오류를 아이 말로 (P6-07). 결과 쪽지 버그버그 옆·이야기 쪽 파이뱀 대사창이 같은 문장을 쓴다.
 // LLM을 부르지 않는 결정적 규칙표 — 더 묻고 싶으면 아이가 "파이뱀에게 물어보기"로.
 // 랜딩 체험 공책 안내(src/lib/landing/miniPython/messages.ts)는 print 한 줄 전용이라 여기서는 진짜 traceback 문장을 직접 본다
-import { errorLineFromStderr } from '@/lib/editor/errorLine';
+import { errorLineFromStderr } from '@/lib/editor/stderrLine';
 
 export interface ErrorExplanation {
   /** 파이썬 오류 이름 (예: "NameError"). 못 읽으면 null */

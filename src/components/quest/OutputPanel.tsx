@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { ValidationType } from '@/lib/quest/validation';
-import { errorLineFromStderr } from '@/lib/editor/errorLine';
+import { errorLineFromStderr } from '@/lib/editor/stderrLine';
 import { DURATION } from '@/lib/motion/tokens';
 import { BugbugAside, BugbugMakeup } from './BugbugAside';
 import {
