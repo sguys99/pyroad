@@ -5,9 +5,12 @@ import { MotionProvider } from '@/components/providers/MotionProvider';
 import { DialogueBox } from '@/components/ui/dialogue-box';
 import { PybaemRig } from '@/components/characters/rig/MascotRig';
 import {
+  ComboBadge,
   QuizPanel,
   type QuizPanelProps,
 } from '@/components/quest/quiz/QuizPanel';
+import { useSfx } from '@/components/providers/SoundProvider';
+import { recordQuizAnswer, useQuizCombo } from '@/lib/quest/quizCombo';
 import { quizLine } from '@/components/quest/quiz/QuizQuest';
 import { QuizTryRunView } from '@/components/quest/quiz/QuizTryRun';
 import { PyodideProvider } from '@/lib/pyodide/PyodideProvider';
@@ -19,6 +22,7 @@ import type {
 } from '@/lib/quest/quizAnswer';
 import {
   quizStatus,
+  WRONG_GAIN,
   type QuizExplainView,
   type QuizMode,
 } from '@/lib/quest/useQuizSession';
@@ -139,6 +143,9 @@ function LiveQuiz() {
   const [misses, setMisses] = useState<QuizAnswerValue[]>([]);
   const [mode, setMode] = useState<QuizMode>('first');
   const [why, setWhy] = useState<QuizExplainView | null>(null);
+  // 앱과 같은 탭 메모리 콤보 (P7-09): 연달아 맞히면 배지 + 정답 소리 피치가 올라감
+  const combo = useQuizCombo();
+  const play = useSfx();
   const status = quizStatus(graded?.r ?? null);
   const line = quizLine(status, mode, graded?.r.attempt_no);
   // 서버 대신 잠깐 생각한 뒤 정답 없는 해설
@@ -183,6 +190,8 @@ function LiveQuiz() {
           : null,
     });
     setGraded({ r, v: value });
+    recordQuizAnswer(correct);
+    if (!correct) play('wrong', { gain: WRONG_GAIN });
     if (!correct && attempt < 3) setMisses((m) => [...m, value]);
   };
   const retry = () => {
@@ -231,7 +240,133 @@ function LiveQuiz() {
           onRetry={retry}
           explain={why}
           onExplain={askWhy}
+          combo={combo}
         />
+      </div>
+    </div>
+  );
+}
+
+const CORRECT_3 = response({
+  correct: true,
+  stars: 3,
+  best_stars: 3,
+  xp_awarded: 30,
+  explanation: 'range(3)은 0, 1, 2 세 번 돌아요.',
+});
+
+/**
+ * 정답·오답 연출 (P7-09): "다시 재생"으로 견본을 새로 그려 한 번 더 봄. 정답 = 도장 + 별 하나씩 + 콤보 배지(정답 소리 피치),
+ * 오답 = 입력 영역 짧은 흔들림 + 남은 기회, 공개 = 정답 쪽지가 펼쳐짐. minimal·동작 줄이기는 움직임 없이 끝 모습
+ */
+function FeedbackDemos() {
+  const [round, setRound] = useState(0);
+  return (
+    <div className="mt-8 space-y-4" data-testid="quiz-feedback">
+      <div className="flex flex-wrap items-center gap-3">
+        <h3 className="font-display text-h3">정답·오답 연출 · 콤보 (P7-09)</h3>
+        <button
+          type="button"
+          className="text-small font-semibold text-primary-text underline"
+          onClick={() => setRound((r) => r + 1)}
+          data-testid="quiz-feedback-replay"
+        >
+          다시 재생
+        </button>
+      </div>
+      <p className="text-small text-muted-foreground">
+        연속 정답 콤보는 저장하지 않는 탭 메모리(quizCombo): 다시 풀기·다음 퀴즈로 가도 이어지고 오답·새로고침이면
+        0. 2연속부터 문제 카드 머리에 불꽃 배지, 정답 소리 피치 1 → 1.12 → 1.26(상한). 오답 소리는 작게. 소리만으로
+        알리지 않게 배지 글자와 함께.
+      </p>
+      <div
+        key={round}
+        className="grid items-start gap-4 md:grid-cols-2"
+      >
+        <Demo
+          label="정답 · 3연속 (⭐⭐⭐ 하나씩 찍힘, 피치 1.26)"
+          surface="card"
+          data-testid="quiz-fx-correct"
+        >
+          <div className="@container">
+            <Still
+              value={PREDICT_ANSWER}
+              submitted={PREDICT_ANSWER}
+              result={CORRECT_3}
+              combo={3}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="연습 정답 (별 없이 딱지)"
+          surface="card"
+          data-testid="quiz-fx-practice"
+        >
+          <div className="@container">
+            <Still
+              mode="practice"
+              value={PREDICT_ANSWER}
+              submitted={PREDICT_ANSWER}
+              result={response({
+                correct: true,
+                mode: 'practice',
+                explanation: 'range(3)은 0, 1, 2 세 번 돌아요.',
+              })}
+              combo={2}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="오답 2번째 (흔들림 + 마지막 기회)"
+          surface="card"
+          data-testid="quiz-fx-wrong"
+        >
+          <div className="@container">
+            <Still
+              value="opt-w9fa"
+              submitted="opt-w9fa"
+              misses={['opt-b2mx', 'opt-w9fa']}
+              result={response({
+                attempt_no: 2,
+                explanation: PREDICT_WHY['opt-w9fa'],
+              })}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="3번째 오답 공개 (쪽지가 펼쳐짐)"
+          surface="card"
+          data-testid="quiz-fx-revealed"
+        >
+          <div className="@container">
+            <Still
+              submitted="opt-w9fa"
+              misses={['opt-b2mx', 'opt-r4tn']}
+              result={response({
+                attempt_no: 3,
+                stars: 1,
+                best_stars: 1,
+                xp_awarded: 10,
+                revealed: {
+                  answer: PREDICT_ANSWER,
+                  explanation: 'range(3)은 0, 1, 2 세 번 돌아요.',
+                },
+              })}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="콤보 배지 2 · 3 · 5연속"
+          note="1연속은 배지 없음. 숫자가 바뀌면 톡 (minimal·동작 줄이기는 그대로)"
+          surface="card"
+          data-testid="quiz-fx-combo"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <ComboBadge combo={2} />
+            <ComboBadge combo={3} />
+            <ComboBadge combo={5} />
+          </div>
+        </Demo>
       </div>
     </div>
   );
@@ -577,6 +712,7 @@ export function QuizSection() {
           </Demo>
         </div>
 
+        <FeedbackDemos />
         <FillBlankDemos />
         <BugHuntDemos />
         <ParsonsDemos />

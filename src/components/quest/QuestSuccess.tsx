@@ -92,12 +92,21 @@ export function useSuccessRun(active: boolean, key: unknown): boolean {
  * 결과 쪽지 위 "통과!" 도장 (시안 `.f-result-stamp`). 나타날 때 한 번 쾅(`stampSlam`, 온보딩 등록증 도장과 같은 박자),
  * `done`이 되면 남은 연출을 끝 모습으로. 글자·색으로도 통과가 보이므로 장식(aria-hidden)
  */
-export function PassStamp({ done }: { done: boolean }) {
+export function PassStamp({
+  done,
+  rate,
+}: {
+  done: boolean;
+  /** 'correct' 피치 (퀴즈 콤보 P7-09: `comboRate`). 도장이 찍힐 때의 값 */
+  rate?: number;
+}) {
   const { budget } = useMotionTier();
   const play = useSfx();
   const ref = useRef<HTMLDivElement>(null);
   const fx = useRef<FxHandle | null>(null);
   const budgetRef = useRef(budget);
+  const rateRef = useRef(rate);
+  rateRef.current = rate;
 
   useEffect(() => {
     const el = ref.current;
@@ -109,7 +118,15 @@ export function PassStamp({ done }: { done: boolean }) {
       budget: budgetRef.current,
       paper: el?.parentElement,
       onImpact: () => {
-        if (live) t = setTimeout(() => isShown(el) && play('correct'));
+        if (live)
+          t = setTimeout(
+            () =>
+              isShown(el) &&
+              play(
+                'correct',
+                rateRef.current ? { rate: rateRef.current } : undefined,
+              ),
+          );
       },
     });
     return () => {

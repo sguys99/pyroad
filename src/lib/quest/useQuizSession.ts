@@ -15,6 +15,7 @@ import type {
   QuizAnswerValue,
 } from './quizAnswer';
 import { buildCelebrationEvents } from './celebrationEvents';
+import { recordQuizAnswer, useQuizCombo } from './quizCombo';
 import {
   ANSWER_CONFETTI,
   CELEBRATION_DELAY_MS,
@@ -28,8 +29,18 @@ import {
  *   - 오답(1·2번째): 고른 답을 misses 에 쌓고 retry 로 다시 (보기는 서버가 새로 섞은 next_quiz 로 바꿈)
  *   - 정답 / 3번째 오답(revealed: 정답 공개 + ⭐1): 회차 끝. retry 는 같은 날 연습(practice, 별·XP 없음)
  * 별 판정이 나면(stars > 0) XP·레벨을 반영하고, 레벨 업은 코드 퀘스트와 같은 축하 시퀀서(celebrationStore)로.
- * 퀴즈는 보너스라 스테이지 클리어·뱃지가 없음(00026, §12-Q60). 정답 효과음은 통과 도장(PassStamp)이, 오답은 여기서 'wrong'
+ * 퀴즈는 보너스라 스테이지 클리어·뱃지가 없음(00026, §12-Q60). 정답 효과음은 통과 도장(PassStamp)이 콤보 피치로, 오답은 여기서 작게 'wrong'.
+ * 연속 정답 콤보(P7-09)는 저장하지 않는 탭 메모리 스토어(quizCombo.ts)
  */
+
+/** 오답 소리는 작게 (틀려도 괜찮다는 톤, P7-09) */
+export const WRONG_GAIN = 0.55;
+/** 퀴즈 정답은 코드 퀘스트보다 작은 컨페티 (연출 단계 배율은 fireConfetti 의 scale) */
+export const QUIZ_CONFETTI = {
+  ...ANSWER_CONFETTI,
+  particleCount: 40,
+  spread: 60,
+};
 
 export type QuizMode = QuizAnswerResult['mode'];
 /** answering = 고르는 중 · wrong = 틀림(다시 풀 수 있음) · correct = 정답 · revealed = 3번 틀려 정답 공개 */
@@ -72,6 +83,7 @@ export function useQuizSession({
   const router = useRouter();
   const play = useSfx();
   const { budget } = useMotionTier();
+  const combo = useQuizCombo();
   const particleScaleRef = useRef(budget.particles);
   particleScaleRef.current = budget.particles;
 
@@ -122,10 +134,11 @@ export function useQuizSession({
     (r: QuizAnswerResponse, submitted: QuizAnswerValue) => {
       setGraded({ result: r, submitted });
       setMode(r.mode);
+      recordQuizAnswer(r.correct);
       if (r.correct) {
-        fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
+        fireConfetti(QUIZ_CONFETTI, { scale: particleScaleRef.current });
       } else {
-        play('wrong');
+        play('wrong', { gain: WRONG_GAIN });
         if (!r.revealed) setMisses((m) => [...m, submitted]);
       }
       if (r.stars <= 0) return;
@@ -246,6 +259,8 @@ export function useQuizSession({
     submitted: graded?.submitted ?? null,
     misses,
     mode,
+    /** 이 탭의 연속 정답 수 (P7-09) */
+    combo,
     bestStars,
     isSubmitting,
     error,

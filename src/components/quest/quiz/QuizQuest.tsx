@@ -14,6 +14,7 @@ import { QuestHeader } from '../QuestHeader';
 import { QuestStatusBar } from '../QuestStatusBar';
 import { CelebrationLayer } from '../QuestWorkspace';
 import { PybaemRig, StoryHead } from '../StoryPage';
+import { HAPPY_MS, useThinkBeat } from '../useThinkBeat';
 import { PRACTICE_NOTE, QUIZ_TRIES, QuizPanel } from './QuizPanel';
 import '../questWorkspace.css';
 import '@/components/world/map/worldMap.css';
@@ -37,12 +38,12 @@ export function quizLine(
     case 'wrong':
       return {
         state: 'encourage',
-        text: `아쉬워요! 틀린 보기는 흐리게 해 둘게요. ${QUIZ_TRIES - attemptNo}번 더 생각해 볼까요?`,
+        text: `아쉬워요! 틀려도 괜찮아요. 아직 ${QUIZ_TRIES - attemptNo}번 더 도전할 수 있으니 천천히 다시 생각해 봐요.`,
       };
     case 'revealed':
       return {
         state: 'teach',
-        text: '괜찮아요, 정답과 까닭을 같이 볼까요? 다음엔 꼭 맞힐 수 있어요!',
+        text: '괜찮아요, 같이 정답을 볼까요? 까닭을 알면 다음엔 꼭 맞힐 수 있어요!',
       };
     default:
       return mode === 'review'
@@ -81,7 +82,10 @@ export function QuizQuest(props: QuestSessionOptions) {
     dots
       .slice(dots.findIndex((d) => d.current) + 1)
       .find((d) => d.state !== 'locked')?.id ?? null;
-  const line = quizLine(s.status, s.mode, s.result?.attempt_no);
+  const said = quizLine(s.status, s.mode, s.result?.attempt_no);
+  // 정답이면 먼저 기쁨 점프(happy) 뒤 응원(cheer) — 코드 퀘스트 StoryPage 와 같은 박자 (P7-09). 동작 줄이기는 바로 응원
+  const jumping = useThinkBeat(s.result, said.state === 'cheer', HAPPY_MS);
+  const line = jumping ? { ...said, state: 'happy' as const } : said;
 
   return (
     <div className="qw-root flex h-dvh flex-col bg-bg">
@@ -101,7 +105,7 @@ export function QuizQuest(props: QuestSessionOptions) {
               className="qs-tutor"
               speaker="파이뱀"
               text={line.text}
-              tone={line.state === 'cheer' ? 'good' : 'tutor'}
+              tone={said.state === 'cheer' ? 'good' : 'tutor'}
               data-testid="quest-dialogue"
               character={(speaking) => (
                 <PybaemRig
@@ -134,6 +138,7 @@ export function QuizQuest(props: QuestSessionOptions) {
             onRetry={s.retry}
             explain={s.explain}
             onExplain={s.askWhy}
+            combo={s.combo}
             nextHref={nextId ? `/quest/${nextId}` : null}
             mapHref={worldHref}
           />

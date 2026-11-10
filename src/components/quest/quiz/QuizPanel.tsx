@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Check,
+  Flame,
   Lightbulb,
   MessageCircleQuestion,
   Play,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DialogueBox } from '@/components/ui/dialogue-box';
+import { RewardIcon } from '@/components/ui/reward-icon';
 import type { QuizKind, QuizPrompt } from '@/lib/quest/questKind';
 import type {
   QuizAnswerResponse,
@@ -31,6 +33,7 @@ import {
   type QuestReward,
 } from '../QuestSuccess';
 import { quizRunCode } from '@/lib/quest/quizCode';
+import { COMBO_BADGE_MIN, comboRate } from '@/lib/quest/quizCombo';
 import { QUIZ_INPUTS } from './quizInputs';
 import type { QuizInputDef } from './types';
 import '../outputPanel.css';
@@ -71,6 +74,8 @@ export interface QuizPanelProps {
   /** 오답 뒤 "왜 틀렸어요?" 파이뱀 해설 (P7-08). onExplain 이 없으면 버튼을 그리지 않음 */
   explain?: QuizExplainView | null;
   onExplain?: () => void;
+  /** 이 탭의 연속 정답 수 (P7-09, quizCombo). 2부터 머리에 불꽃 배지, 정답 소리 피치 */
+  combo?: number;
 }
 
 const EXPLAIN_THINKING = '음… 어디서 헷갈렸는지 같이 생각해 볼게요…';
@@ -157,6 +162,7 @@ export function QuizPanel(p: QuizPanelProps) {
               연습
             </span>
           )}
+          <ComboBadge combo={p.combo ?? 0} />
         </div>
         {!result && p.mode !== 'first' && (
           <p className="qz-notice" data-testid="quiz-mode-note">
@@ -169,23 +175,25 @@ export function QuizPanel(p: QuizPanelProps) {
           {p.quiz.question}
         </h2>
         {def ? (
-          <def.Input
-            quiz={p.quiz as never}
-            value={p.value as never}
-            onChange={p.onChange as never}
-            disabled={!!result || p.isSubmitting}
-            result={
-              result && p.submitted != null
-                ? {
-                    status: status as 'correct' | 'wrong' | 'revealed',
-                    submitted: p.submitted as never,
-                    answer: (result.revealed?.answer ?? null) as never,
-                  }
-                : null
-            }
-            misses={p.misses as never}
-            labelledBy={qid}
-          />
+          <div className="qz-input">
+            <def.Input
+              quiz={p.quiz as never}
+              value={p.value as never}
+              onChange={p.onChange as never}
+              disabled={!!result || p.isSubmitting}
+              result={
+                result && p.submitted != null
+                  ? {
+                      status: status as 'correct' | 'wrong' | 'revealed',
+                      submitted: p.submitted as never,
+                      answer: (result.revealed?.answer ?? null) as never,
+                    }
+                  : null
+              }
+              misses={p.misses as never}
+              labelledBy={qid}
+            />
+          </div>
         ) : (
           <p className="qz-notice">
             이 퀴즈는 곧 풀 수 있어요. 조금만 기다려 줘요!
@@ -194,7 +202,14 @@ export function QuizPanel(p: QuizPanelProps) {
       </section>
 
       <div aria-live="polite" className="qz-live" ref={live}>
-        {result && <Verdict result={result} status={status} done={done} />}
+        {result && (
+          <Verdict
+            result={result}
+            status={status}
+            done={done}
+            combo={p.combo ?? 0}
+          />
+        )}
       </div>
 
       {status === 'wrong' && p.onExplain && (
@@ -332,10 +347,12 @@ function Verdict({
   result,
   status,
   done,
+  combo,
 }: {
   result: QuizAnswerResponse;
   status: QuizStatus;
   done: boolean;
+  combo: number;
 }) {
   const left = QUIZ_TRIES - result.attempt_no;
   const tone =
@@ -364,7 +381,7 @@ function Verdict({
             </>
           ) : (
             <>
-              <Lightbulb aria-hidden /> 정답을 알려 줄게요
+              <Lightbulb aria-hidden /> 같이 정답을 볼까요?
             </>
           )}
         </span>
@@ -372,12 +389,59 @@ function Verdict({
       {status === 'wrong' && (
         <p className="qz-verdict-t">
           {left > 0
-            ? `괜찮아요! ${left}번 더 도전할 수 있어요.`
+            ? `괜찮아요! ${left === 1 ? '마지막으로 ' : ''}${left}번 더 도전할 수 있어요.`
             : '한 번 더 골라 봐요!'}
         </p>
       )}
+      {status === 'correct' && <VerdictStars result={result} />}
       {text && <p className="qo-note">{text}</p>}
-      {status === 'correct' && <PassStamp done={done} />}
+      {status === 'correct' && (
+        <PassStamp done={done} rate={comboRate(combo)} />
+      )}
     </div>
+  );
+}
+
+/**
+ * 정답 쪽지의 별 (P7-09): 받은 별 수만큼 도장처럼 하나씩 찍힘(full·lite, CSS). minimal·동작 줄이기는 처음부터 찍힌 모습.
+ * 연습은 별 없이 "연습 정답" 딱지. 별을 이미 받은 복습(xp 0)도 이번 판정 별을 그대로 보여 줌
+ */
+function VerdictStars({ result }: { result: QuizAnswerResponse }) {
+  if (result.mode === 'practice')
+    return (
+      <p className="qz-stars" data-testid="quiz-verdict-practice">
+        <span className="qz-chip" data-tone="practice">
+          연습 정답
+        </span>
+      </p>
+    );
+  const n = Math.min(3, Math.max(0, result.stars));
+  if (n === 0) return null;
+  return (
+    <p className="qz-stars" data-testid="quiz-verdict-stars">
+      {Array.from({ length: n }, (_, i) => (
+        <span key={i} className="qz-star" style={{ '--i': i } as CSSProperties}>
+          <RewardIcon kind="star" size={28} />
+        </span>
+      ))}
+      <span className="sr-only">별 {n}개</span>
+    </p>
+  );
+}
+
+/**
+ * 연속 정답 배지 (P7-09, §12-Q60 4c): 2연속부터 문제 카드 머리 오른쪽에 불꽃 + "N연속". 숫자가 바뀌면 톡(full·lite).
+ * 소리(정답 피치 상승)와 같은 정보를 글자로도 보여 줌
+ */
+export function ComboBadge({ combo }: { combo: number }) {
+  if (combo < COMBO_BADGE_MIN) return null;
+  return (
+    <span className="qz-combo" role="status" data-testid="quiz-combo">
+      <Flame aria-hidden />
+      <b key={combo} className="qz-combo-n">
+        {combo}
+      </b>
+      연속<span className="sr-only"> 정답</span>
+    </span>
   );
 }

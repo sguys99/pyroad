@@ -804,3 +804,117 @@
 :root[data-reduced='true'] .qz-why {
   animation: none;
 }
+
+/* ───── 정답·오답 연출 (P7-09). transform·opacity 한 번만: full 스프링 · lite 짧게 · minimal·동작 줄이기는 움직임 없이 색·글자·아이콘 */
+/* 정답 쪽지의 별: 도장(약 0.5초) 뒤 하나씩 찍힘 */
+.qz-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0;
+}
+.qz-star {
+  display: inline-flex;
+}
+@keyframes qz-star-in {
+  from {
+    transform: scale(1.8) rotate(-14deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+:root[data-reduced='false'][data-motion='full'] .qz-star {
+  animation: qz-star-in var(--dur-slow) var(--easing-back-out) both;
+  animation-delay: calc(550ms + var(--i) * 150ms);
+}
+:root[data-reduced='false'][data-motion='lite'] .qz-star {
+  animation: qz-star-in var(--dur-base) var(--easing-out) both;
+  animation-delay: calc(385ms + var(--i) * 105ms);
+}
+
+/* 오답: 입력 영역만 짧게 도리도리 (full·lite) */
+@keyframes qz-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-0.375rem);
+  }
+  45% {
+    transform: translateX(0.3rem);
+  }
+  70% {
+    transform: translateX(-0.15rem);
+  }
+}
+:root[data-reduced='false']:is([data-motion='full'], [data-motion='lite'])
+  .qz[data-status='wrong']
+  .qz-input {
+  animation: qz-shake var(--dur-slow) var(--easing-out) both;
+}
+
+/* 3번째 오답 공개: 정답 쪽지가 위에서 펼쳐짐 */
+@keyframes qz-unfold {
+  from {
+    transform: translateY(-0.5rem) scaleY(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.qz-verdict[data-status='revealed'] {
+  transform-origin: top center;
+  animation: qz-unfold var(--spring-body-dur) var(--spring-body) both;
+}
+:root[data-motion='lite'] .qz-verdict[data-status='revealed'] {
+  animation: qz-unfold var(--dur-slow) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-verdict[data-status='revealed'] {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-verdict[data-status='revealed'] {
+  animation: none;
+}
+
+/* 연속 정답 배지: 불꽃 + "N연속". 숫자가 바뀌면 톡 */
+.qz-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.125rem 0.625rem 0.125rem 0.375rem;
+  border-radius: var(--round-pill);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--text-caption--line-height);
+}
+.qz-combo > svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--accent-lip);
+  fill: var(--accent);
+}
+.qz-combo-n {
+  display: inline-block;
+}
+@keyframes qz-combo-pop {
+  from {
+    transform: scale(1.7);
+  }
+  to {
+    transform: none;
+  }
+}
+:root[data-reduced='false'][data-motion='full'] .qz-combo-n {
+  animation: qz-combo-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+:root[data-reduced='false'][data-motion='lite'] .qz-combo-n {
+  animation: qz-combo-pop var(--dur-base) var(--easing-out) both;
+}

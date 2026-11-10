@@ -27,7 +27,13 @@ vi.mock('@/lib/pyodide/PyodideProvider', () => ({
   usePyodideRuntime: () => ({}),
 }));
 
-import { useQuizSession, quizEntryMode, quizStatus } from '../useQuizSession';
+import {
+  useQuizSession,
+  quizEntryMode,
+  quizStatus,
+  WRONG_GAIN,
+} from '../useQuizSession';
+import { getQuizCombo, resetQuizCombo } from '../quizCombo';
 import { CELEBRATION_DELAY_MS } from '../useQuestSession';
 
 const QUIZ: QuizPrompt = {
@@ -98,6 +104,7 @@ beforeEach(() => {
   mocks.play.mockReset();
   mocks.refresh.mockReset();
   mocks.confetti.mockReset();
+  resetQuizCombo();
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -128,6 +135,22 @@ describe('quizEntryMode · quizStatus', () => {
 });
 
 describe('useQuizSession', () => {
+  it('연속 정답 콤보: 정답마다 늘고 다시 풀어도 이어지며 오답이면 0 (P7-09)', async () => {
+    const { result } = renderHook(() => useQuizSession(props()));
+    for (const expected of [1, 2]) {
+      act(() => result.current.setValue('opt-a1bc'));
+      respond(reply({ correct: true, mode: 'practice' }));
+      await act(() => result.current.submit());
+      expect(result.current.combo).toBe(expected);
+      act(() => result.current.retry());
+    }
+    act(() => result.current.setValue('opt-d2ef'));
+    respond(reply({ mode: 'practice' }));
+    await act(() => result.current.submit());
+    expect(result.current.combo).toBe(0);
+    expect(getQuizCombo()).toBe(0);
+  });
+
   it('고른 보기 id 를 quest_id 와 함께 보내고, 오답이면 틀린 답을 쌓고 다시 풀면 next_quiz 로 바꾼다', async () => {
     const { result } = renderHook(() => useQuizSession(props()));
     expect(result.current.status).toBe('answering');
@@ -148,7 +171,7 @@ describe('useQuizSession', () => {
     expect(result.current.status).toBe('wrong');
     expect(result.current.submitted).toBe('opt-d2ef');
     expect(result.current.misses).toEqual(['opt-d2ef']);
-    expect(mocks.play).toHaveBeenCalledWith('wrong');
+    expect(mocks.play).toHaveBeenCalledWith('wrong', { gain: WRONG_GAIN });
     expect(mocks.confetti).not.toHaveBeenCalled();
 
     // 결과가 보이는 동안은 답을 바꾸거나 다시 보낼 수 없음
@@ -275,7 +298,7 @@ describe('useQuizSession', () => {
     await act(() => result.current.submit());
     expect(result.current.status).toBe('revealed');
     expect(result.current.misses).toEqual([]);
-    expect(mocks.play).toHaveBeenCalledWith('wrong');
+    expect(mocks.play).toHaveBeenCalledWith('wrong', { gain: WRONG_GAIN });
     expect(result.current.userXP).toBe(110);
 
     act(() => result.current.retry());
