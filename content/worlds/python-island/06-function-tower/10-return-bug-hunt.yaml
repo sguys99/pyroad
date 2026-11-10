@@ -1,0 +1,42 @@
+# 퀴즈 6-10: 사라진 돌려주기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000119
+order: 10
+title: 사라진 돌려주기
+concept: return, 함수 조합
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 계산한 값을 돌려주지 않을 때
+  learning_goals:
+    - 함수가 값을 돌려주지 않으면 None 이 된다는 것을 안다
+  story_context: 두 배 마법에 1을 더하는 마법을 합쳤더니 오류가 났어요! 탑의 마법사가 도움을 청해요.
+  fallback_text: 함수를 부른 자리에 값이 돌아오려면 함수 안에서 값을 돌려줘야 해요. 계산만 하고 끝나면 빈 값(None)이 돌아와요.
+  quiz:
+    question: 4를 두 배로 만든 뒤 1을 더해 9가 나와야 하는데 오류가 나요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - id: ln-s6ob
+        code: 'def double(n):'
+      - id: ln-v2kc
+        code: '    n * 2'
+      - id: ln-z7he
+        code: print(double(4) + 1)
+    fixes:
+      - id: fx-o3ga
+        code: '    return n * 2'
+      - id: fx-x8ld
+        code: '    print(n * 2)'
+      - id: fx-m6tu
+        code: '    return n + 2'
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-v2kc, fix: fx-o3ga }
+    explanation: return 으로 n * 2 를 돌려줘야 double(4)가 8이 되고, 1을 더해 9가 나와요.
+    explanations:
+      ln-s6ob: 이 줄은 매개변수 n 을 받는 함수를 잘 만들었어요.
+      ln-z7he: 이 줄은 함수가 값을 잘 돌려주면 문제없어요. 함수 안을 살펴봐요.
+      fx-x8ld: print는 화면에 보여 주기만 하고 값을 돌려주지 않아요. 그래서 double(4)가 여전히 None 이에요.
+      fx-m6tu: 두 배가 아니라 2를 더하게 돼요. 9가 아니라 7이 나와요.

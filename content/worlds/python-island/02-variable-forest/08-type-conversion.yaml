@@ -1,0 +1,46 @@
+# 퀘스트 2-8: 변신 마법! 형변환
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000007
+order: 8
+title: 변신 마법! 형변환
+concept: str(), int() 형변환
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 자료형 변환 (str -> int, int -> str)
+  learning_goals:
+    - int()로 문자열을 숫자로 바꿀 수 있다
+    - str()로 숫자를 문자열로 바꿀 수 있다
+    - 형변환이 필요한 상황을 이해한다
+  story_context: 변신 마법사를 만났어요! 글자를 숫자로, 숫자를 글자로 변신시킬 수 있대요.
+  exercise_description: 문자열 "100"과 "23"을 int()로 숫자로 바꿔서 더한 뒤 결과를 출력하세요
+  starter_code: |-
+    # 문자열을 숫자로 바꿔서 더해보세요!
+    a = "100"
+    b = "23"
+    result = 
+    print(result)
+  expected_output_hint: 123이 출력되어야 해요
+  checklist:
+    - 'int( )로 a와 b를 숫자로 바꿔요'
+    - '두 숫자를 더해 result 에 넣어요'
+    - 'result 를 보여 줘요'
+  example_output: |-
+    123
+  fallback_text: '"100"은 글자예요. int("100")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요.'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: '123'
+  hints:
+    level_1: 따옴표가 있으면 글자, 없으면 숫자예요. 글자를 숫자로 바꾸려면?
+    level_2: int() 안에 문자열을 넣으면 숫자로 변신해요! int(a) + int(b)를 해보세요!
+    level_3: result = ___(a) + ___(b) 글자를 숫자로 바꾸는 함수를 넣어보세요!
+  solution_code: |-
+    a = "100"
+    b = "23"
+    result = int(a) + int(b)
+    print(result)

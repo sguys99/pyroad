@@ -28,10 +28,15 @@ describe('커리큘럼 로드맵 = 콘텐츠', () => {
     expect(titles).toEqual([...WORLD1_STAGES]);
   });
 
-  it('월드 1 퀘스트 수가 퀘스트 YAML 수와 같다', () => {
+  it('월드 1 퀘스트 수가 퀘스트 YAML 수와 같다 (보너스 퀴즈는 빼고 셈)', () => {
     const quests = stageDirs.flatMap((dir) =>
       readdirSync(join(WORLD1, dir)).filter(
-        (f) => f.endsWith('.yaml') && f !== 'stage.yaml',
+        (f) =>
+          f.endsWith('.yaml') &&
+          f !== 'stage.yaml' &&
+          !/^quest_type: quiz$/m.test(
+            readFileSync(join(WORLD1, dir, f), 'utf8'),
+          ),
       ),
     );
     expect(quests).toHaveLength(WORLD1_QUESTS);

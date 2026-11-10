@@ -64,11 +64,11 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(page).toHaveURL(new RegExp(`/quest/${quest1.id}$`));
     await expect(questHeader(page)).toContainText(quest1.title);
 
-    // 헤더 스테이지 진행 점(P6-02): 퀘스트마다 점 하나, 지금 퀘스트는 aria-current="step"
+    // 헤더 스테이지 진행 점(P6-02): 퀘스트마다(퀴즈 포함) 점 하나, 지금 퀘스트는 aria-current="step"
     const progress = page.getByTestId('stage-progress');
     const dots = progress.locator('.sp-dot');
-    await expect(dots).toHaveCount(stage1.quests.length);
-    await expect(progress).toContainText(`1/${stage1.quests.length}`);
+    await expect(dots).toHaveCount(stage1.questCount);
+    await expect(progress).toContainText(`1/${stage1.questCount}`);
     await expect(dots.first()).toHaveAttribute('aria-current', 'step');
     await expect(dots.first()).toHaveAttribute('data-state', 'todo');
 
