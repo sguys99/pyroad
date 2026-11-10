@@ -1992,6 +1992,30 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id, p_quest_id: Q2, p_level: 1 },
     ],
     [
+      'CN-1',
+      'anon',
+      'grant_coins',
+      { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_amount: 99999 },
+    ],
+    [
+      'CN-2',
+      u.alice,
+      'grant_coins',
+      { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_amount: 99999 },
+    ],
+    [
+      'CN-3',
+      u.alice,
+      'spend_coins',
+      { p_user_id: u.bob.id, p_ref: 'rls', p_amount: 1 },
+    ],
+    [
+      'CN-3b',
+      u.alice,
+      'coin_apply',
+      { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_delta: 99999 },
+    ],
+    [
       'SET-1',
       u.alice,
       'patch_user_settings',
@@ -2025,7 +2049,8 @@ async function groupRpc(u) {
          and p.proname in ('quest_xp', 'level_for_xp', 'has_three_day_streak', 'decide_new_badges',
                            'is_stage_unlocked', 'complete_quest', 'use_golden_key', 'reset_progress',
                            'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys',
-                           'submit_quiz_answer')
+                           'submit_quiz_answer', 'grant_coins', 'spend_coins', 'coin_apply',
+                           'coin_balance_mismatches', 'users_protect_coins')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2687,6 +2712,181 @@ async function groupReward() {
     op: 'GET /level_curve_adjustments (P8-02 보정 근거는 service_role 전용)',
     ...READ,
     run: async () => classifyRead(await rest('GET', '/rest/v1/level_curve_adjustments?select=*')),
+  });
+}
+
+// ── coins: 코인 원장·잔액 (P8-03, ① 00030) ──────────────────────
+async function groupCoins(u) {
+  const coins = (id) => one(`select coins from public.users where id = '${id}'`);
+  const mismatches = (id) =>
+    one(`select count(*) from public.coin_balance_mismatches() where user_id = '${id}'`);
+  await check({
+    group: 'coins',
+    id: 'CN-4',
+    role: 'service_role',
+    op: 'grant_coins·spend_coins: 같은 키는 한 번만(동시 호출 포함) · 잔액 부족 PT402 · 잘못된 인자 PT400 · 잔액 = 원장 합',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn4', '코인');
+      const g = (source, ref, amount) =>
+        rpc('grant_coins', { p_user_id: x.id, p_source: source, p_ref: ref, p_amount: amount });
+      const sp = (ref, amount) => rpc('spend_coins', { p_user_id: x.id, p_ref: ref, p_amount: amount });
+      const g1 = await g('quest', 'q-1', 10);
+      const g2 = await g('quest', 'q-1', 10);
+      const same = await Promise.all([g('star', 'q-1:1', 5), g('star', 'q-1:1', 5), g('star', 'q-1:1', 5)]);
+      const s1 = await sp('shop:a', 12);
+      const s2 = await sp('shop:b', 4);
+      const s3 = await sp('shop:a', 12);
+      const bad = await Promise.all([
+        g('spend', 'x', 1),
+        g('bogus', 'x', 1),
+        g('quest', 'x', 0),
+        g('quest', '', 1),
+        sp('x', -5),
+        rpc('grant_coins', { p_user_id: '00000000-0000-0000-0000-000000000000', p_source: 'quest', p_ref: 'x', p_amount: 1 }),
+      ]);
+      const v = (r) => (r.status === 200 ? `${r.json.applied}:${r.json.delta}:${r.json.coins}` : `${errCode(r)}:${errMsg(r)}`);
+      return (
+        compare(
+          'CN-4',
+          {
+            g1: 'true:10:10',
+            g2: 'false:0:10',
+            same: 1,
+            s1: 'true:-12:3',
+            s2: 'PT402:not_enough_coins',
+            s3: 'false:0:3',
+            bad: 'PT400,PT400,PT400,PT400,PT400,PT404',
+            coins: '3',
+            rows: '3',
+            mismatches: '0',
+          },
+          {
+            g1: v(g1),
+            g2: v(g2),
+            same: same.filter((r) => r.status === 200 && r.json.applied).length,
+            s1: v(s1),
+            s2: v(s2),
+            s3: v(s3),
+            bad: bad.map(errCode).join(','),
+            coins: coins(x.id),
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '10 지급 → 같은 키 0 → 별 5 동시 3번 중 1번 → 12 차감 → 4 차감 거부, 잔액 3 = 원장 합' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-5',
+    role: 'postgres',
+    op: 'users.coins 직접 쓰기: service_role·postgres 는 coins_ledger_only 오류, authenticated(psql) 는 값이 버려짐, 새 행은 0',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn5', '코인직접');
+      const sr = await rest('PATCH', `/rest/v1/users?id=eq.${x.id}`, {
+        as: 'service',
+        body: { coins: 500 },
+        prefer: 'return=minimal',
+      });
+      const pg = psql(`update public.users set coins = 500 where id = '${x.id}';`);
+      const au = psqlAs(
+        'authenticated',
+        x.id,
+        `update public.users set coins = 500 where id = auth.uid() returning coins;`,
+      );
+      // ③ 00008 뒤에는 UPDATE 권한이 없어 42501, ①만이면 트리거가 이전 값(0)을 남김
+      const auKept = au.ok ? au.out === '0' : /permission denied/i.test(au.err);
+      return (
+        compare(
+          'CN-5',
+          { sr: 'coins_ledger_only', pg: true, auKept: true, coins: '0' },
+          {
+            sr: errMsg(sr),
+            pg: /coins_ledger_only/.test(pg.err),
+            auKept,
+            coins: coins(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '원장 없이 잔액을 바꾸는 경로 없음 (authenticated 는 ③ 뒤 42501, ①만이면 트리거가 무시)' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-6',
+    role: 'authenticated',
+    op: 'coin_ledger: 비로그인 읽기 · 남의 원장 읽기 · 본인 원장 INSERT/DELETE',
+    ...WRITE,
+    run: async () => {
+      one(`select public.coin_apply('${u.bob.id}', 'quest', 'cn6', 7)`);
+      one(`select public.coin_apply('${u.alice.id}', 'quest', 'cn6', 7)`);
+      const anon = classifyRead(await rest('GET', '/rest/v1/coin_ledger?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon 읽기 ${anon.detail}` };
+      const others = await rest('GET', `/rest/v1/coin_ledger?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 원장 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', `/rest/v1/coin_ledger?select=delta`, { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1)
+        return { actual: 'error', detail: `본인 원장 ${own.status} rows=${own.json?.length}` };
+      const ins = await classifyWrite(
+        rest('POST', '/rest/v1/coin_ledger', {
+          as: u.alice,
+          body: { user_id: u.alice.id, delta: 99999, balance_after: 99999, source: 'quest', ref: 'hack' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.coin_ledger where user_id = '${u.alice.id}' and ref = 'hack')`,
+      );
+      if (ins.actual === 'written') return ins;
+      return classifyWrite(
+        rest('DELETE', `/rest/v1/coin_ledger?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.coin_ledger where user_id = '${u.alice.id}')`,
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-7',
+    role: 'service_role',
+    op: '리셋은 코인을 회수하지 않고, 같은 퀘스트 키는 리셋 뒤에도 다시 지급 안 됨 · B55 스테이지 리셋은 퀘스트 밖 XP 를 남김',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn7', '코인리셋');
+      const s1 = stageQuests(STAGE1);
+      const s2 = stageQuests(STAGE2);
+      for (const q of [...s1, s2[0]])
+        await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      // 퀘스트 밖 XP (P8-02 레벨 보정·P8-07 미션 같은 것). earned_xp 에는 없음
+      const base = Number(one(`update public.users set total_xp = total_xp + 15 where id = '${x.id}' returning total_xp`));
+      const s2Xp = Number(one(`select earned_xp from public.user_progress where user_id = '${x.id}' and quest_id = '${s2[0]}'`));
+      const rs = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'stage', p_stage_id: STAGE2 });
+      await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s2[0], p_submission: submission() });
+      const again = await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      const ra = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      const again2 = await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      return (
+        compare(
+          'CN-7',
+          {
+            stageXp: base - s2Xp,
+            again: 'false:10',
+            allXp: 0,
+            again2: 'false:10',
+            coins: '10',
+            mismatches: '0',
+          },
+          {
+            stageXp: rs.json?.total_xp,
+            again: `${again.json?.applied}:${again.json?.coins}`,
+            allXp: ra.json?.total_xp,
+            again2: `${again2.json?.applied}:${again2.json?.coins}`,
+            coins: coins(x.id),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `스테이지 리셋 XP ${base} → ${base - s2Xp} (미션 15 XP 유지), 코인 10 유지·재지급 0` }
+      );
+    },
   });
 }
 
@@ -5892,6 +6092,7 @@ async function main() {
   await groupApiKeys(u);
   await groupRpc(u);
   await groupReward();
+  await groupCoins(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

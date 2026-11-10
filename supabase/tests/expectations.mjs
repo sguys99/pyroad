@@ -140,7 +140,7 @@ export const EXPECT = {
     expect: 'deny',
     requires: 'public.users.coins',
     activateIn: 'P8-03',
-    note: 'coins 는 Phase 8 에서 만듦 (P1-08 범위 아님)',
+    note: '① 00030: users.coins 는 UPDATE 권한 없음(③ 00008) + 보호 트리거 users_protect_coins (①만이면 값을 버림)',
   },
   'B04-14': {
     expect: 'deny',
@@ -376,6 +376,54 @@ export const EXPECT = {
     requires: 'public.record_hint()',
     activateIn: 'P1-04',
     note: '힌트 수는 튜터 API(service_role)만 기록',
+  },
+  // ── coins: 코인 원장 (P8-03, ① 00030) ──────────────────────
+  'CN-1': {
+    expect: 'deny',
+    requires: 'public.grant_coins()',
+    activateIn: 'P8-03',
+  },
+  'CN-2': {
+    expect: 'deny',
+    requires: 'public.grant_coins()',
+    activateIn: 'P8-03',
+    note: '본인에게 코인 지급 시도',
+  },
+  'CN-3': {
+    expect: 'deny',
+    requires: 'public.spend_coins()',
+    activateIn: 'P8-03',
+    note: '다른 사용자 코인 차감 시도',
+  },
+  'CN-3b': {
+    expect: 'deny',
+    requires: 'public.coin_apply()',
+    activateIn: 'P8-03',
+    note: '내부 헬퍼는 소유자(SECURITY DEFINER RPC)만',
+  },
+  'CN-4': {
+    expect: 'allow',
+    requires: 'public.grant_coins()',
+    activateIn: 'P8-03',
+    note: '멱등 (user, source, ref) · 동시 호출 1회 · 음수 잔액 금지 · 잔액 = 원장 합',
+  },
+  'CN-5': {
+    expect: 'allow',
+    requires: 'public.users_protect_coins()',
+    activateIn: 'P8-03',
+    note: '잔액은 원장(coin_apply)으로만 바뀜',
+  },
+  'CN-6': {
+    expect: 'deny',
+    requires: 'public.coin_ledger',
+    activateIn: 'P8-03',
+    note: '본인 행 SELECT 만, 쓰기 권한 없음',
+  },
+  'CN-7': {
+    expect: 'allow',
+    requires: 'public.grant_coins()',
+    activateIn: 'P8-03',
+    note: '리셋은 코인 회수 없음·같은 키 재지급 없음(코인 파밍 차단), B55 스테이지 리셋은 퀘스트 밖 XP 유지',
   },
   'SET-1': {
     expect: 'deny',

@@ -37,6 +37,7 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   },
   already_completed: { status: 409, error: '이미 완료한 퀘스트예요!' },
   no_golden_keys: { status: 400, error: '황금키가 부족해요.' },
+  not_enough_coins: { status: 400, error: '코인이 부족해요.' },
 };
 
 export function rewardError(
@@ -71,7 +72,9 @@ async function callRpc<T>(
     | 'complete_quest'
     | 'use_golden_key'
     | 'reset_progress'
-    | 'submit_quiz_answer',
+    | 'submit_quiz_answer'
+    | 'grant_coins'
+    | 'spend_coins',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -137,4 +140,79 @@ export function submitQuizAnswerRpc<T>(
       p_answer: answer,
     }),
   );
+}
+
+/** 코인 원장 출처 (00030 coin_ledger_source_check 와 같은 목록). spend 는 spendCoinsRpc 만 */
+export const COIN_SOURCES = [
+  'quest',
+  'star',
+  'quiz',
+  'mission',
+  'attendance',
+  'achievement',
+  'chest',
+  'level_up',
+  'retro',
+  'spend',
+] as const;
+export type CoinSource = (typeof COIN_SOURCES)[number];
+
+/** grant_coins·spend_coins 반환 (P8-03). 같은 (source, ref) 를 다시 부르면 applied false, delta 0 */
+export interface CoinRpcResult {
+  applied: boolean;
+  delta: number;
+  coins: number;
+  source: CoinSource;
+  ref: string;
+}
+
+/** 코인 지급 (P8-03, 00030). ref 는 멱등 키 — 형식은 00030 머리 주석 */
+export function grantCoinsRpc(
+  admin: AdminClient,
+  userId: string,
+  source: Exclude<CoinSource, 'spend'>,
+  ref: string,
+  amount: number,
+) {
+  return callRpc<CoinRpcResult>('grant_coins', () =>
+    admin.rpc('grant_coins', {
+      p_user_id: userId,
+      p_source: source,
+      p_ref: ref,
+      p_amount: amount,
+    }),
+  );
+}
+
+/** 코인 차감 (P8-03, 상점은 Phase 9). 잔액이 모자라면 not_enough_coins */
+export function spendCoinsRpc(
+  admin: AdminClient,
+  userId: string,
+  ref: string,
+  amount: number,
+) {
+  return callRpc<CoinRpcResult>('spend_coins', () =>
+    admin.rpc('spend_coins', {
+      p_user_id: userId,
+      p_ref: ref,
+      p_amount: amount,
+    }),
+  );
+}
+
+/** 코인 잔액 (users.coins, 원장 합의 캐시). 본인 세션 클라이언트(RLS)나 admin 으로 읽음. 행이 없으면 null */
+export async function getCoinBalance(
+  client: AdminClient,
+  userId: string,
+): Promise<number | null> {
+  const { data, error } = await client
+    .from('users')
+    .select('coins')
+    .eq('id', userId)
+    .maybeSingle();
+  if (error) {
+    reportServerError(error, { area: 'rewardRpc', op: 'coin balance' });
+    return null;
+  }
+  return data?.coins ?? null;
 }

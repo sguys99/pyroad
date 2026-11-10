@@ -4,6 +4,7 @@ public.board_comments board_comments_select_authenticated [PERMISSIVE SELECT to 
    FROM board_posts p
   WHERE (p.id = board_comments.post_id))))) check (-)
 public.board_posts board_posts_select_authenticated [PERMISSIVE SELECT to authenticated] using (((NOT is_hidden) OR (( SELECT auth.uid() AS uid) = user_id))) check (-)
+public.coin_ledger coin_ledger_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.notices notices_select_public [PERMISSIVE SELECT to public] using (true) check (-)
 public.quests quests_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)
 public.quiz_attempts quiz_attempts_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)

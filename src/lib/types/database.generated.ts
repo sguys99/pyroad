@@ -270,6 +270,44 @@ export type Database = {
           },
         ];
       };
+      coin_ledger: {
+        Row: {
+          balance_after: number;
+          created_at: string;
+          delta: number;
+          id: number;
+          ref: string;
+          source: string;
+          user_id: string;
+        };
+        Insert: {
+          balance_after: number;
+          created_at?: string;
+          delta: number;
+          id?: never;
+          ref: string;
+          source: string;
+          user_id: string;
+        };
+        Update: {
+          balance_after?: number;
+          created_at?: string;
+          delta?: number;
+          id?: never;
+          ref?: string;
+          source?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'coin_ledger_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       level_curve_adjustments: {
         Row: {
           created_at: string;
@@ -765,6 +803,7 @@ export type Database = {
           age_checked_at: string | null;
           avatar_config: Json;
           avatar_url: string | null;
+          coins: number;
           consent_deadline: string | null;
           created_at: string;
           current_level: number;
@@ -786,6 +825,7 @@ export type Database = {
           age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          coins?: number;
           consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
@@ -807,6 +847,7 @@ export type Database = {
           age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          coins?: number;
           consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
@@ -891,6 +932,23 @@ export type Database = {
       };
     };
     Functions: {
+      coin_apply: {
+        Args: {
+          p_delta: number;
+          p_ref: string;
+          p_source: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      coin_balance_mismatches: {
+        Args: never;
+        Returns: {
+          coins: number;
+          ledger_sum: number;
+          user_id: string;
+        }[];
+      };
       complete_onboarding: {
         Args: {
           p_age_band: string;
@@ -933,6 +991,15 @@ export type Database = {
           p_used_golden_key: boolean;
         };
         Returns: string[];
+      };
+      grant_coins: {
+        Args: {
+          p_amount: number;
+          p_ref: string;
+          p_source: string;
+          p_user_id: string;
+        };
+        Returns: Json;
       };
       has_three_day_streak: {
         Args: { p_completed_at: string[] };
@@ -1007,6 +1074,10 @@ export type Database = {
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };
         Returns: string;
+      };
+      spend_coins: {
+        Args: { p_amount: number; p_ref: string; p_user_id: string };
+        Returns: Json;
       };
       submit_quiz_answer: {
         Args: { p_answer: Json; p_quest_id: string; p_user_id: string };
