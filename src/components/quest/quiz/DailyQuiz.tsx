@@ -255,6 +255,8 @@ function DailyQuestion({
           explain={s.explain}
           onExplain={s.askWhy}
           combo={s.combo}
+          // 오늘의 퀴즈는 여러 스테이지에서 오므로 "보너스 퀴즈" 대신 어디 퀴즈인지 (B53)
+          source={`${item.quest.stage.order}단계 ${item.quest.stage.title} · ${item.quest.title}`}
           nextHref={null}
           mapHref={MAP_HREF}
           onNext={onNext}
@@ -386,10 +388,11 @@ export function DailySummary({
           <li className="dq-sum-item" data-testid="daily-sum-combo">
             <Flame aria-hidden className="dq-sum-flame" />
             <span className="sr-only">최고 {maxCombo}연속 정답</span>
-            <b aria-hidden>{maxCombo}</b>
-            <span className="dq-sum-u" aria-hidden>
-              연속
-            </span>
+            {/* "3연속" 붙여 씀 — 콤보 배지와 같은 띄어쓰기 (B53) */}
+            <b aria-hidden>
+              {maxCombo}
+              <span className="dq-sum-u">연속</span>
+            </b>
           </li>
         )}
       </ul>

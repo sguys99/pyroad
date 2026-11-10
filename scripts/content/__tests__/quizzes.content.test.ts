@@ -52,7 +52,8 @@ async function run(code: string): Promise<Outcome> {
   };
 }
 
-const lines = (stdout: string) => stdout.trim().split('\n').join(', ');
+// 출력 예측형 보기는 실제 출력 그대로 (여러 줄은 \n, 화면은 줄마다 ↵ 표시, B53)
+const lines = (stdout: string) => stdout.trim();
 
 it('1월드 스테이지마다 퀴즈가 있음', () => {
   expect(new Set(quizzes.map((q) => q.stage)).size).toBe(7);

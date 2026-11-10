@@ -15,8 +15,8 @@ const LINE_TAG: Partial<Record<OptionMark, string>> = {
   answer: '버그 줄',
   wrong: '고른 줄',
 };
+// 맞혔을 때 "정답"은 줄 꼬리표 하나로 (고친 줄에도 붙이면 두 번 나옴, B53)
 const FIX_TAG: Partial<Record<OptionMark, string>> = {
-  correct: '정답',
   answer: '정답',
   wrong: '고른 수정',
   miss: '아니었어요',
@@ -59,6 +59,42 @@ export function linePreviews(
     !(submitted.line === id && submitted.fix === answer.fix)
   )
     out.push({ fix: answer.fix, mark: 'answer' });
+  return out;
+}
+
+const TOKEN = /[A-Za-z0-9_]+|[가-힣]+|\s+|[^]/gu;
+
+/**
+ * 고친 줄 미리보기 강조 (B53): 원래 줄과 고친 줄을 토큰(낱말·한글 낱말·공백 묶음·기호 한 글자)으로 나눠 LCS 로 견주고,
+ * 고친 줄에서 원래 줄에 없던 토큰의 글자를 true 로. 따옴표 하나·괄호 하나처럼 바뀐 기호만 정확히 짚음
+ */
+export function changedChars(before: string, after: string): boolean[] {
+  const a = before.match(TOKEN) ?? [];
+  const b = after.match(TOKEN) ?? [];
+  // dp[i][j] = a[i..], b[j..] 의 LCS 길이 (줄 하나라 토큰 수가 작음)
+  const dp = Array.from({ length: a.length + 1 }, () =>
+    new Array<number>(b.length + 1).fill(0),
+  );
+  for (let i = a.length - 1; i >= 0; i--)
+    for (let j = b.length - 1; j >= 0; j--)
+      dp[i][j] =
+        a[i] === b[j]
+          ? dp[i + 1][j + 1] + 1
+          : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const out: boolean[] = [];
+  let i = 0;
+  let j = 0;
+  while (j < b.length) {
+    if (i < a.length && a[i] === b[j] && dp[i][j] === dp[i + 1][j + 1] + 1) {
+      out.push(...new Array<boolean>(b[j].length).fill(false));
+      i++;
+      j++;
+    } else if (i < a.length && dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else {
+      out.push(...new Array<boolean>(b[j].length).fill(true));
+      j++;
+    }
+  }
   return out;
 }
 
@@ -168,7 +204,11 @@ export function BugHunt({
                           data-testid="bughunt-preview"
                         >
                           <span className="sr-only">고친 줄 </span>
-                          <QuizCode code={code(p.fix)} inline />
+                          <QuizCode
+                            code={code(p.fix)}
+                            inline
+                            changed={changedChars(l.code, code(p.fix))}
+                          />
                           {FIX_TAG[p.mark] && (
                             <span className="qz-opt-tag">
                               {FIX_TAG[p.mark]}

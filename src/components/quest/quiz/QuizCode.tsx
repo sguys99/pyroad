@@ -1,3 +1,4 @@
+import { Fragment, type ReactNode } from 'react';
 import { highlightSegments } from '@/components/landing/sections/trial/highlight';
 
 /**
@@ -8,25 +9,32 @@ export function QuizCode({
   code,
   label,
   inline = false,
+  changed,
 }: {
   code: string;
   /** 낭독기 이름 (예: "문제 코드"). 보기 안 코드는 생략 */
   label?: string;
   /** 보기 카드 안: 쪽지 면 없이 글자만 */
   inline?: boolean;
+  /** 글자마다 바뀐 곳인지 (버그 찾기 고친 줄 미리보기, `changedChars`). 바뀐 곳은 <mark> 로 강조 */
+  changed?: readonly boolean[];
 }) {
+  let at = 0;
   const pre = (
     <pre className="qz-code" data-inline={inline || undefined}>
       <code>
-        {highlightSegments(code).map((s, i) =>
-          s.kind === 'str' ? (
+        {highlightSegments(code).map((s, i) => {
+          const from = at;
+          at += s.text.length;
+          const body = changed ? marked(s.text, changed, from) : s.text;
+          return s.kind === 'str' ? (
             <span key={i} className="qz-code-str">
-              {s.text}
+              {body}
             </span>
           ) : (
-            s.text
-          ),
-        )}
+            <Fragment key={i}>{body}</Fragment>
+          );
+        })}
       </code>
     </pre>
   );
@@ -37,4 +45,31 @@ export function QuizCode({
       {pre}
     </figure>
   );
+}
+
+/** 조각 글자를 바뀐 곳/그대로 묶음으로 나눠 바뀐 묶음만 <mark> */
+function marked(
+  text: string,
+  changed: readonly boolean[],
+  from: number,
+): ReactNode[] {
+  const out: ReactNode[] = [];
+  let i = 0;
+  while (i < text.length) {
+    const on = !!changed[from + i];
+    let j = i + 1;
+    while (j < text.length && !!changed[from + j] === on) j++;
+    const part = text.slice(i, j);
+    out.push(
+      on ? (
+        <mark key={i} className="qz-diff">
+          {part}
+        </mark>
+      ) : (
+        part
+      ),
+    );
+    i = j;
+  }
+  return out;
 }

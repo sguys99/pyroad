@@ -68,7 +68,11 @@ test.describe('퀘스트 전체 플로우', () => {
     const progress = page.getByTestId('stage-progress');
     const dots = progress.locator('.sp-dot');
     await expect(dots).toHaveCount(stage1.questCount);
-    await expect(progress).toContainText(`1/${stage1.questCount}`);
+    // 숫자는 코드 퀘스트끼리 (B53): 퀴즈 점은 마름모로 따로
+    await expect(progress).toContainText(`1/${stage1.quests.length}`);
+    await expect(progress.locator('.sp-dot[data-kind="quiz"]')).toHaveCount(
+      stage1.questCount - stage1.quests.length,
+    );
     await expect(dots.first()).toHaveAttribute('aria-current', 'step');
     await expect(dots.first()).toHaveAttribute('data-state', 'todo');
 

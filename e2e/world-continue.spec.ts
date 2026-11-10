@@ -134,10 +134,10 @@ test('360px 코드 퀘스트 첫 진입: 이 스테이지 퀴즈 쪽지 → 첫 
   );
   await page.goto(`/quest/${q2.id}`);
   const note = page.getByTestId('phone-quiz-note');
-  await expect(note).toContainText(
-    `폰에서는 퀴즈가 더 편해요 · 이 스테이지 퀴즈 ${s1.quizzes.length}개`,
-  );
-  await note.getByRole('link', { name: '퀴즈 보기' }).click();
+  await expect(note).toContainText('폰에선 퀴즈가 더 편해요');
+  await note
+    .getByRole('link', { name: `퀴즈 ${s1.quizzes.length}개 보기` })
+    .click();
   await expect(page).toHaveURL(new RegExp(`/quest/${z1.id}$`));
 });
 

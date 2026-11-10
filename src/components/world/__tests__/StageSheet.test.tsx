@@ -95,7 +95,14 @@ describe('StageSheet', () => {
       name: /3단계 · 지금 모험 중\s*조건의 갈림길/,
     });
     expect(dialog).toHaveAccessibleDescription('갈림길에서 길을 골라요');
-    expect(dialog).toHaveTextContent('퀘스트 1/4 완료');
+    // 숫자는 코드 퀘스트끼리, 퀴즈는 따로 (B53): 월드맵 노드와 같은 1/3
+    expect(dialog).toHaveTextContent('퀘스트 1/3 완료');
+    expect(screen.getByTestId('stage-sheet-quiz-sum')).toHaveTextContent(
+      '보너스 퀴즈 0/1',
+    );
+    expect(
+      screen.getByRole('link', { name: /^3번\s*퀘스트4/ }),
+    ).toBeInTheDocument();
 
     const replay = screen.getByRole('link', { name: /퀘스트1.*다시 하기/ });
     expect(replay).toHaveAttribute('href', '/quest/q1');

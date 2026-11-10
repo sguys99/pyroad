@@ -163,17 +163,32 @@ describe('leaksQuizAnswer (P7-08, 정답 누출 필터)', () => {
 });
 
 describe('quizExplainFallback (P7-08, 저장된 해설)', () => {
-  it('객관식·버그 찾기: 고른 것의 해설 + 종류별 안내', () => {
+  it('객관식·버그 찾기: 고른 것의 해설은 오답 쪽지에 이미 있어 되풀이하지 않고 종류별 안내만 (B53)', () => {
+    const mc = quizExplainFallback(
+      { quiz: MC, answer: MC_KEY, submitted: 'opt-b2mx' },
+      '콘텐츠 해설',
+    );
+    expect(mc).toMatch(/^보기를 하나씩/);
+    expect(mc).not.toContain('range는 0부터');
+    expect(mc).not.toContain('콘텐츠 해설');
+    const bug = quizExplainFallback({
+      quiz: BUG,
+      answer: BUG_KEY,
+      submitted: { line: 'ln-h7jq', fix: 'fx-m9ts' },
+    });
+    expect(bug).not.toContain('세미콜론');
+    expect(bug).toContain('괄호·따옴표');
+    // 고른 보기에 해설이 없으면 fallback_text + 안내
     expect(
-      quizExplainFallback({ quiz: MC, answer: MC_KEY, submitted: 'opt-b2mx' }),
-    ).toMatch(/^range는 0부터 세기 시작해요\. 보기를 하나씩/);
-    expect(
-      quizExplainFallback({
-        quiz: BUG,
-        answer: BUG_KEY,
-        submitted: { line: 'ln-h7jq', fix: 'fx-m9ts' },
-      }),
-    ).toContain('세미콜론');
+      quizExplainFallback(
+        {
+          quiz: MC,
+          answer: { ...MC_KEY, explanations: {} },
+          submitted: 'opt-b2mx',
+        },
+        '콘텐츠 해설',
+      ),
+    ).toMatch(/^콘텐츠 해설 보기를 하나씩/);
   });
 
   it('해설이 없으면 콘텐츠 fallback_text, 빈칸·순서도 종류별 안내가 나온다', () => {

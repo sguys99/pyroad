@@ -8,6 +8,7 @@ import { Toast, ToastRegion } from '@/components/ui/toast';
 import { track } from '@/lib/analytics/track';
 import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
 import type { StageQuestDot } from '@/lib/quest/stageProgress';
+import './phoneQuizNote.css';
 
 /** 기기에 "봤음"을 남기는 키. 서버에 보내지 않음 */
 export const PHONE_QUIZ_NOTE_KEY = 'pyroad.phoneQuizNote';
@@ -50,12 +51,14 @@ export function PhoneQuizToast({
       closeLabel="닫기"
       action={
         <Button size="sm" variant="secondary" href={href} onClick={onGo}>
-          퀴즈 보기
+          퀴즈 {count}개 보기
         </Button>
       }
+      className="pqn"
       data-testid="phone-quiz-note"
     >
-      폰에서는 퀴즈가 더 편해요 · 이 스테이지 퀴즈 {count}개
+      {/* 360px 에서 두 줄 안쪽 (B53): 퀴즈 수는 버튼이 말함 */}
+      폰에선 퀴즈가 더 편해요
     </Toast>
   );
 }
@@ -92,7 +95,7 @@ export function PhoneQuizNote({
   }, [eligible]);
 
   return (
-    <ToastRegion label="퀴즈 안내">
+    <ToastRegion label="퀴즈 안내" className="pqn-region">
       {open && target && (
         <PhoneQuizToast
           count={quizzes.length}

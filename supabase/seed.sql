@@ -2,7 +2,7 @@
 -- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.
 -- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).
 -- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.
--- 콘텐츠 해시: d6e510a5a3faae7e
+-- 콘텐츠 해시: e675b2cf0f608bd0
 -- 월드 3 · 스테이지 7 · 퀘스트 65 · 정답 행 65 (solution_code 43 + 프로젝트 단계 5)
 --
 -- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).
@@ -262,7 +262,7 @@ VALUES (
   'quiz',
   'multiple_choice',
   TRUE,
-  '{"topic":"주석과 print() 출력 예측하기","learning_goals":["주석(#)은 실행되지 않는다는 것을 안다","print()는 따옴표 안의 글자만 보여 준다는 것을 안다"],"story_context":"시계탑 아래 게시판에 파이뱀이 코드를 붙여 놨어요. 돌리기 전에 무엇이 나올지 맞혀 봐요!","fallback_text":"#으로 시작하는 줄은 메모라서 컴퓨터가 읽지 않아요. 따옴표는 글자를 감싸는 표시일 뿐 화면에는 나오지 않아요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까? (줄이 바뀌는 곳은 쉼표로 적었어요)","code":"# print(\"비밀 메모\")\nprint(\"안녕\")\nprint(2026)","options":[{"id":"opt-b7xe","text":"\"안녕\", 2026"},{"id":"opt-h3ku","text":"안녕, 2026"},{"id":"opt-q2mi","text":"비밀 메모, 안녕, 2026"},{"id":"opt-z5ca","text":"안녕"}]}}'::jsonb,
+  '{"topic":"주석과 print() 출력 예측하기","learning_goals":["주석(#)은 실행되지 않는다는 것을 안다","print()는 따옴표 안의 글자만 보여 준다는 것을 안다"],"story_context":"시계탑 아래 게시판에 파이뱀이 코드를 붙여 놨어요. 돌리기 전에 무엇이 나올지 맞혀 봐요!","fallback_text":"#으로 시작하는 줄은 메모라서 컴퓨터가 읽지 않아요. 따옴표는 글자를 감싸는 표시일 뿐 화면에는 나오지 않아요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"# print(\"비밀 메모\")\nprint(\"안녕\")\nprint(2026)","options":[{"id":"opt-b7xe","text":"\"안녕\"\n2026"},{"id":"opt-h3ku","text":"안녕\n2026"},{"id":"opt-q2mi","text":"비밀 메모\n안녕\n2026"},{"id":"opt-z5ca","text":"안녕"}]}}'::jsonb,
   'all',
   '',
   30
@@ -814,7 +814,7 @@ VALUES (
   'quiz',
   'multiple_choice',
   TRUE,
-  '{"topic":"range()가 만드는 숫자","learning_goals":["range(시작, 끝)은 끝 숫자를 넣지 않는다는 것을 안다"],"story_context":"동굴 문 앞에 숫자를 세는 마법 주문이 새겨져 있어요. 주문을 외우면 어떤 숫자가 나올까요?","fallback_text":"range(시작, 끝)은 시작 숫자부터 세지만, 끝 숫자는 넣지 않고 바로 앞에서 멈춰요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까? (줄이 바뀌는 곳은 쉼표로 적었어요)","code":"for i in range(1, 4):\n    print(i)","options":[{"id":"opt-f9ob","text":"1, 2, 3, 4"},{"id":"opt-n2hr","text":"0, 1, 2, 3"},{"id":"opt-s7ak","text":"0, 1, 2"},{"id":"opt-w4ze","text":"1, 2, 3"}]}}'::jsonb,
+  '{"topic":"range()가 만드는 숫자","learning_goals":["range(시작, 끝)은 끝 숫자를 넣지 않는다는 것을 안다"],"story_context":"동굴 문 앞에 숫자를 세는 마법 주문이 새겨져 있어요. 주문을 외우면 어떤 숫자가 나올까요?","fallback_text":"range(시작, 끝)은 시작 숫자부터 세지만, 끝 숫자는 넣지 않고 바로 앞에서 멈춰요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"for i in range(1, 4):\n    print(i)","options":[{"id":"opt-f9ob","text":"1\n2\n3\n4"},{"id":"opt-n2hr","text":"0\n1\n2\n3"},{"id":"opt-s7ak","text":"0\n1\n2"},{"id":"opt-w4ze","text":"1\n2\n3"}]}}'::jsonb,
   'all',
   '',
   30
@@ -1582,7 +1582,7 @@ VALUES (
   'quiz',
   'multiple_choice',
   TRUE,
-  '{"topic":"반복한 횟수 세기","learning_goals":["반복할 때마다 1씩 더해 횟수를 셀 수 있다"],"story_context":"숫자 맞추기 게임에서 친구가 고른 숫자 기록이 남아 있어요. 기록을 세는 코드를 돌리면 무엇이 나올까요?","fallback_text":"for 는 리스트에 든 값마다 한 번씩 반복해요. tries 에는 리스트의 숫자가 아니라 1이 더해진다는 걸 잘 봐요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까? (줄이 바뀌는 곳은 쉼표로 적었어요)","code":"tries = 0\nfor guess in [3, 8, 5]:\n    tries = tries + 1\nprint(tries)","options":[{"id":"opt-a9ry","text":"1, 2, 3"},{"id":"opt-f5wi","text":"3"},{"id":"opt-l3ep","text":"16"},{"id":"opt-t8gc","text":"1"}]}}'::jsonb,
+  '{"topic":"반복한 횟수 세기","learning_goals":["반복할 때마다 1씩 더해 횟수를 셀 수 있다"],"story_context":"숫자 맞추기 게임에서 친구가 고른 숫자 기록이 남아 있어요. 기록을 세는 코드를 돌리면 무엇이 나올까요?","fallback_text":"for 는 리스트에 든 값마다 한 번씩 반복해요. tries 에는 리스트의 숫자가 아니라 1이 더해진다는 걸 잘 봐요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"tries = 0\nfor guess in [3, 8, 5]:\n    tries = tries + 1\nprint(tries)","options":[{"id":"opt-a9ry","text":"1\n2\n3"},{"id":"opt-f5wi","text":"3"},{"id":"opt-l3ep","text":"16"},{"id":"opt-t8gc","text":"1"}]}}'::jsonb,
   'all',
   '',
   30

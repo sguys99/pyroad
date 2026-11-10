@@ -19,7 +19,8 @@ import { Sheet } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useSfx } from '@/components/providers/soundContext';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { Stars } from '@/components/ui/reward-icon';
+import { RewardIcon, Stars } from '@/components/ui/reward-icon';
+import { questNumbers } from '@/lib/quest/stageProgress';
 import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
 import { isQuizKind, QUIZ_KIND_LABEL } from '@/lib/world/phoneQuiz';
 import { Landmark } from './map/MapArt';
@@ -110,7 +111,14 @@ export function StageSheet({
   if (!stage) return null;
   const rows = questRows(stage, quests);
   const next = rows.find((r) => r.state === 'now');
-  const done = rows.filter((r) => r.state === 'done').length;
+  // 숫자는 코드 퀘스트(보스 포함)끼리 — 월드맵 노드 "1/7"과 같은 기준. 퀴즈는 보너스라 따로 (B53, §12-Q60)
+  const nums = questNumbers(quests);
+  const codeRows = rows.filter((r) => r.kind !== 'quiz');
+  const quizRows = rows.filter((r) => r.kind === 'quiz');
+  const done = codeRows.filter((r) => r.state === 'done').length;
+  const quizDone = quizRows.filter((r) => r.state === 'done').length;
+  const quizStars = quizRows.reduce((n, r) => n + (r.best_stars ?? 0), 0);
+  const nextNo = next && nums.get(next.id);
   const nextVerb =
     next && (next.status === 'in_progress' || done > 0)
       ? '이어하기'
@@ -154,7 +162,9 @@ export function StageSheet({
             className="ss-cta"
             data-testid="stage-sheet-start"
           >
-            {next.order}번 퀘스트 {nextVerb}
+            {nextNo?.quiz
+              ? `보너스 퀴즈 ${nextNo.n} 풀기`
+              : `${nextNo?.n ?? next.order}번 퀘스트 ${nextVerb}`}
           </Button>
         )
       }
@@ -163,7 +173,7 @@ export function StageSheet({
         <div className="ss-sum-txt">
           <b>
             퀘스트 <span className="ss-num font-display">{done}</span>/
-            {rows.length} 완료
+            {codeRows.length} 완료
           </b>
           {SHOW_STARS && (
             <span className="ss-sum-stars">
@@ -174,11 +184,23 @@ export function StageSheet({
         </div>
         <ProgressBar
           value={done}
-          max={Math.max(rows.length, 1)}
+          max={Math.max(codeRows.length, 1)}
           label="이 스테이지에서 끝낸 퀘스트"
-          valueText={`${done} / ${rows.length}`}
+          valueText={`${done} / ${codeRows.length}`}
           size="sm"
         />
+        {quizRows.length > 0 && (
+          <p className="ss-sum-quiz" data-testid="stage-sheet-quiz-sum">
+            <Sparkles aria-hidden className="size-4" strokeWidth={2.4} />
+            보너스 퀴즈 {quizDone}/{quizRows.length}
+            {quizStars > 0 && (
+              <span className="ss-sum-quiz-stars">
+                <RewardIcon kind="star" size={16} />
+                <span className="sr-only">별</span> {quizStars}
+              </span>
+            )}
+          </p>
+        )}
       </div>
 
       <h3 className="ss-k">차례</h3>
@@ -192,6 +214,7 @@ export function StageSheet({
                 Icon: QUIZ_KIND_ICON[quizKind],
               }
             : KIND[q.kind];
+          const no = nums.get(q.id);
           return (
             <li
               key={q.id}
@@ -209,13 +232,19 @@ export function StageSheet({
                 <span className="ss-no" aria-hidden>
                   {q.state === 'done' ? (
                     <Check className="size-5" strokeWidth={3} />
+                  ) : no?.quiz ? (
+                    <Sparkles className="size-5" strokeWidth={2.4} />
                   ) : (
-                    q.order
+                    (no?.n ?? q.order)
                   )}
                 </span>
                 <span className="ss-main">
                   <span className="ss-t">
-                    <span className="sr-only">{q.order}번 </span>
+                    <span className="sr-only">
+                      {no?.quiz
+                        ? `보너스 퀴즈 ${no.n}, `
+                        : `${no?.n ?? q.order}번 `}
+                    </span>
                     {q.title}
                   </span>
                   {q.concept && (

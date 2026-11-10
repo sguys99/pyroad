@@ -15,7 +15,7 @@ prompt:
   story_context: 숫자 맞추기 게임에서 친구가 고른 숫자 기록이 남아 있어요. 기록을 세는 코드를 돌리면 무엇이 나올까요?
   fallback_text: for 는 리스트에 든 값마다 한 번씩 반복해요. tries 에는 리스트의 숫자가 아니라 1이 더해진다는 걸 잘 봐요.
   quiz:
-    question: 이 코드를 돌리면 무엇이 나올까? (줄이 바뀌는 곳은 쉼표로 적었어요)
+    question: 이 코드를 돌리면 무엇이 나올까?
     code: |-
       tries = 0
       for guess in [3, 8, 5]:
@@ -25,7 +25,7 @@ prompt:
       - { id: opt-f5wi, text: '3' }
       - { id: opt-l3ep, text: '16' }
       - { id: opt-t8gc, text: '1' }
-      - { id: opt-a9ry, text: '1, 2, 3' }
+      - { id: opt-a9ry, text: "1\n2\n3" }
 answer:
   quiz_answer:
     accepted: [opt-f5wi]

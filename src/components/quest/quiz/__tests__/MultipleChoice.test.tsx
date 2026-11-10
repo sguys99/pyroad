@@ -169,10 +169,11 @@ describe('MultipleChoice', () => {
     expect(screen.getByTestId('quiz-verdict')).toHaveTextContent('정답이에요');
     const strip = screen.getByTestId('quest-reward');
     expect(strip).toHaveTextContent('퀴즈 통과');
-    expect(within(strip).getByTestId('reward-stars')).toHaveAttribute(
-      'aria-label',
-      '별 3개 / 3개',
+    // 별은 채점 쪽지에 한 번만 (보상 띠에서 되풀이하지 않음, B53)
+    expect(screen.getByTestId('quiz-verdict-stars')).toHaveTextContent(
+      '별 3개',
     );
+    expect(within(strip).queryByTestId('reward-stars')).toBeNull();
     // XP 는 0에서 30까지 세어 올라감 (CountUp)
     expect(within(strip).getByTestId('reward-xp')).toBeInTheDocument();
     expect(screen.getByTestId('next-quest')).toHaveAttribute(
@@ -243,12 +244,18 @@ describe('보기 글자 규칙', () => {
   it('`로 감싸거나 여러 줄이거나 출력 예측형이면 코드', () => {
     expect(optionCode('`print("hi")`', false)).toEqual({
       code: true,
+      output: false,
       text: 'print("hi")',
     });
     expect(optionCode('a\nb', false).code).toBe(true);
-    expect(optionCode('0 1 2', true).code).toBe(true);
+    // 출력 예측형은 출력 모양 (B53)
+    expect(optionCode('0 1 2', true)).toMatchObject({
+      code: true,
+      output: true,
+    });
     expect(optionCode('반복문', false)).toEqual({
       code: false,
+      output: false,
       text: '반복문',
     });
   });

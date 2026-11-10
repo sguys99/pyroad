@@ -188,8 +188,8 @@ const KIND_TIP: Record<QuizPrompt['kind'], string> = {
 };
 
 /**
- * 저장된 해설 (키 없음·한도·오류·누출 감지): 고른 보기·수정안의 해설(채점 응답과 같은 것)이 있으면 그것,
- * 없으면 콘텐츠의 fallback_text(빌드가 정답 글자를 막음) + 종류별 생각 안내. 정답은 들어가지 않음
+ * 저장된 해설 (키 없음·한도·오류·누출 감지). 고른 보기·수정안의 해설은 이미 오답 쪽지(채점 응답, 00026 같은 찾기)에 보이므로
+ * 되풀이하지 않고 종류별 생각 안내만 (B53). 그 해설이 없으면 콘텐츠의 fallback_text(빌드가 정답 글자를 막음) + 안내. 정답은 들어가지 않음
  */
 export function quizExplainFallback(
   input: Pick<QuizExplainInput, 'quiz' | 'answer' | 'submitted'>,
@@ -204,7 +204,7 @@ export function quizExplainFallback(
         ? (why[(submitted as { fix: string }).fix] ??
           why[(submitted as { line: string }).line])
         : undefined;
-  return [choice ?? fallbackText, KIND_TIP[quiz.kind]]
+  return [choice ? undefined : fallbackText, KIND_TIP[quiz.kind]]
     .filter(Boolean)
     .join(' ');
 }

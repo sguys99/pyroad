@@ -1,0 +1,9 @@
+/* 폰 퀴즈 쪽지 (P7-11, B53): 퀘스트 화면 하단 상태 막대(Lv·XP) 위에 떠서 막대를 가리지 않게. 좁은 폰은 아이콘을 빼 글이 두 줄 안에 */
+.g-toast-region.pqn-region {
+  bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 23.99rem) {
+  .pqn .g-toast-icon {
+    display: none;
+  }
+}

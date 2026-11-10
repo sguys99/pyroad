@@ -154,7 +154,7 @@ function LiveQuiz() {
   const combo = useQuizCombo();
   const play = useSfx();
   const status = quizStatus(graded?.r ?? null);
-  const line = quizLine(status, mode, graded?.r.attempt_no);
+  const line = quizLine(status, mode);
   // 서버 대신 잠깐 생각한 뒤 정답 없는 해설
   const askWhy = () => {
     setWhy({ state: 'loading', text: '' });

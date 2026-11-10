@@ -182,12 +182,10 @@ describe('정답·오답 연출과 콤보 (P7-09)', () => {
 
   it('파이뱀: 정답 응원 · 오답 격려 · 공개 설명', () => {
     expect(quizLine('correct', 'first').state).toBe('cheer');
-    expect(quizLine('wrong', 'first', 1)).toMatchObject({
-      state: 'encourage',
-      text: expect.stringContaining('2번 더 도전할 수 있으니'),
-    });
-    expect(quizLine('revealed', 'first', 3).text).toContain(
-      '같이 정답을 볼까요?',
-    );
+    // 남은 기회는 채점 쪽지만 말함 (B53): 대사는 짧은 격려
+    const wrong = quizLine('wrong', 'first');
+    expect(wrong.state).toBe('encourage');
+    expect(wrong.text).not.toMatch(/번 더/);
+    expect(quizLine('revealed', 'first').text).toContain('같이 정답을 볼까요?');
   });
 });

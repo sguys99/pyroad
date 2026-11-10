@@ -218,9 +218,9 @@ answer:
     explanation: range(3)은 0부터 2까지예요.
 ```
 
-**출력 예측형**(§12-Q60 결정 4a): 새 종류 없이 객관식으로 씁니다. 문제는 "이 코드를 돌리면 무엇이 나올까?", `code`에 짧은 코드(5줄 이하), 보기에는 실제 출력과 **흔히 헷갈리는 출력**(0부터/1부터, 마지막 수 포함 여부, 따옴표까지 나온다고 착각, 줄바꿈 대신 한 줄)을 넣습니다. 여러 줄 출력은 보기 글자에서 줄을 공백이나 `,`로 잇는 방식을 한 퀴즈 안에서 같게 씁니다. 정답 보기는 실제로 돌려 본 출력과 같아야 합니다.
+**출력 예측형**(§12-Q60 결정 4a): 새 종류 없이 객관식으로 씁니다. 문제는 "이 코드를 돌리면 무엇이 나올까?", `code`에 짧은 코드(5줄 이하), 보기에는 실제 출력과 **흔히 헷갈리는 출력**(0부터/1부터, 마지막 수 포함 여부, 따옴표까지 나온다고 착각, 줄바꿈 대신 한 줄)을 넣습니다. 여러 줄 출력은 보기 글자에 실제 줄바꿈(`"안녕\n2026"`)으로 씁니다(B53, 쉼표로 잇지 않음 — `[1, 2, 3]` 같은 출력과 헷갈림). 정답 보기는 실제로 돌려 본 출력과 같아야 합니다.
 
-**보기 글자 모양**(화면 `MultipleChoice`, P7-03): 문제에 `code`가 있으면(출력 예측형) 보기는 출력이라 모두 코드 글꼴로 보입니다. 그 밖의 보기는 `` `print("안녕")` ``처럼 글자 전체를 백틱 하나로 감싸거나 여러 줄이면 코드 블록으로, 아니면 보통 글자로 보입니다.
+**보기 글자 모양**(화면 `MultipleChoice`, P7-03·B53): 문제에 `code`가 있으면(출력 예측형) 보기는 "출력 모양" — 코드 글꼴, 문법 색 없이, 줄마다 끝에 ↵ 표시로 보입니다. 그 밖의 보기는 `` `print("안녕")` ``처럼 글자 전체를 백틱 하나로 감싸거나 여러 줄이면 코드 블록으로, 아니면 보통 글자로 보입니다.
 
 #### fill_blank — 빈칸 채우기
 
@@ -300,7 +300,7 @@ answer:
 
 **빌드가 확인**: id 형식·중복, `accepted`·`explanations`가 있는 id만 가리키는지, 객관식에 틀린 보기가 있는지, fill_blank가 모든 빈칸을 채우는지, parsons가 모든 줄을 한 번씩 쓰는지와 indent 모양, 같은 정답 중복, 그리고 **공개 문장(제목·`topic`·`learning_goals`·`story_context`·`fallback_text`·문제 문장)에 정답이 그대로 있는지**(§12-Q20). 정답 글자는 객관식·bug_hunt는 정답 보기·수정안 글자(오답 보기 글자도 같은 문장에 있으면 정답을 짚은 게 아니라서 통과), fill_blank는 빈칸을 정답으로 채운 줄, parsons는 정답 순서로 이어지는 두 줄입니다. 한 글자짜리와 영문·숫자 낱말 한가운데(`3` ⊂ `range(30)`)는 보지 않습니다. 코드·보기 자체는 문제라서 보지 않습니다.
 
-DB: `quests.quest_type = 'quiz'`, `quiz_kind`, `is_mobile_friendly = true`, `validation_type = 'all'`(퀴즈는 쓰지 않는 자리값. 00012 CHECK 안의 값이고 기준값 칸이 비어 코드 채점 경로로는 항상 불합격), `quest_answer_keys`는 `quiz_answer`만 있고 `hints = {}`·`solution_code = NULL`. 정답 코드 자동 검증은 퀴즈를 건너뛰고, 대신 `scripts/content/__tests__/quizzes.content.test.ts`(`test:content`)가 퀴즈 코드를 Pyodide로 돌려 봅니다: 출력 예측형 실제 출력(줄을 `, `로 이음) = 정답 보기, fill_blank 정답 채움은 오류 없이 끝나고 오답 토큰은 결과가 다름, parsons 정답 순서는 모두 같은 출력, bug_hunt 원래 코드·오답 수정안은 정답 수정안과 결과가 다름. 그래서 퀴즈 코드에는 `input()`·`random`을 쓰지 않습니다.
+DB: `quests.quest_type = 'quiz'`, `quiz_kind`, `is_mobile_friendly = true`, `validation_type = 'all'`(퀴즈는 쓰지 않는 자리값. 00012 CHECK 안의 값이고 기준값 칸이 비어 코드 채점 경로로는 항상 불합격), `quest_answer_keys`는 `quiz_answer`만 있고 `hints = {}`·`solution_code = NULL`. 정답 코드 자동 검증은 퀴즈를 건너뛰고, 대신 `scripts/content/__tests__/quizzes.content.test.ts`(`test:content`)가 퀴즈 코드를 Pyodide로 돌려 봅니다: 출력 예측형 실제 출력(앞뒤 공백만 뺌) = 정답 보기, fill_blank 정답 채움은 오류 없이 끝나고 오답 토큰은 결과가 다름, parsons 정답 순서는 모두 같은 출력, bug_hunt 원래 코드·오답 수정안은 정답 수정안과 결과가 다름. 그래서 퀴즈 코드에는 `input()`·`random`을 쓰지 않습니다.
 
 ## 3. 검증 규칙 (`answer.validation`)
 

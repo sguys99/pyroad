@@ -45,3 +45,28 @@ export function stageDots(
       };
     });
 }
+
+/** 스테이지 안 번호 (B53): 코드 퀘스트(보스·프로젝트 포함)와 퀴즈를 따로 1부터 셈. 월드맵 노드 "1/7"·시트 "퀘스트 1/7 · 퀴즈 0/3"과 같은 기준 */
+export interface QuestNumber {
+  quiz: boolean;
+  /** 같은 갈래 안 순번 (1부터) */
+  n: number;
+  /** 같은 갈래 개수 */
+  total: number;
+}
+
+export function questNumbers(
+  quests: readonly { id: string; order: number; quest_type?: string | null }[],
+): Map<string, QuestNumber> {
+  const sorted = [...quests].sort((a, b) => a.order - b.order);
+  const quizTotal = sorted.filter((q) => q.quest_type === 'quiz').length;
+  const codeTotal = sorted.length - quizTotal;
+  const seen = { quiz: 0, code: 0 };
+  return new Map(
+    sorted.map((q) => {
+      const quiz = q.quest_type === 'quiz';
+      const n = ++seen[quiz ? 'quiz' : 'code'];
+      return [q.id, { quiz, n, total: quiz ? quizTotal : codeTotal }];
+    }),
+  );
+}

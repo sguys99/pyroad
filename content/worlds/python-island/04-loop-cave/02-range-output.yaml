@@ -15,15 +15,15 @@ prompt:
   story_context: 동굴 문 앞에 숫자를 세는 마법 주문이 새겨져 있어요. 주문을 외우면 어떤 숫자가 나올까요?
   fallback_text: range(시작, 끝)은 시작 숫자부터 세지만, 끝 숫자는 넣지 않고 바로 앞에서 멈춰요.
   quiz:
-    question: 이 코드를 돌리면 무엇이 나올까? (줄이 바뀌는 곳은 쉼표로 적었어요)
+    question: 이 코드를 돌리면 무엇이 나올까?
     code: |-
       for i in range(1, 4):
           print(i)
     options:
-      - { id: opt-w4ze, text: '1, 2, 3' }
-      - { id: opt-f9ob, text: '1, 2, 3, 4' }
-      - { id: opt-n2hr, text: '0, 1, 2, 3' }
-      - { id: opt-s7ak, text: '0, 1, 2' }
+      - { id: opt-w4ze, text: "1\n2\n3" }
+      - { id: opt-f9ob, text: "1\n2\n3\n4" }
+      - { id: opt-n2hr, text: "0\n1\n2\n3" }
+      - { id: opt-s7ak, text: "0\n1\n2" }
 answer:
   quiz_answer:
     accepted: [opt-w4ze]

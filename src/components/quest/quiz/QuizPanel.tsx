@@ -79,6 +79,8 @@ export interface QuizPanelProps {
   onExplain?: () => void;
   /** 이 탭의 연속 정답 수 (P7-09, quizCombo). 2부터 머리에 불꽃 배지, 정답 소리 피치 */
   combo?: number;
+  /** 머리 눈썹 대신 보일 출처 (오늘의 퀴즈: "1단계 파이썬 마을 입구 · 퀴즈 제목", B53). 없으면 "보너스 퀴즈 · 종류" */
+  source?: string;
 }
 
 const EXPLAIN_THINKING = '음… 어디서 헷갈렸는지 같이 생각해 볼게요…';
@@ -93,8 +95,11 @@ export function quizReward(
   prevBest: number,
 ): QuestReward {
   const practice = r.mode === 'practice';
+  // 정답이면 별은 채점 쪽지가 도장처럼 찍어 보여 줌 → 보상 띠에서 또 보이지 않게. 공개(쪽지에 별 없음)만 띠에
   const stars =
-    r.stars >= 1 && r.stars <= 3 ? (r.stars as 1 | 2 | 3) : undefined;
+    !r.correct && r.stars >= 1 && r.stars <= 3
+      ? (r.stars as 1 | 2 | 3)
+      : undefined;
   return {
     ...base,
     xp: r.xp_awarded,
@@ -168,7 +173,7 @@ export function QuizPanel(p: QuizPanelProps) {
         <div className="qz-head">
           <span className="qz-k">
             <Sparkles aria-hidden />
-            보너스 퀴즈{def ? ` · ${def.label}` : ''}
+            {p.source ?? `보너스 퀴즈${def ? ` · ${def.label}` : ''}`}
           </span>
           {p.mode === 'review' && (
             <span className="qz-chip" data-tone="review">
@@ -481,10 +486,14 @@ export function ComboBadge({ combo }: { combo: number }) {
   return (
     <span className="qz-combo" data-testid="quiz-combo">
       <Flame aria-hidden />
-      <b key={combo} className="qz-combo-n">
-        {combo}
-      </b>
-      연속<span className="sr-only"> 정답</span>
+      {/* 숫자와 "연속"은 붙여서 "2연속" (요약 카드와 같은 띄어쓰기) */}
+      <span>
+        <b key={combo} className="qz-combo-n">
+          {combo}
+        </b>
+        연속
+      </span>
+      <span className="sr-only"> 정답</span>
     </span>
   );
 }

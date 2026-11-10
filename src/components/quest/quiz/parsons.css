@@ -180,33 +180,36 @@
   height: 1.125rem;
 }
 
-/* 좁은 쪽(들여쓰기 버튼까지 4개면 24rem, 아니면 14rem 미만 — 360px 200% 확대 포함): 버튼을 코드 아래 줄 오른쪽으로 */
-@container (max-width: 24rem) {
-  .qz-ps-list[data-indent] > .qz-ps-row {
-    flex-wrap: wrap;
-  }
-  .qz-ps-list[data-indent] .qz-ps-code {
-    flex-basis: calc(100% - 1.75rem);
-  }
-  .qz-ps-list[data-indent] .qz-ps-tools {
-    border-top: var(--line-w) solid var(--line);
-  }
-  .qz-ps-list[data-indent] .qz-ps-code + .qz-ps-tools {
-    margin-left: auto;
-  }
-}
-@container (max-width: 14rem) {
+/* 좁은 쪽(32rem 미만 — 360px 폰 · 넓은 화면 200% 확대, B53): 코드가 줄 폭을 다 쓰도록 한 줄 위로 올리고,
+   손잡이·들여쓰기·위/아래는 그 아래 접힌 손잡이 줄(44px)로. 문자열 중간에서 꺾이지 않게 */
+@container (max-width: 32rem) {
   .qz-ps-row {
     flex-wrap: wrap;
   }
   .qz-ps-code {
-    flex-basis: calc(100% - 1.75rem);
+    order: -1;
+    flex-basis: 100%;
+  }
+  /* 손잡이 줄이 있을 때(고르는 중)만 사이 금 */
+  .qz-ps-code:not(:last-child) {
+    border-bottom: var(--line-w) solid var(--line);
+    border-radius: var(--round-s) var(--round-s) 0 0;
+  }
+  .qz-ps-grip + .qz-ps-code {
+    padding-left: 0.75rem;
+  }
+  .qz-ps-grip {
+    width: 2.75rem;
+    min-height: 2.75rem;
   }
   .qz-ps-tools {
-    border-top: var(--line-w) solid var(--line);
+    border-left: 0;
   }
   .qz-ps-code + .qz-ps-tools {
     margin-left: auto;
+  }
+  .qz-ps-tools + .qz-ps-tools {
+    border-left: var(--line-w) solid var(--line);
   }
 }
 

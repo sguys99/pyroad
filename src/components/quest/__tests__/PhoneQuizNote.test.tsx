@@ -66,10 +66,8 @@ describe('PhoneQuizNote', () => {
     const { unmount } = render(<PhoneQuizNote quests={QUESTS} />);
     await wait();
     const note = screen.getByTestId('phone-quiz-note');
-    expect(note).toHaveTextContent(
-      '폰에서는 퀴즈가 더 편해요 · 이 스테이지 퀴즈 2개',
-    );
-    expect(screen.getByRole('link', { name: '퀴즈 보기' })).toHaveAttribute(
+    expect(note).toHaveTextContent('폰에선 퀴즈가 더 편해요');
+    expect(screen.getByRole('link', { name: '퀴즈 2개 보기' })).toHaveAttribute(
       'href',
       '/quest/z2',
     );

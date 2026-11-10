@@ -20,7 +20,7 @@ vi.mock('@/lib/pyodide/PyodideProvider', () => ({
 }));
 
 import { QuizPanel, type QuizPanelProps } from '../QuizPanel';
-import { bugHuntInput, lineMark, linePreviews } from '../BugHunt';
+import { bugHuntInput, changedChars, lineMark, linePreviews } from '../BugHunt';
 import { QUIZ_INPUTS } from '../quizInputs';
 
 const QUIZ = {
@@ -176,16 +176,22 @@ describe('BugHunt', () => {
     screen.getAllByRole('radio').forEach((r) => expect(r).toBeDisabled());
   });
 
-  it('정답: 줄과 수정에 "정답"', () => {
+  it('정답: "정답" 꼬리표는 줄에 한 번만 (B53)', () => {
     panel({
       value: RIGHT,
       submitted: RIGHT,
       result: reply({ correct: true, stars: 3, best_stars: 3, xp_awarded: 30 }),
     });
     expect(lines()[0]).toHaveAttribute('data-mark', 'correct');
-    expect(within(lines()[0]).getByTestId('bughunt-preview')).toHaveTextContent(
-      '정답',
-    );
+    expect(within(lines()[0]).getAllByText('정답')).toHaveLength(1);
+    expect(
+      within(lines()[0]).getByTestId('bughunt-preview'),
+    ).not.toHaveTextContent('정답');
+    // 고친 줄에서 바뀐 곳(콜론)만 강조
+    expect(
+      within(lines()[0]).getByTestId('bughunt-preview').querySelector('mark')
+        ?.textContent,
+    ).toBe(':');
   });
 
   it('공개: 정답 줄에 "버그 줄" + 정답 수정안, 제출한 줄은 "고른 줄"', () => {
@@ -211,6 +217,17 @@ describe('BugHunt', () => {
 });
 
 describe('BugHunt 규칙', () => {
+  it('changedChars: 토큰 단위로 바뀐 곳만 (B53)', () => {
+    const on = (a: string, b: string) => {
+      const m = changedChars(a, b);
+      return [...b].filter((_, i) => m[i]).join('');
+    };
+    // 바깥 따옴표 두 개만 (가운데 ' 와 ! 는 그대로)
+    expect(on(`print('I'm happy!')`, `print("I'm happy!")`)).toBe('""');
+    expect(on('prnt("hi")', 'print("hi")')).toBe('print');
+    expect(on('for i in range(3)', 'for i in range(3):')).toBe(':');
+    expect(on('x = 1', 'x = 1')).toBe('');
+  });
   it('isComplete: 줄과 수정안이 모두 이 퀴즈에 있어야', () => {
     const ok = bugHuntInput.isComplete;
     expect(ok(null, QUIZ)).toBe(false);

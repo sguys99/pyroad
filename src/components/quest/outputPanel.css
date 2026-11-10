@@ -92,7 +92,8 @@
   padding: 0.25rem 0.75rem;
   border-radius: var(--round-s);
   background: var(--surface);
-  font-size: var(--text-body);
+  /* 나온 글자는 코드 글꼴(D2Coding) — 짝수 px(16)만: 홀수 17px 에선 한글이 반올림돼 숫자보다 커 보임 (docs/design/fonts.md, B53) */
+  font-size: var(--text-code);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -359,7 +360,7 @@
   min-width: 0;
 }
 .qo-cmp-text {
-  font-size: var(--text-body);
+  font-size: var(--text-code);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -370,6 +371,10 @@
   line-height: var(--text-small--line-height);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+/* 코드 글꼴은 짝수 px만 (15px 옆 글자 → 14px, B53) */
+.qo-cmp-mine .font-mono {
+  font-size: var(--text-caption);
 }
 .qo-cmp-none {
   color: var(--text-muted);

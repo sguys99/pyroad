@@ -176,7 +176,9 @@ describe('/api/tutor quiz_explain (P7-08)', () => {
       await POST(post({ type: 'quiz_explain', quest_id: 'q1' }))
     ).json();
     expect(body.is_fallback).toBe(true);
-    expect(body.message).toContain('range는 0부터 세기 시작해요.');
+    // 고른 보기 해설은 오답 쪽지에 이미 있어 종류별 안내만 (B53)
+    expect(body.message).toContain('보기를 하나씩');
+    expect(body.message).not.toContain('range는 0부터');
     expect(body.message).not.toContain('0 1 2 예요');
   });
 
@@ -186,7 +188,7 @@ describe('/api/tutor quiz_explain (P7-08)', () => {
       await POST(post({ type: 'quiz_explain', quest_id: 'q1' }))
     ).json();
     expect(body).toMatchObject({ is_fallback: true, no_api_key: true });
-    expect(body.message).toContain('range는 0부터 세기 시작해요.');
+    expect(body.message).toContain('보기를 하나씩');
   });
 
   it('틀린 제출 기록이 없으면 409, 퀴즈가 아니면 400, 스트림 route 는 400', async () => {

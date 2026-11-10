@@ -40,16 +40,39 @@ export function optionMark(
 }
 
 /**
- * 보기 글자를 코드로 보일지: `로 감싼 글자 · 여러 줄 · 출력 예측형(문제에 code 가 있으면 보기는 출력)이면 pyRoad Mono 코드 블록
- * (content/README 객관식 절)
+ * 보기 글자 모양 (content/README 객관식 절): 출력 예측형(문제에 code 가 있으면 보기는 출력)은 "출력 모양"(코드 글꼴·문법 색 없음·줄마다 ↵, B53),
+ * `로 감싼 글자 · 여러 줄이면 pyRoad Mono 코드, 아니면 보통 글자
  */
 export function optionCode(
   text: string,
   hasCode: boolean,
-): { code: boolean; text: string } {
+): { code: boolean; output: boolean; text: string } {
   const fenced = /^`([^`]+)`$/.exec(text.trim());
-  if (fenced) return { code: true, text: fenced[1] };
-  return { code: hasCode || text.includes('\n'), text };
+  if (fenced) return { code: true, output: false, text: fenced[1] };
+  if (hasCode) return { code: true, output: true, text };
+  return { code: text.includes('\n'), output: false, text };
+}
+
+/** 출력 모양 보기: 줄마다 한 줄, 다음 줄이 있으면 끝에 ↵ (낭독기는 "줄 바꿈") */
+function OutputText({ text }: { text: string }) {
+  const lines = text.split('\n');
+  return (
+    <span className="qz-out font-mono">
+      {lines.map((l, i) => (
+        <span key={i} className="qz-out-line">
+          {l}
+          {i < lines.length - 1 && (
+            <>
+              <span className="qz-out-nl" aria-hidden>
+                ↵
+              </span>
+              <span className="sr-only">, 줄 바꿈, </span>
+            </>
+          )}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 /**
@@ -105,7 +128,9 @@ export function MultipleChoice({
                 ) : null}
               </span>
               <span className="qz-opt-body">
-                {shown.code ? (
+                {shown.output ? (
+                  <OutputText text={shown.text} />
+                ) : shown.code ? (
                   <QuizCode code={shown.text} inline />
                 ) : (
                   shown.text

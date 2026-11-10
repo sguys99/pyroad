@@ -15,7 +15,7 @@ import { QuestStatusBar } from '../QuestStatusBar';
 import { CelebrationLayer } from '../QuestWorkspace';
 import { PybaemRig, StoryHead } from '../StoryPage';
 import { HAPPY_MS, useThinkBeat } from '../useThinkBeat';
-import { PRACTICE_NOTE, QUIZ_TRIES, QuizPanel } from './QuizPanel';
+import { PRACTICE_NOTE, QuizPanel } from './QuizPanel';
 import '../questWorkspace.css';
 import '@/components/world/map/worldMap.css';
 import './quiz.css';
@@ -24,7 +24,6 @@ import './quiz.css';
 export function quizLine(
   status: QuizStatus,
   mode: QuizMode,
-  attemptNo = 0,
 ): { state: PybaemState; text: string } {
   switch (status) {
     case 'correct':
@@ -38,7 +37,8 @@ export function quizLine(
     case 'wrong':
       return {
         state: 'encourage',
-        text: `아쉬워요! 틀려도 괜찮아요. 아직 ${QUIZ_TRIES - attemptNo}번 더 도전할 수 있으니 천천히 다시 생각해 봐요.`,
+        // 남은 기회·보기 해설은 채점 쪽지가 말함 — 대사는 같은 말을 되풀이하지 않는 짧은 격려만 (B53)
+        text: '괜찮아요, 틀리면서 배우는 거예요! 천천히 다시 골라 봐요.',
       };
     case 'revealed':
       return {
@@ -82,7 +82,7 @@ export function QuizQuest(props: QuestSessionOptions) {
     dots
       .slice(dots.findIndex((d) => d.current) + 1)
       .find((d) => d.state !== 'locked')?.id ?? null;
-  const said = quizLine(s.status, s.mode, s.result?.attempt_no);
+  const said = quizLine(s.status, s.mode);
   // 정답이면 먼저 기쁨 점프(happy) 뒤 응원(cheer) — 코드 퀘스트 StoryPage 와 같은 박자 (P7-09). 동작 줄이기는 바로 응원
   const jumping = useThinkBeat(s.result, said.state === 'cheer', HAPPY_MS);
   const line = jumping ? { ...said, state: 'happy' as const } : said;
