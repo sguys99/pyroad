@@ -1,0 +1,249 @@
+/* 코드 순서 맞추기 (P7-05, Parsons). 객관식과 같은 언어: 흰 카드 + 아랫면, 상태는 면 색 + 아이콘 + 글자.
+   위 "내 코드"는 옅은 쪽지 면, 아래 "줄 조각"은 누르는 칩. 값은 토큰 변수만 */
+.qz-ps {
+  display: grid;
+  gap: 1rem;
+}
+.qz-ps-box,
+.qz-ps-tray {
+  min-width: 0;
+}
+.qz-ps-box {
+  padding: 0.75rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 var(--line-w) var(--line);
+}
+.qz-ps-h {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.625rem;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+}
+.qz-ps-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.qz-ps-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+.qz-ps-tag > svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.qz-ps-empty {
+  display: grid;
+  place-items: center;
+  min-height: 3.5rem;
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: var(--round-s);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  text-align: center;
+  outline: 1.5px dashed var(--line-strong);
+  outline-offset: -1.5px;
+}
+
+/* ───── 내 코드 줄: [손잡이] [코드(누르면 빼기)] [들여쓰기 ← →] [위/아래] */
+.qz-ps-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.qz-ps-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: 2.75rem;
+  border-radius: var(--round-s);
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1.5px var(--line-strong),
+    0 var(--lip-h) 0 var(--line);
+}
+/* 끄는 동안만 비켜 서기 애니메이션 (놓는 순간엔 transition 없이 제자리) */
+.qz-ps-list[data-dragging] .qz-ps-row {
+  transition: transform var(--dur-fast) var(--easing-out);
+}
+.qz-ps-list[data-dragging] .qz-ps-row[data-drag] {
+  z-index: 2;
+  transition: none;
+  box-shadow:
+    inset 0 0 0 2px var(--primary),
+    var(--elev-pop);
+}
+:root:is([data-motion='minimal'], [data-reduced='true'])
+  .qz-ps-list[data-dragging]
+  .qz-ps-row {
+  transition: none;
+}
+.qz-ps-grip {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  color: var(--text-muted);
+  cursor: grab;
+  /* 손잡이에서만 스크롤 대신 끌기. 줄의 나머지는 평소처럼 스크롤 */
+  touch-action: none;
+  user-select: none;
+}
+.qz-ps-row[data-drag] .qz-ps-grip {
+  cursor: grabbing;
+}
+.qz-ps-grip > svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.qz-ps-code {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--round-s);
+  color: var(--text);
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.qz-ps-grip + .qz-ps-code {
+  padding-left: 0;
+}
+.qz-ps-code:disabled {
+  cursor: default;
+}
+.qz-ps-code:focus-visible,
+.qz-ps-tool:focus-visible,
+.qz-ps-chip:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+/* 들여쓰기 안내선: 한 칸에 하나 */
+.qz-ps-guide {
+  flex: none;
+  align-self: stretch;
+  width: 1.25rem;
+  margin: -0.5rem 0;
+  border-left: 2px dashed var(--line-strong);
+}
+.qz-ps-guide:first-child {
+  margin-left: 0.25rem;
+}
+.qz-ps-tools {
+  flex: none;
+  display: flex;
+  border-left: var(--line-w) solid var(--line);
+}
+.qz-ps-tools[data-stack] {
+  flex-direction: column;
+}
+.qz-ps-tool {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  width: 2rem;
+  min-height: 1.375rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.qz-ps-tool:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+@media (hover: hover) {
+  .qz-ps-tool:enabled:hover,
+  .qz-ps-code:enabled:hover {
+    background: var(--surface-2);
+  }
+}
+.qz-ps-tool > svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* 결과: 정답 초록 · 틀림 금색 (어느 줄인지는 정답이라 표시하지 않음) · 공개 정답 초록 */
+.qz-ps-box:is([data-status='correct'], [data-status='revealed']) {
+  background: var(--success-soft);
+  box-shadow: inset 0 0 0 2px var(--success);
+}
+.qz-ps-box[data-status='wrong'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.qz-ps-note {
+  margin: 0.625rem 0 0;
+  color: var(--accent-text);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+}
+
+/* ───── 줄 조각 (서버가 섞은 순서). 누르면 내 코드 맨 아래로 */
+.qz-ps-chips {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0 0 var(--lip-h);
+  list-style: none;
+}
+.qz-ps-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--round-s);
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1.5px var(--line-strong),
+    0 var(--lip-h) 0 var(--line);
+  color: var(--text);
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--easing-out),
+    transform var(--dur-fast) var(--easing-press);
+}
+.qz-ps-chip:enabled:active {
+  transform: translateY(var(--lip-h));
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+@media (hover: hover) {
+  .qz-ps-chip:enabled:hover {
+    background: var(--primary-soft);
+  }
+}
+.qz-ps-plus {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--primary-text);
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .qz-ps-chip {
+  transition: none;
+}
