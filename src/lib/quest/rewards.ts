@@ -1,4 +1,5 @@
 import type { BadgeType } from './badges';
+import type { LevelUpCoins } from './coins';
 
 /**
  * 완료·황금키·리셋 API 응답 (P1-03). 값은 모두 DB 함수(00006)가 한 트랜잭션에서 정한 것입니다.
@@ -31,6 +32,12 @@ export interface QuestCompleteResponse {
   /** 보상 계산에 쓴 DB 값 (B05: 요청 본문 값이 아님) */
   hints_used: number;
   used_golden_key: boolean;
+  /** 이번 요청에서 늘어난 코인 전부 (첫 완료 + 레벨 업, P8-04 00031). 이미 완료·황금키 완료는 0 (레벨 업이 없으면) */
+  coins_earned: number;
+  /** 코인 잔액 (users.coins) */
+  coins_balance: number;
+  /** 이번에 지나간 레벨마다 받은 코인 (이미 받은 레벨은 0) */
+  level_ups: LevelUpCoins[];
 }
 
 /** POST /api/quest/golden-key */

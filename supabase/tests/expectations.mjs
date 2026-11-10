@@ -425,6 +425,24 @@ export const EXPECT = {
     activateIn: 'P8-03',
     note: '리셋은 코인 회수 없음·같은 키 재지급 없음(코인 파밍 차단), B55 스테이지 리셋은 퀘스트 밖 XP 유지',
   },
+  'CN-8': {
+    expect: 'allow',
+    requires: 'public.coin_reward()',
+    activateIn: 'P8-04',
+    note: '첫 완료 10 · 동시·다시 완료 1회 · 황금키 0 · 레벨 업 코인과 응답 coins_earned·coins_balance·level_ups',
+  },
+  'CN-9': {
+    expect: 'allow',
+    requires: 'public.coin_reward()',
+    activateIn: 'P8-04',
+    note: '퀴즈 별 코인: 새로 얻은 별 번호에만 · 연습 0 · 리셋 뒤 다시 모아도 0',
+  },
+  'CN-10': {
+    expect: 'allow',
+    requires: 'public.coin_reward()',
+    activateIn: 'P8-04',
+    note: '여러 레벨을 한 번에 넘으면 지나간 레벨마다, 레벨 번호가 원장 키라 다시 넘어도 0',
+  },
   'SET-1': {
     expect: 'deny',
     requires: 'public.patch_user_settings()',

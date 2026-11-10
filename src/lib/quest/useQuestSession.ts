@@ -30,6 +30,7 @@ import {
   buildCelebrationEvents,
   type CelebrationEvent,
 } from './celebrationEvents';
+import { levelUpCoinsTotal } from './coins';
 
 /**
  * 퀘스트 엔진 공통 훅 (P1-09, §2.5).
@@ -287,6 +288,8 @@ export function useQuestSession({
   );
   const [nextQuestId, setNextQuestId] = useState<string | null>(null);
   const [earnedXP, setEarnedXP] = useState<number | null>(null);
+  /** 이번 완료로 받은 퀘스트 코인 (레벨 업 코인은 레벨 업 카드가 보여 주므로 뺌, P8-04) */
+  const [earnedCoins, setEarnedCoins] = useState(0);
   const [userXP, setUserXP] = useState(initialXP);
   const [userLevel, setUserLevel] = useState(initialLevel);
   const [goldenKeys, setGoldenKeys] = useState(initialGoldenKeys);
@@ -607,6 +610,10 @@ export function useQuestSession({
       if (!completion.already_completed) {
         setJustCompleted(true);
         setEarnedXP(completion.xp_gained);
+        setEarnedCoins(
+          (completion.coins_earned ?? 0) -
+            levelUpCoinsTotal(completion.level_ups),
+        );
         setUserXP(completion.total_xp);
         setUserLevel(completion.level_after);
         const events = buildCelebrationEvents(completion, {
@@ -748,6 +755,7 @@ export function useQuestSession({
     ): Promise<'advance' | 'stay'> => {
       setValidation(null);
       setEarnedXP(null);
+      setEarnedCoins(0);
       setReviewRun(review);
       liveOutput.reset();
       // 모바일은 누르자마자 결과 쪽으로 (§12-Q55): 실행 중 글자·멈추기(·P11 turtle 그림)가 실행 버튼과 한 화면에 안 보이는 문제(P0-06)를
@@ -1182,6 +1190,7 @@ export function useQuestSession({
           : 'before') as QuestCompletion | null,
     nextQuestId,
     earnedXP,
+    earnedCoins,
     userXP,
     userLevel,
 

@@ -149,12 +149,13 @@ export function QuestWorkspace({
       ? {
           title: quest.title,
           xp: review ? 0 : (session.earnedXP ?? 0),
+          coins: review ? 0 : session.earnedCoins,
           review,
           stars: codeQuestStars(session.totalHintsUsed, session.usedGoldenKey),
           note: review
             ? '보상은 처음 통과할 때 한 번만 받아요. 복습으로 주문이 더 단단해졌어요!'
             : session.usedGoldenKey
-              ? '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.'
+              ? '황금 열쇠로 연 퀘스트는 XP·코인 없이 통과로 기록돼요.'
               : undefined,
           nextHref: nextQuestId ? `/quest/${nextQuestId}` : null,
           mapHref: worldHref,

@@ -169,6 +169,9 @@ function completion(
     golden_keys: 3,
     hints_used: 0,
     used_golden_key: false,
+    coins_earned: 10,
+    coins_balance: 10,
+    level_ups: [],
     ...fields,
   };
 }
@@ -369,6 +372,9 @@ describe('useQuestSession: 실행·채점·완료', () => {
     routes['/api/quest/complete'] = () => ({
       json: completion({
         level_after: 2,
+        coins_earned: 30,
+        coins_balance: 30,
+        level_ups: [{ level: 2, coins: 20 }],
         new_badges: ['first_code', 'stage_clear'],
         stage_cleared: {
           stage_id: 's1',
@@ -391,6 +397,8 @@ describe('useQuestSession: 실행·채점·완료', () => {
     });
     expect(result.current.isCompleted).toBe(true);
     expect(result.current.earnedXP).toBe(50);
+    // 보상 띠의 코인은 퀘스트 코인만 (레벨 업 20은 레벨 업 카드가 보여 줌, P8-04)
+    expect(result.current.earnedCoins).toBe(10);
     expect(result.current.userXP).toBe(150);
     expect(result.current.userLevel).toBe(2);
     expect(mocks.refresh).toHaveBeenCalledTimes(1);

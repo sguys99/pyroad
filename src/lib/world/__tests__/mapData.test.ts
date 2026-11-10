@@ -72,6 +72,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
       id: ME,
       total_xp: 120,
       current_level: 2,
+      coins: 30,
       user_public_profiles: { public_name: '파이', avatar_skin: null },
     },
     apiKeys: { enabled: true, keys: {} },

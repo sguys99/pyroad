@@ -600,7 +600,7 @@ export function SuccessStagingSection() {
     title: '첫 번째 인사',
     xp: 45,
     stars: 2 as const,
-    coins: 20,
+    coins: 10,
     nextHref: '/dev/design#success-staging',
     mapHref: '/dev/design#success-staging',
   };
@@ -610,7 +610,7 @@ export function SuccessStagingSection() {
         id="success-staging"
         kicker="퀘스트 (P6-08)"
         title="성공 연출 · 통과 도장과 보상"
-        description="정답이면 결과 쪽지에 금색 “통과!” 도장이 쾅 찍히고(온보딩 도장과 같은 stampSlam), 아래 보상 띠에서 별 1→3이 스프링으로 톡톡 · XP·코인이 0부터 올라가요(약 1.6초, lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 모습으로 건너뛰어요. 이야기 쪽 파이뱀은 기쁨 점프(happy) 뒤 응원(cheer). 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0. Q52: 실제 화면은 별·코인을 SHOW_STARS·SHOW_COINS로 숨겨 XP만 — 여기서는 켜서 보여 줘요."
+        description="정답이면 결과 쪽지에 금색 “통과!” 도장이 쾅 찍히고(온보딩 도장과 같은 stampSlam), 아래 보상 띠에서 별 1→3이 스프링으로 톡톡 · XP·코인이 0부터 올라가요(약 1.6초, lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 모습으로 건너뛰어요. 이야기 쪽 파이뱀은 기쁨 점프(happy) 뒤 응원(cheer). 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0. 코인은 P8-04부터 실제 화면에도(처음 통과 10, 퀴즈는 새로 얻은 별마다 5 — 레벨 업 코인은 레벨 업 카드에), 별은 Q52대로 SHOW_STARS가 켜질 때까지(P8-05) 여기서만 보여 줘요."
       >
         <Button
           onClick={() => setRound((r) => r + 1)}
@@ -669,7 +669,7 @@ export function SuccessStagingSection() {
                 reward={{
                   title: '마을 입구 지도 완성',
                   xp: 0,
-                  note: '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.',
+                  note: '황금 열쇠로 연 퀘스트는 XP·코인 없이 통과로 기록돼요.',
                   nextHref: null,
                   mapHref: '/dev/design#success-staging',
                 }}

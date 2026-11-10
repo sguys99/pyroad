@@ -160,6 +160,9 @@ export function useQuizSession({
           golden_keys: 0,
           hints_used: 0,
           used_golden_key: false,
+          coins_earned: r.coins_earned,
+          coins_balance: r.coins_balance,
+          level_ups: r.level_ups,
         },
         { kind: 'quiz', questTitle: quest.title },
       );

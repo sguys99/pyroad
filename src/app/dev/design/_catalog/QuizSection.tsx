@@ -80,6 +80,9 @@ function response(over: Partial<QuizAnswerResponse>): QuizAnswerResponse {
     explanation: null,
     revealed: null,
     next_review_on: null,
+    coins_earned: 0,
+    coins_balance: 0,
+    level_ups: [],
     next_quiz: null,
     ...over,
   };

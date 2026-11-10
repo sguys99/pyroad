@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Bell,
@@ -12,9 +12,8 @@ import {
 } from 'lucide-react';
 
 import { Button, IconButton } from '@/components/ui/button';
-import { LevelSeal } from '@/components/ui/hud';
+import { HudCounter, LevelSeal } from '@/components/ui/hud';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { RewardIcon } from '@/components/ui/reward-icon';
 import { Sheet } from '@/components/ui/sheet';
 import { Toast, ToastRegion } from '@/components/ui/toast';
 import { UserAvatar } from '@/components/profile/UserAvatar';
@@ -28,24 +27,52 @@ import './worldHud.css';
 
 /**
  * 월드맵·책장 상단 HUD (P5-07, Q47). 위에 붙어 따라오는 얇은 바: 아바타+닉네임(→ /profile) · 레벨 도장 + XP 바 ·
- * 스트릭 불꽃 · "곧 열려요" 칩(코인·오늘의 미션·상점, Phase 8~9에서 값만 연결) · 소리 토글 · 메뉴(공지·게시판·로그아웃 시트).
- * 640px 미만은 XP 바가 바 아래 가는 띠로 내려가고 곧 열려요 칩 셋이 버튼 하나로 합쳐진다. 모양·연출은 `worldHud.css`
+ * 스트릭 불꽃 · 코인 잔액(P8-04, 퀘스트에서 받고 돌아오면 지난번 본 값부터 카운트업) · "곧 열려요" 칩(오늘의 미션·상점, Phase 8~9에서
+ * 값만 연결) · 소리 토글 · 메뉴(공지·게시판·로그아웃 시트).
+ * 곧 열려요 칩 둘은 1024px 미만에서 버튼 하나로 합쳐지고 640px 미만에서는 빠진다(코인 칩 자리). 640px 미만은 XP 바가 바 아래
+ * 가는 띠로, 400px 미만은 닉네임 글자도 빠진다(아바타 링크 낭독은 그대로). 모양·연출은 `worldHud.css`
  */
 export interface WorldHudProps {
   name: string;
   skin: SkinId;
   totalXp: number;
   level: number;
+  /** 코인 잔액 (users.coins) */
+  coins: number;
   streak: Streak;
 }
 
 const SOON = [
-  { key: 'coin', label: '코인', icon: <RewardIcon kind="coin" size={22} /> },
   { key: 'mission', label: '오늘의 미션', icon: <ListChecks aria-hidden /> },
   { key: 'shop', label: '상점', icon: <Store aria-hidden /> },
 ] as const;
 
 const SOON_TAIL = '곧 열려요! 조금만 기다려 줘.';
+
+/** 이 탭에서 마지막으로 본 코인 (sessionStorage). 퀘스트에서 받고 지도로 돌아오면 그 값부터 센다 */
+const SEEN_COINS_KEY = 'pyroad:hud-coins';
+
+function useSeenCoins(coins: number): number | undefined {
+  // 서버 HTML 은 잔액 그대로(HudCounter 첫 값) — 지난 값은 그리기 전 처음 한 번만 쓰므로 hydration 이 어긋나지 않음
+  const [from] = useState(() => {
+    if (typeof window === 'undefined') return undefined;
+    try {
+      const raw = window.sessionStorage.getItem(SEEN_COINS_KEY);
+      const n = raw === null ? NaN : Number(raw);
+      return Number.isInteger(n) && n >= 0 ? n : undefined;
+    } catch {
+      return undefined;
+    }
+  });
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(SEEN_COINS_KEY, String(coins));
+    } catch {
+      // 저장소를 못 쓰면 카운트업만 없음
+    }
+  }, [coins]);
+  return from;
+}
 
 /** 불꽃 이름(낭독기·툴팁)과 눌렀을 때 쪽지 */
 export function streakText({ days, today }: Streak): {
@@ -72,8 +99,10 @@ export function WorldHud({
   skin,
   totalXp,
   level,
+  coins,
   streak,
 }: WorldHudProps) {
+  const coinsFrom = useSeenCoins(coins);
   const [note, setNote] = useState<{ id: number; text: string } | null>(null);
   const say = (text: string) =>
     setNote((n) => ({ id: (n?.id ?? 0) + 1, text }));
@@ -131,6 +160,8 @@ export function WorldHud({
           </span>
         </button>
 
+        <HudCounter kind="coin" value={coins} from={coinsFrom} />
+
         <span className="wh-soon" role="group" aria-label="곧 열려요">
           <span className="wh-soon-k" aria-hidden>
             곧 열려요
@@ -152,11 +183,11 @@ export function WorldHud({
         <button
           type="button"
           className="wh-soon-one focus-ring"
-          aria-label="코인·오늘의 미션·상점, 곧 열려요"
-          onClick={() => say(`코인·오늘의 미션·상점은 ${SOON_TAIL}`)}
+          aria-label="오늘의 미션·상점, 곧 열려요"
+          onClick={() => say(`오늘의 미션·상점은 ${SOON_TAIL}`)}
           data-testid="hud-soon"
         >
-          <RewardIcon kind="coin" size={22} />
+          <ListChecks aria-hidden />
         </button>
 
         <SoundToggle className="wh-icon" />

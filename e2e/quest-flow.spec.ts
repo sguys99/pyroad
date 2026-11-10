@@ -2,7 +2,7 @@
 // P1-09(엔진·testid)·P1-10(축하 시퀀서)·B22(Link 이동·Worker 유지)·B38(잠긴 스테이지 URL) 구조로 (P1-21)
 
 import { test, expect } from './support/test';
-import { completeQuests } from './support/admin';
+import { completeQuests, hasCoinKey } from './support/admin';
 import { stage } from './support/content';
 import {
   advanceCelebration,
@@ -26,7 +26,10 @@ const lastQuest = stage1.quests[stage1.quests.length - 1];
 test.describe('퀘스트 전체 플로우', () => {
   test('월드맵 → 퀘스트 진입 → 코드 실행 → 검증 성공 → XP 획득 → 다음 퀘스트(Worker 유지)', async ({
     page,
+    e2eUser,
   }) => {
+    // 첫 완료 코인 10 (P8-04). 리셋은 원장을 지우지 않아 같은 실행에서 이미 받았으면 0 → 띠에 코인 없음
+    const firstCoins = !(await hasCoinKey(e2eUser.id, 'quest', quest1.id));
     const pyodideWorkers: string[] = [];
     page.on('worker', (w) => {
       if (w.url().includes('pyodide-worker')) pyodideWorkers.push(w.url());
@@ -132,7 +135,7 @@ test.describe('퀘스트 전체 플로우', () => {
     // 통과하면 지금 점이 바로 완료로 (세션 상태)
     await expect(dots.first()).toHaveAttribute('data-state', 'done');
 
-    // 성공 장면 (P6-08): 결과 쪽지에 "통과!" 도장 + 아래 보상 띠. 별·코인은 Q52로 숨기고 XP만.
+    // 성공 장면 (P6-08): 결과 쪽지에 "통과!" 도장 + 아래 보상 띠. XP·코인(P8-04 첫 완료 10), 별은 Q52로 숨김.
     // 장면 중에 Esc를 누르면 끝 상태(받은 XP 그대로)로 건너뛴다
     const reward = page.locator('[data-testid="quest-reward"]:visible');
     await expect(reward).toBeVisible();
@@ -143,7 +146,9 @@ test.describe('퀘스트 전체 플로우', () => {
       .toEqual(['correct']);
     expect(await sfx()).not.toContain('bug');
     await expect(reward.getByTestId('reward-stars')).toHaveCount(0);
-    await expect(reward.getByTestId('reward-coins')).toHaveCount(0);
+    if (firstCoins)
+      await expect(reward.getByTestId('reward-coins')).toContainText('10');
+    else await expect(reward.getByTestId('reward-coins')).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(reward).toHaveAttribute('data-done', 'true');
     // 이야기 쪽 파이뱀: 통과 도장 대사

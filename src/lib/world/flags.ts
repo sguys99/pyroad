@@ -5,10 +5,10 @@
 export const SHOW_STARS = false;
 
 /**
- * 코인 표시 (§12-Q52). 코인은 Phase 8 재화(P8-04)부터 받으므로 그 전에는 퀘스트 통과 보상에 XP만 보인다.
- * 별(`SHOW_STARS`)과 함께 연출 코드는 완성해 두고 숨김 — 카탈로그 `#success-staging`에서 켠 모습을 확인. P8-04에서 true
+ * 코인 표시 (§12-Q52). P8-04(2026-11-11)에서 켬: 완료·퀴즈 API가 코인을 주므로(00031) 결과 쪽 보상 띠에 받은 코인이
+ * 카운트업하고(`QuestSuccess`), 레벨 업 카드에 레벨 업 코인이 보인다. 월드맵 HUD 코인 칩은 플래그와 상관없이 잔액
  */
-export const SHOW_COINS = false;
+export const SHOW_COINS = true;
 
 /**
  * 스테이지 보물상자 (§3 F11, P8 — 스테이지 별 합계 목표를 채우면 상자 개봉 + 내용 공개형 보상). 별·코인과 같은 방식(§12-Q52):

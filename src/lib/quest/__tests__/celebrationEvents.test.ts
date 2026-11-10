@@ -14,6 +14,9 @@ const base: QuestCompleteResponse = {
   golden_keys: 3,
   hints_used: 0,
   used_golden_key: false,
+  coins_earned: 10,
+  coins_balance: 10,
+  level_ups: [],
 };
 const stage = {
   stage_id: 's1',
@@ -29,6 +32,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
         {
           ...base,
           level_after: 2,
+          level_ups: [{ level: 2, coins: 20 }],
           stage_cleared: stage,
           new_badges: ['first_code', 'stage_clear'],
         },
@@ -36,7 +40,13 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
       ),
     ).toEqual([
       { type: 'stage_clear', stage },
-      { type: 'level_up', level: 2, fromLevel: 1, title: expect.any(String) },
+      {
+        type: 'level_up',
+        level: 2,
+        fromLevel: 1,
+        title: expect.any(String),
+        coins: 20,
+      },
       { type: 'badge', badge: 'first_code' },
       { type: 'badge', badge: 'stage_clear' },
     ]);

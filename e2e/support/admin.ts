@@ -146,6 +146,49 @@ export async function completeQuests(
   }
 }
 
+/**
+ * 코인 (P8-04). 진행 리셋(resetUser)은 코인·원장을 지우지 않으므로(P8-03 정책) 같은 실행의 스펙끼리 잔액이 이어진다
+ * → 스펙은 절대값 대신 지금 잔액·원장 키를 읽어 기대값을 정한다
+ */
+export async function coinBalance(userId: string): Promise<number> {
+  const row = check(
+    'users.coins',
+    await adminClient().from('users').select('coins').eq('id', userId).single(),
+  ) as { coins: number };
+  return row.coins;
+}
+
+/** 원장에 그 키가 이미 있는지 (있으면 같은 보상은 다시 안 줌) */
+export async function hasCoinKey(
+  userId: string,
+  source: string,
+  ref: string,
+): Promise<boolean> {
+  const rows = check(
+    `coin_ledger ${source}:${ref}`,
+    await adminClient()
+      .from('coin_ledger')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('source', source)
+      .eq('ref', ref),
+  ) as unknown[];
+  return rows.length > 0;
+}
+
+/** 테스트용 코인 지급 (grant_coins, 이번 호출만의 키) */
+export async function grantTestCoins(userId: string, amount: number) {
+  check(
+    'grant_coins',
+    await adminClient().rpc('grant_coins', {
+      p_user_id: userId,
+      p_source: 'retro',
+      p_ref: `e2e:${Date.now()}:${Math.random().toString(36).slice(2)}`,
+      p_amount: amount,
+    }),
+  );
+}
+
 /** `content:build -- --fixtures`가 만든 테스트 월드 행 (Q48, P5-01). 앱 서버는 같은 빌드의 worlds.json 을 읽는다 */
 export const FIXTURE_ROWS = join(REPO_ROOT, 'build/e2e/rows.json');
 

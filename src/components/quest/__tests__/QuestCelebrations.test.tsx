@@ -90,6 +90,7 @@ const LEVEL_UP: CelebrationEvent = {
   level: 2,
   fromLevel: 1,
   title: '새싹 코더',
+  coins: 20,
 };
 const STAGE: CelebrationEvent = {
   type: 'stage_clear',
@@ -159,6 +160,10 @@ describe('QuestCelebrations: 큐 순서·묶음', () => {
     ]);
     await advance(0);
     expect(stepKind()).toBe('level_up');
+    // 레벨 업 코인 (P8-04): 보상 알약, 낭독은 숫자 그대로
+    expect(screen.getByTestId('celebration-level-coins')).toHaveTextContent(
+      '20',
+    );
     // 점: 3단계 중 1번째
     expect(screen.getByLabelText('축하 3개 중 1번째')).toBeInTheDocument();
 

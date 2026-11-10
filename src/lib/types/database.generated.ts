@@ -949,6 +949,7 @@ export type Database = {
           user_id: string;
         }[];
       };
+      coin_reward: { Args: { p_kind: string; p_n?: number }; Returns: number };
       complete_onboarding: {
         Args: {
           p_age_band: string;
@@ -1000,6 +1001,14 @@ export type Database = {
           p_user_id: string;
         };
         Returns: Json;
+      };
+      grant_level_up_coins: {
+        Args: { p_from_level: number; p_to_level: number; p_user_id: string };
+        Returns: Json;
+      };
+      grant_star_coins: {
+        Args: { p_quest_id: string; p_stars: number; p_user_id: string };
+        Returns: number;
       };
       has_three_day_streak: {
         Args: { p_completed_at: string[] };

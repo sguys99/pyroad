@@ -247,7 +247,7 @@ describe('OutputPanel', () => {
       mapHref: '/world',
     };
 
-    it('퀘스트를 마치면 도장 + XP 보상 띠 + 다음 퀘스트. 별·코인은 플래그가 꺼져 있어 숨김 (Q52)', () => {
+    it('퀘스트를 마치면 도장 + XP·코인 보상 띠 + 다음 퀘스트. 별은 플래그가 꺼져 있어 숨김 (Q52, 코인은 P8-04에서 켬)', () => {
       render(
         <OutputPanel
           result={ok}
@@ -260,7 +260,7 @@ describe('OutputPanel', () => {
       const strip = screen.getByTestId('quest-reward');
       expect(within(strip).getByTestId('reward-xp')).toHaveTextContent('30');
       expect(within(strip).queryByTestId('reward-stars')).toBeNull();
-      expect(within(strip).queryByTestId('reward-coins')).toBeNull();
+      expect(within(strip).getByTestId('reward-coins')).toHaveTextContent('15');
       expect(
         within(strip).getByRole('link', { name: '다음 퀘스트' }),
       ).toHaveAttribute('href', '/quest/q2');

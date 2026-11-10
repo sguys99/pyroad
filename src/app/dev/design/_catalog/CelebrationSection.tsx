@@ -21,7 +21,7 @@ import {
 } from '@/lib/celebration/plan';
 import { tierDuration } from '@/lib/motion/tokens';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
-import { getLevelTitle } from '@/lib/quest/xp';
+import { getLevelTitle, levelUpCoins } from '@/lib/quest/xp';
 import { CodeSample, Section } from './ui';
 
 const noop = () => {};
@@ -42,7 +42,13 @@ const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
     label: '스테이지 마지막 퀘스트',
     events: [
       { type: 'stage_clear', stage: STAGE },
-      { type: 'level_up', level: 3, fromLevel: 2, title: getLevelTitle(3) },
+      {
+        type: 'level_up',
+        level: 3,
+        fromLevel: 2,
+        title: getLevelTitle(3),
+        coins: levelUpCoins(3),
+      },
       { type: 'badge', badge: 'first_code' },
       { type: 'badge', badge: 'stage_clear' },
     ],
@@ -129,7 +135,13 @@ const first = (events: CelebrationEvent[]) => planCelebrations(events)[0];
 const CATALOG_STEPS: Record<string, CelebrationStep> = {
   stage_clear: first([{ type: 'stage_clear', stage: STAGE }]),
   level_up: first([
-    { type: 'level_up', level: 3, fromLevel: 2, title: getLevelTitle(3) },
+    {
+      type: 'level_up',
+      level: 3,
+      fromLevel: 2,
+      title: getLevelTitle(3),
+      coins: levelUpCoins(3),
+    },
   ]),
   badges: first([
     { type: 'badge', badge: 'first_code' },
@@ -175,7 +187,7 @@ export function CelebrationSection() {
         id="celebrations"
         kicker="퀘스트 (P6-13)"
         title="축하 오버레이"
-        description="스테이지 클리어 · 레벨 업 · 업적(뱃지) · 황금키 · 프로젝트 완성 · 별·코인 · 보물상자. 같은 카드 껍데기(흰 면, 테두리 없음, 그림자 한 종류)에 제목만 Jua, 금색은 보상에만. 카드 안 연출은 1회성 CSS(transform만)라 등장 중 아무 데나 누르거나 Enter·Space·Esc면 끝 모습으로 건너뛰고, 그다음 Enter·Space는 다음 카드, Esc는 모두 닫기. 스테이지를 끝낸 카드는 맨 뒤에 와서 “지도에서 새 길 보기”가 월드맵 해제 연출로 이어져요. 별·코인(Q52)과 보물상자(SHOW_CHEST)는 Phase 8까지 화면에서 숨기고 여기서만 보여요."
+        description="스테이지 클리어 · 레벨 업 · 업적(뱃지) · 황금키 · 프로젝트 완성 · 별·코인 · 보물상자. 같은 카드 껍데기(흰 면, 테두리 없음, 그림자 한 종류)에 제목만 Jua, 금색은 보상에만. 카드 안 연출은 1회성 CSS(transform만)라 등장 중 아무 데나 누르거나 Enter·Space·Esc면 끝 모습으로 건너뛰고, 그다음 Enter·Space는 다음 카드, Esc는 모두 닫기. 스테이지를 끝낸 카드는 맨 뒤에 와서 “지도에서 새 길 보기”가 월드맵 해제 연출로 이어져요. 레벨 업 카드는 칭호 도장 뒤에 받은 레벨 업 코인(레벨마다 20, 5레벨마다 100, 여러 레벨을 넘으면 합)이 보상 알약으로 톡 튀어 0부터 올라가요(P8-04). 별(Q52)과 보물상자(SHOW_CHEST)는 Phase 8 해당 작업까지 화면에서 숨기고 여기서만 보여요."
       >
         <div className="flex flex-wrap gap-2">
           <Button
@@ -209,6 +221,7 @@ export function CelebrationSection() {
                 level={3}
                 fromLevel={2}
                 title={getLevelTitle(3)}
+                coins={levelUpCoins(3)}
                 budget={budget}
                 settled={settled}
                 onNext={noop}
@@ -218,14 +231,15 @@ export function CelebrationSection() {
           <CardSample
             kind="level_up"
             variant="big"
-            label="레벨 업 · 5레벨마다 큰 칭호 (금색 도장)"
+            label="레벨 업 · 5레벨마다 큰 칭호 (금색 도장) · 두 레벨을 한 번에 넘어 코인 120"
             round={round}
           >
             {(settled) => (
               <LevelUpCard
                 level={10}
-                fromLevel={9}
+                fromLevel={8}
                 title={getLevelTitle(10)}
+                coins={levelUpCoins(9) + levelUpCoins(10)}
                 budget={budget}
                 settled={settled}
                 onNext={noop}

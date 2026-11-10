@@ -22,6 +22,7 @@ const props: WorldHudProps = {
   skin: 'green',
   totalXp: 280, // Lv 2 (200~490) → 80 / 290
   level: 2,
+  coins: 1280,
   streak: { days: 3, today: true },
 };
 
@@ -46,6 +47,16 @@ describe('WorldHud', () => {
     expect(screen.getByRole('status', { name: 'HUD 안내' })).toHaveTextContent(
       '상점은 곧 열려요! 조금만 기다려 줘.',
     );
+  });
+
+  it('코인 칩은 실제 잔액 (P8-04), 본 값을 이 탭에 기억해 다음에 거기서부터 센다', () => {
+    sessionStorage.setItem('pyroad:hud-coins', '1200');
+    render(<WorldHud {...props} />);
+    expect(screen.getByTestId('hud-coin')).toHaveTextContent('코인 1,280개');
+    expect(
+      screen.queryByRole('button', { name: '코인, 곧 열려요' }),
+    ).toBeNull();
+    expect(sessionStorage.getItem('pyroad:hud-coins')).toBe('1280');
   });
 
   it('메뉴 버튼이 있다 (공지·게시판·로그아웃은 시트 안)', () => {

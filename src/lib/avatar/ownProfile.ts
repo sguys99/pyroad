@@ -11,7 +11,7 @@ import { getSkin, type SkinId } from './skins';
 
 /** `supabase.from('users').select(OWN_PROFILE_SELECT).eq('id', user.id).single()` (회귀 APP-4가 같은 쿼리) */
 export const OWN_PROFILE_SELECT =
-  'id, total_xp, current_level, user_public_profiles(public_name, avatar_skin)' as const;
+  'id, total_xp, current_level, coins, user_public_profiles(public_name, avatar_skin)' as const;
 
 export interface PublicProfileRow {
   public_name: string | null;
@@ -22,6 +22,8 @@ export interface OwnProfileRow {
   id: string;
   total_xp: number;
   current_level: number;
+  /** 코인 잔액 (P8-03 users.coins) */
+  coins: number;
   /** 1:1 임베딩이라 객체지만, 관계 추론이 바뀌어도 깨지지 않게 배열도 받음 */
   user_public_profiles: PublicProfileRow | PublicProfileRow[] | null;
 }
@@ -30,6 +32,8 @@ export interface OwnProfile {
   id: string;
   total_xp: number;
   current_level: number;
+  /** 코인 잔액 (월드맵 HUD, P8-04) */
+  coins: number;
   /** 보이는 이름: 닉네임, 없으면 "모험가NNNN" (공개 프로필 행이 없으면 "모험가") */
   name: string;
   skin: SkinId;
@@ -43,6 +47,7 @@ export function toOwnProfile(row: OwnProfileRow): OwnProfile {
     id: row.id,
     total_xp: row.total_xp,
     current_level: row.current_level,
+    coins: row.coins,
     name: authorName({ display_name: pub?.public_name ?? null }),
     skin: getSkin(pub?.avatar_skin).id,
   };

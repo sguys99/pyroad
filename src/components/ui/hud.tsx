@@ -30,10 +30,10 @@ export function formatCompact(n: number): string {
   return n.toLocaleString('ko-KR');
 }
 
-/** 값이 오를 때 한 번 반응: full·lite = 팝, minimal·동작 줄이기 = 색 (data-flash) */
-function useBump(value: number) {
+/** 값이 오를 때 한 번 반응: full·lite = 팝, minimal·동작 줄이기 = 색 (data-flash). from: 처음 값을 이것으로 보고 비교 */
+function useBump(value: number, from?: number) {
   const ref = useRef<HTMLSpanElement>(null);
-  const prev = useRef(value);
+  const prev = useRef(from ?? value);
   const [flash, setFlash] = useState(false);
   const { budget } = useMotionTier();
 
@@ -101,6 +101,8 @@ interface HudCounterProps {
   unit?: string;
   /** 1만 이상 줄여 쓰기를 화면 폭과 상관없이 끄기 (황금키처럼 작은 수) */
   noCompact?: boolean;
+  /** 처음 그릴 때 이 값에서 value까지 카운트업 + 팝 (value보다 작을 때만. 다른 화면에서 오른 값, P8-04 월드맵 코인) */
+  from?: number;
   className?: string;
 }
 
@@ -111,10 +113,11 @@ export function HudCounter({
   label = KIND_LABEL[kind],
   unit = '개',
   noCompact = false,
+  from,
   className,
 }: HudCounterProps) {
-  const shown = useCountUp(value);
-  const { ref, flash } = useBump(value);
+  const shown = useCountUp(value, from);
+  const { ref, flash } = useBump(value, from);
   const full = shown.toLocaleString('ko-KR');
   const short = noCompact ? full : formatCompact(shown);
   return (

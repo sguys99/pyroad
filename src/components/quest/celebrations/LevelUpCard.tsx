@@ -4,12 +4,21 @@ import { useCallback, useRef } from 'react';
 import { useCountUp } from '@/lib/celebration/ticker';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { isMilestoneLevel } from '@/lib/quest/xp';
-import { CelebrationCta, CelebrationMascot, Kicker, delayStyle } from './parts';
+import { RewardIcon } from '@/components/ui/reward-icon';
+import {
+  CelebrationCta,
+  CelebrationMascot,
+  CountUp,
+  Kicker,
+  delayStyle,
+} from './parts';
 
 interface LevelUpCardProps {
   level: number;
   fromLevel: number;
   title: string;
+  /** 지나간 레벨들에서 받은 코인 (P8-04). 0이면 줄을 그리지 않음 */
+  coins?: number;
   budget: MotionBudget;
   settled: boolean;
   onNext: () => void;
@@ -25,11 +34,13 @@ const COUNT_DELAY_MS = 500;
  * "레벨 N 달성" → 파이뱀 기쁨 점프 + 금색 새 칭호 도장. 여러 레벨을 한 번에 오르면 차례로 센다(최대 0.9초).
  * 건너뛰기·동작 줄이기면 처음부터 새 레벨. 장면 약 1.6~2.2초(§12-Q28 3.6초 안)
  * 5레벨마다(§12-Q62)는 "큰 칭호": 레벨 도장이 금색 메달(금색 테), 칭호 도장은 금색 면에 굵은 테두리 (P8-01)
+ * 레벨 업 코인(P8-04, 레벨마다 20 · 5레벨마다 100)은 칭호 도장 뒤에 보상 알약으로 톡 → 0부터 카운트업
  */
 export function LevelUpCard({
   level,
   fromLevel,
   title,
+  coins = 0,
   budget,
   settled,
   onNext,
@@ -107,6 +118,30 @@ export function LevelUpCard({
           <b className="font-display">{title}</b>
         </p>
       </div>
+
+      {coins > 0 && (
+        <ul className="cel-gains" aria-label="레벨 업 보상">
+          <li
+            className="cel-gain cel-pop"
+            style={delayStyle(COUNT_DELAY_MS + countMs + 450)}
+            data-testid="celebration-level-coins"
+          >
+            <RewardIcon kind="coin" size={30} />
+            <b>
+              +
+              <CountUp
+                to={coins}
+                durationMs={600 * budget.effectDuration}
+                delayMs={
+                  (COUNT_DELAY_MS + countMs + 550) * budget.effectDuration
+                }
+                animate={animate}
+              />
+            </b>
+            코인
+          </li>
+        </ul>
+      )}
 
       <div className="cel-actions">
         <CelebrationCta onClick={onNext}>멋져요!</CelebrationCta>

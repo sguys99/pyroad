@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { DialogueBox } from '@/components/ui/dialogue-box';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import type { QuizKind, QuizPrompt } from '@/lib/quest/questKind';
+import { levelUpCoinsTotal } from '@/lib/quest/coins';
 import type {
   QuizAnswerResponse,
   QuizAnswerValue,
@@ -103,12 +104,14 @@ export function quizReward(
   return {
     ...base,
     xp: r.xp_awarded,
+    // 레벨 업 코인은 레벨 업 카드가 보여 줌 → 띠에는 별 코인만
+    coins: (r.coins_earned ?? 0) - levelUpCoinsTotal(r.level_ups),
     stars,
     forceStarsCoins: true,
     review: practice,
     kicker: practice ? '연습 완료' : r.correct ? '퀴즈 통과' : '퀴즈 끝',
     note: practice
-      ? `연습이라 별과 XP는 그대로예요. ${PRACTICE_NOTE}!`
+      ? `연습이라 별·XP·코인은 그대로예요. ${PRACTICE_NOTE}!`
       : r.xp_awarded === 0
         ? `지난번에 받은 별 ${prevBest}개가 그대로 남아요.`
         : !r.correct

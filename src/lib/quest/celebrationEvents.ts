@@ -7,6 +7,7 @@
 import type { BadgeType } from './badges';
 import type { QuestKind } from './questKind';
 import { getLevelTitle } from './xp';
+import { levelUpCoinsTotal } from './coins';
 import {
   levelChanged,
   type QuestCompleteResponse,
@@ -24,9 +25,16 @@ export type CelebrationEvent =
     }
   /** 황금키로 연 퀘스트 (XP 0): 큰 축하 대신 가벼운 확인 */
   | { type: 'golden_key'; kind: QuestKind; questTitle: string }
-  | { type: 'level_up'; level: number; fromLevel: number; title: string }
+  | {
+      type: 'level_up';
+      level: number;
+      fromLevel: number;
+      title: string;
+      /** 지나간 레벨들에서 받은 코인 합 (P8-04, 레벨 업 카드에 보임). 이미 받은 레벨이면 0 */
+      coins?: number;
+    }
   | { type: 'badge'; badge: BadgeType }
-  // Phase 8 자리 (P8-04 코인·P8-05 별): 아직 완료 응답에 없어 만들지 않는다
+  // Phase 8 자리 (P8-05 별): 아직 만들지 않는다. 퀘스트·별 코인은 결과 쪽 보상 띠(QuestSuccess)가, 레벨 업 코인은 레벨 업 카드가 보임
   | { type: 'star'; stars: 1 | 2 | 3; gained: number }
   | { type: 'coin'; amount: number }
   // Phase 8 자리 (§3 F11 스테이지 보물상자, `SHOW_CHEST`): 별 합계 목표를 채우면 상자 개봉 + 내용 공개
@@ -82,6 +90,7 @@ export function buildCelebrationEvents(
       level: completion.level_after,
       fromLevel: completion.level_before,
       title: getLevelTitle(completion.level_after),
+      coins: levelUpCoinsTotal(completion.level_ups),
     });
   }
   for (const badge of completion.new_badges) {

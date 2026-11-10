@@ -104,6 +104,9 @@ export async function POST(request: Request) {
     explanation: result.data.explanation,
     revealed: result.data.revealed,
     next_review_on: result.data.next_review_on,
+    coins_earned: result.data.coins_earned,
+    coins_balance: result.data.coins_balance,
+    level_ups: result.data.level_ups,
     next_quiz: prompt?.quiz ? shuffleQuiz(prompt.quiz) : null,
   };
   return NextResponse.json(body);

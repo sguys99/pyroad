@@ -107,9 +107,10 @@
     font-size: var(--text-caption);
   }
 
-  /* 곧 열려요: 흐린 점선 알약 (랜딩 soon 배지와 같은 금색 글자) */
+  /* 곧 열려요: 흐린 점선 알약 (랜딩 soon 배지와 같은 금색 글자). 1024px 이상만 펼치고, 그 아래는 버튼 하나(.wh-soon-one) —
+     코인 칩(P8-04)이 들어와 닉네임 자리가 줄지 않게 */
   .wh-soon {
-    display: inline-flex;
+    display: none;
     flex: none;
     align-items: center;
     padding: 0 0.25rem;
@@ -117,7 +118,6 @@
     border-radius: var(--round-pill);
   }
   .wh-soon-k {
-    display: none;
     padding: 0 0.25rem 0 0.5rem;
     color: var(--accent-text);
     font-size: var(--text-caption);
@@ -141,12 +141,12 @@
     opacity: 0.6;
     filter: grayscale(0.6);
   }
-  .wh-soon-b > svg {
+  .wh-soon-b > svg,
+  .wh-soon-one > svg {
     width: 1.375rem;
     height: 1.375rem;
   }
   .wh-soon-one {
-    display: none;
     flex: none;
     border: var(--line-w) dashed var(--line-strong);
   }
@@ -158,8 +158,11 @@
     }
   }
   @media (min-width: 64rem) {
-    .wh-soon-k {
-      display: inline;
+    .wh-soon {
+      display: inline-flex;
+    }
+    .wh-soon-one {
+      display: none;
     }
   }
 
@@ -169,7 +172,7 @@
     bottom: auto;
   }
 
-  /* 640px 미만: 한 줄 56px 안팎. XP 바는 바 아래 가는 띠, 곧 열려요는 버튼 하나, 숫자만 */
+  /* 640px 미만: 한 줄 56px 안팎. XP 바는 바 아래 가는 띠, 숫자만 */
   @media (max-width: 39.99rem) {
     .wh-in {
       gap: 0.25rem;
@@ -210,11 +213,10 @@
     .wh-streak-u {
       display: none;
     }
-    .wh-soon {
-      display: none;
-    }
+    /* 640px 미만: 곧 열려요 버튼은 빼고(오늘의 미션·상점이 열리면 그 칩이 들어옴) 코인 칩에 자리를, 400px 아래는 닉네임 글자도 뺌
+       (아바타 링크의 낭독 이름 "○○, 내 프로필"은 그대로) */
     .wh-soon-one {
-      display: inline-grid;
+      display: none;
     }
     .wh .wh-icon {
       width: 2.75rem;
@@ -222,6 +224,18 @@
     }
     .g-toast-region.wh-toast {
       top: calc(4rem + env(safe-area-inset-top, 0px));
+    }
+  }
+  @media (max-width: 24.99rem) {
+    .wh-name {
+      display: none;
+    }
+    .wh-me {
+      flex: 0 0 auto;
+      padding-right: 0;
+    }
+    .wh-in {
+      justify-content: space-between;
     }
   }
 }

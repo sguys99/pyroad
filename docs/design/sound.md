@@ -79,7 +79,7 @@ scripts/build-sounds.sh   원본 → 정규화·인코딩
 | `bug` | 실행 에러: 결과 쪽지에 버그버그가 들어오는 순간(`BugbugAside` 마운트, 실행마다 한 번). 시간 초과·멈춤은 버그버그가 없어 소리도 없음 | 오류 쪽지·"N번째 줄", 버그버그 한마디, 파이뱀 안내 |
 | `tap` | 힌트 요청, 월드맵 노드 누르기(시트 열기)·시트 차례 퀘스트·시트 시작 버튼, 잠긴 노드(`SOFT_TAP`, 경고음 없음), HUD에서 소리 켜기, 설정 볼륨 놓기, **게임 버튼 primary·reward 기본**(P2-11 `Button` `sfx`, 다른 소리를 내는 실행·힌트·축하 CTA는 끔) | 힌트 메시지, 시트·화면 이동, 잠긴 노드 쪽지 글자, 아이콘, 버튼 눌림 모양 |
 | `unlock` | 황금키 (프로젝트 중간 단계) · 황금키 확인 카드 · 지도 잠금 해제 연출(P5-05/P5-11: full·lite는 자물쇠가 깨지는 순간, 그 전에 건너뛰면 건너뛸 때, minimal·동작 줄이기는 끝 상태로 바뀔 때 — 연출 단계와 무관하게 소리 설정만 따름, 한 번만) | 시스템 메시지·카드, 지도의 열린 노드·"열렸어요" 토스트 |
-| `celebrate`·`levelup`·`star`·`coin` | 축하 시퀀서 (`src/lib/celebration/plan.ts` `STEP_SPECS`·`sfxSchedule`) + 결과 쪽지 보상 띠(`RewardStrip`, 별·코인은 `SHOW_STARS`·`SHOW_COINS` 켤 때만) | 축하 카드, 보상 띠 숫자·별 |
+| `celebrate`·`levelup`·`star`·`coin` | 축하 시퀀서 (`src/lib/celebration/plan.ts` `STEP_SPECS`·`sfxSchedule`) + 결과 쪽지 보상 띠(`RewardStrip`, 코인은 P8-04부터, 별은 `SHOW_STARS` 켤 때만) | 축하 카드, 보상 띠 숫자·별 |
 | `blip` | 대사창 `DialogueBox` 글자가 나올 때만 (AI 대화 스트리밍은 블립 없음) | 글자·깜빡이는 커서 |
 | `chest` | (Phase 6 보물상자) | — |
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { OWN_PROFILE_SELECT, toOwnProfile } from '../ownProfile';
 
-const base = { id: 'u1', total_xp: 120, current_level: 2 };
+const base = { id: 'u1', total_xp: 120, current_level: 2, coins: 35 };
 
 describe('내 화면 프로필 (P3-13)', () => {
   it('users 의 실명·사진 컬럼을 고르지 않는다', () => {

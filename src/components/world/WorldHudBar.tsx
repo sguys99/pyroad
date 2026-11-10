@@ -12,6 +12,7 @@ export function WorldHudBar({ data }: { data: WorldMapData }) {
       skin={profile.skin}
       totalXp={profile.total_xp}
       level={profile.current_level}
+      coins={profile.coins}
       streak={currentStreak(data.completedAt)}
     />
   );

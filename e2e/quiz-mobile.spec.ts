@@ -4,7 +4,13 @@
 // 정답은 하드코딩하지 않고 service_role 로 quest_answer_keys 에서 읽는다 (support/admin.ts quizKey)
 
 import { test, expect } from './support/test';
-import { completeQuests, quizKey, totalXp } from './support/admin';
+import {
+  coinBalance,
+  completeQuests,
+  hasCoinKey,
+  quizKey,
+  totalXp,
+} from './support/admin';
 import { stage, stages } from './support/content';
 import { stageButton } from './support/quest';
 import { getXPProgress } from '../src/lib/quest/xp';
@@ -22,6 +28,9 @@ interface Graded {
   explanation: string | null;
   revealed: { answer: unknown; explanation: string } | null;
   next_quiz: unknown;
+  coins_earned: number;
+  coins_balance: number;
+  level_ups: { level: number; coins: number }[];
 }
 
 /** 화면에 보이는 것만: 퀘스트·/daily 페이지는 loading.tsx 뒤에 스트리밍되어 바꿔 끼우는 순간 숨은 사본이 같이 있음 (B48) */
@@ -179,6 +188,15 @@ test.describe('모바일 퀴즈 (360px 터치)', () => {
       await completeQuests(e2eUser.id, quiz.before);
       const key = await quizKey(quiz.id);
       const before = await totalXp(e2eUser.id);
+      // 별 코인 (P8-04): 별 번호마다 처음 한 번 5. 리셋은 원장을 지우지 않아 같은 실행에서 이미 받은 번호는 0
+      const coinsBefore = await coinBalance(e2eUser.id);
+      const newStars = (
+        await Promise.all(
+          [1, 2, 3].map((n) =>
+            hasCoinKey(e2eUser.id, 'star', `${quiz.id}:${n}`),
+          ),
+        )
+      ).filter((had) => !had).length;
 
       await page.goto(`/quest/${quiz.id}`);
       await noHorizontalScroll(page);
@@ -195,6 +213,13 @@ test.describe('모바일 퀴즈 (360px 터치)', () => {
       await expect(byId(page, 'quiz-verdict-stars')).toContainText('별 3개');
       await expect(verdict(page).locator('.qx-stamp')).toBeVisible();
       await expect(byId(page, 'reward-xp-count')).toHaveText('30');
+      const levelCoins = r.level_ups.reduce((n, l) => n + l.coins, 0);
+      expect(r.coins_earned - levelCoins).toBe(newStars * 5);
+      expect(r.coins_balance).toBe(coinsBefore + r.coins_earned);
+      if (newStars > 0)
+        await expect(byId(page, 'reward-coins')).toContainText(
+          String(newStars * 5),
+        );
       await noHorizontalScroll(page);
       expect(await totalXp(e2eUser.id)).toBe(before + 30);
 
@@ -299,7 +324,7 @@ test.describe('모바일 퀴즈 (360px 터치)', () => {
     });
     await expect(byId(page, 'quiz-verdict-practice')).toBeVisible();
     await expect(byId(page, 'quest-reward')).toContainText(
-      '연습이라 별과 XP는 그대로예요',
+      '연습이라 별·XP·코인은 그대로예요',
     );
     await expect(byId(page, 'reward-xp')).toHaveCount(0);
     expect(await totalXp(e2eUser.id)).toBe(30);

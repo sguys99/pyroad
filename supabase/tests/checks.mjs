@@ -2050,7 +2050,8 @@ async function groupRpc(u) {
                            'is_stage_unlocked', 'complete_quest', 'use_golden_key', 'reset_progress',
                            'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys',
                            'submit_quiz_answer', 'grant_coins', 'spend_coins', 'coin_apply',
-                           'coin_balance_mismatches', 'users_protect_coins')
+                           'coin_balance_mismatches', 'users_protect_coins', 'coin_reward', 'grant_star_coins',
+                           'grant_level_up_coins')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2169,7 +2170,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-1',
     role: 'postgres',
-    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges)',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges·coin_reward)',
     ...OK,
     run: () => {
       const cases = [
@@ -2187,6 +2188,11 @@ async function groupReward() {
           `streak ${c.name}`,
           `public.has_three_day_streak(${tsArr(c.completed_at)})::text`,
           String(c.streak),
+        ]),
+        ...rules.coins.map((c) => [
+          `coins ${c.kind}/${c.n ?? ''}`,
+          `public.coin_reward('${c.kind}', ${c.n ?? 'null'})::text`,
+          String(c.coins),
         ]),
         ...rules.badges.map((c) => {
           const f = c.facts;
@@ -2716,10 +2722,10 @@ async function groupReward() {
 }
 
 // ── coins: 코인 원장·잔액 (P8-03, ① 00030) ──────────────────────
+const coins = (id) => one(`select coins from public.users where id = '${id}'`);
+const mismatches = (id) =>
+  one(`select count(*) from public.coin_balance_mismatches() where user_id = '${id}'`);
 async function groupCoins(u) {
-  const coins = (id) => one(`select coins from public.users where id = '${id}'`);
-  const mismatches = (id) =>
-    one(`select count(*) from public.coin_balance_mismatches() where user_id = '${id}'`);
   await check({
     group: 'coins',
     id: 'CN-4',
@@ -2848,7 +2854,7 @@ async function groupCoins(u) {
     group: 'coins',
     id: 'CN-7',
     role: 'service_role',
-    op: '리셋은 코인을 회수하지 않고, 같은 퀘스트 키는 리셋 뒤에도 다시 지급 안 됨 · B55 스테이지 리셋은 퀘스트 밖 XP 를 남김',
+    op: '리셋은 코인을 회수하지 않고, 같은 퀘스트 키는 리셋 뒤에도 다시 지급 안 됨(재풀이 coins_earned 0) · B55 스테이지 리셋은 퀘스트 밖 XP 를 남김',
     ...OK,
     run: async () => {
       const x = await createUser('cn7', '코인리셋');
@@ -2856,35 +2862,122 @@ async function groupCoins(u) {
       const s2 = stageQuests(STAGE2);
       for (const q of [...s1, s2[0]])
         await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
-      await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      // complete_quest 가 이미 준 첫 완료 코인 (P8-04) → 같은 키 grant_coins 는 0
+      const dup = await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      const c0 = coins(x.id);
       // 퀘스트 밖 XP (P8-02 레벨 보정·P8-07 미션 같은 것). earned_xp 에는 없음
       const base = Number(one(`update public.users set total_xp = total_xp + 15 where id = '${x.id}' returning total_xp`));
       const s2Xp = Number(one(`select earned_xp from public.user_progress where user_id = '${x.id}' and quest_id = '${s2[0]}'`));
       const rs = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'stage', p_stage_id: STAGE2 });
-      await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s2[0], p_submission: submission() });
-      const again = await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      const redo = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s2[0], p_submission: submission() });
       const ra = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
-      const again2 = await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      const redoAll = [];
+      for (const q of s1)
+        redoAll.push((await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() })).json?.coins_earned);
       return (
         compare(
           'CN-7',
           {
+            dup: false,
             stageXp: base - s2Xp,
-            again: 'false:10',
+            redo: '0:' + c0,
             allXp: 0,
-            again2: 'false:10',
-            coins: '10',
+            redoAll: 0,
+            coins: c0,
             mismatches: '0',
           },
           {
+            dup: dup.json?.applied,
             stageXp: rs.json?.total_xp,
-            again: `${again.json?.applied}:${again.json?.coins}`,
+            redo: `${redo.json?.coins_earned}:${redo.json?.coins_balance}`,
             allXp: ra.json?.total_xp,
-            again2: `${again2.json?.applied}:${again2.json?.coins}`,
+            redoAll: redoAll.reduce((n, c) => n + (c ?? 99), 0),
             coins: coins(x.id),
             mismatches: mismatches(x.id),
           },
-        ) ?? { actual: 'ok', detail: `스테이지 리셋 XP ${base} → ${base - s2Xp} (미션 15 XP 유지), 코인 10 유지·재지급 0` }
+        ) ?? { actual: 'ok', detail: `스테이지 리셋 XP ${base} → ${base - s2Xp} (미션 15 XP 유지), 코인 ${c0} 유지·재풀이(레벨 업 포함) 0` }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-8',
+    role: 'service_role',
+    op: 'complete_quest 코인 (P8-04): 첫 완료 10 · 같은 퀘스트 다시·동시 8번 1회 · 황금키 완료 0 · 응답 coins_earned·coins_balance·level_ups',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn8', '완료코인');
+      const s1 = stageQuests(STAGE1);
+      const done = (q) => rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      const many = await Promise.all(Array.from({ length: 8 }, () => done(s1[0])));
+      const again = await done(s1[0]);
+      // 황금키: 마지막 단계 정답을 본 뒤 통과 없이 완료 → XP 0 · 코인 0
+      const gk = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: s1[1] });
+      const golden = await done(s1[1]);
+      // 레벨 업: Lv 2 문턱(200) 바로 아래에서 완료 → level_ups [{2, 20}], coins_earned = 10 + 20
+      one(`update public.users set total_xp = 199 where id = '${x.id}'`);
+      const up = await done(s1[2]);
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_completed === false);
+      return (
+        compare(
+          'CN-8',
+          {
+            fresh: 1,
+            first: '10:10:[]',
+            again: 'true:0:10',
+            gk: 200,
+            golden: 'true:0:0:10',
+            up: '30:40:[{"coins":20,"level":2}]',
+            rows: '3',
+            mismatches: '0',
+          },
+          {
+            fresh: fresh.length,
+            first: fresh[0] && `${fresh[0].json.coins_earned}:${fresh[0].json.coins_balance}:${JSON.stringify(fresh[0].json.level_ups)}`,
+            again: `${again.json?.already_completed}:${again.json?.coins_earned}:${again.json?.coins_balance}`,
+            gk: gk.status,
+            golden: `${golden.json?.used_golden_key}:${golden.json?.xp_gained}:${golden.json?.coins_earned}:${golden.json?.coins_balance}`,
+            up: `${up.json?.coins_earned}:${up.json?.coins_balance}:${JSON.stringify(up.json?.level_ups)}`,
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '동시 8번 → 10 한 번, 황금키 0, Lv 2 도착 +20 (원장 3행 = 잔액)' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-10',
+    role: 'postgres',
+    op: 'grant_level_up_coins: 여러 레벨을 한 번에 넘으면 지나간 레벨마다(5레벨마다 100) · 다시 넘어도 0 · 내려가거나 같으면 빈 배열',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn10', '레벨코인');
+      const lv = (from, to) => one(`select public.grant_level_up_coins('${x.id}', ${from}, ${to})::text`);
+      const jump = lv(1, 6);
+      const again = lv(3, 7);
+      const down = lv(7, 3);
+      const top = lv(49, 60);
+      return (
+        compare(
+          'CN-10',
+          {
+            jump: JSON.stringify([2, 3, 4, 5, 6].map((l) => ({ coins: l === 5 ? 100 : 20, level: l }))),
+            again: JSON.stringify([4, 5, 6, 7].map((l) => ({ coins: l === 7 ? 20 : 0, level: l }))),
+            down: '[]',
+            top: '[{"coins":100,"level":50}]',
+            coins: '300',
+            mismatches: '0',
+          },
+          {
+            jump: JSON.stringify(JSON.parse(jump)),
+            again: JSON.stringify(JSON.parse(again)),
+            down,
+            top: JSON.stringify(JSON.parse(top)),
+            coins: coins(x.id),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: 'Lv 1→6 = 20·20·20·100·20, 다시 3→7 은 Lv 7 만 20, 50 넘김 없음' }
       );
     },
   });
@@ -3049,7 +3142,7 @@ async function groupApp(u) {
     [
       'APP-4',
       'world·profile users + 공개 프로필 (P3-13 OWN_PROFILE_SELECT: 실명·사진 컬럼 안 읽음)',
-      `/rest/v1/users?select=id,total_xp,current_level,user_public_profiles(public_name,avatar_skin)&id=eq.${u.alice.id}`,
+      `/rest/v1/users?select=id,total_xp,current_level,coins,user_public_profiles(public_name,avatar_skin)&id=eq.${u.alice.id}`,
     ],
     [
       'APP-5',
@@ -5545,6 +5638,51 @@ async function groupQuiz(u) {
               afterStage1: count(),
             },
           ) || { actual: 'ok', detail: '오답 1번 → 스테이지 2 리셋 1행 · 전체 리셋 0행 → 다시 first 1번째 → 스테이지 1 리셋 0행' }
+        );
+      },
+    });
+    await check({
+      group: 'quiz',
+      id: 'CN-9',
+      role: 'service_role',
+      op: 'submit_quiz_answer 코인 (P8-04): 새로 얻은 별에만 5씩(⭐2 → 10, 복습 ⭐3 → +5) · 연습 0 · 동시 제출 1회 · 리셋 뒤 다시 모아도 0',
+      ...OK,
+      run: async () => {
+        const x = await createUser('cn9', '별코인');
+        const c = (r) => `${r.json?.coins_earned}:${r.json?.coins_balance}`;
+        const w = await quiz(x.id, QZ_WRONG[0]);
+        const first = await quiz(x.id, QZ_RIGHT); // first ⭐2
+        const practice = await quiz(x.id, QZ_RIGHT);
+        one(`update public.user_progress set stars_judged_on = public.kst_today() - 1
+              where user_id = '${x.id}' and quest_id = '${QZ_MC}'`);
+        const review = await Promise.all([quiz(x.id, QZ_RIGHT), quiz(x.id, QZ_RIGHT), quiz(x.id, QZ_RIGHT)]);
+        await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+        const redo = await quiz(x.id, QZ_RIGHT); // 리셋 뒤 다시 ⭐3: 별 번호 1~3 모두 받은 적 있음
+        return (
+          compare(
+            'CN-9',
+            {
+              w: '0:0',
+              first: '10:10',
+              practice: 'practice 0:10',
+              review: '5',
+              redo: '3 0:15',
+              levelUps: '[]',
+              ledger: 'star:3',
+              mismatches: '0',
+            },
+            {
+              w: c(w),
+              first: c(first),
+              practice: `${practice.json?.mode} ${c(practice)}`,
+              review: String(review.reduce((n, r) => n + (r.json?.coins_earned ?? 99), 0)),
+              redo: `${redo.json?.stars} ${c(redo)}`,
+              levelUps: JSON.stringify(redo.json?.level_ups),
+              ledger: one(`select string_agg(source || ':' || n, ',') from (select source, count(*) n from public.coin_ledger
+                            where user_id = '${x.id}' group by source) t`),
+              mismatches: mismatches(x.id),
+            },
+          ) || { actual: 'ok', detail: '⭐2 = 10 → 연습 0 → 복습 ⭐3 동시 3번 중 +5 한 번 → 리셋 뒤 ⭐3 = 0' }
         );
       },
     });

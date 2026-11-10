@@ -309,12 +309,12 @@ function NodeTile({ stage }: { stage: StageWithStatus }) {
   );
 }
 
-// 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨
+// 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨. 코인 0 · 45 · 1,280 · 12.3만(640px 미만 줄여 씀, P8-04)
 const HUDS: [string, WorldHudProps][] = [
-  ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, streak: { days: 0, today: false } }],
-  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 280, level: 2, streak: { days: 1, today: true } }],
-  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 1000, level: 4, streak: { days: 7, today: false } }],
-  ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 31500, level: 50, streak: { days: 12, today: true } }],
+  ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false } }],
+  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true } }],
+  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false } }],
+  ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 31500, level: 50, coins: 123456, streak: { days: 12, today: true } }],
 ];
 
 export function WorldMapSection() {
@@ -436,7 +436,7 @@ export function WorldMapSection() {
       </div>
       <Demo
         label="월드맵 HUD (P5-07)"
-        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 곧 열려요(코인·오늘의 미션·상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 640px 미만: XP 바는 아래 가는 띠, 곧 열려요는 버튼 하나, 닉네임 줄임표. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
+        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 코인 잔액(P8-04: 퀘스트에서 받고 지도로 돌아오면 이 탭에서 마지막으로 본 값부터 카운트업 + 칩 팝, minimal·동작 줄이기는 바로 바꾸고 금색 틴트) · 곧 열려요(오늘의 미션·상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 1024px 미만: 곧 열려요는 버튼 하나. 640px 미만: XP 바는 아래 가는 띠, 코인 1만 이상은 “12.3만”, 곧 열려요는 빠지고(코인 칩 자리) 닉네임 줄임표, 400px 미만은 아바타만. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
         data-testid="world-hud-demo"
       >
         <div data-hud-demo className="grid gap-3">

@@ -25,6 +25,7 @@ import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { cn } from '@/lib/utils';
+import { SHOW_COINS } from '@/lib/world/flags';
 import { cardMotion } from './celebrations/motion';
 import { StageClearCard } from './celebrations/StageClearCard';
 import { ProjectCompleteCard } from './celebrations/ProjectCompleteCard';
@@ -425,6 +426,7 @@ function StepContent({
           level={step.event.level}
           fromLevel={step.event.fromLevel}
           title={step.event.title}
+          coins={SHOW_COINS ? step.event.coins : 0}
           budget={budget}
           settled={settled}
           onNext={onNext}
