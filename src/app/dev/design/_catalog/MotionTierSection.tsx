@@ -176,7 +176,6 @@ export function MotionTierSection() {
         >
           <span className="mascot-bob inline-block size-10 rounded-full bg-primary" />
           <span className="character-breathe inline-block size-10 rounded-xl bg-primary-bright" />
-          <span className="step-pulse inline-block size-6 rounded-full bg-accent" />
           <span className="relative inline-block size-10 rounded-full bg-surface">
             <span className="stage-pulse" />
           </span>

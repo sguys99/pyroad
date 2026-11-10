@@ -22,6 +22,7 @@ import {
 import { SoundToggle } from '@/components/sound/SoundToggle';
 import { QuestHeader } from '@/components/quest/QuestHeader';
 import { StageProgress } from '@/components/quest/StageProgress';
+import { StepStrip } from '@/components/quest/StepStrip';
 import { QuestHints } from '@/components/quest/QuestHints';
 import { AskPybaem } from '@/components/quest/AskPybaem';
 import { MotionProvider } from '@/components/providers/MotionProvider';
@@ -116,6 +117,7 @@ export function ProgressSection() {
       </div>
       <CodeSample code={`<ProgressBar value={xp} max={200} label="다음 레벨까지 경험치" valueText={\`\${xp} / 200 XP\`} />`} />
       <StageProgressDemo />
+      <StepStripDemo />
     </Section>
   );
 }
@@ -157,6 +159,70 @@ function StageProgressDemo() {
         </div>
       </Demo>
       <CodeSample code={`<QuestHeader … dots={stageDots(quest.stage.quests ?? [], quest.id, session.isCompleted, quest.stage.unlocked)} />`} />
+    </>
+  );
+}
+
+// 프로젝트 단계 띠 견본 (P6-12): 숫자 맞추기 게임 5단계
+const DEMO_STEPS = [
+  'random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기',
+  '추측 숫자를 guess 변수에 저장하고 "추측"과 함께 출력하기',
+  'if/elif/else로 비밀 숫자와 추측을 비교하기',
+  'while 반복문으로 정답을 맞출 때까지 반복하기',
+  '시도 횟수를 세고 완성 메시지 출력하기',
+];
+
+function StepStripDemo() {
+  const [step, setStep] = useState(2);
+  const [cleared, setCleared] = useState<number | null>(null);
+  const done = step > DEMO_STEPS.length;
+  const advance = () => {
+    setCleared(null);
+    setStep((n) => n + 1);
+  };
+  const pass = () =>
+    step < DEMO_STEPS.length ? setCleared(step) : setStep(step + 1);
+  return (
+    <>
+      <Demo
+        label="프로젝트 단계 띠 (StepStrip, P6-12)"
+        note="공책 쪽 맨 위. 칸 막대·주색 초록만(헤더 스테이지 점의 둥근 점·금색 알약과 구분: 점 = 어느 퀘스트, 칸 = 이 퀘스트 안 단계). 통과하면 칸이 차오르고 “N단계 통과!” → 다음 목표, “다음 단계로”로 건너뜀(앱은 2.2초 뒤 저절로). minimal 페이드 · 동작 줄이기 없음"
+        surface="card"
+        data-testid="step-strip-demo"
+      >
+        <div className="max-w-xl">
+          <StepStrip
+            goals={DEMO_STEPS}
+            current={Math.min(step, DEMO_STEPS.length)}
+            cleared={cleared}
+            completed={done}
+            onSkip={advance}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={pass}
+            disabled={done || cleared !== null}
+            icon={<Plus aria-hidden />}
+          >
+            {step < DEMO_STEPS.length ? `${step}단계 통과하기` : '프로젝트 완성하기'}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setCleared(null);
+              setStep(1);
+            }}
+            icon={<RotateCcw aria-hidden />}
+          >
+            처음부터
+          </Button>
+        </div>
+      </Demo>
+      <CodeSample code={`<StepStrip goals={steps.map((s) => s.step_goal)} current={session.currentStep} cleared={session.stepCleared} completed={session.isCompleted} onSkip={session.skipStepBeat} />`} />
     </>
   );
 }

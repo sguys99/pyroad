@@ -84,8 +84,8 @@ export function questTabs(verdict: 'good' | 'bad' | null) {
 
 interface QuestWorkspaceProps {
   session: QuestSession;
-  /** 헤더 바로 아래 (프로젝트의 단계 막대 등) */
-  belowHeader?: React.ReactNode;
+  /** 공책 쪽 맨 위 (프로젝트 단계 띠 StepStrip, P6-12). 모바일은 공책·결과 쪽 모두에서 보임 */
+  notebookTop?: React.ReactNode;
   /** 완료했을 때 위에 띄우는 배너 내용 */
   completedBanner: React.ReactNode;
 }
@@ -97,7 +97,7 @@ interface QuestWorkspaceProps {
  */
 export function QuestWorkspace({
   session,
-  belowHeader,
+  notebookTop,
   completedBanner,
 }: QuestWorkspaceProps) {
   const { quest, tab, setTab, runner, runResult, validation, liveOutput } =
@@ -195,8 +195,6 @@ export function QuestWorkspace({
         dots={dots}
       />
 
-      {belowHeader}
-
       {/* API 키 미설정 안내는 파이뱀 대화 안으로 옮김 (P6-10, AskPybaem → ApiKeyBanner) */}
 
       {/* 완료 배너 (방금 마친 퀘스트는 결과 쪽 보상 띠가 대신 안내) */}
@@ -269,6 +267,7 @@ export function QuestWorkspace({
             tab === 'story' && 'max-lg:hidden',
           )}
         >
+          {notebookTop}
           <div className={cn(tab === 'result' && 'max-lg:hidden')}>
             <CodePanel
               code={session.code}

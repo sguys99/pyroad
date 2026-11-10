@@ -35,15 +35,6 @@
     transform: translateY(-6px);
   }
 }
-@keyframes step-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
 /* 현재 스테이지 빛 고리: 미리 그린 그림자 층의 opacity만 (box-shadow 자체를 움직이지 않음) */
 @keyframes stage-pulse {
   0%,
@@ -148,10 +139,6 @@
   /* 월드맵 파이뱀 통통 */
   .mascot-bob {
     animation: mascot-bob 2s ease-in-out infinite;
-  }
-  /* 퀘스트 단계 표시의 현재 단계 */
-  .step-pulse {
-    animation: step-pulse 2s ease-in-out infinite;
   }
   .stage-pulse {
     animation: stage-pulse 2s ease-in-out infinite;

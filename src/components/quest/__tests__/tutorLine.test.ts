@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
-import { tutorLine } from '../StoryPage';
+import { missionItems, tutorLine } from '../StoryPage';
 
 const ok = { stdout: 'a\n', stderr: '', success: true, outcome: 'ok' };
 const session = (s: Partial<QuestSession>) =>
@@ -50,5 +50,42 @@ describe('tutorLine 완료한 퀘스트 (Q57)', () => {
     expect(
       tutorLine(session({ isCompleted: true, completion: 'before' })).text,
     ).toContain('예전에 통과');
+  });
+});
+
+describe('프로젝트 단계 (P6-12)', () => {
+  const steps = [
+    { step_goal: '하나' },
+    { step_goal: '둘' },
+    { step_goal: '셋' },
+  ] as QuestSession['steps'];
+  const base = {
+    steps,
+    quest: { prompt_skeleton: {} } as QuestSession['quest'],
+    isCompleted: false,
+    stepCleared: null,
+  };
+
+  it('해 볼 일은 단계 번호와 지금 단계, "다음 단계" 박자 동안은 통과한 단계를 체크하고 다음 단계가 지금', () => {
+    const now = missionItems(session({ ...base, currentStep: 2 }));
+    expect(now.map((i) => [i.step, i.done, !!i.current])).toEqual([
+      [1, true, false],
+      [2, false, true],
+      [3, false, false],
+    ]);
+    const beat = missionItems(
+      session({ ...base, currentStep: 2, stepCleared: 2 }),
+    );
+    expect(beat[1]).toMatchObject({ done: true, fresh: true });
+    expect(beat[2].current).toBe(true);
+  });
+
+  it('두 번째 단계부터 처음 대사는 이어서 쓰라는 안내', () => {
+    expect(tutorLine(session({ ...base, currentStep: 1 })).text).toContain(
+      '한 단계씩',
+    );
+    expect(tutorLine(session({ ...base, currentStep: 3 })).text).toContain(
+      '3단계 시작',
+    );
   });
 });

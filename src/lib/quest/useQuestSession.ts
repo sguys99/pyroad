@@ -77,15 +77,19 @@ interface StepState {
 export const MAX_HINTS_PER_STEP = 3;
 /** 마지막으로 고친 뒤 이만큼 지나면 자동 저장 */
 export const AUTO_SAVE_DELAY_MS = 2000;
-/** 단계 통과(또는 황금키) 뒤 다음 단계로 넘어가기까지 (통과 표시를 잠깐 보여 줌) */
-export const STEP_ADVANCE_DELAY_MS = 1500;
+/**
+ * 단계 통과(또는 황금키) 뒤 다음 단계로 넘어가기까지: "다음 단계" 박자(해 볼 일 체크 → 다음 목표, P6-12).
+ * 그 사이 `skipStepBeat`로 바로 넘어갈 수 있다
+ */
+export const STEP_ADVANCE_DELAY_MS = 2200;
 /**
  * 완료 컨페티를 본 뒤 축하 오버레이를 띄우기까지. 코드 퀘스트는 결과 쪽 성공 장면(도장 → XP 카운트업, 약 1.6초 —
  * `QuestSuccess.SUCCESS_RUN_MS`)을 끝까지 본 다음 (P6-08)
  */
 export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
   code: 1800,
-  project: 500,
+  // 마지막 단계도 같은 성공 장면(도장 → XP)을 본 뒤 프로젝트 완성 카드 (P6-12, 전에는 500ms라 장면을 덮음)
+  project: 1800,
 };
 
 /**
@@ -512,6 +516,8 @@ export function useQuestSession({
       setStepHints(0);
       liveOutput.reset();
       lockSubmit(false);
+      // 모바일: 비워진 결과 쪽 대신 다음 단계 코드를 쓸 공책 쪽으로 (P6-12)
+      setTab('code');
 
       if (confetti) {
         fireConfetti(STEP_PASS_CONFETTI, { scale: particleScaleRef.current });
@@ -525,6 +531,25 @@ export function useQuestSession({
     },
     [steps, lockSubmit, liveOutput, saveProgress],
   );
+
+  // "다음 단계" 박자 (P6-12): 통과한 단계 번호(넘어가기 전까지)와 바로 넘기기. 예약한 넘김은 한 번만 돈다
+  const [stepCleared, setStepCleared] = useState<number | null>(null);
+  const pendingAdvanceRef = useRef<(() => void) | null>(null);
+  const scheduleAdvance = useCallback(
+    (step: number, passedCode: string, opts?: { confetti?: boolean }) => {
+      const go = () => {
+        if (pendingAdvanceRef.current !== go) return;
+        pendingAdvanceRef.current = null;
+        setStepCleared(null);
+        advanceStep(step, passedCode, opts);
+      };
+      pendingAdvanceRef.current = go;
+      setStepCleared(step);
+      later(go, STEP_ADVANCE_DELAY_MS);
+    },
+    [advanceStep, later],
+  );
+  const skipStepBeat = useCallback(() => pendingAdvanceRef.current?.(), []);
 
   /**
    * 완료 응답을 반영한다. 새로 일어난 일은 축하 이벤트로 (P1-10 시퀀서가 보여 줌).
@@ -764,8 +789,7 @@ export function useQuestSession({
       const step = stepRef.current.step;
       advancing = (await runAndGrade(code, step, isCompleted)) === 'advance';
       // 넘어갈 때까지 실행 버튼은 잠긴 채 (advanceStep 이 푼다)
-      if (advancing)
-        later(() => advanceStep(step, code), STEP_ADVANCE_DELAY_MS);
+      if (advancing) scheduleAdvance(step, code);
     } finally {
       if (!advancing) lockSubmit(false);
     }
@@ -775,8 +799,7 @@ export function useQuestSession({
     isCompleted,
     lockSubmit,
     runAndGrade,
-    later,
-    advanceStep,
+    scheduleAdvance,
     play,
   ]);
 
@@ -985,10 +1008,7 @@ export function useQuestSession({
         // 마지막 단계는 황금키 확인 카드가 같은 'unlock' 소리를 내므로 여기서만
         play('unlock');
         advancing = true;
-        later(
-          () => advanceStep(step, solution, { confetti: false }),
-          STEP_ADVANCE_DELAY_MS,
-        );
+        scheduleAdvance(step, solution, { confetti: false });
       } else {
         // 마지막 단계·코드 퀘스트: 자동 완료 (황금키를 쓴 퀘스트는 서버가 0 XP로 완료, B05)
         const done = await postJson<QuestCompleteResponse>(
@@ -1037,9 +1057,8 @@ export function useQuestSession({
     totalSteps,
     liveOutput,
     runCode,
-    later,
     lockSubmit,
-    advanceStep,
+    scheduleAdvance,
     applyCompletion,
     addSystemMessage,
     finishStreaming,
@@ -1057,6 +1076,10 @@ export function useQuestSession({
     steps,
     currentStep,
     totalSteps,
+    /** 방금 통과해 다음 단계로 넘어가기 직전인 단계 ("다음 단계" 박자, P6-12). 아니면 null */
+    stepCleared,
+    /** "다음 단계" 박자를 건너뛰고 바로 넘어간다 */
+    skipStepBeat,
 
     code,
     setCode,

@@ -26,6 +26,10 @@ export interface MissionItem {
   done: boolean;
   /** 지금 할 차례 (프로젝트 단계) */
   current?: boolean;
+  /** 프로젝트 단계 번호 (상자에 번호) */
+  step?: number;
+  /** 방금 통과한 단계 ("다음 단계" 박자 동안 체크가 톡 찍힘, P6-12) */
+  fresh?: boolean;
 }
 
 /**
@@ -35,10 +39,15 @@ export interface MissionItem {
 export function missionItems(session: QuestSession): MissionItem[] {
   const sk = session.quest.prompt_skeleton;
   if (session.steps?.length) {
+    // "다음 단계" 박자 동안은 통과한 단계를 체크하고 다음 단계를 지금 할 일로 (공책 쪽 StepStrip과 같은 셈)
+    const cleared = session.stepCleared;
+    const shown = cleared ? cleared + 1 : session.currentStep;
     return session.steps.map((s, i) => ({
       text: s.step_goal,
-      done: session.isCompleted || i + 1 < session.currentStep,
-      current: !session.isCompleted && i + 1 === session.currentStep,
+      step: i + 1,
+      done: session.isCompleted || i + 1 < shown,
+      current: !session.isCompleted && i + 1 === shown,
+      fresh: i + 1 === cleared,
     }));
   }
   const done = session.isCompleted || !!session.validation?.passed;
@@ -99,7 +108,9 @@ export function tutorLine(session: QuestSession): {
   return {
     state: 'idle',
     text: session.steps?.length
-      ? '한 단계씩 쌓아 가는 프로젝트예요! 해 볼 일을 위에서부터 차례로 해 봐요.'
+      ? session.currentStep > 1
+        ? `${session.currentStep}단계 시작! 앞 단계 주문은 공책에 그대로 있어요. 이어서 써 봐요.`
+        : '한 단계씩 쌓아 가는 프로젝트예요! 해 볼 일을 위에서부터 차례로 해 봐요.'
       : '이야기를 읽고 해 볼 일을 확인해요. 공책에 주문을 써서 "코드 돌려보기"를 눌러 봐요!',
   };
 }
@@ -179,9 +190,11 @@ export function StoryPage({ session, ask, action, children }: StoryPageProps) {
               className="qs-check"
               data-done={item.done || undefined}
               data-current={item.current || undefined}
+              data-step={item.step}
+              data-fresh={item.fresh || undefined}
             >
               <span className="qs-box" aria-hidden>
-                {item.done && <Check strokeWidth={3} />}
+                {item.done ? <Check strokeWidth={3} /> : item.step}
               </span>
               <span>
                 {item.text}

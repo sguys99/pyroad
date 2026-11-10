@@ -555,7 +555,7 @@ describe('useQuestSession: 실행·채점·완료', () => {
 // ── 프로젝트 단계 ──────────────────────────────────────────────────────
 
 describe('useQuestSession: 프로젝트 단계 진행', () => {
-  it('단계를 통과하면 1.5초 뒤 통과한 코드로 다음 단계로 간다 (그 사이 고친 코드가 아니라)', async () => {
+  it('단계를 통과하면 박자(STEP_ADVANCE_DELAY_MS) 뒤 통과한 코드로 다음 단계로 간다 (그 사이 고친 코드가 아니라)', async () => {
     const { result } = renderHook(() =>
       useQuestSession(options(PROJECT_QUEST)),
     );
@@ -589,6 +589,33 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
       current_step: 2,
       step_submissions: { '1': 'name = "파이"' },
     });
+  });
+
+  it('"다음 단계" 박자: 통과한 단계를 알리고, 건너뛰면 바로 넘어가며 예약한 넘김은 다시 돌지 않는다 (P6-12)', async () => {
+    const { result } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
+    act(() => result.current.setCode('name = "파이"'));
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(result.current.stepCleared).toBe(1);
+    expect(result.current.tab).toBe('result');
+
+    act(() => result.current.skipStepBeat());
+    expect(result.current.stepCleared).toBeNull();
+    expect(result.current.currentStep).toBe(2);
+    // 모바일: 다음 단계 코드를 쓸 공책 쪽으로
+    expect(result.current.tab).toBe('code');
+    expect(result.current.isSubmitting).toBe(false);
+
+    // 남은 타이머가 한 번 더 넘기지 않는다 (2 → 3 아님)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(STEP_ADVANCE_DELAY_MS);
+      await flush();
+    });
+    expect(result.current.currentStep).toBe(2);
+    expect(mocks.upserts.at(-1)!.payload).toMatchObject({ current_step: 2 });
   });
 
   it('B10 회귀: 황금키로 연 중간 단계는 정답 코드를 저장하고 다음 단계로 간다 (예전 코드 아님)', async () => {

@@ -50,7 +50,6 @@ export const AMBIENT = [
 export const IDLE_LOOPS = [
   'character-breathe',
   'mascot-bob',
-  'step-pulse',
   'stage-pulse',
   'wn-ring',
   'char-blink-eye',

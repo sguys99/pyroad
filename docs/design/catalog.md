@@ -27,7 +27,7 @@
 
 | 묶음 | 절 (anchor) | 내용 |
 |---|---|---|
-| 연출 | `#motion` 연출 단계 견본 | 단계표(`MOTION_BUDGETS` full·lite·minimal·동작 줄이기 + "지금" 줄) · 앱과 **같은 클래스**의 반복 연출 견본(대기 루프 `.mascot-bob`·`.character-breathe`·`.step-pulse`·`.stage-pulse`, 앰비언트 `.float-cloud`·`.drift-leaf`·`.stage-shimmer`, 월드 지도 앰비언트 `.wm-a-cloud`·`.wm-a-wave`·`.wm-a-boat`·`.wm-a-bird`·`.wm-a-spark`·`.wm-a-leaf`(P5-09), 바쁨 `.waking-dot`·`.thinking-dot`·`animate-spin`·`animate-pulse`, 눈 깜빡임 `.char-blink-*`·`.char-twinkle`), 흐림·큰 그림자. 칸마다 "돌고 있는 반복 연출 수"를 e2e와 같은 기준으로 센다 |
+| 연출 | `#motion` 연출 단계 견본 | 단계표(`MOTION_BUDGETS` full·lite·minimal·동작 줄이기 + "지금" 줄) · 앱과 **같은 클래스**의 반복 연출 견본(대기 루프 `.mascot-bob`·`.character-breathe`·`.stage-pulse`, 앰비언트 `.float-cloud`·`.drift-leaf`·`.stage-shimmer`, 월드 지도 앰비언트 `.wm-a-cloud`·`.wm-a-wave`·`.wm-a-boat`·`.wm-a-bird`·`.wm-a-spark`·`.wm-a-leaf`(P5-09), 바쁨 `.waking-dot`·`.thinking-dot`·`animate-spin`·`animate-pulse`, 눈 깜빡임 `.char-blink-*`·`.char-twinkle`), 흐림·큰 그림자. 칸마다 "돌고 있는 반복 연출 수"를 e2e와 같은 기준으로 센다 |
 | 토큰 | `#colors` 색 | 토큰 원본(`COLOR`)의 이름·hex·CSS 변수·쓰임 + 바탕·카드 위 대비를 `contrastRatio`로 그 자리에서 계산, `CONTRAST_PAIRS` 52쌍 표(견본 글자·기준·대비) |
 | | `#type` 글자 | `TYPE` 12단계 견본(Jua 제목·버튼 / pyRoad Sans 본문·캡션·눈썹 / pyRoad Mono 코드) + HUD 숫자 `.hud-num` |
 | | `#shape` 반경·그림자·간격·선 | `RADIUS`·`SHADOW`·`SPACE`·`LINE` |
@@ -39,7 +39,7 @@
 | | `#sheet` | Sheet · wide · 긴 내용 스크롤 · Modal · Modal media+가운데 (열기 버튼) |
 | | `#toast` | tone 4종 띄우기·3개 쌓기 + 4 tone × 아이콘·닫기 있음/없음, 두 줄 정지 견본 |
 | | `#tabs` | 2·3(아이콘)·4칸 |
-| | `#progress` | 값 올리기(빛 띠)·0으로, 0·40·100% × primary·reward × sm·md·lg, 흰 카드 위 `animateOnMount` |
+| | `#progress` | 값 올리기(빛 띠)·0으로, 0·40·100% × primary·reward × sm·md·lg, 흰 카드 위 `animateOnMount`, 스테이지 진행 점(P6-02), 프로젝트 단계 띠 `StepStrip`(P6-12: 단계 통과 → "N단계 통과!"·다음 목표·건너뛰기, 완성) |
 | | `#hud` | 전체(코인·별·키·소리) + 코인·별·키·레벨·경험치 올리기·큰 수, 키 없음(월드맵), LevelSeal md·sm·두 자리, 칩 하나씩(1.5억 축약) |
 | | `#bubble` | 타자 효과(다시 타자)·스트리밍 커서·배지·긴 대사, 4 tone × 꼬리 3종 |
 | | `#reward` | 4종 × 20·26·34px, Stars 0~3, 비활성 버튼 안 |
