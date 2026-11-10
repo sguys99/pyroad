@@ -112,6 +112,8 @@ interface CodePanelProps {
   onShowErrorLine?: (line: number) => void;
   /** 결과 쪽지 "파이뱀에게 더 물어보기" (Q56) */
   onAskTutor?: () => void;
+  /** 스테이지 차례 (코드 키보드가 그 스테이지 주문을 앞으로, P6-11) */
+  stage?: number;
 }
 
 export function CodePanel({
@@ -134,6 +136,7 @@ export function CodePanel({
   goal,
   onShowErrorLine,
   onAskTutor,
+  stage,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const showKeyboard = useSyncExternalStore(
@@ -164,7 +167,7 @@ export function CodePanel({
         }
       />
       <div className="ck-slot">
-        {showKeyboard && <CodeKeyboard editor={editorRef} />}
+        {showKeyboard && <CodeKeyboard editor={editorRef} stage={stage} />}
       </div>
 
       {/* 실행 버튼 + 준비·재준비·오류 안내 (P6-05) */}

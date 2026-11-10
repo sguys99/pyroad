@@ -19,7 +19,7 @@
 - 포커스: 앱 공용 포커스 링과 같은 2px `secondary` + 간격 2px(`--focus-w`·`--focus-offset`).
 - 커서: 2px 본문색. 깜빡임은 CodeMirror 기본(1.2초 주기 opacity)이고 연출 단계와 상관없이 둡니다(입력 위치를 알리는 기능 신호). **동작 줄이기에서만 멈추고 늘 보이게** 합니다(`app.css`, P2-12, e2e `motion-tiers`).
 - 활성 줄 띠·활성 줄 번호는 **에디터에 포커스가 있을 때만** 칠합니다(P6-03). 실행 버튼을 누른 뒤처럼 커서가 없는데 줄만 칠해져 있으면 오류 줄 띠와 섞여 잡음입니다.
-- 접기 칸(▸)은 뺐습니다. 시안 공책에 없고 아이에게는 잡음입니다. 자동 완성·괄호 자동 닫기·찾기(Ctrl+F)는 그대로이고 찾기 창 문구는 한국어(`KO_PHRASES`).
+- 접기 칸(▸)은 뺐습니다. 시안 공책에 없고 아이에게는 잡음입니다. 자동 완성·괄호 자동 닫기·찾기(Ctrl+F)는 그대로이고 찾기 창 문구는 한국어(`KO_PHRASES`). 단 터치 화면(`pointer: coarse`)에서는 자동 완성 목록을 눌러서만 고르고 Enter는 늘 줄바꿈입니다(P6-11: 폰 키보드 Enter가 목록을 골라 줄이 안 바뀌던 문제. 목록 자체를 끄지 않은 이유는 손가락으로 `print` 등을 고르는 것이 치는 것보다 쉬워서). Esc로 닫기는 그대로.
 - **줄 바꿈 없음**(가로 스크롤, 시안과 같음). 줄을 꺾으면 좁은 화면에서 한글 주석이 글자 중간에서 꺾여 정렬이 깨지고, 꺾인 줄이 0칸에서 시작해 들여쓰기처럼 보입니다. 360px·20px에서도 줄마다 한 줄 높이인지 e2e가 확인합니다.
 
 ## 2. 색 (모두 토큰 변수, 색 리터럴 없음)
@@ -91,7 +91,7 @@
 - 좁은 쪽: 퀘스트 쪽(`.qw-page`, 컨테이너) 안 폭이 24rem 미만이면(360px 화면 ≈ 18rem) 제목 아이콘을 빼고 "처음 코드로"는 아이콘만 보입니다(이름은 `aria-label`로 그대로). 모든 버튼은 48px 터치 영역 그대로.
 - "처음 코드로": 세션의 `starterCode`(이번 단계를 처음 열었을 때 코드. 프로젝트는 이전 단계 코드 + 이번 단계 시작 코드, 저장된 코드는 제외)로 되돌립니다. 지금 코드와 같으면 꺼지고, 다르면 고친 코드가 사라지므로 확인 창("그대로 두기" / "처음 코드로")을 띄웁니다. 확인 창 모듈은 처음 누를 때 받습니다(`next/dynamic`, 퀘스트 첫 로드 JS에 넣지 않음 — 넣으면 약 10.7KB gzip).
 - 되돌리면 문서가 바뀌므로 오류 줄 표시도 지워집니다.
-- 바깥 손잡이: `CodeEditor`의 `ref`는 `CodeEditorHandle { insert(text, caret?), moveCursor(±1), undo(), focus() }`. `insert`는 선택 영역을 바꾸고 커서를 `caret` 자리(기본 끝)에 둔 뒤 포커스하며, 한 번 = 되돌리기 한 번입니다(`isolateHistory`). 커서는 처음에 코드 끝에 있습니다. `CodePanel`이 안에서 만들어 코드 키보드(P6-04)에 넘깁니다.
+- 바깥 손잡이: `CodeEditor`의 `ref`는 `CodeEditorHandle { insert(text, caret?), moveCursor(±1), undo(), focus(), revealCursor() }`. `insert`는 선택 영역을 바꾸고 커서를 `caret` 자리(기본 끝)에 둔 뒤 포커스하며, 한 번 = 되돌리기 한 번입니다(`isolateHistory`). 커서는 처음에 코드 끝에 있습니다. `CodePanel`이 안에서 만들어 코드 키보드(P6-04)에 넘깁니다.
 
 ## 5. 오류 줄
 
@@ -106,5 +106,6 @@
 ## 7. 범위 밖
 
 - **모바일 코드 키보드 툴바**(§12-Q3 C안): P6-04에서 `src/components/quest/CodeKeyboard.tsx`로 완료. lg 미만 또는 터치 화면에서만 지연 로드, 키 목록·순서의 근거(1월드 1~2스테이지 정답 코드)는 파일 머리 주석, e2e `code-keyboard.spec.ts`. 모바일 문제 유형은 Phase 7.
+- **폰 키보드 대응**(P6-11): 3스테이지부터 그 스테이지 주문(if·for·[ ]·def …)이 앞자리 바로 뒤 "이번 스테이지 주문" 묶음으로 옴(`keyGroups(stage)`). 폰 키보드가 열리고 에디터에 커서가 있으면 띠가 키보드 윗변에 붙는다: `visualViewport`의 `offsetTop + height`(= 키보드 윗변, layout viewport 좌표)로 `position: fixed; top: 0` + `translateY` — iOS Safari는 키보드가 열려도 layout viewport가 그대로이고 visual viewport만 줄고 위로 밀리기도 해서 `bottom: 0`은 키보드 뒤에 숨기 때문. 쪽(`.qw-page`)은 컨테이너 쿼리 상자라 fixed 기준이 되므로 붙을 때만 body로 포털, 자리(`.ck-slot`)는 남아 공책이 출렁이지 않음. 가린 높이(키보드 + 띠)는 `src/lib/editor/keyboardInset.ts` → 에디터 `scrollMargins`로 커서 줄이 띠 위에 오고, 붙는 순간 `revealCursor()`. 확대(pinch zoom) 중에는 띠가 화면 폭보다 넓을 수 있음(드묾). e2e `quest-mobile.spec.ts`는 가짜 visualViewport로 확인
 - 통과 도장 같은 공책 장식: P6-06·P6-08.
 - 다크 모드: 앱 전체가 범위 밖([tokens.md](tokens.md)).

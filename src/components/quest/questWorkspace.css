@@ -15,20 +15,56 @@
   font-size: var(--text-caption);
   line-height: 1;
 }
+.qw-tab-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--round-pill);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.qw-tab-dot[data-tone='good'] {
+  background: var(--primary);
+}
+/* 고른 탭(주색 면) 위의 통과 점은 흰 점 */
+[aria-selected='true'] > .qw-tab-dot[data-tone='good'] {
+  background: var(--on-primary);
+  box-shadow: none;
+}
+.qw-tab-dot[data-tone='bad'] {
+  background: var(--accent);
+}
 .qw-book {
   flex: 1;
   min-height: 0;
   padding: 0.75rem var(--spacing-gutter);
+  /* 손가락을 따라 옆으로 밀린 쪽이 가로 스크롤을 만들지 않게 (P6-11 usePageSwipe). 그림자는 안쪽 여백 안이라 잘리지 않음 */
+  overflow-x: clip;
 }
 .qw-page {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
   container-type: inline-size;
+  /* 세로 스크롤과 확대만 브라우저가, 가로 몸짓은 쪽 넘기기가 받는다 (P6-11) */
+  touch-action: pan-y pinch-zoom;
   padding: 1.25rem 1.125rem 1.5rem;
   border-radius: var(--round-l);
   background: var(--surface);
   box-shadow: var(--elev-card);
+}
+
+/* 가로로 눕힌 폰(높이 30rem 미만): 쪽마다 스크롤하면 쪽 높이가 150px 남짓이라, 화면 전체가 한 번에 스크롤되게 (P6-11) */
+@media (max-width: 63.99rem) and (max-height: 30rem) {
+  .qw-root {
+    height: auto;
+    min-height: 100dvh;
+  }
+  .qw-book {
+    flex: none;
+  }
+  .qw-page {
+    height: auto;
+    overflow-y: visible;
+  }
 }
 
 @media (min-width: 64rem) {

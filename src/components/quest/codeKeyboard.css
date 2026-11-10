@@ -84,3 +84,18 @@
 :root[data-reduced='true'] .ck-key {
   transition: none;
 }
+
+/* 폰 키보드 위에 붙은 띠 (P6-11, useDockAboveKeyboard → body로 옮겨 그림). 화면 폭 전체 · 아래 모서리 없이 · 위쪽만 그림자 한 종류.
+   위치는 transform 하나(--vv-bottom = 폰 키보드 윗변)라 키보드가 오르내려도 레이아웃이 다시 계산되지 않는다 */
+.ck[data-docked] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: 0.375rem max(0.375rem, env(safe-area-inset-right)) 0.375rem
+    max(0.375rem, env(safe-area-inset-left));
+  border-radius: var(--round-m) var(--round-m) 0 0;
+  box-shadow: var(--elev-card);
+  transform: translateY(calc(var(--vv-bottom) - 100%));
+}

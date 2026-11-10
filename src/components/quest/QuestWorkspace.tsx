@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
@@ -18,6 +18,7 @@ import { OutputPanel } from './OutputPanel';
 import type { QuestReward } from './QuestSuccess';
 import { codeQuestStars } from '@/lib/quest/xp';
 import { QuestStatusBar } from './QuestStatusBar';
+import { usePageSwipe } from './usePageSwipe';
 import './questWorkspace.css';
 
 // 축하 오버레이 (P6-13): 받은 축하가 있을 때만 그린다. 첫 로드 JS에서 빼고, 실행을 처음 누를 때 미리 받아 둔다
@@ -49,17 +50,37 @@ function CelebrationLayer({
   );
 }
 
-// 모바일 번호 탭 ①이야기 ②공책 ③결과 (시안 f-ribbons). 패널 id는 aria-controls
-const tabs = (['story', 'code', 'result'] as const).map((value, i) => ({
-  value,
-  label: { story: '이야기', code: '공책', result: '결과' }[value],
-  icon: (
-    <span className="qw-tab-n" aria-hidden>
-      {i + 1}
-    </span>
-  ),
-  panelId: value === 'story' ? 'quest-page-story' : 'quest-page-notebook',
-}));
+const TAB_ORDER = ['story', 'code', 'result'] as const;
+const pageId = (tab: (typeof TAB_ORDER)[number]) =>
+  tab === 'story' ? 'quest-page-story' : 'quest-page-notebook';
+
+/**
+ * 모바일 번호 탭 ①이야기 ②공책 ③결과 (시안 f-ribbons). 패널 id는 aria-controls.
+ * ③결과에는 마지막 실행의 상태 점 (시안 f-ribbon-dot, P6-11): 통과 = 초록 · 오류·다름 = 금색. 낭독기는 탭 이름 뒤에 "통과"·"고칠 곳 있음"
+ */
+export function questTabs(verdict: 'good' | 'bad' | null) {
+  return TAB_ORDER.map((value, i) => ({
+    value,
+    label: (
+      <>
+        {{ story: '이야기', code: '공책', result: '결과' }[value]}
+        {value === 'result' && verdict && (
+          <span className="qw-tab-dot" data-tone={verdict}>
+            <span className="sr-only">
+              {verdict === 'good' ? '통과' : '고칠 곳 있음'}
+            </span>
+          </span>
+        )}
+      </>
+    ),
+    icon: (
+      <span className="qw-tab-n" aria-hidden>
+        {i + 1}
+      </span>
+    ),
+    panelId: pageId(value),
+  }));
+}
 
 interface QuestWorkspaceProps {
   session: QuestSession;
@@ -140,6 +161,23 @@ export function QuestWorkspace({
     const id = ric(() => void loadCelebrations());
     return () => (window.cancelIdleCallback ?? clearTimeout)(id);
   }, [runner.status]);
+  // 쪽 넘기기 (P6-11): 번호 탭 + 좌우 스와이프, 바뀔 때 쪽 넘김 연출
+  const book = useRef<HTMLDivElement>(null);
+  usePageSwipe({
+    host: book,
+    order: TAB_ORDER,
+    tab,
+    setTab,
+    pageOf: (t) => document.getElementById(pageId(t)),
+  });
+  const verdict =
+    runner.isRunning || !runResult || runResult.isStopped
+      ? null
+      : validation?.passed
+        ? 'good'
+        : !runResult.success || validation
+          ? 'bad'
+          : null;
   const notes = hintNotes(
     session.messages,
     session.currentStep,
@@ -147,7 +185,7 @@ export function QuestWorkspace({
   );
 
   return (
-    <div className="flex h-dvh flex-col bg-bg">
+    <div className="qw-root flex h-dvh flex-col bg-bg">
       <QuestHeader
         worldHref={worldHref}
         bgm={quest.stage.world?.bgm ?? null}
@@ -168,10 +206,10 @@ export function QuestWorkspace({
         </div>
       )}
 
-      {/* 모바일·태블릿 번호 탭 (세그먼트 탭, P2-11). 스와이프는 P6-11 */}
+      {/* 모바일·태블릿 번호 탭 (세그먼트 탭, P2-11) + 책 위 좌우 스와이프 (P6-11) */}
       <div className="qw-tabs lg:hidden">
         <SegmentedTabs
-          items={tabs}
+          items={questTabs(verdict)}
           value={tab}
           onValueChange={setTab}
           aria-label="퀘스트 쪽 고르기"
@@ -179,7 +217,7 @@ export function QuestWorkspace({
       </div>
 
       {/* 책 펼침: 왼쪽 이야기 | 오른쪽 공책 */}
-      <div className="qw-book">
+      <div className="qw-book" ref={book}>
         <div
           id="quest-page-story"
           className={cn(
@@ -252,6 +290,7 @@ export function QuestWorkspace({
               goal={goal}
               onShowErrorLine={showErrorLine}
               onAskTutor={askTutor}
+              stage={quest.stage.order}
             />
           </div>
 

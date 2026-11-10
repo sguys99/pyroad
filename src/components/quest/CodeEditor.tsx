@@ -42,6 +42,7 @@ import { python } from '@codemirror/lang-python';
 import { cn } from '@/lib/utils';
 import { codeFontSizeTheme, kidsTheme } from '@/lib/editor/kidsTheme';
 import { errorLineExtension, setErrorLine } from '@/lib/editor/errorLine';
+import { keyboardInset } from '@/lib/editor/keyboardInset';
 import { useCodeFontSize } from '@/lib/editor/useCodeFontSize';
 import { CodeFontSizeControl } from './CodeFontSizeControl';
 
@@ -60,7 +61,6 @@ const setup = [
   indentOnInput(),
   bracketMatching(),
   closeBrackets(),
-  autocompletion(),
   rectangularSelection(),
   crosshairCursor(),
   highlightActiveLine(),
@@ -83,6 +83,8 @@ export interface CodeEditorHandle {
   moveCursor: (dir: -1 | 1) => void;
   undo: () => void;
   focus: () => void;
+  /** 커서 줄을 화면 안으로 (폰 키보드가 올라온 뒤, P6-11) */
+  revealCursor: () => void;
 }
 
 interface CodeEditorProps {
@@ -130,6 +132,13 @@ export function CodeEditor({
       selection: { anchor: initialValueRef.current.length },
       extensions: [
         setup,
+        // 터치 화면: 자동 완성 목록은 눌러서 고르고 Enter는 늘 줄바꿈 (폰 키보드 Enter가 목록을 골라 줄이 안 바뀌던 문제, P6-04 메모 → P6-11).
+        // 기본 키맵을 끄면 setup의 defaultKeymap Enter(줄바꿈)가 completionKeymap Enter보다 먼저다. Esc로 닫기는 그대로
+        autocompletion({
+          defaultKeymap: !window.matchMedia?.('(pointer: coarse)').matches,
+        }),
+        // 폰 키보드 + 코드 키보드가 가린 만큼 커서 줄을 위로 (P6-11, CodeKeyboard가 잼)
+        EditorView.scrollMargins.of(() => ({ bottom: keyboardInset() })),
         python(),
         EditorState.tabSize.of(4),
         kidsTheme(),
@@ -214,13 +223,23 @@ export function CodeEditor({
         view.focus();
       },
       focus: () => viewRef.current?.focus(),
+      revealCursor() {
+        const view = viewRef.current;
+        if (!view) return;
+        view.dispatch({
+          effects: EditorView.scrollIntoView(view.state.selection.main.head, {
+            y: 'nearest',
+          }),
+        });
+      },
     }),
     [],
   );
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <div className="flex items-center justify-end gap-1">
+      {/* 320px처럼 한 줄에 안 들어가면 제목이 위 줄로 (P6-11) */}
+      <div className="flex flex-wrap items-center justify-end gap-1">
         {title && <div className="mr-auto min-w-0">{title}</div>}
         {actions}
         <CodeFontSizeControl size={fontSize} onChange={changeFontSize} />

@@ -32,6 +32,8 @@ import {
   type CodeEditorHandle,
 } from '@/components/quest/CodeEditor';
 import CodeKeyboard from '@/components/quest/CodeKeyboard';
+import { questTabs } from '@/components/quest/QuestWorkspace';
+import { SegmentedTabs } from '@/components/ui/tabs';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { OutputPanel } from '@/components/quest/OutputPanel';
 import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
@@ -45,14 +47,39 @@ import { CelebrationMascot } from '@/components/quest/celebrations/parts';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CodeSample, Demo, Section } from './ui';
 
-/** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다 */
+/** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다. 스테이지를 바꾸면 그 스테이지 주문이 앞으로 (P6-11) */
 function CodeKeyboardDemo() {
   const editor = useRef<CodeEditorHandle>(null);
   const [code, setCode] = useState('# 아래에 코드를 작성해보세요!\n');
+  const [stage, setStage] = useState('1');
   return (
     <div className="flex max-w-sm flex-col gap-2" data-testid="catalog-code-keyboard">
+      <SegmentedTabs
+        aria-label="스테이지"
+        items={['1', '3', '4', '5', '6'].map((v) => ({ value: v, label: `${v}스테이지` }))}
+        value={stage}
+        onValueChange={setStage}
+      />
       <CodeEditor ref={editor} value={code} onChange={setCode} />
-      <CodeKeyboard editor={editor} />
+      <CodeKeyboard editor={editor} stage={Number(stage)} />
+    </div>
+  );
+}
+
+/** 모바일 번호 탭 + ③결과 상태 점 견본 (P6-11) */
+function QuestTabsDemo() {
+  const [tab, setTab] = useState<'story' | 'code' | 'result'>('result');
+  return (
+    <div className="flex max-w-sm flex-col gap-3">
+      {([null, 'good', 'bad'] as const).map((v) => (
+        <SegmentedTabs
+          key={v ?? 'none'}
+          aria-label={`퀘스트 쪽 고르기 (${v ?? '실행 전'})`}
+          items={questTabs(v)}
+          value={tab}
+          onValueChange={setTab}
+        />
+      ))}
     </div>
   );
 }
@@ -86,6 +113,13 @@ export function EditorSection() {
         surface="card"
       >
         <CodeKeyboardDemo />
+      </Demo>
+      <Demo
+        label="모바일 쪽 넘기기 (P6-11)"
+        note="①이야기 ②공책 ③결과 번호 탭 + 책 위 좌우 스와이프(에디터·코드 키보드 안은 제외). ③결과 점: 실행 전 없음 · 통과 초록 · 고칠 곳 금색. 폰 키보드가 올라오면 코드 키보드가 키보드 윗변에 붙음(퀘스트 화면)"
+        surface="card"
+      >
+        <QuestTabsDemo />
       </Demo>
     </Section>
   );

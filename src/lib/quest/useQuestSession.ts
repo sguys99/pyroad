@@ -680,12 +680,14 @@ export function useQuestSession({
       setEarnedXP(null);
       setReviewRun(review);
       liveOutput.reset();
+      // 모바일은 누르자마자 결과 쪽으로 (§12-Q55): 실행 중 글자·멈추기(·P11 turtle 그림)가 실행 버튼과 한 화면에 안 보이는 문제(P0-06)를
+      // 떠 있는 버튼 대신 결과 쪽 자동 이동으로 푼다. 결과 쪽에는 실행 중 멈추기 버튼이 있다 (P6-11)
+      setTab('result');
 
       const result = await runCode(codeToRun, { onStdout: liveOutput.append });
       if (!aliveRef.current) return 'stay';
       setRunResult(result);
       setLastRunCode(result.isStopped ? null : codeToRun);
-      setTab('result');
 
       // 아이가 멈추기를 눌렀음 → 채점·피드백 없이 끝
       if (result.isStopped) return 'stay';
