@@ -41,6 +41,10 @@ import { RigSection } from './_catalog/RigSection';
 import { SocialLoginSection } from './_catalog/AuthSections';
 import {
   EditorSection,
+  RunControlsSection,
+  OutputPanelSection,
+  ErrorStagingSection,
+  SuccessStagingSection,
   ShareCardSection,
   SoundSection,
 } from './_catalog/ExtraSections';
@@ -49,6 +53,7 @@ import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
 import { PwaSection } from './_catalog/PwaSection';
 import { WorldMapSection } from './_catalog/WorldMapSection';
+import { CelebrationSection } from './_catalog/CelebrationSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -100,6 +105,11 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
     group: '기타',
     items: [
       ['editor', '코드 에디터'],
+      ['run-controls', '실행 버튼'],
+      ['output-slip', '결과 쪽지'],
+      ['error-staging', '실패 연출'],
+      ['success-staging', '성공 연출'],
+      ['celebrations', '축하 오버레이'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
@@ -201,6 +211,11 @@ export function DesignCatalog({
               <SocialLoginSection />
               <RigSection />
               <EditorSection />
+              <RunControlsSection />
+              <OutputPanelSection />
+              <ErrorStagingSection />
+              <SuccessStagingSection />
+              <CelebrationSection />
               <ShareCardSection />
               <SoundSection />
               <LegalSection />

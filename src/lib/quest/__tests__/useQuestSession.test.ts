@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
   upserts: [] as Array<{ payload: Record<string, unknown>; options: unknown }>,
   refresh: vi.fn(),
   confetti: vi.fn(),
+  resetConfetti: vi.fn(),
 }));
 
 vi.mock('@/lib/pyodide/PyodideProvider', () => ({
@@ -36,10 +37,16 @@ vi.mock('@/lib/tutor/useTutor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/tutor/useTutor')>()),
   useTutor: () => mocks.tutor,
 }));
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: mocks.refresh, push: vi.fn() }),
+// Next의 useRouter처럼 같은 객체 (렌더마다 새 객체면 router를 deps로 둔 effect가 매번 정리됨)
+const router = vi.hoisted(() => ({
+  refresh: (): void => {},
+  push: (): void => {},
 }));
-vi.mock('@/lib/confetti', () => ({ fireConfetti: mocks.confetti }));
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
+vi.mock('@/lib/confetti', () => ({
+  fireConfetti: mocks.confetti,
+  resetConfetti: mocks.resetConfetti,
+}));
 vi.mock('@/lib/supabase/loadClient', () => ({
   loadBrowserClient: async () => ({
     from: () => ({
@@ -59,6 +66,7 @@ import {
   AUTO_SAVE_DELAY_MS,
   STEP_ADVANCE_DELAY_MS,
   CELEBRATION_DELAY_MS,
+  ASK_QUESTIONS,
   type QuestSessionOptions,
 } from '../useQuestSession';
 
@@ -210,7 +218,9 @@ beforeEach(() => {
   mocks.tutor.setIsLoading.mockReset();
   mocks.upserts.length = 0;
   mocks.refresh.mockReset();
+  router.refresh = mocks.refresh;
   mocks.confetti.mockReset();
+  mocks.resetConfetti.mockReset();
   routes = {
     '/api/quest/validate': () => ({ json: { passed: true } }),
     '/api/quest/complete': () => ({ json: completion() }),
@@ -223,7 +233,6 @@ beforeEach(() => {
     }),
   };
   stubFetch();
-  vi.spyOn(window, 'confirm').mockReturnValue(true);
 });
 
 afterEach(() => {
@@ -419,6 +428,52 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(mocks.refresh).not.toHaveBeenCalled();
   });
 
+  it('완료한 퀘스트를 다시 풀면 복습: 실행·채점·컨페티는 하고 완료 API·튜터는 부르지 않는다 (Q57)', async () => {
+    const { result } = renderHook(() =>
+      useQuestSession(
+        options(
+          CODE_QUEST,
+          progressRow({ status: 'completed', code_submitted: 'print(10)' }),
+        ),
+      ),
+    );
+    await act(async () => {
+      await flush();
+    });
+    expect(result.current.completion).toBe('before');
+    // 첫 진입은 저장된 코드 그대로
+    expect(result.current.code).toBe('print(10)');
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(mocks.runtime.runCode).toHaveBeenCalledTimes(1);
+    expect(callsTo('/api/quest/validate')).toHaveLength(1);
+    expect(callsTo('/api/quest/complete')).toHaveLength(0);
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+    expect(mocks.confetti).toHaveBeenCalledTimes(1);
+    expect(result.current.validation?.passed).toBe(true);
+    expect(result.current.completion).toBe('review');
+    expect(result.current.earnedXP).toBeNull();
+  });
+
+  it('처음 통과하면 completion은 just, 그다음 다시 풀어 통과하면 review', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    expect(result.current.completion).toBeNull();
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.completion).toBe('just');
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(callsTo('/api/quest/complete')).toHaveLength(1);
+    expect(result.current.completion).toBe('review');
+  });
+
   it('완료 기록에 실패하면 완료하지 않고 다시 누를 수 있다 (B06)', async () => {
     routes['/api/quest/complete'] = () => ({
       status: 500,
@@ -433,6 +488,51 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.messages.at(-1)).toEqual({
       role: 'system',
       content: '잠시 뒤에 다시 해 볼까요?',
+    });
+  });
+
+  it('오류·오답 실행은 AI 피드백을 자동으로 부르지 않고, 더 물어보기를 누르면 대화를 열고 그 결과로 묻는다 (Q56)', async () => {
+    const ERR = 'Traceback\nNameError: name x is not defined';
+    mocks.runtime.runCode.mockResolvedValue({
+      stdout: '',
+      stderr: ERR,
+      success: false,
+      hadException: true,
+      outcome: 'error',
+    });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    act(() => result.current.setCode('print(x)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+
+    // 출력이 다름도 자동 호출 없음
+    mocks.runtime.runCode.mockResolvedValue(OK_RUN);
+    routes['/api/quest/validate'] = () => ({ json: { passed: false } });
+    act(() => result.current.setCode('print(1)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+
+    expect(result.current.askOpen).toBe(false);
+    await act(async () => {
+      result.current.askAboutRun();
+      await flush();
+    });
+    expect(result.current.askOpen).toBe(true);
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'code_feedback',
+      quest_id: 'q-code',
+      student_code: 'print(1)',
+      execution_result: { stdout: '10\n', stderr: '', passed: false },
     });
   });
 
@@ -464,7 +564,7 @@ describe('useQuestSession: 실행·채점·완료', () => {
 // ── 프로젝트 단계 ──────────────────────────────────────────────────────
 
 describe('useQuestSession: 프로젝트 단계 진행', () => {
-  it('단계를 통과하면 1.5초 뒤 통과한 코드로 다음 단계로 간다 (그 사이 고친 코드가 아니라)', async () => {
+  it('단계를 통과하면 박자(STEP_ADVANCE_DELAY_MS) 뒤 통과한 코드로 다음 단계로 간다 (그 사이 고친 코드가 아니라)', async () => {
     const { result } = renderHook(() =>
       useQuestSession(options(PROJECT_QUEST)),
     );
@@ -498,6 +598,61 @@ describe('useQuestSession: 프로젝트 단계 진행', () => {
       current_step: 2,
       step_submissions: { '1': 'name = "파이"' },
     });
+  });
+
+  it('"다음 단계" 박자: 통과한 단계를 알리고, 건너뛰면 바로 넘어가며 예약한 넘김은 다시 돌지 않는다 (P6-12)', async () => {
+    const { result } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
+    act(() => result.current.setCode('name = "파이"'));
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(result.current.stepCleared).toBe(1);
+    expect(result.current.tab).toBe('result');
+
+    act(() => result.current.skipStepBeat());
+    expect(result.current.stepCleared).toBeNull();
+    expect(result.current.currentStep).toBe(2);
+    // 모바일: 다음 단계 코드를 쓸 공책 쪽으로
+    expect(result.current.tab).toBe('code');
+    expect(result.current.isSubmitting).toBe(false);
+
+    // 남은 타이머가 한 번 더 넘기지 않는다 (2 → 3 아님)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(STEP_ADVANCE_DELAY_MS);
+      await flush();
+    });
+    expect(result.current.currentStep).toBe(2);
+    expect(mocks.upserts.at(-1)!.payload).toMatchObject({ current_step: 2 });
+  });
+
+  it('단계 통과는 박자 전에 저장: 박자 중에 떠나도 다음 단계가 남는다 (P6-16)', async () => {
+    const { result, unmount } = renderHook(() =>
+      useQuestSession(options(PROJECT_QUEST)),
+    );
+    // 고친 직후 실행: 고친 코드의 자동 저장 타이머가 박자 중에 남아 있다
+    act(() => result.current.setCode('name = "파이"'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.stepCleared).toBe(1);
+    expect(result.current.currentStep).toBe(1);
+    expect(mocks.upserts.at(-1)!.payload).toEqual({
+      user_id: 'u1',
+      quest_id: 'q-proj',
+      code_submitted: 'name = "파이"\nscore = ___',
+      current_step: 2,
+      step_submissions: { '1': 'name = "파이"' },
+    });
+    // 박자 중 자동 저장 타이머가 예전 단계로 덮어쓰지 않는다
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(AUTO_SAVE_DELAY_MS);
+      await flush();
+    });
+    expect(mocks.upserts.at(-1)!.payload).toMatchObject({ current_step: 2 });
+    unmount();
   });
 
   it('B10 회귀: 황금키로 연 중간 단계는 정답 코드를 저장하고 다음 단계로 간다 (예전 코드 아님)', async () => {
@@ -624,6 +779,7 @@ describe('useQuestSession: 황금키', () => {
       stdout: '10\n',
     });
     expect(result.current.isCompleted).toBe(true);
+    expect(result.current.usedGoldenKey).toBe(true);
     expect(result.current.validation?.passed).toBe(true);
     expect(result.current.nextQuestId).toBe('q-next');
     expect(result.current.celebrations).toEqual([
@@ -647,26 +803,42 @@ describe('useQuestSession: 황금키', () => {
     await act(async () => {
       await result.current.handleGoldenKeyUse();
     });
-    expect(window.confirm).not.toHaveBeenCalled();
     expect(callsTo('/api/quest/golden-key')).toHaveLength(0);
     expect(result.current.isCompleted).toBe(false);
     expect(result.current.messages.at(-1)?.role).toBe('system');
-  });
-
-  it('확인 창에서 취소하면 아무것도 하지 않는다', async () => {
-    vi.mocked(window.confirm).mockReturnValue(false);
-    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
-    await act(async () => {
-      await result.current.handleGoldenKeyUse();
-    });
-    expect(callsTo('/api/quest/golden-key')).toHaveLength(0);
-    expect(result.current.isSubmitting).toBe(false);
   });
 });
 
 // ── 힌트 ──────────────────────────────────────────────────────────────
 
 describe('useQuestSession: 힌트', () => {
+  it('받은 힌트는 단계·번호가 붙은 쪽지 메시지로 남는다 (P6-09)', async () => {
+    mocks.tutor.sendTutorStreamRequest.mockImplementation(
+      async (req: { type: string }) =>
+        req.type === 'hint_generator'
+          ? { message: 'print()를 써 봐요', is_fallback: true }
+          : { message: '안내', is_fallback: false },
+    );
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    // 퀘스트 소개가 대화를 채운 뒤
+    await act(async () => {
+      await flush();
+    });
+    await act(async () => {
+      await result.current.handleHintRequest();
+    });
+    const notes = result.current.messages.filter((m) => m.hint);
+    expect(notes).toEqual([
+      { role: 'system', content: '힌트 1/3', hint: { level: 1, step: 1 } },
+      {
+        role: 'tutor',
+        content: 'print()를 써 봐요',
+        isFallback: true,
+        hint: { level: 1, step: 1 },
+      },
+    ]);
+  });
+
   it('힌트 글자를 하나도 못 받고 실패하면 횟수와 라벨을 되돌린다', async () => {
     mocks.tutor.sendTutorStreamRequest.mockImplementation(
       async (req: { type: string }) => {
@@ -758,7 +930,7 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
     });
   });
 
-  it('오답 피드백이 한도에 걸리면 한도 문구', async () => {
+  it('더 물어본 오답 피드백이 한도에 걸리면 한도 문구', async () => {
     routes['/api/quest/validate'] = () => ({ json: { passed: false } });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
@@ -776,6 +948,10 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
       await result.current.handleRun();
       await flush();
     });
+    await act(async () => {
+      result.current.askAboutRun();
+      await flush();
+    });
     expect(result.current.messages.at(-1)).toEqual({
       role: 'tutor',
       content: LIMIT,
@@ -783,7 +959,7 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
     });
   });
 
-  it('오답 피드백이 다른 이유로 실패하면 준비한 문구 (저장된 답변)', async () => {
+  it('더 물어본 오답 피드백이 다른 이유로 실패하면 준비한 문구 (저장된 답변)', async () => {
     routes['/api/quest/validate'] = () => ({ json: { passed: false } });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
@@ -800,10 +976,210 @@ describe('useQuestSession: 튜터 요청 한도 문구 (P1-19)', () => {
       await result.current.handleRun();
       await flush();
     });
+    await act(async () => {
+      result.current.askAboutRun();
+      await flush();
+    });
     expect(result.current.messages.at(-1)).toMatchObject({
       role: 'tutor',
       isFallback: true,
     });
     expect(result.current.messages.at(-1)?.content).not.toBe(LIMIT);
+  });
+});
+
+describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
+  it('what: 소개를 되풀이하지 않고 LLM 없이 지금 할 일만, 프로젝트는 지금 단계 (Q58)', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      result.current.handleAsk('what');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+    expect(result.current.messages.slice(-2)).toMatchObject([
+      { role: 'student', content: ASK_QUESTIONS.what },
+      { role: 'tutor' },
+    ]);
+    expect(result.current.messages.at(-1)?.content).toContain('지금 할 일');
+
+    const project = renderHook(() => useQuestSession(options(PROJECT_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    await act(async () => {
+      project.result.current.handleAsk('what');
+      await flush();
+    });
+    expect(project.result.current.messages.at(-1)?.content).toMatch(
+      /1\/2단계.*이름 출력/,
+    );
+  });
+
+  it('concept: 이 퀘스트 개념 설명(concept_explain) 요청 (Q58)', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      result.current.handleAsk('concept');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'concept_explain',
+      quest_id: 'q-code',
+    });
+    expect(result.current.messages.slice(-2)).toMatchObject([
+      { role: 'student', content: ASK_QUESTIONS.concept },
+      { role: 'tutor', content: '안내' },
+    ]);
+  });
+
+  it('why: 돌린 코드 그대로일 때만, 그 실행 결과로 묻는다', async () => {
+    routes['/api/quest/validate'] = () => ({ json: { passed: false } });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    expect(result.current.canAskWhy).toBe(false);
+    act(() => result.current.setCode('x = 1\nprint(x)'));
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.canAskWhy).toBe(true);
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      result.current.handleAsk('why');
+      await flush();
+    });
+    expect(mocks.tutor.sendTutorStreamRequest.mock.calls[0][0]).toEqual({
+      type: 'code_feedback',
+      quest_id: 'q-code',
+      student_code: 'x = 1\nprint(x)',
+      execution_result: { stdout: '10\n', stderr: '', passed: false },
+    });
+
+    // 코드를 고치면 그 결과는 지금 코드의 것이 아님
+    act(() => result.current.setCode('x = 2\nprint(x)'));
+    expect(result.current.canAskWhy).toBe(false);
+  });
+});
+
+// ── 퀘스트 사이 이동 (P6-15) ───────────────────────────────────────────
+// 퀘스트 페이지는 렌더러를 key={quest.id}로 다시 마운트한다. 앞 퀘스트 세션이 남긴 예약·늦은 응답·컨페티가
+// 다음 퀘스트 화면에 나타나지 않는지 (unmount 뒤 아무 일도 일어나지 않아야 함)
+
+describe('useQuestSession: 퀘스트를 떠나면 앞 퀘스트의 일이 남지 않는다 (P6-15)', () => {
+  it('축하 지연 중에 떠나면 축하가 쌓이지 않고, 떠 있는 컨페티를 지운다', async () => {
+    routes['/api/quest/complete'] = () => ({
+      json: completion({ new_badges: ['first_code'] }),
+    });
+    const { result, unmount } = renderHook(() =>
+      useQuestSession(options(CODE_QUEST)),
+    );
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(mocks.confetti).toHaveBeenCalled();
+    const store = result.current.celebrationStore;
+    unmount();
+    expect(mocks.resetConfetti).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(CELEBRATION_DELAY_MS.code * 2);
+    expect(store.get()).toEqual([]);
+  });
+
+  it('완료 응답이 떠난 뒤에 오면 축하·Router Cache 새로 받기를 하지 않는다', async () => {
+    let answer!: () => void;
+    const gate = new Promise<void>((resolve) => (answer = resolve));
+    const fetchMock = vi.mocked(fetch);
+    const real = fetchMock.getMockImplementation()!;
+    fetchMock.mockImplementation(async (url, init) => {
+      if (url === '/api/quest/complete') await gate;
+      return real(url, init);
+    });
+    routes['/api/quest/complete'] = () => ({
+      json: completion({ new_badges: ['first_code'] }),
+    });
+    const { result, unmount } = renderHook(() =>
+      useQuestSession(options(CODE_QUEST)),
+    );
+    let run!: Promise<unknown>;
+    act(() => {
+      run = result.current.handleRun();
+    });
+    await act(flush);
+    const store = result.current.celebrationStore;
+    unmount();
+    answer();
+    await run;
+    await vi.advanceTimersByTimeAsync(CELEBRATION_DELAY_MS.code * 2);
+    expect(store.get()).toEqual([]);
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+
+  it('진행을 바꾼 퀘스트를 떠날 때만 Router Cache를 새로 받는다 (뒤로 가면 저장한 코드가 보이게)', async () => {
+    const untouched = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(AUTO_SAVE_DELAY_MS);
+      await flush();
+    });
+    untouched.unmount();
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    const edited = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    act(() => edited.result.current.setCode('x = 10'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(AUTO_SAVE_DELAY_MS);
+      await flush();
+    });
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    edited.unmount();
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+
+    const hinted = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await hinted.result.current.handleHintRequest();
+    });
+    hinted.unmount();
+    expect(mocks.refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it('새 퀘스트 세션은 앞 세션과 상태를 나누지 않는다 (코드·결과·힌트·대화·축하 저장소)', async () => {
+    const a = renderHook(() =>
+      useQuestSession(options(CODE_QUEST, progressRow({ hints_used: 2 }))),
+    );
+    act(() => a.result.current.setCode('print("A")'));
+    await act(async () => {
+      await a.result.current.handleRun();
+    });
+    const storeA = a.result.current.celebrationStore;
+    a.unmount();
+
+    const QUEST_B = {
+      ...CODE_QUEST,
+      id: 'q-b',
+      prompt_skeleton: {
+        ...CODE_QUEST.prompt_skeleton,
+        starter_code: 'y = ___',
+      },
+    } as unknown as QuestWithStage;
+    const b = renderHook(() => useQuestSession(options(QUEST_B)));
+    const s = b.result.current;
+    expect(s.code).toBe('y = ___');
+    expect(s.runResult).toBeNull();
+    expect(s.validation).toBeNull();
+    expect(s.isCompleted).toBe(false);
+    expect(s.hintsUsed).toBe(0);
+    expect(s.tab).toBe('story');
+    expect(s.askOpen).toBe(false);
+    expect(s.celebrationStore).not.toBe(storeA);
+    expect(s.celebrations).toEqual([]);
+    expect(s.stepCleared).toBeNull();
+    b.unmount();
   });
 });

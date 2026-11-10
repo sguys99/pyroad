@@ -1,13 +1,15 @@
 'use client';
 
-import { memo, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, m } from 'framer-motion';
-import { sec } from '@/lib/motion/tokens';
+import { sec, tierDuration } from '@/lib/motion/tokens';
 import { X } from 'lucide-react';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import {
   STEP_SPECS,
+  introMs,
   sfxSchedule,
+  stepSummary,
   type CelebrationStep,
 } from '@/lib/celebration/plan';
 import {
@@ -16,6 +18,7 @@ import {
   LEVEL_POP_BURST,
   type ConfettiBurst,
 } from '@/lib/celebration/confettiPresets';
+import { setBackdropQuiet } from '@/lib/celebration/backdropQuiet';
 import { useCelebrationSound } from '@/lib/celebration/sound';
 import { useCelebrationSequence } from '@/lib/celebration/useCelebrationSequence';
 import { fireConfetti, resetConfetti } from '@/lib/confetti';
@@ -29,25 +32,29 @@ import { LevelUpCard } from './celebrations/LevelUpCard';
 import { BadgesCard } from './celebrations/BadgesCard';
 import { GoldenKeyCard } from './celebrations/GoldenKeyCard';
 import { RewardsCard } from './celebrations/RewardsCard';
+import { ChestCard } from './celebrations/ChestCard';
+import './celebrations/celebration.css';
 
-// 모양 (P4-12: 전역 game-ui.css에서 떼어 이 컴포넌트를 쓰는 화면에만 싣는다)
-import '@/components/ui/overlay.css';
 interface QuestCelebrationsProps {
   /** 아직 보여 주지 않은 축하 (useQuestSession.celebrations) */
   events: CelebrationEvent[];
   questId: string;
+  /** 스테이지를 끝낸 카드의 "지도에서 새 길 보기" */
+  worldHref: string;
   /** 앞에서부터 count개를 보여 줬다 */
   onDismiss: (count: number) => void;
 }
 
 /**
- * 축하 시퀀서 (P1-10): 축하 이벤트를 단계로 계획해(`planCelebrations`) 한 번에 하나씩 보여 준다.
+ * 축하 시퀀서 (P1-10 → P6-13 리디자인): 축하 이벤트를 단계로 계획해(`planCelebrations`) 한 번에 하나씩 보여 준다.
  *
- * - 배경(어두운 막)은 시퀀스 내내 그대로이고 카드만 바뀐다 (`AnimatePresence mode="wait"`: 짧은 퇴장 → 스프링 등장).
- *   단계마다 배경이 깜빡이지 않는다.
- * - 넘기기: CTA · 배경 탭 · Enter/Space, 모두 닫기: Esc · "모두 닫기". 단계마다 자동 넘김(카드 아래 막대)
- * - 컨페티·효과음은 카드가 나타날 때 단계 사양(`STEP_SPECS`)대로. 카드가 사라지면 남은 예약도 취소
- * - 연출 단계·reduced-motion은 `useMotionTier()` (P2-15가 실제 단계 감지를 꽂음). reduced면 움직임 0·컨페티 0
+ * - 퀘스트 화면은 이 컴포넌트를 받은 축하가 있을 때만 지연 로드해 그린다(`QuestWorkspace`). 평소에는 chunk도 DOM도 없다
+ * - 배경(어두운 막)은 시퀀스 내내 그대로이고 카드만 바뀐다 (`AnimatePresence mode="wait"`: 짧은 퇴장 → 스프링 등장)
+ * - 카드마다 등장 연출(`introMs`, full 기준·lite 70%) 동안 탭·Enter·Space·Esc는 **끝 상태로 건너뛰기**(§12-Q28).
+ *   끝 상태에서는 Enter·Space·배경 탭 = 다음, Esc·"모두 닫기" = 모두 닫기. 단계마다 자동 넘김(카드 아래 막대)
+ * - 컨페티·효과음은 카드가 나타날 때 단계 사양(`STEP_SPECS`)대로. 카드가 사라지거나 건너뛰면 남은 예약도 취소
+ * - 떠 있는 동안 뒤 화면을 조용히(`setBackdropQuiet`: 덮개 뒤 라이브 리그 정지·책 펼침 CSS 애니메이션 멈춤, §2.10)
+ * - 대화 상자: Tab은 카드 안에서만, 닫히면 열기 전 포커스로, 카드가 바뀔 때 받은 것을 한 줄로 읽어 줌(aria-live)
  *
  * memo + 안정된 props(이벤트 배열은 다 보여 준 뒤 비울 때만 바뀜)라서 퀘스트 셸이 튜터 스트리밍 등으로
  * 다시 그려져도 오버레이는 다시 그려지지 않는다 (§2.10).
@@ -55,6 +62,7 @@ interface QuestCelebrationsProps {
 export const QuestCelebrations = memo(function QuestCelebrations({
   events,
   questId,
+  worldHref,
   onDismiss,
 }: QuestCelebrationsProps) {
   const seq = useCelebrationSequence({ events, onDismiss });
@@ -62,33 +70,62 @@ export const QuestCelebrations = memo(function QuestCelebrations({
   const { step, next, skipAll } = seq;
   const dialogRef = useRef<HTMLDivElement>(null);
   const open = step !== null;
-  // 지금 보여 주는 단계. 퇴장 중인 카드는 예약해 둔 컨페티·효과음을 쏘지 않는다
+  const stepId = step?.id ?? null;
+
+  // 등장 연출이 끝났는지 (시간이 다 되었거나 건너뜀). 동작 줄이기·0초면 처음부터 끝
+  const [settledId, setSettledId] = useState<string | null>(null);
+  // minimal은 카드 안 연출이 없으므로(페이드만) 처음부터 끝 상태
+  const playMs =
+    step && budget.springs ? tierDuration(introMs(step), budget) : 0;
+  const settled = !step || playMs === 0 || settledId === stepId;
+  const settle = useCallback(() => setSettledId(stepId), [stepId]);
+  useEffect(() => {
+    if (settled) return;
+    const timer = setTimeout(settle, playMs);
+    return () => clearTimeout(timer);
+  }, [settled, settle, playMs]);
+
+  // 지금 보여 주는 단계. 퇴장 중이거나 건너뛴 카드는 예약해 둔 컨페티·효과음을 쏘지 않는다
   // (퇴장 연출 동안 DOM에 남아 있으므로 언마운트 정리만으로는 늦음)
   const activeStepRef = useRef<string | null>(null);
-  activeStepRef.current = step?.id ?? null;
+  activeStepRef.current = step && settledId !== step.id ? step.id : null;
 
-  // 키보드: Enter/Space 다음, Esc 모두 닫기, Tab은 카드 안에서만 돈다
+  // 뒤 화면 조용히
+  useEffect(() => {
+    if (!open) return;
+    setBackdropQuiet(true);
+    return () => setBackdropQuiet(false);
+  }, [open]);
+
+  // 키보드: 연출 중엔 Enter·Space·Esc = 끝 상태로, 그 뒤 Enter·Space 다음, Esc 모두 닫기. Tab은 카드 안에서만
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       const target = e.target instanceof Element ? e.target : null;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        skipAll();
-      } else if (e.key === 'Enter' || e.key === ' ') {
-        // "모두 닫기" 버튼 위에서는 그 버튼이 처리
-        if (target?.closest('[data-celebration-skip]')) return;
-        e.preventDefault();
-        next();
-      } else if (e.key === 'Tab') {
+      const isAdvance = e.key === 'Enter' || e.key === ' ';
+      if (e.key === 'Tab') {
         trapFocus(e, dialogRef.current);
+        return;
       }
+      if (e.key !== 'Escape' && !isAdvance) return;
+      // 카드 안 버튼 위의 Enter·Space는 그 버튼이 처리 ("모두 닫기"·지도로·여기 있을래요)
+      if (
+        isAdvance &&
+        target?.closest(
+          '[data-celebration-root] a, [data-celebration-root] button:not([data-testid="celebration-cta"])',
+        )
+      )
+        return;
+      e.preventDefault();
+      if (!settled) settle();
+      else if (e.key === 'Escape') skipAll();
+      else next();
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [open, next, skipAll]);
+  }, [open, next, skipAll, settled, settle]);
 
-  // 닫히면 열기 전 포커스로 돌려준다 (실행 버튼 등). CTA의 autoFocus보다 먼저 잡아야 하므로 렌더 중에 읽는다
+  // 닫히면 열기 전 포커스로 돌려준다 (실행 버튼 등). CTA 포커스보다 먼저 잡아야 하므로 렌더 중에 읽는다
   const restoreFocusRef = useRef<HTMLElement | null>(null);
   if (open && !restoreFocusRef.current && typeof document !== 'undefined') {
     const active = document.activeElement;
@@ -116,6 +153,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
           <m.div
             key="celebration-backdrop"
             data-testid="celebration-overlay"
+            data-celebration-root
             data-reduced={reduced ? 'true' : 'false'}
             className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-scrim p-4"
             initial={{ opacity: 0 }}
@@ -125,19 +163,22 @@ export const QuestCelebrations = memo(function QuestCelebrations({
               transition: reduced ? { duration: 0 } : { duration: sec('fast') },
             }}
             transition={fade}
-            onClick={next}
+            onClick={() => (settled ? next() : settle())}
           >
-            {/* 카드 뒤를 은은하게 밝히는 정적 조명 (흐림 필터 없이, lite에서도 그대로) */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,color-mix(in_srgb,var(--on-scrim)_16%,transparent),transparent_55%)]"
-            />
-
             <SequenceChrome
               index={seq.index}
               total={seq.total}
               onSkip={skipAll}
             />
+
+            {/* 받은 것을 한 줄로 (카드가 바뀔 때마다 읽힘) */}
+            <p
+              className="sr-only"
+              aria-live="polite"
+              data-testid="celebration-live"
+            >
+              {stepSummary(step)}
+            </p>
 
             <div
               ref={dialogRef}
@@ -145,7 +186,12 @@ export const QuestCelebrations = memo(function QuestCelebrations({
               aria-modal="true"
               aria-labelledby="celebration-title"
               className="relative w-full max-w-sm"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                // 카드 안 빈 곳을 눌러도 연출은 끝 상태로 (버튼은 각자 동작)
+                if (!settled && !(e.target as Element).closest('a, button'))
+                  settle();
+              }}
             >
               <AnimatePresence mode="wait">
                 <StepFrame
@@ -153,7 +199,9 @@ export const QuestCelebrations = memo(function QuestCelebrations({
                   step={step}
                   activeStepRef={activeStepRef}
                   questId={questId}
+                  worldHref={worldHref}
                   budget={budget}
+                  settled={settled}
                   autoMs={seq.autoMs}
                   paused={seq.paused}
                   onNext={next}
@@ -207,10 +255,10 @@ function SequenceChrome({
           e.stopPropagation();
           onSkip();
         }}
-        className="flex min-h-9 min-w-20 items-center justify-end gap-1 whitespace-nowrap rounded-full px-2 text-xs font-medium text-on-scrim outline-none focus-visible:ring-2 focus-visible:ring-on-scrim/70"
+        className="flex min-h-11 min-w-20 items-center justify-end gap-1 whitespace-nowrap rounded-full px-2 text-small font-medium text-on-scrim outline-none focus-visible:ring-2 focus-visible:ring-on-scrim/70"
       >
         {total > 1 ? '모두 닫기' : '닫기'}
-        <X className="h-3.5 w-3.5" aria-hidden />
+        <X className="h-4 w-4" aria-hidden />
       </button>
     </div>
   );
@@ -220,19 +268,23 @@ interface StepFrameProps {
   step: CelebrationStep;
   activeStepRef: React.RefObject<string | null>;
   questId: string;
+  worldHref: string;
   budget: MotionBudget;
+  settled: boolean;
   autoMs: number | null;
   paused: boolean;
   onNext: () => void;
   onHover: (hovering: boolean) => void;
 }
 
-/** 카드 하나 (단계마다 새로 마운트). 나타날 때 컨페티·효과음을 예약하고, 사라지면 취소한다 */
+/** 카드 하나 (단계마다 새로 마운트). 나타날 때 컨페티·효과음을 예약하고, 사라지거나 건너뛰면 취소한다 */
 function StepFrame({
   step,
   activeStepRef,
   questId,
+  worldHref,
   budget,
+  settled,
   autoMs,
   paused,
   onNext,
@@ -264,7 +316,7 @@ function StepFrame({
         fireBurst(burst, b),
       );
     }
-    for (const cue of sfxSchedule(s)) {
+    for (const cue of sfxSchedule(s, b)) {
       at(cue.at, () => snd.play(cue.id, { rate: cue.rate }));
     }
     return () => timers.forEach(clearTimeout);
@@ -279,10 +331,9 @@ function StepFrame({
   return (
     <m.div
       data-testid={`celebration-step-${step.kind}`}
-      className={cn(
-        'relative mx-auto flex flex-col items-center gap-3 overflow-hidden rounded-3xl bg-card px-6 pb-7 pt-6 text-center shadow-xl',
-        step.kind === 'golden_key' ? 'max-w-xs' : 'w-full',
-      )}
+      data-kind={step.kind}
+      data-settled={settled || undefined}
+      className="cel-card"
       initial={motion.initial}
       animate={motion.animate}
       exit={motion.exit}
@@ -293,15 +344,22 @@ function StepFrame({
       <StepContent
         step={step}
         questId={questId}
+        worldHref={worldHref}
         budget={budget}
+        settled={settled}
         onNext={onNext}
         onPop={onPop}
       />
+      {budget.effectDuration > 0 && (
+        <span className="cel-skip" aria-hidden>
+          누르면 건너뛰기
+        </span>
+      )}
       {showCountdown && (
         <span
           aria-hidden
           data-testid="celebration-countdown"
-          className="celebration-countdown absolute inset-x-0 bottom-0 h-1 bg-primary/35"
+          className="celebration-countdown"
           style={{
             animationDuration: `${autoMs}ms`,
             animationPlayState: paused ? 'paused' : 'running',
@@ -315,13 +373,17 @@ function StepFrame({
 function StepContent({
   step,
   questId,
+  worldHref,
   budget,
+  settled,
   onNext,
   onPop,
 }: {
   step: CelebrationStep;
   questId: string;
+  worldHref: string;
   budget: MotionBudget;
+  settled: boolean;
   onNext: () => void;
   onPop: () => void;
 }) {
@@ -331,7 +393,6 @@ function StepContent({
         <GoldenKeyCard
           kind={step.event.kind}
           questTitle={step.event.questTitle}
-          budget={budget}
           onNext={onNext}
         />
       );
@@ -341,6 +402,8 @@ function StepContent({
           stage={step.stage}
           questId={questId}
           budget={budget}
+          settled={settled}
+          worldHref={worldHref}
           onNext={onNext}
         />
       );
@@ -351,6 +414,8 @@ function StepContent({
           xpGained={step.xpGained}
           stage={step.stage}
           budget={budget}
+          settled={settled}
+          worldHref={worldHref}
           onNext={onNext}
         />
       );
@@ -361,20 +426,31 @@ function StepContent({
           fromLevel={step.event.fromLevel}
           title={step.event.title}
           budget={budget}
+          settled={settled}
           onNext={onNext}
           onPop={onPop}
         />
       );
     case 'badges':
-      return (
-        <BadgesCard badges={step.badges} budget={budget} onNext={onNext} />
-      );
+      return <BadgesCard badges={step.badges} onNext={onNext} />;
     case 'rewards':
       return (
         <RewardsCard
           stars={step.stars}
           coins={step.coins}
           budget={budget}
+          settled={settled}
+          onNext={onNext}
+        />
+      );
+    case 'chest':
+      return (
+        <ChestCard
+          stageTitle={step.event.stageTitle}
+          goal={step.event.goal}
+          contents={step.event.contents}
+          budget={budget}
+          settled={settled}
           onNext={onNext}
         />
       );

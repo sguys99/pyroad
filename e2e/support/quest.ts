@@ -59,6 +59,19 @@ export async function runCode(page: Page, code: string): Promise<void> {
   await runButton(page).click();
 }
 
+/**
+ * "파이뱀에게 물어보기"를 열어 대화를 보인다 (P6-10). 넓은 화면은 이야기 쪽 안에서 펼침, 좁은 화면은 바텀시트.
+ * 돌려주는 것은 대화가 들어 있는 상자
+ */
+export async function openTutorChat(page: Page): Promise<Locator> {
+  await page.getByTestId('ask-pybaem').click();
+  const chat = page
+    .getByTestId('ask-panel')
+    .or(page.getByRole('dialog', { name: '파이뱀에게 물어보기' }));
+  await expect(chat.getByTestId('chat-log')).toBeVisible();
+  return chat;
+}
+
 /** 월드맵에서 해당 스테이지 버튼 (StageNode 는 링크가 아니라 버튼이고, 잠기면 disabled) */
 export function stageButton(page: Page, stageTitle: string): Locator {
   return page.getByRole('button', { name: new RegExp(stageTitle) });
@@ -74,6 +87,20 @@ export async function openStageSheet(
   await expect(sheet).toBeVisible();
   await expect(page).toHaveURL(/[?&]stage=/);
   return sheet;
+}
+
+/**
+ * 앞 축하 카드를 Enter 로 넘겨(연출 중이면 첫 Enter 는 끝 상태로, P6-13) 맨 뒤 스테이지 클리어 카드까지 간다.
+ * 돌려주는 것은 그 카드
+ */
+export async function toStageClear(page: Page): Promise<Locator> {
+  const card = page.getByTestId('celebration-step-stage_clear');
+  await expect(page.getByTestId('celebration-overlay')).toBeVisible();
+  await expect(async () => {
+    if (!(await card.isVisible())) await page.keyboard.press('Enter');
+    await expect(card).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 20_000 });
+  return card;
 }
 
 /**

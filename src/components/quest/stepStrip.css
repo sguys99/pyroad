@@ -1,0 +1,202 @@
+/* 프로젝트 단계 띠 (P6-12, StepStrip.tsx). 공책 쪽 맨 위 장(章) 띠: 눈썹 글자 + 칸 막대 + 지금 목표.
+   스테이지 진행 점(stageProgress.css: 둥근 점 + 금색 알약)과 다르게 납작한 칸 막대·주색 초록만. 값은 토큰 변수만 */
+
+.qp {
+  display: grid;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.875rem;
+  box-shadow: 0 1px 0 var(--line);
+}
+/* 한 줄: 눈썹 · 칸 막대 · (박자 동안) 건너뛰기 */
+.qp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 1.75rem;
+}
+.qp-k {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 4.5rem;
+  color: var(--primary-text);
+  font-size: var(--text-kicker);
+  font-weight: var(--text-kicker--font-weight);
+  letter-spacing: var(--text-kicker--letter-spacing);
+  line-height: var(--text-kicker--line-height);
+}
+.qp-k > svg {
+  width: 1rem;
+  height: 1rem;
+}
+/* 건너뛰기: 테두리 없는 글자 버튼, 누르는 자리 44px */
+.qp-skip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 44px;
+  margin-block: -0.5rem;
+  padding: 0 0.25rem 0 0.75rem;
+  border-radius: var(--round-pill);
+  color: var(--primary-text);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+.qp-skip > svg {
+  width: 1rem;
+  height: 1rem;
+}
+/* 좁은 쪽(360px 화면): 박자 동안 눈썹이 "N단계 통과!"로 길어지고 건너뛰기가 붙어 칸 막대가 거의 사라지므로
+   건너뛰기는 화살표만(이름은 그대로 낭독) (P6-16) */
+@container (max-width: 24rem) {
+  .qp-skip {
+    justify-content: center;
+    min-width: 44px;
+    padding: 0;
+  }
+  .qp-skip-t {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+.qp-skip:hover {
+  background: var(--primary-soft);
+}
+.qp-skip:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* 칸 막대: 끝냄 = 주색 · 지금 = 옅은 주색 + 주색 테 · 아직 = 선 색 */
+.qp-track {
+  flex: 1;
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.qp-seg {
+  position: relative;
+  flex: 1;
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: var(--round-pill);
+  background: var(--line);
+}
+.qp-seg[data-state='current'] {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1.5px var(--primary);
+}
+.qp-seg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.qp-seg[data-state='done']::after {
+  transform: none;
+}
+
+.qp-goal {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+  overflow-wrap: anywhere;
+}
+@media (min-width: 64rem) {
+  .qp {
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+  }
+  .qp-goal {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+}
+.qp-next {
+  display: inline-block;
+  margin-right: 0.375rem;
+  padding: 0 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-size: var(--text-caption);
+  line-height: 1.6;
+  vertical-align: 0.0625rem;
+}
+
+/* "다음 단계" 박자: 통과한 칸이 왼쪽부터 차오름 → 눈썹 톡 → 다음 목표가 아래에서 올라옴.
+   full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 없음 (모두 한 번만) */
+.qp-seg[data-fresh]::after {
+  animation: qp-fill var(--dur-slow) var(--easing-out) both;
+}
+.qp[data-beat] .qp-k {
+  animation: qp-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+.qp[data-beat] .qp-goal {
+  animation: qp-rise var(--spring-body-dur) var(--spring-body) 0.25s both;
+}
+@keyframes qp-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes qp-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes qp-rise {
+  from {
+    transform: translateY(0.5rem);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes qp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+:root[data-motion='lite'] .qp[data-beat] :is(.qp-k, .qp-goal) {
+  animation: qp-rise var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qp[data-beat] :is(.qp-k, .qp-goal),
+:root[data-motion='minimal'] .qp-seg[data-fresh]::after {
+  animation: qp-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qp[data-beat] :is(.qp-k, .qp-goal),
+:root[data-reduced='true'] .qp-seg[data-fresh]::after {
+  animation: none;
+}
+:root[data-reduced='true'] .qp-seg[data-fresh]::after {
+  transform: none;
+}

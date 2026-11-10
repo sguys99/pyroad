@@ -26,6 +26,7 @@ import {
 } from '../alert-dialog';
 import { Toast, ToastRegion, ToastViewport, useToastQueue } from '../toast';
 import { SpeechBubble, TYPING_CHAR_MS } from '../speech-bubble';
+import { DialogueBox } from '../dialogue-box';
 import { RewardIcon, Stars } from '../reward-icon';
 
 vi.mock('@/components/providers/soundContext', () => ({
@@ -267,5 +268,52 @@ describe('RewardIcon · Stars', () => {
     const stars = screen.getByRole('img', { name: '별 2개 / 3개' });
     expect(stars.querySelectorAll('[data-reward="star"]')).toHaveLength(2);
     expect(stars.querySelectorAll('[data-reward="starEmpty"]')).toHaveLength(1);
+  });
+});
+
+describe('DialogueBox', () => {
+  const TEXT = '이야기를 읽고 해 볼 일을 확인해요';
+  const renderBox = (tier: 'full' | 'minimal', character = vi.fn(() => null)) =>
+    render(
+      <MotionTierProvider tier={tier} reduced="off">
+        <DialogueBox speaker="파이뱀" text={TEXT} character={character} />
+      </MotionTierProvider>,
+    );
+
+  it('full: 타자 중에는 말하는 중·포커스 가능, 누르면 남은 글자를 한 번에. 낭독기 문장은 aria-live 하나', () => {
+    vi.useFakeTimers();
+    const character = vi.fn(() => null);
+    renderBox('full', character);
+    const box = document.querySelector('.g-dialogue')!;
+    expect(box).toHaveAttribute('tabindex', '0');
+    expect(character).toHaveBeenLastCalledWith(true);
+    const live = box.querySelectorAll('[aria-live]');
+    expect(live).toHaveLength(1);
+    expect(live[0]).toHaveTextContent(TEXT);
+
+    fireEvent.click(box);
+    expect(box.querySelector('.g-bubble-rest')?.textContent).toBe('');
+    expect(box).not.toHaveAttribute('tabindex');
+    expect(character).toHaveBeenLastCalledWith(false);
+    // 넘긴 뒤 타이머가 남아 다시 글자를 줄이지 않는다
+    act(() => {
+      vi.advanceTimersByTime(TYPING_CHAR_MS * 5);
+    });
+    expect(box.querySelector('.g-bubble-rest')?.textContent).toBe('');
+  });
+
+  it('Enter로도 넘긴다', () => {
+    vi.useFakeTimers();
+    renderBox('full');
+    const box = document.querySelector('.g-dialogue')!;
+    fireEvent.keyDown(box, { key: 'Enter' });
+    expect(box.querySelector('.g-bubble-rest')?.textContent).toBe('');
+  });
+
+  it('minimal: 처음부터 전체 문장, 넘길 것이 없어 포커스 대상이 아님', () => {
+    renderBox('minimal');
+    const box = document.querySelector('.g-dialogue')!;
+    expect(box.querySelector('.g-bubble-rest')?.textContent).toBe('');
+    expect(box).not.toHaveAttribute('tabindex');
   });
 });

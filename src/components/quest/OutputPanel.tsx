@@ -1,302 +1,426 @@
 'use client';
 
-import { useEffect, useRef, useSyncExternalStore } from 'react';
-import { CheckCircle, Hand, Terminal } from 'lucide-react';
-import { m, AnimatePresence } from 'framer-motion';
-import { sec } from '@/lib/motion/tokens';
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
+import {
+  Check,
+  CornerDownLeft,
+  Flag,
+  Hand,
+  Hourglass,
+  Loader2,
+  MessageCircleQuestion,
+  Search,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
-import type {
-  PybaemExpression,
-  BugBugExpression,
-} from '@/components/characters/expressions';
-
-function TutorAvatar({
-  expression = 'happy',
-}: {
-  expression?: PybaemExpression;
-}) {
-  return (
-    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-      <CharacterAvatar character="pybaem" expression={expression} size="sm" />
-    </div>
-  );
-}
-
-function BugBugHelper({ expression }: { expression: BugBugExpression }) {
-  return (
-    <AnimatePresence>
-      <m.div
-        data-testid="bugbug-helper"
-        initial={{ opacity: 0, x: 8 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 8 }}
-        transition={{ duration: sec('base'), delay: sec('base') }}
-        className="flex h-6 w-6 shrink-0 items-center justify-center"
-      >
-        <CharacterAvatar character="bugbug" expression={expression} size="sm" />
-      </m.div>
-    </AnimatePresence>
-  );
-}
+import type { ValidationType } from '@/lib/quest/validation';
+import { errorLineFromStderr } from '@/lib/editor/stderrLine';
+import { DURATION } from '@/lib/motion/tokens';
+import { BugbugAside, BugbugMakeup } from './BugbugAside';
+import {
+  PassStamp,
+  RewardStrip,
+  useSuccessRun,
+  type QuestReward,
+} from './QuestSuccess';
+import {
+  POP_LINES,
+  errorSummary,
+  mismatchTip,
+  outputLines,
+} from './outputSlip';
+import './outputPanel.css';
 
 const NO_LIVE_OUTPUT = { text: '', clipped: false };
 const subscribeNothing = () => () => {};
 const getNoLiveOutput = () => NO_LIVE_OUTPUT;
 
-/** 실행 중 출력. 이 컴포넌트만 출력 조각마다 다시 그린다 (셸은 그대로) */
-function LiveOutput({ store }: { store?: LiveOutputStore }) {
-  const { text, clipped } = useSyncExternalStore(
+/**
+ * 나온 글자 줄들. 줄마다 쪽지 카드가 튀어나온다(앞 POP_LINES줄만, 연출 단계는 outputPanel.css).
+ * 실행 중(store)과 끝난 뒤(text)를 같은 자리에서 그려서, 실시간으로 이미 나온 줄은 결과가 와도 다시 튀지 않는다.
+ * 실행 중에는 이 컴포넌트만 출력 조각마다 다시 그린다 (셸은 그대로)
+ */
+function OutputLines({
+  store,
+  text,
+}: {
+  store?: LiveOutputStore;
+  text: string;
+}) {
+  const live = useSyncExternalStore(
     store?.subscribe ?? subscribeNothing,
     store?.getSnapshot ?? getNoLiveOutput,
     getNoLiveOutput,
   );
-  const preRef = useRef<HTMLPreElement>(null);
+  const shown = store ? live.text : text;
+  const listRef = useRef<HTMLOListElement>(null);
 
-  // 새 출력이 오면 맨 아래로 (긴 반복문 출력도 마지막 줄이 보이게)
+  // 실행 중 새 출력이 오면 맨 아래로 (긴 반복문 출력도 마지막 줄이 보이게)
   useEffect(() => {
-    const pre = preRef.current;
-    if (pre) pre.scrollTop = pre.scrollHeight;
-  }, [text]);
+    const list = listRef.current;
+    if (store && list) list.scrollTop = list.scrollHeight;
+  }, [store, shown]);
 
-  if (!text) return null;
+  const lines = outputLines(shown);
+  if (!lines.length)
+    return store ? (
+      <p className="qo-empty">주문을 돌리는 중이에요. 글자를 기다려요…</p>
+    ) : null;
   return (
     <>
-      <pre
-        ref={preRef}
-        data-testid="live-output"
-        className={cn(
-          'mt-3 max-h-64 overflow-auto rounded-md bg-muted/50 p-3',
-          'font-mono text-sm leading-relaxed text-foreground',
-        )}
+      <ol
+        ref={listRef}
+        data-testid={store ? 'live-output' : undefined}
+        className="qo-lines"
       >
-        {text}
-      </pre>
-      {clipped && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          출력이 너무 많아서 앞부분만 보여 줘요.
-        </p>
+        {lines.map((line, i) => (
+          <li
+            // 줄 번호가 곧 자리: 새 줄만 새로 그려져 앞줄 연출이 다시 돌지 않는다
+            key={i}
+            className={cn('qo-line font-mono', i < POP_LINES && 'qo-pop')}
+            style={{ '--i': i } as CSSProperties}
+          >
+            {line || ' '}
+          </li>
+        ))}
+      </ol>
+      {store && live.clipped && (
+        <p className="qo-note">출력이 너무 많아서 앞부분만 보여 줘요.</p>
       )}
     </>
   );
 }
 
-/** 실행이 멈추기 전까지 나온 출력 (시간 초과·멈추기·출력 상한) */
-function PartialOutput({ stdout }: { stdout: string }) {
-  if (!stdout) return null;
+type Tone = 'idle' | 'live' | 'good' | 'diff' | 'bug' | 'calm';
+
+interface SlipProps {
+  state: string;
+  tone: Tone;
+  verdict?: 'pass' | 'diff';
+  chip?: ReactNode;
+  /** 나온 글자 (끝난 뒤) */
+  text?: string;
+  /** 실행 중 실시간 출력 */
+  store?: LiveOutputStore;
+  children?: ReactNode;
+  /** 쪽지 아래 붙는 것 (견줘 보기·오류 자리) */
+  after?: ReactNode;
+}
+
+/** "나온 글자" 쪽지 (최종 시안 ResultSlip `.f-slip`): 테두리 없는 옅은 면 + 머리 한 줄(이름 · 상태 딱지) */
+function Slip({
+  state,
+  tone,
+  verdict,
+  chip,
+  text = '',
+  store,
+  children,
+  after,
+}: SlipProps) {
   return (
-    <pre
-      className={cn(
-        'mt-2 max-h-64 overflow-auto rounded-md bg-muted/50 p-3',
-        'font-mono text-xs leading-relaxed text-foreground',
-      )}
+    <section
+      data-testid="output-panel"
+      data-state={state}
+      data-verdict={verdict}
+      className="qo"
+      aria-label="나온 글자"
     >
-      {stdout}
-    </pre>
+      <div className="qo-slip" data-tone={tone} aria-live="polite">
+        <div className="qo-head">
+          <span className="qo-k">
+            <Flag aria-hidden />
+            나온 글자
+          </span>
+          {chip}
+        </div>
+        <OutputLines store={store} text={text} />
+        {children}
+      </div>
+      {after}
+    </section>
   );
 }
 
-interface OutputPanelProps {
-  result: RunResult | null;
-  isRunning: boolean;
-  validationResult?: { passed: boolean } | null;
-  /** 실행 중 stdout (P1-09). 없으면 실행 중 표시만 */
-  liveOutput?: LiveOutputStore;
+function Chip({
+  tone,
+  icon,
+  children,
+}: {
+  tone: Tone;
+  icon?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <span className="qo-chip" data-tone={tone}>
+      {icon}
+      {children}
+    </span>
+  );
 }
 
+/** 고친 뒤 화해 인사를 보여 주는 시간 (CSS qo-bye = --dur-celebrate × 2.5와 같게) */
+const FIX_BYE_MS = DURATION.celebrate * 2.5;
+
+/**
+ * 직전 결과가 오류였고 이번 실행은 끝까지 돌았으면 잠깐 true ("버그를 고쳤어요" 화해 인사).
+ * 실행 중에도 이전 결과가 그대로라 실행 결과가 바뀐 순간만 본다
+ */
+function useBugFixed(result: RunResult | null): boolean {
+  const [seen, setSeen] = useState(result);
+  const [fixed, setFixed] = useState(false);
+  if (result !== seen) {
+    setSeen(result);
+    setFixed(!!seen?.hadException && !!result?.success);
+  }
+  useEffect(() => {
+    if (!fixed) return;
+    const t = setTimeout(() => setFixed(false), FIX_BYE_MS);
+    return () => clearTimeout(t);
+  }, [fixed]);
+  return fixed;
+}
+
+export interface OutputPanelProps {
+  result: RunResult | null;
+  isRunning: boolean;
+  /** 채점 결과. type은 공개 규칙 유형(무엇을 견줘 볼지 안내에만 씀) */
+  validationResult?: { passed: boolean; type?: ValidationType } | null;
+  /** 실행 중 stdout (P1-09). 없으면 실행 중 표시만 */
+  liveOutput?: LiveOutputStore;
+  /** 공개된 "나와야 하는 모습" 안내 (코드 퀘스트 expected_output_hint · 프로젝트 단계 목표). 출력이 다를 때 견줘 보기에 */
+  goal?: string;
+  /** 오류 줄로 가기 (모바일은 공책 쪽으로 넘김) */
+  onShowErrorLine?: (line: number) => void;
+  /** 결과 쪽 안에서 Worker를 다시 띄우는 중 (모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄) */
+  restarting?: boolean;
+  /** 퀘스트를 마쳤으면(완료 응답 뒤) 성공 장면: 도장 쾅 + 보상 띠 + 다음 퀘스트 (P6-08) */
+  reward?: QuestReward | null;
+  /** 오류·출력이 다를 때 "파이뱀에게 더 물어보기" (Q56: AI 피드백은 자동으로 부르지 않고 이 버튼으로만) */
+  onAskTutor?: () => void;
+}
+
+function AskMore({ onAsk }: { onAsk: () => void }) {
+  return (
+    <Button
+      variant="secondary"
+      size="sm"
+      icon={<MessageCircleQuestion aria-hidden />}
+      onClick={onAsk}
+      className="qo-ask"
+      data-testid="ask-more"
+    >
+      파이뱀에게 더 물어보기
+    </Button>
+  );
+}
+
+/**
+ * 결과 쪽지 (P6-06, 최종 시안 ResultSlip "나온 글자"):
+ * 아직 안 돌림 · 실행 중 실시간 출력 · 통과 · 출력이 다름(공개 안내와 견줘 보기) · 오류(줄로 가기) · 시간 초과 · 멈춤 · 출력 상한.
+ * 출력 줄은 쪽지 카드로 튀어나온다(full 스프링 차례로 · lite 짧게 · minimal·동작 줄이기 없음).
+ * 정답 기준값은 서버 전용이라(§2.3) 줄 단위 비교는 하지 않고 공개 안내 + 규칙 유형별 살펴볼 거리만 보여 준다
+ */
 export function OutputPanel({
   result,
   isRunning,
   validationResult,
   liveOutput,
+  goal,
+  onShowErrorLine,
+  restarting = false,
+  reward = null,
+  onAskTutor,
 }: OutputPanelProps) {
+  const bugFixed = useBugFixed(result);
+  const passed = !isRunning && !!result?.success && !!validationResult?.passed;
+  const success = passed && !!reward;
+  const successDone = useSuccessRun(success, result);
   if (isRunning) {
     return (
-      <div
-        data-testid="output-panel"
-        data-state="running"
-        className="rounded-lg border border-border bg-muted/30 p-4"
-      >
-        <div className="flex items-center gap-2">
-          <TutorAvatar expression="thinking" />
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent reduced:animate-none" />
-          <span className="text-sm text-muted-foreground">실행 중...</span>
-        </div>
-        <LiveOutput store={liveOutput} />
-      </div>
+      <Slip
+        state="running"
+        tone="live"
+        chip={
+          <Chip
+            tone="live"
+            icon={
+              <Loader2
+                aria-hidden
+                className="animate-spin reduced:animate-none"
+              />
+            }
+          >
+            돌아가는 중
+          </Chip>
+        }
+        store={liveOutput}
+      />
     );
   }
 
   if (!result) {
     return (
-      <div
-        data-testid="output-panel"
-        data-state="empty"
-        className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/20 p-4"
-      >
-        <TutorAvatar expression="happy" />
-        <Terminal className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">
-          코드를 실행하면 결과가 여기에 표시돼요!
-        </span>
-      </div>
+      <Slip state="empty" tone="idle">
+        <p className="qo-empty">
+          아직 돌려 보지 않았어요. 주문을 쓰고 “코드 돌려보기”를 눌러요!
+        </p>
+      </Slip>
     );
   }
 
-  // 타임아웃
-  if (result.isTimeout) {
+  const wakingNote = restarting && (
+    <p role="status" className="qo-waking" data-testid="runner-waking-inline">
+      <Loader2 aria-hidden className="animate-spin reduced:animate-none" />
+      파이뱀이 공책을 다시 펼치는 중이에요. 몇 초면 다시 돌릴 수 있어요.
+    </p>
+  );
+
+  // 시간 초과·멈춤·출력 상한: 멈추기 전까지 나온 글자 + 차분한 안내
+  if (
+    result.isTimeout ||
+    result.isStopped ||
+    result.outcome === 'output-limit'
+  ) {
+    const [state, title, note, icon] = result.isTimeout
+      ? [
+          'timeout',
+          '앗, 시간이 너무 오래 걸려요!',
+          '혹시 무한 반복이 있는지 살펴볼까요? while 반복문이라면 조건이 언젠가 거짓(False)이 되는지 확인해 봐요.',
+          <Hourglass key="i" aria-hidden />,
+        ]
+      : result.isStopped
+        ? [
+            'stopped',
+            '실행을 멈췄어요',
+            '코드를 살펴보고 준비되면 다시 돌려 봐요!',
+            <Hand key="i" aria-hidden />,
+          ]
+        : [
+            'output-limit',
+            '앗, 출력이 너무 많아요!',
+            '그래서 중간에 멈췄어요. 끝없이 반복되는 print가 있는지 살펴볼까요?',
+            <Hourglass key="i" aria-hidden />,
+          ];
     return (
-      <div
-        data-testid="output-panel"
-        data-state="timeout"
-        className="rounded-lg border border-accent/30 bg-accent/10 p-4"
+      <Slip
+        state={state}
+        text={result.stdout}
+        tone="calm"
+        chip={
+          <Chip tone="calm" icon={icon}>
+            {title}
+          </Chip>
+        }
       >
-        <div className="mb-2 flex items-center gap-2">
-          <TutorAvatar expression="confused" />
-          <BugBugHelper expression="searching" />
-          <span className="font-bold text-foreground">
-            앗, 시간이 너무 오래 걸려요!
-          </span>
-        </div>
-        <p className="text-sm text-foreground">
-          혹시 무한 반복이 있는지 한번 살펴볼까요? 반복문의 조건을 확인해
-          보세요!
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          while 반복문이라면 조건이 언젠가 거짓(False)이 되는지 확인해 봐요.
-        </p>
-        <PartialOutput stdout={result.stdout} />
-      </div>
+        <p className="qo-note">{note}</p>
+        {wakingNote}
+      </Slip>
     );
   }
 
-  // 멈추기 버튼으로 멈춤
-  if (result.isStopped) {
-    return (
-      <div
-        data-testid="output-panel"
-        data-state="stopped"
-        className="rounded-lg border border-border bg-muted/30 p-4"
-      >
-        <div className="mb-2 flex items-center gap-2">
-          <TutorAvatar expression="encouraging" />
-          <Hand className="h-4 w-4 text-muted-foreground" aria-hidden />
-          <span className="font-bold text-foreground">실행을 멈췄어요</span>
-        </div>
-        <p className="text-sm text-foreground">
-          코드를 살펴보고 준비되면 다시 돌려 봐요!
-        </p>
-        <PartialOutput stdout={result.stdout} />
-      </div>
-    );
-  }
-
-  // 출력 상한을 넘어 Worker가 멈춤 (B15)
-  if (result.outcome === 'output-limit') {
-    return (
-      <div
-        data-testid="output-panel"
-        data-state="output-limit"
-        className="rounded-lg border border-accent/30 bg-accent/10 p-4"
-      >
-        <div className="mb-2 flex items-center gap-2">
-          <TutorAvatar expression="confused" />
-          <BugBugHelper expression="searching" />
-          <span className="font-bold text-foreground">
-            앗, 출력이 너무 많아요!
-          </span>
-        </div>
-        <p className="text-sm text-foreground">
-          그래서 중간에 멈췄어요. 끝없이 반복되는 print가 있는지 살펴볼까요?
-        </p>
-        <PartialOutput stdout={result.stdout} />
-      </div>
-    );
-  }
-
-  // 에러
+  // 오류: 나온 글자까지 + 마지막 한 줄 요약(몇 번째 줄 · 종류) + 전체 메시지는 접어 둠
   if (!result.success) {
+    const line = errorLineFromStderr(result.stderr);
+    const summary = errorSummary(result.stderr);
     return (
-      <div
-        data-testid="output-panel"
-        data-state="error"
-        className="rounded-lg border border-accent/30 bg-accent/10 p-4"
+      <Slip
+        state="error"
+        text={result.stdout}
+        tone="bug"
+        chip={
+          <Chip tone="bug" icon={<Search aria-hidden />}>
+            여기를 한번 살펴볼까요?
+          </Chip>
+        }
+        after={
+          <BugbugAside
+            stderr={result.stderr}
+            action={onAskTutor && <AskMore onAsk={onAskTutor} />}
+          />
+        }
       >
-        <div className="mb-2 flex items-center gap-2">
-          <TutorAvatar expression="encouraging" />
-          <BugBugHelper expression="found" />
-          <span className="font-bold text-foreground">
-            앗, 여기를 한번 살펴볼까요?
-          </span>
+        <div className="qo-err" data-testid="output-error">
+          {line && <span className="qo-err-line">{line}번째 줄</span>}
+          {summary && <code className="qo-err-msg font-mono">{summary}</code>}
         </div>
-        <p className="mb-2 text-sm text-foreground">
-          괜찮아요! 에러 메시지를 잘 읽어보면 어디를 고쳐야 할지 알 수 있어요.
-        </p>
-        {result.stderr && (
-          <pre
-            className={cn(
-              'overflow-x-auto rounded-md bg-muted/50 p-3',
-              'font-mono text-xs leading-relaxed text-foreground',
-            )}
-          >
-            {result.stderr}
-          </pre>
-        )}
-      </div>
+        <div className="qo-err-actions">
+          {line && onShowErrorLine && (
+            <button
+              type="button"
+              className="qo-link"
+              onClick={() => onShowErrorLine(line)}
+              data-testid="show-error-line"
+            >
+              <CornerDownLeft aria-hidden />
+              {line}번째 줄 보러 가기
+            </button>
+          )}
+          {result.stderr.trim() !== summary && (
+            <details className="qo-more">
+              <summary>오류 메시지 전체 보기</summary>
+              <pre className="font-mono">{result.stderr}</pre>
+            </details>
+          )}
+        </div>
+      </Slip>
     );
   }
 
-  // 성공 (검증 결과 포함)
-  const borderColor = validationResult?.passed
-    ? 'border-primary/30'
-    : validationResult
-      ? 'border-accent/50'
-      : 'border-primary/30';
-  const bgColor = validationResult?.passed
-    ? 'bg-primary/5'
-    : validationResult
-      ? 'bg-accent/10'
-      : 'bg-primary/5';
-
+  // 돌아감: 통과 / 출력이 다름 / (채점 전)
+  const diff = validationResult && !validationResult.passed;
   return (
-    <div
-      data-testid="output-panel"
-      data-state="success"
-      className={cn('rounded-lg border p-4', borderColor, bgColor)}
+    <Slip
+      state="success"
+      text={result.stdout}
+      tone={passed ? 'good' : diff ? 'diff' : 'idle'}
+      verdict={passed ? 'pass' : diff ? 'diff' : undefined}
+      chip={
+        passed ? (
+          <Chip tone="good" icon={<Check aria-hidden />}>
+            통과! 정답이에요!
+          </Chip>
+        ) : diff ? (
+          <Chip tone="diff">조금 달라요</Chip>
+        ) : null
+      }
+      after={
+        <>
+          {/* 보상 띠가 쪽지 바로 아래 (도장이 띠의 빈 모서리로 걸침), 고친 뒤 화해 인사는 그 아래 */}
+          {success && reward && (
+            <RewardStrip reward={reward} done={successDone} />
+          )}
+          {bugFixed && <BugbugMakeup />}
+          {diff && (
+            <div className="qo-compare" data-testid="output-compare">
+              {goal && (
+                <div className="qo-goal">
+                  <span className="qo-k">해 볼 일에서 나와야 하는 모습</span>
+                  <p>{goal}</p>
+                </div>
+              )}
+              <p className="qo-tip">
+                {mismatchTip(validationResult.type, result.stdout)}
+              </p>
+              {onAskTutor && <AskMore onAsk={onAskTutor} />}
+            </div>
+          )}
+        </>
+      }
     >
-      <div className="mb-2 flex items-center gap-2">
-        <TutorAvatar
-          expression={
-            validationResult?.passed
-              ? 'celebrating'
-              : validationResult
-                ? 'teaching'
-                : 'happy'
-          }
-        />
-        <CheckCircle className="h-5 w-5 text-primary-text" />
-        <span className="font-bold text-foreground">실행 결과</span>
-        {validationResult?.passed && (
-          <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary-text">
-            정답이에요!
-          </span>
-        )}
-        {validationResult && !validationResult.passed && (
-          <span className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs font-bold text-accent-foreground">
-            조금 더 고쳐볼까요?
-          </span>
-        )}
-      </div>
-      <pre
-        className={cn(
-          'overflow-x-auto rounded-md bg-muted/50 p-3',
-          'font-mono text-sm leading-relaxed text-foreground',
-        )}
-      >
-        {result.stdout || '(출력 없음)'}
-      </pre>
-    </div>
+      {!outputLines(result.stdout).length && (
+        <p className="qo-empty">(아무것도 나오지 않았어요)</p>
+      )}
+      {success && <PassStamp done={successDone} />}
+    </Slip>
   );
 }

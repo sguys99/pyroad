@@ -1,0 +1,220 @@
+/* 공책 쪽 실행 줄 (P6-05, RunControls.tsx). 최종 시안 screens.css `.f-run-row`·`.f-run`을 토큰으로:
+   큰 초록 게임 버튼 + 상태 안내 상자(테두리 없는 옅은 면). 반복 연출은 transform·opacity만, 값은 토큰 변수만 */
+
+.qr {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.qr-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+.qr-run {
+  min-width: 12.5rem;
+}
+/* 좁은 쪽(모바일 공책): 버튼이 한 줄을 차지하고, 실행 중이면 멈추기와 나눠 씀 */
+@container (max-width: 30rem) {
+  .qr-run {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* 실행 중: 초록 면 위로 빛 띠가 흐른다 (full·lite). 면 밖으로 나가지 않게 face가 자른다 */
+.qr-run-live .g-btn-face {
+  position: relative;
+  overflow: hidden;
+}
+.qr-run-live .g-btn-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, var(--on-primary) 28%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transform: translateX(-110%);
+  pointer-events: none;
+}
+
+/* 안내 상자: 파이뱀 + 글. 테두리 없이 옅은 주색 면 (말풍선·카드와 같은 결) */
+.qr-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--primary-soft);
+  color: var(--text);
+}
+.qr-panel-error {
+  background: var(--error-soft);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.qr-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+}
+.qr-panel-body {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 0.5rem;
+}
+.qr-panel-t {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+}
+.qr-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.qr-dots {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.1875rem;
+  margin-left: 0.25rem;
+}
+.qr-dots > span {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+}
+
+/* 준비 단계 3칸 */
+.qr-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.qr-step {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+.qr-step[data-step='current'] {
+  color: var(--primary-text);
+  font-weight: 700;
+}
+.qr-step-label {
+  white-space: nowrap;
+}
+/* 지금 칸은 홈을 옅은 주색으로 (흐르는 조각이 지나가는 사이에도 어느 칸인지 보이게) */
+.qr-step[data-step='current'] .qr-step-bar {
+  background: color-mix(in srgb, var(--primary) 18%, var(--surface));
+}
+.qr-step-bar,
+.qr-busy {
+  position: relative;
+  display: block;
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+}
+.qr-step-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.qr-step[data-step='done'] .qr-step-fill {
+  transform: none;
+}
+/* 지금 칸(과 재준비 띠): 진행률을 지어내지 않고 흐르는 조각. 동작 줄이기면 멈춘 반 칸 */
+:is(.qr-step[data-step='current'] .qr-step-bar, .qr-busy) .qr-step-fill {
+  width: 45%;
+  transform: none;
+}
+
+/* 팁: 머리표 + 바뀌는 한 줄 (두 줄까지 자리를 잡아 높이가 흔들리지 않게) */
+.qr-tip {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.qr-tip-k {
+  flex: none;
+  color: var(--primary-text);
+  font-weight: 700;
+}
+.qr-tip-body {
+  min-height: calc(var(--text-small--line-height) * 1em);
+}
+/* 좁은 쪽: 머리표를 위로, 팁은 두 줄까지 자리를 잡아 아래 결과가 흔들리지 않게 */
+@container (max-width: 30rem) {
+  .qr-tip {
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  .qr-tip-body {
+    min-height: calc(var(--text-small--line-height) * 2em);
+  }
+}
+
+/* ───────────── 반복 연출 */
+@keyframes qr-busy {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(225%);
+  }
+}
+@keyframes qr-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-110%);
+  }
+  20% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(260%);
+  }
+}
+/* 바쁨 표시(흐르는 조각): 단계와 무관, 동작 줄이기만 끔 (motion-guidelines §2) */
+:root[data-reduced='false'] {
+  :is(.qr-step[data-step='current'] .qr-step-bar, .qr-busy) .qr-step-fill {
+    animation: qr-busy 1.4s var(--easing-in-out) infinite;
+  }
+}
+/* 실행 중 빛 띠: 꾸밈이라 full·lite만 (minimal은 버튼 스피너만) */
+:root[data-reduced='false']:not([data-motion='minimal']) {
+  .qr-run-live .g-btn-face::after {
+    animation: qr-sweep 1.6s var(--easing-out) infinite;
+  }
+}

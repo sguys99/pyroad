@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateXP,
   calculateLevel,
+  codeQuestStars,
   getLevelTitle,
   getXPProgress,
 } from '../xp';
@@ -114,5 +115,14 @@ describe('getXPProgress', () => {
     expect(result.currentLevelXP).toBe(300);
     expect(result.nextLevelXP).toBe(600);
     expect(result.progressPercent).toBe(0);
+  });
+});
+
+describe('codeQuestStars', () => {
+  it('힌트 0회 3 · 1회 2 · 2회 이상 1, 황금키는 힌트와 상관없이 1', () => {
+    expect([0, 1, 2, 3].map((h) => codeQuestStars(h, false))).toEqual([
+      3, 2, 1, 1,
+    ]);
+    expect(codeQuestStars(0, true)).toBe(1);
   });
 });

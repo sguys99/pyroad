@@ -16,7 +16,6 @@ export function CodeQuest(props: QuestSessionOptions) {
   return (
     <QuestWorkspace
       session={session}
-      nextQuestId={nextQuestId}
       completedBanner={
         <>
           이미 완료한 퀘스트예요!{' '}

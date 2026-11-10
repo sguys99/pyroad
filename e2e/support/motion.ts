@@ -15,6 +15,8 @@ export const MINIMAL_ALLOW: Record<string, string> = {
   pulse: '스켈레톤 animate-pulse (화면 로딩, reduced:animate-none)',
   'waking-dot': '실행기 다시 깨우는 중 점 세 개 (globals.css 바쁨 표시)',
   'thinking-dot': 'AI 튜터 생각 중 점 세 개 (globals.css 바쁨 표시)',
+  'qr-busy':
+    '실행기 준비·재준비 단계 칸의 흐르는 조각 (runControls.css 바쁨 표시, P6-05)',
   'cm-blink':
     '코드 에디터 커서 깜빡임 = 입력 위치 신호 (CodeMirror 기본, 동작 줄이기에서 멈춤)',
   'cm-blink2':
@@ -48,12 +50,13 @@ export const AMBIENT = [
 export const IDLE_LOOPS = [
   'character-breathe',
   'mascot-bob',
-  'step-pulse',
   'stage-pulse',
   'wn-ring',
   'char-blink-eye',
   'char-blink-highlight',
   'char-twinkle',
+  // 실행 중 버튼 빛 띠 (runControls.css, P6-05). 꾸밈이라 minimal은 버튼 스피너만
+  'qr-sweep',
 ];
 
 export interface RunningLoop {

@@ -48,6 +48,7 @@ const KNOWN_TYPES = new Set([
   'encouragement',
   'project_guide',
   'stage_summary',
+  'concept_explain',
 ]);
 
 /** 로그용 사용자 해시: sha256(user id) 앞 16자 (가명. 로그에 id 를 그대로 남기지 않음) */

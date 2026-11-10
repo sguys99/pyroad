@@ -6,7 +6,7 @@ import type { Page } from '@playwright/test';
 import { test, expect } from './support/test';
 import { adminClient } from './support/admin';
 import { stage } from './support/content';
-import { questHeader } from './support/quest';
+import { questHeader, runCode } from './support/quest';
 import {
   AMBIENT,
   IDLE_LOOPS,
@@ -59,6 +59,27 @@ async function check(page: Page, mode: MotionMode, where: string) {
   return { names, blurred };
 }
 
+/** 버그버그 리그 SVG의 transform 속성 쓰기 수 (ms 동안) */
+function transformWrites(page: Page, ms: number) {
+  return page.evaluate(
+    (ms) =>
+      new Promise<number>((resolve) => {
+        const svg = document.querySelector('[data-testid="bugbug-helper"] svg');
+        if (!svg) return resolve(-1);
+        let n = 0;
+        const mo = new MutationObserver((rs) => {
+          for (const r of rs) if (r.attributeName === 'transform') n++;
+        });
+        mo.observe(svg, { attributes: true, subtree: true });
+        setTimeout(() => {
+          mo.disconnect();
+          resolve(n);
+        }, ms);
+      }),
+    ms,
+  );
+}
+
 test.describe('앱 화면 연출 단계 대체 (P2-12)', () => {
   test.afterEach(async ({ e2eUser }) => {
     await setMotion(e2eUser.id, { tier: 'auto', reduced: 'system' });
@@ -100,9 +121,64 @@ test.describe('앱 화면 연출 단계 대체 (P2-12)', () => {
         expect(world.names.some((n) => IDLE_LOOPS.includes(n))).toBe(true);
       }
 
+      // 컨페티 알림(fireConfetti → pyroad:confetti)을 모은다 (P6-08)
+      await page.addInitScript(() => {
+        const w = window as unknown as { __confetti: unknown[] };
+        w.__confetti = [];
+        window.addEventListener('pyroad:confetti', (e) =>
+          w.__confetti.push((e as CustomEvent).detail),
+        );
+      });
       await page.goto(`/quest/${quest.id}`);
       await expect(questHeader(page)).toContainText(quest.title);
       await check(page, mode, '퀘스트');
+
+      // 오류 연출 (P6-07): full만 버그버그가 옆에서 통통 뛰어 들어오고, 나머지는 제자리 표정(found).
+      // 동작 줄이기는 리그가 위치·크기를 바꾸지 않는다 (표정·후광 색만, §12-Q26)
+      await runCode(page, 'print(undefined_var)');
+      const bug = page.getByTestId('bugbug-helper').first();
+      await expect(bug).toBeVisible();
+      await expect(bug).toHaveAttribute(
+        'data-rig-state',
+        mode.tier === 'full' && mode.reduced === 'off' ? 'appear' : 'found',
+      );
+      await check(page, mode, '퀘스트 오류');
+      if (mode.reduced === 'on') {
+        await expect(bug.locator('svg')).toBeVisible();
+        expect(await transformWrites(page, 1000)).toBe(0);
+      }
+
+      // 성공 연출 (P6-08): 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0 (B33).
+      // 보상 띠는 minimal·동작 줄이기면 처음부터 끝 모습
+      await runCode(page, quest.solution);
+      const reward = page.locator('[data-testid="quest-reward"]:visible');
+      await expect(reward).toBeVisible();
+      if (mode.tier === 'minimal' || mode.reduced === 'on') {
+        await expect(reward).toHaveAttribute('data-done', 'true');
+      }
+      const confetti = await page.evaluate(
+        () =>
+          (
+            window as unknown as {
+              __confetti: Array<{ requested: number; fired: number }>;
+            }
+          ).__confetti,
+      );
+      const scale =
+        mode.reduced === 'on'
+          ? 0
+          : { full: 1, lite: 0.3, minimal: 0 }[mode.tier];
+      expect(confetti, '정답 컨페티 80개 요청').toContainEqual({
+        requested: 80,
+        fired: Math.round(80 * scale),
+      });
+      if (scale === 0) {
+        expect(
+          confetti.every((c) => c.fired === 0),
+          '컨페티 0',
+        ).toBe(true);
+      }
+      await check(page, mode, '퀘스트 성공');
     });
   }
 });

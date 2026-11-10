@@ -12,7 +12,16 @@ const QUEST = {
   validation_type: 'exact_match',
   xp_reward: 50,
   created_at: '',
-  stage: { id: 's2', title: '갈림길', order: 2, theme_name: 'bridge' },
+  stage: {
+    id: 's2',
+    title: '갈림길',
+    order: 2,
+    theme_name: 'bridge',
+    quests: [
+      { id: 'q1', order: 1, title: '첫 다리' },
+      { id: 'q2', order: 2, title: '조건 다리' },
+    ],
+  },
   prompt_skeleton: {
     topic: '조건문',
     learning_goals: [],
@@ -50,6 +59,9 @@ function chain(table: string) {
   const q = {
     select: () => q,
     eq: () => q,
+    // user_progress: 스테이지 퀘스트들의 진행을 한 번에 (P6-02)
+    in: () => q,
+    then: (resolve: (r: unknown) => void) => resolve(result()),
     single: async () => result(),
     maybeSingle: async () => result(),
   };
@@ -92,7 +104,7 @@ const render = () => QuestPage({ params: Promise.resolve({ questId: 'q2' }) });
 beforeEach(() => {
   mocks.user.current = { id: 'u1' };
   mocks.quest.current = structuredClone(QUEST);
-  mocks.progress.current = null;
+  mocks.progress.current = [];
   mocks.stageUnlocked
     .mockReset()
     .mockResolvedValue({ data: true, error: null });
@@ -122,7 +134,10 @@ describe('퀘스트 페이지: 스테이지 잠금 (B38)', () => {
   });
 
   it('열린 스테이지면 렌더러에 퀘스트·진행을 넘긴다', async () => {
-    mocks.progress.current = { status: 'in_progress', hints_used: 1 };
+    mocks.progress.current = [
+      { quest_id: 'q1', status: 'completed', hints_used: 0 },
+      { quest_id: 'q2', status: 'in_progress', hints_used: 1 },
+    ];
     const el = (await render()) as ReactElement<Record<string, unknown>>;
     expect(isValidElement(el)).toBe(true);
     expect(mocks.redirect).not.toHaveBeenCalled();
@@ -134,11 +149,23 @@ describe('퀘스트 페이지: 스테이지 잠금 (B38)', () => {
       initialGoldenKeys: 1,
     });
     expect((el.props.quest as { id: string }).id).toBe('q2');
+    // 헤더 진행 점(P6-02): 스테이지 퀘스트마다 내 완료 여부 + 스테이지 열림
+    expect(el.props.quest).toMatchObject({
+      stage: {
+        unlocked: true,
+        quests: [
+          { id: 'q1', completed: true },
+          { id: 'q2', completed: false },
+        ],
+      },
+    });
   });
 
   it('이미 완료한 퀘스트는 스테이지가 잠겨도 복습할 수 있다', async () => {
     mocks.stageUnlocked.mockResolvedValue({ data: false, error: null });
-    mocks.progress.current = { status: 'completed', hints_used: 0 };
+    mocks.progress.current = [
+      { quest_id: 'q2', status: 'completed', hints_used: 0 },
+    ];
     const el = (await render()) as ReactElement<Record<string, unknown>>;
     expect(mocks.redirect).not.toHaveBeenCalled();
     expect(el.props).toMatchObject({ progress: { status: 'completed' } });

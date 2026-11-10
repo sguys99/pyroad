@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { CodeEditor } from '@/components/quest/CodeEditor';
+import { NotebookTitle, ResetCodeButton } from '@/components/quest/CodePanel';
+// 공책 머리 모양(.qw-notebook-t·좁은 쪽 규칙)은 퀘스트 화면 CSS
+import '@/components/quest/questWorkspace.css';
 
 /**
  * 한글 주석 정렬 표본. 1~7줄은 `#`이 21칸째, 8~10줄(주석 속 표)은 `|`가 11칸째에 선다(한글 1자 = 2칸으로 셈).
@@ -23,9 +26,21 @@ export const ALIGNMENT_SAMPLE = [
 export function EditorLab({ errorLine }: { errorLine: number | null }) {
   const [code, setCode] = useState(ALIGNMENT_SAMPLE);
   return (
-    <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-4 bg-bg p-4">
+    <main className="@container mx-auto flex min-h-dvh max-w-3xl flex-col gap-4 bg-bg p-4">
       <h1 className="text-h3 font-display">에디터 점검 (개발 전용)</h1>
-      <CodeEditor value={code} onChange={setCode} errorLine={errorLine} />
+      {/* 퀘스트 공책과 같은 머리 한 줄: 제목 · 처음 코드로 · 글자 크기 (P6-03) */}
+      <CodeEditor
+        value={code}
+        onChange={setCode}
+        errorLine={errorLine}
+        title={<NotebookTitle />}
+        actions={
+          <ResetCodeButton
+            changed={code !== ALIGNMENT_SAMPLE}
+            onReset={() => setCode(ALIGNMENT_SAMPLE)}
+          />
+        }
+      />
     </main>
   );
 }

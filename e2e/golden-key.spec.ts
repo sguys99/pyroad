@@ -6,15 +6,26 @@ import { stage } from './support/content';
 import {
   advanceCelebration,
   completedNotice,
+  openTutorChat,
   outputPanel,
   waitForRunner,
 } from './support/quest';
 
 const quest = stage(1).quests[0];
 
-/** 하단 상태바의 황금키 수. 새로 고친 직후 스트리밍으로 바꿔 끼우는 동안 숨은 사본이 잠깐 같이 있어 보이는 것만 */
+/** 이야기 쪽 황금키 버튼의 남은 수 (P6-09). 새로 고친 직후 스트리밍으로 바꿔 끼우는 동안 숨은 사본이 잠깐 같이 있어 보이는 것만 */
 const goldenKeys = (page: Page, n: number) =>
-  page.getByText(`황금키: ${n}/3`).filter({ visible: true });
+  page
+    .getByRole('button', { name: `황금키 쓰기 (${n}개 남음)` })
+    .filter({ visible: true });
+
+/** 황금키 버튼 → 확인 창 (P6-09: 브라우저 confirm 대신 공통 확인 모달) */
+async function openKeyDialog(page: Page) {
+  await goldenKeys(page, 3).click();
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toContainText('황금키를 쓸까요?');
+  return dialog;
+}
 
 test.describe('황금키', () => {
   test.beforeEach(async ({ page }) => {
@@ -24,8 +35,9 @@ test.describe('황금키', () => {
   });
 
   test('확인 창에서 취소하면 아무것도 바뀌지 않는다', async ({ page }) => {
-    page.once('dialog', (dialog) => void dialog.dismiss());
-    await page.getByRole('button', { name: '황금키', exact: true }).click();
+    const dialog = await openKeyDialog(page);
+    await dialog.getByRole('button', { name: '그만둘래요' }).click();
+    await expect(dialog).toBeHidden();
     await expect(goldenKeys(page, 3)).toBeVisible();
     await expect(outputPanel(page)).toHaveAttribute('data-state', 'empty');
   });
@@ -33,22 +45,22 @@ test.describe('황금키', () => {
   test('황금키를 쓰면 정답 코드가 실행되고, XP·뱃지 없이 완료되며 확인 카드만 나온다', async ({
     page,
   }) => {
-    page.once('dialog', (dialog) => {
-      expect(dialog.type()).toBe('confirm');
-      expect(dialog.message()).toContain('XP와 뱃지를 받을 수 없어요');
-      void dialog.accept();
-    });
     const completion = page.waitForResponse((res) =>
       res.url().endsWith('/api/quest/complete'),
     );
-    await page.getByRole('button', { name: '황금키', exact: true }).click();
+    // 쓰기 전에 결과를 알려 준다: 정답 공개, XP·뱃지 없음, 남는 키
+    const dialog = await openKeyDialog(page);
+    await expect(dialog).toContainText('경험치(XP)와 뱃지 없이 끝나요');
+    await expect(dialog).toContainText('황금키 3개 → 2개');
+    await dialog
+      .getByRole('button', { name: '황금키 쓰기', exact: true })
+      .click();
 
     // 정답 코드가 에디터에 들어가고 자동 실행 → 정답
     await expect(page.locator('.cm-editor .cm-content')).toContainText(
       quest.solution,
     );
     await expect(outputPanel(page)).toContainText('정답이에요!');
-    await expect(page.getByText('🔑 황금키를 사용했어요!')).toBeVisible();
 
     // 큰 축하 대신 작은 확인 카드 (컨페티 없음)
     const card = page.getByTestId('celebration-step-golden_key');
@@ -66,6 +78,11 @@ test.describe('황금키', () => {
     await advanceCelebration(page, 'golden_key');
     await expect(page.getByTestId('celebration-overlay')).toBeHidden();
     await expect(page.getByTestId('celebration-step-badges')).toHaveCount(0);
+
+    // 황금키 알림은 파이뱀 대화에 (P6-10: 닫혀 있으면 물어보기 줄에 새 이야기 수)
+    await expect(page.getByTestId('ask-unread')).toBeVisible();
+    const chat = await openTutorChat(page);
+    await expect(chat.getByText('🔑 황금키를 사용했어요!')).toBeVisible();
 
     // 서버가 차감·0 XP 로 완료
     await expect(goldenKeys(page, 2)).toBeVisible();

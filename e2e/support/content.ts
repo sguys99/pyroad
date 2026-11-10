@@ -13,7 +13,11 @@ export interface E2eQuest {
   order: number;
   title: string;
   solution: string;
+  /** 처음 코드 (공책 첫 내용) */
+  starter: string;
   fallbackText: string;
+  /** 공개 안내 "나와야 하는 모습" (결과 쪽지 견줘 보기, P6-06) */
+  expectedHint: string;
   hints: [string, string, string];
 }
 
@@ -29,7 +33,11 @@ interface QuestYaml {
   order: number;
   title: string;
   quest_type: string;
-  prompt: { fallback_text: string };
+  prompt: {
+    fallback_text: string;
+    expected_output_hint: string;
+    starter_code?: string;
+  };
   answer: {
     solution_code?: string;
     hints: { level_1: string; level_2: string; level_3: string };
@@ -55,7 +63,9 @@ export function stages(): E2eStage[] {
           order: q.order,
           title: q.title,
           solution: (q.answer.solution_code ?? '').trim(),
+          starter: (q.prompt.starter_code ?? '').trim(),
           fallbackText: q.prompt.fallback_text.trim(),
+          expectedHint: q.prompt.expected_output_hint.trim(),
           hints: [
             q.answer.hints.level_1,
             q.answer.hints.level_2,
@@ -87,4 +97,40 @@ export function allQuestIds(): string[] {
           (f) => (parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml).id,
         );
     });
+}
+
+interface ProjectYaml {
+  id: string;
+  title: string;
+  quest_type: string;
+  steps: Array<{
+    prompt: { step_goal: string };
+    answer: { solution_code: string };
+  }>;
+}
+
+/** 첫 월드의 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
+export function projectQuest(): {
+  id: string;
+  title: string;
+  steps: Array<{ goal: string; solution: string }>;
+} {
+  for (const d of readdirSync(WORLD_DIR, { withFileTypes: true })) {
+    if (!d.isDirectory()) continue;
+    const dir = join(WORLD_DIR, d.name);
+    for (const f of readdirSync(dir)) {
+      if (!f.endsWith('.yaml') || f === 'stage.yaml') continue;
+      const q = parse(readFileSync(join(dir, f), 'utf8')) as ProjectYaml;
+      if (q.quest_type !== 'project') continue;
+      return {
+        id: q.id,
+        title: q.title,
+        steps: q.steps.map((s) => ({
+          goal: s.prompt.step_goal,
+          solution: s.answer.solution_code.trim(),
+        })),
+      };
+    }
+  }
+  throw new Error('[e2e] 프로젝트 퀘스트가 content/ 에 없음');
 }

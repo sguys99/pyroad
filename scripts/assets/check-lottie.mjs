@@ -35,7 +35,7 @@ function lottieLightPath() {
     );
   } catch {
     throw new Error(
-      'lottie-web을 찾지 못했어요. 지금은 lottie-react의 의존성으로 설치돼요. lottie-react를 지우면 lottie-web을 직접 추가하세요',
+      'lottie-web을 찾지 못했어요. devDependencies에 있어요 (npm install)',
     );
   }
 }

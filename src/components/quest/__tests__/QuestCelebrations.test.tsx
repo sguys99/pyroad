@@ -10,7 +10,11 @@ import {
 import '@testing-library/jest-dom/vitest';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
-import { MIN_DWELL_MS } from '@/lib/celebration/plan';
+import {
+  MIN_DWELL_MS,
+  introMs,
+  planCelebrations,
+} from '@/lib/celebration/plan';
 import { CelebrationSoundContext } from '@/lib/celebration/sound';
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider';
 import type { ReducedMotionSetting } from '@/lib/motion/tier';
@@ -111,7 +115,12 @@ function renderSeq(
     <LazyMotion features={domAnimation}>
       <MotionTierProvider reduced={reduced}>
         <CelebrationSoundContext.Provider value={{ play: mocks.sfx }}>
-          <QuestCelebrations events={list} questId="q1" onDismiss={onDismiss} />
+          <QuestCelebrations
+            events={list}
+            questId="q1"
+            worldHref="/world"
+            onDismiss={onDismiss}
+          />
         </CelebrationSoundContext.Provider>
       </MotionTierProvider>
     </LazyMotion>
@@ -141,31 +150,39 @@ const stepKind = () =>
     ?.replace('celebration-step-', '') ?? null;
 
 describe('QuestCelebrations: 큐 순서·묶음', () => {
-  it('받은 순서와 상관없이 스테이지 클리어 → 레벨 업 → 뱃지 묶음, 한 번에 하나씩', async () => {
+  it('받은 순서와 상관없이 레벨 업 → 뱃지 묶음 → 스테이지 클리어(맨 뒤, 지도로), 한 번에 하나씩', async () => {
     const { onDismiss } = renderSeq([
       badge('first_code'),
+      STAGE,
       LEVEL_UP,
       badge('stage_clear'),
-      STAGE,
     ]);
     await advance(0);
-    expect(stepKind()).toBe('stage_clear');
+    expect(stepKind()).toBe('level_up');
     // 점: 3단계 중 1번째
     expect(screen.getByLabelText('축하 3개 중 1번째')).toBeInTheDocument();
 
     await advance(DWELL);
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(600);
-    expect(stepKind()).toBe('level_up');
+    expect(stepKind()).toBe('badges');
+    // 뱃지 2개를 한 카드에
+    expect(screen.getByText('새 뱃지 2개')).toBeInTheDocument();
+    expect(screen.getByText('첫 코드')).toBeInTheDocument();
+    expect(screen.getByText('스테이지 클리어')).toBeInTheDocument();
 
     await advance(DWELL);
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(600);
-    expect(stepKind()).toBe('badges');
-    // 뱃지 2개를 한 카드에
-    expect(screen.getByText('뱃지 2개 획득!')).toBeInTheDocument();
-    expect(screen.getByText('첫 코드')).toBeInTheDocument();
-    expect(screen.getByText('스테이지 클리어')).toBeInTheDocument();
+    expect(stepKind()).toBe('stage_clear');
+    // 주 버튼은 월드맵(해제 연출), 보조 "여기 있을래요"가 오버레이만 닫는다
+    expect(screen.getByTestId('celebration-map-cta')).toHaveAttribute(
+      'href',
+      '/world',
+    );
+    expect(screen.getByTestId('celebration-cta')).toHaveTextContent(
+      '여기 있을래요',
+    );
 
     await advance(DWELL);
     fireEvent.click(screen.getByTestId('celebration-cta'));
@@ -201,7 +218,9 @@ describe('QuestCelebrations: 큐 순서·묶음', () => {
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(600);
     expect(stepKind()).toBe('rewards');
-    expect(screen.getByText('+10 코인')).toBeInTheDocument();
+    expect(screen.getByTestId('celebration-live')).toHaveTextContent(
+      '코인 10개 받았어요.',
+    );
     await advance(DWELL);
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(600);
@@ -218,15 +237,37 @@ describe('QuestCelebrations: 넘기기·자동 넘김·건너뛰기', () => {
     expect(stepKind()).toBe('level_up');
   });
 
-  it('배경을 탭하면 다음으로, 카드 안을 탭하면 그대로', async () => {
+  it('연출 중 탭은 끝 상태로, 그다음 배경 탭은 다음으로. 카드 안 탭은 넘기지 않는다', async () => {
     renderSeq([LEVEL_UP, badge('first_code')]);
     await advance(DWELL);
+    const card = () => screen.getByTestId('celebration-step-level_up');
+    expect(card()).not.toHaveAttribute('data-settled');
+    fireEvent.click(screen.getByText('새싹 코더'));
+    await advance(0);
+    expect(card()).toHaveAttribute('data-settled', 'true');
+    // 끝 상태: 숫자는 새 레벨
+    expect(screen.getByText('2')).toBeInTheDocument();
     fireEvent.click(screen.getByText('새싹 코더'));
     await advance(600);
     expect(stepKind()).toBe('level_up');
     fireEvent.click(screen.getByTestId('celebration-overlay'));
     await advance(600);
     expect(stepKind()).toBe('badges');
+  });
+
+  it('연출은 introMs 뒤 스스로 끝 상태가 된다 (레벨 1단계 = 1.3초, §12-Q28 3.6초 안)', async () => {
+    renderSeq([LEVEL_UP]);
+    const ms = introMs(planCelebrations([LEVEL_UP])[0]);
+    expect(ms).toBe(1300);
+    await advance(ms - 100);
+    expect(screen.getByTestId('celebration-step-level_up')).not.toHaveAttribute(
+      'data-settled',
+    );
+    await advance(200);
+    expect(screen.getByTestId('celebration-step-level_up')).toHaveAttribute(
+      'data-settled',
+      'true',
+    );
   });
 
   it('자동 넘김: 레벨 업 6초, 뱃지 2개 6초. 포인터가 카드 위에 있으면 멈췄다가 남은 시간부터', async () => {
@@ -274,7 +315,7 @@ describe('QuestCelebrations: 넘기기·자동 넘김·건너뛰기', () => {
     expect(screen.getByText('정리했어요')).toBeInTheDocument();
   });
 
-  it('"모두 닫기"는 남은 축하를 한 번에 닫는다', async () => {
+  it('"모두 닫기"는 남은 축하를 한 번에 닫는다 (연출 중이어도)', async () => {
     const { onDismiss } = renderSeq([STAGE, LEVEL_UP, badge('first_code')]);
     await advance(0);
     fireEvent.click(screen.getByRole('button', { name: '모두 닫기' }));
@@ -285,7 +326,7 @@ describe('QuestCelebrations: 넘기기·자동 넘김·건너뛰기', () => {
 });
 
 describe('QuestCelebrations: 키보드', () => {
-  it('Enter·Space는 다음으로, Esc는 모두 닫기. CTA에 포커스가 간다', async () => {
+  it('연출 중 Enter·Space·Esc는 끝 상태로, 그 뒤 Enter·Space는 다음, Esc는 모두 닫기. 주 버튼에 포커스가 간다', async () => {
     const { onDismiss } = renderSeq([
       STAGE,
       LEVEL_UP,
@@ -293,18 +334,39 @@ describe('QuestCelebrations: 키보드', () => {
       badge('hint_master'),
     ]);
     await advance(DWELL);
-    expect(screen.getByTestId('celebration-cta')).toHaveFocus();
-
-    fireEvent.keyDown(window, { key: 'Enter' });
-    await advance(600);
     expect(stepKind()).toBe('level_up');
+    expect(screen.getByTestId('celebration-cta')).toHaveFocus();
     expect(screen.getByTestId('celebration-cta')).toHaveTextContent('멋져요!');
 
-    await advance(DWELL);
-    fireEvent.keyDown(window, { key: ' ' });
+    // 1.3초 연출 중: 첫 Enter는 끝 상태로 건너뛰기만
+    fireEvent.keyDown(window, { key: 'Enter' });
+    await advance(0);
+    expect(stepKind()).toBe('level_up');
+    expect(screen.getByTestId('celebration-step-level_up')).toHaveAttribute(
+      'data-settled',
+      'true',
+    );
+    fireEvent.keyDown(window, { key: 'Enter' });
     await advance(600);
     expect(stepKind()).toBe('badges');
 
+    // 뱃지가 아직 톡톡 나오는 중(약 1초): Esc도 먼저 끝 상태로
+    await advance(100);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await advance(0);
+    expect(stepKind()).toBe('badges');
+    expect(screen.getByTestId('celebration-step-badges')).toHaveAttribute(
+      'data-settled',
+      'true',
+    );
+    fireEvent.keyDown(window, { key: ' ' });
+    await advance(600);
+    expect(stepKind()).toBe('stage_clear');
+
+    // 스테이지 클리어: 주 버튼(지도로)이 포커스, Esc 두 번(끝 상태 → 모두 닫기)
+    await advance(DWELL);
+    expect(screen.getByTestId('celebration-map-cta')).toHaveFocus();
+    fireEvent.keyDown(window, { key: 'Escape' });
     fireEvent.keyDown(window, { key: 'Escape' });
     await advance(600);
     expect(screen.queryByTestId('celebration-overlay')).toBeNull();
@@ -320,53 +382,60 @@ describe('QuestCelebrations: 키보드', () => {
     await advance(DWELL);
     expect(screen.getByTestId('celebration-cta')).toHaveFocus();
     fireEvent.keyDown(window, { key: 'Escape' });
+    fireEvent.keyDown(window, { key: 'Escape' });
     await advance(600);
     expect(outside).toHaveFocus();
     outside.remove();
   });
 
-  it('대화 상자 접근성: role=dialog + 제목', async () => {
+  it('대화 상자 접근성: role=dialog + 제목, 받은 것을 aria-live 한 줄로', async () => {
     renderSeq([LEVEL_UP]);
     await advance(0);
     expect(
       screen.getByRole('dialog', { name: '레벨 2 달성' }),
     ).toBeInTheDocument();
+    const live = screen.getByTestId('celebration-live');
+    expect(live).toHaveAttribute('aria-live', 'polite');
+    expect(live).toHaveTextContent('레벨 업! 레벨 2 달성, 새 칭호 새싹 코더.');
+  });
+
+  it('떠 있는 동안 뒤 화면을 조용히 (<html data-celebrating>), 닫히면 되돌린다', async () => {
+    renderSeq([LEVEL_UP]);
+    await advance(0);
+    expect(document.documentElement).toHaveAttribute('data-celebrating');
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    await advance(600);
+    expect(document.documentElement).not.toHaveAttribute('data-celebrating');
   });
 });
 
 describe('QuestCelebrations: 컨페티·효과음', () => {
   it('세기: 스테이지 클리어(3발) > 레벨 업(2발 + 숫자 pop 1발) > 뱃지 묶음(1발, 뱃지 수와 무관)', async () => {
+    const particles = () =>
+      mocks.confetti.mock.calls.reduce(
+        (sum, c) =>
+          sum + (c as unknown as [{ particleCount: number }])[0].particleCount,
+        0,
+      );
     renderSeq([STAGE, LEVEL_UP, badge('first_code'), badge('hint_master')]);
-    await advance(DWELL + 50);
-    const stageShots = mocks.confetti.mock.calls.length;
-    const stageParticles = mocks.confetti.mock.calls.reduce(
-      (sum, c) =>
-        sum + (c as unknown as [{ particleCount: number }])[0].particleCount,
-      0,
-    );
-    expect(stageShots).toBe(3);
-
-    mocks.confetti.mockClear();
-    fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(2500);
     expect(stepKind()).toBe('level_up');
     expect(mocks.confetti).toHaveBeenCalledTimes(3);
-    const levelParticles = mocks.confetti.mock.calls.reduce(
-      (sum, c) =>
-        sum + (c as unknown as [{ particleCount: number }])[0].particleCount,
-      0,
-    );
-    expect(levelParticles).toBeLessThan(stageParticles);
+    const levelParticles = particles();
 
     mocks.confetti.mockClear();
     fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(1500);
     expect(stepKind()).toBe('badges');
     expect(mocks.confetti).toHaveBeenCalledTimes(1);
-    const badgeParticles = (
-      mocks.confetti.mock.calls[0] as unknown as [{ particleCount: number }]
-    )[0].particleCount;
-    expect(badgeParticles).toBeLessThan(levelParticles);
+    expect(particles()).toBeLessThan(levelParticles);
+
+    mocks.confetti.mockClear();
+    fireEvent.click(screen.getByTestId('celebration-cta'));
+    await advance(DWELL + 600);
+    expect(stepKind()).toBe('stage_clear');
+    expect(mocks.confetti).toHaveBeenCalledTimes(3);
+    expect(particles()).toBeGreaterThan(levelParticles);
   });
 
   it('효과음 키: 레벨 업은 levelup 한 번, 뱃지는 하나씩 음을 올려 star', async () => {
@@ -383,8 +452,8 @@ describe('QuestCelebrations: 컨페티·효과음', () => {
     ]);
   });
 
-  it('빨리 넘기면 아직 쏘지 않은 컨페티는 취소된다 (겹쳐 쌓이지 않게)', async () => {
-    renderSeq([STAGE, LEVEL_UP]);
+  it('건너뛰면 아직 쏘지 않은 컨페티는 취소된다 (겹쳐 쌓이지 않게)', async () => {
+    renderSeq([STAGE]);
     await advance(300);
     // 0.15초 첫 발만 나간 상태 (옆 2발은 0.45초)
     expect(mocks.confetti).toHaveBeenCalledTimes(1);
@@ -472,14 +541,21 @@ describe('QuestCelebrations: 프로젝트 + 스테이지 마지막', () => {
       },
       badge('first_code'),
     ]);
+    await advance(DWELL);
+    expect(stepKind()).toBe('badges');
+    fireEvent.click(screen.getByTestId('celebration-cta'));
     await advance(2000);
     expect(stepKind()).toBe('project_complete');
     expect(
-      screen.getByText('Stage 7 · 최종 프로젝트 완료!'),
+      screen.getByText('스테이지 7 · 최종 프로젝트 클리어!'),
     ).toBeInTheDocument();
-    expect(screen.getByText(/나만의 게임을/)).toBeInTheDocument();
-    expect(screen.getByText('100')).toBeInTheDocument();
-    expect(screen.getByLabelText('축하 2개 중 1번째')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '나만의 게임을 완성했어요!' }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('100').length).toBeGreaterThan(0);
+    // 스테이지를 끝낸 카드라 뱃지 뒤(맨 끝)에 오고, 주 버튼은 지도로
+    expect(screen.getByLabelText('축하 2개 중 2번째')).toBeInTheDocument();
+    expect(screen.getByTestId('celebration-map-cta')).toBeInTheDocument();
     expect(mocks.tutor).not.toHaveBeenCalled();
   });
 });

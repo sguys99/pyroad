@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Bug, Plus, RotateCcw, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bug, MessageCircle, Plus, RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -11,6 +11,8 @@ import {
   LevelSeal,
 } from '@/components/ui/hud';
 import { SpeechBubble, type BubbleTone } from '@/components/ui/speech-bubble';
+import { DialogueBox } from '@/components/ui/dialogue-box';
+import { PybaemRig } from '@/components/characters/rig/MascotRig';
 import { RewardIcon, Stars, type RewardKind } from '@/components/ui/reward-icon';
 import {
   Tooltip,
@@ -18,7 +20,36 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { SoundToggle } from '@/components/sound/SoundToggle';
+import { QuestHeader } from '@/components/quest/QuestHeader';
+import { StageProgress } from '@/components/quest/StageProgress';
+import { StepStrip } from '@/components/quest/StepStrip';
+import { QuestHints } from '@/components/quest/QuestHints';
+import { AskPybaem } from '@/components/quest/AskPybaem';
+import { MotionProvider } from '@/components/providers/MotionProvider';
+import {
+  ASK_QUESTIONS,
+  type AskQuestion,
+  type QuestSession,
+} from '@/lib/quest/useQuestSession';
+import type { ChatMessage } from '@/lib/tutor/types';
+import { stageDots, type StageQuestDot } from '@/lib/quest/stageProgress';
 import { CodeSample, Demo, Labeled, Section } from './ui';
+
+// 스테이지 진행 점 견본 (P6-02): 7개 중 1·2 끝냄, 지금 3번
+const STAGE_QUESTS: StageQuestDot[] = [
+  '첫 인사',
+  '두 줄 쓰기',
+  '숫자 계산',
+  '따옴표 친구',
+  '이름표 붙이기',
+  '틀린 곳 찾기',
+  '마을 잔치',
+].map((title, i) => ({
+  id: `demo-q${i + 1}`,
+  order: i + 1,
+  title,
+  completed: i < 2,
+}));
 
 // ───────────────────────────── 진행바
 
@@ -85,7 +116,185 @@ export function ProgressSection() {
         </Demo>
       </div>
       <CodeSample code={`<ProgressBar value={xp} max={200} label="다음 레벨까지 경험치" valueText={\`\${xp} / 200 XP\`} />`} />
+      <StageProgressDemo />
+      <StepStripDemo />
     </Section>
+  );
+}
+
+function StageProgressDemo() {
+  const [passed, setPassed] = useState(false);
+  const dots = stageDots(STAGE_QUESTS, 'demo-q3', passed);
+  return (
+    <>
+      <Demo
+        label="스테이지 진행 점 (StageProgress, P6-02)"
+        note="퀘스트 헤더 오른쪽. 초록 = 끝냄 · 회색 = 아직 · 긴 알약 = 지금(안 끝냈으면 금색, 통과하면 초록). 열린 점은 그 퀘스트 링크, 좁은 화면은 제목 대신 점과 3/7"
+        data-testid="stage-progress-demo"
+      >
+        <div className="overflow-hidden rounded-xl ring-1 ring-border">
+          <QuestHeader
+            worldHref="#"
+            bgm={null}
+            stageTitle="파이썬 마을"
+            stageOrder={1}
+            questTitle="숫자 계산"
+            dots={dots}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <Labeled label="잠긴 스테이지 복습 (안 끝낸 점 잠김)">
+            <StageProgress
+              dots={stageDots(STAGE_QUESTS, 'demo-q1', false, false)}
+            />
+          </Labeled>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setPassed((p) => !p)}
+            icon={passed ? <RotateCcw aria-hidden /> : <Plus aria-hidden />}
+          >
+            {passed ? '되돌리기' : '3번 통과하기'}
+          </Button>
+        </div>
+      </Demo>
+      <CodeSample code={`<QuestHeader … dots={stageDots(quest.stage.quests ?? [], quest.id, session.isCompleted, quest.stage.unlocked)} />`} />
+    </>
+  );
+}
+
+// 프로젝트 단계 띠 견본 (P6-12): 숫자 맞추기 게임 5단계
+const DEMO_STEPS = [
+  'random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기',
+  '추측 숫자를 guess 변수에 저장하고 "추측"과 함께 출력하기',
+  'if/elif/else로 비밀 숫자와 추측을 비교하기',
+  'while 반복문으로 정답을 맞출 때까지 반복하기',
+  '시도 횟수를 세고 완성 메시지 출력하기',
+];
+
+function StepStripDemo() {
+  const [step, setStep] = useState(2);
+  const [cleared, setCleared] = useState<number | null>(null);
+  const done = step > DEMO_STEPS.length;
+  const advance = () => {
+    setCleared(null);
+    setStep((n) => n + 1);
+  };
+  const pass = () =>
+    step < DEMO_STEPS.length ? setCleared(step) : setStep(step + 1);
+  return (
+    <>
+      <Demo
+        label="프로젝트 단계 띠 (StepStrip, P6-12)"
+        note="공책 쪽 맨 위. 칸 막대·주색 초록만(헤더 스테이지 점의 둥근 점·금색 알약과 구분: 점 = 어느 퀘스트, 칸 = 이 퀘스트 안 단계). 통과하면 칸이 차오르고 “N단계 통과!” → 다음 목표, “다음 단계로”로 건너뜀(앱은 2.2초 뒤 저절로). minimal 페이드 · 동작 줄이기 없음"
+        surface="card"
+        data-testid="step-strip-demo"
+      >
+        <div className="max-w-xl">
+          <StepStrip
+            goals={DEMO_STEPS}
+            current={Math.min(step, DEMO_STEPS.length)}
+            cleared={cleared}
+            completed={done}
+            onSkip={advance}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={pass}
+            disabled={done || cleared !== null}
+            icon={<Plus aria-hidden />}
+          >
+            {step < DEMO_STEPS.length ? `${step}단계 통과하기` : '프로젝트 완성하기'}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setCleared(null);
+              setStep(1);
+            }}
+            icon={<RotateCcw aria-hidden />}
+          >
+            처음부터
+          </Button>
+        </div>
+      </Demo>
+      <CodeSample code={`<StepStrip goals={steps.map((s) => s.step_goal)} current={session.currentStep} cleared={session.stepCleared} completed={session.isCompleted} onSkip={session.skipStepBeat} />`} />
+    </>
+  );
+}
+
+// 힌트·황금키 견본 (P6-09): 저장된 힌트처럼 쪽지가 하나씩 열림. 별 안내는 SHOW_STARS가 꺼져 있어도 여기서 확인
+const DEMO_HINTS = [
+  '`print()` 괄호 안에 보여 주고 싶은 글자를 넣어요.',
+  '글자는 따옴표로 감싸야 해요. 예: `"안녕"`',
+  '`print("안녕하세요!")` 처럼 써 봐요.',
+];
+
+function QuestHintsDemo() {
+  const [hints, setHints] = useState(0);
+  const [keys, setKeys] = useState(3);
+  const [usedKey, setUsedKey] = useState(false);
+  const [done, setDone] = useState(false);
+  const common = {
+    kind: 'code' as const,
+    hintsUsed: hints,
+    notes: DEMO_HINTS.slice(0, hints).map((text, i) => ({
+      level: i + 1,
+      text,
+    })),
+    onHint: () => setHints((h) => Math.min(h + 1, 3)),
+    hintBusy: false,
+    goldenKeys: keys,
+    onGoldenKey: () => {
+      setKeys((k) => k - 1);
+      setUsedKey(true);
+      setDone(true);
+    },
+    keyBlocked: false,
+    xpReward: 50,
+    totalHintsUsed: hints,
+    usedGoldenKey: usedKey,
+    isCompleted: done,
+    completion: done ? ('just' as const) : null,
+  };
+  return (
+    <>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Demo
+          label="힌트·황금키 (QuestHints, P6-09) · 지금 화면 = XP 안내"
+          note="이야기 쪽 대사창 아래. 버튼에 남은 횟수, 쓰기 전에 받을 XP가 어떻게 바뀌는지(힌트 0회 1.5배 · 1회 1.25배 · 그 외 기본 · 황금키 0, 서버 quest_xp와 같은 규칙). 황금키는 확인 창(결과·남는 키·다시 채우는 때). 쪽지 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+          surface="card"
+          data-testid="quest-hints-demo"
+        >
+          <QuestHints {...common} showStars={false} />
+        </Demo>
+        <Demo
+          label="같은 줄 · 별 안내 (SHOW_STARS 켜면, P8-05)"
+          note="별 규칙 F3: 힌트 0회 ★★★ · 1회 ★★ · 그 외·황금키 ★. 두 견본은 같은 상태를 공유해요"
+          surface="card"
+        >
+          <QuestHints {...common} showStars />
+        </Demo>
+      </div>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => {
+          setHints(0);
+          setKeys(3);
+          setUsedKey(false);
+          setDone(false);
+        }}
+        icon={<RotateCcw aria-hidden />}
+      >
+        처음부터
+      </Button>
+      <CodeSample code={`<QuestHints kind={session.kind} hintsUsed={session.hintsUsed} notes={hintNotes(session.messages, session.currentStep, session.streamingContent)} … xpReward={quest.xp_reward} totalHintsUsed={session.totalHintsUsed} usedGoldenKey={session.usedGoldenKey} />`} />
+    </>
   );
 }
 
@@ -188,6 +397,110 @@ const SPEAKER: Record<BubbleTone, string> = {
 const TYPING_TEXT =
   '반복문은 같은 일을 여러 번 하게 해 줘. for i in range(3): 을 쓰면 세 번 반복해!';
 
+const DIALOGUE_LINES = [
+  '이야기를 읽고 해 볼 일을 확인해요. 공책에 주문을 써서 "코드 돌려보기"를 눌러 봐요!',
+  '돌아가긴 했는데 나온 글자가 조금 달라요. 해 볼 일을 다시 읽어 봐요!',
+  '해냈어요! 해 볼 일을 모두 끝냈어요. 통과 도장 쾅!',
+];
+
+// 파이뱀에게 물어보기 견본 (P6-10): 가짜 세션으로 질문 → 생각 중 → 흐르는 글자 → 답, 닫힌 채 말이 오면 배지·미리 보기
+const DEMO_CHAT: ChatMessage[] = [
+  {
+    role: 'tutor',
+    content:
+      '`print()`는 화면에 글자를 보여 주는 **마법 주문**이에요! 따옴표 안에 보여 주고 싶은 말을 넣어 봐요.',
+    isFallback: true,
+  },
+  { role: 'system', content: '🔑 황금키를 사용했어요!' },
+];
+const DEMO_ANSWER: Record<AskQuestion, string> = {
+  concept:
+    '`print()`는 괄호 안의 것을 화면에 보여 주는 주문이에요. 칠판에 글씨를 쓰는 것과 비슷해요! 예: `print("사과")` → 사과',
+  what: '해 볼 일은 두 가지예요. 먼저 print() 괄호 안에 "안녕하세요!"를 넣고, 코드 돌려보기를 눌러 나온 글자를 확인해요.',
+  why: '나온 글자가 hello였어요. 해 볼 일은 "안녕하세요!"를 보여 주는 거니까 따옴표 안 글자를 바꿔 볼까요?',
+};
+
+function TutorChatDemo() {
+  const [messages, setMessages] = useState(DEMO_CHAT);
+  const [loading, setLoading] = useState(false);
+  const [stream, setStream] = useState('');
+  const [askOpen, setAskOpen] = useState(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const at = (ms: number, fn: () => void) =>
+    timers.current.push(setTimeout(fn, ms));
+
+  /** 생각 중 1.2초 → 한 글자씩 흘려 쓰기 → 답 */
+  const reply = (answer: string) => {
+    setLoading(true);
+    const chars = [...answer];
+    chars.forEach((_, i) =>
+      at(1200 + i * 30, () => setStream(chars.slice(0, i + 1).join(''))),
+    );
+    at(1400 + chars.length * 30, () => {
+      setStream('');
+      setLoading(false);
+      setMessages((m) => [...m, { role: 'tutor', content: answer }]);
+    });
+  };
+  const session = {
+    messages,
+    isAiLoading: loading,
+    streamingContent: stream,
+    hasApiKey: false,
+    canAskWhy: true,
+    askOpen,
+    setAskOpen,
+    handleAsk: (q: AskQuestion) => {
+      setMessages((m) => [...m, { role: 'student', content: ASK_QUESTIONS[q] }]);
+      reply(DEMO_ANSWER[q]);
+    },
+  } as unknown as QuestSession;
+
+  return (
+    <MotionProvider>
+      <Demo
+        label="파이뱀에게 물어보기 (AskPybaem + ConversationPanel, P6-10)"
+        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼 3개(무엇을 하면 돼요? = 지금 할 일 · 개념만 · 왜 이렇게 나왔어요?, 자유 입력은 P9-17). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
+        surface="card"
+        data-testid="tutor-chat-demo"
+      >
+        <div className="max-w-xl">
+          <AskPybaem session={session} hintPending={false} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            sfx={false}
+            icon={<MessageCircle aria-hidden />}
+            disabled={loading}
+            onClick={() => reply(DEMO_ANSWER.why)}
+            data-testid="tutor-chat-arrive"
+          >
+            파이뱀이 말하기 (닫힌 채로 보면 배지)
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            sfx={false}
+            icon={<RotateCcw aria-hidden />}
+            onClick={() => {
+              timers.current.forEach(clearTimeout);
+              setStream('');
+              setLoading(false);
+              setMessages(DEMO_CHAT);
+            }}
+          >
+            처음부터
+          </Button>
+        </div>
+        <CodeSample code={`<AskPybaem session={session} hintPending={notes.some((n) => n.pending)} />  // StoryPage ask 자리`} />
+      </Demo>
+    </MotionProvider>
+  );
+}
+
 export function BubbleSection() {
   const [round, setRound] = useState(0);
   return (
@@ -234,6 +547,28 @@ export function BubbleSection() {
           </SpeechBubble>
         </Demo>
       </div>
+      <Demo
+        label="대사창 (DialogueBox, P6-01)"
+        note="캐릭터 + 말풍선 + 타자. 누르거나 Enter·Space면 남은 글자를 한 번에, 낭독기는 대사가 바뀔 때 전체 문장을 한 번. 글자가 나오는 동안 리그가 말해요"
+        data-testid="dialogue-box-demo"
+      >
+        <DialogueBox
+          key={round}
+          speaker="파이뱀"
+          text={DIALOGUE_LINES[round % DIALOGUE_LINES.length]}
+          tone={round % DIALOGUE_LINES.length === 2 ? 'good' : 'tutor'}
+          data-testid="dialogue-box"
+          character={(speaking) => (
+            <PybaemRig
+              state={round % DIALOGUE_LINES.length === 2 ? 'cheer' : 'talk'}
+              talking={speaking}
+              size={96}
+              label=""
+            />
+          )}
+        />
+      </Demo>
+      <TutorChatDemo />
       <div className="grid gap-4 sm:grid-cols-2">
         {BUBBLE_TONES.map((tone) => (
           <Demo key={tone} label={tone} note="꼬리 left · top · none">
@@ -252,7 +587,7 @@ export function BubbleSection() {
           </Demo>
         ))}
       </div>
-      <CodeSample code={`<SpeechBubble speaker="파이뱀 선생님" text={line} typing onTypingDone={next} />\n<SpeechBubble tone="bug" speaker="버그버그">…</SpeechBubble>`} />
+      <CodeSample code={`<DialogueBox speaker="파이뱀" text={line} character={(speaking) => <PybaemRig state="talk" talking={speaking} size={96} label="" />} />\n<SpeechBubble speaker="파이뱀 선생님" text={line} typing onTypingDone={next} />\n<SpeechBubble tone="bug" speaker="버그버그">…</SpeechBubble>`} />
     </Section>
   );
 }
@@ -300,6 +635,7 @@ export function RewardSection() {
         </Demo>
       </div>
       <CodeSample code={`<RewardIcon kind="coin" size={26} label="코인" />\n<Stars n={2} max={3} />`} />
+      <QuestHintsDemo />
     </Section>
   );
 }

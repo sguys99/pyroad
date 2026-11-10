@@ -8,7 +8,7 @@ import type { Page } from '@playwright/test';
 import { test, expect } from './support/test';
 import { adminClient, completeQuests } from './support/admin';
 import { stage } from './support/content';
-import { outputPanel, runCode } from './support/quest';
+import { outputPanel, runCode, toStageClear } from './support/quest';
 
 const s1 = stage(1);
 const s2 = stage(2);
@@ -68,12 +68,11 @@ test('퀘스트를 깨서 다음 스테이지가 열리면 지도에서 연출 �
   await page.goto(`/quest/${last.id}`);
   await runCode(page, last.solution);
   await expect(outputPanel(page)).toContainText('정답이에요!');
-  const overlay = page.getByTestId('celebration-overlay');
-  await overlay.getByRole('button', { name: '모두 닫기' }).click();
-  await expect(overlay).toBeHidden();
-
+  // 축하의 맨 뒤 스테이지 클리어 카드 → "지도에서 새 길 보기" (P6-13): 소프트 이동으로 지도에 가서 해제 연출
+  const stageCard = await toStageClear(page);
   const res = recorded(page);
-  await page.goto('/world');
+  await stageCard.getByTestId('celebration-map-cta').click();
+  await expect(page).toHaveURL(/\/world/);
   // 연출 중: 새 노드는 잠김 모습 + 자물쇠, 이전 노드 → 새 노드
   await expect(page.locator('.wu-lock')).toHaveCount(1);
   await expect(page.locator('.world-node[data-unlock="to"]')).toHaveCount(1);

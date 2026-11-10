@@ -20,6 +20,10 @@ import {
   type Ref,
 } from 'react';
 import type { MotionTier } from '../../../lib/motion/tier';
+import {
+  isBackdropQuiet,
+  subscribeBackdropQuiet,
+} from '../../../lib/celebration/backdropQuiet';
 import type { Costume } from './costumes';
 import { RigEngine } from './core/engine';
 import { applyGeo } from './core/markup';
@@ -145,7 +149,16 @@ function RigViewInner<S extends string, P>(
           opacityProperty: true,
           visibilityProperty: true,
         });
-      e.setVisible(onScreen && shown && !document.hidden && !pausedRef.current);
+      // 축하 오버레이 뒤(덮개 아래)는 멈춤, 오버레이 안의 리그는 그대로 (P6-13)
+      const behindOverlay =
+        isBackdropQuiet() && !svg?.closest('[data-celebration-root]');
+      e.setVisible(
+        onScreen &&
+          shown &&
+          !document.hidden &&
+          !pausedRef.current &&
+          !behindOverlay,
+      );
     };
     const start = requestAnimationFrame(() => {
       const l = latest.current;
@@ -182,11 +195,13 @@ function RigViewInner<S extends string, P>(
       update();
     });
     updateRef.current = update;
+    const unquiet = subscribeBackdropQuiet(update);
     document.addEventListener('visibilitychange', update);
     return () => {
       cancelAnimationFrame(start);
       window.clearInterval(poll);
       io?.disconnect();
+      unquiet();
       document.removeEventListener('visibilitychange', update);
       e?.destroy();
       engineRef.current = null;

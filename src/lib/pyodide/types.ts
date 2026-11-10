@@ -39,6 +39,12 @@ export type RunOutcome =
   /** 다른 스레드가 interrupt buffer로 시간 초과를 알림 (Node 검증 실행기) */
   | 'timeout';
 
+/**
+ * 실행기 준비 단계. download = Pyodide 파일 받기·파이썬 띄우기(첫 방문은 수 초~수십 초),
+ * setup = 실행기 안전 장치(네트워크 API 지우기 등, 짧음)
+ */
+export type PyodideLoadStage = 'download' | 'setup';
+
 export interface WorkerRuntimeInfo {
   pyodide: string;
   python: string;
@@ -68,6 +74,8 @@ export type WorkerResponse =
   | {
       type: 'init-status';
       status: 'loading' | 'ready' | 'error';
+      /** loading 단계 (브라우저 Worker만 보냄, P6-05 준비 연출) */
+      stage?: PyodideLoadStage;
       error?: string;
       info?: WorkerRuntimeInfo;
     }

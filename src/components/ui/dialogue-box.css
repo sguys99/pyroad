@@ -1,0 +1,36 @@
+/* 게임 대사창 (P6-01, dialogue-box.tsx). 최종 시안 `.f-tutor`: 캐릭터 칸 + 말풍선, 테두리 없음. 값은 토큰 변수만 */
+
+@layer components {
+  .g-dialogue {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border-radius: var(--round-m);
+  }
+  .g-dialogue[data-typing] {
+    cursor: pointer;
+  }
+  .g-dialogue:focus-visible {
+    outline: var(--focus-w) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  .g-dialogue-who {
+    flex: none;
+    width: 6rem;
+  }
+  /* 리그·정지 그림은 칸 폭에 맞춰 줄어든다 (좁은 쪽에서 말풍선 자리 확보) */
+  .g-dialogue-who > svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .g-dialogue > .g-bubble {
+    flex: 1;
+    margin-top: 0.5rem;
+  }
+  @container (max-width: 22rem) {
+    .g-dialogue-who {
+      width: 4.5rem;
+    }
+  }
+}

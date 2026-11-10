@@ -27,6 +27,7 @@ export function useTyping(text: string, enabled: boolean, onDone?: () => void) {
   const [n, setN] = useState(instant ? chars.length : 0);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+  const timer = useRef<ReturnType<typeof setInterval>>(undefined);
 
   useEffect(() => {
     const total = [...text].length;
@@ -45,13 +46,22 @@ export function useTyping(text: string, enabled: boolean, onDone?: () => void) {
         onDoneRef.current?.();
       }
     }, TYPING_CHAR_MS);
+    timer.current = id;
     return () => clearInterval(id);
   }, [text, instant]);
 
+  const done = n >= chars.length;
   return {
     shown: chars.slice(0, n).join(''),
     rest: chars.slice(n).join(''),
-    done: n >= chars.length,
+    done,
+    /** 남은 글자를 한 번에 (대사창 탭·Enter로 넘기기) */
+    skip: () => {
+      if (done) return;
+      clearInterval(timer.current);
+      setN(chars.length);
+      onDoneRef.current?.();
+    },
   };
 }
 

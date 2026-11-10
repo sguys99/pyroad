@@ -8,6 +8,7 @@ import {
 } from './constants';
 import { isRunSuccessful, truncateOutput } from './runOutcome';
 import type {
+  PyodideLoadStage,
   RunDoneMessage,
   RunOutcome,
   WorkerRequest,
@@ -93,6 +94,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
   const [isRunning, setIsRunning] = useState(false);
   const [restarting, setRestarting] = useState<PyodideRestartReason>(null);
   const [generation, setGeneration] = useState(0);
+  const [loadStage, setLoadStage] = useState<PyodideLoadStage | null>(null);
   const [runtimeInfo, setRuntimeInfo] = useState<WorkerRuntimeInfo | null>(
     null,
   );
@@ -204,12 +206,15 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
             if (msg.status === 'ready') {
               updateStatus('ready');
               setRestarting(null);
+              setLoadStage(null);
               setRuntimeInfo(msg.info ?? null);
             } else if (msg.status === 'loading') {
               updateStatus('loading');
+              if (msg.stage) setLoadStage(msg.stage);
             } else if (msg.status === 'error') {
               updateStatus('error');
               setRestarting(null);
+              setLoadStage(null);
               // 실행기 로딩 실패만 보고 (학생 코드와 무관)
               reportPyodideWorkerError('init', msg.error);
             }
@@ -248,6 +253,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
         reportPyodideWorkerError('worker', message, extra);
         updateStatus('error');
         setRestarting(null);
+        setLoadStage(null);
         const run = runRef.current;
         if (run && run.generation === gen) {
           finishRun(run, {
@@ -261,6 +267,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       workerRef.current = { worker, generation: gen };
       setGeneration(gen);
       setRestarting(reason);
+      setLoadStage('download');
       updateStatus('loading');
       const msg: WorkerRequest = { type: 'init' };
       worker.postMessage(msg);
@@ -364,6 +371,8 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
     stop,
     /** Worker를 다시 띄우는 중인 이유 (재준비 연출용). 준비되면 null */
     restarting,
+    /** 준비 단계 (P6-05 준비 연출). loading이 아니면 null */
+    loadStage,
     /** 지금 Worker의 세대 번호 (Worker를 새로 만들 때마다 1씩 늘어남) */
     generation,
     /** Pyodide 버전·불러온 곳·JSPI 여부 */

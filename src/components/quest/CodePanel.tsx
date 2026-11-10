@@ -1,87 +1,83 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Play, RefreshCw, Square } from 'lucide-react';
-import { m, AnimatePresence } from 'framer-motion';
-import { framerSpring, sec } from '@/lib/motion/tokens';
+import { useRef, useState, useSyncExternalStore } from 'react';
+import dynamic from 'next/dynamic';
+import { NotebookPen, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CodeEditor } from './CodeEditor';
-import { errorLineFromStderr } from '@/lib/editor/errorLine';
-import { OutputPanel } from './OutputPanel';
+import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
+import { errorLineFromStderr } from '@/lib/editor/stderrLine';
+import { OutputPanel, type OutputPanelProps } from './OutputPanel';
 import type {
   PyodideRestartReason,
   PyodideStatus,
   RunResult,
 } from '@/lib/pyodide/usePyodide';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
-import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
+import type { PyodideLoadStage } from '@/lib/pyodide/types';
+import { RunControls } from './RunControls';
 
-const CODING_TIPS = [
-  'print()로 화면에 글자를 보여줄 수 있어요!',
-  '변수는 상자와 같아요 — 값을 담아둘 수 있답니다!',
-  '들여쓰기(스페이스 4칸)는 파이썬에서 아주 중요해요!',
-  'if문으로 조건에 따라 다른 일을 할 수 있어요!',
-  'for문으로 같은 일을 여러 번 반복할 수 있어요!',
-  '# 뒤에 쓰는 글은 메모예요. 컴퓨터는 읽지 않아요!',
-  'input()으로 사용자에게 질문을 할 수 있어요!',
-];
-
-function CodingTipRotator() {
-  const [tipIndex, setTipIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTipIndex((prev) => (prev + 1) % CODING_TIPS.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, []);
-
+/** 공책 머리 제목 (P6-03) */
+export function NotebookTitle() {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-      <span className="shrink-0">
-        <CharacterAvatar character="pybaem" expression="teaching" size="sm" />
-      </span>
-      <div className="min-h-[20px] flex-1">
-        <AnimatePresence mode="wait">
-          <m.p
-            key={tipIndex}
-            className="text-xs text-foreground"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: sec('base') }}
-          >
-            {CODING_TIPS[tipIndex]}
-          </m.p>
-        </AnimatePresence>
-      </div>
-    </div>
+    <h2 className="qw-notebook-t font-display">
+      <NotebookPen aria-hidden />
+      나의 주문 공책
+    </h2>
   );
 }
 
+// 코드 키보드(P6-04)는 좁은 화면(lg 미만)이나 터치 화면에서만 받는다 — 넓은 화면 + 마우스는 첫 로드 JS +0.
+// 자리(.ck-slot 높이)는 같은 조건의 CSS가 미리 잡아 불러온 뒤 실행 버튼이 밀리지 않는다 (questWorkspace.css)
+const KEYBOARD_QUERY = '(max-width: 63.99rem), (pointer: coarse)';
+const CodeKeyboard = dynamic(() => import('./CodeKeyboard'), { ssr: false });
+
+// matchMedia가 없는 환경(jsdom)은 넓은 화면으로 본다
+function subscribeKeyboardQuery(onChange: () => void) {
+  const mq = window.matchMedia?.(KEYBOARD_QUERY);
+  mq?.addEventListener('change', onChange);
+  return () => mq?.removeEventListener('change', onChange);
+}
+
+const ResetCodeDialog = dynamic(() => import('./ResetCodeDialog'), {
+  ssr: false,
+});
+
 /**
- * 시간 초과·멈추기 뒤 Worker를 다시 띄우는 동안 (§2.9 재준비 연출, 2~5초).
- * 점 세 개는 CSS transform·opacity 반복이고 reduced-motion이면 멈춘 점 (§2.10)
+ * "처음 코드로" (P6-03, 시안 NotebookPage 머리). 지금 코드가 시작 코드와 같으면 꺼 두고,
+ * 다르면 고친 코드가 사라지므로 한 번 묻는다. 좁은 쪽(24rem 미만)에서는 글자를 숨기고 아이콘만 (questWorkspace.css)
  */
-export function RunnerWakingNotice() {
+export function ResetCodeButton({
+  changed,
+  onReset,
+}: {
+  changed: boolean;
+  onReset: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  // 한 번 열면 계속 붙여 둔다 (닫히는 연출·포커스 돌려주기)
+  const [loaded, setLoaded] = useState(false);
   return (
-    <div
-      role="status"
-      data-testid="runner-waking"
-      className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2"
-    >
-      <span className="shrink-0">
-        <CharacterAvatar character="pybaem" expression="sleeping" size="sm" />
-      </span>
-      <p className="flex items-center text-xs text-foreground">
-        파이뱀이 실행기를 다시 깨우는 중
-        <span aria-hidden className="ml-1 inline-flex items-end gap-0.5">
-          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
-          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
-          <span className="waking-dot inline-block h-1 w-1 rounded-full bg-primary" />
-        </span>
-      </p>
-    </div>
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        icon={<RotateCcw aria-hidden />}
+        disabled={!changed}
+        aria-label="처음 코드로"
+        aria-haspopup="dialog"
+        className="qw-reset"
+        data-testid="reset-code"
+        onClick={() => {
+          setLoaded(true);
+          setOpen(true);
+        }}
+      >
+        <span className="qw-reset-label">처음 코드로</span>
+      </Button>
+      {loaded && (
+        <ResetCodeDialog open={open} onOpenChange={setOpen} onReset={onReset} />
+      )}
+    </>
   );
 }
 
@@ -89,12 +85,18 @@ interface CodePanelProps {
   /** 에디터 코드. 황금키 정답·다음 단계 코드처럼 바깥에서 바꾸면 에디터에도 반영됨 */
   code: string;
   onCodeChange: (code: string) => void;
+  /** "처음 코드로"가 돌아갈 코드. 주면 공책 머리에 제목과 버튼을 그린다 */
+  starterCode?: string;
   pyodideStatus: PyodideStatus;
   /** Worker를 다시 띄우는 중이면 그 이유 (재준비 연출) */
   restarting?: PyodideRestartReason;
+  /** 처음 준비 단계 (준비 연출의 단계 칸) */
+  loadStage?: PyodideLoadStage | null;
   isRunning: boolean;
   /** 채점·완료 요청 중 (B06: 이 동안 실행 버튼을 다시 누를 수 없음) */
   isSubmitting?: boolean;
+  /** 프로젝트 단계 통과 박자 중 (실행 버튼이 "정답 확인 중"에 머물지 않게, P6-16) */
+  stepping?: boolean;
   onRun: () => void;
   /** 실행 멈추기 (실행 중에만 버튼이 보임) */
   onStop?: () => void;
@@ -103,17 +105,29 @@ interface CodePanelProps {
   /** 실행 중 stdout */
   liveOutput?: LiveOutputStore;
   isCodeEmpty: boolean;
-  validationResult?: { passed: boolean } | null;
-  nextQuestId?: string | null;
+  validationResult?: OutputPanelProps['validationResult'];
+  /** 퀘스트를 마쳤을 때 결과 쪽지 아래 성공 장면·다음 퀘스트 (P6-08) */
+  reward?: OutputPanelProps['reward'];
+  /** 결과 쪽지 견줘 보기에 쓰는 공개 안내 (P6-06) */
+  goal?: string;
+  /** 결과 쪽지의 "N번째 줄 보러 가기" */
+  onShowErrorLine?: (line: number) => void;
+  /** 결과 쪽지 "파이뱀에게 더 물어보기" (Q56) */
+  onAskTutor?: () => void;
+  /** 스테이지 차례 (코드 키보드가 그 스테이지 주문을 앞으로, P6-11) */
+  stage?: number;
 }
 
 export function CodePanel({
   code,
   onCodeChange,
+  starterCode,
   pyodideStatus,
   restarting = null,
+  loadStage = null,
   isRunning,
   isSubmitting = false,
+  stepping = false,
   onRun,
   onStop,
   onRetry,
@@ -121,80 +135,57 @@ export function CodePanel({
   liveOutput,
   isCodeEmpty,
   validationResult,
-  nextQuestId,
+  reward,
+  goal,
+  onShowErrorLine,
+  onAskTutor,
+  stage,
 }: CodePanelProps) {
-  const isReady = pyodideStatus === 'ready';
-  const isLoading = pyodideStatus === 'loading';
-  const isError = pyodideStatus === 'error';
-  // Worker 를 띄우기 전(idle)과 불러오는 중(loading) 모두 아직 누를 수 없으므로 "준비 중..."
-  const isPreparing = !isReady && !isError;
-  const isBusy = isRunning || isSubmitting;
-  const canRun = isReady && !isBusy && !isCodeEmpty;
+  const editorRef = useRef<CodeEditorHandle>(null);
+  const showKeyboard = useSyncExternalStore(
+    subscribeKeyboardQuery,
+    () => window.matchMedia?.(KEYBOARD_QUERY).matches ?? false,
+    () => false,
+  );
 
   return (
-    <div className="flex flex-col gap-3 p-4">
+    // 공책 → 실행 줄 → 결과 간격은 시안 f-run-row·f-result (16px)
+    <div className="flex flex-col gap-4">
       {/* 에디터 (오류가 난 줄은 traceback에서 찾아 표시, P2-18) */}
       <CodeEditor
         value={code}
         onChange={onCodeChange}
+        ref={editorRef}
+        title={starterCode !== undefined && <NotebookTitle />}
+        actions={
+          starterCode !== undefined && (
+            <ResetCodeButton
+              changed={code !== starterCode}
+              onReset={() => onCodeChange(starterCode)}
+            />
+          )
+        }
         errorLine={
           runResult?.hadException ? errorLineFromStderr(runResult.stderr) : null
         }
       />
-
-      {/* Pyodide 상태 + 실행 버튼 */}
-      <div className="flex items-center gap-3">
-        {isError ? (
-          <Button
-            onClick={onRetry}
-            variant="secondary"
-            size="sm"
-            icon={<RefreshCw aria-hidden />}
-          >
-            실행기 다시 불러오기
-          </Button>
-        ) : (
-          // 눌림 피드백은 게임 버튼 자체(아랫면 3px → jellyB 복귀, P2-11). 실행 소리는 세션이 낸다(run)
-          <Button
-            onClick={onRun}
-            disabled={!canRun}
-            loading={isBusy || isPreparing}
-            sfx={false}
-            icon={<Play aria-hidden />}
-            className="min-w-[140px]"
-            data-testid="run-button"
-          >
-            {isRunning
-              ? '실행 중...'
-              : isSubmitting
-                ? '정답 확인 중...'
-                : isPreparing
-                  ? '준비 중...'
-                  : '코드 돌려보기!'}
-          </Button>
-        )}
-
-        {isRunning && onStop && (
-          <Button
-            onClick={onStop}
-            variant="secondary"
-            icon={<Square className="fill-current" aria-hidden />}
-            data-testid="stop-button"
-          >
-            멈추기
-          </Button>
-        )}
-
-        {isError && (
-          <span className="text-xs text-accent-foreground">
-            앗, 실행기를 불러오지 못했어요. 다시 시도해 볼까요?
-          </span>
-        )}
+      <div className="ck-slot">
+        {showKeyboard && <CodeKeyboard editor={editorRef} stage={stage} />}
       </div>
 
-      {/* 다시 준비 중이면 깨우는 연출, 처음 불러오는 중이면 코딩 팁 */}
-      {isLoading &&
-        (restarting ? <RunnerWakingNotice /> : <CodingTipRotator />)}
+      {/* 실행 버튼 + 준비·재준비·오류 안내 (P6-05) */}
+      <RunControls
+        status={pyodideStatus}
+        restarting={restarting}
+        loadStage={loadStage}
+        isRunning={isRunning}
+        isSubmitting={isSubmitting}
+        stepping={stepping}
+        isCodeEmpty={isCodeEmpty}
+        onRun={onRun}
+        onStop={onStop}
+        onRetry={onRetry}
+      />
 
       {/* 실행 결과 */}
       <OutputPanel
@@ -202,21 +193,11 @@ export function CodePanel({
         isRunning={isRunning}
         validationResult={validationResult}
         liveOutput={liveOutput}
+        goal={goal}
+        onShowErrorLine={onShowErrorLine}
+        reward={reward}
+        onAskTutor={onAskTutor}
       />
-
-      {/* 다음 퀘스트 버튼 */}
-      {validationResult?.passed && nextQuestId && (
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={framerSpring('body', { delay: sec('slow') })}
-          className="mt-2"
-        >
-          <Button href={`/quest/${nextQuestId}`} className="w-full">
-            다음 퀘스트로 →
-          </Button>
-        </m.div>
-      )}
     </div>
   );
 }

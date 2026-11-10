@@ -7,11 +7,9 @@ import { dirname, join } from 'node:path';
 
 /**
  * package.json `dependencies`에 있지만 고지 목록에 넣지 않는 것 (이유와 함께).
- * - 쓰지 않는 의존성, 따로 고지하는 런타임(Pyodide)
+ * - 따로 고지하는 런타임(Pyodide). 앱에서 Lottie를 쓰기 시작하면 lottie-web을 dependencies로 옮겨 고지에 넣는다
  */
 export const SKIP_ROOTS = {
-  'lottie-react':
-    '앱에서 쓰지 않는 의존성 (B32). Phase 6에서 lottie-web을 쓰기 시작하면 다시 넣음',
   pyodide: '브라우저 파이썬 런타임으로 따로 고지 (MPL 2.0 + CPython PSF)',
 };
 

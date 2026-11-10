@@ -1,7 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Code2, ExternalLink, Music, Volume2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Code2,
+  ExternalLink,
+  Music,
+  RotateCcw,
+  Volume2,
+} from 'lucide-react';
 import {
   useSfx,
   useSoundSettings,
@@ -16,8 +22,68 @@ import {
   type SfxId,
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
+import { rewardSfx } from '@/lib/celebration/rewardSfx';
 import { Button } from '@/components/ui/button';
+import {
+  RunControls,
+  RunnerLoading,
+} from '@/components/quest/RunControls';
+import {
+  CodeEditor,
+  type CodeEditorHandle,
+} from '@/components/quest/CodeEditor';
+import CodeKeyboard from '@/components/quest/CodeKeyboard';
+import { questTabs } from '@/components/quest/QuestWorkspace';
+import { SegmentedTabs } from '@/components/ui/tabs';
+import { MotionProvider } from '@/components/providers/MotionProvider';
+import { OutputPanel } from '@/components/quest/OutputPanel';
+import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
+import type { RunResult } from '@/lib/pyodide/usePyodide';
+import type { QuestSession } from '@/lib/quest/useQuestSession';
+import { DialogueBox } from '@/components/ui/dialogue-box';
+import { PybaemRig } from '@/components/characters/rig/MascotRig';
+import { tutorLine } from '@/components/quest/StoryPage';
+import { HAPPY_MS, useThinkBeat } from '@/components/quest/useThinkBeat';
+import { CelebrationMascot } from '@/components/quest/celebrations/parts';
+import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { CodeSample, Demo, Section } from './ui';
+
+/** 모바일 코드 키보드 견본 (P6-04): 실제 에디터 + 키보드. 퀘스트 화면은 lg 미만·터치에서만 띄운다. 스테이지를 바꾸면 그 스테이지 주문이 앞으로 (P6-11) */
+function CodeKeyboardDemo() {
+  const editor = useRef<CodeEditorHandle>(null);
+  const [code, setCode] = useState('# 아래에 코드를 작성해보세요!\n');
+  const [stage, setStage] = useState('1');
+  return (
+    <div className="flex max-w-sm flex-col gap-2" data-testid="catalog-code-keyboard">
+      <SegmentedTabs
+        aria-label="스테이지"
+        items={['1', '3', '4', '5', '6'].map((v) => ({ value: v, label: `${v}스테이지` }))}
+        value={stage}
+        onValueChange={setStage}
+      />
+      <CodeEditor ref={editor} value={code} onChange={setCode} />
+      <CodeKeyboard editor={editor} stage={Number(stage)} />
+    </div>
+  );
+}
+
+/** 모바일 번호 탭 + ③결과 상태 점 견본 (P6-11) */
+function QuestTabsDemo() {
+  const [tab, setTab] = useState<'story' | 'code' | 'result'>('result');
+  return (
+    <div className="flex max-w-sm flex-col gap-3">
+      {([null, 'good', 'bad'] as const).map((v) => (
+        <SegmentedTabs
+          key={v ?? 'none'}
+          aria-label={`퀘스트 쪽 고르기 (${v ?? '실행 전'})`}
+          items={questTabs(v)}
+          value={tab}
+          onValueChange={setTab}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function EditorSection() {
   return (
@@ -42,7 +108,576 @@ export function EditorSection() {
           </Button>
         </div>
       </Demo>
+      <Demo
+        label="모바일 코드 키보드 (P6-04)"
+        note="주문(초록)·기호는 띠를 옆으로 넘기고, 커서 ← →는 오른쪽에 고정. 눌러도 에디터 포커스·폰 키보드를 뺏지 않음. 화살표 키로 키 사이 이동"
+        surface="card"
+      >
+        <CodeKeyboardDemo />
+      </Demo>
+      <Demo
+        label="모바일 쪽 넘기기 (P6-11)"
+        note="①이야기 ②공책 ③결과 번호 탭 + 책 위 좌우 스와이프(에디터·코드 키보드 안은 제외). ③결과 점: 실행 전 없음 · 통과 초록 · 고칠 곳 금색. 폰 키보드가 올라오면 코드 키보드가 키보드 윗변에 붙음(퀘스트 화면)"
+        surface="card"
+      >
+        <QuestTabsDemo />
+      </Demo>
     </Section>
+  );
+}
+
+const noop = () => {};
+
+/** 실행 줄 견본 (P6-05). 공책 쪽처럼 흰 면 위, 폭은 쪽 안 폭과 같은 컨테이너 기준 */
+export function RunControlsSection() {
+  const states = [
+    {
+      label: '준비됨',
+      note: '큰 초록 버튼 · 아랫면 3px · 재생 아이콘',
+      props: { status: 'ready' as const, isRunning: false },
+    },
+    {
+      label: '처음 준비 중 · 불러오기',
+      note: 'Worker가 알린 단계만 · 지금 칸은 흐르는 조각(바쁨 표시) · 팁이 바뀜',
+      props: {
+        status: 'loading' as const,
+        loadStage: 'download' as const,
+        isRunning: false,
+      },
+    },
+    {
+      label: '처음 준비 중 · 점검',
+      note: 'Pyodide를 띄운 뒤 네트워크 API 지우기 등 (짧음)',
+      props: {
+        status: 'loading' as const,
+        loadStage: 'setup' as const,
+        isRunning: false,
+      },
+    },
+    {
+      label: '실행 중',
+      note: '초록 면 + 스피너 + 빛 띠(full·lite). 멈추기 옆에',
+      props: { status: 'ready' as const, isRunning: true },
+    },
+    {
+      label: '정답 확인 중',
+      note: '채점·완료 요청 동안 다시 못 누름 (B06)',
+      props: { status: 'ready' as const, isRunning: false, isSubmitting: true },
+    },
+    {
+      label: '다시 준비 중 (무한 루프를 멈춘 뒤)',
+      note: 'Worker를 다시 띄우는 2~5초 (§2.9)',
+      props: {
+        status: 'loading' as const,
+        restarting: 'stop' as const,
+        loadStage: 'download' as const,
+        isRunning: false,
+      },
+    },
+    {
+      label: '빈 공책',
+      note: '준비됐지만 코드가 없으면 납작한 회색 면',
+      props: { status: 'ready' as const, isRunning: false, isCodeEmpty: true },
+    },
+    {
+      label: '실행기 오류',
+      note: '다시 불러오기 + 안내',
+      props: { status: 'error' as const, isRunning: false },
+    },
+  ];
+  // 팁이 Framer m.* 라 LazyMotion 이 필요하다 (앱은 LoggedInShell 이 감쌈)
+  return (
+    <MotionProvider>
+    <Section
+      id="run-controls"
+      kicker="퀘스트 (P6-05)"
+      title="실행 버튼 · 실행기 준비"
+      description="공책 쪽 실행 줄(RunControls). 진행률 숫자는 지어내지 않고 Worker가 알려 주는 단계(불러오기 → 점검 → 준비 끝)만 보여 줘요. 흐르는 조각·점 세 개는 바쁨 표시라 minimal에서도 돌고, 실행 중 빛 띠는 full·lite만, 동작 줄이기는 모두 멈추고 글자·색으로만 알려요. 8초가 넘으면 팁 대신 '처음 한 번은 오래 걸려요' 안내."
+    >
+      <div className="grid items-start gap-4 md:grid-cols-2">
+        {states.map((s) => (
+          <Demo
+            key={s.label}
+            label={s.label}
+            note={s.note}
+            surface="card"
+            className="@container"
+          >
+            <RunControls
+              {...s.props}
+              onRun={noop}
+              onStop={noop}
+              onRetry={noop}
+            />
+          </Demo>
+        ))}
+        <Demo
+          label="첫 방문이 느릴 때"
+          note="Slow 4G 첫 방문 34초 실측 → 8초 뒤 안내로 바뀜"
+          surface="card"
+        >
+          <RunnerLoading stage="download" slow />
+        </Demo>
+      </div>
+      <CodeSample
+        code={`<RunControls status={runner.status} restarting={runner.restarting} loadStage={runner.loadStage}\n  isRunning={runner.isRunning} isSubmitting={isSubmitting} isCodeEmpty={isCodeEmpty}\n  onRun={handleRun} onStop={handleStop} onRetry={runner.retry} />`}
+      />
+    </Section>
+    </MotionProvider>
+  );
+}
+
+const SLIP_ERR =
+  'Traceback (most recent call last):\n  File "<exec>", line 3, in <module>\nNameError: name \'nmae\' is not defined\n';
+
+/** 실행 중 견본: 줄이 하나씩 흘러 들어온다 */
+function LiveSlipDemo() {
+  const [store] = useState(() => createLiveOutputStore());
+  useEffect(() => {
+    store.reset();
+    const timers = ['반복 0', '반복 1', '반복 2'].map((line, i) =>
+      setTimeout(() => store.append(`${line}\n`), (i + 1) * 600),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [store]);
+  return <OutputPanel result={null} isRunning liveOutput={store} />;
+}
+
+/** 결과 쪽지 견본 (P6-06). "다시 튀어나오기"로 줄 카드 등장 연출을 다시 본다 */
+export function OutputPanelSection() {
+  const [round, setRound] = useState(0);
+  const ok = { stderr: '', success: true, outcome: 'ok' as const };
+  const states = [
+    {
+      label: '아직 안 돌림',
+      note: '옅은 회색 쪽지 · 안내 한 줄',
+      node: <OutputPanel result={null} isRunning={false} />,
+    },
+    {
+      label: '실행 중 (실시간 출력)',
+      note: '돌아가는 중 딱지(바쁨 표시) · 줄이 오는 대로 카드로',
+      node: <LiveSlipDemo />,
+    },
+    {
+      label: '통과',
+      note: '초록 면 · "통과! 정답이에요!" 딱지 · 줄마다 흰 카드',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '나는 파이썬 모험가!\n반가워!\n' }}
+          isRunning={false}
+          validationResult={{ passed: true }}
+        />
+      ),
+    },
+    {
+      label: '출력이 다름',
+      note: '금색 면 · 공개 안내(해 볼 일)와 견줘 보기 + 규칙 유형별 살펴볼 거리 + "파이뱀에게 더 물어보기"(Q56). 정답 기준값은 보여 주지 않음',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '안녕하세요\n' }}
+          isRunning={false}
+          validationResult={{ passed: false, type: 'output_match' }}
+          goal="안녕하세요! 가 출력되어야 해요"
+          onAskTutor={noop}
+        />
+      ),
+    },
+    {
+      label: '출력이 다름 · 아무것도 안 나옴',
+      note: 'print를 빠뜨렸을 때',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '' }}
+          isRunning={false}
+          validationResult={{ passed: false, type: 'output_match' }}
+          goal="2026 이 출력되어야 해요"
+        />
+      ),
+    },
+    {
+      label: '오류',
+      note: '옅은 빨강 면 · 몇 번째 줄 + 마지막 한 줄 · 줄로 가기 · 전체 메시지는 접음. 아래에 버그버그 등장(P6-07, 아래 절) + "파이뱀에게 더 물어보기"(Q56: AI 피드백은 누를 때만)',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '마법 상자 준비!\n',
+            stderr: SLIP_ERR,
+            success: false,
+            hadException: true,
+          }}
+          isRunning={false}
+          onShowErrorLine={noop}
+          onAskTutor={noop}
+        />
+      ),
+    },
+    {
+      label: '시간 초과',
+      note: '차분한 회색 · 멈추기 전까지 나온 글자',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '0\n1\n2\n',
+            stderr: '',
+            success: false,
+            isTimeout: true,
+            outcome: 'timeout',
+          }}
+          isRunning={false}
+        />
+      ),
+    },
+    {
+      label: '멈춤 · 결과 쪽에서 재준비',
+      note: '모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '반복 0\n반복 1\n',
+            stderr: '',
+            success: false,
+            isStopped: true,
+            outcome: 'stopped',
+          }}
+          isRunning={false}
+          restarting
+        />
+      ),
+    },
+  ];
+  return (
+    <Section
+      id="output-slip"
+      kicker="퀘스트 (P6-06)"
+      title="결과 쪽지 · 나온 글자"
+      description="공책 쪽 결과(OutputPanel). 나온 글자는 줄마다 흰 카드로 튀어나와요: full은 body 스프링으로 차례로(앞 12줄만), lite는 짧게, minimal·동작 줄이기는 바로 보여요. 출력이 다를 때는 정답 기준값(서버 전용) 대신 해 볼 일의 공개 안내와 규칙 유형별 살펴볼 거리로 견줘 봐요."
+    >
+      <Button
+        onClick={() => setRound((r) => r + 1)}
+        variant="secondary"
+        size="sm"
+        sfx={false}
+        icon={<RotateCcw aria-hidden />}
+        data-testid="output-slip-replay"
+      >
+        다시 튀어나오기
+      </Button>
+      <div className="mt-4 grid items-start gap-4 md:grid-cols-2">
+        {states.map((s) => (
+          <Demo
+            key={`${s.label}-${round}`}
+            label={s.label}
+            note={s.note}
+            surface="card"
+          >
+            {s.node}
+          </Demo>
+        ))}
+      </div>
+      <CodeSample
+        code={`<OutputPanel result={runResult} isRunning={runner.isRunning} validationResult={validation}\n  liveOutput={liveOutput} goal={goal} onShowErrorLine={showErrorLine} />`}
+      />
+    </Section>
+  );
+}
+
+const STAGE_ERR: RunResult = {
+  stdout: '마법 상자 준비!\n',
+  stderr: SLIP_ERR,
+  success: false,
+  hadException: true,
+};
+const STAGE_DIFF: RunResult = {
+  stdout: '안녕하세요\n',
+  stderr: '',
+  success: true,
+  outcome: 'ok',
+};
+const STAGE_TIMEOUT: RunResult = {
+  stdout: '0\n1\n2\n',
+  stderr: '',
+  success: false,
+  isTimeout: true,
+  outcome: 'timeout',
+};
+
+/** 앱과 같은 대사 고르기(tutorLine) + 오류면 생각 박자(useThinkBeat). 견본이라 세션 대신 필요한 값만 */
+function StagedTutor({
+  result,
+  validation = null,
+  round,
+}: {
+  result: RunResult;
+  validation?: QuestSession['validation'];
+  round: number;
+}) {
+  const said = tutorLine({
+    runResult: result,
+    validation,
+    isCompleted: false,
+    steps: null,
+  } as unknown as QuestSession);
+  const thinking = useThinkBeat(`${round}`, !!result.hadException);
+  const line = thinking
+    ? { state: 'think' as const, text: '음… 어디 보자. 버그버그가 어디 숨었을까?' }
+    : said;
+  return (
+    <DialogueBox
+      speaker="파이뱀"
+      text={line.text}
+      data-testid="staging-dialogue"
+      character={(speaking) => (
+        <PybaemRig state={line.state} talking={speaking} size={96} label="" />
+      )}
+    />
+  );
+}
+
+/** 고친 뒤: 오류 → (다시 돌림) → 끝까지 돎. 버그버그가 화해하고 사라진다 */
+function FixDemo() {
+  const [fixed, setFixed] = useState(false);
+  return (
+    <div className="space-y-3">
+      <Button
+        onClick={() => setFixed((f) => !f)}
+        variant="secondary"
+        size="sm"
+        sfx={false}
+        data-testid="staging-fix"
+      >
+        {fixed ? '다시 버그 내기' : '고쳐서 다시 돌리기'}
+      </Button>
+      <OutputPanel
+        result={
+          fixed
+            ? { stdout: '마법 상자 준비!\n상자 열기!\n', stderr: '', success: true, outcome: 'ok' }
+            : STAGE_ERR
+        }
+        isRunning={false}
+        validationResult={fixed ? { passed: true } : null}
+      />
+    </div>
+  );
+}
+
+/** 실패 연출 세 갈래 (P6-07): 오류 · 출력이 다름 · 시간 초과 + 고친 뒤 화해 */
+export function ErrorStagingSection() {
+  const [round, setRound] = useState(0);
+  const cases = [
+    {
+      label: '오류 (버그버그 등장 + 파이뱀 생각 → 설명)',
+      note: 'full: 버그버그가 옆에서 통통 뛰어 들어옴 · lite: 제자리 깜짝 점프 · minimal·동작 줄이기: 움직임 없이 표정·후광 색만. 파이뱀은 생각 박자 뒤 쉬운 설명(동작 줄이기는 바로). lg 미만에서는 결과 쪽에 파이뱀 설명 쪽지가 한 줄 더',
+      result: STAGE_ERR,
+      validation: null,
+      testId: 'staging-error',
+    },
+    {
+      label: '출력이 다름 (버그버그 없음)',
+      note: '파이뱀 갸우뚱(confused) + 격려. 결과 쪽지는 금색 견줘 보기',
+      result: STAGE_DIFF,
+      validation: { passed: false, type: 'output_match' as const },
+      testId: 'staging-diff',
+    },
+    {
+      label: '시간 초과 (무한 반복)',
+      note: '파이뱀 격려(encourage) + 반복이 멈추는지 살펴보자는 차분한 말',
+      result: STAGE_TIMEOUT,
+      validation: null,
+      testId: 'staging-timeout',
+    },
+  ];
+  return (
+    <Section
+      id="error-staging"
+      kicker="퀘스트 (P6-07)"
+      title="실패 연출 · 버그버그와 파이뱀"
+      description="빨간 경고 대신 캐릭터가 알려 줘요. 오류는 파이썬 오류 문장을 아이 말로 바꾼 규칙표(src/lib/quest/errorExplain.ts, LLM 호출 없음)로 줄 번호와 함께 설명해요. 성공 연출은 아래 #success-staging."
+    >
+      <Button
+        onClick={() => setRound((r) => r + 1)}
+        variant="secondary"
+        size="sm"
+        sfx={false}
+        icon={<RotateCcw aria-hidden />}
+        data-testid="staging-replay"
+      >
+        다시 보기
+      </Button>
+      <div className="mt-4 grid gap-4">
+        {cases.map((c) => (
+          <Demo
+            key={`${c.testId}-${round}`}
+            label={c.label}
+            note={c.note}
+            surface="card"
+            data-testid={c.testId}
+          >
+            <div className="grid items-start gap-4 md:grid-cols-2">
+              <StagedTutor
+                result={c.result}
+                validation={c.validation}
+                round={round}
+              />
+              <OutputPanel
+                result={c.result}
+                isRunning={false}
+                validationResult={c.validation}
+                goal="안녕하세요! 가 출력되어야 해요"
+                onShowErrorLine={noop}
+              />
+            </div>
+          </Demo>
+        ))}
+        <Demo
+          label="고친 뒤 (화해)"
+          note="오류 다음 실행이 끝까지 돌면 버그버그가 화해 인사를 하고 3초 뒤 스르르 사라져요(동작 줄이기는 바로)"
+          surface="card"
+          data-testid="staging-fixed"
+        >
+          <FixDemo />
+        </Demo>
+      </div>
+      <CodeSample
+        code={`// OutputPanel 오류 → <BugbugAside stderr={result.stderr} /> (errorAside 자리)\n// StoryPage: tutorLine(session) + useThinkBeat(runResult, hadException)\nexplainError(stderr) // { type, line, text: '3번째 줄을 봐요. …' }`}
+      />
+    </Section>
+  );
+}
+
+const STAGE_PASS: RunResult = {
+  stdout: '안녕하세요!\n마법 상자 준비!\n',
+  stderr: '',
+  success: true,
+  outcome: 'ok',
+};
+const STAGE_PASS_CHECK = { passed: true, type: 'output_match' as const };
+
+/** 이야기 쪽 파이뱀 성공 박자: 기쁨 점프(happy) → 응원(cheer). StoryPage와 같은 tutorLine + useThinkBeat(HAPPY_MS) */
+function SuccessTutor({ round }: { round: number }) {
+  const said = tutorLine({
+    runResult: STAGE_PASS,
+    validation: STAGE_PASS_CHECK,
+    isCompleted: true,
+    steps: null,
+  } as unknown as QuestSession);
+  const jumping = useThinkBeat(`${round}`, true, HAPPY_MS);
+  const state = jumping ? 'happy' : said.state;
+  return (
+    <DialogueBox
+      speaker="파이뱀"
+      text={said.text}
+      tone="good"
+      data-testid="success-dialogue"
+      character={(speaking) => (
+        <span data-rig-state={state} data-testid="success-pybaem">
+          <PybaemRig state={state} talking={speaking} size={96} label="" />
+        </span>
+      )}
+    />
+  );
+}
+
+/** 성공 연출 (P6-08): 도장 쾅 · 보상 띠 · 파이뱀 happy → cheer · 축하 카드 리그 */
+export function SuccessStagingSection() {
+  const [round, setRound] = useState(0);
+  const { budget } = useMotionTier();
+  const reward = {
+    title: '첫 번째 인사',
+    xp: 45,
+    stars: 2 as const,
+    coins: 20,
+    nextHref: '/dev/design#success-staging',
+    mapHref: '/dev/design#success-staging',
+  };
+  return (
+    <MotionProvider>
+      <Section
+        id="success-staging"
+        kicker="퀘스트 (P6-08)"
+        title="성공 연출 · 통과 도장과 보상"
+        description="정답이면 결과 쪽지에 금색 “통과!” 도장이 쾅 찍히고(온보딩 도장과 같은 stampSlam), 아래 보상 띠에서 별 1→3이 스프링으로 톡톡 · XP·코인이 0부터 올라가요(약 1.6초, lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 모습으로 건너뛰어요. 이야기 쪽 파이뱀은 기쁨 점프(happy) 뒤 응원(cheer). 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0. Q52: 실제 화면은 별·코인을 SHOW_STARS·SHOW_COINS로 숨겨 XP만 — 여기서는 켜서 보여 줘요."
+      >
+        <Button
+          onClick={() => setRound((r) => r + 1)}
+          variant="secondary"
+          size="sm"
+          sfx={false}
+          icon={<RotateCcw aria-hidden />}
+          data-testid="success-replay"
+        >
+          다시 보기
+        </Button>
+        <div className="mt-4 grid gap-4">
+          <Demo
+            key={`full-${round}`}
+            label="별·코인을 켠 모습 (Phase 8, 플래그 켬)"
+            note="도장 → 별 1→3 팝 → XP·코인 카운트업 → 다음 퀘스트 · 지도로"
+            surface="card"
+            data-testid="success-flags-on"
+          >
+            <div className="grid items-start gap-4 md:grid-cols-2">
+              <SuccessTutor round={round} />
+              <OutputPanel
+                result={STAGE_PASS}
+                isRunning={false}
+                validationResult={STAGE_PASS_CHECK}
+                reward={{ ...reward, forceStarsCoins: true }}
+              />
+            </div>
+          </Demo>
+          <div className="grid items-start gap-4 md:grid-cols-2">
+            <Demo
+              key={`real-${round}`}
+              label="지금 실제 화면 (XP만)"
+              note="서버가 준 XP만 올라가요. 좁은 화면(lg 미만)은 띠 머리에 파이뱀 얼굴"
+              surface="card"
+              data-testid="success-real"
+            >
+              <OutputPanel
+                result={STAGE_PASS}
+                isRunning={false}
+                validationResult={STAGE_PASS_CHECK}
+                reward={reward}
+              />
+            </Demo>
+            <Demo
+              key={`end-${round}`}
+              label="스테이지 마지막 퀘스트 · 황금 열쇠"
+              note="다음 퀘스트가 없으면 지도가 주 버튼(스테이지 클리어 축하는 오버레이가 먼저). 황금 열쇠로 연 퀘스트는 XP 대신 한 줄"
+              surface="card"
+              data-testid="success-stage-end"
+            >
+              <OutputPanel
+                result={STAGE_PASS}
+                isRunning={false}
+                validationResult={STAGE_PASS_CHECK}
+                reward={{
+                  title: '마을 입구 지도 완성',
+                  xp: 0,
+                  note: '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.',
+                  nextHref: null,
+                  mapHref: '/dev/design#success-staging',
+                }}
+              />
+            </Demo>
+          </div>
+          <Demo
+            key={`card-${round}`}
+            label="축하 카드 파이뱀 (B32 LottieCharacter → 리그)"
+            note="뿌듯(proud)으로 나타났다가 기쁨 점프(happy: 웅크림 → 두 번 + 착지 젤리). 반복 점프는 오버레이에서 쓰지 않음. 축하 카드 전체는 #celebrations"
+            surface="card"
+            data-testid="success-card"
+          >
+            <div className="flex justify-center">
+              <CelebrationMascot size={96} budget={budget} />
+            </div>
+          </Demo>
+        </div>
+        <CodeSample
+          code={`// QuestWorkspace: 완료한 그 실행이면\n<OutputPanel … reward={{ xp: earnedXP, stars, nextHref, mapHref }} />\n// → <PassStamp>(쪽지 위) + <RewardStrip>(쪽지 아래), useSuccessRun(…)으로 건너뛰기\n// StoryPage: tutorLine → 'cheer', useThinkBeat(runResult, cheer, HAPPY_MS) 동안 'happy'`}
+        />
+      </Section>
+    </MotionProvider>
   );
 }
 
@@ -137,6 +772,45 @@ export function SoundSection() {
         >
           별 세 개
         </Button>
+      </Demo>
+      <Demo
+        label="퀘스트 박자 (P6-14)"
+        note="보상 띠와 같은 rewardSfx 예약: 별 1→3(0.45초부터 0.15초 간격) 뒤 코인 카운트업 동안 coin 최대 6번(동시 상한 6). 대사 블립은 #bubble 대사창(다시 타자)에서, 정답은 #success-staging 도장, bug는 #error-staging 버그버그 등장 때"
+      >
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="reward"
+            size="sm"
+            sfx={false}
+            data-testid="sfx-reward-run"
+            onClick={() =>
+              rewardSfx({
+                stars: 3,
+                coins: 40,
+                starsAtMs: 450,
+                starGapMs: 150,
+                countAtMs: 640,
+                countMs: 700,
+              }).forEach((c) =>
+                window.setTimeout(() => play(c.id, { rate: c.rate }), c.at),
+              )
+            }
+          >
+            별 셋 + 코인 카운트업
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            sfx={false}
+            onClick={() =>
+              rewardSfx({ stars: 3, coins: 40 }).forEach((c) =>
+                play(c.id, { rate: c.rate }),
+              )
+            }
+          >
+            움직임 없음 (화음 + 코인 한 번)
+          </Button>
+        </div>
       </Demo>
       <Demo label="지도 노드 (P5-11)" note="열린 노드·차례 퀘스트는 탭, 잠긴 노드는 같은 탭을 작고 낮게(경고음 없음, 안내는 쪽지 글자)">
         <div className="flex flex-wrap gap-3">

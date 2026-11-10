@@ -143,7 +143,7 @@ npm 의존성 전체 목록은 `package.json`이 정본입니다. 여기서는 *
 | Pyodide 314.0.7 (Python 3.14.2, Emscripten 5.0.3) | `public/pyodide/314.0.7/`에 npm 패키지 파일 6개를 **수정 없이** 복사(`scripts/pyodide/copy-assets.mjs`, git 제외, 약 13MB) | Pyodide: MPL 2.0. 안에 든 CPython 인터프리터·표준 라이브러리 `python_stdlib.zip`: PSF License 2.0. Emscripten 런타임(MIT/UIUC)과 내장 C 라이브러리(zlib·bzip2·expat·libffi·mpdecimal·SQLite 등, 허용형) | MPL §3.2: 실행 형태를 배포하면 **소스를 어디서 받는지 알릴 것**(github.com/pyodide/pyodide 태그 314.0.7), 고지 유지. PSF: 라이선스·저작권 고지 유지 | npm 패키지에 라이선스 파일이 없어 복사본에도 없음 → §8 고지 화면에 넣음 |
 | lucide-react 1.7.0 | JS 번들 (아이콘 SVG path) | ISC · Lucide Icons and Contributors | 저작권·허락 문구 고지 | 번들 압축 때 라이선스 주석이 빠짐(2026-11-06 `.next/static/chunks` 확인) → §8 |
 | canvas-confetti 1.9.4 | JS 번들 | ISC · Kiril Vatev | 같음 | 같음 |
-| lottie-web 5.13.0 (`lottie_light`) | P6에서 지연 로드 예정. 지금은 앱에서 쓰지 않음(B32, `lottie-react` 미사용 의존성) | MIT · Bodymovin | 같음 | 쓰기 시작하면 §8 목록에 포함 |
+| lottie-web 5.13.0 (`lottie_light`) | 앱에서 쓰지 않음(B32). `assets:check` 렌더 검사용 devDependency(P6-16에서 미사용 `lottie-react`를 지우고 직접 추가) | MIT · Bodymovin | 같음 | 쓰기 시작하면 §8 목록에 포함 |
 | 그 밖의 JS 의존성 (React, Next.js, Framer Motion, CodeMirror, react-markdown 등) | JS 번들 | 대부분 MIT·ISC·Apache-2.0 | 같음 | §8: 빌드 때 고지 파일 생성 제안 |
 
 ## 6. 저장소에만 있는 제3자 자원 (앱에 배포 안 함)

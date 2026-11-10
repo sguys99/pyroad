@@ -104,6 +104,11 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'social-login',
       'rig',
       'editor',
+      'run-controls',
+      'output-slip',
+      'error-staging',
+      'success-staging',
+      'celebrations',
       'share-card',
       'sound',
       'legal',
@@ -203,7 +208,7 @@ test.describe('연출 단계 대체: 반복 연출 (P2-12)', () => {
         // 검사가 실제로 무언가를 잡는지 (견본이 돌고 있음). 흐림은 움직임이 아니라 단계를 따른다
         if (mode.reduced === 'off') {
           expect(names).toEqual(
-            expect.arrayContaining([...AMBIENT, 'mascot-bob']),
+            expect.arrayContaining([...AMBIENT, 'mascot-bob', 'qr-sweep']),
           );
         }
         expect(blurred).toBeGreaterThan(0);
@@ -223,7 +228,9 @@ test.describe('연출 단계 대체: 반복 연출 (P2-12)', () => {
       if (mode.tier === 'minimal' && mode.reduced === 'off') {
         expect(names.filter((n) => IDLE_LOOPS.includes(n))).toEqual([]);
         // 바쁨 표시는 기능 신호라 계속 돈다
-        expect(names).toEqual(expect.arrayContaining(['waking-dot', 'spin']));
+        expect(names).toEqual(
+          expect.arrayContaining(['waking-dot', 'spin', 'qr-busy']),
+        );
         expect(names.every((n) => n in MINIMAL_ALLOW)).toBe(true);
       }
     });
@@ -335,10 +342,15 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
     page,
   }) => {
     const expected = {
-      full: { toast: 'g-toast-in', shine: true, caret: true },
-      lite: { toast: 'g-toast-in-lite', shine: true, caret: true },
-      minimal: { toast: 'g-fade-in', shine: false, caret: false },
-      reduced: { toast: 'none', shine: false, caret: false },
+      full: { toast: 'g-toast-in', shine: true, caret: true, pop: 'qo-pop' },
+      lite: {
+        toast: 'g-toast-in-lite',
+        shine: true,
+        caret: true,
+        pop: 'qo-pop-lite',
+      },
+      minimal: { toast: 'g-fade-in', shine: false, caret: false, pop: 'none' },
+      reduced: { toast: 'none', shine: false, caret: false, pop: 'none' },
     };
     for (const mode of MOTION_MODES.slice(0, 4)) {
       const want = expected[mode.reduced === 'on' ? 'reduced' : mode.tier];
@@ -397,6 +409,24 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       await expect(
         page.getByTestId('bubble-typing').getByTestId('bubble-caret'),
       ).toHaveCount(want.caret ? 1 : 0);
+      // 대사창(P6-01): 같은 대체 + 누르면 남은 글자를 한 번에
+      const dialogue = page.getByTestId('dialogue-box');
+      if (want.caret) {
+        await expect(dialogue).toHaveAttribute('data-typing', '');
+        await dialogue.click();
+      }
+      await expect(dialogue).not.toHaveAttribute('data-typing');
+      await expect(dialogue.locator('.g-bubble-rest')).toHaveText('');
+
+      // 결과 쪽지 줄 카드 등장 (P6-06): full 스프링 · lite 짧게 · minimal·동작 줄이기 없음, 긴 출력은 앞 12줄만
+      const slipLine = page
+        .locator('section#output-slip [data-verdict="pass"] .qo-line')
+        .first();
+      await expect(slipLine).toHaveClass(/qo-pop/);
+      expect(
+        await slipLine.evaluate((el) => getComputedStyle(el).animationName),
+        `${mode.name} 줄 카드`,
+      ).toBe(want.pop);
     }
   });
 });
@@ -441,6 +471,124 @@ test.describe('동행 펫 슬롯 (P5-08)', () => {
       );
       await page.waitForTimeout(400);
       await near();
+    });
+  }
+});
+
+test.describe('성공 연출 (P6-08)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 도장·별·카운트업이 단계를 따르고, Esc로 끝 상태로 건너뛴다`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('success-flags-on');
+      await demo.scrollIntoViewIfNeeded();
+      await page.getByTestId('success-replay').click();
+      const strip = demo.getByTestId('quest-reward');
+      const xp = strip.getByTestId('reward-xp-count');
+      await expect(strip).toBeVisible();
+      await expect(strip.getByTestId('reward-stars')).toHaveAccessibleName(
+        '별 2개 / 3개',
+      );
+      await expect(strip.getByTestId('reward-coins')).toBeVisible();
+      const stampAnims = () =>
+        demo.locator('.qx-stamp').evaluate((el) => el.getAnimations().length);
+
+      if (mode.tier === 'full' && mode.reduced === 'off') {
+        // 진행 중: 숫자가 아직 끝 값 전, 도장은 내려찍는 중 → Esc 한 번에 끝 값·끝 모습
+        await expect(strip).not.toHaveAttribute('data-done', /.*/);
+        expect(await xp.innerText()).not.toBe('45');
+        expect(await stampAnims()).toBeGreaterThan(0);
+        await page.keyboard.press('Escape');
+        await expect(strip).toHaveAttribute('data-done', 'true');
+        await expect(xp).toHaveText('45');
+        expect(await stampAnims()).toBe(0);
+        // 축하 카드 파이뱀(리그, B32 대체): 뿌듯 → 기쁨 점프
+        await expect(
+          page.getByTestId('success-card').getByTestId('celebration-mascot'),
+        ).toHaveAttribute('data-rig-state', 'happy');
+      } else {
+        // minimal·동작 줄이기: 처음부터 끝 값 (minimal 도장은 페이드, 동작 줄이기는 움직임 0)
+        await expect(strip).toHaveAttribute('data-done', 'true');
+        await expect(xp).toHaveText('45');
+        if (mode.reduced === 'on') expect(await stampAnims()).toBe(0);
+      }
+      // 이야기 쪽 파이뱀: 기쁨 점프 뒤 응원
+      await expect(page.getByTestId('success-pybaem')).toHaveAttribute(
+        'data-rig-state',
+        'cheer',
+        { timeout: 3_000 },
+      );
+    });
+  }
+});
+
+test.describe('축하 오버레이 (P6-13)', () => {
+  for (const mode of MOTION_MODES) {
+    test(`${mode.name}: 카드 7종 견본, 실제 오버레이는 연출 중 Esc로 끝 상태 → Enter로 다음 → 맨 뒤 스테이지 클리어`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const section = page.locator('section#celebrations');
+      await section.scrollIntoViewIfNeeded();
+      for (const kind of [
+        'level_up',
+        'badges',
+        'stage_clear',
+        'golden_key',
+        'project_complete',
+        'rewards',
+        'chest',
+      ]) {
+        await expect(section.getByTestId(`catalog-cel-${kind}`)).toBeVisible();
+      }
+      // 견본도 연출이 끝나면 끝 모습 (보물상자는 열린 뚜껑)
+      await expect(
+        section.getByTestId('catalog-cel-chest').locator('.cel-card'),
+      ).toHaveAttribute('data-settled', 'true', { timeout: 5_000 });
+
+      await page.getByTestId('celebration-open-stage').click();
+      const overlay = page.getByTestId('celebration-overlay');
+      const level = overlay.getByTestId('celebration-step-level_up');
+      await expect(level).toBeVisible();
+      await expect(
+        page.getByRole('dialog', { name: '레벨 3 달성' }),
+      ).toBeVisible();
+      if (mode.tier === 'full' && mode.reduced === 'off') {
+        // 등장 연출 중: 카드 안 1회성 애니메이션이 돈다 → Esc 한 번에 끝 상태(돌고 있는 애니메이션 0), 오버레이는 그대로
+        await expect(level).not.toHaveAttribute('data-settled', /.*/);
+        await page.keyboard.press('Escape');
+        await expect(level).toHaveAttribute('data-settled', 'true');
+        expect(
+          await level.evaluate(
+            (el) =>
+              el
+                .getAnimations({ subtree: true })
+                .filter(
+                  (a) => a instanceof CSSAnimation && a.playState === 'running',
+                ).length,
+          ),
+        ).toBe(0);
+      } else {
+        // lite는 짧게 끝나고, minimal·동작 줄이기는 처음부터 끝 상태
+        await expect(level).toHaveAttribute('data-settled', 'true', {
+          timeout: mode.tier === 'lite' && mode.reduced === 'off' ? 3_000 : 500,
+        });
+      }
+      await expect(overlay.getByTestId('celebration-cta')).toBeFocused();
+      const stage = overlay.getByTestId('celebration-step-stage_clear');
+      await expect(async () => {
+        if (!(await stage.isVisible())) await page.keyboard.press('Enter');
+        await expect(stage).toBeVisible({ timeout: 500 });
+      }).toPass({ timeout: 15_000 });
+      await expect(stage.getByTestId('celebration-map-cta')).toBeFocused();
+      // 닫으면 연 버튼으로 포커스 복귀, 뒤 화면 조용히 해제
+      await overlay.getByRole('button', { name: '모두 닫기' }).click();
+      await expect(overlay).toHaveCount(0);
+      await expect(page.getByTestId('celebration-open-stage')).toBeFocused();
+      await expect(page.locator('html')).not.toHaveAttribute(
+        'data-celebrating',
+      );
     });
   }
 });

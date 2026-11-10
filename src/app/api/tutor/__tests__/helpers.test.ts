@@ -60,6 +60,17 @@ describe('buildFallbackMessage', () => {
     });
   });
 
+  describe('concept_explain — 학습 주제·목표만 (P6-10, Q58)', () => {
+    it('주제와 목표 목록, 정답·힌트 원문은 없음', () => {
+      const body: TutorRequest = { type: 'concept_explain', quest_id: 'q' };
+      const msg = buildFallbackMessage(body, quest, answerKey);
+      expect(msg).toContain('print() 함수로 출력하기');
+      expect(msg).toContain('- print() 사용');
+      expect(msg).not.toContain('안녕하세요');
+      expect(msg).not.toContain('힌트 1단계');
+    });
+  });
+
   describe('hint_generator — 기존 동작 유지', () => {
     it.each([1, 2, 3] as const)('level_%i 힌트를 반환', (level) => {
       const body: TutorRequest = {
@@ -94,6 +105,23 @@ describe('buildFallbackMessage', () => {
       expect(buildFallbackMessage(body, quest, answerKey)).toBe(
         '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡',
       );
+    });
+
+    it('오류가 났으면 결과 쪽지와 같은 쉬운 설명 (P6-16)', () => {
+      const body: TutorRequest = {
+        type: 'code_feedback',
+        quest_id: 'q',
+        execution_result: {
+          stdout: '',
+          stderr:
+            'Traceback (most recent call last):\n  File "<exec>", line 2, in <module>\nNameError: name \'nmae\' is not defined\n',
+          passed: false,
+        },
+      };
+      const msg = buildFallbackMessage(body, quest, answerKey);
+      expect(msg.startsWith('2번째 줄을 봐요.')).toBe(true);
+      expect(msg).toContain('nmae');
+      expect(msg).not.toContain('Traceback');
     });
   });
 

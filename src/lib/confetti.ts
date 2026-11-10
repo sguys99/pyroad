@@ -1,13 +1,31 @@
 import type { Options } from 'canvas-confetti';
 import { MOTION_BUDGETS, isMotionTier } from '@/lib/motion/tier';
 
-// canvas-confetti 모듈 사전 로드 (브라우저에서만). 이 모듈을 쓰는 화면의 청크가 로드될 때 함께 받음.
-// 기본 cannon은 OffscreenCanvas Worker에서 그리므로 메인 스레드 비용은 메시지 전송뿐이다
+// canvas-confetti 모듈은 처음 쏠 때 받는다 (P6-08: 퀘스트 첫 로드 JS·요청에서 뺌, P6-16 예산). 쏘지 않는 단계(minimal·동작 줄이기)는
+// 끝까지 받지 않는다. 기본 cannon은 OffscreenCanvas Worker에서 그리므로 메인 스레드 비용은 메시지 전송뿐이다
 // (Worker를 못 만들면 메인 스레드 rAF 하나로 그림).
-const confettiReady =
-  typeof window !== 'undefined'
-    ? import('canvas-confetti').then((m) => m.default)
-    : null;
+let confettiModule: Promise<typeof import('canvas-confetti')> | null = null;
+function loadConfetti() {
+  confettiModule ??= import('canvas-confetti').then((m) => m.default);
+  return confettiModule;
+}
+
+/**
+ * 쏠 때마다 `pyroad:confetti` 이벤트(`{ requested, fired }`)를 window에 알린다 (쏘지 않은 0도).
+ * e2e가 연출 단계별 파티클 수(full 100% · lite 30% · minimal·동작 줄이기 0, B33)를 확인하는 자리. 화면 동작에는 쓰지 않음
+ */
+export interface ConfettiReport {
+  requested: number;
+  fired: number;
+}
+function report(requested: number, fired: number): number {
+  window.dispatchEvent(
+    new CustomEvent<ConfettiReport>('pyroad:confetti', {
+      detail: { requested, fired },
+    }),
+  );
+  return fired;
+}
 
 /** 화면에 한꺼번에 떠 있을 수 있는 파티클 상한 (연속 축하에서 겹쳐 과해지지 않게, §2.6·§2.10) */
 export const MAX_LIVE_PARTICLES = 220;
@@ -87,27 +105,30 @@ export function fireConfetti(
   options: Omit<Options, 'disableForReducedMotion'>,
   { scale = 1 }: FireConfettiOptions = {},
 ): number {
+  if (typeof window === 'undefined') return 0;
+  const requested = options.particleCount ?? 50;
   const effectiveScale = Math.min(scale, tierParticleCap());
-  if (!confettiReady || effectiveScale <= 0 || reducedMotionActive()) return 0;
+  if (effectiveScale <= 0 || reducedMotionActive()) return report(requested, 0);
   const particleCount = budget.take(
-    (options.particleCount ?? 50) * effectiveScale,
+    requested * effectiveScale,
     performance.now(),
   );
-  if (particleCount === 0) return 0;
+  if (particleCount === 0) return report(requested, 0);
   const disableForReducedMotion =
     document.documentElement.dataset.reduced !== 'false';
-  confettiReady
+  loadConfetti()
     .then((confetti) =>
       confetti({ ...options, particleCount, disableForReducedMotion }),
     )
     .catch(() => {
       // 연출 실패는 무시 (학습 흐름에 영향 없음)
     });
-  return particleCount;
+  return report(requested, particleCount);
 }
 
 /** 떠 있는 컨페티를 지운다 (축하를 모두 닫거나 화면을 떠날 때) */
 export function resetConfetti(): void {
   budget.reset();
-  confettiReady?.then((confetti) => confetti.reset()).catch(() => {});
+  // 받은 적이 없으면 지울 것도 없다 (지우려고 모듈을 받지 않음)
+  confettiModule?.then((confetti) => confetti.reset()).catch(() => {});
 }

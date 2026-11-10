@@ -9,7 +9,7 @@ import { useTutor, TutorRateLimitError } from '@/lib/tutor/useTutor';
 import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
-import { fireConfetti } from '@/lib/confetti';
+import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { useSfx } from '@/components/providers/SoundProvider';
 import type {
@@ -24,6 +24,8 @@ import type {
   RewardErrorResponse,
 } from './rewards';
 import { getQuestKind, type QuestKind } from './questKind';
+import { nowTodoText } from './nowTodo';
+import { createCelebrationStore } from '@/lib/celebration/celebrationStore';
 import {
   buildCelebrationEvents,
   type CelebrationEvent,
@@ -34,7 +36,8 @@ import {
  *
  * 진행 상태·자동 저장·힌트·실행·채점·완료·황금키·보상을 한 곳에서 다루고, 유형별 렌더러
  * (`CodeQuest`, `ProjectQuest`, 이후 Quiz·Boss)는 화면만 그린다. 보상 응답은 축하 이벤트 목록
- * (`celebrations`)으로 내보내고, 축하 시퀀서(`QuestCelebrations`, P1-10)가 다 보여 준 뒤 `dismissCelebrations`로 지운다.
+ * (`celebrationStore`, P6-13: React 상태가 아닌 바깥 저장소 — 넣고 비울 때 셸이 다시 그려지지 않게)로 내보내고,
+ * 축하 시퀀서(`QuestCelebrations`, P1-10)가 다 보여 준 뒤 `dismissCelebrations`로 지운다.
  *
  * 코드 퀘스트는 1단계짜리 프로젝트처럼 다룬다. 단계 진행은 `stepRef`로 읽어서, 타이머 뒤에 실행되는
  * 다음 단계 이동이 예전 화면 값(코드·단계)을 잡지 않는다 (B10).
@@ -42,6 +45,12 @@ import {
  */
 
 export type QuestTab = 'story' | 'code' | 'result';
+
+/**
+ * 완료한 퀘스트의 지금 모습 (§12-Q57): just = 이번에 처음 통과해 보상을 받음 · before = 예전에 통과(복습 전) ·
+ * review = 이미 통과한 퀘스트를 다시 풀어 통과(보상 없음, 완료 API를 부르지 않음)
+ */
+export type QuestCompletion = 'just' | 'before' | 'review';
 
 export interface QuestSessionOptions {
   quest: QuestWithStage;
@@ -68,12 +77,19 @@ interface StepState {
 export const MAX_HINTS_PER_STEP = 3;
 /** 마지막으로 고친 뒤 이만큼 지나면 자동 저장 */
 export const AUTO_SAVE_DELAY_MS = 2000;
-/** 단계 통과(또는 황금키) 뒤 다음 단계로 넘어가기까지 (통과 표시를 잠깐 보여 줌) */
-export const STEP_ADVANCE_DELAY_MS = 1500;
-/** 완료 컨페티를 본 뒤 축하 오버레이를 띄우기까지 */
+/**
+ * 단계 통과(또는 황금키) 뒤 다음 단계로 넘어가기까지: "다음 단계" 박자(해 볼 일 체크 → 다음 목표, P6-12).
+ * 그 사이 `skipStepBeat`로 바로 넘어갈 수 있다
+ */
+export const STEP_ADVANCE_DELAY_MS = 2200;
+/**
+ * 완료 컨페티를 본 뒤 축하 오버레이를 띄우기까지. 코드 퀘스트는 결과 쪽 성공 장면(도장 → XP 카운트업, 약 1.6초 —
+ * `QuestSuccess.SUCCESS_RUN_MS`)을 끝까지 본 다음 (P6-08)
+ */
 export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
-  code: 1000,
-  project: 500,
+  code: 1800,
+  // 마지막 단계도 같은 성공 장면(도장 → XP)을 본 뒤 프로젝트 완성 카드 (P6-12, 전에는 500ms라 장면을 덮음)
+  project: 1800,
 };
 
 /**
@@ -97,9 +113,19 @@ const ANSWER_CONFETTI = {
   startVelocity: 60,
 };
 
-const RUN_ERROR_FEEDBACK =
-  '앗, 코드에 오류가 있어요! 에러 메시지를 잘 읽어보고 다시 도전해봐요! 💪';
-const WRONG_ANSWER_FEEDBACK = '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
+/**
+ * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10, §12-Q58). 자유 입력은 아동 안전 검토 뒤로 미루고(P9-17) 정해진 질문만:
+ * what = 지금 할 일(해 볼 일 + 지금 상태, LLM 없이 `nowTodoText`) · concept = 이 퀘스트 개념만(`concept_explain`) ·
+ * why = 마지막 실행 결과 설명(`code_feedback`, 결과가 지금 코드의 것일 때만)
+ */
+export const ASK_QUESTIONS = {
+  what: '무엇을 하면 돼요?',
+  concept: '힌트 말고 개념만 알려 줘요',
+  why: '왜 이렇게 나왔어요?',
+} as const;
+export type AskQuestion = keyof typeof ASK_QUESTIONS;
+const ASK_FAILED =
+  '지금은 파이뱀이 대답하기 어려워요. 조금 뒤에 다시 물어봐 줘요!';
 const SAVE_FAILED_MESSAGE =
   '앗, 기록을 저장하지 못했어요. 한 번 더 눌러 볼까요?';
 const RUNNER_NOT_READY_FOR_KEY =
@@ -130,6 +156,25 @@ async function postJson<T>(url: string, body: object): Promise<ApiResult<T>> {
 }
 
 /** 이전 단계 코드 아래에 다음 단계 시작 코드를 붙인다 */
+/** fromStep(= current.step)을 passedCode로 통과한 뒤의 단계 상태와 공책 코드 */
+function stepAfter(
+  steps: ProjectStep[],
+  current: { step: number; submissions: Record<string, string> },
+  passedCode: string,
+) {
+  const nextStep = current.step + 1;
+  return {
+    next: {
+      step: nextStep,
+      submissions: {
+        ...current.submissions,
+        [String(current.step)]: passedCode,
+      },
+    },
+    nextCode: appendStarter(passedCode, steps[nextStep - 1].starter_code),
+  };
+}
+
 function appendStarter(code: string, starter: string): string {
   if (code && starter) return code + '\n' + starter;
   return code || starter;
@@ -173,6 +218,7 @@ export function useQuestSession({
   const {
     status: runnerStatus,
     restarting,
+    loadStage,
     isRunning,
     runCode,
     stop,
@@ -215,6 +261,8 @@ export function useQuestSession({
   // AI 튜터
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [streamingContent, setStreamingContent] = useState('');
+  // 마지막으로 돌린 코드 ("왜 이렇게 나왔어요?"는 그 코드 그대로일 때만 묻는다)
+  const [lastRunCode, setLastRunCode] = useState<string | null>(null);
   // 힌트: 화면의 "힌트 n/3"은 단계마다(코드 퀘스트는 퀘스트 전체), 상태바는 누적
   const [stepHints, setStepHints] = useState(
     kind === 'code' ? (progress?.hints_used ?? 0) : 0,
@@ -238,7 +286,14 @@ export function useQuestSession({
   const [userLevel, setUserLevel] = useState(initialLevel);
   const [goldenKeys, setGoldenKeys] = useState(initialGoldenKeys);
   const [isGoldenKeyLoading, setIsGoldenKeyLoading] = useState(false);
-  const [celebrations, setCelebrations] = useState<CelebrationEvent[]>([]);
+  // 이 퀘스트에 황금키를 썼는지 (DB used_golden_key와 같음 → 완료 XP 0, 보상 미리 보기)
+  const [usedGoldenKey, setUsedGoldenKey] = useState(
+    progress?.used_golden_key ?? false,
+  );
+  const [celebrationStore] = useState(createCelebrationStore);
+  // 복습 (Q57): 이번 세션에 처음 통과했는지 · 마지막으로 채점한 실행이 이미 완료한 퀘스트였는지
+  const [justCompleted, setJustCompleted] = useState(false);
+  const [reviewRun, setReviewRun] = useState(false);
 
   // 실행·채점·완료(황금키 포함) 요청 중복 방지 (B06). ref 는 렌더 전 연속 클릭도 막고, state 는 버튼 표시용.
   // 단계를 통과하면 다음 단계로 넘어갈 때까지 잠가 둔다 (같은 단계를 두 번 넘기지 않게)
@@ -267,8 +322,21 @@ export function useQuestSession({
       aliveRef.current = false;
       for (const timer of timers) clearTimeout(timer);
       timers.clear();
+      // 정답·단계 통과 컨페티가 다음 퀘스트 위로 떨어지지 않게 (P6-15)
+      resetConfetti();
     };
   }, []);
+
+  // 진행을 서버에 쓴 퀘스트(코드 자동 저장·힌트·황금키)를 떠나면 Router Cache를 새로 받는다 (P6-15).
+  // 뒤로/앞으로는 캐시된 페이지 데이터를 그대로 다시 쓰므로, 안 그러면 돌아왔을 때 처음 들어온 때의 코드·힌트 수가 보인다
+  const wroteRef = useRef(false);
+  const [entry] = useState(() => ({ code, stepState }));
+  useEffect(
+    () => () => {
+      if (wroteRef.current) router.refresh();
+    },
+    [router],
+  );
 
   // 퀘스트를 떠날 때 돌던 코드를 멈춘다 (Worker는 레이아웃이 계속 가지고 있으므로 다음 퀘스트가 바로 쓸 수 있게)
   useEffect(() => stop, [stop]);
@@ -285,10 +353,20 @@ export function useQuestSession({
 
   /** 스트리밍 말풍선을 정리하고 답을 대화에 넣는다 (한 배치로 처리해 깜빡임 없음) */
   const finishStreaming = useCallback(
-    (message: string, isFallback: boolean, replace = false) => {
+    (
+      message: string,
+      isFallback: boolean,
+      replace = false,
+      hint?: ChatMessage['hint'],
+    ) => {
       setStreamingContent('');
       setIsLoading(false);
-      const msg: ChatMessage = { role: 'tutor', content: message, isFallback };
+      const msg: ChatMessage = {
+        role: 'tutor',
+        content: message,
+        isFallback,
+        hint,
+      };
       setMessages((prev) => (replace ? [msg] : [...prev, msg]));
     },
     [setIsLoading],
@@ -296,7 +374,7 @@ export function useQuestSession({
 
   /**
    * 튜터 답을 말풍선에 흘려 쓴다. 실패하면 준비한 문구, 요청 한도(P1-19)에 걸렸으면 한도 문구. 취소(null)면 아무것도 하지 않음.
-   * 실행 피드백(오답·실행 오류)에만 쓴다: 아이가 누른 버튼에 대한 답이라 "왜 선생님이 대답하지 않는지"를 알려 준다
+   * "파이뱀에게 물어보기" 질문에만 쓴다 (Q56부터 실행 피드백도 버튼으로만): 아이가 누른 버튼에 대한 답이라 "왜 선생님이 대답하지 않는지"를 알려 준다
    */
   const streamTutor = useCallback(
     (req: TutorRequest, failText: string) =>
@@ -421,6 +499,11 @@ export function useQuestSession({
   useEffect(() => {
     if (isCompleted) return;
     const timer = setTimeout(() => {
+      // 단계 통과 박자 중이면 박자가 이미 다음 단계를 저장했다 — 예전 단계로 덮어쓰지 않게 (P6-16)
+      if (pendingAdvanceRef.current) return;
+      // 들어온 그대로를 다시 저장하는 것은 바뀐 것이 아님
+      if (code !== entry.code || stepState !== entry.stepState)
+        wroteRef.current = true;
       saveProgress(
         kind === 'project'
           ? {
@@ -432,7 +515,7 @@ export function useQuestSession({
       );
     }, AUTO_SAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [code, isCompleted, kind, stepState, saveProgress]);
+  }, [code, isCompleted, kind, stepState, saveProgress, entry]);
 
   // ── 단계·완료 ───────────────────────────────────────────────────────
 
@@ -451,16 +534,9 @@ export function useQuestSession({
         lockSubmit(false);
         return;
       }
-      const submissions = {
-        ...current.submissions,
-        [String(fromStep)]: passedCode,
-      };
-      const nextStep = fromStep + 1;
-      const nextCode = appendStarter(
-        passedCode,
-        steps[nextStep - 1].starter_code,
-      );
-      const next = { step: nextStep, submissions };
+      const { next, nextCode } = stepAfter(steps, current, passedCode);
+      const nextStep = next.step;
+      const submissions = next.submissions;
       stepRef.current = next;
 
       setStepState(next);
@@ -470,6 +546,8 @@ export function useQuestSession({
       setStepHints(0);
       liveOutput.reset();
       lockSubmit(false);
+      // 모바일: 비워진 결과 쪽 대신 다음 단계 코드를 쓸 공책 쪽으로 (P6-12)
+      setTab('code');
 
       if (confetti) {
         fireConfetti(STEP_PASS_CONFETTI, { scale: particleScaleRef.current });
@@ -484,6 +562,35 @@ export function useQuestSession({
     [steps, lockSubmit, liveOutput, saveProgress],
   );
 
+  // "다음 단계" 박자 (P6-12): 통과한 단계 번호(넘어가기 전까지)와 바로 넘기기. 예약한 넘김은 한 번만 돈다
+  const [stepCleared, setStepCleared] = useState<number | null>(null);
+  const pendingAdvanceRef = useRef<(() => void) | null>(null);
+  const scheduleAdvance = useCallback(
+    (step: number, passedCode: string, opts?: { confetti?: boolean }) => {
+      const go = () => {
+        if (pendingAdvanceRef.current !== go) return;
+        pendingAdvanceRef.current = null;
+        setStepCleared(null);
+        advanceStep(step, passedCode, opts);
+      };
+      pendingAdvanceRef.current = go;
+      setStepCleared(step);
+      // 통과는 박자를 기다리지 않고 바로 저장한다: 박자 중에 떠나도 다음에 다음 단계에서 시작 (박자는 그림만, P6-16)
+      const current = stepRef.current;
+      if (steps && current.step === step && step < steps.length) {
+        const { next, nextCode } = stepAfter(steps, current, passedCode);
+        saveProgress({
+          code_submitted: nextCode,
+          current_step: next.step,
+          step_submissions: next.submissions,
+        });
+      }
+      later(go, STEP_ADVANCE_DELAY_MS);
+    },
+    [advanceStep, later, steps, saveProgress],
+  );
+  const skipStepBeat = useCallback(() => pendingAdvanceRef.current?.(), []);
+
   /**
    * 완료 응답을 반영한다. 새로 일어난 일은 축하 이벤트로 (P1-10 시퀀서가 보여 줌).
    * 황금키로 연 퀘스트는 큰 축하 대신 "황금키로 열었어요" 확인이 된다 (buildCelebrationEvents)
@@ -493,6 +600,7 @@ export function useQuestSession({
       setNextQuestId(completion.next_quest_id);
       setGoldenKeys(completion.golden_keys);
       if (!completion.already_completed) {
+        setJustCompleted(true);
         setEarnedXP(completion.xp_gained);
         setUserXP(completion.total_xp);
         setUserLevel(completion.level_after);
@@ -501,14 +609,17 @@ export function useQuestSession({
           questTitle,
         });
         if (events.length > 0) {
-          later(() => setCelebrations(events), CELEBRATION_DELAY_MS[kind]);
+          later(
+            () => celebrationStore.push(events),
+            CELEBRATION_DELAY_MS[kind],
+          );
         }
         // 월드맵·프로필이 새 진행을 보이도록 Router Cache를 새로 받는다 (B22: 전체 새로고침 대신)
         router.refresh();
       }
       setIsCompleted(true);
     },
-    [kind, questTitle, later, router],
+    [kind, questTitle, later, router, celebrationStore],
   );
 
   /** 서버 채점 (프로젝트는 단계 기준). 요청이 실패하면 통과하지 않은 것으로 */
@@ -620,39 +731,35 @@ export function useQuestSession({
     ],
   );
 
-  /** 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance' */
+  /**
+   * 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance'.
+   * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고, 보상은 처음 한 번뿐이라 완료 API·튜터를 부르지 않는다
+   */
   const runAndGrade = useCallback(
-    async (codeToRun: string, step: number): Promise<'advance' | 'stay'> => {
+    async (
+      codeToRun: string,
+      step: number,
+      review: boolean,
+    ): Promise<'advance' | 'stay'> => {
       setValidation(null);
       setEarnedXP(null);
+      setReviewRun(review);
       liveOutput.reset();
+      // 모바일은 누르자마자 결과 쪽으로 (§12-Q55): 실행 중 글자·멈추기(·P11 turtle 그림)가 실행 버튼과 한 화면에 안 보이는 문제(P0-06)를
+      // 떠 있는 버튼 대신 결과 쪽 자동 이동으로 푼다. 결과 쪽에는 실행 중 멈추기 버튼이 있다 (P6-11)
+      setTab('result');
 
       const result = await runCode(codeToRun, { onStdout: liveOutput.append });
       if (!aliveRef.current) return 'stay';
       setRunResult(result);
-      setTab('result');
+      setLastRunCode(result.isStopped ? null : codeToRun);
 
       // 아이가 멈추기를 눌렀음 → 채점·피드백 없이 끝
       if (result.isStopped) return 'stay';
 
-      // 실행 에러 (구문 에러·시간 초과 등). 효과음은 장난스러운 버그버그 소리 (경고 부저 대신, P0-15)
-      if (!result.success) {
-        play('bug');
-        streamTutor(
-          {
-            type: 'code_feedback',
-            quest_id: questId,
-            student_code: codeToRun,
-            execution_result: {
-              stdout: result.stdout,
-              stderr: result.stderr,
-              passed: false,
-            },
-          },
-          RUN_ERROR_FEEDBACK,
-        );
-        return 'stay';
-      }
+      // 실행 에러 (구문 에러·시간 초과 등). 효과음 'bug'는 결과 쪽지에 버그버그가 들어오는 순간 (`BugbugAside`, P6-14).
+      // AI 피드백은 자동으로 부르지 않는다 (§12-Q56): 규칙표 설명(errorExplain)이 바로 보이고, 더 묻고 싶으면 askAboutRun
+      if (!result.success) return 'stay';
 
       const passed = await validate(codeToRun, result.stdout, step);
       if (!aliveRef.current) return 'stay';
@@ -661,25 +768,17 @@ export function useQuestSession({
         type: steps?.[step - 1]?.validation_type ?? questValidationType,
       });
 
+      // 출력이 다름: 결과 쪽지 견줘 보기 + 대사창이 바로 안내하고, AI 피드백은 버튼으로만 (Q56)
       if (!passed) {
         play('wrong');
-        streamTutor(
-          {
-            type: 'code_feedback',
-            quest_id: questId,
-            student_code: codeToRun,
-            execution_result: {
-              stdout: result.stdout,
-              stderr: '',
-              passed: false,
-            },
-          },
-          WRONG_ANSWER_FEEDBACK,
-        );
         return 'stay';
       }
 
-      play('correct');
+      // 퀘스트를 마친 통과의 'correct'는 결과 쪽지 "통과!" 도장이 닿는 순간 (`PassStamp`, P6-14). 여기서는 프로젝트 중간 단계만
+      if (review) {
+        fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
+        return 'stay';
+      }
       if (kind === 'project') {
         // 단계 통과 피드백 (비스트림: 곧 시작할 다음 단계 안내 스트림을 끊지 않게)
         askTutor(
@@ -695,7 +794,10 @@ export function useQuestSession({
           },
           '대단해요! 이 단계를 통과했어요! 🎉',
         );
-        if (step < totalSteps) return 'advance';
+        if (step < totalSteps) {
+          play('correct');
+          return 'advance';
+        }
       }
 
       await completeWith(codeToRun, result.stdout);
@@ -709,7 +811,6 @@ export function useQuestSession({
       totalSteps,
       liveOutput,
       runCode,
-      streamTutor,
       askTutor,
       validate,
       completeWith,
@@ -720,16 +821,15 @@ export function useQuestSession({
   const isCodeEmpty = !code.trim();
 
   const handleRun = useCallback(async () => {
-    if (isCodeEmpty || isCompleted || submittingRef.current) return;
+    if (isCodeEmpty || submittingRef.current) return;
     play('run');
     lockSubmit(true);
     let advancing = false;
     try {
       const step = stepRef.current.step;
-      advancing = (await runAndGrade(code, step)) === 'advance';
+      advancing = (await runAndGrade(code, step, isCompleted)) === 'advance';
       // 넘어갈 때까지 실행 버튼은 잠긴 채 (advanceStep 이 푼다)
-      if (advancing)
-        later(() => advanceStep(step, code), STEP_ADVANCE_DELAY_MS);
+      if (advancing) scheduleAdvance(step, code);
     } finally {
       if (!advancing) lockSubmit(false);
     }
@@ -739,8 +839,7 @@ export function useQuestSession({
     isCompleted,
     lockSubmit,
     runAndGrade,
-    later,
-    advanceStep,
+    scheduleAdvance,
     play,
   ]);
 
@@ -750,12 +849,16 @@ export function useQuestSession({
     if (stepHints >= MAX_HINTS_PER_STEP || isAiLoading || isCompleted) return;
 
     const nextLevel = (stepHints + 1) as 1 | 2 | 3;
+    // 이야기 쪽 힌트 쪽지 (P6-09). 단계가 바뀌면 그 단계 쪽지만 보인다
+    const hint = { level: nextLevel, step: stepRef.current.step };
     const hintLabel: ChatMessage = {
       role: 'system',
       content: `힌트 ${nextLevel}/3`,
+      hint,
     };
 
     play('tap');
+    wroteRef.current = true;
     setMessages((prev) => [...prev, hintLabel]);
     setStepHints(nextLevel);
     setTotalHints((n) => n + 1);
@@ -789,12 +892,15 @@ export function useQuestSession({
         undoHint();
         return;
       }
-      finishStreaming(res.message, res.is_fallback);
+      finishStreaming(res.message, res.is_fallback, false, hint);
     } catch (error) {
       undoHint();
+      // 일부라도 받았으면 쪽지가 남아 있으니 실패 안내도 그 쪽지에
       finishStreaming(
         tutorFailure(error, TUTOR_UNAVAILABLE_HINT_MESSAGE).message,
         false,
+        false,
+        received ? hint : undefined,
       );
     }
   }, [
@@ -807,6 +913,83 @@ export function useQuestSession({
     finishStreaming,
     play,
   ]);
+
+  // ── 물어보기 (P6-10) ─────────────────────────────────────────────────
+
+  const canAskWhy = !!runResult && lastRunCode === code;
+  const handleAsk = useCallback(
+    (question: AskQuestion) => {
+      if (isAiLoading || (question === 'why' && (!canAskWhy || !runResult)))
+        return;
+      play('tap');
+      addMessage({ role: 'student', content: ASK_QUESTIONS[question] });
+      if (question === 'what') {
+        // 소개(quest_intro)를 되풀이하지 않고 지금 할 일만 짧게 (P6-10 추가)
+        addMessage({
+          role: 'tutor',
+          content: nowTodoText({
+            task:
+              kind === 'project' && stepGoal !== undefined
+                ? stepGoal
+                : quest.prompt_skeleton.exercise_description,
+            expected:
+              kind === 'project'
+                ? undefined
+                : quest.prompt_skeleton.expected_output_hint,
+            step:
+              kind === 'project'
+                ? { n: currentStep, total: totalSteps }
+                : undefined,
+            runResult,
+            runIsCurrent: canAskWhy,
+            passed: !!validation?.passed,
+            isCompleted,
+          }),
+        });
+        return;
+      }
+      let req: TutorRequest;
+      if (question === 'why' && runResult) {
+        req = {
+          type: 'code_feedback',
+          quest_id: questId,
+          student_code: code,
+          execution_result: {
+            stdout: runResult.stdout,
+            stderr: runResult.success ? '' : runResult.stderr,
+            passed: !!validation?.passed,
+          },
+        };
+      } else {
+        req = { type: 'concept_explain', quest_id: questId };
+      }
+      streamTutor(req, ASK_FAILED);
+    },
+    [
+      isAiLoading,
+      canAskWhy,
+      runResult,
+      validation,
+      isCompleted,
+      code,
+      kind,
+      quest,
+      questId,
+      stepGoal,
+      currentStep,
+      totalSteps,
+      addMessage,
+      streamTutor,
+      play,
+    ],
+  );
+
+  // 결과 쪽지의 "파이뱀에게 더 물어보기" (Q56): 대화를 펼치고 그 실행 결과로 묻는다
+  const [askOpen, setAskOpen] = useState(false);
+  const askAboutRun = useCallback(() => {
+    setAskOpen(true);
+    handleAsk('why');
+  }, [handleAsk]);
 
   // ── 황금키 ──────────────────────────────────────────────────────────
 
@@ -823,16 +1006,12 @@ export function useQuestSession({
       return;
     }
 
+    // 확인은 화면의 황금키 확인 창(QuestHints)이 미리 받는다 (P6-09)
     const step = stepRef.current.step;
-    const confirmed = window.confirm(
-      kind === 'project'
-        ? '황금키를 사용하면 이 단계의 정답이 공개되고 XP와 뱃지를 받을 수 없어요. 사용할까요?'
-        : '황금키를 사용하면 정답이 공개되고 XP와 뱃지를 받을 수 없어요. 사용할까요?',
-    );
-    if (!confirmed) return;
 
     lockSubmit(true);
     setIsGoldenKeyLoading(true);
+    wroteRef.current = true;
     let advancing = false;
 
     try {
@@ -850,6 +1029,7 @@ export function useQuestSession({
 
       const solution = key.data.solution_code;
       setGoldenKeys(key.data.golden_keys);
+      setUsedGoldenKey(true);
       // 에디터에도 정답 코드가 보인다 (CodeEditor가 바깥 값 변경을 반영)
       setCode(solution);
       addSystemMessage(
@@ -870,10 +1050,7 @@ export function useQuestSession({
         // 마지막 단계는 황금키 확인 카드가 같은 'unlock' 소리를 내므로 여기서만
         play('unlock');
         advancing = true;
-        later(
-          () => advanceStep(step, solution, { confetti: false }),
-          STEP_ADVANCE_DELAY_MS,
-        );
+        scheduleAdvance(step, solution, { confetti: false });
       } else {
         // 마지막 단계·코드 퀘스트: 자동 완료 (황금키를 쓴 퀘스트는 서버가 0 XP로 완료, B05)
         const done = await postJson<QuestCompleteResponse>(
@@ -922,9 +1099,8 @@ export function useQuestSession({
     totalSteps,
     liveOutput,
     runCode,
-    later,
     lockSubmit,
-    advanceStep,
+    scheduleAdvance,
     applyCompletion,
     addSystemMessage,
     finishStreaming,
@@ -934,9 +1110,7 @@ export function useQuestSession({
   // ── 축하 ────────────────────────────────────────────────────────────
 
   /** 앞에서부터 count개의 축하를 보여 줬다 */
-  const dismissCelebrations = useCallback((count: number) => {
-    setCelebrations((prev) => prev.slice(count));
-  }, []);
+  const dismissCelebrations = celebrationStore.dismiss;
 
   return {
     kind,
@@ -944,14 +1118,20 @@ export function useQuestSession({
     steps,
     currentStep,
     totalSteps,
+    /** 방금 통과해 다음 단계로 넘어가기 직전인 단계 ("다음 단계" 박자, P6-12). 아니면 null */
+    stepCleared,
+    /** "다음 단계" 박자를 건너뛰고 바로 넘어간다 */
+    skipStepBeat,
 
     code,
     setCode,
+    /** "처음 코드로"가 돌아갈 코드: 이번 단계를 처음 열었을 때의 코드 (저장된 코드 제외) */
+    starterCode: initialCode(quest, steps, stepState, null),
     isCodeEmpty,
     tab,
     setTab,
 
-    runner: { status: runnerStatus, restarting, isRunning, retry },
+    runner: { status: runnerStatus, restarting, loadStage, isRunning, retry },
     runResult,
     liveOutput,
     validation,
@@ -966,24 +1146,47 @@ export function useQuestSession({
     hasApiKey,
     /** "힌트 n/3"에 쓰는 이번 단계 힌트 수 */
     hintsUsed: stepHints,
-    /** 상태바에 쓰는 누적 힌트 수 */
+    /** 보상 계산에 쓰는 누적 힌트 수 (DB hints_used와 같음) */
     totalHintsUsed: totalHints,
     handleHintRequest,
+    /** "파이뱀에게 물어보기" 질문 (P6-10) */
+    handleAsk,
+    /** 마지막 실행 결과가 지금 코드의 것인지 ("왜 이렇게 나왔어요?") */
+    canAskWhy,
+    /** "파이뱀에게 물어보기" 대화가 펼쳐져 있는지 (결과 쪽지 버튼이 열 수 있게 세션에 둠) */
+    askOpen,
+    setAskOpen,
+    /** 결과 쪽지 "파이뱀에게 더 물어보기": 대화를 열고 마지막 실행으로 code_feedback (Q56) */
+    askAboutRun,
 
     goldenKeys,
+    usedGoldenKey,
     isGoldenKeyLoading,
     /** 황금키 버튼을 막을지 (실행기가 준비되지 않았거나 실행·채점 중) */
     isGoldenKeyBlocked: !isRunnerFree,
     handleGoldenKeyUse,
 
     isCompleted,
+    /** 완료했으면 방금 통과·예전에 통과·복습 통과 중 무엇인지 (Q57), 아니면 null */
+    completion: (!isCompleted
+      ? null
+      : reviewRun && validation?.passed
+        ? 'review'
+        : justCompleted
+          ? 'just'
+          : 'before') as QuestCompletion | null,
     nextQuestId,
     earnedXP,
     userXP,
     userLevel,
 
     /** 아직 보여 주지 않은 축하 이벤트 (보여 줄 순서) */
-    celebrations,
+    /** 축하 받은 편지함 (오버레이만 구독, P6-13) */
+    celebrationStore,
+    /** 지금 편지함 내용 (읽는 순간 값. 화면은 celebrationStore를 구독) */
+    get celebrations(): CelebrationEvent[] {
+      return celebrationStore.get();
+    },
     dismissCelebrations,
   };
 }

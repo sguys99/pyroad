@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import {
   autoAdvanceMs,
+  introMs,
   planCelebrations,
+  stepSummary,
   sfxSchedule,
   STEP_SPECS,
   type CelebrationStep,
@@ -18,7 +20,7 @@ const stage = {
 const kinds = (steps: CelebrationStep[]) => steps.map((s) => s.kind);
 
 describe('planCelebrations (축하 단계 계획, P1-10)', () => {
-  it('우선순위: 퀘스트 결과 → 레벨 업 → 뱃지 → 별·코인. 받은 순서가 달라도', () => {
+  it('우선순위: 퀘스트 결과 → 레벨 업 → 뱃지 → 별·코인, 스테이지를 끝낸 카드는 맨 뒤(지도로). 받은 순서가 달라도', () => {
     const events: CelebrationEvent[] = [
       { type: 'coin', amount: 10 },
       { type: 'badge', badge: 'first_code' },
@@ -27,10 +29,10 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
       { type: 'stage_clear', stage },
     ];
     expect(kinds(planCelebrations(events))).toEqual([
-      'stage_clear',
       'level_up',
       'badges',
       'rewards',
+      'stage_clear',
     ]);
   });
 
@@ -63,7 +65,7 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
     ]);
   });
 
-  it('황금키 확인이 가장 먼저, 이어서 스테이지 클리어', () => {
+  it('황금키 확인이 가장 먼저, 스테이지 클리어는 맨 뒤', () => {
     expect(
       kinds(
         planCelebrations([
@@ -72,7 +74,61 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
           { type: 'badge', badge: 'first_code' },
         ]),
       ),
-    ).toEqual(['golden_key', 'stage_clear', 'badges']);
+    ).toEqual(['golden_key', 'badges', 'stage_clear']);
+  });
+
+  it('스테이지 마지막 프로젝트도 맨 뒤, 스테이지가 없는 프로젝트는 그대로 앞', () => {
+    const project = (s: typeof stage | null) =>
+      ({
+        type: 'project_complete',
+        questTitle: '게임',
+        xpGained: 100,
+        stage: s,
+      }) as const;
+    const badge = { type: 'badge', badge: 'first_code' } as const;
+    expect(kinds(planCelebrations([project(stage), badge]))).toEqual([
+      'badges',
+      'project_complete',
+    ]);
+    expect(kinds(planCelebrations([project(null), badge]))).toEqual([
+      'project_complete',
+      'badges',
+    ]);
+  });
+
+  it('보물상자는 Phase 8 전(SHOW_CHEST=false)에는 단계를 만들지 않는다', () => {
+    expect(
+      planCelebrations([
+        {
+          type: 'chest',
+          stageTitle: '시작의 숲',
+          goal: 15,
+          contents: { coins: 40, goldenKeys: 1 },
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('등장 연출은 모두 짧다 (§12-Q28: 레벨 업 최대 3.6초 안)', () => {
+    const steps = planCelebrations([
+      { type: 'level_up', level: 9, fromLevel: 1, title: '마법사' },
+      { type: 'stage_clear', stage },
+      { type: 'golden_key', kind: 'code', questTitle: '변수' },
+      ...(['first_code', 'hint_master', 'stage_clear'] as const).map(
+        (badge) => ({ type: 'badge' as const, badge }),
+      ),
+    ]);
+    for (const s of steps) expect(introMs(s)).toBeLessThanOrEqual(3600);
+    expect(introMs(steps.find((s) => s.kind === 'level_up')!)).toBe(1900);
+  });
+
+  it('aria-live 한 줄: 받은 것을 글자로', () => {
+    const [lv, b] = planCelebrations([
+      { type: 'level_up', level: 3, fromLevel: 2, title: '새싹' },
+      { type: 'badge', badge: 'first_code' },
+    ]);
+    expect(stepSummary(lv)).toBe('레벨 업! 레벨 3 달성, 새 칭호 새싹.');
+    expect(stepSummary(b)).toMatch(/^새 뱃지: /);
   });
 
   it('별·코인은 "보상" 한 단계: 코인은 더하고 별은 가장 높은 것', () => {

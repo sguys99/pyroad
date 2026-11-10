@@ -13,6 +13,7 @@ import {
   buildEncouragementPrompt,
   buildProjectGuidePrompt,
   buildStageSummaryPrompt,
+  buildConceptExplainPrompt,
 } from '@/lib/tutor/prompts';
 import {
   fetchAnswerKeyRow,
@@ -20,6 +21,7 @@ import {
   resolveAnswerKey,
   type QuestAnswerKey,
 } from '@/lib/quest/answerKeys';
+import { explainError } from '@/lib/quest/errorExplain';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import {
   consumeTutorQuota,
@@ -46,6 +48,7 @@ const VALID_TYPES = [
   'encouragement',
   'project_guide',
   'stage_summary',
+  'concept_explain',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
@@ -63,7 +66,12 @@ const REPEAT_DENIED_PER_MINUTE = 5;
 const REPEAT_DENIED_PER_DAY = 100;
 
 // quest_intro, encouragement는 품질보다 속도 우선 → 경량 모델 사용
-const FAST_TYPES = new Set(['quest_intro', 'encouragement', 'stage_summary']);
+const FAST_TYPES = new Set([
+  'quest_intro',
+  'encouragement',
+  'stage_summary',
+  'concept_explain',
+]);
 
 // 캐시 대상 타입은 src/lib/tutor/cache.ts의 buildCacheKey가 정한다 (개인화 입력이 없는 타입만)
 
@@ -450,6 +458,12 @@ export async function prepareTutorCall(
       earnedXP: body.earned_xp ?? 0,
       hintsUsed: body.hints_used ?? 0,
     });
+  } else if (body.type === 'concept_explain') {
+    userPrompt = buildConceptExplainPrompt({
+      questTitle: q.title,
+      topic: skeleton.topic,
+      learningGoals: skeleton.learning_goals,
+    });
   } else if (body.type === 'stage_summary') {
     // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
     const stageConceptsResult = await adminClient
@@ -602,6 +616,19 @@ function getHintBucket(hintsUsed: number): HintBucket {
 
 // ── buildFallbackMessage ────────────────────────────────────
 
+/** "개념만 알려 줘요"의 저장된 답변: 콘텐츠의 학습 주제·목표로만 (정답·힌트 원문 없음) */
+export function conceptFallback(topic: string, goals: string[]): string {
+  const list = goals.filter((g) => g.trim());
+  return [
+    `이번 퀘스트에서 배우는 개념은 **${topic}**이에요! 🐍`,
+    ...(list.length
+      ? ['', '이걸 익히게 돼요:', ...list.map((g) => `- ${g}`)]
+      : []),
+    '',
+    '해 볼 일을 다시 읽고, 이 개념을 어디에 쓰면 될지 떠올려 봐요. 💡',
+  ].join('\n');
+}
+
 // 저장된 힌트도 읽지 못했을 때 (정답 데이터 누락)
 const HINT_UNAVAILABLE_MESSAGE =
   '지금은 힌트를 가져오지 못했어요. 문제를 한 번 더 천천히 읽어 볼까요? 💡';
@@ -621,6 +648,10 @@ export function buildFallbackMessage(
     return hint || HINT_UNAVAILABLE_MESSAGE;
   } else if (body.type === 'code_feedback') {
     if (!body.execution_result?.passed) {
+      // 오류가 났으면 키 없는 아이도 결과 쪽지·대사창과 같은 쉬운 설명을 받는다 (P6-07 규칙표, P6-16)
+      const stderr = body.execution_result?.stderr?.trim();
+      if (stderr)
+        return `${explainError(stderr).text} 고쳐서 다시 돌려 봐요! 💡`;
       return '앗, 조금 고쳐볼까요? 힌트를 사용해보세요! 💡';
     }
     return pickRandom(
@@ -635,6 +666,8 @@ export function buildFallbackMessage(
       topic: skeleton.topic,
       earned_xp: body.earned_xp ?? 0,
     });
+  } else if (body.type === 'concept_explain') {
+    return conceptFallback(skeleton.topic, skeleton.learning_goals);
   } else if (body.type === 'stage_summary') {
     return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;
   } else {

@@ -1,0 +1,101 @@
+/* 모바일 코드 키보드 (P6-04, CodeKeyboard.tsx). 최종 시안 refine.css `.f-keys`·`.f-key`를 토큰으로:
+   옅은 회색 띠 + 흰 키(테두리 없이 아래쪽 2px 턱) + 코드 글꼴. 높이는 questWorkspace.css `.ck-slot`과 같다 */
+.ck {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 3.5rem;
+  padding: 0.375rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+}
+.ck-strip {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* 오른쪽 끝을 흐려 더 넘길 키가 있다는 신호 */
+  mask-image: linear-gradient(
+    90deg,
+    var(--text) calc(100% - 1.25rem),
+    transparent
+  );
+}
+.ck-strip::-webkit-scrollbar {
+  display: none;
+}
+.ck-group {
+  display: flex;
+  flex: none;
+  gap: 0.375rem;
+}
+.ck-strip .ck-group:last-child {
+  padding-right: 1.25rem;
+}
+.ck-moves {
+  padding-left: 0.375rem;
+  border-left: var(--line-w) solid var(--line);
+}
+
+.ck-key {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding: 0 0.625rem;
+  border-radius: var(--round-s);
+  background: var(--surface);
+  box-shadow: 0 2px 0 var(--line);
+  font-size: var(--text-code);
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition:
+    transform var(--dur-instant) var(--ease-press),
+    box-shadow var(--dur-instant) var(--ease-press);
+}
+.ck-key[data-kind='spell'] {
+  color: var(--primary-text);
+  font-weight: 700;
+}
+.ck-key[data-icon] {
+  color: var(--text-muted);
+}
+.ck-key svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.ck-key:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--line);
+}
+.ck-key:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+:root[data-reduced='true'] .ck-key {
+  transition: none;
+}
+
+/* 폰 키보드 위에 붙은 띠 (P6-11, useDockAboveKeyboard → body로 옮겨 그림). 화면 폭 전체 · 아래 모서리 없이 · 위쪽만 그림자 한 종류.
+   위치는 transform 하나(--vv-bottom = 폰 키보드 윗변)라 키보드가 오르내려도 레이아웃이 다시 계산되지 않는다 */
+.ck[data-docked] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: 0.375rem max(0.375rem, env(safe-area-inset-right)) 0.375rem
+    max(0.375rem, env(safe-area-inset-left));
+  border-radius: var(--round-m) var(--round-m) 0 0;
+  box-shadow: var(--elev-card);
+  transform: translateY(calc(var(--vv-bottom) - 100%));
+}

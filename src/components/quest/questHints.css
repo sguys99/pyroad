@@ -1,0 +1,153 @@
+/* 이야기 쪽 힌트·황금키 줄 + 힌트 쪽지 (P6-09, QuestHints.tsx). 최종 시안 screens.css·refine.css `.f-hints`·`.f-note`를 토큰으로:
+   대사창 아래 옅은 선 하나로 나누고, 쪽지는 테두리 없는 옅은 회색 면. 값은 토큰 변수만 */
+
+.qh {
+  margin-top: 0.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.qh-btns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+/* 남은 횟수 꼬리표: 버튼 글자 옆 작은 알약 */
+.qh-count {
+  margin-left: 0.125rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.qh .g-btn.qh-key {
+  --fg: var(--accent-text);
+}
+.qh .g-btn.qh-key .g-btn-face {
+  text-decoration: none;
+}
+/* 좁은 쪽(휴대폰)에서는 "힌트 · 황금키"가 한 줄에 들어가게 동사를 뺀다 (이름은 aria-label에 그대로) */
+@container (max-width: 21rem) {
+  .qh-verb {
+    display: none;
+  }
+  .qh-btns {
+    column-gap: 0.25rem;
+  }
+  .qh .g-btn.qh-key .g-btn-face {
+    padding: 0 0.375rem;
+  }
+}
+.qh-count-key {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* 받을 보상 + 힌트를 쓰면 어떻게 되는지 (쓰기 전에 미리) */
+.qh-reward {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin: 0.625rem 0 0;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  color: var(--text-muted);
+}
+.qh-reward-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.qh-reward-now b {
+  color: var(--primary-text);
+  font-weight: 700;
+}
+
+/* 힌트 쪽지 */
+.qh-notes {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.qh-note {
+  padding: 0.75rem 1rem 0.875rem;
+  border-radius: var(--round-s);
+  background: var(--surface-2);
+  overflow-wrap: anywhere;
+  animation: qh-note-in var(--spring-body-dur) var(--spring-body) both;
+}
+.qh-note-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+  color: var(--accent-text);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+.qh-note-k svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+.qh-note-tag {
+  margin-left: 0.5rem;
+  padding: 0 0.375rem;
+  border-radius: var(--round-s);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+.qh-note-body {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--text);
+}
+.qh-note-wait {
+  color: var(--text-muted);
+}
+
+/* 확인 창 결과 목록 */
+.qh-confirm {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0.25rem 0 0;
+  padding-left: 1.125rem;
+  list-style: disc;
+  text-align: left;
+}
+
+/* 쪽지 등장: full = 살짝 아래에서 스프링 · lite = 짧게 · minimal = 페이드 · 동작 줄이기 = 즉시 */
+@keyframes qh-note-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes qh-note-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+:root[data-motion='lite'] .qh-note {
+  animation: qh-note-in var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qh-note {
+  animation: qh-note-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qh-note {
+  animation: none;
+}

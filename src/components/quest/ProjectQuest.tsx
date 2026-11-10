@@ -7,7 +7,7 @@ import {
   type QuestSessionOptions,
 } from '@/lib/quest/useQuestSession';
 import { QuestWorkspace } from './QuestWorkspace';
-import { StepProgressBar } from './StepProgressBar';
+import { StepStrip } from './StepStrip';
 
 /** 프로젝트 퀘스트 렌더러: 단계마다 코드를 쌓아 가며 통과하는 퀘스트 */
 export function ProjectQuest(props: QuestSessionOptions) {
@@ -17,11 +17,13 @@ export function ProjectQuest(props: QuestSessionOptions) {
   return (
     <QuestWorkspace
       session={session}
-      belowHeader={
-        <StepProgressBar
-          currentStep={session.currentStep}
-          totalSteps={session.totalSteps}
-          stepGoals={steps.map((s) => s.step_goal)}
+      notebookTop={
+        <StepStrip
+          goals={steps.map((s) => s.step_goal)}
+          current={session.currentStep}
+          cleared={session.stepCleared}
+          completed={session.isCompleted}
+          onSkip={session.skipStepBeat}
         />
       }
       completedBanner={

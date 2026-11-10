@@ -168,6 +168,46 @@ test.describe('코드 에디터 한글 정렬 (P2-18)', () => {
     await expect(editor).toHaveAttribute('data-code-font-size', '20');
   });
 
+  for (const width of [360, 1280]) {
+    test(`${width}px: 공책 머리(제목·처음 코드로·글자 크기)가 한 줄이고, 처음 코드로는 물어본 뒤 되돌린다 (P6-03)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/dev/editor');
+      const title = page.getByRole('heading', { name: '나의 주문 공책' });
+      // 확인 창의 같은 이름 버튼과 구분 (닫히는 연출 동안 둘 다 있다)
+      const reset = page.getByTestId('reset-code');
+      await expect(reset).toHaveAccessibleName('처음 코드로');
+      const size = page.getByTestId('code-font-size');
+      const mids = await Promise.all(
+        [title, reset, size].map(async (l) => {
+          const b = (await l.boundingBox())!;
+          return b.y + b.height / 2;
+        }),
+      );
+      expect(Math.max(...mids) - Math.min(...mids)).toBeLessThan(4);
+      const sizeBox = (await size.boundingBox())!;
+      expect(sizeBox.x + sizeBox.width).toBeLessThanOrEqual(width);
+
+      // 처음 코드와 같으면 꺼져 있고, 고치면 켜진다
+      await expect(reset).toBeDisabled();
+      const content = page.locator('.cm-content');
+      await content.click();
+      await page.keyboard.insertText('x = 1 ');
+      await expect(reset).toBeEnabled();
+
+      await reset.click();
+      const dialog = page.getByRole('alertdialog');
+      await dialog.getByRole('button', { name: '그대로 두기' }).click();
+      await expect(content).toContainText('x = 1');
+
+      await reset.click();
+      await dialog.getByRole('button', { name: '처음 코드로' }).click();
+      await expect(content).not.toContainText('x = 1');
+      await expect(reset).toBeDisabled();
+    });
+  }
+
   test('오류 줄 표시는 줄 띠와 줄 번호에 붙고, 코드를 고치면 사라진다', async ({
     page,
   }) => {

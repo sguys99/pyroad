@@ -17,11 +17,13 @@ const MAX_ENTRIES = 200;
  * 타입은 다른 학생에게 재사용되면 안 되므로 캐시하지 않는다 (B17).
  * - quest_intro: 퀘스트 제목·스토리·학습 목표
  * - stage_summary: 스테이지의 개념 목록·다음 스테이지 제목
+ * - concept_explain: 퀘스트 제목·학습 주제·목표
  * - encouragement는 earned_xp·hints_used가 들어가므로 제외
  */
 const CACHEABLE_TYPES: ReadonlySet<TutorRequest['type']> = new Set([
   'quest_intro',
   'stage_summary',
+  'concept_explain',
 ]);
 
 interface CacheEntry {
