@@ -270,6 +270,38 @@ export type Database = {
           },
         ];
       };
+      level_curve_adjustments: {
+        Row: {
+          created_at: string;
+          level_before: number;
+          user_id: string;
+          xp_after: number;
+          xp_before: number;
+        };
+        Insert: {
+          created_at?: string;
+          level_before: number;
+          user_id: string;
+          xp_after: number;
+          xp_before: number;
+        };
+        Update: {
+          created_at?: string;
+          level_before?: number;
+          user_id?: string;
+          xp_after?: number;
+          xp_before?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'level_curve_adjustments_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notices: {
         Row: {
           content: string;

@@ -432,6 +432,18 @@ export const EXPECT = {
     activateIn: 'P8-01',
     note: 'B20 (00028): current_level 은 트리거가 level_for_xp(total_xp) 로만 정함',
   },
+  'RW-15': {
+    expect: 'allow',
+    requires: 'public.level_curve_adjustments',
+    activateIn: 'P8-02',
+    note: '① 00029: 옛 곡선 레벨이 내려가는 사용자는 새 곡선 문턱까지 XP 보정(근거 행), 두 번 실행해도 같음',
+  },
+  'RW-16': {
+    expect: 'deny',
+    requires: 'public.level_curve_adjustments',
+    activateIn: 'P8-02',
+    note: '① 00029: level_curve_adjustments 는 service_role 읽기 전용',
+  },
   'RW-5': {
     expect: 'allow',
     requires: 'public.complete_quest()',

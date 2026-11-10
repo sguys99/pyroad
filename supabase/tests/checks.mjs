@@ -2630,6 +2630,64 @@ async function groupReward() {
       );
     },
   });
+
+  await check({
+    group: 'reward',
+    id: 'RW-15',
+    role: 'postgres',
+    op: 'P8-02 (00029) 리허설: 옛 곡선 레벨의 기존 사용자 → 레벨이 내려가지 않게 XP 보정·나머지는 새 곡선 레벨, 두 번 실행해도 같음',
+    ...OK,
+    run: async () => {
+      const names = ['zero', 'lv2', 'lv4', 'lv5', 'up', 'cheat', 'exact'];
+      const xs = [];
+      for (const n of names) xs.push(await createUser(`rw15${n}`, '재계산'));
+      const file = readFileSync(
+        join(HERE, '..', 'migrations', '00029_level_recalc.sql'),
+        'utf8',
+      );
+      // 00028 이전 상태(옛 곡선 [0, 100, 300, 600, 1000] 의 current_level)를 트리거를 끄고 만든다. cheat = 옛 앱 직접 쓰기(B04)
+      const before = [
+        [0, 1],
+        [150, 2],
+        [700, 4],
+        [1000, 5],
+        [2000, 5],
+        [50, 5],
+        [1210, 5],
+      ];
+      const ids = xs.map((x) => `'${x.id}'`).join(',');
+      const state = `select string_agg(u.total_xp || ':' || u.current_level || ':' || coalesce(a.xp_before::text, '-'), ',' order by u.total_xp, a.xp_before nulls first)
+          from (select * from public.users where id in (${ids})) u
+          left join public.level_curve_adjustments a on a.user_id = u.id;`;
+      const r = psql(`BEGIN;
+        ALTER TABLE public.users DISABLE TRIGGER trg_users_sync_level;
+        ${xs.map((x, i) => `update public.users set total_xp = ${before[i][0]}, current_level = ${before[i][1]} where id = '${x.id}';`).join('\n')}
+        ALTER TABLE public.users ENABLE TRIGGER trg_users_sync_level;
+        ${file}
+        ${state}
+        ${file}
+        ${state}
+        ROLLBACK;`);
+      if (!r.ok) return { actual: 'error', detail: firstLine(r.err) };
+      const [first, second] = r.out.split('\n').filter(Boolean).slice(-2);
+      // 0 → Lv1 · 50(cheat Lv5) → Lv1 그대로 · 150 → 200 Lv2 · 700 → 830 Lv4 · 1000 → 1210 Lv5 · 1210 Lv5 그대로 · 2000 → Lv6
+      const want = '0:1:-,50:1:-,200:2:150,830:4:700,1210:5:-,1210:5:1000,2000:6:-';
+      return (
+        compare('두 번 실행 결과 (xp:레벨:보정 전 xp)', { first: want, second: want }, { first, second }) || {
+          actual: 'ok',
+          detail: '보정 3명(150·700·1000 XP), 2000 XP 는 Lv 6, 다시 실행해도 같음',
+        }
+      );
+    },
+  });
+  await check({
+    group: 'reward',
+    id: 'RW-16',
+    role: 'anon',
+    op: 'GET /level_curve_adjustments (P8-02 보정 근거는 service_role 전용)',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', '/rest/v1/level_curve_adjustments?select=*')),
+  });
 }
 
 // ── account: 탈퇴 (B28) ─────────────────────────────────────
