@@ -31,7 +31,7 @@ export interface E2eStage {
   /** 퀴즈(보너스, P7-12)까지 센 퀘스트 수. 헤더 스테이지 진행 점은 퀴즈도 하나씩 */
   questCount: number;
   /** 퀴즈(보너스) order 순 — 폰 퀴즈 추천(P7-11) */
-  quizzes: { id: string; order: number; title: string }[];
+  quizzes: { id: string; order: number; title: string; kind: string }[];
 }
 
 interface QuestYaml {
@@ -39,6 +39,7 @@ interface QuestYaml {
   order: number;
   title: string;
   quest_type: string;
+  quiz_kind?: string;
   prompt: {
     fallback_text: string;
     checklist: string[];
@@ -90,7 +91,12 @@ export function stages(): E2eStage[] {
         questCount: all.length,
         quizzes: all
           .filter((q) => q.quest_type === 'quiz')
-          .map(({ id, order, title }) => ({ id, order, title }))
+          .map(({ id, order, title, quiz_kind }) => ({
+            id,
+            order,
+            title,
+            kind: quiz_kind ?? '',
+          }))
           .sort((a, b) => a.order - b.order),
       };
     })
