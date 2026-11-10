@@ -36,6 +36,16 @@ export type QuizMode = QuizAnswerResult['mode'];
 export type QuizStatus = 'answering' | 'wrong' | 'correct' | 'revealed';
 
 const SUBMIT_FAILED = '앗, 답을 보내지 못했어요. 한 번 더 눌러 볼까요?';
+const EXPLAIN_FAILED =
+  '앗, 지금은 대답하기 어려워요. 고른 답으로 코드를 한 줄씩 따라가 볼까요?';
+
+/** "왜 틀렸어요?" 파이뱀 해설 (P7-08). loading = 생각 중 · done = 해설 · error = 못 받음(한도 문구 포함) */
+export interface QuizExplainView {
+  state: 'loading' | 'done' | 'error';
+  text: string;
+  /** 서버의 저장된 해설 (키 없음·한도·오류·정답 누출 감지) */
+  fallback?: boolean;
+}
 
 /** 들어올 때의 모드: 별 판정 전 first · 판정이 어제 이전이면 review(복습 도전) · 오늘이면 practice (00026 과 같은 규칙) */
 export function quizEntryMode(
@@ -82,6 +92,10 @@ export function useQuizSession({
   const [earnedXP, setEarnedXP] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [celebrationStore] = useState(createCelebrationStore);
+  /** 해설은 그 채점 결과에 묶임 (다시 풀면 사라짐) */
+  const [explain, setExplain] = useState<
+    (QuizExplainView & { for: QuizAnswerResponse }) | null
+  >(null);
 
   // 연속 클릭 막기 (ref 는 렌더 전, state 는 버튼 표시)
   const submittingRef = useRef(false);
@@ -172,6 +186,40 @@ export function useQuizSession({
     }
   }, [value, graded, quest.id, apply]);
 
+  /**
+   * 오답 뒤 "왜 틀렸어요?" (P7-08): 답은 보내지 않음 — 서버가 이 사용자의 가장 최근 오답을 읽어 해설.
+   * 결과 하나에 한 번만 (다시 누르지 않게 버튼이 말풍선으로 바뀜)
+   */
+  const askWhy = useCallback(async () => {
+    const r = graded?.result;
+    if (!r || quizStatus(r) !== 'wrong' || explain?.for === r) return;
+    setExplain({ for: r, state: 'loading', text: '' });
+    let next: QuizExplainView;
+    try {
+      const res = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'quiz_explain', quest_id: quest.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      next =
+        res.ok && typeof data.message === 'string' && data.message
+          ? { state: 'done', text: data.message, fallback: !!data.is_fallback }
+          : {
+              state: 'error',
+              // 한도(429)는 서버가 아이에게 보여 줄 문구를 줌
+              text:
+                res.status === 429 && typeof data.message === 'string'
+                  ? data.message
+                  : EXPLAIN_FAILED,
+            };
+    } catch {
+      next = { state: 'error', text: EXPLAIN_FAILED };
+    }
+    if (!aliveRef.current) return;
+    setExplain((cur) => (cur?.for === r ? { for: r, ...next } : cur));
+  }, [graded, explain, quest.id]);
+
   /** 다시 풀기: 서버가 새로 섞은 보기로. 회차가 끝났으면(정답·공개) 오늘은 연습이라 틀린 기록도 새로 */
   const retry = useCallback(() => {
     if (!graded) return;
@@ -203,6 +251,16 @@ export function useQuizSession({
     error,
     submit,
     retry,
+    /** 지금 결과의 "왜 틀렸어요?" 해설 (없으면 null) */
+    explain:
+      explain && explain.for === result
+        ? {
+            state: explain.state,
+            text: explain.text,
+            fallback: explain.fallback,
+          }
+        : null,
+    askWhy,
     userXP,
     userLevel,
     earnedXP,

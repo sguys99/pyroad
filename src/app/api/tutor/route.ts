@@ -63,7 +63,12 @@ export async function POST(request: Request) {
   let message: string;
   let isFallback: boolean;
 
-  if (result.ok) {
+  if (result.ok && prepared.quizExplain?.leaks(result.text)) {
+    // 퀴즈 해설에 정답 글자가 섞였음 (P7-08, §2.3): 버리고 저장된 해설. 학생 답·LLM 답은 남기지 않음
+    console.warn('[tutor] quiz_explain 정답 누출 감지 → 저장된 해설로 대체');
+    isFallback = true;
+    message = prepared.quizExplain.fallback;
+  } else if (result.ok) {
     message = result.text;
     // AI가 답했으면 다른 provider로 폴백했더라도(was_fallback) "저장된 답변"이 아니다 (B18 남은 문제).
     // is_fallback 은 서버의 저장된 답변을 보냈을 때만 true (스트림 route 와 같은 뜻)
@@ -75,7 +80,9 @@ export async function POST(request: Request) {
     }
   } else {
     isFallback = true;
-    message = buildFallbackMessage(body, quest, answerKey);
+    message =
+      prepared.quizExplain?.fallback ??
+      buildFallbackMessage(body, quest, answerKey);
   }
 
   // 힌트를 내줄 때 hints_used 를 기록 (P1-04, B05). 응답을 받지 못하는(끊긴) 요청은 세지 않음

@@ -132,6 +132,8 @@ export function QuizQuest(props: QuestSessionOptions) {
             error={s.error}
             onSubmit={s.submit}
             onRetry={s.retry}
+            explain={s.explain}
+            onExplain={s.askWhy}
             nextHref={nextId ? `/quest/${nextId}` : null}
             mapHref={worldHref}
           />

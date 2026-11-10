@@ -2,14 +2,28 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Check, Lightbulb, Play, RotateCcw, Sparkles, X } from 'lucide-react';
+import {
+  Check,
+  Lightbulb,
+  MessageCircleQuestion,
+  Play,
+  RotateCcw,
+  Sparkles,
+  X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DialogueBox } from '@/components/ui/dialogue-box';
 import type { QuizKind, QuizPrompt } from '@/lib/quest/questKind';
 import type {
   QuizAnswerResponse,
   QuizAnswerValue,
 } from '@/lib/quest/quizAnswer';
-import type { QuizMode, QuizStatus } from '@/lib/quest/useQuizSession';
+import type {
+  QuizExplainView,
+  QuizMode,
+  QuizStatus,
+} from '@/lib/quest/useQuizSession';
+import { PybaemRig } from '../StoryPage';
 import {
   PassStamp,
   RewardStrip,
@@ -54,7 +68,12 @@ export interface QuizPanelProps {
   onRetry: () => void;
   nextHref: string | null;
   mapHref: string;
+  /** 오답 뒤 "왜 틀렸어요?" 파이뱀 해설 (P7-08). onExplain 이 없으면 버튼을 그리지 않음 */
+  explain?: QuizExplainView | null;
+  onExplain?: () => void;
 }
+
+const EXPLAIN_THINKING = '음… 어디서 헷갈렸는지 같이 생각해 볼게요…';
 
 /** 결과 보상 띠 (정답·정답 공개 때). 별은 서버 판정 그대로 보이고(SHOW_STARS 와 무관), 연습은 숫자 없이 안내 한 줄 */
 export function quizReward(
@@ -178,6 +197,10 @@ export function QuizPanel(p: QuizPanelProps) {
         {result && <Verdict result={result} status={status} done={done} />}
       </div>
 
+      {status === 'wrong' && p.onExplain && (
+        <WhyWrong explain={p.explain ?? null} onExplain={p.onExplain} />
+      )}
+
       {tryCode && (
         <div className="qz-try-wrap">
           <Button
@@ -238,6 +261,68 @@ export function QuizPanel(p: QuizPanelProps) {
           </Button>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * "왜 틀렸어요?" (P7-08): 오답 쪽지 아래 버튼 → 누르면 그 자리에 파이뱀 대사창(생각 중 표정 → 해설).
+ * 정답은 말하지 않음(서버가 거름). 3번 틀려 정답이 공개되면(revealed) 그리지 않음
+ */
+function WhyWrong({
+  explain,
+  onExplain,
+}: {
+  explain: QuizExplainView | null;
+  onExplain: () => void;
+}) {
+  if (!explain) {
+    return (
+      <Button
+        variant="secondary"
+        size="md"
+        icon={<MessageCircleQuestion aria-hidden />}
+        onClick={onExplain}
+        className="qz-why-btn"
+        data-testid="quiz-why"
+      >
+        파이뱀, 왜 틀렸어요?
+      </Button>
+    );
+  }
+  const thinking = explain.state === 'loading';
+  const state = thinking
+    ? 'think'
+    : explain.state === 'error'
+      ? 'encourage'
+      : 'teach';
+  return (
+    <div
+      className="qz-why"
+      data-state={explain.state}
+      aria-busy={thinking || undefined}
+      data-testid="quiz-why-bubble"
+    >
+      <DialogueBox
+        speaker={
+          <>
+            파이뱀
+            {explain.fallback && (
+              <span className="qz-why-tag">저장된 해설</span>
+            )}
+          </>
+        }
+        text={thinking ? EXPLAIN_THINKING : explain.text}
+        tone="tutor"
+        character={(speaking) => (
+          <PybaemRig
+            state={speaking && !thinking ? 'talk' : state}
+            talking={speaking && !thinking}
+            size={72}
+            label=""
+          />
+        )}
+      />
     </div>
   );
 }

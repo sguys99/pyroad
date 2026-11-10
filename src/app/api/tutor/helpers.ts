@@ -16,11 +16,21 @@ import {
   buildConceptExplainPrompt,
 } from '@/lib/tutor/prompts';
 import {
+  QUIZ_EXPLAIN_RULES,
+  buildQuizExplainPrompt,
+  leaksQuizAnswer,
+  quizExplainFallback,
+  type QuizExplainInput,
+} from '@/lib/tutor/quizExplain';
+import {
   fetchAnswerKeyRow,
   hintFor,
   resolveAnswerKey,
   type QuestAnswerKey,
+  type QuizAnswer,
 } from '@/lib/quest/answerKeys';
+import type { QuizPromptSkeleton } from '@/lib/quest/questKind';
+import type { QuizAnswerValue } from '@/lib/quest/quizAnswer';
 import { explainError } from '@/lib/quest/errorExplain';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
 import {
@@ -49,6 +59,7 @@ const VALID_TYPES = [
   'project_guide',
   'stage_summary',
   'concept_explain',
+  'quiz_explain',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
@@ -95,6 +106,11 @@ export interface PreparedTutorCall {
    * (P1-04, B05). 클라이언트는 hints_used를 쓰지 않는다. 실패해도 던지지 않음(힌트는 그대로 보냄)
    */
   recordHint: (() => Promise<void>) | null;
+  /**
+   * quiz_explain 에서만 (P7-08): 저장된 해설과 정답 누출 검사. 서버 안에서만 쓰고 응답에 넣지 않음.
+   * LLM 답에 정답 글자가 있으면 `leaks` → 버리고 `fallback` (그래서 스트림 route 는 이 유형을 받지 않음)
+   */
+  quizExplain: { fallback: string; leaks: (text: string) => boolean } | null;
   /** 서버 키로 provider 를 부르기 직전에 전역 예산을 1 차감한다 (P1-22). callTutor·callTutorStream 의 `allowServerKey` */
   allowServerKey: (provider: LLMProviderType) => Promise<boolean>;
 }
@@ -198,8 +214,45 @@ async function hasCompletedQuest(
   return data?.status === 'completed';
 }
 
+/** 이 사용자의 이 퀴즈 가장 최근 오답 (quiz_attempts, 채점 RPC 만 씀). 클라이언트가 보낸 답은 쓰지 않음 (정답 오라클 방지) */
+async function fetchLatestWrongAnswer(
+  admin: AdminClient,
+  userId: string,
+  questId: string,
+): Promise<QuizAnswerValue | null> {
+  const { data, error } = await admin
+    .from('quiz_attempts')
+    .select('answer')
+    .eq('user_id', userId)
+    .eq('quest_id', questId)
+    .eq('is_correct', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error('[tutor] quiz_attempts 조회 실패:', error.message);
+  return (data?.answer as QuizAnswerValue | undefined) ?? null;
+}
+
+async function fetchQuizAnswer(
+  admin: AdminClient,
+  questId: string,
+): Promise<QuizAnswer | null> {
+  const { data, error } = await admin
+    .from('quest_answer_keys')
+    .select('quiz_answer')
+    .eq('quest_id', questId)
+    .maybeSingle();
+  if (error)
+    console.error('[tutor] quest_answer_keys 퀴즈 조회 실패:', error.message);
+  const key = data?.quiz_answer as QuizAnswer | null | undefined;
+  return key && Array.isArray(key.accepted) && key.accepted.length > 0
+    ? key
+    : null;
+}
+
 export async function prepareTutorCall(
   request: Request,
+  opts: { stream?: boolean } = {},
 ): Promise<PreparedTutorCall | Response> {
   // 1. Auth 검증
   const supabase = await createClient();
@@ -266,6 +319,11 @@ export async function prepareTutorCall(
     !VALID_TYPES.includes(body.type as (typeof VALID_TYPES)[number])
   ) {
     return reject(400, 'Invalid type', 'invalid_type', String(body.type));
+  }
+
+  // 퀴즈 해설은 다 받은 뒤 정답 누출을 걸러야 하므로 흘려 보내지 않는다 (P7-08)
+  if (opts.stream && body.type === 'quiz_explain') {
+    return reject(400, 'Invalid type', 'invalid_type', body.type);
   }
 
   if (!body.quest_id) {
@@ -386,12 +444,23 @@ export async function prepareTutorCall(
   }
 
   const q = quest as unknown as QuestWithStageServer;
-  const [stageUnlocked, answerKeyRow] = await Promise.all([
-    checkStageUnlocked(adminClient, user.id, q.stage.id, 'tutor'),
-    needsAnswerKey
-      ? fetchAnswerKeyRow(adminClient, questId)
-      : Promise.resolve(null),
-  ]);
+  const isQuizExplain = body.type === 'quiz_explain';
+  if (isQuizExplain && q.quest_type !== 'quiz') {
+    return reject(400, 'Not a quiz', 'invalid_type', body.type);
+  }
+  const [stageUnlocked, answerKeyRow, quizAnswer, wrongAnswer] =
+    await Promise.all([
+      checkStageUnlocked(adminClient, user.id, q.stage.id, 'tutor'),
+      needsAnswerKey
+        ? fetchAnswerKeyRow(adminClient, questId)
+        : Promise.resolve(null),
+      isQuizExplain
+        ? fetchQuizAnswer(adminClient, questId)
+        : Promise.resolve(null),
+      isQuizExplain
+        ? fetchLatestWrongAnswer(adminClient, user.id, questId)
+        : Promise.resolve(null),
+    ]);
 
   // 잠긴 스테이지면 막는다 (B38). 퀘스트 화면이 잠긴 퀘스트를 열지 않으므로 우리 화면은 보내지 않는 요청이다.
   // 이미 완료한 퀘스트(복습)는 화면과 같이 허용한다: 잠김일 때만 진행을 한 번 더 읽으므로 평소 응답은 늦어지지 않음
@@ -410,6 +479,28 @@ export async function prepareTutorCall(
       { error: 'stage_locked', message: STAGE_LOCKED_MESSAGE },
       { status: 403 },
     );
+  }
+
+  // 틀린 제출 기록이 없으면 해설할 것이 없음 (우리 화면은 오답 뒤에만 버튼을 보여 줌)
+  let quizInput: QuizExplainInput | null = null;
+  if (isQuizExplain) {
+    if (!quizAnswer || wrongAnswer == null) {
+      reportTutorAbuse({
+        userId: user.id,
+        reason: 'no_wrong_attempt',
+        level: 'warning',
+        type: body.type,
+        detail: { quest_id: safeQuestId(questId) },
+      });
+      return Response.json({ error: 'no_wrong_attempt' }, { status: 409 });
+    }
+    const quizSkeleton = q.prompt_skeleton as unknown as QuizPromptSkeleton;
+    quizInput = {
+      topic: quizSkeleton.topic,
+      quiz: quizSkeleton.quiz,
+      answer: quizAnswer,
+      submitted: wrongAnswer,
+    };
   }
 
   const skeleton = q.prompt_skeleton;
@@ -464,6 +555,8 @@ export async function prepareTutorCall(
       topic: skeleton.topic,
       learningGoals: skeleton.learning_goals,
     });
+  } else if (quizInput) {
+    userPrompt = buildQuizExplainPrompt(quizInput);
   } else if (body.type === 'stage_summary') {
     // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
     const stageConceptsResult = await adminClient
@@ -508,7 +601,9 @@ export async function prepareTutorCall(
   const hasAnyKey = !!customApiKey || available.includes(FREE_TIER_PROVIDER);
 
   return {
-    systemPrompt: SYSTEM_PROMPT,
+    systemPrompt: quizInput
+      ? SYSTEM_PROMPT + QUIZ_EXPLAIN_RULES
+      : SYSTEM_PROMPT,
     userPrompt,
     providerType,
     customApiKey,
@@ -529,6 +624,10 @@ export async function prepareTutorCall(
             )
         : null,
     allowServerKey: (provider) => consumeServerKeyBudget(adminClient, provider),
+    quizExplain: quizInput && {
+      fallback: quizExplainFallback(quizInput, q.prompt_skeleton.fallback_text),
+      leaks: (text) => leaksQuizAnswer(text, quizInput),
+    },
   };
 }
 

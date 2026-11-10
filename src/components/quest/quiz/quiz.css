@@ -771,3 +771,36 @@
 :root:is([data-motion='minimal'], [data-reduced='true']) .qz-bh-line {
   transition: none;
 }
+
+/* ───── 왜 틀렸어요? (P7-08): 오답 쪽지 아래 보조 버튼 → 같은 자리에 작은 파이뱀 대사창(생각 중 → 해설).
+   대사창은 공통 DialogueBox, 캐릭터 칸만 좁게. 나타날 때 쪽지와 같은 톡 (lite 짧게 · minimal 페이드 · 동작 줄이기 없음) */
+.qz-why-btn {
+  width: 100%;
+}
+.qz-why {
+  animation: qz-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+.qz-why .g-dialogue-who {
+  width: 4.5rem;
+}
+.qz-why[data-state='loading'] .g-bubble {
+  color: var(--text-muted);
+}
+.qz-why-tag {
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+:root[data-motion='lite'] .qz-why {
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-why {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-why {
+  animation: none;
+}

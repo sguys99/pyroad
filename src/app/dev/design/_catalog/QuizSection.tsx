@@ -17,7 +17,11 @@ import type {
   QuizAnswerResponse,
   QuizAnswerValue,
 } from '@/lib/quest/quizAnswer';
-import { quizStatus, type QuizMode } from '@/lib/quest/useQuizSession';
+import {
+  quizStatus,
+  type QuizExplainView,
+  type QuizMode,
+} from '@/lib/quest/useQuizSession';
 import { Demo, Section } from './ui';
 
 const HREF = '/dev/design#quiz';
@@ -107,6 +111,23 @@ function Still(
   );
 }
 
+/** 오답 + "왜 틀렸어요?" 견본 (P7-08): 버튼을 누르면 이 자리에서 생각 중 → 해설 */
+function WhyStill({ explain }: { explain?: QuizExplainView }) {
+  const [shown, setShown] = useState<QuizExplainView | null>(
+    explain ?? null,
+  );
+  return (
+    <Still
+      value="opt-b2mx"
+      submitted="opt-b2mx"
+      misses={['opt-b2mx']}
+      result={response({ explanation: PREDICT_WHY['opt-b2mx'] })}
+      explain={shown}
+      onExplain={() => setShown({ state: 'loading', text: '' })}
+    />
+  );
+}
+
 /** 직접 풀어 보는 견본: 서버 대신 이 자리에서 채점 (회차 3번, 정답 공개, 다시 풀면 보기 다시 섞기·연습) */
 function LiveQuiz() {
   const [quiz, setQuiz] = useState(QUIZ_PREDICT);
@@ -117,8 +138,25 @@ function LiveQuiz() {
   } | null>(null);
   const [misses, setMisses] = useState<QuizAnswerValue[]>([]);
   const [mode, setMode] = useState<QuizMode>('first');
+  const [why, setWhy] = useState<QuizExplainView | null>(null);
   const status = quizStatus(graded?.r ?? null);
   const line = quizLine(status, mode, graded?.r.attempt_no);
+  // 서버 대신 잠깐 생각한 뒤 정답 없는 해설
+  const askWhy = () => {
+    setWhy({ state: 'loading', text: '' });
+    setTimeout(
+      () =>
+        setWhy((w) =>
+          w
+            ? {
+                state: 'done',
+                text: 'print(i)가 몇 번 돌았는지 손가락으로 세어 볼까요? range(3)에서 i는 어디서 시작할까요?',
+              }
+            : w,
+        ),
+      1200,
+    );
+  };
 
   const submit = () => {
     if (value == null) return;
@@ -160,6 +198,7 @@ function LiveQuiz() {
     }
     setValue(null);
     setGraded(null);
+    setWhy(null);
   };
 
   return (
@@ -190,6 +229,8 @@ function LiveQuiz() {
           mode={mode}
           onSubmit={submit}
           onRetry={retry}
+          explain={why}
+          onExplain={askWhy}
         />
       </div>
     </div>
@@ -407,6 +448,56 @@ export function QuizSection() {
                 submitted="opt-b2mx"
                 misses={['opt-b2mx']}
                 result={response({ explanation: PREDICT_WHY['opt-b2mx'] })}
+              />
+            </div>
+          </Demo>
+          <Demo
+            label="오답 · 왜 틀렸어요? (P7-08)"
+            note="누르면 파이뱀이 정답 없이 생각할 거리를 줌. 3번째 오답(정답 공개)에는 없음"
+            surface="card"
+            data-testid="quiz-why-button"
+          >
+            <div className="@container">
+              <WhyStill />
+            </div>
+          </Demo>
+          <Demo
+            label="왜 틀렸어요? · 생각 중"
+            note="파이뱀 생각 중 표정"
+            surface="card"
+            data-testid="quiz-why-thinking"
+          >
+            <div className="@container">
+              <WhyStill explain={{ state: 'loading', text: '' }} />
+            </div>
+          </Demo>
+          <Demo
+            label="왜 틀렸어요? · 해설"
+            surface="card"
+            data-testid="quiz-why-done"
+          >
+            <div className="@container">
+              <WhyStill
+                explain={{
+                  state: 'done',
+                  text: 'range(1, 4)였다면 1부터 셌겠지요? 그런데 이 코드는 range(3)이에요. 맨 처음 i에는 어떤 숫자가 들어갈까요?',
+                }}
+              />
+            </div>
+          </Demo>
+          <Demo
+            label="왜 틀렸어요? · 저장된 해설"
+            note="키 없음·한도·오류·정답 누출 감지 때: 고른 보기 해설 또는 종류별 안내"
+            surface="card"
+            data-testid="quiz-why-fallback"
+          >
+            <div className="@container">
+              <WhyStill
+                explain={{
+                  state: 'done',
+                  fallback: true,
+                  text: `${PREDICT_WHY['opt-b2mx']} 보기를 하나씩 넣어 보고, 컴퓨터가 정말 그렇게 할지 머릿속으로 한 줄씩 따라가 봐요.`,
+                }}
               />
             </div>
           </Demo>

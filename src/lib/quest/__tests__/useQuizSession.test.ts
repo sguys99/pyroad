@@ -165,6 +165,61 @@ describe('useQuizSession', () => {
     expect(result.current.mode).toBe('first');
   });
 
+  it('오답 뒤 왜 틀렸어요?: 답 없이 quiz_explain 만 보내고, 결과에 묶여 다시 풀면 사라진다 (P7-08)', async () => {
+    const { result } = renderHook(() => useQuizSession(props()));
+    act(() => result.current.setValue('opt-d2ef'));
+    respond(reply({}));
+    await act(() => result.current.submit());
+    expect(result.current.explain).toBeNull();
+
+    let done!: (r: Response) => void;
+    fetchMock.mockReturnValueOnce(new Promise<Response>((r) => (done = r)));
+    let pending!: Promise<void>;
+    act(() => {
+      pending = result.current.askWhy();
+    });
+    expect(result.current.explain).toEqual(
+      expect.objectContaining({ state: 'loading' }),
+    );
+    expect(fetchMock.mock.calls[1][0]).toBe('/api/tutor');
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+      type: 'quiz_explain',
+      quest_id: QUEST.id,
+    });
+    await act(async () => {
+      done(
+        Response.json({ message: '처음엔 몇부터 셀까요?', is_fallback: true }),
+      );
+      await pending;
+    });
+    expect(result.current.explain).toEqual({
+      state: 'done',
+      text: '처음엔 몇부터 셀까요?',
+      fallback: true,
+    });
+    // 같은 결과에 다시 묻지 않음
+    await act(() => result.current.askWhy());
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    act(() => result.current.retry());
+    expect(result.current.explain).toBeNull();
+  });
+
+  it('왜 틀렸어요?: 한도(429)면 서버 문구, 그 밖의 실패는 준비한 문구', async () => {
+    const { result } = renderHook(() => useQuizSession(props()));
+    act(() => result.current.setValue('opt-d2ef'));
+    respond(reply({}));
+    await act(() => result.current.submit());
+    respond({ message: '1분 뒤에 다시 물어봐요' }, 429);
+    await act(() => result.current.askWhy());
+    expect(result.current.explain).toEqual(
+      expect.objectContaining({
+        state: 'error',
+        text: '1분 뒤에 다시 물어봐요',
+      }),
+    );
+  });
+
   it('정답(별 판정): XP·레벨 반영, 새로고침, 레벨 업 축하는 성공 장면 뒤에', async () => {
     const { result } = renderHook(() => useQuizSession(props()));
     act(() => result.current.setValue('opt-a1bc'));

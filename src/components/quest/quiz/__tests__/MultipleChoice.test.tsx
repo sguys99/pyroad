@@ -259,3 +259,63 @@ describe('보기 글자 규칙', () => {
     expect(optionMark('x', { ...base, misses: ['x'] })).toBe('miss');
   });
 });
+
+describe('왜 틀렸어요? (P7-08)', () => {
+  const wrong = reply({ explanation: 'range는 0부터 세기 시작해요.' });
+
+  it('오답이면 버튼, 누르면 onExplain. onExplain 이 없으면 버튼 없음', () => {
+    const p = panel({
+      result: wrong,
+      submitted: 'opt-b2mx',
+      onExplain: vi.fn(),
+    });
+    fireEvent.click(screen.getByTestId('quiz-why'));
+    expect(p.onExplain).toHaveBeenCalledTimes(1);
+    cleanup();
+    panel({ result: wrong, submitted: 'opt-b2mx' });
+    expect(screen.queryByTestId('quiz-why')).toBeNull();
+  });
+
+  it('생각 중 → 해설 말풍선 (저장된 해설이면 꼬리표)', () => {
+    panel({
+      result: wrong,
+      submitted: 'opt-b2mx',
+      onExplain: vi.fn(),
+      explain: { state: 'loading', text: '' },
+    });
+    expect(screen.queryByTestId('quiz-why')).toBeNull();
+    expect(screen.getByTestId('quiz-why-bubble')).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
+    cleanup();
+    panel({
+      result: wrong,
+      submitted: 'opt-b2mx',
+      onExplain: vi.fn(),
+      explain: { state: 'done', text: '처음엔 몇부터 셀까요?', fallback: true },
+    });
+    const bubble = screen.getByTestId('quiz-why-bubble');
+    expect(bubble).toHaveTextContent('처음엔 몇부터 셀까요?');
+    expect(bubble).toHaveTextContent('저장된 해설');
+  });
+
+  it('정답 공개(3번째 오답)·정답 뒤에는 버튼이 없다', () => {
+    panel({
+      result: reply({
+        attempt_no: 3,
+        revealed: { answer: 'opt-k7qz', explanation: 'x' },
+      }),
+      submitted: 'opt-b2mx',
+      onExplain: vi.fn(),
+    });
+    expect(screen.queryByTestId('quiz-why')).toBeNull();
+    cleanup();
+    panel({
+      result: reply({ correct: true }),
+      submitted: 'opt-k7qz',
+      onExplain: vi.fn(),
+    });
+    expect(screen.queryByTestId('quiz-why')).toBeNull();
+  });
+});

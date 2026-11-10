@@ -9,7 +9,9 @@ export interface TutorRequest {
     | 'project_guide'
     | 'stage_summary'
     /** "개념만 알려 줘요" (P6-10, §12-Q58): 퀘스트 데이터로만 만드는 개념 설명 */
-    | 'concept_explain';
+    | 'concept_explain'
+    /** 퀴즈 오답 뒤 "왜 틀렸어요?" (P7-08): 학생 답은 서버가 quiz_attempts 에서 읽음. 정답 미포함 */
+    | 'quiz_explain';
   quest_id: string;
   student_code?: string;
   hint_level?: 1 | 2 | 3;

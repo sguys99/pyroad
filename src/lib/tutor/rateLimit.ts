@@ -43,6 +43,12 @@ export const TUTOR_RATE_LIMITS: Record<TutorType, RateLimit & { env: string }> =
     stage_summary: { env: 'TUTOR_LIMIT_SUMMARY', perMinute: 3, perDay: 20 },
     // "개념만 알려 줘요" 버튼 (P6-10). 퀘스트마다 한두 번이면 충분, 캐시 적중도 셈
     concept_explain: { env: 'TUTOR_LIMIT_CONCEPT', perMinute: 4, perDay: 40 },
+    // 퀴즈 오답 뒤 "왜 틀렸어요?" (P7-08). 오답마다 한 번(퀴즈마다 최대 2번) + 오늘의 퀴즈 3문제
+    quiz_explain: {
+      env: 'TUTOR_LIMIT_QUIZ',
+      perMinute: 4,
+      perDay: 60,
+    },
   };
 
 /**
