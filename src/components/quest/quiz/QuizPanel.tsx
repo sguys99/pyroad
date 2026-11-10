@@ -71,6 +71,9 @@ export interface QuizPanelProps {
   onRetry: () => void;
   nextHref: string | null;
   mapHref: string;
+  /** 링크 대신 같은 화면에서 다음 문제로 (오늘의 퀴즈, P7-10) + 그 버튼 글자 */
+  onNext?: () => void;
+  nextLabel?: string;
   /** 오답 뒤 "왜 틀렸어요?" 파이뱀 해설 (P7-08). onExplain 이 없으면 버튼을 그리지 않음 */
   explain?: QuizExplainView | null;
   onExplain?: () => void;
@@ -83,7 +86,10 @@ const EXPLAIN_THINKING = '음… 어디서 헷갈렸는지 같이 생각해 볼�
 /** 결과 보상 띠 (정답·정답 공개 때). 별은 서버 판정 그대로 보이고(SHOW_STARS 와 무관), 연습은 숫자 없이 안내 한 줄 */
 export function quizReward(
   r: QuizAnswerResponse,
-  base: Pick<QuestReward, 'title' | 'nextHref' | 'mapHref'>,
+  base: Pick<
+    QuestReward,
+    'title' | 'nextHref' | 'mapHref' | 'onNext' | 'nextLabel'
+  >,
   prevBest: number,
 ): QuestReward {
   const practice = r.mode === 'practice';
@@ -239,7 +245,13 @@ export function QuizPanel(p: QuizPanelProps) {
         <RewardStrip
           reward={quizReward(
             result,
-            { title: p.title, nextHref: p.nextHref, mapHref: p.mapHref },
+            {
+              title: p.title,
+              nextHref: p.nextHref,
+              mapHref: p.mapHref,
+              onNext: p.onNext,
+              nextLabel: p.nextLabel,
+            },
             prevBest,
           )}
           done={done || status === 'revealed'}

@@ -10,6 +10,7 @@ import { NextBooks } from '@/components/world/book/NextBooks';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import { ContinueFloat } from '@/components/world/ContinueCta';
 import { PhoneQuizPick } from '@/components/world/PhoneQuizPick';
+import { DailyQuizCard } from '@/components/world/DailyQuizCard';
 import { cn } from '@/lib/utils';
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
 import type { WorldMapData } from '@/lib/world/mapData';
@@ -60,6 +61,9 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
             <ApiKeyAlert />
           </div>
         )}
+
+        {/* 오늘의 퀴즈 (P7-10): 맨 위 쪽지 → /daily. 폰 퀴즈 추천은 지도 머리 아래라 자리가 겹치지 않음 */}
+        <DailyQuizCard daily={data.daily} />
 
         {entry && map && (
           <>

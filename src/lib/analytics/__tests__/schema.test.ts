@@ -194,9 +194,23 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     expect(parse({ ...ok, quest_id: 'q1' })).toBe(false);
   });
 
+  it('오늘의 퀴즈(P7-10): 수만, 범위 밖·퀘스트 id는 거부', () => {
+    const parse = (name: string, props: unknown) =>
+      clientBatchSchema.safeParse(batch([{ name, props, path: '/daily' }]))
+        .success;
+    expect(parse('daily_quiz_open', { total: 3, done: 1 })).toBe(true);
+    expect(parse('daily_quiz_open', { total: 4, done: 0 })).toBe(false);
+    expect(parse('daily_quiz_finish', { correct: 2, stars: 5 })).toBe(true);
+    expect(
+      parse('daily_quiz_finish', { correct: 2, stars: 5, quest_id: 'q' }),
+    ).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'continue_click',
+      'daily_quiz_finish',
+      'daily_quiz_open',
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',

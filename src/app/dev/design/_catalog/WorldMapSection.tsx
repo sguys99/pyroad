@@ -19,6 +19,8 @@ import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 import { ContinueButton } from '@/components/world/ContinueCta';
 import { PhoneQuizSlip } from '@/components/world/PhoneQuizPick';
+import { DailyQuizCard } from '@/components/world/DailyQuizCard';
+import type { DailyQuizState } from '@/lib/quest/dailyQuiz';
 import { PhoneQuizToast } from '@/components/quest/PhoneQuizNote';
 import type { ContinueTarget } from '@/lib/world/mapData';
 
@@ -132,6 +134,27 @@ const QUEST_TITLES = [
   ['elif 여러 갈래', 'if-elif-else 여러 갈래로 나누기와 들여쓰기'],
   ['조건 합치기', 'and, or, not'],
 ];
+const dailyPick = (questId: string, review = false) => ({
+  questId,
+  title: '퀴즈',
+  kind: 'multiple_choice' as const,
+  stageOrder: 1,
+  review,
+});
+/** 오늘의 퀴즈 카드: 처음 · 진행 중(복습 포함) · 완료 · 열린 퀴즈 없음 */
+const DAILY_CARD_SAMPLES: Pick<DailyQuizState, 'picks' | 'results'>[] = [
+  { picks: [dailyPick('a', true), dailyPick('b'), dailyPick('c')], results: {} },
+  {
+    picks: [dailyPick('a', true), dailyPick('b', true), dailyPick('c')],
+    results: { a: 'correct' as const },
+  },
+  {
+    picks: [dailyPick('a'), dailyPick('b')],
+    results: { a: 'correct' as const, b: 'revealed' as const },
+  },
+  { picks: [], results: {} },
+];
+
 const SAMPLE_QUESTS: Record<string, StageQuestItem[]> = Object.fromEntries(
   SAMPLE.map((stage, si) => [
     stage.id,
@@ -439,6 +462,17 @@ export function WorldMapSection() {
               <ContinueButton target={target} place="head" />
               <ContinueButton target={target} place="float" />
             </div>
+          ))}
+        </div>
+      </Demo>
+      <Demo
+        label="오늘의 퀴즈 카드 (P7-10)"
+        note="월드맵 맨 위(지도 머리보다 위, 모바일·데스크톱 같음). 남은 수 · 진행 칸 · 복습 n개 포함 → /daily. 다 풀면 초록 도장 '오늘 퀴즈 완료', 열린 퀴즈가 없으면 회색 안내만. 왼쪽 금색 띠라 폰 퀴즈 추천(점선, 지도 머리 아래)과 모양·자리가 다름"
+        data-testid="daily-card-demo"
+      >
+        <div className="grid max-w-md gap-1">
+          {DAILY_CARD_SAMPLES.map((d, i) => (
+            <DailyQuizCard key={i} daily={d} />
           ))}
         </div>
       </Demo>

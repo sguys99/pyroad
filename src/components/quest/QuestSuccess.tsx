@@ -51,6 +51,10 @@ export interface QuestReward {
   /** 다음 퀘스트 주소. 없으면(스테이지 끝) 지도가 주 버튼 */
   nextHref: string | null;
   mapHref: string;
+  /** 링크 대신 같은 화면에서 다음으로 (오늘의 퀴즈 `/daily`, P7-10). 있으면 nextHref 보다 먼저 */
+  onNext?: () => void;
+  /** 다음 버튼 글자 (기본 "다음 퀘스트") */
+  nextLabel?: string;
   /** 이미 통과한 퀘스트를 다시 푼 복습 (Q57): 머리가 "복습 완료", 보상 숫자 없음 */
   review?: boolean;
   /** 띠 머리 눈썹 글자 (기본: "퀘스트 통과"·복습이면 "복습 완료"). 퀴즈는 "퀴즈 통과"·"연습 완료" 등 (P7-03) */
@@ -278,14 +282,15 @@ export function RewardStrip({
       {reward.note && <p className="qx-note">{reward.note}</p>}
 
       <div className="qx-actions">
-        {reward.nextHref ? (
+        {reward.nextHref || reward.onNext ? (
           <>
             <Button
-              href={reward.nextHref}
+              href={reward.onNext ? undefined : (reward.nextHref ?? undefined)}
+              onClick={reward.onNext}
               iconRight={<ArrowRight aria-hidden />}
               data-testid="next-quest"
             >
-              다음 퀘스트
+              {reward.nextLabel ?? '다음 퀘스트'}
             </Button>
             <Button
               href={reward.mapHref}

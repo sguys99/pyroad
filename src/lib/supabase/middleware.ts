@@ -32,6 +32,7 @@ export async function updateSession(request: NextRequest) {
   // 보호 경로: 미인증 → / 리다이렉트. /onboarding(P3-11)은 (protected) 밖이지만 로그인이 필요함
   const protectedPaths = [
     '/world',
+    '/daily',
     '/quest',
     '/profile',
     '/board',

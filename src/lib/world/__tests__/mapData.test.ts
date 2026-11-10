@@ -94,6 +94,8 @@ describe('toWorldMapData (P5-13)', () => {
         is_mobile_friendly: true,
         status: 'completed',
         best_stars: 3,
+        stars_judged_on: null,
+        completed_at: '2026-11-08T01:00:00Z',
       },
       {
         id: 'q2',
@@ -105,6 +107,8 @@ describe('toWorldMapData (P5-13)', () => {
         is_mobile_friendly: false,
         status: 'in_progress',
         best_stars: 0,
+        stars_judged_on: null,
+        completed_at: null,
       },
     ]);
     expect(data.questsByStage.s2[0]).toMatchObject({
@@ -124,6 +128,51 @@ describe('toWorldMapData (P5-13)', () => {
     expect(
       toWorldMapData(OTHER, raw({ progress: [] }), WORLDS).profile,
     ).toBeNull();
+  });
+
+  it('오늘의 퀴즈 (P7-10): 열린 스테이지 퀴즈를 고르고, 오늘 내 시도로만 끝난 문제를 센다', () => {
+    const base = raw();
+    const plain = stage('s1', 1, ['q1', 'q2']);
+    const s1 = {
+      ...plain,
+      quests: plain.quests.map((q) =>
+        q.id === 'q2'
+          ? { ...q, quest_type: 'quiz', quiz_kind: 'parsons' as string | null }
+          : q,
+      ),
+    };
+    const attempt = (user_id: string) => ({
+      user_id,
+      quest_id: 'q2',
+      attempt_no: 1,
+      is_correct: true,
+      created_at: '2026-11-10T01:00:00Z',
+    });
+    const at = (attempts: ReturnType<typeof attempt>[]) =>
+      toWorldMapData(
+        ME,
+        { ...base, stages: [s1, base.stages[1]], attempts },
+        WORLDS,
+        '2026-11-10',
+      ).daily;
+    expect(at([attempt(OTHER)])).toEqual({
+      today: '2026-11-10',
+      picks: [
+        {
+          questId: 'q2',
+          title: '퀘스트 q2',
+          kind: 'parsons',
+          stageOrder: 1,
+          review: false,
+        },
+      ],
+      results: {},
+    });
+    expect(at([attempt(ME)]).results).toEqual({ q2: 'correct' });
+    // 시도를 못 읽었으면(null) 끝난 문제 없음
+    expect(toWorldMapData(ME, base, WORLDS, '2026-11-10').daily.picks).toEqual(
+      [],
+    );
   });
 
   it('황금키로 완료한 시각은 스트릭에서 뺀다', () => {

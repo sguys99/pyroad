@@ -4,6 +4,7 @@
  * 그대로이고 코드 퀘스트를 막거나 숨기지 않는다. 순수 함수라 단위 테스트한다 (`__tests__/phoneQuiz.test.ts`)
  */
 import type { QuizKind } from '@/lib/content/schema';
+import { kstToday } from '@/lib/time/kst';
 import type { StageWithStatus } from '@/lib/types/database';
 
 import type { StageQuestItem } from './mapData';
@@ -36,18 +37,21 @@ interface PickInput {
   /** 보여 주는 월드의 스테이지 (잠긴 스테이지 퀴즈는 고르지 않음) */
   stages: readonly Pick<StageWithStatus, 'id' | 'order' | 'status'>[];
   questsByStage: Record<string, StageQuestItem[]>;
+  /** 오늘 KST 날짜 키 (테스트용, 기본 지금) */
+  today?: string;
 }
 
 /**
  * 고르는 순서: ① 이어하기 스테이지의 안 푼 퀴즈 ② 그 스테이지의 별 3개 미만 퀴즈(복습) ③ 다른 열린 스테이지의 안 푼 퀴즈(가까운 스테이지부터)
  * ④ 다른 스테이지 복습. 같은 자리면 앞 스테이지·앞 순서. 폰이 아니거나, 이어하기가 이미 퀴즈거나 이 월드 밖이면 없음.
- * shortcut: 오늘 푼 퀴즈를 다시 풀면 연습(별·XP 없음)인데 완료 시각을 지도에 싣지 않아 가리지 않는다. 오늘 푼 것을 빼려면 completed_at 을 StageQuestItem 에
+ * 복습은 별 판정일(stars_judged_on)이 오늘 전인 것만 — 오늘 판정한 퀴즈는 다시 풀어도 연습(별·XP 없음)이라 고르지 않는다 (P7-10)
  */
 export function pickPhoneQuiz({
   phone,
   continueQuestId,
   stages,
   questsByStage,
+  today = kstToday(),
 }: PickInput): PhoneQuizPick | null {
   if (!phone || !continueQuestId) return null;
   const open = stages.filter((s) => s.status !== 'locked');
@@ -63,7 +67,10 @@ export function pickPhoneQuiz({
       (questsByStage[s.id] ?? []).flatMap((q) =>
         q.quest_type === 'quiz' &&
         isQuizKind(q.quiz_kind) &&
-        (q.status !== 'completed' || q.best_stars < 3)
+        (q.status !== 'completed' ||
+          (q.best_stars < 3 &&
+            !!q.stars_judged_on &&
+            q.stars_judged_on < today))
           ? [{ q, kind: q.quiz_kind, s, review: q.status === 'completed' }]
           : [],
       ),

@@ -55,6 +55,7 @@ export const PUBLIC_PATHS = [
  */
 export const NOINDEX_PATHS = [
   '/world',
+  '/daily',
   '/quest',
   '/profile',
   '/board',

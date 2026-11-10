@@ -28,7 +28,12 @@ const quiz = (id: string, order: number, extra: Partial<StageQuestItem> = {}) =>
     is_mobile_friendly: true,
     ...extra,
   });
-const done = (stars: number) => ({ status: 'completed', best_stars: stars });
+const TODAY = '2026-11-10';
+const done = (stars: number, judged = '2026-11-09') => ({
+  status: 'completed',
+  best_stars: stars,
+  stars_judged_on: judged,
+});
 
 const stages = [
   { id: 's1', order: 1, status: 'completed' as const },
@@ -53,6 +58,7 @@ const pick = (
     continueQuestId: 'b3',
     stages,
     questsByStage: base,
+    today: TODAY,
     ...over,
   });
 
@@ -104,6 +110,18 @@ describe('pickPhoneQuiz', () => {
     });
     const s1All3 = s1.map((x) => ({ ...x, ...done(3) }));
     expect(pick({ questsByStage: { ...base, s1: s1All3, s2 } })).toBeNull();
+  });
+
+  it('오늘 판정한 퀴즈는 다시 풀어도 연습이라 복습으로 고르지 않음 (P7-10)', () => {
+    const s2 = base.s2.map((x) =>
+      x.id === 'b4'
+        ? { ...x, ...done(3) }
+        : x.id === 'b2'
+          ? { ...x, ...done(1, TODAY) }
+          : x,
+    );
+    const s1 = [q('a1', 1, done(3)), quiz('a3', 3, done(2, TODAY))];
+    expect(pick({ questsByStage: { ...base, s1, s2 } })).toBeNull();
   });
 
   it('다른 스테이지끼리는 이어하기 스테이지에 가까운 쪽', () => {

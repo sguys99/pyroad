@@ -136,6 +136,7 @@ describe('robots.txt · sitemap.xml', () => {
     const disallow = [rule.disallow].flat();
     for (const p of [
       '/world',
+      '/daily',
       '/quest',
       '/profile',
       '/board',

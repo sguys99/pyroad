@@ -26,6 +26,13 @@ import {
   type QuizExplainView,
   type QuizMode,
 } from '@/lib/quest/useQuizSession';
+import {
+  DailyDots,
+  DailyEmpty,
+  DailySummary,
+  type DailyOutcome,
+} from '@/components/quest/quiz/DailyQuiz';
+import '@/components/quest/quiz/daily.css';
 import { Demo, Section } from './ui';
 
 const HREF = '/dev/design#quiz';
@@ -717,6 +724,7 @@ export function QuizSection() {
         <BugHuntDemos />
         <ParsonsDemos />
         <TryRunDemos />
+        <DailyDemos />
       </Section>
       </PyodideProvider>
     </MotionProvider>
@@ -1105,6 +1113,56 @@ function TryRunDemos() {
           />
         </Demo>
       </div>
+    </div>
+  );
+}
+
+/** 오늘의 퀴즈 `/daily` (P7-10): 머리 진행 점(지금·정답+별·정답 공개·아직) · 끝 요약 · 열린 퀴즈 없음 */
+function DailyDemos() {
+  const o = (
+    status: DailyOutcome['status'],
+    stars: number,
+    bestStars: number,
+    xp: number | null = stars * 10,
+  ): DailyOutcome => ({ status, stars, bestStars, xp });
+  return (
+    <div className="mt-8 grid items-start gap-4 md:grid-cols-2" data-testid="daily-demo">
+      <Demo
+        label="오늘의 퀴즈 진행 점 (P7-10)"
+        note="1/3: 지금 푸는 문제는 초록 테두리 · 맞히면 초록 도장 + 받은 별 · 3번 틀려 정답 공개는 점선 · 아직은 흐리게. 화면 읽기는 '2번 문제: 정답, 별 2개'"
+        data-testid="daily-dots-demo"
+      >
+        <div className="grid gap-3">
+          <DailyDots items={[{ id: 'a' }, { id: 'b' }, { id: 'c' }]} step={0} />
+          <DailyDots
+            items={[
+              { id: 'a', outcome: o('correct', 3, 3) },
+              { id: 'b', outcome: o('revealed', 1, 1) },
+              { id: 'c' },
+            ]}
+            step={2}
+          />
+        </div>
+      </Demo>
+      <Demo
+        label="요약 쪽지 (다 풀었을 때)"
+        note="맞힌 수 · 받은 별 · XP · 최고 콤보(2 이상) + 내일 복습 안내 → 월드맵으로. 다시 들어온 날은 XP·콤보를 모르면 숨김. 넘김: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+        data-testid="daily-summary-demo"
+      >
+        <DailySummary
+          outcomes={[o('correct', 3, 3), o('correct', 2, 2, 10), o('revealed', 1, 1)]}
+          maxCombo={2}
+        />
+      </Demo>
+      <Demo label="요약 (다시 들어온 날)" data-testid="daily-summary-again-demo">
+        <DailySummary
+          outcomes={[o('correct', 3, 3, null), o('correct', 0, 3, null)]}
+          maxCombo={null}
+        />
+      </Demo>
+      <Demo label="열린 퀴즈 없음" data-testid="daily-empty-demo">
+        <DailyEmpty />
+      </Demo>
     </div>
   );
 }
