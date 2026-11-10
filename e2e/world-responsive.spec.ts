@@ -11,6 +11,7 @@ import { test, expect } from './support/test';
 import { adminClient, completeQuests } from './support/admin';
 import { stages, stage } from './support/content';
 import { AMBIENT } from './support/motion';
+import { openStageSheet } from './support/quest';
 
 const WIDTHS = [320, 360, 390, 768, 1024, 1280, 1440];
 const s1 = stage(1);
@@ -213,10 +214,8 @@ test('퀘스트에서 돌아와 열린 시트를 닫으면 뒤로 가기 한 번
   await setMotion(e2eUser.id, 'minimal', 'off');
   await page.goto('/worlds');
   await page.goto('/world');
-  await page.locator(`[data-stage-id="${s1.id}"] .wn-hit`).click();
-  const sheet = page.getByTestId('stage-sheet');
-  await expect(sheet).toBeVisible();
-  await expect(page).toHaveURL(/\?stage=/);
+  // 역할로 찾는다: 스트리밍 중에는 아직 안 붙은 숨은 사본(<div hidden id="S:0">)이 같은 노드를 하나 더 갖고 있음 (B48)
+  const sheet = await openStageSheet(page, s1.title);
   await page.getByTestId('stage-sheet-start').click();
   await expect(page).toHaveURL(/\/quest\//);
   await page.goBack();

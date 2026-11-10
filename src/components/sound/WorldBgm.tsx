@@ -11,18 +11,27 @@ import type { BgmId } from '@/lib/sound/manifest';
  */
 export function WorldBgm({ id }: { id: BgmId | null }) {
   useBgm(id);
+  useEffect(() => {
+    if (id) lastWorldBgm = id;
+  }, [id]);
   return null;
 }
 
+// 지도 → 책장 사이에 로딩 화면(loading.tsx)이 120ms 넘게 떠 있으면 앞 곡은 이미 놓였다 → 마지막 월드 곡을 기억해 이어 감 (B48)
+let lastWorldBgm: BgmId | null = null;
+
 /**
  * 책장(`/worlds`): 지금 흐르는 곡을 그대로 이어 간다(지도 ↔ 책장을 오갈 때 곡이 바뀌지 않게).
- * 아무 곡도 없을 때(책장으로 바로 들어옴)만 `fallback`(진행 중 월드 곡).
+ * 흐르는 곡이 없으면 이번 세션에 마지막으로 들은 월드 곡, 그것도 없을 때(책장으로 바로 들어옴)만 `fallback`(진행 중 월드 곡).
  */
 export function KeepWorldBgm({ fallback }: { fallback: BgmId | null }) {
   const engine = useSoundEngine();
   // 마운트 때 한 번: 앞 화면이 원하던 곡은 useBgm 이 120ms 미뤄서 놓으므로 아직 남아 있다
   const [id] = useState(
-    () => (engine.getSnapshot().desiredBgm as BgmId | null) ?? fallback,
+    () =>
+      (engine.getSnapshot().desiredBgm as BgmId | null) ??
+      lastWorldBgm ??
+      fallback,
   );
   useBgm(id);
   return null;
