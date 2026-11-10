@@ -1,0 +1,33 @@
+# 퀴즈 4-6: 금화 합계 순서
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000111
+order: 6
+title: 금화 합계 순서
+concept: 누적 변수 + for
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: 반복하며 더하기
+  learning_goals:
+    - 합계 변수를 반복 전에 0으로 만들어야 한다는 것을 안다
+    - 반복할 줄만 들여쓰기한다
+  story_context: 동굴 속 금화 더미를 1개, 2개, … 5개씩 쌓아 모두 몇 개인지 세려고 해요. 그런데 코드 줄이 섞였어요!
+  fallback_text: 합계 상자는 반복을 시작하기 전에 준비해요. 반복 안에서 할 일만 들여쓰기하고, 다 더한 뒤에 한 번만 보여 줘요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 1부터 5까지 더한 값을 한 번만 보여 줘요
+    indent: true
+    lines:
+      - { id: ln-y2bq, code: 'total = 0' }
+      - { id: ln-h6ns, code: 'for i in range(1, 6):' }
+      - { id: ln-a8ve, code: 'total = total + i' }
+      - { id: ln-m3dp, code: 'print(total)' }
+answer:
+  quiz_answer:
+    accepted:
+      - - { id: ln-y2bq, indent: 0 }
+        - { id: ln-h6ns, indent: 0 }
+        - { id: ln-a8ve, indent: 1 }
+        - { id: ln-m3dp, indent: 0 }
+    explanation: 합계를 0으로 준비하고, 반복 안에서 i를 하나씩 더한 뒤, 반복이 끝나면 들여쓰기 없이 한 번만 보여 줘요. 15가 나와요.

@@ -1,0 +1,35 @@
+# 퀴즈 2-4: 상자 속에 남은 것
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000104
+order: 4
+title: 상자 속에 남은 것
+concept: 변수 재할당
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 변수에 새 값을 넣으면 어떻게 될까
+  learning_goals:
+    - 변수에 새 값을 넣으면 이전 값은 사라진다는 것을 안다
+  story_context: 변수의 숲 마법 상자에 색깔을 두 번 넣었어요. 상자를 열면 어떤 색이 나올까요?
+  fallback_text: 마법 상자에는 값이 하나만 들어가요. 새 값을 넣으면 먼저 들어 있던 값은 어떻게 될지 생각해 봐요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      color = "빨강"
+      color = "파랑"
+      print(color)
+    options:
+      - { id: opt-t6dw, text: '파랑' }
+      - { id: opt-e2rk, text: '빨강' }
+      - { id: opt-y8sn, text: '빨강파랑' }
+      - { id: opt-a4mf, text: 'color' }
+answer:
+  quiz_answer:
+    accepted: [opt-t6dw]
+    explanation: 변수에 새 값을 넣으면 예전 값은 지워지고 새 값만 남아요. 그래서 마지막에 넣은 색이 나와요.
+    explanations:
+      opt-e2rk: 상자에 두 번째로 넣은 값이 있어요. 새 값을 넣으면 먼저 있던 값은 어떻게 될까요?
+      opt-y8sn: 상자에는 값이 하나만 들어가요. 두 값이 이어 붙지 않아요.
+      opt-a4mf: print(color)는 상자 이름이 아니라 상자 안의 값을 보여 줘요.

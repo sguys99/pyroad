@@ -1,0 +1,31 @@
+# 퀴즈 6-6: 기본값 빈칸
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000118
+order: 6
+title: 기본값 빈칸
+concept: 기본 매개변수
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 매개변수에 기본값 주기
+  learning_goals:
+    - 매개변수에 기본값을 정하는 기호를 고를 수 있다
+  story_context: 인사 마법을 업그레이드해요. 이름을 말하지 않아도 "친구"라고 불러 주게 만들고 싶어요!
+  fallback_text: 매개변수에 기본값을 정할 때는 상자에 값을 넣을 때와 같은 기호를 써요. 같은지 비교하는 기호와 헷갈리지 마요.
+  quiz:
+    question: 빈칸을 채워 greet()만 불러도 "안녕, 친구"가 나오게 해요
+    code: |-
+      def greet(name{{bk-h9ap}}"친구"):
+          print("안녕, " + name)
+      greet()
+    tokens:
+      - { id: tok-q2vd, text: '=' }
+      - { id: tok-k8hs, text: '==' }
+      - { id: tok-b4wn, text: ':' }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-h9ap: tok-q2vd }
+    explanation: 매개변수 뒤에 = 와 값을 쓰면 기본값이 돼요. 값을 넣지 않고 부르면 기본값 "친구"가 name에 들어가요.

@@ -28,6 +28,8 @@ export interface E2eStage {
   order: number;
   title: string;
   quests: E2eQuest[];
+  /** 퀴즈(보너스, P7-12)까지 센 퀘스트 수. 헤더 스테이지 진행 점은 퀴즈도 하나씩 */
+  questCount: number;
 }
 
 interface QuestYaml {
@@ -57,9 +59,10 @@ export function stages(): E2eStage[] {
     .map((d) => {
       const dir = join(WORLD_DIR, d.name);
       const stage = parse(readFileSync(join(dir, 'stage.yaml'), 'utf8'));
-      const quests = readdirSync(dir)
+      const all = readdirSync(dir)
         .filter((f) => f.endsWith('.yaml') && f !== 'stage.yaml')
-        .map((f) => parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml)
+        .map((f) => parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml);
+      const quests = all
         .filter((q) => q.quest_type === 'code')
         .map((q) => ({
           id: q.id,
@@ -77,7 +80,13 @@ export function stages(): E2eStage[] {
           ] as [string, string, string],
         }))
         .sort((a, b) => a.order - b.order);
-      return { id: stage.id, order: stage.order, title: stage.title, quests };
+      return {
+        id: stage.id,
+        order: stage.order,
+        title: stage.title,
+        quests,
+        questCount: all.length,
+      };
     })
     .sort((a, b) => a.order - b.order);
   return cache;
@@ -89,7 +98,7 @@ export function stage(order: number): E2eStage {
   return found;
 }
 
-/** 첫 월드의 모든 퀘스트(코드·프로젝트) id. 월드를 다 깬 상태를 만들 때 (P5-01) */
+/** 첫 월드의 모든 퀘스트(코드·프로젝트, 퀴즈 빼고) id. 월드를 다 깬 상태를 만들 때 (P5-01) */
 export function allQuestIds(): string[] {
   return readdirSync(WORLD_DIR, { withFileTypes: true })
     .filter((d) => d.isDirectory())
@@ -97,9 +106,9 @@ export function allQuestIds(): string[] {
       const dir = join(WORLD_DIR, d.name);
       return readdirSync(dir)
         .filter((f) => f.endsWith('.yaml') && f !== 'stage.yaml')
-        .map(
-          (f) => (parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml).id,
-        );
+        .map((f) => parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml)
+        .filter((q) => q.quest_type !== 'quiz')
+        .map((q) => q.id);
     });
 }
 

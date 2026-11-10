@@ -1,0 +1,42 @@
+# 퀴즈 5-3: 없는 과일 꺼내기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000113
+order: 3
+title: 없는 과일 꺼내기
+concept: 인덱싱
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 리스트 번호는 0부터
+  learning_goals:
+    - 리스트의 마지막 번호는 개수보다 1 작다는 것을 안다
+  story_context: 호수 옆 과일 가게에서 첫 과일과 마지막 과일을 보여 주려는데 오류가 났어요!
+  fallback_text: 리스트 번호는 0부터 세요. 과일이 3개면 번호는 몇부터 몇까지일지 세어 봐요.
+  quiz:
+    question: 첫 과일과 마지막 과일을 보여 주려는데 오류가 나요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - id: ln-q4zs
+        code: fruits = ["사과", "바나나", "포도"]
+      - id: ln-b8ju
+        code: print(fruits[0])
+      - id: ln-x3nd
+        code: print(fruits[3])
+    fixes:
+      - id: fx-k5oy
+        code: print(fruits[2])
+      - id: fx-g2mt
+        code: print(fruits[4])
+      - id: fx-i9wl
+        code: print(fruits(3))
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-x3nd, fix: fx-k5oy }
+    explanation: 리스트 번호는 0부터라서 과일 3개의 번호는 0, 1, 2예요. 마지막 과일 포도는 2번이에요.
+    explanations:
+      ln-q4zs: 이 줄은 과일 3개를 리스트에 잘 담았어요.
+      ln-b8ju: 번호 0은 첫 번째 과일이라 맞아요.
+      fx-g2mt: 과일은 3개뿐이라 이 번호에는 과일이 없어요.
+      fx-i9wl: 리스트에서 꺼낼 때는 둥근 괄호가 아니라 대괄호 [ ] 를 써요.

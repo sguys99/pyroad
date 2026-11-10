@@ -1,0 +1,36 @@
+# 퀴즈 7-2: 몇 번 만에 맞혔을까?
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000121
+order: 2
+title: 몇 번 만에 맞혔을까?
+concept: for + 리스트, 누적 변수 복습
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 반복한 횟수 세기
+  learning_goals:
+    - 반복할 때마다 1씩 더해 횟수를 셀 수 있다
+  story_context: 숫자 맞추기 게임에서 친구가 고른 숫자 기록이 남아 있어요. 기록을 세는 코드를 돌리면 무엇이 나올까요?
+  fallback_text: for 는 리스트에 든 값마다 한 번씩 반복해요. tries 에는 리스트의 숫자가 아니라 1이 더해진다는 걸 잘 봐요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까? (줄이 바뀌는 곳은 쉼표로 적었어요)
+    code: |-
+      tries = 0
+      for guess in [3, 8, 5]:
+          tries = tries + 1
+      print(tries)
+    options:
+      - { id: opt-f5wi, text: '3' }
+      - { id: opt-l3ep, text: '16' }
+      - { id: opt-t8gc, text: '1' }
+      - { id: opt-a9ry, text: '1, 2, 3' }
+answer:
+  quiz_answer:
+    accepted: [opt-f5wi]
+    explanation: 리스트에 숫자가 3개라 반복이 3번 돌고, 그때마다 tries 에 1을 더해요. 마지막에 한 번만 보여 줘요.
+    explanations:
+      opt-l3ep: tries 에는 guess 가 아니라 1을 더해요. 리스트의 숫자를 모두 더한 게 아니에요.
+      opt-t8gc: 반복은 리스트에 든 값마다 한 번씩, 여러 번 돌아요.
+      opt-a9ry: print(tries)는 들여쓰기가 없어서 반복이 끝난 뒤 한 번만 실행돼요.

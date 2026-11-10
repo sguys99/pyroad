@@ -1,0 +1,38 @@
+# 퀴즈 3-4: 숫자 요정의 대답
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000108
+order: 4
+title: 숫자 요정의 대답
+concept: if/else, % 나머지 연산
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 나머지로 짝수·홀수 가르기
+  learning_goals:
+    - '% 로 나머지를 구해 짝수와 홀수를 가를 수 있다'
+    - if/else 중 한 쪽만 실행된다는 것을 안다
+  story_context: 숫자 요정이 숫자 7을 들고 왔어요. 요정의 코드를 돌리면 어떤 말이 나올까요?
+  fallback_text: '% 는 나눈 뒤 남는 수를 구해요. 7을 2로 나누면 얼마가 남는지, 그 값이 0과 같은지 생각해 봐요.'
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      n = 7
+      if n % 2 == 0:
+          print("짝수")
+      else:
+          print("홀수")
+    options:
+      - { id: opt-k3vy, text: '홀수' }
+      - { id: opt-r8bd, text: '짝수' }
+      - { id: opt-m5xo, text: '1' }
+      - { id: opt-c2jw, text: '짝수홀수' }
+answer:
+  quiz_answer:
+    accepted: [opt-k3vy]
+    explanation: 7 % 2 는 1이에요(7을 2로 나누면 1이 남아요). 1은 0과 같지 않으니 else 쪽 줄이 실행돼요.
+    explanations:
+      opt-r8bd: 7을 2로 나누면 나머지가 있어요. 나머지가 0일 때만 이 줄이 실행돼요.
+      opt-m5xo: n % 2 는 if 안에서 비교에만 쓰여요. print 하는 건 따옴표 안의 글자예요.
+      opt-c2jw: if 와 else 는 둘 중 한 쪽만 실행돼요.

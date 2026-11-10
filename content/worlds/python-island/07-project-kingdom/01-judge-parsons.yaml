@@ -1,0 +1,50 @@
+# 퀴즈 7-1: 판정 코드 맞추기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000120
+order: 1
+title: 판정 코드 맞추기
+concept: 변수, if/elif/else 복습
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: 숫자 맞추기 게임의 판정
+  learning_goals:
+    - 조건 세 가지를 if/elif/else 로 나눌 수 있다
+    - 조건마다 실행할 줄을 들여쓰기한다
+  story_context: 프로젝트 왕국 문지기가 숫자 맞추기 게임의 판정 코드를 섞어 놨어요. 왕국에 들어가기 전에 다시 맞춰 볼까요?
+  fallback_text: 비교할 값을 먼저 상자에 넣고, if 와 elif 로 큰지 작은지 물어본 뒤, 둘 다 아니면 else 로 가요. 조건마다 실행할 줄은 들여쓰기해요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 고른 숫자가 비밀 숫자보다 큰지 작은지 알려 줘요
+    indent: true
+    lines:
+      - { id: ln-u4mr, code: 'secret = 7' }
+      - { id: ln-g8tz, code: 'guess = 5' }
+      - { id: ln-k2dh, code: 'if guess < secret:' }
+      - { id: ln-w9ac, code: 'print("더 큰 수예요")' }
+      - { id: ln-b5ny, code: 'elif guess > secret:' }
+      - { id: ln-e3lq, code: 'print("더 작은 수예요")' }
+      - { id: ln-p6xf, code: 'else:' }
+      - { id: ln-i7vo, code: 'print("정답!")' }
+answer:
+  quiz_answer:
+    # secret·guess 두 줄은 서로 바꿔도 같은 결과라 두 순서 모두 정답 (if 묶음과 elif 묶음은 elif 가 앞에 올 수 없어 못 바꿈)
+    accepted:
+      - - { id: ln-u4mr, indent: 0 }
+        - { id: ln-g8tz, indent: 0 }
+        - { id: ln-k2dh, indent: 0 }
+        - { id: ln-w9ac, indent: 1 }
+        - { id: ln-b5ny, indent: 0 }
+        - { id: ln-e3lq, indent: 1 }
+        - { id: ln-p6xf, indent: 0 }
+        - { id: ln-i7vo, indent: 1 }
+      - - { id: ln-g8tz, indent: 0 }
+        - { id: ln-u4mr, indent: 0 }
+        - { id: ln-k2dh, indent: 0 }
+        - { id: ln-w9ac, indent: 1 }
+        - { id: ln-b5ny, indent: 0 }
+        - { id: ln-e3lq, indent: 1 }
+        - { id: ln-p6xf, indent: 0 }
+        - { id: ln-i7vo, indent: 1 }
+    explanation: 비밀 숫자와 고른 숫자를 먼저 상자에 넣고, if 와 elif 로 작은지 큰지 물어본 뒤, 둘 다 아니면 else 로 정답을 알려 줘요. 5는 7보다 작아서 "더 큰 수예요"가 나와요.

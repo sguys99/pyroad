@@ -1,0 +1,50 @@
+# 퀘스트 4-5: 합계 구하기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000034
+order: 5
+title: 합계 구하기
+concept: 누적 변수 + for
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 누적 변수와 for 반복문으로 합계 구하기
+  learning_goals:
+    - 누적 변수를 사용하여 값을 더해갈 수 있다
+    - for 반복문과 누적 변수를 조합할 수 있다
+  story_context: 동굴 속 보물 더미! 금화를 하나씩 세어서 총 몇 개인지 합계를 구해봐요!
+  exercise_description: 1부터 10까지 숫자를 모두 더한 합계를 구하여 출력하세요
+  starter_code: |-
+    # 1부터 10까지 합계를 구해보세요!
+    total = 0
+
+    for i in range(1, 11):
+        # total에 i를 더해보세요! (힌트: total = total + ?)
+        
+
+    print(total)
+  expected_output_hint: 55 가 출력되어야 해요 (1+2+3+...+10 = 55)
+  checklist:
+    - '반복 안에서 total = total + i 를 써요'
+    - '그 줄은 for 안쪽으로 들여 써요'
+    - '마지막에 total 을 보여 줘요'
+  example_output: |-
+    55
+  fallback_text: total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: '55'
+  hints:
+    level_1: total이라는 상자에 숫자를 하나씩 더해가면 돼요!
+    level_2: total = 0으로 시작하고, total = total + i로 반복할 때마다 더해보세요!
+    level_3: for 안의 빈 줄에 total = total + i 를 넣어보세요!
+  solution_code: |-
+    total = 0
+
+    for i in range(1, 11):
+        total = total + i
+
+    print(total)

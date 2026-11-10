@@ -1,0 +1,33 @@
+# 퀴즈 6-2: 인사 함수 순서
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000116
+order: 2
+title: 인사 함수 순서
+concept: def, 함수 호출
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: 함수를 만들고 부르기
+  learning_goals:
+    - 함수 안에 들어갈 줄을 들여쓰기한다
+    - 함수를 만든 뒤에 불러야 실행된다는 것을 안다
+  story_context: 함수의 탑 마법사가 인사 마법 주문서를 떨어뜨려서 줄이 섞였어요. 다시 맞춰 볼까요?
+  fallback_text: def 줄 아래에서 들여쓰기한 줄들이 함수 안에 들어가요. 함수는 만든 다음, 들여쓰기 없이 이름을 불러야 실행돼요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, "안녕!" 다음에 "나는 파이뱀이야"가 나오는 함수를 만들고 불러요
+    indent: true
+    lines:
+      - { id: ln-n5ga, code: 'def hello():' }
+      - { id: ln-f8qe, code: 'print("안녕!")' }
+      - { id: ln-r3wy, code: 'print("나는 파이뱀이야")' }
+      - { id: ln-c6kt, code: 'hello()' }
+answer:
+  quiz_answer:
+    accepted:
+      - - { id: ln-n5ga, indent: 0 }
+        - { id: ln-f8qe, indent: 1 }
+        - { id: ln-r3wy, indent: 1 }
+        - { id: ln-c6kt, indent: 0 }
+    explanation: def 로 함수를 만들고 함수 안의 두 줄을 들여쓰기해요. 마지막에 들여쓰기 없이 hello()를 불러야 인사가 나와요.

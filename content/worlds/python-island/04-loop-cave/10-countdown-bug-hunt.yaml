@@ -1,0 +1,48 @@
+# 퀴즈 4-10: 끝나지 않는 카운트다운
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000112
+order: 10
+title: 끝나지 않는 카운트다운
+concept: while 반복, 들여쓰기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 반복이 끝나지 않을 때
+  learning_goals:
+    - while 반복 안에서 조건에 쓰는 값이 바뀌어야 반복이 끝난다는 것을 안다
+  story_context: 동굴 탈출 카운트다운을 돌렸더니 3만 끝없이 나와요! 이대로면 동굴을 빠져나갈 수 없어요.
+  fallback_text: while 은 조건이 참인 동안 들여쓰기한 줄을 계속 반복해요. 반복 안에서 n이 바뀌고 있는지 살펴봐요.
+  quiz:
+    question: 이 코드는 끝나지 않고 3만 계속 나와요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - id: ln-e5gc
+        code: n = 3
+      - id: ln-p9ri
+        code: 'while n > 0:'
+      - id: ln-t2xm
+        code: '    print(n)'
+      - id: ln-o6fu
+        code: n = n - 1
+      - id: ln-j3wa
+        code: print("탈출!")
+    fixes:
+      - id: fx-u7ky
+        code: '    n = n - 1'
+      - id: fx-d3hv
+        code: '    n = n + 1'
+      - id: fx-r6pq
+        code: n = n - 2
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-o6fu, fix: fx-u7ky }
+    explanation: n = n - 1 이 들여쓰기 안으로 들어가야 반복할 때마다 n이 1씩 줄어요. n이 0이 되면 반복이 끝나고 3, 2, 1, 탈출! 이 나와요.
+    explanations:
+      ln-e5gc: 이 줄은 3부터 시작하게 잘 준비했어요.
+      ln-p9ri: 이 줄은 "n이 0보다 클 동안"이라는 뜻으로 잘 썼어요.
+      ln-t2xm: 이 줄은 반복 안에서 n을 보여 주는 줄이라 괜찮아요.
+      ln-j3wa: 이 줄은 반복이 끝난 뒤에 한 번 나오는 줄이라 괜찮아요.
+      fx-d3hv: n이 점점 커지면 n > 0 이 언제나 참이라 반복이 끝나지 않아요.
+      fx-r6pq: 들여쓰기가 없으면 반복 밖에 있는 줄이에요. 반복 안에서는 n이 그대로예요.

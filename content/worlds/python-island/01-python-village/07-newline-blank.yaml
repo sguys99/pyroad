@@ -1,0 +1,28 @@
+# 퀴즈 1-7: 두 줄 편지 빈칸
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000102
+order: 7
+title: 두 줄 편지 빈칸
+concept: 이스케이프 문자 \n
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 글자 안에서 줄 바꾸기
+  learning_goals:
+    - print 한 번으로 글자를 두 줄에 나눠 보여 줄 수 있다
+  story_context: 마법 편지지에 과일 이름을 적어요. 사과와 바나나를 서로 다른 줄에 쓰고 싶어요!
+  fallback_text: 글자 안에서 줄을 바꾸는 특수문자는 역슬래시(\)로 시작해요. 앞에서 써 본 마법 편지지를 떠올려 봐요.
+  quiz:
+    question: 빈칸을 채워 사과와 바나나가 서로 다른 줄에 나오게 해요
+    code: print("사과{{bk-p3zy}}바나나")
+    tokens:
+      - { id: tok-n4ha, text: '\n' }
+      - { id: tok-s9re, text: '/n' }
+      - { id: tok-x2lu, text: 'n\' }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-p3zy: tok-n4ha }
+    explanation: \n 은 "새 줄"이라는 특수문자예요. print 글자 안에 넣으면 그 자리에서 줄이 바뀌어요.

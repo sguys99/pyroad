@@ -1,0 +1,44 @@
+# 퀴즈 6-4: 돌려주는 함수 고르기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000117
+order: 4
+title: 돌려주는 함수 고르기
+concept: 매개변수, return
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 값을 돌려주는 함수
+  learning_goals:
+    - return 으로 계산한 값을 돌려줄 수 있다
+    - 매개변수로 받은 값을 함수 안에서 쓴다
+  story_context: 탑의 마법 계산기를 고치려고 해요. 두 수를 넣으면 더한 값을 돌려줘야 해요.
+  fallback_text: 함수가 값을 돌려주려면 돌려줄 값을 알려 주는 주문이 필요해요. 그리고 넣어 준 두 수를 받을 자리(매개변수)도 있어야 해요.
+  quiz:
+    question: print(add(2, 3)) 을 돌렸을 때 5가 나오는 함수는 어느 것일까?
+    options:
+      - id: opt-j4xs
+        text: |-
+          def add(a, b):
+              return a + b
+      - id: opt-o7md
+        text: |-
+          def add(a, b):
+              a + b
+      - id: opt-e3ru
+        text: |-
+          def add(a, b):
+              return "a + b"
+      - id: opt-y5lf
+        text: |-
+          def add():
+              return a + b
+answer:
+  quiz_answer:
+    accepted: [opt-j4xs]
+    explanation: 매개변수 a, b 로 두 수를 받고 return 으로 더한 값을 돌려줘요. 그래서 add(2, 3)은 5가 돼요.
+    explanations:
+      opt-o7md: 계산은 했지만 돌려주지 않아서 add(2, 3)의 값이 비어 있어요(None).
+      opt-e3ru: 따옴표 안의 a + b 는 계산이 아니라 그냥 글자예요.
+      opt-y5lf: 괄호가 비어 있어서 넣어 준 2와 3을 받을 자리가 없어요.

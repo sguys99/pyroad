@@ -1,0 +1,39 @@
+# 퀴즈 2-9: 변신 마법 버그 잡기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000106
+order: 9
+title: 변신 마법 버그 잡기
+concept: str() 형변환
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 글자와 숫자를 이어 붙일 때
+  learning_goals:
+    - 글자와 숫자는 + 로 바로 이어 붙일 수 없다는 것을 안다
+  story_context: 변신 마법사가 나이 소개 문장을 만들다가 오류를 냈어요. 어느 줄이 문제일까요?
+  fallback_text: 글자와 숫자는 종류가 달라서 + 로 바로 붙일 수 없어요. 숫자를 글자로 바꾸는 변신 마법을 떠올려 봐요.
+  quiz:
+    question: 오류가 나는 줄을 찾아 고쳐요
+    lines:
+      - id: ln-d4yb
+        code: age = 10
+      - id: ln-u8fk
+        code: print("나는 " + age + "살이에요")
+    fixes:
+      - id: fx-h2wc
+        code: print("나는 " + str(age) + "살이에요")
+      - id: fx-n6ze
+        code: print("나는 " + int(age) + "살이에요")
+      - id: fx-q9rt
+        code: print("나는 + age + 살이에요")
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-u8fk, fix: fx-h2wc }
+    explanation: str()은 숫자를 글자로 바꾸는 변신 마법이에요. 글자끼리는 + 로 이어 붙일 수 있어서 "나는 10살이에요"가 나와요.
+    explanations:
+      ln-d4yb: 이 줄은 숫자 10을 상자에 잘 넣었어요. 다른 줄을 살펴봐요.
+      fx-n6ze: int()는 숫자로 바꾸는 마법이라, 여전히 글자와 숫자를 더하게 돼요.
+      fx-q9rt: 모두 따옴표 안에 넣으면 age가 상자가 아니라 그냥 글자 "age"로 나와요.
