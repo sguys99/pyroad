@@ -41,6 +41,10 @@ test.describe('프로젝트 퀘스트', () => {
     const checks = page.locator('.qs-check');
     await expect(checks).toHaveCount(total);
     await expect(checks.nth(0)).toHaveAttribute('data-current');
+    // 지금 단계 아래에만 그 단계의 해 볼 일 (P7-17)
+    await expect(page.locator('.qs-subchecks li')).toHaveText(
+      project.steps[0].checklist,
+    );
 
     // 1단계 통과 → "다음 단계" 박자: 통과 알림 + 다음 목표 + 해 볼 일 체크 → "다음 단계로"로 바로 넘어감
     await runCode(page, project.steps[0].solution);
@@ -49,6 +53,9 @@ test.describe('프로젝트 퀘스트', () => {
     await expect(strip(page)).toContainText(project.steps[1].goal);
     await expect(checks.nth(0)).toHaveAttribute('data-done');
     await expect(checks.nth(1)).toHaveAttribute('data-current');
+    await expect(page.locator('.qs-subchecks li')).toHaveText(
+      project.steps[1].checklist,
+    );
     // 박자 동안 실행 버튼은 "정답 확인 중"에 머물지 않고 쉬는 버튼 (P6-16)
     await expect(
       page.locator('.qr[data-runner-state]').first(),

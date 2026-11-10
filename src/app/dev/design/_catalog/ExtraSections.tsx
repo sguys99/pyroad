@@ -270,15 +270,30 @@ export function OutputPanelSection() {
       ),
     },
     {
-      label: '출력이 다름',
-      note: '금색 면 · 공개 안내(해 볼 일)와 견줘 보기 + 규칙 유형별 살펴볼 거리 + "파이뱀에게 더 물어보기"(Q56). 정답 기준값은 보여 주지 않음',
+      label: '출력이 다름 · 줄마다 견줘 보기',
+      note: '금색 면 · 공개 예시 출력(P7-17)과 줄마다 견줌: 같은 줄 ✓, 다른 줄은 연필 표시 + 옅은 금색 + "내 글자", 모자란 줄 "(안 나왔어요)" · 규칙 유형별 살펴볼 거리 + "파이뱀에게 더 물어보기"(Q56). 결과가 정해진 output_match 퀘스트만',
       node: (
         <OutputPanel
-          result={{ ...ok, stdout: '안녕하세요\n' }}
+          result={{ ...ok, stdout: '=== 파이썬 마을 ===\n인구: 2026 명\n' }}
           isRunning={false}
           validationResult={{ passed: false, type: 'output_match' }}
-          goal="안녕하세요! 가 출력되어야 해요"
+          example={{
+            text: '=== 파이썬 마을 ===\n인구: 2026명\n환영합니다!',
+            compare: true,
+          }}
           onAskTutor={noop}
+        />
+      ),
+    },
+    {
+      label: '출력이 다름 · 무작위 예시',
+      note: '무작위·포함 검사 퀘스트(output_match 아님)는 줄 비교 없이 "예시"라고 밝히고 보여 줌',
+      node: (
+        <OutputPanel
+          result={{ ...ok, stdout: '비밀 숫자: 4\n' }}
+          isRunning={false}
+          validationResult={{ passed: false, type: 'all' }}
+          example={{ text: '비밀 숫자: 7\n추측: 3', compare: false }}
         />
       ),
     },
@@ -290,7 +305,7 @@ export function OutputPanelSection() {
           result={{ ...ok, stdout: '' }}
           isRunning={false}
           validationResult={{ passed: false, type: 'output_match' }}
-          goal="2026 이 출력되어야 해요"
+          example={{ text: '2026', compare: true }}
         />
       ),
     },
@@ -375,7 +390,7 @@ export function OutputPanelSection() {
         ))}
       </div>
       <CodeSample
-        code={`<OutputPanel result={runResult} isRunning={runner.isRunning} validationResult={validation}\n  liveOutput={liveOutput} goal={goal} onShowErrorLine={showErrorLine} />`}
+        code={`<OutputPanel result={runResult} isRunning={runner.isRunning} validationResult={validation}\n  liveOutput={liveOutput} example={{ text: example_output, compare: validation_type === 'output_match' }} onShowErrorLine={showErrorLine} />`}
       />
     </Section>
   );
@@ -522,7 +537,7 @@ export function ErrorStagingSection() {
                 result={c.result}
                 isRunning={false}
                 validationResult={c.validation}
-                goal="안녕하세요! 가 출력되어야 해요"
+                example={{ text: '안녕하세요!', compare: true }}
                 onShowErrorLine={noop}
               />
             </div>

@@ -1,0 +1,56 @@
+# 퀘스트 3-9: 가위바위보 심판
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000031
+order: 9
+title: 가위바위보 심판
+concept: 중첩 if문
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 중첩 if문으로 복잡한 조건 처리하기
+  learning_goals:
+    - if 안에 if를 넣어 중첩 조건을 만들 수 있다
+    - 여러 조건을 조합하여 결과를 판단할 수 있다
+  story_context: 갈림길의 가위바위보 대회! 심판이 되어 누가 이겼는지 판정해봐요!
+  exercise_description: player = "가위", computer = "보"일 때 가위바위보 결과를 판정하세요. 가위가 보를 이기니까 "이겼다!"를 출력!
+  starter_code: |-
+    # 가위바위보 심판이 되어보세요!
+    player = "가위"
+    computer = "보"
+
+    if player == computer:
+        print("비겼다!")
+    elif player == "가위":
+        if computer == "보":
+            print()
+        else:
+            print("졌다!")
+  expected_output_hint: 이겼다! 가 출력되어야 해요
+  checklist:
+    - '안쪽 if 아래 print( ) 안에 "이겼다!"를 넣어요'
+    - '가위와 보일 때 어느 줄이 돌아가는지 따라가 봐요'
+  example_output: |-
+    이겼다!
+  fallback_text: if 안에 또 if를 쓸 수 있어요! 가위가 보를 이기니까, player가 가위이고 computer가 보이면 이긴 거예요.
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: 이겼다!
+  hints:
+    level_1: 가위는 보를 이겨요! player가 가위이고 computer가 보이면 어떤 결과일까요?
+    level_2: if 조건이 맞으니까 print() 안에 결과 메시지를 넣으면 돼요!
+    level_3: print("___") 이겼을 때 나올 메시지를 넣어보세요!
+  solution_code: |-
+    player = "가위"
+    computer = "보"
+
+    if player == computer:
+        print("비겼다!")
+    elif player == "가위":
+        if computer == "보":
+            print("이겼다!")
+        else:
+            print("졌다!")

@@ -976,6 +976,10 @@ export type Database = {
         Args: { p_iss: string; p_provider: string };
         Returns: string;
       };
+      submit_quiz_answer: {
+        Args: { p_answer: Json; p_quest_id: string; p_user_id: string };
+        Returns: Json;
+      };
       use_golden_key: {
         Args: { p_quest_id: string; p_step?: number; p_user_id: string };
         Returns: Json;

@@ -276,6 +276,18 @@
 .qs-check[data-step][data-current] .qs-box {
   background: var(--primary-soft);
 }
+/* 지금 단계의 해 볼 일 (P7-17, 단계 checklist): 단계 목표 아래 작은 점 목록, 본문 굵기로 */
+.qs-subchecks {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0.25rem 0 0;
+  padding-left: 1.125rem;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 400;
+  line-height: var(--text-small--line-height);
+  list-style: disc;
+}
 /* 방금 통과한 단계: 체크가 도장처럼 톡 (full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 없음) */
 .qs-check[data-fresh] .qs-box {
   animation: qs-tick var(--spring-prop-dur) var(--spring-prop) both;

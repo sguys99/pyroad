@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { OWN_PROFILE_SELECT } from '@/lib/avatar/ownProfile';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
+import { kstStartOfDay, kstToday } from '@/lib/time/kst';
 
 import { toWorldMapData, type WorldMapData } from './mapData';
 import { serverWorlds } from './serverWorlds';
@@ -18,7 +19,7 @@ import { serverWorlds } from './serverWorlds';
  * 캐시: 하지 않는다. 공개 콘텐츠(worlds·stages·quests)도 RLS 가 authenticated 전용이라 캐시하려면 service_role 로 읽어야 하고,
  * seed 배포 뒤 오래된 목록이 남을 위험이 있는데, 로컬에서 쿼리 하나가 약 2ms 이고 getUser 와 병렬이라 줄어드는 시간이 없다
  * (측정: docs/perf/P5-13-world-data.md). 월드 지도 설정(WORLDS, e2e 는 serverWorlds 가 테스트 월드를 더함)은 빌드 생성물이라 캐시가 필요 없다.
- * 사용자 데이터는 절대 캐시하지 않는다.
+ * 사용자 데이터는 절대 캐시하지 않는다. 오늘의 퀴즈(P7-10)는 같은 묶음의 오늘 quiz_attempts 로 계산하고 `/daily` 도 이 함수를 쓴다.
  *
  * 최신 유지(무효화) 규칙 — 로그인 화면은 `force-dynamic`이고 Next 15 Router Cache 의 동적 페이지 staleTime 은 0 이라
  * `/world` 로 이동할 때마다 새로 렌더한다. 화면에 머문 채 바뀌는 경우만 따로 처리한다:
@@ -33,7 +34,8 @@ import { serverWorlds } from './serverWorlds';
  */
 export async function loadWorldMapData(): Promise<WorldMapData | null> {
   const supabase = await createClient();
-  const [{ user }, apiKeys, stages, progress, profile, seen] =
+  const today = kstToday();
+  const [{ user }, apiKeys, stages, progress, profile, seen, attempts] =
     await Promise.all([
       getAuthUser(),
       // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
@@ -44,16 +46,21 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       supabase
         .from('stages')
         .select(
-          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, concept, quest_type, is_mobile_friendly)',
+          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, concept, quest_type, quiz_kind, is_mobile_friendly)',
         ),
       supabase
         .from('user_progress')
         .select(
-          'user_id, quest_id, status, best_stars, completed_at, used_golden_key, created_at',
+          'user_id, quest_id, status, best_stars, stars_judged_on, completed_at, used_golden_key, created_at',
         ),
       supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
       // 잠금 해제 연출 본 기록 (P5-05, 00025). 실패하면(00025 전 DB) null → 연출·기록을 하지 않음
       supabase.from('user_seen_unlocks').select('user_id, stage_id'),
+      // 오늘(KST) 퀴즈 시도: 오늘의 퀴즈 완료 계산 (P7-10, 본인 행 SELECT 정책 00012). 실패하면 끝난 문제 없음으로
+      supabase
+        .from('quiz_attempts')
+        .select('user_id, quest_id, attempt_no, is_correct, created_at')
+        .gte('created_at', kstStartOfDay(today).toISOString()),
       // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
     ]);
   if (!user) return null;
@@ -66,7 +73,9 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       profile: profile.data,
       apiKeys,
       seen: seen.error ? null : seen.data,
+      attempts: attempts.data,
     },
     serverWorlds(),
+    today,
   );
 }

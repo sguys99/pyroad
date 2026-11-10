@@ -45,7 +45,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 
 ### 1.1 대비 (WCAG AA, 자동 검사)
 
-`CONTRAST_PAIRS`(52쌍, P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍 추가)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.58:1**(초록 글자 on `bg-primary/10`).
+`CONTRAST_PAIRS`(59쌍, P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍, P7-13에서 퀴즈 7쌍 추가)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.58:1**(초록 글자 on `bg-primary/10`).
 
 | 쓰임 | 글자·전경 | 배경 | 대비 | 기준 |
 |---|---|---|---:|---:|
@@ -74,8 +74,11 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | 월드 바탕 본문 | `text` | `w1Soft` / `w2Soft` / `w3Soft` | 12.60 / 12.53 / 12.35 | 4.5 |
 | 코드 글자·주석·키워드·문자열 | `codeText` / `codeComment` / `codeKeyword` / `codeString` | `codeBg` #FFFFFF | 14.24 / 4.73 / 5.69 / 5.92 | 4.5 |
 | 코드 줄 번호 | `textMuted` | `surface2` | 4.94 | 4.5 |
+| 퀴즈 칩·빈칸 코드 (흰 면 · 정답 면 · 틀린 면) | `codeText` / `codeString` | `surface` / `successSoft` / `accentSoft` | 14.24 · 5.92 / 12.21 / 12.69 | 4.5 |
+| 퀴즈 빈 빈칸 번호 | `textMuted` | `codeBg` | 5.83 | 4.5 |
+| 퀴즈 정답 체크 동그라미 · 정답 테 | `onPrimary` · `success` | `success` · `surface` | 5.69 / 5.69 | 3 |
 
-(표시값은 소수 둘째 자리에서 내림. 전체 47쌍은 `npx vitest run src/lib/design`)
+(표시값은 소수 둘째 자리에서 내림. 전체 59쌍은 `npx vitest run src/lib/design`)
 
 **P0-13 미달 해소**: 예전 브랜드 초록 `#31983d`는 흰 글자 3.69:1, 앱 배경 위 글자 3.39~3.59:1로 미달이었다. 같은 색상 계열에서 명도를 낮춘 `primary` `#3E7B3A`(흰 글자 5.12)와 글자 전용 `primaryText` `#3A7336`(배경 5.18)으로 나눴고, 앱의 `text-primary` 61곳을 모두 `text-primary-text`로 바꿨다. API 키 안내의 `amber-600` on `amber-50`(3.08:1)은 `text-warning` on `bg-warning-soft`(5.28)로, 프로필 `destructive`(3.43)는 `error` `#B3402F`(배경 5.17)로 바뀌었다. `bg-destructive/10` 위 오류 글자는 배경 위에서 4.49로 아슬아슬해 `bg-error-soft`(4.88)로 바꿨고, `hover:bg-primary/90`·`/80`(흰 글자 4.28)은 `hover:bg-primary-lip`(7.51)로 바꿨다.
 

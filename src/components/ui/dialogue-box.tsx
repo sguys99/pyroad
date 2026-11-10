@@ -23,6 +23,8 @@ interface DialogueBoxProps {
   speaker: ReactNode;
   character: (speaking: boolean) => ReactNode;
   tone?: BubbleTone;
+  /** false면 대사가 바뀌어도 낭독기에 알리지 않음 (같은 내용을 다른 곳이 이미 읽을 때, P7-13). 글자는 그대로 읽을 수 있음 */
+  live?: boolean;
   className?: string;
   'data-testid'?: string;
 }
@@ -32,6 +34,7 @@ export function DialogueBox({
   speaker,
   character,
   tone = 'tutor',
+  live = true,
   className,
   'data-testid': testId,
 }: DialogueBoxProps) {
@@ -64,7 +67,7 @@ export function DialogueBox({
         <span aria-hidden className="g-bubble-rest">
           {rest}
         </span>
-        <span className="sr-only" aria-live="polite">
+        <span className="sr-only" aria-live={live ? 'polite' : undefined}>
           {text}
         </span>
       </SpeechBubble>

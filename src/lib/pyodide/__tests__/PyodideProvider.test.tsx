@@ -48,8 +48,17 @@ function QuestStub({
   onRuntime: (id: string, runtime: PyodideRuntime) => void;
 }) {
   const runtime = usePyodideRuntime();
+  const { start } = runtime;
+  // 코드 퀘스트(useQuestSession)처럼 들어오자마자 start (Provider는 lazy, P7-07)
+  useEffect(() => start(), [start]);
   useEffect(() => onRuntime(id, runtime));
   return <p>{id}</p>;
+}
+
+/** 퀴즈 화면 대신: start 를 부르지 않음 */
+function QuizStub() {
+  usePyodideRuntime();
+  return <p>quiz</p>;
 }
 
 beforeEach(() => {
@@ -131,6 +140,21 @@ describe('PyodideProvider (B22: 퀘스트 레이아웃 단위 Worker 싱글톤)'
         data: { type: 'init-status', status: 'ready' },
       } as MessageEvent<WorkerResponse>),
     ).not.toThrow();
+  });
+
+  it('lazy: start 를 부르기 전(퀴즈 화면)에는 Worker를 만들지 않고, 그 뒤 코드 퀘스트로 가면 그때 만든다 (P7-07)', () => {
+    const { rerender } = render(
+      <PyodideProvider>
+        <QuizStub key="quiz" />
+      </PyodideProvider>,
+    );
+    expect(FakeWorker.instances).toHaveLength(0);
+    rerender(
+      <PyodideProvider>
+        <QuestStub key="q1" id="q1" onRuntime={() => {}} />
+      </PyodideProvider>,
+    );
+    expect(FakeWorker.instances).toHaveLength(1);
   });
 
   it('Provider 밖에서 쓰면 알아보기 쉬운 에러', () => {

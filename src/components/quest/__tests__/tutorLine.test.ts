@@ -56,8 +56,8 @@ describe('tutorLine 완료한 퀘스트 (Q57)', () => {
 describe('프로젝트 단계 (P6-12)', () => {
   const steps = [
     { step_goal: '하나' },
-    { step_goal: '둘' },
-    { step_goal: '셋' },
+    { step_goal: '둘', checklist: ['둘-가', '둘-나'] },
+    { step_goal: '셋', checklist: ['셋-가'] },
   ] as QuestSession['steps'];
   const base = {
     steps,
@@ -78,6 +78,35 @@ describe('프로젝트 단계 (P6-12)', () => {
     );
     expect(beat[1]).toMatchObject({ done: true, fresh: true });
     expect(beat[2].current).toBe(true);
+    // 지금 단계 아래에만 그 단계의 해 볼 일 (P7-17)
+    expect(now.map((i) => i.sub)).toEqual([
+      undefined,
+      ['둘-가', '둘-나'],
+      undefined,
+    ]);
+    expect(beat.map((i) => i.sub)).toEqual([undefined, undefined, ['셋-가']]);
+  });
+
+  it('코드 퀘스트 해 볼 일은 콘텐츠 checklist, 없는 예전 행이면 과제 설명 + 안내 (P7-17)', () => {
+    const code = (prompt_skeleton: object) =>
+      missionItems(
+        session({
+          quest: { prompt_skeleton } as QuestSession['quest'],
+          isCompleted: false,
+          validation: { passed: true, type: 'output_match' },
+        }),
+      );
+    expect(
+      code({ checklist: ['가', '나'], exercise_description: 'x' }),
+    ).toEqual([
+      { text: '가', done: true },
+      { text: '나', done: true },
+    ]);
+    expect(
+      code({ exercise_description: '설명', expected_output_hint: '안내' }).map(
+        (i) => i.text,
+      ),
+    ).toEqual(['설명', '안내']);
   });
 
   it('두 번째 단계부터 처음 대사는 이어서 쓰라는 안내', () => {

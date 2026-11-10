@@ -1,0 +1,36 @@
+# 퀴즈 5-8: 정렬한 물고기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000115
+order: 8
+title: 정렬한 물고기
+concept: sort()
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: sort()한 리스트 보기
+  learning_goals:
+    - sort()가 리스트를 작은 수부터 늘어놓는다는 것을 안다
+    - print로 리스트를 보여 주면 대괄호까지 나온다는 것을 안다
+  story_context: 리스트 호수의 숫자 물고기가 뒤죽박죽이에요. 정렬 마법을 쓴 뒤 리스트를 보여 주면 어떻게 나올까요?
+  fallback_text: sort()는 리스트 안의 순서를 작은 수부터 큰 수로 바꿔요. 리스트를 통째로 print 하면 대괄호와 쉼표까지 그대로 나와요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      nums = [3, 1, 2]
+      nums.sort()
+      print(nums)
+    options:
+      - { id: opt-p6jt, text: '[1, 2, 3]' }
+      - { id: opt-u3cy, text: '[3, 1, 2]' }
+      - { id: opt-h8mz, text: '[3, 2, 1]' }
+      - { id: opt-v2bk, text: '1 2 3' }
+answer:
+  quiz_answer:
+    accepted: [opt-p6jt]
+    explanation: sort()는 리스트를 작은 수부터 큰 수로 정리해요. 리스트를 print 하면 대괄호와 쉼표도 함께 나와요.
+    explanations:
+      opt-u3cy: 둘째 줄의 sort()가 리스트 순서를 바꿔 놓았어요.
+      opt-h8mz: sort()는 기본으로 작은 수부터 늘어놓아요.
+      opt-v2bk: 리스트를 통째로 print 하면 대괄호와 쉼표까지 그대로 나와요.

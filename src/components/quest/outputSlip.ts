@@ -1,5 +1,5 @@
 // 결과 쪽지(OutputPanel, P6-06)의 글 다루기. 정답 기준값(expected_output)은 서버에만 있어(§2.3) 여기서는
-// 학생 출력·공개 규칙 유형(validation_type)·공개 안내(expected_output_hint)만으로 견줘 볼 거리를 만든다
+// 학생 출력·공개 규칙 유형(validation_type)·공개 예시 출력(example_output, P7-17)만으로 견줘 볼 거리를 만든다
 import type { ValidationType } from '@/lib/quest/validation';
 
 /** 등장 연출을 거는 앞쪽 줄 수 (긴 출력은 나머지를 그냥 보여 줌) */
@@ -11,6 +11,28 @@ export function outputLines(text: string): string[] {
   const lines = text.split('\n');
   if (lines.at(-1) === '') lines.pop();
   return lines;
+}
+
+export interface LineCompare {
+  /** 예시의 그 줄 (예시가 더 짧으면 null) */
+  example: string | null;
+  /** 나온 글자의 그 줄 (안 나왔으면 null) */
+  actual: string | null;
+  same: boolean;
+}
+
+/**
+ * 예시 출력과 나온 글자를 같은 줄끼리 견줌 (P7-17). output_match 채점처럼 전체 앞뒤 공백·줄바꿈은 무시하고
+ * 줄 안은 한 글자까지 그대로 비교. 결과가 정해진 퀘스트(output_match)에만 씀 — 무작위면 예시만 보여 줌
+ */
+export function compareLines(example: string, actual: string): LineCompare[] {
+  const want = outputLines(example.trim());
+  const got = outputLines(actual.trim());
+  return Array.from({ length: Math.max(want.length, got.length) }, (_, i) => ({
+    example: want[i] ?? null,
+    actual: got[i] ?? null,
+    same: want[i] === got[i],
+  }));
 }
 
 /** traceback 마지막 줄 (예: "NameError: name 'x' is not defined") */

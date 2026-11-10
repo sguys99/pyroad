@@ -87,6 +87,30 @@ export const EVENT_PROPS_SCHEMA = {
       place: z.enum(['head', 'float']),
     })
     .strict(),
+  quiz_try_run: z
+    .object({
+      kind: z.enum(['multiple_choice', 'fill_blank', 'parsons', 'bug_hunt']),
+      edited: z.boolean(),
+    })
+    .strict(),
+  phone_quiz_pick: z
+    .object({
+      place: z.enum(['world', 'quest']),
+      action: z.enum(['show', 'click']),
+    })
+    .strict(),
+  daily_quiz_open: z
+    .object({
+      total: z.number().int().min(0).max(3),
+      done: z.number().int().min(0).max(3),
+    })
+    .strict(),
+  daily_quiz_finish: z
+    .object({
+      correct: z.number().int().min(0).max(3),
+      stars: z.number().int().min(0).max(9),
+    })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -137,6 +161,34 @@ const clientEvent = z.discriminatedUnion('name', [
     .strict(),
   z
     .object({
+      name: z.literal('quiz_try_run'),
+      props: EVENT_PROPS_SCHEMA.quiz_try_run,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('phone_quiz_pick'),
+      props: EVENT_PROPS_SCHEMA.phone_quiz_pick,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('daily_quiz_open'),
+      props: EVENT_PROPS_SCHEMA.daily_quiz_open,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('daily_quiz_finish'),
+      props: EVENT_PROPS_SCHEMA.daily_quiz_finish,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
       name: z.literal('trial_start'),
       props: EVENT_PROPS_SCHEMA.trial_start.default({}),
       path: z.string().max(200).optional(),
@@ -170,6 +222,10 @@ const _clientNamesCovered: Record<
   pwa_install_prompt: 'pwa_install_prompt',
   pwa_installed: 'pwa_installed',
   continue_click: 'continue_click',
+  quiz_try_run: 'quiz_try_run',
+  phone_quiz_pick: 'phone_quiz_pick',
+  daily_quiz_open: 'daily_quiz_open',
+  daily_quiz_finish: 'daily_quiz_finish',
   trial_start: 'trial_start',
   trial_run: 'trial_run',
   trial_success: 'trial_success',

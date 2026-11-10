@@ -23,6 +23,11 @@ prompt:
     fruits = []
     print(fruits)
   expected_output_hint: 사과, 바나나, 포도가 리스트로 출력되어야 해요
+  checklist:
+    - '대괄호 [ ] 안에 "사과", "바나나", "포도"를 넣어요'
+    - '사이사이에 쉼표를 찍어요'
+  example_output: |-
+    ['사과', '바나나', '포도']
   fallback_text: 리스트는 여러 값을 한 상자에 담는 거예요! ["사과", "바나나", "포도"] 이렇게 대괄호 안에 쉼표로 구분해서 넣어요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

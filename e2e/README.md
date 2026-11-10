@@ -36,6 +36,7 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 | `world-select.spec.ts` | 월드 선택(P5-01): 월드 BGM(P5-11, `<html data-bgm data-bgm-playing>`로 제스처 전 무음 → 지도·책장·다른 월드·그 퀘스트 곡 전환), 지도 머리 → 월드 바꾸기 → 책장 → 월드 지도, 잠김·준비 중 안내, 없는 월드 404 화면, 테스트 월드(`fixtures/content/worlds/test-meadow`)를 DB에 넣고 월드 1을 다 깨면 두 번째 월드 지도가 열림. `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷도. 테스트 월드 지도 설정은 Playwright가 서버를 띄우기 전에 `content:build -- --fixtures`로 `build/e2e/`에 만들고 서버 env `PYROAD_E2E_WORLDS`로 읽힘 |
 | `world-continue.spec.ts` | 월드맵 이어하기 CTA(P5-10): 진행 0 → "모험 시작하기"(첫 퀘스트), 하다 만 퀘스트(진행 행) → 다음 차례보다 그 퀘스트, 360px에서 지도를 내리면 아래 떠 있는 버튼(잠긴 노드 쪽지가 뜨면 비켜 줌). `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷 |
 | `world-responsive.spec.ts` | Phase 5 화면 반응형 회귀(P5-14): 7개 폭에서 지도·책장·잠긴 월드·스테이지 시트 가로 넘침 0(시트 주 버튼 하나), 320px 세로 지도의 지금 위치 깃발이 모든 노드에서 이름표에 안 걸림, minimal·동작 줄이기에서 위치·크기 변화·패럴랙스 0, full 탭 숨김 시 앰비언트 멈춤, 퀘스트에서 돌아와 닫은 시트가 기록을 겹치지 않음 |
+| `quiz-mobile.spec.ts` | 모바일 퀴즈(P7-15, 360px 탭만): 4종 첫 시도 ⭐3·30 XP·도장·새로고침 뒤 서버 XP, 오답 2번 → ⭐1·오답 응답에 정답 없음, 3번 → 정답 공개, 같은 날 연습, 퀴즈는 보너스(안 풀어도 다음 스테이지), `/daily` 3문제·콤보·요약, 퀴즈 페이지 HTML·RSC·JS에 정답 없음, 가로 스크롤 없음. 정답은 `support/admin.ts`의 `quizKey`(service_role로 `quest_answer_keys`) |
 | `support/env.ts` | 로컬 스택 찾기, 앱 서버 env 만들기 |
 | `support/admin.ts` | service_role 도우미 (진행 초기화, 앞 퀘스트 완료) |
 | `support/test.ts` | 로그인 스펙의 `test`: 테스트마다 진행 초기화, 끝날 때 쓰기 요청 대기, CSP 위반 감시 |

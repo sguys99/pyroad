@@ -4,7 +4,7 @@
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { test, expect } from './support/test';
+import { test, expect, PHONE_QUIZ_NOTE_KEY } from './support/test';
 import { adminClient, completeQuests } from './support/admin';
 import { stage } from './support/content';
 
@@ -60,6 +60,8 @@ test('360px: 지도를 내리면 아래에 떠 있는 이어하기, 쪽지가 �
   await page.goto('/world');
   const float = page.getByTestId('continue-float');
 
+  // 지도가 하이드레이션 뒤 지금 스테이지(맨 아래)로 스스로 내려간다 → 그 뒤에 맨 위로 (느린 CI 에서 순서가 뒤집혀 B48)
+  await expect(page.locator('.world-node[data-current]')).toBeInViewport();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(head(page)).toBeInViewport();
   await expect(float).toBeHidden();
@@ -86,6 +88,57 @@ test('360px: 지도를 내리면 아래에 떠 있는 이어하기, 쪽지가 �
 
   await float.getByRole('link').click();
   await expect(page).toHaveURL(new RegExp(`/quest/${q2.id}$`));
+});
+
+// 폰 퀴즈 추천 (P7-11, §12-Q3 C): 이어하기는 그대로 코드 퀘스트, 그 아래 보조로 이 스테이지의 안 푼 퀴즈
+test('360px: 이어하기(코드 퀘스트) 아래 "폰에서 하기 좋은 퀴즈", 넓은 화면은 없음', async ({
+  page,
+  e2eUser,
+}) => {
+  const [q1, q2] = s1.quests;
+  const [z1] = s1.quizzes;
+  test.skip(!z1, '1스테이지에 퀴즈가 없음');
+  await completeQuests(e2eUser.id, [{ id: q1.id, solution: q1.solution }]);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/world');
+  await expect(head(page)).toContainText(q2.title);
+  await expect(page.getByTestId('phone-quiz-pick')).toHaveCount(0);
+
+  await page.setViewportSize({ width: 360, height: 740 });
+  const pick = page.getByTestId('phone-quiz-pick');
+  await expect(pick).toBeVisible();
+  await expect(pick).toContainText('폰에서 하기 좋은 퀴즈');
+  await expect(pick).toContainText(z1.title);
+  // 주 버튼은 여전히 코드 퀘스트
+  await expect(head(page)).toContainText(`1단계 · ${q2.title}`);
+  const box = (await pick.boundingBox())!;
+  expect(box.x + box.width).toBeLessThanOrEqual(360);
+
+  await pick.getByRole('link').click();
+  await expect(page).toHaveURL(new RegExp(`/quest/${z1.id}$`));
+});
+
+// 기기당 한 번(본 기록)은 단위 테스트(PhoneQuizNote.test.tsx)가 본다
+test('360px 코드 퀘스트 첫 진입: 이 스테이지 퀴즈 쪽지 → 첫 퀴즈로', async ({
+  page,
+}) => {
+  const [, q2] = s1.quests;
+  const [z1] = s1.quizzes;
+  test.skip(!z1, '1스테이지에 퀴즈가 없음');
+  await page.setViewportSize({ width: 360, height: 740 });
+  // 공통 픽스처가 "봤음"으로 두므로 지운다 (이 init 스크립트가 뒤에 실행됨)
+  await page.addInitScript(
+    (key) => localStorage.removeItem(key),
+    PHONE_QUIZ_NOTE_KEY,
+  );
+  await page.goto(`/quest/${q2.id}`);
+  const note = page.getByTestId('phone-quiz-note');
+  await expect(note).toContainText('폰에선 퀴즈가 더 편해요');
+  await note
+    .getByRole('link', { name: `퀴즈 ${s1.quizzes.length}개 보기` })
+    .click();
+  await expect(page).toHaveURL(new RegExp(`/quest/${z1.id}$`));
 });
 
 // 스크린샷 (보고용): E2E_SHOTS=<폴더> 일 때만. 360·768·1280 × full·minimal

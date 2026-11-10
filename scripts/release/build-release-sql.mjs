@@ -131,6 +131,21 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v0.6-phase7',
+    dir: 'v0.6-phase7',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.6 (Phase 7 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00026 quiz_answer_rpc, 00027 reset_quiz_attempts)',
+          '-- feat/phase7 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.6-runbook.md "Phase 7 병합"',
+        ],
+        parts: ['00026', '00027'],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];

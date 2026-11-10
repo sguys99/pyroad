@@ -64,11 +64,15 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(page).toHaveURL(new RegExp(`/quest/${quest1.id}$`));
     await expect(questHeader(page)).toContainText(quest1.title);
 
-    // 헤더 스테이지 진행 점(P6-02): 퀘스트마다 점 하나, 지금 퀘스트는 aria-current="step"
+    // 헤더 스테이지 진행 점(P6-02): 퀘스트마다(퀴즈 포함) 점 하나, 지금 퀘스트는 aria-current="step"
     const progress = page.getByTestId('stage-progress');
     const dots = progress.locator('.sp-dot');
-    await expect(dots).toHaveCount(stage1.quests.length);
+    await expect(dots).toHaveCount(stage1.questCount);
+    // 숫자는 코드 퀘스트끼리 (B53): 퀴즈 점은 마름모로 따로
     await expect(progress).toContainText(`1/${stage1.quests.length}`);
+    await expect(progress.locator('.sp-dot[data-kind="quiz"]')).toHaveCount(
+      stage1.questCount - stage1.quests.length,
+    );
     await expect(dots.first()).toHaveAttribute('aria-current', 'step');
     await expect(dots.first()).toHaveAttribute('data-state', 'todo');
 
@@ -77,7 +81,8 @@ test.describe('퀘스트 전체 플로우', () => {
       page.getByRole('heading', { level: 1, name: quest1.title }),
     ).toBeVisible();
     const task = page.getByRole('region', { name: '해 볼 일' });
-    await expect(task.getByRole('listitem').first()).toBeVisible();
+    // 해 볼 일은 콘텐츠 checklist 그대로 (P7-17)
+    await expect(task.getByRole('listitem')).toHaveText(quest1.checklist);
     await expect(page.getByTestId('quest-dialogue')).toContainText('파이뱀');
     // 튜터 소개는 "파이뱀에게 물어보기"를 열면 대화에 (P6-10)
     const chat = await openTutorChat(page);
@@ -88,13 +93,18 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(outputPanel(page)).toHaveAttribute('data-state', 'empty');
     const output = outputPanel(page);
 
-    // 결과 쪽지(P6-06): 돌아갔지만 글자가 다르면 "조금 달라요" + 공개 안내(해 볼 일)와 견줘 보기. 정답 기준값은 없음
+    // 결과 쪽지(P6-06): 돌아갔지만 글자가 다르면 "조금 달라요" + 공개 예시 출력과 줄마다 견줘 보기(P7-17)
     await runCode(page, 'print("틀린 글자")');
     await expect(output).toHaveAttribute('data-verdict', 'diff');
     await expect(output).toContainText('조금 달라요');
     await expect(output.locator('.qo-line')).toHaveText(['틀린 글자']);
-    await expect(output.getByTestId('output-compare')).toContainText(
-      quest1.expectedHint,
+    const example = output.getByTestId('output-example');
+    await expect(example).toHaveAttribute('data-compare');
+    await expect(example.locator('li').first()).toContainText(
+      quest1.example.split('\n')[0],
+    );
+    await expect(example.locator('li').first()).toContainText(
+      '내 글자 틀린 글자',
     );
 
     // 대사창 글자가 나오는 동안 블립 (2~3글자마다)
@@ -246,6 +256,9 @@ test.describe('퀘스트 전체 플로우', () => {
     const locked = stageButton(page, stage2.title);
     await expect(locked).toBeDisabled(); // aria-disabled: 포커스·탭은 되고 이동만 막음 (P5-04)
     await expect(locked).toHaveAccessibleName(/잠김/);
+    // 오늘의 퀴즈 카드(P7-10)로 "지금 여기" 노드가 첫 화면 아래라 지도가 들어오자마자 그 노드로 스크롤한다.
+    // force 클릭은 안정 대기가 없어 그 스크롤 전에 좌표를 잡으면 빗나감 → 노드가 다 보인 뒤(= 자리 잡기 끝) 누른다 (B51)
+    await expect(page.locator('[data-current]')).toBeInViewport({ ratio: 1 });
     await locked.click({ force: true });
     await expect(
       page.getByRole('status').getByText('1단계를 통과하면 열려요'),

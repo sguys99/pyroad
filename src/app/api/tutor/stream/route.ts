@@ -16,7 +16,8 @@ const SSE_HEADERS = {
 };
 
 export async function POST(request: Request) {
-  const prepared = await prepareTutorCall(request);
+  // quiz_explain 은 정답 누출을 다 받은 뒤 걸러야 해서 흘려 보내지 않음 (400, P7-08)
+  const prepared = await prepareTutorCall(request, { stream: true });
 
   if (prepared instanceof Response) {
     return prepared;

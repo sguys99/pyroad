@@ -1,0 +1,34 @@
+# 퀴즈 4-2: 동굴 문 숫자 세기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000110
+order: 2
+title: 동굴 문 숫자 세기
+concept: for, range()
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: range()가 만드는 숫자
+  learning_goals:
+    - range(시작, 끝)은 끝 숫자를 넣지 않는다는 것을 안다
+  story_context: 동굴 문 앞에 숫자를 세는 마법 주문이 새겨져 있어요. 주문을 외우면 어떤 숫자가 나올까요?
+  fallback_text: range(시작, 끝)은 시작 숫자부터 세지만, 끝 숫자는 넣지 않고 바로 앞에서 멈춰요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      for i in range(1, 4):
+          print(i)
+    options:
+      - { id: opt-w4ze, text: "1\n2\n3" }
+      - { id: opt-f9ob, text: "1\n2\n3\n4" }
+      - { id: opt-n2hr, text: "0\n1\n2\n3" }
+      - { id: opt-s7ak, text: "0\n1\n2" }
+answer:
+  quiz_answer:
+    accepted: [opt-w4ze]
+    explanation: range(1, 4)는 1부터 시작해서 4 바로 앞인 3까지 숫자를 만들어요. 끝 숫자 4는 들어가지 않아요.
+    explanations:
+      opt-f9ob: range의 끝 숫자는 들어가지 않아요. 끝 숫자 바로 앞에서 멈춰요.
+      opt-n2hr: 시작 숫자를 1로 정해 줬어요. 0부터 세는 건 시작 숫자가 없을 때예요.
+      opt-s7ak: 시작 숫자를 1로 정해 줬으니 0부터 세지 않아요.

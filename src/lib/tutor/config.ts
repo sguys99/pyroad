@@ -10,6 +10,7 @@ export const TOKEN_LIMITS: Record<TutorRequest['type'], number> = {
   project_guide: 1300, // 다단계 프로젝트 안내, 가장 복잡
   stage_summary: 1200, // 축하 + 개념별 정리 + 키워드 + 다음 스테이지 안내
   concept_explain: 800, // 개념 비유 설명 + 다른 작은 예시
+  quiz_explain: 500, // 오답 해설 2~3문장
 };
 
 /**

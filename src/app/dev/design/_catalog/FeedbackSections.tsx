@@ -35,7 +35,7 @@ import type { ChatMessage } from '@/lib/tutor/types';
 import { stageDots, type StageQuestDot } from '@/lib/quest/stageProgress';
 import { CodeSample, Demo, Labeled, Section } from './ui';
 
-// 스테이지 진행 점 견본 (P6-02): 7개 중 1·2 끝냄, 지금 3번
+// 스테이지 진행 점 견본 (P6-02): 7개 중 1·2 끝냄, 지금 3번. 4·6번은 보너스 퀴즈(마름모 점, 숫자는 코드 퀘스트끼리 1/5, B53)
 const STAGE_QUESTS: StageQuestDot[] = [
   '첫 인사',
   '두 줄 쓰기',
@@ -49,6 +49,7 @@ const STAGE_QUESTS: StageQuestDot[] = [
   order: i + 1,
   title,
   completed: i < 2,
+  quest_type: i === 3 || i === 5 ? 'quiz' : 'code',
 }));
 
 // ───────────────────────────── 진행바
@@ -129,7 +130,7 @@ function StageProgressDemo() {
     <>
       <Demo
         label="스테이지 진행 점 (StageProgress, P6-02)"
-        note="퀘스트 헤더 오른쪽. 초록 = 끝냄 · 회색 = 아직 · 긴 알약 = 지금(안 끝냈으면 금색, 통과하면 초록). 열린 점은 그 퀘스트 링크, 좁은 화면은 제목 대신 점과 3/7"
+        note="퀘스트 헤더 오른쪽. 초록 = 끝냄 · 회색 = 아직 · 긴 알약 = 지금(안 끝냈으면 금색, 통과하면 초록) · 작은 마름모 = 보너스 퀴즈(B53). 숫자는 코드 퀘스트끼리(3/5), 퀴즈에서는 '퀴즈 1/2'. 열린 점은 그 퀘스트 링크, 좁은 화면은 제목 대신 점과 숫자"
         data-testid="stage-progress-demo"
       >
         <div className="overflow-hidden rounded-xl ring-1 ring-border">
@@ -143,6 +144,9 @@ function StageProgressDemo() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <Labeled label="보너스 퀴즈 화면 (퀴즈 1/2)">
+            <StageProgress dots={stageDots(STAGE_QUESTS, 'demo-q4', false)} />
+          </Labeled>
           <Labeled label="잠긴 스테이지 복습 (안 끝낸 점 잠김)">
             <StageProgress
               dots={stageDots(STAGE_QUESTS, 'demo-q1', false, false)}

@@ -8,7 +8,14 @@ import {
   ValidationRuleSchema,
   WorldSchema,
 } from '../schema';
-import { codeQuest, projectQuest } from './fixtures';
+import {
+  bugHuntQuiz,
+  codeQuest,
+  fillBlankQuiz,
+  multipleChoiceQuiz,
+  parsonsQuiz,
+  projectQuest,
+} from './fixtures';
 
 /** key 를 뺀 사본 */
 const without = <T extends object>(obj: T, key: keyof T) =>
@@ -103,18 +110,258 @@ describe('QuestSchema', () => {
     ]);
   });
 
+  it('해 볼 일·예시 출력 (P7-17): 코드 퀘스트·프로젝트 단계는 필수, 예시는 정답 규칙을 통과해야 함', () => {
+    const q = codeQuest();
+    expect(errorsOf({ ...q, prompt: without(q.prompt, 'checklist') })).toEqual([
+      'prompt.checklist: Invalid input: expected array, received undefined',
+    ]);
+    expect(
+      errorsOf({ ...q, prompt: { ...q.prompt, example_output: '안녕' } }),
+    ).toEqual([
+      'prompt.example_output: 예시 출력이 정답 규칙을 통과하지 않아요 (output_match 면 기준값과 똑같이 써요)',
+    ]);
+    const p = projectQuest();
+    p.steps[1].prompt.example_output = '아무 말';
+    expect(errorsOf(p)).toEqual([
+      'steps[1].prompt.example_output: 예시 출력이 정답 규칙을 통과하지 않아요 (output_match 면 기준값과 똑같이 써요)',
+    ]);
+    // 프로젝트는 단계마다 써서 퀘스트 전체에는 둘 수 없음
+    const top = projectQuest();
+    expect(
+      errorsOf({ ...top, prompt: { ...top.prompt, checklist: ['a'] } }),
+    ).toEqual(['prompt: Unrecognized key: "checklist"']);
+  });
+
   it('id 는 UUID 형식 (기존 b1000000-… 형식 허용)', () => {
     expect(errorsOf({ ...codeQuest(), id: 'quest-1' })[0]).toMatch(
       /^id: UUID 형식/,
     );
   });
 
-  it('quest_type 이 없거나 모르는 값이면 실패 (퀴즈는 P7-01 에서 추가)', () => {
+  it('quest_type 이 없거나 모르는 값이면 실패 (퀴즈는 quiz_kind 가 있어야 함)', () => {
     const noType = without(codeQuest(), 'quest_type');
     expect(errorsOf(noType).length).toBeGreaterThan(0);
     expect(
       errorsOf({ ...codeQuest(), quest_type: 'quiz' }).length,
     ).toBeGreaterThan(0);
+  });
+});
+
+describe('QuizQuestSchema (P7-01)', () => {
+  it.each([
+    ['multiple_choice', multipleChoiceQuiz],
+    ['fill_blank', fillBlankQuiz],
+    ['parsons', parsonsQuiz],
+    ['bug_hunt', bugHuntQuiz],
+  ])('%s 정상', (_kind, make) => {
+    expect(errorsOf(make())).toEqual([]);
+  });
+
+  it('parsons 들여쓰기 없이 (줄 id 배열), 바꿔도 되는 줄은 accepted 여럿', () => {
+    const q = parsonsQuiz();
+    const raw = {
+      ...q,
+      prompt: { ...q.prompt, quiz: { ...q.prompt.quiz, indent: undefined } },
+      answer: {
+        quiz_answer: {
+          ...q.answer.quiz_answer,
+          accepted: [
+            ['ln-q8wd', 'ln-a3ke', 'ln-m2xa', 'ln-f5tb'],
+            ['ln-a3ke', 'ln-q8wd', 'ln-m2xa', 'ln-f5tb'],
+          ],
+        },
+      },
+    };
+    delete raw.prompt.quiz.indent;
+    expect(errorsOf(raw)).toEqual([]);
+  });
+
+  it('공개 부분에 accepted·is_correct 를 두면 실패', () => {
+    const q = multipleChoiceQuiz();
+    const options = [{ ...q.prompt.quiz.options[0], is_correct: true }];
+    const raw = {
+      ...q,
+      prompt: {
+        ...q.prompt,
+        quiz: { ...q.prompt.quiz, options, accepted: [] },
+      },
+    };
+    expect(errorsOf(raw).slice(0, 2)).toEqual([
+      'prompt.quiz.options[0].is_correct: 정답 필드는 공개 부분(prompt)에 둘 수 없어요. answer 아래로 옮기세요',
+      'prompt.quiz.accepted: 정답 필드는 공개 부분(prompt)에 둘 수 없어요. answer 아래로 옮기세요',
+    ]);
+  });
+
+  it('퀴즈에는 hints·solution_code·validation 이 없음 (strict)', () => {
+    const q = multipleChoiceQuiz();
+    const raw = { ...q, answer: { ...q.answer, solution_code: 'x' } };
+    expect(errorsOf(raw)).toEqual([
+      'answer: Unrecognized key: "solution_code"',
+    ]);
+  });
+
+  describe('1. id 참조', () => {
+    it('없는 보기 id', () => {
+      const q = multipleChoiceQuiz();
+      q.answer.quiz_answer.accepted = ['opt-zz99'];
+      expect(errorsOf(q)).toContain(
+        "answer.quiz_answer.accepted[0]: 'opt-zz99'는 없는 보기 id 예요",
+      );
+    });
+
+    it('보기를 모두 정답으로 하면 실패', () => {
+      const q = multipleChoiceQuiz();
+      q.answer.quiz_answer.accepted = ['opt-k7qz', 'opt-b2mx', 'opt-w9fa'];
+      expect(errorsOf(q)).toEqual([
+        'answer.quiz_answer.accepted: 틀린 보기가 하나는 있어야 해요',
+      ]);
+    });
+
+    it('해설 id 도 있어야 함, id 는 퀴즈 안에서 유일', () => {
+      const q = multipleChoiceQuiz();
+      (q.answer.quiz_answer.explanations as Record<string, string>) = {
+        'opt-zz99': 'x',
+      };
+      q.prompt.quiz.options[2].id = 'opt-k7qz';
+      expect(errorsOf(q)).toEqual([
+        "prompt.quiz.options[2].id: id 'opt-k7qz'가 이 퀴즈 안에서 겹쳐요",
+        "answer.quiz_answer.explanations.opt-zz99: 'opt-zz99'는 없는 보기·줄·수정안 id 예요",
+      ]);
+    });
+
+    it('fill_blank: 모든 빈칸을 있는 토큰으로', () => {
+      const q = fillBlankQuiz();
+      q.answer.quiz_answer.accepted = [
+        { 'bk-r2fa': 'tok-zz99' } as (typeof q.answer.quiz_answer.accepted)[0],
+      ];
+      expect(errorsOf(q)).toEqual([
+        'answer.quiz_answer.accepted[0]: 모든 빈칸(bk-r2fa, bk-m8ce)을 한 번씩 채워야 해요',
+        "answer.quiz_answer.accepted[0].bk-r2fa: 'tok-zz99'는 없는 토큰 id 예요",
+      ]);
+    });
+
+    it('fill_blank: 빈칸이 없으면 실패', () => {
+      const q = fillBlankQuiz();
+      q.prompt.quiz.code = 'for i in range(3):';
+      expect(errorsOf(q)).toContain(
+        'prompt.quiz.code: 빈칸({{bk-r2fa}})이 하나는 있어야 해요',
+      );
+    });
+
+    it('parsons: 모든 줄을 한 번씩, indent 모양', () => {
+      const q = parsonsQuiz();
+      const raw = {
+        ...q,
+        answer: {
+          quiz_answer: {
+            ...q.answer.quiz_answer,
+            accepted: [['ln-q8wd', 'ln-a3ke', 'ln-m2xa']],
+          },
+        },
+      };
+      expect(errorsOf(raw)).toEqual([
+        'answer.quiz_answer.accepted[0]: indent: true 면 {id, indent} 로 써요',
+        'answer.quiz_answer.accepted[0]: 모든 줄을 한 번씩 써야 해요',
+      ]);
+    });
+
+    it('parsons: indent 면 줄 앞 공백 금지', () => {
+      const q = parsonsQuiz();
+      q.prompt.quiz.lines[2].code = '    total = total + i';
+      expect(errorsOf(q)).toEqual([
+        'prompt.quiz.lines[2].code: indent: true 면 줄 앞에 공백을 쓰지 않아요 (들여쓰기는 정답에)',
+      ]);
+    });
+
+    it('bug_hunt: 줄·수정안 id', () => {
+      const q = bugHuntQuiz();
+      q.answer.quiz_answer.accepted = [{ line: 'fx-b7nd', fix: 'ln-x5pc' }];
+      expect(errorsOf(q)).toEqual([
+        "answer.quiz_answer.accepted[0].line: 'fx-b7nd'는 없는 줄 id 예요",
+        "answer.quiz_answer.accepted[0].fix: 'ln-x5pc'는 없는 수정안 id 예요",
+      ]);
+    });
+
+    it('같은 정답 두 번 (키 순서만 달라도)', () => {
+      const q = fillBlankQuiz();
+      q.answer.quiz_answer.accepted.push({
+        'bk-r2fa': 'tok-m4xe',
+        'bk-m8ce': 'tok-c3pd',
+      });
+      expect(errorsOf(q)).toEqual([
+        'answer.quiz_answer.accepted[1]: 같은 정답이 두 번 있어요',
+      ]);
+    });
+  });
+
+  describe('2. 차례가 보이는 id', () => {
+    it.each(['a', 'opt-a', 'l1', 'ln-0001', 'opt-abcd', 'OPT-K7QZ', 'k7qz'])(
+      '%s → 실패',
+      (id) => {
+        const q = multipleChoiceQuiz();
+        q.prompt.quiz.options[1].id = id;
+        expect(errorsOf(q)[0]).toMatch(
+          /^prompt\.quiz\.options\[1\]\.id: id 는/,
+        );
+      },
+    );
+
+    it('parsons 줄 id 를 정렬한 차례가 정답 차례면 실패', () => {
+      const q = parsonsQuiz();
+      const ids = ['ln-a1aa', 'ln-b1bb', 'ln-c1cc', 'ln-d1dd'];
+      q.prompt.quiz.lines.forEach((l, i) => (l.id = ids[i]));
+      q.answer.quiz_answer.accepted[0].forEach((x, i) => (x.id = ids[i]));
+      expect(errorsOf(q)).toEqual([
+        'answer.quiz_answer.accepted[0]: 줄 id 를 정렬한 차례가 정답 차례와 같아요. 화면에 정답 순서로 나오니 id 를 바꿔요',
+      ]);
+    });
+  });
+
+  describe('3. 공개 문장에 정답 (§12-Q20)', () => {
+    it('객관식: fallback_text 에 정답 보기 글자', () => {
+      const q = multipleChoiceQuiz();
+      q.prompt.fallback_text = '답은 0 1 2 예요';
+      expect(errorsOf(q)).toEqual([
+        "prompt.fallback_text: 정답 '0 1 2'이 공개 문장에 그대로 있어요. 퀴즈는 공개 필드에 정답을 쓰지 않아요 (§12-Q20)",
+      ]);
+    });
+
+    it('객관식: 오답 보기도 함께 나오면 정답을 짚은 게 아님 (오탐 방지)', () => {
+      const q = multipleChoiceQuiz();
+      q.prompt.quiz.question = '0 1 2 일까요, 1 2 3 일까요?';
+      expect(errorsOf(q)).toEqual([]);
+    });
+
+    it('객관식: 낱말 한가운데·한 글자는 무시 (오탐 방지)', () => {
+      const q = multipleChoiceQuiz();
+      q.prompt.quiz.options[0].text = '12';
+      q.prompt.story_context = '1234 번째 모험';
+      expect(errorsOf(q)).toEqual([]);
+    });
+
+    it('fill_blank: 문제 문장에 채운 줄', () => {
+      const q = fillBlankQuiz();
+      q.prompt.quiz.question = 'for i in range(3): 처럼 써 봐요';
+      expect(errorsOf(q)).toEqual([
+        "prompt.quiz.question: 정답 'for i in range(3):'이 공개 문장에 그대로 있어요. 퀴즈는 공개 필드에 정답을 쓰지 않아요 (§12-Q20)",
+      ]);
+    });
+
+    it('parsons: 이어지는 두 줄', () => {
+      const q = parsonsQuiz();
+      q.prompt.fallback_text = 'total = 0\nfor i in range(1, 4): 로 시작해요';
+      expect(errorsOf(q)[0]).toMatch(
+        /^prompt\.fallback_text: 정답 'total = 0 for i/,
+      );
+    });
+
+    it('bug_hunt: 학습 목표에 고친 줄', () => {
+      const q = bugHuntQuiz();
+      q.prompt.learning_goals = ['for i in range(3): 를 쓸 수 있다'];
+      expect(errorsOf(q)).toEqual([
+        "prompt.learning_goals[0]: 정답 'for i in range(3):'이 공개 문장에 그대로 있어요. 퀴즈는 공개 필드에 정답을 쓰지 않아요 (§12-Q20)",
+      ]);
+    });
   });
 });
 

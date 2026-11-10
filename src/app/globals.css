@@ -494,6 +494,10 @@
     @apply font-sans;
     scroll-behavior: smooth;
   }
+  /* 동작 줄이기면 페이지 스크롤도 바로 이동 (B52) */
+  html[data-reduced='true'] {
+    scroll-behavior: auto;
+  }
   /* 본문 읽기 기본값 (P0-14 §4.7, 8~12세): 17px · 행간 1.7 · 자간 0 · 어절 단위 줄바꿈.
      크기는 rem이라 브라우저 글자 크기 설정을 따른다. 크기·행간을 정한 유틸리티(text-sm 등)가 있으면 그쪽이 우선 */
   body {

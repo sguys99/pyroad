@@ -1,0 +1,232 @@
+/* 오늘의 퀴즈 (P7-10, DailyQuiz). 퀴즈 퀘스트와 같은 종이·쪽지 언어: 바탕 위 흰 쪽 한 장, 머리는 날짜 눈썹 + 진행 점(도장처럼 찍힘).
+   문제 사이 넘김은 한 번 들어오는 쪽(반복 없음): full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시. 값은 토큰 변수만 */
+
+.dq-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: var(--line-w) solid var(--line);
+  background: var(--bg);
+}
+.dq-back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 44px;
+  color: var(--primary-text);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.dq-back:hover {
+  text-decoration: underline;
+}
+.dq-title {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.15;
+}
+.dq-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--accent-text);
+  font-size: var(--text-kicker);
+  font-weight: var(--text-kicker--font-weight);
+  letter-spacing: var(--text-kicker--letter-spacing);
+  line-height: var(--text-kicker--line-height);
+}
+.dq-t {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-h3);
+  font-weight: 400;
+  line-height: var(--text-h3--line-height);
+}
+
+/* ───── 진행 점: 지금 = 초록 테두리, 정답 = 초록 도장 + 받은 별, 정답 공개 = 점선 */
+.dq-dots {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dq-dot {
+  display: grid;
+  justify-items: center;
+  gap: 0.125rem;
+  min-width: 2rem;
+}
+.dq-dot-face {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--line);
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 800;
+}
+.dq-dot-face > svg {
+  width: 1rem;
+  height: 1rem;
+}
+.dq-dot[data-state='current'] .dq-dot-face {
+  border-color: var(--primary);
+  color: var(--primary-text);
+  /* 색만이 아니라 두 겹 테로도 "지금" 구분 (P7-13) */
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.dq-dot[data-state='correct'] .dq-dot-face {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.dq-dot[data-state='revealed'] .dq-dot-face {
+  border-style: dashed;
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+}
+.dq-dot-stars {
+  display: inline-flex;
+  height: 0.75rem;
+}
+
+/* ───── 문제 쪽: 가운데 한 장 (360px 는 가장자리까지) */
+.dq-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+.dq-sheet {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+.dq-page {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 0.5rem;
+  background: var(--surface);
+}
+@media (min-width: 40rem) {
+  .dq-page {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-radius: var(--round-l);
+    box-shadow: var(--elev-card);
+  }
+}
+
+/* ───── 요약 쪽지 */
+.dq-sum {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: calc(100% - 2rem);
+  max-width: 28rem;
+  margin: 1.5rem auto;
+  padding: 1.25rem 1rem 1.5rem;
+  border-radius: var(--round-l);
+  background: var(--surface);
+  box-shadow: var(--elev-card);
+  text-align: center;
+}
+.dq-sum-rig {
+  display: inline-grid;
+}
+.dq-sum-t {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-h2);
+  font-weight: 400;
+  line-height: var(--text-h2--line-height);
+}
+.dq-sum-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dq-sum-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-body);
+}
+.dq-sum-item > b {
+  font-weight: 800;
+}
+.dq-sum-u {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.dq-sum-xp {
+  color: var(--primary-text);
+  font-size: var(--text-caption);
+  font-weight: 800;
+}
+.dq-sum-flame {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--accent-text);
+}
+.dq-sum-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+
+@keyframes dq-turn {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+@keyframes dq-fade {
+  from {
+    opacity: 0;
+  }
+}
+:root[data-motion='full'] :is(.dq-sheet, .dq-sum) {
+  animation: dq-turn var(--spring-body-dur) var(--spring-body) backwards;
+}
+:root[data-motion='lite'] :is(.dq-sheet, .dq-sum) {
+  animation: dq-turn var(--dur-base) var(--easing-out) backwards;
+}
+:root[data-motion='minimal'] :is(.dq-sheet, .dq-sum) {
+  animation: dq-fade var(--dur-fade) var(--easing-out) backwards;
+}
+:root[data-reduced='true'] :is(.dq-sheet, .dq-sum) {
+  animation: none;
+}
+
+/* 아주 좁은 쪽(360px 200% 확대): 요약 버튼 글자도 줄바꿈 (P7-13) */
+.dq-sum > * {
+  max-width: 100%;
+}
+.dq-sum .g-btn-face {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}

@@ -17,9 +17,12 @@
   font-size: var(--text-body);
   font-weight: inherit;
 }
-/* 좁은 화면은 "3/7"만 */
+/* 좁은 화면은 "3/7"만. 퀴즈는 숫자만 있으면 퀘스트 수로 읽히므로 "퀴즈"를 늘 붙임 (B53) */
 .sp-count-k {
   display: none;
+}
+.sp-count[data-quiz] .sp-count-k {
+  display: inline;
 }
 @media (min-width: 40rem) {
   .sp-count-k {
@@ -78,6 +81,13 @@
 .sp-dot[data-current][data-state='done'] .sp-mark {
   background: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-soft);
+}
+/* 보너스 퀴즈 점: 같은 자리의 작은 마름모 (지금 퀴즈는 알약 그대로) */
+.sp-dot[data-kind='quiz']:not([data-current]) .sp-mark {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 0.0625rem;
+  rotate: 45deg;
 }
 a.sp-dot:hover .sp-mark {
   transform: scale(1.3);

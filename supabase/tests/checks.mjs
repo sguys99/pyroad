@@ -419,6 +419,9 @@ const Q2 = 'b1000000-0000-0000-0000-000000000002'; // 1-2
 const Q3 = 'b1000000-0000-0000-0000-000000000003'; // 1-4
 const Q_PROJECT = 'b1000000-0000-0000-0000-000000000022'; // 7-1 프로젝트
 const STAGE1 = 'a1000000-0000-0000-0000-000000000001';
+/** 콘텐츠 seed(생성물)의 quest_type 별 퀘스트 수. 기대값을 숫자로 박지 않고 seed 에서 셈 (build.ts 가 quest_type 을 한 줄에 씀) */
+const seedQuestCount = (type) =>
+  readFileSync(join(HERE, '..', 'seed.sql'), 'utf8').match(new RegExp(`^  '${type}',\\r?$`, 'gm'))?.length ?? 0;
 
 // ── 그룹 ──────────────────────────────────────────────────
 async function groupEnv() {
@@ -1674,12 +1677,12 @@ async function groupAnswer(u) {
       group: 'answer',
       id: 'B08-1',
       role: 'postgres',
-      op: '새 DB (마이그레이션 → seed) 에서 solution_code 가 있는 퀘스트 수',
+      op: '새 DB (마이그레이션 → seed) 에서 solution_code 가 있는 코드·프로젝트 퀘스트 수 (퀴즈는 정답 코드가 없음)',
       deny: ['present'],
       allow: ['missing'],
       run: () => {
         const n = solutionCount();
-        const total = one('select count(*) from public.quests');
+        const total = one(`select count(*) from public.quests where quest_type <> 'quiz'`);
         return {
           actual: n === '0' ? 'missing' : n === total ? 'present' : 'partial',
           detail: `${total}개 중 ${n}개`,
@@ -1892,20 +1895,20 @@ async function groupAnswer(u) {
     openapi(u.alice),
   );
   // 데이터: 모든 퀘스트의 정답이 quest_answer_keys 에 있고 quests 에는 남지 않음 (00005 + seed 정답 보정, B08)
-  //   코드·프로젝트 퀘스트 기준. 퀴즈(P7-01)가 생기면 quiz_answer 기준을 더할 것
+  //   코드·프로젝트 퀘스트는 expected_output·hints·정답 코드, 퀴즈(P7-01)는 quiz_answer (B49)
   await check({
     group: 'answer',
     id: 'AK-17',
     role: 'postgres',
-    op: 'quest_answer_keys 데이터: 퀘스트마다 expected_output·hints·정답 코드(또는 모든 단계 정답 코드), quests 에 남은 정답 0',
+    op: 'quest_answer_keys 데이터: 코드·프로젝트 퀘스트마다 expected_output·hints·정답 코드(또는 모든 단계 정답 코드), 퀴즈마다 quiz_answer, quests 에 남은 정답 0',
     deny: ['separated'],
     allow: ['left-in-quests', 'missing'],
     run: () => {
-      const [total, eo, hints, sol, stepSol, left] = one(
-        `select (select count(*) from public.quests),
-                count(*) filter (where k.expected_output <> ''),
-                count(*) filter (where k.hints <> '{}'::jsonb),
-                count(*) filter (where k.solution_code is not null
+      const [total, eo, hints, sol, stepSol, left, quizTotal, quizKey] = one(
+        `select (select count(*) from public.quests where quest_type <> 'quiz'),
+                count(*) filter (where q.quest_type <> 'quiz' and k.expected_output <> ''),
+                count(*) filter (where q.quest_type <> 'quiz' and k.hints <> '{}'::jsonb),
+                count(*) filter (where q.quest_type <> 'quiz' and k.solution_code is not null
                   or (jsonb_typeof(q.prompt_skeleton->'steps') = 'array'
                       and jsonb_array_length(q.prompt_skeleton->'steps') > 0
                       and (select count(*) from jsonb_array_elements(k.steps) s where s ? 'solution_code')
@@ -1913,14 +1916,17 @@ async function groupAnswer(u) {
                 (select count(*) from public.quest_answer_keys k2, jsonb_array_elements(k2.steps) s where s ? 'solution_code'),
                 (select count(*) from public.quests
                   where expected_output <> '' or prompt_skeleton ?| array['hints', 'solution_code']
-                     or jsonb_path_exists(prompt_skeleton, '$.steps[*] ? (exists(@.expected_output) || exists(@.hints) || exists(@.solution_code))'))
+                     or jsonb_path_exists(prompt_skeleton, '$.steps[*] ? (exists(@.expected_output) || exists(@.hints) || exists(@.solution_code))')),
+                (select count(*) from public.quests where quest_type = 'quiz'),
+                count(*) filter (where q.quest_type = 'quiz' and k.quiz_answer is not null)
            from public.quests q join public.quest_answer_keys k on k.quest_id = q.id`,
       )
         .split('|')
         .map(Number);
-      const detail = `퀘스트 ${total} · expected_output ${eo} · hints ${hints} · 정답 코드 ${sol} (단계 정답 ${stepSol}) · quests 에 남은 정답 ${left}`;
+      const detail = `코드·프로젝트 ${total} · expected_output ${eo} · hints ${hints} · 정답 코드 ${sol} (단계 정답 ${stepSol}) · 퀴즈 ${quizTotal} · quiz_answer ${quizKey} · quests 에 남은 정답 ${left}`;
       if (left > 0) return { actual: 'left-in-quests', detail };
-      const complete = total > 0 && eo === total && hints === total && sol === total;
+      const complete =
+        total > 0 && eo === total && hints === total && sol === total && quizKey === quizTotal;
       return { actual: complete ? 'separated' : 'missing', detail };
     },
   });
@@ -2018,7 +2024,8 @@ async function groupRpc(u) {
        where n.nspname = 'public'
          and p.proname in ('quest_xp', 'level_for_xp', 'has_three_day_streak', 'decide_new_badges',
                            'is_stage_unlocked', 'complete_quest', 'use_golden_key', 'reset_progress',
-                           'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys')
+                           'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys',
+                           'submit_quiz_answer')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2118,9 +2125,10 @@ const progressRow = (uid, qid) => {
   );
   return v ? JSON.parse(v) : null;
 };
+// complete_quest 로 끝내는 퀘스트 (코드·프로젝트). 퀴즈는 보너스라 submit_quiz_answer 로만 풀고 클리어 계산에서 빠짐 (00026, Q60)
 const stageQuests = (stageId) =>
   one(
-    `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}'`,
+    `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}' and quest_type <> 'quiz'`,
   ).split(',');
 
 async function groupReward() {
@@ -2331,7 +2339,8 @@ async function groupReward() {
         ) ||
         compare(
           'stage_cleared',
-          { stage_id: STAGE1, order: 1, concepts: qs.length },
+          // concepts 는 스테이지의 모든 퀘스트(퀴즈 포함) 개념 (complete_quest 의 stage_cleared)
+          { stage_id: STAGE1, order: 1, concepts: Number(one(`select count(*) from public.quests where stage_id = '${STAGE1}'`)) },
           { ...last.json.stage_cleared, concepts: last.json.stage_cleared?.concepts?.length },
         ) ||
         compare('스테이지 2 황금키', { status: 200 }, { status: unlocked.status }) || {
@@ -3463,7 +3472,7 @@ async function groupSchema(u) {
     group: 'schema',
     id: 'WD-4',
     role: 'postgres',
-    op: '스테이지 world_id·quest_type 백필 (7개 → 1월드, 7-1 project · 나머지 code, quiz_kind 없음)',
+    op: '스테이지 world_id·quest_type 백필 (7개 → 1월드, 7-1 project · code·quiz 는 seed 와 같은 수, quiz_kind·모바일은 퀴즈만)',
     deny: ['mismatch', 'error'],
     allow: ['ok'],
     run: () =>
@@ -3473,8 +3482,10 @@ async function groupSchema(u) {
           RAISE EXCEPTION 'stages: 1월드가 아닌 스테이지 또는 7개가 아님';
         END IF;
         IF (SELECT string_agg(id::text, ',') FROM public.quests WHERE quest_type = 'project') <> '${Q_PROJECT}'
-           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'code') <> 43
-           OR EXISTS (SELECT 1 FROM public.quests WHERE quiz_kind IS NOT NULL OR is_mobile_friendly) THEN
+           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'code') <> ${seedQuestCount('code')}
+           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'quiz') <> ${seedQuestCount('quiz')}
+           OR EXISTS (SELECT 1 FROM public.quests
+                       WHERE (quiz_kind IS NOT NULL) <> (quest_type = 'quiz') OR is_mobile_friendly <> (quest_type = 'quiz')) THEN
           RAISE EXCEPTION 'quests: quest_type·quiz_kind·is_mobile_friendly 가 기대와 다름';
         END IF;
       END $$;`),
@@ -4870,6 +4881,399 @@ async function groupSeenUnlocks(u) {
   });
 }
 
+// ── quiz: 퀴즈 채점 RPC (P7-02, ① 00026) ───────────────────────
+// 시드 퀴즈(P7-12)와 별개로 정답을 아는 점검용 퀴즈를 postgres 로 만들고 끝에 지움 (다른 그룹 점검과 겹치지 않게 맨 뒤에서)
+const QZ_MC = 'd7000000-0000-0000-0000-000000000001'; // 스테이지 1, 객관식
+const QZ_PARSONS = 'd7000000-0000-0000-0000-000000000002'; // 스테이지 1, 순서 맞추기 (정답 2개)
+const QZ_LOCKED = 'd7000000-0000-0000-0000-000000000003'; // 스테이지 2, 객관식
+const QZ_RIGHT = 'opt-k7qz';
+const QZ_WRONG = ['opt-b2mx', 'opt-c3nw', 'opt-d4py'];
+const QZ_EXPLAIN = '정답 해설 qz';
+
+function insertQuizFixtures() {
+  const mcPrompt = (title) =>
+    JSON.stringify({
+      topic: title,
+      learning_goals: ['g'],
+      story_context: 's',
+      fallback_text: 'f',
+      quiz: {
+        kind: 'multiple_choice',
+        question: '?',
+        options: [QZ_RIGHT, ...QZ_WRONG].sort().map((id) => ({ id, text: id })),
+      },
+    });
+  const mcKey = JSON.stringify({
+    kind: 'multiple_choice',
+    accepted: [QZ_RIGHT],
+    explanation: QZ_EXPLAIN,
+    explanations: Object.fromEntries(QZ_WRONG.map((id) => [id, `${id} 를 고른 해설`])),
+  });
+  const parsonsPrompt = JSON.stringify({
+    topic: 'p',
+    learning_goals: ['g'],
+    story_context: 's',
+    fallback_text: 'f',
+    quiz: {
+      kind: 'parsons',
+      question: '?',
+      lines: ['ln-a1x9', 'ln-b2y8', 'ln-c3z7'].map((id) => ({ id, code: id })),
+    },
+  });
+  const parsonsKey = JSON.stringify({
+    kind: 'parsons',
+    accepted: [
+      ['ln-c3z7', 'ln-a1x9', 'ln-b2y8'],
+      ['ln-c3z7', 'ln-b2y8', 'ln-a1x9'],
+    ],
+    explanation: QZ_EXPLAIN,
+  });
+  one(`insert into public.quests (id, stage_id, "order", title, concept, prompt_skeleton, validation_type,
+         quest_type, quiz_kind, is_mobile_friendly, xp_reward) values
+       ('${QZ_MC}', '${STAGE1}', 901, 'qz mc', 'qz', ${sqlStr(mcPrompt('qz mc'))}, 'all', 'quiz', 'multiple_choice', true, 0),
+       ('${QZ_PARSONS}', '${STAGE1}', 902, 'qz parsons', 'qz', ${sqlStr(parsonsPrompt)}, 'all', 'quiz', 'parsons', true, 0),
+       ('${QZ_LOCKED}', '${STAGE2}', 901, 'qz locked', 'qz', ${sqlStr(mcPrompt('qz locked'))}, 'all', 'quiz', 'multiple_choice', true, 0)`);
+  one(`insert into public.quest_answer_keys (quest_id, quiz_answer) values
+       ('${QZ_MC}', ${sqlStr(mcKey)}), ('${QZ_PARSONS}', ${sqlStr(parsonsKey)}), ('${QZ_LOCKED}', ${sqlStr(mcKey)})`);
+}
+
+const quiz = (uid, answer, quest = QZ_MC) =>
+  rpc('submit_quiz_answer', { p_user_id: uid, p_quest_id: quest, p_answer: answer });
+/** 응답에서 비교할 값만 */
+const qv = (r) =>
+  r.status === 200
+    ? (({ correct, attempt_no, mode, stars, best_stars, xp_awarded, total_xp }) => ({
+        correct, attempt_no, mode, stars, best_stars, xp_awarded, total_xp,
+      }))(r.json)
+    : { status: r.status, error: errMsg(r) };
+const quizProgress = (uid, qid = QZ_MC) =>
+  JSON.parse(
+    one(`select coalesce((select json_build_object('status', status, 'stars', stars, 'best_stars', best_stars,
+           'judged_today', stars_judged_on = public.kst_today(), 'earned_xp', earned_xp, 'attempts', attempts)
+           from public.user_progress where user_id = '${uid}' and quest_id = '${qid}'), '{}')`),
+  );
+const quizAttempts = (uid, qid = QZ_MC) =>
+  one(`select coalesce(string_agg(mode || attempt_no || (case when is_correct then 'o' else 'x' end), ',' order by created_at), '')
+         from public.quiz_attempts where user_id = '${uid}' and quest_id = '${qid}'`);
+
+async function groupQuiz(u) {
+  const ready = requirementMet('public.submit_quiz_answer()');
+  if (ready) insertQuizFixtures();
+  try {
+    for (const [id, as] of [['QZ-1', 'anon'], ['QZ-2', u.alice]]) {
+      await check({
+        group: 'quiz',
+        id,
+        role: as === 'anon' ? 'anon' : 'authenticated',
+        op: 'POST /rpc/submit_quiz_answer {p_user_id: 본인} (클라이언트 직접 채점 = 정답 오라클)',
+        deny: ['denied'],
+        allow: ['allowed', 'empty'],
+        run: async () =>
+          classifyRead(
+            await rest('POST', '/rest/v1/rpc/submit_quiz_answer', {
+              as,
+              body: { p_user_id: u.alice.id, p_quest_id: QZ_MC, p_answer: QZ_RIGHT },
+            }),
+          ),
+      });
+    }
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-3',
+      role: 'service_role',
+      op: '보기 4개를 동시에 제출 → 첫 시도(first 1번)는 하나, 시도 번호 겹침 없음, XP = best_stars × 10',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz3', '동시퀴즈');
+        const rs = await Promise.all([QZ_RIGHT, ...QZ_WRONG].map((a) => quiz(x.id, a)));
+        const bad = rs.find((r) => r.status !== 200);
+        if (bad) return { actual: 'error', detail: `${bad.status} ${errMsg(bad)}` };
+        const rows = quizAttempts(x.id).split(',');
+        const firstOnes = rows.filter((r) => r.startsWith('first1')).length;
+        const keys = rows.map((r) => r.slice(0, -1));
+        const p = quizProgress(x.id);
+        return (
+          compare(
+            '동시',
+            { rows: 4, firstOnes: 1, unique: true, attempts: 4, xp: p.best_stars * 10, user_xp: p.best_stars * 10 },
+            {
+              rows: rows.length,
+              firstOnes,
+              unique: new Set(keys).size === keys.length,
+              attempts: p.attempts,
+              xp: p.earned_xp,
+              user_xp: userRow(x.id).total_xp,
+            },
+          ) || { actual: 'ok', detail: rows.join(' ') }
+        );
+      },
+    });
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-4',
+      role: 'service_role',
+      op: '별: 1번째 정답 ⭐3·30 XP, 2번째 ⭐2·20 XP, 3번째 ⭐1·10 XP → completed, best_stars, 레벨 갱신',
+      ...OK,
+      run: async () => {
+        const got = {};
+        for (const wrongs of [0, 1, 2]) {
+          const x = await createUser(`qz4${wrongs}`, '별계산');
+          for (let i = 0; i < wrongs; i++) await quiz(x.id, QZ_WRONG[i]);
+          got[wrongs] = { ...qv(await quiz(x.id, QZ_RIGHT)), progress: quizProgress(x.id), xp: userRow(x.id).total_xp };
+        }
+        const want = (n, stars) => ({
+          correct: true, attempt_no: n, mode: 'first', stars, best_stars: stars, xp_awarded: stars * 10, total_xp: stars * 10,
+        });
+        return (
+          compare('1번째', want(1, 3), got[0]) ||
+          compare('2번째', want(2, 2), got[1]) ||
+          compare('3번째', want(3, 1), got[2]) ||
+          compare(
+            'progress',
+            { p0: { status: 'completed', stars: 3, best_stars: 3, judged_today: true, earned_xp: 30, attempts: 1 }, xp2: 10 },
+            { p0: got[0].progress, xp2: got[2].xp },
+          ) || { actual: 'ok', detail: '⭐3/30 · ⭐2/20 · ⭐1/10' }
+        );
+      },
+    });
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-5',
+      role: 'service_role',
+      op: '오답 응답에 정답 없음(고른 보기 해설만) · 3번째 오답이면 정답 공개 + ⭐1 클리어',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz5', '오답');
+        const rs = [];
+        for (const a of QZ_WRONG) rs.push(await quiz(x.id, a));
+        if (rs.some((r) => r.status !== 200)) return { actual: 'error', detail: rs.map((r) => r.status).join(',') };
+        const leak = rs
+          .slice(0, 2)
+          .map((r, i) => [i + 1, JSON.stringify(r.json)])
+          .filter(([, s]) => s.includes(QZ_RIGHT) || s.includes(QZ_EXPLAIN));
+        if (leak.length) return { actual: 'mismatch', detail: `정답이 오답 응답에: ${leak.map(([n, s]) => `${n}: ${s}`).join(' / ')}` };
+        const third = rs[2].json;
+        return (
+          compare(
+            '1·2번째',
+            { r1: [false, 1, 0, null, `${QZ_WRONG[0]} 를 고른 해설`], r2: [false, 2, 0, null, `${QZ_WRONG[1]} 를 고른 해설`] },
+            {
+              r1: [rs[0].json.correct, rs[0].json.attempt_no, rs[0].json.stars, rs[0].json.revealed, rs[0].json.explanation],
+              r2: [rs[1].json.correct, rs[1].json.attempt_no, rs[1].json.stars, rs[1].json.revealed, rs[1].json.explanation],
+            },
+          ) ||
+          compare(
+            '3번째',
+            {
+              correct: false, attempt_no: 3, stars: 1, xp_awarded: 10,
+              revealed: { answer: QZ_RIGHT, explanation: QZ_EXPLAIN }, explanation: `${QZ_WRONG[2]} 를 고른 해설`,
+            },
+            third,
+          ) ||
+          compare('progress', { status: 'completed', best_stars: 1, earned_xp: 10 }, quizProgress(x.id)) || {
+            actual: 'ok',
+            detail: '오답 2번 정답·정답 해설 없음, 3번째 revealed + ⭐1',
+          }
+        );
+      },
+    });
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-6',
+      role: 'service_role',
+      op: '같은 날 다시 풀기 = practice: 별·XP·best_stars 그대로, 시도 번호는 새 회차 1부터, 3번 틀리면 공개만',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz6', '연습');
+        await quiz(x.id, QZ_WRONG[0]);
+        await quiz(x.id, QZ_RIGHT); // ⭐2 · 20 XP
+        const p1 = qv(await quiz(x.id, QZ_RIGHT));
+        const w = [];
+        for (const a of QZ_WRONG) w.push(await quiz(x.id, a));
+        return (
+          compare(
+            '연습 정답',
+            { correct: true, attempt_no: 1, mode: 'practice', stars: 0, best_stars: 2, xp_awarded: 0, total_xp: 20 },
+            p1,
+          ) ||
+          compare(
+            '연습 3번 오답',
+            { modes: 'practice,practice,practice', nos: '1,2,3', revealed: [false, false, true], xp: 0, stars: 0 },
+            {
+              modes: w.map((r) => r.json.mode).join(','),
+              nos: w.map((r) => r.json.attempt_no).join(','),
+              revealed: w.map((r) => r.json.revealed !== null),
+              xp: w.reduce((n, r) => n + r.json.xp_awarded, 0),
+              stars: w[2].json.stars,
+            },
+          ) ||
+          compare('progress', { stars: 2, best_stars: 2, earned_xp: 20, attempts: 6 }, quizProgress(x.id)) ||
+          compare('시도', { rows: 'first1x,first2o,practice1o,practice1x,practice2x,practice3x' }, { rows: quizAttempts(x.id) }) || {
+            actual: 'ok',
+            detail: 'practice 별·XP 0, 회차 1부터',
+          }
+        );
+      },
+    });
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-7',
+      role: 'service_role',
+      op: '다음 날(KST, 판정일을 하루 앞당김) = review: 오른 별만큼만 XP, 낮게 맞히면 best 유지, 다시 그날은 practice',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz7', '복습');
+        const back = () =>
+          one(`update public.user_progress set stars_judged_on = public.kst_today() - 1
+                where user_id = '${x.id}' and quest_id = '${QZ_MC}'`);
+        await quiz(x.id, QZ_WRONG[0]);
+        await quiz(x.id, QZ_RIGHT); // first ⭐2 · 20
+        back();
+        const rv = await quiz(x.id, QZ_RIGHT); // review ⭐3 · +10
+        const after = qv(await quiz(x.id, QZ_RIGHT)); // 같은 날 → practice
+        back();
+        const w = qv(await quiz(x.id, QZ_WRONG[1])); // review 1번 오답 (판정 없음)
+        const low = qv(await quiz(x.id, QZ_RIGHT)); // review 2번째 정답 ⭐2 < best 3
+        const tomorrow = one(`select to_char(public.kst_today() + 1, 'YYYY-MM-DD')`);
+        return (
+          compare(
+            'review',
+            { correct: true, attempt_no: 1, mode: 'review', stars: 3, best_stars: 3, xp_awarded: 10, total_xp: 30 },
+            qv(rv),
+          ) ||
+          compare('next_review_on', { next_review_on: tomorrow }, rv.json) ||
+          compare('같은 날', { mode: 'practice', stars: 0, xp_awarded: 0, total_xp: 30 }, after) ||
+          compare('review 오답', { mode: 'review', attempt_no: 1, stars: 0 }, w) ||
+          compare('review 낮은 별', { mode: 'review', attempt_no: 2, stars: 2, best_stars: 3, xp_awarded: 0, total_xp: 30 }, low) ||
+          compare(
+            'progress',
+            { stars: 2, best_stars: 3, judged_today: true, earned_xp: 30 },
+            quizProgress(x.id),
+          ) ||
+          compare('users', { total_xp: 30 }, userRow(x.id)) || { actual: 'ok', detail: '⭐2(20) → 복습 ⭐3(+10) → 복습 ⭐2(+0)' }
+        );
+      },
+    });
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-8',
+      role: 'service_role',
+      op: '채점은 accepted 중 하나와 jsonb = (순서 다름·부분집합·상위집합 오답, 두 번째 정답 인정) · 모양 틀림/코드 퀘스트는 400·기록 없음',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz8', '채점');
+        const r = async (a) => (await quiz(x.id, a, QZ_PARSONS)).json?.correct;
+        const got = {
+          reordered: await r(['ln-a1x9', 'ln-b2y8', 'ln-c3z7']),
+          subset: await r(['ln-c3z7', 'ln-a1x9']),
+          superset: await r(['ln-c3z7', 'ln-a1x9', 'ln-b2y8', 'ln-c3z7']),
+          second: await r(['ln-c3z7', 'ln-b2y8', 'ln-a1x9']),
+        };
+        const shape = await quiz(x.id, 'ln-a1x9', QZ_PARSONS);
+        const code = await quiz(x.id, QZ_RIGHT, Q1);
+        return (
+          compare('채점', { reordered: false, subset: false, superset: false, second: true }, got) ||
+          compare(
+            '거부',
+            { shape: '400 invalid_arguments', code: '400 not_quiz', rows: 4, q1_rows: '0' },
+            {
+              shape: `${shape.status} ${errMsg(shape)}`,
+              code: `${code.status} ${errMsg(code)}`,
+              rows: quizAttempts(x.id, QZ_PARSONS).split(',').length,
+              q1_rows: one(`select count(*) from public.quiz_attempts where user_id = '${x.id}' and quest_id = '${Q1}'`),
+            },
+          ) || { actual: 'ok', detail: '순서·집합이 다르면 오답, 정답 2개 모두 인정' }
+        );
+      },
+    });
+
+    await check({
+      group: 'quiz',
+      id: 'QZ-9',
+      role: 'service_role',
+      op: '잠긴 스테이지 퀴즈 403·기록 없음 · 퀴즈는 보너스: 스테이지 1 코드 퀘스트만 끝내면 클리어·스테이지 2 열림',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz9', '보너스');
+        const locked = await quiz(x.id, QZ_RIGHT, QZ_LOCKED);
+        const lockedRows = one(`select count(*) from public.quiz_attempts where user_id = '${x.id}'`);
+        const codeQuests = stageQuests(STAGE1);
+        let last;
+        for (const q of codeQuests) {
+          last = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+          if (last.status !== 200) return { actual: 'error', detail: `${q}: ${last.status} ${errMsg(last)}` };
+        }
+        const unlocked = one(`select public.is_stage_unlocked('${x.id}', '${STAGE2}')`);
+        const open = await quiz(x.id, QZ_RIGHT, QZ_LOCKED);
+        return (
+          compare(
+            '보너스',
+            {
+              locked: '403 stage_locked',
+              lockedRows: '0',
+              stage_cleared: true,
+              badges: ['first_code', 'hint_master', 'stage_clear'],
+              unlocked: 't',
+              open: 200,
+            },
+            {
+              locked: `${locked.status} ${errMsg(locked)}`,
+              lockedRows,
+              stage_cleared: last.json.stage_cleared !== null,
+              badges: userRow(x.id).badges,
+              unlocked,
+              open: open.status,
+            },
+          ) || { actual: 'ok', detail: '퀴즈 2개를 안 풀어도 스테이지 1 클리어' }
+        );
+      },
+    });
+    await check({
+      group: 'quiz',
+      id: 'QZ-10',
+      role: 'service_role',
+      op: 'B50 reset_progress 가 퀴즈 시도 기록도 지움: 뒤 스테이지 리셋은 그대로 · 전체 리셋 → 0 · 다시 first · 그 스테이지 리셋 → 0',
+      ...OK,
+      run: async () => {
+        const x = await createUser('qz10', '퀴즈리셋');
+        const reset = (scope, stage = null) =>
+          rpc('reset_progress', { p_user_id: x.id, p_scope: scope, p_stage_id: stage });
+        const count = () => one(`select count(*) from public.quiz_attempts where user_id = '${x.id}'`);
+        const a = await quiz(x.id, QZ_WRONG[0]);
+        const r2 = await reset('stage', STAGE2);
+        const afterStage2 = count();
+        const rAll = await reset('all');
+        const afterAll = count();
+        const again = await quiz(x.id, QZ_WRONG[0]);
+        const r1 = await reset('stage', STAGE1);
+        for (const r of [r2, rAll, r1])
+          if (r.status !== 200) return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
+        return (
+          compare(
+            '퀴즈 리셋',
+            { first: 'first 1', afterStage2: '1', afterAll: '0', again: 'first 1', afterStage1: '0' },
+            {
+              first: `${a.json?.mode} ${a.json?.attempt_no}`,
+              afterStage2,
+              afterAll,
+              again: `${again.json?.mode} ${again.json?.attempt_no}`,
+              afterStage1: count(),
+            },
+          ) || { actual: 'ok', detail: '오답 1번 → 스테이지 2 리셋 1행 · 전체 리셋 0행 → 다시 first 1번째 → 스테이지 1 리셋 0행' }
+        );
+      },
+    });
+  } finally {
+    if (ready) one(`delete from public.quests where id in ('${QZ_MC}', '${QZ_PARSONS}', '${QZ_LOCKED}')`);
+  }
+}
+
 // ── ratelimit: 사용자별 요청 한도 (P1-19, 00016) ───────────────
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -5416,6 +5820,7 @@ async function main() {
   await groupOnboarding(u);
   await groupConsent(u);
   await groupSeenUnlocks(u);
+  await groupQuiz(u);
   await groupAnalytics(u);
   await groupAccount(u);
   await groupApp(u);

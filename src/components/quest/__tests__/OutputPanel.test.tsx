@@ -96,7 +96,7 @@ describe('OutputPanel', () => {
         result={{ stdout: '10\n', stderr: '', success: true, outcome: 'ok' }}
         isRunning={false}
         validationResult={{ passed: true }}
-        goal="10 이 출력되어야 해요"
+        example={{ text: '10', compare: true }}
       />,
     );
     const panel = screen.getByTestId('output-panel');
@@ -107,13 +107,18 @@ describe('OutputPanel', () => {
     expect(screen.queryByTestId('output-compare')).toBeNull();
   });
 
-  it('출력이 다름: 공개 안내(해 볼 일)와 규칙 유형별 살펴볼 거리로 견줘 본다', () => {
+  it('출력이 다름: 공개 예시 출력과 줄마다 견주고 규칙 유형별 살펴볼 거리 (P7-17)', () => {
     render(
       <OutputPanel
-        result={{ stdout: '안녕\n', stderr: '', success: true, outcome: 'ok' }}
+        result={{
+          stdout: '안녕\n반가워!\n',
+          stderr: '',
+          success: true,
+          outcome: 'ok',
+        }}
         isRunning={false}
         validationResult={{ passed: false, type: 'output_match' }}
-        goal="안녕하세요! 가 출력되어야 해요"
+        example={{ text: '안녕하세요!\n반가워!', compare: true }}
       />,
     );
     expect(screen.getByTestId('output-panel')).toHaveAttribute(
@@ -122,8 +127,30 @@ describe('OutputPanel', () => {
     );
     expect(screen.getByText('조금 달라요')).toBeInTheDocument();
     const compare = screen.getByTestId('output-compare');
-    expect(compare).toHaveTextContent('안녕하세요! 가 출력되어야 해요');
+    expect(compare).toHaveTextContent('2줄 중 1줄 같아요');
+    const rows = within(screen.getByTestId('output-example')).getAllByRole(
+      'listitem',
+    );
+    expect(rows[0]).not.toHaveAttribute('data-same');
+    expect(rows[0]).toHaveTextContent('안녕하세요! (달라요) 내 글자 안녕');
+    expect(rows[1]).toHaveAttribute('data-same');
+    expect(rows[1]).toHaveTextContent('반가워! (같아요)');
     expect(compare).toHaveTextContent('한 글자씩 견줘 봐요');
+  });
+
+  it('무작위 퀘스트는 줄 비교 없이 예시만', () => {
+    render(
+      <OutputPanel
+        result={{ stdout: '4\n', stderr: '', success: true, outcome: 'ok' }}
+        isRunning={false}
+        validationResult={{ passed: false, type: 'contains' }}
+        example={{ text: '7', compare: false }}
+      />,
+    );
+    const ex = screen.getByTestId('output-example');
+    expect(ex).not.toHaveAttribute('data-compare');
+    expect(ex).toHaveTextContent('예시');
+    expect(ex).not.toHaveTextContent('내 글자');
   });
 
   it('오류: 몇 번째 줄 · 마지막 한 줄 요약, 줄로 가기, 전체 메시지는 접어 둠', () => {

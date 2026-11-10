@@ -12,7 +12,7 @@ import { HAPPY_MS, useThinkBeat } from './useThinkBeat';
 import '@/components/world/map/worldMap.css';
 
 // 첫 화면은 서버에서 그린 정지 그림, 라이브 리그는 나중에 (rig.md 지연 로드, P6-16 번들 예산)
-const PybaemRig = dynamic(
+export const PybaemRig = dynamic(
   () =>
     import('@/components/characters/rig/MascotRig').then((m) => m.PybaemRig),
   {
@@ -30,11 +30,14 @@ export interface MissionItem {
   step?: number;
   /** 방금 통과한 단계 ("다음 단계" 박자 동안 체크가 톡 찍힘, P6-12) */
   fresh?: boolean;
+  /** 지금 단계의 해 볼 일 (프로젝트 단계 checklist, P7-17) */
+  sub?: string[];
 }
 
 /**
- * "해 볼 일" 체크리스트 항목. 콘텐츠에 따로 나눈 목록이 없어(§12 결정 필요) 지금 있는 필드로 만든다:
- * 프로젝트는 단계 목표(steps[].step_goal), 코드 퀘스트는 과제 설명 + 기대 결과 안내(있으면). 통과하면 자동으로 체크
+ * "해 볼 일" 체크리스트 항목 (P7-17 콘텐츠 checklist): 코드 퀘스트는 prompt.checklist,
+ * 프로젝트는 단계 목표(steps[].step_goal) 목록 + 지금 단계 아래에 그 단계의 checklist. 통과하면 자동으로 체크.
+ * checklist 가 없는 예전 행이면 과제 설명 + 기대 결과 안내로 (콘텐츠 빌드 전 배포 사이)
  */
 export function missionItems(session: QuestSession): MissionItem[] {
   const sk = session.quest.prompt_skeleton;
@@ -48,10 +51,11 @@ export function missionItems(session: QuestSession): MissionItem[] {
       done: session.isCompleted || i + 1 < shown,
       current: !session.isCompleted && i + 1 === shown,
       fresh: i + 1 === cleared,
+      sub: i + 1 === shown && !session.isCompleted ? s.checklist : undefined,
     }));
   }
   const done = session.isCompleted || !!session.validation?.passed;
-  return [sk.exercise_description, sk.expected_output_hint]
+  return (sk.checklist ?? [sk.exercise_description, sk.expected_output_hint])
     .filter((t) => t?.trim())
     .map((text) => ({ text, done }));
 }
@@ -115,6 +119,35 @@ export function tutorLine(session: QuestSession): {
   };
 }
 
+/** 이야기 쪽 머리: 눈썹(N권 · 스테이지 · 퀘스트 번호) + 제목(Jua) + 스테이지 삽화 + 이야기. 퀴즈 이야기 쪽(P7-03)도 같이 씀 */
+export function StoryHead({ quest }: { quest: QuestSession['quest'] }) {
+  const { stage } = quest;
+  const no = stage.world?.no;
+  return (
+    <>
+      <p className="qs-kicker">
+        {no ? `${no}권 · ` : ''}
+        {stage.title} · 퀘스트 {stage.order}-{quest.order}
+      </p>
+      <h1 id="quest-title" className="qs-title font-display">
+        {quest.title}
+      </h1>
+
+      <div className="wm qs-art" data-world={worldTint(no ?? 0)} aria-hidden>
+        <svg viewBox="-200 -112 400 132" className="wm-art">
+          <path
+            className="wm-f wm-sage"
+            d="M-640 -2 C-360 -18 -150 -24 -40 -6 S200 -28 640 -8 V40 H-640Z"
+          />
+          <Landmark theme={stage.theme_name} />
+        </svg>
+      </div>
+
+      <p className="qs-story">{quest.prompt_skeleton.story_context}</p>
+    </>
+  );
+}
+
 interface StoryPageProps {
   session: QuestSession;
   /** 대사창 바로 아래 "파이뱀에게 물어보기" (P6-10, AskPybaem) */
@@ -132,9 +165,6 @@ interface StoryPageProps {
  */
 export function StoryPage({ session, ask, action, children }: StoryPageProps) {
   const { quest } = session;
-  const { stage } = quest;
-  const sk = quest.prompt_skeleton;
-  const no = stage.world?.no;
   const items = missionItems(session);
   const said = tutorLine(session);
   // 오류면 먼저 생각하는 박자 (minimal 짧게 · 동작 줄이기는 바로 설명)
@@ -159,25 +189,7 @@ export function StoryPage({ session, ask, action, children }: StoryPageProps) {
 
   return (
     <article className="qs" aria-labelledby="quest-title">
-      <p className="qs-kicker">
-        {no ? `${no}권 · ` : ''}
-        {stage.title} · 퀘스트 {stage.order}-{quest.order}
-      </p>
-      <h1 id="quest-title" className="qs-title font-display">
-        {quest.title}
-      </h1>
-
-      <div className="wm qs-art" data-world={worldTint(no ?? 0)} aria-hidden>
-        <svg viewBox="-200 -112 400 132" className="wm-art">
-          <path
-            className="wm-f wm-sage"
-            d="M-640 -2 C-360 -18 -150 -24 -40 -6 S200 -28 640 -8 V40 H-640Z"
-          />
-          <Landmark theme={stage.theme_name} />
-        </svg>
-      </div>
-
-      <p className="qs-story">{sk.story_context}</p>
+      <StoryHead quest={quest} />
 
       <section className="qs-task" aria-labelledby="quest-task">
         <h2 id="quest-task" className="qs-task-k">
@@ -201,6 +213,13 @@ export function StoryPage({ session, ask, action, children }: StoryPageProps) {
                 <span className="sr-only">
                   {item.done ? ' (완료)' : item.current ? ' (지금 할 일)' : ''}
                 </span>
+                {item.sub?.length ? (
+                  <ul className="qs-subchecks">
+                    {item.sub.map((text, j) => (
+                      <li key={j}>{text}</li>
+                    ))}
+                  </ul>
+                ) : null}
               </span>
             </li>
           ))}

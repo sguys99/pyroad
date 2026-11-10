@@ -51,9 +51,15 @@ export interface QuestReward {
   /** 다음 퀘스트 주소. 없으면(스테이지 끝) 지도가 주 버튼 */
   nextHref: string | null;
   mapHref: string;
+  /** 링크 대신 같은 화면에서 다음으로 (오늘의 퀴즈 `/daily`, P7-10). 있으면 nextHref 보다 먼저 */
+  onNext?: () => void;
+  /** 다음 버튼 글자 (기본 "다음 퀘스트") */
+  nextLabel?: string;
   /** 이미 통과한 퀘스트를 다시 푼 복습 (Q57): 머리가 "복습 완료", 보상 숫자 없음 */
   review?: boolean;
-  /** 카탈로그용: 플래그와 상관없이 별·코인 보이기 */
+  /** 띠 머리 눈썹 글자 (기본: "퀘스트 통과"·복습이면 "복습 완료"). 퀴즈는 "퀴즈 통과"·"연습 완료" 등 (P7-03) */
+  kicker?: string;
+  /** 플래그와 상관없이 별·코인 보이기: 카탈로그, 그리고 서버가 별을 판정하는 퀴즈(P7-03) */
   forceStarsCoins?: boolean;
 }
 
@@ -90,12 +96,21 @@ export function useSuccessRun(active: boolean, key: unknown): boolean {
  * 결과 쪽지 위 "통과!" 도장 (시안 `.f-result-stamp`). 나타날 때 한 번 쾅(`stampSlam`, 온보딩 등록증 도장과 같은 박자),
  * `done`이 되면 남은 연출을 끝 모습으로. 글자·색으로도 통과가 보이므로 장식(aria-hidden)
  */
-export function PassStamp({ done }: { done: boolean }) {
+export function PassStamp({
+  done,
+  rate,
+}: {
+  done: boolean;
+  /** 'correct' 피치 (퀴즈 콤보 P7-09: `comboRate`). 도장이 찍힐 때의 값 */
+  rate?: number;
+}) {
   const { budget } = useMotionTier();
   const play = useSfx();
   const ref = useRef<HTMLDivElement>(null);
   const fx = useRef<FxHandle | null>(null);
   const budgetRef = useRef(budget);
+  const rateRef = useRef(rate);
+  rateRef.current = rate;
 
   useEffect(() => {
     const el = ref.current;
@@ -107,7 +122,15 @@ export function PassStamp({ done }: { done: boolean }) {
       budget: budgetRef.current,
       paper: el?.parentElement,
       onImpact: () => {
-        if (live) t = setTimeout(() => isShown(el) && play('correct'));
+        if (live)
+          t = setTimeout(
+            () =>
+              isShown(el) &&
+              play(
+                'correct',
+                rateRef.current ? { rate: rateRef.current } : undefined,
+              ),
+          );
       },
     });
     return () => {
@@ -200,7 +223,9 @@ export function RewardStrip({
           <PybaemStatic state="cheer" size={56} label="" filters={false} />
         </span>
         <div className="qx-title">
-          <p className="qx-k">{reward.review ? '복습 완료' : '퀘스트 통과'}</p>
+          <p className="qx-k">
+            {reward.kicker ?? (reward.review ? '복습 완료' : '퀘스트 통과')}
+          </p>
           <h2 id="quest-reward-title" className="qx-t font-display">
             {reward.title}
           </h2>
@@ -257,14 +282,15 @@ export function RewardStrip({
       {reward.note && <p className="qx-note">{reward.note}</p>}
 
       <div className="qx-actions">
-        {reward.nextHref ? (
+        {reward.nextHref || reward.onNext ? (
           <>
             <Button
-              href={reward.nextHref}
+              href={reward.onNext ? undefined : (reward.nextHref ?? undefined)}
+              onClick={reward.onNext}
               iconRight={<ArrowRight aria-hidden />}
               data-testid="next-quest"
             >
-              다음 퀘스트
+              {reward.nextLabel ?? '다음 퀘스트'}
             </Button>
             <Button
               href={reward.mapHref}

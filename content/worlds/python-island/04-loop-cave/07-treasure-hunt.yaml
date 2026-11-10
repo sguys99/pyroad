@@ -1,0 +1,53 @@
+# 퀘스트 4-7: 보물 찾기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000014
+order: 7
+title: 보물 찾기
+concept: while, break
+xp_reward: 50
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: while 반복문과 break
+  learning_goals:
+    - while 반복문의 구조를 이해한다
+    - break로 반복문을 중간에 멈출 수 있다
+    - 조건이 거짓이 될 때까지 반복하는 것을 안다
+  story_context: 동굴 속에서 보물을 찾아 헤매는 모험가! 보물을 찾으면 멈춰야 해요.
+  exercise_description: 위치를 1부터 하나씩 늘려가며 위치가 5일 때 "보물 발견!"을 출력하고 반복을 멈추세요
+  starter_code: |-
+    # 보물을 찾아보세요!
+    position = 1
+
+    while position <= 10:
+        if position == 5:
+            # 보물을 찾으면 메시지를 출력하고 멈추세요!
+            
+        position = position + 1
+  expected_output_hint: 보물 발견! 이 출력되어야 해요
+  checklist:
+    - 'if 아래에서 print( )로 "보물 발견!"을 보여 줘요'
+    - '바로 다음 줄에 break 로 반복을 멈춰요'
+  example_output: |-
+    보물 발견!
+  fallback_text: 'while은 조건이 맞는 동안 계속 반복해요. break를 만나면 반복을 멈춰요! if position == 5: 에서 보물을 찾으면 break로 탈출!'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: contains
+    expected: 보물 발견!
+  hints:
+    level_1: while은 조건이 참인 동안 계속 반복해요. position이 5가 되면 뭘 해야 할까요?
+    level_2: print()로 메시지를 출력하고, break로 반복을 멈추면 돼요!
+    level_3: |-
+      print("___")
+              ___ 메시지를 출력하고 반복을 멈추는 명령어를 써보세요!
+  solution_code: |-
+    position = 1
+
+    while position <= 10:
+        if position == 5:
+            print("보물 발견!")
+            break
+        position = position + 1

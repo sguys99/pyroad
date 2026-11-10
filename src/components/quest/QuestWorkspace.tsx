@@ -30,11 +30,12 @@ const QuestCelebrations = dynamic(loadCelebrations, { ssr: false });
  * 축하 편지함만 구독하는 자리 (P6-13). 이벤트가 오고 비워질 때 이 컴포넌트만 다시 그려지고 퀘스트 셸은 그대로다.
  * 받은 축하가 없으면 아무것도 그리지 않는다(오버레이 chunk·DOM 없음)
  */
-function CelebrationLayer({
+export function CelebrationLayer({
   session,
   worldHref,
 }: {
-  session: QuestSession;
+  /** 퀴즈 세션(useQuizSession, P7-03)도 같은 편지함을 씀 */
+  session: Pick<QuestSession, 'celebrationStore' | 'quest'>;
   worldHref: string;
 }) {
   const store = session.celebrationStore;
@@ -102,10 +103,17 @@ export function QuestWorkspace({
 }: QuestWorkspaceProps) {
   const { quest, tab, setTab, runner, runResult, validation, liveOutput } =
     session;
-  // 결과 쪽지에서 견줘 볼 공개 안내 (P6-06): 프로젝트는 지금 단계 목표, 코드 퀘스트는 expected_output_hint
-  const goal = session.steps?.length
-    ? session.steps[session.currentStep - 1]?.step_goal
-    : quest.prompt_skeleton.expected_output_hint;
+  // 결과 쪽지에서 견줘 볼 공개 예시 출력 (P7-17): 프로젝트는 지금 단계, 코드 퀘스트는 퀘스트의 example_output.
+  // 결과가 정해진 output_match 만 줄 단위로 견줌 (무작위·포함 검사는 예시만)
+  const guide = session.steps?.length
+    ? session.steps[session.currentStep - 1]
+    : { ...quest.prompt_skeleton, validation_type: quest.validation_type };
+  const example = guide?.example_output
+    ? {
+        text: guide.example_output,
+        compare: guide.validation_type === 'output_match',
+      }
+    : undefined;
   // 오류 줄로: 모바일은 공책 쪽으로 넘기고, 에디터에 표시된 오류 줄(P2-18)을 화면 가운데로
   const showErrorLine = () => {
     setTab('code');
@@ -287,7 +295,7 @@ export function QuestWorkspace({
               isCodeEmpty={session.isCodeEmpty}
               validationResult={validation}
               reward={reward}
-              goal={goal}
+              example={example}
               onShowErrorLine={showErrorLine}
               onAskTutor={askTutor}
               stage={quest.stage.order}
@@ -316,7 +324,7 @@ export function QuestWorkspace({
               isRunning={runner.isRunning}
               validationResult={validation}
               liveOutput={liveOutput}
-              goal={goal}
+              example={example}
               onShowErrorLine={showErrorLine}
               restarting={!!runner.restarting && runner.status === 'loading'}
               reward={reward}

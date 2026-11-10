@@ -8,6 +8,14 @@ import {
   type OwnProfileRow,
 } from '@/lib/avatar/ownProfile';
 
+import {
+  dailyQuizResults,
+  pickDailyQuizzes,
+  type DailyQuizState,
+  type QuizAttemptRow,
+} from '@/lib/quest/dailyQuiz';
+import { kstToday } from '@/lib/time/kst';
+
 import { getWorldStatuses, type WorldsProgress } from './getStageStatuses';
 import { planUnlocks, type UnlockPlan } from './unlockSeen';
 import type { WorldInfo } from './worlds';
@@ -20,6 +28,8 @@ export interface QuestListRow {
   /** 이 퀘스트가 다루는 개념 한 줄 (공개 열, 시트 미리 보기) */
   concept: string;
   quest_type: string;
+  /** 퀴즈 종류 (퀴즈만, 공개 열). 시트 아이콘·폰 퀴즈 추천(P7-11) */
+  quiz_kind: string | null;
   is_mobile_friendly: boolean;
 }
 
@@ -33,6 +43,8 @@ export interface ProgressRow {
   status: string;
   best_stars: number;
   completed_at: string | null;
+  /** 퀴즈 마지막 별 판정일 (KST 'YYYY-MM-DD', 00026). 같은 날 다시 풀면 연습이라 복습 추천에서 뺀다 (P7-10) */
+  stars_judged_on?: string | null;
   /** 황금키로 완료 → 스트릭에서 뺀다 (3일 뱃지와 같은 규칙, Q25) */
   used_golden_key: boolean;
   /** 행이 생긴 때 = 그 퀘스트에서 처음 코드를 고친 때(자동 저장). 이어하기가 "가장 최근에 시작한 퀘스트"를 고른다 */
@@ -43,6 +55,10 @@ export interface ProgressRow {
 export interface StageQuestItem extends QuestListRow {
   status: string | null;
   best_stars: number;
+  /** 퀴즈 마지막 별 판정일 (P7-10, 없으면 판정 전) */
+  stars_judged_on?: string | null;
+  /** 처음 완료한 때 (오늘의 퀴즈가 "오늘 아침 칸"을 되짚을 때) */
+  completed_at?: string | null;
 }
 
 export interface WorldMapData {
@@ -60,6 +76,8 @@ export interface WorldMapData {
   showApiKeyAlert: boolean;
   /** 잠금 해제 연출 (P5-05, Q49): 본 기록과 지금 열린 스테이지 비교. 본 기록을 못 읽었으면 null (연출·기록 없음) */
   unlocks: UnlockPlan | null;
+  /** 오늘의 퀴즈 (P7-10): 오늘 고른 문제와 끝난 문제 */
+  daily: DailyQuizState;
 }
 
 /** 이어하기 CTA (P5-10) */
@@ -114,12 +132,15 @@ export interface WorldMapRaw {
   apiKeys: { enabled: boolean; keys: object } | null;
   /** user_seen_unlocks 본인 행 (P5-05). 조회 실패(00025 전 DB 등)면 null */
   seen: Array<{ user_id: string; stage_id: string }> | null;
+  /** 오늘(KST) 본인 퀴즈 시도 (P7-10, 오늘의 퀴즈 완료 계산). 없으면 끝난 문제 없음 */
+  attempts?: QuizAttemptRow[] | null;
 }
 
 export function toWorldMapData(
   userId: string,
   raw: WorldMapRaw,
   worlds: readonly WorldInfo[],
+  today: string = kstToday(),
 ): WorldMapData {
   // 사용자 행은 RLS(본인만)로 걸러 오지만, 정책이 넓어져도 남의 행이 섞이지 않게 확인한 id 로 한 번 더 거른다
   const progress = raw.progress.filter((p) => p.user_id === userId);
@@ -135,13 +156,22 @@ export function toWorldMapData(
         title: q.title,
         concept: q.concept,
         quest_type: q.quest_type,
+        quiz_kind: q.quiz_kind,
         is_mobile_friendly: q.is_mobile_friendly,
         status: mine.get(q.id)?.status ?? null,
         best_stars: mine.get(q.id)?.best_stars ?? 0,
+        stars_judged_on: mine.get(q.id)?.stars_judged_on ?? null,
+        completed_at: mine.get(q.id)?.completed_at ?? null,
       }));
   }
 
   const worldsProgress = getWorldStatuses(worlds, raw.stages, progress);
+  const picks = pickDailyQuizzes({
+    userId,
+    today,
+    stages: worldsProgress.worlds.flatMap((w) => w.stages),
+    questsByStage,
+  });
   return {
     profile:
       raw.profile && raw.profile.id === userId
@@ -160,6 +190,15 @@ export function toWorldMapData(
       raw.seen &&
         raw.seen.filter((r) => r.user_id === userId).map((r) => r.stage_id),
     ),
+    daily: {
+      today,
+      picks,
+      results: dailyQuizResults(
+        picks.map((p) => p.questId),
+        (raw.attempts ?? []).filter((a) => a.user_id === userId),
+        today,
+      ),
+    },
     // 사용자 커스텀 키 유무만 본다 (서버 기본 키는 무시)
     showApiKeyAlert:
       !!raw.apiKeys?.enabled && Object.keys(raw.apiKeys.keys).length === 0,

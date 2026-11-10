@@ -65,6 +65,67 @@ export async function resetUser(userId: string): Promise<void> {
     'user_seen_unlocks 삭제',
     await db.from('user_seen_unlocks').delete().eq('user_id', userId),
   );
+  // 퀴즈 시도 기록 (P7-15): reset_progress 는 남기는데, 오늘의 퀴즈 완료(dailyQuizResults)가 오늘 시도로 세므로 지운다
+  check(
+    'quiz_attempts 삭제',
+    await db.from('quiz_attempts').delete().eq('user_id', userId),
+  );
+}
+
+/** 퀴즈 공개 부분(quests.prompt_skeleton.quiz)과 서버 전용 정답(quest_answer_keys.quiz_answer)을 service_role 로 (P7-15) */
+export async function quizKey(questId: string): Promise<{
+  kind: string;
+  quiz: Record<string, unknown>;
+  accepted: unknown[];
+  explanation: string;
+  explanations: Record<string, string>;
+}> {
+  const db = adminClient();
+  const quest = check(
+    `quests ${questId}`,
+    await db
+      .from('quests')
+      .select('quiz_kind, prompt_skeleton')
+      .eq('id', questId)
+      .single(),
+  ) as {
+    quiz_kind: string;
+    prompt_skeleton: { quiz: Record<string, unknown> };
+  };
+  const key = check(
+    `quest_answer_keys ${questId}`,
+    await db
+      .from('quest_answer_keys')
+      .select('quiz_answer')
+      .eq('quest_id', questId)
+      .single(),
+  ) as {
+    quiz_answer: {
+      accepted: unknown[];
+      explanation: string;
+      explanations?: Record<string, string>;
+    };
+  };
+  return {
+    kind: quest.quiz_kind,
+    quiz: quest.prompt_skeleton.quiz,
+    accepted: key.quiz_answer.accepted,
+    explanation: key.quiz_answer.explanation,
+    explanations: key.quiz_answer.explanations ?? {},
+  };
+}
+
+/** 사용자의 서버 XP (users.total_xp) */
+export async function totalXp(userId: string): Promise<number> {
+  const row = check(
+    'users total_xp',
+    await adminClient()
+      .from('users')
+      .select('total_xp')
+      .eq('id', userId)
+      .single(),
+  ) as { total_xp: number };
+  return row.total_xp;
 }
 
 /** 앞 퀘스트를 서버 완료 RPC 로 끝내 둔다 (앱의 /api/quest/complete 가 채점 뒤 부르는 것과 같은 함수) */

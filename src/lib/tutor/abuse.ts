@@ -27,7 +27,9 @@ export type TutorAbuseReason =
   | 'input_too_long'
   | 'quest_not_found'
   | 'stage_locked'
-  | 'rate_limited';
+  | 'rate_limited'
+  /** quiz_explain 인데 이 퀴즈에 틀린 제출 기록이 없음 (P7-08) */
+  | 'no_wrong_attempt';
 
 export type TutorAbuseLevel = 'info' | 'warning';
 
@@ -49,6 +51,7 @@ const KNOWN_TYPES = new Set([
   'project_guide',
   'stage_summary',
   'concept_explain',
+  'quiz_explain',
 ]);
 
 /** 로그용 사용자 해시: sha256(user id) 앞 16자 (가명. 로그에 id 를 그대로 남기지 않음) */

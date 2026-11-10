@@ -7,6 +7,7 @@
 import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { SkinId } from '@/lib/avatar/skins';
 import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
+import type { QuizKind } from '@/lib/content/schema';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -87,6 +88,22 @@ export interface AnalyticsEventProps {
     kind: 'recent' | 'next' | 'start';
     place: 'head' | 'float';
   };
+  /**
+   * 퀴즈를 맞힌 뒤(또는 정답 공개 뒤) "직접 실행해 보기" 칸에서 코드를 돌림 (P7-07, 브라우저). kind: 퀴즈 종류,
+   * edited: 처음 코드에서 바꿔 돌렸는지. 코드·출력·퀘스트 id는 보내지 않는다 (채점·보상과 무관한 놀이)
+   */
+  quiz_try_run: { kind: QuizKind; edited: boolean };
+  /**
+   * 폰 퀴즈 추천 (P7-11, 브라우저). place: world(월드맵 이어하기 아래 쪽지)·quest(코드 퀘스트 첫 진입 쪽지),
+   * action: show(보임, 화면에 들어올 때 1번)·click(퀴즈로 감). 퀘스트 id·제목은 보내지 않는다
+   */
+  phone_quiz_pick: { place: 'world' | 'quest'; action: 'show' | 'click' };
+  /**
+   * 오늘의 퀴즈 화면(`/daily`)을 엶 (P7-10, 브라우저). total: 오늘 문제 수(0~3), done: 이미 끝낸 수. 퀘스트 id 는 보내지 않는다
+   */
+  daily_quiz_open: { total: number; done: number };
+  /** 오늘의 퀴즈 마지막 문제를 이 화면에서 끝냄 (P7-10, 브라우저). correct: 맞힌 수, stars: 오늘 받은 별 합 */
+  daily_quiz_finish: { correct: number; stars: number };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -97,11 +114,15 @@ export type TrialRunResult = 'ok' | 'no_print' | MiniErrorKind;
 /** 브라우저가 `/api/analytics`로 보낼 수 있는 이벤트. 나머지는 서버만 기록한다 (클라이언트가 지표를 부풀리지 못하게) */
 export const CLIENT_EVENT_NAMES = [
   'continue_click',
+  'daily_quiz_finish',
+  'daily_quiz_open',
   'landing_view',
   'landing_cta_click',
   'motion_tier_change',
+  'phone_quiz_pick',
   'pwa_install_prompt',
   'pwa_installed',
+  'quiz_try_run',
   'trial_start',
   'trial_run',
   'trial_success',

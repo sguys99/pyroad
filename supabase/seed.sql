@@ -2,8 +2,8 @@
 -- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.
 -- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).
 -- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.
--- 콘텐츠 해시: 4ce8f240ad46949b
--- 월드 3 · 스테이지 7 · 퀘스트 44 · 정답 행 44 (solution_code 43 + 프로젝트 단계 5)
+-- 콘텐츠 해시: e675b2cf0f608bd0
+-- 월드 3 · 스테이지 7 · 퀘스트 65 · 정답 행 65 (solution_code 43 + 프로젝트 단계 5)
 --
 -- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).
 -- - 정답·힌트·solution_code 는 quest_answer_keys(service_role 전용)에 따로 씁니다.
@@ -24,7 +24,7 @@
 -- ------------------------------------------------------------
 UPDATE public.worlds SET "order" = -"order" WHERE "order" > 0 AND slug IN ('python-island', 'code-sea', 'maker-city');
 UPDATE public.stages SET "order" = -"order" WHERE "order" > 0 AND id IN ('a1000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000002', 'a1000000-0000-0000-0000-000000000003', 'a1000000-0000-0000-0000-000000000004', 'a1000000-0000-0000-0000-000000000005', 'a1000000-0000-0000-0000-000000000006', 'a1000000-0000-0000-0000-000000000007');
-UPDATE public.quests SET "order" = -"order" WHERE "order" > 0 AND id IN ('b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000023', 'b1000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000024', 'b1000000-0000-0000-0000-000000000025', 'b1000000-0000-0000-0000-000000000026', 'b1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000027', 'b1000000-0000-0000-0000-000000000006', 'b1000000-0000-0000-0000-000000000028', 'b1000000-0000-0000-0000-000000000007', 'b1000000-0000-0000-0000-000000000029', 'b1000000-0000-0000-0000-000000000008', 'b1000000-0000-0000-0000-000000000030', 'b1000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000010', 'b1000000-0000-0000-0000-000000000011', 'b1000000-0000-0000-0000-000000000031', 'b1000000-0000-0000-0000-000000000032', 'b1000000-0000-0000-0000-000000000012', 'b1000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000033', 'b1000000-0000-0000-0000-000000000034', 'b1000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000015', 'b1000000-0000-0000-0000-000000000035', 'b1000000-0000-0000-0000-000000000036', 'b1000000-0000-0000-0000-000000000016', 'b1000000-0000-0000-0000-000000000017', 'b1000000-0000-0000-0000-000000000037', 'b1000000-0000-0000-0000-000000000018', 'b1000000-0000-0000-0000-000000000038', 'b1000000-0000-0000-0000-000000000039', 'b1000000-0000-0000-0000-000000000040', 'b1000000-0000-0000-0000-000000000019', 'b1000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000041', 'b1000000-0000-0000-0000-000000000021', 'b1000000-0000-0000-0000-000000000042', 'b1000000-0000-0000-0000-000000000043', 'b1000000-0000-0000-0000-000000000044', 'b1000000-0000-0000-0000-000000000022');
+UPDATE public.quests SET "order" = -"order" WHERE "order" > 0 AND id IN ('b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000023', 'b1000000-0000-0000-0000-000000000101', 'b1000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000024', 'b1000000-0000-0000-0000-000000000102', 'b1000000-0000-0000-0000-000000000025', 'b1000000-0000-0000-0000-000000000103', 'b1000000-0000-0000-0000-000000000026', 'b1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000027', 'b1000000-0000-0000-0000-000000000104', 'b1000000-0000-0000-0000-000000000006', 'b1000000-0000-0000-0000-000000000028', 'b1000000-0000-0000-0000-000000000105', 'b1000000-0000-0000-0000-000000000007', 'b1000000-0000-0000-0000-000000000106', 'b1000000-0000-0000-0000-000000000029', 'b1000000-0000-0000-0000-000000000008', 'b1000000-0000-0000-0000-000000000107', 'b1000000-0000-0000-0000-000000000030', 'b1000000-0000-0000-0000-000000000108', 'b1000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000010', 'b1000000-0000-0000-0000-000000000011', 'b1000000-0000-0000-0000-000000000109', 'b1000000-0000-0000-0000-000000000031', 'b1000000-0000-0000-0000-000000000032', 'b1000000-0000-0000-0000-000000000012', 'b1000000-0000-0000-0000-000000000110', 'b1000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000033', 'b1000000-0000-0000-0000-000000000034', 'b1000000-0000-0000-0000-000000000111', 'b1000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000015', 'b1000000-0000-0000-0000-000000000035', 'b1000000-0000-0000-0000-000000000112', 'b1000000-0000-0000-0000-000000000036', 'b1000000-0000-0000-0000-000000000016', 'b1000000-0000-0000-0000-000000000017', 'b1000000-0000-0000-0000-000000000113', 'b1000000-0000-0000-0000-000000000037', 'b1000000-0000-0000-0000-000000000018', 'b1000000-0000-0000-0000-000000000114', 'b1000000-0000-0000-0000-000000000038', 'b1000000-0000-0000-0000-000000000115', 'b1000000-0000-0000-0000-000000000039', 'b1000000-0000-0000-0000-000000000040', 'b1000000-0000-0000-0000-000000000019', 'b1000000-0000-0000-0000-000000000116', 'b1000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000117', 'b1000000-0000-0000-0000-000000000041', 'b1000000-0000-0000-0000-000000000118', 'b1000000-0000-0000-0000-000000000021', 'b1000000-0000-0000-0000-000000000042', 'b1000000-0000-0000-0000-000000000043', 'b1000000-0000-0000-0000-000000000119', 'b1000000-0000-0000-0000-000000000044', 'b1000000-0000-0000-0000-000000000120', 'b1000000-0000-0000-0000-000000000121', 'b1000000-0000-0000-0000-000000000022');
 
 -- ------------------------------------------------------------
 -- 2. 월드 (slug 기준. id 는 DB 가 정함: 1월드는 00012 가 만든 고정 id)
@@ -70,7 +70,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"print() 함수로 출력하기","learning_goals":["print() 함수를 사용하여 텍스트를 출력할 수 있다","따옴표 안에 원하는 텍스트를 넣을 수 있다"],"story_context":"파이썬 마을에 도착한 모험가가 마을 사람들에게 첫 인사를 하는 장면","exercise_description":"print() 함수를 사용하여 \"안녕하세요!\"를 출력해보세요","starter_code":"# 아래에 코드를 작성해보세요!\n","expected_output_hint":"안녕하세요! 가 출력되어야 해요","fallback_text":"print()는 화면에 글자를 보여주는 마법 주문이에요! print(\"안녕하세요!\") 이렇게 따옴표 안에 보여주고 싶은 말을 넣으면 돼요."}'::jsonb,
+  '{"topic":"print() 함수로 출력하기","learning_goals":["print() 함수를 사용하여 텍스트를 출력할 수 있다","따옴표 안에 원하는 텍스트를 넣을 수 있다"],"story_context":"파이썬 마을에 도착한 모험가가 마을 사람들에게 첫 인사를 하는 장면","exercise_description":"print() 함수를 사용하여 \"안녕하세요!\"를 출력해보세요","starter_code":"# 아래에 코드를 작성해보세요!\n","expected_output_hint":"안녕하세요! 가 출력되어야 해요","checklist":["print( )를 써요","따옴표 안에 안녕하세요! 를 넣어요","코드를 돌려서 인사가 나오는지 봐요"],"example_output":"안녕하세요!","fallback_text":"print()는 화면에 글자를 보여주는 마법 주문이에요! print(\"안녕하세요!\") 이렇게 따옴표 안에 보여주고 싶은 말을 넣으면 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -94,7 +94,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"print()를 여러 번 사용하여 여러 줄 출력하기","learning_goals":["print()를 여러 번 사용하여 여러 줄을 출력할 수 있다","각 print()가 한 줄씩 출력하는 것을 이해한다"],"story_context":"마을 입구에서 자기소개를 하는 모험가. 마을 사람들이 이름과 인사를 기다리고 있어요!","exercise_description":"print()를 두 번 사용하여 첫 줄에 \"나는 파이썬 모험가!\", 둘째 줄에 \"반가워!\"를 출력하세요","starter_code":"# 두 줄을 출력해보세요!\n","expected_output_hint":"두 줄이 출력되어야 해요: 나는 파이썬 모험가! 그리고 반가워!","fallback_text":"print()를 두 번 쓰면 두 줄이 나와요! 첫 번째 print()에 첫 번째 문장을, 두 번째 print()에 두 번째 문장을 넣어보세요."}'::jsonb,
+  '{"topic":"print()를 여러 번 사용하여 여러 줄 출력하기","learning_goals":["print()를 여러 번 사용하여 여러 줄을 출력할 수 있다","각 print()가 한 줄씩 출력하는 것을 이해한다"],"story_context":"마을 입구에서 자기소개를 하는 모험가. 마을 사람들이 이름과 인사를 기다리고 있어요!","exercise_description":"print()를 두 번 사용하여 첫 줄에 \"나는 파이썬 모험가!\", 둘째 줄에 \"반가워!\"를 출력하세요","starter_code":"# 두 줄을 출력해보세요!\n","expected_output_hint":"두 줄이 출력되어야 해요: 나는 파이썬 모험가! 그리고 반가워!","checklist":["print( )를 두 줄 써요","첫 줄에는 나는 파이썬 모험가! 를 넣어요","둘째 줄에는 반가워! 를 넣어요"],"example_output":"나는 파이썬 모험가!\n반가워!","fallback_text":"print()를 두 번 쓰면 두 줄이 나와요! 첫 번째 print()에 첫 번째 문장을, 두 번째 print()에 두 번째 문장을 넣어보세요."}'::jsonb,
   'output_match',
   '',
   50
@@ -118,7 +118,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"작은따옴표와 큰따옴표의 차이","learning_goals":["작은따옴표와 큰따옴표 모두 문자열을 만들 수 있다","문자열 안에 따옴표가 포함될 때 다른 종류의 따옴표로 감싸야 함을 안다"],"story_context":"파이썬 마을의 따옴표 가게에 왔어요! 작은따옴표와 큰따옴표, 언제 어떤 걸 써야 할까요?","exercise_description":"print()를 사용하여 I''m happy! 를 출력해보세요. 큰따옴표로 감싸면 안에 작은따옴표를 쓸 수 있어요!","starter_code":"# I''m happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n","expected_output_hint":"I''m happy! 가 출력되어야 해요","fallback_text":"문자열 안에 작은따옴표(  ''  )가 있으면 큰따옴표(\")로 감싸면 돼요! print(\"I''m happy!\") 이렇게요."}'::jsonb,
+  '{"topic":"작은따옴표와 큰따옴표의 차이","learning_goals":["작은따옴표와 큰따옴표 모두 문자열을 만들 수 있다","문자열 안에 따옴표가 포함될 때 다른 종류의 따옴표로 감싸야 함을 안다"],"story_context":"파이썬 마을의 따옴표 가게에 왔어요! 작은따옴표와 큰따옴표, 언제 어떤 걸 써야 할까요?","exercise_description":"print()를 사용하여 I''m happy! 를 출력해보세요. 큰따옴표로 감싸면 안에 작은따옴표를 쓸 수 있어요!","starter_code":"# I''m happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n","expected_output_hint":"I''m happy! 가 출력되어야 해요","checklist":["print( ) 안을 큰따옴표 \" \" 로 감싸요","그 안에 I''m happy! 를 그대로 넣어요"],"example_output":"I''m happy!","fallback_text":"문자열 안에 작은따옴표(  ''  )가 있으면 큰따옴표(\")로 감싸면 돼요! print(\"I''m happy!\") 이렇게요."}'::jsonb,
   'output_match',
   '',
   50
@@ -130,19 +130,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 1-4: 주석으로 메모하기
+-- 퀘스트 1-4: 따옴표 버그 잡기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000101',
+  'a1000000-0000-0000-0000-000000000001',
+  4,
+  '따옴표 버그 잡기',
+  '작은따옴표, 큰따옴표',
+  'quiz',
+  'bug_hunt',
+  TRUE,
+  '{"topic":"글자 안에 따옴표가 있을 때","learning_goals":["글자 안에 작은따옴표가 있으면 바깥을 다른 따옴표로 감싸야 함을 안다"],"story_context":"따옴표 가게 간판 코드가 고장 났어요! 파이뱀이 쓴 두 줄 중 한 줄에서 오류가 나요.","fallback_text":"따옴표는 여는 것과 닫는 것의 짝이 맞아야 해요. 글자 안에 작은따옴표가 들어 있으면 바깥은 어떤 따옴표로 감싸야 할지 떠올려 봐요.","quiz":{"kind":"bug_hunt","question":"오류가 나는 줄을 찾아 고쳐요","lines":[{"id":"ln-r4tw","code":"print(\"어서 오세요!\")"},{"id":"ln-k8ep","code":"print(''I''m happy!'')"}],"fixes":[{"id":"fx-c7jn","code":"print(I''m happy!)"},{"id":"fx-m2va","code":"print(\"I''m happy!\")"},{"id":"fx-w5dq","code":"print(\"I''m happy!)"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 1-5: 주석으로 메모하기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000003',
   'a1000000-0000-0000-0000-000000000001',
-  4,
+  5,
   '주석으로 메모하기',
   '주석(#), print()',
   'code',
   NULL,
   FALSE,
-  '{"topic":"주석(#)의 역할과 사용법","learning_goals":["#으로 시작하는 줄이 주석임을 안다","주석은 컴퓨터가 무시하고 사람만 읽는 메모임을 이해한다","주석과 코드를 구분하여 작성할 수 있다"],"story_context":"마을의 게시판에 비밀 메모를 남기는 모험가. 주석으로 쓴 메모는 컴퓨터가 읽지 못해요!","exercise_description":"첫 줄에 주석(#)으로 아무 메모나 남기고, 둘째 줄에 print()로 \"파이썬은 재미있어!\"를 출력하세요","starter_code":"# 여기에 메모를 남겨보세요 (이 줄은 주석이에요!)\n","expected_output_hint":"파이썬은 재미있어! 만 출력되어야 해요 (주석은 출력되지 않아요)","fallback_text":"#으로 시작하는 줄은 주석이에요. 컴퓨터는 이 줄을 무시해요! 주석 아래에 print(\"파이썬은 재미있어!\")를 써보세요."}'::jsonb,
+  '{"topic":"주석(#)의 역할과 사용법","learning_goals":["#으로 시작하는 줄이 주석임을 안다","주석은 컴퓨터가 무시하고 사람만 읽는 메모임을 이해한다","주석과 코드를 구분하여 작성할 수 있다"],"story_context":"마을의 게시판에 비밀 메모를 남기는 모험가. 주석으로 쓴 메모는 컴퓨터가 읽지 못해요!","exercise_description":"첫 줄에 주석(#)으로 아무 메모나 남기고, 둘째 줄에 print()로 \"파이썬은 재미있어!\"를 출력하세요","starter_code":"# 여기에 메모를 남겨보세요 (이 줄은 주석이에요!)\n","expected_output_hint":"파이썬은 재미있어! 만 출력되어야 해요 (주석은 출력되지 않아요)","checklist":["첫 줄에 # 으로 메모를 남겨요","둘째 줄에 print( )로 파이썬은 재미있어! 를 보여 줘요","메모는 화면에 안 나오는지 확인해요"],"example_output":"파이썬은 재미있어!","fallback_text":"#으로 시작하는 줄은 주석이에요. 컴퓨터는 이 줄을 무시해요! 주석 아래에 print(\"파이썬은 재미있어!\")를 써보세요."}'::jsonb,
   'output_match',
   '',
   50
@@ -154,19 +178,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 1-5: 특수문자 출력하기
+-- 퀘스트 1-6: 특수문자 출력하기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000024',
   'a1000000-0000-0000-0000-000000000001',
-  5,
+  6,
   '특수문자 출력하기',
   '이스케이프 문자 \n',
   'code',
   NULL,
   FALSE,
-  '{"topic":"이스케이프 문자 \\n으로 줄바꿈하기","learning_goals":["\\n이 줄바꿈을 뜻하는 특수 문자임을 안다","print() 한 번으로 여러 줄을 출력할 수 있다"],"story_context":"파이썬 마을의 마법 편지지! \\n을 쓰면 편지가 두 줄로 나뉘어요.","exercise_description":"print()를 한 번만 사용하여 \"첫째 줄\"과 \"둘째 줄\"을 두 줄로 출력하세요. \\n을 사용해요!","starter_code":"# print()를 한 번만 사용해서 두 줄로 출력해보세요!\n# 힌트: \\n은 줄바꿈이에요!\n","expected_output_hint":"첫째 줄과 둘째 줄이 각각 다른 줄에 출력되어야 해요","fallback_text":"\\n은 줄바꿈을 뜻하는 특수 문자예요! print(\"첫째 줄\\n둘째 줄\") 이렇게 쓰면 두 줄로 나뉘어서 출력돼요."}'::jsonb,
+  '{"topic":"이스케이프 문자 \\n으로 줄바꿈하기","learning_goals":["\\n이 줄바꿈을 뜻하는 특수 문자임을 안다","print() 한 번으로 여러 줄을 출력할 수 있다"],"story_context":"파이썬 마을의 마법 편지지! \\n을 쓰면 편지가 두 줄로 나뉘어요.","exercise_description":"print()를 한 번만 사용하여 \"첫째 줄\"과 \"둘째 줄\"을 두 줄로 출력하세요. \\n을 사용해요!","starter_code":"# print()를 한 번만 사용해서 두 줄로 출력해보세요!\n# 힌트: \\n은 줄바꿈이에요!\n","expected_output_hint":"첫째 줄과 둘째 줄이 각각 다른 줄에 출력되어야 해요","checklist":["print( )는 딱 한 번만 써요","첫째 줄과 둘째 줄 사이에 \\n 을 넣어요","두 줄로 나오는지 확인해요"],"example_output":"첫째 줄\n둘째 줄","fallback_text":"\\n은 줄바꿈을 뜻하는 특수 문자예요! print(\"첫째 줄\\n둘째 줄\") 이렇게 쓰면 두 줄로 나뉘어서 출력돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -178,19 +202,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 1-6: 숫자도 출력해요
+-- 퀘스트 1-7: 두 줄 편지 빈칸
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000102',
+  'a1000000-0000-0000-0000-000000000001',
+  7,
+  '두 줄 편지 빈칸',
+  '이스케이프 문자 \n',
+  'quiz',
+  'fill_blank',
+  TRUE,
+  '{"topic":"글자 안에서 줄 바꾸기","learning_goals":["print 한 번으로 글자를 두 줄에 나눠 보여 줄 수 있다"],"story_context":"마법 편지지에 과일 이름을 적어요. 사과와 바나나를 서로 다른 줄에 쓰고 싶어요!","fallback_text":"글자 안에서 줄을 바꾸는 특수문자는 역슬래시(\\)로 시작해요. 앞에서 써 본 마법 편지지를 떠올려 봐요.","quiz":{"kind":"fill_blank","question":"빈칸을 채워 사과와 바나나가 서로 다른 줄에 나오게 해요","code":"print(\"사과{{bk-p3zy}}바나나\")","tokens":[{"id":"tok-n4ha","text":"\\n"},{"id":"tok-s9re","text":"/n"},{"id":"tok-x2lu","text":"n\\"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 1-8: 숫자도 출력해요
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000025',
   'a1000000-0000-0000-0000-000000000001',
-  6,
+  8,
   '숫자도 출력해요',
   'print()로 숫자 출력',
   'code',
   NULL,
   FALSE,
-  '{"topic":"print()로 숫자 출력하기","learning_goals":["print()로 숫자를 출력할 수 있다","숫자는 따옴표 없이 쓰는 것을 안다"],"story_context":"파이썬 마을의 시계탑에 올해 연도를 새겨야 해요! 숫자를 출력해볼까요?","exercise_description":"print()로 숫자 2026을 출력하세요. 따옴표 없이 숫자만 넣어보세요!","starter_code":"# 숫자 2026을 출력해보세요!\n# 힌트: 따옴표 없이 숫자만 넣으면 돼요!\n","expected_output_hint":"2026 이 출력되어야 해요","fallback_text":"print() 안에 따옴표 없이 숫자를 넣으면 숫자가 그대로 출력돼요! print(2026) 이렇게요."}'::jsonb,
+  '{"topic":"print()로 숫자 출력하기","learning_goals":["print()로 숫자를 출력할 수 있다","숫자는 따옴표 없이 쓰는 것을 안다"],"story_context":"파이썬 마을의 시계탑에 올해 연도를 새겨야 해요! 숫자를 출력해볼까요?","exercise_description":"print()로 숫자 2026을 출력하세요. 따옴표 없이 숫자만 넣어보세요!","starter_code":"# 숫자 2026을 출력해보세요!\n# 힌트: 따옴표 없이 숫자만 넣으면 돼요!\n","expected_output_hint":"2026 이 출력되어야 해요","checklist":["print( ) 안에 2026 을 넣어요","따옴표 없이 숫자만 써요"],"example_output":"2026","fallback_text":"print() 안에 따옴표 없이 숫자를 넣으면 숫자가 그대로 출력돼요! print(2026) 이렇게요."}'::jsonb,
   'output_match',
   '',
   50
@@ -202,19 +250,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 1-7: 마을 안내판 만들기
+-- 퀘스트 1-9: 무엇이 나올까?
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000103',
+  'a1000000-0000-0000-0000-000000000001',
+  9,
+  '무엇이 나올까?',
+  'print(), 주석, 숫자 출력',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"주석과 print() 출력 예측하기","learning_goals":["주석(#)은 실행되지 않는다는 것을 안다","print()는 따옴표 안의 글자만 보여 준다는 것을 안다"],"story_context":"시계탑 아래 게시판에 파이뱀이 코드를 붙여 놨어요. 돌리기 전에 무엇이 나올지 맞혀 봐요!","fallback_text":"#으로 시작하는 줄은 메모라서 컴퓨터가 읽지 않아요. 따옴표는 글자를 감싸는 표시일 뿐 화면에는 나오지 않아요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"# print(\"비밀 메모\")\nprint(\"안녕\")\nprint(2026)","options":[{"id":"opt-b7xe","text":"\"안녕\"\n2026"},{"id":"opt-h3ku","text":"안녕\n2026"},{"id":"opt-q2mi","text":"비밀 메모\n안녕\n2026"},{"id":"opt-z5ca","text":"안녕"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 1-10: 마을 안내판 만들기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000026',
   'a1000000-0000-0000-0000-000000000001',
-  7,
+  10,
   '마을 안내판 만들기',
   'print() 종합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"print() 종합 활용","learning_goals":["주석과 print()를 자유롭게 사용할 수 있다","문자열과 숫자를 print()로 출력할 수 있다","여러 줄을 출력하여 의미 있는 결과물을 만들 수 있다"],"story_context":"파이썬 마을에 새 안내판을 세워야 해요! 주석으로 설명을 달고, print()로 멋진 안내판을 만들어봐요!","exercise_description":"주석 1줄을 쓰고, print()를 3번 사용하여 마을 안내판을 만드세요. 첫 줄: === 파이썬 마을 ===, 둘째 줄: 인구: 2026명, 셋째 줄: 환영합니다!","starter_code":"# 마을 안내판을 만들어보세요!\n# 주석 1줄 + print() 3줄로 완성!\n","expected_output_hint":"=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 가 각각 한 줄씩 출력되어야 해요","fallback_text":"주석으로 설명을 달고, print()를 3번 사용해서 안내판을 만들어요! 각 줄에 다른 내용을 넣어보세요.","is_challenge":true}'::jsonb,
+  '{"topic":"print() 종합 활용","learning_goals":["주석과 print()를 자유롭게 사용할 수 있다","문자열과 숫자를 print()로 출력할 수 있다","여러 줄을 출력하여 의미 있는 결과물을 만들 수 있다"],"story_context":"파이썬 마을에 새 안내판을 세워야 해요! 주석으로 설명을 달고, print()로 멋진 안내판을 만들어봐요!","exercise_description":"주석 1줄을 쓰고, print()를 3번 사용하여 마을 안내판을 만드세요. 첫 줄: === 파이썬 마을 ===, 둘째 줄: 인구: 2026명, 셋째 줄: 환영합니다!","starter_code":"# 마을 안내판을 만들어보세요!\n# 주석 1줄 + print() 3줄로 완성!\n","expected_output_hint":"=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 가 각각 한 줄씩 출력되어야 해요","checklist":["# 으로 메모를 한 줄 써요","print( )를 세 번 써요","=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 를 차례로 보여 줘요"],"example_output":"=== 파이썬 마을 ===\n인구: 2026명\n환영합니다!","fallback_text":"주석으로 설명을 달고, print()를 3번 사용해서 안내판을 만들어요! 각 줄에 다른 내용을 넣어보세요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -238,7 +310,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"변수 선언과 값 저장","learning_goals":["변수가 값을 담는 상자임을 이해한다","= 기호로 변수에 값을 저장할 수 있다"],"story_context":"변수의 숲에서 마법 상자에 이름표를 붙이는 모험. 상자에 파이뱀의 이름을 넣어봐요!","exercise_description":"name이라는 변수에 \"파이뱀\"을 저장하고 print(name)으로 출력하세요","starter_code":"# 변수에 이름을 넣어보세요!\nname = \nprint(name)","expected_output_hint":"파이뱀 이 출력되어야 해요","fallback_text":"변수는 값을 담는 상자예요! name = \"파이뱀\" 이렇게 상자에 이름표를 붙이고 값을 넣을 수 있어요."}'::jsonb,
+  '{"topic":"변수 선언과 값 저장","learning_goals":["변수가 값을 담는 상자임을 이해한다","= 기호로 변수에 값을 저장할 수 있다"],"story_context":"변수의 숲에서 마법 상자에 이름표를 붙이는 모험. 상자에 파이뱀의 이름을 넣어봐요!","exercise_description":"name이라는 변수에 \"파이뱀\"을 저장하고 print(name)으로 출력하세요","starter_code":"# 변수에 이름을 넣어보세요!\nname = \nprint(name)","expected_output_hint":"파이뱀 이 출력되어야 해요","checklist":["name 상자에 \"파이뱀\"을 넣어요","print(name)으로 상자 안을 보여 줘요"],"example_output":"파이뱀","fallback_text":"변수는 값을 담는 상자예요! name = \"파이뱀\" 이렇게 상자에 이름표를 붙이고 값을 넣을 수 있어요."}'::jsonb,
   'contains',
   '',
   50
@@ -262,7 +334,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"정수(int)와 문자열(str) 자료형","learning_goals":["숫자는 따옴표 없이, 글자는 따옴표로 감싸서 저장하는 것을 안다","int와 str이 다른 종류의 상자임을 이해한다"],"story_context":"숲 속 두 종류의 마법 상자를 발견! 숫자 상자와 글자 상자를 구분해봐요.","exercise_description":"number 변수에 10을, greeting 변수에 \"안녕\"을 저장하고 각각 print()로 출력하세요","starter_code":"# 숫자와 글자를 각각 변수에 넣어보세요!\nnumber = \ngreeting = \nprint(number)\nprint(greeting)","expected_output_hint":"10과 안녕이 한 줄씩 출력되어야 해요","fallback_text":"숫자는 따옴표 없이 number = 10, 글자는 따옴표와 함께 greeting = \"안녕\" 이렇게 넣어요!"}'::jsonb,
+  '{"topic":"정수(int)와 문자열(str) 자료형","learning_goals":["숫자는 따옴표 없이, 글자는 따옴표로 감싸서 저장하는 것을 안다","int와 str이 다른 종류의 상자임을 이해한다"],"story_context":"숲 속 두 종류의 마법 상자를 발견! 숫자 상자와 글자 상자를 구분해봐요.","exercise_description":"number 변수에 10을, greeting 변수에 \"안녕\"을 저장하고 각각 print()로 출력하세요","starter_code":"# 숫자와 글자를 각각 변수에 넣어보세요!\nnumber = \ngreeting = \nprint(number)\nprint(greeting)","expected_output_hint":"10과 안녕이 한 줄씩 출력되어야 해요","checklist":["number 상자에 숫자 10을 넣어요","greeting 상자에 \"안녕\"을 넣어요","두 상자를 한 줄씩 보여 줘요"],"example_output":"10\n안녕","fallback_text":"숫자는 따옴표 없이 number = 10, 글자는 따옴표와 함께 greeting = \"안녕\" 이렇게 넣어요!"}'::jsonb,
   'output_match',
   '',
   50
@@ -286,7 +358,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"변수 재할당 (값 바꾸기)","learning_goals":["변수에 새로운 값을 다시 넣을 수 있다","변수의 값은 언제든 바꿀 수 있음을 이해한다"],"story_context":"변수의 숲에서 마법 상자의 내용물을 바꿔볼까요? 상자 안의 색깔을 바꿔봐요!","exercise_description":"color 변수에 \"빨강\"을 저장한 후, \"파랑\"으로 바꾸고 print()로 출력하세요","starter_code":"# 색깔을 바꿔보세요!\ncolor = \"빨강\"\n# 아래에서 color를 \"파랑\"으로 바꿔보세요!\n\nprint(color)","expected_output_hint":"파랑 이 출력되어야 해요","fallback_text":"변수는 상자니까 안에 든 걸 바꿀 수 있어요! color = \"파랑\" 이렇게 다시 넣으면 이전 값은 사라지고 새 값이 들어가요."}'::jsonb,
+  '{"topic":"변수 재할당 (값 바꾸기)","learning_goals":["변수에 새로운 값을 다시 넣을 수 있다","변수의 값은 언제든 바꿀 수 있음을 이해한다"],"story_context":"변수의 숲에서 마법 상자의 내용물을 바꿔볼까요? 상자 안의 색깔을 바꿔봐요!","exercise_description":"color 변수에 \"빨강\"을 저장한 후, \"파랑\"으로 바꾸고 print()로 출력하세요","starter_code":"# 색깔을 바꿔보세요!\ncolor = \"빨강\"\n# 아래에서 color를 \"파랑\"으로 바꿔보세요!\n\nprint(color)","expected_output_hint":"파랑 이 출력되어야 해요","checklist":["color 상자에 \"파랑\"을 다시 넣어요","print(color)로 바뀐 색을 보여 줘요"],"example_output":"파랑","fallback_text":"변수는 상자니까 안에 든 걸 바꿀 수 있어요! color = \"파랑\" 이렇게 다시 넣으면 이전 값은 사라지고 새 값이 들어가요."}'::jsonb,
   'output_match',
   '',
   50
@@ -298,19 +370,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 2-4: 나이 계산기
+-- 퀘스트 2-4: 상자 속에 남은 것
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000104',
+  'a1000000-0000-0000-0000-000000000002',
+  4,
+  '상자 속에 남은 것',
+  '변수 재할당',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"변수에 새 값을 넣으면 어떻게 될까","learning_goals":["변수에 새 값을 넣으면 이전 값은 사라진다는 것을 안다"],"story_context":"변수의 숲 마법 상자에 색깔을 두 번 넣었어요. 상자를 열면 어떤 색이 나올까요?","fallback_text":"마법 상자에는 값이 하나만 들어가요. 새 값을 넣으면 먼저 들어 있던 값은 어떻게 될지 생각해 봐요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"color = \"빨강\"\ncolor = \"파랑\"\nprint(color)","options":[{"id":"opt-a4mf","text":"color"},{"id":"opt-e2rk","text":"빨강"},{"id":"opt-t6dw","text":"파랑"},{"id":"opt-y8sn","text":"빨강파랑"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 2-5: 나이 계산기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000006',
   'a1000000-0000-0000-0000-000000000002',
-  4,
+  5,
   '나이 계산기',
   'int 연산',
   'code',
   NULL,
   FALSE,
-  '{"topic":"정수 변수의 사칙연산","learning_goals":["변수에 저장된 숫자로 덧셈, 뺄셈 등을 할 수 있다","연산 결과를 새 변수에 저장할 수 있다"],"story_context":"숲 속 나이를 알려주는 마법 거울! 태어난 해를 넣으면 나이를 계산해줘요.","exercise_description":"birth_year 변수에 자기 태어난 해를 넣고, age = 2026 - birth_year로 나이를 계산한 뒤, print(age, \"살\")로 출력하세요","starter_code":"# 나이를 계산해보세요!\nbirth_year = \nage = 2026 - birth_year\nprint(age, \"살\")","expected_output_hint":"숫자와 살 이 출력되어야 해요 (예: 12 살)","fallback_text":"birth_year = 2014 이렇게 태어난 해를 넣으면 age = 2026 - 2014로 나이가 계산돼요!"}'::jsonb,
+  '{"topic":"정수 변수의 사칙연산","learning_goals":["변수에 저장된 숫자로 덧셈, 뺄셈 등을 할 수 있다","연산 결과를 새 변수에 저장할 수 있다"],"story_context":"숲 속 나이를 알려주는 마법 거울! 태어난 해를 넣으면 나이를 계산해줘요.","exercise_description":"birth_year 변수에 자기 태어난 해를 넣고, age = 2026 - birth_year로 나이를 계산한 뒤, print(age, \"살\")로 출력하세요","starter_code":"# 나이를 계산해보세요!\nbirth_year = \nage = 2026 - birth_year\nprint(age, \"살\")","expected_output_hint":"숫자와 살 이 출력되어야 해요 (예: 12 살)","checklist":["birth_year 에 태어난 해를 숫자로 넣어요","2026 - birth_year 로 나이를 구해요","나이와 살을 함께 보여 줘요"],"example_output":"12 살","fallback_text":"birth_year = 2014 이렇게 태어난 해를 넣으면 age = 2026 - 2014로 나이가 계산돼요!"}'::jsonb,
   'contains',
   '',
   50
@@ -322,19 +418,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 2-5: 글자 합치기 마법
+-- 퀘스트 2-6: 글자 합치기 마법
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000028',
   'a1000000-0000-0000-0000-000000000002',
-  5,
+  6,
   '글자 합치기 마법',
   '문자열 연결(+)',
   'code',
   NULL,
   FALSE,
-  '{"topic":"문자열 연결 연산자 +","learning_goals":["+ 연산자로 문자열을 합칠 수 있다","문자열끼리 더하면 이어붙여지는 것을 이해한다"],"story_context":"변수의 숲에서 마법 접착제를 발견했어요! 글자와 글자를 이어붙여 새로운 단어를 만들어봐요!","exercise_description":"first = \"파이\", second = \"썬\"을 변수에 저장하고, + 연산자로 합쳐서 출력하세요","starter_code":"# 글자를 합쳐보세요!\nfirst = \"파이\"\nsecond = \"썬\"\nresult = \nprint(result)","expected_output_hint":"파이썬 이 출력되어야 해요","fallback_text":"문자열끼리 + 를 쓰면 이어붙여져요! \"파이\" + \"썬\" = \"파이썬\"이 돼요."}'::jsonb,
+  '{"topic":"문자열 연결 연산자 +","learning_goals":["+ 연산자로 문자열을 합칠 수 있다","문자열끼리 더하면 이어붙여지는 것을 이해한다"],"story_context":"변수의 숲에서 마법 접착제를 발견했어요! 글자와 글자를 이어붙여 새로운 단어를 만들어봐요!","exercise_description":"first = \"파이\", second = \"썬\"을 변수에 저장하고, + 연산자로 합쳐서 출력하세요","starter_code":"# 글자를 합쳐보세요!\nfirst = \"파이\"\nsecond = \"썬\"\nresult = \nprint(result)","expected_output_hint":"파이썬 이 출력되어야 해요","checklist":["result 에 first + second 를 넣어요","print(result)로 합친 글자를 보여 줘요"],"example_output":"파이썬","fallback_text":"문자열끼리 + 를 쓰면 이어붙여져요! \"파이\" + \"썬\" = \"파이썬\"이 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -346,19 +442,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 2-6: 변신 마법! 형변환
+-- 퀘스트 2-7: 글자 합치기 순서
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000105',
+  'a1000000-0000-0000-0000-000000000002',
+  7,
+  '글자 합치기 순서',
+  '변수, 문자열 연결(+)',
+  'quiz',
+  'parsons',
+  TRUE,
+  '{"topic":"변수를 만든 뒤에 쓰는 순서","learning_goals":["변수는 값을 넣은 뒤에 쓸 수 있다는 것을 안다","+ 로 글자를 이어 붙일 수 있다"],"story_context":"마법 접착제로 이름과 장소를 붙여 숲의 안내 문장을 만들어요. 그런데 코드 줄이 뒤죽박죽 섞였어요!","fallback_text":"파이썬은 위에서 아래로 한 줄씩 실행해요. 상자를 쓰려면 그 전에 상자에 값이 들어 있어야 해요.","quiz":{"kind":"parsons","question":"줄을 순서대로 놓아 \"파이뱀이 변수의 숲에 왔어요\"가 나오게 해요","lines":[{"id":"ln-c9hl","code":"msg = name + \"이 \" + place + \"에 왔어요\""},{"id":"ln-j5ux","code":"print(msg)"},{"id":"ln-p7ga","code":"place = \"변수의 숲\""},{"id":"ln-v3qo","code":"name = \"파이뱀\""}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 2-8: 변신 마법! 형변환
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000007',
   'a1000000-0000-0000-0000-000000000002',
-  6,
+  8,
   '변신 마법! 형변환',
   'str(), int() 형변환',
   'code',
   NULL,
   FALSE,
-  '{"topic":"자료형 변환 (str -> int, int -> str)","learning_goals":["int()로 문자열을 숫자로 바꿀 수 있다","str()로 숫자를 문자열로 바꿀 수 있다","형변환이 필요한 상황을 이해한다"],"story_context":"변신 마법사를 만났어요! 글자를 숫자로, 숫자를 글자로 변신시킬 수 있대요.","exercise_description":"문자열 \"100\"과 \"23\"을 int()로 숫자로 바꿔서 더한 뒤 결과를 출력하세요","starter_code":"# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = \nprint(result)","expected_output_hint":"123이 출력되어야 해요","fallback_text":"\"100\"은 글자예요. int(\"100\")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요."}'::jsonb,
+  '{"topic":"자료형 변환 (str -> int, int -> str)","learning_goals":["int()로 문자열을 숫자로 바꿀 수 있다","str()로 숫자를 문자열로 바꿀 수 있다","형변환이 필요한 상황을 이해한다"],"story_context":"변신 마법사를 만났어요! 글자를 숫자로, 숫자를 글자로 변신시킬 수 있대요.","exercise_description":"문자열 \"100\"과 \"23\"을 int()로 숫자로 바꿔서 더한 뒤 결과를 출력하세요","starter_code":"# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = \nprint(result)","expected_output_hint":"123이 출력되어야 해요","checklist":["int( )로 a와 b를 숫자로 바꿔요","두 숫자를 더해 result 에 넣어요","result 를 보여 줘요"],"example_output":"123","fallback_text":"\"100\"은 글자예요. int(\"100\")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요."}'::jsonb,
   'output_match',
   '',
   50
@@ -370,19 +490,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 2-7: 자기소개 카드 만들기
+-- 퀘스트 2-9: 변신 마법 버그 잡기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000106',
+  'a1000000-0000-0000-0000-000000000002',
+  9,
+  '변신 마법 버그 잡기',
+  'str() 형변환',
+  'quiz',
+  'bug_hunt',
+  TRUE,
+  '{"topic":"글자와 숫자를 이어 붙일 때","learning_goals":["글자와 숫자는 + 로 바로 이어 붙일 수 없다는 것을 안다"],"story_context":"변신 마법사가 나이 소개 문장을 만들다가 오류를 냈어요. 어느 줄이 문제일까요?","fallback_text":"글자와 숫자는 종류가 달라서 + 로 바로 붙일 수 없어요. 숫자를 글자로 바꾸는 변신 마법을 떠올려 봐요.","quiz":{"kind":"bug_hunt","question":"오류가 나는 줄을 찾아 고쳐요","lines":[{"id":"ln-d4yb","code":"age = 10"},{"id":"ln-u8fk","code":"print(\"나는 \" + age + \"살이에요\")"}],"fixes":[{"id":"fx-h2wc","code":"print(\"나는 \" + str(age) + \"살이에요\")"},{"id":"fx-n6ze","code":"print(\"나는 \" + int(age) + \"살이에요\")"},{"id":"fx-q9rt","code":"print(\"나는 + age + 살이에요\")"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 2-10: 자기소개 카드 만들기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000029',
   'a1000000-0000-0000-0000-000000000002',
-  7,
+  10,
   '자기소개 카드 만들기',
   '변수 종합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"변수와 문자열 연결 종합 활용","learning_goals":["여러 변수를 선언하고 값을 저장할 수 있다","문자열 연결을 사용하여 의미 있는 문장을 만들 수 있다","변수를 활용하여 자기소개 카드를 완성할 수 있다"],"story_context":"변수의 숲을 떠나기 전에, 지금까지 배운 걸 모아서 멋진 자기소개 카드를 만들어봐요!","exercise_description":"name, age, school 변수에 각각 값을 저장하고, 문자열 연결로 자기소개를 3줄로 출력하세요","starter_code":"# 자기소개 카드를 만들어보세요!\nname = \"파이뱀\"\nage = \"10\"\nschool = \"코딩초등학교\"\n\n# 아래에 print()를 3번 써서 자기소개를 출력하세요!\n","expected_output_hint":"이름: 파이뱀, 나이: 10살, 학교: 코딩초등학교 가 각각 한 줄씩 출력되어야 해요","fallback_text":"변수에 저장한 값과 문자열을 + 로 합쳐서 출력해요! print(\"이름: \" + name) 이렇게요.","is_challenge":true}'::jsonb,
+  '{"topic":"변수와 문자열 연결 종합 활용","learning_goals":["여러 변수를 선언하고 값을 저장할 수 있다","문자열 연결을 사용하여 의미 있는 문장을 만들 수 있다","변수를 활용하여 자기소개 카드를 완성할 수 있다"],"story_context":"변수의 숲을 떠나기 전에, 지금까지 배운 걸 모아서 멋진 자기소개 카드를 만들어봐요!","exercise_description":"name, age, school 변수에 각각 값을 저장하고, 문자열 연결로 자기소개를 3줄로 출력하세요","starter_code":"# 자기소개 카드를 만들어보세요!\nname = \"파이뱀\"\nage = \"10\"\nschool = \"코딩초등학교\"\n\n# 아래에 print()를 3번 써서 자기소개를 출력하세요!\n","expected_output_hint":"이름: 파이뱀, 나이: 10살, 학교: 코딩초등학교 가 각각 한 줄씩 출력되어야 해요","checklist":["print( )를 세 번 써요","+ 로 \"이름: \" 과 name 을 이어 붙여요","나이 뒤에는 살, 학교 줄도 같은 방법으로 써요"],"example_output":"이름: 파이뱀\n나이: 10살\n학교: 코딩초등학교","fallback_text":"변수에 저장한 값과 문자열을 + 로 합쳐서 출력해요! print(\"이름: \" + name) 이렇게요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -406,7 +550,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"if/else 조건문","learning_goals":["if 문으로 조건을 검사할 수 있다","else로 조건이 거짓일 때 실행할 코드를 작성할 수 있다","== 비교 연산자를 사용할 수 있다"],"story_context":"갈림길의 비밀 문 앞에 섰어요! 올바른 비밀번호를 입력해야 문이 열려요.","exercise_description":"password 변수에 \"열려라\"를 저장하고, if문으로 password가 \"열려라\"와 같으면 \"통과!\"를 출력하세요","starter_code":"# 비밀번호를 확인하는 코드를 작성해보세요!\npassword = \"열려라\"\n\nif password == \"열려라\":\n    print()","expected_output_hint":"통과! 가 출력되어야 해요","fallback_text":"if는 \"만약 ~라면\"이에요! if password == \"열려라\": 이렇게 조건을 쓰고, 다음 줄에 들여쓰기 후 실행할 코드를 써요."}'::jsonb,
+  '{"topic":"if/else 조건문","learning_goals":["if 문으로 조건을 검사할 수 있다","else로 조건이 거짓일 때 실행할 코드를 작성할 수 있다","== 비교 연산자를 사용할 수 있다"],"story_context":"갈림길의 비밀 문 앞에 섰어요! 올바른 비밀번호를 입력해야 문이 열려요.","exercise_description":"password 변수에 \"열려라\"를 저장하고, if문으로 password가 \"열려라\"와 같으면 \"통과!\"를 출력하세요","starter_code":"# 비밀번호를 확인하는 코드를 작성해보세요!\npassword = \"열려라\"\n\nif password == \"열려라\":\n    print()","expected_output_hint":"통과! 가 출력되어야 해요","checklist":["if 아래 print( ) 안에 \"통과!\"를 넣어요","if 안의 줄은 네 칸 들여 써요"],"example_output":"통과!","fallback_text":"if는 \"만약 ~라면\"이에요! if password == \"열려라\": 이렇게 조건을 쓰고, 다음 줄에 들여쓰기 후 실행할 코드를 써요."}'::jsonb,
   'output_match',
   '',
   50
@@ -418,19 +562,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 3-2: 짝수인지 홀수인지?
+-- 퀘스트 3-2: 비밀 문 버그 잡기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000107',
+  'a1000000-0000-0000-0000-000000000003',
+  2,
+  '비밀 문 버그 잡기',
+  'if/else, 비교(==)',
+  'quiz',
+  'bug_hunt',
+  TRUE,
+  '{"topic":"같은지 비교하는 기호","learning_goals":["값을 넣는 기호와 같은지 비교하는 기호가 다르다는 것을 안다"],"story_context":"갈림길의 비밀 문 코드가 고장 났어요! 비밀번호가 맞는데도 문이 열리지 않고 오류가 나요.","fallback_text":"= 하나는 상자에 값을 넣는 기호예요. if 에서는 두 값이 같은지 물어봐야 해요. 앞에서 비밀번호 퀘스트를 풀 때 쓴 기호를 떠올려 봐요.","quiz":{"kind":"bug_hunt","question":"오류가 나는 줄을 찾아 고쳐요","lines":[{"id":"ln-g5ma","code":"password = \"1234\""},{"id":"ln-x7pe","code":"if password = \"1234\":"},{"id":"ln-b3sk","code":"    print(\"문이 열려요!\")"},{"id":"ln-w8vh","code":"else:"},{"id":"ln-f2ty","code":"    print(\"땡!\")"}],"fixes":[{"id":"fx-a6rq","code":"if password == \"1234\":"},{"id":"fx-l4cn","code":"if password == 1234:"},{"id":"fx-z9um","code":"if password = \"1234\""}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 3-3: 짝수인지 홀수인지?
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000030',
   'a1000000-0000-0000-0000-000000000003',
-  2,
+  3,
   '짝수인지 홀수인지?',
   'if/else, % 나머지 연산',
   'code',
   NULL,
   FALSE,
-  '{"topic":"if/else와 나머지 연산자 %","learning_goals":["% 연산자로 나머지를 구할 수 있다","짝수/홀수를 판별하는 조건을 만들 수 있다"],"story_context":"갈림길에서 숫자 요정을 만났어요! 숫자가 짝수인지 홀수인지 알려줘야 길을 안내해줘요.","exercise_description":"number = 7에 대해 짝수인지 홀수인지 판별하여 출력하세요. 짝수면 \"짝수\", 홀수면 \"홀수\"를 출력!","starter_code":"# 짝수인지 홀수인지 판별해보세요!\nnumber = 7\n\nif number % 2 == 0:\n    print(\"짝수\")\nelse:\n    print()","expected_output_hint":"홀수 가 출력되어야 해요","fallback_text":"% 연산자는 나누기의 나머지를 구해요! 7 % 2 = 1 이니까 홀수예요. 짝수는 나머지가 0이에요."}'::jsonb,
+  '{"topic":"if/else와 나머지 연산자 %","learning_goals":["% 연산자로 나머지를 구할 수 있다","짝수/홀수를 판별하는 조건을 만들 수 있다"],"story_context":"갈림길에서 숫자 요정을 만났어요! 숫자가 짝수인지 홀수인지 알려줘야 길을 안내해줘요.","exercise_description":"number = 7에 대해 짝수인지 홀수인지 판별하여 출력하세요. 짝수면 \"짝수\", 홀수면 \"홀수\"를 출력!","starter_code":"# 짝수인지 홀수인지 판별해보세요!\nnumber = 7\n\nif number % 2 == 0:\n    print(\"짝수\")\nelse:\n    print()","expected_output_hint":"홀수 가 출력되어야 해요","checklist":["else 아래 print( ) 안에 \"홀수\"를 넣어요","7을 2로 나눈 나머지가 1이라 else 쪽이 돌아가요"],"example_output":"홀수","fallback_text":"% 연산자는 나누기의 나머지를 구해요! 7 % 2 = 1 이니까 홀수예요. 짝수는 나머지가 0이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -442,19 +610,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 3-3: 성적표 만들기
+-- 퀘스트 3-4: 숫자 요정의 대답
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000108',
+  'a1000000-0000-0000-0000-000000000003',
+  4,
+  '숫자 요정의 대답',
+  'if/else, % 나머지 연산',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"나머지로 짝수·홀수 가르기","learning_goals":["% 로 나머지를 구해 짝수와 홀수를 가를 수 있다","if/else 중 한 쪽만 실행된다는 것을 안다"],"story_context":"숫자 요정이 숫자 7을 들고 왔어요. 요정의 코드를 돌리면 어떤 말이 나올까요?","fallback_text":"% 는 나눈 뒤 남는 수를 구해요. 7을 2로 나누면 얼마가 남는지, 그 값이 0과 같은지 생각해 봐요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"n = 7\nif n % 2 == 0:\n    print(\"짝수\")\nelse:\n    print(\"홀수\")","options":[{"id":"opt-c2jw","text":"짝수홀수"},{"id":"opt-k3vy","text":"홀수"},{"id":"opt-m5xo","text":"1"},{"id":"opt-r8bd","text":"짝수"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 3-5: 성적표 만들기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000009',
   'a1000000-0000-0000-0000-000000000003',
-  3,
+  5,
   '성적표 만들기',
   'if/elif/else',
   'code',
   NULL,
   FALSE,
-  '{"topic":"if/elif/else 다중 조건문","learning_goals":["elif로 여러 조건을 순서대로 검사할 수 있다","if/elif/else의 실행 흐름을 이해한다"],"story_context":"갈림길의 마법 성적표! 점수에 따라 다른 등급이 나와요.","exercise_description":"score = 85일 때, 90 이상이면 \"등급: A\", 80 이상이면 \"등급: B\", 그 외에는 \"등급: C\"를 출력하세요","starter_code":"# 점수에 따라 등급을 매겨보세요!\nscore = 85\n\nif score >= 90:\n    print(\"등급: A\")\nelif score >= 80:\n    print()\nelse:\n    print(\"등급: C\")","expected_output_hint":"등급: B 가 출력되어야 해요","fallback_text":"elif는 \"그렇지 않고 만약 ~라면\"이에요! 위의 조건이 안 맞으면 다음 elif 조건을 확인해요."}'::jsonb,
+  '{"topic":"if/elif/else 다중 조건문","learning_goals":["elif로 여러 조건을 순서대로 검사할 수 있다","if/elif/else의 실행 흐름을 이해한다"],"story_context":"갈림길의 마법 성적표! 점수에 따라 다른 등급이 나와요.","exercise_description":"score = 85일 때, 90 이상이면 \"등급: A\", 80 이상이면 \"등급: B\", 그 외에는 \"등급: C\"를 출력하세요","starter_code":"# 점수에 따라 등급을 매겨보세요!\nscore = 85\n\nif score >= 90:\n    print(\"등급: A\")\nelif score >= 80:\n    print()\nelse:\n    print(\"등급: C\")","expected_output_hint":"등급: B 가 출력되어야 해요","checklist":["elif 아래 print( ) 안에 \"등급: B\"를 넣어요","85점이 어느 칸에 들어가는지 생각해 봐요"],"example_output":"등급: B","fallback_text":"elif는 \"그렇지 않고 만약 ~라면\"이에요! 위의 조건이 안 맞으면 다음 elif 조건을 확인해요."}'::jsonb,
   'contains',
   '',
   50
@@ -466,19 +658,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 3-4: 놀이공원 입장
+-- 퀘스트 3-6: 놀이공원 입장
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000010',
   'a1000000-0000-0000-0000-000000000003',
-  4,
+  6,
   '놀이공원 입장',
   '비교연산자 (>=, <=, >, <)',
   'code',
   NULL,
   FALSE,
-  '{"topic":"비교연산자로 조건 만들기","learning_goals":[">=, <=, >, < 비교연산자를 사용할 수 있다","비교 결과가 True/False임을 이해한다"],"story_context":"놀이공원에 가려면 키가 120cm 이상이어야 해요! 키를 재볼까요?","exercise_description":"height = 130일 때, height >= 120이면 \"입장 가능!\"을 출력하세요","starter_code":"# 키를 확인하는 코드를 작성해보세요!\nheight = 130\n\nif height >= 120:\n    print()","expected_output_hint":"입장 가능! 이 출력되어야 해요","fallback_text":">= 는 \"크거나 같다\"는 뜻이에요! height >= 120은 키가 120 이상인지 물어보는 거예요."}'::jsonb,
+  '{"topic":"비교연산자로 조건 만들기","learning_goals":[">=, <=, >, < 비교연산자를 사용할 수 있다","비교 결과가 True/False임을 이해한다"],"story_context":"놀이공원에 가려면 키가 120cm 이상이어야 해요! 키를 재볼까요?","exercise_description":"height = 130일 때, height >= 120이면 \"입장 가능!\"을 출력하세요","starter_code":"# 키를 확인하는 코드를 작성해보세요!\nheight = 130\n\nif height >= 120:\n    print()","expected_output_hint":"입장 가능! 이 출력되어야 해요","checklist":["if 아래 print( ) 안에 \"입장 가능!\"을 넣어요","130이 120 이상인지 생각해 봐요"],"example_output":"입장 가능!","fallback_text":">= 는 \"크거나 같다\"는 뜻이에요! height >= 120은 키가 120 이상인지 물어보는 거예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -490,19 +682,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 3-5: 마법사의 조건
+-- 퀘스트 3-7: 마법사의 조건
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000011',
   'a1000000-0000-0000-0000-000000000003',
-  5,
+  7,
   '마법사의 조건',
   'and/or/not 논리연산자',
   'code',
   NULL,
   FALSE,
-  '{"topic":"논리연산자 and, or, not","learning_goals":["and는 두 조건이 모두 참일 때 참이 되는 것을 안다","or는 하나만 참이어도 참이 되는 것을 안다","논리연산자로 복합 조건을 만들 수 있다"],"story_context":"마법사가 되려면 두 가지 시험을 모두 통과해야 해요! 마법 점수와 용기 점수가 모두 높아야 해요.","exercise_description":"magic = 80, courage = 70일 때, 둘 다 60 이상이면 \"마법사 합격!\"을 출력하세요","starter_code":"# 마법사 자격을 확인해보세요!\nmagic = 80\ncourage = 70\n\nif magic >= 60 and courage >= 60:\n    print()","expected_output_hint":"마법사 합격! 이 출력되어야 해요","fallback_text":"and는 \"그리고\"예요! magic >= 60 and courage >= 70은 \"마법 점수가 60 이상이고 용기 점수도 60 이상\"이라는 뜻이에요."}'::jsonb,
+  '{"topic":"논리연산자 and, or, not","learning_goals":["and는 두 조건이 모두 참일 때 참이 되는 것을 안다","or는 하나만 참이어도 참이 되는 것을 안다","논리연산자로 복합 조건을 만들 수 있다"],"story_context":"마법사가 되려면 두 가지 시험을 모두 통과해야 해요! 마법 점수와 용기 점수가 모두 높아야 해요.","exercise_description":"magic = 80, courage = 70일 때, 둘 다 60 이상이면 \"마법사 합격!\"을 출력하세요","starter_code":"# 마법사 자격을 확인해보세요!\nmagic = 80\ncourage = 70\n\nif magic >= 60 and courage >= 60:\n    print()","expected_output_hint":"마법사 합격! 이 출력되어야 해요","checklist":["and 로 두 조건을 함께 봐요","if 아래 print( ) 안에 \"마법사 합격!\"을 넣어요"],"example_output":"마법사 합격!","fallback_text":"and는 \"그리고\"예요! magic >= 60 and courage >= 70은 \"마법 점수가 60 이상이고 용기 점수도 60 이상\"이라는 뜻이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -514,19 +706,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 3-6: 가위바위보 심판
+-- 퀘스트 3-8: 마법사 시험 빈칸
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000109',
+  'a1000000-0000-0000-0000-000000000003',
+  8,
+  '마법사 시험 빈칸',
+  'and/or 논리연산자',
+  'quiz',
+  'fill_blank',
+  TRUE,
+  '{"topic":"두 조건을 모두 따지기","learning_goals":["두 조건이 모두 참이어야 할 때 쓰는 논리연산자를 고를 수 있다"],"story_context":"마법사 시험은 마법 점수와 용기 점수가 둘 다 80점 이상이어야 합격이에요. 판정 코드에 빈칸이 생겼어요!","fallback_text":"논리연산자는 세 가지를 배웠어요. \"둘 다\"일 때, \"하나라도\"일 때, \"반대로\"일 때 각각 무엇을 쓰는지 떠올려 봐요.","quiz":{"kind":"fill_blank","question":"빈칸을 채워 두 점수가 모두 80 이상일 때만 합격이 나오게 해요","code":"magic = 90\ncourage = 70\nif magic >= 80 {{bk-t5wq}} courage >= 80:\n    print(\"마법사 합격!\")\nelse:\n    print(\"다시 도전!\")","tokens":[{"id":"tok-e7lu","text":"and"},{"id":"tok-q6ka","text":"not"},{"id":"tok-y3ni","text":"or"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 3-9: 가위바위보 심판
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000031',
   'a1000000-0000-0000-0000-000000000003',
-  6,
+  9,
   '가위바위보 심판',
   '중첩 if문',
   'code',
   NULL,
   FALSE,
-  '{"topic":"중첩 if문으로 복잡한 조건 처리하기","learning_goals":["if 안에 if를 넣어 중첩 조건을 만들 수 있다","여러 조건을 조합하여 결과를 판단할 수 있다"],"story_context":"갈림길의 가위바위보 대회! 심판이 되어 누가 이겼는지 판정해봐요!","exercise_description":"player = \"가위\", computer = \"보\"일 때 가위바위보 결과를 판정하세요. 가위가 보를 이기니까 \"이겼다!\"를 출력!","starter_code":"# 가위바위보 심판이 되어보세요!\nplayer = \"가위\"\ncomputer = \"보\"\n\nif player == computer:\n    print(\"비겼다!\")\nelif player == \"가위\":\n    if computer == \"보\":\n        print()\n    else:\n        print(\"졌다!\")","expected_output_hint":"이겼다! 가 출력되어야 해요","fallback_text":"if 안에 또 if를 쓸 수 있어요! 가위가 보를 이기니까, player가 가위이고 computer가 보이면 이긴 거예요."}'::jsonb,
+  '{"topic":"중첩 if문으로 복잡한 조건 처리하기","learning_goals":["if 안에 if를 넣어 중첩 조건을 만들 수 있다","여러 조건을 조합하여 결과를 판단할 수 있다"],"story_context":"갈림길의 가위바위보 대회! 심판이 되어 누가 이겼는지 판정해봐요!","exercise_description":"player = \"가위\", computer = \"보\"일 때 가위바위보 결과를 판정하세요. 가위가 보를 이기니까 \"이겼다!\"를 출력!","starter_code":"# 가위바위보 심판이 되어보세요!\nplayer = \"가위\"\ncomputer = \"보\"\n\nif player == computer:\n    print(\"비겼다!\")\nelif player == \"가위\":\n    if computer == \"보\":\n        print()\n    else:\n        print(\"졌다!\")","expected_output_hint":"이겼다! 가 출력되어야 해요","checklist":["안쪽 if 아래 print( ) 안에 \"이겼다!\"를 넣어요","가위와 보일 때 어느 줄이 돌아가는지 따라가 봐요"],"example_output":"이겼다!","fallback_text":"if 안에 또 if를 쓸 수 있어요! 가위가 보를 이기니까, player가 가위이고 computer가 보이면 이긴 거예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -538,19 +754,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 3-7: 영화관 할인 시스템
+-- 퀘스트 3-10: 영화관 할인 시스템
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000032',
   'a1000000-0000-0000-0000-000000000003',
-  7,
+  10,
   '영화관 할인 시스템',
   '조건문 종합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"조건문 종합 활용 - 할인 시스템 만들기","learning_goals":["if/elif/else를 활용하여 실용적인 프로그램을 만들 수 있다","여러 조건을 조합하여 복잡한 로직을 구현할 수 있다","변수와 조건문을 함께 사용할 수 있다"],"story_context":"갈림길의 영화관에서 할인 시스템을 만들어야 해요! 나이와 요일에 따라 할인율이 달라져요.","exercise_description":"age=10, is_weekend=False일 때, 어린이(13세 미만) 평일 50% 할인을 적용하여 나이, 할인율, 가격을 출력하세요. 원래 가격은 10000원이에요.","starter_code":"# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n","expected_output_hint":"나이: 10살, 할인율: 50%, 가격: 5000원 이 각각 출력되어야 해요","fallback_text":"if 안에 또 if를 쓸 수 있어요! 먼저 나이로 어린이인지 확인하고, 그 안에서 평일인지 주말인지 확인해요.","is_challenge":true}'::jsonb,
+  '{"topic":"조건문 종합 활용 - 할인 시스템 만들기","learning_goals":["if/elif/else를 활용하여 실용적인 프로그램을 만들 수 있다","여러 조건을 조합하여 복잡한 로직을 구현할 수 있다","변수와 조건문을 함께 사용할 수 있다"],"story_context":"갈림길의 영화관에서 할인 시스템을 만들어야 해요! 나이와 요일에 따라 할인율이 달라져요.","exercise_description":"age=10, is_weekend=False일 때, 어린이(13세 미만) 평일 50% 할인을 적용하여 나이, 할인율, 가격을 출력하세요. 원래 가격은 10000원이에요.","starter_code":"# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n","expected_output_hint":"나이: 10살, 할인율: 50%, 가격: 5000원 이 각각 출력되어야 해요","checklist":["if 로 13세 미만인지, 평일인지 살펴서 discount 를 정해요","final_price 로 할인된 가격을 구해요","나이·할인율·가격을 한 줄씩 보여 줘요"],"example_output":"나이: 10살\n할인율: 50%\n가격: 5000원","fallback_text":"if 안에 또 if를 쓸 수 있어요! 먼저 나이로 어린이인지 확인하고, 그 안에서 평일인지 주말인지 확인해요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -574,7 +790,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문과 range() 함수","learning_goals":["for 반복문의 구조를 이해한다","range()로 숫자 범위를 만들 수 있다","반복문 안의 코드가 여러 번 실행되는 것을 안다"],"story_context":"동굴 입구에서 마법 숫자를 세어야 문이 열려요! 1부터 5까지 세어볼까요?","exercise_description":"for 반복문과 range()를 사용하여 1부터 5까지 한 줄에 하나씩 출력하세요","starter_code":"# 1부터 5까지 세어보세요!\n# for 반복문과 range()를 사용해보세요!\n\nfor i in range(__, __):\n    print(i)","expected_output_hint":"1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요","fallback_text":"for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요)."}'::jsonb,
+  '{"topic":"for 반복문과 range() 함수","learning_goals":["for 반복문의 구조를 이해한다","range()로 숫자 범위를 만들 수 있다","반복문 안의 코드가 여러 번 실행되는 것을 안다"],"story_context":"동굴 입구에서 마법 숫자를 세어야 문이 열려요! 1부터 5까지 세어볼까요?","exercise_description":"for 반복문과 range()를 사용하여 1부터 5까지 한 줄에 하나씩 출력하세요","starter_code":"# 1부터 5까지 세어보세요!\n# for 반복문과 range()를 사용해보세요!\n\nfor i in range(__, __):\n    print(i)","expected_output_hint":"1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요","checklist":["range( ) 빈칸에 시작 숫자와 끝 숫자를 넣어요","끝 숫자는 하나 더 크게 써요","1부터 5까지 한 줄씩 나오는지 봐요"],"example_output":"1\n2\n3\n4\n5","fallback_text":"for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요)."}'::jsonb,
   'output_match',
   '',
   50
@@ -586,19 +802,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-2: 구구단 외우기
+-- 퀘스트 4-2: 동굴 문 숫자 세기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000110',
+  'a1000000-0000-0000-0000-000000000004',
+  2,
+  '동굴 문 숫자 세기',
+  'for, range()',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"range()가 만드는 숫자","learning_goals":["range(시작, 끝)은 끝 숫자를 넣지 않는다는 것을 안다"],"story_context":"동굴 문 앞에 숫자를 세는 마법 주문이 새겨져 있어요. 주문을 외우면 어떤 숫자가 나올까요?","fallback_text":"range(시작, 끝)은 시작 숫자부터 세지만, 끝 숫자는 넣지 않고 바로 앞에서 멈춰요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"for i in range(1, 4):\n    print(i)","options":[{"id":"opt-f9ob","text":"1\n2\n3\n4"},{"id":"opt-n2hr","text":"0\n1\n2\n3"},{"id":"opt-s7ak","text":"0\n1\n2"},{"id":"opt-w4ze","text":"1\n2\n3"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 4-3: 구구단 외우기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000013',
   'a1000000-0000-0000-0000-000000000004',
-  2,
+  3,
   '구구단 외우기',
   'for 반복문 활용',
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문으로 구구단 출력하기","learning_goals":["for 반복문을 활용하여 패턴을 출력할 수 있다","변수를 활용한 계산식을 반복문에서 사용할 수 있다"],"story_context":"동굴의 마법사가 구구단 시험을 내요! 2단을 외워볼까요?","exercise_description":"for 반복문으로 2단 구구단(2x1=2부터 2x9=18)을 출력하세요. 형식: 2 x 1 = 2","starter_code":"# 2단 구구단을 출력해보세요!\n# 형식: 2 x 1 = 2\n\nfor i in range(1, 10):\n    print()","expected_output_hint":"2 x 1 = 2 부터 2 x 9 = 18 까지 출력되어야 해요","fallback_text":"for i in range(1, 10)으로 i가 1부터 9까지 바뀌면서 2 * i를 계산해요! print(2, \"x\", i, \"=\", 2*i)로 예쁘게 출력할 수 있어요."}'::jsonb,
+  '{"topic":"for 반복문으로 구구단 출력하기","learning_goals":["for 반복문을 활용하여 패턴을 출력할 수 있다","변수를 활용한 계산식을 반복문에서 사용할 수 있다"],"story_context":"동굴의 마법사가 구구단 시험을 내요! 2단을 외워볼까요?","exercise_description":"for 반복문으로 2단 구구단(2x1=2부터 2x9=18)을 출력하세요. 형식: 2 x 1 = 2","starter_code":"# 2단 구구단을 출력해보세요!\n# 형식: 2 x 1 = 2\n\nfor i in range(1, 10):\n    print()","expected_output_hint":"2 x 1 = 2 부터 2 x 9 = 18 까지 출력되어야 해요","checklist":["print( ) 안에 2, \"x\", i, \"=\", 2*i 를 차례로 넣어요","2 x 1 = 2 부터 2 x 9 = 18 까지 나오는지 봐요"],"example_output":"2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n2 x 6 = 12\n2 x 7 = 14\n2 x 8 = 16\n2 x 9 = 18","fallback_text":"for i in range(1, 10)으로 i가 1부터 9까지 바뀌면서 2 * i를 계산해요! print(2, \"x\", i, \"=\", 2*i)로 예쁘게 출력할 수 있어요."}'::jsonb,
   'contains',
   '',
   50
@@ -610,19 +850,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-3: 별 찍기
+-- 퀘스트 4-4: 별 찍기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000033',
   'a1000000-0000-0000-0000-000000000004',
-  3,
+  4,
   '별 찍기',
   '문자열 반복(*)',
   'code',
   NULL,
   FALSE,
-  '{"topic":"문자열 반복 연산자 *","learning_goals":["* 연산자로 문자열을 반복할 수 있다","print()와 문자열 반복을 조합할 수 있다"],"story_context":"동굴 벽에 별을 새겨야 마법 문이 열려요! 별을 5개 찍어볼까요?","exercise_description":"print(\"*\" * 5)를 사용하여 별 5개를 한 줄로 출력하세요","starter_code":"# 별을 5개 찍어보세요!\n# 힌트: 문자열 * 숫자 = 반복!\n\nprint(\"*\" * ___)","expected_output_hint":"***** 가 출력되어야 해요","fallback_text":"문자열에 * 숫자를 하면 그만큼 반복돼요! \"*\" * 5 = \"*****\" 이에요."}'::jsonb,
+  '{"topic":"문자열 반복 연산자 *","learning_goals":["* 연산자로 문자열을 반복할 수 있다","print()와 문자열 반복을 조합할 수 있다"],"story_context":"동굴 벽에 별을 새겨야 마법 문이 열려요! 별을 5개 찍어볼까요?","exercise_description":"print(\"*\" * 5)를 사용하여 별 5개를 한 줄로 출력하세요","starter_code":"# 별을 5개 찍어보세요!\n# 힌트: 문자열 * 숫자 = 반복!\n\nprint(\"*\" * ___)","expected_output_hint":"***** 가 출력되어야 해요","checklist":["\"*\" * 뒤 빈칸에 5를 넣어요","별 다섯 개가 한 줄로 나오는지 봐요"],"example_output":"*****","fallback_text":"문자열에 * 숫자를 하면 그만큼 반복돼요! \"*\" * 5 = \"*****\" 이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -634,19 +874,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-4: 합계 구하기
+-- 퀘스트 4-5: 합계 구하기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000034',
   'a1000000-0000-0000-0000-000000000004',
-  4,
+  5,
   '합계 구하기',
   '누적 변수 + for',
   'code',
   NULL,
   FALSE,
-  '{"topic":"누적 변수와 for 반복문으로 합계 구하기","learning_goals":["누적 변수를 사용하여 값을 더해갈 수 있다","for 반복문과 누적 변수를 조합할 수 있다"],"story_context":"동굴 속 보물 더미! 금화를 하나씩 세어서 총 몇 개인지 합계를 구해봐요!","exercise_description":"1부터 10까지 숫자를 모두 더한 합계를 구하여 출력하세요","starter_code":"# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)","expected_output_hint":"55 가 출력되어야 해요 (1+2+3+...+10 = 55)","fallback_text":"total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요."}'::jsonb,
+  '{"topic":"누적 변수와 for 반복문으로 합계 구하기","learning_goals":["누적 변수를 사용하여 값을 더해갈 수 있다","for 반복문과 누적 변수를 조합할 수 있다"],"story_context":"동굴 속 보물 더미! 금화를 하나씩 세어서 총 몇 개인지 합계를 구해봐요!","exercise_description":"1부터 10까지 숫자를 모두 더한 합계를 구하여 출력하세요","starter_code":"# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)","expected_output_hint":"55 가 출력되어야 해요 (1+2+3+...+10 = 55)","checklist":["반복 안에서 total = total + i 를 써요","그 줄은 for 안쪽으로 들여 써요","마지막에 total 을 보여 줘요"],"example_output":"55","fallback_text":"total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -658,19 +898,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-5: 보물 찾기
+-- 퀘스트 4-6: 금화 합계 순서
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000111',
+  'a1000000-0000-0000-0000-000000000004',
+  6,
+  '금화 합계 순서',
+  '누적 변수 + for',
+  'quiz',
+  'parsons',
+  TRUE,
+  '{"topic":"반복하며 더하기","learning_goals":["합계 변수를 반복 전에 0으로 만들어야 한다는 것을 안다","반복할 줄만 들여쓰기한다"],"story_context":"동굴 속 금화 더미를 1개, 2개, … 5개씩 쌓아 모두 몇 개인지 세려고 해요. 그런데 코드 줄이 섞였어요!","fallback_text":"합계 상자는 반복을 시작하기 전에 준비해요. 반복 안에서 할 일만 들여쓰기하고, 다 더한 뒤에 한 번만 보여 줘요.","quiz":{"kind":"parsons","question":"줄을 순서대로 놓고 들여쓰기도 맞춰, 1부터 5까지 더한 값을 한 번만 보여 줘요","lines":[{"id":"ln-a8ve","code":"total = total + i"},{"id":"ln-h6ns","code":"for i in range(1, 6):"},{"id":"ln-m3dp","code":"print(total)"},{"id":"ln-y2bq","code":"total = 0"}],"indent":true}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 4-7: 보물 찾기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000014',
   'a1000000-0000-0000-0000-000000000004',
-  5,
+  7,
   '보물 찾기',
   'while, break',
   'code',
   NULL,
   FALSE,
-  '{"topic":"while 반복문과 break","learning_goals":["while 반복문의 구조를 이해한다","break로 반복문을 중간에 멈출 수 있다","조건이 거짓이 될 때까지 반복하는 것을 안다"],"story_context":"동굴 속에서 보물을 찾아 헤매는 모험가! 보물을 찾으면 멈춰야 해요.","exercise_description":"위치를 1부터 하나씩 늘려가며 위치가 5일 때 \"보물 발견!\"을 출력하고 반복을 멈추세요","starter_code":"# 보물을 찾아보세요!\nposition = 1\n\nwhile position <= 10:\n    if position == 5:\n        # 보물을 찾으면 메시지를 출력하고 멈추세요!\n        \n    position = position + 1","expected_output_hint":"보물 발견! 이 출력되어야 해요","fallback_text":"while은 조건이 맞는 동안 계속 반복해요. break를 만나면 반복을 멈춰요! if position == 5: 에서 보물을 찾으면 break로 탈출!"}'::jsonb,
+  '{"topic":"while 반복문과 break","learning_goals":["while 반복문의 구조를 이해한다","break로 반복문을 중간에 멈출 수 있다","조건이 거짓이 될 때까지 반복하는 것을 안다"],"story_context":"동굴 속에서 보물을 찾아 헤매는 모험가! 보물을 찾으면 멈춰야 해요.","exercise_description":"위치를 1부터 하나씩 늘려가며 위치가 5일 때 \"보물 발견!\"을 출력하고 반복을 멈추세요","starter_code":"# 보물을 찾아보세요!\nposition = 1\n\nwhile position <= 10:\n    if position == 5:\n        # 보물을 찾으면 메시지를 출력하고 멈추세요!\n        \n    position = position + 1","expected_output_hint":"보물 발견! 이 출력되어야 해요","checklist":["if 아래에서 print( )로 \"보물 발견!\"을 보여 줘요","바로 다음 줄에 break 로 반복을 멈춰요"],"example_output":"보물 발견!","fallback_text":"while은 조건이 맞는 동안 계속 반복해요. break를 만나면 반복을 멈춰요! if position == 5: 에서 보물을 찾으면 break로 탈출!"}'::jsonb,
   'contains',
   '',
   50
@@ -682,19 +946,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-6: 짝수만 골라내기
+-- 퀘스트 4-8: 짝수만 골라내기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000015',
   'a1000000-0000-0000-0000-000000000004',
-  6,
+  8,
   '짝수만 골라내기',
   'for, if, continue',
   'code',
   NULL,
   FALSE,
-  '{"topic":"continue로 특정 반복 건너뛰기","learning_goals":["continue가 현재 반복만 건너뛰는 것을 안다","% (나머지) 연산자를 사용할 수 있다","for와 if를 조합하여 필터링할 수 있다"],"story_context":"동굴의 마법 필터! 짝수만 통과시키고 홀수는 막아요.","exercise_description":"1부터 10까지 반복하면서 짝수만 출력하세요 (홀수는 continue로 건너뛰기)","starter_code":"# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        # 홀수면 건너뛰세요!\n        \n    print(i)","expected_output_hint":"2, 4, 6, 8, 10이 한 줄씩 출력되어야 해요","fallback_text":"% 는 나머지를 구하는 연산자예요! i % 2 != 0은 홀수라는 뜻이에요. continue를 만나면 아래 코드를 건너뛰고 다음 반복으로 가요."}'::jsonb,
+  '{"topic":"continue로 특정 반복 건너뛰기","learning_goals":["continue가 현재 반복만 건너뛰는 것을 안다","% (나머지) 연산자를 사용할 수 있다","for와 if를 조합하여 필터링할 수 있다"],"story_context":"동굴의 마법 필터! 짝수만 통과시키고 홀수는 막아요.","exercise_description":"1부터 10까지 반복하면서 짝수만 출력하세요 (홀수는 continue로 건너뛰기)","starter_code":"# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        # 홀수면 건너뛰세요!\n        \n    print(i)","expected_output_hint":"2, 4, 6, 8, 10이 한 줄씩 출력되어야 해요","checklist":["홀수일 때 continue 를 써서 건너뛰어요","짝수만 한 줄씩 나오는지 봐요"],"example_output":"2\n4\n6\n8\n10","fallback_text":"% 는 나머지를 구하는 연산자예요! i % 2 != 0은 홀수라는 뜻이에요. continue를 만나면 아래 코드를 건너뛰고 다음 반복으로 가요."}'::jsonb,
   'output_match',
   '',
   50
@@ -706,19 +970,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-7: 카운트다운
+-- 퀘스트 4-9: 카운트다운
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000035',
   'a1000000-0000-0000-0000-000000000004',
-  7,
+  9,
   '카운트다운',
   'while 감소 반복',
   'code',
   NULL,
   FALSE,
-  '{"topic":"while 반복문으로 감소하며 반복하기","learning_goals":["while 반복문으로 숫자를 줄여가며 반복할 수 있다","감소하는 반복 패턴을 이해한다"],"story_context":"동굴 탈출 카운트다운! 5초 안에 빠져나가야 해요! 5, 4, 3, 2, 1... 탈출!","exercise_description":"while 반복문으로 5부터 1까지 카운트다운을 출력하세요","starter_code":"# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! ___ 에 알맞은 숫자를 넣어요\n    count = count - ___\n","expected_output_hint":"5, 4, 3, 2, 1이 한 줄씩 출력되어야 해요","fallback_text":"count = 5에서 시작해서, 반복할 때마다 count = count - 1로 1씩 줄여가요. count가 0이 되면 멈춰요!"}'::jsonb,
+  '{"topic":"while 반복문으로 감소하며 반복하기","learning_goals":["while 반복문으로 숫자를 줄여가며 반복할 수 있다","감소하는 반복 패턴을 이해한다"],"story_context":"동굴 탈출 카운트다운! 5초 안에 빠져나가야 해요! 5, 4, 3, 2, 1... 탈출!","exercise_description":"while 반복문으로 5부터 1까지 카운트다운을 출력하세요","starter_code":"# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! ___ 에 알맞은 숫자를 넣어요\n    count = count - ___\n","expected_output_hint":"5, 4, 3, 2, 1이 한 줄씩 출력되어야 해요","checklist":["빈칸 ___ 에 1을 넣어 count 를 하나씩 줄여요","5부터 1까지 한 줄씩 나오는지 봐요"],"example_output":"5\n4\n3\n2\n1","fallback_text":"count = 5에서 시작해서, 반복할 때마다 count = count - 1로 1씩 줄여가요. count가 0이 되면 멈춰요!"}'::jsonb,
   'output_match',
   '',
   50
@@ -730,19 +994,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 4-8: 별 피라미드 만들기
+-- 퀘스트 4-10: 끝나지 않는 카운트다운
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000112',
+  'a1000000-0000-0000-0000-000000000004',
+  10,
+  '끝나지 않는 카운트다운',
+  'while 반복, 들여쓰기',
+  'quiz',
+  'bug_hunt',
+  TRUE,
+  '{"topic":"반복이 끝나지 않을 때","learning_goals":["while 반복 안에서 조건에 쓰는 값이 바뀌어야 반복이 끝난다는 것을 안다"],"story_context":"동굴 탈출 카운트다운을 돌렸더니 3만 끝없이 나와요! 이대로면 동굴을 빠져나갈 수 없어요.","fallback_text":"while 은 조건이 참인 동안 들여쓰기한 줄을 계속 반복해요. 반복 안에서 n이 바뀌고 있는지 살펴봐요.","quiz":{"kind":"bug_hunt","question":"이 코드는 끝나지 않고 3만 계속 나와요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-e5gc","code":"n = 3"},{"id":"ln-p9ri","code":"while n > 0:"},{"id":"ln-t2xm","code":"    print(n)"},{"id":"ln-o6fu","code":"n = n - 1"},{"id":"ln-j3wa","code":"print(\"탈출!\")"}],"fixes":[{"id":"fx-d3hv","code":"    n = n + 1"},{"id":"fx-r6pq","code":"n = n - 2"},{"id":"fx-u7ky","code":"    n = n - 1"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 4-11: 별 피라미드 만들기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000036',
   'a1000000-0000-0000-0000-000000000004',
-  8,
+  11,
   '별 피라미드 만들기',
   '반복 종합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문과 문자열 반복으로 피라미드 만들기","learning_goals":["for 반복문과 문자열 반복(*)을 조합할 수 있다","반복 변수를 활용하여 패턴을 만들 수 있다"],"story_context":"동굴을 탈출하면 별 피라미드를 쌓아야 해요! 반복의 마법으로 피라미드를 완성해봐요!","exercise_description":"for 반복문과 \"*\" * i 를 사용하여 5줄짜리 별 피라미드를 만드세요","starter_code":"# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()","expected_output_hint":"* 부터 ***** 까지 피라미드가 출력되어야 해요","fallback_text":"for i in range(1, 6)으로 i가 1, 2, 3, 4, 5가 되면서 \"*\" * i로 별이 1개, 2개, 3개, 4개, 5개 출력돼요!","is_challenge":true}'::jsonb,
+  '{"topic":"for 반복문과 문자열 반복으로 피라미드 만들기","learning_goals":["for 반복문과 문자열 반복(*)을 조합할 수 있다","반복 변수를 활용하여 패턴을 만들 수 있다"],"story_context":"동굴을 탈출하면 별 피라미드를 쌓아야 해요! 반복의 마법으로 피라미드를 완성해봐요!","exercise_description":"for 반복문과 \"*\" * i 를 사용하여 5줄짜리 별 피라미드를 만드세요","starter_code":"# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()","expected_output_hint":"* 부터 ***** 까지 피라미드가 출력되어야 해요","checklist":["print( ) 안에 \"*\" * i 를 넣어요","줄마다 별이 하나씩 늘어나는지 봐요"],"example_output":"*\n**\n***\n****\n*****","fallback_text":"for i in range(1, 6)으로 i가 1, 2, 3, 4, 5가 되면서 \"*\" * i로 별이 1개, 2개, 3개, 4개, 5개 출력돼요!","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -766,7 +1054,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 생성과 출력","learning_goals":["대괄호 []로 리스트를 만들 수 있다","리스트에 여러 값을 저장할 수 있다","리스트 전체를 출력할 수 있다"],"story_context":"호수 옆 과일 가게에서 과일 바구니를 만들어요! 좋아하는 과일을 담아봐요.","exercise_description":"fruits라는 리스트에 \"사과\", \"바나나\", \"포도\"를 넣고 출력하세요","starter_code":"# 과일 바구니를 만들어보세요!\n# 대괄호 [] 안에 \"사과\", \"바나나\", \"포도\"를 넣어보세요!\n\nfruits = []\nprint(fruits)","expected_output_hint":"사과, 바나나, 포도가 리스트로 출력되어야 해요","fallback_text":"리스트는 여러 값을 한 상자에 담는 거예요! [\"사과\", \"바나나\", \"포도\"] 이렇게 대괄호 안에 쉼표로 구분해서 넣어요."}'::jsonb,
+  '{"topic":"리스트 생성과 출력","learning_goals":["대괄호 []로 리스트를 만들 수 있다","리스트에 여러 값을 저장할 수 있다","리스트 전체를 출력할 수 있다"],"story_context":"호수 옆 과일 가게에서 과일 바구니를 만들어요! 좋아하는 과일을 담아봐요.","exercise_description":"fruits라는 리스트에 \"사과\", \"바나나\", \"포도\"를 넣고 출력하세요","starter_code":"# 과일 바구니를 만들어보세요!\n# 대괄호 [] 안에 \"사과\", \"바나나\", \"포도\"를 넣어보세요!\n\nfruits = []\nprint(fruits)","expected_output_hint":"사과, 바나나, 포도가 리스트로 출력되어야 해요","checklist":["대괄호 [ ] 안에 \"사과\", \"바나나\", \"포도\"를 넣어요","사이사이에 쉼표를 찍어요"],"example_output":"[''사과'', ''바나나'', ''포도'']","fallback_text":"리스트는 여러 값을 한 상자에 담는 거예요! [\"사과\", \"바나나\", \"포도\"] 이렇게 대괄호 안에 쉼표로 구분해서 넣어요."}'::jsonb,
   'contains',
   '',
   50
@@ -790,7 +1078,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 인덱싱과 슬라이싱","learning_goals":["인덱스 번호로 리스트의 특정 값을 꺼낼 수 있다","인덱스가 0부터 시작하는 것을 안다","슬라이싱으로 리스트의 일부를 잘라낼 수 있다"],"story_context":"보물 목록에서 원하는 보물을 골라내봐요! 몇 번째 보물을 꺼낼까요?","exercise_description":"treasures 리스트에서 인덱스를 사용하여 \"다이아몬드\"를 출력하세요","starter_code":"# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[__])","expected_output_hint":"다이아몬드 가 출력되어야 해요","fallback_text":"리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요."}'::jsonb,
+  '{"topic":"리스트 인덱싱과 슬라이싱","learning_goals":["인덱스 번호로 리스트의 특정 값을 꺼낼 수 있다","인덱스가 0부터 시작하는 것을 안다","슬라이싱으로 리스트의 일부를 잘라낼 수 있다"],"story_context":"보물 목록에서 원하는 보물을 골라내봐요! 몇 번째 보물을 꺼낼까요?","exercise_description":"treasures 리스트에서 인덱스를 사용하여 \"다이아몬드\"를 출력하세요","starter_code":"# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[__])","expected_output_hint":"다이아몬드 가 출력되어야 해요","checklist":["treasures[ ] 빈칸에 다이아몬드의 번호를 넣어요","번호는 0부터 센다는 걸 기억해요"],"example_output":"다이아몬드","fallback_text":"리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -802,19 +1090,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 5-3: 리스트 순회하기
+-- 퀘스트 5-3: 없는 과일 꺼내기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000113',
+  'a1000000-0000-0000-0000-000000000005',
+  3,
+  '없는 과일 꺼내기',
+  '인덱싱',
+  'quiz',
+  'bug_hunt',
+  TRUE,
+  '{"topic":"리스트 번호는 0부터","learning_goals":["리스트의 마지막 번호는 개수보다 1 작다는 것을 안다"],"story_context":"호수 옆 과일 가게에서 첫 과일과 마지막 과일을 보여 주려는데 오류가 났어요!","fallback_text":"리스트 번호는 0부터 세요. 과일이 3개면 번호는 몇부터 몇까지일지 세어 봐요.","quiz":{"kind":"bug_hunt","question":"첫 과일과 마지막 과일을 보여 주려는데 오류가 나요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-q4zs","code":"fruits = [\"사과\", \"바나나\", \"포도\"]"},{"id":"ln-b8ju","code":"print(fruits[0])"},{"id":"ln-x3nd","code":"print(fruits[3])"}],"fixes":[{"id":"fx-g2mt","code":"print(fruits[4])"},{"id":"fx-i9wl","code":"print(fruits(3))"},{"id":"fx-k5oy","code":"print(fruits[2])"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 5-4: 리스트 순회하기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000037',
   'a1000000-0000-0000-0000-000000000005',
-  3,
+  4,
   '리스트 순회하기',
   'for + 리스트',
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문으로 리스트 순회하기","learning_goals":["for 반복문으로 리스트의 각 항목을 하나씩 꺼낼 수 있다","리스트 순회의 개념을 이해한다"],"story_context":"리스트 호수에서 색깔 물고기를 하나씩 잡아보아요! for 반복문으로 모든 물고기를 순서대로 만나봐요!","exercise_description":"colors = [\"빨강\", \"초록\", \"파랑\"] 리스트를 for 반복문으로 순회하며 각 색깔을 출력하세요","starter_code":"# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    ","expected_output_hint":"빨강, 초록, 파랑이 한 줄씩 출력되어야 해요","fallback_text":"for color in colors: 라고 쓰면 colors 리스트에서 하나씩 꺼내서 color 변수에 넣어줘요! 첫 번째는 빨강, 두 번째는 초록, 세 번째는 파랑이에요."}'::jsonb,
+  '{"topic":"for 반복문으로 리스트 순회하기","learning_goals":["for 반복문으로 리스트의 각 항목을 하나씩 꺼낼 수 있다","리스트 순회의 개념을 이해한다"],"story_context":"리스트 호수에서 색깔 물고기를 하나씩 잡아보아요! for 반복문으로 모든 물고기를 순서대로 만나봐요!","exercise_description":"colors = [\"빨강\", \"초록\", \"파랑\"] 리스트를 for 반복문으로 순회하며 각 색깔을 출력하세요","starter_code":"# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    ","expected_output_hint":"빨강, 초록, 파랑이 한 줄씩 출력되어야 해요","checklist":["for 아래에 print(color)를 써요","그 줄은 네 칸 들여 써요"],"example_output":"빨강\n초록\n파랑","fallback_text":"for color in colors: 라고 쓰면 colors 리스트에서 하나씩 꺼내서 color 변수에 넣어줘요! 첫 번째는 빨강, 두 번째는 초록, 세 번째는 파랑이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -826,19 +1138,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 5-4: 친구 목록 관리
+-- 퀘스트 5-5: 친구 목록 관리
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000018',
   'a1000000-0000-0000-0000-000000000005',
-  4,
+  5,
   '친구 목록 관리',
   'append(), len()',
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트에 추가하기(append)와 길이 구하기(len)","learning_goals":["append()로 리스트에 새 값을 추가할 수 있다","len()으로 리스트의 길이를 구할 수 있다"],"story_context":"호수 마을에서 새 친구를 만났어요! 친구 목록에 추가하고 몇 명인지 세어봐요.","exercise_description":"friends 리스트에 \"파이뱀\"을 append하고, len()으로 친구 수를 출력하세요","starter_code":"# 친구를 추가하고 몇 명인지 세어보세요!\nfriends = [\"토끼\", \"거북이\", \"다람쥐\"]\n\n# 아래에 \"파이뱀\"을 추가하고, 친구 수를 출력하세요!\n\nprint()","expected_output_hint":"4 가 출력되어야 해요 (3명 + 파이뱀 1명)","fallback_text":"append()는 리스트 끝에 새 값을 추가해요! len()은 리스트에 몇 개가 있는지 세어줘요."}'::jsonb,
+  '{"topic":"리스트에 추가하기(append)와 길이 구하기(len)","learning_goals":["append()로 리스트에 새 값을 추가할 수 있다","len()으로 리스트의 길이를 구할 수 있다"],"story_context":"호수 마을에서 새 친구를 만났어요! 친구 목록에 추가하고 몇 명인지 세어봐요.","exercise_description":"friends 리스트에 \"파이뱀\"을 append하고, len()으로 친구 수를 출력하세요","starter_code":"# 친구를 추가하고 몇 명인지 세어보세요!\nfriends = [\"토끼\", \"거북이\", \"다람쥐\"]\n\n# 아래에 \"파이뱀\"을 추가하고, 친구 수를 출력하세요!\n\nprint()","expected_output_hint":"4 가 출력되어야 해요 (3명 + 파이뱀 1명)","checklist":["friends.append( )로 \"파이뱀\"을 더해요","print( ) 안에 len(friends)를 넣어 친구 수를 보여 줘요"],"example_output":"4","fallback_text":"append()는 리스트 끝에 새 값을 추가해요! len()은 리스트에 몇 개가 있는지 세어줘요."}'::jsonb,
   'contains',
   '',
   50
@@ -850,19 +1162,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 5-5: 리스트 정렬하기
+-- 퀘스트 5-6: 새 친구 빈칸
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000114',
+  'a1000000-0000-0000-0000-000000000005',
+  6,
+  '새 친구 빈칸',
+  'append(), len()',
+  'quiz',
+  'fill_blank',
+  TRUE,
+  '{"topic":"리스트에 넣고 세기","learning_goals":["리스트 끝에 값을 더하는 함수를 고를 수 있다","리스트의 길이를 세는 함수를 고를 수 있다"],"story_context":"호수 마을에서 여우를 새 친구로 사귀었어요! 친구 목록에 넣고 친구가 모두 몇인지 세어 봐요.","fallback_text":"리스트 끝에 하나를 더하는 함수와, 리스트에 몇 개가 들었는지 세는 함수를 친구 목록 퀘스트에서 배웠어요.","quiz":{"kind":"fill_blank","question":"빈칸을 채워 여우를 친구 목록에 넣고, 친구가 모두 몇인지 보여 줘요","code":"friends = [\"토끼\", \"곰\"]\nfriends.{{bk-w6fe}}(\"여우\")\nprint({{bk-c4ro}}(friends))","tokens":[{"id":"tok-a3gn","text":"append"},{"id":"tok-d5yi","text":"add"},{"id":"tok-l7vb","text":"len"},{"id":"tok-s2pe","text":"sort"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 5-7: 리스트 정렬하기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000038',
   'a1000000-0000-0000-0000-000000000005',
-  5,
+  7,
   '리스트 정렬하기',
   'sort()',
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 정렬하기 sort()","learning_goals":["sort()로 리스트를 오름차순 정렬할 수 있다","정렬 후 리스트가 변경되는 것을 이해한다"],"story_context":"리스트 호수의 숫자 물고기가 뒤죽박죽이에요! sort()로 깔끔하게 정리해봐요!","exercise_description":"numbers = [3, 1, 4, 1, 5]를 sort()로 정렬한 후 출력하세요","starter_code":"# 숫자를 정렬해보세요!\nnumbers = [3, 1, 4, 1, 5]\n\n# sort()로 정렬하세요!\n\nprint(numbers)","expected_output_hint":"[1, 1, 3, 4, 5] 가 출력되어야 해요","fallback_text":"sort()는 리스트를 작은 수부터 큰 수 순서로 정리해줘요! numbers.sort() 이렇게 쓰면 돼요."}'::jsonb,
+  '{"topic":"리스트 정렬하기 sort()","learning_goals":["sort()로 리스트를 오름차순 정렬할 수 있다","정렬 후 리스트가 변경되는 것을 이해한다"],"story_context":"리스트 호수의 숫자 물고기가 뒤죽박죽이에요! sort()로 깔끔하게 정리해봐요!","exercise_description":"numbers = [3, 1, 4, 1, 5]를 sort()로 정렬한 후 출력하세요","starter_code":"# 숫자를 정렬해보세요!\nnumbers = [3, 1, 4, 1, 5]\n\n# sort()로 정렬하세요!\n\nprint(numbers)","expected_output_hint":"[1, 1, 3, 4, 5] 가 출력되어야 해요","checklist":["numbers.sort( )로 작은 수부터 줄 세워요","print(numbers)로 보여 줘요"],"example_output":"[1, 1, 3, 4, 5]","fallback_text":"sort()는 리스트를 작은 수부터 큰 수 순서로 정리해줘요! numbers.sort() 이렇게 쓰면 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -874,19 +1210,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 5-6: 리스트 속 검색
+-- 퀘스트 5-8: 정렬한 물고기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000115',
+  'a1000000-0000-0000-0000-000000000005',
+  8,
+  '정렬한 물고기',
+  'sort()',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"sort()한 리스트 보기","learning_goals":["sort()가 리스트를 작은 수부터 늘어놓는다는 것을 안다","print로 리스트를 보여 주면 대괄호까지 나온다는 것을 안다"],"story_context":"리스트 호수의 숫자 물고기가 뒤죽박죽이에요. 정렬 마법을 쓴 뒤 리스트를 보여 주면 어떻게 나올까요?","fallback_text":"sort()는 리스트 안의 순서를 작은 수부터 큰 수로 바꿔요. 리스트를 통째로 print 하면 대괄호와 쉼표까지 그대로 나와요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"nums = [3, 1, 2]\nnums.sort()\nprint(nums)","options":[{"id":"opt-h8mz","text":"[3, 2, 1]"},{"id":"opt-p6jt","text":"[1, 2, 3]"},{"id":"opt-u3cy","text":"[3, 1, 2]"},{"id":"opt-v2bk","text":"1 2 3"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 5-9: 리스트 속 검색
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000039',
   'a1000000-0000-0000-0000-000000000005',
-  6,
+  9,
   '리스트 속 검색',
   'in 연산자',
   'code',
   NULL,
   FALSE,
-  '{"topic":"in 연산자로 리스트에서 값 찾기","learning_goals":["in 연산자로 리스트에 특정 값이 있는지 확인할 수 있다","in의 결과가 True/False임을 이해한다"],"story_context":"리스트 호수의 과일 바구니에서 바나나를 찾아봐요! in 마법으로 있는지 확인할 수 있어요!","exercise_description":"fruits 리스트에 \"바나나\"가 있는지 in 연산자로 확인하고 결과를 출력하세요","starter_code":"# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"True 가 출력되어야 해요","fallback_text":"in 연산자는 리스트에 값이 있는지 확인해요! \"바나나\" in fruits는 바나나가 fruits에 있으면 True, 없으면 False를 돌려줘요."}'::jsonb,
+  '{"topic":"in 연산자로 리스트에서 값 찾기","learning_goals":["in 연산자로 리스트에 특정 값이 있는지 확인할 수 있다","in의 결과가 True/False임을 이해한다"],"story_context":"리스트 호수의 과일 바구니에서 바나나를 찾아봐요! in 마법으로 있는지 확인할 수 있어요!","exercise_description":"fruits 리스트에 \"바나나\"가 있는지 in 연산자로 확인하고 결과를 출력하세요","starter_code":"# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"True 가 출력되어야 해요","checklist":["result 에 \"바나나\" in fruits 를 넣어요","print(result)로 True 인지 False 인지 봐요"],"example_output":"True","fallback_text":"in 연산자는 리스트에 값이 있는지 확인해요! \"바나나\" in fruits는 바나나가 fruits에 있으면 True, 없으면 False를 돌려줘요."}'::jsonb,
   'output_match',
   '',
   50
@@ -898,19 +1258,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 5-7: 쇼핑 리스트 정리기
+-- 퀘스트 5-10: 쇼핑 리스트 정리기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000040',
   'a1000000-0000-0000-0000-000000000005',
-  7,
+  10,
   '쇼핑 리스트 정리기',
   '리스트 종합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 종합 활용 - 쇼핑 리스트 만들기","learning_goals":["빈 리스트를 만들고 append()로 항목을 추가할 수 있다","sort()로 리스트를 정렬할 수 있다","for 반복문으로 리스트를 순회하여 출력할 수 있다","len()으로 항목 수를 세어 출력할 수 있다"],"story_context":"리스트 호수에서 마지막 시험! 쇼핑 리스트를 만들고, 정리하고, 예쁘게 출력해봐요!","exercise_description":"빈 리스트를 만들고, 우유/주스/과자를 append하고, sort()로 정렬한 후, for로 순회 출력하세요","starter_code":"# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")","expected_output_hint":"쇼핑 목록이 정렬되어 출력되어야 해요","fallback_text":"빈 리스트 []를 만들고, append()로 항목을 추가하고, sort()로 정렬한 뒤, for로 하나씩 출력해요!","is_challenge":true}'::jsonb,
+  '{"topic":"리스트 종합 활용 - 쇼핑 리스트 만들기","learning_goals":["빈 리스트를 만들고 append()로 항목을 추가할 수 있다","sort()로 리스트를 정렬할 수 있다","for 반복문으로 리스트를 순회하여 출력할 수 있다","len()으로 항목 수를 세어 출력할 수 있다"],"story_context":"리스트 호수에서 마지막 시험! 쇼핑 리스트를 만들고, 정리하고, 예쁘게 출력해봐요!","exercise_description":"빈 리스트를 만들고, 우유/주스/과자를 append하고, sort()로 정렬한 후, for로 순회 출력하세요","starter_code":"# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")","expected_output_hint":"쇼핑 목록이 정렬되어 출력되어야 해요","checklist":["append( )로 우유·주스·과자를 하나씩 더해요","sort( )로 가나다 순서로 줄 세워요","목록과 총 개수가 나오는지 봐요"],"example_output":"--- 쇼핑 목록 ---\n과자\n우유\n주스\n총 3개","fallback_text":"빈 리스트 []를 만들고, append()로 항목을 추가하고, sort()로 정렬한 뒤, for로 하나씩 출력해요!","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -934,7 +1294,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수 정의(def)와 호출","learning_goals":["def 키워드로 함수를 만들 수 있다","만든 함수를 호출하여 실행할 수 있다","함수가 코드를 묶어서 재사용하는 것임을 이해한다"],"story_context":"탑의 마법사에게 인사 마법을 배워요! 한 번 만들면 여러 번 사용할 수 있어요.","exercise_description":"greet라는 함수를 만들어 \"안녕! 나는 파이뱀이야!\"를 출력하고, 함수를 호출하세요","starter_code":"# 인사하는 함수를 만들어보세요!\ndef greet():\n    # \"안녕! 나는 파이뱀이야!\"를 출력하세요!\n    \n\ngreet()","expected_output_hint":"안녕! 나는 파이뱀이야! 가 출력되어야 해요","fallback_text":"def greet(): 으로 함수를 만들고, 안에 실행할 코드를 쓴 뒤, greet()으로 호출해요! 함수는 코드를 묶어놓은 마법 주문서예요."}'::jsonb,
+  '{"topic":"함수 정의(def)와 호출","learning_goals":["def 키워드로 함수를 만들 수 있다","만든 함수를 호출하여 실행할 수 있다","함수가 코드를 묶어서 재사용하는 것임을 이해한다"],"story_context":"탑의 마법사에게 인사 마법을 배워요! 한 번 만들면 여러 번 사용할 수 있어요.","exercise_description":"greet라는 함수를 만들어 \"안녕! 나는 파이뱀이야!\"를 출력하고, 함수를 호출하세요","starter_code":"# 인사하는 함수를 만들어보세요!\ndef greet():\n    # \"안녕! 나는 파이뱀이야!\"를 출력하세요!\n    \n\ngreet()","expected_output_hint":"안녕! 나는 파이뱀이야! 가 출력되어야 해요","checklist":["def greet( ) 안에 print( )를 들여 써요","\"안녕! 나는 파이뱀이야!\"를 넣어요","greet( )을 불러서 인사가 나오는지 봐요"],"example_output":"안녕! 나는 파이뱀이야!","fallback_text":"def greet(): 으로 함수를 만들고, 안에 실행할 코드를 쓴 뒤, greet()으로 호출해요! 함수는 코드를 묶어놓은 마법 주문서예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -946,19 +1306,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 6-2: 계산기 함수
+-- 퀘스트 6-2: 인사 함수 순서
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000116',
+  'a1000000-0000-0000-0000-000000000006',
+  2,
+  '인사 함수 순서',
+  'def, 함수 호출',
+  'quiz',
+  'parsons',
+  TRUE,
+  '{"topic":"함수를 만들고 부르기","learning_goals":["함수 안에 들어갈 줄을 들여쓰기한다","함수를 만든 뒤에 불러야 실행된다는 것을 안다"],"story_context":"함수의 탑 마법사가 인사 마법 주문서를 떨어뜨려서 줄이 섞였어요. 다시 맞춰 볼까요?","fallback_text":"def 줄 아래에서 들여쓰기한 줄들이 함수 안에 들어가요. 함수는 만든 다음, 들여쓰기 없이 이름을 불러야 실행돼요.","quiz":{"kind":"parsons","question":"줄을 순서대로 놓고 들여쓰기도 맞춰, \"안녕!\" 다음에 \"나는 파이뱀이야\"가 나오는 함수를 만들고 불러요","lines":[{"id":"ln-c6kt","code":"hello()"},{"id":"ln-f8qe","code":"print(\"안녕!\")"},{"id":"ln-n5ga","code":"def hello():"},{"id":"ln-r3wy","code":"print(\"나는 파이뱀이야\")"}],"indent":true}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 6-3: 계산기 함수
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000020',
   'a1000000-0000-0000-0000-000000000006',
-  2,
+  3,
   '계산기 함수',
   '매개변수, return',
   'code',
   NULL,
   FALSE,
-  '{"topic":"매개변수와 return으로 값 돌려주기","learning_goals":["함수에 매개변수로 값을 전달할 수 있다","return으로 함수가 결과를 돌려주는 것을 이해한다"],"story_context":"탑의 마법 계산기! 두 숫자를 넣으면 합계를 알려줘요.","exercise_description":"add라는 함수를 만들어 두 숫자를 받아 합계를 return하고, add(7, 8)의 결과를 출력하세요","starter_code":"# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    # 두 숫자를 더한 결과를 return 하세요!\n    \n\nresult = add(7, 8)\nprint(result)","expected_output_hint":"15 가 출력되어야 해요","fallback_text":"매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요."}'::jsonb,
+  '{"topic":"매개변수와 return으로 값 돌려주기","learning_goals":["함수에 매개변수로 값을 전달할 수 있다","return으로 함수가 결과를 돌려주는 것을 이해한다"],"story_context":"탑의 마법 계산기! 두 숫자를 넣으면 합계를 알려줘요.","exercise_description":"add라는 함수를 만들어 두 숫자를 받아 합계를 return하고, add(7, 8)의 결과를 출력하세요","starter_code":"# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    # 두 숫자를 더한 결과를 return 하세요!\n    \n\nresult = add(7, 8)\nprint(result)","expected_output_hint":"15 가 출력되어야 해요","checklist":["add 안에서 return a + b 를 써요","add(7, 8)의 결과가 나오는지 봐요"],"example_output":"15","fallback_text":"매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요."}'::jsonb,
   'output_match',
   '',
   50
@@ -970,19 +1354,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 6-3: 기본값이 있는 함수
+-- 퀘스트 6-4: 돌려주는 함수 고르기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000117',
+  'a1000000-0000-0000-0000-000000000006',
+  4,
+  '돌려주는 함수 고르기',
+  '매개변수, return',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"값을 돌려주는 함수","learning_goals":["return 으로 계산한 값을 돌려줄 수 있다","매개변수로 받은 값을 함수 안에서 쓴다"],"story_context":"탑의 마법 계산기를 고치려고 해요. 두 수를 넣으면 더한 값을 돌려줘야 해요.","fallback_text":"함수가 값을 돌려주려면 돌려줄 값을 알려 주는 주문이 필요해요. 그리고 넣어 준 두 수를 받을 자리(매개변수)도 있어야 해요.","quiz":{"kind":"multiple_choice","question":"print(add(2, 3)) 을 돌렸을 때 5가 나오는 함수는 어느 것일까?","options":[{"id":"opt-e3ru","text":"def add(a, b):\n    return \"a + b\""},{"id":"opt-j4xs","text":"def add(a, b):\n    return a + b"},{"id":"opt-o7md","text":"def add(a, b):\n    a + b"},{"id":"opt-y5lf","text":"def add():\n    return a + b"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 6-5: 기본값이 있는 함수
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000041',
   'a1000000-0000-0000-0000-000000000006',
-  3,
+  5,
   '기본값이 있는 함수',
   '기본 매개변수',
   'code',
   NULL,
   FALSE,
-  '{"topic":"기본 매개변수 (default parameter)","learning_goals":["함수의 매개변수에 기본값을 설정할 수 있다","기본값이 있으면 인자를 생략할 수 있음을 이해한다"],"story_context":"함수의 탑에서 인사 마법을 업그레이드! 이름을 안 말해도 기본 인사를 해줘요!","exercise_description":"def greet(name=\"친구\") 함수를 만들고, greet()과 greet(\"파이뱀\")을 각각 호출하세요","starter_code":"# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n","expected_output_hint":"안녕, 친구! 와 안녕, 파이뱀! 이 각각 출력되어야 해요","fallback_text":"매개변수에 = 으로 기본값을 넣으면, 호출할 때 값을 안 넣어도 기본값이 사용돼요! def greet(name=\"친구\"): 에서 greet()은 \"친구\"가, greet(\"파이뱀\")은 \"파이뱀\"이 name에 들어가요."}'::jsonb,
+  '{"topic":"기본 매개변수 (default parameter)","learning_goals":["함수의 매개변수에 기본값을 설정할 수 있다","기본값이 있으면 인자를 생략할 수 있음을 이해한다"],"story_context":"함수의 탑에서 인사 마법을 업그레이드! 이름을 안 말해도 기본 인사를 해줘요!","exercise_description":"def greet(name=\"친구\") 함수를 만들고, greet()과 greet(\"파이뱀\")을 각각 호출하세요","starter_code":"# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n","expected_output_hint":"안녕, 친구! 와 안녕, 파이뱀! 이 각각 출력되어야 해요","checklist":["greet 안에서 \"안녕, \" + name + \"!\"를 보여 줘요","greet( )을 이름 없이 한 번 불러요","greet(\"파이뱀\")으로 한 번 더 불러요"],"example_output":"안녕, 친구!\n안녕, 파이뱀!","fallback_text":"매개변수에 = 으로 기본값을 넣으면, 호출할 때 값을 안 넣어도 기본값이 사용돼요! def greet(name=\"친구\"): 에서 greet()은 \"친구\"가, greet(\"파이뱀\")은 \"파이뱀\"이 name에 들어가요."}'::jsonb,
   'output_match',
   '',
   50
@@ -994,19 +1402,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 6-4: 최댓값 찾기
+-- 퀘스트 6-6: 기본값 빈칸
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000118',
+  'a1000000-0000-0000-0000-000000000006',
+  6,
+  '기본값 빈칸',
+  '기본 매개변수',
+  'quiz',
+  'fill_blank',
+  TRUE,
+  '{"topic":"매개변수에 기본값 주기","learning_goals":["매개변수에 기본값을 정하는 기호를 고를 수 있다"],"story_context":"인사 마법을 업그레이드해요. 이름을 말하지 않아도 \"친구\"라고 불러 주게 만들고 싶어요!","fallback_text":"매개변수에 기본값을 정할 때는 상자에 값을 넣을 때와 같은 기호를 써요. 같은지 비교하는 기호와 헷갈리지 마요.","quiz":{"kind":"fill_blank","question":"빈칸을 채워 greet()만 불러도 \"안녕, 친구\"가 나오게 해요","code":"def greet(name{{bk-h9ap}}\"친구\"):\n    print(\"안녕, \" + name)\ngreet()","tokens":[{"id":"tok-b4wn","text":":"},{"id":"tok-k8hs","text":"=="},{"id":"tok-q2vd","text":"="}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 6-7: 최댓값 찾기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000021',
   'a1000000-0000-0000-0000-000000000006',
-  4,
+  7,
   '최댓값 찾기',
   '내장함수 max(), min()',
   'code',
   NULL,
   FALSE,
-  '{"topic":"파이썬 내장함수 max()와 min()","learning_goals":["max()로 가장 큰 값을 찾을 수 있다","min()로 가장 작은 값을 찾을 수 있다","파이썬에 이미 만들어진 함수가 있다는 것을 안다"],"story_context":"탑 꼭대기에서 마법 숫자들 중 가장 큰 숫자를 찾는 시험! 파이썬의 내장함수를 사용해봐요.","exercise_description":"numbers 리스트에서 max()를 사용하여 가장 큰 수를 출력하세요","starter_code":"# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = \nprint(biggest)","expected_output_hint":"9 가 출력되어야 해요","fallback_text":"max()는 가장 큰 값을 찾아주는 내장함수예요! max([3, 7, 1, 9, 4])는 9를 돌려줘요. min()은 반대로 가장 작은 값을 찾아줘요."}'::jsonb,
+  '{"topic":"파이썬 내장함수 max()와 min()","learning_goals":["max()로 가장 큰 값을 찾을 수 있다","min()로 가장 작은 값을 찾을 수 있다","파이썬에 이미 만들어진 함수가 있다는 것을 안다"],"story_context":"탑 꼭대기에서 마법 숫자들 중 가장 큰 숫자를 찾는 시험! 파이썬의 내장함수를 사용해봐요.","exercise_description":"numbers 리스트에서 max()를 사용하여 가장 큰 수를 출력하세요","starter_code":"# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = \nprint(biggest)","expected_output_hint":"9 가 출력되어야 해요","checklist":["biggest 에 max(numbers)를 넣어요","가장 큰 수가 나오는지 봐요"],"example_output":"9","fallback_text":"max()는 가장 큰 값을 찾아주는 내장함수예요! max([3, 7, 1, 9, 4])는 9를 돌려줘요. min()은 반대로 가장 작은 값을 찾아줘요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1018,19 +1450,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 6-5: 여러 값 돌려주기
+-- 퀘스트 6-8: 여러 값 돌려주기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000042',
   'a1000000-0000-0000-0000-000000000006',
-  5,
+  8,
   '여러 값 돌려주기',
   '다중 return (튜플)',
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수에서 여러 값 돌려주기 (튜플)","learning_goals":["함수에서 여러 값을 return할 수 있다","return된 여러 값을 각각 변수에 받을 수 있다"],"story_context":"함수의 탑에서 마법 분석기를 만들어요! 숫자 중 가장 작은 것과 가장 큰 것을 동시에 알려줘요!","exercise_description":"def min_max(a, b, c) 함수를 만들어 가장 작은 값과 가장 큰 값을 return하세요. min_max(1, 9, 5)를 호출하여 결과를 출력!","starter_code":"# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)","expected_output_hint":"1과 9가 각각 한 줄씩 출력되어야 해요","fallback_text":"return 뒤에 쉼표로 여러 값을 쓰면 한 번에 돌려줄 수 있어요! small, big = min_max(1, 9, 5) 이렇게 받으면 돼요."}'::jsonb,
+  '{"topic":"함수에서 여러 값 돌려주기 (튜플)","learning_goals":["함수에서 여러 값을 return할 수 있다","return된 여러 값을 각각 변수에 받을 수 있다"],"story_context":"함수의 탑에서 마법 분석기를 만들어요! 숫자 중 가장 작은 것과 가장 큰 것을 동시에 알려줘요!","exercise_description":"def min_max(a, b, c) 함수를 만들어 가장 작은 값과 가장 큰 값을 return하세요. min_max(1, 9, 5)를 호출하여 결과를 출력!","starter_code":"# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)","expected_output_hint":"1과 9가 각각 한 줄씩 출력되어야 해요","checklist":["return 뒤에 smallest, biggest 를 쉼표로 이어 써요","작은 수와 큰 수가 한 줄씩 나오는지 봐요"],"example_output":"1\n9","fallback_text":"return 뒤에 쉼표로 여러 값을 쓰면 한 번에 돌려줄 수 있어요! small, big = min_max(1, 9, 5) 이렇게 받으면 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1042,19 +1474,19 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 6-6: 함수 안의 함수 호출
+-- 퀘스트 6-9: 함수 안의 함수 호출
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000043',
   'a1000000-0000-0000-0000-000000000006',
-  6,
+  9,
   '함수 안의 함수 호출',
   '함수 조합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수 조합 (함수의 결과를 다른 함수에 전달)","learning_goals":["함수의 return 값을 다른 함수의 인자로 전달할 수 있다","함수를 조합하여 복잡한 계산을 할 수 있다"],"story_context":"함수의 탑에서 마법을 합쳐볼까요? 두 배로 만드는 마법과 하나 더하는 마법을 합치면 어떻게 될까요?","exercise_description":"double(x)은 x를 2배로, add_one(x)은 x에 1을 더하는 함수를 만들고, add_one(double(3))을 호출하세요","starter_code":"# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"7 이 출력되어야 해요 (3*2=6, 6+1=7)","fallback_text":"double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요."}'::jsonb,
+  '{"topic":"함수 조합 (함수의 결과를 다른 함수에 전달)","learning_goals":["함수의 return 값을 다른 함수의 인자로 전달할 수 있다","함수를 조합하여 복잡한 계산을 할 수 있다"],"story_context":"함수의 탑에서 마법을 합쳐볼까요? 두 배로 만드는 마법과 하나 더하는 마법을 합치면 어떻게 될까요?","exercise_description":"double(x)은 x를 2배로, add_one(x)은 x에 1을 더하는 함수를 만들고, add_one(double(3))을 호출하세요","starter_code":"# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"7 이 출력되어야 해요 (3*2=6, 6+1=7)","checklist":["double(3)을 add_one( ) 안에 넣어요","그 결과를 result 에 넣고 보여 줘요"],"example_output":"7","fallback_text":"double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1066,19 +1498,43 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 6-7: 성적 분석 프로그램
+-- 퀘스트 6-10: 사라진 돌려주기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000119',
+  'a1000000-0000-0000-0000-000000000006',
+  10,
+  '사라진 돌려주기',
+  'return, 함수 조합',
+  'quiz',
+  'bug_hunt',
+  TRUE,
+  '{"topic":"계산한 값을 돌려주지 않을 때","learning_goals":["함수가 값을 돌려주지 않으면 None 이 된다는 것을 안다"],"story_context":"두 배 마법에 1을 더하는 마법을 합쳤더니 오류가 났어요! 탑의 마법사가 도움을 청해요.","fallback_text":"함수를 부른 자리에 값이 돌아오려면 함수 안에서 값을 돌려줘야 해요. 계산만 하고 끝나면 빈 값(None)이 돌아와요.","quiz":{"kind":"bug_hunt","question":"4를 두 배로 만든 뒤 1을 더해 9가 나와야 하는데 오류가 나요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-s6ob","code":"def double(n):"},{"id":"ln-v2kc","code":"    n * 2"},{"id":"ln-z7he","code":"print(double(4) + 1)"}],"fixes":[{"id":"fx-m6tu","code":"    return n + 2"},{"id":"fx-o3ga","code":"    return n * 2"},{"id":"fx-x8ld","code":"    print(n * 2)"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 6-11: 성적 분석 프로그램
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000044',
   'a1000000-0000-0000-0000-000000000006',
-  7,
+  11,
   '성적 분석 프로그램',
   '함수 종합',
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수 종합 활용 - 성적 분석 프로그램","learning_goals":["여러 함수를 만들어 역할을 분담할 수 있다","함수의 return 값을 다른 함수에서 활용할 수 있다","함수를 조합하여 실용적인 프로그램을 만들 수 있다"],"story_context":"함수의 탑 마지막 시험! 배운 함수 마법을 모두 써서 성적 분석 프로그램을 완성해봐요!","exercise_description":"average 함수(3과목 평균)와 grade 함수(평균으로 등급 판정)를 만들어 성적을 분석하세요. 점수: 80, 90, 85","starter_code":"# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)","expected_output_hint":"평균: 85.0 과 등급: B 가 출력되어야 해요","fallback_text":"average 함수로 평균을 구하고, grade 함수로 등급을 판정해요! 두 함수를 조합하면 성적 분석 프로그램이 완성돼요.","is_challenge":true}'::jsonb,
+  '{"topic":"함수 종합 활용 - 성적 분석 프로그램","learning_goals":["여러 함수를 만들어 역할을 분담할 수 있다","함수의 return 값을 다른 함수에서 활용할 수 있다","함수를 조합하여 실용적인 프로그램을 만들 수 있다"],"story_context":"함수의 탑 마지막 시험! 배운 함수 마법을 모두 써서 성적 분석 프로그램을 완성해봐요!","exercise_description":"average 함수(3과목 평균)와 grade 함수(평균으로 등급 판정)를 만들어 성적을 분석하세요. 점수: 80, 90, 85","starter_code":"# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)","expected_output_hint":"평균: 85.0 과 등급: B 가 출력되어야 해요","checklist":["average 에서 세 점수를 더해 3으로 나눠 return 해요","grade 에서 if·elif·else 로 등급을 return 해요","평균과 등급이 한 줄씩 나오는지 봐요"],"example_output":"평균: 85.0\n등급: B","fallback_text":"average 함수로 평균을 구하고, grade 함수로 등급을 판정해요! 두 함수를 조합하면 성적 분석 프로그램이 완성돼요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -1090,19 +1546,67 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
--- 퀘스트 7-1: 숫자 맞추기 게임
+-- 퀘스트 7-1: 판정 코드 맞추기
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000120',
+  'a1000000-0000-0000-0000-000000000007',
+  1,
+  '판정 코드 맞추기',
+  '변수, if/elif/else 복습',
+  'quiz',
+  'parsons',
+  TRUE,
+  '{"topic":"숫자 맞추기 게임의 판정","learning_goals":["조건 세 가지를 if/elif/else 로 나눌 수 있다","조건마다 실행할 줄을 들여쓰기한다"],"story_context":"프로젝트 왕국 문지기가 숫자 맞추기 게임의 판정 코드를 섞어 놨어요. 왕국에 들어가기 전에 다시 맞춰 볼까요?","fallback_text":"비교할 값을 먼저 상자에 넣고, if 와 elif 로 큰지 작은지 물어본 뒤, 둘 다 아니면 else 로 가요. 조건마다 실행할 줄은 들여쓰기해요.","quiz":{"kind":"parsons","question":"줄을 순서대로 놓고 들여쓰기도 맞춰, 고른 숫자가 비밀 숫자보다 큰지 작은지 알려 줘요","lines":[{"id":"ln-b5ny","code":"elif guess > secret:"},{"id":"ln-e3lq","code":"print(\"더 작은 수예요\")"},{"id":"ln-g8tz","code":"guess = 5"},{"id":"ln-i7vo","code":"print(\"정답!\")"},{"id":"ln-k2dh","code":"if guess < secret:"},{"id":"ln-p6xf","code":"else:"},{"id":"ln-u4mr","code":"secret = 7"},{"id":"ln-w9ac","code":"print(\"더 큰 수예요\")"}],"indent":true}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 7-2: 몇 번 만에 맞혔을까?
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000121',
+  'a1000000-0000-0000-0000-000000000007',
+  2,
+  '몇 번 만에 맞혔을까?',
+  'for + 리스트, 누적 변수 복습',
+  'quiz',
+  'multiple_choice',
+  TRUE,
+  '{"topic":"반복한 횟수 세기","learning_goals":["반복할 때마다 1씩 더해 횟수를 셀 수 있다"],"story_context":"숫자 맞추기 게임에서 친구가 고른 숫자 기록이 남아 있어요. 기록을 세는 코드를 돌리면 무엇이 나올까요?","fallback_text":"for 는 리스트에 든 값마다 한 번씩 반복해요. tries 에는 리스트의 숫자가 아니라 1이 더해진다는 걸 잘 봐요.","quiz":{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"tries = 0\nfor guess in [3, 8, 5]:\n    tries = tries + 1\nprint(tries)","options":[{"id":"opt-a9ry","text":"1\n2\n3"},{"id":"opt-f5wi","text":"3"},{"id":"opt-l3ep","text":"16"},{"id":"opt-t8gc","text":"1"}]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 7-3: 숫자 맞추기 게임
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
 VALUES (
   'b1000000-0000-0000-0000-000000000022',
   'a1000000-0000-0000-0000-000000000007',
-  1,
+  3,
   '숫자 맞추기 게임',
   '종합 프로젝트',
   'project',
   NULL,
   FALSE,
-  '{"topic":"종합 프로젝트: 숫자 맞추기 게임 만들기","learning_goals":["배운 모든 개념(변수, 조건, 반복, 함수)을 조합할 수 있다","프로그램을 단계적으로 설계하고 구현할 수 있다","완성된 프로그램을 만드는 경험을 쌓는다"],"story_context":"프로젝트 왕국의 최종 관문! 배운 모든 것을 모아 숫자 맞추기 게임을 완성하면 코딩 마법사가 돼요!","exercise_description":"1~10 사이의 비밀 숫자를 맞추는 게임을 만드세요. 5단계에 걸쳐 하나씩 기능을 추가하며 완성해요!","starter_code":"# 숫자 맞추기 게임을 만들어보세요!\nimport random\n","expected_output_hint":"프로젝트를 5단계로 나누어 완성해요","fallback_text":"드디어 프로젝트 왕국에 도착했어요! 지금까지 배운 변수, 조건문, 반복문을 모두 활용해서 숫자 맞추기 게임을 만들 거예요. 5단계로 나누어 하나씩 만들어볼까요?","steps":[{"step_number":1,"step_goal":"random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기","starter_code":"# 1단계: 비밀 숫자 만들기\nimport random\n\n# 비밀 숫자를 만들어보세요! random 모듈을 사용해볼까요?\n","validation_type":"code_check","fallback_text":"1단계에서는 random 모듈을 사용해서 비밀 숫자를 만들어요! random.randint(1, 10)을 사용하면 1부터 10 사이의 숫자를 랜덤으로 만들 수 있어요. 변수에 저장하고 print()로 확인해보세요!"},{"step_number":2,"step_goal":"추측 숫자를 guess 변수에 저장하고 \"추측\"과 함께 출력하기 (Pyodide에서는 random으로 대체)","starter_code":"","validation_type":"all","fallback_text":"2단계에서는 추측 숫자를 만들어요! 실제 게임에서는 input()으로 사용자에게 물어보지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어볼 거예요. guess 변수에 저장하고, print()로 \"추측\"이라는 말과 함께 보여주세요!"},{"step_number":3,"step_goal":"if/elif/else로 비밀 숫자와 추측을 비교하기","starter_code":"","validation_type":"all","fallback_text":"3단계에서는 조건문으로 비밀 숫자와 추측을 비교해요! if/elif/else를 사용해서 정답인지, 더 큰 숫자를 말해야 하는지, 더 작은 숫자를 말해야 하는지 알려주세요!"},{"step_number":4,"step_goal":"while 반복문으로 정답을 맞출 때까지 반복하기","starter_code":"","validation_type":"code_check","fallback_text":"4단계에서는 while 반복문으로 게임을 반복해요! while guess != secret: 으로 정답을 맞출 때까지 계속 추측하도록 만들어보세요!"},{"step_number":5,"step_goal":"시도 횟수를 세고 완성 메시지 출력하기","starter_code":"","validation_type":"contains","fallback_text":"마지막 5단계! 시도 횟수를 세는 변수 attempts를 추가하고, 정답을 맞추면 \"정답! N번 만에 맞췄어요!\"를 출력하세요. 이걸로 게임이 완성돼요!"}]}'::jsonb,
+  '{"topic":"종합 프로젝트: 숫자 맞추기 게임 만들기","learning_goals":["배운 모든 개념(변수, 조건, 반복, 함수)을 조합할 수 있다","프로그램을 단계적으로 설계하고 구현할 수 있다","완성된 프로그램을 만드는 경험을 쌓는다"],"story_context":"프로젝트 왕국의 최종 관문! 배운 모든 것을 모아 숫자 맞추기 게임을 완성하면 코딩 마법사가 돼요!","exercise_description":"1~10 사이의 비밀 숫자를 맞추는 게임을 만드세요. 5단계에 걸쳐 하나씩 기능을 추가하며 완성해요!","starter_code":"# 숫자 맞추기 게임을 만들어보세요!\nimport random\n","expected_output_hint":"프로젝트를 5단계로 나누어 완성해요","fallback_text":"드디어 프로젝트 왕국에 도착했어요! 지금까지 배운 변수, 조건문, 반복문을 모두 활용해서 숫자 맞추기 게임을 만들 거예요. 5단계로 나누어 하나씩 만들어볼까요?","steps":[{"step_number":1,"step_goal":"random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기","checklist":["import random 아래에서 random.randint(1, 10)으로 비밀 숫자를 만들어요","secret 에 넣고 print( )로 보여 줘요"],"example_output":"7","starter_code":"# 1단계: 비밀 숫자 만들기\nimport random\n\n# 비밀 숫자를 만들어보세요! random 모듈을 사용해볼까요?\n","validation_type":"code_check","fallback_text":"1단계에서는 random 모듈을 사용해서 비밀 숫자를 만들어요! random.randint(1, 10)을 사용하면 1부터 10 사이의 숫자를 랜덤으로 만들 수 있어요. 변수에 저장하고 print()로 확인해보세요!"},{"step_number":2,"step_goal":"추측 숫자를 guess 변수에 저장하고 \"추측\"과 함께 출력하기 (Pyodide에서는 random으로 대체)","checklist":["guess 변수에 추측 숫자를 넣어요","print( )로 \"추측\"이라는 말과 함께 보여 줘요"],"example_output":"비밀 숫자: 7\n추측: 3","starter_code":"","validation_type":"all","fallback_text":"2단계에서는 추측 숫자를 만들어요! 실제 게임에서는 input()으로 사용자에게 물어보지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어볼 거예요. guess 변수에 저장하고, print()로 \"추측\"이라는 말과 함께 보여주세요!"},{"step_number":3,"step_goal":"if/elif/else로 비밀 숫자와 추측을 비교하기","checklist":["if 로 정답인지 먼저 봐요","elif 와 else 로 더 큰지 작은지 알려 줘요","숫자는 매번 바뀌어서 나오는 말도 달라져요"],"example_output":"비밀 숫자가 추측보다 커요!","starter_code":"","validation_type":"all","fallback_text":"3단계에서는 조건문으로 비밀 숫자와 추측을 비교해요! if/elif/else를 사용해서 정답인지, 더 큰 숫자를 말해야 하는지, 더 작은 숫자를 말해야 하는지 알려주세요!"},{"step_number":4,"step_goal":"while 반복문으로 정답을 맞출 때까지 반복하기","checklist":["while guess != secret: 으로 반복을 만들어요","반복 안에서 힌트를 보여 주고 guess 를 새로 정해요","반복이 끝나면 정답! 을 보여 줘요"],"example_output":"비밀 숫자가 추측보다 커요!\n비밀 숫자가 추측보다 작아요!\n정답!","starter_code":"","validation_type":"code_check","fallback_text":"4단계에서는 while 반복문으로 게임을 반복해요! while guess != secret: 으로 정답을 맞출 때까지 계속 추측하도록 만들어보세요!"},{"step_number":5,"step_goal":"시도 횟수를 세고 완성 메시지 출력하기","checklist":["attempts 를 0에서 시작해요","한 번 추측할 때마다 attempts 에 1을 더해요","마지막에 몇 번 만에 맞췄는지 보여 줘요"],"example_output":"비밀 숫자가 추측보다 커요!\n정답! 2번 만에 맞췄어요!","starter_code":"","validation_type":"contains","fallback_text":"마지막 5단계! 시도 횟수를 세는 변수 attempts를 추가하고, 정답을 맞추면 \"정답! N번 만에 맞췄어요!\"를 출력하세요. 이걸로 게임이 완성돼요!"}]}'::jsonb,
   'contains',
   '',
   200
@@ -1163,7 +1667,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 1-4: 주석으로 메모하기
+-- 정답 1-4: 따옴표 버그 잡기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000101',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"bug_hunt","accepted":[{"line":"ln-k8ep","fix":"fx-m2va"}],"explanation":"글자 안에 작은따옴표('')가 있으면 바깥을 큰따옴표(\")로 감싸요. 그래야 파이썬이 글자가 어디서 끝나는지 헷갈리지 않아요.","explanations":{"fx-c7jn":"따옴표가 하나도 없으면 파이썬이 글자로 읽지 못해서 오류가 나요.","fx-w5dq":"여는 따옴표만 있고 닫는 따옴표가 없어요. 따옴표는 짝이 맞아야 해요.","ln-r4tw":"이 줄은 따옴표 짝이 잘 맞아요. 다른 줄을 살펴봐요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 1-5: 주석으로 메모하기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000003',
@@ -1178,7 +1697,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 1-5: 특수문자 출력하기
+-- 정답 1-6: 특수문자 출력하기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000024',
@@ -1193,7 +1712,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 1-6: 숫자도 출력해요
+-- 정답 1-7: 두 줄 편지 빈칸
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000102',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"fill_blank","accepted":[{"bk-p3zy":"tok-n4ha"}],"explanation":"\\n 은 \"새 줄\"이라는 특수문자예요. print 글자 안에 넣으면 그 자리에서 줄이 바뀌어요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 1-8: 숫자도 출력해요
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000025',
@@ -1208,7 +1742,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 1-7: 마을 안내판 만들기
+-- 정답 1-9: 무엇이 나올까?
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000103',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-h3ku"],"explanation":"첫 줄은 #으로 시작하는 주석이라 실행되지 않아요. 글자 안녕과 숫자 2026이 한 줄씩 나와요.","explanations":{"opt-b7xe":"따옴표는 \"여기부터 여기까지 글자\"라는 표시예요. 화면에는 나오지 않아요.","opt-q2mi":"#으로 시작하는 줄은 메모(주석)라서 컴퓨터가 실행하지 않아요.","opt-z5ca":"숫자도 print()로 보여 줄 수 있어요. 마지막 줄도 실행돼요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 1-10: 마을 안내판 만들기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000026',
@@ -1268,7 +1817,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 2-4: 나이 계산기
+-- 정답 2-4: 상자 속에 남은 것
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000104',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-t6dw"],"explanation":"변수에 새 값을 넣으면 예전 값은 지워지고 새 값만 남아요. 그래서 마지막에 넣은 색이 나와요.","explanations":{"opt-a4mf":"print(color)는 상자 이름이 아니라 상자 안의 값을 보여 줘요.","opt-e2rk":"상자에 두 번째로 넣은 값이 있어요. 새 값을 넣으면 먼저 있던 값은 어떻게 될까요?","opt-y8sn":"상자에는 값이 하나만 들어가요. 두 값이 이어 붙지 않아요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 2-5: 나이 계산기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000006',
@@ -1283,7 +1847,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 2-5: 글자 합치기 마법
+-- 정답 2-6: 글자 합치기 마법
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000028',
@@ -1298,7 +1862,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 2-6: 변신 마법! 형변환
+-- 정답 2-7: 글자 합치기 순서
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000105',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"parsons","accepted":[["ln-v3qo","ln-p7ga","ln-c9hl","ln-j5ux"],["ln-p7ga","ln-v3qo","ln-c9hl","ln-j5ux"]],"explanation":"상자(변수)에 값을 먼저 넣고, 그 상자들을 + 로 이어 붙인 다음, 마지막에 print로 보여 줘요. name과 place는 어느 쪽을 먼저 만들어도 괜찮아요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 2-8: 변신 마법! 형변환
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000007',
@@ -1313,7 +1892,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 2-7: 자기소개 카드 만들기
+-- 정답 2-9: 변신 마법 버그 잡기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000106',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"bug_hunt","accepted":[{"line":"ln-u8fk","fix":"fx-h2wc"}],"explanation":"str()은 숫자를 글자로 바꾸는 변신 마법이에요. 글자끼리는 + 로 이어 붙일 수 있어서 \"나는 10살이에요\"가 나와요.","explanations":{"fx-n6ze":"int()는 숫자로 바꾸는 마법이라, 여전히 글자와 숫자를 더하게 돼요.","fx-q9rt":"모두 따옴표 안에 넣으면 age가 상자가 아니라 그냥 글자 \"age\"로 나와요.","ln-d4yb":"이 줄은 숫자 10을 상자에 잘 넣었어요. 다른 줄을 살펴봐요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 2-10: 자기소개 카드 만들기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000029',
@@ -1343,7 +1937,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 3-2: 짝수인지 홀수인지?
+-- 정답 3-2: 비밀 문 버그 잡기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000107',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"bug_hunt","accepted":[{"line":"ln-x7pe","fix":"fx-a6rq"}],"explanation":"if 에서 두 값이 같은지 물어볼 때는 == 를 써요. = 하나는 상자에 값을 넣는 기호예요.","explanations":{"fx-l4cn":"따옴표가 없으면 숫자 1234예요. 상자에 든 글자 \"1234\"와는 달라서 문이 열리지 않아요.","fx-z9um":"쌍점(:)이 빠졌고, = 하나는 상자에 값을 넣는 기호라 if 에서 쓸 수 없어요.","ln-b3sk":"이 줄은 들여쓰기도 따옴표도 잘 맞아요.","ln-f2ty":"이 줄은 들여쓰기도 따옴표도 잘 맞아요.","ln-g5ma":"이 줄은 상자에 비밀번호를 넣는 줄이라 = 하나가 맞아요.","ln-w8vh":"else 줄은 잘 썼어요. 쌍점(:)도 있어요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 3-3: 짝수인지 홀수인지?
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000030',
@@ -1358,7 +1967,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 3-3: 성적표 만들기
+-- 정답 3-4: 숫자 요정의 대답
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000108',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-k3vy"],"explanation":"7 % 2 는 1이에요(7을 2로 나누면 1이 남아요). 1은 0과 같지 않으니 else 쪽 줄이 실행돼요.","explanations":{"opt-c2jw":"if 와 else 는 둘 중 한 쪽만 실행돼요.","opt-m5xo":"n % 2 는 if 안에서 비교에만 쓰여요. print 하는 건 따옴표 안의 글자예요.","opt-r8bd":"7을 2로 나누면 나머지가 있어요. 나머지가 0일 때만 이 줄이 실행돼요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 3-5: 성적표 만들기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000009',
@@ -1373,7 +1997,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 3-4: 놀이공원 입장
+-- 정답 3-6: 놀이공원 입장
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000010',
@@ -1388,7 +2012,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 3-5: 마법사의 조건
+-- 정답 3-7: 마법사의 조건
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000011',
@@ -1403,7 +2027,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 3-6: 가위바위보 심판
+-- 정답 3-8: 마법사 시험 빈칸
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000109',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"fill_blank","accepted":[{"bk-t5wq":"tok-e7lu"}],"explanation":"and 는 양쪽 조건이 모두 참일 때만 참이에요. 용기 점수가 70이라 이 코드는 \"다시 도전!\"을 보여 줘요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 3-9: 가위바위보 심판
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000031',
@@ -1418,7 +2057,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 3-7: 영화관 할인 시스템
+-- 정답 3-10: 영화관 할인 시스템
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000032',
@@ -1448,7 +2087,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-2: 구구단 외우기
+-- 정답 4-2: 동굴 문 숫자 세기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000110',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-w4ze"],"explanation":"range(1, 4)는 1부터 시작해서 4 바로 앞인 3까지 숫자를 만들어요. 끝 숫자 4는 들어가지 않아요.","explanations":{"opt-f9ob":"range의 끝 숫자는 들어가지 않아요. 끝 숫자 바로 앞에서 멈춰요.","opt-n2hr":"시작 숫자를 1로 정해 줬어요. 0부터 세는 건 시작 숫자가 없을 때예요.","opt-s7ak":"시작 숫자를 1로 정해 줬으니 0부터 세지 않아요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 4-3: 구구단 외우기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000013',
@@ -1463,7 +2117,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-3: 별 찍기
+-- 정답 4-4: 별 찍기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000033',
@@ -1478,7 +2132,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-4: 합계 구하기
+-- 정답 4-5: 합계 구하기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000034',
@@ -1493,7 +2147,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-5: 보물 찾기
+-- 정답 4-6: 금화 합계 순서
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000111',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"parsons","accepted":[[{"id":"ln-y2bq","indent":0},{"id":"ln-h6ns","indent":0},{"id":"ln-a8ve","indent":1},{"id":"ln-m3dp","indent":0}]],"explanation":"합계를 0으로 준비하고, 반복 안에서 i를 하나씩 더한 뒤, 반복이 끝나면 들여쓰기 없이 한 번만 보여 줘요. 15가 나와요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 4-7: 보물 찾기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000014',
@@ -1508,7 +2177,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-6: 짝수만 골라내기
+-- 정답 4-8: 짝수만 골라내기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000015',
@@ -1523,7 +2192,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-7: 카운트다운
+-- 정답 4-9: 카운트다운
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000035',
@@ -1538,7 +2207,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 4-8: 별 피라미드 만들기
+-- 정답 4-10: 끝나지 않는 카운트다운
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000112',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"bug_hunt","accepted":[{"line":"ln-o6fu","fix":"fx-u7ky"}],"explanation":"n = n - 1 이 들여쓰기 안으로 들어가야 반복할 때마다 n이 1씩 줄어요. n이 0이 되면 반복이 끝나고 3, 2, 1, 탈출! 이 나와요.","explanations":{"fx-d3hv":"n이 점점 커지면 n > 0 이 언제나 참이라 반복이 끝나지 않아요.","fx-r6pq":"들여쓰기가 없으면 반복 밖에 있는 줄이에요. 반복 안에서는 n이 그대로예요.","ln-e5gc":"이 줄은 3부터 시작하게 잘 준비했어요.","ln-j3wa":"이 줄은 반복이 끝난 뒤에 한 번 나오는 줄이라 괜찮아요.","ln-p9ri":"이 줄은 \"n이 0보다 클 동안\"이라는 뜻으로 잘 썼어요.","ln-t2xm":"이 줄은 반복 안에서 n을 보여 주는 줄이라 괜찮아요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 4-11: 별 피라미드 만들기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000036',
@@ -1583,7 +2267,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 5-3: 리스트 순회하기
+-- 정답 5-3: 없는 과일 꺼내기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000113',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"bug_hunt","accepted":[{"line":"ln-x3nd","fix":"fx-k5oy"}],"explanation":"리스트 번호는 0부터라서 과일 3개의 번호는 0, 1, 2예요. 마지막 과일 포도는 2번이에요.","explanations":{"fx-g2mt":"과일은 3개뿐이라 이 번호에는 과일이 없어요.","fx-i9wl":"리스트에서 꺼낼 때는 둥근 괄호가 아니라 대괄호 [ ] 를 써요.","ln-b8ju":"번호 0은 첫 번째 과일이라 맞아요.","ln-q4zs":"이 줄은 과일 3개를 리스트에 잘 담았어요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 5-4: 리스트 순회하기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000037',
@@ -1598,7 +2297,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 5-4: 친구 목록 관리
+-- 정답 5-5: 친구 목록 관리
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000018',
@@ -1613,7 +2312,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 5-5: 리스트 정렬하기
+-- 정답 5-6: 새 친구 빈칸
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000114',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"fill_blank","accepted":[{"bk-w6fe":"tok-a3gn","bk-c4ro":"tok-l7vb"}],"explanation":"append()는 리스트 끝에 값을 하나 더하고, len()은 리스트에 든 개수를 세요. 친구가 3이 나와요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 5-7: 리스트 정렬하기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000038',
@@ -1628,7 +2342,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 5-6: 리스트 속 검색
+-- 정답 5-8: 정렬한 물고기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000115',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-p6jt"],"explanation":"sort()는 리스트를 작은 수부터 큰 수로 정리해요. 리스트를 print 하면 대괄호와 쉼표도 함께 나와요.","explanations":{"opt-h8mz":"sort()는 기본으로 작은 수부터 늘어놓아요.","opt-u3cy":"둘째 줄의 sort()가 리스트 순서를 바꿔 놓았어요.","opt-v2bk":"리스트를 통째로 print 하면 대괄호와 쉼표까지 그대로 나와요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 5-9: 리스트 속 검색
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000039',
@@ -1643,7 +2372,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 5-7: 쇼핑 리스트 정리기
+-- 정답 5-10: 쇼핑 리스트 정리기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000040',
@@ -1673,7 +2402,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 6-2: 계산기 함수
+-- 정답 6-2: 인사 함수 순서
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000116',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"parsons","accepted":[[{"id":"ln-n5ga","indent":0},{"id":"ln-f8qe","indent":1},{"id":"ln-r3wy","indent":1},{"id":"ln-c6kt","indent":0}]],"explanation":"def 로 함수를 만들고 함수 안의 두 줄을 들여쓰기해요. 마지막에 들여쓰기 없이 hello()를 불러야 인사가 나와요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 6-3: 계산기 함수
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000020',
@@ -1688,7 +2432,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 6-3: 기본값이 있는 함수
+-- 정답 6-4: 돌려주는 함수 고르기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000117',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-j4xs"],"explanation":"매개변수 a, b 로 두 수를 받고 return 으로 더한 값을 돌려줘요. 그래서 add(2, 3)은 5가 돼요.","explanations":{"opt-e3ru":"따옴표 안의 a + b 는 계산이 아니라 그냥 글자예요.","opt-o7md":"계산은 했지만 돌려주지 않아서 add(2, 3)의 값이 비어 있어요(None).","opt-y5lf":"괄호가 비어 있어서 넣어 준 2와 3을 받을 자리가 없어요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 6-5: 기본값이 있는 함수
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000041',
@@ -1703,7 +2462,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 6-4: 최댓값 찾기
+-- 정답 6-6: 기본값 빈칸
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000118',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"fill_blank","accepted":[{"bk-h9ap":"tok-q2vd"}],"explanation":"매개변수 뒤에 = 와 값을 쓰면 기본값이 돼요. 값을 넣지 않고 부르면 기본값 \"친구\"가 name에 들어가요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 6-7: 최댓값 찾기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000021',
@@ -1718,7 +2492,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 6-5: 여러 값 돌려주기
+-- 정답 6-8: 여러 값 돌려주기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000042',
@@ -1733,7 +2507,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 6-6: 함수 안의 함수 호출
+-- 정답 6-9: 함수 안의 함수 호출
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000043',
@@ -1748,7 +2522,22 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 6-7: 성적 분석 프로그램
+-- 정답 6-10: 사라진 돌려주기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000119',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"bug_hunt","accepted":[{"line":"ln-v2kc","fix":"fx-o3ga"}],"explanation":"return 으로 n * 2 를 돌려줘야 double(4)가 8이 되고, 1을 더해 9가 나와요.","explanations":{"fx-m6tu":"두 배가 아니라 2를 더하게 돼요. 9가 아니라 7이 나와요.","fx-x8ld":"print는 화면에 보여 주기만 하고 값을 돌려주지 않아요. 그래서 double(4)가 여전히 None 이에요.","ln-s6ob":"이 줄은 매개변수 n 을 받는 함수를 잘 만들었어요.","ln-z7he":"이 줄은 함수가 값을 잘 돌려주면 문제없어요. 함수 안을 살펴봐요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 6-11: 성적 분석 프로그램
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000044',
@@ -1763,7 +2552,37 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
--- 정답 7-1: 숫자 맞추기 게임
+-- 정답 7-1: 판정 코드 맞추기
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000120',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"parsons","accepted":[[{"id":"ln-u4mr","indent":0},{"id":"ln-g8tz","indent":0},{"id":"ln-k2dh","indent":0},{"id":"ln-w9ac","indent":1},{"id":"ln-b5ny","indent":0},{"id":"ln-e3lq","indent":1},{"id":"ln-p6xf","indent":0},{"id":"ln-i7vo","indent":1}],[{"id":"ln-g8tz","indent":0},{"id":"ln-u4mr","indent":0},{"id":"ln-k2dh","indent":0},{"id":"ln-w9ac","indent":1},{"id":"ln-b5ny","indent":0},{"id":"ln-e3lq","indent":1},{"id":"ln-p6xf","indent":0},{"id":"ln-i7vo","indent":1}]],"explanation":"비밀 숫자와 고른 숫자를 먼저 상자에 넣고, if 와 elif 로 작은지 큰지 물어본 뒤, 둘 다 아니면 else 로 정답을 알려 줘요. 5는 7보다 작아서 \"더 큰 수예요\"가 나와요."}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 7-2: 몇 번 만에 맞혔을까?
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000121',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"multiple_choice","accepted":["opt-f5wi"],"explanation":"리스트에 숫자가 3개라 반복이 3번 돌고, 그때마다 tries 에 1을 더해요. 마지막에 한 번만 보여 줘요.","explanations":{"opt-a9ry":"print(tries)는 들여쓰기가 없어서 반복이 끝난 뒤 한 번만 실행돼요.","opt-l3ep":"tries 에는 guess 가 아니라 1을 더해요. 리스트의 숫자를 모두 더한 게 아니에요.","opt-t8gc":"반복은 리스트에 든 값마다 한 번씩, 여러 번 돌아요."}}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 7-3: 숫자 맞추기 게임
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b1000000-0000-0000-0000-000000000022',

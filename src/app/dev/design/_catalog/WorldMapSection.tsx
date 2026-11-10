@@ -18,6 +18,10 @@ import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 import { ContinueButton } from '@/components/world/ContinueCta';
+import { PhoneQuizSlip } from '@/components/world/PhoneQuizPick';
+import { DailyQuizCard } from '@/components/world/DailyQuizCard';
+import type { DailyQuizState } from '@/lib/quest/dailyQuiz';
+import { PhoneQuizToast } from '@/components/quest/PhoneQuizNote';
 import type { ContinueTarget } from '@/lib/world/mapData';
 
 // 이어하기 CTA (P5-10): 하다 만 퀘스트 · 다음 차례 · 진행 0 · 긴 퀘스트 이름
@@ -121,7 +125,7 @@ const NODE_STATES: [label: string, stage: StageWithStatus][] = [
   ],
 ];
 
-// 차례 시트 견본 퀘스트 (P5-06): 완료 2 · 하는 중 1 · 아직, 퀴즈·휴대폰 추천 섞음. 보스 스테이지는 마지막 퀘스트가 보스
+// 차례 시트 견본 퀘스트 (P5-06): 완료 2 · 하는 중 1 · 아직, 퀴즈·폰 추천 섞음. 보스 스테이지는 마지막 퀘스트가 보스
 const QUEST_TITLES = [
   ['if로 길 고르기', 'if 조건문'],
   ['참과 거짓', 'True, False'],
@@ -130,6 +134,27 @@ const QUEST_TITLES = [
   ['elif 여러 갈래', 'if-elif-else 여러 갈래로 나누기와 들여쓰기'],
   ['조건 합치기', 'and, or, not'],
 ];
+const dailyPick = (questId: string, review = false) => ({
+  questId,
+  title: '퀴즈',
+  kind: 'multiple_choice' as const,
+  stageOrder: 1,
+  review,
+});
+/** 오늘의 퀴즈 카드: 처음 · 진행 중(복습 포함) · 완료 · 열린 퀴즈 없음 */
+const DAILY_CARD_SAMPLES: Pick<DailyQuizState, 'picks' | 'results'>[] = [
+  { picks: [dailyPick('a', true), dailyPick('b'), dailyPick('c')], results: {} },
+  {
+    picks: [dailyPick('a', true), dailyPick('b', true), dailyPick('c')],
+    results: { a: 'correct' as const },
+  },
+  {
+    picks: [dailyPick('a'), dailyPick('b')],
+    results: { a: 'correct' as const, b: 'revealed' as const },
+  },
+  { picks: [], results: {} },
+];
+
 const SAMPLE_QUESTS: Record<string, StageQuestItem[]> = Object.fromEntries(
   SAMPLE.map((stage, si) => [
     stage.id,
@@ -139,6 +164,7 @@ const SAMPLE_QUESTS: Record<string, StageQuestItem[]> = Object.fromEntries(
       title,
       concept,
       quest_type: i === 3 ? 'quiz' : 'code',
+      quiz_kind: i === 3 ? 'multiple_choice' : null,
       is_mobile_friendly: i === 3,
       status:
         si < 2 || i < 2 ? 'completed' : si === 2 && i === 2 ? 'in_progress' : null,
@@ -342,7 +368,7 @@ export function WorldMapSection() {
       </Demo>
       <Demo
         label="스테이지 차례 시트 (P5-06)"
-        note="열린 노드를 누르면 떠요(위 지도에서도, 주소에 ?stage= 가 남아 뒤로 가기로 닫힘). 768px 미만 바텀시트, 이상 책 한 쪽. 완료 = 다시 하기, 첫 미완료 = 강조 줄 + 아래 주 버튼, 유형 태그 코드·퀴즈·보스, 휴대폰 추천(휴대폰 화면에서 진하게). 별은 Q51로 숨기고 퀘스트 수만(SHOW_STARS). 줄은 차례로 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+        note="열린 노드를 누르면 떠요(위 지도에서도, 주소에 ?stage= 가 남아 뒤로 가기로 닫힘). 768px 미만 바텀시트, 이상 책 한 쪽. 완료 = 다시 하기, 첫 미완료 = 강조 줄 + 아래 주 버튼, 유형 태그 코드·퀴즈(종류 이름·아이콘, P7-11)·보스, 휴대폰·태블릿 폭에서 폰에서 하기 좋아요 태그(휴대폰은 진하게). 퀴즈가 있으면 목록 아래 보너스 안내 한 줄. 별은 Q51로 숨기고 퀘스트 수만(SHOW_STARS) — 퀴즈 별은 지금도 기록되어 푼 퀴즈 줄에만 보임. 줄은 차례로 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
         data-testid="stage-sheet-demo"
       >
         <div className="flex flex-wrap gap-3">
@@ -366,6 +392,7 @@ export function WorldMapSection() {
                 title: '숫자 맞히기 게임',
                 concept: '종합 프로젝트',
                 quest_type: 'project',
+                quiz_kind: null,
                 is_mobile_friendly: false,
                 status: null,
                 best_stars: 0,
@@ -436,6 +463,53 @@ export function WorldMapSection() {
               <ContinueButton target={target} place="float" />
             </div>
           ))}
+        </div>
+      </Demo>
+      <Demo
+        label="오늘의 퀴즈 카드 (P7-10)"
+        note="월드맵 맨 위(지도 머리보다 위, 모바일·데스크톱 같음). 남은 수 · 진행 칸 · 복습 n개 포함 → /daily. 다 풀면 초록 도장 '오늘 퀴즈 완료', 열린 퀴즈가 없으면 회색 안내만. 왼쪽 금색 띠라 폰 퀴즈 추천(점선, 지도 머리 아래)과 모양·자리가 다름"
+        data-testid="daily-card-demo"
+      >
+        <div className="grid max-w-md gap-1">
+          {DAILY_CARD_SAMPLES.map((d, i) => (
+            <DailyQuizCard key={i} daily={d} />
+          ))}
+        </div>
+      </Demo>
+      <Demo
+        label="폰 퀴즈 추천 (P7-11)"
+        note="휴대폰·태블릿(1024px 미만 또는 터치, 코드 키보드와 같은 판정)에서만. 이어하기가 코드 퀘스트이고 열린 스테이지에 풀 만한 퀴즈가 있으면 지도 머리(이어하기) 아래 보조 쪽지 한 장 — 이어하기 스테이지의 안 푼 퀴즈 → 그 스테이지 별 3개 미만 복습 → 가까운 다른 스테이지. 코드 퀘스트는 그대로 주 버튼. 코드 퀘스트 첫 진입에는 아래 가운데 쪽지 한 번(이 기기에선 다시 안 뜸). 쪽지 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+        data-testid="phone-quiz-demo"
+      >
+        <div className="grid max-w-md gap-4">
+          <span className="text-caption text-muted-foreground">
+            월드맵: 이어하기 아래 (안 푼 퀴즈 · 복습)
+          </span>
+          <div>
+            <ContinueButton target={CTAS[0][1]} place="head" />
+            <PhoneQuizSlip
+              pick={{
+                questId: 'sample',
+                title: '비교 퀴즈',
+                kind: 'multiple_choice',
+                stageOrder: 3,
+                review: false,
+              }}
+            />
+            <PhoneQuizSlip
+              pick={{
+                questId: 'sample',
+                title: '반복문 버그를 잡아라 — 끝나지 않는 while',
+                kind: 'bug_hunt',
+                stageOrder: 4,
+                review: true,
+              }}
+            />
+          </div>
+          <span className="text-caption text-muted-foreground">
+            코드 퀘스트 첫 진입 쪽지
+          </span>
+          <PhoneQuizToast count={3} href="#" onClose={() => {}} />
         </div>
       </Demo>
       <Demo

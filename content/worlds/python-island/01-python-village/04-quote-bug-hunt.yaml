@@ -1,0 +1,39 @@
+# 퀴즈 1-4: 따옴표 버그 잡기
+# 작성 안내: content/README.md "퀴즈" (P7-12). 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000101
+order: 4
+title: 따옴표 버그 잡기
+concept: 작은따옴표, 큰따옴표
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 글자 안에 따옴표가 있을 때
+  learning_goals:
+    - 글자 안에 작은따옴표가 있으면 바깥을 다른 따옴표로 감싸야 함을 안다
+  story_context: 따옴표 가게 간판 코드가 고장 났어요! 파이뱀이 쓴 두 줄 중 한 줄에서 오류가 나요.
+  fallback_text: 따옴표는 여는 것과 닫는 것의 짝이 맞아야 해요. 글자 안에 작은따옴표가 들어 있으면 바깥은 어떤 따옴표로 감싸야 할지 떠올려 봐요.
+  quiz:
+    question: 오류가 나는 줄을 찾아 고쳐요
+    lines:
+      - id: ln-r4tw
+        code: print("어서 오세요!")
+      - id: ln-k8ep
+        code: print('I'm happy!')
+    fixes:
+      - id: fx-m2va
+        code: print("I'm happy!")
+      - id: fx-c7jn
+        code: print(I'm happy!)
+      - id: fx-w5dq
+        code: print("I'm happy!)
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-k8ep, fix: fx-m2va }
+    explanation: 글자 안에 작은따옴표(')가 있으면 바깥을 큰따옴표(")로 감싸요. 그래야 파이썬이 글자가 어디서 끝나는지 헷갈리지 않아요.
+    explanations:
+      ln-r4tw: 이 줄은 따옴표 짝이 잘 맞아요. 다른 줄을 살펴봐요.
+      fx-c7jn: 따옴표가 하나도 없으면 파이썬이 글자로 읽지 못해서 오류가 나요.
+      fx-w5dq: 여는 따옴표만 있고 닫는 따옴표가 없어요. 따옴표는 짝이 맞아야 해요.

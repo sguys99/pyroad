@@ -1,0 +1,1012 @@
+/* 퀴즈 퀘스트 (P7-03, QuizQuest·QuizPanel·MultipleChoice). Phase 6 책 펼침·결과 쪽지·도장 언어를 그대로:
+   흰 쪽 위 테두리 없는 면, 누르는 것은 게임 버튼처럼 아랫면(lip) 있는 흰 카드, 상태는 면 색 + 아이콘 + 글자 꼬리표.
+   틀린 답은 빨강 대신 금색(오류 연출 P6-07과 같은 차분한 톤). 값은 토큰 변수만 */
+
+/* ───── 틀: lg 미만은 번호 탭 없이 두 쪽을 이어 한 번에 스크롤 (퀴즈엔 공책이 없음) */
+@media (max-width: 63.99rem) {
+  .qz-book {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .qz-book > .qw-page {
+    flex: none;
+    height: auto;
+    overflow: visible;
+  }
+  /* 문제가 첫 화면에 가깝게: 삽화는 넓은 화면에서만 */
+  .qz-book .qs-art {
+    display: none;
+  }
+  .qz-book .qs-story {
+    margin-bottom: 1rem;
+  }
+  .qz-book .qs-tutor {
+    margin-bottom: 0;
+  }
+}
+
+/* position: 안의 sr-only(절대 위치) 알림 줄이 앱 틀 밖 문서 높이를 늘려 채점 뒤 scrollIntoView 가 문서까지 밀지 않게 (B53) */
+.qz {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.qz > * + * {
+  margin-top: 1rem;
+}
+.qz > .qz-live:empty {
+  margin-top: 0;
+}
+/* 채점 뒤 이 자리로 스크롤할 때 아래 다시 풀기 버튼까지 보이게 */
+.qz-live {
+  scroll-margin-bottom: 5rem;
+}
+
+/* ───── 문제 카드 머리: 눈썹 · 복습/연습 딱지 */
+.qz-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+}
+.qz-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: auto;
+  color: var(--primary-text);
+  font-size: var(--text-kicker);
+  font-weight: var(--text-kicker--font-weight);
+  letter-spacing: var(--text-kicker--letter-spacing);
+  line-height: var(--text-kicker--line-height);
+}
+.qz-k > svg {
+  width: 1rem;
+  height: 1rem;
+}
+.qz-chip {
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--text-caption--line-height);
+}
+.qz-chip[data-tone='review'] {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.qz-notice {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--round-s);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+/* 초점 이동 자리 (문제 제목 · 채점 쪽지 · 해설 대사창 · 요약 제목, P7-13): 키보드로 왔을 때만 같은 링 */
+.qz-q:focus,
+.qz-verdict:focus,
+.qz-why:focus,
+.dq-sum-t:focus {
+  outline: none;
+}
+.qz-q:focus-visible,
+.qz-verdict:focus-visible,
+.qz-why:focus-visible,
+.dq-sum-t:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.qz-q {
+  margin: 0.625rem 0 1rem;
+  color: var(--text);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  text-wrap: pretty;
+}
+
+/* ───── 코드 (문제 코드 · 코드 보기). 체험 공책과 같은 색: 문자열만 --code-string */
+.qz-code-fig {
+  margin: 0 0 1rem;
+}
+.qz-code {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  border-radius: var(--round-m);
+  background: var(--code-bg);
+  box-shadow: inset 0 0 0 var(--line-w) var(--line);
+  color: var(--code-text);
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  white-space: pre;
+  tab-size: 4;
+}
+.qz-code[data-inline] {
+  padding: 0;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.qz-code-str {
+  color: var(--code-string);
+}
+
+/* ───── 객관식 보기: 쪽 폭 30rem 미만 1열, 넓으면 2열. 큰 흰 카드 + 아랫면 */
+.qz-opts {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 var(--lip-h);
+  border: 0;
+}
+@container (min-width: 30rem) {
+  .qz-opts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.qz-opt {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1.5px var(--line-strong),
+    0 var(--lip-h) 0 var(--line);
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.45;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--easing-out),
+    box-shadow var(--dur-fast) var(--easing-out),
+    transform var(--dur-fast) var(--easing-press),
+    opacity var(--dur-base) var(--easing-out);
+}
+/* 진짜 라디오는 보이지 않게 (라벨 어디를 눌러도 고름, 방향키·낭독기는 그대로) */
+.qz-opt-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.qz-opt:has(.qz-opt-input:focus-visible) {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.qz-opt:not([data-mark='miss']):active:has(.qz-opt-input:enabled) {
+  transform: translateY(var(--lip-h));
+  box-shadow:
+    inset 0 0 0 1.5px var(--line-strong),
+    0 0 0 var(--line);
+}
+@media (hover: hover) {
+  .qz-opt[data-mark='none']:hover:has(.qz-opt-input:enabled) {
+    background: var(--surface-2);
+  }
+}
+.qz-opt-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: var(--round-pill);
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+  color: var(--on-primary);
+}
+.qz-opt-mark > svg {
+  width: 1rem;
+  height: 1rem;
+}
+.qz-opt-body {
+  /* 5rem 이 안 남으면 꼬리표("아니었어요" 등)를 다음 줄로 (아주 좁은 쪽, P7-13) */
+  flex: 1 1 5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.qz-opt[data-code] .qz-opt-body {
+  font-weight: 400;
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+}
+.qz-opt-tag {
+  flex: none;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--text-caption--line-height);
+}
+
+/* 고름: 옅은 주색 면 + 주색 테 + 가운데 점 */
+.qz-opt[data-mark='selected'] {
+  background: var(--primary-soft);
+  box-shadow:
+    inset 0 0 0 2px var(--primary),
+    0 var(--lip-h) 0 var(--primary-lip);
+}
+.qz-opt[data-mark='selected'] .qz-opt-mark {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.qz-opt[data-mark='selected'] .qz-opt-mark::after {
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+}
+/* 정답 (맞힘 · 공개): 초록 면 + 체크 + "정답" */
+.qz-opt:is([data-mark='correct'], [data-mark='answer']) {
+  background: var(--success-soft);
+  box-shadow:
+    inset 0 0 0 2px var(--success),
+    0 var(--lip-h) 0 var(--primary-lip);
+}
+.qz-opt:is([data-mark='correct'], [data-mark='answer']) .qz-opt-mark {
+  background: var(--success);
+  box-shadow: none;
+}
+.qz-opt:is([data-mark='correct'], [data-mark='answer']) .qz-opt-tag {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+/* 틀린 답: 금색 면 + X + "고른 답" (빨간 경고 없음) */
+.qz-opt[data-mark='wrong'] {
+  background: var(--accent-soft);
+  box-shadow:
+    inset 0 0 0 2px var(--accent),
+    0 var(--lip-h) 0 var(--accent-lip);
+}
+.qz-opt[data-mark='wrong'] .qz-opt-mark {
+  background: var(--accent);
+  box-shadow: none;
+  color: var(--on-accent);
+}
+.qz-opt[data-mark='wrong'] .qz-opt-tag {
+  background: var(--surface);
+  color: var(--accent-text);
+}
+/* 이번 회차에 틀렸던 답: 흐리게 + X + "아니었어요", 누를 수 없음 */
+.qz-opt[data-mark='miss'] {
+  opacity: 0.55;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  cursor: not-allowed;
+}
+.qz-opt[data-mark='miss'] .qz-opt-mark {
+  color: var(--text-muted);
+  box-shadow: none;
+}
+.qz-opt[data-mark='miss'] .qz-opt-tag {
+  color: var(--text-muted);
+}
+/* 결과가 보이는 동안 고르지 않은 보기는 한 발 뒤로 */
+.qz:not([data-status='answering']) .qz-opt[data-mark='none'] {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* ───── 채점 쪽지 (결과 쪽지 .qo-slip 위에 덧댐) */
+/* 정답 쪽지: 도장은 오른쪽 아래 모서리에 걸쳐 찍히고 아래 틈(1rem) 안에서 끝남. 쪽지를 다음 블록(직접 실행해 보기 등)보다 위에 둬
+   애니메이션으로 생긴 쌓임 맥락에 도장이 덮이지 않게. 머리 딱지는 오답과 같은 오른쪽 끝, 글만 도장 자리를 비움 */
+.qz-verdict {
+  z-index: 1;
+}
+.qz-verdict[data-status='correct'] {
+  min-height: 7rem;
+}
+.qz-verdict .qx-stamp {
+  right: 1rem;
+  bottom: -0.75rem;
+}
+.qz-verdict[data-status='correct'] .qo-note {
+  padding-right: 4.75rem;
+}
+.qz-verdict-t {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 700;
+  line-height: var(--text-body--line-height);
+}
+/* 정답 쪽지가 나타날 때 한 번 톡 (full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 없음) */
+.qz-verdict {
+  animation: qz-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+@keyframes qz-pop {
+  from {
+    transform: translateY(0.5rem) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes qz-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+:root[data-motion='lite'] .qz-verdict {
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-verdict {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-verdict {
+  animation: none;
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .qz-opt {
+  transition: none;
+}
+
+/* ───── 직접 실행해 보기 (P7-07): 채점 쪽지 바로 아래 버튼 → 펼치는 실행 칸(공책 CodePanel 그대로).
+   칸 머리는 도전 문구 한 줄(쪽지 면 + 반짝 아이콘) + 놀이 안내. 펼칠 때 한 번 톡 (lite 짧게 · minimal 페이드 · 동작 줄이기 없음) */
+.qz-try-wrap {
+  display: grid;
+  /* 코드 키보드 띠(가로 스크롤)가 칸을 넓히지 않게 */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.qz-try-wrap > button {
+  width: 100%;
+}
+.qz-try {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  animation: qz-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+.qz-try-dare {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 700;
+  line-height: var(--text-body--line-height);
+}
+.qz-try-dare > svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  color: var(--accent-text);
+}
+.qz-try-note,
+.qz-try-wait {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+:root[data-motion='lite'] .qz-try {
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-try {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-try {
+  animation: none;
+}
+
+/* ───── 행동 줄: 고르는 동안은 쪽 아래에 붙어 늘 보임, 채점 뒤에는 쪽지 바로 아래 제자리 */
+.qz-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  padding-bottom: 0.25rem;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--surface) 0%, transparent),
+    var(--surface) 1rem
+  );
+}
+/* 내용 바로 아래 (넓은 화면에 큰 빈칸 없이). 1rem 틈이 있어 스크롤 끝에서 흐림 띠가 마지막 카드 테두리를 덮지 않음 */
+.qz > .qz-actions {
+  margin-top: 1rem;
+}
+.qz-actions[data-graded] {
+  position: static;
+  padding-top: 0;
+  background: none;
+}
+.qz-actions > :is(button, a) {
+  width: 100%;
+}
+.qz-error {
+  margin: 0;
+  color: var(--error);
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: var(--text-small--line-height);
+  text-align: center;
+}
+
+/* ───── 빈칸 채우기 (P7-04, FillBlank). 코드는 360px 에서 가로 스크롤 대신 줄바꿈(들여쓰기 공백은 그대로).
+   빈칸 = 코드 안 작은 버튼(점선 테 · 지금 채울 곳은 주색 테 + 옅은 면), 칩 = 아랫면 있는 흰 카드. 칩은 소모되지 않고 쓰는 중이면 흐림 */
+.qz-fb-code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  /* 줄바꿈된 줄에서 빈칸 버튼끼리 겹치지 않게 */
+  line-height: 2.75;
+}
+.qz-fb-slot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-width: 2.75rem;
+  min-height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: var(--round-s);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  color: var(--code-text);
+  font: inherit;
+  line-height: 1.4;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--easing-out),
+    box-shadow var(--dur-fast) var(--easing-out);
+}
+/* 코드 줄 높이에 맞춘 36px 빈칸 → 누르는 자리는 위아래로 넓혀 44px (P7-13) */
+.qz-fb-slot::before {
+  content: '';
+  position: absolute;
+  inset: -0.25rem 0;
+}
+/* 손가락 영역 44px: 보이는 버튼보다 위아래로 넓게 */
+.qz-fb-slot::before {
+  content: '';
+  position: absolute;
+  inset: -0.25rem -0.125rem;
+}
+.qz-fb-slot:focus-visible,
+.qz-fb-chip:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.qz-fb-slot > svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.qz-fb-slot:is([data-mark='empty'], [data-mark='active']) .qz-fb-word {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+.qz-fb-slot[data-mark='empty'] {
+  background: none;
+  box-shadow: none;
+  outline: 1.5px dashed var(--line-strong);
+  outline-offset: -1.5px;
+}
+.qz-fb-slot[data-mark='empty']:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.qz-fb-slot[data-mark='active'] {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.qz-fb-slot[data-mark='active'] .qz-fb-word {
+  color: var(--primary-text);
+}
+.qz-fb-slot:is([data-mark='correct'], [data-mark='answer']) {
+  background: var(--success-soft);
+  box-shadow: inset 0 0 0 2px var(--success);
+  color: var(--text);
+}
+.qz-fb-slot:is([data-mark='correct'], [data-mark='answer']) > svg {
+  color: var(--success);
+}
+.qz-fb-slot[data-mark='wrong'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  color: var(--text);
+}
+.qz-fb-slot[data-mark='wrong'] > svg {
+  color: var(--accent-text);
+}
+.qz-fb-slot:disabled {
+  cursor: default;
+}
+.qz-fb-word {
+  display: inline-block;
+}
+/* 칩 → 빈칸 비행: full 짧게, lite 더 짧게 (minimal·동작 줄이기는 JS 가 아예 건너뜀) */
+.qz-fb-word[data-fly] {
+  transition: transform var(--dur-slow) var(--easing-out);
+}
+:root[data-motion='lite'] .qz-fb-word[data-fly] {
+  transition-duration: var(--dur-fast);
+}
+
+.qz-fb-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  padding-bottom: var(--lip-h);
+}
+.qz-fb-chip {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.875rem;
+  border: 0;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1.5px var(--line-strong),
+    0 var(--lip-h) 0 var(--line);
+  color: var(--code-text);
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity var(--dur-base) var(--easing-out),
+    transform var(--dur-fast) var(--easing-press),
+    box-shadow var(--dur-fast) var(--easing-out);
+}
+.qz-fb-chip:enabled:active {
+  transform: translateY(var(--lip-h));
+  box-shadow:
+    inset 0 0 0 1.5px var(--line-strong),
+    0 0 0 var(--line);
+}
+@media (hover: hover) {
+  .qz-fb-chip:enabled:hover {
+    background: var(--surface-2);
+  }
+}
+/* 쓰는 중: 트레이에 자리는 남고 옅은 면 + 체크 (같은 낱말을 다른 빈칸에도 쓸 수 있어 다시 누를 수 있음).
+   누를 수 있는 칩이라 흐리게(opacity) 하지 않고 글자 대비 AA 를 지킴 (P7-13) */
+.qz-fb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.qz-fb-chip > svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.qz-fb-chip[data-used] {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  color: var(--text-muted);
+}
+.qz-fb-chip:disabled,
+.qz-fb-chip[aria-disabled='true'] {
+  cursor: default;
+}
+.qz-fb-chip[aria-disabled='true']:active {
+  transform: none;
+}
+.qz:not([data-status='answering']) .qz-fb-chip {
+  opacity: 0.45;
+}
+.qz-fb-clear {
+  margin-top: 0.5rem;
+}
+:root:is([data-motion='minimal'], [data-reduced='true'])
+  :is(.qz-fb-slot, .qz-fb-chip) {
+  transition: none;
+}
+
+/* ───── 버그 찾기 (P7-06): 단계 안내 + 버그버그 → 코드 줄 목록(코드 면 위 큰 탭 줄) → 고른 줄 바로 아래 펼쳐지는 수정안 쪽지.
+   고른 줄은 원래 줄 취소선 + 고친 줄 미리보기. 상태 색·꼬리표는 객관식 보기와 같은 규칙 */
+.qz-bh {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.qz-bh-guide {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.qz-bh-face {
+  flex: none;
+  display: grid;
+}
+.qz-bh-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: var(--text-small--line-height);
+}
+.qz-bh-steps > [data-on] {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.qz-bh-lines {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.375rem;
+  border: 0;
+  border-radius: var(--round-m);
+  background: var(--code-bg);
+  box-shadow: inset 0 0 0 var(--line-w) var(--line);
+}
+.qz-bh-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--round-s);
+  color: var(--code-text);
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--easing-out),
+    box-shadow var(--dur-fast) var(--easing-out),
+    opacity var(--dur-base) var(--easing-out);
+}
+.qz-bh-line:has(.qz-opt-input:focus-visible) {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: 0;
+}
+@media (hover: hover) {
+  .qz-bh-line[data-mark='none']:hover:has(.qz-opt-input:enabled) {
+    background: var(--surface-2);
+  }
+}
+.qz-bh-no {
+  flex: none;
+  min-width: 1.25rem;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.qz-bh-code {
+  flex: 1;
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.qz-bh-del {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+.qz-bh-del .qz-code {
+  text-decoration: inherit;
+}
+.qz-bh-ins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+.qz-bh-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  box-shadow: none;
+}
+.qz-bh-tag {
+  justify-self: start;
+}
+.qz-bh-line[data-mark='none'] .qz-bh-mark {
+  visibility: hidden;
+}
+/* 고른 줄: 주색 테 + 벌레 표시 */
+.qz-bh-line[data-mark='selected'] {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.qz-bh-line[data-mark='selected'] .qz-bh-mark {
+  background: var(--primary);
+}
+.qz-bh-line:is([data-mark='correct'], [data-mark='answer']) {
+  background: var(--success-soft);
+  box-shadow: inset 0 0 0 2px var(--success);
+}
+.qz-bh-line:is([data-mark='correct'], [data-mark='answer']) .qz-bh-mark {
+  background: var(--success);
+}
+.qz-bh-line:is([data-mark='correct'], [data-mark='answer']) .qz-bh-tag,
+.qz-bh-ins:is([data-mark='correct'], [data-mark='answer']) .qz-opt-tag {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.qz-bh-line[data-mark='wrong'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.qz-bh-line[data-mark='wrong'] .qz-bh-mark {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.qz-bh-line[data-mark='wrong'] .qz-bh-tag,
+.qz-bh-ins[data-mark='wrong'] .qz-opt-tag {
+  background: var(--surface);
+  color: var(--accent-text);
+}
+.qz:not([data-status='answering']) .qz-bh-line[data-mark='none'] {
+  opacity: 0.7;
+  cursor: default;
+}
+/* 수정안 쪽지: 고른 줄 바로 아래 흰 쪽지로 펼쳐짐 (줄 번호 폭만큼 들여서 어느 줄인지 이어 보이게) */
+.qz-bh-sheet {
+  display: grid;
+  gap: 0.625rem;
+  min-width: 0;
+  margin: 0.25rem 0 0.5rem 1.75rem;
+  padding: 0.75rem 0.75rem calc(0.75rem + var(--lip-h));
+  border: 0;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+.qz-bh-legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.125rem;
+  padding: 0;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+}
+.qz-bh-sheet .qz-opt {
+  min-height: 2.75rem;
+}
+:root[data-motion='minimal'] .qz-bh-sheet {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-bh-sheet {
+  animation: none;
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .qz-bh-line {
+  transition: none;
+}
+
+/* ───── 왜 틀렸어요? (P7-08): 오답 쪽지 아래 보조 버튼 → 같은 자리에 작은 파이뱀 대사창(생각 중 → 해설).
+   대사창은 공통 DialogueBox, 캐릭터 칸만 좁게. 나타날 때 쪽지와 같은 톡 (lite 짧게 · minimal 페이드 · 동작 줄이기 없음) */
+.qz-why-btn {
+  width: 100%;
+}
+.qz-why {
+  container-type: inline-size;
+  animation: qz-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+.qz-why .g-dialogue-who {
+  width: 4.5rem;
+}
+.qz-why[data-state='loading'] .g-bubble {
+  color: var(--text-muted);
+}
+.qz-why-tag {
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+:root[data-motion='lite'] .qz-why {
+  animation: qz-pop var(--dur-base) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-why {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-why {
+  animation: none;
+}
+
+/* ───── 정답·오답 연출 (P7-09). transform·opacity 한 번만: full 스프링 · lite 짧게 · minimal·동작 줄이기는 움직임 없이 색·글자·아이콘 */
+/* 정답 쪽지의 별: 도장(약 0.5초) 뒤 하나씩 찍힘 */
+.qz-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0;
+}
+.qz-star {
+  display: inline-flex;
+}
+@keyframes qz-star-in {
+  from {
+    transform: scale(1.8) rotate(-14deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+:root[data-reduced='false'][data-motion='full'] .qz-star {
+  animation: qz-star-in var(--dur-slow) var(--easing-back-out) both;
+  animation-delay: calc(550ms + var(--i) * 150ms);
+}
+:root[data-reduced='false'][data-motion='lite'] .qz-star {
+  animation: qz-star-in var(--dur-base) var(--easing-out) both;
+  animation-delay: calc(385ms + var(--i) * 105ms);
+}
+
+/* 오답: 입력 영역만 짧게 도리도리 (full·lite) */
+@keyframes qz-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-0.375rem);
+  }
+  45% {
+    transform: translateX(0.3rem);
+  }
+  70% {
+    transform: translateX(-0.15rem);
+  }
+}
+:root[data-reduced='false']:is([data-motion='full'], [data-motion='lite'])
+  .qz[data-status='wrong']
+  .qz-input {
+  animation: qz-shake var(--dur-slow) var(--easing-out) both;
+}
+
+/* 3번째 오답 공개: 정답 쪽지가 위에서 펼쳐짐 */
+@keyframes qz-unfold {
+  from {
+    transform: translateY(-0.5rem) scaleY(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.qz-verdict[data-status='revealed'] {
+  transform-origin: top center;
+  animation: qz-unfold var(--spring-body-dur) var(--spring-body) both;
+}
+:root[data-motion='lite'] .qz-verdict[data-status='revealed'] {
+  animation: qz-unfold var(--dur-slow) var(--easing-out) both;
+}
+:root[data-motion='minimal'] .qz-verdict[data-status='revealed'] {
+  animation: qz-fade var(--dur-fade) var(--easing-out) both;
+}
+:root[data-reduced='true'] .qz-verdict[data-status='revealed'] {
+  animation: none;
+}
+
+/* 연속 정답 배지: 불꽃 + "N연속". 숫자가 바뀌면 톡 */
+.qz-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.125rem 0.625rem 0.125rem 0.375rem;
+  border-radius: var(--round-pill);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--text-caption--line-height);
+}
+.qz-combo > svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--accent-lip);
+  fill: var(--accent);
+}
+.qz-combo-n {
+  display: inline-block;
+}
+@keyframes qz-combo-pop {
+  from {
+    transform: scale(1.7);
+  }
+  to {
+    transform: none;
+  }
+}
+:root[data-reduced='false'][data-motion='full'] .qz-combo-n {
+  animation: qz-combo-pop var(--spring-prop-dur) var(--spring-prop) both;
+}
+:root[data-reduced='false'][data-motion='lite'] .qz-combo-n {
+  animation: qz-combo-pop var(--dur-base) var(--easing-out) both;
+}
+
+/* 아주 좁은 쪽(360px 를 200% 확대 = 180px): 긴 버튼 글자는 줄바꿈해 가로로 넘치지 않게 (P7-13) */
+.qz .g-btn {
+  max-width: 100%;
+  white-space: normal;
+}
+.qz .g-btn-face {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+/* 해설 대사창이 아주 좁으면 장식 캐릭터(aria-hidden)를 빼고 말풍선만 */
+@container (max-width: 15rem) {
+  .qz-why .g-dialogue-who {
+    display: none;
+  }
+}
+
+/* 버그 찾기 고친 줄에서 바뀐 글자 (B53, changedChars): 금색 밑줄 + 옅은 면. 색만이 아니라 밑줄 모양으로도 */
+.qz-diff {
+  border-radius: 0.125rem;
+  background: var(--accent-soft);
+  box-shadow: inset 0 -0.1875rem 0 var(--accent);
+  color: inherit;
+}
+
+/* 출력 예측형 보기 = 출력 모양 (B53): 결과 쪽지처럼 코드 글꼴, 문법 색 없음, 줄마다 한 줄 + 다음 줄이 있으면 옅은 ↵ */
+.qz-out {
+  display: grid;
+  gap: 0.125rem;
+  font-weight: 400;
+  font-size: var(--text-code);
+  line-height: var(--text-code--line-height);
+  white-space: pre-wrap;
+}
+.qz-out-nl {
+  margin-left: 0.375rem;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}

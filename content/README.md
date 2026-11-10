@@ -90,7 +90,7 @@ order: 1
 title: 첫 번째 인사
 concept: print()
 xp_reward: 50
-quest_type: code                            # code | project (퀴즈 quiz 는 P7-01)
+quest_type: code                            # code | project | quiz (아래 "퀴즈")
 
 # 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton)
 prompt:
@@ -102,6 +102,11 @@ prompt:
   starter_code: |
     # 아래에 코드를 작성해보세요!
   expected_output_hint: 안녕하세요! 가 출력되어야 해요
+  checklist:                                # "해 볼 일" 목록 (P7-17). 2~4개, 짧고 구체적으로
+    - print( )를 써요
+    - 따옴표 안에 안녕하세요! 를 넣어요
+  example_output: |-                        # 결과 쪽지의 "이런 모양이면 돼요" (P7-17)
+    안녕하세요!
   fallback_text: print()는 화면에 글자를 보여주는 마법 주문이에요! …
   # is_challenge: true                      # 스테이지의 챌린지 퀘스트 (선택)
 
@@ -121,11 +126,14 @@ answer:
 |---|---|---|---|
 | 맨 위 | `id`, `order`, `title`, `concept`, `xp_reward`, `quest_type` | 모두 | `quests` 컬럼 |
 | `prompt` | `topic`, `learning_goals`, `story_context`, `exercise_description`, `starter_code`, `expected_output_hint`, `fallback_text` | 모두 (`starter_code`만 빈 문자열 허용) | `quests.prompt_skeleton` (공개) |
+| `prompt` | `checklist`(1~5개, 2~4개 권장), `example_output` | 코드 퀘스트 필수. 프로젝트는 퀘스트 전체에 쓰지 않고 `steps[].prompt`에 필수 | `quests.prompt_skeleton` (공개, P7-17) |
 | `prompt` | `is_challenge` | 선택 | `quests.prompt_skeleton` (공개) |
 | `answer` | `validation` | 필수 | `type` → `quests.validation_type`(공개), 기준값 → `quest_answer_keys.expected_output` |
 | `answer` | `hints.level_1~3` | 3개 모두 | `quest_answer_keys.hints` |
 | `answer` | `solution_code` | 코드 퀘스트 필수, 프로젝트 전체에는 선택 | `quest_answer_keys.solution_code` |
 | `answer` | `scenarios` | 선택 (`input()` 퀘스트). 프로젝트는 단계에만 | DB에 쓰지 않음. 자동 검증(§6 정답 자동 검증)만 읽음 |
+
+**해 볼 일·예시 출력 (P7-17, §12-Q59)**: 퀘스트 화면의 "해 볼 일" 체크리스트는 `checklist`를 그대로 보여 주고(통과하면 모두 체크), 결과 쪽지는 출력이 다를 때 `example_output`을 보여 줍니다. 규칙이 `output_match`면 예시와 나온 글자를 줄마다 견주고(같은 줄 ✓, 다른 줄은 연필 표시 + "내 글자"), 다른 규칙(무작위·포함 검사)이면 "예시"라고 밝히고 그대로 보여 줍니다. 예시는 학생에게 보이는 값이라 **정답 규칙을 통과해야 하고**(빌드가 `validateRule`로 확인, `output_match`면 기준값과 똑같이, `code_check`는 정답 코드로 확인) 무작위 출력이면 나올 수 있는 한 가지를 씁니다. 체크리스트는 `exercise_description`·`expected_output_hint`와 같은 말로, 초등학생 눈높이의 "~해요" 문장으로 씁니다.
 
 여러 줄 문자열(코드, 여러 줄 출력)은 `|`(끝 줄바꿈 하나 유지) 또는 `|-`(끝 줄바꿈 없음)로 씁니다. `output_match`는 앞뒤 공백을 무시하므로 어느 쪽이든 됩니다. 시작 코드·정답 코드는 학생 에디터에 그대로 들어가므로 끝 줄바꿈을 원래대로 둡니다.
 
@@ -138,6 +146,10 @@ steps:
   - step_number: 1
     prompt:                              # 공개 → prompt_skeleton.steps[]
       step_goal: random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기
+      checklist:                         # 이 단계의 해 볼 일 (지금 단계 아래에 보임, P7-17)
+        - secret 에 넣고 print( )로 보여 줘요
+      example_output: |-                 # 무작위면 나올 수 있는 한 가지
+        7
       starter_code: |                    # 학생 화면에서는 "이전 단계 코드 + 이 시작 코드"
         import random
       fallback_text: …
@@ -151,6 +163,144 @@ steps:
         secret = random.randint(1, 10)
         print(secret)
 ```
+
+### 퀴즈 (`quest_type: quiz`, P7-01)
+
+키보드 없이 푸는 **보너스 퀘스트**입니다. 스테이지 안 코드 퀘스트 사이에 `order`로 끼워 넣지만 스테이지 잠금 해제·클리어 계산에는 들어가지 않습니다(§12-Q60). 종류는 `quiz_kind` 4가지이고, 실행할 코드가 없어 `hints`·`solution_code`·`validation`·`exercise_description`·`starter_code`·`expected_output_hint`를 쓰지 않습니다(쓰면 오류). XP는 별 1개당 10 XP를 채점 RPC(P7-02)가 줍니다. `xp_reward`는 30(별 3개)으로 씁니다.
+
+공통 모양:
+
+```yaml
+id: …                       # 새 UUID
+order: 3                    # 코드 퀘스트 사이에 끼워도 됨
+title: 반복문 맞혀 보기
+concept: for 반복문
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice  # multiple_choice | fill_blank | parsons | bug_hunt
+
+prompt:                     # 공개 → quests.prompt_skeleton (quiz 에는 빌드가 kind 를 붙임)
+  topic: …
+  learning_goals: [ … ]
+  story_context: …
+  fallback_text: …          # 튜터가 실패할 때 보이는 설명. 정답을 쓰면 빌드 실패
+  quiz: { … }               # 종류별 (아래)
+
+answer:                     # 정답 → quest_answer_keys.quiz_answer (빌드가 kind 를 붙임)
+  quiz_answer:
+    accepted: [ … ]         # 정답 목록. 정답이 여럿이면 모두 (아래 정규형)
+    explanation: …          # 정답 해설 (맞혔을 때, 3번 틀려 정답을 보여 줄 때)
+    explanations:           # 선택. 보기·줄·수정안 id 별 해설 (그것을 골랐을 때)
+      opt-b2mx: 0부터 세요.
+```
+
+**id 규칙** (보기·토큰·줄·수정안·빈칸): `<영문 소문자 머리 1~6자>-<영문 소문자와 숫자를 섞은 4~8자>`, 예: `opt-k7qz`, `tok-m4xe`, `ln-q8wd`, `fx-b7nd`, `bk-r2fa`. 글자와 숫자를 반드시 섞어야 해서 `a`·`b`·`opt-a`·`l1`·`ln-0001`·`opt-abcd` 같은 차례형 이름은 실패합니다. 한 퀴즈 안에서 모두 달라야 합니다. 만들기: `node -e "console.log(Math.random().toString(36).slice(2,6))"`(숫자가 없으면 다시).
+
+빌드는 **보기·토큰·parsons 줄·수정안을 id 순으로** 공개합니다(원본에 정답을 앞에 써도 드러나지 않게). bug_hunt 줄만 코드라서 쓴 순서 그대로입니다. 그래서 parsons 줄 id를 정렬한 차례가 정답 차례와 같으면 빌드가 실패합니다(화면에 정답 순서로 나오기 때문).
+
+#### multiple_choice — 객관식
+
+```yaml
+quiz_kind: multiple_choice
+prompt:
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-                # 선택. 출력 예측형 문제의 코드
+      for i in range(3):
+          print(i)
+    options:                # 2~6개
+      - { id: opt-k7qz, text: "0 1 2" }
+      - { id: opt-b2mx, text: "1 2 3" }
+      - { id: opt-w9fa, text: "0 1 2 3" }
+answer:
+  quiz_answer:
+    accepted: [opt-k7qz]    # 보기 id. 틀린 보기가 하나는 있어야 함
+    explanation: range(3)은 0부터 2까지예요.
+```
+
+**출력 예측형**(§12-Q60 결정 4a): 새 종류 없이 객관식으로 씁니다. 문제는 "이 코드를 돌리면 무엇이 나올까?", `code`에 짧은 코드(5줄 이하), 보기에는 실제 출력과 **흔히 헷갈리는 출력**(0부터/1부터, 마지막 수 포함 여부, 따옴표까지 나온다고 착각, 줄바꿈 대신 한 줄)을 넣습니다. 여러 줄 출력은 보기 글자에 실제 줄바꿈(`"안녕\n2026"`)으로 씁니다(B53, 쉼표로 잇지 않음 — `[1, 2, 3]` 같은 출력과 헷갈림). 정답 보기는 실제로 돌려 본 출력과 같아야 합니다.
+
+**보기 글자 모양**(화면 `MultipleChoice`, P7-03·B53): 문제에 `code`가 있으면(출력 예측형) 보기는 "출력 모양" — 코드 글꼴, 문법 색 없이, 줄마다 끝에 ↵ 표시로 보입니다. 그 밖의 보기는 `` `print("안녕")` ``처럼 글자 전체를 백틱 하나로 감싸거나 여러 줄이면 코드 블록으로, 아니면 보통 글자로 보입니다.
+
+#### fill_blank — 빈칸 채우기
+
+```yaml
+quiz_kind: fill_blank
+prompt:
+  quiz:
+    question: 빈칸을 채워 0부터 2까지 출력해요
+    code: |-                # 빈칸은 {{빈칸 id}}
+      for i in {{bk-r2fa}}(3):
+          {{bk-m8ce}}(i)
+    tokens:                 # 정답에 안 쓰는 토큰 = 방해 토큰
+      - { id: tok-m4xe, text: range }
+      - { id: tok-c3pd, text: print }
+      - { id: tok-z6nh, text: input }
+answer:
+  quiz_answer:
+    accepted:               # 빈칸 id → 토큰 id. 모든 빈칸을 채움
+      - { bk-r2fa: tok-m4xe, bk-m8ce: tok-c3pd }
+    explanation: range 로 숫자를 만들고 print 로 보여 줘요.
+```
+
+#### parsons — 줄 순서 맞추기
+
+```yaml
+quiz_kind: parsons
+prompt:
+  quiz:
+    question: 줄을 순서대로 놓아 1부터 3까지 더해요
+    indent: true            # 선택. true 면 학생이 들여쓰기도 정함 → 줄 앞 공백 없이 씀
+    lines:                  # 2~12줄. 모든 줄을 씀
+      - { id: ln-q8wd, code: total = 0 }
+      - { id: ln-a3ke, code: "for i in range(1, 4):" }
+      - { id: ln-m2xa, code: total = total + i }
+      - { id: ln-f5tb, code: print(total) }
+answer:
+  quiz_answer:
+    accepted:               # indent: true 면 {id, indent}(0~4), 아니면 줄 id 배열
+      - - { id: ln-q8wd, indent: 0 }
+        - { id: ln-a3ke, indent: 0 }
+        - { id: ln-m2xa, indent: 1 }
+        - { id: ln-f5tb, indent: 0 }
+    explanation: 먼저 0으로 시작하고, 반복하며 더한 뒤 출력해요.
+```
+
+바꿔도 되는 줄(예: 서로 상관없는 변수 두 줄)이 있으면 가능한 순서를 `accepted`에 모두 씁니다.
+
+#### bug_hunt — 버그 찾기
+
+```yaml
+quiz_kind: bug_hunt
+prompt:
+  quiz:
+    question: 틀린 줄을 찾아 고쳐요
+    lines:                  # 코드 순서 그대로, 들여쓰기 포함
+      - { id: ln-x5pc, code: "for i in range(3)" }
+      - { id: ln-h7jq, code: "    print(i)" }
+    fixes:                  # 고친 줄 후보 2~6개
+      - { id: fx-b7nd, code: "for i in range(3):" }
+      - { id: fx-e4kr, code: "for i in range[3]" }
+answer:
+  quiz_answer:
+    accepted:               # 틀린 줄 id + 고친 줄 id
+      - { line: ln-x5pc, fix: fx-b7nd }
+    explanation: for 줄 끝에는 쌍점(:)이 있어야 해요.
+```
+
+**`accepted` 정규형** (채점 RPC가 학생 제출값과 `jsonb =`로 그대로 비교, P7-02. `@>` 금지)
+
+| 종류 | 원소 하나 | 예 |
+|---|---|---|
+| `multiple_choice` | 보기 id 문자열 | `"opt-k7qz"` |
+| `fill_blank` | 빈칸 id → 토큰 id 객체 (모든 빈칸, 키 순서 무관) | `{"bk-r2fa":"tok-m4xe","bk-m8ce":"tok-c3pd"}` |
+| `parsons` | 줄 id 배열 (정답 순서) | `["ln-q8wd","ln-a3ke","ln-m2xa","ln-f5tb"]` |
+| `parsons` + `indent: true` | `{id, indent}` 배열 | `[{"id":"ln-q8wd","indent":0}, …]` |
+| `bug_hunt` | `{line, fix}` | `{"line":"ln-x5pc","fix":"fx-b7nd"}` |
+
+**빌드가 확인**: id 형식·중복, `accepted`·`explanations`가 있는 id만 가리키는지, 객관식에 틀린 보기가 있는지, fill_blank가 모든 빈칸을 채우는지, parsons가 모든 줄을 한 번씩 쓰는지와 indent 모양, 같은 정답 중복, 그리고 **공개 문장(제목·`topic`·`learning_goals`·`story_context`·`fallback_text`·문제 문장)에 정답이 그대로 있는지**(§12-Q20). 정답 글자는 객관식·bug_hunt는 정답 보기·수정안 글자(오답 보기 글자도 같은 문장에 있으면 정답을 짚은 게 아니라서 통과), fill_blank는 빈칸을 정답으로 채운 줄, parsons는 정답 순서로 이어지는 두 줄입니다. 한 글자짜리와 영문·숫자 낱말 한가운데(`3` ⊂ `range(30)`)는 보지 않습니다. 코드·보기 자체는 문제라서 보지 않습니다.
+
+DB: `quests.quest_type = 'quiz'`, `quiz_kind`, `is_mobile_friendly = true`, `validation_type = 'all'`(퀴즈는 쓰지 않는 자리값. 00012 CHECK 안의 값이고 기준값 칸이 비어 코드 채점 경로로는 항상 불합격), `quest_answer_keys`는 `quiz_answer`만 있고 `hints = {}`·`solution_code = NULL`. 정답 코드 자동 검증은 퀴즈를 건너뛰고, 대신 `scripts/content/__tests__/quizzes.content.test.ts`(`test:content`)가 퀴즈 코드를 Pyodide로 돌려 봅니다: 출력 예측형 실제 출력(앞뒤 공백만 뺌) = 정답 보기, fill_blank 정답 채움은 오류 없이 끝나고 오답 토큰은 결과가 다름, parsons 정답 순서는 모두 같은 출력, bug_hunt 원래 코드·오답 수정안은 정답 수정안과 결과가 다름. 그래서 퀴즈 코드에는 `input()`·`random`을 쓰지 않습니다.
 
 ## 3. 검증 규칙 (`answer.validation`)
 
@@ -185,8 +335,8 @@ validation:
 ## 4. 공개 부분에 쓰면 안 되는 것
 
 - `prompt`(와 `steps[].prompt`)에는 정답 키 `hints`, `solution_code`, `expected_output`, `is_correct`, `accepted`를 둘 수 없습니다. 스키마가 막고, 빌드한 공개 행도 한 번 더 검사합니다(00005의 `quests_no_answer_fields` CHECK와 같은 목록).
-- 코드 퀘스트의 `fallback_text`·`expected_output_hint`에 예시 코드나 목표 출력을 쓰는 것은 의도한 노출로 인정합니다(§12-Q20: 초반 퀘스트의 예시, `fallback_text`는 튜터가 실패할 때만 보임).
-- **퀴즈(P7-01)는 다릅니다.** 공개 필드에 정답이나 정답이 드러나는 문장을 넣으면 빌드가 실패하게 합니다. 보기·토큰·줄 id는 정답 위치를 암시하지 않는 임의 문자열로 씁니다.
+- 코드 퀘스트의 `fallback_text`·`expected_output_hint`·`example_output`에 예시 코드나 목표 출력을 쓰는 것은 의도한 노출로 인정합니다(§12-Q20: 초반 퀘스트의 예시, `fallback_text`는 튜터가 실패할 때만 보임).
+- **퀴즈(P7-01)는 다릅니다.** 공개 필드에 정답이나 정답이 드러나는 문장을 넣으면 빌드가 실패합니다. 보기·토큰·줄 id는 정답 위치를 암시하지 않는 임의 문자열로 씁니다(위 "퀴즈"의 id 규칙·빌드 확인). 휴리스틱이 못 잡는 표현("첫 번째 보기가 답이에요")도 쓰지 않습니다.
 
 ## 5. 새 퀘스트 추가
 

@@ -1,0 +1,53 @@
+# 퀘스트 1-10: 마을 안내판 만들기
+# 작성 안내: content/README.md
+
+id: b1000000-0000-0000-0000-000000000026
+order: 10
+title: 마을 안내판 만들기
+concept: print() 종합
+xp_reward: 75
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: print() 종합 활용
+  learning_goals:
+    - 주석과 print()를 자유롭게 사용할 수 있다
+    - 문자열과 숫자를 print()로 출력할 수 있다
+    - 여러 줄을 출력하여 의미 있는 결과물을 만들 수 있다
+  story_context: 파이썬 마을에 새 안내판을 세워야 해요! 주석으로 설명을 달고, print()로 멋진 안내판을 만들어봐요!
+  exercise_description: '주석 1줄을 쓰고, print()를 3번 사용하여 마을 안내판을 만드세요. 첫 줄: === 파이썬 마을 ===, 둘째 줄: 인구: 2026명, 셋째 줄: 환영합니다!'
+  starter_code: |
+    # 마을 안내판을 만들어보세요!
+    # 주석 1줄 + print() 3줄로 완성!
+  expected_output_hint: '=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 가 각각 한 줄씩 출력되어야 해요'
+  checklist:
+    - '# 으로 메모를 한 줄 써요'
+    - 'print( )를 세 번 써요'
+    - '=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 를 차례로 보여 줘요'
+  example_output: |-
+    === 파이썬 마을 ===
+    인구: 2026명
+    환영합니다!
+  fallback_text: 주석으로 설명을 달고, print()를 3번 사용해서 안내판을 만들어요! 각 줄에 다른 내용을 넣어보세요.
+  is_challenge: true
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: output_match
+    expected: |-
+      === 파이썬 마을 ===
+      인구: 2026명
+      환영합니다!
+  hints:
+    level_1: print()를 3번 써서 3줄을 출력해야 해요. 각각 어떤 내용을 넣을까요?
+    level_2: print("=== 파이썬 마을 ===")부터 시작해보세요!
+    level_3: |-
+      # 안내판
+      print("=== 파이썬 마을 ===")
+      print("인구: ___명")
+      print("___")
+  solution_code: |-
+    # 마을 안내판
+    print("=== 파이썬 마을 ===")
+    print("인구: 2026명")
+    print("환영합니다!")

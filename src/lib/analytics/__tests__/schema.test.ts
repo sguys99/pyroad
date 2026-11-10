@@ -172,14 +172,52 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     expect(parse({ ...ok, quest_id: 'q1' })).toBe(false);
   });
 
+  it('퀴즈 직접 실행(P7-07): 종류·바꿨는지만, 코드는 거부', () => {
+    const ok = { kind: 'parsons', edited: true };
+    const parse = (props: unknown) =>
+      clientBatchSchema.safeParse(
+        batch([{ name: 'quiz_try_run', props, path: '/quest/x' }]),
+      ).success;
+    expect(parse(ok)).toBe(true);
+    expect(parse({ ...ok, kind: 'boss' })).toBe(false);
+    expect(parse({ ...ok, code: 'print(1)' })).toBe(false);
+  });
+
+  it('폰 퀴즈 추천(P7-11): 자리·동작만, 퀘스트 id는 거부', () => {
+    const ok = { place: 'world', action: 'show' };
+    const parse = (props: unknown) =>
+      clientBatchSchema.safeParse(
+        batch([{ name: 'phone_quiz_pick', props, path: '/world' }]),
+      ).success;
+    expect(parse(ok)).toBe(true);
+    expect(parse({ ...ok, place: 'sheet' })).toBe(false);
+    expect(parse({ ...ok, quest_id: 'q1' })).toBe(false);
+  });
+
+  it('오늘의 퀴즈(P7-10): 수만, 범위 밖·퀘스트 id는 거부', () => {
+    const parse = (name: string, props: unknown) =>
+      clientBatchSchema.safeParse(batch([{ name, props, path: '/daily' }]))
+        .success;
+    expect(parse('daily_quiz_open', { total: 3, done: 1 })).toBe(true);
+    expect(parse('daily_quiz_open', { total: 4, done: 0 })).toBe(false);
+    expect(parse('daily_quiz_finish', { correct: 2, stars: 5 })).toBe(true);
+    expect(
+      parse('daily_quiz_finish', { correct: 2, stars: 5, quest_id: 'q' }),
+    ).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'continue_click',
+      'daily_quiz_finish',
+      'daily_quiz_open',
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',
+      'phone_quiz_pick',
       'pwa_install_prompt',
       'pwa_installed',
+      'quiz_try_run',
       'trial_run',
       'trial_start',
       'trial_success',

@@ -55,6 +55,8 @@ export interface UsePyodideOptions {
   timeoutMs?: number;
   /** stop을 보낸 뒤 Worker를 다시 띄우기 전까지 기다리는 시간 */
   stopGraceMs?: number;
+  /** true면 마운트 때 띄우지 않고 start()를 처음 부를 때 띄운다 (퀴즈 화면은 "직접 실행해 보기"를 누를 때만, P7-07) */
+  lazy?: boolean;
 }
 
 interface ActiveRun {
@@ -89,6 +91,7 @@ const BUSY: RunResult = {
 export function usePyodide(hookOptions: UsePyodideOptions = {}) {
   const timeoutMs = hookOptions.timeoutMs ?? EXECUTION_TIMEOUT_MS;
   const stopGraceMs = hookOptions.stopGraceMs ?? STOP_GRACE_MS;
+  const lazy = hookOptions.lazy ?? false;
 
   const [status, setStatus] = useState<PyodideStatus>('idle');
   const [isRunning, setIsRunning] = useState(false);
@@ -276,9 +279,14 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
   );
   spawnRef.current = spawn;
 
-  // 마운트 시 Worker 생성 + Pyodide 초기화, 언마운트 시 종료
+  /** Worker가 없으면 띄운다 (lazy). 이미 있으면 아무것도 하지 않음 */
+  const start = useCallback(() => {
+    if (!workerRef.current) spawn(null);
+  }, [spawn]);
+
+  // 마운트 시 Worker 생성 + Pyodide 초기화(lazy면 start()가), 언마운트 시 종료
   useEffect(() => {
-    spawn(null);
+    if (!lazy) spawn(null);
     return () => {
       const run = runRef.current;
       if (run) {
@@ -287,7 +295,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       // workerRef가 비므로 이 뒤에 오는 이벤트는 모두 이전 세대로 무시된다
       disposeWorker();
     };
-  }, [spawn, disposeWorker, finishRun]);
+  }, [lazy, spawn, disposeWorker, finishRun]);
 
   /** 실행 중인 코드에 stop을 보낸다. 답이 없으면(CPU 루프) 잠시 뒤 Worker를 다시 띄운다 */
   const requestStop = useCallback(
@@ -365,6 +373,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
 
   return {
     status,
+    start,
     runCode,
     isRunning,
     retry,

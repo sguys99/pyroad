@@ -12,6 +12,9 @@ prompt:
   exercise_description: 안녕을 출력해 보세요
   starter_code: ''
   expected_output_hint: 안녕
+  checklist:
+    - print( )로 안녕을 보여 줘요
+  example_output: 안녕
   fallback_text: print("안녕")
 answer:
   validation:

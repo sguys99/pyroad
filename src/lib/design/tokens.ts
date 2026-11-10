@@ -523,6 +523,14 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: 'codeKeyword', bg: 'codeBg', kind: 'text', use: '코드 키워드' },
   { fg: 'codeString', bg: 'codeBg', kind: 'text', use: '코드 문자열' },
   { fg: 'textMuted', bg: 'surface2', kind: 'text', use: '코드 줄 번호' },
+  // 퀴즈 (P7-13): 흰 칩·빈칸·상태 면 위 코드 글자, 빈 빈칸 번호, 정답 동그라미
+  { fg: 'codeText', bg: 'surface', kind: 'text', use: '퀴즈 낱말 칩·빈칸 코드' },
+  { fg: 'codeString', bg: 'surface', kind: 'text', use: '퀴즈 보기 코드 문자열' },
+  { fg: 'codeText', bg: 'successSoft', kind: 'text', use: '퀴즈 정답 빈칸·줄 코드' },
+  { fg: 'codeText', bg: 'accentSoft', kind: 'text', use: '퀴즈 틀린 빈칸·줄 코드' },
+  { fg: 'textMuted', bg: 'codeBg', kind: 'text', use: '퀴즈 빈 빈칸 번호' },
+  { fg: 'onPrimary', bg: 'success', kind: 'ui', use: '퀴즈 정답 체크 동그라미' },
+  { fg: 'success', bg: 'surface', kind: 'ui', use: '퀴즈 정답 테' },
 ];
 
 const hexToRgb = (hex: string): [number, number, number] => {

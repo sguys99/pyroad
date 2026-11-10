@@ -317,8 +317,9 @@ export function WorldMap({
     const node = box.current?.querySelector('[data-current]');
     if (!node) return;
     const r = node.getBoundingClientRect();
+    // 들어올 때 자리 잡기라 바로 (html의 scroll-behavior: smooth면 첫 화면이 미끄러지고, 그동안 누른 곳이 빗나감, B51)
     if (r.top < 0 || r.bottom > window.innerHeight)
-      node.scrollIntoView({ block: 'center' });
+      node.scrollIntoView({ block: 'center', behavior: 'instant' });
   }, [scrollToCurrent, unlocking]);
 
   // 지난 길 그리기: minimal·동작 줄이기는 즉시, lite는 70% 길이 (P2-15)
