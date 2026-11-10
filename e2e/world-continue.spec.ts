@@ -60,6 +60,8 @@ test('360px: 지도를 내리면 아래에 떠 있는 이어하기, 쪽지가 �
   await page.goto('/world');
   const float = page.getByTestId('continue-float');
 
+  // 지도가 하이드레이션 뒤 지금 스테이지(맨 아래)로 스스로 내려간다 → 그 뒤에 맨 위로 (느린 CI 에서 순서가 뒤집혀 B48)
+  await expect(page.locator('.world-node[data-current]')).toBeInViewport();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(head(page)).toBeInViewport();
   await expect(float).toBeHidden();

@@ -563,11 +563,13 @@ test.describe('축하 오버레이 (P6-13)', () => {
         expect(
           await level.evaluate(
             (el) =>
-              el
-                .getAnimations({ subtree: true })
-                .filter(
-                  (a) => a instanceof CSSAnimation && a.playState === 'running',
-                ).length,
+              el.getAnimations({ subtree: true }).filter(
+                (a) =>
+                  a instanceof CSSAnimation &&
+                  a.playState === 'running' &&
+                  // 자동 넘김 막대는 연출이 아니라 타이머 표시라 Esc 뒤에도 돈다 (마우스가 카드 위면 멈춤 → 그때만 통과하던 것, B48)
+                  a.animationName !== 'celebration-countdown',
+              ).length,
           ),
         ).toBe(0);
       } else {
