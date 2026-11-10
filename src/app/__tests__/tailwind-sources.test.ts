@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 // 랜딩 문구 서브셋과 같은 import 그래프 (정적·동적 import 모두 따라감)
@@ -44,6 +44,25 @@ describe('globals.css Tailwind @source (P4-12)', () => {
     expect(
       missing,
       'globals.css에 @source를 더하세요 (폴더를 여러 화면이 같이 쓰면 파일만)',
+    ).toEqual([]);
+  });
+
+  // Tailwind는 낱말을 다 후보로 본다: 변수 이름 `prose` 하나로 typography 플러그인 .prose 전체(약 3KB gzip)가 랜딩에 실렸다 (B46)
+  it('@source 목록 안 파일에 낱말 prose가 없다 (.prose는 앱 화면 전용)', () => {
+    const files = listed.flatMap((s) => {
+      const abs = join(ROOT, s);
+      return statSync(abs).isDirectory()
+        ? readdirSync(abs, { recursive: true, encoding: 'utf8' }).map((f) =>
+            join(abs, f),
+          )
+        : [abs];
+    });
+    const hits = files.filter(
+      (f) => statSync(f).isFile() && /\bprose\b/.test(readFileSync(f, 'utf8')),
+    );
+    expect(
+      hits.map((f) => relative(ROOT, f)),
+      '이름을 바꾸세요',
     ).toEqual([]);
   });
 

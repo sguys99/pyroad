@@ -83,7 +83,7 @@ lottie-web·canvas-confetti·로그인 시트·쇼케이스 장면은 이미 첫
 |---|---|---|
 | `scripts/perf/check-landing-budget.mjs` | postbuild (Vercel 빌드 포함) | 첫 JS 250KB·렌더 차단 CSS 15KB 초과 = **실패**, 95% 초과 = 경고, 글자가 든 요소의 인라인 `opacity:0` 서버 렌더 = 실패 |
 | `scripts/fonts/check-build.mjs` | postbuild | 앱 라우트에 `app.css`가 없음 / 랜딩에 실림 = 실패 (표시 `--pyroad-app-css`) |
-| `src/app/__tests__/tailwind-sources.test.ts` | unit | 랜딩 import 그래프(정적·동적) 파일이 globals.css `@source` 밖 |
+| `src/app/__tests__/tailwind-sources.test.ts` | unit | 랜딩 import 그래프(정적·동적) 파일이 globals.css `@source` 밖 · `@source` 안 파일에 낱말 `prose`(Tailwind가 변수 이름도 클래스 후보로 잡아 typography `.prose` 약 3KB가 랜딩에 실림, B46) |
 | `src/components/ui/__tests__/game-ui-css.test.ts` | unit | 조각 CSS를 그 컴포넌트가 import하는지 |
 | `e2e/public/landing-perf.spec.ts` | e2e-smoke | JS 없이도 첫 화면 글자가 보임(조상까지 opacity) · 차단 CSS 2개에 앱 CSS·아래쪽 섹션 CSS 없음 · 늦은 CSS 전에는 본문 숨김 → 오면 보임 · 바로가기가 CSS를 기다려 제목으로 · `/#faq` · 설치 띠 막기 |
 

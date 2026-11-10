@@ -791,7 +791,7 @@ function checkQuiz(quest: QuizQuest, report: Report): void {
 
   // 3. 공개 문장에 정답 (코드·보기 자체는 문제라서 보지 않음)
   const p = quest.prompt;
-  const prose: [(string | number)[], string][] = [
+  const publicTexts: [(string | number)[], string][] = [
     [['title'], quest.title],
     [['prompt', 'topic'], p.topic],
     ...p.learning_goals.map((g, i): [(string | number)[], string] => [
@@ -802,7 +802,7 @@ function checkQuiz(quest: QuizQuest, report: Report): void {
     [['prompt', 'fallback_text'], p.fallback_text],
     [[...Q, 'question'], quiz.question],
   ];
-  for (const [path, hay] of prose) {
+  for (const [path, hay] of publicTexts) {
     // 고를 거리: 정답만 들어 있고 오답은 없으면 정답을 짚는 문장
     const pick = correct.find((c) => mentions(hay, c));
     const leaked =
