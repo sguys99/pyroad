@@ -26,6 +26,8 @@ const PROMPT_KEYS = [
   'exercise_description',
   'starter_code',
   'expected_output_hint',
+  'checklist',
+  'example_output',
   'fallback_text',
   'is_challenge',
 ] as const;
@@ -115,6 +117,8 @@ export function questFromRows(quest: Row, answer: Row | undefined): Quest {
           step_number: step.step_number,
           prompt: {
             step_goal: step.step_goal,
+            checklist: step.checklist,
+            example_output: step.example_output,
             starter_code: step.starter_code,
             fallback_text: step.fallback_text,
           },

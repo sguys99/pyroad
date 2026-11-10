@@ -16,8 +16,10 @@ export interface E2eQuest {
   /** 처음 코드 (공책 첫 내용) */
   starter: string;
   fallbackText: string;
-  /** 공개 안내 "나와야 하는 모습" (결과 쪽지 견줘 보기, P6-06) */
-  expectedHint: string;
+  /** 공개 해 볼 일 (P7-17) */
+  checklist: string[];
+  /** 공개 예시 출력 (결과 쪽지 견줘 보기, P7-17) */
+  example: string;
   hints: [string, string, string];
 }
 
@@ -35,7 +37,8 @@ interface QuestYaml {
   quest_type: string;
   prompt: {
     fallback_text: string;
-    expected_output_hint: string;
+    checklist: string[];
+    example_output: string;
     starter_code?: string;
   };
   answer: {
@@ -65,7 +68,8 @@ export function stages(): E2eStage[] {
           solution: (q.answer.solution_code ?? '').trim(),
           starter: (q.prompt.starter_code ?? '').trim(),
           fallbackText: q.prompt.fallback_text.trim(),
-          expectedHint: q.prompt.expected_output_hint.trim(),
+          checklist: q.prompt.checklist,
+          example: q.prompt.example_output.trim(),
           hints: [
             q.answer.hints.level_1,
             q.answer.hints.level_2,
@@ -104,7 +108,7 @@ interface ProjectYaml {
   title: string;
   quest_type: string;
   steps: Array<{
-    prompt: { step_goal: string };
+    prompt: { step_goal: string; checklist: string[] };
     answer: { solution_code: string };
   }>;
 }
@@ -113,7 +117,7 @@ interface ProjectYaml {
 export function projectQuest(): {
   id: string;
   title: string;
-  steps: Array<{ goal: string; solution: string }>;
+  steps: Array<{ goal: string; checklist: string[]; solution: string }>;
 } {
   for (const d of readdirSync(WORLD_DIR, { withFileTypes: true })) {
     if (!d.isDirectory()) continue;
@@ -127,6 +131,7 @@ export function projectQuest(): {
         title: q.title,
         steps: q.steps.map((s) => ({
           goal: s.prompt.step_goal,
+          checklist: s.prompt.checklist,
           solution: s.answer.solution_code.trim(),
         })),
       };

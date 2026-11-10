@@ -33,6 +33,16 @@ prompt:
         print(item)
     print("총 " + str(len(shopping)) + "개")
   expected_output_hint: 쇼핑 목록이 정렬되어 출력되어야 해요
+  checklist:
+    - 'append( )로 우유·주스·과자를 하나씩 더해요'
+    - 'sort( )로 가나다 순서로 줄 세워요'
+    - '목록과 총 개수가 나오는지 봐요'
+  example_output: |-
+    --- 쇼핑 목록 ---
+    과자
+    우유
+    주스
+    총 3개
   fallback_text: 빈 리스트 []를 만들고, append()로 항목을 추가하고, sort()로 정렬한 뒤, for로 하나씩 출력해요!
   is_challenge: true
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)

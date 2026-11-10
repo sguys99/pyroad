@@ -12,7 +12,7 @@
 
 import { z } from 'zod/v4';
 
-import type { ValidationRule } from '@/lib/quest/validation';
+import { validateRule, type ValidationRule } from '@/lib/quest/validation';
 import { QUIZ_BLANK_RE } from '@/lib/quest/questKind';
 import { SOUND_MANIFEST, type BgmId } from '@/lib/sound/manifest';
 
@@ -101,9 +101,25 @@ export const QuestPromptSchema = z.strictObject({
   is_challenge: z.boolean().optional(),
 });
 
+/**
+ * 공개 "해 볼 일" 목록과 예시 출력 (P7-17, §12-Q59). 코드 퀘스트와 프로젝트 단계마다 씀.
+ * 예시 출력은 학생에게 보여 줘도 되는 "이런 모양이면 돼요"이고, 빌드가 정답 규칙을 통과하는지 확인함
+ * (output_match 면 기준값과 같아야 함 — 코드 퀘스트의 의도한 노출, §12-Q20. 결과 쪽지가 줄 단위로 견줌)
+ */
+const publicGuide = {
+  /** 해 볼 일 항목 (2~4개 권장, 짧고 구체적으로) */
+  checklist: z.array(text).min(1).max(5),
+  /** 예시 출력. 무작위 출력이면 나올 수 있는 한 가지 */
+  example_output: text,
+};
+
+/** 코드 퀘스트의 공개 부분. 프로젝트는 해 볼 일·예시 출력을 단계마다 씀 */
+export const CodePromptSchema = QuestPromptSchema.extend(publicGuide);
+
 /** 프로젝트 단계의 공개 부분 → quests.prompt_skeleton.steps[] */
 export const StepPromptSchema = z.strictObject({
   step_goal: text,
+  ...publicGuide,
   /** 이전 단계 코드 뒤에 붙는 시작 코드. 빈 문자열 허용 */
   starter_code: code,
   fallback_text: text,
@@ -174,7 +190,7 @@ const questBase = {
 export const CodeQuestSchema = z.strictObject({
   ...questBase,
   quest_type: z.literal('code'),
-  prompt: QuestPromptSchema,
+  prompt: CodePromptSchema,
   answer: CodeAnswerSchema,
 });
 
@@ -334,8 +350,19 @@ export const QuestSchema = z
       );
       return;
     }
-    if (quest.quest_type !== 'project') return;
+    const report: Report = (path, message) =>
+      ctx.addIssue({ code: 'custom', path, message });
+    if (quest.quest_type === 'code') {
+      checkExample(quest.prompt, quest.answer, ['prompt'], report);
+      return;
+    }
     quest.steps.forEach((step, index) => {
+      checkExample(
+        step.prompt,
+        step.answer,
+        ['steps', index, 'prompt'],
+        report,
+      );
       if (step.step_number !== index + 1) {
         ctx.addIssue({
           code: 'custom',
@@ -565,6 +592,27 @@ function mentions(hay: string, needle: string): boolean {
     }
   }
   return false;
+}
+
+/**
+ * 예시 출력이 정답 규칙을 통과해야 함 (P7-17): 화면이 "이런 모양이면 돼요"로 보여 주므로 따라 하면 통과해야 함.
+ * code_check 는 출력이 아니라 코드를 보므로 정답 코드로 확인 (프로젝트 단계·퀘스트 전체에 정답 코드가 있음)
+ */
+function checkExample(
+  prompt: { example_output: string },
+  answer: { validation: ValidationRule; solution_code?: string },
+  at: (string | number)[],
+  report: Report,
+): void {
+  const ok = validateRule(answer.validation, {
+    stdout: prompt.example_output,
+    studentCode: answer.solution_code ?? '',
+  });
+  if (!ok)
+    report(
+      [...at, 'example_output'],
+      '예시 출력이 정답 규칙을 통과하지 않아요 (output_match 면 기준값과 똑같이 써요)',
+    );
 }
 
 function checkQuiz(quest: QuizQuest, report: Report): void {

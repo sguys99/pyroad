@@ -23,6 +23,11 @@ prompt:
     result = 
     print(result)
   expected_output_hint: True 가 출력되어야 해요
+  checklist:
+    - 'result 에 "바나나" in fruits 를 넣어요'
+    - 'print(result)로 True 인지 False 인지 봐요'
+  example_output: |-
+    True
   fallback_text: in 연산자는 리스트에 값이 있는지 확인해요! "바나나" in fruits는 바나나가 fruits에 있으면 True, 없으면 False를 돌려줘요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

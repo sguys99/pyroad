@@ -19,6 +19,13 @@ prompt:
     # print()를 한 번만 사용해서 두 줄로 출력해보세요!
     # 힌트: \n은 줄바꿈이에요!
   expected_output_hint: 첫째 줄과 둘째 줄이 각각 다른 줄에 출력되어야 해요
+  checklist:
+    - 'print( )는 딱 한 번만 써요'
+    - "첫째 줄과 둘째 줄 사이에 \\n 을 넣어요"
+    - '두 줄로 나오는지 확인해요'
+  example_output: |-
+    첫째 줄
+    둘째 줄
   fallback_text: \n은 줄바꿈을 뜻하는 특수 문자예요! print("첫째 줄\n둘째 줄") 이렇게 쓰면 두 줄로 나뉘어서 출력돼요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

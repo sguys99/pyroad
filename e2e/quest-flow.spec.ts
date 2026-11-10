@@ -77,7 +77,8 @@ test.describe('퀘스트 전체 플로우', () => {
       page.getByRole('heading', { level: 1, name: quest1.title }),
     ).toBeVisible();
     const task = page.getByRole('region', { name: '해 볼 일' });
-    await expect(task.getByRole('listitem').first()).toBeVisible();
+    // 해 볼 일은 콘텐츠 checklist 그대로 (P7-17)
+    await expect(task.getByRole('listitem')).toHaveText(quest1.checklist);
     await expect(page.getByTestId('quest-dialogue')).toContainText('파이뱀');
     // 튜터 소개는 "파이뱀에게 물어보기"를 열면 대화에 (P6-10)
     const chat = await openTutorChat(page);
@@ -88,13 +89,18 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(outputPanel(page)).toHaveAttribute('data-state', 'empty');
     const output = outputPanel(page);
 
-    // 결과 쪽지(P6-06): 돌아갔지만 글자가 다르면 "조금 달라요" + 공개 안내(해 볼 일)와 견줘 보기. 정답 기준값은 없음
+    // 결과 쪽지(P6-06): 돌아갔지만 글자가 다르면 "조금 달라요" + 공개 예시 출력과 줄마다 견줘 보기(P7-17)
     await runCode(page, 'print("틀린 글자")');
     await expect(output).toHaveAttribute('data-verdict', 'diff');
     await expect(output).toContainText('조금 달라요');
     await expect(output.locator('.qo-line')).toHaveText(['틀린 글자']);
-    await expect(output.getByTestId('output-compare')).toContainText(
-      quest1.expectedHint,
+    const example = output.getByTestId('output-example');
+    await expect(example).toHaveAttribute('data-compare');
+    await expect(example.locator('li').first()).toContainText(
+      quest1.example.split('\n')[0],
+    );
+    await expect(example.locator('li').first()).toContainText(
+      '내 글자 틀린 글자',
     );
 
     // 대사창 글자가 나오는 동안 블립 (2~3글자마다)

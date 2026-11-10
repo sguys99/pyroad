@@ -14,6 +14,8 @@ export const codeQuest = () => ({
     exercise_description: '"안녕하세요!"를 출력해보세요',
     starter_code: '# 아래에 코드를 작성해보세요!\n',
     expected_output_hint: '안녕하세요! 가 출력되어야 해요',
+    checklist: ['print( )를 써요', '따옴표 안에 인사를 넣어요'],
+    example_output: '안녕하세요!',
     fallback_text: 'print("안녕하세요!") 이렇게 쓰면 돼요.',
   },
   answer: {
@@ -34,9 +36,15 @@ export const projectQuest = () => ({
   concept: '종합 프로젝트',
   xp_reward: 200,
   quest_type: 'project' as const,
+  // 프로젝트는 해 볼 일·예시 출력을 단계마다 씀 (P7-17)
   prompt: {
-    ...codeQuest().prompt,
+    topic: '숫자 맞추기',
+    learning_goals: ['배운 것을 모아 게임을 만들 수 있다'],
+    story_context: '프로젝트 왕국에 도착한 모험가',
+    exercise_description: '5단계로 게임을 완성해요',
     starter_code: 'import random\n',
+    expected_output_hint: '프로젝트를 단계로 나누어 완성해요',
+    fallback_text: '한 단계씩 해 봐요.',
   },
   answer: {
     validation: { type: 'contains' as const, expected: '번 만에 맞췄어요' },
@@ -47,6 +55,8 @@ export const projectQuest = () => ({
       step_number: 1,
       prompt: {
         step_goal: '비밀 숫자 만들기',
+        checklist: ['randint 로 비밀 숫자를 만들어요'],
+        example_output: '7',
         starter_code: 'import random\n',
         fallback_text: 'random.randint(1, 10)',
       },
@@ -65,6 +75,8 @@ export const projectQuest = () => ({
       step_number: 2,
       prompt: {
         step_goal: '비교하기',
+        checklist: ['if·elif·else 로 견줘요'],
+        example_output: '비밀 숫자가 더 커요!',
         starter_code: '',
         fallback_text: 'if/elif/else',
       },

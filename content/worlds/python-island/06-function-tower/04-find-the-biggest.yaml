@@ -22,6 +22,11 @@ prompt:
     biggest = 
     print(biggest)
   expected_output_hint: 9 가 출력되어야 해요
+  checklist:
+    - 'biggest 에 max(numbers)를 넣어요'
+    - '가장 큰 수가 나오는지 봐요'
+  example_output: |-
+    9
   fallback_text: max()는 가장 큰 값을 찾아주는 내장함수예요! max([3, 7, 1, 9, 4])는 9를 돌려줘요. min()은 반대로 가장 작은 값을 찾아줘요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

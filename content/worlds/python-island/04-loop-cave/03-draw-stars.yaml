@@ -21,6 +21,11 @@ prompt:
 
     print("*" * ___)
   expected_output_hint: '***** 가 출력되어야 해요'
+  checklist:
+    - '"*" * 뒤 빈칸에 5를 넣어요'
+    - '별 다섯 개가 한 줄로 나오는지 봐요'
+  example_output: |-
+    *****
   fallback_text: 문자열에 * 숫자를 하면 그만큼 반복돼요! "*" * 5 = "*****" 이에요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

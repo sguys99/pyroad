@@ -18,6 +18,13 @@ prompt:
   starter_code: |
     # 두 줄을 출력해보세요!
   expected_output_hint: '두 줄이 출력되어야 해요: 나는 파이썬 모험가! 그리고 반가워!'
+  checklist:
+    - 'print( )를 두 줄 써요'
+    - '첫 줄에는 나는 파이썬 모험가! 를 넣어요'
+    - '둘째 줄에는 반가워! 를 넣어요'
+  example_output: |-
+    나는 파이썬 모험가!
+    반가워!
   fallback_text: print()를 두 번 쓰면 두 줄이 나와요! 첫 번째 print()에 첫 번째 문장을, 두 번째 print()에 두 번째 문장을 넣어보세요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

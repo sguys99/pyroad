@@ -26,6 +26,11 @@ prompt:
             
         position = position + 1
   expected_output_hint: 보물 발견! 이 출력되어야 해요
+  checklist:
+    - 'if 아래에서 print( )로 "보물 발견!"을 보여 줘요'
+    - '바로 다음 줄에 break 로 반복을 멈춰요'
+  example_output: |-
+    보물 발견!
   fallback_text: 'while은 조건이 맞는 동안 계속 반복해요. break를 만나면 반복을 멈춰요! if position == 5: 에서 보물을 찾으면 break로 탈출!'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

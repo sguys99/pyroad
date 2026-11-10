@@ -24,6 +24,11 @@ prompt:
     result = add(7, 8)
     print(result)
   expected_output_hint: 15 가 출력되어야 해요
+  checklist:
+    - 'add 안에서 return a + b 를 써요'
+    - 'add(7, 8)의 결과가 나오는지 봐요'
+  example_output: |-
+    15
   fallback_text: '매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요.'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

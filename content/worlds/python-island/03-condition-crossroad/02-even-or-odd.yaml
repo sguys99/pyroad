@@ -24,6 +24,11 @@ prompt:
     else:
         print()
   expected_output_hint: 홀수 가 출력되어야 해요
+  checklist:
+    - 'else 아래 print( ) 안에 "홀수"를 넣어요'
+    - '7을 2로 나눈 나머지가 1이라 else 쪽이 돌아가요'
+  example_output: |-
+    홀수
   fallback_text: '% 연산자는 나누기의 나머지를 구해요! 7 % 2 = 1 이니까 홀수예요. 짝수는 나머지가 0이에요.'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

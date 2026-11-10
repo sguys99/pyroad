@@ -23,6 +23,13 @@ prompt:
 
     # 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!
   expected_output_hint: 안녕, 친구! 와 안녕, 파이뱀! 이 각각 출력되어야 해요
+  checklist:
+    - 'greet 안에서 "안녕, " + name + "!"를 보여 줘요'
+    - 'greet( )을 이름 없이 한 번 불러요'
+    - 'greet("파이뱀")으로 한 번 더 불러요'
+  example_output: |-
+    안녕, 친구!
+    안녕, 파이뱀!
   fallback_text: '매개변수에 = 으로 기본값을 넣으면, 호출할 때 값을 안 넣어도 기본값이 사용돼요! def greet(name="친구"): 에서 greet()은 "친구"가, greet("파이뱀")은 "파이뱀"이 name에 들어가요.'
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:

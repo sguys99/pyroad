@@ -35,6 +35,11 @@ steps:
   - step_number: 1
     prompt:
       step_goal: random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기
+      checklist:
+        - 'import random 아래에서 random.randint(1, 10)으로 비밀 숫자를 만들어요'
+        - 'secret 에 넣고 print( )로 보여 줘요'
+      example_output: |-
+        7
       starter_code: |
         # 1단계: 비밀 숫자 만들기
         import random
@@ -60,6 +65,12 @@ steps:
   - step_number: 2
     prompt:
       step_goal: 추측 숫자를 guess 변수에 저장하고 "추측"과 함께 출력하기 (Pyodide에서는 random으로 대체)
+      checklist:
+        - 'guess 변수에 추측 숫자를 넣어요'
+        - 'print( )로 "추측"이라는 말과 함께 보여 줘요'
+      example_output: |-
+        비밀 숫자: 7
+        추측: 3
       starter_code: ''
       fallback_text: 2단계에서는 추측 숫자를 만들어요! 실제 게임에서는 input()으로 사용자에게 물어보지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어볼 거예요. guess 변수에 저장하고, print()로 "추측"이라는 말과 함께 보여주세요!
     answer:
@@ -89,6 +100,12 @@ steps:
   - step_number: 3
     prompt:
       step_goal: if/elif/else로 비밀 숫자와 추측을 비교하기
+      checklist:
+        - 'if 로 정답인지 먼저 봐요'
+        - 'elif 와 else 로 더 큰지 작은지 알려 줘요'
+        - '숫자는 매번 바뀌어서 나오는 말도 달라져요'
+      example_output: |-
+        비밀 숫자가 추측보다 커요!
       starter_code: ''
       fallback_text: 3단계에서는 조건문으로 비밀 숫자와 추측을 비교해요! if/elif/else를 사용해서 정답인지, 더 큰 숫자를 말해야 하는지, 더 작은 숫자를 말해야 하는지 알려주세요!
     answer:
@@ -131,6 +148,14 @@ steps:
   - step_number: 4
     prompt:
       step_goal: while 반복문으로 정답을 맞출 때까지 반복하기
+      checklist:
+        - 'while guess != secret: 으로 반복을 만들어요'
+        - '반복 안에서 힌트를 보여 주고 guess 를 새로 정해요'
+        - '반복이 끝나면 정답! 을 보여 줘요'
+      example_output: |-
+        비밀 숫자가 추측보다 커요!
+        비밀 숫자가 추측보다 작아요!
+        정답!
       starter_code: ''
       fallback_text: '4단계에서는 while 반복문으로 게임을 반복해요! while guess != secret: 으로 정답을 맞출 때까지 계속 추측하도록 만들어보세요!'
     answer:
@@ -161,6 +186,13 @@ steps:
   - step_number: 5
     prompt:
       step_goal: 시도 횟수를 세고 완성 메시지 출력하기
+      checklist:
+        - 'attempts 를 0에서 시작해요'
+        - '한 번 추측할 때마다 attempts 에 1을 더해요'
+        - '마지막에 몇 번 만에 맞췄는지 보여 줘요'
+      example_output: |-
+        비밀 숫자가 추측보다 커요!
+        정답! 2번 만에 맞췄어요!
       starter_code: ''
       fallback_text: 마지막 5단계! 시도 횟수를 세는 변수 attempts를 추가하고, 정답을 맞추면 "정답! N번 만에 맞췄어요!"를 출력하세요. 이걸로 게임이 완성돼요!
     answer:

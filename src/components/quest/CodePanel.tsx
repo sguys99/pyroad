@@ -108,8 +108,7 @@ interface CodePanelProps {
   validationResult?: OutputPanelProps['validationResult'];
   /** 퀘스트를 마쳤을 때 결과 쪽지 아래 성공 장면·다음 퀘스트 (P6-08) */
   reward?: OutputPanelProps['reward'];
-  /** 결과 쪽지 견줘 보기에 쓰는 공개 안내 (P6-06) */
-  goal?: string;
+  example?: OutputPanelProps['example'];
   /** 결과 쪽지의 "N번째 줄 보러 가기" */
   onShowErrorLine?: (line: number) => void;
   /** 결과 쪽지 "파이뱀에게 더 물어보기" (Q56) */
@@ -136,7 +135,7 @@ export function CodePanel({
   isCodeEmpty,
   validationResult,
   reward,
-  goal,
+  example,
   onShowErrorLine,
   onAskTutor,
   stage,
@@ -193,7 +192,7 @@ export function CodePanel({
         isRunning={isRunning}
         validationResult={validationResult}
         liveOutput={liveOutput}
-        goal={goal}
+        example={example}
         onShowErrorLine={onShowErrorLine}
         reward={reward}
         onAskTutor={onAskTutor}

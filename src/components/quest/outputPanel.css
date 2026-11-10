@@ -318,3 +318,60 @@
 :root[data-reduced='false'] .qo-bug-bye {
   animation: qo-bye calc(var(--dur-celebrate) * 2.5) var(--easing-in-out) both;
 }
+
+/* 예시 출력과 견줘 보기 (P7-17): 예시 줄마다 흰 카드. 같은 줄 ✓, 다른 줄은 연필 표시 + 옅은 금색 면 + 바로 아래 "내 글자" */
+.qo-cmp {
+  display: grid;
+  gap: 0.25rem;
+  max-height: 16rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+.qo-cmp-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--round-s);
+  background: var(--surface-2);
+}
+.qo-goal[data-compare] .qo-cmp-row:not([data-same]) {
+  background: var(--accent-soft);
+}
+.qo-cmp-mark {
+  display: inline-flex;
+  flex: none;
+  padding-top: 0.25rem;
+  color: var(--accent-text);
+}
+.qo-cmp-row[data-same] .qo-cmp-mark {
+  color: var(--primary-text);
+}
+.qo-cmp-mark > svg {
+  width: 1rem;
+  height: 1rem;
+}
+.qo-cmp-body {
+  display: grid;
+  min-width: 0;
+}
+.qo-cmp-text {
+  font-size: var(--text-body);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.qo-cmp-mine {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.qo-cmp-none {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}

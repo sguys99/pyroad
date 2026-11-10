@@ -102,6 +102,11 @@ prompt:
   starter_code: |
     # 아래에 코드를 작성해보세요!
   expected_output_hint: 안녕하세요! 가 출력되어야 해요
+  checklist:                                # "해 볼 일" 목록 (P7-17). 2~4개, 짧고 구체적으로
+    - print( )를 써요
+    - 따옴표 안에 안녕하세요! 를 넣어요
+  example_output: |-                        # 결과 쪽지의 "이런 모양이면 돼요" (P7-17)
+    안녕하세요!
   fallback_text: print()는 화면에 글자를 보여주는 마법 주문이에요! …
   # is_challenge: true                      # 스테이지의 챌린지 퀘스트 (선택)
 
@@ -121,11 +126,14 @@ answer:
 |---|---|---|---|
 | 맨 위 | `id`, `order`, `title`, `concept`, `xp_reward`, `quest_type` | 모두 | `quests` 컬럼 |
 | `prompt` | `topic`, `learning_goals`, `story_context`, `exercise_description`, `starter_code`, `expected_output_hint`, `fallback_text` | 모두 (`starter_code`만 빈 문자열 허용) | `quests.prompt_skeleton` (공개) |
+| `prompt` | `checklist`(1~5개, 2~4개 권장), `example_output` | 코드 퀘스트 필수. 프로젝트는 퀘스트 전체에 쓰지 않고 `steps[].prompt`에 필수 | `quests.prompt_skeleton` (공개, P7-17) |
 | `prompt` | `is_challenge` | 선택 | `quests.prompt_skeleton` (공개) |
 | `answer` | `validation` | 필수 | `type` → `quests.validation_type`(공개), 기준값 → `quest_answer_keys.expected_output` |
 | `answer` | `hints.level_1~3` | 3개 모두 | `quest_answer_keys.hints` |
 | `answer` | `solution_code` | 코드 퀘스트 필수, 프로젝트 전체에는 선택 | `quest_answer_keys.solution_code` |
 | `answer` | `scenarios` | 선택 (`input()` 퀘스트). 프로젝트는 단계에만 | DB에 쓰지 않음. 자동 검증(§6 정답 자동 검증)만 읽음 |
+
+**해 볼 일·예시 출력 (P7-17, §12-Q59)**: 퀘스트 화면의 "해 볼 일" 체크리스트는 `checklist`를 그대로 보여 주고(통과하면 모두 체크), 결과 쪽지는 출력이 다를 때 `example_output`을 보여 줍니다. 규칙이 `output_match`면 예시와 나온 글자를 줄마다 견주고(같은 줄 ✓, 다른 줄은 연필 표시 + "내 글자"), 다른 규칙(무작위·포함 검사)이면 "예시"라고 밝히고 그대로 보여 줍니다. 예시는 학생에게 보이는 값이라 **정답 규칙을 통과해야 하고**(빌드가 `validateRule`로 확인, `output_match`면 기준값과 똑같이, `code_check`는 정답 코드로 확인) 무작위 출력이면 나올 수 있는 한 가지를 씁니다. 체크리스트는 `exercise_description`·`expected_output_hint`와 같은 말로, 초등학생 눈높이의 "~해요" 문장으로 씁니다.
 
 여러 줄 문자열(코드, 여러 줄 출력)은 `|`(끝 줄바꿈 하나 유지) 또는 `|-`(끝 줄바꿈 없음)로 씁니다. `output_match`는 앞뒤 공백을 무시하므로 어느 쪽이든 됩니다. 시작 코드·정답 코드는 학생 에디터에 그대로 들어가므로 끝 줄바꿈을 원래대로 둡니다.
 
@@ -138,6 +146,10 @@ steps:
   - step_number: 1
     prompt:                              # 공개 → prompt_skeleton.steps[]
       step_goal: random 모듈로 1~10 사이의 비밀 숫자를 만들고 출력해보기
+      checklist:                         # 이 단계의 해 볼 일 (지금 단계 아래에 보임, P7-17)
+        - secret 에 넣고 print( )로 보여 줘요
+      example_output: |-                 # 무작위면 나올 수 있는 한 가지
+        7
       starter_code: |                    # 학생 화면에서는 "이전 단계 코드 + 이 시작 코드"
         import random
       fallback_text: …
@@ -321,7 +333,7 @@ validation:
 ## 4. 공개 부분에 쓰면 안 되는 것
 
 - `prompt`(와 `steps[].prompt`)에는 정답 키 `hints`, `solution_code`, `expected_output`, `is_correct`, `accepted`를 둘 수 없습니다. 스키마가 막고, 빌드한 공개 행도 한 번 더 검사합니다(00005의 `quests_no_answer_fields` CHECK와 같은 목록).
-- 코드 퀘스트의 `fallback_text`·`expected_output_hint`에 예시 코드나 목표 출력을 쓰는 것은 의도한 노출로 인정합니다(§12-Q20: 초반 퀘스트의 예시, `fallback_text`는 튜터가 실패할 때만 보임).
+- 코드 퀘스트의 `fallback_text`·`expected_output_hint`·`example_output`에 예시 코드나 목표 출력을 쓰는 것은 의도한 노출로 인정합니다(§12-Q20: 초반 퀘스트의 예시, `fallback_text`는 튜터가 실패할 때만 보임).
 - **퀴즈(P7-01)는 다릅니다.** 공개 필드에 정답이나 정답이 드러나는 문장을 넣으면 빌드가 실패합니다. 보기·토큰·줄 id는 정답 위치를 암시하지 않는 임의 문자열로 씁니다(위 "퀴즈"의 id 규칙·빌드 확인). 휴리스틱이 못 잡는 표현("첫 번째 보기가 답이에요")도 쓰지 않습니다.
 
 ## 5. 새 퀘스트 추가

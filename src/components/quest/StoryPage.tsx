@@ -30,11 +30,14 @@ export interface MissionItem {
   step?: number;
   /** 방금 통과한 단계 ("다음 단계" 박자 동안 체크가 톡 찍힘, P6-12) */
   fresh?: boolean;
+  /** 지금 단계의 해 볼 일 (프로젝트 단계 checklist, P7-17) */
+  sub?: string[];
 }
 
 /**
- * "해 볼 일" 체크리스트 항목. 콘텐츠에 따로 나눈 목록이 없어(§12 결정 필요) 지금 있는 필드로 만든다:
- * 프로젝트는 단계 목표(steps[].step_goal), 코드 퀘스트는 과제 설명 + 기대 결과 안내(있으면). 통과하면 자동으로 체크
+ * "해 볼 일" 체크리스트 항목 (P7-17 콘텐츠 checklist): 코드 퀘스트는 prompt.checklist,
+ * 프로젝트는 단계 목표(steps[].step_goal) 목록 + 지금 단계 아래에 그 단계의 checklist. 통과하면 자동으로 체크.
+ * checklist 가 없는 예전 행이면 과제 설명 + 기대 결과 안내로 (콘텐츠 빌드 전 배포 사이)
  */
 export function missionItems(session: QuestSession): MissionItem[] {
   const sk = session.quest.prompt_skeleton;
@@ -48,10 +51,11 @@ export function missionItems(session: QuestSession): MissionItem[] {
       done: session.isCompleted || i + 1 < shown,
       current: !session.isCompleted && i + 1 === shown,
       fresh: i + 1 === cleared,
+      sub: i + 1 === shown && !session.isCompleted ? s.checklist : undefined,
     }));
   }
   const done = session.isCompleted || !!session.validation?.passed;
-  return [sk.exercise_description, sk.expected_output_hint]
+  return (sk.checklist ?? [sk.exercise_description, sk.expected_output_hint])
     .filter((t) => t?.trim())
     .map((text) => ({ text, done }));
 }
@@ -201,6 +205,13 @@ export function StoryPage({ session, ask, action, children }: StoryPageProps) {
                 <span className="sr-only">
                   {item.done ? ' (완료)' : item.current ? ' (지금 할 일)' : ''}
                 </span>
+                {item.sub?.length ? (
+                  <ul className="qs-subchecks">
+                    {item.sub.map((text, j) => (
+                      <li key={j}>{text}</li>
+                    ))}
+                  </ul>
+                ) : null}
               </span>
             </li>
           ))}

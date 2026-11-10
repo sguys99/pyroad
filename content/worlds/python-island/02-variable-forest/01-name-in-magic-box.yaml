@@ -20,6 +20,11 @@ prompt:
     name = 
     print(name)
   expected_output_hint: 파이뱀 이 출력되어야 해요
+  checklist:
+    - 'name 상자에 "파이뱀"을 넣어요'
+    - 'print(name)으로 상자 안을 보여 줘요'
+  example_output: |-
+    파이뱀
   fallback_text: 변수는 값을 담는 상자예요! name = "파이뱀" 이렇게 상자에 이름표를 붙이고 값을 넣을 수 있어요.
 # 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
 answer:
