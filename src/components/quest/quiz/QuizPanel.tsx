@@ -134,17 +134,21 @@ export function QuizPanel(p: QuizPanelProps) {
   const heading = useRef<HTMLHeadingElement>(null);
   // 초점 이동 (P7-13): 채점되면 채점 쪽지로(낭독기는 초점이 간 쪽지를 읽음 — 따로 aria-live 로 또 읽지 않음),
   // 다시 풀면 문제 제목으로. 제출·다시 풀기 버튼이 바뀌거나 비활성이 되며 초점이 body 로 빠지지 않게
-  const hadResult = useRef(false);
+  // 채점 쪽지가 생기거나 사라질 때만. 처음부터 채점된 채로 그린 카탈로그 견본은 그대로 둔다 —
+  // 견본마다 하이드레이션 뒤 페이지를 끌고 가 느린 CI에서 다른 스펙의 좌표가 빗나갔음 (B54)
+  const hadResult = useRef(!!result);
   useEffect(() => {
+    const had = hadResult.current;
+    hadResult.current = !!result;
+    if (!!result === had) return;
     if (result) {
       live.current?.scrollIntoView?.({ block: 'nearest' });
       live.current
         ?.querySelector<HTMLElement>('.qz-verdict')
         ?.focus({ preventScroll: true });
-    } else if (hadResult.current) {
+    } else if (had) {
       heading.current?.focus({ preventScroll: true });
     }
-    hadResult.current = !!result;
   }, [result]);
   // 정답(또는 공개) 뒤 돌려 볼 코드: 맞힌 제출값 / 공개된 정답으로 조립 (정답을 새로 받지 않음)
   const tryCode =

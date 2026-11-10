@@ -323,19 +323,41 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       await openCatalog(page, mode);
       const chip = page.getByTestId('hud-live').getByTestId('hud-coin');
       await chip.scrollIntoViewIfNeeded();
+      // 바뀌는 동안 보인 숫자·틴트·팝을 페이지 안에서 모은다. 느린 CI는 Playwright 호출 한 번이 수백 ms라
+      // "누르고 150ms 뒤 한 번 읽기"가 이미 끝 값일 수 있음 (B54)
+      await chip.evaluate((el) => {
+        const log = { nums: [] as string[], flash: false, anims: 0 };
+        (window as unknown as { __hud: typeof log }).__hud = log;
+        new MutationObserver(() => {
+          log.nums.push(el.querySelector('.g-hud-num')?.textContent ?? '');
+          log.flash ||= el.hasAttribute('data-flash');
+          log.anims = Math.max(log.anims, el.getAnimations().length);
+        }).observe(el, {
+          subtree: true,
+          childList: true,
+          characterData: true,
+          attributes: true,
+        });
+      });
       await page.getByTestId('hud-coin-up').click();
-      await page.waitForTimeout(150); // 카운트업 700ms의 앞부분
-      const mid = await chip.locator('.g-hud-num').innerText();
-      const anims = await chip.evaluate((el) => el.getAnimations().length);
-      if (mode.tier === 'full' && mode.reduced === 'off') {
-        expect(['1,280', '1,317'], `카운트업 중간값 ${mid}`).not.toContain(mid);
-        expect(anims, '칩 팝').toBeGreaterThan(0);
-        await expect(chip).not.toHaveAttribute('data-flash', /.*/);
-      } else {
-        expect(mid, '즉시 교체').toBe('1,317');
-        await expect(chip).toHaveAttribute('data-flash', 'true');
-      }
       await expect(chip.locator('.g-hud-num')).toHaveText('1,317');
+      const log = await page.evaluate(
+        () =>
+          (
+            window as unknown as {
+              __hud: { nums: string[]; flash: boolean; anims: number };
+            }
+          ).__hud,
+      );
+      const mids = log.nums.filter((n) => n !== '1,280' && n !== '1,317');
+      if (mode.tier === 'full' && mode.reduced === 'off') {
+        expect(mids, `카운트업 중간값 ${log.nums}`).not.toEqual([]);
+        expect(log.anims, '칩 팝').toBeGreaterThan(0);
+        expect(log.flash).toBe(false);
+      } else {
+        expect(mids, '즉시 교체').toEqual([]);
+        expect(log.flash).toBe(true);
+      }
     }
   });
 
@@ -484,6 +506,51 @@ test.describe('성공 연출 (P6-08)', () => {
       await openCatalog(page, mode);
       const demo = page.getByTestId('success-flags-on');
       await demo.scrollIntoViewIfNeeded();
+      const full = mode.tier === 'full' && mode.reduced === 'off';
+      // full: 다시 보기로 새로 그린 장면의 도중(도장이 찍히는 중)을 페이지 안에서 잡아 그 자리에서 Esc.
+      // 느린 CI는 Playwright 호출 몇 번이면 1.6초 장면이 저절로 끝나 "도중" 검사가 빗나감 (B54)
+      const mid = full
+        ? page.evaluate(
+            () =>
+              new Promise<{ xp: string; stamp: number; skipMs: number }>(
+                (resolve) => {
+                  const q = '[data-testid="success-flags-on"]';
+                  const old = document.querySelector(
+                    `${q} [data-testid="quest-reward"]`,
+                  );
+                  const tick = () => {
+                    const d = document.querySelector(q);
+                    const strip = d?.querySelector(
+                      '[data-testid="quest-reward"]',
+                    );
+                    const stamp =
+                      d?.querySelector('.qx-stamp')?.getAnimations().length ??
+                      0;
+                    if (
+                      !strip ||
+                      strip === old ||
+                      strip.hasAttribute('data-done') ||
+                      !stamp
+                    )
+                      return void requestAnimationFrame(tick);
+                    const xp =
+                      strip.querySelector('[data-testid="reward-xp-count"]')
+                        ?.textContent ?? '';
+                    const t0 = performance.now();
+                    dispatchEvent(
+                      new KeyboardEvent('keydown', { key: 'Escape' }),
+                    );
+                    const wait = () =>
+                      strip.hasAttribute('data-done')
+                        ? resolve({ xp, stamp, skipMs: performance.now() - t0 })
+                        : void requestAnimationFrame(wait);
+                    wait();
+                  };
+                  tick();
+                },
+              ),
+          )
+        : null;
       await page.getByTestId('success-replay').click();
       const strip = demo.getByTestId('quest-reward');
       const xp = strip.getByTestId('reward-xp-count');
@@ -495,12 +562,12 @@ test.describe('성공 연출 (P6-08)', () => {
       const stampAnims = () =>
         demo.locator('.qx-stamp').evaluate((el) => el.getAnimations().length);
 
-      if (mode.tier === 'full' && mode.reduced === 'off') {
-        // 진행 중: 숫자가 아직 끝 값 전, 도장은 내려찍는 중 → Esc 한 번에 끝 값·끝 모습
-        await expect(strip).not.toHaveAttribute('data-done', /.*/);
-        expect(await xp.innerText()).not.toBe('45');
-        expect(await stampAnims()).toBeGreaterThan(0);
-        await page.keyboard.press('Escape');
+      if (mid) {
+        // 진행 중: 숫자가 아직 끝 값 전, 도장은 내려찍는 중 → Esc 한 번에(장면 시간 1.6초를 기다리지 않고) 끝 값·끝 모습
+        const m = await mid;
+        expect(m.xp).not.toBe('45');
+        expect(m.stamp).toBeGreaterThan(0);
+        expect(m.skipMs).toBeLessThan(1000);
         await expect(strip).toHaveAttribute('data-done', 'true');
         await expect(xp).toHaveText('45');
         expect(await stampAnims()).toBe(0);
