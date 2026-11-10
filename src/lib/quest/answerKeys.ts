@@ -9,6 +9,9 @@ import type {
   QuestAnswerKeyRow,
 } from '@/lib/types/database';
 
+/** quest_answer_keys.quiz_answer 모양 (P7-01, 정규형은 src/lib/content/schema.ts 머리 주석) */
+export type { QuizAnswer } from '@/lib/content/schema';
+
 /**
  * 퀘스트 정답 조회 (서버 전용, P1-02·B07)
  *

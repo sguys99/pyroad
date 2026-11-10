@@ -15,10 +15,17 @@ import {
 
 import type { ContentTree } from './load';
 import {
+  byQuizId,
   findAnswerKeysInPublic,
+  quizBlankIds,
   type InputScenario,
   type Quest,
   type QuestType,
+  type QuizAnswer,
+  type QuizKind,
+  type QuizPrompt,
+  type QuizPromptSkeleton,
+  type QuizQuest,
   type WorldUnlockRule,
 } from './schema';
 
@@ -62,8 +69,8 @@ export interface QuestRow {
   concept: string;
   quest_type: QuestType;
   /** 퀴즈 종류 (P7-01). 퀴즈가 아니면 null (00012 quests_quiz_kind_only_for_quiz) */
-  quiz_kind: null;
-  /** 키보드 없이 풀 수 있는지 (Phase 7). 코드·프로젝트 퀘스트는 false */
+  quiz_kind: QuizKind | null;
+  /** 키보드 없이 풀 수 있는지 (Phase 7). 퀴즈는 true, 코드·프로젝트 퀘스트는 false */
   is_mobile_friendly: boolean;
   prompt_skeleton: Record<string, unknown> & { steps?: PublicStep[] };
   validation_type: StoredRule['validation_type'];
@@ -88,10 +95,12 @@ export interface StepAnswerRow {
 export interface AnswerKeyRow {
   quest_id: string;
   expected_output: string;
-  hints: HintsRow;
+  /** 퀴즈는 {} (힌트 없음) */
+  hints: HintsRow | Record<string, never>;
   solution_code: string | null;
   steps: StepAnswerRow[];
-  quiz_answer: null;
+  /** 퀴즈 정답 (P7-01). 퀴즈가 아니면 null */
+  quiz_answer: QuizAnswer | null;
 }
 
 export interface ContentRows {
@@ -130,6 +139,14 @@ const QUESTS_CHECK_TYPES = new Set([
   'code_check',
   'all',
 ]);
+
+/**
+ * 퀴즈의 quests.validation_type (P7-01). 퀴즈는 quiz_answer 로만 채점하므로 의미 없는 자리값이고,
+ * CHECK(00012)가 허용하는 값 중 'all' 을 씀: 기준값 칸이 '' 라 코드 채점 경로(parseStoredRule)로 잘못 들어와도
+ * 규칙을 읽지 못해 항상 불합격 (gradeSubmission 은 그보다 먼저 빈 기준값을 거절)
+ */
+export const QUIZ_VALIDATION_TYPE =
+  'all' satisfies StoredRule['validation_type'];
 
 // ------------------------------------------------------------
 // 콘텐츠 → 행
@@ -180,6 +197,8 @@ export function buildRows(tree: ContentTree): BuildResult {
         }
         rows.quests.push(questRow);
         rows.answer_keys.push(answerRow);
+        // 퀴즈는 실행할 코드·규칙이 없어 자동 검증(meta) 대상이 아님
+        if (quest.quest_type === 'quiz') continue;
         meta.set(quest.id, {
           world: world.slug,
           quest_type: quest.quest_type,
@@ -208,6 +227,7 @@ export function splitQuest(
   quest: Quest,
   stageId: string,
 ): { questRow: QuestRow; answerRow: AnswerKeyRow } {
+  if (quest.quest_type === 'quiz') return splitQuiz(quest, stageId);
   const stored = toStoredRule(quest.answer.validation);
   const p = quest.prompt;
 
@@ -265,6 +285,138 @@ export function splitQuest(
       solution_code: quest.answer.solution_code ?? null,
       steps: stepAnswers,
       quiz_answer: null,
+    },
+  };
+}
+
+/**
+ * 퀴즈 → 공개 행 + 정답 행. 보기·토큰·parsons 줄·수정안은 id 순으로 내보냄(원본에 정답을 앞에 써도 드러나지 않게).
+ * bug_hunt 줄은 코드라서 원본 순서 그대로. accepted 는 정규형(schema.ts 머리 주석)으로 키 순서까지 고정
+ */
+function splitQuiz(
+  quest: QuizQuest,
+  stageId: string,
+): { questRow: QuestRow; answerRow: AnswerKeyRow } {
+  const sorted = <T extends { id: string }>(list: T[]) =>
+    [...list].sort(byQuizId).map((x) => ({ ...x }));
+  let quiz: QuizPrompt;
+  let answer: QuizAnswer;
+  const a = quest.answer.quiz_answer;
+  const explain = {
+    explanation: a.explanation,
+    ...(a.explanations && {
+      explanations: Object.fromEntries(
+        Object.entries(a.explanations).sort(([x], [y]) =>
+          x < y ? -1 : x > y ? 1 : 0,
+        ),
+      ),
+    }),
+  };
+
+  switch (quest.quiz_kind) {
+    case 'multiple_choice': {
+      const q = quest.prompt.quiz;
+      quiz = {
+        kind: 'multiple_choice',
+        question: q.question,
+        ...(q.code !== undefined && { code: q.code }),
+        options: sorted(q.options),
+      };
+      answer = {
+        kind: 'multiple_choice',
+        accepted: [...quest.answer.quiz_answer.accepted],
+        ...explain,
+      };
+      break;
+    }
+    case 'fill_blank': {
+      const q = quest.prompt.quiz;
+      const blanks = quizBlankIds(q.code);
+      quiz = {
+        kind: 'fill_blank',
+        question: q.question,
+        code: q.code,
+        tokens: sorted(q.tokens),
+      };
+      answer = {
+        kind: 'fill_blank',
+        accepted: quest.answer.quiz_answer.accepted.map((fill) =>
+          Object.fromEntries(blanks.map((b) => [b, fill[b]])),
+        ),
+        ...explain,
+      };
+      break;
+    }
+    case 'parsons': {
+      const q = quest.prompt.quiz;
+      quiz = {
+        kind: 'parsons',
+        question: q.question,
+        lines: sorted(q.lines),
+        ...(q.indent !== undefined && { indent: q.indent }),
+      };
+      answer = {
+        kind: 'parsons',
+        accepted: quest.answer.quiz_answer.accepted.map((order) =>
+          order.map((x) =>
+            typeof x === 'string' ? x : { id: x.id, indent: x.indent },
+          ),
+        ) as string[][] | { id: string; indent: number }[][],
+        ...explain,
+      };
+      break;
+    }
+    case 'bug_hunt': {
+      const q = quest.prompt.quiz;
+      quiz = {
+        kind: 'bug_hunt',
+        question: q.question,
+        lines: q.lines.map((l) => ({ ...l })),
+        fixes: sorted(q.fixes),
+      };
+      answer = {
+        kind: 'bug_hunt',
+        accepted: quest.answer.quiz_answer.accepted.map((x) => ({
+          line: x.line,
+          fix: x.fix,
+        })),
+        ...explain,
+      };
+      break;
+    }
+  }
+
+  const p = quest.prompt;
+  const skeleton: QuizPromptSkeleton = {
+    topic: p.topic,
+    learning_goals: [...p.learning_goals],
+    story_context: p.story_context,
+    fallback_text: p.fallback_text,
+    quiz,
+  };
+
+  return {
+    questRow: {
+      id: quest.id,
+      stage_id: stageId,
+      order: quest.order,
+      title: quest.title,
+      concept: quest.concept,
+      quest_type: 'quiz',
+      quiz_kind: quest.quiz_kind,
+      is_mobile_friendly: true,
+      prompt_skeleton: skeleton,
+      validation_type: QUIZ_VALIDATION_TYPE,
+      expected_output: '',
+      xp_reward: quest.xp_reward,
+    },
+    answerRow: {
+      quest_id: quest.id,
+      expected_output: '',
+      hints: {},
+      solution_code: null,
+      steps: [],
+      quiz_answer: answer,
     },
   };
 }
@@ -428,7 +580,7 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
       `  ${sqlJson(k.hints)},`,
       `  ${k.solution_code === null ? 'NULL' : sqlText(k.solution_code)},`,
       `  ${sqlJson(k.steps)},`,
-      '  NULL',
+      `  ${k.quiz_answer === null ? 'NULL' : sqlJson(k.quiz_answer)}`,
       ')',
       'ON CONFLICT (quest_id) DO UPDATE SET',
       '  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,',
@@ -547,7 +699,9 @@ export interface CheckFixture {
 export interface FixtureSource {
   /** world(월드 slug)가 없으면 python-island (P1-08 전 DB 스냅샷) */
   stages: (Pick<StageRow, 'id' | 'order'> & { world?: string })[];
+  /** quest_type 이 quiz 인 행은 검증용 JSON 에서 뺌 (실행할 정답 코드가 없음). DB 스냅샷처럼 없으면 코드·프로젝트 */
   quests: (Pick<QuestRow, 'id' | 'stage_id' | 'order' | 'title'> & {
+    quest_type?: QuestType;
     validation_type: string;
     prompt_skeleton: unknown;
   })[];
@@ -578,6 +732,7 @@ export function toCheckFixture(
     stageWorld.get(stageId) ?? options.worldOf?.(stageId) ?? 'python-island';
 
   const quests = rows.quests
+    .filter((q) => q.quest_type !== 'quiz')
     .map((q): CheckQuest => {
       const sk = asRecord(q.prompt_skeleton);
       const k = answers.get(q.id);

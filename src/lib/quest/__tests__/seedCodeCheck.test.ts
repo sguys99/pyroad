@@ -24,33 +24,36 @@ function codeChecksIn(rule: ValidationRule): CodeCheckRule[] {
   return [];
 }
 
-const codeCheckUnits = rows.quests.flatMap((q) => {
-  const m = meta.get(q.id)!;
-  const key = rows.answer_keys.find((k) => k.quest_id === q.id)!;
-  const stageOrder = rows.stages.find((s) => s.id === q.stage_id)!.order;
-  const label = `${stageOrder}-${q.order}`;
-  // 프로젝트 전체 규칙은 마지막 단계 정답이 통과해야 함
-  const units = [
-    {
-      label,
-      rule: m.rule,
-      solution: key.solution_code ?? key.steps.at(-1)?.solution_code,
-    },
-    ...m.steps.map((s) => ({
-      label: `${label}#${s.step_number}`,
-      rule: s.rule,
-      solution: key.steps.find((a) => a.step_number === s.step_number)
-        ?.solution_code,
-    })),
-  ];
-  return units.flatMap((u) =>
-    codeChecksIn(u.rule).map((rule) => ({
-      label: u.label,
-      rule,
-      solution: u.solution,
-    })),
-  );
-});
+// 퀴즈는 실행할 코드가 없음 (P7-01)
+const codeCheckUnits = rows.quests
+  .filter((q) => q.quest_type !== 'quiz')
+  .flatMap((q) => {
+    const m = meta.get(q.id)!;
+    const key = rows.answer_keys.find((k) => k.quest_id === q.id)!;
+    const stageOrder = rows.stages.find((s) => s.id === q.stage_id)!.order;
+    const label = `${stageOrder}-${q.order}`;
+    // 프로젝트 전체 규칙은 마지막 단계 정답이 통과해야 함
+    const units = [
+      {
+        label,
+        rule: m.rule,
+        solution: key.solution_code ?? key.steps.at(-1)?.solution_code,
+      },
+      ...m.steps.map((s) => ({
+        label: `${label}#${s.step_number}`,
+        rule: s.rule,
+        solution: key.steps.find((a) => a.step_number === s.step_number)
+          ?.solution_code,
+      })),
+    ];
+    return units.flatMap((u) =>
+      codeChecksIn(u.rule).map((rule) => ({
+        label: u.label,
+        rule,
+        solution: u.solution,
+      })),
+    );
+  });
 
 describe('content/ code_check 규칙과 정답 코드', () => {
   it('code_check 규칙을 읽음', () => {

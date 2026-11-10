@@ -6,6 +6,7 @@
 // - JSONB 컬럼(Json) → 앱이 쓰는 구조 (prompt_skeleton, step_submissions)
 // 생성 파일은 직접 고치지 말고, 스키마를 바꾼 뒤 `npm run db:types`로 다시 만드세요.
 
+import type { QuizKind } from '@/lib/content/schema';
 import type { ValidationType } from '@/lib/quest/validation';
 import type { BgmId } from '@/lib/sound/manifest';
 import type { StageQuestDot } from '@/lib/quest/stageProgress';
@@ -26,12 +27,15 @@ export type { ValidationType };
 /** quests.quest_type CHECK (00012, P1-08) */
 export type QuestType = 'code' | 'project' | 'quiz' | 'boss';
 
-/** quests.quiz_kind CHECK (00012). quest_type = 'quiz' 일 때만 값이 있음 (P7-01) */
-export type QuizKind =
-  | 'multiple_choice'
-  | 'fill_blank'
-  | 'parsons'
-  | 'bug_hunt';
+/**
+ * quests.quiz_kind CHECK (00012). quest_type = 'quiz' 일 때만 값이 있음 (P7-01).
+ * 퀴즈 공개 부분 타입은 콘텐츠 스키마(src/lib/content/schema.ts)에서 가져옴 (타입만, 번들에 안 들어감)
+ */
+export type {
+  QuizKind,
+  QuizPrompt,
+  QuizPromptSkeleton,
+} from '@/lib/content/schema';
 
 /** worlds.unlock_rule (원본 스키마 src/lib/content/schema.ts WorldUnlockRuleSchema, §12-Q2·Q48) */
 export interface WorldUnlockRule {

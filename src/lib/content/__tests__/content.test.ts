@@ -44,7 +44,8 @@ describe('content/ 원본', () => {
   });
 
   it('모든 퀘스트·단계에 정답 코드가 있음', () => {
-    for (const k of rows.answer_keys) {
+    // 퀴즈는 정답 코드 대신 quiz_answer (P7-01)
+    for (const k of rows.answer_keys.filter((k) => k.quiz_answer === null)) {
       const isProject = k.steps.length > 0;
       if (!isProject) expect(k.solution_code, k.quest_id).toBeTruthy();
       for (const s of k.steps)
@@ -135,7 +136,7 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
     expect(once.quests).toHaveLength(rows.quests.length);
     expect(once.answer_keys).toHaveLength(rows.quests.length);
     expect(once.quests.filter((q) => q.expected_output !== '')).toEqual([]);
-    for (const k of once.answer_keys) {
+    for (const k of once.answer_keys.filter((k) => k.quiz_answer == null)) {
       const steps = k.steps as { solution_code: string }[];
       expect(k.expected_output, String(k.quest_id)).toBeTruthy();
       if (steps.length === 0) expect(k.solution_code).toBeTruthy();

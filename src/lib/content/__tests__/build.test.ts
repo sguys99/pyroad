@@ -13,7 +13,14 @@ import { questFromRows } from '../fromRows';
 import type { ContentTree } from '../load';
 import { findAnswerKeysInPublic, parseQuest, type Quest } from '../schema';
 import { questToYaml } from '../yaml';
-import { codeQuest, projectQuest } from './fixtures';
+import {
+  bugHuntQuiz,
+  codeQuest,
+  fillBlankQuiz,
+  multipleChoiceQuiz,
+  parsonsQuiz,
+  projectQuest,
+} from './fixtures';
 
 const STAGE_1 = {
   id: 'a1000000-0000-0000-0000-000000000001',
@@ -414,5 +421,151 @@ describe('입력 시나리오 (input() 퀘스트 자동 검증, P1-13 · P11-05)
     expect(fixture.quests[1]).not.toHaveProperty('scenarios');
     expect(fixture.quests[1].steps?.[0]).not.toHaveProperty('scenarios');
     expect(fixture.quests[1].steps?.[1].scenarios).toEqual(scenarios);
+  });
+});
+
+describe('퀴즈 빌드 (P7-01)', () => {
+  const quizzes = [
+    multipleChoiceQuiz(),
+    fillBlankQuiz(),
+    parsonsQuiz(),
+    bugHuntQuiz(),
+  ].map(parsed);
+  const { rows, meta, warnings } = buildRows(
+    tree([STAGE_1, [parsed(codeQuest()), ...quizzes]]),
+  );
+  const quizRows = rows.quests.filter((q) => q.quest_type === 'quiz');
+  const quizKeys = rows.answer_keys.filter((k) => k.quiz_answer !== null);
+
+  it('quests: quiz_kind · 키보드 없이 · validation_type 자리값 all · 경고 없음', () => {
+    expect(warnings).toEqual([]);
+    expect(
+      quizRows.map((q) => [
+        q.quiz_kind,
+        q.is_mobile_friendly,
+        q.validation_type,
+        q.expected_output,
+      ]),
+    ).toEqual([
+      ['multiple_choice', true, 'all', ''],
+      ['fill_blank', true, 'all', ''],
+      ['parsons', true, 'all', ''],
+      ['bug_hunt', true, 'all', ''],
+    ]);
+    // 퀴즈는 자동 검증(코드 실행) 대상이 아님
+    expect([...meta.keys()]).toEqual([codeQuest().id]);
+  });
+
+  it('공개 prompt_skeleton.quiz: kind 를 붙이고 보기·토큰·줄·수정안은 id 순 (bug_hunt 줄은 코드 순서)', () => {
+    const [mc, fb, pa, bh] = quizRows.map((q) => q.prompt_skeleton);
+    expect(Object.keys(mc)).toEqual([
+      'topic',
+      'learning_goals',
+      'story_context',
+      'fallback_text',
+      'quiz',
+    ]);
+    expect(mc.quiz).toEqual({
+      kind: 'multiple_choice',
+      question: '이 코드를 돌리면 무엇이 나올까?',
+      code: 'for i in range(3):\n    print(i)',
+      options: [
+        { id: 'opt-b2mx', text: '1 2 3' },
+        { id: 'opt-k7qz', text: '0 1 2' },
+        { id: 'opt-w9fa', text: '0 1 2 3' },
+      ],
+    });
+    expect(fb.quiz).toMatchObject({
+      kind: 'fill_blank',
+      code: 'for i in {{bk-r2fa}}(3):\n    {{bk-m8ce}}(i)',
+      tokens: [
+        { id: 'tok-c3pd', text: 'print' },
+        { id: 'tok-m4xe', text: 'range' },
+        { id: 'tok-z6nh', text: 'input' },
+      ],
+    });
+    expect(pa.quiz).toMatchObject({
+      kind: 'parsons',
+      indent: true,
+      lines: ['ln-a3ke', 'ln-f5tb', 'ln-m2xa', 'ln-q8wd'].map((id) =>
+        expect.objectContaining({ id }),
+      ),
+    });
+    expect(bh.quiz).toMatchObject({
+      kind: 'bug_hunt',
+      lines: [{ id: 'ln-x5pc' }, { id: 'ln-h7jq' }],
+      fixes: [{ id: 'fx-b7nd' }, { id: 'fx-e4kr' }],
+    });
+    for (const q of quizRows) {
+      expect(findAnswerKeysInPublic(q.prompt_skeleton)).toEqual([]);
+    }
+  });
+
+  it('정답 행: accepted 정규형 + 해설, 힌트·정답 코드 없음', () => {
+    expect(quizKeys.map((k) => k.quiz_answer)).toEqual([
+      {
+        kind: 'multiple_choice',
+        accepted: ['opt-k7qz'],
+        explanation: 'range(3)은 0부터 2까지예요.',
+        explanations: { 'opt-b2mx': '0부터 세요.' },
+      },
+      {
+        kind: 'fill_blank',
+        accepted: [{ 'bk-r2fa': 'tok-m4xe', 'bk-m8ce': 'tok-c3pd' }],
+        explanation: 'range 로 숫자를 만들고 print 로 보여 줘요.',
+      },
+      {
+        kind: 'parsons',
+        accepted: [
+          [
+            { id: 'ln-q8wd', indent: 0 },
+            { id: 'ln-a3ke', indent: 0 },
+            { id: 'ln-m2xa', indent: 1 },
+            { id: 'ln-f5tb', indent: 0 },
+          ],
+        ],
+        explanation: '먼저 0으로 시작하고, 반복하며 더한 뒤 출력해요.',
+      },
+      {
+        kind: 'bug_hunt',
+        accepted: [{ line: 'ln-x5pc', fix: 'fx-b7nd' }],
+        explanation: 'for 줄 끝에는 쌍점(:)이 있어야 해요.',
+      },
+    ]);
+    // fill_blank 키는 빈칸이 나온 차례로 고정 (seed 가 매번 같게)
+    expect(Object.keys(quizKeys[1].quiz_answer!.accepted[0] as object)).toEqual(
+      ['bk-r2fa', 'bk-m8ce'],
+    );
+    for (const k of quizKeys) {
+      expect([k.expected_output, k.hints, k.solution_code, k.steps]).toEqual([
+        '',
+        {},
+        null,
+        [],
+      ]);
+    }
+  });
+
+  it('seed: quiz_kind·is_mobile_friendly·quiz_answer 를 쓰고 정답은 quest_answer_keys 에만', () => {
+    const sql = toSeedSql(rows, { hash: 'q' });
+    const statements = sql.split(/;\n/);
+    const quizInserts = statements.filter(
+      (s) => s.includes('INSERT INTO public.quests ') && s.includes("'quiz'"),
+    );
+    expect(quizInserts).toHaveLength(4);
+    expect(quizInserts.join('')).not.toMatch(/accepted|explanation/);
+    expect(quizInserts[0]).toContain("'multiple_choice',\n  TRUE,");
+    const keyInserts = statements.filter((s) =>
+      s.includes('INSERT INTO public.quest_answer_keys'),
+    );
+    expect(keyInserts[1]).toContain(
+      '\'{"kind":"multiple_choice","accepted":["opt-k7qz"]',
+    );
+    expect(keyInserts[0]).toMatch(/'\[\]'::jsonb,\n {2}NULL\n\)/);
+  });
+
+  it('검증용 JSON 에서 퀴즈는 뺌 (실행할 정답 코드가 없음)', () => {
+    const fixture = toCheckFixture(rows, { generatedBy: 't', source: 's' });
+    expect(fixture.quests.map((q) => q.id)).toEqual([codeQuest().id]);
   });
 });
