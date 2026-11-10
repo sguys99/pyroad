@@ -108,7 +108,8 @@ export function Parsons({
     commit(
       next,
       `${next.length}번째 줄에 넣었어요: ${code(id)}`,
-      after ? `[data-tray="${after.id}"]` : null,
+      // 마지막 조각이면 방금 넣은 줄로 (조각 칸이 사라져 초점이 빠지지 않게)
+      after ? `[data-tray="${after.id}"]` : `[data-row="${id}"] .qz-ps-code`,
     );
   };
   const remove = (i: number) => {
@@ -188,7 +189,12 @@ export function Parsons({
           )}
           {!result && (
             <span className="qz-ps-count">
-              {placed.length} / {quiz.lines.length}
+              <span aria-hidden>
+                {placed.length} / {quiz.lines.length}
+              </span>
+              <span className="sr-only">
+                , {quiz.lines.length}줄 중 {placed.length}줄 놓음
+              </span>
             </span>
           )}
         </h3>
@@ -201,6 +207,7 @@ export function Parsons({
             ref={listRef}
             className="qz-ps-list"
             data-dragging={drag ? true : undefined}
+            data-indent={(indentOn && !locked) || undefined}
             data-testid="parsons-mine"
           >
             {placed.map((p, i) => (
@@ -262,7 +269,7 @@ export function Parsons({
                   </span>
                 )}
                 {!locked && (
-                  <span className="qz-ps-tools" data-stack>
+                  <span className="qz-ps-tools">
                     <button
                       type="button"
                       className="qz-ps-tool"
@@ -301,8 +308,10 @@ export function Parsons({
       </section>
 
       {!result && tray.length > 0 && (
-        <section className="qz-ps-tray" aria-label="줄 조각">
-          <h3 className="qz-ps-h">줄 조각</h3>
+        <section className="qz-ps-tray" aria-labelledby={`${headId}-tray`}>
+          <h3 className="qz-ps-h" id={`${headId}-tray`}>
+            줄 조각
+          </h3>
           <ul className="qz-ps-chips" data-testid="parsons-tray">
             {tray.map((l, i) => (
               <li key={l.id}>

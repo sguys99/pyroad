@@ -61,6 +61,7 @@
 
 /* ───── 내 코드 줄: [손잡이] [코드(누르면 빼기)] [들여쓰기 ← →] [위/아래] */
 .qz-ps-list {
+  container-type: inline-size;
   display: grid;
   gap: 0.5rem;
   margin: 0;
@@ -155,15 +156,12 @@
   display: flex;
   border-left: var(--line-w) solid var(--line);
 }
-.qz-ps-tools[data-stack] {
-  flex-direction: column;
-}
+/* 버튼마다 44×44 이상 (P7-13: 예전엔 위/아래를 22px 로 쌓았음) — 나란히 놓고, 좁으면 아래 줄로 내림 */
 .qz-ps-tool {
   display: grid;
-  flex: 1;
   place-items: center;
-  width: 2rem;
-  min-height: 1.375rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
   color: var(--text-muted);
   cursor: pointer;
 }
@@ -180,6 +178,36 @@
 .qz-ps-tool > svg {
   width: 1.125rem;
   height: 1.125rem;
+}
+
+/* 좁은 쪽(들여쓰기 버튼까지 4개면 24rem, 아니면 14rem 미만 — 360px 200% 확대 포함): 버튼을 코드 아래 줄 오른쪽으로 */
+@container (max-width: 24rem) {
+  .qz-ps-list[data-indent] > .qz-ps-row {
+    flex-wrap: wrap;
+  }
+  .qz-ps-list[data-indent] .qz-ps-code {
+    flex-basis: calc(100% - 1.75rem);
+  }
+  .qz-ps-list[data-indent] .qz-ps-tools {
+    border-top: var(--line-w) solid var(--line);
+  }
+  .qz-ps-list[data-indent] .qz-ps-code + .qz-ps-tools {
+    margin-left: auto;
+  }
+}
+@container (max-width: 14rem) {
+  .qz-ps-row {
+    flex-wrap: wrap;
+  }
+  .qz-ps-code {
+    flex-basis: calc(100% - 1.75rem);
+  }
+  .qz-ps-tools {
+    border-top: var(--line-w) solid var(--line);
+  }
+  .qz-ps-code + .qz-ps-tools {
+    margin-left: auto;
+  }
 }
 
 /* 결과: 정답 초록 · 틀림 금색 (어느 줄인지는 정답이라 표시하지 않음) · 공개 정답 초록 */

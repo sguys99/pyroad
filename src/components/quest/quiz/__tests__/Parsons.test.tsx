@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { useState } from 'react';
 import { Parsons, parsonsInput, moveItem, toPlaced, toValue } from '../Parsons';
 import { QUIZ_INPUTS } from '../quizInputs';
 import type { QuizInputProps, QuizOf } from '../types';
@@ -152,6 +153,41 @@ describe('Parsons 탭 정렬', () => {
       { id: 'ln-m2xa', indent: 4 },
       { id: 'ln-a3ke', indent: 0 },
     ]);
+  });
+});
+
+describe('Parsons 키보드·낭독기 (P7-13)', () => {
+  function Live() {
+    const [value, setValue] =
+      useState<QuizInputProps<'parsons'>['value']>(null);
+    return (
+      <Parsons
+        quiz={QUIZ}
+        value={value}
+        onChange={setValue}
+        disabled={false}
+        result={null}
+        misses={[]}
+        labelledBy="q"
+      />
+    );
+  }
+
+  it('조각을 넣으면 다음 조각, 마지막 조각이면 방금 넣은 줄로 초점. 놓은 수를 글로 읽음', () => {
+    render(<Live />);
+    expect(screen.getByRole('region', { name: '줄 조각' })).toBeInTheDocument();
+    fireEvent.click(trayChips()[0]);
+    expect(trayChips()[0]).toHaveFocus();
+    expect(screen.getByText(/3줄 중 1줄 놓음/)).toBeInTheDocument();
+    fireEvent.click(trayChips()[0]);
+    fireEvent.click(trayChips()[0]);
+    expect(trayChips()).toHaveLength(0);
+    expect(
+      screen.getByRole('button', { name: /^3번째 줄: print\("끝"\)/ }),
+    ).toHaveFocus();
+    // 위로 옮겨도 같은 버튼에 초점
+    fireEvent.click(screen.getByRole('button', { name: '3번째 줄 위로' }));
+    expect(screen.getByRole('button', { name: '2번째 줄 위로' })).toHaveFocus();
   });
 });
 

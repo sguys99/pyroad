@@ -119,6 +119,11 @@ describe('DailyQuiz', () => {
     const dots = screen.getAllByTestId('daily-dot');
     expect(dots[0]).toHaveAttribute('data-state', 'correct');
     expect(dots[1]).toHaveAttribute('data-state', 'current');
+    // 진행 점은 "N문제 중 M문제"로 한 번에 읽힘 (P7-13)
+    expect(
+      screen.getByRole('list', { name: /오늘의 퀴즈 진행/ }),
+    ).toHaveAccessibleName('오늘의 퀴즈 진행, 2문제 중 1문제 풀었어요');
+    expect(dots[0]).toHaveTextContent('1번 문제: 정답, 별 2개');
 
     fireEvent.click(screen.getByText('나'));
     fireEvent.click(screen.getByTestId('quiz-submit'));
@@ -133,6 +138,9 @@ describe('DailyQuiz', () => {
 
     fireEvent.click(next);
     const sum = screen.getByTestId('daily-summary');
+    // 누른 버튼이 사라져도 초점은 요약 제목으로 (P7-13)
+    expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
+    expect(screen.getByTestId('daily-sum-stars')).toHaveTextContent('별 5개');
     expect(sum).toHaveTextContent('2문제 중 2문제 맞혔어요');
     expect(screen.getByTestId('daily-sum-stars')).toHaveTextContent('5');
     // 첫 문제 XP 는 이 화면에서 모름 → XP 칸 숨김

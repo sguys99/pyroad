@@ -77,7 +77,6 @@ export function FillBlank({
   onChange,
   disabled,
   result,
-  labelledBy,
 }: QuizInputProps<'fill_blank'>) {
   const parts = quiz.code.split(QUIZ_BLANK_RE);
   const blanks = blankIds(quiz.code);
@@ -184,7 +183,7 @@ export function FillBlank({
       <div
         className="qz-fb-tray"
         role="group"
-        aria-labelledby={labelledBy}
+        aria-label="넣을 낱말"
         data-testid="quiz-tokens"
       >
         {quiz.tokens.map((t) => (
@@ -194,10 +193,13 @@ export function FillBlank({
             className="qz-fb-chip"
             data-used={used.has(t.id) || undefined}
             data-testid="quiz-token"
-            disabled={disabled || !target}
+            disabled={disabled}
+            // 빈칸이 다 차면 누를 곳이 없지만 disabled 로 바꾸지 않음: 방금 누른 칩에서 초점이 body 로 빠지지 않게 (P7-13)
+            aria-disabled={!disabled && !target ? true : undefined}
             aria-label={used.has(t.id) ? `${t.text}, 쓰는 중` : undefined}
             onClick={(e) => pickChip(t.id, e.currentTarget)}
           >
+            {used.has(t.id) && <Check aria-hidden strokeWidth={3} />}
             <code>{t.text}</code>
           </button>
         ))}

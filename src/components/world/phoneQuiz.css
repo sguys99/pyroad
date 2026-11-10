@@ -5,6 +5,7 @@
 @layer components {
   .pq {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem;
     margin-top: 0.75rem;
@@ -25,7 +26,8 @@
   }
   .pq-main {
     display: grid;
-    flex: 1 1 auto;
+    /* 8rem 아래로는 줄이지 않고 버튼을 다음 줄로 (360px 200% 확대에서 가로 넘침 없음, P7-13) */
+    flex: 1 1 8rem;
     gap: 0.125rem;
     min-width: 0;
   }
@@ -56,6 +58,7 @@
   }
   .pq-go {
     flex: none;
+    margin-left: auto;
   }
 }
 

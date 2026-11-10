@@ -104,11 +104,21 @@ export function BugHunt({
           <BugBugSvg expression={face} size={40} />
         </span>
         <ol className="qz-bh-steps" data-testid="bughunt-steps">
-          <li data-on={step === 1 || undefined}>1. 버그가 숨은 줄을 찾아요</li>
+          <li
+            data-on={step === 1 || undefined}
+            aria-current={step === 1 ? 'step' : undefined}
+          >
+            1. 버그가 숨은 줄을 찾아요
+          </li>
           <li aria-hidden className="qz-bh-arrow">
             →
           </li>
-          <li data-on={step === 2 || undefined}>2. 고칠 방법을 골라요</li>
+          <li
+            data-on={step === 2 || undefined}
+            aria-current={step === 2 ? 'step' : undefined}
+          >
+            2. 고칠 방법을 골라요
+          </li>
         </ol>
       </div>
 

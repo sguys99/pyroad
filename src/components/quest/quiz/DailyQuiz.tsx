@@ -134,6 +134,17 @@ export function DailyQuiz({
     [],
   );
 
+  // 다음 문제·요약으로 넘어가면 그 제목으로 초점 (누른 버튼이 사라져 초점이 body 로 빠지지 않게, P7-13). 처음 열 때는 그대로
+  const main = useRef<HTMLElement>(null);
+  const firstStep = useRef(step);
+  useEffect(() => {
+    if (step === firstStep.current) return;
+    firstStep.current = -1;
+    main.current
+      ?.querySelector<HTMLElement>('h2')
+      ?.focus({ preventScroll: true });
+  }, [step]);
+
   const current = list[step];
   return (
     <div className="dq flex min-h-dvh flex-col bg-bg" data-testid="daily-quiz">
@@ -159,7 +170,7 @@ export function DailyQuiz({
         )}
       </header>
 
-      <main className="dq-main">
+      <main className="dq-main" ref={main}>
         {list.length === 0 ? (
           <DailyEmpty />
         ) : current ? (
@@ -264,8 +275,12 @@ export function DailyDots({
   items: { id: string; outcome?: DailyOutcome }[];
   step: number;
 }) {
+  const done = items.filter((it) => it.outcome).length;
   return (
-    <ol className="dq-dots" aria-label="오늘의 퀴즈 진행">
+    <ol
+      className="dq-dots"
+      aria-label={`오늘의 퀴즈 진행, ${items.length}문제 중 ${done}문제 풀었어요`}
+    >
       {items.map(({ id, outcome }, i) => {
         const state = outcome
           ? outcome.status
@@ -346,14 +361,17 @@ export function DailySummary({
         <CalendarCheck aria-hidden className="size-4" />
         오늘의 퀴즈 끝!
       </p>
-      <h2 id="daily-sum-title" className="dq-sum-t font-display">
+      <h2 id="daily-sum-title" className="dq-sum-t font-display" tabIndex={-1}>
         {total}문제 중 {correct}문제 맞혔어요
       </h2>
       <ul className="dq-sum-row" aria-label="오늘 받은 것">
         <li className="dq-sum-item" data-testid="daily-sum-stars">
           <RewardIcon kind="star" size={26} />
-          <b>{stars}</b>
-          <span className="dq-sum-u">별</span>
+          <span className="sr-only">별 {stars}개</span>
+          <b aria-hidden>{stars}</b>
+          <span className="dq-sum-u" aria-hidden>
+            별
+          </span>
         </li>
         {xp !== null && (
           <li className="dq-sum-item" data-testid="daily-sum-xp">
@@ -367,8 +385,11 @@ export function DailySummary({
         {maxCombo !== null && maxCombo >= 2 && (
           <li className="dq-sum-item" data-testid="daily-sum-combo">
             <Flame aria-hidden className="dq-sum-flame" />
-            <b>{maxCombo}</b>
-            <span className="dq-sum-u">연속</span>
+            <span className="sr-only">최고 {maxCombo}연속 정답</span>
+            <b aria-hidden>{maxCombo}</b>
+            <span className="dq-sum-u" aria-hidden>
+              연속
+            </span>
           </li>
         )}
       </ul>

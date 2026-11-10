@@ -110,6 +110,11 @@ describe('BugHunt', () => {
   it('줄을 고르면 그 줄 아래 수정안 라디오 쪽지가 열리고, 고르면 {line, fix}', () => {
     const p = panel({ value: { line: 'ln-x5pc', fix: '' } });
     expect(lines()[0]).toHaveAttribute('data-mark', 'selected');
+    // 지금 단계는 색만이 아니라 aria-current 로도 (P7-13)
+    expect(screen.getByText('2. 고칠 방법을 골라요')).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
     const sheet = screen.getByTestId('bughunt-fixes');
     // 쪽지는 고른 줄 바로 다음
     expect(lines()[0].nextElementSibling).toBe(sheet);

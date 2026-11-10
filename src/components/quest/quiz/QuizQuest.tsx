@@ -106,6 +106,8 @@ export function QuizQuest(props: QuestSessionOptions) {
               speaker="파이뱀"
               text={line.text}
               tone={said.state === 'cheer' ? 'good' : 'tutor'}
+              // 채점 결과는 채점 쪽지(초점 이동)가 읽음 — 대사로 또 읽지 않게 (P7-13)
+              live={false}
               data-testid="quest-dialogue"
               character={(speaking) => (
                 <PybaemRig

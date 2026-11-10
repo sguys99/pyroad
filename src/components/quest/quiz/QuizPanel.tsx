@@ -126,8 +126,20 @@ export function QuizPanel(p: QuizPanelProps) {
   const prevBest = result && result.xp_awarded === 0 ? result.best_stars : 0;
   // 채점 쪽지가 화면 밖(좁은 화면은 보기 아래)이면 보이게. 순간 이동이라 동작 줄이기와 무관
   const live = useRef<HTMLDivElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  // 초점 이동 (P7-13): 채점되면 채점 쪽지로(낭독기는 초점이 간 쪽지를 읽음 — 따로 aria-live 로 또 읽지 않음),
+  // 다시 풀면 문제 제목으로. 제출·다시 풀기 버튼이 바뀌거나 비활성이 되며 초점이 body 로 빠지지 않게
+  const hadResult = useRef(false);
   useEffect(() => {
-    if (result) live.current?.scrollIntoView?.({ block: 'nearest' });
+    if (result) {
+      live.current?.scrollIntoView?.({ block: 'nearest' });
+      live.current
+        ?.querySelector<HTMLElement>('.qz-verdict')
+        ?.focus({ preventScroll: true });
+    } else if (hadResult.current) {
+      heading.current?.focus({ preventScroll: true });
+    }
+    hadResult.current = !!result;
   }, [result]);
   // 정답(또는 공개) 뒤 돌려 볼 코드: 맞힌 제출값 / 공개된 정답으로 조립 (정답을 새로 받지 않음)
   const tryCode =
@@ -177,7 +189,7 @@ export function QuizPanel(p: QuizPanelProps) {
               : `어제보다 한 뼘 더! 오늘 맞히면 별을 더 모을 수 있어요${p.bestStars ? ` (지금 별 ${p.bestStars}개)` : ''}.`}
           </p>
         )}
-        <h2 id={qid} className="qz-q">
+        <h2 id={qid} className="qz-q" ref={heading} tabIndex={-1}>
           {p.quiz.question}
         </h2>
         {def ? (
@@ -207,7 +219,7 @@ export function QuizPanel(p: QuizPanelProps) {
         )}
       </section>
 
-      <div aria-live="polite" className="qz-live" ref={live}>
+      <div className="qz-live" ref={live}>
         {result && (
           <Verdict
             result={result}
@@ -221,6 +233,12 @@ export function QuizPanel(p: QuizPanelProps) {
       {status === 'wrong' && p.onExplain && (
         <WhyWrong explain={p.explain ?? null} onExplain={p.onExplain} />
       )}
+      {/* 이 쪽의 단 하나의 알림 자리: 채점은 초점 이동이 맡고, 여기는 해설이 다 왔을 때만 */}
+      <p className="sr-only" aria-live="polite" data-testid="quiz-announce">
+        {status === 'wrong' && p.explain && p.explain.state !== 'loading'
+          ? `파이뱀: ${p.explain.text}`
+          : ''}
+      </p>
 
       {tryCode && (
         <div className="qz-try-wrap">
@@ -303,6 +321,12 @@ function WhyWrong({
   explain: QuizExplainView | null;
   onExplain: () => void;
 }) {
+  // 버튼이 대사창으로 바뀌면 초점을 대사창으로 (생각 중 문구를 읽고, 해설은 패널 알림 자리가 읽음)
+  const box = useRef<HTMLDivElement>(null);
+  const opened = !!explain;
+  useEffect(() => {
+    if (opened) box.current?.focus({ preventScroll: true });
+  }, [opened]);
   if (!explain) {
     return (
       <Button
@@ -325,6 +349,8 @@ function WhyWrong({
       : 'teach';
   return (
     <div
+      ref={box}
+      tabIndex={-1}
       className="qz-why"
       data-state={explain.state}
       aria-busy={thinking || undefined}
@@ -340,6 +366,7 @@ function WhyWrong({
           </>
         }
         text={thinking ? EXPLAIN_THINKING : explain.text}
+        live={false}
         tone="tutor"
         character={(speaking) => (
           <PybaemRig
@@ -376,6 +403,7 @@ function Verdict({
   return (
     <div
       className="qo-slip qz-verdict"
+      tabIndex={-1}
       data-tone={tone}
       data-testid="quiz-verdict"
       data-status={status}
@@ -406,6 +434,9 @@ function Verdict({
         </p>
       )}
       {status === 'correct' && <VerdictStars result={result} />}
+      {status === 'correct' && combo >= COMBO_BADGE_MIN && (
+        <span className="sr-only">{combo}연속 정답이에요.</span>
+      )}
       {text && <p className="qo-note">{text}</p>}
       {status === 'correct' && (
         <PassStamp done={done} rate={comboRate(combo)} />
@@ -448,7 +479,7 @@ function VerdictStars({ result }: { result: QuizAnswerResponse }) {
 export function ComboBadge({ combo }: { combo: number }) {
   if (combo < COMBO_BADGE_MIN) return null;
   return (
-    <span className="qz-combo" role="status" data-testid="quiz-combo">
+    <span className="qz-combo" data-testid="quiz-combo">
       <Flame aria-hidden />
       <b key={combo} className="qz-combo-n">
         {combo}

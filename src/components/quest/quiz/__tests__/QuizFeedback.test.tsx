@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import type { QuizPrompt } from '@/lib/quest/questKind';
 import type { QuizAnswerResponse } from '@/lib/quest/quizAnswer';
@@ -68,6 +68,73 @@ function panel(over: Partial<QuizPanelProps> = {}) {
     />,
   );
 }
+
+describe('접근성 (P7-13)', () => {
+  const props = (over: Partial<QuizPanelProps> = {}): QuizPanelProps => {
+    const result = over.result ?? null;
+    return {
+      title: '퀴즈',
+      quiz: QUIZ,
+      value: 'opt-a1bc',
+      onChange: vi.fn(),
+      submitted: result ? 'opt-a1bc' : null,
+      misses: [],
+      mode: 'first',
+      bestStars: 0,
+      isSubmitting: false,
+      error: null,
+      onSubmit: vi.fn(),
+      onRetry: vi.fn(),
+      nextHref: null,
+      mapHref: '/world',
+      ...over,
+      result,
+      status: quizStatus(result),
+    };
+  };
+
+  it('채점되면 채점 쪽지로, 다시 풀면 문제 제목으로 초점', () => {
+    const { rerender } = render(<QuizPanel {...props()} />);
+    expect(document.body).toHaveFocus(); // 처음엔 초점을 뺏지 않음
+    rerender(<QuizPanel {...props({ result: reply({ attempt_no: 1 }) })} />);
+    expect(screen.getByTestId('quiz-verdict')).toHaveFocus();
+    rerender(<QuizPanel {...props()} />);
+    expect(
+      screen.getByRole('heading', { name: '무엇이 나올까?' }),
+    ).toHaveFocus();
+  });
+
+  it('알림 자리는 하나: 콤보는 채점 쪽지 글에, 배지는 status 가 아님, 해설은 다 왔을 때만', () => {
+    const { rerender } = render(
+      <QuizPanel
+        {...props({
+          combo: 3,
+          result: reply({ correct: true, stars: 3, best_stars: 3 }),
+        })}
+      />,
+    );
+    expect(document.querySelectorAll('[aria-live]')).toHaveLength(1);
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.getByTestId('quiz-verdict')).toHaveTextContent(
+      '3연속 정답이에요',
+    );
+    const onExplain = vi.fn();
+    const wrong = props({ result: reply({ attempt_no: 1 }), onExplain });
+    rerender(<QuizPanel {...wrong} />);
+    fireEvent.click(screen.getByTestId('quiz-why'));
+    expect(onExplain).toHaveBeenCalled();
+    rerender(<QuizPanel {...wrong} explain={{ state: 'loading', text: '' }} />);
+    expect(screen.getByTestId('quiz-why-bubble')).toHaveFocus();
+    expect(screen.getByTestId('quiz-announce')).toBeEmptyDOMElement();
+    rerender(
+      <QuizPanel {...wrong} explain={{ state: 'done', text: '괄호를 봐요' }} />,
+    );
+    expect(screen.getByTestId('quiz-announce')).toHaveTextContent(
+      '파이뱀: 괄호를 봐요',
+    );
+    expect(document.querySelectorAll('[aria-live]')).toHaveLength(1);
+  });
+});
 
 describe('정답·오답 연출과 콤보 (P7-09)', () => {
   it('콤보 배지는 2연속부터 글자로', () => {

@@ -88,6 +88,20 @@
   font-size: var(--text-small);
   line-height: var(--text-small--line-height);
 }
+/* 초점 이동 자리 (문제 제목 · 채점 쪽지 · 해설 대사창 · 요약 제목, P7-13): 키보드로 왔을 때만 같은 링 */
+.qz-q:focus,
+.qz-verdict:focus,
+.qz-why:focus,
+.dq-sum-t:focus {
+  outline: none;
+}
+.qz-q:focus-visible,
+.qz-verdict:focus-visible,
+.qz-why:focus-visible,
+.dq-sum-t:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
 .qz-q {
   margin: 0.625rem 0 1rem;
   color: var(--text);
@@ -143,6 +157,7 @@
 .qz-opt {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
   min-height: 3.5rem;
@@ -205,7 +220,8 @@
   height: 1rem;
 }
 .qz-opt-body {
-  flex: 1;
+  /* 5rem 이 안 남으면 꼬리표("아니었어요" 등)를 다음 줄로 (아주 좁은 쪽, P7-13) */
+  flex: 1 1 5rem;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -458,6 +474,12 @@
     background-color var(--dur-fast) var(--easing-out),
     box-shadow var(--dur-fast) var(--easing-out);
 }
+/* 코드 줄 높이에 맞춘 36px 빈칸 → 누르는 자리는 위아래로 넓혀 44px (P7-13) */
+.qz-fb-slot::before {
+  content: '';
+  position: absolute;
+  inset: -0.25rem 0;
+}
 /* 손가락 영역 44px: 보이는 버튼보다 위아래로 넓게 */
 .qz-fb-slot::before {
   content: '';
@@ -564,13 +586,29 @@
     background: var(--surface-2);
   }
 }
-/* 쓰는 중: 트레이에 자리는 남고 흐림 (같은 낱말을 다른 빈칸에도 쓸 수 있어 다시 누를 수 있음) */
-.qz-fb-chip[data-used] {
-  opacity: 0.45;
-  box-shadow: inset 0 0 0 1.5px var(--line);
+/* 쓰는 중: 트레이에 자리는 남고 옅은 면 + 체크 (같은 낱말을 다른 빈칸에도 쓸 수 있어 다시 누를 수 있음).
+   누를 수 있는 칩이라 흐리게(opacity) 하지 않고 글자 대비 AA 를 지킴 (P7-13) */
+.qz-fb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
-.qz-fb-chip:disabled {
+.qz-fb-chip > svg {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.qz-fb-chip[data-used] {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  color: var(--text-muted);
+}
+.qz-fb-chip:disabled,
+.qz-fb-chip[aria-disabled='true'] {
   cursor: default;
+}
+.qz-fb-chip[aria-disabled='true']:active {
+  transform: none;
 }
 .qz:not([data-status='answering']) .qz-fb-chip {
   opacity: 0.45;
@@ -778,6 +816,7 @@
   width: 100%;
 }
 .qz-why {
+  container-type: inline-size;
   animation: qz-pop var(--spring-prop-dur) var(--spring-prop) both;
 }
 .qz-why .g-dialogue-who {
@@ -917,4 +956,21 @@
 }
 :root[data-reduced='false'][data-motion='lite'] .qz-combo-n {
   animation: qz-combo-pop var(--dur-base) var(--easing-out) both;
+}
+
+/* 아주 좁은 쪽(360px 를 200% 확대 = 180px): 긴 버튼 글자는 줄바꿈해 가로로 넘치지 않게 (P7-13) */
+.qz .g-btn {
+  max-width: 100%;
+  white-space: normal;
+}
+.qz .g-btn-face {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+/* 해설 대사창이 아주 좁으면 장식 캐릭터(aria-hidden)를 빼고 말풍선만 */
+@container (max-width: 15rem) {
+  .qz-why .g-dialogue-who {
+    display: none;
+  }
 }

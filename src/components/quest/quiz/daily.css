@@ -81,6 +81,9 @@
 .dq-dot[data-state='current'] .dq-dot-face {
   border-color: var(--primary);
   color: var(--primary-text);
+  /* 색만이 아니라 두 겹 테로도 "지금" 구분 (P7-13) */
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 .dq-dot[data-state='correct'] .dq-dot-face {
   border-color: var(--primary);
@@ -216,4 +219,14 @@
 }
 :root[data-reduced='true'] :is(.dq-sheet, .dq-sum) {
   animation: none;
+}
+
+/* 아주 좁은 쪽(360px 200% 확대): 요약 버튼 글자도 줄바꿈 (P7-13) */
+.dq-sum > * {
+  max-width: 100%;
+}
+.dq-sum .g-btn-face {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
 }

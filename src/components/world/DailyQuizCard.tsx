@@ -53,7 +53,12 @@ export function DailyQuizCard({
                 />
               ))}
             </span>
-            {done}/{total}
+            <span aria-hidden>
+              {done}/{total}
+            </span>
+            <span className="sr-only">
+              {total}문제 중 {done}문제 풀었어요
+            </span>
             {review > 0 && (
               <span className="dqc-review">
                 <RotateCcw aria-hidden className="size-3.5" strokeWidth={2.6} />

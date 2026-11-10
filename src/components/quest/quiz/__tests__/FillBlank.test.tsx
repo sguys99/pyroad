@@ -99,8 +99,11 @@ describe('FillBlank 화면', () => {
     expect(chip('range')).toHaveAccessibleName('range, 쓰는 중');
     fireEvent.click(chip('range'));
     expect(blank(2)).toHaveTextContent('range');
-    // 다 차면 칩은 누를 수 없음
-    expect(chip('print')).toBeDisabled();
+    // 다 차면 칩은 누를 곳이 없음 — disabled 가 아니라 aria-disabled (방금 누른 칩에서 초점이 빠지지 않게, P7-13)
+    expect(chip('print')).toHaveAttribute('aria-disabled', 'true');
+    expect(chip('print')).toBeEnabled();
+    fireEvent.click(chip('print'));
+    expect(blank(2)).toHaveTextContent('range');
     fireEvent.click(blank(1));
     expect(blank(1)).not.toHaveTextContent('range');
     expect(blank(1)).toHaveAttribute('aria-current', 'true');
@@ -109,6 +112,18 @@ describe('FillBlank 화면', () => {
     fireEvent.click(screen.getByRole('button', { name: '모두 지우기' }));
     expect(blank(1)).toHaveAttribute('aria-current', 'true');
     expect(blank(2)).not.toHaveTextContent('range');
+  });
+
+  it('키보드: 마지막 빈칸을 채운 칩에 초점이 남고, 낱말 칩 묶음에 이름이 있음 (P7-13)', () => {
+    render(<Live />);
+    expect(
+      screen.getByRole('group', { name: '넣을 낱말' }),
+    ).toBeInTheDocument();
+    chip('range').focus();
+    fireEvent.click(chip('range'));
+    fireEvent.click(chip('range'));
+    expect(chip('range')).toHaveFocus();
+    expect(chip('range')).toHaveAccessibleName('range, 쓰는 중');
   });
 
   it('빈 빈칸을 누르면 그 빈칸을 고름', () => {
