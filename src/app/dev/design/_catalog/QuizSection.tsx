@@ -193,6 +193,143 @@ function LiveQuiz() {
   );
 }
 
+/** 빈칸 채우기 (P7-04). range·print 가 정답, input·len 은 방해 토큰. 둘째 줄은 360px 에서 줄바꿈되는 긴 줄 */
+const QUIZ_FILL: QuizPrompt = {
+  kind: 'fill_blank',
+  question: '빈칸을 채워 0부터 2까지 출력해요',
+  code: 'for i in {{bk-r2fa}}(3):\n    {{bk-m8ce}}(i, "번째 바퀴를 돌았어요", "다음 바퀴로 가요")',
+  tokens: [
+    { id: 'tok-z6nh', text: 'input' },
+    { id: 'tok-c3pd', text: 'print' },
+    { id: 'tok-k2wq', text: 'len' },
+    { id: 'tok-m4xe', text: 'range' },
+  ],
+};
+const FILL_ANSWER = { 'bk-r2fa': 'tok-m4xe', 'bk-m8ce': 'tok-c3pd' };
+const FILL_WRONG = { 'bk-r2fa': 'tok-k2wq', 'bk-m8ce': 'tok-c3pd' };
+const FILL_WHY = 'range 로 숫자를 만들고 print 로 보여 줘요.';
+
+function FillLive() {
+  const [value, setValue] = useState<QuizAnswerValue | null>(null);
+  const [graded, setGraded] = useState<{
+    r: QuizAnswerResponse;
+    v: QuizAnswerValue;
+  } | null>(null);
+  const [misses, setMisses] = useState<QuizAnswerValue[]>([]);
+  const submit = () => {
+    if (value == null) return;
+    const attempt = misses.length + 1;
+    const v = value as Record<string, string>;
+    const correct = Object.entries(FILL_ANSWER).every(([b, t]) => v[b] === t);
+    const stars = correct ? 4 - attempt : attempt === 3 ? 1 : 0;
+    setGraded({
+      v: value,
+      r: response({
+        correct,
+        attempt_no: attempt,
+        stars,
+        best_stars: stars,
+        xp_awarded: stars * 10,
+        explanation: correct ? FILL_WHY : null,
+        revealed:
+          !correct && attempt === 3
+            ? { answer: FILL_ANSWER, explanation: FILL_WHY }
+            : null,
+      }),
+    });
+    if (!correct) setMisses((m) => [...m, value]);
+  };
+  return (
+    <div className="@container">
+      <QuizPanel
+        {...base}
+        quiz={QUIZ_FILL}
+        value={value}
+        onChange={graded ? () => {} : setValue}
+        status={quizStatus(graded?.r ?? null)}
+        result={graded?.r ?? null}
+        submitted={graded?.v ?? null}
+        misses={misses}
+        mode="first"
+        onSubmit={submit}
+        onRetry={() => {
+          if (graded?.r.correct || graded?.r.revealed) setMisses([]);
+          setValue(null);
+          setGraded(null);
+        }}
+      />
+    </div>
+  );
+}
+
+function FillBlankDemos() {
+  return (
+    <>
+      <h3 className="mt-8 mb-2 text-h3">빈칸 채우기 (P7-04)</h3>
+      <p className="mb-4 text-small text-muted-foreground">
+        코드 안 빈칸 버튼 + 아래 낱말 칩(서버가 섞은 순서). 칩을 누르면 강조된
+        빈칸에 들어가고 다음 빈칸으로 넘어가요. 찬 빈칸을 누르면 칩이 돌아가고,
+        빈 빈칸을 누르면 그 빈칸을 골라요. 같은 낱말을 여러 빈칸에 쓸 수 있어 칩은
+        사라지지 않고 흐려져요. 긴 줄은 가로 스크롤 대신 줄바꿈.
+      </p>
+      <div className="grid items-start gap-4 md:grid-cols-2">
+        <Demo
+          label="직접 풀어 보기 (이 자리 채점)"
+          note="range · print 가 정답. 3번째 오답이면 정답 공개"
+          surface="card"
+          data-testid="quiz-fill-live"
+        >
+          <FillLive />
+        </Demo>
+        <Demo
+          label="하나 채움 (둘째 빈칸 차례)"
+          surface="card"
+          data-testid="quiz-fill-partial"
+        >
+          <div className="@container">
+            <Still quiz={QUIZ_FILL} value={{ 'bk-r2fa': 'tok-m4xe' }} />
+          </div>
+        </Demo>
+        <Demo
+          label="오답 (넣은 낱말 그대로)"
+          note="어느 빈칸이 틀렸는지는 알려 주지 않음"
+          surface="card"
+          data-testid="quiz-fill-wrong"
+        >
+          <div className="@container">
+            <Still
+              quiz={QUIZ_FILL}
+              value={FILL_WRONG}
+              submitted={FILL_WRONG}
+              misses={[FILL_WRONG]}
+              result={response({})}
+            />
+          </div>
+        </Demo>
+        <Demo
+          label="공개 (정답 낱말로 채워 보여 줌)"
+          surface="card"
+          data-testid="quiz-fill-revealed"
+        >
+          <div className="@container">
+            <Still
+              quiz={QUIZ_FILL}
+              submitted={FILL_WRONG}
+              result={response({
+                attempt_no: 3,
+                stars: 1,
+                best_stars: 1,
+                xp_awarded: 10,
+                revealed: { answer: FILL_ANSWER, explanation: FILL_WHY },
+              })}
+            />
+          </div>
+        </Demo>
+      </div>
+    </>
+  );
+}
+
 /**
  * 퀴즈 틀과 객관식 (P7-03). 상태 견본은 화면만 그리는 QuizPanel 에 고정 값을 넣고, 맨 위 견본은 이 자리에서 채점해 흐름을 직접 해 봄
  */
@@ -343,6 +480,8 @@ export function QuizSection() {
             </div>
           </Demo>
         </div>
+
+        <FillBlankDemos />
       </Section>
     </MotionProvider>
   );
