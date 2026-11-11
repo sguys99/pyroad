@@ -863,3 +863,32 @@ test.describe('업적 도감 (P8-10)', () => {
     });
   }
 });
+
+test.describe('휴식 알림 (P8-12)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[3]]) {
+    test(`${mode.name}: 권유 → 10초 쉬기 → 다 쉬었어요, Esc는 조금만 더`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const open = page.getByTestId('rest-demo-ask');
+      await open.scrollIntoViewIfNeeded();
+      await open.click();
+      const ask = page.getByRole('dialog', { name: '40분이나 모험했어요!' });
+      await expect(ask).toBeVisible();
+      await expect(ask.getByRole('button', { name: '5분 쉬기' })).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toHaveCount(0);
+
+      await open.click();
+      await page.getByRole('button', { name: '5분 쉬기' }).click();
+      await expect(page.getByRole('timer')).toHaveText(/^0:(10|0\d)$/);
+      await expect(
+        page.getByRole('dialog', { name: '다 쉬었어요!' }),
+      ).toBeVisible({
+        timeout: 15_000,
+      });
+      await page.getByRole('button', { name: '다시 모험하기' }).click();
+      await expect(page.getByRole('dialog')).toHaveCount(0);
+    });
+  }
+});

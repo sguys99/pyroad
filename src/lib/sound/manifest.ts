@@ -103,7 +103,7 @@ export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
   },
   blip: {
     name: '대사 블립',
-    when: '대사창 글자가 나올 때 2~3글자마다 (작게, 넘기면 조용히)',
+    when: '대사창 글자가 나올 때 2~3글자마다 (작게, 넘기면 조용히) · 휴식 알림이 뜰 때·다 쉬었을 때 (P8-12)',
   },
   celebrate: { name: '축하', when: '스테이지·프로젝트를 깼을 때 (축하 카드)' },
 };

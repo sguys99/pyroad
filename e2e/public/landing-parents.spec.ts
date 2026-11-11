@@ -60,8 +60,8 @@ test.describe('랜딩 보호자 섹션 (P4-07)', () => {
       ).toBeVisible();
     await expect(section.getByText('파이썬 마을 입구')).toBeVisible();
     await expect(section.getByText('프로젝트 왕국')).toBeVisible();
-    // 월드 2·3과 휴식 알림은 "준비 중"
-    await expect(section.getByText('준비 중', { exact: true })).toHaveCount(3);
+    // 월드 2·3은 "준비 중" (휴식 알림은 P8-12에서 생겨 편지로 옮김)
+    await expect(section.getByText('준비 중', { exact: true })).toHaveCount(2);
   });
 
   test('full: 화면에 들어오면 한 번 떠오르고 길이 그려진다', async ({

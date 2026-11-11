@@ -43,8 +43,10 @@
 | `phone_quiz_pick` | 브라우저 `track()` — `src/components/world/PhoneQuizPick.tsx`·`src/components/quest/PhoneQuizNote.tsx` (P7-11) | `place`: `world`(월드맵 이어하기 아래 "폰에서 하기 좋은 퀴즈")·`quest`(코드 퀘스트 첫 진입 쪽지), `action`: `show`·`click` | 휴대폰·태블릿(좁은 화면 또는 터치)에서 추천이 보일 때와 눌러 퀴즈로 갈 때(퀘스트 id·제목은 보내지 않음) | show는 화면에 들어올 때 1번(퀘스트 쪽지는 기기당 1번), click은 누를 때마다 |
 | `daily_quiz_open` | 브라우저 `track()` — `src/components/quest/quiz/DailyQuiz.tsx` (P7-10) | `total`: 오늘 문제 수(0~3), `done`: 이미 끝낸 수(0~3) | 오늘의 퀴즈 화면 `/daily`를 열 때(퀘스트 id는 보내지 않음) | 열 때마다 |
 | `daily_quiz_finish` | 브라우저 `track()` — `src/components/quest/quiz/DailyQuiz.tsx` (P7-10) | `correct`: 맞힌 수(0~3), `stars`: 오늘 받은 별 합(0~9) | 이 화면에서 오늘의 마지막 문제를 끝냈을 때(이미 다 푼 날 다시 열면 보내지 않음) | 하루 1번(같은 탭) |
+| `rest_reminder_shown` | 브라우저 `track()` — `src/components/rest/RestReminder.tsx` (P8-12) | `snoozed`: "조금만 더"를 고른 뒤 다시 뜬 것인지 | 40분 연속 모험(탭이 보이는 시간)으로 휴식 알림이 뜰 때(실행·채점 중이면 끝난 뒤) | 뜰 때마다 |
+| `rest_reminder_choice` | 브라우저 `track()` — 같은 파일 (P8-12) | `choice`: `rest`(5분 쉬기)·`more`(조금만 더, Esc·덮개 포함)·`done`(5분을 다 쉼)·`stop`(쉬다가 일찍 돌아감) | 휴식 알림에서 고를 때 | 고를 때마다 |
 
-- **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`·`pwa_install_prompt`·`pwa_installed`·`continue_click`·`quiz_try_run`·`phone_quiz_pick`·`daily_quiz_open`·`daily_quiz_finish`·`trial_start`·`trial_run`·`trial_success`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
+- **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`·`pwa_install_prompt`·`pwa_installed`·`continue_click`·`quiz_try_run`·`phone_quiz_pick`·`daily_quiz_open`·`daily_quiz_finish`·`rest_reminder_shown`·`rest_reminder_choice`·`trial_start`·`trial_run`·`trial_success`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
 - 새 이벤트를 더할 때: `events.ts`(타입·이름) → `schema.ts`(strict 스키마) → 이 표. DB는 이름 형식(`^[a-z][a-z0-9_]{1,47}$`)·크기만 보므로 마이그레이션이 필요 없습니다.
 - `motion_tier_change`는 **기기 성능 분포로 연출 단계 임계값을 조정**하려는 것입니다(P12-04: 놓친 프레임 25%, 창 4개 중 3개). 프레임 수치·화면 크기·기기 모델 같은 지문 정보는 보내지 않고 단계 이름과 경과 초만 보냅니다. `device`(서버가 UA로 판별한 유형)와 함께 보면 "태블릿에서 자동 하향이 얼마나 자주, 몇 초 만에 일어나는지"를 알 수 있습니다(SQL 7). 클라이언트 이벤트라 부풀릴 수 있지만 보상·지표 판정에 쓰지 않는 진단용입니다.
 

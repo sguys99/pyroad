@@ -485,6 +485,17 @@ Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재
 - **연출**: 반짝 별 `ab-glint`(대기 루프, full·lite 1.8초, transform·opacity) · minimal·동작 줄이기는 멈춘 채 보임. 메달 올려놓으면 face 스프링으로 살짝 뜸(minimal·동작 줄이기 없음)
 - **카탈로그**: "업적 도감" 절(`#achievements`) — 견본 13종(받음·받을 수 있음 3·진행·비밀·실패 칭찬), 가짜 받기. e2e `achievement-book.spec.ts`(360 메뉴 → 받기 → 원장·지갑, 넘침 없음 / 1280 4열), `design-catalog.spec.ts` "업적 도감 (P8-10)"
 
+## 13-10. 휴식 알림 `RestReminder` · `RestReminderDialog` (P8-12, §2.6)
+
+로그인 화면 공통 레이아웃(`(protected)/layout.tsx`)에 하나. 타이머는 순수 함수 `src/lib/rest/restTimer.ts`(가짜 시계 단위 테스트), 화면은 공통 `Modal` 위 `RestReminderDialog`(`restReminder.css`, `.rr-*`, 처음 뜰 때 `next/dynamic`으로 받음).
+
+- **연속 플레이**: 탭이 보이는 동안 15초마다 셈(한 번에 30초 넘는 틈은 세지 않음). 탭을 숨기거나 입력이 없는 채로 10분(`BREAK_MS`, 초등 쉬는 시간)이면 처음부터. 탭 세션(sessionStorage `pyroad:rest`)이라 새로 고침·페이지 이동에도 이어짐. 서버 저장 없음
+- **때**: 40분(`REST_AFTER_MS`). 퀘스트 실행·채점 중(`useRestHold`, `useQuestSession`·`useQuizSession`)이나 다른 대화 상자(축하·시트)가 떠 있으면 닫힐 때까지 미룸
+- **단계**: 권유(파이뱀 `proud`, 눈·기지개·물 제안 3개, "5분 쉬기" 첫 초점) → 쉬는 중(파이뱀 `sleep`, 남은 시간 `role=timer` + 진행바, 끝 시각 기준이라 탭을 숨겨도 맞음) → 다 쉬었어요(`cheer`, "다시 모험하기"). "조금만 더 할래요"·Esc·덮개 = 20분 뒤 다시, 쉬다가 "그만 쉬고 돌아가기"도 20분 뒤. 막지 않음
+- **연출·소리**: 공통 모달 연출(full 떠오름 · lite · minimal 페이드 · 동작 줄이기 즉시), 받침 색 전환은 동작 줄이기면 없음. `blip` × 0.5(뜰 때·다 쉬었을 때)
+- **분석**: `rest_reminder_shown`(`snoozed`) · `rest_reminder_choice`(`rest`·`more`·`done`·`stop`)
+- **e2e 빨리 감기**: 테스트 페이지가 켜진 서버(`isTestPagesEnabled`)에서만 sessionStorage `pyroad:rest:speed` 배속을 읽음 → `e2e/rest-reminder.spec.ts`. 카탈로그 "휴식 알림" 절(`#rest`)은 단계별로 당겨 띄움(쉬기 10초)
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |

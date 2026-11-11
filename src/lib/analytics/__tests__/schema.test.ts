@@ -206,6 +206,18 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     ).toBe(false);
   });
 
+  it('휴식 알림(P8-12): 정해 둔 값만', () => {
+    const parse = (name: string, props: unknown) =>
+      clientBatchSchema.safeParse(batch([{ name, props, path: '/world' }]))
+        .success;
+    expect(parse('rest_reminder_shown', { snoozed: false })).toBe(true);
+    expect(parse('rest_reminder_choice', { choice: 'rest' })).toBe(true);
+    expect(parse('rest_reminder_choice', { choice: 'later' })).toBe(false);
+    expect(parse('rest_reminder_shown', { snoozed: true, minutes: 40 })).toBe(
+      false,
+    );
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'continue_click',
@@ -218,6 +230,8 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
       'pwa_install_prompt',
       'pwa_installed',
       'quiz_try_run',
+      'rest_reminder_choice',
+      'rest_reminder_shown',
       'trial_run',
       'trial_start',
       'trial_success',

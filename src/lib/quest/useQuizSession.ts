@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { useRestHold } from '@/lib/rest/restHold';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { createCelebrationStore } from '@/lib/celebration/celebrationStore';
 import { kstToday } from '@/lib/time/kst';
@@ -116,6 +117,8 @@ export function useQuizSession({
   // 연속 클릭 막기 (ref 는 렌더 전, state 는 버튼 표시)
   const submittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 휴식 알림(P8-12)은 채점이 끝날 때까지 미룬다
+  useRestHold(isSubmitting);
 
   // 화면을 떠나면 예약한 축하를 취소하고 늦게 온 응답은 버림 (useQuestSession 과 같음)
   const aliveRef = useRef(true);

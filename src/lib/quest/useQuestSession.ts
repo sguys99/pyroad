@@ -11,6 +11,7 @@ import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { useRestHold } from '@/lib/rest/restHold';
 import { useSfx } from '@/components/providers/SoundProvider';
 import type {
   ProjectStep,
@@ -1068,6 +1069,8 @@ export function useQuestSession({
   // 실행기가 준비되지 않았거나 다른 실행·채점 중이면 쓰지 않는다: 키를 차감한 뒤 정답 실행이 실패하면
   // 정답 대신 오류가 보이는데 퀘스트는 완료되던 문제 (P1-03 보고)
   const isRunnerFree = runnerStatus === 'ready' && !isRunning && !isSubmitting;
+  // 휴식 알림(P8-12)은 실행·채점이 끝날 때까지 미룬다
+  useRestHold(isRunning || isSubmitting);
 
   const handleGoldenKeyUse = useCallback(async () => {
     if (goldenKeys <= 0 || isAiLoading || isGoldenKeyLoading || isCompleted)

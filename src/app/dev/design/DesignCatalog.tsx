@@ -56,6 +56,7 @@ import { WorldMapSection } from './_catalog/WorldMapSection';
 import { CelebrationSection } from './_catalog/CelebrationSection';
 import { QuizSection } from './_catalog/QuizSection';
 import { AchievementBookSection } from './_catalog/AchievementBookSection';
+import { RestSection } from './_catalog/RestSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -120,6 +121,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['onboarding', '온보딩·튜토리얼'],
       ['consent', '보호자 동의'],
       ['pwa', '앱 아이콘·홈 화면'],
+      ['rest', '휴식 알림'],
     ],
   },
 ];
@@ -228,6 +230,7 @@ export function DesignCatalog({
               <OnboardingSection />
               <ConsentSection />
               <PwaSection />
+              <RestSection />
             </div>
           </div>
         </div>

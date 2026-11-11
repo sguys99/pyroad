@@ -5,7 +5,6 @@ import { ParentsReveal } from './parents/ParentsReveal';
 import {
   LETTER,
   ROADMAP,
-  SOON,
   WORLD1_STAGES,
   type LetterColumn,
 } from './parents/parents';
@@ -67,12 +66,6 @@ export function ParentsSection() {
           })}
         </div>
         <div className="ld-parents-foot">
-          <p className="ld-parents-soon">
-            <span className="ld-parents-tag" data-status="soon">
-              준비 중
-            </span>
-            {SOON.join(' · ')}
-          </p>
           <p className="ld-parents-sign font-display">pyRoad 드림</p>
         </div>
       </ParentsReveal>
