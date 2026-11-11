@@ -2261,7 +2261,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-1',
     role: 'postgres',
-    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·current_streak·coin_reward·code_quest_stars·stage_chest_goal)',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·current_streak·kst_date·coin_reward·code_quest_stars·stage_chest_goal)',
     ...OK,
     run: () => {
       const cases = [
@@ -2279,6 +2279,11 @@ async function groupReward() {
           `streak_days ${c.name}`,
           `public.current_streak(array[${c.days.map(sqlStr).join(',')}]::date[], '${c.today}')::text`,
           String(c.streak),
+        ]),
+        ...rules.kst_date.map((c) => [
+          `kst_date ${c.name}`,
+          `public.kst_date('${c.at}'::timestamptz)::text`,
+          c.day,
         ]),
         ...rules.coins.map((c) => [
           `coins ${c.kind}/${c.n ?? ''}`,
@@ -3575,6 +3580,55 @@ async function groupMissions(u) {
       );
     },
   });
+
+  await check({
+    group: 'missions',
+    id: 'DM-5',
+    role: 'service_role',
+    op: '7일 보관 경계(P8-15): 6일 전 달성·안 받은 미션은 pending 에 남고 받기 200, 7일 전은 pending 에서 빠지고 받기 410 · 받은 뒤 다시 받기는 already_claimed(코인 0)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm5', '미션보관');
+      const [a, b] = stageQuests(STAGE1);
+      const d6 = ago(6);
+      const d7 = ago(7);
+      one(`insert into public.user_daily_missions (user_id, day, mission_ids) values
+        ('${x.id}', '${d6}', '{quest_1}'), ('${x.id}', '${d7}', '{quest_1}')`);
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, code_submitted) values
+        ('${x.id}', '${a}', 'completed', ${at(d6, 3600)}, ''),
+        ('${x.id}', '${b}', 'completed', ${at(d7, 3600)}, '')`);
+      const claim = (day) => rpc('claim_daily_mission', { p_user_id: x.id, p_day: day, p_mission_id: 'quest_1' });
+      // 앱(월드맵 HUD)처럼 오늘 첫 방문에 배정하며 읽음 (배정 전 읽기만은 pending 없이 assigned false)
+      const pend = await today_(x.id, []);
+      const in7 = await claim(d7);
+      const in6 = await claim(d6);
+      const again = await claim(d6);
+      const pend2 = await today_(x.id, null);
+      return (
+        compare(
+          'DM-5',
+          {
+            pend: `${d6}:quest_1`,
+            in7: '410:mission_expired',
+            in6: '200:false:10',
+            again: '200:true:0',
+            pend2: 0,
+            refs: `${d6}:quest_1`,
+            mismatches: '0',
+          },
+          {
+            pend: (pend.json?.pending ?? []).map((m) => `${m.day}:${m.id}`).join(','),
+            in7: `${in7.status}:${errMsg(in7)}`,
+            in6: `${in6.status}:${in6.json?.already_claimed}:${in6.json?.mission_coins}`,
+            again: `${again.status}:${again.json?.already_claimed}:${again.json?.coins_earned}`,
+            pend2: pend2.json?.pending?.length,
+            refs: one(`select string_agg(ref, ',' order by ref) from public.coin_ledger where user_id = '${x.id}' and source = 'mission'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `6일 전(${d6}) 받기 +10 · 7일 전(${d7}) 410 · 다시 받기 0` }
+      );
+    },
+  });
 }
 
 // ── 출석·스트릭 방패 (P8-08, ① 00035) ──
@@ -4801,7 +4855,9 @@ async function groupAchievements(u) {
       const sql = readFileSync(join(HERE, '..', 'migrations', '00036_achievements.sql'), 'utf8');
       const m1 = psql(sql);
       const m2 = psql(sql);
-      if (!m1.ok || !m2.ok) return { actual: 'error', detail: firstLine(m1.err || m2.err) };
+      // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
+      const m3 = psql(readFileSync(join(HERE, '..', 'migrations', '00038_profile_stats.sql'), 'utf8'));
+      if (!m1.ok || !m2.ok || !m3.ok) return { actual: 'error', detail: firstLine(m1.err || m2.err || m3.err) };
       const rows = one(`select string_agg(achievement_id || ':' || to_char(achieved_at at time zone 'Asia/Seoul', 'MM-DD') || ':' || (claimed_at is null), ',' order by achievement_id)
                           from public.user_achievements where user_id = '${x.id}'`);
       const got = await claim(x.id, 'project_builder');

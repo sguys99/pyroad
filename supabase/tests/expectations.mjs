@@ -533,6 +533,12 @@ export const EXPECT = {
     activateIn: 'P8-07',
     note: '서버 재판정 미달 거부 · 원장 키로 한 번(코인 + XP 15 + 레벨 업 코인) · 7일 보관',
   },
+  'DM-5': {
+    expect: 'allow',
+    requires: 'public.claim_daily_mission()',
+    activateIn: 'P8-15',
+    note: '7일 보관 경계: 6일 전은 pending·받기 가능, 7일 전은 빠지고 410, 다시 받기 0',
+  },
   // ── 출석·스트릭 방패 (P8-08, ① 00035) ──
   'AT-1': {
     expect: 'deny',

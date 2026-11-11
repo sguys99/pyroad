@@ -28,4 +28,19 @@ describe('starReviewOpen (§2.3, §12-Q64 복습 도전은 별 판정 다음 날
       true,
     );
   });
+
+  it('달·해·윤일 경계 (P8-15): 판정일 다음 날 KST 0시 정각에 열림', () => {
+    const at = (judged: string, iso: string) =>
+      starReviewOpen(
+        { best_stars: 2, stars_judged_on: judged },
+        kstToday(new Date(iso)),
+      );
+    expect(at('2026-11-30', '2026-11-30T14:59:59Z')).toBe(false);
+    expect(at('2026-11-30', '2026-11-30T15:00:00Z')).toBe(true); // 12-01 0시
+    expect(at('2026-12-31', '2026-12-31T14:59:59Z')).toBe(false);
+    expect(at('2026-12-31', '2026-12-31T15:00:00Z')).toBe(true); // 새해 0시
+    expect(at('2028-02-28', '2028-02-28T15:00:00Z')).toBe(true); // 윤일 02-29 0시
+    expect(at('2028-02-29', '2028-02-29T14:59:59Z')).toBe(false);
+    expect(at('2028-02-29', '2028-02-29T15:00:00Z')).toBe(true); // 03-01 0시
+  });
 });
