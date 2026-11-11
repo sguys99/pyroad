@@ -586,6 +586,38 @@ export type Database = {
           },
         ];
       };
+      retro_rewards: {
+        Row: {
+          coins: number;
+          granted_at: string;
+          seen_at: string | null;
+          stars: number;
+          user_id: string;
+        };
+        Insert: {
+          coins: number;
+          granted_at: string;
+          seen_at?: string | null;
+          stars?: number;
+          user_id: string;
+        };
+        Update: {
+          coins?: number;
+          granted_at?: string;
+          seen_at?: string | null;
+          stars?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'retro_rewards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       stages: {
         Row: {
           created_at: string;

@@ -154,7 +154,7 @@ export const RELEASES = [
         file: '1_먼저실행.sql',
         stage: 1,
         head: [
-          '-- pyRoad v0.6 (Phase 8 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00028 level_curve, 00029 level_recalc, 00030 coin_ledger, 00031 coin_sources, 00032 star_system, 00033 stage_chest, 00034 daily_missions, 00035 attendance_streak, 00036 achievements)',
+          '-- pyRoad v0.6 (Phase 8 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00028 level_curve, 00029 level_recalc, 00030 coin_ledger, 00031 coin_sources, 00032 star_system, 00033 stage_chest, 00034 daily_missions, 00035 attendance_streak, 00036 achievements, 00037 retro_rewards)',
           '-- feat/phase8 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.6-runbook.md "Phase 8 병합"',
         ],
         parts: [
@@ -167,6 +167,7 @@ export const RELEASES = [
           '00034',
           '00035',
           '00036',
+          '00037',
         ],
       },
     ],

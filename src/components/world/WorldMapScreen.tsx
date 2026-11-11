@@ -12,6 +12,7 @@ import { ContinueFloat } from '@/components/world/ContinueCta';
 import { PhoneQuizPick } from '@/components/world/PhoneQuizPick';
 import { DailyQuizCard } from '@/components/world/DailyQuizCard';
 import { AttendanceCard } from '@/components/world/AttendanceCard';
+import { RetroWelcomeCard } from '@/components/world/RetroWelcomeCard';
 import { shieldSavedYesterday } from '@/lib/world/attendance';
 import { cn } from '@/lib/utils';
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
@@ -62,6 +63,14 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
           <div className="relative z-10">
             <ApiKeyAlert />
           </div>
+        )}
+
+        {/* 그동안의 모험 보상 (P8-11): 소급 보상을 받은 사용자에게 한 번, 닫으면 다시 안 나옴 */}
+        {data.retroWelcome && (
+          <RetroWelcomeCard
+            retro={data.retroWelcome}
+            achievementsReady={data.achievementsReady}
+          />
         )}
 
         {/* 출석 도장 (P8-08): 오늘 출석 전이면 맨 위 카드. 찍은 뒤엔 이 방문 동안만 남고, 달력은 메뉴 시트에서 */}

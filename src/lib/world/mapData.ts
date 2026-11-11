@@ -75,6 +75,8 @@ export interface WorldMapData {
   dailyStatus: WorldDailyStatus | null;
   /** 얻었지만 코인을 안 받은 업적 수 (P8-10, 메뉴의 업적 도감 금색 점) */
   achievementsReady: number;
+  /** 아직 닫지 않은 소급 보상 (P8-11, 00037 retro_rewards). 없으면 null → 환영 카드 없음 */
+  retroWelcome: RetroWelcome | null;
   /** 이어하기 CTA 대상 (P5-10). 열린 퀘스트를 다 깼으면 null */
   continueTarget: ContinueTarget | null;
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
@@ -83,6 +85,12 @@ export interface WorldMapData {
   unlocks: UnlockPlan | null;
   /** 오늘의 퀴즈 (P7-10): 오늘 고른 문제와 끝난 문제 */
   daily: DailyQuizState;
+}
+
+/** "그동안의 모험 보상" (P8-11): 소급으로 코인을 받은 별 수·코인 합 */
+export interface RetroWelcome {
+  stars: number;
+  coins: number;
 }
 
 /** 이어하기 CTA (P5-10) */
@@ -147,6 +155,8 @@ export interface WorldMapRaw {
   dailyStatus?: WorldDailyStatus | null;
   /** 코인 안 받은 본인 업적 행 (P8-10). 못 읽었으면 없음 */
   readyAchievements?: Array<{ user_id: string }> | null;
+  /** 닫지 않은 본인 소급 보상 행 (P8-11, 00037). 못 읽었으면(00037 전 DB) 없음 */
+  retro?: Array<{ user_id: string; stars: number; coins: number }> | null;
 }
 
 export function toWorldMapData(
@@ -196,6 +206,9 @@ export function toWorldMapData(
     achievementsReady: (raw.readyAchievements ?? []).filter(
       (a) => a.user_id === userId,
     ).length,
+    retroWelcome: toRetroWelcome(
+      (raw.retro ?? []).filter((r) => r.user_id === userId),
+    ),
     profile:
       raw.profile && raw.profile.id === userId
         ? toOwnProfile(raw.profile)
@@ -226,4 +239,13 @@ export function toWorldMapData(
     showApiKeyAlert:
       !!raw.apiKeys?.enabled && Object.keys(raw.apiKeys.keys).length === 0,
   };
+}
+
+/** 닫지 않은 소급 행(보통 1개, 다시 실행했으면 여럿)을 합침. 코인이 없으면 카드 없음 */
+function toRetroWelcome(
+  rows: Array<{ stars: number; coins: number }>,
+): RetroWelcome | null {
+  const coins = rows.reduce((n, r) => n + r.coins, 0);
+  if (coins <= 0) return null;
+  return { stars: rows.reduce((n, r) => n + r.stars, 0), coins };
 }

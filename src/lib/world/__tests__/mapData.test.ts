@@ -219,6 +219,23 @@ describe('toWorldMapData (P5-13)', () => {
     expect(at(null)).toHaveLength(2);
   });
 
+  it('소급 보상 (P8-11): 닫지 않은 내 행만 합치고, 없으면 카드 없음', () => {
+    expect(toWorldMapData(ME, raw(), WORLDS).retroWelcome).toBeNull();
+    expect(
+      toWorldMapData(
+        ME,
+        raw({
+          retro: [
+            { user_id: ME, stars: 6, coins: 90 },
+            { user_id: ME, stars: 0, coins: 20 },
+            { user_id: OTHER, stars: 9, coins: 999 },
+          ],
+        }),
+        WORLDS,
+      ).retroWelcome,
+    ).toEqual({ stars: 6, coins: 110 });
+  });
+
   it('황금키로 완료한 시각은 스트릭에서 뺀다', () => {
     const base = raw();
     const data = toWorldMapData(

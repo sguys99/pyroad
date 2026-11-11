@@ -32,6 +32,7 @@ import { serverWorlds } from './serverWorlds';
  *   스트릭 방패는 렌더마다 `world_daily_status` 가 정산(멱등)
  * - 데일리 미션 받기(P8-07): `/api/missions/claim` 의 revalidatePath + `MissionList`(DailyMissions.tsx) 의 router.refresh() (HUD 코인·XP·미션 칸).
  *   미션 진행은 HUD 미션 칸(`WorldHudBar`)이 렌더마다 서버 RPC 로 다시 셈
+ * - 소급 보상 카드 닫기(P8-11): `/api/retro/seen` 은 무효화하지 않는다. 카드가 바로 사라지고 다음 방문은 새로 렌더
  * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh() (본 기록도 지움, P5-05)
  * - 잠금 해제 본 기록(P5-05): `/api/world/unlocks` 는 무효화하지 않는다. 지도가 기록을 보낸 뒤에는 이 화면에서 다시 쓰지 않고,
  *   다음 방문은 새로 렌더하며, 같은 세션의 중복 재생은 화면 쪽(useStageUnlock)이 막는다
@@ -54,6 +55,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
     dailyRow,
     dailyStatus,
     readyAchievements,
+    retro,
   ] = await Promise.all([
     getAuthUser(),
     // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
@@ -97,6 +99,11 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       .from('user_achievements')
       .select('user_id, achievement_id')
       .is('claimed_at', null),
+    // 닫지 않은 소급 보상 (P8-11, 00037 본인 행 SELECT) → "그동안의 모험 보상" 카드. 실패하면(00037 전 DB) 카드 없음
+    supabase
+      .from('retro_rewards')
+      .select('user_id, stars, coins')
+      .is('seen_at', null),
     // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
   ]);
   if (!user) return null;
@@ -115,6 +122,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
         dailyRow.data?.user_id === user.id ? dailyRow.data.quiz_ids : null,
       dailyStatus,
       readyAchievements: readyAchievements.data,
+      retro: retro.data,
     },
     serverWorlds(),
     today,

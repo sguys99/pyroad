@@ -1,0 +1,34 @@
+/* "그동안의 모험 보상" 카드 (P8-11). 쪽지 틀·머리·바닥은 출석 카드(attendance.css `.at`)를 같이 쓰고 여기는 별·코인 칸과 버튼 줄만. 토큰 변수만 */
+
+@layer components {
+  .rw-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rw-stats > li {
+    display: inline-flex;
+    flex: 1 1 8rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--round-m);
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    font-size: var(--text-h3);
+    line-height: 1.2;
+  }
+  .rw-l {
+    color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 700;
+  }
+  .rw-acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

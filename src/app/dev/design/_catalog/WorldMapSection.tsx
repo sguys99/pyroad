@@ -24,6 +24,7 @@ import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 import { MissionHudButton, MissionHudPlaceholder, MissionList } from '@/components/world/DailyMissions';
 import type { DailyMission, DailyMissionsState } from '@/lib/world/missions';
 import { AttendanceCard, AttendanceMenuSection } from '@/components/world/AttendanceCard';
+import { RetroWelcomeCard } from '@/components/world/RetroWelcomeCard';
 import type { AttendanceStatus } from '@/lib/world/attendance';
 import { ContinueButton } from '@/components/world/ContinueCta';
 import { PhoneQuizSlip } from '@/components/world/PhoneQuizPick';
@@ -494,6 +495,25 @@ function AttendanceDemo() {
   );
 }
 
+// 그동안의 모험 보상 (P8-11): 별·코인 + 받을 업적 · 레벨 업 코인만(별 없음). 닫기는 서버 대신 아무것도 안 함(다시 보려면 새로 고침)
+const RETRO_SAMPLES: [string, { stars: number; coins: number }, number][] = [
+  ['별·코인 + 받을 업적 3개', { stars: 42, coins: 1385 }, 3],
+  ['레벨 업 코인만 (별 보상 없음)', { stars: 0, coins: 140 }, 0],
+];
+
+function RetroDemo() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {RETRO_SAMPLES.map(([label, retro, ready]) => (
+        <figure key={label} className="grid content-start gap-1" data-testid="retro-demo">
+          <figcaption className="text-caption text-text-muted">{label}</figcaption>
+          <RetroWelcomeCard retro={retro} achievementsReady={ready} onDismiss={() => {}} />
+        </figure>
+      ))}
+    </div>
+  );
+}
+
 // 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨. 코인 0 · 45 · 1,280 · 12.3만(640px 미만 줄여 씀, P8-04)
 const HUDS: [string, WorldHudProps][] = [
   ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false } }],
@@ -657,6 +677,13 @@ export function WorldMapSection() {
         data-testid="attendance-demo-section"
       >
         <AttendanceDemo />
+      </Demo>
+      <Demo
+        label="그동안의 모험 보상 (P8-11)"
+        note="새 보상 규칙 전에 모험한 사용자에게 한 번(00037 소급이 코인을 준 사람만), 출석 카드 위. 소급 코인은 이미 잔액에 들어가 있어 받기 대신 '좋아요!'로 닫음(서버 본 기록, 다음 방문부터 없음). 별 보상 = 코인을 받은 별 수(황금키 별 제외), 코인 = 퀘스트 첫 완료·별·레벨 업 합. 소급 판정한 업적은 축하 카드 없이 도감 '받기 가능'이라 그 수와 '업적 보러 가기'. 출석 카드와 같은 쪽지 모양"
+        data-testid="retro-demo-section"
+      >
+        <RetroDemo />
       </Demo>
       <Demo
         label="이어하기 CTA (P5-10)"

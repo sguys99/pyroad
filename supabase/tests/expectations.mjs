@@ -605,6 +605,19 @@ export const EXPECT = {
     activateIn: 'P8-09',
     note: 'user_badges 5종 → 같은 id 업적(받기 가능), 다시 실행해도 그대로',
   },
+  // ── 소급 보상 (P8-11, ① 00037) ──
+  'RT-1': {
+    expect: 'allow',
+    requires: 'public.retro_rewards',
+    activateIn: 'P8-11',
+    note: '옛 상태 리허설: 별 채우기·퀘스트·별·레벨 업 코인(원래 원장 키)·조용한 업적, 두 번 실행 같음, 되돌리기는 소급분만',
+  },
+  'RT-2': {
+    expect: 'deny',
+    requires: 'public.retro_rewards',
+    activateIn: 'P8-11',
+    note: '본인 행 읽기만, 쓰기는 마이그레이션·service_role(seen_at)',
+  },
   'CN-10': {
     expect: 'allow',
     requires: 'public.coin_reward()',

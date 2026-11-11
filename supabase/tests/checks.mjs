@@ -4736,6 +4736,110 @@ async function groupAchievements(u) {
       );
     },
   });
+
+  // ── 소급 보상 (P8-11, ① 00037) ──
+  await check({
+    group: 'achievements',
+    id: 'RT-1',
+    role: 'postgres',
+    op: '00037 리허설: 옛 상태(힌트 0/1/2·황금키·퀴즈 별 일부 받음·뱃지 이관·레벨 보정) → 별·퀘스트·별·레벨 업 코인·조용한 업적, 두 번 실행 같음, 되돌리기',
+    ...OK,
+    run: async () => {
+      const names = ['h0', 'h1', 'h2', 'gold', 'quiz', 'badge', 'lv'];
+      const xs = [];
+      for (const n of names) xs.push(await createUser(`rt1${n}`, '소급'));
+      const id = Object.fromEntries(names.map((n, i) => [n, xs[i].id]));
+      const qz = one(`select id from public.quests where stage_id = '${STAGE1}' and quest_type = 'quiz' order by "order" limit 1`);
+      const file = readFileSync(join(HERE, '..', 'migrations', '00037_retro_rewards.sql'), 'utf8');
+      const rollback = readFileSync(join(HERE, '..', 'rollback', '00037_retro_rewards.rollback.sql'), 'utf8');
+      const done = `'2026-10-01 10:00+09'`;
+      // P8-05 이전 완료 행: best_stars 0 · 판정일 없음. 퀴즈는 00026 이 별을 적었고 별 1 코인만 받은 상태(00031 이전 판정 + 일부)
+      const code = (who, hints, golden = false) =>
+        `insert into public.user_progress (user_id, quest_id, status, hints_used, used_golden_key, completed_at)
+           values ('${id[who]}', '${Q1}', 'completed', ${hints}, ${golden}, ${done});`;
+      const setup = `
+        ${code('h0', 0)} ${code('h1', 1)} ${code('h2', 2)} ${code('gold', 0, true)} ${code('badge', 0)}
+        insert into public.user_progress (user_id, quest_id, status, completed_at, stars, best_stars, stars_judged_on, attempts)
+          values ('${id.quiz}', '${qz}', 'completed', '2026-10-05 10:00+09', 2, 2, '2026-10-05', 1);
+        select public.coin_apply('${id.quiz}', 'star', '${qz}:1', 5);
+        insert into public.user_badges (user_id, badge_type, earned_at) values ('${id.badge}', 'first_code', ${done});
+        insert into public.user_achievements (user_id, achievement_id, achieved_at) values ('${id.badge}', 'first_code', ${done});
+        update public.users set total_xp = 1210 where id = '${id.lv}';
+        insert into public.level_curve_adjustments (user_id, level_before, xp_before, xp_after) values ('${id.lv}', 5, 1000, 1210);
+        select public.coin_apply('${id.lv}', 'level_up', '2', 20);
+        -- 같은 트랜잭션이라 created_at 이 소급과 같아지지 않게 (운영에서는 다른 트랜잭션)
+        update public.coin_ledger set created_at = created_at - interval '1 day' where user_id in (${xs.map((x) => `'${x.id}'`).join(',')});`;
+      const list = names.map((n, i) => `('${id[n]}'::uuid, '${n}', ${i})`).join(',');
+      const progress = (alias) =>
+        `coalesce((select p.best_stars || '/' || coalesce(to_char(p.stars_judged_on, 'MM-DD'), '-') || '/' || p.attempts
+                     from public.user_progress p where p.user_id = ${alias}.id limit 1), '-')`;
+      const state = `select string_agg(n.name || ':' || u.coins || ':' || ${progress('u')} || ':' ||
+            coalesce((select string_agg(r.stars || '/' || r.coins, ';') from public.retro_rewards r where r.user_id = u.id), '-'), ',' order by n.ord)
+          || '|' || (select count(*) from public.coin_balance_mismatches())
+          || '|' || (select string_agg(to_char(achieved_at at time zone 'Asia/Seoul', 'MM-DD') || ':' || (claimed_at is null), ',')
+                       from public.user_achievements where user_id = '${id.badge}' and achievement_id = 'first_code')
+          || '|' || (select count(*) > 0 from public.user_achievements where user_id = '${id.h0}' and claimed_at is null)
+          || '|' || (select count(*) from public.coin_ledger where source = 'achievement' and user_id in (select id from (values ${list}) v(id, name, ord)))
+          from (values ${list}) n(id, name, ord) join public.users u on u.id = n.id;`;
+      const after = `select string_agg(n.name || ':' || u.coins, ',' order by n.ord) || '|' || (select count(*) from public.coin_balance_mismatches())
+            || '|' || (to_regclass('public.retro_rewards') is null)
+          from (values ${list}) n(id, name, ord) join public.users u on u.id = n.id;`;
+      const r = psql(`BEGIN;\n${setup}\n${file}\n${state}\n${file}\n${state}\n${rollback}\n${after}\nROLLBACK;`);
+      if (!r.ok) return { actual: 'error', detail: firstLine(r.err) };
+      const [first, second, back] = r.out.split('\n').filter(Boolean).slice(-3);
+      // 코인: 퀘스트 10 + 별 번호마다 5 (황금키 0) · 퀴즈는 별 2만(별 1은 받음) · Lv 5 = 레벨 3·4(20)·5(100), 레벨 2는 받음
+      const want =
+        'h0:25:3/10-01/1:3/25,h1:20:2/10-01/1:2/20,h2:15:1/10-01/1:1/15,gold:0:1/10-01/1:-,' +
+        'quiz:10:2/10-05/1:1/5,badge:25:3/10-01/1:3/25,lv:160:-:0/140|0|10-01:true|true|0';
+      return (
+        compare(
+          'RT-1 (이름:잔액:별/판정일/시도:소급 별/코인 | 어긋남 | 이관 업적 | 조용한 업적 | 업적 코인)',
+          { first: want, second: want, back: 'h0:0,h1:0,h2:0,gold:0,quiz:5,badge:0,lv:20|0|true' },
+          { first, second, back },
+        ) ?? { actual: 'ok', detail: '힌트 0/1/2 → ⭐3/2/1 + 25/20/15코인, 황금키 ⭐1·0코인, 퀴즈 새 별만, 레벨 업 140, 두 번째 실행 같음, 되돌리면 소급분만 빠짐' }
+      );
+    },
+  });
+  await check({
+    group: 'achievements',
+    id: 'RT-2',
+    role: 'authenticated',
+    op: 'retro_rewards: 본인 행 읽기만 · 남의 행·비로그인 읽기 · 본인 seen_at·coins UPDATE · INSERT (닫기는 /api/retro/seen service_role)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.retro_rewards (user_id, granted_at, stars, coins) values
+             ('${u.alice.id}', '2026-11-01', 3, 25), ('${u.bob.id}', '2026-11-01', 1, 15) on conflict do nothing`);
+      try {
+        return await rt2();
+      } finally {
+        one(`delete from public.retro_rewards where user_id in ('${u.alice.id}', '${u.bob.id}')`);
+      }
+    },
+  });
+  async function rt2() {
+    const own = await rest('GET', '/rest/v1/retro_rewards?select=user_id,stars,coins', { as: u.alice });
+    if (own.status !== 200 || own.json.length !== 1 || own.json[0].user_id !== u.alice.id)
+      return { actual: 'written', detail: `본인·남의 행 ${own.status} ${JSON.stringify(own.json)}` };
+    const anon = classifyRead(await rest('GET', '/rest/v1/retro_rewards?select=*'));
+    if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+    const upd = await classifyWrite(
+      rest('PATCH', `/rest/v1/retro_rewards?user_id=eq.${u.alice.id}`, {
+        as: u.alice,
+        body: { seen_at: new Date().toISOString(), coins: 9999 },
+        prefer: 'return=minimal',
+      }),
+      `select seen_at is not null or coins = 9999 from public.retro_rewards where user_id = '${u.alice.id}'`,
+    );
+    if (upd.actual === 'written') return upd;
+    return classifyWrite(
+      rest('POST', '/rest/v1/retro_rewards', {
+        as: u.alice,
+        body: { user_id: u.alice.id, granted_at: '2026-11-02', stars: 1, coins: 5 },
+        prefer: 'return=minimal',
+      }),
+      `select exists (select 1 from public.retro_rewards where user_id = '${u.alice.id}' and granted_at = '2026-11-02')`,
+    );
+  }
 }
 
 // psql 트랜잭션 안에서 검사하고 되돌림. DO 블록이 기대와 다르면 예외 → 'mismatch'
