@@ -30,8 +30,9 @@ const HintMarkdown = lazy(() => import('./HintMarkdown'));
 export const COMPLETED_NOTE: Record<QuestCompletion, string> = {
   just: '통과해서 보상을 받았어요! 한 번 더 돌려 보면 복습이 돼요.',
   before:
-    '예전에 통과한 퀘스트예요. 다시 풀면 복습이 되고, 못 모은 별은 힌트 없이 통과하면 채워져요. XP는 처음 한 번만 받아요.',
-  review: '복습 완료! XP는 처음 한 번만 받고, 별은 다시 풀어서 채울 수 있어요.',
+    '예전에 통과한 퀘스트예요. 다시 풀면 복습이 되고, 못 모은 별은 다음 날부터 처음 코드로 다시 짜서 채울 수 있어요. XP는 처음 한 번만 받아요.',
+  review:
+    '복습 완료! XP는 처음 한 번만 받고, 별은 다음 날부터 다시 풀어서 채울 수 있어요.',
 };
 
 export interface HintNoteData {

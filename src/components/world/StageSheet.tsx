@@ -23,11 +23,8 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import { questNumbers } from '@/lib/quest/stageProgress';
 import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
-import {
-  isQuizKind,
-  QUIZ_KIND_LABEL,
-  quizReviewOpen,
-} from '@/lib/world/phoneQuiz';
+import { isQuizKind, QUIZ_KIND_LABEL } from '@/lib/world/phoneQuiz';
+import { starReviewOpen } from '@/lib/quest/starReview';
 import { kstToday } from '@/lib/time/kst';
 import { Landmark } from './map/MapArt';
 import { QUIZ_KIND_ICON } from './PhoneQuizPick';
@@ -45,7 +42,7 @@ import './stageSheet.css';
  * - 퀴즈(P7-11, §12-Q3 C): 유형 태그 "퀴즈 · 종류" + 종류 아이콘, 풀었으면 별(퀴즈 별은 지금도 기록됨 → SHOW_STARS 와 상관없이),
  *   목록 아래 "보너스" 안내 한 줄(잠금·클리어 계산에서 빠짐, `countsForClear`). 휴대폰·태블릿(`usePhoneLike`)이면 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요"
  * - 별(P8-05, SHOW_STARS): 완료 줄에 최고 별. 기존 완료(P8-11 소급 전, best_stars 0)는 빈 별 대신 그리지 않음.
- *   별 3개 미만이고 판정 다음 날(KST)이 된 퀴즈는 "복습 도전 가능" 딱지(§2.3, Q25 결정 표시)
+ *   별 3개 미만이고 판정 다음 날(KST)이 된 퀘스트·퀴즈는 "복습 도전 가능" 딱지(§2.3·§12-Q64, `starReviewOpen`)
  * - 줄 차례 등장은 CSS(`stageSheet.css`, 연출 단계별). 효과음은 넣지 않음(P5-11)
  */
 
@@ -277,22 +274,20 @@ export function StageSheet({
                     <span className="ss-tag" data-state={q.state}>
                       {STATE_TEXT[q.state]}
                     </span>
-                    {q.kind === 'quiz' &&
-                      q.state === 'done' &&
-                      quizReviewOpen(q, today) && (
-                        <span
-                          className="ss-tag"
-                          data-review
-                          data-testid="stage-sheet-review"
-                        >
-                          <CalendarCheck
-                            aria-hidden
-                            className="size-3.5"
-                            strokeWidth={2.6}
-                          />
-                          복습 도전 가능
-                        </span>
-                      )}
+                    {q.state === 'done' && starReviewOpen(q, today) && (
+                      <span
+                        className="ss-tag"
+                        data-review
+                        data-testid="stage-sheet-review"
+                      >
+                        <CalendarCheck
+                          aria-hidden
+                          className="size-3.5"
+                          strokeWidth={2.6}
+                        />
+                        복습 도전 가능
+                      </span>
+                    )}
                     {q.is_mobile_friendly && phone && (
                       <span className="ss-tag" data-mobile>
                         <Smartphone

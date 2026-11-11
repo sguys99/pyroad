@@ -206,7 +206,7 @@ describe('StageSheet', () => {
     }
   });
 
-  it('복습 도전 가능 (P8-05, §2.3): 별 3개 미만 퀴즈는 판정 다음 날(KST)부터, 오늘 판정·별 3개·코드 퀘스트는 아님', async () => {
+  it('복습 도전 가능 (P8-05, §12-Q64): 별 3개 미만 퀘스트·퀴즈는 판정 다음 날(KST)부터, 오늘 판정·별 3개는 아님', async () => {
     const quiz = (order: number, extra: Partial<StageQuestItem>) =>
       q(order, {
         quest_type: 'quiz',
@@ -234,8 +234,11 @@ describe('StageSheet', () => {
     );
     await screen.findByRole('dialog');
     const badges = screen.getAllByTestId('stage-sheet-review');
-    expect(badges).toHaveLength(1);
+    expect(badges).toHaveLength(2);
     expect(badges[0]).toHaveTextContent('복습 도전 가능');
+    expect(
+      screen.getByRole('link', { name: /퀘스트1.*복습 도전 가능/ }),
+    ).toHaveAttribute('href', '/quest/q1');
     expect(
       screen.getByRole('link', { name: /퀘스트2.*복습 도전 가능/ }),
     ).toHaveAttribute('href', '/quest/q2');

@@ -453,13 +453,13 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.code_quest_stars()',
     activateIn: 'P8-05',
-    note: '다시 풀기(retry) ⭐3·새 별 번호만 코인·XP 0, retry 없음·실패는 그대로, 동시 요청 1회',
+    note: '다시 풀기(retry): 판정한 날은 연습, 다음 날부터 ⭐3·새 별 번호만 코인·XP 0, retry 없음·실패는 그대로, 동시 요청 1회 (Q64)',
   },
   'SR-3': {
     expect: 'allow',
     requires: 'public.code_quest_stars()',
     activateIn: 'P8-05',
-    note: '황금키 퀘스트 첫 직접 풀이 때 XP·코인·뱃지, 정답 그대로는 0, 두 번째는 그냥 다시 풀기',
+    note: '황금키 퀘스트 첫 직접 풀이(다음 날부터) 때 XP·코인·뱃지, 같은 날·정답 그대로는 0',
   },
   'CN-10': {
     expect: 'allow',

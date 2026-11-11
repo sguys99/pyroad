@@ -3051,7 +3051,7 @@ async function groupCoins(u) {
     group: 'coins',
     id: 'SR-2',
     role: 'service_role',
-    op: '다시 풀기(retry): 통과하면 ⭐3·best 갱신·새 별 번호만 코인·XP 0 · retry 없음/통과 못함은 그대로 · 다시·동시 4번도 1회',
+    op: '다시 풀기(retry, Q64): 판정한 날은 연습(무변화, mode practice) · 다음 날부터 복습 도전 ⭐3·best 갱신·새 별 번호만 코인·XP 0 · retry 없음/통과 못함은 그대로 · 동시 4번도 1회',
     ...OK,
     run: async () => {
       const x = await createUser('st2', '다시별');
@@ -3062,26 +3062,33 @@ async function groupCoins(u) {
       await done(x.id, b);
       const xp0 = userRow(x.id).total_xp;
       const plain = await done(x.id, a);
+      // 같은 날(첫 완료 판정일) 다시 풀기 = 연습
+      const sameDay = await done(x.id, a, { retry: true });
+      // 하루 지난 것처럼 판정일을 어제(KST)로
+      one(`update public.user_progress set stars_judged_on = public.kst_today() - 1 where user_id = '${x.id}'`);
       const failed = await done(x.id, a, { retry: true, passed: false });
       const retry = await done(x.id, a, { retry: true });
       const again = await done(x.id, a, { retry: true });
       const many = await Promise.all(Array.from({ length: 4 }, () => done(x.id, b, { retry: true })));
-      const fmt = (r) => `${r.json?.already_completed}:${r.json?.stars}:${r.json?.best_stars}:${r.json?.new_stars}:${r.json?.xp_gained}:${r.json?.coins_earned}`;
+      const fmt = (r) =>
+        `${r.json?.already_completed}:${r.json?.stars}:${r.json?.best_stars}:${r.json?.new_stars}:${r.json?.xp_gained}:${r.json?.coins_earned}:${r.json?.mode ?? ''}`;
       return (
         compare(
           'SR-2',
           {
-            plain: 'true:0:1:0:0:0',
-            failed: 'true:0:1:0:0:0',
-            retry: 'true:3:3:2:0:10',
-            again: 'true:3:3:0:0:0',
-            many: ['true:3:3:0:0:0', 'true:3:3:0:0:0', 'true:3:3:0:0:0', 'true:3:3:1:0:5'],
-            row: { stars: 3, best: 3, today: true, attempts: 3, direct: false },
+            plain: 'true:0:1:0:0:0:',
+            sameDay: 'true:0:1:0:0:0:practice',
+            failed: 'true:0:1:0:0:0:',
+            retry: 'true:3:3:2:0:10:review',
+            again: 'true:0:3:0:0:0:practice',
+            many: ['true:0:3:0:0:0:practice', 'true:0:3:0:0:0:practice', 'true:0:3:0:0:0:practice', 'true:3:3:1:0:5:review'],
+            row: { stars: 3, best: 3, today: true, attempts: 2, direct: false },
             xp: xp0,
             mismatches: '0',
           },
           {
             plain: fmt(plain),
+            sameDay: fmt(sameDay),
             failed: fmt(failed),
             retry: fmt(retry),
             again: fmt(again),
@@ -3090,7 +3097,7 @@ async function groupCoins(u) {
             xp: userRow(x.id).total_xp,
             mismatches: mismatches(x.id),
           },
-        ) ?? { actual: 'ok', detail: '⭐1 → 다시 풀기 ⭐3(+2별 10코인, XP 그대로), 동시 4번 중 한 번만 +5' }
+        ) ?? { actual: 'ok', detail: '같은 날 연습 → 다음 날 ⭐1 → ⭐3(+2별 10코인, XP 그대로) → 다시 연습, 동시 4번 중 한 번만 +5' }
       );
     },
   });
@@ -3098,13 +3105,15 @@ async function groupCoins(u) {
     group: 'coins',
     id: 'SR-3',
     role: 'service_role',
-    op: '황금키 퀘스트를 처음 직접 풀면 그때 XP·첫 완료 코인·별 코인 1..3·뱃지(first_code·hint_master), 정답 그대로 다시 돌리면 아무것도, 두 번째는 그냥 다시 풀기',
+    op: '황금키 퀘스트를 (다음 날부터) 처음 직접 풀면 그때 XP·첫 완료 코인·별 코인 1..3·뱃지(first_code·hint_master), 같은 날·정답 그대로는 아무것도, 그 뒤는 연습',
     ...OK,
     run: async () => {
       const x = await createUser('st3', '직접풀이');
       const [a] = stageQuests(STAGE1);
       await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: a });
       const golden = await done(x.id, a);
+      const sameDay = await done(x.id, a, { retry: true });
+      one(`update public.user_progress set stars_judged_on = public.kst_today() - 1 where user_id = '${x.id}'`);
       const solution = one(`select solution_code from public.quest_answer_keys where quest_id = '${a}'`);
       const copy = await done(x.id, a, { retry: true, code: `${solution}\n# 내가 썼어요\n` });
       const direct = await done(x.id, a, { retry: true });
@@ -3117,15 +3126,17 @@ async function groupCoins(u) {
           'SR-3',
           {
             golden: 'false:false:1:0:0:[]',
+            sameDay: 'false:false:0:0:0:[]',
             copy: 'false:true:0:0:0:[]',
             direct: `true:false:2:${xpWant}:25:["first_code","hint_master"]`,
             again: 'false:false:0:0:0:[]',
-            row: { stars: 3, best: 3, today: true, attempts: 3, direct: true, xp: xpWant },
+            row: { stars: 3, best: 3, today: true, attempts: 2, direct: true, xp: xpWant },
             badges: ['first_code', 'hint_master'],
             mismatches: '0',
           },
           {
             golden: fmt(golden),
+            sameDay: fmt(sameDay),
             copy: fmt(copy),
             direct: fmt(direct),
             again: fmt(again),

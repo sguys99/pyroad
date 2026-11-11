@@ -14,18 +14,20 @@
 --   4. complete_quest: 00031 + 별
 --      - 첫 완료: stars = best_stars = code_quest_stars(DB hints_used, used_golden_key), stars_judged_on = 오늘(KST), attempts + 1.
 --        별 코인(grant_star_coins)은 황금키 완료면 주지 않음 (황금키 별 1개는 "통과 표시", §2.6 보상은 학습 행동에만 — Q59 확정)
---      - 다시 풀기(p_submission.retry = true, 이미 완료, 서버 재채점 통과, 퀴즈 아님): 다시 풀기 화면은 힌트·황금키를 쓸 수 없으므로
+--      - 다시 풀기(p_submission.retry = true, 이미 완료, 서버 재채점 통과, 퀴즈 아님)는 마지막 별 판정 다음 날(KST)부터 복습 도전
+--        (§12-Q64, 퀴즈와 같은 규칙. 판정 기록이 없는 예전 완료는 바로). 같은 날은 연습: 아무것도 바꾸지 않고 mode = 'practice'.
+--        복습 도전 화면은 저장된 코드 대신 처음 뼈대 코드에서 시작(앱, 저장 코드는 그대로). 다시 풀기 화면은 힌트·황금키를 쓸 수 없으므로
 --        (힌트 버튼 잠김, record_hint·use_golden_key 도 완료 행은 그대로/거절) 이번 별 = code_quest_stars(0, false) = 3.
 --        best_stars = max(best_stars, 별), 새 별 번호에만 별 코인(원장 키라 리셋 뒤·동시 요청도 한 번). XP 는 주지 않음
 --        (코드 퀘스트 XP 는 그 풀이의 힌트 배율로 정한 첫 완료 보상 — 같은 날 다시 풀어 1.5배를 채우는 길을 열지 않음. P8-14 점검)
---        코드 퀘스트는 퀴즈와 달리 같은 날에도 바로 갱신 (메인 기본값, §2.3 "코드 퀘스트 같은 날 재도전"은 P8-14 에서 점검)
 --      - 황금키로 완료한 퀘스트의 첫 직접 풀이(위 다시 풀기 + solved_directly_at 없음 + 정답 복사 아님): solved_directly_at 기록,
 --        그때 처음 학습 보상 — XP quest_xp(base, DB hints_used, 황금키 아님) · 첫 완료 코인 · 별 코인(1..3) · 레벨 업 코인 ·
 --        뱃지 판정(first_code·hint_master·project_builder·streak_3, 스테이지 클리어는 이미 진행으로 셌으므로 아님)
 --      - first_code·streak_3 이 세는 "직접 푼 완료"는 used_golden_key = false 또는 solved_directly_at 있음 (streak 날짜는
 --        직접 푼 시각). 00019 의 "다시 풀어도 판정하지 않음"을 여기서 채움
 --      - retry 가 아니거나 통과하지 않은 이미 완료 요청(중복 클릭·동시 요청)은 지금처럼 아무것도 바꾸지 않음
---      반환에 stars(이번 판정, 없으면 0) · best_stars · new_stars(이번에 늘어난 best) · solved_directly · solution_copy 추가
+--      반환에 stars(이번 판정, 없으면 0) · best_stars · new_stars(이번에 늘어난 best) · solved_directly · solution_copy ·
+--      mode(first | review | practice | null) · next_review_on(다음 복습 도전일 KST) 추가
 --   5. 권한 다시 적음 + 자기 검증
 --   기존 완료 행의 별(지금 0)은 P8-11 소급에서 채움. 화면은 0별 완료 줄에 별을 그리지 않음 (StageSheet)
 --   ⚠️ 00031 (또는 00019·00026) 파일을 다시 실행하면 complete_quest 가 별 없는 정의로 돌아갑니다. 다시 실행했다면 00032 도 다시 실행
@@ -146,6 +148,8 @@ DECLARE
   v_code           TEXT;
   v_passed         BOOLEAN;
   v_first          BOOLEAN;
+  v_retry          BOOLEAN := false;  -- 이미 완료 + retry + 서버 재채점 통과 + 퀴즈 아님
+  v_practice       BOOLEAN := false;  -- 그중 마지막 별 판정이 오늘(KST) → 연습 (Q64)
   v_direct         BOOLEAN := false;  -- 황금키 퀘스트의 첫 직접 풀이 (이번 요청)
   v_copy           BOOLEAN := false;  -- 황금키 정답을 그대로 다시 돌림
   v_has_stars      BOOLEAN;
@@ -202,7 +206,7 @@ BEGIN
     RAISE EXCEPTION 'user_not_found' USING ERRCODE = 'PT404';
   END IF;
 
-  SELECT up.status, up.hints_used, up.used_golden_key, up.best_stars, up.solved_directly_at
+  SELECT up.status, up.hints_used, up.used_golden_key, up.best_stars, up.solved_directly_at, up.stars_judged_on
     INTO v_progress
     FROM public.user_progress up
    WHERE up.user_id = p_user_id AND up.quest_id = p_quest_id
@@ -222,12 +226,16 @@ BEGIN
 
   IF NOT v_first THEN
     -- 다시 풀기는 화면이 retry 를 보내고 서버 재채점을 통과했을 때만. 나머지(중복 클릭·동시 요청)는 아무것도 바꾸지 않음
-    IF v_has_stars AND v_passed AND COALESCE(p_submission->'retry' = 'true'::jsonb, false)
+    v_retry := v_has_stars AND v_passed AND COALESCE(p_submission->'retry' = 'true'::jsonb, false);
+    -- 복습 도전은 마지막 별 판정 다음 날(KST)부터 (Q64, 퀴즈와 같음). 판정 기록이 없는 예전 완료는 바로 복습 도전
+    v_practice := v_retry AND v_progress.stars_judged_on IS NOT NULL
+                  AND v_progress.stars_judged_on >= public.kst_today();
+    IF v_retry AND NOT v_practice
        AND v_progress.used_golden_key AND v_progress.solved_directly_at IS NULL THEN
       v_copy := public.is_solution_copy(p_quest_id, v_code);
       v_direct := NOT v_copy;
     END IF;
-    IF NOT (v_has_stars AND v_passed AND COALESCE(p_submission->'retry' = 'true'::jsonb, false)) OR v_copy THEN
+    IF NOT v_retry OR v_practice OR v_copy THEN
       RETURN jsonb_build_object(
         'already_completed', true,
         'xp_gained',         0,
@@ -247,7 +255,9 @@ BEGIN
         'best_stars',        v_progress.best_stars,
         'new_stars',         0,
         'solved_directly',   false,
-        'solution_copy',     v_copy);
+        'solution_copy',     v_copy,
+        'mode',              CASE WHEN v_practice THEN 'practice' END,
+        'next_review_on',    to_char(v_progress.stars_judged_on + 1, 'YYYY-MM-DD'));
     END IF;
   END IF;
 
@@ -265,7 +275,7 @@ BEGIN
       INSERT INTO public.user_progress (user_id, quest_id, status)
       VALUES (p_user_id, p_quest_id, 'in_progress')
       ON CONFLICT (user_id, quest_id) DO NOTHING;
-      SELECT up.status, up.hints_used, up.used_golden_key, up.best_stars, up.solved_directly_at
+      SELECT up.status, up.hints_used, up.used_golden_key, up.best_stars, up.solved_directly_at, up.stars_judged_on
         INTO v_progress
         FROM public.user_progress up
        WHERE up.user_id = p_user_id AND up.quest_id = p_quest_id
@@ -406,7 +416,9 @@ BEGIN
     'best_stars',        v_best,
     'new_stars',         v_best - v_progress.best_stars,
     'solved_directly',   v_direct,
-    'solution_copy',     false);
+    'solution_copy',     false,
+    'mode',              CASE WHEN v_first THEN 'first' ELSE 'review' END,
+    'next_review_on',    CASE WHEN v_has_stars THEN to_char(public.kst_today() + 1, 'YYYY-MM-DD') END);
 END;
 $$;
 

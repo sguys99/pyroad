@@ -4,6 +4,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 import type { QuestCompleteResponse } from '../rewards';
+import { kstToday } from '@/lib/time/kst';
 
 const mocks = vi.hoisted(() => ({
   runtime: {
@@ -480,7 +481,7 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.earnedXP).toBeNull();
   });
 
-  it('별이 3개 미만이면 다시 풀기 통과 때 완료 API를 retry로 불러 새 별·별 코인만 받는다 (P8-05)', async () => {
+  it('복습 도전(별 3개 미만 + 판정 다음 날): 뼈대 코드에서 시작, 통과하면 완료 API를 retry로 불러 새 별·별 코인만 (P8-05, Q64)', async () => {
     routes['/api/quest/complete'] = () => ({
       json: completion({
         already_completed: true,
@@ -501,11 +502,16 @@ describe('useQuestSession: 실행·채점·완료', () => {
             status: 'completed',
             code_submitted: 'print(10)',
             best_stars: 1,
+            stars_judged_on: '2026-01-01',
           }),
         ),
       ),
     );
     expect(result.current.bestStars).toBe(1);
+    expect(result.current.reviewChallenge).toBe(true);
+    // 저장된 코드 대신 처음 뼈대 코드 (저장 코드는 자동 저장하지 않아 그대로)
+    expect(result.current.code).toBe(result.current.starterCode);
+    expect(result.current.code).not.toBe('print(10)');
     await act(async () => {
       await flush();
     });
@@ -517,7 +523,7 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(callsTo('/api/quest/complete')).toHaveLength(1);
     expect(callsTo('/api/quest/complete')[0].body).toMatchObject({
       retry: true,
-      code_submitted: 'print(10)',
+      code_submitted: result.current.starterCode,
     });
     expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
     expect(result.current.completion).toBe('review');
@@ -527,6 +533,30 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.earnedXP).toBe(0);
     expect(result.current.celebrations).toEqual([]);
     expect(mocks.refresh).toHaveBeenCalled();
+  });
+
+  it('별을 판정한 날 다시 풀면 연습: 저장된 코드 그대로, 완료 API를 부르지 않음 (Q64)', async () => {
+    const { result } = renderHook(() =>
+      useQuestSession(
+        options(
+          CODE_QUEST,
+          progressRow({
+            status: 'completed',
+            code_submitted: 'print(10)',
+            best_stars: 1,
+            stars_judged_on: kstToday(),
+          }),
+        ),
+      ),
+    );
+    expect(result.current.reviewChallenge).toBe(false);
+    expect(result.current.code).toBe('print(10)');
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.completion).toBe('review');
+    expect(callsTo('/api/quest/complete')).toHaveLength(0);
   });
 
   it('처음 통과하면 completion은 just, 그다음 다시 풀어 통과하면 review', async () => {

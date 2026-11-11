@@ -48,6 +48,10 @@ export interface QuestCompleteResponse {
   solved_directly: boolean;
   /** 황금키가 넣어 준 정답을 그대로 다시 돌림 → 별·보상 없음 */
   solution_copy: boolean;
+  /** first = 첫 완료 · review = 복습 도전(다시 풀기) · practice = 판정한 날 다시 풀기(무변화, §12-Q64) · null = 판정 없음 */
+  mode?: 'first' | 'review' | 'practice' | null;
+  /** 다음 복습 도전이 열리는 날 (KST YYYY-MM-DD) */
+  next_review_on?: string | null;
 }
 
 /** 다시 풀기(retry)로 별·보상이 바뀌었는지 (월드맵 다시 받기·화면 갱신 기준) */

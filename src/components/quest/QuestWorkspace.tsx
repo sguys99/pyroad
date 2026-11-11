@@ -355,7 +355,7 @@ export function QuestWorkspace({
 function reviewNote(
   session: Pick<
     QuestSession,
-    'newStars' | 'earnedXP' | 'solutionCopy' | 'bestStars'
+    'newStars' | 'earnedXP' | 'solutionCopy' | 'bestStars' | 'reviewChallenge'
   >,
 ): string {
   if (session.solutionCopy)
@@ -364,7 +364,10 @@ function reviewNote(
     return (session.earnedXP ?? 0) > 0
       ? '황금 열쇠 없이 직접 풀었어요! 이제 정말 내 힘으로 푼 퀘스트예요.'
       : '다시 풀어서 새 별을 모았어요! XP는 처음 통과할 때 한 번만 받아요.';
-  return session.bestStars >= 3
-    ? '별 3개를 다 모은 퀘스트예요. 복습으로 주문이 더 단단해졌어요!'
-    : '보상은 처음 통과할 때 한 번만 받아요. 복습으로 주문이 더 단단해졌어요!';
+  if (session.bestStars >= 3)
+    return '별 3개를 다 모은 퀘스트예요. 복습으로 주문이 더 단단해졌어요!';
+  // 복습 도전은 별 판정 다음 날부터 (§12-Q64). 오늘은 연습
+  return session.reviewChallenge
+    ? '보상은 처음 통과할 때 한 번만 받아요. 복습으로 주문이 더 단단해졌어요!'
+    : '오늘은 연습이에요. 내일부터 처음 코드로 다시 풀면 별을 채울 수 있어요!';
 }

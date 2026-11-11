@@ -341,15 +341,20 @@ test.describe('퀘스트 전체 플로우', () => {
     expect(completeCalls).toEqual([]);
   });
 
-  test('별이 3개 미만인 퀘스트를 다시 풀면 새 별 +N 으로 최고 별을 채운다 (P8-05)', async ({
+  test('별이 3개 미만인 퀘스트를 다음 날 다시 풀면(복습 도전) 뼈대 코드에서 시작해 새 별 +N 으로 채운다 (P8-05, Q64)', async ({
     page,
     e2eUser,
   }) => {
     await completeQuests(e2eUser.id, [quest1]);
-    // 힌트 2번으로 ⭐1 이었던 것처럼 (서버 값은 service_role 만 바꿈)
+    // 지난날 힌트 2번으로 ⭐1 이었던 것처럼 (서버 값은 service_role 만 바꿈) → 복습 도전 (§12-Q64)
     await setBestStars(e2eUser.id, quest1.id, 1);
     await page.goto(`/quest/${quest1.id}`);
     await expect(completedNotice(page)).toBeVisible();
+    // 복습 도전은 저장된 코드(정답) 대신 처음 뼈대 코드에서 시작
+    await expect(page.getByTestId('quest-dialogue')).toContainText('복습 도전');
+    await expect(page.locator('.cm-content').first()).not.toContainText(
+      quest1.solution.split('\n')[0],
+    );
     await waitForRunner(page);
     const completeBodies: unknown[] = [];
     page.on('request', (req) => {

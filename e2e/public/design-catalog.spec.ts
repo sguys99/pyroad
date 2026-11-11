@@ -680,7 +680,8 @@ test.describe('별점 (P8-05)', () => {
     await demo.scrollIntoViewIfNeeded();
     await demo.getByRole('button', { name: '통과한 스테이지' }).click();
     const sheet = page.getByTestId('stage-sheet');
-    await expect(sheet.getByTestId('stage-sheet-review')).toHaveText(
+    // 별 3개 미만 줄(코드 퀘스트·퀴즈)마다 딱지 (§12-Q64)
+    await expect(sheet.getByTestId('stage-sheet-review').first()).toHaveText(
       '복습 도전 가능',
     );
   });

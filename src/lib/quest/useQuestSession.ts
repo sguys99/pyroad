@@ -32,6 +32,7 @@ import {
   type CelebrationEvent,
 } from './celebrationEvents';
 import { levelUpCoinsTotal } from './coins';
+import { starReviewOpen } from './starReview';
 
 /**
  * 퀘스트 엔진 공통 훅 (P1-09, §2.5).
@@ -50,7 +51,7 @@ export type QuestTab = 'story' | 'code' | 'result';
 
 /**
  * 완료한 퀘스트의 지금 모습 (§12-Q57): just = 이번에 처음 통과해 보상을 받음 · before = 예전에 통과(복습 전) ·
- * review = 이미 통과한 퀘스트를 다시 풀어 통과. XP는 없고, 별이 3개 미만이었으면 완료 API(retry)로 별을 채움 (P8-05)
+ * review = 이미 통과한 퀘스트를 다시 풀어 통과. XP는 없고, 복습 도전(별 3개 미만 + 다음 날)이면 완료 API(retry)로 별을 채움 (P8-05, Q64)
  */
 export type QuestCompletion = 'just' | 'before' | 'review';
 
@@ -256,8 +257,13 @@ export function useQuestSession({
   const currentStep = stepState.step;
   const stepDef = steps?.[currentStep - 1] ?? null;
 
+  // 복습 도전 (§12-Q64): 별 3개 미만 + 마지막 별 판정 다음 날(KST)이면 저장된 코드 대신 처음 뼈대 코드에서 다시 짠다.
+  // 완료한 퀘스트는 자동 저장을 하지 않으므로 저장된 코드(처음 통과한 코드)는 그대로 남는다
+  const [reviewChallenge, setReviewChallenge] = useState(
+    () => progress?.status === 'completed' && starReviewOpen(progress),
+  );
   const [code, setCode] = useState(() =>
-    initialCode(quest, steps, stepState, progress),
+    initialCode(quest, steps, stepState, reviewChallenge ? null : progress),
   );
   const [tab, setTab] = useState<QuestTab>('story');
   const [runResult, setRunResult] = useState<RunResult | null>(null);
@@ -616,6 +622,9 @@ export function useQuestSession({
         setBestStars(completion.best_stars);
       setNewStars(completion.new_stars ?? 0);
       setSolutionCopy(completion.solution_copy === true);
+      // 복습 도전을 마쳤으면(review) 오늘은 더 연습만 (서버가 판정일을 오늘로)
+      if (completion.mode === 'review' || completion.mode === 'practice')
+        setReviewChallenge(false);
       if (!completion.already_completed) setJustCompleted(true);
       // 다시 풀기로 새 별(코인)·황금키 퀘스트 첫 직접 풀이(XP·뱃지)를 받았으면 처음 완료처럼 반영 (P8-05)
       if (!completion.already_completed || retryChanged(completion)) {
@@ -774,8 +783,8 @@ export function useQuestSession({
 
   /**
    * 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance'.
-   * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고 튜터는 부르지 않는다. 마지막 단계를 통과했고 별이 3개 미만이면
-   * 완료 API를 retry로 불러 별을 채운다 (P8-05, 별 3개면 받을 것이 없어 부르지 않음)
+   * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고 튜터는 부르지 않는다. 마지막 단계를 통과했고 복습 도전이 열렸으면
+   * (별 3개 미만 + 판정 다음 날, §12-Q64) 완료 API를 retry로 불러 별을 채운다. 아니면 연습이라 부르지 않음
    */
   const runAndGrade = useCallback(
     async (
@@ -822,7 +831,7 @@ export function useQuestSession({
       // 퀘스트를 마친 통과의 'correct'는 결과 쪽지 "통과!" 도장이 닿는 순간 (`PassStamp`, P6-14). 여기서는 프로젝트 중간 단계만
       if (review) {
         fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
-        if (step >= totalSteps && bestStars < 3)
+        if (step >= totalSteps && reviewChallenge)
           await reviewWith(codeToRun, result.stdout);
         return 'stay';
       }
@@ -862,7 +871,7 @@ export function useQuestSession({
       validate,
       completeWith,
       reviewWith,
-      bestStars,
+      reviewChallenge,
       play,
     ],
   );
@@ -1229,6 +1238,8 @@ export function useQuestSession({
     earnedCoins,
     /** 이 퀘스트의 최고 별 (서버 best_stars, 0 = 아직 기록 없음) */
     bestStars,
+    /** 복습 도전이 열려 있는지 (별 3개 미만 + 판정 다음 날 KST, 뼈대 코드에서 시작) — 아니면 다시 풀기는 연습 */
+    reviewChallenge,
     /** 이번 다시 풀기로 늘어난 별 (보상 띠 "새 별 +N") */
     newStars,
     /** 황금키가 넣어 준 정답을 그대로 다시 돌려 별이 늘지 않음 */

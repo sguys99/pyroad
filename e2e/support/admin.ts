@@ -146,7 +146,10 @@ export async function completeQuests(
   }
 }
 
-/** 퀘스트 최고 별 (P8-05). 다시 풀기 스펙이 "별이 모자란 완료"를 만들 때 (서버 값이라 service_role 로만) */
+/**
+ * 퀘스트 최고 별 (P8-05). 다시 풀기 스펙이 "별이 모자란 완료"를 만들 때 (서버 값이라 service_role 로만).
+ * 판정일은 오래전으로 → 복습 도전이 열린 상태 (§12-Q64, 같은 날은 연습)
+ */
 export async function setBestStars(
   userId: string,
   questId: string,
@@ -156,7 +159,7 @@ export async function setBestStars(
     `best_stars ${questId}`,
     await adminClient()
       .from('user_progress')
-      .update({ stars, best_stars: stars })
+      .update({ stars, best_stars: stars, stars_judged_on: '2000-01-01' })
       .eq('user_id', userId)
       .eq('quest_id', questId),
   );
