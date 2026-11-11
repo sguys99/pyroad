@@ -89,7 +89,7 @@ describe('AttendanceCard', () => {
     expect(screen.queryByTestId('attendance-stamp')).toBeNull();
   });
 
-  it('7일째는 방패를 받은 낭독, 새로 고침은 상자 카드를 닫을 때', async () => {
+  it('7일째는 방패를 받은 낭독, 새로 고침은 상자 카드를 띄울 때 한 번 (B56)', async () => {
     const request = vi.fn().mockResolvedValue({
       ...RES,
       day_n: 7,
@@ -119,7 +119,8 @@ describe('AttendanceCard', () => {
     await waitFor(() =>
       expect(screen.getByRole('status')).toHaveTextContent('스트릭 방패도 1개'),
     );
-    expect(refresh).not.toHaveBeenCalled();
+    // 카드를 닫을 때(퇴장 연출 끝) 부르면 새로 고침이 가끔 커밋되지 않아 띄울 때 받아 둠
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   });
 
   it('실패하면 안내 한 줄, 버튼은 그대로', async () => {

@@ -18,8 +18,9 @@ const QuestCelebrations = dynamic(
 
 /**
  * 월드맵에서 받은 보상 축하 (출석 7일째 상자·미션 받기로 오른 레벨 — `levelUpEvents`).
- * 시트 위에 대화 상자를 겹치지 않게 부르는 쪽이 시트를 먼저 닫고 `celebrate`. 카드를 닫으면 router.refresh()로
- * HUD 코인·XP·레벨이 그때 올라감(시트를 닫는 뒤로 가기와 겹치면 새로 받은 화면이 묻혀서). 빈 목록이면 아무것도 안 함
+ * 시트 위에 대화 상자를 겹치지 않게 부르는 쪽이 시트를 먼저 닫고 `celebrate`. 띄우면서 router.refresh()로
+ * HUD 코인·XP·레벨을 받아 둠 — 카드를 닫을 때(퇴장 연출 끝, 언마운트와 같은 틱) 부르면 새로 고침이 가끔 커밋되지 않음 (B56).
+ * 빈 목록이면 아무것도 안 함
  */
 export function useWorldCelebration() {
   const router = useRouter();
@@ -31,13 +32,14 @@ export function useWorldCelebration() {
             events={events}
             questId=""
             worldHref=""
-            onDismiss={() => {
-              setEvents([]);
-              router.refresh();
-            }}
+            onDismiss={() => setEvents([])}
           />,
           document.body,
         )
       : null;
-  return { celebrate: setEvents, layer };
+  const celebrate = (next: CelebrationEvent[]) => {
+    setEvents(next);
+    if (next.length > 0) router.refresh();
+  };
+  return { celebrate, layer };
 }

@@ -235,7 +235,7 @@ interface MissionListProps {
   request?: (day: string, missionId: string) => Promise<ClaimMissionResult>;
   /** 받은 뒤 (기본: router.refresh() — HUD 코인·XP 카운트업) */
   onClaimed?: (res: ClaimMissionResult) => void;
-  /** 받기로 레벨이 올랐을 때 (P8-08 공용 레벨 업 카드). 주면 router.refresh() 대신 이것 — 축하를 닫을 때 새로 고침 */
+  /** 받기로 레벨이 올랐을 때 (P8-08 공용 레벨 업 카드). 주면 router.refresh() 대신 이것 — 축하를 띄울 때 새로 고침 (B56) */
   onLevelUp?: (events: CelebrationEvent[]) => void;
 }
 

@@ -115,15 +115,18 @@ function useOpenStage(
     // 표시는 기록 항목 state에 둔다: 퀘스트에서 뒤로 와 다시 그려져도 남아 있다 (Next는 사용자 state 키를 보존)
     window.history.pushState({ [STAGE_ENTRY]: true }, '', url);
   };
-  const close = () => {
+  /** `then`: 주소가 /world로 돌아온 뒤 부름 (뒤로 가기면 popstate 뒤 — 그 전에 부른 router.refresh()는 Next가 버림) */
+  const close = (then?: () => void) => {
     // 이 화면이 쌓은 기록 항목이면 거둔다: 그 자리에 /world를 덮으면 앞 항목과 겹쳐 뒤로 가기를 한 번 더 눌러야 떠남 (P5-14)
     if (window.history.state?.[STAGE_ENTRY]) {
+      if (then) window.addEventListener('popstate', then, { once: true });
       window.history.back();
       return;
     }
     const url = new URL(window.location.href);
     url.searchParams.delete('stage');
     window.history.replaceState(null, '', url);
+    then?.();
   };
   const sheet = (
     <StageSheet
@@ -133,11 +136,11 @@ function useOpenStage(
       world={world}
       onOpenChange={(next) => !next && close()}
       onChestOpened={(event) => {
-        // HUD 코인·상자 상태는 router.refresh() (`/api/world/chest`가 무효화). 새로 열었으면 시트를 닫는 뒤로 가기와
-        // 겹치면 새로 받은 화면이 묻히므로 축하를 닫을 때 — 카드를 닫으면 HUD 코인이 그때 올라감
+        // HUD 코인·상자 상태는 router.refresh() (`/api/world/chest`가 무효화). 시트를 닫는 뒤로 가기가 끝난 뒤 곧바로:
+        // 축하 카드를 닫을 때(퇴장 연출 끝, 카드 언마운트와 같은 틱) 부르면 새로 고침 전환이 가끔 커밋되지 않고 멈춤 (B56)
         if (!event) return router.refresh();
         setChest([event]);
-        close();
+        close(() => router.refresh());
       }}
       // 주소로 열린 시트(퀘스트에서 돌아옴)도 닫으면 그 노드로 포커스
       finalFocus={() =>
@@ -152,10 +155,7 @@ function useOpenStage(
       events={chest}
       questId=""
       worldHref=""
-      onDismiss={() => {
-        setChest([]);
-        router.refresh();
-      }}
+      onDismiss={() => setChest([])}
     />
   );
   return { open, sheet, celebration, toasts, show, dismiss };
