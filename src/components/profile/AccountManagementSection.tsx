@@ -247,8 +247,8 @@ export function AccountManagementSection({
             <AlertDialogHeader>
               <AlertDialogTitle>전체 리셋</AlertDialogTitle>
               <AlertDialogDescription>
-                모든 퀘스트 진행, 뱃지, 경험치, 레벨이 초기화됩니다. 이 작업은
-                되돌릴 수 없습니다.
+                모든 퀘스트 진행, 경험치, 레벨이 초기화됩니다. 이 작업은 되돌릴
+                수 없습니다. 받은 업적과 코인은 그대로 남아요.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

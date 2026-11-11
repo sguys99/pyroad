@@ -305,8 +305,14 @@
   width: 4rem;
   height: 4rem;
   border-radius: var(--round-pill);
-  background: var(--accent-soft);
-  color: var(--accent-text);
+  /* 업적 티어 색 (P8-09, achievementMedal.css). 티어가 없으면 예전 금색 */
+  background: var(--tier-soft, var(--accent-soft));
+  color: var(--tier-ink, var(--accent-text));
+  box-shadow: inset 0 0 0 2px var(--tier-rim, transparent);
+}
+.cel-medal-tier {
+  color: var(--tier-ink);
+  font-weight: 700;
 }
 .cel-medal svg {
   width: 2rem;

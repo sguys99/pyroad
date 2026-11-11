@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string;
+          description: string;
+          goal: number | null;
+          hidden: boolean;
+          icon: string;
+          id: string;
+          metric: string;
+          name: string;
+          sort: number;
+          tier: string;
+        };
+        Insert: {
+          category: string;
+          description: string;
+          goal?: number | null;
+          hidden?: boolean;
+          icon: string;
+          id: string;
+          metric: string;
+          name: string;
+          sort: number;
+          tier: string;
+        };
+        Update: {
+          category?: string;
+          description?: string;
+          goal?: number | null;
+          hidden?: boolean;
+          icon?: string;
+          id?: string;
+          metric?: string;
+          name?: string;
+          sort?: number;
+          tier?: string;
+        };
+        Relationships: [];
+      };
       analytics_events: {
         Row: {
           actor: string;
@@ -614,6 +653,42 @@ export type Database = {
           },
         ];
       };
+      user_achievements: {
+        Row: {
+          achieved_at: string;
+          achievement_id: string;
+          claimed_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          achieved_at?: string;
+          achievement_id: string;
+          claimed_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          achieved_at?: string;
+          achievement_id?: string;
+          claimed_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_achievements_achievement_id_fkey';
+            columns: ['achievement_id'];
+            isOneToOne: false;
+            referencedRelation: 'achievements';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_achievements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_agreements: {
         Row: {
           agreed_at: string;
@@ -762,6 +837,7 @@ export type Database = {
           earned_xp: number;
           hints_used: number;
           id: string;
+          overcame_error: boolean;
           quest_id: string;
           solved_directly_at: string | null;
           stars: number;
@@ -781,6 +857,7 @@ export type Database = {
           earned_xp?: number;
           hints_used?: number;
           id?: string;
+          overcame_error?: boolean;
           quest_id: string;
           solved_directly_at?: string | null;
           stars?: number;
@@ -800,6 +877,7 @@ export type Database = {
           earned_xp?: number;
           hints_used?: number;
           id?: string;
+          overcame_error?: boolean;
           quest_id?: string;
           solved_directly_at?: string | null;
           stars?: number;
@@ -1049,6 +1127,18 @@ export type Database = {
       };
     };
     Functions: {
+      achievement_progress: {
+        Args: { p_user_id: string };
+        Returns: {
+          achievement_id: string;
+          goal: number;
+          progress: number;
+        }[];
+      };
+      claim_achievement: {
+        Args: { p_achievement_id: string; p_user_id: string };
+        Returns: Json;
+      };
       claim_daily_mission: {
         Args: { p_day: string; p_mission_id: string; p_user_id: string };
         Returns: Json;
@@ -1158,6 +1248,7 @@ export type Database = {
         };
         Returns: string[];
       };
+      evaluate_achievements: { Args: { p_user_id: string }; Returns: Json };
       grant_coins: {
         Args: {
           p_amount: number;

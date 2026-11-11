@@ -14,6 +14,7 @@ import type {
   StampAttendanceResult,
   WorldDailyStatus,
 } from '@/lib/world/attendance';
+import type { AchievementInfo, ClaimAchievementResult } from './achievements';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -50,6 +51,7 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   mission_not_found: { status: 404, error: '오늘의 미션이 아니에요.' },
   mission_not_done: { status: 409, error: '아직 미션을 다 하지 않았어요.' },
   mission_expired: { status: 410, error: '받을 수 있는 날이 지났어요.' },
+  achievement_not_earned: { status: 409, error: '아직 얻지 않은 업적이에요.' },
 };
 
 export function rewardError(
@@ -91,7 +93,8 @@ async function callRpc<T>(
     | 'daily_missions_today'
     | 'claim_daily_mission'
     | 'world_daily_status'
-    | 'stamp_attendance',
+    | 'stamp_attendance'
+    | 'claim_achievement',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -103,7 +106,12 @@ export function completeQuestRpc<T>(
   admin: AdminClient,
   userId: string,
   questId: string,
-  submission: { code: string; passed: boolean; retry?: boolean },
+  submission: {
+    code: string;
+    passed: boolean;
+    retry?: boolean;
+    had_error?: boolean;
+  },
 ) {
   return callRpc<T>('complete_quest', () =>
     admin.rpc('complete_quest', {
@@ -144,18 +152,22 @@ export function resetProgressRpc<T>(
 }
 
 /** 퀴즈 채점 (P7-02, 00026). answer 는 API 가 zod 로 확인한 정규형 그대로 */
-export function submitQuizAnswerRpc<T>(
+export async function submitQuizAnswerRpc<T extends object>(
   admin: AdminClient,
   userId: string,
   questId: string,
   answer: Json,
 ) {
-  return callRpc<T>('submit_quiz_answer', () =>
-    admin.rpc('submit_quiz_answer', {
-      p_user_id: userId,
-      p_quest_id: questId,
-      p_answer: answer,
-    }),
+  return withAchievements(
+    admin,
+    userId,
+    await callRpc<T>('submit_quiz_answer', () =>
+      admin.rpc('submit_quiz_answer', {
+        p_user_id: userId,
+        p_quest_id: questId,
+        p_answer: answer,
+      }),
+    ),
   );
 }
 
@@ -228,16 +240,20 @@ export interface OpenChestResult {
 }
 
 /** 스테이지 보물상자 열기 (P8-06). 서버가 별 합계를 다시 세어 목표 미달이면 not_enough_stars */
-export function openStageChestRpc(
+export async function openStageChestRpc(
   admin: AdminClient,
   userId: string,
   stageId: string,
 ) {
-  return callRpc<OpenChestResult>('open_stage_chest', () =>
-    admin.rpc('open_stage_chest', {
-      p_user_id: userId,
-      p_stage_id: stageId,
-    }),
+  return withAchievements(
+    admin,
+    userId,
+    await callRpc<OpenChestResult>('open_stage_chest', () =>
+      admin.rpc('open_stage_chest', {
+        p_user_id: userId,
+        p_stage_id: stageId,
+      }),
+    ),
   );
 }
 
@@ -259,18 +275,22 @@ export function dailyMissionsRpc(
 }
 
 /** 데일리 미션 보상 받기 (P8-07). 서버가 진행을 다시 세어 미달이면 mission_not_done, 원장 키로 한 번 */
-export function claimDailyMissionRpc(
+export async function claimDailyMissionRpc(
   admin: AdminClient,
   userId: string,
   day: string,
   missionId: string,
 ) {
-  return callRpc<ClaimMissionResult>('claim_daily_mission', () =>
-    admin.rpc('claim_daily_mission', {
-      p_user_id: userId,
-      p_day: day,
-      p_mission_id: missionId,
-    }),
+  return withAchievements(
+    admin,
+    userId,
+    await callRpc<ClaimMissionResult>('claim_daily_mission', () =>
+      admin.rpc('claim_daily_mission', {
+        p_user_id: userId,
+        p_day: day,
+        p_mission_id: missionId,
+      }),
+    ),
   );
 }
 
@@ -299,8 +319,62 @@ export function worldDailyStatusRpc(admin: AdminClient, userId: string) {
 }
 
 /** 출석 도장 (P8-08). 하루 한 번(원장 attendance/<KST 날짜>), 7일째 방패 +1(최대 2) */
-export function stampAttendanceRpc(admin: AdminClient, userId: string) {
-  return callRpc<StampAttendanceResult>('stamp_attendance', () =>
-    admin.rpc('stamp_attendance', { p_user_id: userId }),
+export async function stampAttendanceRpc(admin: AdminClient, userId: string) {
+  return withAchievements(
+    admin,
+    userId,
+    await callRpc<StampAttendanceResult>('stamp_attendance', () =>
+      admin.rpc('stamp_attendance', { p_user_id: userId }),
+    ),
+  );
+}
+
+/**
+ * 업적 판정 (P8-09, 00036 `evaluate_achievements`): 이번에 새로 얻은 업적. complete_quest 는 안에서 부르고, 퀴즈·상자·미션·출석은
+ * 그 RPC 바로 뒤에 여기서 (`withAchievements`). 실패해도 보상은 그대로 두고 빈 목록 — 판정은 멱등이라 다음 보상 때 다시 잡힘
+ */
+export async function evaluateAchievements(
+  admin: AdminClient,
+  userId: string,
+): Promise<AchievementInfo[]> {
+  const { data, error } = await admin.rpc('evaluate_achievements', {
+    p_user_id: userId,
+  });
+  if (error) {
+    reportServerError(error, {
+      area: 'rewardRpc',
+      op: 'evaluate_achievements',
+    });
+    return [];
+  }
+  return (data as unknown as AchievementInfo[] | null) ?? [];
+}
+
+async function withAchievements<T extends object>(
+  admin: AdminClient,
+  userId: string,
+  result: RpcResult<T>,
+): Promise<RpcResult<T & { new_achievements: AchievementInfo[] }>> {
+  if (!result.ok) return result;
+  return {
+    ok: true,
+    data: {
+      ...result.data,
+      new_achievements: await evaluateAchievements(admin, userId),
+    },
+  };
+}
+
+/** 업적 코인 받기 (P8-09). 안 얻었으면 achievement_not_earned, 이미 받았으면 already_claimed(0) */
+export function claimAchievementRpc(
+  admin: AdminClient,
+  userId: string,
+  achievementId: string,
+) {
+  return callRpc<ClaimAchievementResult>('claim_achievement', () =>
+    admin.rpc('claim_achievement', {
+      p_user_id: userId,
+      p_achievement_id: achievementId,
+    }),
   );
 }

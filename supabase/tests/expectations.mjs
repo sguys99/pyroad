@@ -557,6 +557,54 @@ export const EXPECT = {
     activateIn: 'P8-08',
     note: '빠진 날 수만큼 방패가 있으면 다음 방문에 메움, 멱등·동시 1회, 학습일 정의',
   },
+  // ── 업적 (P8-09, ① 00036) ──
+  'AC-1': {
+    expect: 'deny',
+    requires: 'public.evaluate_achievements()',
+    activateIn: 'P8-09',
+    note: '업적 판정은 보상 RPC 안·API(service_role)만',
+  },
+  'AC-1b': {
+    expect: 'deny',
+    requires: 'public.claim_achievement()',
+    activateIn: 'P8-09',
+    note: '업적 받기는 /api/achievements/claim(service_role)만',
+  },
+  'AC-1c': {
+    expect: 'deny',
+    requires: 'public.achievement_progress()',
+    activateIn: 'P8-09',
+  },
+  'AC-1d': {
+    expect: 'deny',
+    requires: 'public.user_achievements',
+    activateIn: 'P8-09',
+    note: '정의·본인 업적 읽기만, 남의 행·anon·쓰기는 막힘',
+  },
+  'AC-2': {
+    expect: 'allow',
+    requires: 'public.evaluate_achievements()',
+    activateIn: 'P8-09',
+    note: '기존 기록에서 파생 판정 · 멱등·동시 1회 · 황금키 완료 제외 · 판정 50ms 미만',
+  },
+  'AC-3': {
+    expect: 'allow',
+    requires: 'public.evaluate_achievements()',
+    activateIn: 'P8-09',
+    note: '실패 칭찬(에러 뒤 통과·퀴즈 다시 맞힘·힌트 끝까지)',
+  },
+  'AC-4': {
+    expect: 'allow',
+    requires: 'public.claim_achievement()',
+    activateIn: 'P8-09',
+    note: '원장 키로 한 번 · 리셋 뒤에도 업적 남음',
+  },
+  'AC-5': {
+    expect: 'allow',
+    requires: 'public.claim_achievement()',
+    activateIn: 'P8-09',
+    note: 'user_badges 5종 → 같은 id 업적(받기 가능), 다시 실행해도 그대로',
+  },
   'CN-10': {
     expect: 'allow',
     requires: 'public.coin_reward()',
@@ -780,6 +828,7 @@ export const EXPECT = {
     note: 'B13 이후 custom_api_keys 를 select 하지 않음. P3-13: display_name·avatar_url 대신 user_public_profiles(public_name, avatar_skin) 임베딩 (src/lib/avatar/ownProfile.ts)',
   },
   'APP-5': { expect: 'allow' },
+  'APP-17': { expect: 'allow' },
   'APP-6': { expect: 'allow' },
   'APP-7': { expect: 'allow' },
   'APP-8': { expect: 'allow' },

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   cleanup,
@@ -58,12 +59,35 @@ describe('StageChest', () => {
     fireEvent.click(screen.getByTestId('stage-chest-open'));
     await waitFor(() => expect(onOpened).toHaveBeenCalled());
     expect(request).toHaveBeenCalledWith('s1');
-    expect(onOpened).toHaveBeenCalledWith({
-      type: 'chest',
-      stageTitle: '파이썬 마을',
-      goal: 15,
-      contents: { coins: 30, goldenKeys: 0 },
-    });
+    expect(onOpened).toHaveBeenCalledWith([
+      {
+        type: 'chest',
+        stageTitle: '파이썬 마을',
+        goal: 15,
+        contents: { coins: 30, goldenKeys: 0 },
+      },
+    ]);
+  });
+
+  it('열어서 새 업적을 얻으면 상자 뒤에 업적 축하 (P8-09)', async () => {
+    const onOpened = vi.fn();
+    const won = achv('chest_1');
+    render(
+      <StageChest
+        stage={stage}
+        onOpened={onOpened}
+        request={async () => ({
+          already_opened: false,
+          coins_earned: 30,
+          new_achievements: [won],
+        })}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('stage-chest-open'));
+    await waitFor(() => expect(onOpened).toHaveBeenCalled());
+    expect(
+      onOpened.mock.calls[0][0].map((e: { type: string }) => e.type),
+    ).toEqual(['chest', 'badge']);
   });
 
   it('이미 열린 상자(다른 탭)면 축하 없이 null, 실패면 안내 한 줄', async () => {

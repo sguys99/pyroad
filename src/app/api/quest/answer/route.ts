@@ -107,6 +107,7 @@ export async function POST(request: Request) {
     coins_earned: result.data.coins_earned,
     coins_balance: result.data.coins_balance,
     level_ups: result.data.level_ups,
+    new_achievements: result.data.new_achievements,
     next_quiz: prompt?.quiz ? shuffleQuiz(prompt.quiz) : null,
   };
   return NextResponse.json(body);

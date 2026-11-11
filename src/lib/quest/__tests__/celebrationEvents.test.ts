@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildCelebrationEvents, levelUpEvents } from '../celebrationEvents';
 import type { QuestCompleteResponse } from '../rewards';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 
 const base: QuestCompleteResponse = {
   already_completed: false,
@@ -8,7 +9,7 @@ const base: QuestCompleteResponse = {
   total_xp: 150,
   level_before: 1,
   level_after: 1,
-  new_badges: [],
+  new_achievements: [],
   stage_cleared: null,
   next_quest_id: 'q2',
   golden_keys: 3,
@@ -39,7 +40,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
           level_after: 2,
           level_ups: [{ level: 2, coins: 20 }],
           stage_cleared: stage,
-          new_badges: ['first_code', 'stage_clear'],
+          new_achievements: [achv('first_code'), achv('stage_clear')],
         },
         { kind: 'code', questTitle: '변수' },
       ),
@@ -52,8 +53,8 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
         title: expect.any(String),
         coins: 20,
       },
-      { type: 'badge', badge: 'first_code' },
-      { type: 'badge', badge: 'stage_clear' },
+      { type: 'badge', badge: achv('first_code') },
+      { type: 'badge', badge: achv('stage_clear') },
     ]);
   });
 
@@ -66,7 +67,11 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
   it('프로젝트가 스테이지 마지막이면 프로젝트 완성 하나에 스테이지 클리어를 담는다 (P1-10)', () => {
     expect(
       buildCelebrationEvents(
-        { ...base, stage_cleared: stage, new_badges: ['first_code'] },
+        {
+          ...base,
+          stage_cleared: stage,
+          new_achievements: [achv('first_code')],
+        },
         { kind: 'project', questTitle: '나만의 게임' },
       ),
     ).toEqual([
@@ -76,7 +81,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
         xpGained: 50,
         stage,
       },
-      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: achv('first_code') },
     ]);
   });
 
@@ -105,7 +110,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
           xp_gained: 0,
           used_golden_key: true,
           stage_cleared: stage,
-          new_badges: [],
+          new_achievements: [],
         },
         { kind: 'code', questTitle: '변수' },
       ),
@@ -143,7 +148,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
           solved_directly: true,
           stage_cleared: null,
           level_after: 2,
-          new_badges: ['first_code'],
+          new_achievements: [achv('first_code')],
         },
         { kind: 'code', questTitle: 'x' },
       ).map((e) => e.type),

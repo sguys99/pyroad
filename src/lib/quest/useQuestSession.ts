@@ -325,6 +325,8 @@ export function useQuestSession({
 
   // 화면을 떠나면 예약한 일(단계 이동·축하)을 취소하고, 늦게 끝난 요청의 후속 처리를 하지 않는다
   const aliveRef = useRef(true);
+  // 이번 풀이 중 실행 에러를 만났는지 (P8-09 실패 칭찬 업적 "에러를 이겨 냄"). 완료 요청에 실어 보내고 비움
+  const hadErrorRef = useRef(false);
   const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
   const later = useCallback((fn: () => void, ms: number) => {
     const timers = timersRef.current;
@@ -683,8 +685,15 @@ export function useQuestSession({
       try {
         const res = await postJson<QuestCompleteResponse>(
           '/api/quest/complete',
-          { quest_id: questId, code_submitted: submitted, stdout, retry: true },
+          {
+            quest_id: questId,
+            code_submitted: submitted,
+            stdout,
+            retry: true,
+            had_error: hadErrorRef.current,
+          },
         );
+        if (res.ok) hadErrorRef.current = false;
         if (aliveRef.current && res.ok) applyCompletion(res.data);
       } catch {
         // 네트워크 오류: 별은 다음에 다시 풀면 채울 수 있음
@@ -703,8 +712,10 @@ export function useQuestSession({
             quest_id: questId,
             code_submitted: submitted,
             stdout,
+            had_error: hadErrorRef.current,
           },
         );
+        if (res.ok) hadErrorRef.current = false;
         if (!aliveRef.current) return;
         if (!res.ok) {
           // 완료를 기록하지 못함 → 완료 처리하지 않고 다시 누를 수 있게 둔다 (B06)
@@ -813,7 +824,10 @@ export function useQuestSession({
 
       // 실행 에러 (구문 에러·시간 초과 등). 효과음 'bug'는 결과 쪽지에 버그버그가 들어오는 순간 (`BugbugAside`, P6-14).
       // AI 피드백은 자동으로 부르지 않는다 (§12-Q56): 규칙표 설명(errorExplain)이 바로 보이고, 더 묻고 싶으면 askAboutRun
-      if (!result.success) return 'stay';
+      if (!result.success) {
+        hadErrorRef.current = true;
+        return 'stay';
+      }
 
       const passed = await validate(codeToRun, result.stdout, step);
       if (!aliveRef.current) return 'stay';

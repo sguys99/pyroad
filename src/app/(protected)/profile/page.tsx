@@ -4,11 +4,11 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
 import { getLevelTitle } from '@/lib/quest/xp';
-import { BADGE_DEFINITIONS } from '@/lib/quest/badges';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { BadgeIcon } from '@/components/shared/BadgeIcon';
+import { AchievementMedal } from '@/components/shared/AchievementMedal';
+import type { Achievement } from '@/lib/types/database';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { UserAvatar } from '@/components/profile/UserAvatar';
 import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
@@ -30,32 +30,47 @@ export default async function ProfilePage() {
   if (!user) redirect('/');
 
   // user.id 필요한 쿼리는 이후 병렬 실행
-  const [profileResult, progressResult, badgesResult] = await Promise.all([
-    supabase
-      .from('users')
-      .select(OWN_PROFILE_SELECT)
-      .eq('id', user.id)
-      .single(),
-    supabase
-      .from('user_progress')
-      .select('quest_id, status')
-      .eq('user_id', user.id)
-      .eq('status', 'completed'),
-    supabase
-      .from('user_badges')
-      .select('badge_type, earned_at')
-      .eq('user_id', user.id),
-  ]);
+  const [profileResult, progressResult, achievedResult, definitionsResult] =
+    await Promise.all([
+      supabase
+        .from('users')
+        .select(OWN_PROFILE_SELECT)
+        .eq('id', user.id)
+        .single(),
+      supabase
+        .from('user_progress')
+        .select('quest_id, status')
+        .eq('user_id', user.id)
+        .eq('status', 'completed'),
+      supabase
+        .from('user_achievements')
+        .select('achievement_id, achieved_at')
+        .eq('user_id', user.id),
+      supabase
+        .from('achievements')
+        .select('id, name, icon, tier, sort, hidden')
+        .order('sort'),
+    ]);
 
   const profile = profileResult.data ? toOwnProfile(profileResult.data) : null;
   const progress = progressResult.data ?? [];
   const stages = sortStages(stagesResult.data ?? []);
-  const badges = badgesResult.data ?? [];
+  // 업적 (P8-09): 얻은 것만 메달로. 전체 도감(실루엣·진행도)은 P8-10
+  const achievedAt = new Map(
+    (achievedResult.data ?? []).map((a) => [a.achievement_id, a.achieved_at]),
+  );
+  const definitions = (definitionsResult.data ?? []) as Pick<
+    Achievement,
+    'id' | 'name' | 'icon' | 'tier' | 'sort' | 'hidden'
+  >[];
+  const earned = definitions.filter((a) => achievedAt.has(a.id));
+  const achievementTotal = definitions.filter(
+    (a) => !a.hidden || achievedAt.has(a.id),
+  ).length;
 
   if (!profile) redirect('/');
 
   const title = getLevelTitle(profile.current_level);
-  const earnedTypes = new Set(badges.map((b) => b.badge_type));
   const completedQuestIds = new Set(
     progress.filter((p) => p.status === 'completed').map((p) => p.quest_id),
   );
@@ -93,33 +108,30 @@ export default async function ProfilePage() {
         </p>
       </Card>
 
-      {/* 뱃지 컬렉션 카드 */}
-      <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold text-foreground">뱃지 컬렉션</h2>
-        <div className="grid grid-cols-5 gap-3">
-          {BADGE_DEFINITIONS.map((badge) => {
-            const earned = earnedTypes.has(badge.type);
-            const badgeData = badges.find((b) => b.badge_type === badge.type);
-            return (
-              <div
-                key={badge.type}
-                className="flex flex-col items-center gap-1"
-              >
-                <BadgeIcon type={badge.type} earned={earned} size="lg" />
-                <p
-                  className={`text-xs font-medium ${earned ? 'text-foreground' : 'text-muted-foreground'}`}
-                >
-                  {badge.name}
+      {/* 업적 카드 (P8-09) */}
+      <Card className="mb-4" data-testid="profile-achievements">
+        <h2 className="mb-3 text-sm font-bold text-foreground">
+          업적 {earned.length}/{achievementTotal}
+        </h2>
+        {earned.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            아직 얻은 업적이 없어요. 퀘스트를 풀면 업적이 생겨요!
+          </p>
+        ) : (
+          <ul className="grid grid-cols-4 gap-3 sm:grid-cols-5">
+            {earned.map((a) => (
+              <li key={a.id} className="flex flex-col items-center gap-1">
+                <AchievementMedal icon={a.icon} tier={a.tier} size="lg" />
+                <p className="text-center text-xs font-medium text-foreground">
+                  {a.name}
                 </p>
-                {earned && badgeData && (
-                  <p className="text-[10px] text-muted-foreground">
-                    {formatKstDate(badgeData.earned_at, 'dot')}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                <p className="text-[10px] text-muted-foreground">
+                  {formatKstDate(achievedAt.get(a.id)!, 'dot')}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       {/* 스테이지 진행률 카드 */}
@@ -179,10 +191,10 @@ export default async function ProfilePage() {
           </div>
           <div>
             <p className="text-xl font-bold text-primary-text sm:text-2xl">
-              {badges.length}
+              {earned.length}
             </p>
             <p className="text-[10px] text-muted-foreground sm:text-xs">
-              획득 뱃지
+              얻은 업적
             </p>
           </div>
         </div>

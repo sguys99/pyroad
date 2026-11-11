@@ -4,13 +4,13 @@
 import { test, expect } from './support/test';
 import {
   bestStars,
+  coinBalance,
   completeQuests,
   hasCoinKey,
   setBestStars,
 } from './support/admin';
 import { stage } from './support/content';
 import {
-  advanceCelebration,
   completedNotice,
   openStageSheet,
   openTutorChat,
@@ -174,10 +174,36 @@ test.describe('퀘스트 전체 플로우', () => {
       '통과해서 보상을 받았어요',
     );
 
-    // 축하 시퀀서: 첫 퀘스트 뱃지 카드 → CTA 로 닫힘
+    // 축하 시퀀서: 첫 퀘스트 업적 카드(첫 코드 등, P8-09) → "코인 N개 받기" → 받은 코인 → "좋아요!"로 닫힘
     await expect(page.getByTestId('celebration-overlay')).toBeVisible();
     await expect(page.getByRole('dialog')).toBeVisible();
-    await advanceCelebration(page, 'badges');
+    const badges = page.getByTestId('celebration-step-badges');
+    await expect(badges).toBeVisible();
+    const medals = badges.getByTestId('achievement-medal');
+    await expect(
+      badges.locator('[data-achievement="first_code"]'),
+    ).toBeVisible();
+    // 받을 코인 = 아직 원장에 없는 업적의 티어 코인 (같은 실행에서 이미 받은 업적은 0)
+    const TIER_COINS = { bronze: 10, silver: 30, gold: 100 } as const;
+    let claimCoins = 0;
+    for (const m of await medals.all()) {
+      const id = (await m.getAttribute('data-achievement'))!;
+      const tier = (await m
+        .locator('.cel-medal')
+        .getAttribute('data-tier')) as keyof typeof TIER_COINS;
+      if (!(await hasCoinKey(e2eUser.id, 'achievement', id)))
+        claimCoins += TIER_COINS[tier];
+    }
+    const coinsBefore = await coinBalance(e2eUser.id);
+    await badges.hover();
+    await badges.getByTestId('achievement-claim').click();
+    await expect(badges.getByRole('status')).toContainText(
+      claimCoins > 0 ? `+${claimCoins}` : '이미 받은',
+    );
+    await expect
+      .poll(() => coinBalance(e2eUser.id))
+      .toBe(coinsBefore + claimCoins);
+    await badges.getByTestId('celebration-cta').click();
     await expect(page.getByTestId('celebration-overlay')).toBeHidden();
 
     // XP 반영 (상태바: 받은 XP 만큼 오르고 +N 표시. 힌트 0회 보너스 등 계산은 단위 테스트 몫)

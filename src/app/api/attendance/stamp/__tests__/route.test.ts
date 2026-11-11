@@ -17,6 +17,9 @@ vi.mock('@/lib/supabase/admin', () => ({
 }));
 
 import { POST } from '../route';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
+
+const WON = achv('first_code');
 
 const STAMPED = {
   stamped: true,
@@ -30,7 +33,14 @@ const STAMPED = {
 
 beforeEach(() => {
   mocks.user = { id: 'u1' };
-  mocks.rpc.mockReset().mockResolvedValue({ data: STAMPED, error: null });
+  // 보상 RPC 뒤 업적 판정(evaluate_achievements, P8-09)은 새 업적 1개
+  mocks.rpc
+    .mockReset()
+    .mockImplementation(async (fn: string) =>
+      fn === 'evaluate_achievements'
+        ? { data: [WON], error: null }
+        : { data: STAMPED, error: null },
+    );
   mocks.revalidatePath.mockReset();
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -39,7 +49,10 @@ describe('POST /api/attendance/stamp (P8-08)', () => {
   it('로그인 사용자 id 로 service_role RPC, 찍으면 월드맵 무효화', async () => {
     const res = await POST();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(STAMPED);
+    expect(await res.json()).toEqual({ ...STAMPED, new_achievements: [WON] });
+    expect(mocks.rpc).toHaveBeenCalledWith('evaluate_achievements', {
+      p_user_id: 'u1',
+    });
     expect(mocks.rpc).toHaveBeenCalledWith('stamp_attendance', {
       p_user_id: 'u1',
     });

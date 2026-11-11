@@ -17,7 +17,7 @@ const QuestCelebrations = dynamic(
 );
 
 /**
- * 월드맵에서 받은 보상 축하 (출석 7일째 상자·미션 받기로 오른 레벨 — `levelUpEvents`).
+ * 월드맵에서 받은 보상 축하 (출석 7일째 상자·미션 받기로 오른 레벨 — `levelUpEvents` · 새 업적 — `achievementEvents`).
  * 시트 위에 대화 상자를 겹치지 않게 부르는 쪽이 시트를 먼저 닫고 `celebrate`. 띄우면서 router.refresh()로
  * HUD 코인·XP·레벨을 받아 둠 — 카드를 닫을 때(퇴장 연출 끝, 언마운트와 같은 틱) 부르면 새로 고침이 가끔 커밋되지 않음 (B56).
  * 빈 목록이면 아무것도 안 함

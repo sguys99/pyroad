@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { QuestCelebrations } from '@/components/quest/QuestCelebrations';
-import { StageChest, type ChestEvent } from '@/components/world/StageChest';
+import { StageChest } from '@/components/world/StageChest';
+import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { Button } from '@/components/ui/button';
 import { StageSheet } from '@/components/world/StageSheet';
@@ -261,7 +262,7 @@ function UnlockDemo({
  * 다시 누를 수 있게 열어도 견본은 "열 수 있음" 그대로
  */
 function ChestDemo() {
-  const [events, setEvents] = useState<ChestEvent[]>([]);
+  const [events, setEvents] = useState<CelebrationEvent[]>([]);
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   useEffect(() => setPortal(document.body), []);
   const rows: [label: string, stage: StageWithStatus][] = [
@@ -277,7 +278,7 @@ function ChestDemo() {
           <figcaption className="text-caption text-text-muted">{label}</figcaption>
           <StageChest
             stage={stage}
-            onOpened={(e) => e && setEvents([e])}
+            onOpened={(e) => e && setEvents(e)}
             request={async () => ({ already_opened: false, coins_earned: 30 })}
           />
         </figure>

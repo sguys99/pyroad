@@ -1,0 +1,35 @@
+/*
+ * 업적 티어 색 (P8-09). 공유 카드 티어(`src/lib/share-card/tokens.ts` TIER_COLOR)와 같은 섞기: 금색 하나 + 중립(실버)·
+ * 붉은 기(브론즈). 색은 토큰 변수만. 메달 면·글자·테두리는 이 변수로 (축하 카드 `.cel-medal`·프로필 `.ach-medal`)
+ */
+[data-tier='gold'] {
+  --tier-soft: var(--accent-soft);
+  --tier-ink: var(--accent-text);
+  --tier-rim: var(--accent);
+}
+[data-tier='silver'] {
+  --tier-soft: var(--surface-2);
+  --tier-ink: var(--text-muted);
+  --tier-rim: var(--line-strong);
+}
+[data-tier='bronze'] {
+  --tier-soft: color-mix(in srgb, var(--error) 10%, var(--accent-soft));
+  --tier-ink: color-mix(in srgb, var(--error) 45%, var(--accent-text));
+  --tier-rim: color-mix(in srgb, var(--error) 50%, var(--accent-lip));
+}
+
+.ach-medal {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: var(--round-pill);
+  background: var(--tier-soft);
+  color: var(--tier-ink);
+  box-shadow: inset 0 0 0 2px var(--tier-rim);
+}
+.ach-medal[data-earned='false'] {
+  background: var(--muted);
+  color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--line);
+  opacity: 0.45;
+}

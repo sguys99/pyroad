@@ -3,7 +3,11 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
-import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
+import {
+  achievementEvents,
+  type CelebrationEvent,
+} from '@/lib/quest/celebrationEvents';
+import type { AchievementInfo } from '@/lib/quest/achievements';
 import { chestCoins, chestGoal, chestState } from '@/lib/world/chest';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -16,6 +20,8 @@ export type ChestEvent = Extract<CelebrationEvent, { type: 'chest' }>;
 export interface ChestOpenResult {
   already_opened: boolean;
   coins_earned: number;
+  /** 열어서 새로 얻은 업적 (P8-09, 예: 첫 보물상자) */
+  new_achievements?: AchievementInfo[];
 }
 
 const OPEN_ERROR = '상자를 열지 못했어요. 잠시 후 다시 해 볼까요?';
@@ -43,10 +49,10 @@ interface StageChestProps {
     | 'chestOpened'
   >;
   /**
-   * 열었을 때: 새로 열었으면 축하 이벤트(코인은 서버가 준 값), 이미 열려 있었으면(다른 탭 등) null.
+   * 열었을 때: 새로 열었으면 축하 이벤트(상자 — 코인은 서버가 준 값 — 와 새 업적), 이미 열려 있었으면(다른 탭 등) null.
    * 부모(월드맵)가 시트를 닫고 축하 오버레이를 띄운 뒤 화면을 새로 고친다
    */
-  onOpened: (event: ChestEvent | null) => void;
+  onOpened: (events: CelebrationEvent[] | null) => void;
   /** 열기 요청 (기본 `/api/world/chest`. 카탈로그·테스트용) */
   request?: (stageId: string) => Promise<ChestOpenResult>;
 }
@@ -81,12 +87,15 @@ export function StageChest({
       onOpened(
         res.already_opened
           ? null
-          : {
-              type: 'chest',
-              stageTitle: stage.title,
-              goal,
-              contents: { coins: res.coins_earned, goldenKeys: 0 },
-            },
+          : [
+              {
+                type: 'chest',
+                stageTitle: stage.title,
+                goal,
+                contents: { coins: res.coins_earned, goldenKeys: 0 },
+              },
+              ...achievementEvents(res.new_achievements),
+            ],
       );
     } catch (e) {
       setError(e instanceof Error && e.message ? e.message : OPEN_ERROR);

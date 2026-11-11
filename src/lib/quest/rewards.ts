@@ -1,4 +1,4 @@
-import type { BadgeType } from './badges';
+import type { AchievementInfo } from './achievements';
 import type { LevelUpCoins } from './coins';
 
 /**
@@ -22,8 +22,8 @@ export interface QuestCompleteResponse {
   total_xp: number;
   level_before: number;
   level_after: number;
-  /** 이번에 새로 받은 뱃지 (축하 순서). 황금키를 쓴 퀘스트는 늘 빈 배열 (Q25, 00019) */
-  new_badges: BadgeType[];
+  /** 이번에 새로 얻은 업적 (P8-09 00036 evaluate_achievements, 정의 sort 순). 코인은 "받기"로. 예전 new_badges 는 늘 [] 라 읽지 않음 */
+  new_achievements?: AchievementInfo[];
   /** 이번 완료로 스테이지를 클리어했으면 그 스테이지 */
   stage_cleared: StageClearInfo | null;
   /** 같은 스테이지의 다음 미완료 퀘스트 (스테이지를 클리어했으면 null) */
@@ -44,7 +44,7 @@ export interface QuestCompleteResponse {
   best_stars: number;
   /** 이번에 늘어난 최고 별 (새 별 코인은 이 별 번호만, 이미 받은 번호면 0) */
   new_stars: number;
-  /** 황금키로 연 퀘스트를 이번에 처음 직접 풀었음 → XP·뱃지를 이때 받음 */
+  /** 황금키로 연 퀘스트를 이번에 처음 직접 풀었음 → XP·업적을 이때 받음 */
   solved_directly: boolean;
   /** 황금키가 넣어 준 정답을 그대로 다시 돌림 → 별·보상 없음 */
   solution_copy: boolean;

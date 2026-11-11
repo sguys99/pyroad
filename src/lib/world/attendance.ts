@@ -7,6 +7,7 @@
  * - 칸별 코인 5·5·10·10·15·20·30(`coinReward('attendance', n)`), 7일째 = 상자(30코인 + 스트릭 방패 1개, 최대 2개)
  * - 방패: 학습(퀘스트·퀴즈)을 빠뜨린 날을 다음 방문 때 서버가 자동으로 메움 — 빠진 날 수만큼 가지고 있을 때만
  */
+import type { AchievementInfo } from '@/lib/quest/achievements';
 import { coinReward } from '@/lib/quest/coins';
 import { addKstDays, type KstDateKey } from '@/lib/time/kst';
 import type { Streak } from '@/lib/time/streak';
@@ -50,6 +51,8 @@ export interface StampAttendanceResult {
   /** 7일째 상자에서 받은 방패 (가득이면 0) */
   shield_granted: number;
   shields: number;
+  /** 도장으로 새로 얻은 업적 (P8-09, 예: 출석 도장 7개) */
+  new_achievements?: AchievementInfo[];
 }
 
 export interface AttendanceCell {

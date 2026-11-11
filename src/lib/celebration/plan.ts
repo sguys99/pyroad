@@ -1,7 +1,8 @@
 // 축하 이벤트 목록 → 보여 줄 단계(step) 목록 (P1-10 축하 시퀀서).
 //
 // 규칙 (§3 F1·F3·F5·F11이 늘어나도 같은 자리에서 정함):
-// 1. 우선순위: 퀘스트 결과(황금키 확인 → 프로젝트 완성·스테이지 클리어) → 레벨 업 → 뱃지 → 별·코인 → 보물상자(Phase 8).
+// 1. 우선순위: 퀘스트 결과(황금키 확인 → 프로젝트 완성·스테이지 클리어) → 레벨 업 → 보물상자(월드맵) → 업적 → 별·코인.
+//    상자를 연 순간이 먼저, 그 상자·도장으로 얻은 업적(첫 보물상자 등, P8-09)은 그 뒤.
 //    같은 우선순위는 받은 순서 그대로 (안정 정렬).
 //    단, 스테이지를 끝낸 카드(스테이지 클리어, 스테이지 마지막 프로젝트)는 맨 뒤로 (P6-13): 그 카드의 주 버튼이
 //    "지도에서 새 길 보기"(월드맵 해제 연출로 이어짐)라 화면을 떠나므로, 레벨 업·뱃지를 먼저 다 보여 준다.
@@ -10,14 +11,13 @@
 // 4. 한 번에 하나씩. 단계마다 자동 넘김 시간·효과음·컨페티 세기를 정한다
 //    (컨페티: 스테이지 클리어·프로젝트 > 레벨 업 > 뱃지, 황금키 확인은 없음).
 
-import type { BadgeType } from '@/lib/quest/badges';
+import type { AchievementInfo } from '@/lib/quest/achievements';
 import type {
   CelebrationEvent,
   CelebrationEventType,
 } from '@/lib/quest/celebrationEvents';
 import type { StageClearInfo } from '@/lib/quest/rewards';
 import { SHOW_CHEST, SHOW_COINS } from '@/lib/world/flags';
-import { getBadgeDefinition } from '@/lib/quest/badges';
 import { withObjectParticle } from '@/lib/korean';
 import { isMilestoneLevel } from '@/lib/quest/xp';
 import type { MotionBudget } from '@/lib/motion/tier';
@@ -43,7 +43,7 @@ export type CelebrationStep =
       stage: StageClearInfo | null;
     }
   | { kind: 'level_up'; id: string; event: EventOf<'level_up'> }
-  | { kind: 'badges'; id: string; badges: BadgeType[] }
+  | { kind: 'badges'; id: string; badges: AchievementInfo[] }
   | {
       kind: 'rewards';
       id: string;
@@ -148,7 +148,8 @@ export function autoAdvanceMs(step: CelebrationStep): number | null {
     case 'level_up':
       return 6000;
     case 'badges':
-      return Math.min(4500 + 1500 * (step.badges.length - 1), 9000);
+      // 업적은 카드에서 "받기"를 누를 수 있게 기다림 (P8-09, §12-Q62 ③)
+      return null;
     case 'rewards':
       return 4000;
     case 'chest':
@@ -203,7 +204,7 @@ export function stepSummary(step: CelebrationStep): string {
     case 'level_up':
       return `레벨 업! 레벨 ${step.event.level} 달성, ${isMilestoneLevel(step.event.level) ? '큰 칭호' : '새 칭호'} ${step.event.title}.${SHOW_COINS && step.event.coins ? ` 코인 ${step.event.coins}개 받았어요.` : ''}`;
     case 'badges':
-      return `새 뱃지: ${step.badges.map((b) => getBadgeDefinition(b).name).join(', ')}.`;
+      return `새 업적: ${step.badges.map((b) => b.name).join(', ')}.`;
     case 'rewards':
       return [
         step.stars && `별 ${step.stars.stars}개`,
@@ -254,7 +255,7 @@ export function planCelebrations(
   const stageEvent = sorted.find(
     (e): e is EventOf<'stage_clear'> => e.type === 'stage_clear',
   );
-  const badges: BadgeType[] = [];
+  const badges: AchievementInfo[] = [];
   let stars: EventOf<'star'> | null = null;
   let coins = 0;
   const chests: EventOf<'chest'>[] = [];
@@ -286,7 +287,8 @@ export function planCelebrations(
         steps.push({ kind: 'level_up', id: id('level_up'), event });
         break;
       case 'badge':
-        if (!badges.includes(event.badge)) badges.push(event.badge);
+        if (!badges.some((b) => b.id === event.badge.id))
+          badges.push(event.badge);
         break;
       case 'star':
         // 여러 번 오면 가장 높은 별
@@ -302,13 +304,13 @@ export function planCelebrations(
     }
   }
 
+  for (const event of chests)
+    steps.push({ kind: 'chest', id: id('chest'), event });
   if (badges.length > 0)
     steps.push({ kind: 'badges', id: id('badges'), badges });
   if (stars || coins > 0) {
     steps.push({ kind: 'rewards', id: id('rewards'), stars, coins });
   }
-  for (const event of chests)
-    steps.push({ kind: 'chest', id: id('chest'), event });
   // 스테이지를 끝낸 카드는 맨 뒤로 (규칙 1의 단서). id는 그대로라 겹치지 않는다
   return [
     ...steps.filter((s) => !closesStage(s)),

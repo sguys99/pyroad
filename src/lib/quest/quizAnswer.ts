@@ -3,6 +3,7 @@ import { z } from 'zod/v4';
 import { QUIZ_ID_PATTERN } from '@/lib/content/schema';
 import type { QuizPrompt } from '@/lib/types/database';
 import type { LevelUpCoins } from './coins';
+import type { AchievementInfo } from './achievements';
 
 /**
  * 퀴즈 채점 API `/api/quest/answer` 요청·응답 (P7-02). 클라이언트(렌더러, P7-03)는 타입만 import 합니다.
@@ -70,6 +71,8 @@ export interface QuizAnswerResult {
 }
 
 export interface QuizAnswerResponse extends QuizAnswerResult {
+  /** 이번 답으로 새로 얻은 업적 (P8-09, API 가 RPC 뒤에 판정) */
+  new_achievements?: AchievementInfo[];
   /** 다시 풀 때 쓸, 새로 섞은 퀴즈 공개 부분 (shuffleQuiz). 읽지 못하면 null → 지금 순서 그대로 */
   next_quiz: QuizPrompt | null;
 }

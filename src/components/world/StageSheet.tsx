@@ -28,7 +28,8 @@ import { starReviewOpen } from '@/lib/quest/starReview';
 import { kstToday } from '@/lib/time/kst';
 import { Landmark } from './map/MapArt';
 import { QUIZ_KIND_ICON } from './PhoneQuizPick';
-import { StageChest, type ChestEvent } from './StageChest';
+import { StageChest } from './StageChest';
+import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import './map/worldMap.css';
 import './stageSheet.css';
 
@@ -106,7 +107,7 @@ interface StageSheetProps {
   /** 오늘 KST 날짜 키 (복습 도전 판정, 테스트·카탈로그용. 기본 지금) */
   today?: string;
   /** 보물상자를 열었을 때 (P8-06, `StageChest` onOpened). 없으면 열어도 아무것도 하지 않음(카탈로그) */
-  onChestOpened?: (event: ChestEvent | null) => void;
+  onChestOpened?: (events: CelebrationEvent[] | null) => void;
 }
 
 export function StageSheet({

@@ -17,6 +17,9 @@ vi.mock('@/lib/supabase/admin', () => ({
 }));
 
 import { POST } from '../route';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
+
+const WON = achv('first_code');
 
 const CLAIMED = {
   claimed: true,
@@ -41,7 +44,14 @@ const post = (body: unknown) =>
 
 beforeEach(() => {
   mocks.user = { id: 'u1' };
-  mocks.rpc.mockReset().mockResolvedValue({ data: CLAIMED, error: null });
+  // 보상 RPC 뒤 업적 판정(evaluate_achievements, P8-09)은 새 업적 1개
+  mocks.rpc
+    .mockReset()
+    .mockImplementation(async (fn: string) =>
+      fn === 'evaluate_achievements'
+        ? { data: [WON], error: null }
+        : { data: CLAIMED, error: null },
+    );
   mocks.revalidatePath.mockReset();
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -54,7 +64,10 @@ describe('POST /api/missions/claim (P8-07)', () => {
       userId: 'u2',
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(CLAIMED);
+    expect(await res.json()).toEqual({ ...CLAIMED, new_achievements: [WON] });
+    expect(mocks.rpc).toHaveBeenCalledWith('evaluate_achievements', {
+      p_user_id: 'u1',
+    });
     expect(mocks.rpc).toHaveBeenCalledWith('claim_daily_mission', {
       p_user_id: 'u1',
       p_day: '2026-11-11',

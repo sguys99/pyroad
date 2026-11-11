@@ -88,13 +88,23 @@ test('퀘스트 완료 → 미션 진행 → 받기 → 코인·XP 15, HUD 반�
       mission_coins: quest.coins,
       xp_earned: 15,
     });
-    await expect(row).toHaveAttribute('data-state', 'claimed');
-    await expect(sheet.getByRole('status')).toContainText(
-      `코인 ${quest.coins}개`,
-    );
     expect(await coinBalance(e2eUser.id)).toBe(coins0 + body.coins_earned);
     expect(await totalXp(e2eUser.id)).toBe(xp0 + 15);
-    await page.keyboard.press('Escape');
+    if (body.new_achievements?.length) {
+      // 미션으로 새 업적(첫 미션 완료 등, P8-09): 시트를 닫고 지도 위 업적 카드 → 나중에 받을래요
+      const overlay = page.getByTestId('celebration-overlay');
+      const badges = overlay.getByTestId('celebration-step-badges');
+      await expect(badges).toBeVisible();
+      await expect(sheet).toBeHidden();
+      await badges.getByTestId('celebration-cta').click();
+      await expect(overlay).toBeHidden();
+    } else {
+      await expect(row).toHaveAttribute('data-state', 'claimed');
+      await expect(sheet.getByRole('status')).toContainText(
+        `코인 ${quest.coins}개`,
+      );
+      await page.keyboard.press('Escape');
+    }
     await expect(page.getByTestId('hud-coin')).toContainText(
       `코인 ${(coins0 + body.coins_earned).toLocaleString('ko-KR')}개`,
     );

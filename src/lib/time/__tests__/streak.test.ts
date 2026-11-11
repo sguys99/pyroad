@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import rules from '../../../../supabase/tests/fixtures/reward-rules.json';
-import { hasThreeDayStreak } from '@/lib/quest/checkBadges';
 import { currentStreak } from '../streak';
 
 // 2026-11-09 12:00 KST
@@ -64,15 +62,5 @@ describe('currentStreak', () => {
       days: 1,
       today: true,
     });
-  });
-
-  // 3일 뱃지(SQL has_three_day_streak · TS hasThreeDayStreak)와 정의가 같은지: 최근 완료일을 "오늘"로 보면 days >= 3 ⇔ 뱃지
-  it.each(rules.streak)('뱃지 대조표와 같음: $name', ({ completed_at }) => {
-    const latest = completed_at
-      .filter((c): c is string => !!c)
-      .sort()
-      .at(-1);
-    const streak = currentStreak(completed_at, latest ?? NOW);
-    expect(streak.days >= 3).toBe(hasThreeDayStreak(completed_at));
   });
 });

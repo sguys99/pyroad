@@ -65,10 +65,16 @@ test('320px: 출석 카드 → 도장 → 칸 코인·HUD 잔액, 다시 찍으�
     await expect(
       card.getByTestId(`attendance-cell-${before.day_n}`),
     ).toHaveAttribute('data-state', 'done');
-    if (before.day_n === 7) {
-      // 7일째 상자: 도장 뒤 상자 카드(방패), 닫으면 새로 고침
+    if (before.day_n === 7 || body.new_achievements?.length) {
+      // 7일째 상자: 도장 뒤 상자 카드(방패), 닫으면 새로 고침. 출석 업적(P8-09, 도장 7개 등)도 지도 위 업적 카드
       const overlay = page.getByTestId('celebration-overlay');
-      await expect(overlay.getByTestId('celebration-step-chest')).toBeVisible();
+      await expect(
+        overlay.getByTestId(
+          before.day_n === 7
+            ? 'celebration-step-chest'
+            : 'celebration-step-badges',
+        ),
+      ).toBeVisible();
       await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
       await expect(overlay).toBeHidden();

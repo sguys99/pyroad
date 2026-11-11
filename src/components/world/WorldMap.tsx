@@ -17,7 +17,7 @@ import { ToastViewport, useToastQueue } from '@/components/ui/toast';
 import { useSfx } from '@/components/providers/soundContext';
 import { SOFT_TAP } from '@/lib/sound/manifest';
 import { StageSheet } from './StageSheet';
-import type { ChestEvent } from './StageChest';
+import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
 import {
@@ -89,7 +89,7 @@ function useOpenStage(
   const router = useRouter();
   const { toasts, show, dismiss } = useToastQueue(1);
   // 연 보물상자 축하 (P8-06). 시트는 닫고 지도 위에 띄운다 (시트 대화 상자 위에 또 대화 상자를 겹치지 않게)
-  const [chest, setChest] = useState<ChestEvent[]>([]);
+  const [chest, setChest] = useState<CelebrationEvent[]>([]);
   const play = useSfx();
   const id = questsByStage ? params.get('stage') : null;
   const current =
@@ -135,11 +135,11 @@ function useOpenStage(
       open={!!current}
       world={world}
       onOpenChange={(next) => !next && close()}
-      onChestOpened={(event) => {
+      onChestOpened={(events) => {
         // HUD 코인·상자 상태는 router.refresh() (`/api/world/chest`가 무효화). 시트를 닫는 뒤로 가기가 끝난 뒤 곧바로:
         // 축하 카드를 닫을 때(퇴장 연출 끝, 카드 언마운트와 같은 틱) 부르면 새로 고침 전환이 가끔 커밋되지 않고 멈춤 (B56)
-        if (!event) return router.refresh();
-        setChest([event]);
+        if (!events) return router.refresh();
+        setChest(events);
         close(() => router.refresh());
       }}
       // 주소로 열린 시트(퀘스트에서 돌아옴)도 닫으면 그 노드로 포커스

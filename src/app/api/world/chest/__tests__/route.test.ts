@@ -17,6 +17,9 @@ vi.mock('@/lib/supabase/admin', () => ({
 }));
 
 import { POST } from '../route';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
+
+const WON = achv('first_code');
 
 const S1 = 'a1000000-0000-0000-0000-000000000001';
 const OPENED = {
@@ -38,7 +41,14 @@ const post = (body: unknown) =>
 
 beforeEach(() => {
   mocks.user = { id: 'u1' };
-  mocks.rpc.mockReset().mockResolvedValue({ data: OPENED, error: null });
+  // 보상 RPC 뒤 업적 판정(evaluate_achievements, P8-09)은 새 업적 1개
+  mocks.rpc
+    .mockReset()
+    .mockImplementation(async (fn: string) =>
+      fn === 'evaluate_achievements'
+        ? { data: [WON], error: null }
+        : { data: OPENED, error: null },
+    );
   mocks.revalidatePath.mockReset();
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -47,7 +57,10 @@ describe('POST /api/world/chest (P8-06)', () => {
   it('로그인 사용자 id 로 service_role RPC 를 부르고 결과를 그대로, 처음 열면 월드맵 무효화', async () => {
     const res = await post({ stageId: S1, userId: 'u2' });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(OPENED);
+    expect(await res.json()).toEqual({ ...OPENED, new_achievements: [WON] });
+    expect(mocks.rpc).toHaveBeenCalledWith('evaluate_achievements', {
+      p_user_id: 'u1',
+    });
     expect(mocks.rpc).toHaveBeenCalledWith('open_stage_chest', {
       p_user_id: 'u1',
       p_stage_id: S1,

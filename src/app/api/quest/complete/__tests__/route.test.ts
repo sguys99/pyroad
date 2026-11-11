@@ -108,6 +108,7 @@ describe('POST /api/quest/complete — 다시 풀기 (P8-05)', () => {
       code: 'print(1)',
       passed: true,
       retry: true,
+      had_error: false,
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/world', 'layout');
     expect(mocks.trackServerEvent).not.toHaveBeenCalled();
@@ -117,5 +118,13 @@ describe('POST /api/quest/complete — 다시 풀기 (P8-05)', () => {
     await complete({ retry: 'yes' });
     expect(mocks.rpcArgs[3]).toMatchObject({ retry: false });
     expect(mocks.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('had_error 는 true 일 때만 RPC 로 (P8-09 실패 칭찬 업적)', async () => {
+    mocks.rpcData = result({});
+    await complete({ had_error: true });
+    expect(mocks.rpcArgs[3]).toMatchObject({ had_error: true });
+    await complete({ had_error: 'yes' });
+    expect(mocks.rpcArgs[3]).toMatchObject({ had_error: false });
   });
 });

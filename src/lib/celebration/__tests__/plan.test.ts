@@ -10,6 +10,7 @@ import {
   type CelebrationStep,
 } from '../plan';
 import { CONFETTI_PRESETS, LEVEL_POP_BURST } from '../confettiPresets';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 
 const stage = {
   stage_id: 's1',
@@ -23,7 +24,7 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
   it('우선순위: 퀘스트 결과 → 레벨 업 → 뱃지 → 별·코인, 스테이지를 끝낸 카드는 맨 뒤(지도로). 받은 순서가 달라도', () => {
     const events: CelebrationEvent[] = [
       { type: 'coin', amount: 10 },
-      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: achv('first_code') },
       { type: 'level_up', level: 2, fromLevel: 1, title: '새싹' },
       { type: 'star', stars: 3, gained: 3 },
       { type: 'stage_clear', stage },
@@ -38,14 +39,14 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
 
   it('뱃지는 여러 개여도 한 단계로 묶는다 (받은 순서, 중복 제거)', () => {
     const steps = planCelebrations([
-      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: achv('first_code') },
       { type: 'level_up', level: 2, fromLevel: 1, title: '새싹' },
-      { type: 'badge', badge: 'stage_clear' },
-      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: achv('stage_clear') },
+      { type: 'badge', badge: achv('first_code') },
     ]);
     expect(steps.at(-1)).toMatchObject({
       kind: 'badges',
-      badges: ['first_code', 'stage_clear'],
+      badges: [achv('first_code'), achv('stage_clear')],
     });
     expect(steps).toHaveLength(2);
   });
@@ -71,7 +72,7 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
         planCelebrations([
           { type: 'stage_clear', stage },
           { type: 'golden_key', kind: 'code', questTitle: '변수' },
-          { type: 'badge', badge: 'first_code' },
+          { type: 'badge', badge: achv('first_code') },
         ]),
       ),
     ).toEqual(['golden_key', 'badges', 'stage_clear']);
@@ -85,7 +86,7 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
         xpGained: 100,
         stage: s,
       }) as const;
-    const badge = { type: 'badge', badge: 'first_code' } as const;
+    const badge = { type: 'badge', badge: achv('first_code') } as const;
     expect(kinds(planCelebrations([project(stage), badge]))).toEqual([
       'badges',
       'project_complete',
@@ -107,6 +108,20 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
     ]);
     expect(kinds(steps)).toEqual(['chest']);
     expect(STEP_SPECS.chest.sfx).toBe('chest');
+    // 상자로 얻은 업적은 상자 다음 (P8-09)
+    expect(
+      kinds(
+        planCelebrations([
+          { type: 'badge', badge: achv('chest_1') },
+          {
+            type: 'chest',
+            stageTitle: 's',
+            goal: 15,
+            contents: { coins: 30, goldenKeys: 0 },
+          },
+        ]),
+      ),
+    ).toEqual(['chest', 'badges']);
   });
 
   it('등장 연출은 모두 짧다 (§12-Q28: 레벨 업 최대 3.6초 안)', () => {
@@ -114,9 +129,10 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
       { type: 'level_up', level: 9, fromLevel: 1, title: '마법사' },
       { type: 'stage_clear', stage },
       { type: 'golden_key', kind: 'code', questTitle: '변수' },
-      ...(['first_code', 'hint_master', 'stage_clear'] as const).map(
-        (badge) => ({ type: 'badge' as const, badge }),
-      ),
+      ...(['first_code', 'hint_master', 'stage_clear'] as const).map((id) => ({
+        type: 'badge' as const,
+        badge: achv(id),
+      })),
     ]);
     for (const s of steps) expect(introMs(s)).toBeLessThanOrEqual(3600);
     expect(introMs(steps.find((s) => s.kind === 'level_up')!)).toBe(1900);
@@ -125,10 +141,10 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
   it('aria-live 한 줄: 받은 것을 글자로', () => {
     const [lv, b] = planCelebrations([
       { type: 'level_up', level: 3, fromLevel: 2, title: '새싹' },
-      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: achv('first_code') },
     ]);
     expect(stepSummary(lv)).toBe('레벨 업! 레벨 3 달성, 새 칭호 새싹.');
-    expect(stepSummary(b)).toMatch(/^새 뱃지: /);
+    expect(stepSummary(b)).toMatch(/^새 업적: /);
   });
 
   it('별·코인은 "보상" 한 단계: 코인은 더하고 별은 가장 높은 것', () => {
@@ -146,8 +162,14 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
   });
 
   it('단계 id는 묶음 번호로 겹치지 않는다', () => {
-    const a = planCelebrations([{ type: 'badge', badge: 'first_code' }], 0);
-    const b = planCelebrations([{ type: 'badge', badge: 'first_code' }], 1);
+    const a = planCelebrations(
+      [{ type: 'badge', badge: achv('first_code') }],
+      0,
+    );
+    const b = planCelebrations(
+      [{ type: 'badge', badge: achv('first_code') }],
+      1,
+    );
     expect(a[0].id).not.toBe(b[0].id);
   });
 
@@ -176,16 +198,16 @@ describe('단계 사양 (자동 넘김·컨페티·효과음)', () => {
         ] as const
       )
         .slice(0, n)
-        .map((badge) => ({ type: 'badge' as const, badge })),
+        .map((id) => ({ type: 'badge' as const, badge: achv(id) })),
     )[0];
 
-  it('자동 넘김: 스테이지 클리어는 기다리고, 뱃지는 개수만큼 길게(상한 9초)', () => {
+  it('자동 넘김: 스테이지 클리어·업적은 기다림', () => {
     expect(autoAdvanceMs(stageStep)).toBeNull();
     expect(autoAdvanceMs(level)).toBe(6000);
     expect(autoAdvanceMs(golden)).toBe(4500);
-    expect(autoAdvanceMs(badges(1))).toBe(4500);
-    expect(autoAdvanceMs(badges(2))).toBe(6000);
-    expect(autoAdvanceMs(badges(5))).toBe(9000);
+    // 업적은 카드에서 "받기"를 누를 수 있게 기다림 (P8-09)
+    expect(autoAdvanceMs(badges(1))).toBeNull();
+    expect(autoAdvanceMs(badges(5))).toBeNull();
   });
 
   it('컨페티 세기: 스테이지 클리어 > 레벨 업 > 뱃지 > 황금키(0)', () => {

@@ -6,6 +6,7 @@
  * - 보상: 난이도 1~3 = 코인 10·15·20(`coinReward('mission', n)`) + XP 15(§12-Q63 ②). "받기" 버튼으로만(§12-Q62 ③)
  * - 안 받은 보상은 7일 동안 받을 수 있음(`pending`, 지난날 것)
  */
+import type { AchievementInfo } from '@/lib/quest/achievements';
 import {
   nextKstMidnight,
   type DateInput,
@@ -68,6 +69,8 @@ export interface ClaimMissionResult {
   level_before: number;
   level_after: number;
   level_ups: { level: number; coins: number }[];
+  /** 받기로 새로 얻은 업적 (P8-09, 예: 첫 미션 완료) */
+  new_achievements?: AchievementInfo[];
 }
 
 /** 달성했고 아직 안 받음 → "받기" */

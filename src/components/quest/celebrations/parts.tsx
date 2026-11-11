@@ -29,16 +29,19 @@ export function CelebrationCta({
   variant,
   testId = 'celebration-cta',
   focus = true,
+  loading,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   /** 화면을 떠나는 버튼 (스테이지 클리어 → 월드맵) */
   href?: string;
   icon?: React.ReactNode;
-  variant?: 'secondary' | 'ghost';
+  variant?: 'secondary' | 'ghost' | 'reward';
   testId?: string;
   /** 카드가 뜬 뒤 포커스를 받는 버튼 (카드마다 하나) */
   focus?: boolean;
+  /** 요청 중 (업적 받기 P8-09) */
+  loading?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -59,6 +62,7 @@ export function CelebrationCta({
       href={href}
       icon={icon}
       variant={variant}
+      loading={loading}
       onClick={onClick}
     >
       {children}

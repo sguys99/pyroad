@@ -307,6 +307,10 @@ test.describe('모바일 퀴즈 (360px 터치)', () => {
     await page.goto(`/quest/${quiz.id}`);
     await answer(page, key, key.accepted[0]);
     await expect(byId(page, 'reward-xp-count')).toHaveText('30');
+    // 첫 정답 업적 카드(첫 퀴즈 정답, P8-09)는 받기를 기다림 → 나중에 받을래요
+    const badges = byId(page, 'celebration-step-badges');
+    await badges.getByTestId('celebration-cta').tap();
+    await expect(byId(page, 'celebration-overlay')).toBeHidden();
 
     await byId(page, 'quiz-retry').tap();
     const card = byId(page, 'quiz-card');

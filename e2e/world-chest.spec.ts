@@ -46,7 +46,10 @@ test('목표 미달은 모으는 중 → 채우면 노드 상자·열기 → 축
         r.url().endsWith('/api/world/chest') && r.request().method() === 'POST',
     );
     await sheet.getByTestId('stage-chest-open').click();
-    expect((await res).status()).toBe(200);
+    const opened = await res;
+    expect(opened.status()).toBe(200);
+    // 상자로 새로 얻은 업적(첫 보물상자 등, P8-09)은 상자 카드 다음 업적 카드
+    const won = ((await opened.json()).new_achievements ?? []) as unknown[];
 
     const overlay = page.getByTestId('celebration-overlay');
     await expect(overlay.getByTestId('celebration-step-chest')).toBeVisible();
@@ -55,6 +58,11 @@ test('목표 미달은 모으는 중 → 채우면 노드 상자·열기 → 축
     ).toBeVisible();
     await expect(sheet).toBeHidden();
     await overlay.getByTestId('celebration-cta').click();
+    if (won.length > 0) {
+      const badges = overlay.getByTestId('celebration-step-badges');
+      await expect(badges).toBeVisible();
+      await badges.getByTestId('celebration-cta').click(); // 나중에 받을래요
+    }
     await expect(overlay).toBeHidden();
     expect(await coinBalance(e2eUser.id)).toBe(before + 30);
     await expect(page.getByTestId('hud-coin')).toContainText(

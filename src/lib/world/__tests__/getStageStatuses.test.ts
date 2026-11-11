@@ -66,6 +66,7 @@ function makeProgress(
     attempts: 0,
     stars_judged_on: null,
     solved_directly_at: null,
+    overcame_error: false,
     ...extra,
   };
 }

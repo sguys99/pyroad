@@ -22,6 +22,7 @@ import { useSfx } from '@/components/providers/soundContext';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { addKstDays, formatKstDate } from '@/lib/time/kst';
 import {
+  achievementEvents,
   levelUpEvents,
   type CelebrationEvent,
 } from '@/lib/quest/celebrationEvents';
@@ -235,7 +236,7 @@ interface MissionListProps {
   request?: (day: string, missionId: string) => Promise<ClaimMissionResult>;
   /** 받은 뒤 (기본: router.refresh() — HUD 코인·XP 카운트업) */
   onClaimed?: (res: ClaimMissionResult) => void;
-  /** 받기로 레벨이 올랐을 때 (P8-08 공용 레벨 업 카드). 주면 router.refresh() 대신 이것 — 축하를 띄울 때 새로 고침 (B56) */
+  /** 받기로 레벨이 올랐거나 업적을 얻었을 때 (P8-08 공용 레벨 업·P8-09 업적 카드). 주면 router.refresh() 대신 이것 — 축하를 띄울 때 새로 고침 (B56) */
   onLevelUp?: (events: CelebrationEvent[]) => void;
 }
 
@@ -295,7 +296,10 @@ export function MissionList({
               : ''),
         );
       }
-      const ups = levelUpEvents(res);
+      const ups = [
+        ...levelUpEvents(res),
+        ...achievementEvents(res.new_achievements),
+      ];
       if (onLevelUp && ups.length > 0 && !res.already_claimed) onLevelUp(ups);
       else (onClaimed ?? (() => router.refresh()))(res);
     } catch (e) {
@@ -386,7 +390,7 @@ export function MissionHudPlaceholder() {
 
 /**
  * HUD 미션 칸 (P8-07): 아이콘 + 달성 수, 받을 보상이 있으면 금색 점. 누르면 미션 시트.
- * 받기로 레벨이 오르면 시트를 닫고 레벨 업 카드 (P8-08 공용 `useWorldCelebration`)
+ * 받기로 레벨이 오르거나 업적을 얻으면 시트를 닫고 레벨 업·업적 카드 (P8-08 공용 `useWorldCelebration`)
  */
 export function MissionHudButton({ state }: { state: DailyMissionsState }) {
   const [open, setOpen] = useState(false);

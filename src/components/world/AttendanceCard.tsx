@@ -11,7 +11,10 @@ import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { stampSlam } from '@/lib/celebration/onboardingFx';
 import { coinReward } from '@/lib/quest/coins';
 import { formatKstDate } from '@/lib/time/kst';
-import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
+import {
+  achievementEvents,
+  type CelebrationEvent,
+} from '@/lib/quest/celebrationEvents';
 import {
   ATTENDANCE_DAYS,
   MAX_SHIELDS,
@@ -166,6 +169,7 @@ export function AttendanceCard({
     let live = true;
     void fx.done.then(() => {
       if (!live) return;
+      const won = achievementEvents(result.new_achievements);
       if (result.day_n === ATTENDANCE_DAYS) {
         const chest: CelebrationEvent = {
           type: 'chest',
@@ -178,7 +182,9 @@ export function AttendanceCard({
           },
           note: '7일 출석을 다 채웠어요!',
         };
-        celebrate([chest]);
+        celebrate([chest, ...won]);
+      } else if (won.length > 0) {
+        celebrate(won);
       } else {
         (onStamped ?? (() => router.refresh()))(result);
       }

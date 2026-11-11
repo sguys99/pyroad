@@ -73,6 +73,11 @@ export async function resetUser(userId: string): Promise<void> {
   // 스트릭 방패 (P8-08): 앱 리셋은 남기지만, 지난 실행의 방패·방패 날이 스트릭 값을 바꾸지 않게 지운다 (출석 기록은 원장이라 남음)
   for (const t of ['streak_shield_days', 'user_streak_shields'] as const)
     check(`${t} 삭제`, await db.from(t).delete().eq('user_id', userId));
+  // 업적 (P8-09): 앱 리셋은 남기지만, 스펙마다 첫 완료 업적 카드가 다시 뜨게 지운다 (받은 코인은 원장이라 남음 → 다시 받으면 0)
+  check(
+    'user_achievements 삭제',
+    await db.from('user_achievements').delete().eq('user_id', userId),
+  );
 }
 
 /** 퀴즈 공개 부분(quests.prompt_skeleton.quiz)과 서버 전용 정답(quest_answer_keys.quiz_answer)을 service_role 로 (P7-15) */

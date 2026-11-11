@@ -2,7 +2,7 @@
 //
 // 테이블 행 타입은 `database.generated.ts`(supabase gen types, `npm run db:types`로 재생성)에서
 // 가져옵니다. 이 파일은 그 위의 얇은 래퍼로, 생성 타입이 표현하지 못하는 부분만 좁힙니다.
-// - CHECK 제약 컬럼(text) → 문자열 리터럴 유니온 (validation_type, quest_type, quiz_kind, status, badge_type)
+// - CHECK 제약 컬럼(text) → 문자열 리터럴 유니온 (validation_type, quest_type, quiz_kind, status, tier, category)
 // - JSONB 컬럼(Json) → 앱이 쓰는 구조 (prompt_skeleton, step_submissions)
 // 생성 파일은 직접 고치지 말고, 스키마를 바꾼 뒤 `npm run db:types`로 다시 만드세요.
 
@@ -72,13 +72,10 @@ export type UserProgress = Omit<
   step_submissions: Record<string, string> | null;
 };
 
-export type UserBadge = Omit<Tables<'user_badges'>, 'badge_type'> & {
-  badge_type:
-    | 'first_code'
-    | 'hint_master'
-    | 'stage_clear'
-    | 'project_builder'
-    | 'streak_3';
+/** 업적 정의 (P8-09, 00036). tier·category 는 CHECK 제약 */
+export type Achievement = Omit<Tables<'achievements'>, 'tier' | 'category'> & {
+  tier: 'bronze' | 'silver' | 'gold';
+  category: 'learn' | 'star' | 'quiz' | 'habit' | 'growth' | 'grit';
 };
 
 /**

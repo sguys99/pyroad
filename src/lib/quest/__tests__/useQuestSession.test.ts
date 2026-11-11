@@ -71,6 +71,7 @@ import {
   ASK_QUESTIONS,
   type QuestSessionOptions,
 } from '../useQuestSession';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 
 // ── 픽스처 ────────────────────────────────────────────────────────────
 
@@ -164,7 +165,7 @@ function completion(
     total_xp: 150,
     level_before: 1,
     level_after: 1,
-    new_badges: [],
+    new_achievements: [],
     stage_cleared: null,
     next_quest_id: 'q-next',
     golden_keys: 3,
@@ -381,7 +382,7 @@ describe('useQuestSession: 실행·채점·완료', () => {
         coins_earned: 30,
         coins_balance: 30,
         level_ups: [{ level: 2, coins: 20 }],
-        new_badges: ['first_code', 'stage_clear'],
+        new_achievements: [achv('first_code'), achv('stage_clear')],
         stage_cleared: {
           stage_id: 's1',
           order: 1,
@@ -400,6 +401,7 @@ describe('useQuestSession: 실행·채점·완료', () => {
       quest_id: 'q-code',
       code_submitted: 'x = ___',
       stdout: '10\n',
+      had_error: false,
     });
     expect(result.current.isCompleted).toBe(true);
     expect(result.current.earnedXP).toBe(50);
@@ -589,6 +591,27 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.messages.at(-1)).toEqual({
       role: 'system',
       content: '잠시 뒤에 다시 해 볼까요?',
+    });
+  });
+
+  it('실행 에러를 만난 뒤 통과하면 완료 요청에 had_error (P8-09 실패 칭찬 업적), 보낸 뒤엔 비움', async () => {
+    mocks.runtime.runCode.mockResolvedValueOnce({
+      stdout: '',
+      stderr: 'Traceback\nNameError',
+      success: false,
+      hadException: true,
+      outcome: 'error',
+    });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(callsTo('/api/quest/complete')).toHaveLength(0);
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(callsTo('/api/quest/complete')[0].body).toMatchObject({
+      had_error: true,
     });
   });
 
@@ -1178,7 +1201,7 @@ describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
 describe('useQuestSession: 퀘스트를 떠나면 앞 퀘스트의 일이 남지 않는다 (P6-15)', () => {
   it('축하 지연 중에 떠나면 축하가 쌓이지 않고, 떠 있는 컨페티를 지운다', async () => {
     routes['/api/quest/complete'] = () => ({
-      json: completion({ new_badges: ['first_code'] }),
+      json: completion({ new_achievements: [achv('first_code')] }),
     });
     const { result, unmount } = renderHook(() =>
       useQuestSession(options(CODE_QUEST)),
@@ -1204,7 +1227,7 @@ describe('useQuestSession: 퀘스트를 떠나면 앞 퀘스트의 일이 남지
       return real(url, init);
     });
     routes['/api/quest/complete'] = () => ({
-      json: completion({ new_badges: ['first_code'] }),
+      json: completion({ new_achievements: [achv('first_code')] }),
     });
     const { result, unmount } = renderHook(() =>
       useQuestSession(options(CODE_QUEST)),
