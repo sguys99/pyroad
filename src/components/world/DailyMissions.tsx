@@ -22,6 +22,11 @@ import { useSfx } from '@/components/providers/soundContext';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { addKstDays, formatKstDate } from '@/lib/time/kst';
 import {
+  levelUpEvents,
+  type CelebrationEvent,
+} from '@/lib/quest/celebrationEvents';
+import { useWorldCelebration } from './useWorldCelebration';
+import {
   formatTimeLeft,
   missionReady,
   msUntilKstMidnight,
@@ -74,12 +79,12 @@ interface Flight {
 }
 
 /** 버튼에서 HUD 코인 칩·레벨 도장으로 날아가는 보상 (full 코인 3개·lite 1개 + XP, minimal·동작 줄이기 없음 — HUD 칩 색 반짝임이 대신) */
-function useRewardFlights() {
+export function useRewardFlights() {
   const { budget } = useMotionTier();
   const [flights, setFlights] = useState<Flight[]>([]);
   const seq = useRef(0);
 
-  const launch = (from: HTMLElement | null) => {
+  const launch = (from: HTMLElement | null, withXp = true) => {
     if (!from || budget.particles === 0 || budget.effectDuration === 0) return;
     const a = from.getBoundingClientRect();
     const x0 = a.left + a.width / 2;
@@ -91,7 +96,7 @@ function useRewardFlights() {
       return { dx: b.left + b.width / 2 - x0, dy: b.top + b.height / 2 - y0 };
     };
     const coin = to('.wh [data-testid="hud-coin"]');
-    const xp = to('.wh [data-testid="level-seal"]');
+    const xp = withXp ? to('.wh [data-testid="level-seal"]') : null;
     const coins = budget.particles >= 1 ? 3 : 1;
     const next: Flight[] = [];
     const add = (
@@ -230,6 +235,8 @@ interface MissionListProps {
   request?: (day: string, missionId: string) => Promise<ClaimMissionResult>;
   /** 받은 뒤 (기본: router.refresh() — HUD 코인·XP 카운트업) */
   onClaimed?: (res: ClaimMissionResult) => void;
+  /** 받기로 레벨이 올랐을 때 (P8-08 공용 레벨 업 카드). 주면 router.refresh() 대신 이것 — 축하를 닫을 때 새로 고침 */
+  onLevelUp?: (events: CelebrationEvent[]) => void;
 }
 
 /**
@@ -245,6 +252,7 @@ export function MissionList({
   state,
   request = requestClaim,
   onClaimed,
+  onLevelUp,
 }: MissionListProps) {
   const router = useRouter();
   const play = useSfx();
@@ -287,7 +295,9 @@ export function MissionList({
               : ''),
         );
       }
-      (onClaimed ?? (() => router.refresh()))(res);
+      const ups = levelUpEvents(res);
+      if (onLevelUp && ups.length > 0 && !res.already_claimed) onLevelUp(ups);
+      else (onClaimed ?? (() => router.refresh()))(res);
     } catch (e) {
       setError(e instanceof Error && e.message ? e.message : CLAIM_ERROR);
     } finally {
@@ -374,37 +384,53 @@ export function MissionHudPlaceholder() {
   );
 }
 
-/** HUD 미션 칸 (P8-07): 아이콘 + 달성 수, 받을 보상이 있으면 금색 점. 누르면 미션 시트 */
+/**
+ * HUD 미션 칸 (P8-07): 아이콘 + 달성 수, 받을 보상이 있으면 금색 점. 누르면 미션 시트.
+ * 받기로 레벨이 오르면 시트를 닫고 레벨 업 카드 (P8-08 공용 `useWorldCelebration`)
+ */
 export function MissionHudButton({ state }: { state: DailyMissionsState }) {
+  const [open, setOpen] = useState(false);
+  const { celebrate, layer } = useWorldCelebration();
   const done = state.missions.filter((m) => m.progress >= m.target).length;
   const total = state.missions.length;
   const ready = readyCount(state);
   const label = `오늘의 미션 ${done}/${total} 달성${ready > 0 ? `, 받을 보상 ${ready}개` : ''}`;
   return (
-    <Sheet
-      title="오늘의 미션"
-      trigger={
-        <button
-          type="button"
-          className="wh-chip wh-mission focus-ring"
-          data-ready={ready > 0 || undefined}
-          aria-label={label}
-          title={label}
-          data-testid="hud-mission"
-        >
-          <ListChecks aria-hidden />
-          <span
-            aria-hidden
-            className="wh-num wh-mission-n font-display tabular-nums"
+    <>
+      <Sheet
+        title="오늘의 미션"
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
+          <button
+            type="button"
+            className="wh-chip wh-mission focus-ring"
+            data-ready={ready > 0 || undefined}
+            aria-label={label}
+            title={label}
+            data-testid="hud-mission"
           >
-            {done}/{total}
-          </span>
-          {ready > 0 && <span className="wh-mission-dot" aria-hidden />}
-        </button>
-      }
-      data-testid="mission-sheet"
-    >
-      <MissionList state={state} />
-    </Sheet>
+            <ListChecks aria-hidden />
+            <span
+              aria-hidden
+              className="wh-num wh-mission-n font-display tabular-nums"
+            >
+              {done}/{total}
+            </span>
+            {ready > 0 && <span className="wh-mission-dot" aria-hidden />}
+          </button>
+        }
+        data-testid="mission-sheet"
+      >
+        <MissionList
+          state={state}
+          onLevelUp={(events) => {
+            setOpen(false);
+            celebrate(events);
+          }}
+        />
+      </Sheet>
+      {layer}
+    </>
   );
 }

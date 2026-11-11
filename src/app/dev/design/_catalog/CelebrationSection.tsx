@@ -71,6 +71,32 @@ const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
     ],
   },
   {
+    id: 'attendance-chest',
+    label: '출석 7일째 상자 (P8-08, 방패 포함)',
+    events: [
+      {
+        type: 'chest',
+        stageTitle: '',
+        goal: 0,
+        contents: { coins: 30, goldenKeys: 0, shields: 1 },
+        note: '7일 출석을 다 채웠어요!',
+      },
+    ],
+  },
+  {
+    id: 'mission-level',
+    label: '미션 받기로 레벨 업 (P8-08 공용)',
+    events: [
+      {
+        type: 'level_up',
+        level: 5,
+        fromLevel: 4,
+        title: getLevelTitle(5),
+        coins: levelUpCoins(5),
+      },
+    ],
+  },
+  {
     id: 'phase8',
     label: '별·코인 (Phase 8)',
     events: [

@@ -521,6 +521,42 @@ export const EXPECT = {
     activateIn: 'P8-07',
     note: '서버 재판정 미달 거부 · 원장 키로 한 번(코인 + XP 15 + 레벨 업 코인) · 7일 보관',
   },
+  // ── 출석·스트릭 방패 (P8-08, ① 00035) ──
+  'AT-1': {
+    expect: 'deny',
+    requires: 'public.stamp_attendance()',
+    activateIn: 'P8-08',
+    note: '출석 도장은 /api/attendance/stamp(service_role)만',
+  },
+  'AT-1b': {
+    expect: 'deny',
+    requires: 'public.world_daily_status()',
+    activateIn: 'P8-08',
+  },
+  'AT-1c': {
+    expect: 'deny',
+    requires: 'public.settle_streak_shields()',
+    activateIn: 'P8-08',
+    note: '방패 정산 헬퍼는 소유자만 (world_daily_status 안에서)',
+  },
+  'AT-1d': {
+    expect: 'deny',
+    requires: 'public.user_streak_shields',
+    activateIn: 'P8-08',
+    note: '본인 방패·방패 날 읽기만, 남의 행·anon·쓰기는 막힘',
+  },
+  'AT-2': {
+    expect: 'allow',
+    requires: 'public.stamp_attendance()',
+    activateIn: 'P8-08',
+    note: '하루 한 번(원장 키) · 누적 7회 사이클 · 7일째 방패(최대 2)',
+  },
+  'AT-3': {
+    expect: 'allow',
+    requires: 'public.world_daily_status()',
+    activateIn: 'P8-08',
+    note: '빠진 날 수만큼 방패가 있으면 다음 방문에 메움, 멱등·동시 1회, 학습일 정의',
+  },
   'CN-10': {
     expect: 'allow',
     requires: 'public.coin_reward()',

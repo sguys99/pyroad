@@ -91,6 +91,49 @@ describe('WorldHud', () => {
   });
 });
 
+describe('스트릭 방패·반짝임 (P8-08)', () => {
+  afterEach(() => window.localStorage.clear());
+
+  it('방패가 있으면 불꽃 모서리에 개수만큼, 이름·쪽지에 개수, 어제를 지켰으면 그 안내', () => {
+    render(<WorldHud {...props} shields={2} shieldSaved />);
+    const fire = screen.getByTestId('hud-streak');
+    expect(fire).toHaveAccessibleName('3일 연속 모험 중, 방패 2개');
+    expect(
+      screen.getByTestId('hud-shields').querySelectorAll('svg'),
+    ).toHaveLength(2);
+    fireEvent.click(fire);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '방패가 불꽃을 지켜 줬어요',
+    );
+  });
+
+  it('방패 0개면 그림 없음', () => {
+    render(<WorldHud {...props} />);
+    expect(screen.queryByTestId('hud-shields')).toBeNull();
+  });
+
+  it('오늘 3일이 되면 한 번 반짝, 이 기기에서 이미 봤으면 다시 안 함', () => {
+    render(<WorldHud {...props} />);
+    expect(screen.getByTestId('hud-streak')).toHaveAttribute('data-spark');
+    cleanup();
+    render(<WorldHud {...props} />);
+    expect(screen.getByTestId('hud-streak')).not.toHaveAttribute('data-spark');
+  });
+
+  it('처음 켜진 날(1일)은 반짝, 2일·오늘 아직은 안 함', () => {
+    render(<WorldHud {...props} streak={{ days: 1, today: true }} />);
+    expect(screen.getByTestId('hud-streak')).toHaveAttribute('data-spark');
+    cleanup();
+    window.localStorage.clear();
+    render(<WorldHud {...props} streak={{ days: 2, today: true }} />);
+    expect(screen.getByTestId('hud-streak')).not.toHaveAttribute('data-spark');
+    cleanup();
+    window.localStorage.clear();
+    render(<WorldHud {...props} streak={{ days: 3, today: false }} />);
+    expect(screen.getByTestId('hud-streak')).not.toHaveAttribute('data-spark');
+  });
+});
+
 describe('streakText', () => {
   it('0일은 꺼진 불꽃 안내', () => {
     expect(streakText({ days: 0, today: false }).label).toBe(

@@ -451,6 +451,7 @@ function StepContent({
           stageTitle={step.event.stageTitle}
           goal={step.event.goal}
           contents={step.event.contents}
+          note={step.event.note}
           budget={budget}
           settled={settled}
           onNext={onNext}

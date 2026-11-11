@@ -4,6 +4,8 @@ import { getAuthUser } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { OWN_PROFILE_SELECT } from '@/lib/avatar/ownProfile';
 import { loadUserApiKeys } from '@/lib/tutor/apiKeys';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { worldDailyStatusRpc } from '@/lib/quest/rewardRpc';
 import { kstStartOfDay, kstToday } from '@/lib/time/kst';
 
 import { toWorldMapData, type WorldMapData } from './mapData';
@@ -26,6 +28,8 @@ import { serverWorlds } from './serverWorlds';
  * - 퀘스트 완료·황금키 마지막 단계(완료 API): `/api/quest/complete` 의 revalidatePath('/world','/profile') + `useQuestSession` 의 router.refresh()
  * - 같은 데이터를 `/world/[slug]`·`/worlds`(P5-01)도 읽는다. 무효화 경로는 `/world`(layout, 하위 월드 포함)·`/worlds`
  * - 보물상자 열기(P8-06): `/api/world/chest` 의 revalidatePath + `StageSheet` 의 router.refresh() (HUD 코인·상자 상태)
+ * - 출석 도장(P8-08): `/api/attendance/stamp` 의 revalidatePath + `AttendanceCard` 의 router.refresh() (HUD 코인·출석 칸).
+ *   스트릭 방패는 렌더마다 `world_daily_status` 가 정산(멱등)
  * - 데일리 미션 받기(P8-07): `/api/missions/claim` 의 revalidatePath + `MissionList`(DailyMissions.tsx) 의 router.refresh() (HUD 코인·XP·미션 칸).
  *   미션 진행은 HUD 미션 칸(`WorldHudBar`)이 렌더마다 서버 RPC 로 다시 셈
  * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh() (본 기록도 지움, P5-05)
@@ -48,6 +52,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
     attempts,
     chests,
     dailyRow,
+    dailyStatus,
   ] = await Promise.all([
     getAuthUser(),
     // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
@@ -80,6 +85,12 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       .select('user_id, quiz_ids')
       .eq('day', today)
       .maybeSingle(),
+    // 스트릭·방패·출석 (P8-08, 00035): 방패 정산(쓰기)이 있어 service_role 이라 확인한 id 로만. 실패(00035 전 DB)면 null
+    getAuthUser().then(async ({ user }) => {
+      if (!user) return null;
+      const r = await worldDailyStatusRpc(createAdminClient(), user.id);
+      return r.ok ? r.data : null;
+    }),
     // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
   ]);
   if (!user) return null;
@@ -96,6 +107,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       chests: chests.data,
       dailyQuizIds:
         dailyRow.data?.user_id === user.id ? dailyRow.data.quiz_ids : null,
+      dailyStatus,
     },
     serverWorlds(),
     today,

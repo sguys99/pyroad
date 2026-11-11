@@ -22,6 +22,8 @@ import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 import { MissionHudButton, MissionHudPlaceholder, MissionList } from '@/components/world/DailyMissions';
 import type { DailyMission, DailyMissionsState } from '@/lib/world/missions';
+import { AttendanceCard, AttendanceMenuSection } from '@/components/world/AttendanceCard';
+import type { AttendanceStatus } from '@/lib/world/attendance';
 import { ContinueButton } from '@/components/world/ContinueCta';
 import { PhoneQuizSlip } from '@/components/world/PhoneQuizPick';
 import { DailyQuizCard } from '@/components/world/DailyQuizCard';
@@ -441,6 +443,56 @@ function MissionDemo() {
   );
 }
 
+// 출석 카드 (P8-08): 오늘 찍을 칸 · 6일 찍고 오늘 7일째(상자) · 방패가 어제를 지킴 · 메뉴 달력(가득)
+const ATT = (over: Partial<AttendanceStatus>): AttendanceStatus => ({
+  today: '2026-11-11',
+  total: 2,
+  stamped_today: false,
+  day_n: 3,
+  cycle: ['2026-11-07', '2026-11-09'],
+  ...over,
+});
+const ATT_SEVEN = ['2026-11-03', '2026-11-04', '2026-11-05', '2026-11-07', '2026-11-08', '2026-11-10'];
+const ATT_SAMPLES: [string, AttendanceStatus, number, boolean][] = [
+  ['3일째 (하루 빠져도 이어짐)', ATT({}), 0, false],
+  ['7일째 = 상자 (코인 30 + 방패)', ATT({ total: 6, day_n: 7, cycle: ATT_SEVEN }), 1, false],
+  ['방패가 어제를 지킴', ATT({ total: 3, day_n: 4, cycle: ['2026-11-01', '2026-11-02', '2026-11-08'] }), 1, true],
+];
+
+/** 출석 카드. 도장은 서버 대신 그 칸 코인을 돌려주는 가짜 요청 — 도장 쾅·코인이 위 HUD 견본으로 날아감, 7일째는 상자 카드 */
+function AttendanceDemo() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {ATT_SAMPLES.map(([label, status, shields, saved]) => (
+        <figure key={label} className="grid content-start gap-1" data-testid="attendance-demo">
+          <figcaption className="text-caption text-text-muted">{label}</figcaption>
+          <AttendanceCard
+            status={status}
+            shields={shields}
+            shieldSaved={saved}
+            request={async () => ({
+              stamped: true,
+              already_stamped: false,
+              day_n: status.day_n,
+              coins_earned: [5, 5, 10, 10, 15, 20, 30][status.day_n - 1],
+              coins_balance: 0,
+              shield_granted: status.day_n === 7 ? 1 : 0,
+              shields: shields + (status.day_n === 7 ? 1 : 0),
+            })}
+            onStamped={() => {}}
+          />
+        </figure>
+      ))}
+      <figure className="grid content-start gap-1">
+        <figcaption className="text-caption text-text-muted">메뉴 시트 달력 (찍은 뒤 · 방패 가득)</figcaption>
+        <div className="rounded-2xl bg-surface p-4 shadow-pop">
+          <AttendanceMenuSection status={ATT({ stamped_today: true, total: 3, day_n: 3, cycle: ['2026-11-07', '2026-11-09', '2026-11-11'] })} shields={2} />
+        </div>
+      </figure>
+    </div>
+  );
+}
+
 // 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨. 코인 0 · 45 · 1,280 · 12.3만(640px 미만 줄여 씀, P8-04)
 const HUDS: [string, WorldHudProps][] = [
   ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false } }],
@@ -449,6 +501,7 @@ const HUDS: [string, WorldHudProps][] = [
   ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 31500, level: 50, coins: 123456, streak: { days: 12, today: true } }],
   ['오늘의 미션 1/3 (P8-07)', { name: '파이', skin: 'green', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true }, missions: <MissionHudButton state={{ day: '2026-11-11', missions: [MISSION('quest_2', '퀘스트 2개 클리어', 'quest_clear', 2, 2, 1), MISSION('review_1', '복습 도전 1개 끝내기', 'review', 2, 1, 1, true), MISSION('no_hint_1', '힌트 없이 퀘스트 1개 클리어', 'no_hint', 2, 1, 0)], pending: [] }} /> }],
   ['받을 보상 있음 (금색 점)', { name: '코딩왕', skin: 'sky', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false }, missions: <MissionHudButton state={MISSION_SAMPLES[0][1]} /> }],
+  ['스트릭 방패 2개 · 어제를 방패가 지킴 (P8-08, 불꽃을 누르면 쪽지)', { name: '파이', skin: 'green', totalXp: 280, level: 2, coins: 45, streak: { days: 5, today: false }, shields: 2, shieldSaved: true }],
   ['미션 읽는 중 (자리만)', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false }, missions: <MissionHudPlaceholder /> }],
 ];
 
@@ -578,7 +631,7 @@ export function WorldMapSection() {
       </div>
       <Demo
         label="월드맵 HUD (P5-07)"
-        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 코인 잔액(P8-04: 퀘스트에서 받고 지도로 돌아오면 이 탭에서 마지막으로 본 값부터 카운트업 + 칩 팝, minimal·동작 줄이기는 바로 바꾸고 금색 틴트) · 오늘의 미션 칸(P8-07, 달성 수 · 받을 보상 금색 점 → 미션 시트) · 곧 열려요(상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 1024px 미만: 곧 열려요는 버튼 하나. 640px 미만: XP 바는 아래 가는 띠, 코인 1만 이상은 “12.3만”, 곧 열려요는 빠지고(코인 칩 자리) 닉네임 줄임표, 400px 미만은 아바타만. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
+        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 코인 잔액(P8-04: 퀘스트에서 받고 지도로 돌아오면 이 탭에서 마지막으로 본 값부터 카운트업 + 칩 팝, minimal·동작 줄이기는 바로 바꾸고 금색 틴트) · 오늘의 미션 칸(P8-07, 달성 수 · 받을 보상 금색 점 → 미션 시트) · 스트릭 방패(P8-08, 불꽃 칩 오른쪽 위 작은 방패 1~2개, 칩 폭 그대로) · 불꽃 반짝임(P8-08: 오늘 풀어 처음 켜진 날·3일이 된 날 한 번 — full 톡 커지며 금색 둘레 2번 · lite 둘레 1번 · minimal·동작 줄이기 없음, 이 기기에서 본 값은 localStorage) · 곧 열려요(상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 1024px 미만: 곧 열려요는 버튼 하나. 640px 미만: XP 바는 아래 가는 띠, 코인 1만 이상은 “12.3만”, 곧 열려요는 빠지고(코인 칩 자리) 닉네임 줄임표, 400px 미만은 아바타만. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
         data-testid="world-hud-demo"
       >
         <div data-hud-demo className="grid gap-3">
@@ -596,6 +649,13 @@ export function WorldMapSection() {
         data-testid="mission-list-demo"
       >
         <MissionDemo />
+      </Demo>
+      <Demo
+        label="출석 도장 (P8-08)"
+        note="월드맵 맨 위(오늘의 퀴즈 위), 오늘 출석 전일 때만. 7칸 달력은 누적 출석으로 채워 하루 빠져도 이어짐(칸 코인 5·5·10·10·15·20·30), 오늘 칸은 금색 점선, 7일째 상자에 든 것(코인 30 + 스트릭 방패 1개, 방패는 최대 2개)을 미리 글자로. '출석 도장 꾹!' → 오늘 칸에 금색 '출석' 도장 쾅(온보딩·통과 도장과 같은 stampSlam: full 내려찍기+종이 떨림+방울 · lite 짧게 · minimal 페이드 · 동작 줄이기 제자리) + 코인 소리 + 코인이 HUD 로(full 3개·lite 1개) → HUD 카운트업. 7일째는 도장 뒤 상자 카드(보물상자와 같은 ChestCard, 방패 포함). 찍은 뒤엔 이 방문 동안 완료 모습(닫기), 다음부터는 메뉴 시트 달력에서 봄. 어제를 방패가 메웠으면 '방패가 불꽃을 지켜 줬어요'. XP 없음"
+        data-testid="attendance-demo-section"
+      >
+        <AttendanceDemo />
       </Demo>
       <Demo
         label="이어하기 CTA (P5-10)"

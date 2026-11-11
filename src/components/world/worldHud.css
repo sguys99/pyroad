@@ -106,6 +106,24 @@
     margin-left: 0.0625rem;
     font-size: var(--text-caption);
   }
+  /* 스트릭 방패 (P8-08): 불꽃 칩 오른쪽 위 모서리에 작은 방패 1~2개 — 칩 폭은 그대로(320px 한 줄) */
+  .wh-streak {
+    position: relative;
+  }
+  .wh-shields {
+    position: absolute;
+    top: -0.125rem;
+    right: -0.25rem;
+    display: flex;
+    pointer-events: none;
+  }
+  .wh-shields > svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: -0.25rem;
+    color: var(--primary-text);
+    fill: var(--surface);
+  }
 
   /* 곧 열려요: 흐린 점선 알약 (랜딩 soon 배지와 같은 금색 글자). 1024px 이상만 펼치고, 그 아래는 버튼 하나(.wh-soon-one) —
      코인 칩(P8-04)이 들어와 닉네임 자리가 줄지 않게 */
@@ -281,6 +299,45 @@
   animation: wh-fade var(--dur-fast) var(--easing-out) both;
 }
 :root[data-reduced='true'] .wh-in {
+  animation: none;
+}
+
+/* 불꽃 반짝임 (P8-08): 처음 켜진 날·3일이 된 날 한 번. full = 톡 커지며 빛 둘레 / lite = 둘레만 짧게 / minimal·동작 줄이기 = 없음 */
+@keyframes wh-spark-pop {
+  40% {
+    transform: scale(1.35) rotate(-8deg);
+  }
+}
+@keyframes wh-spark-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+.wh-streak[data-spark]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0.1875rem var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+:root[data-motion='full'] .wh-streak[data-spark] > svg:first-child {
+  animation: wh-spark-pop var(--dur-slow) var(--easing-back-out) 2;
+}
+:root[data-motion='full'] .wh-streak[data-spark]::after {
+  animation: wh-spark-ring var(--dur-slow) var(--easing-out) 2;
+}
+:root[data-motion='lite'] .wh-streak[data-spark]::after {
+  animation: wh-spark-ring var(--dur-base) var(--easing-out) 1;
+}
+:root[data-reduced='true'] .wh-streak[data-spark] > svg:first-child,
+:root[data-reduced='true'] .wh-streak[data-spark]::after {
   animation: none;
 }
 

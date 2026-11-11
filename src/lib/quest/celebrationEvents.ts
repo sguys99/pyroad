@@ -7,7 +7,7 @@
 import type { BadgeType } from './badges';
 import type { QuestKind } from './questKind';
 import { getLevelTitle } from './xp';
-import { levelUpCoinsTotal } from './coins';
+import { levelUpCoinsTotal, type LevelUpCoins } from './coins';
 import {
   levelChanged,
   type QuestCompleteResponse,
@@ -37,13 +37,16 @@ export type CelebrationEvent =
   // 쓰지 않는 자리: 별(P8-05)·퀘스트·별 코인은 결과 쪽 보상 띠(QuestSuccess)가 별 팝·"새 별 +N"으로, 레벨 업 코인은 레벨 업 카드가 보임
   | { type: 'star'; stars: 1 | 2 | 3; gained: number }
   | { type: 'coin'; amount: number }
-  // 스테이지 보물상자 (§3 F11, P8-06): 월드맵 StageChest "열기" → 서버가 준 코인. 내용 공개형
+  // 스테이지 보물상자 (§3 F11, P8-06): 월드맵 StageChest "열기" → 서버가 준 코인. 내용 공개형.
+  // 출석 7일째 상자(P8-08)도 같은 카드: note 로 부제를 바꾸고 방패를 담음
   | {
       type: 'chest';
       stageTitle: string;
       /** 채운 별 목표 (예: 15) */
       goal: number;
-      contents: { coins: number; goldenKeys: number };
+      contents: { coins: number; goldenKeys: number; shields?: number };
+      /** 부제 (없으면 "<스테이지>에서 별 N개를 모았어요") */
+      note?: string;
     };
 
 export type CelebrationEventType = CelebrationEvent['type'];
@@ -98,4 +101,22 @@ export function buildCelebrationEvents(
     events.push({ type: 'badge', badge });
   }
   return events;
+}
+
+/** 미션 받기 등 퀘스트 밖 보상 응답(level_before·level_after·level_ups) → 레벨 업 축하 (P8-08 공용). 안 올랐으면 빈 목록 */
+export function levelUpEvents(res: {
+  level_before: number;
+  level_after: number;
+  level_ups?: readonly LevelUpCoins[];
+}): CelebrationEvent[] {
+  if (res.level_after <= res.level_before) return [];
+  return [
+    {
+      type: 'level_up',
+      level: res.level_after,
+      fromLevel: res.level_before,
+      title: getLevelTitle(res.level_after),
+      coins: levelUpCoinsTotal(res.level_ups),
+    },
+  ];
 }

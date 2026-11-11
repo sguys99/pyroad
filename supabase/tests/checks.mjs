@@ -2052,6 +2052,24 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id, p_day: '2026-11-11', p_kind: 'quest_clear', p_quiz_ids: [] },
     ],
     [
+      'AT-1',
+      u.alice,
+      'stamp_attendance',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'AT-1b',
+      'anon',
+      'world_daily_status',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'AT-1c',
+      u.alice,
+      'settle_streak_shields',
+      { p_user_id: u.alice.id },
+    ],
+    [
       'SET-1',
       u.alice,
       'patch_user_settings',
@@ -2090,7 +2108,8 @@ async function groupRpc(u) {
                            'grant_level_up_coins', 'code_quest_stars', 'is_solution_copy',
                            'stage_chest_goal', 'open_stage_chest', 'daily_mission_progress',
                            'daily_mission_target', 'daily_mission_possible', 'daily_mission_list',
-                           'daily_missions_today', 'claim_daily_mission')
+                           'daily_missions_today', 'claim_daily_mission', 'streak_learning_days',
+                           'current_streak', 'settle_streak_shields', 'world_daily_status', 'stamp_attendance')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2209,7 +2228,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-1',
     role: 'postgres',
-    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges·coin_reward·code_quest_stars·stage_chest_goal)',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·current_streak·decide_new_badges·coin_reward·code_quest_stars·stage_chest_goal)',
     ...OK,
     run: () => {
       const cases = [
@@ -2226,6 +2245,11 @@ async function groupReward() {
         ...rules.streak.map((c) => [
           `streak ${c.name}`,
           `public.has_three_day_streak(${tsArr(c.completed_at)})::text`,
+          String(c.streak),
+        ]),
+        ...rules.streak_days.map((c) => [
+          `streak_days ${c.name}`,
+          `public.current_streak(array[${c.days.map(sqlStr).join(',')}]::date[], '${c.today}')::text`,
           String(c.streak),
         ]),
         ...rules.coins.map((c) => [
@@ -3455,6 +3479,208 @@ async function groupMissions(u) {
             mismatches: mismatches(x.id),
           },
         ) ?? { actual: 'ok', detail: '미달·남의 미션·기한 밖 거부, 한 번만 코인+XP 15, 레벨 2 넘으며 +20, 어제 것 받기' }
+      );
+    },
+  });
+}
+
+// ── 출석·스트릭 방패 (P8-08, ① 00035) ──
+async function groupAttendance(u) {
+  const ago = (n) => one(`select (public.kst_today() - ${n})::text`);
+  const noonKst = (day) => `('${day} 12:00:00+09'::timestamptz)`;
+  const stamp = (id) => rpc('stamp_attendance', { p_user_id: id });
+  const status = (id) => rpc('world_daily_status', { p_user_id: id });
+  // 지난 출석 = 원장 attendance/<날짜> (도장 RPC 는 오늘만 찍으므로 grant_coins 로 같은 키를 만듦)
+  const pastStamps = async (id, days) => {
+    for (const n of days)
+      await rpc('grant_coins', { p_user_id: id, p_source: 'attendance', p_ref: ago(n), p_amount: 5 });
+  };
+  const setShields = (id, n) =>
+    one(`insert into public.user_streak_shields (user_id, shields) values ('${id}', ${n})
+           on conflict (user_id) do update set shields = excluded.shields`);
+  const learnedOn = (id, quest, day, golden = false) =>
+    one(`insert into public.user_progress (user_id, quest_id, status, completed_at, used_golden_key, code_submitted)
+           values ('${id}', '${quest}', 'completed', ${noonKst(day)}, ${golden}, '')`);
+  const shieldRows = (id) =>
+    one(`select coalesce(string_agg(day::text, ',' order by day), '') from public.streak_shield_days where user_id = '${id}'`);
+  const held = (id) => Number(one(`select coalesce((select shields from public.user_streak_shields where user_id = '${id}'), 0)`));
+
+  await check({
+    group: 'attendance',
+    id: 'AT-1d',
+    role: 'authenticated',
+    op: 'user_streak_shields·streak_shield_days: 남의 행 읽기 · 비로그인 읽기 · 본인 행 INSERT·UPDATE (본인 행 읽기만 열림, 쓰기는 RPC)',
+    ...WRITE,
+    run: async () => {
+      setShields(u.bob.id, 1);
+      setShields(u.alice.id, 1);
+      one(`insert into public.streak_shield_days (user_id, day) values ('${u.bob.id}', '2026-01-01') on conflict do nothing`);
+      const others = await rest('GET', `/rest/v1/user_streak_shields?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 방패 ${others.status} rows=${others.json?.length}` };
+      const otherDays = await rest('GET', `/rest/v1/streak_shield_days?select=day&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (otherDays.status !== 200 || otherDays.json.length !== 0)
+        return { actual: 'written', detail: `남의 방패 날 ${otherDays.status} rows=${otherDays.json?.length}` };
+      const own = await rest('GET', '/rest/v1/user_streak_shields?select=shields', { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 방패 ${own.status}` };
+      for (const t of ['user_streak_shields', 'streak_shield_days']) {
+        const anon = classifyRead(await rest('GET', `/rest/v1/${t}?select=*`));
+        if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${t} ${anon.detail}` };
+      }
+      const upd = await classifyWrite(
+        rest('PATCH', `/rest/v1/user_streak_shields?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { shields: 2 },
+          prefer: 'return=minimal',
+        }),
+        `select shields = 2 from public.user_streak_shields where user_id = '${u.alice.id}'`,
+      );
+      if (upd.actual === 'written') return { actual: 'written', detail: `본인 방패 UPDATE ${upd.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/streak_shield_days', {
+          as: u.alice,
+          body: { user_id: u.alice.id, day: '2026-01-02' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.streak_shield_days where user_id = '${u.alice.id}' and day = '2026-01-02')`,
+      );
+    },
+  });
+
+  await check({
+    group: 'attendance',
+    id: 'AT-2',
+    role: 'service_role',
+    op: '출석 도장: 하루 한 번(원장 attendance/<KST 오늘>, 동시 4번도 1회) · 누적 7회 사이클(끊겨도 진행 유지, 8번째는 1일째) · 7일째 30코인 + 방패 1(가득 2개면 0) · 상태 칸·사이클 · 잔액 = 원장',
+    ...OK,
+    run: async () => {
+      const x = await createUser('at2', '출석도장');
+      const peek = await status(x.id);
+      const many = await Promise.all(Array.from({ length: 4 }, () => stamp(x.id)));
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_stamped === false);
+      const again = await stamp(x.id);
+      const after = await status(x.id);
+      // 지난 출석 6번(띄엄띄엄) → 오늘이 7일째 상자
+      const y = await createUser('at2b', '출석상자');
+      await pastStamps(y.id, [20, 11, 9, 5, 3, 2]);
+      const before7 = await status(y.id);
+      const chest = await stamp(y.id);
+      // 방패가 가득(2)이면 7일째 상자는 코인만
+      const z = await createUser('at2c', '출석방패가득');
+      await pastStamps(z.id, [6, 5, 4, 3, 2, 1]);
+      setShields(z.id, 2);
+      const full = await stamp(z.id);
+      // 7번 다 찍었으면 오늘은 새 사이클 1일째
+      const w = await createUser('at2d', '출석새사이클');
+      await pastStamps(w.id, [7, 6, 5, 4, 3, 2, 1]);
+      const cycle = await stamp(w.id);
+      const wStatus = await status(w.id);
+      return (
+        compare(
+          'AT-2',
+          {
+            peek: `false:1:0`,
+            many: [200, 200, 200, 200],
+            fresh: `1:1:5`,
+            again: `true:0:1`,
+            after: `true:1:${ago(0)}`,
+            before7: `false:7:6`,
+            chest: `7:30:1:1`,
+            full: `7:30:0:2`,
+            cycle: `1:5`,
+            wCycle: `1:${ago(0)}`,
+            ref: ago(0),
+            mismatches: '0:0:0:0',
+          },
+          {
+            peek: `${peek.json?.attendance?.stamped_today}:${peek.json?.attendance?.day_n}:${peek.json?.attendance?.cycle?.length}`,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.day_n}:${fresh[0]?.json.coins_earned}`,
+            again: `${again.json?.already_stamped}:${again.json?.coins_earned}:${again.json?.day_n}`,
+            after: `${after.json?.attendance?.stamped_today}:${after.json?.attendance?.day_n}:${after.json?.attendance?.cycle?.join(',')}`,
+            before7: `${before7.json?.attendance?.stamped_today}:${before7.json?.attendance?.day_n}:${before7.json?.attendance?.cycle?.length}`,
+            chest: `${chest.json?.day_n}:${chest.json?.coins_earned}:${chest.json?.shield_granted}:${chest.json?.shields}`,
+            full: `${full.json?.day_n}:${full.json?.coins_earned}:${full.json?.shield_granted}:${full.json?.shields}`,
+            cycle: `${cycle.json?.day_n}:${cycle.json?.coins_earned}`,
+            wCycle: `${wStatus.json?.attendance?.day_n}:${wStatus.json?.attendance?.cycle?.join(',')}`,
+            ref: one(`select ref from public.coin_ledger where user_id = '${x.id}' and source = 'attendance'`),
+            mismatches: [x, y, z, w].map((v) => mismatches(v.id)).join(':'),
+          },
+        ) ?? { actual: 'ok', detail: '하루 1회 5코인, 띄엄띄엄 6번 뒤 7일째 30+방패, 가득이면 방패 0, 8번째는 1일째' }
+      );
+    },
+  });
+
+  await check({
+    group: 'attendance',
+    id: 'AT-3',
+    role: 'service_role',
+    op: '방패 정산(다음 방문): 하루 공백 1개로 메움·다시 불러도 그대로 · 이틀 공백 2개 · 모자라면 안 씀 · 방패 0 · 오늘 이미 풀었어도 어제 메움 · 동시 4번도 1개 · 학습일(퀴즈 끝냄 포함, 황금키 완료 제외)',
+    ...OK,
+    run: async () => {
+      const [qa, qb, qc] = stageQuests(STAGE1);
+      const quiz = one(
+        `select id from public.quests where stage_id = '${STAGE1}' and quest_type = 'quiz' order by "order" limit 1`,
+      );
+      const mk = async (tag, learned, shields) => {
+        const v = await createUser(`at3${tag}`, `방패${tag}`);
+        learned.forEach((n, i) => learnedOn(v.id, [qa, qb, qc][i], ago(n)));
+        if (shields !== null) setShields(v.id, shields);
+        return v;
+      };
+      const st = (r) =>
+        `${r.json?.streak?.days}:${r.json?.streak?.today}:${r.json?.streak?.shields}:${(r.json?.streak?.filled ?? []).length}`;
+      const one1 = await mk('a', [2], 1);
+      const r1 = await status(one1.id);
+      const r1b = await status(one1.id);
+      const two = await mk('b', [3], 2);
+      const r2 = await status(two.id);
+      const short = await mk('c', [3], 1);
+      const r3 = await status(short.id);
+      const none = await mk('d', [2], null);
+      const r4 = await status(none.id);
+      const todayToo = await mk('e', [2, 0], 1);
+      const r5 = await status(todayToo.id);
+      const race = await mk('f', [2], 2);
+      const r6 = await Promise.all(Array.from({ length: 4 }, () => status(race.id)));
+      // 퀴즈를 어제 끝냄(3번째 오답) = 학습일, 황금키 완료는 학습일 아님
+      const q = await createUser('at3g', '방패퀴즈');
+      one(`insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct, created_at)
+           values ('${q.id}', '${quiz}', 'first', 3, '{}', false, ${noonKst(ago(1))})`);
+      learnedOn(q.id, qa, ago(0), true);
+      const r7 = await status(q.id);
+      return (
+        compare(
+          'AT-3',
+          {
+            one: `2:false:0:1`,
+            oneRows: ago(1),
+            oneAgain: `2:false:0:0`,
+            two: `3:false:0:2`,
+            twoRows: `${ago(2)},${ago(1)}`,
+            short: `0:false:1:0`,
+            none: `0:false:0:0`,
+            todayToo: `3:true:0:1`,
+            race: '1:1',
+            raceDays: 2,
+            quiz: `1:false`,
+            noRows: '',
+          },
+          {
+            one: st(r1),
+            oneRows: shieldRows(one1.id),
+            oneAgain: st(r1b),
+            two: st(r2),
+            twoRows: shieldRows(two.id),
+            short: st(r3),
+            none: st(r4),
+            todayToo: st(r5),
+            race: `${held(race.id)}:${shieldRows(race.id).split(',').length}`,
+            raceDays: r6[0].json?.streak?.days,
+            quiz: `${r7.json?.streak?.days}:${r7.json?.streak?.today}`,
+            noRows: shieldRows(short.id) + shieldRows(none.id),
+          },
+        ) ?? { actual: 'ok', detail: '1일 공백 1개·2일 공백 2개로 메움, 모자람·0개는 그대로, 동시 1회, 퀴즈 끝낸 날 학습일' }
       );
     },
   });
@@ -6709,6 +6935,7 @@ async function main() {
   await groupReward();
   await groupCoins(u);
   await groupMissions(u);
+  await groupAttendance(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

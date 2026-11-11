@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 /**
- * 보상 아이콘 (P2-11, 최종 시안 `design/prototypes/src/final/reward.tsx`): 코인·별·황금키·보물상자(P8-06, 닫힘·열림)를 이모지 대신 자체 SVG로.
+ * 보상 아이콘 (P2-11, 최종 시안 `design/prototypes/src/final/reward.tsx`): 코인·별·황금키·보물상자(P8-06, 닫힘·열림)·스트릭 방패(P8-08)를 이모지 대신 자체 SVG로.
  * - 금색 하나(`accent`)만 쓰고 외곽선은 그 금색의 진한 톤(`accent-lip`) 1px 안팎, 밝은 쪽은 `accent-light`
  * - 빈 별은 중립 면(`line`) + 옅은 선
  * - 색은 Tailwind 토큰 클래스(`fill-accent` …)로만 칠한다 → 월드 테마·토큰 변경을 따라간다
@@ -13,7 +13,8 @@ export type RewardKind =
   | 'starEmpty'
   | 'key'
   | 'chest'
-  | 'chestOpen';
+  | 'chestOpen'
+  | 'shield';
 
 const STAR =
   'M16 3.5l3.7 7.6 8.3 1.2-6 5.9 1.4 8.3L16 22.6l-7.4 3.9 1.4-8.3-6-5.9 8.3-1.2z';
@@ -118,6 +119,22 @@ export function RewardIcon({
           <path
             d="M3.5 19.5h25V21h-25zM14 17.5h4v6.5h-4z"
             className="fill-accent"
+          />
+        </svg>
+      );
+    case 'shield':
+      // 스트릭 방패 (P8-08): 금색 방패 + 가운데 작은 불꽃(면 색으로 뚫음)
+      return (
+        <svg {...common}>
+          <path
+            d="M16 3.5l10.5 3.8v7.9c0 7-4.7 11.5-10.5 13.3C10.2 26.7 5.5 22.2 5.5 15.2V7.3z"
+            className="fill-accent stroke-accent-lip"
+            strokeWidth={1.1}
+            strokeLinejoin="round"
+          />
+          <path
+            d="M16 9.5c2.6 2.6 4 4.6 4 6.9a4 4 0 0 1-8 0c0-1.3.6-2.4 1.6-3.4.2 1.1.8 1.8 1.5 2.1-.4-2 .1-3.8.9-5.6z"
+            className="fill-surface"
           />
         </svg>
       );

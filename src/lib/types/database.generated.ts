@@ -588,6 +588,32 @@ export type Database = {
           },
         ];
       };
+      streak_shield_days: {
+        Row: {
+          created_at: string;
+          day: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          day: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          day?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'streak_shield_days_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_agreements: {
         Row: {
           agreed_at: string;
@@ -862,6 +888,32 @@ export type Database = {
           },
         ];
       };
+      user_streak_shields: {
+        Row: {
+          shields: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          shields?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          shields?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_streak_shields_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       users: {
         Row: {
           age_band: string | null;
@@ -1054,6 +1106,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      current_streak: {
+        Args: { p_days: string[]; p_today: string };
+        Returns: number;
+      };
       daily_mission_list: {
         Args: {
           p_day: string;
@@ -1197,6 +1253,7 @@ export type Database = {
         Args: { p_scope: string; p_stage_id?: string; p_user_id: string };
         Returns: Json;
       };
+      settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };
         Returns: string;
@@ -1206,6 +1263,8 @@ export type Database = {
         Returns: Json;
       };
       stage_chest_goal: { Args: { p_code_quests: number }; Returns: number };
+      stamp_attendance: { Args: { p_user_id: string }; Returns: Json };
+      streak_learning_days: { Args: { p_user_id: string }; Returns: string[] };
       submit_quiz_answer: {
         Args: { p_answer: Json; p_quest_id: string; p_user_id: string };
         Returns: Json;
@@ -1214,6 +1273,7 @@ export type Database = {
         Args: { p_quest_id: string; p_step?: number; p_user_id: string };
         Returns: Json;
       };
+      world_daily_status: { Args: { p_user_id: string }; Returns: Json };
     };
     Enums: {
       [_ in never]: never;

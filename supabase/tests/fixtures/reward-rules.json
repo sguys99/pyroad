@@ -1,5 +1,5 @@
 {
-  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts·checkBadges.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp·has_three_day_streak, 00028 의 level_for_xp(Lv 1~50, P8-01 — 행은 모든 문턱과 그 1 아래), 00019 의 decide_new_badges, 00031 의 coin_reward(P8-04 코인 금액표, TS src/lib/quest/coins.ts coinReward), 00032 의 code_quest_stars(P8-05 코드 퀘스트 별, TS xp.ts codeQuestStars — 다시 풀기 통과는 힌트 0·황금키 아님), 00033 의 stage_chest_goal(P8-06 스테이지 보물상자 목표 별 = ceil(코드 퀘스트 수 × 3 × 0.7), TS src/lib/world/chest.ts chestGoal), test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침",
+  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts·checkBadges.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp·has_three_day_streak, 00028 의 level_for_xp(Lv 1~50, P8-01 — 행은 모든 문턱과 그 1 아래), 00019 의 decide_new_badges, 00031 의 coin_reward(P8-04 코인 금액표, TS src/lib/quest/coins.ts coinReward), 00032 의 code_quest_stars(P8-05 코드 퀘스트 별, TS xp.ts codeQuestStars — 다시 풀기 통과는 힌트 0·황금키 아님), 00033 의 stage_chest_goal(P8-06 스테이지 보물상자 목표 별 = ceil(코드 퀘스트 수 × 3 × 0.7), TS src/lib/world/chest.ts chestGoal), 00035 의 current_streak(P8-08 연속 학습일 — 학습일·방패로 메운 날 목록과 오늘 KST 날짜, TS src/lib/time/streak.ts currentStreak), test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침",
   "xp": [
     { "base": 50, "hints": 0, "golden": false, "xp": 75 },
     { "base": 50, "hints": 1, "golden": false, "xp": 63 },
@@ -188,6 +188,17 @@
     { "name": "KST 자정 경계: UTC 로는 3일이지만 KST 로는 2일", "completed_at": ["2026-11-04T01:00:00Z", "2026-11-03T16:00:00Z", "2026-11-02T16:00:00Z"], "streak": false },
     { "name": "순서 무관 + null 무시", "completed_at": ["2026-11-02T01:00:00Z", null, "2026-11-04T01:00:00Z", "2026-11-03T01:00:00Z"], "streak": true },
     { "name": "월 경계", "completed_at": ["2026-12-01T01:00:00Z", "2026-11-30T01:00:00Z", "2026-11-29T01:00:00Z"], "streak": true }
+  ],
+  "streak_days": [
+    { "name": "학습일 없음", "days": [], "today": "2026-11-11", "streak": 0, "learned_today": false },
+    { "name": "오늘만", "days": ["2026-11-11"], "today": "2026-11-11", "streak": 1, "learned_today": true },
+    { "name": "어제까지 3일 (오늘 아직)", "days": ["2026-11-10", "2026-11-09", "2026-11-08"], "today": "2026-11-11", "streak": 3, "learned_today": false },
+    { "name": "오늘 포함 3일", "days": ["2026-11-11", "2026-11-10", "2026-11-09"], "today": "2026-11-11", "streak": 3, "learned_today": true },
+    { "name": "그제가 마지막이면 꺼짐", "days": ["2026-11-09", "2026-11-08"], "today": "2026-11-11", "streak": 0, "learned_today": false },
+    { "name": "중간 공백에서 끊김", "days": ["2026-11-11", "2026-11-10", "2026-11-08", "2026-11-07"], "today": "2026-11-11", "streak": 2, "learned_today": true },
+    { "name": "월말·연말 넘김", "days": ["2027-01-01", "2026-12-31", "2026-12-30"], "today": "2027-01-01", "streak": 3, "learned_today": true },
+    { "name": "윤년 2월 29일", "days": ["2028-03-01", "2028-02-29", "2028-02-28"], "today": "2028-03-01", "streak": 3, "learned_today": true },
+    { "name": "중복 날짜·순서 섞임", "days": ["2026-11-09", "2026-11-11", "2026-11-10", "2026-11-11"], "today": "2026-11-11", "streak": 3, "learned_today": true }
   ],
   "badges": [
     { "name": "첫 완료, 힌트 0", "facts": { "earned": [], "completedCount": 1, "stageCleared": false, "isFinalStage": false, "hintsUsed": 0, "usedGoldenKey": false, "streak3": false }, "badges": ["first_code", "hint_master"] },

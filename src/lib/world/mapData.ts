@@ -19,6 +19,7 @@ import { kstToday } from '@/lib/time/kst';
 import { getWorldStatuses, type WorldsProgress } from './getStageStatuses';
 import { planUnlocks, type UnlockPlan } from './unlockSeen';
 import type { WorldInfo } from './worlds';
+import type { WorldDailyStatus } from './attendance';
 
 /** 스테이지 시트(P5-06)가 보여 줄 퀘스트 열 (DB 조회 그대로라 quest_type 은 string) */
 export interface QuestListRow {
@@ -68,8 +69,10 @@ export interface WorldMapData {
   progress: WorldsProgress;
   /** 스테이지 id → 퀘스트 목록 (order 순, P5-06 바텀시트) */
   questsByStage: Record<string, StageQuestItem[]>;
-  /** 직접 푼(황금키 아님) 완료 시각들. HUD 스트릭(P5-07, `src/lib/time/streak.ts`)이 KST 날짜로 센다 */
+  /** 직접 푼(황금키 아님) 완료 시각들. HUD 스트릭은 서버 `dailyStatus` 를 쓰고, 그것을 못 읽었을 때(00035 전 DB)만 이것으로 센다 */
   completedAt: string[];
+  /** 스트릭(학습일·방패)·출석 사이클 (P8-08, 서버 `world_daily_status`가 방패를 정산한 뒤). 못 읽었으면 null → 출석 카드 없음 */
+  dailyStatus: WorldDailyStatus | null;
   /** 이어하기 CTA 대상 (P5-10). 열린 퀘스트를 다 깼으면 null */
   continueTarget: ContinueTarget | null;
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
@@ -138,6 +141,8 @@ export interface WorldMapRaw {
   chests?: Array<{ user_id: string; ref: string }> | null;
   /** 오늘 저장한 오늘의 퀴즈 목록 (P8-07 `user_daily_missions.quiz_ids`, §12-Q61). 있으면 그 문제로 고정 */
   dailyQuizIds?: string[] | null;
+  /** `world_daily_status` 결과 (P8-08, 확인한 id 로 service_role). 실패면 null */
+  dailyStatus?: WorldDailyStatus | null;
 }
 
 export function toWorldMapData(
@@ -183,6 +188,7 @@ export function toWorldMapData(
     fixed: raw.dailyQuizIds,
   });
   return {
+    dailyStatus: raw.dailyStatus ?? null,
     profile:
       raw.profile && raw.profile.id === userId
         ? toOwnProfile(raw.profile)

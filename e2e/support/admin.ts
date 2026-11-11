@@ -70,6 +70,9 @@ export async function resetUser(userId: string): Promise<void> {
     'quiz_attempts 삭제',
     await db.from('quiz_attempts').delete().eq('user_id', userId),
   );
+  // 스트릭 방패 (P8-08): 앱 리셋은 남기지만, 지난 실행의 방패·방패 날이 스트릭 값을 바꾸지 않게 지운다 (출석 기록은 원장이라 남음)
+  for (const t of ['streak_shield_days', 'user_streak_shields'] as const)
+    check(`${t} 삭제`, await db.from(t).delete().eq('user_id', userId));
 }
 
 /** 퀴즈 공개 부분(quests.prompt_skeleton.quiz)과 서버 전용 정답(quest_answer_keys.quiz_answer)을 service_role 로 (P7-15) */

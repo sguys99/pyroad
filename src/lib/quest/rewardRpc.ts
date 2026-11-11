@@ -10,6 +10,10 @@ import type {
   ClaimMissionResult,
   DailyMissionsRpcResult,
 } from '@/lib/world/missions';
+import type {
+  StampAttendanceResult,
+  WorldDailyStatus,
+} from '@/lib/world/attendance';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -85,7 +89,9 @@ async function callRpc<T>(
     | 'spend_coins'
     | 'open_stage_chest'
     | 'daily_missions_today'
-    | 'claim_daily_mission',
+    | 'claim_daily_mission'
+    | 'world_daily_status'
+    | 'stamp_attendance',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -283,4 +289,18 @@ export async function getCoinBalance(
     return null;
   }
   return data?.coins ?? null;
+}
+
+/** 월드맵 하루 상태 (P8-08, 00035): 스트릭 방패 정산 뒤 스트릭·방패·출석 사이클. 월드맵 로더가 확인한 id 로 */
+export function worldDailyStatusRpc(admin: AdminClient, userId: string) {
+  return callRpc<WorldDailyStatus>('world_daily_status', () =>
+    admin.rpc('world_daily_status', { p_user_id: userId }),
+  );
+}
+
+/** 출석 도장 (P8-08). 하루 한 번(원장 attendance/<KST 날짜>), 7일째 방패 +1(최대 2) */
+export function stampAttendanceRpc(admin: AdminClient, userId: string) {
+  return callRpc<StampAttendanceResult>('stamp_attendance', () =>
+    admin.rpc('stamp_attendance', { p_user_id: userId }),
+  );
 }

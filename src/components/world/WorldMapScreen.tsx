@@ -11,6 +11,8 @@ import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import { ContinueFloat } from '@/components/world/ContinueCta';
 import { PhoneQuizPick } from '@/components/world/PhoneQuizPick';
 import { DailyQuizCard } from '@/components/world/DailyQuizCard';
+import { AttendanceCard } from '@/components/world/AttendanceCard';
+import { shieldSavedYesterday } from '@/lib/world/attendance';
 import { cn } from '@/lib/utils';
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
 import type { WorldMapData } from '@/lib/world/mapData';
@@ -60,6 +62,18 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
           <div className="relative z-10">
             <ApiKeyAlert />
           </div>
+        )}
+
+        {/* 출석 도장 (P8-08): 오늘 출석 전이면 맨 위 카드. 찍은 뒤엔 이 방문 동안만 남고, 달력은 메뉴 시트에서 */}
+        {data.dailyStatus && (
+          <AttendanceCard
+            status={data.dailyStatus.attendance}
+            shields={data.dailyStatus.streak.shields}
+            shieldSaved={shieldSavedYesterday(
+              data.dailyStatus.streak,
+              data.dailyStatus.attendance.today,
+            )}
+          />
         )}
 
         {/* 오늘의 퀴즈 (P7-10): 맨 위 쪽지 → /daily. 폰 퀴즈 추천은 지도 머리 아래라 자리가 겹치지 않음 */}

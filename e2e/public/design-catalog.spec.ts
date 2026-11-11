@@ -772,3 +772,52 @@ test.describe('데일리 미션 (P8-07)', () => {
     });
   }
 });
+
+test.describe('출석 도장 (P8-08)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 3일째 도장 → 칸에 출석 도장·코인 날아감(full만), 7일째 → 방패 든 상자 카드`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('attendance-demo-section');
+      await demo.scrollIntoViewIfNeeded();
+      const [third, seventh] = [
+        demo.getByTestId('attendance-demo').nth(0),
+        demo.getByTestId('attendance-demo').nth(1),
+      ];
+      await expect(third.getByTestId('attendance-cell-3')).toHaveAttribute(
+        'data-state',
+        'next',
+      );
+      await expect(demo.getByTestId('attendance-demo').nth(2)).toContainText(
+        '방패가 불꽃을 지켜 줬어요',
+      );
+      // HUD 견본: 방패 2개
+      await expect(
+        page.getByTestId('world-hud-demo').getByTestId('hud-shields'),
+      ).toHaveAttribute('data-n', '2');
+
+      await third.getByTestId('attendance-stamp').click();
+      await expect(third.getByTestId('attendance-cell-3')).toHaveAttribute(
+        'data-state',
+        'done',
+      );
+      await expect(
+        third.getByTestId('attendance-cell-3').locator('.at-stamp'),
+      ).toBeVisible();
+      // 코인은 도장이 닿는 순간 HUD 견본으로 (full 만, 나머지는 날아가지 않음)
+      if (mode.tier === 'full' && mode.reduced === 'off')
+        await expect(page.locator('.dm-fly').first()).toBeAttached();
+      else expect(await page.locator('.dm-fly').count()).toBe(0);
+
+      await seventh.getByTestId('attendance-stamp').click();
+      const overlay = page.getByTestId('celebration-overlay');
+      await expect(overlay.getByTestId('celebration-step-chest')).toContainText(
+        '스트릭 방패',
+      );
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      await expect(overlay).toBeHidden();
+    });
+  }
+});

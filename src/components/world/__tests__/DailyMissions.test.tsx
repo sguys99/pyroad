@@ -102,6 +102,23 @@ describe('MissionList', () => {
     );
   });
 
+  it('레벨이 오르면 onLevelUp(레벨 업 카드)으로 넘기고 새로 고침은 카드가 (P8-08)', async () => {
+    const onLevelUp = vi.fn();
+    render(
+      <MissionList
+        state={state()}
+        request={vi.fn().mockResolvedValue(RES)}
+        onLevelUp={onLevelUp}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('mission-claim'));
+    await waitFor(() => expect(onLevelUp).toHaveBeenCalled());
+    expect(onLevelUp.mock.calls[0][0]).toEqual([
+      expect.objectContaining({ type: 'level_up', level: 2, coins: 20 }),
+    ]);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
   it('실패하면 서버 문구, 버튼은 그대로', async () => {
     const request = vi
       .fn()

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildCelebrationEvents } from '../celebrationEvents';
+import { buildCelebrationEvents, levelUpEvents } from '../celebrationEvents';
 import type { QuestCompleteResponse } from '../rewards';
 
 const base: QuestCompleteResponse = {
@@ -148,5 +148,27 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
         { kind: 'code', questTitle: 'x' },
       ).map((e) => e.type),
     ).toEqual(['level_up', 'badge']);
+  });
+});
+
+describe('levelUpEvents (P8-08 미션·출석 등 퀘스트 밖 보상 → 레벨 업 카드)', () => {
+  it('레벨이 오르면 도착 레벨·칭호·지나간 레벨 코인 합', () => {
+    expect(
+      levelUpEvents({
+        level_before: 4,
+        level_after: 5,
+        level_ups: [{ level: 5, coins: 100 }],
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        type: 'level_up',
+        level: 5,
+        fromLevel: 4,
+        coins: 100,
+      }),
+    ]);
+  });
+  it('안 올랐으면 빈 목록', () => {
+    expect(levelUpEvents({ level_before: 3, level_after: 3 })).toEqual([]);
   });
 });

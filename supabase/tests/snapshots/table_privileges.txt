@@ -28,6 +28,8 @@ public.quiz_attempts (table, rls=on) anon: -
 public.quiz_attempts (table, rls=on) authenticated: SELECT
 public.stages (table, rls=on) anon: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
 public.stages (table, rls=on) authenticated: DELETE,INSERT,MAINTAIN,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+public.streak_shield_days (table, rls=on) anon: -
+public.streak_shield_days (table, rls=on) authenticated: SELECT
 public.user_agreements (table, rls=on) anon: -
 public.user_agreements (table, rls=on) authenticated: -
 public.user_api_keys (table, rls=on) anon: -
@@ -49,6 +51,8 @@ public.user_public_profiles (table, rls=on) anon: -
 public.user_public_profiles (table, rls=on) authenticated: SELECT
 public.user_seen_unlocks (table, rls=on) anon: -
 public.user_seen_unlocks (table, rls=on) authenticated: SELECT
+public.user_streak_shields (table, rls=on) anon: -
+public.user_streak_shields (table, rls=on) authenticated: SELECT
 public.users (table, rls=on) anon: SELECT
 public.users (table, rls=on) authenticated: SELECT
 public.users.preferred_provider column authenticated: UPDATE

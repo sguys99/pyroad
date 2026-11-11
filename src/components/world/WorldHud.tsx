@@ -8,6 +8,7 @@ import {
   ListChecks,
   Menu,
   MessageSquare,
+  Shield,
   Store,
 } from 'lucide-react';
 
@@ -40,6 +41,12 @@ export interface WorldHudProps {
   /** 코인 잔액 (users.coins) */
   coins: number;
   streak: Streak;
+  /** 가진 스트릭 방패 (P8-08, 0~2). 불꽃 칩 모서리에 작은 방패 그림으로 */
+  shields?: number;
+  /** 어제를 방패가 메웠음 (P8-08) → 불꽃 쪽지에 "방패가 불꽃을 지켜 줬어요" */
+  shieldSaved?: boolean;
+  /** 메뉴 시트 맨 위 출석 달력 (P8-08, `AttendanceCalendar`). 출석 진입점은 HUD 바에 더 두지 않음 */
+  attendance?: ReactNode;
   /** 오늘의 미션 칸 (P8-07, `MissionHudButton` — 서버는 Suspense 로 감싼 슬롯). 없으면 미션도 "곧 열려요"에 남음 */
   missions?: ReactNode;
 }
@@ -76,24 +83,59 @@ function useSeenCoins(coins: number): number | undefined {
   return from;
 }
 
-/** 불꽃 이름(낭독기·툴팁)과 눌렀을 때 쪽지 */
-export function streakText({ days, today }: Streak): {
+/** 불꽃 이름(낭독기·툴팁)과 눌렀을 때 쪽지. 방패(P8-08)가 있으면 개수, 어제를 방패가 메웠으면 그 안내를 덧붙임 */
+export function streakText(
+  { days, today }: Streak,
+  shields = 0,
+  shieldSaved = false,
+): {
   label: string;
   note: string;
 } {
+  const shieldLabel = shields > 0 ? `, 방패 ${shields}개` : '';
+  const shieldNote =
+    (shieldSaved ? ' 어제는 방패가 불꽃을 지켜 줬어요.' : '') +
+    (shields > 0 ? ` 방패 ${shields}개가 하루 쉬어도 불꽃을 지켜 줘요.` : '');
   if (days === 0) {
     return {
-      label: '불꽃이 꺼져 있어요',
-      note: '불꽃이 꺼져 있어요. 오늘 퀘스트를 하나 풀면 불꽃이 켜져요!',
+      label: `불꽃이 꺼져 있어요${shieldLabel}`,
+      note:
+        '불꽃이 꺼져 있어요. 오늘 퀘스트를 하나 풀면 불꽃이 켜져요!' +
+        (shields > 0 ? ` 방패 ${shields}개를 가지고 있어요.` : ''),
     };
   }
   const label = `${days}일 연속 모험 중`;
   return {
-    label,
-    note: today
-      ? `${label}이에요! 내일도 만나요.`
-      : `${label}이에요! 오늘도 풀면 ${days + 1}일이 돼요.`,
+    label: label + shieldLabel,
+    note:
+      (today
+        ? `${label}이에요! 내일도 만나요.`
+        : `${label}이에요! 오늘도 풀면 ${days + 1}일이 돼요.`) + shieldNote,
   };
+}
+
+/** 불꽃을 마지막으로 본 일수 (localStorage, 기기마다). 불꽃이 처음 켜진 날·3일이 된 날 한 번 반짝이는 데 씀 */
+const SEEN_STREAK_KEY = 'pyroad:hud-streak';
+
+/**
+ * 불꽃 반짝임 (P5-07 제안 승인, P8-08): 오늘 풀어서 1일(처음 켜짐) 또는 3일이 됐고, 이 기기에서 그 값을 아직 못 봤으면 한 번.
+ * 서버 HTML 에는 없고 그린 뒤에 붙음(hydration 같음). 저장소를 못 쓰면 반짝이지 않음(매번 반짝이지 않게)
+ */
+export function useStreakSpark({ days, today }: Streak): boolean {
+  const [spark, setSpark] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(SEEN_STREAK_KEY);
+      const prev = raw === null ? 0 : Number(raw);
+      window.localStorage.setItem(SEEN_STREAK_KEY, String(days));
+      if (today && (days === 1 || days === 3) && !(prev >= days)) {
+        setSpark(true);
+      }
+    } catch {
+      // 저장소를 못 쓰면 반짝임 없음
+    }
+  }, [days, today]);
+  return spark;
 }
 
 export function WorldHud({
@@ -103,6 +145,9 @@ export function WorldHud({
   level,
   coins,
   streak,
+  shields = 0,
+  shieldSaved = false,
+  attendance,
   missions,
 }: WorldHudProps) {
   const soon = missions ? SOON.filter((s) => s.key !== 'mission') : SOON;
@@ -115,7 +160,8 @@ export function WorldHud({
   const { currentLevelXP, nextLevelXP } = getXPProgress(totalXp);
   const max = nextLevelXP === null ? 1 : nextLevelXP - currentLevelXP;
   const value = nextLevelXP === null ? 1 : totalXp - currentLevelXP;
-  const fire = streakText(streak);
+  const fire = streakText(streak, shields, shieldSaved);
+  const spark = useStreakSpark(streak);
 
   return (
     <header className="wh" data-testid="world-hud">
@@ -153,6 +199,7 @@ export function WorldHud({
           type="button"
           className="wh-chip wh-streak focus-ring"
           data-on={streak.days > 0 || undefined}
+          data-spark={spark || undefined}
           aria-label={fire.label}
           title={fire.label}
           onClick={() => say(fire.note)}
@@ -163,6 +210,18 @@ export function WorldHud({
             {streak.days}
             <span className="wh-streak-u">일</span>
           </span>
+          {shields > 0 && (
+            <span
+              className="wh-shields"
+              aria-hidden
+              data-testid="hud-shields"
+              data-n={shields}
+            >
+              {Array.from({ length: shields }, (_, i) => (
+                <Shield key={i} strokeWidth={2.6} />
+              ))}
+            </span>
+          )}
         </button>
 
         <HudCounter kind="coin" value={coins} from={coinsFrom} />
@@ -209,6 +268,7 @@ export function WorldHud({
           data-testid="hud-menu-sheet"
         >
           <nav aria-label="메뉴" className="grid gap-2">
+            {attendance}
             {/* 400px 미만은 바에 자리가 없어 소리 토글이 여기로 (미션 칸 P8-07) */}
             <div className="wh-menu-sound">
               <span>소리</span>
