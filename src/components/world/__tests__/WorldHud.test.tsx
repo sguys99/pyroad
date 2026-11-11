@@ -44,6 +44,19 @@ describe('WorldHud', () => {
     ).toHaveAttribute('data-on');
   });
 
+  it('받을 업적 보상이 있으면 메뉴에 금색 점 + 업적 도감 줄 (P8-10)', async () => {
+    render(<WorldHud {...props} achievementsReady={2} />);
+    fireEvent.click(
+      screen.getByRole('button', { name: '메뉴, 받을 업적 보상 2개' }),
+    );
+    expect(
+      await screen.findByRole('link', { name: '업적 도감, 받을 보상 2개' }),
+    ).toHaveAttribute('href', '/profile/achievements');
+    cleanup();
+    render(<WorldHud {...props} />);
+    expect(screen.getByRole('button', { name: '메뉴' })).toBeInTheDocument();
+  });
+
   it('곧 열려요 칩을 누르면 아이 말투 쪽지', () => {
     render(<WorldHud {...props} />);
     fireEvent.click(screen.getByRole('button', { name: '상점, 곧 열려요' }));

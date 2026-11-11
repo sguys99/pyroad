@@ -110,6 +110,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'success-staging',
       'quiz',
       'celebrations',
+      'achievements',
       'share-card',
       'sound',
       'legal',
@@ -818,6 +819,47 @@ test.describe('출석 도장 (P8-08)', () => {
       await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
       await expect(overlay).toBeHidden();
+    });
+  }
+});
+
+test.describe('업적 도감 (P8-10)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 실루엣·비밀·반짝임 → 받기 → 지갑 잔액·코인 날아감(full만), 반짝임은 full·lite만 돎`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const book = page
+        .getByTestId('achievement-book-demo')
+        .getByTestId('achievement-book');
+      await book.scrollIntoViewIfNeeded();
+      await expect(book.getByTestId('achievement-level_50')).toContainText(
+        '???',
+      );
+      await expect(book.getByTestId('achievement-quests_10')).toHaveAttribute(
+        'data-state',
+        'locked',
+      );
+      await expect(book.getByText('실수도 실력이 돼요!')).toBeVisible();
+      const ready = book.getByTestId('achievement-stage_clear');
+      const glint = ready.locator('.ab-glint').first();
+      const anim = await glint.evaluate(
+        (el) => getComputedStyle(el).animationName,
+      );
+      expect(anim).toBe(
+        mode.tier === 'full' && mode.reduced === 'off' ? 'ab-glint' : 'none',
+      );
+      await expect(glint).toBeVisible();
+
+      await ready.getByTestId('achievement-claim').click();
+      await expect(ready).toHaveAttribute('data-state', 'earned');
+      await expect(book.locator('[data-ab-wallet]')).toContainText(
+        '코인 1,250개',
+      );
+      const flying = await page.locator('.dm-fly').count();
+      if (mode.tier === 'full' && mode.reduced === 'off')
+        expect(flying).toBeGreaterThan(0);
+      else expect(flying).toBe(0);
     });
   }
 });

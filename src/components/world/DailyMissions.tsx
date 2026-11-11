@@ -79,8 +79,11 @@ interface Flight {
   style: CSSProperties;
 }
 
-/** 버튼에서 HUD 코인 칩·레벨 도장으로 날아가는 보상 (full 코인 3개·lite 1개 + XP, minimal·동작 줄이기 없음 — HUD 칩 색 반짝임이 대신) */
-export function useRewardFlights() {
+/**
+ * 버튼에서 HUD 코인 칩·레벨 도장으로 날아가는 보상 (full 코인 3개·lite 1개 + XP, minimal·동작 줄이기 없음 — HUD 칩 색 반짝임이 대신).
+ * `coinTarget`: 코인이 닿을 칩 (업적 도감 P8-10 은 화면 위 지갑 칩)
+ */
+export function useRewardFlights(coinTarget = '.wh [data-testid="hud-coin"]') {
   const { budget } = useMotionTier();
   const [flights, setFlights] = useState<Flight[]>([]);
   const seq = useRef(0);
@@ -96,7 +99,7 @@ export function useRewardFlights() {
       const b = el.getBoundingClientRect();
       return { dx: b.left + b.width / 2 - x0, dy: b.top + b.height / 2 - y0 };
     };
-    const coin = to('.wh [data-testid="hud-coin"]');
+    const coin = to(coinTarget);
     const xp = withXp ? to('.wh [data-testid="level-seal"]') : null;
     const coins = budget.particles >= 1 ? 3 : 1;
     const next: Flight[] = [];

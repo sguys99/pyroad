@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
 import { getLevelTitle } from '@/lib/quest/xp';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
-import { Card } from '@/components/ui/card';
+import { Card, CardButton } from '@/components/ui/card';
+import { ChevronRight } from 'lucide-react';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { AchievementMedal } from '@/components/shared/AchievementMedal';
 import type { Achievement } from '@/lib/types/database';
@@ -44,7 +45,7 @@ export default async function ProfilePage() {
         .eq('status', 'completed'),
       supabase
         .from('user_achievements')
-        .select('achievement_id, achieved_at')
+        .select('achievement_id, achieved_at, claimed_at')
         .eq('user_id', user.id),
       supabase
         .from('achievements')
@@ -55,18 +56,20 @@ export default async function ProfilePage() {
   const profile = profileResult.data ? toOwnProfile(profileResult.data) : null;
   const progress = progressResult.data ?? [];
   const stages = sortStages(stagesResult.data ?? []);
-  // 업적 (P8-09): 얻은 것만 메달로. 전체 도감(실루엣·진행도)은 P8-10
+  // 업적 (P8-09): 얻은 것만 메달로. 전체(실루엣·진행도·받기)는 도감 /profile/achievements (P8-10)
   const achievedAt = new Map(
     (achievedResult.data ?? []).map((a) => [a.achievement_id, a.achieved_at]),
   );
+  const claimable = (achievedResult.data ?? []).filter(
+    (a) => !a.claimed_at,
+  ).length;
   const definitions = (definitionsResult.data ?? []) as Pick<
     Achievement,
     'id' | 'name' | 'icon' | 'tier' | 'sort' | 'hidden'
   >[];
   const earned = definitions.filter((a) => achievedAt.has(a.id));
-  const achievementTotal = definitions.filter(
-    (a) => !a.hidden || achievedAt.has(a.id),
-  ).length;
+  // 도감과 같은 셈: 숨김 업적도 "???" 칸으로 보이므로 전체에 넣음
+  const achievementTotal = definitions.length;
 
   if (!profile) redirect('/');
 
@@ -108,11 +111,27 @@ export default async function ProfilePage() {
         </p>
       </Card>
 
-      {/* 업적 카드 (P8-09) */}
-      <Card className="mb-4" data-testid="profile-achievements">
-        <h2 className="mb-3 text-sm font-bold text-foreground">
-          업적 {earned.length}/{achievementTotal}
-        </h2>
+      {/* 업적 카드 (P8-09) → 누르면 도감 (P8-10). 받을 코인이 있으면 금색 점 */}
+      <CardButton
+        href="/profile/achievements"
+        className="mb-4"
+        data-testid="profile-achievements"
+        aria-label={`업적 도감, ${achievementTotal}개 중 ${earned.length}개${claimable > 0 ? `, 받을 보상 ${claimable}개` : ''}`}
+      >
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-bold whitespace-nowrap text-foreground">
+            업적 {earned.length}/{achievementTotal}
+          </h2>
+          {claimable > 0 && (
+            <span className="ach-ready whitespace-nowrap" aria-hidden>
+              받을 코인
+            </span>
+          )}
+          <span className="ml-auto inline-flex shrink-0 items-center text-sm font-semibold whitespace-nowrap text-primary-text">
+            도감 보기
+            <ChevronRight className="size-4" aria-hidden />
+          </span>
+        </div>
         {earned.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             아직 얻은 업적이 없어요. 퀘스트를 풀면 업적이 생겨요!
@@ -132,7 +151,7 @@ export default async function ProfilePage() {
             ))}
           </ul>
         )}
-      </Card>
+      </CardButton>
 
       {/* 스테이지 진행률 카드 */}
       <Card className="mb-4">

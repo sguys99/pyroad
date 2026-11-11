@@ -53,6 +53,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
     chests,
     dailyRow,
     dailyStatus,
+    readyAchievements,
   ] = await Promise.all([
     getAuthUser(),
     // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
@@ -91,6 +92,11 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       const r = await worldDailyStatusRpc(createAdminClient(), user.id);
       return r.ok ? r.data : null;
     }),
+    // 코인을 아직 안 받은 업적 (P8-10, 00036 본인 행 SELECT) → 메뉴의 업적 도감 금색 점. 실패하면 점 없음
+    supabase
+      .from('user_achievements')
+      .select('user_id, achievement_id')
+      .is('claimed_at', null),
     // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
   ]);
   if (!user) return null;
@@ -108,6 +114,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       dailyQuizIds:
         dailyRow.data?.user_id === user.id ? dailyRow.data.quiz_ids : null,
       dailyStatus,
+      readyAchievements: readyAchievements.data,
     },
     serverWorlds(),
     today,

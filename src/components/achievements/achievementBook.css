@@ -1,0 +1,427 @@
+/* 업적 도감 (P8-10, AchievementBook.tsx). 색은 토큰 변수만, 티어 색은 achievementMedal.css 의 --tier-*.
+   금색은 보상(받기·받을 코인·반짝임)에만. 반복 연출은 받을 수 있는 칸의 반짝 별 하나(transform·opacity, 대기 루프 = full·lite),
+   minimal·동작 줄이기는 멈춘 채 보임(받을 수 있다는 정보는 금색 테두리·"받기" 버튼·낭독 이름이 함) */
+
+.ab {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* ── 위 줄: 프로필로 · 지갑 ── */
+.ab-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: var(--spacing-touch);
+}
+.ab-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  min-height: var(--spacing-touch);
+  padding-right: 0.5rem;
+  border-radius: var(--round-s);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+.ab-back > svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.ab-wallet {
+  margin-left: auto;
+}
+
+/* ── 요약 카드 ── */
+.ab-hero {
+  display: grid;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  border-radius: var(--round-l);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.ab-hero-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.ab-title {
+  margin: 0;
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+}
+.ab-count {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-h3);
+  line-height: 1;
+  white-space: nowrap;
+}
+.ab-count b {
+  color: var(--primary-text);
+  font-size: var(--text-h1);
+  font-weight: 400;
+}
+.ab-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ab-tier-n {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.375rem;
+  border-radius: var(--round-pill);
+  background: var(--tier-soft);
+  color: var(--tier-ink);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.ab-tier-n b {
+  font-weight: 400;
+}
+.ab-tier-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--round-pill);
+  background: var(--tier-soft);
+  box-shadow: inset 0 0 0 3px var(--tier-rim);
+}
+.ab-collect {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--round-m);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.ab-collect p {
+  display: grid;
+  margin: 0;
+  color: var(--accent-text);
+  font-weight: 700;
+}
+.ab-collect p b {
+  font-size: var(--text-h3);
+  font-weight: 400;
+}
+.ab-nowrap {
+  white-space: nowrap;
+}
+.ab-collect p > span:not(.ab-collect-amt) {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+.ab-hint,
+.ab-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+.ab-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+.ab-err {
+  margin: 0;
+  color: var(--error);
+  font-weight: 600;
+}
+
+/* ── 절 ── */
+.ab-sections {
+  display: grid;
+  gap: 1.75rem;
+}
+.ab-sec {
+  display: grid;
+  gap: 0.625rem;
+}
+.ab-sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.ab-sec-t {
+  margin: 0;
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+}
+.ab-sec-n {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.ab-sec-note {
+  margin: -0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+/* 실패 칭찬: 따뜻한 띠 (초록 새싹 + 옅은 성공 면) */
+.ab-sec[data-category='grit'] {
+  padding: 1rem;
+  border-radius: var(--round-l);
+  background: var(--success-soft);
+}
+.ab-grit {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.ab-grit b {
+  display: block;
+  color: var(--success);
+  font-size: var(--text-body);
+  font-weight: 400;
+}
+.ab-grit > svg {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--success);
+}
+
+/* ── 칸 ── */
+.ab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 30rem) {
+  .ab-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 48rem) {
+  .ab-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+.ab-tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 0.75rem 0.625rem;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.ab-tile[data-state='earned'] {
+  box-shadow: inset 0 0 0 2px var(--tier-rim);
+}
+.ab-tile[data-state='claimable'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.ab-tile:is([data-state='locked'], [data-state='secret']) {
+  background: var(--surface-2);
+  box-shadow: none;
+}
+.ab-open {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  min-height: var(--spacing-touch);
+  padding: 0;
+  border: 0;
+  border-radius: var(--round-s);
+  background: none;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ab-medal-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.ab-medal {
+  transition: transform var(--spring-face-dur) var(--spring-face);
+}
+@media (hover: hover) {
+  .ab-open:hover .ab-medal {
+    transform: translateY(-2px) scale(1.04);
+  }
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .ab-medal {
+  transition: none;
+}
+/* 아직 = 실루엣: 흐린 면 + 점선 둘레 */
+.ab-medal[data-earned='false'] {
+  outline: 2px dashed var(--line-strong);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+.ab-medal[data-secret] {
+  font-size: var(--text-h2);
+  line-height: 1;
+  opacity: 0.7;
+}
+.ab-medal-big {
+  width: 6rem;
+  height: 6rem;
+}
+.ab-medal-big > svg {
+  width: 3rem;
+  height: 3rem;
+}
+.ab-medal-big[data-secret] {
+  font-size: var(--text-hero);
+}
+.ab-name {
+  max-width: 100%;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: var(--text-small--line-height);
+  word-break: keep-all;
+}
+.ab-tile:is([data-state='locked'], [data-state='secret']) .ab-name {
+  color: var(--text-muted);
+}
+.ab-date {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+.ab-prog {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+}
+.ab-prog-bar {
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.ab-prog-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+  transform-origin: left;
+}
+.ab-prog-n {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+.ab-claim {
+  width: 100%;
+}
+
+/* 받을 수 있음: 메달 옆 반짝 별 둘 */
+.ab-glint {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  color: var(--accent);
+  fill: currentColor;
+  opacity: 1;
+}
+.ab-glint[data-i='0'] {
+  top: -0.25rem;
+  right: -0.5rem;
+}
+.ab-glint[data-i='1'] {
+  bottom: 0;
+  left: -0.5rem;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+@keyframes ab-glint {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(25deg);
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) .ab-glint {
+  animation: ab-glint 1.8s ease-in-out infinite;
+}
+:root[data-reduced='false']:not([data-motion='minimal']) .ab-glint[data-i='1'] {
+  animation-delay: -0.9s;
+}
+
+/* ── 상세 시트 ── */
+.ab-detail {
+  display: grid;
+  gap: 0.875rem;
+  text-align: center;
+}
+.ab-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+.ab-tier {
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--round-pill);
+  background: var(--tier-soft);
+  color: var(--tier-ink);
+  box-shadow: inset 0 0 0 1.5px var(--tier-rim);
+  font-weight: 700;
+}
+.ab-detail-text {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 600;
+  word-break: keep-all;
+}
+.ab-detail-prog {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--text-muted);
+}
+.ab-detail-date {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+.ab-detail-done {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  margin: 0;
+  color: var(--success);
+  font-weight: 700;
+}
+.ab-detail-done > svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}

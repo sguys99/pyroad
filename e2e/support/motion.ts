@@ -61,6 +61,8 @@ export const IDLE_LOOPS = [
   'sc-wiggle',
   'sc-glint',
   'wn-chest',
+  // 받을 수 있는 업적 칸의 반짝 별 (achievementBook.css, P8-10). 받을 수 있다는 정보는 금색 테두리·"받기" 버튼이 함
+  'ab-glint',
 ];
 
 export interface RunningLoop {

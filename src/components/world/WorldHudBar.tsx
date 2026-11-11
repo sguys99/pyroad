@@ -55,6 +55,7 @@ export function WorldHudBar({ data }: { data: WorldMapData }) {
         s ? { days: s.days, today: s.today } : currentStreak(data.completedAt)
       }
       shields={s?.shields ?? 0}
+      achievementsReady={data.achievementsReady}
       shieldSaved={!!s && shieldSavedYesterday(s, dailyStatus.attendance.today)}
       attendance={
         dailyStatus && (

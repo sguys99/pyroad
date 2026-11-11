@@ -73,6 +73,8 @@ export interface WorldMapData {
   completedAt: string[];
   /** 스트릭(학습일·방패)·출석 사이클 (P8-08, 서버 `world_daily_status`가 방패를 정산한 뒤). 못 읽었으면 null → 출석 카드 없음 */
   dailyStatus: WorldDailyStatus | null;
+  /** 얻었지만 코인을 안 받은 업적 수 (P8-10, 메뉴의 업적 도감 금색 점) */
+  achievementsReady: number;
   /** 이어하기 CTA 대상 (P5-10). 열린 퀘스트를 다 깼으면 null */
   continueTarget: ContinueTarget | null;
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
@@ -143,6 +145,8 @@ export interface WorldMapRaw {
   dailyQuizIds?: string[] | null;
   /** `world_daily_status` 결과 (P8-08, 확인한 id 로 service_role). 실패면 null */
   dailyStatus?: WorldDailyStatus | null;
+  /** 코인 안 받은 본인 업적 행 (P8-10). 못 읽었으면 없음 */
+  readyAchievements?: Array<{ user_id: string }> | null;
 }
 
 export function toWorldMapData(
@@ -189,6 +193,9 @@ export function toWorldMapData(
   });
   return {
     dailyStatus: raw.dailyStatus ?? null,
+    achievementsReady: (raw.readyAchievements ?? []).filter(
+      (a) => a.user_id === userId,
+    ).length,
     profile:
       raw.profile && raw.profile.id === userId
         ? toOwnProfile(raw.profile)

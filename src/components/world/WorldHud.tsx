@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import {
+  Award,
   Bell,
   Flame,
   ListChecks,
@@ -25,6 +26,8 @@ import { getXPProgress } from '@/lib/quest/xp';
 import type { Streak } from '@/lib/time/streak';
 
 import './worldHud.css';
+// 업적 도감 진입점의 금색 점 (.ach-dot·.ach-ready, P8-10)
+import '@/components/shared/achievementMedal.css';
 
 /**
  * 월드맵·책장 상단 HUD (P5-07, Q47). 위에 붙어 따라오는 얇은 바: 아바타+닉네임(→ /profile) · 레벨 도장 + XP 바 ·
@@ -49,6 +52,8 @@ export interface WorldHudProps {
   attendance?: ReactNode;
   /** 오늘의 미션 칸 (P8-07, `MissionHudButton` — 서버는 Suspense 로 감싼 슬롯). 없으면 미션도 "곧 열려요"에 남음 */
   missions?: ReactNode;
+  /** 코인을 안 받은 업적 수 (P8-10) → 메뉴 버튼·"업적 도감" 줄에 금색 점 */
+  achievementsReady?: number;
 }
 
 const SOON = [
@@ -149,6 +154,7 @@ export function WorldHud({
   shieldSaved = false,
   attendance,
   missions,
+  achievementsReady = 0,
 }: WorldHudProps) {
   const soon = missions ? SOON.filter((s) => s.key !== 'mission') : SOON;
   const soonName = soon.map((s) => s.label).join('·');
@@ -261,8 +267,19 @@ export function WorldHud({
         <Sheet
           title="메뉴"
           trigger={
-            <IconButton label="메뉴" className="wh-icon" data-testid="hud-menu">
+            <IconButton
+              label={
+                achievementsReady > 0
+                  ? `메뉴, 받을 업적 보상 ${achievementsReady}개`
+                  : '메뉴'
+              }
+              className="wh-icon relative"
+              data-testid="hud-menu"
+            >
               <Menu aria-hidden />
+              {achievementsReady > 0 && (
+                <span className="ach-dot" aria-hidden />
+              )}
             </IconButton>
           }
           data-testid="hud-menu-sheet"
@@ -274,6 +291,25 @@ export function WorldHud({
               <span>소리</span>
               <SoundToggle />
             </div>
+            <Button
+              href="/profile/achievements"
+              variant="secondary"
+              icon={<Award aria-hidden />}
+              className="w-full"
+              aria-label={
+                achievementsReady > 0
+                  ? `업적 도감, 받을 보상 ${achievementsReady}개`
+                  : undefined
+              }
+              data-testid="menu-achievements"
+            >
+              업적 도감
+              {achievementsReady > 0 && (
+                <span className="ach-ready" aria-hidden>
+                  {achievementsReady}
+                </span>
+              )}
+            </Button>
             <Button
               href="/notice"
               variant="secondary"
