@@ -87,6 +87,8 @@ test('1280px: 4열 진열, 넘침 없음', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/profile/achievements');
   const grid = page.locator('.ab-sec[data-category="learn"] .ab-grid');
+  // evaluateAll 은 기다리지 않음 — 스트리밍 렌더가 칸을 그리기 전이면 0칸 (B58)
+  await expect(grid.locator('.ab-tile').nth(3)).toBeVisible();
   const tops = await grid
     .locator('.ab-tile')
     .evaluateAll((els) =>
