@@ -121,6 +121,16 @@ test('320px 세로 지도: 지금 위치 깃발이 어느 노드에서도 이름
           .map((s) => ({ user_id: e2eUser.id, stage_id: s.id })),
       );
     await page.goto('/world');
+    // 노드 차례 등장(scale 0.85 → 1)이 끝난 제 크기에서 잰다 (B57: 등장 중에 재서 겹침을 놓쳤음)
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll<HTMLElement>('.world-node')].every((n) => {
+        const s = getComputedStyle(n);
+        return (
+          s.opacity === '1' &&
+          (s.transform === 'none' || s.transform === 'matrix(1, 0, 0, 1, 0, 0)')
+        );
+      }),
+    );
     const hits = await page.evaluate(() => {
       const flag = document.querySelector('.wn-here-flag');
       if (!flag) return ['깃발 없음'];

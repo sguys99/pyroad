@@ -606,6 +606,14 @@
      이웃 노드의 이름표·"잠김"에 걸렸다 (P5-14 검수, 320~390px 2·6번 노드) */
   transform: translateX(calc(-50% - var(--dx) * 24px));
 }
+/* 폰 폭 세로 지도(지도 380px 이하)는 깃발 전체를 파이뱀 가운데보다 노드 쪽에 두고 조금 내린다: 제 크기 노드에서
+   "새 곳 도착!"이 이웃 노드(2→3번 이름표, 6→7번 "잠김") 끝에 걸렸다 (B57, 320~390px) */
+@container (max-width: 380px) {
+  .wn-here-flag {
+    top: 6px;
+    transform: translateX(calc(-50% - var(--dx) * (50% + 16px)));
+  }
+}
 /* 동행 펫 자리 (P5-08 슬롯): 파이뱀 발치 바깥쪽(--px, petOffset), 파이뱀 뒤(먼저 그림). 크기는 지도 단위 44 */
 .wu-pet-walker {
   position: absolute;
