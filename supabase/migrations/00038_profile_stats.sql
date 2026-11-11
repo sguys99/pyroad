@@ -120,7 +120,13 @@ AS $$
     'attendance',    (SELECT count(*) FROM public.coin_ledger l WHERE l.user_id = p_user_id AND l.source = 'attendance'),
     'missions',      (SELECT count(*) FROM public.coin_ledger l WHERE l.user_id = p_user_id AND l.source = 'mission'),
     'chests',        (SELECT count(*) FROM public.coin_ledger l WHERE l.user_id = p_user_id AND l.source = 'chest'),
-    'errors',        (SELECT count(*) FROM prog WHERE overcame_error)
+    'errors',        (SELECT count(*) FROM prog WHERE overcame_error),
+    -- 모든 퀘스트(퀴즈 포함)를 직접 풀어 별 3개인 스테이지 (§12-Q65 (d), 업적 perfect_stage · 월드맵 "완벽" 표시와 같은 기준)
+    'perfect_stages', (SELECT count(*) FROM public.stages s
+                        WHERE EXISTS (SELECT 1 FROM public.quests q WHERE q.stage_id = s.id)
+                          AND NOT EXISTS (SELECT 1 FROM public.quests q
+                                           WHERE q.stage_id = s.id
+                                             AND q.id NOT IN (SELECT quest_id FROM prog WHERE direct AND best_stars >= 3)))
   );
 $$;
 

@@ -3280,6 +3280,46 @@ async function groupCoins(u) {
       );
     },
   });
+  await check({
+    group: 'coins',
+    id: 'CH-3',
+    role: 'service_role',
+    op: '§12-Q65: 마지막 스테이지(프로젝트 1개·퀴즈 2개, 목표 3⭐) 상자는 퀴즈 별만으로 409 code_quest_needed → 프로젝트 첫 완료 코인 40(원장 quest/<id>) → 상자 50 · 모든 별 3개 → 업적 perfect_stage',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ch3', '마지막상자');
+      const final = one(`select s.id from public.stages s join public.quests q on q.stage_id = s.id where q.id = '${Q_PROJECT}'`);
+      // 앞 스테이지는 모두 끝냄(잠금 해제) + 마지막 스테이지 퀴즈 2개 ⭐3 — 코드 퀘스트(프로젝트)는 아직
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, best_stars, stars, stars_judged_on, code_submitted)
+           select '${x.id}', q.id, 'completed', now() - interval '2 days', 3, 3, public.kst_today() - 2, ''
+             from public.quests q
+            where q.stage_id <> '${final}' or q.quest_type = 'quiz'`);
+      const quizOnly = await rpc('open_stage_chest', { p_user_id: x.id, p_stage_id: final });
+      const proj = await done(x.id, Q_PROJECT);
+      const opened = await rpc('open_stage_chest', { p_user_id: x.id, p_stage_id: final });
+      return (
+        compare(
+          'CH-3',
+          {
+            quizOnly: '409:code_quest_needed',
+            proj: 200,
+            projectCoins: '40',
+            opened: '200:50:3',
+            perfect: '1',
+            mismatches: '0',
+          },
+          {
+            quizOnly: `${quizOnly.status}:${errMsg(quizOnly)}`,
+            proj: proj.status,
+            projectCoins: one(`select delta from public.coin_ledger where user_id = '${x.id}' and source = 'quest' and ref = '${Q_PROJECT}'`),
+            opened: `${opened.status}:${opened.json?.coins_earned}:${opened.json?.goal}`,
+            perfect: one(`select count(*) from public.user_achievements where user_id = '${x.id}' and achievement_id = 'perfect_stage'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '퀴즈 ⭐6 ≥ 목표 3 이어도 거부 → 프로젝트 +40 → 상자 +50, 완벽한 스테이지' }
+      );
+    },
+  });
 }
 
 // ── 데일리 미션 (P8-07, ① 00034) ──
@@ -3374,6 +3414,37 @@ async function groupMissions(u) {
             progress0: (first.json?.missions ?? []).every((m) => m.progress === 0 && m.claimed === false),
           },
         ) ?? { actual: 'ok', detail: `오늘 ${ids(first).join(',')} · 퀴즈 ${qz.length}개 중 3개 고정` }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-2b',
+    role: 'postgres',
+    op: '§12-Q65 (e): 퀘스트 3개 미션은 최근 7일(어제까지) 중 하루 3개 이상 깬 학생만 · 2개 이하는 늘 · 8일 전 기록·오늘 기록은 안 셈',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm2d', '미션맞춤');
+      const can = (t) =>
+        one(`select public.daily_mission_possible('${x.id}', public.kst_today(), 'quest_clear', ${t}, null)::text`);
+      const clear = (offset, day) =>
+        one(`insert into public.user_progress (user_id, quest_id, status, completed_at, best_stars, stars, stars_judged_on, code_submitted)
+             select '${x.id}', q.id, 'completed', ${at(day, 12 * 3600)}, 2, 2, '${day}'::date, ''
+               from public.quests q where q.quest_type <> 'quiz' order by q.stage_id, q."order" offset ${offset} limit 3`);
+      const fresh = `${can(2)},${can(3)}`;
+      clear(0, ago(8));
+      const old = can(3);
+      clear(3, today());
+      const sameDay = can(3);
+      clear(6, ago(7));
+      const recent = can(3);
+      return (
+        compare(
+          'DM-2b',
+          { fresh: 'true,false', old: 'false', sameDay: 'false', recent: 'true' },
+          { fresh, old, sameDay, recent },
+        ) ?? { actual: 'ok', detail: '새 학생 2개만 → 8일 전·오늘 3개는 안 셈 → 7일 전 3개면 3개 미션' }
       );
     },
   });

@@ -35,7 +35,7 @@ test('360px: 메뉴 금색 점 → 도감 → 받기 → 코인 반영, 넘침 �
 
   const book = page.getByTestId('achievement-book');
   await expect(book.getByRole('heading', { name: '업적 도감' })).toBeVisible();
-  await expect(book.locator('.ab-count')).toContainText('/41');
+  await expect(book.locator('.ab-count')).toContainText('/42');
   // 숨김 업적은 이름 없이 "???"
   await expect(book.getByTestId('achievement-level_50')).toContainText('???');
   // 아직 = 진행 막대 n/목표

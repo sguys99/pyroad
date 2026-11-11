@@ -48,6 +48,10 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   no_golden_keys: { status: 400, error: '황금키가 부족해요.' },
   not_enough_coins: { status: 400, error: '코인이 부족해요.' },
   not_enough_stars: { status: 409, error: '별이 아직 모자라요.' },
+  code_quest_needed: {
+    status: 409,
+    error: '이 스테이지 코드 퀘스트를 먼저 하나 풀어요.',
+  },
   mission_not_found: { status: 404, error: '오늘의 미션이 아니에요.' },
   mission_not_done: { status: 409, error: '아직 미션을 다 하지 않았어요.' },
   mission_expired: { status: 410, error: '받을 수 있는 날이 지났어요.' },

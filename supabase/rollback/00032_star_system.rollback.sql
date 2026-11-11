@@ -165,7 +165,7 @@ BEGIN
   -- 코인 (00031): 첫 완료 코인(황금키 완료는 XP 처럼 0, 퀴즈는 별 코인만) + 지나간 레벨마다 레벨 업 코인.
   -- 원장 키(quest:<quest_id>, level_up:<레벨>)가 남아 리셋 뒤 다시 풀어도 다시 받지 않음 (P8-03)
   IF NOT v_progress.used_golden_key AND v_quest.quest_type <> 'quiz' THEN
-    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward('quest'));
+    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward(CASE WHEN v_quest.quest_type = 'project' THEN 'project' ELSE 'quest' END));
   END IF;
   v_level_ups := public.grant_level_up_coins(p_user_id, v_user.current_level, v_level_after);
   SELECT u.coins INTO v_coins FROM public.users u WHERE u.id = p_user_id;

@@ -26,6 +26,7 @@ const stage = {
   status: 'in_progress' as const,
   stars: 15,
   totalQuestCount: 7,
+  completedQuestCount: 5,
   is_final: false,
   chestOpened: false,
 };
@@ -40,6 +41,28 @@ describe('StageChest', () => {
     expect(screen.getByText('별 6개 더 모으면 열려요')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     expect(screen.getByText(/코인 30/)).toBeInTheDocument();
+    expect(screen.queryByTestId('stage-chest-open')).toBeNull();
+  });
+
+  it('별은 채웠지만 코드 퀘스트를 아직 안 풂: 잠김 + 안내 (§12-Q65 (c))', () => {
+    render(
+      <StageChest
+        stage={{
+          ...stage,
+          totalQuestCount: 1,
+          stars: 6,
+          completedQuestCount: 0,
+        }}
+        onOpened={() => {}}
+      />,
+    );
+    expect(screen.getByTestId('stage-chest')).toHaveAttribute(
+      'data-state',
+      'locked',
+    );
+    expect(
+      screen.getByText('코드 퀘스트를 하나 풀면 열려요'),
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('stage-chest-open')).toBeNull();
   });
 

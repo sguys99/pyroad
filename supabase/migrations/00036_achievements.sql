@@ -1,5 +1,5 @@
 -- ============================================================
--- 업적 시스템: 정의 테이블 41종(브론즈·실버·골드) + 사용자 업적 + 판정(기존 기록에서 파생) + 받기 + 기존 뱃지 5종 이관 (Idempotent)
+-- 업적 시스템: 정의 테이블 42종(브론즈·실버·골드) + 사용자 업적 + 판정(기존 기록에서 파생) + 받기 + 기존 뱃지 5종 이관 (Idempotent)
 --   (P8-09, §3 F5, §2.6 보상은 학습 행동에만, §12-Q62 ③ "받기", 금액은 00031 coin_reward('achievement', 1·2·3) = 10·30·100)
 -- 릴리즈 단계: ① 추가형 (새 테이블 2개·새 함수·user_progress 새 열 + complete_quest 본문 교체. 인자·권한 그대로, 반환은
 --                       new_achievements 키가 늘고 new_badges 는 늘 [] — 이전 앱은 뱃지 축하만 안 보임. user_badges 는 읽기만 남김,
@@ -39,7 +39,7 @@
 --      반환 new_achievements, new_badges 는 [] (user_badges 에 더 쓰지 않음)
 --   9. 권한 + 자기 검증
 --   ⚠️ 00019·00026·00031·00032 파일을 다시 실행하면 complete_quest 가 뱃지 정의로 돌아갑니다. 다시 실행했다면 00036 도 다시 실행
--- 적용 후 NOTICE `[00036] 업적 41종: evaluate_achievements·claim_achievement service_role 전용, 뱃지 n개 이관` 확인
+-- 적용 후 NOTICE `[00036] 업적 42종: evaluate_achievements·claim_achievement service_role 전용, 뱃지 n개 이관` 확인
 -- 확인: supabase/tests AC-1~5, RPC-6, RW-2 등(이관된 5종이 예전 뱃지 규칙대로 나오는지)
 -- 되돌리기: supabase/rollback/00036_achievements.rollback.sql
 -- 운영 SQL Editor 로 적용할 때는 BEGIN; … COMMIT; 으로 감싸서 실행합니다 (supabase/README.md).
@@ -158,6 +158,7 @@ INSERT INTO public.achievements (id, name, description, icon, tier, category, me
   ('three_star_1',    '반짝 별 세 개',    '처음으로 별 3개를 받았어요.',                    'Sparkle',       'bronze', 'star',   'three_stars',   1,   140, false),
   ('three_star_10',   '별 세 개 단골',    '별 3개를 받은 퀘스트가 10개예요.',               'Gem',           'silver', 'star',   'three_stars',   10,  150, false),
   ('three_star_30',   '완벽한 탐험가',    '별 3개를 받은 퀘스트가 30개예요!',               'Orbit',         'gold',   'star',   'three_stars',   30,  160, false),
+  ('perfect_stage',   '완벽한 스테이지',  '스테이지의 모든 퀘스트와 퀴즈에서 별 3개를 받았어요!', 'Crown',   'silver', 'star',   'perfect_stages', 1,  170, false),
   -- 퀴즈
   ('quiz_1',          '첫 퀴즈 정답',     '퀴즈를 처음 맞혔어요.',                          'BadgeCheck',    'bronze', 'quiz',   'quiz_correct',  1,   210, false),
   ('quiz_10',         '퀴즈 척척박사',    '퀴즈 10문제를 맞혔어요.',                        'GraduationCap', 'silver', 'quiz',   'quiz_correct',  10,  220, false),
@@ -257,7 +258,13 @@ AS $$
       'attendance',    (SELECT count(*) FROM public.coin_ledger l WHERE l.user_id = p_user_id AND l.source = 'attendance'),
       'missions',      (SELECT count(*) FROM public.coin_ledger l WHERE l.user_id = p_user_id AND l.source = 'mission'),
       'chests',        (SELECT count(*) FROM public.coin_ledger l WHERE l.user_id = p_user_id AND l.source = 'chest'),
-      'errors',        (SELECT count(*) FROM prog WHERE overcame_error)
+      'errors',        (SELECT count(*) FROM prog WHERE overcame_error),
+      -- 모든 퀘스트(퀴즈 포함)를 직접 풀어 별 3개인 스테이지 (§12-Q65 (d))
+      'perfect_stages', (SELECT count(*) FROM public.stages s
+                          WHERE EXISTS (SELECT 1 FROM public.quests q WHERE q.stage_id = s.id)
+                            AND NOT EXISTS (SELECT 1 FROM public.quests q
+                                             WHERE q.stage_id = s.id
+                                               AND q.id NOT IN (SELECT quest_id FROM prog WHERE direct AND best_stars >= 3)))
     ) AS v
   )
   SELECT a.id,
@@ -592,7 +599,7 @@ BEGIN
   -- 코인 (00031): 첫 완료 코인(황금키 완료는 XP 처럼 0 → 첫 직접 풀이 때, 퀴즈는 별 코인만) + 별 코인 + 레벨 업 코인.
   -- 원장 키(quest:<quest_id>, star:<quest_id>:<n>, level_up:<레벨>)가 남아 리셋 뒤·동시 요청에도 한 번
   IF v_has_stars AND (v_direct OR (v_first AND NOT v_progress.used_golden_key)) THEN
-    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward('quest'));
+    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward(CASE WHEN v_quest.quest_type = 'project' THEN 'project' ELSE 'quest' END));
   END IF;
   -- 별 코인: 새로 얻은 별 번호만. 황금키 완료의 별 1개는 통과 표시라 주지 않음 → 직접 풀면 1..3 을 그때
   IF v_has_stars AND NOT (v_first AND v_progress.used_golden_key) THEN
@@ -677,7 +684,7 @@ BEGIN
   IF EXISTS (SELECT 1 FROM public.achievements
               WHERE metric NOT IN ('quests', 'projects', 'stages', 'no_hint', 'hint_finish', 'stars', 'three_stars',
                                    'quiz_correct', 'quiz_comeback', 'reviews', 'streak', 'level', 'attendance',
-                                   'missions', 'chests', 'errors')
+                                   'missions', 'chests', 'errors', 'perfect_stages')
                  OR (goal IS NULL AND metric <> 'quests')) THEN
     v_bad := v_bad || '모르는 지표'::TEXT;
   END IF;

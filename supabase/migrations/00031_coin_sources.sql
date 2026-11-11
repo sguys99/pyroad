@@ -43,6 +43,7 @@ SET search_path = ''
 AS $$
   SELECT COALESCE(CASE p_kind
     WHEN 'quest'       THEN 10
+    WHEN 'project'     THEN 40   -- 프로젝트 첫 완료 (§12-Q65 (a), XP 4배에 맞춤)
     WHEN 'star'        THEN 5
     WHEN 'level_up'    THEN CASE WHEN p_n BETWEEN 2 AND 50 THEN CASE WHEN p_n % 5 = 0 THEN 100 ELSE 20 END END
     WHEN 'mission'     THEN (ARRAY[10, 15, 20])[p_n]
@@ -260,7 +261,7 @@ BEGIN
   -- 코인 (00031): 첫 완료 코인(황금키 완료는 XP 처럼 0, 퀴즈는 별 코인만) + 지나간 레벨마다 레벨 업 코인.
   -- 원장 키(quest:<quest_id>, level_up:<레벨>)가 남아 리셋 뒤 다시 풀어도 다시 받지 않음 (P8-03)
   IF NOT v_progress.used_golden_key AND v_quest.quest_type <> 'quiz' THEN
-    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward('quest'));
+    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward(CASE WHEN v_quest.quest_type = 'project' THEN 'project' ELSE 'quest' END));
   END IF;
   v_level_ups := public.grant_level_up_coins(p_user_id, v_user.current_level, v_level_after);
   SELECT u.coins INTO v_coins FROM public.users u WHERE u.id = p_user_id;
@@ -555,7 +556,7 @@ DECLARE
   v_bad TEXT[] := '{}';
   v_fn  TEXT;
 BEGIN
-  IF public.coin_reward('quest') <> 10 OR public.coin_reward('star') <> 5
+  IF public.coin_reward('quest') <> 10 OR public.coin_reward('project') <> 40 OR public.coin_reward('star') <> 5
      OR public.coin_reward('level_up', 1) <> 0 OR public.coin_reward('level_up', 2) <> 20
      OR public.coin_reward('level_up', 5) <> 100 OR public.coin_reward('level_up', 51) <> 0
      OR public.coin_reward('attendance', 7) <> 30 OR public.coin_reward('bogus') <> 0 THEN

@@ -3,7 +3,7 @@
  *
  * 학생 유형 × 하루 단위로 1월드 실제 콘텐츠(content/)를 푼다. 규칙은 앱·SQL 원본을 그대로 읽음:
  * XP·레벨·레벨 업 코인 xp.ts · 코인 금액 coins.ts(SQL coin_reward 사본) · 상자 목표 chest.ts ·
- * 미션 풀 00034 · 업적 41종 00036(마이그레이션 INSERT 를 읽음 — 표를 두 벌로 두지 않음).
+ * 미션 풀 00034 · 업적 42종 00036(마이그레이션 INSERT 를 읽음 — 표를 두 벌로 두지 않음).
  * 가정(문서 2.1 절): 퀘스트 걸리는 시간 TIME, 실력 HINT_CYCLE·QUIZ_STAR_CYCLE, 복습 도전은 늘 ⭐3.
  */
 import { createHash } from 'node:crypto';
@@ -62,16 +62,18 @@ export const TIME = { code: 12, project: 45, quiz: 2, codeReview: 6 } as const;
 /** 가정: 코드 퀘스트 힌트 수 순환(평균 XP 배율 1.25 = P8-01 "보통") · 퀴즈 첫 판정 별 순환(평균 ⭐2) */
 export const HINT_CYCLE = [0, 1, 1, 2] as const;
 export const QUIZ_STAR_CYCLE = [3, 2, 2, 1] as const;
-/** §3 "초기 코인 밸런스안" 사용 칸 (Phase 9 상점 예정가) */
+/** Phase 9 상점 가격 (§12-Q65 확정: §3 초기안 ×3, 황금키·방패는 주 1개 구매 한도). 초기안은 SHOP_DRAFT */
 export const SHOP = [
-  { name: '코스튬(싼 것)', price: 50 },
-  { name: '스트릭 방패', price: 60 },
-  { name: '황금키', price: 80 },
-  { name: '프로필 프레임', price: 100 },
-  { name: '에디터 테마', price: 150 },
-  { name: '코스튬(비싼 것)·펫(싼 것)', price: 300 },
-  { name: '펫(비싼 것)', price: 500 },
+  { name: '코스튬(싼 것)', price: 150 },
+  { name: '스트릭 방패', price: 180 },
+  { name: '황금키', price: 240 },
+  { name: '프로필 프레임', price: 300 },
+  { name: '에디터 테마', price: 450 },
+  { name: '코스튬(비싼 것)·펫(싼 것)', price: 900 },
+  { name: '펫(비싼 것)', price: 1500 },
 ] as const;
+/** §3 "초기 코인 밸런스안" 사용 칸 (P8-14 점검 때 가격, 한 달 수입에 견줘 너무 쌌음) */
+export const SHOP_DRAFT_TOTAL = 50 + 60 + 80 + 100 + 150 + 300 + 500;
 
 export const SOURCES = [
   'quest',
@@ -220,6 +222,7 @@ export function simulateEconomy(
   let chestsOpened = 0;
   let shields = 0;
   const learnDays = new Set<number>();
+  const questsOn = new Map<number, number>(); // 날마다 깬 새 코드 퀘스트 수 (§12-Q65 (e) 미션 맞춤 배정)
   const shieldDays = new Set<number>();
   const result: EconomyResult = {
     student,
@@ -254,7 +257,8 @@ export function simulateEconomy(
         !(s.order in result.chestDays) &&
         stageOpen(s) &&
         goal > 0 &&
-        stageStars(s) >= goal
+        stageStars(s) >= goal &&
+        s.quests.some((q) => q.type !== 'quiz' && prog.has(q.id)) // §12-Q65 (c)
       ) {
         coins.chest += chestCoins(s.isFinal);
         chestsOpened++;
@@ -290,6 +294,9 @@ export function simulateEconomy(
       missions: missionsClaimed,
       chests: chestsOpened,
       errors: code.filter((x) => x.p.error).length,
+      perfect_stages: stages.filter(
+        (s) => stageStars(s) === s.quests.length * 3,
+      ).length,
     };
     for (const a of achievementDefs) {
       if (earned.has(a.id) || (metric[a.metric] ?? 0) < (a.goal ?? allQuests))
@@ -339,7 +346,13 @@ export function simulateEconomy(
       );
       const possible = (m: MissionDef) =>
         m.kind === 'quest_clear' || m.kind === 'no_hint'
-          ? remaining >= m.target
+          ? remaining >= m.target &&
+            // 00034: 퀘스트 3개 이상은 최근 7일 중 하루에 그만큼 깬 적이 있을 때만
+            (m.kind !== 'quest_clear' ||
+              m.target <= 2 ||
+              Math.max(
+                ...[1, 2, 3, 4, 5, 6, 7].map((i) => questsOn.get(day - i) ?? 0),
+              ) >= m.target)
           : m.kind === 'review'
             ? reviewOpen
             : m.kind === 'daily_quiz'
@@ -446,7 +459,8 @@ export function simulateEconomy(
         const hints = HINT_CYCLE[codeDone++ % HINT_CYCLE.length];
         const stars = codeQuestStars(hints, false);
         xp += calculateXP(q.base, hints);
-        coins.quest += COIN_RULES.quest;
+        coins.quest +=
+          q.type === 'project' ? COIN_RULES.project : COIN_RULES.quest;
         gainStars(q.id, 0, stars);
         prog.set(q.id, {
           best: stars,
@@ -459,6 +473,7 @@ export function simulateEconomy(
         today.quest++;
         if (hints === 0) today.noHint++;
       }
+      questsOn.set(day, today.quest);
       if (next >= quests.length) {
         credit = 0;
         if (result.world1Day === null) result.world1Day = day;
@@ -619,7 +634,7 @@ function main() {
   }
 
   p(
-    '### 3.4 첫 구매까지 걸리는 날 (모으기만 할 때, 일째)',
+    '### 3.4 상점 물건을 처음 살 수 있는 날 (Phase 9 확정가, 모으기만 할 때)',
     '',
     `| 유형 | 1일째 잔액 | 7일째 | ${SHOP.map((s) => `${s.name} ${s.price}`).join(' | ')} |`,
     `|---|---|---|${SHOP.map(() => '---|').join('')}`,
@@ -683,7 +698,7 @@ function main() {
 
   p(
     '',
-    '### 3.8 업적 (41종 중 얻은 수 · 업적 코인)',
+    `### 3.8 업적 (${loadAchievements().length}종 중 얻은 수 · 업적 코인)`,
     '',
     '| 유형 | 7일 | 30일 | 90일 | 180일 | 180일에 못 얻은 것 |',
     '|---|---|---|---|---|---|',

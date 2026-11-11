@@ -9,8 +9,10 @@ import { levelUpCoins } from './xp';
  * ref 형식은 00030 머리 주석 — mission `<KST 날짜>:<미션 id>` · attendance `<KST 날짜>` · chest `<stage_id>` · achievement `<업적 id>`
  */
 export const COIN_RULES = {
-  /** 코드·프로젝트 퀘스트 첫 완료 (황금키 완료 0, 퀴즈는 별 코인만) */
+  /** 코드 퀘스트 첫 완료 (황금키 완료 0, 퀴즈는 별 코인만) */
   quest: 10,
+  /** 프로젝트 퀘스트 첫 완료 (§12-Q65 (a): XP가 코드의 4배라 코인도 4배) */
+  project: 40,
   /** 별 1개당, 별 번호마다 처음 한 번 (복습으로 늘어난 별만) */
   star: 5,
   /** 데일리 미션 난이도 1·2·3 (P8-07) */

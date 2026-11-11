@@ -11,7 +11,9 @@
 --   2. open_stage_chest(user, stage): 상자 열기 (service_role 전용, /api/world/chest 가 getUser() 로 확인한 id 만 넘김)
 --        - 별 합계는 서버가 다시 셈: 그 스테이지 모든 퀘스트(퀴즈 포함)의 user_progress.best_stars 합 (월드맵 stage.stars 와 같음)
 --        - 이미 열었으면(원장 chest/<stage_id> 있음) 별과 상관없이 {opened: true, already_opened: true, coins_earned: 0}
---        - 목표 미달이면 not_enough_stars (PT409), 없는 스테이지 stage_not_found (PT404), 코드 퀘스트가 없는 스테이지는 목표 0 → 상자 없음(not_enough_stars)
+--        - 목표 미달이면 not_enough_stars (PT409). 별은 채웠어도 그 스테이지 코드 퀘스트(프로젝트 포함)를 하나도 완료하지 않았으면
+--          code_quest_needed (PT409) — 퀴즈 별만으로 여는 길을 막음(§12-Q65 (c), 코드 퀘스트가 프로젝트 1개뿐인 마지막 스테이지는
+--          목표 3 < 퀴즈 2개 최대 6). 황금키 완료도 셈(스테이지 클리어와 같은 기준, 황금키 완료는 별 1개라 목표엔 거의 안 보탬). 없는 스테이지 stage_not_found (PT404), 코드 퀘스트가 없는 스테이지는 목표 0 → 상자 없음(not_enough_stars)
 --        - 열기 = coin_apply(user, 'chest', '<stage_id>', coin_reward('chest', 마지막 스테이지(is_final) 2 · 그 밖 1)) → 30 / 50
 --          원장 키가 상태: 새 테이블 없이 "열었음" = coin_ledger (user, 'chest', stage_id) 행. 동시 호출·리셋 뒤 다시 모아도 1회
 --          (리셋은 코인을 회수하지 않고 같은 키는 다시 주지 않음, §12-Q63 보완)
@@ -52,6 +54,7 @@ DECLARE
   v_final BOOLEAN;
   v_goal  INTEGER;
   v_stars INTEGER;
+  v_code  INTEGER;
   v_res   JSONB;
 BEGIN
   IF p_user_id IS NULL OR p_stage_id IS NULL THEN
@@ -78,10 +81,19 @@ BEGIN
     JOIN public.quests q ON q.id = up.quest_id
    WHERE up.user_id = p_user_id AND q.stage_id = p_stage_id;
 
+  SELECT count(*)::integer INTO v_code
+    FROM public.user_progress up
+    JOIN public.quests q ON q.id = up.quest_id
+   WHERE up.user_id = p_user_id AND q.stage_id = p_stage_id AND q.quest_type <> 'quiz' AND up.status = 'completed';
+
   IF NOT EXISTS (SELECT 1 FROM public.coin_ledger l
-                  WHERE l.user_id = p_user_id AND l.source = 'chest' AND l.ref = p_stage_id::text)
-     AND (v_goal = 0 OR v_stars < v_goal) THEN
-    RAISE EXCEPTION 'not_enough_stars' USING ERRCODE = 'PT409';
+                  WHERE l.user_id = p_user_id AND l.source = 'chest' AND l.ref = p_stage_id::text) THEN
+    IF v_goal = 0 OR v_stars < v_goal THEN
+      RAISE EXCEPTION 'not_enough_stars' USING ERRCODE = 'PT409';
+    END IF;
+    IF v_code = 0 THEN
+      RAISE EXCEPTION 'code_quest_needed' USING ERRCODE = 'PT409';
+    END IF;
   END IF;
 
   v_res := public.coin_apply(p_user_id, 'chest', p_stage_id::text,
@@ -98,7 +110,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.open_stage_chest(UUID, UUID) IS
-  '스테이지 보물상자 열기 (P8-06). service_role 전용: /api/world/chest. 서버가 별 합계를 다시 세어 목표 이상이면 원장 chest/<stage_id> 로 30(마지막 스테이지 50) 코인 한 번';
+  '스테이지 보물상자 열기 (P8-06). service_role 전용: /api/world/chest. 서버가 별 합계를 다시 세어 목표 이상 + 코드 퀘스트 1개 이상 완료(Q65)면 원장 chest/<stage_id> 로 30(마지막 스테이지 50) 코인 한 번';
 
 -- ------------------------------------------------------------
 -- 3. 권한

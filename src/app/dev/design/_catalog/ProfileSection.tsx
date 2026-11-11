@@ -100,7 +100,7 @@ export function ProfileSection() {
         <ProfileStatsCard raw={{ ...STATS, quiz_tries: 0, quiz_right: 0, stats: { ...STATS.stats, quiz_correct: 0 } }} />
         <AchievementsCard
           earned={12}
-          total={41}
+          total={42}
           claimable={2}
           recent={[
             { id: 'a', name: '첫 에러 친구', icon: 'Bug', tier: 'bronze', achievedAt: `${today}T03:00:00Z` },

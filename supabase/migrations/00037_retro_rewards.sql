@@ -12,7 +12,7 @@
 --        streak_learning_days(00035)가 오늘을 학습일로 잘못 셈. attempts = max(attempts, 1) (첫 판정 1번, 00036 reviews 기준)
 --      퀴즈는 00026 부터 판정 때 별을 적으므로 채울 것 없음
 --   2. 코인 (원래 source/ref 그대로 → 이미 받은 것·이후 실시간 지급과 키가 겹쳐 두 번 주지 않음, 원장 UNIQUE):
---        quest/<quest_id>      코드·프로젝트 완료 중 직접 푼 것(황금키 아님 또는 solved_directly_at)  coin_reward('quest') 10
+--        quest/<quest_id>      코드·프로젝트 완료 중 직접 푼 것(황금키 아님 또는 solved_directly_at)  coin_reward('quest') 10 · 프로젝트 'project' 40 (§12-Q65)
 --        star/<quest_id>:<n>   직접 푼 완료(퀴즈 포함)의 별 번호 1..best_stars                       coin_reward('star') 5
 --                              (황금키 완료의 별 1개는 통과 표시라 코인 없음, Q59)
 --        level_up/<레벨>       Lv 2..current_level (00029 보정 뒤 레벨)                              coin_reward('level_up', n)
@@ -119,7 +119,7 @@ BEGIN
   INSERT INTO pg_temp.retro_grants (user_id, source, ref, delta, rank, n)
   SELECT g.user_id, g.source, g.ref, g.delta, g.rank, g.n
     FROM (
-      SELECT up.user_id, 'quest' AS source, up.quest_id::text AS ref, public.coin_reward('quest') AS delta, 1 AS rank, 0 AS n
+      SELECT up.user_id, 'quest' AS source, up.quest_id::text AS ref, public.coin_reward(CASE WHEN q.quest_type = 'project' THEN 'project' ELSE 'quest' END) AS delta, 1 AS rank, 0 AS n
         FROM public.user_progress up
         JOIN public.quests q ON q.id = up.quest_id
        WHERE up.status = 'completed' AND q.quest_type <> 'quiz'

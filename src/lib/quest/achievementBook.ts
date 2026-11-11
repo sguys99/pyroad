@@ -114,6 +114,7 @@ export const METRIC_HINT: Record<string, (goal: number) => string> = {
   missions: (g) => `데일리 미션 ${g}개를 해내요`,
   chests: (g) => `스테이지 보물상자를 ${g}개 열어요`,
   errors: (g) => `에러를 만나도 끝까지 풀어 퀘스트 ${g}개를 통과해요`,
+  perfect_stages: (g) => `스테이지 ${g}개의 모든 퀘스트·퀴즈를 별 3개로 채워요`,
 };
 
 export const SECRET_TEXT = '비밀 업적이에요. 계속 모험하면 알게 될 거예요!';

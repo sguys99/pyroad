@@ -74,6 +74,19 @@
 .ss-num {
   font-size: var(--text-h3);
 }
+/* 별 100% (§12-Q65 (d)): 금색 알약 한 줄, 움직임 없음 */
+.ss-perfect {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  color: var(--accent-text);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
 .ss-sum-stars {
   display: inline-flex;
   align-items: center;

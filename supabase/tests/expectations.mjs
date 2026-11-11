@@ -479,6 +479,12 @@ export const EXPECT = {
     activateIn: 'P8-06',
     note: '서버가 별 합계를 다시 세어 목표 미달 거부 · 원장 키로 한 번만(동시·리셋 뒤 0)',
   },
+  'CH-3': {
+    expect: 'allow',
+    requires: 'public.open_stage_chest()',
+    activateIn: 'P8-14',
+    note: '§12-Q65: 코드 퀘스트 1개 이상 완료해야 상자, 프로젝트 첫 완료 40코인, 완벽한 스테이지 업적',
+  },
   // ── 데일리 미션 (P8-07, ① 00034) ──
   'DM-1': {
     expect: 'deny',
@@ -508,6 +514,12 @@ export const EXPECT = {
     requires: 'public.daily_missions_today()',
     activateIn: 'P8-07',
     note: '사용자·KST 날짜 시드 결정적 배정, 할 수 있는 미션만, 오늘의 퀴즈 목록 고정',
+  },
+  'DM-2b': {
+    expect: 'allow',
+    requires: 'public.daily_mission_possible()',
+    activateIn: 'P8-14',
+    note: '§12-Q65 (e): 퀘스트 3개 미션은 최근 7일 중 하루 3개 이상 깬 학생에게만',
   },
   'DM-3': {
     expect: 'allow',

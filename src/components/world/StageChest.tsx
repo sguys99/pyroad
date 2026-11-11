@@ -45,6 +45,7 @@ interface StageChestProps {
     | 'status'
     | 'stars'
     | 'totalQuestCount'
+    | 'completedQuestCount'
     | 'is_final'
     | 'chestOpened'
   >;
@@ -141,7 +142,9 @@ export function StageChest({
             ? '열었어요! 안에 든 것을 받았어요'
             : state === 'ready'
               ? '별을 다 모았어요! 상자를 열어 보세요'
-              : `별 ${left}개 더 모으면 열려요`}
+              : left > 0
+                ? `별 ${left}개 더 모으면 열려요`
+                : '코드 퀘스트를 하나 풀면 열려요'}
         </p>
         {state === 'locked' && (
           <ProgressBar

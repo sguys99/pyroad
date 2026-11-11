@@ -122,6 +122,7 @@
   ],
   "coins": [
     { "kind": "quest", "coins": 10 },
+    { "kind": "project", "coins": 40 },
     { "kind": "star", "coins": 5 },
     { "kind": "level_up", "n": 1, "coins": 0 },
     { "kind": "level_up", "n": 2, "coins": 20 },

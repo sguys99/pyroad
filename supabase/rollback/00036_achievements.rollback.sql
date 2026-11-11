@@ -221,7 +221,7 @@ BEGIN
   -- 코인 (00031): 첫 완료 코인(황금키 완료는 XP 처럼 0 → 첫 직접 풀이 때, 퀴즈는 별 코인만) + 별 코인 + 레벨 업 코인.
   -- 원장 키(quest:<quest_id>, star:<quest_id>:<n>, level_up:<레벨>)가 남아 리셋 뒤·동시 요청에도 한 번
   IF v_has_stars AND (v_direct OR (v_first AND NOT v_progress.used_golden_key)) THEN
-    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward('quest'));
+    PERFORM public.coin_apply(p_user_id, 'quest', p_quest_id::text, public.coin_reward(CASE WHEN v_quest.quest_type = 'project' THEN 'project' ELSE 'quest' END));
   END IF;
   -- 별 코인: 새로 얻은 별 번호만. 황금키 완료의 별 1개는 통과 표시라 주지 않음 → 직접 풀면 1..3 을 그때
   IF v_has_stars AND NOT (v_first AND v_progress.used_golden_key) THEN

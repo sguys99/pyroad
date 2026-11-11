@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   LEARNING_SOURCES,
+  SHOP,
+  SHOP_DRAFT_TOTAL,
   STUDENTS,
   daysToPrice,
   loadAchievements,
@@ -19,8 +21,8 @@ describe('획득 속도 시뮬레이션', () => {
   );
   const at = (r: typeof normal, d: number) => r.rows[d];
 
-  it('마이그레이션 표를 읽음: 업적 41종 · 미션 7종', () => {
-    expect(loadAchievements()).toHaveLength(41);
+  it('마이그레이션 표를 읽음: 업적 42종 · 미션 7종', () => {
+    expect(loadAchievements()).toHaveLength(42);
     expect(loadMissions().map((m) => m.id)).toEqual([
       'quest_1',
       'quest_2',
@@ -70,18 +72,33 @@ describe('획득 속도 시뮬레이션', () => {
     const quests = stages.flatMap((s) => s.quests);
     const code = quests.filter((q) => q.type !== 'quiz').length;
     for (const r of [light, normal, eager, weekend]) {
-      expect(at(r, 179).coins.quest).toBe(code * 10);
+      // 프로젝트 첫 완료는 40 (§12-Q65 (a))
+      expect(at(r, 179).coins.quest).toBe(code * 10 + 30);
       expect(at(r, 179).coins.star).toBe(quests.length * 3 * 5);
     }
   });
 
-  it('인플레이션 현황(권고 근거): 보통 학생은 1주 안에 펫(500)을 살 수 있음', () => {
-    expect(daysToPrice(normal, 500)).toBeLessThanOrEqual(6);
-    expect(total(at(normal, 29).coins)).toBeGreaterThan(3000);
+  it('Phase 9 확정가(§12-Q65, 초기안 ×3): 첫 구매는 첫 주 안, 물건 한 개씩 모두는 보통 학생 1월드 끝 무렵', () => {
+    expect(daysToPrice(normal, SHOP[0].price)).toBeLessThanOrEqual(6);
+    const all = SHOP.reduce((n, s) => n + s.price, 0);
+    expect(all).toBe(SHOP_DRAFT_TOTAL * 3);
+    const d = daysToPrice(normal, all)!;
+    expect(Math.abs(d - normal.world1Day!)).toBeLessThanOrEqual(7);
   });
 
-  it('소급 보상: 1월드를 다 끝낸 기존 사용자는 바로 1,435코인 + 받기 가능 업적', () => {
-    expect(retroCoins(7, stages).auto).toBe(1435);
+  it('§12-Q65 (e): 하루에 3개를 깬 적 없는 학생에겐 quest_3 을 배정하지 않음, 배정되면 깰 수 있음', () => {
+    expect(light.missions.assigned.quest_3 ?? 0).toBe(0);
+    expect(normal.missions.assigned.quest_3 ?? 0).toBe(0);
+    expect(eager.missions.done.quest_3).toBe(eager.missions.assigned.quest_3);
+  });
+
+  it('§12-Q65 (c): 마지막 스테이지 상자는 프로젝트를 끝낸 뒤 (퀴즈 별만으로는 안 열림)', () => {
+    for (const r of [light, normal, eager, weekend])
+      expect(r.chestDays[7]).toBeGreaterThanOrEqual(r.world1Day!);
+  });
+
+  it('소급 보상: 1월드를 다 끝낸 기존 사용자는 바로 1,465코인 + 받기 가능 업적', () => {
+    expect(retroCoins(7, stages).auto).toBe(1465);
     expect(retroCoins(7, stages).level).toBe(10);
   });
 });

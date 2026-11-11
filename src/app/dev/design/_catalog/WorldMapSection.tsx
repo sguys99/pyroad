@@ -125,6 +125,7 @@ const NODE_STATES: [label: string, stage: StageWithStatus][] = [
   ],
   ['진행 중 (링 2/6)', SAMPLE[2]],
   ['통과 · 보물상자 열 수 있음', SAMPLE[1]],
+  ['별 100% 완벽 (§12-Q65)', { ...SAMPLE[0], stars: 18 }],
   [
     '보스',
     {
@@ -271,6 +272,18 @@ function ChestDemo() {
     ['열 수 있음', SAMPLE[1]],
     ['열었음', SAMPLE[0]],
     ['마지막 스테이지 (코인 50)', { ...SAMPLE[6], status: 'in_progress', stars: 4 }],
+    [
+      '별은 모았지만 코드 퀘스트를 아직 안 풂 (§12-Q65)',
+      {
+        ...SAMPLE[6],
+        id: 'sample-7-quiz-only',
+        status: 'in_progress',
+        totalQuestCount: 1,
+        completedQuestCount: 0,
+        maxStars: 9,
+        stars: 6,
+      },
+    ],
   ];
   return (
     <div className="grid max-w-xl gap-3">
@@ -592,6 +605,11 @@ export function WorldMapSection() {
             quests={SAMPLE_QUESTS[SAMPLE[1].id]}
           />
           <SheetPreview
+            label="별 100% 스테이지"
+            stage={{ ...SAMPLE[0], stars: 18 }}
+            quests={SAMPLE_QUESTS[SAMPLE[0].id] ?? []}
+          />
+          <SheetPreview
             label="보스 스테이지"
             stage={BOSS_STAGE}
             quests={[
@@ -612,14 +630,14 @@ export function WorldMapSection() {
       </Demo>
       <Demo
         label="스테이지 보물상자 (P8-06)"
-        note="스테이지 시트 진행 요약 아래 한 줄. 별 합계(보너스 퀴즈 별 포함)/목표 = 코드 퀘스트 수 × 3의 70% 올림(코드 퀘스트만으로 닿음, 7개면 15⭐). 내용 공개형(§2.6): 안에 든 것(코인 30, 마지막 스테이지 50)을 열기 전부터 보여 줘요. 목표를 채우면 금색 테두리 + 상자가 가끔 들썩·반짝(full·lite, minimal·동작 줄이기는 멈춘 반짝 점) + 금색 “열기”(받기 버튼, §12-Q62 ③). 열면 서버(open_stage_chest)가 별을 다시 세어 원장에 한 번만 지급 → 시트를 닫고 지도 위에 보물상자 축하 카드(뚜껑 들썩 → 열림 → 코인 톡, 효과음 chest, 컨페티). 지도 노드에는 별 합계 옆 작은 상자만. 여기 “열기”는 가짜 요청으로 실제 오버레이를 띄워요"
+        note="스테이지 시트 진행 요약 아래 한 줄. 별 합계(보너스 퀴즈 별 포함)/목표 = 코드 퀘스트 수 × 3의 70% 올림(코드 퀘스트만으로 닿음, 7개면 15⭐). 내용 공개형(§2.6): 안에 든 것(코인 30, 마지막 스테이지 50)을 열기 전부터 보여 줘요. 목표를 채우면 금색 테두리 + 상자가 가끔 들썩·반짝(full·lite, minimal·동작 줄이기는 멈춘 반짝 점) + 금색 “열기”(받기 버튼, §12-Q62 ③). 별을 채웠어도 그 스테이지 코드 퀘스트를 하나도 안 풀었으면 잠긴 채 “코드 퀘스트를 하나 풀면 열려요”(§12-Q65 (c) — 퀴즈 별만으로 마지막 스테이지 상자를 여는 길을 막음). 열면 서버(open_stage_chest)가 별을 다시 세어 원장에 한 번만 지급 → 시트를 닫고 지도 위에 보물상자 축하 카드(뚜껑 들썩 → 열림 → 코인 톡, 효과음 chest, 컨페티). 지도 노드에는 별 합계 옆 작은 상자만. 여기 “열기”는 가짜 요청으로 실제 오버레이를 띄워요"
         data-testid="stage-chest-demo"
       >
         <ChestDemo />
       </Demo>
       <Demo
         label="스테이지 노드 상태 5종 (P5-04)"
-        note="랜드마크는 지도가 한 번만 그리고(잠김 = 연필 스케치), 노드는 버튼 + 알약 이름표 + 별 합계. 진행 중은 초록 이름표 + 번호 원 둘레 진행률 링 + 점선 고리(대기 루프 full·lite), 통과는 도장, 보스(is_final)는 큰 랜드마크 + 왕관 + 금색 번호. 잠긴 노드를 누르면 안내 쪽지"
+        note="랜드마크는 지도가 한 번만 그리고(잠김 = 연필 스케치), 노드는 버튼 + 알약 이름표 + 별 합계. 진행 중은 초록 이름표 + 번호 원 둘레 진행률 링 + 점선 고리(대기 루프 full·lite), 통과는 도장, 보스(is_final)는 큰 랜드마크 + 왕관 + 금색 번호. 별 100%(퀴즈 포함 모든 별 3개, §12-Q65 (d))는 별 알약 금색 테두리 + 작은 왕관(움직임 없음, 코인 없이 업적 “완벽한 스테이지”), 시트 요약 아래 “완벽해요!” 알약. 잠긴 노드를 누르면 안내 쪽지"
         data-testid="world-node-states"
       >
         <div className="flex flex-wrap gap-4">

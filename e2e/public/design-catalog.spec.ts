@@ -698,13 +698,16 @@ test.describe('스테이지 보물상자 (P8-06)', () => {
       const demo = page.getByTestId('stage-chest-demo');
       await demo.scrollIntoViewIfNeeded();
       const rows = demo.getByTestId('stage-chest');
-      await expect(rows).toHaveCount(4);
+      await expect(rows).toHaveCount(5);
       await expect(rows.nth(0)).toHaveAttribute('data-state', 'locked');
       await expect(rows.nth(1)).toHaveAttribute('data-state', 'ready');
       await expect(rows.nth(2)).toHaveAttribute('data-state', 'opened');
       // 내용 공개형: 안에 든 것을 열기 전부터 (마지막 스테이지 50)
       await expect(rows.nth(0)).toContainText('코인 30');
       await expect(rows.nth(3)).toContainText('코인 50');
+      // 별은 채웠어도 코드 퀘스트 0개면 잠김 (§12-Q65 (c))
+      await expect(rows.nth(4)).toHaveAttribute('data-state', 'locked');
+      await expect(rows.nth(4)).toContainText('코드 퀘스트를 하나 풀면 열려요');
       await expect(demo.getByTestId('stage-chest-open')).toHaveCount(1);
 
       const names = loopNames(await runningLoops(page));
@@ -714,6 +717,12 @@ test.describe('스테이지 보물상자 (P8-06)', () => {
       expect(names.includes('wn-chest')).toBe(moving);
       await expect(
         page.getByTestId('world-node-states').locator('.wn-chest'),
+      ).toHaveCount(1);
+      // 별 100% 노드: 금색 왕관 (움직임 없음, §12-Q65 (d))
+      await expect(
+        page
+          .getByTestId('world-node-states')
+          .locator('.wn[data-perfect] .wn-perfect'),
       ).toHaveCount(1);
 
       await demo.getByTestId('stage-chest-open').click();

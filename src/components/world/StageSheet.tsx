@@ -29,6 +29,7 @@ import { kstToday } from '@/lib/time/kst';
 import { Landmark } from './map/MapArt';
 import { QUIZ_KIND_ICON } from './PhoneQuizPick';
 import { StageChest } from './StageChest';
+import { isPerfectStage } from '@/lib/world/chest';
 import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import './map/worldMap.css';
 import './stageSheet.css';
@@ -196,6 +197,12 @@ export function StageSheet({
             </span>
           )}
         </div>
+        {SHOW_STARS && isPerfectStage(stage) && (
+          <span className="ss-perfect" data-testid="stage-sheet-perfect">
+            <Crown aria-hidden className="size-4" strokeWidth={2.6} />
+            완벽해요! 별을 모두 모았어요
+          </span>
+        )}
         <ProgressBar
           value={done}
           max={Math.max(codeRows.length, 1)}

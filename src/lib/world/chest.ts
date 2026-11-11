@@ -18,17 +18,41 @@ export function chestCoins(isFinal: boolean): number {
   return coinReward('chest', isFinal ? 2 : 1);
 }
 
-/** none: 상자 없음(코드 퀘스트 0) · locked: 별 모으는 중 · ready: 열 수 있음 · opened: 열었음 */
+/**
+ * none: 상자 없음(코드 퀘스트 0) · locked: 별 모으는 중(또는 별은 채웠지만 코드 퀘스트를 아직 하나도 안 풂) · ready: 열 수 있음 · opened: 열었음.
+ * 여는 조건 = 별 목표 + 그 스테이지 코드 퀘스트 1개 이상 완료(§12-Q65 (c), SQL `open_stage_chest` code_quest_needed와 같음, 황금키 완료도 셈)
+ */
 export type ChestState = 'none' | 'locked' | 'ready' | 'opened';
 
 export function chestState(
   stage: Pick<
     StageWithStatus,
-    'status' | 'stars' | 'totalQuestCount' | 'chestOpened'
+    | 'status'
+    | 'stars'
+    | 'totalQuestCount'
+    | 'completedQuestCount'
+    | 'chestOpened'
   >,
 ): ChestState {
   const goal = chestGoal(stage.totalQuestCount);
   if (goal === 0 || stage.status === 'locked') return 'none';
   if (stage.chestOpened) return 'opened';
-  return stage.stars >= goal ? 'ready' : 'locked';
+  return stage.stars >= goal && stage.completedQuestCount > 0
+    ? 'ready'
+    : 'locked';
+}
+
+/**
+ * 상자 "다음 단계" (§12-Q65 (d)): 스테이지의 모든 퀘스트·퀴즈가 별 3개 → 지도 노드·스테이지 시트에 금색 "완벽" 표시.
+ * 코인은 없고(인플레이션, docs/balance.md 4절) 업적 `perfect_stage`(SQL 지표 perfect_stages)가 같은 기준으로 한 번 보상.
+ * 황금키 완료는 별 1개라 직접 다시 풀어 3개가 돼야 셈 (SQL 은 직접 푼 것만 — 황금키 완료가 3개가 되는 길은 없어 같은 결과)
+ */
+export function isPerfectStage(
+  stage: Pick<StageWithStatus, 'status' | 'stars' | 'maxStars'>,
+): boolean {
+  return (
+    stage.status !== 'locked' &&
+    stage.maxStars > 0 &&
+    stage.stars >= stage.maxStars
+  );
 }

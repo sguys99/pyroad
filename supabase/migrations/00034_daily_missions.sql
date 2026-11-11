@@ -19,7 +19,7 @@
 --      진행은 기록에서 파생하므로 진행 초기화로 기록이 지워지면 그날 진행도 줄어듦(받은 보상은 그대로)
 --   4. daily_missions_today(user, quiz_ids) (service_role, 월드맵 HUD 미션 칸 WorldHudBar 가 확인한 사용자 id 만, Suspense 안):
 --        오늘(KST) 행이 없고 quiz_ids 가 NULL 이면 {assigned:false} (읽기만)
---        없고 quiz_ids 를 주면 배정: 할 수 있는 미션만(daily_mission_possible) 그룹마다 하나, 퀘스트 그룹은 할 수 있으면 늘 첫 칸,
+--        없고 quiz_ids 를 주면 배정: 할 수 있는 미션만(daily_mission_possible — 퀘스트 3개는 최근 7일 중 하루 3개 이상 깬 학생만, §12-Q65 (e)) 그룹마다 하나, 퀘스트 그룹은 할 수 있으면 늘 첫 칸,
 --          나머지는 md5(사용자:날짜:미션 id) 순 — 결정적. quiz_ids(서버가 고른 오늘의 퀴즈)는 퀴즈 퀘스트만 최대 3개로 걸러 저장.
 --          동시에 두 번 와도 ON CONFLICT DO NOTHING 이라 먼저 저장한 것 하나
 --        반환 {assigned, day, quiz_ids, missions:[{id,title,kind,difficulty,target,progress,coins,xp,claimed}],
@@ -160,13 +160,16 @@ STABLE
 SET search_path = ''
 AS $$
   SELECT CASE p_kind
-    -- 아직 안 깬 코드·프로젝트 퀘스트가 목표만큼 남았는지
-    -- shortcut: 잠긴 스테이지 퀘스트도 셈(앞 스테이지를 깨면 열림). 하루에 다음 스테이지까지 못 가는 학생에게 3개는 어려울 수 있음 — 밸런스(P8-14)에서 보고 필요하면 열린 스테이지만
+    -- 아직 안 깬 코드·프로젝트 퀘스트가 목표만큼 남았는지. 잠긴 스테이지 퀘스트도 셈 — 지금 스테이지를 깨면 같은 날 다음이 열림(P8-14 확인)
+    -- + 목표 3개 이상은 최근 7일(어제까지) 중 하루에 그만큼 깬 적이 있는 학생에게만 (§12-Q65 (e): 하루 30분 학생은 quest_3 을 못 깸, docs/balance.md 3.9)
     WHEN 'quest_clear' THEN (
       SELECT count(*) FROM public.quests q
        WHERE q.quest_type <> 'quiz'
          AND NOT EXISTS (SELECT 1 FROM public.user_progress up
                           WHERE up.user_id = p_user_id AND up.quest_id = q.id AND up.status = 'completed')) >= p_target
+      AND (p_target <= 2
+           OR (SELECT max(public.daily_mission_progress(p_user_id, p_day - g.i, 'quest_clear', NULL))
+                 FROM generate_series(1, 7) AS g(i)) >= p_target)
     WHEN 'no_hint' THEN (
       SELECT count(*) FROM public.quests q
        WHERE q.quest_type <> 'quiz'

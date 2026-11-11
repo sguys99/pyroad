@@ -7,6 +7,7 @@ describe('coins (P8-04 금액표)', () => {
     const inRange = (xs: readonly number[], lo: number, hi: number) =>
       xs.every((x) => x >= lo && x <= hi);
     expect(COIN_RULES.quest).toBe(10);
+    expect(COIN_RULES.project).toBe(4 * COIN_RULES.quest); // §12-Q65 (a)
     expect(COIN_RULES.star).toBe(5);
     expect(inRange(COIN_RULES.mission, 10, 20)).toBe(true);
     expect(inRange(COIN_RULES.attendance, 5, 30)).toBe(true);
