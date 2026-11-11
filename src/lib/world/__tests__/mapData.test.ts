@@ -197,6 +197,28 @@ describe('toWorldMapData (P5-13)', () => {
     );
   });
 
+  it('오늘 저장한 오늘의 퀴즈 목록(P8-07 §12-Q61)이 있으면 그 문제로 고정, 없으면 지금 계산', () => {
+    const base = raw();
+    const plain = stage('s1', 1, ['q1', 'q2']);
+    const s1 = {
+      ...plain,
+      quests: plain.quests.map((q) => ({
+        ...q,
+        quest_type: 'quiz',
+        quiz_kind: 'multiple_choice' as string | null,
+      })),
+    };
+    const at = (dailyQuizIds: string[] | null) =>
+      toWorldMapData(
+        ME,
+        { ...base, stages: [s1, base.stages[1]], dailyQuizIds },
+        WORLDS,
+        '2026-11-10',
+      ).daily.picks.map((p) => p.questId);
+    expect(at(['q2'])).toEqual(['q2']);
+    expect(at(null)).toHaveLength(2);
+  });
+
   it('황금키로 완료한 시각은 스트릭에서 뺀다', () => {
     const base = raw();
     const data = toWorldMapData(

@@ -728,3 +728,47 @@ test.describe('스테이지 보물상자 (P8-06)', () => {
     });
   }
 });
+
+test.describe('데일리 미션 (P8-07)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 진행·달성·받음·지난 보상 · 받기 → 받았어요, 보상이 HUD 로 날아감(full만)`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('mission-list-demo');
+      await demo.scrollIntoViewIfNeeded();
+      const first = demo.getByTestId('mission-demo').first();
+      await expect(first.getByTestId('mission-quest_2')).toHaveAttribute(
+        'data-state',
+        'doing',
+      );
+      await expect(first.getByTestId('mission-review_1')).toContainText(
+        '받았어요',
+      );
+      await expect(
+        first.getByRole('heading', { name: /지난 보상/ }),
+      ).toBeVisible();
+      await expect(first.getByText('어제')).toBeVisible();
+      await expect(first.getByTestId('mission-timer')).toContainText(
+        '새 미션까지',
+      );
+      // HUD 견본: 받을 보상이 있으면 금색 점
+      await expect(
+        page.getByTestId('world-hud-demo').getByTestId('hud-mission').last(),
+      ).toHaveAttribute('data-ready');
+
+      await first
+        .getByTestId('mission-daily_quiz')
+        .getByTestId('mission-claim')
+        .click();
+      await expect(first.getByTestId('mission-daily_quiz')).toHaveAttribute(
+        'data-state',
+        'claimed',
+      );
+      const flying = await page.locator('.dm-fly').count();
+      if (mode.tier === 'full' && mode.reduced === 'off')
+        expect(flying).toBeGreaterThan(0);
+      else expect(flying).toBe(0);
+    });
+  }
+});

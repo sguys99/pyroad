@@ -1,4 +1,4 @@
-// 월드맵 상단 HUD (P5-07, Q47): 스크롤해도 따라오는 바, 실제 값(닉네임·레벨·스트릭·코인 P8-04), 곧 열려요 쪽지, 메뉴 시트(공지·게시판·로그아웃)
+// 월드맵 상단 HUD (P5-07, Q47): 스크롤해도 따라오는 바, 실제 값(닉네임·레벨·스트릭·코인 P8-04·미션 칸 P8-07), 곧 열려요 쪽지, 메뉴 시트(공지·게시판·로그아웃, 400px 미만은 소리)
 
 import { test, expect } from './support/test';
 import { coinBalance, completeQuests, grantTestCoins } from './support/admin';
@@ -41,15 +41,17 @@ test('360px: 스크롤해도 HUD가 위에 있고, 불꽃·코인·곧 열려요
     `코인 ${(await coinBalance(e2eUser.id)).toLocaleString('ko-KR')}개`,
   );
 
-  // 640px 미만은 곧 열려요 버튼이 빠지고(코인 칩 자리), 400px 미만은 닉네임 글자도 빠짐 (아바타 링크 이름은 그대로)
+  // 640px 미만은 곧 열려요 버튼이 빠지고(코인·미션 칸 자리, P8-07), 400px 미만은 닉네임 글자와 바의 소리 토글도 빠짐
+  // (아바타 링크 이름은 그대로, 소리는 메뉴 시트 안)
   await expect(
-    hud.getByRole('button', { name: '오늘의 미션·상점, 곧 열려요' }),
+    hud.getByRole('button', { name: '상점, 곧 열려요' }),
   ).toBeHidden();
+  await expect(hud.getByTestId('hud-mission')).toBeVisible();
   await expect(hud.locator('.wh-name')).toBeHidden();
+  await expect(hud.getByTestId('sound-toggle')).toBeHidden();
   await page.setViewportSize({ width: 768, height: 740 });
-  await hud
-    .getByRole('button', { name: '오늘의 미션·상점, 곧 열려요' })
-    .click();
+  await expect(hud.getByTestId('sound-toggle')).toBeVisible();
+  await hud.getByRole('button', { name: '상점, 곧 열려요' }).click();
   await expect(page.getByRole('status', { name: 'HUD 안내' })).toContainText(
     '곧 열려요!',
   );
@@ -60,6 +62,7 @@ test('360px: 스크롤해도 HUD가 위에 있고, 불꽃·코인·곧 열려요
   await expect(sheet.getByRole('link', { name: '공지사항' })).toBeVisible();
   await expect(sheet.getByRole('link', { name: '게시판' })).toBeVisible();
   await expect(sheet.getByRole('button', { name: '로그아웃' })).toBeVisible();
+  await expect(sheet.getByTestId('sound-toggle')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
   await expect(hud.getByRole('button', { name: '메뉴' })).toBeFocused();

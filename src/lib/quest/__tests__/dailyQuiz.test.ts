@@ -64,6 +64,32 @@ const pick = (
   });
 
 describe('pickDailyQuizzes', () => {
+  it('저장한 목록(P8-07 fixed, §12-Q61)이 있으면 그 문제만 그 순서로 — 새로 열린 퀴즈가 끼어들지 않고, 잠긴 문제는 빠짐', () => {
+    const byStage = {
+      s1: [quiz('a'), quiz('b')],
+      s2: [quiz('new1'), quiz('new2')],
+      s3: [quiz('locked')],
+    };
+    const got = pickDailyQuizzes({
+      userId: 'u1',
+      today: TODAY,
+      stages,
+      questsByStage: byStage,
+      fixed: ['b', 'locked', 'a'],
+    });
+    expect(got.map((p) => p.questId)).toEqual(['b', 'a']);
+    // 빈 목록은 고정하지 않음 (그날 아침 퀴즈가 없던 학생)
+    expect(
+      pickDailyQuizzes({
+        userId: 'u1',
+        today: TODAY,
+        stages,
+        questsByStage: byStage,
+        fixed: [],
+      }),
+    ).toHaveLength(3);
+  });
+
   it('복습 가능(별<3, 어제 판정) → 안 푼 것 → 나머지 순, 최대 3개, 잠긴 스테이지·코드 퀘스트 제외', () => {
     const got = pick({
       s1: [

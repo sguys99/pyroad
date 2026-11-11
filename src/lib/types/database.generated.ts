@@ -308,6 +308,36 @@ export type Database = {
           },
         ];
       };
+      daily_missions: {
+        Row: {
+          active: boolean;
+          difficulty: number;
+          grp: string;
+          id: string;
+          kind: string;
+          target: number;
+          title: string;
+        };
+        Insert: {
+          active?: boolean;
+          difficulty: number;
+          grp: string;
+          id: string;
+          kind: string;
+          target: number;
+          title: string;
+        };
+        Update: {
+          active?: boolean;
+          difficulty?: number;
+          grp?: string;
+          id?: string;
+          kind?: string;
+          target?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
       level_curve_adjustments: {
         Row: {
           created_at: string;
@@ -663,6 +693,38 @@ export type Database = {
           },
         ];
       };
+      user_daily_missions: {
+        Row: {
+          created_at: string;
+          day: string;
+          mission_ids: string[];
+          quiz_ids: string[];
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          day: string;
+          mission_ids: string[];
+          quiz_ids?: string[];
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          day?: string;
+          mission_ids?: string[];
+          quiz_ids?: string[];
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_daily_missions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_progress: {
         Row: {
           attempts: number;
@@ -935,6 +997,10 @@ export type Database = {
       };
     };
     Functions: {
+      claim_daily_mission: {
+        Args: { p_day: string; p_mission_id: string; p_user_id: string };
+        Returns: Json;
+      };
       code_quest_stars: {
         Args: { p_hints_used: number; p_used_golden_key: boolean };
         Returns: number;
@@ -986,6 +1052,42 @@ export type Database = {
           p_per_minute: number;
           p_user_id: string;
         };
+        Returns: Json;
+      };
+      daily_mission_list: {
+        Args: {
+          p_day: string;
+          p_mission_ids: string[];
+          p_quiz_ids: string[];
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      daily_mission_possible: {
+        Args: {
+          p_day: string;
+          p_kind: string;
+          p_quiz_ids: string[];
+          p_target: number;
+          p_user_id: string;
+        };
+        Returns: boolean;
+      };
+      daily_mission_progress: {
+        Args: {
+          p_day: string;
+          p_kind: string;
+          p_quiz_ids: string[];
+          p_user_id: string;
+        };
+        Returns: number;
+      };
+      daily_mission_target: {
+        Args: { p_kind: string; p_quiz_ids: string[]; p_target: number };
+        Returns: number;
+      };
+      daily_missions_today: {
+        Args: { p_quiz_ids?: string[]; p_user_id: string };
         Returns: Json;
       };
       decide_new_badges: {

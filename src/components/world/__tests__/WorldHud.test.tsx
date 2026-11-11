@@ -4,8 +4,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
 import { WorldHud, streakText, type WorldHudProps } from '../WorldHud';
+import { MissionHudButton } from '../DailyMissions';
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
 vi.mock('@/components/sound/SoundToggle', () => ({
   SoundToggle: () => <button type="button">소리 끄기</button>,
 }));
@@ -57,6 +60,28 @@ describe('WorldHud', () => {
       screen.queryByRole('button', { name: '코인, 곧 열려요' }),
     ).toBeNull();
     expect(sessionStorage.getItem('pyroad:hud-coins')).toBe('1280');
+  });
+
+  it('미션이 있으면 미션 칸(P8-07)이 들어오고 곧 열려요는 상점만', () => {
+    render(
+      <WorldHud
+        {...props}
+        missions={
+          <MissionHudButton
+            state={{ day: '2026-11-11', missions: [], pending: [] }}
+          />
+        }
+      />,
+    );
+    expect(screen.getByTestId('hud-mission')).toHaveAccessibleName(
+      '오늘의 미션 0/0 달성',
+    );
+    expect(
+      screen.queryByRole('button', { name: '오늘의 미션, 곧 열려요' }),
+    ).toBeNull();
+    expect(screen.getByTestId('hud-soon')).toHaveAccessibleName(
+      '상점, 곧 열려요',
+    );
   });
 
   it('메뉴 버튼이 있다 (공지·게시판·로그아웃은 시트 안)', () => {

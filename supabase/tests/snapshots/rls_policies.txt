@@ -10,6 +10,7 @@ public.quests quests_select_authenticated [PERMISSIVE SELECT to authenticated] u
 public.quiz_attempts quiz_attempts_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.stages stages_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)
 public.user_badges badges_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
+public.user_daily_missions user_daily_missions_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_insert_own [PERMISSIVE INSERT to authenticated] using (-) check ((( SELECT auth.uid() AS uid) = user_id))
 public.user_progress progress_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check ((( SELECT auth.uid() AS uid) = user_id))

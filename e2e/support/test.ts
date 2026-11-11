@@ -78,6 +78,7 @@ export const test = base.extend<
     cspGuard: void;
     settle: void;
     quietPhoneQuizNote: void;
+    streamSettled: void;
   },
   { e2eUser: E2eUser }
 >({
@@ -109,6 +110,35 @@ export const test = base.extend<
           localStorage.setItem(key, '1');
         } catch {}
       }, PHONE_QUIZ_NOTE_KEY);
+      await use();
+    },
+    { auto: true },
+  ],
+  // 스트리밍 렌더(로딩 화면 → 내용)는 React 가 내용을 숨은 div(S:n)로 먼저 보낸 뒤 제자리로 옮겨, 그 사이 같은 testid 가 둘이라
+  // strict 위치 찾기가 실패한다. 운영(Vercel ↔ Supabase 지연)에선 늘 스트리밍이고, 로컬은 월드맵 렌더가 조금만 길어져도(P8-07 미션 조회)
+  // 그렇게 됨 → 페이지 이동·새로고침 뒤 숨은 div 가 사라질 때까지 기다린다 (화면에는 안 보이는 사본)
+  streamSettled: [
+    async ({ page }, use) => {
+      const settled = () =>
+        page
+          .waitForFunction(
+            () => !document.querySelector('div[hidden][id^="S:"]'),
+            undefined,
+            { timeout: 10_000 },
+          )
+          .catch(() => {});
+      const goto = page.goto.bind(page);
+      const reload = page.reload.bind(page);
+      page.goto = async (...args) => {
+        const res = await goto(...args);
+        await settled();
+        return res;
+      };
+      page.reload = async (...args) => {
+        const res = await reload(...args);
+        await settled();
+        return res;
+      };
       await use();
     },
     { auto: true },

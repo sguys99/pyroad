@@ -20,6 +20,8 @@ import { WorldBook } from '@/components/world/book/WorldBook';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
 import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
+import { MissionHudButton, MissionHudPlaceholder, MissionList } from '@/components/world/DailyMissions';
+import type { DailyMission, DailyMissionsState } from '@/lib/world/missions';
 import { ContinueButton } from '@/components/world/ContinueCta';
 import { PhoneQuizSlip } from '@/components/world/PhoneQuizPick';
 import { DailyQuizCard } from '@/components/world/DailyQuizCard';
@@ -357,12 +359,97 @@ function NodeTile({ stage }: { stage: StageWithStatus }) {
   );
 }
 
+// 데일리 미션 (P8-07): 진행 중 · 달성(받기) · 받음 + 지난 보상, 할 수 있는 미션이 없는 날
+const MISSION = (
+  id: string,
+  title: string,
+  kind: DailyMission['kind'],
+  difficulty: number,
+  target: number,
+  progress: number,
+  claimed = false,
+): DailyMission => ({
+  id,
+  title,
+  kind,
+  difficulty,
+  target,
+  progress,
+  coins: [10, 15, 20][difficulty - 1],
+  xp: 15,
+  claimed,
+});
+const MISSION_SAMPLES: [string, DailyMissionsState][] = [
+  [
+    '진행 중 · 달성 · 받음 + 지난 보상',
+    {
+      day: '2026-11-11',
+      missions: [
+        MISSION('quest_2', '퀘스트 2개 클리어', 'quest_clear', 2, 2, 1),
+        MISSION('daily_quiz', '오늘의 퀴즈 모두 풀기', 'daily_quiz', 2, 3, 3),
+        MISSION('review_1', '복습 도전 1개 끝내기', 'review', 2, 1, 1, true),
+      ],
+      pending: [
+        { ...MISSION('no_hint_1', '힌트 없이 퀘스트 1개 클리어', 'no_hint', 2, 1, 1), day: '2026-11-10' },
+        { ...MISSION('quest_3', '퀘스트 3개 클리어', 'quest_clear', 3, 3, 3), day: '2026-11-08' },
+      ],
+    },
+  ],
+  [
+    '다 받음',
+    {
+      day: '2026-11-11',
+      missions: [
+        MISSION('quest_1', '퀘스트 1개 클리어', 'quest_clear', 1, 1, 1, true),
+        MISSION('quiz_correct_2', '퀴즈 2개 맞히기', 'quiz_correct', 1, 2, 2, true),
+        MISSION('no_hint_1', '힌트 없이 퀘스트 1개 클리어', 'no_hint', 2, 1, 1, true),
+      ],
+      pending: [],
+    },
+  ],
+  ['할 수 있는 미션이 없는 날', { day: '2026-11-11', missions: [], pending: [] }],
+];
+
+/** 미션 목록 (시트 안 모양). 받기는 서버 대신 15코인 + 15 XP 를 돌려주는 가짜 요청 — 위 HUD 견본 코인 칩·레벨 도장으로 날아감 */
+function MissionDemo() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {MISSION_SAMPLES.map(([label, state]) => (
+        <figure key={label} className="grid content-start gap-1" data-testid="mission-demo">
+          <figcaption className="text-caption text-text-muted">{label}</figcaption>
+          <div className="rounded-2xl bg-surface p-4 shadow-pop">
+            <MissionList
+              state={state}
+              request={async () => ({
+                claimed: true,
+                already_claimed: false,
+                mission_coins: 15,
+                xp_earned: 15,
+                coins_earned: 15,
+                coins_balance: 0,
+                total_xp: 0,
+                level_before: 1,
+                level_after: 1,
+                level_ups: [],
+              })}
+              onClaimed={() => {}}
+            />
+          </div>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
 // 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨. 코인 0 · 45 · 1,280 · 12.3만(640px 미만 줄여 씀, P8-04)
 const HUDS: [string, WorldHudProps][] = [
   ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false } }],
   ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true } }],
   ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false } }],
   ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 31500, level: 50, coins: 123456, streak: { days: 12, today: true } }],
+  ['오늘의 미션 1/3 (P8-07)', { name: '파이', skin: 'green', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true }, missions: <MissionHudButton state={{ day: '2026-11-11', missions: [MISSION('quest_2', '퀘스트 2개 클리어', 'quest_clear', 2, 2, 1), MISSION('review_1', '복습 도전 1개 끝내기', 'review', 2, 1, 1, true), MISSION('no_hint_1', '힌트 없이 퀘스트 1개 클리어', 'no_hint', 2, 1, 0)], pending: [] }} /> }],
+  ['받을 보상 있음 (금색 점)', { name: '코딩왕', skin: 'sky', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false }, missions: <MissionHudButton state={MISSION_SAMPLES[0][1]} /> }],
+  ['미션 읽는 중 (자리만)', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false }, missions: <MissionHudPlaceholder /> }],
 ];
 
 export function WorldMapSection() {
@@ -491,7 +578,7 @@ export function WorldMapSection() {
       </div>
       <Demo
         label="월드맵 HUD (P5-07)"
-        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 코인 잔액(P8-04: 퀘스트에서 받고 지도로 돌아오면 이 탭에서 마지막으로 본 값부터 카운트업 + 칩 팝, minimal·동작 줄이기는 바로 바꾸고 금색 틴트) · 곧 열려요(오늘의 미션·상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 1024px 미만: 곧 열려요는 버튼 하나. 640px 미만: XP 바는 아래 가는 띠, 코인 1만 이상은 “12.3만”, 곧 열려요는 빠지고(코인 칩 자리) 닉네임 줄임표, 400px 미만은 아바타만. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
+        note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 코인 잔액(P8-04: 퀘스트에서 받고 지도로 돌아오면 이 탭에서 마지막으로 본 값부터 카운트업 + 칩 팝, minimal·동작 줄이기는 바로 바꾸고 금색 틴트) · 오늘의 미션 칸(P8-07, 달성 수 · 받을 보상 금색 점 → 미션 시트) · 곧 열려요(상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 1024px 미만: 곧 열려요는 버튼 하나. 640px 미만: XP 바는 아래 가는 띠, 코인 1만 이상은 “12.3만”, 곧 열려요는 빠지고(코인 칩 자리) 닉네임 줄임표, 400px 미만은 아바타만. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
         data-testid="world-hud-demo"
       >
         <div data-hud-demo className="grid gap-3">
@@ -502,6 +589,13 @@ export function WorldMapSection() {
             </div>
           ))}
         </div>
+      </Demo>
+      <Demo
+        label="데일리 미션 (P8-07)"
+        note="HUD 미션 칸(달성 수, 받을 보상이 있으면 금색 테두리·점, 640px 미만은 아이콘만) → 시트. 미션마다 종류 아이콘 · 이름 · 난이도 점 · 진행 막대 · 보상(코인 10·15·20 + XP 15). 달성하면 금색 면 + 받기(서버가 다시 세어 지급), 받으면 코인 소리 + 코인·XP 가 HUD 로 날아감(full 3개·lite 1개, minimal·동작 줄이기는 없음 — HUD 칩 색 반짝임) + 카운트업. 지난 6일 달성·안 받은 보상은 '지난 보상'으로 남음. 아래는 자정까지 남은 시간"
+        data-testid="mission-list-demo"
+      >
+        <MissionDemo />
       </Demo>
       <Demo
         label="이어하기 CTA (P5-10)"

@@ -2034,6 +2034,24 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id, p_stage_id: STAGE1 },
     ],
     [
+      'DM-1',
+      u.alice,
+      'claim_daily_mission',
+      { p_user_id: u.alice.id, p_day: '2026-11-11', p_mission_id: 'quest_1' },
+    ],
+    [
+      'DM-1b',
+      'anon',
+      'daily_missions_today',
+      { p_user_id: u.alice.id, p_quiz_ids: [] },
+    ],
+    [
+      'DM-1c',
+      u.alice,
+      'daily_mission_progress',
+      { p_user_id: u.alice.id, p_day: '2026-11-11', p_kind: 'quest_clear', p_quiz_ids: [] },
+    ],
+    [
       'SET-1',
       u.alice,
       'patch_user_settings',
@@ -2070,7 +2088,9 @@ async function groupRpc(u) {
                            'submit_quiz_answer', 'grant_coins', 'spend_coins', 'coin_apply',
                            'coin_balance_mismatches', 'users_protect_coins', 'coin_reward', 'grant_star_coins',
                            'grant_level_up_coins', 'code_quest_stars', 'is_solution_copy',
-                           'stage_chest_goal', 'open_stage_chest')
+                           'stage_chest_goal', 'open_stage_chest', 'daily_mission_progress',
+                           'daily_mission_target', 'daily_mission_possible', 'daily_mission_list',
+                           'daily_missions_today', 'claim_daily_mission')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -3211,6 +3231,230 @@ async function groupCoins(u) {
             mismatches: mismatches(x.id),
           },
         ) ?? { actual: 'ok', detail: `목표 ${goal}⭐: ${need - 1}개(⭐${(need - 1) * 3}) 거부 → ${need}개 +30 한 번 → 리셋 뒤 0` }
+      );
+    },
+  });
+}
+
+// ── 데일리 미션 (P8-07, ① 00034) ──
+async function groupMissions(u) {
+  const today = () => one(`select public.kst_today()::text`);
+  const ago = (n) => one(`select (public.kst_today() - ${n})::text`);
+  const stageQuizzes = (stageId) =>
+    one(
+      `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}' and quest_type = 'quiz'`,
+    ).split(',');
+  const today_ = (id, quiz) => rpc('daily_missions_today', { p_user_id: id, p_quiz_ids: quiz });
+  const ids = (r) => (r.json?.missions ?? []).map((m) => m.id);
+  // KST 자정 기준 시각: '<날짜> 00:00:00+09' 에서 초를 더하고 뺌
+  const at = (day, sec = 0) => `('${day} 00:00:00+09'::timestamptz + interval '${sec} seconds')`;
+
+  await check({
+    group: 'missions',
+    id: 'DM-1d',
+    role: 'authenticated',
+    op: 'user_daily_missions: 남의 행 읽기 · 비로그인 읽기 · 본인 행 INSERT · daily_missions 읽기 (본인 배정 읽기만 열림, 쓰기는 RPC)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.user_daily_missions (user_id, day, mission_ids) values
+             ('${u.bob.id}', '2026-01-01', '{quest_1}'), ('${u.alice.id}', '2026-01-01', '{quest_1}') on conflict do nothing`);
+      const others = await rest('GET', `/rest/v1/user_daily_missions?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 배정 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', '/rest/v1/user_daily_missions?select=day', { as: u.alice });
+      if (own.status !== 200 || own.json.length < 1) return { actual: 'error', detail: `본인 배정 ${own.status}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/user_daily_missions?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon 읽기 ${anon.detail}` };
+      const pool = classifyRead(await rest('GET', '/rest/v1/daily_missions?select=*', { as: u.alice }));
+      if (pool.actual === 'allowed') return { actual: 'written', detail: `미션 풀 읽기 ${pool.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/user_daily_missions', {
+          as: u.alice,
+          body: { user_id: u.alice.id, day: '2026-01-02', mission_ids: ['quest_3'] },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_daily_missions where user_id = '${u.alice.id}' and day = '2026-01-02')`,
+      );
+    },
+  });
+  await check({
+    group: 'missions',
+    id: 'DM-2',
+    role: 'service_role',
+    op: '배정: 읽기만이면 assigned false · 결정적(다시 불러도·행을 지우고 다시 배정해도 같음) · 할 수 있는 것만(새 학생은 복습 없음, 퀴즈 없으면 퀴즈 미션 없음) · 퀘스트 미션 첫 칸 · 오늘의 퀴즈 목록 고정(퀴즈 퀘스트만)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm2', '미션배정');
+      const qz = stageQuizzes(STAGE1);
+      const peek = await today_(x.id, null);
+      const first = await today_(x.id, [...qz, Q1]);
+      const again = await today_(x.id, []);
+      one(`delete from public.user_daily_missions where user_id = '${x.id}'`);
+      const redo = await today_(x.id, [...qz, Q1]);
+      // 퀴즈 없음 → 퀴즈 그룹 빠짐, 복습할 것 없음 → 퀘스트·힌트 없이 2개
+      const y = await createUser('dm2b', '미션퀴즈없음');
+      const noQuiz = await today_(y.id, []);
+      // 어제 판정한 별 1개 퀘스트가 있으면 복습 미션이 들어옴 (퀴즈 없음 → 퀘스트·힌트·복습 3개)
+      const z = await createUser('dm2c', '미션복습');
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, best_stars, stars, stars_judged_on, code_submitted)
+           values ('${z.id}', '${Q1}', 'completed', now() - interval '2 days', 1, 1, public.kst_today() - 1, '')`);
+      const review = await today_(z.id, []);
+      const groups = (r) => (r.json?.missions ?? []).map((m) => m.kind).join(',');
+      return (
+        compare(
+          'DM-2',
+          {
+            peek: false,
+            first: 3,
+            firstKind: 'quest_clear',
+            quiz: qz.slice(0, 3),
+            again: ids(first),
+            againQuiz: qz.slice(0, 3),
+            redo: ids(first),
+            noQuiz: 'quest_clear,no_hint',
+            review: true,
+            progress0: true,
+          },
+          {
+            peek: peek.json?.assigned,
+            first: ids(first).length,
+            firstKind: first.json?.missions?.[0]?.kind,
+            quiz: first.json?.quiz_ids,
+            again: ids(again),
+            againQuiz: again.json?.quiz_ids,
+            redo: ids(redo),
+            noQuiz: groups(noQuiz),
+            review: groups(review).split(',').includes('review') && ids(review).length === 3,
+            progress0: (first.json?.missions ?? []).every((m) => m.progress === 0 && m.claimed === false),
+          },
+        ) ?? { actual: 'ok', detail: `오늘 ${ids(first).join(',')} · 퀴즈 ${qz.length}개 중 3개 고정` }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-3',
+    role: 'postgres',
+    op: '진행 판정은 기존 기록에서 KST 날짜로: 자정 정각은 오늘, 1초 전은 어제 · 황금키 완료 빼고 · 힌트 쓴 완료는 힌트 없이에서 빼고 · 복습(코드 판정일·퀴즈 review) · 오늘의 퀴즈(정답 또는 3번째 오답) · 퀴즈 맞히기',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm3', '미션판정');
+      const d = today();
+      const y = ago(1);
+      const [a, b, c, e] = stageQuests(STAGE1);
+      const [qz1, qz2, qz3] = stageQuizzes(STAGE1);
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, hints_used, used_golden_key, best_stars, stars, stars_judged_on, code_submitted) values
+        ('${x.id}', '${a}', 'completed', ${at(d)}, 0, false, 3, 3, '${d}', ''),
+        ('${x.id}', '${b}', 'completed', ${at(d, -1)}, 0, false, 3, 3, '${d}', ''),
+        ('${x.id}', '${c}', 'completed', ${at(d, 60)}, 0, true, 1, 1, '${d}', ''),
+        ('${x.id}', '${e}', 'completed', ${at(d, 120)}, 2, false, 1, 1, '${d}', '')`);
+      one(`insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct, created_at) values
+        ('${x.id}', '${qz1}', 'first', 1, '{}', true, ${at(d)}),
+        ('${x.id}', '${qz2}', 'first', 3, '{}', false, ${at(d, -1)}),
+        ('${x.id}', '${qz3}', 'review', 2, '{}', false, ${at(d, 30)}),
+        ('${x.id}', '${qz3}', 'review', 3, '{}', false, ${at(d, 40)})`);
+      const p = (day, kind, quiz = []) =>
+        Number(
+          one(`select public.daily_mission_progress('${x.id}', '${day}', '${kind}', '{${quiz.join(',')}}'::uuid[])`),
+        );
+      return (
+        compare(
+          'DM-3',
+          {
+            clearToday: 2,
+            clearYesterday: 1,
+            noHintToday: 1,
+            reviewToday: 2,
+            dailyToday: 1,
+            dailyYesterday: 1,
+            correctToday: 1,
+            correctYesterday: 0,
+          },
+          {
+            clearToday: p(d, 'quest_clear'),
+            clearYesterday: p(y, 'quest_clear'),
+            noHintToday: p(d, 'no_hint'),
+            reviewToday: p(d, 'review'),
+            dailyToday: p(d, 'daily_quiz', [qz1, qz2]),
+            dailyYesterday: p(y, 'daily_quiz', [qz1, qz2]),
+            correctToday: p(d, 'quiz_correct'),
+            correctYesterday: p(y, 'quiz_correct'),
+          },
+        ) ?? { actual: 'ok', detail: `오늘 ${d}: 자정 정각 완료는 오늘, 23:59:59 완료는 어제` }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-4',
+    role: 'service_role',
+    op: '받기: 미달 409 · 배정에 없음 404 · 기한 밖 410 · 동시 4번도 코인·XP 15 한 번(원장 mission/<날짜>:<id>) · 레벨을 넘으면 레벨 업 코인 · 어제 달성·안 받은 것은 pending 에 남고 받을 수 있음 · 잔액 = 원장 합',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm4', '미션받기');
+      const d = today();
+      const y = ago(1);
+      const [a, b] = stageQuests(STAGE1);
+      await today_(x.id, []);
+      one(`update public.user_daily_missions set mission_ids = '{quest_1,quest_3,no_hint_1}' where user_id = '${x.id}'`);
+      await rpc('complete_quest', { p_user_id: x.id, p_quest_id: a, p_submission: submission() });
+      const claim = (id, day = d) => rpc('claim_daily_mission', { p_user_id: x.id, p_day: day, p_mission_id: id });
+      const short = await claim('quest_3');
+      const notMine = await claim('review_1');
+      const old = await claim('quest_1', ago(7));
+      const future = await claim('quest_1', one(`select (public.kst_today() + 1)::text`));
+      const xp0 = Number(one(`select total_xp from public.users where id = '${x.id}'`));
+      const many = await Promise.all(Array.from({ length: 4 }, () => claim('quest_1')));
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_claimed === false);
+      const xp1 = Number(one(`select total_xp from public.users where id = '${x.id}'`));
+      // 레벨 2 문턱(200) 바로 아래에서 받으면 레벨 업 코인
+      one(`update public.users set total_xp = 190 where id = '${x.id}'`);
+      const lv = await claim('no_hint_1');
+      // 어제 배정 + 어제 완료 → pending → 받기
+      one(`insert into public.user_daily_missions (user_id, day, mission_ids) values ('${x.id}', '${y}', '{quest_1}')`);
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, code_submitted)
+           values ('${x.id}', '${b}', 'completed', ${at(y, 3600)}, '')`);
+      const pend = await today_(x.id, null);
+      const past = await claim('quest_1', y);
+      const pend2 = await today_(x.id, null);
+      return (
+        compare(
+          'DM-4',
+          {
+            short: '409:mission_not_done',
+            notMine: '404:mission_not_found',
+            old: '410:mission_expired',
+            future: '410:mission_expired',
+            many: [200, 200, 200, 200],
+            fresh: '1:10:15',
+            xp: 15,
+            lv: '15:35:2:20',
+            pend: `${y}:quest_1`,
+            past: '200:false:10',
+            pend2: 0,
+            rows: '3',
+            refs: `${y}:quest_1,${d}:no_hint_1,${d}:quest_1`,
+            mismatches: '0',
+          },
+          {
+            short: `${short.status}:${errMsg(short)}`,
+            notMine: `${notMine.status}:${errMsg(notMine)}`,
+            old: `${old.status}:${errMsg(old)}`,
+            future: `${future.status}:${errMsg(future)}`,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.mission_coins}:${fresh[0]?.json.xp_earned}`,
+            xp: xp1 - xp0,
+            lv: `${lv.json?.mission_coins}:${lv.json?.coins_earned}:${lv.json?.level_after}:${lv.json?.level_ups?.[0]?.coins}`,
+            pend: (pend.json?.pending ?? []).map((m) => `${m.day}:${m.id}`).join(','),
+            past: `${past.status}:${past.json?.already_claimed}:${past.json?.mission_coins}`,
+            pend2: pend2.json?.pending?.length,
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}' and source = 'mission'`),
+            refs: one(`select string_agg(ref, ',' order by ref) from public.coin_ledger where user_id = '${x.id}' and source = 'mission'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '미달·남의 미션·기한 밖 거부, 한 번만 코인+XP 15, 레벨 2 넘으며 +20, 어제 것 받기' }
       );
     },
   });
@@ -6464,6 +6708,7 @@ async function main() {
   await groupRpc(u);
   await groupReward();
   await groupCoins(u);
+  await groupMissions(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

@@ -26,6 +26,8 @@ import { serverWorlds } from './serverWorlds';
  * - 퀘스트 완료·황금키 마지막 단계(완료 API): `/api/quest/complete` 의 revalidatePath('/world','/profile') + `useQuestSession` 의 router.refresh()
  * - 같은 데이터를 `/world/[slug]`·`/worlds`(P5-01)도 읽는다. 무효화 경로는 `/world`(layout, 하위 월드 포함)·`/worlds`
  * - 보물상자 열기(P8-06): `/api/world/chest` 의 revalidatePath + `StageSheet` 의 router.refresh() (HUD 코인·상자 상태)
+ * - 데일리 미션 받기(P8-07): `/api/missions/claim` 의 revalidatePath + `MissionList`(DailyMissions.tsx) 의 router.refresh() (HUD 코인·XP·미션 칸).
+ *   미션 진행은 HUD 미션 칸(`WorldHudBar`)이 렌더마다 서버 RPC 로 다시 셈
  * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh() (본 기록도 지움, P5-05)
  * - 잠금 해제 본 기록(P5-05): `/api/world/unlocks` 는 무효화하지 않는다. 지도가 기록을 보낸 뒤에는 이 화면에서 다시 쓰지 않고,
  *   다음 방문은 새로 렌더하며, 같은 세션의 중복 재생은 화면 쪽(useStageUnlock)이 막는다
@@ -36,36 +38,50 @@ import { serverWorlds } from './serverWorlds';
 export async function loadWorldMapData(): Promise<WorldMapData | null> {
   const supabase = await createClient();
   const today = kstToday();
-  const [{ user }, apiKeys, stages, progress, profile, seen, attempts, chests] =
-    await Promise.all([
-      getAuthUser(),
-      // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
-      getAuthUser().then(({ user }) =>
-        user ? loadUserApiKeys(user.id) : null,
+  const [
+    { user },
+    apiKeys,
+    stages,
+    progress,
+    profile,
+    seen,
+    attempts,
+    chests,
+    dailyRow,
+  ] = await Promise.all([
+    getAuthUser(),
+    // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
+    getAuthUser().then(({ user }) => (user ? loadUserApiKeys(user.id) : null)),
+    // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08)
+    supabase
+      .from('stages')
+      .select(
+        'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, concept, quest_type, quiz_kind, is_mobile_friendly)',
       ),
-      // 순서는 (월드 order, 스테이지 order): getWorldStatuses 가 world.order 로 정렬 (P1-08)
-      supabase
-        .from('stages')
-        .select(
-          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, title, concept, quest_type, quiz_kind, is_mobile_friendly)',
-        ),
-      supabase
-        .from('user_progress')
-        .select(
-          'user_id, quest_id, status, best_stars, stars_judged_on, completed_at, used_golden_key, created_at',
-        ),
-      supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
-      // 잠금 해제 연출 본 기록 (P5-05, 00025). 실패하면(00025 전 DB) null → 연출·기록을 하지 않음
-      supabase.from('user_seen_unlocks').select('user_id, stage_id'),
-      // 오늘(KST) 퀴즈 시도: 오늘의 퀴즈 완료 계산 (P7-10, 본인 행 SELECT 정책 00012). 실패하면 끝난 문제 없음으로
-      supabase
-        .from('quiz_attempts')
-        .select('user_id, quest_id, attempt_no, is_correct, created_at')
-        .gte('created_at', kstStartOfDay(today).toISOString()),
-      // 연 보물상자 (P8-06): 원장 chest/<stage_id> 본인 행(00030 SELECT 정책). 실패하면 안 연 것으로(열기 RPC 가 멱등)
-      supabase.from('coin_ledger').select('user_id, ref').eq('source', 'chest'),
-      // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
-    ]);
+    supabase
+      .from('user_progress')
+      .select(
+        'user_id, quest_id, status, best_stars, stars_judged_on, completed_at, used_golden_key, created_at',
+      ),
+    supabase.from('users').select(OWN_PROFILE_SELECT).maybeSingle(),
+    // 잠금 해제 연출 본 기록 (P5-05, 00025). 실패하면(00025 전 DB) null → 연출·기록을 하지 않음
+    supabase.from('user_seen_unlocks').select('user_id, stage_id'),
+    // 오늘(KST) 퀴즈 시도: 오늘의 퀴즈 완료 계산 (P7-10, 본인 행 SELECT 정책 00012). 실패하면 끝난 문제 없음으로
+    supabase
+      .from('quiz_attempts')
+      .select('user_id, quest_id, attempt_no, is_correct, created_at')
+      .gte('created_at', kstStartOfDay(today).toISOString()),
+    // 연 보물상자 (P8-06): 원장 chest/<stage_id> 본인 행(00030 SELECT 정책). 실패하면 안 연 것으로(열기 RPC 가 멱등)
+    supabase.from('coin_ledger').select('user_id, ref').eq('source', 'chest'),
+    // 오늘 저장한 오늘의 퀴즈 목록 (P8-07 §12-Q61, 00034 본인 행 SELECT). 없거나(그날 첫 방문·00034 전) 실패하면 지금 계산.
+    // 미션 진행·배정은 HUD 미션 칸(WorldHudBar 의 Suspense)이 따로 — 여기서 기다리면 지도 렌더가 늦어짐
+    supabase
+      .from('user_daily_missions')
+      .select('user_id, quiz_ids')
+      .eq('day', today)
+      .maybeSingle(),
+    // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
+  ]);
   if (!user) return null;
 
   return toWorldMapData(
@@ -78,6 +94,8 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       seen: seen.error ? null : seen.data,
       attempts: attempts.data,
       chests: chests.data,
+      dailyQuizIds:
+        dailyRow.data?.user_id === user.id ? dailyRow.data.quiz_ids : null,
     },
     serverWorlds(),
     today,

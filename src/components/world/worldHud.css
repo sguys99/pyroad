@@ -213,7 +213,7 @@
     .wh-streak-u {
       display: none;
     }
-    /* 640px 미만: 곧 열려요 버튼은 빼고(오늘의 미션·상점이 열리면 그 칩이 들어옴) 코인 칩에 자리를, 400px 아래는 닉네임 글자도 뺌
+    /* 640px 미만: 곧 열려요(상점) 버튼은 빼고 코인·미션 칩(P8-07)에 자리를, 400px 아래는 닉네임 글자와 바의 소리 토글(메뉴 시트로)도 뺌
        (아바타 링크의 낭독 이름 "○○, 내 프로필"은 그대로) */
     .wh-soon-one {
       display: none;
@@ -226,9 +226,31 @@
       top: calc(4rem + env(safe-area-inset-top, 0px));
     }
   }
+  /* 메뉴 시트의 소리 줄: 400px 미만에서만 (바의 소리 토글 대신) */
+  .wh-menu-sound {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.25rem 0 1rem;
+    border-radius: var(--round-m);
+    background: var(--surface-2);
+    font-weight: 700;
+  }
   @media (max-width: 24.99rem) {
     .wh-name {
       display: none;
+    }
+    /* 미션 칸(P8-07)이 들어와 320px 에 자리가 없어 소리 토글은 메뉴 시트로 */
+    .wh .wh-sound {
+      display: none;
+    }
+    .wh-menu-sound {
+      display: flex;
+    }
+    /* 칸 사이·바깥 여백을 줄여 320px 에서 코인 4자리까지 한 줄에 */
+    .wh-in {
+      gap: 0.125rem;
+      padding-inline: 0.5rem;
     }
     .wh-me {
       flex: 0 0 auto;

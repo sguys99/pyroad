@@ -136,6 +136,8 @@ export interface WorldMapRaw {
   attempts?: QuizAttemptRow[] | null;
   /** 연 보물상자 (P8-06): 본인 coin_ledger chest 행, ref = stage_id. 못 읽었으면 없음(모두 안 연 것) */
   chests?: Array<{ user_id: string; ref: string }> | null;
+  /** 오늘 저장한 오늘의 퀴즈 목록 (P8-07 `user_daily_missions.quiz_ids`, §12-Q61). 있으면 그 문제로 고정 */
+  dailyQuizIds?: string[] | null;
 }
 
 export function toWorldMapData(
@@ -178,6 +180,7 @@ export function toWorldMapData(
     today,
     stages: worldsProgress.worlds.flatMap((w) => w.stages),
     questsByStage,
+    fixed: raw.dailyQuizIds,
   });
   return {
     profile:

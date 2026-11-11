@@ -479,6 +479,48 @@ export const EXPECT = {
     activateIn: 'P8-06',
     note: '서버가 별 합계를 다시 세어 목표 미달 거부 · 원장 키로 한 번만(동시·리셋 뒤 0)',
   },
+  // ── 데일리 미션 (P8-07, ① 00034) ──
+  'DM-1': {
+    expect: 'deny',
+    requires: 'public.claim_daily_mission()',
+    activateIn: 'P8-07',
+    note: '미션 받기는 /api/missions/claim(service_role)만',
+  },
+  'DM-1b': {
+    expect: 'deny',
+    requires: 'public.daily_missions_today()',
+    activateIn: 'P8-07',
+  },
+  'DM-1c': {
+    expect: 'deny',
+    requires: 'public.daily_mission_progress()',
+    activateIn: 'P8-07',
+    note: '진행 판정 헬퍼는 소유자만 (보상 RPC 안에서)',
+  },
+  'DM-1d': {
+    expect: 'deny',
+    requires: 'public.user_daily_missions',
+    activateIn: 'P8-07',
+    note: '본인 배정 행 읽기만(오늘의 퀴즈 고정 목록), 남의 행·anon·쓰기·미션 풀은 막힘',
+  },
+  'DM-2': {
+    expect: 'allow',
+    requires: 'public.daily_missions_today()',
+    activateIn: 'P8-07',
+    note: '사용자·KST 날짜 시드 결정적 배정, 할 수 있는 미션만, 오늘의 퀴즈 목록 고정',
+  },
+  'DM-3': {
+    expect: 'allow',
+    requires: 'public.daily_mission_progress()',
+    activateIn: 'P8-07',
+    note: '기존 기록에서 KST 날짜로 판정 (자정 경계)',
+  },
+  'DM-4': {
+    expect: 'allow',
+    requires: 'public.claim_daily_mission()',
+    activateIn: 'P8-07',
+    note: '서버 재판정 미달 거부 · 원장 키로 한 번(코인 + XP 15 + 레벨 업 코인) · 7일 보관',
+  },
   'CN-10': {
     expect: 'allow',
     requires: 'public.coin_reward()',

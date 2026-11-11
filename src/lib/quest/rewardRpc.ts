@@ -6,6 +6,10 @@ import type { Database, Json } from '@/lib/types/database';
 import type { RewardErrorResponse } from './rewards';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 import { reportServerError } from '@/lib/api/serverError';
+import type {
+  ClaimMissionResult,
+  DailyMissionsRpcResult,
+} from '@/lib/world/missions';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -39,6 +43,9 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   no_golden_keys: { status: 400, error: '황금키가 부족해요.' },
   not_enough_coins: { status: 400, error: '코인이 부족해요.' },
   not_enough_stars: { status: 409, error: '별이 아직 모자라요.' },
+  mission_not_found: { status: 404, error: '오늘의 미션이 아니에요.' },
+  mission_not_done: { status: 409, error: '아직 미션을 다 하지 않았어요.' },
+  mission_expired: { status: 410, error: '받을 수 있는 날이 지났어요.' },
 };
 
 export function rewardError(
@@ -76,7 +83,9 @@ async function callRpc<T>(
     | 'submit_quiz_answer'
     | 'grant_coins'
     | 'spend_coins'
-    | 'open_stage_chest',
+    | 'open_stage_chest'
+    | 'daily_missions_today'
+    | 'claim_daily_mission',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -222,6 +231,39 @@ export function openStageChestRpc(
     admin.rpc('open_stage_chest', {
       p_user_id: userId,
       p_stage_id: stageId,
+    }),
+  );
+}
+
+/**
+ * 오늘(KST) 데일리 미션 (P8-07, 00034). quizIds 없이 부르면 읽기만(오늘 배정 전이면 assigned false),
+ * 주면 배정이 없을 때 결정적으로 3개를 고르고 그 오늘의 퀴즈 목록을 저장(§12-Q61). 이미 있으면 저장된 것
+ */
+export function dailyMissionsRpc(
+  admin: AdminClient,
+  userId: string,
+  quizIds?: string[],
+) {
+  return callRpc<DailyMissionsRpcResult>('daily_missions_today', () =>
+    admin.rpc('daily_missions_today', {
+      p_user_id: userId,
+      ...(quizIds && { p_quiz_ids: quizIds }),
+    }),
+  );
+}
+
+/** 데일리 미션 보상 받기 (P8-07). 서버가 진행을 다시 세어 미달이면 mission_not_done, 원장 키로 한 번 */
+export function claimDailyMissionRpc(
+  admin: AdminClient,
+  userId: string,
+  day: string,
+  missionId: string,
+) {
+  return callRpc<ClaimMissionResult>('claim_daily_mission', () =>
+    admin.rpc('claim_daily_mission', {
+      p_user_id: userId,
+      p_day: day,
+      p_mission_id: missionId,
     }),
   );
 }
