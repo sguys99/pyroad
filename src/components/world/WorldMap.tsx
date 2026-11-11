@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { m, type Variants } from 'framer-motion';
 import { Lock, LockOpen } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
@@ -16,6 +17,7 @@ import { ToastViewport, useToastQueue } from '@/components/ui/toast';
 import { useSfx } from '@/components/providers/soundContext';
 import { SOFT_TAP } from '@/lib/sound/manifest';
 import { StageSheet } from './StageSheet';
+import type { ChestEvent } from './StageChest';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
 import {
@@ -69,13 +71,25 @@ function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
  */
 const STAGE_ENTRY = 'pyroadStageSheet';
 
+// 보물상자 축하 (P8-06): 연 순간에만 받는 지연 chunk (퀘스트 화면과 같은 오버레이·시퀀서)
+const QuestCelebrations = dynamic(
+  () =>
+    import('@/components/quest/QuestCelebrations').then(
+      (m) => m.QuestCelebrations,
+    ),
+  { ssr: false },
+);
+
 function useOpenStage(
   stages: StageWithStatus[],
   questsByStage?: Record<string, StageQuestItem[]>,
   world?: WorldId,
 ) {
   const params = useSearchParams();
+  const router = useRouter();
   const { toasts, show, dismiss } = useToastQueue(1);
+  // 연 보물상자 축하 (P8-06). 시트는 닫고 지도 위에 띄운다 (시트 대화 상자 위에 또 대화 상자를 겹치지 않게)
+  const [chest, setChest] = useState<ChestEvent[]>([]);
   const play = useSfx();
   const id = questsByStage ? params.get('stage') : null;
   const current =
@@ -118,6 +132,13 @@ function useOpenStage(
       open={!!current}
       world={world}
       onOpenChange={(next) => !next && close()}
+      onChestOpened={(event) => {
+        // HUD 코인·상자 상태는 router.refresh() (`/api/world/chest`가 무효화). 새로 열었으면 시트를 닫는 뒤로 가기와
+        // 겹치면 새로 받은 화면이 묻히므로 축하를 닫을 때 — 카드를 닫으면 HUD 코인이 그때 올라감
+        if (!event) return router.refresh();
+        setChest([event]);
+        close();
+      }}
       // 주소로 열린 시트(퀘스트에서 돌아옴)도 닫으면 그 노드로 포커스
       finalFocus={() =>
         document.querySelector<HTMLElement>(
@@ -126,7 +147,18 @@ function useOpenStage(
       }
     />
   );
-  return { open, sheet, toasts, show, dismiss };
+  const celebration = chest.length > 0 && (
+    <QuestCelebrations
+      events={chest}
+      questId=""
+      worldHref=""
+      onDismiss={() => {
+        setChest([]);
+        router.refresh();
+      }}
+    />
+  );
+  return { open, sheet, celebration, toasts, show, dismiss };
 }
 
 /** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
@@ -259,7 +291,7 @@ export function WorldMap({
   const { budget } = useMotionTier();
   const { container, item } = nodeVariants(budget);
   const box = useRef<HTMLDivElement>(null);
-  const { open, sheet, toasts, show, dismiss } = useOpenStage(
+  const { open, sheet, celebration, toasts, show, dismiss } = useOpenStage(
     stages,
     questsByStage,
     world,
@@ -473,7 +505,10 @@ export function WorldMap({
       {sheet}
       {portal &&
         createPortal(
-          <ToastViewport toasts={toasts} onDismiss={dismiss} />,
+          <>
+            <ToastViewport toasts={toasts} onDismiss={dismiss} />
+            {celebration}
+          </>,
           portal,
         )}
     </div>

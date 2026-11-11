@@ -3,9 +3,10 @@ import rules from '../../../../supabase/tests/fixtures/reward-rules.json';
 import { calculateXP, calculateLevel, codeQuestStars } from '../xp';
 import { decideNewBadges, hasThreeDayStreak } from '../checkBadges';
 import { coinReward, type CoinRewardKind } from '../coins';
+import { chestGoal } from '@/lib/world/chest';
 
 // 보상 규칙 대조 (P1-03, Q25): 같은 표를 SQL 쪽(00006 의 quest_xp·level_for_xp·has_three_day_streak,
-// 00019 의 decide_new_badges, 00031 의 coin_reward, 00032 의 code_quest_stars)은 npm run test:rls 의 RW-1 이 확인합니다. 둘 다 통과하면 TS 와 SQL 이 같은 규칙입니다.
+// 00019 의 decide_new_badges, 00031 의 coin_reward, 00032 의 code_quest_stars, 00033 의 stage_chest_goal)은 npm run test:rls 의 RW-1 이 확인합니다. 둘 다 통과하면 TS 와 SQL 이 같은 규칙입니다.
 describe('reward-rules.json (TS ↔ SQL 대조표)', () => {
   it.each(rules.xp)(
     'XP: base $base, 힌트 $hints, 황금키 $golden → $xp',
@@ -30,6 +31,13 @@ describe('reward-rules.json (TS ↔ SQL 대조표)', () => {
     '별: 힌트 $hints, 황금키 $golden → $stars',
     ({ hints, golden, stars }) => {
       expect(codeQuestStars(hints, golden)).toBe(stars);
+    },
+  );
+
+  it.each(rules.chest_goal)(
+    '보물상자 목표: 코드 퀘스트 $code_quests → 별 $goal',
+    ({ code_quests, goal }) => {
+      expect(chestGoal(code_quests)).toBe(goal);
     },
   );
 

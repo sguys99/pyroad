@@ -208,4 +208,6 @@ export interface StageWithStatus extends Stage {
   stars: number;
   /** 퀘스트 수 × 3 */
   maxStars: number;
+  /** 보물상자를 열었음 (P8-06, 원장 coin_ledger chest/<stage_id>). 월드맵 데이터만 채움 — 없으면 안 연 것 */
+  chestOpened?: boolean;
 }

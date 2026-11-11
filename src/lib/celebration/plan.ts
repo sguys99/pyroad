@@ -296,7 +296,7 @@ export function planCelebrations(
         coins += event.amount;
         break;
       case 'chest':
-        // Phase 8 전에는 숨김 (§12-Q52와 같은 방식, `SHOW_CHEST`)
+        // 스테이지 시트 "열기"가 만든 상자 (P8-06, `SHOW_CHEST`)
         if (SHOW_CHEST) chests.push(event);
         break;
     }

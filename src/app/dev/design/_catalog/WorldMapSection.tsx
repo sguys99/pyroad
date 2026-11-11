@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { QuestCelebrations } from '@/components/quest/QuestCelebrations';
+import { StageChest, type ChestEvent } from '@/components/world/StageChest';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import { Button } from '@/components/ui/button';
 import { StageSheet } from '@/components/world/StageSheet';
@@ -103,6 +106,8 @@ const SAMPLE: StageWithStatus[] = STAGES.map(([title, theme], i) => ({
   firstIncompleteQuestId: null, // 견본이라 눌러도 퀘스트로 가지 않음
   stars: i < 2 ? 17 - i * 2 : i === 2 ? 5 : 0,
   maxStars: 18,
+  // 보물상자 (P8-06, 목표 13): 1단계는 연 상자, 2단계는 열 수 있음(노드에 작은 상자), 3단계는 모으는 중
+  chestOpened: i === 0,
 }));
 
 // 노드 상태 5종 (P5-04): 잠김 · 열림(아직 0개) · 진행 중(링) · 통과(도장) · 보스(큰 랜드마크 + 왕관)
@@ -113,7 +118,7 @@ const NODE_STATES: [label: string, stage: StageWithStatus][] = [
     { ...SAMPLE[3], status: 'in_progress', completedQuestCount: 0, stars: 0 },
   ],
   ['진행 중 (링 2/6)', SAMPLE[2]],
-  ['통과', SAMPLE[1]],
+  ['통과 · 보물상자 열 수 있음', SAMPLE[1]],
   [
     '보스',
     {
@@ -243,6 +248,47 @@ function UnlockDemo({
         unlockDemo
         pet={pet}
       />
+    </div>
+  );
+}
+
+/**
+ * 보물상자 한 줄 3상태 (P8-06) + 열기 데모: 서버 대신 30코인을 돌려주는 가짜 요청 → 실제 축하 오버레이(body에).
+ * 다시 누를 수 있게 열어도 견본은 "열 수 있음" 그대로
+ */
+function ChestDemo() {
+  const [events, setEvents] = useState<ChestEvent[]>([]);
+  const [portal, setPortal] = useState<HTMLElement | null>(null);
+  useEffect(() => setPortal(document.body), []);
+  const rows: [label: string, stage: StageWithStatus][] = [
+    ['모으는 중', SAMPLE[2]],
+    ['열 수 있음', SAMPLE[1]],
+    ['열었음', SAMPLE[0]],
+    ['마지막 스테이지 (코인 50)', { ...SAMPLE[6], status: 'in_progress', stars: 4 }],
+  ];
+  return (
+    <div className="grid max-w-xl gap-3">
+      {rows.map(([label, stage]) => (
+        <figure key={label} className="grid gap-1" data-testid={`chest-demo-${stage.id}`}>
+          <figcaption className="text-caption text-text-muted">{label}</figcaption>
+          <StageChest
+            stage={stage}
+            onOpened={(e) => e && setEvents([e])}
+            request={async () => ({ already_opened: false, coins_earned: 30 })}
+          />
+        </figure>
+      ))}
+      {portal &&
+        events.length > 0 &&
+        createPortal(
+          <QuestCelebrations
+            events={events}
+            questId=""
+            worldHref=""
+            onDismiss={() => setEvents([])}
+          />,
+          portal,
+        )}
     </div>
   );
 }
@@ -402,6 +448,13 @@ export function WorldMapSection() {
             ]}
           />
         </div>
+      </Demo>
+      <Demo
+        label="스테이지 보물상자 (P8-06)"
+        note="스테이지 시트 진행 요약 아래 한 줄. 별 합계(보너스 퀴즈 별 포함)/목표 = 코드 퀘스트 수 × 3의 70% 올림(코드 퀘스트만으로 닿음, 7개면 15⭐). 내용 공개형(§2.6): 안에 든 것(코인 30, 마지막 스테이지 50)을 열기 전부터 보여 줘요. 목표를 채우면 금색 테두리 + 상자가 가끔 들썩·반짝(full·lite, minimal·동작 줄이기는 멈춘 반짝 점) + 금색 “열기”(받기 버튼, §12-Q62 ③). 열면 서버(open_stage_chest)가 별을 다시 세어 원장에 한 번만 지급 → 시트를 닫고 지도 위에 보물상자 축하 카드(뚜껑 들썩 → 열림 → 코인 톡, 효과음 chest, 컨페티). 지도 노드에는 별 합계 옆 작은 상자만. 여기 “열기”는 가짜 요청으로 실제 오버레이를 띄워요"
+        data-testid="stage-chest-demo"
+      >
+        <ChestDemo />
       </Demo>
       <Demo
         label="스테이지 노드 상태 5종 (P5-04)"

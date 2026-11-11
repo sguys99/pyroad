@@ -686,3 +686,45 @@ test.describe('별점 (P8-05)', () => {
     );
   });
 });
+
+test.describe('스테이지 보물상자 (P8-06)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 3상태 · 열 수 있는 상자만 들썩(full·lite) · 열기 → 상자 축하 카드`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('stage-chest-demo');
+      await demo.scrollIntoViewIfNeeded();
+      const rows = demo.getByTestId('stage-chest');
+      await expect(rows).toHaveCount(4);
+      await expect(rows.nth(0)).toHaveAttribute('data-state', 'locked');
+      await expect(rows.nth(1)).toHaveAttribute('data-state', 'ready');
+      await expect(rows.nth(2)).toHaveAttribute('data-state', 'opened');
+      // 내용 공개형: 안에 든 것을 열기 전부터 (마지막 스테이지 50)
+      await expect(rows.nth(0)).toContainText('코인 30');
+      await expect(rows.nth(3)).toContainText('코인 50');
+      await expect(demo.getByTestId('stage-chest-open')).toHaveCount(1);
+
+      const names = loopNames(await runningLoops(page));
+      const moving = mode.tier !== 'minimal' && mode.reduced === 'off';
+      expect(names.includes('sc-wiggle')).toBe(moving);
+      // 노드 견본(통과 · 보물상자 열 수 있음)의 작은 상자
+      expect(names.includes('wn-chest')).toBe(moving);
+      await expect(
+        page.getByTestId('world-node-states').locator('.wn-chest'),
+      ).toHaveCount(1);
+
+      await demo.getByTestId('stage-chest-open').click();
+      const overlay = page.getByTestId('celebration-overlay');
+      await expect(overlay.getByTestId('celebration-step-chest')).toBeVisible();
+      // 카탈로그엔 카드 견본도 같은 제목 id 를 써서 대화 상자 이름 대신 제목으로 (실제 화면은 e2e/world-chest.spec.ts)
+      await expect(
+        overlay.getByRole('heading', { name: '보물상자가 열렸어요!' }),
+      ).toBeVisible();
+      await expect(overlay.getByTestId('celebration-live')).toContainText('30');
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      await expect(overlay).toBeHidden();
+    });
+  }
+});

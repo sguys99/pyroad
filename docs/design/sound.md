@@ -81,7 +81,7 @@ scripts/build-sounds.sh   원본 → 정규화·인코딩
 | `unlock` | 황금키 (프로젝트 중간 단계) · 황금키 확인 카드 · 지도 잠금 해제 연출(P5-05/P5-11: full·lite는 자물쇠가 깨지는 순간, 그 전에 건너뛰면 건너뛸 때, minimal·동작 줄이기는 끝 상태로 바뀔 때 — 연출 단계와 무관하게 소리 설정만 따름, 한 번만) | 시스템 메시지·카드, 지도의 열린 노드·"열렸어요" 토스트 |
 | `celebrate`·`levelup`·`star`·`coin` | 축하 시퀀서 (`src/lib/celebration/plan.ts` `STEP_SPECS`·`sfxSchedule`) + 결과 쪽지 보상 띠(`RewardStrip`, 코인은 P8-04부터, 별은 `SHOW_STARS` 켤 때만) | 축하 카드, 보상 띠 숫자·별 |
 | `blip` | 대사창 `DialogueBox` 글자가 나올 때만 (AI 대화 스트리밍은 블립 없음) | 글자·깜빡이는 커서 |
-| `chest` | (Phase 6 보물상자) | — |
+| `chest` | 보물상자 축하 카드가 뜰 때 (P8-06, 축하 시퀀서 `STEP_SPECS.chest`) — 스테이지 시트 "열기"(reward 버튼 기본 `tap`)를 누른 뒤 | 상자 카드(뚜껑이 열리고 코인 톡), 받은 코인 글자·HUD 잔액 |
 
 ### 퀘스트 화면 박자 (P6-14)
 

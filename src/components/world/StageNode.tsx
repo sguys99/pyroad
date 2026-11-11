@@ -2,10 +2,11 @@
 
 import { Check, Crown, Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
-import { Stars } from '@/components/ui/reward-icon';
+import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import dynamic from 'next/dynamic';
 import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
-import { SHOW_STARS } from '@/lib/world/flags';
+import { SHOW_CHEST, SHOW_STARS } from '@/lib/world/flags';
+import { chestState } from '@/lib/world/chest';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 
 /**
@@ -44,6 +45,8 @@ export function stageNodeLabel(stage: StageWithStatus): string {
     parts.push(
       `퀘스트 ${stage.completedQuestCount}/${stage.totalQuestCount} 완료`,
     );
+    if (SHOW_CHEST && chestState(stage) === 'ready')
+      parts.push('보물상자를 열 수 있어요');
   }
   return parts.join(', ');
 }
@@ -111,6 +114,10 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
             <>
               <Stars n={1} max={1} size={16} label={false} /> {stage.stars}/
               {stage.maxStars}
+              {/* 열 수 있는 보물상자 (P8-06): 이름표 옆 작은 상자 하나만 — 여는 것은 시트에서 */}
+              {SHOW_CHEST && chestState(stage) === 'ready' && (
+                <RewardIcon kind="chest" size={18} className="wn-chest" />
+              )}
             </>
           ) : (
             // 별이 기록되기 전(Q51): 완료 체크 + 퀘스트 수

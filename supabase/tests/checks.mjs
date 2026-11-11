@@ -2022,6 +2022,18 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_delta: 99999 },
     ],
     [
+      'CH-1',
+      u.alice,
+      'open_stage_chest',
+      { p_user_id: u.alice.id, p_stage_id: STAGE1 },
+    ],
+    [
+      'CH-1b',
+      'anon',
+      'open_stage_chest',
+      { p_user_id: u.alice.id, p_stage_id: STAGE1 },
+    ],
+    [
       'SET-1',
       u.alice,
       'patch_user_settings',
@@ -2057,7 +2069,8 @@ async function groupRpc(u) {
                            'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys',
                            'submit_quiz_answer', 'grant_coins', 'spend_coins', 'coin_apply',
                            'coin_balance_mismatches', 'users_protect_coins', 'coin_reward', 'grant_star_coins',
-                           'grant_level_up_coins', 'code_quest_stars', 'is_solution_copy')
+                           'grant_level_up_coins', 'code_quest_stars', 'is_solution_copy',
+                           'stage_chest_goal', 'open_stage_chest')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2176,7 +2189,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-1',
     role: 'postgres',
-    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges·coin_reward·code_quest_stars)',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges·coin_reward·code_quest_stars·stage_chest_goal)',
     ...OK,
     run: () => {
       const cases = [
@@ -2204,6 +2217,11 @@ async function groupReward() {
           `stars ${c.hints}/${c.golden}`,
           `public.code_quest_stars(${c.hints}, ${c.golden})::text`,
           String(c.stars),
+        ]),
+        ...rules.chest_goal.map((c) => [
+          `chest_goal ${c.code_quests}`,
+          `public.stage_chest_goal(${c.code_quests})::text`,
+          String(c.goal),
         ]),
         ...rules.badges.map((c) => {
           const f = c.facts;
@@ -3145,6 +3163,54 @@ async function groupCoins(u) {
             mismatches: mismatches(x.id),
           },
         ) ?? { actual: 'ok', detail: `황금키 0 → 정답 복사 0 → 직접 풀이 +${xpWant} XP·25코인·뱃지 2 → 다시 0` }
+      );
+    },
+  });
+
+  // ── 보물상자 (P8-06, 00033) ──
+  await check({
+    group: 'coins',
+    id: 'CH-2',
+    role: 'service_role',
+    op: 'open_stage_chest: 별 합계 목표 미달 409 · 목표 도달 → 30코인(원장 chest/<stage_id>) · 동시 4번도 1회 · 리셋 뒤 다시 열어도 0 · 없는 스테이지 404',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ch2', '보물상자');
+      const qs = stageQuests(STAGE1);
+      const goal = Number(one(`select public.stage_chest_goal(${qs.length})`));
+      const need = Math.ceil(goal / 3); // 힌트 없이 첫 완료 = ⭐3
+      const open = (stage = STAGE1) => rpc('open_stage_chest', { p_user_id: x.id, p_stage_id: stage });
+      for (const q of qs.slice(0, need - 1)) await done(x.id, q);
+      const short = await open();
+      await done(x.id, qs[need - 1]);
+      const many = await Promise.all(Array.from({ length: 4 }, () => open()));
+      const before = coins(x.id);
+      await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      const afterReset = await open();
+      const missing = await open('a1000000-0000-0000-0000-0000000000ff');
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_opened === false);
+      return (
+        compare(
+          'CH-2',
+          {
+            short: `409:not_enough_stars`,
+            many: [200, 200, 200, 200],
+            fresh: `1:30:${goal}`,
+            afterReset: `200:true:0:${before}`,
+            missing: 404,
+            rows: '1',
+            mismatches: '0',
+          },
+          {
+            short: `${short.status}:${errMsg(short)}`,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.coins_earned}:${fresh[0]?.json.goal}`,
+            afterReset: `${afterReset.status}:${afterReset.json?.already_opened}:${afterReset.json?.coins_earned}:${afterReset.json?.coins_balance}`,
+            missing: missing.status,
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}' and source = 'chest'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `목표 ${goal}⭐: ${need - 1}개(⭐${(need - 1) * 3}) 거부 → ${need}개 +30 한 번 → 리셋 뒤 0` }
       );
     },
   });

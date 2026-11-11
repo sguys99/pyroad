@@ -426,6 +426,27 @@
   margin-right: -2px;
   color: var(--accent-text);
 }
+/* 열 수 있는 보물상자 (P8-06): 별 합계 옆 작은 상자, 가끔 들썩 (full·lite, 동작 줄이기·minimal은 멈춤) */
+.wn-chest {
+  margin-left: 2px;
+  transform-origin: 50% 90%;
+}
+@keyframes wn-chest {
+  0%,
+  80%,
+  100% {
+    transform: none;
+  }
+  86% {
+    transform: translateY(-2px) rotate(-8deg);
+  }
+  92% {
+    transform: rotate(6deg);
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) .wn-chest {
+  animation: wn-chest 3.2s var(--easing-out) infinite;
+}
 .wn-meta {
   display: inline-flex;
   align-items: center;

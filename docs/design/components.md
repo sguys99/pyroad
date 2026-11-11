@@ -226,11 +226,11 @@ props: `items`(`{ value, label, icon?, panelId? }[]`) · `value` · `onValueChan
 
 ## 10. 보상 아이콘 `RewardIcon` · `Stars`
 
-시안 `reward.tsx`를 옮김: 금색 하나(`accent`) + 그 진한 톤 1px 안팎(`accentLip`) + 밝은 쪽(`accentLight`), 빈 별은 `line` + 옅은 `lineStrong`. 색은 Tailwind 토큰 클래스(`fill-accent` …)라 이모지·하드코딩 색이 없다. `kind` `coin`·`star`·`starEmpty`·`key`, `size`(px, 보기 상자 32), `label`이 있으면 `role="img"`, 없으면 장식.
+시안 `reward.tsx`를 옮김: 금색 하나(`accent`) + 그 진한 톤 1px 안팎(`accentLip`) + 밝은 쪽(`accentLight`), 빈 별은 `line` + 옅은 `lineStrong`. 색은 Tailwind 토큰 클래스(`fill-accent` …)라 이모지·하드코딩 색이 없다. `kind` `coin`·`star`·`starEmpty`·`key`·`chest`·`chestOpen`(P8-06 보물상자, 몸통 `accent-text`·띠 `accent`·안쪽 `accent-light` — 축하 `ChestCard`와 같은 칠), `size`(px, 보기 상자 32), `label`이 있으면 `role="img"`, 없으면 장식.
 
 `Stars n max size label`: 화면 낭독기에 "별 2개 / 3개" 한 번.
 
-**대표 상태**: 4종 × 20·26·34px, Stars 0~3, 비활성 버튼 안(55%).
+**대표 상태**: 6종 × 20·26·34px, Stars 0~3, 비활성 버튼 안(55%).
 
 ## 11. 툴팁 `Tooltip*`
 
@@ -378,6 +378,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **넓은 화면은 책 한 쪽**: 종이 결(`paper-fiber`) + 왼쪽 묶음 쪽 그늘. 머리는 랜드마크 그림(지도와 같은 `Landmark`, 재질은 `.wm`·`.wm-art` 규칙) 왼쪽 + "N단계 · 지금 모험 중/통과한 곳" + 제목(대화 상자 이름) + 설명
 - **진행 요약**: "퀘스트 2/7 완료" + `ProgressBar sm`. `SHOW_STARS`(Q51)면 별 합계도
 - **차례**: 퀘스트마다 줄 전체가 `<Link>`(56px 이상). 번호 원(완료면 체크) · 제목 · 배울 개념 한 줄(`quests.concept` 공개 열, `--text-caption` 옅은 글자, 길면 줄임표라 줄 높이가 늘지 않음, 줄 이름에 ", 배울 개념 …"으로 들어가 스크린리더도 같은 단서로 복습할 퀘스트를 고름 — 정답·힌트는 쓰지 않음) · 유형 태그(코드 `Code2` · 퀴즈 `MessageCircleQuestion` · 보스 `Crown` — 보스는 `quest_type: boss` 또는 마지막 스테이지의 마지막 퀘스트) · 상태 태그(완료 · 지금 차례 · 하는 중 · 아직) · `is_mobile_friendly`면 "휴대폰 추천"(768 미만에서 진한 칩, 이상은 옅게). 끝: 완료 = "다시 하기"(SHOW_STARS면 별 0~3도), 첫 미완료 = 줄만 강조(초록 면 + 왼쪽 띠 + "지금 차례" 태그, `aria-current="step"`)하고 끝은 화살표 — 시작·이어하기 버튼은 시트 아래 주 버튼 하나뿐(P5-14: 줄 안 "이어하기"와 중복 제거), 나머지 = 화살표. 열린 스테이지 안 퀘스트는 서버 가드(B38, 스테이지 단위)상 모두 열리므로 건너뛰어 열 수 있다
+- **보물상자**(P8-06, `SHOW_CHEST`, `StageChest.tsx`·`stageChest.css` `.sc*`): 진행 요약 아래 한 줄. 상자 그림(`RewardIcon chest/chestOpen` 48) · "보물상자" + 별 합계(퀴즈 별 포함)/목표(`chestGoal` = 코드 퀘스트 × 3의 70% 올림) · 한 줄 안내 · 모으는 중엔 `ProgressBar sm` · **안에 든 것**(코인 30, 마지막 스테이지 50 — 내용 공개형 §2.6). 목표를 채우면 금색 테두리·옅은 금색 면 + 금색 `Button reward sm` "열기"(`stage-chest-open`, 24rem 미만은 아래 줄 전체). 열면 `/api/world/chest` → 시트를 닫고 지도 위에 축하 `ChestCard`(시퀀서, 효과음 `chest`), 카드를 닫으면 `router.refresh()`로 HUD 코인·상자 상태. 실패는 안내 한 줄(`role=alert`). 상자 들썩 `sc-wiggle`·반짝 `sc-glint`(full·lite, minimal·동작 줄이기는 멈춘 반짝 점). 지도 노드는 별 합계 옆 작은 상자(`.wn-chest`, 가끔 들썩)와 이름에 ", 보물상자를 열 수 있어요"만
 - **주 버튼**: 첫 미완료 퀘스트 "N번 퀘스트 시작하기/이어하기"(`stage-sheet-start`), 시트 아래에 붙어(sticky) 차례가 길어도 보인다. 다 끝낸 스테이지는 없음
 - **열기·닫기**(`WorldMap` `useOpenStage`): 열면 `?stage=<id>`를 `history.pushState`로 남긴다(서버 렌더 없음). 기기 뒤로 가기 = 닫기, 시트에서 퀘스트로 갔다 뒤로 오면 시트가 다시 열려 있음. 닫기 버튼·Esc·덮개로 닫으면 이 화면이 쌓은 항목은 `history.back()`, 주소로 열린 경우는 `replaceState`로 지움. 닫으면 그 노드로 포커스(`finalFocus`). 잠긴 노드는 시트 대신 안내 쪽지. `questsByStage`를 안 주면(카탈로그 틴트 견본) 열지 않음
 - 효과음 없음(탭 소리는 P5-11)

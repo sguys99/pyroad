@@ -95,7 +95,7 @@ export const SFX_USES: Record<SfxId, { name: string; when: string }> = {
     name: '해제',
     when: '황금키를 쓸 때 · 지도에서 자물쇠가 깨지며 새 단계가 열릴 때',
   },
-  chest: { name: '보물상자', when: '보물상자를 열 때 (Phase 6 이후)' },
+  chest: { name: '보물상자', when: '스테이지 보물상자를 열 때 (P8-06)' },
   run: { name: '실행', when: '실행 버튼을 누를 때' },
   bug: {
     name: '버그버그',

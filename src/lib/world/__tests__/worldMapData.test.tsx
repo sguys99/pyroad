@@ -26,6 +26,7 @@ import {
 
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ refresh: () => {} }),
 }));
 vi.mock('@/components/providers/SoundProvider', () => ({
   useSfx: () => () => {},

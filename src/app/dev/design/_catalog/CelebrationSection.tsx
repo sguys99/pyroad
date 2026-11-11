@@ -35,7 +35,7 @@ const STAGE = {
 const SUMMARY =
   '**print**로 화면에 글자를 보여 주고, **변수**라는 상자에 값을 넣어 다시 꺼내 쓰는 법을 배웠어요. 다음 숲에서도 쓸 거예요!';
 
-/** 실제 오버레이로 띄우는 묶음 (보물상자는 SHOW_CHEST가 꺼져 있어 시퀀서가 건너뜀 → 아래 견본으로만) */
+/** 실제 오버레이로 띄우는 묶음 */
 const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
   {
     id: 'stage',
@@ -57,6 +57,18 @@ const SEQUENCES: { id: string; label: string; events: CelebrationEvent[] }[] = [
     id: 'golden',
     label: '황금키로 연 퀘스트',
     events: [{ type: 'golden_key', kind: 'code', questTitle: '변수 상자' }],
+  },
+  {
+    id: 'chest',
+    label: '보물상자 열기 (P8-06)',
+    events: [
+      {
+        type: 'chest',
+        stageTitle: '파이썬 마을',
+        goal: 15,
+        contents: { coins: 30, goldenKeys: 0 },
+      },
+    ],
   },
   {
     id: 'phase8',
@@ -163,15 +175,14 @@ const CATALOG_STEPS: Record<string, CelebrationStep> = {
     { type: 'star', stars: 2, gained: 2 },
     { type: 'coin', amount: 25 },
   ]),
-  // 보물상자는 시퀀서가 SHOW_CHEST로 거르므로 단계를 직접 만든다 (카드 견본 전용)
   chest: {
     kind: 'chest',
     id: 'catalog-chest',
     event: {
       type: 'chest',
-      stageTitle: '시작의 숲',
+      stageTitle: '파이썬 마을',
       goal: 15,
-      contents: { coins: 40, goldenKeys: 1 },
+      contents: { coins: 30, goldenKeys: 0 },
     },
   },
 };
@@ -187,7 +198,7 @@ export function CelebrationSection() {
         id="celebrations"
         kicker="퀘스트 (P6-13)"
         title="축하 오버레이"
-        description="스테이지 클리어 · 레벨 업 · 업적(뱃지) · 황금키 · 프로젝트 완성 · 별·코인 · 보물상자. 같은 카드 껍데기(흰 면, 테두리 없음, 그림자 한 종류)에 제목만 Jua, 금색은 보상에만. 카드 안 연출은 1회성 CSS(transform만)라 등장 중 아무 데나 누르거나 Enter·Space·Esc면 끝 모습으로 건너뛰고, 그다음 Enter·Space는 다음 카드, Esc는 모두 닫기. 스테이지를 끝낸 카드는 맨 뒤에 와서 “지도에서 새 길 보기”가 월드맵 해제 연출로 이어져요. 레벨 업 카드는 칭호 도장 뒤에 받은 레벨 업 코인(레벨마다 20, 5레벨마다 100, 여러 레벨을 넘으면 합)이 보상 알약으로 톡 튀어 0부터 올라가요(P8-04). 별(Q52)과 보물상자(SHOW_CHEST)는 Phase 8 해당 작업까지 화면에서 숨기고 여기서만 보여요."
+        description="스테이지 클리어 · 레벨 업 · 업적(뱃지) · 황금키 · 프로젝트 완성 · 별·코인 · 보물상자. 같은 카드 껍데기(흰 면, 테두리 없음, 그림자 한 종류)에 제목만 Jua, 금색은 보상에만. 카드 안 연출은 1회성 CSS(transform만)라 등장 중 아무 데나 누르거나 Enter·Space·Esc면 끝 모습으로 건너뛰고, 그다음 Enter·Space는 다음 카드, Esc는 모두 닫기. 스테이지를 끝낸 카드는 맨 뒤에 와서 “지도에서 새 길 보기”가 월드맵 해제 연출로 이어져요. 레벨 업 카드는 칭호 도장 뒤에 받은 레벨 업 코인(레벨마다 20, 5레벨마다 100, 여러 레벨을 넘으면 합)이 보상 알약으로 톡 튀어 0부터 올라가요(P8-04). 보물상자(P8-06)는 스테이지 시트의 “열기”로 열면 월드맵 위에 떠요 — 안에 든 것(코인 30, 마지막 스테이지 50)을 미리 보여 준 그대로 받아요(내용 공개형)."
       >
         <div className="flex flex-wrap gap-2">
           <Button
@@ -302,14 +313,14 @@ export function CelebrationSection() {
           </CardSample>
           <CardSample
             kind="chest"
-            label="보물상자 (Phase 8, SHOW_CHEST 꺼짐)"
+            label="보물상자 (P8-06, 스테이지 시트의 “열기”)"
             round={round}
           >
             {(settled) => (
               <ChestCard
-                stageTitle="시작의 숲"
+                stageTitle="파이썬 마을"
                 goal={15}
-                contents={{ coins: 40, goldenKeys: 1 }}
+                contents={{ coins: 30, goldenKeys: 0 }}
                 budget={budget}
                 settled={settled}
                 onNext={noop}

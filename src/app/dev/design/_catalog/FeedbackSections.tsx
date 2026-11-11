@@ -598,7 +598,14 @@ export function BubbleSection() {
 
 // ───────────────────────────── 보상 아이콘
 
-const KINDS: RewardKind[] = ['coin', 'star', 'starEmpty', 'key'];
+const KINDS: RewardKind[] = [
+  'coin',
+  'star',
+  'starEmpty',
+  'key',
+  'chest',
+  'chestOpen',
+];
 
 export function RewardSection() {
   return (
@@ -609,8 +616,8 @@ export function RewardSection() {
       description="금색 하나(accent) + 진한 톤 외곽 + 밝은 쪽. 이모지·하드코딩 색 없음."
     >
       <div className="grid gap-4 md:grid-cols-2">
-        <Demo label="4종 × 20 · 26 · 34px">
-          <div className="grid grid-cols-4 gap-3">
+        <Demo label="6종 × 20 · 26 · 34px (보물상자 닫힘·열림 P8-06)">
+          <div className="grid grid-cols-3 gap-3">
             {KINDS.map((kind) => (
               <Labeled key={kind} label={kind}>
                 <span className="flex items-end gap-2">

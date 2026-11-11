@@ -131,6 +131,27 @@ describe('toWorldMapData (P5-13)', () => {
     ).toBeNull();
   });
 
+  it('연 보물상자 (P8-06): 내 원장 chest 행의 stage_id 만 chestOpened', () => {
+    const data = toWorldMapData(
+      ME,
+      raw({
+        chests: [
+          { user_id: ME, ref: 's1' },
+          { user_id: OTHER, ref: 's2' },
+        ],
+      }),
+      WORLDS,
+    );
+    expect(
+      data.progress.worlds
+        .flatMap((w) => w.stages)
+        .map((s) => [s.id, s.chestOpened]),
+    ).toEqual([
+      ['s1', true],
+      ['s2', false],
+    ]);
+  });
+
   it('오늘의 퀴즈 (P7-10): 열린 스테이지 퀴즈를 고르고, 오늘 내 시도로만 끝난 문제를 센다', () => {
     const base = raw();
     const plain = stage('s1', 1, ['q1', 'q2']);

@@ -461,6 +461,24 @@ export const EXPECT = {
     activateIn: 'P8-05',
     note: '황금키 퀘스트 첫 직접 풀이(다음 날부터) 때 XP·코인·뱃지, 같은 날·정답 그대로는 0',
   },
+  // ── 보물상자 (P8-06, ① 00033) ──
+  'CH-1': {
+    expect: 'deny',
+    requires: 'public.open_stage_chest()',
+    activateIn: 'P8-06',
+    note: '상자 열기는 /api/world/chest(service_role)만',
+  },
+  'CH-1b': {
+    expect: 'deny',
+    requires: 'public.open_stage_chest()',
+    activateIn: 'P8-06',
+  },
+  'CH-2': {
+    expect: 'allow',
+    requires: 'public.open_stage_chest()',
+    activateIn: 'P8-06',
+    note: '서버가 별 합계를 다시 세어 목표 미달 거부 · 원장 키로 한 번만(동시·리셋 뒤 0)',
+  },
   'CN-10': {
     expect: 'allow',
     requires: 'public.coin_reward()',

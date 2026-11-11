@@ -1,13 +1,19 @@
 import { cn } from '@/lib/utils';
 
 /**
- * 보상 아이콘 (P2-11, 최종 시안 `design/prototypes/src/final/reward.tsx`): 코인·별·황금키를 이모지 대신 자체 SVG로.
+ * 보상 아이콘 (P2-11, 최종 시안 `design/prototypes/src/final/reward.tsx`): 코인·별·황금키·보물상자(P8-06, 닫힘·열림)를 이모지 대신 자체 SVG로.
  * - 금색 하나(`accent`)만 쓰고 외곽선은 그 금색의 진한 톤(`accent-lip`) 1px 안팎, 밝은 쪽은 `accent-light`
  * - 빈 별은 중립 면(`line`) + 옅은 선
  * - 색은 Tailwind 토큰 클래스(`fill-accent` …)로만 칠한다 → 월드 테마·토큰 변경을 따라간다
  * - `label`을 주면 그림 하나로 읽히고(`role="img"`), 없으면 장식(`aria-hidden`)이다. 수치는 옆 글자로 함께 보여 준다
  */
-export type RewardKind = 'coin' | 'star' | 'starEmpty' | 'key';
+export type RewardKind =
+  | 'coin'
+  | 'star'
+  | 'starEmpty'
+  | 'key'
+  | 'chest'
+  | 'chestOpen';
 
 const STAR =
   'M16 3.5l3.7 7.6 8.3 1.2-6 5.9 1.4 8.3L16 22.6l-7.4 3.9 1.4-8.3-6-5.9 8.3-1.2z';
@@ -90,6 +96,28 @@ export function RewardIcon({
             strokeWidth={1.9}
             strokeLinecap="round"
             strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case 'chest':
+    case 'chestOpen':
+      // 축하 카드 ChestCard 와 같은 칠: 몸통 accent-text · 띠 accent · 안쪽 accent-light. 열림은 뚜껑을 뒤로 젖힘
+      return (
+        <svg {...common}>
+          {kind === 'chestOpen' && (
+            <path d="M5 13h22v3H5z" className="fill-accent-light" />
+          )}
+          <g transform={kind === 'chestOpen' ? 'rotate(-30 4 15)' : undefined}>
+            <path
+              d="M3.5 15C3.5 9 9 5.5 16 5.5S28.5 9 28.5 15Z"
+              className="fill-accent-text"
+            />
+            <path d="M14 8.5h4V15h-4z" className="fill-accent" />
+          </g>
+          <path d="M3.5 16h25v11.5h-25z" className="fill-accent-text" />
+          <path
+            d="M3.5 19.5h25V21h-25zM14 17.5h4v6.5h-4z"
+            className="fill-accent"
           />
         </svg>
       );

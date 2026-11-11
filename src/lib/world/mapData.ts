@@ -134,6 +134,8 @@ export interface WorldMapRaw {
   seen: Array<{ user_id: string; stage_id: string }> | null;
   /** 오늘(KST) 본인 퀴즈 시도 (P7-10, 오늘의 퀴즈 완료 계산). 없으면 끝난 문제 없음 */
   attempts?: QuizAttemptRow[] | null;
+  /** 연 보물상자 (P8-06): 본인 coin_ledger chest 행, ref = stage_id. 못 읽었으면 없음(모두 안 연 것) */
+  chests?: Array<{ user_id: string; ref: string }> | null;
 }
 
 export function toWorldMapData(
@@ -166,6 +168,11 @@ export function toWorldMapData(
   }
 
   const worldsProgress = getWorldStatuses(worlds, raw.stages, progress);
+  const opened = new Set(
+    (raw.chests ?? []).filter((c) => c.user_id === userId).map((c) => c.ref),
+  );
+  for (const w of worldsProgress.worlds)
+    for (const s of w.stages) s.chestOpened = opened.has(s.id);
   const picks = pickDailyQuizzes({
     userId,
     today,

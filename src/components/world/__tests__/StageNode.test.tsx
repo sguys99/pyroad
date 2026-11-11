@@ -63,6 +63,21 @@ describe('StageNode (P5-04)', () => {
     ).toBe('열림');
   });
 
+  it('열 수 있는 보물상자(P8-06): 이름표 옆 작은 상자 + 이름에 안내, 열었으면 없음', () => {
+    // 코드 퀘스트 8개 → 목표 17
+    const ready = { ...base, stars: 17 };
+    const { container, rerender } = render(
+      <StageNode stage={ready} onOpen={() => {}} />,
+    );
+    expect(container.querySelector('.wn-chest')).not.toBeNull();
+    expect(stageNodeLabel(ready)).toContain('보물상자를 열 수 있어요');
+    rerender(
+      <StageNode stage={{ ...ready, chestOpened: true }} onOpen={() => {}} />,
+    );
+    expect(container.querySelector('.wn-chest')).toBeNull();
+    expect(stageNodeLabel(base)).not.toContain('보물상자');
+  });
+
   it('잠김: aria-disabled 지만 누르면 onOpen (안내는 WorldMap), 별 대신 잠김', () => {
     const onOpen = vi.fn();
     const locked = { ...base, status: 'locked' as const };

@@ -57,6 +57,10 @@ export const IDLE_LOOPS = [
   'char-twinkle',
   // 실행 중 버튼 빛 띠 (runControls.css, P6-05). 꾸밈이라 minimal은 버튼 스피너만
   'qr-sweep',
+  // 열 수 있는 보물상자 들썩·반짝 (stageChest.css·worldMap.css, P8-06). 열 수 있다는 정보는 글자·테두리·버튼이 함
+  'sc-wiggle',
+  'sc-glint',
+  'wn-chest',
 ];
 
 export interface RunningLoop {

@@ -38,6 +38,7 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   already_completed: { status: 409, error: '이미 완료한 퀘스트예요!' },
   no_golden_keys: { status: 400, error: '황금키가 부족해요.' },
   not_enough_coins: { status: 400, error: '코인이 부족해요.' },
+  not_enough_stars: { status: 409, error: '별이 아직 모자라요.' },
 };
 
 export function rewardError(
@@ -74,7 +75,8 @@ async function callRpc<T>(
     | 'reset_progress'
     | 'submit_quiz_answer'
     | 'grant_coins'
-    | 'spend_coins',
+    | 'spend_coins'
+    | 'open_stage_chest',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -196,6 +198,30 @@ export function spendCoinsRpc(
       p_user_id: userId,
       p_ref: ref,
       p_amount: amount,
+    }),
+  );
+}
+
+/** 스테이지 보물상자 열기 반환 (P8-06, 00033). 이미 열었으면 already_opened, coins_earned 0 */
+export interface OpenChestResult {
+  opened: true;
+  already_opened: boolean;
+  coins_earned: number;
+  coins_balance: number;
+  stars: number;
+  goal: number;
+}
+
+/** 스테이지 보물상자 열기 (P8-06). 서버가 별 합계를 다시 세어 목표 미달이면 not_enough_stars */
+export function openStageChestRpc(
+  admin: AdminClient,
+  userId: string,
+  stageId: string,
+) {
+  return callRpc<OpenChestResult>('open_stage_chest', () =>
+    admin.rpc('open_stage_chest', {
+      p_user_id: userId,
+      p_stage_id: stageId,
     }),
   );
 }

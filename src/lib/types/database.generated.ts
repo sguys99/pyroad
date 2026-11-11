@@ -1040,6 +1040,10 @@ export type Database = {
         Args: { p_limit: number };
         Returns: string[];
       };
+      open_stage_chest: {
+        Args: { p_stage_id: string; p_user_id: string };
+        Returns: Json;
+      };
       patch_user_settings: {
         Args: { p_patch: Json; p_user_id: string };
         Returns: boolean;
@@ -1099,6 +1103,7 @@ export type Database = {
         Args: { p_amount: number; p_ref: string; p_user_id: string };
         Returns: Json;
       };
+      stage_chest_goal: { Args: { p_code_quests: number }; Returns: number };
       submit_quiz_answer: {
         Args: { p_answer: Json; p_quest_id: string; p_user_id: string };
         Returns: Json;

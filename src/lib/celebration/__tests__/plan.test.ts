@@ -96,17 +96,17 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
     ]);
   });
 
-  it('보물상자는 Phase 8 전(SHOW_CHEST=false)에는 단계를 만들지 않는다', () => {
-    expect(
-      planCelebrations([
-        {
-          type: 'chest',
-          stageTitle: '시작의 숲',
-          goal: 15,
-          contents: { coins: 40, goldenKeys: 1 },
-        },
-      ]),
-    ).toEqual([]);
+  it('보물상자(P8-06, SHOW_CHEST)는 상자 카드 하나 — 효과음 chest', () => {
+    const steps = planCelebrations([
+      {
+        type: 'chest',
+        stageTitle: '시작의 숲',
+        goal: 15,
+        contents: { coins: 30, goldenKeys: 0 },
+      },
+    ]);
+    expect(kinds(steps)).toEqual(['chest']);
+    expect(STEP_SPECS.chest.sfx).toBe('chest');
   });
 
   it('등장 연출은 모두 짧다 (§12-Q28: 레벨 업 최대 3.6초 안)', () => {

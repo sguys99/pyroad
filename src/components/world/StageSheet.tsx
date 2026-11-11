@@ -15,7 +15,7 @@ import {
 import type { StageWithStatus } from '@/lib/types/database';
 import type { WorldId } from '@/lib/design/tokens';
 import type { StageQuestItem } from '@/lib/world/mapData';
-import { SHOW_STARS } from '@/lib/world/flags';
+import { SHOW_CHEST, SHOW_STARS } from '@/lib/world/flags';
 import { Sheet } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useSfx } from '@/components/providers/soundContext';
@@ -28,6 +28,7 @@ import { starReviewOpen } from '@/lib/quest/starReview';
 import { kstToday } from '@/lib/time/kst';
 import { Landmark } from './map/MapArt';
 import { QUIZ_KIND_ICON } from './PhoneQuizPick';
+import { StageChest, type ChestEvent } from './StageChest';
 import './map/worldMap.css';
 import './stageSheet.css';
 
@@ -43,6 +44,7 @@ import './stageSheet.css';
  *   목록 아래 "보너스" 안내 한 줄(잠금·클리어 계산에서 빠짐, `countsForClear`). 휴대폰·태블릿(`usePhoneLike`)이면 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요"
  * - 별(P8-05, SHOW_STARS): 완료 줄에 최고 별. 기존 완료(P8-11 소급 전, best_stars 0)는 빈 별 대신 그리지 않음.
  *   별 3개 미만이고 판정 다음 날(KST)이 된 퀘스트·퀴즈는 "복습 도전 가능" 딱지(§2.3·§12-Q64, `starReviewOpen`)
+ * - 보물상자(P8-06, SHOW_CHEST): 진행 요약 아래 별 합계/목표·안에 든 것·"열기" (`StageChest`). 열면 `onChestOpened`
  * - 줄 차례 등장은 CSS(`stageSheet.css`, 연출 단계별). 효과음은 넣지 않음(P5-11)
  */
 
@@ -103,6 +105,8 @@ interface StageSheetProps {
   world?: WorldId;
   /** 오늘 KST 날짜 키 (복습 도전 판정, 테스트·카탈로그용. 기본 지금) */
   today?: string;
+  /** 보물상자를 열었을 때 (P8-06, `StageChest` onOpened). 없으면 열어도 아무것도 하지 않음(카탈로그) */
+  onChestOpened?: (event: ChestEvent | null) => void;
 }
 
 export function StageSheet({
@@ -113,6 +117,7 @@ export function StageSheet({
   finalFocus,
   world,
   today = kstToday(),
+  onChestOpened,
 }: StageSheetProps) {
   const play = useSfx();
   const phone = usePhoneLike();
@@ -210,6 +215,10 @@ export function StageSheet({
           </p>
         )}
       </div>
+
+      {SHOW_CHEST && (
+        <StageChest stage={stage} onOpened={onChestOpened ?? (() => {})} />
+      )}
 
       <h3 className="ss-k">차례</h3>
       <ol className="ss-list">

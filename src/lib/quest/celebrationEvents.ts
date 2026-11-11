@@ -37,7 +37,7 @@ export type CelebrationEvent =
   // 쓰지 않는 자리: 별(P8-05)·퀘스트·별 코인은 결과 쪽 보상 띠(QuestSuccess)가 별 팝·"새 별 +N"으로, 레벨 업 코인은 레벨 업 카드가 보임
   | { type: 'star'; stars: 1 | 2 | 3; gained: number }
   | { type: 'coin'; amount: number }
-  // Phase 8 자리 (§3 F11 스테이지 보물상자, `SHOW_CHEST`): 별 합계 목표를 채우면 상자 개봉 + 내용 공개
+  // 스테이지 보물상자 (§3 F11, P8-06): 월드맵 StageChest "열기" → 서버가 준 코인. 내용 공개형
   | {
       type: 'chest';
       stageTitle: string;
