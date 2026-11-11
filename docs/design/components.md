@@ -496,19 +496,32 @@ Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재
 - **분석**: `rest_reminder_shown`(`snoozed`) · `rest_reminder_choice`(`rest`·`more`·`done`·`stop`)
 - **e2e 빨리 감기**: 테스트 페이지가 켜진 서버(`isTestPagesEnabled`)에서만 sessionStorage `pyroad:rest:speed` 배속을 읽음 → `e2e/rest-reminder.spec.ts`. 카탈로그 "휴식 알림" 절(`#rest`)은 단계별로 당겨 띄움(쉬기 10초)
 
+## 13-11. 프로필 `ProfileHero` · `LearningCalendar` · `ProfileStatsCard` · `AchievementsCard` · `TreasureCard` (P8-13)
+
+`/profile`(로그인, 본인 전용 — 공개 정보 범위 §2.6은 그대로). 코드 `src/components/profile/ProfileSections.tsx`(훅 없음, 서버·카탈로그 공용)·`LearningCalendar.tsx`(클라이언트)·`profile.css`(`.pf-*`), 화면 값은 순수 함수 `src/lib/profile/profileStats.ts`(`buildCalendarMonth`·`calendarMonths`·`learnLevel`·`quizAccuracy`·`recentAchievements`, 단위 테스트). 서버는 본인 권한(사용자·진행·상자 원장·업적)과 service_role `profile_stats`(00038, 확인한 id)를 한 번에 병렬로.
+
+- **틀**: 360 한 열 → 768부터 두 열 그리드(머리·계정 관리는 두 칸). 위 "← 월드맵" + 지갑 `HudCounter coin`
+- **머리**: 아바타(옅은 초록 테) 오른쪽 아래 초록 레벨 도장(레벨업 카드 `.cel-seal` 톤, 5레벨마다 금색 메달) · 이름 · 칭호 도장(`.cel-titlecard` 톤 — 금색 글씨 테두리, -2° 기울임, 큰 칭호는 금색 면) · "다음 칭호 ○○" + 레벨 안 XP `ProgressBar lg`(Lv 50은 "최고 레벨에 닿았어요!")
+- **학습 달력**: 한 달씩, 이전·다음(`IconButton sm`, 첫 기록 달 ~ 이번 달, 최대 12개월, 끝이면 꺼짐). 일요일 시작 표(`<table>`, 요일 머리). 공부한 날 = 초록 원, 그날 푼 퀘스트 수만큼 진하게(1 · 2~3 · 4+, 4+는 흰 글자) · 방패로 지킨 날 = 금색 테 + 방패 아이콘 · 출석 도장 = 아래 금색 점 · 오늘 = `--ring` 테두리 · 앞날은 흐리게. 칸 낭독 "오늘, 11월 12일, 퀘스트 3개, 출석 도장". 아래 "이 달에 n일 공부하고 퀘스트 m개를 풀었어요" + 보는 법. 제목 줄 오른쪽 "지금 n일 연속". 날짜는 모두 KST(서버가 오늘을 정해 넘김)
+- **모험 기록**: 숫자 타일 8개(혼자 푼 퀘스트 · 힌트 없이 · 퀴즈 정답률(정답 시도/전체 시도, 시도 없으면 "-") · 에러를 이겨 냈어요 · 복습 도전 · 연속 학습(최고) · 방패 n/2 · 출석 도장). 수는 업적 지표(`achievement_stats`)와 같아 도감 진행과 어긋나지 않음
+- **업적**: `CardButton` → 도감(P8-10). 얻은 수/전체 · 금색 진행 막대 · 최근 얻은 메달 3개(이름·날짜) · 받을 코인이 있으면 `.ach-ready`
+- **별과 보물**: 코인 잔액 + "이번 주 +n"(월요일부터 번 코인) · 모은 별/최대(월드맵 `stage.stars`와 같은 합, 퀴즈 포함) · 연 보물상자 · 스테이지별 별 막대(`ProgressBar sm reward`) + 상자 아이콘(열었음·열 수 있음·모으는 중은 흐리게), 잠긴 스테이지는 흐리게
+- **연출**: 반복 없음. XP 막대만 들어올 때 채워 오름(진행바 규칙)
+- **카탈로그**: "프로필" 절(`#profile`) — 머리 3종(보통·큰 칭호·최고 레벨), 달력(잔디·방패·출석 / 빈 달), 모험 기록(퀴즈 있음·없음), 업적, 별과 보물. e2e `profile.spec.ts`(360 한 열·오늘 칸 낭독·도감 링크 / 1280 두 열, 넘침 없음)
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
 |---|---|
 | Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 월드맵 이어하기(`ContinueButton`, P5-10), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
 | IconButton | HUD 소리 토글(`SoundToggle`)·메뉴(`WorldHud`), 시트·토스트 닫기 |
-| Card | 프로필 카드 4개, 계정 관리 |
+| Card | 계정 관리 (프로필은 §13-11 `.pf-card`) |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
 | Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06), 월드맵 HUD 메뉴(P5-07) |
 | Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04), HUD 불꽃·곧 열려요 쪽지(P5-07), 잠금 해제 문구(P5-05) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
-| ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률, 스테이지 차례 시트 진행 요약 |
+| ProgressBar | 프로필 머리 XP 막대·업적·스테이지별 별, 스테이지 차례 시트 진행 요약 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |
 | SpeechBubble | 튜터 대사·스트리밍·생각 중 |
 | RewardIcon | 황금키 버튼·남은 개수, 황금키 확인 카드 |

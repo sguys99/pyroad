@@ -111,6 +111,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'quiz',
       'celebrations',
       'achievements',
+      'profile',
       'share-card',
       'sound',
       'legal',

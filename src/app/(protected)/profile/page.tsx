@@ -1,37 +1,68 @@
-import { createClient } from '@/lib/supabase/server';
-import { getAuthUser } from '@/lib/supabase/auth';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LogoutButton } from '@/components/LogoutButton';
-import { getLevelTitle } from '@/lib/quest/xp';
-import { XPProgressBar } from '@/components/shared/XPProgressBar';
-import { Card, CardButton } from '@/components/ui/card';
-import { ChevronRight } from 'lucide-react';
-import { ProgressBar } from '@/components/ui/progress-bar';
-import { AchievementMedal } from '@/components/shared/AchievementMedal';
-import type { Achievement } from '@/lib/types/database';
-import { PageTransition } from '@/components/shared/PageTransition';
-import { UserAvatar } from '@/components/profile/UserAvatar';
-import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
-import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
-import { formatKstDate } from '@/lib/time/kst';
-import { sortStages } from '@/lib/world/stageOrder';
+import { redirect } from 'next/navigation';
+import { CalendarDays, ChevronLeft } from 'lucide-react';
 
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { getAuthUser } from '@/lib/supabase/auth';
+import { reportServerError } from '@/lib/api/serverError';
+import { LogoutButton } from '@/components/LogoutButton';
+import { HudCounter } from '@/components/ui/hud';
+import { PageTransition } from '@/components/shared/PageTransition';
+import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
+import { LearningCalendar } from '@/components/profile/LearningCalendar';
+import {
+  AchievementsCard,
+  ProfileCard,
+  ProfileHero,
+  ProfileStatsCard,
+  TreasureCard,
+} from '@/components/profile/ProfileSections';
+import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
+import type { Achievement } from '@/lib/types/database';
+import {
+  recentAchievements,
+  type ProfileStatsRaw,
+} from '@/lib/profile/profileStats';
+import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import { chestState } from '@/lib/world/chest';
+import { kstToday } from '@/lib/time/kst';
+
+/** 못 읽었을 때(00038 전 DB) 빈 기록 — 화면은 0으로 그대로 그림 */
+const EMPTY_STATS: ProfileStatsRaw = {
+  stats: {
+    quests: 0,
+    no_hint: 0,
+    stars: 0,
+    three_stars: 0,
+    quiz_correct: 0,
+    reviews: 0,
+    streak: 0,
+    errors: 0,
+    chests: 0,
+    attendance: 0,
+  },
+  quiz_tries: 0,
+  quiz_right: 0,
+  streak: 0,
+  shields: 0,
+  days: {},
+  shield_days: [],
+  stamp_days: [],
+  coins_week: 0,
+};
+
+/**
+ * 프로필 (P8-13): 본인 전용 — 공개 정보 범위(§2.6, 닉네임 + 아바타)는 그대로.
+ * 사용자 테이블은 본인 권한(RLS)으로, 통계·학습 달력은 service_role `profile_stats`(00038)를 확인한 id 로 한 번에 — 모두 병렬
+ */
 export default async function ProfilePage() {
   const supabase = await createClient();
-
-  // getAuthUser()와 user.id 불필요한 stages 쿼리를 병렬 실행
-  const [{ user }, stagesResult] = await Promise.all([
-    getAuthUser(),
-    // 순서는 (월드 order, 스테이지 order) — 아래 sortStages (P1-08)
-    supabase
-      .from('stages')
-      .select('id, order, title, world:worlds(order), quests(id)'),
-  ]);
+  const { user } = await getAuthUser();
   if (!user) redirect('/');
+  const today = kstToday();
 
-  // user.id 필요한 쿼리는 이후 병렬 실행
-  const [profileResult, progressResult, achievedResult, definitionsResult] =
+  const [profileRes, stagesRes, progressRes, chestsRes, owned, defs, stats] =
     await Promise.all([
       supabase
         .from('users')
@@ -39,201 +70,128 @@ export default async function ProfilePage() {
         .eq('id', user.id)
         .single(),
       supabase
+        .from('stages')
+        .select(
+          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, quest_type)',
+        ),
+      supabase
         .from('user_progress')
-        .select('quest_id, status')
+        .select('quest_id, status, best_stars')
+        .eq('user_id', user.id),
+      supabase
+        .from('coin_ledger')
+        .select('ref')
         .eq('user_id', user.id)
-        .eq('status', 'completed'),
+        .eq('source', 'chest'),
       supabase
         .from('user_achievements')
         .select('achievement_id, achieved_at, claimed_at')
         .eq('user_id', user.id),
-      supabase
-        .from('achievements')
-        .select('id, name, icon, tier, sort, hidden')
-        .order('sort'),
+      supabase.from('achievements').select('id, name, icon, tier, sort'),
+      createAdminClient().rpc('profile_stats', { p_user_id: user.id }),
     ]);
+  if (stats.error)
+    reportServerError(stats.error, { area: 'profile', op: 'profile_stats' });
 
-  const profile = profileResult.data ? toOwnProfile(profileResult.data) : null;
-  const progress = progressResult.data ?? [];
-  const stages = sortStages(stagesResult.data ?? []);
-  // 업적 (P8-09): 얻은 것만 메달로. 전체(실루엣·진행도·받기)는 도감 /profile/achievements (P8-10)
-  const achievedAt = new Map(
-    (achievedResult.data ?? []).map((a) => [a.achievement_id, a.achieved_at]),
-  );
-  const claimable = (achievedResult.data ?? []).filter(
-    (a) => !a.claimed_at,
-  ).length;
-  const definitions = (definitionsResult.data ?? []) as Pick<
-    Achievement,
-    'id' | 'name' | 'icon' | 'tier' | 'sort' | 'hidden'
-  >[];
-  const earned = definitions.filter((a) => achievedAt.has(a.id));
-  // 도감과 같은 셈: 숨김 업적도 "???" 칸으로 보이므로 전체에 넣음
-  const achievementTotal = definitions.length;
-
+  const profile = profileRes.data ? toOwnProfile(profileRes.data) : null;
   if (!profile) redirect('/');
+  const raw = (stats.data as unknown as ProfileStatsRaw | null) ?? EMPTY_STATS;
 
-  const title = getLevelTitle(profile.current_level);
-  const completedQuestIds = new Set(
+  const progress = progressRes.data ?? [];
+  const opened = new Set((chestsRes.data ?? []).map((c) => c.ref));
+  const stages = getStageStatuses(stagesRes.data ?? [], progress).map((s) => ({
+    ...s,
+    chestOpened: opened.has(s.id),
+  }));
+  const completed = new Set(
     progress.filter((p) => p.status === 'completed').map((p) => p.quest_id),
   );
-  const totalQuests = stages.reduce(
-    (sum, s) => sum + ((s.quests as { id: string }[])?.length ?? 0),
-    0,
-  );
-  const totalCompleted = completedQuestIds.size;
+
+  // 업적: 도감과 같은 셈(숨김 업적도 "???" 칸으로 보이므로 전체에 넣음)
+  const ownedRows = owned.data ?? [];
+  const definitions = (defs.data ?? []) as Pick<
+    Achievement,
+    'id' | 'name' | 'icon' | 'tier' | 'sort'
+  >[];
+  const earnedIds = new Set(ownedRows.map((a) => a.achievement_id));
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      {/* 뒤로가기 */}
-      <div className="mb-6">
-        <Link href="/world" className="text-sm text-primary-text underline">
-          ← 월드맵으로
-        </Link>
-      </div>
-
-      {/* 헤더 */}
-      <div className="mb-6 flex flex-col items-center gap-3">
-        {/* 내 파이뱀 (공개 아바타, 게시판과 같은 모습). 이름은 아래 글자로 */}
-        <UserAvatar skin={profile.skin} size={96} />
-        <h1 className="text-xl font-bold text-foreground">{profile.name}</h1>
-        <p className="text-muted-foreground">
-          Lv.{profile.current_level} {title}
-        </p>
-      </div>
-
-      {/* XP 프로그레스 카드 */}
-      <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold text-foreground">경험치</h2>
-        <XPProgressBar totalXP={profile.total_xp} size="md" />
-        <p className="mt-2 text-center text-lg font-bold text-primary-text">
-          {profile.total_xp} XP
-        </p>
-      </Card>
-
-      {/* 업적 카드 (P8-09) → 누르면 도감 (P8-10). 받을 코인이 있으면 금색 점 */}
-      <CardButton
-        href="/profile/achievements"
-        className="mb-4"
-        data-testid="profile-achievements"
-        aria-label={`업적 도감, ${achievementTotal}개 중 ${earned.length}개${claimable > 0 ? `, 받을 보상 ${claimable}개` : ''}`}
-      >
-        <div className="mb-3 flex items-center gap-2">
-          <h2 className="text-sm font-bold whitespace-nowrap text-foreground">
-            업적 {earned.length}/{achievementTotal}
-          </h2>
-          {claimable > 0 && (
-            <span className="ach-ready whitespace-nowrap" aria-hidden>
-              받을 코인
-            </span>
-          )}
-          <span className="ml-auto inline-flex shrink-0 items-center text-sm font-semibold whitespace-nowrap text-primary-text">
-            도감 보기
-            <ChevronRight className="size-4" aria-hidden />
-          </span>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-4xl">
+      <div className="pf">
+        <div className="pf-top pf-wide">
+          <Link href="/world" className="pf-back focus-ring">
+            <ChevronLeft aria-hidden />
+            월드맵
+          </Link>
+          <HudCounter kind="coin" value={profile.coins} />
         </div>
-        {earned.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            아직 얻은 업적이 없어요. 퀘스트를 풀면 업적이 생겨요!
-          </p>
-        ) : (
-          <ul className="grid grid-cols-4 gap-3 sm:grid-cols-5">
-            {earned.map((a) => (
-              <li key={a.id} className="flex flex-col items-center gap-1">
-                <AchievementMedal icon={a.icon} tier={a.tier} size="lg" />
-                <p className="text-center text-xs font-medium text-foreground">
-                  {a.name}
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {formatKstDate(achievedAt.get(a.id)!, 'dot')}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardButton>
 
-      {/* 스테이지 진행률 카드 */}
-      <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold text-foreground">
-          스테이지 진행률
-        </h2>
-        <div className="flex flex-col gap-3">
-          {stages.map((stage) => {
-            const quests = (stage.quests as { id: string }[]) ?? [];
-            const completed = quests.filter((q) =>
-              completedQuestIds.has(q.id),
-            ).length;
-            return (
-              <div key={stage.id}>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>
-                    {stage.order}. {stage.title}
-                  </span>
-                  <span>
-                    {completed}/{quests.length} 퀘스트
-                  </span>
-                </div>
-                <ProgressBar
-                  value={completed}
-                  max={Math.max(1, quests.length)}
-                  size="sm"
-                  label={`${stage.order}단계 ${stage.title} 진행률`}
-                  valueText={`퀘스트 ${completed}개 / ${quests.length}개`}
-                  className="mt-1"
-                />
-              </div>
-            );
-          })}
+        <ProfileHero
+          name={profile.name}
+          skin={profile.skin}
+          totalXp={profile.total_xp}
+        />
+
+        <ProfileCard
+          title="학습 달력"
+          icon={
+            <CalendarDays className="size-5 text-primary-text" aria-hidden />
+          }
+          side={`지금 ${raw.streak}일 연속`}
+          data-testid="profile-calendar"
+        >
+          <LearningCalendar
+            today={today}
+            days={raw.days}
+            shieldDays={raw.shield_days}
+            stampDays={raw.stamp_days}
+          />
+        </ProfileCard>
+
+        <ProfileStatsCard raw={raw} />
+
+        <AchievementsCard
+          earned={definitions.filter((d) => earnedIds.has(d.id)).length}
+          total={definitions.length}
+          claimable={ownedRows.filter((a) => !a.claimed_at).length}
+          recent={recentAchievements(definitions, ownedRows)}
+        />
+
+        <TreasureCard
+          coins={profile.coins}
+          coinsWeek={raw.coins_week}
+          threeStars={raw.stats.three_stars}
+          stages={stages.map((s) => ({
+            id: s.id,
+            order: s.order,
+            title: s.title,
+            stars: s.stars,
+            maxStars: s.maxStars,
+            chest: chestState(s),
+            locked: s.status === 'locked',
+          }))}
+        />
+
+        <div className="pf-wide">
+          <AccountManagementSection
+            stages={stages.map((s) => ({
+              id: s.id,
+              order: s.order,
+              title: s.title,
+              hasProgress: s.quests.some((q) => completed.has(q.id)),
+            }))}
+          />
         </div>
-      </Card>
 
-      {/* 통계 요약 */}
-      <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-bold text-foreground">통계</h2>
-        <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
-          <div>
-            <p className="text-xl font-bold text-primary-text sm:text-2xl">
-              {totalCompleted}
-            </p>
-            <p className="text-[10px] text-muted-foreground sm:text-xs">
-              완료 퀘스트
-            </p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-primary-text sm:text-2xl">
-              {totalQuests}
-            </p>
-            <p className="text-[10px] text-muted-foreground sm:text-xs">
-              전체 퀘스트
-            </p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-primary-text sm:text-2xl">
-              {earned.length}
-            </p>
-            <p className="text-[10px] text-muted-foreground sm:text-xs">
-              얻은 업적
-            </p>
-          </div>
+        <div className="pf-foot pf-wide">
+          <Link
+            href="/settings"
+            className="text-sm text-primary-text underline"
+          >
+            설정 (움직임 · AI 튜터)
+          </Link>
+          <LogoutButton />
         </div>
-      </Card>
-
-      {/* 계정 관리 */}
-      <AccountManagementSection
-        stages={stages.map((s) => {
-          const quests = (s.quests as { id: string }[]) ?? [];
-          const hasProgress = quests.some((q) => completedQuestIds.has(q.id));
-          return { id: s.id, order: s.order, title: s.title, hasProgress };
-        })}
-      />
-
-      {/* 설정 / 로그아웃 */}
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <Link href="/settings" className="text-sm text-primary-text underline">
-          설정 (움직임 · AI 튜터)
-        </Link>
-        <LogoutButton />
       </div>
     </PageTransition>
   );

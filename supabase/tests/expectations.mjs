@@ -605,6 +605,19 @@ export const EXPECT = {
     activateIn: 'P8-09',
     note: 'user_badges 5종 → 같은 id 업적(받기 가능), 다시 실행해도 그대로',
   },
+  // ── 프로필 통계 (P8-13, ① 00038) ──
+  'PS-1': {
+    expect: 'deny',
+    requires: 'public.profile_stats()',
+    activateIn: 'P8-13',
+    note: '프로필 통계·학습 달력은 /profile 서버(service_role)만',
+  },
+  'PS-2': {
+    expect: 'allow',
+    requires: 'public.profile_stats()',
+    activateIn: 'P8-13',
+    note: '업적 지표와 같은 수 · 그날 푼 퀘스트 수(KST) · 방패·출석 날 · 이번 주 코인, 바뀐 두 함수(학습일·진행도)는 같은 결과',
+  },
   // ── 소급 보상 (P8-11, ① 00037) ──
   'RT-1': {
     expect: 'allow',

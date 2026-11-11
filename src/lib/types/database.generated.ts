@@ -1167,6 +1167,7 @@ export type Database = {
           progress: number;
         }[];
       };
+      achievement_stats: { Args: { p_user_id: string }; Returns: Json };
       claim_achievement: {
         Args: { p_achievement_id: string; p_user_id: string };
         Returns: Json;
@@ -1316,6 +1317,13 @@ export type Database = {
       };
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
+      learning_day_quests: {
+        Args: { p_user_id: string };
+        Returns: {
+          day: string;
+          quest_id: string;
+        }[];
+      };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
       list_expired_unconsented: {
         Args: { p_limit: number };
@@ -1333,6 +1341,7 @@ export type Database = {
         Args: { p_user_id: string };
         Returns: string;
       };
+      profile_stats: { Args: { p_user_id: string }; Returns: Json };
       prune_analytics_events: {
         Args: { p_limit?: number; p_retention?: string };
         Returns: number;

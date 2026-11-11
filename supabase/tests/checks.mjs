@@ -2088,6 +2088,12 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id },
     ],
     [
+      'PS-1',
+      u.alice,
+      'profile_stats',
+      { p_user_id: u.alice.id },
+    ],
+    [
       'SET-1',
       u.alice,
       'patch_user_settings',
@@ -2128,7 +2134,8 @@ async function groupRpc(u) {
                            'daily_mission_target', 'daily_mission_possible', 'daily_mission_list',
                            'daily_missions_today', 'claim_daily_mission', 'streak_learning_days',
                            'current_streak', 'settle_streak_shields', 'world_daily_status', 'stamp_attendance',
-                           'achievement_progress', 'evaluate_achievements', 'claim_achievement')
+                           'achievement_progress', 'evaluate_achievements', 'claim_achievement',
+                           'learning_day_quests', 'achievement_stats', 'profile_stats')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -4814,6 +4821,40 @@ async function groupAchievements(u) {
       } finally {
         one(`delete from public.retro_rewards where user_id in ('${u.alice.id}', '${u.bob.id}')`);
       }
+    },
+  });
+  await check({
+    group: 'achievements',
+    id: 'PS-2',
+    role: 'service_role',
+    op: 'profile_stats: 첫 완료 2개(오늘 KST) → 오늘 2 · 업적 지표와 같은 수 · 학습일 = 서로 다른 날짜 · 방패·출석 날 · 이번 주 코인',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ps2', '프로필통계');
+      for (const q of stageQuests(STAGE1).slice(0, 2)) await complete(x.id, q);
+      one(`insert into public.streak_shield_days (user_id, day) values ('${x.id}', public.kst_today() - 3)`);
+      const r = await rpc('profile_stats', { p_user_id: x.id });
+      const today = one('select to_char(public.kst_today(), \'YYYY-MM-DD\')');
+      const stats = JSON.parse(one(`select public.achievement_stats('${x.id}')::text`));
+      const days = one(`select string_agg(d::text, ',' order by d) from public.streak_learning_days('${x.id}') d`);
+      const week = one(`select coalesce(sum(delta), 0) from public.coin_ledger where user_id = '${x.id}' and delta > 0`);
+      const j = r.json ?? {};
+      return (
+        compare(
+          'PS-2',
+          { status: 200, today: 2, days, stats, shield: [one(`select to_char(public.kst_today() - 3, 'YYYY-MM-DD')`)], week: Number(week), streak: 1, tries: 0 },
+          {
+            status: r.status,
+            today: j.days?.[today],
+            days: Object.keys(j.days ?? {}).sort().join(','),
+            stats: j.stats,
+            shield: j.shield_days,
+            week: j.coins_week,
+            streak: j.streak,
+            tries: j.quiz_tries,
+          },
+        ) ?? { actual: 'ok', detail: `오늘 ${j.days?.[today]}개, 업적 지표 같음, 이번 주 코인 ${j.coins_week}` }
+      );
     },
   });
   async function rt2() {

@@ -57,6 +57,7 @@ import { CelebrationSection } from './_catalog/CelebrationSection';
 import { QuizSection } from './_catalog/QuizSection';
 import { AchievementBookSection } from './_catalog/AchievementBookSection';
 import { RestSection } from './_catalog/RestSection';
+import { ProfileSection } from './_catalog/ProfileSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -115,6 +116,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['quiz', '퀴즈 틀·객관식'],
       ['celebrations', '축하 오버레이'],
       ['achievements', '업적 도감'],
+      ['profile', '프로필'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
@@ -224,6 +226,7 @@ export function DesignCatalog({
               <QuizSection />
               <CelebrationSection />
               <AchievementBookSection />
+              <ProfileSection />
               <ShareCardSection />
               <SoundSection />
               <LegalSection />
