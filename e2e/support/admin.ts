@@ -229,6 +229,15 @@ export async function grantTestCoins(userId: string, amount: number) {
   );
 }
 
+/** 잔액 ≠ 원장 합인 행 (`coin_balance_mismatches()`, Phase 8 완료 기준 "잔액 = 원장 합"). 정상이면 빈 배열 */
+export async function coinMismatches(userIds: readonly string[]) {
+  const rows = check(
+    'coin_balance_mismatches',
+    await adminClient().rpc('coin_balance_mismatches'),
+  ) as Array<{ user_id: string; coins: number; ledger_sum: number }>;
+  return rows.filter((r) => userIds.includes(r.user_id));
+}
+
 /** `content:build -- --fixtures`가 만든 테스트 월드 행 (Q48, P5-01). 앱 서버는 같은 빌드의 worlds.json 을 읽는다 */
 export const FIXTURE_ROWS = join(REPO_ROOT, 'build/e2e/rows.json');
 
