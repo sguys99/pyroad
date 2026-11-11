@@ -18,10 +18,11 @@ import type {
   UserProgress,
 } from '@/lib/types/database';
 import type { ValidationResult } from './validation';
-import type {
-  GoldenKeyResponse,
-  QuestCompleteResponse,
-  RewardErrorResponse,
+import {
+  retryChanged,
+  type GoldenKeyResponse,
+  type QuestCompleteResponse,
+  type RewardErrorResponse,
 } from './rewards';
 import { getQuestKind, type QuestKind } from './questKind';
 import { nowTodoText } from './nowTodo';
@@ -49,7 +50,7 @@ export type QuestTab = 'story' | 'code' | 'result';
 
 /**
  * 완료한 퀘스트의 지금 모습 (§12-Q57): just = 이번에 처음 통과해 보상을 받음 · before = 예전에 통과(복습 전) ·
- * review = 이미 통과한 퀘스트를 다시 풀어 통과(보상 없음, 완료 API를 부르지 않음)
+ * review = 이미 통과한 퀘스트를 다시 풀어 통과. XP는 없고, 별이 3개 미만이었으면 완료 API(retry)로 별을 채움 (P8-05)
  */
 export type QuestCompletion = 'just' | 'before' | 'review';
 
@@ -298,6 +299,10 @@ export function useQuestSession({
   const [usedGoldenKey, setUsedGoldenKey] = useState(
     progress?.used_golden_key ?? false,
   );
+  // 별 (P8-05): 이 퀘스트의 최고 별(0 = 기록 없음) · 이번 다시 풀기로 늘어난 별 · 황금키 정답을 그대로 돌렸는지
+  const [bestStars, setBestStars] = useState(progress?.best_stars ?? 0);
+  const [newStars, setNewStars] = useState(0);
+  const [solutionCopy, setSolutionCopy] = useState(false);
   const [celebrationStore] = useState(createCelebrationStore);
   // 복습 (Q57): 이번 세션에 처음 통과했는지 · 마지막으로 채점한 실행이 이미 완료한 퀘스트였는지
   const [justCompleted, setJustCompleted] = useState(false);
@@ -607,8 +612,13 @@ export function useQuestSession({
     (completion: QuestCompleteResponse) => {
       setNextQuestId(completion.next_quest_id);
       setGoldenKeys(completion.golden_keys);
-      if (!completion.already_completed) {
-        setJustCompleted(true);
+      if (typeof completion.best_stars === 'number')
+        setBestStars(completion.best_stars);
+      setNewStars(completion.new_stars ?? 0);
+      setSolutionCopy(completion.solution_copy === true);
+      if (!completion.already_completed) setJustCompleted(true);
+      // 다시 풀기로 새 별(코인)·황금키 퀘스트 첫 직접 풀이(XP·뱃지)를 받았으면 처음 완료처럼 반영 (P8-05)
+      if (!completion.already_completed || retryChanged(completion)) {
         setEarnedXP(completion.xp_gained);
         setEarnedCoins(
           (completion.coins_earned ?? 0) -
@@ -653,6 +663,25 @@ export function useQuestSession({
       }
     },
     [kind, questId],
+  );
+
+  /**
+   * 다시 풀기 통과 → 완료 API retry (P8-05): 서버가 다시 채점해 best_stars 를 채우고 새 별에만 코인.
+   * 실패해도 복습 통과 화면은 그대로 (보상만 못 받음)
+   */
+  const reviewWith = useCallback(
+    async (submitted: string, stdout: string) => {
+      try {
+        const res = await postJson<QuestCompleteResponse>(
+          '/api/quest/complete',
+          { quest_id: questId, code_submitted: submitted, stdout, retry: true },
+        );
+        if (aliveRef.current && res.ok) applyCompletion(res.data);
+      } catch {
+        // 네트워크 오류: 별은 다음에 다시 풀면 채울 수 있음
+      }
+    },
+    [questId, applyCompletion],
   );
 
   /** 통과한 코드로 완료 요청 (서버가 다시 채점하고, 힌트 수·황금키 사용은 DB 값으로 보상 계산) */
@@ -745,7 +774,8 @@ export function useQuestSession({
 
   /**
    * 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance'.
-   * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고, 보상은 처음 한 번뿐이라 완료 API·튜터를 부르지 않는다
+   * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고 튜터는 부르지 않는다. 마지막 단계를 통과했고 별이 3개 미만이면
+   * 완료 API를 retry로 불러 별을 채운다 (P8-05, 별 3개면 받을 것이 없어 부르지 않음)
    */
   const runAndGrade = useCallback(
     async (
@@ -756,6 +786,8 @@ export function useQuestSession({
       setValidation(null);
       setEarnedXP(null);
       setEarnedCoins(0);
+      setNewStars(0);
+      setSolutionCopy(false);
       setReviewRun(review);
       liveOutput.reset();
       // 모바일은 누르자마자 결과 쪽으로 (§12-Q55): 실행 중 글자·멈추기(·P11 turtle 그림)가 실행 버튼과 한 화면에 안 보이는 문제(P0-06)를
@@ -790,6 +822,8 @@ export function useQuestSession({
       // 퀘스트를 마친 통과의 'correct'는 결과 쪽지 "통과!" 도장이 닿는 순간 (`PassStamp`, P6-14). 여기서는 프로젝트 중간 단계만
       if (review) {
         fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
+        if (step >= totalSteps && bestStars < 3)
+          await reviewWith(codeToRun, result.stdout);
         return 'stay';
       }
       if (kind === 'project') {
@@ -827,6 +861,8 @@ export function useQuestSession({
       askTutor,
       validate,
       completeWith,
+      reviewWith,
+      bestStars,
       play,
     ],
   );
@@ -1191,6 +1227,12 @@ export function useQuestSession({
     nextQuestId,
     earnedXP,
     earnedCoins,
+    /** 이 퀘스트의 최고 별 (서버 best_stars, 0 = 아직 기록 없음) */
+    bestStars,
+    /** 이번 다시 풀기로 늘어난 별 (보상 띠 "새 별 +N") */
+    newStars,
+    /** 황금키가 넣어 준 정답을 그대로 다시 돌려 별이 늘지 않음 */
+    solutionCopy,
     userXP,
     userLevel,
 

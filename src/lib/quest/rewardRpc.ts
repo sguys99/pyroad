@@ -86,7 +86,7 @@ export function completeQuestRpc<T>(
   admin: AdminClient,
   userId: string,
   questId: string,
-  submission: { code: string; passed: boolean },
+  submission: { code: string; passed: boolean; retry?: boolean },
 ) {
   return callRpc<T>('complete_quest', () =>
     admin.rpc('complete_quest', {

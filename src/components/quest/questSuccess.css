@@ -124,6 +124,17 @@
   font-weight: 800;
   text-align: right;
 }
+/* 다시 풀어 늘어난 별 (P8-05): 금색 면 알약, 숫자보다 작은 글자 */
+.qx-new {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.qx-new .qx-num {
+  min-width: 0;
+  color: var(--accent-text);
+  font-size: var(--text-h3);
+  text-align: left;
+}
 .qx-note {
   margin: 0;
   max-width: 26em;

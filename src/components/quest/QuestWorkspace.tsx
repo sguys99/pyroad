@@ -16,7 +16,6 @@ import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
 import type { QuestReward } from './QuestSuccess';
-import { codeQuestStars } from '@/lib/quest/xp';
 import { QuestStatusBar } from './QuestStatusBar';
 import { usePageSwipe } from './usePageSwipe';
 import './questWorkspace.css';
@@ -144,18 +143,22 @@ export function QuestWorkspace({
       .find((d) => d.state !== 'locked')?.id ??
     null;
   const review = session.completion === 'review';
+  const best = session.bestStars;
   const reward: QuestReward | null =
     validation?.passed && session.isCompleted
       ? {
           title: quest.title,
-          xp: review ? 0 : (session.earnedXP ?? 0),
-          coins: review ? 0 : session.earnedCoins,
+          // 다시 풀기는 XP가 없고(황금키 퀘스트의 첫 직접 풀이만), 새 별 코인만 (P8-05). 값은 이번 실행에서 받은 것
+          xp: session.earnedXP ?? 0,
+          coins: session.earnedCoins,
           review,
-          stars: codeQuestStars(session.totalHintsUsed, session.usedGoldenKey),
+          // 서버 최고 별 (0 = 기록 없음 → 별 줄 없이)
+          stars: best >= 1 ? (Math.min(best, 3) as 1 | 2 | 3) : undefined,
+          newStars: review ? session.newStars : 0,
           note: review
-            ? '보상은 처음 통과할 때 한 번만 받아요. 복습으로 주문이 더 단단해졌어요!'
+            ? reviewNote(session)
             : session.usedGoldenKey
-              ? '황금 열쇠로 연 퀘스트는 XP·코인 없이 통과로 기록돼요.'
+              ? '황금 열쇠로 연 퀘스트는 XP·코인 없이 통과로 기록돼요. 나중에 직접 풀면 별과 XP를 받아요.'
               : undefined,
           nextHref: nextQuestId ? `/quest/${nextQuestId}` : null,
           mapHref: worldHref,
@@ -346,4 +349,22 @@ export function QuestWorkspace({
       <CelebrationLayer session={session} worldHref={worldHref} />
     </div>
   );
+}
+
+/** 다시 풀기 통과 보상 띠의 한 줄 (P8-05) */
+function reviewNote(
+  session: Pick<
+    QuestSession,
+    'newStars' | 'earnedXP' | 'solutionCopy' | 'bestStars'
+  >,
+): string {
+  if (session.solutionCopy)
+    return '황금 열쇠가 준 코드를 그대로 돌리면 별이 늘지 않아요. 내 힘으로 다시 써 보면 별을 모을 수 있어요!';
+  if (session.newStars > 0)
+    return (session.earnedXP ?? 0) > 0
+      ? '황금 열쇠 없이 직접 풀었어요! 이제 정말 내 힘으로 푼 퀘스트예요.'
+      : '다시 풀어서 새 별을 모았어요! XP는 처음 통과할 때 한 번만 받아요.';
+  return session.bestStars >= 3
+    ? '별 3개를 다 모은 퀘스트예요. 복습으로 주문이 더 단단해졌어요!'
+    : '보상은 처음 통과할 때 한 번만 받아요. 복습으로 주문이 더 단단해졌어요!';
 }

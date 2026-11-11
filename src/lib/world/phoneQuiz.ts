@@ -42,6 +42,17 @@ interface PickInput {
 }
 
 /**
+ * 복습 도전이 열린 퀴즈 (§2.3): 별을 판정했고(완료) 3개 미만이며, 판정일(KST)이 오늘 전. 오늘 판정했으면 다시 풀어도 연습이라 아님.
+ * 스테이지 시트 "복습 도전 가능"(P8-05)과 폰 추천·오늘의 퀴즈가 같은 기준 (서버 submit_quiz_answer 의 review 모드와 같음)
+ */
+export function quizReviewOpen(
+  q: Pick<StageQuestItem, 'best_stars' | 'stars_judged_on'>,
+  today: string = kstToday(),
+): boolean {
+  return q.best_stars < 3 && !!q.stars_judged_on && q.stars_judged_on < today;
+}
+
+/**
  * 고르는 순서: ① 이어하기 스테이지의 안 푼 퀴즈 ② 그 스테이지의 별 3개 미만 퀴즈(복습) ③ 다른 열린 스테이지의 안 푼 퀴즈(가까운 스테이지부터)
  * ④ 다른 스테이지 복습. 같은 자리면 앞 스테이지·앞 순서. 폰이 아니거나, 이어하기가 이미 퀴즈거나 이 월드 밖이면 없음.
  * 복습은 별 판정일(stars_judged_on)이 오늘 전인 것만 — 오늘 판정한 퀴즈는 다시 풀어도 연습(별·XP 없음)이라 고르지 않는다 (P7-10)
@@ -67,10 +78,7 @@ export function pickPhoneQuiz({
       (questsByStage[s.id] ?? []).flatMap((q) =>
         q.quest_type === 'quiz' &&
         isQuizKind(q.quiz_kind) &&
-        (q.status !== 'completed' ||
-          (q.best_stars < 3 &&
-            !!q.stars_judged_on &&
-            q.stars_judged_on < today))
+        (q.status !== 'completed' || quizReviewOpen(q, today))
           ? [{ q, kind: q.quiz_kind, s, review: q.status === 'completed' }]
           : [],
       ),

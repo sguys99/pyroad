@@ -61,12 +61,15 @@ describe('QuestHints (P6-09)', () => {
     expect(onGoldenKey).toHaveBeenCalledTimes(1);
   });
 
-  it('완료한 퀘스트는 힌트·황금키를 막고 보상은 처음 한 번뿐이라고 알려 준다', () => {
+  it('완료한 퀘스트는 힌트·황금키를 막고 XP는 처음 한 번뿐, 별은 다시 풀어 채운다고 알려 준다 (P8-05)', () => {
     render(<QuestHints {...base} isCompleted />);
     expect(screen.getByRole('button', { name: /힌트 받기/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: /황금키 쓰기/ })).toBeDisabled();
     expect(screen.getByTestId('quest-reward-preview')).toHaveTextContent(
-      '보상은 처음 한 번만',
+      'XP는 처음 한 번만',
+    );
+    expect(screen.getByTestId('quest-reward-preview')).toHaveTextContent(
+      '못 모은 별',
     );
   });
 

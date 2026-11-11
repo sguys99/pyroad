@@ -169,6 +169,8 @@ const SAMPLE_QUESTS: Record<string, StageQuestItem[]> = Object.fromEntries(
       status:
         si < 2 || i < 2 ? 'completed' : si === 2 && i === 2 ? 'in_progress' : null,
       best_stars: si < 2 || i < 2 ? 3 - (i % 2) : 0,
+      // 지난 판정 퀴즈 → "복습 도전 가능" 딱지 (P8-05)
+      stars_judged_on: i === 3 && si < 2 ? '2026-01-01' : null,
     })),
   ]),
 );
@@ -368,7 +370,7 @@ export function WorldMapSection() {
       </Demo>
       <Demo
         label="스테이지 차례 시트 (P5-06)"
-        note="열린 노드를 누르면 떠요(위 지도에서도, 주소에 ?stage= 가 남아 뒤로 가기로 닫힘). 768px 미만 바텀시트, 이상 책 한 쪽. 완료 = 다시 하기, 첫 미완료 = 강조 줄 + 아래 주 버튼, 유형 태그 코드·퀴즈(종류 이름·아이콘, P7-11)·보스, 휴대폰·태블릿 폭에서 폰에서 하기 좋아요 태그(휴대폰은 진하게). 퀴즈가 있으면 목록 아래 보너스 안내 한 줄. 별은 Q51로 숨기고 퀘스트 수만(SHOW_STARS) — 퀴즈 별은 지금도 기록되어 푼 퀴즈 줄에만 보임. 줄은 차례로 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
+        note="열린 노드를 누르면 떠요(위 지도에서도, 주소에 ?stage= 가 남아 뒤로 가기로 닫힘). 768px 미만 바텀시트, 이상 책 한 쪽. 완료 = 다시 하기, 첫 미완료 = 강조 줄 + 아래 주 버튼, 유형 태그 코드·퀴즈(종류 이름·아이콘, P7-11)·보스, 휴대폰·태블릿 폭에서 폰에서 하기 좋아요 태그(휴대폰은 진하게). 퀴즈가 있으면 목록 아래 보너스 안내 한 줄. 별(SHOW_STARS, P8-05): 요약에 별 합계, 완료 줄에 최고 별(기존 완료라 아직 0이면 그리지 않음, P8-11 소급). 별 3개 미만 퀴즈는 판정 다음 날(KST)부터 금색 테두리 “복습 도전 가능” 딱지(통과한 스테이지 견본). 줄은 차례로 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
         data-testid="stage-sheet-demo"
       >
         <div className="flex flex-wrap gap-3">

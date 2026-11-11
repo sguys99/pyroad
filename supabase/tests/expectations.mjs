@@ -163,6 +163,12 @@ export const EXPECT = {
     requires: 'public.user_progress.earned_xp',
     activateIn: 'P1-03',
   },
+  'B04-27': {
+    expect: 'deny',
+    requires: 'public.user_progress.solved_directly_at',
+    activateIn: 'P8-05',
+    note: 'P8-05 00032: 서버 값. ③ 00011 컬럼 권한에 없음 + 보호 트리거',
+  },
   'B04-18': { expect: 'deny' },
   'B04-19': {
     expect: 'deny',
@@ -436,6 +442,24 @@ export const EXPECT = {
     requires: 'public.coin_reward()',
     activateIn: 'P8-04',
     note: '퀴즈 별 코인: 새로 얻은 별 번호에만 · 연습 0 · 리셋 뒤 다시 모아도 0',
+  },
+  'SR-1': {
+    expect: 'allow',
+    requires: 'public.code_quest_stars()',
+    activateIn: 'P8-05',
+    note: '첫 완료 별 = 힌트·황금키 규칙, best_stars·판정일, 별 코인(황금키 0)',
+  },
+  'SR-2': {
+    expect: 'allow',
+    requires: 'public.code_quest_stars()',
+    activateIn: 'P8-05',
+    note: '다시 풀기(retry) ⭐3·새 별 번호만 코인·XP 0, retry 없음·실패는 그대로, 동시 요청 1회',
+  },
+  'SR-3': {
+    expect: 'allow',
+    requires: 'public.code_quest_stars()',
+    activateIn: 'P8-05',
+    note: '황금키 퀘스트 첫 직접 풀이 때 XP·코인·뱃지, 정답 그대로는 0, 두 번째는 그냥 다시 풀기',
   },
   'CN-10': {
     expect: 'allow',

@@ -4,7 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { gradeSubmission } from '@/lib/quest/grade';
 import { completeQuestRpc, rewardError } from '@/lib/quest/rewardRpc';
-import { levelChanged, type QuestCompleteResponse } from '@/lib/quest/rewards';
+import {
+  levelChanged,
+  retryChanged,
+  type QuestCompleteResponse,
+} from '@/lib/quest/rewards';
 import { trackServerEvent } from '@/lib/analytics/server';
 
 /**
@@ -20,6 +24,8 @@ interface CompleteRequest {
   code_submitted: string;
   /** 브라우저(Pyodide)에서 실행한 출력. 서버가 다시 채점함 (프로젝트는 마지막 단계 기준) */
   stdout?: string;
+  /** 이미 완료한 퀘스트를 다시 풀어 통과 (P8-05): 서버 재채점을 통과하면 best_stars 갱신·새 별 코인 */
+  retry?: boolean;
 }
 
 const MAX_CODE_LENGTH = 20_000;
@@ -82,16 +88,17 @@ export async function POST(request: Request) {
     adminClient,
     user.id,
     body.quest_id,
-    { code: body.code_submitted, passed },
+    { code: body.code_submitted, passed, retry: body.retry === true },
   );
   if (!result.ok) return result.response;
 
-  if (!result.data.already_completed) {
-    // 월드맵·프로필 페이지의 Router Cache 무효화
+  if (!result.data.already_completed || retryChanged(result.data)) {
+    // 월드맵·프로필 페이지의 Router Cache 무효화 (다시 풀기로 별이 늘어도)
     revalidatePath('/world', 'layout'); // /world/[slug] 포함 (P5-01)
     revalidatePath('/worlds');
     revalidatePath('/profile');
-
+  }
+  if (!result.data.already_completed) {
     // 처음 완료만 분석 이벤트로 (P1-17). 값은 모두 DB 함수가 정한 것이라 클라이언트가 바꿀 수 없음
     trackServerEvent({
       headers: request.headers,

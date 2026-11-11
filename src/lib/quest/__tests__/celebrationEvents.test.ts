@@ -17,6 +17,11 @@ const base: QuestCompleteResponse = {
   coins_earned: 10,
   coins_balance: 10,
   level_ups: [],
+  stars: 3,
+  best_stars: 3,
+  new_stars: 3,
+  solved_directly: false,
+  solution_copy: false,
 };
 const stage = {
   stage_id: 's1',
@@ -119,17 +124,29 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
     ]);
   });
 
-  it('이미 완료한 퀘스트(already_completed)는 빈 목록', () => {
+  it('이미 완료한 퀘스트(already_completed): 그냥 다시 풀기·중복 요청은 빈 목록', () => {
+    expect(
+      buildCelebrationEvents(
+        { ...base, already_completed: true, xp_gained: 0, new_stars: 1 },
+        { kind: 'code', questTitle: 'x' },
+      ),
+    ).toEqual([]);
+  });
+
+  it('황금키 퀘스트를 처음 직접 풀면(P8-05) 퀘스트 카드 없이 레벨 업·뱃지만', () => {
     expect(
       buildCelebrationEvents(
         {
           ...base,
           already_completed: true,
-          level_after: 3,
+          used_golden_key: true,
+          solved_directly: true,
+          stage_cleared: null,
+          level_after: 2,
           new_badges: ['first_code'],
         },
-        { kind: 'project', questTitle: 'x' },
-      ),
-    ).toEqual([]);
+        { kind: 'code', questTitle: 'x' },
+      ).map((e) => e.type),
+    ).toEqual(['level_up', 'badge']);
   });
 });

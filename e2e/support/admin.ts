@@ -146,6 +146,35 @@ export async function completeQuests(
   }
 }
 
+/** 퀘스트 최고 별 (P8-05). 다시 풀기 스펙이 "별이 모자란 완료"를 만들 때 (서버 값이라 service_role 로만) */
+export async function setBestStars(
+  userId: string,
+  questId: string,
+  stars: number,
+): Promise<void> {
+  check(
+    `best_stars ${questId}`,
+    await adminClient()
+      .from('user_progress')
+      .update({ stars, best_stars: stars })
+      .eq('user_id', userId)
+      .eq('quest_id', questId),
+  );
+}
+
+export async function bestStars(userId: string, questId: string) {
+  const row = check(
+    'user_progress.best_stars',
+    await adminClient()
+      .from('user_progress')
+      .select('best_stars')
+      .eq('user_id', userId)
+      .eq('quest_id', questId)
+      .single(),
+  ) as { best_stars: number };
+  return row.best_stars;
+}
+
 /**
  * 코인 (P8-04). 진행 리셋(resetUser)은 코인·원장을 지우지 않으므로(P8-03 정책) 같은 실행의 스펙끼리 잔액이 이어진다
  * → 스펙은 절대값 대신 지금 잔액·원장 키를 읽어 기대값을 정한다

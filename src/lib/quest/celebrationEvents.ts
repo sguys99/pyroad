@@ -34,7 +34,7 @@ export type CelebrationEvent =
       coins?: number;
     }
   | { type: 'badge'; badge: BadgeType }
-  // Phase 8 자리 (P8-05 별): 아직 만들지 않는다. 퀘스트·별 코인은 결과 쪽 보상 띠(QuestSuccess)가, 레벨 업 코인은 레벨 업 카드가 보임
+  // 쓰지 않는 자리: 별(P8-05)·퀘스트·별 코인은 결과 쪽 보상 띠(QuestSuccess)가 별 팝·"새 별 +N"으로, 레벨 업 코인은 레벨 업 카드가 보임
   | { type: 'star'; stars: 1 | 2 | 3; gained: number }
   | { type: 'coin'; amount: number }
   // Phase 8 자리 (§3 F11 스테이지 보물상자, `SHOW_CHEST`): 별 합계 목표를 채우면 상자 개봉 + 내용 공개
@@ -57,7 +57,8 @@ export interface CelebrationContext {
  * 퀘스트 결과(황금키 확인 / 프로젝트 완성 / 스테이지 클리어) → 레벨 업 → 뱃지(받은 순서).
  * 보여 줄 순서는 시퀀서가 우선순위로 한 번 더 맞춘다 (`planCelebrations`).
  *
- * - 이미 완료한 퀘스트(already_completed)는 새로 받은 것이 없으므로 빈 목록.
+ * - 이미 완료한 퀘스트(already_completed)는 퀘스트 결과 카드 없음. 다시 풀기로 황금키 퀘스트를 처음 직접 풀었으면(P8-05)
+ *   그때 받은 레벨 업·뱃지만 (그냥 다시 풀기·중복 요청은 둘 다 없어 빈 목록).
  * - 황금키를 쓴 퀘스트(DB의 used_golden_key, 프로젝트는 한 단계라도)는 XP가 0이라 "황금키로 열었어요" 확인만.
  *   스테이지를 클리어했으면 스테이지 클리어는 따로 축하한다(나머지 퀘스트는 스스로 풀었으므로).
  *   뱃지는 서버가 주지 않으므로(Q25, 00019) 뱃지 카드도 없다.
@@ -67,11 +68,11 @@ export function buildCelebrationEvents(
   completion: QuestCompleteResponse,
   { kind, questTitle }: CelebrationContext,
 ): CelebrationEvent[] {
-  if (completion.already_completed) return [];
-
   const events: CelebrationEvent[] = [];
   const stage = completion.stage_cleared;
-  if (completion.used_golden_key) {
+  if (completion.already_completed) {
+    // 다시 풀기 (P8-05): 퀘스트 결과 카드는 없고, 황금키 퀘스트의 첫 직접 풀이로 받은 레벨 업·뱃지만 아래에서
+  } else if (completion.used_golden_key) {
     events.push({ type: 'golden_key', kind, questTitle });
     if (stage) events.push({ type: 'stage_clear', stage });
   } else if (kind === 'project') {

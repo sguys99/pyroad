@@ -662,3 +662,26 @@ test.describe('축하 오버레이 (P6-13)', () => {
     });
   }
 });
+
+test.describe('별점 (P8-05)', () => {
+  test('다시 풀어 새 별 띠 · 시트 "복습 도전 가능" 딱지', async ({ page }) => {
+    await openCatalog(page, MOTION_MODES[3]);
+    const retry = page.getByTestId('success-retry');
+    await retry.scrollIntoViewIfNeeded();
+    const strip = retry.getByTestId('quest-reward');
+    await expect(strip).toHaveAttribute('data-review', 'true');
+    await expect(strip.getByTestId('reward-new-stars')).toHaveText('새 별 +2');
+    await expect(strip.getByTestId('reward-xp')).toHaveCount(0);
+    await expect(strip.getByTestId('reward-stars')).toHaveAccessibleName(
+      '별 3개 / 3개',
+    );
+
+    const demo = page.getByTestId('stage-sheet-demo');
+    await demo.scrollIntoViewIfNeeded();
+    await demo.getByRole('button', { name: '통과한 스테이지' }).click();
+    const sheet = page.getByTestId('stage-sheet');
+    await expect(sheet.getByTestId('stage-sheet-review')).toHaveText(
+      '복습 도전 가능',
+    );
+  });
+});

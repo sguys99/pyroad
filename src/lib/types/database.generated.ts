@@ -675,6 +675,7 @@ export type Database = {
           hints_used: number;
           id: string;
           quest_id: string;
+          solved_directly_at: string | null;
           stars: number;
           stars_judged_on: string | null;
           status: string;
@@ -693,6 +694,7 @@ export type Database = {
           hints_used?: number;
           id?: string;
           quest_id: string;
+          solved_directly_at?: string | null;
           stars?: number;
           stars_judged_on?: string | null;
           status?: string;
@@ -711,6 +713,7 @@ export type Database = {
           hints_used?: number;
           id?: string;
           quest_id?: string;
+          solved_directly_at?: string | null;
           stars?: number;
           stars_judged_on?: string | null;
           status?: string;
@@ -932,6 +935,10 @@ export type Database = {
       };
     };
     Functions: {
+      code_quest_stars: {
+        Args: { p_hints_used: number; p_used_golden_key: boolean };
+        Returns: number;
+      };
       coin_apply: {
         Args: {
           p_delta: number;
@@ -1016,6 +1023,10 @@ export type Database = {
       };
       is_nickname_taken: {
         Args: { p_nickname: string; p_user_id: string };
+        Returns: boolean;
+      };
+      is_solution_copy: {
+        Args: { p_code: string; p_quest_id: string };
         Returns: boolean;
       };
       is_stage_unlocked: {

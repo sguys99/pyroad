@@ -95,7 +95,8 @@ export function calculateXP(
 
 /**
  * 코드·프로젝트 퀘스트의 별 (F3·§12-Q17, 최종 시안 Quest.tsx maxStars): 황금키 1 / 힌트 0회 3 / 1회 2 / 그 외 1.
- * 지금은 힌트·황금키 안내의 미리 보기에만 쓴다(SHOW_STARS가 꺼져 있어 화면엔 XP). 서버 판정은 P8-05에서 같은 규칙으로
+ * 서버 판정은 complete_quest 의 code_quest_stars(00032, P8-05)가 같은 규칙 — reward-rules.json "stars" 로 대조.
+ * 화면은 힌트 줄 미리 보기에만 쓰고, 받은 별은 서버 best_stars. 다시 풀기 통과는 힌트·황금키를 쓸 수 없어 (0, false) = 3
  */
 export function codeQuestStars(
   hintsUsed: number,

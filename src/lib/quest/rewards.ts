@@ -15,7 +15,7 @@ export interface StageClearInfo {
 
 /** POST /api/quest/complete */
 export interface QuestCompleteResponse {
-  /** 이미 완료한 퀘스트 (중복 클릭·동시 요청·다시 풀기). 아래 값은 현재 값이고 새로 받은 것은 없음 */
+  /** 이미 완료한 퀘스트 (중복 클릭·동시 요청·다시 풀기). 다시 풀기(retry)면 아래 별 값과 새 별 코인만 바뀔 수 있음 */
   already_completed: boolean;
   /** 이번에 받은 XP (황금키를 쓴 퀘스트는 0) */
   xp_gained: number;
@@ -38,6 +38,21 @@ export interface QuestCompleteResponse {
   coins_balance: number;
   /** 이번에 지나간 레벨마다 받은 코인 (이미 받은 레벨은 0) */
   level_ups: LevelUpCoins[];
+  /** 이번 판정의 별 (P8-05 00032: 첫 완료 = 힌트·황금키 규칙, 다시 풀기 통과 = 3). 판정이 없으면 0 */
+  stars: number;
+  /** 이 퀘스트의 최고 별 (0 = 아직 기록 없음, 기존 완료는 P8-11 소급 전까지 0일 수 있음) */
+  best_stars: number;
+  /** 이번에 늘어난 최고 별 (새 별 코인은 이 별 번호만, 이미 받은 번호면 0) */
+  new_stars: number;
+  /** 황금키로 연 퀘스트를 이번에 처음 직접 풀었음 → XP·뱃지를 이때 받음 */
+  solved_directly: boolean;
+  /** 황금키가 넣어 준 정답을 그대로 다시 돌림 → 별·보상 없음 */
+  solution_copy: boolean;
+}
+
+/** 다시 풀기(retry)로 별·보상이 바뀌었는지 (월드맵 다시 받기·화면 갱신 기준) */
+export function retryChanged(res: QuestCompleteResponse): boolean {
+  return res.already_completed && (res.new_stars > 0 || res.solved_directly);
 }
 
 /** POST /api/quest/golden-key */

@@ -172,6 +172,11 @@ function completion(
     coins_earned: 10,
     coins_balance: 10,
     level_ups: [],
+    stars: 3,
+    best_stars: 3,
+    new_stars: 3,
+    solved_directly: false,
+    solution_copy: false,
     ...fields,
   };
 }
@@ -424,7 +429,11 @@ describe('useQuestSession: 실행·채점·완료', () => {
 
   it('이미 완료한 퀘스트 응답이면 축하·새로 받기 없이 완료만 표시', async () => {
     routes['/api/quest/complete'] = () => ({
-      json: completion({ already_completed: true, xp_gained: 0 }),
+      json: completion({
+        already_completed: true,
+        xp_gained: 0,
+        new_stars: 0,
+      }),
     });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
@@ -437,12 +446,16 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(mocks.refresh).not.toHaveBeenCalled();
   });
 
-  it('완료한 퀘스트를 다시 풀면 복습: 실행·채점·컨페티는 하고 완료 API·튜터는 부르지 않는다 (Q57)', async () => {
+  it('별 3개를 다 모은 퀘스트를 다시 풀면 복습: 실행·채점·컨페티는 하고 완료 API·튜터는 부르지 않는다 (Q57, P8-05)', async () => {
     const { result } = renderHook(() =>
       useQuestSession(
         options(
           CODE_QUEST,
-          progressRow({ status: 'completed', code_submitted: 'print(10)' }),
+          progressRow({
+            status: 'completed',
+            code_submitted: 'print(10)',
+            best_stars: 3,
+          }),
         ),
       ),
     );
@@ -465,6 +478,55 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.validation?.passed).toBe(true);
     expect(result.current.completion).toBe('review');
     expect(result.current.earnedXP).toBeNull();
+  });
+
+  it('별이 3개 미만이면 다시 풀기 통과 때 완료 API를 retry로 불러 새 별·별 코인만 받는다 (P8-05)', async () => {
+    routes['/api/quest/complete'] = () => ({
+      json: completion({
+        already_completed: true,
+        xp_gained: 0,
+        total_xp: 100,
+        stars: 3,
+        best_stars: 3,
+        new_stars: 2,
+        coins_earned: 10,
+        coins_balance: 30,
+      }),
+    });
+    const { result } = renderHook(() =>
+      useQuestSession(
+        options(
+          CODE_QUEST,
+          progressRow({
+            status: 'completed',
+            code_submitted: 'print(10)',
+            best_stars: 1,
+          }),
+        ),
+      ),
+    );
+    expect(result.current.bestStars).toBe(1);
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(callsTo('/api/quest/complete')).toHaveLength(1);
+    expect(callsTo('/api/quest/complete')[0].body).toMatchObject({
+      retry: true,
+      code_submitted: 'print(10)',
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+    expect(result.current.completion).toBe('review');
+    expect(result.current.bestStars).toBe(3);
+    expect(result.current.newStars).toBe(2);
+    expect(result.current.earnedCoins).toBe(10);
+    expect(result.current.earnedXP).toBe(0);
+    expect(result.current.celebrations).toEqual([]);
+    expect(mocks.refresh).toHaveBeenCalled();
   });
 
   it('처음 통과하면 completion은 just, 그다음 다시 풀어 통과하면 review', async () => {

@@ -269,7 +269,7 @@ function QuestHintsDemo() {
     <>
       <div className="grid gap-4 lg:grid-cols-2">
         <Demo
-          label="힌트·황금키 (QuestHints, P6-09) · 지금 화면 = XP 안내"
+          label="힌트·황금키 (QuestHints, P6-09) · XP 안내 (SHOW_STARS 끄면)"
           note="이야기 쪽 대사창 아래. 버튼에 남은 횟수, 쓰기 전에 받을 XP가 어떻게 바뀌는지(힌트 0회 1.5배 · 1회 1.25배 · 그 외 기본 · 황금키 0, 서버 quest_xp와 같은 규칙). 황금키는 확인 창(결과·남는 키·다시 채우는 때). 쪽지 등장: full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시"
           surface="card"
           data-testid="quest-hints-demo"
@@ -277,7 +277,7 @@ function QuestHintsDemo() {
           <QuestHints {...common} showStars={false} />
         </Demo>
         <Demo
-          label="같은 줄 · 별 안내 (SHOW_STARS 켜면, P8-05)"
+          label="같은 줄 · 별 안내 = 지금 화면 (SHOW_STARS, P8-05)"
           note="별 규칙 F3: 힌트 0회 ★★★ · 1회 ★★ · 그 외·황금키 ★. 두 견본은 같은 상태를 공유해요"
           surface="card"
         >

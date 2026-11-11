@@ -1,5 +1,5 @@
 {
-  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts·checkBadges.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp·has_three_day_streak, 00028 의 level_for_xp(Lv 1~50, P8-01 — 행은 모든 문턱과 그 1 아래), 00019 의 decide_new_badges, 00031 의 coin_reward(P8-04 코인 금액표, TS src/lib/quest/coins.ts coinReward), test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침",
+  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts·checkBadges.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp·has_three_day_streak, 00028 의 level_for_xp(Lv 1~50, P8-01 — 행은 모든 문턱과 그 1 아래), 00019 의 decide_new_badges, 00031 의 coin_reward(P8-04 코인 금액표, TS src/lib/quest/coins.ts coinReward), 00032 의 code_quest_stars(P8-05 코드 퀘스트 별, TS xp.ts codeQuestStars — 다시 풀기 통과는 힌트 0·황금키 아님), test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침",
   "xp": [
     { "base": 50, "hints": 0, "golden": false, "xp": 75 },
     { "base": 50, "hints": 1, "golden": false, "xp": 63 },
@@ -152,6 +152,18 @@
     { "kind": "achievement", "n": 3, "coins": 100 },
     { "kind": "achievement", "n": 0, "coins": 0 },
     { "kind": "bogus", "coins": 0 }
+  ],
+  "stars": [
+    { "hints": 0, "golden": false, "stars": 3 },
+    { "hints": 1, "golden": false, "stars": 2 },
+    { "hints": 2, "golden": false, "stars": 1 },
+    { "hints": 3, "golden": false, "stars": 1 },
+    { "hints": 7, "golden": false, "stars": 1 },
+    { "hints": 0, "golden": true, "stars": 1 },
+    { "hints": 1, "golden": true, "stars": 1 },
+    { "hints": 2, "golden": true, "stars": 1 },
+    { "hints": 3, "golden": true, "stars": 1 },
+    { "hints": 7, "golden": true, "stars": 1 }
   ],
   "streak": [
     { "name": "완료 없음", "completed_at": [], "streak": false },

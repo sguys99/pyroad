@@ -163,6 +163,11 @@ export function useQuizSession({
           coins_earned: r.coins_earned,
           coins_balance: r.coins_balance,
           level_ups: r.level_ups,
+          stars: r.stars,
+          best_stars: r.best_stars,
+          new_stars: 0,
+          solved_directly: false,
+          solution_copy: false,
         },
         { kind: 'quiz', questTitle: quest.title },
       );
