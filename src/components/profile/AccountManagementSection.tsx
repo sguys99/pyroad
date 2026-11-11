@@ -14,7 +14,8 @@ import {
 } from '@/lib/auth/withdrawIntent';
 import { SocialLoginButton } from '@/components/auth/SocialLoginButton';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { ChevronRight } from 'lucide-react';
+import './profile.css';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -218,132 +219,87 @@ export function AccountManagementSection({
     return `${baseMsg}\n\n⚠️ 후속 스테이지(${affectedNames})의 진행도 함께 리셋됩니다.`;
   };
 
+  // 지울 범위: '' = 전체, 그 밖은 스테이지 id
+  const [scope, setScope] = useState('');
+  const picked = stages.find((s) => s.id === scope) ?? null;
+
   return (
-    <Card>
-      <h2 className="mb-4 text-sm font-bold text-foreground">계정 관리</h2>
-
-      {/* 진행 현황 리셋 */}
-      <div className="mb-4">
-        <h3 className="mb-2 text-xs font-semibold text-muted-foreground">
-          진행 현황 리셋
-        </h3>
-
-        <AlertDialog>
-          <AlertDialogTrigger
+    <details className="pf-acct" data-testid="account-management">
+      <summary className="pf-acct-sum focus-ring">
+        계정 관리
+        <ChevronRight aria-hidden className="pf-acct-chev" />
+      </summary>
+      <div className="pf-acct-body" data-surface="raised">
+        {/* 진행 기록 지우기: 범위를 고르고 한 버튼 (확인 2단계는 그대로) */}
+        <label htmlFor="reset-scope" className="pf-acct-k">
+          진행 기록 지우기
+        </label>
+        <div className="pf-acct-row">
+          <select
+            id="reset-scope"
+            className="pf-acct-select focus-ring"
+            value={scope}
+            onChange={(e) => setScope(e.target.value)}
             disabled={isLoading}
-            className="mb-3 w-full"
-            render={
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full"
-                disabled={isLoading}
-              />
-            }
+            data-testid="reset-scope"
           >
-            {loading === 'reset-all' ? '리셋 중...' : '전체 리셋'}
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>전체 리셋</AlertDialogTitle>
-              <AlertDialogDescription>
-                모든 퀘스트 진행, 경험치, 레벨이 초기화됩니다. 이 작업은 되돌릴
-                수 없습니다. 받은 업적과 코인은 그대로 남아요.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
-              <AlertDialogAction
-                variant="danger"
-                onClick={() =>
-                  setConfirmAction({
-                    action: handleResetAll,
-                    title: '정말로 리셋하시겠습니까?',
-                    description:
-                      '이 작업은 되돌릴 수 없습니다. 정말 진행하시겠습니까?',
-                    actionLabel: '리셋하기',
-                  })
-                }
-                disabled={isLoading}
-              >
-                리셋하기
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <div className="grid grid-cols-2 gap-2">
-          {stages.map((stage) => (
-            <AlertDialog key={stage.id}>
-              <AlertDialogTrigger
-                disabled={isLoading}
-                render={
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full [&>.g-btn-face]:py-2 [&>.g-btn-face]:leading-tight [&>.g-btn-face]:whitespace-normal"
-                    disabled={isLoading}
-                  />
-                }
-              >
-                {loading === `reset-stage-${stage.id}`
-                  ? '리셋 중...'
-                  : `${stage.order}. ${stage.title}`}
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    스테이지 {stage.order} 리셋
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="whitespace-pre-line">
-                    {getResetDescription(stage)}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isLoading}>
-                    취소
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="danger"
-                    onClick={() =>
-                      setConfirmAction({
-                        action: () => handleResetStage(stage.id),
-                        title: '정말로 리셋하시겠습니까?',
-                        description:
-                          '이 작업은 되돌릴 수 없습니다. 정말 진행하시겠습니까?',
-                        actionLabel: '리셋하기',
-                      })
-                    }
-                    disabled={isLoading}
-                  >
-                    리셋하기
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ))}
+            <option value="">전체</option>
+            {stages.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.order}. {s.title}
+              </option>
+            ))}
+          </select>
+          <AlertDialog>
+            <AlertDialogTrigger
+              disabled={isLoading}
+              render={
+                <Button variant="secondary" size="sm" disabled={isLoading} />
+              }
+            >
+              {loading?.startsWith('reset') ? '리셋 중...' : '리셋'}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {picked ? `스테이지 ${picked.order} 리셋` : '전체 리셋'}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="whitespace-pre-line">
+                  {picked
+                    ? getResetDescription(picked)
+                    : '모든 퀘스트 진행, 경험치, 레벨이 초기화됩니다. 이 작업은 되돌릴 수 없습니다. 받은 업적과 코인은 그대로 남아요.'}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isLoading}>취소</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="danger"
+                  onClick={() =>
+                    setConfirmAction({
+                      action: picked
+                        ? () => handleResetStage(picked.id)
+                        : handleResetAll,
+                      title: '정말로 리셋하시겠습니까?',
+                      description:
+                        '이 작업은 되돌릴 수 없습니다. 정말 진행하시겠습니까?',
+                      actionLabel: '리셋하기',
+                    })
+                  }
+                  disabled={isLoading}
+                >
+                  리셋하기
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-      </div>
+        <p className="pf-acct-note">받은 업적과 코인은 그대로 남아요.</p>
 
-      {/* 구분선 */}
-      <div className="my-4 border-t border-border" />
-
-      {/* 회원 탈퇴 */}
-      <div>
-        <h3 className="mb-2 text-xs font-semibold text-destructive">
-          회원 탈퇴
-        </h3>
+        {/* 회원 탈퇴: 위험 톤 글자 버튼 */}
         <AlertDialog>
           <AlertDialogTrigger
             disabled={isLoading}
-            render={
-              <Button
-                variant="danger"
-                size="sm"
-                className="w-full"
-                disabled={isLoading}
-              />
-            }
+            className="pf-acct-danger focus-ring"
           >
             {loading === 'delete' ? '탈퇴 처리 중...' : '탈퇴하기'}
           </AlertDialogTrigger>
@@ -449,6 +405,6 @@ export function AccountManagementSection({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </details>
   );
 }

@@ -62,7 +62,7 @@ test('360px: 한 열 · 달력 오늘 칸 낭독 · 모험 기록 · 업적 카�
 
   // 카드는 한 열(같은 왼쪽)
   const lefts = await page
-    .locator('.pf > .pf-card, .pf > a')
+    .locator('.pf .pf-card, [data-testid="profile-achievements"]')
     .evaluateAll((els) =>
       els.map((e) => Math.round(e.getBoundingClientRect().left)),
     );
@@ -71,7 +71,7 @@ test('360px: 한 열 · 달력 오늘 칸 낭독 · 모험 기록 · 업적 카�
 
   if (process.env.PROFILE_SHOTS)
     await page.screenshot({
-      path: `${process.env.PROFILE_SHOTS}/프로필-360.png`,
+      path: `${process.env.PROFILE_SHOTS}/프로필-360-v2.png`,
       fullPage: true,
     });
 
@@ -79,7 +79,7 @@ test('360px: 한 열 · 달력 오늘 칸 낭독 · 모험 기록 · 업적 카�
   await expect(page).toHaveURL(/\/profile\/achievements$/);
 });
 
-test('1280px: 두 열(달력 · 모험 기록 나란히), 넘침 없음', async ({
+test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 업적·보물), 넘침 없음', async ({
   page,
   e2eUser,
 }) => {
@@ -87,14 +87,19 @@ test('1280px: 두 열(달력 · 모험 기록 나란히), 넘침 없음', async 
   await seed(e2eUser.id);
   await page.goto('/profile');
   const cal = await page.getByTestId('profile-calendar').boundingBox();
-  const stats = await page.getByTestId('profile-stats').boundingBox();
-  expect(cal && stats && Math.abs(cal.y - stats.y)).toBeLessThan(2);
-  expect(cal && stats && stats.x > cal.x + cal.width).toBe(true);
+  const ach = await page.getByTestId('profile-achievements').boundingBox();
+  expect(cal && ach && Math.abs(cal.y - ach.y)).toBeLessThan(2);
+  expect(cal && ach && ach.x > cal.x + cal.width).toBe(true);
+  // 계정 관리는 접혀 있음 (위험 동작이 바로 보이지 않게)
+  await expect(page.getByTestId('reset-scope')).toBeHidden();
+  await page.getByText('계정 관리').click();
+  await expect(page.getByTestId('reset-scope')).toBeVisible();
+  await page.getByText('계정 관리').click();
   expect(await noOverflow(page)).toBeLessThanOrEqual(0);
 
   if (process.env.PROFILE_SHOTS)
     await page.screenshot({
-      path: `${process.env.PROFILE_SHOTS}/프로필-1280.png`,
+      path: `${process.env.PROFILE_SHOTS}/프로필-1280-v2.png`,
       fullPage: true,
     });
 });

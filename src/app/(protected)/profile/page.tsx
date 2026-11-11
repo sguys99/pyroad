@@ -132,45 +132,59 @@ export default async function ProfilePage() {
           totalXp={profile.total_xp}
         />
 
-        <ProfileCard
-          title="학습 달력"
-          icon={
-            <CalendarDays className="size-5 text-primary-text" aria-hidden />
-          }
-          side={`지금 ${raw.streak}일 연속`}
-          data-testid="profile-calendar"
-        >
-          <LearningCalendar
-            today={today}
-            days={raw.days}
-            shieldDays={raw.shield_days}
-            stampDays={raw.stamp_days}
+        {/* 768+ 두 열: 왼쪽 달력·모험 기록, 오른쪽 업적·별과 보물 (열마다 쌓아 빈 곳을 줄임) */}
+        <div className="pf-col">
+          <ProfileCard
+            title="학습 달력"
+            icon={
+              <CalendarDays className="size-5 text-primary-text" aria-hidden />
+            }
+            side={`지금 ${raw.streak}일 연속`}
+            data-testid="profile-calendar"
+          >
+            <LearningCalendar
+              today={today}
+              days={raw.days}
+              shieldDays={raw.shield_days}
+              stampDays={raw.stamp_days}
+            />
+          </ProfileCard>
+
+          <ProfileStatsCard raw={raw} />
+        </div>
+        <div className="pf-col">
+          <AchievementsCard
+            earned={definitions.filter((d) => earnedIds.has(d.id)).length}
+            total={definitions.length}
+            claimable={ownedRows.filter((a) => !a.claimed_at).length}
+            recent={recentAchievements(definitions, ownedRows)}
           />
-        </ProfileCard>
 
-        <ProfileStatsCard raw={raw} />
+          <TreasureCard
+            coins={profile.coins}
+            coinsWeek={raw.coins_week}
+            threeStars={raw.stats.three_stars}
+            stages={stages.map((s) => ({
+              id: s.id,
+              order: s.order,
+              title: s.title,
+              stars: s.stars,
+              maxStars: s.maxStars,
+              chest: chestState(s),
+              locked: s.status === 'locked',
+            }))}
+          />
+        </div>
 
-        <AchievementsCard
-          earned={definitions.filter((d) => earnedIds.has(d.id)).length}
-          total={definitions.length}
-          claimable={ownedRows.filter((a) => !a.claimed_at).length}
-          recent={recentAchievements(definitions, ownedRows)}
-        />
-
-        <TreasureCard
-          coins={profile.coins}
-          coinsWeek={raw.coins_week}
-          threeStars={raw.stats.three_stars}
-          stages={stages.map((s) => ({
-            id: s.id,
-            order: s.order,
-            title: s.title,
-            stars: s.stars,
-            maxStars: s.maxStars,
-            chest: chestState(s),
-            locked: s.status === 'locked',
-          }))}
-        />
+        <div className="pf-foot pf-wide">
+          <Link
+            href="/settings"
+            className="text-small text-primary-text underline"
+          >
+            설정 (움직임 · AI 튜터)
+          </Link>
+          <LogoutButton />
+        </div>
 
         <div className="pf-wide">
           <AccountManagementSection
@@ -181,16 +195,6 @@ export default async function ProfilePage() {
               hasProgress: s.quests.some((q) => completed.has(q.id)),
             }))}
           />
-        </div>
-
-        <div className="pf-foot pf-wide">
-          <Link
-            href="/settings"
-            className="text-sm text-primary-text underline"
-          >
-            설정 (움직임 · AI 튜터)
-          </Link>
-          <LogoutButton />
         </div>
       </div>
     </PageTransition>

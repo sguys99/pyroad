@@ -448,3 +448,88 @@
   justify-content: center;
   gap: 0.75rem 1.5rem;
 }
+
+/* ── 두 열(768+): 열마다 카드를 쌓아 높이 차를 줄임 ── */
+.pf-col {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-width: 0;
+}
+
+/* ── 계정 관리: 기본 접힘, 작은 본문 글꼴. 위험 동작이 눈에 띄지 않게 ── */
+.pf-acct {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+.pf-acct-sum {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: var(--spacing-touch);
+  padding: 0 0.5rem;
+  border-radius: var(--round-s);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  cursor: pointer;
+  list-style: none;
+}
+.pf-acct-sum::-webkit-details-marker {
+  display: none;
+}
+.pf-acct-chev {
+  width: 1rem;
+  height: 1rem;
+}
+.pf-acct[open] .pf-acct-chev {
+  transform: rotate(90deg);
+}
+.pf-acct-body {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 28rem;
+  padding: 1rem;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  font-size: var(--text-small);
+}
+.pf-acct-k {
+  font-weight: 600;
+}
+.pf-acct-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.pf-acct-select {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--spacing-touch);
+  padding: 0 0.75rem;
+  border-radius: var(--round-s);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-small);
+}
+.pf-acct-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+.pf-acct-danger {
+  justify-self: start;
+  min-height: var(--spacing-touch);
+  margin-top: 0.25rem;
+  padding: 0 0.25rem;
+  border-radius: var(--round-s);
+  color: var(--error);
+  font-size: var(--text-small);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pf-acct-danger:disabled {
+  opacity: 0.5;
+}

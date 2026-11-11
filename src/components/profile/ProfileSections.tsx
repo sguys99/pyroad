@@ -190,9 +190,13 @@ export function ProfileStatsCard({ raw }: { raw: ProfileStatsRaw }) {
         />
         <Tile
           icon={<Trophy />}
-          value={acc === null ? '-' : acc}
+          value={acc === null ? '아직' : acc}
           unit={acc === null ? undefined : '%'}
-          label={`퀴즈 정답률 · 맞힌 퀴즈 ${n(s.quiz_correct)}개`}
+          label={
+            acc === null
+              ? '퀴즈 전이에요'
+              : `퀴즈 정답률 · 맞힌 퀴즈 ${n(s.quiz_correct)}개`
+          }
           testId="quiz"
         />
         <Tile
