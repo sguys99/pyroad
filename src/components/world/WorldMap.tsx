@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { m, type Variants } from 'framer-motion';
 import { Lock, LockOpen } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
@@ -16,6 +17,7 @@ import { ToastViewport, useToastQueue } from '@/components/ui/toast';
 import { useSfx } from '@/components/providers/soundContext';
 import { SOFT_TAP } from '@/lib/sound/manifest';
 import { StageSheet } from './StageSheet';
+import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import type { StageQuestItem } from '@/lib/world/mapData';
 import type { WorldMapConfig } from '@/lib/content/schema';
 import {
@@ -69,13 +71,25 @@ function nodeVars(map: WorldMapConfig, i: number): React.CSSProperties {
  */
 const STAGE_ENTRY = 'pyroadStageSheet';
 
+// 보물상자 축하 (P8-06): 연 순간에만 받는 지연 chunk (퀘스트 화면과 같은 오버레이·시퀀서)
+const QuestCelebrations = dynamic(
+  () =>
+    import('@/components/quest/QuestCelebrations').then(
+      (m) => m.QuestCelebrations,
+    ),
+  { ssr: false },
+);
+
 function useOpenStage(
   stages: StageWithStatus[],
   questsByStage?: Record<string, StageQuestItem[]>,
   world?: WorldId,
 ) {
   const params = useSearchParams();
+  const router = useRouter();
   const { toasts, show, dismiss } = useToastQueue(1);
+  // 연 보물상자 축하 (P8-06). 시트는 닫고 지도 위에 띄운다 (시트 대화 상자 위에 또 대화 상자를 겹치지 않게)
+  const [chest, setChest] = useState<CelebrationEvent[]>([]);
   const play = useSfx();
   const id = questsByStage ? params.get('stage') : null;
   const current =
@@ -101,15 +115,18 @@ function useOpenStage(
     // 표시는 기록 항목 state에 둔다: 퀘스트에서 뒤로 와 다시 그려져도 남아 있다 (Next는 사용자 state 키를 보존)
     window.history.pushState({ [STAGE_ENTRY]: true }, '', url);
   };
-  const close = () => {
+  /** `then`: 주소가 /world로 돌아온 뒤 부름 (뒤로 가기면 popstate 뒤 — 그 전에 부른 router.refresh()는 Next가 버림) */
+  const close = (then?: () => void) => {
     // 이 화면이 쌓은 기록 항목이면 거둔다: 그 자리에 /world를 덮으면 앞 항목과 겹쳐 뒤로 가기를 한 번 더 눌러야 떠남 (P5-14)
     if (window.history.state?.[STAGE_ENTRY]) {
+      if (then) window.addEventListener('popstate', then, { once: true });
       window.history.back();
       return;
     }
     const url = new URL(window.location.href);
     url.searchParams.delete('stage');
     window.history.replaceState(null, '', url);
+    then?.();
   };
   const sheet = (
     <StageSheet
@@ -118,6 +135,13 @@ function useOpenStage(
       open={!!current}
       world={world}
       onOpenChange={(next) => !next && close()}
+      onChestOpened={(events) => {
+        // HUD 코인·상자 상태는 router.refresh() (`/api/world/chest`가 무효화). 시트를 닫는 뒤로 가기가 끝난 뒤 곧바로:
+        // 축하 카드를 닫을 때(퇴장 연출 끝, 카드 언마운트와 같은 틱) 부르면 새로 고침 전환이 가끔 커밋되지 않고 멈춤 (B56)
+        if (!events) return router.refresh();
+        setChest(events);
+        close(() => router.refresh());
+      }}
       // 주소로 열린 시트(퀘스트에서 돌아옴)도 닫으면 그 노드로 포커스
       finalFocus={() =>
         document.querySelector<HTMLElement>(
@@ -126,7 +150,15 @@ function useOpenStage(
       }
     />
   );
-  return { open, sheet, toasts, show, dismiss };
+  const celebration = chest.length > 0 && (
+    <QuestCelebrations
+      events={chest}
+      questId=""
+      worldHref=""
+      onDismiss={() => setChest([])}
+    />
+  );
+  return { open, sheet, celebration, toasts, show, dismiss };
 }
 
 /** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
@@ -259,7 +291,7 @@ export function WorldMap({
   const { budget } = useMotionTier();
   const { container, item } = nodeVariants(budget);
   const box = useRef<HTMLDivElement>(null);
-  const { open, sheet, toasts, show, dismiss } = useOpenStage(
+  const { open, sheet, celebration, toasts, show, dismiss } = useOpenStage(
     stages,
     questsByStage,
     world,
@@ -473,7 +505,10 @@ export function WorldMap({
       {sheet}
       {portal &&
         createPortal(
-          <ToastViewport toasts={toasts} onDismiss={dismiss} />,
+          <>
+            <ToastViewport toasts={toasts} onDismiss={dismiss} />
+            {celebration}
+          </>,
           portal,
         )}
     </div>

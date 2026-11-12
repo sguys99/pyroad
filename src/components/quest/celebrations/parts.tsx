@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { m } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
@@ -21,6 +21,9 @@ import { popIn } from './motion';
  */
 export const CTA_FOCUS_DELAY_MS = 320;
 
+/** false면 카드가 떠도 포커스를 옮기지 않음: 카탈로그 견본처럼 페이지에 늘 깔린 카드가 다른 대화 상자의 포커스를 뺏지 않게 (B61) */
+export const CtaAutoFocus = createContext(true);
+
 export function CelebrationCta({
   children,
   onClick,
@@ -29,26 +32,30 @@ export function CelebrationCta({
   variant,
   testId = 'celebration-cta',
   focus = true,
+  loading,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   /** 화면을 떠나는 버튼 (스테이지 클리어 → 월드맵) */
   href?: string;
   icon?: React.ReactNode;
-  variant?: 'secondary' | 'ghost';
+  variant?: 'secondary' | 'ghost' | 'reward';
   testId?: string;
   /** 카드가 뜬 뒤 포커스를 받는 버튼 (카드마다 하나) */
   focus?: boolean;
+  /** 요청 중 (업적 받기 P8-09) */
+  loading?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
+  const auto = useContext(CtaAutoFocus);
   useEffect(() => {
-    if (!focus) return;
+    if (!focus || !auto) return;
     const timer = setTimeout(
       () => ref.current?.focus({ preventScroll: true }),
       CTA_FOCUS_DELAY_MS,
     );
     return () => clearTimeout(timer);
-  }, [focus]);
+  }, [focus, auto]);
 
   return (
     // 게임 버튼 (P2-11): 눌림 피드백은 버튼이, 소리는 시퀀서가 낸다
@@ -59,6 +66,7 @@ export function CelebrationCta({
       href={href}
       icon={icon}
       variant={variant}
+      loading={loading}
       onClick={onClick}
     >
       {children}

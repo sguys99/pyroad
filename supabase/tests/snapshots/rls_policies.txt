@@ -1,19 +1,26 @@
 # rls_policies: supabase/tests/checks.mjs 가 만든 스냅샷. 직접 고치지 말고
 # 의도한 권한 변경이면 RLS_UPDATE_SNAPSHOTS=1 npm run test:rls 로 다시 만들고 diff 를 리뷰하세요.
+public.achievements achievements_select_all [PERMISSIVE SELECT to authenticated] using (true) check (-)
 public.board_comments board_comments_select_authenticated [PERMISSIVE SELECT to authenticated] using ((((NOT is_hidden) OR (( SELECT auth.uid() AS uid) = user_id)) AND (EXISTS ( SELECT 1
    FROM board_posts p
   WHERE (p.id = board_comments.post_id))))) check (-)
 public.board_posts board_posts_select_authenticated [PERMISSIVE SELECT to authenticated] using (((NOT is_hidden) OR (( SELECT auth.uid() AS uid) = user_id))) check (-)
+public.coin_ledger coin_ledger_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.notices notices_select_public [PERMISSIVE SELECT to public] using (true) check (-)
 public.quests quests_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)
 public.quiz_attempts quiz_attempts_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
+public.retro_rewards retro_rewards_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.stages stages_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)
+public.streak_shield_days streak_shield_days_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
+public.user_achievements user_achievements_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_badges badges_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
+public.user_daily_missions user_daily_missions_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_insert_own [PERMISSIVE INSERT to authenticated] using (-) check ((( SELECT auth.uid() AS uid) = user_id))
 public.user_progress progress_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check ((( SELECT auth.uid() AS uid) = user_id))
 public.user_public_profiles user_public_profiles_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)
 public.user_seen_unlocks user_seen_unlocks_select_own [PERMISSIVE SELECT to authenticated] using ((user_id = ( SELECT auth.uid() AS uid))) check (-)
+public.user_streak_shields user_streak_shields_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.users users_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = id)) check (-)
 public.users users_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = id)) check ((( SELECT auth.uid() AS uid) = id))
 public.worlds worlds_select_authenticated [PERMISSIVE SELECT to authenticated] using (true) check (-)

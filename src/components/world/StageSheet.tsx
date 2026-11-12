@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import {
   ArrowRight,
+  CalendarCheck,
   Check,
   Code2,
   Crown,
@@ -14,7 +15,7 @@ import {
 import type { StageWithStatus } from '@/lib/types/database';
 import type { WorldId } from '@/lib/design/tokens';
 import type { StageQuestItem } from '@/lib/world/mapData';
-import { SHOW_STARS } from '@/lib/world/flags';
+import { SHOW_CHEST, SHOW_STARS } from '@/lib/world/flags';
 import { Sheet } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useSfx } from '@/components/providers/soundContext';
@@ -23,8 +24,13 @@ import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import { questNumbers } from '@/lib/quest/stageProgress';
 import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
 import { isQuizKind, QUIZ_KIND_LABEL } from '@/lib/world/phoneQuiz';
+import { starReviewOpen } from '@/lib/quest/starReview';
+import { kstToday } from '@/lib/time/kst';
 import { Landmark } from './map/MapArt';
 import { QUIZ_KIND_ICON } from './PhoneQuizPick';
+import { StageChest } from './StageChest';
+import { isPerfectStage } from '@/lib/world/chest';
+import type { CelebrationEvent } from '@/lib/quest/celebrationEvents';
 import './map/worldMap.css';
 import './stageSheet.css';
 
@@ -38,6 +44,9 @@ import './stageSheet.css';
  * - 완료 퀘스트는 "다시 하기"(복습), 첫 미완료 퀘스트는 강조 줄("지금 차례") + 아래 주 버튼 "시작하기/이어하기" 하나 (P5-14: 줄 안 버튼과 중복 제거)
  * - 퀴즈(P7-11, §12-Q3 C): 유형 태그 "퀴즈 · 종류" + 종류 아이콘, 풀었으면 별(퀴즈 별은 지금도 기록됨 → SHOW_STARS 와 상관없이),
  *   목록 아래 "보너스" 안내 한 줄(잠금·클리어 계산에서 빠짐, `countsForClear`). 휴대폰·태블릿(`usePhoneLike`)이면 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요"
+ * - 별(P8-05, SHOW_STARS): 완료 줄에 최고 별. 기존 완료(P8-11 소급 전, best_stars 0)는 빈 별 대신 그리지 않음.
+ *   별 3개 미만이고 판정 다음 날(KST)이 된 퀘스트·퀴즈는 "복습 도전 가능" 딱지(§2.3·§12-Q64, `starReviewOpen`)
+ * - 보물상자(P8-06, SHOW_CHEST): 진행 요약 아래 별 합계/목표·안에 든 것·"열기" (`StageChest`). 열면 `onChestOpened`
  * - 줄 차례 등장은 CSS(`stageSheet.css`, 연출 단계별). 효과음은 넣지 않음(P5-11)
  */
 
@@ -96,6 +105,10 @@ interface StageSheetProps {
   finalFocus?: () => HTMLElement | null;
   /** 월드 번호 → 그림 틴트 (시트는 body에 떠서 지도의 data-world를 물려받지 못함) */
   world?: WorldId;
+  /** 오늘 KST 날짜 키 (복습 도전 판정, 테스트·카탈로그용. 기본 지금) */
+  today?: string;
+  /** 보물상자를 열었을 때 (P8-06, `StageChest` onOpened). 없으면 열어도 아무것도 하지 않음(카탈로그) */
+  onChestOpened?: (events: CelebrationEvent[] | null) => void;
 }
 
 export function StageSheet({
@@ -105,6 +118,8 @@ export function StageSheet({
   onOpenChange,
   finalFocus,
   world,
+  today = kstToday(),
+  onChestOpened,
 }: StageSheetProps) {
   const play = useSfx();
   const phone = usePhoneLike();
@@ -182,6 +197,12 @@ export function StageSheet({
             </span>
           )}
         </div>
+        {SHOW_STARS && isPerfectStage(stage) && (
+          <span className="ss-perfect" data-testid="stage-sheet-perfect">
+            <Crown aria-hidden className="size-4" strokeWidth={2.6} />
+            완벽해요! 별을 모두 모았어요
+          </span>
+        )}
         <ProgressBar
           value={done}
           max={Math.max(codeRows.length, 1)}
@@ -202,6 +223,10 @@ export function StageSheet({
           </p>
         )}
       </div>
+
+      {SHOW_CHEST && (
+        <StageChest stage={stage} onOpened={onChestOpened ?? (() => {})} />
+      )}
 
       <h3 className="ss-k">차례</h3>
       <ol className="ss-list">
@@ -266,6 +291,20 @@ export function StageSheet({
                     <span className="ss-tag" data-state={q.state}>
                       {STATE_TEXT[q.state]}
                     </span>
+                    {q.state === 'done' && starReviewOpen(q, today) && (
+                      <span
+                        className="ss-tag"
+                        data-review
+                        data-testid="stage-sheet-review"
+                      >
+                        <CalendarCheck
+                          aria-hidden
+                          className="size-3.5"
+                          strokeWidth={2.6}
+                        />
+                        복습 도전 가능
+                      </span>
+                    )}
                     {q.is_mobile_friendly && phone && (
                       <span className="ss-tag" data-mobile>
                         <Smartphone
@@ -281,10 +320,11 @@ export function StageSheet({
                 <span className="ss-end">
                   {q.state === 'done' ? (
                     <>
-                      {/* 코드 퀘스트 별은 P8-05부터 기록(SHOW_STARS), 퀴즈 별은 P7부터 기록·XP 기준이라 늘 보인다 */}
-                      {(SHOW_STARS || q.kind === 'quiz') && (
-                        <Stars n={q.best_stars} size={18} />
-                      )}
+                      {/* 코드 퀘스트 별은 P8-05부터 기록(SHOW_STARS), 퀴즈 별은 P7부터. 0(소급 전 기존 완료)은 그리지 않음 */}
+                      {(SHOW_STARS || q.kind === 'quiz') &&
+                        q.best_stars > 0 && (
+                          <Stars n={q.best_stars} size={18} />
+                        )}
                       <span className="ss-act">
                         <RotateCcw
                           aria-hidden

@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string;
+          description: string;
+          goal: number | null;
+          hidden: boolean;
+          icon: string;
+          id: string;
+          metric: string;
+          name: string;
+          sort: number;
+          tier: string;
+        };
+        Insert: {
+          category: string;
+          description: string;
+          goal?: number | null;
+          hidden?: boolean;
+          icon: string;
+          id: string;
+          metric: string;
+          name: string;
+          sort: number;
+          tier: string;
+        };
+        Update: {
+          category?: string;
+          description?: string;
+          goal?: number | null;
+          hidden?: boolean;
+          icon?: string;
+          id?: string;
+          metric?: string;
+          name?: string;
+          sort?: number;
+          tier?: string;
+        };
+        Relationships: [];
+      };
       analytics_events: {
         Row: {
           actor: string;
@@ -270,6 +309,106 @@ export type Database = {
           },
         ];
       };
+      coin_ledger: {
+        Row: {
+          balance_after: number;
+          created_at: string;
+          delta: number;
+          id: number;
+          ref: string;
+          source: string;
+          user_id: string;
+        };
+        Insert: {
+          balance_after: number;
+          created_at?: string;
+          delta: number;
+          id?: never;
+          ref: string;
+          source: string;
+          user_id: string;
+        };
+        Update: {
+          balance_after?: number;
+          created_at?: string;
+          delta?: number;
+          id?: never;
+          ref?: string;
+          source?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'coin_ledger_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      daily_missions: {
+        Row: {
+          active: boolean;
+          difficulty: number;
+          grp: string;
+          id: string;
+          kind: string;
+          target: number;
+          title: string;
+        };
+        Insert: {
+          active?: boolean;
+          difficulty: number;
+          grp: string;
+          id: string;
+          kind: string;
+          target: number;
+          title: string;
+        };
+        Update: {
+          active?: boolean;
+          difficulty?: number;
+          grp?: string;
+          id?: string;
+          kind?: string;
+          target?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
+      level_curve_adjustments: {
+        Row: {
+          created_at: string;
+          level_before: number;
+          user_id: string;
+          xp_after: number;
+          xp_before: number;
+        };
+        Insert: {
+          created_at?: string;
+          level_before: number;
+          user_id: string;
+          xp_after: number;
+          xp_before: number;
+        };
+        Update: {
+          created_at?: string;
+          level_before?: number;
+          user_id?: string;
+          xp_after?: number;
+          xp_before?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'level_curve_adjustments_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notices: {
         Row: {
           content: string;
@@ -447,6 +586,38 @@ export type Database = {
           },
         ];
       };
+      retro_rewards: {
+        Row: {
+          coins: number;
+          granted_at: string;
+          seen_at: string | null;
+          stars: number;
+          user_id: string;
+        };
+        Insert: {
+          coins: number;
+          granted_at: string;
+          seen_at?: string | null;
+          stars?: number;
+          user_id: string;
+        };
+        Update: {
+          coins?: number;
+          granted_at?: string;
+          seen_at?: string | null;
+          stars?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'retro_rewards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       stages: {
         Row: {
           created_at: string;
@@ -484,6 +655,68 @@ export type Database = {
             columns: ['world_id'];
             isOneToOne: false;
             referencedRelation: 'worlds';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      streak_shield_days: {
+        Row: {
+          created_at: string;
+          day: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          day: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          day?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'streak_shield_days_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      user_achievements: {
+        Row: {
+          achieved_at: string;
+          achievement_id: string;
+          claimed_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          achieved_at?: string;
+          achievement_id: string;
+          claimed_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          achieved_at?: string;
+          achievement_id?: string;
+          claimed_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_achievements_achievement_id_fkey';
+            columns: ['achievement_id'];
+            isOneToOne: false;
+            referencedRelation: 'achievements';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_achievements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
@@ -593,6 +826,38 @@ export type Database = {
           },
         ];
       };
+      user_daily_missions: {
+        Row: {
+          created_at: string;
+          day: string;
+          mission_ids: string[];
+          quiz_ids: string[];
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          day: string;
+          mission_ids: string[];
+          quiz_ids?: string[];
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          day?: string;
+          mission_ids?: string[];
+          quiz_ids?: string[];
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_daily_missions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_progress: {
         Row: {
           attempts: number;
@@ -604,7 +869,9 @@ export type Database = {
           earned_xp: number;
           hints_used: number;
           id: string;
+          overcame_error: boolean;
           quest_id: string;
+          solved_directly_at: string | null;
           stars: number;
           stars_judged_on: string | null;
           status: string;
@@ -622,7 +889,9 @@ export type Database = {
           earned_xp?: number;
           hints_used?: number;
           id?: string;
+          overcame_error?: boolean;
           quest_id: string;
+          solved_directly_at?: string | null;
           stars?: number;
           stars_judged_on?: string | null;
           status?: string;
@@ -640,7 +909,9 @@ export type Database = {
           earned_xp?: number;
           hints_used?: number;
           id?: string;
+          overcame_error?: boolean;
           quest_id?: string;
+          solved_directly_at?: string | null;
           stars?: number;
           stars_judged_on?: string | null;
           status?: string;
@@ -727,12 +998,39 @@ export type Database = {
           },
         ];
       };
+      user_streak_shields: {
+        Row: {
+          shields: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          shields?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          shields?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_streak_shields_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       users: {
         Row: {
           age_band: string | null;
           age_checked_at: string | null;
           avatar_config: Json;
           avatar_url: string | null;
+          coins: number;
           consent_deadline: string | null;
           created_at: string;
           current_level: number;
@@ -754,6 +1052,7 @@ export type Database = {
           age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          coins?: number;
           consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
@@ -775,6 +1074,7 @@ export type Database = {
           age_checked_at?: string | null;
           avatar_config?: Json;
           avatar_url?: string | null;
+          coins?: number;
           consent_deadline?: string | null;
           created_at?: string;
           current_level?: number;
@@ -859,6 +1159,45 @@ export type Database = {
       };
     };
     Functions: {
+      achievement_progress: {
+        Args: { p_user_id: string };
+        Returns: {
+          achievement_id: string;
+          goal: number;
+          progress: number;
+        }[];
+      };
+      achievement_stats: { Args: { p_user_id: string }; Returns: Json };
+      claim_achievement: {
+        Args: { p_achievement_id: string; p_user_id: string };
+        Returns: Json;
+      };
+      claim_daily_mission: {
+        Args: { p_day: string; p_mission_id: string; p_user_id: string };
+        Returns: Json;
+      };
+      code_quest_stars: {
+        Args: { p_hints_used: number; p_used_golden_key: boolean };
+        Returns: number;
+      };
+      coin_apply: {
+        Args: {
+          p_delta: number;
+          p_ref: string;
+          p_source: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      coin_balance_mismatches: {
+        Args: never;
+        Returns: {
+          coins: number;
+          ledger_sum: number;
+          user_id: string;
+        }[];
+      };
+      coin_reward: { Args: { p_kind: string; p_n?: number }; Returns: number };
       complete_onboarding: {
         Args: {
           p_age_band: string;
@@ -890,6 +1229,46 @@ export type Database = {
         };
         Returns: Json;
       };
+      current_streak: {
+        Args: { p_days: string[]; p_today: string };
+        Returns: number;
+      };
+      daily_mission_list: {
+        Args: {
+          p_day: string;
+          p_mission_ids: string[];
+          p_quiz_ids: string[];
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      daily_mission_possible: {
+        Args: {
+          p_day: string;
+          p_kind: string;
+          p_quiz_ids: string[];
+          p_target: number;
+          p_user_id: string;
+        };
+        Returns: boolean;
+      };
+      daily_mission_progress: {
+        Args: {
+          p_day: string;
+          p_kind: string;
+          p_quiz_ids: string[];
+          p_user_id: string;
+        };
+        Returns: number;
+      };
+      daily_mission_target: {
+        Args: { p_kind: string; p_quiz_ids: string[]; p_target: number };
+        Returns: number;
+      };
+      daily_missions_today: {
+        Args: { p_quiz_ids?: string[]; p_user_id: string };
+        Returns: Json;
+      };
       decide_new_badges: {
         Args: {
           p_completed_count: number;
@@ -902,6 +1281,24 @@ export type Database = {
         };
         Returns: string[];
       };
+      evaluate_achievements: { Args: { p_user_id: string }; Returns: Json };
+      grant_coins: {
+        Args: {
+          p_amount: number;
+          p_ref: string;
+          p_source: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      grant_level_up_coins: {
+        Args: { p_from_level: number; p_to_level: number; p_user_id: string };
+        Returns: Json;
+      };
+      grant_star_coins: {
+        Args: { p_quest_id: string; p_stars: number; p_user_id: string };
+        Returns: number;
+      };
       has_three_day_streak: {
         Args: { p_completed_at: string[] };
         Returns: boolean;
@@ -910,16 +1307,31 @@ export type Database = {
         Args: { p_nickname: string; p_user_id: string };
         Returns: boolean;
       };
+      is_solution_copy: {
+        Args: { p_code: string; p_quest_id: string };
+        Returns: boolean;
+      };
       is_stage_unlocked: {
         Args: { p_stage_id: string; p_user_id: string };
         Returns: boolean;
       };
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
+      learning_day_quests: {
+        Args: { p_user_id: string };
+        Returns: {
+          day: string;
+          quest_id: string;
+        }[];
+      };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
       list_expired_unconsented: {
         Args: { p_limit: number };
         Returns: string[];
+      };
+      open_stage_chest: {
+        Args: { p_stage_id: string; p_user_id: string };
+        Returns: Json;
       };
       patch_user_settings: {
         Args: { p_patch: Json; p_user_id: string };
@@ -929,6 +1341,7 @@ export type Database = {
         Args: { p_user_id: string };
         Returns: string;
       };
+      profile_stats: { Args: { p_user_id: string }; Returns: Json };
       prune_analytics_events: {
         Args: { p_limit?: number; p_retention?: string };
         Returns: number;
@@ -972,10 +1385,18 @@ export type Database = {
         Args: { p_scope: string; p_stage_id?: string; p_user_id: string };
         Returns: Json;
       };
+      settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };
         Returns: string;
       };
+      spend_coins: {
+        Args: { p_amount: number; p_ref: string; p_user_id: string };
+        Returns: Json;
+      };
+      stage_chest_goal: { Args: { p_code_quests: number }; Returns: number };
+      stamp_attendance: { Args: { p_user_id: string }; Returns: Json };
+      streak_learning_days: { Args: { p_user_id: string }; Returns: string[] };
       submit_quiz_answer: {
         Args: { p_answer: Json; p_quest_id: string; p_user_id: string };
         Returns: Json;
@@ -984,6 +1405,7 @@ export type Database = {
         Args: { p_quest_id: string; p_step?: number; p_user_id: string };
         Returns: Json;
       };
+      world_daily_status: { Args: { p_user_id: string }; Returns: Json };
     };
     Enums: {
       [_ in never]: never;

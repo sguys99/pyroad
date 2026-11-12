@@ -28,7 +28,7 @@ import './questSuccess.css';
  *
  * 장면 전체는 약 1.6초(lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 상태로 건너뛴다(§12-Q28).
  * 보상은 이미 서버가 넣었으므로 건너뛰어도 숫자만 끝 값으로 바뀐다.
- * Q52: 별·코인은 연출을 완성해 두고 `SHOW_STARS`·`SHOW_COINS`로 숨김 → 지금 화면은 XP만 (카탈로그 `#success-staging`은 켜서 보여 줌)
+ * Q52: 별·코인은 `SHOW_STARS`·`SHOW_COINS`로 켬 (코인 P8-04, 별 P8-05). 다시 풀어 별이 늘면 "새 별 +N" 알약이 숫자 줄 맨 앞에
  */
 export const SUCCESS_RUN_MS = 1600;
 
@@ -42,8 +42,10 @@ export interface QuestReward {
   title: string;
   /** 이번에 받은 XP (서버 값). 0이면 XP 줄 대신 `note` */
   xp: number;
-  /** 별 미리 보기 (Phase 8 전에는 규칙 계산 `codeQuestStars`, SHOW_STARS일 때만 보임) */
+  /** 별 (서버 best_stars, P8-05. 퀴즈는 정답 공개 때만 — 정답이면 채점 쪽지가 보여 줌) */
   stars?: 1 | 2 | 3;
+  /** 다시 풀어 새로 얻은 별 수 (P8-05 "새 별 +N"). 0이면 안 보임 */
+  newStars?: number;
   /** 받은 코인 (Phase 8, SHOW_COINS일 때만 보임) */
   coins?: number;
   /** XP가 없을 때 한 줄 (황금 열쇠로 연 퀘스트 등) */
@@ -195,6 +197,10 @@ export function RewardStrip({
   const showStars = (reward.forceStarsCoins || SHOW_STARS) && !!reward.stars;
   const coins =
     reward.forceStarsCoins || SHOW_COINS ? Math.max(0, reward.coins ?? 0) : 0;
+  const newStars =
+    reward.forceStarsCoins || SHOW_STARS
+      ? Math.max(0, reward.newStars ?? 0)
+      : 0;
   const countMs = tierDuration(COUNT_MS, budget);
   const countAt = tierDuration(COUNT_AT_MS, budget);
   const strip = useRef<HTMLElement>(null);
@@ -242,8 +248,14 @@ export function RewardStrip({
         />
       )}
 
-      {(reward.xp > 0 || coins > 0) && (
+      {(reward.xp > 0 || coins > 0 || newStars > 0) && (
         <ul className="qx-row" aria-label="받은 보상">
+          {newStars > 0 && (
+            <li className="qx-item qx-new" data-testid="reward-new-stars">
+              <RewardIcon kind="star" size={26} />
+              <b className="qx-num">새 별 +{newStars}</b>
+            </li>
+          )}
           {reward.xp > 0 && (
             <li className="qx-item" data-testid="reward-xp">
               <span className="qx-xp" aria-hidden>

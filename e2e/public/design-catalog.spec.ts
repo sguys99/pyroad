@@ -20,13 +20,25 @@ import {
   runningLoops,
   type MotionMode,
 } from '../support/motion';
+import {
+  formatTimeLeft,
+  msUntilKstMidnight,
+} from '../../src/lib/world/missions';
 
 let violations: string[] = [];
+// 하이드레이션이 어긋나면 React 가 트리를 새로 그려 잡아 둔 요소가 떨어진다 (B68: CI 에서만 가끔 "not attached")
+let hydrationErrors: string[] = [];
 test.beforeEach(async ({ page }) => {
   violations = await watchCspViolations(page);
+  hydrationErrors = [];
+  page.on('pageerror', (e) => {
+    if (/Minified React error #4(18|19|21|23|25)\b|hydrat/i.test(e.message))
+      hydrationErrors.push(e.message);
+  });
 });
 test.afterEach(() => {
   expect(violations, 'CSP 위반이 없어야 함 (B27)').toEqual([]);
+  expect(hydrationErrors, '하이드레이션 불일치가 없어야 함 (B68)').toEqual([]);
 });
 
 async function openCatalog(page: Page, mode?: MotionMode) {
@@ -79,6 +91,24 @@ async function translateY(page: Page, selector: string): Promise<number> {
 }
 
 test.describe('카탈로그 /dev/design (P2-12)', () => {
+  test('기기 시계가 서버와 몇 분 달라도 하이드레이션이 맞는다 (B68)', async ({
+    page,
+  }) => {
+    // 느린 러너에서 서버 HTML 과 하이드레이션 사이에 분이 넘어가는 것을 고정으로 재현
+    await page.clock.install({ time: Date.now() + 3 * 60_000 });
+    await page.clock.resume();
+    await openCatalog(page);
+    // 하이드레이션 뒤 기기 시각으로 다시 그려진 남은 시간 (afterEach 가 하이드레이션 오류를 확인)
+    const timer = page.getByTestId('mission-timer').first();
+    await expect(async () => {
+      const now = await page.evaluate(() => Date.now());
+      await expect(timer).toHaveText(
+        `새 미션까지 ${formatTimeLeft(msUntilKstMidnight(now))}`,
+        { timeout: 500 },
+      );
+    }).toPass();
+  });
+
   test('모든 절과 공통 컴포넌트가 보이고, 공유 카드는 실제 PNG로 그려진다', async ({
     page,
   }) => {
@@ -110,6 +140,8 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'success-staging',
       'quiz',
       'celebrations',
+      'achievements',
+      'profile',
       'share-card',
       'sound',
       'legal',
@@ -659,6 +691,252 @@ test.describe('축하 오버레이 (P6-13)', () => {
       await expect(page.locator('html')).not.toHaveAttribute(
         'data-celebrating',
       );
+    });
+  }
+});
+
+test.describe('별점 (P8-05)', () => {
+  test('다시 풀어 새 별 띠 · 시트 "복습 도전 가능" 딱지', async ({ page }) => {
+    await openCatalog(page, MOTION_MODES[3]);
+    const retry = page.getByTestId('success-retry');
+    await retry.scrollIntoViewIfNeeded();
+    const strip = retry.getByTestId('quest-reward');
+    await expect(strip).toHaveAttribute('data-review', 'true');
+    await expect(strip.getByTestId('reward-new-stars')).toHaveText('새 별 +2');
+    await expect(strip.getByTestId('reward-xp')).toHaveCount(0);
+    await expect(strip.getByTestId('reward-stars')).toHaveAccessibleName(
+      '별 3개 / 3개',
+    );
+
+    const demo = page.getByTestId('stage-sheet-demo');
+    await demo.scrollIntoViewIfNeeded();
+    await demo.getByRole('button', { name: '통과한 스테이지' }).click();
+    const sheet = page.getByTestId('stage-sheet');
+    // 별 3개 미만 줄(코드 퀘스트·퀴즈)마다 딱지 (§12-Q64)
+    await expect(sheet.getByTestId('stage-sheet-review').first()).toHaveText(
+      '복습 도전 가능',
+    );
+  });
+});
+
+test.describe('스테이지 보물상자 (P8-06)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 3상태 · 열 수 있는 상자만 들썩(full·lite) · 열기 → 상자 축하 카드`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('stage-chest-demo');
+      await demo.scrollIntoViewIfNeeded();
+      const rows = demo.getByTestId('stage-chest');
+      await expect(rows).toHaveCount(5);
+      await expect(rows.nth(0)).toHaveAttribute('data-state', 'locked');
+      await expect(rows.nth(1)).toHaveAttribute('data-state', 'ready');
+      await expect(rows.nth(2)).toHaveAttribute('data-state', 'opened');
+      // 내용 공개형: 안에 든 것을 열기 전부터 (마지막 스테이지 50)
+      await expect(rows.nth(0)).toContainText('코인 30');
+      await expect(rows.nth(3)).toContainText('코인 50');
+      // 별은 채웠어도 코드 퀘스트 0개면 잠김 (§12-Q65 (c))
+      await expect(rows.nth(4)).toHaveAttribute('data-state', 'locked');
+      await expect(rows.nth(4)).toContainText('코드 퀘스트를 하나 풀면 열려요');
+      await expect(demo.getByTestId('stage-chest-open')).toHaveCount(1);
+
+      const names = loopNames(await runningLoops(page));
+      const moving = mode.tier !== 'minimal' && mode.reduced === 'off';
+      expect(names.includes('sc-wiggle')).toBe(moving);
+      // 노드 견본(통과 · 보물상자 열 수 있음)의 작은 상자
+      expect(names.includes('wn-chest')).toBe(moving);
+      await expect(
+        page.getByTestId('world-node-states').locator('.wn-chest'),
+      ).toHaveCount(1);
+      // 별 100% 노드: 금색 왕관 (움직임 없음, §12-Q65 (d))
+      await expect(
+        page
+          .getByTestId('world-node-states')
+          .locator('.wn[data-perfect] .wn-perfect'),
+      ).toHaveCount(1);
+
+      await demo.getByTestId('stage-chest-open').click();
+      const overlay = page.getByTestId('celebration-overlay');
+      await expect(overlay.getByTestId('celebration-step-chest')).toBeVisible();
+      // 카탈로그엔 카드 견본도 같은 제목 id 를 써서 대화 상자 이름 대신 제목으로 (실제 화면은 e2e/world-chest.spec.ts)
+      await expect(
+        overlay.getByRole('heading', { name: '보물상자가 열렸어요!' }),
+      ).toBeVisible();
+      await expect(overlay.getByTestId('celebration-live')).toContainText('30');
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      await expect(overlay).toBeHidden();
+    });
+  }
+});
+
+test.describe('데일리 미션 (P8-07)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 진행·달성·받음·지난 보상 · 받기 → 받았어요, 보상이 HUD 로 날아감(full만)`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('mission-list-demo');
+      await demo.scrollIntoViewIfNeeded();
+      const first = demo.getByTestId('mission-demo').first();
+      await expect(first.getByTestId('mission-quest_2')).toHaveAttribute(
+        'data-state',
+        'doing',
+      );
+      await expect(first.getByTestId('mission-review_1')).toContainText(
+        '받았어요',
+      );
+      await expect(
+        first.getByRole('heading', { name: /지난 보상/ }),
+      ).toBeVisible();
+      await expect(first.getByText('어제')).toBeVisible();
+      await expect(first.getByTestId('mission-timer')).toContainText(
+        '새 미션까지',
+      );
+      // HUD 견본: 받을 보상이 있으면 금색 점
+      await expect(
+        page.getByTestId('world-hud-demo').getByTestId('hud-mission').last(),
+      ).toHaveAttribute('data-ready');
+
+      await first
+        .getByTestId('mission-daily_quiz')
+        .getByTestId('mission-claim')
+        .click();
+      await expect(first.getByTestId('mission-daily_quiz')).toHaveAttribute(
+        'data-state',
+        'claimed',
+      );
+      const flying = await page.locator('.dm-fly').count();
+      if (mode.tier === 'full' && mode.reduced === 'off')
+        expect(flying).toBeGreaterThan(0);
+      else expect(flying).toBe(0);
+    });
+  }
+});
+
+test.describe('출석 도장 (P8-08)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 3일째 도장 → 칸에 출석 도장·코인 날아감(full만), 7일째 → 방패 든 상자 카드`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const demo = page.getByTestId('attendance-demo-section');
+      await demo.scrollIntoViewIfNeeded();
+      const [third, seventh] = [
+        demo.getByTestId('attendance-demo').nth(0),
+        demo.getByTestId('attendance-demo').nth(1),
+      ];
+      await expect(third.getByTestId('attendance-cell-3')).toHaveAttribute(
+        'data-state',
+        'next',
+      );
+      await expect(demo.getByTestId('attendance-demo').nth(2)).toContainText(
+        '방패가 불꽃을 지켜 줬어요',
+      );
+      // HUD 견본: 방패 2개
+      await expect(
+        page.getByTestId('world-hud-demo').getByTestId('hud-shields'),
+      ).toHaveAttribute('data-n', '2');
+
+      await third.getByTestId('attendance-stamp').click();
+      await expect(third.getByTestId('attendance-cell-3')).toHaveAttribute(
+        'data-state',
+        'done',
+      );
+      await expect(
+        third.getByTestId('attendance-cell-3').locator('.at-stamp'),
+      ).toBeVisible();
+      // 코인은 도장이 닿는 순간 HUD 견본으로 (full 만, 나머지는 날아가지 않음)
+      if (mode.tier === 'full' && mode.reduced === 'off')
+        await expect(page.locator('.dm-fly').first()).toBeAttached();
+      else expect(await page.locator('.dm-fly').count()).toBe(0);
+
+      await seventh.getByTestId('attendance-stamp').click();
+      const overlay = page.getByTestId('celebration-overlay');
+      await expect(overlay.getByTestId('celebration-step-chest')).toContainText(
+        '스트릭 방패',
+      );
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      await expect(overlay).toBeHidden();
+      // 찍은 7일째 칸: 도장 + 모서리 열린 상자 (§12-Q66 ⑤). 다른 찍은 칸에는 없음
+      const seventhCell = seventh.getByTestId('attendance-cell-7');
+      await expect(seventhCell).toHaveAttribute('data-state', 'done');
+      await expect(seventhCell.locator('.at-stamp')).toBeVisible();
+      await expect(
+        seventhCell.locator('.at-chest-mark [data-reward="chestOpen"]'),
+      ).toBeVisible();
+      await expect(seventh.locator('.at-chest-mark')).toHaveCount(1);
+    });
+  }
+});
+
+test.describe('업적 도감 (P8-10)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[2], MOTION_MODES[3]]) {
+    test(`${mode.name}: 실루엣·비밀·반짝임 → 받기 → 지갑 잔액·코인 날아감(full만), 반짝임은 full·lite만 돎`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const book = page
+        .getByTestId('achievement-book-demo')
+        .getByTestId('achievement-book');
+      await book.scrollIntoViewIfNeeded();
+      await expect(book.getByTestId('achievement-level_50')).toContainText(
+        '???',
+      );
+      await expect(book.getByTestId('achievement-quests_10')).toHaveAttribute(
+        'data-state',
+        'locked',
+      );
+      await expect(book.getByText('실수도 실력이 돼요!')).toBeVisible();
+      const ready = book.getByTestId('achievement-stage_clear');
+      const glint = ready.locator('.ab-glint').first();
+      const anim = await glint.evaluate(
+        (el) => getComputedStyle(el).animationName,
+      );
+      expect(anim).toBe(
+        mode.tier === 'full' && mode.reduced === 'off' ? 'ab-glint' : 'none',
+      );
+      await expect(glint).toBeVisible();
+
+      await ready.getByTestId('achievement-claim').click();
+      await expect(ready).toHaveAttribute('data-state', 'earned');
+      await expect(book.locator('[data-ab-wallet]')).toContainText(
+        '코인 1,250개',
+      );
+      const flying = await page.locator('.dm-fly').count();
+      if (mode.tier === 'full' && mode.reduced === 'off')
+        expect(flying).toBeGreaterThan(0);
+      else expect(flying).toBe(0);
+    });
+  }
+});
+
+test.describe('휴식 알림 (P8-12)', () => {
+  for (const mode of [MOTION_MODES[0], MOTION_MODES[3]]) {
+    test(`${mode.name}: 권유 → 10초 쉬기 → 다 쉬었어요, Esc는 조금만 더`, async ({
+      page,
+    }) => {
+      await openCatalog(page, mode);
+      const open = page.getByTestId('rest-demo-ask');
+      await open.scrollIntoViewIfNeeded();
+      await open.click();
+      const ask = page.getByRole('dialog', { name: '40분이나 모험했어요!' });
+      await expect(ask).toBeVisible();
+      await expect(ask.getByRole('button', { name: '5분 쉬기' })).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toHaveCount(0);
+
+      await open.click();
+      await page.getByRole('button', { name: '5분 쉬기' }).click();
+      await expect(page.getByRole('timer')).toHaveText(/^0:(10|0\d)$/);
+      await expect(
+        page.getByRole('dialog', { name: '다 쉬었어요!' }),
+      ).toBeVisible({
+        timeout: 15_000,
+      });
+      await page.getByRole('button', { name: '다시 모험하기' }).click();
+      await expect(page.getByRole('dialog')).toHaveCount(0);
     });
   }
 });

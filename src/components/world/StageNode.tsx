@@ -2,10 +2,11 @@
 
 import { Check, Crown, Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
-import { Stars } from '@/components/ui/reward-icon';
+import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import dynamic from 'next/dynamic';
 import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
-import { SHOW_STARS } from '@/lib/world/flags';
+import { SHOW_CHEST, SHOW_STARS } from '@/lib/world/flags';
+import { chestState, isPerfectStage } from '@/lib/world/chest';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 
 /**
@@ -41,9 +42,13 @@ export function stageNodeLabel(stage: StageWithStatus): string {
   ];
   if (stage.status !== 'locked') {
     if (SHOW_STARS) parts.push(`별 ${stage.stars}/${stage.maxStars}`);
+    if (SHOW_STARS && isPerfectStage(stage))
+      parts.push('별을 모두 모은 완벽한 스테이지');
     parts.push(
       `퀘스트 ${stage.completedQuestCount}/${stage.totalQuestCount} 완료`,
     );
+    if (SHOW_CHEST && chestState(stage) === 'ready')
+      parts.push('보물상자를 열 수 있어요');
   }
   return parts.join(', ');
 }
@@ -71,6 +76,7 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
       data-stage-id={stage.id}
       data-state={state}
       data-boss={stage.is_final || undefined}
+      data-perfect={(SHOW_STARS && isPerfectStage(stage)) || undefined}
     >
       {stage.status === 'in_progress' && (
         <span aria-hidden className="wn-ring" />
@@ -111,6 +117,14 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
             <>
               <Stars n={1} max={1} size={16} label={false} /> {stage.stars}/
               {stage.maxStars}
+              {/* 별 100% (§12-Q65 (d)): 이름표가 금색 테두리 + 작은 왕관, 움직임 없음(모든 연출 단계 같음) */}
+              {isPerfectStage(stage) && (
+                <Crown className="wn-perfect" strokeWidth={2.6} />
+              )}
+              {/* 열 수 있는 보물상자 (P8-06): 이름표 옆 작은 상자 하나만 — 여는 것은 시트에서 */}
+              {SHOW_CHEST && chestState(stage) === 'ready' && (
+                <RewardIcon kind="chest" size={18} className="wn-chest" />
+              )}
             </>
           ) : (
             // 별이 기록되기 전(Q51): 완료 체크 + 퀘스트 수

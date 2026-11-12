@@ -19,6 +19,7 @@ import { kstToday } from '@/lib/time/kst';
 import { getWorldStatuses, type WorldsProgress } from './getStageStatuses';
 import { planUnlocks, type UnlockPlan } from './unlockSeen';
 import type { WorldInfo } from './worlds';
+import type { WorldDailyStatus } from './attendance';
 
 /** 스테이지 시트(P5-06)가 보여 줄 퀘스트 열 (DB 조회 그대로라 quest_type 은 string) */
 export interface QuestListRow {
@@ -68,8 +69,14 @@ export interface WorldMapData {
   progress: WorldsProgress;
   /** 스테이지 id → 퀘스트 목록 (order 순, P5-06 바텀시트) */
   questsByStage: Record<string, StageQuestItem[]>;
-  /** 직접 푼(황금키 아님) 완료 시각들. HUD 스트릭(P5-07, `src/lib/time/streak.ts`)이 KST 날짜로 센다 */
+  /** 직접 푼(황금키 아님) 완료 시각들. HUD 스트릭은 서버 `dailyStatus` 를 쓰고, 그것을 못 읽었을 때(00035 전 DB)만 이것으로 센다 */
   completedAt: string[];
+  /** 스트릭(학습일·방패)·출석 사이클 (P8-08, 서버 `world_daily_status`가 방패를 정산한 뒤). 못 읽었으면 null → 출석 카드 없음 */
+  dailyStatus: WorldDailyStatus | null;
+  /** 얻었지만 코인을 안 받은 업적 수 (P8-10, 메뉴의 업적 도감 금색 점) */
+  achievementsReady: number;
+  /** 아직 닫지 않은 소급 보상 (P8-11, 00037 retro_rewards). 없으면 null → 환영 카드 없음 */
+  retroWelcome: RetroWelcome | null;
   /** 이어하기 CTA 대상 (P5-10). 열린 퀘스트를 다 깼으면 null */
   continueTarget: ContinueTarget | null;
   /** 서버가 커스텀 키를 받을 수 있는데 등록한 키가 없음 */
@@ -78,6 +85,12 @@ export interface WorldMapData {
   unlocks: UnlockPlan | null;
   /** 오늘의 퀴즈 (P7-10): 오늘 고른 문제와 끝난 문제 */
   daily: DailyQuizState;
+}
+
+/** "그동안의 모험 보상" (P8-11): 소급으로 코인을 받은 별 수·코인 합 */
+export interface RetroWelcome {
+  stars: number;
+  coins: number;
 }
 
 /** 이어하기 CTA (P5-10) */
@@ -134,6 +147,16 @@ export interface WorldMapRaw {
   seen: Array<{ user_id: string; stage_id: string }> | null;
   /** 오늘(KST) 본인 퀴즈 시도 (P7-10, 오늘의 퀴즈 완료 계산). 없으면 끝난 문제 없음 */
   attempts?: QuizAttemptRow[] | null;
+  /** 연 보물상자 (P8-06): 본인 coin_ledger chest 행, ref = stage_id. 못 읽었으면 없음(모두 안 연 것) */
+  chests?: Array<{ user_id: string; ref: string }> | null;
+  /** 오늘 저장한 오늘의 퀴즈 목록 (P8-07 `user_daily_missions.quiz_ids`, §12-Q61). 있으면 그 문제로 고정 */
+  dailyQuizIds?: string[] | null;
+  /** `world_daily_status` 결과 (P8-08, 확인한 id 로 service_role). 실패면 null */
+  dailyStatus?: WorldDailyStatus | null;
+  /** 코인 안 받은 본인 업적 행 (P8-10). 못 읽었으면 없음 */
+  readyAchievements?: Array<{ user_id: string }> | null;
+  /** 닫지 않은 본인 소급 보상 행 (P8-11, 00037). 못 읽었으면(00037 전 DB) 없음 */
+  retro?: Array<{ user_id: string; stars: number; coins: number }> | null;
 }
 
 export function toWorldMapData(
@@ -166,13 +189,26 @@ export function toWorldMapData(
   }
 
   const worldsProgress = getWorldStatuses(worlds, raw.stages, progress);
+  const opened = new Set(
+    (raw.chests ?? []).filter((c) => c.user_id === userId).map((c) => c.ref),
+  );
+  for (const w of worldsProgress.worlds)
+    for (const s of w.stages) s.chestOpened = opened.has(s.id);
   const picks = pickDailyQuizzes({
     userId,
     today,
     stages: worldsProgress.worlds.flatMap((w) => w.stages),
     questsByStage,
+    fixed: raw.dailyQuizIds,
   });
   return {
+    dailyStatus: raw.dailyStatus ?? null,
+    achievementsReady: (raw.readyAchievements ?? []).filter(
+      (a) => a.user_id === userId,
+    ).length,
+    retroWelcome: toRetroWelcome(
+      (raw.retro ?? []).filter((r) => r.user_id === userId),
+    ),
     profile:
       raw.profile && raw.profile.id === userId
         ? toOwnProfile(raw.profile)
@@ -203,4 +239,13 @@ export function toWorldMapData(
     showApiKeyAlert:
       !!raw.apiKeys?.enabled && Object.keys(raw.apiKeys.keys).length === 0,
   };
+}
+
+/** 닫지 않은 소급 행(보통 1개, 다시 실행했으면 여럿)을 합침. 코인이 없으면 카드 없음 */
+function toRetroWelcome(
+  rows: Array<{ stars: number; coins: number }>,
+): RetroWelcome | null {
+  const coins = rows.reduce((n, r) => n + r.coins, 0);
+  if (coins <= 0) return null;
+  return { stars: rows.reduce((n, r) => n + r.stars, 0), coins };
 }

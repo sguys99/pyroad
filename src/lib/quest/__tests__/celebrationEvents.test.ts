@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildCelebrationEvents } from '../celebrationEvents';
+import { buildCelebrationEvents, levelUpEvents } from '../celebrationEvents';
 import type { QuestCompleteResponse } from '../rewards';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 
 const base: QuestCompleteResponse = {
   already_completed: false,
@@ -8,12 +9,20 @@ const base: QuestCompleteResponse = {
   total_xp: 150,
   level_before: 1,
   level_after: 1,
-  new_badges: [],
+  new_achievements: [],
   stage_cleared: null,
   next_quest_id: 'q2',
   golden_keys: 3,
   hints_used: 0,
   used_golden_key: false,
+  coins_earned: 10,
+  coins_balance: 10,
+  level_ups: [],
+  stars: 3,
+  best_stars: 3,
+  new_stars: 3,
+  solved_directly: false,
+  solution_copy: false,
 };
 const stage = {
   stage_id: 's1',
@@ -29,16 +38,23 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
         {
           ...base,
           level_after: 2,
+          level_ups: [{ level: 2, coins: 20 }],
           stage_cleared: stage,
-          new_badges: ['first_code', 'stage_clear'],
+          new_achievements: [achv('first_code'), achv('stage_clear')],
         },
         { kind: 'code', questTitle: '변수' },
       ),
     ).toEqual([
       { type: 'stage_clear', stage },
-      { type: 'level_up', level: 2, fromLevel: 1, title: expect.any(String) },
-      { type: 'badge', badge: 'first_code' },
-      { type: 'badge', badge: 'stage_clear' },
+      {
+        type: 'level_up',
+        level: 2,
+        fromLevel: 1,
+        title: expect.any(String),
+        coins: 20,
+      },
+      { type: 'badge', badge: achv('first_code') },
+      { type: 'badge', badge: achv('stage_clear') },
     ]);
   });
 
@@ -51,7 +67,11 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
   it('프로젝트가 스테이지 마지막이면 프로젝트 완성 하나에 스테이지 클리어를 담는다 (P1-10)', () => {
     expect(
       buildCelebrationEvents(
-        { ...base, stage_cleared: stage, new_badges: ['first_code'] },
+        {
+          ...base,
+          stage_cleared: stage,
+          new_achievements: [achv('first_code')],
+        },
         { kind: 'project', questTitle: '나만의 게임' },
       ),
     ).toEqual([
@@ -61,7 +81,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
         xpGained: 50,
         stage,
       },
-      { type: 'badge', badge: 'first_code' },
+      { type: 'badge', badge: achv('first_code') },
     ]);
   });
 
@@ -90,7 +110,7 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
           xp_gained: 0,
           used_golden_key: true,
           stage_cleared: stage,
-          new_badges: [],
+          new_achievements: [],
         },
         { kind: 'code', questTitle: '변수' },
       ),
@@ -109,17 +129,51 @@ describe('buildCelebrationEvents (완료 응답 → 축하 이벤트 목록)', (
     ]);
   });
 
-  it('이미 완료한 퀘스트(already_completed)는 빈 목록', () => {
+  it('이미 완료한 퀘스트(already_completed): 그냥 다시 풀기·중복 요청은 빈 목록', () => {
+    expect(
+      buildCelebrationEvents(
+        { ...base, already_completed: true, xp_gained: 0, new_stars: 1 },
+        { kind: 'code', questTitle: 'x' },
+      ),
+    ).toEqual([]);
+  });
+
+  it('황금키 퀘스트를 처음 직접 풀면(P8-05) 퀘스트 카드 없이 레벨 업·뱃지만', () => {
     expect(
       buildCelebrationEvents(
         {
           ...base,
           already_completed: true,
-          level_after: 3,
-          new_badges: ['first_code'],
+          used_golden_key: true,
+          solved_directly: true,
+          stage_cleared: null,
+          level_after: 2,
+          new_achievements: [achv('first_code')],
         },
-        { kind: 'project', questTitle: 'x' },
-      ),
-    ).toEqual([]);
+        { kind: 'code', questTitle: 'x' },
+      ).map((e) => e.type),
+    ).toEqual(['level_up', 'badge']);
+  });
+});
+
+describe('levelUpEvents (P8-08 미션·출석 등 퀘스트 밖 보상 → 레벨 업 카드)', () => {
+  it('레벨이 오르면 도착 레벨·칭호·지나간 레벨 코인 합', () => {
+    expect(
+      levelUpEvents({
+        level_before: 4,
+        level_after: 5,
+        level_ups: [{ level: 5, coins: 100 }],
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        type: 'level_up',
+        level: 5,
+        fromLevel: 4,
+        coins: 100,
+      }),
+    ]);
+  });
+  it('안 올랐으면 빈 목록', () => {
+    expect(levelUpEvents({ level_before: 3, level_after: 3 })).toEqual([]);
   });
 });

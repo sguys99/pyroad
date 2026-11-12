@@ -3,8 +3,7 @@
  *
  * - 하루는 KST 자정 기준(`kst.ts`), 같은 날 여러 번은 하루
  * - 오늘 아직 안 풀었어도 어제까지 이어졌으면 그 일수를 유지(`today: false`) — 자정이 지나자마자 불이 꺼지지 않게
- * - 3일 뱃지(`has_three_day_streak`, TS `hasThreeDayStreak`)와 같은 정의: 최근 완료일이 오늘·어제면
- *   `days >= 3` ⇔ 뱃지 조건 (테스트가 `reward-rules.json` 표로 대조). 뱃지처럼 황금키 완료는 넘기기 전에 뺀다
+ * - 황금키 완료는 넘기기 전에 뺀다 (업적 streak_3·7·30 도 같은 학습일, 00036)
  */
 import { kstDayNumberOf, type DateInput } from './kst';
 

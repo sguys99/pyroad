@@ -106,10 +106,29 @@
     margin-left: 0.0625rem;
     font-size: var(--text-caption);
   }
+  /* 스트릭 방패 (P8-08): 불꽃 칩 오른쪽 위 모서리에 작은 방패 1~2개 — 칩 폭은 그대로(320px 한 줄) */
+  .wh-streak {
+    position: relative;
+  }
+  .wh-shields {
+    position: absolute;
+    top: -0.125rem;
+    right: -0.25rem;
+    display: flex;
+    pointer-events: none;
+  }
+  .wh-shields > svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: -0.25rem;
+    color: var(--primary-text);
+    fill: var(--surface);
+  }
 
-  /* 곧 열려요: 흐린 점선 알약 (랜딩 soon 배지와 같은 금색 글자) */
+  /* 곧 열려요: 흐린 점선 알약 (랜딩 soon 배지와 같은 금색 글자). 1024px 이상만 펼치고, 그 아래는 버튼 하나(.wh-soon-one) —
+     코인 칩(P8-04)이 들어와 닉네임 자리가 줄지 않게 */
   .wh-soon {
-    display: inline-flex;
+    display: none;
     flex: none;
     align-items: center;
     padding: 0 0.25rem;
@@ -117,7 +136,6 @@
     border-radius: var(--round-pill);
   }
   .wh-soon-k {
-    display: none;
     padding: 0 0.25rem 0 0.5rem;
     color: var(--accent-text);
     font-size: var(--text-caption);
@@ -141,12 +159,12 @@
     opacity: 0.6;
     filter: grayscale(0.6);
   }
-  .wh-soon-b > svg {
+  .wh-soon-b > svg,
+  .wh-soon-one > svg {
     width: 1.375rem;
     height: 1.375rem;
   }
   .wh-soon-one {
-    display: none;
     flex: none;
     border: var(--line-w) dashed var(--line-strong);
   }
@@ -158,8 +176,11 @@
     }
   }
   @media (min-width: 64rem) {
-    .wh-soon-k {
-      display: inline;
+    .wh-soon {
+      display: inline-flex;
+    }
+    .wh-soon-one {
+      display: none;
     }
   }
 
@@ -169,7 +190,7 @@
     bottom: auto;
   }
 
-  /* 640px 미만: 한 줄 56px 안팎. XP 바는 바 아래 가는 띠, 곧 열려요는 버튼 하나, 숫자만 */
+  /* 640px 미만: 한 줄 56px 안팎. XP 바는 바 아래 가는 띠, 숫자만 */
   @media (max-width: 39.99rem) {
     .wh-in {
       gap: 0.25rem;
@@ -210,11 +231,10 @@
     .wh-streak-u {
       display: none;
     }
-    .wh-soon {
-      display: none;
-    }
+    /* 640px 미만: 곧 열려요(상점) 버튼은 빼고 코인·미션 칩(P8-07)에 자리를, 400px 아래는 닉네임 글자와 바의 소리 토글(메뉴 시트로)도 뺌
+       (아바타 링크의 낭독 이름 "○○, 내 프로필"은 그대로) */
     .wh-soon-one {
-      display: inline-grid;
+      display: none;
     }
     .wh .wh-icon {
       width: 2.75rem;
@@ -222,6 +242,40 @@
     }
     .g-toast-region.wh-toast {
       top: calc(4rem + env(safe-area-inset-top, 0px));
+    }
+  }
+  /* 메뉴 시트의 소리 줄: 400px 미만에서만 (바의 소리 토글 대신) */
+  .wh-menu-sound {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.25rem 0 1rem;
+    border-radius: var(--round-m);
+    background: var(--surface-2);
+    font-weight: 700;
+  }
+  @media (max-width: 24.99rem) {
+    .wh-name {
+      display: none;
+    }
+    /* 미션 칸(P8-07)이 들어와 320px 에 자리가 없어 소리 토글은 메뉴 시트로 */
+    .wh .wh-sound {
+      display: none;
+    }
+    .wh-menu-sound {
+      display: flex;
+    }
+    /* 칸 사이·바깥 여백을 줄여 320px 에서 코인 4자리까지 한 줄에 */
+    .wh-in {
+      gap: 0.125rem;
+      padding-inline: 0.5rem;
+    }
+    .wh-me {
+      flex: 0 0 auto;
+      padding-right: 0;
+    }
+    .wh-in {
+      justify-content: space-between;
     }
   }
 }
@@ -245,6 +299,45 @@
   animation: wh-fade var(--dur-fast) var(--easing-out) both;
 }
 :root[data-reduced='true'] .wh-in {
+  animation: none;
+}
+
+/* 불꽃 반짝임 (P8-08): 처음 켜진 날·3일이 된 날 한 번. full = 톡 커지며 빛 둘레 / lite = 둘레만 짧게 / minimal·동작 줄이기 = 없음 */
+@keyframes wh-spark-pop {
+  40% {
+    transform: scale(1.35) rotate(-8deg);
+  }
+}
+@keyframes wh-spark-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+.wh-streak[data-spark]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0.1875rem var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+:root[data-motion='full'] .wh-streak[data-spark] > svg:first-child {
+  animation: wh-spark-pop var(--dur-slow) var(--easing-back-out) 2;
+}
+:root[data-motion='full'] .wh-streak[data-spark]::after {
+  animation: wh-spark-ring var(--dur-slow) var(--easing-out) 2;
+}
+:root[data-motion='lite'] .wh-streak[data-spark]::after {
+  animation: wh-spark-ring var(--dur-base) var(--easing-out) 1;
+}
+:root[data-reduced='true'] .wh-streak[data-spark] > svg:first-child,
+:root[data-reduced='true'] .wh-streak[data-spark]::after {
   animation: none;
 }
 

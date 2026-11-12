@@ -5,6 +5,7 @@
  */
 import type { QuizKind } from '@/lib/content/schema';
 import { kstToday } from '@/lib/time/kst';
+import { starReviewOpen } from '@/lib/quest/starReview';
 import type { StageWithStatus } from '@/lib/types/database';
 
 import type { StageQuestItem } from './mapData';
@@ -68,9 +69,7 @@ export function pickPhoneQuiz({
         q.quest_type === 'quiz' &&
         isQuizKind(q.quiz_kind) &&
         (q.status !== 'completed' ||
-          (q.best_stars < 3 &&
-            !!q.stars_judged_on &&
-            q.stars_judged_on < today))
+          (!!q.stars_judged_on && starReviewOpen(q, today)))
           ? [{ q, kind: q.quiz_kind, s, review: q.status === 'completed' }]
           : [],
       ),

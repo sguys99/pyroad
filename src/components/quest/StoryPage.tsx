@@ -107,7 +107,9 @@ export function tutorLine(session: QuestSession): {
       text:
         session.completion === 'just'
           ? '방금 통과했어요! 한 번 더 돌려 보면 복습이 돼요.'
-          : '예전에 통과한 퀘스트예요. 다시 돌려 보며 복습해 봐요! 처음부터 풀고 싶으면 "처음 코드로"를 눌러요.',
+          : session.reviewChallenge
+            ? '복습 도전! 처음 코드에서 다시 짜 봐요. 통과하면 못 모은 별을 채울 수 있어요.'
+            : '예전에 통과한 퀘스트예요. 다시 돌려 보며 복습해 봐요! 처음부터 풀고 싶으면 "처음 코드로"를 눌러요.',
     };
   return {
     state: 'idle',

@@ -111,6 +111,10 @@ export const EVENT_PROPS_SCHEMA = {
       stars: z.number().int().min(0).max(9),
     })
     .strict(),
+  rest_reminder_shown: z.object({ snoozed: z.boolean() }).strict(),
+  rest_reminder_choice: z
+    .object({ choice: z.enum(['rest', 'more', 'done', 'stop']) })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -189,6 +193,20 @@ const clientEvent = z.discriminatedUnion('name', [
     .strict(),
   z
     .object({
+      name: z.literal('rest_reminder_shown'),
+      props: EVENT_PROPS_SCHEMA.rest_reminder_shown,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('rest_reminder_choice'),
+      props: EVENT_PROPS_SCHEMA.rest_reminder_choice,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
       name: z.literal('trial_start'),
       props: EVENT_PROPS_SCHEMA.trial_start.default({}),
       path: z.string().max(200).optional(),
@@ -225,6 +243,8 @@ const _clientNamesCovered: Record<
   quiz_try_run: 'quiz_try_run',
   phone_quiz_pick: 'phone_quiz_pick',
   daily_quiz_open: 'daily_quiz_open',
+  rest_reminder_shown: 'rest_reminder_shown',
+  rest_reminder_choice: 'rest_reminder_choice',
   daily_quiz_finish: 'daily_quiz_finish',
   trial_start: 'trial_start',
   trial_run: 'trial_run',

@@ -4,13 +4,17 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { gradeSubmission } from '@/lib/quest/grade';
 import { completeQuestRpc, rewardError } from '@/lib/quest/rewardRpc';
-import { levelChanged, type QuestCompleteResponse } from '@/lib/quest/rewards';
+import {
+  levelChanged,
+  retryChanged,
+  type QuestCompleteResponse,
+} from '@/lib/quest/rewards';
 import { trackServerEvent } from '@/lib/analytics/server';
 
 /**
  * 퀘스트 완료 (P1-03, B05·B06)
  *
- * 완료·XP·레벨·뱃지·스테이지 클리어는 DB 함수 complete_quest 가 한 트랜잭션으로 처리합니다.
+ * 완료·XP·레벨·업적·스테이지 클리어는 DB 함수 complete_quest 가 한 트랜잭션으로 처리합니다.
  * 이 라우트는 로그인 확인 → 채점(quest_answer_keys 기준) → RPC 호출만 합니다.
  * 힌트 수·황금키 사용은 DB 값을 쓰므로 요청 본문의 hints_used·used_golden_key 는 받지 않습니다.
  * 같은 퀘스트를 여러 번(동시에) 보내도 보상은 한 번이고, 그 뒤 요청은 already_completed 로 응답합니다.
@@ -20,6 +24,13 @@ interface CompleteRequest {
   code_submitted: string;
   /** 브라우저(Pyodide)에서 실행한 출력. 서버가 다시 채점함 (프로젝트는 마지막 단계 기준) */
   stdout?: string;
+  /** 이미 완료한 퀘스트를 다시 풀어 통과 (P8-05): 서버 재채점을 통과하면 best_stars 갱신·새 별 코인 */
+  retry?: boolean;
+  /**
+   * 이번 풀이 중 실행 에러를 만났음 (P8-09). 서버는 브라우저 실행 에러를 모르므로 화면이 알림.
+   * 실패 칭찬 업적 판정에만 쓰고 XP·별·코인과 무관 — 거짓이어도 얻는 것은 일부러 틀린 코드를 돌려 얻는 것과 같음
+   */
+  had_error?: boolean;
 }
 
 const MAX_CODE_LENGTH = 20_000;
@@ -82,16 +93,22 @@ export async function POST(request: Request) {
     adminClient,
     user.id,
     body.quest_id,
-    { code: body.code_submitted, passed },
+    {
+      code: body.code_submitted,
+      passed,
+      retry: body.retry === true,
+      had_error: body.had_error === true,
+    },
   );
   if (!result.ok) return result.response;
 
-  if (!result.data.already_completed) {
-    // 월드맵·프로필 페이지의 Router Cache 무효화
+  if (!result.data.already_completed || retryChanged(result.data)) {
+    // 월드맵·프로필 페이지의 Router Cache 무효화 (다시 풀기로 별이 늘어도)
     revalidatePath('/world', 'layout'); // /world/[slug] 포함 (P5-01)
     revalidatePath('/worlds');
     revalidatePath('/profile');
-
+  }
+  if (!result.data.already_completed) {
     // 처음 완료만 분석 이벤트로 (P1-17). 값은 모두 DB 함수가 정한 것이라 클라이언트가 바꿀 수 없음
     trackServerEvent({
       headers: request.headers,

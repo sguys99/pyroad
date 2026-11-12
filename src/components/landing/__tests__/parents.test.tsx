@@ -5,11 +5,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   LETTER,
   ROADMAP,
-  SOON,
   WORLD1_QUESTS,
   WORLD1_STAGES,
 } from '../sections/parents/parents';
 import { ParentsSection } from '../sections/ParentsSection';
+import { REST_AFTER_MS } from '@/lib/rest/restTimer';
 
 // 랜딩 보호자 섹션 (P4-07): 로드맵이 실제 콘텐츠와 맞고, 아직 없는 기능은 "준비 중"으로만, 글은 서버 HTML에 보이는 상태
 
@@ -52,15 +52,15 @@ describe('커리큘럼 로드맵 = 콘텐츠', () => {
 });
 
 describe('보호자 문구', () => {
-  const all = [...LETTER.flatMap((c) => c.items), ...SOON].join(' ');
+  const all = LETTER.flatMap((c) => c.items).join(' ');
 
   it('시안 문구 중 사실이 아닌 것은 쓰지 않는다 (스티커만·20분 알림·주간 카드·코인)', () => {
     expect(all).not.toMatch(/스티커|20분|성장 카드|주간|코인/);
   });
 
-  it('휴식 알림(P8-12)은 준비 중에만 있다', () => {
-    expect(SOON.join(' ')).toMatch(/쉬어 가기 알림/);
-    expect(LETTER.flatMap((c) => c.items).join(' ')).not.toMatch(/알림/);
+  it('휴식 알림(P8-12)은 실제 기준(40분)과 같다', () => {
+    expect(REST_AFTER_MS).toBe(40 * 60_000);
+    expect(all).toMatch(/40분 넘게 이어서 하면 파이뱀이 잠깐 쉬어 가자고/);
   });
 
   it('보호자께 하는 존댓말로 끝난다', () => {
@@ -83,7 +83,7 @@ describe('보호자 섹션 서버 HTML', () => {
       for (const item of col.items) expect(html).toContain(item);
     }
     for (const name of WORLD1_STAGES) expect(html).toContain(name);
-    expect(html.match(/>준비 중</g)?.length).toBe(3);
+    expect(html.match(/>준비 중</g)?.length).toBe(2);
     expect(html).not.toMatch(/opacity:\s*0[;"]/);
   });
 });

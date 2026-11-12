@@ -1,11 +1,16 @@
 // 퀘스트 전체 흐름 (로그인). 기존 시나리오(월드맵 → 퀘스트 → 실행 → 정답 → XP, 잠긴 스테이지)를
 // P1-09(엔진·testid)·P1-10(축하 시퀀서)·B22(Link 이동·Worker 유지)·B38(잠긴 스테이지 URL) 구조로 (P1-21)
 
-import { test, expect } from './support/test';
-import { completeQuests } from './support/admin';
+import { test, expect, waitStreamSettled } from './support/test';
+import {
+  bestStars,
+  coinBalance,
+  completeQuests,
+  hasCoinKey,
+  setBestStars,
+} from './support/admin';
 import { stage } from './support/content';
 import {
-  advanceCelebration,
   completedNotice,
   openStageSheet,
   openTutorChat,
@@ -26,7 +31,15 @@ const lastQuest = stage1.quests[stage1.quests.length - 1];
 test.describe('퀘스트 전체 플로우', () => {
   test('월드맵 → 퀘스트 진입 → 코드 실행 → 검증 성공 → XP 획득 → 다음 퀘스트(Worker 유지)', async ({
     page,
+    e2eUser,
   }) => {
+    // 첫 완료 코인 10 (P8-04) + 힌트 없이 ⭐3 → 별 번호마다 5 (P8-05). 리셋은 원장을 지우지 않아 같은 실행에서 이미 받은 키는 0
+    let firstCoins = (await hasCoinKey(e2eUser.id, 'quest', quest1.id))
+      ? 0
+      : 10;
+    for (const n of [1, 2, 3])
+      if (!(await hasCoinKey(e2eUser.id, 'star', `${quest1.id}:${n}`)))
+        firstCoins += 5;
     const pyodideWorkers: string[] = [];
     page.on('worker', (w) => {
       if (w.url().includes('pyodide-worker')) pyodideWorkers.push(w.url());
@@ -132,7 +145,7 @@ test.describe('퀘스트 전체 플로우', () => {
     // 통과하면 지금 점이 바로 완료로 (세션 상태)
     await expect(dots.first()).toHaveAttribute('data-state', 'done');
 
-    // 성공 장면 (P6-08): 결과 쪽지에 "통과!" 도장 + 아래 보상 띠. 별·코인은 Q52로 숨기고 XP만.
+    // 성공 장면 (P6-08): 결과 쪽지에 "통과!" 도장 + 아래 보상 띠. 별(P8-05 서버 ⭐3)·XP·코인(P8-04).
     // 장면 중에 Esc를 누르면 끝 상태(받은 XP 그대로)로 건너뛴다
     const reward = page.locator('[data-testid="quest-reward"]:visible');
     await expect(reward).toBeVisible();
@@ -142,8 +155,14 @@ test.describe('퀘스트 전체 플로우', () => {
       .poll(async () => (await sfx()).filter((id) => id === 'correct'))
       .toEqual(['correct']);
     expect(await sfx()).not.toContain('bug');
-    await expect(reward.getByTestId('reward-stars')).toHaveCount(0);
-    await expect(reward.getByTestId('reward-coins')).toHaveCount(0);
+    await expect(reward.getByTestId('reward-stars')).toHaveAccessibleName(
+      '별 3개 / 3개',
+    );
+    if (firstCoins)
+      await expect(reward.getByTestId('reward-coins')).toContainText(
+        String(firstCoins),
+      );
+    else await expect(reward.getByTestId('reward-coins')).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(reward).toHaveAttribute('data-done', 'true');
     // 이야기 쪽 파이뱀: 통과 도장 대사
@@ -155,10 +174,36 @@ test.describe('퀘스트 전체 플로우', () => {
       '통과해서 보상을 받았어요',
     );
 
-    // 축하 시퀀서: 첫 퀘스트 뱃지 카드 → CTA 로 닫힘
+    // 축하 시퀀서: 첫 퀘스트 업적 카드(첫 코드 등, P8-09) → "코인 N개 받기" → 받은 코인 → "좋아요!"로 닫힘
     await expect(page.getByTestId('celebration-overlay')).toBeVisible();
     await expect(page.getByRole('dialog')).toBeVisible();
-    await advanceCelebration(page, 'badges');
+    const badges = page.getByTestId('celebration-step-badges');
+    await expect(badges).toBeVisible();
+    const medals = badges.getByTestId('achievement-medal');
+    await expect(
+      badges.locator('[data-achievement="first_code"]'),
+    ).toBeVisible();
+    // 받을 코인 = 아직 원장에 없는 업적의 티어 코인 (같은 실행에서 이미 받은 업적은 0)
+    const TIER_COINS = { bronze: 10, silver: 30, gold: 100 } as const;
+    let claimCoins = 0;
+    for (const m of await medals.all()) {
+      const id = (await m.getAttribute('data-achievement'))!;
+      const tier = (await m
+        .locator('.cel-medal')
+        .getAttribute('data-tier')) as keyof typeof TIER_COINS;
+      if (!(await hasCoinKey(e2eUser.id, 'achievement', id)))
+        claimCoins += TIER_COINS[tier];
+    }
+    const coinsBefore = await coinBalance(e2eUser.id);
+    await badges.hover();
+    await badges.getByTestId('achievement-claim').click();
+    await expect(badges.getByRole('status')).toContainText(
+      claimCoins > 0 ? `+${claimCoins}` : '이미 받은',
+    );
+    await expect
+      .poll(() => coinBalance(e2eUser.id))
+      .toBe(coinsBefore + claimCoins);
+    await badges.getByTestId('celebration-cta').click();
     await expect(page.getByTestId('celebration-overlay')).toBeHidden();
 
     // XP 반영 (상태바: 받은 XP 만큼 오르고 +N 표시. 힌트 0회 보너스 등 계산은 단위 테스트 몫)
@@ -271,6 +316,8 @@ test.describe('퀘스트 전체 플로우', () => {
   }) => {
     await page.goto(`/quest/${stage2.quests[0].id}`);
     await expect(page).toHaveURL(/\/world$/); // 안내 값(?notice=…)은 주소에서 바로 지움
+    // 퀘스트 문서가 스트리밍 중 redirect → meta refresh로 /world 문서가 goto 밖에서 새로 열림: 그 숨은 사본이 사라질 때까지 (B62)
+    await waitStreamSettled(page);
     await expect(page.getByTestId('stage-locked-notice')).toBeVisible();
 
     // 튜터도 잠긴 퀘스트에는 답하지 않는다
@@ -318,7 +365,41 @@ test.describe('퀘스트 전체 플로우', () => {
     await expect(page.locator('span', { hasText: /^\+[1-9]\d*$/ })).toHaveCount(
       0,
     );
+    // 별 3개를 다 모은 퀘스트라 받을 것이 없어 완료 API를 부르지 않음 (P8-05)
     expect(completeCalls).toEqual([]);
+  });
+
+  test('별이 3개 미만인 퀘스트를 다음 날 다시 풀면(복습 도전) 뼈대 코드에서 시작해 새 별 +N 으로 채운다 (P8-05, Q64)', async ({
+    page,
+    e2eUser,
+  }) => {
+    await completeQuests(e2eUser.id, [quest1]);
+    // 지난날 힌트 2번으로 ⭐1 이었던 것처럼 (서버 값은 service_role 만 바꿈) → 복습 도전 (§12-Q64)
+    await setBestStars(e2eUser.id, quest1.id, 1);
+    await page.goto(`/quest/${quest1.id}`);
+    await expect(completedNotice(page)).toBeVisible();
+    // 복습 도전은 저장된 코드(정답) 대신 처음 뼈대 코드에서 시작
+    await expect(page.getByTestId('quest-dialogue')).toContainText('복습 도전');
+    await expect(page.locator('.cm-content').first()).not.toContainText(
+      quest1.solution.split('\n')[0],
+    );
+    await waitForRunner(page);
+    const completeBodies: unknown[] = [];
+    page.on('request', (req) => {
+      if (req.url().endsWith('/api/quest/complete'))
+        completeBodies.push(req.postDataJSON());
+    });
+    await runCode(page, quest1.solution);
+    const reward = page.locator('[data-testid="quest-reward"]:visible');
+    await expect(reward).toHaveAttribute('data-review', 'true');
+    await expect(reward.getByTestId('reward-new-stars')).toHaveText('새 별 +2');
+    await expect(reward.getByTestId('reward-stars')).toHaveAccessibleName(
+      '별 3개 / 3개',
+    );
+    await expect(reward.getByTestId('reward-xp')).toHaveCount(0);
+    expect(completeBodies).toHaveLength(1);
+    expect(completeBodies[0]).toMatchObject({ retry: true });
+    expect(await bestStars(e2eUser.id, quest1.id)).toBe(3);
   });
 
   for (const [label, viewport] of [

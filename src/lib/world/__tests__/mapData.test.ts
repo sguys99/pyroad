@@ -72,6 +72,7 @@ function raw(over: Partial<WorldMapRaw> = {}): WorldMapRaw {
       id: ME,
       total_xp: 120,
       current_level: 2,
+      coins: 30,
       user_public_profiles: { public_name: '파이', avatar_skin: null },
     },
     apiKeys: { enabled: true, keys: {} },
@@ -130,6 +131,27 @@ describe('toWorldMapData (P5-13)', () => {
     ).toBeNull();
   });
 
+  it('연 보물상자 (P8-06): 내 원장 chest 행의 stage_id 만 chestOpened', () => {
+    const data = toWorldMapData(
+      ME,
+      raw({
+        chests: [
+          { user_id: ME, ref: 's1' },
+          { user_id: OTHER, ref: 's2' },
+        ],
+      }),
+      WORLDS,
+    );
+    expect(
+      data.progress.worlds
+        .flatMap((w) => w.stages)
+        .map((s) => [s.id, s.chestOpened]),
+    ).toEqual([
+      ['s1', true],
+      ['s2', false],
+    ]);
+  });
+
   it('오늘의 퀴즈 (P7-10): 열린 스테이지 퀴즈를 고르고, 오늘 내 시도로만 끝난 문제를 센다', () => {
     const base = raw();
     const plain = stage('s1', 1, ['q1', 'q2']);
@@ -173,6 +195,45 @@ describe('toWorldMapData (P5-13)', () => {
     expect(toWorldMapData(ME, base, WORLDS, '2026-11-10').daily.picks).toEqual(
       [],
     );
+  });
+
+  it('오늘 저장한 오늘의 퀴즈 목록(P8-07 §12-Q61)이 있으면 그 문제로 고정, 없으면 지금 계산', () => {
+    const base = raw();
+    const plain = stage('s1', 1, ['q1', 'q2']);
+    const s1 = {
+      ...plain,
+      quests: plain.quests.map((q) => ({
+        ...q,
+        quest_type: 'quiz',
+        quiz_kind: 'multiple_choice' as string | null,
+      })),
+    };
+    const at = (dailyQuizIds: string[] | null) =>
+      toWorldMapData(
+        ME,
+        { ...base, stages: [s1, base.stages[1]], dailyQuizIds },
+        WORLDS,
+        '2026-11-10',
+      ).daily.picks.map((p) => p.questId);
+    expect(at(['q2'])).toEqual(['q2']);
+    expect(at(null)).toHaveLength(2);
+  });
+
+  it('소급 보상 (P8-11): 닫지 않은 내 행만 합치고, 없으면 카드 없음', () => {
+    expect(toWorldMapData(ME, raw(), WORLDS).retroWelcome).toBeNull();
+    expect(
+      toWorldMapData(
+        ME,
+        raw({
+          retro: [
+            { user_id: ME, stars: 6, coins: 90 },
+            { user_id: ME, stars: 0, coins: 20 },
+            { user_id: OTHER, stars: 9, coins: 999 },
+          ],
+        }),
+        WORLDS,
+      ).retroWelcome,
+    ).toEqual({ stars: 6, coins: 110 });
   });
 
   it('황금키로 완료한 시각은 스트릭에서 뺀다', () => {

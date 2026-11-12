@@ -7,7 +7,9 @@ import { CelebrationCta, CountUp, Kicker, delayStyle } from './parts';
 interface ChestCardProps {
   stageTitle: string;
   goal: number;
-  contents: { coins: number; goldenKeys: number };
+  contents: { coins: number; goldenKeys: number; shields?: number };
+  /** 부제 (출석 7일째 상자 P8-08). 없으면 스테이지 별 목표 */
+  note?: string;
   budget: MotionBudget;
   settled: boolean;
   onNext: () => void;
@@ -17,13 +19,14 @@ interface ChestCardProps {
 const REVEAL_MS = 1100;
 
 /**
- * 스테이지 보물상자 (Phase 8 §3 F11, `SHOW_CHEST`로 숨김 — 지금은 카탈로그에서만). 뚜껑이 두 번 들썩 → 열림 →
+ * 스테이지 보물상자 (P8-06 §3 F11, 스테이지 시트 "열기" → 월드맵 위 오버레이). 출석 7일째 상자(P8-08)도 이 카드(부제 note·방패). 뚜껑이 두 번 들썩 → 열림 →
  * 안에 든 것(코인·황금키)이 차례로 톡. 내용 공개형(§2: 확률형 뽑기 없음)이라 받은 것을 글자로 그대로 보여 준다
  */
 export function ChestCard({
   stageTitle,
   goal,
   contents,
+  note,
   budget,
   settled,
   onNext,
@@ -50,7 +53,7 @@ export function ChestCard({
           보물상자가 열렸어요!
         </h2>
         <p className="cel-sub">
-          {stageTitle}에서 별 {goal}개를 모았어요
+          {note ?? `${stageTitle}에서 별 ${goal}개를 모았어요`}
         </p>
       </div>
 
@@ -73,6 +76,13 @@ export function ChestCard({
             <RewardIcon kind="key" size={30} />
             <b>+{contents.goldenKeys}</b>
             황금키
+          </li>
+        )}
+        {!!contents.shields && (
+          <li className="cel-gain cel-pop" style={delayStyle(REVEAL_MS + 180)}>
+            <RewardIcon kind="shield" size={30} />
+            <b>+{contents.shields}</b>
+            스트릭 방패
           </li>
         )}
       </ul>

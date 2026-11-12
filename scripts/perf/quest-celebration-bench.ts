@@ -20,6 +20,7 @@ import { chromium, type CDPSession, type Page } from '@playwright/test';
 import { createServerClient } from '@supabase/ssr';
 
 import { median, pct } from './worldMapBudget';
+import { LEVEL_THRESHOLDS } from '../../src/lib/quest/xp';
 
 export const CELEBRATION_BUDGET = { rafP95Ms: 50, longTaskSumMs: 500 };
 
@@ -128,10 +129,11 @@ async function main() {
       })
       .eq('id', uid);
     await completeQuests(uid, s1.quests.slice(0, -1));
-    // 레벨 3 문턱(300XP) 바로 아래: 정답 한 번에 레벨 업까지 (P0-13 "celeb" 사용자처럼 축하가 두 장 이상)
+    // 레벨 3 문턱 바로 아래: 정답 한 번에 레벨 업까지 (P0-13 "celeb" 사용자처럼 축하가 두 장 이상).
+    // current_level 은 DB 트리거가 total_xp 에서 맞춤 (00028, B20)
     await admin
       .from('users')
-      .update({ total_xp: 299, current_level: 2 })
+      .update({ total_xp: LEVEL_THRESHOLDS[2] - 1 })
       .eq('id', uid);
     const jar = new Map<string, string>();
     const sb = createServerClient(stack.url, stack.anonKey, {

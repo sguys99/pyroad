@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
+import { useRestHold } from '@/lib/rest/restHold';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { createCelebrationStore } from '@/lib/celebration/celebrationStore';
 import { kstToday } from '@/lib/time/kst';
@@ -14,7 +15,11 @@ import type {
   QuizAnswerResult,
   QuizAnswerValue,
 } from './quizAnswer';
-import { buildCelebrationEvents } from './celebrationEvents';
+import {
+  achievementEvents,
+  buildCelebrationEvents,
+  type CelebrationEvent,
+} from './celebrationEvents';
 import { recordQuizAnswer, useQuizCombo } from './quizCombo';
 import {
   ANSWER_CONFETTI,
@@ -29,7 +34,7 @@ import {
  *   - 오답(1·2번째): 고른 답을 misses 에 쌓고 retry 로 다시 (보기는 서버가 새로 섞은 next_quiz 로 바꿈)
  *   - 정답 / 3번째 오답(revealed: 정답 공개 + ⭐1): 회차 끝. retry 는 같은 날 연습(practice, 별·XP 없음)
  * 별 판정이 나면(stars > 0) XP·레벨을 반영하고, 레벨 업은 코드 퀘스트와 같은 축하 시퀀서(celebrationStore)로.
- * 퀴즈는 보너스라 스테이지 클리어·뱃지가 없음(00026, §12-Q60). 정답 효과음은 통과 도장(PassStamp)이 콤보 피치로, 오답은 여기서 작게 'wrong'.
+ * 퀴즈는 보너스라 스테이지 클리어가 없음(업적은 있음, P8-09)(00026, §12-Q60). 정답 효과음은 통과 도장(PassStamp)이 콤보 피치로, 오답은 여기서 작게 'wrong'.
  * 연속 정답 콤보(P7-09)는 저장하지 않는 탭 메모리 스토어(quizCombo.ts)
  */
 
@@ -112,6 +117,8 @@ export function useQuizSession({
   // 연속 클릭 막기 (ref 는 렌더 전, state 는 버튼 표시)
   const submittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 휴식 알림(P8-12)은 채점이 끝날 때까지 미룬다
+  useRestHold(isSubmitting);
 
   // 화면을 떠나면 예약한 축하를 취소하고 늦게 온 응답은 버림 (useQuestSession 과 같음)
   const aliveRef = useRef(true);
@@ -130,6 +137,17 @@ export function useQuizSession({
   const result = graded?.result ?? null;
   const status = quizStatus(result);
 
+  const pushLater = useCallback(
+    (events: CelebrationEvent[]) => {
+      const t = setTimeout(() => {
+        timersRef.current.delete(t);
+        celebrationStore.push(events);
+      }, CELEBRATION_DELAY_MS.quiz);
+      timersRef.current.add(t);
+    },
+    [celebrationStore],
+  );
+
   const apply = useCallback(
     (r: QuizAnswerResponse, submitted: QuizAnswerValue) => {
       setGraded({ result: r, submitted });
@@ -141,8 +159,13 @@ export function useQuizSession({
         play('wrong', { gain: WRONG_GAIN });
         if (!r.revealed) setMisses((m) => [...m, submitted]);
       }
-      if (r.stars <= 0) return;
-      // 별 판정: XP·레벨 반영, 레벨 업 축하 (스테이지 클리어·뱃지는 퀴즈에 없음)
+      // 연습 정답·다시 맞히기도 업적이 될 수 있어 별 판정과 따로 (P8-09)
+      const won = achievementEvents(r.new_achievements);
+      if (r.stars <= 0) {
+        if (won.length > 0) pushLater(won);
+        return;
+      }
+      // 별 판정: XP·레벨 반영, 레벨 업·업적 축하 (스테이지 클리어는 퀴즈에 없음)
       setBestStars(r.best_stars);
       setEarnedXP(r.xp_awarded);
       setUserXP(r.total_xp);
@@ -154,26 +177,28 @@ export function useQuizSession({
           total_xp: r.total_xp,
           level_before: r.level_before,
           level_after: r.level_after,
-          new_badges: [],
+          new_achievements: r.new_achievements,
           stage_cleared: null,
           next_quest_id: null,
           golden_keys: 0,
           hints_used: 0,
           used_golden_key: false,
+          coins_earned: r.coins_earned,
+          coins_balance: r.coins_balance,
+          level_ups: r.level_ups,
+          stars: r.stars,
+          best_stars: r.best_stars,
+          new_stars: 0,
+          solved_directly: false,
+          solution_copy: false,
         },
         { kind: 'quiz', questTitle: quest.title },
       );
-      if (events.length > 0) {
-        const t = setTimeout(() => {
-          timersRef.current.delete(t);
-          celebrationStore.push(events);
-        }, CELEBRATION_DELAY_MS.quiz);
-        timersRef.current.add(t);
-      }
+      if (events.length > 0) pushLater(events);
       // 월드맵·프로필의 별·XP (Router Cache, B22)
       router.refresh();
     },
-    [play, quest.title, celebrationStore, router],
+    [play, quest.title, pushLater, router],
   );
 
   const submit = useCallback(async () => {

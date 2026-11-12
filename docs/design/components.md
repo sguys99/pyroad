@@ -226,11 +226,11 @@ props: `items`(`{ value, label, icon?, panelId? }[]`) · `value` · `onValueChan
 
 ## 10. 보상 아이콘 `RewardIcon` · `Stars`
 
-시안 `reward.tsx`를 옮김: 금색 하나(`accent`) + 그 진한 톤 1px 안팎(`accentLip`) + 밝은 쪽(`accentLight`), 빈 별은 `line` + 옅은 `lineStrong`. 색은 Tailwind 토큰 클래스(`fill-accent` …)라 이모지·하드코딩 색이 없다. `kind` `coin`·`star`·`starEmpty`·`key`, `size`(px, 보기 상자 32), `label`이 있으면 `role="img"`, 없으면 장식.
+시안 `reward.tsx`를 옮김: 금색 하나(`accent`) + 그 진한 톤 1px 안팎(`accentLip`) + 밝은 쪽(`accentLight`), 빈 별은 `line` + 옅은 `lineStrong`. 색은 Tailwind 토큰 클래스(`fill-accent` …)라 이모지·하드코딩 색이 없다. `kind` `coin`·`star`·`starEmpty`·`key`·`chest`·`chestOpen`(P8-06 보물상자, 몸통 `accent-text`·띠 `accent`·안쪽 `accent-light` — 축하 `ChestCard`와 같은 칠), `size`(px, 보기 상자 32), `label`이 있으면 `role="img"`, 없으면 장식.
 
 `Stars n max size label`: 화면 낭독기에 "별 2개 / 3개" 한 번.
 
-**대표 상태**: 4종 × 20·26·34px, Stars 0~3, 비활성 버튼 안(55%).
+**대표 상태**: 6종 × 20·26·34px, Stars 0~3, 비활성 버튼 안(55%).
 
 ## 11. 툴팁 `Tooltip*`
 
@@ -378,6 +378,7 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 - **넓은 화면은 책 한 쪽**: 종이 결(`paper-fiber`) + 왼쪽 묶음 쪽 그늘. 머리는 랜드마크 그림(지도와 같은 `Landmark`, 재질은 `.wm`·`.wm-art` 규칙) 왼쪽 + "N단계 · 지금 모험 중/통과한 곳" + 제목(대화 상자 이름) + 설명
 - **진행 요약**: "퀘스트 2/7 완료" + `ProgressBar sm`. `SHOW_STARS`(Q51)면 별 합계도
 - **차례**: 퀘스트마다 줄 전체가 `<Link>`(56px 이상). 번호 원(완료면 체크) · 제목 · 배울 개념 한 줄(`quests.concept` 공개 열, `--text-caption` 옅은 글자, 길면 줄임표라 줄 높이가 늘지 않음, 줄 이름에 ", 배울 개념 …"으로 들어가 스크린리더도 같은 단서로 복습할 퀘스트를 고름 — 정답·힌트는 쓰지 않음) · 유형 태그(코드 `Code2` · 퀴즈 `MessageCircleQuestion` · 보스 `Crown` — 보스는 `quest_type: boss` 또는 마지막 스테이지의 마지막 퀘스트) · 상태 태그(완료 · 지금 차례 · 하는 중 · 아직) · `is_mobile_friendly`면 "휴대폰 추천"(768 미만에서 진한 칩, 이상은 옅게). 끝: 완료 = "다시 하기"(SHOW_STARS면 별 0~3도), 첫 미완료 = 줄만 강조(초록 면 + 왼쪽 띠 + "지금 차례" 태그, `aria-current="step"`)하고 끝은 화살표 — 시작·이어하기 버튼은 시트 아래 주 버튼 하나뿐(P5-14: 줄 안 "이어하기"와 중복 제거), 나머지 = 화살표. 열린 스테이지 안 퀘스트는 서버 가드(B38, 스테이지 단위)상 모두 열리므로 건너뛰어 열 수 있다
+- **보물상자**(P8-06, `SHOW_CHEST`, `StageChest.tsx`·`stageChest.css` `.sc*`): 진행 요약 아래 한 줄. 상자 그림(`RewardIcon chest/chestOpen` 48) · "보물상자" + 별 합계(퀴즈 별 포함)/목표(`chestGoal` = 코드 퀘스트 × 3의 70% 올림) · 한 줄 안내 · 모으는 중엔 `ProgressBar sm` · **안에 든 것**(코인 30, 마지막 스테이지 50 — 내용 공개형 §2.6). 목표를 채우면 금색 테두리·옅은 금색 면 + 금색 `Button reward sm` "열기"(`stage-chest-open`, 24rem 미만은 아래 줄 전체). 열면 `/api/world/chest` → 시트를 닫고 지도 위에 축하 `ChestCard`(시퀀서, 효과음 `chest`), 카드를 닫으면 `router.refresh()`로 HUD 코인·상자 상태. 실패는 안내 한 줄(`role=alert`). 상자 들썩 `sc-wiggle`·반짝 `sc-glint`(full·lite, minimal·동작 줄이기는 멈춘 반짝 점). 지도 노드는 별 합계 옆 작은 상자(`.wn-chest`, 가끔 들썩)와 이름에 ", 보물상자를 열 수 있어요"만
 - **주 버튼**: 첫 미완료 퀘스트 "N번 퀘스트 시작하기/이어하기"(`stage-sheet-start`), 시트 아래에 붙어(sticky) 차례가 길어도 보인다. 다 끝낸 스테이지는 없음
 - **열기·닫기**(`WorldMap` `useOpenStage`): 열면 `?stage=<id>`를 `history.pushState`로 남긴다(서버 렌더 없음). 기기 뒤로 가기 = 닫기, 시트에서 퀘스트로 갔다 뒤로 오면 시트가 다시 열려 있음. 닫기 버튼·Esc·덮개로 닫으면 이 화면이 쌓은 항목은 `history.back()`, 주소로 열린 경우는 `replaceState`로 지움. 닫으면 그 노드로 포커스(`finalFocus`). 잠긴 노드는 시트 대신 안내 쪽지. `questsByStage`를 안 주면(카탈로그 틴트 견본) 열지 않음
 - 효과음 없음(탭 소리는 P5-11)
@@ -407,15 +408,17 @@ shadcn(Base UI) 툴팁을 토큰으로: 짙은 면 `secondary` + 흰 글자 14px
 
 월드맵(`/world`·`/world/[slug]`)과 책장(`/worlds`) 위에 붙어 따라오는(sticky) 얇은 바. 코드 `src/components/world/WorldHud.tsx`(클라이언트) + `WorldHudBar.tsx`(서버: 월드맵 데이터 → 값, 스트릭 계산), 모양 `worldHud.css`(`.wh-*`). 시안 `Hud`(ui.tsx)에서 로고 대신 내 아바타·닉네임.
 
-- **순서**: 아바타(현재 스킨, 32) + 닉네임(→ `/profile`, 이름 "닉네임, 내 프로필") · `LevelSeal` + XP 바("다음 레벨까지 경험치", 최고 레벨은 "최고 레벨") · 스트릭 불꽃 · 곧 열려요(코인·오늘의 미션·상점) · 소리 토글 · 메뉴
-- **실제 값**: 닉네임·스킨·레벨·XP·스트릭. **곧 열려요**(Q47): 점선 알약 안에 흐린 아이콘 버튼 셋(1024px부터 "곧 열려요" 금색 글자, 랜딩 soon 배지 톤). 누르면 쪽지 "상점은 곧 열려요! 조금만 기다려 줘." Phase 8~9에서 칩을 `HudCounter`로 바꿔 값만 연결
+- **순서**: 아바타(현재 스킨, 32) + 닉네임(→ `/profile`, 이름 "닉네임, 내 프로필") · `LevelSeal` + XP 바("다음 레벨까지 경험치", 최고 레벨은 "최고 레벨") · 스트릭 불꽃 · 코인(`HudCounter`, P8-04) · 오늘의 미션 칸(P8-07) · 곧 열려요(상점) · 소리 토글 · 메뉴
+- **실제 값**: 닉네임·스킨·레벨·XP·스트릭·코인 잔액(`users.coins`, P8-04: 이 탭에서 마지막으로 본 값을 sessionStorage `pyroad:hud-coins`에 두고, 퀘스트에서 받고 돌아오면 그 값부터 `HudCounter` `from`으로 카운트업 + 칩 팝 — minimal·동작 줄이기는 바로 바꾸고 금색 틴트, 서버 HTML은 잔액 그대로). **곧 열려요**(Q47): 1024px부터 점선 알약 안에 흐린 아이콘 버튼 둘("곧 열려요" 금색 글자, 랜딩 soon 배지 톤), 그 아래는 점선 버튼 하나("오늘의 미션·상점, 곧 열려요"). 누르면 쪽지 "상점은 곧 열려요! 조금만 기다려 줘." Phase 8~9에서 칩을 `HudCounter`로 바꿔 값만 연결
 - **스트릭**(`src/lib/time/streak.ts` `currentStreak`): 직접 푼(황금키 아님) 완료 시각의 KST 날짜로 오늘부터 거꾸로 센다. 오늘 아직 안 풀었으면 어제까지 이어진 일수를 유지(`today: false`). 3일 뱃지(`has_three_day_streak`)와 같은 정의 — 단위 테스트가 `reward-rules.json` 표로 대조. 0일은 꺼진 회색 불꽃("불꽃이 꺼져 있어요"), 1일 이상은 금색 불꽃 + 노란 틴트("3일 연속 모험 중"). 누르면 쪽지(0일: "오늘 퀘스트를 하나 풀면 불꽃이 켜져요!", 오늘 아직: "오늘도 풀면 4일이 돼요.")
-- **메뉴**: `IconButton` "메뉴" → `Sheet` "메뉴"(공지사항·게시판 링크 버튼, 로그아웃 `LogoutButton variant="menu"`). 포커스 가두기·Esc·연 버튼으로 복귀는 공통 시트
-- **반응형**: 640px 미만은 한 줄 약 59px — 칸 사이 4px, 도장 40, XP 바는 바 아래 4px 띠(글자 "경험치"는 숨김), 곧 열려요 셋은 버튼 하나("코인·오늘의 미션·상점, 곧 열려요"), 불꽃은 숫자만, 닉네임 줄임표. 640px 이상 65px. 숫자는 고정 폭(`tabular-nums`)
+- **오늘의 미션 칸**(P8-07, `DailyMissions.tsx` `MissionHudButton`·`MissionList`, 모양 `dailyMissions.css` `.wh-mission`·`.dm-*`): 칩 모양(`.wh-chip`) 아이콘 + 달성 수 "n/3", 받을 보상이 있으면 금색 테두리·옅은 금색 면 + 금색 점(`data-ready`), 이름 "오늘의 미션 n/3 달성, 받을 보상 k개". 누르면 `Sheet` "오늘의 미션": 요약(달성 수 알약 + 한 줄) → 미션 카드(종류 아이콘 원 · 이름 · 난이도 점 3개 · 진행 중이면 `ProgressBar sm` · 보상 알약 코인/XP) — 진행 중 / 달성(금색 면·테두리 + `Button reward sm` "받기") / 받음(회색 면·초록 체크 "받았어요") → "지난 보상"(지난 6일 달성·안 받은 것, "어제"·"11월 9일" 꼬리표, 7일 보관) → "새 미션까지 3시간 12분"(30초마다, 자정이 지나면 새로 고침). 받으면 `/api/missions/claim` → 효과음 `coin` + 코인(full 3개·lite 1개)·XP 알약이 버튼에서 HUD 코인 칩·레벨 도장으로 날아감(한 번, transform·opacity, minimal·동작 줄이기는 없음 — HUD 칩 색 반짝임) + `router.refresh()`로 HUD 카운트업, 낭독 "코인 15개와 15 XP를 받았어요!"(레벨 업이면 "레벨 업! Lv n, 코인 m개 더!"). 서버(`WorldHudBar`)는 이 칸을 `Suspense` 슬롯으로 넘겨(읽는 동안 같은 자리 흐린 `MissionHudPlaceholder`) 지도 렌더를 기다리게 하지 않음. 미션을 못 읽으면(00034 전 DB) 칸이 빠짐
+- **스트릭·방패·출석**(P8-08): 불꽃 값은 서버 `world_daily_status`(학습일 = 퀘스트·퀴즈를 푼 KST 날짜 + 방패로 메운 날, 방패 정산 뒤). 방패가 있으면 불꽃 칩 오른쪽 위에 작은 방패 1~2개(`.wh-shields`, 칩 폭 그대로·글자 없음), 이름 "…, 방패 n개", 쪽지에 개수와 어제를 지켰으면 "어제는 방패가 불꽃을 지켜 줬어요". 불꽃 반짝임(`data-spark`): 오늘 풀어 1일(처음 켜짐)·3일이 됐고 이 기기에서 그 값을 못 봤으면 한 번(localStorage `pyroad:hud-streak`) — full 불꽃 톡 + 금색 둘레 2번 · lite 둘레 1번 · minimal·동작 줄이기 없음. 출석 진입점은 바에 더하지 않음: 월드맵 맨 위 **출석 카드** `AttendanceCard`(`AttendanceCard.tsx`·`attendance.css` `.at-*`, 오늘 출석 전일 때만 · 흰 쪽지 + 위 금색 띠 · 7칸 달력 `AttendanceCalendar`(찍은 칸 금색 "출석" 도장 −8°, 오늘 칸 금색 점선, 7일째 상자, 칸 아래 코인) · 7일째 상자에 든 것 한 줄 · `Button reward sm` "출석 도장 꾹!" → 도장 `stampSlam` + `coin` + 코인 날아감 → 7일째면 `ChestCard`(방패 줄) · 찍은 뒤 닫기) + 메뉴 시트 맨 위 `AttendanceMenuSection`(보기만, 방패 n/2). 320px에서 7칸 한 줄
+- **메뉴**: `IconButton` "메뉴" → `Sheet` "메뉴"(업적 도감 — 받을 코인이 있으면 금색 점·알약, §13-9 · 공지사항·게시판 링크 버튼, 로그아웃 `LogoutButton variant="menu"`). 포커스 가두기·Esc·연 버튼으로 복귀는 공통 시트
+- **반응형**: 640px 미만은 한 줄 약 59px — 칸 사이 4px, 도장 40, XP 바는 바 아래 4px 띠(글자 "경험치"는 숨김), 곧 열려요(상점)는 빠짐(코인·미션 칸 자리), 미션 칸은 아이콘 + 점만, 불꽃은 숫자만, 코인 1만 이상은 "1.2만", 닉네임 줄임표 · 400px 미만은 닉네임 글자도 빠지고 아바타만(링크 이름은 그대로), 바의 소리 토글은 메뉴 시트 "소리" 줄로·칸 사이 2px(P8-07, 320px에 코인 4자리까지). 640px 이상 65px. 숫자는 고정 폭(`tabular-nums`)
 - **겹침**: HUD z 40 < 시트·모달 덮개 50 < 토스트 70. HUD 쪽지는 바 바로 아래 가운데(아래 가운데 InstallHint·잠긴 스테이지 쪽지와 안 겹침). ConsentBanner는 HUD 위 흐름에 있고, 스크롤하면 HUD만 붙음
 - **연출**: 등장 한 번(full = 0.5rem 내려오며 `--dur-base`, lite = 페이드 `--dur-fast`, minimal·동작 줄이기 = 없음). 레벨이 오르면 `LevelSeal` 팝, XP 바는 빛 띠(공통 컴포넌트 그대로). 반복 없음
 - 옛 `ProfileSummary` 카드(아바타·Lv·XP·뱃지 5개)는 HUD와 겹쳐 지웠다. 뱃지는 프로필 화면에 있음
-- **카탈로그**: "월드 지도" 절의 "월드맵 HUD (P5-07)" — 스트릭 0·1·7일, 긴 닉네임, 최고 레벨
+- **카탈로그**: "월드 지도" 절의 "월드맵 HUD (P5-07)" — 스트릭 0·1·7일, 긴 닉네임, 최고 레벨, 미션 1/3·받을 보상 있음(P8-07) + "데일리 미션 (P8-07)" — 진행·달성·받음·지난 보상, 다 받음, 미션 없는 날(받기는 가짜 요청으로 날아가기까지) + HUD 견본 "스트릭 방패 2개 · 어제를 방패가 지킴"(P8-08) + "출석 도장 (P8-08)" — 3일째·7일째 상자·방패가 지킴·메뉴 달력(도장은 가짜 요청으로 쾅·상자 카드까지). 축하 절에 "출석 7일째 상자"·"미션 받기로 레벨 업" 묶음
 
 ## 13-6. 이어하기 CTA `ContinueButton` · `ContinueFloat` (P5-10)
 
@@ -467,19 +470,59 @@ Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재
 
 **대표 상태**: 카탈로그 "월드 지도" 절 `world-pet-demo`(견본 알 + "해제 보기"). e2e `design-catalog.spec.ts` "동행 펫 슬롯".
 
+## 13-9. 업적 도감 `AchievementBook` (P8-10)
+
+`/profile/achievements`(로그인, 동적 렌더). 코드 `src/components/achievements/AchievementBook.tsx`(클라이언트)·`achievementBook.css`(`.ab-*`), 화면 값은 순수 함수 `src/lib/quest/achievementBook.ts`(`buildAchievementBook`·`summarizeBook`·`markClaimed`·`METRIC_HINT`, 단위 테스트), 서버 `src/app/(protected)/profile/achievements/page.tsx`. 메달은 `AchievementMedal`(티어 색 `achievementMedal.css`).
+
+- **들어오는 곳**: 프로필 업적 카드(`CardButton`, "도감 보기", 받을 코인이 있으면 금색 알약 `.ach-ready` "받을 코인") · 월드맵 메뉴 시트 "업적 도감" 줄(받을 수가 있으면 금색 숫자 알약, 메뉴 버튼 오른쪽 위 금색 점 `.ach-dot`, 이름 "메뉴, 받을 업적 보상 n개" — 미션 칸 P8-07과 같은 금색). 월드맵 로더가 코인 안 받은 본인 업적 수를 같은 병렬 묶음에서 읽음(`achievementsReady`)
+- **서버**: 먼저 `evaluate_achievements`(멱등, 목표에 닿았는데 기록 안 된 업적을 여기서도 잡음) → 정의(본인 권한) · 내 업적 · `achievement_progress`(service_role, 확인한 id) · 잔액. 숨김 업적은 얻기 전에 이름·아이콘·조건·진행을 내려보내지 않음
+- **위**: "← 프로필" · 지갑 `HudCounter coin`(받으면 응답 `coins_balance`로 카운트업). 요약 카드: "업적 도감" + 얻은 수/전체(41, 숨김 포함 — "???" 칸도 보이므로 프로필 카드도 같은 셈) · `ProgressBar` · 티어 알약 3개(브론즈·실버·골드 수) · 받을 코인 띠(금색 면 + 합 + 업적 수 + `Button reward sm` "모두 받기") 또는 안내 한 줄
+- **거르기**: `SegmentedTabs` 모두 · 얻었어요 · 도전 중 (카테고리 6개는 320px에서 같은 폭 탭에 안 들어가 절로)
+- **절**: 학습 · 별 · 퀴즈 · 꾸준함 · 성장 · 실패 칭찬, 제목 + 얻은 수/전체 + 한 줄 소개. **실패 칭찬**은 옅은 초록 면 + 새싹 + "실수도 실력이 돼요! 틀리고 다시 해 본 용기에 주는 업적이에요"
+- **칸**(2열 · 480px 3열 · 768px 4열): 얻음 = 티어 색 메달 + 티어 둘레 + 날짜 · 받을 수 있음 = 금색 면·테두리 + 메달 옆 반짝 별 둘 + `Button reward sm` "받기 10" · 아직 = 실루엣(흐린 면 + 점선 둘레) + 진행 막대 n/목표 · 비밀 = "?" 메달 + "???" + "비밀". 칸 위쪽(메달·이름·상태)은 한 버튼, 이름 "첫 코드, 브론즈, 얻었어요 2026. 11. 10." / "코드 탐험가, 실버, 아직, 4/10" / "비밀 업적, 골드, 아직 비밀이에요"
+- **상세 시트**(`Sheet`, 가운데 정렬): 큰 메달 · 티어 알약 · 카테고리·코인 · 얻었으면 설명, 아직이면 얻는 법 한 줄(`METRIC_HINT`, 지표마다 "퀘스트 10개를 혼자 풀어요") + 진행 막대 · 얻은 날 · "코인 N개 받기" 또는 "코인을 받았어요"
+- **받기**: `/api/achievements/claim`(멱등, 원장 achievement/<id>) → 효과음 `coin`(버튼 기본 `tap`은 끔) + 코인이 버튼에서 위 지갑으로 날아감(`useRewardFlights(coinTarget)`, full 3개·lite 1개, minimal·동작 줄이기 없음) + 응답 잔액 + 낭독 "코인 N개를 받았어요!". `router.refresh()`는 부르지 않음(B56 — 화면 값은 응답으로). 실패면 `role=alert` 안내, 칸 그대로
+- **연출**: 반짝 별 `ab-glint`(대기 루프, full·lite 1.8초, transform·opacity) · minimal·동작 줄이기는 멈춘 채 보임. 메달 올려놓으면 face 스프링으로 살짝 뜸(minimal·동작 줄이기 없음)
+- **카탈로그**: "업적 도감" 절(`#achievements`) — 견본 13종(받음·받을 수 있음 3·진행·비밀·실패 칭찬), 가짜 받기. e2e `achievement-book.spec.ts`(360 메뉴 → 받기 → 원장·지갑, 넘침 없음 / 1280 4열), `design-catalog.spec.ts` "업적 도감 (P8-10)"
+
+## 13-10. 휴식 알림 `RestReminder` · `RestReminderDialog` (P8-12, §2.6)
+
+로그인 화면 공통 레이아웃(`(protected)/layout.tsx`)에 하나. 타이머는 순수 함수 `src/lib/rest/restTimer.ts`(가짜 시계 단위 테스트), 화면은 공통 `Modal` 위 `RestReminderDialog`(`restReminder.css`, `.rr-*`, 처음 뜰 때 `next/dynamic`으로 받음).
+
+- **연속 플레이**: 탭이 보이는 동안 15초마다 셈(한 번에 30초 넘는 틈은 세지 않음). 탭을 숨기거나 입력이 없는 채로 10분(`BREAK_MS`, 초등 쉬는 시간)이면 처음부터. 탭 세션(sessionStorage `pyroad:rest`)이라 새로 고침·페이지 이동에도 이어짐. 서버 저장 없음
+- **때**: 40분(`REST_AFTER_MS`). 퀘스트 실행·채점 중(`useRestHold`, `useQuestSession`·`useQuizSession`)이나 다른 대화 상자(축하·시트)가 떠 있으면 닫힐 때까지 미룸
+- **단계**: 권유(파이뱀 `proud`, 눈·기지개·물 제안 3개, "5분 쉬기" 첫 초점) → 쉬는 중(파이뱀 `sleep`, 남은 시간 `role=timer` + 진행바, 끝 시각 기준이라 탭을 숨겨도 맞음) → 다 쉬었어요(`cheer`, "다시 모험하기"). "조금만 더 할래요"·Esc·덮개 = 20분 뒤 다시, 쉬다가 "그만 쉬고 돌아가기"도 20분 뒤. 막지 않음
+- **연출·소리**: 공통 모달 연출(full 떠오름 · lite · minimal 페이드 · 동작 줄이기 즉시), 받침 색 전환은 동작 줄이기면 없음. `blip` × 0.5(뜰 때·다 쉬었을 때)
+- **분석**: `rest_reminder_shown`(`snoozed`) · `rest_reminder_choice`(`rest`·`more`·`done`·`stop`)
+- **e2e 빨리 감기**: 테스트 페이지가 켜진 서버(`isTestPagesEnabled`)에서만 sessionStorage `pyroad:rest:speed` 배속을 읽음 → `e2e/rest-reminder.spec.ts`. 카탈로그 "휴식 알림" 절(`#rest`)은 단계별로 당겨 띄움(쉬기 10초)
+
+## 13-11. 프로필 `ProfileHero` · `LearningCalendar` · `ProfileStatsCard` · `AchievementsCard` · `TreasureCard` (P8-13)
+
+`/profile`(로그인, 본인 전용 — 공개 정보 범위 §2.6은 그대로). 코드 `src/components/profile/ProfileSections.tsx`(훅 없음, 서버·카탈로그 공용)·`LearningCalendar.tsx`(클라이언트)·`profile.css`(`.pf-*`), 화면 값은 순수 함수 `src/lib/profile/profileStats.ts`(`buildCalendarMonth`·`calendarMonths`·`learnLevel`·`quizAccuracy`·`recentAchievements`, 단위 테스트). 서버는 본인 권한(사용자·진행·상자 원장·업적)과 service_role `profile_stats`(00038, 확인한 id)를 한 번에 병렬로.
+
+- **틀**: 360 한 열 → 768부터 두 열(머리·아래 줄은 두 칸, 그 밑은 열 단위 쌓기 `.pf-col` — 왼쪽 달력·모험 기록, 오른쪽 업적·별과 보물, 빈 곳을 줄임). 위 "← 월드맵" + 지갑 `HudCounter coin`
+- **계정 관리**(`AccountManagementSection`): 설정·로그아웃 줄 아래 기본 접힌 `<details>` "계정 관리 ›"(작은 본문 글꼴, 흐린 글자). 펼치면 "진행 기록 지우기" 범위 고르기(`select` 전체/스테이지) + `Button secondary sm` "리셋" 하나, "받은 업적과 코인은 그대로 남아요", 위험 톤 글자 버튼 "탈퇴하기". 확인 모달 2단계·네이버 연결 끊기 흐름은 그대로
+- **머리**: 아바타(옅은 초록 테) 오른쪽 아래 초록 레벨 도장(레벨업 카드 `.cel-seal` 톤, 5레벨마다 금색 메달) · 이름 · 칭호 도장(`.cel-titlecard` 톤 — 금색 글씨 테두리, -2° 기울임, 큰 칭호는 금색 면) · "다음 칭호 ○○" + 레벨 안 XP `ProgressBar lg`(Lv 50은 "최고 레벨에 닿았어요!")
+- **학습 달력**: 한 달씩, 이전·다음(`IconButton sm`, 첫 기록 달 ~ 이번 달, 최대 12개월, 끝이면 꺼짐). 일요일 시작 표(`<table>`, 요일 머리). 공부한 날 = 초록 원, 그날 푼 퀘스트 수만큼 진하게(1 · 2~3 · 4+, 4+는 흰 글자) · 방패로 지킨 날 = 금색 테 + 방패 아이콘 · 출석 도장 = 아래 금색 점 · 오늘 = `--ring` 테두리 · 앞날은 흐리게. 칸 낭독 "오늘, 11월 12일, 퀘스트 3개, 출석 도장". 아래 "이 달에 n일 공부하고 퀘스트 m개를 풀었어요" + 보는 법. 제목 줄 오른쪽 "지금 n일 연속". 날짜는 모두 KST(서버가 오늘을 정해 넘김)
+- **모험 기록**: 숫자 타일 8개(혼자 푼 퀘스트 · 힌트 없이 · 퀴즈 정답률(정답 시도/전체 시도, 시도 없으면 "-") · 에러를 이겨 냈어요 · 복습 도전 · 연속 학습(최고) · 방패 n/2 · 출석 도장, 퀴즈를 안 풀었으면 "아직 · 퀴즈 전이에요"). 수는 업적 지표(`achievement_stats`)와 같아 도감 진행과 어긋나지 않음
+- **업적**: `CardButton` → 도감(P8-10). 얻은 수/전체 · 금색 진행 막대 · 최근 얻은 메달 3개(이름·날짜) · 받을 코인이 있으면 `.ach-ready`
+- **별과 보물**: 코인 잔액 + "이번 주 +n"(월요일부터 번 코인) · 모은 별/최대(월드맵 `stage.stars`와 같은 합, 퀴즈 포함) · 연 보물상자 · 스테이지별 별 막대(`ProgressBar sm reward`) + 상자 아이콘(열었음·열 수 있음·모으는 중은 흐리게), 잠긴 스테이지는 흐리게
+- **연출**: 반복 없음. XP 막대만 들어올 때 채워 오름(진행바 규칙)
+- **카탈로그**: "프로필" 절(`#profile`) — 머리 3종(보통·큰 칭호·최고 레벨), 달력(잔디·방패·출석 / 빈 달), 모험 기록(퀴즈 있음·없음), 업적, 별과 보물. e2e `profile.spec.ts`(360 한 열·오늘 칸 낭독·도감 링크 / 1280 두 열, 넘침 없음)
+
 ## 14. 지금 앱에 적용한 곳 (화면 개편은 Phase 4~6)
 
 | 컴포넌트 | 사용처 |
 |---|---|
 | Button | 온보딩 단계 버튼·다른 이름 추천·튜토리얼(P3-11), 실행·멈추기·실행기 다시 불러오기·다음 퀘스트로(CodePanel·QuestWorkspace), 힌트·황금키(ConversationPanel), 축하 CTA(`celebration-cta`), 월드맵 이어하기(`ContinueButton`, P5-10), 랜딩 로그인 CTA(`LoginSheetButton`: 헤더 "로그인"·히어로 "모험 시작하기"), 인앱 브라우저 안내, 설정 저장, 계정 관리, 신고·삭제 대화 상자, 게시판·공지·댓글 등록 |
 | IconButton | HUD 소리 토글(`SoundToggle`)·메뉴(`WorldHud`), 시트·토스트 닫기 |
-| Card | 프로필 카드 4개, 계정 관리 |
+| Card | 계정 관리 (프로필은 §13-11 `.pf-card`) |
 | AlertDialog | 신고, 글·공지 삭제, 리셋·탈퇴(2단계) |
 | Modal | 인앱 브라우저 안내(포커스 가두기·Esc 생김) |
 | Sheet | 랜딩 로그인 시트(`LoginSheet`, P3-05), 월드맵 스테이지 차례 시트(`StageSheet`, P5-06), 월드맵 HUD 메뉴(P5-07) |
 | Toast | 잠긴 스테이지 안내(B38), 월드맵 잠긴 노드 누름 안내(P5-04), HUD 불꽃·곧 열려요 쪽지(P5-07), 잠금 해제 문구(P5-05) |
 | SegmentedTabs | 퀘스트 모바일 이야기/코드/결과 |
-| ProgressBar | XP 막대(`XPProgressBar`), 프로필 스테이지 진행률, 스테이지 차례 시트 진행 요약 |
+| ProgressBar | 프로필 머리 XP 막대·업적·스테이지별 별, 스테이지 차례 시트 진행 요약 |
 | LevelSeal · useCountUp | 퀘스트 상태바 |
 | SpeechBubble | 튜터 대사·스트리밍·생각 중 |
 | RewardIcon | 황금키 버튼·남은 개수, 황금키 확인 카드 |

@@ -4,7 +4,8 @@
  * 고르기: 열린 스테이지(퀴즈 보너스 규칙의 잠금 기준)의 퀴즈를 ① 복습 도전(별 3개 미만, 판정일 < 오늘 KST)
  * ② 아직 판정 안 함 ③ 나머지 순으로, 같은 칸 안은 (사용자, KST 날짜, 퀘스트) 해시 순 — 같은 날 다시 열어도 같은 문제.
  * 오늘 판정한 퀴즈는 "오늘 아침 칸"으로 되돌려 센다(처음 완료가 오늘이면 ②, 아니면 ①). 그래서 풀어도 목록이 바뀌지 않는다.
- * shortcut: 오늘 새 스테이지가 열리거나 퀘스트 화면에서 별 3개 퀴즈를 복습하면 아직 안 푼 칸이 바뀔 수 있다. 고정하려면 고른 목록을 저장(P8-07 데일리 미션 테이블)
+ * 고정(§12-Q61, P8-07): 그날 처음 고른 목록을 데일리 미션 배정(`user_daily_missions.quiz_ids`)과 함께 저장하고, 그 뒤엔 `fixed`로 받아
+ * 그 문제만 그 순서로 낸다 — 하루 중 새 스테이지가 열려도 안 바뀜. 저장한 문제가 잠기면(진행 초기화) 빠짐. 저장 목록이 비었으면(그날 아침 퀴즈 없음) 고정하지 않음
  *
  * 완료: `quiz_attempts`(본인 행 SELECT, 00012)의 오늘(KST) 시도 중 정답이거나 3번째 오답(정답 공개)이면 그 문제는 끝.
  * 데일리 미션(P8-07)이 같은 함수(`dailyQuizResults`·`isDailyQuizDone`)로 "오늘의 퀴즈 완료"를 센다.
@@ -71,13 +72,17 @@ export function pickDailyQuizzes({
   today,
   stages,
   questsByStage,
+  fixed,
 }: {
   userId: string;
   today: KstDateKey;
   stages: readonly { id: string; order: number; status: string }[];
   questsByStage: Record<string, StageQuestItem[]>;
+  /** 그날 저장한 목록 (P8-07). 있으면 이 문제만 이 순서로 */
+  fixed?: readonly string[] | null;
 }): DailyQuizPick[] {
-  return stages
+  const order = fixed?.length ? new Map(fixed.map((id, i) => [id, i])) : null;
+  const all = stages
     .filter((s) => s.status !== 'locked')
     .flatMap((s) =>
       (questsByStage[s.id] ?? []).flatMap((q) =>
@@ -97,11 +102,21 @@ export function pickDailyQuizzes({
             ]
           : [],
       ),
-    )
-    .sort(
-      (a, b) =>
-        a.b - b.b || a.h - b.h || (a.pick.questId < b.pick.questId ? -1 : 1),
-    )
+    );
+  return (
+    order
+      ? all
+          .filter((c) => order.has(c.pick.questId))
+          .sort(
+            (a, b) => order.get(a.pick.questId)! - order.get(b.pick.questId)!,
+          )
+      : all.sort(
+          (a, b) =>
+            a.b - b.b ||
+            a.h - b.h ||
+            (a.pick.questId < b.pick.questId ? -1 : 1),
+        )
+  )
     .slice(0, DAILY_QUIZ_COUNT)
     .map(({ pick, b }) => ({ ...pick, review: b === 0 }));
 }

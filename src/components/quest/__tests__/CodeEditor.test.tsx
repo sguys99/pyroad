@@ -9,9 +9,15 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-/** CodeMirror는 마운트 뒤 동적 import로 온다 (P6-16) */
+/**
+ * CodeMirror는 마운트 뒤 동적 import로 온다 (P6-16). .cm-editor는 setLoaded 렌더보다 먼저 붙으므로
+ * 준비 신호는 data-editor-loading이 빠진 것까지 (B68)
+ */
 const editorReady = (c: HTMLElement) =>
-  waitFor(() => expect(c.querySelector('.cm-editor')).not.toBeNull());
+  waitFor(() => {
+    expect(c.querySelector('.cm-editor')).not.toBeNull();
+    expect(c.querySelector('[data-editor-loading]')).toBeNull();
+  });
 
 const editorText = (container: HTMLElement) =>
   Array.from(container.querySelectorAll('.cm-line'))

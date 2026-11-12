@@ -12,7 +12,7 @@ vi.mock('@/components/providers/soundContext', () => ({
   useSfx: () => () => {},
 }));
 
-// 스테이지 차례 시트 (P5-06): 유형·상태 판정, 다시 하기·시작 링크, 별 숨김(Q51)
+// 스테이지 차례 시트 (P5-06): 유형·상태 판정, 다시 하기·시작 링크, 별(P8-05 SHOW_STARS)·복습 도전 가능
 
 afterEach(cleanup);
 
@@ -81,7 +81,7 @@ describe('questRows', () => {
 });
 
 describe('StageSheet', () => {
-  it('제목·진행 요약, 완료 퀘스트는 다시 하기, 첫 미완료는 이어하기 주 버튼, 별은 숨김', async () => {
+  it('제목·진행 요약, 완료 퀘스트는 다시 하기, 첫 미완료는 이어하기 주 버튼, 별 합계·완료 줄 별', async () => {
     const onOpenChange = vi.fn();
     render(
       <StageSheet
@@ -130,8 +130,12 @@ describe('StageSheet', () => {
     expect(screen.getByTestId('stage-sheet-bonus')).toHaveTextContent(
       '퀴즈는 보너스예요 — 안 풀어도 다음 스테이지가 열려요',
     );
-    // SHOW_STARS = false (Q51): 별 그림 없음
-    expect(screen.queryByRole('img', { name: /별 \d개/ })).toBeNull();
+    // SHOW_STARS (P8-05): 요약에 별 합계, 완료한 코드 퀘스트 줄에 최고 별
+    expect(dialog).toHaveTextContent('3/12');
+    expect(screen.getAllByRole('img', { name: /별 \d개/ })).toHaveLength(1);
+    expect(
+      screen.getByRole('img', { name: '별 3개 / 3개' }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '차례 닫기' }));
     expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -165,7 +169,7 @@ describe('StageSheet', () => {
     );
   });
 
-  it('폰(좁은 화면·터치): 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요", 푼 퀴즈는 별(SHOW_STARS 와 상관없이)', async () => {
+  it('폰(좁은 화면·터치): 휴대폰 추천 퀘스트에 "폰에서 하기 좋아요", 소급 전 0별 완료 줄은 별을 그리지 않음', async () => {
     vi.stubGlobal('matchMedia', (query: string) => ({
       matches: true,
       media: query,
@@ -177,7 +181,7 @@ describe('StageSheet', () => {
         <StageSheet
           stage={stage}
           quests={[
-            q(1, { status: 'completed', best_stars: 3 }),
+            q(1, { status: 'completed', best_stars: 0 }),
             q(2, {
               quest_type: 'quiz',
               quiz_kind: 'bug_hunt',
@@ -192,7 +196,7 @@ describe('StageSheet', () => {
       );
       await screen.findByRole('dialog');
       expect(screen.getByText('폰에서 하기 좋아요')).toBeInTheDocument();
-      // 코드 퀘스트 별은 숨김(Q51), 퀴즈 별만
+      // 별 기록 전(P8-11 소급 전) 완료한 코드 퀘스트는 빈 별 대신 아무것도, 퀴즈 별만
       expect(screen.getAllByRole('img', { name: /별 \d개/ })).toHaveLength(1);
       expect(
         screen.getByRole('img', { name: '별 2개 / 3개' }),
@@ -200,5 +204,43 @@ describe('StageSheet', () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it('복습 도전 가능 (P8-05, §12-Q64): 별 3개 미만 퀘스트·퀴즈는 판정 다음 날(KST)부터, 오늘 판정·별 3개는 아님', async () => {
+    const quiz = (order: number, extra: Partial<StageQuestItem>) =>
+      q(order, {
+        quest_type: 'quiz',
+        quiz_kind: 'multiple_choice',
+        status: 'completed',
+        ...extra,
+      });
+    render(
+      <StageSheet
+        stage={stage}
+        today="2026-11-11"
+        quests={[
+          q(1, {
+            status: 'completed',
+            best_stars: 1,
+            stars_judged_on: '2026-11-01',
+          }),
+          quiz(2, { best_stars: 2, stars_judged_on: '2026-11-10' }),
+          quiz(3, { best_stars: 2, stars_judged_on: '2026-11-11' }),
+          quiz(4, { best_stars: 3, stars_judged_on: '2026-11-01' }),
+        ]}
+        open
+        onOpenChange={() => {}}
+      />,
+    );
+    await screen.findByRole('dialog');
+    const badges = screen.getAllByTestId('stage-sheet-review');
+    expect(badges).toHaveLength(2);
+    expect(badges[0]).toHaveTextContent('복습 도전 가능');
+    expect(
+      screen.getByRole('link', { name: /퀘스트1.*복습 도전 가능/ }),
+    ).toHaveAttribute('href', '/quest/q1');
+    expect(
+      screen.getByRole('link', { name: /퀘스트2.*복습 도전 가능/ }),
+    ).toHaveAttribute('href', '/quest/q2');
   });
 });

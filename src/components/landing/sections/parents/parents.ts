@@ -1,7 +1,7 @@
 /**
  * 랜딩 `#parents` 보호자 안내 문구 (P4-07). 보호자께 하는 말이라 존댓말, 간결하게.
  * **모든 문장은 지금 코드·문서로 확인한 사실만** 쓴다. 근거를 문장 옆 주석에 두고, 바뀌면 같이 고친다.
- * 아직 없는 기능은 `soon`(준비 중)으로만 적는다.
+ * 아직 없는 기능은 쓰지 않는다(로드맵은 `soon`=준비 중). P8-12 휴식 알림은 생겨서 "준비 중"에서 편지로 옮겼다.
  */
 
 export interface LetterColumn {
@@ -23,6 +23,8 @@ export const LETTER: readonly LetterColumn[] = [
       '만 14세 미만은 보호자 동의 전까지 학습만 할 수 있어요.',
       // P1-18 · 처리방침 9-5: 금칙어·개인정보 필터, 서로 다른 3명 신고 시 자동 숨김
       '게시판 글은 금칙어·개인정보 필터와 신고 기능으로 지켜요.',
+      // P8-12 src/lib/rest/restTimer.ts REST_AFTER_MS: 탭이 보이는 연속 40분이면 휴식 카드(막지 않는 권유, 5분 쉬기 카운트다운)
+      '40분 넘게 이어서 하면 파이뱀이 잠깐 쉬어 가자고 알려 줘요.',
     ],
   },
   {
@@ -52,9 +54,6 @@ export const LETTER: readonly LetterColumn[] = [
     ],
   },
 ];
-
-/** 아직 없는 것 (P8-12 휴식 알림). 생기면 LETTER로 옮긴다 */
-export const SOON: readonly string[] = ['40분 연속 학습 때 쉬어 가기 알림'];
 
 export interface Stop {
   world: 1 | 2 | 3;

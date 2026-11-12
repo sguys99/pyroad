@@ -104,6 +104,14 @@ export interface AnalyticsEventProps {
   daily_quiz_open: { total: number; done: number };
   /** 오늘의 퀴즈 마지막 문제를 이 화면에서 끝냄 (P7-10, 브라우저). correct: 맞힌 수, stars: 오늘 받은 별 합 */
   daily_quiz_finish: { correct: number; stars: number };
+  /**
+   * 휴식 알림을 띄움 (P8-12, 브라우저). snoozed: 앞서 "조금만 더"를 고른 뒤 다시 뜬 것인지 (60분·80분…)
+   */
+  rest_reminder_shown: { snoozed: boolean };
+  /**
+   * 휴식 알림에서 고름 (P8-12, 브라우저). rest: 5분 쉬기 · more: 조금만 더(Esc·덮개 포함) · done: 5분을 다 쉼 · stop: 쉬다가 일찍 돌아감
+   */
+  rest_reminder_choice: { choice: 'rest' | 'more' | 'done' | 'stop' };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -123,6 +131,8 @@ export const CLIENT_EVENT_NAMES = [
   'pwa_install_prompt',
   'pwa_installed',
   'quiz_try_run',
+  'rest_reminder_choice',
+  'rest_reminder_shown',
   'trial_start',
   'trial_run',
   'trial_success',

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   render,
@@ -54,6 +55,8 @@ const mocks = vi.hoisted(() => ({
   ),
   sfx: vi.fn(),
 }));
+const refresh = vi.hoisted(() => vi.fn());
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 vi.mock('@/lib/confetti', () => ({
   fireConfetti: mocks.confetti,
   resetConfetti: mocks.resetConfetti,
@@ -90,6 +93,7 @@ const LEVEL_UP: CelebrationEvent = {
   level: 2,
   fromLevel: 1,
   title: '새싹 코더',
+  coins: 20,
 };
 const STAGE: CelebrationEvent = {
   type: 'stage_clear',
@@ -104,7 +108,7 @@ const badge = (
   b: 'first_code' | 'stage_clear' | 'hint_master',
 ): CelebrationEvent => ({
   type: 'badge',
-  badge: b,
+  badge: achv(b),
 });
 
 function renderSeq(
@@ -159,6 +163,10 @@ describe('QuestCelebrations: 큐 순서·묶음', () => {
     ]);
     await advance(0);
     expect(stepKind()).toBe('level_up');
+    // 레벨 업 코인 (P8-04): 보상 알약, 낭독은 숫자 그대로
+    expect(screen.getByTestId('celebration-level-coins')).toHaveTextContent(
+      '20',
+    );
     // 점: 3단계 중 1번째
     expect(screen.getByLabelText('축하 3개 중 1번째')).toBeInTheDocument();
 
@@ -167,9 +175,9 @@ describe('QuestCelebrations: 큐 순서·묶음', () => {
     await advance(600);
     expect(stepKind()).toBe('badges');
     // 뱃지 2개를 한 카드에
-    expect(screen.getByText('새 뱃지 2개')).toBeInTheDocument();
-    expect(screen.getByText('첫 코드')).toBeInTheDocument();
-    expect(screen.getByText('스테이지 클리어')).toBeInTheDocument();
+    expect(screen.getByText('새 업적 2개')).toBeInTheDocument();
+    expect(screen.getByText('업적 first_code')).toBeInTheDocument();
+    expect(screen.getByText('업적 stage_clear')).toBeInTheDocument();
 
     await advance(DWELL);
     fireEvent.click(screen.getByTestId('celebration-cta'));
@@ -270,41 +278,32 @@ describe('QuestCelebrations: 넘기기·자동 넘김·건너뛰기', () => {
     );
   });
 
-  it('자동 넘김: 레벨 업 6초, 뱃지 2개 6초. 포인터가 카드 위에 있으면 멈췄다가 남은 시간부터', async () => {
-    const { onDismiss } = renderSeq([
-      LEVEL_UP,
-      badge('first_code'),
-      badge('hint_master'),
-    ]);
+  it('자동 넘김: 레벨 업 6초, 포인터가 카드 위에 있으면 멈췄다가 남은 시간부터. 업적은 받기를 기다림 (P8-09)', async () => {
+    renderSeq([LEVEL_UP, badge('first_code'), badge('hint_master')]);
     await advance(0);
     expect(screen.getByTestId('celebration-countdown')).toHaveStyle({
       animationDuration: '6000ms',
     });
-    await advance(5900);
-    expect(stepKind()).toBe('level_up');
-    await advance(700);
-    expect(stepKind()).toBe('badges');
-    expect(screen.getByTestId('celebration-countdown')).toHaveStyle({
-      animationDuration: '6000ms',
-    });
-
-    // 뱃지 카드가 나온 지 약 2초 뒤 포인터를 올리고 오래 기다려도 그대로
-    const card = screen.getByTestId('celebration-step-badges');
+    // 약 2초 뒤 포인터를 올리고 오래 기다려도 그대로
+    const card = screen.getByTestId('celebration-step-level_up');
     await advance(2000);
     fireEvent.pointerEnter(card, { pointerType: 'mouse' });
     await advance(10000);
-    expect(stepKind()).toBe('badges');
+    expect(stepKind()).toBe('level_up');
     expect(screen.getByTestId('celebration-countdown')).toHaveStyle({
       animationPlayState: 'paused',
     });
     // 남은 약 4초부터 다시
     fireEvent.pointerLeave(card, { pointerType: 'mouse' });
     await advance(3000);
-    expect(stepKind()).toBe('badges');
+    expect(stepKind()).toBe('level_up');
     await advance(1500);
     await advance(600);
-    expect(screen.queryByTestId('celebration-overlay')).toBeNull();
-    expect(onDismiss).toHaveBeenCalledWith(3);
+    expect(stepKind()).toBe('badges');
+    // 업적 카드는 자동으로 넘기지 않음 (받기·나중에)
+    expect(screen.queryByTestId('celebration-countdown')).toBeNull();
+    await advance(30000);
+    expect(stepKind()).toBe('badges');
   });
 
   it('스테이지 클리어는 정리를 읽도록 자동으로 넘기지 않는다', async () => {

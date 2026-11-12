@@ -4,6 +4,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuestWithStage, UserProgress } from '@/lib/types/database';
 import type { QuestCompleteResponse } from '../rewards';
+import { kstToday } from '@/lib/time/kst';
 
 const mocks = vi.hoisted(() => ({
   runtime: {
@@ -70,6 +71,7 @@ import {
   ASK_QUESTIONS,
   type QuestSessionOptions,
 } from '../useQuestSession';
+import { achv } from '@/lib/quest/__tests__/achievementFixture';
 
 // ── 픽스처 ────────────────────────────────────────────────────────────
 
@@ -163,12 +165,20 @@ function completion(
     total_xp: 150,
     level_before: 1,
     level_after: 1,
-    new_badges: [],
+    new_achievements: [],
     stage_cleared: null,
     next_quest_id: 'q-next',
     golden_keys: 3,
     hints_used: 0,
     used_golden_key: false,
+    coins_earned: 10,
+    coins_balance: 10,
+    level_ups: [],
+    stars: 3,
+    best_stars: 3,
+    new_stars: 3,
+    solved_directly: false,
+    solution_copy: false,
     ...fields,
   };
 }
@@ -369,7 +379,10 @@ describe('useQuestSession: 실행·채점·완료', () => {
     routes['/api/quest/complete'] = () => ({
       json: completion({
         level_after: 2,
-        new_badges: ['first_code', 'stage_clear'],
+        coins_earned: 30,
+        coins_balance: 30,
+        level_ups: [{ level: 2, coins: 20 }],
+        new_achievements: [achv('first_code'), achv('stage_clear')],
         stage_cleared: {
           stage_id: 's1',
           order: 1,
@@ -388,9 +401,12 @@ describe('useQuestSession: 실행·채점·완료', () => {
       quest_id: 'q-code',
       code_submitted: 'x = ___',
       stdout: '10\n',
+      had_error: false,
     });
     expect(result.current.isCompleted).toBe(true);
     expect(result.current.earnedXP).toBe(50);
+    // 보상 띠의 코인은 퀘스트 코인만 (레벨 업 20은 레벨 업 카드가 보여 줌, P8-04)
+    expect(result.current.earnedCoins).toBe(10);
     expect(result.current.userXP).toBe(150);
     expect(result.current.userLevel).toBe(2);
     expect(mocks.refresh).toHaveBeenCalledTimes(1);
@@ -416,7 +432,11 @@ describe('useQuestSession: 실행·채점·완료', () => {
 
   it('이미 완료한 퀘스트 응답이면 축하·새로 받기 없이 완료만 표시', async () => {
     routes['/api/quest/complete'] = () => ({
-      json: completion({ already_completed: true, xp_gained: 0 }),
+      json: completion({
+        already_completed: true,
+        xp_gained: 0,
+        new_stars: 0,
+      }),
     });
     const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
     await act(async () => {
@@ -429,12 +449,16 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(mocks.refresh).not.toHaveBeenCalled();
   });
 
-  it('완료한 퀘스트를 다시 풀면 복습: 실행·채점·컨페티는 하고 완료 API·튜터는 부르지 않는다 (Q57)', async () => {
+  it('별 3개를 다 모은 퀘스트를 다시 풀면 복습: 실행·채점·컨페티는 하고 완료 API·튜터는 부르지 않는다 (Q57, P8-05)', async () => {
     const { result } = renderHook(() =>
       useQuestSession(
         options(
           CODE_QUEST,
-          progressRow({ status: 'completed', code_submitted: 'print(10)' }),
+          progressRow({
+            status: 'completed',
+            code_submitted: 'print(10)',
+            best_stars: 3,
+          }),
         ),
       ),
     );
@@ -457,6 +481,84 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.validation?.passed).toBe(true);
     expect(result.current.completion).toBe('review');
     expect(result.current.earnedXP).toBeNull();
+  });
+
+  it('복습 도전(별 3개 미만 + 판정 다음 날): 뼈대 코드에서 시작, 통과하면 완료 API를 retry로 불러 새 별·별 코인만 (P8-05, Q64)', async () => {
+    routes['/api/quest/complete'] = () => ({
+      json: completion({
+        already_completed: true,
+        xp_gained: 0,
+        total_xp: 100,
+        stars: 3,
+        best_stars: 3,
+        new_stars: 2,
+        coins_earned: 10,
+        coins_balance: 30,
+      }),
+    });
+    const { result } = renderHook(() =>
+      useQuestSession(
+        options(
+          CODE_QUEST,
+          progressRow({
+            status: 'completed',
+            code_submitted: 'print(10)',
+            best_stars: 1,
+            stars_judged_on: '2026-01-01',
+          }),
+        ),
+      ),
+    );
+    expect(result.current.bestStars).toBe(1);
+    expect(result.current.reviewChallenge).toBe(true);
+    // 저장된 코드 대신 처음 뼈대 코드 (저장 코드는 자동 저장하지 않아 그대로)
+    expect(result.current.code).toBe(result.current.starterCode);
+    expect(result.current.code).not.toBe('print(10)');
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorStreamRequest.mockClear();
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(callsTo('/api/quest/complete')).toHaveLength(1);
+    expect(callsTo('/api/quest/complete')[0].body).toMatchObject({
+      retry: true,
+      code_submitted: result.current.starterCode,
+    });
+    expect(mocks.tutor.sendTutorStreamRequest).not.toHaveBeenCalled();
+    expect(result.current.completion).toBe('review');
+    expect(result.current.bestStars).toBe(3);
+    expect(result.current.newStars).toBe(2);
+    expect(result.current.earnedCoins).toBe(10);
+    expect(result.current.earnedXP).toBe(0);
+    expect(result.current.celebrations).toEqual([]);
+    expect(mocks.refresh).toHaveBeenCalled();
+  });
+
+  it('별을 판정한 날 다시 풀면 연습: 저장된 코드 그대로, 완료 API를 부르지 않음 (Q64)', async () => {
+    const { result } = renderHook(() =>
+      useQuestSession(
+        options(
+          CODE_QUEST,
+          progressRow({
+            status: 'completed',
+            code_submitted: 'print(10)',
+            best_stars: 1,
+            stars_judged_on: kstToday(),
+          }),
+        ),
+      ),
+    );
+    expect(result.current.reviewChallenge).toBe(false);
+    expect(result.current.code).toBe('print(10)');
+    await act(async () => {
+      await result.current.handleRun();
+      await flush();
+    });
+    expect(result.current.completion).toBe('review');
+    expect(callsTo('/api/quest/complete')).toHaveLength(0);
   });
 
   it('처음 통과하면 completion은 just, 그다음 다시 풀어 통과하면 review', async () => {
@@ -489,6 +591,27 @@ describe('useQuestSession: 실행·채점·완료', () => {
     expect(result.current.messages.at(-1)).toEqual({
       role: 'system',
       content: '잠시 뒤에 다시 해 볼까요?',
+    });
+  });
+
+  it('실행 에러를 만난 뒤 통과하면 완료 요청에 had_error (P8-09 실패 칭찬 업적), 보낸 뒤엔 비움', async () => {
+    mocks.runtime.runCode.mockResolvedValueOnce({
+      stdout: '',
+      stderr: 'Traceback\nNameError',
+      success: false,
+      hadException: true,
+      outcome: 'error',
+    });
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(callsTo('/api/quest/complete')).toHaveLength(0);
+    await act(async () => {
+      await result.current.handleRun();
+    });
+    expect(callsTo('/api/quest/complete')[0].body).toMatchObject({
+      had_error: true,
     });
   });
 
@@ -1078,7 +1201,7 @@ describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
 describe('useQuestSession: 퀘스트를 떠나면 앞 퀘스트의 일이 남지 않는다 (P6-15)', () => {
   it('축하 지연 중에 떠나면 축하가 쌓이지 않고, 떠 있는 컨페티를 지운다', async () => {
     routes['/api/quest/complete'] = () => ({
-      json: completion({ new_badges: ['first_code'] }),
+      json: completion({ new_achievements: [achv('first_code')] }),
     });
     const { result, unmount } = renderHook(() =>
       useQuestSession(options(CODE_QUEST)),
@@ -1104,7 +1227,7 @@ describe('useQuestSession: 퀘스트를 떠나면 앞 퀘스트의 일이 남지
       return real(url, init);
     });
     routes['/api/quest/complete'] = () => ({
-      json: completion({ new_badges: ['first_code'] }),
+      json: completion({ new_achievements: [achv('first_code')] }),
     });
     const { result, unmount } = renderHook(() =>
       useQuestSession(options(CODE_QUEST)),

@@ -1,0 +1,293 @@
+/* 데일리 미션 (P8-07, DailyMissions.tsx): HUD 미션 칸 + 시트 안 목록 + 보상이 HUD 로 날아가는 연출.
+   금색은 보상(받기·코인·달성 테두리)에만. 날아가기는 한 번만(transform·opacity), full·lite 만 — JS 가 minimal·동작 줄이기면 만들지 않고
+   CSS 도 한 번 더 가림 (§2.10) */
+
+/* ── HUD 칸 (worldHud.css .wh-chip 모양 그대로) ── */
+.wh-mission {
+  position: relative;
+}
+.wh-mission > svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: var(--primary-text);
+}
+.wh-mission[data-ready] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.wh-mission[data-ready] > svg {
+  color: var(--accent-text);
+}
+.wh-mission[data-loading] {
+  min-width: 4.5rem;
+  opacity: 0.5;
+  cursor: default;
+}
+.wh-mission-dot {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--round-pill);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+/* 640px 미만: 숫자는 빼고 아이콘 + 점만 (낭독 이름은 그대로) */
+@media (max-width: 39.99rem) {
+  .wh-mission-n {
+    display: none;
+  }
+  .wh-mission {
+    width: 2.75rem;
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+/* ── 시트 안 ── */
+.dm {
+  display: grid;
+  gap: 0.875rem;
+}
+.dm-sum {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.dm-sum-n {
+  flex: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-button-lg);
+  line-height: 1.2;
+}
+.dm-list {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dm-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.dm-item[data-state='ready'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.dm-item[data-state='claimed'] {
+  background: var(--surface-2);
+  box-shadow: none;
+}
+.dm-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.dm-icon > svg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+.dm-item[data-state='ready'] .dm-icon {
+  background: var(--accent);
+  color: var(--text);
+}
+.dm-item[data-state='claimed'] .dm-icon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.dm-main {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.dm-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.35;
+}
+.dm-title b {
+  font-weight: 700;
+}
+.dm-item[data-state='claimed'] .dm-title b {
+  color: var(--text-muted);
+}
+.dm-day {
+  padding: 0 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+.dm-level {
+  display: inline-flex;
+  gap: 0.1875rem;
+}
+.dm-level i {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: var(--round-pill);
+  background: var(--line);
+}
+.dm-level i[data-on] {
+  background: var(--accent);
+}
+.dm-bar {
+  max-width: 14rem;
+}
+.dm-reward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+.dm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.0625rem 0.5rem 0.0625rem 0.25rem;
+  border-radius: var(--round-pill);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.dm-pill[data-kind='xp'] {
+  padding-left: 0.5rem;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.dm-item[data-state='ready'] .dm-pill {
+  background: var(--surface);
+}
+.dm-side {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 4.5rem;
+}
+.dm-count {
+  color: var(--text-muted);
+  font-size: var(--text-button);
+}
+.dm-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--success);
+  font-size: var(--text-small);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dm-done > svg {
+  width: 1rem;
+  height: 1rem;
+}
+.dm-past {
+  display: grid;
+  gap: 0.5rem;
+}
+.dm-past-t {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: var(--text-body);
+}
+.dm-past-t span {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+.dm-err {
+  margin: 0;
+  color: var(--error);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+.dm-timer {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  text-align: center;
+}
+.dm-timer b {
+  color: var(--text);
+}
+
+/* 좁은 폰: 받기 버튼·진행 수는 아래 줄 오른쪽 */
+@media (max-width: 24rem) {
+  .dm-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .dm-side {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── 보상이 HUD 로 날아감 (한 번) ── */
+.dm-flights {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+.dm-fly {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  margin: -0.75rem 0 0 -0.75rem;
+  opacity: 0;
+  animation: dm-fly calc(var(--dur-page) * var(--k, 1)) var(--easing-in-out)
+    calc(var(--i, 0) * 90ms * var(--k, 1)) both;
+}
+.dm-fly-xp {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--text-caption);
+}
+@keyframes dm-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(0, -1.5rem) scale(1.15);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.7);
+  }
+}
+:root[data-motion='minimal'] .dm-fly,
+:root[data-reduced='true'] .dm-fly {
+  display: none;
+}

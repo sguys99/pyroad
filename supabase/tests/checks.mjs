@@ -1249,6 +1249,12 @@ async function groupWrite(u) {
     { earned_xp: 99999 },
     'earned_xp = 99999',
   );
+  await progressPatch(
+    'B04-27',
+    'PATCH /user_progress {solved_directly_at: now} (황금키 퀘스트 직접 풀이 표시 위조, P8-05)',
+    { solved_directly_at: '2026-01-01T00:00:00Z' },
+    'solved_directly_at is not null',
+  );
   await check({
     group: 'write',
     id: 'B04-18',
@@ -1992,6 +1998,102 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id, p_quest_id: Q2, p_level: 1 },
     ],
     [
+      'CN-1',
+      'anon',
+      'grant_coins',
+      { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_amount: 99999 },
+    ],
+    [
+      'CN-2',
+      u.alice,
+      'grant_coins',
+      { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_amount: 99999 },
+    ],
+    [
+      'CN-3',
+      u.alice,
+      'spend_coins',
+      { p_user_id: u.bob.id, p_ref: 'rls', p_amount: 1 },
+    ],
+    [
+      'CN-3b',
+      u.alice,
+      'coin_apply',
+      { p_user_id: u.alice.id, p_source: 'quest', p_ref: 'rls', p_delta: 99999 },
+    ],
+    [
+      'CH-1',
+      u.alice,
+      'open_stage_chest',
+      { p_user_id: u.alice.id, p_stage_id: STAGE1 },
+    ],
+    [
+      'CH-1b',
+      'anon',
+      'open_stage_chest',
+      { p_user_id: u.alice.id, p_stage_id: STAGE1 },
+    ],
+    [
+      'DM-1',
+      u.alice,
+      'claim_daily_mission',
+      { p_user_id: u.alice.id, p_day: '2026-11-11', p_mission_id: 'quest_1' },
+    ],
+    [
+      'DM-1b',
+      'anon',
+      'daily_missions_today',
+      { p_user_id: u.alice.id, p_quiz_ids: [] },
+    ],
+    [
+      'DM-1c',
+      u.alice,
+      'daily_mission_progress',
+      { p_user_id: u.alice.id, p_day: '2026-11-11', p_kind: 'quest_clear', p_quiz_ids: [] },
+    ],
+    [
+      'AT-1',
+      u.alice,
+      'stamp_attendance',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'AT-1b',
+      'anon',
+      'world_daily_status',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'AT-1c',
+      u.alice,
+      'settle_streak_shields',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'AC-1',
+      u.alice,
+      'evaluate_achievements',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'AC-1b',
+      'anon',
+      'claim_achievement',
+      { p_user_id: u.alice.id, p_achievement_id: 'first_code' },
+    ],
+    [
+      'AC-1c',
+      u.alice,
+      'achievement_progress',
+      { p_user_id: u.alice.id },
+    ],
+    [
+      'PS-1',
+      u.alice,
+      'profile_stats',
+      { p_user_id: u.alice.id },
+    ],
+    [
       'SET-1',
       u.alice,
       'patch_user_settings',
@@ -2025,7 +2127,15 @@ async function groupRpc(u) {
          and p.proname in ('quest_xp', 'level_for_xp', 'has_three_day_streak', 'decide_new_badges',
                            'is_stage_unlocked', 'complete_quest', 'use_golden_key', 'reset_progress',
                            'user_progress_protect_earned_xp', 'record_hint', 'user_progress_lock_keys',
-                           'submit_quiz_answer')
+                           'submit_quiz_answer', 'grant_coins', 'spend_coins', 'coin_apply',
+                           'coin_balance_mismatches', 'users_protect_coins', 'coin_reward', 'grant_star_coins',
+                           'grant_level_up_coins', 'code_quest_stars', 'is_solution_copy',
+                           'stage_chest_goal', 'open_stage_chest', 'daily_mission_progress',
+                           'daily_mission_target', 'daily_mission_possible', 'daily_mission_list',
+                           'daily_missions_today', 'claim_daily_mission', 'streak_learning_days',
+                           'current_streak', 'settle_streak_shields', 'world_daily_status', 'stamp_attendance',
+                           'achievement_progress', 'evaluate_achievements', 'claim_achievement',
+                           'learning_day_quests', 'achievement_stats', 'profile_stats')
          and (has_function_privilege('anon', p.oid, 'EXECUTE') or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
       return { actual: v || 'none', detail: v || '(없음)' };
     },
@@ -2089,8 +2199,17 @@ const OK = { deny: ['mismatch', 'error'], allow: ['ok'] };
 const STAGE2 = 'a1000000-0000-0000-0000-000000000002';
 const Q_STAGE2 = 'b1000000-0000-0000-0000-000000000004'; // 2-1
 const Q_LAST1 = 'b1000000-0000-0000-0000-000000000026'; // 1-7 (75 XP)
-const rpc = (fn, body) =>
-  rest('POST', `/rest/v1/rpc/${fn}`, { as: 'service', body });
+// 기존 뱃지 5종은 P8-09(00036)부터 같은 id 업적. complete_quest 응답의 업적(new_achievements) 중 5종을 예전 순서로
+// new_badges 로 다시 적어, 아래 뱃지 점검들이 "옮겨진 업적이 예전 뱃지 규칙대로 나오는지"를 그대로 확인함
+const LEGACY_BADGES = ['first_code', 'hint_master', 'stage_clear', 'project_builder', 'streak_3'];
+const legacyBadges = (list) =>
+  LEGACY_BADGES.filter((id) => (list ?? []).some((a) => a.id === id));
+const rpc = async (fn, body) => {
+  const r = await rest('POST', `/rest/v1/rpc/${fn}`, { as: 'service', body });
+  if (fn === 'complete_quest' && r.status === 200 && r.json)
+    r.json = { ...r.json, new_badges: legacyBadges(r.json.new_achievements) };
+  return r;
+};
 const submission = (passed = true) => ({ code: 'print(1)', passed });
 /** 기대값 표 비교: 다른 항목만 detail 로 */
 function compare(label, expected, actual) {
@@ -2113,8 +2232,10 @@ const userRow = (id) =>
   JSON.parse(
     one(
       `select json_build_object('total_xp', total_xp, 'level', current_level, 'golden_keys', golden_keys,
-         'badges', coalesce((select json_agg(badge_type order by badge_type) from public.user_badges where user_id = u.id), '[]'),
-         'badge_rows', (select count(*) from public.user_badges where user_id = u.id))
+         'badges', coalesce((select json_agg(achievement_id order by achievement_id) from public.user_achievements
+                              where user_id = u.id and achievement_id in (${LEGACY_BADGES.map(sqlStr).join(', ')})), '[]'),
+         'badge_rows', (select count(*) from public.user_achievements
+                         where user_id = u.id and achievement_id in (${LEGACY_BADGES.map(sqlStr).join(', ')})))
          from public.users u where id = '${id}'`,
     ),
   );
@@ -2135,16 +2256,12 @@ async function groupReward() {
   const rules = JSON.parse(
     readFileSync(join(HERE, 'fixtures', 'reward-rules.json'), 'utf8'),
   );
-  const tsArr = (xs) =>
-    `array[${xs.map((x) => (x === null ? 'null' : sqlStr(x))).join(',')}]::timestamptz[]`;
-  const txtArr = (xs) =>
-    `array[${xs.map(sqlStr).join(',')}]::text[]`;
 
   await check({
     group: 'reward',
     id: 'RW-1',
     role: 'postgres',
-    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·has_three_day_streak·decide_new_badges)',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·current_streak·kst_date·coin_reward·code_quest_stars·stage_chest_goal)',
     ...OK,
     run: () => {
       const cases = [
@@ -2158,19 +2275,31 @@ async function groupReward() {
           `public.level_for_xp(${c.total})::text`,
           String(c.level),
         ]),
-        ...rules.streak.map((c) => [
-          `streak ${c.name}`,
-          `public.has_three_day_streak(${tsArr(c.completed_at)})::text`,
+        ...rules.streak_days.map((c) => [
+          `streak_days ${c.name}`,
+          `public.current_streak(array[${c.days.map(sqlStr).join(',')}]::date[], '${c.today}')::text`,
           String(c.streak),
         ]),
-        ...rules.badges.map((c) => {
-          const f = c.facts;
-          return [
-            `badges ${c.name}`,
-            `array_to_json(public.decide_new_badges(${txtArr(f.earned)}, ${f.completedCount}, ${f.stageCleared}, ${f.isFinalStage}, ${f.hintsUsed}, ${f.usedGoldenKey}, ${f.streak3}))::text`,
-            JSON.stringify(c.badges),
-          ];
-        }),
+        ...rules.kst_date.map((c) => [
+          `kst_date ${c.name}`,
+          `public.kst_date('${c.at}'::timestamptz)::text`,
+          c.day,
+        ]),
+        ...rules.coins.map((c) => [
+          `coins ${c.kind}/${c.n ?? ''}`,
+          `public.coin_reward('${c.kind}', ${c.n ?? 'null'})::text`,
+          String(c.coins),
+        ]),
+        ...rules.stars.map((c) => [
+          `stars ${c.hints}/${c.golden}`,
+          `public.code_quest_stars(${c.hints}, ${c.golden})::text`,
+          String(c.stars),
+        ]),
+        ...rules.chest_goal.map((c) => [
+          `chest_goal ${c.code_quests}`,
+          `public.stage_chest_goal(${c.code_quests})::text`,
+          String(c.goal),
+        ]),
       ];
       const got = one(
         cases.map(([, expr]) => `select ${expr};`).join('\n'),
@@ -2355,7 +2484,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-7',
     role: 'service_role',
-    op: 'B12 스테이지 리셋: earned_xp 합으로 재계산(황금키 0 XP 과다 차감 없음), stage_clear 는 조건부 삭제',
+    op: 'B12 스테이지 리셋: earned_xp 합으로 재계산(황금키 0 XP 과다 차감 없음), 업적(옛 stage_clear)은 남음 (P8-09)',
     ...OK,
     run: async () => {
       const x = await createUser('rw7', '리셋');
@@ -2391,10 +2520,11 @@ async function groupReward() {
           after2,
         ) ||
         compare('스테이지 2 리셋 응답', { removed_badges: [], removed_quests: 2 }, r2.json) ||
-        compare('스테이지 1 리셋', { total_xp: 0, level: 1, badges: ['first_code', 'hint_master'] }, after1) ||
-        compare('스테이지 1 리셋 응답', { removed_badges: ['stage_clear'] }, r1.json) || {
+        // P8-09: 뱃지는 업적이 되어 진행 초기화로 지우지 않음 (user_badges 에 더 쓰지 않아 removed_badges 도 빈 목록)
+        compare('스테이지 1 리셋', { total_xp: 0, level: 1, badges: ['first_code', 'hint_master', 'stage_clear'] }, after1) ||
+        compare('스테이지 1 리셋 응답', { removed_badges: [] }, r1.json) || {
           actual: 'ok',
-          detail: `스테이지 2 리셋 → total_xp ${before.total_xp} → ${stage1Xp}, stage_clear 유지 / 스테이지 1 리셋 → 0, stage_clear 삭제`,
+          detail: `스테이지 2 리셋 → total_xp ${before.total_xp} → ${stage1Xp} / 스테이지 1 리셋 → 0, 업적(옛 stage_clear)은 남음 (P8-09)`,
         }
       );
     },
@@ -2404,7 +2534,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-8',
     role: 'service_role',
-    op: 'B12 전체 리셋: 진행·뱃지 삭제, XP 0, 황금키 3 복구',
+    op: 'B12 전체 리셋: 진행 삭제, XP 0, 황금키 3 복구, 업적(옛 뱃지)은 남음 (P8-09)',
     ...OK,
     run: async () => {
       const x = await createUser('rw8', '전체리셋');
@@ -2415,12 +2545,13 @@ async function groupReward() {
       if (r.status !== 200)
         return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
       return (
-        compare('users', { total_xp: 0, level: 1, golden_keys: 3, badge_rows: 0 }, userRow(x.id)) ||
+        // P8-09: 업적(옛 뱃지)은 진행 초기화 뒤에도 남음 (Q2 첫 완료의 first_code·hint_master)
+        compare('users', { total_xp: 0, level: 1, golden_keys: 3, badge_rows: 2 }, userRow(x.id)) ||
         compare(
           'progress',
           { rows: '0' },
           { rows: one(`select count(*) from public.user_progress where user_id = '${x.id}'`) },
-        ) || { actual: 'ok', detail: '황금키 2 → 3, XP·뱃지·진행 0' }
+        ) || { actual: 'ok', detail: '황금키 2 → 3, XP·진행 0, 업적 2개 남음' }
       );
     },
   });
@@ -2609,6 +2740,1097 @@ async function groupReward() {
       );
     },
   });
+
+  await check({
+    group: 'reward',
+    id: 'RW-14',
+    role: 'service_role',
+    op: 'B20 (00028): users.current_level 은 total_xp 에서만 — 다른 레벨을 써도 트리거가 level_for_xp(total_xp) 로 맞춤',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw14', '레벨');
+      one(`update public.users set total_xp = 3480, current_level = 2 where id = '${x.id}'`);
+      const a = one(`select current_level from public.users where id = '${x.id}'`);
+      one(`update public.users set current_level = 50 where id = '${x.id}'`);
+      const b = one(`select current_level from public.users where id = '${x.id}'`);
+      return (
+        compare('3480 XP 에 Lv 2 를 써도 / Lv 50 만 바꿔도', { a: '10', b: '10' }, { a, b }) || {
+          actual: 'ok',
+          detail: '3480 XP → Lv 10 (쓴 값 2·50 무시)',
+        }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
+    id: 'RW-15',
+    role: 'postgres',
+    op: 'P8-02 (00029) 리허설: 옛 곡선 레벨의 기존 사용자 → 레벨이 내려가지 않게 XP 보정·나머지는 새 곡선 레벨, 두 번 실행해도 같음',
+    ...OK,
+    run: async () => {
+      const names = ['zero', 'lv2', 'lv4', 'lv5', 'up', 'cheat', 'exact'];
+      const xs = [];
+      for (const n of names) xs.push(await createUser(`rw15${n}`, '재계산'));
+      const file = readFileSync(
+        join(HERE, '..', 'migrations', '00029_level_recalc.sql'),
+        'utf8',
+      );
+      // 00028 이전 상태(옛 곡선 [0, 100, 300, 600, 1000] 의 current_level)를 트리거를 끄고 만든다. cheat = 옛 앱 직접 쓰기(B04)
+      const before = [
+        [0, 1],
+        [150, 2],
+        [700, 4],
+        [1000, 5],
+        [2000, 5],
+        [50, 5],
+        [1210, 5],
+      ];
+      const ids = xs.map((x) => `'${x.id}'`).join(',');
+      const state = `select string_agg(u.total_xp || ':' || u.current_level || ':' || coalesce(a.xp_before::text, '-'), ',' order by u.total_xp, a.xp_before nulls first)
+          from (select * from public.users where id in (${ids})) u
+          left join public.level_curve_adjustments a on a.user_id = u.id;`;
+      const r = psql(`BEGIN;
+        ALTER TABLE public.users DISABLE TRIGGER trg_users_sync_level;
+        ${xs.map((x, i) => `update public.users set total_xp = ${before[i][0]}, current_level = ${before[i][1]} where id = '${x.id}';`).join('\n')}
+        ALTER TABLE public.users ENABLE TRIGGER trg_users_sync_level;
+        ${file}
+        ${state}
+        ${file}
+        ${state}
+        ROLLBACK;`);
+      if (!r.ok) return { actual: 'error', detail: firstLine(r.err) };
+      const [first, second] = r.out.split('\n').filter(Boolean).slice(-2);
+      // 0 → Lv1 · 50(cheat Lv5) → Lv1 그대로 · 150 → 200 Lv2 · 700 → 830 Lv4 · 1000 → 1210 Lv5 · 1210 Lv5 그대로 · 2000 → Lv6
+      const want = '0:1:-,50:1:-,200:2:150,830:4:700,1210:5:-,1210:5:1000,2000:6:-';
+      return (
+        compare('두 번 실행 결과 (xp:레벨:보정 전 xp)', { first: want, second: want }, { first, second }) || {
+          actual: 'ok',
+          detail: '보정 3명(150·700·1000 XP), 2000 XP 는 Lv 6, 다시 실행해도 같음',
+        }
+      );
+    },
+  });
+  await check({
+    group: 'reward',
+    id: 'RW-16',
+    role: 'anon',
+    op: 'GET /level_curve_adjustments (P8-02 보정 근거는 service_role 전용)',
+    ...READ,
+    run: async () => classifyRead(await rest('GET', '/rest/v1/level_curve_adjustments?select=*')),
+  });
+}
+
+// ── coins: 코인 원장·잔액 (P8-03, ① 00030) ──────────────────────
+const coins = (id) => one(`select coins from public.users where id = '${id}'`);
+const mismatches = (id) =>
+  one(`select count(*) from public.coin_balance_mismatches() where user_id = '${id}'`);
+async function groupCoins(u) {
+  await check({
+    group: 'coins',
+    id: 'CN-4',
+    role: 'service_role',
+    op: 'grant_coins·spend_coins: 같은 키는 한 번만(동시 호출 포함) · 잔액 부족 PT402 · 잘못된 인자 PT400 · 잔액 = 원장 합',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn4', '코인');
+      const g = (source, ref, amount) =>
+        rpc('grant_coins', { p_user_id: x.id, p_source: source, p_ref: ref, p_amount: amount });
+      const sp = (ref, amount) => rpc('spend_coins', { p_user_id: x.id, p_ref: ref, p_amount: amount });
+      const g1 = await g('quest', 'q-1', 10);
+      const g2 = await g('quest', 'q-1', 10);
+      const same = await Promise.all([g('star', 'q-1:1', 5), g('star', 'q-1:1', 5), g('star', 'q-1:1', 5)]);
+      const s1 = await sp('shop:a', 12);
+      const s2 = await sp('shop:b', 4);
+      const s3 = await sp('shop:a', 12);
+      const bad = await Promise.all([
+        g('spend', 'x', 1),
+        g('bogus', 'x', 1),
+        g('quest', 'x', 0),
+        g('quest', '', 1),
+        sp('x', -5),
+        rpc('grant_coins', { p_user_id: '00000000-0000-0000-0000-000000000000', p_source: 'quest', p_ref: 'x', p_amount: 1 }),
+      ]);
+      const v = (r) => (r.status === 200 ? `${r.json.applied}:${r.json.delta}:${r.json.coins}` : `${errCode(r)}:${errMsg(r)}`);
+      return (
+        compare(
+          'CN-4',
+          {
+            g1: 'true:10:10',
+            g2: 'false:0:10',
+            same: 1,
+            s1: 'true:-12:3',
+            s2: 'PT402:not_enough_coins',
+            s3: 'false:0:3',
+            bad: 'PT400,PT400,PT400,PT400,PT400,PT404',
+            coins: '3',
+            rows: '3',
+            mismatches: '0',
+          },
+          {
+            g1: v(g1),
+            g2: v(g2),
+            same: same.filter((r) => r.status === 200 && r.json.applied).length,
+            s1: v(s1),
+            s2: v(s2),
+            s3: v(s3),
+            bad: bad.map(errCode).join(','),
+            coins: coins(x.id),
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '10 지급 → 같은 키 0 → 별 5 동시 3번 중 1번 → 12 차감 → 4 차감 거부, 잔액 3 = 원장 합' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-5',
+    role: 'postgres',
+    op: 'users.coins 직접 쓰기: service_role·postgres 는 coins_ledger_only 오류, authenticated(psql) 는 값이 버려짐, 새 행은 0',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn5', '코인직접');
+      const sr = await rest('PATCH', `/rest/v1/users?id=eq.${x.id}`, {
+        as: 'service',
+        body: { coins: 500 },
+        prefer: 'return=minimal',
+      });
+      const pg = psql(`update public.users set coins = 500 where id = '${x.id}';`);
+      const au = psqlAs(
+        'authenticated',
+        x.id,
+        `update public.users set coins = 500 where id = auth.uid() returning coins;`,
+      );
+      // ③ 00008 뒤에는 UPDATE 권한이 없어 42501, ①만이면 트리거가 이전 값(0)을 남김
+      const auKept = au.ok ? au.out === '0' : /permission denied/i.test(au.err);
+      return (
+        compare(
+          'CN-5',
+          { sr: 'coins_ledger_only', pg: true, auKept: true, coins: '0' },
+          {
+            sr: errMsg(sr),
+            pg: /coins_ledger_only/.test(pg.err),
+            auKept,
+            coins: coins(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '원장 없이 잔액을 바꾸는 경로 없음 (authenticated 는 ③ 뒤 42501, ①만이면 트리거가 무시)' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-6',
+    role: 'authenticated',
+    op: 'coin_ledger: 비로그인 읽기 · 남의 원장 읽기 · 본인 원장 INSERT/DELETE',
+    ...WRITE,
+    run: async () => {
+      one(`select public.coin_apply('${u.bob.id}', 'quest', 'cn6', 7)`);
+      one(`select public.coin_apply('${u.alice.id}', 'quest', 'cn6', 7)`);
+      const anon = classifyRead(await rest('GET', '/rest/v1/coin_ledger?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon 읽기 ${anon.detail}` };
+      const others = await rest('GET', `/rest/v1/coin_ledger?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 원장 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', `/rest/v1/coin_ledger?select=delta`, { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1)
+        return { actual: 'error', detail: `본인 원장 ${own.status} rows=${own.json?.length}` };
+      const ins = await classifyWrite(
+        rest('POST', '/rest/v1/coin_ledger', {
+          as: u.alice,
+          body: { user_id: u.alice.id, delta: 99999, balance_after: 99999, source: 'quest', ref: 'hack' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.coin_ledger where user_id = '${u.alice.id}' and ref = 'hack')`,
+      );
+      if (ins.actual === 'written') return ins;
+      return classifyWrite(
+        rest('DELETE', `/rest/v1/coin_ledger?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.coin_ledger where user_id = '${u.alice.id}')`,
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-7',
+    role: 'service_role',
+    op: '리셋은 코인을 회수하지 않고, 같은 퀘스트 키는 리셋 뒤에도 다시 지급 안 됨(재풀이 coins_earned 0) · B55 스테이지 리셋은 퀘스트 밖 XP 를 남김',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn7', '코인리셋');
+      const s1 = stageQuests(STAGE1);
+      const s2 = stageQuests(STAGE2);
+      for (const q of [...s1, s2[0]])
+        await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      // complete_quest 가 이미 준 첫 완료 코인 (P8-04) → 같은 키 grant_coins 는 0
+      const dup = await rpc('grant_coins', { p_user_id: x.id, p_source: 'quest', p_ref: s2[0], p_amount: 10 });
+      const c0 = coins(x.id);
+      // 퀘스트 밖 XP (P8-02 레벨 보정·P8-07 미션 같은 것). earned_xp 에는 없음
+      const base = Number(one(`update public.users set total_xp = total_xp + 15 where id = '${x.id}' returning total_xp`));
+      const s2Xp = Number(one(`select earned_xp from public.user_progress where user_id = '${x.id}' and quest_id = '${s2[0]}'`));
+      const rs = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'stage', p_stage_id: STAGE2 });
+      const redo = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: s2[0], p_submission: submission() });
+      const ra = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      const redoAll = [];
+      for (const q of s1)
+        redoAll.push((await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() })).json?.coins_earned);
+      return (
+        compare(
+          'CN-7',
+          {
+            dup: false,
+            stageXp: base - s2Xp,
+            redo: '0:' + c0,
+            allXp: 0,
+            redoAll: 0,
+            coins: c0,
+            mismatches: '0',
+          },
+          {
+            dup: dup.json?.applied,
+            stageXp: rs.json?.total_xp,
+            redo: `${redo.json?.coins_earned}:${redo.json?.coins_balance}`,
+            allXp: ra.json?.total_xp,
+            redoAll: redoAll.reduce((n, c) => n + (c ?? 99), 0),
+            coins: coins(x.id),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `스테이지 리셋 XP ${base} → ${base - s2Xp} (미션 15 XP 유지), 코인 ${c0} 유지·재풀이(레벨 업 포함) 0` }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-8',
+    role: 'service_role',
+    op: 'complete_quest 코인 (P8-04): 첫 완료 10 · 같은 퀘스트 다시·동시 8번 1회 · 황금키 완료 0 · 응답 coins_earned·coins_balance·level_ups',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn8', '완료코인');
+      const s1 = stageQuests(STAGE1);
+      const done = (q) => rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      const many = await Promise.all(Array.from({ length: 8 }, () => done(s1[0])));
+      const again = await done(s1[0]);
+      // 황금키: 마지막 단계 정답을 본 뒤 통과 없이 완료 → XP 0 · 코인 0
+      const gk = await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: s1[1] });
+      const golden = await done(s1[1]);
+      // 레벨 업: Lv 2 문턱(200) 바로 아래에서 완료 → level_ups [{2, 20}], coins_earned = 10 + 20
+      one(`update public.users set total_xp = 199 where id = '${x.id}'`);
+      const up = await done(s1[2]);
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_completed === false);
+      const st = requirementMet('public.code_quest_stars()') ? 15 : 0;
+      return (
+        compare(
+          'CN-8',
+          {
+            // 첫 완료 10 + 별 ⭐3 코인 15 (P8-05 00032 가 있으면). 황금키 완료는 별 코인도 0
+            fresh: 1,
+            first: `${10 + st}:${10 + st}:[]`,
+            again: `true:0:${10 + st}`,
+            gk: 200,
+            golden: `true:0:0:${10 + st}`,
+            up: `${30 + st}:${40 + 2 * st}:[{"coins":20,"level":2}]`,
+            rows: String(st ? 9 : 3),
+            mismatches: '0',
+          },
+          {
+            fresh: fresh.length,
+            first: fresh[0] && `${fresh[0].json.coins_earned}:${fresh[0].json.coins_balance}:${JSON.stringify(fresh[0].json.level_ups)}`,
+            again: `${again.json?.already_completed}:${again.json?.coins_earned}:${again.json?.coins_balance}`,
+            gk: gk.status,
+            golden: `${golden.json?.used_golden_key}:${golden.json?.xp_gained}:${golden.json?.coins_earned}:${golden.json?.coins_balance}`,
+            up: `${up.json?.coins_earned}:${up.json?.coins_balance}:${JSON.stringify(up.json?.level_ups)}`,
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `동시 8번 → 10+별 ${st} 한 번, 황금키 0, Lv 2 도착 +20 (원장 = 잔액)` }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CN-10',
+    role: 'postgres',
+    op: 'grant_level_up_coins: 여러 레벨을 한 번에 넘으면 지나간 레벨마다(5레벨마다 100) · 다시 넘어도 0 · 내려가거나 같으면 빈 배열',
+    ...OK,
+    run: async () => {
+      const x = await createUser('cn10', '레벨코인');
+      const lv = (from, to) => one(`select public.grant_level_up_coins('${x.id}', ${from}, ${to})::text`);
+      const jump = lv(1, 6);
+      const again = lv(3, 7);
+      const down = lv(7, 3);
+      const top = lv(49, 60);
+      return (
+        compare(
+          'CN-10',
+          {
+            jump: JSON.stringify([2, 3, 4, 5, 6].map((l) => ({ coins: l === 5 ? 100 : 20, level: l }))),
+            again: JSON.stringify([4, 5, 6, 7].map((l) => ({ coins: l === 7 ? 20 : 0, level: l }))),
+            down: '[]',
+            top: '[{"coins":100,"level":50}]',
+            coins: '300',
+            mismatches: '0',
+          },
+          {
+            jump: JSON.stringify(JSON.parse(jump)),
+            again: JSON.stringify(JSON.parse(again)),
+            down,
+            top: JSON.stringify(JSON.parse(top)),
+            coins: coins(x.id),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: 'Lv 1→6 = 20·20·20·100·20, 다시 3→7 은 Lv 7 만 20, 50 넘김 없음' }
+      );
+    },
+  });
+
+  // ── 별점 (P8-05, 00032) ──
+  const starRow = (uid, qid) =>
+    JSON.parse(
+      one(`select json_build_object('stars', stars, 'best', best_stars, 'today', stars_judged_on = public.kst_today(),
+             'attempts', attempts, 'direct', solved_directly_at is not null, 'xp', earned_xp)
+             from public.user_progress where user_id = '${uid}' and quest_id = '${qid}'`),
+    );
+  const noXp = (r) => {
+    delete r.xp;
+    return r;
+  };
+  const lvCoins = (r) => (r.json?.level_ups ?? []).reduce((n, l) => n + l.coins, 0);
+  const done = (uid, qid, extra = {}) =>
+    rpc('complete_quest', { p_user_id: uid, p_quest_id: qid, p_submission: { ...submission(), ...extra } });
+  await check({
+    group: 'coins',
+    id: 'SR-1',
+    role: 'service_role',
+    op: '첫 완료 별 = code_quest_stars(DB 힌트, 황금키): 힌트 0 ⭐3 · 1회 ⭐2 · 2회 ⭐1 · 황금키 ⭐1, best_stars·판정일·별 코인(별 번호마다 5, 황금키 0)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('st1', '첫별');
+      const [a, b, c, d] = stageQuests(STAGE1);
+      await rpc('record_hint', { p_user_id: x.id, p_quest_id: b, p_level: 1 });
+      await rpc('record_hint', { p_user_id: x.id, p_quest_id: c, p_level: 2 });
+      await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: d });
+      const rs = [];
+      for (const q of [a, b, c, d]) rs.push(await done(x.id, q));
+      return (
+        compare(
+          'SR-1',
+          {
+            res: ['3:3:3', '2:2:2', '1:1:1', '1:1:1'],
+            coins: [25, 20, 15, 0],
+            rows: [
+              { stars: 3, best: 3, today: true, attempts: 1, direct: false },
+              { stars: 2, best: 2, today: true, attempts: 1, direct: false },
+              { stars: 1, best: 1, today: true, attempts: 1, direct: false },
+              { stars: 1, best: 1, today: true, attempts: 1, direct: false },
+            ],
+            mismatches: '0',
+          },
+          {
+            res: rs.map((r) => `${r.json?.stars}:${r.json?.best_stars}:${r.json?.new_stars}`),
+            coins: rs.map((r) => r.json?.coins_earned - lvCoins(r)),
+            rows: [a, b, c, d].map((q) => noXp(starRow(x.id, q))),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '⭐3 +25 · ⭐2 +20 · ⭐1 +15 · 황금키 ⭐1 +0' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'SR-2',
+    role: 'service_role',
+    op: '다시 풀기(retry, Q64): 판정한 날은 연습(무변화, mode practice) · 다음 날부터 복습 도전 ⭐3·best 갱신·새 별 번호만 코인·XP 0 · retry 없음/통과 못함은 그대로 · 동시 4번도 1회',
+    ...OK,
+    run: async () => {
+      const x = await createUser('st2', '다시별');
+      const [a, b] = stageQuests(STAGE1);
+      await rpc('record_hint', { p_user_id: x.id, p_quest_id: a, p_level: 3 });
+      await rpc('record_hint', { p_user_id: x.id, p_quest_id: b, p_level: 1 });
+      await done(x.id, a);
+      await done(x.id, b);
+      const xp0 = userRow(x.id).total_xp;
+      const plain = await done(x.id, a);
+      // 같은 날(첫 완료 판정일) 다시 풀기 = 연습
+      const sameDay = await done(x.id, a, { retry: true });
+      // 하루 지난 것처럼 판정일을 어제(KST)로
+      one(`update public.user_progress set stars_judged_on = public.kst_today() - 1 where user_id = '${x.id}'`);
+      const failed = await done(x.id, a, { retry: true, passed: false });
+      const retry = await done(x.id, a, { retry: true });
+      const again = await done(x.id, a, { retry: true });
+      const many = await Promise.all(Array.from({ length: 4 }, () => done(x.id, b, { retry: true })));
+      const fmt = (r) =>
+        `${r.json?.already_completed}:${r.json?.stars}:${r.json?.best_stars}:${r.json?.new_stars}:${r.json?.xp_gained}:${r.json?.coins_earned}:${r.json?.mode ?? ''}`;
+      return (
+        compare(
+          'SR-2',
+          {
+            plain: 'true:0:1:0:0:0:',
+            sameDay: 'true:0:1:0:0:0:practice',
+            failed: 'true:0:1:0:0:0:',
+            retry: 'true:3:3:2:0:10:review',
+            again: 'true:0:3:0:0:0:practice',
+            many: ['true:0:3:0:0:0:practice', 'true:0:3:0:0:0:practice', 'true:0:3:0:0:0:practice', 'true:3:3:1:0:5:review'],
+            row: { stars: 3, best: 3, today: true, attempts: 2, direct: false },
+            xp: xp0,
+            mismatches: '0',
+          },
+          {
+            plain: fmt(plain),
+            sameDay: fmt(sameDay),
+            failed: fmt(failed),
+            retry: fmt(retry),
+            again: fmt(again),
+            many: many.map(fmt).sort(),
+            row: noXp(starRow(x.id, a)),
+            xp: userRow(x.id).total_xp,
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '같은 날 연습 → 다음 날 ⭐1 → ⭐3(+2별 10코인, XP 그대로) → 다시 연습, 동시 4번 중 한 번만 +5' }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'SR-3',
+    role: 'service_role',
+    op: '황금키 퀘스트를 (다음 날부터) 처음 직접 풀면 그때 XP·첫 완료 코인·별 코인 1..3·뱃지(first_code·hint_master), 같은 날·정답 그대로는 아무것도, 그 뒤는 연습',
+    ...OK,
+    run: async () => {
+      const x = await createUser('st3', '직접풀이');
+      const [a] = stageQuests(STAGE1);
+      await rpc('use_golden_key', { p_user_id: x.id, p_quest_id: a });
+      const golden = await done(x.id, a);
+      const sameDay = await done(x.id, a, { retry: true });
+      one(`update public.user_progress set stars_judged_on = public.kst_today() - 1 where user_id = '${x.id}'`);
+      const solution = one(`select solution_code from public.quest_answer_keys where quest_id = '${a}'`);
+      const copy = await done(x.id, a, { retry: true, code: `${solution}\n# 내가 썼어요\n` });
+      const direct = await done(x.id, a, { retry: true });
+      const again = await done(x.id, a, { retry: true });
+      const xpWant = Number(one(`select public.quest_xp(xp_reward, 0, false) from public.quests where id = '${a}'`));
+      const fmt = (r) =>
+        `${r.json?.solved_directly}:${r.json?.solution_copy}:${r.json?.new_stars}:${r.json?.xp_gained}:${r.json?.coins_earned - lvCoins(r)}:${JSON.stringify(r.json?.new_badges)}`;
+      return (
+        compare(
+          'SR-3',
+          {
+            golden: 'false:false:1:0:0:[]',
+            sameDay: 'false:false:0:0:0:[]',
+            copy: 'false:true:0:0:0:[]',
+            direct: `true:false:2:${xpWant}:25:["first_code","hint_master"]`,
+            again: 'false:false:0:0:0:[]',
+            row: { stars: 3, best: 3, today: true, attempts: 2, direct: true, xp: xpWant },
+            badges: ['first_code', 'hint_master'],
+            mismatches: '0',
+          },
+          {
+            golden: fmt(golden),
+            sameDay: fmt(sameDay),
+            copy: fmt(copy),
+            direct: fmt(direct),
+            again: fmt(again),
+            row: starRow(x.id, a),
+            badges: userRow(x.id).badges,
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `황금키 0 → 정답 복사 0 → 직접 풀이 +${xpWant} XP·25코인·뱃지 2 → 다시 0` }
+      );
+    },
+  });
+
+  // ── 보물상자 (P8-06, 00033) ──
+  await check({
+    group: 'coins',
+    id: 'CH-2',
+    role: 'service_role',
+    op: 'open_stage_chest: 별 합계 목표 미달 409 · 목표 도달 → 30코인(원장 chest/<stage_id>) · 동시 4번도 1회 · 리셋 뒤 다시 열어도 0 · 없는 스테이지 404',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ch2', '보물상자');
+      const qs = stageQuests(STAGE1);
+      const goal = Number(one(`select public.stage_chest_goal(${qs.length})`));
+      const need = Math.ceil(goal / 3); // 힌트 없이 첫 완료 = ⭐3
+      const open = (stage = STAGE1) => rpc('open_stage_chest', { p_user_id: x.id, p_stage_id: stage });
+      for (const q of qs.slice(0, need - 1)) await done(x.id, q);
+      const short = await open();
+      await done(x.id, qs[need - 1]);
+      const many = await Promise.all(Array.from({ length: 4 }, () => open()));
+      const before = coins(x.id);
+      await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      const afterReset = await open();
+      const missing = await open('a1000000-0000-0000-0000-0000000000ff');
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_opened === false);
+      return (
+        compare(
+          'CH-2',
+          {
+            short: `409:not_enough_stars`,
+            many: [200, 200, 200, 200],
+            fresh: `1:30:${goal}`,
+            afterReset: `200:true:0:${before}`,
+            missing: 404,
+            rows: '1',
+            mismatches: '0',
+          },
+          {
+            short: `${short.status}:${errMsg(short)}`,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.coins_earned}:${fresh[0]?.json.goal}`,
+            afterReset: `${afterReset.status}:${afterReset.json?.already_opened}:${afterReset.json?.coins_earned}:${afterReset.json?.coins_balance}`,
+            missing: missing.status,
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}' and source = 'chest'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `목표 ${goal}⭐: ${need - 1}개(⭐${(need - 1) * 3}) 거부 → ${need}개 +30 한 번 → 리셋 뒤 0` }
+      );
+    },
+  });
+  await check({
+    group: 'coins',
+    id: 'CH-3',
+    role: 'service_role',
+    op: '§12-Q65: 마지막 스테이지(프로젝트 1개·퀴즈 2개, 목표 3⭐) 상자는 퀴즈 별만으로 409 code_quest_needed → 프로젝트 첫 완료 코인 40(원장 quest/<id>) → 상자 50 · 모든 별 3개 → 업적 perfect_stage',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ch3', '마지막상자');
+      const final = one(`select s.id from public.stages s join public.quests q on q.stage_id = s.id where q.id = '${Q_PROJECT}'`);
+      // 앞 스테이지는 모두 끝냄(잠금 해제) + 마지막 스테이지 퀴즈 2개 ⭐3 — 코드 퀘스트(프로젝트)는 아직
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, best_stars, stars, stars_judged_on, code_submitted)
+           select '${x.id}', q.id, 'completed', now() - interval '2 days', 3, 3, public.kst_today() - 2, ''
+             from public.quests q
+            where q.stage_id <> '${final}' or q.quest_type = 'quiz'`);
+      const quizOnly = await rpc('open_stage_chest', { p_user_id: x.id, p_stage_id: final });
+      const proj = await done(x.id, Q_PROJECT);
+      const opened = await rpc('open_stage_chest', { p_user_id: x.id, p_stage_id: final });
+      return (
+        compare(
+          'CH-3',
+          {
+            quizOnly: '409:code_quest_needed',
+            proj: 200,
+            projectCoins: '40',
+            opened: '200:50:3',
+            perfect: '1',
+            mismatches: '0',
+          },
+          {
+            quizOnly: `${quizOnly.status}:${errMsg(quizOnly)}`,
+            proj: proj.status,
+            projectCoins: one(`select delta from public.coin_ledger where user_id = '${x.id}' and source = 'quest' and ref = '${Q_PROJECT}'`),
+            opened: `${opened.status}:${opened.json?.coins_earned}:${opened.json?.goal}`,
+            perfect: one(`select count(*) from public.user_achievements where user_id = '${x.id}' and achievement_id = 'perfect_stage'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '퀴즈 ⭐6 ≥ 목표 3 이어도 거부 → 프로젝트 +40 → 상자 +50, 완벽한 스테이지' }
+      );
+    },
+  });
+}
+
+// ── 데일리 미션 (P8-07, ① 00034) ──
+async function groupMissions(u) {
+  const today = () => one(`select public.kst_today()::text`);
+  const ago = (n) => one(`select (public.kst_today() - ${n})::text`);
+  const stageQuizzes = (stageId) =>
+    one(
+      `select string_agg(id::text, ',' order by "order") from public.quests where stage_id = '${stageId}' and quest_type = 'quiz'`,
+    ).split(',');
+  const today_ = (id, quiz) => rpc('daily_missions_today', { p_user_id: id, p_quiz_ids: quiz });
+  const ids = (r) => (r.json?.missions ?? []).map((m) => m.id);
+  // KST 자정 기준 시각: '<날짜> 00:00:00+09' 에서 초를 더하고 뺌
+  const at = (day, sec = 0) => `('${day} 00:00:00+09'::timestamptz + interval '${sec} seconds')`;
+
+  await check({
+    group: 'missions',
+    id: 'DM-1d',
+    role: 'authenticated',
+    op: 'user_daily_missions: 남의 행 읽기 · 비로그인 읽기 · 본인 행 INSERT · daily_missions 읽기 (본인 배정 읽기만 열림, 쓰기는 RPC)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.user_daily_missions (user_id, day, mission_ids) values
+             ('${u.bob.id}', '2026-01-01', '{quest_1}'), ('${u.alice.id}', '2026-01-01', '{quest_1}') on conflict do nothing`);
+      const others = await rest('GET', `/rest/v1/user_daily_missions?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 배정 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', '/rest/v1/user_daily_missions?select=day', { as: u.alice });
+      if (own.status !== 200 || own.json.length < 1) return { actual: 'error', detail: `본인 배정 ${own.status}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/user_daily_missions?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon 읽기 ${anon.detail}` };
+      const pool = classifyRead(await rest('GET', '/rest/v1/daily_missions?select=*', { as: u.alice }));
+      if (pool.actual === 'allowed') return { actual: 'written', detail: `미션 풀 읽기 ${pool.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/user_daily_missions', {
+          as: u.alice,
+          body: { user_id: u.alice.id, day: '2026-01-02', mission_ids: ['quest_3'] },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_daily_missions where user_id = '${u.alice.id}' and day = '2026-01-02')`,
+      );
+    },
+  });
+  await check({
+    group: 'missions',
+    id: 'DM-2',
+    role: 'service_role',
+    op: '배정: 읽기만이면 assigned false · 결정적(다시 불러도·행을 지우고 다시 배정해도 같음) · 할 수 있는 것만(새 학생은 복습 없음, 퀴즈 없으면 퀴즈 미션 없음) · 퀘스트 미션 첫 칸 · 오늘의 퀴즈 목록 고정(퀴즈 퀘스트만)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm2', '미션배정');
+      const qz = stageQuizzes(STAGE1);
+      const peek = await today_(x.id, null);
+      const first = await today_(x.id, [...qz, Q1]);
+      const again = await today_(x.id, []);
+      one(`delete from public.user_daily_missions where user_id = '${x.id}'`);
+      const redo = await today_(x.id, [...qz, Q1]);
+      // 퀴즈 없음 → 퀴즈 그룹 빠짐, 복습할 것 없음 → 퀘스트·힌트 없이 2개
+      const y = await createUser('dm2b', '미션퀴즈없음');
+      const noQuiz = await today_(y.id, []);
+      // 어제 판정한 별 1개 퀘스트가 있으면 복습 미션이 들어옴 (퀴즈 없음 → 퀘스트·힌트·복습 3개)
+      const z = await createUser('dm2c', '미션복습');
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, best_stars, stars, stars_judged_on, code_submitted)
+           values ('${z.id}', '${Q1}', 'completed', now() - interval '2 days', 1, 1, public.kst_today() - 1, '')`);
+      const review = await today_(z.id, []);
+      const groups = (r) => (r.json?.missions ?? []).map((m) => m.kind).join(',');
+      return (
+        compare(
+          'DM-2',
+          {
+            peek: false,
+            first: 3,
+            firstKind: 'quest_clear',
+            quiz: qz.slice(0, 3),
+            again: ids(first),
+            againQuiz: qz.slice(0, 3),
+            redo: ids(first),
+            noQuiz: 'quest_clear,no_hint',
+            review: true,
+            progress0: true,
+          },
+          {
+            peek: peek.json?.assigned,
+            first: ids(first).length,
+            firstKind: first.json?.missions?.[0]?.kind,
+            quiz: first.json?.quiz_ids,
+            again: ids(again),
+            againQuiz: again.json?.quiz_ids,
+            redo: ids(redo),
+            noQuiz: groups(noQuiz),
+            review: groups(review).split(',').includes('review') && ids(review).length === 3,
+            progress0: (first.json?.missions ?? []).every((m) => m.progress === 0 && m.claimed === false),
+          },
+        ) ?? { actual: 'ok', detail: `오늘 ${ids(first).join(',')} · 퀴즈 ${qz.length}개 중 3개 고정` }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-2b',
+    role: 'postgres',
+    op: '§12-Q65 (e): 퀘스트 3개 미션은 최근 7일(어제까지) 중 하루 3개 이상 깬 학생만 · 2개 이하는 늘 · 8일 전 기록·오늘 기록은 안 셈',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm2d', '미션맞춤');
+      const can = (t) =>
+        one(`select public.daily_mission_possible('${x.id}', public.kst_today(), 'quest_clear', ${t}, null)::text`);
+      const clear = (offset, day) =>
+        one(`insert into public.user_progress (user_id, quest_id, status, completed_at, best_stars, stars, stars_judged_on, code_submitted)
+             select '${x.id}', q.id, 'completed', ${at(day, 12 * 3600)}, 2, 2, '${day}'::date, ''
+               from public.quests q where q.quest_type <> 'quiz' order by q.stage_id, q."order" offset ${offset} limit 3`);
+      const fresh = `${can(2)},${can(3)}`;
+      clear(0, ago(8));
+      const old = can(3);
+      clear(3, today());
+      const sameDay = can(3);
+      clear(6, ago(7));
+      const recent = can(3);
+      return (
+        compare(
+          'DM-2b',
+          { fresh: 'true,false', old: 'false', sameDay: 'false', recent: 'true' },
+          { fresh, old, sameDay, recent },
+        ) ?? { actual: 'ok', detail: '새 학생 2개만 → 8일 전·오늘 3개는 안 셈 → 7일 전 3개면 3개 미션' }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-3',
+    role: 'postgres',
+    op: '진행 판정은 기존 기록에서 KST 날짜로: 자정 정각은 오늘, 1초 전은 어제 · 황금키 완료 빼고 · 힌트 쓴 완료는 힌트 없이에서 빼고 · 복습(코드 판정일·퀴즈 review) · 오늘의 퀴즈(정답 또는 3번째 오답) · 퀴즈 맞히기',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm3', '미션판정');
+      const d = today();
+      const y = ago(1);
+      const [a, b, c, e] = stageQuests(STAGE1);
+      const [qz1, qz2, qz3] = stageQuizzes(STAGE1);
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, hints_used, used_golden_key, best_stars, stars, stars_judged_on, code_submitted) values
+        ('${x.id}', '${a}', 'completed', ${at(d)}, 0, false, 3, 3, '${d}', ''),
+        ('${x.id}', '${b}', 'completed', ${at(d, -1)}, 0, false, 3, 3, '${d}', ''),
+        ('${x.id}', '${c}', 'completed', ${at(d, 60)}, 0, true, 1, 1, '${d}', ''),
+        ('${x.id}', '${e}', 'completed', ${at(d, 120)}, 2, false, 1, 1, '${d}', '')`);
+      one(`insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct, created_at) values
+        ('${x.id}', '${qz1}', 'first', 1, '{}', true, ${at(d)}),
+        ('${x.id}', '${qz2}', 'first', 3, '{}', false, ${at(d, -1)}),
+        ('${x.id}', '${qz3}', 'review', 2, '{}', false, ${at(d, 30)}),
+        ('${x.id}', '${qz3}', 'review', 3, '{}', false, ${at(d, 40)})`);
+      const p = (day, kind, quiz = []) =>
+        Number(
+          one(`select public.daily_mission_progress('${x.id}', '${day}', '${kind}', '{${quiz.join(',')}}'::uuid[])`),
+        );
+      return (
+        compare(
+          'DM-3',
+          {
+            clearToday: 2,
+            clearYesterday: 1,
+            noHintToday: 1,
+            reviewToday: 2,
+            dailyToday: 1,
+            dailyYesterday: 1,
+            correctToday: 1,
+            correctYesterday: 0,
+          },
+          {
+            clearToday: p(d, 'quest_clear'),
+            clearYesterday: p(y, 'quest_clear'),
+            noHintToday: p(d, 'no_hint'),
+            reviewToday: p(d, 'review'),
+            dailyToday: p(d, 'daily_quiz', [qz1, qz2]),
+            dailyYesterday: p(y, 'daily_quiz', [qz1, qz2]),
+            correctToday: p(d, 'quiz_correct'),
+            correctYesterday: p(y, 'quiz_correct'),
+          },
+        ) ?? { actual: 'ok', detail: `오늘 ${d}: 자정 정각 완료는 오늘, 23:59:59 완료는 어제` }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-4',
+    role: 'service_role',
+    op: '받기: 미달 409 · 배정에 없음 404 · 기한 밖 410 · 동시 4번도 코인·XP 15 한 번(원장 mission/<날짜>:<id>) · 레벨을 넘으면 레벨 업 코인 · 어제 달성·안 받은 것은 pending 에 남고 받을 수 있음 · 잔액 = 원장 합',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm4', '미션받기');
+      const d = today();
+      const y = ago(1);
+      const [a, b] = stageQuests(STAGE1);
+      await today_(x.id, []);
+      one(`update public.user_daily_missions set mission_ids = '{quest_1,quest_3,no_hint_1}' where user_id = '${x.id}'`);
+      await rpc('complete_quest', { p_user_id: x.id, p_quest_id: a, p_submission: submission() });
+      const claim = (id, day = d) => rpc('claim_daily_mission', { p_user_id: x.id, p_day: day, p_mission_id: id });
+      const short = await claim('quest_3');
+      const notMine = await claim('review_1');
+      const old = await claim('quest_1', ago(7));
+      const future = await claim('quest_1', one(`select (public.kst_today() + 1)::text`));
+      const xp0 = Number(one(`select total_xp from public.users where id = '${x.id}'`));
+      const many = await Promise.all(Array.from({ length: 4 }, () => claim('quest_1')));
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_claimed === false);
+      const xp1 = Number(one(`select total_xp from public.users where id = '${x.id}'`));
+      // 레벨 2 문턱(200) 바로 아래에서 받으면 레벨 업 코인
+      one(`update public.users set total_xp = 190 where id = '${x.id}'`);
+      const lv = await claim('no_hint_1');
+      // 어제 배정 + 어제 완료 → pending → 받기
+      one(`insert into public.user_daily_missions (user_id, day, mission_ids) values ('${x.id}', '${y}', '{quest_1}')`);
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, code_submitted)
+           values ('${x.id}', '${b}', 'completed', ${at(y, 3600)}, '')`);
+      const pend = await today_(x.id, null);
+      const past = await claim('quest_1', y);
+      const pend2 = await today_(x.id, null);
+      return (
+        compare(
+          'DM-4',
+          {
+            short: '409:mission_not_done',
+            notMine: '404:mission_not_found',
+            old: '410:mission_expired',
+            future: '410:mission_expired',
+            many: [200, 200, 200, 200],
+            fresh: '1:10:15',
+            xp: 15,
+            lv: '15:35:2:20',
+            pend: `${y}:quest_1`,
+            past: '200:false:10',
+            pend2: 0,
+            rows: '3',
+            refs: `${y}:quest_1,${d}:no_hint_1,${d}:quest_1`,
+            mismatches: '0',
+          },
+          {
+            short: `${short.status}:${errMsg(short)}`,
+            notMine: `${notMine.status}:${errMsg(notMine)}`,
+            old: `${old.status}:${errMsg(old)}`,
+            future: `${future.status}:${errMsg(future)}`,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.mission_coins}:${fresh[0]?.json.xp_earned}`,
+            xp: xp1 - xp0,
+            lv: `${lv.json?.mission_coins}:${lv.json?.coins_earned}:${lv.json?.level_after}:${lv.json?.level_ups?.[0]?.coins}`,
+            pend: (pend.json?.pending ?? []).map((m) => `${m.day}:${m.id}`).join(','),
+            past: `${past.status}:${past.json?.already_claimed}:${past.json?.mission_coins}`,
+            pend2: pend2.json?.pending?.length,
+            rows: one(`select count(*) from public.coin_ledger where user_id = '${x.id}' and source = 'mission'`),
+            refs: one(`select string_agg(ref, ',' order by ref) from public.coin_ledger where user_id = '${x.id}' and source = 'mission'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '미달·남의 미션·기한 밖 거부, 한 번만 코인+XP 15, 레벨 2 넘으며 +20, 어제 것 받기' }
+      );
+    },
+  });
+
+  await check({
+    group: 'missions',
+    id: 'DM-5',
+    role: 'service_role',
+    op: '7일 보관 경계(P8-15): 6일 전 달성·안 받은 미션은 pending 에 남고 받기 200, 7일 전은 pending 에서 빠지고 받기 410 · 받은 뒤 다시 받기는 already_claimed(코인 0)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('dm5', '미션보관');
+      const [a, b] = stageQuests(STAGE1);
+      const d6 = ago(6);
+      const d7 = ago(7);
+      one(`insert into public.user_daily_missions (user_id, day, mission_ids) values
+        ('${x.id}', '${d6}', '{quest_1}'), ('${x.id}', '${d7}', '{quest_1}')`);
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, code_submitted) values
+        ('${x.id}', '${a}', 'completed', ${at(d6, 3600)}, ''),
+        ('${x.id}', '${b}', 'completed', ${at(d7, 3600)}, '')`);
+      const claim = (day) => rpc('claim_daily_mission', { p_user_id: x.id, p_day: day, p_mission_id: 'quest_1' });
+      // 앱(월드맵 HUD)처럼 오늘 첫 방문에 배정하며 읽음 (배정 전 읽기만은 pending 없이 assigned false)
+      const pend = await today_(x.id, []);
+      const in7 = await claim(d7);
+      const in6 = await claim(d6);
+      const again = await claim(d6);
+      const pend2 = await today_(x.id, null);
+      return (
+        compare(
+          'DM-5',
+          {
+            pend: `${d6}:quest_1`,
+            in7: '410:mission_expired',
+            in6: '200:false:10',
+            again: '200:true:0',
+            pend2: 0,
+            refs: `${d6}:quest_1`,
+            mismatches: '0',
+          },
+          {
+            pend: (pend.json?.pending ?? []).map((m) => `${m.day}:${m.id}`).join(','),
+            in7: `${in7.status}:${errMsg(in7)}`,
+            in6: `${in6.status}:${in6.json?.already_claimed}:${in6.json?.mission_coins}`,
+            again: `${again.status}:${again.json?.already_claimed}:${again.json?.coins_earned}`,
+            pend2: pend2.json?.pending?.length,
+            refs: one(`select string_agg(ref, ',' order by ref) from public.coin_ledger where user_id = '${x.id}' and source = 'mission'`),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: `6일 전(${d6}) 받기 +10 · 7일 전(${d7}) 410 · 다시 받기 0` }
+      );
+    },
+  });
+}
+
+// ── 출석·스트릭 방패 (P8-08, ① 00035) ──
+async function groupAttendance(u) {
+  const ago = (n) => one(`select (public.kst_today() - ${n})::text`);
+  const noonKst = (day) => `('${day} 12:00:00+09'::timestamptz)`;
+  const stamp = (id) => rpc('stamp_attendance', { p_user_id: id });
+  const status = (id) => rpc('world_daily_status', { p_user_id: id });
+  // 지난 출석 = 원장 attendance/<날짜> (도장 RPC 는 오늘만 찍으므로 grant_coins 로 같은 키를 만듦)
+  const pastStamps = async (id, days) => {
+    for (const n of days)
+      await rpc('grant_coins', { p_user_id: id, p_source: 'attendance', p_ref: ago(n), p_amount: 5 });
+  };
+  const setShields = (id, n) =>
+    one(`insert into public.user_streak_shields (user_id, shields) values ('${id}', ${n})
+           on conflict (user_id) do update set shields = excluded.shields`);
+  const learnedOn = (id, quest, day, golden = false) =>
+    one(`insert into public.user_progress (user_id, quest_id, status, completed_at, used_golden_key, code_submitted)
+           values ('${id}', '${quest}', 'completed', ${noonKst(day)}, ${golden}, '')`);
+  const shieldRows = (id) =>
+    one(`select coalesce(string_agg(day::text, ',' order by day), '') from public.streak_shield_days where user_id = '${id}'`);
+  const held = (id) => Number(one(`select coalesce((select shields from public.user_streak_shields where user_id = '${id}'), 0)`));
+
+  await check({
+    group: 'attendance',
+    id: 'AT-1d',
+    role: 'authenticated',
+    op: 'user_streak_shields·streak_shield_days: 남의 행 읽기 · 비로그인 읽기 · 본인 행 INSERT·UPDATE (본인 행 읽기만 열림, 쓰기는 RPC)',
+    ...WRITE,
+    run: async () => {
+      setShields(u.bob.id, 1);
+      setShields(u.alice.id, 1);
+      one(`insert into public.streak_shield_days (user_id, day) values ('${u.bob.id}', '2026-01-01') on conflict do nothing`);
+      const others = await rest('GET', `/rest/v1/user_streak_shields?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 방패 ${others.status} rows=${others.json?.length}` };
+      const otherDays = await rest('GET', `/rest/v1/streak_shield_days?select=day&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (otherDays.status !== 200 || otherDays.json.length !== 0)
+        return { actual: 'written', detail: `남의 방패 날 ${otherDays.status} rows=${otherDays.json?.length}` };
+      const own = await rest('GET', '/rest/v1/user_streak_shields?select=shields', { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 방패 ${own.status}` };
+      for (const t of ['user_streak_shields', 'streak_shield_days']) {
+        const anon = classifyRead(await rest('GET', `/rest/v1/${t}?select=*`));
+        if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${t} ${anon.detail}` };
+      }
+      const upd = await classifyWrite(
+        rest('PATCH', `/rest/v1/user_streak_shields?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { shields: 2 },
+          prefer: 'return=minimal',
+        }),
+        `select shields = 2 from public.user_streak_shields where user_id = '${u.alice.id}'`,
+      );
+      if (upd.actual === 'written') return { actual: 'written', detail: `본인 방패 UPDATE ${upd.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/streak_shield_days', {
+          as: u.alice,
+          body: { user_id: u.alice.id, day: '2026-01-02' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.streak_shield_days where user_id = '${u.alice.id}' and day = '2026-01-02')`,
+      );
+    },
+  });
+
+  await check({
+    group: 'attendance',
+    id: 'AT-2',
+    role: 'service_role',
+    op: '출석 도장: 하루 한 번(원장 attendance/<KST 오늘>, 동시 4번도 1회) · 누적 7회 사이클(끊겨도 진행 유지, 8번째는 1일째) · 7일째 30코인 + 방패 1(가득 2개면 0) · 상태 칸·사이클 · 잔액 = 원장',
+    ...OK,
+    run: async () => {
+      const x = await createUser('at2', '출석도장');
+      const peek = await status(x.id);
+      const many = await Promise.all(Array.from({ length: 4 }, () => stamp(x.id)));
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_stamped === false);
+      const again = await stamp(x.id);
+      const after = await status(x.id);
+      // 지난 출석 6번(띄엄띄엄) → 오늘이 7일째 상자
+      const y = await createUser('at2b', '출석상자');
+      await pastStamps(y.id, [20, 11, 9, 5, 3, 2]);
+      const before7 = await status(y.id);
+      const chest = await stamp(y.id);
+      // 방패가 가득(2)이면 7일째 상자는 코인만
+      const z = await createUser('at2c', '출석방패가득');
+      await pastStamps(z.id, [6, 5, 4, 3, 2, 1]);
+      setShields(z.id, 2);
+      const full = await stamp(z.id);
+      // 7번 다 찍었으면 오늘은 새 사이클 1일째
+      const w = await createUser('at2d', '출석새사이클');
+      await pastStamps(w.id, [7, 6, 5, 4, 3, 2, 1]);
+      const cycle = await stamp(w.id);
+      const wStatus = await status(w.id);
+      return (
+        compare(
+          'AT-2',
+          {
+            peek: `false:1:0`,
+            many: [200, 200, 200, 200],
+            fresh: `1:1:5`,
+            again: `true:0:1`,
+            after: `true:1:${ago(0)}`,
+            before7: `false:7:6`,
+            chest: `7:30:1:1`,
+            full: `7:30:0:2`,
+            cycle: `1:5`,
+            wCycle: `1:${ago(0)}`,
+            ref: ago(0),
+            mismatches: '0:0:0:0',
+          },
+          {
+            peek: `${peek.json?.attendance?.stamped_today}:${peek.json?.attendance?.day_n}:${peek.json?.attendance?.cycle?.length}`,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.day_n}:${fresh[0]?.json.coins_earned}`,
+            again: `${again.json?.already_stamped}:${again.json?.coins_earned}:${again.json?.day_n}`,
+            after: `${after.json?.attendance?.stamped_today}:${after.json?.attendance?.day_n}:${after.json?.attendance?.cycle?.join(',')}`,
+            before7: `${before7.json?.attendance?.stamped_today}:${before7.json?.attendance?.day_n}:${before7.json?.attendance?.cycle?.length}`,
+            chest: `${chest.json?.day_n}:${chest.json?.coins_earned}:${chest.json?.shield_granted}:${chest.json?.shields}`,
+            full: `${full.json?.day_n}:${full.json?.coins_earned}:${full.json?.shield_granted}:${full.json?.shields}`,
+            cycle: `${cycle.json?.day_n}:${cycle.json?.coins_earned}`,
+            wCycle: `${wStatus.json?.attendance?.day_n}:${wStatus.json?.attendance?.cycle?.join(',')}`,
+            ref: one(`select ref from public.coin_ledger where user_id = '${x.id}' and source = 'attendance'`),
+            mismatches: [x, y, z, w].map((v) => mismatches(v.id)).join(':'),
+          },
+        ) ?? { actual: 'ok', detail: '하루 1회 5코인, 띄엄띄엄 6번 뒤 7일째 30+방패, 가득이면 방패 0, 8번째는 1일째' }
+      );
+    },
+  });
+
+  await check({
+    group: 'attendance',
+    id: 'AT-3',
+    role: 'service_role',
+    op: '방패 정산(다음 방문): 하루 공백 1개로 메움·다시 불러도 그대로 · 이틀 공백 2개 · 모자라면 안 씀 · 방패 0 · 오늘 이미 풀었어도 어제 메움 · 동시 4번도 1개 · 학습일(퀴즈 끝냄 포함, 황금키 완료 제외)',
+    ...OK,
+    run: async () => {
+      const [qa, qb, qc] = stageQuests(STAGE1);
+      const quiz = one(
+        `select id from public.quests where stage_id = '${STAGE1}' and quest_type = 'quiz' order by "order" limit 1`,
+      );
+      const mk = async (tag, learned, shields) => {
+        const v = await createUser(`at3${tag}`, `방패${tag}`);
+        learned.forEach((n, i) => learnedOn(v.id, [qa, qb, qc][i], ago(n)));
+        if (shields !== null) setShields(v.id, shields);
+        return v;
+      };
+      const st = (r) =>
+        `${r.json?.streak?.days}:${r.json?.streak?.today}:${r.json?.streak?.shields}:${(r.json?.streak?.filled ?? []).length}`;
+      const one1 = await mk('a', [2], 1);
+      const r1 = await status(one1.id);
+      const r1b = await status(one1.id);
+      const two = await mk('b', [3], 2);
+      const r2 = await status(two.id);
+      const short = await mk('c', [3], 1);
+      const r3 = await status(short.id);
+      const none = await mk('d', [2], null);
+      const r4 = await status(none.id);
+      const todayToo = await mk('e', [2, 0], 1);
+      const r5 = await status(todayToo.id);
+      const race = await mk('f', [2], 2);
+      const r6 = await Promise.all(Array.from({ length: 4 }, () => status(race.id)));
+      // 퀴즈를 어제 끝냄(3번째 오답) = 학습일, 황금키 완료는 학습일 아님
+      const q = await createUser('at3g', '방패퀴즈');
+      one(`insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct, created_at)
+           values ('${q.id}', '${quiz}', 'first', 3, '{}', false, ${noonKst(ago(1))})`);
+      learnedOn(q.id, qa, ago(0), true);
+      const r7 = await status(q.id);
+      return (
+        compare(
+          'AT-3',
+          {
+            one: `2:false:0:1`,
+            oneRows: ago(1),
+            oneAgain: `2:false:0:0`,
+            two: `3:false:0:2`,
+            twoRows: `${ago(2)},${ago(1)}`,
+            short: `0:false:1:0`,
+            none: `0:false:0:0`,
+            todayToo: `3:true:0:1`,
+            race: '1:1',
+            raceDays: 2,
+            quiz: `1:false`,
+            noRows: '',
+          },
+          {
+            one: st(r1),
+            oneRows: shieldRows(one1.id),
+            oneAgain: st(r1b),
+            two: st(r2),
+            twoRows: shieldRows(two.id),
+            short: st(r3),
+            none: st(r4),
+            todayToo: st(r5),
+            race: `${held(race.id)}:${shieldRows(race.id).split(',').length}`,
+            raceDays: r6[0].json?.streak?.days,
+            quiz: `${r7.json?.streak?.days}:${r7.json?.streak?.today}`,
+            noRows: shieldRows(short.id) + shieldRows(none.id),
+          },
+        ) ?? { actual: 'ok', detail: '1일 공백 1개·2일 공백 2개로 메움, 모자람·0개는 그대로, 동시 1회, 퀴즈 끝낸 날 학습일' }
+      );
+    },
+  });
 }
 
 // ── account: 탈퇴 (B28) ─────────────────────────────────────
@@ -2671,6 +3893,7 @@ async function groupAccount(u) {
       const fx = psql(`
         insert into public.user_progress (user_id, quest_id, status, code_submitted) values ('${x.id}', '${Q1}', 'in_progress', 'print(1)');
         insert into public.user_badges (user_id, badge_type) values ('${x.id}', 'first_code');
+        insert into public.user_achievements (user_id, achievement_id) values ('${x.id}', 'first_code');
         insert into public.quiz_attempts (user_id, quest_id, mode, attempt_no, answer, is_correct) values ('${x.id}', '${Q1}', 'first', 1, '{}', false);
         insert into public.user_api_keys (user_id, provider, key_version, iv, auth_tag, ciphertext) values ('${x.id}', 'openai', 1, 'AAAA', 'AAAA', 'AAAA');
         insert into public.api_rate_limits (user_id, bucket, minute_start, day) values ('${x.id}', 'tutor:hint', now(), public.kst_today());
@@ -2770,12 +3993,17 @@ async function groupApp(u) {
     [
       'APP-4',
       'world·profile users + 공개 프로필 (P3-13 OWN_PROFILE_SELECT: 실명·사진 컬럼 안 읽음)',
-      `/rest/v1/users?select=id,total_xp,current_level,user_public_profiles(public_name,avatar_skin)&id=eq.${u.alice.id}`,
+      `/rest/v1/users?select=id,total_xp,current_level,coins,user_public_profiles(public_name,avatar_skin)&id=eq.${u.alice.id}`,
     ],
     [
       'APP-5',
-      'world·profile user_badges',
-      `/rest/v1/user_badges?select=badge_type,earned_at&user_id=eq.${u.alice.id}`,
+      'profile/page.tsx user_achievements (P8-09: 뱃지 → 업적)',
+      `/rest/v1/user_achievements?select=achievement_id,achieved_at&user_id=eq.${u.alice.id}`,
+    ],
+    [
+      'APP-17',
+      'profile/page.tsx achievements (P8-09 업적 정의)',
+      '/rest/v1/achievements?select=id,name,icon,tier,sort,hidden&order=sort',
     ],
     [
       'APP-6',
@@ -2794,17 +4022,17 @@ async function groupApp(u) {
     ],
     [
       'APP-9',
-      'checkBadges.ts quests',
+      '퀘스트 읽기 (예전 checkBadges.ts)',
       `/rest/v1/quests?select=stage_id&id=eq.${Q1}`,
     ],
     [
       'APP-10',
-      'checkBadges.ts quests',
+      '퀘스트 읽기 (예전 checkBadges.ts)',
       `/rest/v1/quests?select=id&stage_id=eq.${STAGE1}`,
     ],
     [
       'APP-11',
-      'checkBadges.ts quests',
+      '퀘스트 읽기 (예전 checkBadges.ts)',
       `/rest/v1/quests?select=stage_id,stages!inner(is_final)&id=eq.${Q1}`,
     ],
     [
@@ -3401,6 +4629,387 @@ async function groupStatic() {
 }
 
 // ── schema: P1-08 스키마 확장 (00012) ─────────────────────────
+// ── 업적 (P8-09, ① 00036) ──
+async function groupAchievements(u) {
+  const evaluate = (id) => rpc('evaluate_achievements', { p_user_id: id });
+  const claim = (id, a) => rpc('claim_achievement', { p_user_id: id, p_achievement_id: a });
+  const complete = (id, q, extra = {}) =>
+    rpc('complete_quest', { p_user_id: id, p_quest_id: q, p_submission: { ...submission(), ...extra } });
+  const ids = (r) => (r.json?.new_achievements ?? []).map((a) => a.id).join(',');
+  const owned = (id) =>
+    one(`select coalesce(string_agg(achievement_id || ':' || (claimed_at is not null), ',' order by achievement_id), '')
+           from public.user_achievements where user_id = '${id}'`);
+  // 시드 1스테이지 객관식 퀴즈 하나: 정답·오답 보기
+  const mc = JSON.parse(
+    one(`select json_build_object('id', q.id, 'right', k.quiz_answer->'accepted'->0,
+           'wrong', (select o->'id' from jsonb_array_elements(q.prompt_skeleton->'quiz'->'options') o
+                      where o->'id' <> k.quiz_answer->'accepted'->0 limit 1))
+           from public.quests q join public.quest_answer_keys k on k.quest_id = q.id
+          where q.stage_id = '${STAGE1}' and q.quiz_kind = 'multiple_choice' order by q."order" limit 1`),
+  );
+
+  await check({
+    group: 'achievements',
+    id: 'AC-1d',
+    role: 'authenticated',
+    op: 'achievements·user_achievements: 정의는 로그인 사용자 읽기만, 남의 업적·비로그인 읽기 · 본인 업적 INSERT·받은 시각 UPDATE (쓰기는 RPC)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.user_achievements (user_id, achievement_id) values ('${u.bob.id}', 'first_code'), ('${u.alice.id}', 'first_code')
+             on conflict do nothing`);
+      const defs = await rest('GET', '/rest/v1/achievements?select=id', { as: u.alice });
+      if (defs.status !== 200 || defs.json.length < 30) return { actual: 'error', detail: `정의 읽기 ${defs.status} rows=${defs.json?.length}` };
+      const others = await rest('GET', `/rest/v1/user_achievements?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 업적 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', '/rest/v1/user_achievements?select=achievement_id', { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 업적 ${own.status}` };
+      for (const t of ['achievements', 'user_achievements']) {
+        const anon = classifyRead(await rest('GET', `/rest/v1/${t}?select=*`));
+        if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${t} ${anon.detail}` };
+      }
+      const upd = await classifyWrite(
+        rest('PATCH', `/rest/v1/user_achievements?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { claimed_at: new Date().toISOString() },
+          prefer: 'return=minimal',
+        }),
+        `select claimed_at is not null from public.user_achievements where user_id = '${u.alice.id}' and achievement_id = 'first_code'`,
+      );
+      if (upd.actual === 'written') return { actual: 'written', detail: `받은 시각 UPDATE ${upd.detail}` };
+      const def = await classifyWrite(
+        rest('PATCH', '/rest/v1/achievements?id=eq.first_code', {
+          as: u.alice,
+          body: { goal: 99 },
+          prefer: 'return=minimal',
+        }),
+        `select goal = 99 from public.achievements where id = 'first_code'`,
+      );
+      if (def.actual === 'written') return { actual: 'written', detail: `정의 UPDATE ${def.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/user_achievements', {
+          as: u.alice,
+          body: { user_id: u.alice.id, achievement_id: 'level_50' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_achievements where user_id = '${u.alice.id}' and achievement_id = 'level_50')`,
+      );
+    },
+  });
+
+  await check({
+    group: 'achievements',
+    id: 'AC-2',
+    role: 'service_role',
+    op: '판정: 첫 완료(힌트 0) → 첫 코드·힌트 마스터·반짝 별 세 개(브론즈 10코인, sort 순) · 다시 판정 0개 · 동시 4번도 한 번 · 황금키 완료는 지표에 안 셈 · 진행도 · 판정 시간',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ac2', '업적판정');
+      const first = await complete(x.id, Q1);
+      const again = await evaluate(x.id);
+      const many = await Promise.all(Array.from({ length: 4 }, () => evaluate(x.id)));
+      // 황금키로 완료한 퀘스트는 퀘스트 수·힌트 없이에 안 셈 (Q25)
+      const y = await createUser('ac2b', '업적황금키');
+      await rpc('use_golden_key', { p_user_id: y.id, p_quest_id: Q1 });
+      const golden = await complete(y.id, Q1);
+      const prog = JSON.parse(
+        one(`select json_object_agg(achievement_id, progress || '/' || goal) from public.achievement_progress('${x.id}')
+               where achievement_id in ('first_code', 'quests_10', 'quests_all', 'stars_10', 'streak_3')`),
+      );
+      // 스테이지 1을 다 푼 사용자의 판정 시간 (퀘스트 완료 지연, postgres 직접)
+      for (const q of stageQuests(STAGE1).slice(1)) await complete(x.id, q);
+      const ms = Number(
+        one(`do $$ declare t timestamptz := clock_timestamp();
+             begin perform public.evaluate_achievements('${x.id}');
+                   perform set_config('ac.ms', round(extract(epoch from clock_timestamp() - t) * 1000, 1)::text, false); end $$;
+             select current_setting('ac.ms')`),
+      );
+      const total = stageQuests(STAGE1).length;
+      return (
+        compare(
+          'AC-2',
+          {
+            first: 'first_code,hint_master,three_star_1',
+            tiers: 'bronze:10,bronze:10,bronze:10',
+            again: '',
+            many: '',
+            golden: '',
+            goldenOwned: '',
+            prog: { first_code: '1/1', quests_10: '1/10', quests_all: `1/${one("select count(*) from public.quests where quest_type <> 'quiz'")}`, stars_10: '3/10', streak_3: '1/3' },
+            fast: true,
+          },
+          {
+            first: ids(first),
+            tiers: (first.json?.new_achievements ?? []).map((a) => `${a.tier}:${a.coins}`).join(','),
+            again: (again.json ?? []).map((a) => a.id).join(','),
+            many: many.flatMap((r) => r.json ?? []).map((a) => a.id).join(','),
+            golden: ids(golden),
+            goldenOwned: owned(y.id),
+            prog,
+            fast: ms < 50,
+          },
+        ) ?? { actual: 'ok', detail: `첫 완료 업적 3개, 반복·동시 0, 황금키 0, 스테이지 1(${total}개) 뒤 판정 ${ms}ms` }
+      );
+    },
+  });
+
+  await check({
+    group: 'achievements',
+    id: 'AC-3',
+    role: 'service_role',
+    op: '실패 칭찬: 에러 뒤 통과(had_error) → 첫 에러 친구 · 황금키 완료면 아님 · 퀴즈 틀린 뒤 맞힘 → 다시 일어서기(퀴즈 API 뒤 판정) · 힌트 보고 끝까지 → 힌트 친구',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ac3', '실패칭찬');
+      const err = await complete(x.id, Q1, { had_error: true });
+      const flag = one(`select overcame_error from public.user_progress where user_id = '${x.id}' and quest_id = '${Q1}'`);
+      await rpc('record_hint', { p_user_id: x.id, p_quest_id: Q2, p_level: 1 });
+      const hint = await complete(x.id, Q2);
+      const wrong = await rpc('submit_quiz_answer', { p_user_id: x.id, p_quest_id: mc.id, p_answer: mc.wrong });
+      const right = await rpc('submit_quiz_answer', { p_user_id: x.id, p_quest_id: mc.id, p_answer: mc.right });
+      const quizWon = await evaluate(x.id);
+      const y = await createUser('ac3b', '황금키에러');
+      await rpc('use_golden_key', { p_user_id: y.id, p_quest_id: Q1 });
+      await complete(y.id, Q1, { had_error: true });
+      return (
+        compare(
+          'AC-3',
+          {
+            err: true,
+            flag: 't',
+            hint: true,
+            quiz: '200:200:false:true',
+            quizWon: 'comeback_1,quiz_1',
+            goldenFlag: 'f',
+          },
+          {
+            err: ids(err).split(',').includes('error_1'),
+            flag,
+            hint: ids(hint).split(',').includes('hint_finish_1'),
+            quiz: `${wrong.status}:${right.status}:${wrong.json?.correct}:${right.json?.correct}`,
+            quizWon: (quizWon.json ?? []).map((a) => a.id).sort().join(','),
+            goldenFlag: one(`select overcame_error from public.user_progress where user_id = '${y.id}' and quest_id = '${Q1}'`),
+          },
+        ) ?? { actual: 'ok', detail: '에러 뒤 통과·힌트 끝까지·퀴즈 다시 맞힘 업적, 황금키 완료는 에러 칭찬 없음' }
+      );
+    },
+  });
+
+  await check({
+    group: 'achievements',
+    id: 'AC-4',
+    role: 'service_role',
+    op: '받기: 안 얻은 업적 409 · 브론즈 10코인(원장 achievement/<id>) · 동시 4번도 한 번 · 다시 0 · 진행 초기화 뒤에도 업적·받음 남음, 다시 판정해도 새 업적 아님 · 잔액 = 원장',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ac4', '업적받기');
+      const no = await claim(x.id, 'quests_30');
+      const unknown = await claim(x.id, 'no_such');
+      await complete(x.id, Q1);
+      const many = await Promise.all(Array.from({ length: 4 }, () => claim(x.id, 'first_code')));
+      const fresh = many.filter((r) => r.status === 200 && r.json.already_claimed === false);
+      const again = await claim(x.id, 'first_code');
+      await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      const afterReset = owned(x.id);
+      const redo = await complete(x.id, Q1);
+      return (
+        compare(
+          'AC-4',
+          {
+            no: '409:achievement_not_earned',
+            unknown: 409,
+            many: [200, 200, 200, 200],
+            fresh: '1:10',
+            again: 'true:0',
+            ledger: 'first_code:10',
+            afterReset: 'first_code:true,hint_master:false,three_star_1:false',
+            redo: '',
+            mismatches: '0',
+          },
+          {
+            no: `${no.status}:${errMsg(no)}`,
+            unknown: unknown.status,
+            many: many.map((r) => r.status),
+            fresh: `${fresh.length}:${fresh[0]?.json.coins_earned}`,
+            again: `${again.json?.already_claimed}:${again.json?.coins_earned}`,
+            ledger: one(`select string_agg(ref || ':' || delta, ',') from public.coin_ledger where user_id = '${x.id}' and source = 'achievement'`),
+            afterReset,
+            redo: ids(redo),
+            mismatches: mismatches(x.id),
+          },
+        ) ?? { actual: 'ok', detail: '안 얻은 업적 거부, 한 번만 10코인, 리셋 뒤에도 남고 다시 축하하지 않음' }
+      );
+    },
+  });
+
+  await check({
+    group: 'achievements',
+    id: 'AC-5',
+    role: 'service_role',
+    op: '이관: 00036 을 다시 실행하면 user_badges 5종이 같은 id 업적으로(achieved_at = earned_at, 받기 가능), 이미 있으면 그대로 · 받기 10코인',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ac5', '뱃지이관');
+      one(`insert into public.user_badges (user_id, badge_type, earned_at) values
+             ('${x.id}', 'streak_3', '2026-10-01 10:00+09'), ('${x.id}', 'project_builder', '2026-10-02 10:00+09')`);
+      const sql = readFileSync(join(HERE, '..', 'migrations', '00036_achievements.sql'), 'utf8');
+      const m1 = psql(sql);
+      const m2 = psql(sql);
+      // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
+      const m3 = psql(readFileSync(join(HERE, '..', 'migrations', '00038_profile_stats.sql'), 'utf8'));
+      if (!m1.ok || !m2.ok || !m3.ok) return { actual: 'error', detail: firstLine(m1.err || m2.err || m3.err) };
+      const rows = one(`select string_agg(achievement_id || ':' || to_char(achieved_at at time zone 'Asia/Seoul', 'MM-DD') || ':' || (claimed_at is null), ',' order by achievement_id)
+                          from public.user_achievements where user_id = '${x.id}'`);
+      const got = await claim(x.id, 'project_builder');
+      return (
+        compare(
+          'AC-5',
+          { rows: 'project_builder:10-02:true,streak_3:10-01:true', claim: '200:30' },
+          { rows, claim: `${got.status}:${got.json?.coins_earned}` },
+        ) ?? { actual: 'ok', detail: '뱃지 2개 → 업적 2개(얻은 날 그대로, 받기 가능), 두 번 실행해도 그대로, 실버 30코인' }
+      );
+    },
+  });
+
+  // ── 소급 보상 (P8-11, ① 00037) ──
+  await check({
+    group: 'achievements',
+    id: 'RT-1',
+    role: 'postgres',
+    op: '00037 리허설: 옛 상태(힌트 0/1/2·황금키·퀴즈 별 일부 받음·뱃지 이관·레벨 보정) → 별·퀘스트·별·레벨 업 코인·조용한 업적, 두 번 실행 같음, 되돌리기',
+    ...OK,
+    run: async () => {
+      const names = ['h0', 'h1', 'h2', 'gold', 'quiz', 'badge', 'lv'];
+      const xs = [];
+      for (const n of names) xs.push(await createUser(`rt1${n}`, '소급'));
+      const id = Object.fromEntries(names.map((n, i) => [n, xs[i].id]));
+      const qz = one(`select id from public.quests where stage_id = '${STAGE1}' and quest_type = 'quiz' order by "order" limit 1`);
+      const file = readFileSync(join(HERE, '..', 'migrations', '00037_retro_rewards.sql'), 'utf8');
+      const rollback = readFileSync(join(HERE, '..', 'rollback', '00037_retro_rewards.rollback.sql'), 'utf8');
+      const done = `'2026-10-01 10:00+09'`;
+      // P8-05 이전 완료 행: best_stars 0 · 판정일 없음. 퀴즈는 00026 이 별을 적었고 별 1 코인만 받은 상태(00031 이전 판정 + 일부)
+      const code = (who, hints, golden = false) =>
+        `insert into public.user_progress (user_id, quest_id, status, hints_used, used_golden_key, completed_at)
+           values ('${id[who]}', '${Q1}', 'completed', ${hints}, ${golden}, ${done});`;
+      const setup = `
+        ${code('h0', 0)} ${code('h1', 1)} ${code('h2', 2)} ${code('gold', 0, true)} ${code('badge', 0)}
+        insert into public.user_progress (user_id, quest_id, status, completed_at, stars, best_stars, stars_judged_on, attempts)
+          values ('${id.quiz}', '${qz}', 'completed', '2026-10-05 10:00+09', 2, 2, '2026-10-05', 1);
+        select public.coin_apply('${id.quiz}', 'star', '${qz}:1', 5);
+        insert into public.user_badges (user_id, badge_type, earned_at) values ('${id.badge}', 'first_code', ${done});
+        insert into public.user_achievements (user_id, achievement_id, achieved_at) values ('${id.badge}', 'first_code', ${done});
+        update public.users set total_xp = 1210 where id = '${id.lv}';
+        insert into public.level_curve_adjustments (user_id, level_before, xp_before, xp_after) values ('${id.lv}', 5, 1000, 1210);
+        select public.coin_apply('${id.lv}', 'level_up', '2', 20);
+        -- 같은 트랜잭션이라 created_at 이 소급과 같아지지 않게 (운영에서는 다른 트랜잭션)
+        update public.coin_ledger set created_at = created_at - interval '1 day' where user_id in (${xs.map((x) => `'${x.id}'`).join(',')});`;
+      const list = names.map((n, i) => `('${id[n]}'::uuid, '${n}', ${i})`).join(',');
+      const progress = (alias) =>
+        `coalesce((select p.best_stars || '/' || coalesce(to_char(p.stars_judged_on, 'MM-DD'), '-') || '/' || p.attempts
+                     from public.user_progress p where p.user_id = ${alias}.id limit 1), '-')`;
+      const state = `select string_agg(n.name || ':' || u.coins || ':' || ${progress('u')} || ':' ||
+            coalesce((select string_agg(r.stars || '/' || r.coins, ';') from public.retro_rewards r where r.user_id = u.id), '-'), ',' order by n.ord)
+          || '|' || (select count(*) from public.coin_balance_mismatches())
+          || '|' || (select string_agg(to_char(achieved_at at time zone 'Asia/Seoul', 'MM-DD') || ':' || (claimed_at is null), ',')
+                       from public.user_achievements where user_id = '${id.badge}' and achievement_id = 'first_code')
+          || '|' || (select count(*) > 0 from public.user_achievements where user_id = '${id.h0}' and claimed_at is null)
+          || '|' || (select count(*) from public.coin_ledger where source = 'achievement' and user_id in (select id from (values ${list}) v(id, name, ord)))
+          from (values ${list}) n(id, name, ord) join public.users u on u.id = n.id;`;
+      const after = `select string_agg(n.name || ':' || u.coins, ',' order by n.ord) || '|' || (select count(*) from public.coin_balance_mismatches())
+            || '|' || (to_regclass('public.retro_rewards') is null)
+          from (values ${list}) n(id, name, ord) join public.users u on u.id = n.id;`;
+      const r = psql(`BEGIN;\n${setup}\n${file}\n${state}\n${file}\n${state}\n${rollback}\n${after}\nROLLBACK;`);
+      if (!r.ok) return { actual: 'error', detail: firstLine(r.err) };
+      const [first, second, back] = r.out.split('\n').filter(Boolean).slice(-3);
+      // 코인: 퀘스트 10 + 별 번호마다 5 (황금키 0) · 퀴즈는 별 2만(별 1은 받음) · Lv 5 = 레벨 3·4(20)·5(100), 레벨 2는 받음
+      const want =
+        'h0:25:3/10-01/1:3/25,h1:20:2/10-01/1:2/20,h2:15:1/10-01/1:1/15,gold:0:1/10-01/1:-,' +
+        'quiz:10:2/10-05/1:1/5,badge:25:3/10-01/1:3/25,lv:160:-:0/140|0|10-01:true|true|0';
+      return (
+        compare(
+          'RT-1 (이름:잔액:별/판정일/시도:소급 별/코인 | 어긋남 | 이관 업적 | 조용한 업적 | 업적 코인)',
+          { first: want, second: want, back: 'h0:0,h1:0,h2:0,gold:0,quiz:5,badge:0,lv:20|0|true' },
+          { first, second, back },
+        ) ?? { actual: 'ok', detail: '힌트 0/1/2 → ⭐3/2/1 + 25/20/15코인, 황금키 ⭐1·0코인, 퀴즈 새 별만, 레벨 업 140, 두 번째 실행 같음, 되돌리면 소급분만 빠짐' }
+      );
+    },
+  });
+  await check({
+    group: 'achievements',
+    id: 'RT-2',
+    role: 'authenticated',
+    op: 'retro_rewards: 본인 행 읽기만 · 남의 행·비로그인 읽기 · 본인 seen_at·coins UPDATE · INSERT (닫기는 /api/retro/seen service_role)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.retro_rewards (user_id, granted_at, stars, coins) values
+             ('${u.alice.id}', '2026-11-01', 3, 25), ('${u.bob.id}', '2026-11-01', 1, 15) on conflict do nothing`);
+      try {
+        return await rt2();
+      } finally {
+        one(`delete from public.retro_rewards where user_id in ('${u.alice.id}', '${u.bob.id}')`);
+      }
+    },
+  });
+  await check({
+    group: 'achievements',
+    id: 'PS-2',
+    role: 'service_role',
+    op: 'profile_stats: 첫 완료 2개(오늘 KST) → 오늘 2 · 업적 지표와 같은 수 · 학습일 = 서로 다른 날짜 · 방패·출석 날 · 이번 주 코인',
+    ...OK,
+    run: async () => {
+      const x = await createUser('ps2', '프로필통계');
+      for (const q of stageQuests(STAGE1).slice(0, 2)) await complete(x.id, q);
+      one(`insert into public.streak_shield_days (user_id, day) values ('${x.id}', public.kst_today() - 3)`);
+      const r = await rpc('profile_stats', { p_user_id: x.id });
+      const today = one('select to_char(public.kst_today(), \'YYYY-MM-DD\')');
+      const stats = JSON.parse(one(`select public.achievement_stats('${x.id}')::text`));
+      const days = one(`select string_agg(d::text, ',' order by d) from public.streak_learning_days('${x.id}') d`);
+      const week = one(`select coalesce(sum(delta), 0) from public.coin_ledger where user_id = '${x.id}' and delta > 0`);
+      const j = r.json ?? {};
+      return (
+        compare(
+          'PS-2',
+          { status: 200, today: 2, days, stats, shield: [one(`select to_char(public.kst_today() - 3, 'YYYY-MM-DD')`)], week: Number(week), streak: 1, tries: 0 },
+          {
+            status: r.status,
+            today: j.days?.[today],
+            days: Object.keys(j.days ?? {}).sort().join(','),
+            stats: j.stats,
+            shield: j.shield_days,
+            week: j.coins_week,
+            streak: j.streak,
+            tries: j.quiz_tries,
+          },
+        ) ?? { actual: 'ok', detail: `오늘 ${j.days?.[today]}개, 업적 지표 같음, 이번 주 코인 ${j.coins_week}` }
+      );
+    },
+  });
+  async function rt2() {
+    const own = await rest('GET', '/rest/v1/retro_rewards?select=user_id,stars,coins', { as: u.alice });
+    if (own.status !== 200 || own.json.length !== 1 || own.json[0].user_id !== u.alice.id)
+      return { actual: 'written', detail: `본인·남의 행 ${own.status} ${JSON.stringify(own.json)}` };
+    const anon = classifyRead(await rest('GET', '/rest/v1/retro_rewards?select=*'));
+    if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+    const upd = await classifyWrite(
+      rest('PATCH', `/rest/v1/retro_rewards?user_id=eq.${u.alice.id}`, {
+        as: u.alice,
+        body: { seen_at: new Date().toISOString(), coins: 9999 },
+        prefer: 'return=minimal',
+      }),
+      `select seen_at is not null or coins = 9999 from public.retro_rewards where user_id = '${u.alice.id}'`,
+    );
+    if (upd.actual === 'written') return upd;
+    return classifyWrite(
+      rest('POST', '/rest/v1/retro_rewards', {
+        as: u.alice,
+        body: { user_id: u.alice.id, granted_at: '2026-11-02', stars: 1, coins: 5 },
+        prefer: 'return=minimal',
+      }),
+      `select exists (select 1 from public.retro_rewards where user_id = '${u.alice.id}' and granted_at = '2026-11-02')`,
+    );
+  }
+}
+
 // psql 트랜잭션 안에서 검사하고 되돌림. DO 블록이 기대와 다르면 예외 → 'mismatch'
 function sqlCheck(sql) {
   const r = psql(`BEGIN;\n${sql}\nSELECT 'ok';\nROLLBACK;\n`);
@@ -5269,6 +6878,51 @@ async function groupQuiz(u) {
         );
       },
     });
+    await check({
+      group: 'quiz',
+      id: 'CN-9',
+      role: 'service_role',
+      op: 'submit_quiz_answer 코인 (P8-04): 새로 얻은 별에만 5씩(⭐2 → 10, 복습 ⭐3 → +5) · 연습 0 · 동시 제출 1회 · 리셋 뒤 다시 모아도 0',
+      ...OK,
+      run: async () => {
+        const x = await createUser('cn9', '별코인');
+        const c = (r) => `${r.json?.coins_earned}:${r.json?.coins_balance}`;
+        const w = await quiz(x.id, QZ_WRONG[0]);
+        const first = await quiz(x.id, QZ_RIGHT); // first ⭐2
+        const practice = await quiz(x.id, QZ_RIGHT);
+        one(`update public.user_progress set stars_judged_on = public.kst_today() - 1
+              where user_id = '${x.id}' and quest_id = '${QZ_MC}'`);
+        const review = await Promise.all([quiz(x.id, QZ_RIGHT), quiz(x.id, QZ_RIGHT), quiz(x.id, QZ_RIGHT)]);
+        await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+        const redo = await quiz(x.id, QZ_RIGHT); // 리셋 뒤 다시 ⭐3: 별 번호 1~3 모두 받은 적 있음
+        return (
+          compare(
+            'CN-9',
+            {
+              w: '0:0',
+              first: '10:10',
+              practice: 'practice 0:10',
+              review: '5',
+              redo: '3 0:15',
+              levelUps: '[]',
+              ledger: 'star:3',
+              mismatches: '0',
+            },
+            {
+              w: c(w),
+              first: c(first),
+              practice: `${practice.json?.mode} ${c(practice)}`,
+              review: String(review.reduce((n, r) => n + (r.json?.coins_earned ?? 99), 0)),
+              redo: `${redo.json?.stars} ${c(redo)}`,
+              levelUps: JSON.stringify(redo.json?.level_ups),
+              ledger: one(`select string_agg(source || ':' || n, ',') from (select source, count(*) n from public.coin_ledger
+                            where user_id = '${x.id}' group by source) t`),
+              mismatches: mismatches(x.id),
+            },
+          ) || { actual: 'ok', detail: '⭐2 = 10 → 연습 0 → 복습 ⭐3 동시 3번 중 +5 한 번 → 리셋 뒤 ⭐3 = 0' }
+        );
+      },
+    });
   } finally {
     if (ready) one(`delete from public.quests where id in ('${QZ_MC}', '${QZ_PARSONS}', '${QZ_LOCKED}')`);
   }
@@ -5813,6 +7467,10 @@ async function main() {
   await groupApiKeys(u);
   await groupRpc(u);
   await groupReward();
+  await groupCoins(u);
+  await groupMissions(u);
+  await groupAttendance(u);
+  await groupAchievements(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

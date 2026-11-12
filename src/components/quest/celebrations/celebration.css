@@ -269,10 +269,24 @@
   line-height: 1.2;
 }
 
+/* 5레벨마다 큰 칭호 (P8-01, §12-Q62): 레벨 도장이 금색 메달(흰 틈 + 금색 테), 칭호 도장은 금색 면·굵은 테두리 */
+.cel-seal-wrap[data-big] .cel-seal {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow:
+    0 0 0 4px var(--surface),
+    0 0 0 7px var(--accent-lip);
+}
+.cel-titlecard[data-big] {
+  border-width: 2.5px;
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent-light);
+}
+
 /* ───── 뱃지 · 황금키 · 보상: 금색 메달 */
 .cel-medals {
   display: grid;
-  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem 0.5rem;
   width: 100%;
   margin: 0;
@@ -291,8 +305,14 @@
   width: 4rem;
   height: 4rem;
   border-radius: var(--round-pill);
-  background: var(--accent-soft);
-  color: var(--accent-text);
+  /* 업적 티어 색 (P8-09, achievementMedal.css). 티어가 없으면 예전 금색 */
+  background: var(--tier-soft, var(--accent-soft));
+  color: var(--tier-ink, var(--accent-text));
+  box-shadow: inset 0 0 0 2px var(--tier-rim, transparent);
+}
+.cel-medal-tier {
+  color: var(--tier-ink);
+  font-weight: 700;
 }
 .cel-medal svg {
   width: 2rem;
@@ -319,29 +339,27 @@
   font-size: var(--text-caption);
   line-height: 1.35;
 }
-/* 좁은 화면(360)에서 뱃지 2~3개: 세 칸이면 이름이 글자마다 꺾여서, 한 줄에 하나씩 메달 + 이름·설명 (P6-16) */
-@media (max-width: 29.99rem) {
-  .cel-medals[data-many] {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.75rem;
-  }
-  .cel-medals[data-many] .cel-medal-item {
-    grid-template-columns: auto minmax(0, 1fr);
-    justify-items: start;
-    align-items: center;
-    column-gap: 0.75rem;
-    row-gap: 0.125rem;
-    text-align: left;
-  }
-  .cel-medals[data-many] .cel-medal {
-    grid-row: span 2;
-    width: 3rem;
-    height: 3rem;
-  }
-  .cel-medals[data-many] .cel-medal svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
+/* 뱃지 2~3개: 한 줄에 하나씩 메달 + 이름·설명. 카드는 어느 화면에서나 최대 24rem 이라 칸으로 나누면 설명이 한두 낱말씩 꺾임
+   (P6-16은 좁은 화면만 → 넓은 화면에서도 같은 모양, B66) */
+.cel-medals[data-many] {
+  gap: 0.75rem;
+}
+.cel-medals[data-many] .cel-medal-item {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.125rem;
+  text-align: left;
+}
+.cel-medals[data-many] .cel-medal {
+  grid-row: span 2;
+  width: 3rem;
+  height: 3rem;
+}
+.cel-medals[data-many] .cel-medal svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* 받은 것 한 줄 (XP·코인·황금키): 옅은 회색 알약 */

@@ -1,0 +1,63 @@
+/* 휴식 알림 카드 (P8-12). 틀·등장 연출은 공통 모달(.g-modal, overlay.css). 여기는 파이뱀 받침·제안 목록·카운트다운만. 토큰 변수만 */
+
+@layer components {
+  .rr {
+    max-width: 24rem;
+  }
+  /* 파이뱀 받침: 쉬는 동안은 밤하늘처럼 차분한 면 */
+  .rr-hero {
+    display: grid;
+    place-items: center;
+    width: 8.5rem;
+    height: 8.5rem;
+    border-radius: var(--round-pill);
+    background: var(--primary-soft);
+    transition: background-color var(--dur-base) var(--easing-out);
+  }
+  .rr-hero[data-phase='rest'] {
+    background: var(--surface-2);
+  }
+  .rr-hero[data-phase='back'] {
+    background: var(--accent-soft);
+  }
+  :root[data-reduced='true'] .rr-hero {
+    transition: none;
+  }
+
+  .rr-tips {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rr-tips > li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--round-m);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: var(--text-small);
+    font-weight: 600;
+  }
+  .rr-tips svg {
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    color: var(--primary-text);
+  }
+
+  .rr-count {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .rr-clock {
+    margin: 0;
+    color: var(--accent-text);
+    font-size: var(--text-h1);
+    line-height: 1;
+    text-align: center;
+  }
+}

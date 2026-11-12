@@ -25,6 +25,7 @@ import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { cn } from '@/lib/utils';
+import { SHOW_COINS } from '@/lib/world/flags';
 import { cardMotion } from './celebrations/motion';
 import { StageClearCard } from './celebrations/StageClearCard';
 import { ProjectCompleteCard } from './celebrations/ProjectCompleteCard';
@@ -155,7 +156,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
             data-testid="celebration-overlay"
             data-celebration-root
             data-reduced={reduced ? 'true' : 'false'}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-scrim p-4"
+            className="fixed inset-0 z-50 overflow-y-auto bg-scrim"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{
@@ -165,49 +166,53 @@ export const QuestCelebrations = memo(function QuestCelebrations({
             transition={fade}
             onClick={() => (settled ? next() : settle())}
           >
-            <SequenceChrome
-              index={seq.index}
-              total={seq.total}
-              onSkip={skipAll}
-            />
+            {/* 위 컨트롤(점·모두 닫기)은 카드 바로 위에 붙임 — 화면 맨 위에 두면 뒤 HUD·헤더 버튼과 겹쳐 보임 (B64).
+                카드가 화면보다 길면 막 안에서 스크롤 */}
+            <div className="flex min-h-full flex-col items-center justify-center gap-2 p-4">
+              <SequenceChrome
+                index={seq.index}
+                total={seq.total}
+                onSkip={skipAll}
+              />
 
-            {/* 받은 것을 한 줄로 (카드가 바뀔 때마다 읽힘) */}
-            <p
-              className="sr-only"
-              aria-live="polite"
-              data-testid="celebration-live"
-            >
-              {stepSummary(step)}
-            </p>
+              {/* 받은 것을 한 줄로 (카드가 바뀔 때마다 읽힘) */}
+              <p
+                className="sr-only"
+                aria-live="polite"
+                data-testid="celebration-live"
+              >
+                {stepSummary(step)}
+              </p>
 
-            <div
-              ref={dialogRef}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="celebration-title"
-              className="relative w-full max-w-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                // 카드 안 빈 곳을 눌러도 연출은 끝 상태로 (버튼은 각자 동작)
-                if (!settled && !(e.target as Element).closest('a, button'))
-                  settle();
-              }}
-            >
-              <AnimatePresence mode="wait">
-                <StepFrame
-                  key={step.id}
-                  step={step}
-                  activeStepRef={activeStepRef}
-                  questId={questId}
-                  worldHref={worldHref}
-                  budget={budget}
-                  settled={settled}
-                  autoMs={seq.autoMs}
-                  paused={seq.paused}
-                  onNext={next}
-                  onHover={seq.setHovering}
-                />
-              </AnimatePresence>
+              <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="celebration-title"
+                className="relative w-full max-w-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // 카드 안 빈 곳을 눌러도 연출은 끝 상태로 (버튼은 각자 동작)
+                  if (!settled && !(e.target as Element).closest('a, button'))
+                    settle();
+                }}
+              >
+                <AnimatePresence mode="wait">
+                  <StepFrame
+                    key={step.id}
+                    step={step}
+                    activeStepRef={activeStepRef}
+                    questId={questId}
+                    worldHref={worldHref}
+                    budget={budget}
+                    settled={settled}
+                    autoMs={seq.autoMs}
+                    paused={seq.paused}
+                    onNext={next}
+                    onHover={seq.setHovering}
+                  />
+                </AnimatePresence>
+              </div>
             </div>
           </m.div>
         )}
@@ -216,7 +221,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
   );
 });
 
-/** 위쪽: 몇 번째 축하인지(점) + 모두 닫기. 카드가 바뀌어도 그대로 있다 */
+/** 카드 바로 위: 몇 번째 축하인지(점) + 모두 닫기. 카드가 바뀌어도 그대로 있다 */
 function SequenceChrome({
   index,
   total,
@@ -227,11 +232,11 @@ function SequenceChrome({
   onSkip: () => void;
 }) {
   return (
-    <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 p-4">
+    <div className="flex w-full max-w-sm items-center justify-between gap-2">
       <span className="min-w-20" aria-hidden />
       {total > 1 ? (
         <ol
-          className="flex items-center gap-1.5"
+          className="flex min-h-8 items-center gap-1.5 rounded-full bg-on-scrim/15 px-3"
           aria-label={`축하 ${total}개 중 ${index + 1}번째`}
         >
           {Array.from({ length: total }, (_, i) => (
@@ -255,7 +260,7 @@ function SequenceChrome({
           e.stopPropagation();
           onSkip();
         }}
-        className="flex min-h-11 min-w-20 items-center justify-end gap-1 whitespace-nowrap rounded-full px-2 text-small font-medium text-on-scrim outline-none focus-visible:ring-2 focus-visible:ring-on-scrim/70"
+        className="flex min-h-11 min-w-20 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-on-scrim/15 px-3 text-small font-medium text-on-scrim outline-none transition-colors duration-(--dur-fast) hover:bg-on-scrim/25 focus-visible:ring-2 focus-visible:ring-on-scrim/70 reduced:transition-none"
       >
         {total > 1 ? '모두 닫기' : '닫기'}
         <X className="h-4 w-4" aria-hidden />
@@ -425,6 +430,7 @@ function StepContent({
           level={step.event.level}
           fromLevel={step.event.fromLevel}
           title={step.event.title}
+          coins={SHOW_COINS ? step.event.coins : 0}
           budget={budget}
           settled={settled}
           onNext={onNext}
@@ -449,6 +455,7 @@ function StepContent({
           stageTitle={step.event.stageTitle}
           goal={step.event.goal}
           contents={step.event.contents}
+          note={step.event.note}
           budget={budget}
           settled={settled}
           onNext={onNext}

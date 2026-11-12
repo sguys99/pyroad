@@ -600,7 +600,7 @@ export function SuccessStagingSection() {
     title: '첫 번째 인사',
     xp: 45,
     stars: 2 as const,
-    coins: 20,
+    coins: 10,
     nextHref: '/dev/design#success-staging',
     mapHref: '/dev/design#success-staging',
   };
@@ -610,7 +610,7 @@ export function SuccessStagingSection() {
         id="success-staging"
         kicker="퀘스트 (P6-08)"
         title="성공 연출 · 통과 도장과 보상"
-        description="정답이면 결과 쪽지에 금색 “통과!” 도장이 쾅 찍히고(온보딩 도장과 같은 stampSlam), 아래 보상 띠에서 별 1→3이 스프링으로 톡톡 · XP·코인이 0부터 올라가요(약 1.6초, lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 모습으로 건너뛰어요. 이야기 쪽 파이뱀은 기쁨 점프(happy) 뒤 응원(cheer). 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0. Q52: 실제 화면은 별·코인을 SHOW_STARS·SHOW_COINS로 숨겨 XP만 — 여기서는 켜서 보여 줘요."
+        description="정답이면 결과 쪽지에 금색 “통과!” 도장이 쾅 찍히고(온보딩 도장과 같은 stampSlam), 아래 보상 띠에서 별 1→3이 스프링으로 톡톡 · XP·코인이 0부터 올라가요(약 1.6초, lite 70%). 그 사이 아무 데나 누르거나 Enter·Esc·Space면 끝 모습으로 건너뛰어요. 이야기 쪽 파이뱀은 기쁨 점프(happy) 뒤 응원(cheer). 정답 컨페티는 full 100% · lite 30% · minimal·동작 줄이기 0. 코인은 P8-04부터(처음 통과 10 + 새로 얻은 별마다 5 — 레벨 업 코인은 레벨 업 카드에), 별은 P8-05부터 실제 화면에도(서버 best_stars). 이미 통과한 퀘스트를 다시 풀어 별이 늘면 “복습 완료” 띠 맨 앞에 금색 “새 별 +N” 알약과 별 코인이 붙어요(XP 없음)."
       >
         <Button
           onClick={() => setRound((r) => r + 1)}
@@ -643,8 +643,8 @@ export function SuccessStagingSection() {
           <div className="grid items-start gap-4 md:grid-cols-2">
             <Demo
               key={`real-${round}`}
-              label="지금 실제 화면 (XP만)"
-              note="서버가 준 XP만 올라가요. 좁은 화면(lg 미만)은 띠 머리에 파이뱀 얼굴"
+              label="지금 실제 화면 (별·XP·코인, P8-05)"
+              note="SHOW_STARS·SHOW_COINS가 켜져 실제 화면도 같은 띠. 좁은 화면(lg 미만)은 띠 머리에 파이뱀 얼굴"
               surface="card"
               data-testid="success-real"
             >
@@ -669,13 +669,36 @@ export function SuccessStagingSection() {
                 reward={{
                   title: '마을 입구 지도 완성',
                   xp: 0,
-                  note: '황금 열쇠로 연 퀘스트는 XP 없이 통과로 기록돼요.',
+                  stars: 1,
+                  note: '황금 열쇠로 연 퀘스트는 XP·코인 없이 통과로 기록돼요. 나중에 직접 풀면 별과 XP를 받아요.',
                   nextHref: null,
                   mapHref: '/dev/design#success-staging',
                 }}
               />
             </Demo>
           </div>
+          <Demo
+            key={`retry-${round}`}
+            label="다시 풀어 새 별 (P8-05)"
+            note="이미 통과한 퀘스트를 힌트 없이 다시 풀면 ⭐3으로 최고 별을 채우고, 새로 얻은 별 번호에만 코인(별마다 5). XP는 처음 한 번뿐이라 없음. 별 3개를 다 모은 퀘스트는 “복습 완료” 한 줄만"
+            surface="card"
+            data-testid="success-retry"
+          >
+            <OutputPanel
+              result={STAGE_PASS}
+              isRunning={false}
+              validationResult={STAGE_PASS_CHECK}
+              reward={{
+                ...reward,
+                xp: 0,
+                stars: 3,
+                newStars: 2,
+                coins: 10,
+                review: true,
+                note: '다시 풀어서 새 별을 모았어요! XP는 처음 통과할 때 한 번만 받아요.',
+              }}
+            />
+          </Demo>
           <Demo
             key={`card-${round}`}
             label="축하 카드 파이뱀 (B32 LottieCharacter → 리그)"

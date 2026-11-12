@@ -247,7 +247,7 @@ describe('OutputPanel', () => {
       mapHref: '/world',
     };
 
-    it('퀘스트를 마치면 도장 + XP 보상 띠 + 다음 퀘스트. 별·코인은 플래그가 꺼져 있어 숨김 (Q52)', () => {
+    it('퀘스트를 마치면 도장 + 별·XP·코인 보상 띠 + 다음 퀘스트 (Q52: 코인 P8-04, 별 P8-05에서 켬)', () => {
       render(
         <OutputPanel
           result={ok}
@@ -259,8 +259,12 @@ describe('OutputPanel', () => {
       expect(document.querySelector('.qx-stamp')).toHaveTextContent('통과!');
       const strip = screen.getByTestId('quest-reward');
       expect(within(strip).getByTestId('reward-xp')).toHaveTextContent('30');
-      expect(within(strip).queryByTestId('reward-stars')).toBeNull();
-      expect(within(strip).queryByTestId('reward-coins')).toBeNull();
+      expect(within(strip).getByTestId('reward-stars')).toHaveAttribute(
+        'aria-label',
+        '별 2개 / 3개',
+      );
+      expect(within(strip).queryByTestId('reward-new-stars')).toBeNull();
+      expect(within(strip).getByTestId('reward-coins')).toHaveTextContent('15');
       expect(
         within(strip).getByRole('link', { name: '다음 퀘스트' }),
       ).toHaveAttribute('href', '/quest/q2');
@@ -285,6 +289,32 @@ describe('OutputPanel', () => {
         '별 2개 / 3개',
       );
       expect(screen.getByTestId('reward-coins')).toHaveTextContent('15');
+    });
+
+    it('다시 풀어 별이 늘면 "복습 완료" 띠에 새 별 +N 과 별 코인 (P8-05)', () => {
+      render(
+        <OutputPanel
+          result={ok}
+          isRunning={false}
+          validationResult={{ passed: true }}
+          reward={{
+            ...reward,
+            xp: 0,
+            stars: 3,
+            newStars: 2,
+            coins: 10,
+            review: true,
+          }}
+        />,
+      );
+      const strip = screen.getByTestId('quest-reward');
+      expect(strip).toHaveAttribute('data-review', 'true');
+      expect(strip).toHaveTextContent('복습 완료');
+      expect(within(strip).getByTestId('reward-new-stars')).toHaveTextContent(
+        '새 별 +2',
+      );
+      expect(within(strip).queryByTestId('reward-xp')).toBeNull();
+      expect(within(strip).getByTestId('reward-coins')).toHaveTextContent('10');
     });
 
     it('누르거나 Enter·Esc·Space면 끝 상태로 건너뛰고, 아니면 1.6초 뒤 끝난다', () => {

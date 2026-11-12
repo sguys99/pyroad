@@ -9,9 +9,10 @@ import { reportServerError } from '@/lib/api/serverError';
  * 진행 리셋 (P1-03, B12)
  *
  * 진행·뱃지 삭제와 XP 재계산은 DB 함수 reset_progress 가 한 트랜잭션으로 처리합니다.
- * - 스테이지 리셋: 대상과 그 뒤 스테이지의 진행 삭제 → total_xp = 남은 진행의 earned_xp 합
- *   (황금키로 0 XP 받은 퀘스트를 과다 차감하지 않음), stage_clear 뱃지는 완료한 스테이지가 남지 않을 때만 삭제
- * - 전체 리셋: 진행·뱃지 전부 삭제, XP 0, 황금키 3개
+ * - 스테이지 리셋: 대상과 그 뒤 스테이지의 진행 삭제 → total_xp 에서 지운 진행의 earned_xp 만 뺌
+ *   (황금키 0 XP 과다 차감 없음 B12, 레벨 보정·미션 XP 는 남김 B55), stage_clear 뱃지는 완료한 스테이지가 남지 않을 때만 삭제
+ * - 전체 리셋: 진행 전부 삭제, XP 0, 황금키 3개 (업적·코인은 남음 — P8-09 부터 뱃지는 업적이라 removed_badges 는 늘 빈 목록)
+ * - 코인은 어느 리셋도 회수하지 않음. 원장 키가 남아 다시 풀어도 같은 최초 보상 코인은 다시 받지 않음 (P8-03)
  * 사용자 클라이언트로 user_badges 를 지우지 않습니다 (P1-04 에서 DELETE 정책을 없앰).
  */
 interface ResetRequest {

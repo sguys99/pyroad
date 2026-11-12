@@ -36,6 +36,8 @@
     "perf:world": "tsx scripts/perf/world-map-bench.ts",
     "perf:celebration": "tsx scripts/perf/quest-celebration-bench.ts",
     "perf:quest": "tsx scripts/perf/quest-bench.ts",
+    "balance:levels": "tsx scripts/balance/level-curve.ts",
+    "balance:economy": "tsx scripts/balance/economy.ts",
     "test:rls:ci": "bash supabase/tests/run.sh ci",
     "content:build": "tsx scripts/content/build.ts",
     "content:extract": "tsx scripts/content/extract-from-seed.ts",

@@ -7,6 +7,8 @@ import '@/components/consent/consent.css';
 import { consentStatus } from '@/lib/consent/status';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { ConsentBanner } from '@/components/consent/ConsentBanner';
+import { RestReminder } from '@/components/rest/RestReminder';
+import { isTestPagesEnabled } from '@/lib/env/testPages';
 
 /**
  * 로그인 화면은 모두 요청마다 렌더한다: 페이지 CSP의 nonce를 서버 렌더 때 넣어야 하기 때문이다 (B27).
@@ -31,6 +33,8 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
  * 보호자 동의 (P3-15): 만 14세 미만 + 동의 전이면 제한 모드. 상태는 같은 조회로 읽어 `ConsentProvider`로 넘기고(게시판 화면이
  * 글쓰기 자리를 안내로 바꿈), 맨 위 `ConsentBanner`가 안내·파기 7일 전 경고를 보인다. 실제로 막는 것은 게시판 API(`guardianWriteGate`).
  *
+ * 휴식 알림 (P8-12): 모든 로그인 화면에 `RestReminder` 하나(클라이언트 타이머, 서버 저장 없음).
+ *
  * 로그인 화면 틀(`<main>`, 움직임·사운드 설정 동기화, 앱 웹폰트)은 `LoggedInShell` — `/onboarding`과 같이 쓴다.
  */
 export default async function ProtectedLayout({
@@ -47,6 +51,8 @@ export default async function ProtectedLayout({
       <ConsentProvider status={consent}>
         <ConsentBanner />
         {children}
+        {/* 휴식 알림 (P8-12): 탭이 보이는 연속 40분. e2e 빨리 감기는 테스트 페이지가 켜진 서버에서만 */}
+        <RestReminder allowFastClock={isTestPagesEnabled()} />
       </ConsentProvider>
     </LoggedInShell>
   );

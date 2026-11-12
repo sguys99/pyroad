@@ -30,8 +30,9 @@ const HintMarkdown = lazy(() => import('./HintMarkdown'));
 export const COMPLETED_NOTE: Record<QuestCompletion, string> = {
   just: '통과해서 보상을 받았어요! 한 번 더 돌려 보면 복습이 돼요.',
   before:
-    '예전에 통과한 퀘스트예요. 다시 풀면 복습이 되고, 보상은 처음 한 번만 받아요.',
-  review: '복습 완료! 보상은 처음 한 번만 받아서 이번엔 XP가 없어요.',
+    '예전에 통과한 퀘스트예요. 다시 풀면 복습이 되고, 못 모은 별은 다음 날부터 처음 코드로 다시 짜서 채울 수 있어요. XP는 처음 한 번만 받아요.',
+  review:
+    '복습 완료! XP는 처음 한 번만 받고, 별은 다음 날부터 다시 풀어서 채울 수 있어요.',
 };
 
 export interface HintNoteData {
@@ -97,7 +98,7 @@ interface QuestHintsProps {
  * 이야기 쪽 힌트·황금키 줄 + 힌트 쪽지 (P6-09, 최종 시안 Quest.tsx StoryPage·HintNote).
  * 남은 횟수를 버튼에 바로 보여 주고, 쓰기 전에 보상이 어떻게 바뀌는지 미리 알려 준다.
  * 규칙은 서버와 같다: 완료 XP = complete_quest의 quest_xp(힌트 0회 1.5배 · 1회 1.25배 · 그 외 기본 · 황금키 0, xp.ts),
- * 황금키 완료는 뱃지 없음(00019), 스테이지를 깨면 황금키 3개로 채움. 별은 같은 자리에 SHOW_STARS로 (F3 규칙, P8-05)
+ * 황금키 완료는 뱃지 없음(00019, 나중에 직접 풀면 그때 판정 — 00032), 스테이지를 깨면 황금키 3개로 채움. 별은 같은 자리에 SHOW_STARS로 (F3 규칙, P8-05)
  */
 export function QuestHints({
   kind,
@@ -252,7 +253,8 @@ export function QuestHints({
                     : kind === 'project'
                       ? `대신 퀘스트를 다 끝내도 경험치(XP)와 뱃지를 받을 수 없어요. (지금 받을 경험치 +${xp} XP → 0)`
                       : `대신 이 퀘스트는 경험치(XP)와 뱃지 없이 끝나요. (지금 받을 경험치 +${xp} XP → 0)`}
-                  {showStars && ' 별은 1개만 받아요.'}
+                  {showStars &&
+                    ' 별은 1개만 받고, 나중에 내 힘으로 다시 풀면 별과 XP를 채울 수 있어요.'}
                 </li>
                 <li>
                   황금키 {goldenKeys}개 → {goldenKeys - 1}개. 스테이지를 깨면

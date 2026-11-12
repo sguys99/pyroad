@@ -139,10 +139,38 @@ export const RELEASES = [
         file: '1_먼저실행.sql',
         stage: 1,
         head: [
-          '-- pyRoad v0.6 (Phase 7 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00026 quiz_answer_rpc, 00027 reset_quiz_attempts)',
+          '-- pyRoad v0.6 (Phase 7 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00026 quiz_answer_rpc, 00027 reset_quiz_attempts) + 콘텐츠 seed (퀴즈 21문항·해 볼 일·예시 출력)',
           '-- feat/phase7 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.6-runbook.md "Phase 7 병합"',
         ],
-        parts: ['00026', '00027'],
+        // seed 는 00026 뒤 (퀴즈가 잠금 계산에서 빠진 뒤에 퀴즈 행을 넣음)
+        parts: ['00026', '00027', 'seed'],
+      },
+    ],
+  },
+  {
+    name: 'v0.6-phase8',
+    dir: 'v0.6-phase8',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.6 (Phase 8 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00028 level_curve, 00029 level_recalc, 00030 coin_ledger, 00031 coin_sources, 00032 star_system, 00033 stage_chest, 00034 daily_missions, 00035 attendance_streak, 00036 achievements, 00037 retro_rewards, 00038 profile_stats)',
+          '-- feat/phase8 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.6-runbook.md "Phase 8 병합"',
+        ],
+        parts: [
+          '00028',
+          '00029',
+          '00030',
+          '00031',
+          '00032',
+          '00033',
+          '00034',
+          '00035',
+          '00036',
+          '00037',
+          '00038',
+        ],
       },
     ],
   },

@@ -426,6 +426,27 @@
   margin-right: -2px;
   color: var(--accent-text);
 }
+/* 열 수 있는 보물상자 (P8-06): 별 합계 옆 작은 상자, 가끔 들썩 (full·lite, 동작 줄이기·minimal은 멈춤) */
+.wn-chest {
+  margin-left: 2px;
+  transform-origin: 50% 90%;
+}
+@keyframes wn-chest {
+  0%,
+  80%,
+  100% {
+    transform: none;
+  }
+  86% {
+    transform: translateY(-2px) rotate(-8deg);
+  }
+  92% {
+    transform: rotate(6deg);
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal']) .wn-chest {
+  animation: wn-chest 3.2s var(--easing-out) infinite;
+}
 .wn-meta {
   display: inline-flex;
   align-items: center;
@@ -438,6 +459,17 @@
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: 1;
+}
+
+/* 별 100% 완벽한 스테이지 (§12-Q65 (d)): 별 알약에 금색 테두리 + 작은 왕관. 반짝임 없이 고정이라 연출 단계와 무관 */
+.wn[data-perfect] .wn-meta {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.wn-perfect {
+  width: 14px;
+  height: 14px;
+  margin-left: 1px;
+  color: var(--accent-text);
 }
 
 /* 진행률 링: 번호 원 둘레 (진행 중만). 트랙은 옅게, 채운 쪽은 금색 */
@@ -584,6 +616,14 @@
   /* 깃발은 노드 쪽으로 조금 당긴다: 파이뱀은 지도 가운데 쪽(이웃 노드 쪽)에 서서, 좁은 세로 지도에서 깃발이
      이웃 노드의 이름표·"잠김"에 걸렸다 (P5-14 검수, 320~390px 2·6번 노드) */
   transform: translateX(calc(-50% - var(--dx) * 24px));
+}
+/* 폰 폭 세로 지도(지도 380px 이하)는 깃발 전체를 파이뱀 가운데보다 노드 쪽에 두고 조금 내린다: 제 크기 노드에서
+   "새 곳 도착!"이 이웃 노드(2→3번 이름표, 6→7번 "잠김") 끝에 걸렸다 (B57, 320~390px) */
+@container (max-width: 380px) {
+  .wn-here-flag {
+    top: 6px;
+    transform: translateX(calc(-50% - var(--dx) * (50% + 16px)));
+  }
 }
 /* 동행 펫 자리 (P5-08 슬롯): 파이뱀 발치 바깥쪽(--px, petOffset), 파이뱀 뒤(먼저 그림). 크기는 지도 단위 44 */
 .wu-pet-walker {

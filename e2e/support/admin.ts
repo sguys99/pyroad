@@ -70,6 +70,14 @@ export async function resetUser(userId: string): Promise<void> {
     'quiz_attempts 삭제',
     await db.from('quiz_attempts').delete().eq('user_id', userId),
   );
+  // 스트릭 방패 (P8-08): 앱 리셋은 남기지만, 지난 실행의 방패·방패 날이 스트릭 값을 바꾸지 않게 지운다 (출석 기록은 원장이라 남음)
+  for (const t of ['streak_shield_days', 'user_streak_shields'] as const)
+    check(`${t} 삭제`, await db.from(t).delete().eq('user_id', userId));
+  // 업적 (P8-09): 앱 리셋은 남기지만, 스펙마다 첫 완료 업적 카드가 다시 뜨게 지운다 (받은 코인은 원장이라 남음 → 다시 받으면 0)
+  check(
+    'user_achievements 삭제',
+    await db.from('user_achievements').delete().eq('user_id', userId),
+  );
 }
 
 /** 퀴즈 공개 부분(quests.prompt_skeleton.quiz)과 서버 전용 정답(quest_answer_keys.quiz_answer)을 service_role 로 (P7-15) */
@@ -144,6 +152,90 @@ export async function completeQuests(
       }),
     );
   }
+}
+
+/**
+ * 퀘스트 최고 별 (P8-05). 다시 풀기 스펙이 "별이 모자란 완료"를 만들 때 (서버 값이라 service_role 로만).
+ * 판정일은 오래전으로 → 복습 도전이 열린 상태 (§12-Q64, 같은 날은 연습)
+ */
+export async function setBestStars(
+  userId: string,
+  questId: string,
+  stars: number,
+): Promise<void> {
+  check(
+    `best_stars ${questId}`,
+    await adminClient()
+      .from('user_progress')
+      .update({ stars, best_stars: stars, stars_judged_on: '2000-01-01' })
+      .eq('user_id', userId)
+      .eq('quest_id', questId),
+  );
+}
+
+export async function bestStars(userId: string, questId: string) {
+  const row = check(
+    'user_progress.best_stars',
+    await adminClient()
+      .from('user_progress')
+      .select('best_stars')
+      .eq('user_id', userId)
+      .eq('quest_id', questId)
+      .single(),
+  ) as { best_stars: number };
+  return row.best_stars;
+}
+
+/**
+ * 코인 (P8-04). 진행 리셋(resetUser)은 코인·원장을 지우지 않으므로(P8-03 정책) 같은 실행의 스펙끼리 잔액이 이어진다
+ * → 스펙은 절대값 대신 지금 잔액·원장 키를 읽어 기대값을 정한다
+ */
+export async function coinBalance(userId: string): Promise<number> {
+  const row = check(
+    'users.coins',
+    await adminClient().from('users').select('coins').eq('id', userId).single(),
+  ) as { coins: number };
+  return row.coins;
+}
+
+/** 원장에 그 키가 이미 있는지 (있으면 같은 보상은 다시 안 줌) */
+export async function hasCoinKey(
+  userId: string,
+  source: string,
+  ref: string,
+): Promise<boolean> {
+  const rows = check(
+    `coin_ledger ${source}:${ref}`,
+    await adminClient()
+      .from('coin_ledger')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('source', source)
+      .eq('ref', ref),
+  ) as unknown[];
+  return rows.length > 0;
+}
+
+/** 테스트용 코인 지급 (grant_coins, 이번 호출만의 키) */
+export async function grantTestCoins(userId: string, amount: number) {
+  check(
+    'grant_coins',
+    await adminClient().rpc('grant_coins', {
+      p_user_id: userId,
+      p_source: 'retro',
+      p_ref: `e2e:${Date.now()}:${Math.random().toString(36).slice(2)}`,
+      p_amount: amount,
+    }),
+  );
+}
+
+/** 잔액 ≠ 원장 합인 행 (`coin_balance_mismatches()`, Phase 8 완료 기준 "잔액 = 원장 합"). 정상이면 빈 배열 */
+export async function coinMismatches(userIds: readonly string[]) {
+  const rows = check(
+    'coin_balance_mismatches',
+    await adminClient().rpc('coin_balance_mismatches'),
+  ) as Array<{ user_id: string; coins: number; ledger_sum: number }>;
+  return rows.filter((r) => userIds.includes(r.user_id));
 }
 
 /** `content:build -- --fixtures`가 만든 테스트 월드 행 (Q48, P5-01). 앱 서버는 같은 빌드의 worlds.json 을 읽는다 */
