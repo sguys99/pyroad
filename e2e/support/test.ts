@@ -72,6 +72,23 @@ function sleep(ms: number): Promise<void> {
 /** 코드 퀘스트 폰 퀴즈 쪽지(P7-11) "본 기록" 키 (`src/components/quest/PhoneQuizNote.tsx`) */
 export const PHONE_QUIZ_NOTE_KEY = 'pyroad.phoneQuizNote';
 
+/**
+ * 스트리밍 숨은 사본(`div[hidden][id^="S:"]`)이 사라질 때까지 (아래 `streamSettled` 픽스처). goto·reload 밖에서 문서가 새로 열릴 때
+ * (예: 스트리밍 중 redirect → meta refresh로 /world 새 문서, B62) 직접 부른다
+ */
+export function waitStreamSettled(page: Page) {
+  return page
+    .waitForFunction(
+      () => !document.querySelector('div[hidden][id^="S:"]'),
+      undefined,
+      { timeout: 10_000 },
+    )
+    .then(
+      () => {},
+      () => {},
+    );
+}
+
 export const test = base.extend<
   {
     resetProgress: void;
@@ -119,14 +136,7 @@ export const test = base.extend<
   // 그렇게 됨 → 페이지 이동·새로고침 뒤 숨은 div 가 사라질 때까지 기다린다 (화면에는 안 보이는 사본)
   streamSettled: [
     async ({ page }, use) => {
-      const settled = () =>
-        page
-          .waitForFunction(
-            () => !document.querySelector('div[hidden][id^="S:"]'),
-            undefined,
-            { timeout: 10_000 },
-          )
-          .catch(() => {});
+      const settled = () => waitStreamSettled(page);
       const goto = page.goto.bind(page);
       const reload = page.reload.bind(page);
       page.goto = async (...args) => {

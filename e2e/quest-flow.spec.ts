@@ -1,7 +1,7 @@
 // 퀘스트 전체 흐름 (로그인). 기존 시나리오(월드맵 → 퀘스트 → 실행 → 정답 → XP, 잠긴 스테이지)를
 // P1-09(엔진·testid)·P1-10(축하 시퀀서)·B22(Link 이동·Worker 유지)·B38(잠긴 스테이지 URL) 구조로 (P1-21)
 
-import { test, expect } from './support/test';
+import { test, expect, waitStreamSettled } from './support/test';
 import {
   bestStars,
   coinBalance,
@@ -316,6 +316,8 @@ test.describe('퀘스트 전체 플로우', () => {
   }) => {
     await page.goto(`/quest/${stage2.quests[0].id}`);
     await expect(page).toHaveURL(/\/world$/); // 안내 값(?notice=…)은 주소에서 바로 지움
+    // 퀘스트 문서가 스트리밍 중 redirect → meta refresh로 /world 문서가 goto 밖에서 새로 열림: 그 숨은 사본이 사라질 때까지 (B62)
+    await waitStreamSettled(page);
     await expect(page.getByTestId('stage-locked-notice')).toBeVisible();
 
     // 튜터도 잠긴 퀘스트에는 답하지 않는다
