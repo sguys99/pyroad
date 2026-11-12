@@ -85,6 +85,11 @@ test('7개 폭: 지도·책장·잠긴 월드·스테이지 시트에 가로 넘
     const sheet = page.getByTestId('stage-sheet');
     await expect(sheet).toBeVisible();
     expect(await overflowX(page), `${width}px 시트`).toBe(0);
+    // 시트 안 차례 줄도 시트 폭 안 (줄바꿈 안 되는 딱지가 칸을 넓히던 문제, B65)
+    expect(
+      await sheet.evaluate((el) => el.scrollWidth - el.clientWidth),
+      `${width}px 시트 안`,
+    ).toBe(0);
     // 주 버튼 하나(줄 안 "이어하기" 중복 없음)가 화면 안에 붙어 있다
     await expect(page.getByTestId('stage-sheet-start')).toBeInViewport();
     await expect(sheet.getByText('이어하기', { exact: true })).toHaveCount(0);

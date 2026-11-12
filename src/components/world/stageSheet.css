@@ -123,6 +123,8 @@
 /* 차례 */
 .ss-list {
   display: grid;
+  /* minmax(0) : 줄바꿈 안 되는 딱지("폰에서 하기 좋아요" 등)가 칸을 시트보다 넓히지 않게 (B65) */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.25rem;
 }
 .ss-row {
@@ -270,6 +272,23 @@
 }
 .ss-go {
   color: var(--text-muted);
+}
+/* 좁은 화면(< 30rem): 별을 "다시 하기" 위로 쌓아 오른쪽 칸을 줄임 — 나란히 두면 360px 에서 퀘스트 이름 칸이 약 6rem 이라
+   "마법 상자에 / 이름 넣기"처럼 짧은 이름도 두 줄 (B65) */
+@media (max-width: 29.99rem) {
+  .ss-row {
+    gap: 0.625rem;
+    padding-inline: 0.625rem;
+  }
+  .ss-end {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+  .ss-act {
+    min-height: 2rem;
+    padding: 0 0.625rem;
+  }
 }
 /* 주 버튼 줄은 차례가 길어도 늘 보이게 시트 아래에 붙인다 */
 .g-sheet.ss > div:has(> .ss-cta) {
