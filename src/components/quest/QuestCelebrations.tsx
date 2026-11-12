@@ -236,7 +236,7 @@ function SequenceChrome({
       <span className="min-w-20" aria-hidden />
       {total > 1 ? (
         <ol
-          className="flex items-center gap-1.5"
+          className="flex min-h-8 items-center gap-1.5 rounded-full bg-on-scrim/15 px-3"
           aria-label={`축하 ${total}개 중 ${index + 1}번째`}
         >
           {Array.from({ length: total }, (_, i) => (
