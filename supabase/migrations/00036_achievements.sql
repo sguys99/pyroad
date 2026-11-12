@@ -178,7 +178,7 @@ INSERT INTO public.achievements (id, name, description, icon, tier, category, me
   ('level_10',        '레벨 10',          '레벨 10이 되었어요.',                            'Zap',           'bronze', 'growth', 'level',         10,  510, false),
   ('level_20',        '레벨 20',          '레벨 20이 되었어요.',                            'Zap',           'silver', 'growth', 'level',         20,  520, false),
   ('level_30',        '레벨 30',          '레벨 30이 되었어요!',                            'Trophy',        'gold',   'growth', 'level',         30,  530, false),
-  ('level_50',        '전설의 파이썬 마법사', '가장 높은 레벨 50이 되었어요!',              'WandSparkles',  'gold',   'growth', 'level',         50,  540, true),
+  ('level_50',        '정상에 선 코더',   '가장 높은 레벨 50이 되었어요!',                  'MountainSnow',  'gold',   'growth', 'level',         50,  540, true),
   ('chest_1',         '첫 보물상자',      '스테이지 보물상자를 처음 열었어요.',             'Gift',          'bronze', 'growth', 'chests',        1,   550, false),
   ('chest_5',         '보물 사냥꾼',      '스테이지 보물상자를 5개 열었어요.',              'Package',       'silver', 'growth', 'chests',        5,   560, false),
   -- 실패 칭찬 (성장 마인드셋)

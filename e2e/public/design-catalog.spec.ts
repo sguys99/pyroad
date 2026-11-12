@@ -829,6 +829,14 @@ test.describe('출석 도장 (P8-08)', () => {
       await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
       await expect(overlay).toBeHidden();
+      // 찍은 7일째 칸: 도장 + 모서리 열린 상자 (§12-Q66 ⑤). 다른 찍은 칸에는 없음
+      const seventhCell = seventh.getByTestId('attendance-cell-7');
+      await expect(seventhCell).toHaveAttribute('data-state', 'done');
+      await expect(seventhCell.locator('.at-stamp')).toBeVisible();
+      await expect(
+        seventhCell.locator('.at-chest-mark [data-reward="chestOpen"]'),
+      ).toBeVisible();
+      await expect(seventh.locator('.at-chest-mark')).toHaveCount(1);
     });
   }
 });

@@ -23,6 +23,7 @@ import {
   ListChecks,
   Medal,
   Mountain,
+  MountainSnow,
   Orbit,
   Package,
   Repeat,
@@ -36,7 +37,6 @@ import {
   Target,
   Telescope,
   Trophy,
-  WandSparkles,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -69,6 +69,7 @@ export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   ListChecks,
   Medal,
   Mountain,
+  MountainSnow,
   Orbit,
   Package,
   Repeat,
@@ -82,7 +83,6 @@ export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   Target,
   Telescope,
   Trophy,
-  WandSparkles,
   Zap,
 };
 

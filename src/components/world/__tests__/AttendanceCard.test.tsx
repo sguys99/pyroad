@@ -151,6 +151,39 @@ describe('AttendanceCard', () => {
 });
 
 describe('AttendanceMenuSection', () => {
+  it('7일째를 찍으면 도장 + 작은 열린 상자, 다른 찍은 칸에는 없음 (§12-Q66 ⑤)', () => {
+    render(
+      <AttendanceMenuSection
+        status={status({
+          stamped_today: true,
+          total: 7,
+          day_n: 7,
+          cycle: [
+            '2026-11-04',
+            '2026-11-05',
+            '2026-11-06',
+            '2026-11-07',
+            '2026-11-08',
+            '2026-11-10',
+            '2026-11-11',
+          ],
+        })}
+        shields={1}
+      />,
+    );
+    const seventh = screen.getByTestId('attendance-cell-7');
+    expect(seventh).toHaveAttribute('data-state', 'done');
+    expect(seventh).toHaveAttribute(
+      'aria-label',
+      '7일째 상자 열림, 코인 30개, 11월 11일 찍음',
+    );
+    expect(seventh.querySelector('.at-stamp')).toHaveTextContent('출석');
+    expect(
+      seventh.querySelector('.at-chest-mark [data-reward="chestOpen"]'),
+    ).not.toBeNull();
+    expect(document.querySelectorAll('.at-chest-mark')).toHaveLength(1);
+  });
+
   it('찍은 날·방패 수를 보여 줌 (도장 버튼 없음)', () => {
     render(
       <AttendanceMenuSection

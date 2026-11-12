@@ -37,6 +37,10 @@ async function stampOverlaps(calendar: Locator) {
       const bad: string[] = [];
       if (hit(s, box('.at-n'))) bad.push(`${i + 1}: 도장↔n일`);
       if (hit(s, box('.at-coins'))) bad.push(`${i + 1}: 도장↔코인`);
+      // 7일째 찍은 칸의 열린 상자 표시는 "n일" 글자에 닿지 않음 (§12-Q66 ⑤)
+      const mark = cell.querySelector('.at-chest-mark');
+      if (mark && hit(mark.getBoundingClientRect(), box('.at-n')))
+        bad.push(`${i + 1}: 상자 표시↔n일`);
       // 도장 테두리 2px 안쪽 (기울기 전 폭)
       if (text.getBoundingClientRect().width > stamp.offsetWidth - 4)
         bad.push(`${i + 1}: 글자가 도장보다 넓음`);

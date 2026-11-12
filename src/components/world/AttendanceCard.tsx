@@ -44,7 +44,7 @@ interface CalendarProps {
 }
 
 /**
- * 출석 달력 7칸 (P8-08). 찍은 칸은 그림 자리에 금색 "출석" 도장(B63) + 날짜, 오늘 찍을 칸은 점선 테두리, 7일째는 상자(내용은 아래 한 줄로 공개).
+ * 출석 달력 7칸 (P8-08). 찍은 칸은 그림 자리에 금색 "출석" 도장(B63) + 날짜, 오늘 찍을 칸은 점선 테두리, 7일째는 상자(내용은 아래 한 줄로 공개, 찍은 뒤에는 모서리에 작은 열린 상자).
  * 칸마다 받는(받은) 코인. 낭독기는 칸마다 "n일째, 코인 m개, 찍음/오늘/남음"
  */
 export function AttendanceCalendar({ status, stampRef }: CalendarProps) {
@@ -61,7 +61,7 @@ export function AttendanceCalendar({ status, stampRef }: CalendarProps) {
             data-state={state}
             data-chest={c.chest || undefined}
             data-testid={`attendance-cell-${c.n}`}
-            aria-label={`${c.n}일째${c.chest ? ' 상자' : ''}, 코인 ${c.coins}개, ${
+            aria-label={`${c.n}일째${c.chest ? (c.day ? ' 상자 열림' : ' 상자') : ''}, 코인 ${c.coins}개, ${
               c.day
                 ? `${formatKstDate(c.day, 'monthDay')} 찍음`
                 : c.next
@@ -72,6 +72,12 @@ export function AttendanceCalendar({ status, stampRef }: CalendarProps) {
             <span className="at-n" aria-hidden>
               {c.n}일
             </span>
+            {/* 7일째 찍은 칸: 도장이 상자 그림을 대신해도 "열린 상자 날"로 읽히게 칸 오른쪽 위 모서리에 작은 표시 (§12-Q66 ⑤) */}
+            {c.day && c.chest && (
+              <span className="at-chest-mark" aria-hidden>
+                <RewardIcon kind="chestOpen" size={14} />
+              </span>
+            )}
             <span className="at-face" aria-hidden>
               {/* 찍은 칸은 도장이 그림 자리를 대신함 (위 "n일"·아래 코인과 겹치지 않게, B63) */}
               {c.day ? (

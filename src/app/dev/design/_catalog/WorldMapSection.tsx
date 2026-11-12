@@ -458,7 +458,7 @@ function MissionDemo() {
   );
 }
 
-// 출석 카드 (P8-08): 오늘 찍을 칸 · 6일 찍고 오늘 7일째(상자) · 방패가 어제를 지킴 · 메뉴 달력(가득)
+// 출석 카드 (P8-08): 오늘 찍을 칸 · 6일 찍고 오늘 7일째(상자) · 방패가 어제를 지킴 · 메뉴 달력(가득 · 7일째 찍어 열린 상자)
 const ATT = (over: Partial<AttendanceStatus>): AttendanceStatus => ({
   today: '2026-11-11',
   total: 2,
@@ -502,6 +502,12 @@ function AttendanceDemo() {
         <figcaption className="text-caption text-text-muted">메뉴 시트 달력 (찍은 뒤 · 방패 가득)</figcaption>
         <div className="rounded-2xl bg-surface p-4 shadow-pop">
           <AttendanceMenuSection status={ATT({ stamped_today: true, total: 3, day_n: 3, cycle: ['2026-11-07', '2026-11-09', '2026-11-11'] })} shields={2} />
+        </div>
+      </figure>
+      <figure className="grid content-start gap-1" data-testid="attendance-menu-seventh">
+        <figcaption className="text-caption text-text-muted">메뉴 시트 달력 (7일째 찍음 · 열린 상자 표시)</figcaption>
+        <div className="rounded-2xl bg-surface p-4 shadow-pop">
+          <AttendanceMenuSection status={ATT({ stamped_today: true, total: 7, day_n: 7, cycle: [...ATT_SEVEN, '2026-11-11'] })} shields={1} />
         </div>
       </figure>
     </div>

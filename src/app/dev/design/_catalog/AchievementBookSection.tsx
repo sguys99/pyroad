@@ -19,7 +19,7 @@ const DEFS: AchievementDef[] = [
   ['quiz_1', '첫 퀴즈 정답', '퀴즈를 처음 맞혔어요.', 'BadgeCheck', 'bronze', 'quiz', 'quiz_correct', 210],
   ['streak_7', '일주일 불꽃', '7일 연속으로 공부했어요.', 'Flame', 'silver', 'habit', 'streak', 340],
   ['level_10', '레벨 10', '레벨 10이 되었어요.', 'Zap', 'bronze', 'growth', 'level', 510],
-  ['level_50', '전설의 파이썬 마법사', '가장 높은 레벨 50이 되었어요!', 'WandSparkles', 'gold', 'growth', 'level', 540, true],
+  ['level_50', '정상에 선 코더', '가장 높은 레벨 50이 되었어요!', 'MountainSnow', 'gold', 'growth', 'level', 540, true],
   ['error_1', '첫 에러 친구', '에러를 만났지만 포기하지 않고 끝까지 풀었어요!', 'Bug', 'bronze', 'grit', 'errors', 610],
   ['comeback_1', '다시 일어서기', '틀린 퀴즈를 다시 풀어 맞혔어요.', 'Sprout', 'bronze', 'grit', 'quiz_comeback', 640],
   ['hint_finish_10', '힌트로 쑥쑥', '힌트를 보고 퀘스트 10개를 끝까지 해냈어요.', 'Footprints', 'silver', 'grit', 'hint_finish', 670],

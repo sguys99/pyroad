@@ -87,8 +87,8 @@ describe('업적 도감 (P8-10)', () => {
   it('숨김 업적은 얻기 전에 이름·아이콘·조건·진행을 숨기고, 얻으면 보임', () => {
     const hidden = def('level_50', {
       hidden: true,
-      name: '전설',
-      icon: 'WandSparkles',
+      name: '정상에 선 코더',
+      icon: 'MountainSnow',
       metric: 'level',
       tier: 'gold',
     });
@@ -102,13 +102,13 @@ describe('업적 도감 (P8-10)', () => {
       progress: null,
       goal: null,
     });
-    expect(JSON.stringify(secret)).not.toMatch(/전설|WandSparkles|레벨/);
+    expect(JSON.stringify(secret)).not.toMatch(/정상|MountainSnow|레벨/);
     const [shown] = buildAchievementBook(
       [hidden],
       [{ achievement_id: 'level_50', achieved_at: AT, claimed_at: null }],
       progress,
     );
-    expect(shown).toMatchObject({ state: 'claimable', name: '전설' });
+    expect(shown).toMatchObject({ state: 'claimable', name: '정상에 선 코더' });
   });
 
   it('요약: 얻은 수/전체(숨김 포함) · 티어별 · 받을 코인, 받으면 받을 코인이 줄어듦', () => {

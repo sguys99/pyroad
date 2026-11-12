@@ -1,5 +1,5 @@
 /* 출석 카드·달력 (P8-08). `AttendanceCard.tsx`가 import한다. 흰 쪽지 + 위 금색 띠, 7칸 달력(찍은 칸 금색 "출석" 도장 — 통과 도장과 같은 모양),
-   오늘 칸 점선, 7일째 상자. 320px 에서 7칸 한 줄(칸 ≥ 2.1rem). 등장은 한 번(full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시).
+   오늘 칸 점선, 7일째 상자(찍은 뒤 모서리 열린 상자 배지). 320px 에서 7칸 한 줄(칸 ≥ 2.1rem). 등장은 한 번(full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시).
    도장 쾅은 stampSlam(WAAPI)이 하고 여기는 끝 모습(rotate -8deg)만. 토큰 변수만 */
 
 @layer components {
@@ -71,6 +71,7 @@
     list-style: none;
   }
   .at-cell {
+    position: relative;
     display: grid;
     justify-items: center;
     gap: 0.125rem;
@@ -135,6 +136,24 @@
     letter-spacing: -0.04em;
     white-space: nowrap;
     transform: rotate(-8deg);
+    pointer-events: none;
+  }
+  /* 7일째 찍은 칸의 열린 상자 표시: 칸 오른쪽 위 모서리에 걸친 작은 배지 (도장·"n일"·코인 글자와 겹치지 않음).
+     7일째는 늘 마지막 칸이라 오른쪽으로 삐져나와도 옆 칸에 닿지 않음 (카드 안쪽 여백 안) */
+  .at-chest-mark {
+    position: absolute;
+    top: -0.4375rem;
+    right: -0.375rem;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: var(--round-pill);
+    background: var(--surface);
+    box-shadow:
+      0 0 0 var(--line-w) var(--accent),
+      var(--elev-card);
     pointer-events: none;
   }
   .at-cell .ob-splat {
