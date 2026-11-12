@@ -69,6 +69,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
+    container: at-cal / inline-size;
   }
   .at-cell {
     position: relative;
@@ -142,19 +143,33 @@
      7일째는 늘 마지막 칸이라 오른쪽으로 삐져나와도 옆 칸에 닿지 않음 (카드 안쪽 여백 안) */
   .at-chest-mark {
     position: absolute;
-    top: -0.4375rem;
+    top: -0.625rem;
     right: -0.375rem;
     z-index: 4;
     display: grid;
     place-items: center;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1rem;
+    height: 1rem;
     border-radius: var(--round-pill);
     background: var(--surface);
     box-shadow:
       0 0 0 var(--line-w) var(--accent),
       var(--elev-card);
     pointer-events: none;
+  }
+  /* 좁은 달력(320px 메뉴 시트 등, 칸 < 약 2.25rem): 가로 타원은 칸보다 넓어 옆 칸 테두리를 넘음 →
+     세로 도장(출/석 위아래, 진짜 도장처럼). 그림 자리를 모든 칸이 같이 키워 "n일"·코인 줄은 칸마다 맞음 */
+  @container at-cal (max-width: 17.5rem) {
+    .at-face {
+      height: 2.5rem;
+    }
+    .at-stamp {
+      width: 1.5rem;
+      height: 2.25rem;
+      letter-spacing: 0;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+    }
   }
   .at-cell .ob-splat {
     position: absolute;

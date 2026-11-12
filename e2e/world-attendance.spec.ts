@@ -41,8 +41,16 @@ async function stampOverlaps(calendar: Locator) {
       const mark = cell.querySelector('.at-chest-mark');
       if (mark && hit(mark.getBoundingClientRect(), box('.at-n')))
         bad.push(`${i + 1}: 상자 표시↔n일`);
+      // 좁은 달력의 세로 도장은 칸 안 (가로 타원이 옆 칸 테두리를 넘던 것)
+      const c = cell.getBoundingClientRect();
+      if (
+        getComputedStyle(stamp).writingMode.startsWith('vertical') &&
+        (s.left < c.left || s.right > c.right)
+      )
+        bad.push(`${i + 1}: 도장이 칸 밖`);
       // 도장 테두리 2px 안쪽 (기울기 전 폭)
-      if (text.getBoundingClientRect().width > stamp.offsetWidth - 4)
+      const t = text.getBoundingClientRect();
+      if (t.width > stamp.offsetWidth - 4 || t.height > stamp.offsetHeight - 4)
         bad.push(`${i + 1}: 글자가 도장보다 넓음`);
       return bad;
     }),

@@ -75,7 +75,7 @@ export function AttendanceCalendar({ status, stampRef }: CalendarProps) {
             {/* 7일째 찍은 칸: 도장이 상자 그림을 대신해도 "열린 상자 날"로 읽히게 칸 오른쪽 위 모서리에 작은 표시 (§12-Q66 ⑤) */}
             {c.day && c.chest && (
               <span className="at-chest-mark" aria-hidden>
-                <RewardIcon kind="chestOpen" size={14} />
+                <RewardIcon kind="chestOpen" size={12} />
               </span>
             )}
             <span className="at-face" aria-hidden>
