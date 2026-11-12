@@ -86,10 +86,18 @@ test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 업적·보물), 넘침 
   await page.setViewportSize({ width: 1280, height: 900 });
   await seed(e2eUser.id);
   await page.goto('/profile');
-  const cal = await page.getByTestId('profile-calendar').boundingBox();
-  const ach = await page.getByTestId('profile-achievements').boundingBox();
-  expect(cal && ach && Math.abs(cal.y - ach.y)).toBeLessThan(2);
-  expect(cal && ach && ach.x > cal.x + cal.width).toBe(true);
+  await expect(page.getByTestId('profile-achievements')).toBeVisible();
+  // 두 상자를 한 프레임에서 잰다: 따로 재면 화면 등장 전환(PageTransition, 12px 올라옴) 사이에 위치가 달라짐 (B71)
+  const [cal, ach] = await page.evaluate(() =>
+    ['profile-calendar', 'profile-achievements'].map((id) =>
+      document
+        .querySelector(`[data-testid="${id}"]`)!
+        .getBoundingClientRect()
+        .toJSON(),
+    ),
+  );
+  expect(Math.abs(cal.y - ach.y)).toBeLessThan(2);
+  expect(ach.x > cal.x + cal.width).toBe(true);
   // 계정 관리는 접혀 있음 (위험 동작이 바로 보이지 않게)
   await expect(page.getByTestId('reset-scope')).toBeHidden();
   await page.getByText('계정 관리').click();
