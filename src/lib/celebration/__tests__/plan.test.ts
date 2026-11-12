@@ -97,6 +97,20 @@ describe('planCelebrations (축하 단계 계획, P1-10)', () => {
     ]);
   });
 
+  it('상점 구매(P9-02)는 구매 카드 하나 — 입을 수 있는 물건은 "바로 입기"를 기다리고 소모품은 자동 넘김', () => {
+    const buy = (itemId: string) =>
+      planCelebrations([
+        { type: 'purchase', itemId, price: 600, coinsLeft: 640 },
+      ]);
+    const hat = buy('hat_wizard');
+    expect(kinds(hat)).toEqual(['purchase']);
+    expect(autoAdvanceMs(hat[0])).toBeNull();
+    expect(autoAdvanceMs(buy('golden_key')[0])).toBe(5000);
+    expect(stepSummary(hat[0])).toBe('마법사 모자를 샀어요! 남은 코인 640개.');
+    expect(introMs(hat[0])).toBeGreaterThan(0);
+    expect(STEP_SPECS.purchase).toEqual({ sfx: 'chest', confetti: 'badge' });
+  });
+
   it('보물상자(P8-06, SHOW_CHEST)는 상자 카드 하나 — 효과음 chest', () => {
     const steps = planCelebrations([
       {

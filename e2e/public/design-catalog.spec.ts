@@ -968,3 +968,47 @@ test.describe('상점 아이템 카탈로그 (P9-01)', () => {
     });
   }
 });
+
+test.describe('상점 화면 (P9-02)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 가짜 서버 상점에서 미리 보기 → 구매 → 축하 → 바로 입기, 칸이 화면 안`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const demo = page.getByTestId('catalog-shop-screen');
+      await demo.scrollIntoViewIfNeeded();
+      await expect(demo.locator('[data-item]')).toHaveCount(10);
+      await demo.getByRole('button', { name: /^마법사 모자,/ }).click();
+      const sheet = page.getByTestId('shop-sheet');
+      await expect(sheet.getByTestId('shop-stage')).toHaveAttribute(
+        'data-look',
+        /"hat":"wizard"/,
+      );
+      await sheet.getByTestId('shop-buy').click();
+      await sheet.getByTestId('shop-buy-confirm').click();
+      const card = page.getByTestId('celebration-step-purchase');
+      await expect(card).toContainText('마법사 모자');
+      await card.getByTestId('purchase-wear').click();
+      await expect(page.getByTestId('celebration-overlay')).toHaveCount(0);
+      await expect(demo.locator('[data-item="hat_wizard"]')).toHaveAttribute(
+        'data-state',
+        'equipped',
+      );
+      // 코인 부족·오류 상태 견본
+      await expect(page.getByTestId('catalog-shop-error')).toContainText(
+        '상점 문을 열지 못했어요',
+      );
+      await expect(
+        page.getByTestId('catalog-purchase-pet_dragon'),
+      ).toContainText('용용이');
+      // 칸·카드가 화면 안 (카탈로그 페이지 전체 폭은 다른 절의 HUD 견본이 좌우함)
+      for (const right of await page
+        .locator('#shop-screen [data-item], #shop-screen .cel-card')
+        .evaluateAll((els) =>
+          els.map((el) => el.getBoundingClientRect().right),
+        ))
+        expect(right).toBeLessThanOrEqual(width);
+    });
+  }
+});

@@ -184,6 +184,55 @@
     }
   }
 
+  /* 코인 칩 = 상점 가기 (P9-02) */
+  .wh-coin {
+    display: inline-flex;
+    flex: 0 1 auto;
+    min-width: 0;
+    border-radius: var(--round-pill);
+  }
+  /* 상점 칩 (P9-02): 금색 면 알약. 1024px 이상은 글자도, 640px 미만은 빠짐(메뉴 시트·코인 칩으로) */
+  .wh-shop {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0 0.625rem;
+    border-radius: var(--round-pill);
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+  }
+  .wh-shop > svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  .wh-shop-l {
+    display: none;
+    font-size: var(--text-small);
+  }
+  @media (hover: hover) {
+    .wh-shop:hover {
+      background: color-mix(in srgb, var(--accent) 30%, var(--accent-soft));
+    }
+  }
+  @media (min-width: 64rem) {
+    .wh-shop {
+      padding: 0 0.875rem 0 0.75rem;
+    }
+    .wh-shop-l {
+      display: inline;
+    }
+    /* 미션 칸이 없어 곧 열려요가 남은 바(카탈로그 등)는 글자 없이 — 같은 폭 안에 */
+    .wh-soon-one + .wh-shop .wh-shop-l {
+      display: none;
+    }
+  }
+
   /* HUD 쪽지: 바 바로 아래 가운데 */
   .g-toast-region.wh-toast {
     top: calc(4.5rem + env(safe-area-inset-top, 0px));
@@ -233,7 +282,8 @@
     }
     /* 640px 미만: 곧 열려요(상점) 버튼은 빼고 코인·미션 칩(P8-07)에 자리를, 400px 아래는 닉네임 글자와 바의 소리 토글(메뉴 시트로)도 뺌
        (아바타 링크의 낭독 이름 "○○, 내 프로필"은 그대로) */
-    .wh-soon-one {
+    .wh-soon-one,
+    .wh-shop {
       display: none;
     }
     .wh .wh-icon {

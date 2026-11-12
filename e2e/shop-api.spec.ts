@@ -1,4 +1,4 @@
-// 상점 API (P9-03): 로그인 세션으로 구매 → 장착 → 상태에 반영 → 벗기. 화면(P9-02)은 아직 없어 API 계약만 확인.
+// 상점 API (P9-03): 로그인 세션으로 구매 → 장착 → 상태에 반영 → 벗기. API 계약만 확인 (화면 흐름은 shop.spec.ts, P9-02).
 // 코인은 테스트 키로 지급, 가격은 서버(shop_items)가 정하고, 장착은 users.avatar_config(외형)·settings.editor_theme(테마)
 
 import { test, expect } from './support/test';

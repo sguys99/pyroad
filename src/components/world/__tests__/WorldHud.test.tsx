@@ -57,11 +57,27 @@ describe('WorldHud', () => {
     expect(screen.getByRole('button', { name: '메뉴' })).toBeInTheDocument();
   });
 
-  it('곧 열려요 칩을 누르면 아이 말투 쪽지', () => {
+  it('곧 열려요 칩(미션 칸이 없을 때)을 누르면 아이 말투 쪽지', () => {
     render(<WorldHud {...props} />);
-    fireEvent.click(screen.getByRole('button', { name: '상점, 곧 열려요' }));
+    fireEvent.click(screen.getByTestId('hud-soon-mission'));
     expect(screen.getByRole('status', { name: 'HUD 안내' })).toHaveTextContent(
-      '상점은 곧 열려요! 조금만 기다려 줘.',
+      '오늘의 미션은 곧 열려요! 조금만 기다려 줘.',
+    );
+  });
+
+  it('상점 (P9-02): 상점 칩·코인 칩·메뉴 시트 맨 위가 /shop', async () => {
+    render(<WorldHud {...props} />);
+    expect(screen.getByRole('link', { name: '상점' })).toHaveAttribute(
+      'href',
+      '/shop',
+    );
+    expect(
+      screen.getByRole('link', { name: '코인 1,280개, 상점 가기' }),
+    ).toHaveAttribute('href', '/shop');
+    fireEvent.click(screen.getByRole('button', { name: '메뉴' }));
+    expect(await screen.findByTestId('menu-shop')).toHaveAttribute(
+      'href',
+      '/shop',
     );
   });
 
@@ -75,7 +91,7 @@ describe('WorldHud', () => {
     expect(sessionStorage.getItem('pyroad:hud-coins')).toBe('1280');
   });
 
-  it('미션이 있으면 미션 칸(P8-07)이 들어오고 곧 열려요는 상점만', () => {
+  it('미션이 있으면 미션 칸(P8-07)이 들어오고 곧 열려요는 없음', () => {
     render(
       <WorldHud
         {...props}
@@ -92,9 +108,7 @@ describe('WorldHud', () => {
     expect(
       screen.queryByRole('button', { name: '오늘의 미션, 곧 열려요' }),
     ).toBeNull();
-    expect(screen.getByTestId('hud-soon')).toHaveAccessibleName(
-      '상점, 곧 열려요',
-    );
+    expect(screen.queryByTestId('hud-soon')).toBeNull();
   });
 
   it('메뉴 버튼이 있다 (공지·게시판·로그아웃은 시트 안)', () => {

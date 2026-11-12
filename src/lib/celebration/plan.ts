@@ -19,6 +19,7 @@ import type {
 import type { StageClearInfo } from '@/lib/quest/rewards';
 import { SHOW_CHEST, SHOW_COINS } from '@/lib/world/flags';
 import { withObjectParticle } from '@/lib/korean';
+import { getShopItem } from '@/lib/shop/catalog';
 import { isMilestoneLevel } from '@/lib/quest/xp';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { STAR_RATES } from '@/lib/sound/manifest';
@@ -50,7 +51,8 @@ export type CelebrationStep =
       stars: EventOf<'star'> | null;
       coins: number;
     }
-  | { kind: 'chest'; id: string; event: EventOf<'chest'> };
+  | { kind: 'chest'; id: string; event: EventOf<'chest'> }
+  | { kind: 'purchase'; id: string; event: EventOf<'purchase'> };
 
 export type CelebrationStepKind = CelebrationStep['kind'];
 
@@ -64,6 +66,7 @@ export const EVENT_PRIORITY: Record<CelebrationEventType, number> = {
   star: 4,
   coin: 4,
   chest: 5,
+  purchase: 5,
 };
 
 export type ConfettiPresetName = 'grand' | 'level' | 'badge' | 'none';
@@ -81,6 +84,7 @@ export const STEP_SPECS: Record<CelebrationStepKind, StepSpec> = {
   badges: { sfx: 'star', confetti: 'badge' },
   rewards: { sfx: 'coin', confetti: 'none' },
   chest: { sfx: 'chest', confetti: 'badge' },
+  purchase: { sfx: 'chest', confetti: 'badge' },
 };
 
 /** 뱃지가 하나씩 등장하는 시각 (초, 카드 등장 기준). 효과음도 같은 간격으로 */
@@ -154,6 +158,11 @@ export function autoAdvanceMs(step: CelebrationStep): number | null {
       return 4000;
     case 'chest':
       return 6000;
+    case 'purchase':
+      // 입을 수 있는 물건은 "바로 입기"를 고를 때까지 기다림 (소모품은 읽을 시간만)
+      return getShopItem(step.event.itemId)?.kind === 'consumable'
+        ? 5000
+        : null;
   }
 }
 
@@ -182,6 +191,8 @@ export function introMs(step: CelebrationStep): number {
       return 1500;
     case 'chest':
       return 1800;
+    case 'purchase':
+      return 1300;
   }
 }
 
@@ -219,6 +230,10 @@ export function stepSummary(step: CelebrationStep): string {
           ? `, 황금키 ${step.event.contents.goldenKeys}개`
           : ''
       }.`;
+    case 'purchase': {
+      const name = getShopItem(step.event.itemId)?.name ?? '새 물건';
+      return `${withObjectParticle(name)} 샀어요! 남은 코인 ${step.event.coinsLeft}개.`;
+    }
   }
 }
 
@@ -259,6 +274,7 @@ export function planCelebrations(
   let stars: EventOf<'star'> | null = null;
   let coins = 0;
   const chests: EventOf<'chest'>[] = [];
+  const purchases: EventOf<'purchase'>[] = [];
 
   for (const event of sorted) {
     switch (event.type) {
@@ -301,11 +317,16 @@ export function planCelebrations(
         // 스테이지 시트 "열기"가 만든 상자 (P8-06, `SHOW_CHEST`)
         if (SHOW_CHEST) chests.push(event);
         break;
+      case 'purchase':
+        purchases.push(event);
+        break;
     }
   }
 
   for (const event of chests)
     steps.push({ kind: 'chest', id: id('chest'), event });
+  for (const event of purchases)
+    steps.push({ kind: 'purchase', id: id('purchase'), event });
   if (badges.length > 0)
     steps.push({ kind: 'badges', id: id('badges'), badges });
   if (stars || coins > 0) {

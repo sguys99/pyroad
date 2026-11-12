@@ -34,6 +34,7 @@ import { BadgesCard } from './celebrations/BadgesCard';
 import { GoldenKeyCard } from './celebrations/GoldenKeyCard';
 import { RewardsCard } from './celebrations/RewardsCard';
 import { ChestCard } from './celebrations/ChestCard';
+import { PurchaseCard } from './celebrations/PurchaseCard';
 import './celebrations/celebration.css';
 
 interface QuestCelebrationsProps {
@@ -456,6 +457,15 @@ function StepContent({
           goal={step.event.goal}
           contents={step.event.contents}
           note={step.event.note}
+          budget={budget}
+          settled={settled}
+          onNext={onNext}
+        />
+      );
+    case 'purchase':
+      return (
+        <PurchaseCard
+          event={step.event}
           budget={budget}
           settled={settled}
           onNext={onNext}

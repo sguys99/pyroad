@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { useCountUp } from '@/lib/celebration/ticker';
 import { PybaemStatic } from '@/components/characters/rig';
+import type { Costume } from '@/components/characters/rig/costumes';
+import type { SkinPalette } from '@/lib/avatar/skins';
 import { popIn } from './motion';
 
 /**
@@ -225,8 +227,13 @@ export function CelebrationMascot({
   jumpAtMs = 600,
   budget,
   settled = false,
+  costume,
+  palette,
 }: {
   size?: number;
+  /** 꾸민 모습 (상점 구매 축하 P9-02) */
+  costume?: Costume;
+  palette?: SkinPalette;
   /** 카드 등장 기준 점프 시작 (ms, full 기준 — lite는 70%) */
   jumpAtMs?: number;
   budget: MotionBudget;
@@ -254,6 +261,8 @@ export function CelebrationMascot({
         size={size}
         label=""
         lookAt={false}
+        costume={costume}
+        palette={palette}
       />
     </span>
   );
