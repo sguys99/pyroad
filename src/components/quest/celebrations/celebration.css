@@ -286,7 +286,7 @@
 /* ───── 뱃지 · 황금키 · 보상: 금색 메달 */
 .cel-medals {
   display: grid;
-  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem 0.5rem;
   width: 100%;
   margin: 0;
@@ -339,29 +339,27 @@
   font-size: var(--text-caption);
   line-height: 1.35;
 }
-/* 좁은 화면(360)에서 뱃지 2~3개: 세 칸이면 이름이 글자마다 꺾여서, 한 줄에 하나씩 메달 + 이름·설명 (P6-16) */
-@media (max-width: 29.99rem) {
-  .cel-medals[data-many] {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.75rem;
-  }
-  .cel-medals[data-many] .cel-medal-item {
-    grid-template-columns: auto minmax(0, 1fr);
-    justify-items: start;
-    align-items: center;
-    column-gap: 0.75rem;
-    row-gap: 0.125rem;
-    text-align: left;
-  }
-  .cel-medals[data-many] .cel-medal {
-    grid-row: span 2;
-    width: 3rem;
-    height: 3rem;
-  }
-  .cel-medals[data-many] .cel-medal svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
+/* 뱃지 2~3개: 한 줄에 하나씩 메달 + 이름·설명. 카드는 어느 화면에서나 최대 24rem 이라 칸으로 나누면 설명이 한두 낱말씩 꺾임
+   (P6-16은 좁은 화면만 → 넓은 화면에서도 같은 모양, B66) */
+.cel-medals[data-many] {
+  gap: 0.75rem;
+}
+.cel-medals[data-many] .cel-medal-item {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.125rem;
+  text-align: left;
+}
+.cel-medals[data-many] .cel-medal {
+  grid-row: span 2;
+  width: 3rem;
+  height: 3rem;
+}
+.cel-medals[data-many] .cel-medal svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* 받은 것 한 줄 (XP·코인·황금키): 옅은 회색 알약 */

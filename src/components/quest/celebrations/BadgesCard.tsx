@@ -81,11 +81,7 @@ export function BadgesCard({
         </h2>
       </div>
 
-      <ul
-        className="cel-medals"
-        data-many={single ? undefined : ''}
-        style={{ '--n': Math.min(badges.length, 3) } as React.CSSProperties}
-      >
+      <ul className="cel-medals" data-many={single ? undefined : ''}>
         {badges.map((badge, i) => {
           const at = Math.round(
             (BADGE_FIRST_AT_S + i * BADGE_STAGGER_S) * 1000,
