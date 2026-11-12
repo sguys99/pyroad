@@ -13,9 +13,8 @@ import {
 } from './catalog';
 import type { EquipSlot, ShopErrorCode, ShopStatus } from './api';
 
-/** 스트릭 방패 최대 (00035) · 황금키 최대 (스테이지를 깨면 3개로 채워짐, 00040 `golden_keys_full`) */
+/** 스트릭 방패 최대 (00035). 황금키는 상한 없음 (스테이지를 깨면 3개 미만만 3개로 채움, 00041 B72 §12-Q68) */
 export const MAX_SHIELDS = 2;
-export const MAX_GOLDEN_KEYS = 3;
 
 export const KIND_LABEL: Record<ShopKind, string> = {
   costume: '코스튬',
@@ -34,7 +33,7 @@ export const KIND_ORDER: readonly ShopKind[] = [
 ];
 
 /**
- * 카드 상태: 살 수 있음 · 가짐 · 입는 중 · 이번 주 샀음(소모품 한도) · 가득 참(방패 2·황금키 3)
+ * 카드 상태: 살 수 있음 · 가짐 · 입는 중 · 이번 주 샀음(소모품 한도) · 가득 참(방패 2)
  */
 export type ItemState = 'buy' | 'owned' | 'equipped' | 'week_done' | 'full';
 
@@ -54,11 +53,9 @@ export function itemState(item: ShopItem, s: ShopStatus): ItemState {
   if (item.kind === 'consumable') {
     if ((s.bought_this_week[item.id] ?? 0) >= item.weeklyLimit)
       return 'week_done';
-    const full =
-      item.id === 'streak_shield'
-        ? s.shields >= MAX_SHIELDS
-        : s.golden_keys >= MAX_GOLDEN_KEYS;
-    return full ? 'full' : 'buy';
+    return item.id === 'streak_shield' && s.shields >= MAX_SHIELDS
+      ? 'full'
+      : 'buy';
   }
   const slot = equipSlotOf(item);
   if (slot && s.equipped[slot] === item.id) return 'equipped';
@@ -102,8 +99,6 @@ export const SHOP_ERROR_TEXT: Record<ShopErrorCode, string> = {
   weekly_limit_reached: '이번 주에는 벌써 샀어요. 월요일에 다시 살 수 있어요.',
   shields_full:
     '방패는 2개까지만 가질 수 있어요. 하나를 쓰고 나면 또 살 수 있어요.',
-  golden_keys_full:
-    '황금키가 벌써 3개 있어요. 하나를 쓰고 나면 또 살 수 있어요.',
   item_inactive: '이 물건은 지금 팔지 않아요. 다른 물건을 둘러볼까요?',
   item_not_found: '상점에서 이 물건을 찾지 못했어요. 화면을 새로 열어 볼까요?',
   not_owned: '아직 가지고 있지 않은 물건이에요. 먼저 사야 입을 수 있어요.',
@@ -164,9 +159,7 @@ export function stateLabel(item: ShopItem, state: ItemState): string {
     case 'week_done':
       return '이번 주에 샀어요';
     case 'full':
-      return item.id === 'streak_shield'
-        ? `방패가 ${MAX_SHIELDS}개로 가득 찼어요`
-        : `황금키가 ${MAX_GOLDEN_KEYS}개로 가득 찼어요`;
+      return `방패가 ${MAX_SHIELDS}개로 가득 찼어요`;
     case 'buy':
       return `${item.price.toLocaleString('ko-KR')}코인`;
   }

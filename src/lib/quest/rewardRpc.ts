@@ -74,10 +74,6 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
     status: 409,
     error: '방패는 2개까지 가질 수 있어요. 하나를 쓰면 또 살 수 있어요.',
   },
-  golden_keys_full: {
-    status: 409,
-    error: '황금키가 벌써 3개 있어요. 하나를 쓰면 또 살 수 있어요.',
-  },
   not_owned: { status: 403, error: '아직 가지고 있지 않은 물건이에요.' },
   wrong_slot: { status: 400, error: '그 자리에는 입힐 수 없어요.' },
 };

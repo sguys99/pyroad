@@ -2505,6 +2505,36 @@ async function groupReward() {
 
   await check({
     group: 'reward',
+    id: 'RW-6b',
+    role: 'service_role',
+    op: 'B72 황금키 3개 넘게 보관: 5개 가진 채 스테이지 1 클리어 → 5개 그대로, 전체 리셋도 5개 그대로 (3개 미만만 3개로 채움)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('rw6b', '키부자');
+      one(`update public.users set golden_keys = 5 where id = '${x.id}'`);
+      let last;
+      for (const q of stageQuests(STAGE1)) {
+        last = await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+        if (last.status !== 200) return { actual: 'error', detail: `${q}: ${last.status} ${errMsg(last)}` };
+      }
+      const reset = await rpc('reset_progress', { p_user_id: x.id, p_scope: 'all' });
+      return (
+        compare(
+          '황금키',
+          { cleared: true, clear: 5, reset: 5, row: 5 },
+          {
+            cleared: Boolean(last.json?.stage_cleared),
+            clear: last.json?.golden_keys,
+            reset: reset.json?.golden_keys,
+            row: userRow(x.id).golden_keys,
+          },
+        ) ?? { actual: 'ok', detail: '5개 → 스테이지 클리어 5개 → 전체 리셋 5개' }
+      );
+    },
+  });
+
+  await check({
+    group: 'reward',
     id: 'RW-7',
     role: 'service_role',
     op: 'B12 스테이지 리셋: earned_xp 합으로 재계산(황금키 0 XP 과다 차감 없음), 업적(옛 stage_clear)은 남음 (P8-09)',
@@ -3699,7 +3729,7 @@ async function groupInventory(u) {
     group: 'inventory',
     id: 'IV-2',
     role: 'service_role',
-    op: '구매: 가격은 shop_items · 영구 재구매 거부 · 동시 4번도 1번 · 소모품 주 1개(원장 shop:<id>:<월요일>:1) · 방패 2개·황금키 3개 상한 · 황금키는 users.golden_keys 에 더함 · 코인 부족 · 그만 판 아이템 · 없는 아이템 · 잔액 = 원장 · shop_status',
+    op: '구매: 가격은 shop_items · 영구 재구매 거부 · 동시 4번도 1번 · 소모품 주 1개(원장 shop:<id>:<월요일>:1) · 방패 2개 상한 · 황금키는 상한 없이 users.golden_keys 에 더함(3개여도 4개, B72) · 코인 부족 · 그만 판 아이템 · 없는 아이템 · 잔액 = 원장 · shop_status',
     ...OK,
     run: async () => {
       const week = one(`select public.kst_week_start(public.kst_today())::text`);
@@ -3710,8 +3740,7 @@ async function groupInventory(u) {
       const race = await Promise.all(Array.from({ length: 4 }, () => buy(x.id, 'glasses_round')));
       const shield = await buy(x.id, 'streak_shield');
       const shield2 = await buy(x.id, 'streak_shield');
-      const keyFull = await buy(x.id, 'golden_key');
-      one(`update public.users set golden_keys = 2 where id = '${x.id}'`);
+      // 황금키는 가진 수 상한 없음 (B72 §12-Q68): 기본 3개여도 사서 4개
       const key = await buy(x.id, 'golden_key');
       const key2 = await buy(x.id, 'golden_key');
       one(`update public.shop_items set is_active = false where id = 'frame_wave'`);
@@ -3734,14 +3763,13 @@ async function groupInventory(u) {
             race: '1:3:409:already_owned',
             shield: '200:1:1',
             shield2: '409:weekly_limit_reached',
-            keyFull: '409:golden_keys_full',
-            key: '200:3',
+            key: '200:4',
             key2: '409:weekly_limit_reached',
             inactive: '410:item_inactive',
             missing: '404:item_not_found',
             poor: '402:not_enough_coins',
             refs: `shop:glasses_round,shop:golden_key:${week}:1,shop:hat_party,shop:streak_shield:${week}:1`,
-            status: `1280:3:1:glasses_round,hat_party:{"golden_key":1,"streak_shield":1}:${week}`,
+            status: `1280:4:1:glasses_round,hat_party:{"golden_key":1,"streak_shield":1}:${week}`,
             full: '409:shields_full:2:500',
             mismatches: '0:0',
           },
@@ -3751,7 +3779,6 @@ async function groupInventory(u) {
             race: `${race.filter((r) => r.status === 200).length}:${race.filter((r) => r.status === 409).length}:${res(race.find((r) => r.status !== 200) ?? {})}`,
             shield: `${res(shield)}:${shield.json?.shields}:${shield.json?.bought_this_week}`,
             shield2: res(shield2),
-            keyFull: res(keyFull),
             key: `${res(key)}:${key.json?.golden_keys}`,
             key2: res(key2),
             inactive: res(inactive),

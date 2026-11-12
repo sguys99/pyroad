@@ -634,7 +634,7 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.purchase_item()',
     activateIn: 'P9-03',
-    note: '영구 재구매·동시 1회·소모품 주 1개·방패 2·황금키 3·코인 부족·판매 중지 · 잔액 = 원장',
+    note: '영구 재구매·동시 1회·소모품 주 1개·방패 2·황금키 상한 없음(00041 B72)·코인 부족·판매 중지 · 잔액 = 원장',
   },
   'IV-3': {
     expect: 'allow',
@@ -776,6 +776,12 @@ export const EXPECT = {
     requires: 'public.complete_quest()',
     activateIn: 'P1-03',
     note: '스테이지 1 의 코드 퀘스트만 complete_quest (퀴즈는 보너스, B49)',
+  },
+  'RW-6b': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'B72',
+    note: '00041: 스테이지 클리어·전체 리셋은 황금키 3개 미만만 3개로 채움 (§12-Q68)',
   },
   'RW-7': {
     expect: 'allow',

@@ -153,7 +153,7 @@ function fakeShop(start: ShopStatus, failStatus = false): ShopApi {
 
 const RICH: ShopStatus = {
   coins: 1240,
-  golden_keys: 1,
+  golden_keys: 4, // 3개 넘게 가질 수 있음 (B72)
   shields: 1,
   week_start: '2026-11-09',
   owned: ['hat_party', 'glasses_round', 'pet_chick'],

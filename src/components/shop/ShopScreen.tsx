@@ -60,7 +60,6 @@ import {
 import {
   KIND_LABEL,
   KIND_ORDER,
-  MAX_GOLDEN_KEYS,
   MAX_SHIELDS,
   equipSlotOf,
   itemState,
@@ -747,7 +746,7 @@ function ItemDetail({
   const have =
     item.kind === 'consumable'
       ? item.id === 'golden_key'
-        ? `${status.golden_keys}/${MAX_GOLDEN_KEYS}`
+        ? `${status.golden_keys}개`
         : `${status.shields}/${MAX_SHIELDS}`
       : null;
 
@@ -930,9 +929,7 @@ function Closet({
         <li>
           <RewardIcon kind="key" size={28} />
           황금키
-          <b className="font-display tabular-nums">
-            {status.golden_keys}/{MAX_GOLDEN_KEYS}
-          </b>
+          <b className="font-display tabular-nums">{status.golden_keys}개</b>
         </li>
         <li>
           <RewardIcon kind="shield" size={28} />

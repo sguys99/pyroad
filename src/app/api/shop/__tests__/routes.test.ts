@@ -96,7 +96,6 @@ describe('/api/shop (P9-03)', () => {
     ['already_owned', 409],
     ['weekly_limit_reached', 409],
     ['shields_full', 409],
-    ['golden_keys_full', 409],
     ['item_inactive', 410],
     ['item_not_found', 404],
   ])(

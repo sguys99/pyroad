@@ -66,7 +66,6 @@ export type ShopErrorCode =
   | 'already_owned'
   | 'weekly_limit_reached'
   | 'shields_full'
-  | 'golden_keys_full'
   | 'item_not_found'
   | 'item_inactive'
   | 'not_owned'

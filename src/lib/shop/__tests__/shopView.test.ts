@@ -56,7 +56,7 @@ describe('itemState', () => {
     ).toBe('equipped');
   });
 
-  it('소모품: 이번 주 한도 → 이번 주 샀음, 방패 2·황금키 3이면 가득 참', () => {
+  it('소모품: 이번 주 한도 → 이번 주 샀음, 방패 2개면 가득 참, 황금키는 상한 없음 (B72)', () => {
     expect(itemState(item('golden_key'), status())).toBe('buy');
     expect(
       itemState(
@@ -64,8 +64,8 @@ describe('itemState', () => {
         status({ bought_this_week: { golden_key: 1 } }),
       ),
     ).toBe('week_done');
-    expect(itemState(item('golden_key'), status({ golden_keys: 3 }))).toBe(
-      'full',
+    expect(itemState(item('golden_key'), status({ golden_keys: 5 }))).toBe(
+      'buy',
     );
     expect(itemState(item('streak_shield'), status({ shields: 1 }))).toBe(
       'buy',
@@ -126,7 +126,6 @@ describe('아이용 오류 문구', () => {
       'already_owned',
       'weekly_limit_reached',
       'shields_full',
-      'golden_keys_full',
       'item_not_found',
       'item_inactive',
       'not_owned',
