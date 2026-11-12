@@ -1,5 +1,5 @@
 // Phase 8 핵심 루프 (P8-16): 새 학생 한 명으로 하루를 끝까지 —
-// 출석 도장(+5, 원장 attendance/<오늘>) → 오늘 미션 3개 배정 → 힌트 없이 퀘스트 ⭐3(코인 10 + 별 15, XP) → HUD 코인·노드 별 →
+// 출석 도장(+5, 원장 attendance/<오늘>) → 오늘 미션 배정(그날 할 수 있는 것만이라 개수는 정하지 않음) → 힌트 없이 퀘스트 ⭐3(코인 10 + 별 15, XP) → HUD 코인·노드 별 →
 // 미션 받기(코인·XP 15) → 업적 카드 "나중에" → 도감 받기 가능 → 프로필 달력 오늘 칸·스트릭 1 → 어제 학습 기록을 넣으면 스트릭 2 →
 // 같은 날 다시 풀기는 연습(별·코인 그대로). 끝마다 잔액 = 원장 합(`coin_balance_mismatches()` 0행).
 // 공용 테스트 사용자는 같은 실행의 다른 스펙이 출석·원장 키를 이미 썼을 수 있어, 이 스펙만 새 사용자로 절대값을 본다
@@ -57,9 +57,13 @@ async function ledger(userId: string) {
   return data as Array<{ source: string; ref: string; delta: number }>;
 }
 
-/** 떠 있는 축하 카드를 "나중에"·"좋아요" 쪽(celebration-cta)으로 모두 넘긴다 (받기는 누르지 않음) */
+/**
+ * 축하 카드를 "나중에"·"좋아요" 쪽(celebration-cta)으로 모두 넘긴다 (받기는 누르지 않음).
+ * 월드맵 카드는 띄울 때 받는 지연 chunk라 늦게 뜸 → 먼저 뜰 때까지 기다림 (안 그러면 뜨기 전에 "다 넘김"으로 끝남, B60)
+ */
 async function dismissCelebrations(page: Page) {
   const overlay = page.getByTestId('celebration-overlay');
+  await expect(overlay).toBeVisible();
   await expect(async () => {
     if (await overlay.isVisible()) {
       await overlay.hover();
@@ -111,10 +115,11 @@ test('새 학생 하루: 출석 → 미션 배정 → 퀘스트 ⭐3·코인 →
     { source: 'attendance', ref: today, delta: 5 },
   ]);
 
-  // 2. 미션 시트: 오늘 미션 3개, 배정은 저장됨(user_daily_missions)
+  // 2. 미션 시트: 오늘 미션(퀘스트 그룹은 늘 첫 칸, 나머지는 그날 할 수 있는 것만이라 1~3개), 배정은 저장됨(user_daily_missions)
   const { day, missions } = await todayMissions(me);
   expect(day).toBe(today);
-  expect(missions).toHaveLength(3);
+  expect(missions.length).toBeGreaterThan(0);
+  expect(missions[0].kind).toBe('quest_clear');
   const { data: assigned } = await adminClient()
     .from('user_daily_missions')
     .select('mission_ids')
@@ -123,7 +128,9 @@ test('새 학생 하루: 출석 → 미션 배정 → 퀘스트 ⭐3·코인 →
     .single();
   expect(assigned?.mission_ids).toEqual(missions.map((m) => m.id));
   const chip = page.getByTestId('hud-mission');
-  await expect(chip).toHaveAccessibleName(/^오늘의 미션 0\/3 달성$/);
+  await expect(chip).toHaveAccessibleName(
+    `오늘의 미션 0/${missions.length} 달성`,
+  );
   await chip.click();
   const sheet = page.getByRole('dialog', { name: '오늘의 미션' });
   for (const m of missions)
@@ -191,10 +198,11 @@ test('새 학생 하루: 출석 → 미션 배정 → 퀘스트 ⭐3·코인 →
 
   // 4. 미션 받기 → 코인(난이도) · XP 15, 레벨 업·업적이면 카드
   await expect(chip).toHaveAttribute('data-ready');
+  let sheetOpen = false;
   for (const m of ready) {
-    // 받기마다 지도를 새로 연다: 앞 받기의 새로 고침·축하 뒤 시트 닫기(뒤로 가기)가 새로 연 시트를 닫거나 다시 그리지 않게
-    await page.goto('/world');
-    await chip.click();
+    // 앞 받기가 축하 카드로 시트를 닫았으면 다시 연다 (지도는 새로 열지 않음 — B60)
+    if (!sheetOpen) await chip.click();
+    sheetOpen = true;
     const row = sheet.getByTestId(`mission-${m.id}`);
     await expect(row).toHaveAttribute('data-state', 'ready');
     const coins0 = await coinBalance(me);
@@ -213,9 +221,10 @@ test('새 학생 하루: 출석 → 미션 배정 → 퀘스트 ⭐3·코인 →
     });
     expect(await coinBalance(me)).toBe(coins0 + body.coins_earned);
     expect(await totalXp(me)).toBe(xp0 + 15);
-    if (body.level_after > body.level_before || body.new_achievements?.length)
+    if (body.level_after > body.level_before || body.new_achievements?.length) {
       await dismissCelebrations(page);
-    else await expect(row).toHaveAttribute('data-state', 'claimed');
+      sheetOpen = false;
+    } else await expect(row).toHaveAttribute('data-state', 'claimed');
   }
   await page.goto('/world');
   const coinsAfterMissions = await coinBalance(me);
