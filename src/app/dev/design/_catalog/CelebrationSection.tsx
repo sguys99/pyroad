@@ -14,6 +14,7 @@ import { GoldenKeyCard } from '@/components/quest/celebrations/GoldenKeyCard';
 import { ProjectCompleteCard } from '@/components/quest/celebrations/ProjectCompleteCard';
 import { RewardsCard } from '@/components/quest/celebrations/RewardsCard';
 import { ChestCard } from '@/components/quest/celebrations/ChestCard';
+import { CtaAutoFocus } from '@/components/quest/celebrations/parts';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import {
   introMs,
@@ -138,9 +139,12 @@ function CardSample({
         className="rounded-2xl bg-scrim px-3 py-6"
         data-testid={`catalog-cel-${kind}${variant ? `-${variant}` : ''}`}
       >
-        <SettledCard key={round} kind={kind}>
-          {children}
-        </SettledCard>
+        {/* 견본은 늘 깔려 있어 버튼이 포커스를 가져가지 않음 (휴식 알림 등 다른 대화 상자의 첫 초점을 뺏던 문제, B61) */}
+        <CtaAutoFocus.Provider value={false}>
+          <SettledCard key={round} kind={kind}>
+            {children}
+          </SettledCard>
+        </CtaAutoFocus.Provider>
       </div>
     </figure>
   );

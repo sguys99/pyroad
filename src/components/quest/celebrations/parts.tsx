@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { m } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
@@ -20,6 +20,9 @@ import { popIn } from './motion';
  * 수 초짜리 긴 작업이 생겼다 (P1-10 측정). 등장 스프링이 거의 끝난 뒤 `preventScroll`로 옮긴다.
  */
 export const CTA_FOCUS_DELAY_MS = 320;
+
+/** false면 카드가 떠도 포커스를 옮기지 않음: 카탈로그 견본처럼 페이지에 늘 깔린 카드가 다른 대화 상자의 포커스를 뺏지 않게 (B61) */
+export const CtaAutoFocus = createContext(true);
 
 export function CelebrationCta({
   children,
@@ -44,14 +47,15 @@ export function CelebrationCta({
   loading?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
+  const auto = useContext(CtaAutoFocus);
   useEffect(() => {
-    if (!focus) return;
+    if (!focus || !auto) return;
     const timer = setTimeout(
       () => ref.current?.focus({ preventScroll: true }),
       CTA_FOCUS_DELAY_MS,
     );
     return () => clearTimeout(timer);
-  }, [focus]);
+  }, [focus, auto]);
 
   return (
     // 게임 버튼 (P2-11): 눌림 피드백은 버튼이, 소리는 시퀀서가 낸다
