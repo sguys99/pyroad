@@ -20,13 +20,25 @@ import {
   runningLoops,
   type MotionMode,
 } from '../support/motion';
+import {
+  formatTimeLeft,
+  msUntilKstMidnight,
+} from '../../src/lib/world/missions';
 
 let violations: string[] = [];
+// 하이드레이션이 어긋나면 React 가 트리를 새로 그려 잡아 둔 요소가 떨어진다 (B68: CI 에서만 가끔 "not attached")
+let hydrationErrors: string[] = [];
 test.beforeEach(async ({ page }) => {
   violations = await watchCspViolations(page);
+  hydrationErrors = [];
+  page.on('pageerror', (e) => {
+    if (/Minified React error #4(18|19|21|23|25)\b|hydrat/i.test(e.message))
+      hydrationErrors.push(e.message);
+  });
 });
 test.afterEach(() => {
   expect(violations, 'CSP 위반이 없어야 함 (B27)').toEqual([]);
+  expect(hydrationErrors, '하이드레이션 불일치가 없어야 함 (B68)').toEqual([]);
 });
 
 async function openCatalog(page: Page, mode?: MotionMode) {
@@ -79,6 +91,24 @@ async function translateY(page: Page, selector: string): Promise<number> {
 }
 
 test.describe('카탈로그 /dev/design (P2-12)', () => {
+  test('기기 시계가 서버와 몇 분 달라도 하이드레이션이 맞는다 (B68)', async ({
+    page,
+  }) => {
+    // 느린 러너에서 서버 HTML 과 하이드레이션 사이에 분이 넘어가는 것을 고정으로 재현
+    await page.clock.install({ time: Date.now() + 3 * 60_000 });
+    await page.clock.resume();
+    await openCatalog(page);
+    // 하이드레이션 뒤 기기 시각으로 다시 그려진 남은 시간 (afterEach 가 하이드레이션 오류를 확인)
+    const timer = page.getByTestId('mission-timer').first();
+    await expect(async () => {
+      const now = await page.evaluate(() => Date.now());
+      await expect(timer).toHaveText(
+        `새 미션까지 ${formatTimeLeft(msUntilKstMidnight(now))}`,
+        { timeout: 500 },
+      );
+    }).toPass();
+  });
+
   test('모든 절과 공통 컴포넌트가 보이고, 공유 카드는 실제 PNG로 그려진다', async ({
     page,
   }) => {

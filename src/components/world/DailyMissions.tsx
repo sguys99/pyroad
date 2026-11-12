@@ -63,10 +63,14 @@ async function requestClaim(
   return body as ClaimMissionResult;
 }
 
-/** 지금 시각 (간격마다 다시 그림). 시트가 열려 있을 때만 그려지므로 서버 HTML 과 어긋나지 않음 */
+/**
+ * 지금 시각 (간격마다 다시 그림). 서버 HTML 에도 그려질 수 있어(카탈로그) 하이드레이션 사이에 분이 넘어가면
+ * 글자가 어긋난다 → 시각 글자는 suppressHydrationWarning, 마운트 직후 기기 시각으로 한 번 다시 그림 (B68)
+ */
 function useNow(everyMs: number): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), everyMs);
     return () => clearInterval(t);
   }, [everyMs]);
@@ -375,7 +379,7 @@ export function MissionList({
         {say}
       </p>
       <p className="dm-timer" data-testid="mission-timer">
-        새 미션까지 <b>{formatTimeLeft(left)}</b>
+        새 미션까지 <b suppressHydrationWarning>{formatTimeLeft(left)}</b>
       </p>
       {layer}
     </div>
