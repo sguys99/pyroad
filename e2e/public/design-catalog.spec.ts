@@ -940,3 +940,31 @@ test.describe('휴식 알림 (P8-12)', () => {
     });
   }
 });
+
+test.describe('상점 아이템 카탈로그 (P9-01)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 아이템 22종이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const section = page.locator('#shop');
+      await section.scrollIntoViewIfNeeded();
+      const items = section.locator('[data-item]');
+      await expect(items).toHaveCount(22);
+      await expect(section.locator('[data-item="pet_dragon"]')).toContainText(
+        '1,500',
+      );
+      await expect(section.locator('[data-item="golden_key"]')).toContainText(
+        '한 주에 1개',
+      );
+      await expect(
+        section.locator('[data-item^="pet_"] svg[viewBox="0 0 48 48"]'),
+      ).toHaveCount(4);
+      for (const box of await items.evaluateAll((els) =>
+        els.map((el) => el.getBoundingClientRect().right),
+      ))
+        expect(box).toBeLessThanOrEqual(width);
+    });
+  }
+});

@@ -174,6 +174,21 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v0.7-phase9',
+    dir: 'v0.7-phase9',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.7 (Phase 9 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00039 shop_items)',
+          '-- feat/phase9 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.7-runbook.md "Phase 9 병합"',
+        ],
+        parts: ['00039'],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];

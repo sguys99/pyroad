@@ -599,6 +599,13 @@ export const EXPECT = {
     activateIn: 'P8-09',
     note: '정의·본인 업적 읽기만, 남의 행·anon·쓰기는 막힘',
   },
+  // ── 상점 (P9-01, ① 00039) ──
+  'SH-1': {
+    expect: 'deny',
+    requires: 'public.shop_items',
+    activateIn: 'P9-01',
+    note: '카탈로그는 로그인 사용자 읽기만, 비로그인·쓰기는 막힘. 가격은 구매 RPC(P9-03)가 서버에서 읽음',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',

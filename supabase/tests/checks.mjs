@@ -2261,7 +2261,7 @@ async function groupReward() {
     group: 'reward',
     id: 'RW-1',
     role: 'postgres',
-    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·current_streak·kst_date·coin_reward·code_quest_stars·stage_chest_goal)',
+    op: 'reward-rules.json 대조표 = SQL 규칙 함수 (quest_xp·level_for_xp·current_streak·kst_date·kst_week_start·coin_reward·code_quest_stars·stage_chest_goal)',
     ...OK,
     run: () => {
       const cases = [
@@ -2284,6 +2284,11 @@ async function groupReward() {
           `kst_date ${c.name}`,
           `public.kst_date('${c.at}'::timestamptz)::text`,
           c.day,
+        ]),
+        ...rules.kst_week.map((c) => [
+          `kst_week ${c.name}`,
+          `public.kst_week_start('${c.day}'::date)::text`,
+          c.week_start,
         ]),
         ...rules.coins.map((c) => [
           `coins ${c.kind}/${c.n ?? ''}`,
@@ -4693,6 +4698,38 @@ async function groupAchievements(u) {
           prefer: 'return=minimal',
         }),
         `select exists (select 1 from public.user_achievements where user_id = '${u.alice.id}' and achievement_id = 'level_50')`,
+      );
+    },
+  });
+
+  await check({
+    group: 'shop',
+    id: 'SH-1',
+    role: 'authenticated',
+    op: 'shop_items: 로그인 사용자 읽기만(22종), 비로그인 읽기 · 가격 UPDATE · 아이템 INSERT·DELETE 는 막힘 (구매는 P9-03 RPC)',
+    ...WRITE,
+    run: async () => {
+      const defs = await rest('GET', '/rest/v1/shop_items?select=id,price&order=sort', { as: u.alice });
+      if (defs.status !== 200 || defs.json.length < 22) return { actual: 'error', detail: `읽기 ${defs.status} rows=${defs.json?.length}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/shop_items?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+      const upd = await classifyWrite(
+        rest('PATCH', '/rest/v1/shop_items?id=eq.pet_dragon', { as: u.alice, body: { price: 1 }, prefer: 'return=minimal' }),
+        `select price = 1 from public.shop_items where id = 'pet_dragon'`,
+      );
+      if (upd.actual === 'written') return { actual: 'written', detail: `가격 UPDATE ${upd.detail}` };
+      const del = await classifyWrite(
+        rest('DELETE', '/rest/v1/shop_items?id=eq.hat_party', { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.shop_items where id = 'hat_party')`,
+      );
+      if (del.actual === 'written') return { actual: 'written', detail: `DELETE ${del.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/shop_items', {
+          as: u.alice,
+          body: { id: 'hat_free', kind: 'costume', slot: 'hat', name: '공짜', description: '-', price: 150, rarity: 'common', sort: 1 },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.shop_items where id = 'hat_free')`,
       );
     },
   });

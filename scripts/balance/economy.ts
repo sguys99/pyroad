@@ -13,6 +13,7 @@ import { loadContent } from '@/lib/content/load';
 import { COIN_RULES, coinReward } from '@/lib/quest/coins';
 import { calculateLevel, calculateXP, codeQuestStars } from '@/lib/quest/xp';
 import { chestCoins, chestGoal } from '@/lib/world/chest';
+import { SHOP_ITEMS, SHOP_KINDS } from '@/lib/shop/catalog';
 
 const ROOT = resolve(__dirname, '../..');
 
@@ -772,6 +773,29 @@ function main() {
     const x = retroCoins(n);
     p(
       `| 스테이지 1~${n} | ${x.auto} | ${x.claimable} | ${x.chests} | ${x.level} |`,
+    );
+  }
+  // 3.12 상점 카탈로그 (P9-01, 가격 원본 src/lib/shop/catalog.ts). 소모품은 주 1개 한도라 모으는 물건에서 뺌
+  const keep = SHOP_ITEMS.filter((i) => i.kind !== 'consumable');
+  const catalogAll = keep.reduce((n, i) => n + i.price, 0);
+  const cheapestEach = SHOP_KINDS.filter((k) => k !== 'consumable').reduce(
+    (n, k) =>
+      n + Math.min(...keep.filter((i) => i.kind === k).map((i) => i.price)),
+    0,
+  );
+  p(
+    '',
+    '### 3.12 상점 카탈로그 (P9-01, 소모품 빼고 모으는 물건, 쓰지 않을 때)',
+    '',
+    `| 유형 | 종류마다 가장 싼 것 1개씩 ${cheapestEach} | 1월드 끝 잔액 (카탈로그 대비) | 180일 잔액 (카탈로그 대비) | 카탈로그 전부 ${catalogAll} |`,
+    '|---|---|---|---|---|',
+  );
+  for (const r of runs) {
+    const w = r.world1Day;
+    const endBal = w === null ? null : total(at(r, w).coins);
+    const bal180 = total(at(r, 179).coins);
+    p(
+      `| ${r.student.name} | ${dayLabel(daysToPrice(r, cheapestEach))} | ${endBal === null ? '-' : `${endBal} (${pct(endBal, catalogAll)})`} | ${bal180} (${pct(bal180, catalogAll)}) | ${dayLabel(daysToPrice(r, catalogAll))} |`,
     );
   }
   console.log(out.join('\n'));

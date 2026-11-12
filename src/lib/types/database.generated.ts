@@ -618,6 +618,45 @@ export type Database = {
           },
         ];
       };
+      shop_items: {
+        Row: {
+          description: string;
+          id: string;
+          is_active: boolean;
+          kind: string;
+          name: string;
+          price: number;
+          rarity: string;
+          slot: string | null;
+          sort: number;
+          weekly_limit: number | null;
+        };
+        Insert: {
+          description: string;
+          id: string;
+          is_active?: boolean;
+          kind: string;
+          name: string;
+          price: number;
+          rarity: string;
+          slot?: string | null;
+          sort: number;
+          weekly_limit?: number | null;
+        };
+        Update: {
+          description?: string;
+          id?: string;
+          is_active?: boolean;
+          kind?: string;
+          name?: string;
+          price?: number;
+          rarity?: string;
+          slot?: string | null;
+          sort?: number;
+          weekly_limit?: number | null;
+        };
+        Relationships: [];
+      };
       stages: {
         Row: {
           created_at: string;
@@ -1317,6 +1356,7 @@ export type Database = {
       };
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
+      kst_week_start: { Args: { p_day: string }; Returns: string };
       learning_day_quests: {
         Args: { p_user_id: string };
         Returns: {

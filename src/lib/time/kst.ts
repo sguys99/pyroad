@@ -117,6 +117,11 @@ export function addKstDays(key: KstDateKey, days: number): KstDateKey {
   });
 }
 
+/** 그 날짜가 든 주의 월요일 (상점 주 구매 한도, P9-01. SQL `public.kst_week_start`). 1970-01-01은 목요일 */
+export function kstWeekStart(key: KstDateKey): KstDateKey {
+  return addKstDays(key, -((((kstDayNumber(key) + 3) % 7) + 7) % 7));
+}
+
 /** 그 KST 날짜가 시작되는 순간(KST 00:00). `kstStartOfDay('2026-11-04')` → `2026-11-03T15:00:00.000Z` */
 export function kstStartOfDay(key: KstDateKey): Date {
   return new Date(kstDayNumber(key) * DAY_MS - KST_OFFSET_MS);

@@ -4,7 +4,7 @@ import { calculateXP, calculateLevel, codeQuestStars } from '../xp';
 import { coinReward, type CoinRewardKind } from '../coins';
 import { chestGoal } from '@/lib/world/chest';
 import { currentStreak } from '@/lib/time/streak';
-import { toKstDateKey } from '@/lib/time/kst';
+import { kstWeekStart, toKstDateKey } from '@/lib/time/kst';
 
 // 보상 규칙 대조 (P1-03, Q25): 같은 표를 SQL 쪽(00006 의 quest_xp·level_for_xp,
 // 00031 의 coin_reward, 00032 의 code_quest_stars, 00033 의 stage_chest_goal, 00012 의 kst_date)은 npm run test:rls 의 RW-1 이 확인합니다. 둘 다 통과하면 TS 와 SQL 이 같은 규칙입니다.
@@ -36,6 +36,11 @@ describe('reward-rules.json (TS ↔ SQL 대조표)', () => {
   // KST 날짜 경계 (P8-15, SQL 00012 kst_date): 스트릭·미션·출석·복습 가능일의 "하루"가 같은 순간에 바뀜
   it.each(rules.kst_date)('KST 날짜: $name ($at → $day)', ({ at, day }) => {
     expect(toKstDateKey(at)).toBe(day);
+  });
+
+  // 상점 주 구매 한도의 한 주 (P9-01, SQL 00039 kst_week_start): KST 월요일부터
+  it.each(rules.kst_week)('KST 주 시작: $name', ({ day, week_start }) => {
+    expect(kstWeekStart(day)).toBe(week_start);
   });
 
   it.each(rules.coins)('코인: $kind $n → $coins', ({ kind, n, coins }) => {

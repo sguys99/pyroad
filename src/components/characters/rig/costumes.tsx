@@ -8,6 +8,9 @@
 export type HatKind = 'party' | 'explorer' | 'crown' | 'wizard';
 export type GlassesKind = 'round' | 'sun';
 export type BackdropKind = 'island' | 'paper';
+/** 상점 망토 아이템의 색 (P9-01 카탈로그 `art` 키 → `Costume.cape`) */
+export const CAPE_COLORS = { hero: '#D9584A', night: '#3E5A99' } as const;
+export type CapeKind = keyof typeof CAPE_COLORS;
 export interface Costume {
   hat?: HatKind;
   glasses?: GlassesKind;

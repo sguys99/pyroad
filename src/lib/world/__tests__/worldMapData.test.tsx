@@ -120,16 +120,12 @@ describe('월드 지도 데이터 (P5-03)', () => {
     // 펫이 있으면 지금 위치 파이뱀과 같은 겹에서 파이뱀보다 먼저(뒤에) 그려지고, 노드마다 펫 자리 변수
     rerender(
       <MotionConfig reducedMotion="always" transition={{ duration: 0 }}>
-        <WorldMap
-          stages={stages}
-          map={map}
-          pet={{ id: 'sample', art: <i data-testid="pet-art" /> }}
-        />
+        <WorldMap stages={stages} map={map} pet={{ id: 'pet_chick' }} />
       </MotionConfig>,
     );
     const pet = container.querySelector('[data-testid="world-pet"]')!;
-    expect(pet.getAttribute('data-pet')).toBe('sample');
-    expect(pet.querySelector('[data-testid="pet-art"]')).not.toBeNull();
+    expect(pet.getAttribute('data-pet')).toBe('pet_chick');
+    expect(pet.querySelector('svg[viewBox="0 0 48 48"]')).not.toBeNull();
     const marker = container.querySelector(
       '[data-testid="world-current-marker"]',
     )!;
