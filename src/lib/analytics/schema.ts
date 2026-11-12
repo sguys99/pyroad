@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { SKIN_IDS } from '@/lib/avatar/skins';
 import { MINI_ERROR_KINDS } from '@/lib/landing/miniPython/errors';
+import { SHOP_ITEMS, SHOP_KINDS } from '@/lib/shop/catalog';
 import {
   ANON_ID_RE,
   CLIENT_EVENT_NAMES,
@@ -114,6 +115,13 @@ export const EVENT_PROPS_SCHEMA = {
   rest_reminder_shown: z.object({ snoozed: z.boolean() }).strict(),
   rest_reminder_choice: z
     .object({ choice: z.enum(['rest', 'more', 'done', 'stop']) })
+    .strict(),
+  shop_purchase: z
+    .object({
+      item_id: z.enum(SHOP_ITEMS.map((i) => i.id) as [string, ...string[]]),
+      kind: z.enum(SHOP_KINDS),
+      price: z.number().int().min(1).max(10000),
+    })
     .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;

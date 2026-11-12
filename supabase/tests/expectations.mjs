@@ -606,6 +606,42 @@ export const EXPECT = {
     activateIn: 'P9-01',
     note: '카탈로그는 로그인 사용자 읽기만, 비로그인·쓰기는 막힘. 가격은 구매 RPC(P9-03)가 서버에서 읽음',
   },
+  // ── 인벤토리·구매·장착 (P9-03, ① 00040) ──
+  'IV-1': {
+    expect: 'deny',
+    requires: 'public.purchase_item()',
+    activateIn: 'P9-03',
+    note: '구매는 /api/shop/purchase(service_role)만',
+  },
+  'IV-1b': {
+    expect: 'deny',
+    requires: 'public.equip_item()',
+    activateIn: 'P9-03',
+    note: '장착은 /api/shop/equip(service_role)만',
+  },
+  'IV-1c': {
+    expect: 'deny',
+    requires: 'public.shop_status()',
+    activateIn: 'P9-03',
+  },
+  'IV-1d': {
+    expect: 'deny',
+    requires: 'public.user_items',
+    activateIn: 'P9-03',
+    note: '본인 인벤토리 읽기만, 남의 행·anon·쓰기는 막힘',
+  },
+  'IV-2': {
+    expect: 'allow',
+    requires: 'public.purchase_item()',
+    activateIn: 'P9-03',
+    note: '영구 재구매·동시 1회·소모품 주 1개·방패 2·황금키 3·코인 부족·판매 중지 · 잔액 = 원장',
+  },
+  'IV-3': {
+    expect: 'allow',
+    requires: 'public.equip_item()',
+    activateIn: 'P9-03',
+    note: '가진 아이템·맞는 슬롯만, avatar_config·settings.editor_theme, 벗기, 무료 스킨',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',

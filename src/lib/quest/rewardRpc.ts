@@ -15,6 +15,12 @@ import type {
   WorldDailyStatus,
 } from '@/lib/world/attendance';
 import type { AchievementInfo, ClaimAchievementResult } from './achievements';
+import type {
+  EquipResult,
+  EquipSlot,
+  PurchaseResult,
+  ShopStatus,
+} from '@/lib/shop/api';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -56,6 +62,24 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   mission_not_done: { status: 409, error: '아직 미션을 다 하지 않았어요.' },
   mission_expired: { status: 410, error: '받을 수 있는 날이 지났어요.' },
   achievement_not_earned: { status: 409, error: '아직 얻지 않은 업적이에요.' },
+  // 상점 (P9-03, 00040)
+  item_not_found: { status: 404, error: '상점에 없는 물건이에요.' },
+  item_inactive: { status: 410, error: '지금은 팔지 않는 물건이에요.' },
+  already_owned: { status: 409, error: '이미 가지고 있어요!' },
+  weekly_limit_reached: {
+    status: 409,
+    error: '이번 주에는 이미 샀어요. 월요일에 다시 살 수 있어요.',
+  },
+  shields_full: {
+    status: 409,
+    error: '방패는 2개까지 가질 수 있어요. 하나를 쓰면 또 살 수 있어요.',
+  },
+  golden_keys_full: {
+    status: 409,
+    error: '황금키가 벌써 3개 있어요. 하나를 쓰면 또 살 수 있어요.',
+  },
+  not_owned: { status: 403, error: '아직 가지고 있지 않은 물건이에요.' },
+  wrong_slot: { status: 400, error: '그 자리에는 입힐 수 없어요.' },
 };
 
 export function rewardError(
@@ -98,7 +122,10 @@ async function callRpc<T>(
     | 'claim_daily_mission'
     | 'world_daily_status'
     | 'stamp_attendance'
-    | 'claim_achievement',
+    | 'claim_achievement'
+    | 'purchase_item'
+    | 'equip_item'
+    | 'shop_status',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -380,5 +407,39 @@ export function claimAchievementRpc(
       p_user_id: userId,
       p_achievement_id: achievementId,
     }),
+  );
+}
+
+/** 상점 구매 (P9-03, 00040). 가격·한도는 서버(shop_items), 실패는 아이용 이유 코드(already_owned·weekly_limit_reached 등) */
+export function purchaseItemRpc(
+  admin: AdminClient,
+  userId: string,
+  itemId: string,
+) {
+  return callRpc<PurchaseResult>('purchase_item', () =>
+    admin.rpc('purchase_item', { p_user_id: userId, p_item_id: itemId }),
+  );
+}
+
+/** 장착·벗기 (P9-03). itemId null = 벗기. 가진 아이템·맞는 슬롯만(not_owned·wrong_slot), skin 은 무료 6색 */
+export function equipItemRpc(
+  admin: AdminClient,
+  userId: string,
+  slot: EquipSlot,
+  itemId: string | null,
+) {
+  return callRpc<EquipResult>('equip_item', () =>
+    admin.rpc('equip_item', {
+      p_user_id: userId,
+      p_slot: slot,
+      ...(itemId !== null && { p_item_id: itemId }),
+    }),
+  );
+}
+
+/** 상점 상태 (P9-03): 잔액·황금키·방패·가진 아이템·이번 주 소모품 구매 수·장착 */
+export function shopStatusRpc(admin: AdminClient, userId: string) {
+  return callRpc<ShopStatus>('shop_status', () =>
+    admin.rpc('shop_status', { p_user_id: userId }),
   );
 }

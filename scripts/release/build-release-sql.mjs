@@ -182,10 +182,10 @@ export const RELEASES = [
         file: '1_먼저실행.sql',
         stage: 1,
         head: [
-          '-- pyRoad v0.7 (Phase 9 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00039 shop_items)',
+          '-- pyRoad v0.7 (Phase 9 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00039 shop_items · 00040 인벤토리)',
           '-- feat/phase9 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.7-runbook.md "Phase 9 병합"',
         ],
-        parts: ['00039'],
+        parts: ['00039', '00040'],
       },
     ],
   },

@@ -16,6 +16,7 @@ public.streak_shield_days streak_shield_days_select_own [PERMISSIVE SELECT to au
 public.user_achievements user_achievements_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_badges badges_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_daily_missions user_daily_missions_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
+public.user_items user_items_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_insert_own [PERMISSIVE INSERT to authenticated] using (-) check ((( SELECT auth.uid() AS uid) = user_id))
 public.user_progress progress_select_own [PERMISSIVE SELECT to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check (-)
 public.user_progress progress_update_own [PERMISSIVE UPDATE to authenticated] using ((( SELECT auth.uid() AS uid) = user_id)) check ((( SELECT auth.uid() AS uid) = user_id))

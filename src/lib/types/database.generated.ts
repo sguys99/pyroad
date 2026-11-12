@@ -897,6 +897,39 @@ export type Database = {
           },
         ];
       };
+      user_items: {
+        Row: {
+          acquired_at: string;
+          item_id: string;
+          user_id: string;
+        };
+        Insert: {
+          acquired_at?: string;
+          item_id: string;
+          user_id: string;
+        };
+        Update: {
+          acquired_at?: string;
+          item_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_items_item_id_fkey';
+            columns: ['item_id'];
+            isOneToOne: false;
+            referencedRelation: 'shop_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_items_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_progress: {
         Row: {
           attempts: number;
@@ -1320,6 +1353,10 @@ export type Database = {
         };
         Returns: string[];
       };
+      equip_item: {
+        Args: { p_item_id?: string; p_slot: string; p_user_id: string };
+        Returns: Json;
+      };
       evaluate_achievements: { Args: { p_user_id: string }; Returns: Json };
       grant_coins: {
         Args: {
@@ -1387,6 +1424,10 @@ export type Database = {
         Returns: number;
       };
       public_avatar_skin: { Args: { p_avatar_config: Json }; Returns: string };
+      purchase_item: {
+        Args: { p_item_id: string; p_user_id: string };
+        Returns: Json;
+      };
       quest_xp: {
         Args: {
           p_base: number;
@@ -1426,6 +1467,7 @@ export type Database = {
         Returns: Json;
       };
       settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
+      shop_status: { Args: { p_user_id: string }; Returns: Json };
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };
         Returns: string;

@@ -2088,6 +2088,24 @@ async function groupRpc(u) {
       { p_user_id: u.alice.id },
     ],
     [
+      'IV-1',
+      u.alice,
+      'purchase_item',
+      { p_user_id: u.alice.id, p_item_id: 'hat_party' },
+    ],
+    [
+      'IV-1b',
+      'anon',
+      'equip_item',
+      { p_user_id: u.alice.id, p_slot: 'hat', p_item_id: 'hat_party' },
+    ],
+    [
+      'IV-1c',
+      u.alice,
+      'shop_status',
+      { p_user_id: u.bob.id },
+    ],
+    [
       'PS-1',
       u.alice,
       'profile_stats',
@@ -3631,6 +3649,181 @@ async function groupMissions(u) {
             mismatches: mismatches(x.id),
           },
         ) ?? { actual: 'ok', detail: `6일 전(${d6}) 받기 +10 · 7일 전(${d7}) 410 · 다시 받기 0` }
+      );
+    },
+  });
+}
+
+// ── 인벤토리·구매·장착 (P9-03, ① 00040) ──
+async function groupInventory(u) {
+  const buy = (id, item) => rpc('purchase_item', { p_user_id: id, p_item_id: item });
+  const equip = (id, slot, item) =>
+    rpc('equip_item', { p_user_id: id, p_slot: slot, ...(item !== null && { p_item_id: item }) });
+  const shop = (id) => rpc('shop_status', { p_user_id: id });
+  const give = (id, n) => rpc('grant_coins', { p_user_id: id, p_source: 'quest', p_ref: `iv:${n}`, p_amount: n });
+  const res = (r) => (r.status === 200 ? 200 : `${r.status}:${errMsg(r)}`);
+
+  await check({
+    group: 'inventory',
+    id: 'IV-1d',
+    role: 'authenticated',
+    op: 'user_items: 남의 인벤토리 읽기 · 비로그인 읽기 · 본인 INSERT·DELETE (본인 행 읽기만, 쓰기는 purchase_item)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.user_items (user_id, item_id) values ('${u.bob.id}', 'pet_fox'), ('${u.alice.id}', 'hat_party')
+             on conflict do nothing`);
+      const others = await rest('GET', `/rest/v1/user_items?select=item_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 인벤토리 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', '/rest/v1/user_items?select=item_id', { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 인벤토리 ${own.status}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/user_items?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+      const del = await classifyWrite(
+        rest('DELETE', `/rest/v1/user_items?user_id=eq.${u.alice.id}`, { as: u.alice, prefer: 'return=minimal' }),
+        `select not exists (select 1 from public.user_items where user_id = '${u.alice.id}')`,
+      );
+      if (del.actual === 'written') return { actual: 'written', detail: `DELETE ${del.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/user_items', {
+          as: u.alice,
+          body: { user_id: u.alice.id, item_id: 'pet_dragon' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.user_items where user_id = '${u.alice.id}' and item_id = 'pet_dragon')`,
+      );
+    },
+  });
+
+  await check({
+    group: 'inventory',
+    id: 'IV-2',
+    role: 'service_role',
+    op: '구매: 가격은 shop_items · 영구 재구매 거부 · 동시 4번도 1번 · 소모품 주 1개(원장 shop:<id>:<월요일>:1) · 방패 2개·황금키 3개 상한 · 황금키는 users.golden_keys 에 더함 · 코인 부족 · 그만 판 아이템 · 없는 아이템 · 잔액 = 원장 · shop_status',
+    ...OK,
+    run: async () => {
+      const week = one(`select public.kst_week_start(public.kst_today())::text`);
+      const x = await createUser('iv2', '상점구매');
+      await give(x.id, 2000);
+      const hat = await buy(x.id, 'hat_party');
+      const again = await buy(x.id, 'hat_party');
+      const race = await Promise.all(Array.from({ length: 4 }, () => buy(x.id, 'glasses_round')));
+      const shield = await buy(x.id, 'streak_shield');
+      const shield2 = await buy(x.id, 'streak_shield');
+      const keyFull = await buy(x.id, 'golden_key');
+      one(`update public.users set golden_keys = 2 where id = '${x.id}'`);
+      const key = await buy(x.id, 'golden_key');
+      const key2 = await buy(x.id, 'golden_key');
+      one(`update public.shop_items set is_active = false where id = 'frame_wave'`);
+      const inactive = await buy(x.id, 'frame_wave');
+      one(`update public.shop_items set is_active = true where id = 'frame_wave'`);
+      const missing = await buy(x.id, 'hat_nope');
+      const poor = await buy(x.id, 'pet_dragon');
+      const st = await shop(x.id);
+      // 방패가 이미 2개면 이번 주 첫 구매도 거부
+      const y = await createUser('iv2b', '상점방패가득');
+      await give(y.id, 500);
+      one(`insert into public.user_streak_shields (user_id, shields) values ('${y.id}', 2)`);
+      const full = await buy(y.id, 'streak_shield');
+      return (
+        compare(
+          'IV-2',
+          {
+            hat: '200:150:1850',
+            again: '409:already_owned',
+            race: '1:3:409:already_owned',
+            shield: '200:1:1',
+            shield2: '409:weekly_limit_reached',
+            keyFull: '409:golden_keys_full',
+            key: '200:3',
+            key2: '409:weekly_limit_reached',
+            inactive: '410:item_inactive',
+            missing: '404:item_not_found',
+            poor: '402:not_enough_coins',
+            refs: `shop:glasses_round,shop:golden_key:${week}:1,shop:hat_party,shop:streak_shield:${week}:1`,
+            status: `1280:3:1:glasses_round,hat_party:{"golden_key":1,"streak_shield":1}:${week}`,
+            full: '409:shields_full:2:500',
+            mismatches: '0:0',
+          },
+          {
+            hat: `${res(hat)}:${hat.json?.price}:${hat.json?.coins_balance}`,
+            again: res(again),
+            race: `${race.filter((r) => r.status === 200).length}:${race.filter((r) => r.status === 409).length}:${res(race.find((r) => r.status !== 200) ?? {})}`,
+            shield: `${res(shield)}:${shield.json?.shields}:${shield.json?.bought_this_week}`,
+            shield2: res(shield2),
+            keyFull: res(keyFull),
+            key: `${res(key)}:${key.json?.golden_keys}`,
+            key2: res(key2),
+            inactive: res(inactive),
+            missing: res(missing),
+            poor: res(poor),
+            refs: one(`select string_agg(ref, ',' order by ref) from public.coin_ledger where user_id = '${x.id}' and source = 'spend'`),
+            status: `${st.json?.coins}:${st.json?.golden_keys}:${st.json?.shields}:${[...(st.json?.owned ?? [])].sort().join(',')}:${JSON.stringify(st.json?.bought_this_week)}:${st.json?.week_start}`,
+            full: `${res(full)}:${one(`select shields from public.user_streak_shields where user_id = '${y.id}'`)}:${coins(y.id)}`,
+            mismatches: [x, y].map((v) => mismatches(v.id)).join(':'),
+          },
+        ) ?? { actual: 'ok', detail: '모자 150 → 다시 409, 안경 동시 4번 1번, 방패·황금키 주 1개, 상한·부족·판매 중지·없는 아이템 거부, 잔액 = 원장' }
+      );
+    },
+  });
+
+  await check({
+    group: 'inventory',
+    id: 'IV-3',
+    role: 'service_role',
+    op: '장착: 가진 아이템만(not_owned 403) · 슬롯이 맞아야(wrong_slot) · avatar_config 에 슬롯별 id, 다른 키(skin)는 그대로 · 에디터 테마는 settings.editor_theme · null 이면 벗기 · 무료 스킨 6색(공개 avatar_skin 동기화) · 소모품 장착 없음',
+    ...OK,
+    run: async () => {
+      const x = await createUser('iv3', '상점장착');
+      one(`update public.users set avatar_config = '{"skin":"sky"}' where id = '${x.id}'`);
+      const notOwned = await equip(x.id, 'hat', 'hat_crown');
+      one(`insert into public.user_items (user_id, item_id) values ('${x.id}', 'hat_crown'), ('${x.id}', 'pet_chick'), ('${x.id}', 'theme_ocean')`);
+      const wrong = await equip(x.id, 'glasses', 'hat_crown');
+      const consumable = await equip(x.id, 'pet', 'golden_key');
+      const hat = await equip(x.id, 'hat', 'hat_crown');
+      const pet = await equip(x.id, 'pet', 'pet_chick');
+      const theme = await equip(x.id, 'editor_theme', 'theme_ocean');
+      const off = await equip(x.id, 'hat', null);
+      const skin = await equip(x.id, 'skin', 'berry');
+      const badSkin = await equip(x.id, 'skin', 'gold');
+      const badSlot = await equip(x.id, 'shoes', 'hat_crown');
+      const st = await shop(x.id);
+      return (
+        compare(
+          'IV-3',
+          {
+            notOwned: '403:not_owned',
+            wrong: '400:wrong_slot',
+            consumable: '400:wrong_slot',
+            hat: '200:hat_crown:sky',
+            pet: 200,
+            theme: '200:theme_ocean',
+            off: '200:false',
+            skin: 200,
+            badSkin: '400:wrong_slot',
+            badSlot: '400:invalid_arguments',
+            avatar: '{"pet": "pet_chick", "skin": "berry"}',
+            settings: 'theme_ocean',
+            publicSkin: 'berry',
+            status: 'berry:pet_chick:theme_ocean:',
+          },
+          {
+            notOwned: res(notOwned),
+            wrong: res(wrong),
+            consumable: res(consumable),
+            hat: `${res(hat)}:${hat.json?.equipped?.hat}:${hat.json?.equipped?.skin}`,
+            pet: res(pet),
+            theme: `${res(theme)}:${theme.json?.equipped?.editor_theme}`,
+            off: `${res(off)}:${'hat' in (off.json?.equipped ?? {})}`,
+            skin: res(skin),
+            badSkin: res(badSkin),
+            badSlot: res(badSlot),
+            avatar: one(`select avatar_config::text from public.users where id = '${x.id}'`),
+            settings: one(`select settings ->> 'editor_theme' from public.users where id = '${x.id}'`),
+            publicSkin: one(`select avatar_skin from public.user_public_profiles where user_id = '${x.id}'`),
+            status: `${st.json?.equipped?.skin}:${st.json?.equipped?.pet}:${st.json?.equipped?.editor_theme}:${st.json?.equipped?.hat ?? ''}`,
+          },
+        ) ?? { actual: 'ok', detail: '가진 왕관만 모자 칸에, 펫·테마·스킨 장착, 벗기는 키 제거, 공개 스킨 동기화' }
       );
     },
   });
@@ -7508,6 +7701,7 @@ async function main() {
   await groupMissions(u);
   await groupAttendance(u);
   await groupAchievements(u);
+  await groupInventory(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

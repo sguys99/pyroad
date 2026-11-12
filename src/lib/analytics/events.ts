@@ -8,6 +8,7 @@ import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { SkinId } from '@/lib/avatar/skins';
 import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
 import type { QuizKind } from '@/lib/content/schema';
+import type { ShopKind } from '@/lib/shop/catalog';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -112,6 +113,11 @@ export interface AnalyticsEventProps {
    * 휴식 알림에서 고름 (P8-12, 브라우저). rest: 5분 쉬기 · more: 조금만 더(Esc·덮개 포함) · done: 5분을 다 쉼 · stop: 쉬다가 일찍 돌아감
    */
   rest_reminder_choice: { choice: 'rest' | 'more' | 'done' | 'stop' };
+  /**
+   * 상점에서 샀음 (P9-03, `/api/shop/purchase`, 서버). item_id: 카탈로그 id(`SHOP_ITEMS`, 개인정보 아님), kind: 종류,
+   * price: 그때 가격(150~1,500). 경제 밸런스(무엇을 언제 사나) 조정용, 잔액은 보내지 않음
+   */
+  shop_purchase: { item_id: string; kind: ShopKind; price: number };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -145,6 +151,7 @@ export const SERVER_EVENT_NAMES = [
   'quest_start',
   'quest_complete',
   'hint_used',
+  'shop_purchase',
 ] as const;
 export type ServerEventName = (typeof SERVER_EVENT_NAMES)[number];
 
