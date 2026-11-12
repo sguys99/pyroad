@@ -146,12 +146,17 @@ function expectNoAnswerLeak(r: Graded, key: Key) {
 }
 
 async function noHorizontalScroll(page: Page) {
+  // 넘치면 화면 밖으로 나간 요소를 메시지에 (B70)
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
+    await page.evaluate(() =>
+      document.documentElement.scrollWidth <= window.innerWidth
+        ? []
+        : Array.from(document.querySelectorAll('body *'))
+            .filter((e) => e.getBoundingClientRect().right > window.innerWidth)
+            .map((e) => `${e.tagName}.${e.getAttribute('class')}`),
     ),
     '360px 에서 가로 스크롤 없음',
-  ).toBe(true);
+  ).toEqual([]);
 }
 
 const verdict = (page: Page) => byId(page, 'quiz-verdict');

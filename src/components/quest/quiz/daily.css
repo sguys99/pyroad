@@ -105,6 +105,8 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  /* 정답 도장이 크게(2.3배) 내려찍히는 동안 화면 밖으로 나간 부분이 가로 스크롤을 만들지 않게 (B70, .qw-book 과 같음) */
+  overflow-x: clip;
 }
 .dq-sheet {
   display: flex;
