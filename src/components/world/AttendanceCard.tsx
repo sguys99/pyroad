@@ -44,7 +44,7 @@ interface CalendarProps {
 }
 
 /**
- * 출석 달력 7칸 (P8-08). 찍은 칸은 금색 "출석" 도장 + 날짜, 오늘 찍을 칸은 점선 테두리, 7일째는 상자(내용은 아래 한 줄로 공개).
+ * 출석 달력 7칸 (P8-08). 찍은 칸은 그림 자리에 금색 "출석" 도장(B63) + 날짜, 오늘 찍을 칸은 점선 테두리, 7일째는 상자(내용은 아래 한 줄로 공개).
  * 칸마다 받는(받은) 코인. 낭독기는 칸마다 "n일째, 코인 m개, 찍음/오늘/남음"
  */
 export function AttendanceCalendar({ status, stampRef }: CalendarProps) {
@@ -73,18 +73,18 @@ export function AttendanceCalendar({ status, stampRef }: CalendarProps) {
               {c.n}일
             </span>
             <span className="at-face" aria-hidden>
-              {c.chest ? (
-                <RewardIcon kind={c.day ? 'chestOpen' : 'chest'} size={26} />
-              ) : (
-                <RewardIcon kind="coin" size={22} />
-              )}
-              {c.day && (
+              {/* 찍은 칸은 도장이 그림 자리를 대신함 (위 "n일"·아래 코인과 겹치지 않게, B63) */}
+              {c.day ? (
                 <span
                   ref={isToday ? stampRef : undefined}
                   className="at-stamp font-display"
                 >
                   출석
                 </span>
+              ) : c.chest ? (
+                <RewardIcon kind="chest" size={26} />
+              ) : (
+                <RewardIcon kind="coin" size={22} />
               )}
             </span>
             <span className="at-coins font-display tabular-nums" aria-hidden>

@@ -107,31 +107,33 @@
   .at-cell[data-state='done'] .at-coins {
     color: var(--text-muted);
   }
+  /* 그림 자리: 모든 칸이 같은 높이라 "n일"·코인 줄이 칸마다 맞음. 찍은 칸은 이 자리 안에서만 도장 (B63) */
   .at-face {
     position: relative;
     display: grid;
     place-items: center;
-    width: 1.75rem;
+    width: min(3.25rem, 100%);
     height: 1.75rem;
   }
   .at-cell[data-state='later'] .at-face > svg {
     opacity: 0.55;
   }
-  .at-cell[data-state='done'] .at-face > svg {
-    opacity: 0.35;
-  }
-  /* 찍은 칸 도장 (끝 모습 = rotate(-8deg), stampSlam 과 같음) */
+  /* 찍은 칸 도장: 그림 자리 폭에 맞춘 타원 (끝 모습 = rotate(-8deg), stampSlam 과 같음).
+     기울여도 자리 높이(1.75rem) 안 — 위아래 글자에 닿지 않음. 좁은 칸은 칸의 투명 테두리(2px)까지 써서 "출석"이 도장 테두리 안 */
   .at-stamp {
-    position: absolute;
-    inset: -0.375rem;
     display: grid;
     place-items: center;
+    box-sizing: border-box;
+    width: calc(100% + 0.25rem);
+    height: 1.375rem;
     border: 2px solid var(--accent-text);
     border-radius: var(--round-pill);
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
+    background: var(--accent-soft);
     color: var(--accent-text);
     font-size: var(--text-caption);
     line-height: 1;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
     transform: rotate(-8deg);
     pointer-events: none;
   }

@@ -2,6 +2,7 @@
 // 칸 코인(5·5·10·10·15·20·30) → HUD 잔액. 다시 찍기는 0, 다음 방문에는 카드 없이 메뉴 시트 달력에서 봄. 320px 에서 7칸 한 줄
 
 import { test, expect } from './support/test';
+import type { Locator } from '@playwright/test';
 import { adminClient, coinBalance, hasCoinKey } from './support/admin';
 
 const COINS = [5, 5, 10, 10, 15, 20, 30];
@@ -16,6 +17,32 @@ async function attendance(userId: string) {
       attendance: { today: string; stamped_today: boolean; day_n: number };
     }
   ).attendance;
+}
+
+/** 찍은 칸의 "출석" 도장이 위 "n일"·아래 코인 글자와 겹치지 않고 글자가 도장 테두리 안 (B63) */
+async function stampOverlaps(calendar: Locator) {
+  return calendar.locator('.at-cell[data-state="done"]').evaluateAll((cells) =>
+    cells.flatMap((cell, i) => {
+      const box = (sel: string) =>
+        cell.querySelector(sel)!.getBoundingClientRect();
+      const hit = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right &&
+        b.left < a.right &&
+        a.top < b.bottom &&
+        b.top < a.bottom;
+      const stamp = cell.querySelector<HTMLElement>('.at-stamp')!;
+      const text = document.createRange();
+      text.selectNodeContents(stamp);
+      const s = stamp.getBoundingClientRect();
+      const bad: string[] = [];
+      if (hit(s, box('.at-n'))) bad.push(`${i + 1}: 도장↔n일`);
+      if (hit(s, box('.at-coins'))) bad.push(`${i + 1}: 도장↔코인`);
+      // 도장 테두리 2px 안쪽 (기울기 전 폭)
+      if (text.getBoundingClientRect().width > stamp.offsetWidth - 4)
+        bad.push(`${i + 1}: 글자가 도장보다 넓음`);
+      return bad;
+    }),
+  );
 }
 
 test('320px: 출석 카드 → 도장 → 칸 코인·HUD 잔액, 다시 찍으면 0, 다음 방문은 메뉴 달력', async ({
@@ -103,4 +130,6 @@ test('320px: 출석 카드 → 도장 → 칸 코인·HUD 잔액, 다시 찍으�
   await expect(
     menu.getByTestId(`attendance-cell-${after.day_n}`),
   ).toHaveAttribute('data-state', 'done');
+  // 320px 메뉴 달력: 찍은 칸 도장이 칸 글자를 가리지 않음 (B63)
+  expect(await stampOverlaps(menu)).toEqual([]);
 });
