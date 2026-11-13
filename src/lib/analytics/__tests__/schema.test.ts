@@ -228,6 +228,14 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     expect(parse('share_cta_click', { kind: 'weekly' })).toBe(true);
     expect(parse('share_view', { kind: 'secret' })).toBe(false);
     expect(parse('share_view', { kind: 'stage', card_id: 'x' })).toBe(false);
+    // 보호자 리포트 (P9-15): 주·동작만, 토큰은 받지 않음
+    expect(parse('guardian_report_view', { week: 'last' })).toBe(true);
+    expect(parse('guardian_report_view', { week: 'x' })).toBe(false);
+    expect(parse('guardian_report_view', { week: 'this', token: 'x' })).toBe(
+      false,
+    );
+    // 링크 만들기·끄기는 서버만 기록 (브라우저가 보내면 거절)
+    expect(parse('guardian_report_link', { action: 'create' })).toBe(false);
     expect(parse('share_cta_click', { kind: 'stage', nickname: 'a' })).toBe(
       false,
     );
@@ -253,6 +261,7 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
       'continue_click',
       'daily_quiz_finish',
       'daily_quiz_open',
+      'guardian_report_view',
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',

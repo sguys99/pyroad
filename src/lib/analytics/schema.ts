@@ -151,6 +151,10 @@ export const EVENT_PROPS_SCHEMA = {
       result: z.enum(['answered', 'fallback', 'blocked', 'answer_blocked']),
     })
     .strict(),
+  guardian_report_link: z
+    .object({ action: z.enum(['create', 'off']) })
+    .strict(),
+  guardian_report_view: z.object({ week: z.enum(['this', 'last']) }).strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -290,6 +294,13 @@ const clientEvent = z.discriminatedUnion('name', [
       path: z.string().max(200).optional(),
     })
     .strict(),
+  z
+    .object({
+      name: z.literal('guardian_report_view'),
+      props: EVENT_PROPS_SCHEMA.guardian_report_view,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
 ]);
 
 // 스키마가 CLIENT_EVENT_NAMES 를 모두 다루는지 컴파일 때 확인
@@ -317,6 +328,7 @@ const _clientNamesCovered: Record<
   share_cta_click: 'share_cta_click',
   share_open: 'share_open',
   share_channel: 'share_channel',
+  guardian_report_view: 'guardian_report_view',
 };
 void _clientNamesCovered;
 

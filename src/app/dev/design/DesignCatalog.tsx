@@ -52,6 +52,7 @@ import {
 import { LegalSection } from './_catalog/LegalSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
+import { GuardianReportCatalogSection } from './_catalog/GuardianReportCatalog';
 import { PwaSection } from './_catalog/PwaSection';
 import { WorldMapSection } from './_catalog/WorldMapSection';
 import { CelebrationSection } from './_catalog/CelebrationSection';
@@ -134,6 +135,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['legal', '약관 동의'],
       ['onboarding', '온보딩·튜토리얼'],
       ['consent', '보호자 동의'],
+      ['guardian-report', '보호자 리포트'],
       ['pwa', '앱 아이콘·홈 화면'],
       ['rest', '휴식 알림'],
     ],
@@ -248,6 +250,7 @@ export function DesignCatalog({
               <LegalSection />
               <OnboardingSection />
               <ConsentSection />
+              <GuardianReportCatalogSection />
               <PwaSection />
               <RestSection />
             </div>

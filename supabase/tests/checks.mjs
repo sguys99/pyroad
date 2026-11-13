@@ -460,6 +460,29 @@ async function groupBoss(u) {
   });
 
   await check({
+    group: 'guardian',
+    id: 'GR-1b',
+    role: 'authenticated',
+    op: 'guardian_report_links: 로그인(본인 행 포함)·비로그인 모두 읽기·쓰기 불가 (링크는 guardian_report_link 만)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.guardian_report_links (user_id, token_hash) values ('${u.alice.id}', extensions.digest('gr1b', 'sha256')) on conflict do nothing`);
+      const read = classifyRead(await rest('GET', '/rest/v1/guardian_report_links?select=*', { as: u.alice }));
+      if (read.actual === 'allowed') return { actual: 'written', detail: `본인 읽기 ${read.detail}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/guardian_report_links?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+      return classifyWrite(
+        rest('PATCH', `/rest/v1/guardian_report_links?user_id=eq.${u.alice.id}`, {
+          as: u.alice,
+          body: { created_at: '2000-01-01T00:00:00Z' },
+          prefer: 'return=minimal',
+        }),
+        `select created_at < '2001-01-01' from public.guardian_report_links where user_id = '${u.alice.id}'`,
+      );
+    },
+  });
+
+  await check({
     group: 'boss',
     id: 'BOSS-2',
     role: 'service_role',
@@ -2608,6 +2631,18 @@ async function groupRpc(u) {
       u.alice,
       'manage_share_card',
       { p_user_id: u.alice.id, p_card_id: 'rG6TzuP93C8blCS4ZdyehQ', p_action: 'hide' },
+    ],
+    [
+      'GR-1',
+      u.alice,
+      'guardian_report_link',
+      { p_user_id: u.alice.id, p_action: 'create' },
+    ],
+    [
+      'GR-1c',
+      'anon',
+      'guardian_report',
+      { p_token: 'rG6TzuP93C8blCS4ZdyehQ', p_week: 0 },
     ],
     [
       'PS-1',
@@ -5636,6 +5671,86 @@ async function groupAchievements(u) {
           { rows: 'project_builder:10-02:true,streak_3:10-01:true', claim: '200:30' },
           { rows, claim: `${got.status}:${got.json?.coins_earned}` },
         ) ?? { actual: 'ok', detail: '뱃지 2개 → 업적 2개(얻은 날 그대로, 받기 가능), 두 번 실행해도 그대로, 실버 30코인' }
+      );
+    },
+  });
+
+  // ── 보호자 주간 리포트 (P9-15, ① 00050) ──
+  await check({
+    group: 'guardian',
+    id: 'GR-2',
+    role: 'service_role',
+    op: '보호자 리포트: 링크 만들기 → 22자 토큰·해시만 저장 · 요일별 7칸(그날 푼 퀘스트 수)·이번 주/지난 주 합계·배운 것·다음 퀘스트 · 다시 만들기 → 옛 토큰 NULL · 끄기 → NULL · 틀린 모양·없는 토큰·잘못된 주 NULL · 잘못된 동작 400',
+    ...OK,
+    run: async () => {
+      const x = await createUser('gr2', '리포트');
+      const qs = one(`select string_agg(id::text, ',' order by id) from (select id from public.quests where quest_type = 'code' order by id limit 2) t`).split(',');
+      // 이번 주 오늘 1개, 지난 주 같은 요일 1개 (KST)
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at, earned_xp, best_stars) values
+             ('${x.id}', '${qs[0]}', 'completed', now(), 30, 3),
+             ('${x.id}', '${qs[1]}', 'completed', now() - interval '7 days', 20, 2)`);
+      const link = (action) => rpc('guardian_report_link', { p_user_id: x.id, p_action: action });
+      const report = async (token, week = 0) => (await rpc('guardian_report', { p_token: token, p_week: week })).json;
+      const before = (await link('status')).json;
+      const t1 = (await link('create')).json?.token ?? '';
+      const r = await report(t1);
+      const last = await report(t1, 1);
+      const stored = one(`select octet_length(token_hash) || ':' || (token_hash = extensions.digest('${t1}', 'sha256'))
+                            from public.guardian_report_links where user_id = '${x.id}'`);
+      const t2 = (await link('create')).json?.token ?? '';
+      const old = await report(t1);
+      const fresh = (await report(t2))?.totals?.quests;
+      const status = (await link('status')).json?.active;
+      const off = (await link('off')).json?.active;
+      const afterOff = await report(t2);
+      const bad = [await report('short'), await report("rG6TzuP93C8blCS4Zdyeh'"), await report('AAAAAAAAAAAAAAAAAAAAAA'), await report(t2, 2)];
+      const wrong = await link('party');
+      const today = r?.days?.find((d) => d.quests > 0);
+      return (
+        compare(
+          'GR-2',
+          {
+            before: { active: false, created_at: null },
+            token: 22,
+            stored: '32:true',
+            days: 7,
+            today: 1,
+            week: '1:30:3:1',
+            learned: 1,
+            next: true,
+            nickname: true,
+            last: '1:20:2',
+            privacy: false,
+            old: null,
+            fresh: 1,
+            status: true,
+            off: false,
+            afterOff: null,
+            bad: [null, null, null, null],
+            wrong: 400,
+          },
+          {
+            before,
+            token: t1.length,
+            stored,
+            days: r?.days?.length,
+            today: today?.quests,
+            week: `${r?.totals?.quests}:${r?.totals?.xp}:${r?.totals?.stars}:${r?.totals?.active_days}`,
+            learned: r?.learned?.length,
+            next: Boolean(r?.next?.title),
+            nickname: typeof r?.nickname === 'string',
+            last: `${last?.totals?.quests}:${last?.totals?.xp}:${last?.totals?.stars}`,
+            // 학생 id·이메일·코드는 응답에 없음
+            privacy: JSON.stringify(r ?? {}).includes(x.id) || /code|email|user_id/.test(Object.keys(r ?? {}).join(',')),
+            old,
+            fresh,
+            status,
+            off,
+            afterOff,
+            bad,
+            wrong: wrong.status,
+          },
+        ) ?? { actual: 'ok', detail: '만들기·해시 저장·요일 7칸·이번/지난 주·다시 만들기 무효·끄기·잘못된 토큰 NULL' }
       );
     },
   });

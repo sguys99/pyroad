@@ -143,6 +143,15 @@ export interface AnalyticsEventProps {
    * answered = AI 답 · fallback = AI 실패로 저장된 답변 · blocked = 질문을 거름 · answer_blocked = 답을 거르고 저장된 답변
    */
   tutor_free_question: { result: TutorFreeQuestionResult };
+  /**
+   * 보호자 리포트 링크를 만듦(다시 만들기 포함)·끔 (P9-15, 서버 `POST·DELETE /api/guardian-report`). 토큰·링크는 보내지 않는다
+   */
+  guardian_report_link: { action: 'create' | 'off' };
+  /**
+   * 보호자 리포트 `/guardian/[token]`을 엶 (P9-15, 브라우저, 비로그인). week: this(이번 주)·last(지난 주).
+   * 토큰·닉네임·학습 수치는 보내지 않는다 (경로의 토큰도 `normalizePath`가 `[id]`로 지움)
+   */
+  guardian_report_view: { week: 'this' | 'last' };
 }
 
 /** `tutor_free_question.result` 값 (P9-17) */
@@ -168,6 +177,7 @@ export const CLIENT_EVENT_NAMES = [
   'continue_click',
   'daily_quiz_finish',
   'daily_quiz_open',
+  'guardian_report_view',
   'landing_view',
   'landing_cta_click',
   'motion_tier_change',

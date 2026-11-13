@@ -45,14 +45,23 @@ export function isSharePage(pathname: string): boolean {
   return pathname === '/share' || pathname.startsWith('/share/');
 }
 
+/** `/guardian/<token>` 보호자 주간 리포트 (P9-15, 비공개 링크) */
+export function isGuardianReportPage(pathname: string): boolean {
+  return pathname === '/guardian' || pathname.startsWith('/guardian/');
+}
+
 export async function middleware(request: NextRequest) {
   // updateSession이 `NextResponse.next({ request })`로 요청 헤더를 넘기므로 그 전에 넣는다
   const policy = applyPageCsp(request);
   // 공유 페이지(P9-08)는 비로그인 열람·미리보기 수집기용이라 세션 갱신(Supabase getUser 왕복)을 건너뛴다.
   // matcher 에서 빼지 않는 까닭: 이 페이지의 CSP nonce 도 여기서 만든다
-  let response = isSharePage(request.nextUrl.pathname)
-    ? NextResponse.next({ request })
-    : await updateSession(request);
+  // 보호자 리포트(P9-15)도 같은 이유(로그인 없이 링크로 엶)
+  const { pathname } = request.nextUrl;
+  const guardianReport = isGuardianReportPage(pathname);
+  let response =
+    isSharePage(pathname) || guardianReport
+      ? NextResponse.next({ request })
+      : await updateSession(request);
   // 없는 월드 주소는 진짜 404 상태로 (로그인 사용자만 여기까지 옴 — 비로그인은 위에서 / 로 보냄, P5-14).
   // 짝 없는 경로로 바꿔 쓰면 루트 not-found 화면이 404로 그려진다. 없는 퀘스트는 DB 조회가 필요해 페이지에 맡김(200 + noindex)
   const slug = worldSlugOf(request.nextUrl.pathname);
@@ -63,6 +72,12 @@ export async function middleware(request: NextRequest) {
     );
     response.cookies.getAll().forEach((c) => notFound.cookies.set(c));
     response = notFound;
+  }
+  if (guardianReport) {
+    // 링크가 곧 열쇠인 비공개 학습 기록: 어디에도 저장·색인하지 않고, 다른 곳으로 가는 요청에 주소(토큰)를 싣지 않는다
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    response.headers.set('Referrer-Policy', 'no-referrer');
   }
   if (policy) {
     response.headers.set(cspHeader, policy);

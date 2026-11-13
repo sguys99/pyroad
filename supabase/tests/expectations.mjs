@@ -723,6 +723,31 @@ export const EXPECT = {
     activateIn: 'B74',
     note: '00047 achievement_stats: projects 는 프로젝트 퀘스트만(7단계 보스 아님), 보스 reviews 는 처음 이긴 다음 날 이후 승리만(진 판 attempts 는 안 셈)',
   },
+  // ── 보호자 주간 리포트 (P9-15, ① 00050) ──
+  'GR-1': {
+    expect: 'deny',
+    requires: 'public.guardian_report_link()',
+    activateIn: 'P9-15',
+    note: '링크 만들기·끄기는 /api/guardian-report(service_role)만',
+  },
+  'GR-1b': {
+    expect: 'deny',
+    requires: 'public.guardian_report_links',
+    activateIn: 'P9-15',
+    note: '토큰 해시 테이블은 service_role 전용, 본인 행도 읽기·쓰기 불가',
+  },
+  'GR-1c': {
+    expect: 'deny',
+    requires: 'public.guardian_report()',
+    activateIn: 'P9-15',
+    note: '리포트 조회도 서버(/guardian/[token] 페이지)만 — 비로그인이 토큰을 직접 대입해 볼 수 없음',
+  },
+  'GR-2': {
+    expect: 'allow',
+    requires: 'public.guardian_report()',
+    activateIn: 'P9-15',
+    note: '해시만 저장 · 요일별 7칸·이번/지난 주 합계 · 다시 만들기 → 옛 토큰 NULL · 끄기 → NULL · 잘못된 토큰·주 NULL',
+  },
   // ── 공유 카드 관리 (P9-11, ① 00045) ──
   'SCM-1': {
     expect: 'deny',

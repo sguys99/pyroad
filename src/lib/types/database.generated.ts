@@ -419,6 +419,32 @@ export type Database = {
         };
         Relationships: [];
       };
+      guardian_report_links: {
+        Row: {
+          created_at: string;
+          token_hash: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          token_hash: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          token_hash?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'guardian_report_links_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       level_curve_adjustments: {
         Row: {
           created_at: string;
@@ -1486,6 +1512,14 @@ export type Database = {
       grant_star_coins: {
         Args: { p_quest_id: string; p_stars: number; p_user_id: string };
         Returns: number;
+      };
+      guardian_report: {
+        Args: { p_token: string; p_week: number };
+        Returns: Json;
+      };
+      guardian_report_link: {
+        Args: { p_action: string; p_user_id: string };
+        Returns: Json;
       };
       has_three_day_streak: {
         Args: { p_completed_at: string[] };
