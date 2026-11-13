@@ -636,6 +636,33 @@ async function groupBoss(u) {
       );
     },
   });
+
+  await check({
+    group: 'boss',
+    id: 'B75-1',
+    role: 'service_role',
+    op: '"힌트 없이"에서 보스 뺌 (00051): 오늘 보스 승리 + 힌트 0 코드 퀘스트 → 업적 no_hint 1 · 미션 no_hint 진행 1 · 미션 배정 조건의 남은 퀘스트에 보스 없음',
+    ...OK,
+    run: async () => {
+      const x = await createUser('b75', '보스힌트');
+      one(`insert into public.user_progress (user_id, quest_id, status, attempts, stars, best_stars, stars_judged_on, completed_at)
+             values ('${x.id}', '${Q_BOSS}', 'completed', 1, 3, 3, public.kst_today(), now()),
+                    ('${x.id}', '${Q1}', 'completed', 1, 3, 3, public.kst_today(), now())`);
+      const left = Number(
+        one(`select count(*) from public.quests where quest_type in ('code', 'project') and id <> '${Q1}'`),
+      );
+      const got = one(`select (public.achievement_stats('${x.id}')->>'no_hint')
+                          || ':' || public.daily_mission_progress('${x.id}', public.kst_today(), 'no_hint', null)
+                          || ':' || public.daily_mission_possible('${x.id}', public.kst_today(), 'no_hint', ${left}, null)
+                          || ':' || public.daily_mission_possible('${x.id}', public.kst_today(), 'no_hint', ${left + 1}, null)`);
+      return (
+        compare('B75-1', { got: '1:1:true:false' }, { got }) ?? {
+          actual: 'ok',
+          detail: '보스 승리는 힌트 없이로 안 셈, 남은 퀘스트도 코드·프로젝트만',
+        }
+      );
+    },
+  });
 }
 
 async function groupShareCards(u) {
@@ -5655,9 +5682,9 @@ async function groupAchievements(u) {
       const m1 = psql(sql);
       const m2 = psql(sql);
       // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
-      // 00047(B74)·00048(P9-18)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
+      // 00047(B74)·00048(P9-18)·00051(B75)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
       const m3 = psql(
-        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql']
+        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql']
           .map((f) => readFileSync(join(HERE, '..', 'migrations', f), 'utf8'))
           .join('\n'),
       );

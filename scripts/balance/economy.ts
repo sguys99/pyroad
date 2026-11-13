@@ -224,6 +224,7 @@ export function simulateEconomy(
   const missionDefs = loadMissions();
   const quests = stages.flatMap((s) => s.quests);
   const codeTotal = quests.filter((q) => q.type !== 'quiz').length;
+  const bossTotal = quests.filter((q) => q.type === 'boss').length;
   const allQuests = questsTotal || codeTotal; // 업적 quests_all 목표 (DB 전체 코드·프로젝트 수)
   const prog = new Map<string, Progress>();
   const coins = Object.fromEntries(SOURCES.map((s) => [s, 0])) as Record<
@@ -306,7 +307,9 @@ export function simulateEconomy(
       // 00047(B74): 프로젝트 퀘스트만 (보스는 아님)
       projects: code.filter((x) => x.q.type === 'project').length,
       stages: stages.filter(stageCleared).length,
-      no_hint: code.filter((x) => x.p.hints === 0).length,
+      // 00051(B75): 보스는 힌트가 없어 "힌트 없이"에서 뺌
+      no_hint: code.filter((x) => x.q.type !== 'boss' && x.p.hints === 0)
+        .length,
       hint_finish: code.filter((x) => x.p.hints > 0).length,
       stars: all.reduce((n, x) => n + x.p.best, 0),
       three_stars: all.filter((x) => x.p.best >= 3).length,
@@ -372,12 +375,15 @@ export function simulateEconomy(
 
       // 미션 배정 (00034: 할 수 있는 것만, 그룹마다 하나, 퀘스트 그룹 먼저, 3개)
       const remaining = codeTotal - codeDone - bossDone;
+      const bossLeft = bossTotal - bossDone;
       const reviewOpen = [...prog.values()].some(
         (p) => p.best < 3 && p.judgedOn < day,
       );
       const possible = (m: MissionDef) =>
         m.kind === 'quest_clear' || m.kind === 'no_hint'
-          ? remaining >= m.target &&
+          ? // 00051(B75): no_hint 의 남은 퀘스트에서 보스 뺌
+            (m.kind === 'no_hint' ? remaining - bossLeft : remaining) >=
+              m.target &&
             // 00034: 퀘스트 3개 이상은 최근 7일 중 하루에 그만큼 깬 적이 있을 때만
             (m.kind !== 'quest_clear' ||
               m.target <= 2 ||
@@ -505,8 +511,7 @@ export function simulateEconomy(
             error: false,
             correctAtTwoPlus: false,
           });
-          today.quest++;
-          today.noHint++;
+          today.quest++; // 미션 no_hint 는 안 셈 (00051, B75)
           continue;
         }
         const hints = HINT_CYCLE[codeDone++ % HINT_CYCLE.length];

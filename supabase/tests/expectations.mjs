@@ -723,6 +723,12 @@ export const EXPECT = {
     activateIn: 'B74',
     note: '00047 achievement_stats: projects 는 프로젝트 퀘스트만(7단계 보스 아님), 보스 reviews 는 처음 이긴 다음 날 이후 승리만(진 판 attempts 는 안 셈)',
   },
+  'B75-1': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'B75',
+    note: '00051 achievement_stats·daily_mission_progress·daily_mission_possible: no_hint 에서 보스(힌트 없음)를 뺌',
+  },
   // ── 보호자 주간 리포트 (P9-15, ① 00050) ──
   'GR-1': {
     expect: 'deny',
