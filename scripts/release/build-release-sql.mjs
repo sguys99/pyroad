@@ -267,10 +267,28 @@ export function assertReleases(files, releases = RELEASES) {
       }
 }
 
+/**
+ * 콘텐츠 seed 를 실제로 넣는 묶음 = 'seed' 가 있는 마지막 묶음 (B76).
+ * supabase/seed.sql 은 지금 콘텐츠의 생성물이라 최신 스키마에서만 들어감(예: 보스 행은 00046 정답 모양 CHECK 뒤).
+ * 이미 운영에 적용한 앞 릴리즈 묶음은 그때의 seed 로 적용됐으므로, 다시 만들 때는 seed 자리에 안내 주석만 둠.
+ */
+export function seedBundle(releases = RELEASES) {
+  return releases
+    .flatMap((r) => r.bundles)
+    .findLast((b) => b.parts.includes('seed'));
+}
+
 /** 묶음 하나의 SQL (LF) */
 export function bundleText(bundle, files) {
   const out = [...bundle.head, 'BEGIN;', ''];
   for (const p of bundle.parts) {
+    if (p === 'seed' && bundle !== seedBundle()) {
+      out.push(
+        '-- ===== content seed: 이 묶음은 이미 운영에 적용됨. 지금 seed.sql 은 최신 스키마용이라 마지막 릴리즈 묶음에서만 넣음 (B76) =====',
+        '',
+      );
+      continue;
+    }
     const path = p === 'seed' ? SEED : files.get(p);
     const name = p === 'seed' ? 'content seed' : p;
     out.push(
