@@ -639,10 +639,10 @@ describe('보스 (P9-12)', () => {
 
   it('라운드 문제 글에 정답이 그대로 있으면 실패 (퀴즈와 같은 검사)', () => {
     const leak = structuredClone(boss);
-    leak.rounds[3].prompt.quiz.question =
-      '사람이 읽는 메모라서 실행되지 않아요 — 맞을까?';
+    leak.rounds[1].prompt.quiz.question =
+      'print("파이뱀 만세!") 로 고치면 될까?';
     const r = parseQuest(leak);
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.errors.join('\n')).toContain('4번째 문제');
+    if (!r.ok) expect(r.errors.join('\n')).toContain('2번째 문제');
   });
 });

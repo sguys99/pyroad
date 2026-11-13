@@ -1,0 +1,213 @@
+# 보스 7: 버그버그 대왕 (P9-13, 1월드 최종 보스)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000207
+order: 4
+title: 버그버그 대왕
+concept: 1월드 총정리
+xp_reward: 54
+quest_type: boss
+prompt:
+  topic: 파이썬 섬에서 배운 출력·변수·조건·반복·리스트·함수 총정리
+  learning_goals:
+    - 여러 개념이 섞인 코드를 한 줄씩 따라가며 결과를 알아낼 수 있다
+    - 숫자 맞추기 게임에서 자주 나는 버그를 찾아 고칠 수 있다
+    - 반복·조건·함수를 알맞은 차례와 들여쓰기로 놓을 수 있다
+  story_context: 숫자 맞추기 게임을 완성하자 왕국 성문 위에 커다란 왕관을 쓴 버그버그가 나타났어요! 지금까지 만난 버그버그들의 대장, 버그버그 대왕이래요. 파이썬 섬에서 배운 모든 마법으로 마지막 관문을 넘어 봐요!
+  fallback_text: 코드는 위에서 아래로 한 줄씩 따라가요. 상자 값이 어떻게 바뀌는지, 조건이 맞는지, 반복이 몇 번 도는지 차례로 적어 보면 길이 보여요. 따옴표로 감싼 숫자는 글자라는 것도 잊지 마요.
+  boss:
+    name: 버그버그 대왕
+    look: kingdom
+    intro: 나는 버그버그 대왕이다! 버그버그들을 다 이긴 용사로구나. 마지막 일곱 문제를 풀어 보아라!
+    on_defeat: 훌륭하도다! 너야말로 진짜 코딩 마법사로구나. 오늘부터 나도 네 친구가 되겠노라!
+    on_victory: 허허, 마지막 관문은 쉽지 않지? 지금까지 배운 마법을 하나씩 떠올리고 다시 오너라!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000022
+    prompt:
+      quiz:
+        question: 대왕이 레벨 자랑을 해요. 돌리면 무엇이 나올까?
+        code: |-
+          name = "파이뱀"
+          level = 7
+          print(name + "의 레벨은 " + str(level))
+        options:
+          - { id: opt-d7ve, text: '파이뱀의 레벨은 7' }
+          - { id: opt-k3so, text: 'name의 레벨은 level' }
+          - { id: opt-y9ag, text: '파이뱀의 레벨은 str(level)' }
+          - { id: opt-f2pi, text: '파이뱀의 레벨은 "7"' }
+    answer:
+      quiz_answer:
+        accepted: [opt-d7ve]
+        explanation: name 상자 속 파이뱀과, str()로 글자가 된 7이 이어 붙어요. 따옴표와 str()은 화면에 나오지 않아요.
+        explanations:
+          opt-k3so: 따옴표 없는 name 과 level 은 상자 이름이라 상자 속 값이 나와요.
+          opt-y9ag: str(level)은 계산되어 글자 7이 돼요. 코드 글자 그대로 나오지 않아요.
+          opt-f2pi: str()로 글자가 되어도 따옴표는 화면에 나오지 않아요.
+  - quiz_kind: fill_blank
+    review_quest: b1000000-0000-0000-0000-000000000022
+    prompt:
+      quiz:
+        question: 빈칸을 채워 비밀 숫자를 맞히면 그 자리에서 게임이 끝나게 해요
+        code: |-
+          secret = 7
+          for guess in [2, 7, 9]:
+              if guess == secret:
+                  print("정답!")
+                  {{bk-s4qn}}
+              print(guess)
+        tokens:
+          - { id: tok-h8cx, text: break }
+          - { id: tok-a5ld, text: continue }
+          - { id: tok-u2ze, text: return }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-s4qn: tok-h8cx }
+        explanation: break 는 반복을 그 자리에서 끝내요. 7을 맞히면 정답! 을 보여 주고 게임이 끝나서 9는 나오지 않아요.
+        explanations:
+          tok-a5ld: continue 는 이번 차례만 건너뛰고 다음 숫자로 가요. 맞힌 뒤에도 9를 또 봐요.
+          tok-u2ze: return 은 함수 안에서만 쓸 수 있어요. 함수 밖에서 쓰면 오류가 나요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000022
+    prompt:
+      quiz:
+        question: 비밀 숫자 7을 골랐는데 땡! 이 나와요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-c8pw
+            code: answer = "7"
+          - id: ln-j4ri
+            code: secret = 7
+          - id: ln-o6ty
+            code: 'if answer == secret:'
+          - id: ln-g2ub
+            code: '    print("정답!")'
+          - id: ln-w9mf
+            code: 'else:'
+          - id: ln-e5kh
+            code: '    print("땡!")'
+        fixes:
+          - id: fx-l7da
+            code: 'if int(answer) == secret:'
+          - id: fx-x3ng
+            code: 'if str(answer) == secret:'
+          - id: fx-p8vs
+            code: 'if answer = secret:'
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-o6ty, fix: fx-l7da }
+        explanation: 따옴표 속 "7"은 글자, secret 의 7은 숫자라서 서로 같지 않아요. int()로 글자를 숫자로 바꿔서 비교해야 해요. 게임에서 input()으로 받은 값도 글자라서 똑같은 버그가 자주 나요.
+        explanations:
+          ln-c8pw: 게임에서는 고른 숫자가 이렇게 글자로 들어와요. 이 줄은 그대로 두고, 비교하는 줄에서 숫자로 바꿔요.
+          ln-j4ri: 비밀 숫자는 숫자 7로 잘 넣었어요. 다른 줄을 살펴봐요.
+          ln-g2ub: 이 줄은 정답일 때 할 일이라 맞아요. 조건을 따지는 줄을 살펴봐요.
+          ln-w9mf: else 줄은 맞아요. 조건을 따지는 줄을 살펴봐요.
+          ln-e5kh: 이 줄은 틀렸을 때 할 일이라 맞아요. 왜 틀렸다고 판단하는지 살펴봐요.
+          fx-x3ng: str()은 글자로 바꿔요. 글자 "7"과 숫자 7은 여전히 달라요.
+          fx-p8vs: 같은지 비교할 때는 = 를 두 개 써요. 하나만 쓰면 오류가 나요.
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000121
+    prompt:
+      quiz:
+        question: 별 탑을 리스트에 쌓아요. 돌리면 무엇이 나올까?
+        code: |-
+          stars = []
+          for i in range(1, 4):
+              stars.append("*" * i)
+          print(stars)
+        options:
+          - { id: opt-z6hb, text: "['*', '**', '***']" }
+          - { id: opt-i4wr, text: "*\n**\n***" }
+          - { id: opt-m8cu, text: "['*', '*', '*']" }
+          - { id: opt-t5kq, text: '[1, 2, 3]' }
+    answer:
+      quiz_answer:
+        accepted: [opt-z6hb]
+        explanation: 반복하며 별 1개, 2개, 3개짜리 글자를 리스트에 담아요. 마지막에 리스트를 통째로 보여 주면 대괄호와 따옴표까지 함께 나와요.
+        explanations:
+          opt-i4wr: print()는 반복이 끝난 뒤 한 번만, 리스트 전체를 보여 줘요. 그래서 대괄호 안에 함께 나와요.
+          opt-m8cu: '"*" * i 는 i 만큼 별을 반복해요. 반복할 때마다 i 가 1, 2, 3 으로 커져요.'
+          opt-t5kq: 리스트에 담은 것은 숫자 i 가 아니라 별 글자예요.
+  - quiz_kind: parsons
+    review_quest: b1000000-0000-0000-0000-000000000120
+    prompt:
+      quiz:
+        question: 가위바위보 기록에서 이긴 횟수를 세어 돌려주는 함수를 만들고 불러요. 줄을 놓고 들여쓰기도 맞춰요
+        indent: true
+        lines:
+          - { id: ln-v3hk, code: 'def count_win(results):' }
+          - { id: ln-q7ad, code: 'win = 0' }
+          - { id: ln-l4sx, code: 'for r in results:' }
+          - { id: ln-b8no, code: 'if r == "승":' }
+          - { id: ln-y2fe, code: 'win = win + 1' }
+          - { id: ln-a6tj, code: 'return win' }
+          - { id: ln-k9gm, code: 'print(count_win(["승", "패", "승"]))' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-v3hk, indent: 0 }
+            - { id: ln-q7ad, indent: 1 }
+            - { id: ln-l4sx, indent: 1 }
+            - { id: ln-b8no, indent: 2 }
+            - { id: ln-y2fe, indent: 3 }
+            - { id: ln-a6tj, indent: 1 }
+            - { id: ln-k9gm, indent: 0 }
+        explanation: 함수 안에서 0부터 세기 시작하고, 기록을 하나씩 보며 승이면 1을 더해요. return 은 반복이 다 끝난 뒤에 와야 해서 for 와 같은 깊이로 들여 써요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000022
+    prompt:
+      quiz:
+        question: 게임 시작! 이 나와야 하는데 아무것도 나오지 않아요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-h5wz
+            code: 'def start():'
+          - id: ln-d2qc
+            code: '    print("게임 시작!")'
+          - id: ln-s9ev
+            code: start
+        fixes:
+          - id: fx-k6ub
+            code: start()
+          - id: fx-o3ji
+            code: print(start)
+          - id: fx-f7ry
+            code: def start()
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-s9ev, fix: fx-k6ub }
+        explanation: 함수 이름 뒤에 괄호를 붙여야 함수를 불러요. 괄호가 없으면 이름만 말하고 실행하지 않아요.
+        explanations:
+          ln-h5wz: 함수를 만드는 줄은 맞아요. 함수를 부르는 줄을 살펴봐요.
+          ln-d2qc: 함수 안에서 보여 줄 글자는 맞아요. 함수가 불렸는지 살펴봐요.
+          fx-o3ji: 괄호가 없어서 여전히 함수를 부르지 않아요. 함수 자체의 정보가 나와요.
+          fx-f7ry: def 는 함수를 만들 때 쓰는 말이에요. 부를 때는 쓰지 않아요.
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000120
+    prompt:
+      quiz:
+        question: 대왕의 마지막 문제! 숫자 맞추기 기록을 따라가요. 돌리면 무엇이 나올까?
+        code: |-
+          secret = 5
+          for guess in [8, 3, 5, 1]:
+              if guess > secret:
+                  print("작게")
+              elif guess < secret:
+                  print("크게")
+              else:
+                  print("정답!")
+                  break
+        options:
+          - { id: opt-p4xm, text: "작게\n크게\n정답!" }
+          - { id: opt-c9ef, text: "작게\n크게\n정답!\n크게" }
+          - { id: opt-j6dl, text: "크게\n작게\n정답!" }
+          - { id: opt-g3sw, text: '정답!' }
+    answer:
+      quiz_answer:
+        accepted: [opt-p4xm]
+        explanation: 8은 5보다 커서 작게, 3은 작아서 크게, 5는 같아서 정답! 을 보여 주고 break 로 끝나요. 그래서 1은 보지 않아요.
+        explanations:
+          opt-c9ef: 정답! 다음에 break 가 있어서 반복이 끝나요. 1은 따지지 않아요.
+          opt-j6dl: 고른 수가 비밀 숫자보다 크면 더 작게 고르라고 알려 줘요. 8은 5보다 커요.
+          opt-g3sw: 맞히기 전의 8과 3도 하나씩 따져서 글자를 보여 줘요.

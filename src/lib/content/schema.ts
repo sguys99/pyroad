@@ -14,6 +14,7 @@ import { z } from 'zod/v4';
 
 import { validateRule, type ValidationRule } from '@/lib/quest/validation';
 import { QUIZ_BLANK_RE } from '@/lib/quest/questKind';
+import { BOSS_LOOKS } from '@/lib/quest/boss';
 import { SOUND_MANIFEST, type BgmId } from '@/lib/sound/manifest';
 
 const text = z.string().min(1, '비어 있으면 안 돼요');
@@ -379,6 +380,8 @@ export const BossQuestSchema = z.strictObject({
     boss: z.strictObject({
       /** 보스 이름 (예: 따옴표 대장 버그버그) */
       name: text,
+      /** 외형 (P9-13): 버그버그 등딱지 색·모자. 없으면 기본(village) */
+      look: z.enum(BOSS_LOOKS).optional(),
       /** 등장할 때 보스 한마디 */
       intro: text,
       /** 학생이 이겼을 때 보스 한마디 (진 보스가 친구처럼) */

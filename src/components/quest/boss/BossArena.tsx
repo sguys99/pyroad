@@ -4,13 +4,14 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import dynamic from 'next/dynamic';
 import { Heart } from 'lucide-react';
 import {
+  BOSS_LOOK,
   BugBugStatic,
   type BugBugState,
   type PybaemState,
 } from '@/components/characters/rig';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { tierDuration } from '@/lib/motion/tokens';
-import { BOSS_HEARTS } from '@/lib/quest/boss';
+import { BOSS_HEARTS, type BossLook } from '@/lib/quest/boss';
 import type { BossFx, BossPhase } from '@/lib/quest/useBossSession';
 import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { PybaemRig } from '../StoryPage';
@@ -34,6 +35,8 @@ const POSE_MS = 1200;
 export interface BossArenaProps {
   phase: BossPhase;
   bossName: string;
+  /** 스테이지 외형 (P9-13, 등딱지 색·모자). 없으면 기본 */
+  look?: BossLook;
   /** 보스 HP = 남은 문제 수 */
   hp: number;
   total: number;
@@ -69,6 +72,7 @@ export function arenaPoses(
 export function BossArena({
   phase,
   bossName,
+  look = 'village',
   hp,
   total,
   hearts,
@@ -90,6 +94,7 @@ export function BossArena({
     return () => clearTimeout(t);
   }, [fx, budget]);
   const poses = arenaPoses(phase, posing?.type ?? null);
+  const { palette, costume } = BOSS_LOOK[look];
   const n = fx?.n ?? 0;
   // 리그를 다시 마운트하지 않고 같은 연출을 다시 틀려고 a·b 두 이름을 번갈아 씀 (같은 키프레임을 다시 걸면 재생되지 않음)
   const alt = n % 2 ? 'a' : 'b';
@@ -133,6 +138,8 @@ export function BossArena({
             {still ? (
               <BugBugStatic
                 state={poses.boss}
+                palette={palette}
+                costume={costume}
                 size={BOSS_SIZE}
                 framing="stage"
                 label=""
@@ -140,6 +147,8 @@ export function BossArena({
             ) : (
               <BugBugRig
                 state={poses.boss}
+                palette={palette}
+                costume={costume}
                 size={BOSS_SIZE}
                 framing="stage"
                 lookAt={false}

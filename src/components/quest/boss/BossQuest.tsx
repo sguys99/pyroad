@@ -97,6 +97,7 @@ export function BossQuest(props: QuestSessionOptions) {
           <BossArena
             phase={s.phase}
             bossName={s.boss.name}
+            look={s.boss.look}
             hp={bossHp({ round: s.cleared, total: s.total })}
             total={s.total}
             hearts={s.hearts}

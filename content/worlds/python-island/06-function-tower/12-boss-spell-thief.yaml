@@ -1,0 +1,168 @@
+# 보스 6: 주문 도둑 버그버그 (P9-13)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000206
+order: 12
+title: 주문 도둑 버그버그
+concept: 함수 총정리
+xp_reward: 45
+quest_type: boss
+prompt:
+  topic: 6단계에서 배운 def·매개변수·return·기본값·max()/min()·함수 합치기 총정리
+  learning_goals:
+    - 함수를 만들기만 할 때와 부를 때를 구별한다
+    - 매개변수에 무엇이 들어가고 return 이 무엇을 돌려주는지 따라갈 수 있다
+    - 함수 안의 return 을 만나면 함수가 바로 끝남을 안다
+  story_context: 함수의 탑 꼭대기, 마법사의 주문서가 사라졌어요! 주문서를 품에 안고 도망치는 건 바로 버그버그. 주문을 바르게 읽어 내면 한 장씩 되찾을 수 있어요.
+  fallback_text: def 로 함수를 만들고, 이름 뒤에 괄호를 붙여 불러야 실행돼요. 괄호 안 값은 매개변수 상자에 차례로 들어가요. return 은 값을 돌려주면서 함수를 그 자리에서 끝내요.
+  boss:
+    name: 주문 도둑 버그버그
+    look: tower
+    intro: 마법사의 주문서는 내가 슬쩍 가져왔지! 여섯 문제를 풀면 한 장씩 돌려줄게!
+    on_defeat: 졌다, 졌어! 함수 주문을 이렇게 잘 쓰다니. 주문서는 마법사님께 돌려드릴게.
+    on_victory: 주문이 꼬였구나? 함수에 무엇이 들어가고 무엇이 나오는지 따라가 보고 다시 와!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000019
+    prompt:
+      quiz:
+        question: 응원 주문을 만들고 불렀어요. 돌리면 무엇이 나올까?
+        code: |-
+          def cheer():
+              print("힘내!")
+          cheer()
+          cheer()
+        options:
+          - { id: opt-u6pk, text: "힘내!\n힘내!" }
+          - { id: opt-g2we, text: '힘내!' }
+          - { id: opt-l9ct, text: "힘내!\n힘내!\n힘내!" }
+          - { id: opt-o4ys, text: "cheer()\ncheer()" }
+    answer:
+      quiz_answer:
+        accepted: [opt-u6pk]
+        explanation: def 는 주문을 만들어 두기만 해요. cheer()로 두 번 불렀으니 힘내! 가 두 번 나와요.
+        explanations:
+          opt-g2we: 함수는 부를 때마다 다시 실행돼요. 두 번 불렀어요.
+          opt-l9ct: def 로 만들 때는 실행되지 않아요. 부를 때만 실행돼요.
+          opt-o4ys: cheer()는 함수를 부르는 코드예요. 화면에는 함수 안의 print()가 보여 주는 글자가 나와요.
+  - quiz_kind: fill_blank
+    review_quest: b1000000-0000-0000-0000-000000000021
+    prompt:
+      quiz:
+        question: 빈칸을 채워 가장 높은 점수와 가장 낮은 점수의 차이가 나오게 해요
+        code: |-
+          scores = [70, 95, 80]
+          print({{bk-m5ta}}(scores) - {{bk-y8eo}}(scores))
+        tokens:
+          - { id: tok-c3vi, text: max }
+          - { id: tok-w7ub, text: min }
+          - { id: tok-k2fz, text: len }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-m5ta: tok-c3vi, bk-y8eo: tok-w7ub }
+        explanation: max()는 가장 큰 값 95, min()은 가장 작은 값 70을 돌려줘요. 95 - 70 = 25 예요.
+        explanations:
+          tok-k2fz: len()은 점수가 몇 개인지(3) 세는 함수예요. 가장 높거나 낮은 점수가 아니에요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000020
+    prompt:
+      quiz:
+        question: 야호를 두 번 붙여 외치려는데 오류가 나요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-b7ks
+            code: 'def shout(word, times):'
+          - id: ln-q2ln
+            code: '    print(word * times)'
+          - id: ln-x5dr
+            code: shout("야호")
+        fixes:
+          - id: fx-a4hm
+            code: shout("야호", 2)
+          - id: fx-t8pe
+            code: shout("야호" 2)
+          - id: fx-z3cu
+            code: shout("야호", "2")
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-x5dr, fix: fx-a4hm }
+        explanation: 매개변수가 word 와 times 두 개라서 부를 때도 값 두 개를 넣어야 해요. 값 사이는 쉼표로 나눠요.
+        explanations:
+          ln-b7ks: 함수를 만드는 줄은 맞아요. 함수를 부르는 줄을 살펴봐요.
+          ln-q2ln: 글자에 숫자를 곱하면 그만큼 반복돼요. 이 줄은 맞아요.
+          fx-t8pe: 값 두 개 사이에는 쉼표가 있어야 해요. 없으면 오류가 나요.
+          fx-z3cu: 따옴표를 붙인 "2"는 숫자가 아니라 글자예요. 글자에 글자를 곱할 수는 없어서 오류가 나요.
+  - quiz_kind: parsons
+    review_quest: b1000000-0000-0000-0000-000000000043
+    prompt:
+      quiz:
+        question: 느낌표를 붙이는 함수와 두 번 외치는 함수를 만들고, 둘을 합쳐 불러요. 줄을 놓고 들여쓰기도 맞춰요
+        indent: true
+        lines:
+          - { id: ln-r3nb, code: 'def bang(word):' }
+          - { id: ln-f8xd, code: 'return word + "!"' }
+          - { id: ln-c5kw, code: 'def twice(word):' }
+          - { id: ln-m2ta, code: 'return word * 2' }
+          - { id: ln-h9vq, code: 'print(twice(bang("야호")))' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-r3nb, indent: 0 }
+            - { id: ln-f8xd, indent: 1 }
+            - { id: ln-c5kw, indent: 0 }
+            - { id: ln-m2ta, indent: 1 }
+            - { id: ln-h9vq, indent: 0 }
+          - - { id: ln-c5kw, indent: 0 }
+            - { id: ln-m2ta, indent: 1 }
+            - { id: ln-r3nb, indent: 0 }
+            - { id: ln-f8xd, indent: 1 }
+            - { id: ln-h9vq, indent: 0 }
+        explanation: 함수는 부르기 전에 먼저 만들어 둬야 해요. 각 함수의 return 은 들여 쓰고, 두 함수를 합쳐 부르는 줄은 맨 마지막에 둬요.
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000041
+    prompt:
+      quiz:
+        question: 간식 주문에는 기본값이 있어요. 돌리면 무엇이 나올까?
+        code: |-
+          def snack(food="쿠키", count=1):
+              print(food + str(count) + "개")
+          snack("젤리", 2)
+          snack()
+        options:
+          - { id: opt-e5mr, text: "젤리2개\n쿠키1개" }
+          - { id: opt-s8gd, text: "젤리2개\n쿠키2개" }
+          - { id: opt-h3za, text: "젤리2개\n젤리2개" }
+          - { id: opt-p7lo, text: '젤리2개' }
+    answer:
+      quiz_answer:
+        accepted: [opt-e5mr]
+        explanation: 처음엔 젤리와 2를 넣었고, 두 번째는 아무것도 넣지 않아서 기본값 쿠키와 1을 써요.
+        explanations:
+          opt-s8gd: 앞에서 넣은 2는 그 한 번에만 써요. 다시 부를 때 값을 안 넣으면 기본값 1이 돼요.
+          opt-h3za: 함수는 부를 때마다 새로 시작해요. 값을 안 넣으면 기본값을 써요.
+          opt-p7lo: 기본값이 있으면 값을 넣지 않고 불러도 오류 없이 실행돼요.
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000044
+    prompt:
+      quiz:
+        question: 숫자 크기를 알려 주는 주문이에요. 돌리면 무엇이 나올까?
+        code: |-
+          def size(n):
+              if n > 5:
+                  return "큰 수"
+              return "작은 수"
+          print(size(3) + ", " + size(8))
+        options:
+          - { id: opt-b6qt, text: '작은 수, 큰 수' }
+          - { id: opt-n4jx, text: '큰 수, 작은 수' }
+          - { id: opt-r9mc, text: '작은 수, 작은 수' }
+          - { id: opt-w2fh, text: '큰 수, 큰 수' }
+    answer:
+      quiz_answer:
+        accepted: [opt-b6qt]
+        explanation: 3은 5보다 크지 않아서 작은 수, 8은 5보다 커서 큰 수를 돌려줘요. return 을 만나면 함수가 바로 끝나서 아래 return 은 실행되지 않아요.
+        explanations:
+          opt-n4jx: 앞의 size(3)이 먼저 이어 붙어요. 3은 5보다 작아요.
+          opt-r9mc: 8은 5보다 커서 첫 번째 return 에서 큰 수를 돌려주고 끝나요.
+          opt-w2fh: 3은 5보다 크지 않아서 if 아래로 들어가지 않아요. 그래서 아래 return 이 작은 수를 돌려줘요.

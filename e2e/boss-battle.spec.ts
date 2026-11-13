@@ -1,6 +1,6 @@
 // 보스 배틀 (P9-12): 스테이지 코드 퀘스트를 다 끝낸 학생이 1단계 보스와 싸운다.
-//   승리 경로(1280): 도전! → 1번 문제 한 번 틀림(하트 2/3, 무대·낭독 글자) → 모두 맞힘(HP 5→0) → 승리 쪽(별 2 = 남은 하트) +
-//     스테이지 클리어 축하 + 다음 스테이지로 · 자랑하기 → 원장 quest/<보스> 20 + 별 2×5, 잔액 = 원장, XP +40, 2단계 열림
+//   승리 경로(1280): 도전! → 1번 문제 한 번 틀림(하트 2/3, 무대·낭독 글자) → 모두 맞힘(HP n→0) → 승리 쪽(별 2 = 남은 하트) +
+//     스테이지 클리어 축하 + 다음 스테이지로 · 자랑하기 → 원장 quest/<보스> 20 + 별 2×5, 잔액 = 원장, XP 별 2 × xp_reward/3, 2단계 열림
 //   패배 → 다시 도전(360): 세 번 틀림 → 패배 쪽(다시 도전 · 복습하러 가기 = 관련 퀘스트) → 다시 도전 → 하트 3으로 새 판 → 이김(별 3)
 //   잠긴 보스: 코드 퀘스트가 남으면 도전 버튼 없이 안내, API 도 409 boss_locked
 // 응답에는 정답이 없다(오답 응답 본문에 accepted·정답 id 없음). 정답은 service_role 로 quest_answer_keys 에서 읽는다
@@ -210,7 +210,7 @@ test('승리: 한 번 틀리고 모두 맞히면 별 2 · 보상 원장 일치 �
   expect(last.reward).toMatchObject({
     stars: 2,
     best_stars: 2,
-    xp_gained: 40,
+    xp_gained: (BOSS.xp / 3) * 2,
     mode: 'first',
   });
 
@@ -233,7 +233,7 @@ test('승리: 한 번 틀리고 모두 맞히면 별 2 · 보상 원장 일치 �
 
   // 서버: 별 2, XP +40(레벨 업과 무관하게 퀘스트 XP), 원장 quest 20 + 별 1·2, 잔액 = 원장
   expect(await bestStars(me, BOSS.id)).toBe(2);
-  expect((await totalXp(me)) - xpBefore).toBe(40);
+  expect((await totalXp(me)) - xpBefore).toBe((BOSS.xp / 3) * 2);
   const { data: ledger } = await adminClient()
     .from('coin_ledger')
     .select('source, ref, delta')

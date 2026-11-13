@@ -1,0 +1,107 @@
+# 보스 2: 상자 바꿔치기 버그버그 (P9-13)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000202
+order: 11
+title: 상자 바꿔치기 버그버그
+concept: 변수·자료형 총정리
+xp_reward: 30
+quest_type: boss
+prompt:
+  topic: 2단계에서 배운 변수·숫자와 글자·글자 합치기·형변환 총정리
+  learning_goals:
+    - 변수 상자에 마지막으로 넣은 값이 무엇인지 따라갈 수 있다
+    - 숫자와 글자의 + 가 어떻게 다른지 안다
+    - int()·str()로 숫자와 글자를 바꿀 수 있다
+  story_context: 변수의 숲 마법 상자들 속이 뒤바뀌었어요! 범인은 장난꾸러기 버그버그. 상자 속을 바르게 읽어 내면 파이뱀이 버그버그를 콕 찔러요.
+  fallback_text: 변수는 값을 담는 이름표 붙은 상자예요. 같은 상자에 다시 넣으면 새 값으로 바뀌어요. 따옴표로 감싼 것은 글자, 따옴표가 없는 수는 숫자예요. 글자끼리 + 하면 이어 붙고, 숫자끼리 + 하면 더해져요.
+  boss:
+    name: 상자 바꿔치기 버그버그
+    look: forest
+    intro: 쉿! 숲속 마법 상자 속을 내가 몰래 바꿔 놨지롱. 네 문제를 다 풀면 제자리로 돌려줄게!
+    on_defeat: 으앗, 들켰다! 상자 속을 이렇게 잘 읽다니. 상자는 다 돌려놓을게!
+    on_victory: 헤헤, 상자 속이 헷갈렸지? 상자에 마지막으로 넣은 게 뭔지 떠올리고 다시 와!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000005
+    prompt:
+      quiz:
+        question: 버그버그가 숫자에 따옴표를 몰래 붙였어요. 돌리면 무엇이 나올까?
+        code: |-
+          a = "3"
+          b = "4"
+          print(a + b)
+        options:
+          - { id: opt-k5te, text: '34' }
+          - { id: opt-w2pa, text: '7' }
+          - { id: opt-d8ql, text: 'a + b' }
+          - { id: opt-x3nu, text: '3 + 4' }
+    answer:
+      quiz_answer:
+        accepted: [opt-k5te]
+        explanation: 따옴표로 감싼 "3"과 "4"는 숫자가 아니라 글자예요. 글자끼리 + 하면 더하지 않고 이어 붙여요.
+        explanations:
+          opt-w2pa: 더해서 7이 되려면 숫자여야 해요. 따옴표가 있으면 글자라서 이어 붙어요.
+          opt-d8ql: a 와 b 는 상자 이름이에요. print()는 상자 이름이 아니라 상자 속 값을 보여 줘요.
+          opt-x3nu: + 는 화면에 나오지 않아요. 계산하거나 이어 붙이는 기호예요.
+  - quiz_kind: fill_blank
+    review_quest: b1000000-0000-0000-0000-000000000007
+    prompt:
+      quiz:
+        question: 빈칸을 채워 사과 상자에 2개를 더한 7이 나오게 해요
+        code: |-
+          apple = {{bk-f7ra}}("5")
+          print(apple + 2)
+        tokens:
+          - { id: tok-m3si, text: int }
+          - { id: tok-b8oh, text: str }
+          - { id: tok-v4ye, text: print }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-f7ra: tok-m3si }
+        explanation: int()는 글자 "5"를 숫자 5로 바꿔 줘요. 숫자가 되어야 2를 더해 7이 나와요.
+        explanations:
+          tok-b8oh: str()은 글자로 바꾸는 마법이에요. 글자에 숫자 2를 더하면 오류가 나요.
+          tok-v4ye: print()는 화면에 보여 주기만 하고 상자에 숫자를 넣어 주지 않아요. 그래서 2를 더할 수 없어요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000028
+    prompt:
+      quiz:
+        question: 안녕, 파이뱀 이 나와야 하는데 안녕, name 이 나와요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-h4cz
+            code: name = "파이뱀"
+          - id: ln-t9ek
+            code: print("안녕, " + "name")
+        fixes:
+          - id: fx-p2dy
+            code: print("안녕, " + name)
+          - id: fx-e6lw
+            code: print("안녕, " + 'name')
+          - id: fx-y5ar
+            code: print("안녕, " name)
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-t9ek, fix: fx-p2dy }
+        explanation: 상자 이름에 따옴표를 붙이면 상자 속이 아니라 name 이라는 글자 그대로가 돼요. 따옴표를 빼야 상자 속 파이뱀이 나와요.
+        explanations:
+          ln-h4cz: 이 줄은 name 상자에 파이뱀을 잘 넣었어요. 다른 줄을 살펴봐요.
+          fx-e6lw: 작은따옴표도 따옴표예요. 여전히 name 이라는 글자가 나와요.
+          fx-y5ar: 글자와 상자를 이어 붙이려면 사이에 + 가 있어야 해요. 없으면 오류가 나요.
+  - quiz_kind: parsons
+    review_quest: b1000000-0000-0000-0000-000000000027
+    prompt:
+      quiz:
+        question: 도토리 3개를 먼저 두 배로 늘린 다음 1개를 더 넣어서, 7이 나오게 줄을 놓아요
+        lines:
+          - { id: ln-s8gu, code: 'acorn = 3' }
+          - { id: ln-c2mf, code: 'acorn = acorn * 2' }
+          - { id: ln-z6oj, code: 'acorn = acorn + 1' }
+          - { id: ln-a5wb, code: 'print(acorn)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - [ln-s8gu, ln-c2mf, ln-z6oj, ln-a5wb]
+        explanation: 상자를 먼저 만들고(3), 두 배로 바꾸고(6), 1을 더한 뒤(7) 보여 줘요. 차례를 바꾸면 3에 1을 먼저 더해 8이 돼요.

@@ -7,6 +7,18 @@ import type { QuestCompleteResponse } from './rewards';
  */
 export const BOSS_HEARTS = 3;
 
+/** 보스 외형 (P9-13): 스테이지마다 버그버그 등딱지 색·모자가 다름. 콘텐츠 `prompt.boss.look`, 그림은 리그 `bugbug/looks.ts` */
+export const BOSS_LOOKS = [
+  'village',
+  'forest',
+  'crossroad',
+  'cave',
+  'lake',
+  'tower',
+  'kingdom',
+] as const;
+export type BossLook = (typeof BOSS_LOOKS)[number];
+
 export type BossMode = 'first' | 'review' | 'practice';
 
 /** boss_answer 반환 (00046 머리 주석) */

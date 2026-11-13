@@ -10,6 +10,7 @@ import {
   refOf,
   usesPaper,
 } from '../core/markup';
+import { Hat } from '../costumes';
 import type { MarkupProps } from '../core/types';
 import { STYLE_RULES, type RigStyle } from '../style';
 
@@ -113,7 +114,7 @@ const STAR = 'M0 -5 Q0.9 -0.9 5 0 Q0.9 0.9 0 5 Q-0.9 0.9 -5 0 Q-0.9 -0.9 0 -5Z';
 const TOOTH = 'M-1.7 0 H1.7 V2.2 Q0 3.6 -1.7 2.2Z';
 
 export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
-  const { geo, pal, style, idp, reg } = props;
+  const { geo, pal, style, idp, reg, costume } = props;
   const a = (k: string) => attrs(geo, k);
   const r = (k: string) => refOf(reg, k);
   const rules = STYLE_RULES[style];
@@ -353,6 +354,12 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
                 <path d={TOOTH} fill="#fff" />
               </g>
             </g>
+            {/* 보스 모자 (P9-13 스테이지 외형): 파이뱀 모자 조각을 버그버그 머리 높이로 내려 씀 */}
+            {costume?.hat && (
+              <g transform="translate(0 6)">
+                <Hat kind={costume.hat} outline={propInk} tonal={rules.tonal} />
+              </g>
+            )}
           </g>
           {/* 소품 */}
           <g ref={r('mag')} {...a('mag')}>

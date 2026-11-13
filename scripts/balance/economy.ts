@@ -59,7 +59,14 @@ export const STUDENTS: StudentType[] = [
 ];
 
 /** 가정: 걸리는 분 (오늘의 퀴즈 한 문제도 quiz) */
-export const TIME = { code: 12, project: 45, quiz: 2, codeReview: 6 } as const;
+export const TIME = {
+  code: 12,
+  project: 45,
+  quiz: 2,
+  /** 보스 한 판 (문제 4~7개, 한 문제 1분 남짓 + 연출) */
+  boss: 8,
+  codeReview: 6,
+} as const;
 /** 가정: 코드 퀘스트 힌트 수 순환(평균 XP 배율 1.25 = P8-01 "보통") · 퀴즈 첫 판정 별 순환(평균 ⭐2) */
 export const HINT_CYCLE = [0, 1, 1, 2] as const;
 export const QUIZ_STAR_CYCLE = [3, 2, 2, 1] as const;
@@ -94,7 +101,8 @@ export const LEARNING_SOURCES: readonly Source[] = SOURCES.filter(
 
 interface QuestDef {
   id: string;
-  type: 'code' | 'project' | 'quiz';
+  /** 보스(P9-12)는 DB 처럼 퀴즈가 아닌 퀘스트로 셈 (스테이지 클리어·상자·업적·미션 모두 quest_type <> 'quiz') */
+  type: 'code' | 'project' | 'quiz' | 'boss';
   base: number;
   stage: number;
 }
@@ -112,19 +120,12 @@ export function world1Stages(): StageDef[] {
   return world.stages.map((s) => ({
     order: s.stage.order,
     isFinal: s.stage.is_final,
-    // shortcut: 보스(P9-12)는 시뮬레이션에 넣지 않음 — 보상은 docs/balance.md 3.14에 따로 셈. 보스가 7종(P9-13)이 되면 모델에 넣기
-    quests: s.quests.flatMap(({ quest }) =>
-      quest.quest_type === 'boss'
-        ? []
-        : [
-            {
-              id: quest.id,
-              type: quest.quest_type,
-              base: quest.xp_reward,
-              stage: s.stage.order,
-            },
-          ],
-    ),
+    quests: s.quests.map(({ quest }) => ({
+      id: quest.id,
+      type: quest.quest_type,
+      base: quest.xp_reward,
+      stage: s.stage.order,
+    })),
   }));
 }
 
@@ -232,6 +233,7 @@ export function simulateEconomy(
   let credit = 0; // 다음 새 퀘스트에 쌓인 분 (긴 프로젝트는 며칠에 걸침)
   let codeDone = 0;
   let quizDone = 0;
+  let bossDone = 0;
   let attendance = 0;
   let missionsClaimed = 0;
   let chestsOpened = 0;
@@ -294,7 +296,10 @@ export function simulateEconomy(
     const streak = longestRun(new Set([...learnDays, ...shieldDays]));
     const metric: Record<string, number> = {
       quests: code.length,
-      projects: code.filter((x) => x.q.type === 'project').length,
+      // 00036: 마지막 스테이지(is_final)의 퀴즈 아닌 완료 = 프로젝트 → 7단계 보스도 셈
+      projects: code.filter(
+        (x) => stages.find((s) => s.order === x.q.stage)?.isFinal,
+      ).length,
       stages: stages.filter(stageCleared).length,
       no_hint: code.filter((x) => x.p.hints === 0).length,
       hint_finish: code.filter((x) => x.p.hints > 0).length,
@@ -358,7 +363,7 @@ export function simulateEconomy(
         .slice(0, 3);
 
       // 미션 배정 (00034: 할 수 있는 것만, 그룹마다 하나, 퀘스트 그룹 먼저, 3개)
-      const remaining = codeTotal - codeDone;
+      const remaining = codeTotal - codeDone - bossDone;
       const reviewOpen = [...prog.values()].some(
         (p) => p.best < 3 && p.judgedOn < day,
       );
@@ -446,6 +451,8 @@ export function simulateEconomy(
         );
         if (!target) break;
         const p = prog.get(target.id)!;
+        // 보스 복습 승리는 늘어난 별만큼 XP 도 (00046 boss_answer review)
+        if (target.type === 'boss') xp += ((3 - p.best) * target.base) / 3;
         gainStars(target.id, p.best, 3);
         Object.assign(p, { best: 3, judgedOn: day, attempts: p.attempts + 1 });
         budget -= TIME.codeReview;
@@ -465,13 +472,33 @@ export function simulateEconomy(
             ? TIME.quiz
             : q.type === 'project'
               ? TIME.project
-              : TIME.code;
+              : q.type === 'boss'
+                ? TIME.boss
+                : TIME.code;
         if (credit < cost) break;
         credit -= cost;
         next++;
         if (q.type === 'quiz') {
           budget = 99; // 이미 credit 에서 뺌
           finishQuiz(q);
+          continue;
+        }
+        if (q.type === 'boss') {
+          // 별 = 남은 하트 (퀴즈 첫 판정과 같은 순환으로 가정) · XP 별당 xp_reward/3 · 첫 승리 20 (00046)
+          const stars = QUIZ_STAR_CYCLE[bossDone++ % QUIZ_STAR_CYCLE.length];
+          xp += (stars * q.base) / 3;
+          coins.quest += COIN_RULES.boss;
+          gainStars(q.id, 0, stars);
+          prog.set(q.id, {
+            best: stars,
+            judgedOn: day,
+            attempts: 1,
+            hints: 0,
+            error: false,
+            correctAtTwoPlus: false,
+          });
+          today.quest++;
+          today.noHint++;
           continue;
         }
         const hints = HINT_CYCLE[codeDone++ % HINT_CYCLE.length];
@@ -534,7 +561,7 @@ export function simulateEconomy(
       level: calculateLevel(xp),
       coins: { ...coins },
       quizStars: sum(['quiz']),
-      codeStars: sum(['code', 'project']),
+      codeStars: sum(['code', 'project', 'boss']),
     });
   }
   return result;
@@ -560,7 +587,12 @@ export function daysToPrice(r: EconomyResult, price: number): number | null {
 }
 
 /** 소급 보상(00037): Phase 8 전에 스테이지 1..n 을 모두(퀴즈 포함) 끝낸 기존 사용자 */
-export function retroCoins(stageCount: number, stages = world1Stages()) {
+export function retroCoins(stageCount: number, allStages = world1Stages()) {
+  // 00037 소급 때는 보스가 없었음
+  const stages = allStages.map((s) => ({
+    ...s,
+    quests: s.quests.filter((q) => q.type !== 'boss'),
+  }));
   const r = simulateEconomy(
     {
       id: 'retro',

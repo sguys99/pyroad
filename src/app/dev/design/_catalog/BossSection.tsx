@@ -12,7 +12,8 @@ import {
 import { BossLost, BossWon } from '@/components/quest/boss/BossResult';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { WRONG_GAIN } from '@/lib/quest/useQuizSession';
-import { BOSS_HEARTS } from '@/lib/quest/boss';
+import { BOSS_HEARTS, BOSS_LOOKS, type BossLook } from '@/lib/quest/boss';
+import { BOSS_LOOK, BugBugStatic } from '@/components/characters/rig';
 import type { QuizPrompt } from '@/lib/quest/questKind';
 import type {
   BossFx,
@@ -37,6 +38,17 @@ const BOSS = {
   review_quests: [] as (string | null)[],
 };
 const TOTAL = 5;
+
+/** 스테이지 외형 7종 (P9-13, 콘텐츠 `prompt.boss.look`) */
+const LOOK_NAME: Record<BossLook, string> = {
+  village: '1 출력 대장',
+  forest: '2 상자 바꿔치기',
+  crossroad: '3 갈림길 장난꾼',
+  cave: '4 메아리',
+  lake: '5 뒤죽박죽',
+  tower: '6 주문 도둑',
+  kingdom: '7 버그버그 대왕',
+};
 
 const QUIZ: QuizPrompt = {
   kind: 'multiple_choice',
@@ -282,6 +294,25 @@ export function BossSection() {
           <Stage phase="lost" hp={2} hearts={0} fx={null} />
         </Demo>
       </div>
+      <Demo
+        label="스테이지 외형 7종"
+        note="리그 팔레트 덮어쓰기(등딱지·더듬이 끝) + 코스튬 모자. 콘텐츠 prompt.boss.look"
+        data-testid="boss-looks"
+      >
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+          {BOSS_LOOKS.map((look) => (
+            <li key={look} className="flex flex-col items-center gap-1">
+              <BugBugStatic
+                state="idle"
+                size={96}
+                label={LOOK_NAME[look]}
+                {...BOSS_LOOK[look]}
+              />
+              <span className="text-sm">{LOOK_NAME[look]}</span>
+            </li>
+          ))}
+        </ul>
+      </Demo>
       <div className="grid gap-4 lg:grid-cols-2">
         <Demo label="등장 쪽" surface="card">
           <BossIntro
