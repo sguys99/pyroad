@@ -27,7 +27,7 @@ import { UserAvatar } from '@/components/profile/UserAvatar';
 import { PYBAEM_SKINS, skinPalette } from '@/lib/avatar/skins';
 import { CodeSample, Demo, Section } from './ui';
 
-function StateButtons<S extends string>({
+export function StateButtons<S extends string>({
   states,
   labels,
   value,

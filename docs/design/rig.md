@@ -10,7 +10,7 @@
 src/components/characters/rig/
 ├── index.ts            서버에서도 import 가능한 것만 (정의·정지 그림·타입·정책)
 ├── style.ts            스타일 A·B·A×B 규칙 + DEFAULT_RIG_STYLE (시안 확정 후 이 한 줄만 바꿈)
-├── costumes.tsx        코스튬 슬롯 (모자·안경·망토·배경, Phase 9 P9-04 대비 자리)
+├── costumes.tsx        코스튬 조각 (모자·안경·망토·배경, P9-04 꾸미기 렌더러 — §6¾)
 ├── RigStatic.tsx       정지 그림: RigStatic · PybaemStatic · BugBugStatic · ByeolttongiStatic (훅 없음)
 ├── LiveRig.tsx         'use client' 라이브 렌더러 RigView (연출 단계를 props로 받음, React 18·19 공용 API)
 ├── MascotRig.tsx       'use client' 앱 래퍼 PybaemRig · BugBugRig · ByeolttongiRig (useMotionTier() 연동)
@@ -52,7 +52,7 @@ ref.current?.poke(); ref.current?.replay();
 
 - **지연 로드**: 첫 화면은 `PybaemStatic`(서버에서 그림)으로 두고 `next/dynamic(() => import('…/MascotRig'), { ssr: false, loading: () => <PybaemStatic … /> })`로 바꿔도 **같은 모습**입니다. 라이브 리그의 첫 렌더가 같은 `staticGeo()`를 쓰고, 테스트가 두 마크업이 같은지 확인합니다(`static.test.tsx`).
 - **스타일**: `style`을 생략하면 `DEFAULT_RIG_STYLE`(**`'B'`**, P2-06 사용자 리뷰에서 B 방향 확정·P2-07 2차에서 바꿈).
-- **팔레트·코스튬**: `palette={skinPalette('sky')}`(스킨, §6½), `costume={{ hat: 'party', glasses: 'round', cape: '#E53935', bg: 'island' }}`(파이뱀). 표정 소품(별 눈·물음표·Zzz)과 코스튬은 서로 다른 슬롯이라 겹치지 않습니다(P0-10).
+- **팔레트·코스튬**: `palette={skinPalette('sky')}`(스킨, §6½), `costume={{ hat: 'party', glasses: 'round', cape: '#E53935', bg: 'island' }}`(파이뱀). 표정 소품(별 눈·물음표·Zzz)과 코스튬은 서로 다른 슬롯이라 겹치지 않습니다(P0-10, 레이어 표는 §6¾).
 - **접근성**: `role="img"` + `aria-label="파이뱀 선생님 - 기쁨"`. `label=""`이면 장식(`aria-hidden`).
 - `<text>`·`<foreignObject>`·래스터 `<image>`를 쓰지 않습니다(공유 카드 직렬화기, P0-10). 예전 `PybaemSvg`의 "Zzz"·"?"도 경로로 바꿨습니다.
 
@@ -212,6 +212,31 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 - 저장·공개: `users.avatar_config.skin` → 동기화 트리거가 6종 id만 `user_public_profiles.avatar_skin`으로 복사(모르는 값은 NULL = 숲초록, ① 00021). id 목록은 마이그레이션의 `ARRAY[…]`와 같아야 하고(테스트가 대조) 한번 쓴 id는 바꾸지 않습니다
 - 그리기: `UserAvatar`(`src/components/profile/UserAvatar.tsx`, 32 게시판 · 48 월드맵 요약 · 96 프로필) = 둥근 `surface-2` 칩 + 칩과 같은 크기의 `PybaemStatic` idle(4% 위로). 장식(`aria-hidden`)이고 이름은 옆에 글자로. 공유 카드는 `avatar.skin`
 - 색은 캐릭터 고유색이라 토큰이 아닙니다(tokens.md §6 예외 `src/lib/avatar/skins.ts`)
+
+## 6¾. 꾸미기 렌더러 · 코스튬 슬롯 (P9-04)
+
+아이템 1개 = **슬롯 + SVG 조각 + 미리보기**입니다. 조각은 `costumes.tsx` 한 곳에만 있고, 라이브(`PybaemRig`→`RigView`)·정지(`PybaemStatic`, 공유 카드·아바타·상점 썸네일 `ShopItemArt`·구매 카드)가 모두 같은 `PybaemMarkup`으로 그립니다(테스트: 코스튬을 입힌 라이브 첫 렌더 = 정지 그림). 포즈마다 따로 맞추지 않습니다 — 조각이 리그 그룹 안에 있어서 그룹의 움직임을 그대로 받습니다.
+
+| 레이어 (뒤 → 앞) | 슬롯 | 들어가는 곳 | 따라가는 움직임 |
+|---|---|---|---|
+| 배경 `bg` | `island`·`paper` | `<svg>` 바로 아래, 리그(`root`) **밖** | 없음 (정지) |
+| 후광·바닥 그림자 | — | 리그 밖 | 상태 색·점프 높이 |
+| 망토 `cape` | 색 (`CAPE_COLORS`) | `root` 첫 자식 = **몸·꼬리 뒤** | 몸 전체(점프·찌그러짐) + 자락 `capeSwing` |
+| 몸통·꼬리 | 스킨 팔레트 | `root` | |
+| 얼굴·표정 소품(별 눈·눈물) | — | `head > face` | 시선 시차 |
+| 안경 `glasses` | `round`·`sun` | `head > face` 맨 앞 | 머리 기울기 + 시선 시차 (눈동자는 안경 안에서 움직임) |
+| 모자 `hat` | `party`·`explorer`·`crown`·`wizard` | `head` 맨 앞 (`hat` 그룹) | 머리 기울기·끄덕임 + 자체 출렁임 `hatRot` |
+| 머리 밖 표정 소품(반짝이·생각 풍선·음표·Zzz·물음표) | — | `root` 맨 앞 | 몸 전체 |
+
+- **좌표**: 모든 레이어가 같은 128×128 (머리 타원 cx 64 cy 44 rx 28 ry 24, 눈 52·76 / 40). 모자 끝은 상자 위로 나갈 수 있어(마법사 −12) 무대(`framing="stage"`, −20 −36 168 168)에서 다 보입니다. 아바타 상자(0 0 128 128)는 `overflow="visible"`이라 잘리지 않고 칩 밖으로 나옵니다 → 32px 아바타 둘레 처리는 P9-05
+- **소품 위치**: 모자 챙(탐험가 x ≤ 97)과 겹치지 않게 Zzz는 (106,19)부터, 물음표 (104,17), 생각 방울 (96,19)·(103,9)로 옮겼습니다(P9-04, 코스튬 없는 모습도 같은 자리)
+- **선**: A 선 없음 · B 모자는 **제 색의 진한 톤 1.1**(`HAT_TONE`, 펫·별 눈과 같은 말씨) · A×B 잉크 1.6. 망토 B는 옅은 그늘 선
+- **스킨**(§6½) = 팔레트 덮어쓰기라 몸·배·볼·외곽선만 바뀌고 코스튬 색은 그대로입니다
+- **공유 카드 제약**(P0-10): `<text>`·`<foreignObject>`·`<image>`·`<use>`·SMIL(`<animate*>`·`<set>`) 금지. `static.test.tsx`가 **코스튬 10종 × 14상태 × 3스타일 × 스킨 6색**과 **펫 4종**을 모두 그려 검사하고, 조각이 제 그룹(배경 = 리그 밖, 망토 = root 첫 자식, 안경 = 얼굴, 모자 = 머리)에 있는지 DOM으로 확인합니다
+- **견본**: 카탈로그 `/dev/design#costume` — 코스튬 × 포즈 격자(스킨 고르기) · 스킨 6색 × 다 입기 · 라이브 다 입기. e2e `design-catalog.spec.ts` "꾸미기 렌더러 (P9-04)" 360·1280
+- **새 조각 추가**: `costumes.tsx`에 그리기(128 좌표, 금지 요소 없이) → 종류 타입에 id → `src/lib/shop/catalog.ts` `SHOP_ITEMS`·새 마이그레이션 `shop_items` INSERT(드리프트 테스트) → 격자에서 14상태 확인
+
+![코스튬 × 포즈 × 스킨 격자](img/rig/costume-grid.png)
 
 ## 7. 캐릭터 추가 방법
 

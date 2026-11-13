@@ -2249,7 +2249,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 -9.99) rotate(0 64 108) translate(64 108) scale(0.955 1.07) translate(-64 -108)",
@@ -2263,7 +2263,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2286,7 +2286,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.073 0.918) translate(-64 -108)",
@@ -2300,7 +2300,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -2323,7 +2323,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.03 0.97) translate(-64 -108)",
@@ -2337,7 +2337,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -2362,7 +2362,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "1",
-        "transform": "translate(96 20) rotate(-5.3) scale(1.142)",
+        "transform": "translate(104 17) rotate(-5.3) scale(1.142)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -2376,7 +2376,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2399,7 +2399,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "1",
-        "transform": "translate(96 20) rotate(-8.6) scale(0.981)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0.981)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -2413,7 +2413,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -2436,7 +2436,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "1",
-        "transform": "translate(96 20) rotate(8.6) scale(1)",
+        "transform": "translate(104 17) rotate(8.6) scale(1)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
@@ -2450,7 +2450,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -2475,7 +2475,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(2.16 -3.09) rotate(4.33 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -2489,7 +2489,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2512,7 +2512,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.019 0.983) translate(-64 -108)",
@@ -2526,7 +2526,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -2549,7 +2549,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.028 0.966) translate(-64 -108)",
@@ -2563,7 +2563,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -2588,7 +2588,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -2602,7 +2602,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2625,7 +2625,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -2639,7 +2639,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -2662,7 +2662,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
@@ -2676,7 +2676,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -2701,7 +2701,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 -14.72) rotate(0 64 108) translate(64 108) scale(0.904 1.143) translate(-64 -108)",
@@ -2715,7 +2715,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2738,7 +2738,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.924 1.12) translate(-64 -108)",
@@ -2752,7 +2752,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -2775,7 +2775,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 -12.28) rotate(0 64 108) translate(64 108) scale(0.992 1.014) translate(-64 -108)",
@@ -2789,7 +2789,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -2814,7 +2814,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -2828,7 +2828,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2851,7 +2851,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -2865,7 +2865,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -2888,7 +2888,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
@@ -2902,7 +2902,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -2927,7 +2927,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.042) translate(-64 -108)",
@@ -2941,7 +2941,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -2964,7 +2964,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.039) translate(-64 -108)",
@@ -2978,7 +2978,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3001,7 +3001,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.025) translate(-64 -108)",
@@ -3015,7 +3015,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3040,7 +3040,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.03 0.967) translate(-64 -108)",
@@ -3054,7 +3054,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -3077,7 +3077,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.03 0.966) translate(-64 -108)",
@@ -3091,7 +3091,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3114,7 +3114,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.031 0.963) translate(-64 -108)",
@@ -3128,7 +3128,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3153,7 +3153,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -3167,7 +3167,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0.769",
-        "transform": "translate(94.42 21.16) scale(1)",
+        "transform": "translate(106.42 18.16) scale(1)",
       },
     },
     "0.5s": {
@@ -3190,7 +3190,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.989 1.025) translate(-64 -108)",
@@ -3204,7 +3204,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0.616",
-        "transform": "translate(93.75 22.49) scale(0.989)",
+        "transform": "translate(105.75 19.49) scale(0.989)",
       },
     },
     "1s": {
@@ -3227,7 +3227,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.987 1.028) translate(-64 -108)",
@@ -3241,7 +3241,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0.528",
-        "transform": "translate(93.29 23.43) scale(1)",
+        "transform": "translate(105.29 20.43) scale(1)",
       },
     },
   },
@@ -3266,7 +3266,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.967 1.047) translate(-64 -108)",
@@ -3280,7 +3280,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -3303,7 +3303,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.967 1.048) translate(-64 -108)",
@@ -3317,7 +3317,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3340,7 +3340,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.973 1.035) translate(-64 -108)",
@@ -3354,7 +3354,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3379,7 +3379,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -3393,7 +3393,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -3416,7 +3416,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -3430,7 +3430,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3453,7 +3453,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
@@ -3467,7 +3467,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3492,7 +3492,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -3506,7 +3506,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -3529,7 +3529,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -3543,7 +3543,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3566,7 +3566,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
@@ -3580,7 +3580,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3605,7 +3605,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.993 1.015) translate(-64 -108)",
@@ -3619,7 +3619,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -3642,7 +3642,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.995 1.012) translate(-64 -108)",
@@ -3656,7 +3656,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3679,7 +3679,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.999 1.003) translate(-64 -108)",
@@ -3693,7 +3693,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3718,7 +3718,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-5.3) scale(0)",
+        "transform": "translate(104 17) rotate(-5.3) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.991 1.02) translate(-64 -108)",
@@ -3732,7 +3732,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(94.42 21.16) scale(0.4)",
+        "transform": "translate(106.42 18.16) scale(0.4)",
       },
     },
     "0.5s": {
@@ -3755,7 +3755,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(-8.6) scale(0)",
+        "transform": "translate(104 17) rotate(-8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.992 1.019) translate(-64 -108)",
@@ -3769,7 +3769,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.75 22.49) scale(0.4)",
+        "transform": "translate(105.75 19.49) scale(0.4)",
       },
     },
     "1s": {
@@ -3792,7 +3792,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "qmark": {
         "opacity": "0",
-        "transform": "translate(96 20) rotate(8.6) scale(0)",
+        "transform": "translate(104 17) rotate(8.6) scale(0)",
       },
       "root": {
         "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.998 1.005) translate(-64 -108)",
@@ -3806,7 +3806,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 대기
       },
       "zzz0": {
         "opacity": "0",
-        "transform": "translate(93.29 23.43) scale(0.4)",
+        "transform": "translate(105.29 20.43) scale(0.4)",
       },
     },
   },
@@ -3835,7 +3835,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -3849,7 +3849,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "confused": {
@@ -3872,7 +3872,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "1",
-      "transform": "translate(96 20) rotate(0) scale(1)",
+      "transform": "translate(104 17) rotate(0) scale(1)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -3886,7 +3886,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "dance": {
@@ -3909,7 +3909,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -3923,7 +3923,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "encourage": {
@@ -3946,7 +3946,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -3960,7 +3960,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "happy": {
@@ -3983,7 +3983,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -3997,7 +3997,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "idle": {
@@ -4020,7 +4020,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -4034,7 +4034,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "proud": {
@@ -4057,7 +4057,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1.02) translate(-64 -108)",
@@ -4071,7 +4071,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "sad": {
@@ -4094,7 +4094,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1.035 0.955) translate(-64 -108)",
@@ -4108,7 +4108,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "sleep": {
@@ -4131,7 +4131,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -4145,7 +4145,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0.68",
-      "transform": "translate(94 22) scale(1)",
+      "transform": "translate(106 19) scale(1)",
     },
   },
   "surprised": {
@@ -4168,7 +4168,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(0.975 1.03) translate(-64 -108)",
@@ -4182,7 +4182,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "talk": {
@@ -4205,7 +4205,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -4219,7 +4219,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "teach": {
@@ -4242,7 +4242,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -4256,7 +4256,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "think": {
@@ -4279,7 +4279,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -4293,7 +4293,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
   "wave": {
@@ -4316,7 +4316,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "qmark": {
       "opacity": "0",
-      "transform": "translate(96 20) rotate(0) scale(0)",
+      "transform": "translate(104 17) rotate(0) scale(0)",
     },
     "root": {
       "transform": "translate(0 0) rotate(0 64 108) translate(64 108) scale(1 1) translate(-64 -108)",
@@ -4330,7 +4330,7 @@ exports[`파라미터 스냅샷 (상태별·시간별 geometry) > pybaem: 정적
     },
     "zzz0": {
       "opacity": "0",
-      "transform": "translate(94 22) scale(0.4)",
+      "transform": "translate(106 19) scale(0.4)",
     },
   },
 }

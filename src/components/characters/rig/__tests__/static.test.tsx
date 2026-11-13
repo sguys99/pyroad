@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
@@ -20,8 +21,17 @@ import {
 import { RigView } from '../LiveRig';
 import { PybaemSvg } from '../../PybaemSvg';
 import type { PybaemExpression } from '../../expressions';
+import { PetArt } from '../../pets';
+import { PYBAEM_SKINS, skinPalette } from '@/lib/avatar/skins';
+import {
+  PET_IDS,
+  SHOP_ITEMS,
+  costumeFromAvatarConfig,
+} from '@/lib/shop/catalog';
 
 const FORBIDDEN = /<(text|foreignObject|image|tspan|use)\b/i;
+/** SMIL: 정지 이미지(공유 카드)에서 무시되고 연출 단계·동작 줄이기를 따르지 않음 (P0-10, P9-04) */
+const SMIL = /<(animate|animateTransform|animateMotion|set)\b/i;
 const DEFS = [
   [PYBAEM, PYBAEM_STATES],
   [BUGBUG, BUGBUG_STATES],
@@ -129,6 +139,90 @@ describe('정지 그림 (공유 카드·아바타·SSR, P0-10)', () => {
   });
 });
 
+describe('꾸미기 렌더러 (P9-04): 모든 코스튬 조각 × 포즈 × 스킨, 펫', () => {
+  const costumes = SHOP_ITEMS.flatMap((i) =>
+    i.kind === 'costume'
+      ? [[i.id, costumeFromAvatarConfig({ [i.slot]: i.id })] as const]
+      : [],
+  );
+
+  it('코스튬 10종이 모두 조각으로 그려진다', () => {
+    expect(costumes).toHaveLength(10);
+    for (const [id, c] of costumes) expect(Object.keys(c), id).toHaveLength(1);
+  });
+
+  it.each(costumes)(
+    '%s: 모든 상태·스타일·스킨에서 금지 요소·SMIL 없음, 조각이 제 그룹 안에',
+    (_id, costume) => {
+      for (const style of RIG_STYLES)
+        for (const state of PYBAEM_STATES)
+          for (const skin of PYBAEM_SKINS) {
+            const svg = renderToStaticMarkup(
+              <PybaemStatic
+                state={state}
+                style={style}
+                costume={costume}
+                palette={skinPalette(skin.id)}
+                filters={false}
+              />,
+            );
+            expect(svg).not.toMatch(FORBIDDEN);
+            expect(svg).not.toMatch(SMIL);
+            expect(svg).not.toMatch(/NaN|undefined|Infinity/);
+          }
+      // 슬롯 위치: 배경 = 리그(root) 밖 앞, 망토 = root 첫 자식(몸 뒤), 안경 = 얼굴 그룹, 모자 = 머리 그룹
+      const doc = new DOMParser().parseFromString(
+        renderToStaticMarkup(<PybaemStatic costume={costume} />),
+        'image/svg+xml',
+      );
+      const svg = doc.documentElement;
+      const root = svg.querySelector('g > g[transform]')!;
+      const head = [...root.children].find((el) =>
+        el.querySelector(':scope > ellipse[cy="44"]'),
+      )!;
+      if (costume.bg) {
+        const kids = [...svg.children].filter((el) => el.tagName !== 'defs');
+        expect(kids[0].tagName).toBe('g');
+        expect(kids[0].contains(root)).toBe(false);
+      }
+      if (costume.cape)
+        expect(root.firstElementChild!.getAttribute('fill')).toBe(costume.cape);
+      if (costume.glasses)
+        expect(
+          head.querySelector('g[transform^="translate"] circle[r="8.4"]'),
+        ).not.toBeNull();
+      if (costume.hat)
+        expect(
+          head.lastElementChild!.querySelector('path, polygon'),
+        ).not.toBeNull();
+    },
+  );
+
+  it('펫 4종도 금지 요소·SMIL 없음', () => {
+    expect(PET_IDS).toHaveLength(4);
+    for (const id of PET_IDS) {
+      const svg = renderToStaticMarkup(<PetArt id={id} size={48} />);
+      expect(svg).not.toMatch(FORBIDDEN);
+      expect(svg).not.toMatch(SMIL);
+    }
+  });
+
+  it('스킨은 코스튬과 섞여도 몸색만 바꾼다 (코스튬 색은 그대로)', () => {
+    const all = costumeFromAvatarConfig({
+      hat: 'hat_party',
+      cape: 'cape_hero',
+    });
+    for (const skin of PYBAEM_SKINS) {
+      const svg = renderToStaticMarkup(
+        <PybaemStatic costume={all} palette={skinPalette(skin.id)} />,
+      );
+      expect(svg).toContain(`fill="${skin.palette.body}"`);
+      expect(svg).toContain(`fill="${all.cape}"`);
+      expect(svg).toContain('fill="#FF7043"'); // 고깔모자
+    }
+  });
+});
+
 describe('라이브 리그의 첫 렌더 = 정지 그림 (하이드레이션 뒤 바꿔도 같은 모습)', () => {
   const normalize = (s: string) =>
     s
@@ -142,6 +236,13 @@ describe('라이브 리그의 첫 렌더 = 정지 그림 (하이드레이션 뒤
     (_id, def, states) => {
       for (const style of RIG_STYLES) {
         for (const state of [states[0], states[3]]) {
+          // 코스튬도 같은 조각 정의(costumes.tsx)로 그려진다 (P9-04, 중복 없음)
+          const costume = {
+            hat: 'wizard',
+            glasses: 'sun',
+            cape: '#3E5A99',
+            bg: 'paper',
+          } as const;
           const live = renderToStaticMarkup(
             <RigView
               def={def}
@@ -150,6 +251,7 @@ describe('라이브 리그의 첫 렌더 = 정지 그림 (하이드레이션 뒤
               size={160}
               framing="stage"
               pokeable={false}
+              costume={costume}
             />,
           );
           const still = renderToStaticMarkup(
@@ -159,6 +261,7 @@ describe('라이브 리그의 첫 렌더 = 정지 그림 (하이드레이션 뒤
               style={style}
               size={160}
               framing="stage"
+              costume={costume}
             />,
           );
           expect(normalize(live)).toBe(normalize(still));

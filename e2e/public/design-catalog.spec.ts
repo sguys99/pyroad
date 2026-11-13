@@ -133,6 +133,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'tooltip',
       'social-login',
       'rig',
+      'costume',
       'editor',
       'run-controls',
       'output-slip',
@@ -937,6 +938,43 @@ test.describe('휴식 알림 (P8-12)', () => {
       });
       await page.getByRole('button', { name: '다시 모험하기' }).click();
       await expect(page.getByRole('dialog')).toHaveCount(0);
+    });
+  }
+});
+
+test.describe('꾸미기 렌더러 (P9-04)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 코스튬 × 포즈 격자가 스킨을 따라 다시 칠해지고 격자만 가로로 밀린다`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const grid = page.getByTestId('costume-grid');
+      await grid.scrollIntoViewIfNeeded();
+      // 조각 10 + 다 입기 1 행 × 14상태
+      await expect(grid.locator('tr[data-costume]')).toHaveCount(11);
+      await expect(grid.locator('td svg')).toHaveCount(11 * 14);
+      await expect(
+        grid.locator('svg text, svg foreignObject, svg image'),
+      ).toHaveCount(0);
+      // 스킨 바꾸기: 몸색이 하늘파랑으로
+      await grid.getByRole('button', { name: '하늘파랑' }).click();
+      await expect(grid.locator('table')).toHaveAttribute('data-skin', 'sky');
+      await expect(
+        grid
+          .locator('tr[data-costume="hat_wizard"] td')
+          .first()
+          .locator('ellipse[fill="#88BCE2"]'),
+      ).toHaveCount(2);
+      // 격자는 제 상자 안에서만 넘친다 (페이지 가로 넘침 없음)
+      const box = await grid.boundingBox();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      await expect(
+        page.getByTestId('costume-live').locator('svg[role="img"]'),
+      ).toBeVisible();
+      await grid.screenshot({
+        path: testInfo.outputPath(`costume-grid-${width}.png`),
+      });
     });
   }
 });

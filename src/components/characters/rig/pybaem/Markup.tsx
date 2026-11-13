@@ -318,7 +318,9 @@ export function PybaemMarkup(props: MarkupProps<PybaemPalette>) {
               {costume.glasses && <Glasses kind={costume.glasses} />}
             </g>
             <g ref={r('hat')} {...a('hat')}>
-              {costume.hat && <Hat kind={costume.hat} outline={propInk} />}
+              {costume.hat && (
+                <Hat kind={costume.hat} outline={propInk} tonal={rules.tonal} />
+              )}
             </g>
           </g>
           {/* 소품 */}

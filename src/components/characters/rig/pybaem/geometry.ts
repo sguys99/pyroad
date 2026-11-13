@@ -31,11 +31,11 @@ export const NOTE_POS = [
   [102, 44],
   [114, 30],
 ];
-/** Zzz: 큰 Z부터 작은 z로 오른쪽 위 (예전 `<text>` 자리) */
+/** Zzz: 큰 Z부터 작은 z로 오른쪽 위 (예전 `<text>` 자리). 모자 챙(탐험가 x ≤ 97) 밖으로 비켜 둠 (P9-04) */
 export const ZZZ_POS = [
-  [94, 22, 1],
-  [103, 13, 0.78],
-  [110, 6, 0.58],
+  [106, 19, 1],
+  [113, 10, 0.78],
+  [119, 3, 0.58],
 ];
 
 const EYE_L = 52;
@@ -147,11 +147,11 @@ export function pybaemGeometry(p: Params, ctx: GeoCtx): Geo {
   const s1 = clamp(th * 3 - 1, 0, 1.3);
   const s2 = clamp(th * 3 - 2, 0, 1.3);
   g.bub0 = {
-    transform: `translate(91 22) scale(${n3(s0)})`,
+    transform: `translate(96 19) scale(${n3(s0)})`,
     opacity: n3(clamp(s0 * 2)),
   };
   g.bub1 = {
-    transform: `translate(99 11) scale(${n3(s1)})`,
+    transform: `translate(103 9) scale(${n3(s1)})`,
     opacity: n3(clamp(s1 * 2)),
   };
   g.cloud = {
@@ -194,10 +194,10 @@ export function pybaemGeometry(p: Params, ctx: GeoCtx): Geo {
       opacity: n3(zz * (0.85 - 0.22 * i) * (0.8 + 0.2 * w)),
     };
   });
-  // ── 소품: 물음표 (경로)
+  // ── 소품: 물음표 (경로). 모자 챙 밖 (P9-04)
   const q = Math.max(0, p.qmark);
   g.qmark = {
-    transform: `translate(96 20) rotate(${n1(p.qmarkRot)}) scale(${n3(q)})`,
+    transform: `translate(104 17) rotate(${n1(p.qmarkRot)}) scale(${n3(q)})`,
     opacity: n3(clamp(q * 1.5)),
   };
 

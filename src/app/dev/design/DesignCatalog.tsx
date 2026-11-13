@@ -38,6 +38,7 @@ import {
   TooltipSection,
 } from './_catalog/FeedbackSections';
 import { RigSection } from './_catalog/RigSection';
+import { CostumeSection } from './_catalog/CostumeSection';
 import { SocialLoginSection } from './_catalog/AuthSections';
 import {
   EditorSection,
@@ -105,7 +106,13 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['social-login', '소셜 로그인'],
     ],
   },
-  { group: '캐릭터', items: [['rig', '마스코트 리그']] },
+  {
+    group: '캐릭터',
+    items: [
+      ['rig', '마스코트 리그'],
+      ['costume', '꾸미기 렌더러'],
+    ],
+  },
   {
     group: '기타',
     items: [
@@ -221,6 +228,7 @@ export function DesignCatalog({
               <TooltipSection />
               <SocialLoginSection />
               <RigSection />
+              <CostumeSection />
               <EditorSection />
               <RunControlsSection />
               <OutputPanelSection />
