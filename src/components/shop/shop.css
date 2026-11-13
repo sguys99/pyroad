@@ -531,64 +531,83 @@
   stroke-width: 1.5;
 }
 
+/* 에디터 테마 견본 (P9-06): 색은 data-editor-theme 블록이 다시 정한 코드 토큰 그대로. 크기 단위 --u = 견본 폭 1% */
 .shop-theme {
-  --th-bg: var(--code-bg);
-  --th-gut: var(--surface-2);
-  --th-a: var(--code-keyword);
-  --th-b: var(--code-string);
-  --th-c: var(--code-func);
   display: grid;
-  grid-template-columns: 18% 1fr;
+  grid-template-columns: 17% 1fr;
   overflow: hidden;
+  border: var(--line-w) solid var(--line-strong);
   border-radius: var(--round-s);
-  background: var(--th-bg);
-  box-shadow:
-    0 0 0 1px var(--line),
-    var(--shadow-card);
+  background: var(--code-bg);
+  box-shadow: var(--shadow-card);
 }
-.shop-theme[data-art='night'] {
-  --th-bg: var(--text);
-  --th-gut: color-mix(in srgb, var(--surface) 12%, var(--text));
-  --th-a: var(--accent-light);
-  --th-b: var(--w2);
-  --th-c: var(--primary-bright);
-}
-.shop-theme[data-art='ocean'] {
-  --th-bg: color-mix(in srgb, var(--w2) 35%, var(--surface));
-  --th-gut: color-mix(in srgb, var(--w2) 60%, var(--surface));
-  --th-a: var(--code-keyword);
-  --th-b: color-mix(in srgb, var(--w2) 30%, var(--text));
-  --th-c: var(--surface);
-}
-.shop-theme[data-art='candy'] {
-  --th-bg: color-mix(in srgb, var(--error) 10%, var(--surface));
-  --th-gut: color-mix(in srgb, var(--error) 22%, var(--surface));
-  --th-a: color-mix(in srgb, var(--error) 55%, var(--surface));
-  --th-b: var(--accent);
-  --th-c: var(--w2);
-}
-.shop-theme-gutter {
-  background: var(--th-gut);
-}
+.shop-theme-gutter,
 .shop-theme-lines {
   display: grid;
   align-content: center;
-  gap: 14%;
-  padding: 0 14% 0 12%;
+  gap: calc(var(--u) * 6);
+}
+.shop-theme-gutter {
+  justify-items: end;
+  padding-right: calc(var(--u) * 3);
+  background: var(--surface-2);
+  border-right: var(--line-w) solid var(--line);
+}
+.shop-theme-gutter > span,
+.shop-theme-lines > span {
+  height: calc(var(--u) * 8);
+}
+.shop-theme-gutter > span::before {
+  content: '';
+  display: block;
+  width: calc(var(--u) * 4);
+  height: calc(var(--u) * 4);
+  margin-top: calc(var(--u) * 2);
+  border-radius: var(--round-pill);
+  background: var(--text-muted);
 }
 .shop-theme-lines > span {
-  height: 0.4375rem;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 2.5);
+  padding-left: calc(var(--u) * 6);
+}
+/* 활성 줄 띠 + 커서 (에디터와 같은 primary 6%) */
+.shop-theme-lines > span[data-active] {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+.shop-theme-lines > span[data-active]::after {
+  content: '';
+  width: calc(var(--u) * 1.4);
+  height: calc(var(--u) * 7);
+  margin-left: calc(var(--u) * -1);
+  background: var(--code-text);
+}
+.shop-theme-lines span[data-t] {
+  flex: none;
+  height: calc(var(--u) * 4);
   border-radius: var(--round-pill);
-  background: var(--th-a);
 }
-.shop-theme-lines > span[data-i='1'] {
-  width: 78%;
-  margin-left: 14%;
-  background: var(--th-b);
+.shop-theme-lines span[data-t='keyword'] {
+  background: var(--code-keyword);
 }
-.shop-theme-lines > span[data-i='2'] {
-  width: 56%;
-  background: var(--th-c);
+.shop-theme-lines span[data-t='text'] {
+  background: var(--code-text);
+}
+.shop-theme-lines span[data-t='func'] {
+  background: var(--code-func);
+}
+.shop-theme-lines span[data-t='number'] {
+  background: var(--code-number);
+}
+.shop-theme-lines span[data-t='string'] {
+  background: var(--code-string);
+}
+.shop-theme-lines span[data-t='comment'] {
+  background: var(--code-comment);
+}
+.shop-theme-lines span[data-t='indent'] {
+  margin-right: calc(var(--u) * -2.5);
 }
 
 /* ── 시트 ── */

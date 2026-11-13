@@ -21,6 +21,7 @@ import type {
   HatKind,
 } from '@/components/characters/rig/costumes';
 import { CAPE_COLORS } from '@/components/characters/rig/costumes';
+import type { EditorThemeId } from '@/lib/design/tokens';
 
 export const SHOP_KINDS = [
   'costume',
@@ -63,7 +64,11 @@ export type CostumeItem = ItemBase & { kind: 'costume' } & (
 export type PetId = 'pet_chick' | 'pet_turtle' | 'pet_fox' | 'pet_dragon';
 export type PetItem = ItemBase & { kind: 'pet'; id: PetId };
 export type FrameItem = ItemBase & { kind: 'frame'; art: string };
-export type EditorThemeItem = ItemBase & { kind: 'editor_theme'; art: string };
+/** `art` = 에디터 테마 색표 이름 (`EDITOR_THEMES`, P9-06) */
+export type EditorThemeItem = ItemBase & {
+  kind: 'editor_theme';
+  art: EditorThemeId;
+};
 export type ConsumableItem = ItemBase & {
   kind: 'consumable';
   id: 'golden_key' | 'streak_shield';
@@ -350,6 +355,14 @@ function configField(config: unknown, key: string): unknown {
 export function petFromAvatarConfig(config: unknown): PetId | null {
   const pet = configField(config, 'pet');
   return isPetId(pet) ? pet : null;
+}
+
+/** `users.settings.editor_theme`(아이템 id, P9-03 `equip_item`) → 에디터 테마. 없거나 모르는 값이면 null (기본 공책) */
+export function editorThemeFromSettings(
+  settings: unknown,
+): EditorThemeId | null {
+  const item = getShopItem(configField(settings, 'editor_theme'));
+  return item?.kind === 'editor_theme' ? item.art : null;
 }
 
 /** `users.avatar_config` 슬롯별 아이템 id → 리그 `costume` prop. 슬롯이 맞지 않거나 모르는 id는 버림 */

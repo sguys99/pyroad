@@ -33,6 +33,9 @@ import {
   type CodeEditorHandle,
 } from '@/components/quest/CodeEditor';
 import CodeKeyboard from '@/components/quest/CodeKeyboard';
+import { EditorThemeProvider } from '@/components/quest/EditorThemeContext';
+import { EDITOR_THEME_IDS, type EditorThemeId } from '@/lib/design/tokens';
+import { SHOP_ITEMS } from '@/lib/shop/catalog';
 import { questTabs } from '@/components/quest/QuestWorkspace';
 import { SegmentedTabs } from '@/components/ui/tabs';
 import { MotionProvider } from '@/components/providers/MotionProvider';
@@ -63,6 +66,29 @@ function CodeKeyboardDemo() {
       />
       <CodeEditor ref={editor} value={code} onChange={setCode} />
       <CodeKeyboard editor={editor} stage={Number(stage)} />
+    </div>
+  );
+}
+
+const THEME_SAMPLE_CODE = [
+  '# 별을 세어 봐요',
+  'def shine(n):',
+  '    return n * 2',
+  'for i in range(3):',
+  '    print("반짝", shine(i), True)',
+].join('\n');
+
+/** 에디터 테마 견본 (P9-06): 기본 + 상점 공책 3종에 같은 코드 (키워드·함수·숫자·문자열·주석) */
+function EditorThemeDemo({ theme }: { theme: EditorThemeId | null }) {
+  const [code, setCode] = useState(THEME_SAMPLE_CODE);
+  const name = theme
+    ? SHOP_ITEMS.find((i) => i.kind === 'editor_theme' && i.art === theme)?.name
+    : '기본 공책';
+  return (
+    <div className="flex min-w-0 flex-col gap-1" data-testid={`catalog-editor-theme-${theme ?? 'default'}`}>
+      <EditorThemeProvider theme={theme}>
+        <CodeEditor value={code} onChange={setCode} title={<span className="text-small font-bold">{name}</span>} />
+      </EditorThemeProvider>
     </div>
   );
 }
@@ -106,6 +132,16 @@ export function EditorSection() {
           >
             오류 줄 3 표시
           </Button>
+        </div>
+      </Demo>
+      <Demo
+        label="에디터 테마 (P9-06)"
+        note="상점 공책을 입으면 퀘스트 에디터 상자 안 색만 바뀜(공책 머리·실행 줄·결과 쪽지는 그대로). 모든 글자·틴트 조합 AA는 kidsTheme.test.ts. 오류 줄은 점검 페이지 ?theme=night&error=3"
+      >
+        <div className="grid gap-4 md:grid-cols-2" data-testid="catalog-editor-themes">
+          {[null, ...EDITOR_THEME_IDS].map((t) => (
+            <EditorThemeDemo key={t ?? 'default'} theme={t} />
+          ))}
         </div>
       </Demo>
       <Demo

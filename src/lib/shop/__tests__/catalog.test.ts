@@ -8,6 +8,7 @@ import {
   SHOP_ITEMS,
   SHOP_KINDS,
   costumeFromAvatarConfig,
+  editorThemeFromSettings,
   petFromAvatarConfig,
   weeklyLimitOf,
 } from '../catalog';
@@ -131,6 +132,24 @@ describe('상점 카탈로그 (P9-01)', () => {
     expect(new Set(prices).size).toBe(prices.length);
     expect(Math.min(...prices)).toBe(900);
     expect(Math.max(...prices)).toBe(1500);
+  });
+
+  it('settings → 에디터 테마 (모르는 값·다른 종류 id 는 기본 공책 null, P9-06)', () => {
+    expect(editorThemeFromSettings({ editor_theme: 'theme_night' })).toBe(
+      'night',
+    );
+    expect(
+      editorThemeFromSettings({ editor_theme: 'theme_candy', motion: 'full' }),
+    ).toBe('candy');
+    for (const bad of [
+      null,
+      [],
+      'theme_night',
+      {},
+      { editor_theme: 'night' },
+      { editor_theme: 'pet_fox' },
+    ])
+      expect(editorThemeFromSettings(bad)).toBeNull();
   });
 
   it('avatar_config → 펫 id / 리그 코스튬 (모르는 값·슬롯이 틀린 id 는 버림)', () => {

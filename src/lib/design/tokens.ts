@@ -113,6 +113,130 @@ export const COLOR = {
 
 export type ColorName = keyof typeof COLOR;
 
+/**
+ * 에디터 테마 (상점 "공책" 아이템, P9-06, docs/design/editor.md §8). 코드 상자 안(`[data-editor-theme]` 요소)에서만
+ * 아래 색 토큰을 다시 정한다 — 키즈 테마(`kidsTheme.ts`)는 그대로 토큰 변수를 가리키므로 같은 규칙으로 그려진다.
+ * 상점 견본(`ThemeArt`)도 같은 블록을 쓴다. 공책 머리·실행 줄·결과 쪽지 등 상자 밖은 바꾸지 않는다.
+ * 대비는 `kidsTheme.test.ts`가 `EDITOR_CONTRAST_PAIRS` 전부를 테마마다 검사한다
+ */
+export const EDITOR_THEME_KEYS = [
+  'codeBg',
+  'codeText',
+  'codeComment',
+  'codeKeyword',
+  'codeString',
+  'codeNumber',
+  'codeFunc',
+  /** 줄 번호 칸 · 찾기 창 */
+  'surface2',
+  /** 줄 번호 숫자 · 틴트 면 위 주석 */
+  'textMuted',
+  'line',
+  /** 상자 테두리 (바깥 바탕 `bg`와 안쪽 `codeBg` 둘 다 3:1) */
+  'lineStrong',
+  /** 활성 줄·선택 영역 틴트 원색 */
+  'primary',
+  /** 같은 단어 · 자동 완성 고른 줄 */
+  'primarySoft',
+  /** 괄호 짝·지금 찾은 곳 면 */
+  'accentLight',
+  /** 찾은 곳 면 */
+  'accentSoft',
+  /** 찾은 곳 테두리 */
+  'accentText',
+  'error',
+  'errorSoft',
+  /** 자동 완성 상자·입력 칸 */
+  'surface',
+  'text',
+] as const satisfies readonly ColorName[];
+export type EditorThemeKey = (typeof EDITOR_THEME_KEYS)[number];
+export type EditorThemeId = 'night' | 'ocean' | 'candy';
+
+export const EDITOR_THEMES: Record<
+  EditorThemeId,
+  Record<EditorThemeKey, string>
+> = {
+  /** 밤하늘: 짙은 남색 면 + 별빛 금색 문자열 · 라벤더 키워드 · 민트 함수 · 산호 숫자 */
+  night: {
+    codeBg: '#1E2340',
+    codeText: '#E9ECF8',
+    codeComment: '#A3ABCF',
+    codeKeyword: '#BBA6FF',
+    codeString: '#FFD37A',
+    codeNumber: '#FFA99E',
+    codeFunc: '#7FDCC4',
+    surface2: '#181C34',
+    textMuted: '#B3BAD9',
+    line: '#2E3458',
+    lineStrong: '#7480A8',
+    primary: '#A9C8FF',
+    primarySoft: '#343E68',
+    accentLight: '#4B3E1C',
+    accentSoft: '#3A3629',
+    accentText: '#FFD37A',
+    error: '#FF9187',
+    errorSoft: '#4A2634',
+    surface: '#272D4F',
+    text: '#E9ECF8',
+  },
+  /** 바다: 맑은 물빛 면 + 바다색 키워드 · 산호 문자열 · 보라 숫자 · 해초 함수 */
+  ocean: {
+    codeBg: '#F2F9FB',
+    codeText: '#1E3340',
+    codeComment: '#5B727D',
+    codeKeyword: '#066883',
+    codeString: '#A2461F',
+    codeNumber: '#6B46B0',
+    codeFunc: '#1F6E4C',
+    surface2: '#E2F0F4',
+    textMuted: '#4B626E',
+    line: '#CDE3EA',
+    lineStrong: '#6D8D99',
+    primary: '#1E8BA8',
+    primarySoft: '#D6ECF2',
+    accentLight: '#FBE3A6',
+    accentSoft: '#FBF1DC',
+    accentText: '#8A5A00',
+    error: '#B3402F',
+    errorSoft: '#FBEAE6',
+    surface: '#FFFFFF',
+    text: '#1E3340',
+  },
+  /** 솜사탕: 분홍빛 면 + 딸기 키워드 · 라벤더 문자열 · 청록 숫자 · 파랑 함수 */
+  candy: {
+    codeBg: '#FFF6FA',
+    codeText: '#3B2836',
+    codeComment: '#7D6776',
+    codeKeyword: '#AD2A69',
+    codeString: '#6A48B4',
+    codeNumber: '#0D6E77',
+    codeFunc: '#2C62A8',
+    surface2: '#FBE7F0',
+    textMuted: '#6C5665',
+    line: '#F2D6E3',
+    lineStrong: '#987890',
+    primary: '#D0558F',
+    primarySoft: '#F9DDEA',
+    accentLight: '#FBE3A6',
+    accentSoft: '#FBF1DC',
+    accentText: '#8A5A00',
+    error: '#B3402F',
+    errorSoft: '#FBEAE6',
+    surface: '#FFFFFF',
+    text: '#3B2836',
+  },
+};
+
+export const EDITOR_THEME_IDS = Object.keys(EDITOR_THEMES) as EditorThemeId[];
+
+/** 테마를 입힌 전체 색표 (대비 계산용): 상자 밖 색(`bg`·`secondary`)은 앱 그대로 */
+export function editorThemePalette(
+  id: EditorThemeId,
+): Record<ColorName, string> {
+  return { ...COLOR, ...EDITOR_THEMES[id] };
+}
+
 /** 덮개: 글자색(text)을 반투명으로. CSS `--scrim`. 위에 얹는 흰 글자가 흰 화면 위에서도 4.5:1이 되는 최소 진하기 (0.65 → 4.60) */
 export const SCRIM = { color: COLOR.text, alpha: 0.65 } as const;
 
@@ -331,6 +455,16 @@ export function rootCssVars(): Record<string, string> {
     vars[`${springVarName(name)}-dur`] = `${t.duration}ms`;
   }
   return vars;
+}
+
+/** `[data-editor-theme='id']` 블록 (P9-06): 코드 상자 안 색 토큰만 */
+export function editorThemeCssVars(id: EditorThemeId): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(EDITOR_THEMES[id]).map(([k, v]) => [
+      colorVarName(k as ColorName),
+      v,
+    ]),
+  );
 }
 
 /** `[data-world="N"]` 블록 (월드 2·3만 따로 둔다. 1은 :root 기본값과 같다) */
@@ -577,16 +711,23 @@ export function contrastRatio(a: string, b: string): number {
 }
 
 /** 조합의 실제 배경색 (반투명 면은 아래 색과 합성) */
-export function pairBackground(p: ContrastPair): string {
+export function pairBackground(
+  p: ContrastPair,
+  palette: Record<ColorName, string> = COLOR,
+): string {
   if (p.bg === 'scrim') {
-    return blend(SCRIM.color, COLOR[p.over ?? 'bg'], SCRIM.alpha);
+    return blend(SCRIM.color, palette[p.over ?? 'bg'], SCRIM.alpha);
   }
-  if (p.over) return blend(COLOR[p.bg], COLOR[p.over], p.alpha ?? 1);
-  return COLOR[p.bg];
+  if (p.over) return blend(palette[p.bg], palette[p.over], p.alpha ?? 1);
+  return palette[p.bg];
 }
 
-export function pairContrast(p: ContrastPair): number {
-  return contrastRatio(COLOR[p.fg], pairBackground(p));
+/** `palette`: 에디터 테마처럼 일부 토큰을 바꾼 색표 (`editorThemePalette`) */
+export function pairContrast(
+  p: ContrastPair,
+  palette: Record<ColorName, string> = COLOR,
+): number {
+  return contrastRatio(palette[p.fg], pairBackground(p, palette));
 }
 
 /** 표시용: 소수 둘째 자리에서 내림 (반올림하면 4.496이 4.50으로 보여 통과처럼 읽힌다) */

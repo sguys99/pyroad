@@ -340,6 +340,75 @@
   --world-soft: var(--w3-soft);
 }
 
+/* 에디터 테마 (상점 "공책" 아이템, P9-06, docs/design/editor.md §8): 코드 상자(CodeEditor 상자·상점 견본) 요소에만 붙여
+   그 안의 코드·줄 번호·틴트 색 토큰을 바꾼다. 원본은 tokens.ts EDITOR_THEMES (tokens.test.ts가 같은지 검사) */
+[data-editor-theme='night'] {
+  --code-bg: #1e2340;
+  --code-text: #e9ecf8;
+  --code-comment: #a3abcf;
+  --code-keyword: #bba6ff;
+  --code-string: #ffd37a;
+  --code-number: #ffa99e;
+  --code-func: #7fdcc4;
+  --surface-2: #181c34;
+  --text-muted: #b3bad9;
+  --line: #2e3458;
+  --line-strong: #7480a8;
+  --primary: #a9c8ff;
+  --primary-soft: #343e68;
+  --accent-light: #4b3e1c;
+  --accent-soft: #3a3629;
+  --accent-text: #ffd37a;
+  --error: #ff9187;
+  --error-soft: #4a2634;
+  --surface: #272d4f;
+  --text: #e9ecf8;
+}
+[data-editor-theme='ocean'] {
+  --code-bg: #f2f9fb;
+  --code-text: #1e3340;
+  --code-comment: #5b727d;
+  --code-keyword: #066883;
+  --code-string: #a2461f;
+  --code-number: #6b46b0;
+  --code-func: #1f6e4c;
+  --surface-2: #e2f0f4;
+  --text-muted: #4b626e;
+  --line: #cde3ea;
+  --line-strong: #6d8d99;
+  --primary: #1e8ba8;
+  --primary-soft: #d6ecf2;
+  --accent-light: #fbe3a6;
+  --accent-soft: #fbf1dc;
+  --accent-text: #8a5a00;
+  --error: #b3402f;
+  --error-soft: #fbeae6;
+  --surface: #ffffff;
+  --text: #1e3340;
+}
+[data-editor-theme='candy'] {
+  --code-bg: #fff6fa;
+  --code-text: #3b2836;
+  --code-comment: #7d6776;
+  --code-keyword: #ad2a69;
+  --code-string: #6a48b4;
+  --code-number: #0d6e77;
+  --code-func: #2c62a8;
+  --surface-2: #fbe7f0;
+  --text-muted: #6c5665;
+  --line: #f2d6e3;
+  --line-strong: #987890;
+  --primary: #d0558f;
+  --primary-soft: #f9ddea;
+  --accent-light: #fbe3a6;
+  --accent-soft: #fbf1dc;
+  --accent-text: #8a5a00;
+  --error: #b3402f;
+  --error-soft: #fbeae6;
+  --surface: #ffffff;
+  --text: #3b2836;
+}
+
 /* HUD 숫자 (P0-14): Jua에는 tnum이 없어 카운트업 때 숫자 폭이 흔들린다 → 고정 폭 숫자 + 최소 폭 상자, 오른쪽 정렬 */
 @utility hud-num {
   display: inline-block;

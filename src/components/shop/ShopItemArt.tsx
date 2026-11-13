@@ -127,9 +127,26 @@ export function FrameArt({
   );
 }
 
+/** 견본 코드 세 줄 (토큰 종류, 폭 %): `for i in range(3):` / `    print("안녕")` / `# 세 번 인사` */
+const THEME_SAMPLE: [string, number][][] = [
+  [
+    ['keyword', 14],
+    ['text', 6],
+    ['keyword', 10],
+    ['func', 22],
+    ['number', 7],
+  ],
+  [
+    ['indent', 10],
+    ['func', 22],
+    ['string', 34],
+  ],
+  [['comment', 52]],
+];
+
 /**
- * 에디터 테마 견본: 작은 코드 공책 (줄 번호 칸 + 색 막대 세 줄).
- * shortcut: 색은 이름에 맞춘 토큰 틴트 견본 — P9-06이 테마 색을 정하면 그 정의에서 읽을 것
+ * 에디터 테마 견본 (P9-06): 줄 번호 칸 + 코드 세 줄을 그 테마의 실제 색으로 (키워드·이름·함수·숫자·문자열·주석, 둘째 줄은
+ * 커서가 있는 활성 줄). `data-editor-theme`이 퀘스트 에디터와 같은 토큰 블록(globals.css, 원본 tokens.ts `EDITOR_THEMES`)을 건다
  */
 export function ThemeArt({
   art,
@@ -144,14 +161,27 @@ export function ThemeArt({
     <span
       className={cn('shop-theme', className)}
       data-art={art}
-      style={{ width: size, height: Math.round(size * 0.78) }}
+      data-editor-theme={art}
+      style={{
+        width: size,
+        height: Math.round(size * 0.78),
+        ['--u' as string]: `${size / 100}px`,
+      }}
       aria-hidden
     >
-      <span className="shop-theme-gutter" />
+      <span className="shop-theme-gutter">
+        {THEME_SAMPLE.map((_, i) => (
+          <span key={i} data-active={i === 1 || undefined} />
+        ))}
+      </span>
       <span className="shop-theme-lines">
-        <span data-i="0" />
-        <span data-i="1" />
-        <span data-i="2" />
+        {THEME_SAMPLE.map((line, i) => (
+          <span key={i} data-active={i === 1 || undefined}>
+            {line.map(([t, w], j) => (
+              <span key={j} data-t={t} style={{ width: `${w}%` }} />
+            ))}
+          </span>
+        ))}
       </span>
     </span>
   );
