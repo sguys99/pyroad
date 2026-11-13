@@ -648,6 +648,31 @@ export const EXPECT = {
     activateIn: 'P9-03',
     note: '가진 아이템·맞는 슬롯만, avatar_config·settings.editor_theme, 벗기, 무료 스킨',
   },
+  // ── 공유 카드 (P9-07, ① 00043) ──
+  'SC-1': {
+    expect: 'deny',
+    requires: 'public.create_share_card()',
+    activateIn: 'P9-07',
+    note: '만들기는 /api/share-cards(service_role)만 — 성과 숫자는 서버가 계산',
+  },
+  'SC-1b': {
+    expect: 'deny',
+    requires: 'public.share_card_public()',
+    activateIn: 'P9-07',
+    note: '공개 조회도 서버(이미지 라우트·공유 페이지)만',
+  },
+  'SC-1c': {
+    expect: 'deny',
+    requires: 'public.share_cards',
+    activateIn: 'P9-07',
+    note: '본인 카드 읽기만, 남의 행·anon·쓰기는 막힘',
+  },
+  'SC-2': {
+    expect: 'allow',
+    requires: 'public.create_share_card()',
+    activateIn: 'P9-07',
+    note: '실제 기록으로 스냅샷(공개 정보만, 펫 없음) · 같은 id·version · 공개 조회 user_id 없음 · 90일 만료·비공개 0행 · 다시 공개 새 90일',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',

@@ -423,6 +423,133 @@ const STAGE1 = 'a1000000-0000-0000-0000-000000000001';
 const seedQuestCount = (type) =>
   readFileSync(join(HERE, '..', 'seed.sql'), 'utf8').match(new RegExp(`^  '${type}',\\r?$`, 'gm'))?.length ?? 0;
 
+// ── 공유 카드 (P9-07, ① 00043) ──
+async function groupShareCards(u) {
+  const make = (id, kind, ref) =>
+    rpc('create_share_card', { p_user_id: id, p_kind: kind, ...(ref && { p_ref: ref }) });
+  const pub = async (id) => (await rpc('share_card_public', { p_id: id })).json;
+  const res = (r) => (r.status === 200 ? 200 : `${r.status}:${errMsg(r)}`);
+
+  await check({
+    group: 'share',
+    id: 'SC-1c',
+    role: 'authenticated',
+    op: 'share_cards: 남의 카드 읽기 · 비로그인 읽기 · 본인 INSERT·UPDATE (본인 행 읽기만, 쓰기는 create_share_card)',
+    ...WRITE,
+    run: async () => {
+      one(`insert into public.share_cards (id, user_id, kind, ref, snapshot, expires_at) values
+             ('scBob0000000000000000a', '${u.bob.id}', 'levelup', '1', '{"nickname":"밥","level":1}', now() + interval '90 days'),
+             ('scAlice00000000000000a', '${u.alice.id}', 'levelup', '1', '{"nickname":"앨리스","level":1}', now() + interval '90 days')
+           on conflict do nothing`);
+      const others = await rest('GET', `/rest/v1/share_cards?select=id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (others.status !== 200 || others.json.length !== 0)
+        return { actual: 'written', detail: `남의 카드 ${others.status} rows=${others.json?.length}` };
+      const own = await rest('GET', '/rest/v1/share_cards?select=id', { as: u.alice });
+      if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 카드 ${own.status}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/share_cards?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+      const upd = await classifyWrite(
+        rest('PATCH', `/rest/v1/share_cards?id=eq.scAlice00000000000000a`, {
+          as: u.alice,
+          body: { snapshot: { nickname: '앨리스', level: 50 } },
+          prefer: 'return=minimal',
+        }),
+        `select (snapshot->>'level')::int = 50 from public.share_cards where id = 'scAlice00000000000000a'`,
+      );
+      if (upd.actual === 'written') return { actual: 'written', detail: `UPDATE ${upd.detail}` };
+      return classifyWrite(
+        rest('POST', '/rest/v1/share_cards', {
+          as: u.alice,
+          body: { id: 'scAlice00000000000000b', user_id: u.alice.id, kind: 'weekly', ref: 'x',
+                  snapshot: { nickname: '앨리스' }, expires_at: '2099-01-01T00:00:00Z' },
+          prefer: 'return=minimal',
+        }),
+        `select exists (select 1 from public.share_cards where id = 'scAlice00000000000000b')`,
+      );
+    },
+  });
+
+  await check({
+    group: 'share',
+    id: 'SC-2',
+    role: 'service_role',
+    op: '만들기: 성과는 실제 기록(안 깬 스테이지·안 얻은 업적·이번 주 0개 거부) · 스냅샷은 공개 이름·공개 꾸민 모습(펫 없음)·숫자만(CHECK) · 같은 카드는 같은 id(바뀌면 version+1) · 공개 조회는 user_id 없이, 만료(90일)·비공개면 0행 · 다시 만들면 새 90일',
+    ...OK,
+    run: async () => {
+      const x = await createUser('sc2', '공유카드');
+      one(`update public.users set nickname = '하늘별', avatar_config = '{"skin":"sky","hat":"hat_wizard","pet":"pet_fox"}' where id = '${x.id}'`);
+      const weekEmpty = await make(x.id, 'weekly');
+      const stageEarly = await make(x.id, 'stage', STAGE1);
+      const achEarly = await make(x.id, 'achievement', 'first_code');
+      for (const q of stageQuests(STAGE1))
+        await rpc('complete_quest', { p_user_id: x.id, p_quest_id: q, p_submission: submission() });
+      const stage = await make(x.id, 'stage', STAGE1);
+      const again = await make(x.id, 'stage', STAGE1);
+      one(`update public.users set nickname = '바다별' where id = '${x.id}'`);
+      const renamed = await make(x.id, 'stage', STAGE1);
+      const level = await make(x.id, 'levelup');
+      const ach = await make(x.id, 'achievement', 'first_code');
+      const week = await make(x.id, 'weekly');
+      const id = stage.json?.id;
+      const before = await pub(id);
+      one(`update public.share_cards set expires_at = now() - interval '1 second' where id = '${id}'`);
+      const expired = await pub(id);
+      const republish = await make(x.id, 'stage', STAGE1);
+      const days = one(`select round(extract(epoch from expires_at - now()) / 86400) from public.share_cards where id = '${id}'`);
+      one(`update public.share_cards set is_public = false where id = '${id}'`);
+      const hidden = await pub(id);
+      const bad = await make(x.id, 'party');
+      const badStage = await make(x.id, 'stage', 'abc');
+      let checkRes = 'ok';
+      try {
+        one(`insert into public.share_cards (id, user_id, kind, ref, snapshot, expires_at)
+             values ('scBad00000000000000000', '${x.id}', 'weekly', 'z', '{"nickname":"a","email":"a@b.c"}', now())`);
+        checkRes = 'inserted';
+      } catch {
+        /* CHECK 위반 = 기대 */
+      }
+      const total = one(`select count(*) from public.quests where stage_id = '${STAGE1}' and quest_type <> 'quiz'`);
+      const xp = one(`select sum(earned_xp) from public.user_progress where user_id = '${x.id}' and status = 'completed'`);
+      const userLevel = one(`select current_level from public.users where id = '${x.id}'`);
+      return (
+        compare(
+          'SC-2',
+          {
+            early: '409:nothing_this_week|409:stage_not_cleared|409:achievement_not_earned',
+            stage: `200:true:1:하늘별:{"hat":"hat_wizard","skin":"sky"}:1:1:true`,
+            again: `${id}:1`,
+            renamed: `${id}:2:바다별`,
+            level: `200:${userLevel}`,
+            ach: '200:bronze:code',
+            week: `200:${total}:${xp}:false`,
+            pub: 'expires_at,id,kind,snapshot,version:1',
+            expired: 0,
+            republish: `200:${id}:90:1`,
+            hidden: 0,
+            bad: '400:invalid_arguments|404:stage_not_found',
+            check: 'ok',
+          },
+          {
+            early: [weekEmpty, stageEarly, achEarly].map(res).join('|'),
+            stage: `${res(stage)}:${/^[A-Za-z0-9_-]{22}$/.test(id ?? '')}:${stage.json?.version}:${stage.json?.snapshot?.nickname}:${JSON.stringify(stage.json?.snapshot?.avatar)}:${stage.json?.snapshot?.world}:${stage.json?.snapshot?.stageNo}:${[0, 1, 2, 3].includes(stage.json?.snapshot?.stars)}`,
+            again: `${again.json?.id}:${again.json?.version}`,
+            renamed: `${renamed.json?.id}:${renamed.json?.version}:${renamed.json?.snapshot?.nickname}`,
+            level: `${res(level)}:${level.json?.snapshot?.level}`,
+            ach: `${res(ach)}:${ach.json?.snapshot?.tier}:${ach.json?.snapshot?.icon}`,
+            week: `${res(week)}:${week.json?.snapshot?.quests}:${week.json?.snapshot?.xp}:${JSON.stringify(week.json?.snapshot ?? {}).includes('day')}`,
+            pub: `${Object.keys(before?.[0] ?? {}).sort().join(',')}:${before?.length}`,
+            expired: expired?.length,
+            republish: `${res(republish)}:${republish.json?.id}:${days}:${(await pub(id)) && 1}`,
+            hidden: hidden?.length,
+            bad: [bad, badStage].map(res).join('|'),
+            check: checkRes,
+          },
+        ) ?? { actual: 'ok', detail: '거부 3종, 스테이지·레벨·업적·주간 스냅샷, 같은 id·version, 공개 조회·만료·다시 공개·비공개, CHECK' }
+      );
+    },
+  });
+}
+
 // ── 그룹 ──────────────────────────────────────────────────
 async function groupEnv() {
   await check({
@@ -2156,6 +2283,18 @@ async function groupRpc(u) {
       u.alice,
       'shop_status',
       { p_user_id: u.bob.id },
+    ],
+    [
+      'SC-1',
+      u.alice,
+      'create_share_card',
+      { p_user_id: u.alice.id, p_kind: 'levelup' },
+    ],
+    [
+      'SC-1b',
+      'anon',
+      'share_card_public',
+      { p_id: 'rG6TzuP93C8blCS4ZdyehQ' },
     ],
     [
       'PS-1',
@@ -7781,6 +7920,7 @@ async function main() {
   await groupAttendance(u);
   await groupAchievements(u);
   await groupInventory(u);
+  await groupShareCards(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

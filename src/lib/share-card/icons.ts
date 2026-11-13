@@ -39,7 +39,8 @@ export function sparkleSvg(color: string = COLOR.accent): string {
 }
 
 /** 24 격자 선 그림 (stroke = 색, 두께 2.2) */
-const GLYPH: Record<BadgeIcon | 'flag', string> = {
+type Glyph = BadgeIcon | 'flag' | 'bolt';
+const GLYPH: Record<Glyph, string> = {
   code: '<path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.4 5.5l-2.8 13"/>',
   bug:
     '<path d="M8.5 9.5a3.5 3.5 0 0 1 7 0"/><rect x="7" y="9.5" width="10" height="10" rx="5"/>' +
@@ -52,13 +53,11 @@ const GLYPH: Record<BadgeIcon | 'flag', string> = {
   bulb: '<path d="M9 17.5h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V17.5h5.2V15.8c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
   crown: '<path d="M4 18.5h16M4.5 15.5 3 7l5 3.5L12 4.5l4 6L21 7l-1.5 8.5z"/>',
   flag: '<path d="M5 21V4M5 4.5c4.5-2 7.5 2 14 0v9c-6.5 2-9.5-2-14 0"/>',
+  // XP (앱 HUD 의 번개와 같은 뜻)
+  bolt: '<path d="M13.5 2.8 5 13.6h6.2l-1.3 7.6 8.6-11h-6.3z"/>',
 };
 
-export function glyphSvg(
-  icon: BadgeIcon | 'flag',
-  color: string,
-  width = 2.2,
-): string {
+export function glyphSvg(icon: Glyph, color: string, width = 2.2): string {
   return svg(
     '0 0 24 24',
     `<g fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${GLYPH[icon]}</g>`,
@@ -115,7 +114,7 @@ export const iconUri = svgDataUri;
 /** 테스트용: 카드가 쓰는 모든 아이콘 SVG */
 export function allIconSvgs(): string[] {
   const tiers: Tier[] = ['bronze', 'silver', 'gold'];
-  const icons = Object.keys(GLYPH) as (BadgeIcon | 'flag')[];
+  const icons = Object.keys(GLYPH) as Glyph[];
   return [
     starSvg(true),
     starSvg(false),
@@ -125,7 +124,7 @@ export function allIconSvgs(): string[] {
     ...tiers.flatMap((t) => [
       tierPipsSvg(t),
       ...icons
-        .filter((i): i is BadgeIcon => i !== 'flag')
+        .filter((i): i is BadgeIcon => i !== 'flag' && i !== 'bolt')
         .map((i) => medalSvg(t, i)),
     ]),
   ];

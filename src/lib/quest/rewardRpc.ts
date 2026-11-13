@@ -76,6 +76,15 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   },
   not_owned: { status: 403, error: '아직 가지고 있지 않은 물건이에요.' },
   wrong_slot: { status: 400, error: '그 자리에는 입힐 수 없어요.' },
+  // 공유 카드 (P9-07, 00043)
+  stage_not_cleared: {
+    status: 409,
+    error: '스테이지를 다 깨면 자랑할 수 있어요.',
+  },
+  nothing_this_week: {
+    status: 409,
+    error: '이번 주에 끝낸 퀘스트가 생기면 자랑할 수 있어요.',
+  },
 };
 
 export function rewardError(
@@ -121,7 +130,8 @@ async function callRpc<T>(
     | 'claim_achievement'
     | 'purchase_item'
     | 'equip_item'
-    | 'shop_status',
+    | 'shop_status'
+    | 'create_share_card',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -437,5 +447,28 @@ export function equipItemRpc(
 export function shopStatusRpc(admin: AdminClient, userId: string) {
   return callRpc<ShopStatus>('shop_status', () =>
     admin.rpc('shop_status', { p_user_id: userId }),
+  );
+}
+
+/** 공유 카드 만들기·다시 공개 (P9-07, 00043). 성과 숫자는 서버가 실제 기록으로 계산 — 클라이언트는 종류와 ref(스테이지·업적 id)만 */
+export interface ShareCardCreated {
+  id: string;
+  kind: string;
+  version: number;
+  expires_at: string;
+  snapshot: Json;
+}
+export function createShareCardRpc(
+  admin: AdminClient,
+  userId: string,
+  kind: string,
+  ref: string | null,
+) {
+  return callRpc<ShareCardCreated>('create_share_card', () =>
+    admin.rpc('create_share_card', {
+      p_user_id: userId,
+      p_kind: kind,
+      ...(ref ? { p_ref: ref } : {}),
+    }),
   );
 }

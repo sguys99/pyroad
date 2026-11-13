@@ -315,9 +315,8 @@ describe('렌더 트리 (satori 제약, P0-10 §4.5)', () => {
       nickname: '하늘별',
       weekLabel: '11월 첫째 주',
       quests: 3,
+      xp: 90,
       stars: 7,
-      streak: 2,
-      learned: ['print'],
     };
     const t = texts(expand(renderShareCard(d))).join('|');
     expect(t).toContain('하늘별');

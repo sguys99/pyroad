@@ -618,6 +618,53 @@ export type Database = {
           },
         ];
       };
+      share_cards: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          is_public: boolean;
+          kind: string;
+          ref: string;
+          snapshot: Json;
+          updated_at: string;
+          user_id: string;
+          version: number;
+        };
+        Insert: {
+          created_at?: string;
+          expires_at: string;
+          id: string;
+          is_public?: boolean;
+          kind: string;
+          ref: string;
+          snapshot: Json;
+          updated_at?: string;
+          user_id: string;
+          version?: number;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          is_public?: boolean;
+          kind?: string;
+          ref?: string;
+          snapshot?: Json;
+          updated_at?: string;
+          user_id?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'share_cards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       shop_items: {
         Row: {
           description: string;
@@ -1307,6 +1354,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      create_share_card: {
+        Args: { p_kind: string; p_ref?: string; p_user_id: string };
+        Returns: Json;
+      };
       current_streak: {
         Args: { p_days: string[]; p_today: string };
         Returns: number;
@@ -1474,6 +1525,16 @@ export type Database = {
         Returns: Json;
       };
       settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
+      share_card_public: {
+        Args: { p_id: string };
+        Returns: {
+          expires_at: string;
+          id: string;
+          kind: string;
+          snapshot: Json;
+          version: number;
+        }[];
+      };
       shop_status: { Args: { p_user_id: string }; Returns: Json };
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };

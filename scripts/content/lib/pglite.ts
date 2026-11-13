@@ -26,6 +26,10 @@ CREATE TABLE IF NOT EXISTS auth.users (
 );
 CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $f$ SELECT NULL::uuid $f$;
 CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $f$ SELECT 'service_role'::text $f$;
+-- pgcrypto(Supabase 는 extensions 스키마에 기본 설치) 대역: 00043 자기 검증이 부름. 콘텐츠 도구라 난수 품질은 상관없음
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE OR REPLACE FUNCTION extensions.gen_random_bytes(integer) RETURNS bytea LANGUAGE sql VOLATILE AS
+  $f$ SELECT substring(decode(md5(random()::text) || md5(random()::text), 'hex') FROM 1 FOR $1) $f$;
 `;
 
 /** supabase/migrations/*.sql 를 이름 순으로. `upTo`(예: '00005')를 주면 그 번호까지만 */

@@ -11,7 +11,8 @@
 /** 글자 폭 (em). 공유 카드 폰트를 fontTools hmtx로 잰 값 (2026-11-06, `src/fonts/share-card/`) */
 export type MetricFont = 'display' | 'sans';
 interface Metric {
-  /** 한글 평균 (Jua는 0.814, 넓은 글자 0.872 → 넘치지 않게 조금 크게) */
+  /** 한글 (Jua 평균 0.814, 가장 넓은 글자 0.872). 평균보다 조금 크게 잡았더니 넓은 글자가 몰린 10자 닉네임이 CSS 말줄임으로
+   *  잘려서(P9-07 "바다탐험대장파이뱀짱") 가장 넓은 글자 기준으로 잡는다 */
   hangul: number;
   upper: number;
   lower: number;
@@ -21,7 +22,7 @@ interface Metric {
 }
 export const METRICS: Record<MetricFont, Metric> = {
   display: {
-    hangul: 0.83,
+    hangul: 0.872,
     upper: 0.61,
     lower: 0.48,
     digit: 0.63,
