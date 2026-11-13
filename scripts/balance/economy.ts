@@ -3,7 +3,7 @@
  *
  * 학생 유형 × 하루 단위로 1월드 실제 콘텐츠(content/)를 푼다. 규칙은 앱·SQL 원본을 그대로 읽음:
  * XP·레벨·레벨 업 코인 xp.ts · 코인 금액 coins.ts(SQL coin_reward 사본) · 상자 목표 chest.ts ·
- * 미션 풀 00034 · 업적 42종 00036(마이그레이션 INSERT 를 읽음 — 표를 두 벌로 두지 않음).
+ * 미션 풀 00034 · 업적 46종 00036·00048(마이그레이션 INSERT 를 읽음 — 표를 두 벌로 두지 않음).
  * 가정(문서 2.1 절): 퀘스트 걸리는 시간 TIME, 실력 HINT_CYCLE·QUIZ_STAR_CYCLE, 복습 도전은 늘 ⭐3.
  */
 import { createHash } from 'node:crypto';
@@ -143,7 +143,10 @@ export function loadAchievements(): AchievementDef[] {
   const re =
     /\('(\w+)',\s*'[^']*',\s*'[^']*',\s*'\w+',\s*'(bronze|silver|gold)',\s*'\w+',\s*'(\w+)',\s*(NULL|\d+),/g;
   const tiers = { bronze: 1, silver: 2, gold: 3 } as const;
-  return [...migration('00036_achievements.sql').matchAll(re)].map((m) => ({
+  const sql = ['00036_achievements.sql', '00048_weekly_study.sql']
+    .map(migration)
+    .join('\n');
+  return [...sql.matchAll(re)].map((m) => ({
     id: m[1],
     tier: tiers[m[2] as keyof typeof tiers],
     metric: m[3],
@@ -294,6 +297,10 @@ export function simulateEconomy(
     const code = all.filter((x) => x.q.type !== 'quiz');
     const quiz = all.filter((x) => x.q.type === 'quiz');
     const streak = longestRun(new Set([...learnDays, ...shieldDays]));
+    const perWeek = new Map<number, number>();
+    for (const d of learnDays)
+      perWeek.set(Math.floor(d / 7), (perWeek.get(Math.floor(d / 7)) ?? 0) + 1);
+    const weekCounts = () => [...perWeek.values()];
     const metric: Record<string, number> = {
       quests: code.length,
       // 00047(B74): 프로젝트 퀘스트만 (보스는 아님)
@@ -307,6 +314,9 @@ export function simulateEconomy(
       quiz_comeback: quiz.filter((x) => x.p.correctAtTwoPlus).length,
       reviews: all.filter((x) => x.p.attempts >= 2).length,
       streak,
+      // 00048(P9-18): KST 주(월~일, 모델의 day % 7 = 0 이 월요일)마다 공부한 날 수
+      weeks_two: weekCounts().filter((n) => n >= 2).length,
+      weeks_three: weekCounts().filter((n) => n >= 3).length,
       level: calculateLevel(xp),
       attendance,
       missions: missionsClaimed,

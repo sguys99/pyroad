@@ -711,6 +711,12 @@ export const EXPECT = {
     activateIn: 'P9-12',
     note: 'is_stage_unlocked 00046: 이 스테이지·뒤 스테이지에 완료가 있으면 열림(보스가 새로 생겨도 갑자기 잠기지 않음), 진행 행만으로는 안 열림',
   },
+  'WK-1': {
+    expect: 'allow',
+    requires: 'public.achievement_stats()',
+    activateIn: 'P9-18',
+    note: '00048 weeks_two·weeks_three: KST 주(월~일)마다 학습일 수(방패 날 제외), 주 2일 4번 → week2_4',
+  },
   'B74-1': {
     expect: 'allow',
     requires: 'public.boss_answer()',

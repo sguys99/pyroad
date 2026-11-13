@@ -8,7 +8,7 @@ import {
 import type { ClaimAchievementResult } from '@/lib/quest/achievements';
 import { Demo, Section } from './ui';
 
-/** 견본 정의 (00036 표의 실제 행 일부 — 카테고리마다 몇 개, 숨김 level_50 포함) */
+/** 견본 정의 (00036·00048 표의 실제 행 일부 — 카테고리마다 몇 개, 숨김 level_50 포함) */
 const DEFS: AchievementDef[] = [
   ['first_code', '첫 코드', '처음으로 퀘스트를 혼자 풀었어요!', 'Code', 'bronze', 'learn', 'quests', 10],
   ['quests_10', '코드 탐험가', '퀘스트 10개를 혼자 풀었어요.', 'Compass', 'silver', 'learn', 'quests', 20],
@@ -18,6 +18,7 @@ const DEFS: AchievementDef[] = [
   ['stars_150', '은하수 수집가', '별을 150개나 모았어요!', 'Telescope', 'gold', 'star', 'stars', 130],
   ['quiz_1', '첫 퀴즈 정답', '퀴즈를 처음 맞혔어요.', 'BadgeCheck', 'bronze', 'quiz', 'quiz_correct', 210],
   ['streak_7', '일주일 불꽃', '7일 연속으로 공부했어요.', 'Flame', 'silver', 'habit', 'streak', 340],
+  ['week2_4', '차곡차곡 공부', '한 주에 2일 이상 공부한 주가 4번이에요.', 'CalendarDays', 'bronze', 'habit', 'weeks_two', 352],
   ['level_10', '레벨 10', '레벨 10이 되었어요.', 'Zap', 'bronze', 'growth', 'level', 510],
   ['level_50', '정상에 선 코더', '가장 높은 레벨 50이 되었어요!', 'MountainSnow', 'gold', 'growth', 'level', 540, true],
   ['error_1', '첫 에러 친구', '에러를 만났지만 포기하지 않고 끝까지 풀었어요!', 'Bug', 'bronze', 'grit', 'errors', 610],
@@ -49,6 +50,7 @@ const GOALS: Record<string, [number, number]> = {
   quests_30: [4, 30],
   stars_10: [7, 10],
   stars_150: [7, 150],
+  week2_4: [2, 4],
   level_10: [6, 10],
   level_50: [6, 50],
   comeback_1: [0, 1],
@@ -85,7 +87,7 @@ export function AchievementBookSection() {
       title="업적 도감"
       description="/profile/achievements. 얻음(티어 메달·날짜) · 받을 수 있음(반짝 별 + 받기) · 아직(실루엣 + 진행 막대 + 얻는 법) · 비밀(???). 칸을 누르면 상세 시트, 받기는 가짜 요청으로 코인이 위 지갑으로 날아가요."
     >
-      <Demo label="도감 (견본 13종)" surface="bg" data-testid="achievement-book-demo">
+      <Demo label="도감 (견본 14종)" surface="bg" data-testid="achievement-book-demo">
         <AchievementBook
           entries={buildAchievementBook(DEFS, OWNED, PROGRESS)}
           coins={1240}

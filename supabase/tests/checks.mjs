@@ -5615,12 +5615,14 @@ async function groupAchievements(u) {
       one(`insert into public.user_badges (user_id, badge_type, earned_at) values
              ('${x.id}', 'streak_3', '2026-10-01 10:00+09'), ('${x.id}', 'project_builder', '2026-10-02 10:00+09')`);
       const sql = readFileSync(join(HERE, '..', 'migrations', '00036_achievements.sql'), 'utf8');
+      // 00048(P9-18) 정의가 있으면 00036 자기 검증이 새 지표를 모른다고 실패 → 지운 뒤 다시 돌리고 00048 로 되살림 (00048 머리 주석)
+      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three')`);
       const m1 = psql(sql);
       const m2 = psql(sql);
       // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
-      // 00047(B74)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
+      // 00047(B74)·00048(P9-18)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
       const m3 = psql(
-        ['00038_profile_stats.sql', '00047_boss_metrics.sql']
+        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql']
           .map((f) => readFileSync(join(HERE, '..', 'migrations', f), 'utf8'))
           .join('\n'),
       );
@@ -5634,6 +5636,50 @@ async function groupAchievements(u) {
           { rows: 'project_builder:10-02:true,streak_3:10-01:true', claim: '200:30' },
           { rows, claim: `${got.status}:${got.json?.coins_earned}` },
         ) ?? { actual: 'ok', detail: '뱃지 2개 → 업적 2개(얻은 날 그대로, 받기 가능), 두 번 실행해도 그대로, 실버 30코인' }
+      );
+    },
+  });
+
+  await check({
+    group: 'achievements',
+    id: 'WK-1',
+    role: 'service_role',
+    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 46종',
+    ...OK,
+    run: async () => {
+      const x = await createUser('wk1', '주말공부');
+      const qs = one(`select string_agg(id::text, ',' order by id) from (select id from public.quests where quest_type = 'code' order by id limit 10) t`).split(',');
+      // 9/14·9/21·9/28·10/5 주(월요일): 토 12:00 · 일 23:30 KST
+      const at = [];
+      for (const mon of ['2026-09-14', '2026-09-21', '2026-09-28', '2026-10-05']) {
+        const d = new Date(`${mon}T00:00:00Z`);
+        const day = (n) => new Date(d.getTime() + n * 86400000).toISOString().slice(0, 10);
+        at.push(`${day(5)} 12:00+09`, `${day(6)} 23:30+09`);
+      }
+      at.push('2026-10-12 00:30+09'); // 다음 주 월요일 (UTC 로는 일요일)
+      const values = at.map((t, i) => `('${x.id}', '${qs[i]}', 'completed', '${t}')`).join(', ');
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at) values ${values}`);
+      one(`insert into public.streak_shield_days (user_id, day) values ('${x.id}', '2026-10-13')`);
+      const stat = () => {
+        const v = JSON.parse(one(`select public.achievement_stats('${x.id}')`));
+        return `${v.weeks_two}:${v.weeks_three}`;
+      };
+      const four = stat();
+      const got = (await rpc('evaluate_achievements', { p_user_id: x.id })).json ?? [];
+      // 10/5 주에 수요일 하루 더
+      one(`insert into public.user_progress (user_id, quest_id, status, completed_at) values ('${x.id}', '${qs[9]}', 'completed', '2026-10-07 18:00+09')`);
+      const three = stat();
+      return (
+        compare(
+          'WK-1',
+          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '46' },
+          {
+            four,
+            weekly: got.filter((a) => a.id.startsWith('week')).map((a) => a.id).join(','),
+            three,
+            defs: one('select count(*) from public.achievements'),
+          },
+        ) ?? { actual: 'ok', detail: '주 4번 2일 → week2_4, 3일 주 1, 방패·다음 주 월요일 새벽은 안 섞임' }
       );
     },
   });

@@ -141,11 +141,12 @@ describe('업적 도감 (P8-10)', () => {
     });
   });
 
-  it('00036 표의 지표는 모두 얻는 법 문구가 있다', () => {
-    const sql = readFileSync(
-      join(process.cwd(), 'supabase/migrations/00036_achievements.sql'),
-      'utf8',
-    );
+  it('00036·00048 표의 지표는 모두 얻는 법 문구가 있다', () => {
+    const sql = ['00036_achievements.sql', '00048_weekly_study.sql']
+      .map((f) =>
+        readFileSync(join(process.cwd(), 'supabase/migrations', f), 'utf8'),
+      )
+      .join('\n');
     const metrics = [
       ...sql.matchAll(/^\s+\('[a-z0-9_]+',(?:\s*'[^']*',){5}\s*'([a-z_]+)',/gm),
     ].map((m) => m[1]);

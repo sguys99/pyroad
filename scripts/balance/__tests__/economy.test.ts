@@ -22,8 +22,8 @@ describe('획득 속도 시뮬레이션', () => {
   );
   const at = (r: typeof normal, d: number) => r.rows[d];
 
-  it('마이그레이션 표를 읽음: 업적 42종 · 미션 7종', () => {
-    expect(loadAchievements()).toHaveLength(42);
+  it('마이그레이션 표를 읽음: 업적 46종 · 미션 7종', () => {
+    expect(loadAchievements()).toHaveLength(46);
     expect(loadMissions().map((m) => m.id)).toEqual([
       'quest_1',
       'quest_2',
@@ -36,6 +36,22 @@ describe('획득 속도 시뮬레이션', () => {
   });
 
   // 보스 7종(P9-13)으로 1월드가 2~11일 길어져 미션 XP 가 늘어 상한 13 → 14. 미션 XP 를 빼면 그대로 Lv 10
+  it('P9-18: 주말만 공부해도 "한 주에 2일" 업적은 받고(연속 업적은 못 받음), 3일 업적은 주 3일 이상 학생만', () => {
+    const ids = (r: typeof weekend) => r.achievements.map((a) => a.id);
+    expect(ids(weekend)).toEqual(
+      expect.arrayContaining(['week2_4', 'week2_12']),
+    );
+    expect(ids(weekend)).not.toContain('streak_3');
+    expect(ids(weekend)).not.toContain('week3_4');
+    for (const r of [light, normal, eager])
+      expect(ids(r)).toEqual(expect.arrayContaining(['week3_4', 'week3_12']));
+    // 몰아서: 4주째 주말에 4개째 → 브론즈, 12주째에 실버
+    const day = (id: string) =>
+      weekend.achievements.find((a) => a.id === id)?.day;
+    expect(day('week2_4')).toBe(7 * 3 + 6);
+    expect(day('week2_12')).toBe(7 * 11 + 6);
+  });
+
   it('1월드 끝 레벨: 미션 XP 포함 Lv 11~14, 빼면 Lv 10 (F1 목표)', () => {
     for (const r of [light, normal, eager, weekend]) {
       expect(r.world1Day).not.toBeNull();
