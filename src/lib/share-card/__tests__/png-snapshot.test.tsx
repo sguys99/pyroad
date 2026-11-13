@@ -11,7 +11,7 @@ import { ImageResponse } from 'next/og';
 import { renderShareCard } from '../cards';
 import { loadShareCardFonts } from '../fonts';
 import { SHARE_CARD_SAMPLES } from '../samples';
-import { CARD } from '../tokens';
+import { CARD, SAFE } from '../tokens';
 
 const DIR = join(process.cwd(), 'docs/design/img/share-card');
 
@@ -50,6 +50,19 @@ describe('카드 PNG 스냅샷 (P9-07)', () => {
       expect([now.width, now.height]).toEqual([CARD.width, CARD.height]);
       expect([saved.width, saved.height]).toEqual([CARD.width, CARD.height]);
       expect(diffRatio(now.data, saved.data)).toBeLessThan(0.002);
+      // 카카오 2:1 스마트 크롭(P9-09): 위아래 SAFE(20px) 줄은 바탕색뿐 — 잘려도 핵심 요소가 남는다
+      const bg = now.data.subarray(0, 3);
+      const rows = [
+        ...Array.from({ length: SAFE.top }, (_, y) => y),
+        ...Array.from({ length: SAFE.bottom }, (_, y) => CARD.height - 1 - y),
+      ];
+      for (const y of rows)
+        for (let x = 0; x < CARD.width; x++) {
+          const i = (y * CARD.width + x) * 3;
+          expect([now.data[i], now.data[i + 1], now.data[i + 2]]).toEqual([
+            ...bg,
+          ]);
+        }
     },
     20_000,
   );

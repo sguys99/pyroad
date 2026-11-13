@@ -10,6 +10,7 @@ import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
 import type { QuizKind } from '@/lib/content/schema';
 import type { ShopKind } from '@/lib/shop/catalog';
 import type { ShareCardKind } from '@/lib/share-card/types';
+import type { ShareChannel } from '@/lib/share-card/share';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -126,6 +127,13 @@ export interface AnalyticsEventProps {
   share_view: { kind: ShareViewKind };
   /** 공유 페이지의 "나도 해보기"를 누름 (P9-08, 브라우저). 공유 → 방문 → 가입 퍼널 분자 */
   share_cta_click: { kind: ShareViewKind };
+  /** 공유 시트를 엶 (P9-09, 브라우저, 로그인). kind: 카드 종류. 카드 id 는 보내지 않는다 */
+  share_open: { kind: ShareCardKind };
+  /**
+   * 공유 시트에서 채널을 씀 (P9-09, 브라우저). channel: kakao(메시지 창을 띄움) · web_share(기기 공유를 마침) ·
+   * save_image(저장을 시작함) · copy_link(복사함). 받는 사람·카드 id 는 보내지 않는다
+   */
+  share_channel: { kind: ShareCardKind; channel: ShareChannel };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
@@ -150,7 +158,9 @@ export const CLIENT_EVENT_NAMES = [
   'quiz_try_run',
   'rest_reminder_choice',
   'rest_reminder_shown',
+  'share_channel',
   'share_cta_click',
+  'share_open',
   'share_view',
   'trial_start',
   'trial_run',

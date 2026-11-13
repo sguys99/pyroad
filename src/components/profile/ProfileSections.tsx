@@ -67,9 +67,12 @@ export function ProfileCard({
 export function ProfileHero({
   name,
   totalXp,
+  action,
 }: {
   name: string;
   totalXp: number;
+  /** 이름·칭호 아래 버튼 (레벨 카드 자랑하기, P9-09) */
+  action?: ReactNode;
 }) {
   const {
     currentLevel: level,
@@ -105,6 +108,7 @@ export function ProfileHero({
           <small>{big ? '큰 칭호' : '칭호'}</small>
           <b className="font-display">{getLevelTitle(level)}</b>
         </p>
+        {action}
       </div>
       <div className="pf-xp">
         <div className="pf-xp-row">

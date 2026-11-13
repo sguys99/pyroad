@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Music,
   RotateCcw,
+  Share2,
   Volume2,
 } from 'lucide-react';
 import {
@@ -22,6 +23,7 @@ import {
   type SfxId,
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
+import { ShareSheet } from '@/components/share/ShareSheet';
 import { shareCardSummary } from '@/lib/share-card/summary';
 import {
   ShareCardView,
@@ -821,7 +823,42 @@ export function ShareCardSection() {
           <ShareGoneView />
         </div>
       </div>
+      <h3 className="mt-8 font-display text-h3">공유 시트 (P9-09)</h3>
+      <p className="text-small text-muted-foreground">
+        카드 미리보기 + 카카오톡(키가 있을 때만) · 공유하기(Web Share 되는 기기만) · 이미지 저장 · 링크 복사 + 보내기 전 안내.
+        앱에서는 <code>{'<ShareButton kind=…>'}</code>(프로필 레벨 카드) 또는 <code>{'<ShareSheet>'}</code>(축하 화면, P9-10). 견본은 만들어 둔
+        카드(샘플 그림)를 넘겨 만들기 요청을 하지 않는다
+      </p>
+      <ShareSheetDemo />
     </Section>
+  );
+}
+
+function ShareSheetDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Button
+        variant="secondary"
+        icon={<Share2 aria-hidden />}
+        onClick={() => setOpen(true)}
+        data-testid="share-sheet-demo"
+      >
+        공유 시트 열기
+      </Button>
+      <ShareSheet
+        open={open}
+        onOpenChange={setOpen}
+        kind="levelup"
+        card={{
+          id: 'AAAAAAAAAAAAAAAAAAAAAA',
+          kind: 'levelup',
+          version: 1,
+          expiresAt: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+          imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+        }}
+      />
+    </div>
   );
 }
 

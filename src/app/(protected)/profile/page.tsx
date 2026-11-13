@@ -10,6 +10,7 @@ import { LogoutButton } from '@/components/LogoutButton';
 import { HudCounter } from '@/components/ui/hud';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { AccountManagementSection } from '@/components/profile/AccountManagementSection';
+import { ShareButton } from '@/components/share/ShareButton';
 import { LearningCalendar } from '@/components/profile/LearningCalendar';
 import {
   AchievementsCard,
@@ -126,7 +127,11 @@ export default async function ProfilePage() {
           <HudCounter kind="coin" value={profile.coins} />
         </div>
 
-        <ProfileHero name={profile.name} totalXp={profile.total_xp} />
+        <ProfileHero
+          name={profile.name}
+          totalXp={profile.total_xp}
+          action={<ShareButton kind="levelup">레벨 카드 자랑하기</ShareButton>}
+        />
 
         {/* 768+ 두 열: 왼쪽 달력·모험 기록, 오른쪽 업적·별과 보물 (열마다 쌓아 빈 곳을 줄임) */}
         <div className="pf-col">

@@ -26,6 +26,20 @@ export const CSP_PYODIDE_VERSION = '314.0.7';
 export const PYODIDE_CDN_PREFIX = `https://cdn.jsdelivr.net/pyodide/v${CSP_PYODIDE_VERSION}/`;
 
 /**
+ * 카카오톡 공유 (P9-09, `src/lib/share-card/share.ts`). 공유 시트는 동적 렌더 앱 화면에만 있으므로 **nonce 정책에만** 넣는다.
+ * - script: SDK 파일 출처. `'strict-dynamic'`을 아는 브라우저는 출처 목록을 무시하고 nonce 스크립트가 만든 `<script>`를 믿는다
+ *   (이 출처는 strict-dynamic 을 모르는 옛 브라우저용). 파일 자체는 SRI(integrity)로 고정
+ * - connect: 휴대폰에서 메시지를 검사하는 kapi 요청 · form-action: PC 에서 팝업으로 보내는 sharer 폼
+ * - frame: 일부 Android 브라우저가 숨은 iframe 으로 `kakaolink://` 앱을 여는 경로 (내용을 싣는 출처가 아님)
+ */
+export const KAKAO_CSP = {
+  script: 'https://t1.kakaocdn.net',
+  connect: 'https://kapi.kakao.com',
+  formAction: 'https://sharer.kakao.com',
+  frame: 'kakaolink:',
+} as const;
+
+/**
  * 빌드 때 HTML로 미리 만드는 페이지. 여기 있는 경로만 nonce 없는 정적 정책을 받는다.
  * 새 정적 페이지가 생기면 `scripts/security/check-static-pages.ts`(postbuild)가 빌드를 실패시킨다:
  * 이 목록에 넣거나(사용자 콘텐츠가 없을 때만) 동적 렌더로 바꿔야 한다.
@@ -133,6 +147,7 @@ export function buildPageCsp(options: PageCspOptions): string {
         `'nonce-${nonce}'`,
         MOTION_BOOT_SCRIPT_CSP_SOURCE,
         "'strict-dynamic'",
+        KAKAO_CSP.script,
       ]
     : ["'self'", "'unsafe-inline'"];
   if (isDev) scriptSrc.push("'unsafe-eval'");
@@ -142,6 +157,7 @@ export function buildPageCsp(options: PageCspOptions): string {
   if (sentry) connectSrc.push(sentry.origin);
   // 개발 서버 HMR 웹소켓 (Safari는 'self'를 ws:에 맞추지 않음)
   if (isDev) connectSrc.push('ws:');
+  if (nonce) connectSrc.push(KAKAO_CSP.connect);
 
   const directives: Array<[string, string[]]> = [
     ['default-src', ["'self'"]],
@@ -157,11 +173,11 @@ export function buildPageCsp(options: PageCspOptions): string {
     // (blob: Worker는 이 페이지 CSP를 물려받으므로 'unsafe-eval' 없이 돈다)
     ['worker-src', ["'self'", 'blob:']],
     ['manifest-src', ["'self'"]],
-    ['frame-src', ["'none'"]],
+    ['frame-src', nonce ? [KAKAO_CSP.frame] : ["'none'"]],
     ['object-src', ["'none'"]],
     ['base-uri', ["'self'"]],
     // 소셜 로그인은 폼 전송이 아닌 내비게이션이라 form-action에 걸리지 않는다
-    ['form-action', ["'self'"]],
+    ['form-action', nonce ? ["'self'", KAKAO_CSP.formAction] : ["'self'"]],
     ['frame-ancestors', ["'none'"]],
   ];
   if (options.isHttps && !isDev)

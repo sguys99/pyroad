@@ -387,9 +387,4 @@ export function renderShareCard(d: ShareCardData): ReactElement {
 }
 
 /** "이미지 저장" 파일 이름 (P9-08 `Content-Disposition`) */
-export const SHARE_CARD_FILENAME: Record<ShareCardData['kind'], string> = {
-  levelup: 'pyroad-levelup.png',
-  stage: 'pyroad-stage-clear.png',
-  achievement: 'pyroad-achievement.png',
-  weekly: 'pyroad-weekly.png',
-};
+export { SHARE_CARD_FILENAME } from './share';
