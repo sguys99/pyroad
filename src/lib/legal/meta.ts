@@ -17,13 +17,15 @@ export const LEGAL_OPERATOR = {
 
 // TODO(P12-06 법률 검토): 시행일은 처음 공개 배포하는 날로 다시 맞춘다 (지금 값은 초안을 쓴 날)
 /** 이용약관 버전 */
-export const TERMS_VERSION = '2026-11-06';
+export const TERMS_VERSION = '2026-11-20';
 /** 개인정보처리방침 버전 */
-export const PRIVACY_VERSION = '2026-11-08';
+export const PRIVACY_VERSION = '2026-11-20';
 
-export const TERMS_EFFECTIVE_DATE = '2026-11-06';
-// 2026-11-08 개정(§12-Q45): 운영 배포일이 정해지면 시행일을 그날로 맞추고 공지 (v0.5 런북 "Phase 4 병합")
-export const PRIVACY_EFFECTIVE_DATE = '2026-11-08';
+// v0.7 개정(P9-07~11·P9-15·P9-17): 공지일 + 7일 = 시행일 = 배포일. 공지를 올린 날이 2026-11-13 이 아니면
+// 아래 네 값을 (공지일 + 7일 이후의) 실제 배포일로 같이 바꾼다 — v0.7 런북 "처리방침 개정 공지".
+// 버전만 바뀌고 다시 동의는 받지 않는다(기존 동의 기록은 예전 버전 그대로, 새 가입·보호자 동의부터 이 버전으로 기록)
+export const TERMS_EFFECTIVE_DATE = '2026-11-20';
+export const PRIVACY_EFFECTIVE_DATE = '2026-11-20';
 
 /** 법적 고지 페이지 (비로그인 열람, 정적 렌더 — `src/lib/security/csp.ts`의 STATIC_PAGE_PATHS) */
 export const LEGAL_LINKS = [
