@@ -22,6 +22,11 @@ import {
   type SfxId,
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
+import { shareCardSummary } from '@/lib/share-card/summary';
+import {
+  ShareCardView,
+  ShareGoneView,
+} from '@/components/share/ShareCardView';
 import { rewardSfx } from '@/lib/celebration/rewardSfx';
 import { Button } from '@/components/ui/button';
 import {
@@ -792,6 +797,30 @@ export function ShareCardSection() {
           </li>
         ))}
       </ul>
+      <h3 className="mt-8 font-display text-h3">
+        공유 페이지 /share/[cardId] (P9-08)
+      </h3>
+      <p className="text-small text-muted-foreground">
+        링크를 받은 보호자·친구가 로그인 없이 보는 첫 화면. 카드 그림(대체 글 포함) + 축하 문구 + 소개 + 나도
+        해보기(랜딩 30초 체험). 아래: 카드 있음 · 없음·비공개·만료(404, 아이 정보 없음)
+      </p>
+      <div className="grid gap-4" data-testid="share-page-samples">
+        {[SHARE_CARD_SAMPLES[0]].map((s) => (
+          <div
+            key={s.id}
+            className="overflow-hidden rounded-2xl ring-1 ring-line"
+          >
+            <ShareCardView
+              kind={s.data.kind}
+              {...shareCardSummary(s.data)}
+              imageSrc={`/dev/design/share-card/${s.id}`}
+            />
+          </div>
+        ))}
+        <div className="overflow-hidden rounded-2xl ring-1 ring-line">
+          <ShareGoneView />
+        </div>
+      </div>
     </Section>
   );
 }

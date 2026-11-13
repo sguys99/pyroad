@@ -9,6 +9,7 @@ import type { SkinId } from '@/lib/avatar/skins';
 import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
 import type { QuizKind } from '@/lib/content/schema';
 import type { ShopKind } from '@/lib/shop/catalog';
+import type { ShareCardKind } from '@/lib/share-card/types';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -118,12 +119,22 @@ export interface AnalyticsEventProps {
    * price: 그때 가격(150~1,500). 경제 밸런스(무엇을 언제 사나) 조정용, 잔액은 보내지 않음
    */
   shop_purchase: { item_id: string; kind: ShopKind; price: number };
+  /**
+   * 공유 페이지 `/share/[cardId]`를 엶 (P9-08, 브라우저, 비로그인 포함). kind: 카드 종류, gone = 없음·비공개·만료.
+   * 카드 id·닉네임은 보내지 않는다 (경로의 id도 `normalizePath`가 `[id]`로 지움)
+   */
+  share_view: { kind: ShareViewKind };
+  /** 공유 페이지의 "나도 해보기"를 누름 (P9-08, 브라우저). 공유 → 방문 → 가입 퍼널 분자 */
+  share_cta_click: { kind: ShareViewKind };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
 
 /** `trial_run.result` 값 */
 export type TrialRunResult = 'ok' | 'no_print' | MiniErrorKind;
+
+/** `share_view`·`share_cta_click.kind` 값 */
+export type ShareViewKind = ShareCardKind | 'gone';
 
 /** 브라우저가 `/api/analytics`로 보낼 수 있는 이벤트. 나머지는 서버만 기록한다 (클라이언트가 지표를 부풀리지 못하게) */
 export const CLIENT_EVENT_NAMES = [
@@ -139,6 +150,8 @@ export const CLIENT_EVENT_NAMES = [
   'quiz_try_run',
   'rest_reminder_choice',
   'rest_reminder_shown',
+  'share_cta_click',
+  'share_view',
   'trial_start',
   'trial_run',
   'trial_success',
@@ -185,7 +198,8 @@ export function normalizePath(input: string | null | undefined): string | null {
     .split('/')
     .filter(Boolean)
     .map((seg) => {
-      if (UUID_SEGMENT_RE.test(seg)) return '[id]';
+      // 22자 base64url = 공유 카드 id(P9-08) 같은 링크 토큰
+      if (UUID_SEGMENT_RE.test(seg) || ANON_ID_RE.test(seg)) return '[id]';
       if (TEMPLATE_SEGMENT_RE.test(seg)) return seg;
       if (seg.length > 40 || !SAFE_SEGMENT_RE.test(seg)) return '[x]';
       return seg;

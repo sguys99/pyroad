@@ -19,6 +19,13 @@ import {
 const provider = z.enum(['google', 'kakao', 'naver']);
 const questId = z.string().uuid();
 const motionTier = z.enum(['full', 'lite', 'minimal']);
+const SHARE_VIEW_KIND = z.enum([
+  'levelup',
+  'stage',
+  'achievement',
+  'weekly',
+  'gone',
+]);
 
 export const EVENT_PROPS_SCHEMA = {
   landing_view: z.object({}).strict(),
@@ -123,6 +130,8 @@ export const EVENT_PROPS_SCHEMA = {
       price: z.number().int().min(1).max(10000),
     })
     .strict(),
+  share_view: z.object({ kind: SHARE_VIEW_KIND }).strict(),
+  share_cta_click: z.object({ kind: SHARE_VIEW_KIND }).strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -234,6 +243,20 @@ const clientEvent = z.discriminatedUnion('name', [
       path: z.string().max(200).optional(),
     })
     .strict(),
+  z
+    .object({
+      name: z.literal('share_view'),
+      props: EVENT_PROPS_SCHEMA.share_view,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('share_cta_click'),
+      props: EVENT_PROPS_SCHEMA.share_cta_click,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
 ]);
 
 // 스키마가 CLIENT_EVENT_NAMES 를 모두 다루는지 컴파일 때 확인
@@ -257,6 +280,8 @@ const _clientNamesCovered: Record<
   trial_start: 'trial_start',
   trial_run: 'trial_run',
   trial_success: 'trial_success',
+  share_view: 'share_view',
+  share_cta_click: 'share_cta_click',
 };
 void _clientNamesCovered;
 
