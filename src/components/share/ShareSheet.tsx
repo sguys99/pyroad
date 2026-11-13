@@ -428,7 +428,8 @@ export function ShareSheet({
         </Notice>
         <Notice icon={<CalendarClock aria-hidden />}>
           링크는 90일 동안 열려요{expires && ` (${expires}까지)`}. 그다음엔
-          저절로 닫혀요.
+          저절로 닫혀요. 프로필의 &lsquo;내 자랑 카드&rsquo;에서 먼저 닫을 수도
+          있어요.
         </Notice>
         <Notice icon={<MessageCircleWarning aria-hidden />}>
           카카오톡으로 이미 보낸 메시지의 미리보기 그림은 나중에 지울 수 없어요.

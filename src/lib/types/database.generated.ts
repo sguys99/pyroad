@@ -1467,6 +1467,10 @@ export type Database = {
         Args: { p_limit: number };
         Returns: string[];
       };
+      manage_share_card: {
+        Args: { p_action: string; p_card_id: string; p_user_id: string };
+        Returns: Json;
+      };
       open_stage_chest: {
         Args: { p_stage_id: string; p_user_id: string };
         Returns: Json;

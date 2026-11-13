@@ -6,6 +6,7 @@ import {
   Flame,
   Lightbulb,
   RotateCcw,
+  Share2,
   Stamp,
   Trophy,
 } from 'lucide-react';
@@ -414,6 +415,42 @@ export function AchievementsCard({
           </ul>
         </>
       )}
+    </CardButton>
+  );
+}
+
+/** 내 자랑 카드로 가는 줄 (P9-11): 만든 카드 수 · 지금 공개 중인 수 */
+export function ShareCardsCard({
+  total,
+  open,
+}: {
+  total: number;
+  open: number;
+}) {
+  return (
+    <CardButton
+      href="/profile/cards"
+      radius="l"
+      padding="lg"
+      className="flex items-center gap-3"
+      data-testid="profile-share-cards"
+      aria-label={`내 자랑 카드, ${total}장 중 ${open}장 공개 중`}
+    >
+      <Share2 className="size-6 shrink-0 text-primary-text" aria-hidden />
+      <span className="grid min-w-0 gap-0.5">
+        <span className="font-display text-h3 text-foreground">
+          내 자랑 카드
+        </span>
+        <span className="text-caption text-muted-foreground">
+          {total === 0
+            ? '자랑한 카드를 여기서 숨기거나 지울 수 있어요'
+            : `${total}장 · 지금 ${open}장 공개 중`}
+        </span>
+      </span>
+      <ChevronRight
+        className="ml-auto size-5 shrink-0 text-primary-text"
+        aria-hidden
+      />
     </CardButton>
   );
 }

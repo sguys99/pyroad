@@ -40,6 +40,10 @@ vi.mock('@/lib/api/serverError', () => ({
   reportServerError: mocks.reportServerError,
 }));
 vi.mock('@/lib/observability/server', () => ({ captureServerError: vi.fn() }));
+// 카드 다시 그리기·CDN 지우기는 purge.test.ts 가 확인 (P9-11)
+vi.mock('@/lib/share-card/purge', () => ({
+  withShareCardPurge: (_a: unknown, _u: string, run: () => unknown) => run(),
+}));
 
 import { POST } from '../route';
 

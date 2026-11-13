@@ -17,6 +17,10 @@ vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({ rpc: mocks.rpc }),
 }));
 vi.mock('@/lib/analytics/server', () => ({ trackServerEvent: mocks.track }));
+// 카드 다시 그리기·CDN 지우기는 purge.test.ts 가 확인 (P9-11)
+vi.mock('@/lib/share-card/purge', () => ({
+  withShareCardPurge: (_a: unknown, _u: string, run: () => unknown) => run(),
+}));
 
 import { GET } from '../route';
 import { POST as purchase } from '../purchase/route';

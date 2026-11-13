@@ -24,6 +24,8 @@ import {
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
 import { ShareSheet } from '@/components/share/ShareSheet';
+import { MyShareCards } from '@/components/share/MyShareCards';
+import type { MyShareCard } from '@/lib/share-card/myCards';
 import { shareCardSummary } from '@/lib/share-card/summary';
 import {
   ShareCardView,
@@ -831,9 +833,63 @@ export function ShareCardSection() {
         카드(샘플 그림)와 보상 흉내를 넘겨 요청을 하지 않는다
       </p>
       <ShareSheetDemo />
+      <h3 className="mt-8 font-display text-h3">내 자랑 카드 (P9-11)</h3>
+      <p className="text-small text-muted-foreground">
+        프로필 → <code>/profile/cards</code>. 공개 중(남은 날 · 다시 보내기 · 숨기기) · 숨김 · 기간 끝(90일)은 그림 대신 상태 그림 + 다시 공개,
+        지우기는 확인 대화 상자. 숨기기·지우기는 서버가 CDN 사본까지 지운다. 견본은 요청 없이 흉내
+      </p>
+      <MyShareCards
+        now={new Date().toISOString()}
+        rewardClaimed={false}
+        cards={MY_CARD_SAMPLES}
+        act={async (_id, action) =>
+          action === 'delete'
+            ? { version: 1, isPublic: false, expiresAt: '', imageUrl: '' }
+            : {
+                version: 1,
+                isPublic: action === 'show',
+                expiresAt: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+                imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+              }
+        }
+      />
+      <MyShareCards now={new Date().toISOString()} rewardClaimed={false} cards={[]} />
     </Section>
   );
 }
+
+const MY_CARD_SAMPLES: MyShareCard[] = [
+  {
+    id: 'AAAAAAAAAAAAAAAAAAAAAA',
+    kind: 'levelup',
+    version: 1,
+    isPublic: true,
+    expiresAt: new Date(Date.now() + 83 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 7 * 86_400_000).toISOString(),
+    imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+    detail: '레벨 7',
+  },
+  {
+    id: 'BBBBBBBBBBBBBBBBBBBBBB',
+    kind: 'stage',
+    version: 2,
+    isPublic: false,
+    expiresAt: new Date(Date.now() + 60 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 30 * 86_400_000).toISOString(),
+    imageUrl: '',
+    detail: '「반복의 동굴」 · 별 3개',
+  },
+  {
+    id: 'CCCCCCCCCCCCCCCCCCCCCC',
+    kind: 'weekly',
+    version: 1,
+    isPublic: true,
+    expiresAt: new Date(Date.now() - 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 91 * 86_400_000).toISOString(),
+    imageUrl: '',
+    detail: '8월 둘째 주 · 퀘스트 12개',
+  },
+];
 
 function ShareSheetDemo() {
   // 두 견본: 오늘 처음(보내면 +30, 요청 없이 흉내) · 오늘 보상은 이미 받음 (P9-10)

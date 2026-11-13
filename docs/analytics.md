@@ -50,6 +50,7 @@
 | `share_cta_click` | 브라우저 `track(…, { immediate: true })` — 같은 파일 (P9-08) | `kind`: 위와 같음 | 공유 페이지 "나도 해보기"(→ 랜딩 30초 체험)를 누를 때. 공유 → 방문 → 체험·가입 퍼널(날짜별 합계) | 누를 때마다 |
 | `share_open` | 브라우저 `track()` — `src/components/share/ShareSheet.tsx` (P9-09, 로그인) | `kind`: 카드 종류 `levelup`·`stage`·`achievement`·`weekly`. **카드 id 는 보내지 않음** | 공유 시트를 열 때 | 열 때마다 |
 | `share_channel` | 브라우저 `track()` — 같은 파일 (P9-09) | `kind`: 위와 같음, `channel`: `kakao`(메시지 창을 띄움)·`web_share`(기기 공유를 마침)·`save_image`(저장 시작)·`copy_link`(복사함). 받는 사람·카드 id 없음 | 공유 시트에서 채널을 쓸 때(그만두기·실패는 보내지 않음). 열기 → 채널 → 방문(`share_view`) 퍼널 | 쓸 때마다 |
+| `share_manage` | 서버 — `src/app/api/share-cards/[id]/route.ts` (P9-11) | `kind`: 카드 종류, `action`: `hide`(숨기기)·`show`(다시 공개, 새 90일)·`delete`(지우기). 카드 id·닉네임 없음 | "내 자랑 카드"에서 숨기기·다시 공개·지우기가 성공했을 때. 아이들이 공개를 얼마나 거두는지(공개 기간·안내 문구 조정용) | 할 때마다 |
 
 - **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`·`pwa_install_prompt`·`pwa_installed`·`continue_click`·`quiz_try_run`·`phone_quiz_pick`·`daily_quiz_open`·`daily_quiz_finish`·`rest_reminder_shown`·`rest_reminder_choice`·`trial_start`·`trial_run`·`trial_success`·`share_view`·`share_cta_click`·`share_open`·`share_channel`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
 - 새 이벤트를 더할 때: `events.ts`(타입·이름) → `schema.ts`(strict 스키마) → 이 표. DB는 이름 형식(`^[a-z][a-z0-9_]{1,47}$`)·크기만 보므로 마이그레이션이 필요 없습니다.

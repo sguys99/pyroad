@@ -134,7 +134,14 @@ export interface AnalyticsEventProps {
    * save_image(저장을 시작함) · copy_link(복사함). 받는 사람·카드 id 는 보내지 않는다
    */
   share_channel: { kind: ShareCardKind; channel: ShareChannel };
+  /**
+   * 내 자랑 카드를 숨김·다시 공개·지움 (P9-11, 서버 `PATCH·DELETE /api/share-cards/{id}`). 카드 id·닉네임은 보내지 않는다
+   */
+  share_manage: { kind: ShareCardKind; action: ShareManageAction };
 }
+
+/** `share_manage.action` 값 (P9-11) */
+export type ShareManageAction = 'hide' | 'show' | 'delete';
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
 

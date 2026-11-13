@@ -593,6 +593,65 @@ async function groupShareCards(u) {
       );
     },
   });
+
+  // ── 공유 카드 관리 (P9-11, ① 00045) ──
+  await check({
+    group: 'share',
+    id: 'SCM-2',
+    role: 'service_role',
+    op: '숨기기 → 공개 조회 0행 · 다시 공개 → 새 90일 · 지우기 → 행 없음 · 남의 카드·잘못된 동작 거부 · 닉네임·꾸민 모습 변경 → 내 모든 카드 스냅샷 갱신 + version+1 (펫·같은 값은 그대로)',
+    ...OK,
+    run: async () => {
+      const x = await createUser('scm2', '카드관리');
+      const y = await createUser('scm2b', '남의카드');
+      const manage = (id, action, user = x.id) => rpc('manage_share_card', { p_user_id: user, p_card_id: id, p_action: action });
+      const lv = (await make(x.id, 'levelup')).json?.id;
+      const other = (await make(y.id, 'levelup')).json?.id;
+      const denied = [await manage(other, 'hide'), await manage(lv, 'party'), await manage('short', 'hide')];
+      const ver = () => Number(one(`select version from public.share_cards where id = '${lv}'`));
+      const v0 = ver();
+      one(`update public.users set nickname = '새이름' where id = '${x.id}'`);
+      const v1 = ver();
+      one(`update public.users set avatar_config = avatar_config || '{"hat":"hat_wizard"}' where id = '${x.id}'`);
+      const v2 = ver();
+      one(`update public.users set avatar_config = avatar_config || '{"pet":"pet_fox"}' where id = '${x.id}'`);
+      const v3 = ver();
+      const snap = one(`select snapshot->>'nickname' || ':' || (snapshot->'avatar'->>'hat') from public.share_cards where id = '${lv}'`);
+      const hide = await manage(lv, 'hide');
+      const hidden = await pub(lv);
+      one(`update public.share_cards set expires_at = now() - interval '1 day' where id = '${lv}'`);
+      const show = await manage(lv, 'show');
+      const days = one(`select round(extract(epoch from expires_at - now()) / 86400) from public.share_cards where id = '${lv}'`);
+      const shown = await pub(lv);
+      const del = await manage(lv, 'delete');
+      const gone = one(`select count(*) from public.share_cards where id = '${lv}'`);
+      const again = await manage(lv, 'show');
+      const otherLeft = one(`select count(*) from public.share_cards where id = '${other}' and is_public`);
+      return (
+        compare(
+          'SCM-2',
+          {
+            denied: '404:share_card_not_found|400:invalid_arguments|400:invalid_arguments',
+            versions: `${v0}:${v0 + 1}:${v0 + 2}:${v0 + 2}`,
+            snap: '새이름:hat_wizard',
+            hide: '200:false:0',
+            show: '200:true:90:1',
+            del: '200:true:0|404:share_card_not_found',
+            otherLeft: 1,
+          },
+          {
+            denied: denied.map((r) => `${r.status}:${errMsg(r)}`).join('|'),
+            versions: `${v0}:${v1}:${v2}:${v3}`,
+            snap,
+            hide: `${hide.status}:${hide.json?.is_public}:${hidden?.length}`,
+            show: `${show.status}:${show.json?.is_public}:${days}:${shown?.length}`,
+            del: `${del.status}:${del.json?.deleted}:${gone}|${again.status}:${errMsg(again)}`,
+            otherLeft: Number(otherLeft),
+          },
+        ) ?? { actual: 'ok', detail: `거부 3종, 닉네임·모자 version+1·펫 그대로, 숨기기·다시 공개 90일·지우기` }
+      );
+    },
+  });
 }
 
 // ── 그룹 ──────────────────────────────────────────────────
@@ -2346,6 +2405,12 @@ async function groupRpc(u) {
       u.alice,
       'claim_share_reward',
       { p_user_id: u.alice.id, p_card_id: 'rG6TzuP93C8blCS4ZdyehQ' },
+    ],
+    [
+      'SCM-1',
+      u.alice,
+      'manage_share_card',
+      { p_user_id: u.alice.id, p_card_id: 'rG6TzuP93C8blCS4ZdyehQ', p_action: 'hide' },
     ],
     [
       'PS-1',

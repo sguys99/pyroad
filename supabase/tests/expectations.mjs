@@ -686,6 +686,19 @@ export const EXPECT = {
     activateIn: 'P9-10',
     note: '본인 공개·만료 전 카드만 · 하루 1회 30코인(동시 1회) · 원장 share/<KST 날짜> · 잔액 = 원장',
   },
+  // ── 공유 카드 관리 (P9-11, ① 00045) ──
+  'SCM-1': {
+    expect: 'deny',
+    requires: 'public.manage_share_card()',
+    activateIn: 'P9-11',
+    note: '숨기기·다시 공개·지우기는 /api/share-cards/{id}(service_role)만',
+  },
+  'SCM-2': {
+    expect: 'allow',
+    requires: 'public.manage_share_card()',
+    activateIn: 'P9-11',
+    note: '본인 카드만 숨기기·다시 공개(새 90일)·지우기 · 닉네임·꾸민 모습 변경 → 스냅샷 갱신 + version+1',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',

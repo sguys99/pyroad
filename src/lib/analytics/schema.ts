@@ -140,6 +140,12 @@ export const EVENT_PROPS_SCHEMA = {
       channel: z.enum(['kakao', 'web_share', 'save_image', 'copy_link']),
     })
     .strict(),
+  share_manage: z
+    .object({
+      kind: SHARE_CARD_KIND,
+      action: z.enum(['hide', 'show', 'delete']),
+    })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };

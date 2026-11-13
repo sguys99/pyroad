@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { withShareCardPurge } from '@/lib/share-card/purge';
 import { reportServerError } from '@/lib/api/serverError';
 import { trackServerEvent } from '@/lib/analytics/server';
 import { ageBand } from '@/lib/consent/age';
@@ -140,14 +141,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await completeOnboarding(admin, user.id, {
-    nickname: nickname.nickname,
-    skin: input.skin,
-    grade: input.grade,
-    agreements,
-    ageBand: band,
-    guardian,
-  });
+  // 다시 온보딩으로 닉네임·스킨을 바꾸면 내 자랑 카드도 새 그림 + CDN 사본 지우기 (P9-11, 00045 트리거)
+  const result = await withShareCardPurge(admin, user.id, () =>
+    completeOnboarding(admin, user.id, {
+      nickname: nickname.nickname,
+      skin: input.skin,
+      grade: input.grade,
+      agreements,
+      ageBand: band,
+      guardian,
+    }),
+  );
 
   if (!result.ok) {
     if (result.reason === 'taken') {

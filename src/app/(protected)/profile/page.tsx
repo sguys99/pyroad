@@ -17,6 +17,7 @@ import {
   ProfileCard,
   ProfileHero,
   ProfileStatsCard,
+  ShareCardsCard,
   TreasureCard,
 } from '@/components/profile/ProfileSections';
 import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
@@ -63,34 +64,47 @@ export default async function ProfilePage() {
   if (!user) redirect('/');
   const today = kstToday();
 
-  const [profileRes, stagesRes, progressRes, chestsRes, owned, defs, stats] =
-    await Promise.all([
-      supabase
-        .from('users')
-        .select(OWN_PROFILE_SELECT)
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('stages')
-        .select(
-          'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, quest_type)',
-        ),
-      supabase
-        .from('user_progress')
-        .select('quest_id, status, best_stars')
-        .eq('user_id', user.id),
-      supabase
-        .from('coin_ledger')
-        .select('ref')
-        .eq('user_id', user.id)
-        .eq('source', 'chest'),
-      supabase
-        .from('user_achievements')
-        .select('achievement_id, achieved_at, claimed_at')
-        .eq('user_id', user.id),
-      supabase.from('achievements').select('id, name, icon, tier, sort'),
-      createAdminClient().rpc('profile_stats', { p_user_id: user.id }),
-    ]);
+  const [
+    profileRes,
+    stagesRes,
+    progressRes,
+    chestsRes,
+    owned,
+    defs,
+    stats,
+    shareCards,
+  ] = await Promise.all([
+    supabase
+      .from('users')
+      .select(OWN_PROFILE_SELECT)
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('stages')
+      .select(
+        'id, world_id, order, title, theme_name, description, is_final, created_at, world:worlds(order), quests(id, order, quest_type)',
+      ),
+    supabase
+      .from('user_progress')
+      .select('quest_id, status, best_stars')
+      .eq('user_id', user.id),
+    supabase
+      .from('coin_ledger')
+      .select('ref')
+      .eq('user_id', user.id)
+      .eq('source', 'chest'),
+    supabase
+      .from('user_achievements')
+      .select('achievement_id, achieved_at, claimed_at')
+      .eq('user_id', user.id),
+    supabase.from('achievements').select('id, name, icon, tier, sort'),
+    createAdminClient().rpc('profile_stats', { p_user_id: user.id }),
+    // 내 자랑 카드 수 (P9-11, RLS 본인 읽기)
+    supabase
+      .from('share_cards')
+      .select('is_public, expires_at')
+      .eq('user_id', user.id),
+  ]);
   if (stats.error)
     reportServerError(stats.error, { area: 'profile', op: 'profile_stats' });
 
@@ -169,6 +183,15 @@ export default async function ProfilePage() {
             total={definitions.length}
             claimable={ownedRows.filter((a) => !a.claimed_at).length}
             recent={recentAchievements(definitions, ownedRows)}
+          />
+
+          <ShareCardsCard
+            total={shareCards.data?.length ?? 0}
+            open={
+              (shareCards.data ?? []).filter(
+                (c) => c.is_public && new Date(c.expires_at) > new Date(),
+              ).length
+            }
           />
 
           <TreasureCard

@@ -137,7 +137,8 @@ async function callRpc<T>(
     | 'equip_item'
     | 'shop_status'
     | 'create_share_card'
-    | 'claim_share_reward',
+    | 'claim_share_reward'
+    | 'manage_share_card',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -487,5 +488,28 @@ export function claimShareRewardRpc(
 ) {
   return callRpc<ShareRewardResult>('claim_share_reward', () =>
     admin.rpc('claim_share_reward', { p_user_id: userId, p_card_id: cardId }),
+  );
+}
+
+/** 내 자랑 카드 숨기기·다시 공개(새 90일)·지우기 (P9-11, 00045). 본인 카드가 아니면 share_card_not_found */
+export function manageShareCardRpc(
+  admin: AdminClient,
+  userId: string,
+  cardId: string,
+  action: 'hide' | 'show' | 'delete',
+) {
+  return callRpc<{
+    id: string;
+    kind: string;
+    version: number;
+    is_public: boolean;
+    expires_at: string;
+    deleted: boolean;
+  }>('manage_share_card', () =>
+    admin.rpc('manage_share_card', {
+      p_user_id: userId,
+      p_card_id: cardId,
+      p_action: action,
+    }),
   );
 }
