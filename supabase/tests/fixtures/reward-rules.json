@@ -195,7 +195,7 @@
     { "kind": "achievement", "n": 2, "coins": 30 },
     { "kind": "achievement", "n": 3, "coins": 100 },
     { "kind": "achievement", "n": 0, "coins": 0 },
-    { "kind": "share", "coins": 30 },
+    { "kind": "share", "coins": 15 },
     { "kind": "bogus", "coins": 0 }
   ],
   "stars": [

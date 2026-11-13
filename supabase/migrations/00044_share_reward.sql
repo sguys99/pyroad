@@ -1,17 +1,17 @@
 -- ============================================================
--- 자랑하기 보상: 하루 1회 30코인 (Idempotent)   (P9-10, §12-Q67 ④, 원장·멱등은 00030, 금액표는 00031)
+-- 자랑하기 보상: 하루 1회 15코인 (Idempotent)   (P9-10, §12-Q67 ④, 원장·멱등은 00030, 금액표는 00031)
 -- 릴리즈 단계: ① 추가형 (원장 source 허용 값 1개 추가 · coin_reward 에 'share' 행 추가 · 새 함수 1개.
 --                       기존 값·권한은 그대로 — 이전 앱은 'share' 를 쓰지 않음)
 --
 -- 하는 일
 --   1. coin_ledger.source 에 'share' 허용 (CHECK 넓히기)
---   2. coin_reward('share') = 30 (TS 사본 src/lib/quest/coins.ts COIN_RULES.share, 대조 reward-rules.json "coins")
+--   2. coin_reward('share') = 15 (TS 사본 src/lib/quest/coins.ts COIN_RULES.share, 대조 reward-rules.json "coins")
 --   3. claim_share_reward(user, card_id) (service_role, POST /api/share-cards/reward 가 getUser() 로 확인한 id 만 넘김):
 --        - 본인 소유 · 공개 중 · 만료 전인 공유 카드가 있어야 함 (아니면 share_card_not_found) — 카드를 만들고 시트에서 보낸 뒤 부름
---        - 하루 한 번: coin_apply('share', '<KST 오늘 YYYY-MM-DD>', 30). 같은 날 다시·동시에 부르면 already_claimed + 0
+--        - 하루 한 번: coin_apply('share', '<KST 오늘 YYYY-MM-DD>', 15). 같은 날 다시·동시에 부르면 already_claimed + 0
 --        - 반환 {coins_earned, coins_balance, already_claimed}
 --   4. 권한 + 자기 검증
--- 적용 후 NOTICE `[00044] 자랑하기 보상: coin_reward('share') = 30, claim_share_reward service_role 전용` 확인
+-- 적용 후 NOTICE `[00044] 자랑하기 보상: coin_reward('share') = 15, claim_share_reward service_role 전용` 확인
 -- 확인: supabase/tests RW-1(금액표), SHR-1(권한), SHR-2(하루 1회·카드 소유)
 -- 되돌리기: supabase/rollback/00044_share_reward.rollback.sql
 -- 운영 SQL Editor 로 적용할 때는 BEGIN; … COMMIT; 으로 감싸서 실행합니다 (supabase/README.md).
@@ -43,7 +43,7 @@ AS $$
     WHEN 'attendance'  THEN (ARRAY[5, 5, 10, 10, 15, 20, 30])[p_n]
     WHEN 'chest'       THEN (ARRAY[30, 50])[p_n]
     WHEN 'achievement' THEN (ARRAY[10, 30, 100])[p_n]
-    WHEN 'share'       THEN 30   -- 자랑하기 하루 1회 (P9-10, §12-Q67 ④)
+    WHEN 'share'       THEN 15   -- 자랑하기 하루 1회 (P9-10, §12-Q67 ④)
   END, 0);
 $$;
 
@@ -92,7 +92,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.claim_share_reward(UUID, TEXT) IS
-  '자랑하기 보상 (P9-10). service_role 전용: /api/share-cards/reward. 본인 공개 카드가 있을 때 하루 한 번 30코인(원장 share/<KST 날짜>)';
+  '자랑하기 보상 (P9-10). service_role 전용: /api/share-cards/reward. 본인 공개 카드가 있을 때 하루 한 번 15코인(원장 share/<KST 날짜>)';
 
 -- ------------------------------------------------------------
 -- 4. 권한 + 자기 검증
@@ -102,7 +102,7 @@ GRANT EXECUTE ON FUNCTION public.claim_share_reward(UUID, TEXT) TO service_role;
 
 DO $$
 BEGIN
-  IF public.coin_reward('share') <> 30 OR public.coin_reward('attendance', 7) <> 30 OR public.coin_reward('project') <> 40 THEN
+  IF public.coin_reward('share') <> 15 OR public.coin_reward('attendance', 7) <> 30 OR public.coin_reward('project') <> 40 THEN
     RAISE EXCEPTION '[00044] 검증 실패: coin_reward 금액표';
   END IF;
   IF has_function_privilege('anon', 'public.claim_share_reward(uuid, text)', 'EXECUTE')
@@ -110,5 +110,5 @@ BEGIN
      OR NOT has_function_privilege('service_role', 'public.claim_share_reward(uuid, text)', 'EXECUTE') THEN
     RAISE EXCEPTION '[00044] 검증 실패: claim_share_reward 실행 권한이 service_role 전용이 아님';
   END IF;
-  RAISE NOTICE '[00044] 자랑하기 보상: coin_reward(''share'') = 30, claim_share_reward service_role 전용';
+  RAISE NOTICE '[00044] 자랑하기 보상: coin_reward(''share'') = 15, claim_share_reward service_role 전용';
 END $$;

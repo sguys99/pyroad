@@ -829,7 +829,7 @@ export function ShareCardSection() {
       <p className="text-small text-muted-foreground">
         카드 미리보기 + 카카오톡(키가 있을 때만) · 공유하기(Web Share 되는 기기만) · 이미지 저장 · 링크 복사 + 보내기 전 안내.
         앱에서는 <code>{'<ShareButton kind=…>'}</code>(프로필 레벨·주간 카드) 또는 축하 카드의 자랑하기(P9-10). 채널을 다 쓰면
-        자랑하기 보상(하루 1회 30코인) 줄이 바뀐다: 오늘 처음 → +30 코인(효과음·HUD로 날아감) / 오늘 보상은 받았어요. 견본은 만들어 둔
+        자랑하기 보상(하루 1회 15코인) 줄이 바뀐다: 오늘 처음 → +15 코인(효과음·HUD로 날아감) / 오늘 보상은 받았어요. 견본은 만들어 둔
         카드(샘플 그림)와 보상 흉내를 넘겨 요청을 하지 않는다
       </p>
       <ShareSheetDemo />
@@ -892,7 +892,7 @@ const MY_CARD_SAMPLES: MyShareCard[] = [
 ];
 
 function ShareSheetDemo() {
-  // 두 견본: 오늘 처음(보내면 +30, 요청 없이 흉내) · 오늘 보상은 이미 받음 (P9-10)
+  // 두 견본: 오늘 처음(보내면 +15, 요청 없이 흉내) · 오늘 보상은 이미 받음 (P9-10)
   const [open, setOpen] = useState<'offer' | 'claimed' | null>(null);
   const card = (claimed: boolean) => ({
     id: 'AAAAAAAAAAAAAAAAAAAAAA',
@@ -928,7 +928,7 @@ function ShareSheetDemo() {
           kind="levelup"
           card={card(k === 'claimed')}
           requestReward={async () => ({
-            coins_earned: 30,
+            coins_earned: 15,
             coins_balance: 130,
             already_claimed: false,
           })}

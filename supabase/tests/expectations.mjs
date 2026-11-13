@@ -684,7 +684,7 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.claim_share_reward()',
     activateIn: 'P9-10',
-    note: '본인 공개·만료 전 카드만 · 하루 1회 30코인(동시 1회) · 원장 share/<KST 날짜> · 잔액 = 원장',
+    note: '본인 공개·만료 전 카드만 · 하루 1회 15코인(동시 1회) · 원장 share/<KST 날짜> · 잔액 = 원장',
   },
   // ── 공유 카드 관리 (P9-11, ① 00045) ──
   'SCM-1': {

@@ -28,7 +28,7 @@ const req = (body: unknown) =>
 beforeEach(() => {
   mocks.user = { id: 'u1' };
   mocks.rpc.mockReset().mockResolvedValue({
-    data: { coins_earned: 30, coins_balance: 130, already_claimed: false },
+    data: { coins_earned: 15, coins_balance: 130, already_claimed: false },
     error: null,
   });
   mocks.revalidatePath.mockReset();
@@ -52,7 +52,7 @@ describe('POST /api/share-cards/reward (P9-10)', () => {
       p_user_id: 'u1',
       p_card_id: ID,
     });
-    expect((await res.json()).coins_earned).toBe(30);
+    expect((await res.json()).coins_earned).toBe(15);
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/profile');
   });
 

@@ -329,7 +329,7 @@ export function simulateEconomy(
       const slot = (attendance++ % 7) + 1;
       coins.attendance += coinReward('attendance', slot);
       if (slot === 7) shields = Math.min(2, shields + 1);
-      // 자랑하기 (P9-10, 하루 1회 30): 축하 화면(레벨 업·업적·스테이지 클리어)이 뜬 날 한 번 공유한다고 봄.
+      // 자랑하기 (P9-10, 하루 1회 15): 축하 화면(레벨 업·업적·스테이지 클리어)이 뜬 날 한 번 공유한다고 봄.
       // 상한(날마다 프로필 카드를 공유)은 shareEveryDay 옵션으로 — docs/balance.md 3.13
       const proud = `${paidLevel}:${earned.size}:${stages.filter(stageCleared).length}`;
 

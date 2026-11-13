@@ -72,7 +72,7 @@ async function postReward(cardId: string): Promise<ShareRewardResult> {
   return res.json();
 }
 
-/** 보상 줄: 안내(오늘 처음) · 받는 중 · 받음(+30) · 오늘은 이미 받음 */
+/** 보상 줄: 안내(오늘 처음) · 받는 중 · 받음(+15) · 오늘은 이미 받음 */
 type Reward = 'offer' | 'busy' | 'got' | 'claimed';
 
 type Load =

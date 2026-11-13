@@ -554,7 +554,7 @@ async function groupShareCards(u) {
     group: 'share',
     id: 'SHR-2',
     role: 'service_role',
-    op: '자랑하기 보상: 본인 공개·만료 전 카드만(남의 카드·만료·잘못된 id 거부) · 하루 1회 30코인(동시 2번도 1번) · 원장 share/<KST 오늘> · 잔액 = 원장',
+    op: '자랑하기 보상: 본인 공개·만료 전 카드만(남의 카드·만료·잘못된 id 거부) · 하루 1회 15코인(동시 2번도 1번) · 원장 share/<KST 오늘> · 잔액 = 원장',
     ...OK,
     run: async () => {
       const x = await createUser('sr2', '자랑보상');
@@ -577,9 +577,9 @@ async function groupShareCards(u) {
           'SHR-2',
           {
             denied: '404:share_card_not_found|400:invalid_arguments|404:share_card_not_found',
-            first: '30:1',
-            again: '0:true:30',
-            ledger: `${today}:30`,
+            first: '15:1',
+            again: '0:true:15',
+            ledger: `${today}:15`,
             mismatches: 0,
           },
           {
@@ -589,7 +589,7 @@ async function groupShareCards(u) {
             ledger,
             mismatches: Number(mismatches(x.id)),
           },
-        ) ?? { actual: 'ok', detail: '거부 3종, 동시 1회 30, 두 번째 0, 원장 1행, 잔액 일치' }
+        ) ?? { actual: 'ok', detail: '거부 3종, 동시 1회 15, 두 번째 0, 원장 1행, 잔액 일치' }
       );
     },
   });

@@ -24,7 +24,7 @@ export const COIN_RULES = {
   /** 업적 티어: 1 브론즈 · 2 실버 · 3 골드 (P8-09) */
   achievement: [10, 30, 100],
   /** 자랑하기 하루 1회 (P9-10, §12-Q67 ④, 00044 — 원장 share/<KST 날짜>) */
-  share: 30,
+  share: 15,
 } as const;
 
 export type CoinRewardKind = keyof typeof COIN_RULES | 'level_up';
