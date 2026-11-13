@@ -1002,13 +1002,12 @@ test.describe('상점 화면 (P9-02)', () => {
       await expect(
         page.getByTestId('catalog-purchase-pet_dragon'),
       ).toContainText('용용이');
-      // 칸·카드가 화면 안 (카탈로그 페이지 전체 폭은 다른 절의 HUD 견본이 좌우함)
-      for (const right of await page
-        .locator('#shop-screen [data-item], #shop-screen .cel-card')
-        .evaluateAll((els) =>
-          els.map((el) => el.getBoundingClientRect().right),
-        ))
-        expect(right).toBeLessThanOrEqual(width);
+      // 페이지 전체 가로 넘침 없음 (B73: HUD 견본은 자기 칸 안에서만 가로로 밈)
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        ),
+      ).toBeLessThanOrEqual(0);
     });
   }
 });

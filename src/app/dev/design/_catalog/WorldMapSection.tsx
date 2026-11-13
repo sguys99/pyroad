@@ -663,7 +663,8 @@ export function WorldMapSection() {
         note="월드맵·책장 위에 붙어 따라오는 바(여기서는 고정 안 함). 아바타+닉네임 → 내 프로필 · 레벨 도장 + XP 바 · 스트릭 불꽃(0일이면 꺼짐, 누르면 쪽지) · 코인 잔액(P8-04: 퀘스트에서 받고 지도로 돌아오면 이 탭에서 마지막으로 본 값부터 카운트업 + 칩 팝, minimal·동작 줄이기는 바로 바꾸고 금색 틴트) · 오늘의 미션 칸(P8-07, 달성 수 · 받을 보상 금색 점 → 미션 시트) · 스트릭 방패(P8-08, 불꽃 칩 오른쪽 위 작은 방패 1~2개, 칩 폭 그대로) · 불꽃 반짝임(P8-08: 오늘 풀어 처음 켜진 날·3일이 된 날 한 번 — full 톡 커지며 금색 둘레 2번 · lite 둘레 1번 · minimal·동작 줄이기 없음, 이 기기에서 본 값은 localStorage) · 곧 열려요(상점, 누르면 쪽지) · 소리 · 메뉴(공지·게시판·로그아웃 시트). 1024px 미만: 곧 열려요는 버튼 하나. 640px 미만: XP 바는 아래 가는 띠, 코인 1만 이상은 “12.3만”, 곧 열려요는 빠지고(코인 칩 자리) 닉네임 줄임표, 400px 미만은 아바타만. 등장 한 번(full 내려옴 · lite 페이드 · minimal·동작 줄이기 없음)"
         data-testid="world-hud-demo"
       >
-        <div data-hud-demo className="grid gap-3">
+        {/* HUD 는 화면 폭 기준(미디어 쿼리)이라 카드 안(360px 화면에서 약 296px)보다 넓을 수 있음 → 견본 안에서만 가로로 밀어 봄 (B73) */}
+        <div data-hud-demo className="grid gap-3 overflow-x-auto">
           {HUDS.map(([label, props]) => (
             <div key={label} className="grid gap-1">
               <span className="text-caption text-muted-foreground">{label}</span>
