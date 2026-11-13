@@ -488,47 +488,8 @@
 
 /* ── 프레임·공책 견본 (ShopItemArt) ── */
 .shop-frame {
-  position: relative;
   display: inline-grid;
   place-items: center;
-}
-.shop-frame-face {
-  display: grid;
-  place-items: center;
-}
-.shop-frame-ring {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-}
-.shop-frame-line {
-  fill: none;
-  stroke-width: 5;
-}
-.shop-frame[data-art='sprout'] .shop-frame-line {
-  stroke: var(--primary-bright);
-}
-.shop-frame[data-art='sprout'] g {
-  fill: var(--primary-bright);
-  stroke: var(--primary);
-  stroke-width: 1;
-}
-.shop-frame[data-art='star'] .shop-frame-line {
-  stroke: var(--accent);
-}
-.shop-frame[data-art='star'] path {
-  fill: var(--accent-light);
-  stroke: var(--accent-lip);
-  stroke-width: 0.8;
-}
-.shop-frame[data-art='wave'] .shop-frame-line {
-  stroke: var(--w2);
-  stroke-width: 4.5;
-}
-.shop-frame[data-art='wave'] circle:not(.shop-frame-line) {
-  fill: var(--surface);
-  stroke: var(--w2);
-  stroke-width: 1.5;
 }
 
 /* 에디터 테마 견본 (P9-06): 색은 data-editor-theme 블록이 다시 정한 코드 토큰 그대로. 크기 단위 --u = 견본 폭 1% */

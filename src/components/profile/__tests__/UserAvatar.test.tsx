@@ -35,4 +35,36 @@ describe('UserAvatar (P3-13)', () => {
       cleanup();
     }
   });
+
+  it('꾸민 모습 (P9-05): 모자는 그림에 들어가고 칩 안으로 줄여 내림, 테두리는 칩 위 고리', () => {
+    const { getByTestId } = render(
+      <UserAvatar
+        skin="sky"
+        costume={{ hat: 'wizard' }}
+        frame="star"
+        size={32}
+      />,
+    );
+    const el = getByTestId('user-avatar');
+    expect(el).toHaveAttribute('data-hat', 'wizard');
+    expect(el).toHaveAttribute('data-frame', 'star');
+    expect(el.querySelector('[data-hat="wizard"]')).not.toBeNull();
+    expect(el.querySelector('svg')!.getAttribute('class')).toContain(
+      'scale-[0.8]',
+    );
+    expect(el.querySelector('svg.avatar-frame')).toHaveAttribute(
+      'data-art',
+      'star',
+    );
+    expect(el.style.width).toBe('32px');
+  });
+
+  it('모르는 테두리는 그리지 않고, 모자가 없으면 줄이지 않음', () => {
+    const { getByTestId } = render(<UserAvatar frame="rainbow" size={48} />);
+    const el = getByTestId('user-avatar');
+    expect(el.querySelector('svg.avatar-frame')).toBeNull();
+    expect(el.querySelector('svg')!.getAttribute('class')).not.toContain(
+      'scale-',
+    );
+  });
 });

@@ -8,7 +8,7 @@ import type { MotionBudget } from '@/lib/motion/tier';
 import { Button } from '@/components/ui/button';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { useCountUp } from '@/lib/celebration/ticker';
-import { PybaemStatic } from '@/components/characters/rig';
+import { MyPybaemStatic, useMyPybaem } from '@/components/profile/MyLook';
 import type { Costume } from '@/components/characters/rig/costumes';
 import type { SkinPalette } from '@/lib/avatar/skins';
 import { popIn } from './motion';
@@ -213,7 +213,7 @@ const PybaemRig = dynamic(
     import('@/components/characters/rig/MascotRig').then((m) => m.PybaemRig),
   {
     ssr: false,
-    loading: () => <PybaemStatic state="proud" size={96} label="" />,
+    loading: () => <MyPybaemStatic state="proud" size={96} label="" />,
   },
 );
 
@@ -231,7 +231,7 @@ export function CelebrationMascot({
   palette,
 }: {
   size?: number;
-  /** 꾸민 모습 (상점 구매 축하 P9-02) */
+  /** 꾸민 모습 (상점 구매 축하 P9-02). 없으면 지금 입은 내 모습 (P9-05 `useMyPybaem`) */
   costume?: Costume;
   palette?: SkinPalette;
   /** 카드 등장 기준 점프 시작 (ms, full 기준 — lite는 70%) */
@@ -240,6 +240,7 @@ export function CelebrationMascot({
   /** 건너뛰었으면 바로 끝 자세(`happy`) */
   settled?: boolean;
 }) {
+  const me = useMyPybaem();
   const at = settled ? 0 : Math.round(jumpAtMs * budget.effectDuration);
   const [timerJumped, setJumped] = useState(at === 0);
   const jumped = timerJumped || at === 0;
@@ -261,8 +262,8 @@ export function CelebrationMascot({
         size={size}
         label=""
         lookAt={false}
-        costume={costume}
-        palette={palette}
+        costume={costume ?? me.costume}
+        palette={palette ?? me.palette}
       />
     </span>
   );

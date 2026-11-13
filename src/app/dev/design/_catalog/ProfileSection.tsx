@@ -74,15 +74,15 @@ export function ProfileSection() {
       description="본인만 보는 성장 기록. 360은 한 열, 768부터 두 열 카드. 초록은 학습(레벨 도장·잔디), 금색은 보상(칭호 도장·별·코인·출석). 반복 연출 없음 — 정보는 글자와 낭독 이름으로도."
     >
       <div className="pf">
-        <ProfileHero name="코딩하는 다람쥐" skin="green" totalXp={1500} />
+        <ProfileHero name="코딩하는 다람쥐" totalXp={1500} />
         <Demo
           label="5레벨마다 큰 칭호 · 최고 레벨"
           note="Lv 10 = 금색 레벨 도장 + 금색 면 칭호 도장(레벨업 카드와 같은 톤), Lv 50은 '최고 레벨에 닿았어요!'"
           className="pf-wide"
         >
           <div className="pf">
-            <ProfileHero name="섬마을 영웅" skin="green" totalXp={LEVEL_THRESHOLDS[9] + 300} />
-            <ProfileHero name="전설" skin="green" totalXp={LEVEL_THRESHOLDS[49] + 10} />
+            <ProfileHero name="섬마을 영웅" totalXp={LEVEL_THRESHOLDS[9] + 300} />
+            <ProfileHero name="전설" totalXp={LEVEL_THRESHOLDS[49] + 10} />
           </div>
         </Demo>
         <Demo

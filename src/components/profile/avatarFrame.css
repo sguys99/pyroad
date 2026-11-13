@@ -1,0 +1,68 @@
+/* 아바타 테두리 (P9-05, AvatarFrameRing). 토큰 색만. 칩과 같은 칸에 겹쳐 그린다 */
+.avatar-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.avatar-frame .af-band {
+  fill: none;
+  stroke-width: 7;
+}
+.avatar-frame .af-edge,
+.avatar-frame .af-in {
+  fill: none;
+  stroke-width: 1.4;
+}
+.avatar-frame .af-deco {
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.avatar-frame .af-stem {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* 새싹: 연두 고리, 초록 선 */
+.avatar-frame[data-art='sprout'] .af-band {
+  stroke: var(--primary-bright);
+}
+.avatar-frame[data-art='sprout'] .af-edge,
+.avatar-frame[data-art='sprout'] .af-stem {
+  stroke: var(--primary);
+}
+.avatar-frame[data-art='sprout'] .af-deco {
+  fill: var(--primary-bright);
+  stroke: var(--primary);
+}
+
+/* 별빛: 금빛 고리, 진한 금 선 */
+.avatar-frame[data-art='star'] .af-band {
+  stroke: var(--accent);
+}
+.avatar-frame[data-art='star'] .af-edge {
+  stroke: var(--accent-lip);
+}
+.avatar-frame[data-art='star'] .af-deco {
+  fill: var(--accent-light);
+  stroke: var(--accent-lip);
+}
+
+/* 파도: 물빛 물결 고리, 물마루 거품 선 */
+.avatar-frame[data-art='wave'] .af-band {
+  stroke: var(--w2);
+  stroke-width: 7.5;
+}
+.avatar-frame[data-art='wave'] .af-in {
+  stroke: var(--surface);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.avatar-frame[data-art='wave'] .af-deco {
+  fill: var(--surface);
+  stroke: var(--w2);
+  stroke-width: 1.8;
+}

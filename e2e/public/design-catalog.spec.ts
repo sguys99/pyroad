@@ -979,6 +979,42 @@ test.describe('꾸미기 렌더러 (P9-04)', () => {
   }
 });
 
+test.describe('꾸민 아바타·테두리 (P9-05)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 모자는 32px 칩 안에, 테두리 3종이 칩과 같은 크기로 겹치고 화면 안에 있다`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const demo = page.getByTestId('user-avatar-look-demo');
+      await demo.scrollIntoViewIfNeeded();
+      const avatars = demo.getByTestId('user-avatar');
+      await expect(avatars).toHaveCount(5 * 3);
+      for (const art of ['sprout', 'star', 'wave'])
+        await expect(
+          demo.locator(`svg.avatar-frame[data-art="${art}"]`).first(),
+        ).toBeVisible();
+      // 32px: 모자(마법사 −12) 끝이 칩 위로 나가지 않음
+      const small = demo
+        .locator('[data-look="마법사 + 별빛 테두리"]')
+        .getByTestId('user-avatar')
+        .last();
+      const chip = await small.boundingBox();
+      const hat = await small.locator('[data-hat="wizard"]').boundingBox();
+      expect(chip!.width).toBe(32);
+      expect(hat!.y).toBeGreaterThanOrEqual(chip!.y - 0.5);
+      // 테두리는 칩과 같은 칸 (바깥 크기 그대로)
+      const ring = await small.locator('svg.avatar-frame').boundingBox();
+      expect(Math.round(ring!.width)).toBe(32);
+      const box = await demo.boundingBox();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      await demo.screenshot({
+        path: testInfo.outputPath(`avatar-look-${width}.png`),
+      });
+    });
+  }
+});
+
 test.describe('상점 아이템 카탈로그 (P9-01)', () => {
   for (const width of [360, 1280]) {
     test(`${width}px: 아이템 22종이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({

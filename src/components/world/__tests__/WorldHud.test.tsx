@@ -22,7 +22,6 @@ afterEach(cleanup);
 
 const props: WorldHudProps = {
   name: '파이',
-  skin: 'green',
   totalXp: 280, // Lv 2 (200~490) → 80 / 290
   level: 2,
   coins: 1280,

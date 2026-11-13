@@ -32,6 +32,7 @@ import {
 
 import { PybaemStatic } from '@/components/characters/rig/RigStatic';
 import { PetArt } from '@/components/characters/pets';
+import { useSetMyLook } from '@/components/profile/MyLook';
 import { Button } from '@/components/ui/button';
 import { HudCounter } from '@/components/ui/hud';
 import { RewardIcon } from '@/components/ui/reward-icon';
@@ -183,6 +184,13 @@ export function ShopScreen({
   };
 
   /** 입기·벗기. 성공이면 null, 실패면 아이용 문구 */
+  // 내 꾸민 모습(P9-05)을 바로 바꿔 둔다: 상점에서 지도·퀘스트로 돌아가도 새 모습 (로그인 레이아웃은 다시 그려지지 않음)
+  const setMyLook = useSetMyLook();
+  const equipped = status?.equipped;
+  useEffect(() => {
+    if (equipped) setMyLook(equipped);
+  }, [equipped, setMyLook]);
+
   const wear = async (item: ShopItem, on: boolean): Promise<string | null> => {
     const slot = equipSlotOf(item);
     if (!slot) return null;

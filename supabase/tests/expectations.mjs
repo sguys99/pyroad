@@ -31,7 +31,7 @@ export const EXPECT = {
   'B03-2': { expect: 'deny' },
   'B03-3': {
     expect: 'allow',
-    note: '게시판 작성자 표시. 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin (P3-13 ① 00021)',
+    note: '게시판 작성자 표시. 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin (P3-13 ① 00021)·avatar_look (P9-05 ① 00042)',
   },
   'B03-4': { expect: 'deny' },
   'B03-5': { expect: 'deny' },
@@ -75,6 +75,12 @@ export const EXPECT = {
     requires: 'public.user_public_profiles.avatar_skin',
     activateIn: 'P3-13',
     note: '① 00021: 공개 아바타 = avatar_config.skin 을 동기화 트리거가 6종 id 만 복사 (모르는 값·다른 키는 공개 안 됨, 직접 쓰기 거부, CHECK)',
+  },
+  'PP-6': {
+    expect: 'allow',
+    requires: 'public.user_public_profiles.avatar_look',
+    activateIn: 'P9-05',
+    note: '① 00042: 공개 아바타의 꾸민 모습 = avatar_config 의 모자·안경·망토·배경·테두리 중 shop_items 슬롯이 맞는 id 만 (펫·에디터 테마·스킨·모르는 값은 공개 안 됨, 직접 쓰기 거부, CHECK 객체)',
   },
   'NM-1': {
     expect: 'allow',
@@ -939,11 +945,11 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.users.age_band',
     activateIn: 'P3-15',
-    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문 + 보호자 동의 상태, P3-11·P3-15)',
+    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문 + 보호자 동의 상태 + 꾸민 모습 avatar_config, P3-11·P3-15·P9-05)',
   },
   'APP-13': {
     expect: 'allow',
-    note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
+    note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩, P9-05 avatar_look 포함). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
   },
   'APP-14': {
     expect: 'allow',

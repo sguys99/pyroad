@@ -146,11 +146,13 @@ export type BoardPost = Tables<'board_posts'>;
 
 export type BoardComment = Tables<'board_comments'>;
 
-/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public: 닉네임 → 모험가NNNN + 파이뱀 스킨, 00018·00021. 실명·사진 없음) */
+/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public: 닉네임 → 모험가NNNN + 파이뱀 스킨·꾸민 모습, 00018·00021·00042. 실명·사진 없음) */
 export interface BoardAuthor {
   display_name: string | null;
   /** 공개 아바타 스킨 id (NULL = 기본). 이전 응답·낙관적 갱신에서는 없을 수 있음 */
   avatar_skin?: string | null;
+  /** 공개 꾸민 모습 {hat, glasses, cape, bg, frame} 아이템 id (00042, P9-05). 그리기는 `publicLook` */
+  avatar_look?: unknown;
 }
 
 export interface BoardPostWithAuthor extends BoardPost {

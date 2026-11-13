@@ -24,8 +24,18 @@ import {
 import type { RigHandle } from '@/components/characters/rig/LiveRig';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/profile/UserAvatar';
+import { avatarLook } from '@/lib/avatar/look';
 import { PYBAEM_SKINS, skinPalette } from '@/lib/avatar/skins';
 import { CodeSample, Demo, Section } from './ui';
+
+/** 꾸민 아바타 견본 (P9-05): 이름 → avatar_config */
+const AVATAR_LOOKS: [string, Record<string, string>][] = [
+  ['고깔 + 새싹 테두리', { hat: 'hat_party', frame: 'frame_sprout' }],
+  ['마법사 + 별빛 테두리', { skin: 'violet', hat: 'hat_wizard', frame: 'frame_star' }],
+  ['왕관·선글라스·망토 + 파도 테두리', { skin: 'sky', hat: 'hat_crown', glasses: 'glasses_sun', cape: 'cape_hero', frame: 'frame_wave' }],
+  ['탐험가 모자 · 섬 배경', { skin: 'sunny', hat: 'hat_explorer', bg: 'bg_island' }],
+  ['동그란 안경 · 종이 배경 (모자 없음)', { skin: 'berry', glasses: 'glasses_round', bg: 'bg_paper', frame: 'frame_star' }],
+];
 
 export function StateButtons<S extends string>({
   states,
@@ -244,6 +254,31 @@ export function RigSection() {
             <UserAvatar skin={null} size={32} />
             스킨 없음(NULL) → 숲초록
           </span>
+        </div>
+      </Demo>
+      <Demo
+        label="꾸민 아바타 · 테두리 (P9-05)"
+        note="avatar_config 하나로(avatarLook) 모자·안경·망토·배경 + 테두리. 모자를 쓰면 파이뱀을 80%로 줄여 내려 32px 에서도 모자 끝이 칩 안에. 테두리(AvatarFrameRing)는 칩 가장자리에 겹쳐 바깥 크기 그대로, 장식만 살짝 밖으로. HUD·프로필·게시판·상점 견본이 같은 원본"
+        data-testid="user-avatar-look-demo"
+      >
+        <div className="flex flex-col gap-3">
+          {AVATAR_LOOKS.map(([name, config]) => {
+            const look = avatarLook(config);
+            return (
+              <div
+                key={name}
+                className="flex items-center gap-4"
+                data-look={name}
+              >
+                <UserAvatar {...look} size={96} />
+                <UserAvatar {...look} size={48} />
+                <span className="flex items-center gap-2 text-body">
+                  <UserAvatar {...look} size={32} />
+                  {name}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </Demo>
       <CodeSample

@@ -26,7 +26,7 @@ export default async function BoardPage({
     supabase
       .from('board_posts')
       .select(
-        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_skin), board_comments(count)',
+        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_skin, avatar_look), board_comments(count)',
         { count: 'exact' },
       )
       .order('created_at', { ascending: false })

@@ -487,7 +487,7 @@ async function groupView(u) {
     group: 'view',
     id: 'B03-3',
     role: 'authenticated',
-    op: 'GET /user_profiles_public?select=* → 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin 뿐 (P3-13)',
+    op: 'GET /user_profiles_public?select=* → 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin·avatar_look 뿐 (P3-13·P9-05)',
     ...READ,
     run: async () => {
       const r = await rest('GET', '/rest/v1/user_profiles_public?select=*', {
@@ -496,7 +496,7 @@ async function groupView(u) {
       const c = classifyRead(r);
       if (c.actual !== 'allowed') return c;
       const keys = Object.keys(r.json[0]).sort().join(',');
-      return keys === 'avatar_skin,avatar_url,display_name,id'
+      return keys === 'avatar_look,avatar_skin,avatar_url,display_name,id'
         ? { actual: 'allowed', detail: `rows=${r.json.length}, cols=${keys}` }
         : { actual: 'extra-columns', detail: keys };
     },
@@ -792,6 +792,58 @@ async function groupView(u) {
           IF EXISTS (SELECT 1 FROM public.users u JOIN public.user_public_profiles p ON p.user_id = u.id
                       WHERE p.avatar_skin IS DISTINCT FROM public.public_avatar_skin(u.avatar_config)) THEN
             RAISE EXCEPTION '공개 스킨이 avatar_config 와 다른 행이 있음';
+          END IF;
+        END $$;`);
+    },
+  });
+  await check({
+    group: 'view',
+    id: 'PP-6',
+    role: 'authenticated',
+    op: '공개 꾸민 모습 동기화 (P9-05, 00042): avatar_config(equip_item 이 쓰는 값) → avatar_look 은 슬롯이 맞는 모자·안경·망토·배경·테두리 id 만 · 펫·테마·스킨·모르는 값은 공개 안 됨 · 직접 UPDATE 거부 · CHECK',
+    ...OK,
+    run: async () => {
+      const x = await createUser('pp6', '공개꾸밈');
+      return sqlCheck(`
+        DO $$
+        BEGIN
+          IF (SELECT avatar_look FROM public.user_profiles_public WHERE id = '${x.id}') IS DISTINCT FROM '{}'::jsonb THEN
+            RAISE EXCEPTION '가입 직후 avatar_look 이 {} 가 아님';
+          END IF;
+        END $$;
+        UPDATE public.users
+           SET avatar_config = '{"skin": "sky", "hat": "hat_wizard", "frame": "frame_star", "glasses": "hat_party", "cape": "nope", "pet": "pet_chick", "editor_theme": "theme_night"}'
+         WHERE id = '${x.id}';
+        SET LOCAL ROLE authenticated;
+        SET LOCAL request.jwt.claims = '{"sub": "${x.id}", "role": "authenticated"}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_look FROM public.user_profiles_public WHERE id = '${x.id}')
+             IS DISTINCT FROM '{"hat": "hat_wizard", "frame": "frame_star"}'::jsonb THEN
+            RAISE EXCEPTION '뷰 avatar_look 이 모자·테두리만이 아님: %', (SELECT avatar_look FROM public.user_profiles_public WHERE id = '${x.id}');
+          END IF;
+          BEGIN
+            UPDATE public.user_public_profiles SET avatar_look = '{"hat": "hat_crown"}' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION '공개 프로필 avatar_look 직접 UPDATE 가 허용됨';
+          EXCEPTION WHEN insufficient_privilege THEN NULL;
+          END;
+        END $$;
+        RESET ROLE;
+        UPDATE public.users SET avatar_config = avatar_config - 'hat' WHERE id = '${x.id}';
+        DO $$
+        BEGIN
+          IF (SELECT avatar_look FROM public.user_profiles_public WHERE id = '${x.id}')
+             IS DISTINCT FROM '{"frame": "frame_star"}'::jsonb THEN
+            RAISE EXCEPTION '모자를 벗었는데 avatar_look 에 남음';
+          END IF;
+          BEGIN
+            UPDATE public.user_public_profiles SET avatar_look = '[]' WHERE user_id = '${x.id}';
+            RAISE EXCEPTION 'CHECK 가 객체가 아닌 avatar_look 을 받음';
+          EXCEPTION WHEN check_violation THEN NULL;
+          END;
+          IF EXISTS (SELECT 1 FROM public.users u JOIN public.user_public_profiles p ON p.user_id = u.id
+                      WHERE p.avatar_look IS DISTINCT FROM public.public_avatar_look(u.avatar_config)) THEN
+            RAISE EXCEPTION '공개 꾸민 모습이 avatar_config 와 다른 행이 있음';
           END IF;
         END $$;`);
     },
@@ -4267,8 +4319,8 @@ async function groupApp(u) {
     ],
     [
       'APP-15',
-      '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 + 보호자 동의 상태 (P3-11·P3-15 loadOwnUserRow)',
-      `/rest/v1/users?select=settings,onboarded_at,age_band,guardian_consented_at,consent_deadline&id=eq.${u.alice.id}`,
+      '(protected)/layout.tsx 온보딩 관문 + 움직임·사운드 설정 + 보호자 동의 상태 + 꾸민 모습 (P3-11·P3-15·P9-05 loadOwnUserRow)',
+      `/rest/v1/users?select=settings,avatar_config,onboarded_at,age_band,guardian_consented_at,consent_deadline&id=eq.${u.alice.id}`,
     ],
   ];
   // 보고서에 매번 바뀌는 uuid 가 남지 않게 자리표시자로 바꿈
@@ -4341,12 +4393,12 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-13',
     role: 'authenticated',
-    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name,avatar_skin),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18·P3-13)',
+    op: 'board/page.tsx → GET /board_posts?select=*,user_profiles_public!…(display_name,avatar_skin,avatar_look),board_comments(count) + count=exact (작성자 = 모험가NNNN, P1-18·P3-13)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name,avatar_skin),board_comments(count)&order=created_at.desc&offset=0&limit=10',
+        '/rest/v1/board_posts?select=*,user_profiles_public!board_posts_user_id_fkey(display_name,avatar_skin,avatar_look),board_comments(count)&order=created_at.desc&offset=0&limit=10',
         { as: u.alice, prefer: 'count=exact' },
       );
       const c = classifyRead(r);
@@ -4360,7 +4412,7 @@ async function groupApp(u) {
       // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
       if (!/^모험가\d{4}$/.test(name))
         return { actual: 'real-name', detail: name };
-      if (!('avatar_skin' in r.json[0].user_profiles_public))
+      if (!('avatar_skin' in r.json[0].user_profiles_public) || !('avatar_look' in r.json[0].user_profiles_public))
         return { actual: 'avatar-missing', detail: JSON.stringify(r.json[0].user_profiles_public) };
       return c;
     },
@@ -4369,12 +4421,12 @@ async function groupApp(u) {
     group: 'app',
     id: 'APP-14',
     role: 'authenticated',
-    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name,avatar_skin)',
+    op: 'board/[postId]/page.tsx → GET /board_comments?select=*,user_profiles_public!…(display_name,avatar_skin,avatar_look)',
     ...READ,
     run: async () => {
       const r = await rest(
         'GET',
-        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name,avatar_skin)&post_id=eq.${u.postId}&order=created_at.asc`,
+        `/rest/v1/board_comments?select=*,user_profiles_public!board_comments_user_id_fkey(display_name,avatar_skin,avatar_look)&post_id=eq.${u.postId}&order=created_at.asc`,
         { as: u.alice },
       );
       const c = classifyRead(r);
@@ -4388,7 +4440,7 @@ async function groupApp(u) {
       // 픽스처 작성자(bob·alice)는 닉네임이 없으므로 자리표시자여야 함 (실명 박밥·김앨리스가 아님, P1-18)
       if (!/^모험가\d{4}$/.test(name))
         return { actual: 'real-name', detail: name };
-      if (!('avatar_skin' in r.json[0].user_profiles_public))
+      if (!('avatar_skin' in r.json[0].user_profiles_public) || !('avatar_look' in r.json[0].user_profiles_public))
         return { actual: 'avatar-missing', detail: JSON.stringify(r.json[0].user_profiles_public) };
       return c;
     },

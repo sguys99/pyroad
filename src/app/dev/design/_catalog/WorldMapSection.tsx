@@ -519,14 +519,14 @@ function RetroDemo() {
 
 // 월드맵 HUD (P5-07): 스트릭 0 · 1(오늘) · 7(오늘 아직) · 긴 닉네임 · 최고 레벨. 코인 0 · 45 · 1,280 · 12.3만(640px 미만 줄여 씀, P8-04)
 const HUDS: [string, WorldHudProps][] = [
-  ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false } }],
-  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', skin: 'sky', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true } }],
-  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', skin: 'berry', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false } }],
-  ['최고 레벨', { name: '모험가0427', skin: 'violet', totalXp: 31500, level: 50, coins: 123456, streak: { days: 12, today: true } }],
-  ['오늘의 미션 1/3 (P8-07)', { name: '파이', skin: 'green', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true }, missions: <MissionHudButton state={{ day: '2026-11-11', missions: [MISSION('quest_2', '퀘스트 2개 클리어', 'quest_clear', 2, 2, 1), MISSION('review_1', '복습 도전 1개 끝내기', 'review', 2, 1, 1, true), MISSION('no_hint_1', '힌트 없이 퀘스트 1개 클리어', 'no_hint', 2, 1, 0)], pending: [] }} /> }],
-  ['받을 보상 있음 (금색 점)', { name: '코딩왕', skin: 'sky', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false }, missions: <MissionHudButton state={MISSION_SAMPLES[0][1]} /> }],
-  ['스트릭 방패 2개 · 어제를 방패가 지킴 (P8-08, 불꽃을 누르면 쪽지)', { name: '파이', skin: 'green', totalXp: 280, level: 2, coins: 45, streak: { days: 5, today: false }, shields: 2, shieldSaved: true }],
-  ['미션 읽는 중 (자리만)', { name: '파이', skin: 'green', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false }, missions: <MissionHudPlaceholder /> }],
+  ['스트릭 0일 (꺼진 불꽃) · Lv 1', { name: '파이', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false } }],
+  ['스트릭 1일 (오늘 함) · Lv 2', { name: '코딩왕', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true } }],
+  ['스트릭 7일 (오늘 아직) · 긴 닉네임', { name: '아주아주긴닉네임을가진모험가', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false } }],
+  ['최고 레벨', { name: '모험가0427', totalXp: 31500, level: 50, coins: 123456, streak: { days: 12, today: true } }],
+  ['오늘의 미션 1/3 (P8-07)', { name: '파이', totalXp: 280, level: 2, coins: 45, streak: { days: 1, today: true }, missions: <MissionHudButton state={{ day: '2026-11-11', missions: [MISSION('quest_2', '퀘스트 2개 클리어', 'quest_clear', 2, 2, 1), MISSION('review_1', '복습 도전 1개 끝내기', 'review', 2, 1, 1, true), MISSION('no_hint_1', '힌트 없이 퀘스트 1개 클리어', 'no_hint', 2, 1, 0)], pending: [] }} /> }],
+  ['받을 보상 있음 (금색 점)', { name: '코딩왕', totalXp: 1000, level: 4, coins: 1280, streak: { days: 7, today: false }, missions: <MissionHudButton state={MISSION_SAMPLES[0][1]} /> }],
+  ['스트릭 방패 2개 · 어제를 방패가 지킴 (P8-08, 불꽃을 누르면 쪽지)', { name: '파이', totalXp: 280, level: 2, coins: 45, streak: { days: 5, today: false }, shields: 2, shieldSaved: true }],
+  ['미션 읽는 중 (자리만)', { name: '파이', totalXp: 40, level: 1, coins: 0, streak: { days: 0, today: false }, missions: <MissionHudPlaceholder /> }],
 ];
 
 export function WorldMapSection() {
@@ -567,7 +567,7 @@ export function WorldMapSection() {
       </Demo>
       <Demo
         label="동행 펫 슬롯 (P5-08 · 그림 P9-01)"
-        note="운영 지도는 아직 펫 없음(P9-05가 avatar_config.pet 으로 연결). 견본 펫 삐약이가 파이뱀 발치 바깥쪽 뒤에 서고, 지도 밖이면 노드 쪽으로. 해제 연출에서 full은 0.16초 늦게 같은 길을 작게 깡충, lite는 같이 미끄러짐, minimal·동작 줄이기는 바로 새 자리"
+        note="운영 지도는 데려간 펫(avatar_config.pet, P9-05 useMyLook) — pet 을 주지 않으면 그것을 씀. 견본 펫 삐약이가 파이뱀 발치 바깥쪽 뒤에 서고, 지도 밖이면 노드 쪽으로. 해제 연출에서 full은 0.16초 늦게 같은 길을 작게 깡충, lite는 같이 미끄러짐, minimal·동작 줄이기는 바로 새 자리"
         data-testid="world-pet-demo"
       >
         <UnlockDemo

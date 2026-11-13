@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { ArrowRight, Map } from 'lucide-react';
-import { PybaemStatic } from '@/components/characters/rig';
+import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { isShown } from '@/components/sound/isShown';
 import { Button } from '@/components/ui/button';
@@ -226,7 +226,7 @@ export function RewardStrip({
     >
       <div className="qx-head">
         <span className="qx-rig" aria-hidden>
-          <PybaemStatic state="cheer" size={56} label="" filters={false} />
+          <MyPybaemStatic state="cheer" size={56} label="" filters={false} />
         </span>
         <div className="qx-title">
           <p className="qx-k">

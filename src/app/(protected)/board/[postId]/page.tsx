@@ -24,14 +24,14 @@ export default async function BoardPostPage({
     supabase
       .from('board_posts')
       .select(
-        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_skin)',
+        '*, user_profiles_public!board_posts_user_id_fkey(display_name, avatar_skin, avatar_look)',
       )
       .eq('id', postId)
       .single(),
     supabase
       .from('board_comments')
       .select(
-        '*, user_profiles_public!board_comments_user_id_fkey(display_name, avatar_skin)',
+        '*, user_profiles_public!board_comments_user_id_fkey(display_name, avatar_skin, avatar_look)',
       )
       .eq('post_id', postId)
       .order('created_at', { ascending: true }),

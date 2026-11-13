@@ -460,7 +460,7 @@ Phase 5 시그니처 연출. 새로 열린 스테이지에서 **한 번만** 재
 
 지도 위 지금 위치 파이뱀을 따라다닐 펫의 **자리만** 먼저 정해 둔 것. 코드: `src/components/world/PetSlot.tsx`(`PetConfig`·`PetSlot`), 자리 계산 `src/lib/world/worlds.ts`(`PET_SLOT`·`petOffset`), 스타일 `worldMap.css`(`.wn-pet`·`.wu-pet-walker`), 이동 `unlockFx.ts`(`pet`·`petWalk`·`PET_LAG`).
 
-- **데이터**: `WorldMap`의 `pet?: PetConfig | null` (`{ id: PetId }`). 저장은 `users.avatar_config.pet`(펫 아이템 id) → `petFromAvatarConfig`(`src/lib/shop/catalog.ts`, 모르는 값은 null). 운영 지도 연결은 P9-05(지금 운영은 `null` → DOM 없음)
+- **데이터**: `WorldMap`의 `pet?: PetConfig | null` (`{ id: PetId }`). 저장은 `users.avatar_config.pet`(펫 아이템 id) → `petFromAvatarConfig`(`src/lib/shop/catalog.ts`, 모르는 값은 null). 운영 지도는 `pet`을 주지 않으면 내가 데려간 펫(P9-05 `useMyLook`), 없으면 DOM 없음
 - **그림** (P9-01): `src/components/characters/pets.tsx`의 `PetArt`(id → 그림 표) — 삐약이(병아리)·꼬북이(아기 거북)·여울이(아기 여우)·용용이(아기 용). 리그 스타일 B와 같은 말씨: 파스텔 면 + 몸색 진한 톤 외곽선 1.3, 눈·입 잉크 `#3B2F25`, 볼터치 `#F2879B`, 바닥 그림자 `#8E877C`. 48×48, 바닥선 y≈44, 훅·`<text>`·래스터 없음(정지 그림·공유 카드에서도 그대로). 상점 썸네일도 같은 그림
 - **자리**: 지금 위치 파이뱀과 같은 노드 겹(`.world-node.z-20`)에서 파이뱀보다 **먼저** 그려 파이뱀 뒤에 섬(노드 z-10 위). 가로 위치는 노드에서 `--px` 지도 단위 = 파이뱀 쪽(`markerSide`)으로 `92 + 48`(파이뱀 발치 바깥쪽). 바닥은 파이뱀과 같은 선(노드 + 6단위)
 - **크기**: 폭 `max(28px, 44 × --u)`(파이뱀 116의 약 40%), 높이는 그림 비율. 그림은 `svg` 폭 100%

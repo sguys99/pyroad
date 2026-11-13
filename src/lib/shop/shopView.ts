@@ -80,9 +80,10 @@ export function lookWith(equipped: ShopStatus['equipped'], item?: ShopItem) {
   const config: Record<string, unknown> = { ...equipped };
   const slot = item && equipSlotOf(item);
   if (item && slot) config[slot] = item.id;
-  const art = (key: string) => {
+  // 슬롯 이름 = 종류 이름 (frame·editor_theme). 다른 종류 id 가 들어 있으면 버림
+  const art = (key: 'frame' | 'editor_theme') => {
     const found = getShopItem(config[key]);
-    return found && 'art' in found ? found.art : null;
+    return found?.kind === key ? found.art : null;
   };
   return {
     costume: costumeFromAvatarConfig(config),

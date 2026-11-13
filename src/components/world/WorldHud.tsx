@@ -18,10 +18,9 @@ import { HudCounter, LevelSeal } from '@/components/ui/hud';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Sheet } from '@/components/ui/sheet';
 import { Toast, ToastRegion } from '@/components/ui/toast';
-import { UserAvatar } from '@/components/profile/UserAvatar';
+import { MyAvatar } from '@/components/profile/MyLook';
 import { LogoutButton } from '@/components/LogoutButton';
 import { SoundToggle } from '@/components/sound/SoundToggle';
-import type { SkinId } from '@/lib/avatar/skins';
 import { getXPProgress } from '@/lib/quest/xp';
 import type { Streak } from '@/lib/time/streak';
 
@@ -38,7 +37,6 @@ import '@/components/shared/achievementMedal.css';
  */
 export interface WorldHudProps {
   name: string;
-  skin: SkinId;
   totalXp: number;
   level: number;
   /** 코인 잔액 (users.coins) */
@@ -144,7 +142,6 @@ export function useStreakSpark({ days, today }: Streak): boolean {
 
 export function WorldHud({
   name,
-  skin,
   totalXp,
   level,
   coins,
@@ -177,7 +174,7 @@ export function WorldHud({
           aria-label={`${name}, 내 프로필`}
           data-testid="hud-profile"
         >
-          <UserAvatar skin={skin} size={32} className="wh-avatar" />
+          <MyAvatar size={32} className="wh-avatar" />
           <span className="wh-name">{name}</span>
         </Link>
 

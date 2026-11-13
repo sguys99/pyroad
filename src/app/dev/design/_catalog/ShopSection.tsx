@@ -24,7 +24,7 @@ const GROUPS: { kind: ShopKind; label: string; note: string }[] = [
   {
     kind: 'costume',
     label: '코스튬 (150~900)',
-    note: '썸네일 = 그 조각 하나만 입힌 정지 파이뱀(PybaemStatic). 조각을 더 그리면 P9-04가 새 마이그레이션으로 추가',
+    note: '썸네일 = 그 조각 하나만 입힌 정지 파이뱀(PybaemStatic). 새 조각은 rig.md §6¾ "새 조각 추가" 순서(costumes.tsx → 카탈로그 → 새 마이그레이션 shop_items)',
   },
   {
     kind: 'pet',
@@ -34,7 +34,7 @@ const GROUPS: { kind: ShopKind; label: string; note: string }[] = [
   {
     kind: 'frame',
     label: '프로필 프레임 (300)',
-    note: '썸네일 = 그 프레임을 두른 내 아바타(고리 + 새싹·별·물결, P9-02 견본). 실제 그림은 P9-05 (UserAvatar 둘레)',
+    note: '썸네일 = 그 테두리를 두른 내 아바타. HUD·프로필·게시판과 같은 원본 AvatarFrameRing (P9-05)',
   },
   {
     kind: 'editor_theme',

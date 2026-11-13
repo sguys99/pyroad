@@ -47,23 +47,9 @@ export function ShopItemArt({
   }
 }
 
-/** 별 하나 (4갈래 반짝임) */
-const SPARK = 'M0 -5 L1.3 -1.3 L5 0 L1.3 1.3 L0 5 L-1.3 1.3 L-5 0 L-1.3 -1.3Z';
-
-/** 물결 고리 (극좌표 사인) */
-function wavePath(r: number, amp: number, waves: number) {
-  const pts = Array.from({ length: 97 }, (_, i) => {
-    const t = (i / 96) * Math.PI * 2;
-    const rr = r + Math.sin(t * waves) * amp;
-    return `${(50 + Math.cos(t) * rr).toFixed(2)} ${(50 + Math.sin(t) * rr).toFixed(2)}`;
-  });
-  return `M${pts.join('L')}Z`;
-}
-const WAVE = wavePath(45, 2.4, 12);
-
 /**
- * 프로필 프레임 견본: 아바타 둘레 고리 + 장식 (새싹 잎 · 별 · 물결).
- * shortcut: 실제 프레임 그림은 P9-05(UserAvatar 둘레)가 정함 — 그때 이 견본도 그 그림으로 바꿀 것
+ * 프로필 프레임 견본 = 그 테두리를 두른 내 아바타 (P9-05 `AvatarFrameRing` 원본 그대로, HUD·프로필·게시판과 같은 그림).
+ * 장식이 칩 밖으로 조금 나오므로 칸의 80% 크기로
  */
 export function FrameArt({
   art,
@@ -74,7 +60,6 @@ export function FrameArt({
   size: number;
   skin?: string | null;
 }) {
-  const inner = size >= 90 ? 96 : size >= 44 ? 48 : 32;
   return (
     <span
       className="shop-frame"
@@ -82,47 +67,7 @@ export function FrameArt({
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <span
-        className="shop-frame-face"
-        style={{ transform: `scale(${(size * 0.78) / inner})` }}
-      >
-        <UserAvatar skin={skin} size={inner as 32 | 48 | 96} />
-      </span>
-      <svg viewBox="0 0 100 100" className="shop-frame-ring">
-        {art === 'wave' ? (
-          <path d={WAVE} className="shop-frame-line" />
-        ) : (
-          <circle cx="50" cy="50" r="45" className="shop-frame-line" />
-        )}
-        {art === 'sprout' &&
-          [-60, 200, 120].map((deg) => (
-            <g
-              key={deg}
-              transform={`rotate(${deg} 50 50) translate(50 5) rotate(-20)`}
-            >
-              <path d="M0 0 C-7 -3 -9 -10 -4 -14 C1 -10 2 -4 0 0Z" />
-              <path d="M0 0 C6 -2 9 -7 6 -11 C1 -9 -1 -4 0 0Z" />
-            </g>
-          ))}
-        {art === 'star' &&
-          [-90, -18, 54, 126, 198].map((deg, i) => (
-            <path
-              key={deg}
-              d={SPARK}
-              transform={`rotate(${deg} 50 50) translate(95 50) scale(${i % 2 ? 0.9 : 1.25})`}
-            />
-          ))}
-        {art === 'wave' &&
-          [20, 160].map((deg) => (
-            <circle
-              key={deg}
-              cx="50"
-              cy="5"
-              r="3.2"
-              transform={`rotate(${deg} 50 50)`}
-            />
-          ))}
-      </svg>
+      <UserAvatar skin={skin} frame={art} size={Math.round(size * 0.8)} />
     </span>
   );
 }

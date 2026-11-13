@@ -28,6 +28,7 @@ import {
   petOffset,
 } from '@/lib/world/worlds';
 import { PetSlot, type PetConfig } from './PetSlot';
+import { useMyLook } from '@/components/profile/MyLook';
 import type { UnlockPlan } from '@/lib/world/unlockSeen';
 import { useStageUnlock } from './unlock/useStageUnlock';
 import {
@@ -272,7 +273,7 @@ interface WorldMapProps {
   unlocks?: UnlockPlan | null;
   /** 카탈로그 데모: 기록을 보내지 않고 다시 틀 수 있음 */
   unlockDemo?: boolean;
-  /** 동행 펫 (P5-08 슬롯). 운영은 아직 null(그림·데이터는 Phase 9), 카탈로그만 견본 */
+  /** 동행 펫 (P5-08 슬롯). 주지 않으면 내가 데려간 펫(`avatar_config.pet`, P9-05 `useMyLook`), 카탈로그는 견본을 줌 */
   pet?: PetConfig | null;
 }
 
@@ -288,6 +289,8 @@ export function WorldMap({
   pet,
 }: WorldMapProps) {
   const { wide, tall } = map.layouts;
+  const myPet = useMyLook().pet;
+  const shownPet = pet !== undefined ? pet : myPet && { id: myPet };
   const { budget } = useMotionTier();
   const { container, item } = nodeVariants(budget);
   const box = useRef<HTMLDivElement>(null);
@@ -481,7 +484,7 @@ export function WorldMap({
               variants={item}
             >
               {/* 펫이 먼저(파이뱀 뒤에 그려짐) */}
-              <PetSlot pet={pet} />
+              <PetSlot pet={shownPet} />
               <div className="wu-walker">
                 <CurrentMarker
                   live={unlocking && budget.mascot !== 'still'}

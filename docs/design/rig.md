@@ -228,7 +228,7 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 | 모자 `hat` | `party`·`explorer`·`crown`·`wizard` | `head` 맨 앞 (`hat` 그룹) | 머리 기울기·끄덕임 + 자체 출렁임 `hatRot` |
 | 머리 밖 표정 소품(반짝이·생각 풍선·음표·Zzz·물음표) | — | `root` 맨 앞 | 몸 전체 |
 
-- **좌표**: 모든 레이어가 같은 128×128 (머리 타원 cx 64 cy 44 rx 28 ry 24, 눈 52·76 / 40). 모자 끝은 상자 위로 나갈 수 있어(마법사 −12) 무대(`framing="stage"`, −20 −36 168 168)에서 다 보입니다. 아바타 상자(0 0 128 128)는 `overflow="visible"`이라 잘리지 않고 칩 밖으로 나옵니다 → 32px 아바타 둘레 처리는 P9-05
+- **좌표**: 모든 레이어가 같은 128×128 (머리 타원 cx 64 cy 44 rx 28 ry 24, 눈 52·76 / 40). 모자 끝은 상자 위로 나갈 수 있어(마법사 −12) 무대(`framing="stage"`, −20 −36 168 168)에서 다 보입니다. 아바타 상자(0 0 128 128)는 `overflow="visible"`이라 잘리지 않고 칩 밖으로 나옵니다 → `UserAvatar`는 모자를 쓰면 파이뱀을 80%로 줄이고 9% 내려 32px에서도 모자 끝까지 칩 안(P9-05). 모자 그룹에는 `data-hat`
 - **소품 위치**: 모자 챙(탐험가 x ≤ 97)과 겹치지 않게 Zzz는 (106,19)부터, 물음표 (104,17), 생각 방울 (96,19)·(103,9)로 옮겼습니다(P9-04, 코스튬 없는 모습도 같은 자리)
 - **선**: A 선 없음 · B 모자는 **제 색의 진한 톤 1.1**(`HAT_TONE`, 펫·별 눈과 같은 말씨) · A×B 잉크 1.6. 망토 B는 옅은 그늘 선
 - **스킨**(§6½) = 팔레트 덮어쓰기라 몸·배·볼·외곽선만 바뀌고 코스튬 색은 그대로입니다
@@ -237,6 +237,8 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 - **새 조각 추가**: `costumes.tsx`에 그리기(128 좌표, 금지 요소 없이) → 종류 타입에 id → `src/lib/shop/catalog.ts` `SHOP_ITEMS`·새 마이그레이션 `shop_items` INSERT(드리프트 테스트) → 격자에서 14상태 확인
 
 ![코스튬 × 포즈 × 스킨 격자](img/rig/costume-grid.png)
+
+- **꾸민 모습 반영(P9-05)**: 원본은 `users.avatar_config` 하나 → `avatarLook()`(`src/lib/avatar/look.ts`). 로그인 화면은 `MyLookProvider`(로그인 레이아웃, 상점이 장착하면 바로 갱신)의 `useMyPybaem()`을 리그에 펼치거나 `MyPybaemStatic`·`MyAvatar`, 게시판은 공개 프로필 `avatar_skin`·`avatar_look`(00042) → `publicLook()`. 학생의 파이뱀(지도·퀘스트 대화 패널·축하·휴식 알림·HUD·프로필·게시판)만 입히고, 로그인 전·시스템 화면(랜딩·로그인·약관·오류·PWA 안내)의 마스코트는 기본 모습
 
 ## 7. 캐릭터 추가 방법
 
@@ -286,7 +288,7 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 | 축하 `celebrations/LevelUpCard.tsx`·`StageClearCard.tsx`·`ProjectCompleteCard.tsx` | ~~`LottieCharacter`~~ | **완료(P6-08)**: `CelebrationMascot`(`celebrations/parts.tsx`) = 지연 로드 `PybaemRig` `proud` → `jumpAtMs`에 `happy`(점프 두 번 + 젤리, 오버레이에서는 반복 `cheer` 안 씀). 남은 것: 코인 `ByeolttongiRig state="flyIn"→"give"` + `onCue('reward')` | P6-08·P6-13 |
 | 퀘스트 성공 (이야기 쪽 대사창) | `cheer` 고정 | **완료(P6-08)**: 통과하면 `happy` 1.6초(lite 70%, 동작 줄이기 0) → `cheer` (`useThinkBeat(…, HAPPY_MS)`) | P6-08 |
 | 월드맵 `WorldMap.tsx` 현재 스테이지 | `CharacterAvatar` + `.mascot-bob` | `PybaemRig size={56} lookAt={false}` (대기 루프는 리그가) | P5 |
-| 헤더·프로필·HUD 아바타 (`LandingHeader`·`ProfileSummary`·`QuestStatusBar`·`profile/page.tsx`) | `CharacterAvatar` | `PybaemStatic size={32~64} filters={false}` (서버 렌더 가능) | P4·P9-05 |
+| 헤더·프로필·HUD 아바타 (`LandingHeader`·`ProfileSummary`·`QuestStatusBar`·`profile/page.tsx`) | `CharacterAvatar` | **완료(P9-05)**: `UserAvatar`(`PybaemStatic` + 테두리 `AvatarFrameRing`), 내 것은 `MyAvatar`, 게시판은 `publicLook` | P4·P9-05 |
 | 랜딩 히어로 `landing/hero/HeroMascot.tsx` | ~~`LottieCharacter`~~ | **완료**: `PybaemStatic` SSR → 한가할 때 `import()`한 `PybaemRig`로 교체(누르면 반응·마우스 인사) | P4-01 |
 | 공유 카드 (next/og) | — | `PybaemStatic`을 P0-10 직렬화기로 | P10 |
 | `CharacterAvatar`·`*Svg.tsx`·`motionClasses.ts` | 기존 (`LottieCharacter`는 P6-08에서 삭제) | 위 교체가 끝나면 삭제 (`expressions.ts` 타입은 유지) | P6 끝 |

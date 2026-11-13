@@ -126,11 +126,7 @@ export default async function ProfilePage() {
           <HudCounter kind="coin" value={profile.coins} />
         </div>
 
-        <ProfileHero
-          name={profile.name}
-          skin={profile.skin}
-          totalXp={profile.total_xp}
-        />
+        <ProfileHero name={profile.name} totalXp={profile.total_xp} />
 
         {/* 768+ 두 열: 왼쪽 달력·모험 기록, 오른쪽 업적·별과 보물 (열마다 쌓아 빈 곳을 줄임) */}
         <div className="pf-col">

@@ -1,9 +1,11 @@
 'use client';
 
+import type { ComponentProps } from 'react';
 import dynamic from 'next/dynamic';
 import { Check } from 'lucide-react';
 import { DialogueBox } from '@/components/ui/dialogue-box';
-import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
+import type { PybaemState } from '@/components/characters/rig';
+import { MyPybaemStatic, useMyPybaem } from '@/components/profile/MyLook';
 import { Landmark } from '@/components/world/map/MapArt';
 import { worldTint } from '@/lib/world/worldBook';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
@@ -12,14 +14,19 @@ import { HAPPY_MS, useThinkBeat } from './useThinkBeat';
 import '@/components/world/map/worldMap.css';
 
 // 첫 화면은 서버에서 그린 정지 그림, 라이브 리그는 나중에 (rig.md 지연 로드, P6-16 번들 예산)
-export const PybaemRig = dynamic(
+const LivePybaemRig = dynamic(
   () =>
     import('@/components/characters/rig/MascotRig').then((m) => m.PybaemRig),
   {
     ssr: false,
-    loading: () => <PybaemStatic state="idle" size={96} label="" />,
+    loading: () => <MyPybaemStatic state="idle" size={96} label="" />,
   },
 );
+
+/** 퀘스트 대화 패널의 파이뱀 = 학생이 꾸민 내 파이뱀 (P9-05: 코스튬·스킨, 이야기·퀴즈 대사창 공용) */
+export function PybaemRig(props: ComponentProps<typeof LivePybaemRig>) {
+  return <LivePybaemRig {...useMyPybaem()} {...props} />;
+}
 
 export interface MissionItem {
   text: string;

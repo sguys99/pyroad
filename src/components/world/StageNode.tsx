@@ -4,7 +4,8 @@ import { Check, Crown, Lock } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import dynamic from 'next/dynamic';
-import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
+import type { PybaemState } from '@/components/characters/rig';
+import { MyPybaemStatic, useMyPybaem } from '@/components/profile/MyLook';
 import { SHOW_CHEST, SHOW_STARS } from '@/lib/world/flags';
 import { chestState, isPerfectStage } from '@/lib/world/chest';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
@@ -161,13 +162,13 @@ const PybaemRig = dynamic(
   {
     ssr: false,
     loading: () => (
-      <PybaemStatic state="happy" size={120} framing="stage" label="" />
+      <MyPybaemStatic state="happy" size={120} framing="stage" label="" />
     ),
   },
 );
 
 /**
- * 지금 위치: 큰 파이뱀 + "지금 여기!" 칩. 평소에는 정지 리그 그림(엔진 없음)에 CSS 대기 루프 `.mascot-bob`(full·lite)만.
+ * 지금 위치: 큰 파이뱀(내가 꾸민 모습, P9-05) + "지금 여기!" 칩. 평소에는 정지 리그 그림(엔진 없음)에 CSS 대기 루프 `.mascot-bob`(full·lite)만.
  * 잠금 해제 연출(P5-05)은 `live`로 라이브 `PybaemRig`(상태 기쁨 → 응원)를 쓰고 칩 글자를 바꾼다
  */
 export function CurrentMarker({
@@ -181,11 +182,13 @@ export function CurrentMarker({
 }) {
   // 리그의 선 떨림(SVG 변위 필터)은 비싸서 연출 동안 full 도 lite 로 (시안 rigTier: 도장·길이 주인공)
   const { tier } = useMotionTier();
+  const me = useMyPybaem();
   return (
     <div className="wn-here" aria-hidden data-testid="world-current-marker">
       <div className="mascot-bob">
         {live ? (
           <PybaemRig
+            {...me}
             state={state}
             size={120}
             framing="stage"
@@ -195,7 +198,7 @@ export function CurrentMarker({
             pokeable={false}
           />
         ) : (
-          <PybaemStatic state="happy" size={120} framing="stage" label="" />
+          <MyPybaemStatic state="happy" size={120} framing="stage" label="" />
         )}
       </div>
       <span className="wn-here-flag">{flag}</span>

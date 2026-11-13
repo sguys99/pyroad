@@ -14,8 +14,7 @@ import { CardButton } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { AchievementMedal } from '@/components/shared/AchievementMedal';
-import { UserAvatar } from '@/components/profile/UserAvatar';
-import type { SkinId } from '@/lib/avatar/skins';
+import { MyAvatar } from '@/components/profile/MyLook';
 import {
   getLevelTitle,
   getXPProgress,
@@ -67,11 +66,9 @@ export function ProfileCard({
 /** 머리: 아바타 + 레벨 도장, 이름, 칭호 도장(5레벨마다 큰 칭호 금색), 다음 칭호까지 경험치 */
 export function ProfileHero({
   name,
-  skin,
   totalXp,
 }: {
   name: string;
-  skin: SkinId;
   totalXp: number;
 }) {
   const {
@@ -91,7 +88,7 @@ export function ProfileHero({
       data-testid="profile-hero"
     >
       <div className="pf-avatar">
-        <UserAvatar skin={skin} size={96} />
+        <MyAvatar size={96} />
         <span className="pf-seal" data-big={big || undefined}>
           <span className="sr-only">레벨 {level}</span>
           <small aria-hidden className="font-sans">
