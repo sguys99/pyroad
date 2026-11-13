@@ -43,8 +43,28 @@ beforeAll(async () => {
     .map((q) => ({
       id: q.id,
       quiz: (q.prompt_skeleton as unknown as { quiz: QuizPrompt }).quiz,
-      answer: rows.answer_keys.find((k) => k.quest_id === q.id)!.quiz_answer!,
-    }));
+      answer: rows.answer_keys.find((k) => k.quest_id === q.id)!
+        .quiz_answer as QuizAnswer,
+    }))
+    // 보스 라운드(P9-12)도 같은 채점(boss_answer 의 `a.v = p_answer`)이라 함께 검사
+    .concat(
+      rows.quests
+        .filter((q) => q.quest_type === 'boss')
+        .flatMap((q) => {
+          const rounds = (
+            q.prompt_skeleton as unknown as { boss: { rounds: QuizPrompt[] } }
+          ).boss.rounds;
+          const keys = (
+            rows.answer_keys.find((k) => k.quest_id === q.id)!
+              .quiz_answer as unknown as { rounds: QuizAnswer[] }
+          ).rounds;
+          return rounds.map((quiz, i) => ({
+            id: q.id,
+            quiz,
+            answer: keys[i],
+          }));
+        }),
+    );
   db = new PGlite();
   await db.waitReady;
   // 실제 마이그레이션의 kst_date·kst_today 정의 그대로 (00012)
@@ -147,8 +167,8 @@ const ids = (q: QuizPrompt): Record<string, string[]> => {
 };
 
 describe('실제 콘텐츠 퀴즈', () => {
-  it('21문항, 4종 모두 있음', () => {
-    expect(quizzes).toHaveLength(21);
+  it('퀴즈 21문항 + 보스 라운드, 4종 모두 있음', () => {
+    expect(quizzes.length).toBeGreaterThanOrEqual(21 + 3);
     expect(new Set(quizzes.map((q) => q.quiz.kind))).toEqual(
       new Set(['multiple_choice', 'fill_blank', 'parsons', 'bug_hunt']),
     );

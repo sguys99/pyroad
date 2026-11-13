@@ -32,6 +32,8 @@ export interface E2eStage {
   questCount: number;
   /** 퀴즈(보너스) order 순 — 폰 퀴즈 추천(P7-11) */
   quizzes: { id: string; order: number; title: string; kind: string }[];
+  /** 스테이지 보스 (P9-12, 마지막 관문). 없으면 null. quests 에는 들어가지 않음(정답 코드가 없음) */
+  boss: { id: string; order: number; title: string } | null;
 }
 
 interface QuestYaml {
@@ -98,6 +100,10 @@ export function stages(): E2eStage[] {
             kind: quiz_kind ?? '',
           }))
           .sort((a, b) => a.order - b.order),
+        boss:
+          all
+            .filter((q) => q.quest_type === 'boss')
+            .map(({ id, order, title }) => ({ id, order, title }))[0] ?? null,
       };
     })
     .sort((a, b) => a.order - b.order);

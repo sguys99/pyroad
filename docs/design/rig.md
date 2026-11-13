@@ -290,5 +290,6 @@ P0-07 스파이크(파이뱀 7상태) 10.5KB gzip보다 큰 것은 상태 7개 �
 | 월드맵 `WorldMap.tsx` 현재 스테이지 | `CharacterAvatar` + `.mascot-bob` | `PybaemRig size={56} lookAt={false}` (대기 루프는 리그가) | P5 |
 | 헤더·프로필·HUD 아바타 (`LandingHeader`·`ProfileSummary`·`QuestStatusBar`·`profile/page.tsx`) | `CharacterAvatar` | **완료(P9-05)**: `UserAvatar`(`PybaemStatic` + 테두리 `AvatarFrameRing`), 내 것은 `MyAvatar`, 게시판은 `publicLook` | P4·P9-05 |
 | 랜딩 히어로 `landing/hero/HeroMascot.tsx` | ~~`LottieCharacter`~~ | **완료**: `PybaemStatic` SSR → 한가할 때 `import()`한 `PybaemRig`로 교체(누르면 반응·마우스 인사) | P4-01 |
+| 보스 배틀 `quest/boss/BossArena.tsx` | — | **완료(P9-12)**: 내 파이뱀(`PybaemRig` 꾸민 모습, 정답 `happy`·오답 `surprised`·이김 `cheer`·짐 `encourage`) vs 지연 로드 `BugBugRig`(좌우 뒤집어 파이뱀 쪽을 봄, 등장 `appear`·맞음 `hit`·공격 `attack`·짐 `defeat`). 자세는 1.2초 뒤 대기로, 둘 다 `framing="stage"` + 무대 폭 `cqi` 크기 | P9-12 |
 | 공유 카드 (next/og) | — | `PybaemStatic`을 P0-10 직렬화기로 | P10 |
 | `CharacterAvatar`·`*Svg.tsx`·`motionClasses.ts` | 기존 (`LottieCharacter`는 P6-08에서 삭제) | 위 교체가 끝나면 삭제 (`expressions.ts` 타입은 유지) | P6 끝 |

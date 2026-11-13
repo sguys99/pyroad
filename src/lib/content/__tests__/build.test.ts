@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 import {
@@ -11,7 +13,12 @@ import {
 } from '../build';
 import { questFromRows } from '../fromRows';
 import type { ContentTree } from '../load';
-import { findAnswerKeysInPublic, parseQuest, type Quest } from '../schema';
+import {
+  findAnswerKeysInPublic,
+  parseQuest,
+  type Quest,
+  type QuizAnswer,
+} from '../schema';
 import { questToYaml } from '../yaml';
 import {
   bugHuntQuiz,
@@ -543,9 +550,11 @@ describe('퀴즈 빌드 (P7-01)', () => {
       },
     ]);
     // fill_blank 키는 빈칸이 나온 차례로 고정 (seed 가 매번 같게)
-    expect(Object.keys(quizKeys[1].quiz_answer!.accepted[0] as object)).toEqual(
-      ['bk-r2fa', 'bk-m8ce'],
-    );
+    expect(
+      Object.keys(
+        (quizKeys[1].quiz_answer as QuizAnswer).accepted[0] as object,
+      ),
+    ).toEqual(['bk-r2fa', 'bk-m8ce']);
     for (const k of quizKeys) {
       expect([k.expected_output, k.hints, k.solution_code, k.steps]).toEqual([
         '',
@@ -577,5 +586,63 @@ describe('퀴즈 빌드 (P7-01)', () => {
   it('검증용 JSON 에서 퀴즈는 뺌 (실행할 정답 코드가 없음)', () => {
     const fixture = toCheckFixture(rows, { generatedBy: 't', source: 's' });
     expect(fixture.quests.map((q) => q.id)).toEqual([codeQuest().id]);
+  });
+});
+
+describe('보스 (P9-12)', () => {
+  const boss = parseYaml(
+    readFileSync(
+      join(
+        process.cwd(),
+        'content/worlds/python-island/01-python-village/11-boss-print-captain.yaml',
+      ),
+      'utf8',
+    ),
+  );
+
+  it('견본 보스가 스키마를 통과하고, 공개 행에는 정답이 없고 정답 행은 kind boss + 라운드마다 퀴즈 정답', () => {
+    const parsed = parseQuest(boss);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const { questRow, answerRow } = splitQuest(parsed.value, STAGE_1.id);
+    expect(questRow).toMatchObject({
+      quest_type: 'boss',
+      quiz_kind: null,
+      is_mobile_friendly: true,
+    });
+    expect(findAnswerKeysInPublic(questRow.prompt_skeleton)).toEqual([]);
+    const sk = questRow.prompt_skeleton as {
+      boss: { rounds: { kind: string }[]; review_quests: unknown[] };
+    };
+    const key = answerRow.quiz_answer as {
+      kind: string;
+      rounds: { kind: string; accepted: unknown[] }[];
+    };
+    expect(key.kind).toBe('boss');
+    expect(key.rounds.map((r) => r.kind)).toEqual(
+      sk.boss.rounds.map((r) => r.kind),
+    );
+    expect(sk.boss.review_quests).toHaveLength(sk.boss.rounds.length);
+    expect(key.rounds.every((r) => r.accepted.length > 0)).toBe(true);
+  });
+
+  it('xp_reward 는 3의 배수 · 라운드 3~7개 · 라운드 공개 부분에 정답 키 금지', () => {
+    const bad = (over: object) => parseQuest({ ...boss, ...over });
+    expect(bad({ xp_reward: 50 }).ok).toBe(false);
+    expect(bad({ rounds: boss.rounds.slice(0, 2) }).ok).toBe(false);
+    const leak = structuredClone(boss);
+    leak.rounds[0].prompt.accepted = ['opt-r4wk'];
+    const r = parseQuest(leak);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors[0]).toContain('rounds[0].prompt.accepted');
+  });
+
+  it('라운드 문제 글에 정답이 그대로 있으면 실패 (퀴즈와 같은 검사)', () => {
+    const leak = structuredClone(boss);
+    leak.rounds[3].prompt.quiz.question =
+      '사람이 읽는 메모라서 실행되지 않아요 — 맞을까?';
+    const r = parseQuest(leak);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join('\n')).toContain('4번째 문제');
   });
 });

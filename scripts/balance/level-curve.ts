@@ -42,10 +42,12 @@ export function world1Quests(): QuestXp[] {
   const world = tree.worlds.find((w) => w.world.order === 1);
   if (!world) throw new Error('1월드 콘텐츠가 없음');
   return world.stages.flatMap((s) =>
-    s.quests.map(({ quest }) => ({
-      type: quest.quest_type,
-      base: quest.xp_reward,
-    })),
+    // shortcut: 보스(P9-12)는 빼고 셈 (docs/balance.md 3.14). 보스 7종(P9-13) 뒤 모델에 넣기
+    s.quests.flatMap(({ quest }) =>
+      quest.quest_type === 'boss'
+        ? []
+        : [{ type: quest.quest_type, base: quest.xp_reward }],
+    ),
   );
 }
 

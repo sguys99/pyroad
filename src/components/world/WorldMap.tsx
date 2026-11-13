@@ -324,7 +324,10 @@ export function WorldMap({
       )
     : real;
 
-  const inProgressIndex = sorted.findIndex((s) => s.status === 'in_progress');
+  // 맨 뒤 진행 중 스테이지 = 지금 위치 (보스가 새로 생긴 앞 스테이지도 진행 중일 수 있음, 00046)
+  const inProgressIndex = sorted.findLastIndex(
+    (s) => s.status === 'in_progress',
+  );
   // 잉크 길 끝: 진행 중 스테이지, 없으면 마지막으로 완료한 스테이지
   const cur =
     inProgressIndex >= 0

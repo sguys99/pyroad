@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { REPO_ROOT, requireLocalStack, USER_FILE } from './env';
+import { stages } from './content';
 
 export interface E2eUser {
   id: string;
@@ -123,6 +124,62 @@ export async function quizKey(questId: string): Promise<{
   };
 }
 
+/** 보스 문제·정답 (P9-12): 공개 라운드(prompt_skeleton.boss.rounds)와 정답(quest_answer_keys.quiz_answer.rounds) */
+export async function bossKey(questId: string): Promise<{
+  name: string;
+  intro: string;
+  reviewQuests: (string | null)[];
+  rounds: {
+    kind: string;
+    quiz: Record<string, unknown>;
+    accepted: unknown[];
+    explanation: string;
+  }[];
+}> {
+  const db = adminClient();
+  const quest = check(
+    `quests ${questId}`,
+    await db
+      .from('quests')
+      .select('prompt_skeleton')
+      .eq('id', questId)
+      .single(),
+  ) as {
+    prompt_skeleton: {
+      boss: {
+        name: string;
+        intro: string;
+        rounds: Record<string, unknown>[];
+        review_quests: (string | null)[];
+      };
+    };
+  };
+  const key = check(
+    `quest_answer_keys ${questId}`,
+    await db
+      .from('quest_answer_keys')
+      .select('quiz_answer')
+      .eq('quest_id', questId)
+      .single(),
+  ) as {
+    quiz_answer: {
+      rounds: { kind: string; accepted: unknown[]; explanation: string }[];
+    };
+  };
+  const b = quest.prompt_skeleton.boss;
+  return {
+    name: b.name,
+    intro: b.intro,
+    reviewQuests: b.review_quests,
+    rounds: b.rounds.map((quiz, i) => ({
+      kind: key.quiz_answer.rounds[i].kind,
+      quiz,
+      accepted: key.quiz_answer.rounds[i].accepted,
+      explanation: key.quiz_answer.rounds[i].explanation,
+    })),
+  };
+}
+
 /** 사용자의 서버 XP (users.total_xp) */
 export async function totalXp(userId: string): Promise<number> {
   const row = check(
@@ -136,21 +193,40 @@ export async function totalXp(userId: string): Promise<number> {
   return row.total_xp;
 }
 
-/** 앞 퀘스트를 서버 완료 RPC 로 끝내 둔다 (앱의 /api/quest/complete 가 채점 뒤 부르는 것과 같은 함수) */
+/**
+ * 앞 퀘스트를 서버 완료 RPC 로 끝내 둔다 (앱의 /api/quest/complete 가 채점 뒤 부르는 것과 같은 함수).
+ * 한 스테이지의 코드 퀘스트를 모두 끝내면 그 스테이지 보스(P9-12, 스테이지 마지막 관문)도 바로 끝내 "스테이지 통과" 상태로 —
+ * 보스가 생기기 전 스펙들이 기대하던 대로 다음 스테이지가 열림. 보스 화면 자체는 boss-battle 스펙이 봄
+ */
 export async function completeQuests(
   userId: string,
   quests: ReadonlyArray<{ id: string; solution: string }>,
+  { withBoss = true }: { withBoss?: boolean } = {},
 ): Promise<void> {
   const db = adminClient();
-  for (const q of quests) {
+  const complete = async (id: string, code: string) =>
     check(
-      `complete_quest ${q.id}`,
+      `complete_quest ${id}`,
       await db.rpc('complete_quest', {
         p_user_id: userId,
-        p_quest_id: q.id,
-        p_submission: { code: q.solution, passed: true },
+        p_quest_id: id,
+        p_submission: { code, passed: true },
       }),
     );
+  const done = new Set<string>();
+  for (const q of quests) {
+    await complete(q.id, q.solution);
+    done.add(q.id);
+    const s = stages().find((st) => st.quests.some((x) => x.id === q.id));
+    if (
+      withBoss &&
+      s?.boss &&
+      !done.has(s.boss.id) &&
+      s.quests.every((x) => done.has(x.id))
+    ) {
+      await complete(s.boss.id, '');
+      done.add(s.boss.id);
+    }
   }
 }
 

@@ -52,7 +52,11 @@ test('스테이지 클리어 → 자랑하기 → 링크 복사 → 15코인, �
     })),
   );
   const me = student.id;
-  await completeQuests(me, s1.quests.slice(0, -1));
+  // 보스(P9-12)는 먼저 끝내 둠 → 마지막 코드 퀘스트가 스테이지를 깸 (보스로 깨는 길은 boss-battle 스펙)
+  await completeQuests(me, [
+    ...s1.quests.slice(0, -1),
+    ...(s1.boss ? [{ id: s1.boss.id, solution: '' }] : []),
+  ]);
   const before = await coinBalance(me);
 
   // 퀘스트는 1280에서 풀고(360은 이야기·공책 탭), 축하 카드는 두 폭에서 본 뒤 360에서 자랑하기

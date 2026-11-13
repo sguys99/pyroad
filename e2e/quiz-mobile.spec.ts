@@ -13,6 +13,7 @@ import {
 } from './support/admin';
 import { stage, stages } from './support/content';
 import { stageButton } from './support/quest';
+import { enterQuizAnswer } from './support/quizInput';
 import { getXPProgress } from '../src/lib/quest/xp';
 import type { Page } from '@playwright/test';
 
@@ -54,59 +55,9 @@ function firstQuiz(kind: string) {
   throw new Error(`[e2e] ${kind} 퀴즈가 content/ 에 없음`);
 }
 
-const blanks = (code: string) =>
-  [...code.matchAll(/\{\{([^{}]+)\}\}/g)].map((m) => m[1]);
-
 /** 답을 탭으로 넣는다 (값 모양은 content/README 퀴즈 정규형) */
 async function tapAnswer(page: Page, key: Key, answer: Answer) {
-  const card = byId(page, 'quiz-card');
-  switch (key.kind) {
-    case 'multiple_choice':
-      await card
-        .getByTestId('quiz-option')
-        .filter({ has: page.locator(`input[value="${answer as string}"]`) })
-        .tap();
-      return;
-    case 'fill_blank': {
-      const fill = answer as Record<string, string>;
-      const tokens = key.quiz.tokens as { id: string; text: string }[];
-      for (const b of blanks(key.quiz.code as string)) {
-        const text = tokens.find((t) => t.id === fill[b])!.text;
-        await card
-          .getByTestId('quiz-token')
-          .filter({
-            has: page.locator('code').getByText(text, { exact: true }),
-          })
-          .tap();
-      }
-      return;
-    }
-    case 'parsons': {
-      const lines = answer as (string | { id: string; indent: number })[];
-      for (const [i, x] of lines.entries()) {
-        const id = typeof x === 'string' ? x : x.id;
-        await card.locator(`[data-tray="${id}"]`).tap();
-        for (let k = 0; typeof x !== 'string' && k < x.indent; k++)
-          await card
-            .getByRole('button', { name: `${i + 1}번째 줄 들여쓰기 늘리기` })
-            .tap();
-      }
-      return;
-    }
-    case 'bug_hunt': {
-      const { line, fix } = answer as { line: string; fix: string };
-      await card
-        .getByTestId('bughunt-line')
-        .filter({ has: page.locator(`input[value="${line}"]`) })
-        .tap();
-      await card
-        .getByTestId('bughunt-fix')
-        .filter({ has: page.locator(`input[value="${fix}"]`) })
-        .tap();
-      return;
-    }
-  }
-  throw new Error(`[e2e] 모르는 퀴즈 종류 ${key.kind}`);
+  await enterQuizAnswer(page, byId(page, 'quiz-card'), key, answer);
 }
 
 /** "정답 확인"을 탭하고 채점 응답 본문 */

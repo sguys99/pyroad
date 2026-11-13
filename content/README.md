@@ -90,7 +90,7 @@ order: 1
 title: 첫 번째 인사
 concept: print()
 xp_reward: 50
-quest_type: code                            # code | project | quiz (아래 "퀴즈")
+quest_type: code                            # code | project | quiz | boss (아래 "퀴즈"·"보스")
 
 # 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton)
 prompt:
@@ -301,6 +301,42 @@ answer:
 **빌드가 확인**: id 형식·중복, `accepted`·`explanations`가 있는 id만 가리키는지, 객관식에 틀린 보기가 있는지, fill_blank가 모든 빈칸을 채우는지, parsons가 모든 줄을 한 번씩 쓰는지와 indent 모양, 같은 정답 중복, 그리고 **공개 문장(제목·`topic`·`learning_goals`·`story_context`·`fallback_text`·문제 문장)에 정답이 그대로 있는지**(§12-Q20). 정답 글자는 객관식·bug_hunt는 정답 보기·수정안 글자(오답 보기 글자도 같은 문장에 있으면 정답을 짚은 게 아니라서 통과), fill_blank는 빈칸을 정답으로 채운 줄, parsons는 정답 순서로 이어지는 두 줄입니다. 한 글자짜리와 영문·숫자 낱말 한가운데(`3` ⊂ `range(30)`)는 보지 않습니다. 코드·보기 자체는 문제라서 보지 않습니다.
 
 DB: `quests.quest_type = 'quiz'`, `quiz_kind`, `is_mobile_friendly = true`, `validation_type = 'all'`(퀴즈는 쓰지 않는 자리값. 00012 CHECK 안의 값이고 기준값 칸이 비어 코드 채점 경로로는 항상 불합격), `quest_answer_keys`는 `quiz_answer`만 있고 `hints = {}`·`solution_code = NULL`. 정답 코드 자동 검증은 퀴즈를 건너뛰고, 대신 `scripts/content/__tests__/quizzes.content.test.ts`(`test:content`)가 퀴즈 코드를 Pyodide로 돌려 봅니다: 출력 예측형 실제 출력(앞뒤 공백만 뺌) = 정답 보기, fill_blank 정답 채움은 오류 없이 끝나고 오답 토큰은 결과가 다름, parsons 정답 순서는 모두 같은 출력, bug_hunt 원래 코드·오답 수정안은 정답 수정안과 결과가 다름. 그래서 퀴즈 코드에는 `input()`·`random`을 쓰지 않습니다.
+
+### 보스 (`quest_type: boss`, P9-12)
+
+**스테이지 마지막 관문**입니다. 퀴즈 문제(라운드) 3~7개를 이어서 풀고, 맞히면 꾸민 파이뱀이 공격해 보스 HP가 한 칸 줄고, 틀리면 하트(3개)가 하나 줄며 같은 문제를 다시 고릅니다. 하트 0이면 패배(바로 무료 재도전), 마지막 문제를 맞히면 승리. **별 = 남은 하트**, XP = 별 1개당 `xp_reward / 3`(그래서 `xp_reward`는 3의 배수, 견본 60), 첫 승리 코인 20 + 새 별마다 5(`docs/balance.md` 3.14). 채점·하트는 서버(`boss_answer`, 00046)가 한 문제씩 합니다.
+
+- **잠금**: 같은 스테이지의 다른 퀘스트(퀴즈 빼고)를 모두 끝내야 열립니다. 보스는 퀴즈와 달리 **스테이지 클리어·다음 스테이지 해제에 듭니다**(이겨야 통과 도장·보물상자·다음 스테이지). 이미 뒤 스테이지에서 퀘스트를 완료한 학생은 앞 스테이지에 보스가 새로 생겨도 그 스테이지들이 잠기지 않습니다(00046 `is_stage_unlocked`).
+- **순서**: 스테이지의 맨 마지막 `order`(코드 퀘스트·퀴즈 뒤). 파일 이름 `NN-boss-<슬러그>.yaml`, id는 `b1000000-0000-0000-0000-0000000002NN`(스테이지 번호 NN).
+- 라운드 하나 = 퀴즈 하나와 같은 모양·규칙(위 4종, id 규칙, 공개 문장 정답 누출 검사, `test:content` Pyodide 검사). 보스 대사도 공개 문장으로 봅니다. 키보드 없이 깰 수 있게 퀴즈 문제만 씁니다(빌드가 `is_mobile_friendly = true`).
+
+```yaml
+id: b1000000-0000-0000-0000-000000000201
+order: 11                     # 스테이지 맨 마지막
+title: 출력 대장 버그버그
+concept: print() 총정리
+xp_reward: 60                 # 3의 배수 (별 1개당 20)
+quest_type: boss
+prompt:
+  topic: …
+  learning_goals: [ … ]
+  story_context: …
+  fallback_text: …
+  boss:
+    name: 출력 대장 버그버그   # HP 바 이름표
+    intro: 히히! …            # 등장할 때 보스 한마디
+    on_defeat: 으앗, 졌다! …  # 학생이 이겼을 때 (진 보스가 친구처럼)
+    on_victory: 이번엔 …      # 학생이 졌을 때 (놀리지 않고 다시 오라고)
+rounds:                       # 3~7개. 라운드마다 퀴즈 하나
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000002   # 선택. 이 문제에서 지면 "복습하러 가기"가 여는 같은 스테이지 퀘스트
+    prompt:
+      quiz: { question: …, code: …, options: [ … ] }      # 퀴즈 prompt.quiz 와 같음
+    answer:
+      quiz_answer: { accepted: [ … ], explanation: …, explanations: { … } }
+```
+
+DB: `quests.quest_type = 'boss'`, `prompt_skeleton.boss = {name, intro, on_defeat, on_victory, rounds: [퀴즈 공개 모양…], review_quests: [id|null…]}`, `quest_answer_keys.quiz_answer = {kind: 'boss', rounds: [{kind, accepted, explanation, explanations?}…]}`(00046 CHECK). 보기 순서는 들어올 때·다시 도전할 때마다 서버가 섞습니다.
 
 ## 3. 검증 규칙 (`answer.validation`)
 

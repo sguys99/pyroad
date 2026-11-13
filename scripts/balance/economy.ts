@@ -112,12 +112,19 @@ export function world1Stages(): StageDef[] {
   return world.stages.map((s) => ({
     order: s.stage.order,
     isFinal: s.stage.is_final,
-    quests: s.quests.map(({ quest }) => ({
-      id: quest.id,
-      type: quest.quest_type,
-      base: quest.xp_reward,
-      stage: s.stage.order,
-    })),
+    // shortcut: 보스(P9-12)는 시뮬레이션에 넣지 않음 — 보상은 docs/balance.md 3.14에 따로 셈. 보스가 7종(P9-13)이 되면 모델에 넣기
+    quests: s.quests.flatMap(({ quest }) =>
+      quest.quest_type === 'boss'
+        ? []
+        : [
+            {
+              id: quest.id,
+              type: quest.quest_type,
+              base: quest.xp_reward,
+              stage: s.stage.order,
+            },
+          ],
+    ),
   }));
 }
 

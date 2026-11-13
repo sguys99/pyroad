@@ -35,6 +35,7 @@ export type {
   QuizKind,
   QuizPrompt,
   QuizPromptSkeleton,
+  BossPromptSkeleton,
 } from '@/lib/content/schema';
 
 /** worlds.unlock_rule (원본 스키마 src/lib/content/schema.ts WorldUnlockRuleSchema, §12-Q2·Q48) */
@@ -199,7 +200,8 @@ export type QuestWithStage = QuestClientSafe & {
 
 export interface StageWithStatus extends Stage {
   status: StageStatus;
-  quests: Pick<Quest, 'id' | 'order'>[];
+  /** quest_type: 보스만 남았는지(P9-12 StageNode). 없으면 코드 퀘스트로 봄 */
+  quests: (Pick<Quest, 'id' | 'order'> & { quest_type?: string })[];
   completedQuestCount: number;
   totalQuestCount: number;
   firstIncompleteQuestId: string | null;

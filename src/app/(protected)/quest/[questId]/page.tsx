@@ -7,6 +7,7 @@ import { trackQuestStart } from '@/lib/analytics/server';
 import { QUEST_RENDERERS } from '@/components/quest/questRenderers';
 import { stripAnswerFields } from '@/lib/quest/answerKeys';
 import { getQuestKind, type QuizPromptSkeleton } from '@/lib/quest/questKind';
+import type { BossPromptSkeleton } from '@/lib/types/database';
 import { shuffleQuiz } from '@/lib/quest/quizShuffle';
 import { checkStageUnlocked } from '@/lib/world/checkStageUnlocked';
 import { STAGE_LOCKED_REDIRECT } from '@/lib/world/stageLock';
@@ -75,6 +76,9 @@ export default async function QuestPage({ params }: Props) {
   // 퀴즈 보기 순서는 들어올 때마다 섞음 (P7-02, §2.3). 다시 풀기 순서는 /api/quest/answer 의 next_quiz
   const skeleton = quest.prompt_skeleton as Partial<QuizPromptSkeleton>;
   if (skeleton.quiz) skeleton.quiz = shuffleQuiz(skeleton.quiz);
+  // 보스 문제도 문제마다 섞음 (P9-12). 다시 도전 순서는 /api/quest/boss 시작 응답의 rounds
+  const boss = (quest.prompt_skeleton as Partial<BossPromptSkeleton>).boss;
+  if (boss?.rounds) boss.rounds = boss.rounds.map((q) => shuffleQuiz(q));
   // 헤더 BGM = 이 퀘스트가 속한 월드의 곡 (P5-11, 월드맵과 같은 곡이면 이어서 재생)
   // 눈썹 "N권"은 지도 머리와 같은 셈(bookNo: order 순 목록의 자리, P6-01)
   const world = quest.stage.world;

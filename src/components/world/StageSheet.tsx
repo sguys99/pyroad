@@ -7,6 +7,7 @@ import {
   Check,
   Code2,
   Crown,
+  Lock,
   MessageCircleQuestion,
   RotateCcw,
   Smartphone,
@@ -134,6 +135,10 @@ export function StageSheet({
   const quizDone = quizRows.filter((r) => r.state === 'done').length;
   const quizStars = quizRows.reduce((n, r) => n + (r.best_stars ?? 0), 0);
   const nextNo = next && nums.get(next.id);
+  // 보스 배틀(P9-12)은 스테이지 마지막 관문: 다른 코드 퀘스트를 다 끝내야 열림 (서버 boss_locked)
+  const bossWaiting = codeRows.some(
+    (r) => r.quest_type !== 'boss' && r.state !== 'done',
+  );
   const nextVerb =
     next && (next.status === 'in_progress' || done > 0)
       ? '이어하기'
@@ -291,6 +296,22 @@ export function StageSheet({
                     <span className="ss-tag" data-state={q.state}>
                       {STATE_TEXT[q.state]}
                     </span>
+                    {q.quest_type === 'boss' &&
+                      q.state !== 'done' &&
+                      bossWaiting && (
+                        <span
+                          className="ss-tag"
+                          data-boss-lock
+                          data-testid="stage-sheet-boss-lock"
+                        >
+                          <Lock
+                            aria-hidden
+                            className="size-3.5"
+                            strokeWidth={2.6}
+                          />
+                          퀘스트를 다 깨면 열려요
+                        </span>
+                      )}
                     {q.state === 'done' && starReviewOpen(q, today) && (
                       <span
                         className="ss-tag"
@@ -321,7 +342,10 @@ export function StageSheet({
                   {q.state === 'done' ? (
                     <>
                       {/* 코드 퀘스트 별은 P8-05부터 기록(SHOW_STARS), 퀴즈 별은 P7부터. 0(소급 전 기존 완료)은 그리지 않음 */}
-                      {(SHOW_STARS || q.kind === 'quiz') &&
+                      {/* 보스 별 = 남은 하트 (서버 판정, P9-12) */}
+                      {(SHOW_STARS ||
+                        q.kind === 'quiz' ||
+                        q.quest_type === 'boss') &&
                         q.best_stars > 0 && (
                           <Stars n={q.best_stars} size={18} />
                         )}

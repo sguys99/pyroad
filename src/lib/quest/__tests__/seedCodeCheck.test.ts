@@ -26,7 +26,8 @@ function codeChecksIn(rule: ValidationRule): CodeCheckRule[] {
 
 // 퀴즈는 실행할 코드가 없음 (P7-01)
 const codeCheckUnits = rows.quests
-  .filter((q) => q.quest_type !== 'quiz')
+  // 퀴즈·보스(P9-12)는 실행할 코드·규칙이 없음
+  .filter((q) => q.quest_type !== 'quiz' && q.quest_type !== 'boss')
   .flatMap((q) => {
     const m = meta.get(q.id)!;
     const key = rows.answer_keys.find((k) => k.quest_id === q.id)!;

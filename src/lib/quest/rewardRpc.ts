@@ -43,6 +43,20 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   submission_too_large: { status: 413, error: '코드가 너무 길어요.' },
   answer_too_large: { status: 413, error: '답이 너무 길어요.' },
   not_quiz: { status: 400, error: '퀴즈 문제가 아니에요.' },
+  // 보스 배틀 (P9-12, 00046)
+  not_boss: { status: 400, error: '보스 배틀이 아니에요.' },
+  boss_locked: {
+    status: 409,
+    error: '이 스테이지 퀘스트를 모두 깨면 보스가 나타나요!',
+  },
+  boss_run_over: {
+    status: 409,
+    error: '이번 판은 끝났어요. 다시 도전해 볼까요?',
+  },
+  boss_round_mismatch: {
+    status: 409,
+    error: '다른 화면에서 이미 답했어요. 다시 도전해 볼까요?',
+  },
   quest_not_found: { status: 404, error: '퀘스트를 찾을 수 없어요.' },
   stage_not_found: { status: 404, error: '해당 스테이지를 찾을 수 없어요.' },
   user_not_found: { status: 404, error: '사용자 정보를 찾을 수 없어요.' },
@@ -125,6 +139,7 @@ async function callRpc<T>(
     | 'use_golden_key'
     | 'reset_progress'
     | 'submit_quiz_answer'
+    | 'boss_answer'
     | 'grant_coins'
     | 'spend_coins'
     | 'open_stage_chest'
@@ -212,6 +227,25 @@ export async function submitQuizAnswerRpc<T extends object>(
         p_answer: answer,
       }),
     ),
+  );
+}
+
+/** 보스 배틀 한 문제·시작 (P9-12, 00046). answer null = 시작·재도전. 업적은 이긴 판에서 RPC 가 판정해 reward 에 담음 */
+export function bossAnswerRpc<T>(
+  admin: AdminClient,
+  userId: string,
+  questId: string,
+  round: number,
+  answer: Json | null,
+) {
+  return callRpc<T>('boss_answer', () =>
+    admin.rpc('boss_answer', {
+      p_user_id: userId,
+      p_quest_id: questId,
+      p_round: round,
+      // null 은 "시작" (생성된 타입은 Json 만 받아 단언)
+      p_answer: answer as Json,
+    }),
   );
 }
 

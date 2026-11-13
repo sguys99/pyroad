@@ -16,7 +16,13 @@ const kstDay = (n: number) =>
 
 /** 1·2단계 코드 퀘스트를 풀고, 완료 날짜를 지난 며칠에 흩어 둠 (달력에 잔디가 보이게) */
 async function seed(userId: string) {
-  const quests = [...stage(1).quests, ...stage(2).quests];
+  // 1단계 보스(P9-12)는 completeQuests 가 1단계 코드 퀘스트 뒤에 끝냄 → 날짜를 흩을 목록에도 그 자리에 넣음
+  const boss = stage(1).boss;
+  const quests = [
+    ...stage(1).quests,
+    ...(boss ? [{ id: boss.id, solution: '' }] : []),
+    ...stage(2).quests,
+  ];
   await completeQuests(userId, quests);
   // 오늘 3개 · 1일 전 2개 · 그 밖은 하루 하나씩 띄엄띄엄
   const offsets = [0, 0, 0, 1, 1, 2, 4, 4, 4, 4, 5, 7, 8, 9, 11, 12];

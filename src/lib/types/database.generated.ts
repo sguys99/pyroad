@@ -309,6 +309,48 @@ export type Database = {
           },
         ];
       };
+      boss_runs: {
+        Row: {
+          hearts: number;
+          quest_id: string;
+          round: number;
+          started_at: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          hearts?: number;
+          quest_id: string;
+          round?: number;
+          started_at?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          hearts?: number;
+          quest_id?: string;
+          round?: number;
+          started_at?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'boss_runs_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'boss_runs_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       coin_ledger: {
         Row: {
           balance_after: number;
@@ -1293,6 +1335,15 @@ export type Database = {
         }[];
       };
       achievement_stats: { Args: { p_user_id: string }; Returns: Json };
+      boss_answer: {
+        Args: {
+          p_answer: Json;
+          p_quest_id: string;
+          p_round: number;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       claim_achievement: {
         Args: { p_achievement_id: string; p_user_id: string };
         Returns: Json;

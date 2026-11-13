@@ -686,6 +686,31 @@ export const EXPECT = {
     activateIn: 'P9-10',
     note: '본인 공개·만료 전 카드만 · 하루 1회 15코인(동시 1회) · 원장 share/<KST 날짜> · 잔액 = 원장',
   },
+  // ── 보스 배틀 (P9-12, ① 00046) ──
+  'BOSS-1': {
+    expect: 'deny',
+    requires: 'public.boss_answer()',
+    activateIn: 'P9-12',
+    note: '채점·하트·보상은 /api/quest/boss(service_role)만 — 정답 오라클·하트 꾸미기 막기',
+  },
+  'BOSS-1b': {
+    expect: 'deny',
+    requires: 'public.boss_runs',
+    activateIn: 'P9-12',
+    note: '판 상태(라운드·하트)는 service_role 전용, 본인 행도 읽기·쓰기 불가',
+  },
+  'BOSS-2': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'P9-12',
+    note: '코드 퀘스트 전 잠김 · 하트 3 · 패배/승리 · 별 = 남은 하트 · XP 별당 xp_reward/3 · 첫 승리 20 + 별 코인 · 스테이지 클리어 · 연습·복습(Q64) · 잔액 = 원장',
+  },
+  'BOSS-3': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'P9-12',
+    note: 'is_stage_unlocked 00046: 이 스테이지·뒤 스테이지에 완료가 있으면 열림(보스가 새로 생겨도 갑자기 잠기지 않음), 진행 행만으로는 안 열림',
+  },
   // ── 공유 카드 관리 (P9-11, ① 00045) ──
   'SCM-1': {
     expect: 'deny',

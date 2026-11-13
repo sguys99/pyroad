@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Crown, Lock } from 'lucide-react';
+import { Check, Crown, Lock, Swords } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import dynamic from 'next/dynamic';
@@ -35,6 +35,18 @@ const STATE_TEXT: Record<NodeState, string> = {
   clear: '통과',
 };
 
+/**
+ * 보스(P9-12)만 남은 스테이지: 코드 퀘스트를 다 끝내고 마지막 관문이 기다림. 보스는 다른 퀘스트를 다 끝내야 열리므로
+ * "남은 것 1개 + 보스가 있음" = 보스만 남음
+ */
+export function bossWaiting(stage: StageWithStatus): boolean {
+  return (
+    stage.status === 'in_progress' &&
+    stage.quests.some((q) => q.quest_type === 'boss') &&
+    stage.completedQuestCount === stage.totalQuestCount - 1
+  );
+}
+
 /** 화면 낭독기용 이름: 단계·이름·상태·(별)·진행. 별은 SHOW_STARS일 때만 (Q51) */
 export function stageNodeLabel(stage: StageWithStatus): string {
   const parts = [
@@ -50,6 +62,7 @@ export function stageNodeLabel(stage: StageWithStatus): string {
     );
     if (SHOW_CHEST && chestState(stage) === 'ready')
       parts.push('보물상자를 열 수 있어요');
+    if (bossWaiting(stage)) parts.push('보스가 기다려요');
   }
   return parts.join(', ');
 }
@@ -110,6 +123,12 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
           <span className="wn-t">{stage.title}</span>
         </span>
         <span className="wn-meta" aria-hidden>
+          {bossWaiting(stage) && (
+            <span className="wn-boss" data-testid="stage-node-boss">
+              <Swords className="size-3.5" strokeWidth={2.6} />
+              보스!
+            </span>
+          )}
           {locked ? (
             <>
               <Lock className="size-3.5" strokeWidth={2.6} /> 잠김

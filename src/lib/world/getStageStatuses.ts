@@ -32,7 +32,8 @@ export const MAX_STARS_PER_QUEST = 3;
  * 스테이지 잠금 상태. 순서는 (월드 order, 스테이지 order)이고 첫 스테이지는 항상 열림, 나머지는 바로 앞 스테이지의
  * 퀘스트를 모두 완료해야 열림 — 월드의 첫 스테이지는 이전 월드의 마지막 스테이지 기준 (P1-08).
  * 그래서 월드 해제 규칙 previous_world_cleared 도 이 순서로 나옵니다 (스테이지 없는 "준비 중" 월드는 건너뜀).
- * 서버 규칙 supabase/migrations/00012 의 is_stage_unlocked 와 같아야 합니다 (RLS 회귀 WD-5가 월드 간 잠금 확인).
+ * 서버 규칙 is_stage_unlocked(00012·00026·00046)와 같아야 합니다 (RLS 회귀 WD-5가 월드 간 잠금, BOSS-3이 "이미 간 곳은 열림" 확인).
+ * 그 스테이지나 뒤 스테이지에 완료한 퀘스트가 있으면 앞 스테이지를 다 깨지 않았어도 열림 (보스가 새로 생긴 스테이지, 00046).
  * 황금키로 넘긴 퀘스트도 status 'completed' 라 완료로 셉니다 (별은 best_stars 그대로).
  * 퀴즈(quest_type 'quiz')는 보너스라 완료 수·총 수·클리어·firstIncompleteQuestId 에서 뺍니다 (00026, §12-Q60).
  * 별(stars·maxStars)은 모으는 수집 기록이라 퀴즈도 넣습니다 (퀴즈 별이 실제로 쌓이는 첫 유형).
@@ -49,6 +50,15 @@ export function getStageStatuses(
     userProgress.map((p) => [p.quest_id, p.best_stars ?? 0]),
   );
 
+  // 00046: 이 스테이지나 뒤 스테이지에 완료한 퀘스트가 있으면 열림 (앞 스테이지에 보스가 새로 생겨도 잠기지 않게)
+  const stageOfQuest = new Map(
+    sorted.flatMap((s, i) => s.quests.map((q) => [q.id, i] as const)),
+  );
+  const reached = Math.max(
+    -1,
+    ...[...completedQuestIds].map((id) => stageOfQuest.get(id) ?? -1),
+  );
+
   let prevStageCompleted = true;
 
   return sorted.map((stage, index) => {
@@ -63,7 +73,7 @@ export function getStageStatuses(
     let status: StageStatus;
     if (index === 0) {
       status = allCompleted ? 'completed' : 'in_progress';
-    } else if (!prevStageCompleted) {
+    } else if (!prevStageCompleted && index > reached) {
       status = 'locked';
     } else {
       status = allCompleted ? 'completed' : 'in_progress';
@@ -103,7 +113,7 @@ export interface WorldWithStatus {
   totalQuestCount: number;
   stars: number;
   maxStars: number;
-  /** 진행 중(in_progress) 스테이지. 순서 규칙상 전체에서 많아야 하나 */
+  /** 진행 중(in_progress) 스테이지 중 맨 뒤 것 (보통 하나, 보스가 새로 생긴 앞 스테이지가 함께 진행 중일 수 있음) */
   currentStage: StageWithStatus | null;
   /** 이어하기 대상: 현재 스테이지의 첫 미완료 퀘스트 (P5-10) */
   continueQuestId: string | null;
@@ -155,7 +165,9 @@ export function getWorldStatuses(
           : completedStageCount === own.length
             ? 'cleared'
             : 'open';
-    const currentStage = own.find((s) => s.status === 'in_progress') ?? null;
+    // 가장 멀리 간 진행 중 스테이지 (보스가 새로 생긴 앞 스테이지도 진행 중일 수 있어 맨 뒤 것, 00046)
+    const currentStage =
+      own.findLast((s) => s.status === 'in_progress') ?? null;
     const sum = (
       key: 'completedQuestCount' | 'totalQuestCount' | 'stars' | 'maxStars',
     ) => own.reduce((n, s) => n + s[key], 0);

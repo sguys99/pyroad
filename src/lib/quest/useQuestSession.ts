@@ -96,6 +96,8 @@ export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
   project: 1800,
   // 퀴즈도 정답 도장 → 보상 띠를 본 뒤 (P7-03, useQuizSession)
   quiz: 1800,
+  // 보스: 쓰러진 보스·승리 화면(별·보상)을 본 뒤 (P9-12, useBossSession)
+  boss: 1800,
 };
 
 /**

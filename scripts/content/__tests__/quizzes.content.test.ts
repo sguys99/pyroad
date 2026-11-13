@@ -19,15 +19,31 @@ import { CONTENT_DIR } from '../lib/paths';
 /** 무한 반복 버그(오답)는 출력 상한이나 이 시간에 끊김 */
 const TIMEOUT_MS = 3_000;
 
-const quizzes = loadContent(CONTENT_DIR)
+const all = loadContent(CONTENT_DIR)
   .worlds.flatMap((w) => w.stages)
   .flatMap((s) =>
     s.quests.map((q) => ({ stage: s.stage.order, quest: q.quest })),
-  )
-  .filter(
-    (x): x is { stage: number; quest: QuizQuest } =>
-      x.quest.quest_type === 'quiz',
   );
+const quizzes = all.filter(
+  (x): x is { stage: number; quest: QuizQuest } =>
+    x.quest.quest_type === 'quiz',
+);
+// 보스 라운드(P9-12)는 퀴즈 하나와 같은 검사: 라운드마다 퀴즈 퀘스트 모양으로 펼침
+const bossRounds = all.flatMap(({ stage, quest }) =>
+  quest.quest_type === 'boss'
+    ? quest.rounds.map((r, i) => ({
+        stage,
+        quest: {
+          ...quest,
+          title: `${quest.title} ${i + 1}번째 문제`,
+          quest_type: 'quiz',
+          quiz_kind: r.quiz_kind,
+          prompt: { ...quest.prompt, quiz: r.prompt.quiz },
+          answer: r.answer,
+        } as unknown as QuizQuest,
+      }))
+    : [],
+);
 
 let runner: NodePyodideRunner;
 beforeAll(async () => {
@@ -59,7 +75,7 @@ it('1월드 스테이지마다 퀴즈가 있음', () => {
   expect(new Set(quizzes.map((q) => q.stage)).size).toBe(7);
 });
 
-for (const { stage, quest } of quizzes)
+for (const { stage, quest } of [...quizzes, ...bossRounds])
   describe(`${stage}-${quest.order} ${quest.title} (${quest.quiz_kind})`, () => {
     it('정답 코드가 실제로 정답', async () => {
       switch (quest.quiz_kind) {

@@ -56,6 +56,7 @@ import { PwaSection } from './_catalog/PwaSection';
 import { WorldMapSection } from './_catalog/WorldMapSection';
 import { CelebrationSection } from './_catalog/CelebrationSection';
 import { QuizSection } from './_catalog/QuizSection';
+import { BossSection } from './_catalog/BossSection';
 import { AchievementBookSection } from './_catalog/AchievementBookSection';
 import { RestSection } from './_catalog/RestSection';
 import { ProfileSection } from './_catalog/ProfileSection';
@@ -122,6 +123,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['error-staging', '실패 연출'],
       ['success-staging', '성공 연출'],
       ['quiz', '퀴즈 틀·객관식'],
+      ['boss', '보스 배틀'],
       ['celebrations', '축하 오버레이'],
       ['achievements', '업적 도감'],
       ['profile', '프로필'],
@@ -235,6 +237,7 @@ export function DesignCatalog({
               <ErrorStagingSection />
               <SuccessStagingSection />
               <QuizSection />
+              <BossSection />
               <CelebrationSection />
               <AchievementBookSection />
               <ProfileSection />

@@ -1085,3 +1085,63 @@ test.describe('상점 화면 (P9-02)', () => {
     });
   }
 });
+
+test.describe('보스 배틀 (P9-12)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 공격 = HP 한 칸·보스 깜빡, 피격 = 하트 한 개·무대 흔들림, 숫자는 글자로, 가로 넘침 없음`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page, { name: 'full', tier: 'full', reduced: 'off' });
+      const demo = page.getByTestId('boss-live');
+      await demo.scrollIntoViewIfNeeded();
+      const hp = demo.getByTestId('boss-hp');
+      await expect(hp.getByRole('progressbar')).toHaveAttribute(
+        'aria-valuetext',
+        '보스 HP 5/5',
+      );
+      await demo.getByTestId('boss-demo-attack').click();
+      await expect(hp).toHaveAttribute('data-hp', '4');
+      await expect(demo.locator('.bb-rig[data-flash]')).toHaveCount(1);
+      await expect(demo.locator('.bb-shot')).toHaveCount(1);
+      await demo.getByTestId('boss-demo-hurt').click();
+      await expect(demo.getByTestId('boss-hearts')).toHaveAttribute(
+        'aria-label',
+        '하트 2개 남음',
+      );
+      await expect(demo.locator('.bb-stage[data-shake]')).toHaveCount(1);
+      await expect(demo.locator('.bb-heart[data-breaking]')).toHaveCount(1);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        ),
+      ).toBeLessThanOrEqual(0);
+      await demo.screenshot({
+        path: testInfo.outputPath(`boss-live-${width}.png`),
+      });
+      await page
+        .getByTestId('boss-states')
+        .screenshot({ path: testInfo.outputPath(`boss-states-${width}.png`) });
+    });
+  }
+
+  test('동작 줄이기: 별탄·흔들림 애니메이션 없이 "−1" 글자와 하트·HP 값만 바뀐다', async ({
+    page,
+  }) => {
+    await openCatalog(page, { name: 'reduced', tier: 'full', reduced: 'on' });
+    const demo = page.getByTestId('boss-live');
+    await demo.scrollIntoViewIfNeeded();
+    await demo.getByTestId('boss-demo-hurt').click();
+    await expect(demo.getByTestId('boss-hearts')).toHaveAttribute(
+      'data-hearts',
+      '2',
+    );
+    const names = await demo.evaluate((el) =>
+      [...el.querySelectorAll('.bb-stage, .bb-heart, .bb-rig, .bb-shot')]
+        .map((n) => getComputedStyle(n).animationName)
+        .filter((n) => n !== 'none'),
+    );
+    expect(names).toEqual([]);
+    await expect(demo.locator('.bb-dmg')).toBeVisible();
+  });
+});
