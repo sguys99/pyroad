@@ -548,6 +548,51 @@ async function groupShareCards(u) {
       );
     },
   });
+
+  // ── 자랑하기 보상 (P9-10, ① 00044) ──
+  await check({
+    group: 'share',
+    id: 'SHR-2',
+    role: 'service_role',
+    op: '자랑하기 보상: 본인 공개·만료 전 카드만(남의 카드·만료·잘못된 id 거부) · 하루 1회 30코인(동시 2번도 1번) · 원장 share/<KST 오늘> · 잔액 = 원장',
+    ...OK,
+    run: async () => {
+      const x = await createUser('sr2', '자랑보상');
+      const y = await createUser('sr2b', '남의카드');
+      const claim = (card) => rpc('claim_share_reward', { p_user_id: x.id, p_card_id: card });
+      const own = (await make(x.id, 'levelup')).json?.id;
+      const other = (await make(y.id, 'levelup')).json?.id;
+      const others = await claim(other);
+      const badId = await claim('short');
+      one(`update public.share_cards set expires_at = now() - interval '1 second' where id = '${own}'`);
+      const expired = await claim(own);
+      await make(x.id, 'levelup'); // 다시 공개 = 새 90일
+      const [a, b] = await Promise.all([claim(own), claim(own)]);
+      const again = await claim(own);
+      const ledger = one(`select string_agg(ref || ':' || delta, ',') from public.coin_ledger
+                           where user_id = '${x.id}' and source = 'share'`);
+      const today = one(`select to_char(public.kst_today(), 'YYYY-MM-DD')`);
+      return (
+        compare(
+          'SHR-2',
+          {
+            denied: '404:share_card_not_found|400:invalid_arguments|404:share_card_not_found',
+            first: '30:1',
+            again: '0:true:30',
+            ledger: `${today}:30`,
+            mismatches: 0,
+          },
+          {
+            denied: [others, badId, expired].map((r) => `${r.status}:${errMsg(r)}`).join('|'),
+            first: `${(a.json?.coins_earned ?? 0) + (b.json?.coins_earned ?? 0)}:${[a, b].filter((r) => r.json?.already_claimed).length}`,
+            again: `${again.json?.coins_earned}:${again.json?.already_claimed}:${again.json?.coins_balance}`,
+            ledger,
+            mismatches: Number(mismatches(x.id)),
+          },
+        ) ?? { actual: 'ok', detail: '거부 3종, 동시 1회 30, 두 번째 0, 원장 1행, 잔액 일치' }
+      );
+    },
+  });
 }
 
 // ── 그룹 ──────────────────────────────────────────────────
@@ -2295,6 +2340,12 @@ async function groupRpc(u) {
       'anon',
       'share_card_public',
       { p_id: 'rG6TzuP93C8blCS4ZdyehQ' },
+    ],
+    [
+      'SHR-1',
+      u.alice,
+      'claim_share_reward',
+      { p_user_id: u.alice.id, p_card_id: 'rG6TzuP93C8blCS4ZdyehQ' },
     ],
     [
       'PS-1',

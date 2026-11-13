@@ -17,9 +17,19 @@ export function ShareButton({
   variant = 'secondary',
   size = 'sm',
   className,
+  onOpenChange,
+  testId = 'share-open',
 }: Pick<ShareSheetProps, 'kind' | 'cardRef' | 'onShared'> &
-  Pick<ButtonProps, 'variant' | 'size' | 'className' | 'children'>) {
-  const [open, setOpen] = useState(false);
+  Pick<ButtonProps, 'variant' | 'size' | 'className' | 'children'> & {
+    /** 시트가 열리고 닫힐 때 (축하 카드: 열린 동안 자동 넘김·키보드 멈춤, P9-10) */
+    onOpenChange?: (open: boolean) => void;
+    testId?: string;
+  }) {
+  const [open, setRawOpen] = useState(false);
+  const setOpen = (next: boolean) => {
+    setRawOpen(next);
+    onOpenChange?.(next);
+  };
   return (
     <>
       <Button
@@ -28,7 +38,7 @@ export function ShareButton({
         icon={<Share2 aria-hidden />}
         className={className}
         onClick={() => setOpen(true)}
-        data-testid="share-open"
+        data-testid={testId}
       >
         {children}
       </Button>

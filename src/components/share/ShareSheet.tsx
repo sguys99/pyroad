@@ -18,7 +18,11 @@ import {
   UserRound,
 } from 'lucide-react';
 
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { RewardIcon } from '@/components/ui/reward-icon';
+import { useSfx } from '@/components/providers/soundContext';
+import { useRewardFlights } from '@/components/world/DailyMissions';
 import { Sheet } from '@/components/ui/sheet';
 import { KakaoSymbol } from '@/components/auth/brandMarks';
 import { SHARE_CTA_HREF } from '@/components/share/ShareCta';
@@ -35,7 +39,9 @@ import {
   sharePageUrl,
   type ShareCardCreated,
   type ShareChannel,
+  type ShareRewardResult,
 } from '@/lib/share-card/share';
+import { COIN_RULES } from '@/lib/quest/coins';
 import type { ShareCardKind } from '@/lib/share-card/types';
 import { cn } from '@/lib/utils';
 // 카카오 버튼 면 색은 카카오 가이드 그대로 (로그인 버튼과 같은 .g-social)
@@ -50,9 +56,24 @@ export interface ShareSheetProps {
   cardRef?: string;
   /** 이미 만든 카드 (카탈로그 견본 등). 주면 만들기 요청을 하지 않는다 */
   card?: ShareCardCreated;
-  /** 채널을 다 썼을 때 (P9-10 자랑하기 보상은 여기서 서버에 요청) */
+  /** 채널을 다 썼을 때 (보상 요청과 별개로 부름) */
   onShared?: (channel: ShareChannel) => void;
+  /** 자랑하기 보상 요청 (P9-10, 기본 `POST /api/share-cards/reward`. 카탈로그·테스트용) */
+  requestReward?: (cardId: string) => Promise<ShareRewardResult>;
 }
+
+async function postReward(cardId: string): Promise<ShareRewardResult> {
+  const res = await fetch('/api/share-cards/reward', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cardId }),
+  });
+  if (!res.ok) throw new Error(String(res.status));
+  return res.json();
+}
+
+/** 보상 줄: 안내(오늘 처음) · 받는 중 · 받음(+30) · 오늘은 이미 받음 */
+type Reward = 'offer' | 'busy' | 'got' | 'claimed';
 
 type Load =
   | { state: 'loading' }
@@ -78,6 +99,7 @@ export function ShareSheet({
   cardRef,
   card: givenCard,
   onShared,
+  requestReward = postReward,
 }: ShareSheetProps) {
   const [load, setLoad] = useState<Load>(
     givenCard ? { state: 'ready', card: givenCard } : { state: 'loading' },
@@ -87,6 +109,14 @@ export function ShareSheet({
   const [canWebShare, setCanWebShare] = useState(false);
   const [status, setStatus] = useState<{ text: string; copied?: boolean }>();
   const requested = useRef(false);
+  const [reward, setReward] = useState<Reward>(
+    givenCard?.rewardClaimed ? 'claimed' : 'offer',
+  );
+  const rewardRef = useRef<HTMLParagraphElement>(null);
+  const claiming = useRef(false);
+  const router = useRouter();
+  const play = useSfx();
+  const { launch, layer } = useRewardFlights();
   const hasKakaoKey = !!process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
 
   const create = useCallback(async () => {
@@ -98,11 +128,17 @@ export function ShareSheet({
         body: JSON.stringify({ kind, ref: cardRef }),
       });
       const body = await res.json().catch(() => null);
-      if (res.ok) return setLoad({ state: 'ready', card: body });
+      if (res.ok) {
+        if (body?.rewardClaimed) setReward('claimed');
+        return setLoad({ state: 'ready', card: body });
+      }
       setLoad({
         state: 'error',
-        // 보호자 동의 게이트(P3-15)는 아이에게 보여 줄 문구를 준다
-        message: body?.code === 'guardian_consent' ? body.error : FAILED,
+        // 보호자 동의 게이트(P3-15)·아직 자랑할 것이 없음(409)은 아이에게 보여 줄 문구를 준다
+        message:
+          body?.code === 'guardian_consent' || res.status === 409
+            ? body.error
+            : FAILED,
       });
     } catch {
       setLoad({ state: 'error', message: FAILED });
@@ -143,9 +179,32 @@ export function ShareSheet({
     };
   }, [card, open]);
 
+  // 자랑하기 보상 (P9-10, §12-Q67 ④): 어떤 채널이든 다 쓰면 한 번 요청. 금액·하루 1회는 서버가 정함
+  const claimReward = async (cardId: string) => {
+    // 연달아 눌러도 요청은 한 번 (상태는 다음 그리기에야 바뀜)
+    if (reward !== 'offer' || claiming.current) return;
+    claiming.current = true;
+    setReward('busy');
+    try {
+      const res = await requestReward(cardId);
+      if (res.already_claimed || res.coins_earned <= 0)
+        return setReward('claimed');
+      setReward('got');
+      play('coin');
+      launch(rewardRef.current, false);
+      router.refresh();
+    } catch {
+      // 못 받았으면 안내로 되돌려 다음 공유 때 다시 (아이에게 오류를 보이지 않음 — 보상은 덤)
+      setReward('offer');
+    } finally {
+      claiming.current = false;
+    }
+  };
+
   const done = (channel: ShareChannel, text?: string, copied = false) => {
     track('share_channel', { kind, channel });
     if (text) setStatus({ text, copied });
+    if (card) void claimReward(card.id);
     onShared?.(channel);
   };
 
@@ -335,7 +394,29 @@ export function ShareSheet({
         >
           {status?.text}
         </p>
+        <p
+          ref={rewardRef}
+          className="m-0 flex items-center justify-center gap-1.5 text-small text-muted-foreground data-[state=got]:font-semibold data-[state=got]:text-foreground"
+          data-state={reward}
+          data-testid="share-reward"
+          aria-live="polite"
+        >
+          <RewardIcon kind="coin" size={20} />
+          {reward === 'got' ? (
+            <>
+              <b className="font-display text-foreground">
+                +{COIN_RULES.share}
+              </b>{' '}
+              코인을 받았어요!
+            </>
+          ) : reward === 'claimed' ? (
+            '오늘 보상은 받았어요'
+          ) : (
+            `오늘 처음 자랑하면 ${COIN_RULES.share}코인`
+          )}
+        </p>
       </div>
+      {layer}
 
       <ul
         className="m-0 grid list-none gap-2 rounded-2xl bg-surface-2 p-3.5 text-small text-muted-foreground"

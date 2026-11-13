@@ -4,11 +4,22 @@ const mocks = vi.hoisted(() => ({
   user: { id: 'u1' } as { id: string } | null,
   rpc: vi.fn(),
   gate: vi.fn(),
+  /** 오늘 자랑하기 보상 원장 행 (P9-10) */
+  claimed: null as { id: number } | null,
+  eq: vi.fn(),
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: mocks.user } }) },
+    from: () => {
+      const q = {
+        select: () => q,
+        eq: (...a: unknown[]) => (mocks.eq(...a), q),
+        maybeSingle: async () => ({ data: mocks.claimed, error: null }),
+      };
+      return q;
+    },
   }),
 }));
 vi.mock('@/lib/supabase/admin', () => ({
@@ -34,6 +45,8 @@ const image = (id: string) =>
 beforeEach(() => {
   mocks.user = { id: 'u1' };
   mocks.gate.mockReset().mockResolvedValue(null);
+  mocks.claimed = null;
+  mocks.eq.mockReset();
   mocks.rpc.mockReset().mockResolvedValue({
     data: {
       id: ID,
@@ -85,12 +98,25 @@ describe('POST /api/share-cards (P9-07)', () => {
       version: 2,
       expiresAt: '2027-02-11T00:00:00Z',
       imageUrl: `/api/share-cards/${ID}/image?v=2`,
+      rewardClaimed: false,
     });
     await POST(req({ kind: 'weekly', ref: STAGE }));
     expect(mocks.rpc).toHaveBeenLastCalledWith('create_share_card', {
       p_user_id: 'u1',
       p_kind: 'weekly',
     });
+  });
+
+  it('오늘 자랑하기 보상을 받았으면 rewardClaimed (P9-10, 본인 원장 share/<KST 오늘>)', async () => {
+    mocks.claimed = { id: 1 };
+    const res = await POST(req({ kind: 'levelup' }));
+    expect((await res.json()).rewardClaimed).toBe(true);
+    expect(mocks.eq).toHaveBeenCalledWith('user_id', 'u1');
+    expect(mocks.eq).toHaveBeenCalledWith('source', 'share');
+    expect(mocks.eq).toHaveBeenCalledWith(
+      'ref',
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    );
   });
 
   it('RPC 거절은 아이용 문구 (안 깬 스테이지 409)', async () => {

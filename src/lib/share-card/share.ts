@@ -25,6 +25,15 @@ export interface ShareCardCreated {
   expiresAt: string;
   /** 사이트 안 경로 `/api/share-cards/{id}/image?v={version}` */
   imageUrl: string;
+  /** 오늘(KST) 자랑하기 보상을 이미 받았는지 (P9-10). 없으면 모름 = 안 받은 것으로 보여 줌 */
+  rewardClaimed?: boolean;
+}
+
+/** 자랑하기 보상 (`POST /api/share-cards/reward`, P9-10 · 00044 claim_share_reward) */
+export interface ShareRewardResult {
+  coins_earned: number;
+  coins_balance: number;
+  already_claimed: boolean;
 }
 
 /** 저장 파일 이름 (이미지 라우트 `Content-Disposition` · 이미지 저장 버튼) */

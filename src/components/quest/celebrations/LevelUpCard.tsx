@@ -12,6 +12,7 @@ import {
   Kicker,
   delayStyle,
 } from './parts';
+import { CelebrationShare } from './CelebrationShare';
 
 interface LevelUpCardProps {
   level: number;
@@ -145,6 +146,7 @@ export function LevelUpCard({
 
       <div className="cel-actions">
         <CelebrationCta onClick={onNext}>멋져요!</CelebrationCta>
+        <CelebrationShare kind="levelup" />
       </div>
     </>
   );

@@ -1301,6 +1301,10 @@ export type Database = {
         Args: { p_day: string; p_mission_id: string; p_user_id: string };
         Returns: Json;
       };
+      claim_share_reward: {
+        Args: { p_card_id: string; p_user_id: string };
+        Returns: Json;
+      };
       code_quest_stars: {
         Args: { p_hints_used: number; p_used_golden_key: boolean };
         Returns: number;

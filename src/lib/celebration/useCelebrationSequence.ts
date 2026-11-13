@@ -14,7 +14,7 @@ import {
  * 한 번에 하나씩 보여 주고, 다 보거나 모두 닫으면 퇴장 연출이 끝난 뒤 `onDismiss(받은 개수)`로 비운다.
  *
  * - 넘기기: `next()` (CTA·배경 탭·Enter/Space). 등장 직후 `MIN_DWELL_MS` 동안은 무시
- * - 자동 넘김: 단계별 기본값(`autoAdvanceMs`). 카드 위에 포인터가 있거나 탭이 숨겨지면 멈췄다가 남은 시간부터
+ * - 자동 넘김: 단계별 기본값(`autoAdvanceMs`). 카드 위에 포인터가 있거나 탭이 숨겨지거나 공유 시트가 열리면(held) 멈췄다가 남은 시간부터
  * - 모두 닫기: `skipAll()` (Esc·"모두 닫기")
  * - 보여 주는 중에 새 이벤트가 오면 뒤에 이어 붙인다
  * - 언마운트(퀘스트 이동)하면 타이머가 모두 정리된다. 퀘스트 엔진 상태도 함께 사라지므로 따로 비울 것이 없다
@@ -78,9 +78,12 @@ export function useCelebrationSequence({
   events,
   onDismiss,
   now = () => performance.now(),
+  held = false,
 }: {
   events: readonly CelebrationEvent[];
   onDismiss: (count: number) => void;
+  /** 카드 위 공유 시트가 열려 있음 (P9-10) — 자동 넘김을 멈춘다 */
+  held?: boolean;
   /** 테스트용 시계 */
   now?: () => number;
 }): CelebrationSequence {
@@ -130,7 +133,7 @@ export function useCelebrationSequence({
     document.addEventListener('visibilitychange', update);
     return () => document.removeEventListener('visibilitychange', update);
   }, [state.open]);
-  const paused = hovering || hidden;
+  const paused = hovering || hidden || held;
 
   // 자동 넘김: 단계가 바뀌면 처음부터, 멈췄다 다시 가면 남은 시간부터
   const remainingRef = useRef<number | null>(null);

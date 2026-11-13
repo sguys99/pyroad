@@ -27,7 +27,7 @@ import {
 } from '@/lib/profile/profileStats';
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
 import { chestState } from '@/lib/world/chest';
-import { kstToday } from '@/lib/time/kst';
+import { kstToday, kstWeekStart } from '@/lib/time/kst';
 
 /** 못 읽었을 때(00038 전 DB) 빈 기록 — 화면은 0으로 그대로 그림 */
 const EMPTY_STATS: ProfileStatsRaw = {
@@ -149,6 +149,16 @@ export default async function ProfilePage() {
               shieldDays={raw.shield_days}
               stampDays={raw.stamp_days}
             />
+            {/* 이번 주 공부한 날이 있으면 주간 카드 자랑하기 (P9-10, 공개 카드는 합계만 §12-Q67 ②) */}
+            {Object.entries(raw.days).some(
+              ([day, n]) => n > 0 && day >= kstWeekStart(today),
+            ) && (
+              <div className="mt-3 flex justify-center">
+                <ShareButton kind="weekly" testId="share-open-weekly">
+                  이번 주 기록 자랑하기
+                </ShareButton>
+              </div>
+            )}
           </ProfileCard>
 
           <ProfileStatsCard raw={raw} />

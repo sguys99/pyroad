@@ -14,6 +14,7 @@ import {
   Kicker,
   delayStyle,
 } from './parts';
+import { CelebrationShare } from './CelebrationShare';
 
 interface StageClearCardProps {
   stage: StageClearInfo;
@@ -73,18 +74,24 @@ export function StageClearCard({
 
       <ConceptChips concepts={stage.concepts} delayMs={420} />
 
-      <MapActions worldHref={worldHref} onStay={onNext} />
+      <MapActions
+        worldHref={worldHref}
+        onStay={onNext}
+        stageId={stage.stage_id}
+      />
     </>
   );
 }
 
-/** 스테이지를 끝낸 카드의 버튼 줄 (스테이지 클리어·스테이지 마지막 프로젝트) */
+/** 스테이지를 끝낸 카드의 버튼 줄 (스테이지 클리어·스테이지 마지막 프로젝트) + 스테이지 카드 자랑하기(P9-10) */
 export function MapActions({
   worldHref,
   onStay,
+  stageId,
 }: {
   worldHref: string;
   onStay: () => void;
+  stageId: string;
 }) {
   return (
     <div className="cel-actions">
@@ -98,6 +105,7 @@ export function MapActions({
       <CelebrationCta onClick={onStay} variant="ghost" focus={false}>
         여기 있을래요
       </CelebrationCta>
+      <CelebrationShare kind="stage" cardRef={stageId} />
     </div>
   );
 }

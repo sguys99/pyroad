@@ -6,6 +6,7 @@ import { guardianWriteGate } from '@/lib/consent/server';
 import { createShareCardRpc, rewardError } from '@/lib/quest/rewardRpc';
 import { isShareCardKind } from '@/lib/share-card/snapshot';
 import { shareCardImagePath } from '@/lib/share-card/publicCard';
+import { kstToday } from '@/lib/time/kst';
 
 const ACHIEVEMENT_ID = /^[a-z0-9_]{1,64}$/;
 
@@ -17,7 +18,8 @@ const ACHIEVEMENT_ID = /^[a-z0-9_]{1,64}$/;
  *   공개 정보만 스냅샷으로 저장. 안 깬 스테이지·안 얻은 업적은 409
  * - 다른 사람에게 보이는 쓰기라 보호자 동의 게이트(guardianWriteGate, P3-15)를 건다
  * - 같은 카드를 다시 만들면 같은 id 로 다시 공개 + 새 90일(바뀌었으면 version + 1 → 이미지 주소가 바뀜)
- * - 응답: `{ id, kind, version, expiresAt, imageUrl }` (공유 페이지 `/share/{id}`·카카오는 P9-08·P9-09)
+ * - 응답: `{ id, kind, version, expiresAt, imageUrl, rewardClaimed }` (공유 페이지 `/share/{id}`·카카오는 P9-08·P9-09).
+ *   rewardClaimed = 오늘(KST) 자랑하기 보상을 이미 받았는지(P9-10, 본인 원장 share/<날짜> — RLS 본인 읽기). 시트의 보상 안내 줄
  */
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -53,11 +55,19 @@ export async function POST(request: Request) {
   );
   if (!result.ok) return result.response;
   const { id, version, expires_at } = result.data;
+  const { data: claimed } = await supabase
+    .from('coin_ledger')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('source', 'share')
+    .eq('ref', kstToday())
+    .maybeSingle();
   return NextResponse.json({
     id,
     kind,
     version,
     expiresAt: expires_at,
     imageUrl: shareCardImagePath(id, version),
+    rewardClaimed: !!claimed,
   });
 }

@@ -21,6 +21,7 @@ import type {
   PurchaseResult,
   ShopStatus,
 } from '@/lib/shop/api';
+import type { ShareRewardResult } from '@/lib/share-card/share';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -81,6 +82,10 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
     status: 409,
     error: '스테이지를 다 깨면 자랑할 수 있어요.',
   },
+  share_card_not_found: {
+    status: 404,
+    error: '자랑 카드를 찾을 수 없어요. 다시 열어 줘.',
+  },
   nothing_this_week: {
     status: 409,
     error: '이번 주에 끝낸 퀘스트가 생기면 자랑할 수 있어요.',
@@ -131,7 +136,8 @@ async function callRpc<T>(
     | 'purchase_item'
     | 'equip_item'
     | 'shop_status'
-    | 'create_share_card',
+    | 'create_share_card'
+    | 'claim_share_reward',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -470,5 +476,16 @@ export function createShareCardRpc(
       p_kind: kind,
       ...(ref ? { p_ref: ref } : {}),
     }),
+  );
+}
+
+/** 자랑하기 보상 (P9-10, 00044). 본인 공개 카드가 있을 때 KST 하루 한 번 30코인, 이미 받았으면 already_claimed(0) */
+export function claimShareRewardRpc(
+  admin: AdminClient,
+  userId: string,
+  cardId: string,
+) {
+  return callRpc<ShareRewardResult>('claim_share_reward', () =>
+    admin.rpc('claim_share_reward', { p_user_id: userId, p_card_id: cardId }),
   );
 }

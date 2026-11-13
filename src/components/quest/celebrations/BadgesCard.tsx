@@ -12,6 +12,9 @@ import { useSfx } from '@/components/providers/soundContext';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { AchievementGlyph } from '@/components/shared/AchievementMedal';
 import { CelebrationCta, Kicker, delayStyle } from './parts';
+import { CelebrationShare } from './CelebrationShare';
+
+const TIER_RANK = { bronze: 1, silver: 2, gold: 3 } as const;
 
 const CLAIM_ERROR = '코인을 받지 못했어요. 다음에 다시 받을 수 있어요.';
 
@@ -53,6 +56,10 @@ export function BadgesCard({
   const [got, setGot] = useState(0);
   const single = badges.length === 1;
   const total = badges.reduce((n, b) => n + b.coins, 0);
+  // 여러 개면 가장 높은 티어(같으면 먼저 얻은 것) 한 장을 자랑 (P9-10)
+  const proud = badges.reduce((a, b) =>
+    TIER_RANK[b.tier] > TIER_RANK[a.tier] ? b : a,
+  );
 
   const claim = async () => {
     setState('busy');
@@ -136,7 +143,10 @@ export function BadgesCard({
 
       <div className="cel-actions">
         {state === 'done' ? (
-          <CelebrationCta onClick={onNext}>좋아요!</CelebrationCta>
+          <>
+            <CelebrationCta onClick={onNext}>좋아요!</CelebrationCta>
+            <CelebrationShare kind="achievement" cardRef={proud.id} />
+          </>
         ) : (
           <>
             <CelebrationCta
@@ -152,6 +162,7 @@ export function BadgesCard({
             <CelebrationCta variant="ghost" focus={!!error} onClick={onNext}>
               나중에 받을래요
             </CelebrationCta>
+            <CelebrationShare kind="achievement" cardRef={proud.id} />
           </>
         )}
       </div>

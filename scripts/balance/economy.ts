@@ -84,11 +84,12 @@ export const SOURCES = [
   'achievement',
   'mission',
   'attendance',
+  'share',
 ] as const;
 export type Source = (typeof SOURCES)[number];
-/** 학습 행동에서 나온 코인(§2.6) — 출석만 방문 */
+/** 학습 행동에서 나온 코인(§2.6) — 출석(방문)·자랑하기(공유, P9-10)는 아님 */
 export const LEARNING_SOURCES: readonly Source[] = SOURCES.filter(
-  (s) => s !== 'attendance',
+  (s) => s !== 'attendance' && s !== 'share',
 );
 
 interface QuestDef {
@@ -200,7 +201,13 @@ export interface EconomyResult {
 
 export function simulateEconomy(
   student: StudentType,
-  { days = 90, missionXp = 15, stages = world1Stages(), questsTotal = 0 } = {},
+  {
+    days = 90,
+    missionXp = 15,
+    stages = world1Stages(),
+    questsTotal = 0,
+    shareEveryDay = false,
+  } = {},
 ): EconomyResult {
   const achievementDefs = loadAchievements();
   const missionDefs = loadMissions();
@@ -322,6 +329,9 @@ export function simulateEconomy(
       const slot = (attendance++ % 7) + 1;
       coins.attendance += coinReward('attendance', slot);
       if (slot === 7) shields = Math.min(2, shields + 1);
+      // 자랑하기 (P9-10, 하루 1회 30): 축하 화면(레벨 업·업적·스테이지 클리어)이 뜬 날 한 번 공유한다고 봄.
+      // 상한(날마다 프로필 카드를 공유)은 shareEveryDay 옵션으로 — docs/balance.md 3.13
+      const proud = `${paidLevel}:${earned.size}:${stages.filter(stageCleared).length}`;
 
       // 오늘의 퀴즈: 열린 스테이지 퀴즈 중 복습 → 안 푼 것 → 나머지, 3개
       const bucket = (q: QuestDef) => {
@@ -500,6 +510,12 @@ export function simulateEconomy(
         result.missions.done[m.id] = (result.missions.done[m.id] ?? 0) + 1;
       }
       settle(day);
+      if (
+        shareEveryDay ||
+        proud !==
+          `${paidLevel}:${earned.size}:${stages.filter(stageCleared).length}`
+      )
+        coins.share += COIN_RULES.share;
     }
     const sum = (t: QuestDef['type'][]) =>
       quests
@@ -621,14 +637,14 @@ function main() {
     p(
       `**${d + 1}일째**`,
       '',
-      `| 유형 | 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 출석 비중 |`,
-      `|---|---|${SOURCES.map(() => '---|').join('')}---|---|`,
+      `| 유형 | 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 출석 비중 | 자랑 비중 |`,
+      `|---|---|${SOURCES.map(() => '---|').join('')}---|---|---|`,
     );
     for (const r of runs) {
       const c = at(r, d).coins;
       const t = total(c);
       p(
-        `| ${r.student.name} | ${t} | ${SOURCES.map((s) => c[s]).join(' | ')} | ${pct(t - c.attendance, t)} | ${pct(c.attendance, t)} |`,
+        `| ${r.student.name} | ${t} | ${SOURCES.map((s) => c[s]).join(' | ')} | ${pct(t - c.attendance - c.share, t)} | ${pct(c.attendance, t)} | ${pct(c.share, t)} |`,
       );
     }
     p('');

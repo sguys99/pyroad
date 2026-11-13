@@ -84,7 +84,11 @@ export function ProjectCompleteCard({
       )}
 
       {stage ? (
-        <MapActions worldHref={worldHref} onStay={onNext} />
+        <MapActions
+          worldHref={worldHref}
+          onStay={onNext}
+          stageId={stage.stage_id}
+        />
       ) : (
         <div className="cel-actions">
           <CelebrationCta onClick={onNext}>대단해요!</CelebrationCta>

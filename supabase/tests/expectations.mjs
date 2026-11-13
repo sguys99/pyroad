@@ -673,6 +673,19 @@ export const EXPECT = {
     activateIn: 'P9-07',
     note: '실제 기록으로 스냅샷(공개 정보만, 펫 없음) · 같은 id·version · 공개 조회 user_id 없음 · 90일 만료·비공개 0행 · 다시 공개 새 90일',
   },
+  // ── 자랑하기 보상 (P9-10, ① 00044) ──
+  'SHR-1': {
+    expect: 'deny',
+    requires: 'public.claim_share_reward()',
+    activateIn: 'P9-10',
+    note: '보상은 /api/share-cards/reward(service_role)만',
+  },
+  'SHR-2': {
+    expect: 'allow',
+    requires: 'public.claim_share_reward()',
+    activateIn: 'P9-10',
+    note: '본인 공개·만료 전 카드만 · 하루 1회 30코인(동시 1회) · 원장 share/<KST 날짜> · 잔액 = 원장',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',

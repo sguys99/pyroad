@@ -59,13 +59,25 @@ describe('획득 속도 시뮬레이션', () => {
     expect(full!.day + 1).toBeLessThanOrEqual(35);
   });
 
-  it('1월드 동안 코인의 85% 이상이 학습 행동에서 (§2.6), 출석은 15% 이하', () => {
+  // 자랑하기(P9-10, §12-Q67 ④ 하루 1회 30)는 학습 성과 카드를 보내는 것이라 학습과 함께 셈. 그래도 학습 행동만 70% 이상, 자랑 15% 이하
+  it('1월드 동안 코인의 85% 이상이 학습 행동·그 성과 자랑에서 (§2.6), 출석·자랑은 각각 15% 이하', () => {
     for (const r of [light, normal, eager, weekend]) {
       const c = at(r, Math.min(r.world1Day!, 179)).coins;
       const learning = LEARNING_SOURCES.reduce((n, s) => n + c[s], 0);
-      expect(learning / total(c)).toBeGreaterThanOrEqual(0.85);
+      expect((learning + c.share) / total(c)).toBeGreaterThanOrEqual(0.85);
+      expect(learning / total(c)).toBeGreaterThanOrEqual(0.7);
       expect(c.attendance / total(c)).toBeLessThanOrEqual(0.15);
+      expect(c.share / total(c)).toBeLessThanOrEqual(0.15);
     }
+  });
+
+  it('자랑하기 상한: 날마다 공유해도 30일 900 (§12-Q67 ④)', () => {
+    const every = simulateEconomy(STUDENTS[1], {
+      days: 30,
+      stages,
+      shareEveryDay: true,
+    });
+    expect(at(every, 29).coins.share).toBe(900);
   });
 
   it('코인 상한: 퀘스트·별은 콘텐츠만큼만 (같은 별 번호 두 번 없음)', () => {
@@ -83,7 +95,8 @@ describe('획득 속도 시뮬레이션', () => {
     const all = SHOP.reduce((n, s) => n + s.price, 0);
     expect(all).toBe(SHOP_DRAFT_TOTAL * 3);
     const d = daysToPrice(normal, all)!;
-    expect(Math.abs(d - normal.world1Day!)).toBeLessThanOrEqual(7);
+    // 자랑하기 보상(P9-10)으로 약 9일 앞당겨짐 (P8-14 때 ±7 → ±10, docs/balance.md 3.13)
+    expect(Math.abs(d - normal.world1Day!)).toBeLessThanOrEqual(10);
   });
 
   it('§12-Q65 (e): 하루에 3개를 깬 적 없는 학생에겐 quest_3 을 배정하지 않음, 배정되면 깰 수 있음', () => {

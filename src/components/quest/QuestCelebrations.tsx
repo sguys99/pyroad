@@ -35,6 +35,7 @@ import { GoldenKeyCard } from './celebrations/GoldenKeyCard';
 import { RewardsCard } from './celebrations/RewardsCard';
 import { ChestCard } from './celebrations/ChestCard';
 import { PurchaseCard } from './celebrations/PurchaseCard';
+import { CelebrationHold } from './celebrations/CelebrationShare';
 import './celebrations/celebration.css';
 
 interface QuestCelebrationsProps {
@@ -67,7 +68,9 @@ export const QuestCelebrations = memo(function QuestCelebrations({
   worldHref,
   onDismiss,
 }: QuestCelebrationsProps) {
-  const seq = useCelebrationSequence({ events, onDismiss });
+  // 카드의 공유 시트가 열린 동안: 자동 넘김·키보드 멈춤 (P9-10)
+  const [held, setHeld] = useState(false);
+  const seq = useCelebrationSequence({ events, onDismiss, held });
   const { budget, reduced } = useMotionTier();
   const { step, next, skipAll } = seq;
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -101,7 +104,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
 
   // 키보드: 연출 중엔 Enter·Space·Esc = 끝 상태로, 그 뒤 Enter·Space 다음, Esc 모두 닫기. Tab은 카드 안에서만
   useEffect(() => {
-    if (!open) return;
+    if (!open || held) return;
     const onKey = (e: KeyboardEvent) => {
       const target = e.target instanceof Element ? e.target : null;
       const isAdvance = e.key === 'Enter' || e.key === ' ';
@@ -125,7 +128,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [open, next, skipAll, settled, settle]);
+  }, [open, held, next, skipAll, settled, settle]);
 
   // 닫히면 열기 전 포커스로 돌려준다 (실행 버튼 등). CTA 포커스보다 먼저 잡아야 하므로 렌더 중에 읽는다
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -198,21 +201,23 @@ export const QuestCelebrations = memo(function QuestCelebrations({
                     settle();
                 }}
               >
-                <AnimatePresence mode="wait">
-                  <StepFrame
-                    key={step.id}
-                    step={step}
-                    activeStepRef={activeStepRef}
-                    questId={questId}
-                    worldHref={worldHref}
-                    budget={budget}
-                    settled={settled}
-                    autoMs={seq.autoMs}
-                    paused={seq.paused}
-                    onNext={next}
-                    onHover={seq.setHovering}
-                  />
-                </AnimatePresence>
+                <CelebrationHold.Provider value={setHeld}>
+                  <AnimatePresence mode="wait">
+                    <StepFrame
+                      key={step.id}
+                      step={step}
+                      activeStepRef={activeStepRef}
+                      questId={questId}
+                      worldHref={worldHref}
+                      budget={budget}
+                      settled={settled}
+                      autoMs={seq.autoMs}
+                      paused={seq.paused}
+                      onNext={next}
+                      onHover={seq.setHovering}
+                    />
+                  </AnimatePresence>
+                </CelebrationHold.Provider>
               </div>
             </div>
           </m.div>

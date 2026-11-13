@@ -826,8 +826,9 @@ export function ShareCardSection() {
       <h3 className="mt-8 font-display text-h3">공유 시트 (P9-09)</h3>
       <p className="text-small text-muted-foreground">
         카드 미리보기 + 카카오톡(키가 있을 때만) · 공유하기(Web Share 되는 기기만) · 이미지 저장 · 링크 복사 + 보내기 전 안내.
-        앱에서는 <code>{'<ShareButton kind=…>'}</code>(프로필 레벨 카드) 또는 <code>{'<ShareSheet>'}</code>(축하 화면, P9-10). 견본은 만들어 둔
-        카드(샘플 그림)를 넘겨 만들기 요청을 하지 않는다
+        앱에서는 <code>{'<ShareButton kind=…>'}</code>(프로필 레벨·주간 카드) 또는 축하 카드의 자랑하기(P9-10). 채널을 다 쓰면
+        자랑하기 보상(하루 1회 30코인) 줄이 바뀐다: 오늘 처음 → +30 코인(효과음·HUD로 날아감) / 오늘 보상은 받았어요. 견본은 만들어 둔
+        카드(샘플 그림)와 보상 흉내를 넘겨 요청을 하지 않는다
       </p>
       <ShareSheetDemo />
     </Section>
@@ -835,29 +836,48 @@ export function ShareCardSection() {
 }
 
 function ShareSheetDemo() {
-  const [open, setOpen] = useState(false);
+  // 두 견본: 오늘 처음(보내면 +30, 요청 없이 흉내) · 오늘 보상은 이미 받음 (P9-10)
+  const [open, setOpen] = useState<'offer' | 'claimed' | null>(null);
+  const card = (claimed: boolean) => ({
+    id: 'AAAAAAAAAAAAAAAAAAAAAA',
+    kind: 'levelup' as const,
+    version: 1,
+    expiresAt: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+    imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+    rewardClaimed: claimed,
+  });
   return (
     <div className="flex flex-wrap gap-3">
       <Button
         variant="secondary"
         icon={<Share2 aria-hidden />}
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen('offer')}
         data-testid="share-sheet-demo"
       >
-        공유 시트 열기
+        공유 시트 열기 (오늘 처음)
       </Button>
-      <ShareSheet
-        open={open}
-        onOpenChange={setOpen}
-        kind="levelup"
-        card={{
-          id: 'AAAAAAAAAAAAAAAAAAAAAA',
-          kind: 'levelup',
-          version: 1,
-          expiresAt: new Date(Date.now() + 90 * 86_400_000).toISOString(),
-          imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
-        }}
-      />
+      <Button
+        variant="secondary"
+        icon={<Share2 aria-hidden />}
+        onClick={() => setOpen('claimed')}
+        data-testid="share-sheet-demo-claimed"
+      >
+        오늘 보상은 받음
+      </Button>
+      {(['offer', 'claimed'] as const).map((k) => (
+        <ShareSheet
+          key={k}
+          open={open === k}
+          onOpenChange={(o) => setOpen(o ? k : null)}
+          kind="levelup"
+          card={card(k === 'claimed')}
+          requestReward={async () => ({
+            coins_earned: 30,
+            coins_balance: 130,
+            already_claimed: false,
+          })}
+        />
+      ))}
     </div>
   );
 }

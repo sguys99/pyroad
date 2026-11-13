@@ -1,5 +1,5 @@
 {
-  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp, 00028 의 level_for_xp(Lv 1~50, P8-01 — 행은 모든 문턱과 그 1 아래), 00031 의 coin_reward(P8-04 코인 금액표, TS src/lib/quest/coins.ts coinReward), 00032 의 code_quest_stars(P8-05 코드 퀘스트 별, TS xp.ts codeQuestStars — 다시 풀기 통과는 힌트 0·황금키 아님), 00033 의 stage_chest_goal(P8-06 스테이지 보물상자 목표 별 = ceil(코드 퀘스트 수 × 3 × 0.7), TS src/lib/world/chest.ts chestGoal), 00035 의 current_streak(P8-08 연속 학습일 — 학습일·방패로 메운 날 목록과 오늘 KST 날짜, TS src/lib/time/streak.ts currentStreak), 00039 의 kst_week_start(P9-01 상점 주 구매 한도의 한 주 = KST 월요일부터, TS src/lib/time/kst.ts kstWeekStart), 00012 의 kst_date(P8-15 KST 날짜 경계 — 스트릭·미션·출석·복습 가능일이 모두 이 함수·kst_today 로 하루를 셈, TS src/lib/time/kst.ts toKstDateKey), test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침. 3일 뱃지·뱃지 판정 행은 P8-09 업적 이관으로 뺌(업적은 TS 사본 없이 SQL 표 하나, 00036)",
+  "_comment": "보상 규칙 대조표 (P1-03, Q25). TS(src/lib/quest/xp.ts, vitest rewardRules.test.ts)와 SQL(00006 의 quest_xp, 00028 의 level_for_xp(Lv 1~50, P8-01 — 행은 모든 문턱과 그 1 아래), 00031 의 coin_reward(P8-04 코인 금액표, TS src/lib/quest/coins.ts coinReward — share 행은 00044 P9-10 자랑하기), 00032 의 code_quest_stars(P8-05 코드 퀘스트 별, TS xp.ts codeQuestStars — 다시 풀기 통과는 힌트 0·황금키 아님), 00033 의 stage_chest_goal(P8-06 스테이지 보물상자 목표 별 = ceil(코드 퀘스트 수 × 3 × 0.7), TS src/lib/world/chest.ts chestGoal), 00035 의 current_streak(P8-08 연속 학습일 — 학습일·방패로 메운 날 목록과 오늘 KST 날짜, TS src/lib/time/streak.ts currentStreak), 00039 의 kst_week_start(P9-01 상점 주 구매 한도의 한 주 = KST 월요일부터, TS src/lib/time/kst.ts kstWeekStart), 00012 의 kst_date(P8-15 KST 날짜 경계 — 스트릭·미션·출석·복습 가능일이 모두 이 함수·kst_today 로 하루를 셈, TS src/lib/time/kst.ts toKstDateKey), test:rls RW-1)이 모두 이 표와 같아야 함. 규칙을 바꾸면 세 곳을 함께 고침. 3일 뱃지·뱃지 판정 행은 P8-09 업적 이관으로 뺌(업적은 TS 사본 없이 SQL 표 하나, 00036)",
   "xp": [
     { "base": 50, "hints": 0, "golden": false, "xp": 75 },
     { "base": 50, "hints": 1, "golden": false, "xp": 63 },
@@ -195,6 +195,7 @@
     { "kind": "achievement", "n": 2, "coins": 30 },
     { "kind": "achievement", "n": 3, "coins": 100 },
     { "kind": "achievement", "n": 0, "coins": 0 },
+    { "kind": "share", "coins": 30 },
     { "kind": "bogus", "coins": 0 }
   ],
   "stars": [
