@@ -14,6 +14,7 @@ import { z } from 'zod/v4';
 
 import { validateRule, type ValidationRule } from '@/lib/quest/validation';
 import { QUIZ_BLANK_RE } from '@/lib/quest/questKind';
+import { BOSS_LOOKS } from '@/lib/quest/boss';
 import { SOUND_MANIFEST, type BgmId } from '@/lib/sound/manifest';
 
 const text = z.string().min(1, '비어 있으면 안 돼요');
@@ -337,15 +338,77 @@ export const QuizQuestSchema = z.discriminatedUnion('quiz_kind', [
   }),
 ]);
 
+// ------------------------------------------------------------
+// 보스 (P9-12). 스테이지 마지막 관문: 퀴즈 문제(라운드) 3~7개를 이어서 풀고, 맞히면 보스 HP −1 · 틀리면 하트 −1
+//   prompt.boss          → quests.prompt_skeleton.boss           공개: 보스 이름·대사 (rounds 는 빌드가 퀴즈 공개 모양으로 붙임)
+//   rounds[].prompt.quiz → quests.prompt_skeleton.boss.rounds[]  공개: 퀴즈와 같은 모양 (보기 id 순)
+//   rounds[].answer      → quest_answer_keys.quiz_answer          정답: {kind: 'boss', rounds: [{kind, accepted, …}]}
+// 라운드 하나는 퀴즈 하나와 같은 규칙으로 검사함 (id·정답 글자 누출, checkQuiz)
+// ------------------------------------------------------------
+
+type QuizOption = (typeof QuizQuestSchema.options)[number];
+const bossRoundOf = <O extends QuizOption>(o: O) =>
+  z.strictObject({
+    quiz_kind: o.shape.quiz_kind,
+    prompt: z.strictObject({ quiz: o.shape.prompt.shape.quiz }),
+    answer: o.shape.answer,
+    /** 선택. 이 문제에서 져서 끝나면 "복습하러 가기"가 여는 같은 스테이지 퀘스트 id (없으면 스테이지 퀘스트 목록) */
+    review_quest: id.optional(),
+  });
+const [mcQuiz, fbQuiz, psQuiz, bhQuiz] = QuizQuestSchema.options;
+
+export const BossRoundSchema = z.discriminatedUnion('quiz_kind', [
+  bossRoundOf(mcQuiz),
+  bossRoundOf(fbQuiz),
+  bossRoundOf(psQuiz),
+  bossRoundOf(bhQuiz),
+]);
+
+/** 보스 라운드 수 (HP). 하트는 3개라 3문제보다 짧으면 긴장이 없고, 7문제보다 길면 초등학생에게 지침 */
+export const BOSS_ROUNDS = { min: 3, max: 7 } as const;
+
+export const BossQuestSchema = z.strictObject({
+  ...questBase,
+  quest_type: z.literal('boss'),
+  /** 별 3개(하트 3개 남기고 이김)일 때 XP. 별 1개당 1/3 이라 3의 배수 (00046 boss_answer) */
+  xp_reward: z
+    .int()
+    .min(3)
+    .multipleOf(3, 'xp_reward 는 3의 배수로 써요 (별 1개당 1/3)'),
+  prompt: z.strictObject({
+    ...quizPromptBase,
+    boss: z.strictObject({
+      /** 보스 이름 (예: 따옴표 대장 버그버그) */
+      name: text,
+      /** 외형 (P9-13): 버그버그 등딱지 색·모자. 없으면 기본(village) */
+      look: z.enum(BOSS_LOOKS).optional(),
+      /** 등장할 때 보스 한마디 */
+      intro: text,
+      /** 학생이 이겼을 때 보스 한마디 (진 보스가 친구처럼) */
+      on_defeat: text,
+      /** 학생이 졌을 때 보스 한마디 (놀리지 않고 다시 오라고) */
+      on_victory: text,
+    }),
+  }),
+  rounds: z.array(BossRoundSchema).min(BOSS_ROUNDS.min).max(BOSS_ROUNDS.max),
+});
+
 export const QuestSchema = z
   .discriminatedUnion('quest_type', [
     CodeQuestSchema,
     ProjectQuestSchema,
     QuizQuestSchema,
+    BossQuestSchema,
   ])
   .superRefine((quest, ctx) => {
     if (quest.quest_type === 'quiz') {
       checkQuiz(quest, (path, message) =>
+        ctx.addIssue({ code: 'custom', path, message }),
+      );
+      return;
+    }
+    if (quest.quest_type === 'boss') {
+      checkBoss(quest, (path, message) =>
         ctx.addIssue({ code: 'custom', path, message }),
       );
       return;
@@ -492,6 +555,8 @@ export type InputScenario = z.infer<typeof InputScenarioSchema>;
 export type CodeQuest = z.infer<typeof CodeQuestSchema>;
 export type ProjectQuest = z.infer<typeof ProjectQuestSchema>;
 export type QuizQuest = z.infer<typeof QuizQuestSchema>;
+export type BossQuest = z.infer<typeof BossQuestSchema>;
+export type BossRound = z.infer<typeof BossRoundSchema>;
 export type Quest = z.infer<typeof QuestSchema>;
 export type QuestType = Quest['quest_type'];
 export type QuizKind = QuizQuest['quiz_kind'];
@@ -506,6 +571,15 @@ export type QuizPrompt = {
 /** 퀴즈의 quests.prompt_skeleton 전체 */
 export type QuizPromptSkeleton = Omit<QuizQuest['prompt'], 'quiz'> & {
   quiz: QuizPrompt;
+};
+
+/** 보스의 quests.prompt_skeleton 전체 (P9-12). 라운드는 퀴즈 공개 모양 */
+export type BossPromptSkeleton = Omit<BossQuest['prompt'], 'boss'> & {
+  boss: BossQuest['prompt']['boss'] & {
+    rounds: QuizPrompt[];
+    /** rounds[i] 를 복습할 퀘스트 id (없으면 null) */
+    review_quests: (string | null)[];
+  };
 };
 
 /** quest_answer_keys.quiz_answer. 서버 전용 (src/lib/quest/answerKeys.ts 에서 다시 내보냄) */
@@ -818,6 +892,38 @@ function checkQuiz(quest: QuizQuest, report: Report): void {
   }
 }
 
+/** 보스: 라운드마다 퀴즈 하나처럼 검사 (공개 문장 = 보스 퀘스트의 제목·주제·이야기·대사 + 그 라운드 문제) */
+function checkBoss(quest: BossQuest, report: Report): void {
+  const b = quest.prompt.boss;
+  quest.rounds.forEach((round, i) => {
+    const asQuiz = {
+      ...quest,
+      quest_type: 'quiz',
+      quiz_kind: round.quiz_kind,
+      prompt: {
+        ...quest.prompt,
+        // 보스 대사도 공개 문장이라 이야기 칸에 함께 넣어 정답 누출을 봄
+        story_context: [
+          quest.prompt.story_context,
+          b.intro,
+          b.on_defeat,
+          b.on_victory,
+        ].join('\n'),
+        quiz: round.prompt.quiz,
+      },
+      answer: round.answer,
+    } as unknown as QuizQuest;
+    checkQuiz(asQuiz, (path, message) =>
+      report(
+        path[0] === 'answer' || path[1] === 'quiz'
+          ? ['rounds', i, ...path]
+          : path,
+        `${i + 1}번째 문제: ${message}`,
+      ),
+    );
+  });
+}
+
 export type ParseResult<T> =
   | { ok: true; value: T }
   | { ok: false; errors: string[] };
@@ -858,6 +964,17 @@ function publicPartsOf(raw: unknown): [(string | number)[], unknown][] {
   if (typeof raw !== 'object' || raw === null) return [];
   const quest = raw as { prompt?: unknown; steps?: unknown };
   const parts: [(string | number)[], unknown][] = [[['prompt'], quest.prompt]];
+  const rounds = (raw as { rounds?: unknown }).rounds;
+  if (Array.isArray(rounds)) {
+    rounds.forEach((round, i) => {
+      if (typeof round === 'object' && round !== null) {
+        parts.push([
+          ['rounds', i, 'prompt'],
+          (round as { prompt?: unknown }).prompt,
+        ]);
+      }
+    });
+  }
   if (Array.isArray(quest.steps)) {
     quest.steps.forEach((step, i) => {
       if (typeof step === 'object' && step !== null) {

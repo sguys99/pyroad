@@ -13,6 +13,7 @@ import type { EditorController } from '@/lib/editor/createEditor';
 import { CODE_LINE_HEIGHT } from '@/lib/editor/fontSize';
 import { useCodeFontSize } from '@/lib/editor/useCodeFontSize';
 import { CodeFontSizeControl } from './CodeFontSizeControl';
+import { useEditorTheme } from './EditorThemeContext';
 import './codeEditor.css';
 
 // CodeMirror 구성은 src/lib/editor/createEditor.ts. 마운트한 뒤 동적 import로 받아 첫 로드 JS에서 뺀다 (P6-16):
@@ -62,6 +63,7 @@ export function CodeEditor({
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const { size: fontSize, change: changeFontSize } = useCodeFontSize();
+  const theme = useEditorTheme();
   // 에디터가 도착했을 때의 최신 값 (그 사이 바뀐 값·글자 크기·오류 줄도 그대로 시작)
   const latestRef = useRef({ value, fontSize, errorLine });
   latestRef.current = { value, fontSize, errorLine };
@@ -125,6 +127,7 @@ export function CodeEditor({
         ref={containerRef}
         data-testid="code-editor"
         data-editor-loading={loaded ? undefined : ''}
+        data-editor-theme={theme ?? undefined}
       >
         {!loaded && (
           <pre

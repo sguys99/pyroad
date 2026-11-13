@@ -81,10 +81,13 @@ test.describe('퀘스트 전체 플로우', () => {
     const progress = page.getByTestId('stage-progress');
     const dots = progress.locator('.sp-dot');
     await expect(dots).toHaveCount(stage1.questCount);
-    // 숫자는 코드 퀘스트끼리 (B53): 퀴즈 점은 마름모로 따로
-    await expect(progress).toContainText(`1/${stage1.quests.length}`);
+    // 숫자는 코드 퀘스트(보스 포함, P9-12)끼리 (B53): 퀴즈 점은 마름모로 따로
+    const bossCount = stage1.boss ? 1 : 0;
+    await expect(progress).toContainText(
+      `1/${stage1.quests.length + bossCount}`,
+    );
     await expect(progress.locator('.sp-dot[data-kind="quiz"]')).toHaveCount(
-      stage1.questCount - stage1.quests.length,
+      stage1.quizzes.length,
     );
     await expect(dots.first()).toHaveAttribute('aria-current', 'step');
     await expect(dots.first()).toHaveAttribute('data-state', 'todo');
@@ -246,7 +249,11 @@ test.describe('퀘스트 전체 플로우', () => {
     e2eUser,
   }) => {
     // 앞 퀘스트는 서버 완료 RPC 로 끝내 둔다
-    await completeQuests(e2eUser.id, stage1.quests.slice(0, -1));
+    // 보스(P9-12)는 먼저 끝내 둠 → 마지막 코드 퀘스트가 스테이지를 깸 (보스로 깨는 길은 boss-battle 스펙)
+    await completeQuests(e2eUser.id, [
+      ...stage1.quests.slice(0, -1),
+      ...(stage1.boss ? [{ id: stage1.boss.id, solution: '' }] : []),
+    ]);
 
     await page.goto(`/quest/${lastQuest.id}`);
     await runCode(page, lastQuest.solution);
@@ -284,12 +291,13 @@ test.describe('퀘스트 전체 플로우', () => {
     await overlay.getByRole('button', { name: /모두 닫기|닫기/ }).click();
     await expect(page.locator('html')).not.toHaveAttribute('data-celebrating');
     await expect(overlay).toBeHidden();
-    // 스테이지 끝: 다음 퀘스트 대신 지도로
+    // 마지막 코드 퀘스트 뒤에는 스테이지 보스(P9-12) 차례가 이어짐 (여기서는 미리 이긴 보스 = 복습 판). 보스가 없으면 지도로
     const reward = page.locator('[data-testid="quest-reward"]:visible');
-    await expect(reward.getByTestId('back-to-map')).toBeVisible();
-    await expect(reward.getByRole('link', { name: '다음 퀘스트' })).toHaveCount(
-      0,
-    );
+    if (stage1.boss)
+      await expect(
+        reward.getByRole('link', { name: '다음 퀘스트' }),
+      ).toHaveAttribute('href', `/quest/${stage1.boss.id}`);
+    else await expect(reward.getByTestId('back-to-map')).toBeVisible();
 
     // 월드맵: 다음 스테이지가 열림
     await page.goto('/world');

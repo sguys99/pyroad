@@ -49,6 +49,12 @@ export const TUTOR_RATE_LIMITS: Record<TutorType, RateLimit & { env: string }> =
       perMinute: 4,
       perDay: 60,
     },
+    // 자유 질문 (P9-17). 아이가 직접 쓰므로 버튼보다 빡빡하게: 분당 3, 하루 20 (안전 설계 docs/tutor-free-input.md)
+    free_question: {
+      env: 'TUTOR_LIMIT_FREE',
+      perMinute: 3,
+      perDay: 20,
+    },
   };
 
 /**
@@ -102,7 +108,9 @@ export function getTutorRateLimit(
 ): RateLimit {
   const def = TUTOR_RATE_LIMITS[type];
   const base = readEnvLimit(def.env, env) ?? def;
-  if (!ownKey) return { perMinute: base.perMinute, perDay: base.perDay };
+  // 자유 질문은 본인 키여도 늘리지 않는다 (P9-17): 한도는 비용보다 아이가 AI와 자유롭게 나누는 대화량을 묶는 안전장치
+  if (!ownKey || type === 'free_question')
+    return { perMinute: base.perMinute, perDay: base.perDay };
   const mult = readEnvLimit(OWN_KEY_MULTIPLIER_ENV, env) ?? OWN_KEY_MULTIPLIER;
   return {
     perMinute: Math.min(MAX_LIMIT, base.perMinute * mult.perMinute),

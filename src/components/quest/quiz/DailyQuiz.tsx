@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CalendarCheck, Check, Flame, Map } from 'lucide-react';
 
-import { PybaemStatic } from '@/components/characters/rig/RigStatic';
+import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { Button } from '@/components/ui/button';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { track } from '@/lib/analytics/track';
@@ -352,7 +352,7 @@ export function DailySummary({
       data-testid="daily-summary"
     >
       <span className="dq-sum-rig" aria-hidden>
-        <PybaemStatic
+        <MyPybaemStatic
           state={all ? 'cheer' : 'wave'}
           size={88}
           label=""
@@ -418,7 +418,7 @@ export function DailyEmpty() {
   return (
     <section className="dq-sum" data-testid="daily-empty">
       <span className="dq-sum-rig" aria-hidden>
-        <PybaemStatic state="wave" size={88} label="" filters={false} />
+        <MyPybaemStatic state="wave" size={88} label="" filters={false} />
       </span>
       <h2 className="dq-sum-t font-display">아직 풀 퀴즈가 없어요</h2>
       <p className="dq-sum-note">

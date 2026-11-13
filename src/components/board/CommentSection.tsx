@@ -8,6 +8,7 @@ import type { BoardCommentWithAuthor } from '@/lib/types/database';
 import { formatKstDate } from '@/lib/time/kst';
 import { authorName } from '@/lib/board/display';
 import { UserAvatar } from '@/components/profile/UserAvatar';
+import { publicLook } from '@/lib/avatar/look';
 import { BOARD_LIMITS } from '@/lib/board/limits';
 import { BoardFormMessage, type BoardFormError } from './BoardFormMessage';
 import { ReportButton } from './ReportButton';
@@ -52,6 +53,7 @@ export function CommentSection({
           created_at: string;
           author_name?: string;
           author_skin?: string | null;
+          author_look?: unknown;
         };
       };
       if (!res.ok || !data.comment) {
@@ -75,6 +77,7 @@ export function CommentSection({
         user_profiles_public: {
           display_name: data.comment.author_name ?? null,
           avatar_skin: data.comment.author_skin ?? null,
+          avatar_look: data.comment.author_look ?? null,
         },
       };
       setComments((prev) => [...prev, newComment]);
@@ -124,7 +127,7 @@ export function CommentSection({
                 <div className="mb-1 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                     <UserAvatar
-                      skin={comment.user_profiles_public?.avatar_skin}
+                      {...publicLook(comment.user_profiles_public)}
                       size={32}
                     />
                     <span>{authorName(comment.user_profiles_public)}</span>

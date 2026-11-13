@@ -174,6 +174,36 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v0.7-phase9',
+    dir: 'v0.7-phase9',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.7 (Phase 9 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00039 shop_items · 00040 인벤토리 · 00041 황금키 보관 · 00042 공개 꾸민 모습 · 00043 공유 카드 · 00044 자랑하기 보상 · 00045 공유 카드 관리 · 00046 보스 배틀 · 00047 보스 업적 지표 · 00048 주 n일 공부 업적 · 00050 보호자 리포트 링크 · 00051 힌트 없이 보스 제외) + 콘텐츠 seed (1월드 보스 7종)',
+          '-- feat/phase9 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.7-runbook.md "Phase 9 병합"',
+        ],
+        parts: [
+          '00039',
+          '00040',
+          '00041',
+          '00042',
+          '00043',
+          '00044',
+          '00045',
+          '00046',
+          '00047',
+          '00048',
+          '00050',
+          '00051',
+          // seed 는 00046 뒤 (보스 정답 모양 CHECK 가 넓어진 뒤에 보스 행을 넣음)
+          'seed',
+        ],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];
@@ -237,10 +267,28 @@ export function assertReleases(files, releases = RELEASES) {
       }
 }
 
+/**
+ * 콘텐츠 seed 를 실제로 넣는 묶음 = 'seed' 가 있는 마지막 묶음 (B76).
+ * supabase/seed.sql 은 지금 콘텐츠의 생성물이라 최신 스키마에서만 들어감(예: 보스 행은 00046 정답 모양 CHECK 뒤).
+ * 이미 운영에 적용한 앞 릴리즈 묶음은 그때의 seed 로 적용됐으므로, 다시 만들 때는 seed 자리에 안내 주석만 둠.
+ */
+export function seedBundle(releases = RELEASES) {
+  return releases
+    .flatMap((r) => r.bundles)
+    .findLast((b) => b.parts.includes('seed'));
+}
+
 /** 묶음 하나의 SQL (LF) */
 export function bundleText(bundle, files) {
   const out = [...bundle.head, 'BEGIN;', ''];
   for (const p of bundle.parts) {
+    if (p === 'seed' && bundle !== seedBundle()) {
+      out.push(
+        '-- ===== content seed: 이 묶음은 이미 운영에 적용됨. 지금 seed.sql 은 최신 스키마용이라 마지막 릴리즈 묶음에서만 넣음 (B76) =====',
+        '',
+      );
+      continue;
+    }
     const path = p === 'seed' ? SEED : files.get(p);
     const name = p === 'seed' ? 'content seed' : p;
     out.push(

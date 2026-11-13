@@ -126,7 +126,8 @@ test('360px: 미션 칸이 HUD 에 남고(곧 열려요는 빠짐) 시트에 가
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto('/world');
   await expect(page.getByTestId('hud-mission')).toBeVisible();
-  await expect(page.getByTestId('hud-soon')).toBeHidden();
+  await expect(page.getByTestId('hud-soon')).toHaveCount(0);
+  await expect(page.getByTestId('hud-shop')).toBeHidden();
   await page.getByTestId('hud-mission').click();
   await expect(page.getByTestId('mission-list')).toBeVisible();
   const overflow = await page.evaluate(

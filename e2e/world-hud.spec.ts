@@ -1,10 +1,10 @@
-// 월드맵 상단 HUD (P5-07, Q47): 스크롤해도 따라오는 바, 실제 값(닉네임·레벨·스트릭·코인 P8-04·미션 칸 P8-07), 곧 열려요 쪽지, 메뉴 시트(공지·게시판·로그아웃, 400px 미만은 소리)
+// 월드맵 상단 HUD (P5-07, Q47): 스크롤해도 따라오는 바, 실제 값(닉네임·레벨·스트릭·코인 P8-04·미션 칸 P8-07), 상점 진입점(P9-02), 메뉴 시트(상점·공지·게시판·로그아웃, 400px 미만은 소리)
 
 import { test, expect } from './support/test';
 import { coinBalance, completeQuests, grantTestCoins } from './support/admin';
 import { stage } from './support/content';
 
-test('360px: 스크롤해도 HUD가 위에 있고, 불꽃·코인·곧 열려요·메뉴가 동작한다', async ({
+test('360px: 스크롤해도 HUD가 위에 있고, 불꽃·코인·상점·메뉴가 동작한다', async ({
   page,
   e2eUser,
 }) => {
@@ -41,24 +41,28 @@ test('360px: 스크롤해도 HUD가 위에 있고, 불꽃·코인·곧 열려요
     `코인 ${(await coinBalance(e2eUser.id)).toLocaleString('ko-KR')}개`,
   );
 
-  // 640px 미만은 곧 열려요 버튼이 빠지고(코인·미션 칸 자리, P8-07), 400px 미만은 닉네임 글자와 바의 소리 토글도 빠짐
+  // 640px 미만은 상점 칩이 빠지고(코인·미션 칸 자리 — 코인 칩·메뉴로 상점, P9-02), 400px 미만은 닉네임 글자와 바의 소리 토글도 빠짐
   // (아바타 링크 이름은 그대로, 소리는 메뉴 시트 안)
-  await expect(
-    hud.getByRole('button', { name: '상점, 곧 열려요' }),
-  ).toBeHidden();
+  await expect(hud.getByTestId('hud-shop')).toBeHidden();
+  await expect(hud.getByTestId('hud-coin-shop')).toHaveAttribute(
+    'href',
+    '/shop',
+  );
   await expect(hud.getByTestId('hud-mission')).toBeVisible();
   await expect(hud.locator('.wh-name')).toBeHidden();
   await expect(hud.getByTestId('sound-toggle')).toBeHidden();
   await page.setViewportSize({ width: 768, height: 740 });
   await expect(hud.getByTestId('sound-toggle')).toBeVisible();
-  await hud.getByRole('button', { name: '상점, 곧 열려요' }).click();
-  await expect(page.getByRole('status', { name: 'HUD 안내' })).toContainText(
-    '곧 열려요!',
-  );
+  await expect(
+    hud.getByRole('link', { name: '상점', exact: true }),
+  ).toHaveAttribute('href', '/shop');
   await page.setViewportSize({ width: 360, height: 740 });
 
   await hud.getByRole('button', { name: '메뉴' }).click();
   const sheet = page.getByTestId('hud-menu-sheet');
+  await expect(
+    sheet.getByRole('link', { name: '상점', exact: true }),
+  ).toBeVisible();
   await expect(sheet.getByRole('link', { name: '공지사항' })).toBeVisible();
   await expect(sheet.getByRole('link', { name: '게시판' })).toBeVisible();
   await expect(sheet.getByRole('button', { name: '로그아웃' })).toBeVisible();

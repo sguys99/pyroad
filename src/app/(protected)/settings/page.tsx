@@ -11,6 +11,7 @@ import { SoundSettingsSection } from '@/components/settings/SoundSettingsSection
 import { InstallAppSection } from '@/components/settings/InstallAppSection';
 import { LinkedAccountsSection } from '@/components/settings/LinkedAccountsSection';
 import { GuardianConsentStatus } from '@/components/consent/GuardianConsentStatus';
+import { GuardianReportSection } from '@/components/guardian-report/GuardianReportSection';
 import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
@@ -175,6 +176,8 @@ export default function SettingsPage() {
       <LinkedAccountsSection />
       {/* 보호자 동의 (P3-15). 로그인 레이아웃 ConsentProvider 값, 모르면 그리지 않음 */}
       <GuardianConsentStatus />
+      {/* 보호자 주간 리포트 비밀 링크 (P9-15) */}
+      <GuardianReportSection />
 
       <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
     </>

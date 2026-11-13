@@ -4,6 +4,8 @@
 // 축하 시퀀서(`src/lib/celebration/plan.ts` + `QuestCelebrations`)가 정한다: 순서·묶음·자동 넘김·컨페티·효과음.
 // 모두 "이번 요청에서 새로 일어난 일"만 담는다 (P1-03).
 
+import type { Costume } from '@/components/characters/rig/costumes';
+import type { PetId } from '@/lib/shop/catalog';
 import type { AchievementInfo } from './achievements';
 import type { QuestKind } from './questKind';
 import { getLevelTitle } from './xp';
@@ -48,6 +50,16 @@ export type CelebrationEvent =
       contents: { coins: number; goldenKeys: number; shields?: number };
       /** 부제 (없으면 "<스테이지>에서 별 N개를 모았어요") */
       note?: string;
+    }
+  // 상점 구매 (P9-02): 산 물건이 톡 나오고 "바로 입기"(장착은 `PurchaseWearContext`, 상점 화면이 줌)
+  | {
+      type: 'purchase';
+      /** 상점 아이템 id (`SHOP_ITEMS`) */
+      itemId: string;
+      price: number;
+      coinsLeft: number;
+      /** 그 물건을 입은 모습 (지금 입은 것 위에 덮어 입힘, 코스튬·펫만) */
+      look?: { costume: Costume; pet: PetId | null; skin: string | null };
     };
 
 export type CelebrationEventType = CelebrationEvent['type'];

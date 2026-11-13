@@ -38,6 +38,7 @@ import {
   TooltipSection,
 } from './_catalog/FeedbackSections';
 import { RigSection } from './_catalog/RigSection';
+import { CostumeSection } from './_catalog/CostumeSection';
 import { SocialLoginSection } from './_catalog/AuthSections';
 import {
   EditorSection,
@@ -51,13 +52,16 @@ import {
 import { LegalSection } from './_catalog/LegalSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
+import { GuardianReportCatalogSection } from './_catalog/GuardianReportCatalog';
 import { PwaSection } from './_catalog/PwaSection';
 import { WorldMapSection } from './_catalog/WorldMapSection';
 import { CelebrationSection } from './_catalog/CelebrationSection';
 import { QuizSection } from './_catalog/QuizSection';
+import { BossSection } from './_catalog/BossSection';
 import { AchievementBookSection } from './_catalog/AchievementBookSection';
 import { RestSection } from './_catalog/RestSection';
 import { ProfileSection } from './_catalog/ProfileSection';
+import { ShopScreenSection, ShopSection } from './_catalog/ShopSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -104,7 +108,13 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['social-login', '소셜 로그인'],
     ],
   },
-  { group: '캐릭터', items: [['rig', '마스코트 리그']] },
+  {
+    group: '캐릭터',
+    items: [
+      ['rig', '마스코트 리그'],
+      ['costume', '꾸미기 렌더러'],
+    ],
+  },
   {
     group: '기타',
     items: [
@@ -114,14 +124,18 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['error-staging', '실패 연출'],
       ['success-staging', '성공 연출'],
       ['quiz', '퀴즈 틀·객관식'],
+      ['boss', '보스 배틀'],
       ['celebrations', '축하 오버레이'],
       ['achievements', '업적 도감'],
       ['profile', '프로필'],
+      ['shop', '상점 아이템'],
+      ['shop-screen', '상점 화면'],
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
       ['onboarding', '온보딩·튜토리얼'],
       ['consent', '보호자 동의'],
+      ['guardian-report', '보호자 리포트'],
       ['pwa', '앱 아이콘·홈 화면'],
       ['rest', '휴식 알림'],
     ],
@@ -218,20 +232,25 @@ export function DesignCatalog({
               <TooltipSection />
               <SocialLoginSection />
               <RigSection />
+              <CostumeSection />
               <EditorSection />
               <RunControlsSection />
               <OutputPanelSection />
               <ErrorStagingSection />
               <SuccessStagingSection />
               <QuizSection />
+              <BossSection />
               <CelebrationSection />
               <AchievementBookSection />
               <ProfileSection />
+              <ShopSection />
+              <ShopScreenSection />
               <ShareCardSection />
               <SoundSection />
               <LegalSection />
               <OnboardingSection />
               <ConsentSection />
+              <GuardianReportCatalogSection />
               <PwaSection />
               <RestSection />
             </div>

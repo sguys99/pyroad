@@ -309,6 +309,48 @@ export type Database = {
           },
         ];
       };
+      boss_runs: {
+        Row: {
+          hearts: number;
+          quest_id: string;
+          round: number;
+          started_at: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          hearts?: number;
+          quest_id: string;
+          round?: number;
+          started_at?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          hearts?: number;
+          quest_id?: string;
+          round?: number;
+          started_at?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'boss_runs_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'boss_runs_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       coin_ledger: {
         Row: {
           balance_after: number;
@@ -376,6 +418,32 @@ export type Database = {
           title?: string;
         };
         Relationships: [];
+      };
+      guardian_report_links: {
+        Row: {
+          created_at: string;
+          token_hash: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          token_hash: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          token_hash?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'guardian_report_links_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       level_curve_adjustments: {
         Row: {
@@ -618,6 +686,92 @@ export type Database = {
           },
         ];
       };
+      share_cards: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          is_public: boolean;
+          kind: string;
+          ref: string;
+          snapshot: Json;
+          updated_at: string;
+          user_id: string;
+          version: number;
+        };
+        Insert: {
+          created_at?: string;
+          expires_at: string;
+          id: string;
+          is_public?: boolean;
+          kind: string;
+          ref: string;
+          snapshot: Json;
+          updated_at?: string;
+          user_id: string;
+          version?: number;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          is_public?: boolean;
+          kind?: string;
+          ref?: string;
+          snapshot?: Json;
+          updated_at?: string;
+          user_id?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'share_cards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      shop_items: {
+        Row: {
+          description: string;
+          id: string;
+          is_active: boolean;
+          kind: string;
+          name: string;
+          price: number;
+          rarity: string;
+          slot: string | null;
+          sort: number;
+          weekly_limit: number | null;
+        };
+        Insert: {
+          description: string;
+          id: string;
+          is_active?: boolean;
+          kind: string;
+          name: string;
+          price: number;
+          rarity: string;
+          slot?: string | null;
+          sort: number;
+          weekly_limit?: number | null;
+        };
+        Update: {
+          description?: string;
+          id?: string;
+          is_active?: boolean;
+          kind?: string;
+          name?: string;
+          price?: number;
+          rarity?: string;
+          slot?: string | null;
+          sort?: number;
+          weekly_limit?: number | null;
+        };
+        Relationships: [];
+      };
       stages: {
         Row: {
           created_at: string;
@@ -858,6 +1012,39 @@ export type Database = {
           },
         ];
       };
+      user_items: {
+        Row: {
+          acquired_at: string;
+          item_id: string;
+          user_id: string;
+        };
+        Insert: {
+          acquired_at?: string;
+          item_id: string;
+          user_id: string;
+        };
+        Update: {
+          acquired_at?: string;
+          item_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_items_item_id_fkey';
+            columns: ['item_id'];
+            isOneToOne: false;
+            referencedRelation: 'shop_items';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_items_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_progress: {
         Row: {
           attempts: number;
@@ -938,18 +1125,21 @@ export type Database = {
       };
       user_public_profiles: {
         Row: {
+          avatar_look: Json;
           avatar_skin: string | null;
           public_name: string;
           updated_at: string;
           user_id: string;
         };
         Insert: {
+          avatar_look?: Json;
           avatar_skin?: string | null;
           public_name: string;
           updated_at?: string;
           user_id: string;
         };
         Update: {
+          avatar_look?: Json;
           avatar_skin?: string | null;
           public_name?: string;
           updated_at?: string;
@@ -1130,18 +1320,21 @@ export type Database = {
     Views: {
       user_profiles_public: {
         Row: {
+          avatar_look: Json | null;
           avatar_skin: string | null;
           avatar_url: string | null;
           display_name: string | null;
           id: string | null;
         };
         Insert: {
+          avatar_look?: Json | null;
           avatar_skin?: string | null;
           avatar_url?: never;
           display_name?: string | null;
           id?: string | null;
         };
         Update: {
+          avatar_look?: Json | null;
           avatar_skin?: string | null;
           avatar_url?: never;
           display_name?: string | null;
@@ -1168,12 +1361,25 @@ export type Database = {
         }[];
       };
       achievement_stats: { Args: { p_user_id: string }; Returns: Json };
+      boss_answer: {
+        Args: {
+          p_answer: Json;
+          p_quest_id: string;
+          p_round: number;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       claim_achievement: {
         Args: { p_achievement_id: string; p_user_id: string };
         Returns: Json;
       };
       claim_daily_mission: {
         Args: { p_day: string; p_mission_id: string; p_user_id: string };
+        Returns: Json;
+      };
+      claim_share_reward: {
+        Args: { p_card_id: string; p_user_id: string };
         Returns: Json;
       };
       code_quest_stars: {
@@ -1229,6 +1435,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      create_share_card: {
+        Args: { p_kind: string; p_ref?: string; p_user_id: string };
+        Returns: Json;
+      };
       current_streak: {
         Args: { p_days: string[]; p_today: string };
         Returns: number;
@@ -1281,6 +1491,10 @@ export type Database = {
         };
         Returns: string[];
       };
+      equip_item: {
+        Args: { p_item_id?: string; p_slot: string; p_user_id: string };
+        Returns: Json;
+      };
       evaluate_achievements: { Args: { p_user_id: string }; Returns: Json };
       grant_coins: {
         Args: {
@@ -1298,6 +1512,14 @@ export type Database = {
       grant_star_coins: {
         Args: { p_quest_id: string; p_stars: number; p_user_id: string };
         Returns: number;
+      };
+      guardian_report: {
+        Args: { p_token: string; p_week: number };
+        Returns: Json;
+      };
+      guardian_report_link: {
+        Args: { p_action: string; p_user_id: string };
+        Returns: Json;
       };
       has_three_day_streak: {
         Args: { p_completed_at: string[] };
@@ -1317,6 +1539,7 @@ export type Database = {
       };
       kst_date: { Args: { p_at: string }; Returns: string };
       kst_today: { Args: never; Returns: string };
+      kst_week_start: { Args: { p_day: string }; Returns: string };
       learning_day_quests: {
         Args: { p_user_id: string };
         Returns: {
@@ -1328,6 +1551,10 @@ export type Database = {
       list_expired_unconsented: {
         Args: { p_limit: number };
         Returns: string[];
+      };
+      manage_share_card: {
+        Args: { p_action: string; p_card_id: string; p_user_id: string };
+        Returns: Json;
       };
       open_stage_chest: {
         Args: { p_stage_id: string; p_user_id: string };
@@ -1346,7 +1573,12 @@ export type Database = {
         Args: { p_limit?: number; p_retention?: string };
         Returns: number;
       };
+      public_avatar_look: { Args: { p_avatar_config: Json }; Returns: Json };
       public_avatar_skin: { Args: { p_avatar_config: Json }; Returns: string };
+      purchase_item: {
+        Args: { p_item_id: string; p_user_id: string };
+        Returns: Json;
+      };
       quest_xp: {
         Args: {
           p_base: number;
@@ -1386,6 +1618,17 @@ export type Database = {
         Returns: Json;
       };
       settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
+      share_card_public: {
+        Args: { p_id: string };
+        Returns: {
+          expires_at: string;
+          id: string;
+          kind: string;
+          snapshot: Json;
+          version: number;
+        }[];
+      };
+      shop_status: { Args: { p_user_id: string }; Returns: Json };
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };
         Returns: string;

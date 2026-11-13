@@ -47,7 +47,6 @@ export function WorldHudBar({ data }: { data: WorldMapData }) {
   return (
     <WorldHud
       name={profile.name}
-      skin={profile.skin}
       totalXp={profile.total_xp}
       level={profile.current_level}
       coins={profile.coins}

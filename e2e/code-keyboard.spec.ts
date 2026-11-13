@@ -7,6 +7,7 @@
 
 import { test, expect } from './support/test';
 import { stage } from './support/content';
+import { completeQuests } from './support/admin';
 import { outputPanel, runButton, waitForRunner } from './support/quest';
 import type { Page } from '@playwright/test';
 
@@ -97,12 +98,17 @@ test.describe('모바일 코드 키보드 (360px 터치)', () => {
 
   test('키보드 툴바로 1월드 1~2스테이지 퀘스트를 끝까지 푼다', async ({
     page,
+    e2eUser,
   }) => {
     const quests = [...stage(1).quests, ...stage(2).quests];
     test.setTimeout(60_000 + quests.length * 30_000);
 
     for (const quest of quests) {
       await test.step(`${quest.title}`, async () => {
+        // 2단계는 1단계 보스(P9-12)를 이겨야 열림 — 보스 화면은 boss-battle 스펙, 여기서는 서버로 끝내 둠
+        const boss = stage(1).boss;
+        if (boss && quest.id === stage(2).quests[0].id)
+          await completeQuests(e2eUser.id, [{ id: boss.id, solution: '' }]);
         await page.goto(`/quest/${quest.id}`);
         await page.getByRole('tab', { name: /공책/ }).tap();
         await waitForRunner(page);

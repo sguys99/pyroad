@@ -165,6 +165,8 @@ export function serverEnv(
     NEXT_TELEMETRY_DISABLED: '1',
     // 테스트 전용 페이지(/dev/editor, P2-18). 운영 배포에는 없는 값이라 거기서는 404
     PYROAD_TEST_PAGES: '1',
+    // 공유 시트의 카카오톡 버튼을 보이게 (P9-09). SDK 는 스펙이 window.Kakao 모의 객체로 대신해 외부로 나가지 않음
+    NEXT_PUBLIC_KAKAO_JS_KEY: 'e2e-kakao-js-key',
     // 테스트 월드 지도 설정 (Q48, P5-01): webServer 명령이 먼저 `content:build -- --fixtures`로 만든다 (src/lib/world/serverWorlds.ts)
     PYROAD_E2E_WORLDS: join(REPO_ROOT, 'build/e2e/worlds.json'),
     // 미들웨어의 없는 월드 404(P5-14)가 테스트 월드를 지나 보내게 (Edge라 위 파일을 못 읽음)

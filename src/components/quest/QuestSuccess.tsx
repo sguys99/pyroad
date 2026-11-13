@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { ArrowRight, Map } from 'lucide-react';
-import { PybaemStatic } from '@/components/characters/rig';
+import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { isShown } from '@/components/sound/isShown';
 import { Button } from '@/components/ui/button';
@@ -188,9 +188,12 @@ function useRewardSfx(
 export function RewardStrip({
   reward,
   done,
+  actions,
 }: {
   reward: QuestReward;
   done: boolean;
+  /** 아래 행동 줄을 바꿀 때 (보스 승리: 다음 스테이지 · 자랑하기 · 한 번 더, P9-12) */
+  actions?: React.ReactNode;
 }) {
   const { budget } = useMotionTier();
   const animate = !done && budget.springs && budget.effectDuration > 0;
@@ -226,7 +229,7 @@ export function RewardStrip({
     >
       <div className="qx-head">
         <span className="qx-rig" aria-hidden>
-          <PybaemStatic state="cheer" size={56} label="" filters={false} />
+          <MyPybaemStatic state="cheer" size={56} label="" filters={false} />
         </span>
         <div className="qx-title">
           <p className="qx-k">
@@ -294,33 +297,36 @@ export function RewardStrip({
       {reward.note && <p className="qx-note">{reward.note}</p>}
 
       <div className="qx-actions">
-        {reward.nextHref || reward.onNext ? (
-          <>
-            <Button
-              href={reward.onNext ? undefined : (reward.nextHref ?? undefined)}
-              onClick={reward.onNext}
-              iconRight={<ArrowRight aria-hidden />}
-              data-testid="next-quest"
-            >
-              {reward.nextLabel ?? '다음 퀘스트'}
-            </Button>
+        {actions ??
+          (reward.nextHref || reward.onNext ? (
+            <>
+              <Button
+                href={
+                  reward.onNext ? undefined : (reward.nextHref ?? undefined)
+                }
+                onClick={reward.onNext}
+                iconRight={<ArrowRight aria-hidden />}
+                data-testid="next-quest"
+              >
+                {reward.nextLabel ?? '다음 퀘스트'}
+              </Button>
+              <Button
+                href={reward.mapHref}
+                variant="secondary"
+                icon={<Map aria-hidden />}
+              >
+                지도로
+              </Button>
+            </>
+          ) : (
             <Button
               href={reward.mapHref}
-              variant="secondary"
               icon={<Map aria-hidden />}
+              data-testid="back-to-map"
             >
-              지도로
+              지도로 돌아가기
             </Button>
-          </>
-        ) : (
-          <Button
-            href={reward.mapHref}
-            icon={<Map aria-hidden />}
-            data-testid="back-to-map"
-          >
-            지도로 돌아가기
-          </Button>
-        )}
+          ))}
       </div>
     </section>
   );

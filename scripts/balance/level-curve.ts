@@ -33,7 +33,7 @@ export const SCENARIOS: Scenario[] = [
 ];
 
 export interface QuestXp {
-  type: 'code' | 'project' | 'quiz';
+  type: 'code' | 'project' | 'quiz' | 'boss';
   base: number;
 }
 
@@ -55,7 +55,10 @@ export function worldXp(quests: QuestXp[], s: Scenario, scale = 1): number {
       sum +
       (q.type === 'quiz'
         ? s.quizStars * QUIZ_XP_PER_STAR
-        : calculateXP(Math.round(q.base * scale), s.hints)),
+        : q.type === 'boss'
+          ? // 00046: 별(남은 하트) × xp_reward/3. 별은 퀴즈 첫 판정과 같다고 가정
+            s.quizStars * Math.round((q.base * scale) / 3)
+          : calculateXP(Math.round(q.base * scale), s.hints)),
     0,
   );
 }
@@ -85,11 +88,11 @@ function main() {
   const quests = world1Quests();
   const count = (t: QuestXp['type']) => quests.filter((q) => q.type === t);
   const base = quests
-    .filter((q) => q.type !== 'quiz')
+    .filter((q) => q.type === 'code' || q.type === 'project')
     .reduce((a, q) => a + q.base, 0);
   const out: string[] = [];
   out.push(
-    `1월드: 코드 ${count('code').length} · 프로젝트 ${count('project').length} · 퀴즈 ${count('quiz').length}개, 코드·프로젝트 기본 XP 합 ${base}`,
+    `1월드: 코드 ${count('code').length} · 프로젝트 ${count('project').length} · 퀴즈 ${count('quiz').length} · 보스 ${count('boss').length}개, 코드·프로젝트 기본 XP 합 ${base} · 보스 별 3개 XP 합 ${count('boss').reduce((a, q) => a + q.base, 0)}`,
     '',
     '| 시나리오 | 1월드 XP | 1월드 Lv | 2월드까지 XP | Lv | 3월드까지 XP | Lv |',
     '|---|---|---|---|---|---|---|',

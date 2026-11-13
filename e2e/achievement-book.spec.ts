@@ -35,7 +35,13 @@ test('360px: 메뉴 금색 점 → 도감 → 받기 → 코인 반영, 넘침 �
 
   const book = page.getByTestId('achievement-book');
   await expect(book.getByRole('heading', { name: '업적 도감' })).toBeVisible();
-  await expect(book.locator('.ab-count')).toContainText('/42');
+  await expect(book.locator('.ab-count')).toContainText('/46');
+  // "한 주에 n일 공부" 업적(P9-18)은 꾸준함 칸에 연속 업적 바로 뒤
+  const habit = book.locator('.ab-sec[data-category="habit"]');
+  const weekly = habit.getByTestId('achievement-week2_4');
+  await expect(weekly).toContainText('차곡차곡 공부');
+  await expect(weekly).toContainText('/4');
+  await expect(habit.getByTestId('achievement-week3_12')).toBeVisible();
   // 숨김 업적은 이름 없이 "???"
   await expect(book.getByTestId('achievement-level_50')).toContainText('???');
   // 아직 = 진행 막대 n/목표

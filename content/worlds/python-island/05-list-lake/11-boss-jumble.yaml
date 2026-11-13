@@ -1,0 +1,178 @@
+# 보스 5: 뒤죽박죽 버그버그 (P9-13)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000205
+order: 11
+title: 뒤죽박죽 버그버그
+concept: 리스트 총정리
+xp_reward: 45
+quest_type: boss
+prompt:
+  topic: 5단계에서 배운 리스트·번호(인덱스)·append()·len()·sort()·in 총정리
+  learning_goals:
+    - 리스트 번호가 0부터 시작함을 알고 값을 꺼낼 수 있다
+    - append()·len()·sort()가 리스트를 어떻게 바꾸는지 따라갈 수 있다
+    - for 로 리스트를 하나씩 돌며 골라 담을 수 있다
+  story_context: 첨벙! 리스트 호수의 물고기 목록이 뒤죽박죽 섞여 버렸어요. 물을 튀기며 웃는 건 바로 버그버그! 목록을 바르게 읽어 내면 물고기들이 제자리로 돌아와요.
+  fallback_text: 리스트는 여러 값을 대괄호 안에 차례로 담아요. 번호는 0부터 세요. append()는 맨 뒤에 하나를 더하고, len()은 몇 개인지 세고, sort()는 작은 것부터 줄을 세워요. in 은 리스트 안에 있는지 확인해요.
+  boss:
+    name: 뒤죽박죽 버그버그
+    look: lake
+    intro: 첨벙첨벙! 물고기 목록을 뒤죽박죽 섞어 놨지롱! 여섯 문제를 풀면 다시 줄 세워 줄게!
+    on_defeat: 으앗, 번호를 딱딱 맞게 세네! 물고기들은 제자리로 돌려놓을게. 탑에서 또 보자!
+    on_victory: 헤헤, 물고기 순서가 헷갈렸지? 번호를 어디서부터 세는지 떠올리고 다시 와!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000017
+    prompt:
+      quiz:
+        question: 물고기 한 마리를 더 넣었어요. 돌리면 무엇이 나올까?
+        code: |-
+          fish = ["붕어", "잉어", "메기"]
+          fish.append("송어")
+          print(len(fish))
+          print(fish[1])
+        options:
+          - { id: opt-c5ri, text: "4\n잉어" }
+          - { id: opt-v2hn, text: "3\n붕어" }
+          - { id: opt-k8ad, text: "4\n붕어" }
+          - { id: opt-e3wy, text: "3\n잉어" }
+    answer:
+      quiz_answer:
+        accepted: [opt-c5ri]
+        explanation: append()로 송어가 맨 뒤에 들어가 모두 4마리예요. 번호는 0부터 세니까 1번은 두 번째인 잉어예요.
+        explanations:
+          opt-v2hn: append()로 송어가 들어가서 4마리가 돼요. 그리고 번호 1은 두 번째 물고기예요.
+          opt-k8ad: 번호는 0부터 세요. 붕어가 0번, 잉어가 1번이에요.
+          opt-e3wy: append()는 리스트에 바로 하나를 더해요. 송어까지 세면 4마리예요.
+  - quiz_kind: fill_blank
+    review_quest: b1000000-0000-0000-0000-000000000039
+    prompt:
+      quiz:
+        question: 빈칸을 채워 바구니에 배가 들어 있으면 배가 있어요! 가 나오게 해요
+        code: |-
+          basket = ["사과", "배", "감"]
+          if "배" {{bk-u7nc}} basket:
+              print("배가 있어요!")
+        tokens:
+          - { id: tok-r2xo, text: in }
+          - { id: tok-f9db, text: '==' }
+          - { id: tok-i6kq, text: not }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-u7nc: tok-r2xo }
+        explanation: in 은 왼쪽 값이 오른쪽 리스트 안에 있는지 확인해요. 배가 있으니까 참이 되어 글자가 나와요.
+        explanations:
+          tok-f9db: == 는 "배" 한 개와 리스트 전체가 똑같은지 비교해요. 리스트는 "배"와 같지 않아서 아무것도 나오지 않아요.
+          tok-i6kq: not 혼자서는 두 값 사이에 쓸 수 없어서 오류가 나요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000037
+    prompt:
+      quiz:
+        question: 물고기 색을 한 줄에 하나씩 보여 주려는데 리스트 전체가 세 번 나와요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-w4fs
+            code: colors = ["빨강", "파랑", "노랑"]
+          - id: ln-o8ck
+            code: 'for c in colors:'
+          - id: ln-l3tm
+            code: '    print(colors)'
+        fixes:
+          - id: fx-s7ve
+            code: '    print(c)'
+          - id: fx-g5zi
+            code: '    print(colors[c])'
+          - id: fx-b2qu
+            code: '    print("c")'
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-l3tm, fix: fx-s7ve }
+        explanation: for c in colors 는 색을 하나씩 c 에 담아 줘요. 그래서 반복 안에서는 c 를 보여 줘야 한 줄에 색 하나씩 나와요.
+        explanations:
+          ln-w4fs: 이 줄은 리스트를 잘 만들었어요. 반복 안에서 무엇을 보여 주는지 살펴봐요.
+          ln-o8ck: 이 줄은 색을 하나씩 꺼내는 반복이라 맞아요. 그 아래 줄을 살펴봐요.
+          fx-g5zi: c 에는 번호가 아니라 색 글자가 들어 있어요. 글자로는 번호처럼 꺼낼 수 없어 오류가 나요.
+          fx-b2qu: 따옴표로 감싸면 c 라는 글자 그대로가 세 번 나와요.
+  - quiz_kind: parsons
+    review_quest: b1000000-0000-0000-0000-000000000018
+    prompt:
+      quiz:
+        question: 20cm보다 큰 물고기만 새 리스트에 담고, 몇 마리인지 한 번만 보여 줘요. 줄을 놓고 들여쓰기도 맞춰요
+        indent: true
+        lines:
+          - { id: ln-t6eb, code: 'fish = [12, 30, 8, 25]' }
+          - { id: ln-h3ow, code: 'big = []' }
+          - { id: ln-z9ak, code: 'for f in fish:' }
+          - { id: ln-p4uj, code: 'if f > 20:' }
+          - { id: ln-e7rn, code: 'big.append(f)' }
+          - { id: ln-a2gx, code: 'print(len(big))' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-t6eb, indent: 0 }
+            - { id: ln-h3ow, indent: 0 }
+            - { id: ln-z9ak, indent: 0 }
+            - { id: ln-p4uj, indent: 1 }
+            - { id: ln-e7rn, indent: 2 }
+            - { id: ln-a2gx, indent: 0 }
+          - - { id: ln-h3ow, indent: 0 }
+            - { id: ln-t6eb, indent: 0 }
+            - { id: ln-z9ak, indent: 0 }
+            - { id: ln-p4uj, indent: 1 }
+            - { id: ln-e7rn, indent: 2 }
+            - { id: ln-a2gx, indent: 0 }
+        explanation: 빈 리스트를 먼저 만들고, 물고기를 하나씩 보며 20보다 크면 담아요. 다 담은 뒤에 len()으로 세어야 해서 print 는 반복 밖에 둬요.
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000038
+    prompt:
+      quiz:
+        question: 물고기 숫자를 줄 세운 뒤 맨 앞과 맨 뒤를 보여 줘요. 돌리면 무엇이 나올까?
+        code: |-
+          nums = [7, 2, 9, 4]
+          nums.sort()
+          print(nums[0])
+          print(nums[3])
+        options:
+          - { id: opt-q3jm, text: "2\n9" }
+          - { id: opt-x7bf, text: "7\n4" }
+          - { id: opt-d4nt, text: "9\n2" }
+          - { id: opt-i8wa, text: '[2, 4, 7, 9]' }
+    answer:
+      quiz_answer:
+        accepted: [opt-q3jm]
+        explanation: sort()로 [2, 4, 7, 9] 가 돼요. 0번은 가장 작은 2, 3번은 가장 큰 9예요.
+        explanations:
+          opt-x7bf: sort()는 리스트를 바로 바꿔요. 줄 세운 뒤의 0번과 3번을 봐야 해요.
+          opt-d4nt: sort()는 작은 것부터 큰 것 차례로 줄을 세워요.
+          opt-i8wa: print()에 리스트 전체가 아니라 0번, 3번 하나씩을 넣었어요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000018
+    prompt:
+      quiz:
+        question: 여우를 친구 목록에 넣고 친구 수 3을 보여 주려는데 오류가 나요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-f6pv
+            code: friends = ["토끼", "곰"]
+          - id: ln-n2he
+            code: friends = friends.append("여우")
+          - id: ln-u5cs
+            code: print(len(friends))
+        fixes:
+          - id: fx-j3ol
+            code: friends.append("여우")
+          - id: fx-r8yk
+            code: friends.append(여우)
+          - id: fx-c6wd
+            code: friends + "여우"
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-n2he, fix: fx-j3ol }
+        explanation: append()는 리스트를 바로 바꾸고 아무것도 돌려주지 않아요. 그래서 friends = 를 붙이면 리스트가 사라져요. append()만 써요.
+        explanations:
+          ln-f6pv: 이 줄은 리스트를 잘 만들었어요. 여우를 넣는 줄을 살펴봐요.
+          ln-u5cs: len()으로 세는 건 맞아요. 그 전에 friends 가 리스트가 아니게 된 게 문제예요.
+          fx-r8yk: 여우에 따옴표가 없으면 글자가 아니라 상자 이름으로 읽어서 오류가 나요.
+          fx-c6wd: 리스트와 글자는 + 로 붙일 수 없어서 오류가 나요. 넣을 때는 append()를 써요.

@@ -218,11 +218,50 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
     );
   });
 
+  it('공유 페이지(P9-08): 카드 종류만, 카드 id·닉네임은 거부', () => {
+    const parse = (name: string, props: unknown) =>
+      clientBatchSchema.safeParse(
+        batch([{ name, props, path: '/share/AAAAAAAAAAAAAAAAAAAAAA' }]),
+      ).success;
+    expect(parse('share_view', { kind: 'levelup' })).toBe(true);
+    expect(parse('share_view', { kind: 'gone' })).toBe(true);
+    expect(parse('share_cta_click', { kind: 'weekly' })).toBe(true);
+    expect(parse('share_view', { kind: 'secret' })).toBe(false);
+    expect(parse('share_view', { kind: 'stage', card_id: 'x' })).toBe(false);
+    // 보호자 리포트 (P9-15): 주·동작만, 토큰은 받지 않음
+    expect(parse('guardian_report_view', { week: 'last' })).toBe(true);
+    expect(parse('guardian_report_view', { week: 'x' })).toBe(false);
+    expect(parse('guardian_report_view', { week: 'this', token: 'x' })).toBe(
+      false,
+    );
+    // 링크 만들기·끄기는 서버만 기록 (브라우저가 보내면 거절)
+    expect(parse('guardian_report_link', { action: 'create' })).toBe(false);
+    expect(parse('share_cta_click', { kind: 'stage', nickname: 'a' })).toBe(
+      false,
+    );
+  });
+
+  it('공유 시트(P9-09): 카드 종류 + 채널 이름만', () => {
+    const parse = (name: string, props: unknown) =>
+      clientBatchSchema.safeParse(batch([{ name, props }])).success;
+    expect(parse('share_open', { kind: 'levelup' })).toBe(true);
+    for (const channel of ['kakao', 'web_share', 'save_image', 'copy_link'])
+      expect(parse('share_channel', { kind: 'stage', channel })).toBe(true);
+    expect(parse('share_open', { kind: 'gone' })).toBe(false);
+    expect(parse('share_channel', { kind: 'stage', channel: 'sms' })).toBe(
+      false,
+    );
+    expect(
+      parse('share_channel', { kind: 'stage', channel: 'kakao', card_id: 'x' }),
+    ).toBe(false);
+  });
+
   it('이벤트 목록이 events.ts 의 클라이언트 이름과 같다', () => {
     expect([...CLIENT_EVENT_NAMES].sort()).toEqual([
       'continue_click',
       'daily_quiz_finish',
       'daily_quiz_open',
+      'guardian_report_view',
       'landing_cta_click',
       'landing_view',
       'motion_tier_change',
@@ -232,6 +271,10 @@ describe('clientBatchSchema — 브라우저가 보낼 수 있는 것 (P1-17)', 
       'quiz_try_run',
       'rest_reminder_choice',
       'rest_reminder_shown',
+      'share_channel',
+      'share_cta_click',
+      'share_open',
+      'share_view',
       'trial_run',
       'trial_start',
       'trial_success',
@@ -340,6 +383,7 @@ describe('normalizePath — 쿼리·id 를 남기지 않음', () => {
     ['/board/kid@example.com', '/board/[x]'],
     ['/notice/%EA%B3%B5%EC%A7%80', '/notice/[x]'],
     [`/a/${'b'.repeat(41)}`, '/a/[x]'],
+    ['/share/Ab3_-Ab3_-Ab3_-Ab3_-Ab', '/share/[id]'],
   ])('%s → %s', (input, expected) => {
     expect(normalizePath(input)).toBe(expected);
   });

@@ -6,6 +6,7 @@ import {
   Flame,
   Lightbulb,
   RotateCcw,
+  Share2,
   Stamp,
   Trophy,
 } from 'lucide-react';
@@ -14,8 +15,7 @@ import { CardButton } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { AchievementMedal } from '@/components/shared/AchievementMedal';
-import { UserAvatar } from '@/components/profile/UserAvatar';
-import type { SkinId } from '@/lib/avatar/skins';
+import { MyAvatar } from '@/components/profile/MyLook';
 import {
   getLevelTitle,
   getXPProgress,
@@ -67,12 +67,13 @@ export function ProfileCard({
 /** 머리: 아바타 + 레벨 도장, 이름, 칭호 도장(5레벨마다 큰 칭호 금색), 다음 칭호까지 경험치 */
 export function ProfileHero({
   name,
-  skin,
   totalXp,
+  action,
 }: {
   name: string;
-  skin: SkinId;
   totalXp: number;
+  /** 이름·칭호 아래 버튼 (레벨 카드 자랑하기, P9-09) */
+  action?: ReactNode;
 }) {
   const {
     currentLevel: level,
@@ -91,7 +92,7 @@ export function ProfileHero({
       data-testid="profile-hero"
     >
       <div className="pf-avatar">
-        <UserAvatar skin={skin} size={96} />
+        <MyAvatar size={96} />
         <span className="pf-seal" data-big={big || undefined}>
           <span className="sr-only">레벨 {level}</span>
           <small aria-hidden className="font-sans">
@@ -108,6 +109,7 @@ export function ProfileHero({
           <small>{big ? '큰 칭호' : '칭호'}</small>
           <b className="font-display">{getLevelTitle(level)}</b>
         </p>
+        {action}
       </div>
       <div className="pf-xp">
         <div className="pf-xp-row">
@@ -413,6 +415,42 @@ export function AchievementsCard({
           </ul>
         </>
       )}
+    </CardButton>
+  );
+}
+
+/** 내 자랑 카드로 가는 줄 (P9-11): 만든 카드 수 · 지금 공개 중인 수 */
+export function ShareCardsCard({
+  total,
+  open,
+}: {
+  total: number;
+  open: number;
+}) {
+  return (
+    <CardButton
+      href="/profile/cards"
+      radius="l"
+      padding="lg"
+      className="flex items-center gap-3"
+      data-testid="profile-share-cards"
+      aria-label={`내 자랑 카드, ${total}장 중 ${open}장 공개 중`}
+    >
+      <Share2 className="size-6 shrink-0 text-primary-text" aria-hidden />
+      <span className="grid min-w-0 gap-0.5">
+        <span className="font-display text-h3 text-foreground">
+          내 자랑 카드
+        </span>
+        <span className="text-caption text-muted-foreground">
+          {total === 0
+            ? '자랑한 카드를 여기서 숨기거나 지울 수 있어요'
+            : `${total}장 · 지금 ${open}장 공개 중`}
+        </span>
+      </span>
+      <ChevronRight
+        className="ml-auto size-5 shrink-0 text-primary-text"
+        aria-hidden
+      />
     </CardButton>
   );
 }

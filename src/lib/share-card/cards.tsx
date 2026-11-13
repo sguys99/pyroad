@@ -300,9 +300,6 @@ export function AchievementCard(d: AchievementCardData) {
 }
 
 export function WeeklyCard(d: WeeklyCardData) {
-  const learned = d.learned.map(cleanText).filter(Boolean);
-  const shown = learned.slice(0, 3);
-  const more = learned.length - shown.length;
   const heroSize = fitNumberRow(d.quests, TEXT_W, {
     max: 124,
     unitSize: TYPE.heroUnit,
@@ -365,55 +362,12 @@ export function WeeklyCard(d: WeeklyCardData) {
           label="모은 별"
         />
         <StatTile
-          icon={iconUri(glyphSvg('flame', COLOR.accentLip, 2.4))}
-          value={d.streak}
-          unit="일"
-          label="연속 공부"
+          icon={iconUri(glyphSvg('bolt', COLOR.accentLip, 2.4))}
+          value={d.xp}
+          unit="XP"
+          label="얻은 경험치"
         />
       </div>
-      {shown.length ? (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            marginTop: 18,
-            width: TEXT_W,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 24,
-              color: COLOR.textMuted,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            배운 것
-          </div>
-          {shown.map((l, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                padding: '6px 16px',
-                borderRadius: CARD_RADIUS.chip,
-                backgroundColor: COLOR.surface2,
-                fontSize: 24,
-                color: COLOR.text,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {truncateEm(l, 6)}
-            </div>
-          ))}
-          {more > 0 ? (
-            <div
-              style={{ fontSize: 24, color: COLOR.textMuted }}
-            >{`+${more}`}</div>
-          ) : null}
-        </div>
-      ) : null}
     </CardFrame>
   );
 }
@@ -433,9 +387,4 @@ export function renderShareCard(d: ShareCardData): ReactElement {
 }
 
 /** "이미지 저장" 파일 이름 (P9-08 `Content-Disposition`) */
-export const SHARE_CARD_FILENAME: Record<ShareCardData['kind'], string> = {
-  levelup: 'pyroad-levelup.png',
-  stage: 'pyroad-stage-clear.png',
-  achievement: 'pyroad-achievement.png',
-  weekly: 'pyroad-weekly.png',
-};
+export { SHARE_CARD_FILENAME } from './share';

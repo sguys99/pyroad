@@ -27,6 +27,11 @@ const PYODIDE_CONTENT_TYPES: Array<[string, string]> = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['pyodide'],
+  // 공유 카드 이미지 함수에 카드 폰트(KS 2,350자 + Pretendard 전체 대체, TTF/OTF)를 번들 (P9-07, §2.5). 로더가 고정 경로로 읽어
+  // 추적되지만 확실히 넣는다. 빌드 뒤 route.js.nft.json 에 이 폴더의 폰트 3개만 있는지 확인 (docs/design/share-card.md §8)
+  outputFileTracingIncludes: {
+    '/api/share-cards/[id]/image': ['./src/fonts/share-card/**/*.{ttf,otf}'],
+  },
   poweredByHeader: false,
   async headers() {
     return [

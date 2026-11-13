@@ -1,0 +1,628 @@
+/* 보스 배틀 (P9-12, BossArena·BossQuest·BossResult). 퀘스트 책 펼침 언어 그대로 + 무대 한 장.
+   움직임은 일회성 transform·opacity 애니메이션만(§2.10): full·lite 모두(lite 는 --bb-k 0.7 배), minimal 은 opacity 만,
+   동작 줄이기는 0 (리그 표정·글자·색으로). 속성이 없으면(부트 실패) 아무것도 움직이지 않는 것이 기본. 값은 토큰 변수만 */
+
+/* ───── 무대 */
+.bb-arena {
+  --bb-k: 1;
+  position: relative;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--round-l);
+  background: color-mix(in srgb, var(--world-soft) 70%, var(--surface));
+}
+:root[data-motion='lite'] .bb-arena {
+  --bb-k: 0.7;
+}
+.bb-sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      120% 70% at 78% 30%,
+      color-mix(in srgb, var(--error) 10%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 60% at 18% 40%,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 65%
+    );
+}
+/* 판이 끝나면 하늘색이 이긴 쪽으로 */
+.bb-arena[data-phase='won'] .bb-sky {
+  background: radial-gradient(
+    130% 90% at 30% 35%,
+    color-mix(in srgb, var(--accent) 22%, transparent),
+    transparent 70%
+  );
+}
+
+/* 이름표 줄: 하트(왼쪽) · 보스 이름 + HP(오른쪽) */
+.bb-plates {
+  order: -1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0;
+}
+.bb-hearts,
+.bb-hp {
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: var(--elev-card);
+}
+.bb-hearts {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.375rem 0.625rem 0.375rem 0.5rem;
+}
+.bb-plate-n {
+  margin-left: 0.25rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: var(--text-caption--line-height);
+  white-space: nowrap;
+}
+.bb-heart {
+  display: inline-flex;
+  color: var(--line-strong);
+}
+.bb-heart svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+}
+.bb-heart[data-alive] {
+  color: var(--error);
+}
+.bb-heart[data-alive] svg {
+  fill: currentColor;
+}
+
+.bb-hp {
+  flex: 0 1 15rem;
+  min-width: 0;
+  padding: 0.375rem 0.625rem 0.5rem;
+}
+.bb-hp-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.bb-hp-name > .font-display {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bb-hp-track {
+  position: relative;
+  height: 0.875rem;
+  overflow: hidden;
+  border-radius: var(--round-pill);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.bb-hp-fill,
+.bb-hp-lag {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--bb-hp, 1));
+}
+.bb-hp-fill {
+  background: var(--error);
+  transition: transform calc(var(--dur-progress) * var(--bb-k))
+    var(--easing-out);
+}
+/* 깎인 만큼의 밝은 잔상이 한 박자 늦게 따라 줄어듦 */
+.bb-hp-lag {
+  background: var(--accent-light);
+  transition: transform calc(var(--dur-slow) * var(--bb-k)) var(--easing-in-out)
+    calc(var(--dur-base) * var(--bb-k));
+}
+.bb-hp-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--surface);
+  opacity: 0.85;
+}
+:root[data-motion='minimal'] :is(.bb-hp-fill, .bb-hp-lag) {
+  transition-duration: var(--dur-fade);
+  transition-delay: 0s;
+}
+:root[data-reduced='true'] :is(.bb-hp-fill, .bb-hp-lag) {
+  transition: none;
+}
+
+/* 무대 바닥: 두 캐릭터가 서는 언덕 */
+.bb-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: clamp(9.5rem, 42cqi, 15rem);
+  margin-top: -1.25rem;
+  padding: 0 3% 0;
+}
+.bb-ground {
+  position: absolute;
+  inset: auto -10% 0;
+  height: 30%;
+  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+  background: color-mix(in srgb, var(--world) 26%, var(--surface));
+}
+.bb-side {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 42%;
+}
+.bb-rig {
+  display: inline-flex;
+}
+/* 리그 크기는 무대 폭을 따라 (지도 단위처럼 cqi) */
+.bb-rig > svg {
+  width: clamp(7.5rem, 36cqi, 12rem);
+  height: auto;
+}
+.bb-side[data-side='boss'] .bb-rig > svg {
+  width: clamp(8.5rem, 40cqi, 13.5rem);
+}
+/* 버그버그가 파이뱀 쪽(왼쪽)을 보게 */
+.bb-side[data-side='boss'] .bb-rig > * {
+  transform: scaleX(-1);
+}
+
+/* 보스 한마디: 이름표 줄 아래 오른쪽 (보스 쪽). 화면 낭독은 쪽의 알림 줄이 맡음 */
+.bb-say {
+  order: -1;
+  align-self: flex-end;
+  max-width: min(22rem, 78%);
+  margin: 0.625rem 0.75rem 0;
+}
+.bb-say .g-bubble {
+  box-shadow: var(--elev-card);
+}
+.bb-say .g-bubble-t {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+
+/* ───── 이펙트 (기본은 끝 모습: 별탄·별꽃 숨김, 피해 숫자는 보임 = 동작 줄이기 모양) */
+.bb-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bb-shot,
+.bb-burst,
+.bb-dmg {
+  position: absolute;
+  top: 42%;
+}
+.bb-shot {
+  left: 24%;
+  opacity: 0;
+}
+.bb-burst {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+.bb-burst[data-at='boss'],
+.bb-dmg[data-at='boss'] {
+  left: 74%;
+}
+.bb-burst[data-at='hero'],
+.bb-dmg[data-at='hero'] {
+  left: 24%;
+}
+.bb-burst > i {
+  position: absolute;
+  left: -0.1875rem;
+  top: -1.4rem;
+  width: 0.375rem;
+  height: 1rem;
+  border-radius: var(--round-pill);
+  background: var(--accent);
+  transform-origin: 50% 1.4rem;
+  transform: rotate(var(--r)) translateY(-0.25rem);
+}
+.bb-burst[data-tone='hurt'] > i {
+  background: var(--error);
+}
+.bb-dmg {
+  margin-top: -3.25rem;
+  translate: -50% 0;
+  color: var(--accent-text);
+  font-size: var(--text-h2);
+  line-height: 1;
+  -webkit-text-stroke: 4px var(--surface);
+  paint-order: stroke fill;
+}
+.bb-dmg[data-tone='hurt'] {
+  color: var(--error);
+}
+
+/* full·lite: 별탄이 날아가 맞고 별꽃이 터지고 숫자가 떠오름, 무대 흔들림·깜빡임·하트 깨짐 */
+:root[data-reduced='false']:not([data-motion='minimal']) {
+  .bb-shot {
+    animation: bb-shot calc(420ms * var(--bb-k)) var(--easing-in-out) both;
+  }
+  .bb-burst {
+    animation: bb-burst-o calc(520ms * var(--bb-k)) var(--easing-out)
+      calc(380ms * var(--bb-k)) both;
+  }
+  .bb-burst[data-at='hero'] {
+    animation-delay: calc(260ms * var(--bb-k));
+  }
+  .bb-burst > i {
+    animation: bb-ray calc(520ms * var(--bb-k)) var(--easing-out)
+      calc(380ms * var(--bb-k)) both;
+  }
+  .bb-burst[data-at='hero'] > i {
+    animation-delay: calc(260ms * var(--bb-k));
+  }
+  .bb-dmg {
+    animation: bb-dmg calc(900ms * var(--bb-k)) var(--easing-out)
+      calc(400ms * var(--bb-k)) both;
+  }
+  .bb-dmg[data-at='hero'] {
+    animation-delay: calc(280ms * var(--bb-k));
+  }
+  .bb-rig[data-flash='a'] {
+    animation: bb-flash-a calc(560ms * var(--bb-k)) linear
+      calc(300ms * var(--bb-k)) both;
+  }
+  .bb-rig[data-flash='b'] {
+    animation: bb-flash-b calc(560ms * var(--bb-k)) linear
+      calc(300ms * var(--bb-k)) both;
+  }
+  .bb-stage[data-shake='a'] {
+    animation: bb-shake-a calc(360ms * var(--bb-k)) var(--easing-out)
+      calc(240ms * var(--bb-k)) both;
+  }
+  .bb-stage[data-shake='b'] {
+    animation: bb-shake-b calc(360ms * var(--bb-k)) var(--easing-out)
+      calc(240ms * var(--bb-k)) both;
+  }
+  /* 공격하는 쪽이 상대에게 한 걸음 튀어 나갔다 돌아옴 */
+  .bb-side[data-side='hero'][data-lunge='a'] {
+    animation: bb-lunge-a calc(420ms * var(--bb-k)) var(--easing-out) both;
+  }
+  .bb-side[data-side='hero'][data-lunge='b'] {
+    animation: bb-lunge-b calc(420ms * var(--bb-k)) var(--easing-out) both;
+  }
+  .bb-side[data-side='boss'][data-lunge='a'] {
+    --bb-dir: -1;
+    animation: bb-lunge-a calc(420ms * var(--bb-k)) var(--easing-out) both;
+  }
+  .bb-side[data-side='boss'][data-lunge='b'] {
+    --bb-dir: -1;
+    animation: bb-lunge-b calc(420ms * var(--bb-k)) var(--easing-out) both;
+  }
+  .bb-heart[data-breaking] {
+    animation: bb-heart-break calc(600ms * var(--bb-k)) var(--easing-out)
+      calc(280ms * var(--bb-k)) both;
+  }
+}
+/* minimal: 위치 변화 없이 깜빡임·숫자 사라짐만 */
+:root[data-reduced='false'][data-motion='minimal'] {
+  .bb-dmg {
+    animation: bb-fade-out var(--dur-celebrate) var(--easing-out) 300ms both;
+  }
+  .bb-rig[data-flash='a'] {
+    animation: bb-flash-a 560ms linear both;
+  }
+  .bb-rig[data-flash='b'] {
+    animation: bb-flash-b 560ms linear both;
+  }
+}
+
+@keyframes bb-shot {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+    transform: translate(48cqi, -0.75rem) scale(1.15) rotate(300deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(50cqi, -0.5rem) scale(0.4) rotate(360deg);
+  }
+}
+@keyframes bb-burst-o {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  70% {
+    opacity: 1;
+  }
+}
+@keyframes bb-ray {
+  0% {
+    transform: rotate(var(--r)) translateY(0.5rem) scaleY(0.3);
+  }
+  100% {
+    transform: rotate(var(--r)) translateY(-0.75rem) scaleY(1);
+  }
+}
+@keyframes bb-dmg {
+  0% {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.2);
+  }
+  35% {
+    transform: translateY(-0.25rem) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-2.25rem) scale(1);
+  }
+}
+@keyframes bb-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes bb-flash-a {
+  0%,
+  40%,
+  80% {
+    opacity: 1;
+  }
+  20%,
+  60% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes bb-flash-b {
+  0%,
+  40%,
+  80% {
+    opacity: 1;
+  }
+  20%,
+  60% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes bb-shake-a {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+@keyframes bb-shake-b {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+@keyframes bb-lunge-a {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(calc(var(--bb-dir, 1) * 8cqi));
+  }
+}
+@keyframes bb-lunge-b {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(calc(var(--bb-dir, 1) * 8cqi));
+  }
+}
+@keyframes bb-heart-break {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.45) rotate(-12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* 쪽 안의 sr-only 알림 줄(절대 위치)이 앱 틀 밖 문서 높이를 늘리지 않게 (B53과 같은 까닭) */
+.bb-book > .qw-page {
+  position: relative;
+}
+
+/* ───── 문제 카드 머리: "문제 2/5" · 모드 딱지 */
+.bb-q .qz-head .bb-round {
+  font-variant-numeric: tabular-nums;
+}
+.bb-verdict-next {
+  margin-top: 0.75rem;
+}
+
+/* ───── 결과 (이김·짐) */
+.bb-result {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.bb-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem 1rem;
+  border-radius: var(--round-l);
+  background: var(--surface-2);
+  text-align: center;
+}
+.bb-result[data-result='won'] .bb-result-card {
+  background: color-mix(in srgb, var(--accent-soft) 70%, var(--surface));
+}
+.bb-result-k {
+  color: var(--primary-text);
+  font-size: var(--text-kicker);
+  font-weight: var(--text-kicker--font-weight);
+  letter-spacing: var(--text-kicker--letter-spacing);
+  line-height: var(--text-kicker--line-height);
+}
+.bb-result[data-result='won'] .bb-result-k {
+  color: var(--accent-text);
+}
+.bb-result-t {
+  color: var(--text);
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+}
+.bb-result-p {
+  max-width: 26rem;
+  color: var(--text-muted);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.bb-result-stars {
+  display: flex;
+  gap: 0.25rem;
+}
+.bb-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.bb-result-actions > * {
+  flex: 1 1 11rem;
+}
+.bb-result-actions > [data-slot='share-button'],
+.bb-result-actions > .bb-ghost {
+  flex: 0 1 auto;
+}
+
+/* ───── 등장 쪽 규칙 세 줄 */
+.bb-rules {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.bb-rules > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--text);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.bb-rules svg,
+.bb-rules-heart {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  color: var(--primary-text);
+}
+/* 하트 모양 점 (아이콘 대신 같은 하트 색을 보여 줌) */
+.bb-rules-heart {
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--error);
+  scale: 0.75;
+}
+
+/* ───── 좁은 화면(두 쪽을 이어 스크롤) 싸우는 동안: 무대를 위에 붙여 문제를 풀면서 공격·피격을 봄.
+   이야기 머리·보스 말풍선은 등장·결과 때만 (말풍선 내용은 낭독 알림 줄이 같은 정보를 글자로) */
+@media (max-width: 63.99rem) {
+  .bb-book[data-phase='battle'] > .qw-page-l {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 0.5rem;
+    /* 위 여백(책 안쪽 여백)으로 밀려 올라간 문제 글이 비치지 않게 바탕색 띠를 위로 덧댐 */
+    box-shadow:
+      0 -0.75rem 0 var(--bg),
+      var(--elev-card);
+  }
+  .bb-book[data-phase='battle'] .qs,
+  .bb-book[data-phase='battle'] .bb-say {
+    display: none;
+  }
+  .bb-book[data-phase='battle'] .bb-stage {
+    height: clamp(7.5rem, 32cqi, 10rem);
+    margin-top: 0;
+  }
+  .bb-book[data-phase='battle'] .bb-rig > svg {
+    width: clamp(6rem, 27cqi, 8.5rem);
+  }
+  .bb-book[data-phase='battle'] .bb-side[data-side='boss'] .bb-rig > svg {
+    width: clamp(6.5rem, 30cqi, 9.5rem);
+  }
+  /* 채점 쪽지·문제 제목으로 옮길 때 붙은 무대 아래로 */
+  .bb-q .qz-verdict,
+  .bb-q .qz-q {
+    scroll-margin-top: 14rem;
+  }
+}

@@ -6,8 +6,9 @@ import { coinBalance, completeQuests, hasCoinKey } from './support/admin';
 import { stage } from './support/content';
 
 const s1 = stage(1);
-// 목표 = ceil(코드 퀘스트 수 × 3 × 0.7) (src/lib/world/chest.ts chestGoal). 힌트 없이 끝낸 퀘스트는 ⭐3
-const goal = Math.floor((s1.quests.length * 21 + 9) / 10);
+// 목표 = ceil(코드 퀘스트(보스 포함, P9-12) 수 × 3 × 0.7) (src/lib/world/chest.ts chestGoal). 힌트 없이 끝낸 퀘스트는 ⭐3
+const required = s1.quests.length + (s1.boss ? 1 : 0);
+const goal = Math.floor((required * 21 + 9) / 10);
 const need = Math.ceil(goal / 3);
 
 test('목표 미달은 모으는 중 → 채우면 노드 상자·열기 → 축하 카드 + 코인 30, 다시 열 수 없음', async ({

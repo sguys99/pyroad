@@ -2,7 +2,7 @@
 
 > - 근거: 계획서 §2.5(공유 카드)·§2.6(공개 정보)·§12-Q14(닉네임 글자)·§12-Q28~Q31(최종 시안) · [P0-10 스파이크](../spikes/P0-10-og-share-card.md) · [tokens.md](tokens.md) · [fonts.md](fonts.md) · [assets.md](assets.md) · [rig.md](rig.md)
 > - 코드: `src/lib/share-card/` (테스트 `__tests__/share-card.test.tsx`) · 샘플 렌더 `scripts/share-card/render-samples.tsx` · 폰트 `src/fonts/share-card/`
-> - 범위: 템플릿(디자인 + 렌더 코드)과 샘플까지. 공유 링크·DB·이미지 라우트·CDN 캐시·비공개 처리는 P9-07~P9-11 (§7)
+> - 범위: 템플릿(디자인 + 렌더 코드)과 샘플(P2-19) + 카드 데이터(`share_cards`)·만들기 API·이미지 라우트(P9-07, §8). 공유 페이지·카카오·자랑하기 버튼·비공개는 P9-08~P9-11
 
 ## 1. 한눈에
 
@@ -27,10 +27,10 @@
 | 레벨업 `levelup` | `level`, `title?`(새 칭호) | "레벨 업!" 초록 틴트 | "레벨 **12** 달성!" (숫자 150px 초록 글자, 자릿수가 늘면 줄어듦) | 새 칭호 금색 틴트 칸 | 파이뱀 응원 + 별똥이 반짝 |
 | 스테이지 클리어 `stage` | `world`, `worldName`, `stageNo`, `stageName`, `stars`, `maxStars=3` | "1권 숲 마을 · 스테이지 3" 흰 칸 + 월드 ink | 스테이지 이름(Jua, 1~2줄) + 별 3개(100px, 2줄이면 84px) | "닉네임 님이 깼어요" | 파이뱀 뿌듯(별 눈) |
 | 업적 `achievement` | `name`, `desc`, `tier`, `icon` | "업적 달성 · 골드" 티어 틴트 | 메달(160px) + 업적 이름(Jua, 1~2줄) | 설명 2줄 + "닉네임 님이 받았어요" | 파이뱀 기쁨 (+ `bug` 업적은 버그버그 화해) |
-| 주간 성장 `weekly` | `weekLabel`, `quests`, `stars`, `streak`, `learned[]` | "이번 주 성장 · 11월 첫째 주" | "퀘스트 **12** 개" | 별·연속 공부 두 칸 + 배운 것 칩 3개(+N) | 파이뱀 설명(윙크) |
+| 주간 성장 `weekly` | `weekLabel`, `quests`, `xp`, `stars` (합계만) | "이번 주 성장 · 11월 첫째 주" | "퀘스트 **12** 개" | 모은 별·얻은 경험치(XP, 번개) 두 칸 | 파이뱀 설명(윙크) |
 
 - 데이터 → 엘리먼트: `renderShareCard(data)`(`cards.tsx`). 이미지 저장 파일 이름은 `SHARE_CARD_FILENAME`.
-- 주간 카드는 **요일별 막대를 넣지 않았다**: 활동한 요일이 드러나는지가 아직 미결(계획서 Phase 0 사용자 작업 "주간 성장 카드에 요일별 활동…", P9-15). 정해지면 `WeeklyCardData`에 추가.
+- 주간 카드는 **합계만**(§12-Q67 ②): 이번 주 퀘스트 수·XP·별. 요일별 활동(활동한 요일이 드러남)은 보호자 리포트(P9-15)에만. P2-19의 연속 공부·배운 것 칩은 P9-07에서 빼고 XP 칸으로 바꿈.
 
 ## 3. 상태
 
@@ -39,10 +39,10 @@
 | 빈 별 | `stars`를 0~`maxStars`로 자르고 채운 별 + 빈 별(중립 면 `line` + 옅은 선). 0개도 별 3칸이 다 보인다 | [별 1개](img/share-card/stage-w2-long-1star.png) · [별 0개](img/share-card/stage-w3-0stars.png) |
 | 티어 브론즈·실버·골드 | 색 + **이름표 글자 + 메달 아래 별 점 1·2·3개**(색을 못 구별해도 알 수 있게). 리본은 브랜드 초록 | [골드](img/share-card/achievement-gold.png) · [실버](img/share-card/achievement-silver.png) · [브론즈](img/share-card/achievement-bronze-long.png) |
 | 월드 1·2·3 틴트 | 무대 바탕 = `w{N}Soft`, 언덕 = `w{N}`를 45% 섞은 색, 스테이지 이름표 글자 = `w{N}Ink`. 스테이지 카드는 그 스테이지의 월드, 나머지는 `world`(기본 1) | 월드 1·2·3: 위 스테이지 샘플 3장 |
-| 긴 닉네임 | 최대 10자(§12-Q14·P3-11). 10자는 **자르지 않고** 크기만 54 → 38px까지 줄인다(붙는 말이 가장 긴 카드에서도, 테스트). 규칙 밖 입력은 10자 + `…` | [레벨업](img/share-card/levelup-long.png) · [주간](img/share-card/weekly-long.png) |
+| 긴 닉네임 | 최대 10자(§12-Q14·P3-11). 10자는 **자르지 않고** 크기만 54 → 38px까지 줄인다(Jua 한글 폭은 가장 넓은 글자 0.872em로 어림 — 평균으로 잡았던 P2-19 값은 넓은 글자 10자가 CSS 말줄임에 걸렸음, P9-07)(붙는 말이 가장 긴 카드에서도, 테스트). 규칙 밖 입력은 10자 + `…` | [레벨업](img/share-card/levelup-long.png) · [주간](img/share-card/weekly-long.png) |
 | 긴 제목 | 한 줄에 64px 이상이면 한 줄(최대 84), 아니면 2줄(64~48px), 그래도 넘치면 2줄 분량에서 `…`. 마지막 안전장치 `lineClamp: 2` | [2줄](img/share-card/stage-w2-long-1star.png) · [줄임표](img/share-card/achievement-bronze-long.png) |
 | 큰 숫자 | Jua에는 고정폭 숫자가 없어 숫자마다 0.6em 칸(`Digits`). 레벨·퀘스트 수는 자릿수가 늘면 줄을 넘지 않게 크기를 줄인다(`fitNumberRow`) | [레벨 128](img/share-card/levelup-long.png) · [퀘스트 108](img/share-card/weekly-long.png) |
-| 꾸미기 | `avatar.costume`(P9-04 `avatar_config`)을 리그 정지 그림에 그대로 | [탐험가 모자](img/share-card/levelup-long.png) |
+| 꾸미기 | 카드 스냅샷의 공개 꾸민 모습(스킨 + 모자·안경·망토·배경 아이템 id, P9-05 `public_avatar_look`과 같은 값) → `avatarLook` → 리그 정지 그림. 배경 아이템은 캐릭터 뒤 원으로 무대 안에. **펫·테두리는 그리지 않음**(공개 아바타와 같게 펫 없음, 테두리는 아바타 칩 장식이라 무대가 액자 역할) | [다 입기](img/share-card/levelup-costume.png) · [왕관·선글라스·망토 + 긴 닉네임](img/share-card/stage-costume-long.png) · [고깔·안경·종이 배경](img/share-card/achievement-costume.png) · [탐험가 + 망토](img/share-card/weekly-long.png) |
 
 ### 색 (모두 토큰 또는 토큰을 섞은 색, `tokens.ts`)
 
@@ -116,13 +116,14 @@
 - 장당 **약 0.23~0.32초**(부하가 높을 때 0.5~0.7초), PNG **59~82KB**. P0-10 시안 카드(0.8~1.3초, 146~310KB)보다 3~4배 싸다: 흐림 그림자·SVG 필터·수채 장식이 없어서(P0-10 §4.2에서 비용의 대부분이 필터였음).
 - 그래도 요청마다 그리면 CPU가 아깝고 첫 카카오 스크랩이 cold를 탄다 → CDN 캐시는 여전히 필요(§8).
 
-## 8. P9-07로 넘길 것
+## 8. 카드 데이터·만들기 API·이미지 라우트 (P9-07 ✅)
 
-- **이미지 라우트** `/api/share-cards/{id}/image` (P9-08): `export const runtime = 'nodejs'`, `new ImageResponse(renderShareCard(payload), { ...CARD, fonts: await loadShareCardFonts(), headers })`. `share_cards.payload` 스냅샷만으로 그리고 쿼리 문자열 글자는 그리지 않는다.
-- **헤더**(P0-10 §4.7): `Cache-Control: public, max-age=3600`, `Vercel-CDN-Cache-Control: public, max-age=31536000`, `Vercel-Cache-Tag: share-card-{id}`, `Content-Disposition: inline; filename="${SHARE_CARD_FILENAME[kind]}"`, `X-Robots-Tag: noindex`. 비공개·삭제는 `dangerouslyDeleteByTag`(P9-11). 카드가 바뀌면 `?v={version}`.
-- **함수 번들**: `next.config.ts` `outputFileTracingIncludes`에 `'/api/share-cards/[id]/image': ['./src/fonts/share-card/**']`. 예상 크기 ≈ `@vercel/og` 2.98MB + 카드 폰트 2.97MB + 라우트 청크 약 1MB ≈ **7MB**(Node 함수 한도 250MB, P0-10 실측 9.6MB보다 작음). 빌드 뒤 `route.js.nft.json`에 폰트 3개만 들어갔는지 확인. `src/fonts/share-card/`에는 카드 폰트만 둔다(`fonts:check`가 남는 파일을 막음).
-- **미들웨어** matcher에서 `/share`·`/api/share-cards` 제외(P0-10 §7).
-- **스냅샷 비교 테스트**: 샘플 PNG(`docs/design/img/share-card/`)를 기준으로 satori·resvg 버전이 바뀌면 모양 차이를 잡는다(Next 업그레이드 리스크, P0-10 §7).
+- **데이터** `share_cards`(00043): id = 128비트 난수 base64url 22자, `kind`·`ref`(레벨·스테이지 id·업적 id·주 월요일, 사용자·종류·ref당 1행), `snapshot`(공개 정보만 — 최상위 키를 DB CHECK와 `snapshot.ts`(zod `strict`)가 같은 목록으로 고정), `version`, `is_public`, `expires_at`(**90일 뒤 자동 비공개**, §12-Q67). 본인 행 읽기만, 쓰기는 RPC만.
+- **만들기** `POST /api/share-cards` `{ kind, ref? }` → `guardianWriteGate`(P3-15) → service_role `create_share_card`: 성과 숫자는 클라이언트 값을 받지 않고 실제 기록으로 계산(레벨 = `current_level`, 스테이지 = 코드 퀘스트를 다 끝낸 것만·별 = 그 스테이지 별 합 ÷ 만점 × 3 내림, 업적 = 얻은 것만·메달 그림은 분류에서, 주간 = 이번 주 처음 끝낸 퀘스트 수·그 XP·그 별). 닉네임은 공개 이름, 아바타는 공개 꾸민 모습(펫 없음). 같은 카드를 다시 만들면 같은 id로 다시 공개 + 새 90일, 스냅샷이 바뀌었으면 `version + 1`. 응답 `{ id, kind, version, expiresAt, imageUrl }`, 거절은 아이용 문구(`stage_not_cleared`·`achievement_not_earned`·`nothing_this_week` 409).
+- **이미지** `GET /api/share-cards/{id}/image?v={version}`: `runtime = 'nodejs'`, service_role `share_card_public`(공개·만료 전만, user_id 없음) → `cardFromSnapshot` → `renderShareCard`. **쿼리 문자열은 읽지 않음**(`v`는 캐시 키). 헤더: `cache-control: public, max-age=3600`, `vercel-cdn-cache-control: public, max-age=31536000`, `vercel-cache-tag: share-card-{id}`, `content-disposition: inline; filename="pyroad-<종류>.png"`, `x-robots-tag: noindex`. 단 두 max-age는 **만료 시각까지 남은 초를 넘지 않음**(CDN 사본이 90일 비공개를 늦추지 않게). 키는 소문자로: `ImageResponse`의 기본 `cache-control`(1년 immutable)을 덮어야 해서. 없음·비공개·만료·모양이 틀린 스냅샷은 404 `no-store`.
+- **함수 번들**: `next.config.ts` `outputFileTracingIncludes`(`./src/fonts/share-card/**/*.{ttf,otf}`). 빌드 뒤 `route.js.nft.json` 폰트 = 카드 폰트 3개 + `@vercel/og` 기본 Noto(라틴) 1개, 추적 파일 합 약 8.3MB(2026-11-13).
+- **스냅샷 비교 테스트** `__tests__/png-snapshot.test.tsx`: 샘플마다 운영 엔진으로 그려 커밋한 PNG와 픽셀 비교(채널 차이 24 넘는 픽셀 0.2% 미만). 숫자 한 자리만 바뀌어도(0.5%) 실패. 의도한 변경이면 `npm run share-card:render` 후 PNG를 같은 커밋에.
+- **P9-08** ✅ 공유 페이지 `/share/[cardId]`: `loadPublicShareCard` → `ShareCardView`(카드 PNG + 대체 글·축하 문구·소개·"나도 해보기"), 문구는 `shareCardSummary`(`summary.ts`), og:image = `shareCardImagePath`, noindex. 없음·비공개·만료는 `not-found.tsx`. 미들웨어는 `/api/share-cards` 제외, `/share`는 nonce CSP 때문에 남기고 세션 갱신만 건너뜀. 리전은 icn1·서울로 이미 같음. **P9-11로**: 비공개·삭제 뒤 `dangerouslyDeleteByTag('share-card-{id}')`, 다시 공개 = `expires_at = now() + 90일`.
 - **P4-10** ✅ 사이트 OG 이미지도 같은 틀·폰트(`CardFrame`·`Stage`·`loadShareCardFonts`)로: `src/lib/share-card/site.tsx`(`SiteOgCard`) → `src/app/opengraph-image.tsx`(`force-static`, 빌드 때 한 번 생성, 런타임 함수·폰트 파일 추적 없음). 무대는 월드 1 틴트에 지도(먼·가까운 언덕, 점선 잉크 길 → 금색 X, 깃발 탑, 나무, 해) + 손 흔드는 파이뱀, 글은 "무료 · 설치 없이 웹에서" / "파이뱀과 떠나는 파이썬 모험"(둘째 줄 형광펜) / "퀘스트를 깨며 진짜 파이썬 코드를 배워요". `Stage`에 `backdrop`(바탕 그림)·`ground`(기본 언덕 끄기)·`heroLeft`를 더함. 샘플 [site-og](img/share-card/site-og.png) · [가이드](img/share-card/guide/site-og.png), `npm run share-card:render -- --only=site-og`
 - **P2-12 카탈로그**는 이 문서의 샘플 PNG를 링크하면 된다(개발 전용 미리보기 라우트는 만들지 않음: 운영 번들에 폰트를 싣지 않으려고).
 

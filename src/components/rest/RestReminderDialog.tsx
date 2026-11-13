@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { PybaemRig } from '@/components/characters/rig/MascotRig';
+import { useMyPybaem } from '@/components/profile/MyLook';
 import { REST_MS } from '@/lib/rest/restTimer';
 import './restReminder.css';
 
@@ -92,6 +93,7 @@ export function RestReminderDialog({
 
   const shown = phase ?? 'ask';
   const copy = COPY[shown];
+  const me = useMyPybaem();
   return (
     <Modal
       open={phase !== null}
@@ -110,6 +112,7 @@ export function RestReminderDialog({
       media={
         <div className="rr-hero" data-phase={shown} aria-hidden>
           <PybaemRig
+            {...me}
             state={copy.pose}
             size={112}
             framing="avatar"

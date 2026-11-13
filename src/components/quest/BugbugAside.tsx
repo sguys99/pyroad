@@ -1,12 +1,9 @@
 'use client';
 
+import { MyPybaemStatic } from '@/components/profile/MyLook';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef } from 'react';
-import {
-  BugBugStatic,
-  PybaemStatic,
-  type BugBugState,
-} from '@/components/characters/rig';
+import { BugBugStatic, type BugBugState } from '@/components/characters/rig';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { isShown } from '@/components/sound/isShown';
 import { SpeechBubble } from '@/components/ui/speech-bubble';
@@ -72,7 +69,7 @@ export function BugbugAside({
       </div>
       <div className="qo-bug-row qo-bug-explain" data-testid="error-explain">
         <span className="qo-bug-rig qo-bug-rig-tutor">
-          <PybaemStatic state="teach" size={56} label="" filters={false} />
+          <MyPybaemStatic state="teach" size={56} label="" filters={false} />
         </span>
         <SpeechBubble speaker="파이뱀" tail="left" className="qo-bug-bubble">
           {text}

@@ -423,6 +423,108 @@
   transform: rotate(-28deg);
 }
 
+/* ───── 상점 구매 (P9-02 PurchaseCard): 금빛 빛살 원 + 산 물건(또는 그 물건을 입은 파이뱀) + 반짝이 셋.
+   희귀도: 보통 = 옅은 금 · 희귀 = 하늘빛 섞음 · 전설 = 진한 금 */
+.cel-buy {
+  --buy-ray: var(--accent-soft);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 11rem;
+  height: 10rem;
+  margin-top: -0.5rem;
+}
+.cel-buy[data-rarity='rare'] {
+  --buy-ray: color-mix(in srgb, var(--w2) 55%, var(--accent-soft));
+}
+.cel-buy[data-rarity='epic'] {
+  --buy-ray: color-mix(in srgb, var(--accent) 45%, var(--accent-soft));
+}
+.cel-buy-rays {
+  position: absolute;
+  inset: -0.5rem;
+  border-radius: var(--round-pill);
+  background: repeating-conic-gradient(
+    var(--buy-ray) 0deg 12deg,
+    transparent 12deg 30deg
+  );
+  -webkit-mask-image: radial-gradient(
+    closest-side,
+    var(--text) 45%,
+    transparent
+  );
+  mask-image: radial-gradient(closest-side, var(--text) 45%, transparent);
+}
+.cel-buy-stage,
+.cel-buy-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.cel-buy-art {
+  width: 7rem;
+  height: 7rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 0.25rem var(--buy-ray),
+    var(--shadow-card);
+}
+.cel-buy-pet {
+  position: absolute;
+  right: -1.75rem;
+  bottom: 0.25rem;
+}
+.cel-buy-spark {
+  position: absolute;
+  width: 0.875rem;
+  height: 0.875rem;
+  background: var(--accent);
+  clip-path: polygon(
+    50% 0,
+    62% 38%,
+    100% 50%,
+    62% 62%,
+    50% 100%,
+    38% 62%,
+    0 50%,
+    38% 38%
+  );
+}
+.cel-buy-spark[data-i='0'] {
+  top: 0.75rem;
+  left: 1rem;
+}
+.cel-buy-spark[data-i='1'] {
+  top: 0.25rem;
+  right: 1.5rem;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.cel-buy-spark[data-i='2'] {
+  bottom: 1.25rem;
+  left: 0.25rem;
+  width: 0.625rem;
+  height: 0.625rem;
+}
+.cel-buy-left {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+@keyframes cel-rays {
+  from {
+    transform: rotate(-50deg) scale(0.3);
+    opacity: 0;
+  }
+}
+:root[data-reduced='false']:not([data-motion='minimal'])
+  .cel-card:not([data-settled])
+  .cel-buy-rays {
+  animation: cel-rays calc(var(--dur-celebrate) * var(--cel-t))
+    var(--easing-out) both;
+}
+
 /* ───── 1회성 등장 (transform만, 글자는 처음부터 보임). 지연은 style --d(ms, full 기준) × --cel-t */
 @keyframes cel-pop {
   from {

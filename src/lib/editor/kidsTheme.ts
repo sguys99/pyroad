@@ -247,6 +247,17 @@ const over = (bg: ColorName, pct: number, base: ColorName = 'codeBg') => ({
   alpha: pct / 100,
 });
 
+/** 주석이 아닌 글자색 (기본 테마는 숫자·함수 = 본문색, 상점 테마는 따로, P9-06) */
+const SYNTAX = [
+  'codeText',
+  'codeKeyword',
+  'codeString',
+  'codeNumber',
+  'codeFunc',
+] as const;
+/** 틴트 면 위 글자 (주석은 textMuted로 바뀜) */
+const ON_TINT = ['textMuted', ...SYNTAX] as const;
+
 /**
  * 에디터 안 글자·UI 대비 (`kidsTheme.test.ts`가 AA 미달이면 실패, docs/design/editor.md 표).
  * 틴트 면 위 주석은 테마가 `textMuted`로 바꾸므로 그 조합을 검사한다. 선택 영역(포커스) 안 글자는 모두 `codeText`
@@ -257,15 +268,15 @@ export const EDITOR_CONTRAST_PAIRS: ContrastPair[] = [
   { fg: 'codeComment', bg: 'codeBg', kind: 'text', use: '주석' },
   { fg: 'codeKeyword', bg: 'codeBg', kind: 'text', use: '키워드' },
   { fg: 'codeString', bg: 'codeBg', kind: 'text', use: '문자열' },
+  { fg: 'codeNumber', bg: 'codeBg', kind: 'text', use: '숫자' },
+  { fg: 'codeFunc', bg: 'codeBg', kind: 'text', use: '함수' },
   // 활성 줄
-  ...(['codeText', 'textMuted', 'codeKeyword', 'codeString'] as const).map(
-    (fg) => ({
-      fg,
-      ...over('primary', TINT.activeLine),
-      kind: 'text' as const,
-      use: '활성 줄',
-    }),
-  ),
+  ...ON_TINT.map((fg) => ({
+    fg,
+    ...over('primary', TINT.activeLine),
+    kind: 'text' as const,
+    use: '활성 줄',
+  })),
   // 선택 영역
   {
     fg: 'codeText',
@@ -273,14 +284,12 @@ export const EDITOR_CONTRAST_PAIRS: ContrastPair[] = [
     kind: 'text',
     use: '선택 영역(포커스, 글자 모두 본문색)',
   },
-  ...(['codeText', 'codeComment', 'codeKeyword', 'codeString'] as const).map(
-    (fg) => ({
-      fg,
-      ...over('primary', TINT.selectionBlur),
-      kind: 'text' as const,
-      use: '선택 영역(포커스 없음)',
-    }),
-  ),
+  ...(['codeComment', ...SYNTAX] as const).map((fg) => ({
+    fg,
+    ...over('primary', TINT.selectionBlur),
+    kind: 'text' as const,
+    use: '선택 영역(포커스 없음)',
+  })),
   // 같은 단어·오류 줄·찾기 (주석은 textMuted)
   ...(
     [
@@ -290,9 +299,7 @@ export const EDITOR_CONTRAST_PAIRS: ContrastPair[] = [
       ['accentLight', 100, '지금 찾은 곳·괄호 짝'],
     ] as const
   ).flatMap(([bg, pct, use]) =>
-    (['codeText', 'textMuted', 'codeKeyword', 'codeString'] as const).map(
-      (fg) => ({ fg, ...over(bg, pct), kind: 'text' as const, use }),
-    ),
+    ON_TINT.map((fg) => ({ fg, ...over(bg, pct), kind: 'text' as const, use })),
   ),
   { fg: 'error', bg: 'errorSoft', kind: 'text', use: '짝 없는 괄호' },
   // 줄 번호

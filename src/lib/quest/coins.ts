@@ -13,6 +13,8 @@ export const COIN_RULES = {
   quest: 10,
   /** 프로젝트 퀘스트 첫 완료 (§12-Q65 (a): XP가 코드의 4배라 코인도 4배) */
   project: 40,
+  /** 보스 첫 승리 (P9-12, 00046 boss_answer — 원장 quest/<보스 id>). 문제 5개 안팎 = 퀴즈 두세 개 몫 */
+  boss: 20,
   /** 별 1개당, 별 번호마다 처음 한 번 (복습으로 늘어난 별만) */
   star: 5,
   /** 데일리 미션 난이도 1·2·3 (P8-07) */
@@ -23,6 +25,8 @@ export const COIN_RULES = {
   chest: [30, 50],
   /** 업적 티어: 1 브론즈 · 2 실버 · 3 골드 (P8-09) */
   achievement: [10, 30, 100],
+  /** 자랑하기 하루 1회 (P9-10, §12-Q67 ④, 00044 — 원장 share/<KST 날짜>) */
+  share: 15,
 } as const;
 
 export type CoinRewardKind = keyof typeof COIN_RULES | 'level_up';

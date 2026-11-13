@@ -4,6 +4,7 @@ import type { BoardPostWithAuthor } from '@/lib/types/database';
 import { formatKstDate } from '@/lib/time/kst';
 import { authorName } from '@/lib/board/display';
 import { UserAvatar } from '@/components/profile/UserAvatar';
+import { publicLook } from '@/lib/avatar/look';
 
 interface BoardCardProps {
   post: BoardPostWithAuthor;
@@ -30,10 +31,7 @@ export function BoardCard({ post }: BoardCardProps) {
         </p>
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
           <span className="flex min-w-0 items-center gap-1.5">
-            <UserAvatar
-              skin={post.user_profiles_public?.avatar_skin}
-              size={32}
-            />
+            <UserAvatar {...publicLook(post.user_profiles_public)} size={32} />
             <span className="truncate">
               {authorName(post.user_profiles_public)}
             </span>

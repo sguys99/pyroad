@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { SKIN_IDS } from '@/lib/avatar/skins';
 import { MINI_ERROR_KINDS } from '@/lib/landing/miniPython/errors';
+import { SHOP_ITEMS, SHOP_KINDS } from '@/lib/shop/catalog';
 import {
   ANON_ID_RE,
   CLIENT_EVENT_NAMES,
@@ -18,6 +19,14 @@ import {
 const provider = z.enum(['google', 'kakao', 'naver']);
 const questId = z.string().uuid();
 const motionTier = z.enum(['full', 'lite', 'minimal']);
+const SHARE_CARD_KIND = z.enum(['levelup', 'stage', 'achievement', 'weekly']);
+const SHARE_VIEW_KIND = z.enum([
+  'levelup',
+  'stage',
+  'achievement',
+  'weekly',
+  'gone',
+]);
 
 export const EVENT_PROPS_SCHEMA = {
   landing_view: z.object({}).strict(),
@@ -115,6 +124,37 @@ export const EVENT_PROPS_SCHEMA = {
   rest_reminder_choice: z
     .object({ choice: z.enum(['rest', 'more', 'done', 'stop']) })
     .strict(),
+  shop_purchase: z
+    .object({
+      item_id: z.enum(SHOP_ITEMS.map((i) => i.id) as [string, ...string[]]),
+      kind: z.enum(SHOP_KINDS),
+      price: z.number().int().min(1).max(10000),
+    })
+    .strict(),
+  share_view: z.object({ kind: SHARE_VIEW_KIND }).strict(),
+  share_cta_click: z.object({ kind: SHARE_VIEW_KIND }).strict(),
+  share_open: z.object({ kind: SHARE_CARD_KIND }).strict(),
+  share_channel: z
+    .object({
+      kind: SHARE_CARD_KIND,
+      channel: z.enum(['kakao', 'web_share', 'save_image', 'copy_link']),
+    })
+    .strict(),
+  share_manage: z
+    .object({
+      kind: SHARE_CARD_KIND,
+      action: z.enum(['hide', 'show', 'delete']),
+    })
+    .strict(),
+  tutor_free_question: z
+    .object({
+      result: z.enum(['answered', 'fallback', 'blocked', 'answer_blocked']),
+    })
+    .strict(),
+  guardian_report_link: z
+    .object({ action: z.enum(['create', 'off']) })
+    .strict(),
+  guardian_report_view: z.object({ week: z.enum(['this', 'last']) }).strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };
@@ -226,6 +266,41 @@ const clientEvent = z.discriminatedUnion('name', [
       path: z.string().max(200).optional(),
     })
     .strict(),
+  z
+    .object({
+      name: z.literal('share_view'),
+      props: EVENT_PROPS_SCHEMA.share_view,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('share_cta_click'),
+      props: EVENT_PROPS_SCHEMA.share_cta_click,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('share_open'),
+      props: EVENT_PROPS_SCHEMA.share_open,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('share_channel'),
+      props: EVENT_PROPS_SCHEMA.share_channel,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal('guardian_report_view'),
+      props: EVENT_PROPS_SCHEMA.guardian_report_view,
+      path: z.string().max(200).optional(),
+    })
+    .strict(),
 ]);
 
 // 스키마가 CLIENT_EVENT_NAMES 를 모두 다루는지 컴파일 때 확인
@@ -249,6 +324,11 @@ const _clientNamesCovered: Record<
   trial_start: 'trial_start',
   trial_run: 'trial_run',
   trial_success: 'trial_success',
+  share_view: 'share_view',
+  share_cta_click: 'share_cta_click',
+  share_open: 'share_open',
+  share_channel: 'share_channel',
+  guardian_report_view: 'guardian_report_view',
 };
 void _clientNamesCovered;
 

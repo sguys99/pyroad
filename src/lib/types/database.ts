@@ -35,6 +35,7 @@ export type {
   QuizKind,
   QuizPrompt,
   QuizPromptSkeleton,
+  BossPromptSkeleton,
 } from '@/lib/content/schema';
 
 /** worlds.unlock_rule (원본 스키마 src/lib/content/schema.ts WorldUnlockRuleSchema, §12-Q2·Q48) */
@@ -146,11 +147,13 @@ export type BoardPost = Tables<'board_posts'>;
 
 export type BoardComment = Tables<'board_comments'>;
 
-/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public: 닉네임 → 모험가NNNN + 파이뱀 스킨, 00018·00021. 실명·사진 없음) */
+/** 다른 사용자에게 보이는 작성자 정보 (user_profiles_public: 닉네임 → 모험가NNNN + 파이뱀 스킨·꾸민 모습, 00018·00021·00042. 실명·사진 없음) */
 export interface BoardAuthor {
   display_name: string | null;
   /** 공개 아바타 스킨 id (NULL = 기본). 이전 응답·낙관적 갱신에서는 없을 수 있음 */
   avatar_skin?: string | null;
+  /** 공개 꾸민 모습 {hat, glasses, cape, bg, frame} 아이템 id (00042, P9-05). 그리기는 `publicLook` */
+  avatar_look?: unknown;
 }
 
 export interface BoardPostWithAuthor extends BoardPost {
@@ -197,7 +200,8 @@ export type QuestWithStage = QuestClientSafe & {
 
 export interface StageWithStatus extends Stage {
   status: StageStatus;
-  quests: Pick<Quest, 'id' | 'order'>[];
+  /** quest_type: 보스만 남았는지(P9-12 StageNode). 없으면 코드 퀘스트로 봄 */
+  quests: (Pick<Quest, 'id' | 'order'> & { quest_type?: string })[];
   completedQuestCount: number;
   totalQuestCount: number;
   firstIncompleteQuestId: string | null;

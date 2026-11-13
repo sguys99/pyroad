@@ -1,0 +1,109 @@
+# 보스 1: 출력 대장 버그버그 (P9-12 견본 → P9-13 완성)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000201
+order: 11
+title: 출력 대장 버그버그
+concept: print() 총정리
+xp_reward: 30
+quest_type: boss
+prompt:
+  topic: 1단계에서 배운 print()·따옴표·주석·줄바꿈 총정리
+  learning_goals:
+    - print()가 무엇을 어떤 차례로 보여 주는지 읽을 수 있다
+    - 따옴표·괄호 짝이 틀린 줄을 찾아 고칠 수 있다
+    - 주석과 줄바꿈 글자가 하는 일을 안다
+  story_context: 마을 입구 시계탑에 버그버그가 나타나 안내판 글자를 엉망으로 만들고 있어요! 문제를 맞힐 때마다 파이뱀이 버그버그를 콕 찌를 수 있어요.
+  fallback_text: print()는 괄호 안의 글자를 화면에 보여 줘요. 따옴표와 괄호는 여는 것과 닫는 것의 짝이 맞아야 하고, 줄을 쓴 차례대로 한 줄씩 나와요. 샵(#)으로 시작하는 줄은 메모라서 실행되지 않아요.
+  boss:
+    name: 출력 대장 버그버그
+    look: village
+    intro: 히히! 마을 안내판은 내가 접수했다! 내 문제를 네 개 다 풀면 돌려줄게!
+    on_defeat: 으앗, 졌다! 너 print() 진짜 잘하는구나. 안내판은 돌려줄게, 다음 숲에서 또 보자!
+    on_victory: 이번엔 내가 이겼지롱! 그래도 거의 다 왔어. 조금 쉬었다가 다시 도전해!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000024
+    prompt:
+      quiz:
+        question: 시계탑 종소리 코드야. 돌리면 무엇이 나올까?
+        code: |-
+          print("땡!\n땡!")
+          print(12)
+        options:
+          - { id: opt-r4wk, text: "땡!\n땡!\n12" }
+          - { id: opt-c8nz, text: "땡!\\n땡!\n12" }
+          - { id: opt-y2hd, text: "땡!땡!\n12" }
+          - { id: opt-e6tq, text: "12\n땡!\n땡!" }
+    answer:
+      quiz_answer:
+        accepted: [opt-r4wk]
+        explanation: 글자 안의 역슬래시 n 은 화면에 나오지 않고 그 자리에서 줄을 바꿔요. 그래서 땡! 이 두 줄, 그다음 숫자 12가 나와요.
+        explanations:
+          opt-c8nz: 역슬래시 n 은 글자로 나오지 않아요. 줄을 바꾸라는 표시예요.
+          opt-y2hd: 역슬래시 n 자리에서 줄이 바뀌어요. 땡! 두 개가 한 줄에 붙지 않아요.
+          opt-e6tq: 컴퓨터는 위에서 아래로, 쓴 차례대로 실행해요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000023
+    prompt:
+      quiz:
+        question: 오류가 나는 줄을 찾아 고쳐요
+        lines:
+          - id: ln-a4kd
+            code: '# 시계탑 안내판'
+          - id: ln-p7ws
+            code: print("파이뱀 만세!')
+          - id: ln-g3vb
+            code: print("버그버그 물러가라!")
+        fixes:
+          - id: fx-r3hm
+            code: print("파이뱀 만세!")
+          - id: fx-j8tc
+            code: print(파이뱀 만세!)
+          - id: fx-n5qe
+            code: print"파이뱀 만세!"
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-p7ws, fix: fx-r3hm }
+        explanation: 큰따옴표로 연 글자는 큰따옴표로 닫아야 해요. 작은따옴표로 닫으면 짝이 맞지 않아 오류가 나요.
+        explanations:
+          ln-a4kd: '#으로 시작하는 줄은 메모(주석)라서 오류가 나지 않아요. 다른 줄을 살펴봐요.'
+          ln-g3vb: 이 줄은 따옴표와 괄호 짝이 잘 맞아요. 다른 줄을 살펴봐요.
+          fx-j8tc: 따옴표가 없으면 파이썬이 글자로 읽지 못해서 오류가 나요.
+          fx-n5qe: print 다음에는 괄호가 꼭 있어야 해요. 괄호로 글자를 감싸요.
+  - quiz_kind: fill_blank
+    review_quest: b1000000-0000-0000-0000-000000000003
+    prompt:
+      quiz:
+        question: 빈칸을 채워 버그버그가 몰래 넣은 줄은 실행되지 않게 해요
+        code: |-
+          {{bk-w2nx}} print("버그버그 최고!")
+          print("파이뱀 최고!")
+        tokens:
+          - { id: tok-q4ma, text: '#' }
+          - { id: tok-h6rb, text: '//' }
+          - { id: tok-z3kv, text: '"' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-w2nx: tok-q4ma }
+        explanation: 줄 맨 앞에 샵(#)을 붙이면 그 줄은 주석이 돼요. 컴퓨터는 주석을 건너뛰어서 파이뱀 최고! 만 나와요.
+        explanations:
+          tok-h6rb: 빗금 두 개(//)는 파이썬의 주석 표시가 아니라서 오류가 나요.
+          tok-z3kv: 따옴표 하나만 열면 짝이 안 맞아서 오류가 나요.
+  - quiz_kind: parsons
+    review_quest: b1000000-0000-0000-0000-000000000002
+    prompt:
+      quiz:
+        question: '안내판에 "== 시계탑 소식 ==", "버그버그는", "물러가고", "파이뱀이", "돌아왔다!" 가 한 줄씩 차례로 나오게 줄을 놓아요'
+        lines:
+          - { id: ln-m7cq, code: 'print("== 시계탑 소식 ==")' }
+          - { id: ln-k2wd, code: 'print("버그버그는")' }
+          - { id: ln-u4hs, code: 'print("물러가고\n파이뱀이")' }
+          - { id: ln-b9fe, code: 'print("돌아왔다!")' }
+    answer:
+      quiz_answer:
+        accepted:
+          - [ln-m7cq, ln-k2wd, ln-u4hs, ln-b9fe]
+        explanation: 컴퓨터는 위에 쓴 줄부터 차례로 실행해요. 역슬래시 n 이 든 줄은 print() 한 번으로 두 줄을 보여 줘요.

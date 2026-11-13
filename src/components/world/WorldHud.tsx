@@ -18,10 +18,9 @@ import { HudCounter, LevelSeal } from '@/components/ui/hud';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Sheet } from '@/components/ui/sheet';
 import { Toast, ToastRegion } from '@/components/ui/toast';
-import { UserAvatar } from '@/components/profile/UserAvatar';
+import { MyAvatar } from '@/components/profile/MyLook';
 import { LogoutButton } from '@/components/LogoutButton';
 import { SoundToggle } from '@/components/sound/SoundToggle';
-import type { SkinId } from '@/lib/avatar/skins';
 import { getXPProgress } from '@/lib/quest/xp';
 import type { Streak } from '@/lib/time/streak';
 
@@ -32,13 +31,12 @@ import '@/components/shared/achievementMedal.css';
 /**
  * 월드맵·책장 상단 HUD (P5-07, Q47). 위에 붙어 따라오는 얇은 바: 아바타+닉네임(→ /profile) · 레벨 도장 + XP 바 ·
  * 스트릭 불꽃 · 코인 잔액(P8-04, 퀘스트에서 받고 돌아오면 지난번 본 값부터 카운트업) · 오늘의 미션 칸(P8-07, 달성 수 + 받을 보상 금색 점 →
- * 미션 시트, 모든 폭) · "곧 열려요" 칩(상점, Phase 9) · 소리 토글 · 메뉴(공지·게시판·로그아웃 시트).
- * 곧 열려요 칩 둘은 1024px 미만에서 버튼 하나로 합쳐지고 640px 미만에서는 빠진다(코인 칩 자리). 640px 미만은 XP 바가 바 아래
+ * 미션 시트, 모든 폭) · 상점(P9-02: 코인 칩을 누르면 `/shop`, 640px 이상은 차양 칩도, 메뉴 시트 맨 위 "상점") · 소리 토글 ·
+ * 메뉴(공지·게시판·로그아웃 시트). 미션 칸이 없으면 "곧 열려요"(미션)가 남는데 1024px 미만은 버튼 하나, 640px 미만은 빠진다. 640px 미만은 XP 바가 바 아래
  * 가는 띠로, 400px 미만은 닉네임 글자도 빠진다(아바타 링크 낭독은 그대로). 모양·연출은 `worldHud.css`
  */
 export interface WorldHudProps {
   name: string;
-  skin: SkinId;
   totalXp: number;
   level: number;
   /** 코인 잔액 (users.coins) */
@@ -58,7 +56,6 @@ export interface WorldHudProps {
 
 const SOON = [
   { key: 'mission', label: '오늘의 미션', icon: <ListChecks aria-hidden /> },
-  { key: 'shop', label: '상점', icon: <Store aria-hidden /> },
 ] as const;
 
 const SOON_TAIL = '곧 열려요! 조금만 기다려 줘.';
@@ -145,7 +142,6 @@ export function useStreakSpark({ days, today }: Streak): boolean {
 
 export function WorldHud({
   name,
-  skin,
   totalXp,
   level,
   coins,
@@ -156,7 +152,7 @@ export function WorldHud({
   missions,
   achievementsReady = 0,
 }: WorldHudProps) {
-  const soon = missions ? SOON.filter((s) => s.key !== 'mission') : SOON;
+  const soon = missions ? [] : SOON;
   const soonName = soon.map((s) => s.label).join('·');
   const coinsFrom = useSeenCoins(coins);
   const [note, setNote] = useState<{ id: number; text: string } | null>(null);
@@ -178,7 +174,7 @@ export function WorldHud({
           aria-label={`${name}, 내 프로필`}
           data-testid="hud-profile"
         >
-          <UserAvatar skin={skin} size={32} className="wh-avatar" />
+          <MyAvatar size={32} className="wh-avatar" />
           <span className="wh-name">{name}</span>
         </Link>
 
@@ -230,37 +226,61 @@ export function WorldHud({
           )}
         </button>
 
-        <HudCounter kind="coin" value={coins} from={coinsFrom} />
+        {/* 코인 칩을 누르면 상점 (P9-02, 모든 폭 — 640px 미만은 바에 상점 칩 자리가 없음) */}
+        <Link
+          href="/shop"
+          className="wh-coin focus-ring"
+          aria-label={`코인 ${coins.toLocaleString('ko-KR')}개, 상점 가기`}
+          data-testid="hud-coin-shop"
+        >
+          <HudCounter kind="coin" value={coins} from={coinsFrom} />
+        </Link>
 
         {missions}
 
-        <span className="wh-soon" role="group" aria-label="곧 열려요">
-          <span className="wh-soon-k" aria-hidden>
-            곧 열려요
-          </span>
-          {soon.map((s) => (
+        {soon.length > 0 && (
+          <>
+            <span className="wh-soon" role="group" aria-label="곧 열려요">
+              <span className="wh-soon-k" aria-hidden>
+                곧 열려요
+              </span>
+              {soon.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  className="wh-soon-b focus-ring"
+                  aria-label={`${s.label}, 곧 열려요`}
+                  title={`${s.label} · 곧 열려요`}
+                  onClick={() => say(`${s.label}은 ${SOON_TAIL}`)}
+                  data-testid={`hud-soon-${s.key}`}
+                >
+                  {s.icon}
+                </button>
+              ))}
+            </span>
             <button
-              key={s.key}
               type="button"
-              className="wh-soon-b focus-ring"
-              aria-label={`${s.label}, 곧 열려요`}
-              title={`${s.label} · 곧 열려요`}
-              onClick={() => say(`${s.label}은 ${SOON_TAIL}`)}
-              data-testid={`hud-soon-${s.key}`}
+              className="wh-soon-one focus-ring"
+              aria-label={`${soonName}, 곧 열려요`}
+              onClick={() => say(`${soonName}은 ${SOON_TAIL}`)}
+              data-testid="hud-soon"
             >
-              {s.icon}
+              <ListChecks aria-hidden />
             </button>
-          ))}
-        </span>
-        <button
-          type="button"
-          className="wh-soon-one focus-ring"
-          aria-label={`${soonName}, 곧 열려요`}
-          onClick={() => say(`${soonName}은 ${SOON_TAIL}`)}
-          data-testid="hud-soon"
+          </>
+        )}
+
+        {/* 상점 (P9-02): 640px 이상은 바에 차양 칩, 그 아래는 메뉴 시트 맨 위 */}
+        <Link
+          href="/shop"
+          className="wh-shop focus-ring"
+          aria-label="상점"
+          title="상점"
+          data-testid="hud-shop"
         >
-          {missions ? <Store aria-hidden /> : <ListChecks aria-hidden />}
-        </button>
+          <Store aria-hidden />
+          <span className="wh-shop-l">상점</span>
+        </Link>
 
         <SoundToggle className="wh-icon wh-sound" />
 
@@ -286,6 +306,15 @@ export function WorldHud({
         >
           <nav aria-label="메뉴" className="grid gap-2">
             {attendance}
+            <Button
+              href="/shop"
+              variant="secondary"
+              icon={<Store aria-hidden />}
+              className="w-full"
+              data-testid="menu-shop"
+            >
+              상점
+            </Button>
             {/* 400px 미만은 바에 자리가 없어 소리 토글이 여기로 (미션 칸 P8-07) */}
             <div className="wh-menu-sound">
               <span>소리</span>

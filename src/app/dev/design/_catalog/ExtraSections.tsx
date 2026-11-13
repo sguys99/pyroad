@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Music,
   RotateCcw,
+  Share2,
   Volume2,
 } from 'lucide-react';
 import {
@@ -22,6 +23,14 @@ import {
   type SfxId,
 } from '@/lib/sound/manifest';
 import { SHARE_CARD_SAMPLES } from '@/lib/share-card/samples';
+import { ShareSheet } from '@/components/share/ShareSheet';
+import { MyShareCards } from '@/components/share/MyShareCards';
+import type { MyShareCard } from '@/lib/share-card/myCards';
+import { shareCardSummary } from '@/lib/share-card/summary';
+import {
+  ShareCardView,
+  ShareGoneView,
+} from '@/components/share/ShareCardView';
 import { rewardSfx } from '@/lib/celebration/rewardSfx';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +42,9 @@ import {
   type CodeEditorHandle,
 } from '@/components/quest/CodeEditor';
 import CodeKeyboard from '@/components/quest/CodeKeyboard';
+import { EditorThemeProvider } from '@/components/quest/EditorThemeContext';
+import { EDITOR_THEME_IDS, type EditorThemeId } from '@/lib/design/tokens';
+import { SHOP_ITEMS } from '@/lib/shop/catalog';
 import { questTabs } from '@/components/quest/QuestWorkspace';
 import { SegmentedTabs } from '@/components/ui/tabs';
 import { MotionProvider } from '@/components/providers/MotionProvider';
@@ -63,6 +75,29 @@ function CodeKeyboardDemo() {
       />
       <CodeEditor ref={editor} value={code} onChange={setCode} />
       <CodeKeyboard editor={editor} stage={Number(stage)} />
+    </div>
+  );
+}
+
+const THEME_SAMPLE_CODE = [
+  '# 별을 세어 봐요',
+  'def shine(n):',
+  '    return n * 2',
+  'for i in range(3):',
+  '    print("반짝", shine(i), True)',
+].join('\n');
+
+/** 에디터 테마 견본 (P9-06): 기본 + 상점 공책 3종에 같은 코드 (키워드·함수·숫자·문자열·주석) */
+function EditorThemeDemo({ theme }: { theme: EditorThemeId | null }) {
+  const [code, setCode] = useState(THEME_SAMPLE_CODE);
+  const name = theme
+    ? SHOP_ITEMS.find((i) => i.kind === 'editor_theme' && i.art === theme)?.name
+    : '기본 공책';
+  return (
+    <div className="flex min-w-0 flex-col gap-1" data-testid={`catalog-editor-theme-${theme ?? 'default'}`}>
+      <EditorThemeProvider theme={theme}>
+        <CodeEditor value={code} onChange={setCode} title={<span className="text-small font-bold">{name}</span>} />
+      </EditorThemeProvider>
     </div>
   );
 }
@@ -106,6 +141,16 @@ export function EditorSection() {
           >
             오류 줄 3 표시
           </Button>
+        </div>
+      </Demo>
+      <Demo
+        label="에디터 테마 (P9-06)"
+        note="상점 공책을 입으면 퀘스트 에디터 상자 안 색만 바뀜(공책 머리·실행 줄·결과 쪽지는 그대로). 모든 글자·틴트 조합 AA는 kidsTheme.test.ts. 오류 줄은 점검 페이지 ?theme=night&error=3"
+      >
+        <div className="grid gap-4 md:grid-cols-2" data-testid="catalog-editor-themes">
+          {[null, ...EDITOR_THEME_IDS].map((t) => (
+            <EditorThemeDemo key={t ?? 'default'} theme={t} />
+          ))}
         </div>
       </Demo>
       <Demo
@@ -756,7 +801,140 @@ export function ShareCardSection() {
           </li>
         ))}
       </ul>
+      <h3 className="mt-8 font-display text-h3">
+        공유 페이지 /share/[cardId] (P9-08)
+      </h3>
+      <p className="text-small text-muted-foreground">
+        링크를 받은 보호자·친구가 로그인 없이 보는 첫 화면. 카드 그림(대체 글 포함) + 축하 문구 + 소개 + 나도
+        해보기(랜딩 30초 체험). 아래: 카드 있음 · 없음·비공개·만료(404, 아이 정보 없음)
+      </p>
+      <div className="grid gap-4" data-testid="share-page-samples">
+        {[SHARE_CARD_SAMPLES[0]].map((s) => (
+          <div
+            key={s.id}
+            className="overflow-hidden rounded-2xl ring-1 ring-line"
+          >
+            <ShareCardView
+              kind={s.data.kind}
+              {...shareCardSummary(s.data)}
+              imageSrc={`/dev/design/share-card/${s.id}`}
+            />
+          </div>
+        ))}
+        <div className="overflow-hidden rounded-2xl ring-1 ring-line">
+          <ShareGoneView />
+        </div>
+      </div>
+      <h3 className="mt-8 font-display text-h3">공유 시트 (P9-09)</h3>
+      <p className="text-small text-muted-foreground">
+        카드 미리보기 + 카카오톡(키가 있을 때만) · 공유하기(Web Share 되는 기기만) · 이미지 저장 · 링크 복사 + 보내기 전 안내.
+        앱에서는 <code>{'<ShareButton kind=…>'}</code>(프로필 레벨·주간 카드) 또는 축하 카드의 자랑하기(P9-10). 채널을 다 쓰면
+        자랑하기 보상(하루 1회 15코인) 줄이 바뀐다: 오늘 처음 → +15 코인(효과음·HUD로 날아감) / 오늘 보상은 받았어요. 견본은 만들어 둔
+        카드(샘플 그림)와 보상 흉내를 넘겨 요청을 하지 않는다
+      </p>
+      <ShareSheetDemo />
+      <h3 className="mt-8 font-display text-h3">내 자랑 카드 (P9-11)</h3>
+      <p className="text-small text-muted-foreground">
+        프로필 → <code>/profile/cards</code>. 공개 중(남은 날 · 다시 보내기 · 숨기기) · 숨김 · 기간 끝(90일)은 그림 대신 상태 그림 + 다시 공개,
+        지우기는 확인 대화 상자. 숨기기·지우기는 서버가 CDN 사본까지 지운다. 견본은 요청 없이 흉내
+      </p>
+      <MyShareCards
+        now={new Date().toISOString()}
+        rewardClaimed={false}
+        cards={MY_CARD_SAMPLES}
+        act={async (_id, action) =>
+          action === 'delete'
+            ? { version: 1, isPublic: false, expiresAt: '', imageUrl: '' }
+            : {
+                version: 1,
+                isPublic: action === 'show',
+                expiresAt: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+                imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+              }
+        }
+      />
+      <MyShareCards now={new Date().toISOString()} rewardClaimed={false} cards={[]} />
     </Section>
+  );
+}
+
+const MY_CARD_SAMPLES: MyShareCard[] = [
+  {
+    id: 'AAAAAAAAAAAAAAAAAAAAAA',
+    kind: 'levelup',
+    version: 1,
+    isPublic: true,
+    expiresAt: new Date(Date.now() + 83 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 7 * 86_400_000).toISOString(),
+    imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+    detail: '레벨 7',
+  },
+  {
+    id: 'BBBBBBBBBBBBBBBBBBBBBB',
+    kind: 'stage',
+    version: 2,
+    isPublic: false,
+    expiresAt: new Date(Date.now() + 60 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 30 * 86_400_000).toISOString(),
+    imageUrl: '',
+    detail: '「반복의 동굴」 · 별 3개',
+  },
+  {
+    id: 'CCCCCCCCCCCCCCCCCCCCCC',
+    kind: 'weekly',
+    version: 1,
+    isPublic: true,
+    expiresAt: new Date(Date.now() - 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 91 * 86_400_000).toISOString(),
+    imageUrl: '',
+    detail: '8월 둘째 주 · 퀘스트 12개',
+  },
+];
+
+function ShareSheetDemo() {
+  // 두 견본: 오늘 처음(보내면 +15, 요청 없이 흉내) · 오늘 보상은 이미 받음 (P9-10)
+  const [open, setOpen] = useState<'offer' | 'claimed' | null>(null);
+  const card = (claimed: boolean) => ({
+    id: 'AAAAAAAAAAAAAAAAAAAAAA',
+    kind: 'levelup' as const,
+    version: 1,
+    expiresAt: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+    imageUrl: `/dev/design/share-card/${SHARE_CARD_SAMPLES[0].id}`,
+    rewardClaimed: claimed,
+  });
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Button
+        variant="secondary"
+        icon={<Share2 aria-hidden />}
+        onClick={() => setOpen('offer')}
+        data-testid="share-sheet-demo"
+      >
+        공유 시트 열기 (오늘 처음)
+      </Button>
+      <Button
+        variant="secondary"
+        icon={<Share2 aria-hidden />}
+        onClick={() => setOpen('claimed')}
+        data-testid="share-sheet-demo-claimed"
+      >
+        오늘 보상은 받음
+      </Button>
+      {(['offer', 'claimed'] as const).map((k) => (
+        <ShareSheet
+          key={k}
+          open={open === k}
+          onOpenChange={(o) => setOpen(o ? k : null)}
+          kind="levelup"
+          card={card(k === 'claimed')}
+          requestReward={async () => ({
+            coins_earned: 15,
+            coins_balance: 130,
+            already_claimed: false,
+          })}
+        />
+      ))}
+    </div>
   );
 }
 

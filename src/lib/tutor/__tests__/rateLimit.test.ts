@@ -57,6 +57,12 @@ describe('getTutorRateLimit', () => {
     });
   });
 
+  it('자유 질문은 분당 3 · 하루 20, 본인 키여도 늘리지 않는다 (P9-17)', () => {
+    const limit = { perMinute: 3, perDay: 20 };
+    expect(getTutorRateLimit('free_question', false, {})).toEqual(limit);
+    expect(getTutorRateLimit('free_question', true, {})).toEqual(limit);
+  });
+
   it('env 로 유형별 한도와 본인 키 배수를 바꾼다', () => {
     const env = {
       TUTOR_LIMIT_HINT: '2/10',

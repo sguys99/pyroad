@@ -28,6 +28,7 @@
 #                           CRLF 로 바꾼 사본으로, 파일 그대로(파일 안의 BEGIN/COMMIT, psql -1 아님) 적용 (B39).
 #                           Windows SQL Editor 붙여넣기 재현. 적용 뒤 \r 이 없는지(CR-1~3), LF 로 적용한 DB 와
 #                           콘텐츠가 같은지(CR-4, db reset 뒤) 점검 (supabase/tests/crlf.mjs)
+#                           지금 seed.sql 은 seed 가 있는 마지막 묶음(v0.7 ①, 00046 뒤)에만 들어감 — 앞 묶음은 그때 seed 로 이미 운영 적용됨 (B76). CI 는 이 모드
 #   RLS_PROJECT_ID          ci: 기본 pyroadrls   (컨테이너 supabase_*_<id>)
 #   RLS_PORT_BASE           ci: 기본 54620       (api=+1 db=+2 … config.toml 의 5452x 를 같은 간격으로 옮김)
 #   RLS_WORKDIR             ci: 기본 mktemp -d

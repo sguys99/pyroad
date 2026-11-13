@@ -8,6 +8,9 @@ import type { SocialProvider } from '@/lib/auth/socialLogin';
 import type { SkinId } from '@/lib/avatar/skins';
 import type { MiniErrorKind } from '@/lib/landing/miniPython/errors';
 import type { QuizKind } from '@/lib/content/schema';
+import type { ShopKind } from '@/lib/shop/catalog';
+import type { ShareCardKind } from '@/lib/share-card/types';
+import type { ShareChannel } from '@/lib/share-card/share';
 import type {
   MotionTier,
   MotionTierSetting,
@@ -112,18 +115,69 @@ export interface AnalyticsEventProps {
    * 휴식 알림에서 고름 (P8-12, 브라우저). rest: 5분 쉬기 · more: 조금만 더(Esc·덮개 포함) · done: 5분을 다 쉼 · stop: 쉬다가 일찍 돌아감
    */
   rest_reminder_choice: { choice: 'rest' | 'more' | 'done' | 'stop' };
+  /**
+   * 상점에서 샀음 (P9-03, `/api/shop/purchase`, 서버). item_id: 카탈로그 id(`SHOP_ITEMS`, 개인정보 아님), kind: 종류,
+   * price: 그때 가격(150~1,500). 경제 밸런스(무엇을 언제 사나) 조정용, 잔액은 보내지 않음
+   */
+  shop_purchase: { item_id: string; kind: ShopKind; price: number };
+  /**
+   * 공유 페이지 `/share/[cardId]`를 엶 (P9-08, 브라우저, 비로그인 포함). kind: 카드 종류, gone = 없음·비공개·만료.
+   * 카드 id·닉네임은 보내지 않는다 (경로의 id도 `normalizePath`가 `[id]`로 지움)
+   */
+  share_view: { kind: ShareViewKind };
+  /** 공유 페이지의 "나도 해보기"를 누름 (P9-08, 브라우저). 공유 → 방문 → 가입 퍼널 분자 */
+  share_cta_click: { kind: ShareViewKind };
+  /** 공유 시트를 엶 (P9-09, 브라우저, 로그인). kind: 카드 종류. 카드 id 는 보내지 않는다 */
+  share_open: { kind: ShareCardKind };
+  /**
+   * 공유 시트에서 채널을 씀 (P9-09, 브라우저). channel: kakao(메시지 창을 띄움) · web_share(기기 공유를 마침) ·
+   * save_image(저장을 시작함) · copy_link(복사함). 받는 사람·카드 id 는 보내지 않는다
+   */
+  share_channel: { kind: ShareCardKind; channel: ShareChannel };
+  /**
+   * 내 자랑 카드를 숨김·다시 공개·지움 (P9-11, 서버 `PATCH·DELETE /api/share-cards/{id}`). 카드 id·닉네임은 보내지 않는다
+   */
+  share_manage: { kind: ShareCardKind; action: ShareManageAction };
+  /**
+   * "파이뱀에게 물어보기" 자유 질문 결과 (P9-17, 서버 `/api/tutor`). 질문·답 내용·거른 규칙은 보내지 않는다(결과 갈래만).
+   * answered = AI 답 · fallback = AI 실패로 저장된 답변 · blocked = 질문을 거름 · answer_blocked = 답을 거르고 저장된 답변
+   */
+  tutor_free_question: { result: TutorFreeQuestionResult };
+  /**
+   * 보호자 리포트 링크를 만듦(다시 만들기 포함)·끔 (P9-15, 서버 `POST·DELETE /api/guardian-report`). 토큰·링크는 보내지 않는다
+   */
+  guardian_report_link: { action: 'create' | 'off' };
+  /**
+   * 보호자 리포트 `/guardian/[token]`을 엶 (P9-15, 브라우저, 비로그인). week: this(이번 주)·last(지난 주).
+   * 토큰·닉네임·학습 수치는 보내지 않는다 (경로의 토큰도 `normalizePath`가 `[id]`로 지움)
+   */
+  guardian_report_view: { week: 'this' | 'last' };
 }
+
+/** `tutor_free_question.result` 값 (P9-17) */
+export type TutorFreeQuestionResult =
+  | 'answered'
+  | 'fallback'
+  | 'blocked'
+  | 'answer_blocked';
+
+/** `share_manage.action` 값 (P9-11) */
+export type ShareManageAction = 'hide' | 'show' | 'delete';
 
 export type AnalyticsEventName = keyof AnalyticsEventProps;
 
 /** `trial_run.result` 값 */
 export type TrialRunResult = 'ok' | 'no_print' | MiniErrorKind;
 
+/** `share_view`·`share_cta_click.kind` 값 */
+export type ShareViewKind = ShareCardKind | 'gone';
+
 /** 브라우저가 `/api/analytics`로 보낼 수 있는 이벤트. 나머지는 서버만 기록한다 (클라이언트가 지표를 부풀리지 못하게) */
 export const CLIENT_EVENT_NAMES = [
   'continue_click',
   'daily_quiz_finish',
   'daily_quiz_open',
+  'guardian_report_view',
   'landing_view',
   'landing_cta_click',
   'motion_tier_change',
@@ -133,6 +187,10 @@ export const CLIENT_EVENT_NAMES = [
   'quiz_try_run',
   'rest_reminder_choice',
   'rest_reminder_shown',
+  'share_channel',
+  'share_cta_click',
+  'share_open',
+  'share_view',
   'trial_start',
   'trial_run',
   'trial_success',
@@ -145,6 +203,8 @@ export const SERVER_EVENT_NAMES = [
   'quest_start',
   'quest_complete',
   'hint_used',
+  'shop_purchase',
+  'tutor_free_question',
 ] as const;
 export type ServerEventName = (typeof SERVER_EVENT_NAMES)[number];
 
@@ -178,7 +238,8 @@ export function normalizePath(input: string | null | undefined): string | null {
     .split('/')
     .filter(Boolean)
     .map((seg) => {
-      if (UUID_SEGMENT_RE.test(seg)) return '[id]';
+      // 22자 base64url = 공유 카드 id(P9-08) 같은 링크 토큰
+      if (UUID_SEGMENT_RE.test(seg) || ANON_ID_RE.test(seg)) return '[id]';
       if (TEMPLATE_SEGMENT_RE.test(seg)) return seg;
       if (seg.length > 40 || !SAFE_SEGMENT_RE.test(seg)) return '[x]';
       return seg;

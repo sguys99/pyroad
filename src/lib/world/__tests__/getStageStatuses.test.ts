@@ -439,3 +439,77 @@ describe('getWorldStatuses', () => {
     });
   });
 });
+
+describe('보스 배틀 (P9-12, 00046)', () => {
+  const stages = [
+    makeStage(1, [
+      { id: 'q1-1' },
+      { id: 'q1-2' },
+      { id: 'b1', quest_type: 'boss' },
+    ]),
+    makeStage(2, [{ id: 'q2-1' }, { id: 'q2-2' }]),
+    makeStage(3, [{ id: 'q3-1' }]),
+  ];
+
+  it('보스는 클리어·해제에 듦: 코드만 끝내면 스테이지 1 진행 중, 2 잠김', () => {
+    const r = getStageStatuses(stages, [
+      makeProgress('q1-1'),
+      makeProgress('q1-2'),
+    ]);
+    expect(r.map((s) => s.status)).toEqual(['in_progress', 'locked', 'locked']);
+    expect(r[0].totalQuestCount).toBe(3);
+    expect(r[0].firstIncompleteQuestId).toBe('b1');
+  });
+
+  it('보스를 이기면 스테이지 1 통과, 2 열림', () => {
+    const r = getStageStatuses(stages, [
+      makeProgress('q1-1'),
+      makeProgress('q1-2'),
+      makeProgress('b1'),
+    ]);
+    expect(r.map((s) => s.status)).toEqual([
+      'completed',
+      'in_progress',
+      'locked',
+    ]);
+  });
+
+  it('이미 간 곳은 계속 열림: 2단계에 완료가 있으면 1단계 보스 전이어도 2단계 열림, 3단계는 잠김 (SQL BOSS-3)', () => {
+    const progress = [
+      makeProgress('q1-1'),
+      makeProgress('q1-2'),
+      makeProgress('q2-1'),
+    ];
+    const r = getStageStatuses(stages, progress);
+    expect(r.map((s) => s.status)).toEqual([
+      'in_progress',
+      'in_progress',
+      'locked',
+    ]);
+    // 진행 행(in_progress)만으로는 열리지 않음 (화면이 만들 수 있는 행)
+    const only = getStageStatuses(stages, [
+      makeProgress('q2-1', 'in_progress'),
+    ]);
+    expect(only[1].status).toBe('locked');
+  });
+
+  it('지금 위치는 가장 멀리 간 진행 중 스테이지', () => {
+    const worlds: WorldInfo[] = [
+      {
+        slug: 'w1',
+        order: 1,
+        title: '월드',
+        theme: 't',
+        description: '',
+        unlock_rule: { type: 'open' },
+        ready: true,
+      } as unknown as WorldInfo,
+    ];
+    const res = getWorldStatuses(worlds, stages, [
+      makeProgress('q1-1'),
+      makeProgress('q1-2'),
+      makeProgress('q2-1'),
+    ]);
+    expect(res.worlds[0].currentStage?.id).toBe('stage-2');
+  });
+});

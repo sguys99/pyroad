@@ -3,7 +3,7 @@
  *
  * 학생 유형 × 하루 단위로 1월드 실제 콘텐츠(content/)를 푼다. 규칙은 앱·SQL 원본을 그대로 읽음:
  * XP·레벨·레벨 업 코인 xp.ts · 코인 금액 coins.ts(SQL coin_reward 사본) · 상자 목표 chest.ts ·
- * 미션 풀 00034 · 업적 42종 00036(마이그레이션 INSERT 를 읽음 — 표를 두 벌로 두지 않음).
+ * 미션 풀 00034 · 업적 46종 00036·00048(마이그레이션 INSERT 를 읽음 — 표를 두 벌로 두지 않음).
  * 가정(문서 2.1 절): 퀘스트 걸리는 시간 TIME, 실력 HINT_CYCLE·QUIZ_STAR_CYCLE, 복습 도전은 늘 ⭐3.
  */
 import { createHash } from 'node:crypto';
@@ -13,6 +13,7 @@ import { loadContent } from '@/lib/content/load';
 import { COIN_RULES, coinReward } from '@/lib/quest/coins';
 import { calculateLevel, calculateXP, codeQuestStars } from '@/lib/quest/xp';
 import { chestCoins, chestGoal } from '@/lib/world/chest';
+import { SHOP_ITEMS, SHOP_KINDS } from '@/lib/shop/catalog';
 
 const ROOT = resolve(__dirname, '../..');
 
@@ -58,7 +59,14 @@ export const STUDENTS: StudentType[] = [
 ];
 
 /** 가정: 걸리는 분 (오늘의 퀴즈 한 문제도 quiz) */
-export const TIME = { code: 12, project: 45, quiz: 2, codeReview: 6 } as const;
+export const TIME = {
+  code: 12,
+  project: 45,
+  quiz: 2,
+  /** 보스 한 판 (문제 4~7개, 한 문제 1분 남짓 + 연출) */
+  boss: 8,
+  codeReview: 6,
+} as const;
 /** 가정: 코드 퀘스트 힌트 수 순환(평균 XP 배율 1.25 = P8-01 "보통") · 퀴즈 첫 판정 별 순환(평균 ⭐2) */
 export const HINT_CYCLE = [0, 1, 1, 2] as const;
 export const QUIZ_STAR_CYCLE = [3, 2, 2, 1] as const;
@@ -83,16 +91,18 @@ export const SOURCES = [
   'achievement',
   'mission',
   'attendance',
+  'share',
 ] as const;
 export type Source = (typeof SOURCES)[number];
-/** 학습 행동에서 나온 코인(§2.6) — 출석만 방문 */
+/** 학습 행동에서 나온 코인(§2.6) — 출석(방문)·자랑하기(공유, P9-10)는 아님 */
 export const LEARNING_SOURCES: readonly Source[] = SOURCES.filter(
-  (s) => s !== 'attendance',
+  (s) => s !== 'attendance' && s !== 'share',
 );
 
 interface QuestDef {
   id: string;
-  type: 'code' | 'project' | 'quiz';
+  /** 보스(P9-12)는 DB 처럼 퀴즈가 아닌 퀘스트로 셈 (스테이지 클리어·상자·업적·미션 모두 quest_type <> 'quiz') */
+  type: 'code' | 'project' | 'quiz' | 'boss';
   base: number;
   stage: number;
 }
@@ -133,7 +143,10 @@ export function loadAchievements(): AchievementDef[] {
   const re =
     /\('(\w+)',\s*'[^']*',\s*'[^']*',\s*'\w+',\s*'(bronze|silver|gold)',\s*'\w+',\s*'(\w+)',\s*(NULL|\d+),/g;
   const tiers = { bronze: 1, silver: 2, gold: 3 } as const;
-  return [...migration('00036_achievements.sql').matchAll(re)].map((m) => ({
+  const sql = ['00036_achievements.sql', '00048_weekly_study.sql']
+    .map(migration)
+    .join('\n');
+  return [...sql.matchAll(re)].map((m) => ({
     id: m[1],
     tier: tiers[m[2] as keyof typeof tiers],
     metric: m[3],
@@ -199,12 +212,19 @@ export interface EconomyResult {
 
 export function simulateEconomy(
   student: StudentType,
-  { days = 90, missionXp = 15, stages = world1Stages(), questsTotal = 0 } = {},
+  {
+    days = 90,
+    missionXp = 15,
+    stages = world1Stages(),
+    questsTotal = 0,
+    shareEveryDay = false,
+  } = {},
 ): EconomyResult {
   const achievementDefs = loadAchievements();
   const missionDefs = loadMissions();
   const quests = stages.flatMap((s) => s.quests);
   const codeTotal = quests.filter((q) => q.type !== 'quiz').length;
+  const bossTotal = quests.filter((q) => q.type === 'boss').length;
   const allQuests = questsTotal || codeTotal; // 업적 quests_all 목표 (DB 전체 코드·프로젝트 수)
   const prog = new Map<string, Progress>();
   const coins = Object.fromEntries(SOURCES.map((s) => [s, 0])) as Record<
@@ -217,6 +237,7 @@ export function simulateEconomy(
   let credit = 0; // 다음 새 퀘스트에 쌓인 분 (긴 프로젝트는 며칠에 걸침)
   let codeDone = 0;
   let quizDone = 0;
+  let bossDone = 0;
   let attendance = 0;
   let missionsClaimed = 0;
   let chestsOpened = 0;
@@ -277,11 +298,18 @@ export function simulateEconomy(
     const code = all.filter((x) => x.q.type !== 'quiz');
     const quiz = all.filter((x) => x.q.type === 'quiz');
     const streak = longestRun(new Set([...learnDays, ...shieldDays]));
+    const perWeek = new Map<number, number>();
+    for (const d of learnDays)
+      perWeek.set(Math.floor(d / 7), (perWeek.get(Math.floor(d / 7)) ?? 0) + 1);
+    const weekCounts = () => [...perWeek.values()];
     const metric: Record<string, number> = {
       quests: code.length,
+      // 00047(B74): 프로젝트 퀘스트만 (보스는 아님)
       projects: code.filter((x) => x.q.type === 'project').length,
       stages: stages.filter(stageCleared).length,
-      no_hint: code.filter((x) => x.p.hints === 0).length,
+      // 00051(B75): 보스는 힌트가 없어 "힌트 없이"에서 뺌
+      no_hint: code.filter((x) => x.q.type !== 'boss' && x.p.hints === 0)
+        .length,
       hint_finish: code.filter((x) => x.p.hints > 0).length,
       stars: all.reduce((n, x) => n + x.p.best, 0),
       three_stars: all.filter((x) => x.p.best >= 3).length,
@@ -289,6 +317,9 @@ export function simulateEconomy(
       quiz_comeback: quiz.filter((x) => x.p.correctAtTwoPlus).length,
       reviews: all.filter((x) => x.p.attempts >= 2).length,
       streak,
+      // 00048(P9-18): KST 주(월~일, 모델의 day % 7 = 0 이 월요일)마다 공부한 날 수
+      weeks_two: weekCounts().filter((n) => n >= 2).length,
+      weeks_three: weekCounts().filter((n) => n >= 3).length,
       level: calculateLevel(xp),
       attendance,
       missions: missionsClaimed,
@@ -321,6 +352,9 @@ export function simulateEconomy(
       const slot = (attendance++ % 7) + 1;
       coins.attendance += coinReward('attendance', slot);
       if (slot === 7) shields = Math.min(2, shields + 1);
+      // 자랑하기 (P9-10, 하루 1회 15): 축하 화면(레벨 업·업적·스테이지 클리어)이 뜬 날 한 번 공유한다고 봄.
+      // 상한(날마다 프로필 카드를 공유)은 shareEveryDay 옵션으로 — docs/balance.md 3.13
+      const proud = `${paidLevel}:${earned.size}:${stages.filter(stageCleared).length}`;
 
       // 오늘의 퀴즈: 열린 스테이지 퀴즈 중 복습 → 안 푼 것 → 나머지, 3개
       const bucket = (q: QuestDef) => {
@@ -340,13 +374,16 @@ export function simulateEconomy(
         .slice(0, 3);
 
       // 미션 배정 (00034: 할 수 있는 것만, 그룹마다 하나, 퀘스트 그룹 먼저, 3개)
-      const remaining = codeTotal - codeDone;
+      const remaining = codeTotal - codeDone - bossDone;
+      const bossLeft = bossTotal - bossDone;
       const reviewOpen = [...prog.values()].some(
         (p) => p.best < 3 && p.judgedOn < day,
       );
       const possible = (m: MissionDef) =>
         m.kind === 'quest_clear' || m.kind === 'no_hint'
-          ? remaining >= m.target &&
+          ? // 00051(B75): no_hint 의 남은 퀘스트에서 보스 뺌
+            (m.kind === 'no_hint' ? remaining - bossLeft : remaining) >=
+              m.target &&
             // 00034: 퀘스트 3개 이상은 최근 7일 중 하루에 그만큼 깬 적이 있을 때만
             (m.kind !== 'quest_clear' ||
               m.target <= 2 ||
@@ -428,6 +465,8 @@ export function simulateEconomy(
         );
         if (!target) break;
         const p = prog.get(target.id)!;
+        // 보스 복습 승리는 늘어난 별만큼 XP 도 (00046 boss_answer review)
+        if (target.type === 'boss') xp += ((3 - p.best) * target.base) / 3;
         gainStars(target.id, p.best, 3);
         Object.assign(p, { best: 3, judgedOn: day, attempts: p.attempts + 1 });
         budget -= TIME.codeReview;
@@ -447,13 +486,32 @@ export function simulateEconomy(
             ? TIME.quiz
             : q.type === 'project'
               ? TIME.project
-              : TIME.code;
+              : q.type === 'boss'
+                ? TIME.boss
+                : TIME.code;
         if (credit < cost) break;
         credit -= cost;
         next++;
         if (q.type === 'quiz') {
           budget = 99; // 이미 credit 에서 뺌
           finishQuiz(q);
+          continue;
+        }
+        if (q.type === 'boss') {
+          // 별 = 남은 하트 (퀴즈 첫 판정과 같은 순환으로 가정) · XP 별당 xp_reward/3 · 첫 승리 20 (00046)
+          const stars = QUIZ_STAR_CYCLE[bossDone++ % QUIZ_STAR_CYCLE.length];
+          xp += (stars * q.base) / 3;
+          coins.quest += COIN_RULES.boss;
+          gainStars(q.id, 0, stars);
+          prog.set(q.id, {
+            best: stars,
+            judgedOn: day,
+            attempts: 1,
+            hints: 0,
+            error: false,
+            correctAtTwoPlus: false,
+          });
+          today.quest++; // 미션 no_hint 는 안 셈 (00051, B75)
           continue;
         }
         const hints = HINT_CYCLE[codeDone++ % HINT_CYCLE.length];
@@ -499,6 +557,12 @@ export function simulateEconomy(
         result.missions.done[m.id] = (result.missions.done[m.id] ?? 0) + 1;
       }
       settle(day);
+      if (
+        shareEveryDay ||
+        proud !==
+          `${paidLevel}:${earned.size}:${stages.filter(stageCleared).length}`
+      )
+        coins.share += COIN_RULES.share;
     }
     const sum = (t: QuestDef['type'][]) =>
       quests
@@ -510,7 +574,7 @@ export function simulateEconomy(
       level: calculateLevel(xp),
       coins: { ...coins },
       quizStars: sum(['quiz']),
-      codeStars: sum(['code', 'project']),
+      codeStars: sum(['code', 'project', 'boss']),
     });
   }
   return result;
@@ -536,7 +600,12 @@ export function daysToPrice(r: EconomyResult, price: number): number | null {
 }
 
 /** 소급 보상(00037): Phase 8 전에 스테이지 1..n 을 모두(퀴즈 포함) 끝낸 기존 사용자 */
-export function retroCoins(stageCount: number, stages = world1Stages()) {
+export function retroCoins(stageCount: number, allStages = world1Stages()) {
+  // 00037 소급 때는 보스가 없었음
+  const stages = allStages.map((s) => ({
+    ...s,
+    quests: s.quests.filter((q) => q.type !== 'boss'),
+  }));
   const r = simulateEconomy(
     {
       id: 'retro',
@@ -620,14 +689,14 @@ function main() {
     p(
       `**${d + 1}일째**`,
       '',
-      `| 유형 | 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 출석 비중 |`,
-      `|---|---|${SOURCES.map(() => '---|').join('')}---|---|`,
+      `| 유형 | 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 출석 비중 | 자랑 비중 |`,
+      `|---|---|${SOURCES.map(() => '---|').join('')}---|---|---|`,
     );
     for (const r of runs) {
       const c = at(r, d).coins;
       const t = total(c);
       p(
-        `| ${r.student.name} | ${t} | ${SOURCES.map((s) => c[s]).join(' | ')} | ${pct(t - c.attendance, t)} | ${pct(c.attendance, t)} |`,
+        `| ${r.student.name} | ${t} | ${SOURCES.map((s) => c[s]).join(' | ')} | ${pct(t - c.attendance - c.share, t)} | ${pct(c.attendance, t)} | ${pct(c.share, t)} |`,
       );
     }
     p('');
@@ -772,6 +841,29 @@ function main() {
     const x = retroCoins(n);
     p(
       `| 스테이지 1~${n} | ${x.auto} | ${x.claimable} | ${x.chests} | ${x.level} |`,
+    );
+  }
+  // 3.12 상점 카탈로그 (P9-01, 가격 원본 src/lib/shop/catalog.ts). 소모품은 주 1개 한도라 모으는 물건에서 뺌
+  const keep = SHOP_ITEMS.filter((i) => i.kind !== 'consumable');
+  const catalogAll = keep.reduce((n, i) => n + i.price, 0);
+  const cheapestEach = SHOP_KINDS.filter((k) => k !== 'consumable').reduce(
+    (n, k) =>
+      n + Math.min(...keep.filter((i) => i.kind === k).map((i) => i.price)),
+    0,
+  );
+  p(
+    '',
+    '### 3.12 상점 카탈로그 (P9-01, 소모품 빼고 모으는 물건, 쓰지 않을 때)',
+    '',
+    `| 유형 | 종류마다 가장 싼 것 1개씩 ${cheapestEach} | 1월드 끝 잔액 (카탈로그 대비) | 180일 잔액 (카탈로그 대비) | 카탈로그 전부 ${catalogAll} |`,
+    '|---|---|---|---|---|',
+  );
+  for (const r of runs) {
+    const w = r.world1Day;
+    const endBal = w === null ? null : total(at(r, w).coins);
+    const bal180 = total(at(r, 179).coins);
+    p(
+      `| ${r.student.name} | ${dayLabel(daysToPrice(r, cheapestEach))} | ${endBal === null ? '-' : `${endBal} (${pct(endBal, catalogAll)})`} | ${bal180} (${pct(bal180, catalogAll)}) | ${dayLabel(daysToPrice(r, catalogAll))} |`,
     );
   }
   console.log(out.join('\n'));

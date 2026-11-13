@@ -49,6 +49,40 @@ describe('middleware 페이지 CSP (B27)', () => {
     );
   });
 
+  it('공유 페이지(P9-08): nonce CSP는 붙이고 세션 갱신(getUser)은 건너뜀', async () => {
+    const middleware = await load();
+    const req = new NextRequest(
+      'https://pyroad.vercel.app/share/AAAAAAAAAAAAAAAAAAAAAA',
+    );
+    const res = await middleware(req);
+    expect(nonceOf(res.headers.get('content-security-policy'))).toBeTruthy();
+    expect(req.headers.get('content-security-policy')).toBe(
+      res.headers.get('content-security-policy'),
+    );
+    expect(updateSession).not.toHaveBeenCalled();
+    await middleware(new NextRequest('https://pyroad.vercel.app/shareholder'));
+    expect(updateSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('보호자 리포트(P9-15): nonce CSP · 세션 갱신 건너뜀 · 캐시 금지·noindex·리퍼러 없음', async () => {
+    const middleware = await load();
+    const res = await middleware(
+      new NextRequest(
+        'https://pyroad.vercel.app/guardian/AAAAAAAAAAAAAAAAAAAAAA',
+      ),
+    );
+    expect(nonceOf(res.headers.get('content-security-policy'))).toBeTruthy();
+    expect(updateSession).not.toHaveBeenCalled();
+    expect(res.headers.get('cache-control')).toBe('private, no-store');
+    expect(res.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+    const other = await middleware(
+      new NextRequest('https://pyroad.vercel.app/guardians'),
+    );
+    expect(updateSession).toHaveBeenCalledTimes(1);
+    expect(other.headers.get('x-robots-tag')).toBeNull();
+  });
+
   it('랜딩(정적): nonce 없는 정책, 요청 헤더는 건드리지 않음', async () => {
     const middleware = await load();
     const res = await middleware(new NextRequest('https://pyroad.vercel.app/'));
@@ -141,6 +175,11 @@ describe('middleware matcher (B26·P2-16·P4-10·P4-11)', () => {
       '/api/quest',
       // 이름이 icon으로 시작해도 아이콘 라우트가 아니면 거친다
       '/iconography',
+      // 공유 페이지는 CSP nonce 때문에 거친다 (세션 갱신만 건너뜀, P9-08)
+      '/share/AAAAAAAAAAAAAAAAAAAAAA',
+      '/api/share-cardsx',
+      // 보호자 리포트도 nonce CSP·캐시 금지 헤더 때문에 거친다 (P9-15)
+      '/guardian/AAAAAAAAAAAAAAAAAAAAAA',
     ]) {
       expect(await matches(path), path).toBe(true);
     }
@@ -159,6 +198,9 @@ describe('middleware matcher (B26·P2-16·P4-10·P4-11)', () => {
       '/icon.svg',
       '/pyodide/314.0.7/pyodide.mjs',
       '/sounds/sfx/tap.v1.webm',
+      // 공유 카드 API·이미지 (P9-08)
+      '/api/share-cards',
+      '/api/share-cards/AAAAAAAAAAAAAAAAAAAAAA/image',
     ]) {
       expect(await matches(path), path).toBe(false);
     }

@@ -25,10 +25,13 @@ import { StageProgress } from '@/components/quest/StageProgress';
 import { StepStrip } from '@/components/quest/StepStrip';
 import { QuestHints } from '@/components/quest/QuestHints';
 import { AskPybaem } from '@/components/quest/AskPybaem';
+import { FreeQuestionForm } from '@/components/quest/FreeQuestionForm';
+import { FREE_QUESTION_MESSAGES } from '@/lib/tutor/freeQuestion';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import {
   ASK_QUESTIONS,
   type AskQuestion,
+  type FreeAskResult,
   type QuestSession,
 } from '@/lib/quest/useQuestSession';
 import type { ChatMessage } from '@/lib/tutor/types';
@@ -429,6 +432,7 @@ function TutorChatDemo() {
   const [loading, setLoading] = useState(false);
   const [stream, setStream] = useState('');
   const [askOpen, setAskOpen] = useState(false);
+  const [freeLeft, setFreeLeft] = useState<number | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   const at = (ms: number, fn: () => void) =>
@@ -459,13 +463,31 @@ function TutorChatDemo() {
       setMessages((m) => [...m, { role: 'student', content: ASK_QUESTIONS[q] }]);
       reply(DEMO_ANSWER[q]);
     },
+    // 자유 질문 (P9-17) 견본: 숫자 3개 이상이면 "개인정보" 안내(진짜 거르기는 서버), 아니면 생각 중 → 답 한 번에
+    freeRemaining: freeLeft,
+    handleFreeAsk: async (question: string): Promise<FreeAskResult> => {
+      if (/\d{3}/.test(question))
+        return {
+          status: 'note',
+          block: 'personal',
+          message: FREE_QUESTION_MESSAGES.personal,
+        };
+      setFreeLeft((n) => Math.max(0, (n ?? 20) - 1));
+      setMessages((m) => [...m, { role: 'student', content: question }]);
+      setLoading(true);
+      at(1200, () => {
+        setLoading(false);
+        setMessages((m) => [...m, { role: 'tutor', content: DEMO_ANSWER.concept }]);
+      });
+      return { status: 'sent' };
+    },
   } as unknown as QuestSession;
 
   return (
     <MotionProvider>
       <Demo
         label="파이뱀에게 물어보기 (AskPybaem + ConversationPanel, P6-10)"
-        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼 3개(무엇을 하면 돼요? = 지금 할 일 · 개념만 · 왜 이렇게 나왔어요?, 자유 입력은 P9-17). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
+        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼 3개(무엇을 하면 돼요? = 지금 할 일 · 개념만 · 왜 이렇게 나왔어요?) + 그 아래 자유 질문 칸(P9-17: 100자, 오늘 남은 수, 거른 질문은 대화에 넣지 않고 칸 아래 금색 쪽지 — 견본은 숫자 3개를 쓰면 개인정보 안내, 폰 키보드가 올라오면 버튼 줄을 접고 칸을 키보드 위로). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
         surface="card"
         data-testid="tutor-chat-demo"
       >
@@ -498,6 +520,16 @@ function TutorChatDemo() {
           >
             처음부터
           </Button>
+        </div>
+        <div className="max-w-xl" data-testid="free-ask-out-demo">
+          <p className="text-caption text-muted-foreground">
+            오늘 다 물어봤을 때 (남은 수 0)
+          </p>
+          <FreeQuestionForm
+            onSubmit={async () => ({ status: 'busy' })}
+            remaining={0}
+            busy={false}
+          />
         </div>
         <CodeSample code={`<AskPybaem session={session} hintPending={notes.some((n) => n.pending)} />  // StoryPage ask 자리`} />
       </Demo>

@@ -72,6 +72,7 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       join('v0.5-phase5', '1_먼저실행.sql'),
       join('v0.6-phase7', '1_먼저실행.sql'),
       join('v0.6-phase8', '1_먼저실행.sql'),
+      join('v0.7-phase9', '1_먼저실행.sql'),
     ]);
     const phase2 = readFileSync(
       join(out, 'v0.5-phase2', '1_먼저실행.sql'),
@@ -106,6 +107,19 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       phase7.indexOf('-- ===== 00026 ====='),
     );
     expect(phase7).toMatch(/DELETE FROM public\.quiz_attempts/);
+    // B76: 지금 seed.sql(보스 행 등)은 마지막 묶음(v0.7 ①, 00046 뒤)에만. 앞 묶음은 안내 주석만
+    const seedMark = '-- ===== content seed =====';
+    expect(phase7).not.toContain(seedMark);
+    expect(readFileSync(join(out, '2_두번째실행.sql'), 'utf8')).not.toContain(
+      seedMark,
+    );
+    const phase9 = readFileSync(
+      join(out, 'v0.7-phase9', '1_먼저실행.sql'),
+      'utf8',
+    );
+    expect(phase9.indexOf(seedMark)).toBeGreaterThan(
+      phase9.indexOf('-- ===== 00046 ====='),
+    );
   });
 
   it('--release 로 고른 릴리즈만, --crlf 면 모든 줄바꿈이 CRLF', () => {

@@ -28,13 +28,14 @@ describe('커리큘럼 로드맵 = 콘텐츠', () => {
     expect(titles).toEqual([...WORLD1_STAGES]);
   });
 
-  it('월드 1 퀘스트 수가 퀘스트 YAML 수와 같다 (보너스 퀴즈는 빼고 셈)', () => {
+  // 랜딩 "퀘스트 N개"는 코드·프로젝트 퀘스트 수 — 보너스 퀴즈와 스테이지 보스(P9-12, 퀴즈 문제 묶음)는 빼고 셈
+  it('월드 1 퀘스트 수가 퀘스트 YAML 수와 같다 (보너스 퀴즈·보스는 빼고 셈)', () => {
     const quests = stageDirs.flatMap((dir) =>
       readdirSync(join(WORLD1, dir)).filter(
         (f) =>
           f.endsWith('.yaml') &&
           f !== 'stage.yaml' &&
-          !/^quest_type: quiz$/m.test(
+          !/^quest_type: (quiz|boss)$/m.test(
             readFileSync(join(WORLD1, dir, f), 'utf8'),
           ),
       ),

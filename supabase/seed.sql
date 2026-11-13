@@ -2,8 +2,8 @@
 -- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.
 -- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).
 -- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.
--- 콘텐츠 해시: e675b2cf0f608bd0
--- 월드 3 · 스테이지 7 · 퀘스트 65 · 정답 행 65 (solution_code 43 + 프로젝트 단계 5)
+-- 콘텐츠 해시: bd074a41b3383dca
+-- 월드 3 · 스테이지 7 · 퀘스트 72 · 정답 행 72 (solution_code 43 + 프로젝트 단계 5)
 --
 -- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).
 -- - 정답·힌트·solution_code 는 quest_answer_keys(service_role 전용)에 따로 씁니다.
@@ -24,7 +24,7 @@
 -- ------------------------------------------------------------
 UPDATE public.worlds SET "order" = -"order" WHERE "order" > 0 AND slug IN ('python-island', 'code-sea', 'maker-city');
 UPDATE public.stages SET "order" = -"order" WHERE "order" > 0 AND id IN ('a1000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000002', 'a1000000-0000-0000-0000-000000000003', 'a1000000-0000-0000-0000-000000000004', 'a1000000-0000-0000-0000-000000000005', 'a1000000-0000-0000-0000-000000000006', 'a1000000-0000-0000-0000-000000000007');
-UPDATE public.quests SET "order" = -"order" WHERE "order" > 0 AND id IN ('b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000023', 'b1000000-0000-0000-0000-000000000101', 'b1000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000024', 'b1000000-0000-0000-0000-000000000102', 'b1000000-0000-0000-0000-000000000025', 'b1000000-0000-0000-0000-000000000103', 'b1000000-0000-0000-0000-000000000026', 'b1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000027', 'b1000000-0000-0000-0000-000000000104', 'b1000000-0000-0000-0000-000000000006', 'b1000000-0000-0000-0000-000000000028', 'b1000000-0000-0000-0000-000000000105', 'b1000000-0000-0000-0000-000000000007', 'b1000000-0000-0000-0000-000000000106', 'b1000000-0000-0000-0000-000000000029', 'b1000000-0000-0000-0000-000000000008', 'b1000000-0000-0000-0000-000000000107', 'b1000000-0000-0000-0000-000000000030', 'b1000000-0000-0000-0000-000000000108', 'b1000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000010', 'b1000000-0000-0000-0000-000000000011', 'b1000000-0000-0000-0000-000000000109', 'b1000000-0000-0000-0000-000000000031', 'b1000000-0000-0000-0000-000000000032', 'b1000000-0000-0000-0000-000000000012', 'b1000000-0000-0000-0000-000000000110', 'b1000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000033', 'b1000000-0000-0000-0000-000000000034', 'b1000000-0000-0000-0000-000000000111', 'b1000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000015', 'b1000000-0000-0000-0000-000000000035', 'b1000000-0000-0000-0000-000000000112', 'b1000000-0000-0000-0000-000000000036', 'b1000000-0000-0000-0000-000000000016', 'b1000000-0000-0000-0000-000000000017', 'b1000000-0000-0000-0000-000000000113', 'b1000000-0000-0000-0000-000000000037', 'b1000000-0000-0000-0000-000000000018', 'b1000000-0000-0000-0000-000000000114', 'b1000000-0000-0000-0000-000000000038', 'b1000000-0000-0000-0000-000000000115', 'b1000000-0000-0000-0000-000000000039', 'b1000000-0000-0000-0000-000000000040', 'b1000000-0000-0000-0000-000000000019', 'b1000000-0000-0000-0000-000000000116', 'b1000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000117', 'b1000000-0000-0000-0000-000000000041', 'b1000000-0000-0000-0000-000000000118', 'b1000000-0000-0000-0000-000000000021', 'b1000000-0000-0000-0000-000000000042', 'b1000000-0000-0000-0000-000000000043', 'b1000000-0000-0000-0000-000000000119', 'b1000000-0000-0000-0000-000000000044', 'b1000000-0000-0000-0000-000000000120', 'b1000000-0000-0000-0000-000000000121', 'b1000000-0000-0000-0000-000000000022');
+UPDATE public.quests SET "order" = -"order" WHERE "order" > 0 AND id IN ('b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000023', 'b1000000-0000-0000-0000-000000000101', 'b1000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000024', 'b1000000-0000-0000-0000-000000000102', 'b1000000-0000-0000-0000-000000000025', 'b1000000-0000-0000-0000-000000000103', 'b1000000-0000-0000-0000-000000000026', 'b1000000-0000-0000-0000-000000000201', 'b1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000027', 'b1000000-0000-0000-0000-000000000104', 'b1000000-0000-0000-0000-000000000006', 'b1000000-0000-0000-0000-000000000028', 'b1000000-0000-0000-0000-000000000105', 'b1000000-0000-0000-0000-000000000007', 'b1000000-0000-0000-0000-000000000106', 'b1000000-0000-0000-0000-000000000029', 'b1000000-0000-0000-0000-000000000202', 'b1000000-0000-0000-0000-000000000008', 'b1000000-0000-0000-0000-000000000107', 'b1000000-0000-0000-0000-000000000030', 'b1000000-0000-0000-0000-000000000108', 'b1000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000010', 'b1000000-0000-0000-0000-000000000011', 'b1000000-0000-0000-0000-000000000109', 'b1000000-0000-0000-0000-000000000031', 'b1000000-0000-0000-0000-000000000032', 'b1000000-0000-0000-0000-000000000203', 'b1000000-0000-0000-0000-000000000012', 'b1000000-0000-0000-0000-000000000110', 'b1000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000033', 'b1000000-0000-0000-0000-000000000034', 'b1000000-0000-0000-0000-000000000111', 'b1000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000015', 'b1000000-0000-0000-0000-000000000035', 'b1000000-0000-0000-0000-000000000112', 'b1000000-0000-0000-0000-000000000036', 'b1000000-0000-0000-0000-000000000204', 'b1000000-0000-0000-0000-000000000016', 'b1000000-0000-0000-0000-000000000017', 'b1000000-0000-0000-0000-000000000113', 'b1000000-0000-0000-0000-000000000037', 'b1000000-0000-0000-0000-000000000018', 'b1000000-0000-0000-0000-000000000114', 'b1000000-0000-0000-0000-000000000038', 'b1000000-0000-0000-0000-000000000115', 'b1000000-0000-0000-0000-000000000039', 'b1000000-0000-0000-0000-000000000040', 'b1000000-0000-0000-0000-000000000205', 'b1000000-0000-0000-0000-000000000019', 'b1000000-0000-0000-0000-000000000116', 'b1000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000117', 'b1000000-0000-0000-0000-000000000041', 'b1000000-0000-0000-0000-000000000118', 'b1000000-0000-0000-0000-000000000021', 'b1000000-0000-0000-0000-000000000042', 'b1000000-0000-0000-0000-000000000043', 'b1000000-0000-0000-0000-000000000119', 'b1000000-0000-0000-0000-000000000044', 'b1000000-0000-0000-0000-000000000206', 'b1000000-0000-0000-0000-000000000120', 'b1000000-0000-0000-0000-000000000121', 'b1000000-0000-0000-0000-000000000022', 'b1000000-0000-0000-0000-000000000207');
 
 -- ------------------------------------------------------------
 -- 2. 월드 (slug 기준. id 는 DB 가 정함: 1월드는 00012 가 만든 고정 id)
@@ -298,6 +298,30 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
+-- 퀘스트 1-11: 출력 대장 버그버그
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000201',
+  'a1000000-0000-0000-0000-000000000001',
+  11,
+  '출력 대장 버그버그',
+  'print() 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"1단계에서 배운 print()·따옴표·주석·줄바꿈 총정리","learning_goals":["print()가 무엇을 어떤 차례로 보여 주는지 읽을 수 있다","따옴표·괄호 짝이 틀린 줄을 찾아 고칠 수 있다","주석과 줄바꿈 글자가 하는 일을 안다"],"story_context":"마을 입구 시계탑에 버그버그가 나타나 안내판 글자를 엉망으로 만들고 있어요! 문제를 맞힐 때마다 파이뱀이 버그버그를 콕 찌를 수 있어요.","fallback_text":"print()는 괄호 안의 글자를 화면에 보여 줘요. 따옴표와 괄호는 여는 것과 닫는 것의 짝이 맞아야 하고, 줄을 쓴 차례대로 한 줄씩 나와요. 샵(#)으로 시작하는 줄은 메모라서 실행되지 않아요.","boss":{"name":"출력 대장 버그버그","look":"village","intro":"히히! 마을 안내판은 내가 접수했다! 내 문제를 네 개 다 풀면 돌려줄게!","on_defeat":"으앗, 졌다! 너 print() 진짜 잘하는구나. 안내판은 돌려줄게, 다음 숲에서 또 보자!","on_victory":"이번엔 내가 이겼지롱! 그래도 거의 다 왔어. 조금 쉬었다가 다시 도전해!","rounds":[{"kind":"multiple_choice","question":"시계탑 종소리 코드야. 돌리면 무엇이 나올까?","code":"print(\"땡!\\n땡!\")\nprint(12)","options":[{"id":"opt-c8nz","text":"땡!\\n땡!\n12"},{"id":"opt-e6tq","text":"12\n땡!\n땡!"},{"id":"opt-r4wk","text":"땡!\n땡!\n12"},{"id":"opt-y2hd","text":"땡!땡!\n12"}]},{"kind":"bug_hunt","question":"오류가 나는 줄을 찾아 고쳐요","lines":[{"id":"ln-a4kd","code":"# 시계탑 안내판"},{"id":"ln-p7ws","code":"print(\"파이뱀 만세!'')"},{"id":"ln-g3vb","code":"print(\"버그버그 물러가라!\")"}],"fixes":[{"id":"fx-j8tc","code":"print(파이뱀 만세!)"},{"id":"fx-n5qe","code":"print\"파이뱀 만세!\""},{"id":"fx-r3hm","code":"print(\"파이뱀 만세!\")"}]},{"kind":"fill_blank","question":"빈칸을 채워 버그버그가 몰래 넣은 줄은 실행되지 않게 해요","code":"{{bk-w2nx}} print(\"버그버그 최고!\")\nprint(\"파이뱀 최고!\")","tokens":[{"id":"tok-h6rb","text":"//"},{"id":"tok-q4ma","text":"#"},{"id":"tok-z3kv","text":"\""}]},{"kind":"parsons","question":"안내판에 \"== 시계탑 소식 ==\", \"버그버그는\", \"물러가고\", \"파이뱀이\", \"돌아왔다!\" 가 한 줄씩 차례로 나오게 줄을 놓아요","lines":[{"id":"ln-b9fe","code":"print(\"돌아왔다!\")"},{"id":"ln-k2wd","code":"print(\"버그버그는\")"},{"id":"ln-m7cq","code":"print(\"== 시계탑 소식 ==\")"},{"id":"ln-u4hs","code":"print(\"물러가고\\n파이뱀이\")"}]}],"review_quests":["b1000000-0000-0000-0000-000000000024","b1000000-0000-0000-0000-000000000023","b1000000-0000-0000-0000-000000000003","b1000000-0000-0000-0000-000000000002"]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
 -- 퀘스트 2-1: 마법 상자에 이름 넣기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
@@ -538,6 +562,30 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
+-- 퀘스트 2-11: 상자 바꿔치기 버그버그
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000202',
+  'a1000000-0000-0000-0000-000000000002',
+  11,
+  '상자 바꿔치기 버그버그',
+  '변수·자료형 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"2단계에서 배운 변수·숫자와 글자·글자 합치기·형변환 총정리","learning_goals":["변수 상자에 마지막으로 넣은 값이 무엇인지 따라갈 수 있다","숫자와 글자의 + 가 어떻게 다른지 안다","int()·str()로 숫자와 글자를 바꿀 수 있다"],"story_context":"변수의 숲 마법 상자들 속이 뒤바뀌었어요! 범인은 장난꾸러기 버그버그. 상자 속을 바르게 읽어 내면 파이뱀이 버그버그를 콕 찔러요.","fallback_text":"변수는 값을 담는 이름표 붙은 상자예요. 같은 상자에 다시 넣으면 새 값으로 바뀌어요. 따옴표로 감싼 것은 글자, 따옴표가 없는 수는 숫자예요. 글자끼리 + 하면 이어 붙고, 숫자끼리 + 하면 더해져요.","boss":{"name":"상자 바꿔치기 버그버그","look":"forest","intro":"쉿! 숲속 마법 상자 속을 내가 몰래 바꿔 놨지롱. 네 문제를 다 풀면 제자리로 돌려줄게!","on_defeat":"으앗, 들켰다! 상자 속을 이렇게 잘 읽다니. 상자는 다 돌려놓을게!","on_victory":"헤헤, 상자 속이 헷갈렸지? 상자에 마지막으로 넣은 게 뭔지 떠올리고 다시 와!","rounds":[{"kind":"multiple_choice","question":"버그버그가 숫자에 따옴표를 몰래 붙였어요. 돌리면 무엇이 나올까?","code":"a = \"3\"\nb = \"4\"\nprint(a + b)","options":[{"id":"opt-d8ql","text":"a + b"},{"id":"opt-k5te","text":"34"},{"id":"opt-w2pa","text":"7"},{"id":"opt-x3nu","text":"3 + 4"}]},{"kind":"fill_blank","question":"빈칸을 채워 사과 상자에 2개를 더한 7이 나오게 해요","code":"apple = {{bk-f7ra}}(\"5\")\nprint(apple + 2)","tokens":[{"id":"tok-b8oh","text":"str"},{"id":"tok-m3si","text":"int"},{"id":"tok-v4ye","text":"print"}]},{"kind":"bug_hunt","question":"안녕, 파이뱀 이 나와야 하는데 안녕, name 이 나와요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-h4cz","code":"name = \"파이뱀\""},{"id":"ln-t9ek","code":"print(\"안녕, \" + \"name\")"}],"fixes":[{"id":"fx-e6lw","code":"print(\"안녕, \" + ''name'')"},{"id":"fx-p2dy","code":"print(\"안녕, \" + name)"},{"id":"fx-y5ar","code":"print(\"안녕, \" name)"}]},{"kind":"parsons","question":"도토리 3개를 먼저 두 배로 늘린 다음 1개를 더 넣어서, 7이 나오게 줄을 놓아요","lines":[{"id":"ln-a5wb","code":"print(acorn)"},{"id":"ln-c2mf","code":"acorn = acorn * 2"},{"id":"ln-s8gu","code":"acorn = 3"},{"id":"ln-z6oj","code":"acorn = acorn + 1"}]}],"review_quests":["b1000000-0000-0000-0000-000000000005","b1000000-0000-0000-0000-000000000007","b1000000-0000-0000-0000-000000000028","b1000000-0000-0000-0000-000000000027"]}}'::jsonb,
+  'all',
+  '',
+  30
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
 -- 퀘스트 3-1: 비밀번호를 맞춰라!
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
@@ -770,6 +818,30 @@ VALUES (
   'output_match',
   '',
   75
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 3-11: 갈림길 장난꾼 버그버그
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000203',
+  'a1000000-0000-0000-0000-000000000003',
+  11,
+  '갈림길 장난꾼 버그버그',
+  '조건문 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"3단계에서 배운 if/elif/else·비교·나머지·and/or 총정리","learning_goals":["if/elif/else 가운데 어느 줄이 실행되는지 위에서부터 따질 수 있다","비교 기호와 and/or 를 바르게 쓸 수 있다","나머지(%)로 나누어떨어지는지 판단할 수 있다"],"story_context":"갈림길 표지판이 빙글빙글 돌아가 버렸어요! 장난꾼 버그버그가 표지판을 다 돌려놓았대요. 조건을 바르게 따지면 길이 보여요.","fallback_text":"if 는 조건이 맞을 때만 그 아래 줄을 실행해요. elif 와 else 는 위의 조건이 맞지 않았을 때만 차례로 따져요. and 는 둘 다 맞아야, or 는 하나만 맞아도 참이에요.","boss":{"name":"갈림길 장난꾼 버그버그","look":"crossroad","intro":"이쪽일까~ 저쪽일까~? 표지판은 내가 다 돌려 놨지! 다섯 문제를 맞혀서 길을 찾아봐!","on_defeat":"우와, 조건을 척척 따지네! 표지판은 다시 바르게 세워 둘게. 다음 동굴에서 보자!","on_victory":"길을 잃었구나? 조건을 위에서부터 하나씩 따져 보고 다시 도전해!","rounds":[{"kind":"multiple_choice","question":"이 코드를 돌리면 무엇이 나올까?","code":"score = 85\nif score >= 60:\n    print(\"통과\")\nelif score >= 80:\n    print(\"우수\")\nelse:\n    print(\"다시\")","options":[{"id":"opt-g7kx","text":"통과"},{"id":"opt-j2wi","text":"다시"},{"id":"opt-q9fe","text":"통과\n우수"},{"id":"opt-u3bn","text":"우수"}]},{"kind":"bug_hunt","question":"키가 120 이상이면 탈 수 있다고 알려 주려는데 오류가 나요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-n3rd","code":"height = 130"},{"id":"ln-v8ap","code":"if height => 120:"},{"id":"ln-f5ts","code":"    print(\"탈 수 있어요\")"}],"fixes":[{"id":"fx-c9hy","code":"if height =< 120:"},{"id":"fx-k4mw","code":"if height >= 120:"},{"id":"fx-o2xg","code":"if height <= 120:"}]},{"kind":"fill_blank","question":"빈칸을 채워 토요일이나 일요일이면 놀이공원 가는 날이 나오게 해요","code":"day = \"토요일\"\nif day == \"토요일\" {{bk-r6pd}} day == \"일요일\":\n    print(\"놀이공원 가는 날!\")\nelse:\n    print(\"학교 가는 날\")","tokens":[{"id":"tok-e2lj","text":"and"},{"id":"tok-n7vu","text":"not"},{"id":"tok-w5ic","text":"or"}]},{"kind":"parsons","question":"숫자가 3으로도 5로도 나누어떨어지면 박수 두 번, 3으로만 나누어떨어지면 박수 한 번, 아니면 숫자를 말해요. 줄을 놓고 들여쓰기도 맞춰요","lines":[{"id":"ln-a8rn","code":"print(\"박수 한 번\")"},{"id":"ln-b2ez","code":"print(\"박수 두 번\")"},{"id":"ln-c7wf","code":"print(n)"},{"id":"ln-d9qo","code":"if n % 3 == 0 and n % 5 == 0:"},{"id":"ln-m6uk","code":"elif n % 3 == 0:"},{"id":"ln-x4bh","code":"n = 15"},{"id":"ln-y3js","code":"else:"}],"indent":true},{"kind":"multiple_choice","question":"마법 점수 70, 용기 점수 90인 친구의 결과는? 돌리면 무엇이 나올까?","code":"magic = 70\ncourage = 90\nif magic >= 80 and courage >= 80:\n    print(\"대마법사\")\nelif magic >= 80 or courage >= 80:\n    print(\"견습 마법사\")\nelse:\n    print(\"다시 도전\")","options":[{"id":"opt-f4dq","text":"견습 마법사\n다시 도전"},{"id":"opt-h5vc","text":"견습 마법사"},{"id":"opt-l8tz","text":"다시 도전"},{"id":"opt-s2ma","text":"대마법사"}]}],"review_quests":["b1000000-0000-0000-0000-000000000009","b1000000-0000-0000-0000-000000000010","b1000000-0000-0000-0000-000000000011","b1000000-0000-0000-0000-000000000030","b1000000-0000-0000-0000-000000000032"]}}'::jsonb,
+  'all',
+  '',
+  36
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1042,6 +1114,30 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
+-- 퀘스트 4-12: 메아리 버그버그
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000204',
+  'a1000000-0000-0000-0000-000000000004',
+  12,
+  '메아리 버그버그',
+  '반복문 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"4단계에서 배운 for·range()·while·반복 멈추기와 건너뛰기·글자 곱하기 총정리","learning_goals":["range()가 어디서 시작해 어디 앞에서 멈추는지 안다","반복할 때마다 상자 값이 어떻게 바뀌는지 따라갈 수 있다","반복을 아예 끝내는 말과 이번 차례만 건너뛰는 말을 구별한다"],"story_context":"동굴 깊은 곳에서 \"반복~ 반복~\" 메아리가 끝없이 울려요. 메아리를 멈추지 않으면 동굴 밖으로 나갈 수 없대요!","fallback_text":"for 는 정해진 횟수만큼, while 은 조건이 맞는 동안 반복해요. range(1, 5)는 1부터 시작해 5 바로 앞인 4에서 멈춰요. break 는 반복을 아예 끝내요. 이번 차례만 건너뛰고 다음 차례로 가는 말도 따로 있어요.","boss":{"name":"메아리 버그버그","look":"cave","intro":"반복! 반복! 반복~! 동굴에 내 목소리가 울린다~ 다섯 문제를 다 풀기 전엔 못 나가지롱~","on_defeat":"메아리가… 멈췄다…! 반복을 이렇게 잘 세다니. 동굴 문 열어 줄게~ 열어 줄게~","on_victory":"또 만났네~ 만났네~ 반복이 몇 번 도는지 손가락으로 세어 보고 다시 와~","rounds":[{"kind":"multiple_choice","question":"메아리 주문이에요. 돌리면 무엇이 나올까?","code":"for i in range(3):\n    print(\"메\" + \"아\" * i)","options":[{"id":"opt-b3ky","text":"메아\n메아아\n메아아아"},{"id":"opt-n6dw","text":"메\n메아\n메아아"},{"id":"opt-t8oe","text":"메아\n메아\n메아"},{"id":"opt-z4cr","text":"메아아아"}]},{"kind":"bug_hunt","question":"1부터 5까지 세야 하는데 5가 빠져요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-r7hq","code":"for i in range(1, 5):"},{"id":"ln-e2vs","code":"    print(i)"}],"fixes":[{"id":"fx-h6lc","code":"for i in range(2, 6):"},{"id":"fx-u9ab","code":"for i in range(0, 5):"},{"id":"fx-w3gn","code":"for i in range(1, 6):"}]},{"kind":"fill_blank","question":"빈칸을 채워 4만 건너뛰고 1, 2, 3, 5, 6, 7 이 나오게 해요","code":"for n in range(1, 8):\n    if n == 4:\n        {{bk-j5yt}}\n    print(n)","tokens":[{"id":"tok-c4ga","text":"break"},{"id":"tok-o3fm","text":"stop"},{"id":"tok-p8ux","text":"continue"}]},{"kind":"parsons","question":"while 로 3 + 2 + 1 을 더해서 합계 6을 딱 한 번만 보여 줘요. 줄을 놓고 들여쓰기도 맞춰요","lines":[{"id":"ln-d3yf","code":"print(total)"},{"id":"ln-g4ma","code":"total = total + n"},{"id":"ln-i2pw","code":"n = 3"},{"id":"ln-k7rb","code":"n = n - 1"},{"id":"ln-q8ze","code":"while n > 0:"},{"id":"ln-v5ok","code":"total = 0"}],"indent":true},{"kind":"multiple_choice","question":"동굴 출구 주문이에요. 돌리면 무엇이 나올까?","code":"for n in range(1, 10):\n    if n % 2 == 0:\n        continue\n    if n > 5:\n        break\n    print(n)","options":[{"id":"opt-a9kf","text":"1\n3\n5\n7\n9"},{"id":"opt-m4xu","text":"1\n3\n5"},{"id":"opt-w7se","text":"2\n4"},{"id":"opt-y5bl","text":"1\n3\n5\n7"}]}],"review_quests":["b1000000-0000-0000-0000-000000000033","b1000000-0000-0000-0000-000000000012","b1000000-0000-0000-0000-000000000015","b1000000-0000-0000-0000-000000000035","b1000000-0000-0000-0000-000000000014"]}}'::jsonb,
+  'all',
+  '',
+  36
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
 -- 퀘스트 5-1: 과일 바구니
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
@@ -1274,6 +1370,30 @@ VALUES (
   'output_match',
   '',
   75
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 5-11: 뒤죽박죽 버그버그
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000205',
+  'a1000000-0000-0000-0000-000000000005',
+  11,
+  '뒤죽박죽 버그버그',
+  '리스트 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"5단계에서 배운 리스트·번호(인덱스)·append()·len()·sort()·in 총정리","learning_goals":["리스트 번호가 0부터 시작함을 알고 값을 꺼낼 수 있다","append()·len()·sort()가 리스트를 어떻게 바꾸는지 따라갈 수 있다","for 로 리스트를 하나씩 돌며 골라 담을 수 있다"],"story_context":"첨벙! 리스트 호수의 물고기 목록이 뒤죽박죽 섞여 버렸어요. 물을 튀기며 웃는 건 바로 버그버그! 목록을 바르게 읽어 내면 물고기들이 제자리로 돌아와요.","fallback_text":"리스트는 여러 값을 대괄호 안에 차례로 담아요. 번호는 0부터 세요. append()는 맨 뒤에 하나를 더하고, len()은 몇 개인지 세고, sort()는 작은 것부터 줄을 세워요. in 은 리스트 안에 있는지 확인해요.","boss":{"name":"뒤죽박죽 버그버그","look":"lake","intro":"첨벙첨벙! 물고기 목록을 뒤죽박죽 섞어 놨지롱! 여섯 문제를 풀면 다시 줄 세워 줄게!","on_defeat":"으앗, 번호를 딱딱 맞게 세네! 물고기들은 제자리로 돌려놓을게. 탑에서 또 보자!","on_victory":"헤헤, 물고기 순서가 헷갈렸지? 번호를 어디서부터 세는지 떠올리고 다시 와!","rounds":[{"kind":"multiple_choice","question":"물고기 한 마리를 더 넣었어요. 돌리면 무엇이 나올까?","code":"fish = [\"붕어\", \"잉어\", \"메기\"]\nfish.append(\"송어\")\nprint(len(fish))\nprint(fish[1])","options":[{"id":"opt-c5ri","text":"4\n잉어"},{"id":"opt-e3wy","text":"3\n잉어"},{"id":"opt-k8ad","text":"4\n붕어"},{"id":"opt-v2hn","text":"3\n붕어"}]},{"kind":"fill_blank","question":"빈칸을 채워 바구니에 배가 들어 있으면 배가 있어요! 가 나오게 해요","code":"basket = [\"사과\", \"배\", \"감\"]\nif \"배\" {{bk-u7nc}} basket:\n    print(\"배가 있어요!\")","tokens":[{"id":"tok-f9db","text":"=="},{"id":"tok-i6kq","text":"not"},{"id":"tok-r2xo","text":"in"}]},{"kind":"bug_hunt","question":"물고기 색을 한 줄에 하나씩 보여 주려는데 리스트 전체가 세 번 나와요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-w4fs","code":"colors = [\"빨강\", \"파랑\", \"노랑\"]"},{"id":"ln-o8ck","code":"for c in colors:"},{"id":"ln-l3tm","code":"    print(colors)"}],"fixes":[{"id":"fx-b2qu","code":"    print(\"c\")"},{"id":"fx-g5zi","code":"    print(colors[c])"},{"id":"fx-s7ve","code":"    print(c)"}]},{"kind":"parsons","question":"20cm보다 큰 물고기만 새 리스트에 담고, 몇 마리인지 한 번만 보여 줘요. 줄을 놓고 들여쓰기도 맞춰요","lines":[{"id":"ln-a2gx","code":"print(len(big))"},{"id":"ln-e7rn","code":"big.append(f)"},{"id":"ln-h3ow","code":"big = []"},{"id":"ln-p4uj","code":"if f > 20:"},{"id":"ln-t6eb","code":"fish = [12, 30, 8, 25]"},{"id":"ln-z9ak","code":"for f in fish:"}],"indent":true},{"kind":"multiple_choice","question":"물고기 숫자를 줄 세운 뒤 맨 앞과 맨 뒤를 보여 줘요. 돌리면 무엇이 나올까?","code":"nums = [7, 2, 9, 4]\nnums.sort()\nprint(nums[0])\nprint(nums[3])","options":[{"id":"opt-d4nt","text":"9\n2"},{"id":"opt-i8wa","text":"[2, 4, 7, 9]"},{"id":"opt-q3jm","text":"2\n9"},{"id":"opt-x7bf","text":"7\n4"}]},{"kind":"bug_hunt","question":"여우를 친구 목록에 넣고 친구 수 3을 보여 주려는데 오류가 나요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-f6pv","code":"friends = [\"토끼\", \"곰\"]"},{"id":"ln-n2he","code":"friends = friends.append(\"여우\")"},{"id":"ln-u5cs","code":"print(len(friends))"}],"fixes":[{"id":"fx-c6wd","code":"friends + \"여우\""},{"id":"fx-j3ol","code":"friends.append(\"여우\")"},{"id":"fx-r8yk","code":"friends.append(여우)"}]}],"review_quests":["b1000000-0000-0000-0000-000000000017","b1000000-0000-0000-0000-000000000039","b1000000-0000-0000-0000-000000000037","b1000000-0000-0000-0000-000000000018","b1000000-0000-0000-0000-000000000038","b1000000-0000-0000-0000-000000000018"]}}'::jsonb,
+  'all',
+  '',
+  45
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1546,6 +1666,30 @@ ON CONFLICT (id) DO UPDATE SET
   validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
   xp_reward = EXCLUDED.xp_reward;
 
+-- 퀘스트 6-12: 주문 도둑 버그버그
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000206',
+  'a1000000-0000-0000-0000-000000000006',
+  12,
+  '주문 도둑 버그버그',
+  '함수 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"6단계에서 배운 def·매개변수·return·기본값·max()/min()·함수 합치기 총정리","learning_goals":["함수를 만들기만 할 때와 부를 때를 구별한다","매개변수에 무엇이 들어가고 return 이 무엇을 돌려주는지 따라갈 수 있다","함수 안의 return 을 만나면 함수가 바로 끝남을 안다"],"story_context":"함수의 탑 꼭대기, 마법사의 주문서가 사라졌어요! 주문서를 품에 안고 도망치는 건 바로 버그버그. 주문을 바르게 읽어 내면 한 장씩 되찾을 수 있어요.","fallback_text":"def 로 함수를 만들고, 이름 뒤에 괄호를 붙여 불러야 실행돼요. 괄호 안 값은 매개변수 상자에 차례로 들어가요. return 은 값을 돌려주면서 함수를 그 자리에서 끝내요.","boss":{"name":"주문 도둑 버그버그","look":"tower","intro":"마법사의 주문서는 내가 슬쩍 가져왔지! 여섯 문제를 풀면 한 장씩 돌려줄게!","on_defeat":"졌다, 졌어! 함수 주문을 이렇게 잘 쓰다니. 주문서는 마법사님께 돌려드릴게.","on_victory":"주문이 꼬였구나? 함수에 무엇이 들어가고 무엇이 나오는지 따라가 보고 다시 와!","rounds":[{"kind":"multiple_choice","question":"응원 주문을 만들고 불렀어요. 돌리면 무엇이 나올까?","code":"def cheer():\n    print(\"힘내!\")\ncheer()\ncheer()","options":[{"id":"opt-g2we","text":"힘내!"},{"id":"opt-l9ct","text":"힘내!\n힘내!\n힘내!"},{"id":"opt-o4ys","text":"cheer()\ncheer()"},{"id":"opt-u6pk","text":"힘내!\n힘내!"}]},{"kind":"fill_blank","question":"빈칸을 채워 가장 높은 점수와 가장 낮은 점수의 차이가 나오게 해요","code":"scores = [70, 95, 80]\nprint({{bk-m5ta}}(scores) - {{bk-y8eo}}(scores))","tokens":[{"id":"tok-c3vi","text":"max"},{"id":"tok-k2fz","text":"len"},{"id":"tok-w7ub","text":"min"}]},{"kind":"bug_hunt","question":"야호를 두 번 붙여 외치려는데 오류가 나요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-b7ks","code":"def shout(word, times):"},{"id":"ln-q2ln","code":"    print(word * times)"},{"id":"ln-x5dr","code":"shout(\"야호\")"}],"fixes":[{"id":"fx-a4hm","code":"shout(\"야호\", 2)"},{"id":"fx-t8pe","code":"shout(\"야호\" 2)"},{"id":"fx-z3cu","code":"shout(\"야호\", \"2\")"}]},{"kind":"parsons","question":"느낌표를 붙이는 함수와 두 번 외치는 함수를 만들고, 둘을 합쳐 불러요. 줄을 놓고 들여쓰기도 맞춰요","lines":[{"id":"ln-c5kw","code":"def twice(word):"},{"id":"ln-f8xd","code":"return word + \"!\""},{"id":"ln-h9vq","code":"print(twice(bang(\"야호\")))"},{"id":"ln-m2ta","code":"return word * 2"},{"id":"ln-r3nb","code":"def bang(word):"}],"indent":true},{"kind":"multiple_choice","question":"간식 주문에는 기본값이 있어요. 돌리면 무엇이 나올까?","code":"def snack(food=\"쿠키\", count=1):\n    print(food + str(count) + \"개\")\nsnack(\"젤리\", 2)\nsnack()","options":[{"id":"opt-e5mr","text":"젤리2개\n쿠키1개"},{"id":"opt-h3za","text":"젤리2개\n젤리2개"},{"id":"opt-p7lo","text":"젤리2개"},{"id":"opt-s8gd","text":"젤리2개\n쿠키2개"}]},{"kind":"multiple_choice","question":"숫자 크기를 알려 주는 주문이에요. 돌리면 무엇이 나올까?","code":"def size(n):\n    if n > 5:\n        return \"큰 수\"\n    return \"작은 수\"\nprint(size(3) + \", \" + size(8))","options":[{"id":"opt-b6qt","text":"작은 수, 큰 수"},{"id":"opt-n4jx","text":"큰 수, 작은 수"},{"id":"opt-r9mc","text":"작은 수, 작은 수"},{"id":"opt-w2fh","text":"큰 수, 큰 수"}]}],"review_quests":["b1000000-0000-0000-0000-000000000019","b1000000-0000-0000-0000-000000000021","b1000000-0000-0000-0000-000000000020","b1000000-0000-0000-0000-000000000043","b1000000-0000-0000-0000-000000000041","b1000000-0000-0000-0000-000000000044"]}}'::jsonb,
+  'all',
+  '',
+  45
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
 -- 퀘스트 7-1: 판정 코드 맞추기
 INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
                            prompt_skeleton, validation_type, expected_output, xp_reward)
@@ -1610,6 +1754,30 @@ VALUES (
   'contains',
   '',
   200
+)
+ON CONFLICT (id) DO UPDATE SET
+  stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
+  concept = EXCLUDED.concept, quest_type = EXCLUDED.quest_type, quiz_kind = EXCLUDED.quiz_kind,
+  is_mobile_friendly = EXCLUDED.is_mobile_friendly, prompt_skeleton = EXCLUDED.prompt_skeleton,
+  validation_type = EXCLUDED.validation_type, expected_output = EXCLUDED.expected_output,
+  xp_reward = EXCLUDED.xp_reward;
+
+-- 퀘스트 7-4: 버그버그 대왕
+INSERT INTO public.quests (id, stage_id, "order", title, concept, quest_type, quiz_kind, is_mobile_friendly,
+                           prompt_skeleton, validation_type, expected_output, xp_reward)
+VALUES (
+  'b1000000-0000-0000-0000-000000000207',
+  'a1000000-0000-0000-0000-000000000007',
+  4,
+  '버그버그 대왕',
+  '1월드 총정리',
+  'boss',
+  NULL,
+  TRUE,
+  '{"topic":"파이썬 섬에서 배운 출력·변수·조건·반복·리스트·함수 총정리","learning_goals":["여러 개념이 섞인 코드를 한 줄씩 따라가며 결과를 알아낼 수 있다","숫자 맞추기 게임에서 자주 나는 버그를 찾아 고칠 수 있다","반복·조건·함수를 알맞은 차례와 들여쓰기로 놓을 수 있다"],"story_context":"숫자 맞추기 게임을 완성하자 왕국 성문 위에 커다란 왕관을 쓴 버그버그가 나타났어요! 지금까지 만난 버그버그들의 대장, 버그버그 대왕이래요. 파이썬 섬에서 배운 모든 마법으로 마지막 관문을 넘어 봐요!","fallback_text":"코드는 위에서 아래로 한 줄씩 따라가요. 상자 값이 어떻게 바뀌는지, 조건이 맞는지, 반복이 몇 번 도는지 차례로 적어 보면 길이 보여요. 따옴표로 감싼 숫자는 글자라는 것도 잊지 마요.","boss":{"name":"버그버그 대왕","look":"kingdom","intro":"나는 버그버그 대왕이다! 버그버그들을 다 이긴 용사로구나. 마지막 일곱 문제를 풀어 보아라!","on_defeat":"훌륭하도다! 너야말로 진짜 코딩 마법사로구나. 오늘부터 나도 네 친구가 되겠노라!","on_victory":"허허, 마지막 관문은 쉽지 않지? 지금까지 배운 마법을 하나씩 떠올리고 다시 오너라!","rounds":[{"kind":"multiple_choice","question":"대왕이 레벨 자랑을 해요. 돌리면 무엇이 나올까?","code":"name = \"파이뱀\"\nlevel = 7\nprint(name + \"의 레벨은 \" + str(level))","options":[{"id":"opt-d7ve","text":"파이뱀의 레벨은 7"},{"id":"opt-f2pi","text":"파이뱀의 레벨은 \"7\""},{"id":"opt-k3so","text":"name의 레벨은 level"},{"id":"opt-y9ag","text":"파이뱀의 레벨은 str(level)"}]},{"kind":"fill_blank","question":"빈칸을 채워 비밀 숫자를 맞히면 그 자리에서 게임이 끝나게 해요","code":"secret = 7\nfor guess in [2, 7, 9]:\n    if guess == secret:\n        print(\"정답!\")\n        {{bk-s4qn}}\n    print(guess)","tokens":[{"id":"tok-a5ld","text":"continue"},{"id":"tok-h8cx","text":"break"},{"id":"tok-u2ze","text":"return"}]},{"kind":"bug_hunt","question":"비밀 숫자 7을 골랐는데 땡! 이 나와요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-c8pw","code":"answer = \"7\""},{"id":"ln-j4ri","code":"secret = 7"},{"id":"ln-o6ty","code":"if answer == secret:"},{"id":"ln-g2ub","code":"    print(\"정답!\")"},{"id":"ln-w9mf","code":"else:"},{"id":"ln-e5kh","code":"    print(\"땡!\")"}],"fixes":[{"id":"fx-l7da","code":"if int(answer) == secret:"},{"id":"fx-p8vs","code":"if answer = secret:"},{"id":"fx-x3ng","code":"if str(answer) == secret:"}]},{"kind":"multiple_choice","question":"별 탑을 리스트에 쌓아요. 돌리면 무엇이 나올까?","code":"stars = []\nfor i in range(1, 4):\n    stars.append(\"*\" * i)\nprint(stars)","options":[{"id":"opt-i4wr","text":"*\n**\n***"},{"id":"opt-m8cu","text":"[''*'', ''*'', ''*'']"},{"id":"opt-t5kq","text":"[1, 2, 3]"},{"id":"opt-z6hb","text":"[''*'', ''**'', ''***'']"}]},{"kind":"parsons","question":"가위바위보 기록에서 이긴 횟수를 세어 돌려주는 함수를 만들고 불러요. 줄을 놓고 들여쓰기도 맞춰요","lines":[{"id":"ln-a6tj","code":"return win"},{"id":"ln-b8no","code":"if r == \"승\":"},{"id":"ln-k9gm","code":"print(count_win([\"승\", \"패\", \"승\"]))"},{"id":"ln-l4sx","code":"for r in results:"},{"id":"ln-q7ad","code":"win = 0"},{"id":"ln-v3hk","code":"def count_win(results):"},{"id":"ln-y2fe","code":"win = win + 1"}],"indent":true},{"kind":"bug_hunt","question":"게임 시작! 이 나와야 하는데 아무것도 나오지 않아요. 틀린 줄을 찾아 고쳐요","lines":[{"id":"ln-h5wz","code":"def start():"},{"id":"ln-d2qc","code":"    print(\"게임 시작!\")"},{"id":"ln-s9ev","code":"start"}],"fixes":[{"id":"fx-f7ry","code":"def start()"},{"id":"fx-k6ub","code":"start()"},{"id":"fx-o3ji","code":"print(start)"}]},{"kind":"multiple_choice","question":"대왕의 마지막 문제! 숫자 맞추기 기록을 따라가요. 돌리면 무엇이 나올까?","code":"secret = 5\nfor guess in [8, 3, 5, 1]:\n    if guess > secret:\n        print(\"작게\")\n    elif guess < secret:\n        print(\"크게\")\n    else:\n        print(\"정답!\")\n        break","options":[{"id":"opt-c9ef","text":"작게\n크게\n정답!\n크게"},{"id":"opt-g3sw","text":"정답!"},{"id":"opt-j6dl","text":"크게\n작게\n정답!"},{"id":"opt-p4xm","text":"작게\n크게\n정답!"}]}],"review_quests":["b1000000-0000-0000-0000-000000000022","b1000000-0000-0000-0000-000000000022","b1000000-0000-0000-0000-000000000022","b1000000-0000-0000-0000-000000000121","b1000000-0000-0000-0000-000000000120","b1000000-0000-0000-0000-000000000022","b1000000-0000-0000-0000-000000000120"]}}'::jsonb,
+  'all',
+  '',
+  54
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1772,6 +1940,21 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
+-- 정답 1-11: 출력 대장 버그버그
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000201',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-r4wk"],"explanation":"글자 안의 역슬래시 n 은 화면에 나오지 않고 그 자리에서 줄을 바꿔요. 그래서 땡! 이 두 줄, 그다음 숫자 12가 나와요.","explanations":{"opt-c8nz":"역슬래시 n 은 글자로 나오지 않아요. 줄을 바꾸라는 표시예요.","opt-e6tq":"컴퓨터는 위에서 아래로, 쓴 차례대로 실행해요.","opt-y2hd":"역슬래시 n 자리에서 줄이 바뀌어요. 땡! 두 개가 한 줄에 붙지 않아요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-p7ws","fix":"fx-r3hm"}],"explanation":"큰따옴표로 연 글자는 큰따옴표로 닫아야 해요. 작은따옴표로 닫으면 짝이 맞지 않아 오류가 나요.","explanations":{"fx-j8tc":"따옴표가 없으면 파이썬이 글자로 읽지 못해서 오류가 나요.","fx-n5qe":"print 다음에는 괄호가 꼭 있어야 해요. 괄호로 글자를 감싸요.","ln-a4kd":"#으로 시작하는 줄은 메모(주석)라서 오류가 나지 않아요. 다른 줄을 살펴봐요.","ln-g3vb":"이 줄은 따옴표와 괄호 짝이 잘 맞아요. 다른 줄을 살펴봐요."}},{"kind":"fill_blank","accepted":[{"bk-w2nx":"tok-q4ma"}],"explanation":"줄 맨 앞에 샵(#)을 붙이면 그 줄은 주석이 돼요. 컴퓨터는 주석을 건너뛰어서 파이뱀 최고! 만 나와요.","explanations":{"tok-h6rb":"빗금 두 개(//)는 파이썬의 주석 표시가 아니라서 오류가 나요.","tok-z3kv":"따옴표 하나만 열면 짝이 안 맞아서 오류가 나요."}},{"kind":"parsons","accepted":[["ln-m7cq","ln-k2wd","ln-u4hs","ln-b9fe"]],"explanation":"컴퓨터는 위에 쓴 줄부터 차례로 실행해요. 역슬래시 n 이 든 줄은 print() 한 번으로 두 줄을 보여 줘요."}]}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
 -- 정답 2-1: 마법 상자에 이름 넣기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
@@ -1922,6 +2105,21 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
+-- 정답 2-11: 상자 바꿔치기 버그버그
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000202',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-k5te"],"explanation":"따옴표로 감싼 \"3\"과 \"4\"는 숫자가 아니라 글자예요. 글자끼리 + 하면 더하지 않고 이어 붙여요.","explanations":{"opt-d8ql":"a 와 b 는 상자 이름이에요. print()는 상자 이름이 아니라 상자 속 값을 보여 줘요.","opt-w2pa":"더해서 7이 되려면 숫자여야 해요. 따옴표가 있으면 글자라서 이어 붙어요.","opt-x3nu":"+ 는 화면에 나오지 않아요. 계산하거나 이어 붙이는 기호예요."}},{"kind":"fill_blank","accepted":[{"bk-f7ra":"tok-m3si"}],"explanation":"int()는 글자 \"5\"를 숫자 5로 바꿔 줘요. 숫자가 되어야 2를 더해 7이 나와요.","explanations":{"tok-b8oh":"str()은 글자로 바꾸는 마법이에요. 글자에 숫자 2를 더하면 오류가 나요.","tok-v4ye":"print()는 화면에 보여 주기만 하고 상자에 숫자를 넣어 주지 않아요. 그래서 2를 더할 수 없어요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-t9ek","fix":"fx-p2dy"}],"explanation":"상자 이름에 따옴표를 붙이면 상자 속이 아니라 name 이라는 글자 그대로가 돼요. 따옴표를 빼야 상자 속 파이뱀이 나와요.","explanations":{"fx-e6lw":"작은따옴표도 따옴표예요. 여전히 name 이라는 글자가 나와요.","fx-y5ar":"글자와 상자를 이어 붙이려면 사이에 + 가 있어야 해요. 없으면 오류가 나요.","ln-h4cz":"이 줄은 name 상자에 파이뱀을 잘 넣었어요. 다른 줄을 살펴봐요."}},{"kind":"parsons","accepted":[["ln-s8gu","ln-c2mf","ln-z6oj","ln-a5wb"]],"explanation":"상자를 먼저 만들고(3), 두 배로 바꾸고(6), 1을 더한 뒤(7) 보여 줘요. 차례를 바꾸면 3에 1을 먼저 더해 8이 돼요."}]}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
 -- 정답 3-1: 비밀번호를 맞춰라!
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
@@ -2066,6 +2264,21 @@ VALUES (
   E'age = 10\nis_weekend = False\nprice = 10000\n\nif age < 13:\n    if is_weekend == False:\n        discount = 50\n    else:\n        discount = 30\nelse:\n    discount = 0\n\nfinal_price = price * (100 - discount) // 100\n\nprint("나이: " + str(age) + "살")\nprint("할인율: " + str(discount) + "%")\nprint("가격: " + str(final_price) + "원")',
   '[]'::jsonb,
   NULL
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 3-11: 갈림길 장난꾼 버그버그
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000203',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-g7kx"],"explanation":"85는 60 이상이라 첫 조건이 맞아요. if 가 맞으면 아래 elif 와 else 는 보지 않고 넘어가요.","explanations":{"opt-j2wi":"else 는 위의 조건이 모두 틀릴 때만 실행돼요. 85는 60 이상이에요.","opt-q9fe":"if·elif·else 묶음에서는 맞는 것 딱 하나만 실행돼요.","opt-u3bn":"85는 80 이상도 맞지만, 위에 있는 if 가 먼저 맞아서 elif 까지 가지 않아요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-v8ap","fix":"fx-k4mw"}],"explanation":"\"크거나 같다\"는 > 를 먼저, = 를 뒤에 써서 >= 예요. 말하는 차례 그대로 \"크다, 같다\"로 외워요.","explanations":{"fx-c9hy":"= 는 늘 뒤에 와요. =< 처럼 쓰면 오류가 나요.","fx-o2xg":"<= 는 \"작거나 같다\"예요. 130은 120보다 크니까 아무것도 나오지 않아요.","ln-f5ts":"이 줄은 들여쓰기와 따옴표가 잘 맞아요. 다른 줄을 살펴봐요.","ln-n3rd":"이 줄은 height 상자에 130을 잘 넣었어요. 다른 줄을 살펴봐요."}},{"kind":"fill_blank","accepted":[{"bk-r6pd":"tok-w5ic"}],"explanation":"or 는 둘 가운데 하나만 맞아도 참이에요. 오늘은 토요일이라 첫 조건이 맞아서 놀이공원 가는 날이 나와요.","explanations":{"tok-e2lj":"and 는 둘 다 맞아야 해요. 하루가 토요일이면서 일요일일 수는 없어서 학교 가는 날이 나와요.","tok-n7vu":"not 은 조건 하나를 뒤집는 말이라 두 조건 사이에 쓸 수 없어요. 오류가 나요."}},{"kind":"parsons","accepted":[[{"id":"ln-x4bh","indent":0},{"id":"ln-d9qo","indent":0},{"id":"ln-b2ez","indent":1},{"id":"ln-m6uk","indent":0},{"id":"ln-a8rn","indent":1},{"id":"ln-y3js","indent":0},{"id":"ln-c7wf","indent":1}]],"explanation":"더 까다로운 조건(3과 5 모두)을 맨 위에 둬야 해요. 3으로만 따지는 elif 가 위에 있으면 15도 박수 한 번에서 멈춰요."},{"kind":"multiple_choice","accepted":["opt-h5vc"],"explanation":"and 조건은 마법 점수가 80보다 낮아서 틀려요. or 조건은 용기 점수 90이 80 이상이라 하나만 맞아도 참이 되어 견습 마법사가 나와요.","explanations":{"opt-f4dq":"맞는 조건 하나를 실행하면 else 는 건너뛰어요.","opt-l8tz":"or 는 하나만 맞아도 돼요. 용기 점수 90이 80 이상이에요.","opt-s2ma":"and 는 둘 다 맞아야 해요. 마법 점수 70은 80보다 낮아요."}}]}'::jsonb
 )
 ON CONFLICT (quest_id) DO UPDATE SET
   expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
@@ -2237,6 +2450,21 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
+-- 정답 4-12: 메아리 버그버그
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000204',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-n6dw"],"explanation":"range(3)은 0, 1, 2 예요. \"아\"를 0번, 1번, 2번 곱하니까 메, 메아, 메아아 가 한 줄씩 나와요.","explanations":{"opt-b3ky":"range(3)은 1이 아니라 0부터 시작해요. 처음엔 \"아\"가 0번 붙어요.","opt-t8oe":"i 는 반복할 때마다 0, 1, 2 로 바뀌어요. 붙는 \"아\"의 개수도 달라져요.","opt-z4cr":"print()가 반복 안에 있어서 반복할 때마다 한 줄씩 나와요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-r7hq","fix":"fx-w3gn"}],"explanation":"range()의 끝 숫자는 들어가지 않아요. 5까지 세려면 끝을 하나 더 큰 6으로 써요.","explanations":{"fx-h6lc":"끝은 맞췄지만 2부터 시작해서 1이 빠져요.","fx-u9ab":"0부터 시작하면 0, 1, 2, 3, 4 가 나와요. 여전히 5가 없어요.","ln-e2vs":"이 줄은 들여쓰기가 맞고 i 를 잘 보여 줘요. 반복 범위를 정하는 줄을 살펴봐요."}},{"kind":"fill_blank","accepted":[{"bk-j5yt":"tok-p8ux"}],"explanation":"continue 는 이번 차례만 건너뛰고 다음 숫자로 넘어가요. 4일 때 print 를 건너뛰어서 4만 빠져요.","explanations":{"tok-c4ga":"break 는 반복을 아예 끝내요. 1, 2, 3 까지만 나와요.","tok-o3fm":"파이썬에는 stop 이라는 명령이 없어서 오류가 나요."}},{"kind":"parsons","accepted":[[{"id":"ln-v5ok","indent":0},{"id":"ln-i2pw","indent":0},{"id":"ln-q8ze","indent":0},{"id":"ln-g4ma","indent":1},{"id":"ln-k7rb","indent":1},{"id":"ln-d3yf","indent":0}],[{"id":"ln-i2pw","indent":0},{"id":"ln-v5ok","indent":0},{"id":"ln-q8ze","indent":0},{"id":"ln-g4ma","indent":1},{"id":"ln-k7rb","indent":1},{"id":"ln-d3yf","indent":0}]],"explanation":"두 상자를 먼저 만들고, 반복 안에서 n 을 더한 다음 1 줄여요. 합계는 반복이 끝난 뒤 한 번만 보여 줘야 해서 print 는 들여쓰지 않아요."},{"kind":"multiple_choice","accepted":["opt-m4xu"],"explanation":"짝수는 continue 로 건너뛰고, 홀수 1, 3, 5 를 보여 줘요. 7이 되면 5보다 커서 break 로 반복이 끝나요.","explanations":{"opt-a9kf":"7은 5보다 커서 break 를 만나요. break 뒤로는 반복하지 않아요.","opt-w7se":"continue 는 짝수일 때 print 를 건너뛰게 해요. 짝수는 나오지 않아요.","opt-y5bl":"7일 때는 print 보다 break 를 먼저 만나서 7은 나오지 않아요."}}]}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
 -- 정답 5-1: 과일 바구니
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
@@ -2381,6 +2609,21 @@ VALUES (
   E'shopping = []\nshopping.append("우유")\nshopping.append("주스")\nshopping.append("과자")\nshopping.sort()\nprint("--- 쇼핑 목록 ---")\nfor item in shopping:\n    print(item)\nprint("총 " + str(len(shopping)) + "개")',
   '[]'::jsonb,
   NULL
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 5-11: 뒤죽박죽 버그버그
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000205',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-c5ri"],"explanation":"append()로 송어가 맨 뒤에 들어가 모두 4마리예요. 번호는 0부터 세니까 1번은 두 번째인 잉어예요.","explanations":{"opt-e3wy":"append()는 리스트에 바로 하나를 더해요. 송어까지 세면 4마리예요.","opt-k8ad":"번호는 0부터 세요. 붕어가 0번, 잉어가 1번이에요.","opt-v2hn":"append()로 송어가 들어가서 4마리가 돼요. 그리고 번호 1은 두 번째 물고기예요."}},{"kind":"fill_blank","accepted":[{"bk-u7nc":"tok-r2xo"}],"explanation":"in 은 왼쪽 값이 오른쪽 리스트 안에 있는지 확인해요. 배가 있으니까 참이 되어 글자가 나와요.","explanations":{"tok-f9db":"== 는 \"배\" 한 개와 리스트 전체가 똑같은지 비교해요. 리스트는 \"배\"와 같지 않아서 아무것도 나오지 않아요.","tok-i6kq":"not 혼자서는 두 값 사이에 쓸 수 없어서 오류가 나요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-l3tm","fix":"fx-s7ve"}],"explanation":"for c in colors 는 색을 하나씩 c 에 담아 줘요. 그래서 반복 안에서는 c 를 보여 줘야 한 줄에 색 하나씩 나와요.","explanations":{"fx-b2qu":"따옴표로 감싸면 c 라는 글자 그대로가 세 번 나와요.","fx-g5zi":"c 에는 번호가 아니라 색 글자가 들어 있어요. 글자로는 번호처럼 꺼낼 수 없어 오류가 나요.","ln-o8ck":"이 줄은 색을 하나씩 꺼내는 반복이라 맞아요. 그 아래 줄을 살펴봐요.","ln-w4fs":"이 줄은 리스트를 잘 만들었어요. 반복 안에서 무엇을 보여 주는지 살펴봐요."}},{"kind":"parsons","accepted":[[{"id":"ln-t6eb","indent":0},{"id":"ln-h3ow","indent":0},{"id":"ln-z9ak","indent":0},{"id":"ln-p4uj","indent":1},{"id":"ln-e7rn","indent":2},{"id":"ln-a2gx","indent":0}],[{"id":"ln-h3ow","indent":0},{"id":"ln-t6eb","indent":0},{"id":"ln-z9ak","indent":0},{"id":"ln-p4uj","indent":1},{"id":"ln-e7rn","indent":2},{"id":"ln-a2gx","indent":0}]],"explanation":"빈 리스트를 먼저 만들고, 물고기를 하나씩 보며 20보다 크면 담아요. 다 담은 뒤에 len()으로 세어야 해서 print 는 반복 밖에 둬요."},{"kind":"multiple_choice","accepted":["opt-q3jm"],"explanation":"sort()로 [2, 4, 7, 9] 가 돼요. 0번은 가장 작은 2, 3번은 가장 큰 9예요.","explanations":{"opt-d4nt":"sort()는 작은 것부터 큰 것 차례로 줄을 세워요.","opt-i8wa":"print()에 리스트 전체가 아니라 0번, 3번 하나씩을 넣었어요.","opt-x7bf":"sort()는 리스트를 바로 바꿔요. 줄 세운 뒤의 0번과 3번을 봐야 해요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-n2he","fix":"fx-j3ol"}],"explanation":"append()는 리스트를 바로 바꾸고 아무것도 돌려주지 않아요. 그래서 friends = 를 붙이면 리스트가 사라져요. append()만 써요.","explanations":{"fx-c6wd":"리스트와 글자는 + 로 붙일 수 없어서 오류가 나요. 넣을 때는 append()를 써요.","fx-r8yk":"여우에 따옴표가 없으면 글자가 아니라 상자 이름으로 읽어서 오류가 나요.","ln-f6pv":"이 줄은 리스트를 잘 만들었어요. 여우를 넣는 줄을 살펴봐요.","ln-u5cs":"len()으로 세는 건 맞아요. 그 전에 friends 가 리스트가 아니게 된 게 문제예요."}}]}'::jsonb
 )
 ON CONFLICT (quest_id) DO UPDATE SET
   expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
@@ -2552,6 +2795,21 @@ ON CONFLICT (quest_id) DO UPDATE SET
   solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
   quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
 
+-- 정답 6-12: 주문 도둑 버그버그
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000206',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-u6pk"],"explanation":"def 는 주문을 만들어 두기만 해요. cheer()로 두 번 불렀으니 힘내! 가 두 번 나와요.","explanations":{"opt-g2we":"함수는 부를 때마다 다시 실행돼요. 두 번 불렀어요.","opt-l9ct":"def 로 만들 때는 실행되지 않아요. 부를 때만 실행돼요.","opt-o4ys":"cheer()는 함수를 부르는 코드예요. 화면에는 함수 안의 print()가 보여 주는 글자가 나와요."}},{"kind":"fill_blank","accepted":[{"bk-m5ta":"tok-c3vi","bk-y8eo":"tok-w7ub"}],"explanation":"max()는 가장 큰 값 95, min()은 가장 작은 값 70을 돌려줘요. 95 - 70 = 25 예요.","explanations":{"tok-k2fz":"len()은 점수가 몇 개인지(3) 세는 함수예요. 가장 높거나 낮은 점수가 아니에요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-x5dr","fix":"fx-a4hm"}],"explanation":"매개변수가 word 와 times 두 개라서 부를 때도 값 두 개를 넣어야 해요. 값 사이는 쉼표로 나눠요.","explanations":{"fx-t8pe":"값 두 개 사이에는 쉼표가 있어야 해요. 없으면 오류가 나요.","fx-z3cu":"따옴표를 붙인 \"2\"는 숫자가 아니라 글자예요. 글자에 글자를 곱할 수는 없어서 오류가 나요.","ln-b7ks":"함수를 만드는 줄은 맞아요. 함수를 부르는 줄을 살펴봐요.","ln-q2ln":"글자에 숫자를 곱하면 그만큼 반복돼요. 이 줄은 맞아요."}},{"kind":"parsons","accepted":[[{"id":"ln-r3nb","indent":0},{"id":"ln-f8xd","indent":1},{"id":"ln-c5kw","indent":0},{"id":"ln-m2ta","indent":1},{"id":"ln-h9vq","indent":0}],[{"id":"ln-c5kw","indent":0},{"id":"ln-m2ta","indent":1},{"id":"ln-r3nb","indent":0},{"id":"ln-f8xd","indent":1},{"id":"ln-h9vq","indent":0}]],"explanation":"함수는 부르기 전에 먼저 만들어 둬야 해요. 각 함수의 return 은 들여 쓰고, 두 함수를 합쳐 부르는 줄은 맨 마지막에 둬요."},{"kind":"multiple_choice","accepted":["opt-e5mr"],"explanation":"처음엔 젤리와 2를 넣었고, 두 번째는 아무것도 넣지 않아서 기본값 쿠키와 1을 써요.","explanations":{"opt-h3za":"함수는 부를 때마다 새로 시작해요. 값을 안 넣으면 기본값을 써요.","opt-p7lo":"기본값이 있으면 값을 넣지 않고 불러도 오류 없이 실행돼요.","opt-s8gd":"앞에서 넣은 2는 그 한 번에만 써요. 다시 부를 때 값을 안 넣으면 기본값 1이 돼요."}},{"kind":"multiple_choice","accepted":["opt-b6qt"],"explanation":"3은 5보다 크지 않아서 작은 수, 8은 5보다 커서 큰 수를 돌려줘요. return 을 만나면 함수가 바로 끝나서 아래 return 은 실행되지 않아요.","explanations":{"opt-n4jx":"앞의 size(3)이 먼저 이어 붙어요. 3은 5보다 작아요.","opt-r9mc":"8은 5보다 커서 첫 번째 return 에서 큰 수를 돌려주고 끝나요.","opt-w2fh":"3은 5보다 크지 않아서 if 아래로 들어가지 않아요. 그래서 아래 return 이 작은 수를 돌려줘요."}}]}'::jsonb
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
 -- 정답 7-1: 판정 코드 맞추기
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
@@ -2591,6 +2849,21 @@ VALUES (
   NULL,
   '[{"step_number":1,"expected_output":"random.randint","hints":{"level_1":"random 모듈의 randint 함수를 사용하면 원하는 범위의 숫자를 만들 수 있어요!","level_2":"secret = random.randint(1, 10) 이렇게 변수에 저장하고, print()로 확인해보세요!","level_3":"secret = random.___(1, 10)\nprint(secret)\n랜덤 숫자를 만드는 함수 이름을 넣어보세요!"},"solution_code":"import random\n\nsecret = random.randint(1, 10)\nprint(secret)"},{"step_number":2,"expected_output":"[{\"type\":\"code_check\",\"expected\":\"guess\"},{\"type\":\"contains\",\"expected\":\"추측\"}]","hints":{"level_1":"추측 숫자를 저장할 변수가 필요해요! guess라는 이름은 어떨까요?","level_2":"실제 게임에서는 input()을 쓰지만, 여기서는 int(random.randint(1, 10))으로 자동 추측을 만들어요!","level_3":"guess = ___(random.randint(1, 10))\nprint(\"추측: \" + ___(guess))\n타입을 바꾸는 함수를 넣어보세요!"},"solution_code":"import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\nprint(\"비밀 숫자: \" + str(secret))\nprint(\"추측: \" + str(guess))"},{"step_number":3,"expected_output":"[{\"type\":\"code_check\",\"expected\":\"elif\"},{\"type\":\"contains_any\",\"expected\":[\"커요\",\"작아요\",\"정답\"]}]","hints":{"level_1":"if, elif, else를 사용해서 세 가지 경우를 나눠보세요: 같을 때, 작을 때, 클 때!","level_2":"if guess == secret: 정답!\nelif guess < secret: 더 커요!\nelse: 더 작아요!\n이런 구조예요!","level_3":"if guess == secret:\n    print(\"___!\")\nelif guess < secret:\n    print(\"비밀 숫자가 더 ___!\")\nelse:\n    print(\"비밀 숫자가 더 ___!\")\n___에 정답, 커요, 작아요 중 알맞은 말을 넣어보세요! 숫자는 매번 바뀌니까 어느 말이 나와도 괜찮아요."},"solution_code":"import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\n\nif guess == secret:\n    print(\"정답!\")\nelif guess < secret:\n    print(\"비밀 숫자가 추측보다 커요!\")\nelse:\n    print(\"비밀 숫자가 추측보다 작아요!\")"},{"step_number":4,"expected_output":"while","hints":{"level_1":"while 반복문을 사용하면 조건이 참인 동안 계속 반복할 수 있어요!","level_2":"while guess != secret: 이렇게 쓰면 정답을 맞출 때까지 반복해요! 추측 코드를 while 안에 넣어보세요.","level_3":"while guess ___ secret:\n    guess = ___(random.randint(1, 10))\n같지 않다는 비교 기호와 타입 변환 함수를 넣어보세요!"},"solution_code":"import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\n\nwhile guess != secret:\n    if guess < secret:\n        print(\"비밀 숫자가 추측보다 커요!\")\n    else:\n        print(\"비밀 숫자가 추측보다 작아요!\")\n    guess = int(random.randint(1, 10))\n\nprint(\"정답!\")"},{"step_number":5,"expected_output":"번 만에 맞췄어요","hints":{"level_1":"attempts라는 변수를 만들어서 추측할 때마다 1씩 올려보세요!","level_2":"attempts = 0을 while 앞에 두고, while 안에서 attempts = attempts + 1로 올려요!","level_3":"print(\"정답! \" + ___(attempts) + \"번 만에 맞췄어요!\") 숫자를 글자로 바꾸는 함수를 넣어보세요!"},"solution_code":"import random\n\nsecret = random.randint(1, 10)\nguess = int(random.randint(1, 10))\nattempts = 0\n\nwhile guess != secret:\n    attempts = attempts + 1\n    if guess < secret:\n        print(\"비밀 숫자가 추측보다 커요!\")\n    else:\n        print(\"비밀 숫자가 추측보다 작아요!\")\n    guess = int(random.randint(1, 10))\n\nattempts = attempts + 1\nprint(\"정답! \" + str(attempts) + \"번 만에 맞췄어요!\")"}]'::jsonb,
   NULL
+)
+ON CONFLICT (quest_id) DO UPDATE SET
+  expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,
+  solution_code = EXCLUDED.solution_code, steps = EXCLUDED.steps,
+  quiz_answer = EXCLUDED.quiz_answer, updated_at = NOW();
+
+-- 정답 7-4: 버그버그 대왕
+INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
+VALUES (
+  'b1000000-0000-0000-0000-000000000207',
+  '',
+  '{}'::jsonb,
+  NULL,
+  '[]'::jsonb,
+  '{"kind":"boss","rounds":[{"kind":"multiple_choice","accepted":["opt-d7ve"],"explanation":"name 상자 속 파이뱀과, str()로 글자가 된 7이 이어 붙어요. 따옴표와 str()은 화면에 나오지 않아요.","explanations":{"opt-f2pi":"str()로 글자가 되어도 따옴표는 화면에 나오지 않아요.","opt-k3so":"따옴표 없는 name 과 level 은 상자 이름이라 상자 속 값이 나와요.","opt-y9ag":"str(level)은 계산되어 글자 7이 돼요. 코드 글자 그대로 나오지 않아요."}},{"kind":"fill_blank","accepted":[{"bk-s4qn":"tok-h8cx"}],"explanation":"break 는 반복을 그 자리에서 끝내요. 7을 맞히면 정답! 을 보여 주고 게임이 끝나서 9는 나오지 않아요.","explanations":{"tok-a5ld":"continue 는 이번 차례만 건너뛰고 다음 숫자로 가요. 맞힌 뒤에도 9를 또 봐요.","tok-u2ze":"return 은 함수 안에서만 쓸 수 있어요. 함수 밖에서 쓰면 오류가 나요."}},{"kind":"bug_hunt","accepted":[{"line":"ln-o6ty","fix":"fx-l7da"}],"explanation":"따옴표 속 \"7\"은 글자, secret 의 7은 숫자라서 서로 같지 않아요. int()로 글자를 숫자로 바꿔서 비교해야 해요. 게임에서 input()으로 받은 값도 글자라서 똑같은 버그가 자주 나요.","explanations":{"fx-p8vs":"같은지 비교할 때는 = 를 두 개 써요. 하나만 쓰면 오류가 나요.","fx-x3ng":"str()은 글자로 바꿔요. 글자 \"7\"과 숫자 7은 여전히 달라요.","ln-c8pw":"게임에서는 고른 숫자가 이렇게 글자로 들어와요. 이 줄은 그대로 두고, 비교하는 줄에서 숫자로 바꿔요.","ln-e5kh":"이 줄은 틀렸을 때 할 일이라 맞아요. 왜 틀렸다고 판단하는지 살펴봐요.","ln-g2ub":"이 줄은 정답일 때 할 일이라 맞아요. 조건을 따지는 줄을 살펴봐요.","ln-j4ri":"비밀 숫자는 숫자 7로 잘 넣었어요. 다른 줄을 살펴봐요.","ln-w9mf":"else 줄은 맞아요. 조건을 따지는 줄을 살펴봐요."}},{"kind":"multiple_choice","accepted":["opt-z6hb"],"explanation":"반복하며 별 1개, 2개, 3개짜리 글자를 리스트에 담아요. 마지막에 리스트를 통째로 보여 주면 대괄호와 따옴표까지 함께 나와요.","explanations":{"opt-i4wr":"print()는 반복이 끝난 뒤 한 번만, 리스트 전체를 보여 줘요. 그래서 대괄호 안에 함께 나와요.","opt-m8cu":"\"*\" * i 는 i 만큼 별을 반복해요. 반복할 때마다 i 가 1, 2, 3 으로 커져요.","opt-t5kq":"리스트에 담은 것은 숫자 i 가 아니라 별 글자예요."}},{"kind":"parsons","accepted":[[{"id":"ln-v3hk","indent":0},{"id":"ln-q7ad","indent":1},{"id":"ln-l4sx","indent":1},{"id":"ln-b8no","indent":2},{"id":"ln-y2fe","indent":3},{"id":"ln-a6tj","indent":1},{"id":"ln-k9gm","indent":0}]],"explanation":"함수 안에서 0부터 세기 시작하고, 기록을 하나씩 보며 승이면 1을 더해요. return 은 반복이 다 끝난 뒤에 와야 해서 for 와 같은 깊이로 들여 써요."},{"kind":"bug_hunt","accepted":[{"line":"ln-s9ev","fix":"fx-k6ub"}],"explanation":"함수 이름 뒤에 괄호를 붙여야 함수를 불러요. 괄호가 없으면 이름만 말하고 실행하지 않아요.","explanations":{"fx-f7ry":"def 는 함수를 만들 때 쓰는 말이에요. 부를 때는 쓰지 않아요.","fx-o3ji":"괄호가 없어서 여전히 함수를 부르지 않아요. 함수 자체의 정보가 나와요.","ln-d2qc":"함수 안에서 보여 줄 글자는 맞아요. 함수가 불렸는지 살펴봐요.","ln-h5wz":"함수를 만드는 줄은 맞아요. 함수를 부르는 줄을 살펴봐요."}},{"kind":"multiple_choice","accepted":["opt-p4xm"],"explanation":"8은 5보다 커서 작게, 3은 작아서 크게, 5는 같아서 정답! 을 보여 주고 break 로 끝나요. 그래서 1은 보지 않아요.","explanations":{"opt-c9ef":"정답! 다음에 break 가 있어서 반복이 끝나요. 1은 따지지 않아요.","opt-g3sw":"맞히기 전의 8과 3도 하나씩 따져서 글자를 보여 줘요.","opt-j6dl":"고른 수가 비밀 숫자보다 크면 더 작게 고르라고 알려 줘요. 8은 5보다 커요."}}]}'::jsonb
 )
 ON CONFLICT (quest_id) DO UPDATE SET
   expected_output = EXCLUDED.expected_output, hints = EXCLUDED.hints,

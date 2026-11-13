@@ -7,7 +7,12 @@ import remarkGfm from 'remark-gfm';
 import { SpeechBubble } from '@/components/ui/speech-bubble';
 import { Button } from '@/components/ui/button';
 import type { ChatMessage } from '@/lib/tutor/types';
-import { ASK_QUESTIONS, type AskQuestion } from '@/lib/quest/useQuestSession';
+import {
+  ASK_QUESTIONS,
+  type AskQuestion,
+  type FreeAskResult,
+} from '@/lib/quest/useQuestSession';
+import { FreeQuestionForm } from './FreeQuestionForm';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import type { PybaemExpression } from '@/components/characters/expressions';
 import { useMessageExpression } from '@/components/characters/useCharacterExpression';
@@ -33,6 +38,10 @@ export interface ConversationPanelProps {
   onAsk?: (question: AskQuestion) => void;
   /** "왜 이렇게 나왔어요?" (마지막 실행 결과가 지금 코드의 것일 때만) */
   canAskWhy?: boolean;
+  /** 자유 질문 보내기 (P9-17, 없으면 칸을 그리지 않음) */
+  onFreeAsk?: (question: string) => Promise<FreeAskResult>;
+  /** 오늘 남은 자유 질문 수 (모르면 null) */
+  freeRemaining?: number | null;
 }
 
 /** 이 시간이 지나도 답이 없으면 "조금 오래 걸려요" 문구로 바꿔 아이가 기다릴 수 있게 함 */
@@ -147,7 +156,7 @@ function StreamingMessage({ content }: { content: string }) {
 /**
  * 파이뱀과 나눈 이야기 (P6-10). "파이뱀에게 물어보기"를 열면 지연 로드된다(마크다운 렌더러가 첫 화면 JS에 들지 않게):
  * 데스크톱은 이야기 쪽 안에서 펼침, 모바일은 바텀시트. 파이뱀은 왼쪽(작은 얼굴 + 테두리 없는 말풍선), 아이 질문은 오른쪽.
- * 아래에는 정해진 질문 버튼 줄 — 고르면 내 말풍선 → 생각 중 점 세 개 → 흘러나오는 답
+ * 아래에는 정해진 질문 버튼 줄 — 고르면 내 말풍선 → 생각 중 점 세 개 → 흘러나오는 답. 그 아래 자유 질문 칸(P9-17, 답은 서버가 거른 뒤 한 번에)
  */
 export default function ConversationPanel({
   messages,
@@ -157,6 +166,8 @@ export default function ConversationPanel({
   hasApiKey,
   onAsk,
   canAskWhy = false,
+  onFreeAsk,
+  freeRemaining = null,
 }: ConversationPanelProps) {
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -216,6 +227,13 @@ export default function ConversationPanel({
             </Button>
           ))}
         </div>
+      )}
+      {onFreeAsk && (
+        <FreeQuestionForm
+          onSubmit={onFreeAsk}
+          remaining={freeRemaining}
+          busy={isAiLoading}
+        />
       )}
     </div>
   );

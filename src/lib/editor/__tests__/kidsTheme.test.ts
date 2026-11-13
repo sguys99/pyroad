@@ -3,6 +3,8 @@ import { highlightTree } from '@lezer/highlight';
 import { pythonLanguage } from '@codemirror/lang-python';
 import {
   CONTRAST_MIN,
+  EDITOR_THEME_IDS,
+  editorThemePalette,
   fmtRatio,
   pairContrast,
   rootCssVars,
@@ -94,14 +96,21 @@ describe('CodeMirror 키즈 테마 (P2-18)', () => {
     expect(spans[TOKEN_CLASS.number]).toEqual(['3']);
   });
 
-  it.each(EDITOR_CONTRAST_PAIRS.map((p) => [`${p.use}: ${p.fg}`, p] as const))(
-    '대비 AA — %s',
-    (_, pair) => {
-      const ratio = pairContrast(pair);
-      expect(
-        ratio,
-        `${pair.fg} / ${pair.bg}${pair.over ? `(${pair.alpha} over ${pair.over})` : ''} = ${fmtRatio(ratio)}`,
-      ).toBeGreaterThanOrEqual(CONTRAST_MIN[pair.kind]);
-    },
-  );
+  // 기본 테마 + 상점 공책 테마 3종 (P9-06): 같은 조합 전부를 그 테마 색표로
+  it.each(
+    [undefined, ...EDITOR_THEME_IDS].flatMap((theme) =>
+      EDITOR_CONTRAST_PAIRS.map(
+        (p) => [`${theme ?? '기본'} ${p.use}: ${p.fg}`, p, theme] as const,
+      ),
+    ),
+  )('대비 AA — %s', (_, pair, theme) => {
+    const ratio = pairContrast(
+      pair,
+      theme ? editorThemePalette(theme) : undefined,
+    );
+    expect(
+      ratio,
+      `${pair.fg} / ${pair.bg}${pair.over ? `(${pair.alpha} over ${pair.over})` : ''} = ${fmtRatio(ratio)}`,
+    ).toBeGreaterThanOrEqual(CONTRAST_MIN[pair.kind]);
+  });
 });

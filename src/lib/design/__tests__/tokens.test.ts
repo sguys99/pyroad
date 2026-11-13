@@ -17,6 +17,8 @@ import {
   rootCssVars,
   themeCssVars,
   worldCssVars,
+  EDITOR_THEME_IDS,
+  editorThemeCssVars,
   type ColorName,
   type WorldId,
 } from '../tokens';
@@ -89,6 +91,17 @@ describe('디자인 토큰 ↔ globals.css 드리프트 (P2-09)', () => {
     expect(theme['--font-sans']).toContain(`'${FONT_FAMILY.sans}'`);
     expect(theme['--font-mono'].startsWith(`'${FONT_FAMILY.mono}'`)).toBe(true);
   });
+
+  it.each(EDITOR_THEME_IDS)(
+    "[data-editor-theme='%s']는 TS 에디터 테마와 같다 (P9-06)",
+    (id) => {
+      expectSameVars(
+        block(`[data-editor-theme='${id}']`),
+        editorThemeCssVars(id),
+        `globals.css [data-editor-theme='${id}']`,
+      );
+    },
+  );
 
   it('[data-world="1|2|3"]는 월드 틴트 3개만 바꾼다', () => {
     for (const id of [1, 2, 3] as WorldId[]) {

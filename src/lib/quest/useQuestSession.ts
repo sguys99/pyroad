@@ -8,6 +8,7 @@ import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { useTutor, TutorRateLimitError } from '@/lib/tutor/useTutor';
 import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
 import type { ChatMessage, TutorRequest } from '@/lib/tutor/types';
+import type { FreeQuestionBlock } from '@/lib/tutor/freeQuestion';
 import { loadBrowserClient } from '@/lib/supabase/loadClient';
 import { fireConfetti, resetConfetti } from '@/lib/confetti';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
@@ -96,6 +97,8 @@ export const CELEBRATION_DELAY_MS: Record<QuestKind, number> = {
   project: 1800,
   // 퀴즈도 정답 도장 → 보상 띠를 본 뒤 (P7-03, useQuizSession)
   quiz: 1800,
+  // 보스: 쓰러진 보스·승리 화면(별·보상)을 본 뒤 (P9-12, useBossSession)
+  boss: 1800,
 };
 
 /**
@@ -120,7 +123,7 @@ export const ANSWER_CONFETTI = {
 };
 
 /**
- * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10, §12-Q58). 자유 입력은 아동 안전 검토 뒤로 미루고(P9-17) 정해진 질문만:
+ * "파이뱀에게 물어보기"에서 고르는 질문 (P6-10, §12-Q58). 자유 입력은 `handleFreeAsk`(P9-17):
  * what = 지금 할 일(해 볼 일 + 지금 상태, LLM 없이 `nowTodoText`) · concept = 이 퀘스트 개념만(`concept_explain`) ·
  * why = 마지막 실행 결과 설명(`code_feedback`, 결과가 지금 코드의 것일 때만)
  */
@@ -130,6 +133,15 @@ export const ASK_QUESTIONS = {
   why: '왜 이렇게 나왔어요?',
 } as const;
 export type AskQuestion = keyof typeof ASK_QUESTIONS;
+
+/**
+ * 자유 질문을 보낸 결과 (P9-17). sent = 대화에 들어감(입력 칸 비움) · note = 보내지 못함: 입력 칸 아래 안내, 글은 남겨 고칠 수 있게
+ * (개인정보·부적절·역할 바꾸기로 거름, 한도). 위험 신호(wellbeing)는 안내를 파이뱀 말풍선으로 대화에 남기므로 sent
+ */
+export type FreeAskResult =
+  | { status: 'sent' }
+  | { status: 'note'; message: string; block?: FreeQuestionBlock }
+  | { status: 'busy' };
 const ASK_FAILED =
   '지금은 파이뱀이 대답하기 어려워요. 조금 뒤에 다시 물어봐 줘요!';
 const SAVE_FAILED_MESSAGE =
@@ -1057,6 +1069,57 @@ export function useQuestSession({
     ],
   );
 
+  // ── 자유 질문 (P9-17) ────────────────────────────────────────────────
+
+  /** 오늘 더 물어볼 수 있는 수 (서버가 답할 때 알려 줌, 처음엔 모름 = null) */
+  const [freeRemaining, setFreeRemaining] = useState<number | null>(null);
+  /**
+   * 아이가 쓴 질문 보내기. 거르기는 서버가 한다(화면은 글자 수만). 내 말풍선을 먼저 띄우고 생각 중 → 답.
+   * 서버가 거르면 말풍선을 거두고 안내를 돌려준다(입력 칸 아래). 답은 다 받은 뒤 거른 것이라 흘려 쓰지 않는다
+   */
+  const handleFreeAsk = useCallback(
+    async (question: string): Promise<FreeAskResult> => {
+      const text = question.trim();
+      if (!text || isAiLoading) return { status: 'busy' };
+      play('tap');
+      const mine: ChatMessage = { role: 'student', content: text };
+      const takeBack = () =>
+        setMessages((prev) => prev.filter((m) => m !== mine));
+      addMessage(mine);
+      try {
+        const res = await sendTutorRequest({
+          type: 'free_question',
+          quest_id: questId,
+          question: text,
+        });
+        if (!res) {
+          takeBack();
+          return { status: 'busy' };
+        }
+        if (res.remaining !== undefined) setFreeRemaining(res.remaining);
+        if (res.blocked && res.blocked !== 'wellbeing') {
+          takeBack();
+          return { status: 'note', message: res.message, block: res.blocked };
+        }
+        addMessage({
+          role: 'tutor',
+          content: res.message,
+          isFallback: res.is_fallback,
+        });
+        return { status: 'sent' };
+      } catch (error) {
+        if (error instanceof TutorRateLimitError) {
+          takeBack();
+          if (error.scope === 'day') setFreeRemaining(0);
+          return { status: 'note', message: error.message };
+        }
+        addMessage({ role: 'tutor', content: ASK_FAILED, isFallback: true });
+        return { status: 'sent' };
+      }
+    },
+    [isAiLoading, play, addMessage, sendTutorRequest, questId],
+  );
+
   // 결과 쪽지의 "파이뱀에게 더 물어보기" (Q56): 대화를 펼치고 그 실행 결과로 묻는다
   const [askOpen, setAskOpen] = useState(false);
   const askAboutRun = useCallback(() => {
@@ -1228,6 +1291,10 @@ export function useQuestSession({
     handleAsk,
     /** 마지막 실행 결과가 지금 코드의 것인지 ("왜 이렇게 나왔어요?") */
     canAskWhy,
+    /** "파이뱀에게 물어보기" 자유 질문 (P9-17) */
+    handleFreeAsk,
+    /** 오늘 남은 자유 질문 수 (모르면 null) */
+    freeRemaining,
     /** "파이뱀에게 물어보기" 대화가 펼쳐져 있는지 (결과 쪽지 버튼이 열 수 있게 세션에 둠) */
     askOpen,
     setAskOpen,

@@ -5,14 +5,15 @@ import { simulate, tailDays, world1Quests } from '../level-curve';
 describe('레벨 곡선 시뮬레이션', () => {
   const [careful, normal, reviewed, hinty] = simulate(world1Quests());
 
-  it('보통 학생: 1월드 Lv 10 · 2월드 ≈ Lv 20 · 3월드 ≈ Lv 30 (퀴즈 복습까지 하면 3월드 30)', () => {
-    expect(normal.worlds.map((w) => w.level)).toEqual([10, 19, 29]);
-    expect(reviewed.worlds.map((w) => w.level)).toEqual([10, 19, 30]);
+  // 보스 7종(P9-13, 별 3개 XP 합 276)을 넣어 3월드 끝이 29 → 30, 복습까지 하면 1월드 11
+  it('보통 학생: 1월드 Lv 10 · 2월드 ≈ Lv 20 · 3월드 ≈ Lv 30 (퀴즈·보스 복습까지 하면 1월드 11)', () => {
+    expect(normal.worlds.map((w) => w.level)).toEqual([10, 19, 30]);
+    expect(reviewed.worlds.map((w) => w.level)).toEqual([11, 20, 31]);
   });
 
-  it('1월드 끝 레벨은 Lv 8~11 안 (힌트를 많이 써도, 꼼꼼해도)', () => {
+  it('1월드 끝 레벨은 Lv 8~12 안 (힌트를 많이 써도, 꼼꼼해도 — 보스 포함)', () => {
     expect(hinty.worlds[0].level).toBeGreaterThanOrEqual(8);
-    expect(careful.worlds[0].level).toBeLessThanOrEqual(11);
+    expect(careful.worlds[0].level).toBeLessThanOrEqual(12);
   });
 
   it('Lv 30 → 50 은 학습 XP 없이는 닿지 않음, 하루 45 XP면 약 1년', () => {

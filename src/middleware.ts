@@ -40,10 +40,28 @@ function applyPageCsp(request: NextRequest): string | null {
   return policy;
 }
 
+/** `/share/<id>` 공유 페이지 */
+export function isSharePage(pathname: string): boolean {
+  return pathname === '/share' || pathname.startsWith('/share/');
+}
+
+/** `/guardian/<token>` 보호자 주간 리포트 (P9-15, 비공개 링크) */
+export function isGuardianReportPage(pathname: string): boolean {
+  return pathname === '/guardian' || pathname.startsWith('/guardian/');
+}
+
 export async function middleware(request: NextRequest) {
   // updateSession이 `NextResponse.next({ request })`로 요청 헤더를 넘기므로 그 전에 넣는다
   const policy = applyPageCsp(request);
-  let response = await updateSession(request);
+  // 공유 페이지(P9-08)는 비로그인 열람·미리보기 수집기용이라 세션 갱신(Supabase getUser 왕복)을 건너뛴다.
+  // matcher 에서 빼지 않는 까닭: 이 페이지의 CSP nonce 도 여기서 만든다
+  // 보호자 리포트(P9-15)도 같은 이유(로그인 없이 링크로 엶)
+  const { pathname } = request.nextUrl;
+  const guardianReport = isGuardianReportPage(pathname);
+  let response =
+    isSharePage(pathname) || guardianReport
+      ? NextResponse.next({ request })
+      : await updateSession(request);
   // 없는 월드 주소는 진짜 404 상태로 (로그인 사용자만 여기까지 옴 — 비로그인은 위에서 / 로 보냄, P5-14).
   // 짝 없는 경로로 바꿔 쓰면 루트 not-found 화면이 404로 그려진다. 없는 퀘스트는 DB 조회가 필요해 페이지에 맡김(200 + noindex)
   const slug = worldSlugOf(request.nextUrl.pathname);
@@ -54,6 +72,12 @@ export async function middleware(request: NextRequest) {
     );
     response.cookies.getAll().forEach((c) => notFound.cookies.set(c));
     response = notFound;
+  }
+  if (guardianReport) {
+    // 링크가 곧 열쇠인 비공개 학습 기록: 어디에도 저장·색인하지 않고, 다른 곳으로 가는 요청에 주소(토큰)를 싣지 않는다
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    response.headers.set('Referrer-Policy', 'no-referrer');
   }
   if (policy) {
     response.headers.set(cspHeader, policy);
@@ -74,8 +98,10 @@ export const config = {
   // 빌드 때 만든 메타데이터 파일(공유 미리보기 그림 `/opengraph-image`·`robots.txt`·`sitemap.xml`)도 제외 (P4-10):
   // 크롤러가 받는 정적 응답에 세션 갱신·페이지 CSP가 필요 없다.
   // 앱 매니페스트·파비콘(`/icon`)·홈 화면 아이콘(`/apple-icon`, 해시 쿼리·`/icon/<id>` 변형 포함)도 같은 이유 (P4-11).
-  // manifest 아이콘 `/pwa/*.png`는 확장자 규칙으로 이미 빠진다
+  // manifest 아이콘 `/pwa/*.png`는 확장자 규칙으로 이미 빠진다.
+  // 공유 카드 API(`/api/share-cards`, P9-08)도 제외: 이미지는 비로그인·수집기가 받는 CDN 캐시 응답, 만들기 API 는 스스로 getUser.
+  // 공유 페이지 `/share`는 nonce CSP 때문에 남기고 세션 갱신만 건너뛴다(위 isSharePage)
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|pyodide/|workers/|sounds/|images/|textures/|animations/|opengraph-image|twitter-image|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|icon(?:$|/)|apple-icon(?:$|/)|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/share-cards(?:$|/)|pyodide/|workers/|sounds/|images/|textures/|animations/|opengraph-image|twitter-image|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|icon(?:$|/)|apple-icon(?:$|/)|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)',
   ],
 };

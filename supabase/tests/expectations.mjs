@@ -31,7 +31,7 @@ export const EXPECT = {
   'B03-2': { expect: 'deny' },
   'B03-3': {
     expect: 'allow',
-    note: '게시판 작성자 표시. 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin (P3-13 ① 00021)',
+    note: '게시판 작성자 표시. 컬럼은 id·display_name·avatar_url(NULL)·avatar_skin (P3-13 ① 00021)·avatar_look (P9-05 ① 00042)',
   },
   'B03-4': { expect: 'deny' },
   'B03-5': { expect: 'deny' },
@@ -75,6 +75,12 @@ export const EXPECT = {
     requires: 'public.user_public_profiles.avatar_skin',
     activateIn: 'P3-13',
     note: '① 00021: 공개 아바타 = avatar_config.skin 을 동기화 트리거가 6종 id 만 복사 (모르는 값·다른 키는 공개 안 됨, 직접 쓰기 거부, CHECK)',
+  },
+  'PP-6': {
+    expect: 'allow',
+    requires: 'public.user_public_profiles.avatar_look',
+    activateIn: 'P9-05',
+    note: '① 00042: 공개 아바타의 꾸민 모습 = avatar_config 의 모자·안경·망토·배경·테두리 중 shop_items 슬롯이 맞는 id 만 (펫·에디터 테마·스킨·모르는 값은 공개 안 됨, 직접 쓰기 거부, CHECK 객체)',
   },
   'NM-1': {
     expect: 'allow',
@@ -599,6 +605,168 @@ export const EXPECT = {
     activateIn: 'P8-09',
     note: '정의·본인 업적 읽기만, 남의 행·anon·쓰기는 막힘',
   },
+  // ── 상점 (P9-01, ① 00039) ──
+  'SH-1': {
+    expect: 'deny',
+    requires: 'public.shop_items',
+    activateIn: 'P9-01',
+    note: '카탈로그는 로그인 사용자 읽기만, 비로그인·쓰기는 막힘. 가격은 구매 RPC(P9-03)가 서버에서 읽음',
+  },
+  // ── 인벤토리·구매·장착 (P9-03, ① 00040) ──
+  'IV-1': {
+    expect: 'deny',
+    requires: 'public.purchase_item()',
+    activateIn: 'P9-03',
+    note: '구매는 /api/shop/purchase(service_role)만',
+  },
+  'IV-1b': {
+    expect: 'deny',
+    requires: 'public.equip_item()',
+    activateIn: 'P9-03',
+    note: '장착은 /api/shop/equip(service_role)만',
+  },
+  'IV-1c': {
+    expect: 'deny',
+    requires: 'public.shop_status()',
+    activateIn: 'P9-03',
+  },
+  'IV-1d': {
+    expect: 'deny',
+    requires: 'public.user_items',
+    activateIn: 'P9-03',
+    note: '본인 인벤토리 읽기만, 남의 행·anon·쓰기는 막힘',
+  },
+  'IV-2': {
+    expect: 'allow',
+    requires: 'public.purchase_item()',
+    activateIn: 'P9-03',
+    note: '영구 재구매·동시 1회·소모품 주 1개·방패 2·황금키 상한 없음(00041 B72)·코인 부족·판매 중지 · 잔액 = 원장',
+  },
+  'IV-3': {
+    expect: 'allow',
+    requires: 'public.equip_item()',
+    activateIn: 'P9-03',
+    note: '가진 아이템·맞는 슬롯만, avatar_config·settings.editor_theme, 벗기, 무료 스킨',
+  },
+  // ── 공유 카드 (P9-07, ① 00043) ──
+  'SC-1': {
+    expect: 'deny',
+    requires: 'public.create_share_card()',
+    activateIn: 'P9-07',
+    note: '만들기는 /api/share-cards(service_role)만 — 성과 숫자는 서버가 계산',
+  },
+  'SC-1b': {
+    expect: 'deny',
+    requires: 'public.share_card_public()',
+    activateIn: 'P9-07',
+    note: '공개 조회도 서버(이미지 라우트·공유 페이지)만',
+  },
+  'SC-1c': {
+    expect: 'deny',
+    requires: 'public.share_cards',
+    activateIn: 'P9-07',
+    note: '본인 카드 읽기만, 남의 행·anon·쓰기는 막힘',
+  },
+  'SC-2': {
+    expect: 'allow',
+    requires: 'public.create_share_card()',
+    activateIn: 'P9-07',
+    note: '실제 기록으로 스냅샷(공개 정보만, 펫 없음) · 같은 id·version · 공개 조회 user_id 없음 · 90일 만료·비공개 0행 · 다시 공개 새 90일',
+  },
+  // ── 자랑하기 보상 (P9-10, ① 00044) ──
+  'SHR-1': {
+    expect: 'deny',
+    requires: 'public.claim_share_reward()',
+    activateIn: 'P9-10',
+    note: '보상은 /api/share-cards/reward(service_role)만',
+  },
+  'SHR-2': {
+    expect: 'allow',
+    requires: 'public.claim_share_reward()',
+    activateIn: 'P9-10',
+    note: '본인 공개·만료 전 카드만 · 하루 1회 15코인(동시 1회) · 원장 share/<KST 날짜> · 잔액 = 원장',
+  },
+  // ── 보스 배틀 (P9-12, ① 00046) ──
+  'BOSS-1': {
+    expect: 'deny',
+    requires: 'public.boss_answer()',
+    activateIn: 'P9-12',
+    note: '채점·하트·보상은 /api/quest/boss(service_role)만 — 정답 오라클·하트 꾸미기 막기',
+  },
+  'BOSS-1b': {
+    expect: 'deny',
+    requires: 'public.boss_runs',
+    activateIn: 'P9-12',
+    note: '판 상태(라운드·하트)는 service_role 전용, 본인 행도 읽기·쓰기 불가',
+  },
+  'BOSS-2': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'P9-12',
+    note: '코드 퀘스트 전 잠김 · 하트 3 · 패배/승리 · 별 = 남은 하트 · XP 별당 xp_reward/3 · 첫 승리 20 + 별 코인 · 스테이지 클리어 · 연습·복습(Q64) · 잔액 = 원장',
+  },
+  'BOSS-3': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'P9-12',
+    note: 'is_stage_unlocked 00046: 이 스테이지·뒤 스테이지에 완료가 있으면 열림(보스가 새로 생겨도 갑자기 잠기지 않음), 진행 행만으로는 안 열림',
+  },
+  'WK-1': {
+    expect: 'allow',
+    requires: 'public.achievement_stats()',
+    activateIn: 'P9-18',
+    note: '00048 weeks_two·weeks_three: KST 주(월~일)마다 학습일 수(방패 날 제외), 주 2일 4번 → week2_4',
+  },
+  'B74-1': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'B74',
+    note: '00047 achievement_stats: projects 는 프로젝트 퀘스트만(7단계 보스 아님), 보스 reviews 는 처음 이긴 다음 날 이후 승리만(진 판 attempts 는 안 셈)',
+  },
+  'B75-1': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'B75',
+    note: '00051 achievement_stats·daily_mission_progress·daily_mission_possible: no_hint 에서 보스(힌트 없음)를 뺌',
+  },
+  // ── 보호자 주간 리포트 (P9-15, ① 00050) ──
+  'GR-1': {
+    expect: 'deny',
+    requires: 'public.guardian_report_link()',
+    activateIn: 'P9-15',
+    note: '링크 만들기·끄기는 /api/guardian-report(service_role)만',
+  },
+  'GR-1b': {
+    expect: 'deny',
+    requires: 'public.guardian_report_links',
+    activateIn: 'P9-15',
+    note: '토큰 해시 테이블은 service_role 전용, 본인 행도 읽기·쓰기 불가',
+  },
+  'GR-1c': {
+    expect: 'deny',
+    requires: 'public.guardian_report()',
+    activateIn: 'P9-15',
+    note: '리포트 조회도 서버(/guardian/[token] 페이지)만 — 비로그인이 토큰을 직접 대입해 볼 수 없음',
+  },
+  'GR-2': {
+    expect: 'allow',
+    requires: 'public.guardian_report()',
+    activateIn: 'P9-15',
+    note: '해시만 저장 · 요일별 7칸·이번/지난 주 합계 · 다시 만들기 → 옛 토큰 NULL · 끄기 → NULL · 잘못된 토큰·주 NULL',
+  },
+  // ── 공유 카드 관리 (P9-11, ① 00045) ──
+  'SCM-1': {
+    expect: 'deny',
+    requires: 'public.manage_share_card()',
+    activateIn: 'P9-11',
+    note: '숨기기·다시 공개·지우기는 /api/share-cards/{id}(service_role)만',
+  },
+  'SCM-2': {
+    expect: 'allow',
+    requires: 'public.manage_share_card()',
+    activateIn: 'P9-11',
+    note: '본인 카드만 숨기기·다시 공개(새 90일)·지우기 · 닉네임·꾸민 모습 변경 → 스냅샷 갱신 + version+1',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',
@@ -733,6 +901,12 @@ export const EXPECT = {
     requires: 'public.complete_quest()',
     activateIn: 'P1-03',
     note: '스테이지 1 의 코드 퀘스트만 complete_quest (퀴즈는 보너스, B49)',
+  },
+  'RW-6b': {
+    expect: 'allow',
+    requires: 'public.complete_quest()',
+    activateIn: 'B72',
+    note: '00041: 스테이지 클리어·전체 리셋은 황금키 3개 미만만 3개로 채움 (§12-Q68)',
   },
   'RW-7': {
     expect: 'allow',
@@ -890,11 +1064,11 @@ export const EXPECT = {
     expect: 'allow',
     requires: 'public.users.age_band',
     activateIn: 'P3-15',
-    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문 + 보호자 동의 상태, P3-11·P3-15)',
+    note: '로그인 레이아웃의 users 조회 한 번 (움직임·사운드 설정 + 온보딩 관문 + 보호자 동의 상태 + 꾸민 모습 avatar_config, P3-11·P3-15·P9-05)',
   },
   'APP-13': {
     expect: 'allow',
-    note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
+    note: '게시판 목록 작성자 표시 (user_profiles_public 임베딩, P9-05 avatar_look 포함). P1-18 00014: 닉네임 없는 사용자는 모험가NNNN (실명이면 real-name 으로 FAIL)',
   },
   'APP-14': {
     expect: 'allow',

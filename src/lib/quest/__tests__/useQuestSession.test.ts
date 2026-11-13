@@ -1192,6 +1192,64 @@ describe('useQuestSession: 파이뱀에게 물어보기 (P6-10)', () => {
     act(() => result.current.setCode('x = 2\nprint(x)'));
     expect(result.current.canAskWhy).toBe(false);
   });
+  it('자유 질문 (P9-17): 보내면 내 말풍선 + 답·남은 수, 거르면 말풍선을 거두고 안내, 위험 신호는 대화에 남김', async () => {
+    const { result } = renderHook(() => useQuestSession(options(CODE_QUEST)));
+    await act(async () => {
+      await flush();
+    });
+    mocks.tutor.sendTutorRequest.mockResolvedValueOnce({
+      message: '변수는 상자예요',
+      is_fallback: false,
+      remaining: 19,
+    });
+    let out: unknown;
+    await act(async () => {
+      out = await result.current.handleFreeAsk('  변수가 뭐예요? ');
+    });
+    expect(out).toEqual({ status: 'sent' });
+    expect(mocks.tutor.sendTutorRequest).toHaveBeenLastCalledWith({
+      type: 'free_question',
+      quest_id: 'q-code',
+      question: '변수가 뭐예요?',
+    });
+    expect(result.current.messages.slice(-2)).toMatchObject([
+      { role: 'student', content: '변수가 뭐예요?' },
+      { role: 'tutor', content: '변수는 상자예요' },
+    ]);
+    expect(result.current.freeRemaining).toBe(19);
+
+    const before = result.current.messages.length;
+    mocks.tutor.sendTutorRequest.mockResolvedValueOnce({
+      message: '개인정보 안내',
+      is_fallback: false,
+      blocked: 'personal',
+      remaining: 18,
+    });
+    await act(async () => {
+      out = await result.current.handleFreeAsk('내 번호 010-1234-5678');
+    });
+    expect(out).toEqual({
+      status: 'note',
+      message: '개인정보 안내',
+      block: 'personal',
+    });
+    expect(result.current.messages).toHaveLength(before);
+    expect(result.current.freeRemaining).toBe(18);
+
+    mocks.tutor.sendTutorRequest.mockResolvedValueOnce({
+      message: '믿을 수 있는 어른에게 말해 줘요',
+      is_fallback: false,
+      blocked: 'wellbeing',
+    });
+    await act(async () => {
+      out = await result.current.handleFreeAsk('너무 힘들어요');
+    });
+    expect(out).toEqual({ status: 'sent' });
+    expect(result.current.messages.at(-1)).toMatchObject({
+      role: 'tutor',
+      content: '믿을 수 있는 어른에게 말해 줘요',
+    });
+  });
 });
 
 // ── 퀘스트 사이 이동 (P6-15) ───────────────────────────────────────────

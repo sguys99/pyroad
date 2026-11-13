@@ -17,6 +17,8 @@ import type { ContentTree } from './load';
 import {
   byQuizId,
   findAnswerKeysInPublic,
+  type BossPromptSkeleton,
+  type BossQuest,
   quizBlankIds,
   type InputScenario,
   type Quest,
@@ -101,8 +103,14 @@ export interface AnswerKeyRow {
   hints: HintsRow | Record<string, never>;
   solution_code: string | null;
   steps: StepAnswerRow[];
-  /** 퀴즈 정답 (P7-01). 퀴즈가 아니면 null */
-  quiz_answer: QuizAnswer | null;
+  /** 퀴즈 정답 (P7-01) · 보스 라운드 정답 (P9-12). 둘 다 아니면 null */
+  quiz_answer: QuizAnswer | BossAnswer | null;
+}
+
+/** 보스 정답 (P9-12, quest_answer_keys.quiz_answer, 00046) */
+export interface BossAnswer {
+  kind: 'boss';
+  rounds: QuizAnswer[];
 }
 
 export interface ContentRows {
@@ -199,8 +207,18 @@ export function buildRows(tree: ContentTree): BuildResult {
         }
         rows.quests.push(questRow);
         rows.answer_keys.push(answerRow);
+        if (quest.quest_type === 'boss') {
+          const ids = new Set(quests.map((q) => q.quest.id));
+          quest.rounds.forEach((r, i) => {
+            if (r.review_quest && !ids.has(r.review_quest))
+              throw new Error(
+                `${file}: rounds[${i}].review_quest '${r.review_quest}'는 이 스테이지 퀘스트가 아니에요`,
+              );
+          });
+        }
         // 퀴즈는 실행할 코드·규칙이 없어 자동 검증(meta) 대상이 아님
-        if (quest.quest_type === 'quiz') continue;
+        if (quest.quest_type === 'quiz' || quest.quest_type === 'boss')
+          continue;
         meta.set(quest.id, {
           world: world.slug,
           quest_type: quest.quest_type,
@@ -230,6 +248,7 @@ export function splitQuest(
   stageId: string,
 ): { questRow: QuestRow; answerRow: AnswerKeyRow } {
   if (quest.quest_type === 'quiz') return splitQuiz(quest, stageId);
+  if (quest.quest_type === 'boss') return splitBoss(quest, stageId);
   const stored = toStoredRule(quest.answer.validation);
   const p = quest.prompt;
 
@@ -304,6 +323,108 @@ function splitQuiz(
   quest: QuizQuest,
   stageId: string,
 ): { questRow: QuestRow; answerRow: AnswerKeyRow } {
+  const { quiz, answer } = splitQuizBody(quest);
+  const p = quest.prompt;
+  const skeleton: QuizPromptSkeleton = {
+    topic: p.topic,
+    learning_goals: [...p.learning_goals],
+    story_context: p.story_context,
+    fallback_text: p.fallback_text,
+    quiz,
+  };
+
+  return {
+    questRow: {
+      id: quest.id,
+      stage_id: stageId,
+      order: quest.order,
+      title: quest.title,
+      concept: quest.concept,
+      quest_type: 'quiz',
+      quiz_kind: quest.quiz_kind,
+      is_mobile_friendly: true,
+      prompt_skeleton: skeleton,
+      validation_type: QUIZ_VALIDATION_TYPE,
+      expected_output: '',
+      xp_reward: quest.xp_reward,
+    },
+    answerRow: {
+      quest_id: quest.id,
+      expected_output: '',
+      hints: {},
+      solution_code: null,
+      steps: [],
+      quiz_answer: answer,
+    },
+  };
+}
+
+/**
+ * 보스 (P9-12) → 공개 행 + 정답 행. 라운드마다 퀴즈와 같은 나누기(splitQuizBody): 공개 = prompt_skeleton.boss.rounds[],
+ * 정답 = quiz_answer {kind: 'boss', rounds: [{kind, accepted, explanation, explanations?}]} (00046 boss_answer 가 읽음).
+ * 키보드 없이 깰 수 있게 모두 퀴즈 문제라 휴대폰 추천
+ */
+function splitBoss(
+  quest: BossQuest,
+  stageId: string,
+): { questRow: QuestRow; answerRow: AnswerKeyRow } {
+  const parts = quest.rounds.map((r) =>
+    splitQuizBody({
+      quiz_kind: r.quiz_kind,
+      prompt: r.prompt,
+      answer: r.answer,
+    } as QuizBodySource),
+  );
+  const p = quest.prompt;
+  const skeleton: BossPromptSkeleton = {
+    topic: p.topic,
+    learning_goals: [...p.learning_goals],
+    story_context: p.story_context,
+    fallback_text: p.fallback_text,
+    boss: {
+      ...p.boss,
+      rounds: parts.map((x) => x.quiz),
+      review_quests: quest.rounds.map((r) => r.review_quest ?? null),
+    },
+  };
+  return {
+    questRow: {
+      id: quest.id,
+      stage_id: stageId,
+      order: quest.order,
+      title: quest.title,
+      concept: quest.concept,
+      quest_type: 'boss',
+      quiz_kind: null,
+      is_mobile_friendly: true,
+      prompt_skeleton: skeleton,
+      validation_type: QUIZ_VALIDATION_TYPE,
+      expected_output: '',
+      xp_reward: quest.xp_reward,
+    },
+    answerRow: {
+      quest_id: quest.id,
+      expected_output: '',
+      hints: {},
+      solution_code: null,
+      steps: [],
+      quiz_answer: { kind: 'boss', rounds: parts.map((x) => x.answer) },
+    },
+  };
+}
+
+/** 퀴즈 종류마다 따로 고른 모양 (Pick 을 유니온에 그대로 쓰면 quiz_kind 로 좁혀지지 않음) */
+type QuizBodySource = QuizQuest extends infer Q
+  ? Q extends QuizQuest
+    ? Pick<Q, 'quiz_kind' | 'prompt' | 'answer'>
+    : never
+  : never;
+
+/** 퀴즈 하나의 공개 부분·정답 부분 (퀴즈 퀘스트와 보스 라운드 공용) */
+function splitQuizBody(quest: QuizBodySource): {
+  quiz: QuizPrompt;
+  answer: QuizAnswer;
+} {
   const sorted = <T extends { id: string }>(list: T[]) =>
     [...list].sort(byQuizId).map((x) => ({ ...x }));
   let quiz: QuizPrompt;
@@ -393,39 +514,7 @@ function splitQuiz(
     }
   }
 
-  const p = quest.prompt;
-  const skeleton: QuizPromptSkeleton = {
-    topic: p.topic,
-    learning_goals: [...p.learning_goals],
-    story_context: p.story_context,
-    fallback_text: p.fallback_text,
-    quiz,
-  };
-
-  return {
-    questRow: {
-      id: quest.id,
-      stage_id: stageId,
-      order: quest.order,
-      title: quest.title,
-      concept: quest.concept,
-      quest_type: 'quiz',
-      quiz_kind: quest.quiz_kind,
-      is_mobile_friendly: true,
-      prompt_skeleton: skeleton,
-      validation_type: QUIZ_VALIDATION_TYPE,
-      expected_output: '',
-      xp_reward: quest.xp_reward,
-    },
-    answerRow: {
-      quest_id: quest.id,
-      expected_output: '',
-      hints: {},
-      solution_code: null,
-      steps: [],
-      quiz_answer: answer,
-    },
-  };
+  return { quiz, answer };
 }
 
 /** 공개 행에 정답이 섞였으면 예외 (00005 의 quests_no_answer_fields CHECK 와 같은 검사를 빌드에서 먼저) */
@@ -739,7 +828,7 @@ export function toCheckFixture(
     stageWorld.get(stageId) ?? options.worldOf?.(stageId) ?? 'python-island';
 
   const quests = rows.quests
-    .filter((q) => q.quest_type !== 'quiz')
+    .filter((q) => q.quest_type !== 'quiz' && q.quest_type !== 'boss')
     .map((q): CheckQuest => {
       const sk = asRecord(q.prompt_skeleton);
       const k = answers.get(q.id);

@@ -1,4 +1,4 @@
-# 코드 에디터 (CodeMirror 키즈 테마, P2-18 · 공책 머리 P6-03)
+# 코드 에디터 (CodeMirror 키즈 테마, P2-18 · 공책 머리 P6-03 · 공책 테마 P9-06)
 
 퀘스트 화면의 코드 에디터 모양과 글자 규칙. 기준은 승인된 최종 시안(§12-Q31)의 "나의 주문 공책" 코드 상자(`design/prototypes/src/final/Quest.tsx`·`refine.css`)입니다. 색·글꼴 토큰은 [tokens.md](tokens.md)·[fonts.md](fonts.md).
 
@@ -108,4 +108,24 @@
 - **모바일 코드 키보드 툴바**(§12-Q3 C안): P6-04에서 `src/components/quest/CodeKeyboard.tsx`로 완료. lg 미만 또는 터치 화면에서만 지연 로드, 키 목록·순서의 근거(1월드 1~2스테이지 정답 코드)는 파일 머리 주석, e2e `code-keyboard.spec.ts`. 모바일 문제 유형은 Phase 7.
 - **폰 키보드 대응**(P6-11): 3스테이지부터 그 스테이지 주문(if·for·[ ]·def …)이 앞자리 바로 뒤 "이번 스테이지 주문" 묶음으로 옴(`keyGroups(stage)`). 폰 키보드가 열리고 에디터에 커서가 있으면 띠가 키보드 윗변에 붙는다: `visualViewport`의 `offsetTop + height`(= 키보드 윗변, layout viewport 좌표)로 `position: fixed; top: 0` + `translateY` — iOS Safari는 키보드가 열려도 layout viewport가 그대로이고 visual viewport만 줄고 위로 밀리기도 해서 `bottom: 0`은 키보드 뒤에 숨기 때문. 쪽(`.qw-page`)은 컨테이너 쿼리 상자라 fixed 기준이 되므로 붙을 때만 body로 포털, 자리(`.ck-slot`)는 남아 공책이 출렁이지 않음. 가린 높이(키보드 + 띠)는 `src/lib/editor/keyboardInset.ts` → 에디터 `scrollMargins`로 커서 줄이 띠 위에 오고, 붙는 순간 `revealCursor()`. 확대(pinch zoom) 중에는 띠가 화면 폭보다 넓을 수 있음(드묾). e2e `quest-mobile.spec.ts`는 가짜 visualViewport로 확인
 - 통과 도장 같은 공책 장식: P6-06·P6-08.
-- 다크 모드: 앱 전체가 범위 밖([tokens.md](tokens.md)).
+- 다크 모드: 앱 전체가 범위 밖([tokens.md](tokens.md)). 어두운 코드 상자는 상점 밤하늘 공책(§8)뿐.
+
+## 8. 공책 테마 (상점 아이템, P9-06)
+
+상점 "공책" 3종(밤하늘·바다·솜사탕, 각 450코인)을 쓰면 퀘스트 에디터 **상자 안 색만** 바뀝니다. 장착은 P9-03 `equip_item`이 `users.settings.editor_theme`(아이템 id)에 씁니다(클라이언트 설정 API는 이 키를 못 씀).
+
+- **원본**: `tokens.ts` `EDITOR_THEMES`(테마마다 `EDITOR_THEME_KEYS` 20색 전부) → `globals.css` `[data-editor-theme='night|ocean|candy']` 블록(`tokens.test.ts`가 같은지 검사). 이 블록은 코드 상자 요소에서 색 토큰 변수(`--code-*`·`--surface-2`·`--text-muted`·`--line(-strong)`·`--primary(-soft)`·`--accent-light/soft/text`·`--error(-soft)`·`--surface`·`--text`)를 다시 정할 뿐이라, 키즈 테마(`KIDS_THEME_SPEC`)·틴트·주석 진하기 규칙이 그대로 적용됩니다. 그래서 `codeEditor.css`(에디터가 오기 전 글자)와 상점 견본은 Tailwind `--color-*`가 아니라 토큰 변수를 직접 씁니다(`--color-*`는 `:root`에서 이미 풀린 값이라 상자 안에서 바뀌지 않음).
+- **범위**: 코드 상자(`CodeEditor`의 `[data-testid=code-editor]` — 줄 번호·자동 완성·찾기 창 포함)만. 공책 머리·코드 키보드·실행 줄·결과 쪽지·튜터는 앱 색 그대로입니다. 밤하늘은 어두운 상자가 밝은 쪽 위에 놓이는 모양이고(테두리 `lineStrong`이 바깥 `bg`·안쪽 `codeBg` 모두 3:1), 결과 쪽지까지 어둡게 하면 화면 반이 다른 앱처럼 보여 넣지 않았습니다(기본값). 포커스 링(`secondary`)은 바깥 바탕 위라 그대로.
+- **문법색**: 기본 공책은 구문색 3종 + 본문색이지만, 테마는 숫자·함수에도 색을 줍니다(키워드·문자열·숫자·함수·주석 5종). 굵게·기울임은 여전히 없음.
+
+| 테마 | 면 · 글자 | 키워드 | 문자열 | 숫자 | 함수 | 주석 |
+|---|---|---|---|---|---|---|
+| 밤하늘 `night` | `#1E2340` · `#E9ECF8` | 라벤더 `#BBA6FF` | 별빛 금색 `#FFD37A` | 산호 `#FFA99E` | 민트 `#7FDCC4` | `#A3ABCF` |
+| 바다 `ocean` | `#F2F9FB` · `#1E3340` | 바다색 `#066883` | 산호 `#A2461F` | 보라 `#6B46B0` | 해초 `#1F6E4C` | `#5B727D` |
+| 솜사탕 `candy` | `#FFF6FA` · `#3B2836` | 딸기 `#AD2A69` | 라벤더 `#6A48B4` | 청록 `#0D6E77` | 파랑 `#2C62A8` | `#7D6776` |
+
+- **대비**: `kidsTheme.test.ts`가 §2의 `EDITOR_CONTRAST_PAIRS` 전부(숫자·함수 포함 54조합)를 기본 + 테마 3종 색표(`editorThemePalette`)로 검사합니다. 가장 빠듯한 곳: 밤하늘 같은 단어 위 키워드 4.91·괄호 짝 위 키워드 4.99, 바다 기본 면 주석 4.75·포커스 없는 선택 위 주석 4.60, 솜사탕 같은 단어 위 숫자 4.71·상자 테두리 바깥 3.52.
+- **적용**: 퀘스트 레이아웃(`(protected)/quest/layout.tsx`)이 로그인 레이아웃과 같은 조회(`loadOwnUserRow`, React cache)의 `settings`를 `editorThemeFromSettings`(`src/lib/shop/catalog.ts`, 모르는 값·다른 종류 id는 기본)로 읽어 `EditorThemeProvider`에 넣고, `CodeEditor`가 상자에 `data-editor-theme`을 붙입니다. 서버 HTML부터 그 색이라 깜빡이지 않습니다. 코드·프로젝트 퀘스트와 퀴즈 "직접 실행해 보기"가 모두 이 레이아웃 아래입니다. `/dev/editor?theme=night`, 카탈로그 `#editor` "에디터 테마" 견본(기본 + 3종)도 같은 Provider.
+- **상점 견본** `ThemeArt`(`ShopItemArt.tsx`): 같은 `data-editor-theme` 블록으로 줄 번호 칸 + 코드 세 줄(키워드·이름·함수·숫자 / 함수·문자열 + 활성 줄·커서 / 주석)을 색 막대로 그립니다.
+- 검사: 단위 `kidsTheme.test.ts`·`tokens.test.ts`·`catalog.test.ts`(`editorThemeFromSettings`), e2e `editor-theme.spec.ts`(360·1280: 상점 공책 탭에서 쓰기 → 퀘스트 서버 HTML에 `data-editor-theme` + CodeMirror 면 색 → 그만 쓰기 → 기본).
+- CodeMirror 기본 테마의 밝은/어두운 구분(`&light`/`&dark`)은 쓰지 않습니다 — 우리가 덮지 않는 찾기 창 닫기 단추 정도만 밝은 기본값이라 밤하늘에서 조금 흐릴 수 있습니다(드묾).

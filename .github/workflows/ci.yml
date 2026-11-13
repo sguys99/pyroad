@@ -151,7 +151,7 @@ jobs:
       - run: npm run test:pyodide
 
   # RLS·권한 회귀 (P1-20). 격리 스택(supabase_*_pyroadci)을 띄워 점검하고 내림. DB 는 러너 안의 Docker 뿐
-  # - PR·기능 브랜치: 운영 재현(prod_replay) + fresh_legacy (RLS_SKIP_NEWDEFAULT=1)
+  # - PR·기능 브랜치: 운영 재현(prod_replay, 릴리즈 묶음 CRLF 그대로 = RLS_CRLF=1) + fresh_legacy (RLS_SKIP_NEWDEFAULT=1)
   # - main push·수동 실행: 3개 시나리오 전체 (+ fresh_newdefault, 스택 재시작 1회)
   # - prod_replay 는 과거 커밋(2f0a8f3^ 의 00001, e800386 의 seed)을 git show 로 읽으므로 전체 히스토리가 필요하다
   #   (얕은 clone 이면 run.sh 가 조용히 건너뜀 → 아래에서 실제로 돌았는지 확인)
@@ -175,6 +175,8 @@ jobs:
         env:
           RLS_PROJECT_ID: pyroadci
           RLS_PORT_BASE: '54820'
+          # 운영 재현을 실제 붙여넣기 묶음(build-release-sql.mjs, CRLF)으로 — 묶음 순서·seed 위치 문제를 CI 가 잡음 (B76)
+          RLS_CRLF: '1'
           RLS_SKIP_NEWDEFAULT: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch') && '0' || '1' }}
         run: |
           supabase --version

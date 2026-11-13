@@ -34,6 +34,7 @@ const ROUTES = {
   '/quest/[questId]': '(protected)/quest/[questId]/page',
   '/settings': '(protected)/settings/page',
   '/notice': 'notice/page',
+  '/share/[cardId]': 'share/[cardId]/page',
 };
 
 /** next-font-manifest에서 랜딩이 아닌데 preload가 있는 라우트 */

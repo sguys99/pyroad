@@ -63,7 +63,11 @@ test('퀘스트를 깨서 다음 스테이지가 열리면 지도에서 연출 �
   await firstVisit(page, e2eUser.id);
 
   // 마지막 퀘스트를 화면에서 풀어 1단계를 통과
-  await completeQuests(e2eUser.id, s1.quests.slice(0, -1));
+  // 보스(P9-12)는 먼저 끝내 둠 → 마지막 코드 퀘스트가 스테이지를 깸 (보스로 깨는 길은 boss-battle 스펙)
+  await completeQuests(e2eUser.id, [
+    ...s1.quests.slice(0, -1),
+    ...(s1.boss ? [{ id: s1.boss.id, solution: '' }] : []),
+  ]);
   const last = s1.quests[s1.quests.length - 1];
   await page.goto(`/quest/${last.id}`);
   await runCode(page, last.solution);

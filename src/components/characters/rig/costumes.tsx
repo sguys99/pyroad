@@ -1,4 +1,4 @@
-// 코스튬 슬롯 (Phase 9 F6·P9-04 대비 자리, P0-07 §4.6). 지금은 파이뱀만. 모두 같은 128×128 좌표계, 리그 그룹 안에 들어간다.
+// 코스튬 조각 (P9-04 꾸미기 렌더러, P0-07 §4.6, docs/design/rig.md §6¾). 지금은 파이뱀만. 라이브·정지·공유 카드가 이 한 벌을 쓴다. 모두 같은 128×128 좌표계, 리그 그룹 안에 들어간다.
 // - 모자: 머리 그룹 안 (머리 회전·흔들림을 같이 받음 + 자체 출렁임 hatRot)
 // - 안경: 얼굴 그룹 안 (시선 시차를 같이 받음, 눈동자는 안경 안에서 움직임)
 // - 망토: 몸 뒤 (자락이 capeSwing으로 출렁)
@@ -8,6 +8,9 @@
 export type HatKind = 'party' | 'explorer' | 'crown' | 'wizard';
 export type GlassesKind = 'round' | 'sun';
 export type BackdropKind = 'island' | 'paper';
+/** 상점 망토 아이템의 색 (P9-01 카탈로그 `art` 키 → `Costume.cape`) */
+export const CAPE_COLORS = { hero: '#D9584A', night: '#3E5A99' } as const;
+export type CapeKind = keyof typeof CAPE_COLORS;
 export interface Costume {
   hat?: HatKind;
   glasses?: GlassesKind;
@@ -15,9 +18,31 @@ export interface Costume {
   bg?: BackdropKind;
 }
 
-export function Hat({ kind, outline }: { kind: HatKind; outline?: string }) {
-  const ol = outline
-    ? { stroke: outline, strokeWidth: 1.6, strokeLinejoin: 'round' as const }
+/** 스타일 B(몸색 톤 외곽선)에서 모자에 두르는 제 색의 진한 톤 (펫·별 눈과 같은 말씨) */
+const HAT_TONE: Record<HatKind, string> = {
+  party: '#C4512B',
+  explorer: '#9C7B45',
+  crown: '#C98A0B',
+  wizard: '#4A2C8F',
+};
+
+/** outline = 잉크 외곽선(A×B), tonal = 제 색 진한 톤 얇은 선(B), 둘 다 없으면 선 없음(A) */
+export function Hat({
+  kind,
+  outline,
+  tonal,
+}: {
+  kind: HatKind;
+  outline?: string;
+  tonal?: boolean;
+}) {
+  const stroke = outline ?? (tonal ? HAT_TONE[kind] : undefined);
+  const ol = stroke
+    ? {
+        stroke,
+        strokeWidth: outline ? 1.6 : 1.1,
+        strokeLinejoin: 'round' as const,
+      }
     : {};
   switch (kind) {
     case 'party':

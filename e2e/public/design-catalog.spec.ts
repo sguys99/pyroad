@@ -133,6 +133,7 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       'tooltip',
       'social-login',
       'rig',
+      'costume',
       'editor',
       'run-controls',
       'output-slip',
@@ -939,4 +940,208 @@ test.describe('휴식 알림 (P8-12)', () => {
       await expect(page.getByRole('dialog')).toHaveCount(0);
     });
   }
+});
+
+test.describe('꾸미기 렌더러 (P9-04)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 코스튬 × 포즈 격자가 스킨을 따라 다시 칠해지고 격자만 가로로 밀린다`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const grid = page.getByTestId('costume-grid');
+      await grid.scrollIntoViewIfNeeded();
+      // 조각 10 + 다 입기 1 행 × 14상태
+      await expect(grid.locator('tr[data-costume]')).toHaveCount(11);
+      await expect(grid.locator('td svg')).toHaveCount(11 * 14);
+      await expect(
+        grid.locator('svg text, svg foreignObject, svg image'),
+      ).toHaveCount(0);
+      // 스킨 바꾸기: 몸색이 하늘파랑으로
+      await grid.getByRole('button', { name: '하늘파랑' }).click();
+      await expect(grid.locator('table')).toHaveAttribute('data-skin', 'sky');
+      await expect(
+        grid
+          .locator('tr[data-costume="hat_wizard"] td')
+          .first()
+          .locator('ellipse[fill="#88BCE2"]'),
+      ).toHaveCount(2);
+      // 격자는 제 상자 안에서만 넘친다 (페이지 가로 넘침 없음)
+      const box = await grid.boundingBox();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      await expect(
+        page.getByTestId('costume-live').locator('svg[role="img"]'),
+      ).toBeVisible();
+      await grid.screenshot({
+        path: testInfo.outputPath(`costume-grid-${width}.png`),
+      });
+    });
+  }
+});
+
+test.describe('꾸민 아바타·테두리 (P9-05)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 모자는 32px 칩 안에, 테두리 3종이 칩과 같은 크기로 겹치고 화면 안에 있다`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const demo = page.getByTestId('user-avatar-look-demo');
+      await demo.scrollIntoViewIfNeeded();
+      const avatars = demo.getByTestId('user-avatar');
+      await expect(avatars).toHaveCount(5 * 3);
+      for (const art of ['sprout', 'star', 'wave'])
+        await expect(
+          demo.locator(`svg.avatar-frame[data-art="${art}"]`).first(),
+        ).toBeVisible();
+      // 32px: 모자(마법사 −12) 끝이 칩 위로 나가지 않음
+      const small = demo
+        .locator('[data-look="마법사 + 별빛 테두리"]')
+        .getByTestId('user-avatar')
+        .last();
+      const chip = await small.boundingBox();
+      const hat = await small.locator('[data-hat="wizard"]').boundingBox();
+      expect(chip!.width).toBe(32);
+      expect(hat!.y).toBeGreaterThanOrEqual(chip!.y - 0.5);
+      // 테두리는 칩과 같은 칸 (바깥 크기 그대로)
+      const ring = await small.locator('svg.avatar-frame').boundingBox();
+      expect(Math.round(ring!.width)).toBe(32);
+      const box = await demo.boundingBox();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      await demo.screenshot({
+        path: testInfo.outputPath(`avatar-look-${width}.png`),
+      });
+    });
+  }
+});
+
+test.describe('상점 아이템 카탈로그 (P9-01)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 아이템 22종이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const section = page.locator('#shop');
+      await section.scrollIntoViewIfNeeded();
+      const items = section.locator('[data-item]');
+      await expect(items).toHaveCount(22);
+      await expect(section.locator('[data-item="pet_dragon"]')).toContainText(
+        '1,500',
+      );
+      await expect(section.locator('[data-item="golden_key"]')).toContainText(
+        '한 주에 1개',
+      );
+      await expect(
+        section.locator('[data-item^="pet_"] svg[viewBox="0 0 48 48"]'),
+      ).toHaveCount(4);
+      for (const box of await items.evaluateAll((els) =>
+        els.map((el) => el.getBoundingClientRect().right),
+      ))
+        expect(box).toBeLessThanOrEqual(width);
+    });
+  }
+});
+
+test.describe('상점 화면 (P9-02)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 가짜 서버 상점에서 미리 보기 → 구매 → 축하 → 바로 입기, 칸이 화면 안`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page);
+      const demo = page.getByTestId('catalog-shop-screen');
+      await demo.scrollIntoViewIfNeeded();
+      await expect(demo.locator('[data-item]')).toHaveCount(10);
+      await demo.getByRole('button', { name: /^마법사 모자,/ }).click();
+      const sheet = page.getByTestId('shop-sheet');
+      await expect(sheet.getByTestId('shop-stage')).toHaveAttribute(
+        'data-look',
+        /"hat":"wizard"/,
+      );
+      await sheet.getByTestId('shop-buy').click();
+      await sheet.getByTestId('shop-buy-confirm').click();
+      const card = page.getByTestId('celebration-step-purchase');
+      await expect(card).toContainText('마법사 모자');
+      await card.getByTestId('purchase-wear').click();
+      await expect(page.getByTestId('celebration-overlay')).toHaveCount(0);
+      await expect(demo.locator('[data-item="hat_wizard"]')).toHaveAttribute(
+        'data-state',
+        'equipped',
+      );
+      // 코인 부족·오류 상태 견본
+      await expect(page.getByTestId('catalog-shop-error')).toContainText(
+        '상점 문을 열지 못했어요',
+      );
+      await expect(
+        page.getByTestId('catalog-purchase-pet_dragon'),
+      ).toContainText('용용이');
+      // 페이지 전체 가로 넘침 없음 (B73: HUD 견본은 자기 칸 안에서만 가로로 밈)
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        ),
+      ).toBeLessThanOrEqual(0);
+    });
+  }
+});
+
+test.describe('보스 배틀 (P9-12)', () => {
+  for (const width of [360, 1280]) {
+    test(`${width}px: 공격 = HP 한 칸·보스 깜빡, 피격 = 하트 한 개·무대 흔들림, 숫자는 글자로, 가로 넘침 없음`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openCatalog(page, { name: 'full', tier: 'full', reduced: 'off' });
+      const demo = page.getByTestId('boss-live');
+      await demo.scrollIntoViewIfNeeded();
+      const hp = demo.getByTestId('boss-hp');
+      await expect(hp.getByRole('progressbar')).toHaveAttribute(
+        'aria-valuetext',
+        '보스 HP 5/5',
+      );
+      await demo.getByTestId('boss-demo-attack').click();
+      await expect(hp).toHaveAttribute('data-hp', '4');
+      await expect(demo.locator('.bb-rig[data-flash]')).toHaveCount(1);
+      await expect(demo.locator('.bb-shot')).toHaveCount(1);
+      await demo.getByTestId('boss-demo-hurt').click();
+      await expect(demo.getByTestId('boss-hearts')).toHaveAttribute(
+        'aria-label',
+        '하트 2개 남음',
+      );
+      await expect(demo.locator('.bb-stage[data-shake]')).toHaveCount(1);
+      await expect(demo.locator('.bb-heart[data-breaking]')).toHaveCount(1);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        ),
+      ).toBeLessThanOrEqual(0);
+      await demo.screenshot({
+        path: testInfo.outputPath(`boss-live-${width}.png`),
+      });
+      await page
+        .getByTestId('boss-states')
+        .screenshot({ path: testInfo.outputPath(`boss-states-${width}.png`) });
+    });
+  }
+
+  test('동작 줄이기: 별탄·흔들림 애니메이션 없이 "−1" 글자와 하트·HP 값만 바뀐다', async ({
+    page,
+  }) => {
+    await openCatalog(page, { name: 'reduced', tier: 'full', reduced: 'on' });
+    const demo = page.getByTestId('boss-live');
+    await demo.scrollIntoViewIfNeeded();
+    await demo.getByTestId('boss-demo-hurt').click();
+    await expect(demo.getByTestId('boss-hearts')).toHaveAttribute(
+      'data-hearts',
+      '2',
+    );
+    const names = await demo.evaluate((el) =>
+      [...el.querySelectorAll('.bb-stage, .bb-heart, .bb-rig, .bb-shot')]
+        .map((n) => getComputedStyle(n).animationName)
+        .filter((n) => n !== 'none'),
+    );
+    expect(names).toEqual([]);
+    await expect(demo.locator('.bb-dmg')).toBeVisible();
+  });
 });

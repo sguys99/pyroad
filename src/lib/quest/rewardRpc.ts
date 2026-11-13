@@ -15,6 +15,13 @@ import type {
   WorldDailyStatus,
 } from '@/lib/world/attendance';
 import type { AchievementInfo, ClaimAchievementResult } from './achievements';
+import type {
+  EquipResult,
+  EquipSlot,
+  PurchaseResult,
+  ShopStatus,
+} from '@/lib/shop/api';
+import type { ShareRewardResult } from '@/lib/share-card/share';
 
 /**
  * 보상 RPC 호출 (서버 전용, P1-03)
@@ -36,6 +43,20 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   submission_too_large: { status: 413, error: '코드가 너무 길어요.' },
   answer_too_large: { status: 413, error: '답이 너무 길어요.' },
   not_quiz: { status: 400, error: '퀴즈 문제가 아니에요.' },
+  // 보스 배틀 (P9-12, 00046)
+  not_boss: { status: 400, error: '보스 배틀이 아니에요.' },
+  boss_locked: {
+    status: 409,
+    error: '이 스테이지 퀘스트를 모두 깨면 보스가 나타나요!',
+  },
+  boss_run_over: {
+    status: 409,
+    error: '이번 판은 끝났어요. 다시 도전해 볼까요?',
+  },
+  boss_round_mismatch: {
+    status: 409,
+    error: '다른 화면에서 이미 답했어요. 다시 도전해 볼까요?',
+  },
   quest_not_found: { status: 404, error: '퀘스트를 찾을 수 없어요.' },
   stage_not_found: { status: 404, error: '해당 스테이지를 찾을 수 없어요.' },
   user_not_found: { status: 404, error: '사용자 정보를 찾을 수 없어요.' },
@@ -56,6 +77,33 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
   mission_not_done: { status: 409, error: '아직 미션을 다 하지 않았어요.' },
   mission_expired: { status: 410, error: '받을 수 있는 날이 지났어요.' },
   achievement_not_earned: { status: 409, error: '아직 얻지 않은 업적이에요.' },
+  // 상점 (P9-03, 00040)
+  item_not_found: { status: 404, error: '상점에 없는 물건이에요.' },
+  item_inactive: { status: 410, error: '지금은 팔지 않는 물건이에요.' },
+  already_owned: { status: 409, error: '이미 가지고 있어요!' },
+  weekly_limit_reached: {
+    status: 409,
+    error: '이번 주에는 이미 샀어요. 월요일에 다시 살 수 있어요.',
+  },
+  shields_full: {
+    status: 409,
+    error: '방패는 2개까지 가질 수 있어요. 하나를 쓰면 또 살 수 있어요.',
+  },
+  not_owned: { status: 403, error: '아직 가지고 있지 않은 물건이에요.' },
+  wrong_slot: { status: 400, error: '그 자리에는 입힐 수 없어요.' },
+  // 공유 카드 (P9-07, 00043)
+  stage_not_cleared: {
+    status: 409,
+    error: '스테이지를 다 깨면 자랑할 수 있어요.',
+  },
+  share_card_not_found: {
+    status: 404,
+    error: '자랑 카드를 찾을 수 없어요. 다시 열어 줘.',
+  },
+  nothing_this_week: {
+    status: 409,
+    error: '이번 주에 끝낸 퀘스트가 생기면 자랑할 수 있어요.',
+  },
 };
 
 export function rewardError(
@@ -91,6 +139,7 @@ async function callRpc<T>(
     | 'use_golden_key'
     | 'reset_progress'
     | 'submit_quiz_answer'
+    | 'boss_answer'
     | 'grant_coins'
     | 'spend_coins'
     | 'open_stage_chest'
@@ -98,7 +147,13 @@ async function callRpc<T>(
     | 'claim_daily_mission'
     | 'world_daily_status'
     | 'stamp_attendance'
-    | 'claim_achievement',
+    | 'claim_achievement'
+    | 'purchase_item'
+    | 'equip_item'
+    | 'shop_status'
+    | 'create_share_card'
+    | 'claim_share_reward'
+    | 'manage_share_card',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -172,6 +227,25 @@ export async function submitQuizAnswerRpc<T extends object>(
         p_answer: answer,
       }),
     ),
+  );
+}
+
+/** 보스 배틀 한 문제·시작 (P9-12, 00046). answer null = 시작·재도전. 업적은 이긴 판에서 RPC 가 판정해 reward 에 담음 */
+export function bossAnswerRpc<T>(
+  admin: AdminClient,
+  userId: string,
+  questId: string,
+  round: number,
+  answer: Json | null,
+) {
+  return callRpc<T>('boss_answer', () =>
+    admin.rpc('boss_answer', {
+      p_user_id: userId,
+      p_quest_id: questId,
+      p_round: round,
+      // null 은 "시작" (생성된 타입은 Json 만 받아 단언)
+      p_answer: answer as Json,
+    }),
   );
 }
 
@@ -379,6 +453,97 @@ export function claimAchievementRpc(
     admin.rpc('claim_achievement', {
       p_user_id: userId,
       p_achievement_id: achievementId,
+    }),
+  );
+}
+
+/** 상점 구매 (P9-03, 00040). 가격·한도는 서버(shop_items), 실패는 아이용 이유 코드(already_owned·weekly_limit_reached 등) */
+export function purchaseItemRpc(
+  admin: AdminClient,
+  userId: string,
+  itemId: string,
+) {
+  return callRpc<PurchaseResult>('purchase_item', () =>
+    admin.rpc('purchase_item', { p_user_id: userId, p_item_id: itemId }),
+  );
+}
+
+/** 장착·벗기 (P9-03). itemId null = 벗기. 가진 아이템·맞는 슬롯만(not_owned·wrong_slot), skin 은 무료 6색 */
+export function equipItemRpc(
+  admin: AdminClient,
+  userId: string,
+  slot: EquipSlot,
+  itemId: string | null,
+) {
+  return callRpc<EquipResult>('equip_item', () =>
+    admin.rpc('equip_item', {
+      p_user_id: userId,
+      p_slot: slot,
+      ...(itemId !== null && { p_item_id: itemId }),
+    }),
+  );
+}
+
+/** 상점 상태 (P9-03): 잔액·황금키·방패·가진 아이템·이번 주 소모품 구매 수·장착 */
+export function shopStatusRpc(admin: AdminClient, userId: string) {
+  return callRpc<ShopStatus>('shop_status', () =>
+    admin.rpc('shop_status', { p_user_id: userId }),
+  );
+}
+
+/** 공유 카드 만들기·다시 공개 (P9-07, 00043). 성과 숫자는 서버가 실제 기록으로 계산 — 클라이언트는 종류와 ref(스테이지·업적 id)만 */
+export interface ShareCardCreated {
+  id: string;
+  kind: string;
+  version: number;
+  expires_at: string;
+  snapshot: Json;
+}
+export function createShareCardRpc(
+  admin: AdminClient,
+  userId: string,
+  kind: string,
+  ref: string | null,
+) {
+  return callRpc<ShareCardCreated>('create_share_card', () =>
+    admin.rpc('create_share_card', {
+      p_user_id: userId,
+      p_kind: kind,
+      ...(ref ? { p_ref: ref } : {}),
+    }),
+  );
+}
+
+/** 자랑하기 보상 (P9-10, 00044). 본인 공개 카드가 있을 때 KST 하루 한 번 30코인, 이미 받았으면 already_claimed(0) */
+export function claimShareRewardRpc(
+  admin: AdminClient,
+  userId: string,
+  cardId: string,
+) {
+  return callRpc<ShareRewardResult>('claim_share_reward', () =>
+    admin.rpc('claim_share_reward', { p_user_id: userId, p_card_id: cardId }),
+  );
+}
+
+/** 내 자랑 카드 숨기기·다시 공개(새 90일)·지우기 (P9-11, 00045). 본인 카드가 아니면 share_card_not_found */
+export function manageShareCardRpc(
+  admin: AdminClient,
+  userId: string,
+  cardId: string,
+  action: 'hide' | 'show' | 'delete',
+) {
+  return callRpc<{
+    id: string;
+    kind: string;
+    version: number;
+    is_public: boolean;
+    expires_at: string;
+    deleted: boolean;
+  }>('manage_share_card', () =>
+    admin.rpc('manage_share_card', {
+      p_user_id: userId,
+      p_card_id: cardId,
+      p_action: action,
     }),
   );
 }

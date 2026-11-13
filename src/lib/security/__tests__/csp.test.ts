@@ -17,7 +17,9 @@ import {
   originOf,
   parseSentryDsn,
   sentryCspReportUri,
+  KAKAO_CSP,
 } from '../csp';
+import { KAKAO_SDK_URL } from '@/lib/share-card/share';
 import { MOTION_BOOT_SCRIPT_CSP_SOURCE } from '@/lib/motion/boot';
 
 const SUPABASE_URL = 'https://abcdefghijklmnop.supabase.co';
@@ -54,7 +56,21 @@ describe('페이지 CSP (B27)', () => {
       "'nonce-abc123=='",
       MOTION_BOOT_SCRIPT_CSP_SOURCE,
       "'strict-dynamic'",
+      KAKAO_CSP.script,
     ]);
+  });
+
+  it('카카오톡 공유(P9-09): nonce 정책에만 SDK·kapi·sharer·kakaolink 를 더하고 정적 정책은 그대로', () => {
+    const d = parse(buildPageCsp({ ...prod, nonce: 'n' }));
+    expect(d['connect-src']).toContain('https://kapi.kakao.com');
+    expect(d['form-action']).toEqual(["'self'", 'https://sharer.kakao.com']);
+    expect(d['frame-src']).toEqual(['kakaolink:']);
+    expect(KAKAO_SDK_URL.startsWith(`${KAKAO_CSP.script}/`)).toBe(true);
+    const s = parse(buildPageCsp(prod));
+    expect(s['connect-src']).toEqual(["'self'", SUPABASE_URL]);
+    expect(s['form-action']).toEqual(["'self'"]);
+    expect(s['frame-src']).toEqual(["'none'"]);
+    expect(JSON.stringify(s)).not.toContain('kakao');
   });
 
   it('정적 정책(nonce 없음): self + unsafe-inline (해시를 넣으면 unsafe-inline이 무시되므로 넣지 않음)', () => {
@@ -77,12 +93,12 @@ describe('페이지 CSP (B27)', () => {
       'style-src': ["'self'", "'unsafe-inline'"],
       'img-src': ["'self'", 'data:', 'blob:'],
       'font-src': ["'self'"],
-      'connect-src': ["'self'", SUPABASE_URL],
+      'connect-src': ["'self'", SUPABASE_URL, KAKAO_CSP.connect],
       // canvas-confetti·lottie-web의 Blob Worker (P1-10)
       'worker-src': ["'self'", 'blob:'],
       'object-src': ["'none'"],
       'base-uri': ["'self'"],
-      'form-action': ["'self'"],
+      'form-action': ["'self'", KAKAO_CSP.formAction],
       'frame-ancestors': ["'none'"],
       'upgrade-insecure-requests': [],
     });
@@ -122,6 +138,7 @@ describe('페이지 CSP (B27)', () => {
       "'self'",
       SUPABASE_URL,
       'https://o4500000000000001.ingest.us.sentry.io',
+      KAKAO_CSP.connect,
     ]);
     expect(d['report-uri']).toEqual([
       'https://o4500000000000001.ingest.us.sentry.io/api/4500000000000002/security/?sentry_key=0123456789abcdef&sentry_environment=preview',

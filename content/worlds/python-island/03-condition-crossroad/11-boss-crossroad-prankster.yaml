@@ -1,0 +1,154 @@
+# 보스 3: 갈림길 장난꾼 버그버그 (P9-13)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b1000000-0000-0000-0000-000000000203
+order: 11
+title: 갈림길 장난꾼 버그버그
+concept: 조건문 총정리
+xp_reward: 36
+quest_type: boss
+prompt:
+  topic: 3단계에서 배운 if/elif/else·비교·나머지·and/or 총정리
+  learning_goals:
+    - if/elif/else 가운데 어느 줄이 실행되는지 위에서부터 따질 수 있다
+    - 비교 기호와 and/or 를 바르게 쓸 수 있다
+    - 나머지(%)로 나누어떨어지는지 판단할 수 있다
+  story_context: 갈림길 표지판이 빙글빙글 돌아가 버렸어요! 장난꾼 버그버그가 표지판을 다 돌려놓았대요. 조건을 바르게 따지면 길이 보여요.
+  fallback_text: if 는 조건이 맞을 때만 그 아래 줄을 실행해요. elif 와 else 는 위의 조건이 맞지 않았을 때만 차례로 따져요. and 는 둘 다 맞아야, or 는 하나만 맞아도 참이에요.
+  boss:
+    name: 갈림길 장난꾼 버그버그
+    look: crossroad
+    intro: 이쪽일까~ 저쪽일까~? 표지판은 내가 다 돌려 놨지! 다섯 문제를 맞혀서 길을 찾아봐!
+    on_defeat: 우와, 조건을 척척 따지네! 표지판은 다시 바르게 세워 둘게. 다음 동굴에서 보자!
+    on_victory: 길을 잃었구나? 조건을 위에서부터 하나씩 따져 보고 다시 도전해!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000009
+    prompt:
+      quiz:
+        question: 이 코드를 돌리면 무엇이 나올까?
+        code: |-
+          score = 85
+          if score >= 60:
+              print("통과")
+          elif score >= 80:
+              print("우수")
+          else:
+              print("다시")
+        options:
+          - { id: opt-g7kx, text: '통과' }
+          - { id: opt-u3bn, text: '우수' }
+          - { id: opt-q9fe, text: "통과\n우수" }
+          - { id: opt-j2wi, text: '다시' }
+    answer:
+      quiz_answer:
+        accepted: [opt-g7kx]
+        explanation: 85는 60 이상이라 첫 조건이 맞아요. if 가 맞으면 아래 elif 와 else 는 보지 않고 넘어가요.
+        explanations:
+          opt-u3bn: 85는 80 이상도 맞지만, 위에 있는 if 가 먼저 맞아서 elif 까지 가지 않아요.
+          opt-q9fe: if·elif·else 묶음에서는 맞는 것 딱 하나만 실행돼요.
+          opt-j2wi: else 는 위의 조건이 모두 틀릴 때만 실행돼요. 85는 60 이상이에요.
+  - quiz_kind: bug_hunt
+    review_quest: b1000000-0000-0000-0000-000000000010
+    prompt:
+      quiz:
+        question: 키가 120 이상이면 탈 수 있다고 알려 주려는데 오류가 나요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - id: ln-n3rd
+            code: height = 130
+          - id: ln-v8ap
+            code: 'if height => 120:'
+          - id: ln-f5ts
+            code: '    print("탈 수 있어요")'
+        fixes:
+          - id: fx-k4mw
+            code: 'if height >= 120:'
+          - id: fx-c9hy
+            code: 'if height =< 120:'
+          - id: fx-o2xg
+            code: 'if height <= 120:'
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-v8ap, fix: fx-k4mw }
+        explanation: '"크거나 같다"는 > 를 먼저, = 를 뒤에 써서 >= 예요. 말하는 차례 그대로 "크다, 같다"로 외워요.'
+        explanations:
+          ln-n3rd: 이 줄은 height 상자에 130을 잘 넣었어요. 다른 줄을 살펴봐요.
+          ln-f5ts: 이 줄은 들여쓰기와 따옴표가 잘 맞아요. 다른 줄을 살펴봐요.
+          fx-c9hy: = 는 늘 뒤에 와요. =< 처럼 쓰면 오류가 나요.
+          fx-o2xg: <= 는 "작거나 같다"예요. 130은 120보다 크니까 아무것도 나오지 않아요.
+  - quiz_kind: fill_blank
+    review_quest: b1000000-0000-0000-0000-000000000011
+    prompt:
+      quiz:
+        question: 빈칸을 채워 토요일이나 일요일이면 놀이공원 가는 날이 나오게 해요
+        code: |-
+          day = "토요일"
+          if day == "토요일" {{bk-r6pd}} day == "일요일":
+              print("놀이공원 가는 날!")
+          else:
+              print("학교 가는 날")
+        tokens:
+          - { id: tok-w5ic, text: or }
+          - { id: tok-e2lj, text: and }
+          - { id: tok-n7vu, text: not }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-r6pd: tok-w5ic }
+        explanation: or 는 둘 가운데 하나만 맞아도 참이에요. 오늘은 토요일이라 첫 조건이 맞아서 놀이공원 가는 날이 나와요.
+        explanations:
+          tok-e2lj: and 는 둘 다 맞아야 해요. 하루가 토요일이면서 일요일일 수는 없어서 학교 가는 날이 나와요.
+          tok-n7vu: not 은 조건 하나를 뒤집는 말이라 두 조건 사이에 쓸 수 없어요. 오류가 나요.
+  - quiz_kind: parsons
+    review_quest: b1000000-0000-0000-0000-000000000030
+    prompt:
+      quiz:
+        question: 숫자가 3으로도 5로도 나누어떨어지면 박수 두 번, 3으로만 나누어떨어지면 박수 한 번, 아니면 숫자를 말해요. 줄을 놓고 들여쓰기도 맞춰요
+        indent: true
+        lines:
+          - { id: ln-x4bh, code: 'n = 15' }
+          - { id: ln-d9qo, code: 'if n % 3 == 0 and n % 5 == 0:' }
+          - { id: ln-b2ez, code: 'print("박수 두 번")' }
+          - { id: ln-m6uk, code: 'elif n % 3 == 0:' }
+          - { id: ln-a8rn, code: 'print("박수 한 번")' }
+          - { id: ln-y3js, code: 'else:' }
+          - { id: ln-c7wf, code: 'print(n)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-x4bh, indent: 0 }
+            - { id: ln-d9qo, indent: 0 }
+            - { id: ln-b2ez, indent: 1 }
+            - { id: ln-m6uk, indent: 0 }
+            - { id: ln-a8rn, indent: 1 }
+            - { id: ln-y3js, indent: 0 }
+            - { id: ln-c7wf, indent: 1 }
+        explanation: 더 까다로운 조건(3과 5 모두)을 맨 위에 둬야 해요. 3으로만 따지는 elif 가 위에 있으면 15도 박수 한 번에서 멈춰요.
+  - quiz_kind: multiple_choice
+    review_quest: b1000000-0000-0000-0000-000000000032
+    prompt:
+      quiz:
+        question: 마법 점수 70, 용기 점수 90인 친구의 결과는? 돌리면 무엇이 나올까?
+        code: |-
+          magic = 70
+          courage = 90
+          if magic >= 80 and courage >= 80:
+              print("대마법사")
+          elif magic >= 80 or courage >= 80:
+              print("견습 마법사")
+          else:
+              print("다시 도전")
+        options:
+          - { id: opt-h5vc, text: '견습 마법사' }
+          - { id: opt-s2ma, text: '대마법사' }
+          - { id: opt-l8tz, text: '다시 도전' }
+          - { id: opt-f4dq, text: "견습 마법사\n다시 도전" }
+    answer:
+      quiz_answer:
+        accepted: [opt-h5vc]
+        explanation: and 조건은 마법 점수가 80보다 낮아서 틀려요. or 조건은 용기 점수 90이 80 이상이라 하나만 맞아도 참이 되어 견습 마법사가 나와요.
+        explanations:
+          opt-s2ma: and 는 둘 다 맞아야 해요. 마법 점수 70은 80보다 낮아요.
+          opt-l8tz: or 는 하나만 맞아도 돼요. 용기 점수 90이 80 이상이에요.
+          opt-f4dq: 맞는 조건 하나를 실행하면 else 는 건너뛰어요.

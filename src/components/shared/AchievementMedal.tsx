@@ -5,7 +5,11 @@ import {
   BugOff,
   Bug,
   CalendarCheck,
+  CalendarDays,
+  CalendarFold,
   CalendarHeart,
+  CalendarPlus,
+  CalendarRange,
   Castle,
   Code,
   Compass,
@@ -44,14 +48,18 @@ import type { AchievementTier } from '@/lib/quest/achievements';
 import { cn } from '@/lib/utils';
 import './achievementMedal.css';
 
-/** 업적 아이콘 (00036 achievements.icon 의 Lucide 이름 → 컴포넌트). 표에 새 이름을 쓰면 여기에도 (테스트가 대조) */
+/** 업적 아이콘 (00036·00048 achievements.icon 의 Lucide 이름 → 컴포넌트). 표에 새 이름을 쓰면 여기에도 (테스트가 대조) */
 export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   BadgeCheck,
   Brain,
   Bug,
   BugOff,
   CalendarCheck,
+  CalendarDays,
+  CalendarFold,
   CalendarHeart,
+  CalendarPlus,
+  CalendarRange,
   Castle,
   Code,
   Compass,

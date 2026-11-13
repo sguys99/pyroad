@@ -98,7 +98,7 @@ interface QuestHintsProps {
  * 이야기 쪽 힌트·황금키 줄 + 힌트 쪽지 (P6-09, 최종 시안 Quest.tsx StoryPage·HintNote).
  * 남은 횟수를 버튼에 바로 보여 주고, 쓰기 전에 보상이 어떻게 바뀌는지 미리 알려 준다.
  * 규칙은 서버와 같다: 완료 XP = complete_quest의 quest_xp(힌트 0회 1.5배 · 1회 1.25배 · 그 외 기본 · 황금키 0, xp.ts),
- * 황금키 완료는 뱃지 없음(00019, 나중에 직접 풀면 그때 판정 — 00032), 스테이지를 깨면 황금키 3개로 채움. 별은 같은 자리에 SHOW_STARS로 (F3 규칙, P8-05)
+ * 황금키 완료는 뱃지 없음(00019, 나중에 직접 풀면 그때 판정 — 00032), 스테이지를 깨면 황금키 3개 미만만 3개로 채움(00041). 별은 같은 자리에 SHOW_STARS로 (F3 규칙, P8-05)
  */
 export function QuestHints({
   kind,
@@ -258,7 +258,7 @@ export function QuestHints({
                 </li>
                 <li>
                   황금키 {goldenKeys}개 → {goldenKeys - 1}개. 스테이지를 깨면
-                  다시 3개로 채워져요.
+                  3개보다 적을 때 3개로 채워져요.
                 </li>
               </ul>
             </AlertDialogDescription>

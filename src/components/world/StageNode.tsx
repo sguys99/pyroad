@@ -1,10 +1,11 @@
 'use client';
 
-import { Check, Crown, Lock } from 'lucide-react';
+import { Check, Crown, Lock, Swords } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import { RewardIcon, Stars } from '@/components/ui/reward-icon';
 import dynamic from 'next/dynamic';
-import { PybaemStatic, type PybaemState } from '@/components/characters/rig';
+import type { PybaemState } from '@/components/characters/rig';
+import { MyPybaemStatic, useMyPybaem } from '@/components/profile/MyLook';
 import { SHOW_CHEST, SHOW_STARS } from '@/lib/world/flags';
 import { chestState, isPerfectStage } from '@/lib/world/chest';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
@@ -34,6 +35,18 @@ const STATE_TEXT: Record<NodeState, string> = {
   clear: '통과',
 };
 
+/**
+ * 보스(P9-12)만 남은 스테이지: 코드 퀘스트를 다 끝내고 마지막 관문이 기다림. 보스는 다른 퀘스트를 다 끝내야 열리므로
+ * "남은 것 1개 + 보스가 있음" = 보스만 남음
+ */
+export function bossWaiting(stage: StageWithStatus): boolean {
+  return (
+    stage.status === 'in_progress' &&
+    stage.quests.some((q) => q.quest_type === 'boss') &&
+    stage.completedQuestCount === stage.totalQuestCount - 1
+  );
+}
+
 /** 화면 낭독기용 이름: 단계·이름·상태·(별)·진행. 별은 SHOW_STARS일 때만 (Q51) */
 export function stageNodeLabel(stage: StageWithStatus): string {
   const parts = [
@@ -49,6 +62,7 @@ export function stageNodeLabel(stage: StageWithStatus): string {
     );
     if (SHOW_CHEST && chestState(stage) === 'ready')
       parts.push('보물상자를 열 수 있어요');
+    if (bossWaiting(stage)) parts.push('보스가 기다려요');
   }
   return parts.join(', ');
 }
@@ -109,6 +123,12 @@ export function StageNode({ stage, onOpen }: StageNodeProps) {
           <span className="wn-t">{stage.title}</span>
         </span>
         <span className="wn-meta" aria-hidden>
+          {bossWaiting(stage) && (
+            <span className="wn-boss" data-testid="stage-node-boss">
+              <Swords className="size-3.5" strokeWidth={2.6} />
+              보스!
+            </span>
+          )}
           {locked ? (
             <>
               <Lock className="size-3.5" strokeWidth={2.6} /> 잠김
@@ -161,13 +181,13 @@ const PybaemRig = dynamic(
   {
     ssr: false,
     loading: () => (
-      <PybaemStatic state="happy" size={120} framing="stage" label="" />
+      <MyPybaemStatic state="happy" size={120} framing="stage" label="" />
     ),
   },
 );
 
 /**
- * 지금 위치: 큰 파이뱀 + "지금 여기!" 칩. 평소에는 정지 리그 그림(엔진 없음)에 CSS 대기 루프 `.mascot-bob`(full·lite)만.
+ * 지금 위치: 큰 파이뱀(내가 꾸민 모습, P9-05) + "지금 여기!" 칩. 평소에는 정지 리그 그림(엔진 없음)에 CSS 대기 루프 `.mascot-bob`(full·lite)만.
  * 잠금 해제 연출(P5-05)은 `live`로 라이브 `PybaemRig`(상태 기쁨 → 응원)를 쓰고 칩 글자를 바꾼다
  */
 export function CurrentMarker({
@@ -181,11 +201,13 @@ export function CurrentMarker({
 }) {
   // 리그의 선 떨림(SVG 변위 필터)은 비싸서 연출 동안 full 도 lite 로 (시안 rigTier: 도장·길이 주인공)
   const { tier } = useMotionTier();
+  const me = useMyPybaem();
   return (
     <div className="wn-here" aria-hidden data-testid="world-current-marker">
       <div className="mascot-bob">
         {live ? (
           <PybaemRig
+            {...me}
             state={state}
             size={120}
             framing="stage"
@@ -195,7 +217,7 @@ export function CurrentMarker({
             pokeable={false}
           />
         ) : (
-          <PybaemStatic state="happy" size={120} framing="stage" label="" />
+          <MyPybaemStatic state="happy" size={120} framing="stage" label="" />
         )}
       </div>
       <span className="wn-here-flag">{flag}</span>
