@@ -711,6 +711,12 @@ export const EXPECT = {
     activateIn: 'P9-12',
     note: 'is_stage_unlocked 00046: 이 스테이지·뒤 스테이지에 완료가 있으면 열림(보스가 새로 생겨도 갑자기 잠기지 않음), 진행 행만으로는 안 열림',
   },
+  'B74-1': {
+    expect: 'allow',
+    requires: 'public.boss_answer()',
+    activateIn: 'B74',
+    note: '00047 achievement_stats: projects 는 프로젝트 퀘스트만(7단계 보스 아님), 보스 reviews 는 처음 이긴 다음 날 이후 승리만(진 판 attempts 는 안 셈)',
+  },
   // ── 공유 카드 관리 (P9-11, ① 00045) ──
   'SCM-1': {
     expect: 'deny',

@@ -296,10 +296,8 @@ export function simulateEconomy(
     const streak = longestRun(new Set([...learnDays, ...shieldDays]));
     const metric: Record<string, number> = {
       quests: code.length,
-      // 00036: 마지막 스테이지(is_final)의 퀴즈 아닌 완료 = 프로젝트 → 7단계 보스도 셈
-      projects: code.filter(
-        (x) => stages.find((s) => s.order === x.q.stage)?.isFinal,
-      ).length,
+      // 00047(B74): 프로젝트 퀘스트만 (보스는 아님)
+      projects: code.filter((x) => x.q.type === 'project').length,
       stages: stages.filter(stageCleared).length,
       no_hint: code.filter((x) => x.p.hints === 0).length,
       hint_finish: code.filter((x) => x.p.hints > 0).length,

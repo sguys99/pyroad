@@ -463,7 +463,7 @@ async function groupBoss(u) {
     group: 'boss',
     id: 'BOSS-2',
     role: 'service_role',
-    op: '보스: 코드 퀘스트 전 boss_locked · 틀리면 하트 −1(같은 문제) · 하트 0 패배 뒤 boss_run_over · 라운드 어긋남 거부 · 하트 2개로 승리 = ⭐2·40 XP·20+별 코인·스테이지 클리어 · 같은 날 다시 이기면 연습(무변화) · 다음 날 ⭐3 복습은 늘어난 별만 · 정답은 응답에 없음 · 잔액 = 원장',
+    op: '보스: 코드 퀘스트 전 boss_locked · 틀리면 하트 −1(같은 문제) · 하트 0 패배 뒤 boss_run_over · 라운드 어긋남 거부 · 하트 2개로 승리 = ⭐2·20 XP·20+별 코인·스테이지 클리어 · 같은 날 다시 이기면 연습(무변화) · 다음 날 ⭐3 복습은 늘어난 별만 · 정답은 응답에 없음 · 잔액 = 원장',
     ...OK,
     run: async () => {
       const x = await createUser('boss2', '보스전');
@@ -524,17 +524,17 @@ async function groupBoss(u) {
           {
             locked: '409:boss_locked',
             notBoss: '400:not_boss',
-            start: '0:3:5:first',
+            start: '0:3:4:first',
             misses: '2,1,0:,,lose',
             over: '409:boss_run_over',
             lostStatus: 'in_progress',
             mismatch: '409:boss_round_mismatch',
-            win: 'win:2:5:2:2:40:2:true:false',
+            win: 'win:2:4:2:2:20:2:true:false',
             leaked: [],
             ledger: `quest:${Q_BOSS}:20,star:${Q_BOSS}:1:5,star:${Q_BOSS}:2:5`,
-            progress: { status: 'completed', stars: 2, best: 2, xp: 40, attempts: 2 },
+            progress: { status: 'completed', stars: 2, best: 2, xp: 20, attempts: 2 },
             practice: 'practice:0:0:2:true',
-            review: 'review:20:3:1:null:1',
+            review: 'review:10:3:1:null:1',
             mismatches: 0,
           },
           {
@@ -578,6 +578,38 @@ async function groupBoss(u) {
           { progressOnly: 'f', stage2: 't', stage3: 'f' },
           { progressOnly, stage2: unlocked(STAGE2), stage3: unlocked(stage3) },
         ) ?? { actual: 'ok', detail: '완료 기록 있는 스테이지까지 열림' }
+      );
+    },
+  });
+
+  await check({
+    group: 'boss',
+    id: 'B74-1',
+    role: 'service_role',
+    op: '업적 지표의 보스 (00047): 7단계 보스 승리는 projects 에 안 셈(프로젝트 완료만) · 진 뒤 같은 날 이긴 보스(attempts 2)는 reviews 아님 · 다음 날 다시 이기면 reviews 1',
+    ...OK,
+    run: async () => {
+      const x = await createUser('b74', '보스지표');
+      const finalBoss = one(
+        `select q.id from public.quests q join public.stages s on s.id = q.stage_id where s.is_final and q.quest_type = 'boss' limit 1`,
+      );
+      const stat = () => {
+        const v = JSON.parse(one(`select public.achievement_stats('${x.id}')`));
+        return `${v.projects}:${v.reviews}`;
+      };
+      one(`insert into public.user_progress (user_id, quest_id, status, attempts, stars, best_stars, stars_judged_on, completed_at)
+             values ('${x.id}', '${finalBoss}', 'completed', 2, 2, 2, public.kst_today(), now())`);
+      const lostThenWon = stat();
+      one(`update public.user_progress set completed_at = now() - interval '2 days' where user_id = '${x.id}' and quest_id = '${finalBoss}'`);
+      const reviewed = stat();
+      one(`insert into public.user_progress (user_id, quest_id, status, attempts, completed_at)
+             values ('${x.id}', '${Q_PROJECT}', 'completed', 1, now())`);
+      const project = stat();
+      return (
+        compare('B74-1', { lostThenWon: '0:0', reviewed: '0:1', project: '1:1' }, { lostThenWon, reviewed, project }) ?? {
+          actual: 'ok',
+          detail: '보스는 프로젝트 아님, 복습은 다음 날 승리부터',
+        }
       );
     },
   });
@@ -3034,8 +3066,8 @@ async function groupReward() {
         if (r.status !== 200)
           return { actual: 'error', detail: `${r.status} ${errMsg(r)}` };
       return (
-        // 보스(P9-12, xp_reward 60)는 stageQuests 에 들어 complete_quest 가 힌트 0 = 90 XP 로 끝냄 (보스 화면의 XP 규칙은 BOSS-2)
-        compare('준비', { stage1Xp: 0 + 5 * 75 + 113 + 90 }, { stage1Xp }) ||
+        // 보스(P9-12, P9-13 부터 xp_reward 30)는 stageQuests 에 들어 complete_quest 가 힌트 0 = 45 XP 로 끝냄 (보스 화면의 XP 규칙은 BOSS-2)
+        compare('준비', { stage1Xp: 0 + 5 * 75 + 113 + 45 }, { stage1Xp }) ||
         compare(
           '스테이지 2 리셋',
           {
@@ -3815,7 +3847,7 @@ async function groupCoins(u) {
     group: 'coins',
     id: 'CH-3',
     role: 'service_role',
-    op: '§12-Q65: 마지막 스테이지(프로젝트 1개·퀴즈 2개, 목표 3⭐) 상자는 퀴즈 별만으로 409 code_quest_needed → 프로젝트 첫 완료 코인 40(원장 quest/<id>) → 상자 50 · 모든 별 3개 → 업적 perfect_stage',
+    op: '§12-Q65: 마지막 스테이지(프로젝트 1개·보스 1개·퀴즈 2개, 목표 5⭐) 상자는 퀴즈 별만으로 409 code_quest_needed → 프로젝트 첫 완료 코인 40(원장 quest/<id>) → 상자 50 · 모든 별 3개 → 업적 perfect_stage',
     ...OK,
     run: async () => {
       const x = await createUser('ch3', '마지막상자');
@@ -3835,7 +3867,7 @@ async function groupCoins(u) {
             quizOnly: '409:code_quest_needed',
             proj: 200,
             projectCoins: '40',
-            opened: '200:50:3',
+            opened: '200:50:5',
             perfect: '1',
             mismatches: '0',
           },
@@ -5586,7 +5618,12 @@ async function groupAchievements(u) {
       const m1 = psql(sql);
       const m2 = psql(sql);
       // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
-      const m3 = psql(readFileSync(join(HERE, '..', 'migrations', '00038_profile_stats.sql'), 'utf8'));
+      // 00047(B74)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
+      const m3 = psql(
+        ['00038_profile_stats.sql', '00047_boss_metrics.sql']
+          .map((f) => readFileSync(join(HERE, '..', 'migrations', f), 'utf8'))
+          .join('\n'),
+      );
       if (!m1.ok || !m2.ok || !m3.ok) return { actual: 'error', detail: firstLine(m1.err || m2.err || m3.err) };
       const rows = one(`select string_agg(achievement_id || ':' || to_char(achieved_at at time zone 'Asia/Seoul', 'MM-DD') || ':' || (claimed_at is null), ',' order by achievement_id)
                           from public.user_achievements where user_id = '${x.id}'`);
