@@ -24,8 +24,14 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ auth: { getUser } })),
 }));
 vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: () => ({ auth: { admin: { deleteUser, getUserById } } }),
+  createAdminClient: () => ({
+    auth: { admin: { deleteUser, getUserById } },
+    from: () => ({
+      select: () => ({ eq: async () => ({ data: [], error: null }) }),
+    }),
+  }),
 }));
+vi.mock('@/lib/share-card/purge', () => ({ purgeShareCards: vi.fn() }));
 vi.mock('@/lib/analytics/server', () => ({
   deleteUserAnalytics: vi.fn(async () => {}),
 }));
