@@ -62,8 +62,15 @@ export async function POST(request: Request) {
 
   let message: string;
   let isFallback: boolean;
+  const free = prepared.freeQuestion;
+  const unsafe = result.ok && free ? free.unsafe(result.text) : null;
 
-  if (result.ok && prepared.quizExplain?.leaks(result.text)) {
+  if (free && unsafe) {
+    // 자유 질문 답에 개인정보·부적절한 말·정답 코드 (P9-17): 버리고 저장된 답변. 질문·답 원문은 남기지 않음
+    isFallback = true;
+    message = free.fallback;
+    free.report('answer_blocked', unsafe);
+  } else if (result.ok && prepared.quizExplain?.leaks(result.text)) {
     // 퀴즈 해설에 정답 글자가 섞였음 (P7-08, §2.3): 버리고 저장된 해설. 학생 답·LLM 답은 남기지 않음
     console.warn('[tutor] quiz_explain 정답 누출 감지 → 저장된 해설로 대체');
     isFallback = true;
@@ -90,9 +97,12 @@ export async function POST(request: Request) {
     await recordHint();
   }
 
+  if (free && !unsafe) free.report(isFallback ? 'fallback' : 'answered');
+
   const response: TutorResponse = {
     message,
     is_fallback: isFallback,
+    ...(free?.remaining !== undefined && { remaining: free.remaining }),
     ...(!hasAnyKey && isFallback && { no_api_key: true }),
     ...(result.provider_used && { provider_used: result.provider_used }),
   };

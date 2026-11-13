@@ -29,7 +29,13 @@ export type TutorAbuseReason =
   | 'stage_locked'
   | 'rate_limited'
   /** quiz_explain 인데 이 퀴즈에 틀린 제출 기록이 없음 (P7-08) */
-  | 'no_wrong_attempt';
+  | 'no_wrong_attempt'
+  /** free_question 의 question 이 없거나 길이 상한을 넘음 (화면은 보내지 않음, P9-17) */
+  | 'invalid_question'
+  /** free_question 을 거름 (P9-17). detail 은 거른 갈래·규칙 id 만, 질문 원문은 남기지 않음 */
+  | 'free_question_blocked'
+  /** 모델 답에 개인정보·부적절한 말·정답 코드가 있어 버리고 저장된 답변을 보냄 (P9-17) */
+  | 'free_answer_blocked';
 
 export type TutorAbuseLevel = 'info' | 'warning';
 
@@ -52,6 +58,7 @@ const KNOWN_TYPES = new Set([
   'stage_summary',
   'concept_explain',
   'quiz_explain',
+  'free_question',
 ]);
 
 /** 로그용 사용자 해시: sha256(user id) 앞 16자 (가명. 로그에 id 를 그대로 남기지 않음) */

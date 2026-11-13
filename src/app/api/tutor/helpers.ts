@@ -14,7 +14,19 @@ import {
   buildProjectGuidePrompt,
   buildStageSummaryPrompt,
   buildConceptExplainPrompt,
+  buildFreeQuestionPrompt,
+  FREE_QUESTION_RULES,
 } from '@/lib/tutor/prompts';
+import {
+  FREE_QUESTION_MAX_LENGTH,
+  FREE_QUESTION_MESSAGES,
+} from '@/lib/tutor/freeQuestion';
+import {
+  checkFreeAnswer,
+  checkFreeQuestion,
+} from '@/lib/tutor/freeQuestionFilter';
+import { trackServerEvent } from '@/lib/analytics/server';
+import type { TutorFreeQuestionResult } from '@/lib/analytics/events';
 import {
   QUIZ_EXPLAIN_RULES,
   buildQuizExplainPrompt,
@@ -60,6 +72,7 @@ const VALID_TYPES = [
   'stage_summary',
   'concept_explain',
   'quiz_explain',
+  'free_question',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
@@ -87,7 +100,12 @@ const FAST_TYPES = new Set([
 // 캐시 대상 타입은 src/lib/tutor/cache.ts의 buildCacheKey가 정한다 (개인화 입력이 없는 타입만)
 
 // 정답(힌트 원문·expected_output)이 필요한 타입만 quest_answer_keys를 읽는다 (P1-02)
-const ANSWER_KEY_TYPES = new Set(['hint_generator', 'code_feedback']);
+// free_question 은 답에 정답 코드가 통째로 들어 있는지 거르려고 읽는다 (P9-17, 프롬프트에는 넣지 않음)
+const ANSWER_KEY_TYPES = new Set([
+  'hint_generator',
+  'code_feedback',
+  'free_question',
+]);
 
 export interface PreparedTutorCall {
   systemPrompt: string;
@@ -113,6 +131,16 @@ export interface PreparedTutorCall {
   quizExplain: { fallback: string; leaks: (text: string) => boolean } | null;
   /** 서버 키로 provider 를 부르기 직전에 전역 예산을 1 차감한다 (P1-22). callTutor·callTutorStream 의 `allowServerKey` */
   allowServerKey: (provider: LLMProviderType) => Promise<boolean>;
+  /**
+   * free_question 에서만 (P9-17): 답 거르기(`unsafe` → 이유 코드, 걸리면 버리고 `fallback`)·오늘 남은 수·분석 기록.
+   * 흘려 보내지 않는다(다 받은 답을 거른 뒤에 보여 줌) — 스트림 route 는 이 유형을 받지 않음
+   */
+  freeQuestion: {
+    fallback: string;
+    unsafe: (text: string) => string | null;
+    remaining: number | undefined;
+    report: (result: TutorFreeQuestionResult, reason?: string) => void;
+  } | null;
 }
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -180,7 +208,35 @@ export function sanitizeTutorBody(body: TutorRequest): TutorRequest {
     total_steps: toBoundedInt(body.total_steps, 1, 50),
     previous_code: truncate(body.previous_code, MAX_CODE_LENGTH),
     step_goal: truncate(body.step_goal, MAX_STEP_GOAL_LENGTH),
+    question: cleanQuestion(body.question),
   };
+}
+
+/** 자유 질문 정리: 줄바꿈·제어 문자를 띄어쓰기로, 앞뒤 공백 제거. 문자열이 아니면 undefined */
+export function cleanQuestion(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  return value.replace(/[\u0000-\u001f\u007f\s]+/g, ' ').trim();
+}
+
+/** 오늘 남은 자유 질문 수 (한도 행의 day_count, P9-17). 읽지 못하면 undefined (화면은 숫자를 숨김) */
+async function freeQuestionRemaining(
+  admin: AdminClient,
+  userId: string,
+  perDay: number,
+): Promise<number | undefined> {
+  const { data, error } = await admin
+    .from('api_rate_limits')
+    .select('day_count')
+    .eq('user_id', userId)
+    .eq('bucket', 'tutor:free_question')
+    .maybeSingle();
+  if (error || !data) return undefined;
+  return Math.max(0, perDay - data.day_count);
+}
+
+/** 자유 질문을 거르지 못했거나 답을 버렸을 때의 저장된 답변: 이번 개념 안내 (질문 원문·정답 없음) */
+export function freeQuestionFallback(topic: string, goals: string[]): string {
+  return `지금은 파이뱀이 그 질문에 바로 답하기 어려워요. 🐍\n\n${conceptFallback(topic, goals)}`;
 }
 
 /** 자르기 한도를 넘은 필드 이름 (기록용, P1-19). 출력은 우리 화면의 상한보다 길 때만 (정상 실행도 2,000자는 넘음) */
@@ -321,8 +377,11 @@ export async function prepareTutorCall(
     return reject(400, 'Invalid type', 'invalid_type', String(body.type));
   }
 
-  // 퀴즈 해설은 다 받은 뒤 정답 누출을 걸러야 하므로 흘려 보내지 않는다 (P7-08)
-  if (opts.stream && body.type === 'quiz_explain') {
+  // 퀴즈 해설(P7-08)·자유 질문(P9-17)은 다 받은 뒤 걸러야 하므로 흘려 보내지 않는다
+  if (
+    opts.stream &&
+    (body.type === 'quiz_explain' || body.type === 'free_question')
+  ) {
     return reject(400, 'Invalid type', 'invalid_type', body.type);
   }
 
@@ -351,6 +410,21 @@ export async function prepareTutorCall(
       'missing_execution_result',
       body.type,
     );
+  }
+
+  if (body.type === 'free_question') {
+    // 화면은 빈 질문·상한 넘는 질문을 보내지 않음. 길이만 남기고 내용은 남기지 않음
+    const question = cleanQuestion(body.question);
+    if (!question || question.length > FREE_QUESTION_MAX_LENGTH) {
+      return reject(
+        400,
+        'question (1~100 chars) is required for free_question',
+        'invalid_question',
+        body.type,
+        'warning',
+        { length: question?.length ?? -1 },
+      );
+    }
   }
 
   const tooLong = overLongFields(body);
@@ -425,6 +499,15 @@ export async function prepareTutorCall(
     });
     return rateLimitedResponse(quota);
   }
+  const isFree = body.type === 'free_question';
+  const remainingLookup =
+    isFree && !quota.failedOpen
+      ? freeQuestionRemaining(
+          adminClient,
+          user.id,
+          getTutorRateLimit(body.type, !!customApiKey).perDay,
+        ).catch(() => undefined)
+      : Promise.resolve(undefined);
 
   // 5. Quest → 스테이지 잠금(B38) + 정답 병렬 조회
   const needsAnswerKey = ANSWER_KEY_TYPES.has(body.type);
@@ -479,6 +562,42 @@ export async function prepareTutorCall(
       { error: 'stage_locked', message: STAGE_LOCKED_MESSAGE },
       { status: 403 },
     );
+  }
+
+  // 자유 질문 거르기 (P9-17): 한도·퀘스트 확인 뒤, LLM 전. 걸리면 아이용 안내만 (200, blocked). 기록은 갈래·규칙 id 만
+  const freeReport = (result: TutorFreeQuestionResult, reason?: string) => {
+    trackServerEvent({
+      headers: request.headers,
+      userId: user.id,
+      name: 'tutor_free_question',
+      props: { result },
+      path: '/quest/[id]',
+    });
+    if (reason)
+      reportTutorAbuse({
+        userId: user.id,
+        reason:
+          result === 'blocked'
+            ? 'free_question_blocked'
+            : 'free_answer_blocked',
+        // 모델이 규칙을 어긴 답은 운영이 알아야 함(warning → Sentry, 이유 코드만). 아이 입력 거르기는 로그만
+        level: result === 'blocked' ? 'info' : 'warning',
+        type: body.type,
+        detail: { rule: reason },
+      });
+  };
+  const remaining = await remainingLookup;
+  if (isFree) {
+    const check = checkFreeQuestion(body.question ?? '');
+    if (!check.ok) {
+      freeReport('blocked', `${check.block}:${check.rule}`);
+      return Response.json({
+        message: FREE_QUESTION_MESSAGES[check.block],
+        is_fallback: false,
+        blocked: check.block,
+        ...(remaining !== undefined && { remaining }),
+      });
+    }
   }
 
   // 틀린 제출 기록이 없으면 해설할 것이 없음 (우리 화면은 오답 뒤에만 버튼을 보여 줌)
@@ -557,6 +676,14 @@ export async function prepareTutorCall(
     });
   } else if (quizInput) {
     userPrompt = buildQuizExplainPrompt(quizInput);
+  } else if (isFree) {
+    userPrompt = buildFreeQuestionPrompt({
+      questTitle: q.title,
+      topic: skeleton.topic,
+      learningGoals: skeleton.learning_goals,
+      exerciseDescription: skeleton.exercise_description,
+      question: body.question ?? '',
+    });
   } else if (body.type === 'stage_summary') {
     // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
     const stageConceptsResult = await adminClient
@@ -603,7 +730,9 @@ export async function prepareTutorCall(
   return {
     systemPrompt: quizInput
       ? SYSTEM_PROMPT + QUIZ_EXPLAIN_RULES
-      : SYSTEM_PROMPT,
+      : isFree
+        ? SYSTEM_PROMPT + FREE_QUESTION_RULES
+        : SYSTEM_PROMPT,
     userPrompt,
     providerType,
     customApiKey,
@@ -628,6 +757,18 @@ export async function prepareTutorCall(
       fallback: quizExplainFallback(quizInput, q.prompt_skeleton.fallback_text),
       leaks: (text) => leaksQuizAnswer(text, quizInput),
     },
+    freeQuestion: isFree
+      ? {
+          fallback: freeQuestionFallback(
+            skeleton.topic,
+            skeleton.learning_goals,
+          ),
+          unsafe: (text) =>
+            checkFreeAnswer(text, answerKey?.solutionCode ?? null),
+          remaining,
+          report: freeReport,
+        }
+      : null,
   };
 }
 
@@ -767,6 +908,8 @@ export function buildFallbackMessage(
     });
   } else if (body.type === 'concept_explain') {
     return conceptFallback(skeleton.topic, skeleton.learning_goals);
+  } else if (body.type === 'free_question') {
+    return freeQuestionFallback(skeleton.topic, skeleton.learning_goals);
   } else if (body.type === 'stage_summary') {
     return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;
   } else {

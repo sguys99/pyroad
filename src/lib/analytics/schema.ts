@@ -146,6 +146,11 @@ export const EVENT_PROPS_SCHEMA = {
       action: z.enum(['hide', 'show', 'delete']),
     })
     .strict(),
+  tutor_free_question: z
+    .object({
+      result: z.enum(['answered', 'fallback', 'blocked', 'answer_blocked']),
+    })
+    .strict(),
 } satisfies {
   [K in AnalyticsEventName]: z.ZodType<AnalyticsEventProps[K]>;
 };

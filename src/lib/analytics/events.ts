@@ -138,7 +138,19 @@ export interface AnalyticsEventProps {
    * 내 자랑 카드를 숨김·다시 공개·지움 (P9-11, 서버 `PATCH·DELETE /api/share-cards/{id}`). 카드 id·닉네임은 보내지 않는다
    */
   share_manage: { kind: ShareCardKind; action: ShareManageAction };
+  /**
+   * "파이뱀에게 물어보기" 자유 질문 결과 (P9-17, 서버 `/api/tutor`). 질문·답 내용·거른 규칙은 보내지 않는다(결과 갈래만).
+   * answered = AI 답 · fallback = AI 실패로 저장된 답변 · blocked = 질문을 거름 · answer_blocked = 답을 거르고 저장된 답변
+   */
+  tutor_free_question: { result: TutorFreeQuestionResult };
 }
+
+/** `tutor_free_question.result` 값 (P9-17) */
+export type TutorFreeQuestionResult =
+  | 'answered'
+  | 'fallback'
+  | 'blocked'
+  | 'answer_blocked';
 
 /** `share_manage.action` 값 (P9-11) */
 export type ShareManageAction = 'hide' | 'show' | 'delete';
@@ -182,6 +194,7 @@ export const SERVER_EVENT_NAMES = [
   'quest_complete',
   'hint_used',
   'shop_purchase',
+  'tutor_free_question',
 ] as const;
 export type ServerEventName = (typeof SERVER_EVENT_NAMES)[number];
 

@@ -112,6 +112,8 @@ export function AskPybaem({ session, hintPending }: AskPybaemProps) {
       hasApiKey={session.hasApiKey}
       onAsk={session.handleAsk}
       canAskWhy={session.canAskWhy}
+      onFreeAsk={session.handleFreeAsk}
+      freeRemaining={session.freeRemaining}
     />
   );
 
