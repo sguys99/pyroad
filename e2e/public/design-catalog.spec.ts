@@ -57,6 +57,12 @@ async function openCatalog(page: Page, mode?: MotionMode) {
   }
 }
 
+/** 이 뒤에 거는 타이머·rAF 를 멈춘다(이미 건 타이머는 그대로). 1회성 연출 중 상태를 시간에 기대지 않고 확인할 때 (B78) */
+async function pauseClock(page: Page) {
+  await page.clock.install();
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1_000);
+}
+
 /** 리그 SVG 안의 속성 쓰기를 ms 동안 센다 (전체 / transform만) */
 function rigWrites(page: Page, testId: string, ms: number) {
   return page.evaluate(
@@ -629,6 +635,7 @@ test.describe('축하 오버레이 (P6-13)', () => {
     test(`${mode.name}: 카드 7종 견본, 실제 오버레이는 연출 중 Esc로 끝 상태 → Enter로 다음 → 맨 뒤 스테이지 클리어`, async ({
       page,
     }) => {
+      const full = mode.tier === 'full' && mode.reduced === 'off';
       await openCatalog(page, mode);
       const section = page.locator('section#celebrations');
       await section.scrollIntoViewIfNeeded();
@@ -648,6 +655,8 @@ test.describe('축하 오버레이 (P6-13)', () => {
         section.getByTestId('catalog-cel-chest').locator('.cel-card'),
       ).toHaveAttribute('data-settled', 'true', { timeout: 5_000 });
 
+      // 등장 연출(약 1.3초 타이머)은 느린 CI 러너에서 클릭·확인 사이에 다 지나간다 → 시계를 세워 연출 중을 잡는다 (B78)
+      if (full) await pauseClock(page);
       await page.getByTestId('celebration-open-stage').click();
       const overlay = page.getByTestId('celebration-overlay');
       const level = overlay.getByTestId('celebration-step-level_up');
@@ -655,7 +664,7 @@ test.describe('축하 오버레이 (P6-13)', () => {
       await expect(
         page.getByRole('dialog', { name: '레벨 3 달성' }),
       ).toBeVisible();
-      if (mode.tier === 'full' && mode.reduced === 'off') {
+      if (full) {
         // 등장 연출 중: 카드 안 1회성 애니메이션이 돈다 → Esc 한 번에 끝 상태(돌고 있는 애니메이션 0), 오버레이는 그대로
         await expect(level).not.toHaveAttribute('data-settled', /.*/);
         await page.keyboard.press('Escape');
@@ -672,6 +681,7 @@ test.describe('축하 오버레이 (P6-13)', () => {
               ).length,
           ),
         ).toBe(0);
+        await page.clock.resume();
       } else {
         // lite는 짧게 끝나고, minimal·동작 줄이기는 처음부터 끝 상태
         await expect(level).toHaveAttribute('data-settled', 'true', {
@@ -776,6 +786,7 @@ test.describe('데일리 미션 (P8-07)', () => {
     test(`${mode.name}: 진행·달성·받음·지난 보상 · 받기 → 받았어요, 보상이 HUD 로 날아감(full만)`, async ({
       page,
     }) => {
+      const full = mode.tier === 'full' && mode.reduced === 'off';
       await openCatalog(page, mode);
       const demo = page.getByTestId('mission-list-demo');
       await demo.scrollIntoViewIfNeeded();
@@ -799,6 +810,21 @@ test.describe('데일리 미션 (P8-07)', () => {
         page.getByTestId('world-hud-demo').getByTestId('hud-mission').last(),
       ).toHaveAttribute('data-ready');
 
+      // 날아가는 보상은 1.4초 뒤 지워진다 → 느린 CI 러너에서도 세도록 생기는 순간을 기록 (B78·B81: 시계를 세우면
+      // 뒤늦게 하이드레이션되는 시간 글자가 달라져 React #418)
+      await page.evaluate(() => {
+        const w = window as unknown as { __dmFly: number };
+        w.__dmFly = 0;
+        new MutationObserver((records) => {
+          for (const r of records)
+            for (const n of r.addedNodes)
+              if (
+                n instanceof Element &&
+                (n.matches('.dm-fly') || n.querySelector('.dm-fly'))
+              )
+                w.__dmFly++;
+        }).observe(document.body, { childList: true, subtree: true });
+      });
       await first
         .getByTestId('mission-daily_quiz')
         .getByTestId('mission-claim')
@@ -807,9 +833,10 @@ test.describe('데일리 미션 (P8-07)', () => {
         'data-state',
         'claimed',
       );
-      const flying = await page.locator('.dm-fly').count();
-      if (mode.tier === 'full' && mode.reduced === 'off')
-        expect(flying).toBeGreaterThan(0);
+      const flying = await page.evaluate(
+        () => (window as unknown as { __dmFly: number }).__dmFly,
+      );
+      if (full) expect(flying).toBeGreaterThan(0);
       else expect(flying).toBe(0);
     });
   }

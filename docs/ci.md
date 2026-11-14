@@ -27,6 +27,7 @@
 - Supabase CLI는 **2.115.0** 고정(`supabase/README.md`). 로컬에서 격리 모드를 다른 작업과 동시에 돌릴 때는 `RLS_PROJECT_ID`·`RLS_PORT_BASE`를 바꿉니다.
 - `prettier --check .`는 P1-21에서 `lint-typecheck`에 넣었습니다(기존 파일은 P1-15 마무리 커밋에서 일괄 정리). 스파이크·생성물·문서(`*.md`)·`supabase/`는 `.prettierignore`로 제외합니다.
 - e2e 재시도는 0입니다(흔들림을 재시도로 가리지 않음). 실패하면 아티팩트의 `test-results/*/trace.zip`을 `npx playwright show-trace`로 봅니다.
+- `e2e-smoke` 제한 시간은 **30분**입니다(B78). GitHub 러너에서 비로그인 e2e 182개가 빌드 포함 약 19분(main도 18분)이라 20분이면 정상 실행도 취소됩니다. 1회성 연출 중 상태(축하 카드 등장·보상 날아감)를 확인하는 스펙은 시간에 기대지 않게 `page.clock`으로 시계를 세운 뒤 확인합니다(느린 러너에선 클릭과 확인 사이에 1.3초가 다 지나감).
 
 ### 에셋 검사 (`e2e-smoke`)
 
