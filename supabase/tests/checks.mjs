@@ -5575,7 +5575,7 @@ async function groupAchievements(u) {
             golden: ids(golden),
             goldenOwned: owned(y.id),
             prog,
-            fast: ms < 50,
+            fast: ms < 150, // B80: 로컬 15~17ms, GitHub 러너 45~50ms가 평소 값 → 크게 느려진 회귀만 잡음
           },
         ) ?? { actual: 'ok', detail: `첫 완료 업적 3개, 반복·동시 0, 황금키 0, 스테이지 1(${total}개) 뒤 판정 ${ms}ms` }
       );
