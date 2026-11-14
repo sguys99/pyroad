@@ -810,8 +810,21 @@ test.describe('데일리 미션 (P8-07)', () => {
         page.getByTestId('world-hud-demo').getByTestId('hud-mission').last(),
       ).toHaveAttribute('data-ready');
 
-      // 날아가는 보상은 1.4초 뒤 지워진다 → 느린 CI 러너에서도 세도록 받기 전에 시계를 세운다 (B78)
-      if (full) await pauseClock(page);
+      // 날아가는 보상은 1.4초 뒤 지워진다 → 느린 CI 러너에서도 세도록 생기는 순간을 기록 (B78·B81: 시계를 세우면
+      // 뒤늦게 하이드레이션되는 시간 글자가 달라져 React #418)
+      await page.evaluate(() => {
+        const w = window as unknown as { __dmFly: number };
+        w.__dmFly = 0;
+        new MutationObserver((records) => {
+          for (const r of records)
+            for (const n of r.addedNodes)
+              if (
+                n instanceof Element &&
+                (n.matches('.dm-fly') || n.querySelector('.dm-fly'))
+              )
+                w.__dmFly++;
+        }).observe(document.body, { childList: true, subtree: true });
+      });
       await first
         .getByTestId('mission-daily_quiz')
         .getByTestId('mission-claim')
@@ -820,7 +833,9 @@ test.describe('데일리 미션 (P8-07)', () => {
         'data-state',
         'claimed',
       );
-      const flying = await page.locator('.dm-fly').count();
+      const flying = await page.evaluate(
+        () => (window as unknown as { __dmFly: number }).__dmFly,
+      );
       if (full) expect(flying).toBeGreaterThan(0);
       else expect(flying).toBe(0);
     });
