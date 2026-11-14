@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
-import { toBook, unlockText } from '@/lib/world/worldBook';
+import { skillCheckOfferOf, toBook, unlockText } from '@/lib/world/worldBook';
 
 import { WorldBook } from './WorldBook';
 
@@ -46,6 +46,7 @@ export function WorldShelf({
               book={toBook(w)}
               no={i + 1}
               unlock={unlockText(worlds, i)}
+              skillCheck={skillCheckOfferOf(worlds, i)}
               current={w.world.slug === current}
               fresh={
                 w.status === 'open' &&

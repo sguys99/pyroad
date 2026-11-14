@@ -3,6 +3,7 @@
 // 구조 (§2.4)
 //   content/worlds/<world-slug>/world.yaml
 //   content/worlds/<world-slug>/map.yaml           (지도 설정, P5-03. 스테이지가 있는 월드는 필수)
+//   content/worlds/<world-slug>/skill-check.yaml   (실력 확인 퀴즈, P10-03. 선택)
 //   content/worlds/<world-slug>/<NN>-<stage-slug>/stage.yaml
 //   content/worlds/<world-slug>/<NN>-<stage-slug>/<NN>-<quest-slug>.yaml
 // NN(두 자리)은 YAML 안의 order 와 같아야 합니다. 정렬·탐색용이고, 원본 값은 YAML 의 order 입니다.
@@ -13,12 +14,15 @@ import { dirname, join, relative } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 import {
+  findAnswerKeysInPublic,
   parseQuest,
   parseWith,
+  SkillCheckSchema,
   StageSchema,
   WorldMapSchema,
   WorldSchema,
   type Quest,
+  type SkillCheck,
   type Stage,
   type World,
   type WorldMapConfig,
@@ -41,6 +45,8 @@ export interface LoadedWorld {
   /** map.yaml. 스테이지가 없는 "준비 중" 월드는 없어도 됨 */
   map: WorldMapConfig | null;
   stages: LoadedStage[];
+  /** skill-check.yaml (실력 확인 퀴즈, P10-03). 없으면 null */
+  skillCheck: SkillCheck | null;
 }
 
 export interface ContentTree {
@@ -110,6 +116,29 @@ export function loadContent(contentDir: string): ContentTree {
       }
     }
     return map.value;
+  };
+
+  /** skill-check.yaml 검사 (P10-03): 공개 부분(prompt)에 정답 키가 없고 스키마를 통과 */
+  const loadSkillCheck = (file: string): SkillCheck | null => {
+    if (!existsSync(file)) return null;
+    const raw = readYaml(file) as {
+      sets?: { questions?: { prompt?: unknown }[] }[];
+    };
+    const leaks = (raw?.sets ?? []).flatMap((set, s) =>
+      (set?.questions ?? []).flatMap((q, i) =>
+        findAnswerKeysInPublic(q?.prompt, ['sets', s, 'questions', i]),
+      ),
+    );
+    for (const l of leaks)
+      problems.push(
+        `${rel(file)} ${l}: 정답 필드는 공개 부분(prompt)에 둘 수 없어요`,
+      );
+    const check = parseWith(SkillCheckSchema, raw);
+    if (!check.ok) {
+      problems.push(...check.errors.map((e) => `${rel(file)} ${e}`));
+      return null;
+    }
+    return check.value;
   };
 
   const worldsDir = join(contentDir, 'worlds');
@@ -198,7 +227,13 @@ export function loadContent(contentDir: string): ContentTree {
       }
     }
     const map = loadMap(join(worldDir, 'map.yaml'), stages.length);
-    worlds.push({ file: worldFile, world: world.value, map, stages });
+    worlds.push({
+      file: worldFile,
+      world: world.value,
+      map,
+      stages,
+      skillCheck: loadSkillCheck(join(worldDir, 'skill-check.yaml')),
+    });
   }
 
   if (worlds.length === 0) problems.push('월드가 하나도 없어요');

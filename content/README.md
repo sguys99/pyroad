@@ -21,7 +21,8 @@ content/
     │   └── 07-project-kingdom/
     │       ├── stage.yaml
     │       └── 01-number-guessing-game.yaml
-    ├── code-sea/                      # 월드 2: world.yaml·map.yaml + 스테이지 7개 껍데기(퀘스트는 P10-05~07). 퀘스트 전이라 "준비 중"
+    ├── code-sea/                      # 월드 2: world.yaml·map.yaml + 스테이지 7개(퀘스트는 P10-05~07, 빈 스테이지가 있으면 "준비 중")
+    │   └── skill-check.yaml           # 실력 확인 퀴즈 (선택, P10-03)
     └── maker-city/world.yaml          # 월드 3 "준비 중"
 ```
 
@@ -340,6 +341,29 @@ rounds:                       # 3~7개. 라운드마다 퀴즈 하나
 ```
 
 DB: `quests.quest_type = 'boss'`, `prompt_skeleton.boss = {name, intro, on_defeat, on_victory, rounds: [퀴즈 공개 모양…], review_quests: [id|null…]}`, `quest_answer_keys.quiz_answer = {kind: 'boss', rounds: [{kind, accepted, explanation, explanations?}…]}`(00046 CHECK). 보기 순서는 들어올 때·다시 도전할 때마다 서버가 섞습니다.
+
+### 실력 확인 퀴즈 (`<world>/skill-check.yaml`, P10-03)
+
+앞 월드를 다 깨지 않고 이 월드를 여는 시험입니다(설계 [world2.md](../docs/curriculum/world2.md) §7). 파일이 있는 월드만 잠긴 책에 "실력 확인 퀴즈"가 보입니다(`worlds.generated.ts`의 `skill_check`).
+
+- **묶음 2벌 × 10문제**. KST 날마다 번갈아 나오고(00052 `skill_check_set_for`), 하루 1번, **8문제 이상** 맞히면 합격 → 그 월드의 첫 스테이지가 열립니다. XP·코인은 없습니다.
+- 문제 하나 = 보스 라운드 하나와 같은 모양·규칙(퀴즈 4종, id 규칙, 공개 문장 정답 누출 검사, `test:content` Pyodide 검사). 앞 월드 스테이지를 고르게, 퀴즈·보스와 겹치지 않는 새 문제로 씁니다.
+- `review_quest`는 **필수**이고 앞 월드의 퀘스트여야 합니다(빌드가 확인). 틀린 문제의 그 퀘스트 스테이지가 결과 화면의 "더 연습하면 좋은 단계"가 됩니다.
+- 학생에게 **정답·해설을 보여 주지 않습니다**(하루 1번이라도 정답을 보면 외워서 통과할 수 있음). `explanation`은 검수용으로만 씁니다.
+
+```yaml
+sets:
+  - questions:              # 1벌, 10개
+      - quiz_kind: multiple_choice
+        review_quest: b1000000-0000-0000-0000-000000000024   # 앞 월드 퀘스트
+        prompt:
+          quiz: { question: …, code: …, options: [ … ] }
+        answer:
+          quiz_answer: { accepted: [ … ], explanation: … }
+  - questions: [ … ]        # 2벌, 10개
+```
+
+DB: `skill_check_questions (world_id, set_no, no, review_quest_id, quiz, answer)` — service_role 전용(정답이 함께 있음). 화면에는 API(`/api/world/skill-check`)가 `quiz`만 섞어서 보냅니다.
 
 ## 3. 검증 규칙 (`answer.validation`)
 

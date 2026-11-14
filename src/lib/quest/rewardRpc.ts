@@ -104,6 +104,20 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
     status: 409,
     error: '이번 주에 끝낸 퀘스트가 생기면 자랑할 수 있어요.',
   },
+  // 실력 확인 퀴즈 (P10-03, 00052)
+  world_not_found: { status: 404, error: '그런 월드는 없어요.' },
+  skill_check_missing: {
+    status: 404,
+    error: '이 월드는 아직 실력 확인 퀴즈가 없어요.',
+  },
+  skill_check_not_started: {
+    status: 409,
+    error: '날짜가 바뀌었어요. 오늘 문제로 다시 시작해 볼까요?',
+  },
+  skill_check_done_today: {
+    status: 409,
+    error: '오늘은 이미 도전했어요. 내일 다시 만나요!',
+  },
 };
 
 export function rewardError(
@@ -153,7 +167,9 @@ async function callRpc<T>(
     | 'shop_status'
     | 'create_share_card'
     | 'claim_share_reward'
-    | 'manage_share_card',
+    | 'manage_share_card'
+    | 'skill_check_start'
+    | 'skill_check_submit',
   run: () => PromiseLike<{ data: Json | null; error: PostgrestError | null }>,
 ): Promise<RpcResult<T>> {
   const { data, error } = await run();
@@ -245,6 +261,36 @@ export function bossAnswerRpc<T>(
       p_round: round,
       // null 은 "시작" (생성된 타입은 Json 만 받아 단언)
       p_answer: answer as Json,
+    }),
+  );
+}
+
+/** 실력 확인 퀴즈 시작 (P10-03, 00052): 오늘 도전을 쓰고 오늘 묶음 번호. 보상 없음 */
+export function skillCheckStartRpc<T>(
+  admin: AdminClient,
+  userId: string,
+  worldId: string,
+) {
+  return callRpc<T>('skill_check_start', () =>
+    admin.rpc('skill_check_start', {
+      p_user_id: userId,
+      p_world_id: worldId,
+    }),
+  );
+}
+
+/** 실력 확인 퀴즈 제출·채점 (P10-03, 00052). 정답·해설 없이 점수와 복습 스테이지만 */
+export function skillCheckSubmitRpc<T>(
+  admin: AdminClient,
+  userId: string,
+  worldId: string,
+  answers: Json,
+) {
+  return callRpc<T>('skill_check_submit', () =>
+    admin.rpc('skill_check_submit', {
+      p_user_id: userId,
+      p_world_id: worldId,
+      p_answers: answers,
     }),
   );
 }

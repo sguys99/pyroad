@@ -1,0 +1,169 @@
+/* 실력 확인 퀴즈 (P10-03, SkillCheckQuiz). 오늘의 퀴즈(daily.css)의 종이 한 장·요약 쪽지를 그대로 쓰고, 여기는 시험지 모양만:
+   규칙 목록 · 진행 점(답을 고른 문제만 채움 — 맞았는지는 보이지 않음) · 이전/다음 두 칸 · 점수 · 연습할 단계 목록.
+   값은 토큰 변수만, 반복 연출 없음 (넘김 연출은 daily.css 의 .dq-sheet·.dq-sum 단계별 규칙) */
+
+/* ───── 안내 쪽: 규칙 목록 (아이콘 + 한 줄) */
+.sk-rules {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+  list-style: none;
+  text-align: left;
+}
+.sk-rules > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.sk-rules svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.125em;
+  color: var(--primary-text);
+}
+
+/* ───── 진행 점: 10개가 360px 한 줄에 (24px 점, 줄이 모자라면 줄바꿈) */
+.sk-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0 0 0.25rem;
+  padding: 0;
+  list-style: none;
+}
+.sk-dot {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--line);
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 800;
+  line-height: 1;
+}
+.sk-dot[data-state='answered'] {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.sk-dot[data-state='current'] {
+  border-color: var(--primary);
+  color: var(--primary-text);
+  /* 색만이 아니라 두 겹 테로도 "지금" 구분 (오늘의 퀴즈 점과 같음) */
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ───── 이전 / 다음 두 칸 (360px 도 한 줄, 이전은 좁게) */
+.sk-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0.5rem;
+}
+.sk-nav > :is(button, a) {
+  width: 100%;
+}
+.sk-actions .g-btn-face,
+.sk-intro .g-btn-face {
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* ───── 결과: 점수 크게 + 합격 기준 */
+.sk-score {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25rem 0.375rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-h3);
+  font-weight: 700;
+}
+.sk-score > b {
+  color: var(--text);
+  font-size: var(--text-hero);
+  font-weight: 400;
+  line-height: 1;
+}
+.sk-result[data-passed='true'] .sk-score > b {
+  color: var(--primary-text);
+}
+.sk-score-u {
+  flex-basis: 100%;
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+/* ───── 더 연습하면 좋은 단계: 단계마다 지도 시트로 가는 줄 */
+.sk-practice {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+}
+.sk-practice-t {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  color: var(--accent-text);
+  font-size: var(--text-kicker);
+  font-weight: 750;
+}
+.sk-practice > ul {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sk-practice-a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-small);
+}
+.sk-practice-a:hover {
+  background: var(--primary-soft);
+}
+.sk-practice-a:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.sk-practice-n {
+  flex: none;
+  padding: 0.0625rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--primary-text);
+  font-size: var(--text-caption);
+  font-weight: 800;
+}
+.sk-practice-s {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 700;
+}
+.sk-practice-a > svg {
+  flex: none;
+  color: var(--text-muted);
+}

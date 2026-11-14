@@ -73,6 +73,7 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       join('v0.6-phase7', '1_먼저실행.sql'),
       join('v0.6-phase8', '1_먼저실행.sql'),
       join('v0.7-phase9', '1_먼저실행.sql'),
+      join('v0.8-phase10', '1_먼저실행.sql'),
     ]);
     const phase2 = readFileSync(
       join(out, 'v0.5-phase2', '1_먼저실행.sql'),
@@ -107,7 +108,7 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       phase7.indexOf('-- ===== 00026 ====='),
     );
     expect(phase7).toMatch(/DELETE FROM public\.quiz_attempts/);
-    // B76: 지금 seed.sql(보스 행 등)은 마지막 묶음(v0.7 ①, 00046 뒤)에만. 앞 묶음은 안내 주석만
+    // B76: 지금 seed.sql(보스·실력 확인 퀴즈 행 등)은 마지막 묶음(v0.8 ①, 00052 뒤)에만. 앞 묶음은 안내 주석만
     const seedMark = '-- ===== content seed =====';
     expect(phase7).not.toContain(seedMark);
     expect(readFileSync(join(out, '2_두번째실행.sql'), 'utf8')).not.toContain(
@@ -117,8 +118,14 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
       join(out, 'v0.7-phase9', '1_먼저실행.sql'),
       'utf8',
     );
-    expect(phase9.indexOf(seedMark)).toBeGreaterThan(
-      phase9.indexOf('-- ===== 00046 ====='),
+    // v0.7 은 이미 운영에 적용됨 → 지금 seed 는 v0.8 묶음(00052 뒤)에만 (P10-03)
+    expect(phase9).not.toContain(seedMark);
+    const phase10 = readFileSync(
+      join(out, 'v0.8-phase10', '1_먼저실행.sql'),
+      'utf8',
+    );
+    expect(phase10.indexOf(seedMark)).toBeGreaterThan(
+      phase10.indexOf('-- ===== 00052 ====='),
     );
   });
 

@@ -19,6 +19,14 @@ import type { StageWithStatus } from '@/lib/types/database';
 import { WORLDS } from '@/lib/world/worlds';
 import { WorldBook } from '@/components/world/book/WorldBook';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
+import { SkillCheckOffer } from '@/components/world/book/SkillCheckOffer';
+import {
+  SkillCheckDots,
+  SkillCheckIntro,
+  SkillCheckResultCard,
+} from '@/components/world/skillCheck/SkillCheckQuiz';
+import '@/components/quest/quiz/daily.css';
+import '@/components/world/skillCheck/skillCheck.css';
 import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 import { MissionHudButton, MissionHudPlaceholder, MissionList } from '@/components/world/DailyMissions';
@@ -830,6 +838,64 @@ export function WorldMapSection() {
             </li>
           ))}
         </ol>
+      </Demo>
+      <Demo
+        label="실력 확인 퀴즈 (P10-03)"
+        note="앞 월드를 이미 아는 학생이 잠긴 월드를 바로 여는 시험(10문제 중 8문제, KST 하루 1번, 서버 채점). 잠긴 책(책장·다음 권)에는 작은 쪽지, 잠긴 책 안내(/world/code-sea)에는 큰 쪽지. 오늘 이미 냈으면 '내일 다시' + 오늘 결과 보기. 화면(/world/[slug]/skill-check): 안내 → 문제(진행 점은 답을 골랐는지만, 맞았는지는 안 보임) → 결과. 결과는 점수와 '더 연습하면 좋은 단계'만 — 정답·해설은 보여 주지 않음. 합격하면 컨페티 + 지도에서 첫 스테이지 잠금 해제 연출(P5-05)"
+        data-testid="skill-check-catalog"
+      >
+        <ol className="wb-shelf">
+          <li>
+            <WorldBook
+              book={BOOK(2, '코드 바다', 'locked', 0)}
+              no={2}
+              unlock="파이썬 섬을 다 모험하면 열려요"
+              heading="h3"
+              skillCheck={{ slug: 'code-sea', prevTitle: '파이썬 섬', triedToday: false }}
+            />
+          </li>
+          <li>
+            <WorldBook
+              book={BOOK(2, '코드 바다', 'locked', 0)}
+              no={2}
+              unlock="파이썬 섬을 다 모험하면 열려요"
+              heading="h3"
+              skillCheck={{ slug: 'code-sea', prevTitle: '파이썬 섬', triedToday: true }}
+            />
+          </li>
+        </ol>
+        <div className="grid max-w-md gap-3" data-world="2">
+          <SkillCheckOffer slug="code-sea" prevTitle="파이썬 섬" triedToday={false} />
+          <SkillCheckOffer slug="code-sea" prevTitle="파이썬 섬" triedToday />
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <SkillCheckIntro worldTitle="코드 바다" prevTitle="파이썬 섬" />
+          <div className="dq-page flex flex-col gap-3 self-start">
+            <SkillCheckDots total={10} step={3} answered={[true, true, true, false, true, false, false, false, false, false]} />
+            <span className="text-caption text-muted-foreground">진행 점: 고른 문제 · 지금 문제(두 겹 테) · 아직</span>
+          </div>
+          <SkillCheckResultCard
+            worldTitle="코드 바다"
+            mapHref="#"
+            autoFocus={false}
+            result={{ score: 9, total: 10, pass_score: 8, passed: true, practice: [] }}
+          />
+          <SkillCheckResultCard
+            worldTitle="코드 바다"
+            mapHref="#"
+            autoFocus={false}
+            result={{
+              score: 6,
+              total: 10,
+              pass_score: 8,
+              passed: false,
+              practice: [
+                { quest_id: 'q3', stage_id: 'sample-3', stage_order: 3, stage_title: '조건의 갈림길', world_slug: 'python-island' },
+                { quest_id: 'q6', stage_id: 'sample-6', stage_order: 6, stage_title: '함수의 탑', world_slug: 'python-island' },
+              ],
+            }}
+          />
+        </div>
       </Demo>
       <CodeSample
         code={`<WorldMap stages={stages} map={world.map} theme={world.theme} world={world.order} scrollToCurrent />`}

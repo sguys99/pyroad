@@ -112,6 +112,12 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
     expect([...once.answer_keys].sort(byId)).toEqual(
       [...rows.answer_keys].sort(byId),
     );
+    // 실력 확인 퀴즈 (P10-03): 2월드 2벌 × 10문제
+    expect(once.skill_checks).toEqual(rows.skill_checks);
+    expect(rows.skill_checks.map((r) => `${r.world}:${r.set_no}`)).toEqual([
+      ...Array(10).fill('code-sea:1'),
+      ...Array(10).fill('code-sea:2'),
+    ]);
   });
 
   it('다시 실행해도 같음 (멱등)', () => {

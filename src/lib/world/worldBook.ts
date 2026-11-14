@@ -43,6 +43,26 @@ export function unlockText(
     : '앞 월드를 다 모험하면 열려요';
 }
 
+/** 잠긴 책의 실력 확인 퀴즈 진입점 값 (P10-03). 퀴즈가 없거나 열린 월드면 null */
+export interface SkillCheckOfferInfo {
+  slug: string;
+  prevTitle: string;
+  triedToday: boolean;
+}
+
+export function skillCheckOfferOf(
+  worlds: readonly WorldWithStatus[],
+  index: number,
+): SkillCheckOfferInfo | null {
+  const w = worlds[index];
+  if (!w?.skillCheck) return null;
+  return {
+    slug: w.world.slug,
+    prevTitle: unlockAfter(worlds, index)?.world.title ?? '앞 월드',
+    triedToday: w.skillCheck.triedToday,
+  };
+}
+
 /** 표지 띠 글자 */
 export const STATUS_LABEL: Record<WorldStatus, string> = {
   open: '모험 중',

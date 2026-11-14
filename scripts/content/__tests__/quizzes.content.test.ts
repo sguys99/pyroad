@@ -19,8 +19,9 @@ import { CONTENT_DIR } from '../lib/paths';
 /** 무한 반복 버그(오답)는 출력 상한이나 이 시간에 끊김 */
 const TIMEOUT_MS = 3_000;
 
-const all = loadContent(CONTENT_DIR)
-  .worlds.flatMap((w) => w.stages)
+const tree = loadContent(CONTENT_DIR);
+const all = tree.worlds
+  .flatMap((w) => w.stages)
   .flatMap((s) =>
     s.quests.map((q) => ({ stage: s.stage.order, quest: q.quest })),
   );
@@ -43,6 +44,27 @@ const bossRounds = all.flatMap(({ stage, quest }) =>
         } as unknown as QuizQuest,
       }))
     : [],
+);
+
+// 실력 확인 퀴즈(P10-03) 문제도 퀴즈 하나와 같은 검사 (stage 자리는 월드 order, order 자리는 묶음·번호)
+const skillChecks = tree.worlds.flatMap(({ world, skillCheck }) =>
+  (skillCheck?.sets ?? []).flatMap((set, s) =>
+    set.questions.map(
+      (q, i) =>
+        ({
+          stage: world.order,
+          quest: {
+            id: q.review_quest,
+            order: `${s + 1}-${i + 1}`,
+            title: `${world.title} 실력 확인 ${s + 1}벌 ${i + 1}번`,
+            quest_type: 'quiz',
+            quiz_kind: q.quiz_kind,
+            prompt: q.prompt,
+            answer: q.answer,
+          },
+        }) as unknown as { stage: number; quest: QuizQuest },
+    ),
+  ),
 );
 
 let runner: NodePyodideRunner;
@@ -75,7 +97,7 @@ it('1월드 스테이지마다 퀴즈가 있음', () => {
   expect(new Set(quizzes.map((q) => q.stage)).size).toBe(7);
 });
 
-for (const { stage, quest } of [...quizzes, ...bossRounds])
+for (const { stage, quest } of [...quizzes, ...bossRounds, ...skillChecks])
   describe(`${stage}-${quest.order} ${quest.title} (${quest.quiz_kind})`, () => {
     it('정답 코드가 실제로 정답', async () => {
       switch (quest.quiz_kind) {

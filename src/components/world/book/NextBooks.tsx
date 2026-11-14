@@ -2,7 +2,12 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
-import { bookNo, toBook, unlockText } from '@/lib/world/worldBook';
+import {
+  bookNo,
+  skillCheckOfferOf,
+  toBook,
+  unlockText,
+} from '@/lib/world/worldBook';
 
 import { WorldBook } from './WorldBook';
 
@@ -41,6 +46,7 @@ export function NextBooks({
             book={toBook(w)}
             no={bookNo(worlds, w.world.slug)}
             unlock={unlockText(worlds, at + 1 + i)}
+            skillCheck={skillCheckOfferOf(worlds, at + 1 + i)}
             heading="h3"
           />
         ))}

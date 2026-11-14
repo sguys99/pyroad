@@ -711,6 +711,31 @@ export const EXPECT = {
     activateIn: 'P9-12',
     note: 'is_stage_unlocked 00046: 이 스테이지·뒤 스테이지에 완료가 있으면 열림(보스가 새로 생겨도 갑자기 잠기지 않음), 진행 행만으로는 안 열림',
   },
+  // ── 실력 확인 퀴즈 (P10-03, ① 00052) ──
+  'SKC-1': {
+    expect: 'deny',
+    requires: 'public.skill_check_start()',
+    activateIn: 'P10-03',
+    note: '시작(하루 도전 쓰기)은 /api/world/skill-check(service_role)만',
+  },
+  'SKC-1b': {
+    expect: 'deny',
+    requires: 'public.skill_check_questions',
+    activateIn: 'P10-03',
+    note: '문제·정답은 service_role 전용, 도전 기록은 본인 읽기만(합격 위조·남의 기록 읽기 불가)',
+  },
+  'SKC-1c': {
+    expect: 'deny',
+    requires: 'public.skill_check_submit()',
+    activateIn: 'P10-03',
+    note: '채점은 service_role 만 — 정답 오라클·합격 위조 막기',
+  },
+  'SKC-2': {
+    expect: 'allow',
+    requires: 'public.skill_check_submit()',
+    activateIn: 'P10-03',
+    note: '하루 1번 · 날마다 묶음 번갈아 · 7/10 불합격 8/10 합격 · 응답에 정답 없음 · 합격하면 2월드 첫 스테이지만 열림(is_stage_unlocked 00052) · 잠긴 동안 complete_quest 거부 · XP·코인 그대로',
+  },
   'WK-1': {
     expect: 'allow',
     requires: 'public.achievement_stats()',

@@ -23,6 +23,8 @@ export interface WorldInfo {
   ready: boolean;
   /** 지도 설정. 준비 중 월드는 null */
   map: WorldMapConfig | null;
+  /** 실력 확인 퀴즈로 열 수 있는 월드 (P10-03, content/worlds/<slug>/skill-check.yaml) */
+  skill_check?: true;
 }
 
 export type MapPoint = MapLayout['nodes'][number];

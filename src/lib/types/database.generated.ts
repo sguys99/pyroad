@@ -772,6 +772,102 @@ export type Database = {
         };
         Relationships: [];
       };
+      skill_check_attempts: {
+        Row: {
+          attempt_on: string;
+          passed: boolean;
+          practice: Json;
+          score: number | null;
+          set_no: number;
+          started_at: string;
+          submitted_at: string | null;
+          total: number | null;
+          user_id: string;
+          world_id: string;
+        };
+        Insert: {
+          attempt_on?: string;
+          passed?: boolean;
+          practice?: Json;
+          score?: number | null;
+          set_no: number;
+          started_at?: string;
+          submitted_at?: string | null;
+          total?: number | null;
+          user_id: string;
+          world_id: string;
+        };
+        Update: {
+          attempt_on?: string;
+          passed?: boolean;
+          practice?: Json;
+          score?: number | null;
+          set_no?: number;
+          started_at?: string;
+          submitted_at?: string | null;
+          total?: number | null;
+          user_id?: string;
+          world_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'skill_check_attempts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'skill_check_attempts_world_id_fkey';
+            columns: ['world_id'];
+            isOneToOne: false;
+            referencedRelation: 'worlds';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      skill_check_questions: {
+        Row: {
+          answer: Json;
+          no: number;
+          quiz: Json;
+          review_quest_id: string;
+          set_no: number;
+          world_id: string;
+        };
+        Insert: {
+          answer: Json;
+          no: number;
+          quiz: Json;
+          review_quest_id: string;
+          set_no: number;
+          world_id: string;
+        };
+        Update: {
+          answer?: Json;
+          no?: number;
+          quiz?: Json;
+          review_quest_id?: string;
+          set_no?: number;
+          world_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'skill_check_questions_review_quest_id_fkey';
+            columns: ['review_quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'skill_check_questions_world_id_fkey';
+            columns: ['world_id'];
+            isOneToOne: false;
+            referencedRelation: 'worlds';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       stages: {
         Row: {
           created_at: string;
@@ -1629,6 +1725,18 @@ export type Database = {
         }[];
       };
       shop_status: { Args: { p_user_id: string }; Returns: Json };
+      skill_check_set_for: {
+        Args: { p_day: string; p_sets: number };
+        Returns: number;
+      };
+      skill_check_start: {
+        Args: { p_user_id: string; p_world_id: string };
+        Returns: Json;
+      };
+      skill_check_submit: {
+        Args: { p_answers: Json; p_user_id: string; p_world_id: string };
+        Returns: Json;
+      };
       social_login_provider: {
         Args: { p_iss: string; p_provider: string };
         Returns: string;

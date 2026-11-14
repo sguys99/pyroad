@@ -18,6 +18,11 @@ import { kstToday } from '@/lib/time/kst';
 
 import { getWorldStatuses, type WorldsProgress } from './getStageStatuses';
 import { planUnlocks, type UnlockPlan } from './unlockSeen';
+import {
+  attachSkillChecks,
+  skillPassWorldIds,
+  type SkillCheckAttemptRow,
+} from './skillCheck';
 import type { WorldInfo } from './worlds';
 import type { WorldDailyStatus } from './attendance';
 
@@ -157,6 +162,8 @@ export interface WorldMapRaw {
   readyAchievements?: Array<{ user_id: string }> | null;
   /** 닫지 않은 본인 소급 보상 행 (P8-11, 00037). 못 읽었으면(00037 전 DB) 없음 */
   retro?: Array<{ user_id: string; stars: number; coins: number }> | null;
+  /** 본인 실력 확인 퀴즈 도전 (P10-03, 00052). 못 읽었으면(00052 전 DB) 없음 = 합격 없음 */
+  skillChecks?: SkillCheckAttemptRow[] | null;
 }
 
 export function toWorldMapData(
@@ -188,7 +195,14 @@ export function toWorldMapData(
       }));
   }
 
-  const worldsProgress = getWorldStatuses(worlds, raw.stages, progress);
+  const checks = (raw.skillChecks ?? []).filter((r) => r.user_id === userId);
+  const worldsProgress = getWorldStatuses(
+    worlds,
+    raw.stages,
+    progress,
+    skillPassWorldIds(checks),
+  );
+  attachSkillChecks(worldsProgress.worlds, checks, today);
   const opened = new Set(
     (raw.chests ?? []).filter((c) => c.user_id === userId).map((c) => c.ref),
   );

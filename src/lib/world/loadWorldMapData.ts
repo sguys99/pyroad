@@ -34,6 +34,7 @@ import { serverWorlds } from './serverWorlds';
  *   미션 진행은 HUD 미션 칸(`WorldHudBar`)이 렌더마다 서버 RPC 로 다시 셈
  * - 소급 보상 카드 닫기(P8-11): `/api/retro/seen` 은 무효화하지 않는다. 카드가 바로 사라지고 다음 방문은 새로 렌더
  * - 진행 리셋: `/api/account/reset` 의 revalidatePath + `AccountManagementSection` 의 router.refresh() (본 기록도 지움, P5-05)
+ * - 실력 확인 퀴즈(P10-03): `/api/world/skill-check` 제출의 revalidatePath. 합격하면 화면이 새 월드 지도로 이동
  * - 잠금 해제 본 기록(P5-05): `/api/world/unlocks` 는 무효화하지 않는다. 지도가 기록을 보낸 뒤에는 이 화면에서 다시 쓰지 않고,
  *   다음 방문은 새로 렌더하며, 같은 세션의 중복 재생은 화면 쪽(useStageUnlock)이 막는다
  * - 설정·API 키·닉네임 변경: 다른 화면에서 일어나고 `/world` 로 돌아올 때 새로 렌더됨 (별도 무효화 없음)
@@ -56,6 +57,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
     dailyStatus,
     readyAchievements,
     retro,
+    skillChecks,
   ] = await Promise.all([
     getAuthUser(),
     // 본인 API 키는 service_role 전용 테이블에 있어 확인한 id 로만 (B13)
@@ -104,6 +106,10 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       .from('retro_rewards')
       .select('user_id, stars, coins')
       .is('seen_at', null),
+    // 실력 확인 퀴즈 도전 (P10-03, 00052 본인 행 SELECT): 합격 → 그 월드 첫 스테이지 열림, 오늘 제출 → "내일 다시". 실패하면(00052 전 DB) 없음
+    supabase
+      .from('skill_check_attempts')
+      .select('user_id, world_id, attempt_on, passed, submitted_at'),
     // 뱃지는 월드맵에 보이지 않아(옛 ProfileSummary 를 HUD 가 대신함, P5-07) 읽지 않는다. 프로필 화면이 따로 읽음
   ]);
   if (!user) return null;
@@ -123,6 +129,7 @@ export async function loadWorldMapData(): Promise<WorldMapData | null> {
       dailyStatus,
       readyAchievements: readyAchievements.data,
       retro: retro.data,
+      skillChecks: skillChecks.data,
     },
     serverWorlds(),
     today,

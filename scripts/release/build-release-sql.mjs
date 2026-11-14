@@ -204,6 +204,25 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v0.8-phase10',
+    dir: 'v0.8-phase10',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.8 (Phase 10 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00052 실력 확인 퀴즈) + 콘텐츠 seed (2월드 코드 바다 · 실력 확인 퀴즈 문제)',
+          '-- feat/phase10 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.8-runbook.md "Phase 10 병합"',
+        ],
+        parts: [
+          '00052',
+          // seed 는 00052 뒤 (skill_check_questions 테이블이 생긴 뒤에 문제 행을 넣음)
+          'seed',
+        ],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];
