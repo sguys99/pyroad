@@ -162,7 +162,179 @@ export const WORLDS: readonly WorldInfo[] = [
       "type": "previous_world_cleared"
     },
     "ready": false,
-    "map": null
+    "map": {
+      "bgm": "world2",
+      "path": "catmull_rom",
+      "layouts": {
+        "wide": {
+          "width": 1200,
+          "height": 720,
+          "node_scale": 1,
+          "nodes": [
+            [150, 590],
+            [345, 440],
+            [585, 590],
+            [720, 390],
+            [500, 235],
+            [800, 195],
+            [1050, 345]
+          ],
+          "decorations": [
+            {
+              "kind": "waves",
+              "x": 50,
+              "y": 120
+            },
+            {
+              "kind": "waves",
+              "x": 300,
+              "y": 670
+            },
+            {
+              "kind": "waves",
+              "x": 860,
+              "y": 650
+            },
+            {
+              "kind": "boat",
+              "x": 630,
+              "y": 105
+            },
+            {
+              "kind": "buoy",
+              "x": 430,
+              "y": 345
+            },
+            {
+              "kind": "whale",
+              "x": 875,
+              "y": 505,
+              "scale": 1.1
+            },
+            {
+              "kind": "bird",
+              "x": 980,
+              "y": 110
+            },
+            {
+              "kind": "bird",
+              "x": 210,
+              "y": 230
+            },
+            {
+              "kind": "palm",
+              "x": 90,
+              "y": 330,
+              "scale": 1.1
+            },
+            {
+              "kind": "palm",
+              "x": 1150,
+              "y": 560
+            },
+            {
+              "kind": "palm",
+              "x": 360,
+              "y": 150,
+              "scale": 0.9
+            },
+            {
+              "kind": "rock",
+              "x": 30,
+              "y": 470
+            },
+            {
+              "kind": "rock",
+              "x": 1120,
+              "y": 150,
+              "scale": 1.2
+            },
+            {
+              "kind": "rock",
+              "x": 650,
+              "y": 690,
+              "scale": 0.9
+            }
+          ]
+        },
+        "tall": {
+          "width": 400,
+          "height": 1180,
+          "node_scale": 0.82,
+          "nodes": [
+            [118, 1060],
+            [290, 915],
+            [110, 770],
+            [286, 625],
+            [114, 485],
+            [282, 352],
+            [182, 198]
+          ],
+          "decorations": [
+            {
+              "kind": "waves",
+              "x": 30,
+              "y": 70
+            },
+            {
+              "kind": "waves",
+              "x": 230,
+              "y": 1150
+            },
+            {
+              "kind": "boat",
+              "x": 300,
+              "y": 80,
+              "scale": 0.9
+            },
+            {
+              "kind": "buoy",
+              "x": 345,
+              "y": 1050
+            },
+            {
+              "kind": "whale",
+              "x": 10,
+              "y": 625,
+              "scale": 0.9
+            },
+            {
+              "kind": "bird",
+              "x": 40,
+              "y": 300
+            },
+            {
+              "kind": "palm",
+              "x": 360,
+              "y": 500,
+              "scale": 0.9
+            },
+            {
+              "kind": "palm",
+              "x": 40,
+              "y": 360,
+              "scale": 0.85
+            },
+            {
+              "kind": "rock",
+              "x": 340,
+              "y": 780
+            },
+            {
+              "kind": "rock",
+              "x": 20,
+              "y": 920,
+              "scale": 0.9
+            }
+          ]
+        }
+      },
+      "ambient": {
+        "clouds": true,
+        "sparkles": true,
+        "weather": "none"
+      }
+    }
   },
   {
     "slug": "maker-city",

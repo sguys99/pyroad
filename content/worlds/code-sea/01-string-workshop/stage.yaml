@@ -1,0 +1,9 @@
+# 스테이지 2-1: 산호 문자열 공방 (stages 테이블). 설계: docs/curriculum/world2.md §3
+# 퀘스트는 P10-05~07에서 더함. 퀘스트가 하나도 없는 월드는 seed에 넣지 않고 "준비 중"으로 둠 (content/README.md)
+
+id: a2000000-0000-0000-0000-000000000001
+order: 1
+title: 산호 문자열 공방
+theme_name: string_workshop
+description: 글자를 자르고, 바꾸고, 붙여서 산호 간판을 고쳐요!
+is_final: false

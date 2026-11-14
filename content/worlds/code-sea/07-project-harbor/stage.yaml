@@ -1,0 +1,8 @@
+# 스테이지 2-F: 응용 프로젝트 항구 (stages 테이블). 설계: docs/curriculum/world2.md §3
+
+id: a2000000-0000-0000-0000-000000000007
+order: 7
+title: 응용 프로젝트 항구
+theme_name: project_harbor
+description: 배운 주문을 모아 쓸모 있는 프로그램을 완성해요!
+is_final: true

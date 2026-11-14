@@ -490,7 +490,18 @@ const point = z.tuple([z.number().min(0), z.number().min(0)]);
 
 /** 지도 장식 (그림 종류는 지도 컴포넌트가 정함, P5-02) */
 export const MapDecorationSchema = z.strictObject({
-  kind: z.enum(['tree', 'mountains', 'waves', 'bird', 'boat']),
+  // palm·rock(중간 레이어)·buoy·whale(먼 레이어, 움직임)은 2월드 바다 (P10-04)
+  kind: z.enum([
+    'tree',
+    'mountains',
+    'waves',
+    'bird',
+    'boat',
+    'palm',
+    'rock',
+    'buoy',
+    'whale',
+  ]),
   x: z.number(),
   y: z.number(),
   /** 크기 배율. 없으면 1 */

@@ -21,7 +21,7 @@ content/
     │   └── 07-project-kingdom/
     │       ├── stage.yaml
     │       └── 01-number-guessing-game.yaml
-    ├── code-sea/world.yaml            # 월드 2 "준비 중" (스테이지 없음, Q48)
+    ├── code-sea/                      # 월드 2: world.yaml·map.yaml + 스테이지 7개 껍데기(퀘스트는 P10-05~07). 퀘스트 전이라 "준비 중"
     └── maker-city/world.yaml          # 월드 3 "준비 중"
 ```
 
@@ -44,6 +44,8 @@ content/
 
 스테이지 디렉토리가 없는 월드는 **"준비 중"** 표지가 됩니다(`ready: false`, 랜딩·월드 선택 화면). 스테이지를 넣으면 `map.yaml`도 함께 씁니다.
 
+**지도만 먼저 만든 월드 (P10-04)**: 스테이지는 있지만 퀘스트 파일이 **하나도 없는** 월드는 검사를 통과하되 스테이지를 seed(DB)에 넣지 않고 `ready: false`(준비 중)로 둡니다. 지도(`map.yaml`)는 앱에 실려 카탈로그에서 볼 수 있습니다. 퀘스트를 하나라도 넣으면 보통 월드가 되어 **모든 스테이지**에 퀘스트가 있어야 합니다("퀘스트 파일이 없어요").
+
 빌드가 `worlds`에 `slug` 기준으로 업서트하고(id는 DB가 정함, 1월드는 00012가 만든 고정 id) 그 월드의 스테이지에 `stages.world_id`를 채웁니다(P1-08). 스테이지 순서는 (월드 `order`, 스테이지 `order`)이고, 월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열립니다(Phase 10 전까지).
 
 ### map.yaml → 앱 지도 (DB 에 쓰지 않음, P5-03)
@@ -62,7 +64,7 @@ layouts:
     nodes:             # i번째 = i+1번 스테이지 중심 [x, y]
       - [170, 600]
       - …
-    decorations:       # 선택. kind: tree | mountains | waves | bird | boat, scale 선택
+    decorations:       # 선택. kind: tree | mountains | waves | bird | boat | palm | rock | buoy | whale, scale 선택
       - { kind: tree, x: 70, y: 430, scale: 1.2 }
   tall:                # 좁은 화면: 세로로 긴 지도 (같은 키)
     width: 400
@@ -72,7 +74,7 @@ layouts:
 
 - **빌드가 확인**: 두 레이아웃 모두 노드 수 = 스테이지 수, 노드가 `width × height` 안, 모르는 키 없음, 스테이지가 있는 월드에 `map.yaml`이 있음.
 - 테마 키는 `world.yaml`의 `theme`, 노드의 랜드마크 그림은 `stage.yaml`의 `theme_name`을 씁니다(따로 적지 않음).
-- 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`는 먼 레이어, `mountains`·`tree`는 중간 레이어에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
+- 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`·`buoy`는 먼 레이어(움직임), `mountains`·`tree`·`palm`·`rock`·`whale`은 중간 레이어(정지)에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
 - 앰비언트(P5-09): `ambient`는 구름(먼 레이어)·반짝임(물결 옆 + 길 위)·날씨를 켜고 끕니다. 자리는 `src/lib/world/ambient.ts`가 레이아웃에서 정하고(종류별 상한 `AMBIENT_CAP`), `waves`·`boat`·`bird` 장식은 스위치와 상관없이 움직입니다. 움직임은 연출 단계 full에서만.
 - 좌표를 정할 때는 확정 시안 `design/prototypes/src/final/World.tsx`의 `WIDE`·`TALL`을 참고합니다. 지금 노드 카드가 넓어서(P5-04 전) 양 끝 노드는 지도 가장자리에서 120 이상 떨어뜨립니다. 노드 `y`는 130 이상(지금 위치 파이뱀이 노드 위에 섬). 파이뱀은 가장자리에 가까우면 노드 반대쪽에 서고(`markerSide`), 단위 테스트가 모든 월드·노드에서 잘리지 않는지 확인합니다.
 - 테스트용 2번째 월드: `e2e/fixtures/content/worlds/test-meadow/`(스테이지 3개). 단위 테스트(`src/lib/world/__tests__/worldMapData.test.tsx`)가 `content/`에 이 디렉토리를 더해 지도가 나오는지 확인합니다.

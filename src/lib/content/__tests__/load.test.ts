@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { stringify } from 'yaml';
 
+import { buildRows, toWorldInfos } from '../build';
 import { ContentError, loadContent } from '../load';
 import { codeQuest } from './fixtures';
 
@@ -67,6 +68,53 @@ describe('loadContent', () => {
     expect(tree.worlds[0].stages[0].quests[0].quest.title).toBe('첫 번째 인사');
     expect(tree.hash).toMatch(/^[0-9a-f]{16}$/);
     expect(loadContent(dir).hash).toBe(tree.hash);
+  });
+
+  it('퀘스트가 하나도 없는 월드는 지도만 먼저 만든 "준비 중": 통과하되 seed 에 스테이지를 넣지 않음 (P10-04)', () => {
+    const draft = makeContent({
+      'world.yaml': WORLD,
+      'map.yaml': MAP,
+      '01-python-village/stage.yaml': STAGE,
+    });
+    const tree = loadContent(draft);
+    expect(buildRows(tree).rows.stages).toEqual([]);
+    expect(toWorldInfos(tree)[0]).toMatchObject({ ready: false });
+    expect(toWorldInfos(tree)[0].map).not.toBeNull();
+
+    // 퀘스트가 생기면 모든 스테이지에 있어야 함
+    const MAP2 = {
+      ...MAP,
+      layouts: {
+        wide: {
+          ...MAP.layouts.wide,
+          nodes: [
+            [130, 600],
+            [330, 470],
+          ],
+        },
+        tall: {
+          ...MAP.layouts.tall,
+          nodes: [
+            [104, 1080],
+            [292, 930],
+          ],
+        },
+      },
+    };
+    const partial = makeContent({
+      'world.yaml': WORLD,
+      'map.yaml': MAP2,
+      '01-python-village/stage.yaml': STAGE,
+      '01-python-village/01-first-greeting.yaml': codeQuest(),
+      '02-variable-forest/stage.yaml': {
+        ...STAGE,
+        id: 'a1000000-0000-0000-0000-000000000002',
+        order: 2,
+      },
+    });
+    expect(problemsOf(partial)).toEqual([
+      expect.stringMatching(/02-variable-forest: 퀘스트 파일이 없어요/),
+    ]);
   });
 
   it('이름·번호·중복 문제를 파일 경로와 함께 모두 모아 알려 줌', () => {

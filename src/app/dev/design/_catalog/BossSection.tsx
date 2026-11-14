@@ -39,7 +39,7 @@ const BOSS = {
 };
 const TOTAL = 5;
 
-/** 스테이지 외형 7종 (P9-13, 콘텐츠 `prompt.boss.look`) */
+/** 스테이지 외형 1월드 7종 (P9-13) + 2월드 7종 (P10-04), 콘텐츠 `prompt.boss.look` */
 const LOOK_NAME: Record<BossLook, string> = {
   village: '1 출력 대장',
   forest: '2 상자 바꿔치기',
@@ -48,6 +48,14 @@ const LOOK_NAME: Record<BossLook, string> = {
   lake: '5 뒤죽박죽',
   tower: '6 주문 도둑',
   kingdom: '7 버그버그 대왕',
+  // 2월드 코드 바다 (P10-04)
+  workshop: '2-1 글자 뒤섞기',
+  library: '2-2 이름표 도둑',
+  maze: '2-3 소용돌이',
+  pirate: '2-4 회전목마',
+  hospital: '2-5 배탈 난',
+  ridge: '2-6 산맥 지킴이',
+  captain: '2-F 버그버그 선장',
 };
 
 const QUIZ: QuizPrompt = {
@@ -295,8 +303,8 @@ export function BossSection() {
         </Demo>
       </div>
       <Demo
-        label="스테이지 외형 7종"
-        note="리그 팔레트 덮어쓰기(등딱지·더듬이 끝) + 코스튬 모자. 콘텐츠 prompt.boss.look"
+        label="스테이지 외형 14종 (1월드 7 · 2월드 바다 7)"
+        note="리그 팔레트 덮어쓰기(등딱지·더듬이 끝) + 코스튬 모자. 2월드는 바다 소품(산호·털모자·튜브·해적 모자·붕대·아귀 초롱·선장 모자 + 문어 다리). 콘텐츠 prompt.boss.look"
         data-testid="boss-looks"
       >
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">

@@ -94,6 +94,8 @@
   --color-w2: var(--w2);
   --color-w2-ink: var(--w2-ink);
   --color-w2-soft: var(--w2-soft);
+  --color-w2-shallow: var(--w2-shallow);
+  --color-w2-deep: var(--w2-deep);
   --color-w3: var(--w3);
   --color-w3-ink: var(--w3-ink);
   --color-w3-soft: var(--w3-soft);
@@ -235,6 +237,8 @@
   --w2: #b4c8d2;
   --w2-ink: #6b645b;
   --w2-soft: #edf1f3;
+  --w2-shallow: #cfe4e3;
+  --w2-deep: #95bac6;
   --w3: #d9c3a3;
   --w3-ink: #6b645b;
   --w3-soft: #f4eee5;

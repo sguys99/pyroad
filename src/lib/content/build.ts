@@ -13,7 +13,7 @@ import {
   type ValidationRule,
 } from '@/lib/quest/validation';
 
-import type { ContentTree } from './load';
+import { isDraft, type ContentTree } from './load';
 import {
   byQuizId,
   findAnswerKeysInPublic,
@@ -182,6 +182,8 @@ export function buildRows(tree: ContentTree): BuildResult {
       description: world.description,
       unlock_rule: { ...world.unlock_rule },
     });
+    // 지도만 먼저 만든 "준비 중" 월드(isDraft)는 스테이지를 DB 에 넣지 않음 → 앱에서 그대로 준비 중 (P10-04)
+    if (isDraft(stages)) continue;
     for (const { stage, quests } of [...stages].sort(
       (a, b) => a.stage.order - b.stage.order,
     )) {
@@ -917,7 +919,7 @@ function strOrNull(value: unknown): string | null {
 /**
  * world.yaml + map.yaml → `src/lib/world/worlds.generated.ts` 소스.
  * 지도는 DB 가 아니라 앱 번들로 갑니다(서버·클라이언트 어디서나 import). 이름·준비 여부도 여기 한 곳에서 읽습니다.
- * `ready` 는 스테이지가 있는지에서 나옴 (없으면 "준비 중", 랜딩 worldsData 와 같은 뜻).
+ * `ready` 는 퀘스트가 있는 스테이지가 있는지에서 나옴 (없으면 "준비 중", 랜딩 worldsData 와 같은 뜻). 지도는 준비 중이어도 실림.
  * TS 로 만드는 까닭: 랜딩 글꼴 서브셋 수집기(scripts/fonts/landing-text.mjs)가 TS 모듈만 따라감.
  */
 export function toWorldInfos(tree: ContentTree): WorldInfo[] {
@@ -929,7 +931,7 @@ export function toWorldInfos(tree: ContentTree): WorldInfo[] {
       title: world.title,
       theme: world.theme,
       unlock_rule: world.unlock_rule,
-      ready: stages.length > 0,
+      ready: !isDraft(stages),
       map,
     }));
 }

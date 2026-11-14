@@ -116,6 +116,27 @@ const SAMPLE: StageWithStatus[] = STAGES.map(([title, theme], i) => ({
   chestOpened: i === 0,
 }));
 
+// 월드 2 코드 바다 견본 (P10-04, 이름·테마는 content/worlds/code-sea): 1~4 완료, 5 진행 중, 6·7 잠김
+const SEA_STAGES: [title: string, theme: string][] = [
+  ['산호 문자열 공방', 'string_workshop'],
+  ['등대 딕셔너리 도서관', 'dict_library'],
+  ['소용돌이 반복 미로', 'nested_maze'],
+  ['해적선 랜덤 놀이공원', 'random_park'],
+  ['버그 병원선', 'bug_hospital'],
+  ['해저 알고리즘 산맥', 'algorithm_ridge'],
+  ['응용 프로젝트 항구', 'project_harbor'],
+];
+const SEA_SAMPLE: StageWithStatus[] = SEA_STAGES.map(([title, theme], i) => ({
+  ...SAMPLE[i],
+  id: `sea-${i + 1}`,
+  title,
+  theme_name: theme,
+  status: i < 4 ? 'completed' : i === 4 ? 'in_progress' : 'locked',
+  completedQuestCount: i < 4 ? 6 : i === 4 ? 3 : 0,
+  stars: i < 4 ? 16 : i === 4 ? 7 : 0,
+  chestOpened: i < 3,
+}));
+
 // 노드 상태 5종 (P5-04): 잠김 · 열림(아직 0개) · 진행 중(링) · 통과(도장) · 보스(큰 랜드마크 + 왕관)
 const NODE_STATES: [label: string, stage: StageWithStatus][] = [
   ['잠김', { ...SAMPLE[3] }],
@@ -531,6 +552,7 @@ const HUDS: [string, WorldHudProps][] = [
 
 export function WorldMapSection() {
   const island = WORLDS.find((w) => w.map);
+  const sea = WORLDS.find((w) => w.slug === 'code-sea');
   if (!island?.map) return null;
   // 지도 노드·잉크 길은 Framer m.* 라 LazyMotion 이 필요하다 (앱은 LoggedInShell 이 감쌈)
   return (
@@ -641,6 +663,36 @@ export function WorldMapSection() {
           ))}
         </div>
       </Demo>
+      {sea?.map && (
+        <Demo
+          label={`월드 ${sea.order} · ${sea.title} (P10-04, 바다 해도 · theme: ${sea.theme})`}
+          note="그림책 2권 바다 여행: 물빛 해도 + 나침반·항로선, 노드마다 섬(등심선 고리 2줄). 장식 야자수·바위·부표·고래·갈매기. 견본 진행: 1~4 완료, 5 진행 중, 6·7 잠김(연필 스케치)"
+          data-testid="world-map-2"
+        >
+          <WorldMap
+            stages={SEA_SAMPLE}
+            map={sea.map}
+            theme={sea.theme}
+            world={sea.order as WorldId}
+          />
+        </Demo>
+      )}
+      {sea && (
+        <Demo
+          label="2월드 랜드마크 7종 (열림 · 잠김)"
+          note="산호 문자열 공방 · 등대 딕셔너리 도서관 · 소용돌이 반복 미로 · 해적선 랜덤 놀이공원 · 버그 병원선 · 해저 알고리즘 산맥 · 응용 프로젝트 항구(보스, 1.15배 + 왕관)"
+          data-testid="world-2-landmarks"
+        >
+          <div className="flex flex-wrap gap-4">
+            {SEA_SAMPLE.map((stage) => (
+              <div key={stage.id} className="grid gap-2" data-world="2">
+                <NodeTile stage={{ ...stage, status: 'completed' }} />
+                <NodeTile stage={{ ...stage, status: 'locked' }} />
+              </div>
+            ))}
+          </div>
+        </Demo>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         {WORLDS.filter((w) => !w.map).map((w) => (
           <Demo
