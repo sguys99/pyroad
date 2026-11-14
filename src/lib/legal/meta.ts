@@ -1,3 +1,5 @@
+import { kstToday, type DateInput } from '@/lib/time/kst';
+
 /**
  * 약관·개인정보처리방침의 운영자 정보와 버전 (P3-14, §12-Q37).
  *
@@ -26,6 +28,14 @@ export const PRIVACY_VERSION = '2026-11-21';
 // 버전만 바뀌고 다시 동의는 받지 않는다(기존 동의 기록은 예전 버전 그대로, 새 가입·보호자 동의부터 이 버전으로 기록)
 export const TERMS_EFFECTIVE_DATE = '2026-11-21';
 export const PRIVACY_EFFECTIVE_DATE = '2026-11-21';
+
+/**
+ * 새 처리방침에 근거한 기능(자랑 카드·보호자 주간 리포트·AI 튜터 자유 질문)을 켤지: KST 날짜 ≥ 시행일 (B79, §12-Q71).
+ * v0.7 은 시행일 전에 배포하므로 이 기능들은 KST 2026-11-21 00:00 에 저절로 켜진다. 요청 때 판정은 `policyGate.ts`
+ */
+export function isPolicyEffective(now: DateInput = Date.now()): boolean {
+  return kstToday(now) >= PRIVACY_EFFECTIVE_DATE;
+}
 
 /** 법적 고지 페이지 (비로그인 열람, 정적 렌더 — `src/lib/security/csp.ts`의 STATIC_PAGE_PATHS) */
 export const LEGAL_LINKS = [

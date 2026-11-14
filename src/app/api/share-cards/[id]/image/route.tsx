@@ -6,6 +6,7 @@ import {
   shareCardCacheHeaders,
 } from '@/lib/share-card/publicCard';
 import { CARD } from '@/lib/share-card/tokens';
+import { isPolicyLive } from '@/lib/legal/policyGate';
 
 /**
  * 공유 카드 PNG (P9-07, §2.5, P0-10). 1200×630, `share_cards` 스냅샷만으로 그린다 — 쿼리 문자열(`?v=`)은 캐시 키일 뿐 읽지 않음.
@@ -13,7 +14,7 @@ import { CARD } from '@/lib/share-card/tokens';
  * - **Node.js 런타임**(Edge 는 폰트·@vercel/og 로 함수 크기 한도 초과). 폰트는 `src/fonts/share-card/`를
  *   `next.config.ts` `outputFileTracingIncludes`로 이 함수에 번들(외부 네트워크 없음)
  * - 렌더가 장당 수백 ms CPU 라 CDN 캐시 필수: `shareCardCacheHeaders`(1년, 단 만료 시각까지) + 태그 `share-card-{id}`
- * - 없음·비공개·만료(90일, §12-Q67)는 404, 캐시하지 않음
+ * - 처리방침 시행일 전(B79)·없음·비공개·만료(90일, §12-Q67)는 404, 캐시하지 않음(no-store → 시행일 뒤 CDN 이 옛 404 를 내놓지 않음)
  */
 export const runtime = 'nodejs';
 
@@ -24,7 +25,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const card = await loadPublicShareCard(id);
+  const card = (await isPolicyLive()) ? await loadPublicShareCard(id) : null;
   if (card === 'error')
     return new Response('잠시 뒤에 다시 열어 주세요.', {
       status: 503,

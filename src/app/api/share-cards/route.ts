@@ -7,6 +7,7 @@ import { createShareCardRpc, rewardError } from '@/lib/quest/rewardRpc';
 import { isShareCardKind } from '@/lib/share-card/snapshot';
 import { shareCardImagePath } from '@/lib/share-card/publicCard';
 import { kstToday } from '@/lib/time/kst';
+import { isPolicyLive, policyNotYet } from '@/lib/legal/policyGate';
 
 const ACHIEVEMENT_ID = /^[a-z0-9_]{1,64}$/;
 
@@ -20,8 +21,10 @@ const ACHIEVEMENT_ID = /^[a-z0-9_]{1,64}$/;
  * - 같은 카드를 다시 만들면 같은 id 로 다시 공개 + 새 90일(바뀌었으면 version + 1 → 이미지 주소가 바뀜)
  * - 응답: `{ id, kind, version, expiresAt, imageUrl, rewardClaimed }` (공유 페이지 `/share/{id}`·카카오는 P9-08·P9-09).
  *   rewardClaimed = 오늘(KST) 자랑하기 보상을 이미 받았는지(P9-10, 본인 원장 share/<날짜> — RLS 본인 읽기). 시트의 보상 안내 줄
+ * - 처리방침 시행일 전에는 404 not_yet (B79)
  */
 export async function POST(request: Request) {
+  if (!(await isPolicyLive())) return policyNotYet();
   const supabase = await createClient();
   const {
     data: { user },

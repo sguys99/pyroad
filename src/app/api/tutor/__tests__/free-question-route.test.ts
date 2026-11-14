@@ -87,6 +87,13 @@ vi.mock('@/lib/tutor/providers/factory', async (importOriginal) => ({
 import { POST } from '../route';
 import { POST as POST_STREAM } from '../stream/route';
 
+// 처리방침 시행일 판정은 켜 둔다 (B79). 꺼진 경우는 따로 확인
+const policy = vi.hoisted(() => ({ live: true }));
+vi.mock('@/lib/legal/policyGate', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/legal/policyGate')>()),
+  isPolicyLive: async () => policy.live,
+}));
+
 function post(body: object, path = '/api/tutor') {
   return new Request(`http://localhost${path}`, {
     method: 'POST',
@@ -280,6 +287,19 @@ describe('/api/tutor free_question (P9-17)', () => {
     expect(res.status).toBe(400);
     expect(mocks.quota).not.toHaveBeenCalled();
     expect(allLogs()).toContain('invalid_question');
+  });
+
+  it('처리방침 시행일 전(B79)은 404 not_yet, 한도·LLM 까지 가지 않음', async () => {
+    policy.live = false;
+    try {
+      const res = await POST(ask('변수는 왜 써요?'));
+      expect(res.status).toBe(404);
+      expect(await res.json()).toMatchObject({ code: 'not_yet' });
+      expect(mocks.quota).not.toHaveBeenCalled();
+      expect(mocks.createProvider).not.toHaveBeenCalled();
+    } finally {
+      policy.live = true;
+    }
   });
 
   it('100자 질문은 받는다', async () => {

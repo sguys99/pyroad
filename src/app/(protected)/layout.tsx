@@ -10,6 +10,8 @@ import { ConsentBanner } from '@/components/consent/ConsentBanner';
 import { RestReminder } from '@/components/rest/RestReminder';
 import { isTestPagesEnabled } from '@/lib/env/testPages';
 import { MyLookProvider } from '@/components/profile/MyLook';
+import { PolicyLiveProvider } from '@/components/legal/PolicyLive';
+import { isPolicyLive } from '@/lib/legal/policyGate';
 
 /**
  * 로그인 화면은 모두 요청마다 렌더한다: 페이지 CSP의 nonce를 서버 렌더 때 넣어야 하기 때문이다 (B27).
@@ -36,6 +38,8 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
  *
  * 꾸민 모습 (P9-05): 같은 조회의 `avatar_config`를 `MyLookProvider`로 — 지도·퀘스트·축하·HUD·프로필의 내 파이뱀이 이것으로 그린다.
  *
+ * 새 처리방침 근거 기능 (B79): 자랑 카드·보호자 리포트·자유 질문의 진입점은 시행일 전에 숨긴다. 요청마다 판정해 `PolicyLiveProvider`로.
+ *
  * 휴식 알림 (P8-12): 모든 로그인 화면에 `RestReminder` 하나(클라이언트 타이머, 서버 저장 없음).
  *
  * 로그인 화면 틀(`<main>`, 움직임·사운드 설정 동기화, 앱 웹폰트)은 `LoggedInShell` — `/onboarding`과 같이 쓴다.
@@ -45,7 +49,10 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const row = await loadOwnUserRow();
+  const [row, policyLive] = await Promise.all([
+    loadOwnUserRow(),
+    isPolicyLive(),
+  ]);
   if (row && row.onboardedAt === null) redirect('/onboarding');
   // 보호자 동의 상태 (P3-15): 같은 조회 결과로. 모르면 null → 띠·안내 없음 (막는 것은 서버 API)
   const consent = row?.consent ? consentStatus(row.consent) : null;
@@ -53,10 +60,12 @@ export default async function ProtectedLayout({
     <LoggedInShell>
       <ConsentProvider status={consent}>
         <MyLookProvider config={row?.avatarConfig ?? null}>
-          <ConsentBanner />
-          {children}
-          {/* 휴식 알림 (P8-12): 탭이 보이는 연속 40분. e2e 빨리 감기는 테스트 페이지가 켜진 서버에서만 */}
-          <RestReminder allowFastClock={isTestPagesEnabled()} />
+          <PolicyLiveProvider live={policyLive}>
+            <ConsentBanner />
+            {children}
+            {/* 휴식 알림 (P8-12): 탭이 보이는 연속 40분. e2e 빨리 감기는 테스트 페이지가 켜진 서버에서만 */}
+            <RestReminder allowFastClock={isTestPagesEnabled()} />
+          </PolicyLiveProvider>
         </MyLookProvider>
       </ConsentProvider>
     </LoggedInShell>

@@ -24,6 +24,13 @@ vi.mock('@/lib/observability/server', () => ({ captureServerError: vi.fn() }));
 
 import { DELETE, PATCH } from '../route';
 
+// 처리방침 시행일 판정은 켜 둔다 (B79). 꺼진 경우는 따로 확인
+const policy = vi.hoisted(() => ({ live: true }));
+vi.mock('@/lib/legal/policyGate', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/legal/policyGate')>()),
+  isPolicyLive: async () => policy.live,
+}));
+
 const ID = 'rG6TzuP93C8blCS4ZdyehQ';
 const ctx = (id = ID) => ({ params: Promise.resolve({ id }) });
 const patch = (body: unknown, id = ID) =>

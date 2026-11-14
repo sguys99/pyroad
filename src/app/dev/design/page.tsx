@@ -11,6 +11,7 @@ import '@/fonts/pyroad-mono/pyroad-mono.css';
 // 온보딩 조각(P3-11)은 globals.css 밖 스타일 (랜딩 CSS 예산)
 import '@/components/onboarding/onboarding.css';
 import '@/components/consent/consent.css';
+import { PolicyLiveProvider } from '@/components/legal/PolicyLive';
 import { DesignCatalog, type ReducedChoice, type TierChoice } from './DesignCatalog';
 
 export const metadata: Metadata = {
@@ -35,5 +36,10 @@ export default async function DesignCatalogPage({
   const tier: TierChoice = isMotionTier(motion) ? motion : 'auto';
   const reducedChoice: ReducedChoice =
     reduced === 'on' || reduced === 'off' ? reduced : 'system';
-  return <DesignCatalog initialTier={tier} initialReduced={reducedChoice} />;
+  // 견본은 시행일과 상관없이 자랑하기·자유 질문까지 보인다 (B79)
+  return (
+    <PolicyLiveProvider live>
+      <DesignCatalog initialTier={tier} initialReduced={reducedChoice} />
+    </PolicyLiveProvider>
+  );
 }

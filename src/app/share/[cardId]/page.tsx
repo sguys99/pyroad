@@ -6,6 +6,7 @@ import {
   loadPublicShareCard,
   shareCardImagePath,
 } from '@/lib/share-card/publicCard';
+import { isPolicyLive } from '@/lib/legal/policyGate';
 import { shareCardSummary } from '@/lib/share-card/summary';
 import { SITE_NAME } from '@/lib/seo/site';
 
@@ -17,7 +18,7 @@ import { SITE_NAME } from '@/lib/seo/site';
  * - `robots: noindex`(링크를 받은 사람만 보는 곳), og:image = 카드 PNG(`?v=version`, 카드가 바뀌면 카카오 썸네일도 새로),
  *   og:url = 이 페이지
  * - 요청마다 렌더(DB 조회 + CSP nonce). 미들웨어는 이 경로에서 세션 갱신을 건너뛴다(`src/middleware.ts`)
- * - 없음·비공개·만료 → `not-found.tsx`(404), 조회 실패 → 던져서 오류 화면(500, 미리보기 수집기가 빈 카드를 캐시하지 않게)
+ * - 처리방침 시행일 전(B79)·없음·비공개·만료 → `not-found.tsx`(404), 조회 실패 → 던져서 오류 화면(500, 미리보기 수집기가 빈 카드를 캐시하지 않게)
  */
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,7 @@ type Props = { params: Promise<{ cardId: string }> };
 
 // generateMetadata 와 페이지가 같은 요청에서 한 번만 조회
 const loadCard = cache(async (id: string) => {
+  if (!(await isPolicyLive())) return null;
   const card = await loadPublicShareCard(id);
   if (card === 'error') throw new Error('share card unavailable');
   return card;
