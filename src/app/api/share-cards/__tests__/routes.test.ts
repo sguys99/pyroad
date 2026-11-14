@@ -30,13 +30,6 @@ vi.mock('@/lib/consent/server', () => ({ guardianWriteGate: mocks.gate }));
 import { POST } from '../route';
 import { GET } from '../[id]/image/route';
 
-// 처리방침 시행일 판정은 켜 둔다 (B79). 꺼진 경우는 따로 확인
-const policy = vi.hoisted(() => ({ live: true }));
-vi.mock('@/lib/legal/policyGate', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/legal/policyGate')>()),
-  isPolicyLive: async () => policy.live,
-}));
-
 const ID = 'rG6TzuP93C8blCS4ZdyehQ';
 const STAGE = '11111111-2222-4333-8444-555555555555';
 const req = (body: unknown) =>
@@ -134,23 +127,6 @@ describe('POST /api/share-cards (P9-07)', () => {
     const res = await POST(req({ kind: 'stage', ref: STAGE }));
     expect(res.status).toBe(409);
     expect((await res.json()).code).toBe('stage_not_cleared');
-  });
-});
-
-describe('처리방침 시행일 전 (B79)', () => {
-  it('만들기·이미지 모두 404 not_yet·no-store, DB 를 부르지 않음', async () => {
-    policy.live = false;
-    try {
-      const res = await POST(req({ kind: 'levelup' }));
-      expect(res.status).toBe(404);
-      expect(await res.json()).toMatchObject({ code: 'not_yet' });
-      const img = await image(ID);
-      expect(img.status).toBe(404);
-      expect(img.headers.get('cache-control')).toBe('no-store');
-      expect(mocks.rpc).not.toHaveBeenCalled();
-    } finally {
-      policy.live = true;
-    }
   });
 });
 

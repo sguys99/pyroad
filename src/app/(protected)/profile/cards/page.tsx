@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
@@ -15,7 +15,6 @@ import {
 import { shareCardImagePath } from '@/lib/share-card/publicCard';
 import type { ShareCardKind } from '@/lib/share-card/types';
 import { kstToday } from '@/lib/time/kst';
-import { isPolicyLive } from '@/lib/legal/policyGate';
 import '@/components/profile/profile.css';
 
 export const metadata: Metadata = { title: '내 자랑 카드' };
@@ -26,7 +25,6 @@ export const metadata: Metadata = { title: '내 자랑 카드' };
 export default async function MyShareCardsPage() {
   const { user } = await getAuthUser();
   if (!user) redirect('/');
-  if (!(await isPolicyLive())) notFound(); // 처리방침 시행일부터 (B79)
   const supabase = await createClient();
   const [rows, claimed] = await Promise.all([
     supabase

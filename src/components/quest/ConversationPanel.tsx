@@ -13,7 +13,6 @@ import {
   type FreeAskResult,
 } from '@/lib/quest/useQuestSession';
 import { FreeQuestionForm } from './FreeQuestionForm';
-import { usePolicyLive } from '@/components/legal/PolicyLive';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import type { PybaemExpression } from '@/components/characters/expressions';
 import { useMessageExpression } from '@/components/characters/useCharacterExpression';
@@ -171,7 +170,6 @@ export default function ConversationPanel({
   freeRemaining = null,
 }: ConversationPanelProps) {
   const logRef = useRef<HTMLDivElement>(null);
-  const policyLive = usePolicyLive();
 
   // 새 메시지·스트리밍이면 대화 상자 안에서만 끝으로. 이야기 쪽 전체(해 볼 일 카드)는 움직이지 않는다 (P6-01)
   useEffect(() => {
@@ -230,8 +228,7 @@ export default function ConversationPanel({
           ))}
         </div>
       )}
-      {/* 자유 질문은 처리방침 시행일부터 (B79) */}
-      {onFreeAsk && policyLive && (
+      {onFreeAsk && (
         <FreeQuestionForm
           onSubmit={onFreeAsk}
           remaining={freeRemaining}

@@ -29,7 +29,6 @@ import {
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
 import { chestState } from '@/lib/world/chest';
 import { kstToday, kstWeekStart } from '@/lib/time/kst';
-import { isPolicyLive } from '@/lib/legal/policyGate';
 
 /** 못 읽었을 때(00038 전 DB) 빈 기록 — 화면은 0으로 그대로 그림 */
 const EMPTY_STATS: ProfileStatsRaw = {
@@ -74,7 +73,6 @@ export default async function ProfilePage() {
     defs,
     stats,
     shareCards,
-    policyLive,
   ] = await Promise.all([
     supabase
       .from('users')
@@ -106,8 +104,6 @@ export default async function ProfilePage() {
       .from('share_cards')
       .select('is_public, expires_at')
       .eq('user_id', user.id),
-    // 자랑 카드는 처리방침 시행일부터 (B79)
-    isPolicyLive(),
   ]);
   if (stats.error)
     reportServerError(stats.error, { area: 'profile', op: 'profile_stats' });
@@ -148,11 +144,7 @@ export default async function ProfilePage() {
         <ProfileHero
           name={profile.name}
           totalXp={profile.total_xp}
-          action={
-            policyLive && (
-              <ShareButton kind="levelup">레벨 카드 자랑하기</ShareButton>
-            )
-          }
+          action={<ShareButton kind="levelup">레벨 카드 자랑하기</ShareButton>}
         />
 
         {/* 768+ 두 열: 왼쪽 달력·모험 기록, 오른쪽 업적·별과 보물 (열마다 쌓아 빈 곳을 줄임) */}
@@ -172,16 +164,15 @@ export default async function ProfilePage() {
               stampDays={raw.stamp_days}
             />
             {/* 이번 주 공부한 날이 있으면 주간 카드 자랑하기 (P9-10, 공개 카드는 합계만 §12-Q67 ②) */}
-            {policyLive &&
-              Object.entries(raw.days).some(
-                ([day, n]) => n > 0 && day >= kstWeekStart(today),
-              ) && (
-                <div className="mt-3 flex justify-center">
-                  <ShareButton kind="weekly" testId="share-open-weekly">
-                    이번 주 기록 자랑하기
-                  </ShareButton>
-                </div>
-              )}
+            {Object.entries(raw.days).some(
+              ([day, n]) => n > 0 && day >= kstWeekStart(today),
+            ) && (
+              <div className="mt-3 flex justify-center">
+                <ShareButton kind="weekly" testId="share-open-weekly">
+                  이번 주 기록 자랑하기
+                </ShareButton>
+              </div>
+            )}
           </ProfileCard>
 
           <ProfileStatsCard raw={raw} />
@@ -194,16 +185,14 @@ export default async function ProfilePage() {
             recent={recentAchievements(definitions, ownedRows)}
           />
 
-          {policyLive && (
-            <ShareCardsCard
-              total={shareCards.data?.length ?? 0}
-              open={
-                (shareCards.data ?? []).filter(
-                  (c) => c.is_public && new Date(c.expires_at) > new Date(),
-                ).length
-              }
-            />
-          )}
+          <ShareCardsCard
+            total={shareCards.data?.length ?? 0}
+            open={
+              (shareCards.data ?? []).filter(
+                (c) => c.is_public && new Date(c.expires_at) > new Date(),
+              ).length
+            }
+          />
 
           <TreasureCard
             coins={profile.coins}

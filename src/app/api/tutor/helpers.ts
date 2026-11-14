@@ -61,7 +61,6 @@ import { captureServerError } from '@/lib/observability/server';
 import { checkStageUnlocked } from '@/lib/world/checkStageUnlocked';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
-import { isPolicyLive, policyNotYet } from '@/lib/legal/policyGate';
 import type { QuestWithStageServer } from '@/lib/types/database';
 
 const VALID_TYPES = [
@@ -377,10 +376,6 @@ export async function prepareTutorCall(
   ) {
     return reject(400, 'Invalid type', 'invalid_type', String(body.type));
   }
-
-  // 자유 질문(P9-17)은 처리방침 시행일부터 (B79). 화면에 칸이 없으니 남기지 않고 없는 기능처럼 404
-  if (body.type === 'free_question' && !(await isPolicyLive()))
-    return policyNotYet();
 
   // 퀴즈 해설(P7-08)·자유 질문(P9-17)은 다 받은 뒤 걸러야 하므로 흘려 보내지 않는다
   if (

@@ -3,7 +3,6 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { claimShareRewardRpc, rewardError } from '@/lib/quest/rewardRpc';
-import { isPolicyLive, policyNotYet } from '@/lib/legal/policyGate';
 
 const CARD_ID = /^[A-Za-z0-9_-]{22}$/;
 
@@ -15,10 +14,8 @@ const CARD_ID = /^[A-Za-z0-9_-]{22}$/;
  *   같은 날 다시·동시에 불러도 200 + already_claimed(0)
  * - 보호자 동의 게이트는 걸지 않음: 남에게 보이는 쓰기(카드 공개)는 만들기 API 가 이미 막고, 여기는 본인 코인만 바뀜(출석 도장과 같음)
  * - 받으면 HUD 코인이 바뀌므로 무효화 (화면은 router.refresh())
- * - 처리방침 시행일 전에는 404 not_yet (B79)
  */
 export async function POST(request: Request) {
-  if (!(await isPolicyLive())) return policyNotYet();
   const supabase = await createClient();
   const {
     data: { user },

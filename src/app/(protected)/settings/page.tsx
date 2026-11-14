@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePolicyLive } from '@/components/legal/PolicyLive';
 import { Compass, X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,6 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
-  const policyLive = usePolicyLive();
 
   useEffect(() => {
     fetch('/api/settings')
@@ -178,11 +176,10 @@ export default function SettingsPage() {
       <LinkedAccountsSection />
       {/* 보호자 동의 (P3-15). 로그인 레이아웃 ConsentProvider 값, 모르면 그리지 않음 */}
       <GuardianConsentStatus />
-      {/* 보호자 주간 리포트 비밀 링크 (P9-15). 처리방침 시행일부터 (B79) */}
-      {policyLive && <GuardianReportSection />}
+      {/* 보호자 주간 리포트 비밀 링크 (P9-15) */}
+      <GuardianReportSection />
 
-      {/* 위 카드의 아래 여백과 겹쳐(마진 상쇄) 보호자 동의 카드만 있어도 간격이 같음 (B79) */}
-      <h2 className="mt-6 mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
+      <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
     </>
   );
 

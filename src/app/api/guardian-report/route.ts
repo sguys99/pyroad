@@ -5,7 +5,6 @@ import { reportServerError } from '@/lib/api/serverError';
 import { guardianWriteGate } from '@/lib/consent/server';
 import { trackServerEvent } from '@/lib/analytics/server';
 import { guardianReportPath } from '@/lib/guardian-report/report';
-import { isPolicyLive, policyNotYet } from '@/lib/legal/policyGate';
 
 /**
  * 보호자 주간 리포트 링크 (P9-15). 사용자는 `auth.getUser()`로 확인한 id 만
@@ -14,12 +13,11 @@ import { isPolicyLive, policyNotYet } from '@/lib/legal/policyGate';
  * - `POST` 만들기·다시 만들기 `{active, createdAt, path}` — 새 토큰으로 바꿔 써서 옛 링크는 바로 404.
  *   학습 기록을 다른 사람에게 보여 주는 쓰기라 보호자 동의 게이트(P3-15, 공유 카드와 같음)
  * - `DELETE` 끄기 (늘 허용)
- * 모두 service_role RPC `guardian_report_link`(00050). 처리방침 시행일 전에는 모두 404 not_yet (B79)
+ * 모두 service_role RPC `guardian_report_link`(00050)
  */
 type Action = 'status' | 'create' | 'off';
 
 async function run(request: Request, action: Action) {
-  if (!(await isPolicyLive())) return policyNotYet();
   const supabase = await createClient();
   const {
     data: { user },

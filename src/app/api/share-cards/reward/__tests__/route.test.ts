@@ -18,13 +18,6 @@ vi.mock('@/lib/supabase/admin', () => ({
 
 import { POST } from '../route';
 
-// 처리방침 시행일 판정은 켜 둔다 (B79). 꺼진 경우는 따로 확인
-const policy = vi.hoisted(() => ({ live: true }));
-vi.mock('@/lib/legal/policyGate', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/legal/policyGate')>()),
-  isPolicyLive: async () => policy.live,
-}));
-
 const ID = 'rG6TzuP93C8blCS4ZdyehQ';
 const req = (body: unknown) =>
   new Request('http://x/api/share-cards/reward', {
@@ -43,17 +36,6 @@ beforeEach(() => {
 });
 
 describe('POST /api/share-cards/reward (P9-10)', () => {
-  it('처리방침 시행일 전(B79)은 404 not_yet, 보상 RPC 를 부르지 않음', async () => {
-    policy.live = false;
-    try {
-      const res = await POST(req({ cardId: 'rG6TzuP93C8blCS4ZdyehQ' }));
-      expect(res.status).toBe(404);
-      expect(mocks.rpc).not.toHaveBeenCalled();
-    } finally {
-      policy.live = true;
-    }
-  });
-
   it('로그인하지 않으면 401, 잘못된 카드 id 는 400 — RPC 를 부르지 않음', async () => {
     mocks.user = null;
     expect((await POST(req({ cardId: ID }))).status).toBe(401);
