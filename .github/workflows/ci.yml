@@ -225,7 +225,8 @@ jobs:
   e2e-smoke:
     # Playwright 1.58은 ubuntu-latest(26.04)를 지원하지 않아 24.04로 고정. Playwright를 올리면 함께 확인
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # 비로그인 e2e 가 빌드 포함 약 19분이라 20분이면 취소된다 (B78, docs/ci.md)
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
