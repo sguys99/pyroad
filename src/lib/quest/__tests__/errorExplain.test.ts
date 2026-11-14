@@ -77,6 +77,34 @@ describe('explainError', () => {
       /int\( \)로 바꾸려고/,
     ],
     ['IndexError: list index out of range', 'IndexError', /없는 번호/],
+    // 2월드 (P10-08)
+    ['IndexError: string index out of range', 'IndexError', /글자에 없는 자리/],
+    ["KeyError: 'apple'", 'KeyError', /'apple' 라는 이름표\(키\)/],
+    [
+      "ValueError: could not convert string to float: 'a'",
+      'ValueError',
+      /바꿀 수 없어요/,
+    ],
+    [
+      "TypeError: 'str' object does not support item assignment",
+      'TypeError',
+      /한 자리만 바꿔/,
+    ],
+    [
+      'TypeError: list indices must be integers or slices, not str',
+      'TypeError',
+      /정수여야/,
+    ],
+    [
+      "ModuleNotFoundError: No module named 'randon'",
+      'ModuleNotFoundError',
+      /randon 라는 모듈/,
+    ],
+    [
+      "AttributeError: module 'random' has no attribute 'randit'",
+      'AttributeError',
+      /random 모듈에는 randit/,
+    ],
   ])('%s', (last, type, re) => {
     const e = explainError(tb(3, last));
     expect(e.type).toBe(type);

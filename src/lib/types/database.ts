@@ -179,7 +179,10 @@ export interface StageWithQuests extends Stage {
 
 /** 서버 라우트(튜터 등)가 읽는 퀘스트. 정답은 들어 있지 않음 (answerKeys.ts로 따로 읽음) */
 export type QuestWithStageServer = Quest & {
-  stage: Pick<Stage, 'id' | 'world_id' | 'title' | 'order' | 'theme_name'>;
+  stage: Pick<Stage, 'id' | 'world_id' | 'title' | 'order' | 'theme_name'> & {
+    /** 월드 순서 (튜터 설명 깊이, P10-08). 임베딩이 비면 null·undefined → 1월드처럼 */
+    world?: { order: number } | null;
+  };
 };
 
 /** 클라이언트에 전달되는 Quest (정답 필드 없음) */
