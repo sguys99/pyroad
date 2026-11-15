@@ -90,4 +90,21 @@ describe('BadgesCard (P8-09 업적 카드)', () => {
       expect(screen.getByRole('status')).toHaveTextContent('이미 받은'),
     );
   });
+
+  it('코인 없는 배지만(실력 인정, 00053)이면 받기 없이 바로 "좋아요!"', () => {
+    const onNext = vi.fn();
+    const request = vi.fn();
+    render(
+      <BadgesCard
+        badges={[{ ...achv('skill_pass', 'silver'), coins: 0 }]}
+        onNext={onNext}
+        request={request}
+      />,
+    );
+    expect(screen.queryByTestId('achievement-claim')).toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
+    fireEvent.click(screen.getByTestId('celebration-cta'));
+    expect(onNext).toHaveBeenCalled();
+    expect(request).not.toHaveBeenCalled();
+  });
 });

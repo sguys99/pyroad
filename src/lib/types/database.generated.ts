@@ -12,6 +12,7 @@ export type Database = {
       achievements: {
         Row: {
           category: string;
+          coins: number | null;
           description: string;
           goal: number | null;
           hidden: boolean;
@@ -24,6 +25,7 @@ export type Database = {
         };
         Insert: {
           category: string;
+          coins?: number | null;
           description: string;
           goal?: number | null;
           hidden?: boolean;
@@ -36,6 +38,7 @@ export type Database = {
         };
         Update: {
           category?: string;
+          coins?: number | null;
           description?: string;
           goal?: number | null;
           hidden?: boolean;

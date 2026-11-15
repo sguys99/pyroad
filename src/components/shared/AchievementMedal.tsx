@@ -42,13 +42,20 @@ import {
   Telescope,
   Trophy,
   Zap,
+  Anchor,
+  ClipboardCheck,
+  Sailboat,
+  Shell,
+  ShipWheel,
+  Stethoscope,
+  Waves,
   type LucideIcon,
 } from 'lucide-react';
 import type { AchievementTier } from '@/lib/quest/achievements';
 import { cn } from '@/lib/utils';
 import './achievementMedal.css';
 
-/** 업적 아이콘 (00036·00048 achievements.icon 의 Lucide 이름 → 컴포넌트). 표에 새 이름을 쓰면 여기에도 (테스트가 대조) */
+/** 업적 아이콘 (00036·00048·00053 achievements.icon 의 Lucide 이름 → 컴포넌트). 표에 새 이름을 쓰면 여기에도 (테스트가 대조) */
 export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   BadgeCheck,
   Brain,
@@ -92,6 +99,14 @@ export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   Telescope,
   Trophy,
   Zap,
+  // 2월드 코드 바다 (00053)
+  Anchor,
+  ClipboardCheck,
+  Sailboat,
+  Shell,
+  ShipWheel,
+  Stethoscope,
+  Waves,
 };
 
 /** 업적 아이콘 그림 (모르는 이름은 메달 모양) */

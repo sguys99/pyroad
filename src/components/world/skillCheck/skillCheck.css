@@ -167,3 +167,35 @@
   flex: none;
   color: var(--text-muted);
 }
+
+/* 합격 배지 줄 (P10-11, 업적 "실력 인정" — 코인 없는 실버 배지). 바다 면 위 메달 + 도감으로 */
+.sk-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--round-l);
+  background: var(--w2-soft);
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  text-align: left;
+}
+.sk-badge:hover {
+  background: var(--w2-shallow);
+}
+.sk-badge > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sk-badge b {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: 400;
+}
+.sk-badge > svg {
+  flex: none;
+  color: var(--text-muted);
+}

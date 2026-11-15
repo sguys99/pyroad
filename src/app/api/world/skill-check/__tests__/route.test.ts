@@ -109,7 +109,7 @@ describe('POST /api/world/skill-check (P10-03)', () => {
     });
   });
 
-  it('제출: 답을 그대로 skill_check_submit 에, 합격하면 지도·책장·프로필 무효화', async () => {
+  it('제출: 답을 그대로 skill_check_submit 에, 합격하면 업적 판정(실력 인정) + 지도·책장·프로필 무효화', async () => {
     const result = {
       score: 8,
       total: 10,
@@ -119,13 +119,17 @@ describe('POST /api/world/skill-check (P10-03)', () => {
       first_stage_id: 's2',
     };
     nextRpc(result);
+    mocks.rpc.mockResolvedValueOnce({ data: [], error: null });
     const answers = ['opt-a1bc', { 'bk-a1bc': 'tok-b2cd' }];
     const res = await post({ world: 'code-sea', answers });
     expect(await res.json()).toEqual(result);
-    expect(mocks.rpc).toHaveBeenLastCalledWith('skill_check_submit', {
+    expect(mocks.rpc).toHaveBeenCalledWith('skill_check_submit', {
       p_user_id: 'u1',
       p_world_id: 'w2',
       p_answers: answers,
+    });
+    expect(mocks.rpc).toHaveBeenLastCalledWith('evaluate_achievements', {
+      p_user_id: 'u1',
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith('/worlds');
   });
@@ -140,6 +144,10 @@ describe('POST /api/world/skill-check (P10-03)', () => {
     });
     await post({ world: 'code-sea', answers: ['opt-a1bc'] });
     expect(mocks.revalidatePath).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalledWith(
+      'evaluate_achievements',
+      expect.anything(),
+    );
     nextRpc(null, { message: 'skill_check_done_today' });
     const res = await post({ world: 'code-sea', answers: ['opt-a1bc'] });
     expect(res.status).toBe(409);

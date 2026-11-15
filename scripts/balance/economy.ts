@@ -139,11 +139,16 @@ export interface AchievementDef {
   metric: string;
   goal: number | null;
 }
+// shortcut: achievements.coins(00053, skill_pass 0)는 읽지 않고 티어 금액만 — 1월드 시뮬레이션은 2월드 업적에 닿지 않음. 2월드를 시뮬레이션하면 읽을 것
 export function loadAchievements(): AchievementDef[] {
   const re =
     /\('(\w+)',\s*'[^']*',\s*'[^']*',\s*'\w+',\s*'(bronze|silver|gold)',\s*'\w+',\s*'(\w+)',\s*(NULL|\d+),/g;
   const tiers = { bronze: 1, silver: 2, gold: 3 } as const;
-  const sql = ['00036_achievements.sql', '00048_weekly_study.sql']
+  const sql = [
+    '00036_achievements.sql',
+    '00048_weekly_study.sql',
+    '00053_sea_achievements.sql',
+  ]
     .map(migration)
     .join('\n');
   return [...sql.matchAll(re)].map((m) => ({

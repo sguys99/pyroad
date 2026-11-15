@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 
 import { MyPybaemStatic } from '@/components/profile/MyLook';
+import { AchievementMedal } from '@/components/shared/AchievementMedal';
 import { useSfx } from '@/components/providers/soundContext';
 import { QUIZ_INPUTS } from '@/components/quest/quiz/quizInputs';
 import type { QuizInputDef } from '@/components/quest/quiz/types';
@@ -529,6 +530,20 @@ export function SkillCheckResultCard({
             ))}
           </ul>
         </div>
+      )}
+      {passed && (
+        <Link
+          href="/profile/achievements"
+          className="sk-badge focus-ring"
+          data-testid="skill-check-badge"
+        >
+          <AchievementMedal icon="ClipboardCheck" tier="silver" size="md" />
+          <span>
+            <b className="font-display">업적 「실력 인정」</b>
+            배지를 받았어요. 업적 도감에서 볼 수 있어요
+          </span>
+          <ArrowRight aria-hidden className="size-4" />
+        </Link>
       )}
       <p className="dq-sum-note">
         {passed

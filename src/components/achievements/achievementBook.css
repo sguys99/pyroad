@@ -195,6 +195,33 @@
   color: var(--success);
 }
 
+/* 코드 바다(2월드, P10-11): 바다 띠 (지도와 같은 얕은 바다 → 옅은 바다 면 + 돛단배) */
+.ab-sec[data-category='sea'] {
+  padding: 1rem;
+  border-radius: var(--round-l);
+  background: linear-gradient(180deg, var(--w2-shallow), var(--w2-soft));
+}
+.ab-sea {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.ab-sea b {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: 400;
+}
+.ab-sea > svg {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--w2-ink);
+}
+
 /* ── 칸 ── */
 .ab-grid {
   display: grid;

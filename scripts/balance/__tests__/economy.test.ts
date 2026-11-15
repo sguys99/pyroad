@@ -22,8 +22,12 @@ describe('획득 속도 시뮬레이션', () => {
   );
   const at = (r: typeof normal, d: number) => r.rows[d];
 
-  it('마이그레이션 표를 읽음: 업적 46종 · 미션 7종', () => {
-    expect(loadAchievements()).toHaveLength(46);
+  it('마이그레이션 표를 읽음: 업적 53종(00053 코드 바다 7종) · 미션 7종', () => {
+    expect(loadAchievements()).toHaveLength(53);
+    // 1월드 시뮬레이션에선 2월드 지표가 없어 코드 바다 업적은 아무도 못 얻음 (1월드 코인 표 그대로)
+    expect(
+      eager.achievements.filter((a) => /^(skill_pass|sea_)/.test(a.id)),
+    ).toEqual([]);
     expect(loadMissions().map((m) => m.id)).toEqual([
       'quest_1',
       'quest_2',

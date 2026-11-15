@@ -33,7 +33,7 @@ export default async function AchievementsPage() {
     supabase
       .from('achievements')
       .select(
-        'id, name, description, icon, tier, category, metric, sort, hidden',
+        'id, name, description, icon, tier, category, metric, sort, hidden, coins',
       ),
     supabase
       .from('user_achievements')

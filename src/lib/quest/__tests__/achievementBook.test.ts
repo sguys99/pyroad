@@ -23,6 +23,7 @@ const def = (
   metric: 'quests',
   sort: 10,
   hidden: false,
+  coins: null,
   ...over,
 });
 const AT = '2026-11-10T03:00:00Z';
@@ -40,6 +41,30 @@ describe('업적 도감 (P8-10)', () => {
       [],
     );
     expect(book.map((e) => e.id)).toEqual(['a', 'b', 'quiz', 'grit']);
+  });
+
+  it('코드 바다(00053): 실패 칭찬 뒤 바다 절, 코인 0 배지는 0 · 나머지는 티어 금액', () => {
+    const book = buildAchievementBook(
+      [
+        def('skill_pass', {
+          category: 'sea',
+          tier: 'silver',
+          coins: 0,
+          sort: 710,
+        }),
+        def('sea_captain', { category: 'sea', tier: 'silver', sort: 750 }),
+        def('grit', { category: 'grit', sort: 1 }),
+      ],
+      [{ achievement_id: 'skill_pass', achieved_at: AT, claimed_at: AT }],
+      [],
+    );
+    expect(book.map((e) => [e.id, e.coins])).toEqual([
+      ['grit', 10],
+      ['skill_pass', 0],
+      ['sea_captain', 30],
+    ]);
+    expect(book[1].state).toBe('earned');
+    expect(summarizeBook(book).claimableCoins).toBe(0);
   });
 
   it('상태: 받음 · 받을 수 있음 · 진행(얻는 법 + n/목표, 목표를 넘지 않음)', () => {
@@ -142,7 +167,11 @@ describe('업적 도감 (P8-10)', () => {
   });
 
   it('00036·00048 표의 지표는 모두 얻는 법 문구가 있다', () => {
-    const sql = ['00036_achievements.sql', '00048_weekly_study.sql']
+    const sql = [
+      '00036_achievements.sql',
+      '00048_weekly_study.sql',
+      '00053_sea_achievements.sql',
+    ]
       .map((f) =>
         readFileSync(join(process.cwd(), 'supabase/migrations', f), 'utf8'),
       )

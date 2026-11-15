@@ -2,7 +2,7 @@ import { coinReward } from './coins';
 import type { AchievementTier } from './achievements';
 
 /**
- * 업적 도감 (P8-10). 서버가 정의(00036·00048 `achievements`) · 내 업적(`user_achievements`) · 진행도(`achievement_progress`)를 읽어
+ * 업적 도감 (P8-10). 서버가 정의(00036·00048·00053 `achievements`) · 내 업적(`user_achievements`) · 진행도(`achievement_progress`)를 읽어
  * 이 함수로 화면 값을 만든다. 숨김 업적은 얻기 전에는 이름·조건·진행을 내려보내지 않음("???").
  */
 export type AchievementCategory =
@@ -11,7 +11,8 @@ export type AchievementCategory =
   | 'quiz'
   | 'habit'
   | 'growth'
-  | 'grit';
+  | 'grit'
+  | 'sea';
 
 export const CATEGORY_ORDER: readonly AchievementCategory[] = [
   'learn',
@@ -20,6 +21,7 @@ export const CATEGORY_ORDER: readonly AchievementCategory[] = [
   'habit',
   'growth',
   'grit',
+  'sea',
 ];
 
 export const CATEGORY_LABEL: Record<AchievementCategory, string> = {
@@ -29,6 +31,7 @@ export const CATEGORY_LABEL: Record<AchievementCategory, string> = {
   habit: '꾸준함',
   growth: '성장',
   grit: '실패 칭찬',
+  sea: '코드 바다',
 };
 
 /** 정의 한 줄 (00036 achievements 에서 쓰는 열) */
@@ -42,6 +45,8 @@ export interface AchievementDef {
   metric: string;
   sort: number;
   hidden: boolean;
+  /** 받기 코인 (00053). null = 티어 금액, 0 = 코인 없는 배지(얻는 순간 받은 것으로 기록) */
+  coins: number | null;
 }
 
 export interface OwnedAchievement {
@@ -117,6 +122,14 @@ export const METRIC_HINT: Record<string, (goal: number) => string> = {
   chests: (g) => `스테이지 보물상자를 ${g}개 열어요`,
   errors: (g) => `에러를 만나도 끝까지 풀어 퀘스트 ${g}개를 통과해요`,
   perfect_stages: (g) => `스테이지 ${g}개의 모든 퀘스트·퀴즈를 별 3개로 채워요`,
+  // 2월드 코드 바다 (00053)
+  skill_pass: () => '코드 바다 실력 확인 퀴즈에 합격해요',
+  sea_stages: (g) => `코드 바다 스테이지 ${g}개를 끝까지 깨요`,
+  sea_bosses: (g) => `코드 바다 보스 ${g}마리를 이겨요`,
+  sea_bug_fix: (g) => `버그 병원선 코드 퀘스트 ${g}개를 힌트 없이 풀어요`,
+  sea_clear: () => '버그버그 선장을 이기고 코드 바다를 끝까지 깨요',
+  sea_perfect: (g) =>
+    `코드 바다 스테이지 ${g}개의 모든 퀘스트·퀴즈를 별 3개로 채워요`,
 };
 
 export const SECRET_TEXT = '비밀 업적이에요. 계속 모험하면 알게 될 거예요!';
@@ -134,7 +147,7 @@ export function buildAchievementBook(
     .sort((a, b) => cat(a.category) - cat(b.category) || a.sort - b.sort)
     .map((d): BookEntry => {
       const o = mine.get(d.id);
-      const coins = tierCoins(d.tier);
+      const coins = d.coins ?? tierCoins(d.tier);
       const base = {
         id: d.id,
         category: d.category,

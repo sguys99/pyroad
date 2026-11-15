@@ -51,11 +51,14 @@ export function BadgesCard({
 }: BadgesCardProps) {
   const router = useRouter();
   const play = useSfx();
-  const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
+  const total = badges.reduce((n, b) => n + b.coins, 0);
+  // 코인 없는 배지만(예: "실력 인정", 00053)이면 받을 것이 없어 바로 "좋아요!"
+  const [state, setState] = useState<'idle' | 'busy' | 'done'>(
+    total > 0 ? 'idle' : 'done',
+  );
   const [error, setError] = useState<string | null>(null);
   const [got, setGot] = useState(0);
   const single = badges.length === 1;
-  const total = badges.reduce((n, b) => n + b.coins, 0);
   // 여러 개면 가장 높은 티어(같으면 먼저 얻은 것) 한 장을 자랑 (P9-10)
   const proud = badges.reduce((a, b) =>
     TIER_RANK[b.tier] > TIER_RANK[a.tier] ? b : a,
@@ -121,7 +124,7 @@ export function BadgesCard({
         })}
       </ul>
 
-      {state === 'done' && (
+      {state === 'done' && total > 0 && (
         <p className="cel-gains" role="status">
           <span className="cel-gain">
             <RewardIcon kind="coin" size={24} />

@@ -742,6 +742,12 @@ export const EXPECT = {
     activateIn: 'P9-18',
     note: '00048 weeks_two·weeks_three: KST 주(월~일)마다 학습일 수(방패 날 제외), 주 2일 4번 → week2_4',
   },
+  'SEA-1': {
+    expect: 'allow',
+    requires: 'public.achievement_stats()',
+    activateIn: 'P10-11',
+    note: '00053 코드 바다 업적: skill_pass 는 코인 0(얻는 순간 claimed_at, 받기 0·원장 없음) · 2-5 코드 힌트 0 모두 → sea_bug_doctor(보스 제외) · 스테이지·보스·2월드 클리어·별 3 모두(숨김) · 받기는 티어 금액',
+  },
   'B74-1': {
     expect: 'allow',
     requires: 'public.boss_answer()',

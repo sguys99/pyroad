@@ -4,6 +4,7 @@ import { z } from 'zod/v4';
 
 import { reportServerError } from '@/lib/api/serverError';
 import {
+  evaluateAchievements,
   rewardError,
   skillCheckStartRpc,
   skillCheckSubmitRpc,
@@ -31,7 +32,8 @@ import {
  *   (보기는 시도마다 섞음). 이미 냈으면 오늘 결과, 이미 열린 월드면 open
  * - 제출 `{ world, answers }`: `skill_check_submit` 가 서버에서 채점·하루 1번·합격 기록. 응답은 점수와 복습 스테이지뿐
  *   (정답·해설·어느 문제를 틀렸는지는 주지 않음 — 하루 1번이라도 정답을 보면 다음에 외워서 통과할 수 있음)
- * 보상(XP·코인)은 없음. 합격하면 그 월드의 첫 스테이지가 열려(is_stage_unlocked 00052) 지도·책장을 무효화
+ * 보상(XP·코인)은 없음. 합격하면 그 월드의 첫 스테이지가 열려(is_stage_unlocked 00052) 지도·책장을 무효화하고
+ * 업적 판정(evaluate_achievements) — "실력 인정" 배지(00053, 코인 0)
  */
 
 /** 시작·제출은 하루 몇 번뿐이라 넉넉한 값 (부하 방지) */
@@ -110,6 +112,8 @@ export async function POST(request: Request) {
     );
     if (!result.ok) return result.response;
     if (result.data.passed) {
+      // 업적 "실력 인정"(00053, 코인 없는 배지): 합격 행을 보고 판정. 실패해도 다음 판정·도감 열기 때 잡힘
+      await evaluateAchievements(admin, user.id);
       revalidatePath('/world', 'layout');
       revalidatePath('/worlds');
       revalidatePath('/profile');
