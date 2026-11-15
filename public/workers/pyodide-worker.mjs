@@ -8,6 +8,7 @@
 // input() (P11-01): JSPI가 있으면 코어가 run_sync로 answer를 기다린다. 없으면 SW 동기 XHR 채널을 쓴다 —
 // 이 Worker는 `/pyodide/runner/pyodide-worker.mjs`(next.config.ts rewrites)로 떠서 SW scope 안에 있고,
 // 페이지가 미리 등록한 SW(`input-sw.js`)가 `__sync/read` 요청을 답이 올 때까지 붙잡아 둔다.
+// time.sleep도 같은 채널(`__sync/sleep`)로 자서, 자는 중 멈추기가 Worker를 살린 채 끝난다 (P11-03).
 //
 // turtle (P11-02): shim `turtle.py`를 같은 경로(`/pyodide/runner/turtle.py` → public/workers/)에서 Pyodide와 함께 받아 코어에 넘긴다.
 
@@ -66,6 +67,30 @@ function swReadLine(requestId) {
     }
     if (reply?.kind === 'value' || reply?.kind === 'stop') return reply;
     if (reply?.kind !== 'timeout') return null;
+  }
+}
+
+/**
+ * time.sleep을 SW 동기 XHR로 잔다 (JSPI 없음, P11-03). SW가 ms만큼 붙잡아 두다가, 페이지가 이 실행을 멈추면 바로 'stop'.
+ * 긴 잠은 SW 붙잡기 한도(15초)보다 짧게 나눠 묻는다. 채널이 끊기면 null (코어가 원래 time.sleep으로 잠)
+ */
+function swSleep(runId, ms) {
+  const end = performance.now() + ms;
+  for (;;) {
+    const left = Math.round(end - performance.now());
+    if (left <= 0) return 'ok';
+    let reply;
+    try {
+      const xhr = syncGet(
+        `sleep?run=${encodeURIComponent(runId)}&ms=${Math.min(left, 10_000)}`,
+      );
+      if (xhr.status !== 200) return null;
+      reply = JSON.parse(xhr.responseText);
+    } catch {
+      return null;
+    }
+    if (reply?.kind === 'stop') return 'stop';
+    if (reply?.kind !== 'ok') return null;
   }
 }
 
@@ -183,7 +208,10 @@ async function init() {
     const jspi = await runtime.canRunSync();
     // 네트워크 API를 지우기 전에 (ping의 깨우기 fetch)
     const swChannel = !jspi && (await pingSwChannel());
-    if (swChannel) options.readLineSync = swReadLine;
+    if (swChannel) {
+      options.readLineSync = swReadLine;
+      options.sleepSync = swSleep;
+    }
     // 여기부터 Worker는 바깥으로 요청을 보낼 수 없다 (B15)
     const removedGlobals = removeNetworkGlobals(self);
     const left = remainingNetworkGlobals(self);

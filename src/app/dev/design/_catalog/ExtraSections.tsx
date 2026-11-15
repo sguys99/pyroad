@@ -211,7 +211,7 @@ export function RunControlsSection() {
     },
     {
       label: '다시 준비 중 (무한 루프를 멈춘 뒤)',
-      note: 'Worker를 다시 띄우는 2~5초 (§2.9)',
+      note: 'Worker를 다시 띄우는 2~5초 (§2.9). 버튼만 못 누름, 안내 상자는 결과 쪽지 안 (P11-03)',
       props: {
         status: 'loading' as const,
         restarting: 'stop' as const,
@@ -468,8 +468,25 @@ export function OutputPanelSection() {
       ),
     },
     {
-      label: '멈춤 · 결과 쪽에서 재준비',
-      note: '모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄',
+      label: '시간 초과 · 실행기 다시 준비 (P11-03)',
+      note: '그림 없는 무한 반복: 시간 제한 뒤 Worker를 다시 띄우는 2~5초. 잠든 파이뱀·점·흐르는 띠는 바쁨 표시(동작 줄이기면 멈춤), 실행 버튼은 "다시 준비 중..."',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '',
+            stderr: '',
+            success: false,
+            isTimeout: true,
+            outcome: 'timeout',
+          }}
+          isRunning={false}
+          restarting="timeout"
+        />
+      ),
+    },
+    {
+      label: '멈춤 · 실행기 다시 준비',
+      note: '끝나지 않는 계산을 멈추기로 멈췄을 때. 멈추기 전 글자는 남김',
       node: (
         <OutputPanel
           result={{
@@ -480,7 +497,7 @@ export function OutputPanelSection() {
             outcome: 'stopped',
           }}
           isRunning={false}
-          restarting
+          restarting="stop"
         />
       ),
     },

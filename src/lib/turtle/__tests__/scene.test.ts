@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import samples from '@/app/dev/design/_catalog/turtleSamples.json';
 import { Scene, moveTicks, turnTicks, usesTurtle } from '../scene';
-import { describeDrawing, summarizeDrawing } from '../describe';
+import { describeDrawing, koColorName, summarizeDrawing } from '../describe';
 import { fontString, textWidthGuess } from '../TurtleCanvas';
 
 const NEW = (id = 0) => [
@@ -87,8 +87,34 @@ describe('usesTurtle', () => {
 describe('그림 요약 (캔버스 대체 글)', () => {
   it('정사각형', () => {
     expect(describeDrawing(samples.square.commands)).toBe(
-      '거북이 1마리가 그린 그림: 선 4개. 쓴 색: seagreen',
+      '거북이 1마리가 그린 그림: 선 4개. 쓴 색: 바다 초록',
     );
+  });
+
+  it('CSS 색 이름은 쉬운 한글로, 직접 고른 색·모르는 이름은 뭉뚱그림 (P11-03)', () => {
+    expect(
+      ['dimgray', 'tomato', 'darkred', 'lightblue', 'mediumseagreen'].map(
+        koColorName,
+      ),
+    ).toEqual([
+      '어두운 회색',
+      '토마토색',
+      '진한 빨강',
+      '연한 파랑',
+      '바다 초록',
+    ]);
+    expect(koColorName('#ff8800')).toBe('직접 고른 색');
+    expect(koColorName('papayawhip')).toBe('그 밖의 색');
+    // 같은 이름이 된 색은 한 번만
+    expect(
+      describeDrawing([
+        NEW(),
+        ['s', 0, { pc: '#112233' }],
+        ['m', 0, 10, 0],
+        ['s', 0, { pc: '#445566' }],
+        ['m', 0, 20, 0],
+      ]),
+    ).toMatch(/쓴 색: 직접 고른 색$/);
   });
 
   it('막대그래프: 색칠·글씨·한글 색 이름', () => {

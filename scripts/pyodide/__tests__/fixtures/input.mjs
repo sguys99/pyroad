@@ -1,6 +1,6 @@
 // input() 대화형 채널 확인 스크립트 (P11-01, runtime.pyodide.test.ts).
 //   node --experimental-wasm-jspi input.mjs jspi  → JSPI: input-request에 answer 메시지로 답 (브라우저 기본)
-//   node input.mjs sw                             → JSPI 없음: readLineSync(SW 동기 XHR 대역)로 답
+//   node input.mjs sw                             → JSPI 없음: readLineSync·sleepSync(SW 동기 XHR 대역)로 답·잠 (P11-03)
 //   node input.mjs none                           → 둘 다 없음: InputUnavailable, 입력 없는 코드는 그대로
 // 마지막 줄에 JSON 결과를 찍는다.
 import { loadPyodide } from 'pyodide';
@@ -15,6 +15,8 @@ const waiters = new Map();
 /** sw 모드 답 큐: 'stop'이면 멈춤 */
 let swAnswers = [];
 let runtime;
+/** sw 모드 time.sleep: 이 횟수만큼 'ok' 뒤 'stop' (null이면 늘 'ok') */
+let sleepsBeforeStop = null;
 /** jspi 모드: input-request가 오면 답할 값을 정하는 함수 */
 let onRequest = () => {};
 
@@ -28,6 +30,14 @@ runtime = createRuntime(pyodide, {
           return next === 'stop'
             ? { kind: 'stop' }
             : { kind: 'value', value: next };
+        }
+      : null,
+  sleepSync:
+    mode === 'sw'
+      ? (_runId, ms) => {
+          log.push(['sleep', ms]);
+          if (sleepsBeforeStop === null) return 'ok';
+          return sleepsBeforeStop-- > 0 ? 'ok' : 'stop';
         }
       : null,
   post: (msg) => {
@@ -90,5 +100,15 @@ const result = { mode, jspi };
 result.greet = await run('g', GREET, ['철수', '둘째 줄']);
 result.inInit = await run('c', CLASS, ['뭉치']);
 result.stopped = await run('s', 'while True:\n    input("? ")', ['a', 'stop']);
+if (mode === 'sw') {
+  // time.sleep 중 멈추기 (P11-03): 자기 전 글자가 먼저 오고, 세 번째 잠에서 멈춤 → Worker 유지
+  sleepsBeforeStop = 2;
+  result.sleepStop = await run(
+    'z',
+    'import time\nn = 0\nwhile True:\n    print("자", n)\n    time.sleep(0.25)\n    n += 1',
+    [],
+  );
+  sleepsBeforeStop = null;
+}
 result.after = await run('a', 'print("ok")', []);
 console.log(JSON.stringify(result));

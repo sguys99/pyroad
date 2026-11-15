@@ -1,6 +1,6 @@
 import { Scene, type TurtleCommand } from './scene';
 
-/** 대체 글에 쓰는 색 이름 (shim의 한글 색 이름을 거꾸로). 없으면 코드에 쓴 이름 그대로 */
+/** 대체 글에 쓰는 색 이름 (shim의 한글 색 이름을 거꾸로 + 자주 쓰는 CSS 이름) */
 const KO_COLOR: Record<string, string> = {
   red: '빨강',
   orange: '주황',
@@ -15,10 +15,72 @@ const KO_COLOR: Record<string, string> = {
   black: '검정',
   white: '하양',
   gray: '회색',
+  grey: '회색',
   brown: '갈색',
   gold: '금색',
   silver: '은색',
+  cyan: '청록',
+  aqua: '청록',
+  teal: '청록',
+  turquoise: '청록',
+  magenta: '자주',
+  fuchsia: '자주',
+  violet: '보라',
+  indigo: '남색',
+  orchid: '연보라',
+  lavender: '연보라',
+  plum: '연보라',
+  lime: '연두',
+  limegreen: '연두',
+  lawngreen: '연두',
+  chartreuse: '연두',
+  olive: '올리브색',
+  seagreen: '바다 초록',
+  forestgreen: '숲 초록',
+  springgreen: '초록',
+  maroon: '밤색',
+  crimson: '진한 빨강',
+  firebrick: '벽돌색',
+  tomato: '토마토색',
+  coral: '산호색',
+  salmon: '연어색',
+  hotpink: '분홍',
+  beige: '베이지색',
+  ivory: '상아색',
+  khaki: '카키색',
+  tan: '연한 갈색',
+  chocolate: '초콜릿색',
+  sienna: '갈색',
+  peru: '갈색',
+  royalblue: '파랑',
+  dodgerblue: '파랑',
+  steelblue: '파랑',
+  cornflowerblue: '파랑',
+  slategray: '푸른 회색',
+  slateblue: '보랏빛 파랑',
+  snow: '하양',
 };
+
+/** CSS 색 이름 앞말 (darkred → 진한 빨강, dimgray → 어두운 회색) */
+const KO_SHADE: [string, string][] = [
+  ['dark', '진한 '],
+  ['deep', '진한 '],
+  ['dim', '어두운 '],
+  ['light', '연한 '],
+  ['pale', '연한 '],
+  ['medium', ''],
+];
+
+/** 색 문자열 → 쉬운 한글 이름. 직접 고른 색(#코드·숫자)과 모르는 이름은 뭉뚱그린다 */
+export function koColorName(color: string): string {
+  const c = color.trim().toLowerCase();
+  if (KO_COLOR[c]) return KO_COLOR[c];
+  for (const [prefix, ko] of KO_SHADE) {
+    const base = c.startsWith(prefix) ? KO_COLOR[c.slice(prefix.length)] : '';
+    if (base) return ko + base;
+  }
+  return /^[a-z]+$/.test(c) ? '그 밖의 색' : '직접 고른 색';
+}
 
 export interface DrawingSummary {
   turtles: number;
@@ -109,13 +171,10 @@ export function describeDrawing(commands: readonly TurtleCommand[]): string {
   const body = parts.length
     ? `: ${parts.join(', ')}`
     : '. 아직 그린 것이 없어요';
-  const colors = s.colors.length
-    ? `. 쓴 색: ${s.colors
-        .slice(0, 5)
-        .map((c) => KO_COLOR[c] ?? c)
-        .join(
-          ', ',
-        )}${s.colors.length > 5 ? ` 외 ${s.colors.length - 5}가지` : ''}`
+  // 이름이 같아진 색(예: 직접 고른 색 여럿)은 한 번만
+  const names = [...new Set(s.colors.map(koColorName))];
+  const colors = names.length
+    ? `. 쓴 색: ${names.slice(0, 5).join(', ')}${names.length > 5 ? ` 외 ${names.length - 5}가지` : ''}`
     : '';
   return `${head}${body}${colors}`;
 }

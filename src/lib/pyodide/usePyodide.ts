@@ -81,7 +81,10 @@ interface ActiveRun {
   timer: ReturnType<typeof setTimeout> | null;
   graceTimer: ReturnType<typeof setTimeout> | null;
   stopReason: 'timeout' | 'stop' | null;
-  timeoutMs: number;
+  /** 시간 제한 중 아직 쓰지 않은 Python 실행 시간(ms). 입력 대기 동안은 줄지 않는다 (P11-03) */
+  budgetMs: number;
+  /** 지금 시간을 재고 있는 구간의 시작 (performance.now). 입력 대기 중이면 null */
+  clockFrom: number | null;
   inputs: RunInput[];
   /** 답을 기다리는 input() 요청 */
   waiting: Extract<WorkerResponse, { type: 'input-request' }> | null;
@@ -90,6 +93,22 @@ interface ActiveRun {
 interface WorkerHandle {
   worker: Worker;
   generation: number;
+}
+
+/**
+ * 시간 제한 시계 (P11-03): Python이 도는 동안만 잰다. 입력 대기는 pauseClock으로 빼고,
+ * turtle 그림은 done 뒤에 화면이 다시 그리는 것이라(그리는 시간은 실행과 따로) 처음부터 들어가지 않는다
+ */
+function startClock(run: ActiveRun, onTimeout: () => void) {
+  run.clockFrom = performance.now();
+  run.timer = setTimeout(onTimeout, Math.max(0, run.budgetMs));
+}
+
+function pauseClock(run: ActiveRun) {
+  if (run.timer) clearTimeout(run.timer);
+  run.timer = null;
+  if (run.clockFrom !== null) run.budgetMs -= performance.now() - run.clockFrom;
+  run.clockFrom = null;
 }
 
 const NOT_READY: RunResult = {
@@ -214,10 +233,8 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       run: ActiveRun,
       msg: Extract<WorkerResponse, { type: 'input-request' }>,
     ) => {
-      // 답을 기다리는 시간은 시간 제한에서 뺀다 (답한 뒤 다시 잼)
-      // shortcut: 답할 때마다 시간 제한을 처음부터 다시 잼, 실행 시간만 정확히 셀 일은 P11-03
-      if (run.timer) clearTimeout(run.timer);
-      run.timer = null;
+      // 답을 기다리는 시간은 시간 제한에서 뺀다: 시계를 멈추고, 답하면 남은 시간부터 다시 잰다 (P11-03)
+      pauseClock(run);
       run.waiting = msg;
       run.options.onInputRequest?.({
         answer: (value) => {
@@ -239,10 +256,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
             };
             workerRef.current?.worker.postMessage(answer);
           }
-          run.timer = setTimeout(
-            () => requestStopRef.current(run, 'timeout'),
-            run.timeoutMs,
-          );
+          startClock(run, () => requestStopRef.current(run, 'timeout'));
         },
         stop: () => requestStopRef.current(run, 'stop'),
       });
@@ -399,6 +413,8 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           kind: 'stop',
         });
       }
+      // time.sleep도 SW 동기 XHR로 자고 있을 수 있다 (JSPI 없음, P11-03). SW가 없으면(JSPI) 아무 일도 없음
+      inputSwRef.current?.active?.postMessage({ id: run.id, kind: 'stop-run' });
       run.waiting = null;
       const handle = workerRef.current;
       if (handle && handle.generation === run.generation) {
@@ -439,7 +455,8 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           timer: null,
           graceTimer: null,
           stopReason: null,
-          timeoutMs: options.timeoutMs ?? optionsRef.current.timeoutMs,
+          budgetMs: options.timeoutMs ?? optionsRef.current.timeoutMs,
+          clockFrom: null,
           inputs: [],
           waiting: null,
         };
@@ -447,10 +464,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
         setIsRunning(true);
 
         // 시간 초과: 먼저 stop(time.sleep 대기 중이면 Worker 유지), 답이 없으면 Worker 재시작
-        run.timer = setTimeout(
-          () => requestStop(run, 'timeout'),
-          run.timeoutMs,
-        );
+        startClock(run, () => requestStop(run, 'timeout'));
 
         const msg: WorkerRequest = { type: 'run', id: run.id, code };
         handle.worker.postMessage(msg);

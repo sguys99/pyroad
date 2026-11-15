@@ -46,4 +46,21 @@ test('실행기 경로 SW가 동기 XHR로 답을 넘기고, 대기 중 멈추�
   await expect(
     page.locator('[data-testid="runner-waking"]:visible'),
   ).toHaveCount(0);
+
+  // time.sleep도 SW 동기 XHR로 자서, 자는 중 멈추기가 재준비 없이 끝난다 (P11-03)
+  await runCode(
+    page,
+    'import time\nfor i in range(100):\n    print("쿨쿨", i)\n    time.sleep(0.3)',
+  );
+  await expect(
+    page.locator('[data-testid="live-output"]:visible'),
+  ).toContainText('쿨쿨 1');
+  await page.getByTestId('stop-button').click();
+  await expect(output).toHaveAttribute('data-state', 'stopped');
+  await expect(output).toContainText('쿨쿨 0');
+  await expect(
+    page.locator('[data-testid="runner-waking"]:visible'),
+  ).toHaveCount(0);
+  await runCode(page, 'print("깨어남")');
+  await expect(output).toContainText('깨어남');
 });

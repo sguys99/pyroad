@@ -25,7 +25,7 @@ import {
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { RunResult } from '@/lib/pyodide/usePyodide';
+import type { PyodideRestartReason, RunResult } from '@/lib/pyodide/usePyodide';
 import type {
   LiveOutputSnapshot,
   LiveOutputStore,
@@ -50,6 +50,7 @@ import {
   transcriptRows,
 } from './outputSlip';
 import { InputReply } from './InputReply';
+import { RunnerWakingNotice } from './RunControls';
 import './outputPanel.css';
 
 // 그림판 (P11-02): turtle을 쓰는 코드에서만 받는다 (렌더러 chunk는 첫 로드 JS 밖)
@@ -291,8 +292,8 @@ export interface OutputPanelProps {
   example?: { text: string; compare: boolean };
   /** 오류 줄로 가기 (모바일은 공책 쪽으로 넘김) */
   onShowErrorLine?: (line: number) => void;
-  /** 결과 쪽 안에서 Worker를 다시 띄우는 중 (모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄) */
-  restarting?: boolean;
+  /** Worker를 다시 띄우는 중이면 그 이유 (P11-03 재준비 연출을 쪽지 안에). 준비 중이 아니면 null */
+  restarting?: PyodideRestartReason;
   /** 퀘스트를 마쳤으면(완료 응답 뒤) 성공 장면: 도장 쾅 + 보상 띠 + 다음 퀘스트 (P6-08) */
   reward?: QuestReward | null;
   /** 오류·출력이 다를 때 "파이뱀에게 더 물어보기" (Q56: AI 피드백은 자동으로 부르지 않고 이 버튼으로만) */
@@ -429,7 +430,7 @@ function ResultSlip({
   liveOutput,
   example,
   onShowErrorLine,
-  restarting = false,
+  restarting = null,
   reward = null,
   onAskTutor,
   inputAutoFocus = true,
@@ -455,22 +456,19 @@ function ResultSlip({
     );
   }
 
+  const wakingNote = restarting && <RunnerWakingNotice reason={restarting} />;
+
   if (!result) {
     return (
       <Slip state="empty" tone="idle">
-        <p className="qo-empty">
-          아직 돌려 보지 않았어요. 주문을 쓰고 “코드 돌려보기”를 눌러요!
-        </p>
+        {wakingNote || (
+          <p className="qo-empty">
+            아직 돌려 보지 않았어요. 주문을 쓰고 “코드 돌려보기”를 눌러요!
+          </p>
+        )}
       </Slip>
     );
   }
-
-  const wakingNote = restarting && (
-    <p role="status" className="qo-waking" data-testid="runner-waking-inline">
-      <Loader2 aria-hidden className="animate-spin reduced:animate-none" />
-      파이뱀이 공책을 다시 펼치는 중이에요. 몇 초면 다시 돌릴 수 있어요.
-    </p>
-  );
 
   // 시간 초과·멈춤·출력 상한: 멈추기 전까지 나온 글자 + 차분한 안내
   if (

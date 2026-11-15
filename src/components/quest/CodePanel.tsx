@@ -190,6 +190,7 @@ export function CodePanel({
         reward={reward}
         onAskTutor={onAskTutor}
         turtle={turtle ?? usesTurtle(code)}
+        restarting={pyodideStatus === 'loading' ? restarting : null}
       />
     </div>
   );

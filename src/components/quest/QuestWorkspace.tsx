@@ -337,7 +337,9 @@ export function QuestWorkspace({
               liveOutput={liveOutput}
               example={example}
               onShowErrorLine={showErrorLine}
-              restarting={!!runner.restarting && runner.status === 'loading'}
+              restarting={
+                runner.status === 'loading' ? runner.restarting : null
+              }
               reward={reward}
               onAskTutor={askTutor}
               turtle={turtle}

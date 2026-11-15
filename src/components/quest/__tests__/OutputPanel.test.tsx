@@ -363,7 +363,7 @@ describe('OutputPanel', () => {
     });
   });
 
-  it('결과 쪽 재준비는 쪽지 안 한 줄로', () => {
+  it('재준비 연출은 결과 쪽지 안에 (P11-03)', () => {
     render(
       <OutputPanel
         result={{
@@ -374,12 +374,16 @@ describe('OutputPanel', () => {
           outcome: 'stopped',
         }}
         isRunning={false}
-        restarting
+        restarting="stop"
       />,
     );
-    expect(screen.getByTestId('runner-waking-inline')).toHaveTextContent(
-      '다시 펼치는 중',
+    // 재준비 연출은 쪽지 안에 (P11-03): 낭독기 알림 자리 + 이유별 한 줄
+    const waking = screen.getByTestId('runner-waking');
+    expect(screen.getByTestId('output-panel')).toContainElement(waking);
+    expect(waking.querySelector('[role="status"]')).toHaveTextContent(
+      '실행기를 다시 준비하고 있어요',
     );
+    expect(waking).toHaveTextContent('끝나지 않는 주문을 멈췄어요');
   });
 
   it('input() 대기: 대답을 기다려요 딱지 + 입력 칸, Enter로 보내면 내 말풍선 (P11-01)', () => {

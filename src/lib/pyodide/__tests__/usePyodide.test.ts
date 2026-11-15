@@ -496,28 +496,38 @@ describe('usePyodide: input() (P11-01)', () => {
     });
   });
 
-  it('답을 기다리는 동안은 시간 제한이 멈추고, 답하면 다시 잰다', async () => {
+  it('시간 제한은 Python 실행 시간만 모아 잼: 답을 기다리는 동안은 빼고, 답하면 남은 시간부터 (P11-03)', async () => {
     vi.useFakeTimers();
     const { result } = setup();
     const worker = latest();
-    let req!: InputRequest;
-    void startRun(result, 'input()', { onInputRequest: (r) => (req = r) });
+    const reqs: InputRequest[] = [];
+    void startRun(result, 'input()', { onInputRequest: (r) => reqs.push(r) });
     const { id } = worker.lastRun();
-    worker.emit({
-      type: 'input-request',
-      id,
-      requestId: `${id}:1`,
-      channel: 'jspi',
-    });
-    act(() => {
-      vi.advanceTimersByTime(5000);
-    });
-    expect(worker.posted.some((m) => m.type === 'stop')).toBe(false);
-    req.answer('a');
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    expect(worker.posted.some((m) => m.type === 'stop')).toBe(true);
+    const stopped = () => worker.posted.some((m) => m.type === 'stop');
+    const ask = (n: number) =>
+      worker.emit({
+        type: 'input-request',
+        id,
+        requestId: `${id}:${n}`,
+        channel: 'jspi',
+      });
+    const wait = (ms: number) =>
+      act(() => {
+        vi.advanceTimersByTime(ms);
+      });
+    wait(400); // Python 400ms
+    ask(1);
+    wait(5000); // 생각하는 시간은 세지 않음
+    reqs[0].answer('a');
+    wait(300); // Python 300ms (모두 700)
+    ask(2);
+    wait(60_000);
+    expect(stopped()).toBe(false);
+    reqs[1].answer('b');
+    wait(299);
+    expect(stopped()).toBe(false);
+    wait(1); // 400 + 300 + 300 = 1000ms → 시간 초과
+    expect(stopped()).toBe(true);
   });
 
   it('입력 대기 중 멈추기는 Worker에 stop (JSPI)', async () => {
@@ -578,9 +588,11 @@ describe('usePyodide: input() (P11-01)', () => {
         channel: 'sw',
       });
       reqs[1].stop();
+      // 입력 대기 요청과 함께 그 실행의 time.sleep(SW 동기 XHR)도 깨운다 (P11-03)
       expect(swPosted).toEqual([
         { id: `${id}:1`, kind: 'value', value: '42' },
         { id: `${id}:2`, kind: 'stop' },
+        { id, kind: 'stop-run' },
       ]);
       expect(worker.posted.some((m) => m.type === 'answer')).toBe(false);
     } finally {

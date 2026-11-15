@@ -371,6 +371,16 @@ describe('input() 대화형 채널 (P11-01)', () => {
       expect(r.stopped).toMatchObject({ outcome: 'stopped', errorType: null });
       expect(r.stopped.wall).toBeLessThan(1000);
       expect(r.after).toMatchObject({ outcome: 'ok', stdout: 'ok\n' });
+      if (mode === 'sw') {
+        // time.sleep도 SW 채널로 자고, 자는 중 멈추기는 Worker를 살린 채 stopped (P11-03)
+        expect(r.sleepStop).toMatchObject({
+          outcome: 'stopped',
+          errorType: null,
+          stdout: '자 0\n자 1\n자 2\n',
+        });
+        // 자기 전에 나온 글자를 먼저 보낸다 (자는 동안은 이벤트 루프가 돌지 않음)
+        expect(r.sleepStop.order.slice(0, 2)).toEqual(['stdout', 'sleep']);
+      }
     },
   );
 

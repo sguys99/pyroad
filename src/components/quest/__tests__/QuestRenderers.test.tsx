@@ -253,7 +253,7 @@ describe('퀘스트 렌더러 스모크', () => {
     mocks.runtime.restarting = 'timeout';
     render(<CodeQuest {...props(CODE_QUEST)} />);
     expect(screen.getAllByTestId('runner-waking')[0]).toHaveTextContent(
-      '파이뱀이 주문 공책을 다시 펼치는 중',
+      '실행기를 다시 준비하고 있어요',
     );
     expect(screen.getAllByTestId('runner-waking')[0]).toHaveTextContent(
       '너무 오래 걸려서',

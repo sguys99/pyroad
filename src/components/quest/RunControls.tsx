@@ -179,8 +179,9 @@ export function RunnerLoading({
 }
 
 /**
- * 시간 초과·멈추기 뒤 Worker를 다시 띄우는 동안 (§2.9 재준비 연출, 2~5초).
- * 점 세 개·흐르는 띠는 CSS transform·opacity 반복이고 동작 줄이기면 멈춘 그림 (§2.10)
+ * 시간 초과·멈추기 뒤 Worker를 다시 띄우는 동안 (§2.9 재준비 연출, 2~5초). 결과 쪽지 안에 붙는다 (P11-03).
+ * 잠든 파이뱀 + 점 세 개 + 흐르는 띠는 바쁨 표시라 minimal에서도 돌고, 동작 줄이기면 멈춘 그림 (§2.10).
+ * 낭독기에는 role="status"로 한 번 알린다 (다 되면 RunControls가 "다시 준비됐어요")
  */
 export function RunnerWakingNotice({
   reason = null,
@@ -188,7 +189,7 @@ export function RunnerWakingNotice({
   reason?: PyodideRestartReason;
 }) {
   return (
-    <div className="qr-panel" data-testid="runner-waking">
+    <div className="qr-panel qr-waking" data-testid="runner-waking">
       <span className="qr-avatar">
         <CharacterAvatar
           character="pybaem"
@@ -199,7 +200,7 @@ export function RunnerWakingNotice({
       </span>
       <div className="qr-panel-body">
         <p role="status" className="qr-panel-t">
-          파이뱀이 주문 공책을 다시 펼치는 중
+          실행기를 다시 준비하고 있어요
           <span aria-hidden className="qr-dots">
             <span className="waking-dot" />
             <span className="waking-dot" />
@@ -211,12 +212,25 @@ export function RunnerWakingNotice({
         </span>
         <p className="qr-note">
           {reason === 'timeout'
-            ? '주문이 너무 오래 걸려서 멈췄어요. 몇 초면 다시 돌릴 수 있어요.'
-            : '끝나지 않는 주문을 멈췄어요. 몇 초면 다시 돌릴 수 있어요.'}
+            ? '주문이 너무 오래 걸려서 파이뱀이 멈췄어요. 몇 초만 기다리면 다시 돌릴 수 있어요.'
+            : '끝나지 않는 주문을 멈췄어요. 몇 초만 기다리면 다시 돌릴 수 있어요.'}
         </p>
       </div>
     </div>
   );
+}
+
+/**
+ * 재준비가 끝난 순간만 true (낭독기 안내 "다시 준비됐어요"). 실행·채점 등 다음 상태로 가면 다시 false
+ */
+function useWokeUp(state: RunnerState): boolean {
+  const [prev, setPrev] = useState(state);
+  const [woke, setWoke] = useState(false);
+  if (state !== prev) {
+    setPrev(state);
+    setWoke(prev === 'restarting' && state === 'ready');
+  }
+  return woke;
 }
 
 interface RunControlsProps {
@@ -237,7 +251,8 @@ interface RunControlsProps {
 
 /**
  * 공책 쪽 실행 줄 (P6-05, 최종 시안 `f-run-row`): 큰 초록 게임 버튼 "코드 돌려보기"(아랫면 3px·재생 아이콘) +
- * 실행 중 멈추기 + 상태별 안내 상자(처음 준비 단계·팁 / 재준비 / 실행기 오류).
+ * 실행 중 멈추기 + 상태별 안내 상자(처음 준비 단계·팁 / 실행기 오류). 재준비 중에는 버튼만 "다시 준비 중..."(못 누름)이고
+ * 안내는 결과 쪽지 안에 (P11-03).
  * 실행 중에는 버튼 면에 빛 띠가 흐른다(full·lite, minimal은 스피너만, 동작 줄이기는 글자만)
  */
 export function RunControls({
@@ -262,6 +277,7 @@ export function RunControls({
   // 준비 중은 아직 못 누르는 납작한 회색 면 + 스피너, 실행·채점 중은 초록 면 그대로 바쁨 (게임 버튼 loading)
   const waiting = state === 'preparing' || state === 'restarting';
   const working = state === 'running' || state === 'checking';
+  const wokeUp = useWokeUp(state);
 
   return (
     <div
@@ -320,7 +336,10 @@ export function RunControls({
       </div>
 
       {state === 'preparing' && <RunnerLoading stage={loadStage} />}
-      {state === 'restarting' && <RunnerWakingNotice reason={restarting} />}
+      {/* 재준비 연출은 결과 쪽지 안(RunnerWakingNotice, P11-03). 끝나면 여기서 낭독기에 알림 (늘 있는 알림 자리) */}
+      <p role="status" className="sr-only" data-testid="runner-announce">
+        {wokeUp ? '실행기가 다시 준비됐어요. 코드를 돌릴 수 있어요.' : ''}
+      </p>
       {state === 'error' && (
         <p role="alert" className="qr-panel qr-panel-error">
           앗, 실행기를 불러오지 못했어요. 인터넷이 연결됐는지 보고 다시 불러와

@@ -8,7 +8,7 @@
 // - 실행마다 새 namespace + 학생 코드에만 적용되는 import 훅(표준 모듈 내부 import는 그대로)
 // - stdout·stderr를 실행 중에 묶어서(batched) 흘려보냄 + 실행당 출력 상한
 // - traceback은 학생 코드(`<exec>`) 줄만, 예외 여부는 done 메시지로 알림(B25 후속)
-// - `time.sleep` 중 멈추기(JSPI가 있으면 Worker를 살린 채 KeyboardInterrupt)
+// - `time.sleep` 중 멈추기: Worker를 살린 채 KeyboardInterrupt (JSPI는 run_sync, 없으면 SW 동기 XHR로 잠, P11-03)
 // - `input()`·`sys.stdin` (P11-01): 입력 시나리오(CI) → 대화형 채널(JSPI `run_sync` 또는 SW 동기 XHR) → 없으면 안내.
 //   입력 대기 중 멈추기도 Worker를 살린 채 KeyboardInterrupt
 // - turtle (P11-02): `options.turtleSource`(public/workers/turtle.py)를 FS `/pyroad/turtle.py`에 설치하고, turtle을 쓰는
@@ -218,7 +218,12 @@ def _sleep(secs):
         # JSPI: 기다리는 동안 Worker 이벤트 루프가 돌아서 stop 메시지를 받을 수 있다
         if _run_sync(__pyroad_js_sleep(secs * 1000)) == "stopped":
             raise KeyboardInterrupt
-    else:
+        return
+    # JSPI 없음: SW 동기 XHR이 붙잡아 두는 동안 자고, 멈추기도 SW가 풀어 준다 (P11-03). 채널이 없으면 그냥 잔다
+    slept = __pyroad_sleep_sync(secs * 1000)
+    if slept == "stopped":
+        raise KeyboardInterrupt
+    if slept != "ok":
         _orig_sleep(secs)
 
 
@@ -407,6 +412,7 @@ def harden():
  *   flushChars?: number,
  *   interactiveInput?: boolean,
  *   readLineSync?: (requestId: string) => null | { kind: 'value', value: string } | { kind: 'stop' },
+ *   sleepSync?: (runId: string, ms: number) => 'ok' | 'stop' | null,
  *   turtleSource?: string,
  *   turtleMaxCommands?: number,
  * }} options interruptBuffer: Node처럼 다른 스레드가 SharedArrayBuffer로 KeyboardInterrupt를 보낼 때 넘김.
@@ -416,7 +422,8 @@ def harden():
  *   interactiveInput: 브라우저처럼 사람이 답하는 곳이면 true. 입력 시나리오가 없을 때 input()이
  *   input-request를 보내고 answer를 기다린다(JSPI). false(Node 검증)면 바로 EOF → EOFError.
  *   readLineSync: JSPI가 없을 때 쓰는 동기 채널(SW 동기 XHR, P0-05 ②). 끊겼으면 null을 돌려준다.
- *   createRuntime 뒤에 options에 넣어도 된다(실행 때 읽음)
+ *   sleepSync: JSPI가 없을 때 time.sleep을 SW 동기 XHR로 자는 함수(P11-03). 'stop'이면 멈추기, null이면 채널이 끊김.
+ *   readLineSync·sleepSync는 createRuntime 뒤에 options에 넣어도 된다(실행 때 읽음)
  *   turtleSource: turtle shim(public/workers/turtle.py) 내용. 주면 TURTLE_PATH에 설치한다 (P11-02)
  */
 export function createRuntime(pyodide, options) {
@@ -582,11 +589,26 @@ export function createRuntime(pyodide, options) {
       sleeper = { resolve, timer };
     });
 
+  // time.sleep 대체 (JSPI가 없을 때, P11-03). options.sleepSync(SW 동기 XHR)가 있으면 그 안에서 자고 'ok'·'stopped',
+  // 없거나 끊기면 undefined(→ Python None)라 원래 time.sleep으로 잔다(멈추기는 Worker 재시작)
+  const sleepSync = (ms) => {
+    if (!active || active.stopReason) return 'stopped';
+    if (!options.sleepSync) return undefined;
+    flush(); // 자기 전에 나온 글자를 먼저 보인다 (자는 동안은 이벤트 루프가 돌지 않음)
+    const reply = options.sleepSync(active.id, ms);
+    if (reply === 'stop') {
+      requestStop('stop');
+      return 'stopped';
+    }
+    return reply === 'ok' ? 'ok' : undefined;
+  };
+
   // ---- Python 준비 ---------------------------------------------------------
   const priv = pyodide.globals.get('dict')();
   priv.set('__pyroad_filename', STUDENT_FILENAME);
   priv.set('__pyroad_blocked', pyodide.toPy(BLOCKED_MODULES));
   priv.set('__pyroad_js_sleep', jsSleep);
+  priv.set('__pyroad_sleep_sync', sleepSync);
   priv.set('__pyroad_read_line', readLine);
   priv.set('__pyroad_read_stop', READ_STOP);
   priv.set('__pyroad_read_unavailable', READ_UNAVAILABLE);

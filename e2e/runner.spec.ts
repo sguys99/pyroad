@@ -90,7 +90,7 @@ test.describe('Python 실행기', () => {
     await expect(runButton(page)).toBeEnabled();
   });
 
-  test('실행 중 출력이 실시간으로 보이고, 멈추기로 멈춘다', async ({
+  test('실행 중 출력이 실시간으로 보이고, time.sleep 중 멈추기는 실행기를 다시 띄우지 않는다 (P11-03)', async ({
     page,
   }) => {
     await runCode(
@@ -109,6 +109,11 @@ test.describe('Python 실행기', () => {
     await expect(output).toContainText('실행을 멈췄어요');
     await expect(output).toContainText('반복 0'); // 멈추기 전 출력은 남는다
     await expect(page.getByTestId('stop-button')).toBeHidden();
+    // 자는 중 멈추기는 Worker를 살린 채 KeyboardInterrupt (재준비 없음, P0-05 17~69ms)
+    await expect(
+      page.locator('[data-testid="runner-waking"]:visible'),
+    ).toHaveCount(0);
+    expect((await runnerStates()).join(' → ')).not.toContain('restarting');
 
     // 바로 다시 실행할 수 있다
     await runCode(page, quest.solution);
@@ -247,16 +252,45 @@ test.describe('Python 실행기', () => {
     await expect(runButton(page)).toHaveText('실행 중...');
     await page.getByTestId('stop-button').click();
     // CPU 루프는 Worker 가 stop 에 답하지 못해 다시 띄운다 (재준비 연출, P6-05)
-    const waking = page.locator('[data-testid="runner-waking"]:visible');
+    // 재준비 연출은 결과 쪽지 안 (P11-03), 그동안 실행 버튼은 못 누름
+    const waking = output.getByTestId('runner-waking');
     await expect(waking).toBeVisible();
-    await expect(waking).toContainText('주문 공책을 다시 펼치는 중');
+    await expect(waking).toContainText('실행기를 다시 준비하고 있어요');
     await expect(output).toHaveAttribute('data-state', 'stopped');
+    await expect(runButton(page)).toBeDisabled();
 
     await waitForRunner(page);
     await expect(waking).toBeHidden();
     // 실행 중 → 재준비(버튼 "다시 준비 중...", 못 누름) → 준비됨. 재준비는 처음 준비 안내(팁)를 다시 보이지 않는다
     const states = (await runnerStates()).join(' → ');
     expect(states).toMatch(
+      /running:- → restarting:download( → restarting:setup)? → ready:-$/,
+    );
+    await runCode(page, quest.solution);
+    await expect(output).toHaveAttribute('data-state', 'success');
+  });
+
+  test('그림 없는 무한 반복은 시간 제한 뒤 실행기를 다시 준비하고, 다시 실행할 수 있다 (P11-03)', async ({
+    page,
+  }) => {
+    await runCode(page, 'n = 0\nwhile True:\n    n += 1');
+    const output = outputPanel(page);
+    // 시간 제한 5초(Python 실행 시간) → stop에 답이 없으니 Worker terminate·재시작
+    await expect(output).toHaveAttribute('data-state', 'timeout', {
+      timeout: 15_000,
+    });
+    await expect(output).toContainText('시간이 너무 오래 걸려요');
+    const waking = output.getByTestId('runner-waking');
+    await expect(waking).toContainText('너무 오래 걸려서');
+    await expect(runButton(page)).toBeDisabled();
+    const shots = process.env.E2E_SHOTS;
+    if (shots) await output.screenshot({ path: `${shots}/runner-waking.png` });
+    await waitForRunner(page);
+    await expect(waking).toBeHidden();
+    await expect(page.getByTestId('runner-announce')).toHaveText(
+      /다시 준비됐어요/,
+    );
+    expect((await runnerStates()).join(' → ')).toMatch(
       /running:- → restarting:download( → restarting:setup)? → ready:-$/,
     );
     await runCode(page, quest.solution);
