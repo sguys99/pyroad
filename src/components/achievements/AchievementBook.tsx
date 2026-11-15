@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Check, ChevronLeft, Sparkle, Sprout } from 'lucide-react';
+import { Check, ChevronLeft, Sailboat, Sparkle, Sprout } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { HudCounter } from '@/components/ui/hud';
@@ -53,6 +53,7 @@ const CATEGORY_NOTE: Record<AchievementCategory, string> = {
   habit: '매일 조금씩 하면 열려요',
   growth: '레벨이 오르고 상자를 열면 열려요',
   grit: '틀리고 다시 해 본 용기에 주는 업적이에요',
+  sea: '2월드 섬들을 항해하며 모아요',
 };
 
 type Filter = 'all' | 'earned' | 'todo';
@@ -193,7 +194,8 @@ export interface AchievementBookProps {
  * 업적 도감 (P8-10, §3 F5). `/profile/achievements`.
  *
  * - 위 요약: 얻은 수/전체 · 티어별 · 받을 코인 + "모두 받기"
- * - 거르기 탭(모두·얻었어요·도전 중) + 카테고리 절(학습·별·퀴즈·꾸준함·성장·실패 칭찬 — 실패 칭찬은 따뜻한 띠)
+ * - 거르기 탭(모두·얻었어요·도전 중) + 카테고리 절(학습·별·퀴즈·꾸준함·성장·실패 칭찬·코드 바다 — 실패 칭찬은 따뜻한 띠,
+ *   코드 바다는 바다 띠. "실력 인정"처럼 코인 0 배지는 받기 없이 바로 얻음)
  * - 칸: 얻음 = 티어 색 메달 + 날짜 · 받을 수 있음 = 반짝임 + "받기" · 아직 = 실루엣 + 진행 막대 · 숨김 = "???"
  * - 칸을 누르면 상세 시트. 받기는 서버 RPC(멱등) → 효과음 `coin` + 코인이 위 지갑으로 날아감 + 응답 잔액으로 카운트업
  *   (router.refresh 없음 — B56)
@@ -376,6 +378,14 @@ export function AchievementBook({
                     {CATEGORY_NOTE.grit}
                   </span>
                 </p>
+              ) : c === 'sea' ? (
+                <p className="ab-sea">
+                  <Sailboat aria-hidden />
+                  <span>
+                    <b className="font-display">코드 바다에서만 얻어요!</b>{' '}
+                    {CATEGORY_NOTE.sea}
+                  </span>
+                </p>
               ) : (
                 <p className="ab-sec-note">{CATEGORY_NOTE[c]}</p>
               )}
@@ -418,7 +428,8 @@ export function AchievementBook({
             <p className="ab-detail-meta">
               <TierTag tier={open.tier} />
               <span>
-                {CATEGORY_LABEL[open.category]} · 코인 {open.coins}
+                {CATEGORY_LABEL[open.category]} ·{' '}
+                {open.coins > 0 ? `코인 ${open.coins}` : '배지만 주는 업적'}
               </span>
             </p>
             <p className="ab-detail-text">{open.text}</p>
@@ -457,7 +468,7 @@ export function AchievementBook({
             ) : open.state === 'earned' ? (
               <p className="ab-detail-done">
                 <Check aria-hidden strokeWidth={3} />
-                코인을 받았어요
+                {open.coins > 0 ? '코인을 받았어요' : '배지를 간직했어요'}
               </p>
             ) : null}
           </div>

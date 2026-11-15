@@ -1,0 +1,34 @@
+# 2월드 퀴즈 4-6: 수학 도구 빈칸
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000033
+order: 6
+title: 수학 도구 빈칸
+concept: import, math.sqrt, round
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 모듈 가져오기와 수학 도구
+  learning_goals:
+    - 모듈을 가져오는 주문을 고를 수 있다
+    - 제곱근 도구와 반올림 함수를 고를 수 있다
+  story_context: 해적 기술자의 수학 도구 상자 설명서가 물에 젖어 글자가 지워졌어요! 빠진 낱말을 채워 16의 제곱근과 반올림한 원주율을 보여 줘요.
+  fallback_text: 도구 상자를 쓰려면 먼저 가져와야 해요. 상자 안 도구는 상자 이름 뒤에 점을 찍고 꺼내고, 반올림은 상자 없이 바로 쓰는 함수예요.
+  quiz:
+    question: 빈칸을 채워 4.0 과 3.14 가 한 줄씩 나오게 해요
+    code: |-
+      {{bk-07mx}} math
+      print(math.{{bk-41kp}}(16))
+      print({{bk-32s9}}(3.14159, 2))
+    tokens:
+      - { id: tok-jd4n, text: import }
+      - { id: tok-e24t, text: sqrt }
+      - { id: tok-8ojx, text: round }
+      - { id: tok-da8w, text: ceil }
+      - { id: tok-e98z, text: floor }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-07mx: tok-jd4n, bk-41kp: tok-e24t, bk-32s9: tok-8ojx }
+    explanation: import math 로 도구 상자를 가져오고, math.sqrt(16)은 4.0 이에요. round(3.14159, 2)는 소수 둘째 자리까지 반올림해 3.14 예요.

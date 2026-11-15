@@ -14,7 +14,9 @@ import {
 // `all` 안의 code_check(B09·B30)도 포함한다. Pyodide 없이 코드 텍스트만 본다.
 // 정답을 실제로 실행해 규칙 전체를 확인하는 것은 P1-13 자동 검증(`npm run test:content`).
 
-const { rows, meta } = buildRows(loadContent(CONTENT_DIR));
+const { rows, meta } = buildRows(loadContent(CONTENT_DIR), {
+  includeDrafts: true,
+});
 
 type CodeCheckRule = Extract<ValidationRule, { type: 'code_check' }>;
 

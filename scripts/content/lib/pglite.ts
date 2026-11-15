@@ -49,6 +49,8 @@ export interface ContentSnapshot {
   stages: Record<string, unknown>[];
   quests: Record<string, unknown>[];
   answer_keys: Record<string, unknown>[];
+  /** 실력 확인 퀴즈 (P10-03, 00052). 00052 전 마이그레이션까지만 돌리면 없음 */
+  skill_checks?: Record<string, unknown>[];
 }
 
 // created_at·updated_at 은 실행 시각이라 비교에서 뺀다. jsonb 는 키 순서가 정규화되어 나온다.
@@ -69,6 +71,12 @@ SELECT json_build_object(
     SELECT quest_id, expected_output, hints, solution_code, steps, quiz_answer
       FROM public.quest_answer_keys) k)
 )::text AS j`;
+
+// 00052 전 마이그레이션까지만 돌렸으면 테이블이 없어 따로 읽음
+const SKILL_CHECK_SQL = `
+SELECT coalesce(json_agg(to_jsonb(c) - 'world_order' ORDER BY c.world_order, c.set_no, c.no), '[]'::json)::text AS j FROM (
+  SELECT w.slug AS world, w."order" AS world_order, c.set_no, c.no, c.review_quest_id, c.quiz, c.answer
+    FROM public.skill_check_questions c JOIN public.worlds w ON w.id = c.world_id) c`;
 
 export interface ReplayOptions {
   /** 마이그레이션 번호 상한 (예: '00005'). 작업 중인 다른 마이그레이션을 빼고 싶을 때 */
@@ -110,10 +118,20 @@ export async function replay(options: ReplayOptions): Promise<ReplayResult> {
       await runStep(db, seed.name, text(seed.sql));
     }
     const { rows } = await db.query<{ j: string }>(SNAPSHOT_SQL);
+    const snapshot = JSON.parse(rows[0].j) as ContentSnapshot;
+    const hasSkillCheck = (
+      await db.query<{ t: string | null }>(
+        `SELECT to_regclass('public.skill_check_questions')::text AS t`,
+      )
+    ).rows[0].t;
+    if (hasSkillCheck)
+      snapshot.skill_checks = JSON.parse(
+        (await db.query<{ j: string }>(SKILL_CHECK_SQL)).rows[0].j,
+      );
     const engine = (await db.query<{ v: string }>('SELECT version() AS v'))
       .rows[0].v;
     return {
-      snapshot: JSON.parse(rows[0].j) as ContentSnapshot,
+      snapshot,
       migrations: files.map((f) => f.slice(MIGRATIONS_DIR.length + 1)),
       engine: engine.split(',')[0],
     };

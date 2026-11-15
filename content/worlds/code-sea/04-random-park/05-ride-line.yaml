@@ -1,0 +1,66 @@
+# 2월드 퀘스트 4-5: 놀이기구 줄 섞기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-4
+# 섞은 줄은 보여 주기만, 다시 세운 줄(늘 같음)로 채점 (제안 D)
+
+id: b2000000-0000-0000-0000-000000000032
+order: 5
+title: 놀이기구 줄 섞기
+concept: random.shuffle, sort()
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: random.shuffle로 리스트 섞기
+  learning_goals:
+    - random.shuffle(리스트)로 리스트 순서를 무작위로 섞을 수 있다
+    - shuffle은 새 리스트를 주지 않고 원래 리스트를 바꾼다는 것을 안다
+    - 섞인 리스트를 sort()로 다시 세울 수 있다
+  story_context: 회전 그네 앞에 바다 친구들이 줄을 섰어요. 버그버그가 "누가 먼저 탈지 섞자!" 하고 줄을 마구 섞었어요. 섞어 보고, 다시 가나다 순서로 세워 줘요.
+  exercise_description: 'random.shuffle(line)으로 줄을 섞어 출력한 다음, line.sort()로 가나다 순서로 다시 세워 출력하세요'
+  starter_code: |
+    import random
+
+    line = ["해마", "고래", "상어", "거북", "문어"]
+
+    # 1) 줄을 무작위로 섞고 보여 줘요
+    ___
+    print(line)
+
+    # 2) 가나다 순서로 다시 세우고 보여 줘요
+    ___
+    print(line)
+  expected_output_hint: "첫 줄은 매번 달라요. 둘째 줄은 늘 ['거북', '고래', '문어', '상어', '해마'] 예요"
+  checklist:
+    - '첫 빈칸에 random.shuffle(line) 을 써요'
+    - '둘째 빈칸에 line.sort() 를 써요'
+    - 둘째 줄이 가나다 순서인지 봐요
+  example_output: |-
+    ['상어', '거북', '해마', '문어', '고래']
+    ['거북', '고래', '문어', '상어', '해마']
+  fallback_text: 'random.shuffle(line)은 line 자체를 섞어요. 그래서 line = random.shuffle(line) 처럼 다시 담으면 안 되고, 한 줄로 그냥 불러요. 섞은 다음 line.sort() 를 부르면 가나다 순서로 돌아와요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: code_check
+        expected: shuffle
+      - type: code_check
+        expected: .sort()
+      - type: contains
+        expected: "['거북', '고래', '문어', '상어', '해마']"
+  hints:
+    level_1: random 상자에서 카드를 섞듯 리스트를 섞는 도구는 shuffle 이에요.
+    level_2: 'random.shuffle(line) 은 결과를 따로 돌려주지 않고 line 을 바로 섞어요. 정렬은 1월드에서 배운 sort() 예요.'
+    level_3: |-
+      두 빈칸을 이렇게 채워 보세요!
+      random.shuffle(line)
+      line.sort()
+  solution_code: |
+    import random
+
+    line = ["해마", "고래", "상어", "거북", "문어"]
+
+    random.shuffle(line)
+    print(line)
+
+    line.sort()
+    print(line)

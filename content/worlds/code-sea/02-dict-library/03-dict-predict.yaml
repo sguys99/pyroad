@@ -1,0 +1,36 @@
+# 2월드 퀴즈 2-3: 이름표 덮어쓰기
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000013
+order: 3
+title: 이름표 덮어쓰기
+concept: 딕셔너리 값 수정
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 같은 이름표에 두 번 넣기
+  learning_goals:
+    - 같은 키에 다시 넣으면 값이 바뀐다는 것을 안다
+  story_context: 조개 상자에 조개 수를 적었는데, 버그버그가 몰래 다시 적었어요. 상자를 열어 보면 어떻게 되어 있을까요?
+  fallback_text: 딕셔너리에서 이름표는 하나뿐이에요. 이미 있는 이름표에 다시 넣으면 새 이름표가 생기지 않고 내용이 바뀌어요. 없는 이름표에 넣으면 맨 뒤에 새로 붙어요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      box = {"조개": 1}
+      box["조개"] = 5
+      box["소라"] = 2
+      print(box)
+    options:
+      - { id: opt-f3hu, text: "{'조개': 5, '소라': 2}" }
+      - { id: opt-y8dq, text: "{'조개': 1, '소라': 2}" }
+      - { id: opt-l2wv, text: "{'조개': 1, '조개': 5, '소라': 2}" }
+      - { id: opt-c6nb, text: "{'조개': 6, '소라': 2}" }
+answer:
+  quiz_answer:
+    accepted: [opt-f3hu]
+    explanation: 조개 이름표에 5를 다시 넣으면 1이 5로 바뀌어요. 소라는 없던 이름표라 뒤에 새로 붙어요.
+    explanations:
+      opt-y8dq: 둘째 줄에서 조개 이름표의 내용을 바꿨어요.
+      opt-l2wv: 한 딕셔너리에 같은 이름표는 하나뿐이에요.
+      opt-c6nb: = 는 더하지 않고 새 값으로 바꿔요.

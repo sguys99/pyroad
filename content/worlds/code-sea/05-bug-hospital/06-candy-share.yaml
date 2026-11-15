@@ -1,0 +1,64 @@
+# 2월드 퀘스트 5-6: 사탕 나누기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5
+# 시작 코드는 친구 0명에서 일부러 ZeroDivisionError. 특정 에러만 잡게 except ZeroDivisionError 를 code_check (제안 F)
+
+id: b2000000-0000-0000-0000-000000000041
+order: 6
+title: 사탕 나누기
+concept: try / except ZeroDivisionError
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: 특정 에러만 잡기
+  learning_goals:
+    - 0으로 나누면 ZeroDivisionError가 난다는 것을 안다
+    - except 뒤에 에러 이름을 써서 그 에러만 잡을 수 있다
+  story_context: 다 나은 환자들에게 사탕 12개를 나눠 주기로 했어요. 방마다 친구 수로 나누는데, 빈 방에서 코드가 멈췄어요! 0명에게는 나눌 수가 없거든요.
+  exercise_description: '방마다 candy // f 로 나누다 f 가 0이면 ZeroDivisionError 가 나요. try 와 except ZeroDivisionError: 로 잡아 "나눌 친구가 없어요"를 출력하세요'
+  starter_code: |
+    candy = 12
+    friends = [3, 0, 2]
+
+    for f in friends:
+        # // 는 나눈 몫이에요 (12 // 3 은 4)
+        # 0으로 나누면 멈춰요! try 와 except ZeroDivisionError: 로 감싸요
+        print(f"{f}명이면 한 명에 {candy // f}개")
+  expected_output_hint: '3명이면 한 명에 4개, 나눌 친구가 없어요, 2명이면 한 명에 6개 가 한 줄씩 나와야 해요'
+  checklist:
+    - 'print 줄을 try: 안에 넣어요'
+    - 'except ZeroDivisionError: 아래에서 나눌 친구가 없어요 를 출력해요'
+    - 세 줄이 모두 나오는지 봐요
+  example_output: |-
+    3명이면 한 명에 4개
+    나눌 친구가 없어요
+    2명이면 한 명에 6개
+  fallback_text: 'ZeroDivisionError 는 0으로 나누려 했다는 뜻이에요. except 뒤에 ZeroDivisionError 처럼 에러 이름을 쓰면 그 에러만 잡아요. 다른 에러는 그대로 보여 줘서 다른 버그를 숨기지 않아요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          3명이면 한 명에 4개
+          나눌 친구가 없어요
+          2명이면 한 명에 6개
+      - type: code_check
+        expected: except ZeroDivisionError
+  hints:
+    level_1: 숫자 변신 안전띠처럼 try 와 except 로 감싸요. 이번에 잡을 에러 이름은 쪽지 맨 아래 줄에 있어요.
+    level_2: 'try: 아래에 print 줄을 넣고, except ZeroDivisionError: 아래에 print("나눌 친구가 없어요") 를 써요.'
+    level_3: |-
+      for 안을 이렇게 바꿔 보세요!
+          try:
+              print(f"{f}명이면 한 명에 {candy // f}개")
+          except ZeroDivisionError:
+              print("나눌 친구가 없어요")
+  solution_code: |
+    candy = 12
+    friends = [3, 0, 2]
+
+    for f in friends:
+        try:
+            print(f"{f}명이면 한 명에 {candy // f}개")
+        except ZeroDivisionError:
+            print("나눌 친구가 없어요")

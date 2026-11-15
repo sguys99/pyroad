@@ -30,7 +30,7 @@ export type { DurationName, EasingName, SpringName } from '@/lib/motion/tokens';
 /**
  * 색 토큰. 쓰임(role)은 docs/design/tokens.md 표와 `CONTRAST_PAIRS`를 본다.
  * - **장식 전용**(글자를 얹거나 글자색으로 쓰지 않음): `line`, `surfaceLip`, `primaryLip`, `primaryBright`, `accent`,
- *   `accentLip`, `accentLight`, `w1`·`w2`·`w3`
+ *   `accentLip`, `accentLight`, `w1`·`w2`·`w3`, `w2Shallow`·`w2Deep`(2월드 지도 바다)
  * - 초록 글자는 `primaryText`(배경·면·보조 면 위 AA), 금색 계열 글자는 `accentText`
  */
 export const COLOR = {
@@ -97,6 +97,9 @@ export const COLOR = {
   w2: '#B4C8D2',
   w2Ink: '#6B645B',
   w2Soft: '#EDF1F3',
+  /** 2월드 지도 바다 (P10-04, 장식 전용): 섬 둘레 얕은 물 · 가장자리 깊은 물. 종이 결이 비치게 반투명으로 칠함 */
+  w2Shallow: '#CFE4E3',
+  w2Deep: '#95BAC6',
   w3: '#D9C3A3',
   w3Ink: '#6B645B',
   w3Soft: '#F4EEE5',
@@ -650,6 +653,9 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: 'text', bg: 'w1Soft', kind: 'text', use: '월드 1 바탕 본문' },
   { fg: 'w2Ink', bg: 'w2Soft', kind: 'text', use: '월드 2 표지 글자' },
   { fg: 'text', bg: 'w2Soft', kind: 'text', use: '월드 2 바탕 본문' },
+  // 2월드 지도 바다 (P10-04): 지금은 글자를 얹지 않지만(이름표는 흰 알약), 물 위에 글자가 놓여도 읽히는지
+  { fg: 'text', bg: 'w2Shallow', kind: 'text', use: '2월드 얕은 바다 위 글자' },
+  { fg: 'text', bg: 'w2Deep', kind: 'text', use: '2월드 깊은 바다 위 글자' },
   { fg: 'w3Ink', bg: 'w3Soft', kind: 'text', use: '월드 3 표지 글자' },
   { fg: 'text', bg: 'w3Soft', kind: 'text', use: '월드 3 바탕 본문' },
   { fg: 'codeText', bg: 'codeBg', kind: 'text', use: '코드 글자' },

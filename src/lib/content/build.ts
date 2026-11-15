@@ -8,12 +8,13 @@
 
 import type { WorldInfo } from '@/lib/world/worlds';
 import {
+  hasExactOutput,
   toStoredRule,
   type StoredRule,
   type ValidationRule,
 } from '@/lib/quest/validation';
 
-import type { ContentTree } from './load';
+import { isDraft, type ContentTree } from './load';
 import {
   byQuizId,
   findAnswerKeysInPublic,
@@ -60,6 +61,8 @@ export interface PublicStep {
   step_goal: string;
   checklist: string[];
   example_output: string;
+  /** 출력이 정해진 규칙(`all` 안의 output_match 포함)이면 true — 결과 쪽지가 예시와 줄 단위로 견줌 (P10-09) */
+  example_exact?: true;
   starter_code: string;
   validation_type: StoredRule['validation_type'];
   fallback_text: string;
@@ -113,11 +116,26 @@ export interface BossAnswer {
   rounds: QuizAnswer[];
 }
 
+/** 실력 확인 퀴즈 문제 한 줄 (P10-03, skill_check_questions, service_role 전용 — 00052) */
+export interface SkillCheckRow {
+  /** 월드 slug. seed 는 worlds 에서 id 를 찾아 world_id 에 씀 */
+  world: string;
+  set_no: number;
+  no: number;
+  review_quest_id: string;
+  /** 공개 모양 (퀴즈와 같음, 보기 id 순 — 화면에 보낼 때 서버가 섞음) */
+  quiz: QuizPrompt;
+  /** 정답 (accepted·해설). 학생에게 보내지 않음 */
+  answer: QuizAnswer;
+}
+
 export interface ContentRows {
   worlds: WorldRow[];
   stages: StageRow[];
   quests: QuestRow[];
   answer_keys: AnswerKeyRow[];
+  /** 실력 확인 퀴즈 (월드 order · 묶음 · 번호 순) */
+  skill_checks: SkillCheckRow[];
 }
 
 /** 빌드 결과에만 있는 부가 정보 (DB 에 쓰지 않음) */
@@ -162,12 +180,17 @@ export const QUIZ_VALIDATION_TYPE =
 // 콘텐츠 → 행
 // ------------------------------------------------------------
 
-export function buildRows(tree: ContentTree): BuildResult {
+/** `includeDrafts`: 준비 중 월드의 퀘스트도 행으로 (seed 에는 넣지 않고 자동 검증에만 씀, P10-05) */
+export function buildRows(
+  tree: ContentTree,
+  { includeDrafts = false }: { includeDrafts?: boolean } = {},
+): BuildResult {
   const rows: ContentRows = {
     worlds: [],
     stages: [],
     quests: [],
     answer_keys: [],
+    skill_checks: [],
   };
   const meta = new Map<string, QuestMeta>();
   const warnings: string[] = [];
@@ -182,6 +205,8 @@ export function buildRows(tree: ContentTree): BuildResult {
       description: world.description,
       unlock_rule: { ...world.unlock_rule },
     });
+    // "준비 중" 월드(isDraft)는 스테이지를 DB 에 넣지 않음 → 앱에서 그대로 준비 중 (P10-04)
+    if (isDraft(stages) && !includeDrafts) continue;
     for (const { stage, quests } of [...stages].sort(
       (a, b) => a.stage.order - b.stage.order,
     )) {
@@ -208,11 +233,14 @@ export function buildRows(tree: ContentTree): BuildResult {
         rows.quests.push(questRow);
         rows.answer_keys.push(answerRow);
         if (quest.quest_type === 'boss') {
-          const ids = new Set(quests.map((q) => q.quest.id));
+          // 같은 월드면 다른 스테이지도 됨: 최종 보스가 앞 스테이지 퀘스트로 복습 보냄 (P10-07)
+          const ids = new Set(
+            stages.flatMap((s) => s.quests.map((q) => q.quest.id)),
+          );
           quest.rounds.forEach((r, i) => {
             if (r.review_quest && !ids.has(r.review_quest))
               throw new Error(
-                `${file}: rounds[${i}].review_quest '${r.review_quest}'는 이 스테이지 퀘스트가 아니에요`,
+                `${file}: rounds[${i}].review_quest '${r.review_quest}'는 이 월드 퀘스트가 아니에요`,
               );
           });
         }
@@ -238,7 +266,46 @@ export function buildRows(tree: ContentTree): BuildResult {
     }
   }
 
+  // 실력 확인 퀴즈 (P10-03): 복습 퀘스트는 앞 월드의 퀘스트여야 함 (틀리면 "더 연습하면 좋은 단계"로 보냄)
+  const questWorld = new Map<string, number>();
+  for (const { world, stages } of worlds)
+    for (const { quests } of stages)
+      for (const { quest } of quests) questWorld.set(quest.id, world.order);
+  for (const { world, file, skillCheck } of worlds) {
+    skillCheck?.sets.forEach((set, s) =>
+      set.questions.forEach((q, i) => {
+        const at = questWorld.get(q.review_quest ?? '');
+        if (at === undefined || at >= world.order)
+          throw new Error(
+            `${file}: skill-check.yaml sets[${s}].questions[${i}].review_quest '${q.review_quest}'는 앞 월드의 퀘스트가 아니에요`,
+          );
+        const { quiz, answer } = splitQuizBody({
+          quiz_kind: q.quiz_kind,
+          prompt: q.prompt,
+          answer: q.answer,
+        } as QuizBodySource);
+        rows.skill_checks.push({
+          world: world.slug,
+          set_no: s + 1,
+          no: i + 1,
+          review_quest_id: q.review_quest!,
+          quiz,
+          answer,
+        });
+      }),
+    );
+  }
+
   assertNoAnswersInPublicRows(rows.quests);
+  const leaked = rows.skill_checks.flatMap((r) =>
+    findAnswerKeysInPublic(r.quiz).map(
+      (path) => `${r.world} ${r.set_no}-${r.no}: quiz.${path}`,
+    ),
+  );
+  if (leaked.length > 0)
+    throw new Error(
+      `실력 확인 퀴즈 공개 부분에 정답이 섞였어요:\n  ${leaked.join('\n  ')}`,
+    );
   return { rows, meta, warnings };
 }
 
@@ -261,7 +328,13 @@ export function splitQuest(
     starter_code: p.starter_code,
     expected_output_hint: p.expected_output_hint,
     ...('checklist' in p
-      ? { checklist: [...p.checklist], example_output: p.example_output }
+      ? {
+          checklist: [...p.checklist],
+          example_output: p.example_output,
+          ...(hasExactOutput(quest.answer.validation)
+            ? { example_exact: true }
+            : {}),
+        }
       : {}),
     fallback_text: p.fallback_text,
     ...(p.is_challenge === undefined ? {} : { is_challenge: p.is_challenge }),
@@ -282,6 +355,9 @@ export function splitQuest(
         step_goal: step.prompt.step_goal,
         checklist: [...step.prompt.checklist],
         example_output: step.prompt.example_output,
+        ...(hasExactOutput(step.answer.validation)
+          ? { example_exact: true as const }
+          : {}),
         starter_code: step.prompt.starter_code,
         validation_type: s.validation_type,
         fallback_text: step.prompt.fallback_text,
@@ -685,6 +761,25 @@ export function toSeedSql(rows: ContentRows, options: SeedSqlOptions): string {
     );
   }
 
+  if (rows.skill_checks.length > 0) {
+    out.push(
+      '',
+      '-- ------------------------------------------------------------',
+      '-- 6. 실력 확인 퀴즈 (skill_check_questions, service_role 전용, P10-03 · 00052). quiz 는 공개 모양, answer 는 정답',
+      '-- ------------------------------------------------------------',
+      'INSERT INTO public.skill_check_questions (world_id, set_no, no, review_quest_id, quiz, answer)',
+      'VALUES',
+      rows.skill_checks
+        .map(
+          (r) =>
+            `  (${[worldIdOf(r.world), String(r.set_no), String(r.no), sqlText(r.review_quest_id), sqlJson(r.quiz), sqlJson(r.answer)].join(', ')})`,
+        )
+        .join(',\n'),
+      'ON CONFLICT (world_id, set_no, no) DO UPDATE SET',
+      '  review_quest_id = EXCLUDED.review_quest_id, quiz = EXCLUDED.quiz, answer = EXCLUDED.answer;',
+    );
+  }
+
   return out.join('\n') + '\n';
 }
 
@@ -761,7 +856,7 @@ export interface CheckStep {
 
 export interface CheckQuest {
   id: string;
-  /** `<스테이지 order>-<퀘스트 order>` (P0-09 와 같음). 2월드가 생기면 월드를 앞에 붙임 */
+  /** `<스테이지 order>-<퀘스트 order>` (P0-09 와 같음). 1월드 밖은 월드 slug 를 앞에: `code-sea/1-2` */
   key: string;
   world: string;
   stage_order: number;
@@ -840,7 +935,10 @@ export function toCheckFixture(
       const meta = options.meta?.get(q.id);
       return {
         id: q.id,
-        key: `${so}-${q.order}`,
+        key:
+          worldOf(q.stage_id) === 'python-island'
+            ? `${so}-${q.order}`
+            : `${worldOf(q.stage_id)}/${so}-${q.order}`,
         world: worldOf(q.stage_id),
         stage_order: so,
         order: q.order,
@@ -917,20 +1015,22 @@ function strOrNull(value: unknown): string | null {
 /**
  * world.yaml + map.yaml → `src/lib/world/worlds.generated.ts` 소스.
  * 지도는 DB 가 아니라 앱 번들로 갑니다(서버·클라이언트 어디서나 import). 이름·준비 여부도 여기 한 곳에서 읽습니다.
- * `ready` 는 스테이지가 있는지에서 나옴 (없으면 "준비 중", 랜딩 worldsData 와 같은 뜻).
+ * `ready` 는 퀘스트가 있는 스테이지가 있는지에서 나옴 (없으면 "준비 중", 랜딩 worldsData 와 같은 뜻). 지도는 준비 중이어도 실림.
  * TS 로 만드는 까닭: 랜딩 글꼴 서브셋 수집기(scripts/fonts/landing-text.mjs)가 TS 모듈만 따라감.
  */
 export function toWorldInfos(tree: ContentTree): WorldInfo[] {
   return [...tree.worlds]
     .sort((a, b) => a.world.order - b.world.order)
-    .map(({ world, map, stages }) => ({
+    .map(({ world, map, stages, skillCheck }) => ({
       slug: world.slug,
       order: world.order,
       title: world.title,
       theme: world.theme,
       unlock_rule: world.unlock_rule,
-      ready: stages.length > 0,
+      ready: !isDraft(stages),
       map,
+      // 실력 확인 퀴즈가 있는 월드 (P10-03). 잠긴 표지에 "실력 확인 퀴즈" 진입점
+      ...(skillCheck && { skill_check: true as const }),
     }));
 }
 

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { REPO_ROOT } from './env';
 
-const WORLD_DIR = join(REPO_ROOT, 'content/worlds/python-island');
+const worldDir = (world: string) => join(REPO_ROOT, 'content/worlds', world);
 
 export interface E2eQuest {
   id: string;
@@ -55,15 +55,16 @@ interface QuestYaml {
   };
 }
 
-let cache: E2eStage[] | null = null;
+const cache = new Map<string, E2eStage[]>();
 
-/** 첫 월드의 스테이지들 (order 순), 각 스테이지의 코드 퀘스트 (order 순) */
-export function stages(): E2eStage[] {
-  if (cache) return cache;
-  cache = readdirSync(WORLD_DIR, { withFileTypes: true })
+/** 월드(기본: 첫 월드)의 스테이지들 (order 순), 각 스테이지의 코드 퀘스트 (order 순) */
+export function stages(world = 'python-island'): E2eStage[] {
+  const hit = cache.get(world);
+  if (hit) return hit;
+  const list = readdirSync(worldDir(world), { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => {
-      const dir = join(WORLD_DIR, d.name);
+      const dir = join(worldDir(world), d.name);
       const stage = parse(readFileSync(join(dir, 'stage.yaml'), 'utf8'));
       const all = readdirSync(dir)
         .filter((f) => f.endsWith('.yaml') && f !== 'stage.yaml')
@@ -113,23 +114,26 @@ export function stages(): E2eStage[] {
       };
     })
     .sort((a, b) => a.order - b.order);
-  return cache;
+  cache.set(world, list);
+  return list;
 }
 
-export function stage(order: number): E2eStage {
-  const found = stages().find((s) => s.order === order);
+export function stage(order: number, world = 'python-island'): E2eStage {
+  const found = stages(world).find((s) => s.order === order);
   if (!found) throw new Error(`[e2e] 스테이지 ${order} 가 content/ 에 없음`);
   return found;
 }
 
-/** 첫 월드의 모든 퀘스트(코드·프로젝트, 퀴즈 빼고) id. 월드를 다 깬 상태를 만들 때 (P5-01) */
-export function allQuestIds(): string[] {
-  return readdirSync(WORLD_DIR, { withFileTypes: true })
+/** 월드(기본: 첫 월드)의 모든 퀘스트(코드·프로젝트·보스, 퀴즈 빼고) id, 스테이지·파일 순. 월드를 다 깬 상태를 만들 때 (P5-01) */
+export function allQuestIds(world = 'python-island'): string[] {
+  return readdirSync(worldDir(world), { withFileTypes: true })
     .filter((d) => d.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name))
     .flatMap((d) => {
-      const dir = join(WORLD_DIR, d.name);
+      const dir = join(worldDir(world), d.name);
       return readdirSync(dir)
         .filter((f) => f.endsWith('.yaml') && f !== 'stage.yaml')
+        .sort()
         .map((f) => parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml)
         .filter((q) => q.quest_type !== 'quiz')
         .map((q) => q.id);
@@ -146,16 +150,18 @@ interface ProjectYaml {
   }>;
 }
 
-/** 첫 월드의 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
-export function projectQuest(): {
+/** 월드(기본: 첫 월드)의 첫 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
+export function projectQuest(world = 'python-island'): {
   id: string;
   title: string;
   steps: Array<{ goal: string; checklist: string[]; solution: string }>;
 } {
-  for (const d of readdirSync(WORLD_DIR, { withFileTypes: true })) {
+  for (const d of readdirSync(worldDir(world), { withFileTypes: true }).sort(
+    (a, b) => a.name.localeCompare(b.name),
+  )) {
     if (!d.isDirectory()) continue;
-    const dir = join(WORLD_DIR, d.name);
-    for (const f of readdirSync(dir)) {
+    const dir = join(worldDir(world), d.name);
+    for (const f of readdirSync(dir).sort()) {
       if (!f.endsWith('.yaml') || f === 'stage.yaml') continue;
       const q = parse(readFileSync(join(dir, f), 'utf8')) as ProjectYaml;
       if (q.quest_type !== 'project') continue;

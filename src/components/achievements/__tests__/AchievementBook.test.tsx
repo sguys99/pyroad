@@ -43,6 +43,7 @@ const def = (
   metric: 'quests',
   sort: 10,
   hidden: false,
+  coins: null,
   ...over,
 });
 const entries = buildAchievementBook(
@@ -83,6 +84,29 @@ describe('AchievementBook (P8-10)', () => {
       }),
     ).toBeInTheDocument();
     expect(screen.queryByText('이름 secret')).toBeNull();
+  });
+
+  it('코드 바다 절(P10-11): 바다 띠, 코인 0 배지는 받기 없이 "배지만 주는 업적"', () => {
+    const sea = buildAchievementBook(
+      [
+        def('skill_pass', {
+          category: 'sea',
+          tier: 'silver',
+          coins: 0,
+          name: '실력 인정',
+        }),
+      ],
+      [{ achievement_id: 'skill_pass', achieved_at: AT, claimed_at: AT }],
+      [],
+    );
+    render(<AchievementBook entries={sea} coins={50} />);
+    expect(screen.getByText('코드 바다에서만 얻어요!')).toBeInTheDocument();
+    const tile = screen.getByTestId('achievement-skill_pass');
+    expect(tile).toHaveAttribute('data-state', 'earned');
+    expect(screen.queryByTestId('achievement-collect')).toBeNull();
+    fireEvent.click(within(tile).getByRole('button'));
+    expect(screen.getByText(/배지만 주는 업적/)).toBeInTheDocument();
+    expect(screen.getByText('배지를 간직했어요')).toBeInTheDocument();
   });
 
   it('칸 받기 → 응답 잔액으로 지갑, 효과음 coin, 새로 고침 없음 (B56)', async () => {

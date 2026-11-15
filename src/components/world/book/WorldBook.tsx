@@ -7,6 +7,7 @@ import { Card, CardButton } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import {
   type BookSummary,
+  type SkillCheckOfferInfo,
   isOpenable,
   STATUS_LABEL,
   worldPath,
@@ -14,6 +15,7 @@ import {
 } from '@/lib/world/worldBook';
 
 import { useBookNavigate } from './bookTransition';
+import { SkillCheckOffer } from './SkillCheckOffer';
 // 표지 그림 재질·책 모양
 import './worldBook.css';
 
@@ -50,6 +52,8 @@ interface WorldBookProps {
   heading?: 'h2' | 'h3';
   /** 새로 열린 월드 (첫 스테이지의 잠금 해제 연출을 아직 못 봄, P5-05): 상태 칩이 "새로 열렸어요!" */
   fresh?: boolean;
+  /** 잠긴 책의 실력 확인 퀴즈 진입점 (P10-03, `skillCheckOfferOf`) */
+  skillCheck?: SkillCheckOfferInfo | null;
 }
 
 /**
@@ -64,6 +68,7 @@ export function WorldBook({
   current = false,
   heading: H = 'h2',
   fresh = false,
+  skillCheck = null,
 }: WorldBookProps) {
   const go = useBookNavigate();
   const { slug, title, order, status } = book;
@@ -114,6 +119,8 @@ export function WorldBook({
           </span>
         )}
       </div>
+      {/* 표지·글 아래 카드 폭 전체 (360px 가로 카드에서도 버튼이 한 줄) */}
+      {!openable && skillCheck && <SkillCheckOffer {...skillCheck} compact />}
     </>
   );
 

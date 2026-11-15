@@ -1,0 +1,34 @@
+# 2월드 퀴즈 1-5: 리본 조각 맞히기
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000005
+order: 5
+title: 리본 조각 맞히기
+concept: 슬라이싱
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 슬라이싱 결과 맞히기
+  learning_goals:
+    - 슬라이싱의 시작 번호는 들어가고 끝 번호는 빠진다는 것을 안다
+  story_context: 버그버그가 리본을 몰래 잘라 갔어요! 남은 코드를 보고 잘라 간 조각이 어떤 글자인지 맞혀 봐요.
+  fallback_text: 글자 번호는 0부터 세요. [시작:끝]으로 자르면 시작 번호 글자는 들어가고, 끝 번호 글자는 빠져요. 번호를 글자 아래에 하나씩 적어 보세요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      word = "dolphin"
+      print(word[1:4])
+    options:
+      - { id: opt-r4ka, text: olp }
+      - { id: opt-m7cs, text: olph }
+      - { id: opt-x2pe, text: dolp }
+      - { id: opt-b9tn, text: dol }
+answer:
+  quiz_answer:
+    accepted: [opt-r4ka]
+    explanation: d가 0번, o가 1번이에요. [1:4]는 1번부터 4번 바로 앞(3번)까지라서 o, l, p 세 글자가 나와요.
+    explanations:
+      opt-m7cs: 끝 번호 4번 글자 h 는 들어가지 않아요.
+      opt-x2pe: 번호는 0부터 세요. 1번은 둘째 글자 o 예요.
+      opt-b9tn: 1번부터 시작하니 0번 글자 d 는 빠져요.

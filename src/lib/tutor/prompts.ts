@@ -1,3 +1,5 @@
+import { buildLevelSection } from './glossary';
+
 export const SYSTEM_PROMPT = `당신은 "파이뱀 선생님"입니다. 초등학교 4~6학년 학생에게 파이썬을 가르치는 친근한 뱀 캐릭터 AI 튜터입니다.
 
 ## 성격 및 말투
@@ -25,6 +27,8 @@ export const SYSTEM_PROMPT = `당신은 "파이뱀 선생님"입니다. 초등�
 - 번호 목록을 사용할 때는 반드시 마지막 항목까지 완성하세요`;
 
 interface QuestIntroParams {
+  /** 퀘스트의 월드 순서 (서버가 DB에서 읽은 값). 2 이상이면 한 단계 깊은 설명 + 용어집 */
+  worldOrder?: number;
   stageTitle: string;
   themeName: string;
   questTitle: string;
@@ -42,7 +46,7 @@ export function buildQuestIntroPrompt(params: QuestIntroParams): string {
 - 학습 목표: ${params.learningGoals.join(', ')}
 - 스토리 배경: ${params.storyContext}
 
-## 지시
+${buildLevelSection(params.worldOrder, `${params.topic} ${params.learningGoals.join(' ')}`)}## 지시
 1. 스토리 배경을 활용하여 재미있는 도입부를 만들어주세요
 2. 오늘 배울 개념을 일상생활 비유로 쉽게 설명해주세요
 3. 실습 과제를 자연스럽게 안내해주세요: "${params.exerciseDescription}"
@@ -52,6 +56,8 @@ export function buildQuestIntroPrompt(params: QuestIntroParams): string {
 }
 
 interface HintParams {
+  /** 퀘스트의 월드 순서 (서버가 DB에서 읽은 값). 2 이상이면 한 단계 깊은 설명 + 용어집 */
+  worldOrder?: number;
   topic: string;
   exerciseDescription: string;
   studentCode: string;
@@ -66,7 +72,7 @@ export function buildHintPrompt(params: HintParams): string {
 - 학생이 작성한 코드: ${params.studentCode || '(아직 코드를 작성하지 않았어요)'}
 - 현재 힌트 단계: ${params.hintLevel} / 3
 
-## 지시
+${buildLevelSection(params.worldOrder, `${params.topic} ${params.exerciseDescription}`)}## 지시
 힌트 단계 ${params.hintLevel}에 맞는 수준의 힌트를 제공하세요:
 - 1단계: 개념적 넛지 (방향만 제시)
 - 2단계: 구체적 방향 (사용할 문법 요소 안내)
@@ -78,6 +84,8 @@ export function buildHintPrompt(params: HintParams): string {
 }
 
 interface CodeFeedbackParams {
+  /** 퀘스트의 월드 순서 (서버가 DB에서 읽은 값). 2 이상이면 한 단계 깊은 설명 + 용어집 */
+  worldOrder?: number;
   topic: string;
   exerciseDescription: string;
   studentCode: string;
@@ -105,7 +113,7 @@ ${params.studentCode}
 ${params.stderr ? `- 에러: ${params.stderr}` : ''}
 - 판정: ${statusLabel}
 
-## 지시
+${buildLevelSection(params.worldOrder, `${params.topic} ${params.exerciseDescription}`)}## 지시
 ${
   params.stderr
     ? `학생의 코드에서 에러가 발생했어요. 에러 메시지를 초등학생이 이해할 수 있도록 쉽게 설명해주세요. 어디를 고치면 좋을지 방향만 알려주세요.`
@@ -205,6 +213,8 @@ ${params.hintsUsed === 0 ? '3. 힌트 없이 스스로 해냈다고 특별히 �
 }
 
 interface ConceptExplainParams {
+  /** 퀘스트의 월드 순서 (서버가 DB에서 읽은 값). 2 이상이면 한 단계 깊은 설명 + 용어집 */
+  worldOrder?: number;
   questTitle: string;
   topic: string;
   learningGoals: string[];
@@ -219,7 +229,7 @@ export function buildConceptExplainPrompt(
 - 학습 주제: ${params.topic}
 - 학습 목표: ${params.learningGoals.join(', ')}
 
-## 지시
+${buildLevelSection(params.worldOrder, `${params.topic} ${params.learningGoals.join(' ')}`)}## 지시
 학생이 "힌트 말고 개념만 알려 줘요"라고 물었어요.
 1. "${params.topic}" 개념이 무엇인지 일상생활 비유로 쉽게 설명해주세요
 2. 과제와 상관없는 아주 짧은 예시 코드 하나로 보여주세요 (과제의 정답이나 정답과 비슷한 코드는 절대 쓰지 마세요)
@@ -241,6 +251,8 @@ export const FREE_QUESTION_RULES = `
 - 학생에게 이름, 나이, 학교, 사는 곳, 연락처, 사진 같은 개인정보를 묻지 마세요. 링크나 다른 웹사이트, 앱을 알려 주지 마세요.`;
 
 interface FreeQuestionParams {
+  /** 퀘스트의 월드 순서 (서버가 DB에서 읽은 값). 2 이상이면 한 단계 깊은 설명 + 용어집 */
+  worldOrder?: number;
   questTitle: string;
   topic: string;
   learningGoals: string[];
@@ -266,7 +278,7 @@ export function buildFreeQuestionPrompt(params: FreeQuestionParams): string {
 ${isolateQuestion(params.question)}
 [[/질문]]
 
-## 지시
+${buildLevelSection(params.worldOrder, `${params.topic} ${params.learningGoals.join(' ')}`)}## 지시
 1. 파이썬이나 이번 퀘스트에 관한 질문이면 일상생활 비유와 쉬운 말로 답해 주세요
 2. 예시 코드는 과제와 상관없는 짧은 것(3줄 이하)만 쓰세요. 정답을 달라고 하면 정답 대신 스스로 해 볼 첫걸음 하나만 알려 주세요
 3. 파이썬과 상관없는 질문이면 그 내용에는 답하지 말고, 다정하게 한 문장으로 받아 준 뒤 "${params.topic}" 이야기로 돌아와 작은 질문 하나를 건네세요

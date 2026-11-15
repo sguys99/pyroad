@@ -400,6 +400,53 @@
     }
   }
 
+  /* ───────────── 실력 확인 퀴즈 쪽지 (P10-03, SkillCheckOffer): 잠긴 책에 끼운 시험지. 점선 테 + 월드 틴트 바탕, 반복 연출 없음 */
+  .wb-skill {
+    display: grid;
+    justify-items: start;
+    gap: 0.5rem;
+    padding: 0.75rem 0.875rem;
+    border: 2px dashed
+      color-mix(
+        in srgb,
+        var(--world, var(--line-strong)) 70%,
+        var(--line-strong)
+      );
+    border-radius: var(--round-m);
+    background: var(--world-soft, var(--surface-2));
+  }
+  .wb-skill[data-tried] {
+    border-color: var(--line-strong);
+    background: var(--surface-2);
+  }
+  .wb-skill-k {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--world-ink, var(--text-muted));
+    font-size: var(--text-kicker);
+    font-weight: 750;
+    letter-spacing: 0.02em;
+  }
+  .wb-skill[data-tried] .wb-skill-k {
+    color: var(--text-muted);
+  }
+  .wb-skill-t {
+    margin: 0;
+    color: var(--text);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+  .wb-skill .g-btn-face {
+    white-space: normal;
+  }
+  /* 책장 카드 안: 카드 아래쪽에 붙고 버튼은 한 줄 */
+  .wb-skill[data-compact] {
+    grid-column: 1 / -1;
+    align-self: end;
+    padding: 0.625rem 0.75rem;
+  }
+
   /* ───────────── 책 ↔ 지도 전환 (View Transitions, 한 번만) */
   :root[data-book-vt]::view-transition-old(root),
   :root[data-book-vt]::view-transition-new(root) {

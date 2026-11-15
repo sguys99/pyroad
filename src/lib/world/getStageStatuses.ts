@@ -34,6 +34,7 @@ export const MAX_STARS_PER_QUEST = 3;
  * 그래서 월드 해제 규칙 previous_world_cleared 도 이 순서로 나옵니다 (스테이지 없는 "준비 중" 월드는 건너뜀).
  * 서버 규칙 is_stage_unlocked(00012·00026·00046)와 같아야 합니다 (RLS 회귀 WD-5가 월드 간 잠금, BOSS-3이 "이미 간 곳은 열림" 확인).
  * 그 스테이지나 뒤 스테이지에 완료한 퀘스트가 있으면 앞 스테이지를 다 깨지 않았어도 열림 (보스가 새로 생긴 스테이지, 00046).
+ * 월드의 첫 스테이지는 그 월드의 실력 확인 퀴즈에 합격했어도 열림 (`skillPassWorldIds`, 00052 · P10-03).
  * 황금키로 넘긴 퀘스트도 status 'completed' 라 완료로 셉니다 (별은 best_stars 그대로).
  * 퀴즈(quest_type 'quiz')는 보너스라 완료 수·총 수·클리어·firstIncompleteQuestId 에서 뺍니다 (00026, §12-Q60).
  * 별(stars·maxStars)은 모으는 수집 기록이라 퀴즈도 넣습니다 (퀴즈 별이 실제로 쌓이는 첫 유형).
@@ -41,6 +42,8 @@ export const MAX_STARS_PER_QUEST = 3;
 export function getStageStatuses(
   stages: StageWithQuests[],
   userProgress: ProgressMinimal[],
+  /** 실력 확인 퀴즈에 합격한 월드 id (skill_check_attempts.passed, 00052). 그 월드의 첫 스테이지가 열림 */
+  skillPassWorldIds: ReadonlySet<string> = new Set(),
 ): StageWithStatus[] {
   const sorted = sortStages(stages);
   const completedQuestIds = new Set(
@@ -70,8 +73,12 @@ export function getStageStatuses(
     const allCompleted =
       completedCount === required.length && required.length > 0;
 
+    const passedIn =
+      skillPassWorldIds.has(stage.world_id) &&
+      sorted[index - 1]?.world_id !== stage.world_id;
+
     let status: StageStatus;
-    if (index === 0) {
+    if (index === 0 || passedIn) {
       status = allCompleted ? 'completed' : 'in_progress';
     } else if (!prevStageCompleted && index > reached) {
       status = 'locked';
@@ -117,6 +124,8 @@ export interface WorldWithStatus {
   currentStage: StageWithStatus | null;
   /** 이어하기 대상: 현재 스테이지의 첫 미완료 퀘스트 (P5-10) */
   continueQuestId: string | null;
+  /** 잠긴 월드의 실력 확인 퀴즈 진입점 (P10-03, `attachSkillChecks`). 없으면 퀴즈 없음·이미 열림 */
+  skillCheck?: { triedToday: boolean } | null;
   /** 해제 조건 안내용. previousWorld 는 order 바로 앞 월드 */
   unlock: {
     rule: WorldInfo['unlock_rule'];
@@ -128,7 +137,7 @@ export interface WorldWithStatus {
 export interface WorldsProgress {
   worlds: WorldWithStatus[];
   /**
-   * `/world` 가 보여 줄 월드 (Q50): 열린 월드 중 아직 클리어 안 한 첫 월드, 모두 클리어면 마지막으로 열린 월드.
+   * `/world` 가 보여 줄 월드 (Q50): 열린 월드 중 아직 클리어 안 한 가장 뒤 월드, 모두 클리어면 마지막으로 열린 월드.
    * 스테이지 있는 월드가 없으면 null
    */
   current: WorldWithStatus | null;
@@ -144,8 +153,9 @@ export function getWorldStatuses(
   worlds: readonly WorldInfo[],
   stages: StageWithQuests[],
   userProgress: ProgressMinimal[],
+  skillPassWorldIds?: ReadonlySet<string>,
 ): WorldsProgress {
-  const all = getStageStatuses(stages, userProgress);
+  const all = getStageStatuses(stages, userProgress, skillPassWorldIds);
   const ordered = [...worlds].sort((a, b) => a.order - b.order);
 
   const result: WorldWithStatus[] = [];
@@ -198,8 +208,11 @@ export function getWorldStatuses(
   );
   return {
     worlds: result,
+    // 열린 월드가 여럿이면 가장 뒤 (실력 확인 퀴즈로 앞 월드를 건너뛴 학생은 새 월드가 지금 월드, P10-03)
     current:
-      reachable.find((w) => w.status === 'open') ?? reachable.at(-1) ?? null,
+      reachable.findLast((w) => w.status === 'open') ??
+      reachable.at(-1) ??
+      null,
     unlockedStageIds: all.filter((s) => s.status !== 'locked').map((s) => s.id),
   };
 }

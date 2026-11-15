@@ -62,6 +62,7 @@ import { checkStageUnlocked } from '@/lib/world/checkStageUnlocked';
 import { STAGE_LOCKED_MESSAGE } from '@/lib/world/stageLock';
 import type { TutorRequest, LLMProviderType } from '@/lib/tutor/types';
 import type { QuestWithStageServer } from '@/lib/types/database';
+import { glossaryFallbackLines } from '@/lib/tutor/glossary';
 
 const VALID_TYPES = [
   'quest_intro',
@@ -235,8 +236,12 @@ async function freeQuestionRemaining(
 }
 
 /** 자유 질문을 거르지 못했거나 답을 버렸을 때의 저장된 답변: 이번 개념 안내 (질문 원문·정답 없음) */
-export function freeQuestionFallback(topic: string, goals: string[]): string {
-  return `지금은 파이뱀이 그 질문에 바로 답하기 어려워요. 🐍\n\n${conceptFallback(topic, goals)}`;
+export function freeQuestionFallback(
+  topic: string,
+  goals: string[],
+  worldOrder?: number,
+): string {
+  return `지금은 파이뱀이 그 질문에 바로 답하기 어려워요. 🐍\n\n${conceptFallback(topic, goals, worldOrder)}`;
 }
 
 /** 자르기 한도를 넘은 필드 이름 (기록용, P1-19). 출력은 우리 화면의 상한보다 길 때만 (정상 실행도 2,000자는 넘음) */
@@ -448,7 +453,9 @@ export async function prepareTutorCall(
   const questLookup = Promise.resolve(
     adminClient
       .from('quests')
-      .select('*, stage:stages(id, world_id, title, order, theme_name)')
+      .select(
+        '*, stage:stages(id, world_id, title, order, theme_name, world:worlds(order))',
+      )
       .eq('id', questId)
       .single(),
   );
@@ -628,11 +635,13 @@ export async function prepareTutorCall(
     ? resolveAnswerKey(answerKeyRow, quest)
     : null;
 
-  // 6. 프롬프트 조립
+  // 6. 프롬프트 조립. 월드 순서는 DB의 퀘스트 → 스테이지 → 월드에서만 (2월드 이상이면 한 단계 깊게, P10-08)
+  const worldOrder = q.stage.world?.order;
   let userPrompt: string;
 
   if (body.type === 'quest_intro') {
     userPrompt = buildQuestIntroPrompt({
+      worldOrder,
       stageTitle: q.stage.title,
       themeName: q.stage.theme_name,
       questTitle: q.title,
@@ -644,6 +653,7 @@ export async function prepareTutorCall(
   } else if (body.type === 'hint_generator') {
     const hintLevel = body.hint_level as 1 | 2 | 3;
     userPrompt = buildHintPrompt({
+      worldOrder,
       topic: skeleton.topic,
       exerciseDescription: skeleton.exercise_description,
       studentCode: body.student_code || '',
@@ -653,6 +663,7 @@ export async function prepareTutorCall(
   } else if (body.type === 'code_feedback') {
     const er = body.execution_result!;
     userPrompt = buildCodeFeedbackPrompt({
+      worldOrder,
       topic: skeleton.topic,
       exerciseDescription: skeleton.exercise_description,
       studentCode: body.student_code || '',
@@ -670,6 +681,7 @@ export async function prepareTutorCall(
     });
   } else if (body.type === 'concept_explain') {
     userPrompt = buildConceptExplainPrompt({
+      worldOrder,
       questTitle: q.title,
       topic: skeleton.topic,
       learningGoals: skeleton.learning_goals,
@@ -678,6 +690,7 @@ export async function prepareTutorCall(
     userPrompt = buildQuizExplainPrompt(quizInput);
   } else if (isFree) {
     userPrompt = buildFreeQuestionPrompt({
+      worldOrder,
       questTitle: q.title,
       topic: skeleton.topic,
       learningGoals: skeleton.learning_goals,
@@ -762,6 +775,7 @@ export async function prepareTutorCall(
           fallback: freeQuestionFallback(
             skeleton.topic,
             skeleton.learning_goals,
+            worldOrder,
           ),
           unsafe: (text) =>
             checkFreeAnswer(text, answerKey?.solutionCode ?? null),
@@ -857,13 +871,18 @@ function getHintBucket(hintsUsed: number): HintBucket {
 // ── buildFallbackMessage ────────────────────────────────────
 
 /** "개념만 알려 줘요"의 저장된 답변: 콘텐츠의 학습 주제·목표로만 (정답·힌트 원문 없음) */
-export function conceptFallback(topic: string, goals: string[]): string {
+export function conceptFallback(
+  topic: string,
+  goals: string[],
+  worldOrder?: number,
+): string {
   const list = goals.filter((g) => g.trim());
   return [
     `이번 퀘스트에서 배우는 개념은 **${topic}**이에요! 🐍`,
     ...(list.length
       ? ['', '이걸 익히게 돼요:', ...list.map((g) => `- ${g}`)]
       : []),
+    ...glossaryFallbackLines(worldOrder, `${topic} ${list.join(' ')}`),
     '',
     '해 볼 일을 다시 읽고, 이 개념을 어디에 쓰면 될지 떠올려 봐요. 💡',
   ].join('\n');
@@ -907,9 +926,17 @@ export function buildFallbackMessage(
       earned_xp: body.earned_xp ?? 0,
     });
   } else if (body.type === 'concept_explain') {
-    return conceptFallback(skeleton.topic, skeleton.learning_goals);
+    return conceptFallback(
+      skeleton.topic,
+      skeleton.learning_goals,
+      quest.stage.world?.order,
+    );
   } else if (body.type === 'free_question') {
-    return freeQuestionFallback(skeleton.topic, skeleton.learning_goals);
+    return freeQuestionFallback(
+      skeleton.topic,
+      skeleton.learning_goals,
+      quest.stage.world?.order,
+    );
   } else if (body.type === 'stage_summary') {
     return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;
   } else {

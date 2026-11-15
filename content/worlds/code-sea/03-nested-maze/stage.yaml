@@ -1,0 +1,8 @@
+# 스테이지 2-3: 소용돌이 반복 미로 (stages 테이블). 설계: docs/curriculum/world2.md §3
+
+id: a2000000-0000-0000-0000-000000000003
+order: 3
+title: 소용돌이 반복 미로
+theme_name: nested_maze
+description: 반복 안에 반복을 넣어 숨은 보물 지도를 찾아요!
+is_final: false

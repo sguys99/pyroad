@@ -1,0 +1,58 @@
+# 2월드 퀘스트 3-1: 바닥 타일 깔기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-3 (제안 C: 줄 문자열 만들기)
+
+id: b2000000-0000-0000-0000-000000000019
+order: 1
+title: 바닥 타일 깔기
+concept: 중첩 반복
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: 반복 안에 반복 넣기
+  learning_goals:
+    - 반복 안에 또 반복을 넣을 수 있다
+    - 바깥 반복이 한 번 돌 때 안쪽 반복은 끝까지 다 돈다는 것을 안다
+    - 안쪽 반복에서 글자를 모아 한 줄을 만들 수 있다
+  story_context: 소용돌이 미로 입구의 바닥 타일이 다 벗겨졌어요! 줄마다 타일 4장씩, 모두 3줄을 깔아야 해요. 반복 안에 반복을 넣으면 금방 깔 수 있대요.
+  exercise_description: '바깥 반복은 3줄, 안쪽 반복은 row 에 "#"을 4번 붙여 3줄 × 4칸 타일을 출력하세요'
+  starter_code: |
+    for r in range(3):
+        row = ""
+        # 안쪽 반복으로 row 에 "#" 을 4번 붙여요
+        ___
+        print(row)
+  expected_output_hint: '#### 가 3줄 나와야 해요'
+  checklist:
+    - '___ 자리에 for c in range(4): 를 써요'
+    - '안쪽 반복 안에서 row = row + "#" 으로 붙여요'
+    - '#### 가 3줄인지 봐요'
+  example_output: |-
+    ####
+    ####
+    ####
+  fallback_text: '바깥 for 가 한 줄을 맡고, 안쪽 for 가 그 줄의 칸을 맡아요. 안쪽에서 row = row + "#" 로 칸을 하나씩 붙이고, 안쪽이 다 끝나면 print(row) 로 한 줄을 보여 줘요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          ####
+          ####
+          ####
+      # 들여쓴 for = 반복 안의 반복
+      - type: code_check
+        expected: '    for'
+  hints:
+    level_1: 한 줄에 타일이 4장이에요. 4번 반복하는 주문은 무엇이었죠?
+    level_2: 'for c in range(4): 를 쓰고, 그 아래 한 번 더 들여써서 row = row + "#" 을 넣어요.'
+    level_3: |-
+      ___ 자리를 이렇게 바꿔 보세요!
+      for c in range(4):
+          row = row + "#"
+  solution_code: |
+    for r in range(3):
+        row = ""
+        for c in range(4):
+            row = row + "#"
+        print(row)

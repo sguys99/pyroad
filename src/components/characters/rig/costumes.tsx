@@ -11,8 +11,18 @@ export type BackdropKind = 'island' | 'paper';
 /** 상점 망토 아이템의 색 (P9-01 카탈로그 `art` 키 → `Costume.cape`) */
 export const CAPE_COLORS = { hero: '#D9584A', night: '#3E5A99' } as const;
 export type CapeKind = keyof typeof CAPE_COLORS;
+/** 보스 버그버그 바다 소품 (P10-04, 2월드 외형). 버그버그만 그림 (`bugbug/gear.tsx`) */
+export type BossGear =
+  | 'coral'
+  | 'beanie'
+  | 'tube'
+  | 'tricorn'
+  | 'bandage'
+  | 'lure'
+  | 'captain';
 export interface Costume {
   hat?: HatKind;
+  gear?: BossGear;
   glasses?: GlassesKind;
   cape?: string; // 망토 색
   bg?: BackdropKind;

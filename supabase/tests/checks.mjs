@@ -435,6 +435,161 @@ const bossWrong = (kind) =>
     bug_hunt: { line: 'ln-zz99', fix: 'fx-zz99' },
   })[kind];
 
+// ── 실력 확인 퀴즈 (P10-03, ① 00052) ──
+async function groupSkillCheck(u) {
+  await check({
+    group: 'skill_check',
+    id: 'SKC-1b',
+    role: 'authenticated',
+    op: 'skill_check_questions 읽기(정답 있음) · skill_check_attempts 쓰기(합격 위조) · 남의 도전 읽기 불가',
+    ...WRITE,
+    run: async () => {
+      const q = classifyRead(await rest('GET', '/rest/v1/skill_check_questions?select=*', { as: u.alice }));
+      if (q.actual === 'allowed') return { actual: 'written', detail: `문제(정답) 읽기 ${q.detail}` };
+      const anon = classifyRead(await rest('GET', '/rest/v1/skill_check_attempts?select=*'));
+      if (anon.actual === 'allowed') return { actual: 'written', detail: `anon 도전 읽기 ${anon.detail}` };
+      const world = one(`select id from public.worlds where slug = 'code-sea'`);
+      one(`insert into public.skill_check_attempts (user_id, world_id, attempt_on, set_no) values ('${u.bob.id}', '${world}', public.kst_today(), 1) on conflict do nothing`);
+      const other = await rest('GET', `/rest/v1/skill_check_attempts?select=user_id&user_id=eq.${u.bob.id}`, { as: u.alice });
+      if (Array.isArray(other.json) && other.json.length > 0) return { actual: 'written', detail: '남의 도전 기록이 보임' };
+      return classifyWrite(
+        rest('POST', '/rest/v1/skill_check_attempts', {
+          as: u.alice,
+          body: { user_id: u.alice.id, world_id: world, set_no: 1, passed: true, submitted_at: new Date().toISOString(), score: 10, total: 10 },
+          prefer: 'return=minimal',
+        }),
+        `select count(*) > 0 from public.skill_check_attempts where user_id = '${u.alice.id}' and passed`,
+      );
+    },
+  });
+
+  const x = await createUser('skc2', '실력확인');
+  await check({
+    group: 'skill_check',
+    id: 'SKC-2',
+    role: 'postgres',
+    op: '하루 1번(시작 = 도전, 같은 날 같은 묶음) · 날마다 묶음 번갈아 · 서버 채점(7/10 불합격, 8/10 합격) · 정답 없는 응답 · 잠김 → 합격하면 2월드 첫 스테이지만 열림 · 잠긴 동안 완료 RPC 거부 · XP·코인 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        -- 2월드 스테이지가 아직 없으면(P10-04 전) 시험 스테이지 2개를 붙임. 있으면 그대로 씀
+        INSERT INTO public.stages (id, world_id, "order", title, theme_name)
+        SELECT v.id, w.id, v.o, '시험', 'test'
+          FROM public.worlds w,
+               (VALUES ('a2000000-0000-0000-0000-0000000000f1'::uuid, 1), ('a2000000-0000-0000-0000-0000000000f2'::uuid, 2)) v(id, o)
+         WHERE w.slug = 'code-sea' AND NOT EXISTS (SELECT 1 FROM public.stages s WHERE s.world_id = w.id);
+        INSERT INTO public.quests (id, stage_id, "order", title, concept, validation_type, quest_type)
+        SELECT 'b2000000-0000-0000-0000-0000000000f1', 'a2000000-0000-0000-0000-0000000000f1', 1, '시험', 'x', 'contains', 'code'
+         WHERE EXISTS (SELECT 1 FROM public.stages WHERE id = 'a2000000-0000-0000-0000-0000000000f1');
+        DO $$
+        DECLARE
+          v_uid    UUID := '${x.id}';
+          v_world  UUID;
+          v_first  UUID;
+          v_second UUID;
+          v_quest  UUID;
+          v_r      JSONB;
+          v_set    INTEGER;
+          v_ans    JSONB;
+          v_before TEXT;
+          v_err    TEXT;
+        BEGIN
+          SELECT id INTO v_world FROM public.worlds WHERE slug = 'code-sea';
+          SELECT id INTO v_first FROM public.stages WHERE world_id = v_world ORDER BY "order" LIMIT 1;
+          SELECT id INTO v_second FROM public.stages WHERE world_id = v_world ORDER BY "order" OFFSET 1 LIMIT 1;
+          SELECT id INTO v_quest FROM public.quests WHERE stage_id = v_first AND quest_type <> 'quiz' ORDER BY "order" LIMIT 1;
+          SELECT total_xp || ':' || coins INTO v_before FROM public.users WHERE id = v_uid;
+          IF (SELECT count(*) FROM public.skill_check_questions WHERE world_id = v_world) <> 20 THEN
+            RAISE EXCEPTION 'code-sea 문제가 20개가 아님 (seed)';
+          END IF;
+
+          -- 잠긴 동안: 스테이지 잠김, 완료 RPC 거부 (서버 가드)
+          IF public.is_stage_unlocked(v_uid, v_first) THEN RAISE EXCEPTION '처음부터 2월드가 열림'; END IF;
+          BEGIN
+            PERFORM public.complete_quest(v_uid, v_quest, '{"code": "print(1)", "passed": true}'::jsonb);
+            RAISE EXCEPTION '잠긴 2월드 퀘스트를 완료함';
+          EXCEPTION WHEN OTHERS THEN
+            IF SQLERRM <> 'stage_locked' THEN RAISE EXCEPTION '잠긴 2월드 완료 거부 사유: %', SQLERRM; END IF;
+          END;
+
+          -- 시작 = 오늘 도전. 같은 날 다시 시작해도 같은 묶음, 행 하나
+          v_r := public.skill_check_start(v_uid, v_world);
+          v_set := (v_r->>'set_no')::int;
+          IF v_r->>'status' <> 'ready' OR v_set <> public.skill_check_set_for(public.kst_today(), 2) THEN
+            RAISE EXCEPTION '시작: %', v_r;
+          END IF;
+          v_r := public.skill_check_start(v_uid, v_world);
+          IF (v_r->>'set_no')::int <> v_set
+             OR (SELECT count(*) FROM public.skill_check_attempts WHERE user_id = v_uid) <> 1 THEN
+            RAISE EXCEPTION '같은 날 다시 시작: %', v_r;
+          END IF;
+
+          -- 길이가 다르면 거부
+          BEGIN
+            PERFORM public.skill_check_submit(v_uid, v_world, '["opt-zz99"]'::jsonb);
+            RAISE EXCEPTION '문제 수와 다른 답 배열을 받음';
+          EXCEPTION WHEN OTHERS THEN
+            IF SQLERRM <> 'invalid_arguments' THEN RAISE EXCEPTION '길이 거부 사유: %', SQLERRM; END IF;
+          END;
+
+          -- 7/10: 불합격, 정답·해설 없음, 연습할 단계 있음
+          SELECT jsonb_agg(CASE WHEN no <= 7 THEN answer->'accepted'->0 ELSE '"opt-zz99"'::jsonb END ORDER BY no)
+            INTO v_ans FROM public.skill_check_questions WHERE world_id = v_world AND set_no = v_set;
+          v_r := public.skill_check_submit(v_uid, v_world, v_ans);
+          IF (v_r->>'score')::int <> 7 OR (v_r->>'passed')::boolean OR (v_r->>'pass_score')::int <> 8
+             OR jsonb_array_length(v_r->'practice') < 1 OR v_r->>'first_stage_id' IS NOT NULL
+             OR v_r::text LIKE '%accepted%' OR v_r::text LIKE '%explanation%' OR v_r::text LIKE '%opt-%' THEN
+            RAISE EXCEPTION '7/10 채점: %', v_r;
+          END IF;
+          IF public.is_stage_unlocked(v_uid, v_first) THEN RAISE EXCEPTION '불합격인데 열림'; END IF;
+
+          -- 하루 1번: 같은 날 다시 내기 거부, 시작하면 오늘 결과
+          BEGIN
+            PERFORM public.skill_check_submit(v_uid, v_world, v_ans);
+            RAISE EXCEPTION '같은 날 두 번 냄';
+          EXCEPTION WHEN OTHERS THEN
+            IF SQLERRM <> 'skill_check_done_today' THEN RAISE EXCEPTION '두 번째 제출 거부 사유: %', SQLERRM; END IF;
+          END;
+          v_r := public.skill_check_start(v_uid, v_world);
+          IF v_r->>'status' <> 'done' OR (v_r->>'score')::int <> 7 OR jsonb_array_length(v_r->'practice') < 1 THEN
+            RAISE EXCEPTION '같은 날 다시 열기: %', v_r;
+          END IF;
+
+          -- 다음 날: 다른 묶음, 8/10 합격 → 첫 스테이지만 열림
+          -- 어제 도전한 것처럼: 날짜를 하루 앞으로, 묶음도 어제 묶음으로
+          v_set := public.skill_check_set_for(public.kst_today() - 1, 2);
+          UPDATE public.skill_check_attempts SET attempt_on = attempt_on - 1, set_no = v_set WHERE user_id = v_uid;
+          v_r := public.skill_check_start(v_uid, v_world);
+          IF v_r->>'status' <> 'ready' OR (v_r->>'set_no')::int = v_set THEN
+            RAISE EXCEPTION '다음 날 묶음이 바뀌지 않음: % (어제 %)', v_r, v_set;
+          END IF;
+          v_set := (v_r->>'set_no')::int;
+          SELECT jsonb_agg(CASE WHEN no <= 8 THEN answer->'accepted'->0 ELSE '"opt-zz99"'::jsonb END ORDER BY no)
+            INTO v_ans FROM public.skill_check_questions WHERE world_id = v_world AND set_no = v_set;
+          v_r := public.skill_check_submit(v_uid, v_world, v_ans);
+          IF (v_r->>'score')::int <> 8 OR NOT (v_r->>'passed')::boolean OR (v_r->>'first_stage_id')::uuid <> v_first THEN
+            RAISE EXCEPTION '8/10 채점: %', v_r;
+          END IF;
+          IF NOT public.is_stage_unlocked(v_uid, v_first) THEN RAISE EXCEPTION '합격했는데 첫 스테이지가 잠김'; END IF;
+          IF v_second IS NOT NULL AND public.is_stage_unlocked(v_uid, v_second) THEN
+            RAISE EXCEPTION '합격만으로 둘째 스테이지까지 열림';
+          END IF;
+          IF public.skill_check_start(v_uid, v_world)->>'status' <> 'open' THEN RAISE EXCEPTION '합격 뒤 시작이 open 이 아님'; END IF;
+          IF (SELECT total_xp || ':' || coins FROM public.users WHERE id = v_uid) <> v_before THEN
+            RAISE EXCEPTION 'XP·코인이 바뀜 (보상 없음이어야 함)';
+          END IF;
+
+          -- 문제가 없는 월드는 시작 불가
+          BEGIN
+            PERFORM public.skill_check_start(v_uid, (SELECT id FROM public.worlds WHERE slug = 'python-island'));
+            RAISE EXCEPTION '문제 없는 월드에서 시작됨';
+          EXCEPTION WHEN OTHERS THEN
+            IF SQLERRM <> 'skill_check_missing' THEN RAISE EXCEPTION '문제 없는 월드 거부 사유: %', SQLERRM; END IF;
+          END;
+        END $$;`),
+  });
+}
+
 async function groupBoss(u) {
   await check({
     group: 'boss',
@@ -2640,6 +2795,18 @@ async function groupRpc(u) {
       'anon',
       'share_card_public',
       { p_id: 'rG6TzuP93C8blCS4ZdyehQ' },
+    ],
+    [
+      'SKC-1',
+      u.alice,
+      'skill_check_start',
+      { p_user_id: u.alice.id, p_world_id: '00000000-0000-0000-0000-000000000000' },
+    ],
+    [
+      'SKC-1c',
+      'anon',
+      'skill_check_submit',
+      { p_user_id: u.alice.id, p_world_id: '00000000-0000-0000-0000-000000000000', p_answers: [] },
     ],
     [
       'BOSS-1',
@@ -4856,9 +5023,15 @@ async function groupApp(u) {
         const r = await rest('GET', path, { as: u.alice });
         const c = classifyRead(r);
         if ((id === 'APP-2' || id === 'APP-6') && c.actual === 'allowed') {
-          const bad = r.json.filter((s) => s.world?.order !== 1);
-          if (bad.length)
-            return { actual: 'world-missing', detail: `${bad.length}행에 world.order 없음` };
+          // 임베딩한 월드 order 가 DB 와 같은지 (P10-07 부터 2월드도 seed — 1월드만이라고 가정하지 않음)
+          const want = Object.fromEntries(
+            one(`select string_agg(s.id || ':' || w."order", ',') from public.stages s join public.worlds w on w.id = s.world_id`)
+              .split(',')
+              .map((x) => x.split(':')),
+          );
+          const bad = r.json.filter((s) => typeof s.world?.order !== 'number' || String(s.world.order) !== want[s.id]);
+          if (bad.length || r.json.length !== Object.keys(want).length)
+            return { actual: 'world-missing', detail: `${bad.length}행에 world.order 없음·틀림 (${r.json.length}/${Object.keys(want).length}행)` };
         }
         if (id === 'APP-4' && c.actual === 'allowed') {
           const pub = r.json[0]?.user_public_profiles;
@@ -5682,14 +5855,14 @@ async function groupAchievements(u) {
       one(`insert into public.user_badges (user_id, badge_type, earned_at) values
              ('${x.id}', 'streak_3', '2026-10-01 10:00+09'), ('${x.id}', 'project_builder', '2026-10-02 10:00+09')`);
       const sql = readFileSync(join(HERE, '..', 'migrations', '00036_achievements.sql'), 'utf8');
-      // 00048(P9-18) 정의가 있으면 00036 자기 검증이 새 지표를 모른다고 실패 → 지운 뒤 다시 돌리고 00048 로 되살림 (00048 머리 주석)
-      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three')`);
+      // 00048(P9-18)·00053(P10-11) 정의가 있으면 00036 자기 검증이 새 지표를 모른다고 실패 → 지운 뒤 다시 돌리고 00048·00053 으로 되살림 (00048 머리 주석)
+      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three') or category = 'sea'`);
       const m1 = psql(sql);
       const m2 = psql(sql);
       // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
-      // 00047(B74)·00048(P9-18)·00051(B75)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
+      // 00047(B74)·00048(P9-18)·00051(B75)·00053(P10-11, evaluate·claim 도)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
       const m3 = psql(
-        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql']
+        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql', '00053_sea_achievements.sql']
           .map((f) => readFileSync(join(HERE, '..', 'migrations', f), 'utf8'))
           .join('\n'),
       );
@@ -5791,7 +5964,7 @@ async function groupAchievements(u) {
     group: 'achievements',
     id: 'WK-1',
     role: 'service_role',
-    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 46종',
+    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 53종(00053 코드 바다 7종 포함)',
     ...OK,
     run: async () => {
       const x = await createUser('wk1', '주말공부');
@@ -5819,7 +5992,7 @@ async function groupAchievements(u) {
       return (
         compare(
           'WK-1',
-          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '46' },
+          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '53' },
           {
             four,
             weekly: got.filter((a) => a.id.startsWith('week')).map((a) => a.id).join(','),
@@ -5829,6 +6002,116 @@ async function groupAchievements(u) {
         ) ?? { actual: 'ok', detail: '주 4번 2일 → week2_4, 3일 주 1, 방패·다음 주 월요일 새벽은 안 섞임' }
       );
     },
+  });
+
+  // ── 코드 바다 업적 (P10-11, ① 00053) ──
+  const sea = await createUser('sea1', '바다항해');
+  await check({
+    group: 'achievements',
+    id: 'SEA-1',
+    role: 'postgres',
+    op: '코드 바다 업적 (00053): 실력 확인 합격 → skill_pass(코인 0, 얻는 순간 받은 것 · 받기 0 · 원장 없음) · 2-5 코드 퀘스트 힌트 0 모두 → sea_bug_doctor(힌트 1개면 아직, 보스는 셈에서 뺌) · 2-5 보스까지 → sea_stage_1·sea_boss_1 · 2월드 모두 → sea_captain·sea_bosses_all · 별 3개 모두 → 숨김 sea_perfect · 받기 실버 30 · 다시 판정해도 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        -- 2월드가 아직 seed 에 없으면(초안) 시험 콘텐츠: 스테이지 7개(a2…01~07, 7이 마지막) × 코드 1 + 보스 1, 2-5 는 코드 2. 있으면 실제 콘텐츠
+        INSERT INTO public.stages (id, world_id, "order", title, theme_name, is_final)
+        SELECT ('a2000000-0000-0000-0000-00000000000' || g)::uuid, w.id, g, '시험', 'test', g = 7
+          FROM public.worlds w, generate_series(1, 7) g
+         WHERE w.slug = 'code-sea' AND NOT EXISTS (SELECT 1 FROM public.stages s WHERE s.world_id = w.id);
+        INSERT INTO public.quests (id, stage_id, "order", title, concept, validation_type, quest_type)
+        SELECT ('b2000000-0000-0000-0000-00000000f0' || s."order" || v.n)::uuid, s.id, v.n, '시험', 'x', 'contains', v.t
+          FROM public.stages s JOIN public.worlds w ON w.id = s.world_id,
+               (VALUES (1, 'code'), (2, 'code'), (9, 'boss')) v(n, t)
+         WHERE w.slug = 'code-sea' AND s.title = '시험' AND (v.n <> 2 OR s."order" = 5);
+        DO $$
+        DECLARE
+          v_uid   UUID := '${sea.id}';
+          c_bug   CONSTANT UUID := 'a2000000-0000-0000-0000-000000000005';
+          v_got   TEXT;
+          v_r     JSONB;
+          v_coins INTEGER;
+          v_last  UUID;
+          v_n     INTEGER;
+          sea_new CONSTANT TEXT := $q$SELECT COALESCE(string_agg(e->>'id' || ':' || (e->>'coins'), ',' ORDER BY e->>'id'), '')
+                                       FROM jsonb_array_elements(public.evaluate_achievements($1)) e
+                                      WHERE e->>'id' IN (SELECT id FROM public.achievements WHERE category = 'sea')$q$;
+        BEGIN
+          SELECT coins INTO v_coins FROM public.users WHERE id = v_uid;
+          v_r := public.achievement_stats(v_uid);
+          IF (v_r->>'sea_perfect_total')::int <> 7 OR (v_r->>'sea_bosses_total')::int < 1 OR (v_r->>'sea_bug_fix_total')::int < 1
+             OR (v_r->>'sea_stages')::int <> 0 OR (v_r->>'skill_pass')::int <> 0 THEN
+            RAISE EXCEPTION '처음 지표: %', v_r;
+          END IF;
+
+          -- 실력 확인 합격 → 코인 0 배지, 얻는 순간 받은 것으로
+          INSERT INTO public.skill_check_attempts (user_id, world_id, set_no, submitted_at, score, total, passed)
+          SELECT v_uid, id, 1, now(), 8, 10, true FROM public.worlds WHERE slug = 'code-sea';
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> 'skill_pass:0' THEN RAISE EXCEPTION '합격 판정: %', v_got; END IF;
+          IF (SELECT claimed_at IS NULL FROM public.user_achievements WHERE user_id = v_uid AND achievement_id = 'skill_pass') THEN
+            RAISE EXCEPTION '코인 0 배지가 받기 대기로 남음';
+          END IF;
+          v_r := public.claim_achievement(v_uid, 'skill_pass');
+          IF (v_r->>'coins_earned')::int <> 0 OR NOT (v_r->>'already_claimed')::boolean THEN RAISE EXCEPTION '실력 인정 받기: %', v_r; END IF;
+          -- ①만 적용된 사이에 생긴 claimed_at 없는 행도 원장 없이 받음
+          UPDATE public.user_achievements SET claimed_at = NULL WHERE user_id = v_uid AND achievement_id = 'skill_pass';
+          v_r := public.claim_achievement(v_uid, 'skill_pass');
+          IF (v_r->>'coins_earned')::int <> 0 OR (v_r->>'already_claimed')::boolean
+             OR EXISTS (SELECT 1 FROM public.coin_ledger WHERE user_id = v_uid AND source = 'achievement' AND ref = 'skill_pass')
+             OR (SELECT coins FROM public.users WHERE id = v_uid) <> v_coins THEN
+            RAISE EXCEPTION '코인 0 받기: % (원장·잔액)', v_r;
+          END IF;
+
+          -- 2-5 코드 퀘스트: 하나만 힌트 1 → 아직, 모두 힌트 0 → 명의 (보스는 아직 안 깸)
+          INSERT INTO public.user_progress (user_id, quest_id, status, hints_used, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 0, 3, 3, 1, now() - interval '1 day' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id = c_bug AND q.quest_type IN ('code', 'project');
+          SELECT quest_id INTO v_last FROM public.user_progress up JOIN public.quests q ON q.id = up.quest_id
+           WHERE up.user_id = v_uid AND q.stage_id = c_bug ORDER BY q."order" LIMIT 1;
+          UPDATE public.user_progress SET hints_used = 1, stars = 2, best_stars = 2 WHERE user_id = v_uid AND quest_id = v_last;
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '힌트 본 퀘스트가 있는데: %', v_got; END IF;
+          UPDATE public.user_progress SET hints_used = 0 WHERE user_id = v_uid AND quest_id = v_last;
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> 'sea_bug_doctor:30' THEN RAISE EXCEPTION '버그 병원선: %', v_got; END IF;
+
+          -- 2-5 보스(힌트 없음)·퀴즈까지 → 첫 스테이지·첫 보스. 보스는 힌트 없이에 안 셈
+          v_n := (public.achievement_stats(v_uid)->>'sea_bug_fix')::int;
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 2, 2, 1, now() - interval '1 hour'
+            FROM public.quests q WHERE q.stage_id = c_bug AND q.quest_type IN ('boss', 'quiz');
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> 'sea_boss_1:10,sea_stage_1:10' THEN RAISE EXCEPTION '2-5 클리어: %', v_got; END IF;
+          IF (public.achievement_stats(v_uid)->>'sea_bug_fix')::int <> v_n THEN RAISE EXCEPTION '보스가 힌트 없이로 셈'; END IF;
+
+          -- 2월드 나머지 모두 (별 3) → 선장·보스 모두. 2-5 보스 별 2라 완벽은 아직
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '1 minute' + q."order" * interval '1 second'
+            FROM public.quests q JOIN public.stages s ON s.id = q.stage_id JOIN public.worlds w ON w.id = s.world_id
+           WHERE w.slug = 'code-sea' AND s.id <> c_bug;
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> 'sea_bosses_all:100,sea_captain:30' THEN RAISE EXCEPTION '2월드 클리어: %', v_got; END IF;
+          v_r := public.achievement_stats(v_uid);
+          IF (v_r->>'sea_stages')::int <> 7 OR (v_r->>'sea_clear')::int <> 1 OR (v_r->>'sea_perfect')::int <> 6 THEN
+            RAISE EXCEPTION '2월드 지표: %', v_r;
+          END IF;
+
+          -- 2-5 별 3 → 숨김 업적 완벽한 바다
+          UPDATE public.user_progress SET best_stars = 3
+           WHERE user_id = v_uid AND quest_id IN (SELECT id FROM public.quests WHERE stage_id = c_bug);
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> 'sea_perfect:100' THEN RAISE EXCEPTION '완벽한 바다: %', v_got; END IF;
+          EXECUTE sea_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '다시 판정: %', v_got; END IF;
+
+          -- 받기: 실버 30, 원장 한 번
+          v_r := public.claim_achievement(v_uid, 'sea_captain');
+          IF (v_r->>'coins_earned')::int <> 30 OR (v_r->>'coins_balance')::int <> v_coins + 30
+             OR (SELECT delta FROM public.coin_ledger WHERE user_id = v_uid AND source = 'achievement' AND ref = 'sea_captain') <> 30 THEN
+            RAISE EXCEPTION '선장 받기: %', v_r;
+          END IF;
+        END $$;`),
   });
 
   // ── 소급 보상 (P8-11, ① 00037) ──
@@ -6041,16 +6324,20 @@ async function groupSchema(u) {
     group: 'schema',
     id: 'WD-4',
     role: 'postgres',
-    op: '스테이지 world_id·quest_type 백필 (7개 → 1월드, 7-1 project · code·quiz·boss 는 seed 와 같은 수, quiz_kind 는 퀴즈만 · 모바일은 퀴즈·보스만)',
+    op: '스테이지 world_id·quest_type 백필 (1월드 7개 + 2월드 7개, 1월드 project 는 7-1 · project·code·quiz·boss 는 seed 와 같은 수, quiz_kind 는 퀴즈만 · 모바일은 퀴즈·보스만)',
     deny: ['mismatch', 'error'],
     allow: ['ok'],
     run: () =>
       sqlCheck(`DO $$ BEGIN
-        IF (SELECT count(*) FROM public.stages WHERE world_id <> '${PYTHON_ISLAND}') > 0
-           OR (SELECT count(*) FROM public.stages) <> 7 THEN
-          RAISE EXCEPTION 'stages: 1월드가 아닌 스테이지 또는 7개가 아님';
+        -- 1월드(python-island) 7개 + 2월드(code-sea, P10-07 부터 seed) 7개, 그 밖의 월드엔 없음
+        IF (SELECT count(*) FROM public.stages WHERE world_id = '${PYTHON_ISLAND}') <> 7
+           OR (SELECT count(*) FROM public.stages s JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'code-sea') <> 7
+           OR (SELECT count(*) FROM public.stages) <> 14 THEN
+          RAISE EXCEPTION 'stages: 1월드 7개 · 2월드 7개가 아님';
         END IF;
-        IF (SELECT string_agg(id::text, ',') FROM public.quests WHERE quest_type = 'project') <> '${Q_PROJECT}'
+        IF (SELECT string_agg(q.id::text, ',') FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
+             WHERE q.quest_type = 'project' AND s.world_id = '${PYTHON_ISLAND}') <> '${Q_PROJECT}'
+           OR (SELECT count(*) FROM public.quests WHERE quest_type = 'project') <> ${seedQuestCount('project')}
            OR (SELECT count(*) FROM public.quests WHERE quest_type = 'code') <> ${seedQuestCount('code')}
            OR (SELECT count(*) FROM public.quests WHERE quest_type = 'quiz') <> ${seedQuestCount('quiz')}
            OR (SELECT count(*) FROM public.quests WHERE quest_type = 'boss') <> ${seedQuestCount('boss')}
@@ -6065,48 +6352,56 @@ async function groupSchema(u) {
     group: 'schema',
     id: 'WD-5',
     role: 'postgres',
-    op: '2월드 스테이지(order 1) 추가 → UNIQUE(world_id, order) 허용, 1월드 마지막 스테이지를 깨야 열림, 리셋은 (월드, 스테이지) 순서',
+    op: '2월드(code-sea, seed) 첫 스테이지: 1월드와 같은 order 1 이 공존(UNIQUE(world_id, order)), 1월드 마지막 스테이지를 깨야 열림, 리셋은 (월드, 스테이지) 순서',
     deny: ['mismatch', 'error'],
     allow: ['ok'],
     run: () =>
       sqlCheck(`
-        INSERT INTO public.worlds (id, "order", slug, title, theme)
-        VALUES ('c1000000-0000-0000-0000-0000000000ff', 99, 'rls-world-2', '시험 월드', 'test');
-        INSERT INTO public.stages (id, world_id, "order", title, theme_name)
-        VALUES ('a1000000-0000-0000-0000-0000000000ff', 'c1000000-0000-0000-0000-0000000000ff', 1, '시험 스테이지', 'test');
-        INSERT INTO public.quests (id, stage_id, "order", title, concept, validation_type, quest_type)
-        VALUES ('b1000000-0000-0000-0000-0000000000ff', 'a1000000-0000-0000-0000-0000000000ff', 1, '시험', 'x', 'contains', 'code');
         DO $$
         DECLARE
-          v_uid UUID := '${u.dan.id}';
-          v_r   JSONB;
+          v_uid    UUID := '${u.dan.id}';
+          v_stage  UUID;
+          v_quest  UUID;
+          v_after7 INTEGER;
+          v_r      JSONB;
         BEGIN
-          IF public.is_stage_unlocked(v_uid, 'a1000000-0000-0000-0000-0000000000ff') THEN
+          -- 2월드 첫 스테이지 (P10-07 부터 seed 의 실제 콘텐츠)
+          SELECT s.id INTO v_stage FROM public.stages s JOIN public.worlds w ON w.id = s.world_id
+           WHERE w.slug = 'code-sea' AND s."order" = 1;
+          SELECT q.id INTO v_quest FROM public.quests q WHERE q.stage_id = v_stage AND q.quest_type = 'code' ORDER BY q."order" LIMIT 1;
+          IF v_stage IS NULL OR v_quest IS NULL
+             OR NOT EXISTS (SELECT 1 FROM public.stages WHERE world_id = '${PYTHON_ISLAND}' AND "order" = 1) THEN
+            RAISE EXCEPTION '1월드·2월드 order 1 스테이지가 함께 있지 않음';
+          END IF;
+          IF public.is_stage_unlocked(v_uid, v_stage) THEN
             RAISE EXCEPTION '2월드 첫 스테이지가 처음부터 열림';
           END IF;
           INSERT INTO public.user_progress (user_id, quest_id, status, completed_at)
           SELECT v_uid, q.id, 'completed', now() FROM public.quests q WHERE q.stage_id = '${STAGE7}'
           ON CONFLICT (user_id, quest_id) DO UPDATE SET status = 'completed';
-          IF NOT public.is_stage_unlocked(v_uid, 'a1000000-0000-0000-0000-0000000000ff') THEN
+          IF NOT public.is_stage_unlocked(v_uid, v_stage) THEN
             RAISE EXCEPTION '1월드 마지막 스테이지를 깼는데 2월드 첫 스테이지가 잠김';
           END IF;
           IF NOT public.is_stage_unlocked(v_uid, '${STAGE1}') THEN
             RAISE EXCEPTION '1월드 첫 스테이지가 잠김';
           END IF;
           INSERT INTO public.user_progress (user_id, quest_id, status, completed_at)
-          VALUES (v_uid, 'b1000000-0000-0000-0000-0000000000ff', 'completed', now());
+          VALUES (v_uid, v_quest, 'completed', now());
           -- 2월드 스테이지 리셋: 1월드 진행은 그대로
-          v_r := public.reset_progress(v_uid, 'stage', 'a1000000-0000-0000-0000-0000000000ff');
+          v_r := public.reset_progress(v_uid, 'stage', v_stage);
           IF (v_r->>'removed_quests')::int <> 1
              OR NOT EXISTS (SELECT 1 FROM public.user_progress WHERE user_id = v_uid AND quest_id = '${Q_PROJECT}') THEN
             RAISE EXCEPTION '2월드 리셋이 1월드 진행을 지움: %', v_r;
           END IF;
-          -- 1월드 7스테이지 리셋: 뒤의 2월드 스테이지도 함께
+          -- 1월드 7스테이지 리셋: 뒤의 2월드 스테이지도 함께 (7단계 + 2월드 전부)
           INSERT INTO public.user_progress (user_id, quest_id, status, completed_at)
-          VALUES (v_uid, 'b1000000-0000-0000-0000-0000000000ff', 'completed', now());
+          VALUES (v_uid, v_quest, 'completed', now());
+          SELECT count(*) INTO v_after7 FROM public.stages s JOIN public.worlds w ON w.id = s.world_id
+           WHERE (w."order", s."order") >= (1, 7);
           v_r := public.reset_progress(v_uid, 'stage', '${STAGE7}');
-          IF jsonb_array_length(v_r->'reset_stages') <> 2
-             OR EXISTS (SELECT 1 FROM public.user_progress WHERE user_id = v_uid AND quest_id = 'b1000000-0000-0000-0000-0000000000ff') THEN
+          IF v_after7 < 2 OR jsonb_array_length(v_r->'reset_stages') <> v_after7
+             OR NOT (v_r->'reset_stages' @> jsonb_build_array(jsonb_build_object('id', v_stage)))
+             OR EXISTS (SELECT 1 FROM public.user_progress WHERE user_id = v_uid AND quest_id = v_quest) THEN
             RAISE EXCEPTION '1월드 리셋이 뒤 월드 스테이지를 함께 리셋하지 않음: %', v_r;
           END IF;
         END $$;`),
@@ -8436,6 +8731,7 @@ async function main() {
   await groupInventory(u);
   await groupShareCards(u);
   await groupBoss(u);
+  await groupSkillCheck(u);
   await groupSchema(u);
   await groupAuthTriggers(u);
   await groupBoard(u);

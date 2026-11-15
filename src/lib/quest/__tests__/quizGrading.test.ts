@@ -37,7 +37,9 @@ let quizzes: BuiltQuiz[];
 let db: PGlite;
 
 beforeAll(async () => {
-  const rows = buildRows(loadContent(CONTENT_DIR)).rows;
+  const rows = buildRows(loadContent(CONTENT_DIR), {
+    includeDrafts: true,
+  }).rows;
   quizzes = rows.quests
     .filter((q) => q.quest_type === 'quiz')
     .map((q) => ({

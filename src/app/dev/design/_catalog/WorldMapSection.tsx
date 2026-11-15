@@ -19,6 +19,14 @@ import type { StageWithStatus } from '@/lib/types/database';
 import { WORLDS } from '@/lib/world/worlds';
 import { WorldBook } from '@/components/world/book/WorldBook';
 import { WorldMapHead } from '@/components/world/book/WorldMapHead';
+import { SkillCheckOffer } from '@/components/world/book/SkillCheckOffer';
+import {
+  SkillCheckDots,
+  SkillCheckIntro,
+  SkillCheckResultCard,
+} from '@/components/world/skillCheck/SkillCheckQuiz';
+import '@/components/quest/quiz/daily.css';
+import '@/components/world/skillCheck/skillCheck.css';
 import type { BookSummary } from '@/lib/world/worldBook';
 import { WorldHud, type WorldHudProps } from '@/components/world/WorldHud';
 import { MissionHudButton, MissionHudPlaceholder, MissionList } from '@/components/world/DailyMissions';
@@ -114,6 +122,27 @@ const SAMPLE: StageWithStatus[] = STAGES.map(([title, theme], i) => ({
   maxStars: 18,
   // 보물상자 (P8-06, 목표 13): 1단계는 연 상자, 2단계는 열 수 있음(노드에 작은 상자), 3단계는 모으는 중
   chestOpened: i === 0,
+}));
+
+// 월드 2 코드 바다 견본 (P10-04, 이름·테마는 content/worlds/code-sea): 1~4 완료, 5 진행 중, 6·7 잠김
+const SEA_STAGES: [title: string, theme: string][] = [
+  ['산호 문자열 공방', 'string_workshop'],
+  ['등대 딕셔너리 도서관', 'dict_library'],
+  ['소용돌이 반복 미로', 'nested_maze'],
+  ['해적선 랜덤 놀이공원', 'random_park'],
+  ['버그 병원선', 'bug_hospital'],
+  ['해저 알고리즘 산맥', 'algorithm_ridge'],
+  ['응용 프로젝트 항구', 'project_harbor'],
+];
+const SEA_SAMPLE: StageWithStatus[] = SEA_STAGES.map(([title, theme], i) => ({
+  ...SAMPLE[i],
+  id: `sea-${i + 1}`,
+  title,
+  theme_name: theme,
+  status: i < 4 ? 'completed' : i === 4 ? 'in_progress' : 'locked',
+  completedQuestCount: i < 4 ? 6 : i === 4 ? 3 : 0,
+  stars: i < 4 ? 16 : i === 4 ? 7 : 0,
+  chestOpened: i < 3,
 }));
 
 // 노드 상태 5종 (P5-04): 잠김 · 열림(아직 0개) · 진행 중(링) · 통과(도장) · 보스(큰 랜드마크 + 왕관)
@@ -531,6 +560,7 @@ const HUDS: [string, WorldHudProps][] = [
 
 export function WorldMapSection() {
   const island = WORLDS.find((w) => w.map);
+  const sea = WORLDS.find((w) => w.slug === 'code-sea');
   if (!island?.map) return null;
   // 지도 노드·잉크 길은 Framer m.* 라 LazyMotion 이 필요하다 (앱은 LoggedInShell 이 감쌈)
   return (
@@ -641,6 +671,36 @@ export function WorldMapSection() {
           ))}
         </div>
       </Demo>
+      {sea?.map && (
+        <Demo
+          label={`월드 ${sea.order} · ${sea.title} (P10-04, 바다 해도 · theme: ${sea.theme})`}
+          note="그림책 2권 바다 여행: 물빛 해도 + 나침반·항로선, 노드마다 섬(등심선 고리 2줄). 장식 야자수·바위·부표·고래·갈매기. 견본 진행: 1~4 완료, 5 진행 중, 6·7 잠김(연필 스케치)"
+          data-testid="world-map-2"
+        >
+          <WorldMap
+            stages={SEA_SAMPLE}
+            map={sea.map}
+            theme={sea.theme}
+            world={sea.order as WorldId}
+          />
+        </Demo>
+      )}
+      {sea && (
+        <Demo
+          label="2월드 랜드마크 7종 (열림 · 잠김)"
+          note="산호 문자열 공방 · 등대 딕셔너리 도서관 · 소용돌이 반복 미로 · 해적선 랜덤 놀이공원 · 버그 병원선 · 해저 알고리즘 산맥 · 응용 프로젝트 항구(보스, 1.15배 + 왕관)"
+          data-testid="world-2-landmarks"
+        >
+          <div className="flex flex-wrap gap-4">
+            {SEA_SAMPLE.map((stage) => (
+              <div key={stage.id} className="grid gap-2" data-world="2">
+                <NodeTile stage={{ ...stage, status: 'completed' }} />
+                <NodeTile stage={{ ...stage, status: 'locked' }} />
+              </div>
+            ))}
+          </div>
+        </Demo>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         {WORLDS.filter((w) => !w.map).map((w) => (
           <Demo
@@ -778,6 +838,64 @@ export function WorldMapSection() {
             </li>
           ))}
         </ol>
+      </Demo>
+      <Demo
+        label="실력 확인 퀴즈 (P10-03)"
+        note="앞 월드를 이미 아는 학생이 잠긴 월드를 바로 여는 시험(10문제 중 8문제, KST 하루 1번, 서버 채점). 잠긴 책(책장·다음 권)에는 작은 쪽지, 잠긴 책 안내(/world/code-sea)에는 큰 쪽지. 오늘 이미 냈으면 '내일 다시' + 오늘 결과 보기. 화면(/world/[slug]/skill-check): 안내 → 문제(진행 점은 답을 골랐는지만, 맞았는지는 안 보임) → 결과. 결과는 점수와 '더 연습하면 좋은 단계'만 — 정답·해설은 보여 주지 않음. 합격하면 컨페티 + 지도에서 첫 스테이지 잠금 해제 연출(P5-05)"
+        data-testid="skill-check-catalog"
+      >
+        <ol className="wb-shelf">
+          <li>
+            <WorldBook
+              book={BOOK(2, '코드 바다', 'locked', 0)}
+              no={2}
+              unlock="파이썬 섬을 다 모험하면 열려요"
+              heading="h3"
+              skillCheck={{ slug: 'code-sea', prevTitle: '파이썬 섬', triedToday: false }}
+            />
+          </li>
+          <li>
+            <WorldBook
+              book={BOOK(2, '코드 바다', 'locked', 0)}
+              no={2}
+              unlock="파이썬 섬을 다 모험하면 열려요"
+              heading="h3"
+              skillCheck={{ slug: 'code-sea', prevTitle: '파이썬 섬', triedToday: true }}
+            />
+          </li>
+        </ol>
+        <div className="grid max-w-md gap-3" data-world="2">
+          <SkillCheckOffer slug="code-sea" prevTitle="파이썬 섬" triedToday={false} />
+          <SkillCheckOffer slug="code-sea" prevTitle="파이썬 섬" triedToday />
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <SkillCheckIntro worldTitle="코드 바다" prevTitle="파이썬 섬" />
+          <div className="dq-page flex flex-col gap-3 self-start">
+            <SkillCheckDots total={10} step={3} answered={[true, true, true, false, true, false, false, false, false, false]} />
+            <span className="text-caption text-muted-foreground">진행 점: 고른 문제 · 지금 문제(두 겹 테) · 아직</span>
+          </div>
+          <SkillCheckResultCard
+            worldTitle="코드 바다"
+            mapHref="#"
+            autoFocus={false}
+            result={{ score: 9, total: 10, pass_score: 8, passed: true, practice: [] }}
+          />
+          <SkillCheckResultCard
+            worldTitle="코드 바다"
+            mapHref="#"
+            autoFocus={false}
+            result={{
+              score: 6,
+              total: 10,
+              pass_score: 8,
+              passed: false,
+              practice: [
+                { quest_id: 'q3', stage_id: 'sample-3', stage_order: 3, stage_title: '조건의 갈림길', world_slug: 'python-island' },
+                { quest_id: 'q6', stage_id: 'sample-6', stage_order: 6, stage_title: '함수의 탑', world_slug: 'python-island' },
+              ],
+            }}
+          />
+        </div>
       </Demo>
       <CodeSample
         code={`<WorldMap stages={stages} map={world.map} theme={world.theme} world={world.order} scrollToCurrent />`}

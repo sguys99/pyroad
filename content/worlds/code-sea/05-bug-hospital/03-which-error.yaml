@@ -1,0 +1,35 @@
+# 2월드 퀴즈 5-3: 어떤 에러일까?
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 에러 예측형 객관식(world2.md 제안 E): 코드가 에러로 끝나고, 정답 보기 = 실제 에러 이름 (quizzes.content.test.ts)
+
+id: b2000000-0000-0000-0000-000000000038
+order: 3
+title: 어떤 에러일까?
+concept: 에러 이름
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 코드를 보고 에러 이름 맞히기
+  learning_goals:
+    - 리스트에 없는 번호를 꺼낼 때 나는 에러 이름을 고를 수 있다
+  story_context: 버그버그가 조개 목록 코드를 들고 왔어요. "이거 돌리면 배가 아파! 무슨 병인지 진단해 줘!"
+  fallback_text: 리스트 번호는 0부터 세요. 조개가 2개면 쓸 수 있는 번호가 몇 번까지인지 세어 보고, 에러 이름이 무슨 뜻인지 떠올려 보세요.
+  quiz:
+    question: 이 코드를 돌리면 어떤 에러가 날까?
+    code: |-
+      shells = ["소라", "가리비"]
+      print(shells[2])
+    options:
+      - { id: opt-e9ix, text: IndexError }
+      - { id: opt-i3vw, text: KeyError }
+      - { id: opt-87aa, text: NameError }
+      - { id: opt-7tqv, text: TypeError }
+answer:
+  quiz_answer:
+    accepted: [opt-e9ix]
+    explanation: 조개가 2개라 번호는 0과 1뿐이에요. 없는 번호 2를 꺼내서 IndexError 가 나요.
+    explanations:
+      opt-i3vw: KeyError 는 딕셔너리에 없는 이름표를 꺼낼 때 나요. shells 는 리스트예요.
+      opt-87aa: NameError 는 없는 이름을 쓸 때 나요. shells 는 첫 줄에서 만들었어요.
+      opt-7tqv: TypeError 는 글자와 숫자처럼 섞을 수 없는 것을 섞을 때 나요.

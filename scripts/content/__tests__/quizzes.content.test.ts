@@ -2,6 +2,7 @@
 //
 //   multiple_choice  문제에 code 가 있으면(출력 예측형) 실제 출력 = 정답 보기, 오답 보기와는 다름
 //                    (여러 줄 출력은 줄을 ", " 로 이은 모양. content/README.md "출력 예측형")
+//                    코드가 에러로 끝나면(에러 예측형, world2.md 제안 E) 정답 보기 = 실제 에러 이름
 //   fill_blank       정답으로 채운 코드는 오류 없이 끝나고, 다른 토큰으로 채운 결과는 정답과 다름
 //   parsons          정답 순서(들여쓰기 포함)는 모두 오류 없이 끝나고 출력이 서로 같음
 //   bug_hunt         원래 코드와 오답 수정안은 정답 수정안과 결과(출력·오류·시간 초과)가 다름, 정답 수정안은 오류 없이 끝남
@@ -9,6 +10,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { buildRows } from '@/lib/content/build';
 import { loadContent } from '@/lib/content/load';
 import type { QuizQuest } from '@/lib/content/schema';
 import { QUIZ_BLANK_RE } from '@/lib/quest/questKind';
@@ -19,13 +21,21 @@ import { CONTENT_DIR } from '../lib/paths';
 /** 무한 반복 버그(오답)는 출력 상한이나 이 시간에 끊김 */
 const TIMEOUT_MS = 3_000;
 
-const all = loadContent(CONTENT_DIR)
-  .worlds.flatMap((w) => w.stages)
-  .flatMap((s) =>
-    s.quests.map((q) => ({ stage: s.stage.order, quest: q.quest })),
-  );
+const tree = loadContent(CONTENT_DIR);
+const worlds = tree.worlds;
+// stage: 1월드는 `1`, 다른 월드는 `code-sea/1` (테스트 이름·스테이지 구분용)
+const stageKey = (world: string, order: number) =>
+  world === 'python-island' ? `${order}` : `${world}/${order}`;
+const all = worlds.flatMap((w) =>
+  w.stages.flatMap((s) =>
+    s.quests.map((q) => ({
+      stage: stageKey(w.world.slug, s.stage.order),
+      quest: q.quest,
+    })),
+  ),
+);
 const quizzes = all.filter(
-  (x): x is { stage: number; quest: QuizQuest } =>
+  (x): x is { stage: string; quest: QuizQuest } =>
     x.quest.quest_type === 'quiz',
 );
 // 보스 라운드(P9-12)는 퀴즈 하나와 같은 검사: 라운드마다 퀴즈 퀘스트 모양으로 펼침
@@ -45,6 +55,27 @@ const bossRounds = all.flatMap(({ stage, quest }) =>
     : [],
 );
 
+// 실력 확인 퀴즈(P10-03) 문제도 퀴즈 하나와 같은 검사 (stage 자리는 월드 order, order 자리는 묶음·번호)
+const skillChecks = tree.worlds.flatMap(({ world, skillCheck }) =>
+  (skillCheck?.sets ?? []).flatMap((set, s) =>
+    set.questions.map(
+      (q, i) =>
+        ({
+          stage: world.order,
+          quest: {
+            id: q.review_quest,
+            order: `${s + 1}-${i + 1}`,
+            title: `${world.title} 실력 확인 ${s + 1}벌 ${i + 1}번`,
+            quest_type: 'quiz',
+            quiz_kind: q.quiz_kind,
+            prompt: q.prompt,
+            answer: q.answer,
+          },
+        }) as unknown as { stage: number; quest: QuizQuest },
+    ),
+  ),
+);
+
 let runner: NodePyodideRunner;
 beforeAll(async () => {
   runner = await NodePyodideRunner.create({ timeoutMs: TIMEOUT_MS });
@@ -56,6 +87,7 @@ interface Outcome {
   /** 결과 비교용: 출력, 또는 오류 종류·시간 초과 */
   result: string;
   stdout: string;
+  errorType: string | null;
 }
 
 async function run(code: string): Promise<Outcome> {
@@ -65,17 +97,40 @@ async function run(code: string): Promise<Outcome> {
     ok,
     result: ok ? r.stdout.trim() : `${r.outcome}:${r.errorType ?? ''}`,
     stdout: r.stdout,
+    errorType: r.errorType,
   };
 }
 
 // 출력 예측형 보기는 실제 출력 그대로 (여러 줄은 \n, 화면은 줄마다 ↵ 표시, B53)
 const lines = (stdout: string) => stdout.trim();
 
-it('1월드 스테이지마다 퀴즈가 있음', () => {
-  expect(new Set(quizzes.map((q) => q.stage)).size).toBe(7);
+// 모바일로 풀 수 있게 퀘스트가 있는 스테이지마다 퀴즈가 있음 (아직 안 쓴 준비 중 스테이지는 건너뜀)
+it('퀘스트가 있는 스테이지마다 퀴즈가 있음', () => {
+  const withQuests = worlds.flatMap((w) =>
+    w.stages
+      .filter((s) => s.quests.length > 0)
+      .map((s) => stageKey(w.world.slug, s.stage.order)),
+  );
+  expect(withQuests.filter((k) => !k.includes('/')).length).toBe(7); // 1월드는 그대로 7개
+  expect(new Set(quizzes.map((q) => q.stage))).toEqual(new Set(withQuests));
 });
 
-for (const { stage, quest } of [...quizzes, ...bossRounds])
+// Phase 10 완료 기준 ③: seed 에 들어가는 2월드 7 스테이지마다 모바일로 풀 수 있는 퀘스트(is_mobile_friendly: 퀴즈·보스)가 있음
+it('2월드 seed 스테이지마다 모바일 퀘스트(퀴즈·보스)가 있음', () => {
+  const { rows } = buildRows(tree);
+  const sea = rows.stages.filter((s) => s.world === 'code-sea');
+  expect(sea.length).toBe(7);
+  for (const s of sea) {
+    const mobile = rows.quests.filter(
+      (q) => q.stage_id === s.id && q.is_mobile_friendly,
+    );
+    expect(mobile.length, `code-sea/${s.order} ${s.title}`).toBeGreaterThan(0);
+    expect(mobile.some((q) => q.quest_type === 'quiz')).toBe(true);
+    expect(mobile.some((q) => q.quest_type === 'boss')).toBe(true);
+  }
+});
+
+for (const { stage, quest } of [...quizzes, ...bossRounds, ...skillChecks])
   describe(`${stage}-${quest.order} ${quest.title} (${quest.quiz_kind})`, () => {
     it('정답 코드가 실제로 정답', async () => {
       switch (quest.quiz_kind) {
@@ -83,14 +138,21 @@ for (const { stage, quest } of [...quizzes, ...bossRounds])
           const { code, options } = quest.prompt.quiz;
           if (!code) return; // 개념 객관식: 돌릴 코드 없음
           const out = await run(code);
+          const accepted = quest.answer.quiz_answer.accepted;
+          if (!out.ok && out.errorType) {
+            // 에러 예측형: 에러 이름 보기 중 실제 에러와 같은 것만 정답
+            const named = options
+              .filter((o) => o.text === out.errorType)
+              .map((o) => o.id);
+            expect(named, `실제 에러: ${out.result}`).toEqual(accepted);
+            return;
+          }
           expect(out.ok, out.result).toBe(true);
           const shown = lines(out.stdout);
           const matching = options
             .filter((o) => o.text === shown)
             .map((o) => o.id);
-          expect(matching, `실제 출력: ${shown}`).toEqual(
-            quest.answer.quiz_answer.accepted,
-          );
+          expect(matching, `실제 출력: ${shown}`).toEqual(accepted);
           return;
         }
         case 'fill_blank': {

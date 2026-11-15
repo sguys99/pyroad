@@ -39,6 +39,7 @@
 | `w1`·`w2`·`w3` | `--w1` … · `bg-w2-soft` … | `#A9CF94` · `#B4C8D2` · `#D9C3A3` | decor: 월드 틴트 (§3) |
 | `w1Ink`·`w2Ink`·`w3Ink` | `--w1-ink` … | `#3A7336` · `#6B645B` · `#6B645B` | 월드 표지 글자 (2·3은 중립: 칩마다 다른 색 금지) |
 | `w1Soft`·`w2Soft`·`w3Soft` | `--w1-soft` … | `#EDF3E8` · `#EDF1F3` · `#F4EEE5` | 월드 바탕 |
+| `w2Shallow`·`w2Deep` | `--w2-shallow`·`--w2-deep` | `#CFE4E3` · `#95BAC6` | decor: 2월드 지도 바다 (얕은 물·깊은 물, P10-04) |
 | `code*` | `--code-bg` · `--code-keyword` … · `text-code-keyword` | 바탕 `#FFFFFF`, 글자·숫자·함수 `#2E2A25`, 키워드 `#3A7336`, 문자열 `#8A5A00`, 주석 `#7A7268` | CodeMirror 키즈 테마 ([editor.md](editor.md), 틴트 면 위 대비 포함) |
 
 shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--destructive`·`--border`·`--input`·`--ring` …)은 그대로 두고 위 토큰을 가리킨다. 쓰지 않던 `--chart-*`·`--sidebar-*`는 지웠다.

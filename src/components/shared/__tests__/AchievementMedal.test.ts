@@ -6,7 +6,11 @@ import { ACHIEVEMENT_ICONS } from '../AchievementMedal';
 // 업적 표(00036·00048)의 아이콘 이름이 모두 화면 아이콘 표에 있는지 (없으면 메달 모양으로 대신 그려져 티가 안 남)
 describe('업적 아이콘 (P8-09)', () => {
   it('00036·00048 achievements.icon 은 모두 ACHIEVEMENT_ICONS 에 있다', () => {
-    const sql = ['00036_achievements.sql', '00048_weekly_study.sql']
+    const sql = [
+      '00036_achievements.sql',
+      '00048_weekly_study.sql',
+      '00053_sea_achievements.sql',
+    ]
       .map((f) =>
         readFileSync(join(process.cwd(), 'supabase/migrations', f), 'utf8'),
       )

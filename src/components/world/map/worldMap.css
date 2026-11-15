@@ -318,6 +318,51 @@
 .wm-olive {
   --f: color-mix(in srgb, var(--primary) 66%, var(--world));
 }
+/* 2월드 코드 바다 (P10-04): 산호 · 깊은 바다(고래) · 섬 풀밭(월드 틴트와 상관없이 따뜻한 연두) */
+.wm-coral {
+  --f: color-mix(in srgb, var(--error) 46%, var(--surface));
+}
+.wm-deep {
+  --f: color-mix(in srgb, var(--w2-deep) 62%, var(--text-muted));
+}
+.wm-isle {
+  --f: color-mix(in srgb, var(--w1) 58%, var(--w3-soft));
+}
+/* 해도 (2월드 토큰 --w2-shallow·--w2-deep): 깊은 물(가장자리) → 중간 → 얕은 물(가운데·섬 둘레). 반투명이라 종이 섬유 결이 비침.
+   물 재질(wm-water·wm-sea)과 물결 선도 이 바다 색을 따른다 */
+.wm-art[data-theme='code_sea'] {
+  --wm-sea: color-mix(in srgb, var(--w2-shallow) 70%, var(--w2-deep));
+}
+.wm-art .wm-sea-deep {
+  fill: var(--w2-deep);
+  opacity: 0.62;
+}
+.wm-art .wm-sea-mid {
+  fill: color-mix(in srgb, var(--w2-deep) 40%, var(--w2-shallow));
+  opacity: 0.6;
+}
+.wm-art .wm-sea-shallow {
+  fill: var(--w2-shallow);
+  opacity: 0.6;
+}
+.wm-art .wm-shoal {
+  fill: color-mix(in srgb, var(--w2-shallow) 55%, var(--surface));
+  opacity: 0.75;
+}
+.wm-art[data-theme='code_sea'] .wm-wave {
+  stroke: color-mix(in srgb, var(--w2-deep) 60%, var(--text-muted));
+}
+.wm-art .wm-rhumb {
+  fill: none;
+  stroke: var(--wm-ink);
+  stroke-width: 0.6;
+  opacity: 0.22;
+  vector-effect: non-scaling-stroke;
+}
+/* 바다 위 길은 모래톱보다 옅은 뱃길 (잉크·연필 점선은 그대로) */
+.wm-art[data-theme='code_sea'] .wm-road-sand {
+  opacity: 0.45;
+}
 
 /* 잠긴 곳: 연필 스케치 (채움 없음 + 점선). 클리어하면 색이 입혀진다 */
 .wm-art .wm-pencil .wm-f,

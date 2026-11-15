@@ -3,8 +3,14 @@ import { Library, Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
-import { STATUS_LABEL, toBook, worldTint } from '@/lib/world/worldBook';
+import {
+  STATUS_LABEL,
+  type SkillCheckOfferInfo,
+  toBook,
+  worldTint,
+} from '@/lib/world/worldBook';
 
+import { SkillCheckOffer } from './SkillCheckOffer';
 import { WorldCover } from './WorldBook';
 
 /**
@@ -15,10 +21,13 @@ export function LockedBook({
   entry,
   no,
   unlock,
+  skillCheck = null,
 }: {
   entry: WorldWithStatus;
   no: number;
   unlock: string;
+  /** 실력 확인 퀴즈로 바로 여는 길 (P10-03, `skillCheckOfferOf`) */
+  skillCheck?: SkillCheckOfferInfo | null;
 }) {
   const soon = entry.status === 'coming_soon';
   return (
@@ -45,6 +54,7 @@ export function LockedBook({
             : '아직 펼칠 수 없는 책이에요.'}
         </p>
         <p className="text-body font-bold text-primary-text">{unlock}</p>
+        {skillCheck && <SkillCheckOffer {...skillCheck} />}
         <div className="mt-1 flex flex-wrap gap-3">
           <Button href="/world" icon={<MapIcon aria-hidden />}>
             지금 모험 지도로

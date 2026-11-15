@@ -1,0 +1,37 @@
+# 2월드 퀴즈 3-3: 몇 번 울릴까?
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000021
+order: 3
+title: 몇 번 울릴까?
+concept: 중첩 반복 횟수
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 중첩 반복이 도는 횟수
+  learning_goals:
+    - 바깥 반복 한 번마다 안쪽 반복이 끝까지 돈다는 것을 안다
+  story_context: 미로 안에 종이 걸려 있어요. 반복 안의 반복이 돌 때마다 종이 한 번씩 울려요. 종은 모두 몇 번 울릴까요?
+  fallback_text: 바깥 반복이 한 번 돌 때마다 안쪽 반복은 처음부터 끝까지 다 돌아요. 바깥이 돈 횟수와 안쪽이 돈 횟수를 함께 생각해 보세요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      ring = 0
+      for i in range(3):
+          for j in range(2):
+              ring = ring + 1
+      print(ring)
+    options:
+      - { id: opt-w5jd, text: '6' }
+      - { id: opt-k8ab, text: '5' }
+      - { id: opt-q3zu, text: '3' }
+      - { id: opt-h7ve, text: '2' }
+answer:
+  quiz_answer:
+    accepted: [opt-w5jd]
+    explanation: 바깥 반복이 3번 돌고, 한 번 돌 때마다 안쪽 반복이 2번씩 돌아요. 그래서 2 + 2 + 2 로 6번 울려요.
+    explanations:
+      opt-k8ab: 3과 2를 더한 수예요. 안쪽 반복은 바깥이 돌 때마다 다시 처음부터 돌아요.
+      opt-q3zu: 바깥 반복만 센 수예요. 안쪽 반복도 매번 돌아요.
+      opt-h7ve: 안쪽 반복 한 바퀴만 센 수예요.

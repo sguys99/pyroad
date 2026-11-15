@@ -1,0 +1,59 @@
+# 2월드 퀘스트 2-2: 책 빌리기 기록장
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-2
+
+id: b2000000-0000-0000-0000-000000000012
+order: 2
+title: 책 빌리기 기록장
+concept: 딕셔너리 값 추가·수정, len()
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: 딕셔너리에 이름표 더하고 내용 고치기
+  learning_goals:
+    - '딕셔너리[새 키] = 값 으로 이름표를 더할 수 있다'
+    - '딕셔너리[있는 키] = 값 으로 내용을 고칠 수 있다'
+    - len()으로 이름표 수를 셀 수 있다
+  story_context: 하늘이가 바다 탐험 책을 빌려 간대요. 기록장에 빌린 사람을 적어 줘요. 그런데 쪽수도 잘못 적혀 있네요! 버그버그의 장난인가 봐요.
+  exercise_description: 'book 에 "빌린 사람" 이름표를 새로 붙여 "하늘"을 넣고, "쪽수"를 130으로 고친 뒤 book 과 이름표 수를 출력하세요'
+  starter_code: |
+    book = {"제목": "바다 탐험", "쪽수": 120}
+
+    # 1) "빌린 사람" 이름표를 새로 붙여 "하늘"을 넣어요
+
+    # 2) "쪽수"를 130 으로 고쳐요
+
+    print(book)
+    print(f"이름표 수: {len(book)}")
+  expected_output_hint: 'book 안에 빌린 사람 하늘과 쪽수 130이 보이고, 이름표 수: 3 이 나와야 해요'
+  checklist:
+    - 'book["빌린 사람"] = "하늘" 을 써요'
+    - 'book["쪽수"] = 130 으로 고쳐요'
+    - '이름표 수가 3 인지 봐요'
+  example_output: |-
+    {'제목': '바다 탐험', '쪽수': 130, '빌린 사람': '하늘'}
+    이름표 수: 3
+  fallback_text: '없는 이름표에 book["빌린 사람"] = "하늘" 하고 넣으면 새 이름표가 붙어요. 있는 이름표에 넣으면 내용이 바뀌어요. 이름표는 한 상자에 하나뿐이라서, 같은 이름표가 둘이 되지 않아요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          {'제목': '바다 탐험', '쪽수': 130, '빌린 사람': '하늘'}
+          이름표 수: 3
+      # 이름표를 넣고 고치는 줄. 채점이 띄어쓰기를 맞춰 보므로 book["x"]="y" 도 통과 (P10-09)
+      - type: code_check
+        expected: '] ='
+  hints:
+    level_1: 변수에 값을 넣을 때처럼 = 를 써요. 그런데 왼쪽에 변수 대신 무엇을 쓸까요?
+    level_2: 'book["이름표"] = 내용 처럼 쓰면 넣기도, 고치기도 돼요!'
+    level_3: 'book["빌린 사람"] = "하늘" 과 book["쪽수"] = 130 두 줄을 빈 곳에 써 보세요!'
+  solution_code: |
+    book = {"제목": "바다 탐험", "쪽수": 120}
+
+    book["빌린 사람"] = "하늘"
+
+    book["쪽수"] = 130
+
+    print(book)
+    print(f"이름표 수: {len(book)}")

@@ -1,0 +1,85 @@
+# 2월드 퀘스트 6-8: 키 순서대로 줄 서기 (챌린지)
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-6 (제안 G: min·remove·append 로 "가장 작은 것 뽑기")
+# 반복은 for range(5)라 remove 를 빠뜨려도 끝남. remove 는 여기서 처음 배워 설명을 붙임
+
+id: b2000000-0000-0000-0000-000000000053
+order: 8
+title: 키 순서대로 줄 서기
+concept: 정렬 직접 만들기
+xp_reward: 120
+quest_type: code
+prompt:
+  topic: 가장 작은 것을 차례로 뽑아 줄 세우기
+  learning_goals:
+    - 남은 것 중 가장 작은 값을 min()으로 찾을 수 있다
+    - 리스트.remove(값)으로 그 값을 리스트에서 뺄 수 있다
+    - 가장 작은 것을 하나씩 뽑아 새 줄 뒤에 세우는 방법으로 정렬을 만들 수 있다
+  story_context: 드디어 산맥 꼭대기예요! 친구 다섯 명이 사진을 찍으려고 키 순서대로 줄을 서야 해요. sort() 는 금지 구역이라 못 써요. 남은 친구 중 가장 작은 친구를 불러 새 줄 맨 뒤에 세우는 걸 되풀이하면 줄이 완성돼요.
+  exercise_description: '남은 줄에서 가장 작은 키를 찾아 빼고, 새 줄 맨 뒤에 세우는 일을 5번 되풀이해 키 순서대로 줄을 세우세요'
+  starter_code: |
+    line = [132, 125, 140, 128, 136]
+    check = sorted(line)
+    new_line = []
+
+    # 친구 수(5명)만큼 반복해요
+    for i in range(5):
+        # 1) 남은 친구 중 가장 작은 키를 찾아요
+        shortest = ___
+        # 2) 그 친구를 원래 줄에서 빼요
+        ___
+        # 3) 새 줄 맨 뒤에 세워요
+        ___
+        print(new_line)
+
+    print(new_line == check)
+  expected_output_hint: '새 줄이 [125] 부터 한 명씩 늘어 [125, 128, 132, 136, 140] 이 되고, 마지막에 True 가 나와야 해요'
+  checklist:
+    - 'shortest = min(line) 으로 가장 작은 키를 찾아요'
+    - 'line.remove(shortest) 로 원래 줄에서 빼요'
+    - 'new_line.append(shortest) 로 새 줄에 세우고, 마지막에 True 가 나오는지 봐요'
+  example_output: |-
+    [125]
+    [125, 128]
+    [125, 128, 132]
+    [125, 128, 132, 136]
+    [125, 128, 132, 136, 140]
+    True
+  fallback_text: '줄 세우기 알고리즘: ① 남은 친구 중 가장 작은 친구를 찾아요(min). ② 그 친구를 원래 줄에서 빼요. 리스트.remove(값)은 리스트에서 그 값을 찾아 빼 주는 메서드예요. ③ 새 줄 맨 뒤에 세워요(append). 다섯 번 되풀이하면 작은 키부터 줄이 서요. sorted(line)은 정렬한 새 리스트를 돌려줘서 확인용으로 써요.'
+  is_challenge: true
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          [125]
+          [125, 128]
+          [125, 128, 132]
+          [125, 128, 132, 136]
+          [125, 128, 132, 136, 140]
+          True
+      - type: code_check
+        expected: .remove(
+      - type: code_check
+        expected: min(
+        whole_word: true
+  hints:
+    level_1: 남은 친구 중 가장 작은 키는 1월드에서 배운 min( ) 으로 찾아요. 찾은 친구는 원래 줄에서 빼야 다음에 또 뽑히지 않아요.
+    level_2: '빼는 메서드는 line.remove(값), 새 줄 뒤에 세우는 메서드는 new_line.append(값) 이에요.'
+    level_3: |-
+      세 빈칸을 이렇게 채워 보세요!
+          shortest = min(line)
+          line.remove(shortest)
+          new_line.append(shortest)
+  solution_code: |
+    line = [132, 125, 140, 128, 136]
+    check = sorted(line)
+    new_line = []
+
+    for i in range(5):
+        shortest = min(line)
+        line.remove(shortest)
+        new_line.append(shortest)
+        print(new_line)
+
+    print(new_line == check)

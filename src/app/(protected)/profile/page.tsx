@@ -27,6 +27,10 @@ import {
   type ProfileStatsRaw,
 } from '@/lib/profile/profileStats';
 import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import {
+  skillPassWorldIds,
+  type SkillCheckAttemptRow,
+} from '@/lib/world/skillCheck';
 import { chestState } from '@/lib/world/chest';
 import { kstToday, kstWeekStart } from '@/lib/time/kst';
 
@@ -73,6 +77,7 @@ export default async function ProfilePage() {
     defs,
     stats,
     shareCards,
+    skillChecks,
   ] = await Promise.all([
     supabase
       .from('users')
@@ -104,6 +109,11 @@ export default async function ProfilePage() {
       .from('share_cards')
       .select('is_public, expires_at')
       .eq('user_id', user.id),
+    // 실력 확인 퀴즈 합격 (P10-03, 00052 본인 행 SELECT) → 그 월드 첫 스테이지 열림. 실패하면 합격 없음
+    supabase
+      .from('skill_check_attempts')
+      .select('user_id, world_id, attempt_on, passed, submitted_at')
+      .eq('user_id', user.id),
   ]);
   if (stats.error)
     reportServerError(stats.error, { area: 'profile', op: 'profile_stats' });
@@ -114,7 +124,11 @@ export default async function ProfilePage() {
 
   const progress = progressRes.data ?? [];
   const opened = new Set((chestsRes.data ?? []).map((c) => c.ref));
-  const stages = getStageStatuses(stagesRes.data ?? [], progress).map((s) => ({
+  const stages = getStageStatuses(
+    stagesRes.data ?? [],
+    progress,
+    skillPassWorldIds((skillChecks.data ?? []) as SkillCheckAttemptRow[]),
+  ).map((s) => ({
     ...s,
     chestOpened: opened.has(s.id),
   }));

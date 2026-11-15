@@ -21,7 +21,8 @@ content/
     │   └── 07-project-kingdom/
     │       ├── stage.yaml
     │       └── 01-number-guessing-game.yaml
-    ├── code-sea/world.yaml            # 월드 2 "준비 중" (스테이지 없음, Q48)
+    ├── code-sea/                      # 월드 2: world.yaml·map.yaml + 스테이지 7개(퀘스트는 P10-05~07, 빈 스테이지가 있으면 "준비 중")
+    │   └── skill-check.yaml           # 실력 확인 퀴즈 (선택, P10-03)
     └── maker-city/world.yaml          # 월드 3 "준비 중"
 ```
 
@@ -44,6 +45,8 @@ content/
 
 스테이지 디렉토리가 없는 월드는 **"준비 중"** 표지가 됩니다(`ready: false`, 랜딩·월드 선택 화면). 스테이지를 넣으면 `map.yaml`도 함께 씁니다.
 
+**쓰는 중인 월드 (P10-04·P10-05)**: 퀘스트 파일이 **없는 스테이지가 하나라도 있는** 월드는 "준비 중"입니다. 검사를 통과하되 스테이지·퀘스트를 seed(DB)에 넣지 않고 `ready: false`로 둡니다. 지도(`map.yaml`)는 앱에 실려 카탈로그에서 볼 수 있습니다. 그래서 월드를 스테이지 하나씩 채워 나갈 수 있고, **이미 쓴 퀘스트는 보통 월드와 똑같이 검사합니다**(스키마·빌드 검사, `test:content`의 정답 실행·시작 코드 불합격·퀴즈 Pyodide 검사 — `buildRows(tree, { includeDrafts: true })`). 마지막 스테이지에 퀘스트를 넣는 순간 월드 전체가 seed에 들어갑니다. `test:content` 퀘스트 키는 1월드 밖이면 월드를 앞에 붙입니다: `TEST_CONTENT_ONLY=code-sea/1-2`.
+
 빌드가 `worlds`에 `slug` 기준으로 업서트하고(id는 DB가 정함, 1월드는 00012가 만든 고정 id) 그 월드의 스테이지에 `stages.world_id`를 채웁니다(P1-08). 스테이지 순서는 (월드 `order`, 스테이지 `order`)이고, 월드의 첫 스테이지는 이전 월드의 마지막 스테이지를 깨야 열립니다(Phase 10 전까지).
 
 ### map.yaml → 앱 지도 (DB 에 쓰지 않음, P5-03)
@@ -62,7 +65,7 @@ layouts:
     nodes:             # i번째 = i+1번 스테이지 중심 [x, y]
       - [170, 600]
       - …
-    decorations:       # 선택. kind: tree | mountains | waves | bird | boat, scale 선택
+    decorations:       # 선택. kind: tree | mountains | waves | bird | boat | palm | rock | buoy | whale, scale 선택
       - { kind: tree, x: 70, y: 430, scale: 1.2 }
   tall:                # 좁은 화면: 세로로 긴 지도 (같은 키)
     width: 400
@@ -72,7 +75,7 @@ layouts:
 
 - **빌드가 확인**: 두 레이아웃 모두 노드 수 = 스테이지 수, 노드가 `width × height` 안, 모르는 키 없음, 스테이지가 있는 월드에 `map.yaml`이 있음.
 - 테마 키는 `world.yaml`의 `theme`, 노드의 랜드마크 그림은 `stage.yaml`의 `theme_name`을 씁니다(따로 적지 않음).
-- 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`는 먼 레이어, `mountains`·`tree`는 중간 레이어에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
+- 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`·`buoy`는 먼 레이어(움직임), `mountains`·`tree`·`palm`·`rock`·`whale`은 중간 레이어(정지)에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
 - 앰비언트(P5-09): `ambient`는 구름(먼 레이어)·반짝임(물결 옆 + 길 위)·날씨를 켜고 끕니다. 자리는 `src/lib/world/ambient.ts`가 레이아웃에서 정하고(종류별 상한 `AMBIENT_CAP`), `waves`·`boat`·`bird` 장식은 스위치와 상관없이 움직입니다. 움직임은 연출 단계 full에서만.
 - 좌표를 정할 때는 확정 시안 `design/prototypes/src/final/World.tsx`의 `WIDE`·`TALL`을 참고합니다. 지금 노드 카드가 넓어서(P5-04 전) 양 끝 노드는 지도 가장자리에서 120 이상 떨어뜨립니다. 노드 `y`는 130 이상(지금 위치 파이뱀이 노드 위에 섬). 파이뱀은 가장자리에 가까우면 노드 반대쪽에 서고(`markerSide`), 단위 테스트가 모든 월드·노드에서 잘리지 않는지 확인합니다.
 - 테스트용 2번째 월드: `e2e/fixtures/content/worlds/test-meadow/`(스테이지 3개). 단위 테스트(`src/lib/world/__tests__/worldMapData.test.tsx`)가 `content/`에 이 디렉토리를 더해 지도가 나오는지 확인합니다.
@@ -300,7 +303,7 @@ answer:
 
 **빌드가 확인**: id 형식·중복, `accepted`·`explanations`가 있는 id만 가리키는지, 객관식에 틀린 보기가 있는지, fill_blank가 모든 빈칸을 채우는지, parsons가 모든 줄을 한 번씩 쓰는지와 indent 모양, 같은 정답 중복, 그리고 **공개 문장(제목·`topic`·`learning_goals`·`story_context`·`fallback_text`·문제 문장)에 정답이 그대로 있는지**(§12-Q20). 정답 글자는 객관식·bug_hunt는 정답 보기·수정안 글자(오답 보기 글자도 같은 문장에 있으면 정답을 짚은 게 아니라서 통과), fill_blank는 빈칸을 정답으로 채운 줄, parsons는 정답 순서로 이어지는 두 줄입니다. 한 글자짜리와 영문·숫자 낱말 한가운데(`3` ⊂ `range(30)`)는 보지 않습니다. 코드·보기 자체는 문제라서 보지 않습니다.
 
-DB: `quests.quest_type = 'quiz'`, `quiz_kind`, `is_mobile_friendly = true`, `validation_type = 'all'`(퀴즈는 쓰지 않는 자리값. 00012 CHECK 안의 값이고 기준값 칸이 비어 코드 채점 경로로는 항상 불합격), `quest_answer_keys`는 `quiz_answer`만 있고 `hints = {}`·`solution_code = NULL`. 정답 코드 자동 검증은 퀴즈를 건너뛰고, 대신 `scripts/content/__tests__/quizzes.content.test.ts`(`test:content`)가 퀴즈 코드를 Pyodide로 돌려 봅니다: 출력 예측형 실제 출력(앞뒤 공백만 뺌) = 정답 보기, fill_blank 정답 채움은 오류 없이 끝나고 오답 토큰은 결과가 다름, parsons 정답 순서는 모두 같은 출력, bug_hunt 원래 코드·오답 수정안은 정답 수정안과 결과가 다름. 그래서 퀴즈 코드에는 `input()`·`random`을 쓰지 않습니다.
+DB: `quests.quest_type = 'quiz'`, `quiz_kind`, `is_mobile_friendly = true`, `validation_type = 'all'`(퀴즈는 쓰지 않는 자리값. 00012 CHECK 안의 값이고 기준값 칸이 비어 코드 채점 경로로는 항상 불합격), `quest_answer_keys`는 `quiz_answer`만 있고 `hints = {}`·`solution_code = NULL`. 정답 코드 자동 검증은 퀴즈를 건너뛰고, 대신 `scripts/content/__tests__/quizzes.content.test.ts`(`test:content`)가 퀴즈 코드를 Pyodide로 돌려 봅니다: 출력 예측형 실제 출력(앞뒤 공백만 뺌) = 정답 보기(코드가 에러로 끝나는 에러 예측형은 `IndexError` 같은 실제 에러 이름 보기 = 정답, world2.md 제안 E), fill_blank 정답 채움은 오류 없이 끝나고 오답 토큰은 결과가 다름, parsons 정답 순서는 모두 같은 출력, bug_hunt 원래 코드·오답 수정안은 정답 수정안과 결과가 다름. 그래서 퀴즈 코드에는 `input()`·`random`을 쓰지 않습니다.
 
 ### 보스 (`quest_type: boss`, P9-12)
 
@@ -330,7 +333,7 @@ prompt:
     on_victory: 이번엔 …      # 학생이 졌을 때 (놀리지 않고 다시 오라고)
 rounds:                       # 3~7개. 라운드마다 퀴즈 하나
   - quiz_kind: multiple_choice
-    review_quest: b1000000-0000-0000-0000-000000000002   # 선택. 이 문제에서 지면 "복습하러 가기"가 여는 같은 스테이지 퀘스트
+    review_quest: b1000000-0000-0000-0000-000000000002   # 선택. 이 문제에서 지면 "복습하러 가기"가 여는 같은 월드 퀘스트 (보통 같은 스테이지, 최종 보스는 앞 스테이지도)
     prompt:
       quiz: { question: …, code: …, options: [ … ] }      # 퀴즈 prompt.quiz 와 같음
     answer:
@@ -339,6 +342,29 @@ rounds:                       # 3~7개. 라운드마다 퀴즈 하나
 
 DB: `quests.quest_type = 'boss'`, `prompt_skeleton.boss = {name, intro, on_defeat, on_victory, rounds: [퀴즈 공개 모양…], review_quests: [id|null…]}`, `quest_answer_keys.quiz_answer = {kind: 'boss', rounds: [{kind, accepted, explanation, explanations?}…]}`(00046 CHECK). 보기 순서는 들어올 때·다시 도전할 때마다 서버가 섞습니다.
 
+### 실력 확인 퀴즈 (`<world>/skill-check.yaml`, P10-03)
+
+앞 월드를 다 깨지 않고 이 월드를 여는 시험입니다(설계 [world2.md](../docs/curriculum/world2.md) §7). 파일이 있는 월드만 잠긴 책에 "실력 확인 퀴즈"가 보입니다(`worlds.generated.ts`의 `skill_check`).
+
+- **묶음 2벌 × 10문제**. KST 날마다 번갈아 나오고(00052 `skill_check_set_for`), 하루 1번, **8문제 이상** 맞히면 합격 → 그 월드의 첫 스테이지가 열립니다. XP·코인은 없습니다.
+- 문제 하나 = 보스 라운드 하나와 같은 모양·규칙(퀴즈 4종, id 규칙, 공개 문장 정답 누출 검사, `test:content` Pyodide 검사). 앞 월드 스테이지를 고르게, 퀴즈·보스와 겹치지 않는 새 문제로 씁니다.
+- `review_quest`는 **필수**이고 앞 월드의 퀘스트여야 합니다(빌드가 확인). 틀린 문제의 그 퀘스트 스테이지가 결과 화면의 "더 연습하면 좋은 단계"가 됩니다.
+- 학생에게 **정답·해설을 보여 주지 않습니다**(하루 1번이라도 정답을 보면 외워서 통과할 수 있음). `explanation`은 검수용으로만 씁니다.
+
+```yaml
+sets:
+  - questions:              # 1벌, 10개
+      - quiz_kind: multiple_choice
+        review_quest: b1000000-0000-0000-0000-000000000024   # 앞 월드 퀘스트
+        prompt:
+          quiz: { question: …, code: …, options: [ … ] }
+        answer:
+          quiz_answer: { accepted: [ … ], explanation: … }
+  - questions: [ … ]        # 2벌, 10개
+```
+
+DB: `skill_check_questions (world_id, set_no, no, review_quest_id, quiz, answer)` — service_role 전용(정답이 함께 있음). 화면에는 API(`/api/world/skill-check`)가 `quiz`만 섞어서 보냅니다.
+
 ## 3. 검증 규칙 (`answer.validation`)
 
 | `type` | 기준 | 통과 조건 |
@@ -346,7 +372,7 @@ DB: `quests.quest_type = 'boss'`, `prompt_skeleton.boss = {name, intro, on_defea
 | `output_match` | `expected: 문자열` | 출력 전체가 같음 (앞뒤 공백·줄바꿈 무시) |
 | `contains` | `expected: 문자열` | 출력에 들어 있음 |
 | `contains_any` | `expected: [문자열, …]` | 출력에 하나라도 들어 있음. **무작위 출력 퀘스트에 씀** |
-| `code_check` | `expected: 문자열`, `whole_word: true`(선택) | 코드에 들어 있음. 주석·문자열 안의 글자는 보지 않음(B25). `whole_word`면 `int(`가 `randint(` 안에서는 안 걸림(B30) |
+| `code_check` | `expected: 문자열`, `whole_word: true`(선택) | 코드에 들어 있음. 주석·문자열 안의 글자는 보지 않음(B25). `whole_word`면 `int(`가 `randint(` 안에서는 안 걸림(B30). 띄어쓰기는 코드·기준 모두 같은 모양으로 맞춰 봄(P10-09): 기호 옆 공백은 무시(`] =` ≡ `]=`), 들여쓰기는 탭·2칸·4칸 모두 한 모양(`    for` = 들여쓴 `for`) |
 | `all` | `rules: [규칙, …]` | 모두 통과 |
 
 ```yaml
@@ -363,6 +389,7 @@ validation:
 - **무작위 출력에는 `random.seed` 고정 대신 넓은 규칙을 씁니다.** 시드를 고정하면 난수 뽑는 순서만 다른, 똑같이 맞는 답이 떨어집니다(§2.4).
 - `output_match`·`contains`는 답을 그대로 `print`해도 통과합니다. 개념이 중요한 퀘스트는 `all`로 `code_check`와 묶습니다.
 - `code_check`에 짧은 문자열을 쓰면 다른 코드에 섞여 걸립니다(`int(` ⊂ `randint(`). `whole_word: true`를 쓰거나 더 긴 문자열을 고릅니다.
+- 반대로 너무 좁으면 맞는 답이 떨어집니다. 같은 뜻의 다른 정답(예: `range(len(x))` 대신 `range(0, len(x))`)도 걸리게 고르고, 아이들이 쓸 만한 다른 정답은 `scripts/content/__tests__/gradingVariants.content.test.ts`의 `HANDWRITTEN`에 넣어 `test:content`로 확인합니다(모든 정답은 탭·2칸 들여쓰기·기호 옆 공백 없음·빈 줄·작은따옴표 모양으로도 저절로 채점해 봄).
 - 3단계 힌트(`level_3`)대로 쓴 답도 규칙을 통과하는지 확인합니다(B09: 힌트 문구로는 절대 통과 못 하던 사례).
 
 **DB 저장 형태** (`src/lib/quest/validation.ts`의 `toStoredRule`): 기존 두 칸(`validation_type` + `expected_output`)을 그대로 씁니다. `output_match`·`contains`·`code_check`는 기준 문자열 그대로, `contains_any`·`all`은 기준값 칸에 JSON을 넣고, `code_check` + `whole_word`는 하위 규칙 하나짜리 `all`로 저장합니다. 채점 API(`/api/quest/validate`)는 바꾸지 않아도 됩니다.

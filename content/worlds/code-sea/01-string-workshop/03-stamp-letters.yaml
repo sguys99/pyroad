@@ -1,0 +1,61 @@
+# 2월드 퀘스트 1-3: 조개 도장 세기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-1
+
+id: b2000000-0000-0000-0000-000000000003
+order: 3
+title: 조개 도장 세기
+concept: 글자 돌며 세기
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: for로 글자를 돌며 if로 세기
+  learning_goals:
+    - for로 글자를 하나씩 돌 수 있다
+    - if로 원하는 글자를 만날 때마다 수를 늘릴 수 있다
+  story_context: 버그버그가 간판 banana boat 곳곳에 조개 도장을 찍어 놨어요. a 글자마다 도장이 하나씩 있대요. 도장이 모두 몇 개인지 세어 봐요!
+  exercise_description: 'text = "banana boat" 를 for로 한 글자씩 돌며, 글자가 "a" 일 때마다 count를 1씩 늘려 "a는 4번"을 출력하세요'
+  starter_code: |
+    text = "banana boat"
+    count = 0
+
+    for letter in text:
+        # letter 가 "a" 이면 count 를 1 늘려요
+        ___
+
+    print(f"a는 {count}번")
+  expected_output_hint: a는 4번 이 나와야 해요
+  checklist:
+    - 'for 안에 if letter == "a": 를 써요'
+    - 'if 안에서 count = count + 1 로 하나 늘려요'
+    - a는 4번 이 나오는지 봐요
+  example_output: |-
+    a는 4번
+  fallback_text: '세기는 상자 count 를 0으로 두고, 원하는 글자를 만날 때마다 1씩 더하는 거예요. for letter in text: 안에 if letter == "a": 를 넣고 그 안에서 count = count + 1 을 해요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: a는 4번
+      - type: code_check
+        expected: for
+        whole_word: true
+      - type: code_check
+        expected: if
+        whole_word: true
+  hints:
+    level_1: 글자를 하나씩 볼 때마다 "이 글자가 a인가?" 하고 물어봐야 해요. 물어보는 주문은 무엇이었죠?
+    level_2: 'if letter == "a": 로 묻고, 맞으면 count = count + 1 로 하나 늘려요. if 아래 줄은 한 번 더 들여써요!'
+    level_3: |-
+      ___ 자리를 이렇게 바꿔 보세요!
+      if letter == "a":
+          count = count + 1
+  solution_code: |
+    text = "banana boat"
+    count = 0
+
+    for letter in text:
+        if letter == "a":
+            count = count + 1
+
+    print(f"a는 {count}번")

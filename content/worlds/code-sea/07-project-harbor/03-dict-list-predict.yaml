@@ -1,0 +1,35 @@
+# 2월드 퀴즈 F-3: 기록장 읽기
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000056
+order: 3
+title: 기록장 읽기
+concept: 리스트 속 딕셔너리
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 리스트 번호와 딕셔너리 이름표로 값 꺼내기
+  learning_goals:
+    - 리스트 속 딕셔너리에서 번호와 이름표를 차례로 써서 값을 꺼낼 수 있다
+  story_context: 별똥이가 용돈 기입장을 몰래 읽어 보려고 해요. 리스트 번호와 이름표를 차례로 따라가면 어떤 값이 나올까요?
+  fallback_text: 먼저 대괄호 안의 번호로 리스트에서 기록 하나를 꺼내요. 리스트 번호는 0부터 세요. 그다음 이름표로 그 기록 딕셔너리에서 값을 꺼내요. print 에 쉼표로 두 값을 주면 사이에 빈칸 하나가 들어가요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      records = [{"내용": "용돈", "금액": 5000},
+                 {"내용": "간식", "금액": -1500}]
+      print(records[1]["내용"], records[0]["금액"])
+    options:
+      - { id: opt-h4nw, text: '간식 5000' }
+      - { id: opt-t9cb, text: '용돈 -1500' }
+      - { id: opt-x2gf, text: '용돈 5000' }
+      - { id: opt-b6ur, text: '간식 -1500' }
+answer:
+  quiz_answer:
+    accepted: [opt-h4nw]
+    explanation: records[1] 은 두 번째 기록(간식)이라 내용은 간식이에요. records[0] 은 첫 번째 기록(용돈)이라 금액은 5000이에요.
+    explanations:
+      opt-t9cb: 리스트 번호는 0부터 세요. 1번은 두 번째 기록이에요.
+      opt-x2gf: 내용은 1번 기록에서 꺼내요. 1번은 두 번째 기록이에요.
+      opt-b6ur: 금액은 0번 기록에서 꺼내요. 0번은 첫 번째 기록이에요.

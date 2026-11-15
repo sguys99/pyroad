@@ -1,0 +1,58 @@
+# 2월드 퀘스트 1-4: 글자 리본 자르기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-1
+
+id: b2000000-0000-0000-0000-000000000004
+order: 4
+title: 글자 리본 자르기
+concept: 슬라이싱
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: '[시작:끝]으로 글자 잘라 내기'
+  learning_goals:
+    - '[시작:끝]으로 글자의 한 부분을 잘라 낼 수 있다'
+    - 끝 번호 글자는 잘라 낸 조각에 들어가지 않는다는 것을 안다
+  story_context: 공방에 starfish 글자 리본이 길게 걸려 있어요. 가위로 싹둑 잘라서 star 리본과 fish 리본 두 개로 나눠 볼까요?
+  exercise_description: 'word = "starfish" 를 [시작:끝]으로 잘라 star 와 fish 를 한 줄씩 출력하세요'
+  starter_code: |
+    word = "starfish"
+
+    # [시작:끝] 으로 잘라요. 끝 번호 글자는 들어가지 않아요
+    # s  t  a  r  f  i  s  h
+    # 0  1  2  3  4  5  6  7
+    front = word[0:___]
+    back = word[___:]
+
+    print(front)
+    print(back)
+  expected_output_hint: star 와 fish 가 한 줄씩 나와야 해요
+  checklist:
+    - 'front 는 0번부터 4번 앞까지 잘라요'
+    - 'back 은 4번부터 끝까지 잘라요'
+    - star 와 fish 가 나오는지 봐요
+  example_output: |-
+    star
+    fish
+  fallback_text: 'word[0:4]는 0번부터 4번 바로 앞(3번)까지 잘라요. 그래서 s t a r 네 글자예요. 끝 번호를 비우면 word[4:]처럼 끝까지 잘라요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          star
+          fish
+      - type: code_check
+        expected: ':4]'
+  hints:
+    level_1: 'starfish 아래 번호표를 봐요. f 는 몇 번에 있나요?'
+    level_2: '[시작:끝]에서 끝 번호 글자는 들어가지 않아요. star 가 0~3번이니 끝 번호는 하나 더 큰 수예요!'
+    level_3: 'front = word[0:4], back = word[4:] 처럼 빈칸에 4를 넣어 보세요!'
+  solution_code: |
+    word = "starfish"
+
+    front = word[0:4]
+    back = word[4:]
+
+    print(front)
+    print(back)

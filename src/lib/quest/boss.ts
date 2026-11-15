@@ -16,6 +16,14 @@ export const BOSS_LOOKS = [
   'lake',
   'tower',
   'kingdom',
+  // 2월드 코드 바다 (P10-04): 바다 소품을 단 버그버그. 2-1 ~ 2-6, 2-F 선장
+  'workshop',
+  'library',
+  'maze',
+  'pirate',
+  'hospital',
+  'ridge',
+  'captain',
 ] as const;
 export type BossLook = (typeof BOSS_LOOKS)[number];
 

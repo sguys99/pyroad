@@ -21,6 +21,7 @@ import { isStageLockedNotice } from '@/lib/world/stageLock';
 import {
   bookNo,
   isOpenable,
+  skillCheckOfferOf,
   unlockText,
   worldTint,
 } from '@/lib/world/worldBook';
@@ -122,6 +123,7 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
             entry={entry}
             no={no}
             unlock={unlockText(worlds, index)}
+            skillCheck={skillCheckOfferOf(worlds, index)}
           />
         )}
       </PageTransition>

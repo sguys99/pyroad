@@ -1,0 +1,36 @@
+# 2월드 퀴즈 3-6: 지도 그리기 순서
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000024
+order: 6
+title: 지도 그리기 순서
+concept: 중첩 반복 들여쓰기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: 중첩 반복 줄 순서와 들여쓰기
+  learning_goals:
+    - 줄 글자를 준비하는 곳, 칸을 붙이는 곳, 한 줄을 보여 주는 곳의 들여쓰기를 고를 수 있다
+  story_context: 버그버그가 지도 그리기 주문의 줄을 뒤섞어 놨어요! 줄 순서와 들여쓰기를 맞춰 지도를 다시 그려요.
+  fallback_text: 지도 리스트를 먼저 만들어요. 줄마다 빈 글자를 새로 준비하고, 칸은 안쪽 반복에서 붙이고, 한 줄이 다 모이면 바깥 반복 안에서 보여 줘요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 지도를 한 줄씩 보여 줘요
+    indent: true
+    lines:
+      - { id: ln-v4ce, code: 'grid = [["#", "."], [".", "#"]]' }
+      - { id: ln-p9ra, code: 'for row in grid:' }
+      - { id: ln-b2xs, code: 'line = ""' }
+      - { id: ln-z6kt, code: 'for cell in row:' }
+      - { id: ln-f3ow, code: 'line = line + cell' }
+      - { id: ln-m8yh, code: 'print(line)' }
+answer:
+  quiz_answer:
+    accepted:
+      - - { id: ln-v4ce, indent: 0 }
+        - { id: ln-p9ra, indent: 0 }
+        - { id: ln-b2xs, indent: 1 }
+        - { id: ln-z6kt, indent: 1 }
+        - { id: ln-f3ow, indent: 2 }
+        - { id: ln-m8yh, indent: 1 }
+    explanation: 줄마다 빈 글자를 준비하고(한 칸 들여쓰기), 안쪽 반복에서 칸을 붙인 뒤(두 칸), 안쪽이 끝나면 한 칸 들여쓰기로 한 줄을 보여 줘요. "#." 과 ".#" 두 줄이 나와요.

@@ -1,0 +1,8 @@
+# 스테이지 2-6: 해저 알고리즘 산맥 (stages 테이블). 설계: docs/curriculum/world2.md §3
+
+id: a2000000-0000-0000-0000-000000000006
+order: 6
+title: 해저 알고리즘 산맥
+theme_name: algorithm_ridge
+description: 합, 최댓값, 찾기, 줄 세우기를 직접 만들어 봐요!
+is_final: false

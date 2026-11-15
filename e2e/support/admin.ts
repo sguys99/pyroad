@@ -217,7 +217,9 @@ export async function completeQuests(
   for (const q of quests) {
     await complete(q.id, q.solution);
     done.add(q.id);
-    const s = stages().find((st) => st.quests.some((x) => x.id === q.id));
+    const s = [...stages(), ...stages('code-sea')].find((st) =>
+      st.quests.some((x) => x.id === q.id),
+    );
     if (
       withBoss &&
       s?.boss &&

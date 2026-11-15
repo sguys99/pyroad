@@ -56,7 +56,7 @@ export function QuestHeader({
       <span
         className={
           hasDots
-            ? 'sr-only min-w-0 truncate text-sm font-medium text-foreground sm:not-sr-only'
+            ? 'min-w-0 truncate text-sm font-medium text-foreground max-sm:sr-only'
             : 'min-w-0 truncate text-sm font-medium text-foreground'
         }
       >

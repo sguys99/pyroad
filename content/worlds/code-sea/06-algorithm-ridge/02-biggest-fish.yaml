@@ -1,0 +1,62 @@
+# 2월드 퀘스트 6-2: 가장 큰 물고기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-6
+
+id: b2000000-0000-0000-0000-000000000047
+order: 2
+title: 가장 큰 물고기
+concept: 최댓값 직접 찾기
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: max() 없이 가장 큰 값 찾기
+  learning_goals:
+    - 첫 값을 대장으로 정하고, 더 큰 값을 만나면 대장을 바꿔 최댓값을 찾을 수 있다
+    - 이런 차근차근한 순서를 알고리즘이라고 부른다는 것을 안다
+  story_context: 두 번째 봉우리에서 물고기 대회가 열렸어요! 가장 큰 물고기가 금메달이에요. max() 는 금지니까, 물고기를 한 마리씩 보며 "지금까지 가장 큰 물고기"인 대장을 기억해 둬요.
+  exercise_description: 'best 를 첫 물고기 fish[0] 으로 정하고, for 로 돌며 f 가 best 보다 크면 best 를 f 로 바꿔 "가장 큰 물고기: 77cm"를 출력하세요'
+  starter_code: |
+    fish = [34, 52, 18, 77, 45]
+
+    # max() 없이 찾아요! 첫 물고기를 대장으로 정해요
+    best = fish[0]
+
+    for f in fish:
+        # 대장보다 큰 물고기를 만나면 대장을 바꿔요
+        ___
+
+    print(f"가장 큰 물고기: {best}cm")
+  expected_output_hint: '가장 큰 물고기: 77cm 가 나와야 해요'
+  checklist:
+    - 'if f > best: 로 대장과 비교해요'
+    - 'if 안에서 best = f 로 대장을 바꿔요'
+  example_output: |-
+    가장 큰 물고기: 77cm
+  fallback_text: '대장 찾기 알고리즘: ① 첫 물고기를 대장으로 정해요. ② 다음 물고기가 대장보다 크면 그 물고기가 새 대장이에요. ③ 끝까지 보면 남은 대장이 가장 커요. 34 → 52 → 77 순서로 대장이 바뀌어요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: '가장 큰 물고기: 77cm'
+      - type: code_check
+        expected: if
+        whole_word: true
+      - type: code_check
+        expected: '>'
+  hints:
+    level_1: 물고기 f 가 대장 best 보다 큰지 물어봐요. 크다는 비교 기호는 무엇이죠?
+    level_2: 'if f > best: 로 묻고, 맞으면 그 아래 들여써서 best = f 로 대장을 바꿔요.'
+    level_3: |-
+      빈칸을 이렇게 바꿔 보세요!
+          if f > best:
+              best = f
+  solution_code: |
+    fish = [34, 52, 18, 77, 45]
+
+    best = fish[0]
+
+    for f in fish:
+        if f > best:
+            best = f
+
+    print(f"가장 큰 물고기: {best}cm")

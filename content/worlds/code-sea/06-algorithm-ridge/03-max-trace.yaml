@@ -1,0 +1,37 @@
+# 2월드 퀴즈 6-3: 대장이 몇 번 바뀔까?
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000048
+order: 3
+title: 대장이 몇 번 바뀔까?
+concept: 최댓값 추적
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 최댓값 찾기를 손으로 따라가기
+  learning_goals:
+    - 대장보다 큰 값을 만날 때만 대장이 바뀐다는 것을 따라갈 수 있다
+  story_context: 버그버그가 대장 찾기 코드에 확성기를 달았어요. 대장이 바뀔 때마다 새 대장을 외친대요. 무엇을 외칠지 맞혀 봐요!
+  fallback_text: 숫자를 하나씩 보며 지금 대장과 비교해 보세요. 대장보다 클 때만 대장이 바뀌고 외쳐요. 대장과 같거나 작으면 조용해요.
+  quiz:
+    question: 이 코드를 돌리면 무엇이 나올까?
+    code: |-
+      best = 3
+      for n in [3, 8, 5, 9, 2]:
+          if n > best:
+              best = n
+              print(best)
+    options:
+      - { id: opt-8vqv, text: "8\n9" }
+      - { id: opt-02jo, text: "3\n8\n9" }
+      - { id: opt-5in5, text: "8\n5\n9" }
+      - { id: opt-ev9f, text: '9' }
+answer:
+  quiz_answer:
+    accepted: [opt-8vqv]
+    explanation: 대장 3에서 시작해요. 3은 같아서 그대로, 8은 더 커서 대장이 되고 8을 외쳐요. 5는 작아서 그대로, 9는 더 커서 9를 외쳐요. 2는 작아요. 그래서 8과 9가 나와요.
+    explanations:
+      opt-02jo: 3은 대장 3과 같아서 크지 않아요. 같을 때는 외치지 않아요.
+      opt-5in5: 5는 대장 8보다 작아서 대장이 바뀌지 않아요.
+      opt-ev9f: print 가 반복 안에 있어서 대장이 바뀔 때마다 외쳐요. 마지막 대장만 나오는 게 아니에요.

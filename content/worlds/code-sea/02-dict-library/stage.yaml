@@ -1,0 +1,8 @@
+# 스테이지 2-2: 등대 딕셔너리 도서관 (stages 테이블). 설계: docs/curriculum/world2.md §3
+
+id: a2000000-0000-0000-0000-000000000002
+order: 2
+title: 등대 딕셔너리 도서관
+theme_name: dict_library
+description: 이름표(키)와 내용(값)을 짝지어 등대 도서관을 정리해요!
+is_final: false

@@ -1,0 +1,138 @@
+# 2월드 보스 1: 글자 뒤섞기 버그버그 (P10-07)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000201
+order: 11
+title: 글자 뒤섞기 버그버그
+concept: 문자열 총정리
+xp_reward: 54
+quest_type: boss
+prompt:
+  topic: 글자 번호, 자르기, 바꾸기 메서드, f-string, 암호 총정리
+  learning_goals:
+    - 글자 번호와 자르기로 원하는 글자를 꺼낼 수 있다
+    - replace, upper 같은 메서드를 알맞게 고를 수 있다
+    - 끝 글자에서 처음으로 돌아오는 암호의 버그를 고칠 수 있다
+  story_context: 산호 공방의 간판을 거의 다 고쳤을 때, 망치를 든 버그버그가 공방 지붕에서 폴짝 뛰어내렸어요! 글자를 몽땅 뒤섞는 게 제일 좋대요. 공방에서 배운 글자 주문으로 버그버그를 이겨 봐요!
+  fallback_text: 글자 번호는 0부터 세고, -1은 맨 끝 글자예요. 자르기 [시작:끝]에서 끝 번호 글자는 들어가지 않아요. 메서드는 글자 뒤에 점을 찍고 불러요. 암호에서 끝까지 가면 나머지(%)로 처음으로 돌아와요.
+  boss:
+    name: 글자 뒤섞기 버그버그
+    look: workshop
+    intro: 히히, 나는 글자 뒤섞기 버그버그! 간판 글자를 다 뒤섞어 놨지롱. 다섯 문제를 풀면 돌려줄게!
+    on_defeat: 으앗, 글자가 다 제자리로 돌아갔어! 너 글자 다루는 솜씨가 진짜 좋구나. 다음 섬 등대 도서관에는 이름표가 잔뜩 있대!
+    on_victory: 헤헤, 글자가 아직 뒤죽박죽이야. 글자 번호는 0부터 센다는 걸 떠올리고 다시 와!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000002
+    prompt:
+      quiz:
+        question: 버그버그가 간판에서 글자 두 개를 떼어 갔어요. 돌리면 무엇이 나올까?
+        code: |-
+          word = "CORAL"
+          print(word[0] + word[-1])
+        options:
+          - { id: opt-c4lq, text: 'CL' }
+          - { id: opt-r8az, text: 'CA' }
+          - { id: opt-y2om, text: 'OL' }
+          - { id: opt-k6wn, text: 'C L' }
+    answer:
+      quiz_answer:
+        accepted: [opt-c4lq]
+        explanation: 0번은 맨 앞 글자 C, -1번은 맨 끝 글자 L이에요. + 는 글자를 빈칸 없이 바로 이어 붙여요.
+        explanations:
+          opt-r8az: -1번은 맨 끝 글자예요. 끝에서 두 번째 글자가 아니에요.
+          opt-y2om: 글자 번호는 0부터 세요. 0번이 맨 앞 글자예요.
+          opt-k6wn: + 로 이으면 사이에 빈칸이 생기지 않아요.
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000004
+    prompt:
+      quiz:
+        question: 글자 리본을 잘라요. 돌리면 무엇이 나올까?
+        code: |-
+          word = "seahorse"
+          print(word[3:8])
+        options:
+          - { id: opt-h5rs, text: 'horse' }
+          - { id: opt-m3pk, text: 'hors' }
+          - { id: opt-u7ea, text: 'ahors' }
+          - { id: opt-d9fi, text: 'ahorse' }
+    answer:
+      quiz_answer:
+        accepted: [opt-h5rs]
+        explanation: 3번 글자 h부터 잘라요. 끝 번호 8은 들어가지 않아서 7번 글자 e까지 나와요.
+        explanations:
+          opt-m3pk: 끝 번호 8은 빠지지만 7번 글자 e는 들어가요.
+          opt-u7ea: 글자 번호는 0부터 세요. 3번은 네 번째 글자 h예요.
+          opt-d9fi: 시작 번호 3번 글자 h부터 잘라요. 그 앞의 a는 빠져요.
+  - quiz_kind: fill_blank
+    review_quest: b2000000-0000-0000-0000-000000000006
+    prompt:
+      quiz:
+        question: 빈칸을 채워 bug 를 fish 로 바꾸고, 간판을 큰 글자로 보여 줘요
+        code: |-
+          sign = "bug shop"
+          sign = sign.{{bk-t3wa}}("bug", "fish")
+          print(sign.{{bk-g7nc}}())
+        tokens:
+          - { id: tok-p2vx, text: replace }
+          - { id: tok-e6ku, text: upper }
+          - { id: tok-z4mr, text: lower }
+          - { id: tok-q8hy, text: split }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-t3wa: tok-p2vx, bk-g7nc: tok-e6ku }
+        explanation: replace 는 앞 글자를 뒤 글자로 바꿔요. upper 는 모든 글자를 큰 글자로 바꿔서 FISH SHOP 이 나와요.
+        explanations:
+          tok-z4mr: lower 는 작은 글자로 바꿔요. 간판은 큰 글자여야 해요.
+          tok-q8hy: split 은 글자를 쪼개 리스트로 만들어요.
+  - quiz_kind: bug_hunt
+    review_quest: b2000000-0000-0000-0000-000000000010
+    prompt:
+      quiz:
+        question: z 를 한 칸 밀면 맨 앞으로 돌아와 a 가 나와야 하는데, 코드가 멈춰요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-f6sb, code: 'abc = "abcdefghijklmnopqrstuvwxyz"' }
+          - { id: ln-n2jx, code: 'ch = "z"' }
+          - { id: ln-v9dq, code: 'n = abc.index(ch)' }
+          - { id: ln-k4ze, code: 'print(abc[n + 1])' }
+        fixes:
+          - { id: fx-w5ma, code: 'print(abc[(n + 1) % 26])' }
+          - { id: fx-b8te, code: 'print(abc[n + 1 % 26])' }
+          - { id: fx-j3oc, code: 'print(abc[n - 1])' }
+          - { id: fx-s7yl, code: 'print(abc[(n + 1) % 25])' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-k4ze, fix: fx-w5ma }
+        explanation: z 는 25번이라 한 칸 밀면 26번인데, 26번 글자는 없어서 멈춰요. 26으로 나눈 나머지를 쓰면 26이 0이 되어 맨 앞 a 로 돌아와요.
+        explanations:
+          ln-f6sb: 알파벳 26글자를 잘 적었어요.
+          ln-n2jx: 밀어 볼 글자 z 를 잘 담았어요.
+          ln-v9dq: index 로 z 의 번호를 잘 찾았어요.
+          fx-b8te: 괄호가 없으면 1 % 26 을 먼저 계산해서 여전히 26번을 찾아요.
+          fx-j3oc: 1을 빼면 알파벳 거꾸로 한 칸 가서 y 가 나와요. 다음 글자 쪽으로 밀어야 해요.
+          fx-s7yl: 알파벳은 26글자라서 26으로 나눠야 해요. 25로 나누면 b 가 나와요.
+  - quiz_kind: parsons
+    review_quest: b2000000-0000-0000-0000-000000000008
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 조개 목걸이를 쪼개 하나씩 이름표를 달아요
+        indent: true
+        lines:
+          - { id: ln-u5gr, code: 'name = "파이뱀"' }
+          - { id: ln-h2cw, code: 'shells = "진주,소라"' }
+          - { id: ln-x8ma, code: 'for s in shells.split(","):' }
+          - { id: ln-d4oy, code: 'print(f"{name}의 {s}")' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-u5gr, indent: 0 }
+            - { id: ln-h2cw, indent: 0 }
+            - { id: ln-x8ma, indent: 0 }
+            - { id: ln-d4oy, indent: 1 }
+          - - { id: ln-h2cw, indent: 0 }
+            - { id: ln-u5gr, indent: 0 }
+            - { id: ln-x8ma, indent: 0 }
+            - { id: ln-d4oy, indent: 1 }
+        explanation: 변수 두 개를 먼저 담고(어느 쪽이 먼저여도 괜찮아요), split 으로 쉼표마다 쪼갠 조각을 하나씩 돌며 f-string 으로 이름표를 달아요. 파이뱀의 진주, 파이뱀의 소라 가 나와요.

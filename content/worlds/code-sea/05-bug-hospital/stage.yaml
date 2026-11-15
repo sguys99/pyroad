@@ -1,0 +1,8 @@
+# 스테이지 2-5: 버그 병원선 (stages 테이블). 설계: docs/curriculum/world2.md §3
+
+id: a2000000-0000-0000-0000-000000000005
+order: 5
+title: 버그 병원선
+theme_name: bug_hospital
+description: 에러 메시지를 읽고 아픈 코드를 고쳐 줘요!
+is_final: false

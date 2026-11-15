@@ -1,0 +1,42 @@
+# 2월드 퀴즈 F-1: 기록 함수 순서
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000054
+order: 1
+title: 기록 함수 순서
+concept: 함수 + 딕셔너리 + 리스트
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: 딕셔너리를 만들어 리스트에 더하는 함수
+  learning_goals:
+    - 함수 안에서 딕셔너리를 만들고 리스트에 더하는 차례와 들여쓰기를 고를 수 있다
+  story_context: 항구에 내리자마자 바람이 휙 불어서 기록 함수 주문 쪽지가 뒤죽박죽 섞였어요! 줄 순서와 들여쓰기를 맞춰 쪽지를 다시 붙여 줘요.
+  fallback_text: 빈 리스트는 함수를 부르기 전에만 있으면 돼요. 함수 안에서는 기록 딕셔너리를 먼저 만들고, 그다음에 리스트에 더해요. 함수를 만든 뒤에 불러야 하고, 기록 수는 맨 마지막에 보여 줘요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 기록 하나를 더한 뒤 기록 수를 보여 줘요
+    indent: true
+    lines:
+      - { id: ln-w3kd, code: 'records = []' }
+      - { id: ln-c8zt, code: 'def add_record(name, money):' }
+      - { id: ln-r5hb, code: 'record = {"내용": name, "금액": money}' }
+      - { id: ln-a2vq, code: 'records.append(record)' }
+      - { id: ln-m7pe, code: 'add_record("간식", -1500)' }
+      - { id: ln-e4ys, code: 'print(len(records))' }
+answer:
+  quiz_answer:
+    accepted:
+      - - { id: ln-w3kd, indent: 0 }
+        - { id: ln-c8zt, indent: 0 }
+        - { id: ln-r5hb, indent: 1 }
+        - { id: ln-a2vq, indent: 1 }
+        - { id: ln-m7pe, indent: 0 }
+        - { id: ln-e4ys, indent: 0 }
+      - - { id: ln-c8zt, indent: 0 }
+        - { id: ln-r5hb, indent: 1 }
+        - { id: ln-a2vq, indent: 1 }
+        - { id: ln-w3kd, indent: 0 }
+        - { id: ln-m7pe, indent: 0 }
+        - { id: ln-e4ys, indent: 0 }
+    explanation: 함수 안의 두 줄은 한 칸 들여 써요. 기록 딕셔너리를 먼저 만들어야 리스트에 더할 수 있어요. 빈 리스트는 함수를 부르기 전이면 맨 앞이든 함수 다음이든 괜찮아요. 기록이 하나 들어가서 1이 나와요.

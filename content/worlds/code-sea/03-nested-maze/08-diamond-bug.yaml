@@ -1,0 +1,42 @@
+# 2월드 퀴즈 3-8: 찌그러진 다이아몬드
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000026
+order: 8
+title: 찌그러진 다이아몬드
+concept: 안쪽 반복 range
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 안쪽 반복 횟수 버그 찾기
+  learning_goals:
+    - range의 끝 숫자는 들어가지 않는다는 것을 안쪽 반복에서도 쓸 수 있다
+  story_context: 다이아몬드 윗부분을 그리려는데 별이 하나씩 모자라 찌그러졌어요! 버그버그가 숫자를 슬쩍 바꿨나 봐요.
+  fallback_text: 줄마다 별이 1개, 3개, 5개 나와야 해요. range(시작, 끝)은 끝 숫자 바로 앞까지 돌아요. 안쪽 반복이 몇 번 도는지 줄마다 세어 보세요.
+  quiz:
+    question: 별이 1개, 3개, 5개인 삼각형이 나와야 하는데 별이 모자라요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - { id: ln-a7kd, code: 'for i in range(1, 4):' }
+      - { id: ln-s3pm, code: '    row = " " * (3 - i)' }
+      - { id: ln-w9tx, code: '    for j in range(1, 2 * i - 1):' }
+      - { id: ln-c5ge, code: '        row = row + "*"' }
+      - { id: ln-y2nf, code: '    print(row)' }
+    fixes:
+      - { id: fx-h6rb, code: '    for j in range(1, 2 * i):' }
+      - { id: fx-o4zm, code: '    for j in range(1, 2 * i + 1):' }
+      - { id: fx-t8wq, code: '    for j in range(1, i):' }
+      - { id: fx-d1vc, code: '    for j in range(2 * i, 1):' }
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-w9tx, fix: fx-h6rb }
+    explanation: range(1, 2 * i)는 1부터 2 * i 바로 앞까지라서 1번, 3번, 5번 돌아요. 원래 줄은 끝을 하나 더 줄여서 별이 0개, 2개, 4개만 나왔어요.
+    explanations:
+      ln-a7kd: 바깥 반복은 1, 2, 3 세 줄을 잘 돌아요.
+      ln-s3pm: 앞 공백은 2칸, 1칸, 0칸으로 잘 줄어요.
+      ln-c5ge: 별을 한 개씩 붙이는 줄은 맞아요.
+      ln-y2nf: 안쪽 반복이 끝난 뒤 한 줄을 보여 주는 자리가 맞아요.
+      fx-o4zm: 이러면 별이 2개, 4개, 6개로 하나씩 많아져요.
+      fx-t8wq: 이러면 별이 0개, 1개, 2개만 나와요.
+      fx-d1vc: 시작이 끝보다 크면 range는 한 번도 돌지 않아요.

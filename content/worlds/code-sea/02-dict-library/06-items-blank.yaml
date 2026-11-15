@@ -1,0 +1,35 @@
+# 2월드 퀴즈 2-6: 책장 돌기 빈칸
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000016
+order: 6
+title: 책장 돌기 빈칸
+concept: items(), len()
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 딕셔너리 돌기와 세기
+  learning_goals:
+    - 이름표와 내용을 한 쌍씩 꺼내는 메서드를 고를 수 있다
+    - 딕셔너리의 이름표 수를 세는 함수를 고를 수 있다
+  story_context: 책장을 한 바퀴 돌며 칸마다 권수를 보여 주고, 칸이 모두 몇 개인지 세려고 해요. 그런데 주문 두 군데가 지워졌어요!
+  fallback_text: 이름표와 내용을 한 쌍씩 꺼내야 name 과 count 두 변수에 나눠 담을 수 있어요. 개수를 세는 함수는 리스트에서도 썼어요.
+  quiz:
+    question: 빈칸을 채워 책장을 한 바퀴 돌며 보여 주고, 이름표가 몇 개인지 세어요
+    code: |-
+      shelf = {"동화": 4, "과학": 2}
+      for name, count in shelf.{{bk-i6tz}}():
+          print(f"{name}: {count}권")
+      print({{bk-n3ry}}(shelf))
+    tokens:
+      - { id: tok-e5pw, text: items }
+      - { id: tok-u9mc, text: len }
+      - { id: tok-o2ka, text: keys }
+      - { id: tok-z7fj, text: values }
+      - { id: tok-g4sx, text: sum }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-i6tz: tok-e5pw, bk-n3ry: tok-u9mc }
+    explanation: items()는 이름표와 내용을 한 쌍씩 꺼내 name 과 count 에 나눠 담아요. len()은 이름표 수를 세서 2가 나와요.

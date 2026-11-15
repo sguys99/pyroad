@@ -1,0 +1,59 @@
+# 2월드 퀘스트 1-8: 조개 목걸이 꿰기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-1
+
+id: b2000000-0000-0000-0000-000000000008
+order: 8
+title: 조개 목걸이 꿰기
+concept: split(), join()
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: split()으로 쪼개고 join()으로 잇기
+  learning_goals:
+    - split()으로 글자를 기준 글자마다 쪼개 리스트를 만들 수 있다
+    - join()으로 리스트를 하나의 글자로 이어 붙일 수 있다
+  story_context: 바닷가에서 주운 구슬 이름이 "진주,소라,조개"로 한 줄에 붙어 있어요. 하나씩 떼어 세어 보고, 예쁜 목걸이로 다시 꿰어 볼까요?
+  exercise_description: 'shells = "진주,소라,조개" 를 split(",")로 쪼개 구슬 수를 출력하고, " - ".join()으로 이어 목걸이를 출력하세요'
+  starter_code: |
+    shells = "진주,소라,조개"
+
+    # 쉼표(,)를 기준으로 쪼개면 리스트가 돼요
+    beads = shells.split(___)
+    print(f"구슬 {len(beads)}개")
+
+    # " - " 로 구슬을 이어 목걸이를 꿰어요
+    necklace = ___
+    print(necklace)
+  expected_output_hint: 구슬 3개 와 진주 - 소라 - 조개 가 한 줄씩 나와야 해요
+  checklist:
+    - 'split( ) 안에 쉼표 "," 를 넣어요'
+    - 'necklace 에 " - ".join(beads) 를 넣어요'
+    - 구슬 사이에 - 가 들어갔는지 봐요
+  example_output: |-
+    구슬 3개
+    진주 - 소라 - 조개
+  fallback_text: 'shells.split(",")은 쉼표마다 잘라 ["진주", "소라", "조개"] 리스트를 만들어요. " - ".join(리스트)는 반대로 리스트 사이사이에 " - "를 끼워 하나의 글자로 이어요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          구슬 3개
+          진주 - 소라 - 조개
+      - type: code_check
+        expected: .split(
+      - type: code_check
+        expected: .join(
+  hints:
+    level_1: 쪼갤 때 기준이 되는 글자는 구슬 사이에 있는 글자예요. 무엇일까요?
+    level_2: 'join 은 사이에 넣을 글자 뒤에 점을 찍고 불러요. " - ".join(beads) 처럼요!'
+    level_3: 'beads = shells.split(",") 와 necklace = " - ".join(beads) 를 써 보세요!'
+  solution_code: |
+    shells = "진주,소라,조개"
+
+    beads = shells.split(",")
+    print(f"구슬 {len(beads)}개")
+
+    necklace = " - ".join(beads)
+    print(necklace)

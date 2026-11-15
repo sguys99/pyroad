@@ -89,6 +89,14 @@ const RULES: Rule[] = [
     '숫자와 글자는 + 로 더할 수 없어요. 글자를 int( )로 숫자로 바꾸거나, 숫자를 str( )로 글자로 바꿔 봐요.',
   ],
   [
+    /^TypeError: 'str' object does not support item assignment/,
+    '글자는 한 자리만 바꿔 넣을 수 없어요. .replace( )를 쓰거나 새 글자를 만들어 봐요.',
+  ],
+  [
+    /^TypeError: (list|string|str|tuple) indices must be integers/,
+    '[ ] 안의 자리 번호는 정수여야 해요. 글자나 소수가 들어가지 않았는지 봐요.',
+  ],
+  [
     /^TypeError: /,
     '서로 섞어 쓸 수 없는 값끼리 셈을 했어요. 숫자인지 글자인지 하나씩 확인해 봐요.',
   ],
@@ -101,12 +109,31 @@ const RULES: Rule[] = [
     '숫자가 아닌 글자를 int( )로 바꾸려고 했어요. 숫자만 들어 있는지 확인해 봐요.',
   ],
   [
+    /^ValueError: /,
+    '그 값으로는 바꿀 수 없어요. 값이 알맞은 모양인지 확인해 봐요.',
+  ],
+  [
+    /^IndexError: string index out of range/,
+    '글자에 없는 자리 번호를 찾았어요. 번호는 0부터 시작하고, 마지막 글자는 길이보다 하나 작은 번호(또는 -1)예요.',
+  ],
+  [
     /^IndexError: /,
     '목록에 없는 번호를 찾았어요. 번호는 0부터 시작해서 개수보다 하나 작은 데서 끝나요.',
   ],
   [
     /^KeyError: (.+)/,
-    (m) => `사전에 ${m[1]} 라는 열쇠가 없어요. 열쇠 이름을 다시 확인해 봐요.`,
+    (m) =>
+      `딕셔너리에 ${m[1]} 라는 이름표(키)가 없어요. 이름표 철자를 확인하거나 .get( )으로 꺼내 봐요.`,
+  ],
+  [
+    /^ModuleNotFoundError: No module named '([^']+)'/,
+    (m) =>
+      `${m[1]} 라는 모듈(도구 상자)은 없어요. import 뒤 이름의 철자를 확인해 봐요.`,
+  ],
+  [
+    /^AttributeError: module '([^']+)' has no attribute '([^']+)'/,
+    (m) =>
+      `${m[1]} 모듈에는 ${m[2]} 라는 도구가 없어요. 점(.) 뒤 이름의 철자를 확인해 봐요.`,
   ],
   [
     /^AttributeError: /,

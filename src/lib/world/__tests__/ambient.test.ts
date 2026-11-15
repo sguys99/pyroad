@@ -4,6 +4,29 @@ import { WORLDS, mapPath } from '../worlds';
 
 const island = WORLDS.find((w) => w.slug === 'python-island')!.map!;
 
+describe('동시 애니메이션 상한 (worldMap.css "16개 안팎", P10-04)', () => {
+  // 움직이는 장식: MapArt FAR_KINDS (고래·야자수·바위는 정지)
+  const MOVING = new Set(['waves', 'boat', 'bird', 'buoy']);
+  it.each(WORLDS.filter((w) => w.map).map((w) => [w.slug, w.map!] as const))(
+    '%s: 레이아웃마다 16개 이하',
+    (_slug, map) => {
+      for (const layout of Object.values(map.layouts)) {
+        const plan = ambientPlan(layout, map.path, map.ambient);
+        const decos = (layout.decorations ?? []).filter((d) =>
+          MOVING.has(d.kind),
+        ).length;
+        const total =
+          decos +
+          plan.clouds.length +
+          plan.seaSparks.length +
+          plan.roadSparks.length +
+          plan.leaves.length;
+        expect(total).toBeLessThanOrEqual(16);
+      }
+    },
+  );
+});
+
 describe('지도 앰비언트 자리 (P5-09)', () => {
   it('ambient가 없으면 아무것도 두지 않는다', () => {
     const p = ambientPlan(island.layouts.wide, island.path, undefined);

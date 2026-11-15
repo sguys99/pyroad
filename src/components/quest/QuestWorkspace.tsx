@@ -103,14 +103,17 @@ export function QuestWorkspace({
   const { quest, tab, setTab, runner, runResult, validation, liveOutput } =
     session;
   // 결과 쪽지에서 견줘 볼 공개 예시 출력 (P7-17): 프로젝트는 지금 단계, 코드 퀘스트는 퀘스트의 example_output.
-  // 결과가 정해진 output_match 만 줄 단위로 견줌 (무작위·포함 검사는 예시만)
+  // 결과가 정해진 규칙만 줄 단위로 견줌 (무작위·포함 검사는 예시만). `all`(출력 = + 코드 ⊃)은 빌드가 내보낸
+  // example_exact 로 앎 (P10-09). 플래그가 없는 옛 행은 규칙 유형으로
   const guide = session.steps?.length
     ? session.steps[session.currentStep - 1]
     : { ...quest.prompt_skeleton, validation_type: quest.validation_type };
   const example = guide?.example_output
     ? {
         text: guide.example_output,
-        compare: guide.validation_type === 'output_match',
+        compare:
+          guide.example_exact === true ||
+          guide.validation_type === 'output_match',
       }
     : undefined;
   // 오류 줄로: 모바일은 공책 쪽으로 넘기고, 에디터에 표시된 오류 줄(P2-18)을 화면 가운데로

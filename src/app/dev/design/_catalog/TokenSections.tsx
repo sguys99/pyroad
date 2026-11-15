@@ -74,6 +74,8 @@ const COLOR_ROLE: Record<ColorName, string> = {
   w2: '월드 2 틴트 (장식)',
   w2Ink: '월드 2 표지 글자',
   w2Soft: '월드 2 바탕',
+  w2Shallow: '2월드 지도 얕은 바다 (장식)',
+  w2Deep: '2월드 지도 깊은 바다 (장식)',
   w3: '월드 3 틴트 (장식)',
   w3Ink: '월드 3 표지 글자',
   w3Soft: '월드 3 바탕',
@@ -91,7 +93,7 @@ const COLOR_GROUPS: [string, ColorName[]][] = [
   ['주색 · 보조', ['primary', 'onPrimary', 'primaryLip', 'primaryText', 'primaryBright', 'primarySoft', 'secondary', 'onSecondary']],
   ['강조 금색', ['accent', 'onAccent', 'accentLip', 'accentLight', 'accentText', 'accentSoft']],
   ['의미색 · 덮개', ['success', 'successSoft', 'warning', 'warningSoft', 'error', 'onError', 'errorSoft', 'onScrim']],
-  ['월드 틴트', ['w1', 'w1Ink', 'w1Soft', 'w2', 'w2Ink', 'w2Soft', 'w3', 'w3Ink', 'w3Soft']],
+  ['월드 틴트', ['w1', 'w1Ink', 'w1Soft', 'w2', 'w2Ink', 'w2Soft', 'w2Shallow', 'w2Deep', 'w3', 'w3Ink', 'w3Soft']],
   ['코드', ['codeBg', 'codeText', 'codeComment', 'codeKeyword', 'codeString', 'codeNumber', 'codeFunc']],
 ];
 

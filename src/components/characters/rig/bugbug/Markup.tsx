@@ -11,6 +11,7 @@ import {
   usesPaper,
 } from '../core/markup';
 import { Hat } from '../costumes';
+import { BossHeadGear, BossTentacles, BossTube } from './gear';
 import type { MarkupProps } from '../core/types';
 import { STYLE_RULES, type RigStyle } from '../style';
 
@@ -131,6 +132,8 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
   // 소품 선: 잉크(A×B) / 몸색 톤(B)이면 차분한 금갈색 / 없음(A)이면 밝은 금색
   const propInk = lineInk ?? (rules.tonal ? '#B78A3E' : undefined);
   const legW = lineInk ? 3.4 : 3.2;
+  const gear = costume?.gear;
+  const tentacles = gear === 'captain';
 
   const half = (side: 'L' | 'R') => (
     <g ref={r(`shell${side}`)} {...a(`shell${side}`)}>
@@ -207,17 +210,22 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
       ))}
       <g filter={paper ? `url(#${idp}boil)` : undefined}>
         <g ref={r('root')} {...a('root')}>
+          {/* 문어 다리 (P10-04 선장 외형): 다리 대신. 다리 경로는 리그가 계속 움직이므로 감추기만 */}
+          {tentacles && <BossTentacles pal={pal} ink={lineInk} />}
           {/* 다리 */}
           <g
             stroke={lineInk ?? pal.leg}
             strokeWidth={legW}
             strokeLinecap="round"
             fill="none"
+            opacity={tentacles ? 0 : undefined}
           >
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <path key={i} ref={r(`leg${i}`)} {...a(`leg${i}`)} />
             ))}
           </g>
+          {/* 소용돌이 튜브 (P10-04): 뒤쪽 테는 몸 뒤 */}
+          {gear === 'tube' && <BossTube part="back" ink={lineInk} />}
           {/* 배·날개 (등딱지가 열리면 보임) */}
           <ellipse cx="64" cy="82" rx="27" ry="25" fill={pal.under} />
           <ellipse
@@ -242,6 +250,7 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
           />
           {half('L')}
           {half('R')}
+          {gear === 'tube' && <BossTube part="front" ink={lineInk} />}
           {/* 머리 */}
           <g ref={r('head')} {...a('head')}>
             {(['L', 'R'] as const).map((s) => (
@@ -359,6 +368,10 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
               <g transform="translate(0 6)">
                 <Hat kind={costume.hat} outline={propInk} tonal={rules.tonal} />
               </g>
+            )}
+            {/* 바다 소품 (P10-04 2월드 외형) */}
+            {gear && gear !== 'tube' && (
+              <BossHeadGear gear={gear} pal={pal} ink={lineInk} />
             )}
           </g>
           {/* 소품 */}

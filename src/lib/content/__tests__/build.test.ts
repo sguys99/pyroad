@@ -68,6 +68,7 @@ function tree(...stages: [typeof STAGE_1, Quest[]][]): ContentTree {
           unlock_rule: { type: 'open' },
         },
         map: null,
+        skillCheck: null,
         stages: stages.map(([stage, quests]) => ({
           file: 'stage.yaml',
           stage,
@@ -112,8 +113,35 @@ describe('buildRows: 공개/정답 분리', () => {
       'expected_output_hint',
       'checklist',
       'example_output',
+      'example_exact',
       'fallback_text',
     ]);
+  });
+
+  // P10-09: 결과 쪽지 줄 비교는 출력이 정해진 규칙에서만. `all` 안의 output_match 도 (2월드 33개), 기준값은 내보내지 않음
+  it('example_exact: output_match 가 (all 안에라도) 있으면 true, 없으면 키가 없음', () => {
+    expect(codeRow.prompt_skeleton.example_exact).toBe(true);
+    const q = codeQuest();
+    const skeletonOf = (validation: unknown) =>
+      buildRows(
+        tree([
+          STAGE_1,
+          [parsed({ ...q, answer: { ...q.answer, validation } })],
+        ]),
+      ).rows.quests[0].prompt_skeleton;
+    const exactAll = skeletonOf({
+      type: 'all',
+      rules: [
+        { type: 'output_match', expected: '안녕하세요!' },
+        { type: 'code_check', expected: 'print(' },
+      ],
+    });
+    expect(exactAll.example_exact).toBe(true);
+    expect(JSON.stringify(exactAll)).not.toContain('"print("');
+    expect(
+      'example_exact' in skeletonOf({ type: 'contains', expected: '안녕' }),
+    ).toBe(false);
+    // 프로젝트 단계: code_check · all[code_check, contains_any] 라 플래그 없음 (아래 steps toEqual)
   });
 
   it('정답 문자열은 quests 행에 없고 quest_answer_keys 행에만 있음', () => {
@@ -635,6 +663,24 @@ describe('보스 (P9-12)', () => {
     const r = parseQuest(leak);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors[0]).toContain('rounds[0].prompt.accepted');
+  });
+
+  it('review_quest 는 같은 월드의 다른 스테이지도 되고, 월드에 없는 퀘스트면 실패 (P10-07 최종 보스)', () => {
+    const withReview = (id: string) =>
+      parsed({
+        ...boss,
+        order: 2,
+        rounds: boss.rounds.map((r: object) => ({ ...r, review_quest: id })),
+      });
+    const code = parsed(codeQuest()); // STAGE_1 의 퀘스트
+    const ok = withReview(code.id);
+    expect(() =>
+      buildRows(tree([STAGE_1, [code]], [STAGE_7, [ok]])),
+    ).not.toThrow();
+    const bad = withReview('b9000000-0000-0000-0000-000000000001');
+    expect(() => buildRows(tree([STAGE_1, [code]], [STAGE_7, [bad]]))).toThrow(
+      '이 월드 퀘스트가 아니에요',
+    );
   });
 
   it('라운드 문제 글에 정답이 그대로 있으면 실패 (퀴즈와 같은 검사)', () => {

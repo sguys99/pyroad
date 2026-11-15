@@ -1,0 +1,81 @@
+# 2월드 퀘스트 6-5: 조개 속 진주 찾기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-6
+# 진주가 3번째와 5번째에 있어서 break 를 안 쓰면 "5번째"가 나와 불합격
+
+id: b2000000-0000-0000-0000-000000000050
+order: 5
+title: 조개 속 진주 찾기
+concept: 차례로 찾기(검색) + break
+xp_reward: 85
+quest_type: code
+prompt:
+  topic: 차례로 열어 보며 찾기
+  learning_goals:
+    - 앞에서부터 하나씩 열어 보며 찾는 검색 순서를 코드로 쓸 수 있다
+    - 찾으면 break로 반복을 바로 멈출 수 있다
+    - 찾았는지를 True/False 표시로 기억해 두었다가 결과를 알려 줄 수 있다
+  story_context: 네 번째 봉우리 바닥에 조개가 줄지어 있어요. 이 중 어딘가에 진주가 숨어 있대요! 조개를 하나씩 열어 보다가 진주를 찾으면 더 열지 말고 멈춰요. 조개를 너무 많이 열면 조개가 화를 내거든요.
+  exercise_description: '조개를 하나씩 열며 opened 를 세다가 "진주"를 찾으면 found 를 True 로 바꾸고 break 로 멈춰요. 그러면 아래 코드가 "3번째 조개에서 찾았어요"를 출력해요'
+  starter_code: |
+    beach = ["모래", "미역", "진주", "돌멩이", "진주"]
+    opened = 0
+    found = False
+
+    for shell in beach:
+        opened = opened + 1
+        print(f"{opened}번째 조개를 열어요")
+        if shell == "진주":
+            # 찾았다고 표시하고, 더 열지 않고 멈춰요
+            ___
+
+    if found:
+        print(f"{opened}번째 조개에서 찾았어요")
+    else:
+        print("없어요")
+  expected_output_hint: '조개를 3번째까지만 열고 3번째 조개에서 찾았어요 가 나와야 해요'
+  checklist:
+    - 'found = True 로 찾았다고 표시해요'
+    - 바로 다음 줄에 break 를 써서 멈춰요
+    - 조개를 3번째까지만 여는지 봐요
+  example_output: |-
+    1번째 조개를 열어요
+    2번째 조개를 열어요
+    3번째 조개를 열어요
+    3번째 조개에서 찾았어요
+  fallback_text: '차례로 찾기 알고리즘: 앞에서부터 하나씩 열어 보고, 찾으면 그 자리에서 멈춰요. break 는 반복을 바로 끝내는 주문이에요. break 가 없으면 5번째 진주까지 열어 버려서 "5번째"가 나와요. 진주가 하나도 없으면 found 가 False 그대로라 "없어요"가 나와요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          1번째 조개를 열어요
+          2번째 조개를 열어요
+          3번째 조개를 열어요
+          3번째 조개에서 찾았어요
+      - type: code_check
+        expected: break
+        whole_word: true
+  hints:
+    level_1: 찾았다는 표시 found 를 바꾸고, 반복을 바로 끝내는 주문을 써요. 1월드에서 반복을 멈출 때 쓴 낱말이에요.
+    level_2: 'if 안에 found = True 를 쓰고, 그 아래 줄에 break 를 써요.'
+    level_3: |-
+      빈칸을 이렇게 바꿔 보세요!
+              found = True
+              break
+  solution_code: |
+    beach = ["모래", "미역", "진주", "돌멩이", "진주"]
+    opened = 0
+    found = False
+
+    for shell in beach:
+        opened = opened + 1
+        print(f"{opened}번째 조개를 열어요")
+        if shell == "진주":
+            found = True
+            break
+
+    if found:
+        print(f"{opened}번째 조개에서 찾았어요")
+    else:
+        print("없어요")

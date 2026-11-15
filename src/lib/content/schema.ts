@@ -352,7 +352,7 @@ const bossRoundOf = <O extends QuizOption>(o: O) =>
     quiz_kind: o.shape.quiz_kind,
     prompt: z.strictObject({ quiz: o.shape.prompt.shape.quiz }),
     answer: o.shape.answer,
-    /** 선택. 이 문제에서 져서 끝나면 "복습하러 가기"가 여는 같은 스테이지 퀘스트 id (없으면 스테이지 퀘스트 목록) */
+    /** 선택. 이 문제에서 져서 끝나면 "복습하러 가기"가 여는 같은 월드 퀘스트 id (보통 같은 스테이지, 최종 보스는 앞 스테이지도. 없으면 스테이지 퀘스트 목록) */
     review_quest: id.optional(),
   });
 const [mcQuiz, fbQuiz, psQuiz, bhQuiz] = QuizQuestSchema.options;
@@ -437,6 +437,69 @@ export const QuestSchema = z
   });
 
 // ------------------------------------------------------------
+// 실력 확인 퀴즈 (P10-03, docs/curriculum/world2.md §7). content/worlds/<slug>/skill-check.yaml (선택)
+//   앞 월드를 다 깨지 않고 이 월드를 여는 시험: 묶음 2벌 × 10문제, KST 날마다 번갈아, 8문제 이상 합격 (00052)
+//   sets[].questions[].prompt.quiz → skill_check_questions.quiz    공개 (서버만 읽어 화면에 보냄)
+//   sets[].questions[].answer      → skill_check_questions.answer  정답 (service_role 전용, 학생에게 정답·해설을 보여 주지 않음)
+//   review_quest                   → 틀리면 "더 연습하면 좋은 단계"로 보여 줄 앞 월드 퀘스트 (필수)
+// 문제 하나는 보스 라운드와 같은 모양·규칙 (id·정답 글자 누출 검사 checkQuiz, test:content 실제 실행)
+// ------------------------------------------------------------
+
+export const SKILL_CHECK = { sets: 2, questions: 10 } as const;
+
+export const SkillCheckSchema = z
+  .strictObject({
+    sets: z
+      .array(
+        z.strictObject({
+          questions: z
+            .array(BossRoundSchema)
+            .length(SKILL_CHECK.questions, '문제는 10개씩 써요'),
+        }),
+      )
+      .length(SKILL_CHECK.sets, '묶음은 2벌이에요 (날마다 번갈아)'),
+  })
+  .superRefine((check, ctx) => {
+    check.sets.forEach((set, s) =>
+      set.questions.forEach((q, i) => {
+        const at = ['sets', s, 'questions', i];
+        if (!q.review_quest)
+          ctx.addIssue({
+            code: 'custom',
+            path: [...at, 'review_quest'],
+            message: '틀렸을 때 복습할 앞 월드 퀘스트 id 를 써요',
+          });
+        const asQuiz = {
+          id: q.review_quest ?? '',
+          order: i + 1,
+          title: '실력 확인 퀴즈',
+          concept: '',
+          xp_reward: 0,
+          quest_type: 'quiz',
+          quiz_kind: q.quiz_kind,
+          prompt: {
+            topic: '',
+            learning_goals: [''],
+            story_context: '',
+            fallback_text: '',
+            quiz: q.prompt.quiz,
+          },
+          answer: q.answer,
+        } as unknown as QuizQuest;
+        checkQuiz(asQuiz, (path, message) =>
+          ctx.addIssue({
+            code: 'custom',
+            path: [...at, ...path],
+            message: `${s + 1}벌 ${i + 1}번째 문제: ${message}`,
+          }),
+        );
+      }),
+    );
+  });
+
+export type SkillCheck = z.infer<typeof SkillCheckSchema>;
+
+// ------------------------------------------------------------
 // 월드·스테이지 메타 (world.yaml, stage.yaml)
 // ------------------------------------------------------------
 
@@ -490,7 +553,18 @@ const point = z.tuple([z.number().min(0), z.number().min(0)]);
 
 /** 지도 장식 (그림 종류는 지도 컴포넌트가 정함, P5-02) */
 export const MapDecorationSchema = z.strictObject({
-  kind: z.enum(['tree', 'mountains', 'waves', 'bird', 'boat']),
+  // palm·rock(중간 레이어)·buoy·whale(먼 레이어, 움직임)은 2월드 바다 (P10-04)
+  kind: z.enum([
+    'tree',
+    'mountains',
+    'waves',
+    'bird',
+    'boat',
+    'palm',
+    'rock',
+    'buoy',
+    'whale',
+  ]),
   x: z.number(),
   y: z.number(),
   /** 크기 배율. 없으면 1 */
