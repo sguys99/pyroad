@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000025
 order: 7
 title: X 표시를 찾아라
 concept: 좌표 찾기, range(len())
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 줄 번호와 칸 번호로 격자 돌기
@@ -41,7 +41,7 @@ answer:
       - type: output_match
         expected: 보물은 1줄 2칸
       - type: code_check
-        expected: range(len(
+        expected: len(grid
   hints:
     level_1: 칸 자체가 아니라 번호가 필요해요. 번호를 차례로 만드는 주문 range 안에 무엇을 넣을까요?
     level_2: '줄 수는 len(grid), r 번 줄의 칸 수는 len(grid[r]) 예요. 칸이 X 인지는 if grid[r][c] == "X": 로 물어요.'

@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000003
 order: 3
 title: 조개 도장 세기
 concept: 글자 돌며 세기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: for로 글자를 돌며 if로 세기

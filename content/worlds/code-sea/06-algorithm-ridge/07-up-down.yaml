@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000052
 order: 7
 title: 업다운 마법
 concept: 반씩 줄여 찾기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 가운데를 골라 반씩 줄여 찾기

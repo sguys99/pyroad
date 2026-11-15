@@ -173,6 +173,39 @@ describe('validateResult', () => {
         expect(codeContains('내점수 = 1', '점수', whole)).toBe(false);
       });
     });
+
+    describe('띄어쓰기 차이 무시 (P10-09)', () => {
+      it('기호 옆 띄어쓰기는 있든 없든 같음', () => {
+        expect(codeContains('book["x"]="y"', '] =')).toBe(true);
+        expect(codeContains('book["x"]  =  "y"', ']=')).toBe(true);
+        expect(codeContains('n = (n+3)%26', '% 26')).toBe(true);
+        expect(
+          codeContains('fever=temperature-37', 'fever = temperature'),
+        ).toBe(true);
+        expect(codeContains('x = a // 2', 'x=a//2')).toBe(true);
+      });
+
+      it('들여쓰기는 탭·2칸·4칸 모두 "들여쓴 줄"로 같음', () => {
+        for (const indent of ['\t', '  ', '    ', '        '])
+          expect(
+            codeContains(`for r in x:\n${indent}for c in y:\n`, '    for'),
+          ).toBe(true);
+        expect(
+          codeContains('for r in x:\n    print(r)\nfor c in y:\n', '    for'),
+        ).toBe(false);
+      });
+
+      it('낱말 사이 띄어쓰기는 남아서 붙은 낱말과 구별', () => {
+        expect(codeContains('import  math', 'import math')).toBe(true);
+        expect(codeContains('importmath = 1', 'import math')).toBe(false);
+        expect(codeContains('for\tx in y:', 'for', { wholeWord: true })).toBe(
+          true,
+        );
+        expect(codeContains('format(x)', 'for', { wholeWord: true })).toBe(
+          false,
+        );
+      });
+    });
   });
 
   describe('blankCommentsAndStrings', () => {

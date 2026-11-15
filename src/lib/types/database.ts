@@ -103,6 +103,8 @@ export interface ProjectStep {
   checklist?: string[];
   /** 공개 예시 출력 (P7-17) */
   example_output?: string;
+  /** 출력이 정해진 단계면 true — 결과 쪽지가 예시와 줄 단위로 견줌 (P10-09, 빌드가 규칙에서 만듦) */
+  example_exact?: boolean;
   starter_code: string;
   validation_type: ValidationType;
   fallback_text: string;
@@ -119,6 +121,8 @@ export interface PromptSkeleton {
   checklist?: string[];
   /** 공개 예시 출력 (P7-17, 코드 퀘스트만) */
   example_output?: string;
+  /** 출력이 정해진 퀘스트면 true (`all` 안의 output_match 포함) — 결과 쪽지가 예시와 줄 단위로 견줌 (P10-09) */
+  example_exact?: boolean;
   fallback_text: string;
   steps?: ProjectStep[];
 }

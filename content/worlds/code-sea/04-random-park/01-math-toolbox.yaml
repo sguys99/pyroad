@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000028
 order: 1
 title: 수학 도구 상자
 concept: import, math
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 모듈을 불러와 수학 도구 쓰기

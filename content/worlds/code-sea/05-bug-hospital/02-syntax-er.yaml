@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000037
 order: 2
 title: 문법 응급실
 concept: SyntaxError
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 문법 에러 고치기

@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000011
 order: 1
 title: 책 이름표 붙이기
 concept: 딕셔너리 만들기, 키로 꺼내기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 딕셔너리 만들고 키로 값 꺼내기

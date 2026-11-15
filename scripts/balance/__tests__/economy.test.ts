@@ -12,6 +12,7 @@ import {
   simulateEconomy,
   total,
   world1Stages,
+  worldStages,
 } from '../economy';
 
 // docs/balance.md 3~4절 숫자가 규칙·콘텐츠가 바뀌어도 지켜지는지 (P8-14). 바뀌면 시트 표도 `npm run balance:economy`로 다시
@@ -142,5 +143,29 @@ describe('획득 속도 시뮬레이션', () => {
   it('소급 보상: 1월드를 다 끝낸 기존 사용자는 바로 1,465코인 + 받기 가능 업적', () => {
     expect(retroCoins(7, stages).auto).toBe(1465);
     expect(retroCoins(7, stages).level).toBe(10);
+  });
+});
+
+// docs/balance.md 7절 (P10-09): 1월드에 이어 2월드 실제 콘텐츠
+describe('2월드까지 (balance:economy -- --world2)', () => {
+  const w1 = world1Stages();
+  const stages = [...w1, ...worldStages(2, w1.length)];
+  const normal = simulateEconomy(STUDENTS[1], { days: 120, stages });
+  const noMission = simulateEconomy(STUDENTS[1], {
+    days: 120,
+    stages,
+    missionXp: 0,
+  });
+
+  it('보통 학생: 2월드도 1월드만큼 걸리고(25~45일), 미션 XP 빼면 Lv 10 → 20~21, 상자 7개 모두', () => {
+    const a = normal.clearDays[w1.length];
+    const b = normal.clearDays[stages.length];
+    expect(b - a).toBeGreaterThanOrEqual(25);
+    expect(b - a).toBeLessThanOrEqual(45);
+    expect(noMission.rows[a].level).toBe(10);
+    expect(noMission.rows[b].level).toBeGreaterThanOrEqual(20);
+    expect(noMission.rows[b].level).toBeLessThanOrEqual(21);
+    for (let o = w1.length + 1; o <= stages.length; o++)
+      expect(normal.chestDays[o]).toBeLessThanOrEqual(b);
   });
 });

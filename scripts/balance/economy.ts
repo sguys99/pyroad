@@ -112,19 +112,22 @@ interface StageDef {
   quests: QuestDef[];
 }
 
-export function world1Stages(): StageDef[] {
+export const world1Stages = () => worldStages(1);
+
+/** 월드의 스테이지. 여러 월드를 이어 붙일 때는 `offset`만큼 order 를 밀어 앞 월드 마지막 스테이지 다음에 열리게 함 */
+export function worldStages(order: number, offset = 0): StageDef[] {
   const world = loadContent(resolve(ROOT, 'content')).worlds.find(
-    (w) => w.world.order === 1,
+    (w) => w.world.order === order,
   );
-  if (!world) throw new Error('1월드 콘텐츠가 없음');
+  if (!world) throw new Error(`${order}월드 콘텐츠가 없음`);
   return world.stages.map((s) => ({
-    order: s.stage.order,
+    order: s.stage.order + offset,
     isFinal: s.stage.is_final,
     quests: s.quests.map(({ quest }) => ({
       id: quest.id,
       type: quest.quest_type,
       base: quest.xp_reward,
-      stage: s.stage.order,
+      stage: s.stage.order + offset,
     })),
   }));
 }
@@ -207,6 +210,8 @@ export interface EconomyResult {
   /** 1월드 새 퀘스트를 모두 끝낸 날 (0부터), 못 끝내면 null */
   world1Day: number | null;
   chestDays: Record<number, number>;
+  /** 스테이지 클리어(퀴즈 빼고 모두, 보스 포함) 날 */
+  clearDays: Record<number, number>;
   /** 스테이지 별이 최대(100%)가 된 날 */
   perfectDays: Record<number, number>;
   achievements: { id: string; day: number; coins: number }[];
@@ -255,6 +260,7 @@ export function simulateEconomy(
     rows: [],
     world1Day: null,
     chestDays: {},
+    clearDays: {},
     perfectDays: {},
     achievements: [],
     missions: { assigned: {}, done: {} },
@@ -290,6 +296,8 @@ export function simulateEconomy(
         chestsOpened++;
         result.chestDays[s.order] = day;
       }
+      if (!(s.order in result.clearDays) && stageCleared(s))
+        result.clearDays[s.order] = day;
       if (
         !(s.order in result.perfectDays) &&
         stageStars(s) === s.quests.length * 3
@@ -662,7 +670,62 @@ function achievementsNotRetro(r: EconomyResult): number {
 const pct = (a: number, b: number) => `${Math.round((a / b) * 100)}%`;
 const dayLabel = (d: number | null) => (d === null ? '180+' : `${d + 1}일`);
 
+/** `npm run balance:economy -- --world2`: 1월드에 이어 2월드 실제 콘텐츠를 풀 때 (P10-09, balance.md 7절) */
+function mainWorld2() {
+  const days = 365;
+  const catalogAll = SHOP_ITEMS.filter((i) => i.kind !== 'consumable').reduce(
+    (n, i) => n + i.price,
+    0,
+  );
+  const w1 = world1Stages();
+  const stages = [...w1, ...worldStages(2, w1.length)];
+  const w1End = w1.length;
+  const w2End = stages.length;
+  const runs = STUDENTS.map((s) => simulateEconomy(s, { days, stages }));
+  const noM = STUDENTS.map((s) =>
+    simulateEconomy(s, { days, stages, missionXp: 0 }),
+  );
+  const at = (r: EconomyResult, d: number) =>
+    r.rows[Math.min(d, r.rows.length - 1)];
+  const out: string[] = [
+    '| 유형 | 1월드 끝(일째) | 2월드 끝(일째) | 2월드 걸린 날 | Lv (1월드 끝 → 2월드 끝) | 미션 XP 빼면 | 2월드 XP (미션 빼면) |',
+    '|---|---|---|---|---|---|---|',
+  ];
+  const coinRows: string[] = [
+    `| 유형 | 2월드 동안 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 상자 연 수 | 2월드 끝 잔액 (카탈로그 ${catalogAll} 대비) |`,
+    `|---|---|${SOURCES.map(() => '---|').join('')}---|---|---|`,
+  ];
+  runs.forEach((r, i) => {
+    const a = r.clearDays[w1End];
+    const b = r.clearDays[w2End];
+    if (a === undefined || b === undefined) {
+      out.push(
+        `| ${r.student.name} | ${a === undefined ? '-' : a + 1} | ${days}일 안에 못 끝냄 | - | - | - | - |`,
+      );
+      return;
+    }
+    const [ra, rb, na, nb] = [at(r, a), at(r, b), at(noM[i], a), at(noM[i], b)];
+    out.push(
+      `| ${r.student.name} | ${a + 1} | ${b + 1} | ${b - a} | ${ra.level} → ${rb.level} | ${na.level} → ${nb.level} | ${rb.xp - ra.xp} (${nb.xp - na.xp}) |`,
+    );
+    const diff = SOURCES.map((s) => rb.coins[s] - ra.coins[s]);
+    const t = diff.reduce((x, y) => x + y, 0);
+    const learn = SOURCES.reduce(
+      (n, s, k) => n + (LEARNING_SOURCES.includes(s) ? diff[k] : 0),
+      0,
+    );
+    const chests = Object.entries(r.chestDays).filter(
+      ([o, d]) => Number(o) > w1End && d <= b,
+    ).length;
+    coinRows.push(
+      `| ${r.student.name} | ${t} | ${diff.join(' | ')} | ${pct(learn, t)} | ${chests} / ${w2End - w1End} | ${total(rb.coins)} (${pct(total(rb.coins), catalogAll)}) |`,
+    );
+  });
+  console.log([...out, '', ...coinRows].join('\n'));
+}
+
 function main() {
+  if (process.argv.includes('--world2')) return mainWorld2();
   const days = 180;
   const runs = STUDENTS.map((s) => simulateEconomy(s, { days }));
   const noMissionXp = STUDENTS.map((s) =>

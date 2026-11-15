@@ -8,6 +8,7 @@
 
 import type { WorldInfo } from '@/lib/world/worlds';
 import {
+  hasExactOutput,
   toStoredRule,
   type StoredRule,
   type ValidationRule,
@@ -60,6 +61,8 @@ export interface PublicStep {
   step_goal: string;
   checklist: string[];
   example_output: string;
+  /** 출력이 정해진 규칙(`all` 안의 output_match 포함)이면 true — 결과 쪽지가 예시와 줄 단위로 견줌 (P10-09) */
+  example_exact?: true;
   starter_code: string;
   validation_type: StoredRule['validation_type'];
   fallback_text: string;
@@ -325,7 +328,13 @@ export function splitQuest(
     starter_code: p.starter_code,
     expected_output_hint: p.expected_output_hint,
     ...('checklist' in p
-      ? { checklist: [...p.checklist], example_output: p.example_output }
+      ? {
+          checklist: [...p.checklist],
+          example_output: p.example_output,
+          ...(hasExactOutput(quest.answer.validation)
+            ? { example_exact: true }
+            : {}),
+        }
       : {}),
     fallback_text: p.fallback_text,
     ...(p.is_challenge === undefined ? {} : { is_challenge: p.is_challenge }),
@@ -346,6 +355,9 @@ export function splitQuest(
         step_goal: step.prompt.step_goal,
         checklist: [...step.prompt.checklist],
         example_output: step.prompt.example_output,
+        ...(hasExactOutput(step.answer.validation)
+          ? { example_exact: true as const }
+          : {}),
         starter_code: step.prompt.starter_code,
         validation_type: s.validation_type,
         fallback_text: step.prompt.fallback_text,

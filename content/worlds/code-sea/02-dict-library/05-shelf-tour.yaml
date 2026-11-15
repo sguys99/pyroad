@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000015
 order: 5
 title: 책장 한 바퀴
 concept: items()
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: items()로 딕셔너리 모두 돌기

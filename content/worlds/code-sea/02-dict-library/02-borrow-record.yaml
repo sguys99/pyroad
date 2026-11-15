@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000012
 order: 2
 title: 책 빌리기 기록장
 concept: 딕셔너리 값 추가·수정, len()
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 딕셔너리에 이름표 더하고 내용 고치기
@@ -41,7 +41,7 @@ answer:
         expected: |-
           {'제목': '바다 탐험', '쪽수': 130, '빌린 사람': '하늘'}
           이름표 수: 3
-      # 이름표를 넣고 고치는 줄 (= 앞뒤 띄어쓰기는 시작 코드·힌트 모양 그대로, 설계 ※2)
+      # 이름표를 넣고 고치는 줄. 채점이 띄어쓰기를 맞춰 보므로 book["x"]="y" 도 통과 (P10-09)
       - type: code_check
         expected: '] ='
   hints:

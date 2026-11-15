@@ -60,7 +60,12 @@ export function questFromRows(quest: Row, answer: Row | undefined): Quest {
   const prompt: Row = {};
   for (const key of PROMPT_KEYS) if (key in sk) prompt[key] = sk[key];
   for (const key of Object.keys(sk)) {
-    if (!(PROMPT_KEYS as readonly string[]).includes(key) && key !== 'steps') {
+    // example_exact 는 빌드가 규칙에서 만드는 값이라 원본에 쓰지 않음 (P10-09)
+    if (
+      !(PROMPT_KEYS as readonly string[]).includes(key) &&
+      key !== 'steps' &&
+      key !== 'example_exact'
+    ) {
       prompt[key] = sk[key]; // 모르는 키는 그대로 넘겨 스키마가 짚게 함
     }
   }

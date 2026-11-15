@@ -372,7 +372,7 @@ DB: `skill_check_questions (world_id, set_no, no, review_quest_id, quiz, answer)
 | `output_match` | `expected: 문자열` | 출력 전체가 같음 (앞뒤 공백·줄바꿈 무시) |
 | `contains` | `expected: 문자열` | 출력에 들어 있음 |
 | `contains_any` | `expected: [문자열, …]` | 출력에 하나라도 들어 있음. **무작위 출력 퀘스트에 씀** |
-| `code_check` | `expected: 문자열`, `whole_word: true`(선택) | 코드에 들어 있음. 주석·문자열 안의 글자는 보지 않음(B25). `whole_word`면 `int(`가 `randint(` 안에서는 안 걸림(B30) |
+| `code_check` | `expected: 문자열`, `whole_word: true`(선택) | 코드에 들어 있음. 주석·문자열 안의 글자는 보지 않음(B25). `whole_word`면 `int(`가 `randint(` 안에서는 안 걸림(B30). 띄어쓰기는 코드·기준 모두 같은 모양으로 맞춰 봄(P10-09): 기호 옆 공백은 무시(`] =` ≡ `]=`), 들여쓰기는 탭·2칸·4칸 모두 한 모양(`    for` = 들여쓴 `for`) |
 | `all` | `rules: [규칙, …]` | 모두 통과 |
 
 ```yaml
@@ -389,6 +389,7 @@ validation:
 - **무작위 출력에는 `random.seed` 고정 대신 넓은 규칙을 씁니다.** 시드를 고정하면 난수 뽑는 순서만 다른, 똑같이 맞는 답이 떨어집니다(§2.4).
 - `output_match`·`contains`는 답을 그대로 `print`해도 통과합니다. 개념이 중요한 퀘스트는 `all`로 `code_check`와 묶습니다.
 - `code_check`에 짧은 문자열을 쓰면 다른 코드에 섞여 걸립니다(`int(` ⊂ `randint(`). `whole_word: true`를 쓰거나 더 긴 문자열을 고릅니다.
+- 반대로 너무 좁으면 맞는 답이 떨어집니다. 같은 뜻의 다른 정답(예: `range(len(x))` 대신 `range(0, len(x))`)도 걸리게 고르고, 아이들이 쓸 만한 다른 정답은 `scripts/content/__tests__/gradingVariants.content.test.ts`의 `HANDWRITTEN`에 넣어 `test:content`로 확인합니다(모든 정답은 탭·2칸 들여쓰기·기호 옆 공백 없음·빈 줄·작은따옴표 모양으로도 저절로 채점해 봄).
 - 3단계 힌트(`level_3`)대로 쓴 답도 규칙을 통과하는지 확인합니다(B09: 힌트 문구로는 절대 통과 못 하던 사례).
 
 **DB 저장 형태** (`src/lib/quest/validation.ts`의 `toStoredRule`): 기존 두 칸(`validation_type` + `expected_output`)을 그대로 씁니다. `output_match`·`contains`·`code_check`는 기준 문자열 그대로, `contains_any`·`all`은 기준값 칸에 JSON을 넣고, `code_check` + `whole_word`는 하위 규칙 하나짜리 `all`로 저장합니다. 채점 API(`/api/quest/validate`)는 바꾸지 않아도 됩니다.

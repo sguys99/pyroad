@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000050
 order: 5
 title: 조개 속 진주 찾기
 concept: 차례로 찾기(검색) + break
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 차례로 열어 보며 찾기

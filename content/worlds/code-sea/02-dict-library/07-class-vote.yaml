@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000017
 order: 7
 title: 반장 투표 세기
 concept: 딕셔너리로 개수 세기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 딕셔너리로 개수 세기

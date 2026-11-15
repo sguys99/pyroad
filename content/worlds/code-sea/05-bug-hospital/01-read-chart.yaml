@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000036
 order: 1
 title: 진료 기록 읽기
 concept: 에러 메시지 읽기, NameError
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 에러 메시지에서 에러 이름과 줄 번호 찾기

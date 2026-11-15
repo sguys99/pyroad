@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000019
 order: 1
 title: 바닥 타일 깔기
 concept: 중첩 반복
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 반복 안에 반복 넣기

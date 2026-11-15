@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000014
 order: 4
 title: 없는 책을 찾으면?
 concept: in, get()
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 없는 키를 안전하게 다루기

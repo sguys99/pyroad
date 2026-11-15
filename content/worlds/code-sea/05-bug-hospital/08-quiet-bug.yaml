@@ -1,13 +1,14 @@
 # 2월드 퀘스트 5-8: 조용한 버그 탐정
 # 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5
 # 에러 없이 답이 틀린 버그(range(1, …)로 첫 값 빠짐). 시작 코드는 평균 53.3 으로 불합격.
-# 고친 반복 range(len(scores)) 를 code_check (제안 F) — 들여다보기 print 는 지우고 내야 output_match 통과
+# 채점(P10-09): 출력 + 반복(for). range(len(scores))·range(0, len(scores))·for s in scores·print("평균:", avg) 모두 맞는 고침이라
+# 고친 모양을 code_check 로 고르지 않음(맞는 답이 떨어지는 쪽이 더 나쁨) — 들여다보기 print 는 지우고 내야 output_match 통과
 
 id: b2000000-0000-0000-0000-000000000043
 order: 8
 title: 조용한 버그 탐정
 concept: print 디버깅
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 에러 없이 틀린 답 찾기
@@ -41,7 +42,8 @@ answer:
       - type: output_match
         expected: '평균: 80.0'
       - type: code_check
-        expected: range(len(scores))
+        expected: for
+        whole_word: true
   hints:
     level_1: 반복 안에 print(i, scores[i]) 를 넣어 실행해 보세요. 점수 세 개가 다 나오나요?
     level_2: '리스트 번호는 0부터예요. range(1, len(scores)) 는 몇 번부터 시작하나요?'

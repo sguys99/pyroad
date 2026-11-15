@@ -2,7 +2,7 @@
 -- pyRoad 콘텐츠 seed — 생성물입니다. 직접 고치지 마세요.
 -- 고치려면 content/ 의 YAML 을 고친 뒤 npm run content:build 로 다시 만듭니다 (content/README.md).
 -- CI 는 npm run content:build -- --check 로 이 파일이 content/ 와 같은지 확인합니다.
--- 콘텐츠 해시: 005f90e2fae01734
+-- 콘텐츠 해시: 42810285d466780b
 -- 월드 3 · 스테이지 14 · 퀘스트 136 · 정답 행 136 (solution_code 81 + 프로젝트 단계 15)
 --
 -- - quests 에는 공개 부분만 씁니다 (expected_output = '', prompt_skeleton 에 정답 키 없음 → 00005 CHECK 통과).
@@ -77,7 +77,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"print() 함수로 출력하기","learning_goals":["print() 함수를 사용하여 텍스트를 출력할 수 있다","따옴표 안에 원하는 텍스트를 넣을 수 있다"],"story_context":"파이썬 마을에 도착한 모험가가 마을 사람들에게 첫 인사를 하는 장면","exercise_description":"print() 함수를 사용하여 \"안녕하세요!\"를 출력해보세요","starter_code":"# 아래에 코드를 작성해보세요!\n","expected_output_hint":"안녕하세요! 가 출력되어야 해요","checklist":["print( )를 써요","따옴표 안에 안녕하세요! 를 넣어요","코드를 돌려서 인사가 나오는지 봐요"],"example_output":"안녕하세요!","fallback_text":"print()는 화면에 글자를 보여주는 마법 주문이에요! print(\"안녕하세요!\") 이렇게 따옴표 안에 보여주고 싶은 말을 넣으면 돼요."}'::jsonb,
+  '{"topic":"print() 함수로 출력하기","learning_goals":["print() 함수를 사용하여 텍스트를 출력할 수 있다","따옴표 안에 원하는 텍스트를 넣을 수 있다"],"story_context":"파이썬 마을에 도착한 모험가가 마을 사람들에게 첫 인사를 하는 장면","exercise_description":"print() 함수를 사용하여 \"안녕하세요!\"를 출력해보세요","starter_code":"# 아래에 코드를 작성해보세요!\n","expected_output_hint":"안녕하세요! 가 출력되어야 해요","checklist":["print( )를 써요","따옴표 안에 안녕하세요! 를 넣어요","코드를 돌려서 인사가 나오는지 봐요"],"example_output":"안녕하세요!","example_exact":true,"fallback_text":"print()는 화면에 글자를 보여주는 마법 주문이에요! print(\"안녕하세요!\") 이렇게 따옴표 안에 보여주고 싶은 말을 넣으면 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -101,7 +101,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"print()를 여러 번 사용하여 여러 줄 출력하기","learning_goals":["print()를 여러 번 사용하여 여러 줄을 출력할 수 있다","각 print()가 한 줄씩 출력하는 것을 이해한다"],"story_context":"마을 입구에서 자기소개를 하는 모험가. 마을 사람들이 이름과 인사를 기다리고 있어요!","exercise_description":"print()를 두 번 사용하여 첫 줄에 \"나는 파이썬 모험가!\", 둘째 줄에 \"반가워!\"를 출력하세요","starter_code":"# 두 줄을 출력해보세요!\n","expected_output_hint":"두 줄이 출력되어야 해요: 나는 파이썬 모험가! 그리고 반가워!","checklist":["print( )를 두 줄 써요","첫 줄에는 나는 파이썬 모험가! 를 넣어요","둘째 줄에는 반가워! 를 넣어요"],"example_output":"나는 파이썬 모험가!\n반가워!","fallback_text":"print()를 두 번 쓰면 두 줄이 나와요! 첫 번째 print()에 첫 번째 문장을, 두 번째 print()에 두 번째 문장을 넣어보세요."}'::jsonb,
+  '{"topic":"print()를 여러 번 사용하여 여러 줄 출력하기","learning_goals":["print()를 여러 번 사용하여 여러 줄을 출력할 수 있다","각 print()가 한 줄씩 출력하는 것을 이해한다"],"story_context":"마을 입구에서 자기소개를 하는 모험가. 마을 사람들이 이름과 인사를 기다리고 있어요!","exercise_description":"print()를 두 번 사용하여 첫 줄에 \"나는 파이썬 모험가!\", 둘째 줄에 \"반가워!\"를 출력하세요","starter_code":"# 두 줄을 출력해보세요!\n","expected_output_hint":"두 줄이 출력되어야 해요: 나는 파이썬 모험가! 그리고 반가워!","checklist":["print( )를 두 줄 써요","첫 줄에는 나는 파이썬 모험가! 를 넣어요","둘째 줄에는 반가워! 를 넣어요"],"example_output":"나는 파이썬 모험가!\n반가워!","example_exact":true,"fallback_text":"print()를 두 번 쓰면 두 줄이 나와요! 첫 번째 print()에 첫 번째 문장을, 두 번째 print()에 두 번째 문장을 넣어보세요."}'::jsonb,
   'output_match',
   '',
   50
@@ -125,7 +125,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"작은따옴표와 큰따옴표의 차이","learning_goals":["작은따옴표와 큰따옴표 모두 문자열을 만들 수 있다","문자열 안에 따옴표가 포함될 때 다른 종류의 따옴표로 감싸야 함을 안다"],"story_context":"파이썬 마을의 따옴표 가게에 왔어요! 작은따옴표와 큰따옴표, 언제 어떤 걸 써야 할까요?","exercise_description":"print()를 사용하여 I''m happy! 를 출력해보세요. 큰따옴표로 감싸면 안에 작은따옴표를 쓸 수 있어요!","starter_code":"# I''m happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n","expected_output_hint":"I''m happy! 가 출력되어야 해요","checklist":["print( ) 안을 큰따옴표 \" \" 로 감싸요","그 안에 I''m happy! 를 그대로 넣어요"],"example_output":"I''m happy!","fallback_text":"문자열 안에 작은따옴표(  ''  )가 있으면 큰따옴표(\")로 감싸면 돼요! print(\"I''m happy!\") 이렇게요."}'::jsonb,
+  '{"topic":"작은따옴표와 큰따옴표의 차이","learning_goals":["작은따옴표와 큰따옴표 모두 문자열을 만들 수 있다","문자열 안에 따옴표가 포함될 때 다른 종류의 따옴표로 감싸야 함을 안다"],"story_context":"파이썬 마을의 따옴표 가게에 왔어요! 작은따옴표와 큰따옴표, 언제 어떤 걸 써야 할까요?","exercise_description":"print()를 사용하여 I''m happy! 를 출력해보세요. 큰따옴표로 감싸면 안에 작은따옴표를 쓸 수 있어요!","starter_code":"# I''m happy! 를 출력해보세요!\n# 힌트: 큰따옴표로 감싸보세요!\n","expected_output_hint":"I''m happy! 가 출력되어야 해요","checklist":["print( ) 안을 큰따옴표 \" \" 로 감싸요","그 안에 I''m happy! 를 그대로 넣어요"],"example_output":"I''m happy!","example_exact":true,"fallback_text":"문자열 안에 작은따옴표(  ''  )가 있으면 큰따옴표(\")로 감싸면 돼요! print(\"I''m happy!\") 이렇게요."}'::jsonb,
   'output_match',
   '',
   50
@@ -173,7 +173,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"주석(#)의 역할과 사용법","learning_goals":["#으로 시작하는 줄이 주석임을 안다","주석은 컴퓨터가 무시하고 사람만 읽는 메모임을 이해한다","주석과 코드를 구분하여 작성할 수 있다"],"story_context":"마을의 게시판에 비밀 메모를 남기는 모험가. 주석으로 쓴 메모는 컴퓨터가 읽지 못해요!","exercise_description":"첫 줄에 주석(#)으로 아무 메모나 남기고, 둘째 줄에 print()로 \"파이썬은 재미있어!\"를 출력하세요","starter_code":"# 여기에 메모를 남겨보세요 (이 줄은 주석이에요!)\n","expected_output_hint":"파이썬은 재미있어! 만 출력되어야 해요 (주석은 출력되지 않아요)","checklist":["첫 줄에 # 으로 메모를 남겨요","둘째 줄에 print( )로 파이썬은 재미있어! 를 보여 줘요","메모는 화면에 안 나오는지 확인해요"],"example_output":"파이썬은 재미있어!","fallback_text":"#으로 시작하는 줄은 주석이에요. 컴퓨터는 이 줄을 무시해요! 주석 아래에 print(\"파이썬은 재미있어!\")를 써보세요."}'::jsonb,
+  '{"topic":"주석(#)의 역할과 사용법","learning_goals":["#으로 시작하는 줄이 주석임을 안다","주석은 컴퓨터가 무시하고 사람만 읽는 메모임을 이해한다","주석과 코드를 구분하여 작성할 수 있다"],"story_context":"마을의 게시판에 비밀 메모를 남기는 모험가. 주석으로 쓴 메모는 컴퓨터가 읽지 못해요!","exercise_description":"첫 줄에 주석(#)으로 아무 메모나 남기고, 둘째 줄에 print()로 \"파이썬은 재미있어!\"를 출력하세요","starter_code":"# 여기에 메모를 남겨보세요 (이 줄은 주석이에요!)\n","expected_output_hint":"파이썬은 재미있어! 만 출력되어야 해요 (주석은 출력되지 않아요)","checklist":["첫 줄에 # 으로 메모를 남겨요","둘째 줄에 print( )로 파이썬은 재미있어! 를 보여 줘요","메모는 화면에 안 나오는지 확인해요"],"example_output":"파이썬은 재미있어!","example_exact":true,"fallback_text":"#으로 시작하는 줄은 주석이에요. 컴퓨터는 이 줄을 무시해요! 주석 아래에 print(\"파이썬은 재미있어!\")를 써보세요."}'::jsonb,
   'output_match',
   '',
   50
@@ -197,7 +197,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"이스케이프 문자 \\n으로 줄바꿈하기","learning_goals":["\\n이 줄바꿈을 뜻하는 특수 문자임을 안다","print() 한 번으로 여러 줄을 출력할 수 있다"],"story_context":"파이썬 마을의 마법 편지지! \\n을 쓰면 편지가 두 줄로 나뉘어요.","exercise_description":"print()를 한 번만 사용하여 \"첫째 줄\"과 \"둘째 줄\"을 두 줄로 출력하세요. \\n을 사용해요!","starter_code":"# print()를 한 번만 사용해서 두 줄로 출력해보세요!\n# 힌트: \\n은 줄바꿈이에요!\n","expected_output_hint":"첫째 줄과 둘째 줄이 각각 다른 줄에 출력되어야 해요","checklist":["print( )는 딱 한 번만 써요","첫째 줄과 둘째 줄 사이에 \\n 을 넣어요","두 줄로 나오는지 확인해요"],"example_output":"첫째 줄\n둘째 줄","fallback_text":"\\n은 줄바꿈을 뜻하는 특수 문자예요! print(\"첫째 줄\\n둘째 줄\") 이렇게 쓰면 두 줄로 나뉘어서 출력돼요."}'::jsonb,
+  '{"topic":"이스케이프 문자 \\n으로 줄바꿈하기","learning_goals":["\\n이 줄바꿈을 뜻하는 특수 문자임을 안다","print() 한 번으로 여러 줄을 출력할 수 있다"],"story_context":"파이썬 마을의 마법 편지지! \\n을 쓰면 편지가 두 줄로 나뉘어요.","exercise_description":"print()를 한 번만 사용하여 \"첫째 줄\"과 \"둘째 줄\"을 두 줄로 출력하세요. \\n을 사용해요!","starter_code":"# print()를 한 번만 사용해서 두 줄로 출력해보세요!\n# 힌트: \\n은 줄바꿈이에요!\n","expected_output_hint":"첫째 줄과 둘째 줄이 각각 다른 줄에 출력되어야 해요","checklist":["print( )는 딱 한 번만 써요","첫째 줄과 둘째 줄 사이에 \\n 을 넣어요","두 줄로 나오는지 확인해요"],"example_output":"첫째 줄\n둘째 줄","example_exact":true,"fallback_text":"\\n은 줄바꿈을 뜻하는 특수 문자예요! print(\"첫째 줄\\n둘째 줄\") 이렇게 쓰면 두 줄로 나뉘어서 출력돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -245,7 +245,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"print()로 숫자 출력하기","learning_goals":["print()로 숫자를 출력할 수 있다","숫자는 따옴표 없이 쓰는 것을 안다"],"story_context":"파이썬 마을의 시계탑에 올해 연도를 새겨야 해요! 숫자를 출력해볼까요?","exercise_description":"print()로 숫자 2026을 출력하세요. 따옴표 없이 숫자만 넣어보세요!","starter_code":"# 숫자 2026을 출력해보세요!\n# 힌트: 따옴표 없이 숫자만 넣으면 돼요!\n","expected_output_hint":"2026 이 출력되어야 해요","checklist":["print( ) 안에 2026 을 넣어요","따옴표 없이 숫자만 써요"],"example_output":"2026","fallback_text":"print() 안에 따옴표 없이 숫자를 넣으면 숫자가 그대로 출력돼요! print(2026) 이렇게요."}'::jsonb,
+  '{"topic":"print()로 숫자 출력하기","learning_goals":["print()로 숫자를 출력할 수 있다","숫자는 따옴표 없이 쓰는 것을 안다"],"story_context":"파이썬 마을의 시계탑에 올해 연도를 새겨야 해요! 숫자를 출력해볼까요?","exercise_description":"print()로 숫자 2026을 출력하세요. 따옴표 없이 숫자만 넣어보세요!","starter_code":"# 숫자 2026을 출력해보세요!\n# 힌트: 따옴표 없이 숫자만 넣으면 돼요!\n","expected_output_hint":"2026 이 출력되어야 해요","checklist":["print( ) 안에 2026 을 넣어요","따옴표 없이 숫자만 써요"],"example_output":"2026","example_exact":true,"fallback_text":"print() 안에 따옴표 없이 숫자를 넣으면 숫자가 그대로 출력돼요! print(2026) 이렇게요."}'::jsonb,
   'output_match',
   '',
   50
@@ -293,7 +293,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"print() 종합 활용","learning_goals":["주석과 print()를 자유롭게 사용할 수 있다","문자열과 숫자를 print()로 출력할 수 있다","여러 줄을 출력하여 의미 있는 결과물을 만들 수 있다"],"story_context":"파이썬 마을에 새 안내판을 세워야 해요! 주석으로 설명을 달고, print()로 멋진 안내판을 만들어봐요!","exercise_description":"주석 1줄을 쓰고, print()를 3번 사용하여 마을 안내판을 만드세요. 첫 줄: === 파이썬 마을 ===, 둘째 줄: 인구: 2026명, 셋째 줄: 환영합니다!","starter_code":"# 마을 안내판을 만들어보세요!\n# 주석 1줄 + print() 3줄로 완성!\n","expected_output_hint":"=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 가 각각 한 줄씩 출력되어야 해요","checklist":["# 으로 메모를 한 줄 써요","print( )를 세 번 써요","=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 를 차례로 보여 줘요"],"example_output":"=== 파이썬 마을 ===\n인구: 2026명\n환영합니다!","fallback_text":"주석으로 설명을 달고, print()를 3번 사용해서 안내판을 만들어요! 각 줄에 다른 내용을 넣어보세요.","is_challenge":true}'::jsonb,
+  '{"topic":"print() 종합 활용","learning_goals":["주석과 print()를 자유롭게 사용할 수 있다","문자열과 숫자를 print()로 출력할 수 있다","여러 줄을 출력하여 의미 있는 결과물을 만들 수 있다"],"story_context":"파이썬 마을에 새 안내판을 세워야 해요! 주석으로 설명을 달고, print()로 멋진 안내판을 만들어봐요!","exercise_description":"주석 1줄을 쓰고, print()를 3번 사용하여 마을 안내판을 만드세요. 첫 줄: === 파이썬 마을 ===, 둘째 줄: 인구: 2026명, 셋째 줄: 환영합니다!","starter_code":"# 마을 안내판을 만들어보세요!\n# 주석 1줄 + print() 3줄로 완성!\n","expected_output_hint":"=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 가 각각 한 줄씩 출력되어야 해요","checklist":["# 으로 메모를 한 줄 써요","print( )를 세 번 써요","=== 파이썬 마을 ===, 인구: 2026명, 환영합니다! 를 차례로 보여 줘요"],"example_output":"=== 파이썬 마을 ===\n인구: 2026명\n환영합니다!","example_exact":true,"fallback_text":"주석으로 설명을 달고, print()를 3번 사용해서 안내판을 만들어요! 각 줄에 다른 내용을 넣어보세요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -365,7 +365,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"정수(int)와 문자열(str) 자료형","learning_goals":["숫자는 따옴표 없이, 글자는 따옴표로 감싸서 저장하는 것을 안다","int와 str이 다른 종류의 상자임을 이해한다"],"story_context":"숲 속 두 종류의 마법 상자를 발견! 숫자 상자와 글자 상자를 구분해봐요.","exercise_description":"number 변수에 10을, greeting 변수에 \"안녕\"을 저장하고 각각 print()로 출력하세요","starter_code":"# 숫자와 글자를 각각 변수에 넣어보세요!\nnumber = \ngreeting = \nprint(number)\nprint(greeting)","expected_output_hint":"10과 안녕이 한 줄씩 출력되어야 해요","checklist":["number 상자에 숫자 10을 넣어요","greeting 상자에 \"안녕\"을 넣어요","두 상자를 한 줄씩 보여 줘요"],"example_output":"10\n안녕","fallback_text":"숫자는 따옴표 없이 number = 10, 글자는 따옴표와 함께 greeting = \"안녕\" 이렇게 넣어요!"}'::jsonb,
+  '{"topic":"정수(int)와 문자열(str) 자료형","learning_goals":["숫자는 따옴표 없이, 글자는 따옴표로 감싸서 저장하는 것을 안다","int와 str이 다른 종류의 상자임을 이해한다"],"story_context":"숲 속 두 종류의 마법 상자를 발견! 숫자 상자와 글자 상자를 구분해봐요.","exercise_description":"number 변수에 10을, greeting 변수에 \"안녕\"을 저장하고 각각 print()로 출력하세요","starter_code":"# 숫자와 글자를 각각 변수에 넣어보세요!\nnumber = \ngreeting = \nprint(number)\nprint(greeting)","expected_output_hint":"10과 안녕이 한 줄씩 출력되어야 해요","checklist":["number 상자에 숫자 10을 넣어요","greeting 상자에 \"안녕\"을 넣어요","두 상자를 한 줄씩 보여 줘요"],"example_output":"10\n안녕","example_exact":true,"fallback_text":"숫자는 따옴표 없이 number = 10, 글자는 따옴표와 함께 greeting = \"안녕\" 이렇게 넣어요!"}'::jsonb,
   'output_match',
   '',
   50
@@ -389,7 +389,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"변수 재할당 (값 바꾸기)","learning_goals":["변수에 새로운 값을 다시 넣을 수 있다","변수의 값은 언제든 바꿀 수 있음을 이해한다"],"story_context":"변수의 숲에서 마법 상자의 내용물을 바꿔볼까요? 상자 안의 색깔을 바꿔봐요!","exercise_description":"color 변수에 \"빨강\"을 저장한 후, \"파랑\"으로 바꾸고 print()로 출력하세요","starter_code":"# 색깔을 바꿔보세요!\ncolor = \"빨강\"\n# 아래에서 color를 \"파랑\"으로 바꿔보세요!\n\nprint(color)","expected_output_hint":"파랑 이 출력되어야 해요","checklist":["color 상자에 \"파랑\"을 다시 넣어요","print(color)로 바뀐 색을 보여 줘요"],"example_output":"파랑","fallback_text":"변수는 상자니까 안에 든 걸 바꿀 수 있어요! color = \"파랑\" 이렇게 다시 넣으면 이전 값은 사라지고 새 값이 들어가요."}'::jsonb,
+  '{"topic":"변수 재할당 (값 바꾸기)","learning_goals":["변수에 새로운 값을 다시 넣을 수 있다","변수의 값은 언제든 바꿀 수 있음을 이해한다"],"story_context":"변수의 숲에서 마법 상자의 내용물을 바꿔볼까요? 상자 안의 색깔을 바꿔봐요!","exercise_description":"color 변수에 \"빨강\"을 저장한 후, \"파랑\"으로 바꾸고 print()로 출력하세요","starter_code":"# 색깔을 바꿔보세요!\ncolor = \"빨강\"\n# 아래에서 color를 \"파랑\"으로 바꿔보세요!\n\nprint(color)","expected_output_hint":"파랑 이 출력되어야 해요","checklist":["color 상자에 \"파랑\"을 다시 넣어요","print(color)로 바뀐 색을 보여 줘요"],"example_output":"파랑","example_exact":true,"fallback_text":"변수는 상자니까 안에 든 걸 바꿀 수 있어요! color = \"파랑\" 이렇게 다시 넣으면 이전 값은 사라지고 새 값이 들어가요."}'::jsonb,
   'output_match',
   '',
   50
@@ -461,7 +461,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"문자열 연결 연산자 +","learning_goals":["+ 연산자로 문자열을 합칠 수 있다","문자열끼리 더하면 이어붙여지는 것을 이해한다"],"story_context":"변수의 숲에서 마법 접착제를 발견했어요! 글자와 글자를 이어붙여 새로운 단어를 만들어봐요!","exercise_description":"first = \"파이\", second = \"썬\"을 변수에 저장하고, + 연산자로 합쳐서 출력하세요","starter_code":"# 글자를 합쳐보세요!\nfirst = \"파이\"\nsecond = \"썬\"\nresult = \nprint(result)","expected_output_hint":"파이썬 이 출력되어야 해요","checklist":["result 에 first + second 를 넣어요","print(result)로 합친 글자를 보여 줘요"],"example_output":"파이썬","fallback_text":"문자열끼리 + 를 쓰면 이어붙여져요! \"파이\" + \"썬\" = \"파이썬\"이 돼요."}'::jsonb,
+  '{"topic":"문자열 연결 연산자 +","learning_goals":["+ 연산자로 문자열을 합칠 수 있다","문자열끼리 더하면 이어붙여지는 것을 이해한다"],"story_context":"변수의 숲에서 마법 접착제를 발견했어요! 글자와 글자를 이어붙여 새로운 단어를 만들어봐요!","exercise_description":"first = \"파이\", second = \"썬\"을 변수에 저장하고, + 연산자로 합쳐서 출력하세요","starter_code":"# 글자를 합쳐보세요!\nfirst = \"파이\"\nsecond = \"썬\"\nresult = \nprint(result)","expected_output_hint":"파이썬 이 출력되어야 해요","checklist":["result 에 first + second 를 넣어요","print(result)로 합친 글자를 보여 줘요"],"example_output":"파이썬","example_exact":true,"fallback_text":"문자열끼리 + 를 쓰면 이어붙여져요! \"파이\" + \"썬\" = \"파이썬\"이 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -509,7 +509,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"자료형 변환 (str -> int, int -> str)","learning_goals":["int()로 문자열을 숫자로 바꿀 수 있다","str()로 숫자를 문자열로 바꿀 수 있다","형변환이 필요한 상황을 이해한다"],"story_context":"변신 마법사를 만났어요! 글자를 숫자로, 숫자를 글자로 변신시킬 수 있대요.","exercise_description":"문자열 \"100\"과 \"23\"을 int()로 숫자로 바꿔서 더한 뒤 결과를 출력하세요","starter_code":"# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = \nprint(result)","expected_output_hint":"123이 출력되어야 해요","checklist":["int( )로 a와 b를 숫자로 바꿔요","두 숫자를 더해 result 에 넣어요","result 를 보여 줘요"],"example_output":"123","fallback_text":"\"100\"은 글자예요. int(\"100\")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요."}'::jsonb,
+  '{"topic":"자료형 변환 (str -> int, int -> str)","learning_goals":["int()로 문자열을 숫자로 바꿀 수 있다","str()로 숫자를 문자열로 바꿀 수 있다","형변환이 필요한 상황을 이해한다"],"story_context":"변신 마법사를 만났어요! 글자를 숫자로, 숫자를 글자로 변신시킬 수 있대요.","exercise_description":"문자열 \"100\"과 \"23\"을 int()로 숫자로 바꿔서 더한 뒤 결과를 출력하세요","starter_code":"# 문자열을 숫자로 바꿔서 더해보세요!\na = \"100\"\nb = \"23\"\nresult = \nprint(result)","expected_output_hint":"123이 출력되어야 해요","checklist":["int( )로 a와 b를 숫자로 바꿔요","두 숫자를 더해 result 에 넣어요","result 를 보여 줘요"],"example_output":"123","example_exact":true,"fallback_text":"\"100\"은 글자예요. int(\"100\")으로 숫자 100으로 변신시킬 수 있어요! 숫자끼리는 더할 수 있지요."}'::jsonb,
   'output_match',
   '',
   50
@@ -557,7 +557,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"변수와 문자열 연결 종합 활용","learning_goals":["여러 변수를 선언하고 값을 저장할 수 있다","문자열 연결을 사용하여 의미 있는 문장을 만들 수 있다","변수를 활용하여 자기소개 카드를 완성할 수 있다"],"story_context":"변수의 숲을 떠나기 전에, 지금까지 배운 걸 모아서 멋진 자기소개 카드를 만들어봐요!","exercise_description":"name, age, school 변수에 각각 값을 저장하고, 문자열 연결로 자기소개를 3줄로 출력하세요","starter_code":"# 자기소개 카드를 만들어보세요!\nname = \"파이뱀\"\nage = \"10\"\nschool = \"코딩초등학교\"\n\n# 아래에 print()를 3번 써서 자기소개를 출력하세요!\n","expected_output_hint":"이름: 파이뱀, 나이: 10살, 학교: 코딩초등학교 가 각각 한 줄씩 출력되어야 해요","checklist":["print( )를 세 번 써요","+ 로 \"이름: \" 과 name 을 이어 붙여요","나이 뒤에는 살, 학교 줄도 같은 방법으로 써요"],"example_output":"이름: 파이뱀\n나이: 10살\n학교: 코딩초등학교","fallback_text":"변수에 저장한 값과 문자열을 + 로 합쳐서 출력해요! print(\"이름: \" + name) 이렇게요.","is_challenge":true}'::jsonb,
+  '{"topic":"변수와 문자열 연결 종합 활용","learning_goals":["여러 변수를 선언하고 값을 저장할 수 있다","문자열 연결을 사용하여 의미 있는 문장을 만들 수 있다","변수를 활용하여 자기소개 카드를 완성할 수 있다"],"story_context":"변수의 숲을 떠나기 전에, 지금까지 배운 걸 모아서 멋진 자기소개 카드를 만들어봐요!","exercise_description":"name, age, school 변수에 각각 값을 저장하고, 문자열 연결로 자기소개를 3줄로 출력하세요","starter_code":"# 자기소개 카드를 만들어보세요!\nname = \"파이뱀\"\nage = \"10\"\nschool = \"코딩초등학교\"\n\n# 아래에 print()를 3번 써서 자기소개를 출력하세요!\n","expected_output_hint":"이름: 파이뱀, 나이: 10살, 학교: 코딩초등학교 가 각각 한 줄씩 출력되어야 해요","checklist":["print( )를 세 번 써요","+ 로 \"이름: \" 과 name 을 이어 붙여요","나이 뒤에는 살, 학교 줄도 같은 방법으로 써요"],"example_output":"이름: 파이뱀\n나이: 10살\n학교: 코딩초등학교","example_exact":true,"fallback_text":"변수에 저장한 값과 문자열을 + 로 합쳐서 출력해요! print(\"이름: \" + name) 이렇게요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -605,7 +605,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"if/else 조건문","learning_goals":["if 문으로 조건을 검사할 수 있다","else로 조건이 거짓일 때 실행할 코드를 작성할 수 있다","== 비교 연산자를 사용할 수 있다"],"story_context":"갈림길의 비밀 문 앞에 섰어요! 올바른 비밀번호를 입력해야 문이 열려요.","exercise_description":"password 변수에 \"열려라\"를 저장하고, if문으로 password가 \"열려라\"와 같으면 \"통과!\"를 출력하세요","starter_code":"# 비밀번호를 확인하는 코드를 작성해보세요!\npassword = \"열려라\"\n\nif password == \"열려라\":\n    print()","expected_output_hint":"통과! 가 출력되어야 해요","checklist":["if 아래 print( ) 안에 \"통과!\"를 넣어요","if 안의 줄은 네 칸 들여 써요"],"example_output":"통과!","fallback_text":"if는 \"만약 ~라면\"이에요! if password == \"열려라\": 이렇게 조건을 쓰고, 다음 줄에 들여쓰기 후 실행할 코드를 써요."}'::jsonb,
+  '{"topic":"if/else 조건문","learning_goals":["if 문으로 조건을 검사할 수 있다","else로 조건이 거짓일 때 실행할 코드를 작성할 수 있다","== 비교 연산자를 사용할 수 있다"],"story_context":"갈림길의 비밀 문 앞에 섰어요! 올바른 비밀번호를 입력해야 문이 열려요.","exercise_description":"password 변수에 \"열려라\"를 저장하고, if문으로 password가 \"열려라\"와 같으면 \"통과!\"를 출력하세요","starter_code":"# 비밀번호를 확인하는 코드를 작성해보세요!\npassword = \"열려라\"\n\nif password == \"열려라\":\n    print()","expected_output_hint":"통과! 가 출력되어야 해요","checklist":["if 아래 print( ) 안에 \"통과!\"를 넣어요","if 안의 줄은 네 칸 들여 써요"],"example_output":"통과!","example_exact":true,"fallback_text":"if는 \"만약 ~라면\"이에요! if password == \"열려라\": 이렇게 조건을 쓰고, 다음 줄에 들여쓰기 후 실행할 코드를 써요."}'::jsonb,
   'output_match',
   '',
   50
@@ -653,7 +653,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"if/else와 나머지 연산자 %","learning_goals":["% 연산자로 나머지를 구할 수 있다","짝수/홀수를 판별하는 조건을 만들 수 있다"],"story_context":"갈림길에서 숫자 요정을 만났어요! 숫자가 짝수인지 홀수인지 알려줘야 길을 안내해줘요.","exercise_description":"number = 7에 대해 짝수인지 홀수인지 판별하여 출력하세요. 짝수면 \"짝수\", 홀수면 \"홀수\"를 출력!","starter_code":"# 짝수인지 홀수인지 판별해보세요!\nnumber = 7\n\nif number % 2 == 0:\n    print(\"짝수\")\nelse:\n    print()","expected_output_hint":"홀수 가 출력되어야 해요","checklist":["else 아래 print( ) 안에 \"홀수\"를 넣어요","7을 2로 나눈 나머지가 1이라 else 쪽이 돌아가요"],"example_output":"홀수","fallback_text":"% 연산자는 나누기의 나머지를 구해요! 7 % 2 = 1 이니까 홀수예요. 짝수는 나머지가 0이에요."}'::jsonb,
+  '{"topic":"if/else와 나머지 연산자 %","learning_goals":["% 연산자로 나머지를 구할 수 있다","짝수/홀수를 판별하는 조건을 만들 수 있다"],"story_context":"갈림길에서 숫자 요정을 만났어요! 숫자가 짝수인지 홀수인지 알려줘야 길을 안내해줘요.","exercise_description":"number = 7에 대해 짝수인지 홀수인지 판별하여 출력하세요. 짝수면 \"짝수\", 홀수면 \"홀수\"를 출력!","starter_code":"# 짝수인지 홀수인지 판별해보세요!\nnumber = 7\n\nif number % 2 == 0:\n    print(\"짝수\")\nelse:\n    print()","expected_output_hint":"홀수 가 출력되어야 해요","checklist":["else 아래 print( ) 안에 \"홀수\"를 넣어요","7을 2로 나눈 나머지가 1이라 else 쪽이 돌아가요"],"example_output":"홀수","example_exact":true,"fallback_text":"% 연산자는 나누기의 나머지를 구해요! 7 % 2 = 1 이니까 홀수예요. 짝수는 나머지가 0이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -725,7 +725,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"비교연산자로 조건 만들기","learning_goals":[">=, <=, >, < 비교연산자를 사용할 수 있다","비교 결과가 True/False임을 이해한다"],"story_context":"놀이공원에 가려면 키가 120cm 이상이어야 해요! 키를 재볼까요?","exercise_description":"height = 130일 때, height >= 120이면 \"입장 가능!\"을 출력하세요","starter_code":"# 키를 확인하는 코드를 작성해보세요!\nheight = 130\n\nif height >= 120:\n    print()","expected_output_hint":"입장 가능! 이 출력되어야 해요","checklist":["if 아래 print( ) 안에 \"입장 가능!\"을 넣어요","130이 120 이상인지 생각해 봐요"],"example_output":"입장 가능!","fallback_text":">= 는 \"크거나 같다\"는 뜻이에요! height >= 120은 키가 120 이상인지 물어보는 거예요."}'::jsonb,
+  '{"topic":"비교연산자로 조건 만들기","learning_goals":[">=, <=, >, < 비교연산자를 사용할 수 있다","비교 결과가 True/False임을 이해한다"],"story_context":"놀이공원에 가려면 키가 120cm 이상이어야 해요! 키를 재볼까요?","exercise_description":"height = 130일 때, height >= 120이면 \"입장 가능!\"을 출력하세요","starter_code":"# 키를 확인하는 코드를 작성해보세요!\nheight = 130\n\nif height >= 120:\n    print()","expected_output_hint":"입장 가능! 이 출력되어야 해요","checklist":["if 아래 print( ) 안에 \"입장 가능!\"을 넣어요","130이 120 이상인지 생각해 봐요"],"example_output":"입장 가능!","example_exact":true,"fallback_text":">= 는 \"크거나 같다\"는 뜻이에요! height >= 120은 키가 120 이상인지 물어보는 거예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -749,7 +749,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"논리연산자 and, or, not","learning_goals":["and는 두 조건이 모두 참일 때 참이 되는 것을 안다","or는 하나만 참이어도 참이 되는 것을 안다","논리연산자로 복합 조건을 만들 수 있다"],"story_context":"마법사가 되려면 두 가지 시험을 모두 통과해야 해요! 마법 점수와 용기 점수가 모두 높아야 해요.","exercise_description":"magic = 80, courage = 70일 때, 둘 다 60 이상이면 \"마법사 합격!\"을 출력하세요","starter_code":"# 마법사 자격을 확인해보세요!\nmagic = 80\ncourage = 70\n\nif magic >= 60 and courage >= 60:\n    print()","expected_output_hint":"마법사 합격! 이 출력되어야 해요","checklist":["and 로 두 조건을 함께 봐요","if 아래 print( ) 안에 \"마법사 합격!\"을 넣어요"],"example_output":"마법사 합격!","fallback_text":"and는 \"그리고\"예요! magic >= 60 and courage >= 70은 \"마법 점수가 60 이상이고 용기 점수도 60 이상\"이라는 뜻이에요."}'::jsonb,
+  '{"topic":"논리연산자 and, or, not","learning_goals":["and는 두 조건이 모두 참일 때 참이 되는 것을 안다","or는 하나만 참이어도 참이 되는 것을 안다","논리연산자로 복합 조건을 만들 수 있다"],"story_context":"마법사가 되려면 두 가지 시험을 모두 통과해야 해요! 마법 점수와 용기 점수가 모두 높아야 해요.","exercise_description":"magic = 80, courage = 70일 때, 둘 다 60 이상이면 \"마법사 합격!\"을 출력하세요","starter_code":"# 마법사 자격을 확인해보세요!\nmagic = 80\ncourage = 70\n\nif magic >= 60 and courage >= 60:\n    print()","expected_output_hint":"마법사 합격! 이 출력되어야 해요","checklist":["and 로 두 조건을 함께 봐요","if 아래 print( ) 안에 \"마법사 합격!\"을 넣어요"],"example_output":"마법사 합격!","example_exact":true,"fallback_text":"and는 \"그리고\"예요! magic >= 60 and courage >= 70은 \"마법 점수가 60 이상이고 용기 점수도 60 이상\"이라는 뜻이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -797,7 +797,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"중첩 if문으로 복잡한 조건 처리하기","learning_goals":["if 안에 if를 넣어 중첩 조건을 만들 수 있다","여러 조건을 조합하여 결과를 판단할 수 있다"],"story_context":"갈림길의 가위바위보 대회! 심판이 되어 누가 이겼는지 판정해봐요!","exercise_description":"player = \"가위\", computer = \"보\"일 때 가위바위보 결과를 판정하세요. 가위가 보를 이기니까 \"이겼다!\"를 출력!","starter_code":"# 가위바위보 심판이 되어보세요!\nplayer = \"가위\"\ncomputer = \"보\"\n\nif player == computer:\n    print(\"비겼다!\")\nelif player == \"가위\":\n    if computer == \"보\":\n        print()\n    else:\n        print(\"졌다!\")","expected_output_hint":"이겼다! 가 출력되어야 해요","checklist":["안쪽 if 아래 print( ) 안에 \"이겼다!\"를 넣어요","가위와 보일 때 어느 줄이 돌아가는지 따라가 봐요"],"example_output":"이겼다!","fallback_text":"if 안에 또 if를 쓸 수 있어요! 가위가 보를 이기니까, player가 가위이고 computer가 보이면 이긴 거예요."}'::jsonb,
+  '{"topic":"중첩 if문으로 복잡한 조건 처리하기","learning_goals":["if 안에 if를 넣어 중첩 조건을 만들 수 있다","여러 조건을 조합하여 결과를 판단할 수 있다"],"story_context":"갈림길의 가위바위보 대회! 심판이 되어 누가 이겼는지 판정해봐요!","exercise_description":"player = \"가위\", computer = \"보\"일 때 가위바위보 결과를 판정하세요. 가위가 보를 이기니까 \"이겼다!\"를 출력!","starter_code":"# 가위바위보 심판이 되어보세요!\nplayer = \"가위\"\ncomputer = \"보\"\n\nif player == computer:\n    print(\"비겼다!\")\nelif player == \"가위\":\n    if computer == \"보\":\n        print()\n    else:\n        print(\"졌다!\")","expected_output_hint":"이겼다! 가 출력되어야 해요","checklist":["안쪽 if 아래 print( ) 안에 \"이겼다!\"를 넣어요","가위와 보일 때 어느 줄이 돌아가는지 따라가 봐요"],"example_output":"이겼다!","example_exact":true,"fallback_text":"if 안에 또 if를 쓸 수 있어요! 가위가 보를 이기니까, player가 가위이고 computer가 보이면 이긴 거예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -821,7 +821,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"조건문 종합 활용 - 할인 시스템 만들기","learning_goals":["if/elif/else를 활용하여 실용적인 프로그램을 만들 수 있다","여러 조건을 조합하여 복잡한 로직을 구현할 수 있다","변수와 조건문을 함께 사용할 수 있다"],"story_context":"갈림길의 영화관에서 할인 시스템을 만들어야 해요! 나이와 요일에 따라 할인율이 달라져요.","exercise_description":"age=10, is_weekend=False일 때, 어린이(13세 미만) 평일 50% 할인을 적용하여 나이, 할인율, 가격을 출력하세요. 원래 가격은 10000원이에요.","starter_code":"# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n","expected_output_hint":"나이: 10살, 할인율: 50%, 가격: 5000원 이 각각 출력되어야 해요","checklist":["if 로 13세 미만인지, 평일인지 살펴서 discount 를 정해요","final_price 로 할인된 가격을 구해요","나이·할인율·가격을 한 줄씩 보여 줘요"],"example_output":"나이: 10살\n할인율: 50%\n가격: 5000원","fallback_text":"if 안에 또 if를 쓸 수 있어요! 먼저 나이로 어린이인지 확인하고, 그 안에서 평일인지 주말인지 확인해요.","is_challenge":true}'::jsonb,
+  '{"topic":"조건문 종합 활용 - 할인 시스템 만들기","learning_goals":["if/elif/else를 활용하여 실용적인 프로그램을 만들 수 있다","여러 조건을 조합하여 복잡한 로직을 구현할 수 있다","변수와 조건문을 함께 사용할 수 있다"],"story_context":"갈림길의 영화관에서 할인 시스템을 만들어야 해요! 나이와 요일에 따라 할인율이 달라져요.","exercise_description":"age=10, is_weekend=False일 때, 어린이(13세 미만) 평일 50% 할인을 적용하여 나이, 할인율, 가격을 출력하세요. 원래 가격은 10000원이에요.","starter_code":"# 영화관 할인 시스템을 만들어보세요!\nage = 10\nis_weekend = False\nprice = 10000\n\n# 어린이(13세 미만)이면 할인!\n# if 문으로 나이와 요일에 따라 discount를 정해보세요!\n\n\n# 최종 가격을 계산하세요!\n# final_price = price * (100 - discount) // 100\n\n# 나이, 할인율, 가격을 출력하세요!\n","expected_output_hint":"나이: 10살, 할인율: 50%, 가격: 5000원 이 각각 출력되어야 해요","checklist":["if 로 13세 미만인지, 평일인지 살펴서 discount 를 정해요","final_price 로 할인된 가격을 구해요","나이·할인율·가격을 한 줄씩 보여 줘요"],"example_output":"나이: 10살\n할인율: 50%\n가격: 5000원","example_exact":true,"fallback_text":"if 안에 또 if를 쓸 수 있어요! 먼저 나이로 어린이인지 확인하고, 그 안에서 평일인지 주말인지 확인해요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -869,7 +869,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문과 range() 함수","learning_goals":["for 반복문의 구조를 이해한다","range()로 숫자 범위를 만들 수 있다","반복문 안의 코드가 여러 번 실행되는 것을 안다"],"story_context":"동굴 입구에서 마법 숫자를 세어야 문이 열려요! 1부터 5까지 세어볼까요?","exercise_description":"for 반복문과 range()를 사용하여 1부터 5까지 한 줄에 하나씩 출력하세요","starter_code":"# 1부터 5까지 세어보세요!\n# for 반복문과 range()를 사용해보세요!\n\nfor i in range(__, __):\n    print(i)","expected_output_hint":"1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요","checklist":["range( ) 빈칸에 시작 숫자와 끝 숫자를 넣어요","끝 숫자는 하나 더 크게 써요","1부터 5까지 한 줄씩 나오는지 봐요"],"example_output":"1\n2\n3\n4\n5","fallback_text":"for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요)."}'::jsonb,
+  '{"topic":"for 반복문과 range() 함수","learning_goals":["for 반복문의 구조를 이해한다","range()로 숫자 범위를 만들 수 있다","반복문 안의 코드가 여러 번 실행되는 것을 안다"],"story_context":"동굴 입구에서 마법 숫자를 세어야 문이 열려요! 1부터 5까지 세어볼까요?","exercise_description":"for 반복문과 range()를 사용하여 1부터 5까지 한 줄에 하나씩 출력하세요","starter_code":"# 1부터 5까지 세어보세요!\n# for 반복문과 range()를 사용해보세요!\n\nfor i in range(__, __):\n    print(i)","expected_output_hint":"1, 2, 3, 4, 5가 한 줄씩 출력되어야 해요","checklist":["range( ) 빈칸에 시작 숫자와 끝 숫자를 넣어요","끝 숫자는 하나 더 크게 써요","1부터 5까지 한 줄씩 나오는지 봐요"],"example_output":"1\n2\n3\n4\n5","example_exact":true,"fallback_text":"for i in range(1, 6)은 i가 1, 2, 3, 4, 5로 바뀌면서 아래 코드를 반복해요! range(1, 6)은 1부터 5까지예요 (6은 포함 안 돼요)."}'::jsonb,
   'output_match',
   '',
   50
@@ -941,7 +941,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"문자열 반복 연산자 *","learning_goals":["* 연산자로 문자열을 반복할 수 있다","print()와 문자열 반복을 조합할 수 있다"],"story_context":"동굴 벽에 별을 새겨야 마법 문이 열려요! 별을 5개 찍어볼까요?","exercise_description":"print(\"*\" * 5)를 사용하여 별 5개를 한 줄로 출력하세요","starter_code":"# 별을 5개 찍어보세요!\n# 힌트: 문자열 * 숫자 = 반복!\n\nprint(\"*\" * ___)","expected_output_hint":"***** 가 출력되어야 해요","checklist":["\"*\" * 뒤 빈칸에 5를 넣어요","별 다섯 개가 한 줄로 나오는지 봐요"],"example_output":"*****","fallback_text":"문자열에 * 숫자를 하면 그만큼 반복돼요! \"*\" * 5 = \"*****\" 이에요."}'::jsonb,
+  '{"topic":"문자열 반복 연산자 *","learning_goals":["* 연산자로 문자열을 반복할 수 있다","print()와 문자열 반복을 조합할 수 있다"],"story_context":"동굴 벽에 별을 새겨야 마법 문이 열려요! 별을 5개 찍어볼까요?","exercise_description":"print(\"*\" * 5)를 사용하여 별 5개를 한 줄로 출력하세요","starter_code":"# 별을 5개 찍어보세요!\n# 힌트: 문자열 * 숫자 = 반복!\n\nprint(\"*\" * ___)","expected_output_hint":"***** 가 출력되어야 해요","checklist":["\"*\" * 뒤 빈칸에 5를 넣어요","별 다섯 개가 한 줄로 나오는지 봐요"],"example_output":"*****","example_exact":true,"fallback_text":"문자열에 * 숫자를 하면 그만큼 반복돼요! \"*\" * 5 = \"*****\" 이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -965,7 +965,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"누적 변수와 for 반복문으로 합계 구하기","learning_goals":["누적 변수를 사용하여 값을 더해갈 수 있다","for 반복문과 누적 변수를 조합할 수 있다"],"story_context":"동굴 속 보물 더미! 금화를 하나씩 세어서 총 몇 개인지 합계를 구해봐요!","exercise_description":"1부터 10까지 숫자를 모두 더한 합계를 구하여 출력하세요","starter_code":"# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)","expected_output_hint":"55 가 출력되어야 해요 (1+2+3+...+10 = 55)","checklist":["반복 안에서 total = total + i 를 써요","그 줄은 for 안쪽으로 들여 써요","마지막에 total 을 보여 줘요"],"example_output":"55","fallback_text":"total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요."}'::jsonb,
+  '{"topic":"누적 변수와 for 반복문으로 합계 구하기","learning_goals":["누적 변수를 사용하여 값을 더해갈 수 있다","for 반복문과 누적 변수를 조합할 수 있다"],"story_context":"동굴 속 보물 더미! 금화를 하나씩 세어서 총 몇 개인지 합계를 구해봐요!","exercise_description":"1부터 10까지 숫자를 모두 더한 합계를 구하여 출력하세요","starter_code":"# 1부터 10까지 합계를 구해보세요!\ntotal = 0\n\nfor i in range(1, 11):\n    # total에 i를 더해보세요! (힌트: total = total + ?)\n    \n\nprint(total)","expected_output_hint":"55 가 출력되어야 해요 (1+2+3+...+10 = 55)","checklist":["반복 안에서 total = total + i 를 써요","그 줄은 for 안쪽으로 들여 써요","마지막에 total 을 보여 줘요"],"example_output":"55","example_exact":true,"fallback_text":"total = 0으로 시작해서, 반복할 때마다 total = total + i로 숫자를 더해가요! 1+2+3+...+10 = 55예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1037,7 +1037,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"continue로 특정 반복 건너뛰기","learning_goals":["continue가 현재 반복만 건너뛰는 것을 안다","% (나머지) 연산자를 사용할 수 있다","for와 if를 조합하여 필터링할 수 있다"],"story_context":"동굴의 마법 필터! 짝수만 통과시키고 홀수는 막아요.","exercise_description":"1부터 10까지 반복하면서 짝수만 출력하세요 (홀수는 continue로 건너뛰기)","starter_code":"# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        # 홀수면 건너뛰세요!\n        \n    print(i)","expected_output_hint":"2, 4, 6, 8, 10이 한 줄씩 출력되어야 해요","checklist":["홀수일 때 continue 를 써서 건너뛰어요","짝수만 한 줄씩 나오는지 봐요"],"example_output":"2\n4\n6\n8\n10","fallback_text":"% 는 나머지를 구하는 연산자예요! i % 2 != 0은 홀수라는 뜻이에요. continue를 만나면 아래 코드를 건너뛰고 다음 반복으로 가요."}'::jsonb,
+  '{"topic":"continue로 특정 반복 건너뛰기","learning_goals":["continue가 현재 반복만 건너뛰는 것을 안다","% (나머지) 연산자를 사용할 수 있다","for와 if를 조합하여 필터링할 수 있다"],"story_context":"동굴의 마법 필터! 짝수만 통과시키고 홀수는 막아요.","exercise_description":"1부터 10까지 반복하면서 짝수만 출력하세요 (홀수는 continue로 건너뛰기)","starter_code":"# 짝수만 출력해보세요!\nfor i in range(1, 11):\n    if i % 2 != 0:\n        # 홀수면 건너뛰세요!\n        \n    print(i)","expected_output_hint":"2, 4, 6, 8, 10이 한 줄씩 출력되어야 해요","checklist":["홀수일 때 continue 를 써서 건너뛰어요","짝수만 한 줄씩 나오는지 봐요"],"example_output":"2\n4\n6\n8\n10","example_exact":true,"fallback_text":"% 는 나머지를 구하는 연산자예요! i % 2 != 0은 홀수라는 뜻이에요. continue를 만나면 아래 코드를 건너뛰고 다음 반복으로 가요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1061,7 +1061,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"while 반복문으로 감소하며 반복하기","learning_goals":["while 반복문으로 숫자를 줄여가며 반복할 수 있다","감소하는 반복 패턴을 이해한다"],"story_context":"동굴 탈출 카운트다운! 5초 안에 빠져나가야 해요! 5, 4, 3, 2, 1... 탈출!","exercise_description":"while 반복문으로 5부터 1까지 카운트다운을 출력하세요","starter_code":"# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! ___ 에 알맞은 숫자를 넣어요\n    count = count - ___\n","expected_output_hint":"5, 4, 3, 2, 1이 한 줄씩 출력되어야 해요","checklist":["빈칸 ___ 에 1을 넣어 count 를 하나씩 줄여요","5부터 1까지 한 줄씩 나오는지 봐요"],"example_output":"5\n4\n3\n2\n1","fallback_text":"count = 5에서 시작해서, 반복할 때마다 count = count - 1로 1씩 줄여가요. count가 0이 되면 멈춰요!"}'::jsonb,
+  '{"topic":"while 반복문으로 감소하며 반복하기","learning_goals":["while 반복문으로 숫자를 줄여가며 반복할 수 있다","감소하는 반복 패턴을 이해한다"],"story_context":"동굴 탈출 카운트다운! 5초 안에 빠져나가야 해요! 5, 4, 3, 2, 1... 탈출!","exercise_description":"while 반복문으로 5부터 1까지 카운트다운을 출력하세요","starter_code":"# 카운트다운을 만들어보세요!\ncount = 5\n\nwhile count >= 1:\n    print(count)\n    # count를 1씩 줄여보세요! ___ 에 알맞은 숫자를 넣어요\n    count = count - ___\n","expected_output_hint":"5, 4, 3, 2, 1이 한 줄씩 출력되어야 해요","checklist":["빈칸 ___ 에 1을 넣어 count 를 하나씩 줄여요","5부터 1까지 한 줄씩 나오는지 봐요"],"example_output":"5\n4\n3\n2\n1","example_exact":true,"fallback_text":"count = 5에서 시작해서, 반복할 때마다 count = count - 1로 1씩 줄여가요. count가 0이 되면 멈춰요!"}'::jsonb,
   'output_match',
   '',
   50
@@ -1109,7 +1109,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문과 문자열 반복으로 피라미드 만들기","learning_goals":["for 반복문과 문자열 반복(*)을 조합할 수 있다","반복 변수를 활용하여 패턴을 만들 수 있다"],"story_context":"동굴을 탈출하면 별 피라미드를 쌓아야 해요! 반복의 마법으로 피라미드를 완성해봐요!","exercise_description":"for 반복문과 \"*\" * i 를 사용하여 5줄짜리 별 피라미드를 만드세요","starter_code":"# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()","expected_output_hint":"* 부터 ***** 까지 피라미드가 출력되어야 해요","checklist":["print( ) 안에 \"*\" * i 를 넣어요","줄마다 별이 하나씩 늘어나는지 봐요"],"example_output":"*\n**\n***\n****\n*****","fallback_text":"for i in range(1, 6)으로 i가 1, 2, 3, 4, 5가 되면서 \"*\" * i로 별이 1개, 2개, 3개, 4개, 5개 출력돼요!","is_challenge":true}'::jsonb,
+  '{"topic":"for 반복문과 문자열 반복으로 피라미드 만들기","learning_goals":["for 반복문과 문자열 반복(*)을 조합할 수 있다","반복 변수를 활용하여 패턴을 만들 수 있다"],"story_context":"동굴을 탈출하면 별 피라미드를 쌓아야 해요! 반복의 마법으로 피라미드를 완성해봐요!","exercise_description":"for 반복문과 \"*\" * i 를 사용하여 5줄짜리 별 피라미드를 만드세요","starter_code":"# 별 피라미드를 만들어보세요!\n# 1줄: *\n# 2줄: **\n# ...\n# 5줄: *****\n\nfor i in range(1, 6):\n    print()","expected_output_hint":"* 부터 ***** 까지 피라미드가 출력되어야 해요","checklist":["print( ) 안에 \"*\" * i 를 넣어요","줄마다 별이 하나씩 늘어나는지 봐요"],"example_output":"*\n**\n***\n****\n*****","example_exact":true,"fallback_text":"for i in range(1, 6)으로 i가 1, 2, 3, 4, 5가 되면서 \"*\" * i로 별이 1개, 2개, 3개, 4개, 5개 출력돼요!","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -1181,7 +1181,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 인덱싱과 슬라이싱","learning_goals":["인덱스 번호로 리스트의 특정 값을 꺼낼 수 있다","인덱스가 0부터 시작하는 것을 안다","슬라이싱으로 리스트의 일부를 잘라낼 수 있다"],"story_context":"보물 목록에서 원하는 보물을 골라내봐요! 몇 번째 보물을 꺼낼까요?","exercise_description":"treasures 리스트에서 인덱스를 사용하여 \"다이아몬드\"를 출력하세요","starter_code":"# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[__])","expected_output_hint":"다이아몬드 가 출력되어야 해요","checklist":["treasures[ ] 빈칸에 다이아몬드의 번호를 넣어요","번호는 0부터 센다는 걸 기억해요"],"example_output":"다이아몬드","fallback_text":"리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요."}'::jsonb,
+  '{"topic":"리스트 인덱싱과 슬라이싱","learning_goals":["인덱스 번호로 리스트의 특정 값을 꺼낼 수 있다","인덱스가 0부터 시작하는 것을 안다","슬라이싱으로 리스트의 일부를 잘라낼 수 있다"],"story_context":"보물 목록에서 원하는 보물을 골라내봐요! 몇 번째 보물을 꺼낼까요?","exercise_description":"treasures 리스트에서 인덱스를 사용하여 \"다이아몬드\"를 출력하세요","starter_code":"# 보물 목록에서 다이아몬드를 꺼내보세요!\ntreasures = [\"금화\", \"은화\", \"다이아몬드\", \"루비\"]\nprint(treasures[__])","expected_output_hint":"다이아몬드 가 출력되어야 해요","checklist":["treasures[ ] 빈칸에 다이아몬드의 번호를 넣어요","번호는 0부터 센다는 걸 기억해요"],"example_output":"다이아몬드","example_exact":true,"fallback_text":"리스트의 번호는 0부터 시작해요! treasures[0]은 금화, treasures[1]은 은화, treasures[2]는 다이아몬드예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1229,7 +1229,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"for 반복문으로 리스트 순회하기","learning_goals":["for 반복문으로 리스트의 각 항목을 하나씩 꺼낼 수 있다","리스트 순회의 개념을 이해한다"],"story_context":"리스트 호수에서 색깔 물고기를 하나씩 잡아보아요! for 반복문으로 모든 물고기를 순서대로 만나봐요!","exercise_description":"colors = [\"빨강\", \"초록\", \"파랑\"] 리스트를 for 반복문으로 순회하며 각 색깔을 출력하세요","starter_code":"# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    ","expected_output_hint":"빨강, 초록, 파랑이 한 줄씩 출력되어야 해요","checklist":["for 아래에 print(color)를 써요","그 줄은 네 칸 들여 써요"],"example_output":"빨강\n초록\n파랑","fallback_text":"for color in colors: 라고 쓰면 colors 리스트에서 하나씩 꺼내서 color 변수에 넣어줘요! 첫 번째는 빨강, 두 번째는 초록, 세 번째는 파랑이에요."}'::jsonb,
+  '{"topic":"for 반복문으로 리스트 순회하기","learning_goals":["for 반복문으로 리스트의 각 항목을 하나씩 꺼낼 수 있다","리스트 순회의 개념을 이해한다"],"story_context":"리스트 호수에서 색깔 물고기를 하나씩 잡아보아요! for 반복문으로 모든 물고기를 순서대로 만나봐요!","exercise_description":"colors = [\"빨강\", \"초록\", \"파랑\"] 리스트를 for 반복문으로 순회하며 각 색깔을 출력하세요","starter_code":"# 색깔을 하나씩 출력해보세요!\ncolors = [\"빨강\", \"초록\", \"파랑\"]\n\nfor color in colors:\n    # color를 출력해보세요!\n    ","expected_output_hint":"빨강, 초록, 파랑이 한 줄씩 출력되어야 해요","checklist":["for 아래에 print(color)를 써요","그 줄은 네 칸 들여 써요"],"example_output":"빨강\n초록\n파랑","example_exact":true,"fallback_text":"for color in colors: 라고 쓰면 colors 리스트에서 하나씩 꺼내서 color 변수에 넣어줘요! 첫 번째는 빨강, 두 번째는 초록, 세 번째는 파랑이에요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1301,7 +1301,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 정렬하기 sort()","learning_goals":["sort()로 리스트를 오름차순 정렬할 수 있다","정렬 후 리스트가 변경되는 것을 이해한다"],"story_context":"리스트 호수의 숫자 물고기가 뒤죽박죽이에요! sort()로 깔끔하게 정리해봐요!","exercise_description":"numbers = [3, 1, 4, 1, 5]를 sort()로 정렬한 후 출력하세요","starter_code":"# 숫자를 정렬해보세요!\nnumbers = [3, 1, 4, 1, 5]\n\n# sort()로 정렬하세요!\n\nprint(numbers)","expected_output_hint":"[1, 1, 3, 4, 5] 가 출력되어야 해요","checklist":["numbers.sort( )로 작은 수부터 줄 세워요","print(numbers)로 보여 줘요"],"example_output":"[1, 1, 3, 4, 5]","fallback_text":"sort()는 리스트를 작은 수부터 큰 수 순서로 정리해줘요! numbers.sort() 이렇게 쓰면 돼요."}'::jsonb,
+  '{"topic":"리스트 정렬하기 sort()","learning_goals":["sort()로 리스트를 오름차순 정렬할 수 있다","정렬 후 리스트가 변경되는 것을 이해한다"],"story_context":"리스트 호수의 숫자 물고기가 뒤죽박죽이에요! sort()로 깔끔하게 정리해봐요!","exercise_description":"numbers = [3, 1, 4, 1, 5]를 sort()로 정렬한 후 출력하세요","starter_code":"# 숫자를 정렬해보세요!\nnumbers = [3, 1, 4, 1, 5]\n\n# sort()로 정렬하세요!\n\nprint(numbers)","expected_output_hint":"[1, 1, 3, 4, 5] 가 출력되어야 해요","checklist":["numbers.sort( )로 작은 수부터 줄 세워요","print(numbers)로 보여 줘요"],"example_output":"[1, 1, 3, 4, 5]","example_exact":true,"fallback_text":"sort()는 리스트를 작은 수부터 큰 수 순서로 정리해줘요! numbers.sort() 이렇게 쓰면 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1349,7 +1349,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"in 연산자로 리스트에서 값 찾기","learning_goals":["in 연산자로 리스트에 특정 값이 있는지 확인할 수 있다","in의 결과가 True/False임을 이해한다"],"story_context":"리스트 호수의 과일 바구니에서 바나나를 찾아봐요! in 마법으로 있는지 확인할 수 있어요!","exercise_description":"fruits 리스트에 \"바나나\"가 있는지 in 연산자로 확인하고 결과를 출력하세요","starter_code":"# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"True 가 출력되어야 해요","checklist":["result 에 \"바나나\" in fruits 를 넣어요","print(result)로 True 인지 False 인지 봐요"],"example_output":"True","fallback_text":"in 연산자는 리스트에 값이 있는지 확인해요! \"바나나\" in fruits는 바나나가 fruits에 있으면 True, 없으면 False를 돌려줘요."}'::jsonb,
+  '{"topic":"in 연산자로 리스트에서 값 찾기","learning_goals":["in 연산자로 리스트에 특정 값이 있는지 확인할 수 있다","in의 결과가 True/False임을 이해한다"],"story_context":"리스트 호수의 과일 바구니에서 바나나를 찾아봐요! in 마법으로 있는지 확인할 수 있어요!","exercise_description":"fruits 리스트에 \"바나나\"가 있는지 in 연산자로 확인하고 결과를 출력하세요","starter_code":"# 바나나가 있는지 찾아보세요!\nfruits = [\"사과\", \"바나나\", \"포도\"]\n\n# in 연산자로 \"바나나\"가 fruits에 있는지 확인해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"True 가 출력되어야 해요","checklist":["result 에 \"바나나\" in fruits 를 넣어요","print(result)로 True 인지 False 인지 봐요"],"example_output":"True","example_exact":true,"fallback_text":"in 연산자는 리스트에 값이 있는지 확인해요! \"바나나\" in fruits는 바나나가 fruits에 있으면 True, 없으면 False를 돌려줘요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1373,7 +1373,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"리스트 종합 활용 - 쇼핑 리스트 만들기","learning_goals":["빈 리스트를 만들고 append()로 항목을 추가할 수 있다","sort()로 리스트를 정렬할 수 있다","for 반복문으로 리스트를 순회하여 출력할 수 있다","len()으로 항목 수를 세어 출력할 수 있다"],"story_context":"리스트 호수에서 마지막 시험! 쇼핑 리스트를 만들고, 정리하고, 예쁘게 출력해봐요!","exercise_description":"빈 리스트를 만들고, 우유/주스/과자를 append하고, sort()로 정렬한 후, for로 순회 출력하세요","starter_code":"# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")","expected_output_hint":"쇼핑 목록이 정렬되어 출력되어야 해요","checklist":["append( )로 우유·주스·과자를 하나씩 더해요","sort( )로 가나다 순서로 줄 세워요","목록과 총 개수가 나오는지 봐요"],"example_output":"--- 쇼핑 목록 ---\n과자\n우유\n주스\n총 3개","fallback_text":"빈 리스트 []를 만들고, append()로 항목을 추가하고, sort()로 정렬한 뒤, for로 하나씩 출력해요!","is_challenge":true}'::jsonb,
+  '{"topic":"리스트 종합 활용 - 쇼핑 리스트 만들기","learning_goals":["빈 리스트를 만들고 append()로 항목을 추가할 수 있다","sort()로 리스트를 정렬할 수 있다","for 반복문으로 리스트를 순회하여 출력할 수 있다","len()으로 항목 수를 세어 출력할 수 있다"],"story_context":"리스트 호수에서 마지막 시험! 쇼핑 리스트를 만들고, 정리하고, 예쁘게 출력해봐요!","exercise_description":"빈 리스트를 만들고, 우유/주스/과자를 append하고, sort()로 정렬한 후, for로 순회 출력하세요","starter_code":"# 쇼핑 리스트를 만들어보세요!\nshopping = []\n\n# 3개 항목을 추가하세요! (append 사용)\n\n\n# 정렬하세요! (sort 사용)\n\n\n# 출력하세요!\nprint(\"--- 쇼핑 목록 ---\")\nfor item in shopping:\n    print(item)\nprint(\"총 \" + str(len(shopping)) + \"개\")","expected_output_hint":"쇼핑 목록이 정렬되어 출력되어야 해요","checklist":["append( )로 우유·주스·과자를 하나씩 더해요","sort( )로 가나다 순서로 줄 세워요","목록과 총 개수가 나오는지 봐요"],"example_output":"--- 쇼핑 목록 ---\n과자\n우유\n주스\n총 3개","example_exact":true,"fallback_text":"빈 리스트 []를 만들고, append()로 항목을 추가하고, sort()로 정렬한 뒤, for로 하나씩 출력해요!","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -1421,7 +1421,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수 정의(def)와 호출","learning_goals":["def 키워드로 함수를 만들 수 있다","만든 함수를 호출하여 실행할 수 있다","함수가 코드를 묶어서 재사용하는 것임을 이해한다"],"story_context":"탑의 마법사에게 인사 마법을 배워요! 한 번 만들면 여러 번 사용할 수 있어요.","exercise_description":"greet라는 함수를 만들어 \"안녕! 나는 파이뱀이야!\"를 출력하고, 함수를 호출하세요","starter_code":"# 인사하는 함수를 만들어보세요!\ndef greet():\n    # \"안녕! 나는 파이뱀이야!\"를 출력하세요!\n    \n\ngreet()","expected_output_hint":"안녕! 나는 파이뱀이야! 가 출력되어야 해요","checklist":["def greet( ) 안에 print( )를 들여 써요","\"안녕! 나는 파이뱀이야!\"를 넣어요","greet( )을 불러서 인사가 나오는지 봐요"],"example_output":"안녕! 나는 파이뱀이야!","fallback_text":"def greet(): 으로 함수를 만들고, 안에 실행할 코드를 쓴 뒤, greet()으로 호출해요! 함수는 코드를 묶어놓은 마법 주문서예요."}'::jsonb,
+  '{"topic":"함수 정의(def)와 호출","learning_goals":["def 키워드로 함수를 만들 수 있다","만든 함수를 호출하여 실행할 수 있다","함수가 코드를 묶어서 재사용하는 것임을 이해한다"],"story_context":"탑의 마법사에게 인사 마법을 배워요! 한 번 만들면 여러 번 사용할 수 있어요.","exercise_description":"greet라는 함수를 만들어 \"안녕! 나는 파이뱀이야!\"를 출력하고, 함수를 호출하세요","starter_code":"# 인사하는 함수를 만들어보세요!\ndef greet():\n    # \"안녕! 나는 파이뱀이야!\"를 출력하세요!\n    \n\ngreet()","expected_output_hint":"안녕! 나는 파이뱀이야! 가 출력되어야 해요","checklist":["def greet( ) 안에 print( )를 들여 써요","\"안녕! 나는 파이뱀이야!\"를 넣어요","greet( )을 불러서 인사가 나오는지 봐요"],"example_output":"안녕! 나는 파이뱀이야!","example_exact":true,"fallback_text":"def greet(): 으로 함수를 만들고, 안에 실행할 코드를 쓴 뒤, greet()으로 호출해요! 함수는 코드를 묶어놓은 마법 주문서예요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1469,7 +1469,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"매개변수와 return으로 값 돌려주기","learning_goals":["함수에 매개변수로 값을 전달할 수 있다","return으로 함수가 결과를 돌려주는 것을 이해한다"],"story_context":"탑의 마법 계산기! 두 숫자를 넣으면 합계를 알려줘요.","exercise_description":"add라는 함수를 만들어 두 숫자를 받아 합계를 return하고, add(7, 8)의 결과를 출력하세요","starter_code":"# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    # 두 숫자를 더한 결과를 return 하세요!\n    \n\nresult = add(7, 8)\nprint(result)","expected_output_hint":"15 가 출력되어야 해요","checklist":["add 안에서 return a + b 를 써요","add(7, 8)의 결과가 나오는지 봐요"],"example_output":"15","fallback_text":"매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요."}'::jsonb,
+  '{"topic":"매개변수와 return으로 값 돌려주기","learning_goals":["함수에 매개변수로 값을 전달할 수 있다","return으로 함수가 결과를 돌려주는 것을 이해한다"],"story_context":"탑의 마법 계산기! 두 숫자를 넣으면 합계를 알려줘요.","exercise_description":"add라는 함수를 만들어 두 숫자를 받아 합계를 return하고, add(7, 8)의 결과를 출력하세요","starter_code":"# 두 숫자를 더하는 함수를 만들어보세요!\ndef add(a, b):\n    # 두 숫자를 더한 결과를 return 하세요!\n    \n\nresult = add(7, 8)\nprint(result)","expected_output_hint":"15 가 출력되어야 해요","checklist":["add 안에서 return a + b 를 써요","add(7, 8)의 결과가 나오는지 봐요"],"example_output":"15","example_exact":true,"fallback_text":"매개변수는 함수에 전달하는 값이에요! def add(a, b): 에서 a, b가 매개변수이고, return a + b로 합계를 돌려줘요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1517,7 +1517,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"기본 매개변수 (default parameter)","learning_goals":["함수의 매개변수에 기본값을 설정할 수 있다","기본값이 있으면 인자를 생략할 수 있음을 이해한다"],"story_context":"함수의 탑에서 인사 마법을 업그레이드! 이름을 안 말해도 기본 인사를 해줘요!","exercise_description":"def greet(name=\"친구\") 함수를 만들고, greet()과 greet(\"파이뱀\")을 각각 호출하세요","starter_code":"# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n","expected_output_hint":"안녕, 친구! 와 안녕, 파이뱀! 이 각각 출력되어야 해요","checklist":["greet 안에서 \"안녕, \" + name + \"!\"를 보여 줘요","greet( )을 이름 없이 한 번 불러요","greet(\"파이뱀\")으로 한 번 더 불러요"],"example_output":"안녕, 친구!\n안녕, 파이뱀!","fallback_text":"매개변수에 = 으로 기본값을 넣으면, 호출할 때 값을 안 넣어도 기본값이 사용돼요! def greet(name=\"친구\"): 에서 greet()은 \"친구\"가, greet(\"파이뱀\")은 \"파이뱀\"이 name에 들어가요."}'::jsonb,
+  '{"topic":"기본 매개변수 (default parameter)","learning_goals":["함수의 매개변수에 기본값을 설정할 수 있다","기본값이 있으면 인자를 생략할 수 있음을 이해한다"],"story_context":"함수의 탑에서 인사 마법을 업그레이드! 이름을 안 말해도 기본 인사를 해줘요!","exercise_description":"def greet(name=\"친구\") 함수를 만들고, greet()과 greet(\"파이뱀\")을 각각 호출하세요","starter_code":"# 기본값이 있는 함수를 만들어보세요!\ndef greet(name=\"친구\"):\n    # \"안녕, \" + name + \"!\" 를 출력하세요!\n    \n\n# 이름 없이 한 번, 이름을 넣어서 한 번, 총 두 번 호출해보세요!\n","expected_output_hint":"안녕, 친구! 와 안녕, 파이뱀! 이 각각 출력되어야 해요","checklist":["greet 안에서 \"안녕, \" + name + \"!\"를 보여 줘요","greet( )을 이름 없이 한 번 불러요","greet(\"파이뱀\")으로 한 번 더 불러요"],"example_output":"안녕, 친구!\n안녕, 파이뱀!","example_exact":true,"fallback_text":"매개변수에 = 으로 기본값을 넣으면, 호출할 때 값을 안 넣어도 기본값이 사용돼요! def greet(name=\"친구\"): 에서 greet()은 \"친구\"가, greet(\"파이뱀\")은 \"파이뱀\"이 name에 들어가요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1565,7 +1565,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"파이썬 내장함수 max()와 min()","learning_goals":["max()로 가장 큰 값을 찾을 수 있다","min()로 가장 작은 값을 찾을 수 있다","파이썬에 이미 만들어진 함수가 있다는 것을 안다"],"story_context":"탑 꼭대기에서 마법 숫자들 중 가장 큰 숫자를 찾는 시험! 파이썬의 내장함수를 사용해봐요.","exercise_description":"numbers 리스트에서 max()를 사용하여 가장 큰 수를 출력하세요","starter_code":"# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = \nprint(biggest)","expected_output_hint":"9 가 출력되어야 해요","checklist":["biggest 에 max(numbers)를 넣어요","가장 큰 수가 나오는지 봐요"],"example_output":"9","fallback_text":"max()는 가장 큰 값을 찾아주는 내장함수예요! max([3, 7, 1, 9, 4])는 9를 돌려줘요. min()은 반대로 가장 작은 값을 찾아줘요."}'::jsonb,
+  '{"topic":"파이썬 내장함수 max()와 min()","learning_goals":["max()로 가장 큰 값을 찾을 수 있다","min()로 가장 작은 값을 찾을 수 있다","파이썬에 이미 만들어진 함수가 있다는 것을 안다"],"story_context":"탑 꼭대기에서 마법 숫자들 중 가장 큰 숫자를 찾는 시험! 파이썬의 내장함수를 사용해봐요.","exercise_description":"numbers 리스트에서 max()를 사용하여 가장 큰 수를 출력하세요","starter_code":"# 가장 큰 수를 찾아보세요!\nnumbers = [3, 7, 1, 9, 4]\nbiggest = \nprint(biggest)","expected_output_hint":"9 가 출력되어야 해요","checklist":["biggest 에 max(numbers)를 넣어요","가장 큰 수가 나오는지 봐요"],"example_output":"9","example_exact":true,"fallback_text":"max()는 가장 큰 값을 찾아주는 내장함수예요! max([3, 7, 1, 9, 4])는 9를 돌려줘요. min()은 반대로 가장 작은 값을 찾아줘요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1589,7 +1589,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수에서 여러 값 돌려주기 (튜플)","learning_goals":["함수에서 여러 값을 return할 수 있다","return된 여러 값을 각각 변수에 받을 수 있다"],"story_context":"함수의 탑에서 마법 분석기를 만들어요! 숫자 중 가장 작은 것과 가장 큰 것을 동시에 알려줘요!","exercise_description":"def min_max(a, b, c) 함수를 만들어 가장 작은 값과 가장 큰 값을 return하세요. min_max(1, 9, 5)를 호출하여 결과를 출력!","starter_code":"# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)","expected_output_hint":"1과 9가 각각 한 줄씩 출력되어야 해요","checklist":["return 뒤에 smallest, biggest 를 쉼표로 이어 써요","작은 수와 큰 수가 한 줄씩 나오는지 봐요"],"example_output":"1\n9","fallback_text":"return 뒤에 쉼표로 여러 값을 쓰면 한 번에 돌려줄 수 있어요! small, big = min_max(1, 9, 5) 이렇게 받으면 돼요."}'::jsonb,
+  '{"topic":"함수에서 여러 값 돌려주기 (튜플)","learning_goals":["함수에서 여러 값을 return할 수 있다","return된 여러 값을 각각 변수에 받을 수 있다"],"story_context":"함수의 탑에서 마법 분석기를 만들어요! 숫자 중 가장 작은 것과 가장 큰 것을 동시에 알려줘요!","exercise_description":"def min_max(a, b, c) 함수를 만들어 가장 작은 값과 가장 큰 값을 return하세요. min_max(1, 9, 5)를 호출하여 결과를 출력!","starter_code":"# 최소값과 최대값을 동시에 돌려주는 함수!\ndef min_max(a, b, c):\n    smallest = min(a, b, c)\n    biggest = max(a, b, c)\n    # smallest와 biggest를 동시에 return 하세요! (쉼표로 구분)\n    \n\nsmall, big = min_max(1, 9, 5)\nprint(small)\nprint(big)","expected_output_hint":"1과 9가 각각 한 줄씩 출력되어야 해요","checklist":["return 뒤에 smallest, biggest 를 쉼표로 이어 써요","작은 수와 큰 수가 한 줄씩 나오는지 봐요"],"example_output":"1\n9","example_exact":true,"fallback_text":"return 뒤에 쉼표로 여러 값을 쓰면 한 번에 돌려줄 수 있어요! small, big = min_max(1, 9, 5) 이렇게 받으면 돼요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1613,7 +1613,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수 조합 (함수의 결과를 다른 함수에 전달)","learning_goals":["함수의 return 값을 다른 함수의 인자로 전달할 수 있다","함수를 조합하여 복잡한 계산을 할 수 있다"],"story_context":"함수의 탑에서 마법을 합쳐볼까요? 두 배로 만드는 마법과 하나 더하는 마법을 합치면 어떻게 될까요?","exercise_description":"double(x)은 x를 2배로, add_one(x)은 x에 1을 더하는 함수를 만들고, add_one(double(3))을 호출하세요","starter_code":"# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"7 이 출력되어야 해요 (3*2=6, 6+1=7)","checklist":["double(3)을 add_one( ) 안에 넣어요","그 결과를 result 에 넣고 보여 줘요"],"example_output":"7","fallback_text":"double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요."}'::jsonb,
+  '{"topic":"함수 조합 (함수의 결과를 다른 함수에 전달)","learning_goals":["함수의 return 값을 다른 함수의 인자로 전달할 수 있다","함수를 조합하여 복잡한 계산을 할 수 있다"],"story_context":"함수의 탑에서 마법을 합쳐볼까요? 두 배로 만드는 마법과 하나 더하는 마법을 합치면 어떻게 될까요?","exercise_description":"double(x)은 x를 2배로, add_one(x)은 x에 1을 더하는 함수를 만들고, add_one(double(3))을 호출하세요","starter_code":"# 두 함수를 만들고 합쳐보세요!\ndef double(x):\n    return x * 2\n\ndef add_one(x):\n    return x + 1\n\n# double(3)의 결과에 add_one을 적용해서 result에 저장하세요!\nresult = \nprint(result)","expected_output_hint":"7 이 출력되어야 해요 (3*2=6, 6+1=7)","checklist":["double(3)을 add_one( ) 안에 넣어요","그 결과를 result 에 넣고 보여 줘요"],"example_output":"7","example_exact":true,"fallback_text":"double(3)은 6을 돌려주고, add_one(6)은 7을 돌려줘요! 함수의 결과를 다른 함수에 바로 넣을 수 있어요."}'::jsonb,
   'output_match',
   '',
   50
@@ -1661,7 +1661,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"함수 종합 활용 - 성적 분석 프로그램","learning_goals":["여러 함수를 만들어 역할을 분담할 수 있다","함수의 return 값을 다른 함수에서 활용할 수 있다","함수를 조합하여 실용적인 프로그램을 만들 수 있다"],"story_context":"함수의 탑 마지막 시험! 배운 함수 마법을 모두 써서 성적 분석 프로그램을 완성해봐요!","exercise_description":"average 함수(3과목 평균)와 grade 함수(평균으로 등급 판정)를 만들어 성적을 분석하세요. 점수: 80, 90, 85","starter_code":"# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)","expected_output_hint":"평균: 85.0 과 등급: B 가 출력되어야 해요","checklist":["average 에서 세 점수를 더해 3으로 나눠 return 해요","grade 에서 if·elif·else 로 등급을 return 해요","평균과 등급이 한 줄씩 나오는지 봐요"],"example_output":"평균: 85.0\n등급: B","fallback_text":"average 함수로 평균을 구하고, grade 함수로 등급을 판정해요! 두 함수를 조합하면 성적 분석 프로그램이 완성돼요.","is_challenge":true}'::jsonb,
+  '{"topic":"함수 종합 활용 - 성적 분석 프로그램","learning_goals":["여러 함수를 만들어 역할을 분담할 수 있다","함수의 return 값을 다른 함수에서 활용할 수 있다","함수를 조합하여 실용적인 프로그램을 만들 수 있다"],"story_context":"함수의 탑 마지막 시험! 배운 함수 마법을 모두 써서 성적 분석 프로그램을 완성해봐요!","exercise_description":"average 함수(3과목 평균)와 grade 함수(평균으로 등급 판정)를 만들어 성적을 분석하세요. 점수: 80, 90, 85","starter_code":"# 성적 분석 프로그램을 만들어보세요!\ndef average(a, b, c):\n    # 세 과목의 평균을 구해서 return 하세요!\n    \n\ndef grade(avg):\n    # 90 이상 \"A\", 80 이상 \"B\", 70 이상 \"C\", 나머지 \"D\"\n    \n\n# 3과목 점수\navg = average(80, 90, 85)\ng = grade(avg)\n\nprint(\"평균: \" + str(avg))\nprint(\"등급: \" + g)","expected_output_hint":"평균: 85.0 과 등급: B 가 출력되어야 해요","checklist":["average 에서 세 점수를 더해 3으로 나눠 return 해요","grade 에서 if·elif·else 로 등급을 return 해요","평균과 등급이 한 줄씩 나오는지 봐요"],"example_output":"평균: 85.0\n등급: B","example_exact":true,"fallback_text":"average 함수로 평균을 구하고, grade 함수로 등급을 판정해요! 두 함수를 조합하면 성적 분석 프로그램이 완성돼요.","is_challenge":true}'::jsonb,
   'output_match',
   '',
   75
@@ -1805,10 +1805,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"f-string으로 글자 안에 변수 넣기","learning_goals":["따옴표 앞에 f를 붙여 f-string을 만들 수 있다","{ } 안에 변수 이름을 넣어 값을 글자 속에 끼워 넣을 수 있다"],"story_context":"코드 바다의 첫 섬, 산호 문자열 공방에 도착했어요! 공방 문에 걸 반짝 이름표를 만들어 볼까요? 파이뱀이 새 주문 f-string을 알려 줄 거예요.","exercise_description":"name과 age 변수를 f-string에 넣어 \"이름: 바다\"와 \"바다는 10살\" 두 줄을 출력하세요","starter_code":"# 반짝 이름표를 만들어요!\nname = \"바다\"\nage = 10\n\n# 따옴표 앞에 f 를 붙이면 { } 안에 변수를 넣을 수 있어요\nprint(f\"이름: {name}\")\n\n# 아래 줄도 f-string 으로 바꿔서 \"바다는 10살\"이 나오게 해요\nprint(\"___는 ___살\")\n","expected_output_hint":"이름: 바다 와 바다는 10살 두 줄이 나와야 해요","checklist":["둘째 print 의 따옴표 앞에 f 를 붙여요","___ 자리에 {name} 과 {age} 를 넣어요","바다는 10살 이 나오는지 봐요"],"example_output":"이름: 바다\n바다는 10살","fallback_text":"f-string은 따옴표 앞에 f를 붙인 글자예요. f\"{name}는 {age}살\"처럼 쓰면 { } 자리에 변수 값이 쏙 들어가요. 숫자 age도 str() 없이 바로 넣을 수 있어요!"}'::jsonb,
+  '{"topic":"f-string으로 글자 안에 변수 넣기","learning_goals":["따옴표 앞에 f를 붙여 f-string을 만들 수 있다","{ } 안에 변수 이름을 넣어 값을 글자 속에 끼워 넣을 수 있다"],"story_context":"코드 바다의 첫 섬, 산호 문자열 공방에 도착했어요! 공방 문에 걸 반짝 이름표를 만들어 볼까요? 파이뱀이 새 주문 f-string을 알려 줄 거예요.","exercise_description":"name과 age 변수를 f-string에 넣어 \"이름: 바다\"와 \"바다는 10살\" 두 줄을 출력하세요","starter_code":"# 반짝 이름표를 만들어요!\nname = \"바다\"\nage = 10\n\n# 따옴표 앞에 f 를 붙이면 { } 안에 변수를 넣을 수 있어요\nprint(f\"이름: {name}\")\n\n# 아래 줄도 f-string 으로 바꿔서 \"바다는 10살\"이 나오게 해요\nprint(\"___는 ___살\")\n","expected_output_hint":"이름: 바다 와 바다는 10살 두 줄이 나와야 해요","checklist":["둘째 print 의 따옴표 앞에 f 를 붙여요","___ 자리에 {name} 과 {age} 를 넣어요","바다는 10살 이 나오는지 봐요"],"example_output":"이름: 바다\n바다는 10살","example_exact":true,"fallback_text":"f-string은 따옴표 앞에 f를 붙인 글자예요. f\"{name}는 {age}살\"처럼 쓰면 { } 자리에 변수 값이 쏙 들어가요. 숫자 age도 str() 없이 바로 넣을 수 있어요!"}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1829,10 +1829,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"글자 번호(인덱스)로 글자 꺼내기","learning_goals":["글자의 자리 번호가 0부터 시작한다는 것을 안다","[-1]로 맨 끝 글자를 꺼낼 수 있다","len()으로 글자 수를 세고, for로 한 글자씩 꺼낼 수 있다"],"story_context":"공방 선반에 OCEAN 글자 상자가 놓여 있어요. 글자마다 자리 번호가 붙어 있대요. 상자에서 글자를 하나씩 꺼내 볼까요?","exercise_description":"word = \"OCEAN\" 에서 첫 글자, 마지막 글자([-1]), 글자 수를 출력하고, for로 한 글자씩 한 줄에 하나씩 출력하세요","starter_code":"word = \"OCEAN\"\n\n# 글자 번호는 0부터 세요. 맨 끝 글자는 -1 번이에요\nprint(f\"첫 글자: {word[0]}\")\nprint(f\"마지막 글자: {word[___]}\")\nprint(f\"글자 수: {___}\")\n\n# for 로 한 글자씩 꺼내 한 줄에 하나씩 보여 줘요\nfor letter in word:\n    print(___)\n","expected_output_hint":"첫 글자: O, 마지막 글자: N, 글자 수: 5 다음에 O C E A N 이 한 줄에 하나씩 나와야 해요","checklist":["마지막 글자 번호에 -1 을 넣어요","글자 수는 len(word) 로 세요","for 안에서 letter 를 보여 줘요"],"example_output":"첫 글자: O\n마지막 글자: N\n글자 수: 5\nO\nC\nE\nA\nN","fallback_text":"글자도 리스트처럼 자리 번호가 있어요. word[0]은 첫 글자, word[-1]은 맨 끝 글자예요. len(word)는 글자 수를 세고, for letter in word: 는 글자를 하나씩 꺼내 줘요."}'::jsonb,
+  '{"topic":"글자 번호(인덱스)로 글자 꺼내기","learning_goals":["글자의 자리 번호가 0부터 시작한다는 것을 안다","[-1]로 맨 끝 글자를 꺼낼 수 있다","len()으로 글자 수를 세고, for로 한 글자씩 꺼낼 수 있다"],"story_context":"공방 선반에 OCEAN 글자 상자가 놓여 있어요. 글자마다 자리 번호가 붙어 있대요. 상자에서 글자를 하나씩 꺼내 볼까요?","exercise_description":"word = \"OCEAN\" 에서 첫 글자, 마지막 글자([-1]), 글자 수를 출력하고, for로 한 글자씩 한 줄에 하나씩 출력하세요","starter_code":"word = \"OCEAN\"\n\n# 글자 번호는 0부터 세요. 맨 끝 글자는 -1 번이에요\nprint(f\"첫 글자: {word[0]}\")\nprint(f\"마지막 글자: {word[___]}\")\nprint(f\"글자 수: {___}\")\n\n# for 로 한 글자씩 꺼내 한 줄에 하나씩 보여 줘요\nfor letter in word:\n    print(___)\n","expected_output_hint":"첫 글자: O, 마지막 글자: N, 글자 수: 5 다음에 O C E A N 이 한 줄에 하나씩 나와야 해요","checklist":["마지막 글자 번호에 -1 을 넣어요","글자 수는 len(word) 로 세요","for 안에서 letter 를 보여 줘요"],"example_output":"첫 글자: O\n마지막 글자: N\n글자 수: 5\nO\nC\nE\nA\nN","example_exact":true,"fallback_text":"글자도 리스트처럼 자리 번호가 있어요. word[0]은 첫 글자, word[-1]은 맨 끝 글자예요. len(word)는 글자 수를 세고, for letter in word: 는 글자를 하나씩 꺼내 줘요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1853,10 +1853,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"for로 글자를 돌며 if로 세기","learning_goals":["for로 글자를 하나씩 돌 수 있다","if로 원하는 글자를 만날 때마다 수를 늘릴 수 있다"],"story_context":"버그버그가 간판 banana boat 곳곳에 조개 도장을 찍어 놨어요. a 글자마다 도장이 하나씩 있대요. 도장이 모두 몇 개인지 세어 봐요!","exercise_description":"text = \"banana boat\" 를 for로 한 글자씩 돌며, 글자가 \"a\" 일 때마다 count를 1씩 늘려 \"a는 4번\"을 출력하세요","starter_code":"text = \"banana boat\"\ncount = 0\n\nfor letter in text:\n    # letter 가 \"a\" 이면 count 를 1 늘려요\n    ___\n\nprint(f\"a는 {count}번\")\n","expected_output_hint":"a는 4번 이 나와야 해요","checklist":["for 안에 if letter == \"a\": 를 써요","if 안에서 count = count + 1 로 하나 늘려요","a는 4번 이 나오는지 봐요"],"example_output":"a는 4번","fallback_text":"세기는 상자 count 를 0으로 두고, 원하는 글자를 만날 때마다 1씩 더하는 거예요. for letter in text: 안에 if letter == \"a\": 를 넣고 그 안에서 count = count + 1 을 해요."}'::jsonb,
+  '{"topic":"for로 글자를 돌며 if로 세기","learning_goals":["for로 글자를 하나씩 돌 수 있다","if로 원하는 글자를 만날 때마다 수를 늘릴 수 있다"],"story_context":"버그버그가 간판 banana boat 곳곳에 조개 도장을 찍어 놨어요. a 글자마다 도장이 하나씩 있대요. 도장이 모두 몇 개인지 세어 봐요!","exercise_description":"text = \"banana boat\" 를 for로 한 글자씩 돌며, 글자가 \"a\" 일 때마다 count를 1씩 늘려 \"a는 4번\"을 출력하세요","starter_code":"text = \"banana boat\"\ncount = 0\n\nfor letter in text:\n    # letter 가 \"a\" 이면 count 를 1 늘려요\n    ___\n\nprint(f\"a는 {count}번\")\n","expected_output_hint":"a는 4번 이 나와야 해요","checklist":["for 안에 if letter == \"a\": 를 써요","if 안에서 count = count + 1 로 하나 늘려요","a는 4번 이 나오는지 봐요"],"example_output":"a는 4번","example_exact":true,"fallback_text":"세기는 상자 count 를 0으로 두고, 원하는 글자를 만날 때마다 1씩 더하는 거예요. for letter in text: 안에 if letter == \"a\": 를 넣고 그 안에서 count = count + 1 을 해요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1877,10 +1877,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"[시작:끝]으로 글자 잘라 내기","learning_goals":["[시작:끝]으로 글자의 한 부분을 잘라 낼 수 있다","끝 번호 글자는 잘라 낸 조각에 들어가지 않는다는 것을 안다"],"story_context":"공방에 starfish 글자 리본이 길게 걸려 있어요. 가위로 싹둑 잘라서 star 리본과 fish 리본 두 개로 나눠 볼까요?","exercise_description":"word = \"starfish\" 를 [시작:끝]으로 잘라 star 와 fish 를 한 줄씩 출력하세요","starter_code":"word = \"starfish\"\n\n# [시작:끝] 으로 잘라요. 끝 번호 글자는 들어가지 않아요\n# s  t  a  r  f  i  s  h\n# 0  1  2  3  4  5  6  7\nfront = word[0:___]\nback = word[___:]\n\nprint(front)\nprint(back)\n","expected_output_hint":"star 와 fish 가 한 줄씩 나와야 해요","checklist":["front 는 0번부터 4번 앞까지 잘라요","back 은 4번부터 끝까지 잘라요","star 와 fish 가 나오는지 봐요"],"example_output":"star\nfish","fallback_text":"word[0:4]는 0번부터 4번 바로 앞(3번)까지 잘라요. 그래서 s t a r 네 글자예요. 끝 번호를 비우면 word[4:]처럼 끝까지 잘라요."}'::jsonb,
+  '{"topic":"[시작:끝]으로 글자 잘라 내기","learning_goals":["[시작:끝]으로 글자의 한 부분을 잘라 낼 수 있다","끝 번호 글자는 잘라 낸 조각에 들어가지 않는다는 것을 안다"],"story_context":"공방에 starfish 글자 리본이 길게 걸려 있어요. 가위로 싹둑 잘라서 star 리본과 fish 리본 두 개로 나눠 볼까요?","exercise_description":"word = \"starfish\" 를 [시작:끝]으로 잘라 star 와 fish 를 한 줄씩 출력하세요","starter_code":"word = \"starfish\"\n\n# [시작:끝] 으로 잘라요. 끝 번호 글자는 들어가지 않아요\n# s  t  a  r  f  i  s  h\n# 0  1  2  3  4  5  6  7\nfront = word[0:___]\nback = word[___:]\n\nprint(front)\nprint(back)\n","expected_output_hint":"star 와 fish 가 한 줄씩 나와야 해요","checklist":["front 는 0번부터 4번 앞까지 잘라요","back 은 4번부터 끝까지 잘라요","star 와 fish 가 나오는지 봐요"],"example_output":"star\nfish","example_exact":true,"fallback_text":"word[0:4]는 0번부터 4번 바로 앞(3번)까지 잘라요. 그래서 s t a r 네 글자예요. 끝 번호를 비우면 word[4:]처럼 끝까지 잘라요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1925,10 +1925,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"글자 메서드 upper()와 replace()","learning_goals":["값 뒤에 점(.)을 찍고 메서드를 부를 수 있다","upper()로 영어를 대문자로 바꿀 수 있다","replace()로 낱말을 다른 낱말로 바꿀 수 있다"],"story_context":"공방 간판에 \"i love the lake\"라고 쓰여 있어요. 여긴 호수가 아니라 바다인데! 간판을 크게 외치고, lake 를 sea 로 고쳐 줘요.","exercise_description":"spell = \"i love the lake\" 를 upper()로 대문자로 한 줄, replace()로 lake 를 sea 로 바꿔 한 줄 출력하세요","starter_code":"spell = \"i love the lake\"\n\n# 메서드는 값 뒤에 점(.)을 찍고 불러요\nprint(spell.___())\nprint(spell.replace(\"___\", \"___\"))\n","expected_output_hint":"I LOVE THE LAKE 와 i love the sea 가 한 줄씩 나와야 해요","checklist":["첫째 줄 빈칸에 upper 를 넣어요","replace(\"바꿀 낱말\", \"새 낱말\")에 lake 와 sea 를 넣어요","두 줄이 나오는지 봐요"],"example_output":"I LOVE THE LAKE\ni love the sea","fallback_text":"메서드는 값 뒤에 점(.)을 찍고 부르는 그 값 전용 함수예요. spell.upper()는 모두 대문자로, spell.replace(\"lake\", \"sea\")는 lake 를 sea 로 바꾼 새 글자를 돌려줘요. lower()는 반대로 소문자로 바꿔요."}'::jsonb,
+  '{"topic":"글자 메서드 upper()와 replace()","learning_goals":["값 뒤에 점(.)을 찍고 메서드를 부를 수 있다","upper()로 영어를 대문자로 바꿀 수 있다","replace()로 낱말을 다른 낱말로 바꿀 수 있다"],"story_context":"공방 간판에 \"i love the lake\"라고 쓰여 있어요. 여긴 호수가 아니라 바다인데! 간판을 크게 외치고, lake 를 sea 로 고쳐 줘요.","exercise_description":"spell = \"i love the lake\" 를 upper()로 대문자로 한 줄, replace()로 lake 를 sea 로 바꿔 한 줄 출력하세요","starter_code":"spell = \"i love the lake\"\n\n# 메서드는 값 뒤에 점(.)을 찍고 불러요\nprint(spell.___())\nprint(spell.replace(\"___\", \"___\"))\n","expected_output_hint":"I LOVE THE LAKE 와 i love the sea 가 한 줄씩 나와야 해요","checklist":["첫째 줄 빈칸에 upper 를 넣어요","replace(\"바꿀 낱말\", \"새 낱말\")에 lake 와 sea 를 넣어요","두 줄이 나오는지 봐요"],"example_output":"I LOVE THE LAKE\ni love the sea","example_exact":true,"fallback_text":"메서드는 값 뒤에 점(.)을 찍고 부르는 그 값 전용 함수예요. spell.upper()는 모두 대문자로, spell.replace(\"lake\", \"sea\")는 lake 를 sea 로 바꾼 새 글자를 돌려줘요. lower()는 반대로 소문자로 바꿔요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -1973,10 +1973,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"split()으로 쪼개고 join()으로 잇기","learning_goals":["split()으로 글자를 기준 글자마다 쪼개 리스트를 만들 수 있다","join()으로 리스트를 하나의 글자로 이어 붙일 수 있다"],"story_context":"바닷가에서 주운 구슬 이름이 \"진주,소라,조개\"로 한 줄에 붙어 있어요. 하나씩 떼어 세어 보고, 예쁜 목걸이로 다시 꿰어 볼까요?","exercise_description":"shells = \"진주,소라,조개\" 를 split(\",\")로 쪼개 구슬 수를 출력하고, \" - \".join()으로 이어 목걸이를 출력하세요","starter_code":"shells = \"진주,소라,조개\"\n\n# 쉼표(,)를 기준으로 쪼개면 리스트가 돼요\nbeads = shells.split(___)\nprint(f\"구슬 {len(beads)}개\")\n\n# \" - \" 로 구슬을 이어 목걸이를 꿰어요\nnecklace = ___\nprint(necklace)\n","expected_output_hint":"구슬 3개 와 진주 - 소라 - 조개 가 한 줄씩 나와야 해요","checklist":["split( ) 안에 쉼표 \",\" 를 넣어요","necklace 에 \" - \".join(beads) 를 넣어요","구슬 사이에 - 가 들어갔는지 봐요"],"example_output":"구슬 3개\n진주 - 소라 - 조개","fallback_text":"shells.split(\",\")은 쉼표마다 잘라 [\"진주\", \"소라\", \"조개\"] 리스트를 만들어요. \" - \".join(리스트)는 반대로 리스트 사이사이에 \" - \"를 끼워 하나의 글자로 이어요."}'::jsonb,
+  '{"topic":"split()으로 쪼개고 join()으로 잇기","learning_goals":["split()으로 글자를 기준 글자마다 쪼개 리스트를 만들 수 있다","join()으로 리스트를 하나의 글자로 이어 붙일 수 있다"],"story_context":"바닷가에서 주운 구슬 이름이 \"진주,소라,조개\"로 한 줄에 붙어 있어요. 하나씩 떼어 세어 보고, 예쁜 목걸이로 다시 꿰어 볼까요?","exercise_description":"shells = \"진주,소라,조개\" 를 split(\",\")로 쪼개 구슬 수를 출력하고, \" - \".join()으로 이어 목걸이를 출력하세요","starter_code":"shells = \"진주,소라,조개\"\n\n# 쉼표(,)를 기준으로 쪼개면 리스트가 돼요\nbeads = shells.split(___)\nprint(f\"구슬 {len(beads)}개\")\n\n# \" - \" 로 구슬을 이어 목걸이를 꿰어요\nnecklace = ___\nprint(necklace)\n","expected_output_hint":"구슬 3개 와 진주 - 소라 - 조개 가 한 줄씩 나와야 해요","checklist":["split( ) 안에 쉼표 \",\" 를 넣어요","necklace 에 \" - \".join(beads) 를 넣어요","구슬 사이에 - 가 들어갔는지 봐요"],"example_output":"구슬 3개\n진주 - 소라 - 조개","example_exact":true,"fallback_text":"shells.split(\",\")은 쉼표마다 잘라 [\"진주\", \"소라\", \"조개\"] 리스트를 만들어요. \" - \".join(리스트)는 반대로 리스트 사이사이에 \" - \"를 끼워 하나의 글자로 이어요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2021,7 +2021,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"글자를 세 칸씩 밀어 암호 만들기","learning_goals":["index()로 글자의 자리 번호를 찾을 수 있다","% 26으로 z 다음에 다시 a로 돌아오게 할 수 있다","반복하며 새 글자를 한 글자씩 붙여 만들 수 있다"],"story_context":"공방 주인이 버그버그 몰래 비밀 쪽지를 보내고 싶대요. 알파벳을 세 칸씩 밀면 아무도 못 읽는 암호가 돼요! python 을 암호로 바꿔 볼까요?","exercise_description":"word = \"python\" 의 글자마다 abc.index()로 번호를 찾고, 3칸 민 번호를 % 26으로 돌려 새 글자를 붙여 \"암호: sbwkrq\"를 출력하세요","starter_code":"abc = \"abcdefghijklmnopqrstuvwxyz\"\nword = \"python\"\nsecret = \"\"\n\nfor ch in word:\n    num = abc.index(ch)    # 이 글자가 abc 에서 몇 번인지 찾아요\n    # 3칸 밀어요. z 를 넘어가면 % 26 으로 a 쪽으로 돌아와요\n    new_num = ___\n    secret = secret + abc[new_num]\n\nprint(f\"암호: {secret}\")\n","expected_output_hint":"암호: sbwkrq 가 나와야 해요","checklist":["new_num 에 num 보다 3 큰 수를 넣어요","% 26 으로 z 다음은 a 로 돌아오게 해요","y 가 b 로 바뀌었는지 봐요"],"example_output":"암호: sbwkrq","fallback_text":"p는 15번이라 3칸 밀면 18번 s가 돼요. 그런데 y는 24번이라 3칸 밀면 27번, abc에 없는 번호예요! (24 + 3) % 26 은 1이라서 b로 돌아와요. 시계가 12 다음에 1로 돌아오는 것과 같아요.","is_challenge":true}'::jsonb,
+  '{"topic":"글자를 세 칸씩 밀어 암호 만들기","learning_goals":["index()로 글자의 자리 번호를 찾을 수 있다","% 26으로 z 다음에 다시 a로 돌아오게 할 수 있다","반복하며 새 글자를 한 글자씩 붙여 만들 수 있다"],"story_context":"공방 주인이 버그버그 몰래 비밀 쪽지를 보내고 싶대요. 알파벳을 세 칸씩 밀면 아무도 못 읽는 암호가 돼요! python 을 암호로 바꿔 볼까요?","exercise_description":"word = \"python\" 의 글자마다 abc.index()로 번호를 찾고, 3칸 민 번호를 % 26으로 돌려 새 글자를 붙여 \"암호: sbwkrq\"를 출력하세요","starter_code":"abc = \"abcdefghijklmnopqrstuvwxyz\"\nword = \"python\"\nsecret = \"\"\n\nfor ch in word:\n    num = abc.index(ch)    # 이 글자가 abc 에서 몇 번인지 찾아요\n    # 3칸 밀어요. z 를 넘어가면 % 26 으로 a 쪽으로 돌아와요\n    new_num = ___\n    secret = secret + abc[new_num]\n\nprint(f\"암호: {secret}\")\n","expected_output_hint":"암호: sbwkrq 가 나와야 해요","checklist":["new_num 에 num 보다 3 큰 수를 넣어요","% 26 으로 z 다음은 a 로 돌아오게 해요","y 가 b 로 바뀌었는지 봐요"],"example_output":"암호: sbwkrq","example_exact":true,"fallback_text":"p는 15번이라 3칸 밀면 18번 s가 돼요. 그런데 y는 24번이라 3칸 밀면 27번, abc에 없는 번호예요! (24 + 3) % 26 은 1이라서 b로 돌아와요. 시계가 12 다음에 1로 돌아오는 것과 같아요.","is_challenge":true}'::jsonb,
   'all',
   '',
   120
@@ -2069,10 +2069,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"딕셔너리 만들고 키로 값 꺼내기","learning_goals":["{키: 값} 모양으로 딕셔너리를 만들 수 있다","딕셔너리[키]로 값을 꺼낼 수 있다"],"story_context":"등대 도서관에 왔어요! 버그버그가 책 이름표를 몽땅 떼어 갔대요. 파이뱀이 말해요. \"딕셔너리는 이름표 붙은 조개 상자야!\" 첫 책에 이름표를 붙여 줘요.","exercise_description":"book 딕셔너리에 \"제목\"은 \"바다 탐험\", \"쪽수\"는 120을 넣고, 키로 꺼내 제목과 쪽수를 출력하세요","starter_code":"# 책 이름표를 붙여요: { \"이름표\": 내용, \"이름표\": 내용 }\nbook = {\"제목\": \"바다 탐험\", \"쪽수\": ___}\n\n# 딕셔너리[이름표] 로 내용을 꺼내요\ntitle = book[\"제목\"]\npages = ___\n\nprint(f\"제목: {title}\")\nprint(f\"쪽수: {pages}쪽\")\n","expected_output_hint":"제목: 바다 탐험 과 쪽수: 120쪽 이 한 줄씩 나와야 해요","checklist":["\"쪽수\" 이름표에 120 을 넣어요","pages 에 book[\"쪽수\"] 를 넣어요","두 줄이 나오는지 봐요"],"example_output":"제목: 바다 탐험\n쪽수: 120쪽","fallback_text":"딕셔너리는 {키: 값} 짝을 쉼표로 이어 담아요. 리스트는 번호로 꺼내지만, 딕셔너리는 book[\"제목\"]처럼 이름표(키)로 꺼내요."}'::jsonb,
+  '{"topic":"딕셔너리 만들고 키로 값 꺼내기","learning_goals":["{키: 값} 모양으로 딕셔너리를 만들 수 있다","딕셔너리[키]로 값을 꺼낼 수 있다"],"story_context":"등대 도서관에 왔어요! 버그버그가 책 이름표를 몽땅 떼어 갔대요. 파이뱀이 말해요. \"딕셔너리는 이름표 붙은 조개 상자야!\" 첫 책에 이름표를 붙여 줘요.","exercise_description":"book 딕셔너리에 \"제목\"은 \"바다 탐험\", \"쪽수\"는 120을 넣고, 키로 꺼내 제목과 쪽수를 출력하세요","starter_code":"# 책 이름표를 붙여요: { \"이름표\": 내용, \"이름표\": 내용 }\nbook = {\"제목\": \"바다 탐험\", \"쪽수\": ___}\n\n# 딕셔너리[이름표] 로 내용을 꺼내요\ntitle = book[\"제목\"]\npages = ___\n\nprint(f\"제목: {title}\")\nprint(f\"쪽수: {pages}쪽\")\n","expected_output_hint":"제목: 바다 탐험 과 쪽수: 120쪽 이 한 줄씩 나와야 해요","checklist":["\"쪽수\" 이름표에 120 을 넣어요","pages 에 book[\"쪽수\"] 를 넣어요","두 줄이 나오는지 봐요"],"example_output":"제목: 바다 탐험\n쪽수: 120쪽","example_exact":true,"fallback_text":"딕셔너리는 {키: 값} 짝을 쉼표로 이어 담아요. 리스트는 번호로 꺼내지만, 딕셔너리는 book[\"제목\"]처럼 이름표(키)로 꺼내요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2093,10 +2093,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"딕셔너리에 이름표 더하고 내용 고치기","learning_goals":["딕셔너리[새 키] = 값 으로 이름표를 더할 수 있다","딕셔너리[있는 키] = 값 으로 내용을 고칠 수 있다","len()으로 이름표 수를 셀 수 있다"],"story_context":"하늘이가 바다 탐험 책을 빌려 간대요. 기록장에 빌린 사람을 적어 줘요. 그런데 쪽수도 잘못 적혀 있네요! 버그버그의 장난인가 봐요.","exercise_description":"book 에 \"빌린 사람\" 이름표를 새로 붙여 \"하늘\"을 넣고, \"쪽수\"를 130으로 고친 뒤 book 과 이름표 수를 출력하세요","starter_code":"book = {\"제목\": \"바다 탐험\", \"쪽수\": 120}\n\n# 1) \"빌린 사람\" 이름표를 새로 붙여 \"하늘\"을 넣어요\n\n# 2) \"쪽수\"를 130 으로 고쳐요\n\nprint(book)\nprint(f\"이름표 수: {len(book)}\")\n","expected_output_hint":"book 안에 빌린 사람 하늘과 쪽수 130이 보이고, 이름표 수: 3 이 나와야 해요","checklist":["book[\"빌린 사람\"] = \"하늘\" 을 써요","book[\"쪽수\"] = 130 으로 고쳐요","이름표 수가 3 인지 봐요"],"example_output":"{''제목'': ''바다 탐험'', ''쪽수'': 130, ''빌린 사람'': ''하늘''}\n이름표 수: 3","fallback_text":"없는 이름표에 book[\"빌린 사람\"] = \"하늘\" 하고 넣으면 새 이름표가 붙어요. 있는 이름표에 넣으면 내용이 바뀌어요. 이름표는 한 상자에 하나뿐이라서, 같은 이름표가 둘이 되지 않아요."}'::jsonb,
+  '{"topic":"딕셔너리에 이름표 더하고 내용 고치기","learning_goals":["딕셔너리[새 키] = 값 으로 이름표를 더할 수 있다","딕셔너리[있는 키] = 값 으로 내용을 고칠 수 있다","len()으로 이름표 수를 셀 수 있다"],"story_context":"하늘이가 바다 탐험 책을 빌려 간대요. 기록장에 빌린 사람을 적어 줘요. 그런데 쪽수도 잘못 적혀 있네요! 버그버그의 장난인가 봐요.","exercise_description":"book 에 \"빌린 사람\" 이름표를 새로 붙여 \"하늘\"을 넣고, \"쪽수\"를 130으로 고친 뒤 book 과 이름표 수를 출력하세요","starter_code":"book = {\"제목\": \"바다 탐험\", \"쪽수\": 120}\n\n# 1) \"빌린 사람\" 이름표를 새로 붙여 \"하늘\"을 넣어요\n\n# 2) \"쪽수\"를 130 으로 고쳐요\n\nprint(book)\nprint(f\"이름표 수: {len(book)}\")\n","expected_output_hint":"book 안에 빌린 사람 하늘과 쪽수 130이 보이고, 이름표 수: 3 이 나와야 해요","checklist":["book[\"빌린 사람\"] = \"하늘\" 을 써요","book[\"쪽수\"] = 130 으로 고쳐요","이름표 수가 3 인지 봐요"],"example_output":"{''제목'': ''바다 탐험'', ''쪽수'': 130, ''빌린 사람'': ''하늘''}\n이름표 수: 3","example_exact":true,"fallback_text":"없는 이름표에 book[\"빌린 사람\"] = \"하늘\" 하고 넣으면 새 이름표가 붙어요. 있는 이름표에 넣으면 내용이 바뀌어요. 이름표는 한 상자에 하나뿐이라서, 같은 이름표가 둘이 되지 않아요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2141,10 +2141,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"없는 키를 안전하게 다루기","learning_goals":["in으로 딕셔너리에 키가 있는지 확인할 수 있다",".get(키, 대신 값)으로 없는 키도 멈추지 않고 꺼낼 수 있다"],"story_context":"책장에 책이 몇 권 있는지 적어 둔 딕셔너리가 있어요. 그런데 없는 책 문어 요리를 찾자 프로그램이 멈춰 버렸어요! 멈추지 않게 고쳐 볼까요?","exercise_description":"in으로 \"고래 일기\"가 있는지 확인해 \"고래 일기 있어요\"를 출력하고, 마지막 줄의 shelf[\"문어 요리\"]를 .get(\"문어 요리\", \"없어요\")로 바꿔 출력하세요","starter_code":"shelf = {\"바다 탐험\": 3, \"고래 일기\": 1}\n\n# 1) \"고래 일기\" 이름표가 shelf 에 있는지 in 으로 확인해요\nif ___:\n    print(\"고래 일기 있어요\")\n\nprint(shelf[\"바다 탐험\"])\n\n# 2) 없는 이름표를 꺼내면 에러가 나요! .get(이름표, \"없어요\") 로 바꿔요\nprint(shelf[\"문어 요리\"])\n","expected_output_hint":"고래 일기 있어요, 3, 없어요 가 한 줄씩 나와야 해요","checklist":["if 빈칸에 \"고래 일기\" in shelf 를 넣어요","마지막 줄을 shelf.get(\"문어 요리\", \"없어요\") 로 바꿔요","멈추지 않고 세 줄이 나오는지 봐요"],"example_output":"고래 일기 있어요\n3\n없어요","fallback_text":"\"고래 일기\" in shelf 는 이름표가 있으면 True, 없으면 False 예요. shelf[\"문어 요리\"]처럼 없는 이름표를 꺼내면 KeyError 로 멈추지만, shelf.get(\"문어 요리\", \"없어요\")는 멈추지 않고 \"없어요\"를 돌려줘요."}'::jsonb,
+  '{"topic":"없는 키를 안전하게 다루기","learning_goals":["in으로 딕셔너리에 키가 있는지 확인할 수 있다",".get(키, 대신 값)으로 없는 키도 멈추지 않고 꺼낼 수 있다"],"story_context":"책장에 책이 몇 권 있는지 적어 둔 딕셔너리가 있어요. 그런데 없는 책 문어 요리를 찾자 프로그램이 멈춰 버렸어요! 멈추지 않게 고쳐 볼까요?","exercise_description":"in으로 \"고래 일기\"가 있는지 확인해 \"고래 일기 있어요\"를 출력하고, 마지막 줄의 shelf[\"문어 요리\"]를 .get(\"문어 요리\", \"없어요\")로 바꿔 출력하세요","starter_code":"shelf = {\"바다 탐험\": 3, \"고래 일기\": 1}\n\n# 1) \"고래 일기\" 이름표가 shelf 에 있는지 in 으로 확인해요\nif ___:\n    print(\"고래 일기 있어요\")\n\nprint(shelf[\"바다 탐험\"])\n\n# 2) 없는 이름표를 꺼내면 에러가 나요! .get(이름표, \"없어요\") 로 바꿔요\nprint(shelf[\"문어 요리\"])\n","expected_output_hint":"고래 일기 있어요, 3, 없어요 가 한 줄씩 나와야 해요","checklist":["if 빈칸에 \"고래 일기\" in shelf 를 넣어요","마지막 줄을 shelf.get(\"문어 요리\", \"없어요\") 로 바꿔요","멈추지 않고 세 줄이 나오는지 봐요"],"example_output":"고래 일기 있어요\n3\n없어요","example_exact":true,"fallback_text":"\"고래 일기\" in shelf 는 이름표가 있으면 True, 없으면 False 예요. shelf[\"문어 요리\"]처럼 없는 이름표를 꺼내면 KeyError 로 멈추지만, shelf.get(\"문어 요리\", \"없어요\")는 멈추지 않고 \"없어요\"를 돌려줘요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2165,10 +2165,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"items()로 딕셔너리 모두 돌기","learning_goals":["for 키, 값 in 딕셔너리.items(): 로 이름표와 내용을 한 쌍씩 꺼낼 수 있다","돌면서 값을 더해 합계를 낼 수 있다"],"story_context":"등대 도서관 책장을 한 바퀴 돌며 칸마다 책이 몇 권인지 세어 봐요. 다 돌고 나면 모두 몇 권인지도 알려 줘요!","exercise_description":"for name, count in shelf.items(): 로 \"동화: 4권\"처럼 한 줄씩 출력하고, 권수를 모두 더해 \"모두 11권\"을 출력하세요","starter_code":"shelf = {\"동화\": 4, \"과학\": 2, \"만화\": 5}\ntotal = 0\n\n# .items() 는 이름표와 내용을 한 쌍씩 꺼내 줘요\nfor name, count in shelf.___():\n    print(f\"{name}: {count}권\")\n    # total 에 count 를 더해요\n    ___\n\nprint(f\"모두 {total}권\")\n","expected_output_hint":"동화: 4권, 과학: 2권, 만화: 5권, 모두 11권 이 한 줄씩 나와야 해요","checklist":["shelf 뒤 빈칸에 items 를 넣어요","for 안에서 total = total + count 로 더해요","모두 11권 이 나오는지 봐요"],"example_output":"동화: 4권\n과학: 2권\n만화: 5권\n모두 11권","fallback_text":"shelf.items() 는 (\"동화\", 4), (\"과학\", 2) 처럼 이름표와 내용을 한 쌍씩 꺼내요. for name, count in shelf.items(): 라고 쓰면 name 에 이름표, count 에 내용이 들어가요."}'::jsonb,
+  '{"topic":"items()로 딕셔너리 모두 돌기","learning_goals":["for 키, 값 in 딕셔너리.items(): 로 이름표와 내용을 한 쌍씩 꺼낼 수 있다","돌면서 값을 더해 합계를 낼 수 있다"],"story_context":"등대 도서관 책장을 한 바퀴 돌며 칸마다 책이 몇 권인지 세어 봐요. 다 돌고 나면 모두 몇 권인지도 알려 줘요!","exercise_description":"for name, count in shelf.items(): 로 \"동화: 4권\"처럼 한 줄씩 출력하고, 권수를 모두 더해 \"모두 11권\"을 출력하세요","starter_code":"shelf = {\"동화\": 4, \"과학\": 2, \"만화\": 5}\ntotal = 0\n\n# .items() 는 이름표와 내용을 한 쌍씩 꺼내 줘요\nfor name, count in shelf.___():\n    print(f\"{name}: {count}권\")\n    # total 에 count 를 더해요\n    ___\n\nprint(f\"모두 {total}권\")\n","expected_output_hint":"동화: 4권, 과학: 2권, 만화: 5권, 모두 11권 이 한 줄씩 나와야 해요","checklist":["shelf 뒤 빈칸에 items 를 넣어요","for 안에서 total = total + count 로 더해요","모두 11권 이 나오는지 봐요"],"example_output":"동화: 4권\n과학: 2권\n만화: 5권\n모두 11권","example_exact":true,"fallback_text":"shelf.items() 는 (\"동화\", 4), (\"과학\", 2) 처럼 이름표와 내용을 한 쌍씩 꺼내요. for name, count in shelf.items(): 라고 쓰면 name 에 이름표, count 에 내용이 들어가요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2213,10 +2213,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"딕셔너리로 개수 세기","learning_goals":["처음 나온 이름은 1로, 이미 있는 이름은 1씩 늘려 셀 수 있다","센 결과를 items()로 돌며 보여 줄 수 있다"],"story_context":"바다 학교에서 반장을 뽑았어요! 투표 쪽지를 하나씩 열어 후보마다 몇 표인지 세어 봐요. 별똥이가 결과를 기다리고 있어요.","exercise_description":"votes 리스트를 돌며 후보마다 표 수를 count 딕셔너리에 세고, \"고래: 3표\"처럼 한 줄씩 출력하세요","starter_code":"votes = [\"고래\", \"상어\", \"고래\", \"문어\", \"고래\", \"상어\"]\ncount = {}\n\nfor name in votes:\n    if name in count:\n        # 이미 이름표가 있으면 표를 1 늘려요\n        count[name] = ___\n    else:\n        # 처음 나온 이름이면 1표로 시작해요\n        ___\n\nfor name, n in count.items():\n    print(f\"{name}: {n}표\")\n","expected_output_hint":"고래: 3표, 상어: 2표, 문어: 1표 가 한 줄씩 나와야 해요","checklist":["이미 있으면 count[name] 에 1을 더해요","처음이면 count[name] = 1 로 이름표를 붙여요","고래가 3표인지 봐요"],"example_output":"고래: 3표\n상어: 2표\n문어: 1표","fallback_text":"빈 딕셔너리 count = {} 에서 시작해요. 이름이 처음 나오면 count[name] = 1 로 이름표를 붙이고, 이미 있으면 count[name] = count[name] + 1 로 한 표 늘려요."}'::jsonb,
+  '{"topic":"딕셔너리로 개수 세기","learning_goals":["처음 나온 이름은 1로, 이미 있는 이름은 1씩 늘려 셀 수 있다","센 결과를 items()로 돌며 보여 줄 수 있다"],"story_context":"바다 학교에서 반장을 뽑았어요! 투표 쪽지를 하나씩 열어 후보마다 몇 표인지 세어 봐요. 별똥이가 결과를 기다리고 있어요.","exercise_description":"votes 리스트를 돌며 후보마다 표 수를 count 딕셔너리에 세고, \"고래: 3표\"처럼 한 줄씩 출력하세요","starter_code":"votes = [\"고래\", \"상어\", \"고래\", \"문어\", \"고래\", \"상어\"]\ncount = {}\n\nfor name in votes:\n    if name in count:\n        # 이미 이름표가 있으면 표를 1 늘려요\n        count[name] = ___\n    else:\n        # 처음 나온 이름이면 1표로 시작해요\n        ___\n\nfor name, n in count.items():\n    print(f\"{name}: {n}표\")\n","expected_output_hint":"고래: 3표, 상어: 2표, 문어: 1표 가 한 줄씩 나와야 해요","checklist":["이미 있으면 count[name] 에 1을 더해요","처음이면 count[name] = 1 로 이름표를 붙여요","고래가 3표인지 봐요"],"example_output":"고래: 3표\n상어: 2표\n문어: 1표","example_exact":true,"fallback_text":"빈 딕셔너리 count = {} 에서 시작해요. 이름이 처음 나오면 count[name] = 1 로 이름표를 붙이고, 이미 있으면 count[name] = count[name] + 1 로 한 표 늘려요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2237,7 +2237,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"문장을 쪼개 단어 수 세기","learning_goals":["split()으로 문장을 단어 리스트로 쪼갤 수 있다","딕셔너리로 단어마다 나온 횟수를 셀 수 있다","if로 조건에 맞는 단어만 골라 보여 줄 수 있다"],"story_context":"등대지기가 쓴 일기에 자꾸 나오는 단어가 있대요. 단어장을 만들어 어떤 단어가 많이 나왔는지 찾아봐요!","exercise_description":"sentence 를 split()으로 단어로 쪼개 단어마다 개수를 count 딕셔너리에 세고, 2번 넘게 나온 단어만 \"the: 3번\"처럼 출력하세요","starter_code":"sentence = \"the sea is blue and the sky is blue and the sun is hot\"\nwords = sentence.___()\ncount = {}\n\n# 1) words 를 돌며 단어마다 개수를 세요 (반장 투표 세기처럼!)\n\n# 2) 2번 넘게 나온 단어만 보여 줘요\nfor word, n in count.items():\n    if ___:\n        print(f\"{word}: {n}번\")\n","expected_output_hint":"2번 넘게 나온 the: 3번 과 is: 3번 이 나와야 해요","checklist":["split() 으로 문장을 단어로 쪼개요","반장 투표처럼 단어마다 개수를 세요","if n > 2: 로 2번 넘게 나온 단어만 골라요"],"example_output":"the: 3번\nis: 3번","fallback_text":"split()은 괄호를 비우면 띄어쓰기마다 잘라요. 반장 투표 세기와 똑같이 count 딕셔너리로 단어를 세고, 마지막에 n > 2 인 단어만 보여 주면 돼요. 2번 나온 blue 와 and 는 빠져야 해요.","is_challenge":true}'::jsonb,
+  '{"topic":"문장을 쪼개 단어 수 세기","learning_goals":["split()으로 문장을 단어 리스트로 쪼갤 수 있다","딕셔너리로 단어마다 나온 횟수를 셀 수 있다","if로 조건에 맞는 단어만 골라 보여 줄 수 있다"],"story_context":"등대지기가 쓴 일기에 자꾸 나오는 단어가 있대요. 단어장을 만들어 어떤 단어가 많이 나왔는지 찾아봐요!","exercise_description":"sentence 를 split()으로 단어로 쪼개 단어마다 개수를 count 딕셔너리에 세고, 2번 넘게 나온 단어만 \"the: 3번\"처럼 출력하세요","starter_code":"sentence = \"the sea is blue and the sky is blue and the sun is hot\"\nwords = sentence.___()\ncount = {}\n\n# 1) words 를 돌며 단어마다 개수를 세요 (반장 투표 세기처럼!)\n\n# 2) 2번 넘게 나온 단어만 보여 줘요\nfor word, n in count.items():\n    if ___:\n        print(f\"{word}: {n}번\")\n","expected_output_hint":"2번 넘게 나온 the: 3번 과 is: 3번 이 나와야 해요","checklist":["split() 으로 문장을 단어로 쪼개요","반장 투표처럼 단어마다 개수를 세요","if n > 2: 로 2번 넘게 나온 단어만 골라요"],"example_output":"the: 3번\nis: 3번","example_exact":true,"fallback_text":"split()은 괄호를 비우면 띄어쓰기마다 잘라요. 반장 투표 세기와 똑같이 count 딕셔너리로 단어를 세고, 마지막에 n > 2 인 단어만 보여 주면 돼요. 2번 나온 blue 와 and 는 빠져야 해요.","is_challenge":true}'::jsonb,
   'all',
   '',
   120
@@ -2285,10 +2285,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"반복 안에 반복 넣기","learning_goals":["반복 안에 또 반복을 넣을 수 있다","바깥 반복이 한 번 돌 때 안쪽 반복은 끝까지 다 돈다는 것을 안다","안쪽 반복에서 글자를 모아 한 줄을 만들 수 있다"],"story_context":"소용돌이 미로 입구의 바닥 타일이 다 벗겨졌어요! 줄마다 타일 4장씩, 모두 3줄을 깔아야 해요. 반복 안에 반복을 넣으면 금방 깔 수 있대요.","exercise_description":"바깥 반복은 3줄, 안쪽 반복은 row 에 \"#\"을 4번 붙여 3줄 × 4칸 타일을 출력하세요","starter_code":"for r in range(3):\n    row = \"\"\n    # 안쪽 반복으로 row 에 \"#\" 을 4번 붙여요\n    ___\n    print(row)\n","expected_output_hint":"#### 가 3줄 나와야 해요","checklist":["___ 자리에 for c in range(4): 를 써요","안쪽 반복 안에서 row = row + \"#\" 으로 붙여요","#### 가 3줄인지 봐요"],"example_output":"####\n####\n####","fallback_text":"바깥 for 가 한 줄을 맡고, 안쪽 for 가 그 줄의 칸을 맡아요. 안쪽에서 row = row + \"#\" 로 칸을 하나씩 붙이고, 안쪽이 다 끝나면 print(row) 로 한 줄을 보여 줘요."}'::jsonb,
+  '{"topic":"반복 안에 반복 넣기","learning_goals":["반복 안에 또 반복을 넣을 수 있다","바깥 반복이 한 번 돌 때 안쪽 반복은 끝까지 다 돈다는 것을 안다","안쪽 반복에서 글자를 모아 한 줄을 만들 수 있다"],"story_context":"소용돌이 미로 입구의 바닥 타일이 다 벗겨졌어요! 줄마다 타일 4장씩, 모두 3줄을 깔아야 해요. 반복 안에 반복을 넣으면 금방 깔 수 있대요.","exercise_description":"바깥 반복은 3줄, 안쪽 반복은 row 에 \"#\"을 4번 붙여 3줄 × 4칸 타일을 출력하세요","starter_code":"for r in range(3):\n    row = \"\"\n    # 안쪽 반복으로 row 에 \"#\" 을 4번 붙여요\n    ___\n    print(row)\n","expected_output_hint":"#### 가 3줄 나와야 해요","checklist":["___ 자리에 for c in range(4): 를 써요","안쪽 반복 안에서 row = row + \"#\" 으로 붙여요","#### 가 3줄인지 봐요"],"example_output":"####\n####\n####","example_exact":true,"fallback_text":"바깥 for 가 한 줄을 맡고, 안쪽 for 가 그 줄의 칸을 맡아요. 안쪽에서 row = row + \"#\" 로 칸을 하나씩 붙이고, 안쪽이 다 끝나면 print(row) 로 한 줄을 보여 줘요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2309,10 +2309,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"중첩 반복으로 구구단 표 만들기","learning_goals":["바깥 반복 변수와 안쪽 반복 변수를 함께 쓸 수 있다","f-string으로 계산 결과를 글자에 넣을 수 있다"],"story_context":"미로 벽에 구구단 표가 반쯤 지워져 있어요. 2단부터 4단까지, 1부터 3까지 곱한 표를 다시 그려 줘요.","exercise_description":"안쪽 반복으로 b 가 1~3 일 때 row 에 칸을 붙여 \"2단: 2x1=2 2x2=4 2x3=6\"처럼 한 단씩 출력하세요","starter_code":"for a in range(2, 5):\n    row = f\"{a}단:\"\n    # 여기에 안쪽 반복을 넣어요\n    # b 가 1, 2, 3 일 때 row 에 f\" {a}x{b}={a * b}\" 를 붙여요\n\n    print(row)\n","expected_output_hint":"2단: 2x1=2 2x2=4 2x3=6 처럼 2단부터 4단까지 3줄이 나와야 해요","checklist":["for b in range(1, 4): 를 들여써서 넣어요","row = row + f\" {a}x{b}={a * b}\" 로 칸을 붙여요","칸 앞에 띄어쓰기 한 칸, 줄 끝에는 띄어쓰기가 없어요"],"example_output":"2단: 2x1=2 2x2=4 2x3=6\n3단: 3x1=3 3x2=6 3x3=9\n4단: 4x1=4 4x2=8 4x3=12","fallback_text":"바깥 a 가 2일 때 안쪽 b 가 1, 2, 3 을 다 돌고, 그다음 a 가 3이 돼요. 칸 글자 앞에 띄어쓰기를 붙이면 \"2단:\" 뒤에 칸이 예쁘게 이어지고 줄 끝에 빈칸이 남지 않아요."}'::jsonb,
+  '{"topic":"중첩 반복으로 구구단 표 만들기","learning_goals":["바깥 반복 변수와 안쪽 반복 변수를 함께 쓸 수 있다","f-string으로 계산 결과를 글자에 넣을 수 있다"],"story_context":"미로 벽에 구구단 표가 반쯤 지워져 있어요. 2단부터 4단까지, 1부터 3까지 곱한 표를 다시 그려 줘요.","exercise_description":"안쪽 반복으로 b 가 1~3 일 때 row 에 칸을 붙여 \"2단: 2x1=2 2x2=4 2x3=6\"처럼 한 단씩 출력하세요","starter_code":"for a in range(2, 5):\n    row = f\"{a}단:\"\n    # 여기에 안쪽 반복을 넣어요\n    # b 가 1, 2, 3 일 때 row 에 f\" {a}x{b}={a * b}\" 를 붙여요\n\n    print(row)\n","expected_output_hint":"2단: 2x1=2 2x2=4 2x3=6 처럼 2단부터 4단까지 3줄이 나와야 해요","checklist":["for b in range(1, 4): 를 들여써서 넣어요","row = row + f\" {a}x{b}={a * b}\" 로 칸을 붙여요","칸 앞에 띄어쓰기 한 칸, 줄 끝에는 띄어쓰기가 없어요"],"example_output":"2단: 2x1=2 2x2=4 2x3=6\n3단: 3x1=3 3x2=6 3x3=9\n4단: 4x1=4 4x2=8 4x3=12","example_exact":true,"fallback_text":"바깥 a 가 2일 때 안쪽 b 가 1, 2, 3 을 다 돌고, 그다음 a 가 3이 돼요. 칸 글자 앞에 띄어쓰기를 붙이면 \"2단:\" 뒤에 칸이 예쁘게 이어지고 줄 끝에 빈칸이 남지 않아요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2357,10 +2357,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"2차원 리스트에서 grid[줄][칸]으로 꺼내기","learning_goals":["리스트 안에 리스트를 넣어 격자를 만들 수 있다","grid[줄][칸]으로 한 칸을 꺼낼 수 있다","len()으로 줄 수와 칸 수를 셀 수 있다"],"story_context":"버그버그가 숨긴 보물 지도를 찾았어요! 지도는 리스트 안에 리스트가 들어 있는 모양이에요. X 표시가 있는 칸을 꺼내 볼까요?","exercise_description":"grid[1][2] 로 보물 칸을 꺼내 \"보물 칸: X\"를 출력하고, 줄 수 len(grid)와 칸 수 len(grid[0])도 출력하세요","starter_code":"grid = [\n    [\".\", \"#\", \".\", \".\"],\n    [\".\", \".\", \"X\", \".\"],\n    [\"#\", \".\", \".\", \".\"],\n]\n\n# grid[줄][칸] — 줄 번호도 칸 번호도 0부터 세요\nprint(f\"보물 칸: {grid[___][___]}\")\nprint(f\"줄 수: {len(grid)}\")\nprint(f\"칸 수: {len(___)}\")\n","expected_output_hint":"보물 칸: X, 줄 수: 3, 칸 수: 4 가 한 줄씩 나와야 해요","checklist":["X 는 1번 줄의 2번 칸이에요. grid[1][2] 로 꺼내요","칸 수는 첫 줄 grid[0] 의 길이예요","세 줄이 나오는지 봐요"],"example_output":"보물 칸: X\n줄 수: 3\n칸 수: 4","fallback_text":"grid[1]은 둘째 줄 리스트 [\".\", \".\", \"X\", \".\"] 예요. 거기서 다시 [2]를 하면 셋째 칸 \"X\"가 나와요. 그래서 grid[1][2]처럼 줄 번호 다음에 칸 번호를 써요."}'::jsonb,
+  '{"topic":"2차원 리스트에서 grid[줄][칸]으로 꺼내기","learning_goals":["리스트 안에 리스트를 넣어 격자를 만들 수 있다","grid[줄][칸]으로 한 칸을 꺼낼 수 있다","len()으로 줄 수와 칸 수를 셀 수 있다"],"story_context":"버그버그가 숨긴 보물 지도를 찾았어요! 지도는 리스트 안에 리스트가 들어 있는 모양이에요. X 표시가 있는 칸을 꺼내 볼까요?","exercise_description":"grid[1][2] 로 보물 칸을 꺼내 \"보물 칸: X\"를 출력하고, 줄 수 len(grid)와 칸 수 len(grid[0])도 출력하세요","starter_code":"grid = [\n    [\".\", \"#\", \".\", \".\"],\n    [\".\", \".\", \"X\", \".\"],\n    [\"#\", \".\", \".\", \".\"],\n]\n\n# grid[줄][칸] — 줄 번호도 칸 번호도 0부터 세요\nprint(f\"보물 칸: {grid[___][___]}\")\nprint(f\"줄 수: {len(grid)}\")\nprint(f\"칸 수: {len(___)}\")\n","expected_output_hint":"보물 칸: X, 줄 수: 3, 칸 수: 4 가 한 줄씩 나와야 해요","checklist":["X 는 1번 줄의 2번 칸이에요. grid[1][2] 로 꺼내요","칸 수는 첫 줄 grid[0] 의 길이예요","세 줄이 나오는지 봐요"],"example_output":"보물 칸: X\n줄 수: 3\n칸 수: 4","example_exact":true,"fallback_text":"grid[1]은 둘째 줄 리스트 [\".\", \".\", \"X\", \".\"] 예요. 거기서 다시 [2]를 하면 셋째 칸 \"X\"가 나와요. 그래서 grid[1][2]처럼 줄 번호 다음에 칸 번호를 써요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2381,10 +2381,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"2차원 리스트를 중첩 반복으로 그리기","learning_goals":["바깥 반복으로 줄을, 안쪽 반복으로 칸을 꺼낼 수 있다","칸을 이어 붙여 한 줄씩 지도를 그릴 수 있다"],"story_context":"보물 지도를 손에 넣었지만 리스트 모양이라 알아보기 어려워요. 칸을 이어 붙여 진짜 지도처럼 그려 볼까요?","exercise_description":"바깥 for 로 grid 의 줄을, 안쪽 for 로 줄의 칸을 꺼내 line 에 이어 붙이고, 한 줄씩 지도를 출력하세요","starter_code":"grid = [\n    [\".\", \".\", \"#\", \".\"],\n    [\"#\", \".\", \".\", \"X\"],\n    [\".\", \"#\", \".\", \".\"],\n]\n\nfor row in grid:\n    line = \"\"\n    # 안쪽 반복으로 row 의 칸을 하나씩 line 에 붙여요\n\n    print(line)\n","expected_output_hint":"..#. / #..X / .#.. 세 줄이 나와야 해요","checklist":["for cell in row: 를 들여써서 넣어요","안쪽에서 line = line + cell 로 칸을 붙여요","지도가 세 줄로 나오는지 봐요"],"example_output":"..#.\n#..X\n.#..","fallback_text":"for row in grid: 는 줄 리스트를 하나씩 꺼내요. 그 안에서 for cell in row: 로 칸을 하나씩 꺼내 line 에 붙이면 한 줄이 완성돼요."}'::jsonb,
+  '{"topic":"2차원 리스트를 중첩 반복으로 그리기","learning_goals":["바깥 반복으로 줄을, 안쪽 반복으로 칸을 꺼낼 수 있다","칸을 이어 붙여 한 줄씩 지도를 그릴 수 있다"],"story_context":"보물 지도를 손에 넣었지만 리스트 모양이라 알아보기 어려워요. 칸을 이어 붙여 진짜 지도처럼 그려 볼까요?","exercise_description":"바깥 for 로 grid 의 줄을, 안쪽 for 로 줄의 칸을 꺼내 line 에 이어 붙이고, 한 줄씩 지도를 출력하세요","starter_code":"grid = [\n    [\".\", \".\", \"#\", \".\"],\n    [\"#\", \".\", \".\", \"X\"],\n    [\".\", \"#\", \".\", \".\"],\n]\n\nfor row in grid:\n    line = \"\"\n    # 안쪽 반복으로 row 의 칸을 하나씩 line 에 붙여요\n\n    print(line)\n","expected_output_hint":"..#. / #..X / .#.. 세 줄이 나와야 해요","checklist":["for cell in row: 를 들여써서 넣어요","안쪽에서 line = line + cell 로 칸을 붙여요","지도가 세 줄로 나오는지 봐요"],"example_output":"..#.\n#..X\n.#..","example_exact":true,"fallback_text":"for row in grid: 는 줄 리스트를 하나씩 꺼내요. 그 안에서 for cell in row: 로 칸을 하나씩 꺼내 line 에 붙이면 한 줄이 완성돼요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2429,10 +2429,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"줄 번호와 칸 번호로 격자 돌기","learning_goals":["range(len(grid))로 줄 번호를 돌 수 있다","줄 번호와 칸 번호(좌표)로 원하는 칸을 찾을 수 있다"],"story_context":"새 지도에서 X 표시가 어디 있는지 파이뱀이 궁금해해요. 칸을 하나씩 열어 보다가 X 를 만나면 몇째 줄 몇째 칸인지 알려 줘요!","exercise_description":"for r in range(len(grid)): 와 for c in range(len(grid[r])): 로 모든 칸을 돌다가 칸이 \"X\" 이면 \"보물은 1줄 2칸\"처럼 출력하세요 (번호는 0부터)","starter_code":"grid = [\n    [\".\", \".\", \".\", \".\"],\n    [\".\", \"#\", \"X\", \".\"],\n    [\"#\", \".\", \".\", \".\"],\n]\n\n# 줄 번호 r 와 칸 번호 c 로 모든 칸을 돌아요 (0부터)\nfor r in range(___):\n    for c in range(___):\n        # grid[r][c] 가 \"X\" 이면 f\"보물은 {r}줄 {c}칸\" 을 보여 줘요\n        ___\n","expected_output_hint":"보물은 1줄 2칸 이 나와야 해요","checklist":["바깥 빈칸은 len(grid), 안쪽 빈칸은 len(grid[r]) 예요","if grid[r][c] == \"X\": 로 물어봐요","보물은 1줄 2칸 이 나오는지 봐요"],"example_output":"보물은 1줄 2칸","fallback_text":"range(len(grid))는 줄 번호 0, 1, 2 를 차례로 줘요. 그 안에서 range(len(grid[r]))로 칸 번호를 돌면, grid[r][c]로 모든 칸을 하나씩 볼 수 있어요."}'::jsonb,
+  '{"topic":"줄 번호와 칸 번호로 격자 돌기","learning_goals":["range(len(grid))로 줄 번호를 돌 수 있다","줄 번호와 칸 번호(좌표)로 원하는 칸을 찾을 수 있다"],"story_context":"새 지도에서 X 표시가 어디 있는지 파이뱀이 궁금해해요. 칸을 하나씩 열어 보다가 X 를 만나면 몇째 줄 몇째 칸인지 알려 줘요!","exercise_description":"for r in range(len(grid)): 와 for c in range(len(grid[r])): 로 모든 칸을 돌다가 칸이 \"X\" 이면 \"보물은 1줄 2칸\"처럼 출력하세요 (번호는 0부터)","starter_code":"grid = [\n    [\".\", \".\", \".\", \".\"],\n    [\".\", \"#\", \"X\", \".\"],\n    [\"#\", \".\", \".\", \".\"],\n]\n\n# 줄 번호 r 와 칸 번호 c 로 모든 칸을 돌아요 (0부터)\nfor r in range(___):\n    for c in range(___):\n        # grid[r][c] 가 \"X\" 이면 f\"보물은 {r}줄 {c}칸\" 을 보여 줘요\n        ___\n","expected_output_hint":"보물은 1줄 2칸 이 나와야 해요","checklist":["바깥 빈칸은 len(grid), 안쪽 빈칸은 len(grid[r]) 예요","if grid[r][c] == \"X\": 로 물어봐요","보물은 1줄 2칸 이 나오는지 봐요"],"example_output":"보물은 1줄 2칸","example_exact":true,"fallback_text":"range(len(grid))는 줄 번호 0, 1, 2 를 차례로 줘요. 그 안에서 range(len(grid[r]))로 칸 번호를 돌면, grid[r][c]로 모든 칸을 하나씩 볼 수 있어요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2477,7 +2477,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"공백과 별로 다이아몬드 무늬 만들기","learning_goals":["줄 번호에 따라 공백 수와 별 수가 바뀌는 규칙을 찾을 수 있다","반복을 두 번 써서 늘어나는 무늬와 줄어드는 무늬를 만들 수 있다"],"story_context":"미로 맨 끝 문에 다이아몬드 자물쇠가 있어요! 별로 다이아몬드 무늬를 그리면 문이 열리고 별똥이가 보물을 떨어뜨려 준대요.","exercise_description":"공백과 별로 5줄 다이아몬드(위 3줄은 별 1, 3, 5개, 아래 2줄은 별 3, 1개)를 반복문으로 출력하세요","starter_code":"# 다이아몬드 무늬를 만들어요 (위 3줄, 아래 2줄)\n#   *\n#  ***\n# *****\n#  ***\n#   *\n\n# 위쪽 3줄: 줄마다 앞 공백은 하나씩 줄고, 별은 2개씩 늘어요\n# 빈칸에 식을 넣을 때는 괄호 ( ) 안에 넣어야 먼저 계산돼요\nfor i in range(1, 4):\n    print(\" \" * (___) + \"*\" * (___))\n\n# 아래쪽 2줄: 이번엔 반대로! 반복을 하나 더 써요\n","expected_output_hint":"별이 1, 3, 5, 3, 1개인 다이아몬드 5줄이 나와야 해요","checklist":["위쪽 공백은 (3 - i) 칸, 별은 (2 * i - 1) 개예요. 식은 괄호로 묶어요","아래쪽은 i 가 2, 1 이 되는 반복을 하나 더 써요","별 줄 끝에 띄어쓰기를 붙이지 않아요"],"example_output":"  *\n ***\n*****\n ***\n  *","fallback_text":"i 가 1, 2, 3 일 때 공백은 2, 1, 0 칸(3 - i), 별은 1, 3, 5 개(2 * i - 1)예요. 아래쪽은 같은 식에 i 를 2, 1 로 넣으면 돼요. for i in [2, 1]: 처럼 리스트를 돌아도 돼요.","is_challenge":true}'::jsonb,
+  '{"topic":"공백과 별로 다이아몬드 무늬 만들기","learning_goals":["줄 번호에 따라 공백 수와 별 수가 바뀌는 규칙을 찾을 수 있다","반복을 두 번 써서 늘어나는 무늬와 줄어드는 무늬를 만들 수 있다"],"story_context":"미로 맨 끝 문에 다이아몬드 자물쇠가 있어요! 별로 다이아몬드 무늬를 그리면 문이 열리고 별똥이가 보물을 떨어뜨려 준대요.","exercise_description":"공백과 별로 5줄 다이아몬드(위 3줄은 별 1, 3, 5개, 아래 2줄은 별 3, 1개)를 반복문으로 출력하세요","starter_code":"# 다이아몬드 무늬를 만들어요 (위 3줄, 아래 2줄)\n#   *\n#  ***\n# *****\n#  ***\n#   *\n\n# 위쪽 3줄: 줄마다 앞 공백은 하나씩 줄고, 별은 2개씩 늘어요\n# 빈칸에 식을 넣을 때는 괄호 ( ) 안에 넣어야 먼저 계산돼요\nfor i in range(1, 4):\n    print(\" \" * (___) + \"*\" * (___))\n\n# 아래쪽 2줄: 이번엔 반대로! 반복을 하나 더 써요\n","expected_output_hint":"별이 1, 3, 5, 3, 1개인 다이아몬드 5줄이 나와야 해요","checklist":["위쪽 공백은 (3 - i) 칸, 별은 (2 * i - 1) 개예요. 식은 괄호로 묶어요","아래쪽은 i 가 2, 1 이 되는 반복을 하나 더 써요","별 줄 끝에 띄어쓰기를 붙이지 않아요"],"example_output":"  *\n ***\n*****\n ***\n  *","example_exact":true,"fallback_text":"i 가 1, 2, 3 일 때 공백은 2, 1, 0 칸(3 - i), 별은 1, 3, 5 개(2 * i - 1)예요. 아래쪽은 같은 식에 i 를 2, 1 로 넣으면 돼요. for i in [2, 1]: 처럼 리스트를 돌아도 돼요.","is_challenge":true}'::jsonb,
   'all',
   '',
   120
@@ -2525,10 +2525,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"모듈을 불러와 수학 도구 쓰기","learning_goals":["import로 다른 사람이 만들어 둔 도구 상자(모듈)를 가져올 수 있다","math.sqrt, math.pi, math.ceil, math.floor를 쓸 수 있다","round(값, 2)로 소수 둘째 자리까지 반올림할 수 있다"],"story_context":"해적선 놀이공원에 도착했어요! 기구를 고치는 해적 기술자가 수학 도구 상자를 빌려준대요. 상자 이름은 math 예요. import math 라고 부르면 상자가 열리고, 그 안의 도구를 math.도구이름 으로 꺼내 써요.","exercise_description":"import math 로 도구 상자를 가져와 math.sqrt(49), round(math.pi, 2), math.ceil(7 / 2) 를 차례로 출력하세요","starter_code":"# 1) 수학 도구 상자 math 를 가져와요\n___\n\n# 예시: 7 / 2 = 3.5 를 내림하면 3\nprint(math.floor(7 / 2))\n\n# 2) 49의 제곱근 (같은 수를 두 번 곱해 49가 되는 수)\nprint(___)\n\n# 3) 원주율 math.pi (동그라미 둘레가 지름의 약 3.14배라는 수) 를 소수 둘째 자리까지 반올림\nprint(___)\n\n# 4) 7 / 2 = 3.5 를 올림 (소수점 아래가 있으면 다음 정수로 올려요)\nprint(___)\n","expected_output_hint":"3, 7.0, 3.14, 4 가 한 줄씩 나와야 해요","checklist":["맨 위 빈칸에 import math 를 써요","math.sqrt(49), round(math.pi, 2), math.ceil(7 / 2) 를 print( ) 안에 넣어요","4줄이 나오는지 봐요"],"example_output":"3\n7.0\n3.14\n4","fallback_text":"import math 를 쓰면 수학 도구 상자가 열려요. math.sqrt(49)는 제곱근이라 7.0 이 나오고, round(math.pi, 2)는 3.14159… 를 둘째 자리까지 반올림해 3.14 예요. math.ceil 은 올림, math.floor 는 내림이에요. 이 도구들은 몇 번을 돌려도 늘 같은 답을 줘요."}'::jsonb,
+  '{"topic":"모듈을 불러와 수학 도구 쓰기","learning_goals":["import로 다른 사람이 만들어 둔 도구 상자(모듈)를 가져올 수 있다","math.sqrt, math.pi, math.ceil, math.floor를 쓸 수 있다","round(값, 2)로 소수 둘째 자리까지 반올림할 수 있다"],"story_context":"해적선 놀이공원에 도착했어요! 기구를 고치는 해적 기술자가 수학 도구 상자를 빌려준대요. 상자 이름은 math 예요. import math 라고 부르면 상자가 열리고, 그 안의 도구를 math.도구이름 으로 꺼내 써요.","exercise_description":"import math 로 도구 상자를 가져와 math.sqrt(49), round(math.pi, 2), math.ceil(7 / 2) 를 차례로 출력하세요","starter_code":"# 1) 수학 도구 상자 math 를 가져와요\n___\n\n# 예시: 7 / 2 = 3.5 를 내림하면 3\nprint(math.floor(7 / 2))\n\n# 2) 49의 제곱근 (같은 수를 두 번 곱해 49가 되는 수)\nprint(___)\n\n# 3) 원주율 math.pi (동그라미 둘레가 지름의 약 3.14배라는 수) 를 소수 둘째 자리까지 반올림\nprint(___)\n\n# 4) 7 / 2 = 3.5 를 올림 (소수점 아래가 있으면 다음 정수로 올려요)\nprint(___)\n","expected_output_hint":"3, 7.0, 3.14, 4 가 한 줄씩 나와야 해요","checklist":["맨 위 빈칸에 import math 를 써요","math.sqrt(49), round(math.pi, 2), math.ceil(7 / 2) 를 print( ) 안에 넣어요","4줄이 나오는지 봐요"],"example_output":"3\n7.0\n3.14\n4","example_exact":true,"fallback_text":"import math 를 쓰면 수학 도구 상자가 열려요. math.sqrt(49)는 제곱근이라 7.0 이 나오고, round(math.pi, 2)는 3.14159… 를 둘째 자리까지 반올림해 3.14 예요. math.ceil 은 올림, math.floor 는 내림이에요. 이 도구들은 몇 번을 돌려도 늘 같은 답을 줘요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2552,7 +2552,7 @@ VALUES (
   '{"topic":"random.randint로 주사위 굴리기","learning_goals":["random.randint(1, 6)으로 1부터 6까지 중 하나를 무작위로 뽑을 수 있다","randint는 양 끝 숫자 1과 6도 나온다는 것을 안다","많이 굴려 보고 결과가 맞는지 프로그램으로 검사할 수 있다"],"story_context":"놀이공원의 주사위 기구에 버그버그가 장난을 쳤다는 소문이 있어요! 정직한 주사위라면 몇 번을 굴려도 1부터 6까지만 나와야 해요. 100번 굴려서 검사해 봐요.","exercise_description":"random.randint(1, 6)으로 주사위를 한 번 굴려 보여 주고, 100번 더 굴리며 1~6 안에 든 횟수를 ok 에 세어 \"정직한 주사위: 100\" 처럼 출력하세요","starter_code":"import random\n\n# 1) 1부터 6까지 중 하나를 무작위로 뽑아요\ndice = random.___(1, 6)\nprint(f\"한 번 굴린 눈: {dice}\")\n\n# 2) 100번 굴려서 1~6 안에 든 횟수를 세요\nok = 0\nfor i in range(100):\n    n = ___\n    if n >= 1 and n <= 6:\n        ok = ok + 1\nprint(f\"정직한 주사위: {ok}\")\n","expected_output_hint":"한 번 굴린 눈은 매번 달라요. 마지막 줄 정직한 주사위: 100 은 늘 같아야 해요","checklist":["random.___ 빈칸에 randint 를 써요","반복 안에서도 n = random.randint(1, 6) 으로 굴려요","정직한 주사위: 100 이 나오는지 봐요"],"example_output":"한 번 굴린 눈: 4\n정직한 주사위: 100","fallback_text":"random.randint(1, 6)은 1, 2, 3, 4, 5, 6 중 하나를 무작위로 골라요. range와 달리 끝 숫자 6도 나와요. 굴릴 때마다 눈이 달라서, 눈 대신 \"1~6 안에 든 횟수\"를 세면 언제나 같은 결과로 검사할 수 있어요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2600,7 +2600,7 @@ VALUES (
   '{"topic":"random.choice로 리스트에서 하나 고르기","learning_goals":["random.choice(리스트)로 리스트 안에서 하나를 무작위로 고를 수 있다"],"story_context":"놀이공원 매점 앞에서 별똥이가 고민해요. \"뭘 먹을지 못 고르겠어!\" 간식 목록에서 하나를 무작위로 골라 주는 추천 기계를 만들어 줘요.","exercise_description":"random.choice(snacks)로 간식 하나를 골라 pick 에 담고 \"오늘의 간식: 솜사탕\" 처럼 출력하세요","starter_code":"import random\n\nsnacks = [\"붕어빵\", \"떡볶이\", \"솜사탕\", \"핫도그\"]\n\n# 간식 목록에서 하나를 무작위로 골라요\npick = ___\nprint(f\"오늘의 간식: {pick}\")\n","expected_output_hint":"오늘의 간식: 뒤에 네 간식 중 하나가 나와요. 돌릴 때마다 바뀔 수 있어요","checklist":["빈칸에 random.choice(snacks) 를 써요","여러 번 돌려서 간식이 바뀌는지 봐요"],"example_output":"오늘의 간식: 솜사탕","fallback_text":"random.choice(리스트)는 리스트 안의 값 하나를 무작위로 골라 줘요. randint가 숫자를 고른다면, choice는 리스트에서 골라요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2624,7 +2624,7 @@ VALUES (
   '{"topic":"random.shuffle로 리스트 섞기","learning_goals":["random.shuffle(리스트)로 리스트 순서를 무작위로 섞을 수 있다","shuffle은 새 리스트를 주지 않고 원래 리스트를 바꾼다는 것을 안다","섞인 리스트를 sort()로 다시 세울 수 있다"],"story_context":"회전 그네 앞에 바다 친구들이 줄을 섰어요. 버그버그가 \"누가 먼저 탈지 섞자!\" 하고 줄을 마구 섞었어요. 섞어 보고, 다시 가나다 순서로 세워 줘요.","exercise_description":"random.shuffle(line)으로 줄을 섞어 출력한 다음, line.sort()로 가나다 순서로 다시 세워 출력하세요","starter_code":"import random\n\nline = [\"해마\", \"고래\", \"상어\", \"거북\", \"문어\"]\n\n# 1) 줄을 무작위로 섞고 보여 줘요\n___\nprint(line)\n\n# 2) 가나다 순서로 다시 세우고 보여 줘요\n___\nprint(line)\n","expected_output_hint":"첫 줄은 매번 달라요. 둘째 줄은 늘 [''거북'', ''고래'', ''문어'', ''상어'', ''해마''] 예요","checklist":["첫 빈칸에 random.shuffle(line) 을 써요","둘째 빈칸에 line.sort() 를 써요","둘째 줄이 가나다 순서인지 봐요"],"example_output":"[''상어'', ''거북'', ''해마'', ''문어'', ''고래'']\n[''거북'', ''고래'', ''문어'', ''상어'', ''해마'']","fallback_text":"random.shuffle(line)은 line 자체를 섞어요. 그래서 line = random.shuffle(line) 처럼 다시 담으면 안 되고, 한 줄로 그냥 불러요. 섞은 다음 line.sort() 를 부르면 가나다 순서로 돌아와요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2672,7 +2672,7 @@ VALUES (
   '{"topic":"많이 굴려 보고 통계 내기","learning_goals":["반복으로 주사위를 아주 많이 굴려 볼 수 있다 (시뮬레이션)","딕셔너리로 눈마다 나온 횟수를 셀 수 있다","횟수를 모두 더해 굴린 횟수와 같은지 검사할 수 있다"],"story_context":"정직한 주사위인 건 알았어요. 그런데 6만 자꾸 나오는 건 아닐까요? 손으로 600번 굴리면 팔이 아프니까 컴퓨터에게 대신 굴려 달라고 해요. 이런 걸 시뮬레이션이라고 해요.","exercise_description":"for 로 600번 굴려 나온 눈 n 의 횟수를 counts[n] 에 1씩 더하고, 눈마다 횟수를 보여 준 뒤 횟수 합을 \"모두 600번\" 처럼 출력하세요","starter_code":"import random\n\ncounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}\n\nfor i in range(600):\n    # 1) 주사위를 굴려요\n    n = ___\n    # 2) 나온 눈 n 의 횟수를 1 늘려요\n    ___\n\ntotal = 0\nfor eye, count in counts.items():\n    print(f\"{eye}: {count}번\")\n    total = total + count\nprint(f\"모두 {total}번\")\n","expected_output_hint":"눈마다 횟수는 매번 달라요. 마지막 줄 모두 600번 은 늘 같아야 해요","checklist":["n = random.randint(1, 6) 으로 굴려요","counts[n] = counts[n] + 1 로 횟수를 늘려요","모두 600번 이 나오는지 봐요"],"example_output":"1: 97번\n2: 104번\n3: 99번\n4: 101번\n5: 95번\n6: 104번\n모두 600번","fallback_text":"counts 는 눈(이름표)마다 나온 횟수(값)를 담는 딕셔너리예요. 반장 투표를 셀 때처럼 counts[n] = counts[n] + 1 로 하나씩 늘려요. 600번을 굴렸으니 횟수를 모두 더하면 언제나 600이에요. 눈마다 횟수는 100 근처로 비슷하게 나와요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2741,10 +2741,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"에러 메시지에서 에러 이름과 줄 번호 찾기","learning_goals":["에러 메시지의 마지막 줄에서 에러 이름을 찾을 수 있다","에러 메시지의 line 숫자를 보고 몇째 줄이 아픈지 찾을 수 있다","NameError는 없는 이름(오타)을 썼을 때 난다는 것을 안다"],"story_context":"바다 위 병원선에 버그버그가 실려 왔어요! 코드를 너무 많이 먹어서 배탈이 났대요. 의사 가운을 입은 모험가가 진료 기록을 열었더니 코드가 멈추고 빨간 쪽지가 나왔어요. 이 쪽지가 바로 에러 메시지예요.","exercise_description":"코드를 실행해 에러 메시지를 읽어 보세요. 마지막 줄의 에러 이름과 line 숫자를 보고, 그 줄의 변수 이름 오타를 고쳐 세 줄이 모두 나오게 하세요","starter_code":"# 버그버그 진료 기록\npatient = \"버그버그\"\ntemperature = 38\nfever = temprature - 37\nprint(f\"환자: {patient}\")\nprint(f\"체온: {temperature}도\")\nprint(f\"열이 {fever}도 높아요\")\n","expected_output_hint":"환자: 버그버그, 체온: 38도, 열이 1도 높아요 가 한 줄씩 나와야 해요","checklist":["먼저 그대로 실행해서 에러 메시지를 읽어요","line 뒤의 숫자가 가리키는 줄을 찾아요","그 줄의 이름 오타를 위에서 만든 변수 이름과 똑같이 고쳐요"],"example_output":"환자: 버그버그\n체온: 38도\n열이 1도 높아요","fallback_text":"에러 메시지는 아래에서부터 읽어요. 맨 아래 줄 NameError 는 \"그런 이름은 없어요\"라는 뜻이고, 그 위의 line 4 는 4번째 줄이 아프다는 뜻이에요. 4번째 줄의 temprature 를 3번째 줄에서 만든 temperature 와 똑같이 고쳐요."}'::jsonb,
+  '{"topic":"에러 메시지에서 에러 이름과 줄 번호 찾기","learning_goals":["에러 메시지의 마지막 줄에서 에러 이름을 찾을 수 있다","에러 메시지의 line 숫자를 보고 몇째 줄이 아픈지 찾을 수 있다","NameError는 없는 이름(오타)을 썼을 때 난다는 것을 안다"],"story_context":"바다 위 병원선에 버그버그가 실려 왔어요! 코드를 너무 많이 먹어서 배탈이 났대요. 의사 가운을 입은 모험가가 진료 기록을 열었더니 코드가 멈추고 빨간 쪽지가 나왔어요. 이 쪽지가 바로 에러 메시지예요.","exercise_description":"코드를 실행해 에러 메시지를 읽어 보세요. 마지막 줄의 에러 이름과 line 숫자를 보고, 그 줄의 변수 이름 오타를 고쳐 세 줄이 모두 나오게 하세요","starter_code":"# 버그버그 진료 기록\npatient = \"버그버그\"\ntemperature = 38\nfever = temprature - 37\nprint(f\"환자: {patient}\")\nprint(f\"체온: {temperature}도\")\nprint(f\"열이 {fever}도 높아요\")\n","expected_output_hint":"환자: 버그버그, 체온: 38도, 열이 1도 높아요 가 한 줄씩 나와야 해요","checklist":["먼저 그대로 실행해서 에러 메시지를 읽어요","line 뒤의 숫자가 가리키는 줄을 찾아요","그 줄의 이름 오타를 위에서 만든 변수 이름과 똑같이 고쳐요"],"example_output":"환자: 버그버그\n체온: 38도\n열이 1도 높아요","example_exact":true,"fallback_text":"에러 메시지는 아래에서부터 읽어요. 맨 아래 줄 NameError 는 \"그런 이름은 없어요\"라는 뜻이고, 그 위의 line 4 는 4번째 줄이 아프다는 뜻이에요. 4번째 줄의 temprature 를 3번째 줄에서 만든 temperature 와 똑같이 고쳐요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2765,10 +2765,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"문법 에러 고치기","learning_goals":["SyntaxError는 파이썬 맞춤법(문법)이 틀렸을 때 난다는 것을 안다","빠진 쌍점(:)과 짝이 안 맞는 괄호를 찾아 고칠 수 있다","에러를 하나 고치면 다음 에러가 나올 수 있다는 것을 안다"],"story_context":"응급실에 약 먹는 시간표 코드가 실려 왔어요. 그런데 코드를 돌리기도 전에 SyntaxError 쪽지가 나와요! 버그버그가 맞춤법 두 군데를 망가뜨렸대요.","exercise_description":"시간표 코드의 문법 에러 두 곳(빠진 쌍점, 닫히지 않은 괄호)을 고쳐 아침·점심·저녁 약과 \"다 먹었어요!\"가 나오게 하세요","starter_code":"# 버그버그 약 먹는 시간표\ntimes = [\"아침\", \"점심\", \"저녁\"]\nfor t in times\n    print(f\"{t}: 약 한 알\"\nprint(\"다 먹었어요!\")\n","expected_output_hint":"아침: 약 한 알, 점심: 약 한 알, 저녁: 약 한 알, 다 먹었어요! 가 한 줄씩 나와야 해요","checklist":["실행해서 에러 메시지의 line 숫자를 봐요","for 줄 끝에 빠진 기호를 붙여요","한 번 더 실행해서 다음 에러를 찾아 괄호 짝을 맞춰요"],"example_output":"아침: 약 한 알\n점심: 약 한 알\n저녁: 약 한 알\n다 먹었어요!","fallback_text":"SyntaxError 는 파이썬 맞춤법이 틀렸다는 뜻이라 한 줄도 실행되지 않아요. expected '':'' 는 쌍점이 있어야 한다는 말이고, was never closed 는 열린 괄호가 닫히지 않았다는 말이에요. 하나를 고치고 다시 실행하면 다음 에러가 보여요."}'::jsonb,
+  '{"topic":"문법 에러 고치기","learning_goals":["SyntaxError는 파이썬 맞춤법(문법)이 틀렸을 때 난다는 것을 안다","빠진 쌍점(:)과 짝이 안 맞는 괄호를 찾아 고칠 수 있다","에러를 하나 고치면 다음 에러가 나올 수 있다는 것을 안다"],"story_context":"응급실에 약 먹는 시간표 코드가 실려 왔어요. 그런데 코드를 돌리기도 전에 SyntaxError 쪽지가 나와요! 버그버그가 맞춤법 두 군데를 망가뜨렸대요.","exercise_description":"시간표 코드의 문법 에러 두 곳(빠진 쌍점, 닫히지 않은 괄호)을 고쳐 아침·점심·저녁 약과 \"다 먹었어요!\"가 나오게 하세요","starter_code":"# 버그버그 약 먹는 시간표\ntimes = [\"아침\", \"점심\", \"저녁\"]\nfor t in times\n    print(f\"{t}: 약 한 알\"\nprint(\"다 먹었어요!\")\n","expected_output_hint":"아침: 약 한 알, 점심: 약 한 알, 저녁: 약 한 알, 다 먹었어요! 가 한 줄씩 나와야 해요","checklist":["실행해서 에러 메시지의 line 숫자를 봐요","for 줄 끝에 빠진 기호를 붙여요","한 번 더 실행해서 다음 에러를 찾아 괄호 짝을 맞춰요"],"example_output":"아침: 약 한 알\n점심: 약 한 알\n저녁: 약 한 알\n다 먹었어요!","example_exact":true,"fallback_text":"SyntaxError 는 파이썬 맞춤법이 틀렸다는 뜻이라 한 줄도 실행되지 않아요. expected '':'' 는 쌍점이 있어야 한다는 말이고, was never closed 는 열린 괄호가 닫히지 않았다는 말이에요. 하나를 고치고 다시 실행하면 다음 에러가 보여요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2813,10 +2813,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"KeyError 읽고 고치기","learning_goals":["KeyError는 딕셔너리에 없는 이름표를 꺼낼 때 난다는 것을 안다",".get(이름표, 0)으로 없는 이름표도 멈추지 않고 꺼낼 수 있다"],"story_context":"병원선 약 상자에는 감기약과 밴드만 있어요. 간호사 별똥이가 장부에 적힌 약을 하나씩 세는데, 연고에서 갑자기 코드가 멈췄어요! 쪽지에는 KeyError 라고 적혀 있어요.","exercise_description":"장부 book 의 약 이름을 하나씩 medicine 에서 꺼내다 \"연고\"에서 KeyError 가 나요. medicine[name] 을 medicine.get(name, 0) 으로 고쳐 \"연고: 0개\"까지 모두 출력하세요","starter_code":"medicine = {\"감기약\": 3, \"밴드\": 5}\nbook = [\"감기약\", \"밴드\", \"연고\"]\n\nfor name in book:\n    print(f\"{name}: {medicine[name]}개\")\n","expected_output_hint":"감기약: 3개, 밴드: 5개, 연고: 0개 가 한 줄씩 나와야 해요","checklist":["실행해서 KeyError 뒤에 나온 이름표를 봐요","medicine[name] 을 medicine.get(name, 0) 으로 바꿔요","연고: 0개 까지 세 줄이 나오는지 봐요"],"example_output":"감기약: 3개\n밴드: 5개\n연고: 0개","fallback_text":"KeyError 는 딕셔너리에 그런 이름표가 없다는 뜻이에요. 쪽지 끝에 없는 이름표 연고가 적혀 있어요. 등대 도서관에서 배운 .get(이름표, 대신 값)은 이름표가 없으면 멈추지 않고 대신 값을 돌려줘요."}'::jsonb,
+  '{"topic":"KeyError 읽고 고치기","learning_goals":["KeyError는 딕셔너리에 없는 이름표를 꺼낼 때 난다는 것을 안다",".get(이름표, 0)으로 없는 이름표도 멈추지 않고 꺼낼 수 있다"],"story_context":"병원선 약 상자에는 감기약과 밴드만 있어요. 간호사 별똥이가 장부에 적힌 약을 하나씩 세는데, 연고에서 갑자기 코드가 멈췄어요! 쪽지에는 KeyError 라고 적혀 있어요.","exercise_description":"장부 book 의 약 이름을 하나씩 medicine 에서 꺼내다 \"연고\"에서 KeyError 가 나요. medicine[name] 을 medicine.get(name, 0) 으로 고쳐 \"연고: 0개\"까지 모두 출력하세요","starter_code":"medicine = {\"감기약\": 3, \"밴드\": 5}\nbook = [\"감기약\", \"밴드\", \"연고\"]\n\nfor name in book:\n    print(f\"{name}: {medicine[name]}개\")\n","expected_output_hint":"감기약: 3개, 밴드: 5개, 연고: 0개 가 한 줄씩 나와야 해요","checklist":["실행해서 KeyError 뒤에 나온 이름표를 봐요","medicine[name] 을 medicine.get(name, 0) 으로 바꿔요","연고: 0개 까지 세 줄이 나오는지 봐요"],"example_output":"감기약: 3개\n밴드: 5개\n연고: 0개","example_exact":true,"fallback_text":"KeyError 는 딕셔너리에 그런 이름표가 없다는 뜻이에요. 쪽지 끝에 없는 이름표 연고가 적혀 있어요. 등대 도서관에서 배운 .get(이름표, 대신 값)은 이름표가 없으면 멈추지 않고 대신 값을 돌려줘요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2837,10 +2837,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"try와 except로 멈추지 않게 하기","learning_goals":["try 아래 코드를 해 보고, 에러가 나면 except 아래로 간다는 것을 안다","int()로 바꿀 수 없는 글자에서 나는 ValueError를 잡을 수 있다"],"story_context":"환자 카드에 적힌 약 개수를 int()로 숫자로 바꿔 더하려는데, 버그버그가 카드 하나에 abc 라고 낙서를 했어요! 그 카드에서 ValueError 가 나며 멈춰 버려요. 안전띠를 매 주면 넘어져도 멈추지 않아요.","exercise_description":"for 안의 세 줄을 try: 아래로 넣고, except ValueError: 아래에서 \"abc: 숫자가 아니에요\" 처럼 출력하세요. 숫자 카드만 더해 마지막에 \"합계: 8\"이 나와야 해요","starter_code":"cards = [\"3\", \"abc\", \"5\"]\ntotal = 0\n\nfor card in cards:\n    # 아래 세 줄을 try: 안에 넣고, except ValueError: 를 더해요\n    number = int(card)\n    total = total + number\n    print(f\"{card} 더했어요\")\n\nprint(f\"합계: {total}\")\n","expected_output_hint":"3 더했어요, abc: 숫자가 아니에요, 5 더했어요, 합계: 8 이 한 줄씩 나와야 해요","checklist":["for 안에 try: 를 쓰고 세 줄을 한 칸 더 들여써요","try 와 같은 줄 높이에 except ValueError: 를 써요","except 아래에서 print(f\"{card}: 숫자가 아니에요\") 를 써요"],"example_output":"3 더했어요\nabc: 숫자가 아니에요\n5 더했어요\n합계: 8","fallback_text":"try: 아래는 \"일단 해 봐!\", except ValueError: 아래는 \"바꿀 수 없는 값이면 멈추지 말고 이쪽으로!\"예요. abc 카드에서 int() 가 실패하면 그 아래 두 줄은 건너뛰고 except 쪽 print 를 해요. 그다음 카드 5 는 다시 try 부터 해요."}'::jsonb,
+  '{"topic":"try와 except로 멈추지 않게 하기","learning_goals":["try 아래 코드를 해 보고, 에러가 나면 except 아래로 간다는 것을 안다","int()로 바꿀 수 없는 글자에서 나는 ValueError를 잡을 수 있다"],"story_context":"환자 카드에 적힌 약 개수를 int()로 숫자로 바꿔 더하려는데, 버그버그가 카드 하나에 abc 라고 낙서를 했어요! 그 카드에서 ValueError 가 나며 멈춰 버려요. 안전띠를 매 주면 넘어져도 멈추지 않아요.","exercise_description":"for 안의 세 줄을 try: 아래로 넣고, except ValueError: 아래에서 \"abc: 숫자가 아니에요\" 처럼 출력하세요. 숫자 카드만 더해 마지막에 \"합계: 8\"이 나와야 해요","starter_code":"cards = [\"3\", \"abc\", \"5\"]\ntotal = 0\n\nfor card in cards:\n    # 아래 세 줄을 try: 안에 넣고, except ValueError: 를 더해요\n    number = int(card)\n    total = total + number\n    print(f\"{card} 더했어요\")\n\nprint(f\"합계: {total}\")\n","expected_output_hint":"3 더했어요, abc: 숫자가 아니에요, 5 더했어요, 합계: 8 이 한 줄씩 나와야 해요","checklist":["for 안에 try: 를 쓰고 세 줄을 한 칸 더 들여써요","try 와 같은 줄 높이에 except ValueError: 를 써요","except 아래에서 print(f\"{card}: 숫자가 아니에요\") 를 써요"],"example_output":"3 더했어요\nabc: 숫자가 아니에요\n5 더했어요\n합계: 8","example_exact":true,"fallback_text":"try: 아래는 \"일단 해 봐!\", except ValueError: 아래는 \"바꿀 수 없는 값이면 멈추지 말고 이쪽으로!\"예요. abc 카드에서 int() 가 실패하면 그 아래 두 줄은 건너뛰고 except 쪽 print 를 해요. 그다음 카드 5 는 다시 try 부터 해요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2861,10 +2861,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"특정 에러만 잡기","learning_goals":["0으로 나누면 ZeroDivisionError가 난다는 것을 안다","except 뒤에 에러 이름을 써서 그 에러만 잡을 수 있다"],"story_context":"다 나은 환자들에게 사탕 12개를 나눠 주기로 했어요. 방마다 친구 수로 나누는데, 빈 방에서 코드가 멈췄어요! 0명에게는 나눌 수가 없거든요.","exercise_description":"방마다 candy // f 로 나누다 f 가 0이면 ZeroDivisionError 가 나요. try 와 except ZeroDivisionError: 로 잡아 \"나눌 친구가 없어요\"를 출력하세요","starter_code":"candy = 12\nfriends = [3, 0, 2]\n\nfor f in friends:\n    # // 는 나눈 몫이에요 (12 // 3 은 4)\n    # 0으로 나누면 멈춰요! try 와 except ZeroDivisionError: 로 감싸요\n    print(f\"{f}명이면 한 명에 {candy // f}개\")\n","expected_output_hint":"3명이면 한 명에 4개, 나눌 친구가 없어요, 2명이면 한 명에 6개 가 한 줄씩 나와야 해요","checklist":["print 줄을 try: 안에 넣어요","except ZeroDivisionError: 아래에서 나눌 친구가 없어요 를 출력해요","세 줄이 모두 나오는지 봐요"],"example_output":"3명이면 한 명에 4개\n나눌 친구가 없어요\n2명이면 한 명에 6개","fallback_text":"ZeroDivisionError 는 0으로 나누려 했다는 뜻이에요. except 뒤에 ZeroDivisionError 처럼 에러 이름을 쓰면 그 에러만 잡아요. 다른 에러는 그대로 보여 줘서 다른 버그를 숨기지 않아요."}'::jsonb,
+  '{"topic":"특정 에러만 잡기","learning_goals":["0으로 나누면 ZeroDivisionError가 난다는 것을 안다","except 뒤에 에러 이름을 써서 그 에러만 잡을 수 있다"],"story_context":"다 나은 환자들에게 사탕 12개를 나눠 주기로 했어요. 방마다 친구 수로 나누는데, 빈 방에서 코드가 멈췄어요! 0명에게는 나눌 수가 없거든요.","exercise_description":"방마다 candy // f 로 나누다 f 가 0이면 ZeroDivisionError 가 나요. try 와 except ZeroDivisionError: 로 잡아 \"나눌 친구가 없어요\"를 출력하세요","starter_code":"candy = 12\nfriends = [3, 0, 2]\n\nfor f in friends:\n    # // 는 나눈 몫이에요 (12 // 3 은 4)\n    # 0으로 나누면 멈춰요! try 와 except ZeroDivisionError: 로 감싸요\n    print(f\"{f}명이면 한 명에 {candy // f}개\")\n","expected_output_hint":"3명이면 한 명에 4개, 나눌 친구가 없어요, 2명이면 한 명에 6개 가 한 줄씩 나와야 해요","checklist":["print 줄을 try: 안에 넣어요","except ZeroDivisionError: 아래에서 나눌 친구가 없어요 를 출력해요","세 줄이 모두 나오는지 봐요"],"example_output":"3명이면 한 명에 4개\n나눌 친구가 없어요\n2명이면 한 명에 6개","example_exact":true,"fallback_text":"ZeroDivisionError 는 0으로 나누려 했다는 뜻이에요. except 뒤에 ZeroDivisionError 처럼 에러 이름을 쓰면 그 에러만 잡아요. 다른 에러는 그대로 보여 줘서 다른 버그를 숨기지 않아요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2909,10 +2909,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"에러 없이 틀린 답 찾기","learning_goals":["에러가 없어도 답이 틀릴 수 있다는 것을 안다 (조용한 버그)","print로 반복 중간의 값을 들여다보며 버그를 찾을 수 있다"],"story_context":"버그버그 건강 점수 80, 90, 70의 평균을 냈더니 53.3 이 나왔어요. 에러 쪽지도 없는데 답이 이상해요! 이런 버그는 조용히 숨어 있어서, 탐정처럼 print 돋보기로 중간 값을 들여다봐야 찾을 수 있어요.","exercise_description":"반복 안에 print(i, scores[i]) 를 넣어 어떤 점수가 더해지는지 들여다보고, range 를 range(len(scores)) 로 고쳐 \"평균: 80.0\"만 나오게 하세요","starter_code":"scores = [80, 90, 70]\ntotal = 0\n\nfor i in range(1, len(scores)):\n    # 돋보기: 여기에 print(i, scores[i]) 를 넣어 들여다봐요\n    total = total + scores[i]\n\navg = round(total / len(scores), 1)\nprint(f\"평균: {avg}\")\n","expected_output_hint":"평균: 80.0 한 줄만 나와야 해요","checklist":["print(i, scores[i]) 로 몇 번 점수부터 더해지는지 봐요","빠진 점수가 더해지게 range(len(scores)) 로 고쳐요","돋보기 print 를 지우고 평균: 80.0 만 나오는지 봐요"],"example_output":"평균: 80.0","fallback_text":"print(i, scores[i]) 를 넣어 보면 1 90, 2 70 만 나와요. 0번 점수 80 이 빠졌어요! range(1, …)는 1부터 세니까 0부터 세는 range(len(scores)) 로 바꿔요. 버그를 찾은 뒤에는 돋보기 print 를 지워요."}'::jsonb,
+  '{"topic":"에러 없이 틀린 답 찾기","learning_goals":["에러가 없어도 답이 틀릴 수 있다는 것을 안다 (조용한 버그)","print로 반복 중간의 값을 들여다보며 버그를 찾을 수 있다"],"story_context":"버그버그 건강 점수 80, 90, 70의 평균을 냈더니 53.3 이 나왔어요. 에러 쪽지도 없는데 답이 이상해요! 이런 버그는 조용히 숨어 있어서, 탐정처럼 print 돋보기로 중간 값을 들여다봐야 찾을 수 있어요.","exercise_description":"반복 안에 print(i, scores[i]) 를 넣어 어떤 점수가 더해지는지 들여다보고, range 를 range(len(scores)) 로 고쳐 \"평균: 80.0\"만 나오게 하세요","starter_code":"scores = [80, 90, 70]\ntotal = 0\n\nfor i in range(1, len(scores)):\n    # 돋보기: 여기에 print(i, scores[i]) 를 넣어 들여다봐요\n    total = total + scores[i]\n\navg = round(total / len(scores), 1)\nprint(f\"평균: {avg}\")\n","expected_output_hint":"평균: 80.0 한 줄만 나와야 해요","checklist":["print(i, scores[i]) 로 몇 번 점수부터 더해지는지 봐요","빠진 점수가 더해지게 range(len(scores)) 로 고쳐요","돋보기 print 를 지우고 평균: 80.0 만 나오는지 봐요"],"example_output":"평균: 80.0","example_exact":true,"fallback_text":"print(i, scores[i]) 를 넣어 보면 1 90, 2 70 만 나와요. 0번 점수 80 이 빠졌어요! range(1, …)는 1부터 세니까 0부터 세는 range(len(scores)) 로 바꿔요. 버그를 찾은 뒤에는 돋보기 print 를 지워요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -2957,7 +2957,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"여러 에러를 하나씩 읽고 고치기","learning_goals":["에러 메시지를 보고 KeyError, TypeError, IndexError를 구분할 수 있다","에러를 하나 고치고 다시 실행해 다음 에러를 찾을 수 있다","에러마다 알맞은 고치는 방법을 고를 수 있다"],"story_context":"다 나은 버그버그가 병원선 매점에서 퇴원 선물을 사려는데, 매점 계산기가 고장 났어요! 버그가 세 마리나 숨어 있대요. 하나를 고치면 다음 버그가 나타나요. 의사 선생님, 마지막 진료를 부탁해요!","exercise_description":"계산기의 버그 세 개를 고치세요. 가격표에 없는 물건은 price.get(item, 0) 으로 0원, 글자 \"2\"인 배달비는 int(delivery) 로 숫자로, 없는 번호 basket[3] 은 맨 끝 번호 basket[-1] 로 바꿔요","starter_code":"# 병원선 매점 계산기\nprice = {\"사과\": 3, \"우유\": 4, \"빵\": 5}\nbasket = [\"사과\", \"우유\", \"바나나\"]\ndelivery = \"2\"\n\ntotal = 0\nfor item in basket:\n    total = total + price[item]\nprint(f\"합계: {total}원\")\n\ntotal = total + delivery\nprint(f\"배달비 더해서: {total}원\")\n\nprint(f\"마지막 물건: {basket[3]}\")\n","expected_output_hint":"합계: 7원, 배달비 더해서: 9원, 마지막 물건: 바나나 가 한 줄씩 나와야 해요","checklist":["첫 에러(KeyError): price[item] 을 price.get(item, 0) 으로 바꿔요","둘째 에러(TypeError): delivery 를 int(delivery) 로 바꿔 더해요","셋째 에러(IndexError): basket[3] 을 basket[-1] 로 바꿔요"],"example_output":"합계: 7원\n배달비 더해서: 9원\n마지막 물건: 바나나","fallback_text":"에러는 한 번에 하나씩 나와요. KeyError 는 없는 이름표, TypeError 는 숫자와 글자처럼 섞을 수 없는 것을 더할 때, IndexError 는 없는 번호예요. 하나 고치고 다시 실행해서 다음 쪽지를 읽어요. 바나나는 가격표에 없어서 0원으로 쳐요.","is_challenge":true}'::jsonb,
+  '{"topic":"여러 에러를 하나씩 읽고 고치기","learning_goals":["에러 메시지를 보고 KeyError, TypeError, IndexError를 구분할 수 있다","에러를 하나 고치고 다시 실행해 다음 에러를 찾을 수 있다","에러마다 알맞은 고치는 방법을 고를 수 있다"],"story_context":"다 나은 버그버그가 병원선 매점에서 퇴원 선물을 사려는데, 매점 계산기가 고장 났어요! 버그가 세 마리나 숨어 있대요. 하나를 고치면 다음 버그가 나타나요. 의사 선생님, 마지막 진료를 부탁해요!","exercise_description":"계산기의 버그 세 개를 고치세요. 가격표에 없는 물건은 price.get(item, 0) 으로 0원, 글자 \"2\"인 배달비는 int(delivery) 로 숫자로, 없는 번호 basket[3] 은 맨 끝 번호 basket[-1] 로 바꿔요","starter_code":"# 병원선 매점 계산기\nprice = {\"사과\": 3, \"우유\": 4, \"빵\": 5}\nbasket = [\"사과\", \"우유\", \"바나나\"]\ndelivery = \"2\"\n\ntotal = 0\nfor item in basket:\n    total = total + price[item]\nprint(f\"합계: {total}원\")\n\ntotal = total + delivery\nprint(f\"배달비 더해서: {total}원\")\n\nprint(f\"마지막 물건: {basket[3]}\")\n","expected_output_hint":"합계: 7원, 배달비 더해서: 9원, 마지막 물건: 바나나 가 한 줄씩 나와야 해요","checklist":["첫 에러(KeyError): price[item] 을 price.get(item, 0) 으로 바꿔요","둘째 에러(TypeError): delivery 를 int(delivery) 로 바꿔 더해요","셋째 에러(IndexError): basket[3] 을 basket[-1] 로 바꿔요"],"example_output":"합계: 7원\n배달비 더해서: 9원\n마지막 물건: 바나나","example_exact":true,"fallback_text":"에러는 한 번에 하나씩 나와요. KeyError 는 없는 이름표, TypeError 는 숫자와 글자처럼 섞을 수 없는 것을 더할 때, IndexError 는 없는 번호예요. 하나 고치고 다시 실행해서 다음 쪽지를 읽어요. 바나나는 가격표에 없어서 0원으로 쳐요.","is_challenge":true}'::jsonb,
   'all',
   '',
   120
@@ -3005,10 +3005,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"sum() 없이 합계와 평균 구하기","learning_goals":["for로 하나씩 더해 합계를 직접 구할 수 있다","합계를 개수로 나누고 round(값, 1)로 평균을 구할 수 있다","내가 만든 결과가 sum()과 같은지 ==로 확인할 수 있다"],"story_context":"바다 밑 산맥 입구에 버그버그가 \"내장 함수 금지 구역\" 팻말을 세워 놨어요! 내장 함수는 sum, max, sort 처럼 파이썬에 처음부터 들어 있는 함수예요. 이걸 못 쓴대요. 첫 봉우리에서는 진주 다섯 알의 무게를 직접 더해 합계와 평균을 구해야 해요.","exercise_description":"sum() 없이 for 로 진주 무게를 더해 \"합계: 53\"과 \"평균: 10.6\"을 출력하세요. 마지막 줄은 sum() 과 같은지 확인해요","starter_code":"pearls = [12, 7, 15, 9, 10]\ntotal = 0\n\n# 1) sum() 없이 for 로 하나씩 더해요\n___\n\nprint(f\"합계: {total}\")\n\n# 2) 평균 = 합계 ÷ 개수, 소수 첫째 자리까지\navg = ___\nprint(f\"평균: {avg}\")\n\n# 3) 내가 구한 합계가 sum() 과 같은지 확인해요\nprint(total == sum(pearls))\n","expected_output_hint":"합계: 53, 평균: 10.6, True 가 한 줄씩 나와야 해요","checklist":["for p in pearls: 아래에서 total = total + p 로 더해요","avg = round(total / len(pearls), 1) 로 평균을 구해요","마지막 줄에 True 가 나오는지 봐요"],"example_output":"합계: 53\n평균: 10.6\nTrue","fallback_text":"합계는 빈 바구니 total = 0 에서 시작해 진주를 하나씩 넣는 것과 같아요. 평균은 합계를 개수 len(pearls) 로 나눈 값이고, round(값, 1)로 소수 첫째 자리까지만 보여 줘요. 마지막 줄이 True 면 내가 만든 방법이 sum() 과 똑같다는 뜻이에요."}'::jsonb,
+  '{"topic":"sum() 없이 합계와 평균 구하기","learning_goals":["for로 하나씩 더해 합계를 직접 구할 수 있다","합계를 개수로 나누고 round(값, 1)로 평균을 구할 수 있다","내가 만든 결과가 sum()과 같은지 ==로 확인할 수 있다"],"story_context":"바다 밑 산맥 입구에 버그버그가 \"내장 함수 금지 구역\" 팻말을 세워 놨어요! 내장 함수는 sum, max, sort 처럼 파이썬에 처음부터 들어 있는 함수예요. 이걸 못 쓴대요. 첫 봉우리에서는 진주 다섯 알의 무게를 직접 더해 합계와 평균을 구해야 해요.","exercise_description":"sum() 없이 for 로 진주 무게를 더해 \"합계: 53\"과 \"평균: 10.6\"을 출력하세요. 마지막 줄은 sum() 과 같은지 확인해요","starter_code":"pearls = [12, 7, 15, 9, 10]\ntotal = 0\n\n# 1) sum() 없이 for 로 하나씩 더해요\n___\n\nprint(f\"합계: {total}\")\n\n# 2) 평균 = 합계 ÷ 개수, 소수 첫째 자리까지\navg = ___\nprint(f\"평균: {avg}\")\n\n# 3) 내가 구한 합계가 sum() 과 같은지 확인해요\nprint(total == sum(pearls))\n","expected_output_hint":"합계: 53, 평균: 10.6, True 가 한 줄씩 나와야 해요","checklist":["for p in pearls: 아래에서 total = total + p 로 더해요","avg = round(total / len(pearls), 1) 로 평균을 구해요","마지막 줄에 True 가 나오는지 봐요"],"example_output":"합계: 53\n평균: 10.6\nTrue","example_exact":true,"fallback_text":"합계는 빈 바구니 total = 0 에서 시작해 진주를 하나씩 넣는 것과 같아요. 평균은 합계를 개수 len(pearls) 로 나눈 값이고, round(값, 1)로 소수 첫째 자리까지만 보여 줘요. 마지막 줄이 True 면 내가 만든 방법이 sum() 과 똑같다는 뜻이에요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -3029,10 +3029,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"max() 없이 가장 큰 값 찾기","learning_goals":["첫 값을 대장으로 정하고, 더 큰 값을 만나면 대장을 바꿔 최댓값을 찾을 수 있다","이런 차근차근한 순서를 알고리즘이라고 부른다는 것을 안다"],"story_context":"두 번째 봉우리에서 물고기 대회가 열렸어요! 가장 큰 물고기가 금메달이에요. max() 는 금지니까, 물고기를 한 마리씩 보며 \"지금까지 가장 큰 물고기\"인 대장을 기억해 둬요.","exercise_description":"best 를 첫 물고기 fish[0] 으로 정하고, for 로 돌며 f 가 best 보다 크면 best 를 f 로 바꿔 \"가장 큰 물고기: 77cm\"를 출력하세요","starter_code":"fish = [34, 52, 18, 77, 45]\n\n# max() 없이 찾아요! 첫 물고기를 대장으로 정해요\nbest = fish[0]\n\nfor f in fish:\n    # 대장보다 큰 물고기를 만나면 대장을 바꿔요\n    ___\n\nprint(f\"가장 큰 물고기: {best}cm\")\n","expected_output_hint":"가장 큰 물고기: 77cm 가 나와야 해요","checklist":["if f > best: 로 대장과 비교해요","if 안에서 best = f 로 대장을 바꿔요"],"example_output":"가장 큰 물고기: 77cm","fallback_text":"대장 찾기 알고리즘: ① 첫 물고기를 대장으로 정해요. ② 다음 물고기가 대장보다 크면 그 물고기가 새 대장이에요. ③ 끝까지 보면 남은 대장이 가장 커요. 34 → 52 → 77 순서로 대장이 바뀌어요."}'::jsonb,
+  '{"topic":"max() 없이 가장 큰 값 찾기","learning_goals":["첫 값을 대장으로 정하고, 더 큰 값을 만나면 대장을 바꿔 최댓값을 찾을 수 있다","이런 차근차근한 순서를 알고리즘이라고 부른다는 것을 안다"],"story_context":"두 번째 봉우리에서 물고기 대회가 열렸어요! 가장 큰 물고기가 금메달이에요. max() 는 금지니까, 물고기를 한 마리씩 보며 \"지금까지 가장 큰 물고기\"인 대장을 기억해 둬요.","exercise_description":"best 를 첫 물고기 fish[0] 으로 정하고, for 로 돌며 f 가 best 보다 크면 best 를 f 로 바꿔 \"가장 큰 물고기: 77cm\"를 출력하세요","starter_code":"fish = [34, 52, 18, 77, 45]\n\n# max() 없이 찾아요! 첫 물고기를 대장으로 정해요\nbest = fish[0]\n\nfor f in fish:\n    # 대장보다 큰 물고기를 만나면 대장을 바꿔요\n    ___\n\nprint(f\"가장 큰 물고기: {best}cm\")\n","expected_output_hint":"가장 큰 물고기: 77cm 가 나와야 해요","checklist":["if f > best: 로 대장과 비교해요","if 안에서 best = f 로 대장을 바꿔요"],"example_output":"가장 큰 물고기: 77cm","example_exact":true,"fallback_text":"대장 찾기 알고리즘: ① 첫 물고기를 대장으로 정해요. ② 다음 물고기가 대장보다 크면 그 물고기가 새 대장이에요. ③ 끝까지 보면 남은 대장이 가장 커요. 34 → 52 → 77 순서로 대장이 바뀌어요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -3077,10 +3077,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"조건에 맞는 값만 새 리스트에 담기","learning_goals":["if로 조건에 맞는 값만 골라 새 리스트에 append할 수 있다","len()으로 골라낸 개수를 셀 수 있다"],"story_context":"세 번째 봉우리에는 해저 케이블카가 있어요. 그런데 키가 130cm 이상인 친구만 탈 수 있대요! 친구들 키를 하나씩 보고 탈 수 있는 친구만 골라 줘요.","exercise_description":"heights 를 돌며 키 h 가 130 이상이면 tall 에 append 하고, tall 리스트와 \"130cm 이상: 3명\"을 출력하세요","starter_code":"heights = [128, 135, 141, 126, 133, 129]\ntall = []\n\nfor h in heights:\n    # 130 이상이면 tall 에 담아요\n    ___\n\nprint(tall)\nprint(f\"130cm 이상: {len(tall)}명\")\n","expected_output_hint":"[135, 141, 133] 과 130cm 이상: 3명 이 나와야 해요","checklist":["if h >= 130: 으로 물어봐요","if 안에서 tall.append(h) 로 담아요","두 줄이 나오는지 봐요"],"example_output":"[135, 141, 133]\n130cm 이상: 3명","fallback_text":"빈 리스트 tall = [] 를 바구니로 두고, 조건 h >= 130 에 맞는 키만 tall.append(h) 로 담아요. 130 \"이상\"은 130도 들어가니까 > 가 아니라 >= 예요. 다 담은 뒤 len(tall)로 세면 몇 명인지 알 수 있어요."}'::jsonb,
+  '{"topic":"조건에 맞는 값만 새 리스트에 담기","learning_goals":["if로 조건에 맞는 값만 골라 새 리스트에 append할 수 있다","len()으로 골라낸 개수를 셀 수 있다"],"story_context":"세 번째 봉우리에는 해저 케이블카가 있어요. 그런데 키가 130cm 이상인 친구만 탈 수 있대요! 친구들 키를 하나씩 보고 탈 수 있는 친구만 골라 줘요.","exercise_description":"heights 를 돌며 키 h 가 130 이상이면 tall 에 append 하고, tall 리스트와 \"130cm 이상: 4명\"을 출력하세요","starter_code":"heights = [128, 135, 141, 126, 130, 133, 129]\ntall = []\n\nfor h in heights:\n    # 130 이상이면 tall 에 담아요\n    ___\n\nprint(tall)\nprint(f\"130cm 이상: {len(tall)}명\")\n","expected_output_hint":"[135, 141, 130, 133] 과 130cm 이상: 4명 이 나와야 해요","checklist":["if h >= 130: 으로 물어봐요","if 안에서 tall.append(h) 로 담아요","두 줄이 나오는지 봐요"],"example_output":"[135, 141, 130, 133]\n130cm 이상: 4명","example_exact":true,"fallback_text":"빈 리스트 tall = [] 를 바구니로 두고, 조건 h >= 130 에 맞는 키만 tall.append(h) 로 담아요. 130 \"이상\"은 130도 들어가니까 > 가 아니라 >= 예요. 다 담은 뒤 len(tall)로 세면 몇 명인지 알 수 있어요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -3101,10 +3101,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"차례로 열어 보며 찾기","learning_goals":["앞에서부터 하나씩 열어 보며 찾는 검색 순서를 코드로 쓸 수 있다","찾으면 break로 반복을 바로 멈출 수 있다","찾았는지를 True/False 표시로 기억해 두었다가 결과를 알려 줄 수 있다"],"story_context":"네 번째 봉우리 바닥에 조개가 줄지어 있어요. 이 중 어딘가에 진주가 숨어 있대요! 조개를 하나씩 열어 보다가 진주를 찾으면 더 열지 말고 멈춰요. 조개를 너무 많이 열면 조개가 화를 내거든요.","exercise_description":"조개를 하나씩 열며 opened 를 세다가 \"진주\"를 찾으면 found 를 True 로 바꾸고 break 로 멈춰요. 그러면 아래 코드가 \"3번째 조개에서 찾았어요\"를 출력해요","starter_code":"beach = [\"모래\", \"미역\", \"진주\", \"돌멩이\", \"진주\"]\nopened = 0\nfound = False\n\nfor shell in beach:\n    opened = opened + 1\n    print(f\"{opened}번째 조개를 열어요\")\n    if shell == \"진주\":\n        # 찾았다고 표시하고, 더 열지 않고 멈춰요\n        ___\n\nif found:\n    print(f\"{opened}번째 조개에서 찾았어요\")\nelse:\n    print(\"없어요\")\n","expected_output_hint":"조개를 3번째까지만 열고 3번째 조개에서 찾았어요 가 나와야 해요","checklist":["found = True 로 찾았다고 표시해요","바로 다음 줄에 break 를 써서 멈춰요","조개를 3번째까지만 여는지 봐요"],"example_output":"1번째 조개를 열어요\n2번째 조개를 열어요\n3번째 조개를 열어요\n3번째 조개에서 찾았어요","fallback_text":"차례로 찾기 알고리즘: 앞에서부터 하나씩 열어 보고, 찾으면 그 자리에서 멈춰요. break 는 반복을 바로 끝내는 주문이에요. break 가 없으면 5번째 진주까지 열어 버려서 \"5번째\"가 나와요. 진주가 하나도 없으면 found 가 False 그대로라 \"없어요\"가 나와요."}'::jsonb,
+  '{"topic":"차례로 열어 보며 찾기","learning_goals":["앞에서부터 하나씩 열어 보며 찾는 검색 순서를 코드로 쓸 수 있다","찾으면 break로 반복을 바로 멈출 수 있다","찾았는지를 True/False 표시로 기억해 두었다가 결과를 알려 줄 수 있다"],"story_context":"네 번째 봉우리 바닥에 조개가 줄지어 있어요. 이 중 어딘가에 진주가 숨어 있대요! 조개를 하나씩 열어 보다가 진주를 찾으면 더 열지 말고 멈춰요. 조개를 너무 많이 열면 조개가 화를 내거든요.","exercise_description":"조개를 하나씩 열며 opened 를 세다가 \"진주\"를 찾으면 found 를 True 로 바꾸고 break 로 멈춰요. 그러면 아래 코드가 \"3번째 조개에서 찾았어요\"를 출력해요","starter_code":"beach = [\"모래\", \"미역\", \"진주\", \"돌멩이\", \"진주\"]\nopened = 0\nfound = False\n\nfor shell in beach:\n    opened = opened + 1\n    print(f\"{opened}번째 조개를 열어요\")\n    if shell == \"진주\":\n        # 찾았다고 표시하고, 더 열지 않고 멈춰요\n        ___\n\nif found:\n    print(f\"{opened}번째 조개에서 찾았어요\")\nelse:\n    print(\"없어요\")\n","expected_output_hint":"조개를 3번째까지만 열고 3번째 조개에서 찾았어요 가 나와야 해요","checklist":["found = True 로 찾았다고 표시해요","바로 다음 줄에 break 를 써서 멈춰요","조개를 3번째까지만 여는지 봐요"],"example_output":"1번째 조개를 열어요\n2번째 조개를 열어요\n3번째 조개를 열어요\n3번째 조개에서 찾았어요","example_exact":true,"fallback_text":"차례로 찾기 알고리즘: 앞에서부터 하나씩 열어 보고, 찾으면 그 자리에서 멈춰요. break 는 반복을 바로 끝내는 주문이에요. break 가 없으면 5번째 진주까지 열어 버려서 \"5번째\"가 나와요. 진주가 하나도 없으면 found 가 False 그대로라 \"없어요\"가 나와요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -3149,10 +3149,10 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"가운데를 골라 반씩 줄여 찾기","learning_goals":["범위의 가운데 수 (low + high) // 2 를 골라 추측할 수 있다","업이면 low를, 다운이면 high를 바꿔 찾을 범위를 반으로 줄일 수 있다","반씩 줄여 찾으면 차례로 찾기보다 훨씬 빨리 찾는다는 것을 안다"],"story_context":"다섯 번째 봉우리 문지기가 1부터 100 사이의 비밀 수를 생각했대요. 파이썬 섬에서 했던 숫자 맞추기 게임 기억나요? 이번엔 컴퓨터가 가장 똑똑하게 맞히는 업다운 마법을 써 봐요. 언제나 남은 범위의 한가운데를 부르는 거예요!","exercise_description":"업이면 low 를, 다운이면 high 를 바꿔 찾을 범위를 반씩 줄이세요. 추측을 한 줄씩 보여 주고 마지막에 \"7번 만에 찾았어요\"가 나와야 해요","starter_code":"secret = 77\nlow = 1\nhigh = 100\ntries = 0\nguess = 0\n\nwhile guess != secret:\n    # // 2 는 반으로 나눈 몫이에요 (소수점은 버려요)\n    guess = (low + high) // 2\n    tries = tries + 1\n    if guess < secret:\n        print(f\"{guess}: 업!\")\n        # 비밀 수는 guess 보다 커요. 범위의 아래쪽 끝을 올려요\n        low = ___\n    elif guess > secret:\n        print(f\"{guess}: 다운!\")\n        # 비밀 수는 guess 보다 작아요. 범위의 위쪽 끝을 내려요\n        high = ___\n    else:\n        print(f\"{guess}: 정답!\")\n\nprint(f\"{tries}번 만에 찾았어요\")\n","expected_output_hint":"50: 업! 부터 77: 정답! 까지 7줄과 7번 만에 찾았어요 가 나와야 해요","checklist":["업이면 low = guess + 1 이에요","다운이면 high = guess - 1 이에요","7번 만에 찾았는지 봐요"],"example_output":"50: 업!\n75: 업!\n88: 다운!\n81: 다운!\n78: 다운!\n76: 업!\n77: 정답!\n7번 만에 찾았어요","fallback_text":"업다운 마법: 1~100의 가운데 50을 불러요. \"업!\"이면 비밀 수는 51~100 안에 있으니 low 를 guess + 1 로 올려요. \"다운!\"이면 high 를 guess - 1 로 내려요. 부를 때마다 남은 범위가 반으로 줄어서, 1부터 차례로 부르면 77번 걸릴 것을 7번 만에 찾아요. guess 는 이미 아니라고 확인했으니 범위에서 빼요. + 1, - 1 을 빠뜨리면 88 대신 87 처럼 숫자가 어긋나요."}'::jsonb,
+  '{"topic":"가운데를 골라 반씩 줄여 찾기","learning_goals":["범위의 가운데 수 (low + high) // 2 를 골라 추측할 수 있다","업이면 low를, 다운이면 high를 바꿔 찾을 범위를 반으로 줄일 수 있다","반씩 줄여 찾으면 차례로 찾기보다 훨씬 빨리 찾는다는 것을 안다"],"story_context":"다섯 번째 봉우리 문지기가 1부터 100 사이의 비밀 수를 생각했대요. 파이썬 섬에서 했던 숫자 맞추기 게임 기억나요? 이번엔 컴퓨터가 가장 똑똑하게 맞히는 업다운 마법을 써 봐요. 언제나 남은 범위의 한가운데를 부르는 거예요!","exercise_description":"업이면 low 를, 다운이면 high 를 바꿔 찾을 범위를 반씩 줄이세요. 추측을 한 줄씩 보여 주고 마지막에 \"7번 만에 찾았어요\"가 나와야 해요","starter_code":"secret = 77\nlow = 1\nhigh = 100\ntries = 0\nguess = 0\n\nwhile guess != secret:\n    # // 2 는 반으로 나눈 몫이에요 (소수점은 버려요)\n    guess = (low + high) // 2\n    tries = tries + 1\n    if guess < secret:\n        print(f\"{guess}: 업!\")\n        # 비밀 수는 guess 보다 커요. 범위의 아래쪽 끝을 올려요\n        low = ___\n    elif guess > secret:\n        print(f\"{guess}: 다운!\")\n        # 비밀 수는 guess 보다 작아요. 범위의 위쪽 끝을 내려요\n        high = ___\n    else:\n        print(f\"{guess}: 정답!\")\n\nprint(f\"{tries}번 만에 찾았어요\")\n","expected_output_hint":"50: 업! 부터 77: 정답! 까지 7줄과 7번 만에 찾았어요 가 나와야 해요","checklist":["업이면 low = guess + 1 이에요","다운이면 high = guess - 1 이에요","7번 만에 찾았는지 봐요"],"example_output":"50: 업!\n75: 업!\n88: 다운!\n81: 다운!\n78: 다운!\n76: 업!\n77: 정답!\n7번 만에 찾았어요","example_exact":true,"fallback_text":"업다운 마법: 1~100의 가운데 50을 불러요. \"업!\"이면 비밀 수는 51~100 안에 있으니 low 를 guess + 1 로 올려요. \"다운!\"이면 high 를 guess - 1 로 내려요. 부를 때마다 남은 범위가 반으로 줄어서, 1부터 차례로 부르면 77번 걸릴 것을 7번 만에 찾아요. guess 는 이미 아니라고 확인했으니 범위에서 빼요. + 1, - 1 을 빠뜨리면 88 대신 87 처럼 숫자가 어긋나요."}'::jsonb,
   'all',
   '',
-  90
+  85
 )
 ON CONFLICT (id) DO UPDATE SET
   stage_id = EXCLUDED.stage_id, "order" = EXCLUDED."order", title = EXCLUDED.title,
@@ -3173,7 +3173,7 @@ VALUES (
   'code',
   NULL,
   FALSE,
-  '{"topic":"가장 작은 것을 차례로 뽑아 줄 세우기","learning_goals":["남은 것 중 가장 작은 값을 min()으로 찾을 수 있다","리스트.remove(값)으로 그 값을 리스트에서 뺄 수 있다","가장 작은 것을 하나씩 뽑아 새 줄 뒤에 세우는 방법으로 정렬을 만들 수 있다"],"story_context":"드디어 산맥 꼭대기예요! 친구 다섯 명이 사진을 찍으려고 키 순서대로 줄을 서야 해요. sort() 는 금지 구역이라 못 써요. 남은 친구 중 가장 작은 친구를 불러 새 줄 맨 뒤에 세우는 걸 되풀이하면 줄이 완성돼요.","exercise_description":"남은 줄에서 가장 작은 키를 찾아 빼고, 새 줄 맨 뒤에 세우는 일을 5번 되풀이해 키 순서대로 줄을 세우세요","starter_code":"line = [132, 125, 140, 128, 136]\ncheck = sorted(line)\nnew_line = []\n\n# 친구 수(5명)만큼 반복해요\nfor i in range(5):\n    # 1) 남은 친구 중 가장 작은 키를 찾아요\n    shortest = ___\n    # 2) 그 친구를 원래 줄에서 빼요\n    ___\n    # 3) 새 줄 맨 뒤에 세워요\n    ___\n    print(new_line)\n\nprint(new_line == check)\n","expected_output_hint":"새 줄이 [125] 부터 한 명씩 늘어 [125, 128, 132, 136, 140] 이 되고, 마지막에 True 가 나와야 해요","checklist":["shortest = min(line) 으로 가장 작은 키를 찾아요","line.remove(shortest) 로 원래 줄에서 빼요","new_line.append(shortest) 로 새 줄에 세우고, 마지막에 True 가 나오는지 봐요"],"example_output":"[125]\n[125, 128]\n[125, 128, 132]\n[125, 128, 132, 136]\n[125, 128, 132, 136, 140]\nTrue","fallback_text":"줄 세우기 알고리즘: ① 남은 친구 중 가장 작은 친구를 찾아요(min). ② 그 친구를 원래 줄에서 빼요. 리스트.remove(값)은 리스트에서 그 값을 찾아 빼 주는 메서드예요. ③ 새 줄 맨 뒤에 세워요(append). 다섯 번 되풀이하면 작은 키부터 줄이 서요. sorted(line)은 정렬한 새 리스트를 돌려줘서 확인용으로 써요.","is_challenge":true}'::jsonb,
+  '{"topic":"가장 작은 것을 차례로 뽑아 줄 세우기","learning_goals":["남은 것 중 가장 작은 값을 min()으로 찾을 수 있다","리스트.remove(값)으로 그 값을 리스트에서 뺄 수 있다","가장 작은 것을 하나씩 뽑아 새 줄 뒤에 세우는 방법으로 정렬을 만들 수 있다"],"story_context":"드디어 산맥 꼭대기예요! 친구 다섯 명이 사진을 찍으려고 키 순서대로 줄을 서야 해요. sort() 는 금지 구역이라 못 써요. 남은 친구 중 가장 작은 친구를 불러 새 줄 맨 뒤에 세우는 걸 되풀이하면 줄이 완성돼요.","exercise_description":"남은 줄에서 가장 작은 키를 찾아 빼고, 새 줄 맨 뒤에 세우는 일을 5번 되풀이해 키 순서대로 줄을 세우세요","starter_code":"line = [132, 125, 140, 128, 136]\ncheck = sorted(line)\nnew_line = []\n\n# 친구 수(5명)만큼 반복해요\nfor i in range(5):\n    # 1) 남은 친구 중 가장 작은 키를 찾아요\n    shortest = ___\n    # 2) 그 친구를 원래 줄에서 빼요\n    ___\n    # 3) 새 줄 맨 뒤에 세워요\n    ___\n    print(new_line)\n\nprint(new_line == check)\n","expected_output_hint":"새 줄이 [125] 부터 한 명씩 늘어 [125, 128, 132, 136, 140] 이 되고, 마지막에 True 가 나와야 해요","checklist":["shortest = min(line) 으로 가장 작은 키를 찾아요","line.remove(shortest) 로 원래 줄에서 빼요","new_line.append(shortest) 로 새 줄에 세우고, 마지막에 True 가 나오는지 봐요"],"example_output":"[125]\n[125, 128]\n[125, 128, 132]\n[125, 128, 132, 136]\n[125, 128, 132, 136, 140]\nTrue","example_exact":true,"fallback_text":"줄 세우기 알고리즘: ① 남은 친구 중 가장 작은 친구를 찾아요(min). ② 그 친구를 원래 줄에서 빼요. 리스트.remove(값)은 리스트에서 그 값을 찾아 빼 주는 메서드예요. ③ 새 줄 맨 뒤에 세워요(append). 다섯 번 되풀이하면 작은 키부터 줄이 서요. sorted(line)은 정렬한 새 리스트를 돌려줘서 확인용으로 써요.","is_challenge":true}'::jsonb,
   'all',
   '',
   120
@@ -3245,7 +3245,7 @@ VALUES (
   'project',
   NULL,
   FALSE,
-  '{"topic":"응용 프로젝트: 용돈 기입장 만들기","learning_goals":["딕셔너리, 리스트, 함수, f-string을 한 프로그램에서 함께 쓸 수 있다","큰 프로그램을 작은 단계로 나눠 하나씩 만들 수 있다","합계와 가장 큰 값을 직접 계산해 보고서를 만들 수 있다"],"story_context":"응용 프로젝트 항구에 도착했어요! 배를 타고 오는 동안 용돈을 어디에 썼는지 하나도 기억나지 않아요. 파이뱀과 함께 들어온 돈과 나간 돈을 적는 기입장 프로그램을 만들어, 이번 달 보고서를 완성해 봐요.","exercise_description":"용돈 기록을 딕셔너리로 적고, 리스트에 모으고, 함수로 더하고 계산해서 이번 달 보고서를 만드세요. 5단계로 하나씩 기능을 더해요!","starter_code":"# 용돈 기입장을 만들어 봐요!\n","expected_output_hint":"프로젝트를 5단계로 나누어 완성해요","fallback_text":"용돈 기입장은 기록 하나를 이름표가 붙은 딕셔너리로 적는 데서 시작해요. 기록을 리스트에 모으고, 함수로 새 기록을 더하고, 반복하며 금액을 더하면 남은 돈을 알 수 있어요. 한 단계씩 차근차근 가 봐요!","steps":[{"step_number":1,"step_goal":"기록 하나를 딕셔너리로 만들고, 내용과 금액을 꺼내 f-string으로 보여 주기","checklist":["record[\"내용\"] 처럼 이름표로 값을 꺼내요","f-string으로 \"용돈: 5000원\" 모양을 만들어요"],"example_output":"용돈: 5000원","starter_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[___]\nmoney = record[___]\nprint(f\"{name}: {money}원\")\n","validation_type":"all","fallback_text":"딕셔너리는 이름표(키)가 붙은 상자예요. record[\"내용\"] 이라고 쓰면 \"내용\" 이름표가 붙은 상자에서 값을 꺼내요. 꺼낸 값을 f-string의 중괄호 안에 넣어 한 줄로 보여 주세요."},{"step_number":2,"step_goal":"기록 여러 개를 리스트에 담고, for 로 한 줄씩 보여 주기","checklist":["for record in records: 로 기록을 하나씩 꺼내요","1단계처럼 내용과 금액을 꺼내 한 줄로 보여 줘요","[기입장] 아래에 기록 세 줄이 나오는지 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원","starter_code":"\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    # 기록 하나를 1단계처럼 한 줄로 보여 줘요\n    ___\n","validation_type":"all","fallback_text":"리스트 안에 딕셔너리를 여러 개 넣을 수 있어요. for 로 리스트를 돌면 record 에 기록이 하나씩 들어와요. 반복 안에서 1단계와 똑같이 내용과 금액을 꺼내 보여 주면 돼요. 쓴 돈은 빼기(-)로 적었어요."},{"step_number":3,"step_goal":"add_record(내용, 금액) 함수로 새 기록을 리스트에 더하기","checklist":["함수 안에서 새 기록 딕셔너리를 만들어요","records.append( )로 리스트에 더해요","기록 5개 가 나오는지 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원\n기록 5개","starter_code":"\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    # 새 기록 딕셔너리를 records 에 더해요\n    ___\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")\n","validation_type":"all","fallback_text":"함수를 만들어 두면 같은 일을 이름 하나로 여러 번 할 수 있어요. add_record 안에서 {\"내용\": name, \"금액\": money} 로 새 기록을 만들고, 리스트 끝에 더하는 append 로 records 에 넣어요."},{"step_number":4,"step_goal":"total() 함수로 남은 돈을 돌려받고, 들어온 돈과 나간 돈의 합계도 보여 주기","checklist":["total() 안에서 금액을 left 에 하나씩 더해요","쓴 돈은 빼기로 적혀 있어서, 나간 돈은 빼서 더해요","들어온 돈, 나간 돈, 남은 돈 세 줄을 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원\n기록 5개\n들어온 돈: 6000원\n나간 돈: 4300원\n남은 돈: 1700원","starter_code":"\n# 4단계: 남은 돈을 계산하는 함수를 만들어요\ndef total():\n    left = 0\n    for record in records:\n        # 금액을 left 에 더해요\n        ___\n    return left\n\nincome = 0\nspend = 0\nfor record in records:\n    if record[\"금액\"] > 0:\n        income = income + record[\"금액\"]\n    else:\n        # 빼기로 적힌 금액을 빼면 나간 돈이 커져요\n        # 예: 0 - (-1500) 은 0 + 1500 이라 1500 이 돼요\n        spend = spend - ___\n\nprint(f\"들어온 돈: {income}원\")\nprint(f\"나간 돈: {spend}원\")\nprint(f\"남은 돈: {total()}원\")\n","validation_type":"all","fallback_text":"남은 돈은 모든 금액을 차례로 더하면 나와요. 들어온 돈은 더하기, 쓴 돈은 빼기로 적었으니 그냥 모두 더하면 돼요. 함수는 return 으로 계산한 값을 돌려줘요. 나간 돈은 빼기로 적힌 금액을 한 번 더 빼서 더하기 수로 만들어요."},{"step_number":5,"step_goal":"내용별로 쓴 돈을 딕셔너리에 모으고, 가장 많이 쓴 곳을 찾아 이번 달 보고서 만들기","checklist":["쓴 돈을 내용별로 spent 딕셔너리에 모아요","더 큰 금액이 나오면 big_name 과 big_money 를 바꿔요","보고서 마지막 줄에 가장 많이 쓴 곳이 나오는지 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원\n기록 5개\n들어온 돈: 6000원\n나간 돈: 4300원\n남은 돈: 1700원\n[이번 달 보고서]\n간식: 2300원\n저금: 2000원\n선물: 2500원\n가장 많이 쓴 곳: 선물","starter_code":"\n# 5단계: 이번 달 보고서를 만들어요\nadd_record(\"선물\", -2500)\n\nspent = {}\nfor record in records:\n    if record[\"금액\"] < 0:\n        name = record[\"내용\"]\n        # not in 은 \"안에 없으면\"이에요. 처음 보는 내용이면 0 에서 시작해요\n        if name not in spent:\n            spent[name] = 0\n        spent[name] = spent[name] - record[\"금액\"]\n\nprint(\"[이번 달 보고서]\")\nbig_name = \"\"\nbig_money = 0\nfor name, money in spent.items():\n    print(f\"{name}: {money}원\")\n    # 지금까지 가장 큰 금액보다 크면 대장을 바꿔요\n    if ___:\n        big_name = name\n        big_money = money\nprint(f\"가장 많이 쓴 곳: {big_name}\")\n","validation_type":"all","fallback_text":"내용별 합계는 등대 도서관에서 투표를 세던 방법과 같아요. 처음 보는 내용이면 0으로 시작하고 금액을 더해요. 가장 큰 값은 산맥에서 배운 대로, 지금까지의 대장보다 큰 값이 나오면 대장을 바꾸면 찾을 수 있어요."}]}'::jsonb,
+  '{"topic":"응용 프로젝트: 용돈 기입장 만들기","learning_goals":["딕셔너리, 리스트, 함수, f-string을 한 프로그램에서 함께 쓸 수 있다","큰 프로그램을 작은 단계로 나눠 하나씩 만들 수 있다","합계와 가장 큰 값을 직접 계산해 보고서를 만들 수 있다"],"story_context":"응용 프로젝트 항구에 도착했어요! 배를 타고 오는 동안 용돈을 어디에 썼는지 하나도 기억나지 않아요. 파이뱀과 함께 들어온 돈과 나간 돈을 적는 기입장 프로그램을 만들어, 이번 달 보고서를 완성해 봐요.","exercise_description":"용돈 기록을 딕셔너리로 적고, 리스트에 모으고, 함수로 더하고 계산해서 이번 달 보고서를 만드세요. 5단계로 하나씩 기능을 더해요!","starter_code":"# 용돈 기입장을 만들어 봐요!\n","expected_output_hint":"프로젝트를 5단계로 나누어 완성해요","fallback_text":"용돈 기입장은 기록 하나를 이름표가 붙은 딕셔너리로 적는 데서 시작해요. 기록을 리스트에 모으고, 함수로 새 기록을 더하고, 반복하며 금액을 더하면 남은 돈을 알 수 있어요. 한 단계씩 차근차근 가 봐요!","steps":[{"step_number":1,"step_goal":"기록 하나를 딕셔너리로 만들고, 내용과 금액을 꺼내 f-string으로 보여 주기","checklist":["record[\"내용\"] 처럼 이름표로 값을 꺼내요","f-string으로 \"용돈: 5000원\" 모양을 만들어요"],"example_output":"용돈: 5000원","example_exact":true,"starter_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[___]\nmoney = record[___]\nprint(f\"{name}: {money}원\")\n","validation_type":"all","fallback_text":"딕셔너리는 이름표(키)가 붙은 상자예요. record[\"내용\"] 이라고 쓰면 \"내용\" 이름표가 붙은 상자에서 값을 꺼내요. 꺼낸 값을 f-string의 중괄호 안에 넣어 한 줄로 보여 주세요."},{"step_number":2,"step_goal":"기록 여러 개를 리스트에 담고, for 로 한 줄씩 보여 주기","checklist":["for record in records: 로 기록을 하나씩 꺼내요","1단계처럼 내용과 금액을 꺼내 한 줄로 보여 줘요","[기입장] 아래에 기록 세 줄이 나오는지 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원","starter_code":"\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    # 기록 하나를 1단계처럼 한 줄로 보여 줘요\n    ___\n","validation_type":"all","fallback_text":"리스트 안에 딕셔너리를 여러 개 넣을 수 있어요. for 로 리스트를 돌면 record 에 기록이 하나씩 들어와요. 반복 안에서 1단계와 똑같이 내용과 금액을 꺼내 보여 주면 돼요. 쓴 돈은 빼기(-)로 적었어요."},{"step_number":3,"step_goal":"add_record(내용, 금액) 함수로 새 기록을 리스트에 더하기","checklist":["함수 안에서 새 기록 딕셔너리를 만들어요","records.append( )로 리스트에 더해요","기록 5개 가 나오는지 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원\n기록 5개","starter_code":"\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    # 새 기록 딕셔너리를 records 에 더해요\n    ___\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")\n","validation_type":"all","fallback_text":"함수를 만들어 두면 같은 일을 이름 하나로 여러 번 할 수 있어요. add_record 안에서 {\"내용\": name, \"금액\": money} 로 새 기록을 만들고, 리스트 끝에 더하는 append 로 records 에 넣어요."},{"step_number":4,"step_goal":"total() 함수로 남은 돈을 돌려받고, 들어온 돈과 나간 돈의 합계도 보여 주기","checklist":["total() 안에서 금액을 left 에 하나씩 더해요","쓴 돈은 빼기로 적혀 있어서, 나간 돈은 빼서 더해요","들어온 돈, 나간 돈, 남은 돈 세 줄을 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원\n기록 5개\n들어온 돈: 6000원\n나간 돈: 4300원\n남은 돈: 1700원","starter_code":"\n# 4단계: 남은 돈을 계산하는 함수를 만들어요\ndef total():\n    left = 0\n    for record in records:\n        # 금액을 left 에 더해요\n        ___\n    return left\n\nincome = 0\nspend = 0\nfor record in records:\n    if record[\"금액\"] > 0:\n        income = income + record[\"금액\"]\n    else:\n        # 빼기로 적힌 금액을 빼면 나간 돈이 커져요\n        # 예: 0 - (-1500) 은 0 + 1500 이라 1500 이 돼요\n        spend = spend - ___\n\nprint(f\"들어온 돈: {income}원\")\nprint(f\"나간 돈: {spend}원\")\nprint(f\"남은 돈: {total()}원\")\n","validation_type":"all","fallback_text":"남은 돈은 모든 금액을 차례로 더하면 나와요. 들어온 돈은 더하기, 쓴 돈은 빼기로 적었으니 그냥 모두 더하면 돼요. 함수는 return 으로 계산한 값을 돌려줘요. 나간 돈은 빼기로 적힌 금액을 한 번 더 빼서 더하기 수로 만들어요."},{"step_number":5,"step_goal":"내용별로 쓴 돈을 딕셔너리에 모으고, 가장 많이 쓴 곳을 찾아 이번 달 보고서 만들기","checklist":["쓴 돈을 내용별로 spent 딕셔너리에 모아요","더 큰 금액이 나오면 big_name 과 big_money 를 바꿔요","보고서 마지막 줄에 가장 많이 쓴 곳이 나오는지 봐요"],"example_output":"용돈: 5000원\n[기입장]\n용돈: 5000원\n간식: -1500원\n저금: -2000원\n기록 5개\n들어온 돈: 6000원\n나간 돈: 4300원\n남은 돈: 1700원\n[이번 달 보고서]\n간식: 2300원\n저금: 2000원\n선물: 2500원\n가장 많이 쓴 곳: 선물","starter_code":"\n# 5단계: 이번 달 보고서를 만들어요\nadd_record(\"선물\", -2500)\n\nspent = {}\nfor record in records:\n    if record[\"금액\"] < 0:\n        name = record[\"내용\"]\n        # not in 은 \"안에 없으면\"이에요. 처음 보는 내용이면 0 에서 시작해요\n        if name not in spent:\n            spent[name] = 0\n        spent[name] = spent[name] - record[\"금액\"]\n\nprint(\"[이번 달 보고서]\")\nbig_name = \"\"\nbig_money = 0\nfor name, money in spent.items():\n    print(f\"{name}: {money}원\")\n    # 지금까지 가장 큰 금액보다 크면 대장을 바꿔요\n    if ___:\n        big_name = name\n        big_money = money\nprint(f\"가장 많이 쓴 곳: {big_name}\")\n","validation_type":"all","fallback_text":"내용별 합계는 등대 도서관에서 투표를 세던 방법과 같아요. 처음 보는 내용이면 0으로 시작하고 금액을 더해요. 가장 큰 값은 산맥에서 배운 대로, 지금까지의 대장보다 큰 값이 나오면 대장을 바꾸면 찾을 수 있어요."}]}'::jsonb,
   'all',
   '',
   300
@@ -3293,7 +3293,7 @@ VALUES (
   'project',
   NULL,
   FALSE,
-  '{"topic":"응용 프로젝트: 영어 단어 퀴즈 만들기","learning_goals":["딕셔너리와 함수로 채점하는 프로그램을 만들 수 있다","random.shuffle로 문제 순서를 섞어도 점수는 같다는 것을 확인할 수 있다","틀린 단어를 리스트에 모아 오답 노트를 만들 수 있다"],"story_context":"항구의 선원 학교에서 영어 단어 시험을 본대요! 별똥이가 친구들 답안지를 한 장 주워 왔어요. 파이뱀과 함께 단어장을 만들고, 답안지를 채점하고, 틀린 단어를 모은 오답 노트까지 만드는 퀴즈 프로그램을 완성해 봐요.","exercise_description":"영어 단어와 뜻을 담은 단어장 딕셔너리를 만들고, 답을 채점하는 함수, 문제 순서 섞기, 오답 노트까지 5단계로 하나씩 더해 단어 퀴즈 프로그램을 완성하세요.","starter_code":"# 단어 퀴즈 프로그램을 만들어 봐요!\n","expected_output_hint":"프로젝트를 5단계로 나누어 완성해요","fallback_text":"단어 퀴즈는 영어 단어를 이름표, 우리말 뜻을 내용으로 하는 딕셔너리에서 시작해요. 답이 맞는지 알려 주는 함수를 만들고, 반복하며 맞힌 개수를 세요. 순서를 섞어도 맞힌 개수는 그대로라는 것도 확인해 봐요!","steps":[{"step_number":1,"step_goal":"영어 단어 5개와 뜻을 담은 단어장 딕셔너리를 만들고 .items()로 모두 보여 주기","checklist":["words 뒤 빈칸에 이름표와 내용을 함께 꺼내는 메서드를 넣어요","단어 = 뜻 모양으로 다섯 줄이 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배","starter_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.___():\n    print(f\"{eng} = {kor}\")\n","validation_type":"all","fallback_text":"딕셔너리를 돌 때 이름표와 내용을 한 쌍씩 꺼내려면 등대 도서관에서 배운 메서드를 써요. eng 에는 영어 단어, kor 에는 우리말 뜻이 들어가요."},{"step_number":2,"step_goal":"check(단어, 답) 함수를 만들어 답이 맞으면 True, 틀리면 False 돌려주기","checklist":["단어장에서 꺼낸 뜻과 답이 같은지 == 로 비교해요","True 와 False 가 한 줄씩 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse","starter_code":"\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    # 단어장의 뜻과 답이 같으면 True, 다르면 False 를 돌려줘요\n    return ___\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n","validation_type":"all","fallback_text":"words[word] 로 단어장에서 그 단어의 뜻을 꺼낼 수 있어요. 두 값이 같은지 == 로 비교하면 그 결과가 바로 True 나 False 예요. 그 결과를 return 으로 돌려주면 돼요."},{"step_number":3,"step_goal":"친구가 적은 답안지 딕셔너리를 check 로 채점해 맞힌 개수 보여 주기","checklist":["for 로 답안지의 단어와 답을 한 쌍씩 꺼내요","check 가 True 면 score 에 1을 더해요","맞힌 개수: 3/5 가 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse\n맞힌 개수: 3/5","starter_code":"\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    # check 로 맞으면 score 에 1을 더해요\n    ___\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")\n","validation_type":"all","fallback_text":"답안지도 딕셔너리라서 .items() 로 단어와 답을 한 쌍씩 꺼낼 수 있어요. 2단계에서 만든 check 함수가 True 를 돌려주면 맞은 거예요. if 로 확인하고 score 에 1을 더해요."},{"step_number":4,"step_goal":"문제 순서를 random.shuffle로 섞어서 다시 내고, 섞어도 맞힌 개수가 같은지 확인하기","checklist":["random.shuffle( )로 quiz 리스트를 섞어요","문제 순서는 돌릴 때마다 달라져요","다시 풀어도 맞힌 개수: 3/5 가 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse\n맞힌 개수: 3/5\nstar → 별\nship → 새\napple → 사과\nfish → 물고기\nsea → 산\n다시 풀어도 맞힌 개수: 3/5","starter_code":"\n# 4단계: 문제 순서를 섞어서 다시 내요\nimport random\n\nquiz = [\"apple\", \"sea\", \"star\", \"fish\", \"ship\"]\n# quiz 리스트의 순서를 섞어요\n___\n\nscore = 0\nfor word in quiz:\n    answer = answers[word]\n    print(f\"{word} → {answer}\")\n    if check(word, answer):\n        score = score + 1\nprint(f\"다시 풀어도 맞힌 개수: {score}/{len(quiz)}\")\n","validation_type":"all","fallback_text":"random 도구 상자의 shuffle 은 리스트 순서를 마구 섞어요. 해적선 놀이공원에서 놀이기구 줄을 섞었던 것처럼요. 순서는 돌릴 때마다 달라지지만 점수는 단어와 답을 짝지어 매기니까 늘 같아요."},{"step_number":5,"step_goal":"틀린 단어를 오답 노트 리스트에 모으고, .upper()로 제목을 크게 꾸며 보여 주기","checklist":["틀린 단어를 wrong 리스트에 append 로 더해요","\"wrong note\" 를 .upper( )로 큰 글자 제목으로 바꿔요","틀린 단어: 2개 가 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse\n맞힌 개수: 3/5\nstar → 별\nship → 새\napple → 사과\nfish → 물고기\nsea → 산\n다시 풀어도 맞힌 개수: 3/5\nWRONG NOTE\n- ship: 배\n- sea: 바다\n틀린 단어: 2개","starter_code":"\n# 5단계: 틀린 단어를 오답 노트에 모아요\nwrong = []\nfor word in quiz:\n    if answers[word] != words[word]:\n        # 틀린 단어를 wrong 에 더해요\n        ___\n\nprint(\"wrong note\".___())\nfor word in wrong:\n    print(f\"- {word}: {words[word]}\")\nprint(f\"틀린 단어: {len(wrong)}개\")\n","validation_type":"all","fallback_text":"리스트 끝에 하나씩 더할 때는 append 를 써요. 글자를 모두 큰 글자로 바꾸는 메서드는 산호 문자열 공방에서 배웠어요. 틀린 단어 순서는 섞인 순서를 따라가서 돌릴 때마다 달라질 수 있어요."}]}'::jsonb,
+  '{"topic":"응용 프로젝트: 영어 단어 퀴즈 만들기","learning_goals":["딕셔너리와 함수로 채점하는 프로그램을 만들 수 있다","random.shuffle로 문제 순서를 섞어도 점수는 같다는 것을 확인할 수 있다","틀린 단어를 리스트에 모아 오답 노트를 만들 수 있다"],"story_context":"항구의 선원 학교에서 영어 단어 시험을 본대요! 별똥이가 친구들 답안지를 한 장 주워 왔어요. 파이뱀과 함께 단어장을 만들고, 답안지를 채점하고, 틀린 단어를 모은 오답 노트까지 만드는 퀴즈 프로그램을 완성해 봐요.","exercise_description":"영어 단어와 뜻을 담은 단어장 딕셔너리를 만들고, 답을 채점하는 함수, 문제 순서 섞기, 오답 노트까지 5단계로 하나씩 더해 단어 퀴즈 프로그램을 완성하세요.","starter_code":"# 단어 퀴즈 프로그램을 만들어 봐요!\n","expected_output_hint":"프로젝트를 5단계로 나누어 완성해요","fallback_text":"단어 퀴즈는 영어 단어를 이름표, 우리말 뜻을 내용으로 하는 딕셔너리에서 시작해요. 답이 맞는지 알려 주는 함수를 만들고, 반복하며 맞힌 개수를 세요. 순서를 섞어도 맞힌 개수는 그대로라는 것도 확인해 봐요!","steps":[{"step_number":1,"step_goal":"영어 단어 5개와 뜻을 담은 단어장 딕셔너리를 만들고 .items()로 모두 보여 주기","checklist":["words 뒤 빈칸에 이름표와 내용을 함께 꺼내는 메서드를 넣어요","단어 = 뜻 모양으로 다섯 줄이 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배","example_exact":true,"starter_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.___():\n    print(f\"{eng} = {kor}\")\n","validation_type":"all","fallback_text":"딕셔너리를 돌 때 이름표와 내용을 한 쌍씩 꺼내려면 등대 도서관에서 배운 메서드를 써요. eng 에는 영어 단어, kor 에는 우리말 뜻이 들어가요."},{"step_number":2,"step_goal":"check(단어, 답) 함수를 만들어 답이 맞으면 True, 틀리면 False 돌려주기","checklist":["단어장에서 꺼낸 뜻과 답이 같은지 == 로 비교해요","True 와 False 가 한 줄씩 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse","starter_code":"\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    # 단어장의 뜻과 답이 같으면 True, 다르면 False 를 돌려줘요\n    return ___\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n","validation_type":"all","fallback_text":"words[word] 로 단어장에서 그 단어의 뜻을 꺼낼 수 있어요. 두 값이 같은지 == 로 비교하면 그 결과가 바로 True 나 False 예요. 그 결과를 return 으로 돌려주면 돼요."},{"step_number":3,"step_goal":"친구가 적은 답안지 딕셔너리를 check 로 채점해 맞힌 개수 보여 주기","checklist":["for 로 답안지의 단어와 답을 한 쌍씩 꺼내요","check 가 True 면 score 에 1을 더해요","맞힌 개수: 3/5 가 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse\n맞힌 개수: 3/5","starter_code":"\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    # check 로 맞으면 score 에 1을 더해요\n    ___\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")\n","validation_type":"all","fallback_text":"답안지도 딕셔너리라서 .items() 로 단어와 답을 한 쌍씩 꺼낼 수 있어요. 2단계에서 만든 check 함수가 True 를 돌려주면 맞은 거예요. if 로 확인하고 score 에 1을 더해요."},{"step_number":4,"step_goal":"문제 순서를 random.shuffle로 섞어서 다시 내고, 섞어도 맞힌 개수가 같은지 확인하기","checklist":["random.shuffle( )로 quiz 리스트를 섞어요","문제 순서는 돌릴 때마다 달라져요","다시 풀어도 맞힌 개수: 3/5 가 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse\n맞힌 개수: 3/5\nstar → 별\nship → 새\napple → 사과\nfish → 물고기\nsea → 산\n다시 풀어도 맞힌 개수: 3/5","starter_code":"\n# 4단계: 문제 순서를 섞어서 다시 내요\nimport random\n\nquiz = [\"apple\", \"sea\", \"star\", \"fish\", \"ship\"]\n# quiz 리스트의 순서를 섞어요\n___\n\nscore = 0\nfor word in quiz:\n    answer = answers[word]\n    print(f\"{word} → {answer}\")\n    if check(word, answer):\n        score = score + 1\nprint(f\"다시 풀어도 맞힌 개수: {score}/{len(quiz)}\")\n","validation_type":"all","fallback_text":"random 도구 상자의 shuffle 은 리스트 순서를 마구 섞어요. 해적선 놀이공원에서 놀이기구 줄을 섞었던 것처럼요. 순서는 돌릴 때마다 달라지지만 점수는 단어와 답을 짝지어 매기니까 늘 같아요."},{"step_number":5,"step_goal":"틀린 단어를 오답 노트 리스트에 모으고, .upper()로 제목을 크게 꾸며 보여 주기","checklist":["틀린 단어를 wrong 리스트에 append 로 더해요","\"wrong note\" 를 .upper( )로 큰 글자 제목으로 바꿔요","틀린 단어: 2개 가 나오는지 봐요"],"example_output":"apple = 사과\nsea = 바다\nstar = 별\nfish = 물고기\nship = 배\nTrue\nFalse\n맞힌 개수: 3/5\nstar → 별\nship → 새\napple → 사과\nfish → 물고기\nsea → 산\n다시 풀어도 맞힌 개수: 3/5\nWRONG NOTE\n- ship: 배\n- sea: 바다\n틀린 단어: 2개","starter_code":"\n# 5단계: 틀린 단어를 오답 노트에 모아요\nwrong = []\nfor word in quiz:\n    if answers[word] != words[word]:\n        # 틀린 단어를 wrong 에 더해요\n        ___\n\nprint(\"wrong note\".___())\nfor word in wrong:\n    print(f\"- {word}: {words[word]}\")\nprint(f\"틀린 단어: {len(wrong)}개\")\n","validation_type":"all","fallback_text":"리스트 끝에 하나씩 더할 때는 append 를 써요. 글자를 모두 큰 글자로 바꾸는 메서드는 산호 문자열 공방에서 배웠어요. 틀린 단어 순서는 섞인 순서를 따라가서 돌릴 때마다 달라질 수 있어요."}]}'::jsonb,
   'all',
   '',
   300
@@ -4432,7 +4432,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000002',
-  '[{"type":"output_match","expected":"첫 글자: O\n마지막 글자: N\n글자 수: 5\nO\nC\nE\nA\nN"},{"type":"code_check","expected":"[-1]"},{"type":"code_check","expected":"len(word)"}]',
+  '[{"type":"output_match","expected":"첫 글자: O\n마지막 글자: N\n글자 수: 5\nO\nC\nE\nA\nN"},{"type":"code_check","expected":"[-1]"},{"type":"code_check","expected":"len("}]',
   '{"level_1":"리스트 호수에서 리스트 번호를 0부터 셌던 것 기억나요? 글자도 똑같아요!","level_2":"뒤에서부터 셀 때는 음수 번호를 써요. 맨 끝은 -1 이에요. 글자 수는 len() 으로 세요.","level_3":"word[-1], len(word), print(letter) 를 빈칸에 차례로 넣어 보세요!"}'::jsonb,
   E'word = "OCEAN"\n\nprint(f"첫 글자: {word[0]}")\nprint(f"마지막 글자: {word[-1]}")\nprint(f"글자 수: {len(word)}")\n\nfor letter in word:\n    print(letter)\n',
   '[]'::jsonb,
@@ -4807,7 +4807,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000025',
-  '[{"type":"output_match","expected":"보물은 1줄 2칸"},{"type":"code_check","expected":"range(len("}]',
+  '[{"type":"output_match","expected":"보물은 1줄 2칸"},{"type":"code_check","expected":"len(grid"}]',
   '{"level_1":"칸 자체가 아니라 번호가 필요해요. 번호를 차례로 만드는 주문 range 안에 무엇을 넣을까요?","level_2":"줄 수는 len(grid), r 번 줄의 칸 수는 len(grid[r]) 예요. 칸이 X 인지는 if grid[r][c] == \"X\": 로 물어요.","level_3":"빈칸에 len(grid) 와 len(grid[r]) 를 넣고, 마지막 ___ 을 이렇게 바꿔 보세요!\nif grid[r][c] == \"X\":\n    print(f\"보물은 {r}줄 {c}칸\")"}'::jsonb,
   E'grid = [\n    [".", ".", ".", "."],\n    [".", "#", "X", "."],\n    ["#", ".", ".", "."],\n]\n\nfor r in range(len(grid)):\n    for c in range(len(grid[r])):\n        if grid[r][c] == "X":\n            print(f"보물은 {r}줄 {c}칸")\n',
   '[]'::jsonb,
@@ -4882,7 +4882,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000029',
-  '[{"type":"code_check","expected":"randint"},{"type":"contains","expected":"정직한 주사위: 100"}]',
+  '[{"type":"code_check","expected":"randint"},{"type":"code_check","expected":"n = random.randint("},{"type":"contains","expected":"정직한 주사위: 100"}]',
   '{"level_1":"random 상자에서 두 숫자 사이의 정수를 뽑는 도구는 rand 로 시작해요. 1월드 숫자 맞추기 게임에서 썼어요!","level_2":"random.randint(1, 6) 이 주사위 한 번이에요. 반복 안의 n 에도 똑같이 넣어요.","level_3":"두 빈칸을 이렇게 채워 보세요!\ndice = random.randint(1, 6)\nn = random.randint(1, 6)"}'::jsonb,
   E'import random\n\ndice = random.randint(1, 6)\nprint(f"한 번 굴린 눈: {dice}")\n\nok = 0\nfor i in range(100):\n    n = random.randint(1, 6)\n    if n >= 1 and n <= 6:\n        ok = ok + 1\nprint(f"정직한 주사위: {ok}")\n',
   '[]'::jsonb,
@@ -4972,7 +4972,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000035',
-  '[{"type":"code_check","expected":"while"},{"type":"code_check","expected":"random.choice"},{"type":"contains","expected":"번 만에 뽑았어요"}]',
+  '[{"type":"code_check","expected":"while"},{"type":"code_check","expected":"random.choice"},{"type":"contains","expected":"번 만에 뽑았어요"},{"type":"contains","expected":"번째: 황금 열쇠"}]',
   '{"level_1":"황금 열쇠가 \"아닌\" 동안 반복해요. 같지 않다는 비교 기호는 != 예요.","level_2":"while prize != \"황금 열쇠\": 로 쓰고, 반복 안에서 간식 추천기처럼 random.choice 로 뽑아요.","level_3":"두 빈칸을 이렇게 채워 보세요!\nwhile prize != \"황금 열쇠\":\n    prize = random.choice(prizes)"}'::jsonb,
   E'import random\n\nprizes = ["사탕", "풍선", "스티커", "모자", "황금 열쇠"]\ntries = 0\nprize = ""\n\nwhile prize != "황금 열쇠":\n    prize = random.choice(prizes)\n    tries = tries + 1\n    print(f"{tries}번째: {prize}")\n\nprint(f"{tries}번 만에 뽑았어요!")\n',
   '[]'::jsonb,
@@ -5107,7 +5107,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000043',
-  '[{"type":"output_match","expected":"평균: 80.0"},{"type":"code_check","expected":"range(len(scores))"}]',
+  '[{"type":"output_match","expected":"평균: 80.0"},{"type":"code_check","expected":"for","whole_word":true}]',
   '{"level_1":"반복 안에 print(i, scores[i]) 를 넣어 실행해 보세요. 점수 세 개가 다 나오나요?","level_2":"리스트 번호는 0부터예요. range(1, len(scores)) 는 몇 번부터 시작하나요?","level_3":"for 줄을 for i in range(len(scores)): 로 고치고, 돋보기 print 를 지워 보세요!"}'::jsonb,
   E'scores = [80, 90, 70]\ntotal = 0\n\nfor i in range(len(scores)):\n    total = total + scores[i]\n\navg = round(total / len(scores), 1)\nprint(f"평균: {avg}")\n',
   '[]'::jsonb,
@@ -5137,7 +5137,7 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000045',
-  '[{"type":"output_match","expected":"합계: 7원\n배달비 더해서: 9원\n마지막 물건: 바나나"},{"type":"code_check","expected":"price.get("},{"type":"code_check","expected":"int(delivery)"},{"type":"code_check","expected":"basket[-1]"}]',
+  '[{"type":"output_match","expected":"합계: 7원\n배달비 더해서: 9원\n마지막 물건: 바나나"},{"type":"code_check","expected":"price.get("},{"type":"code_check","expected":"int(delivery)"},{"type":"code_check","expected":"basket["}]',
   '{"level_1":"실행할 때마다 에러 쪽지 맨 아래 줄을 읽어요. 에러 이름이 어디가 아픈지 알려 줘요.","level_2":"없는 이름표는 .get(이름표, 0), 글자 숫자는 int( ), 맨 끝 물건은 번호 -1 이에요.","level_3":"세 줄을 이렇게 고쳐 보세요!\n    total = total + price.get(item, 0)\ntotal = total + int(delivery)\nprint(f\"마지막 물건: {basket[-1]}\")"}'::jsonb,
   E'# 병원선 매점 계산기\nprice = {"사과": 3, "우유": 4, "빵": 5}\nbasket = ["사과", "우유", "바나나"]\ndelivery = "2"\n\ntotal = 0\nfor item in basket:\n    total = total + price.get(item, 0)\nprint(f"합계: {total}원")\n\ntotal = total + int(delivery)\nprint(f"배달비 더해서: {total}원")\n\nprint(f"마지막 물건: {basket[-1]}")\n',
   '[]'::jsonb,
@@ -5212,9 +5212,9 @@ ON CONFLICT (quest_id) DO UPDATE SET
 INSERT INTO public.quest_answer_keys (quest_id, expected_output, hints, solution_code, steps, quiz_answer)
 VALUES (
   'b2000000-0000-0000-0000-000000000049',
-  '[{"type":"output_match","expected":"[135, 141, 133]\n130cm 이상: 3명"},{"type":"code_check","expected":"append("}]',
+  '[{"type":"output_match","expected":"[135, 141, 130, 133]\n130cm 이상: 4명"},{"type":"code_check","expected":"append("}]',
   '{"level_1":"키 h 가 130 이상인지 if 로 물어봐요. \"이상\"은 같은 것도 들어가요.","level_2":"if h >= 130: 아래에 들여써서 tall.append(h) 를 써요.","level_3":"빈칸을 이렇게 바꿔 보세요!\n    if h >= 130:\n        tall.append(h)"}'::jsonb,
-  E'heights = [128, 135, 141, 126, 133, 129]\ntall = []\n\nfor h in heights:\n    if h >= 130:\n        tall.append(h)\n\nprint(tall)\nprint(f"130cm 이상: {len(tall)}명")\n',
+  E'heights = [128, 135, 141, 126, 130, 133, 129]\ntall = []\n\nfor h in heights:\n    if h >= 130:\n        tall.append(h)\n\nprint(tall)\nprint(f"130cm 이상: {len(tall)}명")\n',
   '[]'::jsonb,
   NULL
 )
@@ -5320,7 +5320,7 @@ VALUES (
   '[{"type":"contains","expected":"가장 많이 쓴 곳: 선물"},{"type":"code_check","expected":"def add_record"}]',
   '{"level_1":"이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!","level_2":"딕셔너리로 기록 하나, 리스트로 기록 여러 개, 함수로 더하기와 합계를 만들어요.","level_3":"막히면 단계마다 있는 힌트를 열어 보세요. 빈칸 ___ 을 채우면 돼요!"}'::jsonb,
   NULL,
-  '[{"step_number":1,"expected_output":"[{\"type\":\"output_match\",\"expected\":\"용돈: 5000원\"},{\"type\":\"code_check\",\"expected\":\"record[\"}]","hints":{"level_1":"등대 도서관에서 책 이름표로 값을 꺼냈던 것을 떠올려 보세요!","level_2":"빈칸에는 이름표 글자가 들어가요. 따옴표를 꼭 붙여요.","level_3":"name = record[\"___\"]\nmoney = record[\"___\"]\n빈칸에 딕셔너리의 이름표 두 개를 차례로 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")"},{"step_number":2,"expected_output":"[{\"type\":\"contains\",\"expected\":\"[기입장]\\n용돈: 5000원\\n간식: -1500원\\n저금: -2000원\"},{\"type\":\"code_check\",\"expected\":\"in records\"}]","hints":{"level_1":"반복 안의 빈칸에 1단계에서 쓴 세 줄을 다시 써 보세요.","level_2":"반복 안에서도 name, money 를 꺼내고 print 로 보여 줘요. 줄 앞에 빈칸 네 개를 꼭 넣어요.","level_3":"for record in records:\n    name = record[\"내용\"]\n    money = record[\"___\"]\n    print(f\"{name}: {money}원\")\n빈칸에 금액 이름표를 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")"},{"step_number":3,"expected_output":"[{\"type\":\"contains\",\"expected\":\"기록 5개\"},{\"type\":\"code_check\",\"expected\":\".append(\"}]","hints":{"level_1":"리스트 끝에 하나를 더하는 메서드를 떠올려 보세요. 리스트 호수에서 배웠어요!","level_2":"records.append( ) 괄호 안에 {\"내용\": name, \"금액\": money} 딕셔너리를 넣어요.","level_3":"def add_record(name, money):\n    records.___({\"내용\": name, \"금액\": money})\n빈칸에 리스트에 더하는 메서드 이름을 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")\n\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    records.append({\"내용\": name, \"금액\": money})\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")"},{"step_number":4,"expected_output":"[{\"type\":\"contains\",\"expected\":\"들어온 돈: 6000원\\n나간 돈: 4300원\\n남은 돈: 1700원\"},{\"type\":\"code_check\",\"expected\":\"def total\"}]","hints":{"level_1":"해저 알고리즘 산맥에서 진주 무게를 하나씩 더했던 방법과 같아요!","level_2":"total() 안의 빈칸은 left = left + record[\"금액\"] 이에요. 아래 빈칸에는 지금 보고 있는 기록의 금액을 넣어요.","level_3":"left = left + record[\"___\"]\nspend = spend - record[\"___\"]\n빈칸 두 곳에 같은 이름표를 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")\n\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    records.append({\"내용\": name, \"금액\": money})\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")\n\n# 4단계: 남은 돈을 계산하는 함수를 만들어요\ndef total():\n    left = 0\n    for record in records:\n        left = left + record[\"금액\"]\n    return left\n\nincome = 0\nspend = 0\nfor record in records:\n    if record[\"금액\"] > 0:\n        income = income + record[\"금액\"]\n    else:\n        spend = spend - record[\"금액\"]\n\nprint(f\"들어온 돈: {income}원\")\nprint(f\"나간 돈: {spend}원\")\nprint(f\"남은 돈: {total()}원\")"},{"step_number":5,"expected_output":"[{\"type\":\"contains\",\"expected\":\"[이번 달 보고서]\\n간식: 2300원\\n저금: 2000원\\n선물: 2500원\\n가장 많이 쓴 곳: 선물\"},{\"type\":\"code_check\",\"expected\":\"big_money\"}]","hints":{"level_1":"지금 보고 있는 money 가 지금까지의 대장 big_money 보다 큰지 비교해 보세요.","level_2":"if 뒤에 money > big_money 처럼 두 값을 비교하는 조건을 써요.","level_3":"if money ___ big_money:\n빈칸에 \"더 크다\"를 뜻하는 기호를 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")\n\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    records.append({\"내용\": name, \"금액\": money})\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")\n\n# 4단계: 남은 돈을 계산하는 함수를 만들어요\ndef total():\n    left = 0\n    for record in records:\n        left = left + record[\"금액\"]\n    return left\n\nincome = 0\nspend = 0\nfor record in records:\n    if record[\"금액\"] > 0:\n        income = income + record[\"금액\"]\n    else:\n        spend = spend - record[\"금액\"]\n\nprint(f\"들어온 돈: {income}원\")\nprint(f\"나간 돈: {spend}원\")\nprint(f\"남은 돈: {total()}원\")\n\n# 5단계: 이번 달 보고서를 만들어요\nadd_record(\"선물\", -2500)\n\nspent = {}\nfor record in records:\n    if record[\"금액\"] < 0:\n        name = record[\"내용\"]\n        if name not in spent:\n            spent[name] = 0\n        spent[name] = spent[name] - record[\"금액\"]\n\nprint(\"[이번 달 보고서]\")\nbig_name = \"\"\nbig_money = 0\nfor name, money in spent.items():\n    print(f\"{name}: {money}원\")\n    if money > big_money:\n        big_name = name\n        big_money = money\nprint(f\"가장 많이 쓴 곳: {big_name}\")"}]'::jsonb,
+  '[{"step_number":1,"expected_output":"[{\"type\":\"output_match\",\"expected\":\"용돈: 5000원\"},{\"type\":\"code_check\",\"expected\":\"record[\"}]","hints":{"level_1":"등대 도서관에서 책 이름표로 값을 꺼냈던 것을 떠올려 보세요!","level_2":"빈칸에는 이름표 글자가 들어가요. 따옴표를 꼭 붙여요.","level_3":"name = record[\"___\"]\nmoney = record[\"___\"]\n빈칸에 딕셔너리의 이름표 두 개를 차례로 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")"},{"step_number":2,"expected_output":"[{\"type\":\"contains\",\"expected\":\"[기입장]\\n용돈: 5000원\\n간식: -1500원\\n저금: -2000원\"},{\"type\":\"code_check\",\"expected\":\"in records\"}]","hints":{"level_1":"반복 안의 빈칸에 1단계에서 쓴 세 줄을 다시 써 보세요.","level_2":"반복 안에서도 name, money 를 꺼내고 print 로 보여 줘요. 줄 앞에 빈칸 네 개를 꼭 넣어요.","level_3":"for record in records:\n    name = record[\"내용\"]\n    money = record[\"___\"]\n    print(f\"{name}: {money}원\")\n빈칸에 금액 이름표를 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")"},{"step_number":3,"expected_output":"[{\"type\":\"contains\",\"expected\":\"기록 5개\"},{\"type\":\"code_check\",\"expected\":\".append(\"}]","hints":{"level_1":"리스트 끝에 하나를 더하는 메서드를 떠올려 보세요. 리스트 호수에서 배웠어요!","level_2":"records.append( ) 괄호 안에 {\"내용\": name, \"금액\": money} 딕셔너리를 넣어요.","level_3":"def add_record(name, money):\n    records.___({\"내용\": name, \"금액\": money})\n빈칸에 리스트에 더하는 메서드 이름을 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")\n\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    records.append({\"내용\": name, \"금액\": money})\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")"},{"step_number":4,"expected_output":"[{\"type\":\"contains\",\"expected\":\"들어온 돈: 6000원\\n나간 돈: 4300원\\n남은 돈: 1700원\"},{\"type\":\"code_check\",\"expected\":\"left +\"}]","hints":{"level_1":"해저 알고리즘 산맥에서 진주 무게를 하나씩 더했던 방법과 같아요!","level_2":"total() 안의 빈칸은 left = left + record[\"금액\"] 이에요. 아래 빈칸에는 지금 보고 있는 기록의 금액을 넣어요.","level_3":"left = left + record[\"___\"]\nspend = spend - record[\"___\"]\n빈칸 두 곳에 같은 이름표를 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")\n\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    records.append({\"내용\": name, \"금액\": money})\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")\n\n# 4단계: 남은 돈을 계산하는 함수를 만들어요\ndef total():\n    left = 0\n    for record in records:\n        left = left + record[\"금액\"]\n    return left\n\nincome = 0\nspend = 0\nfor record in records:\n    if record[\"금액\"] > 0:\n        income = income + record[\"금액\"]\n    else:\n        spend = spend - record[\"금액\"]\n\nprint(f\"들어온 돈: {income}원\")\nprint(f\"나간 돈: {spend}원\")\nprint(f\"남은 돈: {total()}원\")"},{"step_number":5,"expected_output":"[{\"type\":\"contains\",\"expected\":\"[이번 달 보고서]\\n간식: 2300원\\n저금: 2000원\\n선물: 2500원\\n가장 많이 쓴 곳: 선물\"},{\"type\":\"code_check\",\"expected\":\"money >\",\"whole_word\":true}]","hints":{"level_1":"지금 보고 있는 money 가 지금까지의 대장 big_money 보다 큰지 비교해 보세요.","level_2":"if 뒤에 money > big_money 처럼 두 값을 비교하는 조건을 써요.","level_3":"if money ___ big_money:\n빈칸에 \"더 크다\"를 뜻하는 기호를 넣어 보세요!"},"solution_code":"# 1단계: 기록 하나를 딕셔너리로 만들어요\nrecord = {\"내용\": \"용돈\", \"금액\": 5000}\n\n# record 에서 내용과 금액을 꺼내요\nname = record[\"내용\"]\nmoney = record[\"금액\"]\nprint(f\"{name}: {money}원\")\n\n# 2단계: 기록 여러 개를 리스트에 담아요\nrecords = [\n    {\"내용\": \"용돈\", \"금액\": 5000},\n    {\"내용\": \"간식\", \"금액\": -1500},\n    {\"내용\": \"저금\", \"금액\": -2000},\n]\n\nprint(\"[기입장]\")\nfor record in records:\n    name = record[\"내용\"]\n    money = record[\"금액\"]\n    print(f\"{name}: {money}원\")\n\n# 3단계: 기록을 더하는 함수를 만들어요\ndef add_record(name, money):\n    records.append({\"내용\": name, \"금액\": money})\n\nadd_record(\"간식\", -800)\nadd_record(\"심부름\", 1000)\nprint(f\"기록 {len(records)}개\")\n\n# 4단계: 남은 돈을 계산하는 함수를 만들어요\ndef total():\n    left = 0\n    for record in records:\n        left = left + record[\"금액\"]\n    return left\n\nincome = 0\nspend = 0\nfor record in records:\n    if record[\"금액\"] > 0:\n        income = income + record[\"금액\"]\n    else:\n        spend = spend - record[\"금액\"]\n\nprint(f\"들어온 돈: {income}원\")\nprint(f\"나간 돈: {spend}원\")\nprint(f\"남은 돈: {total()}원\")\n\n# 5단계: 이번 달 보고서를 만들어요\nadd_record(\"선물\", -2500)\n\nspent = {}\nfor record in records:\n    if record[\"금액\"] < 0:\n        name = record[\"내용\"]\n        if name not in spent:\n            spent[name] = 0\n        spent[name] = spent[name] - record[\"금액\"]\n\nprint(\"[이번 달 보고서]\")\nbig_name = \"\"\nbig_money = 0\nfor name, money in spent.items():\n    print(f\"{name}: {money}원\")\n    if money > big_money:\n        big_name = name\n        big_money = money\nprint(f\"가장 많이 쓴 곳: {big_name}\")"}]'::jsonb,
   NULL
 )
 ON CONFLICT (quest_id) DO UPDATE SET
@@ -5350,7 +5350,7 @@ VALUES (
   '[{"type":"contains","expected":"맞힌 개수: 3/5"},{"type":"contains","expected":"틀린 단어: 2개"},{"type":"code_check","expected":"random.shuffle"}]',
   '{"level_1":"이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!","level_2":"단어장 딕셔너리, 채점 함수, 순서 섞기, 오답 노트 순서로 만들어요.","level_3":"막히면 단계마다 있는 힌트를 열어 보세요. 빈칸 ___ 을 채우면 돼요!"}'::jsonb,
   NULL,
-  '[{"step_number":1,"expected_output":"[{\"type\":\"output_match\",\"expected\":\"apple = 사과\\nsea = 바다\\nstar = 별\\nfish = 물고기\\nship = 배\"},{\"type\":\"code_check\",\"expected\":\".items(\"}]","hints":{"level_1":"책장 한 바퀴 퀘스트에서 이름표와 내용을 한 쌍씩 꺼냈던 메서드를 떠올려 보세요!","level_2":"빈칸에 영어로 \"물건들\"이라는 뜻의 메서드 이름을 넣어요.","level_3":"for eng, kor in words.___():\n빈칸에 i 로 시작하는 다섯 글자 메서드 이름을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")"},{"step_number":2,"expected_output":"[{\"type\":\"contains\",\"expected\":\"True\\nFalse\"},{\"type\":\"code_check\",\"expected\":\"==\"}]","hints":{"level_1":"단어장에서 뜻을 꺼내 답과 같은지 비교하면 돼요.","level_2":"return 뒤에 words[word] == answer 처럼 비교를 바로 써도 True 나 False 가 돌아가요.","level_3":"return words[___] == answer\n빈칸에 함수가 받은 영어 단어 변수 이름을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))"},{"step_number":3,"expected_output":"[{\"type\":\"contains\",\"expected\":\"맞힌 개수: 3/5\"},{\"type\":\"code_check\",\"expected\":\"check(word\"}]","hints":{"level_1":"2단계에서 만든 함수에 단어와 답을 넣어 불러 보세요.","level_2":"if check(word, answer): 다음 줄에 score = score + 1 을 써요. 들여쓰기를 한 번 더 해요!","level_3":"if check(word, ___):\n    score = score + 1\n빈칸에 친구가 적은 답 변수 이름을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    if check(word, answer):\n        score = score + 1\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")"},{"step_number":4,"expected_output":"[{\"type\":\"contains\",\"expected\":\"다시 풀어도 맞힌 개수: 3/5\"},{\"type\":\"code_check\",\"expected\":\"random.shuffle\"}]","hints":{"level_1":"놀이기구 줄 섞기 퀘스트에서 리스트를 섞었던 주문을 떠올려 보세요!","level_2":"빈칸에 random.shuffle(quiz) 처럼 섞을 리스트를 괄호 안에 넣어요.","level_3":"random.___(quiz)\n빈칸에 \"섞다\"라는 뜻의 영어 낱말을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    if check(word, answer):\n        score = score + 1\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")\n\n# 4단계: 문제 순서를 섞어서 다시 내요\nimport random\n\nquiz = [\"apple\", \"sea\", \"star\", \"fish\", \"ship\"]\nrandom.shuffle(quiz)\n\nscore = 0\nfor word in quiz:\n    answer = answers[word]\n    print(f\"{word} → {answer}\")\n    if check(word, answer):\n        score = score + 1\nprint(f\"다시 풀어도 맞힌 개수: {score}/{len(quiz)}\")"},{"step_number":5,"expected_output":"[{\"type\":\"contains\",\"expected\":\"WRONG NOTE\"},{\"type\":\"contains\",\"expected\":\"틀린 단어: 2개\"},{\"type\":\"code_check\",\"expected\":\".upper(\"},{\"type\":\"code_check\",\"expected\":\".append(\"}]","hints":{"level_1":"첫 빈칸은 리스트에 더하기, 둘째 빈칸은 큰 글자로 바꾸기예요.","level_2":"wrong.append(word) 로 틀린 단어를 더하고, \"wrong note\".upper() 로 제목을 바꿔요.","level_3":"wrong.___(word)\nprint(\"wrong note\".___())\n빈칸에 리스트에 더하는 메서드와 큰 글자로 바꾸는 메서드를 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    if check(word, answer):\n        score = score + 1\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")\n\n# 4단계: 문제 순서를 섞어서 다시 내요\nimport random\n\nquiz = [\"apple\", \"sea\", \"star\", \"fish\", \"ship\"]\nrandom.shuffle(quiz)\n\nscore = 0\nfor word in quiz:\n    answer = answers[word]\n    print(f\"{word} → {answer}\")\n    if check(word, answer):\n        score = score + 1\nprint(f\"다시 풀어도 맞힌 개수: {score}/{len(quiz)}\")\n\n# 5단계: 틀린 단어를 오답 노트에 모아요\nwrong = []\nfor word in quiz:\n    if answers[word] != words[word]:\n        wrong.append(word)\n\nprint(\"wrong note\".upper())\nfor word in wrong:\n    print(f\"- {word}: {words[word]}\")\nprint(f\"틀린 단어: {len(wrong)}개\")"}]'::jsonb,
+  '[{"step_number":1,"expected_output":"[{\"type\":\"output_match\",\"expected\":\"apple = 사과\\nsea = 바다\\nstar = 별\\nfish = 물고기\\nship = 배\"},{\"type\":\"code_check\",\"expected\":\".items(\"}]","hints":{"level_1":"책장 한 바퀴 퀘스트에서 이름표와 내용을 한 쌍씩 꺼냈던 메서드를 떠올려 보세요!","level_2":"빈칸에 영어로 \"물건들\"이라는 뜻의 메서드 이름을 넣어요.","level_3":"for eng, kor in words.___():\n빈칸에 i 로 시작하는 다섯 글자 메서드 이름을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")"},{"step_number":2,"expected_output":"[{\"type\":\"contains\",\"expected\":\"True\\nFalse\"},{\"type\":\"code_check\",\"expected\":\"==\"}]","hints":{"level_1":"단어장에서 뜻을 꺼내 답과 같은지 비교하면 돼요.","level_2":"return 뒤에 words[word] == answer 처럼 비교를 바로 써도 True 나 False 가 돌아가요.","level_3":"return words[___] == answer\n빈칸에 함수가 받은 영어 단어 변수 이름을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))"},{"step_number":3,"expected_output":"[{\"type\":\"contains\",\"expected\":\"맞힌 개수: 3/5\"},{\"type\":\"code_check\",\"expected\":\"if check(\"}]","hints":{"level_1":"2단계에서 만든 함수에 단어와 답을 넣어 불러 보세요.","level_2":"if check(word, answer): 다음 줄에 score = score + 1 을 써요. 들여쓰기를 한 번 더 해요!","level_3":"if check(word, ___):\n    score = score + 1\n빈칸에 친구가 적은 답 변수 이름을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    if check(word, answer):\n        score = score + 1\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")"},{"step_number":4,"expected_output":"[{\"type\":\"contains\",\"expected\":\"다시 풀어도 맞힌 개수: 3/5\"},{\"type\":\"code_check\",\"expected\":\"random.shuffle\"}]","hints":{"level_1":"놀이기구 줄 섞기 퀘스트에서 리스트를 섞었던 주문을 떠올려 보세요!","level_2":"빈칸에 random.shuffle(quiz) 처럼 섞을 리스트를 괄호 안에 넣어요.","level_3":"random.___(quiz)\n빈칸에 \"섞다\"라는 뜻의 영어 낱말을 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    if check(word, answer):\n        score = score + 1\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")\n\n# 4단계: 문제 순서를 섞어서 다시 내요\nimport random\n\nquiz = [\"apple\", \"sea\", \"star\", \"fish\", \"ship\"]\nrandom.shuffle(quiz)\n\nscore = 0\nfor word in quiz:\n    answer = answers[word]\n    print(f\"{word} → {answer}\")\n    if check(word, answer):\n        score = score + 1\nprint(f\"다시 풀어도 맞힌 개수: {score}/{len(quiz)}\")"},{"step_number":5,"expected_output":"[{\"type\":\"contains\",\"expected\":\"WRONG NOTE\"},{\"type\":\"contains\",\"expected\":\"틀린 단어: 2개\"},{\"type\":\"code_check\",\"expected\":\".upper(\"},{\"type\":\"code_check\",\"expected\":\".append(\"}]","hints":{"level_1":"첫 빈칸은 리스트에 더하기, 둘째 빈칸은 큰 글자로 바꾸기예요.","level_2":"wrong.append(word) 로 틀린 단어를 더하고, \"wrong note\".upper() 로 제목을 바꿔요.","level_3":"wrong.___(word)\nprint(\"wrong note\".___())\n빈칸에 리스트에 더하는 메서드와 큰 글자로 바꾸는 메서드를 넣어 보세요!"},"solution_code":"# 1단계: 단어장을 만들어요\nwords = {\"apple\": \"사과\", \"sea\": \"바다\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"배\"}\n\nfor eng, kor in words.items():\n    print(f\"{eng} = {kor}\")\n\n# 2단계: 답이 맞는지 알려 주는 함수\ndef check(word, answer):\n    return words[word] == answer\n\nprint(check(\"sea\", \"바다\"))\nprint(check(\"star\", \"달\"))\n\n# 3단계: 친구가 적은 답안지를 채점해요\nanswers = {\"apple\": \"사과\", \"sea\": \"산\", \"star\": \"별\", \"fish\": \"물고기\", \"ship\": \"새\"}\n\nscore = 0\nfor word, answer in answers.items():\n    if check(word, answer):\n        score = score + 1\n\nprint(f\"맞힌 개수: {score}/{len(words)}\")\n\n# 4단계: 문제 순서를 섞어서 다시 내요\nimport random\n\nquiz = [\"apple\", \"sea\", \"star\", \"fish\", \"ship\"]\nrandom.shuffle(quiz)\n\nscore = 0\nfor word in quiz:\n    answer = answers[word]\n    print(f\"{word} → {answer}\")\n    if check(word, answer):\n        score = score + 1\nprint(f\"다시 풀어도 맞힌 개수: {score}/{len(quiz)}\")\n\n# 5단계: 틀린 단어를 오답 노트에 모아요\nwrong = []\nfor word in quiz:\n    if answers[word] != words[word]:\n        wrong.append(word)\n\nprint(\"wrong note\".upper())\nfor word in wrong:\n    print(f\"- {word}: {words[word]}\")\nprint(f\"틀린 단어: {len(wrong)}개\")"}]'::jsonb,
   NULL
 )
 ON CONFLICT (quest_id) DO UPDATE SET

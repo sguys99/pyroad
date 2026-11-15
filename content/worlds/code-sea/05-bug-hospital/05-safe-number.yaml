@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000040
 order: 5
 title: 숫자 변신 안전띠
 concept: try / except ValueError
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: try와 except로 멈추지 않게 하기

@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000002
 order: 2
 title: 글자 상자 꺼내기
 concept: 인덱스, 음수 인덱스, len()
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 # 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
 prompt:
@@ -58,8 +58,9 @@ answer:
           N
       - type: code_check
         expected: '[-1]'
+      # len(word)·len("OCEAN") 모두 통과 (P10-09)
       - type: code_check
-        expected: len(word)
+        expected: len(
   hints:
     level_1: 리스트 호수에서 리스트 번호를 0부터 셌던 것 기억나요? 글자도 똑같아요!
     level_2: '뒤에서부터 셀 때는 음수 번호를 써요. 맨 끝은 -1 이에요. 글자 수는 len() 으로 세요.'

@@ -55,8 +55,9 @@ answer:
         expected: price.get(
       - type: code_check
         expected: int(delivery)
+      # basket[-1]·basket[2]·basket[len(basket) - 1] 모두 통과 (P10-09). 고치기 전 basket[3] 은 IndexError 라 출력에서 떨어짐
       - type: code_check
-        expected: basket[-1]
+        expected: basket[
   hints:
     level_1: 실행할 때마다 에러 쪽지 맨 아래 줄을 읽어요. 에러 이름이 어디가 아픈지 알려 줘요.
     level_2: '없는 이름표는 .get(이름표, 0), 글자 숫자는 int( ), 맨 끝 물건은 번호 -1 이에요.'

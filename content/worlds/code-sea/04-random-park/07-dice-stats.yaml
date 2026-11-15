@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000034
 order: 7
 title: 주사위 600번 굴리기
 concept: 시뮬레이션 + 딕셔너리 세기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 많이 굴려 보고 통계 내기

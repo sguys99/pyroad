@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000029
 order: 2
 title: 정직한 주사위 검사
 concept: random.randint
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: random.randint로 주사위 굴리기
@@ -45,6 +45,9 @@ answer:
     rules:
       - type: code_check
         expected: randint
+      # 반복 안에서도 새로 굴려야 함 — n = dice 로 한 번 굴린 눈을 100번 세면 떨어짐 (P10-09)
+      - type: code_check
+        expected: n = random.randint(
       - type: contains
         expected: '정직한 주사위: 100'
   hints:

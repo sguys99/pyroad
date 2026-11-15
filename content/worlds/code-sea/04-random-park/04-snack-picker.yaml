@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000031
 order: 4
 title: 오늘의 간식 추천기
 concept: random.choice
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: random.choice로 리스트에서 하나 고르기

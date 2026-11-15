@@ -170,6 +170,17 @@ export function parseStoredRule(
   }
 }
 
+/**
+ * 출력이 한 글자까지 정해진 규칙인지 (`output_match`, 또는 `all` 안에 있음). 그러면 공개 예시 출력이 곧 기준값이라
+ * 결과 쪽지가 줄 단위로 견줘도 된다 (P10-09, 빌드가 `example_exact` 공개 플래그로 내보냄 — 기준값 자체는 내보내지 않음)
+ */
+export function hasExactOutput(rule: ValidationRule): boolean {
+  return (
+    rule.type === 'output_match' ||
+    (rule.type === 'all' && rule.rules.some(hasExactOutput))
+  );
+}
+
 /** 하위 규칙이 하나뿐인 all은 그 규칙으로 푼다 (DB에서 콘텐츠로 되돌릴 때, toStoredRule의 반대) */
 export function simplifyRule(rule: ValidationRule): ValidationRule {
   if (rule.type !== 'all') return rule;
@@ -251,10 +262,29 @@ export function codeContains(
   pattern: string,
   options: CodeCheckOptions = {},
 ): boolean {
-  const visible = blankCommentsAndStrings(code);
+  const visible = normalizeSpacing(blankCommentsAndStrings(code));
+  const target = normalizeSpacing(pattern);
   return options.wholeWord
-    ? includesWholeWord(visible, pattern)
-    : visible.includes(pattern);
+    ? includesWholeWord(visible, target)
+    : visible.includes(target);
+}
+
+/**
+ * 띄어쓰기 차이로 맞는 답이 떨어지지 않게 코드와 패턴을 같은 모양으로 맞춘다 (P10-09).
+ * 공백·탭 묶음마다: 줄 처음(들여쓰기)은 깊이·탭과 상관없이 한 칸, 낱말 사이는 한 칸, 기호 옆이나 줄 끝은 지운다.
+ * 예: `book["x"]="y"` ≡ `book["x"] = "y"`, `x%26` ≡ `x % 26`, 탭·2칸 들여쓴 `for` ≡ `    for`.
+ * 낱말 사이 한 칸은 남기므로 whole_word 판정(`for` ≠ `format`)은 그대로다.
+ */
+export function normalizeSpacing(text: string): string {
+  return text.replace(/[ \t]+/g, (run: string, at: number) => {
+    const before = text[at - 1];
+    const after = text[at + run.length];
+    if (after === '\n' || after === '\r') return '';
+    if (before === undefined || before === '\n' || before === '\r')
+      return isIdentChar(after) ? ' ' : '';
+    if (after === undefined) return isIdentChar(before) ? ' ' : '';
+    return isIdentChar(before) && isIdentChar(after) ? ' ' : '';
+  });
 }
 
 // Python 식별자에 쓰일 수 있는 글자 (근사: 유니코드 글자·숫자·밑줄)

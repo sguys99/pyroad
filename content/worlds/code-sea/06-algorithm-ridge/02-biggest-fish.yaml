@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000047
 order: 2
 title: 가장 큰 물고기
 concept: 최댓값 직접 찾기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: max() 없이 가장 큰 값 찾기

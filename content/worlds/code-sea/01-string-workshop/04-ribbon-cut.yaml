@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000004
 order: 4
 title: 글자 리본 자르기
 concept: 슬라이싱
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: '[시작:끝]으로 글자 잘라 내기'

@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000008
 order: 8
 title: 조개 목걸이 꿰기
 concept: split(), join()
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: split()으로 쪼개고 join()으로 잇기

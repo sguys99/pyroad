@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000041
 order: 6
 title: 사탕 나누기
 concept: try / except ZeroDivisionError
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 특정 에러만 잡기

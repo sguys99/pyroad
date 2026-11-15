@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000049
 order: 4
 title: 키 큰 친구 세기
 concept: 조건에 맞는 것 골라내기
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: 조건에 맞는 값만 새 리스트에 담기
@@ -13,9 +13,9 @@ prompt:
     - if로 조건에 맞는 값만 골라 새 리스트에 append할 수 있다
     - len()으로 골라낸 개수를 셀 수 있다
   story_context: 세 번째 봉우리에는 해저 케이블카가 있어요. 그런데 키가 130cm 이상인 친구만 탈 수 있대요! 친구들 키를 하나씩 보고 탈 수 있는 친구만 골라 줘요.
-  exercise_description: 'heights 를 돌며 키 h 가 130 이상이면 tall 에 append 하고, tall 리스트와 "130cm 이상: 3명"을 출력하세요'
+  exercise_description: 'heights 를 돌며 키 h 가 130 이상이면 tall 에 append 하고, tall 리스트와 "130cm 이상: 4명"을 출력하세요'
   starter_code: |
-    heights = [128, 135, 141, 126, 133, 129]
+    heights = [128, 135, 141, 126, 130, 133, 129]
     tall = []
 
     for h in heights:
@@ -24,14 +24,14 @@ prompt:
 
     print(tall)
     print(f"130cm 이상: {len(tall)}명")
-  expected_output_hint: '[135, 141, 133] 과 130cm 이상: 3명 이 나와야 해요'
+  expected_output_hint: '[135, 141, 130, 133] 과 130cm 이상: 4명 이 나와야 해요'
   checklist:
     - 'if h >= 130: 으로 물어봐요'
     - 'if 안에서 tall.append(h) 로 담아요'
     - 두 줄이 나오는지 봐요
   example_output: |-
-    [135, 141, 133]
-    130cm 이상: 3명
+    [135, 141, 130, 133]
+    130cm 이상: 4명
   fallback_text: '빈 리스트 tall = [] 를 바구니로 두고, 조건 h >= 130 에 맞는 키만 tall.append(h) 로 담아요. 130 "이상"은 130도 들어가니까 > 가 아니라 >= 예요. 다 담은 뒤 len(tall)로 세면 몇 명인지 알 수 있어요.'
 answer:
   validation:
@@ -39,8 +39,8 @@ answer:
     rules:
       - type: output_match
         expected: |-
-          [135, 141, 133]
-          130cm 이상: 3명
+          [135, 141, 130, 133]
+          130cm 이상: 4명
       - type: code_check
         expected: append(
   hints:
@@ -51,7 +51,7 @@ answer:
           if h >= 130:
               tall.append(h)
   solution_code: |
-    heights = [128, 135, 141, 126, 133, 129]
+    heights = [128, 135, 141, 126, 130, 133, 129]
     tall = []
 
     for h in heights:

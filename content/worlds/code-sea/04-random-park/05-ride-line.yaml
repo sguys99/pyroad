@@ -6,7 +6,7 @@ id: b2000000-0000-0000-0000-000000000032
 order: 5
 title: 놀이기구 줄 섞기
 concept: random.shuffle, sort()
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 prompt:
   topic: random.shuffle로 리스트 섞기

@@ -52,6 +52,9 @@ answer:
         expected: random.choice
       - type: contains
         expected: 번 만에 뽑았어요
+      # 마지막에 황금 열쇠를 실제로 뽑아야 함 — while prize == "황금 열쇠" 는 한 번도 안 돌아 "0번 만에"로 끝남 (P10-09)
+      - type: contains
+        expected: '번째: 황금 열쇠'
   hints:
     level_1: 황금 열쇠가 "아닌" 동안 반복해요. 같지 않다는 비교 기호는 != 예요.
     level_2: 'while prize != "황금 열쇠": 로 쓰고, 반복 안에서 간식 추천기처럼 random.choice 로 뽑아요.'

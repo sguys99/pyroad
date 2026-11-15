@@ -5,7 +5,7 @@ id: b2000000-0000-0000-0000-000000000001
 order: 1
 title: 반짝 이름표
 concept: f-string
-xp_reward: 90
+xp_reward: 85
 quest_type: code
 # 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
 prompt:

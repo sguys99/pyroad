@@ -264,8 +264,9 @@ steps:
               들어온 돈: 6000원
               나간 돈: 4300원
               남은 돈: 1700원
+          # def total 은 시작 코드에 이미 있어 빈칸(금액 더하기)을 봄: left = left + … · left += … 모두 (P10-09)
           - type: code_check
-            expected: def total
+            expected: left +
       hints:
         level_1: 해저 알고리즘 산맥에서 진주 무게를 하나씩 더했던 방법과 같아요!
         level_2: 'total() 안의 빈칸은 left = left + record["금액"] 이에요. 아래 빈칸에는 지금 보고 있는 기록의 금액을 넣어요.'
@@ -379,8 +380,10 @@ steps:
               저금: 2000원
               선물: 2500원
               가장 많이 쓴 곳: 선물
+          # big_money 는 시작 코드에 이미 있어 빈칸의 비교를 봄: money > big_money · money >= big_money (P10-09)
           - type: code_check
-            expected: big_money
+            expected: money >
+            whole_word: true
       hints:
         level_1: 지금 보고 있는 money 가 지금까지의 대장 big_money 보다 큰지 비교해 보세요.
         level_2: 'if 뒤에 money > big_money 처럼 두 값을 비교하는 조건을 써요.'
