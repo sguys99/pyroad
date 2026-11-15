@@ -1,0 +1,380 @@
+# 3월드 프로젝트 2-7: 숲속 모험 이야기 (5단계, 고쳐 나가기 — 이야기 순서대로 아래로 자람, world3.md §3 제안 B)
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world3.md §4 3-2
+# 시험 손님 입력은 앞 단계 입력부터 차례로 (별명 → 갈림길 → 수수께끼 → 마지막 선택). 입력 수 = 맞는 프로그램이 딱 쓰는 만큼
+# 아동 안전: 싸움·무서운 장면 없음, 용은 친구, "실패 엔딩"도 다음 모험 약속. 별명만 물음(제안 J)
+# 마지막 단계를 끝낸 완성 작품(대화 기록)만 갤러리에 출품 (publishableQuests: 3월드 project 완료)
+
+id: b3000000-0000-0000-0000-000000000014
+order: 7
+title: 숲속 모험 이야기
+concept: input, 갈림길, while, 함수 종합
+xp_reward: 360
+quest_type: project
+prompt:
+  topic: '대형 프로젝트: 관객이 고르는 텍스트 어드벤처'
+  learning_goals:
+    - 입력에 따라 다르게 흘러가는 이야기를 만들 수 있다
+    - while 로 정답을 말할 때까지 묻고 몇 번 만에 맞혔는지 셀 수 있다
+    - 가방 리스트와 in, 함수로 장면을 나누고 엔딩을 여러 개 만들 수 있다
+  story_context: 극장의 이야기책 "숲속 모험"이 첫 장에서 멈춰 있어요. 관객이 고르는 대로 이야기가 흘러가게 만들면 다음 장이 하나씩 열린대요. 무서운 괴물은 없어요. 수수께끼를 풀고, 아기 용과 친구가 되고, 보물을 찾는 이야기예요!
+  exercise_description: 별명 묻기, 첫 갈림길과 가방, 수수께끼 문, 아기 용과 이야기, 마지막 선택과 엔딩 3개를 5단계로 하나씩 더해 숲속 모험 이야기를 완성하세요.
+  starter_code: |
+    # 숲속 모험 이야기를 만들어 봐요!
+  expected_output_hint: 프로젝트를 5단계로 나누어 완성해요
+  fallback_text: 이야기는 위에서 아래로 흘러가요. 단계마다 새 장면을 맨 아래에 덧붙여요. 손님이 무엇을 고를지 모르니 input() 으로 묻고, if 로 갈림길을 만들어요. 시험 손님 부르기를 누르면 여러 손님이 이야기를 끝까지 해 봐요.
+answer:
+  validation:
+    type: all
+    rules:
+      - type: code_check
+        expected: elif
+        whole_word: true
+      - type: code_check
+        expected: def talk_dragon(
+  hints:
+    level_1: 이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 별명, 갈림길, 수수께끼, 아기 용, 마지막 선택 순서로 맨 아래에 덧붙여요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 시작 코드의 주석이 할 일을 알려 줘요!
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: 'input 으로 모험가 별명을 묻고, 빈 가방을 만들어 모험 시작하기'
+      checklist:
+        - 'nickname = input("모험가 별명은? ") 으로 별명을 물어요'
+        - 'f-string 으로 "(별명), 모험을 시작해요!" 를 출력해요'
+      example_output: '모험가 별명은? 콩콩, 모험을 시작해요!'
+      starter_code: |
+        # 숲속 모험 이야기
+        # 1) input( ) 으로 "모험가 별명은? " 하고 물어 nickname 에 담아요
+
+        # 2) 빈 가방 bag 을 만들어요
+        bag = []
+
+        # 3) "(별명), 모험을 시작해요!" 를 출력해요
+      fallback_text: '진짜 이름 말고 별명을 물어요. 받은 별명은 nickname 에 담고 f-string 의 { } 안에 넣어요. 가방 bag 은 아직 빈 리스트 [] 예요. 다음 단계에서 물건을 넣어요.'
+    answer:
+      validation:
+        type: code_check
+        expected: 'input('
+      scenarios:
+        - name: 콩콩 손님
+          inputs: ['콩콩']
+          expect: { type: contains, expected: '콩콩, 모험을 시작해요' }
+        - name: 별똥 손님
+          inputs: ['별똥']
+          expect: { type: contains, expected: '별똥, 모험을 시작해요' }
+      hints:
+        level_1: '별명을 묻는 줄과 인사하는 줄, 두 줄을 더해요.'
+        level_2: 'nickname = input("모험가 별명은? ") 을 bag = [] 위에 쓰고, 맨 아래에 print(f"{nickname}, 모험을 시작해요!") 를 써요.'
+        level_3: |-
+          nickname = ___("모험가 별명은? ")
+          print(f"{___}, 모험을 시작해요!")
+          빈칸에 묻는 주문과 변수 이름을 넣어 보세요!
+      solution_code: |
+        # 숲속 모험 이야기
+        nickname = input("모험가 별명은? ")
+        bag = []
+        print(f"{nickname}, 모험을 시작해요!")
+  - step_number: 2
+    prompt:
+      step_goal: '1(동굴)을 고르면 가방에 "열쇠"를, 2(강)를 고르면 "지도"를 넣는 첫 갈림길 만들기'
+      checklist:
+        - 'if way == "1": 로 갈림길을 만들어요'
+        - 'bag.append( ) 로 가방에 물건을 넣어요'
+        - '두 손님이 각자 다른 물건을 줍는지 봐요'
+      example_output: |-
+        모험가 별명은? 콩콩, 모험을 시작해요!
+        1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? 동굴에서 반짝이는 열쇠를 주웠어요!
+      starter_code: |
+
+        # 2단계: 첫 갈림길
+        way = input("1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? ")
+        # 1이면 "동굴에서 반짝이는 열쇠를 주웠어요!" 하고 가방에 "열쇠"를 넣어요(append)
+        # 아니면 "강가에서 낡은 지도를 주웠어요!" 하고 가방에 "지도"를 넣어요
+      fallback_text: '두 갈래 문에서처럼 입력은 글자라서 "1" 과 견줘요. 리스트 끝에 물건을 넣을 때는 bag.append("열쇠") 처럼 append 를 써요. 가방에 넣은 물건은 4단계와 5단계에서 다시 써요.'
+    answer:
+      validation:
+        type: code_check
+        expected: '.append('
+      scenarios:
+        - name: 동굴 손님
+          inputs: ['콩콩', '1']
+          expect: { type: contains, expected: '열쇠를 주웠어요' }
+        - name: 강 손님
+          inputs: ['콩콩', '2']
+          expect: { type: contains, expected: '지도를 주웠어요' }
+      hints:
+        level_1: '고른 길에 따라 말도 다르고, 가방에 넣는 물건도 달라요.'
+        level_2: 'if way == "1": 아래에 열쇠 print 와 bag.append("열쇠") 를, else: 아래에 지도 print 와 bag.append("지도") 를 들여 써요.'
+        level_3: |-
+          if way == "1":
+              print("동굴에서 반짝이는 열쇠를 주웠어요!")
+              bag.___("열쇠")
+          else:
+              print("강가에서 낡은 지도를 주웠어요!")
+              bag.___("지도")
+          빈칸에 리스트에 넣는 메서드를 넣어 보세요!
+      solution_code: |
+        # 숲속 모험 이야기
+        nickname = input("모험가 별명은? ")
+        bag = []
+        print(f"{nickname}, 모험을 시작해요!")
+
+        # 2단계: 첫 갈림길
+        way = input("1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? ")
+        if way == "1":
+            print("동굴에서 반짝이는 열쇠를 주웠어요!")
+            bag.append("열쇠")
+        else:
+            print("강가에서 낡은 지도를 주웠어요!")
+            bag.append("지도")
+  - step_number: 3
+    prompt:
+      step_goal: '수수께끼 정답(거북이)을 말할 때까지 while 로 다시 묻고, 몇 번 만에 문이 열렸는지 세기'
+      checklist:
+        - 'while answer != "거북이": 로 반복을 만들어요'
+        - '반복 안에서 "땡! 다시 생각해 봐요." 를 출력하고 tries 를 1 늘려요'
+        - '반복 안에서 answer 를 다시 입력받아요'
+      example_output: |-
+        모험가 별명은? 콩콩, 모험을 시작해요!
+        1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? 동굴에서 반짝이는 열쇠를 주웠어요!
+        커다란 문이 말해요. 등딱지를 지고 느릿느릿 걷는 동물은?
+        정답은? 땡! 다시 생각해 봐요.
+        정답은? 2번 만에 문이 열렸어요!
+      starter_code: |
+
+        # 3단계: 수수께끼 문
+        print("커다란 문이 말해요. 등딱지를 지고 느릿느릿 걷는 동물은?")
+        tries = 1
+        answer = input("정답은? ")
+        # 정답(거북이)이 아니면 "땡! 다시 생각해 봐요." 하고 또 물어요 (while)
+        # 다시 물을 때마다 tries 를 1 늘려요
+
+        print(f"{tries}번 만에 문이 열렸어요!")
+      fallback_text: '다시 물어볼게요 퀘스트처럼 while 로 정답이 아닌 동안 계속 물어요. 처음에 한 번 물었으니 tries 는 1 에서 시작하고, 다시 물을 때마다 1씩 늘려요. 반복이 끝나면 정답을 맞힌 거예요.'
+    answer:
+      validation:
+        type: code_check
+        expected: 'while'
+        whole_word: true
+      scenarios:
+        - name: 두 번 만에 맞힌 손님
+          inputs: ['콩콩', '1', '사자', '거북이']
+          expect: { type: contains, expected: '2번 만에 문이 열렸어요' }
+        - name: 한 번에 맞힌 손님
+          inputs: ['콩콩', '2', '거북이']
+          expect: { type: contains, expected: '1번 만에 문이 열렸어요' }
+      hints:
+        level_1: '정답이 아닌 동안 반복해요. 반복 안에서 다시 묻지 않으면 끝나지 않아요!'
+        level_2: 'while answer != "거북이": 아래에 print("땡! 다시 생각해 봐요."), tries = tries + 1, answer = input("정답은? ") 을 들여 써요.'
+        level_3: |-
+          while answer ___ "거북이":
+              print("땡! 다시 생각해 봐요.")
+              tries = tries + 1
+              answer = input("정답은? ")
+          빈칸에 "같지 않다" 기호를 넣어 보세요!
+      solution_code: |
+        # 숲속 모험 이야기
+        nickname = input("모험가 별명은? ")
+        bag = []
+        print(f"{nickname}, 모험을 시작해요!")
+
+        # 2단계: 첫 갈림길
+        way = input("1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? ")
+        if way == "1":
+            print("동굴에서 반짝이는 열쇠를 주웠어요!")
+            bag.append("열쇠")
+        else:
+            print("강가에서 낡은 지도를 주웠어요!")
+            bag.append("지도")
+
+        # 3단계: 수수께끼 문
+        print("커다란 문이 말해요. 등딱지를 지고 느릿느릿 걷는 동물은?")
+        tries = 1
+        answer = input("정답은? ")
+        while answer != "거북이":
+            print("땡! 다시 생각해 봐요.")
+            tries = tries + 1
+            answer = input("정답은? ")
+        print(f"{tries}번 만에 문이 열렸어요!")
+  - step_number: 4
+    prompt:
+      step_goal: 'def talk_dragon(bag): 을 만들어 가방에 열쇠가 있는지(in)에 따라 아기 용 미르가 다르게 말하게 하기'
+      checklist:
+        - 'def talk_dragon(bag): 을 만들어요'
+        - 'if "열쇠" in bag: 로 가방 속을 확인해요'
+        - '열쇠를 주운 손님과 지도를 주운 손님의 대사가 다른지 봐요'
+      example_output: |-
+        (앞 장면에 이어서)
+        문 너머에서 아기 용 미르를 만났어요!
+        미르: 내 보물 상자 열쇠잖아! 찾아 줘서 고마워!
+      starter_code: |
+
+        # 4단계: 아기 용 미르
+        # def talk_dragon(bag): 를 만들어요
+        #   "문 너머에서 아기 용 미르를 만났어요!" 를 출력하고
+        #   가방에 "열쇠"가 있으면(in) "미르: 내 보물 상자 열쇠잖아! 찾아 줘서 고마워!"
+        #   없으면 "미르: 지도가 있구나! 같이 보물 상자를 찾아보자!"
+
+
+        talk_dragon(bag)
+      fallback_text: 'in 은 리스트 안에 그 값이 있는지 알려 줘요. "열쇠" in bag 이 True 면 가방에 열쇠가 있는 거예요. 함수는 부르는 줄(talk_dragon(bag))보다 위에 만들어요.'
+    answer:
+      validation:
+        type: code_check
+        expected: 'def talk_dragon('
+      scenarios:
+        - name: 열쇠 주운 손님
+          inputs: ['콩콩', '1', '거북이']
+          expect: { type: contains, expected: '찾아 줘서 고마워' }
+        - name: 지도 주운 손님
+          inputs: ['콩콩', '2', '거북이']
+          expect: { type: contains, expected: '같이 보물 상자를 찾아보자' }
+      hints:
+        level_1: '가방 안에 열쇠가 있는지 확인하는 주문은 in 이에요.'
+        level_2: 'def talk_dragon(bag): 아래에 만났다는 print, if "열쇠" in bag: 과 else: 로 대사 두 가지를 들여 써요.'
+        level_3: |-
+          def talk_dragon(bag):
+              print("문 너머에서 아기 용 미르를 만났어요!")
+              if "열쇠" ___ bag:
+                  print("미르: 내 보물 상자 열쇠잖아! 찾아 줘서 고마워!")
+              else:
+                  print("미르: 지도가 있구나! 같이 보물 상자를 찾아보자!")
+          빈칸에 "안에 있다"는 주문을 넣어 보세요!
+      solution_code: |
+        # 숲속 모험 이야기
+        nickname = input("모험가 별명은? ")
+        bag = []
+        print(f"{nickname}, 모험을 시작해요!")
+
+        # 2단계: 첫 갈림길
+        way = input("1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? ")
+        if way == "1":
+            print("동굴에서 반짝이는 열쇠를 주웠어요!")
+            bag.append("열쇠")
+        else:
+            print("강가에서 낡은 지도를 주웠어요!")
+            bag.append("지도")
+
+        # 3단계: 수수께끼 문
+        print("커다란 문이 말해요. 등딱지를 지고 느릿느릿 걷는 동물은?")
+        tries = 1
+        answer = input("정답은? ")
+        while answer != "거북이":
+            print("땡! 다시 생각해 봐요.")
+            tries = tries + 1
+            answer = input("정답은? ")
+        print(f"{tries}번 만에 문이 열렸어요!")
+
+        # 4단계: 아기 용 미르
+        def talk_dragon(bag):
+            print("문 너머에서 아기 용 미르를 만났어요!")
+            if "열쇠" in bag:
+                print("미르: 내 보물 상자 열쇠잖아! 찾아 줘서 고마워!")
+            else:
+                print("미르: 지도가 있구나! 같이 보물 상자를 찾아보자!")
+
+        talk_dragon(bag)
+  - step_number: 5
+    prompt:
+      step_goal: '마지막 선택(노래/선물)과 가방으로 엔딩 3개를 만들고 "모험 끝" 으로 마치기'
+      checklist:
+        - 'if, elif, else 로 엔딩 3개를 나눠요'
+        - '선물을 고르면 가방에 열쇠가 있는지에 따라 엔딩이 달라요'
+        - '마지막에 "(별명)의 모험 끝!" 을 출력해요'
+      example_output: |-
+        (앞 장면에 이어서)
+        미르에게 무엇을 해 줄까요? 1) 노래 불러 주기  2) 선물 주기 미르가 신나서 하늘을 한 바퀴 날았어요. 엔딩: 노래하는 친구
+        콩콩의 모험 끝!
+      starter_code: |
+
+        # 5단계: 마지막 선택
+        gift = input("미르에게 무엇을 해 줄까요? 1) 노래 불러 주기  2) 선물 주기 ")
+        # 1이면 "미르가 신나서 하늘을 한 바퀴 날았어요. 엔딩: 노래하는 친구"
+        # 아니고 가방에 열쇠가 있으면 "열쇠로 보물 상자가 열렸어요! 엔딩: 숲속 보물 찾기"
+        # 둘 다 아니면 "미르와 지도를 들고 집으로 돌아가 다음 모험을 꿈꿔요. 엔딩: 다음 모험 약속"
+        # 마지막에 "(별명)의 모험 끝!" 을 출력해요
+      fallback_text: '갈림길이 셋이면 if, elif, else 를 써요. 위에서부터 차례로 확인해서 처음 참인 곳 하나만 실행해요. 노래(1)인지 먼저 보고, 아니면 가방에 열쇠가 있는지, 둘 다 아니면 마지막 엔딩이에요. 다 만들면 시험 손님 세 명이 엔딩 세 개를 하나씩 봐요!'
+    answer:
+      validation:
+        type: code_check
+        expected: 'elif'
+        whole_word: true
+      scenarios:
+        - name: 노래하는 손님
+          inputs: ['콩콩', '1', '거북이', '1']
+          expect:
+            type: all
+            rules:
+              - { type: contains, expected: '엔딩: 노래하는 친구' }
+              - { type: contains, expected: '모험 끝' }
+        - name: 열쇠로 선물하는 손님
+          inputs: ['콩콩', '1', '거북이', '2']
+          expect:
+            type: all
+            rules:
+              - { type: contains, expected: '엔딩: 숲속 보물 찾기' }
+              - { type: contains, expected: '모험 끝' }
+        - name: 지도로 선물하는 손님
+          inputs: ['콩콩', '2', '거북이', '2']
+          expect:
+            type: all
+            rules:
+              - { type: contains, expected: '엔딩: 다음 모험 약속' }
+              - { type: contains, expected: '모험 끝' }
+      hints:
+        level_1: '엔딩이 세 개라서 갈림길도 세 갈래예요. 두 번째 갈림길에서 가방을 확인해요.'
+        level_2: 'if gift == "1": 엔딩 1, elif "열쇠" in bag: 엔딩 2, else: 엔딩 3 을 쓰고, 맨 아래에 print(f"{nickname}의 모험 끝!") 을 써요.'
+        level_3: |-
+          if gift == "1":
+              print("미르가 신나서 하늘을 한 바퀴 날았어요. 엔딩: 노래하는 친구")
+          ___ "열쇠" in bag:
+              print("열쇠로 보물 상자가 열렸어요! 엔딩: 숲속 보물 찾기")
+          else:
+              print("미르와 지도를 들고 집으로 돌아가 다음 모험을 꿈꿔요. 엔딩: 다음 모험 약속")
+          print(f"{nickname}의 모험 끝!")
+          빈칸에 "아니면 만약"을 뜻하는 주문을 넣어 보세요!
+      solution_code: |
+        # 숲속 모험 이야기
+        nickname = input("모험가 별명은? ")
+        bag = []
+        print(f"{nickname}, 모험을 시작해요!")
+
+        # 2단계: 첫 갈림길
+        way = input("1) 반짝이는 동굴  2) 시원한 강  어디로 갈까요? ")
+        if way == "1":
+            print("동굴에서 반짝이는 열쇠를 주웠어요!")
+            bag.append("열쇠")
+        else:
+            print("강가에서 낡은 지도를 주웠어요!")
+            bag.append("지도")
+
+        # 3단계: 수수께끼 문
+        print("커다란 문이 말해요. 등딱지를 지고 느릿느릿 걷는 동물은?")
+        tries = 1
+        answer = input("정답은? ")
+        while answer != "거북이":
+            print("땡! 다시 생각해 봐요.")
+            tries = tries + 1
+            answer = input("정답은? ")
+        print(f"{tries}번 만에 문이 열렸어요!")
+
+        # 4단계: 아기 용 미르
+        def talk_dragon(bag):
+            print("문 너머에서 아기 용 미르를 만났어요!")
+            if "열쇠" in bag:
+                print("미르: 내 보물 상자 열쇠잖아! 찾아 줘서 고마워!")
+            else:
+                print("미르: 지도가 있구나! 같이 보물 상자를 찾아보자!")
+
+        talk_dragon(bag)
+
+        # 5단계: 마지막 선택
+        gift = input("미르에게 무엇을 해 줄까요? 1) 노래 불러 주기  2) 선물 주기 ")
+        if gift == "1":
+            print("미르가 신나서 하늘을 한 바퀴 날았어요. 엔딩: 노래하는 친구")
+        elif "열쇠" in bag:
+            print("열쇠로 보물 상자가 열렸어요! 엔딩: 숲속 보물 찾기")
+        else:
+            print("미르와 지도를 들고 집으로 돌아가 다음 모험을 꿈꿔요. 엔딩: 다음 모험 약속")
+        print(f"{nickname}의 모험 끝!")

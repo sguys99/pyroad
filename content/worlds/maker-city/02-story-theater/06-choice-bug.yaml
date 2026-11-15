@@ -1,0 +1,38 @@
+# 3월드 퀴즈 2-6: 숫자 1과 글자 "1" (버그 찾기)
+# int(choice) == 1 로 고쳐도 맞는 고침이라 정답 둘
+
+id: b3000000-0000-0000-0000-000000000013
+order: 6
+title: 숫자 1과 글자 "1"
+concept: 입력과 비교
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 입력한 글자를 숫자와 견주는 버그
+  learning_goals:
+    - 글자 "1" 과 숫자 1 은 같지 않다는 것을 안다
+    - 입력을 견줄 때 따옴표를 붙이거나 int() 로 바꿔 고칠 수 있다
+  story_context: 관객이 1번을 골랐는데 동굴 장면이 안 나와요! 버그버그가 몰래 따옴표를 훔쳐 갔나 봐요.
+  fallback_text: 'input() 으로 받은 값은 늘 글자예요. 글자 "1" 과 숫자 1 은 생김새가 비슷해도 파이썬에게는 다른 값이라 == 로 견주면 False 예요. 둘 중 하나를 다른 쪽 모양으로 맞춰 줘요.'
+  quiz:
+    question: 1을 입력했다고 해요. 그런데 동굴로 출발하지 않아요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - { id: ln-23q0, code: 'choice = "1"  # 1을 입력했다고 해요' }
+      - { id: ln-3dqi, code: 'print("동굴 탐험을 시작할까요?")' }
+      - { id: ln-5ath, code: 'if choice == 1:' }
+      - { id: ln-81zz, code: '    print("동굴로 출발!")' }
+    fixes:
+      - { id: fx-4e0g, code: 'if choice == "1":' }
+      - { id: fx-x6e0, code: 'if int(choice) == 1:' }
+      - { id: fx-y5wv, code: 'if choice = "1":' }
+      - { id: fx-v2m2, code: 'if choice == "one":' }
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-5ath, fix: fx-4e0g }
+      - { line: ln-5ath, fix: fx-x6e0 }
+    explanation: choice 는 글자 "1" 이라서 숫자 1 과 견주면 False 예요. 글자끼리 "1" 과 견주거나, int(choice) 로 숫자로 바꿔 1 과 견주면 동굴로 출발해요.
+    explanations:
+      fx-y5wv: '= 하나는 값을 넣는 주문이에요. 견줄 때는 == 두 개를 써요.'
+      fx-v2m2: 입력한 글자는 "one" 이 아니라 "1" 이에요.

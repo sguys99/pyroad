@@ -1,0 +1,174 @@
+# 3월드 보스 3: 퀴즈쇼 진행자 버그버그 (6문제)
+# 작성 안내: content/README.md "보스". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 퀴즈·보스 코드에는 input()·random 을 넣지 않음 → "입력했다고 해요" 주석과 답 리스트로 (world3.md §5)
+
+id: b3000000-0000-0000-0000-000000000203
+order: 7
+title: 퀴즈쇼 진행자 버그버그
+concept: 퀴즈쇼 총정리
+xp_reward: 66
+quest_type: boss
+prompt:
+  topic: .strip(), 점수와 하트, break, try/except, 문제 은행 총정리
+  learning_goals:
+    - 입력 답을 다듬고 점수와 하트가 어떻게 바뀌는지 따라갈 수 있다
+    - 문제 은행에서 값을 꺼내고 숫자 답의 에러를 잡을 수 있다
+  story_context: 퀴즈쇼 첫 방송 날! 그런데 나비넥타이를 맨 버그버그가 마이크를 빼앗고 진행자 자리에 앉아 버렸어요. "내 문제 여섯 개를 다 맞히면 마이크를 돌려주지!"
+  fallback_text: 입력한 답은 .strip() 으로 앞뒤 빈칸을 지우고 견줘요. 맞히면 점수 +1, 틀리면 하트 -1, 하트가 0이면 break 로 멈춰요. 문제 은행은 리스트 번호로 카드를 꺼내고 이름표로 문제와 답을 꺼내요. int() 가 실패하면 ValueError 예요.
+  boss:
+    name: 퀴즈쇼 진행자 버그버그
+    look: host
+    intro: 자, 시청자 여러분! 오늘의 도전자 등장! 히히, 내 문제는 아주 어렵다고. 하트 세 개로 버틸 수 있을까?
+    on_defeat: 딩동댕! 여섯 문제 모두 통과! 마이크는 돌려줄게. 다음 방송엔 나를 손님으로 불러 줄래?
+    on_victory: 땡! 오늘 방송은 여기까지! 퀴즈 연습하고 다음 회차에 다시 도전해 줘. 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000015
+    prompt:
+      quiz:
+        question: 손님이 앞에 빈칸을 넣어 고래라고 입력했다고 해요. 돌리면 무엇이 나올까?
+        code: |-
+          answer = " 고래"  # 앞에 빈칸을 넣어 입력했다고 해요
+          if answer.strip() == "고래":
+              print("딩동댕!")
+          else:
+              print("땡!")
+        options:
+          - { id: opt-k6p1, text: '딩동댕!' }
+          - { id: opt-5s0g, text: '땡!' }
+          - { id: opt-id7j, text: "딩동댕!\n땡!" }
+          - { id: opt-1qx2, text: ' 딩동댕!' }
+    answer:
+      quiz_answer:
+        accepted: [opt-k6p1]
+        explanation: .strip() 이 앞의 빈칸을 지워서 "고래" 와 같아져요. 그래서 딩동댕! 이 나와요.
+        explanations:
+          opt-5s0g: .strip() 없이 견줬다면 땡! 이지만, 빈칸을 지우고 견줬어요.
+          opt-id7j: if 와 else 중 하나만 실행돼요.
+          opt-1qx2: 빈칸은 답에서 지워진 것이고, print 하는 글자에는 빈칸이 없어요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000019
+    prompt:
+      quiz:
+        question: 하트 3개로 손님 답 다섯 개를 채점해요. 돌리면 무엇이 나올까?
+        code: |-
+          answers = ["몰라", "고래", "몰라", "몰라", "고래"]
+          hearts = 3
+          score = 0
+          for a in answers:
+              if a == "고래":
+                  score = score + 1
+              else:
+                  hearts = hearts - 1
+                  if hearts == 0:
+                      break
+          print(score)
+        options:
+          - { id: opt-egf2, text: '1' }
+          - { id: opt-h1r9, text: '2' }
+          - { id: opt-yxg2, text: '0' }
+          - { id: opt-5mms, text: '3' }
+    answer:
+      quiz_answer:
+        accepted: [opt-egf2]
+        explanation: 몰라(하트 2) → 고래(점수 1) → 몰라(하트 1) → 몰라(하트 0, break). 마지막 고래까지 가기 전에 멈춰서 점수는 1이에요.
+        explanations:
+          opt-h1r9: 하트가 0이 되면 break 로 멈춰서 마지막 고래는 채점하지 않아요.
+          opt-yxg2: 두 번째 답 고래는 맞혀서 점수가 1 올라요.
+          opt-5mms: 고래는 다섯 개 중 두 개뿐이고, 그중 하나만 채점됐어요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000017
+    prompt:
+      quiz:
+        question: 빈칸을 채워 문제 은행의 두 번째 카드에서 정답을 꺼내요
+        code: |-
+          bank = [{"q": "무지개는 몇 가지 색?", "a": "7"}, {"q": "한 바퀴는 몇 도?", "a": "360"}]
+          card = bank[{{bk-81qt}}]
+          print(card[{{bk-6tz4}}])
+        tokens:
+          - { id: tok-92i1, text: '1' }
+          - { id: tok-c94s, text: '0' }
+          - { id: tok-vyh1, text: '"a"' }
+          - { id: tok-1xyd, text: '"q"' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-81qt: tok-92i1, bk-6tz4: tok-vyh1 }
+        explanation: 리스트 번호는 0부터 세서 두 번째 카드는 bank[1] 이에요. 정답은 이름표 "a" 로 꺼내서 360 이 나와요.
+        explanations:
+          tok-c94s: 0번은 첫 번째 카드예요.
+          tok-1xyd: '"q" 는 문제가 든 이름표예요. 정답은 "a" 예요.'
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000018
+    prompt:
+      quiz:
+        question: 손님이 열둘이라고 입력했다고 해요. 빈칸을 채워 퀴즈 기계가 멈추지 않고 안내하게 해요
+        code: |-
+          text = "열둘"  # 열둘을 입력했다고 해요
+          try:
+              n = {{bk-5muy}}(text)
+              print(n + 1)
+          except {{bk-zrg1}}:
+              print("숫자로 답해 줘요!")
+        tokens:
+          - { id: tok-rx82, text: int }
+          - { id: tok-xc7f, text: str }
+          - { id: tok-54gt, text: ValueError }
+          - { id: tok-7isy, text: KeyError }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-5muy: tok-rx82, bk-zrg1: tok-54gt }
+        explanation: int("열둘") 은 숫자로 바꿀 수 없어서 ValueError 가 나요. except ValueError 가 그 에러를 잡아 안내 문장을 보여 줘요.
+        explanations:
+          tok-xc7f: str 로 바꾸면 글자에 1을 더하다가 다른 에러(TypeError)가 나서 잡히지 않아요.
+          tok-7isy: KeyError 는 딕셔너리에 없는 이름표를 꺼낼 때 나는 에러예요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000017
+    prompt:
+      quiz:
+        question: 버그버그가 문제 은행에서 카드를 꺼내요. 이 코드를 돌리면 어떤 에러가 날까?
+        code: |-
+          bank = [{"q": "고래는 어디 살아요?", "a": "바다"}]
+          print(bank[1]["a"])
+        options:
+          - { id: opt-y4ok, text: IndexError }
+          - { id: opt-4d9u, text: KeyError }
+          - { id: opt-37hz, text: ValueError }
+          - { id: opt-1t11, text: NameError }
+    answer:
+      quiz_answer:
+        accepted: [opt-y4ok]
+        explanation: 카드가 한 장뿐이라 쓸 수 있는 번호는 0번뿐이에요. 없는 번호 1번을 꺼내려고 해서 IndexError 가 나요.
+        explanations:
+          opt-4d9u: '"a" 이름표는 카드에 있어요. 문제는 그 전에, 리스트 번호 1번이 없다는 거예요.'
+          opt-37hz: ValueError 는 int("열둘") 처럼 값을 바꿀 수 없을 때 나요.
+          opt-1t11: bank 는 위에서 만들어 둔 이름이에요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000020
+    prompt:
+      quiz:
+        question: 틀릴 때마다 하트가 줄어야 하는데 오히려 늘어나서 게임이 끝나지 않아요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-2oms, code: 'hearts = 2' }
+          - { id: ln-4xol, code: 'for a in ["몰라", "몰라", "고래"]:' }
+          - { id: ln-8wq2, code: '    if a != "고래":' }
+          - { id: ln-k2pa, code: '        hearts = hearts + 1' }
+          - { id: ln-m7rd, code: '        if hearts == 0:' }
+          - { id: ln-c4ye, code: '            print("게임 오버!")' }
+          - { id: ln-w9tb, code: '            break' }
+          - { id: ln-j3sn, code: 'print(f"하트 {hearts}개")' }
+        fixes:
+          - { id: fx-co6v, code: '        hearts = hearts - 1' }
+          - { id: fx-2sf6, code: '        hearts = hearts' }
+          - { id: fx-br5q, code: '        hearts = 0 + 1' }
+          - { id: fx-22lx, code: '        hearts = hearts * 1' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-k2pa, fix: fx-co6v }
+        explanation: 틀리면 하트를 1 빼야 해요. 두 번 틀리면 하트가 0이 되어 게임 오버! 가 나오고 반복을 멈춰요.
+        explanations:
+          fx-2sf6: 하트가 그대로라서 게임이 끝나지 않아요.
+          fx-br5q: 하트가 늘 1이 되어 0이 되지 않아요.
+          fx-22lx: 1을 곱하면 하트가 그대로예요.

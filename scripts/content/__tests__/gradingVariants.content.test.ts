@@ -114,6 +114,86 @@ const HANDWRITTEN: Record<string, (string | Edit)[]> = {
   'code-sea/3-1': [
     'for r in range(3):\n\trow = ""\n\tfor c in range(4):\n\t\trow += "#"\n\tprint(row)\n',
   ],
+  // 3월드 (P11-12 플레이테스트): 그림은 돌리거나 옮기거나 다른 방향으로 그려도, 입력은 다른 반복 모양이어도 통과
+  'maker-city/1-1': [
+    [
+      ['range(4)', 'range(0, 4)'],
+      ['t.left(90)', 't.right(90)'],
+    ],
+    // 돌리고 옮긴 네모 + 시작 코드 두 줄을 남긴 채 반복 (첫 변을 두 번 그림)
+    [
+      [
+        't = turtle.Turtle()\n',
+        't = turtle.Turtle()\nt.penup()\nt.goto(-70, 30)\nt.pendown()\nt.left(45)\nt.forward(100)\nt.left(90)\n',
+      ],
+    ],
+    'from turtle import *\nfor i in range(4):\n    forward(100)\n    left(90)\ndone()\n',
+  ],
+  'maker-city/1-3': [[['t.left(360 / n)', 't.right(360 / n)']]],
+  'maker-city/1-4': [
+    [
+      ['t.right(144)', 't.left(144)'],
+      ['t.begin_fill()', 't.left(30)\nt.begin_fill()'],
+    ],
+  ],
+  'maker-city/1-6': [[['i % 3', 'i % len(colors)']]],
+  'maker-city/1-7#2': [
+    [
+      [
+        '    t.penup()\n    t.goto(x, y + 80)\n    t.pendown()\n',
+        '    t.left(90)\n    t.forward(80)\n    t.right(90)\n',
+      ],
+      ['house(-100, -100)', 'house(60, -100)'],
+    ],
+  ],
+  'maker-city/1-7#3': [
+    [
+      [
+        '    t.back(60)\n',
+        '    t.penup()\n    t.goto(200, 180)\n    t.pendown()\n',
+      ],
+    ],
+    [['t.back(60)', 't.backward(60)']],
+  ],
+  'maker-city/1-7#4': [
+    [
+      [
+        'for i in range(5):\n    flower(-250 + i * 120, -200, colors[i])',
+        'x = -250\nfor c in colors:\n    flower(x, -200, c)\n    x = x + 120',
+      ],
+    ],
+  ],
+  'maker-city/2-2': [
+    'candy = input("사탕이 몇 개 있어요? ")\nprint(f"요술 항아리에서 나온 사탕 {int(candy) * 2}개!")\n',
+  ],
+  'maker-city/2-5': [
+    [['while door != "1" and door != "2":', 'while door not in ["1", "2"]:']],
+    'while True:\n    door = input("1번 문과 2번 문 중 어디로 갈까요? ")\n    if door == "1" or door == "2":\n        break\n    print("다시 골라 줘요!")\n\nif door == "1":\n    print("반짝이는 동굴에 들어왔어요!")\nelse:\n    print("시원한 강에 도착했어요!")\n',
+  ],
+  'maker-city/2-7#3': [
+    [
+      [
+        'tries = 1\nanswer = input("정답은? ")\nwhile answer != "거북이":\n    print("땡! 다시 생각해 봐요.")\n    tries = tries + 1\n    answer = input("정답은? ")',
+        'tries = 0\nwhile True:\n    answer = input("정답은? ")\n    tries += 1\n    if answer == "거북이":\n        break\n    print("땡! 다시 생각해 봐요.")',
+      ],
+    ],
+  ],
+  'maker-city/2-7#5': [
+    [['elif "열쇠" in bag:', 'elif gift == "2" and "열쇠" in bag:']],
+  ],
+  'maker-city/3-1': [
+    'answer = input("바다에서 가장 큰 동물은? ")\nif answer.strip() == "고래":\n    print("딩동댕!")\nelse:\n    print("땡!")\n',
+  ],
+  'maker-city/3-3': [
+    "bank = [\n    {'q': '바다에서 가장 큰 동물은?', 'a': '고래'},\n    {'q': '무지개는 몇 가지 색일까요?', 'a': '7'},\n    {'q': '다리가 8개인 바다 동물은?', 'a': '문어'},\n]\nscore = 0\nfor i in range(len(bank)):\n    answer = input(bank[i]['q']).strip()\n    if answer == bank[i]['a']:\n        score += 1\nprint(f'맞힌 문제: {score}점')\n",
+  ],
+  'maker-city/3-4': [
+    [['except ValueError:', 'except:']],
+    'text = input("7 + 5 = ? ")\ntry:\n    answer = int(text)\nexcept ValueError:\n    print("숫자로 답해 줘요!")\nelse:\n    if answer == 12:\n        print("딩동댕!")\n    else:\n        print("땡!")\n',
+  ],
+  'maker-city/3-6#4': [
+    [['random.shuffle(bank)', 'bank = random.sample(bank, len(bank))']],
+  ],
 };
 
 /** 틀린 코드 (정답 고쳐 쓰기). 출력은 맞거나 비슷해도 떨어져야 함 */
@@ -137,6 +217,73 @@ const WRONG: Record<string, Edit[]> = {
   'code-sea/7-4#3': [
     [['if check(word, answer):\n        score = score + 1', 'score = 3']],
   ],
+  // 3월드 (P11-12 플레이테스트): 그림이 비슷하거나 시험 손님 하나만 맞는 답
+  'maker-city/1-1': [
+    [
+      [
+        'for i in range(4):\n    t.forward(100)\n    t.left(90)',
+        't.forward(100)\nt.left(90)\n'.repeat(4),
+      ],
+    ],
+    [['forward(100)', 'forward(50)']],
+    [['range(4)', 'range(3)']],
+  ],
+  'maker-city/1-3': [[['360 / n', '90']], [['range(n)', 'range(4)']]],
+  'maker-city/1-4': [
+    [['t.end_fill()', '']],
+    [
+      [
+        't.begin_fill()\nfor i in range(5):',
+        'for i in range(5):\n    t.begin_fill()',
+      ],
+    ],
+    [['right(144)', 'right(72)']],
+  ],
+  'maker-city/1-6': [[['colors[i % 3]', '"red"']], [['range(12)', 'range(6)']]],
+  'maker-city/1-7#2': [
+    [['house(-100, -100)', 'house(-250, -100)']],
+    [['    polygon(3, 80)\n', '']],
+  ],
+  'maker-city/1-7#4': [
+    [
+      [
+        '    for i in range(6):\n        t.circle(15)\n        t.left(60)',
+        '    for i in range(5):\n        t.circle(15)\n        t.left(72)',
+      ],
+    ],
+  ],
+  'maker-city/2-1': [[['{nickname}', '별똥']]],
+  'maker-city/2-2': [[['int(input', 'float(input']]],
+  'maker-city/2-4': [[['door == "1"', 'door == 1']]],
+  'maker-city/2-5': [
+    [['while door != "1" and door != "2":', 'if door != "1" and door != "2":']],
+    [['door != "1" and door != "2"', 'door != "1" or door != "2"']],
+  ],
+  'maker-city/2-7#3': [[['    tries = tries + 1\n', '']]],
+  'maker-city/2-7#4': [[['if "열쇠" in bag:', 'if bag == "열쇠":']]],
+  'maker-city/2-7#5': [[['elif "열쇠" in bag:', 'elif gift == "2":']]],
+  'maker-city/3-1': [[['answer = answer.strip()', 'x = "a".strip()']]],
+  'maker-city/3-3': [
+    [['input(card["q"] + " ").strip()', 'input(card["q"] + " ")']],
+  ],
+  'maker-city/3-4': [
+    [
+      [
+        'try:\n    answer = int(text)\n    if answer == 12:\n        print("딩동댕!")\n    else:\n        print("땡!")\nexcept ValueError:\n    print("숫자로 답해 줘요!")',
+        'try:\n    answer = int(text)\nexcept ValueError:\n    print("숫자로 답해 줘요!")\nif answer == 12:\n    print("딩동댕!")\nelse:\n    print("땡!")',
+      ],
+    ],
+  ],
+  'maker-city/3-6#3': [
+    [['            break\n', '']],
+    [
+      [
+        '            print("게임 오버!")\n            break',
+        '            print("게임 오버!")\n        break',
+      ],
+    ],
+  ],
+  'maker-city/3-6#5': [[['        wrong.append(card["q"])\n', '']]],
 };
 
 const { units } = loadUnits(CONTENT_DIR);

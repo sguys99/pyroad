@@ -1,0 +1,34 @@
+# 3월드 퀴즈 2-3: 입력은 글자! (출력 예측형 객관식)
+# 퀴즈 코드에는 input() 을 쓰지 않음 (test:content 가 실제로 돌림) → "입력했다고 해요" 주석으로
+
+id: b3000000-0000-0000-0000-000000000010
+order: 3
+title: 입력은 글자!
+concept: 입력은 늘 글자
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 입력받은 글자끼리 더하면
+  learning_goals:
+    - input() 으로 받은 숫자는 글자라서 + 가 이어 붙이기라는 것을 안다
+  story_context: 버그버그가 극장 계산기에 장난을 쳤어요. 손님이 3을 입력했는데, 그 값을 두 번 더했더니 이상한 답이 나왔대요!
+  fallback_text: 'input() 은 무엇을 치든 글자로 돌려줘요. 따옴표 안의 "3" 은 숫자 3이 아니라 글자예요. 글자끼리 + 를 하면 계산하지 않고 이어 붙여요.'
+  quiz:
+    question: 손님이 3을 입력했다고 해요. 돌리면 무엇이 나올까?
+    code: |-
+      answer = "3"  # 3을 입력했다고 해요
+      print(answer + answer)
+    options:
+      - { id: opt-8jh4, text: '33' }
+      - { id: opt-8f0o, text: '6' }
+      - { id: opt-hb69, text: '3+3' }
+      - { id: opt-mxt0, text: '9' }
+answer:
+  quiz_answer:
+    accepted: [opt-8jh4]
+    explanation: 입력은 늘 글자라서 "3" + "3" 은 글자를 이어 붙인 "33" 이에요. 6을 만들려면 int(answer) 로 숫자로 바꿔야 해요.
+    explanations:
+      opt-8f0o: 숫자 3끼리면 6이지만, 입력은 글자라서 이어 붙여져요.
+      opt-hb69: + 는 글자에 찍히지 않아요. 이어 붙이기만 해요.
+      opt-mxt0: 3 × 3 이 아니에요. 글자 두 개를 이어 붙여요.

@@ -1,0 +1,56 @@
+# 3월드 퀘스트 2-4: 두 갈래 문
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-2 (P11-05 e2e fixture test-meadow 02-test-guests 와 같은 모양)
+
+id: b3000000-0000-0000-0000-000000000011
+order: 4
+title: 두 갈래 문
+concept: input() 과 if
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 고른 답에 따라 다른 장면 보여 주기
+  learning_goals:
+    - 입력받은 답을 if 로 견줘 다른 말을 할 수 있다
+    - 입력은 글자라서 "1" 처럼 따옴표로 견준다는 것을 안다
+  story_context: 이야기 속 모험가가 숲 앞에 섰어요. 왼쪽엔 1번 문, 오른쪽엔 2번 문! 관객이 고르는 문에 따라 이야기가 달라져야 해요.
+  exercise_description: '1을 고르면 "반짝이는 동굴에 들어왔어요!", 2를 고르면 "시원한 강에 도착했어요!" 를 출력하세요'
+  starter_code: |
+    door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+
+    # 1이면 "반짝이는 동굴에 들어왔어요!"
+    # 2면 "시원한 강에 도착했어요!"
+  expected_output_hint: 1 손님은 반짝이는 동굴, 2 손님은 시원한 강으로 가야 해요
+  checklist:
+    - 'if door == "1": 로 1번 문을 견줘요'
+    - 아니면 else 로 시원한 강을 보여 줘요
+    - 시험 손님 두 명이 각자 다른 장면을 보는지 봐요
+  example_output: '1번 문과 2번 문 중 어디로 갈까요? 반짝이는 동굴에 들어왔어요!'
+  fallback_text: '입력은 글자라서 숫자 1이 아니라 글자 "1" 과 견줘요. if door == "1": 아래에 동굴 장면을, else: 아래에 강 장면을 들여 써요.'
+answer:
+  validation:
+    type: code_check
+    expected: if
+    whole_word: true
+  scenarios:
+    - name: 1번 문 손님
+      inputs: ['1']
+      expect: { type: contains, expected: 반짝이는 동굴 }
+    - name: 2번 문 손님
+      inputs: ['2']
+      expect: { type: contains, expected: 시원한 강 }
+  hints:
+    level_1: 고른 문이 1인지 견주는 주문은 if 예요. 입력은 글자라는 것도 잊지 마세요!
+    level_2: 'if door == "1": 다음 줄에 동굴 print 를 들여 쓰고, else: 다음 줄에 강 print 를 들여 써요.'
+    level_3: |-
+      if door == ___:
+          print("반짝이는 동굴에 들어왔어요!")
+      else:
+          print("시원한 강에 도착했어요!")
+      빈칸에 따옴표로 감싼 1을 넣어 보세요!
+  solution_code: |
+    door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+
+    if door == "1":
+        print("반짝이는 동굴에 들어왔어요!")
+    else:
+        print("시원한 강에 도착했어요!")

@@ -1,0 +1,33 @@
+# 3월드 퀴즈 3-2: 빈칸 지우개 (출력 예측형 객관식)
+
+id: b3000000-0000-0000-0000-000000000016
+order: 2
+title: 빈칸 지우개
+concept: .strip()
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: .strip() 이 지우는 빈칸
+  learning_goals:
+    - .strip() 이 글자의 앞뒤 빈칸만 지운다는 것을 안다
+  story_context: 퀴즈쇼 진행자가 대답 "네" 를 대괄호 사이에 끼워 보여 주려고 해요. 그런데 손님이 앞에 빈칸 두 개, 뒤에 하나를 넣어 쳤대요!
+  fallback_text: .strip() 은 글자 앞과 뒤에 붙은 빈칸을 모두 지워요. 글자 사이의 빈칸은 그대로 둬요. 대괄호 [ ] 는 빈칸이 남았는지 잘 보이게 하려고 붙인 거예요.
+  quiz:
+    question: 돌리면 무엇이 나올까?
+    code: |-
+      reply = "  네 "
+      print("[" + reply.strip() + "]")
+    options:
+      - { id: opt-etq8, text: '[네]' }
+      - { id: opt-j90y, text: '[  네 ]' }
+      - { id: opt-849w, text: '[ 네 ]' }
+      - { id: opt-4tkq, text: '[네 ]' }
+answer:
+  quiz_answer:
+    accepted: [opt-etq8]
+    explanation: .strip() 은 앞의 빈칸 두 개와 뒤의 빈칸 하나를 모두 지워서 "네" 만 남아요. 그래서 [네] 가 나와요.
+    explanations:
+      opt-j90y: .strip() 을 했으니 빈칸이 지워져요.
+      opt-849w: 앞뒤 빈칸은 몇 개든 모두 지워요.
+      opt-4tkq: 뒤에 붙은 빈칸도 지워요. 앞만 지우는 건 .lstrip() 이에요.
