@@ -56,6 +56,20 @@ test('360px: 스크롤해도 HUD가 위에 있고, 불꽃·코인·상점·메�
   await expect(
     hud.getByRole('link', { name: '상점', exact: true }),
   ).toHaveAttribute('href', '/shop');
+  // 640~1023px: 코인 칩이 줄어 숫자가 옆 미션 칩 밑으로 겹치지 않음 (B84). 코인 칩 오른쪽 끝 ≤ 미션 칩 왼쪽 끝
+  await grantTestCoins(e2eUser.id, 2000); // 네 자리 잔액 (리셋은 코인을 지우지 않음)
+  for (const width of [640, 768, 1000]) {
+    await page.setViewportSize({ width, height: 740 });
+    await page.reload();
+    await expect(hud.getByTestId('hud-mission')).toBeVisible();
+    await expect
+      .poll(async () => {
+        const coin = (await hud.getByTestId('hud-coin').boundingBox())!;
+        const mission = (await hud.getByTestId('hud-mission').boundingBox())!;
+        return coin.x + coin.width - mission.x;
+      }, `${width}px 코인 칩이 미션 칩과 겹침(px)`)
+      .toBeLessThanOrEqual(0.5);
+  }
   await page.setViewportSize({ width: 360, height: 740 });
 
   await hud.getByRole('button', { name: '메뉴' }).click();

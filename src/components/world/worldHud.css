@@ -233,6 +233,17 @@
     }
   }
 
+  /* 640~1023px (B84): 미션·상점 칩(P8-07·P9-02)이 들어온 뒤 42rem 바에 칸이 다 안 들어가 코인 칩이 줄며 숫자가 미션 칩 밑으로 겹침
+     → 이 폭에서는 바를 화면 폭까지 쓰고, 코인 칩은 줄지 않게(줄어드는 칸은 닉네임만) */
+  @media (min-width: 40rem) and (max-width: 63.99rem) {
+    .wh-in {
+      max-width: none;
+    }
+    .wh-coin {
+      flex: none;
+    }
+  }
+
   /* HUD 쪽지: 바 바로 아래 가운데 */
   .g-toast-region.wh-toast {
     top: calc(4.5rem + env(safe-area-inset-top, 0px));
