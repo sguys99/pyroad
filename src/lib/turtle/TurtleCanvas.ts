@@ -132,6 +132,8 @@ export class TurtleCanvas {
   items: Item[] = [];
   private queue: TurtleCommand[] = [];
   private qi = 0;
+  /** 큐에 남은 프레임 끝 표시 ['f'] 수 (P11-04 따라잡기) */
+  private framesQueued = 0;
   private ended = false;
   private cur: Anim | null = null;
   private avail = 0;
@@ -204,6 +206,7 @@ export class TurtleCanvas {
     this.items = [];
     this.queue = [];
     this.qi = 0;
+    this.framesQueued = 0;
     this.ended = false;
     this.cur = null;
     this.avail = 0;
@@ -224,6 +227,7 @@ export class TurtleCanvas {
     let grew = false;
     for (const c of cmds) {
       this.queue.push(c);
+      if (c[0] === 'f') this.framesQueued++;
       const op = this.ahead.apply(c);
       grew = this.track(op) || grew;
       // 글씨 조각(unicode-range)을 그 차례가 오기 전에 미리 받는다 (P0-14)
@@ -719,7 +723,8 @@ export class TurtleCanvas {
     this.raf = 0;
     const dt = this.lastNow ? Math.min(now - this.lastNow, 100) : TICK_MS;
     this.lastNow = now;
-    const m = this.skip ? Infinity : this.multiplier;
+    // 게임 루프(P11-04): 끝난 프레임이 둘 넘게 밀려 있으면 애니메이션 없이 따라잡는다 (화면이 Python보다 한 프레임 넘게 늦지 않게)
+    const m = this.skip || this.framesQueued > 1 ? Infinity : this.multiplier;
     this.avail = m === Infinity ? Infinity : this.avail + (dt / TICK_MS) * m;
     const t0 = performance.now();
     for (;;) {
@@ -761,6 +766,7 @@ export class TurtleCanvas {
   /** 명령 하나 시작. 즉시 끝나는 명령이면 처리하고 null */
   private begin(cmd: TurtleCommand, m: number): Anim | null {
     const op = this.scene.apply(cmd);
+    if (op.k === 'frame') this.framesQueued--;
     const instant = m === Infinity;
     switch (op.k) {
       case 'move': {

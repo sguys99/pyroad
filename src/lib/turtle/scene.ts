@@ -16,6 +16,7 @@
  *   ['c', id]                   이 거북이 그림 지우기
  *   ['C']                       화면 전체 지우기
  *   ['bg', color]  ['tr', 0|1]  ['u']  ['v', w, h]  ['t', title]
+ *   ['f']                       프레임 끝 (P11-04: time.sleep 때 그린 게 있으면. 명령 상한에 안 셈)
  */
 
 export type TurtleCommand = unknown[];
@@ -121,6 +122,7 @@ export type TurtleOp =
   | { k: 'bg'; color: string }
   | { k: 'tracer'; n: number }
   | { k: 'update' }
+  | { k: 'frame' }
   | { k: 'view'; w: number; h: number }
   | { k: 'title'; text: string }
   | { k: 'unknown'; c: TurtleCommand };
@@ -304,6 +306,8 @@ export class Scene {
         return { k: 'tracer', n: this.tracer };
       case 'u':
         return { k: 'update' };
+      case 'f':
+        return { k: 'frame' };
       case 'v':
         this.view = { w: num(c[1]), h: num(c[2]) };
         return { k: 'view', ...this.view };

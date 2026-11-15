@@ -61,6 +61,21 @@ describe('Scene 리듀서', () => {
     expect(s.turtles.size).toBe(0);
   });
 
+  it('프레임 끝 [f] (P11-04)는 그림을 바꾸지 않고 그림 요약에도 안 들어감', () => {
+    const s = new Scene();
+    s.apply(NEW());
+    expect(s.apply(['f'])).toEqual({ k: 'frame' });
+    const square = [
+      NEW(),
+      ...[0, 1, 2, 3].flatMap(() => [
+        ['m', 0, 10, 0],
+        ['r', 0, 90, 90],
+      ]),
+    ];
+    const framed = square.flatMap((c) => [c, ['f']]);
+    expect(describeDrawing(framed)).toBe(describeDrawing(square));
+  });
+
   it('CPython 애니메이션 길이 공식', () => {
     expect(moveTicks(100, 0)).toBe(0);
     // speed 3: 1 + int(100 / (3 * 1.1**3 * 3)) = 1 + int(8.35) = 9

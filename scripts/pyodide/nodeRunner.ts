@@ -39,6 +39,10 @@ export interface NodeRunOptions {
   seed?: number;
   /** input()에 차례로 들어갈 줄. 다 쓰면 EOFError */
   stdin?: string[];
+  /** 키 시나리오 (P11-04): keys[n]은 n번째 프레임(time.sleep n번 뒤)에 get_key() 큐로. null = 그 프레임엔 키 없음 */
+  keys?: (string | null)[];
+  /** time.sleep을 건너뜀 (기본 true: 검증 실행은 900프레임 게임도 바로 끝남. time.time은 건너뛴 만큼 앞으로) */
+  skipSleep?: boolean;
   timeoutMs?: number;
   /** 실행 중에 오는 출력 조각 (스트리밍 확인용) */
   onOutput?: (kind: 'stdout' | 'stderr', text: string) => void;
@@ -180,6 +184,8 @@ export class NodePyodideRunner {
       code,
       seed: options.seed,
       stdin: options.stdin,
+      keys: options.keys,
+      skipSleep: options.skipSleep ?? true,
     });
     const msg = await Promise.race([reply, hang]);
     clearTimeout(interruptTimer);

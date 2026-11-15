@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   EXECUTION_TIMEOUT_MS,
   PYODIDE_WORKER_URL,
+  RUN_WALL_LIMIT_MS,
   STOP_GRACE_MS,
 } from './constants';
 import { isRunSuccessful, truncateOutput } from './runOutcome';
@@ -13,6 +14,7 @@ import {
 } from './inputChannel';
 import type {
   InputRequest,
+  KeyInput,
   RunInput,
   PyodideLoadStage,
   RunDoneMessage,
@@ -50,6 +52,8 @@ export interface RunResult {
   truncated?: boolean;
   /** input()에 학생이 답한 말 (P11-01). stdout의 어느 자리(at = 그때까지 stdout 길이)에 끼는지와 함께 */
   inputs?: RunInput[];
+  /** 시간 초과가 실행 시간(5초)이 아니라 벽시계 상한(RUN_WALL_LIMIT_MS, 끝없는 게임 루프)에 걸린 것 (P11-04) */
+  wallLimit?: boolean;
 }
 
 export interface RunCodeOptions {
@@ -60,7 +64,14 @@ export interface RunCodeOptions {
   onInputRequest?: (request: InputRequest) => void;
   /** turtle 그리기 명령 묶음 (P11-02, JSON 배열 문자열) */
   onTurtle?: (chunk: string) => void;
+  /** 실행이 get_key()를 부름 (P11-04): 조종판을 펴고 이 손잡이로 키를 보낸다 */
+  onKeys?: (input: KeyInput) => void;
   timeoutMs?: number;
+  /** 벽시계 상한 (기본 RUN_WALL_LIMIT_MS) */
+  wallLimitMs?: number;
+  /** 키 시나리오·잠 건너뛰기 (검증 실행, P11-04·P11-05. 형식은 types.ts WorkerRequest run) */
+  keys?: (string | null)[];
+  skipSleep?: boolean;
 }
 
 export interface UsePyodideOptions {
@@ -81,10 +92,16 @@ interface ActiveRun {
   timer: ReturnType<typeof setTimeout> | null;
   graceTimer: ReturnType<typeof setTimeout> | null;
   stopReason: 'timeout' | 'stop' | null;
-  /** 시간 제한 중 아직 쓰지 않은 Python 실행 시간(ms). 입력 대기 동안은 줄지 않는다 (P11-03) */
+  /** 시간 제한 중 아직 쓰지 않은 Python 실행 시간(ms). 입력 대기·time.sleep 동안은 줄지 않는다 (P11-03·P11-04) */
   budgetMs: number;
-  /** 지금 시간을 재고 있는 구간의 시작 (performance.now). 입력 대기 중이면 null */
-  clockFrom: number | null;
+  /** 벽시계 상한 중 남은 시간(ms). 입력 대기 동안만 줄지 않는다 (P11-04) */
+  wallMs: number;
+  /** 지금 구간: Python이 돎 · 자는 중 · 입력 대기 */
+  clockMode: ClockMode;
+  /** 지금 구간의 시작 (performance.now) */
+  clockFrom: number;
+  /** 벽시계 상한으로 멈춤 */
+  wallLimit: boolean;
   inputs: RunInput[];
   /** 답을 기다리는 input() 요청 */
   waiting: Extract<WorkerResponse, { type: 'input-request' }> | null;
@@ -95,20 +112,33 @@ interface WorkerHandle {
   generation: number;
 }
 
-/**
- * 시간 제한 시계 (P11-03): Python이 도는 동안만 잰다. 입력 대기는 pauseClock으로 빼고,
- * turtle 그림은 done 뒤에 화면이 다시 그리는 것이라(그리는 시간은 실행과 따로) 처음부터 들어가지 않는다
- */
-function startClock(run: ActiveRun, onTimeout: () => void) {
-  run.clockFrom = performance.now();
-  run.timer = setTimeout(onTimeout, Math.max(0, run.budgetMs));
-}
+type ClockMode = 'python' | 'sleep' | 'input';
 
-function pauseClock(run: ActiveRun) {
+/**
+ * 시간 제한 시계 (P11-03·P11-04). 구간을 바꿀 때마다 지난 구간 시간을 뺀다:
+ * - 실행 시간(budgetMs, 5초)은 Python이 도는 동안만 — 입력 대기·time.sleep은 빼고, turtle 그림은 done 뒤 화면이 그려서 처음부터 밖
+ * - 벽시계(wallMs, 3분)는 입력 대기만 빼고 — 끝을 잊은 게임 루프(잠만 자는 무한 반복)를 끝낸다
+ * 타이머는 둘 중 먼저 닿는 쪽 하나만 건다. onLimit(wall)
+ */
+function setClock(
+  run: ActiveRun,
+  mode: ClockMode,
+  onLimit: (wall: boolean) => void,
+) {
+  const now = performance.now();
+  const spent = now - run.clockFrom;
+  if (run.clockMode !== 'input') run.wallMs -= spent;
+  if (run.clockMode === 'python') run.budgetMs -= spent;
+  run.clockMode = mode;
+  run.clockFrom = now;
   if (run.timer) clearTimeout(run.timer);
   run.timer = null;
-  if (run.clockFrom !== null) run.budgetMs -= performance.now() - run.clockFrom;
-  run.clockFrom = null;
+  if (mode === 'input') return;
+  const wall = mode === 'sleep' || run.wallMs < run.budgetMs;
+  run.timer = setTimeout(
+    () => onLimit(wall),
+    Math.max(0, wall ? run.wallMs : run.budgetMs),
+  );
 }
 
 const NOT_READY: RunResult = {
@@ -169,6 +199,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
         stdout: truncateOutput(result.stdout ?? run.stdout),
         stderr: truncateOutput(result.stderr ?? run.stderr),
         ...(run.inputs.length > 0 && { inputs: run.inputs }),
+        ...(result.isTimeout && run.wallLimit && { wallLimit: true }),
         ...result,
       });
     },
@@ -234,7 +265,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       msg: Extract<WorkerResponse, { type: 'input-request' }>,
     ) => {
       // 답을 기다리는 시간은 시간 제한에서 뺀다: 시계를 멈추고, 답하면 남은 시간부터 다시 잰다 (P11-03)
-      pauseClock(run);
+      setClock(run, 'input', onLimitRef.current(run));
       run.waiting = msg;
       run.options.onInputRequest?.({
         answer: (value) => {
@@ -256,7 +287,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
             };
             workerRef.current?.worker.postMessage(answer);
           }
-          startClock(run, () => requestStopRef.current(run, 'timeout'));
+          setClock(run, 'python', onLimitRef.current(run));
         },
         stop: () => requestStopRef.current(run, 'stop'),
       });
@@ -266,6 +297,35 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
   const requestStopRef = useRef<
     (run: ActiveRun, reason: 'timeout' | 'stop') => void
   >(() => {});
+  /** 시계가 상한에 닿으면: 벽시계였는지 적고 시간 초과로 멈춤 */
+  const onLimitRef = useRef((run: ActiveRun) => (wall: boolean) => {
+    if (wall) run.wallLimit = true;
+    requestStopRef.current(run, 'timeout');
+  });
+
+  /** get_key()를 처음 부름 (P11-04): 키를 보낼 손잡이를 넘긴다. SW 채널이면 SW가 쌓았다가 잠 답에 실어 준다 */
+  const handleKeys = useCallback(
+    (run: ActiveRun, msg: Extract<WorkerResponse, { type: 'keys' }>) => {
+      run.options.onKeys?.({
+        channel: msg.channel,
+        stop: () => requestStopRef.current(run, 'stop'),
+        press: (key) => {
+          if (runRef.current !== run || typeof key !== 'string') return;
+          if (msg.channel === 'sw') {
+            inputSwRef.current?.active?.postMessage({
+              id: run.id,
+              kind: 'key',
+              key,
+            });
+          } else {
+            const req: WorkerRequest = { type: 'key', id: run.id, key };
+            workerRef.current?.worker.postMessage(req);
+          }
+        },
+      });
+    },
+    [],
+  );
 
   const createWorker = useCallback(
     (gen: number) => {
@@ -327,6 +387,18 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           case 'input-request':
             if (isRunMsg) handleInputRequest(run, msg);
             break;
+          case 'keys':
+            if (isRunMsg) handleKeys(run, msg);
+            break;
+          // time.sleep 동안은 실행 시간에 넣지 않는다 (P11-04). 멈추는 중이면 시계는 상관없음
+          case 'sleep':
+            if (isRunMsg && !run.stopReason)
+              setClock(run, 'sleep', onLimitRef.current(run));
+            break;
+          case 'wake':
+            if (isRunMsg && !run.stopReason)
+              setClock(run, 'python', onLimitRef.current(run));
+            break;
         }
       };
 
@@ -351,7 +423,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       const msg: WorkerRequest = { type: 'init' };
       worker.postMessage(msg);
     },
-    [finishRun, handleDone, handleInputRequest, updateStatus],
+    [finishRun, handleDone, handleInputRequest, handleKeys, updateStatus],
   );
 
   const spawn = useCallback(
@@ -456,7 +528,10 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           graceTimer: null,
           stopReason: null,
           budgetMs: options.timeoutMs ?? optionsRef.current.timeoutMs,
-          clockFrom: null,
+          wallMs: options.wallLimitMs ?? RUN_WALL_LIMIT_MS,
+          clockMode: 'input',
+          clockFrom: performance.now(),
+          wallLimit: false,
           inputs: [],
           waiting: null,
         };
@@ -464,13 +539,21 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
         setIsRunning(true);
 
         // 시간 초과: 먼저 stop(time.sleep 대기 중이면 Worker 유지), 답이 없으면 Worker 재시작
-        startClock(run, () => requestStop(run, 'timeout'));
+        setClock(run, 'python', onLimitRef.current(run));
 
-        const msg: WorkerRequest = { type: 'run', id: run.id, code };
+        const msg: WorkerRequest = {
+          type: 'run',
+          id: run.id,
+          code,
+          ...(options.keys && { keys: options.keys }),
+          ...(options.skipSleep !== undefined && {
+            skipSleep: options.skipSleep,
+          }),
+        };
         handle.worker.postMessage(msg);
       });
     },
-    [requestStop],
+    [],
   );
 
   /** 실행 멈추기 (멈추기 버튼). 실행 중이 아니면 아무것도 하지 않는다 */

@@ -94,3 +94,21 @@ describe('turtle 명령 (P11-02)', () => {
     expect(liveRunOptions(store).onTurtle).toBe(store.turtle);
   });
 });
+
+describe('키 입력 (P11-04)', () => {
+  it('get_key()를 부르면 keys에 채널이 켜지고 pressKey가 실행으로, reset이면 끊김', () => {
+    const store = createLiveOutputStore();
+    const press = vi.fn();
+    store.pressKey('Left'); // 듣는 실행 없음
+    const stop = vi.fn();
+    liveRunOptions(store).onKeys?.({ channel: 'sw', press, stop });
+    store.stopRun();
+    expect(stop).toHaveBeenCalledOnce();
+    expect(store.getSnapshot().keys).toBe('sw');
+    store.pressKey('Up');
+    store.reset();
+    store.pressKey('Down');
+    expect(press.mock.calls).toEqual([['Up']]);
+    expect(store.getSnapshot().keys).toBeNull();
+  });
+});

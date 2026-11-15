@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OutputPanel } from '@/components/quest/OutputPanel';
+import { GameKeys } from '@/components/quest/GameKeys';
 import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { CodeSample, Demo, Section } from './ui';
@@ -73,6 +74,31 @@ function StageDemo({
 }
 
 /** 그림판 (P11-02): turtle을 쓰는 코드의 결과 위 도화지 + 빠르기·바로 완성·모눈·저장 */
+/** 게임 조종판 견본 (P11-04): 실행 없이 누른 키 이름만 보여 준다 */
+function GameKeysDemo({ none = false }: { none?: boolean }) {
+  const [last, setLast] = useState<string[]>([]);
+  return (
+    <>
+      <GameKeys
+        running
+        pad="always"
+        preview={{
+          channel: none ? 'none' : 'jspi',
+          onKey: (k) => setLast((l) => [...l, k].slice(-6)),
+        }}
+      />
+      {!none && (
+        <p
+          className="text-caption text-muted-foreground"
+          data-testid="game-keys-demo-log"
+        >
+          get_key() → {last.length ? last.join(', ') : 'None'}
+        </p>
+      )}
+    </>
+  );
+}
+
 export function TurtleSection() {
   const [round, setRound] = useState(0);
   const [emptyStore] = useState(() => createLiveOutputStore());
@@ -110,6 +136,16 @@ export function TurtleSection() {
       node: <StageDemo name="spiral" />,
     },
     {
+      label: '게임 조종판 (P11-04)',
+      note: '실행이 get_key()를 부르면 그림판 아래에 나와요. 키보드 화살표·스페이스·글자 키, 폰·태블릿은 ← ↑ → ↓ 패드(64px, 누르고 있으면 계속). 여기선 패드를 늘 보여 줘요',
+      node: <GameKeysDemo />,
+    },
+    {
+      label: '게임 조종판 · 키를 못 받는 브라우저',
+      note: 'JSPI도 SW도 없으면(iOS 26 이하 인앱) 버튼 대신 안내 한 줄',
+      node: <GameKeysDemo none />,
+    },
+    {
       label: '명령 상한 (5만 개)',
       note: 'while True로 끝없이 그리면 TurtleLimitError로 멈춰요 — 실행기를 다시 띄우지 않고 그림은 남아요',
       node: (
@@ -132,8 +168,8 @@ export function TurtleSection() {
     <Section
       id="turtle-stage"
       kicker="퀘스트 (P11-02)"
-      title="그림판 · 거북이 그리기"
-      description="turtle 코드의 결과(TurtleStage). 결과 쪽지와 같은 옅은 면 위 흰 도화지에 느릿이가 그려요. 빠르기(0.25배~8배·바로), 바로 완성, 좌표 모눈, PNG 저장. 낭독기는 그림 요약 한 문장을 읽어요. 견본은 녹화한 명령을 재생해요(갤러리와 같은 방식)."
+      title="그림판 · 거북이 그리기 · 게임 조종판"
+      description="turtle 코드의 결과(TurtleStage). 결과 쪽지와 같은 옅은 면 위 흰 도화지에 느릿이가 그려요. 빠르기(0.25배~8배·바로), 바로 완성, 좌표 모눈, PNG 저장. 낭독기는 그림 요약 한 문장을 읽어요. 견본은 녹화한 명령을 재생해요(갤러리와 같은 방식). get_key()를 쓰는 게임은 그림판 아래 조종판(P11-04)."
     >
       <Button
         onClick={() => setRound((r) => r + 1)}
@@ -160,7 +196,7 @@ export function TurtleSection() {
         ))}
       </div>
       <CodeSample
-        code={`// 실행: liveRunOptions(store)가 turtle 청크도 저장소로 (usePyodide onTurtle)\n<OutputPanel result={runResult} isRunning={runner.isRunning} liveOutput={liveOutput}\n  turtle={usesTurtle(code)} />  // → <TurtleStage store running /> + 결과 쪽지\n// 갤러리 썸네일(P11-06): new TurtleCanvas(host).push(commands) → exportPNG({ width: 400, height: 400, fit: 'content' })`}
+        code={`// 실행: liveRunOptions(store)가 turtle 청크도 저장소로 (usePyodide onTurtle)\n<OutputPanel result={runResult} isRunning={runner.isRunning} liveOutput={liveOutput}\n  turtle={usesTurtle(code)} />  // → <TurtleStage store running /> + (get_key() 실행 중) <GameKeys /> + 결과 쪽지\n// 갤러리 썸네일(P11-06): new TurtleCanvas(host).push(commands) → exportPNG({ width: 400, height: 400, fit: 'content' })`}
       />
     </Section>
   );

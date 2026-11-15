@@ -8,9 +8,10 @@
 // 대기 상태를 읽어 입력 칸을 그리고 `answer`·`stopInput`을 부른다 (셸·코드 패널을 거쳐 props를 내려보내지 않음).
 // turtle 그리기 명령(P11-02)도 여기 쌓는다: 글자 줄과 따로 구독해서(subscribeTurtle) 청크마다 출력창이 다시 그려지지 않고,
 // 그림판(TurtleStage)이 늦게 붙어도(모바일 결과 쪽) 이번 실행 명령을 처음부터 다시 그릴 수 있다.
+// 키 입력(P11-04)도 같은 길: 실행이 get_key()를 부르면 `keys`가 켜지고, 조종판(GameKeys)이 `pressKey`로 키를 보낸다.
 
 import { MAX_OUTPUT_LENGTH } from './constants';
-import type { InputRequest, RunInput } from './types';
+import type { InputChannel, InputRequest, KeyInput, RunInput } from './types';
 import type { RunCodeOptions } from './usePyodide';
 import type { TurtleCommand } from '@/lib/turtle/scene';
 
@@ -25,6 +26,8 @@ export interface LiveOutputSnapshot {
   waiting: boolean;
   /** 이번 실행이 turtle로 무언가 그렸는지 (첫 명령이 오면 true, P11-02) */
   drawing: boolean;
+  /** 이번 실행이 get_key()로 키를 듣는 길 (P11-04). 안 들으면 null */
+  keys: InputChannel | null;
 }
 
 export interface LiveOutputStore {
@@ -36,6 +39,12 @@ export interface LiveOutputStore {
   answer(value: string): void;
   /** 이번 실행 멈추기 (입력 칸의 멈추기 버튼) */
   stopInput(): void;
+  /** 실행이 get_key()를 부름 (usePyodide onKeys) */
+  listenKeys(input: KeyInput): void;
+  /** 키 하나 보내기 (조종판). 듣는 실행이 없으면 무시 */
+  pressKey(key: string): void;
+  /** 이번 실행 멈추기 (조종판·입력 칸의 멈추기 버튼) */
+  stopRun(): void;
   /** turtle 명령 묶음 받기 (usePyodide onTurtle, JSON 배열 문자열) */
   turtle(chunk: string): void;
   /** 이번 실행의 turtle 명령. 실행마다(reset) 새 배열이라 바뀐 배열이면 새 그림 */
@@ -52,6 +61,7 @@ const EMPTY: LiveOutputSnapshot = {
   inputs: NO_INPUTS,
   waiting: false,
   drawing: false,
+  keys: null,
 };
 
 /**
@@ -65,6 +75,7 @@ export function createLiveOutputStore(
   let request: InputRequest | null = null;
   // 이번 실행 멈추기 (답을 보낸 뒤 다음 질문 전에도 입력 칸의 멈추기가 듣게)
   let stopRun: (() => void) | null = null;
+  let keyInput: KeyInput | null = null;
   const listeners = new Set<() => void>();
   let turtle: TurtleCommand[] = [];
   const turtleListeners = new Set<() => void>();
@@ -89,6 +100,7 @@ export function createLiveOutputStore(
     reset() {
       request = null;
       stopRun = null;
+      keyInput = null;
       if (turtle.length) {
         turtle = [];
         notifyTurtle();
@@ -115,6 +127,17 @@ export function createLiveOutputStore(
     stopInput() {
       request = null;
       if (snapshot.waiting) set({ waiting: false });
+      stopRun?.();
+    },
+    listenKeys(input) {
+      keyInput = input;
+      stopRun = input.stop;
+      set({ keys: input.channel });
+    },
+    pressKey(key) {
+      keyInput?.press(key);
+    },
+    stopRun() {
       stopRun?.();
     },
     turtle(chunk) {
@@ -145,10 +168,11 @@ export function createLiveOutputStore(
 /** runCode에 넘길 출력·입력 연결 (실행 중 출력 + input() 대기) */
 export function liveRunOptions(
   store: LiveOutputStore,
-): Pick<RunCodeOptions, 'onStdout' | 'onInputRequest' | 'onTurtle'> {
+): Pick<RunCodeOptions, 'onStdout' | 'onInputRequest' | 'onTurtle' | 'onKeys'> {
   return {
     onStdout: store.append,
     onInputRequest: store.ask,
     onTurtle: store.turtle,
+    onKeys: store.listenKeys,
   };
 }

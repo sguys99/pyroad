@@ -55,6 +55,8 @@ import './outputPanel.css';
 
 // 그림판 (P11-02): turtle을 쓰는 코드에서만 받는다 (렌더러 chunk는 첫 로드 JS 밖)
 const TurtleStage = dynamic(() => import('./TurtleStage'), { ssr: false });
+// 게임 조종판 (P11-04): get_key()를 부르는 실행에서만 받는다
+const GameKeys = dynamic(() => import('./GameKeys'), { ssr: false });
 
 const NO_LIVE_OUTPUT: LiveOutputSnapshot = {
   text: '',
@@ -62,6 +64,7 @@ const NO_LIVE_OUTPUT: LiveOutputSnapshot = {
   inputs: [],
   waiting: false,
   drawing: false,
+  keys: null,
 };
 const subscribeNothing = () => () => {};
 const getNoLiveOutput = () => NO_LIVE_OUTPUT;
@@ -316,18 +319,29 @@ function useDrawing(store?: LiveOutputStore): boolean {
   );
 }
 
+/** 이번 실행이 get_key()로 키를 듣는지만 구독 (P11-04) */
+function useListening(store?: LiveOutputStore): boolean {
+  return useSyncExternalStore(
+    store?.subscribe ?? subscribeNothing,
+    () => (store?.getSnapshot().keys ?? null) !== null,
+    () => false,
+  );
+}
+
 /**
- * 실행 결과 자리: turtle 그림판(P11-02, 그릴 때만) + 결과 쪽지. 그림판은 쪽지 위에 두고 쪽지 상태가 바뀌어도
- * 같은 자리에 남아(다시 만들지 않음) 빠르기·모눈 설정과 그린 그림이 유지된다
+ * 실행 결과 자리: turtle 그림판(P11-02, 그릴 때만) + 게임 조종판(P11-04, get_key()를 부르는 실행 중) + 결과 쪽지.
+ * 그림판은 쪽지 위에 두고 쪽지 상태가 바뀌어도 같은 자리에 남아(다시 만들지 않음) 빠르기·모눈 설정과 그린 그림이 유지된다
  */
 export function OutputPanel(props: OutputPanelProps) {
   const drawing = useDrawing(props.liveOutput);
+  const listening = useListening(props.liveOutput) && props.isRunning;
   const stage = (props.turtle || drawing) && (
     <TurtleStage store={props.liveOutput} running={props.isRunning} />
   );
   return (
     <>
       {stage}
+      {listening && <GameKeys store={props.liveOutput} running />}
       <ResultSlip {...props} quietEmpty={!!stage} />
     </>
   );
@@ -476,26 +490,33 @@ function ResultSlip({
     result.isStopped ||
     result.outcome === 'output-limit'
   ) {
-    const [state, title, note, icon] = result.isTimeout
+    const [state, title, note, icon] = result.wallLimit
       ? [
           'timeout',
-          '앗, 시간이 너무 오래 걸려요!',
-          '혹시 무한 반복이 있는지 살펴볼까요? while 반복문이라면 조건이 언젠가 거짓(False)이 되는지 확인해 봐요.',
+          '3분이 지나서 멈췄어요',
+          '끝나지 않는 게임 반복이 있나 봐요. for frame in range(900): 처럼 몇 번 돌지 정해 두면 30초 뒤에 끝나요.',
           <Hourglass key="i" aria-hidden />,
         ]
-      : result.isStopped
+      : result.isTimeout
         ? [
-            'stopped',
-            '실행을 멈췄어요',
-            '코드를 살펴보고 준비되면 다시 돌려 봐요!',
-            <Hand key="i" aria-hidden />,
-          ]
-        : [
-            'output-limit',
-            '앗, 출력이 너무 많아요!',
-            '그래서 중간에 멈췄어요. 끝없이 반복되는 print가 있는지 살펴볼까요?',
+            'timeout',
+            '앗, 시간이 너무 오래 걸려요!',
+            '혹시 무한 반복이 있는지 살펴볼까요? while 반복문이라면 조건이 언젠가 거짓(False)이 되는지 확인해 봐요.',
             <Hourglass key="i" aria-hidden />,
-          ];
+          ]
+        : result.isStopped
+          ? [
+              'stopped',
+              '실행을 멈췄어요',
+              '코드를 살펴보고 준비되면 다시 돌려 봐요!',
+              <Hand key="i" aria-hidden />,
+            ]
+          : [
+              'output-limit',
+              '앗, 출력이 너무 많아요!',
+              '그래서 중간에 멈췄어요. 끝없이 반복되는 print가 있는지 살펴볼까요?',
+              <Hourglass key="i" aria-hidden />,
+            ];
     return (
       <Slip
         state={state}

@@ -7,6 +7,7 @@
 // 15초마다 'timeout'으로 끊고 Worker가 다시 묻는다 (SW 수명 제한 대비 long-poll). 나머지 요청은 건드리지 않는다.
 // time.sleep (P11-03): `__sync/sleep?run=&ms=`를 ms만큼 붙잡았다가 'ok'. 페이지가 { id: 실행 id, kind: 'stop-run' }을
 // 보내면 그 실행의 잠을 바로 'stop'으로 깨우고, 그 뒤에 오는 잠도 바로 'stop'.
+// 키 입력 (P11-04): 페이지가 { id: 실행 id, kind: 'key', key }를 보내면 쌓아 두었다가 그 실행의 다음 잠 답에 { keys }로 싣는다.
 
 const HOLD_MS = 15000;
 /** requestId → 응답 함수 */
@@ -17,6 +18,16 @@ const mailbox = new Map();
 const sleepers = new Map();
 /** 멈춘 실행 id (멈춘 뒤에 온 잠도 바로 깨움). 오래된 것부터 버린다 */
 const stoppedRuns = new Set();
+/** 실행 id → 아직 Worker에 못 준 키 (실행 수·키 수 모두 상한) */
+const keyQueues = new Map();
+const MAX_KEYS = 32;
+
+/** 쌓인 키를 꺼내 비운다 */
+function takeKeys(run) {
+  const keys = keyQueues.get(run) ?? [];
+  keyQueues.delete(run);
+  return keys;
+}
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) =>
@@ -26,7 +37,18 @@ self.addEventListener('activate', (event) =>
 self.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || typeof msg.id !== 'string') return;
+  if (msg.kind === 'key') {
+    if (typeof msg.key !== 'string' || msg.key.length > 16) return;
+    if (!keyQueues.has(msg.id)) {
+      keyQueues.set(msg.id, []);
+      if (keyQueues.size > 50) keyQueues.delete(keyQueues.keys().next().value);
+    }
+    const queue = keyQueues.get(msg.id);
+    if (queue.length < MAX_KEYS) queue.push(msg.key);
+    return;
+  }
   if (msg.kind === 'stop-run') {
+    keyQueues.delete(msg.id);
     stoppedRuns.add(msg.id);
     if (stoppedRuns.size > 50)
       stoppedRuns.delete(stoppedRuns.values().next().value);
@@ -76,7 +98,7 @@ self.addEventListener('fetch', (event) => {
       new Promise((resolve) => {
         const timer = setTimeout(() => {
           sleepers.delete(run);
-          resolve({ kind: 'ok' });
+          resolve({ kind: 'ok', keys: takeKeys(run) });
         }, ms);
         sleepers.set(run, () => {
           clearTimeout(timer);

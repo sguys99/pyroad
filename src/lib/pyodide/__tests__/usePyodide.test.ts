@@ -4,7 +4,12 @@ import { renderHook, act } from '@testing-library/react';
 
 import { usePyodide, type RunResult } from '../usePyodide';
 import { PYODIDE_WORKER_URL } from '../constants';
-import type { InputRequest, WorkerRequest, WorkerResponse } from '../types';
+import type {
+  InputRequest,
+  KeyInput,
+  WorkerRequest,
+  WorkerResponse,
+} from '../types';
 import { reportPyodideWorkerError } from '../workerErrorReport';
 
 vi.mock('../workerErrorReport', async (importOriginal) => ({
@@ -598,5 +603,79 @@ describe('usePyodide: input() (P11-01)', () => {
     } finally {
       delete (navigator as { serviceWorker?: unknown }).serviceWorker;
     }
+  });
+});
+
+describe('usePyodide: 키 입력·프레임 루프 (P11-04)', () => {
+  const wait = (ms: number) =>
+    act(() => {
+      vi.advanceTimersByTime(ms);
+    });
+
+  it('time.sleep(sleep~wake)은 실행 시간에 넣지 않음: 30초 게임도 5초 제한에 걸리지 않음', () => {
+    vi.useFakeTimers();
+    const { result } = setup(); // 실행 시간 1초
+    const worker = latest();
+    void startRun(result);
+    const { id } = worker.lastRun();
+    const stopped = () => worker.posted.some((m) => m.type === 'stop');
+    for (let frame = 0; frame < 900; frame++) {
+      wait(1); // Python 1ms
+      worker.emit({ type: 'sleep', id, ms: 33 });
+      wait(33);
+      worker.emit({ type: 'wake', id });
+    }
+    expect(stopped()).toBe(false); // Python 900ms
+    wait(100);
+    expect(stopped()).toBe(true); // 1000ms
+  });
+
+  it('벽시계 상한: 잠만 자는 끝없는 루프는 wallLimitMs에서 멈추고 결과에 wallLimit', async () => {
+    vi.useFakeTimers();
+    const { result } = setup();
+    const worker = latest();
+    const promise = startRun(result, 'while True: time.sleep(1)', {
+      wallLimitMs: 10_000,
+    });
+    const { id } = worker.lastRun();
+    worker.emit({ type: 'sleep', id, ms: 1e9 });
+    wait(9_999);
+    expect(worker.posted.some((m) => m.type === 'stop')).toBe(false);
+    wait(1);
+    expect(worker.posted.at(-1)).toEqual({ type: 'stop', id });
+    worker.emit({
+      type: 'done',
+      id,
+      outcome: 'stopped',
+      hadException: false,
+      errorType: null,
+      truncated: false,
+      ms: 1,
+    });
+    await expect(promise).resolves.toMatchObject({
+      isTimeout: true,
+      wallLimit: true,
+    });
+  });
+
+  it('get_key()를 부르면 손잡이를 넘기고, 누른 키는 JSPI면 Worker에 key 메시지로', () => {
+    const { result } = setup();
+    const worker = latest();
+    let keys!: KeyInput;
+    void startRun(result, 'get_key()', { onKeys: (k) => (keys = k) });
+    const { id } = worker.lastRun();
+    worker.emit({ type: 'keys', id, channel: 'jspi' });
+    expect(keys.channel).toBe('jspi');
+    keys.press('Left');
+    expect(worker.posted.at(-1)).toEqual({ type: 'key', id, key: 'Left' });
+  });
+
+  it('키 시나리오·잠 건너뛰기는 run 메시지로 (검증 실행)', () => {
+    const { result } = setup();
+    void startRun(result, 'x', { keys: ['Right', null], skipSleep: true });
+    expect(latest().lastRun()).toMatchObject({
+      keys: ['Right', null],
+      skipSleep: true,
+    });
   });
 });

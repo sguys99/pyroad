@@ -9,6 +9,7 @@
 // 이 Worker는 `/pyodide/runner/pyodide-worker.mjs`(next.config.ts rewrites)로 떠서 SW scope 안에 있고,
 // 페이지가 미리 등록한 SW(`input-sw.js`)가 `__sync/read` 요청을 답이 올 때까지 붙잡아 둔다.
 // time.sleep도 같은 채널(`__sync/sleep`)로 자서, 자는 중 멈추기가 Worker를 살린 채 끝난다 (P11-03).
+// 키 입력(P11-04): JSPI면 페이지가 이 Worker에 `key` 메시지(자는 동안 받음), SW면 SW에 보내고 잠 답에 실려 온다.
 //
 // turtle (P11-02): shim `turtle.py`를 같은 경로(`/pyodide/runner/turtle.py` → public/workers/)에서 Pyodide와 함께 받아 코어에 넘긴다.
 
@@ -72,13 +73,13 @@ function swReadLine(requestId) {
 
 /**
  * time.sleep을 SW 동기 XHR로 잔다 (JSPI 없음, P11-03). SW가 ms만큼 붙잡아 두다가, 페이지가 이 실행을 멈추면 바로 'stop'.
- * 긴 잠은 SW 붙잡기 한도(15초)보다 짧게 나눠 묻는다. 채널이 끊기면 null (코어가 원래 time.sleep으로 잠)
+ * 긴 잠은 SW 붙잡기 한도(15초)보다 짧게 나눠 묻는다. 채널이 끊기면 null (코어가 원래 time.sleep으로 잠).
+ * 자는 동안 페이지가 SW에 보낸 키는 답에 실려 와서 onKeys로 넘긴다 (P11-04) — 그래서 sleep(0)도 한 번은 묻는다
  */
-function swSleep(runId, ms) {
+function swSleep(runId, ms, onKeys) {
   const end = performance.now() + ms;
   for (;;) {
-    const left = Math.round(end - performance.now());
-    if (left <= 0) return 'ok';
+    const left = Math.max(0, Math.round(end - performance.now()));
     let reply;
     try {
       const xhr = syncGet(
@@ -89,8 +90,10 @@ function swSleep(runId, ms) {
     } catch {
       return null;
     }
+    if (Array.isArray(reply?.keys)) onKeys?.(reply.keys);
     if (reply?.kind === 'stop') return 'stop';
     if (reply?.kind !== 'ok') return null;
+    if (performance.now() >= end) return 'ok';
   }
 }
 

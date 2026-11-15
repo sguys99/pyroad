@@ -75,12 +75,13 @@ _UNSUPPORTED = {
 }
 
 _UNSUPPORTED_HINT = {
-    'onkey': '키보드로 움직이기는 3-6 미니 게임에서 배울 예정이에요.',
-    'onkeypress': '키보드로 움직이기는 3-6 미니 게임에서 배울 예정이에요.',
-    'onkeyrelease': '키보드로 움직이기는 3-6 미니 게임에서 배울 예정이에요.',
-    'listen': '키보드로 움직이기는 3-6 미니 게임에서 배울 예정이에요.',
-    'onclick': '마우스 클릭은 3-6 미니 게임에서 배울 예정이에요.',
-    'onscreenclick': '마우스 클릭은 3-6 미니 게임에서 배울 예정이에요.',
+    'onkey': '키는 from pyroad import get_key 하고, 반복 안에서 get_key()로 읽어요.',
+    'onkeypress': '키는 from pyroad import get_key 하고, 반복 안에서 get_key()로 읽어요.',
+    'onkeyrelease': '키는 from pyroad import get_key 하고, 반복 안에서 get_key()로 읽어요.',
+    'listen': '키는 from pyroad import get_key 하고, 반복 안에서 get_key()로 읽어요.',
+    'ontimer': '대신 반복 안에서 time.sleep()으로 쉬어 가요.',
+    'onclick': '마우스 클릭은 아직 쓸 수 없어요. 키는 get_key()로 읽어요.',
+    'onscreenclick': '마우스 클릭은 아직 쓸 수 없어요. 키는 get_key()로 읽어요.',
     'textinput': '대신 input()을 써 보세요.',
     'numinput': '대신 int(input())을 써 보세요.',
 }
@@ -306,6 +307,7 @@ _buf = []
 _stats = {'commands': 0, 'messages': 0, 'chars': 0, 'limit_hit': False}
 _chunk = [1]
 _last_flush = [0.0]
+_frame_start = [0]   # 이번 프레임이 시작할 때의 명령 수 (상한은 프레임마다 셈, P11-04)
 
 
 def _r(v):
@@ -332,7 +334,7 @@ def _flush():
 
 def _emit(cmd):
     n = _stats['commands'] + 1
-    if n > _cfg['max_commands']:
+    if n - _frame_start[0] > _cfg['max_commands']:
         _stats['limit_hit'] = True
         raise TurtleLimitError(
             '그림 명령이 너무 많아요 (최대 %s개). 끝나지 않는 반복(while True)이 있는지 '
@@ -1006,8 +1008,23 @@ def _pyroad_begin(sink=None, max_commands=50000, stream=True, first_ms=40):
     _chunk[0] = 1 if not first_ms else _cfg['chunk_max']
     _last_flush[0] = _time.perf_counter()
     _next_stamp[0] = 1
+    _frame_start[0] = 0
     _the_screen[0] = None
     Turtle._pen = None
+
+
+def _pyroad_frame():
+    """time.sleep 때마다 호출 (P11-04): 이번 프레임에 그린 게 있으면 프레임 표시 ['f']를 붙여 바로 보낸다.
+
+    게임 루프가 프레임마다 화면에 나타나고, 렌더러는 두 프레임 넘게 밀리면 따라잡는다.
+    명령 상한은 프레임마다 다시 센다 — 잠 없이 그리는 무한 반복만 상한에 걸리고, 쉬어 가는 30초 게임은 걸리지 않는다
+    (전체 길이는 실행 시간 제한과 페이지의 실행 벽시계 상한이 막음). ['f']는 명령 수에 넣지 않는다.
+    """
+    if _stats['commands'] == _frame_start[0]:
+        return
+    _frame_start[0] = _stats['commands']
+    _buf.append(['f'])
+    _flush()
 
 
 def _pyroad_end():
