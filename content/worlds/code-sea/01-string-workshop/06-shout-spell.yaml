@@ -1,0 +1,53 @@
+# 2월드 퀘스트 1-6: 크게! 작게! 바꿔!
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-1
+
+id: b2000000-0000-0000-0000-000000000006
+order: 6
+title: 크게! 작게! 바꿔!
+concept: upper(), replace()
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 글자 메서드 upper()와 replace()
+  learning_goals:
+    - 값 뒤에 점(.)을 찍고 메서드를 부를 수 있다
+    - upper()로 영어를 대문자로 바꿀 수 있다
+    - replace()로 낱말을 다른 낱말로 바꿀 수 있다
+  story_context: 공방 간판에 "i love the lake"라고 쓰여 있어요. 여긴 호수가 아니라 바다인데! 간판을 크게 외치고, lake 를 sea 로 고쳐 줘요.
+  exercise_description: 'spell = "i love the lake" 를 upper()로 대문자로 한 줄, replace()로 lake 를 sea 로 바꿔 한 줄 출력하세요'
+  starter_code: |
+    spell = "i love the lake"
+
+    # 메서드는 값 뒤에 점(.)을 찍고 불러요
+    print(spell.___())
+    print(spell.replace("___", "___"))
+  expected_output_hint: I LOVE THE LAKE 와 i love the sea 가 한 줄씩 나와야 해요
+  checklist:
+    - '첫째 줄 빈칸에 upper 를 넣어요'
+    - 'replace("바꿀 낱말", "새 낱말")에 lake 와 sea 를 넣어요'
+    - 두 줄이 나오는지 봐요
+  example_output: |-
+    I LOVE THE LAKE
+    i love the sea
+  fallback_text: '메서드는 값 뒤에 점(.)을 찍고 부르는 그 값 전용 함수예요. spell.upper()는 모두 대문자로, spell.replace("lake", "sea")는 lake 를 sea 로 바꾼 새 글자를 돌려줘요. lower()는 반대로 소문자로 바꿔요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          I LOVE THE LAKE
+          i love the sea
+      - type: code_check
+        expected: .upper(
+      - type: code_check
+        expected: .replace(
+  hints:
+    level_1: 대문자는 영어로 upper case 예요. 크게 외치는 메서드 이름이 떠오르나요?
+    level_2: 'spell.upper() 는 대문자로 바꿔요. replace 는 ("바꿀 낱말", "새 낱말") 순서로 넣어요.'
+    level_3: 'print(spell.upper()) 와 print(spell.replace("lake", "sea")) 를 써 보세요!'
+  solution_code: |
+    spell = "i love the lake"
+
+    print(spell.upper())
+    print(spell.replace("lake", "sea"))

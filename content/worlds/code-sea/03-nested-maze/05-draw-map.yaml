@@ -1,0 +1,68 @@
+# 2월드 퀘스트 3-5: 지도 그리기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-3
+
+id: b2000000-0000-0000-0000-000000000023
+order: 5
+title: 지도 그리기
+concept: 2차원 리스트 + 중첩 반복
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 2차원 리스트를 중첩 반복으로 그리기
+  learning_goals:
+    - 바깥 반복으로 줄을, 안쪽 반복으로 칸을 꺼낼 수 있다
+    - 칸을 이어 붙여 한 줄씩 지도를 그릴 수 있다
+  story_context: 보물 지도를 손에 넣었지만 리스트 모양이라 알아보기 어려워요. 칸을 이어 붙여 진짜 지도처럼 그려 볼까요?
+  exercise_description: '바깥 for 로 grid 의 줄을, 안쪽 for 로 줄의 칸을 꺼내 line 에 이어 붙이고, 한 줄씩 지도를 출력하세요'
+  starter_code: |
+    grid = [
+        [".", ".", "#", "."],
+        ["#", ".", ".", "X"],
+        [".", "#", ".", "."],
+    ]
+
+    for row in grid:
+        line = ""
+        # 안쪽 반복으로 row 의 칸을 하나씩 line 에 붙여요
+
+        print(line)
+  expected_output_hint: '..#. / #..X / .#.. 세 줄이 나와야 해요'
+  checklist:
+    - 'for cell in row: 를 들여써서 넣어요'
+    - '안쪽에서 line = line + cell 로 칸을 붙여요'
+    - 지도가 세 줄로 나오는지 봐요
+  example_output: |-
+    ..#.
+    #..X
+    .#..
+  fallback_text: 'for row in grid: 는 줄 리스트를 하나씩 꺼내요. 그 안에서 for cell in row: 로 칸을 하나씩 꺼내 line 에 붙이면 한 줄이 완성돼요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          ..#.
+          #..X
+          .#..
+      - type: code_check
+        expected: '    for'
+  hints:
+    level_1: row 는 한 줄 리스트예요. 리스트 안의 칸을 하나씩 꺼내려면 무엇을 쓸까요?
+    level_2: 'for cell in row: 로 칸을 꺼내고, line = line + cell 로 붙여요. 바닥 타일 깔기와 비슷해요!'
+    level_3: |-
+      print(line) 위에 이렇게 써 보세요!
+      for cell in row:
+          line = line + cell
+  solution_code: |
+    grid = [
+        [".", ".", "#", "."],
+        ["#", ".", ".", "X"],
+        [".", "#", ".", "."],
+    ]
+
+    for row in grid:
+        line = ""
+        for cell in row:
+            line = line + cell
+        print(line)

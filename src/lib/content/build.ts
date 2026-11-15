@@ -177,7 +177,11 @@ export const QUIZ_VALIDATION_TYPE =
 // 콘텐츠 → 행
 // ------------------------------------------------------------
 
-export function buildRows(tree: ContentTree): BuildResult {
+/** `includeDrafts`: 준비 중 월드의 퀘스트도 행으로 (seed 에는 넣지 않고 자동 검증에만 씀, P10-05) */
+export function buildRows(
+  tree: ContentTree,
+  { includeDrafts = false }: { includeDrafts?: boolean } = {},
+): BuildResult {
   const rows: ContentRows = {
     worlds: [],
     stages: [],
@@ -198,8 +202,8 @@ export function buildRows(tree: ContentTree): BuildResult {
       description: world.description,
       unlock_rule: { ...world.unlock_rule },
     });
-    // 지도만 먼저 만든 "준비 중" 월드(isDraft)는 스테이지를 DB 에 넣지 않음 → 앱에서 그대로 준비 중 (P10-04)
-    if (isDraft(stages)) continue;
+    // "준비 중" 월드(isDraft)는 스테이지를 DB 에 넣지 않음 → 앱에서 그대로 준비 중 (P10-04)
+    if (isDraft(stages) && !includeDrafts) continue;
     for (const { stage, quests } of [...stages].sort(
       (a, b) => a.stage.order - b.stage.order,
     )) {
@@ -837,7 +841,7 @@ export interface CheckStep {
 
 export interface CheckQuest {
   id: string;
-  /** `<스테이지 order>-<퀘스트 order>` (P0-09 와 같음). 2월드가 생기면 월드를 앞에 붙임 */
+  /** `<스테이지 order>-<퀘스트 order>` (P0-09 와 같음). 1월드 밖은 월드 slug 를 앞에: `code-sea/1-2` */
   key: string;
   world: string;
   stage_order: number;
@@ -916,7 +920,10 @@ export function toCheckFixture(
       const meta = options.meta?.get(q.id);
       return {
         id: q.id,
-        key: `${so}-${q.order}`,
+        key:
+          worldOf(q.stage_id) === 'python-island'
+            ? `${so}-${q.order}`
+            : `${worldOf(q.stage_id)}/${so}-${q.order}`,
         world: worldOf(q.stage_id),
         stage_order: so,
         order: q.order,

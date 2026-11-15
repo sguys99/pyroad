@@ -1,0 +1,75 @@
+# 2월드 퀘스트 1-2: 글자 상자 꺼내기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-1
+
+id: b2000000-0000-0000-0000-000000000002
+order: 2
+title: 글자 상자 꺼내기
+concept: 인덱스, 음수 인덱스, len()
+xp_reward: 90
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 글자 번호(인덱스)로 글자 꺼내기
+  learning_goals:
+    - 글자의 자리 번호가 0부터 시작한다는 것을 안다
+    - '[-1]로 맨 끝 글자를 꺼낼 수 있다'
+    - len()으로 글자 수를 세고, for로 한 글자씩 꺼낼 수 있다
+  story_context: 공방 선반에 OCEAN 글자 상자가 놓여 있어요. 글자마다 자리 번호가 붙어 있대요. 상자에서 글자를 하나씩 꺼내 볼까요?
+  exercise_description: 'word = "OCEAN" 에서 첫 글자, 마지막 글자([-1]), 글자 수를 출력하고, for로 한 글자씩 한 줄에 하나씩 출력하세요'
+  starter_code: |
+    word = "OCEAN"
+
+    # 글자 번호는 0부터 세요. 맨 끝 글자는 -1 번이에요
+    print(f"첫 글자: {word[0]}")
+    print(f"마지막 글자: {word[___]}")
+    print(f"글자 수: {___}")
+
+    # for 로 한 글자씩 꺼내 한 줄에 하나씩 보여 줘요
+    for letter in word:
+        print(___)
+  expected_output_hint: '첫 글자: O, 마지막 글자: N, 글자 수: 5 다음에 O C E A N 이 한 줄에 하나씩 나와야 해요'
+  checklist:
+    - '마지막 글자 번호에 -1 을 넣어요'
+    - '글자 수는 len(word) 로 세요'
+    - 'for 안에서 letter 를 보여 줘요'
+  example_output: |-
+    첫 글자: O
+    마지막 글자: N
+    글자 수: 5
+    O
+    C
+    E
+    A
+    N
+  fallback_text: '글자도 리스트처럼 자리 번호가 있어요. word[0]은 첫 글자, word[-1]은 맨 끝 글자예요. len(word)는 글자 수를 세고, for letter in word: 는 글자를 하나씩 꺼내 줘요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          첫 글자: O
+          마지막 글자: N
+          글자 수: 5
+          O
+          C
+          E
+          A
+          N
+      - type: code_check
+        expected: '[-1]'
+      - type: code_check
+        expected: len(word)
+  hints:
+    level_1: 리스트 호수에서 리스트 번호를 0부터 셌던 것 기억나요? 글자도 똑같아요!
+    level_2: '뒤에서부터 셀 때는 음수 번호를 써요. 맨 끝은 -1 이에요. 글자 수는 len() 으로 세요.'
+    level_3: 'word[-1], len(word), print(letter) 를 빈칸에 차례로 넣어 보세요!'
+  solution_code: |
+    word = "OCEAN"
+
+    print(f"첫 글자: {word[0]}")
+    print(f"마지막 글자: {word[-1]}")
+    print(f"글자 수: {len(word)}")
+
+    for letter in word:
+        print(letter)

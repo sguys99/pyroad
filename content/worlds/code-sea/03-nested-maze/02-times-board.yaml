@@ -1,0 +1,58 @@
+# 2월드 퀘스트 3-2: 구구단 표
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-3
+# 줄 끝 공백 함정(제안 C)을 피하려고 칸 앞에 공백을 붙이고 줄을 "2단:" 으로 시작함
+
+id: b2000000-0000-0000-0000-000000000020
+order: 2
+title: 구구단 표
+concept: 중첩 반복 + f-string
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 중첩 반복으로 구구단 표 만들기
+  learning_goals:
+    - 바깥 반복 변수와 안쪽 반복 변수를 함께 쓸 수 있다
+    - f-string으로 계산 결과를 글자에 넣을 수 있다
+  story_context: 미로 벽에 구구단 표가 반쯤 지워져 있어요. 2단부터 4단까지, 1부터 3까지 곱한 표를 다시 그려 줘요.
+  exercise_description: '바깥 반복은 a 가 2~4, 안쪽 반복은 b 가 1~3 이 되게 하여 row 에 f" {a}x{b}={a * b}" 를 붙이고 "2단: 2x1=2 2x2=4 2x3=6"처럼 한 단씩 출력하세요'
+  starter_code: |
+    for a in range(2, 5):
+        row = f"{a}단:"
+        # 여기에 안쪽 반복을 넣어요
+        # b 가 1, 2, 3 일 때 row 에 f" {a}x{b}={a * b}" 를 붙여요
+
+        print(row)
+  expected_output_hint: '2단: 2x1=2 2x2=4 2x3=6 처럼 2단부터 4단까지 3줄이 나와야 해요'
+  checklist:
+    - 'for b in range(1, 4): 를 들여써서 넣어요'
+    - 'row = row + f" {a}x{b}={a * b}" 로 칸을 붙여요'
+    - '칸 앞에 띄어쓰기 한 칸, 줄 끝에는 띄어쓰기가 없어요'
+  example_output: |-
+    2단: 2x1=2 2x2=4 2x3=6
+    3단: 3x1=3 3x2=6 3x3=9
+    4단: 4x1=4 4x2=8 4x3=12
+  fallback_text: '바깥 a 가 2일 때 안쪽 b 가 1, 2, 3 을 다 돌고, 그다음 a 가 3이 돼요. 칸 글자 앞에 띄어쓰기를 붙이면 "2단:" 뒤에 칸이 예쁘게 이어지고 줄 끝에 빈칸이 남지 않아요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          2단: 2x1=2 2x2=4 2x3=6
+          3단: 3x1=3 3x2=6 3x3=9
+          4단: 4x1=4 4x2=8 4x3=12
+      - type: code_check
+        expected: '    for'
+  hints:
+    level_1: 바닥 타일 깔기처럼 안쪽 반복에서 row 에 한 칸씩 붙여요. 이번엔 무엇을 붙일까요?
+    level_2: 'b 가 1부터 3까지 되려면 range(1, 4) 예요. 칸 글자는 f" {a}x{b}={a * b}" 예요.'
+    level_3: |-
+      print(row) 위에 이렇게 써 보세요!
+      for b in range(1, 4):
+          row = row + f" {a}x{b}={a * b}"
+  solution_code: |
+    for a in range(2, 5):
+        row = f"{a}단:"
+        for b in range(1, 4):
+            row = row + f" {a}x{b}={a * b}"
+        print(row)

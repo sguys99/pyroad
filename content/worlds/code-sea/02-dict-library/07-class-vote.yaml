@@ -1,0 +1,70 @@
+# 2월드 퀘스트 2-7: 반장 투표 세기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-2
+
+id: b2000000-0000-0000-0000-000000000017
+order: 7
+title: 반장 투표 세기
+concept: 딕셔너리로 개수 세기
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 딕셔너리로 개수 세기
+  learning_goals:
+    - 처음 나온 이름은 1로, 이미 있는 이름은 1씩 늘려 셀 수 있다
+    - 센 결과를 items()로 돌며 보여 줄 수 있다
+  story_context: 바다 학교에서 반장을 뽑았어요! 투표 쪽지를 하나씩 열어 후보마다 몇 표인지 세어 봐요. 별똥이가 결과를 기다리고 있어요.
+  exercise_description: 'votes 리스트를 돌며 후보마다 표 수를 count 딕셔너리에 세고, "고래: 3표"처럼 한 줄씩 출력하세요'
+  starter_code: |
+    votes = ["고래", "상어", "고래", "문어", "고래", "상어"]
+    count = {}
+
+    for name in votes:
+        if name in count:
+            # 이미 이름표가 있으면 표를 1 늘려요
+            count[name] = ___
+        else:
+            # 처음 나온 이름이면 1표로 시작해요
+            ___
+
+    for name, n in count.items():
+        print(f"{name}: {n}표")
+  expected_output_hint: '고래: 3표, 상어: 2표, 문어: 1표 가 한 줄씩 나와야 해요'
+  checklist:
+    - '이미 있으면 count[name] 에 1을 더해요'
+    - '처음이면 count[name] = 1 로 이름표를 붙여요'
+    - '고래가 3표인지 봐요'
+  example_output: |-
+    고래: 3표
+    상어: 2표
+    문어: 1표
+  fallback_text: '빈 딕셔너리 count = {} 에서 시작해요. 이름이 처음 나오면 count[name] = 1 로 이름표를 붙이고, 이미 있으면 count[name] = count[name] + 1 로 한 표 늘려요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          고래: 3표
+          상어: 2표
+          문어: 1표
+      - type: code_check
+        expected: for
+        whole_word: true
+      - type: code_check
+        expected: count[name]
+  hints:
+    level_1: 표를 하나 늘리는 건 지금 표 수에 1을 더하는 거예요. 지금 표 수는 어디에 있나요?
+    level_2: '지금 표 수는 count[name] 에 있어요. 처음 나온 이름은 아직 이름표가 없으니 1을 넣어 붙여요.'
+    level_3: '첫 빈칸은 count[name] + 1, 둘째 빈칸 ___ 은 count[name] = 1 이에요!'
+  solution_code: |
+    votes = ["고래", "상어", "고래", "문어", "고래", "상어"]
+    count = {}
+
+    for name in votes:
+        if name in count:
+            count[name] = count[name] + 1
+        else:
+            count[name] = 1
+
+    for name, n in count.items():
+        print(f"{name}: {n}표")

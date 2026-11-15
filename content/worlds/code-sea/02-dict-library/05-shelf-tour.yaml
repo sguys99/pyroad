@@ -1,0 +1,63 @@
+# 2월드 퀘스트 2-5: 책장 한 바퀴
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-2
+
+id: b2000000-0000-0000-0000-000000000015
+order: 5
+title: 책장 한 바퀴
+concept: items()
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: items()로 딕셔너리 모두 돌기
+  learning_goals:
+    - 'for 키, 값 in 딕셔너리.items(): 로 이름표와 내용을 한 쌍씩 꺼낼 수 있다'
+    - 돌면서 값을 더해 합계를 낼 수 있다
+  story_context: 등대 도서관 책장을 한 바퀴 돌며 칸마다 책이 몇 권인지 세어 봐요. 다 돌고 나면 모두 몇 권인지도 알려 줘요!
+  exercise_description: 'for name, count in shelf.items(): 로 "동화: 4권"처럼 한 줄씩 출력하고, 권수를 모두 더해 "모두 11권"을 출력하세요'
+  starter_code: |
+    shelf = {"동화": 4, "과학": 2, "만화": 5}
+    total = 0
+
+    # .items() 는 이름표와 내용을 한 쌍씩 꺼내 줘요
+    for name, count in shelf.___():
+        print(f"{name}: {count}권")
+        # total 에 count 를 더해요
+        ___
+
+    print(f"모두 {total}권")
+  expected_output_hint: '동화: 4권, 과학: 2권, 만화: 5권, 모두 11권 이 한 줄씩 나와야 해요'
+  checklist:
+    - 'shelf 뒤 빈칸에 items 를 넣어요'
+    - 'for 안에서 total = total + count 로 더해요'
+    - '모두 11권 이 나오는지 봐요'
+  example_output: |-
+    동화: 4권
+    과학: 2권
+    만화: 5권
+    모두 11권
+  fallback_text: 'shelf.items() 는 ("동화", 4), ("과학", 2) 처럼 이름표와 내용을 한 쌍씩 꺼내요. for name, count in shelf.items(): 라고 쓰면 name 에 이름표, count 에 내용이 들어가요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          동화: 4권
+          과학: 2권
+          만화: 5권
+          모두 11권
+      - type: code_check
+        expected: .items(
+  hints:
+    level_1: 이름표와 내용을 한 쌍씩 꺼내는 메서드 이름은 영어로 "물건들"이라는 뜻이에요.
+    level_2: '빈칸은 items 예요. 합계는 동굴에서 금화를 더했던 것처럼 total = total + count 로 해요!'
+    level_3: 'for name, count in shelf.items(): 로 바꾸고, 빈칸 ___ 에 total = total + count 를 써 보세요!'
+  solution_code: |
+    shelf = {"동화": 4, "과학": 2, "만화": 5}
+    total = 0
+
+    for name, count in shelf.items():
+        print(f"{name}: {count}권")
+        total = total + count
+
+    print(f"모두 {total}권")

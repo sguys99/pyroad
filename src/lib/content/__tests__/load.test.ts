@@ -70,7 +70,7 @@ describe('loadContent', () => {
     expect(loadContent(dir).hash).toBe(tree.hash);
   });
 
-  it('퀘스트가 하나도 없는 월드는 지도만 먼저 만든 "준비 중": 통과하되 seed 에 스테이지를 넣지 않음 (P10-04)', () => {
+  it('퀘스트 없는 스테이지가 있는 월드는 "준비 중": 통과하되 seed 에 스테이지를 넣지 않음 (P10-04·P10-05)', () => {
     const draft = makeContent({
       'world.yaml': WORLD,
       'map.yaml': MAP,
@@ -81,7 +81,7 @@ describe('loadContent', () => {
     expect(toWorldInfos(tree)[0]).toMatchObject({ ready: false });
     expect(toWorldInfos(tree)[0].map).not.toBeNull();
 
-    // 퀘스트가 생기면 모든 스테이지에 있어야 함
+    // 스테이지 일부에만 퀘스트가 있어도 준비 중. 있는 퀘스트는 검사하고 자동 검증용 행(includeDrafts)에만 들어감
     const MAP2 = {
       ...MAP,
       layouts: {
@@ -112,8 +112,31 @@ describe('loadContent', () => {
         order: 2,
       },
     });
-    expect(problemsOf(partial)).toEqual([
-      expect.stringMatching(/02-variable-forest: 퀘스트 파일이 없어요/),
+    const partialTree = loadContent(partial);
+    expect(buildRows(partialTree).rows.stages).toEqual([]);
+    expect(buildRows(partialTree).rows.quests).toEqual([]);
+    expect(toWorldInfos(partialTree)[0]).toMatchObject({ ready: false });
+    expect(
+      buildRows(partialTree, { includeDrafts: true }).rows.quests.map(
+        (q) => q.title,
+      ),
+    ).toEqual(['첫 번째 인사']);
+    const broken = makeContent({
+      'world.yaml': WORLD,
+      'map.yaml': MAP2,
+      '01-python-village/stage.yaml': STAGE,
+      '01-python-village/01-first-greeting.yaml': {
+        ...codeQuest(),
+        xp_reward: 'x',
+      },
+      '02-variable-forest/stage.yaml': {
+        ...STAGE,
+        id: 'a1000000-0000-0000-0000-000000000002',
+        order: 2,
+      },
+    });
+    expect(problemsOf(broken)).toEqual([
+      expect.stringMatching(/01-first-greeting\.yaml.*xp_reward/),
     ]);
   });
 

@@ -10,7 +10,7 @@
 
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { join, relative } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
 import {
@@ -65,9 +65,12 @@ export class ContentError extends Error {
   }
 }
 
-/** 스테이지는 있지만 퀘스트가 하나도 없는 월드 (지도만 먼저 만든 "준비 중", P10-04) */
+/**
+ * 준비 중 월드: 스테이지가 없거나, 퀘스트 파일이 없는 스테이지가 하나라도 있음 (P10-04, 스테이지별로 쓰는 중 P10-05).
+ * seed 에 넣지 않지만 있는 퀘스트는 똑같이 검사함(스키마, `test:content`)
+ */
 export const isDraft = (stages: readonly LoadedStage[]) =>
-  stages.every((s) => s.quests.length === 0);
+  stages.length === 0 || stages.some((s) => s.quests.length === 0);
 
 const NUMBERED = /^(\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const QUEST_FILE = /^(\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*\.yaml$/;
@@ -217,14 +220,6 @@ export function loadContent(contentDir: string): ContentTree {
         quests.push({ file: questFile, quest: quest.value });
       }
       stages.push({ file: stageFile, stage: stage.value, quests });
-    }
-    // 퀘스트가 하나도 없는 월드는 지도만 먼저 만든 "준비 중"(seed 에 넣지 않음). 퀘스트가 생기면 모든 스테이지에 있어야 함
-    if (!isDraft(stages)) {
-      for (const s of stages) {
-        if (s.quests.length === 0) {
-          problems.push(`${rel(dirname(s.file))}: 퀘스트 파일이 없어요`);
-        }
-      }
     }
     const map = loadMap(join(worldDir, 'map.yaml'), stages.length);
     worlds.push({

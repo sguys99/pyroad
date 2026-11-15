@@ -1,0 +1,63 @@
+# 2월드 퀘스트 2-4: 없는 책을 찾으면?
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-2
+
+id: b2000000-0000-0000-0000-000000000014
+order: 4
+title: 없는 책을 찾으면?
+concept: in, get()
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 없는 키를 안전하게 다루기
+  learning_goals:
+    - in으로 딕셔너리에 키가 있는지 확인할 수 있다
+    - .get(키, 대신 값)으로 없는 키도 멈추지 않고 꺼낼 수 있다
+  story_context: 책장에 책이 몇 권 있는지 적어 둔 딕셔너리가 있어요. 그런데 없는 책 문어 요리를 찾자 프로그램이 멈춰 버렸어요! 멈추지 않게 고쳐 볼까요?
+  exercise_description: 'in으로 "고래 일기"가 있는지 확인해 "고래 일기 있어요"를 출력하고, 마지막 줄의 shelf["문어 요리"]를 .get("문어 요리", "없어요")로 바꿔 출력하세요'
+  starter_code: |
+    shelf = {"바다 탐험": 3, "고래 일기": 1}
+
+    # 1) "고래 일기" 이름표가 shelf 에 있는지 in 으로 확인해요
+    if ___:
+        print("고래 일기 있어요")
+
+    print(shelf["바다 탐험"])
+
+    # 2) 없는 이름표를 꺼내면 에러가 나요! .get(이름표, "없어요") 로 바꿔요
+    print(shelf["문어 요리"])
+  expected_output_hint: 고래 일기 있어요, 3, 없어요 가 한 줄씩 나와야 해요
+  checklist:
+    - 'if 빈칸에 "고래 일기" in shelf 를 넣어요'
+    - '마지막 줄을 shelf.get("문어 요리", "없어요") 로 바꿔요'
+    - 멈추지 않고 세 줄이 나오는지 봐요
+  example_output: |-
+    고래 일기 있어요
+    3
+    없어요
+  fallback_text: '"고래 일기" in shelf 는 이름표가 있으면 True, 없으면 False 예요. shelf["문어 요리"]처럼 없는 이름표를 꺼내면 KeyError 로 멈추지만, shelf.get("문어 요리", "없어요")는 멈추지 않고 "없어요"를 돌려줘요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          고래 일기 있어요
+          3
+          없어요
+      - type: code_check
+        expected: .get(
+      - type: code_check
+        expected: in shelf
+  hints:
+    level_1: 리스트 호수에서 "이 값이 리스트 안에 있나?" 물을 때 쓴 낱말이 있었어요. 딕셔너리에도 똑같이 써요!
+    level_2: 'if "고래 일기" in shelf: 로 물어봐요. 없는 이름표는 shelf.get(이름표, 대신 값) 으로 꺼내요.'
+    level_3: 'if "고래 일기" in shelf: 를 쓰고, 마지막 줄을 print(shelf.get("문어 요리", "없어요")) 로 바꿔 보세요!'
+  solution_code: |
+    shelf = {"바다 탐험": 3, "고래 일기": 1}
+
+    if "고래 일기" in shelf:
+        print("고래 일기 있어요")
+
+    print(shelf["바다 탐험"])
+
+    print(shelf.get("문어 요리", "없어요"))

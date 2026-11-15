@@ -1,0 +1,57 @@
+# 2월드 퀘스트 2-1: 책 이름표 붙이기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-2
+
+id: b2000000-0000-0000-0000-000000000011
+order: 1
+title: 책 이름표 붙이기
+concept: 딕셔너리 만들기, 키로 꺼내기
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 딕셔너리 만들고 키로 값 꺼내기
+  learning_goals:
+    - '{키: 값} 모양으로 딕셔너리를 만들 수 있다'
+    - '딕셔너리[키]로 값을 꺼낼 수 있다'
+  story_context: 등대 도서관에 왔어요! 버그버그가 책 이름표를 몽땅 떼어 갔대요. 파이뱀이 말해요. "딕셔너리는 이름표 붙은 조개 상자야!" 첫 책에 이름표를 붙여 줘요.
+  exercise_description: 'book 딕셔너리에 "제목"은 "바다 탐험", "쪽수"는 120을 넣고, 키로 꺼내 제목과 쪽수를 출력하세요'
+  starter_code: |
+    # 책 이름표를 붙여요: { "이름표": 내용, "이름표": 내용 }
+    book = {"제목": "바다 탐험", "쪽수": ___}
+
+    # 딕셔너리[이름표] 로 내용을 꺼내요
+    title = book["제목"]
+    pages = ___
+
+    print(f"제목: {title}")
+    print(f"쪽수: {pages}쪽")
+  expected_output_hint: '제목: 바다 탐험 과 쪽수: 120쪽 이 한 줄씩 나와야 해요'
+  checklist:
+    - '"쪽수" 이름표에 120 을 넣어요'
+    - 'pages 에 book["쪽수"] 를 넣어요'
+    - 두 줄이 나오는지 봐요
+  example_output: |-
+    제목: 바다 탐험
+    쪽수: 120쪽
+  fallback_text: '딕셔너리는 {키: 값} 짝을 쉼표로 이어 담아요. 리스트는 번호로 꺼내지만, 딕셔너리는 book["제목"]처럼 이름표(키)로 꺼내요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          제목: 바다 탐험
+          쪽수: 120쪽
+      - type: code_check
+        expected: book[
+  hints:
+    level_1: title 줄을 잘 봐요. 제목은 어떤 이름표로 꺼냈나요?
+    level_2: '쪽수도 같은 방법으로 꺼내요. 대괄호 안에 이름표 "쪽수"를 넣어요!'
+    level_3: '"쪽수": 120 으로 넣고, pages = book["쪽수"] 를 써 보세요!'
+  solution_code: |
+    book = {"제목": "바다 탐험", "쪽수": 120}
+
+    title = book["제목"]
+    pages = book["쪽수"]
+
+    print(f"제목: {title}")
+    print(f"쪽수: {pages}쪽")

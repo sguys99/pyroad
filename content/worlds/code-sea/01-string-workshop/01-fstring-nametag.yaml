@@ -1,0 +1,59 @@
+# 2월드 퀘스트 1-1: 반짝 이름표
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-1
+
+id: b2000000-0000-0000-0000-000000000001
+order: 1
+title: 반짝 이름표
+concept: f-string
+xp_reward: 90
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: f-string으로 글자 안에 변수 넣기
+  learning_goals:
+    - 따옴표 앞에 f를 붙여 f-string을 만들 수 있다
+    - '{ } 안에 변수 이름을 넣어 값을 글자 속에 끼워 넣을 수 있다'
+  story_context: 코드 바다의 첫 섬, 산호 문자열 공방에 도착했어요! 공방 문에 걸 반짝 이름표를 만들어 볼까요? 파이뱀이 새 주문 f-string을 알려 줄 거예요.
+  exercise_description: 'name과 age 변수를 f-string에 넣어 "이름: 바다"와 "바다는 10살" 두 줄을 출력하세요'
+  starter_code: |
+    # 반짝 이름표를 만들어요!
+    name = "바다"
+    age = 10
+
+    # 따옴표 앞에 f 를 붙이면 { } 안에 변수를 넣을 수 있어요
+    print(f"이름: {name}")
+
+    # 아래 줄도 f-string 으로 바꿔서 "바다는 10살"이 나오게 해요
+    print("___는 ___살")
+  expected_output_hint: '이름: 바다 와 바다는 10살 두 줄이 나와야 해요'
+  checklist:
+    - '둘째 print 의 따옴표 앞에 f 를 붙여요'
+    - '___ 자리에 {name} 과 {age} 를 넣어요'
+    - '바다는 10살 이 나오는지 봐요'
+  example_output: |-
+    이름: 바다
+    바다는 10살
+  fallback_text: 'f-string은 따옴표 앞에 f를 붙인 글자예요. f"{name}는 {age}살"처럼 쓰면 { } 자리에 변수 값이 쏙 들어가요. 숫자 age도 str() 없이 바로 넣을 수 있어요!'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          이름: 바다
+          바다는 10살
+      - type: code_check
+        expected: '{name}'
+      - type: code_check
+        expected: '{age}'
+  hints:
+    level_1: 첫째 print 줄을 잘 봐요. 따옴표 앞에 무엇이 붙어 있나요?
+    level_2: 'f를 붙인 따옴표 안에서는 { } 안에 변수 이름을 쓰면 그 값이 나와요. {name}, {age}처럼요!'
+    level_3: 'print(f"{___}는 {___}살") 의 빈칸에 name 과 age 를 넣어 보세요!'
+  solution_code: |
+    name = "바다"
+    age = 10
+
+    print(f"이름: {name}")
+    print(f"{name}는 {age}살")

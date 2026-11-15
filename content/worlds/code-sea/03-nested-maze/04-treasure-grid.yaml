@@ -1,0 +1,63 @@
+# 2월드 퀘스트 3-4: 보물 지도 칸 꺼내기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-3 (격자에 한글 없음, P0-14)
+
+id: b2000000-0000-0000-0000-000000000022
+order: 4
+title: 보물 지도 칸 꺼내기
+concept: 2차원 리스트
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: '2차원 리스트에서 grid[줄][칸]으로 꺼내기'
+  learning_goals:
+    - 리스트 안에 리스트를 넣어 격자를 만들 수 있다
+    - 'grid[줄][칸]으로 한 칸을 꺼낼 수 있다'
+    - len()으로 줄 수와 칸 수를 셀 수 있다
+  story_context: 버그버그가 숨긴 보물 지도를 찾았어요! 지도는 리스트 안에 리스트가 들어 있는 모양이에요. X 표시가 있는 칸을 꺼내 볼까요?
+  exercise_description: 'grid[1][2] 로 보물 칸을 꺼내 "보물 칸: X"를 출력하고, 줄 수 len(grid)와 칸 수 len(grid[0])도 출력하세요'
+  starter_code: |
+    grid = [
+        [".", "#", ".", "."],
+        [".", ".", "X", "."],
+        ["#", ".", ".", "."],
+    ]
+
+    # grid[줄][칸] — 줄 번호도 칸 번호도 0부터 세요
+    print(f"보물 칸: {grid[___][___]}")
+    print(f"줄 수: {len(grid)}")
+    print(f"칸 수: {len(___)}")
+  expected_output_hint: '보물 칸: X, 줄 수: 3, 칸 수: 4 가 한 줄씩 나와야 해요'
+  checklist:
+    - 'X 는 1번 줄의 2번 칸이에요. grid[1][2] 로 꺼내요'
+    - '칸 수는 첫 줄 grid[0] 의 길이예요'
+    - 세 줄이 나오는지 봐요
+  example_output: |-
+    보물 칸: X
+    줄 수: 3
+    칸 수: 4
+  fallback_text: 'grid[1]은 둘째 줄 리스트 [".", ".", "X", "."] 예요. 거기서 다시 [2]를 하면 셋째 칸 "X"가 나와요. 그래서 grid[1][2]처럼 줄 번호 다음에 칸 번호를 써요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          보물 칸: X
+          줄 수: 3
+          칸 수: 4
+      - type: code_check
+        expected: ']['
+  hints:
+    level_1: 번호는 0부터 세요. X 는 몇 번 줄에 있나요? 그 줄에서 몇 번 칸에 있나요?
+    level_2: '줄 번호는 1, 칸 번호는 2 예요. 칸 수는 한 줄 리스트의 길이라서 len(grid[0]) 이에요.'
+    level_3: 'grid[1][2] 와 len(grid[0]) 을 빈칸에 넣어 보세요!'
+  solution_code: |
+    grid = [
+        [".", "#", ".", "."],
+        [".", ".", "X", "."],
+        ["#", ".", ".", "."],
+    ]
+
+    print(f"보물 칸: {grid[1][2]}")
+    print(f"줄 수: {len(grid)}")
+    print(f"칸 수: {len(grid[0])}")

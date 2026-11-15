@@ -1,0 +1,38 @@
+# 2월드 퀴즈 1-9: 이름표가 이상해
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000009
+order: 9
+title: 이름표가 이상해
+concept: f-string
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: f-string 버그 찾기
+  learning_goals:
+    - f를 빠뜨리면 중괄호가 글자 그대로 나온다는 것을 안다
+  story_context: 버그버그가 이름표 주문에서 글자 하나를 훔쳐 갔어요! 이름표에 바다는 10살 대신 이상한 글자가 나와요.
+  fallback_text: 중괄호 안에 변수 이름을 넣어 값을 끼우려면 따옴표 앞에 꼭 붙여야 하는 글자가 있어요. 반짝 이름표 퀘스트를 떠올려 보세요.
+  quiz:
+    question: 바다는 10살 이 나와야 하는데 중괄호가 그대로 나와요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - { id: ln-d3wq, code: 'name = "바다"' }
+      - { id: ln-t8ox, code: 'age = 10' }
+      - { id: ln-g5mj, code: 'print("{name}는 {age}살")' }
+    fixes:
+      - { id: fx-n2ry, code: 'print(f"{name}는 {age}살")' }
+      - { id: fx-a6vk, code: 'print("f{name}는 {age}살")' }
+      - { id: fx-q9ul, code: 'print(name + "는 " + age + "살")' }
+      - { id: fx-e4hs, code: 'print("name는 age살")' }
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-g5mj, fix: fx-n2ry }
+    explanation: f-string은 따옴표 바깥, 따옴표 바로 앞에 f를 붙여요. 그래야 중괄호 자리에 name과 age 값이 들어가요.
+    explanations:
+      ln-d3wq: 이 줄은 이름을 잘 담았어요.
+      ln-t8ox: 이 줄은 나이를 잘 담았어요.
+      fx-a6vk: f가 따옴표 안에 들어가면 그냥 글자 f로 나와요.
+      fx-q9ul: 숫자 age는 str()로 바꾸지 않으면 글자와 + 로 이을 수 없어요.
+      fx-e4hs: 따옴표 안의 name, age는 변수가 아니라 그냥 글자예요.

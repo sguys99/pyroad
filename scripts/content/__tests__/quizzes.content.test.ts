@@ -20,13 +20,20 @@ import { CONTENT_DIR } from '../lib/paths';
 const TIMEOUT_MS = 3_000;
 
 const tree = loadContent(CONTENT_DIR);
-const all = tree.worlds
-  .flatMap((w) => w.stages)
-  .flatMap((s) =>
-    s.quests.map((q) => ({ stage: s.stage.order, quest: q.quest })),
-  );
+const worlds = tree.worlds;
+// stage: 1월드는 `1`, 다른 월드는 `code-sea/1` (테스트 이름·스테이지 구분용)
+const stageKey = (world: string, order: number) =>
+  world === 'python-island' ? `${order}` : `${world}/${order}`;
+const all = worlds.flatMap((w) =>
+  w.stages.flatMap((s) =>
+    s.quests.map((q) => ({
+      stage: stageKey(w.world.slug, s.stage.order),
+      quest: q.quest,
+    })),
+  ),
+);
 const quizzes = all.filter(
-  (x): x is { stage: number; quest: QuizQuest } =>
+  (x): x is { stage: string; quest: QuizQuest } =>
     x.quest.quest_type === 'quiz',
 );
 // 보스 라운드(P9-12)는 퀴즈 하나와 같은 검사: 라운드마다 퀴즈 퀘스트 모양으로 펼침
@@ -93,8 +100,15 @@ async function run(code: string): Promise<Outcome> {
 // 출력 예측형 보기는 실제 출력 그대로 (여러 줄은 \n, 화면은 줄마다 ↵ 표시, B53)
 const lines = (stdout: string) => stdout.trim();
 
-it('1월드 스테이지마다 퀴즈가 있음', () => {
-  expect(new Set(quizzes.map((q) => q.stage)).size).toBe(7);
+// 모바일로 풀 수 있게 퀘스트가 있는 스테이지마다 퀴즈가 있음 (아직 안 쓴 준비 중 스테이지는 건너뜀)
+it('퀘스트가 있는 스테이지마다 퀴즈가 있음', () => {
+  const withQuests = worlds.flatMap((w) =>
+    w.stages
+      .filter((s) => s.quests.length > 0)
+      .map((s) => stageKey(w.world.slug, s.stage.order)),
+  );
+  expect(withQuests.filter((k) => !k.includes('/')).length).toBe(7); // 1월드는 그대로 7개
+  expect(new Set(quizzes.map((q) => q.stage))).toEqual(new Set(withQuests));
 });
 
 for (const { stage, quest } of [...quizzes, ...bossRounds, ...skillChecks])

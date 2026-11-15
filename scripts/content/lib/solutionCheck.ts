@@ -123,7 +123,7 @@ export function toUnits(
 /** content/ 를 메모리에서 빌드해 검증 단위를 만든다 (content:build 와 같은 함수, 파일은 쓰지 않음) */
 export function loadUnits(contentDir: string) {
   const tree = loadContent(contentDir);
-  const { rows, meta, warnings } = buildRows(tree);
+  const { rows, meta, warnings } = buildRows(tree, { includeDrafts: true });
   const fixture = toCheckFixture(rows, {
     generatedBy: 'npm run test:content',
     source: `content/ (${tree.hash})`,
