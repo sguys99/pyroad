@@ -104,6 +104,12 @@ const RPC_ERRORS: Record<string, { status: number; error: string }> = {
     status: 409,
     error: '이번 주에 끝낸 퀘스트가 생기면 자랑할 수 있어요.',
   },
+  // 작품 카드 (P11-08, 00056)
+  creation_not_found: { status: 404, error: '작품을 찾지 못했어요.' },
+  creation_not_shared: {
+    status: 409,
+    error: '갤러리에 전시 중인 작품만 자랑 카드로 만들 수 있어요.',
+  },
   // 실력 확인 퀴즈 (P10-03, 00052)
   world_not_found: { status: 404, error: '그런 월드는 없어요.' },
   skill_check_missing: {
@@ -166,6 +172,7 @@ async function callRpc<T>(
     | 'equip_item'
     | 'shop_status'
     | 'create_share_card'
+    | 'create_creation_share_card'
     | 'claim_share_reward'
     | 'manage_share_card'
     | 'skill_check_start'
@@ -556,6 +563,20 @@ export function createShareCardRpc(
       p_user_id: userId,
       p_kind: kind,
       ...(ref ? { p_ref: ref } : {}),
+    }),
+  );
+}
+
+/** 작품 자랑 카드 만들기 (P11-08, 00056). 갤러리에 전시 중인 내 작품만, 아니면 creation_not_found·creation_not_shared */
+export function createCreationShareCardRpc(
+  admin: AdminClient,
+  userId: string,
+  creationId: string,
+) {
+  return callRpc<ShareCardCreated>('create_creation_share_card', () =>
+    admin.rpc('create_creation_share_card', {
+      p_user_id: userId,
+      p_creation_id: creationId,
     }),
   );
 }

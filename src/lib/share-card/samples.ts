@@ -3,8 +3,39 @@
  * 닉네임은 지어낸 예시다(실제 아이 정보 아님). 대표 상태: 긴 닉네임(10자)·긴 제목(2줄)·빈 별·티어 3종·월드 1/2/3,
  * 4종마다 꾸미기 있음/없음(P9-07: `*-costume`은 DB 스냅샷 모양으로 — 공개 꾸민 모습 아이템 id → `avatarLook`)
  */
+import { COLOR } from '@/lib/design/tokens';
 import { cardFromSnapshot } from './snapshot';
+import { svgDataUri } from './svg';
 import type { ShareCardData } from './types';
+
+/**
+ * 작품 카드 샘플 그림 (P11-08): 거북이가 그린 무지개 별. 운영은 작품 썸네일 PNG(400×400)를 data URI 로 넣는데,
+ * 샘플은 같은 자리에 들어가는 SVG 로 대신한다(카탈로그·테스트가 파일을 읽지 않게)
+ */
+export const SAMPLE_DRAWING = (() => {
+  const colors = [
+    COLOR.error,
+    COLOR.accent,
+    COLOR.primary,
+    COLOR.w3Blueprint,
+    COLOR.w3Brick,
+  ];
+  const pts = Array.from({ length: 5 }, (_, i) => {
+    const a = (-90 + i * 144) * (Math.PI / 180);
+    return [200 + 150 * Math.cos(a), 210 + 150 * Math.sin(a)].map((n) =>
+      n.toFixed(1),
+    );
+  });
+  const lines = pts
+    .map(([x, y], i) => {
+      const [x2, y2] = pts[(i + 1) % 5];
+      return `<path d="M${x} ${y} L${x2} ${y2}" stroke="${colors[i]}" stroke-width="9" stroke-linecap="round"/>`;
+    })
+    .join('');
+  return svgDataUri(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="${COLOR.surface}"/>${lines}<circle cx="200" cy="210" r="22" fill="${COLOR.accent}"/></svg>`,
+  );
+})();
 
 /** DB 스냅샷(`share_cards.snapshot`, 00043) 모양 그대로 → 운영 이미지 라우트와 같은 길(`cardFromSnapshot`)로 */
 function fromSnapshot(kind: ShareCardData['kind'], snapshot: object) {
@@ -190,6 +221,43 @@ export const SHARE_CARD_SAMPLES: ShareCardSample[] = [
       stars: 256,
       world: 2,
       avatar: { skin: 'violet', hat: 'hat_explorer', cape: 'cape_night' },
+    }),
+  },
+  {
+    id: 'creation-drawing',
+    note: '작품 카드 — 그림(썸네일) + 탐험가 모자, 스냅샷 (P11-08)',
+    data: {
+      ...fromSnapshot('creation', {
+        nickname: '별빛코더',
+        world: 3,
+        name: '무지개 별',
+        avatar: { skin: 'sky', hat: 'hat_explorer' },
+      }),
+      thumbnail: SAMPLE_DRAWING,
+    } as ShareCardData,
+  },
+  {
+    id: 'creation-chat',
+    note: '작품 카드 — 대화 앞 4줄(대답 오른쪽), 스냅샷 (P11-08)',
+    data: fromSnapshot('creation', {
+      nickname: '코딩왕민준',
+      world: 3,
+      name: '두근두근 퀴즈쇼',
+      lines: [
+        { text: '퀴즈쇼에 온 걸 환영해요! 이름이 뭐예요?' },
+        { text: '번개', answer: true },
+        { text: '번개님, 첫 문제! 파이썬의 마스코트는 무엇일까요?' },
+        { text: '파이뱀', answer: true },
+      ],
+    }),
+  },
+  {
+    id: 'creation-long',
+    note: '작품 카드 — 긴 닉네임 10자 + 20자 제목(2줄), 그림 없음(썸네일 없는 그림)',
+    data: fromSnapshot('creation', {
+      nickname: '파이썬마스터김하늘별',
+      world: 3,
+      name: '우리 동네 가상 펫 돌봄 센터 키우기',
     }),
   },
 ];

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { reportServerError } from '@/lib/api/serverError';
+import { fromBytea } from '@/lib/creations/server';
 import { cardFromSnapshot, SHARE_CARD_ID } from './snapshot';
 import type { ShareCardData } from './types';
 
@@ -16,9 +17,13 @@ export interface PublicShareCard {
   expiresAt: Date;
 }
 
-/** null = 없음·비공개·만료·모양이 틀림(404), 'error' = 조회 실패(503) */
+/**
+ * null = 없음·비공개·만료·모양이 틀림(404), 'error' = 조회 실패(503).
+ * `art` = 그림 작품 카드의 썸네일까지 읽음 (이미지 라우트만 — 공유 페이지는 카드 PNG 주소만 쓴다)
+ */
 export async function loadPublicShareCard(
   id: string,
+  { art = false }: { art?: boolean } = {},
 ): Promise<PublicShareCard | null | 'error'> {
   if (!SHARE_CARD_ID.test(id)) return null;
   const { data, error } = await createAdminClient()
@@ -36,6 +41,22 @@ export async function loadPublicShareCard(
       op: 'snapshot parse',
     });
     return null;
+  }
+  // 그림 작품 카드: 작품 썸네일 PNG 를 그림에 넣는다(스냅샷에는 없음). 카드·작품이 공개 중일 때만 오는 service_role 함수(00056)
+  if (art && card.kind === 'creation' && !card.lines) {
+    const thumb = await createAdminClient().rpc(
+      'share_card_creation_thumbnail',
+      { p_id: id },
+    );
+    if (thumb.error) {
+      reportServerError(thumb.error, {
+        area: 'share-card',
+        op: 'creation thumbnail',
+      });
+      return 'error';
+    }
+    if (typeof thumb.data === 'string' && thumb.data)
+      card.thumbnail = `data:image/png;base64,${fromBytea(thumb.data).toString('base64')}`;
   }
   return {
     id: data.id,

@@ -54,6 +54,23 @@ const SCHEMAS = {
     xp: count,
     stars: count,
   }),
+  // 작품 카드 (P11-08, 00056). 그림(썸네일)은 스냅샷이 아니라 이미지 라우트가 작품에서 읽는다
+  creation: z.object({
+    ...base,
+    name: z.string().min(1).max(40),
+    lines: z
+      .array(
+        z
+          .object({
+            text: z.string().min(1).max(60),
+            answer: z.literal(true).optional(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(4)
+      .optional(),
+  }),
 } as const;
 
 export const SHARE_CARD_KINDS = Object.keys(SCHEMAS) as ShareCardKind[];

@@ -986,6 +986,28 @@ const MY_CARD_SAMPLES: MyShareCard[] = [
     imageUrl: '',
     detail: '8월 둘째 주 · 퀘스트 12개',
   },
+  // 작품 카드 (P11-08): 전시 중 · 작품을 갤러리에서 내려 닫힘(다시 공개 대신 안내)
+  {
+    id: 'DDDDDDDDDDDDDDDDDDDDDD',
+    kind: 'creation',
+    version: 1,
+    isPublic: true,
+    expiresAt: new Date(Date.now() + 88 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    imageUrl: '/dev/design/share-card/creation-drawing',
+    detail: '「무지개 별」',
+  },
+  {
+    id: 'EEEEEEEEEEEEEEEEEEEEEE',
+    kind: 'creation',
+    version: 1,
+    isPublic: false,
+    expiresAt: new Date(Date.now() + 70 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 20 * 86_400_000).toISOString(),
+    imageUrl: '',
+    detail: '「두근두근 퀴즈쇼」',
+    workOffShow: true,
+  },
 ];
 
 function ShareSheetDemo() {

@@ -185,3 +185,69 @@ describe('GET /api/share-cards/{id}/image (P9-07)', () => {
     expect(png.readUInt32BE(20)).toBe(630);
   }, 20_000);
 });
+
+describe('작품 카드 (P11-08)', () => {
+  const WORK = '99999999-2222-4333-8444-555555555555';
+
+  it('ref 는 작품 uuid 만, 동의 게이트 뒤 create_creation_share_card(확인한 id·작품 id 만)', async () => {
+    expect((await POST(req({ kind: 'creation' }))).status).toBe(400);
+    expect((await POST(req({ kind: 'creation', ref: 'x' }))).status).toBe(400);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    const res = await POST(
+      req({ kind: 'creation', ref: WORK, title: '가짜', code: 'x' }),
+    );
+    expect(res.status).toBe(200);
+    expect(mocks.gate).toHaveBeenCalledWith('u1', expect.anything());
+    expect(mocks.rpc).toHaveBeenCalledWith('create_creation_share_card', {
+      p_user_id: 'u1',
+      p_creation_id: WORK,
+    });
+    expect((await res.json()).kind).toBe('creation');
+  });
+
+  it('전시 중이 아닌 작품은 409 아이용 문구', async () => {
+    mocks.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'creation_not_shared', code: 'PT409' },
+    });
+    const res = await POST(req({ kind: 'creation', ref: WORK }));
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toContain('갤러리에 전시 중인 작품');
+  });
+
+  it('그림 작품 이미지: 공개 카드 + 작품 썸네일(service_role 함수)로 그림, 썸네일이 없으면 그래도 그림', async () => {
+    // 1×1 PNG
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64',
+    );
+    let thumb: string | null = `\\x${png.toString('hex')}`;
+    mocks.rpc.mockImplementation((name: string) =>
+      name === 'share_card_public'
+        ? {
+            maybeSingle: async () => ({
+              data: {
+                id: ID,
+                kind: 'creation',
+                version: 1,
+                expires_at: new Date(Date.now() + 86_400_000).toISOString(),
+                snapshot: { nickname: '하늘별', world: 3, name: '무지개 별' },
+              },
+              error: null,
+            }),
+          }
+        : Promise.resolve({ data: thumb, error: null }),
+    );
+    const res = await image(ID);
+    expect(res.status).toBe(200);
+    expect(mocks.rpc).toHaveBeenCalledWith('share_card_creation_thumbnail', {
+      p_id: ID,
+    });
+    expect(res.headers.get('content-disposition')).toContain(
+      'pyroad-creation.png',
+    );
+    expect(res.headers.get('vercel-cache-tag')).toBe(`share-card-${ID}`);
+    thumb = null;
+    expect((await image(ID)).status).toBe(200);
+  }, 20_000);
+});

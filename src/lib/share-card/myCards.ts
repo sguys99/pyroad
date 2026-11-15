@@ -14,6 +14,8 @@ export interface MyShareCard {
   imageUrl: string;
   /** 카드에 적힌 성과 한 줄 ("레벨 7", "「…」 스테이지 · 별 3개") */
   detail: string;
+  /** 작품 카드인데 작품이 지금 갤러리에 없음(내림·숨김) — 다시 공개할 수 없음 (P11-08, 00056) */
+  workOffShow?: boolean;
 }
 
 export const KIND_LABEL: Record<ShareCardKind, string> = {
@@ -21,6 +23,7 @@ export const KIND_LABEL: Record<ShareCardKind, string> = {
   stage: '스테이지 클리어 카드',
   achievement: '업적 카드',
   weekly: '이번 주 기록 카드',
+  creation: '작품 카드',
 };
 
 /** 공개 중 · 숨김(본인이 닫음) · 기간 끝(90일, §12-Q67 ①) */
@@ -52,5 +55,7 @@ export function myCardDetail(kind: string, snapshot: unknown): string {
       return `「${d.name}」`;
     case 'weekly':
       return `${d.weekLabel} · 퀘스트 ${d.quests}개`;
+    case 'creation':
+      return `「${d.name}」`;
   }
 }

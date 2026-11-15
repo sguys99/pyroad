@@ -1295,6 +1295,91 @@ async function groupShareCards(u) {
   });
 }
 
+async function groupCreationShareCards() {
+  // ── 작품 자랑 카드 (P11-08, ① 00056) ──
+  const pub = async (id) => (await rpc('share_card_public', { p_id: id })).json;
+  const thumb = async (id) => (await rpc('share_card_creation_thumbnail', { p_id: id })).json;
+  const make = (user, creation) => rpc('create_creation_share_card', { p_user_id: user, p_creation_id: creation });
+  const res = (r) => (r.status === 200 ? 200 : `${r.status}:${errMsg(r)}`);
+  await check({
+    group: 'share',
+    id: 'SCC-2',
+    role: 'service_role',
+    op: '작품 카드: 전시 중인 내 작품만(비공개·남의 작품 거절) · 스냅샷은 이름·대화 앞 4줄(40자)만, 코드 없음 · 썸네일 함수 · 이름 변경 → version+1 · 내리기·숨김 → 카드 닫힘·공개 조회 0행·다시 공개 거절 · 다시 전시 후 다시 공개 · 지우기 → 카드 행 삭제',
+    ...OK,
+    run: async () => {
+      const x = await createUser('scc2', '작품카드');
+      const y = await createUser('scc2b', '남의작품');
+      const draw = one(`insert into public.creations (user_id, kind, title, code, commands_gz, thumbnail, visibility, published_at)
+        values ('${x.id}', 'drawing', '별 그림', 'secret_code()', decode('1f8b' || repeat('00', 30), 'hex'),
+                decode('89504e470d0a1a0a' || repeat('00', 70), 'hex'), 'public', now()) returning id`);
+      const chat = one(`insert into public.creations (user_id, kind, title, code, transcript, visibility, published_at)
+        values ('${x.id}', 'conversation', '퀴즈쇼', 'secret_code()',
+                '[{"text":"이름이 뭐예요?"},{"text":"   "},{"text":"번개","answer":true},{"text":"${'가'.repeat(50)}"},{"text":"넷째"},{"text":"다섯째"}]',
+                'public', now()) returning id`);
+      const priv = one(`insert into public.creations (user_id, kind, title, transcript) values ('${x.id}', 'conversation', '비밀', '[{"text":"x"}]') returning id`);
+      const others = one(`insert into public.creations (user_id, kind, title, transcript, visibility, published_at) values ('${y.id}', 'conversation', '남의', '[{"text":"x"}]', 'public', now()) returning id`);
+      const denied = [await make(x.id, priv), await make(x.id, others)].map(res).join('|');
+
+      const d = (await make(x.id, draw)).json;
+      const c = (await make(x.id, chat)).json;
+      const again = (await make(x.id, draw)).json;
+      const chatLines = c?.snapshot?.lines;
+      const keys = Object.keys(d?.snapshot ?? {}).filter((k) => k !== 'avatar').sort().join(',');
+      const thumbOk = typeof (await thumb(d?.id)) === 'string';
+      const chatThumb = await thumb(c?.id);
+
+      const v0 = Number(one(`select version from public.share_cards where id = '${d.id}'`));
+      one(`update public.creations set title = '무지개 별' where id = '${draw}'`);
+      const renamed = one(`select version || ':' || (snapshot->>'name') from public.share_cards where id = '${d.id}'`);
+
+      one(`update public.creations set visibility = 'private' where id = '${draw}'`);
+      const closed = one(`select is_public from public.share_cards where id = '${d.id}'`);
+      const closedPub = (await pub(d.id))?.length;
+      const closedThumb = await thumb(d.id);
+      const reshow = res(await rpc('manage_share_card', { p_user_id: x.id, p_card_id: d.id, p_action: 'show' }));
+      one(`update public.creations set visibility = 'public' where id = '${draw}'`);
+      const stillClosed = one(`select is_public from public.share_cards where id = '${d.id}'`);
+      const reshow2 = res(await rpc('manage_share_card', { p_user_id: x.id, p_card_id: d.id, p_action: 'show' }));
+      const reopened = (await pub(d.id))?.length;
+
+      one(`update public.creations set hidden_at = now() where id = '${chat}'`);
+      const hiddenPub = (await pub(c.id))?.length;
+      one(`delete from public.creations where id = '${draw}'`);
+      const gone = Number(one(`select count(*) from public.share_cards where id = '${d.id}'`));
+      return (
+        compare(
+          'SCC-2',
+          {
+            denied: '409:creation_not_shared|404:creation_not_found',
+            sameId: true,
+            keys: 'name,nickname,world',
+            lines: [{ text: '이름이 뭐예요?' }, { text: '번개', answer: true }, { text: '가'.repeat(40) }, { text: '넷째' }],
+            thumbs: 'true:null',
+            renamed: `${v0 + 1}:무지개 별`,
+            closed: 'f:0:null',
+            reshow: '409:creation_not_shared|f|200:1',
+            hiddenPub: 0,
+            gone: 0,
+          },
+          {
+            denied,
+            sameId: !!d?.id && again?.id === d.id,
+            keys,
+            lines: chatLines,
+            thumbs: `${thumbOk}:${chatThumb}`,
+            renamed,
+            closed: `${closed}:${closedPub}:${closedThumb}`,
+            reshow: `${reshow}|${stillClosed}|${reshow2}:${reopened}`,
+            hiddenPub,
+            gone,
+          },
+        ) ?? { actual: 'ok', detail: '거절 2종, 같은 id, 이름·4줄·40자, 썸네일, 이름 version+1, 내리기 닫힘·재공개 거절, 숨김, 삭제' }
+      );
+    },
+  });
+}
+
 // ── 그룹 ──────────────────────────────────────────────────
 async function groupEnv() {
   await check({
@@ -3070,6 +3155,18 @@ async function groupRpc(u) {
       u.alice,
       'manage_share_card',
       { p_user_id: u.alice.id, p_card_id: 'rG6TzuP93C8blCS4ZdyehQ', p_action: 'hide' },
+    ],
+    [
+      'SCC-1',
+      u.alice,
+      'create_creation_share_card',
+      { p_user_id: u.alice.id, p_creation_id: '00000000-0000-0000-0000-000000000000' },
+    ],
+    [
+      'SCC-1b',
+      'anon',
+      'share_card_creation_thumbnail',
+      { p_id: 'rG6TzuP93C8blCS4ZdyehQ' },
     ],
     [
       'GR-1',
@@ -8977,6 +9074,7 @@ async function main() {
   await groupAchievements(u);
   await groupInventory(u);
   await groupShareCards(u);
+  await groupCreationShareCards();
   await groupCreations(u);
   await groupGallery(u);
   await groupBoss(u);

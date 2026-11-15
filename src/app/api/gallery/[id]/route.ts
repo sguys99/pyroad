@@ -8,6 +8,7 @@ import { REPORT_REASONS } from '@/lib/board/limits';
 import { guardianWriteGate } from '@/lib/consent/server';
 import { countStickers } from '@/lib/gallery/server';
 import { STICKERS } from '@/lib/gallery/stickers';
+import { purgeCreationShareCards } from '@/lib/share-card/purge';
 
 /**
  * 갤러리 작품 하나에 하는 일 (P11-07). 사용자는 `auth.getUser()`로 확인한 id 만, 쓰기는 모두 service_role(00055)
@@ -91,6 +92,8 @@ export async function POST(
       return bad(FAILED, 500, 'server');
     }
     if (!data?.length) return bad(NOT_FOUND, 404, 'not_found');
+    // 숨기면 그 작품 자랑 카드도 닫힘(00056 트리거) → CDN 사본도 지움 (P11-08)
+    if (body.hidden) await purgeCreationShareCards(admin, id);
     return NextResponse.json({ id, hidden: body.hidden });
   }
 
@@ -113,7 +116,9 @@ export async function POST(
       });
       return bad(FAILED, 500, 'server');
     }
-    const { result } = data as { result: string };
+    const { result, hidden } = data as { result: string; hidden?: boolean };
+    // 신고 3명 자동 숨김 → 자랑 카드도 닫힘(00056) → CDN 사본 지움 (P11-08)
+    if (hidden) await purgeCreationShareCards(admin, id);
     if (result === 'own') return bad('내 작품은 신고할 수 없어요.', 400, 'own');
     if (result === 'not_found') return bad(NOT_FOUND, 404, 'not_found');
     return NextResponse.json({

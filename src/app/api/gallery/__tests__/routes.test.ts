@@ -11,7 +11,9 @@ const mocks = vi.hoisted(() => ({
   result: {} as Record<string, (op: string) => Result>,
   rpc: vi.fn(),
   gate: vi.fn(),
+  purge: vi.fn(),
 }));
+vi.mock('@vercel/functions', () => ({ dangerouslyDeleteByTag: mocks.purge }));
 
 function client(name: string) {
   return {
@@ -163,5 +165,30 @@ describe('신고·운영자 숨김', () => {
     expect(mocks.calls.find((c) => c.op === 'update')?.arg).toHaveProperty(
       'published_at',
     );
+  });
+
+  it('숨기면(운영자·신고 3명) 그 작품 자랑 카드의 CDN 사본도 지움 (P11-08), 다시 보일 때는 안 지움', async () => {
+    mocks.purge.mockReset();
+    mocks.result['admin:share_cards'] = () => ({
+      data: [{ id: 'cardAAAAAAAAAAAAAAAAAA' }],
+    });
+    mocks.user = { id: 'u9', app_metadata: { role: 'admin' } };
+    await post({ action: 'moderate', hidden: false });
+    expect(mocks.purge).not.toHaveBeenCalled();
+    expect((await post({ action: 'moderate', hidden: true })).status).toBe(200);
+    expect(mocks.purge).toHaveBeenCalledWith([
+      'share-card-cardAAAAAAAAAAAAAAAAAA',
+    ]);
+    mocks.purge.mockReset();
+    mocks.user = { id: 'u1', app_metadata: {} };
+    mocks.rpc.mockImplementation(async (fn: string) =>
+      fn === 'consume_rate_limit'
+        ? { data: { allowed: true }, error: null }
+        : { data: { result: 'reported', hidden: true }, error: null },
+    );
+    expect((await post({ action: 'report', reason: 'other' })).status).toBe(
+      200,
+    );
+    expect(mocks.purge).toHaveBeenCalledTimes(1);
   });
 });

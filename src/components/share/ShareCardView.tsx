@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PartyPopper } from 'lucide-react';
+import { Palette, PartyPopper } from 'lucide-react';
 import { PybaemStatic } from '@/components/characters/rig';
 import type { ShareViewKind } from '@/lib/analytics/events';
 import { ShareCta } from './ShareCta';
@@ -85,8 +85,17 @@ export function ShareCardView({
         <section aria-labelledby="share-title" className="grid gap-5">
           <div className="grid gap-2">
             <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-kicker font-bold text-accent-text">
-              <PartyPopper aria-hidden className="size-4" />
-              축하해 주세요!
+              {kind === 'creation' ? (
+                <>
+                  <Palette aria-hidden className="size-4" />
+                  구경해 주세요!
+                </>
+              ) : (
+                <>
+                  <PartyPopper aria-hidden className="size-4" />
+                  축하해 주세요!
+                </>
+              )}
             </p>
             <h1
               id="share-title"
@@ -95,7 +104,9 @@ export function ShareCardView({
               {headline}
             </h1>
             <p className="text-body text-pretty text-muted-foreground">
-              친구가 pyRoad에서 파이썬 모험을 하고 있어요. 박수를 보내 주세요.
+              {kind === 'creation'
+                ? '친구가 pyRoad에서 파이썬 코드로 직접 만든 작품이에요. 박수를 보내 주세요.'
+                : '친구가 pyRoad에서 파이썬 모험을 하고 있어요. 박수를 보내 주세요.'}
             </p>
           </div>
           <ShareInvite kind={kind} />

@@ -25,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Sheet } from '@/components/ui/sheet';
 import { UserAvatar } from '@/components/profile/UserAvatar';
+import { ShareButton } from '@/components/share/ShareButton';
 import type { AvatarLook } from '@/lib/avatar/look';
 import { hasExtraPersonalInfo } from '@/lib/creations/limits';
 import type { TranscriptRow } from '@/components/quest/outputSlip';
@@ -185,6 +186,16 @@ export function OwnerPanel({
               친구들이 &ldquo;코드 보기&rdquo;로 내 코드를 읽을 수 있어요.
             </span>
           </label>
+          {/* 갤러리 밖(가족·친구)에게는 자랑 카드로만 보임 (Q74 ③, P11-08) */}
+          <ShareButton
+            kind="creation"
+            cardRef={work.id}
+            variant="primary"
+            size="md"
+            testId="owner-share-card"
+          >
+            자랑 카드 만들기
+          </ShareButton>
           <Button
             variant="secondary"
             icon={<EyeOff aria-hidden />}
@@ -236,8 +247,8 @@ export function OwnerPanel({
           <AlertDialogHeader>
             <AlertDialogTitle>갤러리에서 내릴까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              친구들에게 더는 보이지 않고 내 작품함에 그대로 남아요. 언제든 다시
-              올릴 수 있어요.
+              친구들에게 더는 보이지 않고 내 작품함에 그대로 남아요. 이 작품으로
+              만든 자랑 카드 링크도 닫혀요. 언제든 다시 올릴 수 있어요.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

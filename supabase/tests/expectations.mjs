@@ -830,6 +830,25 @@ export const EXPECT = {
     activateIn: 'P9-11',
     note: '본인 카드만 숨기기·다시 공개(새 90일)·지우기 · 닉네임·꾸민 모습 변경 → 스냅샷 갱신 + version+1',
   },
+  // ── 작품 자랑 카드 (P11-08, ① 00056) ──
+  'SCC-1': {
+    expect: 'deny',
+    requires: 'public.create_creation_share_card()',
+    activateIn: 'P11-08',
+    note: '작품 카드 만들기는 /api/share-cards(service_role, 동의 게이트 뒤)만',
+  },
+  'SCC-1b': {
+    expect: 'deny',
+    requires: 'public.share_card_creation_thumbnail()',
+    activateIn: 'P11-08',
+    note: '작품 카드 그림(썸네일)은 이미지 라우트(service_role)만',
+  },
+  'SCC-2': {
+    expect: 'allow',
+    requires: 'public.create_creation_share_card()',
+    activateIn: 'P11-08',
+    note: '전시 중인 내 작품만 · 이름·대화 앞 4줄(40자)만 · 내리기·숨김 → 카드 닫힘·다시 공개 거절 · 삭제 → 카드 삭제 · 이름 변경 → version+1',
+  },
   'AC-2': {
     expect: 'allow',
     requires: 'public.evaluate_achievements()',

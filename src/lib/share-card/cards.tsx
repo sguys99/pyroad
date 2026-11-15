@@ -4,9 +4,11 @@
  * 레이아웃·제약은 `layout.tsx`, 색·크기는 `tokens.ts`, 글자 규칙은 `text.ts`.
  */
 import type { ReactElement } from 'react';
-import { COLOR } from '@/lib/design/tokens';
+import { blend, COLOR } from '@/lib/design/tokens';
+import { characterUri } from './characters';
 import {
   CardFrame,
+  STAGE_H,
   Digits,
   Kicker,
   NicknameLine,
@@ -19,6 +21,7 @@ import { cleanText, fitLine, fitNumberRow, fitTitle, truncateEm } from './text';
 import {
   CARD_RADIUS,
   FONT,
+  STAGE_W,
   TEXT_W,
   TIER_COLOR,
   TIER_LABEL,
@@ -27,6 +30,7 @@ import {
 } from './tokens';
 import type {
   AchievementCardData,
+  CreationCardData,
   LevelUpCardData,
   ShareCardData,
   StageClearCardData,
@@ -39,6 +43,7 @@ export const NICKNAME_SUFFIX: Record<ShareCardData['kind'], string> = {
   stage: '님이 깼어요',
   achievement: '님이 받았어요',
   weekly: '님은 이번 주',
+  creation: '님이 만들었어요',
 };
 
 const heroText = {
@@ -372,6 +377,260 @@ export function WeeklyCard(d: WeeklyCardData) {
   );
 }
 
+/** 박람회 삼각 깃발 줄 (갤러리 `/gallery` 배너와 같은 네 색) */
+function buntingSvg(): string {
+  const colors = [
+    COLOR.accent,
+    COLOR.w3Brick,
+    COLOR.w3Blueprint,
+    COLOR.primaryBright,
+  ];
+  const flags = Array.from({ length: 9 }, (_, i) => {
+    const x = 18 + i * 54;
+    return `<path d="M${x} 12 L${x + 40} 12 L${x + 20} 44 Z" fill="${colors[i % 4]}"/>`;
+  }).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 52"><path d="M0 8 Q250 22 500 8" fill="none" stroke="${COLOR.w3Ink}" stroke-width="3"/>${flags}</svg>`;
+}
+
+/** 학생이 쓴 글자(작품 이름·대화)의 그림 문자는 뺀다: 카드 폰트에 이모지가 없다(외부 이모지 CDN 도 쓰지 않음, P0-10 §4.5) */
+const noEmoji = (t: string) =>
+  cleanText(t.replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, ''));
+
+const FRAME = { left: 34, top: 74, size: 356, border: 18 } as const;
+const ART = FRAME.size - FRAME.border * 2 - 16;
+
+/** 액자 안: 그림(썸네일) · 대화 말풍선 · 그림이 없으면 별 */
+function CreationArt({ d }: { d: CreationCardData }) {
+  if (d.lines?.length) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 8,
+          width: ART,
+          height: ART,
+          padding: '0 6px',
+        }}
+      >
+        {d.lines.map((l, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'block',
+              alignSelf: l.answer ? 'flex-end' : 'flex-start',
+              maxWidth: ART - 24,
+              padding: '8px 14px',
+              borderRadius: l.answer
+                ? '18px 18px 4px 18px'
+                : '18px 18px 18px 4px',
+              backgroundColor: l.answer ? COLOR.primary : COLOR.surface2,
+              color: l.answer ? COLOR.onPrimary : COLOR.text,
+              fontSize: 21,
+              lineHeight: 1.25,
+              lineClamp: 2,
+              overflow: 'hidden',
+            }}
+          >
+            {/* 2줄 분량에서 자름 (낱말 경계 손실은 fitTitle 처럼 90%로 어림) */}
+            {truncateEm(noEmoji(l.text), ((ART - 52) / 21) * 2 * 0.9)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return d.thumbnail ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={d.thumbnail}
+      width={ART}
+      height={ART}
+      alt=""
+      style={{ objectFit: 'contain' }}
+    />
+  ) : (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={iconUri(starSvg(true))} width={140} height={140} alt="" />
+  );
+}
+
+/**
+ * 작품 카드 (P11-08): 왼쪽 무대 = 메이커 박람회 벽(3월드 모래 벽 + 삼각 깃발) 위 압정 꽂은 액자, 안에 작품(그림 또는 대화 앞 4줄),
+ * 파이뱀이 액자 옆에서 자랑. 오른쪽 = 출품작 이름표(작품 이름 크게 + 닉네임). 코드는 그리지 않는다
+ */
+export function CreationCard(d: CreationCardData) {
+  const w = worldPalette(3);
+  const title = fitTitle(noEmoji(d.name) || '내 작품', TEXT_W, TYPE.title);
+  const heroSize = 190;
+  return (
+    <CardFrame
+      stage={
+        <div
+          style={{
+            width: STAGE_W,
+            height: STAGE_H,
+            display: 'flex',
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: CARD_RADIUS.stage,
+            backgroundColor: w.soft,
+          }}
+        >
+          {/* 바닥 */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 86,
+              backgroundColor: w.ground,
+            }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={iconUri(buntingSvg())}
+            width={STAGE_W}
+            height={52}
+            alt=""
+            style={{ position: 'absolute', left: 0, top: 10 }}
+          />
+          {/* 액자 아랫면 (그림자 대신 단색 도형, satori 제약) */}
+          <div
+            style={{
+              position: 'absolute',
+              left: FRAME.left,
+              top: FRAME.top + 8,
+              width: FRAME.size,
+              height: FRAME.size,
+              borderRadius: CARD_RADIUS.tile,
+              backgroundColor: blend(COLOR.w3Ink, w.tint, 0.35),
+            }}
+          />
+          {/* 액자: 나무 틀(3월드 모래색) → 흰 도화지 → 작품 */}
+          <div
+            style={{
+              position: 'absolute',
+              left: FRAME.left,
+              top: FRAME.top,
+              width: FRAME.size,
+              height: FRAME.size,
+              display: 'flex',
+              padding: FRAME.border,
+              borderRadius: CARD_RADIUS.tile,
+              backgroundColor: w.tint,
+            }}
+          >
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 10,
+                backgroundColor: COLOR.surface,
+              }}
+            >
+              <CreationArt d={d} />
+            </div>
+          </div>
+          {/* 압정 (아랫면 + 머리) */}
+          <div
+            style={{
+              position: 'absolute',
+              left: FRAME.left + FRAME.size / 2 - 14,
+              top: FRAME.top - 8,
+              width: 28,
+              height: 28,
+              borderRadius: 9999,
+              backgroundColor: COLOR.accentLip,
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: FRAME.left + FRAME.size / 2 - 14,
+              top: FRAME.top - 12,
+              width: 28,
+              height: 28,
+              borderRadius: 9999,
+              backgroundColor: COLOR.w3Brick,
+            }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={characterUri(
+              {
+                id: 'pybaem',
+                state: 'proud',
+                costume: d.avatar?.costume,
+                skin: d.avatar?.skin,
+              },
+              'card-hero-',
+            )}
+            width={heroSize}
+            height={heroSize}
+            alt=""
+            style={{
+              position: 'absolute',
+              left: STAGE_W - heroSize + 14,
+              bottom: -4,
+            }}
+          />
+        </div>
+      }
+    >
+      <Kicker color={w.ink} background={COLOR.surface}>
+        메이커 박람회 출품작
+      </Kicker>
+      <div
+        style={{
+          display: 'block',
+          marginTop: 24,
+          width: TEXT_W,
+          fontFamily: FONT.display,
+          fontWeight: 400,
+          fontSize: title.fontSize,
+          lineHeight: 1.18,
+          color: COLOR.text,
+          lineClamp: 2,
+          overflow: 'hidden',
+        }}
+      >
+        {title.text}
+      </div>
+      <NicknameLine
+        nickname={d.nickname}
+        suffix={NICKNAME_SUFFIX.creation}
+        marginTop={24}
+      />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          marginTop: 18,
+          fontSize: TYPE.body,
+          color: COLOR.textMuted,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={iconUri(glyphSvg('code', w.ink))}
+          width={34}
+          height={34}
+          alt=""
+        />
+        {d.lines?.length
+          ? '파이썬으로 만든 대화 프로그램'
+          : '파이썬 거북이로 그린 그림'}
+      </div>
+    </CardFrame>
+  );
+}
+
 /** 데이터 → 카드 엘리먼트 */
 export function renderShareCard(d: ShareCardData): ReactElement {
   switch (d.kind) {
@@ -383,6 +642,8 @@ export function renderShareCard(d: ShareCardData): ReactElement {
       return <AchievementCard {...d} />;
     case 'weekly':
       return <WeeklyCard {...d} />;
+    case 'creation':
+      return <CreationCard {...d} />;
   }
 }
 

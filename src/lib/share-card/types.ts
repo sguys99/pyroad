@@ -7,7 +7,12 @@
 import type { WorldId } from '@/lib/design/tokens';
 import type { Costume } from '@/components/characters/rig/costumes';
 
-export type ShareCardKind = 'levelup' | 'stage' | 'achievement' | 'weekly';
+export type ShareCardKind =
+  | 'levelup'
+  | 'stage'
+  | 'achievement'
+  | 'weekly'
+  | 'creation';
 export type Tier = 'bronze' | 'silver' | 'gold';
 
 /** 업적 메달 안 그림 (자체 SVG, 이모지 대신) */
@@ -71,8 +76,28 @@ export interface WeeklyCardData extends Base {
   stars: number;
 }
 
+/** 대화 작품 한 줄 (작품 `transcript` 앞 4줄, 줄마다 40자 — 00056) */
+export interface CreationLine {
+  text: string;
+  /** 작가가 input()에 답한 줄 (오른쪽 말풍선) */
+  answer?: true;
+}
+
+/**
+ * 작품 카드 (P11-08): 갤러리에 전시 중인 3월드 작품. 그림 작품은 `thumbnail`(이미지 라우트가 작품 썸네일 PNG 를 읽어
+ * data URI 로 넣음 — 스냅샷에는 없음), 대화 작품은 `lines`. 코드는 싣지 않는다
+ */
+export interface CreationCardData extends Base {
+  kind: 'creation';
+  /** 작품 이름 (공개할 때 금칙어·개인정보 검사를 통과한 값) */
+  name: string;
+  lines?: CreationLine[];
+  thumbnail?: string;
+}
+
 export type ShareCardData =
   | LevelUpCardData
   | StageClearCardData
   | AchievementCardData
-  | WeeklyCardData;
+  | WeeklyCardData
+  | CreationCardData;

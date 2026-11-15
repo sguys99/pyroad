@@ -1723,6 +1723,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      create_creation_share_card: {
+        Args: { p_creation_id: string; p_user_id: string };
+        Returns: Json;
+      };
       create_share_card: {
         Args: { p_kind: string; p_ref?: string; p_user_id: string };
         Returns: Json;
@@ -1914,6 +1918,10 @@ export type Database = {
         Returns: Json;
       };
       settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
+      share_card_creation_thumbnail: {
+        Args: { p_id: string };
+        Returns: string;
+      };
       share_card_public: {
         Args: { p_id: string };
         Returns: {

@@ -9,7 +9,9 @@ const mocks = vi.hoisted(() => ({
   result: {} as Record<string, (op: string) => Result>,
   rpc: vi.fn(),
   gate: vi.fn(),
+  purge: vi.fn(),
 }));
+vi.mock('@vercel/functions', () => ({ dangerouslyDeleteByTag: mocks.purge }));
 
 function client(name: string) {
   return {
@@ -322,5 +324,39 @@ describe('DELETE /api/creations/{id}', () => {
     mocks.result['user:creations'] = () => ({ data: [] });
     expect((await del()).status).toBe(404);
     expect((await del('x')).status).toBe(404);
+  });
+
+  it('작품 자랑 카드(P11-08): 지우기·내리기 뒤 그 작품 카드의 CDN 사본을 태그로 지움 (지우기는 행이 사라지기 전에 id 를 구함)', async () => {
+    mocks.purge.mockReset();
+    mocks.result['admin:share_cards'] = () => ({
+      data: [{ id: 'cardAAAAAAAAAAAAAAAAAA' }],
+    });
+    const del = await DELETE(new Request('http://x'), {
+      params: Promise.resolve({ id: ID }),
+    });
+    expect(del.status).toBe(200);
+    const order = mocks.calls
+      .filter((c) => c.op === 'delete' || c.table === 'share_cards')
+      .map((c) => `${c.table}:${c.op}`);
+    expect(order.indexOf('share_cards:select')).toBeLessThan(
+      order.indexOf('creations:delete'),
+    );
+    expect(mocks.calls).toContainEqual(
+      expect.objectContaining({
+        table: 'share_cards',
+        op: 'eq',
+        arg: 'kind',
+      }),
+    );
+    expect(mocks.purge).toHaveBeenCalledWith([
+      'share-card-cardAAAAAAAAAAAAAAAAAA',
+    ]);
+
+    mocks.purge.mockReset();
+    mocks.result['user:creations'] = () => ({ data: ROW });
+    expect((await patch({ visibility: 'private' })).status).toBe(200);
+    expect(mocks.purge).toHaveBeenCalledWith([
+      'share-card-cardAAAAAAAAAAAAAAAAAA',
+    ]);
   });
 });

@@ -272,9 +272,9 @@ describe('상태 매핑 (빈 별·티어·월드 틴트)', () => {
 // ─────────────── satori 제약·금지 요소
 
 describe('렌더 트리 (satori 제약, P0-10 §4.5)', () => {
-  it('샘플이 4종을 모두 덮는다', () => {
+  it('샘플이 5종을 모두 덮는다', () => {
     expect(ALL_KINDS).toEqual(
-      new Set(['levelup', 'stage', 'achievement', 'weekly']),
+      new Set(['levelup', 'stage', 'achievement', 'weekly', 'creation']),
     );
   });
 

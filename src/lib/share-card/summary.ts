@@ -45,5 +45,16 @@ export function shareCardSummary(d: ShareCardData): ShareCardSummary {
         alt: `주간 성장 카드. ${nick}님의 ${week}: 퀘스트 ${d.quests}개, ${d.xp} XP, 별 ${d.stars}개.`,
       };
     }
+    case 'creation': {
+      const name = `「${cleanText(d.name)}」`;
+      const lines = d.lines?.length
+        ? ` 대화: ${d.lines.map((l) => `${l.answer ? '(대답) ' : ''}${cleanText(l.text)}`).join(' / ')}.`
+        : ' 파이썬 거북이로 그린 그림이 액자에 걸려 있어요.';
+      return {
+        // 제목 뒤 조사는 받침에 따라 달라져 붙이지 않는다
+        headline: `${nick}님이 파이썬으로 만든 작품 ${name}!`,
+        alt: `작품 카드. ${nick}님이 만든 작품 ${name}.${lines}`,
+      };
+    }
   }
 }

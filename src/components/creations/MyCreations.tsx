@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { ShareButton } from '@/components/share/ShareButton';
 import { formatKstDate } from '@/lib/time/kst';
 import type { CreationKind } from '@/lib/creations/limits';
 import '@/components/gallery/gallery.css';
@@ -160,6 +161,17 @@ export function MyCreations({
                   )}
                 </div>
               </Link>
+              {item.isPublic && !item.hidden && (
+                // 전시 중인 작품만 갤러리 밖으로 자랑 (P11-08)
+                <ShareButton
+                  kind="creation"
+                  cardRef={item.id}
+                  testId="my-creation-share"
+                >
+                  자랑 카드
+                  <span className="sr-only"> 만들기: {item.title}</span>
+                </ShareButton>
+              )}
               <Button
                 size="sm"
                 variant="ghost"
@@ -185,7 +197,8 @@ export function MyCreations({
           <AlertDialogHeader>
             <AlertDialogTitle>이 작품을 지울까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              지운 작품은 다시 되살릴 수 없어요.
+              지운 작품은 다시 되살릴 수 없어요. 이 작품으로 만든 자랑 카드
+              링크도 함께 닫혀요.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

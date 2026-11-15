@@ -10,6 +10,10 @@ import {
   parseCommandsGz,
   publishableQuests,
 } from '@/lib/creations/server';
+import {
+  creationCardIds,
+  purgeCreationShareCards,
+} from '@/lib/share-card/purge';
 
 /**
  * 내 작품 고치기·공개·지우기 (P11-06). 사용자는 `auth.getUser()`로 확인한 id 만
@@ -20,6 +24,8 @@ import {
  *     ③ 3월드 프로젝트를 끝낸 작품만(Q75 ⑧) ④ 제목·대화 기록·그림 글씨(+ 코드 보기를 켰으면 코드)의 금칙어 + 개인정보
  *     지킴이(Q75 ⑨, 제안 J) → 통과하면 service_role 로 공개. 공개 중인 작품을 고쳐도 같은 검사를 다시 한다
  * - `DELETE` 본인 세션(RLS)
+ * - 작품 자랑 카드(P11-08): 내리기·이름 변경·지우기는 00056 트리거가 카드를 닫거나 다시 그리게 하거나 지우고,
+ *   여기서는 그 카드 이미지의 CDN 사본을 지운다(`purgeCreationShareCards`)
  */
 
 const FAILED = '지금은 바꾸지 못했어요. 잠시 뒤에 다시 해 줘요.';
@@ -82,6 +88,7 @@ export async function PATCH(
       reportServerError(upd, { area: 'creations', op: 'update' });
       return bad(FAILED, 500, 'server');
     }
+    await purgeCreationShareCards(createAdminClient(), id);
     return NextResponse.json({ id, title, showCode, visibility: 'private' });
   }
 
@@ -132,6 +139,7 @@ export async function PATCH(
     reportServerError(pub, { area: 'creations', op: 'publish' });
     return bad(FAILED, 500, 'server');
   }
+  if (title !== row.title) await purgeCreationShareCards(admin, id);
   return NextResponse.json({ id, title, showCode, visibility: 'public' });
 }
 
@@ -144,6 +152,9 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id } = await params;
   if (!isUuid(id)) return bad('작품을 찾지 못했어요.', 404, 'not_found');
+  const admin = createAdminClient();
+  // 지우면 카드 행도 트리거로 사라지므로 CDN 에서 지울 id 를 먼저 구한다
+  const cards = await creationCardIds(admin, id);
   const { data, error } = await supabase
     .from('creations')
     .delete()
@@ -154,5 +165,6 @@ export async function DELETE(
     return bad(FAILED, 500, 'server');
   }
   if (!data?.length) return bad('작품을 찾지 못했어요.', 404, 'not_found');
+  await purgeCreationShareCards(admin, id, cards);
   return NextResponse.json({ id, deleted: true });
 }
