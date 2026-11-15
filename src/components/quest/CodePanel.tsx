@@ -111,6 +111,10 @@ interface CodePanelProps {
   stage?: number;
   /** 코드가 turtle을 씀 → 결과 위에 그림판 (P11-02). 없으면 코드에서 직접 본다 */
   turtle?: boolean;
+  /** 시험 손님 부르기 (P11-05, 손님이 있는 퀘스트만) */
+  onGrade?: () => void;
+  guests?: OutputPanelProps['guests'];
+  reasons?: OutputPanelProps['reasons'];
 }
 
 export function CodePanel({
@@ -136,6 +140,9 @@ export function CodePanel({
   onAskTutor,
   stage,
   turtle,
+  onGrade,
+  guests,
+  reasons,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const showKeyboard = usePhoneLike();
@@ -177,6 +184,8 @@ export function CodePanel({
         onRun={onRun}
         onStop={onStop}
         onRetry={onRetry}
+        onGrade={onGrade}
+        grading={!!guests && (isRunning || isSubmitting)}
       />
 
       {/* 실행 결과 */}
@@ -190,6 +199,9 @@ export function CodePanel({
         reward={reward}
         onAskTutor={onAskTutor}
         turtle={turtle ?? usesTurtle(code)}
+        guests={guests}
+        reasons={reasons}
+        guestHint={!!onGrade}
         restarting={pyodideStatus === 'loading' ? restarting : null}
       />
     </div>

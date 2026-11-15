@@ -22,6 +22,7 @@ import {
   type BossQuest,
   quizBlankIds,
   type InputScenario,
+  type PublicScenario,
   type Quest,
   type QuestType,
   type QuizAnswer,
@@ -66,6 +67,8 @@ export interface PublicStep {
   starter_code: string;
   validation_type: StoredRule['validation_type'];
   fallback_text: string;
+  /** 시험 손님 공개 부분 (P11-05) */
+  scenarios?: PublicScenario[];
 }
 
 export interface QuestRow {
@@ -316,7 +319,11 @@ export function splitQuest(
 ): { questRow: QuestRow; answerRow: AnswerKeyRow } {
   if (quest.quest_type === 'quiz') return splitQuiz(quest, stageId);
   if (quest.quest_type === 'boss') return splitBoss(quest, stageId);
-  const stored = toStoredRule(quest.answer.validation);
+  const codeScenarios =
+    quest.quest_type === 'code' ? quest.answer.scenarios : undefined;
+  const stored = toStoredRule(
+    withScenarioRules(quest.answer.validation, codeScenarios),
+  );
   const p = quest.prompt;
 
   // 키 순서를 고정해 생성 SQL 이 매번 같게 함 (jsonb 비교에는 영향 없음)
@@ -338,12 +345,15 @@ export function splitQuest(
       : {}),
     fallback_text: p.fallback_text,
     ...(p.is_challenge === undefined ? {} : { is_challenge: p.is_challenge }),
+    ...publicScenarios(codeScenarios),
   };
 
   const stepAnswers: StepAnswerRow[] = [];
   if (quest.quest_type === 'project') {
     skeleton.steps = quest.steps.map((step) => {
-      const s = toStoredRule(step.answer.validation);
+      const s = toStoredRule(
+        withScenarioRules(step.answer.validation, step.answer.scenarios),
+      );
       stepAnswers.push({
         step_number: step.step_number,
         expected_output: s.expected_output,
@@ -361,6 +371,7 @@ export function splitQuest(
         starter_code: step.prompt.starter_code,
         validation_type: s.validation_type,
         fallback_text: step.prompt.fallback_text,
+        ...publicScenarios(step.answer.scenarios),
       };
     });
   }
@@ -388,6 +399,37 @@ export function splitQuest(
       steps: stepAnswers,
       quiz_answer: null,
     },
+  };
+}
+
+/**
+ * 시험 손님의 규칙(expect)을 퀘스트 규칙에 붙인다 (P11-05): `all[퀘스트 규칙, {scenario i: expect}…]`.
+ * 정답 테이블에만 들어가고, 채점은 손님 i의 실행마다 퀘스트 규칙 + 손님 i 규칙을 본다 (validation.ts `scenario`)
+ */
+export function withScenarioRules(
+  rule: ValidationRule,
+  scenarios: InputScenario[] | undefined,
+): ValidationRule {
+  const extra = (scenarios ?? []).flatMap((s, index) =>
+    s.expect ? [{ type: 'scenario' as const, index, rule: s.expect }] : [],
+  );
+  if (!extra.length) return rule;
+  const base = rule.type === 'all' ? rule.rules : [rule];
+  return { type: 'all', rules: [...base, ...extra] };
+}
+
+/** 시험 손님의 공개 부분 (이름·입력·키·시드, 키 순서 고정). 손님 규칙(expect)은 빼고 */
+function publicScenarios(scenarios: InputScenario[] | undefined): {
+  scenarios?: PublicScenario[];
+} {
+  if (!scenarios?.length) return {};
+  return {
+    scenarios: scenarios.map((s) => ({
+      ...(s.name !== undefined && { name: s.name }),
+      ...(s.inputs && { inputs: [...s.inputs] }),
+      ...(s.keys && { keys: [...s.keys] }),
+      ...(s.seed !== undefined && { seed: s.seed }),
+    })),
   };
 }
 

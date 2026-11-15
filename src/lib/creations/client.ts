@@ -1,7 +1,9 @@
 // 작품 저장 (P11-06) 브라우저 쪽: 명령 gzip · 썸네일 다시 그리기 · 저장 요청
 import type { TurtleCommand } from '@/lib/turtle/scene';
+import { finalFrame } from '@/lib/turtle/snapshot';
 import type { TranscriptRow } from '@/components/quest/outputSlip';
 import {
+  CREATION_COMMANDS_GZ_MAX,
   CREATION_THUMBNAIL_MAX,
   CREATION_THUMBNAIL_SIZE,
   type CreationKind,
@@ -61,6 +63,24 @@ export async function renderThumbnail(
   }
 }
 
+/** 이보다 긴 명령 스트림(긴 게임 등)은 움직임 대신 마지막 화면만 저장 (P11-05, `finalFrame`) */
+export const CREATION_REPLAY_MAX = 10_000;
+
+/**
+ * 저장할 명령 gzip (P11-05): 긴 게임처럼 명령이 CREATION_REPLAY_MAX개를 넘거나 압축해도 상한을 넘으면
+ * 마지막 화면만 다시 그리는 짧은 스트림(`finalFrame`)으로 바꾼다 — 서버 검사(명령 5만 개·gzip 100KB)를 넘지 않게
+ */
+export async function creationCommandsGz(
+  commands: readonly TurtleCommand[],
+): Promise<Blob> {
+  if (commands.length > CREATION_REPLAY_MAX)
+    return gzipJson(finalFrame(commands));
+  const gz = await gzipJson(commands);
+  return gz.size > CREATION_COMMANDS_GZ_MAX
+    ? gzipJson(finalFrame(commands))
+    : gz;
+}
+
 export interface CreationDraft {
   kind: CreationKind;
   title: string;
@@ -91,7 +111,11 @@ export async function saveCreation(draft: CreationDraft): Promise<SaveResult> {
     }),
   );
   if (draft.commands)
-    form.set('commands', await gzipJson(draft.commands), 'commands.json.gz');
+    form.set(
+      'commands',
+      await creationCommandsGz(draft.commands),
+      'commands.json.gz',
+    );
   if (draft.thumbnail) form.set('thumbnail', draft.thumbnail, 'thumbnail.png');
   try {
     const res = await fetch('/api/creations', { method: 'POST', body: form });

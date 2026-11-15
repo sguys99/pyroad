@@ -165,14 +165,35 @@ describe('planRuns', () => {
       { seeds: 2, unseededRuns: 1, randomSeed },
     );
     expect(plan).toEqual([
-      { label: '시나리오 1 · 시드 0', seed: 0, stdin: ['3', '5'] },
-      { label: '시나리오 1 · 시드 1', seed: 1, stdin: ['3', '5'] },
+      { label: '시나리오 1 · 시드 0', seed: 0, stdin: ['3', '5'], scenario: 0 },
+      { label: '시나리오 1 · 시드 1', seed: 1, stdin: ['3', '5'], scenario: 0 },
       {
         label: '시나리오 1 · 무시드(시드 1234)',
         seed: 1234,
         stdin: ['3', '5'],
+        scenario: 0,
       },
-      { label: '시나리오 2 · 시드 42', seed: 42, stdin: ['abc', '82'] },
+      {
+        label: '시나리오 2 · 시드 42',
+        seed: 42,
+        stdin: ['abc', '82'],
+        scenario: 1,
+      },
+    ]);
+  });
+
+  it('시험 손님 (P11-05): 이름은 라벨에, 키 시나리오는 keys, 입력이 없으면 stdin 없음', () => {
+    const plan = planRuns(
+      [{ name: '오른쪽 손님', keys: ['Right', null, 'Up'] }],
+      { seeds: 1, unseededRuns: 0 },
+    );
+    expect(plan).toEqual([
+      {
+        label: '시나리오 1(오른쪽 손님) · 시드 0',
+        seed: 0,
+        keys: ['Right', null, 'Up'],
+        scenario: 0,
+      },
     ]);
   });
 

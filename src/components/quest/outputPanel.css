@@ -233,6 +233,16 @@
   font-size: var(--text-caption);
 }
 
+/* 그림 규칙이 떨어진 이유 (P11-05, 서버 채점 문장) */
+.qo-reasons {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: var(--text-small);
+  color: var(--text);
+}
+
 .qo-empty,
 .qo-note {
   margin: 0;

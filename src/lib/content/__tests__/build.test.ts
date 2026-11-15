@@ -434,7 +434,7 @@ describe('입력 시나리오 (input() 퀘스트 자동 검증, P1-13 · P11-05)
     ).toBe(false);
   });
 
-  it('DB 행에는 쓰지 않고, meta 를 넘긴 검증 JSON 에만 붙음', () => {
+  it('손님 입력은 공개 칸에(시험 문제), meta 를 넘긴 검증 JSON 에도 (P11-05)', () => {
     const project = projectQuest();
     project.steps[1].answer = {
       ...project.steps[1].answer,
@@ -454,7 +454,15 @@ describe('입력 시나리오 (input() 퀘스트 자동 검증, P1-13 · P11-05)
         [STAGE_7, [parsed(project)]],
       ),
     );
-    expect(JSON.stringify(rows)).not.toContain('inputs');
+    expect(rows.quests[0].prompt_skeleton.scenarios).toEqual(scenarios);
+    expect(rows.quests[1].prompt_skeleton.steps?.[1].scenarios).toEqual(
+      scenarios,
+    );
+    expect(rows.quests[1].prompt_skeleton.steps?.[0]).not.toHaveProperty(
+      'scenarios',
+    );
+    // expect 가 없으면 규칙은 그대로
+    expect(rows.quests[0].validation_type).toBe('output_match');
     const plain = toCheckFixture(rows, { generatedBy: 't', source: 't' });
     expect(plain.quests[0]).not.toHaveProperty('scenarios');
     const fixture = toCheckFixture(rows, {
@@ -466,6 +474,93 @@ describe('입력 시나리오 (input() 퀘스트 자동 검증, P1-13 · P11-05)
     expect(fixture.quests[1]).not.toHaveProperty('scenarios');
     expect(fixture.quests[1].steps?.[0]).not.toHaveProperty('scenarios');
     expect(fixture.quests[1].steps?.[1].scenarios).toEqual(scenarios);
+  });
+
+  it('손님 규칙(expect)은 정답 테이블 규칙에만 scenario 로 붙고 공개 칸에는 없음', () => {
+    const guests = [
+      {
+        name: '별똥이 손님',
+        inputs: ['별똥'],
+        expect: { type: 'contains' as const, expected: '비밀 대답 별똥' },
+      },
+      { inputs: ['콩콩'] },
+    ];
+    const quest = parsed({
+      ...codeQuest(),
+      answer: {
+        ...codeQuest().answer,
+        validation: { type: 'contains', expected: '안녕' },
+        scenarios: guests,
+      },
+    });
+    const { questRow, answerRow } = splitQuest(quest, STAGE_1.id);
+    expect(questRow.validation_type).toBe('all');
+    expect(questRow.prompt_skeleton.scenarios).toEqual([
+      { name: '별똥이 손님', inputs: ['별똥'] },
+      { inputs: ['콩콩'] },
+    ]);
+    expect(JSON.stringify(questRow)).not.toContain('비밀 대답');
+    expect(JSON.parse(answerRow.expected_output)).toEqual([
+      { type: 'contains', expected: '안녕' },
+      {
+        type: 'scenario',
+        index: 0,
+        rule: { type: 'contains', expected: '비밀 대답 별똥' },
+      },
+    ]);
+  });
+
+  it('스키마: 손님은 inputs·keys·expect 중 하나는 있어야 하고 키는 문자열·null', () => {
+    const withGuests = (s: unknown) =>
+      parseQuest({
+        ...codeQuest(),
+        answer: { ...codeQuest().answer, scenarios: s },
+      }).ok;
+    expect(withGuests([{ keys: ['Right', null] }])).toBe(true);
+    expect(withGuests([{ name: '손님' }])).toBe(false);
+    expect(withGuests([{ keys: [3] }])).toBe(false);
+  });
+});
+
+describe('그림 규칙·any (P11-05)', () => {
+  it('그림 규칙과 any 는 공개 칸 CHECK 밖이라 all 하나짜리로 감싸 저장', () => {
+    const quest = parsed({
+      ...codeQuest(),
+      answer: {
+        ...codeQuest().answer,
+        validation: {
+          type: 'any',
+          rules: [
+            { type: 'shape', shape: 'regular', n: 4, side: 100 },
+            { type: 'code_check', expected: 'input(' },
+          ],
+        },
+      },
+    });
+    const { questRow, answerRow } = splitQuest(quest, STAGE_1.id);
+    expect(questRow.validation_type).toBe('all');
+    expect(JSON.parse(answerRow.expected_output)).toEqual([
+      {
+        type: 'any',
+        rules: [
+          { type: 'shape', n: 4, shape: 'regular', side: 100 },
+          { type: 'code_check', expected: 'input(' },
+        ],
+      },
+    ]);
+  });
+
+  it('스키마: 모르는 그림 옵션·틀린 선분은 오류', () => {
+    const withRule = (validation: unknown) =>
+      parseQuest({
+        ...codeQuest(),
+        answer: { ...codeQuest().answer, validation },
+      }).ok;
+    expect(withRule({ type: 'shape', shape: 'circle' })).toBe(false);
+    expect(withRule({ type: 'colors', min: 2, extra: 1 })).toBe(false);
+    expect(withRule({ type: 'match_drawing', segments: [[0, 0, 1]] })).toBe(
+      false,
+    );
   });
 });
 

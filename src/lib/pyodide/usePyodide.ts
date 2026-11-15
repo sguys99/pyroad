@@ -72,6 +72,10 @@ export interface RunCodeOptions {
   /** 키 시나리오·잠 건너뛰기 (검증 실행, P11-04·P11-05. 형식은 types.ts WorkerRequest run) */
   keys?: (string | null)[];
   skipSleep?: boolean;
+  /** 시험 손님 입력 (P11-05): input()이 차례로 가져가고 다 쓰면 EOFError. 쓴 줄은 RunResult.inputs에 남음 */
+  stdin?: string[];
+  /** 실행 전 random.seed (손님 재현용) */
+  seed?: number;
 }
 
 export interface UsePyodideOptions {
@@ -390,6 +394,11 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           case 'keys':
             if (isRunMsg) handleKeys(run, msg);
             break;
+          case 'stdin':
+            // 시험 손님이 답한 줄: 프롬프트 바로 뒤 자리에 (학생이 직접 답한 것과 같은 모양)
+            if (isRunMsg)
+              run.inputs.push({ at: run.stdout.length, value: msg.value });
+            break;
           // time.sleep 동안은 실행 시간에 넣지 않는다 (P11-04). 멈추는 중이면 시계는 상관없음
           case 'sleep':
             if (isRunMsg && !run.stopReason)
@@ -546,6 +555,8 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           id: run.id,
           code,
           ...(options.keys && { keys: options.keys }),
+          ...(options.stdin && { stdin: options.stdin }),
+          ...(options.seed !== undefined && { seed: options.seed }),
           ...(options.skipSleep !== undefined && {
             skipSleep: options.skipSleep,
           }),

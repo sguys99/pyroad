@@ -501,6 +501,26 @@ describe('usePyodide: input() (P11-01)', () => {
     });
   });
 
+  it('시험 손님 (P11-05): stdin·seed를 run에 싣고, 손님이 쓴 줄은 프롬프트 자리와 함께 결과에', async () => {
+    const { result } = setup();
+    const worker = latest();
+    const promise = startRun(result, 'input()', {
+      stdin: ['별똥'],
+      seed: 3,
+      skipSleep: true,
+    });
+    const run = worker.lastRun();
+    expect(run).toMatchObject({ stdin: ['별똥'], seed: 3, skipSleep: true });
+    worker.emit({ type: 'stdout', id: run.id, text: '별명? ' });
+    worker.emit({ type: 'stdin', id: run.id, value: '별똥' });
+    worker.emit({ type: 'stdout', id: run.id, text: '안녕 별똥\n' });
+    worker.emit(done(run.id));
+    await expect(promise).resolves.toMatchObject({
+      stdout: '별명? 안녕 별똥\n',
+      inputs: [{ at: 4, value: '별똥' }],
+    });
+  });
+
   it('시간 제한은 Python 실행 시간만 모아 잼: 답을 기다리는 동안은 빼고, 답하면 남은 시간부터 (P11-03)', async () => {
     vi.useFakeTimers();
     const { result } = setup();

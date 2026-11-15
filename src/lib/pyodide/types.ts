@@ -12,6 +12,7 @@
 //                  turtle* (그리기 명령 청크, P11-02. turtle을 쓰는 실행만, done보다 먼저)
 //                  keys (get_key()를 처음 부름, P11-04) → main이 누른 키를 key로 보냄 (SW 채널이면 SW로)
 //                  sleep → wake (time.sleep 동안. main은 그 사이 실행 시간 시계를 멈춤, P11-04)
+//                  stdin (run의 stdin 큐에서 한 줄을 씀, 시험 손님 P11-05 — 대화 기록에 손님 말풍선)
 
 export type WorkerRequest =
   | { type: 'init' }
@@ -115,6 +116,8 @@ export type WorkerResponse =
   /** time.sleep 시작 / 끝 (P11-04). 그 사이는 실행 시간 제한에 넣지 않는다 */
   | { type: 'sleep'; id: string; ms: number }
   | { type: 'wake'; id: string }
+  /** 미리 정한 입력 한 줄을 input()이 가져감 (시험 손님, P11-05). 그때까지의 stdout은 먼저 옴 */
+  | { type: 'stdin'; id: string; value: string }
   | RunDoneMessage
   | { type: 'run-error'; id: string; error: string };
 

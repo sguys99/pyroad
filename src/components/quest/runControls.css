@@ -17,7 +17,8 @@
 }
 /* 좁은 쪽(모바일 공책): 버튼이 한 줄을 차지하고, 실행 중이면 멈추기와 나눠 씀 */
 @container (max-width: 30rem) {
-  .qr-run {
+  .qr-run,
+  .qr-grade {
     flex: 1 1 0;
     min-width: 0;
   }

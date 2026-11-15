@@ -50,6 +50,8 @@ import {
   transcriptRows,
 } from './outputSlip';
 import { InputReply } from './InputReply';
+import { TestGuests } from './TestGuests';
+import type { GuestRun } from '@/lib/quest/testGuests';
 import { RunnerWakingNotice } from './RunControls';
 import './outputPanel.css';
 
@@ -308,6 +310,12 @@ export interface OutputPanelProps {
    * 없어도 실행이 무언가 그리면(liveOutput.drawing) 그림판이 나온다
    */
   turtle?: boolean;
+  /** 시험 손님 대화 (P11-05). 손님 채점을 했으면 손님마다 카드, 결과 쪽지는 판정만 */
+  guests?: readonly GuestRun[] | null;
+  /** 떨어진 그림 규칙의 이유 (서버 채점 문장, P11-05) */
+  reasons?: readonly string[];
+  /** 손님이 있는 퀘스트: 직접 실행 뒤 "시험 손님 부르기"로 채점하라고 안내 (P11-05) */
+  guestHint?: boolean;
 }
 
 /** 이번 실행이 그렸는지만 구독 (글자 조각마다 다시 그리지 않음) */
@@ -342,6 +350,14 @@ export function OutputPanel(props: OutputPanelProps) {
     <>
       {stage}
       {listening && <GameKeys store={props.liveOutput} running />}
+      {props.guests && (
+        <TestGuests
+          guests={props.guests}
+          running={props.guests.some(
+            (g) => g.state === 'running' || g.state === 'waiting',
+          )}
+        />
+      )}
       <ResultSlip {...props} quietEmpty={!!stage} />
     </>
   );
@@ -449,6 +465,9 @@ function ResultSlip({
   onAskTutor,
   inputAutoFocus = true,
   quietEmpty = false,
+  guests = null,
+  reasons = [],
+  guestHint = false,
 }: OutputPanelProps & {
   /** 그림판이 있으면 "아무것도 나오지 않았어요"를 줄인다 (그림이 결과라서) */
   quietEmpty?: boolean;
@@ -457,7 +476,11 @@ function ResultSlip({
   const passed = !isRunning && !!result?.success && !!validationResult?.passed;
   const success = passed && !!reward;
   const successDone = useSuccessRun(success, result);
-  if (isRunning) {
+  // 손님과 손님 사이(잠깐 실행이 없음)에도 실행 중 쪽지 그대로
+  const guestsBusy = !!guests?.some(
+    (g) => g.state === 'running' || g.state === 'waiting',
+  );
+  if (isRunning || guestsBusy) {
     return (
       <Slip
         state="running"
@@ -465,7 +488,11 @@ function ResultSlip({
         chip={<LiveChip store={liveOutput} />}
         store={liveOutput}
       >
-        <LiveReply store={liveOutput} autoFocus={inputAutoFocus} />
+        {guests ? (
+          <p className="qo-note">시험 손님이 내 프로그램을 써 보고 있어요.</p>
+        ) : (
+          <LiveReply store={liveOutput} autoFocus={inputAutoFocus} />
+        )}
       </Slip>
     );
   }
@@ -627,8 +654,9 @@ function ResultSlip({
   return (
     <Slip
       state="success"
-      text={result.stdout}
-      inputs={result.inputs}
+      // 손님 채점이면 글자는 손님 카드에 (같은 대화를 두 번 보이지 않게)
+      text={guests ? '' : result.stdout}
+      inputs={guests ? undefined : result.inputs}
       tone={passed ? 'good' : diff ? 'diff' : 'idle'}
       verdict={passed ? 'pass' : diff ? 'diff' : undefined}
       chip={
@@ -649,11 +677,20 @@ function ResultSlip({
           {bugFixed && <BugbugMakeup />}
           {diff && (
             <div className="qo-compare" data-testid="output-compare">
-              {example && (
+              {example && !guests && (
                 <ExampleCompare example={example} stdout={result.stdout} />
               )}
+              {reasons.length > 0 && (
+                <ul className="qo-reasons" data-testid="grade-reasons">
+                  {reasons.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+              )}
               <p className="qo-tip">
-                {mismatchTip(validationResult.type, result.stdout)}
+                {guests
+                  ? '“조금 달라요” 손님의 대화를 살펴봐요. 손님이 넣은 대답에 맞는 말이 나왔나요?'
+                  : mismatchTip(validationResult.type, result.stdout)}
               </p>
               {onAskTutor && <AskMore onAsk={onAskTutor} />}
             </div>
@@ -661,11 +698,25 @@ function ResultSlip({
         </>
       }
     >
-      {!outputLines(result.stdout).length && (
+      {guests ? (
         <p className="qo-empty">
-          {quietEmpty
-            ? '그림만 그리고 글자는 없어요'
-            : '(아무것도 나오지 않았어요)'}
+          {validationResult
+            ? '시험 손님과 나눈 대화는 위에 있어요'
+            : '손님 이야기를 듣고 채점하는 중이에요…'}
+        </p>
+      ) : (
+        !outputLines(result.stdout).length && (
+          <p className="qo-empty">
+            {quietEmpty
+              ? '그림만 그리고 글자는 없어요'
+              : '(아무것도 나오지 않았어요)'}
+          </p>
+        )
+      )}
+      {guestHint && !guests && !validationResult && (
+        <p className="qo-tip" data-testid="guest-hint">
+          직접 해 봤나요? “시험 손님 부르기”를 누르면 손님들이 차례로 써 보고
+          채점해요.
         </p>
       )}
       {success && <PassStamp done={successDone} />}

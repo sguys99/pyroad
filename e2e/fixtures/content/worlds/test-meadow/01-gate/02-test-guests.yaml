@@ -1,0 +1,45 @@
+# 시험 손님 채점 e2e (P11-05, e2e/test-guests.spec.ts). 3-2 "두 갈래 문" 모양: 손님 2명이 각자 다른 문을 고름
+id: d9000000-0000-0000-0000-000000000011
+order: 2
+title: 테스트 두 갈래 문
+concept: input()
+xp_reward: 10
+quest_type: code
+prompt:
+  topic: 입력으로 갈림길
+  learning_goals:
+    - input()으로 고른 답에 따라 다른 말을 할 수 있다
+  story_context: 테스트 들판의 두 갈래 문이에요
+  exercise_description: 1이면 반짝이는 동굴, 2면 시원한 강을 보여 줘요
+  starter_code: |
+    door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+  expected_output_hint: 고른 문에 따라 다른 장면
+  checklist:
+    - if로 고른 문을 견줘요
+  example_output: 1번 문과 2번 문 중 어디로 갈까요? 반짝이는 동굴에 들어왔어요!
+  fallback_text: 'if door == "1":'
+answer:
+  validation:
+    type: code_check
+    expected: if
+  scenarios:
+    - name: 별똥이 손님
+      inputs: ['1']
+      expect:
+        type: contains
+        expected: 반짝이는 동굴
+    - name: 콩콩이 손님
+      inputs: ['2']
+      expect:
+        type: contains
+        expected: 시원한 강
+  hints:
+    level_1: 고른 문을 견줘요
+    level_2: if door == "1"
+    level_3: 'if door == "___":'
+  solution_code: |
+    door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+    if door == "1":
+        print("반짝이는 동굴에 들어왔어요!")
+    else:
+        print("시원한 강에 도착했어요!")

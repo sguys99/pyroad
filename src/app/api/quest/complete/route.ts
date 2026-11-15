@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { gradeSubmission } from '@/lib/quest/grade';
+import { parseGradePayload } from '@/lib/quest/gradeRuns';
 import { completeQuestRpc, rewardError } from '@/lib/quest/rewardRpc';
 import {
   levelChanged,
@@ -22,7 +23,10 @@ import { trackServerEvent } from '@/lib/analytics/server';
 interface CompleteRequest {
   quest_id: string;
   code_submitted: string;
-  /** 브라우저(Pyodide)에서 실행한 출력. 서버가 다시 채점함 (프로젝트는 마지막 단계 기준) */
+  /**
+   * 브라우저(Pyodide)에서 실행한 출력. 서버가 다시 채점함 (프로젝트는 마지막 단계 기준).
+   * + turtle(그림 명령)·runs(시험 손님마다 출력·그림, P11-05) — src/lib/quest/gradeRuns.ts
+   */
   stdout?: string;
   /** 이미 완료한 퀘스트를 다시 풀어 통과 (P8-05): 서버 재채점을 통과하면 best_stars 갱신·새 별 코인 */
   retry?: boolean;
@@ -34,7 +38,6 @@ interface CompleteRequest {
 }
 
 const MAX_CODE_LENGTH = 20_000;
-const MAX_STDOUT_LENGTH = 100_000;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -62,19 +65,18 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const stdout = typeof body.stdout === 'string' ? body.stdout : '';
-  if (
-    body.code_submitted.length > MAX_CODE_LENGTH ||
-    stdout.length > MAX_STDOUT_LENGTH
-  ) {
-    return rewardError('submission_too_large');
+  const parsed = parseGradePayload(body as unknown as Record<string, unknown>);
+  if (body.code_submitted.length > MAX_CODE_LENGTH || !parsed.ok) {
+    return parsed.ok || parsed.error === 'too_large'
+      ? rewardError('submission_too_large')
+      : NextResponse.json({ error: 'Invalid runs' }, { status: 400 });
   }
 
   const adminClient = createAdminClient();
 
   // 채점: 통과하지 않은 제출은 완료하지 않는다. 황금키를 쓴 퀘스트는 DB 함수가 채점 없이 완료 (XP 0)
   const grade = await gradeSubmission(adminClient, body.quest_id, {
-    stdout,
+    ...parsed.payload,
     studentCode: body.code_submitted,
     step: 'final',
   });

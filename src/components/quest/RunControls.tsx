@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, Play, RefreshCw, Square } from 'lucide-react';
+import { Loader2, Play, RefreshCw, Square, UsersRound } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { sec } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils';
@@ -247,6 +247,13 @@ interface RunControlsProps {
   onRun: () => void;
   onStop?: () => void;
   onRetry: () => void;
+  /**
+   * 시험 손님 부르기 (P11-05, 손님이 있는 퀘스트만): 손님마다 자동으로 실행해 채점. 있으면 "코드 돌려보기"는
+   * 내가 직접 해 보는 실행(채점 없음)이고 채점은 이 버튼으로
+   */
+  onGrade?: () => void;
+  /** 손님이 쓰는 중 (실행 버튼 대신 이 버튼이 바쁨 표시) */
+  grading?: boolean;
 }
 
 /**
@@ -266,6 +273,8 @@ export function RunControls({
   onRun,
   onStop,
   onRetry,
+  onGrade,
+  grading = false,
 }: RunControlsProps) {
   const state = runnerState({
     status,
@@ -276,7 +285,9 @@ export function RunControls({
   });
   // 준비 중은 아직 못 누르는 납작한 회색 면 + 스피너, 실행·채점 중은 초록 면 그대로 바쁨 (게임 버튼 loading)
   const waiting = state === 'preparing' || state === 'restarting';
-  const working = state === 'running' || state === 'checking';
+  const busy = state === 'running' || state === 'checking';
+  // 손님 채점 중에는 손님 버튼이 바쁨 표시, 실행 버튼은 쉬는 모양으로 잠금
+  const working = busy && !grading;
   const wokeUp = useWokeUp(state);
 
   return (
@@ -301,7 +312,7 @@ export function RunControls({
           // 눌림 피드백은 게임 버튼 자체(아랫면 3px → jellyB 복귀, P2-11). 실행 소리는 세션이 낸다(run)
           <Button
             onClick={onRun}
-            disabled={waiting || isCodeEmpty || state === 'stepping'}
+            disabled={waiting || isCodeEmpty || state === 'stepping' || grading}
             loading={working}
             size="lg"
             sfx={false}
@@ -318,7 +329,27 @@ export function RunControls({
             className={cn('qr-run', state === 'running' && 'qr-run-live')}
             data-testid="run-button"
           >
-            {LABEL[state]}
+            {grading ? LABEL.ready : LABEL[state]}
+          </Button>
+        )}
+        {onGrade && state !== 'error' && (
+          <Button
+            onClick={onGrade}
+            variant="secondary"
+            size="lg"
+            sfx={false}
+            disabled={
+              waiting ||
+              isCodeEmpty ||
+              state === 'stepping' ||
+              (busy && !grading)
+            }
+            loading={busy && grading}
+            icon={<UsersRound aria-hidden />}
+            className="qr-grade"
+            data-testid="grade-button"
+          >
+            {busy && grading ? '손님이 써 보는 중...' : '시험 손님 부르기'}
           </Button>
         )}
         {state === 'running' && onStop && (

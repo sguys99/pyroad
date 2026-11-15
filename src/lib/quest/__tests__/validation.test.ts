@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   blankCommentsAndStrings,
   codeContains,
+  drawingReasons,
   isValidationRule,
   parseStoredRule,
   simplifyRule,
@@ -469,7 +470,7 @@ describe('contains_any · all (P1-11)', () => {
 
     it('너무 깊게 중첩된 all 은 규칙으로 보지 않음', () => {
       let rule: unknown = { type: 'contains', expected: 'x' };
-      for (let i = 0; i < 6; i++) rule = { type: 'all', rules: [rule] };
+      for (let i = 0; i < 8; i++) rule = { type: 'all', rules: [rule] };
       expect(isValidationRule(rule)).toBe(false);
     });
   });
@@ -484,5 +485,149 @@ describe('contains_any · all (P1-11)', () => {
       type: 'contains',
       expected: '["x"]',
     });
+  });
+});
+
+describe('P11-05: any · 그림 규칙 · 시험 손님', () => {
+  // 정사각형 (변 100, 반시계)
+  const SQUARE = [
+    [
+      'n',
+      0,
+      {
+        x: 0,
+        y: 0,
+        h: 0,
+        d: 1,
+        pc: 'red',
+        fc: 'black',
+        w: 1,
+        sp: 3,
+        v: 1,
+        sh: 'classic',
+        sz: [1, 1, 1],
+      },
+    ],
+    ['m', 0, 100, 0],
+    ['m', 0, 100, 100],
+    ['m', 0, 0, 100],
+    ['m', 0, 0, 0],
+  ];
+  const square: ValidationRule = {
+    type: 'shape',
+    shape: 'regular',
+    n: 4,
+    side: 100,
+  };
+
+  it('그림 규칙은 turtle 명령으로 판정하고, 그림이 없으면 불합격', () => {
+    expect(
+      validateRule(square, { stdout: '', studentCode: '', turtle: SQUARE }),
+    ).toBe(true);
+    expect(validateRule(square, { stdout: '', studentCode: '' })).toBe(false);
+    // 예시 출력 검사(그림 없음)는 그림 규칙을 건너뜀
+    expect(
+      validateRule(square, {
+        stdout: '',
+        studentCode: '',
+        ignoreDrawing: true,
+      }),
+    ).toBe(true);
+  });
+
+  it('any: 하나라도 통과하면 통과 (3-F 자유 작품, 제안 H)', () => {
+    const rule: ValidationRule = {
+      type: 'any',
+      rules: [
+        { type: 'segments', min: 10 },
+        { type: 'code_check', expected: 'input(' },
+      ],
+    };
+    expect(validateRule(rule, { stdout: '', studentCode: 'x = input()' })).toBe(
+      true,
+    );
+    expect(
+      validateRule(rule, {
+        stdout: '',
+        studentCode: 'print(1)',
+        turtle: SQUARE,
+      }),
+    ).toBe(false);
+  });
+
+  it('scenario: 그 손님 실행에만 붙는 규칙', () => {
+    const rule: ValidationRule = {
+      type: 'all',
+      rules: [
+        { type: 'code_check', expected: 'input(' },
+        {
+          type: 'scenario',
+          index: 0,
+          rule: { type: 'contains', expected: '6개' },
+        },
+        {
+          type: 'scenario',
+          index: 1,
+          rule: { type: 'contains', expected: '20개' },
+        },
+      ],
+    };
+    const code = 'n = int(input())';
+    expect(
+      validateRule(rule, { stdout: '6개', studentCode: code, scenario: 0 }),
+    ).toBe(true);
+    expect(
+      validateRule(rule, { stdout: '6개', studentCode: code, scenario: 1 }),
+    ).toBe(false);
+    expect(
+      validateRule(rule, { stdout: '20개', studentCode: code, scenario: 1 }),
+    ).toBe(true);
+  });
+
+  it('저장: any·그림·손님 규칙은 all 안에서만 (공개 칸 CHECK 그대로), 되읽기 왕복', () => {
+    for (const rule of [
+      square,
+      { type: 'any', rules: [square] } as ValidationRule,
+    ]) {
+      const stored = toStoredRule(rule);
+      expect(stored.validation_type).toBe('all');
+      expect(parseStoredRule('all', stored.expected_output)).toEqual({
+        type: 'all',
+        rules: [rule],
+      });
+    }
+  });
+
+  it('isValidationRule: 그림 규칙 모양 확인 (DB에서 읽은 JSON)', () => {
+    expect(isValidationRule({ type: 'turtles', min: 2 })).toBe(true);
+    expect(isValidationRule({ type: 'turtles' })).toBe(false);
+    expect(isValidationRule({ type: 'shape', shape: 'blob' })).toBe(false);
+    expect(
+      isValidationRule({ type: 'match_drawing', segments: [[0, 0, 1, 1]] }),
+    ).toBe(true);
+    expect(
+      isValidationRule({ type: 'match_drawing', segments: [[0, 0, 'a', 1]] }),
+    ).toBe(false);
+    expect(
+      isValidationRule({ type: 'scenario', index: -1, rule: square }),
+    ).toBe(false);
+  });
+
+  it('drawingReasons: 떨어진 그림 규칙만 한국어 문장으로 (출력 규칙 이유는 내지 않음)', () => {
+    const rule: ValidationRule = {
+      type: 'all',
+      rules: [
+        { type: 'contains', expected: '비밀' },
+        square,
+        { type: 'turtles', min: 2 },
+      ],
+    };
+    const reasons = drawingReasons(rule, {
+      stdout: '',
+      studentCode: '',
+      turtle: SQUARE,
+    });
+    expect(reasons).toEqual(['거북이가 2마리 이상 필요해요 (지금 1마리).']);
+    expect(reasons.join(' ')).not.toContain('비밀');
   });
 });

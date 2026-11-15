@@ -322,6 +322,9 @@ export function QuestWorkspace({
               onAskTutor={askTutor}
               stage={quest.stage.order}
               turtle={turtle}
+              onGrade={session.scenarios ? session.handleGrade : undefined}
+              guests={session.guests}
+              reasons={session.gradeReasons}
             />
             <div className="mt-3 max-lg:hidden empty:hidden">{saveBar}</div>
           </div>
@@ -356,6 +359,9 @@ export function QuestWorkspace({
               reward={reward}
               onAskTutor={askTutor}
               turtle={turtle}
+              guests={session.guests}
+              reasons={session.gradeReasons}
+              guestHint={!!session.scenarios}
             />
             {saveBar}
           </div>

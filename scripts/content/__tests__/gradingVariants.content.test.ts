@@ -151,10 +151,14 @@ afterAll(() => runner?.close());
 /** 불합격 이유 (통과면 null) */
 async function failure(unit: CheckUnit, code: string): Promise<string | null> {
   for (const p of planRuns(unit.scenarios, { seeds: 1, unseededRuns: 0 })) {
-    const r = await runner.run(code, { seed: p.seed, stdin: p.stdin });
+    const r = await runner.run(code, {
+      seed: p.seed,
+      stdin: p.stdin,
+      keys: p.keys,
+    });
     for (const rule of [unit.rule, unit.questRule]) {
       if (!rule) continue;
-      const v = judge(rule, r, code, EXECUTION_TIMEOUT_MS);
+      const v = judge(rule, r, code, EXECUTION_TIMEOUT_MS, p.scenario);
       if (!v.passed)
         return [
           `${p.label} · 규칙 ${ruleSummary(rule)}`,

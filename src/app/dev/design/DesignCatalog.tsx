@@ -53,6 +53,7 @@ import { LegalSection } from './_catalog/LegalSection';
 import { TurtleSection } from './_catalog/TurtleSection';
 import { CreationSection } from './_catalog/CreationSection';
 import { GallerySection } from './_catalog/GallerySection';
+import { TestGuestSection } from './_catalog/TestGuestSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
 import { GuardianReportCatalogSection } from './_catalog/GuardianReportCatalog';
@@ -127,6 +128,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['turtle-stage', '그림판'],
       ['save-creation', '작품 저장'],
       ['gallery', '작품 갤러리'],
+      ['test-guests', '시험 손님'],
       ['error-staging', '실패 연출'],
       ['success-staging', '성공 연출'],
       ['quiz', '퀴즈 틀·객관식'],
@@ -245,6 +247,7 @@ export function DesignCatalog({
               <TurtleSection />
               <CreationSection />
               <GallerySection />
+              <TestGuestSection />
               <ErrorStagingSection />
               <SuccessStagingSection />
               <QuizSection />

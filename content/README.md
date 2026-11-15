@@ -134,7 +134,7 @@ answer:
 | `answer` | `validation` | 필수 | `type` → `quests.validation_type`(공개), 기준값 → `quest_answer_keys.expected_output` |
 | `answer` | `hints.level_1~3` | 3개 모두 | `quest_answer_keys.hints` |
 | `answer` | `solution_code` | 코드 퀘스트 필수, 프로젝트 전체에는 선택 | `quest_answer_keys.solution_code` |
-| `answer` | `scenarios` | 선택 (`input()` 퀘스트). 프로젝트는 단계에만 | DB에 쓰지 않음. 자동 검증(§6 정답 자동 검증)만 읽음 |
+| `answer` | `scenarios` | 선택 (`input()`·키 퀘스트 = 시험 손님, P11-05). 프로젝트는 단계에만, 최대 8명 | `name`·`inputs`·`keys`·`seed`는 `quests.prompt_skeleton.scenarios`(공개, 화면이 손님 실행에 씀), `expect`는 `quest_answer_keys` 규칙 안 `{type: scenario, index, rule}`. 자동 검증(§6)도 같은 손님으로 |
 
 **해 볼 일·예시 출력 (P7-17, §12-Q59)**: 퀘스트 화면의 "해 볼 일" 체크리스트는 `checklist`를 그대로 보여 주고(통과하면 모두 체크), 결과 쪽지는 출력이 다를 때 `example_output`을 보여 줍니다. 규칙이 `output_match`면 예시와 나온 글자를 줄마다 견주고(같은 줄 ✓, 다른 줄은 연필 표시 + "내 글자"), 다른 규칙(무작위·포함 검사)이면 "예시"라고 밝히고 그대로 보여 줍니다. 예시는 학생에게 보이는 값이라 **정답 규칙을 통과해야 하고**(빌드가 `validateRule`로 확인, `output_match`면 기준값과 똑같이, `code_check`는 정답 코드로 확인) 무작위 출력이면 나올 수 있는 한 가지를 씁니다. 체크리스트는 `exercise_description`·`expected_output_hint`와 같은 말로, 초등학생 눈높이의 "~해요" 문장으로 씁니다.
 
@@ -374,6 +374,14 @@ DB: `skill_check_questions (world_id, set_no, no, review_quest_id, quiz, answer)
 | `contains_any` | `expected: [문자열, …]` | 출력에 하나라도 들어 있음. **무작위 출력 퀘스트에 씀** |
 | `code_check` | `expected: 문자열`, `whole_word: true`(선택) | 코드에 들어 있음. 주석·문자열 안의 글자는 보지 않음(B25). `whole_word`면 `int(`가 `randint(` 안에서는 안 걸림(B30). 띄어쓰기는 코드·기준 모두 같은 모양으로 맞춰 봄(P10-09): 기호 옆 공백은 무시(`] =` ≡ `]=`), 들여쓰기는 탭·2칸·4칸 모두 한 모양(`    for` = 들여쓴 `for`) |
 | `all` | `rules: [규칙, …]` | 모두 통과 |
+| `any` | `rules: [규칙, …]` | 하나라도 통과 (P11-05 제안 H, 3-F 자유 작품) |
+| `shape` | `shape: regular\|rectangle`, `n`(변 수, 기본 4)·`k`(별, 오각별 2)·`side`·`filled`·`count`(선택) | 그림에 그 도형이 있음 (P11-05, 이하 그림 규칙은 turtle 명령 스트림을 `src/lib/turtle/check.ts`로 판정 — 순서·방향·나눠 그리기·위치 무관, 모두 "있다" 판정) |
+| `circles` | `min`(기본 1)·`radius`(선택) | 한 바퀴 원이 min개 이상 (`circle()`이든 반복이든) |
+| `colors` | `min` | 선·채우기·점에 쓴 색 가짓수 |
+| `text` | `includes`·`min`(선택) | `write()` 글씨 |
+| `segments` | `min`·`max`(선택) | 한 직선 위 이어진 선을 합친 선 개수 |
+| `turtles` | `min` | 거북이 수 |
+| `match_drawing` | `segments: [[x0,y0,x1,y1], …]`·`translate`·`extra_ok`(선택) | 정답 그림 선분과 같음 (순서·방향·나눠 그리기 무관). 선분은 `test:content`가 틀릴 때 그 실행의 선분을 같은 모양으로 보여 주므로 정답 코드 실행에서 붙여 넣음 |
 
 ```yaml
 # 무작위 숫자를 쓰는 퀘스트: 어떤 숫자가 나와도 올바른 답이면 통과해야 함 (B09, §12-Q18)
@@ -392,7 +400,9 @@ validation:
 - 반대로 너무 좁으면 맞는 답이 떨어집니다. 같은 뜻의 다른 정답(예: `range(len(x))` 대신 `range(0, len(x))`)도 걸리게 고르고, 아이들이 쓸 만한 다른 정답은 `scripts/content/__tests__/gradingVariants.content.test.ts`의 `HANDWRITTEN`에 넣어 `test:content`로 확인합니다(모든 정답은 탭·2칸 들여쓰기·기호 옆 공백 없음·빈 줄·작은따옴표 모양으로도 저절로 채점해 봄).
 - 3단계 힌트(`level_3`)대로 쓴 답도 규칙을 통과하는지 확인합니다(B09: 힌트 문구로는 절대 통과 못 하던 사례).
 
-**DB 저장 형태** (`src/lib/quest/validation.ts`의 `toStoredRule`): 기존 두 칸(`validation_type` + `expected_output`)을 그대로 씁니다. `output_match`·`contains`·`code_check`는 기준 문자열 그대로, `contains_any`·`all`은 기준값 칸에 JSON을 넣고, `code_check` + `whole_word`는 하위 규칙 하나짜리 `all`로 저장합니다. 채점 API(`/api/quest/validate`)는 바꾸지 않아도 됩니다.
+- 그림 규칙이 떨어지면 아이용 한국어 이유("정사각형을 아직 찾지 못했어요. 변이 4개여야 하는데 지금은 3개예요.")를 결과 쪽지에 보여 줍니다(출력 규칙 이유는 기준값이 정답이라 내지 않음). 예시 출력 검사(P7-17)는 그림 규칙을 건너뜁니다.
+
+**DB 저장 형태** (`src/lib/quest/validation.ts`의 `toStoredRule`): 기존 두 칸(`validation_type` + `expected_output`)을 그대로 씁니다. `output_match`·`contains`·`code_check`는 기준 문자열 그대로, `contains_any`·`all`은 기준값 칸에 JSON을 넣고, `code_check` + `whole_word`·`any`·그림 규칙(P11-05)은 하위 규칙 하나짜리 `all`로 저장합니다(공개 칸 CHECK 00012를 바꾸지 않음). 채점 API(`/api/quest/validate`)는 바꾸지 않아도 됩니다.
 
 > `quests.validation_type` CHECK는 00012(P1-08)부터 `contains_any`·`all`도 받으므로, 새 유형을 프로젝트 단계뿐 아니라 퀘스트 전체 규칙에도 쓸 수 있습니다. 단, 운영에 00012가 적용되기 전에는 그런 콘텐츠의 seed를 적용할 수 없습니다(런북 순서: ① → ② → ③ → seed).
 
@@ -471,15 +481,19 @@ TEST_CONTENT_DIR=/tmp/my-content npm run test:content   # 다른 콘텐츠 디�
   안내: 일부 시드에서만 실패하면 출력이 무작위인 퀘스트예요. … contains_any·all 같은 넓은 규칙을 쓰세요
   ```
 
-- **입력 시나리오** (`input()` 퀘스트, P11-05에서 확장): `answer.scenarios`(프로젝트는 `steps[].answer.scenarios`)에 적으면 각 시나리오의 `inputs`가 실행기의 `setStdin` 큐로 한 줄씩 들어갑니다. 입력이 모자라면 `EOFError`(실패). `seed`를 적은 시나리오는 그 시드로 한 번만 실행합니다(입력이 비밀 숫자 같은 난수에 맞춰져 있을 때). 시작 코드도 같은 입력으로 실행합니다. `input("프롬프트")`의 프롬프트는 stdout에 찍히고 입력한 글자는 찍히지 않으므로, 프롬프트가 있는 퀘스트는 `output_match` 대신 `contains` 계열을 씁니다.
+- **시험 손님** (`input()`·키 퀘스트, P11-05·제안 C): `answer.scenarios`(프로젝트는 `steps[].answer.scenarios`)의 손님마다 `inputs`가 `input()`에 한 줄씩(실행 메시지 `stdin` 큐), `keys`가 프레임마다 `get_key()`에 들어가고 잠은 건너뜁니다. 입력이 모자라면 `EOFError`("입력이 더 필요해요", 실패). 퀘스트 규칙(`validation`)은 손님마다 모두 통과해야 하고, `expect`는 그 손님 실행에만 붙습니다. 화면은 "코드 돌려보기"가 직접 해 보기(채점 없음), "시험 손님 부르기"가 같은 손님으로 채점하고 서버가 손님별 출력·그림을 다시 판정합니다. 손님 입력은 공개(시험 문제)이고 `expect`만 정답입니다. `seed`는 재현용으로, 그 시드로 한 번만 실행합니다 — **무작위는 시드 대신 순서와 무관한 입력**(1~10 차례 입력, "모두 틀림")·넓은 규칙으로. 시작 코드도 같은 손님으로 실행하고, 손님 중 하나라도 늘 떨어지면 불합격으로 봅니다. `input("프롬프트")`의 프롬프트는 stdout에 찍히고 입력한 글자는 찍히지 않으므로 `output_match` 대신 `contains` 계열을 씁니다.
 
   ```yaml
   answer:
-    validation: { type: contains, expected: 통과! }
+    validation: { type: code_check, expected: if }   # 손님마다 모두
     scenarios:
-      - inputs: [열려라]           # 시드 0~9 + 무시드로 실행
-      - inputs: [틀림, 열려라]
-  # 숫자 맞추기처럼 입력이 난수에 맞춰져 있으면: - { inputs: [abc, '50', '75', '82'], seed: 42 }
+      - name: 별똥이 손님                            # 화면 이름 (없으면 손님 1)
+        inputs: ['1']
+        expect: { type: contains, expected: 반짝이는 동굴 }
+      - inputs: ['2']
+        expect: { type: contains, expected: 시원한 강 }
+      - keys: [Right, Right, null, Up]               # 키 손님: keys[n] = n번 잔 뒤
+        expect: { type: contains, expected: '(20.00,10.00)' }
   ```
 
 - 시간: 44 퀘스트(48 단위, 실행 1,056회)에 Pyodide 로드 4~13초 + 검사 1~12초(Pyodide 수와 머신 부하에 따라). `npm test`에서는 빠집니다(`*.content.test.ts`, `vitest.config.ts`).

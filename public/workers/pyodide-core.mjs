@@ -589,7 +589,11 @@ export function createRuntime(pyodide, options) {
     if (!active || active.stopReason) return READ_STOP;
     if (active.stdin) {
       const line = active.stdin.shift();
-      return line === undefined ? '' : `${line}\n`;
+      if (line === undefined) return '';
+      // 시험 손님 입력 (P11-05): 화면이 프롬프트 바로 뒤에 손님 말풍선을 끼우도록 앞 출력을 먼저 보내고 알림
+      flush();
+      post({ type: 'stdin', id: active.id, value: line });
+      return `${line}\n`;
     }
     if (!interactiveInput) return '';
     // 실행 때 읽는다: 브라우저 Worker는 JSPI가 없다는 걸 안 뒤(canRunSync) SW 채널을 확인하고 넣는다
