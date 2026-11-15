@@ -1,0 +1,456 @@
+# 2월드 프로젝트 F-2: 용돈 기입장
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world2.md §3 2-F
+# 결과가 늘 같음. 단계 k 의 화면 코드 = (k-1 단계 정답 + k 단계 시작 코드)라서 앞 단계 출력도 함께 나옴 → 새로 나오는 덩어리를 contains 로 봄
+
+id: b2000000-0000-0000-0000-000000000055
+order: 2
+title: 용돈 기입장
+concept: 딕셔너리 + 리스트 + 함수 종합
+xp_reward: 300
+quest_type: project
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: '응용 프로젝트: 용돈 기입장 만들기'
+  learning_goals:
+    - 딕셔너리, 리스트, 함수, f-string을 한 프로그램에서 함께 쓸 수 있다
+    - 큰 프로그램을 작은 단계로 나눠 하나씩 만들 수 있다
+    - 합계와 가장 큰 값을 직접 계산해 보고서를 만들 수 있다
+  story_context: 응용 프로젝트 항구에 도착했어요! 배를 타고 오는 동안 용돈을 어디에 썼는지 하나도 기억나지 않아요. 파이뱀과 함께 들어온 돈과 나간 돈을 적는 기입장 프로그램을 만들어, 이번 달 보고서를 완성해 봐요.
+  exercise_description: 용돈 기록을 딕셔너리로 적고, 리스트에 모으고, 함수로 더하고 계산해서 이번 달 보고서를 만드세요. 5단계로 하나씩 기능을 더해요!
+  starter_code: |
+    # 용돈 기입장을 만들어 봐요!
+  expected_output_hint: 프로젝트를 5단계로 나누어 완성해요
+  fallback_text: 용돈 기입장은 기록 하나를 이름표가 붙은 딕셔너리로 적는 데서 시작해요. 기록을 리스트에 모으고, 함수로 새 기록을 더하고, 반복하며 금액을 더하면 남은 돈을 알 수 있어요. 한 단계씩 차근차근 가 봐요!
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: all
+    rules:
+      - type: contains
+        expected: '가장 많이 쓴 곳: 선물'
+      - type: code_check
+        expected: def add_record
+  hints:
+    level_1: 이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 딕셔너리로 기록 하나, 리스트로 기록 여러 개, 함수로 더하기와 합계를 만들어요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 빈칸 ___ 을 채우면 돼요!
+# 단계별 prompt 는 공개(prompt_skeleton.steps[]), answer 는 정답(quest_answer_keys.steps[])
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: 기록 하나를 딕셔너리로 만들고, 내용과 금액을 꺼내 f-string으로 보여 주기
+      checklist:
+        - 'record["내용"] 처럼 이름표로 값을 꺼내요'
+        - 'f-string으로 "용돈: 5000원" 모양을 만들어요'
+      example_output: |-
+        용돈: 5000원
+      starter_code: |
+        # 1단계: 기록 하나를 딕셔너리로 만들어요
+        record = {"내용": "용돈", "금액": 5000}
+
+        # record 에서 내용과 금액을 꺼내요
+        name = record[___]
+        money = record[___]
+        print(f"{name}: {money}원")
+      fallback_text: 딕셔너리는 이름표(키)가 붙은 상자예요. record["내용"] 이라고 쓰면 "내용" 이름표가 붙은 상자에서 값을 꺼내요. 꺼낸 값을 f-string의 중괄호 안에 넣어 한 줄로 보여 주세요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - type: output_match
+            expected: '용돈: 5000원'
+          - type: code_check
+            expected: record[
+      hints:
+        level_1: 등대 도서관에서 책 이름표로 값을 꺼냈던 것을 떠올려 보세요!
+        level_2: 빈칸에는 이름표 글자가 들어가요. 따옴표를 꼭 붙여요.
+        level_3: |-
+          name = record["___"]
+          money = record["___"]
+          빈칸에 딕셔너리의 이름표 두 개를 차례로 넣어 보세요!
+      solution_code: |-
+        # 1단계: 기록 하나를 딕셔너리로 만들어요
+        record = {"내용": "용돈", "금액": 5000}
+
+        # record 에서 내용과 금액을 꺼내요
+        name = record["내용"]
+        money = record["금액"]
+        print(f"{name}: {money}원")
+  - step_number: 2
+    prompt:
+      step_goal: 기록 여러 개를 리스트에 담고, for 로 한 줄씩 보여 주기
+      checklist:
+        - 'for record in records: 로 기록을 하나씩 꺼내요'
+        - '1단계처럼 내용과 금액을 꺼내 한 줄로 보여 줘요'
+        - '[기입장] 아래에 기록 세 줄이 나오는지 봐요'
+      example_output: |-
+        용돈: 5000원
+        [기입장]
+        용돈: 5000원
+        간식: -1500원
+        저금: -2000원
+      starter_code: |
+
+        # 2단계: 기록 여러 개를 리스트에 담아요
+        records = [
+            {"내용": "용돈", "금액": 5000},
+            {"내용": "간식", "금액": -1500},
+            {"내용": "저금", "금액": -2000},
+        ]
+
+        print("[기입장]")
+        for record in records:
+            # 기록 하나를 1단계처럼 한 줄로 보여 줘요
+            ___
+      fallback_text: 리스트 안에 딕셔너리를 여러 개 넣을 수 있어요. for 로 리스트를 돌면 record 에 기록이 하나씩 들어와요. 반복 안에서 1단계와 똑같이 내용과 금액을 꺼내 보여 주면 돼요. 쓴 돈은 빼기(-)로 적었어요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - type: contains
+            expected: |-
+              [기입장]
+              용돈: 5000원
+              간식: -1500원
+              저금: -2000원
+          - type: code_check
+            expected: in records
+      hints:
+        level_1: 반복 안의 빈칸에 1단계에서 쓴 세 줄을 다시 써 보세요.
+        level_2: 반복 안에서도 name, money 를 꺼내고 print 로 보여 줘요. 줄 앞에 빈칸 네 개를 꼭 넣어요.
+        level_3: |-
+          for record in records:
+              name = record["내용"]
+              money = record["___"]
+              print(f"{name}: {money}원")
+          빈칸에 금액 이름표를 넣어 보세요!
+      solution_code: |-
+        # 1단계: 기록 하나를 딕셔너리로 만들어요
+        record = {"내용": "용돈", "금액": 5000}
+
+        # record 에서 내용과 금액을 꺼내요
+        name = record["내용"]
+        money = record["금액"]
+        print(f"{name}: {money}원")
+
+        # 2단계: 기록 여러 개를 리스트에 담아요
+        records = [
+            {"내용": "용돈", "금액": 5000},
+            {"내용": "간식", "금액": -1500},
+            {"내용": "저금", "금액": -2000},
+        ]
+
+        print("[기입장]")
+        for record in records:
+            name = record["내용"]
+            money = record["금액"]
+            print(f"{name}: {money}원")
+  - step_number: 3
+    prompt:
+      step_goal: add_record(내용, 금액) 함수로 새 기록을 리스트에 더하기
+      checklist:
+        - '함수 안에서 새 기록 딕셔너리를 만들어요'
+        - 'records.append( )로 리스트에 더해요'
+        - '기록 5개 가 나오는지 봐요'
+      example_output: |-
+        용돈: 5000원
+        [기입장]
+        용돈: 5000원
+        간식: -1500원
+        저금: -2000원
+        기록 5개
+      starter_code: |
+
+        # 3단계: 기록을 더하는 함수를 만들어요
+        def add_record(name, money):
+            # 새 기록 딕셔너리를 records 에 더해요
+            ___
+
+        add_record("간식", -800)
+        add_record("심부름", 1000)
+        print(f"기록 {len(records)}개")
+      fallback_text: '함수를 만들어 두면 같은 일을 이름 하나로 여러 번 할 수 있어요. add_record 안에서 {"내용": name, "금액": money} 로 새 기록을 만들고, 리스트 끝에 더하는 append 로 records 에 넣어요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - type: contains
+            expected: 기록 5개
+          - type: code_check
+            expected: .append(
+      hints:
+        level_1: 리스트 끝에 하나를 더하는 메서드를 떠올려 보세요. 리스트 호수에서 배웠어요!
+        level_2: 'records.append( ) 괄호 안에 {"내용": name, "금액": money} 딕셔너리를 넣어요.'
+        level_3: |-
+          def add_record(name, money):
+              records.___({"내용": name, "금액": money})
+          빈칸에 리스트에 더하는 메서드 이름을 넣어 보세요!
+      solution_code: |-
+        # 1단계: 기록 하나를 딕셔너리로 만들어요
+        record = {"내용": "용돈", "금액": 5000}
+
+        # record 에서 내용과 금액을 꺼내요
+        name = record["내용"]
+        money = record["금액"]
+        print(f"{name}: {money}원")
+
+        # 2단계: 기록 여러 개를 리스트에 담아요
+        records = [
+            {"내용": "용돈", "금액": 5000},
+            {"내용": "간식", "금액": -1500},
+            {"내용": "저금", "금액": -2000},
+        ]
+
+        print("[기입장]")
+        for record in records:
+            name = record["내용"]
+            money = record["금액"]
+            print(f"{name}: {money}원")
+
+        # 3단계: 기록을 더하는 함수를 만들어요
+        def add_record(name, money):
+            records.append({"내용": name, "금액": money})
+
+        add_record("간식", -800)
+        add_record("심부름", 1000)
+        print(f"기록 {len(records)}개")
+  - step_number: 4
+    prompt:
+      step_goal: total() 함수로 남은 돈을 돌려받고, 들어온 돈과 나간 돈의 합계도 보여 주기
+      checklist:
+        - 'total() 안에서 금액을 left 에 하나씩 더해요'
+        - '쓴 돈은 빼기로 적혀 있어서, 나간 돈은 빼서 더해요'
+        - '들어온 돈, 나간 돈, 남은 돈 세 줄을 봐요'
+      example_output: |-
+        용돈: 5000원
+        [기입장]
+        용돈: 5000원
+        간식: -1500원
+        저금: -2000원
+        기록 5개
+        들어온 돈: 6000원
+        나간 돈: 4300원
+        남은 돈: 1700원
+      starter_code: |
+
+        # 4단계: 남은 돈을 계산하는 함수를 만들어요
+        def total():
+            left = 0
+            for record in records:
+                # 금액을 left 에 더해요
+                ___
+            return left
+
+        income = 0
+        spend = 0
+        for record in records:
+            if record["금액"] > 0:
+                income = income + record["금액"]
+            else:
+                # 빼기로 적힌 금액을 빼면 나간 돈이 커져요
+                spend = spend - ___
+
+        print(f"들어온 돈: {income}원")
+        print(f"나간 돈: {spend}원")
+        print(f"남은 돈: {total()}원")
+      fallback_text: 남은 돈은 모든 금액을 차례로 더하면 나와요. 들어온 돈은 더하기, 쓴 돈은 빼기로 적었으니 그냥 모두 더하면 돼요. 함수는 return 으로 계산한 값을 돌려줘요. 나간 돈은 빼기로 적힌 금액을 한 번 더 빼서 더하기 수로 만들어요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - type: contains
+            expected: |-
+              들어온 돈: 6000원
+              나간 돈: 4300원
+              남은 돈: 1700원
+          - type: code_check
+            expected: def total
+      hints:
+        level_1: 해저 알고리즘 산맥에서 진주 무게를 하나씩 더했던 방법과 같아요!
+        level_2: 'total() 안의 빈칸은 left = left + record["금액"] 이에요. 아래 빈칸에는 지금 보고 있는 기록의 금액을 넣어요.'
+        level_3: |-
+          left = left + record["___"]
+          spend = spend - record["___"]
+          빈칸 두 곳에 같은 이름표를 넣어 보세요!
+      solution_code: |-
+        # 1단계: 기록 하나를 딕셔너리로 만들어요
+        record = {"내용": "용돈", "금액": 5000}
+
+        # record 에서 내용과 금액을 꺼내요
+        name = record["내용"]
+        money = record["금액"]
+        print(f"{name}: {money}원")
+
+        # 2단계: 기록 여러 개를 리스트에 담아요
+        records = [
+            {"내용": "용돈", "금액": 5000},
+            {"내용": "간식", "금액": -1500},
+            {"내용": "저금", "금액": -2000},
+        ]
+
+        print("[기입장]")
+        for record in records:
+            name = record["내용"]
+            money = record["금액"]
+            print(f"{name}: {money}원")
+
+        # 3단계: 기록을 더하는 함수를 만들어요
+        def add_record(name, money):
+            records.append({"내용": name, "금액": money})
+
+        add_record("간식", -800)
+        add_record("심부름", 1000)
+        print(f"기록 {len(records)}개")
+
+        # 4단계: 남은 돈을 계산하는 함수를 만들어요
+        def total():
+            left = 0
+            for record in records:
+                left = left + record["금액"]
+            return left
+
+        income = 0
+        spend = 0
+        for record in records:
+            if record["금액"] > 0:
+                income = income + record["금액"]
+            else:
+                spend = spend - record["금액"]
+
+        print(f"들어온 돈: {income}원")
+        print(f"나간 돈: {spend}원")
+        print(f"남은 돈: {total()}원")
+  - step_number: 5
+    prompt:
+      step_goal: 내용별로 쓴 돈을 딕셔너리에 모으고, 가장 많이 쓴 곳을 찾아 이번 달 보고서 만들기
+      checklist:
+        - '쓴 돈을 내용별로 spent 딕셔너리에 모아요'
+        - '더 큰 금액이 나오면 big_name 과 big_money 를 바꿔요'
+        - '보고서 마지막 줄에 가장 많이 쓴 곳이 나오는지 봐요'
+      example_output: |-
+        용돈: 5000원
+        [기입장]
+        용돈: 5000원
+        간식: -1500원
+        저금: -2000원
+        기록 5개
+        들어온 돈: 6000원
+        나간 돈: 4300원
+        남은 돈: 1700원
+        [이번 달 보고서]
+        간식: 2300원
+        저금: 2000원
+        선물: 2500원
+        가장 많이 쓴 곳: 선물
+      starter_code: |
+
+        # 5단계: 이번 달 보고서를 만들어요
+        add_record("선물", -2500)
+
+        spent = {}
+        for record in records:
+            if record["금액"] < 0:
+                name = record["내용"]
+                if name not in spent:
+                    spent[name] = 0
+                spent[name] = spent[name] - record["금액"]
+
+        print("[이번 달 보고서]")
+        big_name = ""
+        big_money = 0
+        for name, money in spent.items():
+            print(f"{name}: {money}원")
+            # 지금까지 가장 큰 금액보다 크면 대장을 바꿔요
+            if ___:
+                big_name = name
+                big_money = money
+        print(f"가장 많이 쓴 곳: {big_name}")
+      fallback_text: 내용별 합계는 등대 도서관에서 투표를 세던 방법과 같아요. 처음 보는 내용이면 0으로 시작하고 금액을 더해요. 가장 큰 값은 산맥에서 배운 대로, 지금까지의 대장보다 큰 값이 나오면 대장을 바꾸면 찾을 수 있어요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - type: contains
+            expected: |-
+              [이번 달 보고서]
+              간식: 2300원
+              저금: 2000원
+              선물: 2500원
+              가장 많이 쓴 곳: 선물
+          - type: code_check
+            expected: big_money
+      hints:
+        level_1: 지금 보고 있는 money 가 지금까지의 대장 big_money 보다 큰지 비교해 보세요.
+        level_2: 'if 뒤에 money > big_money 처럼 두 값을 비교하는 조건을 써요.'
+        level_3: |-
+          if money ___ big_money:
+          빈칸에 "더 크다"를 뜻하는 기호를 넣어 보세요!
+      solution_code: |-
+        # 1단계: 기록 하나를 딕셔너리로 만들어요
+        record = {"내용": "용돈", "금액": 5000}
+
+        # record 에서 내용과 금액을 꺼내요
+        name = record["내용"]
+        money = record["금액"]
+        print(f"{name}: {money}원")
+
+        # 2단계: 기록 여러 개를 리스트에 담아요
+        records = [
+            {"내용": "용돈", "금액": 5000},
+            {"내용": "간식", "금액": -1500},
+            {"내용": "저금", "금액": -2000},
+        ]
+
+        print("[기입장]")
+        for record in records:
+            name = record["내용"]
+            money = record["금액"]
+            print(f"{name}: {money}원")
+
+        # 3단계: 기록을 더하는 함수를 만들어요
+        def add_record(name, money):
+            records.append({"내용": name, "금액": money})
+
+        add_record("간식", -800)
+        add_record("심부름", 1000)
+        print(f"기록 {len(records)}개")
+
+        # 4단계: 남은 돈을 계산하는 함수를 만들어요
+        def total():
+            left = 0
+            for record in records:
+                left = left + record["금액"]
+            return left
+
+        income = 0
+        spend = 0
+        for record in records:
+            if record["금액"] > 0:
+                income = income + record["금액"]
+            else:
+                spend = spend - record["금액"]
+
+        print(f"들어온 돈: {income}원")
+        print(f"나간 돈: {spend}원")
+        print(f"남은 돈: {total()}원")
+
+        # 5단계: 이번 달 보고서를 만들어요
+        add_record("선물", -2500)
+
+        spent = {}
+        for record in records:
+            if record["금액"] < 0:
+                name = record["내용"]
+                if name not in spent:
+                    spent[name] = 0
+                spent[name] = spent[name] - record["금액"]
+
+        print("[이번 달 보고서]")
+        big_name = ""
+        big_money = 0
+        for name, money in spent.items():
+            print(f"{name}: {money}원")
+            if money > big_money:
+                big_name = name
+                big_money = money
+        print(f"가장 많이 쓴 곳: {big_name}")

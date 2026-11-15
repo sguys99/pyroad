@@ -1,0 +1,171 @@
+# 2월드 보스 5: 배탈 난 버그버그 (P10-07)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+# 에러 예측형 객관식 2문제(world2.md 제안 E): 코드가 에러로 끝나고, 정답 보기 = 실제 에러 이름 (quizzes.content.test.ts)
+
+id: b2000000-0000-0000-0000-000000000205
+order: 11
+title: 배탈 난 버그버그
+concept: 에러와 디버깅 총정리
+xp_reward: 66
+quest_type: boss
+prompt:
+  topic: 에러 이름, 에러가 난 줄 찾기, try 와 except 흐름 총정리
+  learning_goals:
+    - 짧은 코드를 보고 어떤 에러가 날지 고를 수 있다
+    - 에러가 나는 줄이나 답이 틀리게 나오는 줄을 찾아 고칠 수 있다
+    - try 와 except 를 알맞은 차례와 들여쓰기로 놓을 수 있다
+  story_context: 병원선 침대에 환자복을 입은 버그버그가 누워 있어요. 코드를 너무 많이 먹어서 배탈이 났대요! 의사 가운을 입은 모험가가 진료 기록을 읽고 하나씩 고쳐 주면, 다 나은 버그버그가 마지막 시험을 낸대요.
+  fallback_text: 에러 쪽지의 맨 아래 줄에 에러 이름이 있어요. 종류가 다른 값을 섞었는지, 없는 이름이나 번호나 이름표를 찾았는지, 0으로 나눴는지 하나씩 따져 보면 어떤 에러인지 알 수 있어요. except 뒤에는 잡고 싶은 에러 이름을 써요. 에러가 없는데 답이 틀리면 print 로 중간 값을 들여다봐요.
+  boss:
+    name: 배탈 난 버그버그
+    look: hospital
+    intro: 아이고 배야... 코드를 너무 많이 먹었어. 의사 선생님, 여섯 군데만 고쳐 주면 다 나을 것 같아!
+    on_defeat: 와, 배가 하나도 안 아파! 에러 쪽지를 척척 읽는 진짜 코드 의사구나. 다음 섬 해저 산맥에는 지킴이 친구가 기다린대!
+    on_victory: 아야야, 아직 배가 꾸르륵해. 에러 쪽지의 맨 아래 줄을 다시 읽어 보고 또 와 줘!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000045
+    prompt:
+      quiz:
+        question: '버그버그 진료 기록 1번: 이 코드를 돌리면 어떤 에러가 날까?'
+        code: |-
+          candy = "사탕"
+          print(candy + 3)
+        options:
+          - { id: opt-t4hw, text: TypeError }
+          - { id: opt-k9ab, text: NameError }
+          - { id: opt-d3qe, text: SyntaxError }
+          - { id: opt-y7mn, text: IndexError }
+    answer:
+      quiz_answer:
+        accepted: [opt-t4hw]
+        explanation: candy 에 든 글자 "사탕" 과 숫자 3은 종류가 달라서 + 로 이을 수 없어요. 섞을 수 없는 종류를 섞으면 TypeError 가 나요. str(3) 으로 글자로 바꾸면 고칠 수 있어요.
+        explanations:
+          opt-k9ab: NameError 는 없는 이름을 쓸 때 나요. candy 는 첫 줄에서 만들었어요.
+          opt-d3qe: 괄호와 따옴표는 짝이 잘 맞아요. 문법은 틀리지 않았어요.
+          opt-y7mn: IndexError 는 없는 번호를 꺼낼 때 나요. 여기서는 번호를 꺼내지 않아요.
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000039
+    prompt:
+      quiz:
+        question: '진료 기록 2번: 이 코드를 돌리면 어떤 에러가 날까?'
+        code: |-
+          box = {"감기약": 3}
+          print(box["연고"])
+        options:
+          - { id: opt-c8ur, text: KeyError }
+          - { id: opt-m2ft, text: IndexError }
+          - { id: opt-w5lo, text: ValueError }
+          - { id: opt-g6zi, text: ZeroDivisionError }
+    answer:
+      quiz_answer:
+        accepted: [opt-c8ur]
+        explanation: 약 상자 딕셔너리에 연고 이름표가 없어요. 없는 이름표를 대괄호로 꺼내면 KeyError 가 나요. get 을 쓰면 멈추지 않아요.
+        explanations:
+          opt-m2ft: IndexError 는 리스트에서 없는 번호를 꺼낼 때 나요. 딕셔너리는 이름표로 꺼내요.
+          opt-w5lo: ValueError 는 int("abc") 처럼 바꿀 수 없는 값을 바꿀 때 나요.
+          opt-g6zi: 0으로 나누는 곳이 없어요.
+  - quiz_kind: bug_hunt
+    review_quest: b2000000-0000-0000-0000-000000000036
+    prompt:
+      quiz:
+        question: 진료 기록에 NameError 가 적혀 있어요. 감기약 3개 가 나오게 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-q5wa, code: 'medicine = "감기약"' }
+          - { id: ln-h8de, code: 'count = 3' }
+          - { id: ln-x2pn, code: 'print(f"{medicin} {count}개")' }
+        fixes:
+          - { id: fx-b6ks, code: 'print(f"{medicine} {count}개")' }
+          - { id: fx-u3yc, code: 'print("{medicine} {count}개")' }
+          - { id: fx-g9ma, code: 'print(f"{medicine} {count}")' }
+          - { id: fx-o4tr, code: 'print(f"{medicin} {Count}개")' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-x2pn, fix: fx-b6ks }
+        explanation: 상자 이름은 medicine 인데 마지막 줄에서 e 를 빠뜨렸어요. 이름이 한 글자만 달라도 파이썬은 없는 이름이라고 NameError 를 내요.
+        explanations:
+          ln-q5wa: 이 줄은 medicine 상자를 잘 만들었어요.
+          ln-h8de: 이 줄은 count 상자를 잘 만들었어요.
+          fx-u3yc: 따옴표 앞에 f 가 없으면 중괄호가 그대로 나와요.
+          fx-g9ma: 이름은 고쳤지만 개 가 빠졌어요.
+          fx-o4tr: medicin 은 그대로 틀렸고, Count 처럼 큰 글자로 바꾸면 또 다른 이름이 돼요.
+  - quiz_kind: parsons
+    review_quest: b2000000-0000-0000-0000-000000000041
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 친구가 0명이어도 멈추지 않고 사탕을 나눠요
+        indent: true
+        lines:
+          - { id: ln-v3mz, code: 'candies = 10' }
+          - { id: ln-r6bq, code: 'for friends in [2, 0]:' }
+          - { id: ln-e9sk, code: 'try:' }
+          - { id: ln-a4wd, code: 'print(candies // friends)' }
+          - { id: ln-n7ox, code: 'except ZeroDivisionError:' }
+          - { id: ln-j2gc, code: 'print("나눌 친구가 없어요")' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-v3mz, indent: 0 }
+            - { id: ln-r6bq, indent: 0 }
+            - { id: ln-e9sk, indent: 1 }
+            - { id: ln-a4wd, indent: 2 }
+            - { id: ln-n7ox, indent: 1 }
+            - { id: ln-j2gc, indent: 2 }
+        explanation: try 안에서 나눠 보고, 0으로 나누는 에러가 나면 except 쪽으로 가요. try 와 except 는 같은 깊이, 할 일은 한 칸 더 들여 써요. 5 다음에 나눌 친구가 없어요 가 나와요.
+  - quiz_kind: bug_hunt
+    review_quest: b2000000-0000-0000-0000-000000000040
+    prompt:
+      quiz:
+        question: except 를 써 두었는데도 abc 에서 멈춰요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-p7yt, code: 'items = ["3", "abc"]' }
+          - { id: ln-f2hc, code: 'for x in items:' }
+          - { id: ln-s8vn, code: '    try:' }
+          - { id: ln-k5qa, code: '        print(int(x) + 1)' }
+          - { id: ln-z3re, code: '    except TypeError:' }
+          - { id: ln-m6lu, code: '        print("숫자가 아니에요")' }
+        fixes:
+          - { id: fx-c4wn, code: '    except ValueError:' }
+          - { id: fx-t8dj, code: '    except KeyError:' }
+          - { id: fx-y2bo, code: '    except NameError:' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-z3re, fix: fx-c4wn }
+        explanation: int("abc") 처럼 숫자로 바꿀 수 없는 글자를 바꾸면 ValueError 가 나요. except 뒤에 그 에러 이름을 써야 잡아서 숫자가 아니에요 를 보여 줘요.
+        explanations:
+          ln-p7yt: 글자 두 개가 든 리스트는 맞아요. abc 는 일부러 넣은 거예요.
+          ln-f2hc: 하나씩 도는 반복은 맞아요.
+          ln-s8vn: try 로 해 보는 것은 맞아요.
+          ln-k5qa: 이 줄에서 에러가 나는 건 맞지만, 고칠 곳은 에러를 잡는 줄이에요.
+          ln-m6lu: 잡았을 때 보여 줄 말은 맞아요.
+          fx-t8dj: KeyError 는 없는 이름표일 때 나요. 여기서 나는 에러가 아니에요.
+          fx-y2bo: NameError 는 없는 이름일 때 나요. 여기서 나는 에러가 아니에요.
+  - quiz_kind: bug_hunt
+    review_quest: b2000000-0000-0000-0000-000000000043
+    prompt:
+      quiz:
+        question: 에러는 안 나는데 평균이 90 이 아니라 63 이 나와요. 조용한 버그가 숨은 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-b9xe, code: 'scores = [80, 90, 100]' }
+          - { id: ln-g4kp, code: 'total = 0' }
+          - { id: ln-w7sm, code: 'for i in range(1, len(scores)):' }
+          - { id: ln-d5yf, code: '    total = total + scores[i]' }
+          - { id: ln-r2na, code: 'print(total // len(scores))' }
+        fixes:
+          - { id: fx-e6qh, code: 'for i in range(len(scores)):' }
+          - { id: fx-s3mk, code: 'for i in range(1, len(scores) + 1):' }
+          - { id: fx-a9uv, code: 'for i in range(0, len(scores) - 1):' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-w7sm, fix: fx-e6qh }
+        explanation: range(1, …) 는 1번부터 세서 0번 점수 80을 빠뜨려요. range(len(scores)) 로 0번부터 돌면 세 점수를 모두 더해 평균 90이 나와요.
+        explanations:
+          ln-b9xe: 점수 리스트는 맞아요.
+          ln-g4kp: 합계를 0에서 시작하는 것은 맞아요.
+          ln-d5yf: 점수를 더하는 줄은 맞아요. 몇 번째 점수부터 더하는지 살펴봐요.
+          ln-r2na: 개수로 나누는 것은 맞아요. 합계가 모자라요.
+          fx-s3mk: 끝을 하나 늘리면 없는 3번 점수를 꺼내다 IndexError 가 나요.
+          fx-a9uv: 0번부터 세지만 끝이 하나 모자라서 100을 빠뜨려요.

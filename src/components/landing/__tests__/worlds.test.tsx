@@ -135,7 +135,7 @@ describe('세계관 섹션 서버 HTML', () => {
     expect(html).toMatch(/<a href="#try"[^>]*class="ld-worlds-act"/);
     expect(html).toContain('aria-label="코드 바다: 잠겨 있어요"');
     expect(html).toContain('aria-label="메이커 시티: 잠겨 있어요"');
-    expect(html.match(/준비 중/g)).toHaveLength(2);
+    expect(html.match(/준비 중/g)).toHaveLength(1); // 2월드는 다 써서(P10-07) 메이커 시티만
     expect(html.match(/class="ld-worlds-lock"/g)).toHaveLength(2);
   });
 

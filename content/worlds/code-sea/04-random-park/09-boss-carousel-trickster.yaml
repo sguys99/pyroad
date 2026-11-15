@@ -1,0 +1,158 @@
+# 2월드 보스 4: 회전목마 버그버그 (P10-07)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+# 보스 코드는 test:content 가 실제로 돌리므로 random 을 돌리지 않음(world2.md §3 2-4). 랜덤 문제는 코드 칸 없는 개념 객관식
+
+id: b2000000-0000-0000-0000-000000000204
+order: 9
+title: 회전목마 버그버그
+concept: 모듈·랜덤·수학 총정리
+xp_reward: 60
+quest_type: boss
+prompt:
+  topic: import, math 도구, randint 범위, choice 와 shuffle 총정리
+  learning_goals:
+    - math 도구로 계산한 결과를 알아낼 수 있다
+    - randint 가 낼 수 있는 수와 shuffle 이 하는 일을 설명할 수 있다
+    - 올림이 필요한 계산에서 알맞은 math 도구를 고를 수 있다
+  story_context: 놀이공원 한가운데 회전목마가 혼자서 빙빙 돌기 시작했어요! 해적 모자를 쓴 버그버그가 목마에 올라타 있네요. 주사위와 수학 도구에 숨은 장난을 찾아 회전목마를 멈춰 봐요!
+  fallback_text: import 로 도구 상자를 가져와야 math 나 random 을 쓸 수 있어요. math.sqrt 는 제곱근, math.ceil 은 올림, math.floor 는 내림이에요. 이 도구들은 결과가 늘 같아요. randint 는 앞 수와 뒤 수를 모두 포함하고, shuffle 은 리스트 순서를 섞어요.
+  boss:
+    name: 회전목마 버그버그
+    look: pirate
+    intro: 요호호! 나는 회전목마 버그버그! 주사위에 장난 좀 쳤지. 여섯 문제를 맞히면 목마를 멈춰 줄게!
+    on_defeat: 으아, 목마가 멈췄다! 랜덤도 수학도 척척이구나. 다음 섬은 버그 병원선인데... 사실 나 배가 좀 아파.
+    on_victory: 요호호, 목마는 계속 돈다! 도구 상자마다 무슨 도구가 있는지 다시 살펴보고 와!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000028
+    prompt:
+      quiz:
+        question: 수학 도구 상자를 열었어요. 돌리면 무엇이 나올까?
+        code: |-
+          import math
+          print(math.sqrt(16) + math.ceil(2.1))
+        options:
+          - { id: opt-s7gd, text: '7.0' }
+          - { id: opt-e3pw, text: '7' }
+          - { id: opt-l9ck, text: '6.0' }
+          - { id: opt-x4uy, text: '6' }
+    answer:
+      quiz_answer:
+        accepted: [opt-s7gd]
+        explanation: math.sqrt(16) 은 소수점이 붙은 4.0 이고, math.ceil(2.1) 은 올림해서 3이에요. 소수점 수와 더하면 결과에도 소수점이 붙어요.
+        explanations:
+          opt-e3pw: sqrt 는 늘 소수점이 붙은 수를 돌려줘요. 그래서 더한 값에도 .0 이 붙어요.
+          opt-l9ck: ceil 은 올림이라 2.1 이 3이 돼요. 2가 아니에요.
+          opt-x4uy: ceil 은 올림이고, sqrt 결과에는 소수점이 붙어요.
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000029
+    prompt:
+      quiz:
+        question: 주사위 놀이에서 random.randint(1, 6) 을 써요. 이 주문이 낼 수 있는 수를 모두 모은 것은 무엇일까?
+        options:
+          - { id: opt-b5ni, text: '1, 2, 3, 4, 5, 6' }
+          - { id: opt-u8fa, text: '1, 2, 3, 4, 5' }
+          - { id: opt-g2rm, text: '0, 1, 2, 3, 4, 5' }
+          - { id: opt-w6tz, text: '2, 3, 4, 5' }
+    answer:
+      quiz_answer:
+        accepted: [opt-b5ni]
+        explanation: randint 는 range 와 달리 앞 수와 뒤 수를 모두 포함해요. 그래서 1부터 6까지 모두 나올 수 있어요.
+        explanations:
+          opt-u8fa: range 는 끝 수가 빠지지만, randint 는 끝 수 6도 나와요.
+          opt-g2rm: randint(1, 6) 은 1부터 시작해요. 0은 나오지 않아요.
+          opt-w6tz: 앞 수 1과 뒤 수 6도 나올 수 있어요.
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000032
+    prompt:
+      quiz:
+        question: 'friends = ["파이뱀", "별똥이", "버그버그"] 에 random.shuffle(friends) 를 하면 friends 는 어떻게 될까?'
+        options:
+          - {
+              id: opt-h3kq,
+              text: '세 친구가 모두 그대로 있고, 서는 순서만 바뀔 수 있어요',
+            }
+          - { id: opt-n7ew, text: '세 친구 중 한 명만 골라서 알려 줘요' }
+          - { id: opt-c2ya, text: '친구 한 명이 줄에서 빠져요' }
+          - { id: opt-r9ob, text: '언제나 가나다 순서로 줄을 서요' }
+    answer:
+      quiz_answer:
+        accepted: [opt-h3kq]
+        explanation: shuffle 은 리스트 안의 순서를 섞기만 해요. 아무도 빠지거나 새로 들어오지 않아요. 우연히 원래 순서와 같을 때도 있어요.
+        explanations:
+          opt-n7ew: 하나만 골라 주는 것은 random.choice 예요.
+          opt-c2ya: shuffle 은 아무것도 빼지 않아요. 빼는 것은 remove 같은 메서드예요.
+          opt-r9ob: 가나다 순서로 세우는 것은 sort 예요. shuffle 은 마구 섞어요.
+  - quiz_kind: fill_blank
+    review_quest: b2000000-0000-0000-0000-000000000028
+    prompt:
+      quiz:
+        question: 빈칸을 채워 반지름이 3인 둥근 회전판의 넓이를 소수 첫째 자리까지 보여 줘요
+        code: |-
+          {{bk-f4tn}} math
+          r = 3
+          print(round(math.{{bk-k8ws}} * r * r, 1))
+        tokens:
+          - { id: tok-a6mq, text: import }
+          - { id: tok-p3hv, text: pi }
+          - { id: tok-z5dc, text: sqrt }
+          - { id: tok-e9rj, text: random }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-f4tn: tok-a6mq, bk-k8ws: tok-p3hv }
+        explanation: import 로 math 도구 상자를 가져오고, 원의 넓이는 원주율 pi 에 반지름을 두 번 곱해요. round 로 소수 첫째 자리까지 줄이면 28.3 이에요.
+        explanations:
+          tok-z5dc: sqrt 는 제곱근을 구하는 함수예요. 원주율 값이 아니에요.
+          tok-e9rj: random 은 다른 도구 상자 이름이에요. math 안에는 random 이 없어요.
+  - quiz_kind: fill_blank
+    review_quest: b2000000-0000-0000-0000-000000000034
+    prompt:
+      quiz:
+        question: 주사위를 굴린 기록이에요. 빈칸을 채워 3이 몇 번 나왔는지와 모두 몇 번 굴렸는지 보여 줘요
+        code: |-
+          rolls = [3, 6, 3, 1]
+          count = {}
+          for r in rolls:
+              count[r] = count.{{bk-c2xh}}(r, 0) + 1
+          print(count[3], {{bk-v7md}}(rolls))
+        tokens:
+          - { id: tok-u4bn, text: get }
+          - { id: tok-m8ke, text: len }
+          - { id: tok-t2ps, text: max }
+          - { id: tok-o6wa, text: items }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-c2xh: tok-u4bn, bk-v7md: tok-m8ke }
+        explanation: get 은 처음 나온 눈이면 0을 줘서 1부터 셀 수 있어요. len 은 기록의 개수라서 모두 4번 굴렸어요. 3은 2번 나왔어요.
+        explanations:
+          tok-t2ps: max 는 가장 큰 눈을 알려 줘요. 굴린 횟수가 아니에요.
+          tok-o6wa: items 는 이름표와 내용을 한 쌍씩 꺼낼 때 써요.
+  - quiz_kind: bug_hunt
+    review_quest: b2000000-0000-0000-0000-000000000028
+    prompt:
+      quiz:
+        question: 보트 하나에 두 명씩 타요. 친구 7명이 모두 타려면 보트가 4척 있어야 하는데 3척이 나와요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-y3gq, code: 'import math' }
+          - { id: ln-l8re, code: 'kids = 7' }
+          - { id: ln-c6vn, code: 'boats = math.floor(kids / 2)' }
+          - { id: ln-w2tx, code: 'print(f"보트 {boats}척이 필요해요")' }
+        fixes:
+          - { id: fx-h5ad, code: 'boats = math.ceil(kids / 2)' }
+          - { id: fx-n9qu, code: 'boats = kids // 2' }
+          - { id: fx-p4mf, code: 'boats = kids / 2' }
+          - { id: fx-z7ki, code: 'boats = math.sqrt(kids)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-c6vn, fix: fx-h5ad }
+        explanation: 7 나누기 2는 3.5라서 남는 한 명도 탈 보트가 하나 더 있어야 해요. floor 는 내림이라 3이 되고, ceil 은 올림이라 4가 돼요.
+        explanations:
+          ln-y3gq: math 도구 상자를 가져오는 줄은 맞아요.
+          ln-l8re: 친구 수 7은 맞아요.
+          ln-w2tx: 보여 주는 줄은 맞아요. 보트 수를 계산하는 줄을 살펴봐요.
+          fx-n9qu: // 는 몫만 구해서 내림과 같아요. 여전히 3척이에요.
+          fx-p4mf: 3.5척이 나와요. 보트는 반 척만 빌릴 수 없어요.
+          fx-z7ki: sqrt 는 제곱근이에요. 나누기와 상관없어요.

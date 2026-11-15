@@ -333,7 +333,7 @@ prompt:
     on_victory: 이번엔 …      # 학생이 졌을 때 (놀리지 않고 다시 오라고)
 rounds:                       # 3~7개. 라운드마다 퀴즈 하나
   - quiz_kind: multiple_choice
-    review_quest: b1000000-0000-0000-0000-000000000002   # 선택. 이 문제에서 지면 "복습하러 가기"가 여는 같은 스테이지 퀘스트
+    review_quest: b1000000-0000-0000-0000-000000000002   # 선택. 이 문제에서 지면 "복습하러 가기"가 여는 같은 월드 퀘스트 (보통 같은 스테이지, 최종 보스는 앞 스테이지도)
     prompt:
       quiz: { question: …, code: …, options: [ … ] }      # 퀴즈 prompt.quiz 와 같음
     answer:

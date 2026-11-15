@@ -1,0 +1,217 @@
+# 2월드 보스 6: 산맥 지킴이 버그버그 (P10-07)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000206
+order: 9
+title: 산맥 지킴이 버그버그
+concept: 기초 알고리즘 총정리
+xp_reward: 72
+quest_type: boss
+prompt:
+  topic: 합과 평균, 최댓값 찾기, 검색 횟수, 반씩 줄여 찾기, 줄 세우기 총정리
+  learning_goals:
+    - 합, 평균, 가장 큰 값을 직접 구하는 코드를 따라갈 수 있다
+    - 차례로 찾기와 반씩 줄여 찾기가 어떻게 움직이는지 설명할 수 있다
+    - 가장 작은 것을 차례로 뽑아 줄 세우는 코드를 알맞은 차례로 놓을 수 있다
+  story_context: 해저 산맥의 가장 높은 봉우리에 오르자, 커다란 돌 갑옷을 입은 버그버그가 길을 막았어요! 산맥 지킴이래요. 내장 함수 없이 직접 생각하는 힘을 보여 주면 길을 비켜 준대요.
+  fallback_text: 알고리즘은 문제를 푸는 순서예요. 합은 0에서 시작해 하나씩 더하고, 가장 큰 값은 첫 값을 대장으로 두고 더 큰 값이 나오면 바꿔요. 찾으면 break 로 멈추고, 반씩 줄여 찾을 때는 가운데를 먼저 봐요. 줄 세우기는 남은 것 중 가장 작은 것을 하나씩 데려와요.
+  boss:
+    name: 산맥 지킴이 버그버그
+    look: ridge
+    intro: 쿵! 나는 산맥 지킴이 버그버그다. 여기서부터는 내장 함수 금지 구역! 일곱 문제를 풀어야 지나갈 수 있지.
+    on_defeat: 쿵... 졌다! 머리로 차근차근 생각하는 힘이 정말 대단해. 이제 마지막 항구로 가 봐. 거기엔 엄청 큰 선장 모자를 쓴 녀석이 있대!
+    on_victory: 쿵쿵, 아직 산을 넘기엔 이르다! 종이에 값을 한 줄씩 적어 가며 따라가 보고 다시 오너라.
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000046
+    prompt:
+      quiz:
+        question: 진주 세 알의 무게를 더하고 평균을 내요. 돌리면 무엇이 나올까?
+        code: |-
+          pearls = [3, 5, 4]
+          total = 0
+          for p in pearls:
+              total = total + p
+          print(total, round(total / len(pearls), 1))
+        options:
+          - { id: opt-j6sw, text: '12 4.0' }
+          - { id: opt-q2dn, text: '12 4' }
+          - { id: opt-f8ky, text: '12 3.0' }
+          - { id: opt-v5mb, text: '4.0 12' }
+    answer:
+      quiz_answer:
+        accepted: [opt-j6sw]
+        explanation: 3 + 5 + 4 로 합계는 12예요. 12를 진주 개수 3으로 나누면 4.0 인데, / 로 나누면 언제나 소수점이 붙어요.
+        explanations:
+          opt-q2dn: / 로 나눈 결과에는 소수점이 붙어요. round 를 해도 4.0 으로 남아요.
+          opt-f8ky: 진주는 3개라서 3으로 나눠요. 12 ÷ 3 은 4예요.
+          opt-v5mb: print 는 쓴 차례대로 보여 줘요. 합계가 먼저예요.
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000047
+    prompt:
+      quiz:
+        question: 물고기 대장이 바뀔 때마다 알려 줘요. 돌리면 무엇이 나올까?
+        code: |-
+          fish = [4, 9, 2, 11, 7]
+          leader = fish[0]
+          for f in fish:
+              if f > leader:
+                  leader = f
+                  print(leader)
+        options:
+          - { id: opt-r3hx, text: "9\n11" }
+          - { id: opt-c7ua, text: "4\n9\n11" }
+          - { id: opt-n4gt, text: '11' }
+          - { id: opt-w9ep, text: "9\n11\n7" }
+    answer:
+      quiz_answer:
+        accepted: [opt-r3hx]
+        explanation: 대장은 4로 시작해요. 9가 더 커서 바뀌고, 2는 작아서 그대로, 11이 더 커서 또 바뀌고, 7은 작아서 그대로예요. 바뀔 때만 보여 줘서 두 줄이 나와요.
+        explanations:
+          opt-c7ua: 처음 대장 4는 바뀐 게 아니라서 보여 주지 않아요.
+          opt-n4gt: print 가 if 안에 있어서 바뀔 때마다 보여 줘요. 마지막에 한 번만이 아니에요.
+          opt-w9ep: 7은 대장 11보다 작아서 바뀌지 않아요.
+  - quiz_kind: fill_blank
+    review_quest: b2000000-0000-0000-0000-000000000049
+    prompt:
+      quiz:
+        question: 빈칸을 채워 키가 130 이상인 친구만 새 리스트에 담고 몇 명인지 보여 줘요
+        code: |-
+          heights = [128, 135, 131, 140]
+          tall = []
+          for h in heights:
+              if h {{bk-p6rd}} 130:
+                  tall.{{bk-x3vf}}(h)
+          print(len(tall))
+        tokens:
+          - { id: tok-g5wq, text: '>=' }
+          - { id: tok-b8lo, text: '<' }
+          - { id: tok-s4ny, text: append }
+          - { id: tok-k2ez, text: remove }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-p6rd: tok-g5wq, bk-x3vf: tok-s4ny }
+        explanation: '>= 는 "크거나 같다"예요. 130 이상인 135, 131, 140 을 append 로 새 리스트 끝에 담으면 3명이에요.'
+        explanations:
+          tok-b8lo: < 를 쓰면 130 보다 작은 친구만 골라요.
+          tok-k2ez: remove 는 리스트에서 빼는 메서드예요. 빈 리스트에서 빼려고 하면 멈춰요.
+  - quiz_kind: multiple_choice
+    review_quest: b2000000-0000-0000-0000-000000000050
+    prompt:
+      quiz:
+        question: 조개를 하나씩 열어 진주를 찾아요. 돌리면 무엇이 나올까?
+        code: |-
+          shells = ["모래", "돌", "진주", "돌"]
+          opened = 0
+          for s in shells:
+              opened = opened + 1
+              if s == "진주":
+                  break
+          print(f"{opened}번 열었어요")
+        options:
+          - { id: opt-y8bk, text: '3번 열었어요' }
+          - { id: opt-e5qm, text: '4번 열었어요' }
+          - { id: opt-h2zc, text: '2번 열었어요' }
+          - { id: opt-t6ja, text: '1번 열었어요' }
+    answer:
+      quiz_answer:
+        accepted: [opt-y8bk]
+        explanation: 모래, 돌, 진주 순서로 열어요. 진주를 연 그 순간에도 1을 더한 다음 break 로 멈춰서 3번이에요. 마지막 돌은 열지 않아요.
+        explanations:
+          opt-e5qm: 진주를 찾으면 break 로 멈춰서 마지막 조개는 열지 않아요.
+          opt-h2zc: 진주를 연 것도 한 번이에요. 1을 더한 다음에 멈춰요.
+          opt-t6ja: 진주는 세 번째 조개에 있어요.
+  - quiz_kind: parsons
+    review_quest: b2000000-0000-0000-0000-000000000050
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 진주가 몇 번째 조개에 있는지 찾으면 바로 멈춰요
+        indent: true
+        lines:
+          - { id: ln-m3vc, code: 'shells = ["돌", "진주", "모래"]' }
+          - { id: ln-z8ka, code: 'for i in range(len(shells)):' }
+          - { id: ln-b4re, code: 'if shells[i] == "진주":' }
+          - { id: ln-w6py, code: 'print(f"{i + 1}번째 조개에서 찾았어요")' }
+          - { id: ln-f9dt, code: 'break' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-m3vc, indent: 0 }
+            - { id: ln-z8ka, indent: 0 }
+            - { id: ln-b4re, indent: 1 }
+            - { id: ln-w6py, indent: 2 }
+            - { id: ln-f9dt, indent: 2 }
+        explanation: 번호로 하나씩 열어 보다가 진주를 만나면, 먼저 몇 번째인지 보여 주고 break 로 멈춰요. 번호는 0부터라 1을 더해 2번째 조개라고 알려 줘요.
+  - quiz_kind: fill_blank
+    review_quest: b2000000-0000-0000-0000-000000000052
+    prompt:
+      quiz:
+        question: 업다운 마법으로 비밀 수 70 을 찾아요. 빈칸을 채워 가운데 수를 고르고, 업이면 아래쪽 끝을 올려요
+        code: |-
+          secret = 70
+          low = 1
+          high = 100
+          guess = (low + high) {{bk-h7nu}} 2
+          if guess < secret:
+              low = guess {{bk-d4sa}} 1
+          print(guess, low, high)
+        tokens:
+          - { id: tok-r9cx, text: '//' }
+          - { id: tok-a3mf, text: '/' }
+          - { id: tok-w7jb, text: '+' }
+          - { id: tok-e2tg, text: '-' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-h7nu: tok-r9cx, bk-d4sa: tok-w7jb }
+        explanation: // 는 나눈 몫만 남겨서 가운데 수가 50이 돼요. 50은 70보다 작아서 업! 이제 50은 아니니까 51부터 다시 찾아요.
+        explanations:
+          tok-a3mf: / 로 나누면 50.5 처럼 소수점이 생겨요. 수 맞히기에는 몫만 남기는 // 를 써요.
+          tok-e2tg: 비밀 수가 더 크니까 아래쪽 끝을 올려야 해요. 빼면 오히려 내려가요.
+  - quiz_kind: parsons
+    review_quest: b2000000-0000-0000-0000-000000000053
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 가장 작은 키를 하나씩 데려와 새 줄에 세워요
+        indent: true
+        lines:
+          - { id: ln-u7hs, code: 'line = [5, 3, 8]' }
+          - { id: ln-c2qn, code: 'new_line = []' }
+          - { id: ln-k9wd, code: 'while len(line) > 0:' }
+          - { id: ln-g3yx, code: 'small = min(line)' }
+          - { id: ln-a8fp, code: 'line.remove(small)' }
+          - { id: ln-s5ob, code: 'new_line.append(small)' }
+          - { id: ln-e6lz, code: 'print(new_line)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-u7hs, indent: 0 }
+            - { id: ln-c2qn, indent: 0 }
+            - { id: ln-k9wd, indent: 0 }
+            - { id: ln-g3yx, indent: 1 }
+            - { id: ln-a8fp, indent: 1 }
+            - { id: ln-s5ob, indent: 1 }
+            - { id: ln-e6lz, indent: 0 }
+          - - { id: ln-c2qn, indent: 0 }
+            - { id: ln-u7hs, indent: 0 }
+            - { id: ln-k9wd, indent: 0 }
+            - { id: ln-g3yx, indent: 1 }
+            - { id: ln-a8fp, indent: 1 }
+            - { id: ln-s5ob, indent: 1 }
+            - { id: ln-e6lz, indent: 0 }
+          - - { id: ln-u7hs, indent: 0 }
+            - { id: ln-c2qn, indent: 0 }
+            - { id: ln-k9wd, indent: 0 }
+            - { id: ln-g3yx, indent: 1 }
+            - { id: ln-s5ob, indent: 1 }
+            - { id: ln-a8fp, indent: 1 }
+            - { id: ln-e6lz, indent: 0 }
+          - - { id: ln-c2qn, indent: 0 }
+            - { id: ln-u7hs, indent: 0 }
+            - { id: ln-k9wd, indent: 0 }
+            - { id: ln-g3yx, indent: 1 }
+            - { id: ln-s5ob, indent: 1 }
+            - { id: ln-a8fp, indent: 1 }
+            - { id: ln-e6lz, indent: 0 }
+        explanation: 남은 줄이 빌 때까지, 가장 작은 키를 찾고 그 친구를 원래 줄에서 빼서 새 줄 끝에 세워요. 빼기와 세우기는 어느 쪽이 먼저여도 괜찮아요. [3, 5, 8] 이 나와요.

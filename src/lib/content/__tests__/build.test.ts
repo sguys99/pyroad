@@ -638,6 +638,24 @@ describe('보스 (P9-12)', () => {
     if (!r.ok) expect(r.errors[0]).toContain('rounds[0].prompt.accepted');
   });
 
+  it('review_quest 는 같은 월드의 다른 스테이지도 되고, 월드에 없는 퀘스트면 실패 (P10-07 최종 보스)', () => {
+    const withReview = (id: string) =>
+      parsed({
+        ...boss,
+        order: 2,
+        rounds: boss.rounds.map((r: object) => ({ ...r, review_quest: id })),
+      });
+    const code = parsed(codeQuest()); // STAGE_1 의 퀘스트
+    const ok = withReview(code.id);
+    expect(() =>
+      buildRows(tree([STAGE_1, [code]], [STAGE_7, [ok]])),
+    ).not.toThrow();
+    const bad = withReview('b9000000-0000-0000-0000-000000000001');
+    expect(() => buildRows(tree([STAGE_1, [code]], [STAGE_7, [bad]]))).toThrow(
+      '이 월드 퀘스트가 아니에요',
+    );
+  });
+
   it('라운드 문제 글에 정답이 그대로 있으면 실패 (퀴즈와 같은 검사)', () => {
     const leak = structuredClone(boss);
     leak.rounds[1].prompt.quiz.question =

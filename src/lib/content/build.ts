@@ -230,11 +230,14 @@ export function buildRows(
         rows.quests.push(questRow);
         rows.answer_keys.push(answerRow);
         if (quest.quest_type === 'boss') {
-          const ids = new Set(quests.map((q) => q.quest.id));
+          // 같은 월드면 다른 스테이지도 됨: 최종 보스가 앞 스테이지 퀘스트로 복습 보냄 (P10-07)
+          const ids = new Set(
+            stages.flatMap((s) => s.quests.map((q) => q.quest.id)),
+          );
           quest.rounds.forEach((r, i) => {
             if (r.review_quest && !ids.has(r.review_quest))
               throw new Error(
-                `${file}: rounds[${i}].review_quest '${r.review_quest}'는 이 스테이지 퀘스트가 아니에요`,
+                `${file}: rounds[${i}].review_quest '${r.review_quest}'는 이 월드 퀘스트가 아니에요`,
               );
           });
         }

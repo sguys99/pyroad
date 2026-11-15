@@ -352,7 +352,7 @@ const bossRoundOf = <O extends QuizOption>(o: O) =>
     quiz_kind: o.shape.quiz_kind,
     prompt: z.strictObject({ quiz: o.shape.prompt.shape.quiz }),
     answer: o.shape.answer,
-    /** 선택. 이 문제에서 져서 끝나면 "복습하러 가기"가 여는 같은 스테이지 퀘스트 id (없으면 스테이지 퀘스트 목록) */
+    /** 선택. 이 문제에서 져서 끝나면 "복습하러 가기"가 여는 같은 월드 퀘스트 id (보통 같은 스테이지, 최종 보스는 앞 스테이지도. 없으면 스테이지 퀘스트 목록) */
     review_quest: id.optional(),
   });
 const [mcQuiz, fbQuiz, psQuiz, bhQuiz] = QuizQuestSchema.options;

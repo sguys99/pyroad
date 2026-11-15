@@ -122,14 +122,17 @@ export function stage(order: number): E2eStage {
   return found;
 }
 
-/** 첫 월드의 모든 퀘스트(코드·프로젝트, 퀴즈 빼고) id. 월드를 다 깬 상태를 만들 때 (P5-01) */
-export function allQuestIds(): string[] {
-  return readdirSync(WORLD_DIR, { withFileTypes: true })
+/** 월드(기본: 첫 월드)의 모든 퀘스트(코드·프로젝트·보스, 퀴즈 빼고) id, 스테이지·파일 순. 월드를 다 깬 상태를 만들 때 (P5-01) */
+export function allQuestIds(world = 'python-island'): string[] {
+  const worldDir = join(REPO_ROOT, 'content/worlds', world);
+  return readdirSync(worldDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name))
     .flatMap((d) => {
-      const dir = join(WORLD_DIR, d.name);
+      const dir = join(worldDir, d.name);
       return readdirSync(dir)
         .filter((f) => f.endsWith('.yaml') && f !== 'stage.yaml')
+        .sort()
         .map((f) => parse(readFileSync(join(dir, f), 'utf8')) as QuestYaml)
         .filter((q) => q.quest_type !== 'quiz')
         .map((q) => q.id);

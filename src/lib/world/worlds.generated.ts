@@ -161,7 +161,7 @@ export const WORLDS: readonly WorldInfo[] = [
     "unlock_rule": {
       "type": "previous_world_cleared"
     },
-    "ready": false,
+    "ready": true,
     "map": {
       "bgm": "world2",
       "path": "catmull_rom",
