@@ -1,0 +1,82 @@
+# 2월드 퀘스트 5-10: 고장 난 계산기 (챌린지)
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5
+# 고치기 퀘스트: 시작 코드는 KeyError → TypeError → IndexError 차례로 멈춤 (§10). 고친 세 곳을 모두 code_check (제안 F)
+
+id: b2000000-0000-0000-0000-000000000045
+order: 10
+title: 고장 난 계산기
+concept: 에러 세 가지 고치기
+xp_reward: 120
+quest_type: code
+prompt:
+  topic: 여러 에러를 하나씩 읽고 고치기
+  learning_goals:
+    - 에러 메시지를 보고 KeyError, TypeError, IndexError를 구분할 수 있다
+    - 에러를 하나 고치고 다시 실행해 다음 에러를 찾을 수 있다
+    - 에러마다 알맞은 고치는 방법을 고를 수 있다
+  story_context: 다 나은 버그버그가 병원선 매점에서 퇴원 선물을 사려는데, 매점 계산기가 고장 났어요! 버그가 세 마리나 숨어 있대요. 하나를 고치면 다음 버그가 나타나요. 의사 선생님, 마지막 진료를 부탁해요!
+  exercise_description: '계산기의 버그 세 개를 고치세요. 가격표에 없는 물건은 price.get(item, 0) 으로 0원, 글자 "2"인 배달비는 int(delivery) 로 숫자로, 없는 번호 basket[3] 은 맨 끝 번호 basket[-1] 로 바꿔요'
+  starter_code: |
+    # 병원선 매점 계산기
+    price = {"사과": 3, "우유": 4, "빵": 5}
+    basket = ["사과", "우유", "바나나"]
+    delivery = "2"
+
+    total = 0
+    for item in basket:
+        total = total + price[item]
+    print(f"합계: {total}원")
+
+    total = total + delivery
+    print(f"배달비 더해서: {total}원")
+
+    print(f"마지막 물건: {basket[3]}")
+  expected_output_hint: '합계: 7원, 배달비 더해서: 9원, 마지막 물건: 바나나 가 한 줄씩 나와야 해요'
+  checklist:
+    - '첫 에러(KeyError): price[item] 을 price.get(item, 0) 으로 바꿔요'
+    - '둘째 에러(TypeError): delivery 를 int(delivery) 로 바꿔 더해요'
+    - '셋째 에러(IndexError): basket[3] 을 basket[-1] 로 바꿔요'
+  example_output: |-
+    합계: 7원
+    배달비 더해서: 9원
+    마지막 물건: 바나나
+  fallback_text: '에러는 한 번에 하나씩 나와요. KeyError 는 없는 이름표, TypeError 는 숫자와 글자처럼 섞을 수 없는 것을 더할 때, IndexError 는 없는 번호예요. 하나 고치고 다시 실행해서 다음 쪽지를 읽어요. 바나나는 가격표에 없어서 0원으로 쳐요.'
+  is_challenge: true
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          합계: 7원
+          배달비 더해서: 9원
+          마지막 물건: 바나나
+      - type: code_check
+        expected: price.get(
+      - type: code_check
+        expected: int(delivery)
+      - type: code_check
+        expected: basket[-1]
+  hints:
+    level_1: 실행할 때마다 에러 쪽지 맨 아래 줄을 읽어요. 에러 이름이 어디가 아픈지 알려 줘요.
+    level_2: '없는 이름표는 .get(이름표, 0), 글자 숫자는 int( ), 맨 끝 물건은 번호 -1 이에요.'
+    level_3: |-
+      세 줄을 이렇게 고쳐 보세요!
+          total = total + price.get(item, 0)
+      total = total + int(delivery)
+      print(f"마지막 물건: {basket[-1]}")
+  solution_code: |
+    # 병원선 매점 계산기
+    price = {"사과": 3, "우유": 4, "빵": 5}
+    basket = ["사과", "우유", "바나나"]
+    delivery = "2"
+
+    total = 0
+    for item in basket:
+        total = total + price.get(item, 0)
+    print(f"합계: {total}원")
+
+    total = total + int(delivery)
+    print(f"배달비 더해서: {total}원")
+
+    print(f"마지막 물건: {basket[-1]}")

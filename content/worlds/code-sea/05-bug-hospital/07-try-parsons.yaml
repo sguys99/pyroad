@@ -1,0 +1,34 @@
+# 2월드 퀴즈 5-7: 안전띠 순서
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000042
+order: 7
+title: 안전띠 순서
+concept: try / except 들여쓰기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: try와 except 블록의 순서와 들여쓰기
+  learning_goals:
+    - try 아래에 해 볼 코드를, except 아래에 에러가 났을 때 할 코드를 놓을 수 있다
+  story_context: 버그버그가 안전띠 주문을 조각조각 잘라 놨어요! 줄을 다시 맞춰서, 숫자로 못 바꾸는 글자를 만나도 멈추지 않게 해 줘요.
+  fallback_text: 먼저 해 볼 일을 감싸는 줄이 오고, 그 아래 한 칸 들여써서 해 볼 일을 차례로 놓아요. 에러가 났을 때 갈 곳은 맨 처음 줄과 같은 높이에 놓고, 할 일은 다시 한 칸 들여써요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 숫자로 못 바꾸면 안내 글이 나오게 해요
+    indent: true
+    lines:
+      - { id: ln-s4xi, code: 'try:' }
+      - { id: ln-c5ix, code: 'n = int("다섯")' }
+      - { id: ln-np9f, code: 'print(n + 1)' }
+      - { id: ln-1y66, code: 'except ValueError:' }
+      - { id: ln-ddj9, code: 'print("숫자로 바꿀 수 없어요")' }
+answer:
+  quiz_answer:
+    accepted:
+      - - { id: ln-s4xi, indent: 0 }
+        - { id: ln-c5ix, indent: 1 }
+        - { id: ln-np9f, indent: 1 }
+        - { id: ln-1y66, indent: 0 }
+        - { id: ln-ddj9, indent: 1 }
+    explanation: try 아래에서 "다섯"을 int()로 바꿔 보다가 ValueError 가 나면, 남은 줄은 건너뛰고 except ValueError 아래로 가서 "숫자로 바꿀 수 없어요"를 보여 줘요. try 와 except 는 같은 높이, 그 안의 줄은 한 칸 들여써요.

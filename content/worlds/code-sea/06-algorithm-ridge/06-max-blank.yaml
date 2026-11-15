@@ -1,0 +1,36 @@
+# 2월드 퀴즈 6-6: 대장 찾기 빈칸
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b2000000-0000-0000-0000-000000000051
+order: 6
+title: 대장 찾기 빈칸
+concept: 최댓값 찾기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 최댓값 찾기 코드 완성하기
+  learning_goals:
+    - 대장과 비교하는 기호와 대장을 바꾸는 값을 고를 수 있다
+  story_context: 버그버그가 대장 찾기 주문 두 군데를 지워 놨어요! 빈칸을 채워 가장 큰 수 9를 찾아 줘요.
+  fallback_text: 지금 보는 수가 대장보다 커야 대장이 바뀌어요. 대장이 바뀔 때는 지금 보는 수가 새 대장이 돼요.
+  quiz:
+    question: 빈칸을 채워 가장 큰 수 9가 나오게 해요
+    code: |-
+      nums = [4, 9, 6]
+      best = nums[0]
+      for n in nums:
+          if n {{bk-s4dq}} best:
+              best = {{bk-7mzc}}
+      print(best)
+    tokens:
+      - { id: tok-c8pe, text: '>' }
+      - { id: tok-q2wl, text: '<' }
+      - { id: tok-h5ug, text: n }
+      - { id: tok-o4tb, text: best }
+      - { id: tok-y3fk, text: '0' }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-s4dq: tok-c8pe, bk-7mzc: tok-h5ug }
+    explanation: n 이 대장 best 보다 크면(>) 대장을 n 으로 바꿔요. 4 → 9 로 대장이 바뀌고 6은 9보다 작아서 그대로라 9가 나와요.

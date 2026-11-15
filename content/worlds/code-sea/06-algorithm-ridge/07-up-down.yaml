@@ -1,0 +1,100 @@
+# 2월드 퀘스트 6-7: 업다운 마법
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-6 (제안 H)
+# 비밀 수를 정해 두어 결과가 늘 같음(output_match). low·high 를 바꾸는 줄이 빈칸이라 시작 코드는 첫 반복에서 바로 오류로 멈춤 (B31)
+
+id: b2000000-0000-0000-0000-000000000052
+order: 7
+title: 업다운 마법
+concept: 반씩 줄여 찾기
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 가운데를 골라 반씩 줄여 찾기
+  learning_goals:
+    - 범위의 가운데 수 (low + high) // 2 를 골라 추측할 수 있다
+    - 업이면 low를, 다운이면 high를 바꿔 찾을 범위를 반으로 줄일 수 있다
+    - 반씩 줄여 찾으면 차례로 찾기보다 훨씬 빨리 찾는다는 것을 안다
+  story_context: 다섯 번째 봉우리 문지기가 1부터 100 사이의 비밀 수를 생각했대요. 파이썬 섬에서 했던 숫자 맞추기 게임 기억나요? 이번엔 컴퓨터가 가장 똑똑하게 맞히는 업다운 마법을 써 봐요. 언제나 남은 범위의 한가운데를 부르는 거예요!
+  exercise_description: '가운데 수 guess 가 비밀 수보다 작으면(업) low 를 guess + 1 로, 크면(다운) high 를 guess - 1 로 바꿔 범위를 반씩 줄이세요. 추측을 한 줄씩 보여 주고 마지막에 "7번 만에 찾았어요"가 나와야 해요'
+  starter_code: |
+    secret = 77
+    low = 1
+    high = 100
+    tries = 0
+    guess = 0
+
+    while guess != secret:
+        guess = (low + high) // 2
+        tries = tries + 1
+        if guess < secret:
+            print(f"{guess}: 업!")
+            # 비밀 수는 guess 보다 커요. 범위의 아래쪽 끝을 올려요
+            low = ___
+        elif guess > secret:
+            print(f"{guess}: 다운!")
+            # 비밀 수는 guess 보다 작아요. 범위의 위쪽 끝을 내려요
+            high = ___
+        else:
+            print(f"{guess}: 정답!")
+
+    print(f"{tries}번 만에 찾았어요")
+  expected_output_hint: '50: 업! 부터 77: 정답! 까지 7줄과 7번 만에 찾았어요 가 나와야 해요'
+  checklist:
+    - '업이면 low = guess + 1 이에요'
+    - '다운이면 high = guess - 1 이에요'
+    - 7번 만에 찾았는지 봐요
+  example_output: |-
+    50: 업!
+    75: 업!
+    88: 다운!
+    81: 다운!
+    78: 다운!
+    76: 업!
+    77: 정답!
+    7번 만에 찾았어요
+  fallback_text: '업다운 마법: 1~100의 가운데 50을 불러요. "업!"이면 비밀 수는 51~100 안에 있으니 low 를 guess + 1 로 올려요. "다운!"이면 high 를 guess - 1 로 내려요. 부를 때마다 남은 범위가 반으로 줄어서, 1부터 차례로 부르면 77번 걸릴 것을 7번 만에 찾아요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          50: 업!
+          75: 업!
+          88: 다운!
+          81: 다운!
+          78: 다운!
+          76: 업!
+          77: 정답!
+          7번 만에 찾았어요
+      - type: code_check
+        expected: while
+      - type: code_check
+        expected: // 2
+  hints:
+    level_1: '"업!"이면 비밀 수가 guess 보다 커요. 그럼 guess 와 그보다 작은 수는 더 볼 필요가 없겠죠?'
+    level_2: '업이면 아래쪽 끝 low 를 guess 바로 다음 수로, 다운이면 위쪽 끝 high 를 guess 바로 앞 수로 바꿔요.'
+    level_3: |-
+      두 빈칸을 이렇게 채워 보세요!
+      low = guess + 1
+      high = guess - 1
+  solution_code: |
+    secret = 77
+    low = 1
+    high = 100
+    tries = 0
+    guess = 0
+
+    while guess != secret:
+        guess = (low + high) // 2
+        tries = tries + 1
+        if guess < secret:
+            print(f"{guess}: 업!")
+            low = guess + 1
+        elif guess > secret:
+            print(f"{guess}: 다운!")
+            high = guess - 1
+        else:
+            print(f"{guess}: 정답!")
+
+    print(f"{tries}번 만에 찾았어요")

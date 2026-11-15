@@ -2,6 +2,7 @@
 //
 //   multiple_choice  문제에 code 가 있으면(출력 예측형) 실제 출력 = 정답 보기, 오답 보기와는 다름
 //                    (여러 줄 출력은 줄을 ", " 로 이은 모양. content/README.md "출력 예측형")
+//                    코드가 에러로 끝나면(에러 예측형, world2.md 제안 E) 정답 보기 = 실제 에러 이름
 //   fill_blank       정답으로 채운 코드는 오류 없이 끝나고, 다른 토큰으로 채운 결과는 정답과 다름
 //   parsons          정답 순서(들여쓰기 포함)는 모두 오류 없이 끝나고 출력이 서로 같음
 //   bug_hunt         원래 코드와 오답 수정안은 정답 수정안과 결과(출력·오류·시간 초과)가 다름, 정답 수정안은 오류 없이 끝남
@@ -85,6 +86,7 @@ interface Outcome {
   /** 결과 비교용: 출력, 또는 오류 종류·시간 초과 */
   result: string;
   stdout: string;
+  errorType: string | null;
 }
 
 async function run(code: string): Promise<Outcome> {
@@ -94,6 +96,7 @@ async function run(code: string): Promise<Outcome> {
     ok,
     result: ok ? r.stdout.trim() : `${r.outcome}:${r.errorType ?? ''}`,
     stdout: r.stdout,
+    errorType: r.errorType,
   };
 }
 
@@ -119,14 +122,21 @@ for (const { stage, quest } of [...quizzes, ...bossRounds, ...skillChecks])
           const { code, options } = quest.prompt.quiz;
           if (!code) return; // 개념 객관식: 돌릴 코드 없음
           const out = await run(code);
+          const accepted = quest.answer.quiz_answer.accepted;
+          if (!out.ok && out.errorType) {
+            // 에러 예측형: 에러 이름 보기 중 실제 에러와 같은 것만 정답
+            const named = options
+              .filter((o) => o.text === out.errorType)
+              .map((o) => o.id);
+            expect(named, `실제 에러: ${out.result}`).toEqual(accepted);
+            return;
+          }
           expect(out.ok, out.result).toBe(true);
           const shown = lines(out.stdout);
           const matching = options
             .filter((o) => o.text === shown)
             .map((o) => o.id);
-          expect(matching, `실제 출력: ${shown}`).toEqual(
-            quest.answer.quiz_answer.accepted,
-          );
+          expect(matching, `실제 출력: ${shown}`).toEqual(accepted);
           return;
         }
         case 'fill_blank': {

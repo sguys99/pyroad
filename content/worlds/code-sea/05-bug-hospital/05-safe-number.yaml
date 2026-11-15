@@ -1,0 +1,75 @@
+# 2월드 퀘스트 5-5: 숫자 변신 안전띠
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5
+# input() 대신 리스트로 미리 둔 값(§10). 시작 코드는 "abc"에서 일부러 ValueError. except 를 code_check (제안 F)
+
+id: b2000000-0000-0000-0000-000000000040
+order: 5
+title: 숫자 변신 안전띠
+concept: try / except ValueError
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: try와 except로 멈추지 않게 하기
+  learning_goals:
+    - try 아래 코드를 해 보고, 에러가 나면 except 아래로 간다는 것을 안다
+    - int()로 바꿀 수 없는 글자에서 나는 ValueError를 잡을 수 있다
+  story_context: 환자 카드에 적힌 약 개수를 int()로 숫자로 바꿔 더하려는데, 버그버그가 카드 하나에 abc 라고 낙서를 했어요! 그 카드에서 ValueError 가 나며 멈춰 버려요. 안전띠를 매 주면 넘어져도 멈추지 않아요.
+  exercise_description: 'for 안의 세 줄을 try: 아래로 넣고, except ValueError: 아래에서 "abc: 숫자가 아니에요" 처럼 출력하세요. 숫자 카드만 더해 마지막에 "합계: 8"이 나와야 해요'
+  starter_code: |
+    cards = ["3", "abc", "5"]
+    total = 0
+
+    for card in cards:
+        # 아래 세 줄을 try: 안에 넣고, except ValueError: 를 더해요
+        number = int(card)
+        total = total + number
+        print(f"{card} 더했어요")
+
+    print(f"합계: {total}")
+  expected_output_hint: '3 더했어요, abc: 숫자가 아니에요, 5 더했어요, 합계: 8 이 한 줄씩 나와야 해요'
+  checklist:
+    - 'for 안에 try: 를 쓰고 세 줄을 한 칸 더 들여써요'
+    - 'try 와 같은 줄 높이에 except ValueError: 를 써요'
+    - 'except 아래에서 print(f"{card}: 숫자가 아니에요") 를 써요'
+  example_output: |-
+    3 더했어요
+    abc: 숫자가 아니에요
+    5 더했어요
+    합계: 8
+  fallback_text: 'try: 아래는 "일단 해 봐!", except ValueError: 아래는 "바꿀 수 없는 값이면 멈추지 말고 이쪽으로!"예요. abc 카드에서 int() 가 실패하면 그 아래 두 줄은 건너뛰고 except 쪽 print 를 해요. 그다음 카드 5 는 다시 try 부터 해요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          3 더했어요
+          abc: 숫자가 아니에요
+          5 더했어요
+          합계: 8
+      - type: code_check
+        expected: except
+  hints:
+    level_1: 에러가 날 수도 있는 줄을 감싸는 안전띠는 try 와 except 두 낱말이에요.
+    level_2: 'try: 아래에 세 줄을 들여써 넣고, 같은 높이에 except ValueError: 를 써서 그 아래에 안내 글을 출력해요.'
+    level_3: |-
+      for 안을 이렇게 바꿔 보세요!
+          try:
+              number = int(card)
+              total = total + number
+              print(f"{card} 더했어요")
+          except ValueError:
+              print(f"{card}: 숫자가 아니에요")
+  solution_code: |
+    cards = ["3", "abc", "5"]
+    total = 0
+
+    for card in cards:
+        try:
+            number = int(card)
+            total = total + number
+            print(f"{card} 더했어요")
+        except ValueError:
+            print(f"{card}: 숫자가 아니에요")
+
+    print(f"합계: {total}")

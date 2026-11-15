@@ -1,0 +1,32 @@
+# 2월드 퀴즈 4-3: 주사위가 못 내는 수
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 무작위라 코드 칸 없이 개념 객관식으로 냄 (world2.md 제안 D)
+
+id: b2000000-0000-0000-0000-000000000030
+order: 3
+title: 주사위가 못 내는 수
+concept: random.randint 범위
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: randint가 고르는 수의 범위
+  learning_goals:
+    - random.randint(a, b)는 a와 b도 포함해 고른다는 것을 안다
+  story_context: 버그버그가 주사위 기구 앞에서 내기를 걸어요. "이 주사위가 절대 못 내는 수를 맞히면 네가 이겨!"
+  fallback_text: randint는 range와 달라요. 괄호 안 두 숫자 사이의 정수를 고르는데, 시작 숫자와 끝 숫자도 나올 수 있어요.
+  quiz:
+    question: 'dice = random.randint(1, 6) 으로 주사위를 굴려요. dice 에 절대 들어갈 수 없는 수는 무엇일까?'
+    options:
+      - { id: opt-r3y0, text: '0' }
+      - { id: opt-e6e9, text: '1' }
+      - { id: opt-3ync, text: '6' }
+      - { id: opt-fd7b, text: '3' }
+answer:
+  quiz_answer:
+    accepted: [opt-r3y0]
+    explanation: random.randint(1, 6)은 1부터 6까지, 1과 6도 포함해 골라요. 그래서 0은 절대 나오지 않아요.
+    explanations:
+      opt-e6e9: 시작 숫자 1도 나올 수 있어요.
+      opt-3ync: range와 달리 randint는 끝 숫자 6도 나와요.
+      opt-fd7b: 3은 1과 6 사이라서 나올 수 있어요.

@@ -1,0 +1,54 @@
+# 2월드 퀘스트 4-4: 오늘의 간식 추천기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-4
+# 무작위 출력: 간식 이름이 다른 문장에 안 나오게 하고 "오늘의 간식: 이름" 줄 전체로 contains_any (§10)
+
+id: b2000000-0000-0000-0000-000000000031
+order: 4
+title: 오늘의 간식 추천기
+concept: random.choice
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: random.choice로 리스트에서 하나 고르기
+  learning_goals:
+    - random.choice(리스트)로 리스트 안에서 하나를 무작위로 고를 수 있다
+  story_context: 놀이공원 매점 앞에서 별똥이가 고민해요. "뭘 먹을지 못 고르겠어!" 간식 목록에서 하나를 무작위로 골라 주는 추천 기계를 만들어 줘요.
+  exercise_description: 'random.choice(snacks)로 간식 하나를 골라 pick 에 담고 "오늘의 간식: 솜사탕" 처럼 출력하세요'
+  starter_code: |
+    import random
+
+    snacks = ["붕어빵", "떡볶이", "솜사탕", "핫도그"]
+
+    # 간식 목록에서 하나를 무작위로 골라요
+    pick = ___
+    print(f"오늘의 간식: {pick}")
+  expected_output_hint: '오늘의 간식: 뒤에 네 간식 중 하나가 나와요. 돌릴 때마다 바뀔 수 있어요'
+  checklist:
+    - '빈칸에 random.choice(snacks) 를 써요'
+    - 여러 번 돌려서 간식이 바뀌는지 봐요
+  example_output: |-
+    오늘의 간식: 솜사탕
+  fallback_text: 'random.choice(리스트)는 리스트 안의 값 하나를 무작위로 골라 줘요. randint가 숫자를 고른다면, choice는 리스트에서 골라요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: code_check
+        expected: random.choice
+      - type: contains_any
+        expected:
+          - '오늘의 간식: 붕어빵'
+          - '오늘의 간식: 떡볶이'
+          - '오늘의 간식: 솜사탕'
+          - '오늘의 간식: 핫도그'
+  hints:
+    level_1: random 상자에는 리스트에서 하나를 "골라 주는" 도구가 있어요. 고르다는 영어로 choose, 고르기는 choice 예요!
+    level_2: 'random.choice( ) 괄호 안에 간식 리스트 이름을 넣어요.'
+    level_3: 'pick = random.choice(snacks) 로 바꿔 보세요!'
+  solution_code: |
+    import random
+
+    snacks = ["붕어빵", "떡볶이", "솜사탕", "핫도그"]
+
+    pick = random.choice(snacks)
+    print(f"오늘의 간식: {pick}")

@@ -1,0 +1,54 @@
+# 2월드 퀘스트 5-4: 없는 이름표 처방
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5 (Q73 ①로 추가)
+# 고치기 퀘스트: 시작 코드는 "연고"에서 일부러 KeyError (§10). .get( 을 code_check (제안 F)
+
+id: b2000000-0000-0000-0000-000000000039
+order: 4
+title: 없는 이름표 처방
+concept: KeyError, get()
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: KeyError 읽고 고치기
+  learning_goals:
+    - KeyError는 딕셔너리에 없는 이름표를 꺼낼 때 난다는 것을 안다
+    - .get(이름표, 0)으로 없는 이름표도 멈추지 않고 꺼낼 수 있다
+  story_context: 병원선 약 상자에는 감기약과 밴드만 있어요. 간호사 별똥이가 장부에 적힌 약을 하나씩 세는데, 연고에서 갑자기 코드가 멈췄어요! 쪽지에는 KeyError 라고 적혀 있어요.
+  exercise_description: '장부 book 의 약 이름을 하나씩 medicine 에서 꺼내다 "연고"에서 KeyError 가 나요. medicine[name] 을 medicine.get(name, 0) 으로 고쳐 "연고: 0개"까지 모두 출력하세요'
+  starter_code: |
+    medicine = {"감기약": 3, "밴드": 5}
+    book = ["감기약", "밴드", "연고"]
+
+    for name in book:
+        print(f"{name}: {medicine[name]}개")
+  expected_output_hint: '감기약: 3개, 밴드: 5개, 연고: 0개 가 한 줄씩 나와야 해요'
+  checklist:
+    - 실행해서 KeyError 뒤에 나온 이름표를 봐요
+    - 'medicine[name] 을 medicine.get(name, 0) 으로 바꿔요'
+    - '연고: 0개 까지 세 줄이 나오는지 봐요'
+  example_output: |-
+    감기약: 3개
+    밴드: 5개
+    연고: 0개
+  fallback_text: 'KeyError 는 딕셔너리에 그런 이름표가 없다는 뜻이에요. 쪽지 끝에 없는 이름표 연고가 적혀 있어요. 등대 도서관에서 배운 .get(이름표, 대신 값)은 이름표가 없으면 멈추지 않고 대신 값을 돌려줘요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          감기약: 3개
+          밴드: 5개
+          연고: 0개
+      - type: code_check
+        expected: .get(
+  hints:
+    level_1: 등대 딕셔너리 도서관에서 없는 책을 찾을 때 어떤 꺼내기를 썼는지 떠올려 보세요.
+    level_2: 'medicine.get(이름표, 대신 값) 은 이름표가 없으면 대신 값을 줘요. 약이 없으면 0개예요.'
+    level_3: 'print 줄을 print(f"{name}: {medicine.get(name, 0)}개") 로 고쳐 보세요!'
+  solution_code: |
+    medicine = {"감기약": 3, "밴드": 5}
+    book = ["감기약", "밴드", "연고"]
+
+    for name in book:
+        print(f"{name}: {medicine.get(name, 0)}개")

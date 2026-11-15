@@ -1,0 +1,68 @@
+# 2월드 퀘스트 4-2: 정직한 주사위 검사
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-4
+# 제안 D: 무작위로 나온 눈은 보여 주기만 하고, 늘 같은 "검사 줄"(정직한 주사위: 100)로 채점
+
+id: b2000000-0000-0000-0000-000000000029
+order: 2
+title: 정직한 주사위 검사
+concept: random.randint
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: random.randint로 주사위 굴리기
+  learning_goals:
+    - random.randint(1, 6)으로 1부터 6까지 중 하나를 무작위로 뽑을 수 있다
+    - randint는 양 끝 숫자 1과 6도 나온다는 것을 안다
+    - 많이 굴려 보고 결과가 맞는지 프로그램으로 검사할 수 있다
+  story_context: 놀이공원의 주사위 기구에 버그버그가 장난을 쳤다는 소문이 있어요! 정직한 주사위라면 몇 번을 굴려도 1부터 6까지만 나와야 해요. 100번 굴려서 검사해 봐요.
+  exercise_description: 'random.randint(1, 6)으로 주사위를 한 번 굴려 보여 주고, 100번 더 굴리며 1~6 안에 든 횟수를 ok 에 세어 "정직한 주사위: 100" 처럼 출력하세요'
+  starter_code: |
+    import random
+
+    # 1) 1부터 6까지 중 하나를 무작위로 뽑아요
+    dice = random.___(1, 6)
+    print(f"한 번 굴린 눈: {dice}")
+
+    # 2) 100번 굴려서 1~6 안에 든 횟수를 세요
+    ok = 0
+    for i in range(100):
+        n = ___
+        if n >= 1 and n <= 6:
+            ok = ok + 1
+    print(f"정직한 주사위: {ok}")
+  expected_output_hint: '한 번 굴린 눈은 매번 달라요. 마지막 줄 정직한 주사위: 100 은 늘 같아야 해요'
+  checklist:
+    - 'random.___ 빈칸에 randint 를 써요'
+    - '반복 안에서도 n = random.randint(1, 6) 으로 굴려요'
+    - '정직한 주사위: 100 이 나오는지 봐요'
+  example_output: |-
+    한 번 굴린 눈: 4
+    정직한 주사위: 100
+  fallback_text: 'random.randint(1, 6)은 1, 2, 3, 4, 5, 6 중 하나를 무작위로 골라요. range와 달리 끝 숫자 6도 나와요. 굴릴 때마다 눈이 달라서, 눈 대신 "1~6 안에 든 횟수"를 세면 언제나 같은 결과로 검사할 수 있어요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: code_check
+        expected: randint
+      - type: contains
+        expected: '정직한 주사위: 100'
+  hints:
+    level_1: random 상자에서 두 숫자 사이의 정수를 뽑는 도구는 rand 로 시작해요. 1월드 숫자 맞추기 게임에서 썼어요!
+    level_2: 'random.randint(1, 6) 이 주사위 한 번이에요. 반복 안의 n 에도 똑같이 넣어요.'
+    level_3: |-
+      두 빈칸을 이렇게 채워 보세요!
+      dice = random.randint(1, 6)
+      n = random.randint(1, 6)
+  solution_code: |
+    import random
+
+    dice = random.randint(1, 6)
+    print(f"한 번 굴린 눈: {dice}")
+
+    ok = 0
+    for i in range(100):
+        n = random.randint(1, 6)
+        if n >= 1 and n <= 6:
+            ok = ok + 1
+    print(f"정직한 주사위: {ok}")

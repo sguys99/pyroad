@@ -1,0 +1,60 @@
+# 2월드 퀘스트 5-2: 문법 응급실
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5
+# 고치기 퀘스트: 시작 코드는 일부러 SyntaxError 두 곳 (§10). 고친 for 줄을 code_check (제안 F)
+
+id: b2000000-0000-0000-0000-000000000037
+order: 2
+title: 문법 응급실
+concept: SyntaxError
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 문법 에러 고치기
+  learning_goals:
+    - SyntaxError는 파이썬 맞춤법(문법)이 틀렸을 때 난다는 것을 안다
+    - 빠진 쌍점(:)과 짝이 안 맞는 괄호를 찾아 고칠 수 있다
+    - 에러를 하나 고치면 다음 에러가 나올 수 있다는 것을 안다
+  story_context: 응급실에 약 먹는 시간표 코드가 실려 왔어요. 그런데 코드를 돌리기도 전에 SyntaxError 쪽지가 나와요! 버그버그가 맞춤법 두 군데를 망가뜨렸대요.
+  exercise_description: '시간표 코드의 문법 에러 두 곳(빠진 쌍점, 닫히지 않은 괄호)을 고쳐 아침·점심·저녁 약과 "다 먹었어요!"가 나오게 하세요'
+  starter_code: |
+    # 버그버그 약 먹는 시간표
+    times = ["아침", "점심", "저녁"]
+    for t in times
+        print(f"{t}: 약 한 알"
+    print("다 먹었어요!")
+  expected_output_hint: '아침: 약 한 알, 점심: 약 한 알, 저녁: 약 한 알, 다 먹었어요! 가 한 줄씩 나와야 해요'
+  checklist:
+    - 실행해서 에러 메시지의 line 숫자를 봐요
+    - 'for 줄 끝에 빠진 기호를 붙여요'
+    - 한 번 더 실행해서 다음 에러를 찾아 괄호 짝을 맞춰요
+  example_output: |-
+    아침: 약 한 알
+    점심: 약 한 알
+    저녁: 약 한 알
+    다 먹었어요!
+  fallback_text: "SyntaxError 는 파이썬 맞춤법이 틀렸다는 뜻이라 한 줄도 실행되지 않아요. expected ':' 는 쌍점이 있어야 한다는 말이고, was never closed 는 열린 괄호가 닫히지 않았다는 말이에요. 하나를 고치고 다시 실행하면 다음 에러가 보여요."
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          아침: 약 한 알
+          점심: 약 한 알
+          저녁: 약 한 알
+          다 먹었어요!
+      - type: code_check
+        expected: 'in times:'
+  hints:
+    level_1: 'for 나 if 줄 끝에는 늘 붙는 기호가 있었어요. 무엇이었죠?'
+    level_2: 'for t in times 끝에 쌍점(:)을 붙여요. 그다음 print( 의 여는 괄호에 맞는 닫는 괄호가 있는지 세어 봐요.'
+    level_3: |-
+      두 줄을 이렇게 고쳐 보세요!
+      for t in times:
+          print(f"{t}: 약 한 알")
+  solution_code: |
+    # 버그버그 약 먹는 시간표
+    times = ["아침", "점심", "저녁"]
+    for t in times:
+        print(f"{t}: 약 한 알")
+    print("다 먹었어요!")

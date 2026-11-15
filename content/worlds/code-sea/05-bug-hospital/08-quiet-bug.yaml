@@ -1,0 +1,57 @@
+# 2월드 퀘스트 5-8: 조용한 버그 탐정
+# 작성 안내: content/README.md · 설계: docs/curriculum/world2.md §3 2-5
+# 에러 없이 답이 틀린 버그(range(1, …)로 첫 값 빠짐). 시작 코드는 평균 53.3 으로 불합격.
+# 고친 반복 range(len(scores)) 를 code_check (제안 F) — 들여다보기 print 는 지우고 내야 output_match 통과
+
+id: b2000000-0000-0000-0000-000000000043
+order: 8
+title: 조용한 버그 탐정
+concept: print 디버깅
+xp_reward: 90
+quest_type: code
+prompt:
+  topic: 에러 없이 틀린 답 찾기
+  learning_goals:
+    - 에러가 없어도 답이 틀릴 수 있다는 것을 안다 (조용한 버그)
+    - print로 반복 중간의 값을 들여다보며 버그를 찾을 수 있다
+  story_context: 버그버그 건강 점수 80, 90, 70의 평균을 냈더니 53.3 이 나왔어요. 에러 쪽지도 없는데 답이 이상해요! 이런 버그는 조용히 숨어 있어서, 탐정처럼 print 돋보기로 중간 값을 들여다봐야 찾을 수 있어요.
+  exercise_description: '반복 안에 print(i, scores[i]) 를 넣어 어떤 점수가 더해지는지 들여다보고, 빠진 점수가 더해지게 range 를 range(len(scores)) 로 고쳐 "평균: 80.0"을 출력하세요. 다 고치면 들여다보기 print 는 지워요'
+  starter_code: |
+    scores = [80, 90, 70]
+    total = 0
+
+    for i in range(1, len(scores)):
+        # 돋보기: 여기에 print(i, scores[i]) 를 넣어 들여다봐요
+        total = total + scores[i]
+
+    avg = round(total / len(scores), 1)
+    print(f"평균: {avg}")
+  expected_output_hint: '평균: 80.0 한 줄만 나와야 해요'
+  checklist:
+    - 'print(i, scores[i]) 로 몇 번 점수부터 더해지는지 봐요'
+    - '빠진 점수가 더해지게 range(len(scores)) 로 고쳐요'
+    - '돋보기 print 를 지우고 평균: 80.0 만 나오는지 봐요'
+  example_output: |-
+    평균: 80.0
+  fallback_text: 'print(i, scores[i]) 를 넣어 보면 1 90, 2 70 만 나와요. 0번 점수 80 이 빠졌어요! range(1, …)는 1부터 세니까 0부터 세는 range(len(scores)) 로 바꿔요. 버그를 찾은 뒤에는 돋보기 print 를 지워요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: '평균: 80.0'
+      - type: code_check
+        expected: range(len(scores))
+  hints:
+    level_1: 반복 안에 print(i, scores[i]) 를 넣어 실행해 보세요. 점수 세 개가 다 나오나요?
+    level_2: '리스트 번호는 0부터예요. range(1, len(scores)) 는 몇 번부터 시작하나요?'
+    level_3: 'for 줄을 for i in range(len(scores)): 로 고치고, 돋보기 print 를 지워 보세요!'
+  solution_code: |
+    scores = [80, 90, 70]
+    total = 0
+
+    for i in range(len(scores)):
+        total = total + scores[i]
+
+    avg = round(total / len(scores), 1)
+    print(f"평균: {avg}")
