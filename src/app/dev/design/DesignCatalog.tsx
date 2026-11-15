@@ -51,6 +51,7 @@ import {
 } from './_catalog/ExtraSections';
 import { LegalSection } from './_catalog/LegalSection';
 import { TurtleSection } from './_catalog/TurtleSection';
+import { EditorHandleSection } from './_catalog/EditorHandleSection';
 import { CreationSection } from './_catalog/CreationSection';
 import { GallerySection } from './_catalog/GallerySection';
 import { TestGuestSection } from './_catalog/TestGuestSection';
@@ -123,6 +124,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
     group: '기타',
     items: [
       ['editor', '코드 에디터'],
+      ['editor-handles', '숫자 손잡이·3월드 키보드'],
       ['run-controls', '실행 버튼'],
       ['output-slip', '결과 쪽지'],
       ['turtle-stage', '그림판'],
@@ -242,6 +244,7 @@ export function DesignCatalog({
               <RigSection />
               <CostumeSection />
               <EditorSection />
+              <EditorHandleSection />
               <RunControlsSection />
               <OutputPanelSection />
               <TurtleSection />

@@ -323,6 +323,8 @@ export function QuestWorkspace({
               stage={quest.stage.order}
               turtle={turtle}
               onGrade={session.scenarios ? session.handleGrade : undefined}
+              onPreview={session.handlePreview}
+              world={quest.stage.world?.slug}
               guests={session.guests}
               reasons={session.gradeReasons}
             />

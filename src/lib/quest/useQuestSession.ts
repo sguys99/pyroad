@@ -847,14 +847,15 @@ export function useQuestSession({
   /**
    * 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance'.
    * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고 튜터는 부르지 않는다. 마지막 단계를 통과했고 복습 도전이 열렸으면
-   * (별 3개 미만 + 판정 다음 날, §12-Q64) 완료 API를 retry로 불러 별을 채운다. 아니면 연습이라 부르지 않음
+   * (별 3개 미만 + 판정 다음 날, §12-Q64) 완료 API를 retry로 불러 별을 채운다. 아니면 연습이라 부르지 않음.
+   * preview = 숫자 손잡이(world3 제안 L)가 부르는 다시 그리기: 실행만 하고 채점·쪽 넘김은 하지 않는다
    */
   const runAndGrade = useCallback(
     async (
       codeToRun: string,
       step: number,
       review: boolean,
-      mode: 'run' | 'guests' = 'run',
+      mode: 'run' | 'guests' | 'preview' = 'run',
     ): Promise<'advance' | 'stay'> => {
       // 시험 손님이 있는 퀘스트(P11-05): "코드 돌려보기"는 내가 직접 해 보는 실행(채점 없음), "시험 손님 부르기"가 채점
       const scenarios = scenariosAt(step);
@@ -870,7 +871,7 @@ export function useQuestSession({
       liveOutput.reset();
       // 모바일은 누르자마자 결과 쪽으로 (§12-Q55): 실행 중 글자·멈추기(·P11 turtle 그림)가 실행 버튼과 한 화면에 안 보이는 문제(P0-06)를
       // 떠 있는 버튼 대신 결과 쪽 자동 이동으로 푼다. 결과 쪽에는 실행 중 멈추기 버튼이 있다 (P6-11)
-      setTab('result');
+      if (mode !== 'preview') setTab('result');
 
       let result: RunResult;
       let payload: GradePayload | null;
@@ -904,7 +905,7 @@ export function useQuestSession({
         return 'stay';
       }
       // 손님이 있는 퀘스트의 직접 실행은 놀이: 채점은 손님이 (한 갈래만 해 보고 통과하는 일이 없게, 제안 C)
-      if (scenarios && !byGuests) return 'stay';
+      if ((scenarios && !byGuests) || mode === 'preview') return 'stay';
 
       const graded = await validate(codeToRun, payload, step);
       const { passed } = graded;
@@ -974,9 +975,9 @@ export function useQuestSession({
   const isCodeEmpty = !code.trim();
 
   const runWith = useCallback(
-    async (mode: 'run' | 'guests') => {
+    async (mode: 'run' | 'guests' | 'preview') => {
       if (isCodeEmpty || submittingRef.current) return;
-      play('run');
+      if (mode !== 'preview') play('run');
       lockSubmit(true);
       let advancing = false;
       try {
@@ -1002,6 +1003,8 @@ export function useQuestSession({
   const handleRun = useCallback(() => runWith('run'), [runWith]);
   /** 시험 손님 부르기 (P11-05): 공개 손님마다 자동으로 실행해 채점 */
   const handleGrade = useCallback(() => runWith('guests'), [runWith]);
+  /** 숫자 손잡이로 바꾼 코드를 다시 그리기 (world3 제안 L): 채점·쪽 넘김·실행 소리 없이 실행만 */
+  const handlePreview = useCallback(() => runWith('preview'), [runWith]);
 
   // ── 힌트 ────────────────────────────────────────────────────────────
 
@@ -1360,6 +1363,7 @@ export function useQuestSession({
     validation,
     isSubmitting,
     handleRun,
+    handlePreview,
     /** 시험 손님 (P11-05): 이 단계(퀘스트)의 공개 손님. 있으면 채점은 handleGrade로 */
     scenarios: scenariosAt(currentStep),
     handleGrade,

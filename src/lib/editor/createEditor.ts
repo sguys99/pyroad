@@ -65,6 +65,7 @@ const setup = [
 import { codeFontSizeTheme, kidsTheme } from './kidsTheme';
 import { errorLineExtension, setErrorLine } from './errorLine';
 import { keyboardInset } from './keyboardInset';
+import { numberHandle } from './numberHandle';
 import type { CodeFontSize } from './fontSize';
 
 export interface EditorController {
@@ -72,6 +73,8 @@ export interface EditorController {
   setValue: (value: string) => void;
   setFontSize: (size: CodeFontSize) => void;
   setErrorLine: (line: number | null) => void;
+  /** 숫자 손잡이 켜기·끄기 (world3 제안 L) */
+  setNumberHandle: (on: boolean) => void;
   insert: (text: string, caret?: number) => void;
   moveCursor: (dir: -1 | 1) => void;
   undo: () => void;
@@ -87,9 +90,15 @@ export function createEditor(
     fontSize: CodeFontSize;
     errorLine: number | null;
     onChange: (code: string) => void;
+    /** 숫자 손잡이로 숫자를 바꿀 때마다 (켜져 있을 때만) */
+    onNudge?: () => void;
+    numberHandle?: boolean;
   },
 ): EditorController {
   const fontSizeCompartment = new Compartment();
+  const handleCompartment = new Compartment();
+  const handle = (on: boolean) =>
+    on ? numberHandle(() => opts.onNudge?.()) : [];
   const state = EditorState.create({
     doc: opts.doc,
     // 커서는 끝에서 시작 (값 동기화와 같음): 에디터를 누르기 전에 코드 키보드로 넣어도 시작 코드 뒤에 붙는다
@@ -108,6 +117,7 @@ export function createEditor(
       kidsTheme(),
       fontSizeCompartment.of(codeFontSizeTheme(opts.fontSize)),
       errorLineExtension(),
+      handleCompartment.of(handle(!!opts.numberHandle)),
       EditorView.contentAttributes.of({ 'aria-label': '파이썬 코드' }),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) opts.onChange(update.state.doc.toString());
@@ -131,6 +141,9 @@ export function createEditor(
       view.dispatch({
         effects: fontSizeCompartment.reconfigure(codeFontSizeTheme(size)),
       });
+    },
+    setNumberHandle(on) {
+      view.dispatch({ effects: handleCompartment.reconfigure(handle(on)) });
     },
     setErrorLine(line) {
       view.dispatch({ effects: setErrorLine.of(line) });

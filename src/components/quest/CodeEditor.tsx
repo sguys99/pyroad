@@ -46,6 +46,8 @@ interface CodeEditorProps {
   actions?: ReactNode;
   ref?: Ref<CodeEditorHandle>;
   className?: string;
+  /** 있으면 숫자 손잡이를 켜고(world3 제안 L), 손잡이로 숫자를 바꿀 때마다 부른다 */
+  onNumberNudge?: () => void;
 }
 
 export function CodeEditor({
@@ -56,17 +58,21 @@ export function CodeEditor({
   actions,
   ref,
   className,
+  onNumberNudge,
 }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorController | null>(null);
   const [loaded, setLoaded] = useState(false);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const nudgeRef = useRef(onNumberNudge);
+  nudgeRef.current = onNumberNudge;
+  const handleOn = !!onNumberNudge;
   const { size: fontSize, change: changeFontSize } = useCodeFontSize();
   const theme = useEditorTheme();
   // 에디터가 도착했을 때의 최신 값 (그 사이 바뀐 값·글자 크기·오류 줄도 그대로 시작)
-  const latestRef = useRef({ value, fontSize, errorLine });
-  latestRef.current = { value, fontSize, errorLine };
+  const latestRef = useRef({ value, fontSize, errorLine, handleOn });
+  latestRef.current = { value, fontSize, errorLine, handleOn };
 
   // 에디터는 처음 마운트할 때 한 번만 만든다. 그 뒤 값은 아래 동기화 effect가 맞춘다
   useEffect(() => {
@@ -79,6 +85,8 @@ export function CodeEditor({
         fontSize: l.fontSize,
         errorLine: l.errorLine,
         onChange: (code) => onChangeRef.current(code),
+        numberHandle: l.handleOn,
+        onNudge: () => nudgeRef.current?.(),
       });
       setLoaded(true);
     });
@@ -102,6 +110,10 @@ export function CodeEditor({
   useEffect(() => {
     editorRef.current?.setErrorLine(errorLine);
   }, [errorLine]);
+
+  useEffect(() => {
+    editorRef.current?.setNumberHandle(handleOn);
+  }, [handleOn]);
 
   useImperativeHandle(
     ref,

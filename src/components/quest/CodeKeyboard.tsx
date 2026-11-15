@@ -137,8 +137,115 @@ const FIX: Group = {
   ],
 };
 
-/** 띠 묶음 차례: 앞자리 · (이번 스테이지 주문) · 기호 · 주문 · 고치기 */
-export function keyGroups(stage?: number): Group[] {
+// 3월드(maker-city) 스테이지별 앞자리 (world3 제안 M). 그 스테이지 정답 코드에 자주 나오는데 폰 기호판으로 치기 번거로운 것.
+// 1월드에 있는 주문은 그대로 쓰고(` in `처럼 띄어쓰기 포함), 새 괄호 주문은 한 쌍을 넣고 커서를 가운데(값이 없는 주문은 끝), 낱말은 띄어쓰기까지, `t.`·`self.`는 그대로.
+// front는 360px 퀘스트 띠에서 넘기지 않고 보이는 자리(150px, 키 둘)라 짧은 것만 — 3-6 `time.sleep()`은 길어서 바로 뒤 묶음 맨 앞
+// (e2e number-handle·public/editor-handles가 잼)
+function spell(label: string, bare = false): Key {
+  const known = SPELLS.find((k) => k.label === label);
+  if (known) return known;
+  const call = label.endsWith('()');
+  const name = `${label.replace(/[().:]+$/, '').replace(/^\./, '')} 주문 넣기`;
+  if (call)
+    return {
+      label,
+      name,
+      text: label,
+      caret: bare ? undefined : label.length - 1,
+    };
+  if (/[.:]$/.test(label)) return { label, name, text: label };
+  return { label, name, text: `${label} ` };
+}
+const W3: Record<number, { front: Key[]; more: Key[] }> = {
+  1: {
+    front: [spell('t.'), spell('forward()')],
+    more: [
+      ...['left()', 'right()', 'color()', 'goto()', 'circle()'].map((l) =>
+        spell(l),
+      ),
+      ...['penup()', 'begin_fill()', 'end_fill()'].map((l) => spell(l, true)),
+      ...['for', 'range()', 'def'].map((l) => spell(l)),
+    ],
+  },
+  2: {
+    front: [spell('input()'), spell('if')],
+    more: [
+      'elif',
+      'else:',
+      '==',
+      'while',
+      'int()',
+      'in',
+      '.append()',
+      'def',
+    ].map((l) => spell(l)),
+  },
+  3: {
+    front: [spell('input()'), spell('if')],
+    more: [
+      spell('.strip()', true),
+      ...['elif', 'else:', '==', 'for', 'in', 'try:', 'except', 'break'].map(
+        (l) => spell(l),
+      ),
+    ],
+  },
+  4: {
+    front: [spell('class'), spell('self.')],
+    more: ['def', '__init__()', 'max()', 'min()', 'return'].map((l) =>
+      spell(l),
+    ),
+  },
+  5: {
+    front: [spell('for'), spell('len()')],
+    more: [
+      'in',
+      '.split()',
+      'sum()',
+      'max()',
+      'range()',
+      't.',
+      'forward()',
+    ].map((l) => spell(l)),
+  },
+  6: {
+    front: [spell('get_key()', true)],
+    more: [
+      'time.sleep()',
+      'if',
+      'elif',
+      'for',
+      'range()',
+      'def',
+      'return',
+      't.',
+      'goto()',
+    ].map((l) => spell(l)),
+  },
+  7: {
+    front: [spell('t.'), spell('input()')],
+    more: ['def', 'if', 'for', 'range()', '.append()', 'return'].map((l) =>
+      spell(l),
+    ),
+  },
+};
+
+/**
+ * 띠 묶음 차례: 앞자리 · (이번 스테이지 주문) · 기호 · 주문 · 고치기.
+ * 3월드는 맨 앞에 스테이지 앞자리, 기본 앞자리 다음에 그 스테이지 주문 (world3 제안 M). 나머지 주문은 겹치지 않게 뒤로
+ */
+export function keyGroups(stage?: number, world?: string): Group[] {
+  const w3 = world === 'maker-city' && stage ? W3[stage] : undefined;
+  if (w3) {
+    const taken = new Set([...w3.front, ...w3.more].map((k) => k.label));
+    return [
+      { name: '이번 스테이지 앞자리', keys: w3.front },
+      FRONT,
+      { name: '이번 스테이지 주문', keys: w3.more },
+      SYMBOLS,
+      { name: '주문', keys: SPELLS.filter((k) => !taken.has(k.label)) },
+      FIX,
+    ];
+  }
   const now = SPELLS.filter((k) => stage && k.stages?.includes(stage));
   const rest = SPELLS.filter((k) => !now.includes(k));
   return [
@@ -179,16 +286,19 @@ const MOVES: Group = {
 export default function CodeKeyboard({
   editor,
   stage,
+  world,
 }: {
   editor: RefObject<CodeEditorHandle | null>;
   /** 지금 스테이지 차례 (그 스테이지 주문을 앞으로, P6-11) */
   stage?: number;
+  /** 월드 슬러그 (3월드는 스테이지 앞자리, world3 제안 M) */
+  world?: string;
 }) {
   const [active, setActive] = useState(0);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const bar = useRef<HTMLDivElement>(null);
   const dock = useDockAboveKeyboard(editor, bar);
-  const groups = keyGroups(stage);
+  const groups = keyGroups(stage, world);
   const keyCount = [...groups, MOVES].reduce((n, g) => n + g.keys.length, 0);
 
   const press = (key: Key) => {
@@ -233,7 +343,7 @@ export default function CodeKeyboard({
             }}
             type="button"
             className="ck-key font-mono"
-            data-kind={/^[.a-zA-Z]/.test(key.label) ? 'spell' : undefined}
+            data-kind={/^[._a-zA-Z]/.test(key.label) ? 'spell' : undefined}
             data-icon={key.icon ? '' : undefined}
             aria-label={key.name}
             tabIndex={i === active ? 0 : -1}
