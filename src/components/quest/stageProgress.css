@@ -52,6 +52,19 @@
 .sp-dot[data-current] {
   width: 2rem;
 }
+/* 2월드는 한 스테이지에 점이 11개까지(퀘스트 10 + 보스) → 폰(40rem 미만)에서 9점 이상이면 촘촘히.
+   그대로 두면 .sp-dots 가 넘쳐 잘리고 지금 점(금색 알약)이 사라짐 (P10-12, 360px 11점 ≈ 158px) */
+@media (max-width: 39.999rem) {
+  .sp-dots:has(> :nth-child(9)) .sp-dot {
+    width: 0.8125rem;
+  }
+  .sp-dots:has(> :nth-child(9)) .sp-dot[data-current] {
+    width: 1.75rem;
+  }
+  .sp-dots:has(> :nth-child(9)) .sp-dot[data-current] .sp-mark {
+    width: 1.125rem;
+  }
+}
 .sp-mark {
   display: block;
   width: 0.5rem;
