@@ -43,4 +43,4 @@ export const BUGBUG: RigDef<BugBugState, BugBugPalette> = {
 
 export * from './params';
 export { BUGBUG_PALETTES, type BugBugPalette } from './Markup';
-export { BOSS_LOOK } from './looks';
+export { BOSS_LOOK, MAKER_BOSS_LOOK } from './looks';

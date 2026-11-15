@@ -1,0 +1,8 @@
+# 스테이지 3-2: 모험 이야기 극장 (stages 테이블). 설계: docs/curriculum/world3.md §4
+
+id: a3000000-0000-0000-0000-000000000002
+order: 2
+title: 모험 이야기 극장
+theme_name: story_theater
+description: 관객이 고르는 대로 흘러가는 모험 이야기를 만들어요!
+is_final: false

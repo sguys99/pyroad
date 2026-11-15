@@ -1,0 +1,8 @@
+# 스테이지 3-4: 가상 펫 돌봄 센터 (stages 테이블). 설계: docs/curriculum/world3.md §4
+
+id: a3000000-0000-0000-0000-000000000004
+order: 4
+title: 가상 펫 돌봄 센터
+theme_name: pet_center
+description: 펫 설계도를 만들어 아기 펫들의 배고픔과 기분을 돌봐요!
+is_final: false

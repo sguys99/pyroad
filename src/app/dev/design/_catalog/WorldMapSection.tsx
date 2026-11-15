@@ -145,6 +145,29 @@ const SEA_SAMPLE: StageWithStatus[] = SEA_STAGES.map(([title, theme], i) => ({
   chestOpened: i < 3,
 }));
 
+// 월드 3 메이커 시티 견본 (P11-11, 이름·테마는 content/worlds/maker-city): 1~3 완료, 4 진행 중, 5~7 잠김
+const MAKER_STAGES: [title: string, theme: string][] = [
+  ['거북이 화가 공방', 'turtle_studio'],
+  ['모험 이야기 극장', 'story_theater'],
+  ['두근두근 퀴즈쇼 방송국', 'quiz_studio'],
+  ['가상 펫 돌봄 센터', 'pet_center'],
+  ['데이터 탐정 사무소', 'detective_office'],
+  ['미니 게임 오락실', 'game_arcade'],
+  ['메이커 박람회', 'maker_fair'],
+];
+const MAKER_SAMPLE: StageWithStatus[] = MAKER_STAGES.map(
+  ([title, theme], i) => ({
+    ...SAMPLE[i],
+    id: `maker-${i + 1}`,
+    title,
+    theme_name: theme,
+    status: i < 3 ? 'completed' : i === 3 ? 'in_progress' : 'locked',
+    completedQuestCount: i < 3 ? 8 : i === 3 ? 4 : 0,
+    stars: i < 3 ? 15 : i === 3 ? 6 : 0,
+    chestOpened: i < 2,
+  }),
+);
+
 // 노드 상태 5종 (P5-04): 잠김 · 열림(아직 0개) · 진행 중(링) · 통과(도장) · 보스(큰 랜드마크 + 왕관)
 const NODE_STATES: [label: string, stage: StageWithStatus][] = [
   ['잠김', { ...SAMPLE[3] }],
@@ -561,6 +584,7 @@ const HUDS: [string, WorldHudProps][] = [
 export function WorldMapSection() {
   const island = WORLDS.find((w) => w.map);
   const sea = WORLDS.find((w) => w.slug === 'code-sea');
+  const city = WORLDS.find((w) => w.slug === 'maker-city');
   if (!island?.map) return null;
   // 지도 노드·잉크 길은 Framer m.* 라 LazyMotion 이 필요하다 (앱은 LoggedInShell 이 감쌈)
   return (
@@ -694,6 +718,36 @@ export function WorldMapSection() {
           <div className="flex flex-wrap gap-4">
             {SEA_SAMPLE.map((stage) => (
               <div key={stage.id} className="grid gap-2" data-world="2">
+                <NodeTile stage={{ ...stage, status: 'completed' }} />
+                <NodeTile stage={{ ...stage, status: 'locked' }} />
+              </div>
+            ))}
+          </div>
+        </Demo>
+      )}
+      {city?.map && (
+        <Demo
+          label={`월드 ${city.order} · ${city.title} (P11-11, 설계도 도시 · theme: ${city.theme})`}
+          note="그림책 3권 메이커 시티: 설계도 모눈종이 위 거리 블록·공원 + 왼쪽 아래 항구(2월드 배에서 내린 곳) + 설계 도구 표장(각도기·연필·톱니), 노드마다 돌 광장. 장식 집·가로등·나무(정지), 톱니(천천히 돎)·열기구·배·새(full만 움직임). 견본 진행: 1~3 완료, 4 진행 중, 5~7 잠김(연필 스케치)"
+          data-testid="world-map-3"
+        >
+          <WorldMap
+            stages={MAKER_SAMPLE}
+            map={city.map}
+            theme={city.theme}
+            world={city.order as WorldId}
+          />
+        </Demo>
+      )}
+      {city && (
+        <Demo
+          label="3월드 랜드마크 7종 (열림 · 잠김)"
+          note="거북이 화가 공방 · 모험 이야기 극장 · 두근두근 퀴즈쇼 방송국 · 가상 펫 돌봄 센터 · 데이터 탐정 사무소 · 미니 게임 오락실 · 메이커 박람회(보스, 1.15배 + 왕관)"
+          data-testid="world-3-landmarks"
+        >
+          <div className="flex flex-wrap gap-4">
+            {MAKER_SAMPLE.map((stage) => (
+              <div key={stage.id} className="grid gap-2" data-world="3">
                 <NodeTile stage={{ ...stage, status: 'completed' }} />
                 <NodeTile stage={{ ...stage, status: 'locked' }} />
               </div>

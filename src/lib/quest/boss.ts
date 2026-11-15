@@ -24,6 +24,14 @@ export const BOSS_LOOKS = [
   'hospital',
   'ridge',
   'captain',
+  // 3월드 메이커 시티 (P11-11): 공방 소품을 단 버그버그. 3-1 ~ 3-6, 3-F 메가 로봇
+  'painter',
+  'storyteller',
+  'host',
+  'pet_sitter',
+  'detective',
+  'arcade',
+  'mega_robot',
 ] as const;
 export type BossLook = (typeof BOSS_LOOKS)[number];
 

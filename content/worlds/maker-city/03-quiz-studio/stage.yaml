@@ -1,0 +1,8 @@
+# 스테이지 3-3: 두근두근 퀴즈쇼 방송국 (stages 테이블). 설계: docs/curriculum/world3.md §4
+
+id: a3000000-0000-0000-0000-000000000003
+order: 3
+title: 두근두근 퀴즈쇼 방송국
+theme_name: quiz_studio
+description: 답을 진짜로 입력받는 퀴즈쇼를 만들어 방송국을 살려요!
+is_final: false

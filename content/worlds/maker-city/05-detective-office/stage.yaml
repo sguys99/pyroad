@@ -1,0 +1,8 @@
+# 스테이지 3-5: 데이터 탐정 사무소 (stages 테이블). 설계: docs/curriculum/world3.md §4
+
+id: a3000000-0000-0000-0000-000000000005
+order: 5
+title: 데이터 탐정 사무소
+theme_name: detective_office
+description: 설문 쪽지를 세고 막대그래프를 그려 사건을 풀어요!
+is_final: false

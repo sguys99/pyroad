@@ -23,7 +23,7 @@ content/
     │       └── 01-number-guessing-game.yaml
     ├── code-sea/                      # 월드 2: world.yaml·map.yaml + 스테이지 7개(퀘스트는 P10-05~07, 빈 스테이지가 있으면 "준비 중")
     │   └── skill-check.yaml           # 실력 확인 퀴즈 (선택, P10-03)
-    └── maker-city/world.yaml          # 월드 3 "준비 중"
+    └── maker-city/                    # 월드 3: world.yaml·map.yaml + 스테이지 7개 껍데기(퀘스트는 P11-12~14). 퀘스트 전이라 "준비 중"
 ```
 
 - 이름은 영문 소문자·숫자·하이픈만 씁니다. 앞 두 자리 번호는 YAML의 `order`와 같아야 합니다(빌드가 확인).
@@ -65,7 +65,7 @@ layouts:
     nodes:             # i번째 = i+1번 스테이지 중심 [x, y]
       - [170, 600]
       - …
-    decorations:       # 선택. kind: tree | mountains | waves | bird | boat | palm | rock | buoy | whale, scale 선택
+    decorations:       # 선택. kind: tree | mountains | waves | bird | boat | palm | rock | buoy | whale | house | lamp | cog | balloon, scale 선택
       - { kind: tree, x: 70, y: 430, scale: 1.2 }
   tall:                # 좁은 화면: 세로로 긴 지도 (같은 키)
     width: 400
@@ -75,7 +75,7 @@ layouts:
 
 - **빌드가 확인**: 두 레이아웃 모두 노드 수 = 스테이지 수, 노드가 `width × height` 안, 모르는 키 없음, 스테이지가 있는 월드에 `map.yaml`이 있음.
 - 테마 키는 `world.yaml`의 `theme`, 노드의 랜드마크 그림은 `stage.yaml`의 `theme_name`을 씁니다(따로 적지 않음).
-- 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`·`buoy`는 먼 레이어(움직임), `mountains`·`tree`·`palm`·`rock`·`whale`은 중간 레이어(정지)에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
+- 그림(P5-02, `src/components/world/map/MapArt.tsx`): `decorations`의 `waves`·`boat`·`bird`·`buoy`·`cog`·`balloon`은 먼 레이어(움직임), `mountains`·`tree`·`palm`·`rock`·`whale`·`house`·`lamp`은 중간 레이어(정지)에 그려지고(패럴랙스 깊이), 바다·해안선 같은 바탕은 테마 키로 `THEME_BASE`에서 고릅니다(없는 테마는 종이 바탕 + 장식만). 랜드마크는 `theme_name`이 `LANDMARKS`에 있을 때만, 크기는 `node_scale`.
 - 앰비언트(P5-09): `ambient`는 구름(먼 레이어)·반짝임(물결 옆 + 길 위)·날씨를 켜고 끕니다. 자리는 `src/lib/world/ambient.ts`가 레이아웃에서 정하고(종류별 상한 `AMBIENT_CAP`), `waves`·`boat`·`bird` 장식은 스위치와 상관없이 움직입니다. 움직임은 연출 단계 full에서만.
 - 좌표를 정할 때는 확정 시안 `design/prototypes/src/final/World.tsx`의 `WIDE`·`TALL`을 참고합니다. 지금 노드 카드가 넓어서(P5-04 전) 양 끝 노드는 지도 가장자리에서 120 이상 떨어뜨립니다. 노드 `y`는 130 이상(지금 위치 파이뱀이 노드 위에 섬). 파이뱀은 가장자리에 가까우면 노드 반대쪽에 서고(`markerSide`), 단위 테스트가 모든 월드·노드에서 잘리지 않는지 확인합니다.
 - 테스트용 2번째 월드: `e2e/fixtures/content/worlds/test-meadow/`(스테이지 3개). 단위 테스트(`src/lib/world/__tests__/worldMapData.test.tsx`)가 `content/`에 이 디렉토리를 더해 지도가 나오는지 확인합니다.

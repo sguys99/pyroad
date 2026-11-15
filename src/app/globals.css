@@ -99,6 +99,8 @@
   --color-w3: var(--w3);
   --color-w3-ink: var(--w3-ink);
   --color-w3-soft: var(--w3-soft);
+  --color-w3-brick: var(--w3-brick);
+  --color-w3-blueprint: var(--w3-blueprint);
   --color-code-bg: var(--code-bg);
   --color-code-text: var(--code-text);
   --color-code-comment: var(--code-comment);
@@ -242,6 +244,8 @@
   --w3: #d9c3a3;
   --w3-ink: #6b645b;
   --w3-soft: #f4eee5;
+  --w3-brick: #e2a486;
+  --w3-blueprint: #a7bcc9;
   --world: var(--w1);
   --world-ink: var(--w1-ink);
   --world-soft: var(--w1-soft);

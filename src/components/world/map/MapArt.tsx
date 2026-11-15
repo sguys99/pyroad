@@ -27,6 +27,8 @@ export type LayoutName = 'wide' | 'tall';
 const at = (x: number, y: number, s = 1) =>
   s === 1 ? `translate(${x} ${y})` : `translate(${x} ${y}) scale(${s})`;
 
+const r1 = (n: number) => Math.round(n * 10) / 10;
+
 /** 채운 면: 재질(--f) + 그 진한 톤 선 */
 function F({ m, d }: { m: string; d: string }) {
   return <path className={`wm-f wm-${m}`} d={d} />;
@@ -114,6 +116,45 @@ function Whale({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   );
 }
 
+/** 메이커 시티 골목 집 두 채 (3월드). i로 지붕 재질(벽돌·슬레이트)과 높이를 엇갈림 */
+function Houses({
+  x,
+  y,
+  s = 1,
+  i,
+}: {
+  x: number;
+  y: number;
+  s?: number;
+  i: number;
+}) {
+  const [a, b] = i % 2 ? ['slate', 'brick'] : ['brick', 'slate'];
+  return (
+    <g transform={at(x, y, s)}>
+      <F m="cream" d="M-26 0 V-26 H-2 V0 Z" />
+      <F m={a} d="M-29 -26 L-14 -42 L1 -26 Z" />
+      <F m="paper" d="M-2 0 V-34 H24 V0 Z" />
+      <F m={b} d="M-5 -34 L11 -50 L27 -34 Z" />
+      <F m="wood-dark" d="M15 -50 v-6 h4 v10z" />
+      <L d="M-20 -18 h6 v6 h-6z M6 -26 h6 v6 h-6z M6 -14 h6 v6 h-6z" />
+      <F m="wood-dark" d="M-12 0 v-9 a3 3 0 0 1 6 0 v9z" />
+    </g>
+  );
+}
+
+/** 가로등 (3월드): 기둥 + 등 + 받침 */
+function Lamp({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  return (
+    <g transform={at(x, y, s)}>
+      <F m="wood-dark" d="M-1.5 0 V-34 H1.5 V0 Z" />
+      <F m="wood-dark" d="M-5 0 h10 l-2 -4 h-6z" />
+      <F m="wood-dark" d="M-6 -34 h12 l-3 -4 h-6z" />
+      <F m="gold" d="M-4 -38 h8 v-8 h-8z" />
+      <F m="wood-dark" d="M-5.5 -46 h11 l-5.5 -5z" />
+    </g>
+  );
+}
+
 // ───────────── 움직이는 조각 (앰비언트, P5-09). 좌표는 바닥 기준 (0,0), box = 조각 viewBox [x, y, w, h]
 
 const pct = (n: number) => `${Math.round(n * 10000) / 100}%`;
@@ -170,6 +211,8 @@ const FAR_KINDS = new Set<Decoration['kind']>([
   'boat',
   'bird',
   'buoy',
+  'cog',
+  'balloon',
 ]);
 
 /** 먼 곳의 움직이는 장식 (물결·배·새). 새는 날기(바깥)와 날갯짓(안쪽 svg)을 다른 상자에 걸어 transform이 겹치지 않게 */
@@ -214,10 +257,47 @@ function FarSprite({
           <L d="M0 -20 V-23" />
         </Sprite>
       );
+    // 3월드: 천천히 도는 톱니 (가운데가 상자 가운데라 제자리 회전)
+    case 'cog':
+      return (
+        <Sprite {...p} box={[-22, -22, 44, 44]} cls="wm-a-cog">
+          <path className="wm-f wm-slate" fillRule="evenodd" d={COG_D} />
+          <circle className="wm-l" r="7" />
+        </Sprite>
+      );
+    // 3월드: 줄무늬 열기구 (둥실 떠오르기)
+    case 'balloon':
+      return (
+        <Sprite {...p} box={[-17, -48, 34, 52]} cls="wm-a-float">
+          <F
+            m="paper"
+            d="M0 -46 C18 -46 20 -24 6 -14 H-6 C-20 -24 -18 -46 0 -46 Z"
+          />
+          <F
+            m="brick"
+            d="M0 -46 C-8 -44 -10 -26 -6 -14 H-2 C-4 -26 -4 -40 0 -46 Z"
+          />
+          <F m="brick" d="M0 -46 C8 -44 10 -26 6 -14 H2 C4 -26 4 -40 0 -46 Z" />
+          <L d="M-6 -14 L-4 -4 M6 -14 L4 -4" />
+          <F m="wood" d="M-5 -5 h10 v6 h-10z" />
+        </Sprite>
+      );
     default:
       return null;
   }
 }
+
+/** 톱니바퀴 8개 이 + 가운데 구멍 (evenodd) */
+const COG_D = (() => {
+  const teeth = 8;
+  const pts: string[] = [];
+  for (let k = 0; k < teeth * 4; k++) {
+    const a = (k / (teeth * 4)) * Math.PI * 2;
+    const rr = k % 4 < 2 ? 19 : 14;
+    pts.push(`${r1(Math.cos(a) * rr)} ${r1(Math.sin(a) * rr)}`);
+  }
+  return `M${pts.join('L')}Z M-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0z`;
+})();
 
 function Deco({ d, i }: { d: Decoration; i: number }) {
   const p = { x: d.x, y: d.y, s: d.scale };
@@ -232,6 +312,10 @@ function Deco({ d, i }: { d: Decoration; i: number }) {
       return <SeaRock {...p} />;
     case 'whale':
       return <Whale {...p} />;
+    case 'house':
+      return <Houses {...p} i={i} />;
+    case 'lamp':
+      return <Lamp {...p} />;
     default:
       return null; // 물결·배·새는 FarSprite
   }
@@ -279,8 +363,6 @@ function Coast({
 }
 
 // 2월드 코드 바다 (P10-04): 지도 전체가 물빛 해도. 나침반 + 거기서 뻗는 항로선(먼 레이어), 노드마다 섬(길 레이어, THEME_GROUND)
-
-const r1 = (n: number) => Math.round(n * 10) / 10;
 
 /** 나침반 + 항로선 16줄. 오른쪽 아래 바다, 크기는 가로 지도 1 · 세로 지도 0.65 */
 function SeaChart({ layout }: { layout: MapLayout }) {
@@ -417,12 +499,215 @@ function SeaIsles({
   );
 }
 
+// 3월드 메이커 시티 (P11-11): 설계도 모눈종이 위 도시. 거리 사이 블록(공원 몇 곳) + 왼쪽 아래 항구(2월드에서 배를 대고 내린 곳)
+// + 설계 도구 표장(먼 레이어), 노드마다 둥근 돌 광장(길 레이어, THEME_GROUND)
+
+/** 블록 하나를 노드에서 이만큼(지도 단위 × node_scale) 떨어뜨림: 광장·랜드마크·이름표 자리를 비움 */
+const CLEAR = 118;
+/** 블록마다 공원인지·조금 어긋난 크기: 좌표로 정하는 결정적 값 (0~1) */
+const hash01 = (a: number, b: number) => {
+  const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+  return v - Math.floor(v);
+};
+
+/** 모눈 (설계도 종이) + 거리 사이 블록 */
+function CityBlocks({ layout }: { layout: MapLayout }) {
+  const { width: w, height: h, nodes, node_scale: ns } = layout;
+  const tall = h > w;
+  const cw = tall ? 92 : 112;
+  const ch = tall ? 84 : 96;
+  const gap = tall ? 18 : 22;
+  const step = 20;
+  const grid: string[] = [];
+  for (let x = 0; x <= w; x += step) grid.push(`M${x} -200V${h + 200}`);
+  for (let y = 0; y <= h; y += step) grid.push(`M-200 ${y}H${w + 200}`);
+  const blocks: ReactNode[] = [];
+  for (let gx = -1; gx * cw < w + cw; gx++) {
+    for (let gy = -1; gy * ch < h + ch; gy++) {
+      const x = gx * cw + (gy % 2 ? cw / 2 : 0);
+      const y = gy * ch;
+      const cx = x + cw / 2;
+      const cy = y + ch / 2;
+      if (
+        nodes.some(
+          ([nx, ny]) =>
+            Math.hypot(nx - cx, (ny - 30 - cy) * 1.25) < CLEAR * ns + cw / 2,
+        )
+      )
+        continue;
+      const k = hash01(gx + 7, gy + 11);
+      const bx = x + gap / 2;
+      const by = y + gap / 2;
+      const bw = cw - gap - (k > 0.7 ? 12 : 0);
+      const bh = ch - gap;
+      const park = k < 0.14;
+      blocks.push(
+        <g key={`${gx},${gy}`}>
+          <rect
+            className={park ? 'wm-park' : 'wm-block'}
+            x={bx}
+            y={by}
+            width={bw}
+            height={bh}
+            rx={9}
+          />
+          {/* 위에서 본 지붕 두세 채 (블록마다 자리·재질을 엇갈림) */}
+          {!park &&
+            [0, 1, 2].slice(0, k > 0.55 ? 3 : 2).map((j) => {
+              const rw = (bw - 18) / 3;
+              const rh = j % 2 ? bh * 0.42 : bh * 0.3;
+              return (
+                <rect
+                  key={j}
+                  className={
+                    (j + Math.round(k * 10)) % 3
+                      ? 'wm-rooftop'
+                      : 'wm-rooftop wm-rooftop-slate'
+                  }
+                  x={bx + 6 + j * (rw + 3)}
+                  y={j % 2 ? by + bh - rh - 6 : by + 6}
+                  width={rw}
+                  height={rh}
+                  rx={2}
+                />
+              );
+            })}
+        </g>,
+      );
+    }
+  }
+  return (
+    <>
+      <path className="wm-grid" d={grid.join('')} />
+      <path
+        className="wm-grid wm-grid-major"
+        d={grid.filter((_, i) => i % 5 === 0).join('')}
+      />
+      {blocks}
+    </>
+  );
+}
+
+/** 항구 바다 (왼쪽 아래 구석): 2월드 물빛 + 해안선 + 부두 */
+const HARBOR_WIDE = {
+  sea: 'M-200 610 H0 C26 640 52 668 96 688 C126 702 150 712 172 720 V920 H-200 Z',
+  coast: 'M0 610 C26 640 52 668 96 688 C126 702 150 712 172 720',
+  pier: 'M40 662 L70 642 L77 649 L47 669 Z',
+};
+const HARBOR_TALL = {
+  sea: 'M-200 1124 H0 C70 1136 120 1128 190 1142 C260 1156 330 1150 400 1160 H600 V1400 H-200 Z',
+  coast: 'M0 1124 C70 1136 120 1128 190 1142 C260 1156 330 1150 400 1160',
+  pier: 'M228 1150 L240 1124 L250 1128 L238 1154 Z',
+};
+
+/** 설계 도구 표장: 각도기 + 연필 + 톱니 (2월드 나침반 자리). 가로 지도는 오른쪽 위, 세로 지도는 왼쪽 위 */
+function MakerEmblem({ layout }: { layout: MapLayout }) {
+  const wide = layout.width >= 900;
+  const k = wide ? 1 : 0.62;
+  const cx = wide ? layout.width - 112 : 64;
+  const cy = wide ? 112 : 92;
+  const ticks = Array.from({ length: 13 }, (_, i) => {
+    const a = Math.PI + (i / 12) * Math.PI;
+    const r0 = i % 3 ? 38 : 33;
+    return `M${r1(Math.cos(a) * r0)} ${r1(Math.sin(a) * r0)}L${r1(Math.cos(a) * 44)} ${r1(Math.sin(a) * 44)}`;
+  }).join('');
+  return (
+    <g transform={at(cx, cy, k)}>
+      <path
+        className="wm-f wm-slate"
+        fillRule="evenodd"
+        transform="translate(-40 6)"
+        d={COG_D}
+      />
+      <F m="paper" d="M-46 0 A46 46 0 0 1 46 0 Z" />
+      <path className="wm-l" d={ticks} />
+      <path className="wm-l wm-l-soft" d="M-22 0 A22 22 0 0 1 22 0" />
+      <g transform="rotate(-38)">
+        <F m="gold" d="M-40 -5 H26 V5 H-40 Z" />
+        <F m="brick" d="M-48 -5 H-40 V5 H-48 Z" />
+        <F m="cream" d="M26 -5 L40 0 L26 5 Z" />
+        <L d="M36 -1.4 L40 0 L36 1.4 M-40 0 H26" />
+      </g>
+    </g>
+  );
+}
+
+function CityBase({ name, layout }: { name: LayoutName; layout: MapLayout }) {
+  const h = name === 'wide' ? HARBOR_WIDE : HARBOR_TALL;
+  const sx = layout.width / (name === 'wide' ? 1200 : 400);
+  const sy = layout.height / (name === 'wide' ? 720 : 1180);
+  return (
+    <>
+      <CityBlocks layout={layout} />
+      <g transform={sx === 1 && sy === 1 ? undefined : `scale(${sx} ${sy})`}>
+        <path className="wm-sea" d={h.sea} />
+        <path className="wm-coast" d={h.coast} />
+        <F m="wood" d={h.pier} />
+      </g>
+      <MakerEmblem layout={layout} />
+    </>
+  );
+}
+
+/** 노드마다 둥근 돌 광장: 연석 → 포장 → 돌 무늬 고리. 랜드마크가 그 위에 선다 (길 레이어라 패럴랙스 없음) */
+function CityPlazas({
+  layout,
+  bosses,
+}: {
+  layout: MapLayout;
+  bosses: ReadonlyArray<boolean>;
+}) {
+  return (
+    <g>
+      {layout.nodes.map(([x, y], i) => {
+        const s = layout.node_scale * (bosses[i] ? 1.15 : 1);
+        const cy = y + 4 * s;
+        return (
+          <g key={i}>
+            <ellipse
+              className="wm-f wm-curb"
+              cx={x}
+              cy={cy + 2 * s}
+              rx={80 * s}
+              ry={27 * s}
+            />
+            <ellipse
+              className="wm-f wm-plaza"
+              cx={x}
+              cy={cy}
+              rx={74 * s}
+              ry={23 * s}
+            />
+            <ellipse
+              className="wm-cobble"
+              cx={x}
+              cy={cy}
+              rx={60 * s}
+              ry={17 * s}
+            />
+            <ellipse
+              className="wm-cobble"
+              cx={x}
+              cy={cy}
+              rx={44 * s}
+              ry={11 * s}
+            />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
 /** 테마별 길 레이어 바닥 그림 (노드에 붙어 움직이면 안 되는 것: 섬). 없으면 안 그림 */
 export const THEME_GROUND: Record<
   string,
   (layout: MapLayout, bosses: ReadonlyArray<boolean>) => ReactNode
 > = {
   code_sea: (layout, bosses) => <SeaIsles layout={layout} bosses={bosses} />,
+  maker_city: (layout, bosses) => (
+    <CityPlazas layout={layout} bosses={bosses} />
+  ),
 };
 
 export const THEME_BASE: Record<
@@ -448,6 +733,7 @@ export const THEME_BASE: Record<
       />
     ),
   code_sea: (_name, layout) => <SeaBase layout={layout} />,
+  maker_city: (name, layout) => <CityBase name={name} layout={layout} />,
 };
 
 // ───────────── 스테이지 랜드마크 7종 (바닥 중앙 = 0,0 · 대략 폭 120 × 높이 100). 키는 스테이지 theme_name
@@ -773,6 +1059,205 @@ function Harbor() {
   );
 }
 
+// ───────────── 3월드 메이커 시티 랜드마크 7종 (P11-11, 같은 좌표 규칙). 공방마다 톱니 지붕·간판으로 "만드는 곳" 느낌
+
+/** 3-1 거북이 화가 공방: 톱니 지붕 작업실 + 이젤 위 별 그림 + 붓 자국을 끌고 가는 거북이 느릿이 */
+function TurtleStudio() {
+  return (
+    <>
+      <F m="cream" d="M-58 0 V-50 H-8 V0 Z" />
+      <F
+        m="brick"
+        d="M-62 -50 L-62 -58 L-46 -74 L-46 -58 L-30 -74 L-30 -58 L-14 -74 L-14 -58 L-4 -58 L-4 -50 Z"
+      />
+      <F m="water" d="M-44 -66 L-34 -66 L-34 -58 M-28 -66 L-18 -66 L-18 -58" />
+      <F m="water" d="M-52 -40 h16 v14 h-16z" />
+      <L d="M-44 -40 v14 M-52 -33 h16" />
+      <F m="wood-dark" d="M-28 0 v-22 a7 7 0 0 1 14 0 v22z" />
+      <L d="M10 0 L22 -64 M44 0 L32 -64 M27 -64 V-6" />
+      <F m="paper" d="M8 -74 H46 V-40 H8 Z" />
+      <F m="gold" d="M27 -70 l3 7 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1z" />
+      <path
+        className="wm-l wm-ink-only"
+        d="M12 -46 q6 -6 10 0 M34 -46 q4 -5 8 0"
+      />
+      <F m="wood" d="M8 -40 H46 V-36 H8 Z" />
+      <path className="wm-l wm-l-dot" d="M-6 6 C8 10 20 2 34 6" />
+      <F m="olive" d="M38 0 C38 -14 62 -14 62 0 Z" />
+      <L d="M44 -2 L48 -9 L54 -9 L58 -2 M48 -9 L46 -12 M54 -9 L56 -12" />
+      <F m="sage" d="M61 -6 a5 5 0 1 0 0.1 0z" />
+      <F m="sage" d="M40 0 h5 v3 h-5z M54 0 h5 v3 h-5z" />
+      <F m="brick" d="M-4 0 h7 v-6 h-7z" />
+      <F m="slate" d="M-62 0 h7 v-8 h-7z" />
+    </>
+  );
+}
+
+/** 3-2 모험 이야기 극장: 삼각 지붕 극장 + 빨간 막이 걷힌 무대 + 지붕 위 펼친 책 간판 */
+function StoryTheater() {
+  return (
+    <>
+      <F m="cream" d="M-50 0 V-58 H50 V0 Z" />
+      <F m="brick" d="M-56 -58 L0 -82 L56 -58 Z" />
+      <L d="M-38 -62 L0 -77 L38 -62" />
+      <F
+        m="paper"
+        d="M-22 -86 Q-11 -92 0 -86 Q11 -92 22 -86 V-72 Q11 -78 0 -72 Q-11 -78 -22 -72 Z"
+      />
+      <L d="M0 -86 V-72 M-16 -84 q5 -2 10 0 M6 -84 q5 -2 10 0 M-16 -80 q5 -2 10 0 M6 -80 q5 -2 10 0" />
+      <F m="cave" d="M-30 0 V-34 Q0 -50 30 -34 V0 Z" />
+      <F m="coral" d="M-30 0 V-34 Q-8 -40 -8 -30 Q-14 -18 -24 -12 V0 Z" />
+      <F m="coral" d="M30 0 V-34 Q8 -40 8 -30 Q14 -18 24 -12 V0 Z" />
+      <F m="gold" d="M-32 -36 Q0 -54 32 -36 V-32 Q0 -48 -32 -32 Z" />
+      <F
+        m="gold wm-ink-only"
+        d="M0 -22 l2 -5 2 5 5 1 -4 3 1 5 -4 -3 -4 3 1 -5 -4 -3z"
+      />
+      <F m="stone" d="M-46 0 V-54 H-38 V0 Z M38 0 V-54 H46 V0 Z" />
+      <F m="stone" d="M-54 0 H54 V6 H-54 Z" />
+    </>
+  );
+}
+
+/** 3-3 두근두근 퀴즈쇼 방송국: 방송국 건물 + "ON AIR" 불 + 물음표 말풍선 + 신호를 내보내는 철탑 */
+function QuizStudio() {
+  return (
+    <>
+      <F m="slate" d="M-56 0 V-52 H6 V0 Z" />
+      <F m="paper" d="M-52 0 V-46 H2 V0 Z" />
+      <F m="coral" d="M-44 -40 H-14 V-30 H-44 Z" />
+      <path className="wm-l wm-ink-only" d="M-40 -35 h4 M-32 -35 h10" />
+      <F m="water" d="M-44 -22 h12 v10 h-12z M-24 -22 h12 v10 h-12z" />
+      <F m="wood-dark" d="M-8 0 v-16 h10 v16z" />
+      <F
+        m="gold"
+        d="M-40 -72 a16 13 0 1 1 10 12 l-6 6 0 -8 a16 13 0 0 1 -4 -10z"
+      />
+      <L d="M-30 -76 q0 -5 5 -5 q5 0 5 5 q0 3 -5 5 v3 M-25 -63 v0.1" />
+      <F m="wood-dark" d="M18 0 L30 -84 L42 0 h-4 L30 -72 L22 0 Z" />
+      <L d="M23 -14 L39 -28 M37 -14 L23 -28 M25 -36 L36 -52 M35 -36 L25 -52 M27 -60 L33 -70" />
+      <F m="coral" d="M30 -86 a4 4 0 1 0 0.1 0z" />
+      <path
+        className="wm-l wm-ink-only"
+        d="M20 -94 q-5 8 0 16 M40 -94 q5 8 0 16 M14 -98 q-8 12 0 24 M46 -98 q8 12 0 24"
+      />
+    </>
+  );
+}
+
+/** 3-4 가상 펫 돌봄 센터: 하트 창 돌봄 집 + 발자국 간판 + 개집 + 뼈다귀 */
+function PetCenter() {
+  return (
+    <>
+      <F m="paper" d="M-56 0 V-44 H8 V0 Z" />
+      <F m="brick" d="M-62 -42 L-24 -76 L14 -42 Z" />
+      <F
+        m="coral"
+        d="M-24 -50 c-3 -6 -11 -3 -8 3 l8 7 8 -7 c3 -6 -5 -9 -8 -3z"
+      />
+      <F m="gold" d="M-46 -32 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0z" />
+      <L d="M-38 -30 a2.5 2 0 1 0 0.1 0 M-42 -35 v0.1 M-38 -37 v0.1 M-34 -35 v0.1" />
+      <F m="water" d="M-20 -32 h14 v12 h-14z" />
+      <F m="wood-dark" d="M-22 0 v-14 h12 v14z" />
+      <F m="wood" d="M20 0 V-24 H54 V0 Z" />
+      <F m="brick" d="M16 -22 L37 -42 L58 -22 Z" />
+      <F m="cave" d="M30 0 v-10 a7 7 0 0 1 14 0 v10z" />
+      <F
+        m="paper"
+        d="M44 6 h10 a2.5 2.5 0 1 1 2 -3 a2.5 2.5 0 1 1 -2 -3 h-10 a2.5 2.5 0 1 1 -2 3 a2.5 2.5 0 1 1 2 3z"
+      />
+      <L d="M-62 0 v-10 M-66 -6 h8" />
+    </>
+  );
+}
+
+/** 3-5 데이터 탐정 사무소: 좁고 높은 사무소 + 창에 막대그래프 + 돋보기 간판 + 설문 쪽지 상자 */
+function DetectiveOffice() {
+  return (
+    <>
+      <F m="stone" d="M-38 0 V-80 H14 V0 Z" />
+      <F m="slate" d="M-42 -80 H18 V-88 H-42 Z" />
+      <F m="wood-dark" d="M-6 -88 v-10 h8 v10z" />
+      <F m="paper" d="M-30 -70 h36 v24 h-36z" />
+      <F m="brick" d="M-25 -50 h6 v-8 h-6z" />
+      <F m="gold" d="M-16 -50 h6 v-16 h-6z" />
+      <F m="slate" d="M-7 -50 h6 v-11 h-6z" />
+      <L d="M-28 -50 h32" />
+      <F m="water" d="M-30 -36 h12 v12 h-12z M-6 -36 h12 v12 h-12z" />
+      <F m="wood-dark" d="M-20 0 v-16 h12 v16z" />
+      <L d="M14 -62 H34 V-56" />
+      <path
+        className="wm-f wm-paper"
+        fillRule="evenodd"
+        d="M22 -46 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0z M26 -46 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0z"
+      />
+      <F m="water" d="M26 -46 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0z" />
+      <F m="wood-dark" d="M42 -36 l10 10 -3 3 -10 -10z" />
+      <F m="wood" d="M24 0 V-14 H48 V0 Z" />
+      <F m="paper" d="M28 -14 l2 -8 h7 l-1 8z M38 -14 l3 -7 h6 l-2 7z" />
+      <L d="M24 -7 H48" />
+    </>
+  );
+}
+
+/** 3-6 미니 게임 오락실: 오락기 모양 건물 (간판 띠 + 화면 속 픽셀 별 + 조이스틱·단추) + 떠 있는 코인 */
+function GameArcade() {
+  return (
+    <>
+      <F m="slate" d="M-40 0 V-58 L-34 -84 H34 L40 -58 V0 Z" />
+      <F m="gold" d="M-34 -84 H34 L36 -74 H-36 Z" />
+      <path className="wm-l wm-ink-only" d="M-24 -79 h48" />
+      <F m="cave" d="M-30 -68 H30 V-36 H-30 Z" />
+      <F
+        m="gold"
+        d="M-3 -64 h6 v5 h6 v5 h-3 v5 h3 v5 h-6 v-3 h-6 v3 h-6 v-5 h3 v-5 h-3 v-5 h6z"
+      />
+      <F m="sage" d="M-24 -44 h4 v4 h-4z M18 -60 h4 v4 h-4z" />
+      <F m="cream" d="M-44 -30 H44 L40 -20 H-40 Z" />
+      <L d="M-24 -26 V-36" />
+      <F m="coral" d="M-28 -38 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0z" />
+      <F m="brick" d="M6 -27 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0z" />
+      <F m="gold" d="M16 -27 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0z" />
+      <F m="wood-dark" d="M-10 0 v-14 h20 v14z" />
+      <L d="M0 -14 v14" />
+      <F m="gold wm-ink-only" d="M50 -60 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0z" />
+      <path className="wm-l wm-ink-only" d="M56 -63 v6" />
+    </>
+  );
+}
+
+/** 3-F 메이커 박람회 (보스 스테이지): 줄무늬 큰 천막 + 작은 천막 + 삼각 깃발 줄 + 받침대 위 로봇 작품 */
+function MakerFair() {
+  return (
+    <>
+      <path className="wm-l" d="M-62 -54 Q-30 -40 0 -58 Q30 -40 62 -54" />
+      {[-50, -38, -26, -14, 14, 26, 38, 50].map((x, i) => (
+        <F
+          key={x}
+          m={['gold', 'brick', 'slate', 'sage'][i % 4]}
+          d={`M${x - 4} ${-55 + Math.abs(x) * 0.18 - (Math.abs(x) > 40 ? 0 : 6)} h8 l-4 7z`}
+        />
+      ))}
+      <F m="paper" d="M-28 0 V-44 H28 V0 Z" />
+      <F m="brick" d="M-20 0 V-44 H-10 V0 Z M10 0 V-44 H20 V0 Z" />
+      <F m="cave" d="M-8 0 V-20 Q0 -28 8 -20 V0 Z" />
+      <F m="paper" d="M-34 -44 L0 -84 L34 -44 Z" />
+      <F m="brick" d="M-23 -44 L0 -84 L-6 -44 Z M6 -44 L0 -84 L23 -44 Z" />
+      <F m="wood-dark" d="M-1 -84 v-12 h2 v12z" />
+      <F m="gold" d="M1 -96 l12 4 -12 4z" />
+      <F m="cream" d="M30 0 V-22 H58 V0 Z" />
+      <F m="slate" d="M26 -22 L44 -40 L62 -22 Z" />
+      <L d="M44 -22 V0" />
+      <F m="stone" d="M-62 0 V-10 H-36 V0 Z" />
+      <F m="stone" d="M-56 -10 V-30 H-42 V-10 Z" />
+      <F m="slate" d="M-58 -30 V-44 H-40 V-30 Z" />
+      <F m="gold" d="M-54 -38 h3 v3 h-3z M-47 -38 h3 v3 h-3z" />
+      <L d="M-49 -44 v-6 M-60 -24 h-4 M-38 -24 h4" />
+      <F m="coral" d="M-51 -52 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0z" />
+    </>
+  );
+}
+
 const LANDMARKS: Record<string, () => ReactNode> = {
   python_village: Gate,
   variable_forest: Forest,
@@ -788,6 +1273,13 @@ const LANDMARKS: Record<string, () => ReactNode> = {
   bug_hospital: HospitalShip,
   algorithm_ridge: SortedRidge,
   project_harbor: Harbor,
+  turtle_studio: TurtleStudio,
+  story_theater: StoryTheater,
+  quiz_studio: QuizStudio,
+  pet_center: PetCenter,
+  detective_office: DetectiveOffice,
+  game_arcade: GameArcade,
+  maker_fair: MakerFair,
 };
 
 /** 보스(마지막) 스테이지 랜드마크 배율. 노드 이름표 자리도 같은 값(worldMap.css `--s`) */

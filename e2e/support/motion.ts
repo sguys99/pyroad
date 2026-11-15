@@ -44,6 +44,9 @@ export const AMBIENT = [
   'wm-flap',
   'wm-spark',
   'wm-leaf',
+  // 3월드 메이커 시티 (P11-11): 톱니 회전 · 열기구
+  'wm-spin',
+  'wm-float',
 ];
 
 /** 대기 루프: full·lite만 */

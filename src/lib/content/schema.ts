@@ -564,6 +564,11 @@ export const MapDecorationSchema = z.strictObject({
     'rock',
     'buoy',
     'whale',
+    // house·lamp(중간 레이어, 정지)·cog·balloon(먼 레이어, 움직임)은 3월드 메이커 시티 (P11-11)
+    'house',
+    'lamp',
+    'cog',
+    'balloon',
   ]),
   x: z.number(),
   y: z.number(),

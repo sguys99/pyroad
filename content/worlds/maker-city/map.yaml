@@ -1,0 +1,73 @@
+# 월드 3 지도 설정 (P11-11). 작성법: content/README.md "map.yaml"
+# 그림책 3권 "메이커 시티": 설계도 모눈종이 위 도시(THEME_BASE maker_city — 거리 사이 블록·공원 + 왼쪽 아래 항구 + 설계 도구 표장, 노드마다 돌 광장)
+# 2월드 배에서 내린 항구(왼쪽 아래)에서 출발해 골목을 지그재그로 오르고, 오른쪽 박람회장으로 내려오는 길
+# 7번(3-F 박람회, 보스)은 랜드마크 1.15배 + 왕관이라 오른쪽에 넉넉히
+
+bgm: world3
+path: catmull_rom
+# 앰비언트 (P5-09, full에서만 움직임): 도시라 나뭇잎 없이 구름·반짝임만. 톱니(cog)·열기구(balloon)·배·물결·새는 장식이 움직이고 집·가로등·나무는 정지
+# 동시 애니메이션 (worldMap.css 상한 16개 안팎, ambient.test): wide = 물결 1 + 배 1 + 톱니 2 + 열기구 1 + 새 2 + 구름 3 + 반짝임 4 = 14,
+#   tall = 1 + 1 + 1 + 1 + 1 + 3 + 4 = 12
+ambient: { clouds: true, sparkles: true, weather: none }
+
+layouts:
+  # 넓은 화면: 가로 지도
+  wide:
+    width: 1200
+    height: 720
+    node_scale: 1
+    nodes:
+      - [190, 540]
+      - [420, 610]
+      - [620, 470]
+      - [400, 330]
+      - [640, 200]
+      - [880, 320]
+      - [1050, 530]
+    decorations:
+      - { kind: waves, x: -10, y: 700 }
+      - { kind: boat, x: 2, y: 668, scale: 0.75 }
+      - { kind: cog, x: 830, y: 120, scale: 1.3 }
+      - { kind: cog, x: 220, y: 300, scale: 0.9 }
+      - { kind: balloon, x: 470, y: 120 }
+      - { kind: bird, x: 980, y: 210 }
+      - { kind: bird, x: 300, y: 80 }
+      - { kind: house, x: 120, y: 330, scale: 1.1 }
+      - { kind: house, x: 560, y: 340 }
+      - { kind: house, x: 800, y: 620, scale: 1.05 }
+      - { kind: house, x: 1130, y: 350 }
+      - { kind: house, x: 300, y: 470, scale: 0.9 }
+      - { kind: lamp, x: 520, y: 580 }
+      - { kind: lamp, x: 760, y: 410 }
+      - { kind: lamp, x: 260, y: 640 }
+      - { kind: tree, x: 980, y: 660, scale: 1.1 }
+      - { kind: tree, x: 1000, y: 668 }
+      - { kind: tree, x: 60, y: 250, scale: 1.1 }
+      - { kind: tree, x: 720, y: 690 }
+
+  # 좁은 화면: 세로로 긴 지도
+  tall:
+    width: 400
+    height: 1180
+    node_scale: 0.82
+    nodes:
+      - [130, 1040]
+      - [290, 905]
+      - [122, 770]
+      - [286, 625]
+      - [124, 485]
+      - [282, 350]
+      - [180, 200]
+    decorations:
+      - { kind: waves, x: 280, y: 1166 }
+      - { kind: boat, x: 330, y: 1130, scale: 0.8 }
+      - { kind: cog, x: 350, y: 120, scale: 0.9 }
+      - { kind: balloon, x: 60, y: 300, scale: 0.9 }
+      - { kind: bird, x: 300, y: 40 }
+      - { kind: house, x: 340, y: 760, scale: 0.85 }
+      - { kind: house, x: 30, y: 620, scale: 0.85 }
+      - { kind: house, x: 345, y: 480, scale: 0.8 }
+      - { kind: lamp, x: 210, y: 700 }
+      - { kind: lamp, x: 190, y: 980 }
+      - { kind: tree, x: 30, y: 920 }
+      - { kind: tree, x: 370, y: 1020, scale: 0.9 }

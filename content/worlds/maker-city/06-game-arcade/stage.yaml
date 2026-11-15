@@ -1,0 +1,8 @@
+# 스테이지 3-6: 미니 게임 오락실 (stages 테이블). 설계: docs/curriculum/world3.md §4
+
+id: a3000000-0000-0000-0000-000000000006
+order: 6
+title: 미니 게임 오락실
+theme_name: game_arcade
+description: 키보드로 느릿이를 움직이는 게임을 만들어 오락실을 다시 켜요!
+is_final: false
