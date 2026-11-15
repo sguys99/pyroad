@@ -15,7 +15,7 @@ prompt:
     - 에러가 없어도 답이 틀릴 수 있다는 것을 안다 (조용한 버그)
     - print로 반복 중간의 값을 들여다보며 버그를 찾을 수 있다
   story_context: 버그버그 건강 점수 80, 90, 70의 평균을 냈더니 53.3 이 나왔어요. 에러 쪽지도 없는데 답이 이상해요! 이런 버그는 조용히 숨어 있어서, 탐정처럼 print 돋보기로 중간 값을 들여다봐야 찾을 수 있어요.
-  exercise_description: '반복 안에 print(i, scores[i]) 를 넣어 어떤 점수가 더해지는지 들여다보고, 빠진 점수가 더해지게 range 를 range(len(scores)) 로 고쳐 "평균: 80.0"을 출력하세요. 다 고치면 들여다보기 print 는 지워요'
+  exercise_description: '반복 안에 print(i, scores[i]) 를 넣어 어떤 점수가 더해지는지 들여다보고, range 를 range(len(scores)) 로 고쳐 "평균: 80.0"만 나오게 하세요'
   starter_code: |
     scores = [80, 90, 70]
     total = 0

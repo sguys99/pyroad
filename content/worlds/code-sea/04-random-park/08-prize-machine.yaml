@@ -14,7 +14,7 @@ prompt:
     - while로 원하는 결과가 나올 때까지 무작위 뽑기를 되풀이할 수 있다
     - 반복할 때마다 횟수를 세어 몇 번 만에 끝났는지 알 수 있다
   story_context: 놀이공원 마지막 기구는 뽑기 기계예요! 황금 열쇠를 뽑으면 해적선 보물 창고 문이 열린대요. 황금 열쇠가 나올 때까지 계속 뽑아 봐요.
-  exercise_description: 'prize 가 "황금 열쇠"가 아닌 동안 while 로 random.choice(prizes)를 뽑고, 뽑을 때마다 tries 를 1 늘려 "1번째: 풍선" 처럼 보여 준 뒤, 끝나면 "3번 만에 뽑았어요!" 처럼 출력하세요'
+  exercise_description: 'while 로 황금 열쇠가 나올 때까지 random.choice(prizes)로 뽑고, 끝나면 "3번 만에 뽑았어요!" 처럼 몇 번 만에 뽑았는지 출력하세요'
   starter_code: |
     import random
 
@@ -32,7 +32,7 @@ prompt:
     print(f"{tries}번 만에 뽑았어요!")
   expected_output_hint: '뽑은 상품과 횟수는 매번 달라요. 마지막 줄은 ○번 만에 뽑았어요! 모양이에요'
   checklist:
-    - 'while 빈칸에 prize != "황금 열쇠" 를 써요'
+    - 'while 빈칸에 prize != "황금 열쇠" 를 써요. 황금 열쇠 가운데 띄어쓰기까지 리스트와 똑같이 써요'
     - 'prize = random.choice(prizes) 로 뽑아요'
     - 마지막에 황금 열쇠가 나오고 몇 번 만에 뽑았는지 나오는지 봐요
   example_output: |-

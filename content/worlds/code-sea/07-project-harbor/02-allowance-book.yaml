@@ -248,6 +248,7 @@ steps:
                 income = income + record["금액"]
             else:
                 # 빼기로 적힌 금액을 빼면 나간 돈이 커져요
+                # 예: 0 - (-1500) 은 0 + 1500 이라 1500 이 돼요
                 spend = spend - ___
 
         print(f"들어온 돈: {income}원")
@@ -351,6 +352,7 @@ steps:
         for record in records:
             if record["금액"] < 0:
                 name = record["내용"]
+                # not in 은 "안에 없으면"이에요. 처음 보는 내용이면 0 에서 시작해요
                 if name not in spent:
                     spent[name] = 0
                 spent[name] = spent[name] - record["금액"]

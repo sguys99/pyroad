@@ -47,7 +47,7 @@ answer:
         expected: 'in times:'
   hints:
     level_1: 'for 나 if 줄 끝에는 늘 붙는 기호가 있었어요. 무엇이었죠?'
-    level_2: 'for t in times 끝에 쌍점(:)을 붙여요. 그다음 print( 의 여는 괄호에 맞는 닫는 괄호가 있는지 세어 봐요.'
+    level_2: 'for t in times 끝에 쌍점(:)을 붙여요. 그다음 print( 의 여는 괄호에 맞는 닫는 괄호가 있는지 세어 봐요. 닫는 괄호는 따옴표 바깥, 줄 맨 끝에 붙여요.'
     level_3: |-
       두 줄을 이렇게 고쳐 보세요!
       for t in times:

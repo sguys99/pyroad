@@ -20,6 +20,7 @@ prompt:
     friends = [3, 0, 2]
 
     for f in friends:
+        # // 는 나눈 몫이에요 (12 // 3 은 4)
         # 0으로 나누면 멈춰요! try 와 except ZeroDivisionError: 로 감싸요
         print(f"{f}명이면 한 명에 {candy // f}개")
   expected_output_hint: '3명이면 한 명에 4개, 나눌 친구가 없어요, 2명이면 한 명에 6개 가 한 줄씩 나와야 해요'

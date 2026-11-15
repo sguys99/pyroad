@@ -15,7 +15,7 @@ prompt:
     - 리스트.remove(값)으로 그 값을 리스트에서 뺄 수 있다
     - 가장 작은 것을 하나씩 뽑아 새 줄 뒤에 세우는 방법으로 정렬을 만들 수 있다
   story_context: 드디어 산맥 꼭대기예요! 친구 다섯 명이 사진을 찍으려고 키 순서대로 줄을 서야 해요. sort() 는 금지 구역이라 못 써요. 남은 친구 중 가장 작은 친구를 불러 새 줄 맨 뒤에 세우는 걸 되풀이하면 줄이 완성돼요.
-  exercise_description: '5번 반복하며 남은 줄 line 에서 가장 작은 키를 min(line)으로 찾아 line.remove(shortest)로 빼고 new_line.append(shortest)로 새 줄에 세우세요. 마지막 줄은 내 정렬이 sorted() 와 같은지 확인해요'
+  exercise_description: '남은 줄에서 가장 작은 키를 찾아 빼고, 새 줄 맨 뒤에 세우는 일을 5번 되풀이해 키 순서대로 줄을 세우세요'
   starter_code: |
     line = [132, 125, 140, 128, 136]
     check = sorted(line)
