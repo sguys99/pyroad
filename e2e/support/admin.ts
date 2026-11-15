@@ -79,6 +79,11 @@ export async function resetUser(userId: string): Promise<void> {
     'user_achievements 삭제',
     await db.from('user_achievements').delete().eq('user_id', userId),
   );
+  // 작품 (P11-06): 스펙마다 빈 작품함에서
+  check(
+    'creations 삭제',
+    await db.from('creations').delete().eq('user_id', userId),
+  );
 }
 
 /** 퀴즈 공개 부분(quests.prompt_skeleton.quiz)과 서버 전용 정답(quest_answer_keys.quiz_answer)을 service_role 로 (P7-15) */

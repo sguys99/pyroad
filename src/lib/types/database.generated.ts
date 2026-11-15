@@ -392,6 +392,75 @@ export type Database = {
           },
         ];
       };
+      creations: {
+        Row: {
+          code: string;
+          commands_gz: string | null;
+          created_at: string;
+          hidden_at: string | null;
+          id: string;
+          kind: string;
+          published_at: string | null;
+          quest_id: string | null;
+          show_code: boolean;
+          thumbnail: string | null;
+          title: string;
+          transcript: Json | null;
+          updated_at: string;
+          user_id: string;
+          visibility: string;
+        };
+        Insert: {
+          code?: string;
+          commands_gz?: string | null;
+          created_at?: string;
+          hidden_at?: string | null;
+          id?: string;
+          kind: string;
+          published_at?: string | null;
+          quest_id?: string | null;
+          show_code?: boolean;
+          thumbnail?: string | null;
+          title: string;
+          transcript?: Json | null;
+          updated_at?: string;
+          user_id: string;
+          visibility?: string;
+        };
+        Update: {
+          code?: string;
+          commands_gz?: string | null;
+          created_at?: string;
+          hidden_at?: string | null;
+          id?: string;
+          kind?: string;
+          published_at?: string | null;
+          quest_id?: string | null;
+          show_code?: boolean;
+          thumbnail?: string | null;
+          title?: string;
+          transcript?: Json | null;
+          updated_at?: string;
+          user_id?: string;
+          visibility?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creations_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'creations_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       daily_missions: {
         Row: {
           active: boolean;

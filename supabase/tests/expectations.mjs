@@ -673,6 +673,19 @@ export const EXPECT = {
     activateIn: 'P9-07',
     note: '실제 기록으로 스냅샷(공개 정보만, 펫 없음) · 같은 id·version · 공개 조회 user_id 없음 · 90일 만료·비공개 0행 · 다시 공개 새 90일',
   },
+  // ── 작품 (P11-06, ① 00054) ──
+  'CRE-1': {
+    expect: 'deny',
+    requires: 'public.creations',
+    activateIn: 'P11-06',
+    note: '본인 행만 읽기·비공개 저장·고치기·지우기. 공개 전환·숨김·주인 열은 service_role(/api/creations, 검사 뒤)만',
+  },
+  'CRE-2': {
+    expect: 'allow',
+    requires: 'public.creations',
+    activateIn: 'P11-06',
+    note: '그림·대화 비공개 저장 · 크기·모양 CHECK(gzip·PNG 머리, 100KB·200KB, 20자) · updated_at · 사용자당 60개(PT409)',
+  },
   // ── 자랑하기 보상 (P9-10, ① 00044) ──
   'SHR-1': {
     expect: 'deny',

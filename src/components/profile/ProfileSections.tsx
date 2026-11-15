@@ -6,6 +6,7 @@ import {
   Flame,
   Lightbulb,
   RotateCcw,
+  Palette,
   Share2,
   Stamp,
   Trophy,
@@ -445,6 +446,34 @@ export function ShareCardsCard({
           {total === 0
             ? '자랑한 카드를 여기서 숨기거나 지울 수 있어요'
             : `${total}장 · 지금 ${open}장 공개 중`}
+        </span>
+      </span>
+      <ChevronRight
+        className="ml-auto size-5 shrink-0 text-primary-text"
+        aria-hidden
+      />
+    </CardButton>
+  );
+}
+
+/** 프로필 → 내 작품함 (P11-06). 저장한 작품 수만 */
+export function CreationsCard({ total }: { total: number }) {
+  return (
+    <CardButton
+      href="/profile/creations"
+      radius="l"
+      padding="lg"
+      className="flex items-center gap-3"
+      data-testid="profile-creations"
+      aria-label={`내 작품함, 작품 ${total}개`}
+    >
+      <Palette className="size-6 shrink-0 text-accent-text" aria-hidden />
+      <span className="grid min-w-0 gap-0.5">
+        <span className="font-display text-h3 text-foreground">내 작품함</span>
+        <span className="text-caption text-muted-foreground">
+          {total === 0
+            ? '거북이 그림과 대화 작품을 모아 둬요'
+            : `작품 ${total}개 · 나만 볼 수 있어요`}
         </span>
       </span>
       <ChevronRight

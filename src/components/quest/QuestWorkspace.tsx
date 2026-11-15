@@ -15,6 +15,7 @@ import { StoryPage } from './StoryPage';
 import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
+import { SaveCreationBar } from './SaveCreation';
 import type { QuestReward } from './QuestSuccess';
 import { QuestStatusBar } from './QuestStatusBar';
 import { usePageSwipe } from './usePageSwipe';
@@ -119,6 +120,17 @@ export function QuestWorkspace({
     : undefined;
   // turtle을 쓰는 코드면 결과 위에 그림판을 미리 펼침 (P11-02). 모바일도 실행하면 결과 쪽으로 넘어가 그림이 보인다 (P6-11)
   const turtle = usesTurtle(session.code);
+  // 작품으로 저장 (P11-06): 그림·대화가 나온 실행이 끝나면 결과 쪽지 아래 (데스크톱·모바일 결과 쪽 각각)
+  const saveBar = (
+    <SaveCreationBar
+      liveOutput={liveOutput}
+      runResult={runResult}
+      lastRunCode={session.lastRunCode}
+      isRunning={runner.isRunning}
+      questId={quest.id}
+      questTitle={quest.title}
+    />
+  );
   // 오류 줄로: 모바일은 공책 쪽으로 넘기고, 에디터에 표시된 오류 줄(P2-18)을 화면 가운데로
   const showErrorLine = () => {
     setTab('code');
@@ -311,6 +323,7 @@ export function QuestWorkspace({
               stage={quest.stage.order}
               turtle={turtle}
             />
+            <div className="mt-3 max-lg:hidden empty:hidden">{saveBar}</div>
           </div>
 
           {/* 모바일 결과 쪽 */}
@@ -344,6 +357,7 @@ export function QuestWorkspace({
               onAskTutor={askTutor}
               turtle={turtle}
             />
+            {saveBar}
           </div>
         </div>
       </div>

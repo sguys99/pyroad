@@ -820,6 +820,111 @@ async function groupBoss(u) {
   });
 }
 
+// ── 작품 (P11-06, ① 00054) ──
+const GZ = `\\x1f8b${'00'.repeat(30)}`;
+const PNGHEX = `\\x89504e470d0a1a0a${'00'.repeat(70)}`;
+
+async function groupCreations(u) {
+  const drawing = (extra = {}) => ({ user_id: u.alice.id, kind: 'drawing', title: '별 그림', code: 'import turtle', commands_gz: GZ, ...extra });
+
+  await check({
+    group: 'creations',
+    id: 'CRE-1',
+    role: 'authenticated',
+    op: 'creations: 남의 작품·비로그인 읽기 · 공개로 저장/바꾸기 · 숨김·주인 열 쓰기 · 남의 작품 고치기·지우기 (본인 비공개만, 공개는 service_role)',
+    ...WRITE,
+    run: async () => {
+      const bobRow = one(`insert into public.creations (user_id, kind, title, transcript) values
+             ('${u.bob.id}', 'conversation', '밥의 모험', '[{"text":"안녕"}]') returning id`);
+      const mine = one(`insert into public.creations (user_id, kind, title, commands_gz) values
+             ('${u.alice.id}', 'drawing', '앨리스 그림', '${GZ}') returning id`);
+      try {
+        const others = await rest('GET', `/rest/v1/creations?select=id&user_id=eq.${u.bob.id}`, { as: u.alice });
+        if (others.status !== 200 || others.json.length !== 0)
+          return { actual: 'written', detail: `남의 작품 ${others.status} rows=${others.json?.length}` };
+        const own = await rest('GET', '/rest/v1/creations?select=id', { as: u.alice });
+        if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 작품 ${own.status}` };
+        const anon = classifyRead(await rest('GET', '/rest/v1/creations?select=*'));
+        if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+        const tries = [
+          ['INSERT public', rest('POST', '/rest/v1/creations', { as: u.alice, body: drawing({ title: '공개로', visibility: 'public' }), prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creations where title = '공개로')`],
+          ['INSERT 남의 이름', rest('POST', '/rest/v1/creations', { as: u.alice, body: drawing({ title: '사칭', user_id: u.bob.id }), prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creations where title = '사칭')`],
+          ['UPDATE public', rest('PATCH', `/rest/v1/creations?id=eq.${mine}`, { as: u.alice, body: { visibility: 'public' }, prefer: 'return=minimal' }),
+           `select visibility = 'public' from public.creations where id = '${mine}'`],
+          ['UPDATE hidden_at', rest('PATCH', `/rest/v1/creations?id=eq.${mine}`, { as: u.alice, body: { hidden_at: null, published_at: '2026-01-01T00:00:00Z' }, prefer: 'return=minimal' }),
+           `select published_at is not null from public.creations where id = '${mine}'`],
+          ['UPDATE 남의 작품', rest('PATCH', `/rest/v1/creations?id=eq.${bobRow}`, { as: u.alice, body: { title: '바꿈' }, prefer: 'return=minimal' }),
+           `select title = '바꿈' from public.creations where id = '${bobRow}'`],
+          ['DELETE 남의 작품', rest('DELETE', `/rest/v1/creations?id=eq.${bobRow}`, { as: u.alice, prefer: 'return=minimal' }),
+           `select not exists (select 1 from public.creations where id = '${bobRow}')`],
+          ['anon INSERT', rest('POST', '/rest/v1/creations', { body: drawing({ title: '익명' }), prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creations where title = '익명')`],
+        ];
+        let last;
+        for (const [name, req, verify] of tries) {
+          last = await classifyWrite(req, verify);
+          if (last.actual === 'written') return { actual: 'written', detail: `${name} ${last.detail}` };
+          // RLS WITH CHECK 위반(42501)·열 권한(42501)·RLS 0행 = 막힘
+          if (last.actual === 'error' && !/42501/.test(last.detail)) return { actual: 'error', detail: `${name} ${last.detail}` };
+        }
+        return { actual: 'denied', detail: '7가지 쓰기 모두 막힘' };
+      } finally {
+        one(`delete from public.creations where user_id in ('${u.alice.id}', '${u.bob.id}')`);
+      }
+    },
+  });
+
+  await check({
+    group: 'creations',
+    id: 'CRE-2',
+    role: 'authenticated',
+    op: '본인 비공개 저장(그림·대화)·제목 고치기(updated_at)·지우기 · 크기·모양 CHECK(gzip·PNG 머리, 20자, 종류별 내용) · 사용자당 60개',
+    ...OK,
+    run: async () => {
+      try {
+        const post = (body) => rest('POST', '/rest/v1/creations', { as: u.alice, body, prefer: 'return=representation' });
+        const ok = await post(drawing({ thumbnail: PNGHEX }));
+        if (ok.status !== 201 || ok.json[0].visibility !== 'private' || ok.json[0].show_code !== false)
+          return { actual: 'mismatch', detail: `그림 저장 ${ok.status} ${JSON.stringify(ok.json)?.slice(0, 120)}` };
+        const id = ok.json[0].id;
+        const conv = await post({ user_id: u.alice.id, kind: 'conversation', title: '모험', transcript: [{ text: '이름?' }, { text: '콩이', answer: true }] });
+        if (conv.status !== 201) return { actual: 'mismatch', detail: `대화 저장 ${conv.status}` };
+        const bad = [
+          ['gzip 머리 아님', drawing({ commands_gz: `\\x0000${'00'.repeat(30)}` })],
+          ['명령 100KB 초과', drawing({ commands_gz: `\\x1f8b${'00'.repeat(102_400)}` })],
+          ['PNG 머리 아님', drawing({ thumbnail: `\\x${'00'.repeat(80)}` })],
+          ['제목 21자', drawing({ title: '가'.repeat(21) })],
+          ['제목 앞뒤 공백', drawing({ title: ' 별 ' })],
+          ['그림인데 명령 없음', drawing({ commands_gz: null })],
+          ['대화인데 기록 없음', { user_id: u.alice.id, kind: 'conversation', title: '빈 대화' }],
+          ['대화에 그림', { user_id: u.alice.id, kind: 'conversation', title: '섞임', transcript: [{ text: 'x' }], commands_gz: GZ }],
+          ['모르는 종류', drawing({ kind: 'video' })],
+        ];
+        for (const [name, body] of bad) {
+          const r = await post(body);
+          if (r.status < 400 || errCode(r) !== '23514') return { actual: 'mismatch', detail: `${name}: ${r.status} ${errCode(r)}` };
+        }
+        const before = one(`select updated_at from public.creations where id = '${id}'`);
+        const upd = await rest('PATCH', `/rest/v1/creations?id=eq.${id}`, { as: u.alice, body: { title: '새 이름', show_code: true }, prefer: 'return=representation' });
+        if (upd.status !== 200 || upd.json[0]?.title !== '새 이름' || upd.json[0].updated_at === before)
+          return { actual: 'mismatch', detail: `고치기 ${upd.status}` };
+        const del = await rest('DELETE', `/rest/v1/creations?id=eq.${id}`, { as: u.alice, prefer: 'return=representation' });
+        if (del.status !== 200 || del.json.length !== 1) return { actual: 'mismatch', detail: `지우기 ${del.status}` };
+        // 상한: 지금 1개(대화) + 59개 = 60 → 다음 저장은 PT409
+        one(`insert into public.creations (user_id, kind, title, transcript)
+               select '${u.alice.id}', 'conversation', '채움 ' || g, '[{"text":"x"}]' from generate_series(1, 59) g`);
+        const full = await post(drawing({ title: '61번째' }));
+        if (full.status < 400 || !/creations_limit/.test(errMsg(full))) return { actual: 'mismatch', detail: `상한 ${full.status} ${errMsg(full)}` };
+        return { actual: 'ok', detail: '저장·고치기·지우기·CHECK 9가지·60개 상한' };
+      } finally {
+        one(`delete from public.creations where user_id = '${u.alice.id}'`);
+      }
+    },
+  });
+}
+
 async function groupShareCards(u) {
   const make = (id, kind, ref) =>
     rpc('create_share_card', { p_user_id: id, p_kind: kind, ...(ref && { p_ref: ref }) });
@@ -8730,6 +8835,7 @@ async function main() {
   await groupAchievements(u);
   await groupInventory(u);
   await groupShareCards(u);
+  await groupCreations(u);
   await groupBoss(u);
   await groupSkillCheck(u);
   await groupSchema(u);

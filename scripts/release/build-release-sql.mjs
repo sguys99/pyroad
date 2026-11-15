@@ -224,6 +224,22 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v0.9-phase11',
+    dir: 'v0.9-phase11',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v0.9 (Phase 11 병합) 운영 적용 1/1: ① 추가형 마이그레이션 (00054 작품)',
+          '-- feat/phase11 병합(앱 배포) 직전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v0.9-runbook.md "Phase 11 병합"',
+        ],
+        // 3월드 콘텐츠(P11-12~14)가 들어오면 여기 seed 를 더한다
+        parts: ['00054'],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];

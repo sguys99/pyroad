@@ -18,6 +18,18 @@ public.boss_runs (table, rls=on) anon: -
 public.boss_runs (table, rls=on) authenticated: -
 public.coin_ledger (table, rls=on) anon: -
 public.coin_ledger (table, rls=on) authenticated: SELECT
+public.creations (table, rls=on) anon: -
+public.creations (table, rls=on) authenticated: DELETE,SELECT
+public.creations.code column authenticated: INSERT
+public.creations.commands_gz column authenticated: INSERT
+public.creations.kind column authenticated: INSERT
+public.creations.quest_id column authenticated: INSERT
+public.creations.show_code column authenticated: INSERT,UPDATE
+public.creations.thumbnail column authenticated: INSERT
+public.creations.title column authenticated: INSERT,UPDATE
+public.creations.transcript column authenticated: INSERT
+public.creations.user_id column authenticated: INSERT
+public.creations.visibility column authenticated: UPDATE
 public.daily_missions (table, rls=on) anon: -
 public.daily_missions (table, rls=on) authenticated: -
 public.guardian_report_links (table, rls=on) anon: -

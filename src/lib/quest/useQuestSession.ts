@@ -1294,6 +1294,8 @@ export function useQuestSession({
     handleAsk,
     /** 마지막 실행 결과가 지금 코드의 것인지 ("왜 이렇게 나왔어요?") */
     canAskWhy,
+    /** 마지막으로 끝까지 돌린 코드 (멈췄으면 null) — "작품으로 저장"(P11-06)이 그 실행의 코드를 저장 */
+    lastRunCode,
     /** "파이뱀에게 물어보기" 자유 질문 (P9-17) */
     handleFreeAsk,
     /** 오늘 남은 자유 질문 수 (모르면 null) */
