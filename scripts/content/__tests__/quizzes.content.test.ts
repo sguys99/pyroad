@@ -10,6 +10,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { buildRows } from '@/lib/content/build';
 import { loadContent } from '@/lib/content/load';
 import type { QuizQuest } from '@/lib/content/schema';
 import { QUIZ_BLANK_RE } from '@/lib/quest/questKind';
@@ -112,6 +113,21 @@ it('퀘스트가 있는 스테이지마다 퀴즈가 있음', () => {
   );
   expect(withQuests.filter((k) => !k.includes('/')).length).toBe(7); // 1월드는 그대로 7개
   expect(new Set(quizzes.map((q) => q.stage))).toEqual(new Set(withQuests));
+});
+
+// Phase 10 완료 기준 ③: seed 에 들어가는 2월드 7 스테이지마다 모바일로 풀 수 있는 퀘스트(is_mobile_friendly: 퀴즈·보스)가 있음
+it('2월드 seed 스테이지마다 모바일 퀘스트(퀴즈·보스)가 있음', () => {
+  const { rows } = buildRows(tree);
+  const sea = rows.stages.filter((s) => s.world === 'code-sea');
+  expect(sea.length).toBe(7);
+  for (const s of sea) {
+    const mobile = rows.quests.filter(
+      (q) => q.stage_id === s.id && q.is_mobile_friendly,
+    );
+    expect(mobile.length, `code-sea/${s.order} ${s.title}`).toBeGreaterThan(0);
+    expect(mobile.some((q) => q.quest_type === 'quiz')).toBe(true);
+    expect(mobile.some((q) => q.quest_type === 'boss')).toBe(true);
+  }
 });
 
 for (const { stage, quest } of [...quizzes, ...bossRounds, ...skillChecks])
