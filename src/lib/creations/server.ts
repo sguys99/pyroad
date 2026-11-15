@@ -2,8 +2,9 @@ import 'server-only';
 
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { z } from 'zod';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/types/database';
 import { MODERATION_MESSAGES, moderateText } from '@/lib/moderation/filter';
-import { unicodeFold } from '@/lib/moderation/normalize';
 import { TURTLE_MAX_COMMANDS } from '@/lib/pyodide/constants';
 import {
   CREATION_CODE_MAX_BYTES,
@@ -13,6 +14,7 @@ import {
   CREATION_TRANSCRIPT_MAX_CHARS,
   CREATION_TRANSCRIPT_MAX_ROWS,
   CREATION_TRANSCRIPT_ROW_MAX,
+  hasExtraPersonalInfo,
 } from './limits';
 
 /**
@@ -163,20 +165,8 @@ export const toBytea = (b: Uint8Array) =>
 export const fromBytea = (s: string) =>
   Buffer.from(s.startsWith('\\x') ? s.slice(2) : s, 'hex');
 
-/**
- * 출품 전 개인정보 지킴이 (제안 J ③, world3.md §7): 금칙어 검사의 개인정보 규칙에 더해
- * 숫자 9자리 이상 연속 · 010 으로 시작하는 숫자열 · 이메일 모양. 걸리면 공개하지 않는다
- */
-const EXTRA_PERSONAL_INFO = [
-  /\d{9,}/,
-  /(?<!\d)010(?:[\s.\-_]*\d){4,}/,
-  /[^\s@]+\s*@\s*[^\s@]+\.[a-z]{2,}/i,
-];
-
-export function hasExtraPersonalInfo(text: string) {
-  const folded = unicodeFold(text);
-  return EXTRA_PERSONAL_INFO.some((re) => re.test(folded));
-}
+// 출품 전 개인정보 지킴이는 화면(출품 시트 경고)도 같이 써서 limits.ts 에 (P11-07)
+export { hasExtraPersonalInfo } from './limits';
 
 export type CreationField = 'title' | 'transcript' | 'drawing' | 'code';
 
@@ -220,4 +210,48 @@ export function checkCreationTexts(
     }
   }
   return { ok: true };
+}
+
+type Db = SupabaseClient<Database>;
+
+/**
+ * 출품 자격 (Q75 ⑧): 3월드 프로젝트 퀘스트를 끝낸 작품만 — 준비 퀘스트·자유 실행은 비공개 저장만.
+ * 주어진 퀘스트 중 자격이 되는 id 모음. `db` 는 본인 세션(RLS로 본인 진행만 읽힘)
+ */
+export async function publishableQuests(
+  db: Db,
+  userId: string,
+  questIds: readonly string[],
+): Promise<Set<string>> {
+  const ids = [...new Set(questIds)];
+  if (!ids.length) return new Set();
+  const [quests, progress] = await Promise.all([
+    db
+      .from('quests')
+      .select('id, quest_type, stage:stages(world:worlds(order))')
+      .in('id', ids),
+    db
+      .from('user_progress')
+      .select('quest_id')
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .in('quest_id', ids),
+  ]);
+  const done = new Set((progress.data ?? []).map((p) => p.quest_id));
+  return new Set(
+    (
+      (quests.data ?? []) as unknown as {
+        id: string;
+        quest_type: string;
+        stage: { world: { order: number } | null } | null;
+      }[]
+    )
+      .filter(
+        (q) =>
+          q.quest_type === 'project' &&
+          q.stage?.world?.order === 3 &&
+          done.has(q.id),
+      )
+      .map((q) => q.id),
+  );
 }

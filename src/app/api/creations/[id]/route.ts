@@ -8,6 +8,7 @@ import {
   creationPatchSchema,
   fromBytea,
   parseCommandsGz,
+  publishableQuests,
 } from '@/lib/creations/server';
 
 /**
@@ -25,39 +26,6 @@ const FAILED = '지금은 바꾸지 못했어요. 잠시 뒤에 다시 해 줘�
 
 function bad(message: string, status = 400, code = 'invalid') {
   return NextResponse.json({ error: message, code }, { status });
-}
-
-type Supabase = Awaited<ReturnType<typeof createClient>>;
-
-/** 출품 자격: 3월드 프로젝트 퀘스트를 끝냄 (Q75 ⑧ — 준비 퀘스트·자유 실행은 비공개 저장만) */
-async function canPublish(
-  supabase: Supabase,
-  userId: string,
-  questId: string | null,
-) {
-  if (!questId) return false;
-  const [quest, progress] = await Promise.all([
-    supabase
-      .from('quests')
-      .select('quest_type, stage:stages(world:worlds(order))')
-      .eq('id', questId)
-      .maybeSingle(),
-    supabase
-      .from('user_progress')
-      .select('status')
-      .eq('user_id', userId)
-      .eq('quest_id', questId)
-      .maybeSingle(),
-  ]);
-  const q = quest.data as {
-    quest_type: string;
-    stage: { world: { order: number } | null } | null;
-  } | null;
-  return (
-    q?.quest_type === 'project' &&
-    q.stage?.world?.order === 3 &&
-    progress.data?.status === 'completed'
-  );
 }
 
 async function signedIn() {
@@ -122,7 +90,10 @@ export async function PATCH(
   if (blocked) return blocked;
   if (row.hidden_at)
     return bad('운영자가 숨긴 작품이라 다시 올릴 수 없어요.', 409, 'hidden');
-  if (!(await canPublish(supabase, user.id, row.quest_id)))
+  if (
+    !row.quest_id ||
+    !(await publishableQuests(supabase, user.id, [row.quest_id])).size
+  )
     return bad(
       '갤러리에는 메이커 시티 프로젝트를 끝낸 작품만 올릴 수 있어요. 이 작품은 내 작품함에 간직해 둘게요.',
       409,
@@ -151,10 +122,9 @@ export async function PATCH(
       title,
       show_code: showCode,
       visibility: 'public',
-      published_at:
-        row.visibility === 'public' && row.published_at
-          ? row.published_at
-          : new Date().toISOString(),
+      // 처음 공개한 시각을 지킨다: 내렸다 다시 올려도 갤러리 맨 앞으로 오지 않고, 신고 수(00055 report_creation)도 이어서 센다.
+      // 운영자가 숨김을 풀 때만 새로 (그 뒤 신고만 셈)
+      published_at: row.published_at ?? new Date().toISOString(),
     })
     .eq('id', id)
     .eq('user_id', user.id);

@@ -36,7 +36,7 @@ export interface CreationSource {
 
 /**
  * 결과 쪽지 아래 "작품으로 저장" 띠 (P11-06). 퀘스트 세션(useQuestSession)의 마지막 실행을 그대로 읽어
- * 끝까지 돈 실행이 그림을 그렸거나 대화(input)를 했으면 나온다. 저장은 늘 비공개(내 작품함), 공개는 갤러리(P11-07)
+ * 끝까지 돈 실행이 그림을 그렸거나 대화(input)를 했으면 나온다. 저장은 늘 비공개(내 작품함), 저장 뒤 "작품 보기"에서 갤러리에 올림(P11-07)
  */
 export function SaveCreationBar({
   liveOutput,
@@ -68,6 +68,7 @@ export function SaveCreationBar({
   );
   const [open, setOpen] = useState(false);
   const [savedFor, setSavedFor] = useState<RunResult | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const ready =
     !isRunning &&
@@ -99,13 +100,18 @@ export function SaveCreationBar({
           </span>
           <span className="cr-bar-sub">
             {saved
-              ? '프로필의 내 작품함에서 언제든 다시 볼 수 있어요.'
+              ? '다시 보고, 프로젝트 작품은 갤러리에도 올릴 수 있어요.'
               : '작품으로 저장해 두면 나중에 다시 볼 수 있어요.'}
           </span>
         </span>
         {saved ? (
-          <Button size="sm" variant="ghost" href={MY_CREATIONS_HREF}>
-            작품함 보기
+          <Button
+            size="sm"
+            variant="ghost"
+            href={savedId ? `/gallery/${savedId}` : MY_CREATIONS_HREF}
+            data-testid="save-creation-view"
+          >
+            작품 보기
           </Button>
         ) : (
           <Button
@@ -130,7 +136,10 @@ export function SaveCreationBar({
             commands,
             transcript: transcriptRows(snap.text, snap.inputs),
           }}
-          onSaved={() => setSavedFor(runResult)}
+          onSaved={(id) => {
+            setSavedFor(runResult);
+            setSavedId(id);
+          }}
           save={save}
         />
       )}

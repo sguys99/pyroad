@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, MessagesSquare, Palette, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Lock,
+  MessagesSquare,
+  Palette,
+  ShieldAlert,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,18 +23,21 @@ import {
 import { Button } from '@/components/ui/button';
 import { formatKstDate } from '@/lib/time/kst';
 import type { CreationKind } from '@/lib/creations/limits';
+import '@/components/gallery/gallery.css';
 
 export interface MyCreation {
   id: string;
   kind: CreationKind;
   title: string;
   isPublic: boolean;
+  /** 운영자가 숨김 (P11-07) */
+  hidden?: boolean;
   createdAt: string;
 }
 
 /**
  * 내 작품함 (P11-06): 저장한 작품 목록 + 지우기(확인). 그림은 썸네일(본인만, `/api/creations/{id}/thumbnail`),
- * 대화는 말풍선 그림. 다시 보기(명령 재생·대화 재생)와 갤러리 올리기는 P11-07. `remove` 는 카탈로그가 요청 없이 흉내 낼 때
+ * 대화는 말풍선 그림. 누르면 작품 보기(`/gallery/{id}` — 다시 보기·갤러리 올리기·내리기, P11-07). `remove` 는 카탈로그가 요청 없이 흉내 낼 때
  */
 export function MyCreations({
   creations: initial,
@@ -89,45 +100,66 @@ export function MyCreations({
               className="grid content-start gap-2 rounded-3xl bg-surface p-2.5 shadow-card"
               data-testid="my-creation"
             >
-              <figure className="m-0 grid aspect-square place-items-center overflow-hidden rounded-2xl bg-surface-2">
-                {src && !broken.has(item.id) ? (
-                  // 본인 전용 동적 PNG 라 next/image 최적화를 거치지 않는다
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={src}
-                    alt={`${item.title} 그림`}
-                    width={400}
-                    height={400}
-                    loading="lazy"
-                    className="block size-full bg-surface object-contain"
-                    onError={() => setBroken((s) => new Set(s).add(item.id))}
-                  />
-                ) : item.kind === 'drawing' ? (
-                  <Palette
-                    className="size-10 text-accent-text"
-                    aria-label="그림 작품"
-                  />
-                ) : (
-                  <MessagesSquare
-                    className="size-10 text-primary-text"
-                    aria-label="대화 작품"
-                  />
-                )}
-              </figure>
-              <div className="grid gap-0.5 px-1">
-                <h2 className="m-0 truncate font-display text-body">
-                  {item.title}
-                </h2>
-                <p className="m-0 flex items-center gap-1 text-caption text-muted-foreground">
-                  {!item.isPublic && (
-                    <Lock
-                      className="size-3.5 shrink-0"
-                      aria-label="나만 보기"
+              <Link
+                href={`/gallery/${item.id}`}
+                className="focus-ring grid gap-2 rounded-2xl"
+                aria-label={`${item.title} 보기`}
+                data-testid="my-creation-open"
+              >
+                <figure className="m-0 grid aspect-square place-items-center overflow-hidden rounded-2xl bg-surface-2">
+                  {src && !broken.has(item.id) ? (
+                    // 본인 전용 동적 PNG 라 next/image 최적화를 거치지 않는다
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={src}
+                      alt={`${item.title} 그림`}
+                      width={400}
+                      height={400}
+                      loading="lazy"
+                      className="block size-full bg-surface object-contain"
+                      onError={() => setBroken((s) => new Set(s).add(item.id))}
+                    />
+                  ) : item.kind === 'drawing' ? (
+                    <Palette
+                      className="size-10 text-accent-text"
+                      aria-label="그림 작품"
+                    />
+                  ) : (
+                    <MessagesSquare
+                      className="size-10 text-primary-text"
+                      aria-label="대화 작품"
                     />
                   )}
-                  {formatKstDate(item.createdAt, 'monthDay')}
-                </p>
-              </div>
+                </figure>
+                <div className="grid gap-0.5 px-1">
+                  <h2 className="m-0 truncate font-display text-body">
+                    {item.title}
+                  </h2>
+                  <p className="m-0 flex items-center gap-1 text-caption text-muted-foreground">
+                    {formatKstDate(item.createdAt, 'monthDay')}
+                  </p>
+                  {item.hidden ? (
+                    <span className="gl-chip" data-state="hidden">
+                      <ShieldAlert aria-hidden />
+                      운영자가 숨김
+                    </span>
+                  ) : item.isPublic ? (
+                    <span
+                      className="gl-chip"
+                      data-state="public"
+                      data-testid="my-creation-public"
+                    >
+                      <Sparkles aria-hidden />
+                      전시 중
+                    </span>
+                  ) : (
+                    <span className="gl-chip">
+                      <Lock aria-hidden />
+                      나만 보기
+                    </span>
+                  )}
+                </div>
+              </Link>
               <Button
                 size="sm"
                 variant="ghost"

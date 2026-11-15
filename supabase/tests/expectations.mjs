@@ -686,6 +686,25 @@ export const EXPECT = {
     activateIn: 'P11-06',
     note: '그림·대화 비공개 저장 · 크기·모양 CHECK(gzip·PNG 머리, 100KB·200KB, 20자) · updated_at · 사용자당 60개(PT409)',
   },
+  // ── 갤러리 (P11-07, ① 00055) ──
+  'GAL-1': {
+    expect: 'deny',
+    requires: 'public.gallery_creations',
+    activateIn: 'P11-07',
+    note: '갤러리 뷰·남의 공개 작품·스티커·신고는 서버(service_role, 로그인 확인 뒤)만. 학생 세션은 읽기·쓰기·report_creation 모두 막힘',
+  },
+  'GAL-2': {
+    expect: 'allow',
+    requires: 'public.gallery_creations',
+    activateIn: 'P11-07',
+    note: '공개·안 숨긴 작품만, 코드는 show_code 인 것만, 작가는 공개 이름·파이뱀만, 스티커 합계 · 정해진 5종(CHECK)·사람마다 1개(PK)',
+  },
+  'GAL-3': {
+    expect: 'allow',
+    requires: 'public.report_creation()',
+    activateIn: 'P11-07',
+    note: '본인·비공개 거절, 중복 already, 서로 다른 3명 자동 숨김(hidden_at), 운영자가 다시 보이게 하면(published_at 새로) 그 뒤 신고만 셈',
+  },
   // ── 자랑하기 보상 (P9-10, ① 00044) ──
   'SHR-1': {
     expect: 'deny',

@@ -6,6 +6,7 @@ import {
   Award,
   Bell,
   Flame,
+  Frame,
   ListChecks,
   Menu,
   MessageSquare,
@@ -338,6 +339,15 @@ export function WorldHud({
                   {achievementsReady}
                 </span>
               )}
+            </Button>
+            <Button
+              href="/gallery"
+              variant="secondary"
+              icon={<Frame aria-hidden />}
+              className="w-full"
+              data-testid="menu-gallery"
+            >
+              작품 갤러리
             </Button>
             <Button
               href="/notice"

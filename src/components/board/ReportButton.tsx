@@ -24,22 +24,50 @@ import {
 import { cn } from '@/lib/utils';
 
 interface ReportButtonProps {
-  targetType: ReportTargetType;
+  /** creation = 갤러리 작품 (P11-07, `/api/gallery/{id}`) */
+  targetType: ReportTargetType | 'creation';
   targetId: string;
+  /** 단추 모양 바꾸기 (갤러리는 더 큰 글자 단추) */
+  className?: string;
 }
 
 type Phase = 'choose' | 'sending' | 'done';
 
-const TARGET_LABEL: Record<ReportTargetType, string> = {
+const TARGET_LABEL: Record<ReportButtonProps['targetType'], string> = {
   post: '글',
   comment: '댓글',
+  creation: '작품',
 };
+
+/** 신고 보내기: 게시판(P1-18) · 갤러리 작품(P11-07) */
+function send(
+  targetType: ReportButtonProps['targetType'],
+  targetId: string,
+  reason: ReportReason,
+) {
+  const [url, body] =
+    targetType === 'creation'
+      ? [`/api/gallery/${targetId}`, { action: 'report', reason }]
+      : [
+          '/api/board/reports',
+          { target_type: targetType, target_id: targetId, reason },
+        ];
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
 
 /**
  * 게시글·댓글 신고 (P1-18). 사유를 고르면 /api/board/reports 로 보냄.
  * 자기 글에는 보여 주지 않음(서버도 거부). 같은 대상은 한 번만 신고됨(서버 UNIQUE).
  */
-export function ReportButton({ targetType, targetId }: ReportButtonProps) {
+export function ReportButton({
+  targetType,
+  targetId,
+  className,
+}: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('choose');
   const [reason, setReason] = useState<ReportReason | null>(null);
@@ -68,15 +96,7 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
     setPhase('sending');
     setError('');
     try {
-      const res = await fetch('/api/board/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          target_type: targetType,
-          target_id: targetId,
-          reason,
-        }),
-      });
+      const res = await send(targetType, targetId, reason);
       const data = (await res.json().catch(() => ({}))) as {
         message?: string;
         error?: string;
@@ -100,7 +120,11 @@ export function ReportButton({ targetType, targetId }: ReportButtonProps) {
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger
-        className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className={
+          className ??
+          'inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
+        }
+        data-testid="report-open"
         aria-label={
           reported ? `이 ${target}은 신고했어요` : `이 ${target} 신고하기`
         }

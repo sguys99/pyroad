@@ -925,6 +925,146 @@ async function groupCreations(u) {
   });
 }
 
+// ── 갤러리 (P11-07, ① 00055) ──
+async function groupGallery(u) {
+  const make = (user, extra = '') =>
+    one(`insert into public.creations (user_id, kind, title, transcript, visibility, published_at, show_code, code${extra ? ', hidden_at' : ''})
+           values ('${user}', 'conversation', '갤러리 ' || left(md5(random()::text), 6), '[{"text":"안녕"}]', 'public', now(), false, 'secret_code()'${extra ? `, ${extra}` : ''}) returning id`);
+  const cleanup = () => {
+    one(`delete from public.creation_reports where reporter_id in ('${u.alice.id}', '${u.bob.id}') or target_user_id in ('${u.alice.id}', '${u.bob.id}')`);
+    one(`delete from public.creations where user_id in ('${u.alice.id}', '${u.bob.id}')`);
+  };
+
+  await check({
+    group: 'gallery',
+    id: 'GAL-1',
+    role: 'authenticated',
+    op: '학생·anon 이 갤러리 뷰·남의 공개 작품·스티커·신고 표를 읽거나 쓰기 · report_creation 실행 (서버만)',
+    ...WRITE,
+    run: async () => {
+      const bobRow = make(u.bob.id);
+      try {
+        for (const [who, as] of [['alice', u.alice], ['anon', 'anon']]) {
+          for (const path of [
+            '/rest/v1/gallery_creations?select=id',
+            `/rest/v1/creations?select=id,code&id=eq.${bobRow}`,
+            '/rest/v1/creation_reactions?select=*',
+            '/rest/v1/creation_reports?select=*',
+          ]) {
+            const r = classifyRead(await rest('GET', path, { as }));
+            if (r.actual === 'allowed') return { actual: 'written', detail: `${who} 읽기 ${path} ${r.detail}` };
+          }
+        }
+        const tries = [
+          ['스티커 쓰기', rest('POST', '/rest/v1/creation_reactions', { as: u.alice, body: { creation_id: bobRow, user_id: u.alice.id, sticker: 'love' }, prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creation_reactions where creation_id = '${bobRow}')`],
+          ['신고 쓰기', rest('POST', '/rest/v1/creation_reports', { as: u.alice, body: { creation_id: bobRow, reporter_id: u.alice.id, reason: 'other' }, prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creation_reports where creation_id = '${bobRow}')`],
+          ['report_creation', rest('POST', '/rest/v1/rpc/report_creation', { as: u.alice, body: { p_reporter_id: u.alice.id, p_creation_id: bobRow, p_reason: 'other' } }),
+           `select exists (select 1 from public.creation_reports where creation_id = '${bobRow}')`],
+          ['남의 작품 숨김 풀기', rest('PATCH', `/rest/v1/creations?id=eq.${bobRow}`, { as: u.alice, body: { title: '바꿈' }, prefer: 'return=minimal' }),
+           `select title = '바꿈' from public.creations where id = '${bobRow}'`],
+        ];
+        for (const [name, req, verify] of tries) {
+          const c = await classifyWrite(req, verify);
+          if (c.actual === 'written') return { actual: 'written', detail: `${name} ${c.detail}` };
+          if (c.actual === 'error' && !/42501|PGRST202/.test(c.detail)) return { actual: 'error', detail: `${name} ${c.detail}` };
+        }
+        return { actual: 'denied', detail: '뷰·남의 작품·반응·신고 읽기 8가지, 쓰기 4가지 막힘' };
+      } finally {
+        cleanup();
+      }
+    },
+  });
+
+  await check({
+    group: 'gallery',
+    id: 'GAL-2',
+    role: 'service_role',
+    op: 'gallery_creations: 공개·안 숨긴 작품만, 코드는 show_code 인 것만, 작가는 공개 이름만, 스티커 합계 · 정해진 스티커만(CHECK)·한 사람 한 번(PK)',
+    ...OK,
+    run: async () => {
+      const shown = make(u.bob.id);
+      const hidden = make(u.bob.id, 'now()');
+      const priv = one(`insert into public.creations (user_id, kind, title, transcript) values ('${u.bob.id}', 'conversation', '비공개', '[{"text":"x"}]') returning id`);
+      try {
+        one(`update public.creations set show_code = true, code = 'print(1)' where id = '${shown}'`);
+        const add = (user, sticker) =>
+          rest('POST', '/rest/v1/creation_reactions', { as: 'service', body: { creation_id: shown, user_id: user, sticker }, prefer: 'return=minimal' });
+        await add(u.alice.id, 'love');
+        await add(u.alice.id, 'wow');
+        const dup = await add(u.alice.id, 'love');
+        const bad = await add(u.alice.id, 'poop');
+        const v = await rest('GET', `/rest/v1/gallery_creations?select=*&author_id=eq.${u.bob.id}`, { as: 'service' });
+        if (v.status !== 200) return { actual: 'error', detail: `뷰 ${v.status} ${errMsg(v)}` };
+        const row = v.json.find((r) => r.id === shown);
+        const cols = Object.keys(row ?? {}).sort().join(',');
+        return (
+          compare(
+            '뷰',
+            { ids: [shown], code: 'print(1)', stickers: { love: 1, wow: 1 }, hasEmail: false, dup: '23505', bad: '23514', name: true },
+            {
+              ids: v.json.map((r) => r.id),
+              code: row?.code,
+              stickers: row?.stickers && { love: row.stickers.love, wow: row.stickers.wow },
+              hasEmail: /email|display_name|nickname/.test(cols),
+              dup: errCode(dup),
+              bad: errCode(bad),
+              name: typeof row?.author_name === 'string' && row.author_name.length > 0,
+            },
+          ) ?? { actual: 'ok', detail: `숨김·비공개(${hidden.slice(0, 4)}·${priv.slice(0, 4)}) 빠짐, 스티커 합계·CHECK·PK` }
+        );
+      } finally {
+        cleanup();
+      }
+    },
+  });
+
+  await check({
+    group: 'gallery',
+    id: 'GAL-3',
+    role: 'service_role',
+    op: 'report_creation: 본인·없는·비공개 작품 거절 · 같은 사람 두 번은 already · 서로 다른 3명이면 hidden_at · 숨김 푼 뒤(published_at 새로) 다시 셈',
+    ...OK,
+    run: async () => {
+      const id = make(u.bob.id);
+      const priv = one(`insert into public.creations (user_id, kind, title, transcript) values ('${u.bob.id}', 'conversation', '비공개', '[{"text":"x"}]') returning id`);
+      const extra = [await createUser('gal1', '신고1'), await createUser('gal2', '신고2')];
+      const rep = async (who, target = id) =>
+        (await rpc('report_creation', { p_reporter_id: who, p_creation_id: target, p_reason: 'abuse' })).json;
+      try {
+        const own = await rep(u.bob.id);
+        const missing = await rep(u.alice.id, priv);
+        const first = await rep(u.alice.id);
+        const again = await rep(u.alice.id);
+        const second = await rep(extra[0].id);
+        const third = await rep(extra[1].id);
+        const hidden = one(`select hidden_at is not null from public.creations where id = '${id}'`);
+        const after = await rep(u.alice.id);
+        one(`update public.creations set hidden_at = null, published_at = now() where id = '${id}'`);
+        const reshown = await rep(extra[0].id);
+        const stillShown = one(`select hidden_at is null from public.creations where id = '${id}'`);
+        return (
+          compare(
+            '신고',
+            {
+              own: 'own', missing: 'not_found', first: 'reported', again: 'already',
+              second: false, third: true, hidden: 't', after: 'not_found', reshown: false, stillShown: 't',
+            },
+            {
+              own: own?.result, missing: missing?.result, first: first?.result, again: again?.result,
+              second: second?.hidden, third: third?.hidden, hidden, after: after?.result, reshown: reshown?.hidden, stillShown,
+            },
+          ) ?? { actual: 'ok', detail: '본인·비공개 거절, 중복 already, 3명 자동 숨김, 다시 보인 뒤 새로 셈' }
+        );
+      } finally {
+        cleanup();
+        for (const x of extra) one(`delete from public.creation_reports where reporter_id = '${x.id}'`);
+      }
+    },
+  });
+}
+
 async function groupShareCards(u) {
   const make = (id, kind, ref) =>
     rpc('create_share_card', { p_user_id: id, p_kind: kind, ...(ref && { p_ref: ref }) });
@@ -4931,6 +5071,8 @@ async function groupAccount(u) {
             from fk
            where confdeltype <> 'c'
              and not (conrelid = 'public.board_reports'::regclass and attname = 'target_user_id' and confdeltype = 'n')
+             -- 갤러리 신고(00055)도 게시판처럼: 신고된 학생이 탈퇴해도 신고 기록은 남김
+             and not (conrelid = to_regclass('public.creation_reports') and attname = 'target_user_id' and confdeltype = 'n')
           union all
           select format('%s.%s (users FK 없음)', c.oid::regclass, a.attname)
             from pg_attribute a
@@ -8836,6 +8978,7 @@ async function main() {
   await groupInventory(u);
   await groupShareCards(u);
   await groupCreations(u);
+  await groupGallery(u);
   await groupBoss(u);
   await groupSkillCheck(u);
   await groupSchema(u);

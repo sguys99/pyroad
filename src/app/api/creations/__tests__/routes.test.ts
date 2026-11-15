@@ -23,7 +23,15 @@ function client(name: string) {
         mocks.calls.push({ client: name, table, op: k, arg });
         return q;
       };
-      for (const k of ['select', 'insert', 'update', 'delete', 'eq', 'order'])
+      for (const k of [
+        'select',
+        'insert',
+        'update',
+        'delete',
+        'eq',
+        'in',
+        'order',
+      ])
         q[k] = chain(k);
       const done = async () =>
         (mocks.result[`${name}:${table}`] ?? (() => ({ data: null })))(op);
@@ -115,9 +123,11 @@ beforeEach(() => {
           ? { data: [{ id: ID }] }
           : { data: ROW },
     'user:quests': () => ({
-      data: { quest_type: 'project', stage: { world: { order: 3 } } },
+      data: [
+        { id: QUEST, quest_type: 'project', stage: { world: { order: 3 } } },
+      ],
     }),
-    'user:user_progress': () => ({ data: { status: 'completed' } }),
+    'user:user_progress': () => ({ data: [{ quest_id: QUEST }] }),
     'admin:creations': () => ({ error: null }),
   };
   mocks.rpc
@@ -252,24 +262,26 @@ describe('PATCH /api/creations/{id}', () => {
 
     mocks.result['user:creations'] = () => ({ data: ROW });
     mocks.result['user:quests'] = () => ({
-      data: { quest_type: 'code', stage: { world: { order: 3 } } },
+      data: [{ id: QUEST, quest_type: 'code', stage: { world: { order: 3 } } }],
     });
     expect(await (await patch({ visibility: 'public' })).json()).toMatchObject({
       code: 'not_eligible',
     });
     mocks.result['user:quests'] = () => ({
-      data: { quest_type: 'project', stage: { world: { order: 1 } } },
+      data: [
+        { id: QUEST, quest_type: 'project', stage: { world: { order: 1 } } },
+      ],
     });
     expect((await patch({ visibility: 'public' })).status).toBe(409);
     mocks.result['user:quests'] = () => ({
-      data: { quest_type: 'project', stage: { world: { order: 3 } } },
+      data: [
+        { id: QUEST, quest_type: 'project', stage: { world: { order: 3 } } },
+      ],
     });
-    mocks.result['user:user_progress'] = () => ({
-      data: { status: 'in_progress' },
-    });
+    mocks.result['user:user_progress'] = () => ({ data: [] });
     expect((await patch({ visibility: 'public' })).status).toBe(409);
     mocks.result['user:user_progress'] = () => ({
-      data: { status: 'completed' },
+      data: [{ quest_id: QUEST }],
     });
 
     mocks.result['user:creations'] = () => ({
