@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createLiveOutputStore } from '../liveOutput';
+import { createLiveOutputStore, liveRunOptions } from '../liveOutput';
 
 describe('createLiveOutputStore (실행 중 stdout)', () => {
   it('조각을 이어 붙이고 구독자에게 알린다', () => {
@@ -69,5 +69,28 @@ describe('createLiveOutputStore (실행 중 stdout)', () => {
     store.stopInput();
     expect(stop).toHaveBeenCalledTimes(1);
     expect(store.getSnapshot().inputs).toEqual([]);
+  });
+});
+
+describe('turtle 명령 (P11-02)', () => {
+  it('청크를 쌓아 구독자에게 알리고, drawing은 첫 명령에서 한 번 켜짐. reset은 새 배열', () => {
+    const store = createLiveOutputStore();
+    const onTurtle = vi.fn();
+    const onSnap = vi.fn();
+    store.subscribeTurtle(onTurtle);
+    store.subscribe(onSnap);
+    const first = store.getTurtle();
+    store.turtle('[["n",0,{}],["m",0,1,0]]');
+    store.turtle('[["m",0,2,0]]');
+    store.turtle('깨진 JSON');
+    expect(store.getTurtle()).toHaveLength(3);
+    expect(onTurtle).toHaveBeenCalledTimes(2);
+    expect(store.getSnapshot().drawing).toBe(true);
+    expect(onSnap).toHaveBeenCalledTimes(1);
+    store.reset();
+    expect(store.getTurtle()).toEqual([]);
+    expect(store.getTurtle()).not.toBe(first);
+    expect(store.getSnapshot().drawing).toBe(false);
+    expect(liveRunOptions(store).onTurtle).toBe(store.turtle);
   });
 });

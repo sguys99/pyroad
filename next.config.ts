@@ -85,7 +85,7 @@ const nextConfig: NextConfig = {
     // 실행기 경로 → 버전 관리되는 public/workers/ (P11-01). Worker의 상대 import(./pyodide-core.mjs)도 같은 경로로 온다
     return [
       {
-        source: `${RUNNER_PATH}/:file((?:pyodide-worker|pyodide-core)\\.mjs|input-sw\\.js)`,
+        source: `${RUNNER_PATH}/:file((?:pyodide-worker|pyodide-core)\\.mjs|input-sw\\.js|turtle\\.py)`,
         destination: '/workers/:file',
       },
     ];

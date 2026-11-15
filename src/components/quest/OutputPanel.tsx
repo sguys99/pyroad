@@ -22,6 +22,7 @@ import {
   RefreshCw,
   Search,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
@@ -51,11 +52,15 @@ import {
 import { InputReply } from './InputReply';
 import './outputPanel.css';
 
+// 그림판 (P11-02): turtle을 쓰는 코드에서만 받는다 (렌더러 chunk는 첫 로드 JS 밖)
+const TurtleStage = dynamic(() => import('./TurtleStage'), { ssr: false });
+
 const NO_LIVE_OUTPUT: LiveOutputSnapshot = {
   text: '',
   clipped: false,
   inputs: [],
   waiting: false,
+  drawing: false,
 };
 const subscribeNothing = () => () => {};
 const getNoLiveOutput = () => NO_LIVE_OUTPUT;
@@ -294,6 +299,37 @@ export interface OutputPanelProps {
   onAskTutor?: () => void;
   /** input()이 물으면 입력 칸으로 포커스 (기본 true, 카탈로그 견본만 끔) */
   inputAutoFocus?: boolean;
+  /**
+   * 코드가 turtle을 불러 씀 (P11-02, `usesTurtle(code)`): 실행 전에도 그림판을 펼쳐 둔다.
+   * 없어도 실행이 무언가 그리면(liveOutput.drawing) 그림판이 나온다
+   */
+  turtle?: boolean;
+}
+
+/** 이번 실행이 그렸는지만 구독 (글자 조각마다 다시 그리지 않음) */
+function useDrawing(store?: LiveOutputStore): boolean {
+  return useSyncExternalStore(
+    store?.subscribe ?? subscribeNothing,
+    () => store?.getSnapshot().drawing ?? false,
+    () => false,
+  );
+}
+
+/**
+ * 실행 결과 자리: turtle 그림판(P11-02, 그릴 때만) + 결과 쪽지. 그림판은 쪽지 위에 두고 쪽지 상태가 바뀌어도
+ * 같은 자리에 남아(다시 만들지 않음) 빠르기·모눈 설정과 그린 그림이 유지된다
+ */
+export function OutputPanel(props: OutputPanelProps) {
+  const drawing = useDrawing(props.liveOutput);
+  const stage = (props.turtle || drawing) && (
+    <TurtleStage store={props.liveOutput} running={props.isRunning} />
+  );
+  return (
+    <>
+      {stage}
+      <ResultSlip {...props} quietEmpty={!!stage} />
+    </>
+  );
 }
 
 /**
@@ -386,7 +422,7 @@ function AskMore({ onAsk }: { onAsk: () => void }) {
  * 출력 줄은 쪽지 카드로 튀어나온다(full 스프링 차례로 · lite 짧게 · minimal·동작 줄이기 없음).
  * 정답 기준값은 서버 전용이라(§2.3) 공개 예시 출력(P7-17)과 견줘 보고 규칙 유형별 살펴볼 거리를 보여 준다
  */
-export function OutputPanel({
+function ResultSlip({
   result,
   isRunning,
   validationResult,
@@ -397,7 +433,11 @@ export function OutputPanel({
   reward = null,
   onAskTutor,
   inputAutoFocus = true,
-}: OutputPanelProps) {
+  quietEmpty = false,
+}: OutputPanelProps & {
+  /** 그림판이 있으면 "아무것도 나오지 않았어요"를 줄인다 (그림이 결과라서) */
+  quietEmpty?: boolean;
+}) {
   const bugFixed = useBugFixed(result);
   const passed = !isRunning && !!result?.success && !!validationResult?.passed;
   const success = passed && !!reward;
@@ -603,7 +643,11 @@ export function OutputPanel({
       }
     >
       {!outputLines(result.stdout).length && (
-        <p className="qo-empty">(아무것도 나오지 않았어요)</p>
+        <p className="qo-empty">
+          {quietEmpty
+            ? '그림만 그리고 글자는 없어요'
+            : '(아무것도 나오지 않았어요)'}
+        </p>
       )}
       {success && <PassStamp done={successDone} />}
     </Slip>

@@ -6,10 +6,13 @@
 //
 // input() 대기(P11-01)도 여기 둔다: 실행을 부른 곳은 `liveRunOptions(store)`만 넘기고, 출력창(OutputPanel)이
 // 대기 상태를 읽어 입력 칸을 그리고 `answer`·`stopInput`을 부른다 (셸·코드 패널을 거쳐 props를 내려보내지 않음).
+// turtle 그리기 명령(P11-02)도 여기 쌓는다: 글자 줄과 따로 구독해서(subscribeTurtle) 청크마다 출력창이 다시 그려지지 않고,
+// 그림판(TurtleStage)이 늦게 붙어도(모바일 결과 쪽) 이번 실행 명령을 처음부터 다시 그릴 수 있다.
 
 import { MAX_OUTPUT_LENGTH } from './constants';
 import type { InputRequest, RunInput } from './types';
 import type { RunCodeOptions } from './usePyodide';
+import type { TurtleCommand } from '@/lib/turtle/scene';
 
 export interface LiveOutputSnapshot {
   /** 지금까지 받은 출력 (화면 상한 MAX_OUTPUT_LENGTH까지만) */
@@ -20,6 +23,8 @@ export interface LiveOutputSnapshot {
   inputs: readonly RunInput[];
   /** input()이 답을 기다리는 중 */
   waiting: boolean;
+  /** 이번 실행이 turtle로 무언가 그렸는지 (첫 명령이 오면 true, P11-02) */
+  drawing: boolean;
 }
 
 export interface LiveOutputStore {
@@ -31,6 +36,11 @@ export interface LiveOutputStore {
   answer(value: string): void;
   /** 이번 실행 멈추기 (입력 칸의 멈추기 버튼) */
   stopInput(): void;
+  /** turtle 명령 묶음 받기 (usePyodide onTurtle, JSON 배열 문자열) */
+  turtle(chunk: string): void;
+  /** 이번 실행의 turtle 명령. 실행마다(reset) 새 배열이라 바뀐 배열이면 새 그림 */
+  getTurtle(): readonly TurtleCommand[];
+  subscribeTurtle(listener: () => void): () => void;
   getSnapshot(): LiveOutputSnapshot;
   subscribe(listener: () => void): () => void;
 }
@@ -41,6 +51,7 @@ const EMPTY: LiveOutputSnapshot = {
   clipped: false,
   inputs: NO_INPUTS,
   waiting: false,
+  drawing: false,
 };
 
 /**
@@ -55,6 +66,11 @@ export function createLiveOutputStore(
   // 이번 실행 멈추기 (답을 보낸 뒤 다음 질문 전에도 입력 칸의 멈추기가 듣게)
   let stopRun: (() => void) | null = null;
   const listeners = new Set<() => void>();
+  let turtle: TurtleCommand[] = [];
+  const turtleListeners = new Set<() => void>();
+  const notifyTurtle = () => {
+    for (const listener of turtleListeners) listener();
+  };
   const set = (next: Partial<LiveOutputSnapshot>) => {
     snapshot = { ...snapshot, ...next };
     for (const listener of listeners) listener();
@@ -73,6 +89,10 @@ export function createLiveOutputStore(
     reset() {
       request = null;
       stopRun = null;
+      if (turtle.length) {
+        turtle = [];
+        notifyTurtle();
+      }
       if (snapshot === EMPTY) return;
       snapshot = EMPTY;
       for (const listener of listeners) listener();
@@ -97,6 +117,23 @@ export function createLiveOutputStore(
       if (snapshot.waiting) set({ waiting: false });
       stopRun?.();
     },
+    turtle(chunk) {
+      let cmds: unknown;
+      try {
+        cmds = JSON.parse(chunk);
+      } catch {
+        return;
+      }
+      if (!Array.isArray(cmds) || !cmds.length) return;
+      turtle.push(...(cmds as TurtleCommand[]));
+      notifyTurtle();
+      if (!snapshot.drawing) set({ drawing: true });
+    },
+    getTurtle: () => turtle,
+    subscribeTurtle(listener) {
+      turtleListeners.add(listener);
+      return () => turtleListeners.delete(listener);
+    },
     getSnapshot: () => snapshot,
     subscribe(listener) {
       listeners.add(listener);
@@ -108,6 +145,10 @@ export function createLiveOutputStore(
 /** runCode에 넘길 출력·입력 연결 (실행 중 출력 + input() 대기) */
 export function liveRunOptions(
   store: LiveOutputStore,
-): Pick<RunCodeOptions, 'onStdout' | 'onInputRequest'> {
-  return { onStdout: store.append, onInputRequest: store.ask };
+): Pick<RunCodeOptions, 'onStdout' | 'onInputRequest' | 'onTurtle'> {
+  return {
+    onStdout: store.append,
+    onInputRequest: store.ask,
+    onTurtle: store.turtle,
+  };
 }

@@ -24,6 +24,9 @@ export const INPUT_SW_URL = `${PYODIDE_RUNNER_PATH}input-sw.js`;
 
 export const EXECUTION_TIMEOUT_MS = 5000;
 
+/** 실행 한 번의 turtle 그리기 명령 상한 (§12-Q74 ①). 넘으면 shim이 TurtleLimitError로 끝냄 — Worker 재시작 없음 */
+export const TURTLE_MAX_COMMANDS = 50_000;
+
 /**
  * stop을 보낸 뒤 Worker가 답할 때까지 기다리는 시간. time.sleep 대기 중이면(JSPI) 수십 ms 안에 끝나고,
  * CPU 무한 루프면 답이 없으므로 이 시간이 지나면 Worker를 terminate하고 다시 띄운다.

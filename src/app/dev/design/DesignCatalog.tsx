@@ -50,6 +50,7 @@ import {
   SoundSection,
 } from './_catalog/ExtraSections';
 import { LegalSection } from './_catalog/LegalSection';
+import { TurtleSection } from './_catalog/TurtleSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
 import { GuardianReportCatalogSection } from './_catalog/GuardianReportCatalog';
@@ -121,6 +122,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['editor', '코드 에디터'],
       ['run-controls', '실행 버튼'],
       ['output-slip', '결과 쪽지'],
+      ['turtle-stage', '그림판'],
       ['error-staging', '실패 연출'],
       ['success-staging', '성공 연출'],
       ['quiz', '퀴즈 틀·객관식'],
@@ -236,6 +238,7 @@ export function DesignCatalog({
               <EditorSection />
               <RunControlsSection />
               <OutputPanelSection />
+              <TurtleSection />
               <ErrorStagingSection />
               <SuccessStagingSection />
               <QuizSection />

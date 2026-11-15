@@ -15,6 +15,7 @@ import type {
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { PyodideLoadStage } from '@/lib/pyodide/types';
 import { RunControls } from './RunControls';
+import { usesTurtle } from '@/lib/turtle/scene';
 import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
 
 /** 공책 머리 제목 (P6-03) */
@@ -108,6 +109,8 @@ interface CodePanelProps {
   onAskTutor?: () => void;
   /** 스테이지 차례 (코드 키보드가 그 스테이지 주문을 앞으로, P6-11) */
   stage?: number;
+  /** 코드가 turtle을 씀 → 결과 위에 그림판 (P11-02). 없으면 코드에서 직접 본다 */
+  turtle?: boolean;
 }
 
 export function CodePanel({
@@ -132,6 +135,7 @@ export function CodePanel({
   onShowErrorLine,
   onAskTutor,
   stage,
+  turtle,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const showKeyboard = usePhoneLike();
@@ -185,6 +189,7 @@ export function CodePanel({
         onShowErrorLine={onShowErrorLine}
         reward={reward}
         onAskTutor={onAskTutor}
+        turtle={turtle ?? usesTurtle(code)}
       />
     </div>
   );

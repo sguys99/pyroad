@@ -5,6 +5,7 @@
 //
 // workerData: { interruptBuffer: SharedArrayBuffer(8), maxCaptureLength?: number, removeNetwork?: boolean }
 
+import { readFileSync } from 'node:fs';
 import { parentPort, workerData } from 'node:worker_threads';
 import { loadPyodide } from 'pyodide';
 
@@ -24,6 +25,11 @@ async function main() {
   const runtime = createRuntime(pyodide, {
     post,
     interruptBuffer: new Int32Array(workerData.interruptBuffer),
+    // 브라우저 Worker와 같은 turtle shim (P11-02)
+    turtleSource: readFileSync(
+      new URL('../../public/workers/turtle.py', import.meta.url),
+      'utf8',
+    ),
     ...(workerData.maxCaptureLength && {
       maxCaptureLength: workerData.maxCaptureLength,
     }),

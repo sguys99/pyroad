@@ -18,6 +18,7 @@ import { OutputPanel } from './OutputPanel';
 import type { QuestReward } from './QuestSuccess';
 import { QuestStatusBar } from './QuestStatusBar';
 import { usePageSwipe } from './usePageSwipe';
+import { usesTurtle } from '@/lib/turtle/scene';
 import './questWorkspace.css';
 
 // 축하 오버레이 (P6-13): 받은 축하가 있을 때만 그린다. 첫 로드 JS에서 빼고, 실행을 처음 누를 때 미리 받아 둔다
@@ -116,6 +117,8 @@ export function QuestWorkspace({
           guide.validation_type === 'output_match',
       }
     : undefined;
+  // turtle을 쓰는 코드면 결과 위에 그림판을 미리 펼침 (P11-02). 모바일도 실행하면 결과 쪽으로 넘어가 그림이 보인다 (P6-11)
+  const turtle = usesTurtle(session.code);
   // 오류 줄로: 모바일은 공책 쪽으로 넘기고, 에디터에 표시된 오류 줄(P2-18)을 화면 가운데로
   const showErrorLine = () => {
     setTab('code');
@@ -306,6 +309,7 @@ export function QuestWorkspace({
               onShowErrorLine={showErrorLine}
               onAskTutor={askTutor}
               stage={quest.stage.order}
+              turtle={turtle}
             />
           </div>
 
@@ -336,6 +340,7 @@ export function QuestWorkspace({
               restarting={!!runner.restarting && runner.status === 'loading'}
               reward={reward}
               onAskTutor={askTutor}
+              turtle={turtle}
             />
           </div>
         </div>

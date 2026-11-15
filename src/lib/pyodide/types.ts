@@ -9,7 +9,7 @@
 //                  run-error (실행기 내부 오류. 이때는 done이 오지 않음)
 //                  input-request (input() 대기, P11-01) → main이 answer로 답함
 //                  (SW 채널이면 Worker가 동기 XHR로 막혀 있어 answer·stop을 SW에 보낸다)
-// 확장 예정: turtle 명령 청크 `{ type: 'turtle', id, chunk }` (P11-02)
+//                  turtle* (그리기 명령 청크, P11-02. turtle을 쓰는 실행만, done보다 먼저)
 
 export type WorkerRequest =
   | { type: 'init' }
@@ -90,6 +90,8 @@ export type WorkerResponse =
     }
   | { type: 'stdout'; id: string; text: string }
   | { type: 'stderr'; id: string; text: string }
+  /** turtle 그리기 명령 묶음 (P11-02). chunk = JSON 배열 문자열, 형식은 src/lib/turtle/scene.ts */
+  | { type: 'turtle'; id: string; chunk: string }
   | {
       type: 'input-request';
       id: string;

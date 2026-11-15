@@ -50,6 +50,7 @@
 - 리거처 없음: CodeMirror 테마에 `fontVariantLigatures: 'none'`(`!=`가 한 글자처럼 보이지 않게). CodeMirror 기본 테마가 `.cm-scroller`에 `monospace`를 직접 넣으므로 거기도 `var(--font-mono)`를 줍니다.
 - 에디터는 기본 16px, 14·16·18·20px 네 단계 조절, 행간 1.6입니다(P2-18, [editor.md](editor.md)). 한글 주석 정렬은 e2e `editor-alignment.spec.ts`가 단계마다 실제 렌더로 0px인지 잽니다.
 - 파이썬 `f"{x:<6}"` 패딩은 글자 **수** 기준이라 D2Coding에서도 한글 표가 어긋납니다(P0-14 §4.6).
+- **turtle 캔버스 글씨** (P11-02): `write(…, font=("Arial", 16))`는 `"Arial", "pyRoad Sans", sans-serif`로 그립니다(`src/lib/turtle/TurtleCanvas.ts` `CANVAS_FONT_FALLBACK`). 새 글꼴 파일은 없고 앱에 이미 있는 본문 unicode-range 조각을 씁니다 — 렌더러가 글씨 명령을 **받는 순간** `document.fonts.load(font, text)`로 필요한 조각만 미리 받고, 그 글씨 차례가 와도 아직이면 최대 2초 기다립니다. 랜딩·첫 로드 바이트는 그대로입니다(그림판은 turtle 코드에서만 동적 import).
 
 ## 3. 파일과 다시 만드는 법
 

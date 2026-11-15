@@ -8,6 +8,8 @@
 // input() (P11-01): JSPI가 있으면 코어가 run_sync로 answer를 기다린다. 없으면 SW 동기 XHR 채널을 쓴다 —
 // 이 Worker는 `/pyodide/runner/pyodide-worker.mjs`(next.config.ts rewrites)로 떠서 SW scope 안에 있고,
 // 페이지가 미리 등록한 SW(`input-sw.js`)가 `__sync/read` 요청을 답이 올 때까지 붙잡아 둔다.
+//
+// turtle (P11-02): shim `turtle.py`를 같은 경로(`/pyodide/runner/turtle.py` → public/workers/)에서 Pyodide와 함께 받아 코어에 넘긴다.
 
 import {
   PYODIDE_VERSION,
@@ -41,6 +43,14 @@ function syncGet(path) {
   xhr.open('GET', SYNC_URL + path, false);
   xhr.send(null);
   return xhr;
+}
+
+/** turtle shim 받기. 못 받으면 null (turtle만 못 쓰고 나머지 실행은 그대로) */
+function fetchTurtleSource() {
+  return fetch(new URL('./turtle.py', import.meta.url)).then(
+    (res) => (res.ok ? res.text() : null),
+    () => null,
+  );
 }
 
 /** SW 채널로 답 하나를 기다린다. 채널이 끊기면 null (코어가 "입력을 받을 수 없어요"로 끝냄) */
@@ -147,6 +157,7 @@ async function init() {
   // 단계(P6-05): download = 파일 받기·파이썬 띄우기(대부분의 시간), setup = 실행기 안전 장치. 바이트 진행률은 loadPyodide가 주지 않는다
   post({ type: 'init-status', status: 'loading', stage: 'download' });
   const t0 = performance.now();
+  const turtleSource = fetchTurtleSource();
   try {
     let pyodide = null;
     let source = null;
@@ -163,7 +174,11 @@ async function init() {
     if (!pyodide) throw new Error(errors.join(' / '));
     post({ type: 'init-status', status: 'loading', stage: 'setup' });
 
-    const options = { post, interactiveInput: true };
+    const options = {
+      post,
+      interactiveInput: true,
+      turtleSource: (await turtleSource) ?? undefined,
+    };
     runtime = createRuntime(pyodide, options);
     const jspi = await runtime.canRunSync();
     // 네트워크 API를 지우기 전에 (ping의 깨우기 fetch)

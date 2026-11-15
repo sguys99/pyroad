@@ -58,6 +58,8 @@ export interface RunCodeOptions {
   onStderr?: (text: string) => void;
   /** input()이 답을 기다림 (P11-01). 답할 때까지 시간 제한이 멈춘다 */
   onInputRequest?: (request: InputRequest) => void;
+  /** turtle 그리기 명령 묶음 (P11-02, JSON 배열 문자열) */
+  onTurtle?: (chunk: string) => void;
   timeoutMs?: number;
 }
 
@@ -294,6 +296,9 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
               run.stderr += msg.text;
               run.options.onStderr?.(msg.text);
             }
+            break;
+          case 'turtle':
+            if (isRunMsg) run.options.onTurtle?.(msg.chunk);
             break;
           case 'done':
             if (isRunMsg) handleDone(run, msg);

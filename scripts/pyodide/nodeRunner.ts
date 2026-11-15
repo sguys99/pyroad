@@ -60,6 +60,8 @@ export interface NodeRunResult {
   restarted: boolean;
   truncated: boolean;
   ms: number;
+  /** 실행 중에 온 turtle 그리기 명령 (P11-02, src/lib/turtle/scene.ts 형식) */
+  turtle: unknown[][];
 }
 
 export interface NodeRunnerOptions {
@@ -135,6 +137,7 @@ export class NodePyodideRunner {
     const t0 = performance.now();
     let stdout = '';
     let stderr = '';
+    const turtle: unknown[][] = [];
     let timedOut = false;
 
     Atomics.store(this.interrupt, 0, 0);
@@ -150,6 +153,8 @@ export class NodePyodideRunner {
           if (msg.type === 'stdout') stdout += msg.text;
           else stderr += msg.text;
           options.onOutput?.(msg.type, msg.text);
+        } else if (msg.type === 'turtle') {
+          turtle.push(...(JSON.parse(msg.chunk) as unknown[][]));
         } else if (msg.type === 'done' || msg.type === 'run-error') {
           worker.off('message', onMessage);
           resolve(msg);
@@ -187,6 +192,7 @@ export class NodePyodideRunner {
       fullStdout: stdout,
       fullStderr: stderr,
       ms,
+      turtle,
     };
     if (msg === 'hang') {
       await worker.terminate();

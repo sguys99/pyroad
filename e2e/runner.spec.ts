@@ -145,6 +145,77 @@ test.describe('Python 실행기', () => {
     ]);
   });
 
+  test('turtle: 그림판에 그리고, 바로 완성·모눈·PNG 저장, 그리는 무한 반복은 재준비 없이 멈춤 (P11-02)', async ({
+    page,
+  }) => {
+    await runCode(
+      page,
+      'import turtle\nt = turtle.Turtle()\nt.color("red", "gold")\nt.begin_fill()\nfor i in range(4):\n    t.forward(150)\n    t.left(90)\nt.end_fill()\nt.write("네모", font=("Arial", 16, "bold"))\nturtle.title("내 네모")\nprint(t.position())',
+    );
+    const stage = page.locator('[data-testid="turtle-stage"]:visible');
+    await expect(stage).toBeVisible();
+    await expect(outputPanel(page)).toHaveAttribute('data-state', 'success');
+    // CPython과 같은 글자: 한 바퀴 돈 x는 -1.8e-14라 (-0.00,0.00)
+    await expect(outputPanel(page)).toContainText('(-0.00,0.00)');
+    // 1배로 그리는 중에 바로 완성
+    const finish = stage.getByTestId('turtle-finish');
+    if (await finish.isEnabled()) await finish.click();
+    await expect(stage).toHaveAttribute('data-state', 'done');
+    await expect(stage.getByTestId('turtle-title')).toHaveText('내 네모');
+    await expect(stage.getByTestId('turtle-canvas')).toHaveAttribute(
+      'aria-label',
+      /선 4개, 색칠 1곳, 글씨 “네모”.*빨강, 금색/,
+    );
+    // 캔버스에 실제 픽셀이 칠해졌다 (그림 레이어)
+    const inked = await stage.getByTestId('turtle-canvas').evaluate((host) => {
+      const cv = host.querySelectorAll('canvas')[1] as HTMLCanvasElement;
+      const d = cv
+        .getContext('2d')!
+        .getImageData(0, 0, cv.width, cv.height).data;
+      let n = 0;
+      for (let i = 3; i < d.length; i += 4) if (d[i]) n++;
+      return n;
+    });
+    expect(inked).toBeGreaterThan(1000);
+
+    // E2E_SHOTS=<폴더>면 360·768·1280 퀘스트 화면 (실행 뒤라 모바일은 결과 쪽)
+    const shots = process.env.E2E_SHOTS;
+    if (shots) {
+      for (const width of [360, 768, 1280]) {
+        await page.setViewportSize({ width, height: width < 768 ? 780 : 900 });
+        const visible = page.locator('[data-testid="turtle-stage"]:visible');
+        await visible.scrollIntoViewIfNeeded();
+        await page.screenshot({ path: `${shots}/turtle-quest-${width}.png` });
+      }
+      await page.setViewportSize({ width: 1280, height: 720 });
+    }
+
+    const grid = stage.getByTestId('turtle-grid');
+    await grid.click();
+    await expect(grid).toHaveAttribute('aria-pressed', 'true');
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      stage.getByTestId('turtle-save').click(),
+    ]);
+    expect(download.suggestedFilename()).toBe('내 네모.png');
+    const png = await download.createReadStream();
+    const head: Buffer = await new Promise((resolve) =>
+      png.once('data', (b) => resolve(b as Buffer)),
+    );
+    expect(head.subarray(1, 4).toString()).toBe('PNG');
+
+    // 그리는 무한 반복: 명령 5만 개에서 TurtleLimitError, 실행기 재준비 없음
+    await runCode(
+      page,
+      'import turtle\nt = turtle.Turtle()\nwhile True:\n    t.forward(2)\n    t.left(7)',
+    );
+    await expect(outputPanel(page)).toHaveAttribute('data-state', 'error', {
+      timeout: 20_000,
+    });
+    await expect(outputPanel(page)).toContainText('그림 명령이 너무 많아요');
+    expect((await runnerStates()).join(' → ')).not.toContain('restarting');
+  });
+
   test('input() 대기 중 멈추기는 실행기를 다시 띄우지 않고 바로 멈춘다 (P11-01)', async ({
     page,
   }) => {

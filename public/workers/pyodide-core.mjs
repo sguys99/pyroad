@@ -11,6 +11,9 @@
 // - `time.sleep` 중 멈추기(JSPI가 있으면 Worker를 살린 채 KeyboardInterrupt)
 // - `input()`·`sys.stdin` (P11-01): 입력 시나리오(CI) → 대화형 채널(JSPI `run_sync` 또는 SW 동기 XHR) → 없으면 안내.
 //   입력 대기 중 멈추기도 Worker를 살린 채 KeyboardInterrupt
+// - turtle (P11-02): `options.turtleSource`(public/workers/turtle.py)를 FS `/pyroad/turtle.py`에 설치하고, turtle을 쓰는
+//   실행마다 새 모듈로 불러 그리기 명령을 `{ type: 'turtle', id, chunk }`로 실행 중에 흘려보냄. 명령이 TURTLE_MAX_COMMANDS를
+//   넘으면 shim이 TurtleLimitError를 내서 Worker를 다시 띄우지 않고 끝남
 // - Python에서 `js`·`pyodide_js` 모듈을 뗌. 단 Python 쪽 차단은 우회되므로(gc, __globals__ 등)
 //   진짜 경계는 `removeNetworkGlobals()`로 JS 전역의 네트워크 API를 지우는 것이다.
 //
@@ -52,6 +55,12 @@ export const STUDENT_FILENAME = '<exec>';
 
 /** interruptBuffer[1]에 넣는 KeyboardInterrupt 이유: 시간 초과 (Node 검증 실행기) */
 export const INTERRUPT_REASON_TIMEOUT = 1;
+
+/** 실행 한 번의 turtle 그리기 명령 상한 (src/lib/pyodide/constants.ts와 같아야 함, §12-Q74 ①). 넘으면 TurtleLimitError */
+export const TURTLE_MAX_COMMANDS = 50_000;
+
+/** turtle shim을 두는 워커 FS 경로 (§2.9) */
+export const TURTLE_PATH = '/pyroad/turtle.py';
 
 /** 입력을 받을 길(JSPI·SW)이 없는 기기에서 input()을 부르면 나는 예외 이름 (src/lib/pyodide/types.ts INPUT_UNAVAILABLE_ERROR) */
 export const INPUT_UNAVAILABLE_ERROR = 'InputUnavailable';
@@ -290,12 +299,40 @@ def seed(value):
     random.seed(value)
 
 
+_turtle_code = None
+_turtle_emit, _turtle_max = __pyroad_turtle_emit, __pyroad_turtle_max
+
+
+def install_turtle(path):
+    # 코드 객체만 한 번 만들어 두고 실행마다 새 모듈로 돌린다 (학생이 바꾼 모듈 속성이 다음 실행에 남지 않게)
+    global _turtle_code
+    with open(path, encoding="utf-8") as f:
+        _turtle_code = compile(f.read(), path, "exec")
+    if "/pyroad" not in sys.path:
+        sys.path.insert(0, "/pyroad")
+
+
+def _fresh_turtle(code):
+    import types
+
+    sys.modules.pop("turtle", None)
+    if _turtle_code is None or "turtle" not in code:
+        return None
+    mod = types.ModuleType("turtle")
+    mod.__file__ = _turtle_code.co_filename
+    sys.modules["turtle"] = mod
+    exec(_turtle_code, mod.__dict__)
+    mod._pyroad_begin(_turtle_emit, _turtle_max)
+    return mod
+
+
 def run(code, stopped):
     # 학생이 바꿔 둔 표준 입출력을 되돌린다
     sys.stdout, sys.stderr, sys.stdin = sys.__stdout__, sys.__stderr__, _stdin
     linecache.cache[FILENAME] = (len(code), None, code.splitlines(True), FILENAME)
     ns = {"__name__": "__main__", "__builtins__": _student_builtins()}
     had_exception, error_type = False, None
+    turtle = _fresh_turtle(code)
     try:
         exec(compile(code, FILENAME, "exec"), ns)
     except SystemExit as e:
@@ -311,6 +348,11 @@ def run(code, stopped):
         had_exception, error_type = True, type(e).__name__
         _write_traceback(e)
     finally:
+        if turtle is not None:
+            try:
+                turtle._pyroad_end()  # 남은 그리기 명령 (멈췄거나 예외가 나도 그때까지의 그림은 보낸다)
+            except BaseException:
+                pass
         _flush()
     return [had_exception, error_type]
 
@@ -365,6 +407,8 @@ def harden():
  *   flushChars?: number,
  *   interactiveInput?: boolean,
  *   readLineSync?: (requestId: string) => null | { kind: 'value', value: string } | { kind: 'stop' },
+ *   turtleSource?: string,
+ *   turtleMaxCommands?: number,
  * }} options interruptBuffer: Node처럼 다른 스레드가 SharedArrayBuffer로 KeyboardInterrupt를 보낼 때 넘김.
  *   `new Int32Array(new SharedArrayBuffer(8))`: [0]에 2(SIGINT)를 넣으면 멈추고, [1]은 이유
  *   (INTERRUPT_REASON_TIMEOUT이면 outcome이 'timeout'). 없으면 이 스레드 전용 버퍼를 만든다
@@ -373,6 +417,7 @@ def harden():
  *   input-request를 보내고 answer를 기다린다(JSPI). false(Node 검증)면 바로 EOF → EOFError.
  *   readLineSync: JSPI가 없을 때 쓰는 동기 채널(SW 동기 XHR, P0-05 ②). 끊겼으면 null을 돌려준다.
  *   createRuntime 뒤에 options에 넣어도 된다(실행 때 읽음)
+ *   turtleSource: turtle shim(public/workers/turtle.py) 내용. 주면 TURTLE_PATH에 설치한다 (P11-02)
  */
 export function createRuntime(pyodide, options) {
   const {
@@ -545,7 +590,20 @@ export function createRuntime(pyodide, options) {
   priv.set('__pyroad_read_line', readLine);
   priv.set('__pyroad_read_stop', READ_STOP);
   priv.set('__pyroad_read_unavailable', READ_UNAVAILABLE);
+  // turtle 명령 청크 (JSON 배열 문자열, P11-02). 실행 중에만 보낸다
+  priv.set('__pyroad_turtle_emit', (chunk) => {
+    if (active) post({ type: 'turtle', id: active.id, chunk });
+  });
+  priv.set(
+    '__pyroad_turtle_max',
+    options.turtleMaxCommands ?? TURTLE_MAX_COMMANDS,
+  );
   pyodide.runPython(PRELUDE, { globals: priv, filename: '<pyroad>' });
+  if (options.turtleSource) {
+    pyodide.FS.mkdirTree('/pyroad');
+    pyodide.FS.writeFile(TURTLE_PATH, options.turtleSource);
+    priv.get('install_turtle')(TURTLE_PATH);
+  }
   const py = {
     run: priv.get('run'),
     seed: priv.get('seed'),
