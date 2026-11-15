@@ -9,6 +9,8 @@
 // - stdout·stderr를 실행 중에 묶어서(batched) 흘려보냄 + 실행당 출력 상한
 // - traceback은 학생 코드(`<exec>`) 줄만, 예외 여부는 done 메시지로 알림(B25 후속)
 // - `time.sleep` 중 멈추기(JSPI가 있으면 Worker를 살린 채 KeyboardInterrupt)
+// - `input()`·`sys.stdin` (P11-01): 입력 시나리오(CI) → 대화형 채널(JSPI `run_sync` 또는 SW 동기 XHR) → 없으면 안내.
+//   입력 대기 중 멈추기도 Worker를 살린 채 KeyboardInterrupt
 // - Python에서 `js`·`pyodide_js` 모듈을 뗌. 단 Python 쪽 차단은 우회되므로(gc, __globals__ 등)
 //   진짜 경계는 `removeNetworkGlobals()`로 JS 전역의 네트워크 API를 지우는 것이다.
 //
@@ -50,6 +52,13 @@ export const STUDENT_FILENAME = '<exec>';
 
 /** interruptBuffer[1]에 넣는 KeyboardInterrupt 이유: 시간 초과 (Node 검증 실행기) */
 export const INTERRUPT_REASON_TIMEOUT = 1;
+
+/** 입력을 받을 길(JSPI·SW)이 없는 기기에서 input()을 부르면 나는 예외 이름 (src/lib/pyodide/types.ts INPUT_UNAVAILABLE_ERROR) */
+export const INPUT_UNAVAILABLE_ERROR = 'InputUnavailable';
+
+// readLine()이 Python에 돌려주는 신호. 답은 늘 줄바꿈으로 끝나므로 이 값과 겹치지 않는다
+const READ_STOP = '\0stop';
+const READ_UNAVAILABLE = '\0unavailable';
 
 export const OUTPUT_LIMIT_NOTICE =
   '\n[출력이 너무 많아서 여기서 멈췄어요. 끝없이 반복되는 print가 있는지 확인해 보세요!]\n';
@@ -163,7 +172,7 @@ export function blockedImportMessage(name) {
 // 비공개 dict에서 한 번 실행되는 Python 코드. 학생 namespace에는 아무 이름도 넣지 않는다.
 // (클래스 안의 __이름은 name mangling되므로 쓰지 않음)
 const PRELUDE = String.raw`
-import sys, builtins, linecache, traceback
+import io, sys, builtins, linecache, traceback
 import time as _time
 from pyodide.ffi import run_sync as _run_sync, can_run_sync as _can_run_sync
 
@@ -207,6 +216,43 @@ def _sleep(secs):
 _time.sleep = _sleep
 
 
+class InputUnavailable(Exception):
+    pass
+
+
+InputUnavailable.__module__ = "builtins"
+_read_line = __pyroad_read_line
+_READ_STOP, _READ_UNAVAILABLE = __pyroad_read_stop, __pyroad_read_unavailable
+
+
+class _Stdin(io.TextIOBase):
+    # 학생 코드의 sys.stdin. 내장 input()도 tty가 아니면 sys.stdin.readline()을 부른다 (P11-01)
+    def readable(self):
+        return True
+
+    def readline(self, size=-1):
+        jspi = bool(_can_run_sync())
+        line = _read_line(jspi)
+        if not isinstance(line, str):
+            # JSPI: 답을 기다리는 동안 Worker 이벤트 루프가 돌아 answer·stop 메시지를 받는다
+            line = _run_sync(line)
+        if line == _READ_STOP:
+            raise KeyboardInterrupt
+        if line == _READ_UNAVAILABLE:
+            raise InputUnavailable("이 브라우저에서는 input()으로 답을 받을 수 없어요")
+        return line
+
+    def read(self, size=-1):
+        # shortcut: 입력 끝(EOF)까지 한 줄씩 모음. 대화형에서는 학생이 끝을 보낼 길이 없어 시나리오(CI)용
+        lines = []
+        while (line := self.readline()):
+            lines.append(line)
+        return "".join(lines)
+
+
+_stdin = _Stdin()
+
+
 def _keep_student_frames(te, seen):
     if te is None or id(te) in seen:
         return
@@ -246,7 +292,7 @@ def seed(value):
 
 def run(code, stopped):
     # 학생이 바꿔 둔 표준 입출력을 되돌린다
-    sys.stdout, sys.stderr, sys.stdin = sys.__stdout__, sys.__stderr__, sys.__stdin__
+    sys.stdout, sys.stderr, sys.stdin = sys.__stdout__, sys.__stderr__, _stdin
     linecache.cache[FILENAME] = (len(code), None, code.splitlines(True), FILENAME)
     ns = {"__name__": "__main__", "__builtins__": _student_builtins()}
     had_exception, error_type = False, None
@@ -317,10 +363,16 @@ def harden():
  *   maxCaptureLength?: number,
  *   flushIntervalMs?: number,
  *   flushChars?: number,
+ *   interactiveInput?: boolean,
+ *   readLineSync?: (requestId: string) => null | { kind: 'value', value: string } | { kind: 'stop' },
  * }} options interruptBuffer: Node처럼 다른 스레드가 SharedArrayBuffer로 KeyboardInterrupt를 보낼 때 넘김.
  *   `new Int32Array(new SharedArrayBuffer(8))`: [0]에 2(SIGINT)를 넣으면 멈추고, [1]은 이유
  *   (INTERRUPT_REASON_TIMEOUT이면 outcome이 'timeout'). 없으면 이 스레드 전용 버퍼를 만든다
  *   (출력 상한을 넘었을 때 실행을 멈추는 데 씀)
+ *   interactiveInput: 브라우저처럼 사람이 답하는 곳이면 true. 입력 시나리오가 없을 때 input()이
+ *   input-request를 보내고 answer를 기다린다(JSPI). false(Node 검증)면 바로 EOF → EOFError.
+ *   readLineSync: JSPI가 없을 때 쓰는 동기 채널(SW 동기 XHR, P0-05 ②). 끊겼으면 null을 돌려준다.
+ *   createRuntime 뒤에 options에 넣어도 된다(실행 때 읽음)
  */
 export function createRuntime(pyodide, options) {
   const {
@@ -329,6 +381,7 @@ export function createRuntime(pyodide, options) {
     flushIntervalMs = 30,
     flushChars = 4096,
   } = options;
+  const { interactiveInput = false } = options;
   const interrupt = options.interruptBuffer ?? new Int32Array(1);
   pyodide.setInterruptBuffer(interrupt);
   const now = () => performance.now();
@@ -337,6 +390,10 @@ export function createRuntime(pyodide, options) {
   let active = null;
   /** @type {null | { resolve: (v: string) => void, timer: any }} */
   let sleeper = null;
+  /** JSPI input() 대기. answer(requestId 같음)나 stop이 오면 풀린다 */
+  /** @type {null | { requestId: string, resolve: (v: string) => void }} */
+  let inputWaiter = null;
+  let inputSeq = 0;
 
   // ---- 출력 스트리밍 -------------------------------------------------------
   const decoders = { stdout: new TextDecoder(), stderr: new TextDecoder() };
@@ -406,20 +463,59 @@ export function createRuntime(pyodide, options) {
   });
   pyodide.setStdout(writer('stdout'));
   pyodide.setStderr(writer('stderr'));
-  pyodide.setStdin({
-    // 입력 시나리오(CI: 미리 정한 답, P11-05)가 있으면 한 줄씩, 없으면 EOF → EOFError
-    // (브라우저 input()은 P11-01에서 input-request / answer로 붙임)
-    stdin: () => {
-      const line = active?.stdin?.shift();
-      return line === undefined ? undefined : `${line}\n`;
-    },
-    isatty: false,
-  });
+  // 학생 코드의 sys.stdin은 Python _Stdin(→ readLine)이다. 진짜 표준 입력은 늘 EOF
+  pyodide.setStdin({ stdin: () => undefined, isatty: false });
+
+  // ---- 입력 (P11-01) ---------------------------------------------------------
+  /**
+   * Python _Stdin.readline()이 부른다. 문자열(한 줄, 끝이면 '') 또는 JSPI면 그 문자열의 Promise.
+   * 순서: 입력 시나리오(CI, P11-05) → 대화형(JSPI 기다리기 / SW 동기 XHR) → 길이 없으면 READ_UNAVAILABLE
+   */
+  function readLine(jspi) {
+    if (!active || active.stopReason) return READ_STOP;
+    if (active.stdin) {
+      const line = active.stdin.shift();
+      return line === undefined ? '' : `${line}\n`;
+    }
+    if (!interactiveInput) return '';
+    // 실행 때 읽는다: 브라우저 Worker는 JSPI가 없다는 걸 안 뒤(canRunSync) SW 채널을 확인하고 넣는다
+    const readLineSync = options.readLineSync;
+    if (!jspi && !readLineSync) return READ_UNAVAILABLE;
+    // 프롬프트("이름? ")가 입력 칸보다 먼저 보이게
+    flush();
+    const requestId = `${active.id}:${++inputSeq}`;
+    const request = { type: 'input-request', id: active.id, requestId };
+    if (jspi) {
+      return new Promise((resolve) => {
+        inputWaiter = { requestId, resolve };
+        post({ ...request, channel: 'jspi' });
+      });
+    }
+    post({ ...request, channel: 'sw' });
+    const reply = readLineSync(requestId);
+    if (reply?.kind === 'value') return `${firstLine(reply.value)}\n`;
+    if (reply?.kind === 'stop') {
+      requestStop('stop');
+      return READ_STOP;
+    }
+    return READ_UNAVAILABLE;
+  }
+
+  function answer(msg) {
+    if (!inputWaiter || msg.requestId !== inputWaiter.requestId) return;
+    const { resolve } = inputWaiter;
+    inputWaiter = null;
+    resolve(`${firstLine(msg.value)}\n`);
+  }
 
   // ---- 멈추기 --------------------------------------------------------------
   function requestStop(reason) {
     if (!active) return;
     active.stopReason ??= reason;
+    if (inputWaiter) {
+      inputWaiter.resolve(READ_STOP);
+      inputWaiter = null;
+    }
     if (sleeper) {
       clearTimeout(sleeper.timer);
       sleeper.resolve('stopped');
@@ -446,6 +542,9 @@ export function createRuntime(pyodide, options) {
   priv.set('__pyroad_filename', STUDENT_FILENAME);
   priv.set('__pyroad_blocked', pyodide.toPy(BLOCKED_MODULES));
   priv.set('__pyroad_js_sleep', jsSleep);
+  priv.set('__pyroad_read_line', readLine);
+  priv.set('__pyroad_read_stop', READ_STOP);
+  priv.set('__pyroad_read_unavailable', READ_UNAVAILABLE);
   pyodide.runPython(PRELUDE, { globals: priv, filename: '<pyroad>' });
   const py = {
     run: priv.get('run'),
@@ -530,6 +629,7 @@ export function createRuntime(pyodide, options) {
     resetInterrupt();
 
     const end = () => {
+      inputWaiter = null;
       flush();
       const state = active;
       active = null;
@@ -594,8 +694,7 @@ export function createRuntime(pyodide, options) {
         if (active && (!msg.id || msg.id === active.id)) requestStop('stop');
         return;
       case 'answer':
-        // P11-01: input-request에 대한 답. 지금은 input()을 브라우저에서 받지 않는다
-        return;
+        return answer(msg);
     }
   }
 
@@ -607,6 +706,11 @@ export function createRuntime(pyodide, options) {
       return active !== null;
     },
   };
+}
+
+/** 답은 한 줄만 (입력 칸은 줄바꿈을 보내지 않지만 메시지는 믿지 않는다) */
+function firstLine(value) {
+  return String(value ?? '').split(/\r?\n/, 1)[0];
 }
 
 /** Pyodide·Python 버전 정보 */

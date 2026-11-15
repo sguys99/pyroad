@@ -10,8 +10,17 @@ export const PYODIDE_SELF_HOST_PATH = `/pyodide/${PYODIDE_VERSION}/`;
 /** 자체 호스팅이 막혔을 때만 쓰는 폴백 */
 export const PYODIDE_CDN_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
+/**
+ * 실행기 경로 (P11-01). 파일은 `public/workers/`에 있고 next.config.ts rewrites로 이 경로에서 서빙한다.
+ * input() 폴백 SW의 scope라 Worker도 이 경로에서 띄워야 SW가 동기 XHR을 붙잡을 수 있다
+ */
+export const PYODIDE_RUNNER_PATH = '/pyodide/runner/';
+
 /** module Worker 스크립트 (`new Worker(url, { type: 'module' })`) */
-export const PYODIDE_WORKER_URL = '/workers/pyodide-worker.mjs';
+export const PYODIDE_WORKER_URL = `${PYODIDE_RUNNER_PATH}pyodide-worker.mjs`;
+
+/** input() 폴백 Service Worker (JSPI 없는 브라우저만 등록, scope = PYODIDE_RUNNER_PATH) */
+export const INPUT_SW_URL = `${PYODIDE_RUNNER_PATH}input-sw.js`;
 
 export const EXECUTION_TIMEOUT_MS = 5000;
 

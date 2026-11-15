@@ -4,7 +4,7 @@ import { renderHook, act } from '@testing-library/react';
 
 import { usePyodide, type RunResult } from '../usePyodide';
 import { PYODIDE_WORKER_URL } from '../constants';
-import type { WorkerRequest, WorkerResponse } from '../types';
+import type { InputRequest, WorkerRequest, WorkerResponse } from '../types';
 import { reportPyodideWorkerError } from '../workerErrorReport';
 
 vi.mock('../workerErrorReport', async (importOriginal) => ({
@@ -52,6 +52,7 @@ class FakeWorker {
         python: '3.14.2',
         source: 'self',
         jspi: true,
+        input: 'jspi',
         loadMs: 10,
         removedGlobals: ['fetch'],
       },
@@ -450,5 +451,140 @@ describe('usePyodide: Worker 정리 (B14)', () => {
     }
     expect(FakeWorker.instances).toHaveLength(4);
     expect(FakeWorker.instances.filter((w) => !w.terminated)).toHaveLength(1);
+  });
+});
+
+describe('usePyodide: input() (P11-01)', () => {
+  const done = (id: string) =>
+    ({
+      type: 'done',
+      id,
+      outcome: 'ok',
+      hadException: false,
+      errorType: null,
+      truncated: false,
+      ms: 1,
+    }) as const;
+
+  it('JSPI: 요청을 넘기고 답은 Worker에 answer로, 답한 말은 stdout 자리와 함께 결과에', async () => {
+    const { result } = setup();
+    const worker = latest();
+    const asked: InputRequest[] = [];
+    const promise = startRun(result, 'input()', {
+      onInputRequest: (req) => asked.push(req),
+    });
+    const { id } = worker.lastRun();
+    worker.emit({ type: 'stdout', id, text: '이름? ' });
+    worker.emit({
+      type: 'input-request',
+      id,
+      requestId: `${id}:1`,
+      channel: 'jspi',
+    });
+    expect(asked).toHaveLength(1);
+    asked[0].answer('철수');
+    asked[0].answer('두 번'); // 같은 요청에 두 번은 무시
+    expect(worker.posted.filter((m) => m.type === 'answer')).toEqual([
+      { type: 'answer', id, requestId: `${id}:1`, value: '철수' },
+    ]);
+    worker.emit({ type: 'stdout', id, text: '안녕 철수\n' });
+    worker.emit(done(id));
+    await expect(promise).resolves.toMatchObject({
+      success: true,
+      stdout: '이름? 안녕 철수\n',
+      inputs: [{ at: 4, value: '철수' }],
+    });
+  });
+
+  it('답을 기다리는 동안은 시간 제한이 멈추고, 답하면 다시 잰다', async () => {
+    vi.useFakeTimers();
+    const { result } = setup();
+    const worker = latest();
+    let req!: InputRequest;
+    void startRun(result, 'input()', { onInputRequest: (r) => (req = r) });
+    const { id } = worker.lastRun();
+    worker.emit({
+      type: 'input-request',
+      id,
+      requestId: `${id}:1`,
+      channel: 'jspi',
+    });
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(worker.posted.some((m) => m.type === 'stop')).toBe(false);
+    req.answer('a');
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(worker.posted.some((m) => m.type === 'stop')).toBe(true);
+  });
+
+  it('입력 대기 중 멈추기는 Worker에 stop (JSPI)', async () => {
+    const { result } = setup();
+    const worker = latest();
+    let req!: InputRequest;
+    const promise = startRun(result, 'input()', {
+      onInputRequest: (r) => (req = r),
+    });
+    const { id } = worker.lastRun();
+    worker.emit({
+      type: 'input-request',
+      id,
+      requestId: `${id}:1`,
+      channel: 'jspi',
+    });
+    req.stop();
+    expect(worker.posted.at(-1)).toEqual({ type: 'stop', id });
+    worker.emit({ ...done(id), outcome: 'stopped' });
+    await expect(promise).resolves.toMatchObject({ isStopped: true });
+  });
+
+  it('JSPI가 없으면 SW를 등록한 뒤 Worker를 띄우고, 답·멈추기는 SW로', async () => {
+    const swPosted: unknown[] = [];
+    const active = {
+      state: 'activated',
+      postMessage: (m: unknown) => swPosted.push(m),
+    };
+    const register = vi.fn(async () => ({ active }));
+    vi.stubGlobal('WebAssembly', {});
+    Object.defineProperty(navigator, 'serviceWorker', {
+      value: { register },
+      configurable: true,
+    });
+    try {
+      const { result } = renderHook(() => usePyodide({ timeoutMs: 1000 }));
+      expect(FakeWorker.instances).toHaveLength(0);
+      await act(async () => {});
+      expect(register).toHaveBeenCalledWith('/pyodide/runner/input-sw.js', {
+        scope: '/pyodide/runner/',
+      });
+      const worker = latest();
+      worker.ready();
+      const reqs: InputRequest[] = [];
+      void startRun(result, 'input()', { onInputRequest: (r) => reqs.push(r) });
+      const { id } = worker.lastRun();
+      worker.emit({
+        type: 'input-request',
+        id,
+        requestId: `${id}:1`,
+        channel: 'sw',
+      });
+      reqs[0].answer('42');
+      worker.emit({
+        type: 'input-request',
+        id,
+        requestId: `${id}:2`,
+        channel: 'sw',
+      });
+      reqs[1].stop();
+      expect(swPosted).toEqual([
+        { id: `${id}:1`, kind: 'value', value: '42' },
+        { id: `${id}:2`, kind: 'stop' },
+      ]);
+      expect(worker.posted.some((m) => m.type === 'answer')).toBe(false);
+    } finally {
+      delete (navigator as { serviceWorker?: unknown }).serviceWorker;
+    }
   });
 });

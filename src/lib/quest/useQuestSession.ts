@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePyodideRuntime } from '@/lib/pyodide/PyodideProvider';
-import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
+import {
+  createLiveOutputStore,
+  liveRunOptions,
+} from '@/lib/pyodide/liveOutput';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { useTutor, TutorRateLimitError } from '@/lib/tutor/useTutor';
 import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
@@ -827,7 +830,7 @@ export function useQuestSession({
       // 떠 있는 버튼 대신 결과 쪽 자동 이동으로 푼다. 결과 쪽에는 실행 중 멈추기 버튼이 있다 (P6-11)
       setTab('result');
 
-      const result = await runCode(codeToRun, { onStdout: liveOutput.append });
+      const result = await runCode(codeToRun, liveRunOptions(liveOutput));
       if (!aliveRef.current) return 'stay';
       setRunResult(result);
       setLastRunCode(result.isStopped ? null : codeToRun);
@@ -1178,7 +1181,7 @@ export function useQuestSession({
 
       // 정답 코드 자동 실행
       liveOutput.reset();
-      const result = await runCode(solution, { onStdout: liveOutput.append });
+      const result = await runCode(solution, liveRunOptions(liveOutput));
       if (!aliveRef.current) return;
       setRunResult(result);
       setTab('result');

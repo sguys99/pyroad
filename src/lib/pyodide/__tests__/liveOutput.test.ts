@@ -8,7 +8,7 @@ describe('createLiveOutputStore (실행 중 stdout)', () => {
     store.subscribe(listener);
     store.append('안녕\n');
     store.append('파이뱀\n');
-    expect(store.getSnapshot()).toEqual({
+    expect(store.getSnapshot()).toMatchObject({
       text: '안녕\n파이뱀\n',
       clipped: false,
     });
@@ -19,7 +19,7 @@ describe('createLiveOutputStore (실행 중 stdout)', () => {
     const store = createLiveOutputStore(5);
     store.append('123');
     store.append('4567');
-    expect(store.getSnapshot()).toEqual({ text: '12345', clipped: true });
+    expect(store.getSnapshot()).toMatchObject({ text: '12345', clipped: true });
     const before = store.getSnapshot();
     store.append('8');
     expect(store.getSnapshot()).toBe(before);
@@ -45,5 +45,29 @@ describe('createLiveOutputStore (실행 중 stdout)', () => {
     expect(store.getSnapshot()).toBe(store.getSnapshot());
     store.append('x');
     expect(store.getSnapshot()).toBe(store.getSnapshot());
+  });
+
+  it('input() 대기: ask → waiting, answer는 그때 글자 자리와 함께 기록하고 요청에 전달 (P11-01)', () => {
+    const store = createLiveOutputStore();
+    const answer = vi.fn();
+    const stop = vi.fn();
+    store.append('이름? ');
+    store.ask({ answer, stop });
+    expect(store.getSnapshot().waiting).toBe(true);
+    store.answer('철수');
+    expect(answer).toHaveBeenCalledWith('철수');
+    expect(store.getSnapshot()).toMatchObject({
+      waiting: false,
+      inputs: [{ at: 4, value: '철수' }],
+    });
+    // 기다리지 않을 때 답은 무시, 멈추기는 이번 실행에 그대로 간다
+    store.answer('또');
+    expect(answer).toHaveBeenCalledTimes(1);
+    store.stopInput();
+    expect(stop).toHaveBeenCalledTimes(1);
+    store.reset();
+    store.stopInput();
+    expect(stop).toHaveBeenCalledTimes(1);
+    expect(store.getSnapshot().inputs).toEqual([]);
   });
 });

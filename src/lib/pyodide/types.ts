@@ -7,7 +7,8 @@
 //   worker → main: init-status(loading → ready | error)
 //                  stdout* / stderr* (실행 중 스트리밍, 묶어서 보냄) → done
 //                  run-error (실행기 내부 오류. 이때는 done이 오지 않음)
-//                  input-request (P11-01에서 사용. 지금은 보내지 않음)
+//                  input-request (input() 대기, P11-01) → main이 answer로 답함
+//                  (SW 채널이면 Worker가 동기 XHR로 막혀 있어 answer·stop을 SW에 보낸다)
 // 확장 예정: turtle 명령 청크 `{ type: 'turtle', id, chunk }` (P11-02)
 
 export type WorkerRequest =
@@ -23,8 +24,14 @@ export type WorkerRequest =
     }
   /** 실행 멈추기. time.sleep 대기 중이면(JSPI) Worker를 살린 채 끝나고, CPU 루프면 응답이 없음 → terminate */
   | { type: 'stop'; id?: string }
-  /** input-request에 대한 답 (P11-01) */
-  | { type: 'answer'; id: string; value: string };
+  /** input-request에 대한 답 (P11-01, JSPI 채널). id = 실행 id, requestId = 요청마다 다름 */
+  | { type: 'answer'; id: string; requestId: string; value: string };
+
+/** input()으로 답을 받는 길 (P11-01). none = JSPI도 SW도 없음 → input()은 InputUnavailable */
+export type InputChannel = 'jspi' | 'sw' | 'none';
+
+/** 입력 길이 없을 때 input()이 내는 예외 이름 (pyodide-core.mjs INPUT_UNAVAILABLE_ERROR) */
+export const INPUT_UNAVAILABLE_ERROR = 'InputUnavailable';
 
 /** 실행이 어떻게 끝났는지 */
 export type RunOutcome =
@@ -52,6 +59,8 @@ export interface WorkerRuntimeInfo {
   source: 'self' | 'cdn' | 'npm';
   /** run_sync를 쓸 수 있는지 (JSPI). true면 time.sleep 중 멈추기가 Worker 재시작 없이 됨 */
   jspi: boolean;
+  /** input()으로 답을 받는 길 (Node 검증 실행기는 입력 시나리오만 써서 none) */
+  input: InputChannel;
   loadMs: number;
   /** 로딩 뒤 Worker 전역에서 지운 네트워크 API */
   removedGlobals: string[];
@@ -81,6 +90,26 @@ export type WorkerResponse =
     }
   | { type: 'stdout'; id: string; text: string }
   | { type: 'stderr'; id: string; text: string }
-  | { type: 'input-request'; id: string; prompt: string }
+  | {
+      type: 'input-request';
+      id: string;
+      requestId: string;
+      /** 답을 보낼 곳: jspi = Worker에 answer, sw = 등록한 Service Worker에 postMessage */
+      channel: Exclude<InputChannel, 'none'>;
+    }
   | RunDoneMessage
   | { type: 'run-error'; id: string; error: string };
+
+/** input()에 학생이 답한 말 (P11-01). at = 답할 때까지 나온 stdout 길이 (프롬프트 바로 뒤 자리) */
+export interface RunInput {
+  at: number;
+  value: string;
+}
+
+/** input()이 답을 기다릴 때 받는 손잡이 (P11-01). 프롬프트는 이미 stdout으로 왔다 */
+export interface InputRequest {
+  /** 답 보내기 (한 줄). 같은 요청에 두 번 보내면 무시 */
+  answer: (value: string) => void;
+  /** 입력 대기 중 멈추기 (Worker를 살린 채 KeyboardInterrupt) */
+  stop: () => void;
+}

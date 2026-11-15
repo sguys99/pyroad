@@ -63,6 +63,8 @@ export const IDLE_LOOPS = [
   'wn-chest',
   // 받을 수 있는 업적 칸의 반짝 별 (achievementBook.css, P8-10). 받을 수 있다는 정보는 금색 테두리·"받기" 버튼이 함
   'ab-glint',
+  // input() 대답을 기다리는 점 숨쉬기 (outputPanel.css, P11-01). 기다린다는 정보는 딱지 글자·입력 칸이 함
+  'qo-wait',
 ];
 
 export interface RunningLoop {

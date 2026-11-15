@@ -75,7 +75,9 @@ test.describe('Python 실행기', () => {
     // Worker 의 Resource Timing 을 직접 읽는다. CDN(jsDelivr) 폴백 없이 /pyodide/<버전>/ 에서
     const worker = page
       .workers()
-      .find((w) => w.url().startsWith(`${baseURL}/workers/pyodide-worker`));
+      .find((w) =>
+        w.url().startsWith(`${baseURL}/pyodide/runner/pyodide-worker`),
+      );
     expect(worker, 'Pyodide module Worker').toBeTruthy();
     const loaded = await worker!.evaluate(() =>
       performance.getEntriesByType('resource').map((e) => e.name),
@@ -109,6 +111,57 @@ test.describe('Python 실행기', () => {
     await expect(page.getByTestId('stop-button')).toBeHidden();
 
     // 바로 다시 실행할 수 있다
+    await runCode(page, quest.solution);
+    await expect(output).toHaveAttribute('data-state', 'success');
+  });
+
+  test('input(): 프롬프트가 먼저 보이고, 입력 칸에 답하면 말풍선으로 남는다 (P11-01)', async ({
+    page,
+  }) => {
+    await runCode(
+      page,
+      'print("안녕!")\nname = input("이름이 뭐야? ")\nage = int(input("몇 살? "))\nprint(name + "는", age + 1, "살이 될 거야")',
+    );
+    const output = outputPanel(page);
+    const field = page.locator('[data-testid="input-reply-field"]:visible');
+    await expect(field).toBeFocused();
+    await expect(output).toContainText('대답을 기다려요');
+    // 프롬프트는 답하기 전에 이미 보인다 (stdout 스트리밍)
+    await expect(
+      page.locator('[data-testid="live-output"]:visible'),
+    ).toContainText('이름이 뭐야?');
+    await field.fill('파이');
+    await field.press('Enter');
+    await expect(output).toContainText('몇 살?');
+    await field.fill('9');
+    await page.locator('[data-testid="input-reply-send"]:visible').click();
+
+    await expect(output).toHaveAttribute('data-state', 'success');
+    await expect(output).toContainText('파이는 10 살이 될 거야');
+    // 답은 stdout이 아니라 말풍선으로 (프롬프트 뒤 자리에)
+    await expect(output.getByTestId('output-answer')).toHaveText([
+      '내 대답: 파이',
+      '내 대답: 9',
+    ]);
+  });
+
+  test('input() 대기 중 멈추기는 실행기를 다시 띄우지 않고 바로 멈춘다 (P11-01)', async ({
+    page,
+  }) => {
+    await runCode(page, 'while True:\n    input("또? ")');
+    const output = outputPanel(page);
+    const field = page.locator('[data-testid="input-reply-field"]:visible');
+    await field.fill('응');
+    await field.press('Enter');
+    await expect(output.getByTestId('output-answer')).toHaveCount(1);
+    await expect(field).toBeFocused();
+    await page.locator('[data-testid="input-reply-stop"]:visible').click();
+    await expect(output).toHaveAttribute('data-state', 'stopped');
+    // Worker를 살린 채 KeyboardInterrupt → 재준비 없이 바로 다시 실행
+    await expect(
+      page.locator('[data-testid="runner-waking"]:visible'),
+    ).toHaveCount(0);
+    expect((await runnerStates()).join(' → ')).not.toContain('restarting');
     await runCode(page, quest.solution);
     await expect(output).toHaveAttribute('data-state', 'success');
   });

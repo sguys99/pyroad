@@ -14,15 +14,22 @@ import {
   Flag,
   Hand,
   Hourglass,
+  Keyboard,
   Loader2,
   MessageCircleQuestion,
+  MessageCircleMore,
   PencilLine,
+  RefreshCw,
   Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
-import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
+import type {
+  LiveOutputSnapshot,
+  LiveOutputStore,
+} from '@/lib/pyodide/liveOutput';
+import { INPUT_UNAVAILABLE_ERROR, type RunInput } from '@/lib/pyodide/types';
 import type { ValidationType } from '@/lib/quest/validation';
 import { errorLineFromStderr } from '@/lib/editor/stderrLine';
 import { DURATION } from '@/lib/motion/tokens';
@@ -39,41 +46,57 @@ import {
   errorSummary,
   mismatchTip,
   outputLines,
+  transcriptRows,
 } from './outputSlip';
+import { InputReply } from './InputReply';
 import './outputPanel.css';
 
-const NO_LIVE_OUTPUT = { text: '', clipped: false };
+const NO_LIVE_OUTPUT: LiveOutputSnapshot = {
+  text: '',
+  clipped: false,
+  inputs: [],
+  waiting: false,
+};
 const subscribeNothing = () => () => {};
 const getNoLiveOutput = () => NO_LIVE_OUTPUT;
 
+/** 실행 중 출력 저장소 구독 (store가 없으면 빈 값) */
+function useLive(store?: LiveOutputStore): LiveOutputSnapshot {
+  return useSyncExternalStore(
+    store?.subscribe ?? subscribeNothing,
+    store?.getSnapshot ?? getNoLiveOutput,
+    getNoLiveOutput,
+  );
+}
+
 /**
  * 나온 글자 줄들. 줄마다 쪽지 카드가 튀어나온다(앞 POP_LINES줄만, 연출 단계는 outputPanel.css).
+ * input()에 답한 말은 프롬프트 줄 바로 뒤에 내 말풍선으로 끼운다 (P11-01, 대화처럼).
  * 실행 중(store)과 끝난 뒤(text)를 같은 자리에서 그려서, 실시간으로 이미 나온 줄은 결과가 와도 다시 튀지 않는다.
  * 실행 중에는 이 컴포넌트만 출력 조각마다 다시 그린다 (셸은 그대로)
  */
 function OutputLines({
   store,
   text,
+  inputs,
 }: {
   store?: LiveOutputStore;
   text: string;
+  inputs?: readonly RunInput[];
 }) {
-  const live = useSyncExternalStore(
-    store?.subscribe ?? subscribeNothing,
-    store?.getSnapshot ?? getNoLiveOutput,
-    getNoLiveOutput,
-  );
+  const live = useLive(store);
   const shown = store ? live.text : text;
+  const answers = store ? live.inputs : inputs;
   const listRef = useRef<HTMLOListElement>(null);
 
   // 실행 중 새 출력이 오면 맨 아래로 (긴 반복문 출력도 마지막 줄이 보이게)
   useEffect(() => {
     const list = listRef.current;
     if (store && list) list.scrollTop = list.scrollHeight;
-  }, [store, shown]);
+  }, [store, shown, answers]);
 
-  const lines = outputLines(shown);
-  if (!lines.length)
+  const rows = transcriptRows(shown, answers);
+  if (!rows.length)
     return store ? (
       <p className="qo-empty">주문을 돌리는 중이에요. 글자를 기다려요…</p>
     ) : null;
@@ -84,16 +107,28 @@ function OutputLines({
         data-testid={store ? 'live-output' : undefined}
         className="qo-lines"
       >
-        {lines.map((line, i) => (
-          <li
-            // 줄 번호가 곧 자리: 새 줄만 새로 그려져 앞줄 연출이 다시 돌지 않는다
-            key={i}
-            className={cn('qo-line font-mono', i < POP_LINES && 'qo-pop')}
-            style={{ '--i': i } as CSSProperties}
-          >
-            {line || ' '}
-          </li>
-        ))}
+        {rows.map((row, i) =>
+          row.answer ? (
+            <li
+              // 줄 번호가 곧 자리: 새 줄만 새로 그려져 앞줄 연출이 다시 돌지 않는다
+              key={i}
+              className={cn('qo-answer', i < POP_LINES && 'qo-pop')}
+              style={{ '--i': i } as CSSProperties}
+              data-testid="output-answer"
+            >
+              <span className="sr-only">내 대답: </span>
+              <span className="qo-answer-bubble">{row.text || ' '}</span>
+            </li>
+          ) : (
+            <li
+              key={i}
+              className={cn('qo-line font-mono', i < POP_LINES && 'qo-pop')}
+              style={{ '--i': i } as CSSProperties}
+            >
+              {row.text || ' '}
+            </li>
+          ),
+        )}
       </ol>
       {store && live.clipped && (
         <p className="qo-note">출력이 너무 많아서 앞부분만 보여 줘요.</p>
@@ -102,7 +137,7 @@ function OutputLines({
   );
 }
 
-type Tone = 'idle' | 'live' | 'good' | 'diff' | 'bug' | 'calm';
+type Tone = 'idle' | 'live' | 'ask' | 'good' | 'diff' | 'bug' | 'calm';
 
 interface SlipProps {
   state: string;
@@ -111,6 +146,8 @@ interface SlipProps {
   chip?: ReactNode;
   /** 나온 글자 (끝난 뒤) */
   text?: string;
+  /** input()에 답한 말 (끝난 뒤, P11-01) */
+  inputs?: readonly RunInput[];
   /** 실행 중 실시간 출력 */
   store?: LiveOutputStore;
   children?: ReactNode;
@@ -125,6 +162,7 @@ function Slip({
   verdict,
   chip,
   text = '',
+  inputs,
   store,
   children,
   after,
@@ -145,7 +183,7 @@ function Slip({
           </span>
           {chip}
         </div>
-        <OutputLines store={store} text={text} />
+        <OutputLines store={store} text={text} inputs={inputs} />
         {children}
       </div>
       {after}
@@ -167,6 +205,48 @@ function Chip({
       {icon}
       {children}
     </span>
+  );
+}
+
+/** 실행 중 딱지: input()이 기다리면 "대답을 기다려요" (P11-01). 저장소를 스스로 구독해 쪽지는 다시 그리지 않는다 */
+function LiveChip({ store }: { store?: LiveOutputStore }) {
+  const live = useLive(store);
+  return live.waiting ? (
+    <Chip tone="ask" icon={<MessageCircleMore aria-hidden />}>
+      대답을 기다려요
+    </Chip>
+  ) : (
+    <Chip
+      tone="live"
+      icon={
+        <Loader2 aria-hidden className="animate-spin reduced:animate-none" />
+      }
+    >
+      돌아가는 중
+    </Chip>
+  );
+}
+
+/**
+ * 실행 중 대화 입력줄 (P11-01). 한 번 물어본 실행은 끝날 때까지 칸을 남겨 둔다
+ * (다음 질문 사이에 칸이 사라졌다 나타나며 휴대폰 키보드가 닫히지 않게)
+ */
+function LiveReply({
+  store,
+  autoFocus,
+}: {
+  store?: LiveOutputStore;
+  autoFocus: boolean;
+}) {
+  const live = useLive(store);
+  if (!store || (!live.waiting && live.inputs.length === 0)) return null;
+  return (
+    <InputReply
+      waiting={live.waiting}
+      onAnswer={store.answer}
+      onStop={store.stopInput}
+      autoFocus={autoFocus}
+    />
   );
 }
 
@@ -212,6 +292,8 @@ export interface OutputPanelProps {
   reward?: QuestReward | null;
   /** 오류·출력이 다를 때 "파이뱀에게 더 물어보기" (Q56: AI 피드백은 자동으로 부르지 않고 이 버튼으로만) */
   onAskTutor?: () => void;
+  /** input()이 물으면 입력 칸으로 포커스 (기본 true, 카탈로그 견본만 끔) */
+  inputAutoFocus?: boolean;
 }
 
 /**
@@ -314,6 +396,7 @@ export function OutputPanel({
   restarting = false,
   reward = null,
   onAskTutor,
+  inputAutoFocus = true,
 }: OutputPanelProps) {
   const bugFixed = useBugFixed(result);
   const passed = !isRunning && !!result?.success && !!validationResult?.passed;
@@ -324,21 +407,11 @@ export function OutputPanel({
       <Slip
         state="running"
         tone="live"
-        chip={
-          <Chip
-            tone="live"
-            icon={
-              <Loader2
-                aria-hidden
-                className="animate-spin reduced:animate-none"
-              />
-            }
-          >
-            돌아가는 중
-          </Chip>
-        }
+        chip={<LiveChip store={liveOutput} />}
         store={liveOutput}
-      />
+      >
+        <LiveReply store={liveOutput} autoFocus={inputAutoFocus} />
+      </Slip>
     );
   }
 
@@ -389,6 +462,7 @@ export function OutputPanel({
       <Slip
         state={state}
         text={result.stdout}
+        inputs={result.inputs}
         tone="calm"
         chip={
           <Chip tone="calm" icon={icon}>
@@ -402,6 +476,44 @@ export function OutputPanel({
     );
   }
 
+  // input()을 받을 길이 없는 기기 (JSPI·SW 모두 없음, §12-Q74): 버그가 아니라 브라우저 탓이라 차분하게 + 새로고침·Safari 안내
+  if (result.errorType === INPUT_UNAVAILABLE_ERROR) {
+    return (
+      <Slip
+        state="input-unavailable"
+        text={result.stdout}
+        tone="calm"
+        chip={
+          <Chip tone="calm" icon={<Keyboard aria-hidden />}>
+            대답을 받을 수 없어요
+          </Chip>
+        }
+      >
+        <div className="qo-noinput" data-testid="input-unavailable">
+          <p className="qo-note">
+            이 브라우저에서는 <code className="font-mono">input()</code>으로
+            대답을 받을 수 없어요. 새로고침해 보고, 그래도 안 되면 Safari나
+            Chrome으로 열어 주세요.
+          </p>
+          <p className="qo-tip">
+            카카오톡 같은 앱 안에서 열었다면 메뉴(⋯)에서 “Safari로 열기”를
+            눌러요. input() 없는 코드는 여기서도 돌릴 수 있어요.
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            sfx={false}
+            icon={<RefreshCw aria-hidden />}
+            onClick={() => window.location.reload()}
+            className="qo-ask"
+          >
+            새로고침
+          </Button>
+        </div>
+      </Slip>
+    );
+  }
+
   // 오류: 나온 글자까지 + 마지막 한 줄 요약(몇 번째 줄 · 종류) + 전체 메시지는 접어 둠
   if (!result.success) {
     const line = errorLineFromStderr(result.stderr);
@@ -410,6 +522,7 @@ export function OutputPanel({
       <Slip
         state="error"
         text={result.stdout}
+        inputs={result.inputs}
         tone="bug"
         chip={
           <Chip tone="bug" icon={<Search aria-hidden />}>
@@ -456,6 +569,7 @@ export function OutputPanel({
     <Slip
       state="success"
       text={result.stdout}
+      inputs={result.inputs}
       tone={passed ? 'good' : diff ? 'diff' : 'idle'}
       verdict={passed ? 'pass' : diff ? 'diff' : undefined}
       chip={

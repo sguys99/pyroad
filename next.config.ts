@@ -12,7 +12,15 @@ import {
  * wasm은 `application/wasm`이어야 스트리밍 컴파일(instantiateStreaming)을 쓴다.
  * Worker 스크립트(`/workers/*.mjs`)는 배포마다 바뀔 수 있으므로 캐시는 기본값(재검증)으로 둔다.
  * Worker 스크립트에는 Worker 전용 CSP를 붙인다 (B27, `src/lib/security/csp.ts`).
+ *
+ * 실행기 경로 `/pyodide/runner/` (P11-01): Worker와 input() 폴백 SW(`input-sw.js`)를 이 경로로 서빙한다(rewrites → `/workers/`).
+ * SW scope를 실행기 경로로만 좁혀 앱 페이지는 SW를 거치지 않고, Worker는 scope 안에 있어 SW가 동기 XHR을 붙잡을 수 있다(P0-05).
+ * `public/pyodide/`는 복사본이라(git 제외) 파일은 `public/workers/`에 두고 경로만 빌려 쓴다.
  */
+/** 실행기 경로 (src/lib/pyodide/constants.ts PYODIDE_RUNNER_PATH와 같음) */
+const RUNNER_PATH = '/pyodide/runner';
+/** Pyodide 버전 경로만 (`/pyodide/314.0.7/`). 실행기 경로 `/pyodide/runner/`는 배포마다 바뀌므로 immutable이 아님 */
+const PYODIDE_VERSION_SEGMENT = ':version(\\d[^/]*)';
 /** 버전 경로·버전 파일 이름 공용 (Pyodide·사운드·이미지) */
 const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable';
 /** 파일 이름에 버전이 붙는 에셋 폴더 (P2-16, scripts/assets/) */
@@ -42,11 +50,11 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'Content-Security-Policy', value: API_CSP }],
       },
       {
-        source: '/pyodide/:version/:file*',
+        source: `/pyodide/${PYODIDE_VERSION_SEGMENT}/:file*`,
         headers: [{ key: 'Cache-Control', value: IMMUTABLE_CACHE }],
       },
       ...PYODIDE_CONTENT_TYPES.map(([ext, type]) => ({
-        source: `/pyodide/:version/:file(.*\\.${ext})`,
+        source: `/pyodide/${PYODIDE_VERSION_SEGMENT}/:file(.*\\.${ext})`,
         headers: [{ key: 'Content-Type', value: type }],
       })),
       // 사운드 (P2-14): 파일 이름에 버전이 있어(`<id>.v<N>.webm`) 내용이 바뀌지 않으므로 1년 immutable 캐시.
@@ -61,13 +69,24 @@ const nextConfig: NextConfig = {
         source: `/${dir}/:file*`,
         headers: [{ key: 'Cache-Control', value: IMMUTABLE_CACHE }],
       })),
+      ...['/workers/:file(.*\\.m?js)', `${RUNNER_PATH}/:file(.*\\.m?js)`].map(
+        (source) => ({
+          source,
+          headers: [
+            { key: 'Content-Type', value: 'text/javascript; charset=utf-8' },
+            // Worker·SW는 자기 스크립트 응답의 CSP를 쓴다. 'unsafe-eval' 없음 = Python → Function 우회 차단 (B27, §2.9)
+            { key: 'Content-Security-Policy', value: buildWorkerCsp() },
+          ],
+        }),
+      ),
+    ];
+  },
+  async rewrites() {
+    // 실행기 경로 → 버전 관리되는 public/workers/ (P11-01). Worker의 상대 import(./pyodide-core.mjs)도 같은 경로로 온다
+    return [
       {
-        source: '/workers/:file(.*\\.mjs)',
-        headers: [
-          { key: 'Content-Type', value: 'text/javascript; charset=utf-8' },
-          // Worker는 자기 스크립트 응답의 CSP를 쓴다. 'unsafe-eval' 없음 = Python → Function 우회 차단 (B27, §2.9)
-          { key: 'Content-Security-Policy', value: buildWorkerCsp() },
-        ],
+        source: `${RUNNER_PATH}/:file((?:pyodide-worker|pyodide-core)\\.mjs|input-sw\\.js)`,
+        destination: '/workers/:file',
       },
     ];
   },

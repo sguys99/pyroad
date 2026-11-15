@@ -190,12 +190,12 @@ export function buildPageCsp(options: PageCspOptions): string {
 }
 
 /**
- * Pyodide module Worker(`/workers/*.mjs`) CSP.
+ * Pyodide module Worker(`/workers/*.mjs`, 실행기 경로 `/pyodide/runner/*`) CSP. input() 폴백 SW(`input-sw.js`, P11-01)도 같은 정책.
  *
  * Worker는 자기 스크립트 응답의 CSP를 쓴다(페이지 CSP를 물려받지 않음). 학생 Python 코드가 JsProxy로
  * `Function` 생성자에 닿아도 `'unsafe-eval'`이 없어 EvalError가 난다 (B15의 실제 경계).
  * - script-src: 자체 호스팅 `pyodide.mjs` import + wasm 컴파일(`'wasm-unsafe-eval'`) + jsDelivr 폴백 import
- * - connect-src: wasm·zip·lock 파일 fetch와 HEAD 확인 (자체 호스팅·jsDelivr)
+ * - connect-src: wasm·zip·lock 파일 fetch와 HEAD 확인 (자체 호스팅·jsDelivr), SW 입력 채널 동기 XHR(`'self'`)
  * - default-src 'none': 그 밖(이미지·폰트 등)은 Worker에서 쓰지 않음
  * - `worker-src`·`base-uri`는 넣지 않는다. (실측, Firefox 1538) `worker-src 'none'`이나 `base-uri 'none'`이 있으면
  *   Worker가 시작하지 못하고 `onerror`만 난다. Worker 안의 하위 Worker는 script-src로 떨어지고,

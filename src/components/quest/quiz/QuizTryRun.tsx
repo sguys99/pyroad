@@ -8,7 +8,10 @@ import {
   usePyodideRuntime,
   type PyodideRuntime,
 } from '@/lib/pyodide/PyodideProvider';
-import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
+import {
+  createLiveOutputStore,
+  liveRunOptions,
+} from '@/lib/pyodide/liveOutput';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import type { QuizKind } from '@/lib/quest/questKind';
 import { tryItPrompt } from '@/lib/quest/quizCode';
@@ -59,7 +62,7 @@ export function QuizTryRunView({
     // 학생 코드는 보내지 않음: 종류와 바꿔 봤는지만 (§2.6)
     track('quiz_try_run', { kind, edited: draft !== code });
     live.reset();
-    const r = await runtime.runCode(draft, { onStdout: live.append });
+    const r = await runtime.runCode(draft, liveRunOptions(live));
     if (alive.current) setResult(r);
   };
 

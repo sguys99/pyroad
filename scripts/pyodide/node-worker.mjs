@@ -41,6 +41,7 @@ async function main() {
       ...runtimeInfo(pyodide),
       source: 'npm',
       jspi,
+      input: 'none',
       loadMs: Math.round(performance.now() - t0),
       removedGlobals,
     },
