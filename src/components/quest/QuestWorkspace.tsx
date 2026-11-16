@@ -23,6 +23,12 @@ import { usesTurtle } from '@/lib/turtle/scene';
 import './questWorkspace.css';
 
 // 축하 오버레이 (P6-13): 받은 축하가 있을 때만 그린다. 첫 로드 JS에서 빼고, 실행을 처음 누를 때 미리 받아 둔다
+// 3월드 프로젝트의 메이커 작업대 (P11-14): 그 퀘스트에서만 받는다 (아이디어 카드·그림 검사기를 다른 퀘스트 첫 로드에 싣지 않게)
+const MakerHelper = dynamic(
+  () => import('./MakerHelper').then((m) => m.MakerHelper),
+  { ssr: false },
+);
+
 const loadCelebrations = () =>
   import('./QuestCelebrations').then((m) => m.QuestCelebrations);
 const QuestCelebrations = dynamic(loadCelebrations, { ssr: false });
@@ -287,6 +293,11 @@ export function QuestWorkspace({
               isCompleted={session.isCompleted}
               completion={session.completion}
             />
+            {/* 3월드 프로젝트: 기획 도우미·작품 평가 친구 (P11-14) */}
+            {session.kind === 'project' &&
+              quest.stage.world?.slug === 'maker-city' && (
+                <MakerHelper session={session} />
+              )}
           </StoryPage>
         </div>
 

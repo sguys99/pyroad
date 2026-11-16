@@ -152,6 +152,9 @@ export type FreeAskResult =
   | { status: 'sent' }
   | { status: 'note'; message: string; block?: FreeQuestionBlock }
   | { status: 'busy' };
+/** 작품 평가를 부탁하는 아이 말풍선 (P11-14) */
+const CREATION_FEEDBACK_ASK = '파이뱀, 내 작품 어때요?';
+
 const ASK_FAILED =
   '지금은 파이뱀이 대답하기 어려워요. 조금 뒤에 다시 물어봐 줘요!';
 const SAVE_FAILED_MESSAGE =
@@ -1156,7 +1159,11 @@ export function useQuestSession({
    * 서버가 거르면 말풍선을 거두고 안내를 돌려준다(입력 칸 아래). 답은 다 받은 뒤 거른 것이라 흘려 쓰지 않는다
    */
   const handleFreeAsk = useCallback(
-    async (question: string): Promise<FreeAskResult> => {
+    async (
+      question: string,
+      /** 3-F 기획 도우미(P11-14)도 같은 길: 아이 글 → 서버 거르기 → 답 */
+      type: 'free_question' | 'project_planner' = 'free_question',
+    ): Promise<FreeAskResult> => {
       const text = question.trim();
       if (!text || isAiLoading) return { status: 'busy' };
       play('tap');
@@ -1166,7 +1173,7 @@ export function useQuestSession({
       addMessage(mine);
       try {
         const res = await sendTutorRequest({
-          type: 'free_question',
+          type,
           quest_id: questId,
           question: text,
         });
@@ -1204,6 +1211,58 @@ export function useQuestSession({
     setAskOpen(true);
     handleAsk('why');
   }, [handleAsk]);
+
+  /**
+   * 작품 평가 친구 (P11-14, 3월드 프로젝트): 지금 코드로 끝까지 돌린 실행의 출력·그림 요약으로 칭찬 2 + 한 걸음 더.
+   * 거른 답이라 흘려 쓰지 않는다. 대화를 펼쳐 답을 보여 줌
+   */
+  const canAskFeedback =
+    !!runResult?.success && !runResult.isStopped && lastRunCode === code;
+  const handleCreationFeedback = useCallback(async () => {
+    if (isAiLoading || !canAskFeedback || !runResult) return;
+    play('tap');
+    setAskOpen(true);
+    addMessage({ role: 'student', content: CREATION_FEEDBACK_ASK });
+    try {
+      const res = await sendTutorRequest({
+        type: 'creation_feedback',
+        quest_id: questId,
+        student_code: code,
+        execution_result: {
+          stdout: runResult.stdout,
+          stderr: '',
+          passed: true,
+        },
+        // 그림 요약은 이 버튼을 누를 때만 (그림 검사기를 퀘스트 첫 로드에 싣지 않게)
+        drawing: (await import('@/lib/tutor/maker')).drawingSummary(
+          liveOutput.getTurtle(),
+        ),
+      });
+      if (res)
+        addMessage({
+          role: 'tutor',
+          content: res.message,
+          isFallback: res.is_fallback,
+        });
+    } catch (error) {
+      addMessage({
+        role: 'tutor',
+        content:
+          error instanceof TutorRateLimitError ? error.message : ASK_FAILED,
+        isFallback: true,
+      });
+    }
+  }, [
+    isAiLoading,
+    canAskFeedback,
+    runResult,
+    play,
+    addMessage,
+    sendTutorRequest,
+    questId,
+    code,
+    liveOutput,
+  ]);
 
   // ── 황금키 ──────────────────────────────────────────────────────────
 
@@ -1393,6 +1452,9 @@ export function useQuestSession({
     handleFreeAsk,
     /** 오늘 남은 자유 질문 수 (모르면 null) */
     freeRemaining,
+    /** 작품 평가 친구 (P11-14): 지금 코드로 끝까지 돈 실행이 있을 때만 */
+    canAskFeedback,
+    handleCreationFeedback,
     /** "파이뱀에게 물어보기" 대화가 펼쳐져 있는지 (결과 쪽지 버튼이 열 수 있게 세션에 둠) */
     askOpen,
     setAskOpen,

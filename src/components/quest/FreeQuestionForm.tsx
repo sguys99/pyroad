@@ -54,7 +54,23 @@ interface FreeQuestionFormProps {
   remaining: number | null;
   /** 파이뱀이 답하는 중 */
   busy: boolean;
+  /** 3-F 기획 도우미(P11-14)처럼 다른 자리에서 쓸 때의 글 (없으면 자유 질문 글) */
+  text?: {
+    label: string;
+    placeholder: string;
+    help: string;
+    send: string;
+    testId: string;
+  };
 }
+
+const FREE_TEXT = {
+  label: '파이뱀에게 직접 물어보기',
+  placeholder: '직접 물어봐요',
+  help: '파이썬 이야기만 · 이름·연락처·학교는 쓰지 않아요',
+  send: '보내기',
+  testId: 'free-ask',
+};
 
 /**
  * "파이뱀에게 물어보기" 자유 질문 칸 (P9-17). 정해진 질문 버튼 아래 한 줄: 입력 칸 + 보내기.
@@ -65,6 +81,7 @@ export function FreeQuestionForm({
   onSubmit,
   remaining,
   busy,
+  text: words = FREE_TEXT,
 }: FreeQuestionFormProps) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -98,10 +115,10 @@ export function FreeQuestionForm({
       onSubmit={submit}
       data-kb={cover > 0 || undefined}
       style={cover ? { marginBottom: cover } : undefined}
-      data-testid="free-ask"
+      data-testid={words.testId}
     >
       <label htmlFor={id} className="sr-only">
-        파이뱀에게 직접 물어보기
+        {words.label}
       </label>
       <div className="qf-row">
         <input
@@ -115,7 +132,7 @@ export function FreeQuestionForm({
           autoComplete="off"
           spellCheck={false}
           placeholder={
-            out ? '오늘은 다 물어봤어요. 내일 또 만나요!' : '직접 물어봐요'
+            out ? '오늘은 다 물어봤어요. 내일 또 만나요!' : words.placeholder
           }
           disabled={out}
           aria-invalid={note ? true : undefined}
@@ -124,16 +141,16 @@ export function FreeQuestionForm({
             setText(e.target.value);
             if (note) setNote(null);
           }}
-          data-testid="free-ask-input"
+          data-testid={`${words.testId}-input`}
         />
         <Button
           type="submit"
           size="sm"
           icon={<SendHorizontal aria-hidden />}
           disabled={!canSend}
-          data-testid="free-ask-send"
+          data-testid={`${words.testId}-send`}
         >
-          보내기
+          {words.send}
         </Button>
       </div>
       {note && (
@@ -142,15 +159,15 @@ export function FreeQuestionForm({
           id={`${id}-note`}
           className="qf-note"
           role="alert"
-          data-testid="free-ask-note"
+          data-testid={`${words.testId}-note`}
         >
           <ShieldCheck aria-hidden />
           {note}
         </p>
       )}
       <p id={`${id}-help`} className="qf-help">
-        <span>파이썬 이야기만 · 이름·연락처·학교는 쓰지 않아요</span>
-        <span className="qf-count" data-testid="free-ask-count">
+        <span>{words.help}</span>
+        <span className="qf-count" data-testid={`${words.testId}-count`}>
           {remaining !== null && !out && `오늘 ${remaining}번 남음 · `}
           {text.length}/{FREE_QUESTION_MAX_LENGTH}
         </span>

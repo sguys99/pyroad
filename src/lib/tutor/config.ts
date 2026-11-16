@@ -12,6 +12,8 @@ export const TOKEN_LIMITS: Record<TutorRequest['type'], number> = {
   concept_explain: 800, // 개념 비유 설명 + 다른 작은 예시
   quiz_explain: 500, // 오답 해설 2~3문장
   free_question: 700, // 자유 질문 답 (300자 이내 지시)
+  project_planner: 1300, // 이름 후보·기능 3개·기획 카드 코드 블록 (600자 이내 지시)
+  creation_feedback: 900, // 잘한 점 2 + 한 걸음 더 + 질문 (450자 이내 지시)
 };
 
 /**
