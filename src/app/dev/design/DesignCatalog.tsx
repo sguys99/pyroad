@@ -180,6 +180,9 @@ export function DesignCatalog({
 
   useSamplingPause(override);
   useHtmlMotionOverride(override, tier, reduced, root.tier, root.reduced);
+  // 하이드레이션 끝 표시 (B91): 부트 스크립트가 서버 HTML 에 data-motion="full" 을 먼저 붙여 e2e 가 손이 붙기 전에 누를 수 있었음
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -193,7 +196,11 @@ export function DesignCatalog({
   return (
     <MotionTierProvider tier={tier} reduced={reduced ? 'on' : 'off'}>
       <TooltipProvider>
-        <div className="min-h-dvh bg-background text-foreground">
+        <div
+          className="min-h-dvh bg-background text-foreground"
+          data-testid="design-catalog"
+          data-hydrated={hydrated || undefined}
+        >
           <MotionBar
             tierChoice={tierChoice}
             reducedChoice={reducedChoice}

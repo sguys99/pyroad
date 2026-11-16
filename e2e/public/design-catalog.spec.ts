@@ -47,6 +47,12 @@ async function openCatalog(page: Page, mode?: MotionMode) {
   await expect(
     page.getByRole('heading', { name: 'pyRoad 디자인 카탈로그' }),
   ).toBeVisible();
+  // 서버 HTML 에도 부트 스크립트의 data-motion="full" 이 있어 아래 확인만으로는 하이드레이션을 기다리지 못함 (B91)
+  await expect(page.getByTestId('design-catalog')).toHaveAttribute(
+    'data-hydrated',
+    'true',
+    { timeout: 30_000 },
+  );
   if (mode) {
     const html = page.locator('html');
     await expect(html).toHaveAttribute('data-motion', mode.tier);
@@ -61,6 +67,28 @@ async function openCatalog(page: Page, mode?: MotionMode) {
 async function pauseClock(page: Page) {
   await page.clock.install();
   await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1_000);
+}
+
+/**
+ * 날아가는 보상(`.dm-fly`)이 생기는 순간을 센다. 1.4초 뒤 지워져 느린 CI 러너에서는 확인 전에 사라짐 (B78·B91).
+ * 시계를 세우면 뒤늦게 하이드레이션되는 시간 글자가 달라져 React #418 (B81) → 시계 대신 DOM 추가를 기록
+ */
+async function countFlights(page: Page): Promise<() => Promise<number>> {
+  await page.evaluate(() => {
+    const w = window as unknown as { __dmFly: number };
+    w.__dmFly = 0;
+    new MutationObserver((records) => {
+      for (const r of records)
+        for (const n of r.addedNodes)
+          if (
+            n instanceof Element &&
+            (n.matches('.dm-fly') || n.querySelector('.dm-fly'))
+          )
+            w.__dmFly++;
+    }).observe(document.body, { childList: true, subtree: true });
+  });
+  return () =>
+    page.evaluate(() => (window as unknown as { __dmFly: number }).__dmFly);
 }
 
 /** 리그 SVG 안의 속성 쓰기를 ms 동안 센다 (전체 / transform만) */
@@ -329,15 +357,20 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       const duration = await btn
         .locator('.g-btn-face')
         .evaluate((el) => getComputedStyle(el).transitionDuration);
+      // 젤리 출렁임(WAAPI `animate()`)을 거는 순간을 센다 — 약 0.6초짜리라 느린 러너에선 확인 전에 끝남 (B91)
+      await btn.locator('.g-btn-face').evaluate((el) => {
+        const e = el as HTMLElement & { __jelly?: number };
+        const animate = e.animate.bind(e);
+        e.__jelly = 0;
+        e.animate = (...args) => {
+          e.__jelly!++;
+          return animate(...args);
+        };
+      });
       await page.mouse.up();
-      // WAAPI만 센다 (CSS 전환 복귀는 CSSTransition으로 따로 잡힘)
       const jelly = await btn
         .locator('.g-btn-face')
-        .evaluate(
-          (el) =>
-            el.getAnimations().filter((a) => !(a instanceof CSSTransition))
-              .length,
-        );
+        .evaluate((el) => (el as HTMLElement & { __jelly?: number }).__jelly);
       await page.mouse.move(0, 0);
 
       if (mode.reduced === 'on') {
@@ -810,21 +843,7 @@ test.describe('데일리 미션 (P8-07)', () => {
         page.getByTestId('world-hud-demo').getByTestId('hud-mission').last(),
       ).toHaveAttribute('data-ready');
 
-      // 날아가는 보상은 1.4초 뒤 지워진다 → 느린 CI 러너에서도 세도록 생기는 순간을 기록 (B78·B81: 시계를 세우면
-      // 뒤늦게 하이드레이션되는 시간 글자가 달라져 React #418)
-      await page.evaluate(() => {
-        const w = window as unknown as { __dmFly: number };
-        w.__dmFly = 0;
-        new MutationObserver((records) => {
-          for (const r of records)
-            for (const n of r.addedNodes)
-              if (
-                n instanceof Element &&
-                (n.matches('.dm-fly') || n.querySelector('.dm-fly'))
-              )
-                w.__dmFly++;
-        }).observe(document.body, { childList: true, subtree: true });
-      });
+      const flights = await countFlights(page);
       await first
         .getByTestId('mission-daily_quiz')
         .getByTestId('mission-claim')
@@ -833,9 +852,7 @@ test.describe('데일리 미션 (P8-07)', () => {
         'data-state',
         'claimed',
       );
-      const flying = await page.evaluate(
-        () => (window as unknown as { __dmFly: number }).__dmFly,
-      );
+      const flying = await flights();
       if (full) expect(flying).toBeGreaterThan(0);
       else expect(flying).toBe(0);
     });
@@ -866,6 +883,7 @@ test.describe('출석 도장 (P8-08)', () => {
         page.getByTestId('world-hud-demo').getByTestId('hud-shields'),
       ).toHaveAttribute('data-n', '2');
 
+      const flights = await countFlights(page);
       await third.getByTestId('attendance-stamp').click();
       await expect(third.getByTestId('attendance-cell-3')).toHaveAttribute(
         'data-state',
@@ -876,8 +894,8 @@ test.describe('출석 도장 (P8-08)', () => {
       ).toBeVisible();
       // 코인은 도장이 닿는 순간 HUD 견본으로 (full 만, 나머지는 날아가지 않음)
       if (mode.tier === 'full' && mode.reduced === 'off')
-        await expect(page.locator('.dm-fly').first()).toBeAttached();
-      else expect(await page.locator('.dm-fly').count()).toBe(0);
+        await expect.poll(flights).toBeGreaterThan(0);
+      else expect(await flights()).toBe(0);
 
       await seventh.getByTestId('attendance-stamp').click();
       const overlay = page.getByTestId('celebration-overlay');
@@ -927,12 +945,13 @@ test.describe('업적 도감 (P8-10)', () => {
       );
       await expect(glint).toBeVisible();
 
+      const flights = await countFlights(page);
       await ready.getByTestId('achievement-claim').click();
       await expect(ready).toHaveAttribute('data-state', 'earned');
       await expect(book.locator('[data-ab-wallet]')).toContainText(
         '코인 1,250개',
       );
-      const flying = await page.locator('.dm-fly').count();
+      const flying = await flights();
       if (mode.tier === 'full' && mode.reduced === 'off')
         expect(flying).toBeGreaterThan(0);
       else expect(flying).toBe(0);
