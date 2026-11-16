@@ -146,7 +146,7 @@ interface ProjectYaml {
   quest_type: string;
   steps: Array<{
     prompt: { step_goal: string; checklist: string[] };
-    answer: { solution_code: string };
+    answer: { solution_code: string; scenarios?: unknown[] };
   }>;
 }
 
@@ -157,7 +157,13 @@ export function projectQuest(
 ): {
   id: string;
   title: string;
-  steps: Array<{ goal: string; checklist: string[]; solution: string }>;
+  /** guests: 시험 손님이 있는 단계 (채점은 "시험 손님 부르기", P11-05) */
+  steps: Array<{
+    goal: string;
+    checklist: string[];
+    solution: string;
+    guests: boolean;
+  }>;
 } {
   for (const d of readdirSync(worldDir(world), { withFileTypes: true }).sort(
     (a, b) => a.name.localeCompare(b.name),
@@ -175,6 +181,7 @@ export function projectQuest(
           goal: s.prompt.step_goal,
           checklist: s.prompt.checklist,
           solution: s.answer.solution_code.trim(),
+          guests: !!s.answer.scenarios?.length,
         })),
       };
     }

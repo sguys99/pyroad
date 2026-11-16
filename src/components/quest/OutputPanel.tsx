@@ -587,7 +587,10 @@ function ResultSlip({
           </p>
           <p className="qo-tip">
             카카오톡 같은 앱 안에서 열었다면 메뉴(⋯)에서 “Safari로 열기”를
-            눌러요. input() 없는 코드는 여기서도 돌릴 수 있어요.
+            눌러요.{' '}
+            {guestHint
+              ? '“시험 손님 부르기”는 여기서도 돼요. 손님이 대신 대답하고 채점해요.'
+              : 'input() 없는 코드는 여기서도 돌릴 수 있어요.'}
           </p>
           <Button
             variant="secondary"

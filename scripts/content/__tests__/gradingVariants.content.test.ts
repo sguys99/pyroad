@@ -117,6 +117,29 @@ const HANDWRITTEN: Record<string, (string | Edit | WithInputs)[]> = {
   'code-sea/3-1': [
     'for r in range(3):\n\trow = ""\n\tfor c in range(4):\n\t\trow += "#"\n\tprint(row)\n',
   ],
+  // 1월드 7-3 숫자 맞추기 input() 버전 (P11-15): 다른 출력 모양 · while True + break · choice 로 뽑기 · += 로 세기
+  '7-3#2': [
+    [['print("추측: " + str(guess))', 'print(f"추측: {guess}")']],
+    [['print("추측: " + str(guess))', 'print("추측:", guess)']],
+  ],
+  '7-3#4': [
+    [['random.randint(1, 10)', 'random.choice(range(1, 11))']],
+    [
+      [
+        'while guess != secret:\n    if guess < secret:',
+        'while True:\n    if guess == secret:\n        break\n    if guess < secret:',
+      ],
+    ],
+  ],
+  '7-3#5': [
+    [
+      ['attempts = attempts + 1\n\nwhile', 'attempts += 1\n\nwhile'],
+      [
+        'print("정답! " + str(attempts) + "번 만에 맞췄어요!")',
+        'print(f"정답! {attempts}번 만에 맞췄어요!")',
+      ],
+    ],
+  ],
   // 3월드 (P11-12 플레이테스트): 그림은 돌리거나 옮기거나 다른 방향으로 그려도, 입력은 다른 반복 모양이어도 통과
   'maker-city/1-1': [
     [
@@ -418,6 +441,12 @@ const WRONG: Record<string, Edit[]> = {
   'code-sea/7-2#5': [[['if money > big_money:', 'if name == "선물":']]],
   'code-sea/7-4#3': [
     [['if check(word, answer):\n        score = score + 1', 'score = 3']],
+  ],
+  // 1월드 7-3 (P11-15): 받은 숫자를 안 씀 · 반복 안에서 다시 안 물음(끝없음) · break 없는 while True(입력 모자람)
+  '7-3#2': [[['print("추측: " + str(guess))', 'print("추측: 5")']]],
+  '7-3#4': [
+    [['    guess = int(input("1~10 숫자를 맞혀 봐요: "))\n', '']],
+    [['while guess != secret:', 'while True:']],
   ],
   // 3월드 (P11-12 플레이테스트): 그림이 비슷하거나 시험 손님 하나만 맞는 답
   'maker-city/1-1': [
