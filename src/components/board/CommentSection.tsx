@@ -178,7 +178,7 @@ export function CommentSection({
             }}
             maxLength={BOARD_LIMITS.comment}
             rows={2}
-            placeholder="댓글을 작성하세요"
+            placeholder="댓글을 써 주세요"
             aria-label="댓글"
             className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />

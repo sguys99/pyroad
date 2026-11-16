@@ -28,6 +28,7 @@ import {
   CardDescription,
   CardTitle,
 } from '@/components/ui/card';
+import { BackLink } from '@/components/ui/back-link';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -299,6 +300,27 @@ function LoadingConfirm() {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+export function BackLinkSection() {
+  return (
+    <Section
+      id="back-link"
+      kicker="컴포넌트 §15"
+      title="뒤로 가기"
+      description="화면 맨 위 왼쪽 “‹ 월드맵”. 글자는 갈 곳 이름만 쓰고, 제목은 그 아래 Jua(font-display text-h2)로 (B100)."
+    >
+      <div className="flex flex-wrap items-center gap-4" data-testid="back-link-demo">
+        <BackLink href="#back-link">월드맵</BackLink>
+        <BackLink href="#back-link">프로필</BackLink>
+        <BackLink href="#back-link">게시판</BackLink>
+      </div>
+      <div>
+        <BackLink href="#back-link">월드맵</BackLink>
+        <h3 className="mt-2 font-display text-h2">게시판</h3>
+      </div>
+    </Section>
   );
 }
 

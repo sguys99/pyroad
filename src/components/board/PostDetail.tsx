@@ -29,7 +29,7 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
           </p>
         </div>
       )}
-      <h1 className="mb-2 text-lg font-bold text-foreground">{post.title}</h1>
+      <h1 className="mb-2 font-display text-h3">{post.title}</h1>
       <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
         <UserAvatar {...publicLook(post.user_profiles_public)} size={32} />
         <span>{authorName(post.user_profiles_public)}</span>

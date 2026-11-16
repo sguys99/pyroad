@@ -1,17 +1,13 @@
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { CreatePostForm } from '@/components/board/CreatePostForm';
 
 export default function BoardCreatePage() {
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link href="/board" className="text-sm text-primary-text underline">
-          ← 게시판으로
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+      <BackLink href="/board">게시판</BackLink>
 
-      <h1 className="mb-6 text-2xl font-bold text-foreground">글쓰기</h1>
+      <h1 className="mt-2 mb-5 font-display text-h2">글쓰기</h1>
 
       <CreatePostForm />
     </PageTransition>

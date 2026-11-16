@@ -1,8 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessagesSquare,
+  PenLine,
+} from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
+import { BackLink } from '@/components/ui/back-link';
+import { Button } from '@/components/ui/button';
 import { BoardCard } from '@/components/board/BoardCard';
 import type { BoardPostWithAuthor } from '@/lib/types/database';
 
@@ -47,27 +54,23 @@ export default async function BoardPage({
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link href="/world" className="text-sm text-primary-text underline">
-          ← 월드맵으로
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+      {/* 위 줄·제목은 상점·프로필과 같은 짜임 (B100) */}
+      <BackLink href="/world">월드맵</BackLink>
 
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">게시판</h1>
-        <Link
-          href="/board/create"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip"
-        >
+      <div className="mt-2 mb-5 flex items-center justify-between gap-3">
+        <h1 className="m-0 font-display text-h2">게시판</h1>
+        <Button href="/board/create" size="sm" icon={<PenLine aria-hidden />}>
           글쓰기
-        </Link>
+        </Button>
       </div>
 
       {boardPosts.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            아직 게시글이 없습니다. 첫 번째 글을 작성해보세요!
+        <div className="grid justify-items-center gap-2 rounded-3xl bg-surface p-8 text-center shadow-card">
+          <MessagesSquare className="size-8 text-primary-text" aria-hidden />
+          <p className="m-0 font-display text-h3">아직 글이 없어요</p>
+          <p className="m-0 text-small text-muted-foreground">
+            모험하다 궁금한 것이나 자랑하고 싶은 것을 첫 글로 남겨 볼까요?
           </p>
         </div>
       ) : (
@@ -79,25 +82,29 @@ export default async function BoardPage({
       )}
 
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
+        <div className="mt-6 flex items-center justify-center gap-3">
           {currentPage > 1 && (
-            <Link
+            <Button
               href={`/board?page=${currentPage - 1}`}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent"
+              variant="secondary"
+              size="sm"
+              icon={<ChevronLeft aria-hidden />}
             >
               이전
-            </Link>
+            </Button>
           )}
-          <span className="text-sm text-muted-foreground">
+          <span className="text-small text-muted-foreground tabular-nums">
             {currentPage} / {totalPages}
           </span>
           {currentPage < totalPages && (
-            <Link
+            <Button
               href={`/board?page=${currentPage + 1}`}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent"
+              variant="secondary"
+              size="sm"
+              iconRight={<ChevronRight aria-hidden />}
             >
               다음
-            </Link>
+            </Button>
           )}
         </div>
       )}

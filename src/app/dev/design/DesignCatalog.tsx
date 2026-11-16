@@ -25,6 +25,7 @@ import {
 import {
   ButtonSection,
   CardSection,
+  BackLinkSection,
   AlertDialogSection,
   SheetSection,
   ToastSection,
@@ -101,6 +102,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
     items: [
       ['buttons', '게임 버튼'],
       ['cards', '카드'],
+      ['back-link', '뒤로 가기'],
       ['alert-dialog', '확인 모달'],
       ['sheet', '바텀시트·모달'],
       ['toast', '토스트'],
@@ -238,6 +240,7 @@ export function DesignCatalog({
               <MotionTokenSection />
               <ButtonSection />
               <CardSection />
+              <BackLinkSection />
               <AlertDialogSection />
               <SheetSection />
               <ToastSection />

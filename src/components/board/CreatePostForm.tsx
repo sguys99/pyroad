@@ -102,7 +102,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
           maxLength={BOARD_LIMITS.title}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목을 입력하세요"
+          placeholder="제목을 써 주세요"
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <p className="mt-1 text-right text-[11px] text-muted-foreground">
@@ -123,7 +123,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
           rows={8}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="내용을 입력하세요"
+          placeholder="내용을 써 주세요"
           className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <p className="mt-1 text-right text-[11px] text-muted-foreground">

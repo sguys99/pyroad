@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { isAdminUser } from '@/lib/admin';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { NoticeDetail } from '@/components/notice/NoticeDetail';
 import type { Notice } from '@/lib/types/database';
@@ -25,12 +25,10 @@ export default async function NoticeDetailPage({
   const isAdmin = isAdminUser(user);
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link href="/notice" className="text-sm text-primary-text underline">
-          ← 공지사항으로
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+      <BackLink href="/notice" className="mb-3">
+        공지사항
+      </BackLink>
 
       <NoticeDetail notice={notice as Notice} isAdmin={isAdmin} />
     </PageTransition>

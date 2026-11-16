@@ -14,7 +14,7 @@ export function NoticeDetail({ notice, isAdmin }: NoticeDetailProps) {
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <h1 className="mb-2 text-lg font-bold text-foreground">{notice.title}</h1>
+      <h1 className="mb-2 font-display text-h3">{notice.title}</h1>
       <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{date}</span>
         {isEdited && <span>(수정됨)</span>}

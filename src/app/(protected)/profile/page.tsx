@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { redirect } from 'next/navigation';
-import { CalendarDays, ChevronLeft } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -155,10 +156,7 @@ export default async function ProfilePage() {
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-4xl">
       <div className="pf">
         <div className="pf-top pf-wide">
-          <Link href="/world" className="pf-back focus-ring">
-            <ChevronLeft aria-hidden />
-            월드맵
-          </Link>
+          <BackLink href="/world">월드맵</BackLink>
           <HudCounter kind="coin" value={profile.coins} />
         </div>
 

@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { isAdminUser } from '@/lib/admin';
-import Link from 'next/link';
+import { ChevronLeft, ChevronRight, Megaphone, PenLine } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
+import { BackLink } from '@/components/ui/back-link';
+import { Button } from '@/components/ui/button';
 import { NoticeCard } from '@/components/notice/NoticeCard';
 import type { Notice } from '@/lib/types/database';
 
@@ -33,32 +35,31 @@ export default async function NoticePage({
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link
-          href={user ? '/world' : '/'}
-          className="text-sm text-primary-text underline"
-        >
-          {user ? '← 월드맵으로' : '← 홈으로'}
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+      {/* 위 줄·제목은 상점·프로필과 같은 짜임 (B100) */}
+      <BackLink href={user ? '/world' : '/'}>
+        {user ? '월드맵' : '처음 화면'}
+      </BackLink>
 
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">공지사항</h1>
+      <div className="mt-2 mb-5 flex min-h-touch items-center justify-between gap-3">
+        <h1 className="m-0 font-display text-h2">공지사항</h1>
         {isAdmin && (
-          <Link
+          <Button
             href="/notice/create"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-lip"
+            size="sm"
+            icon={<PenLine aria-hidden />}
           >
             공지 작성
-          </Link>
+          </Button>
         )}
       </div>
 
       {noticeList.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            아직 공지사항이 없습니다.
+        <div className="grid justify-items-center gap-2 rounded-3xl bg-surface p-8 text-center shadow-card">
+          <Megaphone className="size-8 text-primary-text" aria-hidden />
+          <p className="m-0 font-display text-h3">아직 공지가 없어요</p>
+          <p className="m-0 text-small text-muted-foreground">
+            새 소식이 생기면 여기에 알려 줄게요.
           </p>
         </div>
       ) : (
@@ -70,25 +71,29 @@ export default async function NoticePage({
       )}
 
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
+        <div className="mt-6 flex items-center justify-center gap-3">
           {currentPage > 1 && (
-            <Link
+            <Button
               href={`/notice?page=${currentPage - 1}`}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent"
+              variant="secondary"
+              size="sm"
+              icon={<ChevronLeft aria-hidden />}
             >
               이전
-            </Link>
+            </Button>
           )}
-          <span className="text-sm text-muted-foreground">
+          <span className="text-small text-muted-foreground tabular-nums">
             {currentPage} / {totalPages}
           </span>
           {currentPage < totalPages && (
-            <Link
+            <Button
               href={`/notice?page=${currentPage + 1}`}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent"
+              variant="secondary"
+              size="sm"
+              iconRight={<ChevronRight aria-hidden />}
             >
               다음
-            </Link>
+            </Button>
           )}
         </div>
       )}

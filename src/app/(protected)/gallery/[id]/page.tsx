@@ -1,13 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { notFound, redirect } from 'next/navigation';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Code2,
-  MessagesSquare,
-  Palette,
-} from 'lucide-react';
+import { ChevronRight, Code2, MessagesSquare, Palette } from 'lucide-react';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { isAdminUser } from '@/lib/admin';
 import { isUuid } from '@/lib/api/serverError';
@@ -58,13 +53,9 @@ export default async function GalleryWorkPage({
   return (
     <PageTransition className="mx-auto grid min-h-screen max-w-lg content-start gap-4 px-4 py-4 sm:py-6 md:max-w-3xl lg:max-w-6xl">
       <div className="pf-top">
-        <Link
-          href={work.isMine ? '/profile/creations' : '/gallery'}
-          className="pf-back focus-ring"
-        >
-          <ChevronLeft aria-hidden />
+        <BackLink href={work.isMine ? '/profile/creations' : '/gallery'}>
           {work.isMine ? '내 작품함' : '갤러리'}
-        </Link>
+        </BackLink>
         {work.isMine && shown && (
           <Link href="/gallery" className="pf-back focus-ring">
             갤러리 가기

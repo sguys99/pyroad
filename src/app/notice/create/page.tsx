@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { CreateNoticeForm } from '@/components/notice/CreateNoticeForm';
 import { isAdmin } from '@/lib/admin';
@@ -8,14 +8,10 @@ export default async function NoticeCreatePage() {
   if (!(await isAdmin())) redirect('/notice');
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link href="/notice" className="text-sm text-primary-text underline">
-          ← 공지사항으로
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+      <BackLink href="/notice">공지사항</BackLink>
 
-      <h1 className="mb-6 text-2xl font-bold text-foreground">공지 작성</h1>
+      <h1 className="mt-2 mb-5 font-display text-h2">공지 작성</h1>
 
       <CreateNoticeForm />
     </PageTransition>

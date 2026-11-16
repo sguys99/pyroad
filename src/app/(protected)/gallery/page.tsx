@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { redirect } from 'next/navigation';
 import { ChevronLeft, ChevronRight, ShieldAlert } from 'lucide-react';
 import { getAuthUser } from '@/lib/supabase/auth';
@@ -36,10 +36,7 @@ export default async function GalleryPage({
   return (
     <PageTransition className="mx-auto grid min-h-screen max-w-lg content-start gap-5 px-4 py-4 sm:py-6 md:max-w-6xl">
       <div className="pf-top">
-        <Link href="/world" className="pf-back focus-ring">
-          <ChevronLeft aria-hidden />
-          월드맵
-        </Link>
+        <BackLink href="/world">월드맵</BackLink>
         <span className="flex items-center gap-1">
           {isAdminUser(user) && (
             <Button

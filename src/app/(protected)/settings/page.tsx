@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Compass, X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
+import { BackLink } from '@/components/ui/back-link';
 import { Button } from '@/components/ui/button';
 import { LegalNav } from '@/components/legal/LegalPageShell';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
@@ -156,15 +156,9 @@ export default function SettingsPage() {
 
   const header = (
     <>
-      {/* 뒤로가기 */}
-      <div className="mb-6">
-        <Link href="/profile" className="text-sm text-primary-text underline">
-          ← 프로필로
-        </Link>
-      </div>
-
-      {/* 제목 */}
-      <h1 className="mb-6 text-xl font-bold text-foreground">설정</h1>
+      {/* 위 줄·제목은 상점·프로필과 같은 짜임 (B100) */}
+      <BackLink href="/profile">프로필</BackLink>
+      <h1 className="mt-2 mb-5 font-display text-h2">설정</h1>
 
       {/* 움직임 (P2-15). 연출 단계 Provider 값이라 서버 응답을 기다리지 않음 */}
       <MotionSettingsSection serverMotion={settings?.motion} />
@@ -185,7 +179,7 @@ export default function SettingsPage() {
 
   if (!settings) {
     return (
-      <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
+      <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
         {header}
         <p className="text-center text-muted-foreground">불러오는 중...</p>
       </PageTransition>
@@ -196,7 +190,7 @@ export default function SettingsPage() {
   const keysEnabled = settings.custom_keys_enabled !== false;
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
       {header}
 
       {/* Provider 선택 카드 */}
