@@ -100,9 +100,14 @@ export function WorldBook({
               label={`${title} 진행`}
               valueText={`스테이지 ${book.completedStages}/${book.totalStages}`}
             />
-            <span className="wb-note">
-              스테이지 {book.completedStages}/{book.totalStages} · 퀘스트{' '}
-              {book.completedQuests}/{book.totalQuests}
+            {/* 좁으면 "퀘스트 18/51"이 통째로 다음 줄로 (숫자 앞에서 끊기지 않게, B101) */}
+            <span className="wb-note wb-stat">
+              <span>
+                스테이지 {book.completedStages}/{book.totalStages} ·
+              </span>{' '}
+              <span>
+                퀘스트 {book.completedQuests}/{book.totalQuests}
+              </span>
             </span>
             <span className="wb-go">
               {status === 'cleared' ? '다시 펼치기' : '지도 펼치기'}
