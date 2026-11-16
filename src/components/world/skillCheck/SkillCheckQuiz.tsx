@@ -554,6 +554,9 @@ export function SkillCheckResultCard({
         <Button
           size="lg"
           href={mapHref}
+          // 지도를 JS·CSS까지 미리 받아 둔다 (B92): 누른 뒤 받으며 그리면 Next 15.5 내장 React의 전환 핑 버그로 이동이 멈춤.
+          // shortcut: 이 버튼만 막음, Next 16.3+(React 수정 포함)로 올리면 지움
+          prefetch
           icon={<MapIcon aria-hidden />}
           data-testid="skill-check-go"
         >

@@ -44,6 +44,8 @@ export interface ButtonProps extends Omit<ButtonPrimitive.Props, 'className'> {
   sfx?: SfxId | false;
   /** 링크 버튼 (Next `<Link>`, 소프트 내비게이션) */
   href?: string;
+  /** 링크 버튼의 미리 가져오기 (`<Link prefetch>`). 기본은 Next 기본값 */
+  prefetch?: boolean;
   /** 눌린 모양으로 고정 (카탈로그·미리 보기용, P2-12) */
   pressed?: boolean;
   className?: string;
@@ -70,6 +72,7 @@ function Button({
   loading = false,
   sfx,
   href,
+  prefetch,
   pressed: forcePressed = false,
   render,
   nativeButton,
@@ -177,6 +180,7 @@ function Button({
     return (
       <Link
         href={href}
+        prefetch={prefetch}
         aria-disabled={inactive || undefined}
         {...(props as Omit<ComponentProps<typeof Link>, 'href'>)}
         {...(shared as unknown as ComponentProps<'a'>)}
