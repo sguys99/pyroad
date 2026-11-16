@@ -11,7 +11,7 @@ import { test, expect, type Browser, type Page } from '@playwright/test';
 import { adminClient, completeQuests } from '../support/admin';
 import { stage, stages } from '../support/content';
 import { createSocialUser, deleteSocialUsers } from '../support/socialUsers';
-import { runCode } from '../support/quest';
+import { runButton, runCode, waitForRunner } from '../support/quest';
 import { PHONE_QUIZ_NOTE_KEY, waitStreamSettled } from '../support/test';
 
 const WIDTHS = [
@@ -127,13 +127,19 @@ async function settle(page: Page) {
     );
   });
   await expect(page.locator('html')).toHaveAttribute('data-reduced', 'true');
-  // 지도는 들어올 때 지금 위치를 가운데로 스크롤하는데, 그 순간 화면 등장 전환(PageTransition)이 0~12px 어디쯤인지에 따라
-  // 스크롤 값이 달라진다 → 다 자리 잡은 뒤 같은 방식으로 한 번 더 맞춘다
-  await page.evaluate(() =>
-    document
-      .querySelector('.world-map [data-current]')
-      ?.scrollIntoView({ block: 'center', behavior: 'instant' }),
-  );
+  // 지도는 들어올 때 지금 위치로 스크롤하는데, 그 순간 화면 등장 전환(PageTransition)이 0~12px 어디쯤인지에 따라
+  // 스크롤 값이 달라진다 → 다 자리 잡은 뒤 같은 규칙(WorldMap.tsx 들어올 때 자리 잡기, B97)으로 한 번 더 맞춘다
+  await page.evaluate(() => {
+    const map = document.querySelector('.world-map');
+    const node = map?.querySelector('[data-current]');
+    if (!map || !node) return;
+    const hud =
+      document.querySelector('.wh')?.getBoundingClientRect().bottom ?? 0;
+    const m = map.getBoundingClientRect();
+    if (m.height + 32 <= window.innerHeight - hud)
+      window.scrollBy({ top: m.top - hud - 16, behavior: 'instant' });
+    else node.scrollIntoView({ block: 'center', behavior: 'instant' });
+  });
 }
 
 /** 날짜·오늘에 따라 바뀌는 칸 */
@@ -253,13 +259,11 @@ test('월드 선택', async ({ browser, baseURL }) => {
 
 test('퀘스트 (코드)', async ({ browser, baseURL }) => {
   await onboardNewbie();
-  await screen(
-    browser,
-    baseURL!,
-    'quest-code',
-    'newbie',
-    visit(`/quest/${s1.quests[0].id}`),
-  );
+  await screen(browser, baseURL!, 'quest-code', 'newbie', async (page) => {
+    await page.goto(`/quest/${s1.quests[0].id}`);
+    // 실행기 준비 전("준비 중…"·불러오기 쪽지)을 찍으면 흔들림 (P12-02 뒤 1280에서 한 번 잡힘). 360은 공책 탭이 닫혀 버튼이 안 보임
+    if (await runButton(page).count()) await waitForRunner(page);
+  });
 });
 
 test('퀘스트 (퀴즈)', async ({ browser, baseURL }) => {

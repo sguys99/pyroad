@@ -96,6 +96,27 @@ test('7개 폭: 지도·책장·잠긴 월드·스테이지 시트에 가로 넘
   }
 });
 
+test('넓은 지도: 지금 위치로 내려가도 지도 위 끝이 HUD 밑에 잘리지 않는다 (B97)', async ({
+  page,
+  e2eUser,
+}) => {
+  await completeQuests(e2eUser.id, [s1.quests[0]]);
+  await setMotion(e2eUser.id, 'minimal', 'off');
+  for (const size of [
+    { width: 1280, height: 800 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto('/world');
+    await expect(page.locator('.world-node[data-current]')).toBeInViewport();
+    const [hud, map] = await page.evaluate(() => [
+      document.querySelector('.wh')!.getBoundingClientRect().bottom,
+      document.querySelector('.world-map')!.getBoundingClientRect().top,
+    ]);
+    expect(map, `${size.width}px`).toBeGreaterThanOrEqual(hud);
+  }
+});
+
 test('320px 세로 지도: 지금 위치 깃발이 어느 노드에서도 이름표에 걸리지 않는다', async ({
   page,
   e2eUser,

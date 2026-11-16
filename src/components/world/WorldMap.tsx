@@ -352,12 +352,20 @@ export function WorldMap({
   const unlocking = unlock.target >= 0;
   useEffect(() => {
     if (!scrollToCurrent || unlocking) return;
-    const node = box.current?.querySelector('[data-current]');
-    if (!node) return;
+    const map = box.current;
+    const node = map?.querySelector('[data-current]');
+    if (!map || !node) return;
     const r = node.getBoundingClientRect();
+    if (r.top >= 0 && r.bottom <= window.innerHeight) return;
     // 들어올 때 자리 잡기라 바로 (html의 scroll-behavior: smooth면 첫 화면이 미끄러지고, 그동안 누른 곳이 빗나감, B51)
-    if (r.top < 0 || r.bottom > window.innerHeight)
-      node.scrollIntoView({ block: 'center', behavior: 'instant' });
+    // 넓은 지도가 위에 붙는 HUD 아래 한 화면에 다 들어가면 지도 위 끝을 HUD 밑에 맞춘다 — 가운데 맞추면 지도 위쪽·높은 단계 이름표가 HUD 밑에 잘림 (B97)
+    const hud =
+      document.querySelector('.wh')?.getBoundingClientRect().bottom ?? 0;
+    const m = map.getBoundingClientRect();
+    const gap = 16;
+    if (m.height + gap * 2 <= window.innerHeight - hud)
+      window.scrollBy({ top: m.top - hud - gap, behavior: 'instant' });
+    else node.scrollIntoView({ block: 'center', behavior: 'instant' });
   }, [scrollToCurrent, unlocking]);
 
   // 지난 길 그리기: minimal·동작 줄이기는 즉시, lite는 70% 길이 (P2-15)
