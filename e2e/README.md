@@ -33,6 +33,8 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 | `social-login.spec.ts` | 로그인: 카카오·네이버·Google 세 갈래 로그인 시트 → (목업) provider → 온보딩 관문(새 사용자) / 월드맵(온보딩 끝낸 사용자), 최근 로그인 저장(`pyroad.lastLogin.v1`)과 로그아웃 뒤 "최근에 사용" 배지. 새 로컬 사용자 4명(로그인 4번) (P3-17) |
 | `auth.setup.ts` / `auth.teardown.ts` | 이번 실행 전용 테스트 사용자를 service_role로 만들고 로그인 쿠키를 `e2e/.auth/`에 저장 / 끝나면 사용자 삭제 |
 | `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터·움직임 설정(P2-15)·월드맵·퀘스트 연출 단계 대체(`motion-tiers.spec.ts`, P2-12) |
+| `journey.spec.ts` | 처음부터 끝까지 한 학생 여정(P12-01): 랜딩 → 카카오 로그인(목업) → 온보딩(나이 모름 = 만 14세 미만 + 보호자와 함께 동의) → 지도 시트로 1단계 첫 코드 퀘스트 → 보너스 퀴즈 → (남은 코드 퀘스트는 서버 완료 RPC) → 1단계 보스 승리 → 보상(별 3·보스 XP·코인 = 원장, HUD 잔액, 1단계 클리어·2단계 열림) → 번 코인으로 상점 구매·바로 입기 → 프로필 자랑하기 링크 복사 15코인 → 비로그인으로 공유 페이지 열람. 단계별 깊은 검사는 각 스펙 몫이고 여기는 앞 단계가 만든 상태가 다음 단계로 이어지는지만. **새 학생**(`createSocialUser`) |
+| `sound-unlock.spec.ts` | 소리 잠금 해제·자동재생 금지(P12-01, P0-15): 실제 기본 정책(`--autoplay-policy=document-user-activation-required`)으로 띄우고, "제스처 전" 상태는 페이지 스크립트(`addInitScript`)가 로드 3초 뒤 찍어 console로만 보냄(활성화 없음·곡은 정했지만 `data-bgm-playing` 빈 값·새 AudioContext는 `suspended`) → `page.evaluate`로 활성화만 생겨도 앱은 안 열림 → 실제 클릭(`locator.click`, `isTrusted`)으로 BGM 재생·컨텍스트 `running`. 아래 "주의"의 활성화 함정 때문에 이 파일만 트레이스를 끄고 `support/test`(goto 뒤 `waitForFunction`)가 아닌 기본 `test`를 씀 |
 | `world-select.spec.ts` | 월드 선택(P5-01): 월드 BGM(P5-11, `<html data-bgm data-bgm-playing>`로 제스처 전 무음 → 지도·책장·다른 월드·그 퀘스트 곡 전환), 지도 머리 → 월드 바꾸기 → 책장 → 월드 지도, 잠김·준비 중 안내, 없는 월드 404 화면, 테스트 월드(`fixtures/content/worlds/test-meadow`)를 DB에 넣고 월드 1을 다 깨면 두 번째 월드 지도가 열림. `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷도. 테스트 월드 지도 설정은 Playwright가 서버를 띄우기 전에 `content:build -- --fixtures`로 `build/e2e/`에 만들고 서버 env `PYROAD_E2E_WORLDS`로 읽힘 |
 | `world-chest.spec.ts` | 스테이지 보물상자(P8-06): 별 합계 목표 미달이면 시트에 모으는 중·안에 든 것(코인 30), 채우면 노드에 작은 상자·이름에 안내 → 시트 "열기" → `/api/world/chest` 200 → 시트가 닫히고 지도 위 상자 축하 카드 → 잔액 +30·HUD, 다시 열면 "열었음". 리셋해도 원장이 남아 재시도면 열린 모습만 확인 |
 | `world-missions.spec.ts` | 데일리 미션(P8-07): 월드맵 HUD 미션 칸 → 시트 "오늘의 미션"(첫 칸은 퀘스트 미션, 배정은 서버 `daily_missions_today`로 읽어 기대값) → 달성 전 받기 API 409 → 퀘스트를 끝내면 칸에 금색 점·"받기" → 200, 코인(난이도 금액 + 레벨 업 코인)·XP 15, HUD 잔액 → 다시 받으면 `already_claimed`(0). 360px에서 미션 칸이 보이고 곧 열려요는 빠짐, 시트 가로 넘침 0. 원장 키가 남아 같은 날 재시도면 "받았어요"만 확인 |
@@ -63,6 +65,7 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 - 같은 작업 트리에서 다른 `next build`/`next dev`와 동시에 돌리지 마세요 (`.next/`를 같이 씀).
 - 로그인 스펙은 테스트 사용자 한 명을 테스트마다 초기화하며 쓰므로 `workers: 1`입니다. 재시도는 0 — 흔들리면 고칩니다.
 - 로그인은 실행마다 한 번 (로컬 Auth 로그인 한도: 5분에 30회).
+- **사용자 활성화 함정 (P0-15)**: Playwright의 `page.evaluate`·`waitForFunction`·locator 확인(`expect(locator)`·액션의 사전 검사)과 **트레이스 스냅샷**은 CDP 호출에 `userGesture`를 붙여 페이지에 사용자 활성화(sticky)를 줍니다(실측: `trace: 'retain-on-failure'`면 로드 약 40ms 뒤 `navigator.userActivation.hasBeenActive === true`). 그래서 "제스처 전에는 소리가 안 난다"를 보려면 `sound-unlock.spec.ts`처럼 트레이스를 끄고, 그 상태를 페이지 스크립트가 찍어 보내게 하고, 잠금 해제는 실제 클릭으로 합니다. 다른 스펙의 효과음 기록(`pyroad:sfx`)은 요청 이벤트라 활성화와 상관없음
 
 ## 소셜 로그인 목업 (P3-17)
 

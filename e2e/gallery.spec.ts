@@ -368,7 +368,8 @@ test('대화 작품은 기록을 채팅처럼 다시 보여 주고, 켠 코드�
   const viewer = await newStudent('독자');
   const vp = await openAs(browser, baseURL!, viewer.cookies);
   await vp.goto(`/gallery/${data!.id}`);
-  const chat = vp.getByTestId('gallery-conversation');
+  // 갤러리는 loading.tsx 뒤 스트리밍이라 숨은 사본(S:n)이 잠깐 같이 있음(B48) → 보이는 것만
+  const chat = vp.getByTestId('gallery-conversation').filter({ visible: true });
   await expect(chat.locator('ol')).toHaveAttribute('data-state', 'done', {
     timeout: 15_000,
   });
