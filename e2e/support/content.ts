@@ -150,8 +150,11 @@ interface ProjectYaml {
   }>;
 }
 
-/** 월드(기본: 첫 월드)의 첫 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
-export function projectQuest(world = 'python-island'): {
+/** 월드(기본: 첫 월드)의 n번째(0부터, 기본 첫) 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
+export function projectQuest(
+  world = 'python-island',
+  n = 0,
+): {
   id: string;
   title: string;
   steps: Array<{ goal: string; checklist: string[]; solution: string }>;
@@ -164,7 +167,7 @@ export function projectQuest(world = 'python-island'): {
     for (const f of readdirSync(dir).sort()) {
       if (!f.endsWith('.yaml') || f === 'stage.yaml') continue;
       const q = parse(readFileSync(join(dir, f), 'utf8')) as ProjectYaml;
-      if (q.quest_type !== 'project') continue;
+      if (q.quest_type !== 'project' || n-- > 0) continue;
       return {
         id: q.id,
         title: q.title,

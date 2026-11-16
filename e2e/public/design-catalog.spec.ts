@@ -978,9 +978,9 @@ test.describe('꾸미기 렌더러 (P9-04)', () => {
       await openCatalog(page);
       const grid = page.getByTestId('costume-grid');
       await grid.scrollIntoViewIfNeeded();
-      // 조각 10 + 다 입기 1 행 × 14상태
-      await expect(grid.locator('tr[data-costume]')).toHaveCount(11);
-      await expect(grid.locator('td svg')).toHaveCount(11 * 14);
+      // 조각 12(메이커 베레모·탐정 모자 P11-14 포함) + 다 입기 1 행 × 14상태
+      await expect(grid.locator('tr[data-costume]')).toHaveCount(13);
+      await expect(grid.locator('td svg')).toHaveCount(13 * 14);
       await expect(
         grid.locator('svg text, svg foreignObject, svg image'),
       ).toHaveCount(0);
@@ -1061,7 +1061,7 @@ test.describe('상점 아이템 카탈로그 (P9-01)', () => {
       );
       await expect(
         section.locator('[data-item^="pet_"] svg[viewBox="0 0 48 48"]'),
-      ).toHaveCount(4);
+      ).toHaveCount(5); // 느릿이 (P11-14)
       for (const box of await items.evaluateAll((els) =>
         els.map((el) => el.getBoundingClientRect().right),
       ))
@@ -1079,7 +1079,7 @@ test.describe('상점 화면 (P9-02)', () => {
       await openCatalog(page);
       const demo = page.getByTestId('catalog-shop-screen');
       await demo.scrollIntoViewIfNeeded();
-      await expect(demo.locator('[data-item]')).toHaveCount(10);
+      await expect(demo.locator('[data-item]')).toHaveCount(12); // 코스튬 탭 (메이커 모자 2 P11-14 포함)
       await demo.getByRole('button', { name: /^마법사 모자,/ }).click();
       const sheet = page.getByTestId('shop-sheet');
       await expect(sheet.getByTestId('shop-stage')).toHaveAttribute(

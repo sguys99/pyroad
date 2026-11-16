@@ -1,7 +1,7 @@
 // 2월드 코드 바다 끝까지 (P10-12, Phase 10 완료 기준 ②): 1월드를 다 깬 새 학생이 2월드를 연다 →
 //   화면에서 코드 퀘스트·보너스 퀴즈(2-1), 프로젝트 1단계(2-F 용돈 기입장), 최종 보스 "버그버그 선장"(2-F)을 풀고,
 //   나머지는 서버 완료 RPC(앱 완료 API 가 채점 뒤 부르는 함수)로 스테이지 순서대로 끝냄 — 스테이지마다 지도에서 다음 스테이지가 열리는지 확인.
-//   끝: 지도 7 스테이지 모두 클리어, 책장에서 코드 바다 "다 읽었어요" · 메이커 시티 해제 조건 "코드 바다를 다 모험하면 열려요".
+//   끝: 지도 7 스테이지 모두 클리어, 책장에서 코드 바다 "다 읽었어요" · 메이커 시티 "새로 열렸어요!" (P11-14부터 3월드 준비 완료).
 // 실력 확인 퀴즈 합격 길(P10-03): 1월드 기록이 없는 새 학생이 책장 → 퀴즈 10문제 모두 맞힘 → 합격 + 배지 → 2월드 첫 스테이지만 열림.
 // 정답은 하드코딩하지 않고 content/ YAML(코드 정답)과 service_role(퀴즈·보스·실력 확인 정답)에서 읽는다
 
@@ -185,10 +185,8 @@ test('1월드를 다 깬 학생이 2월드 7 스테이지를 끝까지 (코드·
     page.locator(`.wb-shelf [data-book-slug="${slug}"]`);
   await expect(book('python-island')).toContainText('다 읽었어요');
   await expect(book('code-sea')).toContainText('다 읽었어요');
-  await expect(book('maker-city')).toContainText('준비 중');
-  await expect(book('maker-city')).toContainText(
-    '코드 바다를 다 모험하면 열려요',
-  );
+  // P11-14부터 3월드도 다 써서, 2월드를 끝내면 메이커 시티가 바로 열림
+  await expect(book('maker-city')).toContainText('새로 열렸어요!');
   expect(await coinMismatches([me])).toEqual([]);
 });
 

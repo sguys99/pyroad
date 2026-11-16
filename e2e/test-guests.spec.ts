@@ -1,6 +1,6 @@
 // 시험 손님 채점 (P11-05, §12-Q75 ⑤): 입력 퀘스트는 "코드 돌려보기"가 직접 해 보기(채점 없음)이고
 // "시험 손님 부르기"가 공개 손님마다 자동 실행 → 대화 카드 → 서버가 손님별 규칙으로 재채점 → 완료.
-// 퀘스트는 테스트 월드(e2e/fixtures/content/worlds/test-meadow/01-gate/02-test-guests.yaml)라 앞 월드를 끝내 둔다
+// 퀘스트는 테스트 월드(e2e/fixtures/content/worlds/test-meadow/01-gate/02-test-guests.yaml)라 앞 월드(3월드까지, P11-14)를 끝내 둔다
 
 import { test, expect } from './support/test';
 import {
@@ -42,7 +42,11 @@ test.describe('시험 손님 채점 (P11-05)', () => {
   }) => {
     await completeQuests(
       e2eUser.id,
-      [...allQuestIds(), ...allQuestIds('code-sea')].map((id) => ({
+      [
+        ...allQuestIds(),
+        ...allQuestIds('code-sea'),
+        ...allQuestIds('maker-city'),
+      ].map((id) => ({
         id,
         solution: '',
       })),
@@ -123,7 +127,11 @@ test.describe('시험 손님 채점 (P11-05)', () => {
   }) => {
     await completeQuests(
       e2eUser.id,
-      [...allQuestIds(), ...allQuestIds('code-sea')].map((id) => ({
+      [
+        ...allQuestIds(),
+        ...allQuestIds('code-sea'),
+        ...allQuestIds('maker-city'),
+      ].map((id) => ({
         id,
         solution: '',
       })),
