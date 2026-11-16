@@ -43,11 +43,11 @@ describe('커리큘럼 로드맵 = 콘텐츠', () => {
     expect(quests).toHaveLength(WORLD1_QUESTS);
   });
 
-  it('월드 1만 열려 있고 2·3은 준비 중 (§12-Q40 이름)', () => {
+  it('월드 1·2·3 모두 열림 — 상태는 world.yaml ready 를 따름 (§12-Q40 이름, B88)', () => {
     expect(ROADMAP.map((s) => [s.world, s.name, s.status])).toEqual([
       [1, '파이썬 섬', 'open'],
-      [2, '코드 바다', 'soon'],
-      [3, '메이커 시티', 'soon'],
+      [2, '코드 바다', 'open'],
+      [3, '메이커 시티', 'open'],
     ]);
   });
 });
@@ -78,13 +78,14 @@ describe('보호자 섹션 서버 HTML', () => {
     expect(html).toContain('id="parents-title"');
   });
 
-  it('편지 세 단·로드맵·준비 중 표시가 처음부터 보이는 상태다', () => {
+  it('편지 세 단·로드맵이 처음부터 보이는 상태다 (준비 중·바뀔 수 있어요 없음, B88)', () => {
     for (const col of LETTER) {
       expect(html).toContain(`>${col.title}</h3>`);
       for (const item of col.items) expect(html).toContain(item);
     }
     for (const name of WORLD1_STAGES) expect(html).toContain(name);
-    expect(html.match(/>준비 중</g)?.length).toBe(2);
+    expect(html).not.toContain('>준비 중<');
+    expect(html).not.toContain('바뀔 수 있어요');
     expect(html).not.toMatch(/opacity:\s*0[;"]/);
   });
 });

@@ -2,7 +2,13 @@
  * 랜딩 `#parents` 보호자 안내 문구 (P4-07). 보호자께 하는 말이라 존댓말, 간결하게.
  * **모든 문장은 지금 코드·문서로 확인한 사실만** 쓴다. 근거를 문장 옆 주석에 두고, 바뀌면 같이 고친다.
  * 아직 없는 기능은 쓰지 않는다(로드맵은 `soon`=준비 중). P8-12 휴식 알림은 생겨서 "준비 중"에서 편지로 옮겼다.
+ * 로드맵 열림 여부는 content/worlds/<slug>/world.yaml 의 `ready`(세계관 섹션과 같은 곳, B88)
  */
+import { WORLDS } from '@/lib/world/worlds';
+
+/** 콘텐츠가 있는 월드면 open (월드 order = 번호) */
+const statusOf = (no: 1 | 2 | 3): Stop['status'] =>
+  WORLDS.find((w) => w.order === no)?.ready ? 'open' : 'soon';
 
 export interface LetterColumn {
   id: 'safety' | 'ai' | 'learning';
@@ -89,14 +95,14 @@ export const ROADMAP: readonly Stop[] = [
     // §5 2월드 초안 (Phase 10)
     world: 2,
     name: '코드 바다',
-    status: 'soon',
+    status: statusOf(2),
     summary: '문자열·딕셔너리·랜덤·에러 처리 같은 응용',
   },
   {
     // §5 3월드 초안 (Phase 11)
     world: 3,
     name: '메이커 시티',
-    status: 'soon',
+    status: statusOf(3),
     summary: '거북이 그림, 텍스트 게임 같은 나만의 작품',
   },
 ];

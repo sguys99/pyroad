@@ -19,7 +19,11 @@ export function FunShowcaseSection() {
       deferredCss="fun"
       kicker="퀘스트 말고도 재미가 가득"
       title="모험이 더 신나는 이유"
-      lead="'곧 열려요'는 지금 만들고 있는 기능이에요."
+      lead={
+        FUN_SCENES.some((s) => s.soon)
+          ? "'곧 열려요'는 지금 만들고 있는 기능이에요."
+          : undefined
+      }
       className="ld-fun"
     >
       <FunShowcase scenes={FUN_SCENES} />
