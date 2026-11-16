@@ -123,9 +123,9 @@ describe('상점 카탈로그 (P9-01)', () => {
     ]);
   });
 
-  it('펫 3~4종, 900~1,500 안에서 가격이 모두 다름', () => {
+  it('펫 3~5종(메이커 느릿이 포함, P11-14), 900~1,500 안에서 가격이 모두 다름', () => {
     expect(PET_IDS.length).toBeGreaterThanOrEqual(3);
-    expect(PET_IDS.length).toBeLessThanOrEqual(4);
+    expect(PET_IDS.length).toBeLessThanOrEqual(5);
     const prices = SHOP_ITEMS.filter((i) => i.kind === 'pet').map(
       (i) => i.price,
     );

@@ -6200,13 +6200,13 @@ async function groupAchievements(u) {
              ('${x.id}', 'streak_3', '2026-10-01 10:00+09'), ('${x.id}', 'project_builder', '2026-10-02 10:00+09')`);
       const sql = readFileSync(join(HERE, '..', 'migrations', '00036_achievements.sql'), 'utf8');
       // 00048(P9-18)·00053(P10-11) 정의가 있으면 00036 자기 검증이 새 지표를 모른다고 실패 → 지운 뒤 다시 돌리고 00048·00053 으로 되살림 (00048 머리 주석)
-      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three') or category = 'sea'`);
+      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three') or category in ('sea', 'maker')`);
       const m1 = psql(sql);
       const m2 = psql(sql);
       // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
       // 00047(B74)·00048(P9-18)·00051(B75)·00053(P10-11, evaluate·claim 도)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
       const m3 = psql(
-        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql', '00053_sea_achievements.sql']
+        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql', '00053_sea_achievements.sql', '00057_maker_achievements.sql']
           .map((f) => readFileSync(join(HERE, '..', 'migrations', f), 'utf8'))
           .join('\n'),
       );
@@ -6308,7 +6308,7 @@ async function groupAchievements(u) {
     group: 'achievements',
     id: 'WK-1',
     role: 'service_role',
-    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 53종(00053 코드 바다 7종 포함)',
+    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 62종(00053 코드 바다 7종 · 00057 메이커 시티 9종 포함)',
     ...OK,
     run: async () => {
       const x = await createUser('wk1', '주말공부');
@@ -6336,7 +6336,7 @@ async function groupAchievements(u) {
       return (
         compare(
           'WK-1',
-          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '53' },
+          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '62' },
           {
             four,
             weekly: got.filter((a) => a.id.startsWith('week')).map((a) => a.id).join(','),
@@ -6454,6 +6454,102 @@ async function groupAchievements(u) {
           IF (v_r->>'coins_earned')::int <> 30 OR (v_r->>'coins_balance')::int <> v_coins + 30
              OR (SELECT delta FROM public.coin_ledger WHERE user_id = v_uid AND source = 'achievement' AND ref = 'sea_captain') <> 30 THEN
             RAISE EXCEPTION '선장 받기: %', v_r;
+          END IF;
+        END $$;`),
+  });
+
+  // ── 메이커 시티 업적 (P11-14, ① 00057) ──
+  const maker = await createUser('maker1', '메이커');
+  const makerFriend = await createUser('maker2', '메이커친구');
+  await check({
+    group: 'achievements',
+    id: 'MAKER-1',
+    role: 'postgres',
+    op: '메이커 시티 업적 (00057): 작품 저장 → 첫 작품 · 출품 → 첫 전시 · 친구 작품 5개 스티커 → 응원 단장(코인 0, 받은 것으로) · 내 작품 스티커는 안 셈 · 3-1 깸 → 거북이 화가 · 3-2~3-4 → 이야기 짓는 사람 · 3-6 → 게임 개발자 · 3월드 모두(별 3) → 도시 보스·명예 시민·숨김 완벽한 도시 · 받기 골드 100 · 다시 판정해도 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        DO $$
+        DECLARE
+          v_uid   UUID := '${maker.id}';
+          v_fr    UUID := '${makerFriend.id}';
+          v_got   TEXT;
+          v_r     JSONB;
+          v_coins INTEGER;
+          v_c     UUID;
+          q_new   CONSTANT TEXT := $q$SELECT COALESCE(string_agg(e->>'id' || ':' || (e->>'coins'), ',' ORDER BY e->>'id'), '')
+                                     FROM jsonb_array_elements(public.evaluate_achievements($1)) e
+                                    WHERE e->>'id' IN (SELECT id FROM public.achievements WHERE category = 'maker')$q$;
+          q_any   CONSTANT UUID := (SELECT q.id FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
+                                     JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'maker-city' ORDER BY s."order", q."order" LIMIT 1);
+        BEGIN
+          SELECT coins INTO v_coins FROM public.users WHERE id = v_uid;
+          v_r := public.achievement_stats(v_uid);
+          IF (v_r->>'maker_perfect_total')::int <> 7 OR (v_r->>'maker_bosses_total')::int <> 7
+             OR (v_r->>'maker_saves')::int <> 0 OR (v_r->>'maker_cheers')::int <> 0 THEN
+            RAISE EXCEPTION '처음 지표: %', v_r;
+          END IF;
+
+          -- 작품 저장 → 첫 작품, 출품 → 첫 전시
+          INSERT INTO public.creations (user_id, quest_id, kind, title, code, transcript)
+          VALUES (v_uid, q_any, 'conversation', '내 이야기', 'print(1)', '[{"out":"1"}]'::jsonb)
+          RETURNING id INTO v_c;
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'maker_first_save:10' THEN RAISE EXCEPTION '첫 작품: %', v_got; END IF;
+          UPDATE public.creations SET visibility = 'public', published_at = now() WHERE id = v_c;
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'maker_first_post:10' THEN RAISE EXCEPTION '첫 전시: %', v_got; END IF;
+
+          -- 스티커: 내 작품은 안 셈, 친구 작품 4개면 아직, 5개면 응원 단장(코인 0, 얻는 순간 받은 것)
+          INSERT INTO public.creation_reactions (creation_id, user_id, sticker) VALUES (v_c, v_uid, 'wow');
+          INSERT INTO public.creations (user_id, quest_id, kind, title, code, transcript)
+          SELECT v_fr, q_any, 'conversation', '친구 ' || g, 'print(1)', '[{"out":"1"}]'::jsonb FROM generate_series(1, 5) g;
+          INSERT INTO public.creation_reactions (creation_id, user_id, sticker)
+          SELECT c.id, v_uid, s FROM public.creations c, (VALUES ('wow'), ('love')) v(s)
+           WHERE c.user_id = v_fr AND c.title IN ('친구 1', '친구 2', '친구 3', '친구 4');
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '스티커 4개 작품인데: %', v_got; END IF;
+          INSERT INTO public.creation_reactions (creation_id, user_id, sticker)
+          SELECT c.id, v_uid, 'cheer' FROM public.creations c WHERE c.user_id = v_fr AND c.title = '친구 5';
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'cheer_leader:0' THEN RAISE EXCEPTION '응원 단장: %', v_got; END IF;
+          IF (SELECT claimed_at IS NULL FROM public.user_achievements WHERE user_id = v_uid AND achievement_id = 'cheer_leader') THEN
+            RAISE EXCEPTION '코인 0 배지가 받기 대기로 남음';
+          END IF;
+
+          -- 3-1 모두(별 3) → 거북이 화가 + 도시 보스 첫 승리
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '1 hour' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id = 'a3000000-0000-0000-0000-000000000001';
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'maker_boss_first:10,turtle_painter:30' THEN RAISE EXCEPTION '3-1: %', v_got; END IF;
+
+          -- 3-2·3-3 만 → 아직, 3-4 까지 → 이야기 짓는 사람
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '50 minutes' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id IN ('a3000000-0000-0000-0000-000000000002', 'a3000000-0000-0000-0000-000000000003');
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '3-2·3-3 만: %', v_got; END IF;
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '40 minutes' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id = 'a3000000-0000-0000-0000-000000000004';
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'story_weaver:30' THEN RAISE EXCEPTION '3-4: %', v_got; END IF;
+
+          -- 나머지(3-5·3-6·3-F) 모두 별 3 → 게임 개발자·명예 시민·완벽한 도시
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '1 minute' + s."order" * interval '1 second' + q."order" * interval '10 ms'
+            FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
+           WHERE s.id IN ('a3000000-0000-0000-0000-000000000005', 'a3000000-0000-0000-0000-000000000006', 'a3000000-0000-0000-0000-000000000007');
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'game_maker:30,maker_citizen:100,perfect_city:100' THEN RAISE EXCEPTION '3월드 클리어: %', v_got; END IF;
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '다시 판정: %', v_got; END IF;
+
+          -- 받기: 골드 100, 원장 한 번
+          v_r := public.claim_achievement(v_uid, 'maker_citizen');
+          IF (v_r->>'coins_earned')::int <> 100 OR (v_r->>'coins_balance')::int <> v_coins + 100 THEN
+            RAISE EXCEPTION '명예 시민 받기: %', v_r;
           END IF;
         END $$;`),
   });
@@ -6668,16 +6764,17 @@ async function groupSchema(u) {
     group: 'schema',
     id: 'WD-4',
     role: 'postgres',
-    op: '스테이지 world_id·quest_type 백필 (1월드 7개 + 2월드 7개, 1월드 project 는 7-1 · project·code·quiz·boss 는 seed 와 같은 수, quiz_kind 는 퀴즈만 · 모바일은 퀴즈·보스만)',
+    op: '스테이지 world_id·quest_type 백필 (1월드 7개 + 2월드 7개 + 3월드 7개(P11-14 부터 seed), 1월드 project 는 7-1 · project·code·quiz·boss 는 seed 와 같은 수, quiz_kind 는 퀴즈만 · 모바일은 퀴즈·보스만)',
     deny: ['mismatch', 'error'],
     allow: ['ok'],
     run: () =>
       sqlCheck(`DO $$ BEGIN
-        -- 1월드(python-island) 7개 + 2월드(code-sea, P10-07 부터 seed) 7개, 그 밖의 월드엔 없음
+        -- 1월드(python-island) 7개 + 2월드(code-sea, P10-07 부터 seed) 7개 + 3월드(maker-city, P11-14 부터 seed) 7개
         IF (SELECT count(*) FROM public.stages WHERE world_id = '${PYTHON_ISLAND}') <> 7
            OR (SELECT count(*) FROM public.stages s JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'code-sea') <> 7
-           OR (SELECT count(*) FROM public.stages) <> 14 THEN
-          RAISE EXCEPTION 'stages: 1월드 7개 · 2월드 7개가 아님';
+           OR (SELECT count(*) FROM public.stages s JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'maker-city') <> 7
+           OR (SELECT count(*) FROM public.stages) <> 21 THEN
+          RAISE EXCEPTION 'stages: 1월드 7개 · 2월드 7개 · 3월드 7개가 아님';
         END IF;
         IF (SELECT string_agg(q.id::text, ',') FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
              WHERE q.quest_type = 'project' AND s.world_id = '${PYTHON_ISLAND}') <> '${Q_PROJECT}'

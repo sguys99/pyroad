@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Check, ChevronLeft, Sailboat, Sparkle, Sprout } from 'lucide-react';
+import {
+  Building2,
+  Check,
+  ChevronLeft,
+  Sailboat,
+  Sparkle,
+  Sprout,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { HudCounter } from '@/components/ui/hud';
@@ -54,6 +61,7 @@ const CATEGORY_NOTE: Record<AchievementCategory, string> = {
   growth: '레벨이 오르고 상자를 열면 열려요',
   grit: '틀리고 다시 해 본 용기에 주는 업적이에요',
   sea: '2월드 섬들을 항해하며 모아요',
+  maker: '3월드 작업실에서 작품을 만들며 모아요',
 };
 
 type Filter = 'all' | 'earned' | 'todo';
@@ -384,6 +392,14 @@ export function AchievementBook({
                   <span>
                     <b className="font-display">코드 바다에서만 얻어요!</b>{' '}
                     {CATEGORY_NOTE.sea}
+                  </span>
+                </p>
+              ) : c === 'maker' ? (
+                <p className="ab-sea ab-maker">
+                  <Building2 aria-hidden />
+                  <span>
+                    <b className="font-display">메이커 시티에서만 얻어요!</b>{' '}
+                    {CATEGORY_NOTE.maker}
                   </span>
                 </p>
               ) : (

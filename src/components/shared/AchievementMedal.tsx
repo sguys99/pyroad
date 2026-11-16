@@ -49,6 +49,15 @@ import {
   ShipWheel,
   Stethoscope,
   Waves,
+  BookOpen,
+  Bot,
+  Brush,
+  Building2,
+  Frame,
+  Gamepad2,
+  HandHeart,
+  Landmark,
+  Palette,
   type LucideIcon,
 } from 'lucide-react';
 import type { AchievementTier } from '@/lib/quest/achievements';
@@ -107,6 +116,16 @@ export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   ShipWheel,
   Stethoscope,
   Waves,
+  // 3월드 메이커 시티 (00057)
+  BookOpen,
+  Bot,
+  Brush,
+  Building2,
+  Frame,
+  Gamepad2,
+  HandHeart,
+  Landmark,
+  Palette,
 };
 
 /** 업적 아이콘 그림 (모르는 이름은 메달 모양) */

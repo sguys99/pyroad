@@ -157,7 +157,7 @@ export const EDITOR_THEME_KEYS = [
   'text',
 ] as const satisfies readonly ColorName[];
 export type EditorThemeKey = (typeof EDITOR_THEME_KEYS)[number];
-export type EditorThemeId = 'night' | 'ocean' | 'candy';
+export type EditorThemeId = 'night' | 'ocean' | 'candy' | 'arcade';
 
 export const EDITOR_THEMES: Record<
   EditorThemeId,
@@ -231,6 +231,29 @@ export const EDITOR_THEMES: Record<
     errorSoft: '#FBEAE6',
     surface: '#FFFFFF',
     text: '#3B2836',
+  },
+  /** 밤하늘 오락실 (P11-14 제안 N): 보랏빛 밤 면 + 네온 분홍 키워드 · 네온 노랑 문자열 · 하늘 숫자 · 연두 함수 */
+  arcade: {
+    codeBg: '#1A1530',
+    codeText: '#F1ECFF',
+    codeComment: '#ABA2CF',
+    codeKeyword: '#FF8AD8',
+    codeString: '#FFE46B',
+    codeNumber: '#7FF0FF',
+    codeFunc: '#8CF59A',
+    surface2: '#14102A',
+    textMuted: '#B9B0DD',
+    line: '#2E2650',
+    lineStrong: '#7A6FA8',
+    primary: '#9EF0B0',
+    primarySoft: '#2F2A5A',
+    accentLight: '#4A3A14',
+    accentSoft: '#3A3222',
+    accentText: '#FFE46B',
+    error: '#FF8F8F',
+    errorSoft: '#4A2234',
+    surface: '#241D44',
+    text: '#F1ECFF',
   },
 };
 

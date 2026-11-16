@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { evaluateAchievements } from '@/lib/quest/rewardRpc';
 import { reportServerError } from '@/lib/api/serverError';
 import {
   checkCreationTexts,
@@ -146,5 +147,7 @@ export async function POST(request: Request) {
     reportServerError(error, { area: 'creations', op: 'insert' });
     return bad(SAVE_FAILED, 500, 'server');
   }
+  // 업적 "첫 작품"(00057): 저장 행을 보고 판정. 실패해도 다음 판정·도감 열기 때 잡힘
+  await evaluateAchievements(createAdminClient(), user.id);
   return NextResponse.json({ id: data.id }, { status: 201 });
 }

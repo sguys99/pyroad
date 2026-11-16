@@ -780,6 +780,12 @@ export const EXPECT = {
     activateIn: 'P10-11',
     note: '00053 코드 바다 업적: skill_pass 는 코인 0(얻는 순간 claimed_at, 받기 0·원장 없음) · 2-5 코드 힌트 0 모두 → sea_bug_doctor(보스 제외) · 스테이지·보스·2월드 클리어·별 3 모두(숨김) · 받기는 티어 금액',
   },
+  'MAKER-1': {
+    expect: 'allow',
+    requires: 'public.achievement_stats()',
+    activateIn: 'P11-14',
+    note: '00057 메이커 시티 업적: 작품 저장·출품·친구 작품 5개 스티커(cheer_leader 코인 0, 내 작품 제외) · 3-1 / 3-2~3-4 / 3-6 / 3-F 클리어 · 보스 첫 승리 · 별 3 모두(숨김) · 받기는 티어 금액',
+  },
   'B74-1': {
     expect: 'allow',
     requires: 'public.boss_answer()',

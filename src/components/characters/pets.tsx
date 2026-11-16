@@ -81,10 +81,24 @@ function Chick() {
   );
 }
 
+/** 거북 등딱지 색 (꼬북이 = 청록, 느릿이 = 꿀색) */
+const TEAL_SHELL = {
+  fill: '#79BFAF',
+  plate: '#A9DACD',
+  rim: '#579E8F',
+  line: '#3E7E70',
+};
+const HONEY_SHELL = {
+  fill: '#E9B872',
+  plate: '#F6D9A8',
+  rim: '#C9924A',
+  line: '#9C6B2E',
+};
+
 /** 꼬북이: 아기 거북 (옆모습, 오른쪽을 보며 고개를 듦) */
-function Turtle() {
+function Turtle({ palette = TEAL_SHELL }: { palette?: typeof TEAL_SHELL }) {
   const skin = line('#7E9F5C');
-  const shell = line('#3E7E70');
+  const shell = line(palette.line);
   const neck = 'M31 34.5c1.6-3.4 3.6-6 6-7.6';
   return (
     <>
@@ -102,15 +116,18 @@ function Turtle() {
       />
       <path
         d="M4 36.5C4 26.1 11 19 20.3 19s16.3 7.1 16.3 17.5Z"
-        fill="#79BFAF"
+        fill={palette.fill}
         {...shell}
       />
-      <path d="M16.5 23.6h7.6l3.2 5.3-3.2 5.3h-7.6l-3.2-5.3Z" fill="#A9DACD" />
-      <path d="M7.7 30.4l3.4-4.6 2 3.2-2 4.4H7.3Z" fill="#A9DACD" />
-      <path d="M32.7 30.4l-3.4-4.6-2 3.2 2 4.4h3.8Z" fill="#A9DACD" />
+      <path
+        d="M16.5 23.6h7.6l3.2 5.3-3.2 5.3h-7.6l-3.2-5.3Z"
+        fill={palette.plate}
+      />
+      <path d="M7.7 30.4l3.4-4.6 2 3.2-2 4.4H7.3Z" fill={palette.plate} />
+      <path d="M32.7 30.4l-3.4-4.6-2 3.2 2 4.4h3.8Z" fill={palette.plate} />
       <path
         d="M2.9 35.6h33.8a2.2 2.2 0 0 1 0 4.4H2.9a2.2 2.2 0 0 1 0-4.4Z"
-        fill="#579E8F"
+        fill={palette.rim}
         {...shell}
       />
       <path
@@ -245,9 +262,45 @@ function Dragon() {
   );
 }
 
+const TealTurtle = () => <Turtle />;
+
+/** 느릿이: 메이커 시티 화가 거북 (P11-14 제안 N) — 꿀색 등딱지에 물감 방울, 베레모, 등에 멘 붓 */
+function Neurit() {
+  return (
+    <>
+      <Turtle palette={HONEY_SHELL} />
+      <path
+        d="M9 21.5 L4.5 13.5"
+        stroke="#8D6E63"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
+      <path
+        d="M4.9 14.2 L3.4 11.2 C2.6 9.6 4.4 8.6 5.3 10 L6.4 12.8 Z"
+        fill="#C2435F"
+        {...line('#8E2F45', 0.9)}
+      />
+      <circle cx="13.5" cy="26.8" r="1.6" fill="#4FA3E0" />
+      <circle cx="26.6" cy="26.2" r="1.4" fill="#C2435F" />
+      <circle cx="20.2" cy="21.6" r="1.2" fill="#7CC36E" />
+      <path
+        d="M33.4 18.6c-.6-3.4 3.2-5.6 6.8-5.4 3.4.2 5.8 2 4.6 4.4-2.6 1.6-8.4 1.8-11.4 1Z"
+        fill="#C2435F"
+        {...line('#8E2F45', 1)}
+      />
+      <path
+        d="M39.2 13.3l.4-1.8 1.1.2-.3 1.7Z"
+        fill="#C2435F"
+        {...line('#8E2F45', 0.8)}
+      />
+    </>
+  );
+}
+
 const PET_ART: Record<PetId, () => React.ReactElement> = {
   pet_chick: Chick,
-  pet_turtle: Turtle,
+  pet_turtle: TealTurtle,
+  pet_neurit: Neurit,
   pet_fox: Fox,
   pet_dragon: Dragon,
 };

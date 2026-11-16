@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { evaluateAchievements } from '@/lib/quest/rewardRpc';
 import { isUuid, reportServerError } from '@/lib/api/serverError';
 import { guardianWriteGate } from '@/lib/consent/server';
 import {
@@ -140,6 +141,8 @@ export async function PATCH(
     return bad(FAILED, 500, 'server');
   }
   if (title !== row.title) await purgeCreationShareCards(admin, id);
+  // 업적 "첫 전시"(00057)
+  await evaluateAchievements(admin, user.id);
   return NextResponse.json({ id, title, showCode, visibility: 'public' });
 }
 

@@ -5,7 +5,13 @@
 // - 배경: 리그 밖 (정적)
 // 표정 소품(별 눈·물음표·Zzz)은 코스튬과 분리되어 있어 서로 겹치지 않는다 (P0-10). 예전 `ProudAccessory` 왕관은 `crown` 모자.
 // 훅 없음 (서버·공유 카드에서도 호출).
-export type HatKind = 'party' | 'explorer' | 'crown' | 'wizard';
+export type HatKind =
+  | 'party'
+  | 'explorer'
+  | 'crown'
+  | 'wizard'
+  | 'beret'
+  | 'detective';
 export type GlassesKind = 'round' | 'sun';
 export type BackdropKind = 'island' | 'paper';
 /** 상점 망토 아이템의 색 (P9-01 카탈로그 `art` 키 → `Costume.cape`) */
@@ -41,6 +47,8 @@ const HAT_TONE: Record<HatKind, string> = {
   explorer: '#9C7B45',
   crown: '#C98A0B',
   wizard: '#4A2C8F',
+  beret: '#8E2F45',
+  detective: '#6B4F33',
 };
 
 /** outline = 잉크 외곽선(A×B), tonal = 제 색 진한 톤 얇은 선(B), 둘 다 없으면 선 없음(A) */
@@ -136,6 +144,75 @@ export function Hat({
             fill="#FFF176"
           />
           <circle cx="71" cy="2" r="1.4" fill="#FFF176" />
+        </g>
+      );
+    // 3월드 메이커 상점 (P11-14 제안 N): 화가 베레모 — 물감 세 방울 + 꼭지 (보스 painter 소품과 같은 말씨)
+    case 'beret':
+      return (
+        <g transform="rotate(-8 64 22)">
+          <path
+            d="M41 24 C38 12 54 5 69 6 C83 7 91 14 86 23 C77 28 50 28 41 24 Z"
+            fill="#C2435F"
+            {...ol}
+          />
+          <path
+            d="M44 22 C56 26 74 26 85 21"
+            stroke="#A3364F"
+            strokeWidth="1.4"
+            fill="none"
+          />
+          <path d="M63 6.5 l1.4 -5 3 .6 -.8 4.6 z" fill="#C2435F" {...ol} />
+          <circle cx="53" cy="15" r="2.8" fill="#4FA3E0" />
+          <circle cx="73" cy="13" r="2.3" fill="#FFD54F" />
+          <circle cx="62" cy="20" r="2" fill="#7CC36E" />
+          <ellipse
+            cx="55"
+            cy="10"
+            rx="5"
+            ry="2"
+            fill="#fff"
+            opacity="0.3"
+            transform="rotate(-15 55 10)"
+          />
+        </g>
+      );
+    // 탐정 모자 (사냥 모자): 앞뒤 챙 + 귀덮개 + 체크 무늬 (보스 detective 소품과 같은 모양)
+    case 'detective':
+      return (
+        <g transform="translate(0 -6)">
+          <path
+            d="M34 31 Q40 26 46 29 L44 34 Q38 33 34 31 Z"
+            fill="#8D6E52"
+            {...ol}
+          />
+          <path
+            d="M94 31 Q88 26 82 29 L84 34 Q90 33 94 31 Z"
+            fill="#8D6E52"
+            {...ol}
+          />
+          <path
+            d="M43 32 C41 16 52 9 64 9 C76 9 87 16 85 32 Z"
+            fill="#B89470"
+            {...ol}
+          />
+          <path
+            d="M64 9 V32 M53 12 C50 18 49 25 50 32 M75 12 C78 18 79 25 78 32 M45 22 H83"
+            stroke="#7A5C40"
+            strokeWidth="0.9"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M47 27 C45 33 46 38 50 40 C52 36 52 31 51 27 Z"
+            fill="#8D6E52"
+            {...ol}
+          />
+          <path
+            d="M81 27 C83 33 82 38 78 40 C76 36 76 31 77 27 Z"
+            fill="#8D6E52"
+            {...ol}
+          />
+          <ellipse cx="64" cy="7" rx="3" ry="2.4" fill="#8D6E52" {...ol} />
         </g>
       );
   }

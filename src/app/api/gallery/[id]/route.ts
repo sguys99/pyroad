@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { evaluateAchievements } from '@/lib/quest/rewardRpc';
 import { isAdminUser } from '@/lib/admin';
 import { isUuid, reportServerError } from '@/lib/api/serverError';
 import { REPORT_REASONS } from '@/lib/board/limits';
@@ -169,5 +170,7 @@ export async function POST(
     reportServerError(error, { area: 'gallery', op: 'react' });
     return bad(FAILED, 500, 'server');
   }
+  // 업적 "응원 단장"(00057, 코인 없는 배지): 붙인 스티커만 셈
+  if (body.on) await evaluateAchievements(admin, user.id);
   return NextResponse.json({ stickers: await countStickers(id) });
 }

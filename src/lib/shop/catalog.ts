@@ -61,7 +61,12 @@ export type CostumeItem = ItemBase & { kind: 'costume' } & (
     | { slot: 'cape'; art: CapeKind }
     | { slot: 'bg'; art: BackdropKind }
   );
-export type PetId = 'pet_chick' | 'pet_turtle' | 'pet_fox' | 'pet_dragon';
+export type PetId =
+  | 'pet_chick'
+  | 'pet_turtle'
+  | 'pet_fox'
+  | 'pet_dragon'
+  | 'pet_neurit';
 export type PetItem = ItemBase & { kind: 'pet'; id: PetId };
 export type FrameItem = ItemBase & { kind: 'frame'; art: string };
 /** `art` = 에디터 테마 색표 이름 (`EDITOR_THEMES`, P9-06) */
@@ -203,6 +208,29 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
     rarity: 'epic',
     sort: 100,
   },
+  // ── 메이커 상점 (P11-14 제안 N, 00058): 3월드에서 상점이 바닥나지 않게 (balance.md 8.3) ──
+  {
+    id: 'hat_beret',
+    kind: 'costume',
+    slot: 'hat',
+    art: 'beret',
+    name: '화가 베레모',
+    description: '물감 방울이 톡톡 묻은 거북이 화가의 베레모예요.',
+    price: 450,
+    rarity: 'rare',
+    sort: 102,
+  },
+  {
+    id: 'hat_detective',
+    kind: 'costume',
+    slot: 'hat',
+    art: 'detective',
+    name: '탐정 모자',
+    description: '데이터 탐정처럼 단서를 찾는 체크무늬 모자예요.',
+    price: 600,
+    rarity: 'rare',
+    sort: 104,
+  },
   // ── 프로필 프레임 (아바타 테두리, 그림은 P9-05) ──
   {
     id: 'frame_sprout',
@@ -265,6 +293,16 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
     rarity: 'common',
     sort: 230,
   },
+  {
+    id: 'theme_arcade',
+    kind: 'editor_theme',
+    art: 'arcade',
+    name: '밤하늘 오락실 공책',
+    description: '네온사인이 반짝이는 오락실 밤하늘 공책이에요.',
+    price: 450,
+    rarity: 'common',
+    sort: 240,
+  },
   // ── 동행 펫 (월드맵 PetSlot, 그림 PET_ART) ──
   {
     id: 'pet_chick',
@@ -301,6 +339,15 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
     price: 1500,
     rarity: 'epic',
     sort: 340,
+  },
+  {
+    id: 'pet_neurit',
+    kind: 'pet',
+    name: '느릿이',
+    description: '메이커 시티의 화가 거북이가 붓을 메고 따라와요.',
+    price: 1200,
+    rarity: 'rare',
+    sort: 350,
   },
   // ── 소모품 (주 1개 구매 한도, §12-Q65) ──
   {

@@ -1044,7 +1044,7 @@ test.describe('꾸민 아바타·테두리 (P9-05)', () => {
 
 test.describe('상점 아이템 카탈로그 (P9-01)', () => {
   for (const width of [360, 1280]) {
-    test(`${width}px: 아이템 22종이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({
+    test(`${width}px: 아이템 26종(메이커 4종 P11-14 포함)이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -1052,7 +1052,7 @@ test.describe('상점 아이템 카탈로그 (P9-01)', () => {
       const section = page.locator('#shop');
       await section.scrollIntoViewIfNeeded();
       const items = section.locator('[data-item]');
-      await expect(items).toHaveCount(22);
+      await expect(items).toHaveCount(26);
       await expect(section.locator('[data-item="pet_dragon"]')).toContainText(
         '1,500',
       );
