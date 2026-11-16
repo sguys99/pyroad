@@ -1,0 +1,168 @@
+# 3월드 보스 5: 수상한 그래프 버그버그 (6문제)
+# 작성 안내: content/README.md "보스". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 객관식 3 · 빈칸 1 · 버그 찾기 2 (world3.md §5). 데이터는 가상의 동물 친구
+
+id: b3000000-0000-0000-0000-000000000205
+order: 7
+title: 수상한 그래프 버그버그
+concept: 데이터 탐정 총정리
+xp_reward: 72
+quest_type: boss
+prompt:
+  topic: 세기, 평균, 가운데 값, 막대 높이, 결론 라벨 총정리
+  learning_goals:
+    - 데이터를 세고 평균과 가운데 값을 구한 결과를 따라갈 수 있다
+    - 막대그래프와 결론 문장의 버그를 찾을 수 있다
+  story_context: 탐정 보고서를 내려는 순간, 사냥 모자를 쓰고 돋보기를 든 버그버그가 나타났어요! "그 그래프, 수상한데? 내 문제 여섯 개를 풀면 진짜 탐정으로 인정해 주지!"
+  fallback_text: 세기는 처음 보는 이름표를 0에서 시작해 1씩 더해요. 평균은 모두 더해 개수로 똑같이 나눈 값이고, 가운데 값은 줄 세운 다음 한가운데 값이에요. 막대 높이는 표 수에 칸 수를 곱해요. 결론에는 1등을 담아 둔 변수를 써요.
+  boss:
+    name: 수상한 그래프 버그버그
+    look: detective
+    intro: 흠흠, 나는 명탐정 버그버그! 네 그래프에서 수상한 냄새가 나는걸? 내 돋보기 문제를 풀 수 있을까?
+    on_defeat: 으음, 증거 완벽! 네가 진짜 탐정이었구나. 다음 사건은 나랑 같이 풀어 줄래?
+    on_victory: 흠흠, 이번 사건은 미해결! 단서를 더 모아서 다시 와. 사무소에서 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000028
+    prompt:
+      quiz:
+        question: 설문 쪽지 네 장을 세어요. 돌리면 무엇이 나올까?
+        code: |-
+          votes = "귤,포도,귤,귤"
+          count = {}
+          for f in votes.split(","):
+              count[f] = count.get(f, 0) + 1
+          print(count["귤"])
+        options:
+          - { id: opt-m4c8, text: '3' }
+          - { id: opt-z7p2, text: '4' }
+          - { id: opt-e1nx, text: '1' }
+          - { id: opt-6tqd, text: '2' }
+    answer:
+      quiz_answer:
+        accepted: [opt-m4c8]
+        explanation: 쉼표로 쪼개면 귤, 포도, 귤, 귤 네 장이에요. 귤은 세 장이라 3 이 나와요.
+        explanations:
+          opt-z7p2: 4 는 쪽지 전체 수예요. 포도 한 장은 따로 세요.
+          opt-e1nx: 처음 본 귤만 1 이고, 다시 나올 때마다 1씩 더해요.
+          opt-6tqd: 귤은 첫째, 셋째, 넷째 쪽지에 있어요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000029
+    prompt:
+      quiz:
+        question: 동물 친구 네 명의 고리 던지기 점수예요. 돌리면 무엇이 나올까?
+        code: |-
+          scores = [5, 7, 9, 3]
+          print(sum(scores) / len(scores))
+        options:
+          - { id: opt-r2v9, text: '6.0' }
+          - { id: opt-8hwk, text: '24' }
+          - { id: opt-u5ja, text: '7.0' }
+          - { id: opt-3ncy, text: '4' }
+    answer:
+      quiz_answer:
+        accepted: [opt-r2v9]
+        explanation: 모두 더하면 24, 네 명으로 똑같이 나누면 6 이에요. 나누기 / 는 소수점이 있는 수라 6.0 으로 나와요.
+        explanations:
+          opt-8hwk: 24 는 모두 더한 값이에요. 아직 나누지 않았어요.
+          opt-u5ja: 가운데쯤 있는 7 이 아니라 더해서 나눈 값이에요.
+          opt-3ncy: 4 는 친구 수예요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000030
+    prompt:
+      quiz:
+        question: 버그버그가 "리스트 한가운데가 가운데 값이지!" 라고 우겨요. 돌리면 무엇이 나올까?
+        code: |-
+          import statistics
+          heights = [10, 2, 7]
+          print(statistics.median(heights))
+        options:
+          - { id: opt-c5gm, text: '7' }
+          - { id: opt-n9xb, text: '2' }
+          - { id: opt-4wse, text: '10' }
+          - { id: opt-h0tf, text: '6.333333333333333' }
+    answer:
+      quiz_answer:
+        accepted: [opt-c5gm]
+        explanation: 줄 세우면 2, 7, 10 이에요. 한가운데는 7 이에요.
+        explanations:
+          opt-n9xb: 2 는 적어 낸 차례의 한가운데예요. 줄을 먼저 세워요.
+          opt-4wse: 10 은 가장 큰 값이에요.
+          opt-h0tf: 모두 더해 3으로 나눈 평균이에요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000033
+    prompt:
+      quiz:
+        question: 빈칸을 채워 과일마다 막대 높이(표 하나에 20칸)를 구해요
+        code: |-
+          count = {"딸기": 7, "사과": 5}
+          for fruit, n in count.{{bk-5jq2}}():
+              height = n {{bk-x8ra}} 20
+              print(fruit, height)
+        tokens:
+          - { id: tok-a3mf, text: items }
+          - { id: tok-9vzd, text: keys }
+          - { id: tok-k6yu, text: '*' }
+          - { id: tok-2pbe, text: '+' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-5jq2: tok-a3mf, bk-x8ra: tok-k6yu }
+        explanation: items() 는 과일과 표 수를 짝으로 꺼내 줘요. 표 하나에 20칸이니까 곱하기로 딸기 140, 사과 100 이 나와요.
+        explanations:
+          tok-9vzd: keys() 는 과일 이름만 꺼내서 표 수를 함께 받을 수 없어요.
+          tok-2pbe: 더하면 7표가 27칸이 돼요. 표 하나에 20칸씩이니 곱해요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000033
+    prompt:
+      quiz:
+        question: 1등은 딸기인데 보고서에는 다른 과일이 1등이라고 나와요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-p6dk, code: 'count = {"딸기": 7, "사과": 5, "포도": 4}' }
+          - { id: ln-7hwa, code: 'best = ""' }
+          - { id: ln-y2gc, code: 'best_n = 0' }
+          - { id: ln-3mfx, code: 'for fruit, n in count.items():' }
+          - { id: ln-v9re, code: '    if n > best_n:' }
+          - { id: ln-1kzq, code: '        best = fruit' }
+          - { id: ln-t5ub, code: '        best_n = n' }
+          - { id: ln-g8no, code: 'print(f"가장 인기: {fruit} ({best_n}표)")' }
+        fixes:
+          - { id: fx-w3hd, code: 'print(f"가장 인기: {best} ({best_n}표)")' }
+          - { id: fx-5rjc, code: 'print(f"가장 인기: {n} ({best_n}표)")' }
+          - { id: fx-q8yv, code: 'print(f"가장 인기: {fruit} ({n}표)")' }
+          - { id: fx-0ebs, code: 'print(f"가장 인기: best ({best_n}표)")' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-g8no, fix: fx-w3hd }
+        explanation: 반복이 끝나면 fruit 에는 마지막에 꺼낸 포도가 남아요. 1등 과일은 best 에 담아 두었으니 best 를 써야 딸기가 나와요.
+        explanations:
+          fx-5rjc: n 은 마지막 과일의 표 수예요. 과일 이름이 아니에요.
+          fx-q8yv: fruit 와 n 은 모두 마지막 과일(포도)의 값이에요.
+          fx-0ebs: 중괄호가 없으면 best 라는 글자가 그대로 나와요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000029
+    prompt:
+      quiz:
+        question: 친구 네 명의 평균이 이상하게 커요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-8cwp, code: 'jumps = [30, 40, 50, 20]' }
+          - { id: ln-j2ty, code: 'total = 0' }
+          - { id: ln-5fvn, code: 'for j in jumps:' }
+          - { id: ln-r0mk, code: '    total = total + j' }
+          - { id: ln-e7sd, code: 'avg = total / 3' }
+          - { id: ln-z4ha, code: 'print(f"평균 {avg}")' }
+        fixes:
+          - { id: fx-n6tq, code: 'avg = total / len(jumps)' }
+          - { id: fx-2xkl, code: 'avg = len(jumps) / total' }
+          - { id: fx-7jmc, code: 'avg = total // 3' }
+          - { id: fx-c1ug, code: 'avg = total / len(total)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-e7sd, fix: fx-n6tq }
+        explanation: 친구는 네 명인데 3으로 나눠서 평균이 커졌어요. len(jumps) 로 사람 수를 세어 나누면 140 ÷ 4 = 35.0 이 나와요.
+        explanations:
+          fx-2xkl: 사람 수를 합계로 나누면 아주 작은 수가 나와요. 합계를 사람 수로 나눠요.
+          fx-7jmc: 여전히 3으로 나눠요. 친구는 네 명이에요.
+          fx-c1ug: total 은 숫자라서 len 으로 셀 수 없어 에러가 나요.

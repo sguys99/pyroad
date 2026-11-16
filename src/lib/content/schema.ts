@@ -71,6 +71,82 @@ const AllRule = z.strictObject({
   rules: z.array(z.lazy(() => ValidationRuleSchema)).min(1),
 });
 
+const AnyRule = z.strictObject({
+  type: z.literal('any'),
+  /** 하나라도 통과하면 통과 (3-F 자유 작품: 그림·입력·키 중 하나, 제안 H) */
+  rules: z.array(z.lazy(() => ValidationRuleSchema)).min(1),
+});
+
+// 그림 규칙 (P11-05, turtle 명령 스트림을 src/lib/turtle/check.ts로 판정). 모두 "있다" 판정이라 앞 단계 그림이 남아도 됨
+const count = z.int().min(0);
+
+const ShapeRule = z.strictObject({
+  type: z.literal('shape'),
+  /** regular: 정다각형(k=1)·별(k=2, 오각별) / rectangle: 직사각형 */
+  shape: z.enum(['regular', 'rectangle']),
+  /** 변 수 (regular). 기본 4 */
+  n: z.int().min(3).max(36).optional(),
+  /** 별 건너뛰기. 1 = 정다각형, 2 = 오각별(144°씩) */
+  k: z.int().min(1).max(17).optional(),
+  /** 변 길이 (±3%) */
+  side: z.number().positive().optional(),
+  /** begin_fill/end_fill로 채운 도형이어야 함 */
+  filled: z.boolean().optional(),
+  /** 이 도형이 몇 개 이상 (기본 1). 같은 자리 선·채우기는 한 번 셈 */
+  count: z.int().min(1).optional(),
+});
+
+const CirclesRule = z.strictObject({
+  type: z.literal('circles'),
+  /** 한 바퀴 원이 몇 개 이상 (기본 1). circle()이든 반복이든 */
+  min: count.optional(),
+  /** 반지름 (±3) */
+  radius: z.number().positive().optional(),
+});
+
+const ColorsRule = z.strictObject({
+  type: z.literal('colors'),
+  /** 선·채우기·점에 쓴 색 가짓수 */
+  min: count,
+});
+
+const TextRule = z.strictObject({
+  type: z.literal('text'),
+  /** write()로 쓴 글씨에 이 글자가 들어 있어야 함 */
+  includes: text.optional(),
+  /** (includes에 맞는) 글씨 수 (기본 1) */
+  min: count.optional(),
+});
+
+const SegmentsRule = z.strictObject({
+  type: z.literal('segments'),
+  /** 한 직선 위 이어진 선을 합친 선 개수 */
+  min: count.optional(),
+  max: count.optional(),
+});
+
+const TurtlesRule = z.strictObject({
+  type: z.literal('turtles'),
+  /** 만든 거북이 수 */
+  min: count,
+});
+
+const MatchDrawingRule = z.strictObject({
+  type: z.literal('match_drawing'),
+  /**
+   * 정답 그림의 선분 [x0, y0, x1, y1] (순서·방향·나눠 그리기 무관). 정답 코드 그림에서 뽑은 값을 붙여 넣음:
+   * `test:content`가 틀리면 정답 코드의 선분을 보여 준다
+   */
+  segments: z
+    .array(z.tuple([z.number(), z.number(), z.number(), z.number()]))
+    .min(1)
+    .max(5000),
+  /** 그린 자리는 보지 않음 */
+  translate: z.boolean().optional(),
+  /** 정답에 없는 선이 더 있어도 됨 (덧붙이기 프로젝트) */
+  extra_ok: z.boolean().optional(),
+});
+
 export const ValidationRuleSchema: z.ZodType<ValidationRule> =
   z.discriminatedUnion('type', [
     OutputMatchRule,
@@ -78,6 +154,14 @@ export const ValidationRuleSchema: z.ZodType<ValidationRule> =
     ContainsAnyRule,
     CodeCheckRule,
     AllRule,
+    AnyRule,
+    ShapeRule,
+    CirclesRule,
+    ColorsRule,
+    TextRule,
+    SegmentsRule,
+    TurtlesRule,
+    MatchDrawingRule,
   ]);
 
 // ------------------------------------------------------------
@@ -138,15 +222,31 @@ export const HintsSchema = z.strictObject({
 });
 
 /**
- * 자동 검증(P1-13 `npm run test:content`)이 `input()`에 넣을 입력 시나리오. CI 전용이라 DB 에는 쓰지 않음.
- * 실행기의 `setStdin` 큐로 한 줄씩 들어가고, 모자라면 EOFError (P11-05에서 기대 출력 등으로 확장)
+ * 시험 손님 (P11-05, 제안 C). "채점"을 누르면 손님마다 학생 코드를 한 번씩 실행하고(입력은 `setStdin` 큐, 키는 프레임 순서)
+ * 대화를 채팅처럼 보여 준다. 같은 손님으로 CI(`test:content`)가 정답 코드를 검사한다.
+ * - 공개: name·inputs·keys·seed → quests.prompt_skeleton(`scenarios`). 입력은 정답이 아니라 시험 문제라 보여 줌
+ * - 정답: expect → quest_answer_keys 규칙 안 `{type:'scenario', index, rule}` (서버만, 클라이언트가 보낸 출력·그림을 다시 판정)
+ * 입력이 모자라면 EOFError("입력이 더 필요해요"). 퀘스트 규칙(`validation`)은 손님마다 모두 통과해야 함
  */
-export const InputScenarioSchema = z.strictObject({
-  /** input() 한 번에 한 줄씩 */
-  inputs: z.array(z.string()),
-  /** 정하면 이 시드로만 실행 (입력이 난수에 맞춰져 있을 때). 없으면 시드 0~9 + 무시드 */
-  seed: z.int().min(0).optional(),
-});
+export const InputScenarioSchema = z
+  .strictObject({
+    /** 화면에 보이는 손님 이름. 예: `별똥이 손님` (없으면 `손님 1`) */
+    name: z.string().min(1).max(20).optional(),
+    /** input() 한 번에 한 줄씩 */
+    inputs: z.array(z.string().max(200)).max(50).optional(),
+    /**
+     * 키 시나리오 (P11-04): keys[n]은 n번째 프레임(time.sleep을 n번 부른 뒤)이 시작할 때 get_key() 큐로.
+     * null은 그 프레임엔 키 없음. Tk 이름(`Left` `Right` `Up` `Down` `space` …)
+     */
+    keys: z.array(z.string().min(1).max(12).nullable()).max(2000).optional(),
+    /** 재현용 시드. 정하면 CI도 이 시드로만 (무작위 결과는 시드 대신 넓은 규칙으로, §2.4·B09) */
+    seed: z.int().min(0).optional(),
+    /** 이 손님 실행에만 붙는 규칙 (예: 입력 3 → 출력에 `6개`). 정답 테이블에만 */
+    expect: ValidationRuleSchema.optional(),
+  })
+  .refine((s) => s.inputs || s.keys || s.expect, {
+    message: 'inputs·keys·expect 중 하나는 있어야 해요',
+  });
 
 /** 코드 퀘스트·프로젝트 단계의 정답 → quest_answer_keys (단계는 steps[]) */
 export const CodeAnswerSchema = z.strictObject({
@@ -154,8 +254,8 @@ export const CodeAnswerSchema = z.strictObject({
   hints: HintsSchema,
   /** 황금키 정답 코드. 자동 검증(P1-13)이 이 코드로 규칙을 통과하는지 확인 */
   solution_code: text,
-  /** 선택. input() 을 쓰는 퀘스트의 자동 검증 입력 (CI 전용) */
-  scenarios: z.array(InputScenarioSchema).min(1).optional(),
+  /** 선택. 시험 손님 (input()·키 퀘스트, P11-05). 손님 입력은 공개, expect 는 정답 테이블 */
+  scenarios: z.array(InputScenarioSchema).min(1).max(8).optional(),
 });
 
 /**
@@ -564,6 +664,11 @@ export const MapDecorationSchema = z.strictObject({
     'rock',
     'buoy',
     'whale',
+    // house·lamp(중간 레이어, 정지)·cog·balloon(먼 레이어, 움직임)은 3월드 메이커 시티 (P11-11)
+    'house',
+    'lamp',
+    'cog',
+    'balloon',
   ]),
   x: z.number(),
   y: z.number(),
@@ -626,6 +731,8 @@ export type World = z.infer<typeof WorldSchema>;
 export type WorldUnlockRule = z.infer<typeof WorldUnlockRuleSchema>;
 export type Stage = z.infer<typeof StageSchema>;
 export type InputScenario = z.infer<typeof InputScenarioSchema>;
+/** 시험 손님의 공개 부분 (quests.prompt_skeleton.scenarios / steps[].scenarios, 화면이 실행에 씀) */
+export type PublicScenario = Omit<InputScenario, 'expect'>;
 export type CodeQuest = z.infer<typeof CodeQuestSchema>;
 export type ProjectQuest = z.infer<typeof ProjectQuestSchema>;
 export type QuizQuest = z.infer<typeof QuizQuestSchema>;
@@ -752,9 +859,11 @@ function checkExample(
   at: (string | number)[],
   report: Report,
 ): void {
+  // 그림 규칙은 출력이 아니라 그림을 보므로 예시 출력 검사에서는 건너뜀 (그림은 test:content 가 정답 코드로 확인)
   const ok = validateRule(answer.validation, {
     stdout: prompt.example_output,
     studentCode: answer.solution_code ?? '',
+    ignoreDrawing: true,
   });
   if (!ok)
     report(

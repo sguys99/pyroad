@@ -673,6 +673,38 @@ export const EXPECT = {
     activateIn: 'P9-07',
     note: '실제 기록으로 스냅샷(공개 정보만, 펫 없음) · 같은 id·version · 공개 조회 user_id 없음 · 90일 만료·비공개 0행 · 다시 공개 새 90일',
   },
+  // ── 작품 (P11-06, ① 00054) ──
+  'CRE-1': {
+    expect: 'deny',
+    requires: 'public.creations',
+    activateIn: 'P11-06',
+    note: '본인 행만 읽기·비공개 저장·고치기·지우기. 공개 전환·숨김·주인 열은 service_role(/api/creations, 검사 뒤)만',
+  },
+  'CRE-2': {
+    expect: 'allow',
+    requires: 'public.creations',
+    activateIn: 'P11-06',
+    note: '그림·대화 비공개 저장 · 크기·모양 CHECK(gzip·PNG 머리, 100KB·200KB, 20자) · updated_at · 사용자당 60개(PT409)',
+  },
+  // ── 갤러리 (P11-07, ① 00055) ──
+  'GAL-1': {
+    expect: 'deny',
+    requires: 'public.gallery_creations',
+    activateIn: 'P11-07',
+    note: '갤러리 뷰·남의 공개 작품·스티커·신고는 서버(service_role, 로그인 확인 뒤)만. 학생 세션은 읽기·쓰기·report_creation 모두 막힘',
+  },
+  'GAL-2': {
+    expect: 'allow',
+    requires: 'public.gallery_creations',
+    activateIn: 'P11-07',
+    note: '공개·안 숨긴 작품만, 코드는 show_code 인 것만, 작가는 공개 이름·파이뱀만, 스티커 합계 · 정해진 5종(CHECK)·사람마다 1개(PK)',
+  },
+  'GAL-3': {
+    expect: 'allow',
+    requires: 'public.report_creation()',
+    activateIn: 'P11-07',
+    note: '본인·비공개 거절, 중복 already, 서로 다른 3명 자동 숨김(hidden_at), 운영자가 다시 보이게 하면(published_at 새로) 그 뒤 신고만 셈',
+  },
   // ── 자랑하기 보상 (P9-10, ① 00044) ──
   'SHR-1': {
     expect: 'deny',
@@ -748,6 +780,12 @@ export const EXPECT = {
     activateIn: 'P10-11',
     note: '00053 코드 바다 업적: skill_pass 는 코인 0(얻는 순간 claimed_at, 받기 0·원장 없음) · 2-5 코드 힌트 0 모두 → sea_bug_doctor(보스 제외) · 스테이지·보스·2월드 클리어·별 3 모두(숨김) · 받기는 티어 금액',
   },
+  'MAKER-1': {
+    expect: 'allow',
+    requires: 'public.achievement_stats()',
+    activateIn: 'P11-14',
+    note: '00057 메이커 시티 업적: 작품 저장·출품·친구 작품 5개 스티커(cheer_leader 코인 0, 내 작품 제외) · 3-1 / 3-2~3-4 / 3-6 / 3-F 클리어 · 보스 첫 승리 · 별 3 모두(숨김) · 받기는 티어 금액',
+  },
   'B74-1': {
     expect: 'allow',
     requires: 'public.boss_answer()',
@@ -797,6 +835,25 @@ export const EXPECT = {
     requires: 'public.manage_share_card()',
     activateIn: 'P9-11',
     note: '본인 카드만 숨기기·다시 공개(새 90일)·지우기 · 닉네임·꾸민 모습 변경 → 스냅샷 갱신 + version+1',
+  },
+  // ── 작품 자랑 카드 (P11-08, ① 00056) ──
+  'SCC-1': {
+    expect: 'deny',
+    requires: 'public.create_creation_share_card()',
+    activateIn: 'P11-08',
+    note: '작품 카드 만들기는 /api/share-cards(service_role, 동의 게이트 뒤)만',
+  },
+  'SCC-1b': {
+    expect: 'deny',
+    requires: 'public.share_card_creation_thumbnail()',
+    activateIn: 'P11-08',
+    note: '작품 카드 그림(썸네일)은 이미지 라우트(service_role)만',
+  },
+  'SCC-2': {
+    expect: 'allow',
+    requires: 'public.create_creation_share_card()',
+    activateIn: 'P11-08',
+    note: '전시 중인 내 작품만 · 이름·대화 앞 4줄(40자)만 · 내리기·숨김 → 카드 닫힘·다시 공개 거절 · 삭제 → 카드 삭제 · 이름 변경 → version+1',
   },
   'AC-2': {
     expect: 'allow',

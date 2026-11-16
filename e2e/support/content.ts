@@ -146,15 +146,24 @@ interface ProjectYaml {
   quest_type: string;
   steps: Array<{
     prompt: { step_goal: string; checklist: string[] };
-    answer: { solution_code: string };
+    answer: { solution_code: string; scenarios?: unknown[] };
   }>;
 }
 
-/** 월드(기본: 첫 월드)의 첫 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
-export function projectQuest(world = 'python-island'): {
+/** 월드(기본: 첫 월드)의 n번째(0부터, 기본 첫) 프로젝트 퀘스트 (P6-12): 단계 목표와 단계마다의 정답 코드 */
+export function projectQuest(
+  world = 'python-island',
+  n = 0,
+): {
   id: string;
   title: string;
-  steps: Array<{ goal: string; checklist: string[]; solution: string }>;
+  /** guests: 시험 손님이 있는 단계 (채점은 "시험 손님 부르기", P11-05) */
+  steps: Array<{
+    goal: string;
+    checklist: string[];
+    solution: string;
+    guests: boolean;
+  }>;
 } {
   for (const d of readdirSync(worldDir(world), { withFileTypes: true }).sort(
     (a, b) => a.name.localeCompare(b.name),
@@ -164,7 +173,7 @@ export function projectQuest(world = 'python-island'): {
     for (const f of readdirSync(dir).sort()) {
       if (!f.endsWith('.yaml') || f === 'stage.yaml') continue;
       const q = parse(readFileSync(join(dir, f), 'utf8')) as ProjectYaml;
-      if (q.quest_type !== 'project') continue;
+      if (q.quest_type !== 'project' || n-- > 0) continue;
       return {
         id: q.id,
         title: q.title,
@@ -172,6 +181,7 @@ export function projectQuest(world = 'python-island'): {
           goal: s.prompt.step_goal,
           checklist: s.prompt.checklist,
           solution: s.answer.solution_code.trim(),
+          guests: !!s.answer.scenarios?.length,
         })),
       };
     }

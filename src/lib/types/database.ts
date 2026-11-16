@@ -6,7 +6,7 @@
 // - JSONB 컬럼(Json) → 앱이 쓰는 구조 (prompt_skeleton, step_submissions)
 // 생성 파일은 직접 고치지 말고, 스키마를 바꾼 뒤 `npm run db:types`로 다시 만드세요.
 
-import type { QuizKind } from '@/lib/content/schema';
+import type { PublicScenario, QuizKind } from '@/lib/content/schema';
 import type { ValidationType } from '@/lib/quest/validation';
 import type { BgmId } from '@/lib/sound/manifest';
 import type { StageQuestDot } from '@/lib/quest/stageProgress';
@@ -31,6 +31,7 @@ export type QuestType = 'code' | 'project' | 'quiz' | 'boss';
  * quests.quiz_kind CHECK (00012). quest_type = 'quiz' 일 때만 값이 있음 (P7-01).
  * 퀴즈 공개 부분 타입은 콘텐츠 스키마(src/lib/content/schema.ts)에서 가져옴 (타입만, 번들에 안 들어감)
  */
+export type { PublicScenario };
 export type {
   QuizKind,
   QuizPrompt,
@@ -108,6 +109,8 @@ export interface ProjectStep {
   starter_code: string;
   validation_type: ValidationType;
   fallback_text: string;
+  /** 시험 손님 (P11-05). 있으면 채점은 손님마다 실행한 결과로 */
+  scenarios?: PublicScenario[];
 }
 
 export interface PromptSkeleton {
@@ -125,6 +128,8 @@ export interface PromptSkeleton {
   example_exact?: boolean;
   fallback_text: string;
   steps?: ProjectStep[];
+  /** 시험 손님 (P11-05, 코드 퀘스트만. 프로젝트는 단계마다). 입력·키는 공개, 손님별 규칙은 정답 테이블 */
+  scenarios?: PublicScenario[];
 }
 
 // 정답 타입 (서버 전용, quest_answer_keys)

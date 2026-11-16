@@ -15,8 +15,20 @@ import {
   buildStageSummaryPrompt,
   buildConceptExplainPrompt,
   buildFreeQuestionPrompt,
+  buildProjectPlannerPrompt,
+  buildCreationFeedbackPrompt,
   FREE_QUESTION_RULES,
+  MAKER_RULES,
 } from '@/lib/tutor/prompts';
+import {
+  creationFacts,
+  creationFeedbackFallback,
+  drawingLine,
+  factsLine,
+  plannerFallback,
+} from '@/lib/tutor/maker';
+import { moderateText } from '@/lib/moderation/filter';
+import { hasExtraPersonalInfo } from '@/lib/creations/limits';
 import {
   FREE_QUESTION_MAX_LENGTH,
   FREE_QUESTION_MESSAGES,
@@ -74,6 +86,8 @@ const VALID_TYPES = [
   'concept_explain',
   'quiz_explain',
   'free_question',
+  'project_planner',
+  'creation_feedback',
 ] as const;
 const VALID_HINT_LEVELS = [1, 2, 3] as const;
 const MAX_CODE_LENGTH = 2000;
@@ -210,7 +224,36 @@ export function sanitizeTutorBody(body: TutorRequest): TutorRequest {
     previous_code: truncate(body.previous_code, MAX_CODE_LENGTH),
     step_goal: truncate(body.step_goal, MAX_STEP_GOAL_LENGTH),
     question: cleanQuestion(body.question),
+    drawing: cleanDrawing(body.drawing),
   };
+}
+
+/** 그림 요약 (creation_feedback): 네 수 모두 0~100,000 정수. 모양이 다르면 버림 */
+function cleanDrawing(value: unknown): TutorRequest['drawing'] {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    return undefined;
+  const v = value as Record<string, unknown>;
+  const n = (k: string) => toBoundedInt(v[k], 0, 100_000) ?? 0;
+  return {
+    lines: n('lines'),
+    circles: n('circles'),
+    colors: n('colors'),
+    texts: n('texts'),
+  };
+}
+
+/** 작품 글자에 개인정보로 보이는 것 (출품 전 지킴이 제안 J 와 같은 기준: 금칙어 필터 개인정보 + 긴 숫자·010·이메일) */
+export function looksPersonal(text: string): boolean {
+  const r = moderateText(text);
+  return (
+    (!r.ok && (r.category === 'personal_info' || r.category === 'contact')) ||
+    hasExtraPersonalInfo(text)
+  );
+}
+
+/** 3월드 작품 평가에 넣는 실행 결과: 앞 20줄 */
+function firstLines(text: string, n = 20): string {
+  return text.split('\n').slice(0, n).join('\n').trim();
 }
 
 /** 자유 질문 정리: 줄바꿈·제어 문자를 띄어쓰기로, 앞뒤 공백 제거. 문자열이 아니면 undefined */
@@ -385,7 +428,10 @@ export async function prepareTutorCall(
   // 퀴즈 해설(P7-08)·자유 질문(P9-17)은 다 받은 뒤 걸러야 하므로 흘려 보내지 않는다
   if (
     opts.stream &&
-    (body.type === 'quiz_explain' || body.type === 'free_question')
+    (body.type === 'quiz_explain' ||
+      body.type === 'free_question' ||
+      body.type === 'project_planner' ||
+      body.type === 'creation_feedback')
   ) {
     return reject(400, 'Invalid type', 'invalid_type', body.type);
   }
@@ -417,8 +463,20 @@ export async function prepareTutorCall(
     );
   }
 
-  if (body.type === 'free_question') {
-    // 화면은 빈 질문·상한 넘는 질문을 보내지 않음. 길이만 남기고 내용은 남기지 않음
+  if (
+    body.type === 'creation_feedback' &&
+    !String(body.student_code ?? '').trim()
+  ) {
+    return reject(
+      400,
+      'student_code is required for creation_feedback',
+      'missing_execution_result',
+      body.type,
+    );
+  }
+
+  if (body.type === 'free_question' || body.type === 'project_planner') {
+    // 화면은 빈 질문·상한 넘는 질문을 보내지 않음. 길이만 남기고 내용은 남기지 않음 (기획 도우미 아이디어도 같은 상한)
     const question = cleanQuestion(body.question);
     if (!question || question.length > FREE_QUESTION_MAX_LENGTH) {
       return reject(
@@ -534,6 +592,17 @@ export async function prepareTutorCall(
   }
 
   const q = quest as unknown as QuestWithStageServer;
+  // 3-F 메이커 박람회 튜터 (P11-14): 작품 평가는 3월드 프로젝트, 기획 도우미는 3-F(maker_fair) 프로젝트에서만
+  const isMaker =
+    body.type === 'project_planner' || body.type === 'creation_feedback';
+  if (
+    isMaker &&
+    (q.quest_type !== 'project' ||
+      (q.stage.world?.order ?? 0) < 3 ||
+      (body.type === 'project_planner' && q.stage.theme_name !== 'maker_fair'))
+  ) {
+    return reject(400, 'Not a maker project', 'invalid_type', body.type);
+  }
   const isQuizExplain = body.type === 'quiz_explain';
   if (isQuizExplain && q.quest_type !== 'quiz') {
     return reject(400, 'Not a quiz', 'invalid_type', body.type);
@@ -594,10 +663,28 @@ export async function prepareTutorCall(
       });
   };
   const remaining = await remainingLookup;
-  if (isFree) {
+  const isPlanner = body.type === 'project_planner';
+  // 기획 도우미는 자유 질문과 같이 거르고 기록하되, 자유 질문 분석 이벤트(tutor_free_question)에는 넣지 않음
+  const makerReport = (result: TutorFreeQuestionResult, reason?: string) => {
+    if (reason)
+      reportTutorAbuse({
+        userId: user.id,
+        reason:
+          result === 'blocked'
+            ? 'free_question_blocked'
+            : 'free_answer_blocked',
+        level: result === 'blocked' ? 'info' : 'warning',
+        type: body.type,
+        detail: { rule: reason },
+      });
+  };
+  if (isFree || isPlanner) {
     const check = checkFreeQuestion(body.question ?? '');
     if (!check.ok) {
-      freeReport('blocked', `${check.block}:${check.rule}`);
+      (isFree ? freeReport : makerReport)(
+        'blocked',
+        `${check.block}:${check.rule}`,
+      );
       return Response.json({
         message: FREE_QUESTION_MESSAGES[check.block],
         is_fallback: false,
@@ -697,6 +784,23 @@ export async function prepareTutorCall(
       exerciseDescription: skeleton.exercise_description,
       question: body.question ?? '',
     });
+  } else if (isPlanner) {
+    userPrompt = buildProjectPlannerPrompt({
+      worldOrder,
+      idea: body.question ?? '',
+    });
+  } else if (body.type === 'creation_feedback') {
+    const code = body.student_code ?? '';
+    const stdout = firstLines(body.execution_result?.stdout ?? '');
+    userPrompt = buildCreationFeedbackPrompt({
+      worldOrder,
+      questTitle: q.title,
+      studentCode: code,
+      stdout,
+      drawing: drawingLine(body.drawing),
+      facts: factsLine(creationFacts(code)),
+      personal: looksPersonal(`${code}\n${stdout}`),
+    });
   } else if (body.type === 'stage_summary') {
     // stage_summary: 동일 스테이지의 모든 퀘스트 concept를 수집
     const stageConceptsResult = await adminClient
@@ -745,7 +849,9 @@ export async function prepareTutorCall(
       ? SYSTEM_PROMPT + QUIZ_EXPLAIN_RULES
       : isFree
         ? SYSTEM_PROMPT + FREE_QUESTION_RULES
-        : SYSTEM_PROMPT,
+        : isMaker
+          ? SYSTEM_PROMPT + MAKER_RULES
+          : SYSTEM_PROMPT,
     userPrompt,
     providerType,
     customApiKey,
@@ -782,7 +888,15 @@ export async function prepareTutorCall(
           remaining,
           report: freeReport,
         }
-      : null,
+      : isMaker
+        ? {
+            // 기획 도우미·작품 평가 답도 같은 거르기 (개인정보·부적절한 말). 정답 코드는 자유 작품이라 비교하지 않음
+            fallback: buildFallbackMessage(body, q, null),
+            unsafe: (text) => checkFreeAnswer(text, null),
+            remaining: undefined,
+            report: makerReport,
+          }
+        : null,
   };
 }
 
@@ -936,6 +1050,17 @@ export function buildFallbackMessage(
       skeleton.topic,
       skeleton.learning_goals,
       quest.stage.world?.order,
+    );
+  } else if (body.type === 'project_planner') {
+    return plannerFallback(body.question ?? '');
+  } else if (body.type === 'creation_feedback') {
+    const code = body.student_code ?? '';
+    return creationFeedbackFallback(
+      code,
+      body.drawing,
+      looksPersonal(
+        `${code}\n${firstLines(body.execution_result?.stdout ?? '')}`,
+      ),
     );
   } else if (body.type === 'stage_summary') {
     return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;

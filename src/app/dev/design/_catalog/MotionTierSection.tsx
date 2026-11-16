@@ -193,7 +193,7 @@ export function MotionTierSection() {
         </LoopTile>
         <LoopTile
           label="월드 지도 앰비언트 (P5-09)"
-          rule="full만 · 구름 흐름·물결·배 까딱·새 날기+날갯짓·반짝임·나뭇잎. 지도 밖·탭 숨김이면 멈춤"
+          rule="full만 · 구름 흐름·물결·배 까딱·새 날기+날갯짓·반짝임·나뭇잎·톱니 회전·열기구. 지도 밖·탭 숨김이면 멈춤"
           testId="tile-map-ambient"
         >
           <span className="wm-a-cloud inline-block h-5 w-16 rounded-full bg-surface" />
@@ -206,6 +206,9 @@ export function MotionTierSection() {
           </span>
           <span className="wm-a-spark inline-block size-3 rounded-sm bg-accent" />
           <span className="wm-a-leaf inline-block size-3 rounded-tl-full rounded-br-full bg-primary-bright" />
+          {/* 3월드 (P11-11): 톱니 회전 · 열기구 둥실 */}
+          <span className="wm-a-cog inline-block size-4 rounded-sm border-2 border-dashed border-secondary" />
+          <span className="wm-a-float inline-block h-5 w-4 rounded-t-full bg-w3-brick" />
         </LoopTile>
         <LoopTile
           label="바쁨 표시"

@@ -5,8 +5,8 @@ import { WORLDS, mapPath } from '../worlds';
 const island = WORLDS.find((w) => w.slug === 'python-island')!.map!;
 
 describe('동시 애니메이션 상한 (worldMap.css "16개 안팎", P10-04)', () => {
-  // 움직이는 장식: MapArt FAR_KINDS (고래·야자수·바위는 정지)
-  const MOVING = new Set(['waves', 'boat', 'bird', 'buoy']);
+  // 움직이는 장식: MapArt FAR_KINDS (고래·야자수·바위·집·가로등은 정지)
+  const MOVING = new Set(['waves', 'boat', 'bird', 'buoy', 'cog', 'balloon']);
   it.each(WORLDS.filter((w) => w.map).map((w) => [w.slug, w.map!] as const))(
     '%s: 레이아웃마다 16개 이하',
     (_slug, map) => {

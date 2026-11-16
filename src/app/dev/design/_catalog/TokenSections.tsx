@@ -79,6 +79,8 @@ const COLOR_ROLE: Record<ColorName, string> = {
   w3: '월드 3 틴트 (장식)',
   w3Ink: '월드 3 표지 글자',
   w3Soft: '월드 3 바탕',
+  w3Brick: '3월드 지도 벽돌 지붕 (장식)',
+  w3Blueprint: '3월드 지도 설계도 모눈 (장식)',
   codeBg: '코드 바탕',
   codeText: '코드 글자',
   codeComment: '코드 주석',
@@ -93,7 +95,7 @@ const COLOR_GROUPS: [string, ColorName[]][] = [
   ['주색 · 보조', ['primary', 'onPrimary', 'primaryLip', 'primaryText', 'primaryBright', 'primarySoft', 'secondary', 'onSecondary']],
   ['강조 금색', ['accent', 'onAccent', 'accentLip', 'accentLight', 'accentText', 'accentSoft']],
   ['의미색 · 덮개', ['success', 'successSoft', 'warning', 'warningSoft', 'error', 'onError', 'errorSoft', 'onScrim']],
-  ['월드 틴트', ['w1', 'w1Ink', 'w1Soft', 'w2', 'w2Ink', 'w2Soft', 'w2Shallow', 'w2Deep', 'w3', 'w3Ink', 'w3Soft']],
+  ['월드 틴트', ['w1', 'w1Ink', 'w1Soft', 'w2', 'w2Ink', 'w2Soft', 'w2Shallow', 'w2Deep', 'w3', 'w3Ink', 'w3Soft', 'w3Brick', 'w3Blueprint']],
   ['코드', ['codeBg', 'codeText', 'codeComment', 'codeKeyword', 'codeString', 'codeNumber', 'codeFunc']],
 ];
 

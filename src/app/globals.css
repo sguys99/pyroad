@@ -99,6 +99,8 @@
   --color-w3: var(--w3);
   --color-w3-ink: var(--w3-ink);
   --color-w3-soft: var(--w3-soft);
+  --color-w3-brick: var(--w3-brick);
+  --color-w3-blueprint: var(--w3-blueprint);
   --color-code-bg: var(--code-bg);
   --color-code-text: var(--code-text);
   --color-code-comment: var(--code-comment);
@@ -242,6 +244,8 @@
   --w3: #d9c3a3;
   --w3-ink: #6b645b;
   --w3-soft: #f4eee5;
+  --w3-brick: #e2a486;
+  --w3-blueprint: #a7bcc9;
   --world: var(--w1);
   --world-ink: var(--w1-ink);
   --world-soft: var(--w1-soft);
@@ -411,6 +415,28 @@
   --error-soft: #fbeae6;
   --surface: #ffffff;
   --text: #3b2836;
+}
+[data-editor-theme='arcade'] {
+  --code-bg: #1a1530;
+  --code-text: #f1ecff;
+  --code-comment: #aba2cf;
+  --code-keyword: #ff8ad8;
+  --code-string: #ffe46b;
+  --code-number: #7ff0ff;
+  --code-func: #8cf59a;
+  --surface-2: #14102a;
+  --text-muted: #b9b0dd;
+  --line: #2e2650;
+  --line-strong: #7a6fa8;
+  --primary: #9ef0b0;
+  --primary-soft: #2f2a5a;
+  --accent-light: #4a3a14;
+  --accent-soft: #3a3222;
+  --accent-text: #ffe46b;
+  --error: #ff8f8f;
+  --error-soft: #4a2234;
+  --surface: #241d44;
+  --text: #f1ecff;
 }
 
 /* HUD 숫자 (P0-14): Jua에는 tnum이 없어 카운트업 때 숫자 폭이 흔들린다 → 고정 폭 숫자 + 최소 폭 상자, 오른쪽 정렬 */

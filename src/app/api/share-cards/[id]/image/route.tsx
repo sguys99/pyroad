@@ -24,7 +24,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const card = await loadPublicShareCard(id);
+  const card = await loadPublicShareCard(id, { art: true });
   if (card === 'error')
     return new Response('잠시 뒤에 다시 열어 주세요.', {
       status: 503,

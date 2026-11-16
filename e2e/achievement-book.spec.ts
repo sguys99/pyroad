@@ -35,7 +35,7 @@ test('360px: 메뉴 금색 점 → 도감 → 받기 → 코인 반영, 넘침 �
 
   const book = page.getByTestId('achievement-book');
   await expect(book.getByRole('heading', { name: '업적 도감' })).toBeVisible();
-  await expect(book.locator('.ab-count')).toContainText('/53'); // 46 + 코드 바다 7 (P10-11)
+  await expect(book.locator('.ab-count')).toContainText('/62'); // 46 + 코드 바다 7 (P10-11) + 메이커 시티 9 (P11-14)
   // "한 주에 n일 공부" 업적(P9-18)은 꾸준함 칸에 연속 업적 바로 뒤
   const habit = book.locator('.ab-sec[data-category="habit"]');
   const weekly = habit.getByTestId('achievement-week2_4');

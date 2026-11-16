@@ -4,6 +4,14 @@
 // Pyodide는 자체 호스팅(/pyodide/<버전>/, 빌드 전에 npm 패키지에서 복사)에서 불러오고,
 // 실패했을 때만 jsDelivr에서 불러온다. 로딩이 끝나면 Worker 전역의 네트워크 API를 지운다.
 // 실행 로직은 Node 검증 실행기와 같이 쓰는 pyodide-core.mjs에 있다. 메시지는 src/lib/pyodide/types.ts.
+//
+// input() (P11-01): JSPI가 있으면 코어가 run_sync로 answer를 기다린다. 없으면 SW 동기 XHR 채널을 쓴다 —
+// 이 Worker는 `/pyodide/runner/pyodide-worker.mjs`(next.config.ts rewrites)로 떠서 SW scope 안에 있고,
+// 페이지가 미리 등록한 SW(`input-sw.js`)가 `__sync/read` 요청을 답이 올 때까지 붙잡아 둔다.
+// time.sleep도 같은 채널(`__sync/sleep`)로 자서, 자는 중 멈추기가 Worker를 살린 채 끝난다 (P11-03).
+// 키 입력(P11-04): JSPI면 페이지가 이 Worker에 `key` 메시지(자는 동안 받음), SW면 SW에 보내고 잠 답에 실려 온다.
+//
+// turtle (P11-02): shim `turtle.py`를 같은 경로(`/pyodide/runner/turtle.py` → public/workers/)에서 Pyodide와 함께 받아 코어에 넘긴다.
 
 import {
   PYODIDE_VERSION,
@@ -26,6 +34,86 @@ const SOURCES = [
 ];
 
 const post = (msg) => self.postMessage(msg);
+
+// 동기 XHR은 SW 입력 채널에만 쓴다. 전역의 XMLHttpRequest는 로딩 뒤 지우므로(B15) 그 전에 여기에만 잡아 둔다.
+// 모듈 안 변수라 학생 코드(JsProxy로 전역까지 가도)는 닿지 않는다
+const SyncXHR = self.XMLHttpRequest;
+const SYNC_URL = new URL('./__sync/', self.location.href).href;
+
+function syncGet(path) {
+  const xhr = new SyncXHR();
+  xhr.open('GET', SYNC_URL + path, false);
+  xhr.send(null);
+  return xhr;
+}
+
+/** turtle shim 받기. 못 받으면 null (turtle만 못 쓰고 나머지 실행은 그대로) */
+function fetchTurtleSource() {
+  return fetch(new URL('./turtle.py', import.meta.url)).then(
+    (res) => (res.ok ? res.text() : null),
+    () => null,
+  );
+}
+
+/** SW 채널로 답 하나를 기다린다. 채널이 끊기면 null (코어가 "입력을 받을 수 없어요"로 끝냄) */
+function swReadLine(requestId) {
+  for (;;) {
+    let reply;
+    try {
+      const xhr = syncGet(`read?id=${encodeURIComponent(requestId)}`);
+      if (xhr.status !== 200) return null;
+      reply = JSON.parse(xhr.responseText);
+    } catch {
+      return null;
+    }
+    if (reply?.kind === 'value' || reply?.kind === 'stop') return reply;
+    if (reply?.kind !== 'timeout') return null;
+  }
+}
+
+/**
+ * time.sleep을 SW 동기 XHR로 잔다 (JSPI 없음, P11-03). SW가 ms만큼 붙잡아 두다가, 페이지가 이 실행을 멈추면 바로 'stop'.
+ * 긴 잠은 SW 붙잡기 한도(15초)보다 짧게 나눠 묻는다. 채널이 끊기면 null (코어가 원래 time.sleep으로 잠).
+ * 자는 동안 페이지가 SW에 보낸 키는 답에 실려 와서 onKeys로 넘긴다 (P11-04) — 그래서 sleep(0)도 한 번은 묻는다
+ */
+function swSleep(runId, ms, onKeys) {
+  const end = performance.now() + ms;
+  for (;;) {
+    const left = Math.max(0, Math.round(end - performance.now()));
+    let reply;
+    try {
+      const xhr = syncGet(
+        `sleep?run=${encodeURIComponent(runId)}&ms=${Math.min(left, 10_000)}`,
+      );
+      if (xhr.status !== 200) return null;
+      reply = JSON.parse(xhr.responseText);
+    } catch {
+      return null;
+    }
+    if (Array.isArray(reply?.keys)) onKeys?.(reply.keys);
+    if (reply?.kind === 'stop') return 'stop';
+    if (reply?.kind !== 'ok') return null;
+    if (performance.now() >= end) return 'ok';
+  }
+}
+
+/**
+ * SW가 이 Worker의 요청을 가로채는지 확인한다. 강력 새로고침·SW를 막는 정책이면 실패.
+ * Firefox는 새 Worker의 첫 요청 몇 개를 SW가 가로채지 않아서(P0-05 실측) async fetch로 한 번 깨운 뒤 다시 묻는다
+ */
+async function pingSwChannel() {
+  if (!SyncXHR) return false;
+  for (let i = 0; i < 5; i++) {
+    try {
+      await fetch(`${SYNC_URL}ping?warm=${i}`, { cache: 'no-store' });
+      if (syncGet(`ping?try=${i}`).responseText.includes('pong')) return true;
+    } catch {
+      // 다시 시도
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+}
 
 /** @type {ReturnType<typeof createRuntime> | null} */
 let runtime = null;
@@ -97,6 +185,7 @@ async function init() {
   // 단계(P6-05): download = 파일 받기·파이썬 띄우기(대부분의 시간), setup = 실행기 안전 장치. 바이트 진행률은 loadPyodide가 주지 않는다
   post({ type: 'init-status', status: 'loading', stage: 'download' });
   const t0 = performance.now();
+  const turtleSource = fetchTurtleSource();
   try {
     let pyodide = null;
     let source = null;
@@ -113,8 +202,19 @@ async function init() {
     if (!pyodide) throw new Error(errors.join(' / '));
     post({ type: 'init-status', status: 'loading', stage: 'setup' });
 
-    runtime = createRuntime(pyodide, { post });
+    const options = {
+      post,
+      interactiveInput: true,
+      turtleSource: (await turtleSource) ?? undefined,
+    };
+    runtime = createRuntime(pyodide, options);
     const jspi = await runtime.canRunSync();
+    // 네트워크 API를 지우기 전에 (ping의 깨우기 fetch)
+    const swChannel = !jspi && (await pingSwChannel());
+    if (swChannel) {
+      options.readLineSync = swReadLine;
+      options.sleepSync = swSleep;
+    }
     // 여기부터 Worker는 바깥으로 요청을 보낼 수 없다 (B15)
     const removedGlobals = removeNetworkGlobals(self);
     const left = remainingNetworkGlobals(self);
@@ -128,6 +228,7 @@ async function init() {
         ...runtimeInfo(pyodide),
         source,
         jspi,
+        input: jspi ? 'jspi' : swChannel ? 'sw' : 'none',
         loadMs: Math.round(performance.now() - t0),
         removedGlobals,
       },

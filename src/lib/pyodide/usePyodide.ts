@@ -4,10 +4,18 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   EXECUTION_TIMEOUT_MS,
   PYODIDE_WORKER_URL,
+  RUN_WALL_LIMIT_MS,
   STOP_GRACE_MS,
 } from './constants';
 import { isRunSuccessful, truncateOutput } from './runOutcome';
+import {
+  needsInputServiceWorker,
+  registerInputServiceWorker,
+} from './inputChannel';
 import type {
+  InputRequest,
+  KeyInput,
+  RunInput,
   PyodideLoadStage,
   RunDoneMessage,
   RunOutcome,
@@ -42,13 +50,32 @@ export interface RunResult {
   errorType?: string | null;
   /** 출력이 Worker 상한(MAX_CAPTURE_LENGTH)을 넘어 잘렸는지 */
   truncated?: boolean;
+  /** input()에 학생이 답한 말 (P11-01). stdout의 어느 자리(at = 그때까지 stdout 길이)에 끼는지와 함께 */
+  inputs?: RunInput[];
+  /** 시간 초과가 실행 시간(5초)이 아니라 벽시계 상한(RUN_WALL_LIMIT_MS, 끝없는 게임 루프)에 걸린 것 (P11-04) */
+  wallLimit?: boolean;
 }
 
 export interface RunCodeOptions {
   /** 실행 중 stdout 조각 (Worker가 묶어서 보냄). input() 프롬프트 등을 바로 보여 줄 때 */
   onStdout?: (text: string) => void;
   onStderr?: (text: string) => void;
+  /** input()이 답을 기다림 (P11-01). 답할 때까지 시간 제한이 멈춘다 */
+  onInputRequest?: (request: InputRequest) => void;
+  /** turtle 그리기 명령 묶음 (P11-02, JSON 배열 문자열) */
+  onTurtle?: (chunk: string) => void;
+  /** 실행이 get_key()를 부름 (P11-04): 조종판을 펴고 이 손잡이로 키를 보낸다 */
+  onKeys?: (input: KeyInput) => void;
   timeoutMs?: number;
+  /** 벽시계 상한 (기본 RUN_WALL_LIMIT_MS) */
+  wallLimitMs?: number;
+  /** 키 시나리오·잠 건너뛰기 (검증 실행, P11-04·P11-05. 형식은 types.ts WorkerRequest run) */
+  keys?: (string | null)[];
+  skipSleep?: boolean;
+  /** 시험 손님 입력 (P11-05): input()이 차례로 가져가고 다 쓰면 EOFError. 쓴 줄은 RunResult.inputs에 남음 */
+  stdin?: string[];
+  /** 실행 전 random.seed (손님 재현용) */
+  seed?: number;
 }
 
 export interface UsePyodideOptions {
@@ -69,11 +96,53 @@ interface ActiveRun {
   timer: ReturnType<typeof setTimeout> | null;
   graceTimer: ReturnType<typeof setTimeout> | null;
   stopReason: 'timeout' | 'stop' | null;
+  /** 시간 제한 중 아직 쓰지 않은 Python 실행 시간(ms). 입력 대기·time.sleep 동안은 줄지 않는다 (P11-03·P11-04) */
+  budgetMs: number;
+  /** 벽시계 상한 중 남은 시간(ms). 입력 대기 동안만 줄지 않는다 (P11-04) */
+  wallMs: number;
+  /** 지금 구간: Python이 돎 · 자는 중 · 입력 대기 */
+  clockMode: ClockMode;
+  /** 지금 구간의 시작 (performance.now) */
+  clockFrom: number;
+  /** 벽시계 상한으로 멈춤 */
+  wallLimit: boolean;
+  inputs: RunInput[];
+  /** 답을 기다리는 input() 요청 */
+  waiting: Extract<WorkerResponse, { type: 'input-request' }> | null;
 }
 
 interface WorkerHandle {
   worker: Worker;
   generation: number;
+}
+
+type ClockMode = 'python' | 'sleep' | 'input';
+
+/**
+ * 시간 제한 시계 (P11-03·P11-04). 구간을 바꿀 때마다 지난 구간 시간을 뺀다:
+ * - 실행 시간(budgetMs, 5초)은 Python이 도는 동안만 — 입력 대기·time.sleep은 빼고, turtle 그림은 done 뒤 화면이 그려서 처음부터 밖
+ * - 벽시계(wallMs, 3분)는 입력 대기만 빼고 — 끝을 잊은 게임 루프(잠만 자는 무한 반복)를 끝낸다
+ * 타이머는 둘 중 먼저 닿는 쪽 하나만 건다. onLimit(wall)
+ */
+function setClock(
+  run: ActiveRun,
+  mode: ClockMode,
+  onLimit: (wall: boolean) => void,
+) {
+  const now = performance.now();
+  const spent = now - run.clockFrom;
+  if (run.clockMode !== 'input') run.wallMs -= spent;
+  if (run.clockMode === 'python') run.budgetMs -= spent;
+  run.clockMode = mode;
+  run.clockFrom = now;
+  if (run.timer) clearTimeout(run.timer);
+  run.timer = null;
+  if (mode === 'input') return;
+  const wall = mode === 'sleep' || run.wallMs < run.budgetMs;
+  run.timer = setTimeout(
+    () => onLimit(wall),
+    Math.max(0, wall ? run.wallMs : run.budgetMs),
+  );
 }
 
 const NOT_READY: RunResult = {
@@ -103,6 +172,10 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
   );
 
   const workerRef = useRef<WorkerHandle | null>(null);
+  // input() 폴백 SW (JSPI 없는 브라우저만, P11-01). SW 채널 답·멈추기는 Worker가 아니라 여기로 보낸다
+  const inputSwRef = useRef<ServiceWorkerRegistration | null>(null);
+  // SW 등록을 기다리는 중이라 Worker가 아직 없음 (start()가 두 번 띄우지 않게)
+  const pendingSpawnRef = useRef(false);
   // 지금 Worker의 세대 번호. 종료된 Worker의 늦은 메시지·에러는 이 값과 달라서 무시된다 (B14)
   const generationRef = useRef(0);
   const statusRef = useRef<PyodideStatus>('idle');
@@ -129,6 +202,8 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       run.resolve({
         stdout: truncateOutput(result.stdout ?? run.stdout),
         stderr: truncateOutput(result.stderr ?? run.stderr),
+        ...(run.inputs.length > 0 && { inputs: run.inputs }),
+        ...(result.isTimeout && run.wallLimit && { wallLimit: true }),
         ...result,
       });
     },
@@ -188,10 +263,76 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
     [finishRun],
   );
 
-  const spawn = useCallback(
-    (reason: PyodideRestartReason) => {
-      disposeWorker();
-      const gen = ++generationRef.current;
+  const handleInputRequest = useCallback(
+    (
+      run: ActiveRun,
+      msg: Extract<WorkerResponse, { type: 'input-request' }>,
+    ) => {
+      // 답을 기다리는 시간은 시간 제한에서 뺀다: 시계를 멈추고, 답하면 남은 시간부터 다시 잰다 (P11-03)
+      setClock(run, 'input', onLimitRef.current(run));
+      run.waiting = msg;
+      run.options.onInputRequest?.({
+        answer: (value) => {
+          if (runRef.current !== run || run.waiting !== msg) return;
+          run.waiting = null;
+          run.inputs.push({ at: run.stdout.length, value });
+          if (msg.channel === 'sw') {
+            inputSwRef.current?.active?.postMessage({
+              id: msg.requestId,
+              kind: 'value',
+              value,
+            });
+          } else {
+            const answer: WorkerRequest = {
+              type: 'answer',
+              id: run.id,
+              requestId: msg.requestId,
+              value,
+            };
+            workerRef.current?.worker.postMessage(answer);
+          }
+          setClock(run, 'python', onLimitRef.current(run));
+        },
+        stop: () => requestStopRef.current(run, 'stop'),
+      });
+    },
+    [],
+  );
+  const requestStopRef = useRef<
+    (run: ActiveRun, reason: 'timeout' | 'stop') => void
+  >(() => {});
+  /** 시계가 상한에 닿으면: 벽시계였는지 적고 시간 초과로 멈춤 */
+  const onLimitRef = useRef((run: ActiveRun) => (wall: boolean) => {
+    if (wall) run.wallLimit = true;
+    requestStopRef.current(run, 'timeout');
+  });
+
+  /** get_key()를 처음 부름 (P11-04): 키를 보낼 손잡이를 넘긴다. SW 채널이면 SW가 쌓았다가 잠 답에 실어 준다 */
+  const handleKeys = useCallback(
+    (run: ActiveRun, msg: Extract<WorkerResponse, { type: 'keys' }>) => {
+      run.options.onKeys?.({
+        channel: msg.channel,
+        stop: () => requestStopRef.current(run, 'stop'),
+        press: (key) => {
+          if (runRef.current !== run || typeof key !== 'string') return;
+          if (msg.channel === 'sw') {
+            inputSwRef.current?.active?.postMessage({
+              id: run.id,
+              kind: 'key',
+              key,
+            });
+          } else {
+            const req: WorkerRequest = { type: 'key', id: run.id, key };
+            workerRef.current?.worker.postMessage(req);
+          }
+        },
+      });
+    },
+    [],
+  );
+
+  const createWorker = useCallback(
+    (gen: number) => {
       const worker = new Worker(PYODIDE_WORKER_URL, { type: 'module' });
       const isCurrent = () => workerRef.current?.generation === gen;
 
@@ -234,6 +375,9 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
               run.options.onStderr?.(msg.text);
             }
             break;
+          case 'turtle':
+            if (isRunMsg) run.options.onTurtle?.(msg.chunk);
+            break;
           case 'done':
             if (isRunMsg) handleDone(run, msg);
             break;
@@ -245,7 +389,24 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
             }
             break;
           case 'input-request':
-            // P11-01에서 입력 박스를 붙인다. 지금 Worker는 이 메시지를 보내지 않는다
+            if (isRunMsg) handleInputRequest(run, msg);
+            break;
+          case 'keys':
+            if (isRunMsg) handleKeys(run, msg);
+            break;
+          case 'stdin':
+            // 시험 손님이 답한 줄: 프롬프트 바로 뒤 자리에 (학생이 직접 답한 것과 같은 모양)
+            if (isRunMsg)
+              run.inputs.push({ at: run.stdout.length, value: msg.value });
+            break;
+          // time.sleep 동안은 실행 시간에 넣지 않는다 (P11-04). 멈추는 중이면 시계는 상관없음
+          case 'sleep':
+            if (isRunMsg && !run.stopReason)
+              setClock(run, 'sleep', onLimitRef.current(run));
+            break;
+          case 'wake':
+            if (isRunMsg && !run.stopReason)
+              setClock(run, 'python', onLimitRef.current(run));
             break;
         }
       };
@@ -268,20 +429,42 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       };
 
       workerRef.current = { worker, generation: gen };
+      const msg: WorkerRequest = { type: 'init' };
+      worker.postMessage(msg);
+    },
+    [finishRun, handleDone, handleInputRequest, handleKeys, updateStatus],
+  );
+
+  const spawn = useCallback(
+    (reason: PyodideRestartReason) => {
+      disposeWorker();
+      const gen = ++generationRef.current;
       setGeneration(gen);
       setRestarting(reason);
       setLoadStage('download');
       updateStatus('loading');
-      const msg: WorkerRequest = { type: 'init' };
-      worker.postMessage(msg);
+      if (needsInputServiceWorker()) {
+        // JSPI 없는 브라우저: input() 폴백 SW가 활성화된 뒤에 Worker를 띄운다 (P11-01)
+        pendingSpawnRef.current = true;
+        void registerInputServiceWorker().then((reg) => {
+          inputSwRef.current = reg;
+          // 그새 언마운트(pending 해제)됐거나 다시 띄웠으면(세대가 바뀜) 버린다
+          if (generationRef.current !== gen || !pendingSpawnRef.current) return;
+          pendingSpawnRef.current = false;
+          createWorker(gen);
+        });
+      } else {
+        createWorker(gen);
+      }
     },
-    [disposeWorker, finishRun, handleDone, updateStatus],
+    [disposeWorker, createWorker, updateStatus],
   );
+
   spawnRef.current = spawn;
 
   /** Worker가 없으면 띄운다 (lazy). 이미 있으면 아무것도 하지 않음 */
   const start = useCallback(() => {
-    if (!workerRef.current) spawn(null);
+    if (!workerRef.current && !pendingSpawnRef.current) spawn(null);
   }, [spawn]);
 
   // 마운트 시 Worker 생성 + Pyodide 초기화(lazy면 start()가), 언마운트 시 종료
@@ -292,8 +475,10 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
       if (run) {
         finishRun(run, { success: false, outcome: 'stopped', isStopped: true });
       }
-      // workerRef가 비므로 이 뒤에 오는 이벤트는 모두 이전 세대로 무시된다
+      // workerRef가 비므로 이 뒤에 오는 이벤트는 모두 이전 세대로 무시된다.
+      // SW 등록을 기다리던 Worker 만들기도 세대가 달라져 버려진다
       disposeWorker();
+      pendingSpawnRef.current = false;
     };
   }, [lazy, spawn, disposeWorker, finishRun]);
 
@@ -302,6 +487,16 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
     (run: ActiveRun, reason: 'timeout' | 'stop') => {
       if (runRef.current !== run) return;
       run.stopReason ??= reason;
+      // SW 채널로 답을 기다리는 Worker는 동기 XHR에 막혀 stop 메시지를 못 읽는다 → SW가 풀어 준다
+      if (run.waiting?.channel === 'sw') {
+        inputSwRef.current?.active?.postMessage({
+          id: run.waiting.requestId,
+          kind: 'stop',
+        });
+      }
+      // time.sleep도 SW 동기 XHR로 자고 있을 수 있다 (JSPI 없음, P11-03). SW가 없으면(JSPI) 아무 일도 없음
+      inputSwRef.current?.active?.postMessage({ id: run.id, kind: 'stop-run' });
+      run.waiting = null;
       const handle = workerRef.current;
       if (handle && handle.generation === run.generation) {
         const msg: WorkerRequest = { type: 'stop', id: run.id };
@@ -316,6 +511,7 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
     },
     [restartStuckRun],
   );
+  requestStopRef.current = requestStop;
 
   const runCode = useCallback(
     (code: string, options: RunCodeOptions = {}): Promise<RunResult> => {
@@ -340,21 +536,35 @@ export function usePyodide(hookOptions: UsePyodideOptions = {}) {
           timer: null,
           graceTimer: null,
           stopReason: null,
+          budgetMs: options.timeoutMs ?? optionsRef.current.timeoutMs,
+          wallMs: options.wallLimitMs ?? RUN_WALL_LIMIT_MS,
+          clockMode: 'input',
+          clockFrom: performance.now(),
+          wallLimit: false,
+          inputs: [],
+          waiting: null,
         };
         runRef.current = run;
         setIsRunning(true);
 
         // 시간 초과: 먼저 stop(time.sleep 대기 중이면 Worker 유지), 답이 없으면 Worker 재시작
-        run.timer = setTimeout(
-          () => requestStop(run, 'timeout'),
-          options.timeoutMs ?? optionsRef.current.timeoutMs,
-        );
+        setClock(run, 'python', onLimitRef.current(run));
 
-        const msg: WorkerRequest = { type: 'run', id: run.id, code };
+        const msg: WorkerRequest = {
+          type: 'run',
+          id: run.id,
+          code,
+          ...(options.keys && { keys: options.keys }),
+          ...(options.stdin && { stdin: options.stdin }),
+          ...(options.seed !== undefined && { seed: options.seed }),
+          ...(options.skipSleep !== undefined && {
+            skipSleep: options.skipSleep,
+          }),
+        };
         handle.worker.postMessage(msg);
       });
     },
-    [requestStop],
+    [],
   );
 
   /** 실행 멈추기 (멈추기 버튼). 실행 중이 아니면 아무것도 하지 않는다 */

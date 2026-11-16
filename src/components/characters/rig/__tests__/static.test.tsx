@@ -146,8 +146,8 @@ describe('꾸미기 렌더러 (P9-04): 모든 코스튬 조각 × 포즈 × 스�
       : [],
   );
 
-  it('코스튬 10종이 모두 조각으로 그려진다', () => {
-    expect(costumes).toHaveLength(10);
+  it('코스튬 12종(메이커 베레모·탐정 모자 P11-14 포함)이 모두 조각으로 그려진다', () => {
+    expect(costumes).toHaveLength(12);
     for (const [id, c] of costumes) expect(Object.keys(c), id).toHaveLength(1);
   });
 
@@ -198,8 +198,8 @@ describe('꾸미기 렌더러 (P9-04): 모든 코스튬 조각 × 포즈 × 스�
     },
   );
 
-  it('펫 4종도 금지 요소·SMIL 없음', () => {
-    expect(PET_IDS).toHaveLength(4);
+  it('펫 5종도 금지 요소·SMIL 없음', () => {
+    expect(PET_IDS).toHaveLength(5);
     for (const id of PET_IDS) {
       const svg = renderToStaticMarkup(<PetArt id={id} size={48} />);
       expect(svg).not.toMatch(FORBIDDEN);

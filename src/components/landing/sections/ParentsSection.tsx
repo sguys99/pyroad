@@ -113,9 +113,11 @@ export function ParentsSection() {
             </li>
           ))}
         </ol>
-        <p className="ld-parents-note">
-          월드 2·3의 이름과 내용은 바뀔 수 있어요.
-        </p>
+        {ROADMAP.some((s) => s.status === 'soon') && (
+          <p className="ld-parents-note">
+            월드 2·3의 이름과 내용은 바뀔 수 있어요.
+          </p>
+        )}
       </ParentsReveal>
     </LandingSection>
   );

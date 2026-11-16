@@ -1,0 +1,76 @@
+# 3월드 퀘스트 3-3: 문제 은행 돌기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-3
+# code_check: 설계의 '["a"]' 대신 input( + for (작은따옴표 ['a']·다른 변수 이름도 맞는 답, P11-12 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000017
+order: 3
+title: 문제 은행 돌기
+concept: 리스트 속 딕셔너리와 for
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 문제 은행을 for 로 돌며 묻고 점수 세기
+  learning_goals:
+    - 리스트 속 딕셔너리에서 문제와 답을 꺼낼 수 있다
+    - for 로 문제를 하나씩 묻고 맞힌 개수를 셀 수 있다
+  story_context: 한 문제만 내는 퀴즈쇼는 너무 짧대요! 방송국 창고에서 문제 카드 세 장이 든 문제 은행을 찾았어요. 차례로 묻고 몇 문제를 맞혔는지 알려 줘요.
+  exercise_description: 'bank 의 문제를 for 로 하나씩 꺼내 input() 으로 묻고, 답(앞뒤 빈칸을 지운)이 맞으면 score 를 1 늘려서 "맞힌 문제: 3점" 처럼 출력하세요'
+  starter_code: |
+    bank = [
+        {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+        {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+        {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+    ]
+    score = 0
+
+    # for 로 bank 의 문제 카드를 하나씩 꺼내요
+    #   카드["q"] 로 묻고(input), 답이 카드["a"] 와 같으면 score 를 1 늘려요
+
+
+    print(f"맞힌 문제: {score}점")
+  expected_output_hint: 다 맞힌 손님은 3점, 다 모르는 손님은 0점이 나와야 해요
+  checklist:
+    - 'for card in bank: 로 문제 카드를 하나씩 꺼내요'
+    - input(card["q"]) 로 묻고 .strip() 으로 빈칸을 지워요
+    - 답이 card["a"] 와 같으면 score 를 1 늘려요
+  example_output: '바다에서 가장 큰 동물은? 무지개는 몇 가지 색일까요? 다리가 8개인 바다 동물은? 맞힌 문제: 3점'
+  fallback_text: 'bank 는 문제 카드(딕셔너리)를 모은 리스트예요. for card in bank: 로 돌면 card 에 카드가 하나씩 들어와요. card["q"] 는 문제, card["a"] 는 정답이에요. 2월드 항구에서 만든 단어 퀴즈처럼 맞힐 때마다 score 에 1 을 더해요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: code_check, expected: input( }
+      - { type: code_check, expected: for, whole_word: true }
+  scenarios:
+    - name: 다 맞힌 손님
+      inputs: ['고래', '7', '문어']
+      expect: { type: contains, expected: '맞힌 문제: 3점' }
+    - name: 두 개 맞힌 손님
+      inputs: ['고래', '8', ' 문어']
+      expect: { type: contains, expected: '맞힌 문제: 2점' }
+    - name: 다 모르는 손님
+      inputs: ['몰라', '몰라', '몰라']
+      expect: { type: contains, expected: '맞힌 문제: 0점' }
+  hints:
+    level_1: 문제가 세 장이니 같은 일을 세 번 해요. 리스트를 하나씩 도는 반복을 떠올려 보세요!
+    level_2: 'for card in bank: 아래에 answer = input(card["q"] + " ").strip() 을 쓰고, if answer == card["a"]: 아래에 score = score + 1 을 들여 써요.'
+    level_3: |-
+      for card in bank:
+          answer = input(card["q"] + " ").strip()
+          if answer == card[___]:
+              score = score + 1
+      빈칸에 정답이 든 이름표를 넣어 보세요!
+  solution_code: |
+    bank = [
+        {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+        {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+        {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+    ]
+    score = 0
+
+    for card in bank:
+        answer = input(card["q"] + " ").strip()
+        if answer == card["a"]:
+            score = score + 1
+
+    print(f"맞힌 문제: {score}점")

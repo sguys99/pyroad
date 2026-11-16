@@ -1,0 +1,137 @@
+/* 메이커 작업대 (P11-14, MakerHelper.tsx): 이야기 쪽 힌트 줄 아래 설계도 카드 — 3월드 지도(P11-11)의 모눈종이·청사진 색.
+   값은 토큰 변수만. 자유 질문 칸(.qf)은 askPybaem.css 그대로 */
+
+.mk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  container-type: inline-size;
+}
+
+.mk {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem 1rem;
+  border: var(--line-w) dashed var(--w3-blueprint);
+  border-radius: var(--round-l);
+  /* 옅은 모눈: 청사진 선 두 겹을 아주 옅게 (글자 대비는 면색 --w3-soft 기준) */
+  background-color: var(--w3-soft);
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--w3-blueprint) 18%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--w3-blueprint) 18%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 1.25rem 1.25rem;
+  color: var(--text);
+}
+
+.mk-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 400;
+  color: var(--text);
+}
+.mk-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--w3-ink);
+  box-shadow: var(--elev-card);
+}
+.mk-icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.mk-fb .mk-icon {
+  color: var(--accent-text);
+}
+
+.mk-lead,
+.mk-sub {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--text);
+}
+.mk-sub {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+
+/* 저장된 아이디어 카드 칩: 누르면 바로 기획 도우미에게 (터치 44px) */
+.mk-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mk-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.75rem;
+  padding: 0 0.875rem 0 0.375rem;
+  border: var(--line-w) solid var(--line);
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.mk-card-k {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--round-pill);
+  background: var(--w3-soft);
+  color: var(--w3-ink);
+  font-size: var(--text-caption);
+  line-height: 1.4;
+}
+.mk-card:hover:not(:disabled) {
+  border-color: var(--w3-blueprint);
+}
+.mk-card:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.mk-card:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+.mk-card:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+:root:is([data-motion='minimal'], [data-reduced='true']) .mk-card {
+  transition: none;
+}
+:root[data-reduced='true'] .mk-card:active:not(:disabled) {
+  transform: none;
+}
+
+/* 좁은 쪽(휴대폰): 입력 칸과 "같이 기획하기"를 두 줄로 */
+@container (max-width: 22rem) {
+  .mk .qf-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

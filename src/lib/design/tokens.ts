@@ -30,7 +30,7 @@ export type { DurationName, EasingName, SpringName } from '@/lib/motion/tokens';
 /**
  * 색 토큰. 쓰임(role)은 docs/design/tokens.md 표와 `CONTRAST_PAIRS`를 본다.
  * - **장식 전용**(글자를 얹거나 글자색으로 쓰지 않음): `line`, `surfaceLip`, `primaryLip`, `primaryBright`, `accent`,
- *   `accentLip`, `accentLight`, `w1`·`w2`·`w3`, `w2Shallow`·`w2Deep`(2월드 지도 바다)
+ *   `accentLip`, `accentLight`, `w1`·`w2`·`w3`, `w2Shallow`·`w2Deep`(2월드 지도 바다), `w3Brick`·`w3Blueprint`(3월드 지도)
  * - 초록 글자는 `primaryText`(배경·면·보조 면 위 AA), 금색 계열 글자는 `accentText`
  */
 export const COLOR = {
@@ -103,6 +103,9 @@ export const COLOR = {
   w3: '#D9C3A3',
   w3Ink: '#6B645B',
   w3Soft: '#F4EEE5',
+  /** 3월드 지도 메이커 시티 (P11-11, 장식 전용): 벽돌 지붕·간판 · 설계도 모눈·슬레이트 지붕. 종이 결이 비치게 반투명으로도 칠함 */
+  w3Brick: '#E2A486',
+  w3Blueprint: '#A7BCC9',
 
   // 코드: 키워드 초록 · 문자열 금색 글자 · 주석 회색, 나머지는 본문색
   codeBg: '#FFFFFF',
@@ -154,7 +157,7 @@ export const EDITOR_THEME_KEYS = [
   'text',
 ] as const satisfies readonly ColorName[];
 export type EditorThemeKey = (typeof EDITOR_THEME_KEYS)[number];
-export type EditorThemeId = 'night' | 'ocean' | 'candy';
+export type EditorThemeId = 'night' | 'ocean' | 'candy' | 'arcade';
 
 export const EDITOR_THEMES: Record<
   EditorThemeId,
@@ -228,6 +231,29 @@ export const EDITOR_THEMES: Record<
     errorSoft: '#FBEAE6',
     surface: '#FFFFFF',
     text: '#3B2836',
+  },
+  /** 밤하늘 오락실 (P11-14 제안 N): 보랏빛 밤 면 + 네온 분홍 키워드 · 네온 노랑 문자열 · 하늘 숫자 · 연두 함수 */
+  arcade: {
+    codeBg: '#1A1530',
+    codeText: '#F1ECFF',
+    codeComment: '#ABA2CF',
+    codeKeyword: '#FF8AD8',
+    codeString: '#FFE46B',
+    codeNumber: '#7FF0FF',
+    codeFunc: '#8CF59A',
+    surface2: '#14102A',
+    textMuted: '#B9B0DD',
+    line: '#2E2650',
+    lineStrong: '#7A6FA8',
+    primary: '#9EF0B0',
+    primarySoft: '#2F2A5A',
+    accentLight: '#4A3A14',
+    accentSoft: '#3A3222',
+    accentText: '#FFE46B',
+    error: '#FF8F8F',
+    errorSoft: '#4A2234',
+    surface: '#241D44',
+    text: '#F1ECFF',
   },
 };
 
@@ -656,6 +682,9 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   // 2월드 지도 바다 (P10-04): 지금은 글자를 얹지 않지만(이름표는 흰 알약), 물 위에 글자가 놓여도 읽히는지
   { fg: 'text', bg: 'w2Shallow', kind: 'text', use: '2월드 얕은 바다 위 글자' },
   { fg: 'text', bg: 'w2Deep', kind: 'text', use: '2월드 깊은 바다 위 글자' },
+  // 3월드 지도 (P11-11): 지금은 글자를 얹지 않지만(이름표는 흰 알약), 지붕·모눈 위에 글자가 놓여도 읽히는지
+  { fg: 'text', bg: 'w3Brick', kind: 'text', use: '3월드 벽돌 지붕 위 글자' },
+  { fg: 'text', bg: 'w3Blueprint', kind: 'text', use: '3월드 설계도 모눈 위 글자' },
   { fg: 'w3Ink', bg: 'w3Soft', kind: 'text', use: '월드 3 표지 글자' },
   { fg: 'text', bg: 'w3Soft', kind: 'text', use: '월드 3 바탕 본문' },
   { fg: 'codeText', bg: 'codeBg', kind: 'text', use: '코드 글자' },

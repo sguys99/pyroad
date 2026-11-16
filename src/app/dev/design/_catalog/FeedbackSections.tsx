@@ -26,6 +26,7 @@ import { StepStrip } from '@/components/quest/StepStrip';
 import { QuestHints } from '@/components/quest/QuestHints';
 import { AskPybaem } from '@/components/quest/AskPybaem';
 import { FreeQuestionForm } from '@/components/quest/FreeQuestionForm';
+import { MakerHelper } from '@/components/quest/MakerHelper';
 import { FREE_QUESTION_MESSAGES } from '@/lib/tutor/freeQuestion';
 import { MotionProvider } from '@/components/providers/MotionProvider';
 import {
@@ -532,6 +533,53 @@ function TutorChatDemo() {
           />
         </div>
         <CodeSample code={`<AskPybaem session={session} hintPending={notes.some((n) => n.pending)} />  // StoryPage ask 자리`} />
+      </Demo>
+      <Demo
+        label="메이커 작업대 (MakerHelper, P11-14)"
+        note="3월드 프로젝트 이야기 쪽 힌트 줄 아래 설계도 카드. 3-F 1단계 = 기획 도우미(아이디어 한 줄 또는 저장된 아이디어 카드 6종 칩 → project_planner, 답은 위 대화로), 3-F 4단계·3월드 프로젝트 완료 뒤 = 작품 평가 친구(지금 코드로 끝까지 돌린 실행이 있어야 눌림 → creation_feedback). 칩 44px, 좁은 쪽은 입력 칸·버튼 두 줄, 동작 줄이기는 눌림 움직임 없음"
+        surface="card"
+        data-testid="maker-helper-demo"
+      >
+        <div className="grid max-w-3xl gap-4 md:grid-cols-2">
+          <MakerHelper
+            session={
+              {
+                ...session,
+                kind: 'project',
+                quest: {
+                  stage: {
+                    theme_name: 'maker_fair',
+                    world: { slug: 'maker-city' },
+                  },
+                },
+                currentStep: 1,
+                totalSteps: 4,
+                isCompleted: false,
+                canAskFeedback: false,
+              } as unknown as QuestSession
+            }
+          />
+          <MakerHelper
+            session={
+              {
+                ...session,
+                kind: 'project',
+                quest: {
+                  stage: {
+                    theme_name: 'maker_fair',
+                    world: { slug: 'maker-city' },
+                  },
+                },
+                currentStep: 4,
+                totalSteps: 4,
+                isCompleted: false,
+                canAskFeedback: true,
+                handleCreationFeedback: async () =>
+                  reply(DEMO_ANSWER.concept),
+              } as unknown as QuestSession
+            }
+          />
+        </div>
       </Demo>
     </MotionProvider>
   );

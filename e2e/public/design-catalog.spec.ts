@@ -47,6 +47,12 @@ async function openCatalog(page: Page, mode?: MotionMode) {
   await expect(
     page.getByRole('heading', { name: 'pyRoad 디자인 카탈로그' }),
   ).toBeVisible();
+  // 서버 HTML 에도 부트 스크립트의 data-motion="full" 이 있어 아래 확인만으로는 하이드레이션을 기다리지 못함 (B91)
+  await expect(page.getByTestId('design-catalog')).toHaveAttribute(
+    'data-hydrated',
+    'true',
+    { timeout: 30_000 },
+  );
   if (mode) {
     const html = page.locator('html');
     await expect(html).toHaveAttribute('data-motion', mode.tier);
@@ -61,6 +67,28 @@ async function openCatalog(page: Page, mode?: MotionMode) {
 async function pauseClock(page: Page) {
   await page.clock.install();
   await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1_000);
+}
+
+/**
+ * 날아가는 보상(`.dm-fly`)이 생기는 순간을 센다. 1.4초 뒤 지워져 느린 CI 러너에서는 확인 전에 사라짐 (B78·B91).
+ * 시계를 세우면 뒤늦게 하이드레이션되는 시간 글자가 달라져 React #418 (B81) → 시계 대신 DOM 추가를 기록
+ */
+async function countFlights(page: Page): Promise<() => Promise<number>> {
+  await page.evaluate(() => {
+    const w = window as unknown as { __dmFly: number };
+    w.__dmFly = 0;
+    new MutationObserver((records) => {
+      for (const r of records)
+        for (const n of r.addedNodes)
+          if (
+            n instanceof Element &&
+            (n.matches('.dm-fly') || n.querySelector('.dm-fly'))
+          )
+            w.__dmFly++;
+    }).observe(document.body, { childList: true, subtree: true });
+  });
+  return () =>
+    page.evaluate(() => (window as unknown as { __dmFly: number }).__dmFly);
 }
 
 /** 리그 SVG 안의 속성 쓰기를 ms 동안 센다 (전체 / transform만) */
@@ -187,7 +215,6 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
     const before = await page.evaluate(() =>
       localStorage.getItem('pyroad.motion.prefs.v1'),
     );
-    const detected = await page.locator('html').getAttribute('data-motion');
     await page
       .getByTestId('motion-tier-choice')
       .getByRole('radio', { name: 'minimal' })
@@ -214,10 +241,14 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       .getByRole('radio', { name: '기기 설정' })
       .click();
     await expect(page.locator('html')).toHaveAttribute('data-reduced', 'false');
-    await expect(page.locator('html')).toHaveAttribute(
-      'data-motion',
-      detected ?? 'full',
-    );
+    // 루트 감지는 느린 러너에서 테스트 도중에도 내려갈 수 있어(실측 full → lite) 처음 값이 아니라 지금 감지 값과 비교 (B94)
+    await expect
+      .poll(async () => {
+        const motion = await page.locator('html').getAttribute('data-motion');
+        const now = await page.getByTestId('motion-now').textContent();
+        return !!now?.includes(`감지 ${motion}`);
+      })
+      .toBe(true);
     expect(
       await page.evaluate(() => localStorage.getItem('pyroad.motion.prefs.v1')),
     ).toBe(before);
@@ -329,15 +360,20 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
       const duration = await btn
         .locator('.g-btn-face')
         .evaluate((el) => getComputedStyle(el).transitionDuration);
+      // 젤리 출렁임(WAAPI `animate()`)을 거는 순간을 센다 — 약 0.6초짜리라 느린 러너에선 확인 전에 끝남 (B91)
+      await btn.locator('.g-btn-face').evaluate((el) => {
+        const e = el as HTMLElement & { __jelly?: number };
+        const animate = e.animate.bind(e);
+        e.__jelly = 0;
+        e.animate = (...args) => {
+          e.__jelly!++;
+          return animate(...args);
+        };
+      });
       await page.mouse.up();
-      // WAAPI만 센다 (CSS 전환 복귀는 CSSTransition으로 따로 잡힘)
       const jelly = await btn
         .locator('.g-btn-face')
-        .evaluate(
-          (el) =>
-            el.getAnimations().filter((a) => !(a instanceof CSSTransition))
-              .length,
-        );
+        .evaluate((el) => (el as HTMLElement & { __jelly?: number }).__jelly);
       await page.mouse.move(0, 0);
 
       if (mode.reduced === 'on') {
@@ -810,21 +846,7 @@ test.describe('데일리 미션 (P8-07)', () => {
         page.getByTestId('world-hud-demo').getByTestId('hud-mission').last(),
       ).toHaveAttribute('data-ready');
 
-      // 날아가는 보상은 1.4초 뒤 지워진다 → 느린 CI 러너에서도 세도록 생기는 순간을 기록 (B78·B81: 시계를 세우면
-      // 뒤늦게 하이드레이션되는 시간 글자가 달라져 React #418)
-      await page.evaluate(() => {
-        const w = window as unknown as { __dmFly: number };
-        w.__dmFly = 0;
-        new MutationObserver((records) => {
-          for (const r of records)
-            for (const n of r.addedNodes)
-              if (
-                n instanceof Element &&
-                (n.matches('.dm-fly') || n.querySelector('.dm-fly'))
-              )
-                w.__dmFly++;
-        }).observe(document.body, { childList: true, subtree: true });
-      });
+      const flights = await countFlights(page);
       await first
         .getByTestId('mission-daily_quiz')
         .getByTestId('mission-claim')
@@ -833,9 +855,7 @@ test.describe('데일리 미션 (P8-07)', () => {
         'data-state',
         'claimed',
       );
-      const flying = await page.evaluate(
-        () => (window as unknown as { __dmFly: number }).__dmFly,
-      );
+      const flying = await flights();
       if (full) expect(flying).toBeGreaterThan(0);
       else expect(flying).toBe(0);
     });
@@ -866,6 +886,7 @@ test.describe('출석 도장 (P8-08)', () => {
         page.getByTestId('world-hud-demo').getByTestId('hud-shields'),
       ).toHaveAttribute('data-n', '2');
 
+      const flights = await countFlights(page);
       await third.getByTestId('attendance-stamp').click();
       await expect(third.getByTestId('attendance-cell-3')).toHaveAttribute(
         'data-state',
@@ -876,8 +897,8 @@ test.describe('출석 도장 (P8-08)', () => {
       ).toBeVisible();
       // 코인은 도장이 닿는 순간 HUD 견본으로 (full 만, 나머지는 날아가지 않음)
       if (mode.tier === 'full' && mode.reduced === 'off')
-        await expect(page.locator('.dm-fly').first()).toBeAttached();
-      else expect(await page.locator('.dm-fly').count()).toBe(0);
+        await expect.poll(flights).toBeGreaterThan(0);
+      else expect(await flights()).toBe(0);
 
       await seventh.getByTestId('attendance-stamp').click();
       const overlay = page.getByTestId('celebration-overlay');
@@ -927,12 +948,13 @@ test.describe('업적 도감 (P8-10)', () => {
       );
       await expect(glint).toBeVisible();
 
+      const flights = await countFlights(page);
       await ready.getByTestId('achievement-claim').click();
       await expect(ready).toHaveAttribute('data-state', 'earned');
       await expect(book.locator('[data-ab-wallet]')).toContainText(
         '코인 1,250개',
       );
-      const flying = await page.locator('.dm-fly').count();
+      const flying = await flights();
       if (mode.tier === 'full' && mode.reduced === 'off')
         expect(flying).toBeGreaterThan(0);
       else expect(flying).toBe(0);
@@ -978,9 +1000,9 @@ test.describe('꾸미기 렌더러 (P9-04)', () => {
       await openCatalog(page);
       const grid = page.getByTestId('costume-grid');
       await grid.scrollIntoViewIfNeeded();
-      // 조각 10 + 다 입기 1 행 × 14상태
-      await expect(grid.locator('tr[data-costume]')).toHaveCount(11);
-      await expect(grid.locator('td svg')).toHaveCount(11 * 14);
+      // 조각 12(메이커 베레모·탐정 모자 P11-14 포함) + 다 입기 1 행 × 14상태
+      await expect(grid.locator('tr[data-costume]')).toHaveCount(13);
+      await expect(grid.locator('td svg')).toHaveCount(13 * 14);
       await expect(
         grid.locator('svg text, svg foreignObject, svg image'),
       ).toHaveCount(0);
@@ -1044,7 +1066,7 @@ test.describe('꾸민 아바타·테두리 (P9-05)', () => {
 
 test.describe('상점 아이템 카탈로그 (P9-01)', () => {
   for (const width of [360, 1280]) {
-    test(`${width}px: 아이템 22종이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({
+    test(`${width}px: 아이템 26종(메이커 4종 P11-14 포함)이 썸네일·가격과 함께 보이고 칸이 화면 안에 있다`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -1052,7 +1074,7 @@ test.describe('상점 아이템 카탈로그 (P9-01)', () => {
       const section = page.locator('#shop');
       await section.scrollIntoViewIfNeeded();
       const items = section.locator('[data-item]');
-      await expect(items).toHaveCount(22);
+      await expect(items).toHaveCount(26);
       await expect(section.locator('[data-item="pet_dragon"]')).toContainText(
         '1,500',
       );
@@ -1061,7 +1083,7 @@ test.describe('상점 아이템 카탈로그 (P9-01)', () => {
       );
       await expect(
         section.locator('[data-item^="pet_"] svg[viewBox="0 0 48 48"]'),
-      ).toHaveCount(4);
+      ).toHaveCount(5); // 느릿이 (P11-14)
       for (const box of await items.evaluateAll((els) =>
         els.map((el) => el.getBoundingClientRect().right),
       ))
@@ -1079,7 +1101,7 @@ test.describe('상점 화면 (P9-02)', () => {
       await openCatalog(page);
       const demo = page.getByTestId('catalog-shop-screen');
       await demo.scrollIntoViewIfNeeded();
-      await expect(demo.locator('[data-item]')).toHaveCount(10);
+      await expect(demo.locator('[data-item]')).toHaveCount(12); // 코스튬 탭 (메이커 모자 2 P11-14 포함)
       await demo.getByRole('button', { name: /^마법사 모자,/ }).click();
       const sheet = page.getByTestId('shop-sheet');
       await expect(sheet.getByTestId('shop-stage')).toHaveAttribute(

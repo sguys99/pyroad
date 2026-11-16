@@ -42,6 +42,7 @@ export const SHARE_CARD_FILENAME: Record<ShareCardKind, string> = {
   stage: 'pyroad-stage-clear.png',
   achievement: 'pyroad-achievement.png',
   weekly: 'pyroad-weekly.png',
+  creation: 'pyroad-creation.png',
 };
 
 /** 카카오 메시지 제목 · Web Share 글 (닉네임 없이 — 닉네임은 카드 그림에만) */
@@ -50,6 +51,7 @@ export const SHARE_TITLE: Record<ShareCardKind, string> = {
   stage: '파이썬 모험 스테이지를 깼어요!',
   achievement: '파이썬 모험에서 새 업적을 받았어요!',
   weekly: '이번 주 파이썬 모험 기록이에요!',
+  creation: '파이썬으로 직접 만든 작품이에요!',
 };
 export const SHARE_DESCRIPTION = 'pyRoad에서 파이뱀과 파이썬을 배우고 있어요.';
 

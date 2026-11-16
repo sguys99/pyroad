@@ -1,0 +1,186 @@
+# 3월드 보스 2: 이야기 뒤죽박죽 버그버그 (5문제)
+# 작성 안내: content/README.md "보스". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 퀴즈·보스 코드에는 input() 을 넣지 않음 → "입력했다고 해요" 주석과 답 리스트로 (world3.md §5)
+
+id: b3000000-0000-0000-0000-000000000202
+order: 8
+title: 이야기 뒤죽박죽 버그버그
+concept: 입력과 갈림길 총정리
+xp_reward: 60
+quest_type: boss
+prompt:
+  topic: 입력은 글자, int 로 바꾸기, 다시 묻기, 갈림길 총정리
+  learning_goals:
+    - 입력받은 값이 글자라는 것을 떠올려 결과를 예측할 수 있다
+    - 다시 묻기 반복과 갈림길의 순서를 맞추고 버그를 고칠 수 있다
+  story_context: 이야기책이 마지막 장까지 열리려는 순간, 두루마리 망토를 두른 버그버그가 책장을 마구 섞어 버렸어요! 다섯 문제를 풀어 이야기를 제자리로 돌려놓아요.
+  fallback_text: input() 으로 받은 값은 늘 글자예요. 숫자 계산을 하려면 int() 로 바꾸고, 글자와 견줄 때는 따옴표를 붙여요. 잘못 고르면 while 로 다시 묻고, 갈림길이 여럿이면 if, elif, else 를 위에서부터 차례로 봐요.
+  boss:
+    name: 이야기 뒤죽박죽 버그버그
+    look: storyteller
+    intro: 옛날 옛적에… 히히, 내가 이야기를 다 섞어 놨지! 다섯 장을 바로잡으면 이야기를 돌려줄게!
+    on_defeat: 으앗, 이야기가 다 제자리로 돌아갔네! 사실 나도 이 이야기 끝이 궁금했어. 다음엔 관객으로 올게!
+    on_victory: 히히, 이야기는 아직 뒤죽박죽이야! 극장에서 연습하고 다시 와. 다음 장에서 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000010
+    prompt:
+      quiz:
+        question: 손님이 사탕 수로 4를 입력했다고 해요. 돌리면 무엇이 나올까?
+        code: |-
+          candy = "4"  # 4를 입력했다고 해요
+          print(candy * 3)
+        options:
+          - { id: opt-4sev, text: '444' }
+          - { id: opt-158n, text: '12' }
+          - { id: opt-4zzu, text: '7' }
+          - { id: opt-4u1k, text: '4 4 4' }
+    answer:
+      quiz_answer:
+        accepted: [opt-4sev]
+        explanation: 입력은 글자라서 "4" * 3 은 글자 "4" 를 세 번 이어 붙인 444 예요. 12 를 만들려면 int(candy) * 3 이에요.
+        explanations:
+          opt-158n: 숫자 4라면 12 지만, 입력은 글자라서 이어 붙여요.
+          opt-4zzu: 4 + 3 이 아니라 곱하기예요. 그리고 글자라서 이어 붙여요.
+          opt-4u1k: 글자를 이어 붙일 때 사이에 빈칸이 생기지 않아요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000009
+    prompt:
+      quiz:
+        question: 빈칸을 채워 입력한 사과 수에 3개를 더해요
+        code: |-
+          apples = "5"  # 5를 입력했다고 해요
+          total = {{bk-n915}}(apples) + 3
+          print(f"사과 {total}개")
+        tokens:
+          - { id: tok-zqa0, text: int }
+          - { id: tok-3e4g, text: str }
+          - { id: tok-yc0w, text: len }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-n915: tok-zqa0 }
+        explanation: int 로 글자 "5" 를 숫자 5 로 바꿔야 3 을 더해 사과 8개가 돼요.
+        explanations:
+          tok-3e4g: str 은 글자로 만드는 주문이에요. 글자에 숫자 3 을 더하면 에러가 나요.
+          tok-yc0w: len 은 글자 수를 세요. "5" 는 한 글자라 1 + 3 = 4 가 돼요.
+  - quiz_kind: parsons
+    review_quest: b3000000-0000-0000-0000-000000000012
+    prompt:
+      quiz:
+        question: 손님이 3, 안녕, 2 를 차례로 입력했다고 해요. 줄을 순서대로 놓고 들여쓰기도 맞춰, 1이나 2가 나올 때까지 다시 물어요
+        indent: true
+        lines:
+          - { id: ln-59ke, code: 'answers = ["3", "안녕", "2"]' }
+          - { id: ln-2ank, code: n = 0 }
+          - { id: ln-3lg6, code: 'door = answers[n]' }
+          - { id: ln-5qw2, code: 'while door != "1" and door != "2":' }
+          - { id: ln-v0gn, code: 'print("다시 골라 줘요!")' }
+          - { id: ln-4z1u, code: n = n + 1 }
+          - { id: ln-fn0b, code: 'door = answers[n]' }
+          - { id: ln-6vmr, code: 'print(f"{door}번 문으로 가요!")' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-59ke, indent: 0 }
+            - { id: ln-2ank, indent: 0 }
+            - { id: ln-3lg6, indent: 0 }
+            - { id: ln-5qw2, indent: 0 }
+            - { id: ln-v0gn, indent: 1 }
+            - { id: ln-4z1u, indent: 1 }
+            - { id: ln-fn0b, indent: 1 }
+            - { id: ln-6vmr, indent: 0 }
+          - - { id: ln-59ke, indent: 0 }
+            - { id: ln-2ank, indent: 0 }
+            - { id: ln-3lg6, indent: 0 }
+            - { id: ln-5qw2, indent: 0 }
+            - { id: ln-4z1u, indent: 1 }
+            - { id: ln-v0gn, indent: 1 }
+            - { id: ln-fn0b, indent: 1 }
+            - { id: ln-6vmr, indent: 0 }
+          - - { id: ln-59ke, indent: 0 }
+            - { id: ln-2ank, indent: 0 }
+            - { id: ln-3lg6, indent: 0 }
+            - { id: ln-5qw2, indent: 0 }
+            - { id: ln-4z1u, indent: 1 }
+            - { id: ln-fn0b, indent: 1 }
+            - { id: ln-v0gn, indent: 1 }
+            - { id: ln-6vmr, indent: 0 }
+          - - { id: ln-2ank, indent: 0 }
+            - { id: ln-59ke, indent: 0 }
+            - { id: ln-3lg6, indent: 0 }
+            - { id: ln-5qw2, indent: 0 }
+            - { id: ln-v0gn, indent: 1 }
+            - { id: ln-4z1u, indent: 1 }
+            - { id: ln-fn0b, indent: 1 }
+            - { id: ln-6vmr, indent: 0 }
+          - - { id: ln-2ank, indent: 0 }
+            - { id: ln-59ke, indent: 0 }
+            - { id: ln-3lg6, indent: 0 }
+            - { id: ln-5qw2, indent: 0 }
+            - { id: ln-4z1u, indent: 1 }
+            - { id: ln-v0gn, indent: 1 }
+            - { id: ln-fn0b, indent: 1 }
+            - { id: ln-6vmr, indent: 0 }
+          - - { id: ln-2ank, indent: 0 }
+            - { id: ln-59ke, indent: 0 }
+            - { id: ln-3lg6, indent: 0 }
+            - { id: ln-5qw2, indent: 0 }
+            - { id: ln-4z1u, indent: 1 }
+            - { id: ln-fn0b, indent: 1 }
+            - { id: ln-v0gn, indent: 1 }
+            - { id: ln-6vmr, indent: 0 }
+        explanation: 처음 답을 꺼낸 뒤, 1도 2도 아닌 동안 "다시 골라 줘요!" 를 말하고 다음 답을 꺼내요. 반복 안의 세 줄은 한 칸 들여 쓰고, 반복이 끝난 뒤 고른 문으로 가요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000013
+    prompt:
+      quiz:
+        question: 2를 입력했는데 선물을 주지 않고 모험이 끝나 버려요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-pl03, code: 'choice = "2"  # 2를 입력했다고 해요' }
+          - { id: ln-30oc, code: 'if choice == "1":' }
+          - { id: ln-5zts, code: '    print("노래를 불러 줘요")' }
+          - { id: ln-p6fj, code: 'elif choice == 2:' }
+          - { id: ln-1ciw, code: '    print("선물을 줘요")' }
+          - { id: ln-4t61, code: 'else:' }
+          - { id: ln-n9ju, code: '    print("모험 끝")' }
+        fixes:
+          - { id: fx-nz5h, code: 'elif choice == "2":' }
+          - { id: fx-w4qh, code: 'elif int(choice) == 2:' }
+          - { id: fx-h92o, code: 'elif choice = "2":' }
+          - { id: fx-qhw6, code: 'elif choice == "1":' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-p6fj, fix: fx-nz5h }
+          - { line: ln-p6fj, fix: fx-w4qh }
+        explanation: choice 는 글자 "2" 라서 숫자 2 와 견주면 False 예요. 그래서 else 로 가 버렸어요. 따옴표를 붙여 글자끼리 견주거나 int(choice) 로 바꾸면 선물을 줘요.
+        explanations:
+          fx-h92o: '= 하나는 값을 넣는 주문이라 견줄 수 없어요. == 를 써요.'
+          fx-qhw6: 1 은 노래를 부르는 갈림길이에요. 2 를 견줘야 해요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000011
+    prompt:
+      quiz:
+        question: 손님이 3을 입력했다고 해요. 돌리면 무엇이 나올까?
+        code: |-
+          door = "3"  # 3을 입력했다고 해요
+          if door == "1":
+              print("동굴")
+          elif door == "2":
+              print("강")
+          else:
+              print("다시 골라 줘요")
+        options:
+          - { id: opt-0g3n, text: '다시 골라 줘요' }
+          - { id: opt-i8pd, text: '강' }
+          - { id: opt-04tn, text: '동굴' }
+          - { id: opt-40ks, text: "동굴\n강" }
+    answer:
+      quiz_answer:
+        accepted: [opt-0g3n]
+        explanation: '"3" 은 "1" 도 "2" 도 아니라서 if 와 elif 를 지나 else 로 가요.'
+        explanations:
+          opt-i8pd: elif 는 "2" 일 때만이에요. 손님은 3을 입력했어요.
+          opt-04tn: if 는 "1" 일 때만 실행돼요.
+          opt-40ks: if, elif, else 중에서 하나만 실행돼요.

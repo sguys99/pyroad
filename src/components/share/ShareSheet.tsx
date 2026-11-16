@@ -424,7 +424,18 @@ export function ShareSheet({
         data-testid="share-notice"
       >
         <Notice icon={<UserRound aria-hidden />}>
-          카드에는 <b className="text-foreground">닉네임과 캐릭터</b>만 보여요.
+          {kind === 'creation' ? (
+            <>
+              카드에는 <b className="text-foreground">닉네임과 캐릭터</b>, 작품
+              이름과 그림(대화 작품은 앞 몇 줄)만 보여요. 코드는 보이지 않아요.
+              갤러리에서 작품을 내리면 링크도 닫혀요.
+            </>
+          ) : (
+            <>
+              카드에는 <b className="text-foreground">닉네임과 캐릭터</b>만
+              보여요.
+            </>
+          )}
         </Notice>
         <Notice icon={<CalendarClock aria-hidden />}>
           링크는 90일 동안 열려요{expires && ` (${expires}까지)`}. 그다음엔

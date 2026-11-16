@@ -10,10 +10,29 @@ export const PYODIDE_SELF_HOST_PATH = `/pyodide/${PYODIDE_VERSION}/`;
 /** 자체 호스팅이 막혔을 때만 쓰는 폴백 */
 export const PYODIDE_CDN_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
-/** module Worker 스크립트 (`new Worker(url, { type: 'module' })`) */
-export const PYODIDE_WORKER_URL = '/workers/pyodide-worker.mjs';
+/**
+ * 실행기 경로 (P11-01). 파일은 `public/workers/`에 있고 next.config.ts rewrites로 이 경로에서 서빙한다.
+ * input() 폴백 SW의 scope라 Worker도 이 경로에서 띄워야 SW가 동기 XHR을 붙잡을 수 있다
+ */
+export const PYODIDE_RUNNER_PATH = '/pyodide/runner/';
 
+/** module Worker 스크립트 (`new Worker(url, { type: 'module' })`) */
+export const PYODIDE_WORKER_URL = `${PYODIDE_RUNNER_PATH}pyodide-worker.mjs`;
+
+/** input() 폴백 Service Worker (JSPI 없는 브라우저만 등록, scope = PYODIDE_RUNNER_PATH) */
+export const INPUT_SW_URL = `${PYODIDE_RUNNER_PATH}input-sw.js`;
+
+/** 시간 제한: Python이 실제로 도는 시간 (입력 대기·time.sleep은 빼고 잼, P11-03·P11-04) */
 export const EXECUTION_TIMEOUT_MS = 5000;
+
+/**
+ * 실행 한 번의 벽시계 상한 (P11-04): time.sleep은 시간 제한에서 빠지므로 끝을 잊은 게임 루프가 끝없이 돌지 않게.
+ * 입력 대기는 넣지 않는다. 30초 게임(`range(900)`)의 여섯 배
+ */
+export const RUN_WALL_LIMIT_MS = 180_000;
+
+/** 실행 한 번의 turtle 그리기 명령 상한 (§12-Q74 ①). 넘으면 shim이 TurtleLimitError로 끝냄 — Worker 재시작 없음 */
+export const TURTLE_MAX_COMMANDS = 50_000;
 
 /**
  * stop을 보낸 뒤 Worker가 답할 때까지 기다리는 시간. time.sleep 대기 중이면(JSPI) 수십 ms 안에 끝나고,

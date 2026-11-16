@@ -23,3 +23,79 @@
   white-space: pre;
   tab-size: 4;
 }
+
+/* 숫자 손잡이 (world3 제안 L, src/lib/editor/numberHandle.ts). 켜진 에디터의 숫자에 점선 밑줄 = "눌러 볼 수 있어요".
+   손잡이는 CodeMirror 말풍선(.cm-tooltip) 안: 이름·값 한 줄 + − 슬라이더 + 한 줄, 누르는 곳은 모두 44px 이상.
+   CodeMirror 기본 말풍선 테두리·면을 덮으려고 .cm-editor부터 적는다 */
+.cm-num-on .pr-tok-number {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.cm-editor .cm-tooltip:has(> .cm-num) {
+  border: var(--line-w) solid var(--line);
+  border-radius: var(--round-m);
+  background: var(--surface);
+  box-shadow: var(--elev-pop);
+}
+.cm-num {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: min(17rem, calc(100vw - 2rem));
+  padding: 0.5rem;
+  color: var(--text);
+}
+.cm-num-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.25rem;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.cm-num-v {
+  color: var(--primary-text);
+}
+.cm-num-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.cm-num-range {
+  flex: 1 1 0;
+  width: 0;
+  height: 2.75rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+.cm-num-b {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--round-s);
+  background: var(--surface-2);
+  box-shadow: 0 2px 0 var(--line);
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--dur-instant) var(--ease-press);
+}
+.cm-num-b:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.cm-num-range:focus-visible,
+.cm-num-b:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+}
+:root[data-reduced='true'] .cm-num-b {
+  transition: none;
+}

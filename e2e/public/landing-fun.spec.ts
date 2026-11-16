@@ -75,10 +75,10 @@ function listAnimations(page: Page): Promise<string[]> {
 
 const SCENES = [
   { id: 'level', title: '레벨 업', soon: false },
-  { id: 'coin', title: '코인 모으기', soon: true },
+  { id: 'coin', title: '코인 모으기', soon: false },
   { id: 'dress', title: '파이뱀 꾸미기', soon: false },
-  { id: 'share', title: '자랑하기', soon: true },
-  { id: 'boss', title: '보스 배틀', soon: true },
+  { id: 'share', title: '자랑하기', soon: false },
+  { id: 'boss', title: '보스 배틀', soon: false },
 ];
 
 test.describe('랜딩 재미 요소 쇼케이스 (P4-05)', () => {
@@ -96,7 +96,7 @@ test.describe('랜딩 재미 요소 쇼케이스 (P4-05)', () => {
       ).toBeAttached();
       await expect(card.locator('.ld-fun-soon')).toHaveCount(s.soon ? 1 : 0);
     }
-    await expect(section.locator('.ld-fun-soon')).toHaveCount(3);
+    await expect(section.locator('.ld-fun-soon')).toHaveCount(0); // 다섯 장면 모두 앱에 있음 (B88)
   });
 
   test('full: 화면 안 장면을 한 번에 하나씩 차례로 반복한다 (무한 애니메이션 없음)', async ({

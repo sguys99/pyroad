@@ -222,6 +222,27 @@
   color: var(--w2-ink);
 }
 
+/* 메이커 시티(3월드, P11-14): 설계도 띠 (지도와 같은 모눈종이 면 + 빌딩) */
+.ab-sec[data-category='maker'] {
+  padding: 1rem;
+  border-radius: var(--round-l);
+  background-color: var(--w3-soft);
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--w3-blueprint) 22%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--w3-blueprint) 22%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 1.25rem 1.25rem;
+}
+.ab-maker > svg {
+  color: var(--w3-ink);
+}
+
 /* ── 칸 ── */
 .ab-grid {
   display: grid;

@@ -1,0 +1,61 @@
+# 3월드 퀘스트 1-6: 빙글빙글 꽃
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-1
+# code_check 는 설계의 "% 3]" 대신 "%" — colors[i % len(colors)] 도 맞는 답 (P11-12 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000006
+order: 6
+title: 빙글빙글 꽃
+concept: circle 과 색 리스트, 나머지 %
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 원을 돌려 그리며 색을 번갈아 바꾸기
+  learning_goals:
+    - circle() 로 원을 그릴 수 있다
+    - 나머지 % 로 리스트의 색을 차례로 돌려 쓸 수 있다
+  story_context: 공방 마당 벽에 커다란 꽃을 그려 달라는 부탁이 왔어요! 느릿이가 동그라미를 그리고 조금 돌고, 또 그리고 조금 돌면 꽃이 피어난대요. 빨강, 주황, 보라 물감을 번갈아 쓰면 더 예쁘겠죠?
+  exercise_description: 'for 로 12번 반복하며 원(circle(50))을 그리고 왼쪽으로 30도 돌아요. 색은 colors 리스트에서 i % 3 번째를 골라 빨강, 주황, 보라가 번갈아 나오게 하세요'
+  starter_code: |
+    import turtle
+
+    t = turtle.Turtle()
+    t.speed(0)
+    colors = ["red", "orange", "purple"]
+
+    for i in range(12):
+        # i 를 3으로 나눈 나머지 번호의 색을 골라요 (0, 1, 2, 0, 1, 2, ...)
+        t.color(___)
+        t.circle(50)
+        t.left(30)
+  expected_output_hint: 그림판에 원 12개가 빙 둘러 꽃처럼 그려지고, 색이 세 가지로 번갈아 나와야 해요
+  checklist:
+    - ___ 자리에 colors 리스트에서 꺼낸 색을 넣어요
+    - 번호는 i 를 3으로 나눈 나머지(%)로 골라요
+    - 빨강, 주황, 보라 원이 번갈아 나오는지 봐요
+  example_output: (그림판에 빨강·주황·보라 원 12개로 된 꽃)
+  fallback_text: '% 는 나눈 나머지를 구해요. 0 % 3 = 0, 1 % 3 = 1, 2 % 3 = 2, 3 % 3 = 0 처럼 0, 1, 2 가 계속 돌아요. 그래서 colors[i % 3] 으로 색을 고르면 리스트 끝에 닿아도 처음으로 돌아가요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: circles, min: 12 }
+      - { type: colors, min: 3 }
+      - type: code_check
+        expected: '%'
+  hints:
+    level_1: 12번 도는 동안 색 번호가 0, 1, 2, 0, 1, 2 … 로 돌아야 해요. 어떤 계산이 그렇게 될까요?
+    level_2: 'i 를 3으로 나눈 나머지는 i % 3 이에요. 리스트에서 꺼낼 때는 colors[번호] 처럼 써요.'
+    level_3: |-
+      t.color(colors[i ___ 3])
+      빈칸에 나머지를 구하는 기호를 넣어 보세요!
+  solution_code: |
+    import turtle
+
+    t = turtle.Turtle()
+    t.speed(0)
+    colors = ["red", "orange", "purple"]
+
+    for i in range(12):
+        t.color(colors[i % 3])
+        t.circle(50)
+        t.left(30)

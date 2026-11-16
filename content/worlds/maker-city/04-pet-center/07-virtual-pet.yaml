@@ -1,0 +1,556 @@
+# 3월드 프로젝트 4-7: 나의 가상 펫 (5단계, 설계도 자리(pass) + 고쳐 나가기 + 자리표 주석 — world3.md §3 제안 B)
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world3.md §4 3-4
+# 1단계 시작 코드에 feed·play·sleep 을 pass 로, tick 은 "(4단계)" 주석 자리로 둠 (def tick(self 가 미리 있으면 4단계 code_check 가 효과 없음, L4)
+# 시험 손님 입력은 앞 단계 입력(펫 이름)부터 차례로. 입력 수 = 맞는 프로그램이 쓰는 만큼 (모자라면 "입력이 더 필요해요")
+# 아동 안전: 펫은 아프거나 죽지 않음 — 심심하면 "삐졌어요", 끝나면 할머니 댁에 놀러 감
+# 마지막 단계를 끝낸 완성 작품(대화 기록)만 갤러리에 출품 (publishableQuests: 3월드 project 완료)
+
+id: b3000000-0000-0000-0000-000000000027
+order: 7
+title: 나의 가상 펫
+concept: class, 메서드, 메뉴 반복 종합
+xp_reward: 360
+quest_type: project
+prompt:
+  topic: '대형 프로젝트: 5일 동안 돌보는 가상 펫'
+  learning_goals:
+    - class 설계도에 상태와 메서드를 담아 펫을 만들 수 있다
+    - 값을 0~100 안으로 묶고, 메뉴 반복으로 펫을 돌볼 수 있다
+    - 시간이 흐르는 tick 메서드와 정해진 날 수로 게임을 끝낼 수 있다
+  story_context: 돌봄 센터에 나만의 아기 펫이 왔어요! 이름을 지어 주고, 밥을 주고, 같이 놀고, 재워 주면서 5일 동안 돌봐요. 마지막 날에는 펫과 얼마나 친해졌는지 알려 줘요. 완성하면 친구들이 갤러리에서 내 펫 이야기를 볼 수 있어요.
+  exercise_description: 펫 설계도와 상태 보기, 돌봄 메서드, 돌봄 메뉴, 시간이 흐르는 tick, 5일 끝과 우정 결과를 5단계로 하나씩 더해 가상 펫을 완성하세요.
+  starter_code: |
+    # 나의 가상 펫을 만들어 봐요!
+  expected_output_hint: 프로젝트를 5단계로 나누어 완성해요
+  fallback_text: 설계도(class) 안에 펫의 상태와 행동을 모아 둬요. pass 로 비워 둔 자리와 "(4단계) 여기에…" 같은 주석이 고칠 자리를 알려 줘요. 시험 손님 부르기를 누르면 여러 손님이 펫 이름을 짓고 메뉴를 골라 봐요.
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: code_check, expected: class Pet }
+      - { type: code_check, expected: 'def tick(self' }
+  hints:
+    level_1: 이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 상태 보기, 돌봄 메서드, 메뉴, 시간 흐르기, 5일 끝 순서로 만들어요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 코드 안의 pass 와 자리표 주석이 고칠 곳을 알려 줘요!
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: 'status 메서드로 펫 이름과 배고픔·기분 막대를 보여 주기'
+      checklist:
+        - 'def status(self): 를 설계도 안에 만들어요'
+        - '"(이름)의 상태" 와 "배고픔 50 #####" 같은 막대 두 줄을 출력해요'
+        - 시험 손님이 지은 이름이 상태 카드에 나오는지 봐요
+      example_output: |-
+        펫 이름은? 콩이의 상태
+        배고픔 50 #####
+        기분 50 #####
+      starter_code: |
+        # 나의 가상 펫
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+                self.hunger = 50   # 배고픔 (0~100)
+                self.mood = 50     # 기분 (0~100)
+
+            # 1단계: status 메서드를 만들어요
+            #   "(이름)의 상태" 를 출력하고,
+            #   "배고픔 50 #####" 처럼 값과 "#" * (값 // 10) 막대를 한 줄씩 보여 줘요 (기분도)
+
+
+            def feed(self):
+                pass  # 2단계에서 채워요
+
+            def play(self):
+                pass  # 2단계에서 채워요
+
+            def sleep(self):
+                pass  # 2단계에서 채워요
+
+            # (4단계) 여기에 tick 메서드를 만들어요
+
+
+        # 펫 이름을 입력받아 펫을 만들고 상태를 보여 줘요
+        name = input("펫 이름은? ")
+        pet = Pet(name)
+        pet.status()
+      fallback_text: 'pass 는 "아직 비워 둔 자리"라는 뜻이에요. 1단계에서는 status 만 만들어요. 메서드 안에서는 self.name, self.hunger 처럼 self 를 붙여 내 상태를 꺼내요. 막대는 펫 상태 카드에서 만든 "#" * (값 // 10) 이에요.'
+    answer:
+      validation:
+        type: code_check
+        expected: 'def status(self'
+      scenarios:
+        - name: 콩이 손님
+          inputs: ['콩이']
+          expect:
+            type: all
+            rules:
+              - { type: contains, expected: '콩이의 상태' }
+              - { type: contains, expected: '배고픔 50 #####' }
+        - name: 별이 손님
+          inputs: ['별이']
+          expect: { type: contains, expected: '별이의 상태' }
+      hints:
+        level_1: 'status 도 메서드라서 def status(self): 로 시작해요. 그 아래에 print 세 줄!'
+        level_2: 'print(f"{self.name}의 상태") 다음에 print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10)) 를 쓰고, 기분도 같은 모양으로 써요.'
+        level_3: |-
+          def status(self):
+              print(f"{self.name}의 상태")
+              print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10))
+              print(f"기분 {___.mood} " + "#" * (self.mood // 10))
+          빈칸에 "나 자신"을 넣고, 설계도 안에 들여 써 보세요!
+      solution_code: |
+        # 나의 가상 펫
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+                self.hunger = 50   # 배고픔 (0~100)
+                self.mood = 50     # 기분 (0~100)
+
+            def status(self):
+                print(f"{self.name}의 상태")
+                print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10))
+                print(f"기분 {self.mood} " + "#" * (self.mood // 10))
+
+            def feed(self):
+                pass  # 2단계에서 채워요
+
+            def play(self):
+                pass  # 2단계에서 채워요
+
+            def sleep(self):
+                pass  # 2단계에서 채워요
+
+            # (4단계) 여기에 tick 메서드를 만들어요
+
+
+        # 펫 이름을 입력받아 펫을 만들고 상태를 보여 줘요
+        name = input("펫 이름은? ")
+        pet = Pet(name)
+        pet.status()
+  - step_number: 2
+    prompt:
+      step_goal: 'feed·play·sleep 의 pass 를 채우고, 값은 0~100 안으로 묶기'
+      checklist:
+        - 'feed 는 배고픔 -30 (max 로 0 밑으로 안 가게)'
+        - 'play 는 기분 +20, 배고픔 +10 (min 으로 100 위로 안 가게), sleep 은 기분 +10'
+        - '검사 줄에서 배고픔 0, 기분 100 이 나오는지 봐요'
+      example_output: |-
+        (앞에 이어서)
+        콩이: 냠냠! 맛있어요
+        콩이: 냠냠! 맛있어요
+        콩이의 상태
+        배고픔 0
+        기분 50 #####
+        콩이: 신나요!
+        콩이: 신나요!
+        콩이: 신나요!
+        콩이의 상태
+        배고픔 30 ###
+        기분 100 ##########
+      starter_code: |
+
+        # 2단계: 위 설계도에서 feed, play, sleep 의 pass 를 지우고 채워요
+        #   feed  : 배고픔 -30 (max 로 0 밑으로 안 가게), "(이름): 냠냠! 맛있어요" 출력
+        #   play  : 기분 +20, 배고픔 +10 (min 으로 100 위로 안 가게), "(이름): 신나요!" 출력
+        #   sleep : 기분 +10 (100 위로 안 가게), "(이름): 쿨쿨, 잘 잤어요" 출력
+        # 검사 줄: 밥 두 번 → 상태, 놀기 세 번 → 상태 (3단계에서 지워요)
+        pet.feed()
+        pet.feed()
+        pet.status()
+        for i in range(3):
+            pet.play()
+        pet.status()
+      fallback_text: '돌봄 함수와 펫 두 마리에서 한 것과 같아요. max(0, 값) 은 0 밑으로, min(100, 값) 은 100 위로 못 가게 막아요. 검사 줄은 밥을 두 번 줘서 배고픔이 0 에서 멈추는지, 세 번 놀아서 기분이 100 에서 멈추는지 봐요.'
+    answer:
+      # 설계의 code_check "min(100" 대신 검사 줄 출력 "기분 100" — if 로 100 에서 멈춰도 맞는 답 (P11-13 작성 메모)
+      validation:
+        type: all
+        rules:
+          - { type: contains, expected: '배고픔 0' }
+          - { type: contains, expected: '기분 100' }
+      scenarios:
+        - name: 콩이 손님
+          inputs: ['콩이']
+      hints:
+        level_1: 'pass 를 지우고 그 자리에 값을 바꾸는 줄과 print 줄을 써요. 0 과 100 을 넘지 않게 max 와 min 으로 감싸요!'
+        level_2: 'feed 에는 self.hunger = max(0, self.hunger - 30), play 에는 self.mood = min(100, self.mood + 20) 과 self.hunger = min(100, self.hunger + 10), sleep 에는 self.mood = min(100, self.mood + 10) 을 써요.'
+        level_3: |-
+          def feed(self):
+              self.hunger = max(0, self.hunger - 30)
+              print(f"{self.name}: 냠냠! 맛있어요")
+
+          def play(self):
+              self.mood = ___(100, self.mood + 20)
+              self.hunger = ___(100, self.hunger + 10)
+              print(f"{self.name}: 신나요!")
+          빈칸에 작은 값을 고르는 주문을 넣고, sleep 도 같은 모양으로 채워 보세요!
+      solution_code: |
+        # 나의 가상 펫
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+                self.hunger = 50   # 배고픔 (0~100)
+                self.mood = 50     # 기분 (0~100)
+
+            def status(self):
+                print(f"{self.name}의 상태")
+                print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10))
+                print(f"기분 {self.mood} " + "#" * (self.mood // 10))
+
+            def feed(self):
+                self.hunger = max(0, self.hunger - 30)
+                print(f"{self.name}: 냠냠! 맛있어요")
+
+            def play(self):
+                self.mood = min(100, self.mood + 20)
+                self.hunger = min(100, self.hunger + 10)
+                print(f"{self.name}: 신나요!")
+
+            def sleep(self):
+                self.mood = min(100, self.mood + 10)
+                print(f"{self.name}: 쿨쿨, 잘 잤어요")
+
+            # (4단계) 여기에 tick 메서드를 만들어요
+
+
+        # 펫 이름을 입력받아 펫을 만들고 상태를 보여 줘요
+        name = input("펫 이름은? ")
+        pet = Pet(name)
+        pet.status()
+
+        # 검사 줄: 밥 두 번 → 상태, 놀기 세 번 → 상태 (3단계에서 지워요)
+        pet.feed()
+        pet.feed()
+        pet.status()
+        for i in range(3):
+            pet.play()
+        pet.status()
+  - step_number: 3
+    prompt:
+      step_goal: '돌봄 메뉴를 while True 로 계속 묻고, 0 이면 break 로 끝내기'
+      checklist:
+        - 검사 줄(pet.feed() 부터 마지막 pet.status() 까지)을 지워요
+        - 'while True: 안에서 1 밥, 2 놀기, 3 잠을 골라 돌보고 상태를 보여 줘요'
+        - '0 이면 "잘 가, (이름)!" 을 출력하고 break 해요'
+      example_output: |-
+        펫 이름은? 콩이의 상태
+        배고픔 50 #####
+        기분 50 #####
+        1 밥, 2 놀기, 3 잠, 0 끝: 콩이: 냠냠! 맛있어요
+        콩이의 상태
+        배고픔 20 ##
+        기분 50 #####
+        1 밥, 2 놀기, 3 잠, 0 끝: 잘 가, 콩이!
+      starter_code: |
+
+        # 3단계: 돌봄 메뉴
+        #   1) 위의 검사 줄(pet.feed() 부터 마지막 pet.status() 까지)을 지워요
+        #   2) while True: 로 계속 물어요
+        #        choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")
+        #      "1" 이면 feed, "2" 면 play, "3" 이면 sleep 을 하고 상태를 보여 줘요
+        #      "0" 이면 "잘 가, (이름)!" 을 출력하고 break 로 멈춰요
+      fallback_text: 'while True: 는 끝없이 도는 반복이라 멈추는 문이 꼭 있어야 해요. 0 을 고르면 break 로 반복을 빠져나가요. 입력은 늘 글자라서 choice == "1" 처럼 따옴표를 붙여 견줘요. break 가 없으면 손님 입력이 다 떨어져서 "입력이 더 필요해요" 가 나와요.'
+    answer:
+      # 3월드 플레이테스트(제안 O): while choice != "0": 처럼 break 없이 끝내도 맞는 답.
+      # 0 에서 끝나는지는 손님이 봄(안 끝나면 입력이 모자람), 반복 없이 한 번만 묻는 답은 while 검사로
+      validation:
+        type: code_check
+        expected: while
+        whole_word: true
+      scenarios:
+        - name: 콩이 손님
+          inputs: ['콩이', '1', '2', '0']
+          expect: { type: contains, expected: '잘 가, 콩이' }
+        - name: 별이 손님
+          inputs: ['별이', '3', '0']
+          expect: { type: contains, expected: '잘 가, 별이' }
+      hints:
+        level_1: '끝없이 묻다가 0 일 때만 빠져나오는 반복이에요. 고른 번호마다 다른 메서드를 불러요.'
+        level_2: 'while True: 아래에 choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ") 을 쓰고, if/elif 로 "1"·"2"·"3"·"0" 을 견줘요. "0" 일 때 print(f"잘 가, {pet.name}!") 와 break!'
+        level_3: |-
+          while True:
+              choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")
+              if choice == "1":
+                  pet.feed()
+              elif choice == "2":
+                  pet.play()
+              elif choice == "3":
+                  pet.sleep()
+              elif choice == "0":
+                  print(f"잘 가, {pet.name}!")
+                  ___
+              pet.status()
+          빈칸에 반복을 멈추는 주문을 넣어 보세요!
+      solution_code: |
+        # 나의 가상 펫
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+                self.hunger = 50   # 배고픔 (0~100)
+                self.mood = 50     # 기분 (0~100)
+
+            def status(self):
+                print(f"{self.name}의 상태")
+                print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10))
+                print(f"기분 {self.mood} " + "#" * (self.mood // 10))
+
+            def feed(self):
+                self.hunger = max(0, self.hunger - 30)
+                print(f"{self.name}: 냠냠! 맛있어요")
+
+            def play(self):
+                self.mood = min(100, self.mood + 20)
+                self.hunger = min(100, self.hunger + 10)
+                print(f"{self.name}: 신나요!")
+
+            def sleep(self):
+                self.mood = min(100, self.mood + 10)
+                print(f"{self.name}: 쿨쿨, 잘 잤어요")
+
+            # (4단계) 여기에 tick 메서드를 만들어요
+
+
+        # 펫 이름을 입력받아 펫을 만들고 상태를 보여 줘요
+        name = input("펫 이름은? ")
+        pet = Pet(name)
+        pet.status()
+
+        # 3단계: 돌봄 메뉴
+        # (5단계) 여기서 반복을 5일로 바꿔요
+        while True:
+            choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")
+            if choice == "1":
+                pet.feed()
+            elif choice == "2":
+                pet.play()
+            elif choice == "3":
+                pet.sleep()
+            elif choice == "0":
+                print(f"잘 가, {pet.name}!")
+                break
+            # (4단계) 여기서 시간이 흘러요
+            pet.status()
+  - step_number: 4
+    prompt:
+      step_goal: 'tick 메서드로 차례마다 배고픔 +10·기분 -5, 너무 배고프면 "배고파요!"'
+      checklist:
+        - '"(4단계)" 자리에 def tick(self): 를 만들어요'
+        - '배고픔이 80 보다 크면 "배고파요!", 기분이 20 보다 작으면 "심심해서 삐졌어요!"'
+        - '메뉴 반복의 "(4단계)" 자리에서 pet.tick() 을 불러요'
+      example_output: |-
+        (앞에 이어서)
+        1 밥, 2 놀기, 3 잠, 0 끝: 콩이: 신나요!
+        콩이: 배고파요!
+        콩이의 상태
+        배고픔 90 #########
+        기분 80 ########
+      starter_code: |
+
+        # 4단계: 시간이 흘러요 — 위 코드를 고쳐요
+        #   1) 설계도의 "(4단계)" 자리에 tick 메서드를 만들어요
+        #      배고픔 +10 (100 위로 안 가게), 기분 -5 (0 밑으로 안 가게)
+        #      배고픔이 80 보다 크면 "(이름): 배고파요!"
+        #      기분이 20 보다 작으면 "(이름): 심심해서 삐졌어요!"
+        #   2) 메뉴 반복의 "(4단계)" 자리에서 pet.tick() 을 불러요
+      fallback_text: '펫은 가만히 있어도 조금씩 배가 고프고 심심해져요. 차례가 한 번 지날 때마다 tick 이 그 일을 해요. 메서드를 만들기만 하고 부르지 않으면 아무 일도 안 일어나니까, 반복 안에서 pet.tick() 을 꼭 불러요. 펫은 아프지 않아요. 너무 심심하면 삐질 뿐이에요!'
+    answer:
+      validation:
+        type: code_check
+        expected: 'def tick(self'
+      scenarios:
+        - name: 세 번 노는 콩이 손님
+          inputs: ['콩이', '2', '2', '2', '0']
+          expect: { type: contains, expected: '배고파요' }
+        - name: 밥만 주는 별이 손님
+          inputs: ['별이', '1', '1', '1', '1', '1', '1', '1', '0']
+          expect: { type: contains, expected: '삐졌어요' }
+      hints:
+        level_1: '차례마다 값을 조금 바꾸고, 너무 크거나 작으면 한마디 하는 메서드예요. 만든 뒤 반복 안에서 불러요.'
+        level_2: 'def tick(self): 아래에 self.hunger = min(100, self.hunger + 10) 과 self.mood = max(0, self.mood - 5) 를 쓰고, if self.hunger > 80: 과 if self.mood < 20: 으로 말하게 해요.'
+        level_3: |-
+          def tick(self):
+              self.hunger = min(100, self.hunger + 10)
+              self.mood = max(0, self.mood - 5)
+              if self.hunger ___ 80:
+                  print(f"{self.name}: 배고파요!")
+              if self.mood < 20:
+                  print(f"{self.name}: 심심해서 삐졌어요!")
+          빈칸에 "보다 크면" 기호를 넣고, 반복 안에서 pet.tick() 을 불러 보세요!
+      solution_code: |
+        # 나의 가상 펫
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+                self.hunger = 50   # 배고픔 (0~100)
+                self.mood = 50     # 기분 (0~100)
+
+            def status(self):
+                print(f"{self.name}의 상태")
+                print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10))
+                print(f"기분 {self.mood} " + "#" * (self.mood // 10))
+
+            def feed(self):
+                self.hunger = max(0, self.hunger - 30)
+                print(f"{self.name}: 냠냠! 맛있어요")
+
+            def play(self):
+                self.mood = min(100, self.mood + 20)
+                self.hunger = min(100, self.hunger + 10)
+                print(f"{self.name}: 신나요!")
+
+            def sleep(self):
+                self.mood = min(100, self.mood + 10)
+                print(f"{self.name}: 쿨쿨, 잘 잤어요")
+
+            def tick(self):
+                self.hunger = min(100, self.hunger + 10)
+                self.mood = max(0, self.mood - 5)
+                if self.hunger > 80:
+                    print(f"{self.name}: 배고파요!")
+                if self.mood < 20:
+                    print(f"{self.name}: 심심해서 삐졌어요!")
+
+
+        # 펫 이름을 입력받아 펫을 만들고 상태를 보여 줘요
+        name = input("펫 이름은? ")
+        pet = Pet(name)
+        pet.status()
+
+        # 3단계: 돌봄 메뉴
+        # (5단계) 여기서 반복을 5일로 바꿔요
+        while True:
+            choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")
+            if choice == "1":
+                pet.feed()
+            elif choice == "2":
+                pet.play()
+            elif choice == "3":
+                pet.sleep()
+            elif choice == "0":
+                print(f"잘 가, {pet.name}!")
+                break
+            pet.tick()
+            pet.status()
+  - step_number: 5
+    prompt:
+      step_goal: '5일이 지나면 저절로 끝나고, 기분으로 우정 결과 문장 말하기'
+      checklist:
+        - 'while True: 를 for day in range(1, 6): 으로 바꾸고 "(날)일째" 를 출력해요'
+        - '반복이 끝나면 "(날)일이 지났어요" 와 우정 점수를 출력해요'
+        - '기분에 따라 결과 문장 3가지 중 하나를 말하고 인사해요'
+      example_output: |-
+        (앞에 이어서)
+        5일째
+        1 밥, 2 놀기, 3 잠, 0 끝: 콩이: 신나요!
+        콩이의 상태
+        배고픔 60 ######
+        기분 75 #######
+        5일이 지났어요
+        우정 점수: 75
+        [콩이] 우리 단짝 친구가 되었어요!
+        [콩이] 할머니 댁에 놀러 갈게요. 또 만나요!
+      starter_code: |
+
+        # 5일째에 끝나요 — 위 코드를 고쳐요
+        #   1) while True: 를 for day in range(1, 6): 으로 바꾸고, 반복 맨 위에서 "(날)일째" 를 출력해요
+        #   2) 여기 아래에 "(날)일이 지났어요" 와 "우정 점수: (기분)" 을 출력해요
+        #   3) 기분이 70 이상이면 "[이름] 우리 단짝 친구가 되었어요!",
+        #      40 이상이면 "[이름] 우리 사이좋은 친구가 되었어요!",
+        #      아니면 "[이름] 조금 삐졌어요. 내일 더 놀아 주면 다시 친해져요!"
+        #   4) 마지막에 "[이름] 할머니 댁에 놀러 갈게요. 또 만나요!" 로 인사해요
+      fallback_text: 'for day in range(1, 6): 는 day 가 1, 2, 3, 4, 5 로 바뀌며 다섯 번 돌아요. 그래서 끝없이 묻지 않고 5일 뒤 저절로 끝나요. 반복이 끝난 뒤 day 에는 마지막 날이 남아 있어요. 우정 결과는 큰 기분부터 if, elif, else 로 견줘요. 다 만들면 갤러리에 내 펫 이야기를 걸 수 있어요!'
+    answer:
+      validation:
+        type: contains
+        expected: '5일이 지났어요'
+      scenarios:
+        - name: 골고루 돌본 콩이 손님
+          inputs: ['콩이', '1', '2', '3', '1', '2']
+          expect: { type: contains, expected: '단짝 친구' }
+        - name: 한 번 놀아 준 구름이 손님
+          inputs: ['구름이', '2', '1', '1', '1', '1']
+          expect: { type: contains, expected: '사이좋은 친구' }
+        - name: 밥만 주는 별이 손님
+          inputs: ['별이', '1', '1', '1', '1', '1']
+          expect: { type: contains, expected: '다시 친해져요' }
+      hints:
+        level_1: '끝없는 반복을 다섯 번만 도는 반복으로 바꿔요. 끝난 뒤에는 기분을 보고 결과를 말해요.'
+        level_2: 'while True: 를 for day in range(1, 6): 으로 바꾸고 그 아래 첫 줄에 print(f"{day}일째") 를 써요. 반복 밖에서 print(f"{day}일이 지났어요") 다음에 if/elif/else 로 결과를 말해요.'
+        level_3: |-
+          print(f"{day}일이 지났어요")
+          print(f"우정 점수: {pet.mood}")
+          if pet.mood >= 70:
+              print(f"[{pet.name}] 우리 단짝 친구가 되었어요!")
+          ___ pet.mood >= 40:
+              print(f"[{pet.name}] 우리 사이좋은 친구가 되었어요!")
+          else:
+              print(f"[{pet.name}] 조금 삐졌어요. 내일 더 놀아 주면 다시 친해져요!")
+          print(f"[{pet.name}] 할머니 댁에 놀러 갈게요. 또 만나요!")
+          빈칸에 "아니면 만약" 주문을 넣어 보세요!
+      solution_code: |
+        # 나의 가상 펫
+        class Pet:
+            def __init__(self, name):
+                self.name = name
+                self.hunger = 50   # 배고픔 (0~100)
+                self.mood = 50     # 기분 (0~100)
+
+            def status(self):
+                print(f"{self.name}의 상태")
+                print(f"배고픔 {self.hunger} " + "#" * (self.hunger // 10))
+                print(f"기분 {self.mood} " + "#" * (self.mood // 10))
+
+            def feed(self):
+                self.hunger = max(0, self.hunger - 30)
+                print(f"{self.name}: 냠냠! 맛있어요")
+
+            def play(self):
+                self.mood = min(100, self.mood + 20)
+                self.hunger = min(100, self.hunger + 10)
+                print(f"{self.name}: 신나요!")
+
+            def sleep(self):
+                self.mood = min(100, self.mood + 10)
+                print(f"{self.name}: 쿨쿨, 잘 잤어요")
+
+            def tick(self):
+                self.hunger = min(100, self.hunger + 10)
+                self.mood = max(0, self.mood - 5)
+                if self.hunger > 80:
+                    print(f"{self.name}: 배고파요!")
+                if self.mood < 20:
+                    print(f"{self.name}: 심심해서 삐졌어요!")
+
+
+        # 펫 이름을 입력받아 펫을 만들고 상태를 보여 줘요
+        name = input("펫 이름은? ")
+        pet = Pet(name)
+        pet.status()
+
+        # 3단계: 돌봄 메뉴
+        for day in range(1, 6):
+            print(f"{day}일째")
+            choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")
+            if choice == "1":
+                pet.feed()
+            elif choice == "2":
+                pet.play()
+            elif choice == "3":
+                pet.sleep()
+            elif choice == "0":
+                print(f"잘 가, {pet.name}!")
+                break
+            pet.tick()
+            pet.status()
+
+        # 5일째에 끝나요
+        print(f"{day}일이 지났어요")
+        print(f"우정 점수: {pet.mood}")
+        if pet.mood >= 70:
+            print(f"[{pet.name}] 우리 단짝 친구가 되었어요!")
+        elif pet.mood >= 40:
+            print(f"[{pet.name}] 우리 사이좋은 친구가 되었어요!")
+        else:
+            print(f"[{pet.name}] 조금 삐졌어요. 내일 더 놀아 주면 다시 친해져요!")
+        print(f"[{pet.name}] 할머니 댁에 놀러 갈게요. 또 만나요!")

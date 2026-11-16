@@ -19,12 +19,19 @@ import {
 const provider = z.enum(['google', 'kakao', 'naver']);
 const questId = z.string().uuid();
 const motionTier = z.enum(['full', 'lite', 'minimal']);
-const SHARE_CARD_KIND = z.enum(['levelup', 'stage', 'achievement', 'weekly']);
+const SHARE_CARD_KIND = z.enum([
+  'levelup',
+  'stage',
+  'achievement',
+  'weekly',
+  'creation',
+]);
 const SHARE_VIEW_KIND = z.enum([
   'levelup',
   'stage',
   'achievement',
   'weekly',
+  'creation',
   'gone',
 ]);
 

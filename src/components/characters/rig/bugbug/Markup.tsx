@@ -11,7 +11,13 @@ import {
   usesPaper,
 } from '../core/markup';
 import { Hat } from '../costumes';
-import { BossHeadGear, BossTentacles, BossTube } from './gear';
+import {
+  BossBodyGear,
+  BossHeadGear,
+  BossShellGear,
+  BossTentacles,
+  BossTube,
+} from './gear';
 import type { MarkupProps } from '../core/types';
 import { STYLE_RULES, type RigStyle } from '../style';
 
@@ -134,6 +140,8 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
   const legW = lineInk ? 3.4 : 3.2;
   const gear = costume?.gear;
   const tentacles = gear === 'captain';
+  // 원래 다리를 감추는 외형: 문어 다리(선장) · 쇠 다리(메가 로봇)
+  const hideLegs = tentacles || gear === 'robot';
 
   const half = (side: 'L' | 'R') => (
     <g ref={r(`shell${side}`)} {...a(`shell${side}`)}>
@@ -168,11 +176,15 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
           />
         </>
       )}
-      <g fill={pal.spot}>
-        {(side === 'L' ? SPOTS_L : SPOTS_R).map(([x, y, rr]) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r={rr} />
-        ))}
-      </g>
+      {gear === 'arcade' ? (
+        <BossShellGear side={side} ink={lineInk} />
+      ) : (
+        <g fill={pal.spot}>
+          {(side === 'L' ? SPOTS_L : SPOTS_R).map(([x, y, rr]) => (
+            <circle key={`${x}-${y}`} cx={x} cy={y} r={rr} />
+          ))}
+        </g>
+      )}
       {!inked && (
         <path d="M64 54 V107" stroke={pal.shellDark} strokeWidth="2" />
       )}
@@ -218,7 +230,7 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
             strokeWidth={legW}
             strokeLinecap="round"
             fill="none"
-            opacity={tentacles ? 0 : undefined}
+            opacity={hideLegs ? 0 : undefined}
           >
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <path key={i} ref={r(`leg${i}`)} {...a(`leg${i}`)} />
@@ -226,6 +238,8 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
           </g>
           {/* 소용돌이 튜브 (P10-04): 뒤쪽 테는 몸 뒤 */}
           {gear === 'tube' && <BossTube part="back" ink={lineInk} />}
+          {/* 메이커 몸 소품 (P11-11): 책 망토·메가 로봇 몸통·팔·쇠 다리 */}
+          {gear && <BossBodyGear gear={gear} part="back" ink={lineInk} />}
           {/* 배·날개 (등딱지가 열리면 보임) */}
           <ellipse cx="64" cy="82" rx="27" ry="25" fill={pal.under} />
           <ellipse
@@ -251,6 +265,7 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
           {half('L')}
           {half('R')}
           {gear === 'tube' && <BossTube part="front" ink={lineInk} />}
+          {gear && <BossBodyGear gear={gear} part="front" ink={lineInk} />}
           {/* 머리 */}
           <g ref={r('head')} {...a('head')}>
             {(['L', 'R'] as const).map((s) => (
@@ -369,8 +384,8 @@ export function BugBugMarkup(props: MarkupProps<BugBugPalette>) {
                 <Hat kind={costume.hat} outline={propInk} tonal={rules.tonal} />
               </g>
             )}
-            {/* 바다 소품 (P10-04 2월드 외형) */}
-            {gear && gear !== 'tube' && (
+            {/* 바다·메이커 소품 (P10-04 2월드 · P11-11 3월드 외형) */}
+            {gear && gear !== 'tube' && gear !== 'arcade' && (
               <BossHeadGear gear={gear} pal={pal} ink={lineInk} />
             )}
           </g>

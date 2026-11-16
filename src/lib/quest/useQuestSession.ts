@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePyodideRuntime } from '@/lib/pyodide/PyodideProvider';
-import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
+import {
+  createLiveOutputStore,
+  liveRunOptions,
+} from '@/lib/pyodide/liveOutput';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { useTutor, TutorRateLimitError } from '@/lib/tutor/useTutor';
 import { TUTOR_UNAVAILABLE_HINT_MESSAGE } from '@/lib/tutor/messages';
@@ -20,6 +23,13 @@ import type {
   UserProgress,
 } from '@/lib/types/database';
 import type { ValidationResult } from './validation';
+import { gradeCommands, type GradePayload } from './gradeRuns';
+import {
+  initialGuests,
+  markGuests,
+  runGuests,
+  type GuestRun,
+} from './testGuests';
 import {
   retryChanged,
   type GoldenKeyResponse,
@@ -142,6 +152,9 @@ export type FreeAskResult =
   | { status: 'sent' }
   | { status: 'note'; message: string; block?: FreeQuestionBlock }
   | { status: 'busy' };
+/** 작품 평가를 부탁하는 아이 말풍선 (P11-14) */
+const CREATION_FEEDBACK_ASK = '파이뱀, 내 작품 어때요?';
+
 const ASK_FAILED =
   '지금은 파이뱀이 대답하기 어려워요. 조금 뒤에 다시 물어봐 줘요!';
 const SAVE_FAILED_MESSAGE =
@@ -261,6 +274,15 @@ export function useQuestSession({
   const questValidationType = quest.validation_type;
   const steps = quest.prompt_skeleton.steps ?? null;
   const totalSteps = steps?.length ?? 1;
+  const codeScenarios = quest.prompt_skeleton.scenarios;
+  /** 그 단계(코드 퀘스트는 퀘스트)의 시험 손님 (P11-05). 없으면 undefined */
+  const scenariosAt = useCallback(
+    (step: number) => {
+      const list = steps ? steps[step - 1]?.scenarios : codeScenarios;
+      return list?.length ? list : undefined;
+    },
+    [steps, codeScenarios],
+  );
 
   // 단계 진행. stepRef는 타이머·비동기 흐름이 최신 단계를 읽는 곳 (B10)
   const [stepState, setStepState] = useState<StepState>(() =>
@@ -281,6 +303,10 @@ export function useQuestSession({
   const [tab, setTab] = useState<QuestTab>('story');
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
+  // 시험 손님 채점 (P11-05): 손님마다 실행한 대화와 통과 표시. 손님 채점을 하지 않았으면 null
+  const [guests, setGuests] = useState<GuestRun[] | null>(null);
+  // 그림 규칙이 떨어진 이유 (서버 채점 문장, 결과 쪽지·튜터 힌트)
+  const [gradeReasons, setGradeReasons] = useState<string[]>([]);
   // 실행 중 stdout. 출력창만 구독하므로 출력 조각마다 셸이 다시 그려지지 않는다
   const [liveOutput] = useState(createLiveOutputStore);
 
@@ -577,6 +603,8 @@ export function useQuestSession({
       setCode(nextCode);
       setRunResult(null);
       setValidation(null);
+      setGuests(null);
+      setGradeReasons([]);
       setStepHints(0);
       liveOutput.reset();
       lockSubmit(false);
@@ -670,20 +698,33 @@ export function useQuestSession({
 
   /** 서버 채점 (프로젝트는 단계 기준). 요청이 실패하면 통과하지 않은 것으로 */
   const validate = useCallback(
-    async (codeToCheck: string, stdout: string, step: number) => {
+    async (
+      codeToCheck: string,
+      payload: GradePayload,
+      step: number,
+    ): Promise<{
+      passed: boolean;
+      scenarios?: boolean[];
+      reasons?: string[];
+    }> => {
       try {
-        const res = await postJson<{ passed?: boolean }>(
-          '/api/quest/validate',
-          {
-            quest_id: questId,
-            stdout,
-            student_code: codeToCheck,
-            ...(kind === 'project' && { step_number: step }),
-          },
-        );
-        return res.data.passed === true;
+        const res = await postJson<{
+          passed?: boolean;
+          scenarios?: boolean[];
+          reasons?: string[];
+        }>('/api/quest/validate', {
+          quest_id: questId,
+          ...payload,
+          student_code: codeToCheck,
+          ...(kind === 'project' && { step_number: step }),
+        });
+        return {
+          passed: res.data.passed === true,
+          scenarios: res.data.scenarios,
+          reasons: res.data.reasons,
+        };
       } catch {
-        return false;
+        return { passed: false };
       }
     },
     [kind, questId],
@@ -694,14 +735,14 @@ export function useQuestSession({
    * 실패해도 복습 통과 화면은 그대로 (보상만 못 받음)
    */
   const reviewWith = useCallback(
-    async (submitted: string, stdout: string) => {
+    async (submitted: string, payload: GradePayload) => {
       try {
         const res = await postJson<QuestCompleteResponse>(
           '/api/quest/complete',
           {
             quest_id: questId,
             code_submitted: submitted,
-            stdout,
+            ...payload,
             retry: true,
             had_error: hadErrorRef.current,
           },
@@ -717,14 +758,15 @@ export function useQuestSession({
 
   /** 통과한 코드로 완료 요청 (서버가 다시 채점하고, 힌트 수·황금키 사용은 DB 값으로 보상 계산) */
   const completeWith = useCallback(
-    async (submitted: string, stdout: string) => {
+    async (submitted: string, payload: GradePayload) => {
+      const { stdout } = payload;
       try {
         const res = await postJson<QuestCompleteResponse>(
           '/api/quest/complete',
           {
             quest_id: questId,
             code_submitted: submitted,
-            stdout,
+            ...payload,
             had_error: hadErrorRef.current,
           },
         );
@@ -808,15 +850,22 @@ export function useQuestSession({
   /**
    * 실행 → 채점 → (마지막 단계면) 완료. 다음 단계로 넘어가야 하면 'advance'.
    * review = 이미 완료한 퀘스트 다시 풀기 (Q57): 채점·연출은 같고 튜터는 부르지 않는다. 마지막 단계를 통과했고 복습 도전이 열렸으면
-   * (별 3개 미만 + 판정 다음 날, §12-Q64) 완료 API를 retry로 불러 별을 채운다. 아니면 연습이라 부르지 않음
+   * (별 3개 미만 + 판정 다음 날, §12-Q64) 완료 API를 retry로 불러 별을 채운다. 아니면 연습이라 부르지 않음.
+   * preview = 숫자 손잡이(world3 제안 L)가 부르는 다시 그리기: 실행만 하고 채점·쪽 넘김은 하지 않는다
    */
   const runAndGrade = useCallback(
     async (
       codeToRun: string,
       step: number,
       review: boolean,
+      mode: 'run' | 'guests' | 'preview' = 'run',
     ): Promise<'advance' | 'stay'> => {
+      // 시험 손님이 있는 퀘스트(P11-05): "코드 돌려보기"는 내가 직접 해 보는 실행(채점 없음), "시험 손님 부르기"가 채점
+      const scenarios = scenariosAt(step);
+      const byGuests = !!scenarios && mode === 'guests';
       setValidation(null);
+      setGradeReasons([]);
+      setGuests(byGuests ? initialGuests(scenarios) : null);
       setEarnedXP(null);
       setEarnedCoins(0);
       setNewStars(0);
@@ -825,9 +874,26 @@ export function useQuestSession({
       liveOutput.reset();
       // 모바일은 누르자마자 결과 쪽으로 (§12-Q55): 실행 중 글자·멈추기(·P11 turtle 그림)가 실행 버튼과 한 화면에 안 보이는 문제(P0-06)를
       // 떠 있는 버튼 대신 결과 쪽 자동 이동으로 푼다. 결과 쪽에는 실행 중 멈추기 버튼이 있다 (P6-11)
-      setTab('result');
+      if (mode !== 'preview') setTab('result');
 
-      const result = await runCode(codeToRun, { onStdout: liveOutput.append });
+      let result: RunResult;
+      let payload: GradePayload | null;
+      if (byGuests) {
+        const outcome = await runGuests(runCode, codeToRun, scenarios, {
+          onTurtle: liveOutput.turtle,
+          beforeRun: liveOutput.reset,
+          onUpdate: (next) => aliveRef.current && setGuests(next),
+        });
+        result = outcome.result;
+        payload = outcome.runs && {
+          stdout: outcome.result.stdout,
+          runs: outcome.runs,
+        };
+      } else {
+        result = await runCode(codeToRun, liveRunOptions(liveOutput));
+        const turtle = gradeCommands(liveOutput.getTurtle());
+        payload = { stdout: result.stdout, ...(turtle && { turtle }) };
+      }
       if (!aliveRef.current) return 'stay';
       setRunResult(result);
       setLastRunCode(result.isStopped ? null : codeToRun);
@@ -837,13 +903,18 @@ export function useQuestSession({
 
       // 실행 에러 (구문 에러·시간 초과 등). 효과음 'bug'는 결과 쪽지에 버그버그가 들어오는 순간 (`BugbugAside`, P6-14).
       // AI 피드백은 자동으로 부르지 않는다 (§12-Q56): 규칙표 설명(errorExplain)이 바로 보이고, 더 묻고 싶으면 askAboutRun
-      if (!result.success) {
+      if (!result.success || !payload) {
         hadErrorRef.current = true;
         return 'stay';
       }
+      // 손님이 있는 퀘스트의 직접 실행은 놀이: 채점은 손님이 (한 갈래만 해 보고 통과하는 일이 없게, 제안 C)
+      if ((scenarios && !byGuests) || mode === 'preview') return 'stay';
 
-      const passed = await validate(codeToRun, result.stdout, step);
+      const graded = await validate(codeToRun, payload, step);
+      const { passed } = graded;
       if (!aliveRef.current) return 'stay';
+      if (byGuests) setGuests((g) => g && markGuests(g, graded.scenarios));
+      setGradeReasons(graded.reasons ?? []);
       setValidation({
         passed,
         type: steps?.[step - 1]?.validation_type ?? questValidationType,
@@ -859,7 +930,7 @@ export function useQuestSession({
       if (review) {
         fireConfetti(ANSWER_CONFETTI, { scale: particleScaleRef.current });
         if (step >= totalSteps && reviewChallenge)
-          await reviewWith(codeToRun, result.stdout);
+          await reviewWith(codeToRun, payload);
         return 'stay';
       }
       if (kind === 'project') {
@@ -883,10 +954,11 @@ export function useQuestSession({
         }
       }
 
-      await completeWith(codeToRun, result.stdout);
+      await completeWith(codeToRun, payload);
       return 'stay';
     },
     [
+      scenariosAt,
       kind,
       questId,
       questValidationType,
@@ -905,28 +977,37 @@ export function useQuestSession({
 
   const isCodeEmpty = !code.trim();
 
-  const handleRun = useCallback(async () => {
-    if (isCodeEmpty || submittingRef.current) return;
-    play('run');
-    lockSubmit(true);
-    let advancing = false;
-    try {
-      const step = stepRef.current.step;
-      advancing = (await runAndGrade(code, step, isCompleted)) === 'advance';
-      // 넘어갈 때까지 실행 버튼은 잠긴 채 (advanceStep 이 푼다)
-      if (advancing) scheduleAdvance(step, code);
-    } finally {
-      if (!advancing) lockSubmit(false);
-    }
-  }, [
-    code,
-    isCodeEmpty,
-    isCompleted,
-    lockSubmit,
-    runAndGrade,
-    scheduleAdvance,
-    play,
-  ]);
+  const runWith = useCallback(
+    async (mode: 'run' | 'guests' | 'preview') => {
+      if (isCodeEmpty || submittingRef.current) return;
+      if (mode !== 'preview') play('run');
+      lockSubmit(true);
+      let advancing = false;
+      try {
+        const step = stepRef.current.step;
+        advancing =
+          (await runAndGrade(code, step, isCompleted, mode)) === 'advance';
+        // 넘어갈 때까지 실행 버튼은 잠긴 채 (advanceStep 이 푼다)
+        if (advancing) scheduleAdvance(step, code);
+      } finally {
+        if (!advancing) lockSubmit(false);
+      }
+    },
+    [
+      code,
+      isCodeEmpty,
+      isCompleted,
+      lockSubmit,
+      runAndGrade,
+      scheduleAdvance,
+      play,
+    ],
+  );
+  const handleRun = useCallback(() => runWith('run'), [runWith]);
+  /** 시험 손님 부르기 (P11-05): 공개 손님마다 자동으로 실행해 채점 */
+  const handleGrade = useCallback(() => runWith('guests'), [runWith]);
+  /** 숫자 손잡이로 바꾼 코드를 다시 그리기 (world3 제안 L): 채점·쪽 넘김·실행 소리 없이 실행만 */
+  const handlePreview = useCallback(() => runWith('preview'), [runWith]);
 
   // ── 힌트 ────────────────────────────────────────────────────────────
 
@@ -1078,7 +1159,11 @@ export function useQuestSession({
    * 서버가 거르면 말풍선을 거두고 안내를 돌려준다(입력 칸 아래). 답은 다 받은 뒤 거른 것이라 흘려 쓰지 않는다
    */
   const handleFreeAsk = useCallback(
-    async (question: string): Promise<FreeAskResult> => {
+    async (
+      question: string,
+      /** 3-F 기획 도우미(P11-14)도 같은 길: 아이 글 → 서버 거르기 → 답 */
+      type: 'free_question' | 'project_planner' = 'free_question',
+    ): Promise<FreeAskResult> => {
       const text = question.trim();
       if (!text || isAiLoading) return { status: 'busy' };
       play('tap');
@@ -1088,7 +1173,7 @@ export function useQuestSession({
       addMessage(mine);
       try {
         const res = await sendTutorRequest({
-          type: 'free_question',
+          type,
           quest_id: questId,
           question: text,
         });
@@ -1126,6 +1211,58 @@ export function useQuestSession({
     setAskOpen(true);
     handleAsk('why');
   }, [handleAsk]);
+
+  /**
+   * 작품 평가 친구 (P11-14, 3월드 프로젝트): 지금 코드로 끝까지 돌린 실행의 출력·그림 요약으로 칭찬 2 + 한 걸음 더.
+   * 거른 답이라 흘려 쓰지 않는다. 대화를 펼쳐 답을 보여 줌
+   */
+  const canAskFeedback =
+    !!runResult?.success && !runResult.isStopped && lastRunCode === code;
+  const handleCreationFeedback = useCallback(async () => {
+    if (isAiLoading || !canAskFeedback || !runResult) return;
+    play('tap');
+    setAskOpen(true);
+    addMessage({ role: 'student', content: CREATION_FEEDBACK_ASK });
+    try {
+      const res = await sendTutorRequest({
+        type: 'creation_feedback',
+        quest_id: questId,
+        student_code: code,
+        execution_result: {
+          stdout: runResult.stdout,
+          stderr: '',
+          passed: true,
+        },
+        // 그림 요약은 이 버튼을 누를 때만 (그림 검사기를 퀘스트 첫 로드에 싣지 않게)
+        drawing: (await import('@/lib/tutor/maker')).drawingSummary(
+          liveOutput.getTurtle(),
+        ),
+      });
+      if (res)
+        addMessage({
+          role: 'tutor',
+          content: res.message,
+          isFallback: res.is_fallback,
+        });
+    } catch (error) {
+      addMessage({
+        role: 'tutor',
+        content:
+          error instanceof TutorRateLimitError ? error.message : ASK_FAILED,
+        isFallback: true,
+      });
+    }
+  }, [
+    isAiLoading,
+    canAskFeedback,
+    runResult,
+    play,
+    addMessage,
+    sendTutorRequest,
+    questId,
+    code,
+    liveOutput,
+  ]);
 
   // ── 황금키 ──────────────────────────────────────────────────────────
 
@@ -1176,9 +1313,18 @@ export function useQuestSession({
           : '🔑 황금키를 사용했어요!',
       );
 
-      // 정답 코드 자동 실행
+      // 정답 코드 자동 실행 (시험 손님이 있으면 손님으로 — input()이 물어서 멈추지 않게, P11-05)
       liveOutput.reset();
-      const result = await runCode(solution, { onStdout: liveOutput.append });
+      const keyGuests = scenariosAt(step);
+      const result = keyGuests
+        ? (
+            await runGuests(runCode, solution, keyGuests, {
+              onTurtle: liveOutput.turtle,
+              beforeRun: liveOutput.reset,
+              onUpdate: (next) => aliveRef.current && setGuests(next),
+            })
+          ).result
+        : await runCode(solution, liveRunOptions(liveOutput));
       if (!aliveRef.current) return;
       setRunResult(result);
       setTab('result');
@@ -1235,6 +1381,7 @@ export function useQuestSession({
     questValidationType,
     topic,
     totalSteps,
+    scenariosAt,
     liveOutput,
     runCode,
     lockSubmit,
@@ -1275,6 +1422,14 @@ export function useQuestSession({
     validation,
     isSubmitting,
     handleRun,
+    handlePreview,
+    /** 시험 손님 (P11-05): 이 단계(퀘스트)의 공개 손님. 있으면 채점은 handleGrade로 */
+    scenarios: scenariosAt(currentStep),
+    handleGrade,
+    /** 손님마다 실행한 대화·통과 표시 (손님 채점을 안 했으면 null) */
+    guests,
+    /** 떨어진 그림 규칙의 이유 (서버 채점 문장) */
+    gradeReasons,
     /** 실행 멈추기 (실행 중에만 버튼이 보임) */
     handleStop: stop,
 
@@ -1291,10 +1446,15 @@ export function useQuestSession({
     handleAsk,
     /** 마지막 실행 결과가 지금 코드의 것인지 ("왜 이렇게 나왔어요?") */
     canAskWhy,
+    /** 마지막으로 끝까지 돌린 코드 (멈췄으면 null) — "작품으로 저장"(P11-06)이 그 실행의 코드를 저장 */
+    lastRunCode,
     /** "파이뱀에게 물어보기" 자유 질문 (P9-17) */
     handleFreeAsk,
     /** 오늘 남은 자유 질문 수 (모르면 null) */
     freeRemaining,
+    /** 작품 평가 친구 (P11-14): 지금 코드로 끝까지 돈 실행이 있을 때만 */
+    canAskFeedback,
+    handleCreationFeedback,
     /** "파이뱀에게 물어보기" 대화가 펼쳐져 있는지 (결과 쪽지 버튼이 열 수 있게 세션에 둠) */
     askOpen,
     setAskOpen,

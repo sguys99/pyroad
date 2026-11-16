@@ -6,12 +6,13 @@ import { cardFromSnapshot, SHARE_CARD_KINDS } from '../snapshot';
 import { shareCardCacheHeaders } from '../publicCard';
 
 describe('스냅샷 → 카드 (P9-07)', () => {
-  it('4종, DB CHECK 와 같은 키만 받음 (모르는 키·종류·모양이 틀리면 null)', () => {
+  it('5종, DB CHECK 와 같은 키만 받음 (모르는 키·종류·모양이 틀리면 null)', () => {
     expect(SHARE_CARD_KINDS).toEqual([
       'levelup',
       'stage',
       'achievement',
       'weekly',
+      'creation',
     ]);
     expect(cardFromSnapshot('levelup', { nickname: 'a1', level: 2 })).not.toBe(
       null,
@@ -32,6 +33,26 @@ describe('스냅샷 → 카드 (P9-07)', () => {
         days: { mon: 1 },
       }),
     ).toBe(null);
+  });
+
+  it('작품 카드 (P11-08): 이름 + 대화 앞 4줄까지, 코드·썸네일·다른 키는 받지 않음', () => {
+    const base = { nickname: '하늘별', world: 3, name: '무지개 별' };
+    expect(cardFromSnapshot('creation', base)).toMatchObject({
+      kind: 'creation',
+      name: '무지개 별',
+    });
+    const lines = [{ text: '안녕' }, { text: '번개', answer: true }];
+    expect(cardFromSnapshot('creation', { ...base, lines })).toMatchObject({
+      lines,
+    });
+    for (const bad of [
+      { ...base, code: 'print(1)' },
+      { ...base, thumbnail: 'data:image/png;base64,AAAA' },
+      { ...base, lines: [{ text: '안녕', user: 'x' }] },
+      { ...base, lines: Array.from({ length: 5 }, () => ({ text: 'a' })) },
+      { ...base, lines: [{ text: '안녕', answer: false }] },
+    ])
+      expect(cardFromSnapshot('creation', bad)).toBe(null);
   });
 
   it('공개 꾸민 모습 아이템 id → 코스튬·스킨 (펫·모르는 값은 그리지 않음)', () => {

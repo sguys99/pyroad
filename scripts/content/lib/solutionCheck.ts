@@ -20,13 +20,21 @@ import {
 import { loadContent } from '@/lib/content/load';
 import type { InputScenario } from '@/lib/content/schema';
 import {
+  drawingReasons,
   parseStoredRule,
   validateResult,
   validateRule,
+  type RunContext,
   type StoredRule,
   type ValidationRule,
   type ValidationType,
 } from '@/lib/quest/validation';
+import {
+  analyze,
+  DRAWING_RULE_TYPES,
+  mergedSegments,
+  roundSegments,
+} from '@/lib/turtle/check';
 
 import type {
   NodePyodideRunner,
@@ -170,6 +178,10 @@ export interface PlannedRun {
   seed: number;
   /** input() 에 들어갈 줄. 없으면 input() 이 EOFError */
   stdin?: string[];
+  /** 키 시나리오 (P11-04·P11-05): keys[n] = n번째 프레임에 get_key() 큐로 */
+  keys?: (string | null)[];
+  /** 시험 손님 번호 (0부터, `scenario` 규칙이 이 실행에 붙음). 시나리오가 없으면 없음 */
+  scenario?: number;
 }
 
 export interface PlanOptions {
@@ -188,8 +200,14 @@ export function planRuns(
   const randomSeed = options.randomSeed ?? (() => randomInt(2 ** 32));
   const list: (InputScenario | null)[] = scenarios?.length ? scenarios : [null];
   return list.flatMap((scenario, i) => {
-    const prefix = scenarios?.length ? `시나리오 ${i + 1} · ` : '';
-    const stdin = scenario ? { stdin: [...scenario.inputs] } : {};
+    const prefix = scenarios?.length
+      ? `시나리오 ${i + 1}${scenario?.name ? `(${scenario.name})` : ''} · `
+      : '';
+    const stdin = {
+      ...(scenario?.inputs && { stdin: [...scenario.inputs] }),
+      ...(scenario?.keys && { keys: [...scenario.keys] }),
+      ...(scenario && { scenario: i }),
+    };
     // 시나리오의 입력이 특정 시드(예: 비밀 숫자)에 맞춰져 있으면 그 시드로만
     if (scenario?.seed !== undefined) {
       return [
@@ -220,7 +238,8 @@ export function planRuns(
 type RunLike = Pick<
   NodeRunResult,
   'success' | 'outcome' | 'stdout' | 'stderr' | 'isTimeout'
->;
+> &
+  Partial<Pick<NodeRunResult, 'turtle'>>;
 
 export interface Verdict {
   passed: boolean;
@@ -233,6 +252,7 @@ export function judge(
   run: RunLike,
   code: string,
   timeoutMs = 5000,
+  scenario?: number,
 ): Verdict {
   if (!run.success) {
     return { passed: false, detail: runFailure(run, timeoutMs) };
@@ -244,11 +264,16 @@ export function judge(
       detail: ['기준값(expected)이 비어 있어 채점 API 가 채점하지 않아요'],
     };
   }
+  const ctx: RunContext = {
+    stdout: run.stdout,
+    studentCode: code,
+    turtle: run.turtle ?? [],
+    scenario,
+  };
   const { passed } = validateResult({
     validationType: rule.validation_type,
     expectedOutput: rule.expected_output,
-    stdout: run.stdout,
-    studentCode: code,
+    ...ctx,
   });
   if (passed) return { passed, detail: [] };
   const parsed = parseStoredRule(rule.validation_type, rule.expected_output);
@@ -260,7 +285,7 @@ export function judge(
       ],
     };
   }
-  return { passed, detail: explainRule(parsed, run.stdout, code) };
+  return { passed, detail: explainRule(parsed, ctx) };
 }
 
 function runFailure(run: RunLike, timeoutMs: number): string[] {
@@ -292,13 +317,23 @@ export function ruleSummary(rule: StoredRule): string {
 function summarize(rule: ValidationRule): string {
   switch (rule.type) {
     case 'all':
-      return `all[${rule.rules.map(summarize).join(', ')}]`;
+    case 'any':
+      return `${rule.type}[${rule.rules.map(summarize).join(', ')}]`;
+    case 'scenario':
+      return `손님${rule.index + 1}{${summarize(rule.rule)}}`;
     case 'contains_any':
       return `contains_any ${JSON.stringify(rule.expected)}`;
     case 'code_check':
       return `code_check ${JSON.stringify(rule.expected)}${rule.whole_word ? ' (whole_word)' : ''}`;
-    default:
+    case 'output_match':
+    case 'contains':
       return `${rule.type} ${JSON.stringify(rule.expected)}`;
+    case 'match_drawing':
+      return `match_drawing (선분 ${rule.segments.length}개${rule.translate ? ', 평행이동' : ''}${rule.extra_ok ? ', 더 있어도 됨' : ''})`;
+    default: {
+      const { type, ...rest } = rule;
+      return `${type} ${JSON.stringify(rest)}`;
+    }
   }
 }
 
@@ -314,25 +349,38 @@ function describeRule(rule: ValidationRule): string {
       return `code_check: 코드에 ${JSON.stringify(rule.expected)}가 있어야 해요 (주석·문자열 안은 세지 않음${rule.whole_word ? ', 단어 단위' : ''})`;
     case 'all':
       return 'all: 아래 규칙을 모두 통과해야 해요';
+    case 'any':
+      return 'any: 아래 규칙 중 하나만 통과하면 돼요';
+    case 'scenario':
+      return `손님 ${rule.index + 1}의 실행에만 붙는 규칙`;
+    default:
+      return `그림 ${summarize(rule)}`;
   }
 }
 
 /** 어떤 (하위) 규칙이 왜 실패했는지. output_match 는 기대/실제 줄 단위 차이를 붙인다 */
-export function explainRule(
-  rule: ValidationRule,
-  stdout: string,
-  code: string,
-): string[] {
-  const ctx = { stdout, studentCode: code };
+export function explainRule(rule: ValidationRule, ctx: RunContext): string[] {
+  const { stdout, studentCode: code } = ctx;
   let showOutput = false;
   let showCode = false;
+  let showSegments = false;
   const walk = (r: ValidationRule, indent: string): string[] => {
+    // 다른 손님에게 붙은 규칙은 이 실행과 상관없음
+    if (r.type === 'scenario' && r.index !== ctx.scenario) return [];
     const ok = validateRule(r, ctx);
     const head = `${indent}${ok ? '[통과]' : '[실패]'} ${describeRule(r)}`;
-    if (r.type === 'all') {
+    if (r.type === 'all' || r.type === 'any') {
       return [head, ...r.rules.flatMap((child) => walk(child, indent + '  '))];
     }
+    if (r.type === 'scenario') return [head, ...walk(r.rule, indent + '  ')];
     if (ok) return [head];
+    if (DRAWING_RULE_TYPES.has(r.type)) {
+      if (r.type === 'match_drawing') showSegments = true;
+      return [
+        head,
+        ...drawingReasons(r, ctx).map((reason) => `${indent}    ${reason}`),
+      ];
+    }
     if (r.type === 'output_match') {
       return [
         head,
@@ -348,6 +396,13 @@ export function explainRule(
   const lines = walk(rule, '');
   if (showOutput) lines.push(...block('실제 출력', stdout));
   if (showCode) lines.push(...block('검사한 코드', code));
+  if (showSegments)
+    // 작성자가 match_drawing.segments 에 붙여 넣을 수 있게 (정답 코드를 실행한 그림이면 그대로 정답 선분)
+    lines.push(
+      `이 실행이 그린 선분 (match_drawing.segments 모양): ${JSON.stringify(
+        roundSegments(mergedSegments(analyze(ctx.turtle ?? []).segments)),
+      )}`,
+    );
   return lines;
 }
 
@@ -422,6 +477,8 @@ function tail(text: string, count: number): string {
 export interface RunRecord {
   label: string;
   seed: number;
+  /** 시험 손님 번호 (시나리오가 없으면 없음) */
+  scenario?: number;
   passed: boolean;
   detail: string[];
   stdout: string;
@@ -467,17 +524,21 @@ export async function checkUnit(
       const r = await runner.run(code, {
         seed: p.seed,
         stdin: p.stdin,
+        keys: p.keys,
         timeoutMs,
       });
       out.push({
         label: p.label,
         seed: p.seed,
-        ...judge(unit.rule, r, code, timeoutMs),
+        ...(p.scenario !== undefined && { scenario: p.scenario }),
+        ...judge(unit.rule, r, code, timeoutMs, p.scenario),
         stdout: r.stdout,
         isTimeout: r.isTimeout,
         isOutputLimit: r.outcome === 'output-limit',
         ms: r.ms,
-        ...(questRule && { questRule: judge(questRule, r, code, timeoutMs) }),
+        ...(questRule && {
+          questRule: judge(questRule, r, code, timeoutMs, p.scenario),
+        }),
       });
       // 무한 루프는 시드와 상관없는 경우가 대부분이라 같은 코드로 또 기다리지 않는다
       if (r.isTimeout || r.outcome === 'output-limit') break;
@@ -612,6 +673,15 @@ export function starterPassesProblem(r: UnitReport): string | null {
   if (r.internalError) return internalProblem(r);
   const passed = r.starter.filter((x) => x.passed);
   if (passed.length === 0) return null;
+  // 시험 손님이 있으면 채점은 손님 모두가 통과해야 통과 → 한 손님이라도 늘 떨어지면 시작 코드는 불합격
+  const count = u.scenarios?.length ?? 0;
+  if (
+    count > 0 &&
+    Array.from({ length: count }, (_, i) => i).some(
+      (i) => !passed.some((x) => x.scenario === i),
+    )
+  )
+    return null;
   return [
     header(u),
     `시작 코드를 그대로 실행해도 통과해요: ${r.starter.length}회 중 ${passed.length}회 (${labels(passed)})`,

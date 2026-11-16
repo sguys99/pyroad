@@ -1,7 +1,7 @@
 /* 월드 지도 (P5-02): 종이 결 두루마리 지도 + 깊이별 레이어. WorldMap.tsx가 import한다. 값은 토큰 변수만.
    - 레이아웃: 지도를 담은 상자(.wm, 컨테이너) 폭 900px부터 가로 지도(wide), 그 아래는 세로로 긴 지도(tall, 최대 560px). 시안과 같은 기준
    - 패럴랙스(먼 곳·중간 레이어, WorldMap이 --ms를 씀): full + 동작 줄이기 꺼짐만. lite·minimal·동작 줄이기는 정지 배경
-   - 앰비언트(P5-09, 아래 "앰비언트" 절): 구름·물결·배·새·반짝임·나뭇잎. full + 동작 줄이기 꺼짐만, 화면 밖·탭 숨김이면 멈춤 */
+   - 앰비언트(P5-09, 아래 "앰비언트" 절): 구름·물결·배·새·반짝임·나뭇잎 (+ 3월드 톱니·열기구). full + 동작 줄이기 꺼짐만, 화면 밖·탭 숨김이면 멈춤 */
 
 .wm {
   container-type: inline-size;
@@ -134,6 +134,16 @@
   .wm-a-leaf {
     animation: wm-leaf 15s linear calc(var(--i, 0) * -5s) infinite;
   }
+  /* 3월드: 천천히 도는 톱니 · 둥실 열기구 */
+  .wm-a-cog {
+    animation: wm-spin 24s linear infinite;
+  }
+  .wm-a-cog:nth-child(even) {
+    animation-direction: reverse;
+  }
+  .wm-a-float {
+    animation: wm-float 7s ease-in-out infinite;
+  }
 }
 /* 화면 밖·탭 숨김 (WorldMap useAmbientPause). 위 full 규칙보다 명시도가 같거나 높고 뒤에 있어야 이긴다 */
 :root .world-map[data-amb-off] .wm-amb .wm-sprite,
@@ -183,6 +193,20 @@
   }
   50% {
     transform: scaleY(0.4);
+  }
+}
+@keyframes wm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wm-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-14%) rotate(2deg);
   }
 }
 /* 대부분 꺼져 있다가 잠깐 반짝 (밀도 낮게) */
@@ -362,6 +386,76 @@
 /* 바다 위 길은 모래톱보다 옅은 뱃길 (잉크·연필 점선은 그대로) */
 .wm-art[data-theme='code_sea'] .wm-road-sand {
   opacity: 0.45;
+}
+
+/* 3월드 메이커 시티 (P11-11, 토큰 --w3-brick·--w3-blueprint): 설계도 모눈종이 위 도시 블록 + 돌 광장 + 벽돌·슬레이트 지붕.
+   항구 바다는 2월드 물빛을 그대로 (배를 대고 내린 곳). 모눈·블록은 반투명이라 종이 섬유 결이 비침 */
+.wm-brick {
+  --f: var(--w3-brick);
+}
+.wm-slate {
+  --f: color-mix(in srgb, var(--w3-blueprint) 82%, var(--surface));
+}
+.wm-curb {
+  --f: color-mix(in srgb, var(--surface-lip) 70%, var(--w3));
+}
+.wm-plaza {
+  --f: color-mix(in srgb, var(--w3-soft) 60%, var(--surface));
+}
+.wm-art[data-theme='maker_city'] {
+  --wm-sea: color-mix(in srgb, var(--w2-shallow) 70%, var(--w2-deep));
+}
+.wm-art .wm-grid {
+  fill: none;
+  stroke: var(--w3-blueprint);
+  stroke-width: 0.5;
+  opacity: 0.32;
+  vector-effect: non-scaling-stroke;
+}
+.wm-art .wm-grid-major {
+  stroke-width: 0.8;
+  opacity: 0.4;
+}
+.wm-art .wm-block {
+  fill: color-mix(in srgb, var(--w3) 30%, var(--w3-soft));
+  stroke: color-mix(in srgb, var(--w3) 70%, var(--text-muted));
+  stroke-width: 0.8;
+  stroke-dasharray: 3 4;
+  opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+.wm-art .wm-park {
+  fill: color-mix(in srgb, var(--w1) 38%, var(--w3-soft));
+  stroke: color-mix(in srgb, var(--w1) 60%, var(--text-muted));
+  stroke-width: 0.8;
+  stroke-dasharray: 3 4;
+  opacity: 0.45;
+  vector-effect: non-scaling-stroke;
+}
+/* 블록 안 지붕 (위에서 본 모습): 벽돌 · 슬레이트, 아주 옅게 */
+.wm-art .wm-rooftop {
+  fill: var(--w3-brick);
+  stroke: color-mix(in srgb, var(--w3-brick) 70%, var(--text));
+  stroke-width: 0.6;
+  opacity: 0.24;
+  vector-effect: non-scaling-stroke;
+}
+.wm-art .wm-rooftop-slate {
+  fill: var(--w3-blueprint);
+  stroke: color-mix(in srgb, var(--w3-blueprint) 70%, var(--text));
+}
+.wm-art .wm-cobble {
+  fill: none;
+  stroke: color-mix(in srgb, var(--w3) 70%, var(--text-muted));
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+  opacity: 0.45;
+  vector-effect: non-scaling-stroke;
+}
+/* 도시 길은 모래 대신 돌 포장 */
+.wm-art[data-theme='maker_city'] .wm-road-sand {
+  stroke: color-mix(in srgb, var(--surface-lip) 55%, var(--w3-soft));
+  opacity: 0.95;
 }
 
 /* 잠긴 곳: 연필 스케치 (채움 없음 + 점선). 클리어하면 색이 입혀진다 */

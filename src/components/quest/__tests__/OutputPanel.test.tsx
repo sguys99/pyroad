@@ -363,7 +363,7 @@ describe('OutputPanel', () => {
     });
   });
 
-  it('결과 쪽 재준비는 쪽지 안 한 줄로', () => {
+  it('재준비 연출은 결과 쪽지 안에 (P11-03)', () => {
     render(
       <OutputPanel
         result={{
@@ -374,11 +374,86 @@ describe('OutputPanel', () => {
           outcome: 'stopped',
         }}
         isRunning={false}
-        restarting
+        restarting="stop"
       />,
     );
-    expect(screen.getByTestId('runner-waking-inline')).toHaveTextContent(
-      '다시 펼치는 중',
+    // 재준비 연출은 쪽지 안에 (P11-03): 낭독기 알림 자리 + 이유별 한 줄
+    const waking = screen.getByTestId('runner-waking');
+    expect(screen.getByTestId('output-panel')).toContainElement(waking);
+    expect(waking.querySelector('[role="status"]')).toHaveTextContent(
+      '실행기를 다시 준비하고 있어요',
     );
+    expect(waking).toHaveTextContent('끝나지 않는 주문을 멈췄어요');
+  });
+
+  it('input() 대기: 대답을 기다려요 딱지 + 입력 칸, Enter로 보내면 내 말풍선 (P11-01)', () => {
+    const store = createLiveOutputStore();
+    const answer = vi.fn();
+    const stop = vi.fn();
+    render(<OutputPanel result={null} isRunning liveOutput={store} />);
+    expect(screen.queryByTestId('input-reply')).toBeNull();
+    act(() => {
+      store.append('이름? ');
+      store.ask({ answer, stop });
+    });
+    expect(screen.getByText('대답을 기다려요')).toBeInTheDocument();
+    const field = screen.getByRole('textbox', { name: '파이썬에게 보낼 대답' });
+    expect(field).toHaveAttribute('enterkeyhint', 'send');
+    expect(field).toHaveFocus();
+    fireEvent.change(field, { target: { value: '철수' } });
+    // 한글 조합 중 Enter는 보내지 않음
+    fireEvent.keyDown(field, { key: 'Enter', keyCode: 229 });
+    expect(answer).not.toHaveBeenCalled();
+    fireEvent.keyDown(field, { key: 'Enter', keyCode: 13 });
+    expect(answer).toHaveBeenCalledWith('철수');
+    expect(screen.getByTestId('output-answer')).toHaveTextContent('철수');
+    // 다음 질문 전에도 칸은 남고(읽기 전용), 멈추기는 듣는다
+    expect(field).toHaveAttribute('readonly');
+    fireEvent.click(screen.getByRole('button', { name: '멈추기' }));
+    expect(stop).toHaveBeenCalled();
+  });
+
+  it('끝난 뒤에도 답한 말은 프롬프트 뒤 말풍선으로 남는다', () => {
+    render(
+      <OutputPanel
+        result={{
+          stdout: '이름? 안녕 철수\n',
+          stderr: '',
+          success: true,
+          outcome: 'ok',
+          inputs: [{ at: 4, value: '철수' }],
+        }}
+        isRunning={false}
+      />,
+    );
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(
+      ['이름? ', '내 대답: 철수', '안녕 철수'],
+    );
+  });
+
+  it('input()을 받을 수 없는 기기: 버그가 아니라 새로고침·Safari 안내', () => {
+    render(
+      <OutputPanel
+        result={{
+          stdout: '이름? ',
+          stderr: 'InputUnavailable: ...\n',
+          success: false,
+          hadException: true,
+          errorType: 'InputUnavailable',
+          outcome: 'error',
+        }}
+        isRunning={false}
+      />,
+    );
+    expect(screen.getByTestId('output-panel')).toHaveAttribute(
+      'data-state',
+      'input-unavailable',
+    );
+    expect(screen.getByTestId('input-unavailable')).toHaveTextContent(
+      'Safari로 열기',
+    );
+    expect(
+      screen.getByRole('button', { name: '새로고침' }),
+    ).toBeInTheDocument();
   });
 });

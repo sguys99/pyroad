@@ -1,9 +1,8 @@
 /**
  * 랜딩 재미 요소 쇼케이스의 장면 5개 (P4-05, §12-Q42).
  *
- * - `soon`: 아직 앱에 없는 기능 → "곧 열려요" 배지. **배지는 여기 플래그만 바꾸면 꺼진다** (Phase 8 코인, Phase 9 자랑하기·보스 배틀)
- *   지금 있는 것(2026-11): 레벨·경험치(퀘스트 완료, 레벨 업 축하), 파이뱀 색 6가지(온보딩에서 고름, §12-Q34).
- *   없는 것: 코인·상점(Phase 8), 공유 카드 자랑하기·보스 배틀(Phase 9), 옷·모자(코스튬, Phase 9)
+ * - `soon`: 아직 앱에 없는 기능 → "곧 열려요" 배지. **배지는 여기 플래그만 바꾸면 꺼진다**
+ *   지금은 다섯 장면 모두 있음 — 코인(Phase 8), 자랑하기·보스 배틀(Phase 9). 플래그가 남아 있던 것을 B88에서 끔
  * - 문구는 장면마다 제목 + 한 줄 (랜딩 글꼴 서브셋 예산)
  * - 장면 길이·간격은 모션 토큰에서 만든다 (CSS `--ld-fun-t`와 같은 값, fun.css)
  */
@@ -33,7 +32,7 @@ export const FUN_SCENES: readonly FunScene[] = [
     id: 'coin',
     title: '코인 모으기',
     line: '퀘스트 보상으로 코인을 모아요',
-    soon: true,
+    soon: false,
   },
   {
     id: 'dress',
@@ -45,13 +44,13 @@ export const FUN_SCENES: readonly FunScene[] = [
     id: 'share',
     title: '자랑하기',
     line: '멋진 순간을 카드로 만들어 보여 줘요',
-    soon: true,
+    soon: false,
   },
   {
     id: 'boss',
     title: '보스 배틀',
     line: '스테이지 끝에서 버그버그와 겨뤄요',
-    soon: true,
+    soon: false,
   },
 ];
 

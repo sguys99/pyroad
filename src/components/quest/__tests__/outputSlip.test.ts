@@ -4,6 +4,7 @@ import {
   errorSummary,
   mismatchTip,
   outputLines,
+  transcriptRows,
 } from '../outputSlip';
 
 describe('outputSlip', () => {
@@ -52,5 +53,40 @@ describe('outputSlip', () => {
     expect(mismatchTip('code_check', '')).toContain('방법');
     expect(mismatchTip('all', 'x')).toContain('쓴 방법');
     expect(mismatchTip(undefined, 'x')).toContain('하나씩');
+  });
+});
+
+describe('transcriptRows (P11-01 input 대화)', () => {
+  it('답은 프롬프트 줄 바로 뒤에 내 말로, 답 뒤에는 줄이 바뀜', () => {
+    const text = '시작!\n이름? 안녕 철수\n나이? 끝\n';
+    expect(
+      transcriptRows(text, [
+        { at: text.indexOf('안녕'), value: '철수' },
+        { at: text.indexOf('끝'), value: '' },
+      ]),
+    ).toEqual([
+      { text: '시작!' },
+      { text: '이름? ' },
+      { text: '철수', answer: true },
+      { text: '안녕 철수' },
+      { text: '나이? ' },
+      { text: '', answer: true },
+      { text: '끝' },
+    ]);
+  });
+
+  it('프롬프트 없이 줄바꿈 뒤에 물으면 말풍선만, 입력이 없으면 outputLines와 같음', () => {
+    expect(transcriptRows('질문\n', [{ at: 3, value: 'a' }])).toEqual([
+      { text: '질문' },
+      { text: 'a', answer: true },
+    ]);
+    expect(transcriptRows('a\nb\n')).toEqual([{ text: 'a' }, { text: 'b' }]);
+  });
+
+  it('잘린 출력 밖 자리의 답은 끝에 붙임', () => {
+    expect(transcriptRows('ab', [{ at: 99, value: 'x' }])).toEqual([
+      { text: 'ab' },
+      { text: 'x', answer: true },
+    ]);
   });
 });

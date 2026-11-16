@@ -1,0 +1,155 @@
+# 3월드 보스 1: 물감 범벅 버그버그 (5문제)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+# 거북이 문제는 print(t.position())·heading()·filling() 으로 끝냄 (world3.md 제안 G: 그림은 출력이 없어 test:content 가 검증 못 함)
+
+id: b3000000-0000-0000-0000-000000000201
+order: 8
+title: 물감 범벅 버그버그
+concept: 거북이 그리기 총정리
+xp_reward: 60
+quest_type: boss
+prompt:
+  topic: 각도, 위치, 함수 매개변수, 채우기, 그리기 순서 총정리
+  learning_goals:
+    - 거북이가 움직인 뒤의 위치와 방향을 머릿속으로 따라갈 수 있다
+    - 정다각형 함수와 색칠 주문의 버그를 찾을 수 있다
+  story_context: 벽화가 거의 다 살아났는데, 베레모를 쓴 버그버그가 붓을 휘두르며 나타났어요! 물감을 여기저기 튀기며 느릿이의 명령을 뒤죽박죽으로 만들고 있어요. 다섯 문제를 풀어 공방을 지켜요!
+  fallback_text: 거북이는 처음에 (0, 0) 에서 오른쪽(0도)을 봐요. forward 는 보는 쪽으로, left 는 시계 반대 방향으로 돌아요. 도형을 다 그리면 한 바퀴 360도를 돌아 처음 방향으로 와요. 색칠은 begin_fill 로 시작해 end_fill 로 끝내요.
+  boss:
+    name: 물감 범벅 버그버그
+    look: painter
+    intro: 히히! 나는 물감 범벅 버그버그! 벽화를 다시 그렸다고? 내 붓질 다섯 번을 막아 보시지!
+    on_defeat: 으앗, 물감이 다 말라 버렸어! 네 거북이 그림, 사실 좀 멋지더라. 나도 다음엔 예쁜 그림을 그려 볼래!
+    on_victory: 히히, 물감이 아직 남았지롱! 느릿이랑 연습하고 다시 와. 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000002
+    prompt:
+      quiz:
+        question: 버그버그가 육각형 벽화를 망쳐 놨어요. 정육각형의 꼭짓점마다 도는 각도예요. 돌리면 무엇이 나올까?
+        code: |-
+          n = 6
+          print(360 / n)
+        options:
+          - { id: opt-wru8, text: '60.0' }
+          - { id: opt-s93b, text: '6.0' }
+          - { id: opt-l6qy, text: '120.0' }
+          - { id: opt-udt8, text: '36.0' }
+    answer:
+      quiz_answer:
+        accepted: [opt-wru8]
+        explanation: 한 바퀴 360도를 꼭짓점 6개에 똑같이 나누면 60도예요. 나누기 / 라서 60.0 으로 나와요.
+        explanations:
+          opt-s93b: 360 ÷ 6 이에요. 6.0 은 36 ÷ 6 이에요.
+          opt-l6qy: 120도씩은 삼각형이에요. 360 ÷ 3 = 120.
+          opt-udt8: 36 이 아니라 한 바퀴 360 을 나눠요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000001
+    prompt:
+      quiz:
+        question: 느릿이가 이렇게 움직이면 마지막에 어디에 있을까? 돌리면 무엇이 나올까?
+        code: |-
+          import turtle
+          t = turtle.Turtle()
+          t.forward(100)
+          t.left(90)
+          t.forward(50)
+          print(t.position())
+        options:
+          - { id: opt-1pnu, text: '(100.00,50.00)' }
+          - { id: opt-n38m, text: '(50.00,100.00)' }
+          - { id: opt-52t6, text: '(150.00,0.00)' }
+          - { id: opt-m1qc, text: '(100.00,-50.00)' }
+    answer:
+      quiz_answer:
+        accepted: [opt-1pnu]
+        explanation: 오른쪽으로 100 가서 (100, 0), 왼쪽으로 90도 돌면 위를 봐요. 위로 50 가면 (100, 50) 이에요. 위치는 (가로, 세로) 순서예요.
+        explanations:
+          opt-n38m: 위치는 (가로, 세로) 순서로 써요. 가로로 100, 세로로 50 갔어요.
+          opt-52t6: left(90) 으로 돌았으니 두 번째 forward 는 오른쪽이 아니라 위로 가요.
+          opt-m1qc: left 는 왼쪽으로 돌아서 위를 봐요. 아래(-)로 가려면 right 예요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000003
+    prompt:
+      quiz:
+        question: 도형 요술 함수의 빈칸을 채워 정삼각형을 그린 뒤 처음 방향(0.0)으로 돌아오게 해요
+        code: |-
+          import turtle
+          t = turtle.Turtle()
+
+          def polygon(n, size):
+              for i in range(n):
+                  t.forward(size)
+                  t.left(360 / {{bk-kgf1}})
+
+          polygon(3, 100)
+          print(t.heading())
+        tokens:
+          - { id: tok-2xwx, text: n }
+          - { id: tok-ar3z, text: size }
+          - { id: tok-qy0v, text: i }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-kgf1: tok-2xwx }
+        explanation: 변이 n개면 꼭짓점마다 360 ÷ n 도씩 돌아요. 세 번 돌아 모두 360도라서 처음처럼 0.0 쪽을 봐요.
+        explanations:
+          tok-ar3z: size 는 변의 길이예요. 360 ÷ 100 이면 아주 조금만 돌아서 도형이 닫히지 않아요.
+          tok-qy0v: i 는 처음에 0이라 0으로 나누게 돼서 에러가 나요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000004
+    prompt:
+      quiz:
+        question: 별을 다 그렸는데 색칠이 끝나지 않아요. filling() 은 아직 색칠 중이면 True 예요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-2lf1, code: import turtle }
+          - { id: ln-3w5l, code: t = turtle.Turtle() }
+          - { id: ln-546q, code: 't.fillcolor("yellow")' }
+          - { id: ln-e7ty, code: t.begin_fill() }
+          - { id: ln-6bxo, code: 'for i in range(5):' }
+          - { id: ln-iw72, code: '    t.forward(100)' }
+          - { id: ln-zvn5, code: '    t.right(144)' }
+          - { id: ln-1q20, code: t.begin_fill() }
+          - { id: ln-2wto, code: print(t.filling()) }
+        fixes:
+          - { id: fx-qo8o, code: t.end_fill() }
+          - { id: fx-u67i, code: 't.fillcolor("yellow")' }
+          - { id: fx-2zzp, code: t.right(144) }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-1q20, fix: fx-qo8o }
+        explanation: 색칠은 begin_fill 로 시작하고 end_fill 로 끝내요. 다 그린 뒤에 또 begin_fill 을 부르면 색칠이 끝나지 않아요. 고치면 False 가 나와요.
+        explanations:
+          fx-u67i: 색을 다시 골라도 색칠은 끝나지 않아요.
+          fx-2zzp: 한 번 더 돌아도 색칠은 계속 진행 중이에요.
+  - quiz_kind: parsons
+    review_quest: b3000000-0000-0000-0000-000000000007
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓아, 선 없이 (-50, 0) 으로 옮긴 뒤 네모를 그리고 마지막 위치를 보여 줘요
+        lines:
+          - { id: ln-n2y9, code: import turtle }
+          - { id: ln-t3f3, code: t = turtle.Turtle() }
+          - { id: ln-6maj, code: t.penup() }
+          - { id: ln-1z3b, code: 't.goto(-50, 0)' }
+          - { id: ln-58ug, code: t.pendown() }
+          - { id: ln-8dbw, code: 'for i in range(4):' }
+          - { id: ln-6lci, code: '    t.forward(100)' }
+          - { id: ln-v11b, code: '    t.left(90)' }
+          - { id: ln-0t1t, code: print(t.position()) }
+    answer:
+      quiz_answer:
+        accepted:
+          - [
+              ln-n2y9,
+              ln-t3f3,
+              ln-6maj,
+              ln-1z3b,
+              ln-58ug,
+              ln-8dbw,
+              ln-6lci,
+              ln-v11b,
+              ln-0t1t,
+            ]
+        explanation: 거북이를 만들고, 펜을 들어 옮긴 뒤 펜을 내려요. 네모를 다 그리면 출발한 (-50, 0) 으로 돌아와서 (-50.00,0.00) 이 나와요.

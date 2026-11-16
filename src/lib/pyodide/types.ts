@@ -7,8 +7,12 @@
 //   worker → main: init-status(loading → ready | error)
 //                  stdout* / stderr* (실행 중 스트리밍, 묶어서 보냄) → done
 //                  run-error (실행기 내부 오류. 이때는 done이 오지 않음)
-//                  input-request (P11-01에서 사용. 지금은 보내지 않음)
-// 확장 예정: turtle 명령 청크 `{ type: 'turtle', id, chunk }` (P11-02)
+//                  input-request (input() 대기, P11-01) → main이 answer로 답함
+//                  (SW 채널이면 Worker가 동기 XHR로 막혀 있어 answer·stop을 SW에 보낸다)
+//                  turtle* (그리기 명령 청크, P11-02. turtle을 쓰는 실행만, done보다 먼저)
+//                  keys (get_key()를 처음 부름, P11-04) → main이 누른 키를 key로 보냄 (SW 채널이면 SW로)
+//                  sleep → wake (time.sleep 동안. main은 그 사이 실행 시간 시계를 멈춤, P11-04)
+//                  stdin (run의 stdin 큐에서 한 줄을 씀, 시험 손님 P11-05 — 대화 기록에 손님 말풍선)
 
 export type WorkerRequest =
   | { type: 'init' }
@@ -20,11 +24,26 @@ export type WorkerRequest =
       seed?: number;
       /** 미리 정한 입력 줄 (CI 입력 시나리오, P1-13·P11-05). 다 쓰면 EOFError */
       stdin?: string[];
+      /**
+       * 키 시나리오 (P11-04·P11-05): keys[n]은 n번째 프레임(time.sleep을 n번 부른 뒤)이 시작할 때 get_key() 큐에 들어감.
+       * null이면 그 프레임엔 키 없음. 주면 진짜 키는 받지 않는다
+       */
+      keys?: (string | null)[];
+      /** time.sleep을 건너뜀 (검증 실행. time.time 등은 건너뛴 만큼 앞으로 감). 없으면 실행기 기본값 */
+      skipSleep?: boolean;
     }
   /** 실행 멈추기. time.sleep 대기 중이면(JSPI) Worker를 살린 채 끝나고, CPU 루프면 응답이 없음 → terminate */
   | { type: 'stop'; id?: string }
-  /** input-request에 대한 답 (P11-01) */
-  | { type: 'answer'; id: string; value: string };
+  /** input-request에 대한 답 (P11-01, JSPI 채널). id = 실행 id, requestId = 요청마다 다름 */
+  | { type: 'answer'; id: string; requestId: string; value: string }
+  /** 누른 키 하나 (P11-04, JSPI 채널). Tk 이름: 'Left' 'Right' 'Up' 'Down' 'space' 'a' … */
+  | { type: 'key'; id: string; key: string };
+
+/** input()으로 답을 받는 길 (P11-01). none = JSPI도 SW도 없음 → input()은 InputUnavailable */
+export type InputChannel = 'jspi' | 'sw' | 'none';
+
+/** 입력 길이 없을 때 input()이 내는 예외 이름 (pyodide-core.mjs INPUT_UNAVAILABLE_ERROR) */
+export const INPUT_UNAVAILABLE_ERROR = 'InputUnavailable';
 
 /** 실행이 어떻게 끝났는지 */
 export type RunOutcome =
@@ -52,6 +71,8 @@ export interface WorkerRuntimeInfo {
   source: 'self' | 'cdn' | 'npm';
   /** run_sync를 쓸 수 있는지 (JSPI). true면 time.sleep 중 멈추기가 Worker 재시작 없이 됨 */
   jspi: boolean;
+  /** input()으로 답을 받는 길 (Node 검증 실행기는 입력 시나리오만 써서 none) */
+  input: InputChannel;
   loadMs: number;
   /** 로딩 뒤 Worker 전역에서 지운 네트워크 API */
   removedGlobals: string[];
@@ -81,6 +102,45 @@ export type WorkerResponse =
     }
   | { type: 'stdout'; id: string; text: string }
   | { type: 'stderr'; id: string; text: string }
-  | { type: 'input-request'; id: string; prompt: string }
+  /** turtle 그리기 명령 묶음 (P11-02). chunk = JSON 배열 문자열, 형식은 src/lib/turtle/scene.ts */
+  | { type: 'turtle'; id: string; chunk: string }
+  | {
+      type: 'input-request';
+      id: string;
+      requestId: string;
+      /** 답을 보낼 곳: jspi = Worker에 answer, sw = 등록한 Service Worker에 postMessage */
+      channel: Exclude<InputChannel, 'none'>;
+    }
+  /** 이 실행이 get_key()를 부름 (P11-04, 실행당 한 번). channel = 키를 보낼 곳 (none이면 받을 길 없음) */
+  | { type: 'keys'; id: string; channel: InputChannel }
+  /** time.sleep 시작 / 끝 (P11-04). 그 사이는 실행 시간 제한에 넣지 않는다 */
+  | { type: 'sleep'; id: string; ms: number }
+  | { type: 'wake'; id: string }
+  /** 미리 정한 입력 한 줄을 input()이 가져감 (시험 손님, P11-05). 그때까지의 stdout은 먼저 옴 */
+  | { type: 'stdin'; id: string; value: string }
   | RunDoneMessage
   | { type: 'run-error'; id: string; error: string };
+
+/** input()에 학생이 답한 말 (P11-01). at = 답할 때까지 나온 stdout 길이 (프롬프트 바로 뒤 자리) */
+export interface RunInput {
+  at: number;
+  value: string;
+}
+
+/** get_key()를 부르는 실행의 키 보내기 손잡이 (P11-04) */
+export interface KeyInput {
+  /** 키 하나 보내기 (Tk 이름). 실행이 끝났으면 무시 */
+  press: (key: string) => void;
+  /** 키를 받을 길이 있는지 (none = JSPI도 SW도 없음) */
+  channel: InputChannel;
+  /** 게임 멈추기 (폰 결과 쪽에는 실행 줄이 없어 조종판에 둠) */
+  stop: () => void;
+}
+
+/** input()이 답을 기다릴 때 받는 손잡이 (P11-01). 프롬프트는 이미 stdout으로 왔다 */
+export interface InputRequest {
+  /** 답 보내기 (한 줄). 같은 요청에 두 번 보내면 무시 */
+  answer: (value: string) => void;
+  /** 입력 대기 중 멈추기 (Worker를 살린 채 KeyboardInterrupt) */
+  stop: () => void;
+}

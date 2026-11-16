@@ -88,7 +88,7 @@ test.describe('랜딩 세계관 (P4-04)', () => {
     await expect(page.getByTestId('world-card-3')).toContainText(
       '코드 바다의 마지막 프로젝트를 끝내면 열려요',
     );
-    await expect(section.getByText('준비 중')).toHaveCount(1); // 메이커 시티만 (2월드는 P10-07에서 다 씀)
+    await expect(section.getByText('준비 중')).toHaveCount(0); // 3월드도 seed 에 들어감 (P11-14, B87)
   });
 
   test('잠긴 월드를 누르면(마우스·키보드) "앞 월드를 끝내면 열려요!" 안내만 나온다', async ({

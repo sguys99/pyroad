@@ -15,12 +15,20 @@ import { StoryPage } from './StoryPage';
 import { QuestHints, hintNotes } from './QuestHints';
 import { CodePanel } from './CodePanel';
 import { OutputPanel } from './OutputPanel';
+import { SaveCreationBar } from './SaveCreation';
 import type { QuestReward } from './QuestSuccess';
 import { QuestStatusBar } from './QuestStatusBar';
 import { usePageSwipe } from './usePageSwipe';
+import { usesTurtle } from '@/lib/turtle/scene';
 import './questWorkspace.css';
 
 // 축하 오버레이 (P6-13): 받은 축하가 있을 때만 그린다. 첫 로드 JS에서 빼고, 실행을 처음 누를 때 미리 받아 둔다
+// 3월드 프로젝트의 메이커 작업대 (P11-14): 그 퀘스트에서만 받는다 (아이디어 카드·그림 검사기를 다른 퀘스트 첫 로드에 싣지 않게)
+const MakerHelper = dynamic(
+  () => import('./MakerHelper').then((m) => m.MakerHelper),
+  { ssr: false },
+);
+
 const loadCelebrations = () =>
   import('./QuestCelebrations').then((m) => m.QuestCelebrations);
 const QuestCelebrations = dynamic(loadCelebrations, { ssr: false });
@@ -116,6 +124,19 @@ export function QuestWorkspace({
           guide.validation_type === 'output_match',
       }
     : undefined;
+  // turtle을 쓰는 코드면 결과 위에 그림판을 미리 펼침 (P11-02). 모바일도 실행하면 결과 쪽으로 넘어가 그림이 보인다 (P6-11)
+  const turtle = usesTurtle(session.code);
+  // 작품으로 저장 (P11-06): 그림·대화가 나온 실행이 끝나면 결과 쪽지 아래 (데스크톱·모바일 결과 쪽 각각)
+  const saveBar = (
+    <SaveCreationBar
+      liveOutput={liveOutput}
+      runResult={runResult}
+      lastRunCode={session.lastRunCode}
+      isRunning={runner.isRunning}
+      questId={quest.id}
+      questTitle={quest.title}
+    />
+  );
   // 오류 줄로: 모바일은 공책 쪽으로 넘기고, 에디터에 표시된 오류 줄(P2-18)을 화면 가운데로
   const showErrorLine = () => {
     setTab('code');
@@ -272,6 +293,11 @@ export function QuestWorkspace({
               isCompleted={session.isCompleted}
               completion={session.completion}
             />
+            {/* 3월드 프로젝트: 기획 도우미·작품 평가 친구 (P11-14) */}
+            {session.kind === 'project' &&
+              quest.stage.world?.slug === 'maker-city' && (
+                <MakerHelper session={session} />
+              )}
           </StoryPage>
         </div>
 
@@ -306,7 +332,14 @@ export function QuestWorkspace({
               onShowErrorLine={showErrorLine}
               onAskTutor={askTutor}
               stage={quest.stage.order}
+              turtle={turtle}
+              onGrade={session.scenarios ? session.handleGrade : undefined}
+              onPreview={session.handlePreview}
+              world={quest.stage.world?.slug}
+              guests={session.guests}
+              reasons={session.gradeReasons}
             />
+            <div className="mt-3 max-lg:hidden empty:hidden">{saveBar}</div>
           </div>
 
           {/* 모바일 결과 쪽 */}
@@ -333,10 +366,17 @@ export function QuestWorkspace({
               liveOutput={liveOutput}
               example={example}
               onShowErrorLine={showErrorLine}
-              restarting={!!runner.restarting && runner.status === 'loading'}
+              restarting={
+                runner.status === 'loading' ? runner.restarting : null
+              }
               reward={reward}
               onAskTutor={askTutor}
+              turtle={turtle}
+              guests={session.guests}
+              reasons={session.gradeReasons}
+              guestHint={!!session.scenarios}
             />
+            {saveBar}
           </div>
         </div>
       </div>

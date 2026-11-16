@@ -15,10 +15,21 @@ export interface TutorRequest {
     /** 퀴즈 오답 뒤 "왜 틀렸어요?" (P7-08): 학생 답은 서버가 quiz_attempts 에서 읽음. 정답 미포함 */
     | 'quiz_explain'
     /** "파이뱀에게 물어보기" 자유 질문 (P9-17): 아이가 쓴 `question` 을 서버가 거른 뒤에만 LLM 에. 흘려 보내지 않음 */
-    | 'free_question';
+    | 'free_question'
+    /** 3-F 기획 도우미 (P11-14): 아이가 쓴 아이디어 `question` 을 자유 질문처럼 거른 뒤에만. 흘려 보내지 않음 */
+    | 'project_planner'
+    /** 3월드 작품 평가 친구 (P11-14): 코드·실행 결과·그림 요약으로 칭찬 2 + 한 걸음 더 1. 흘려 보내지 않음 */
+    | 'creation_feedback';
   quest_id: string;
-  /** free_question 만: 아이가 쓴 질문 (FREE_QUESTION_MAX_LENGTH 자 이하) */
+  /** free_question·project_planner: 아이가 쓴 질문·아이디어 (FREE_QUESTION_MAX_LENGTH 자 이하) */
   question?: string;
+  /** creation_feedback: 그림 요약 (화면이 그림 규칙 검사기로 센 수) */
+  drawing?: {
+    lines: number;
+    circles: number;
+    colors: number;
+    texts: number;
+  };
   student_code?: string;
   hint_level?: 1 | 2 | 3;
   execution_result?: {
@@ -39,7 +50,7 @@ export interface TutorResponse {
   is_fallback: boolean;
   no_api_key?: boolean;
   provider_used?: string;
-  /** free_question 을 서버가 걸렀음 (P9-17). message 는 아이용 안내이고 LLM 은 부르지 않음 */
+  /** free_question·project_planner 를 서버가 걸렀음 (P9-17). message 는 아이용 안내이고 LLM 은 부르지 않음 */
   blocked?: FreeQuestionBlock;
   /** free_question: 오늘 더 물어볼 수 있는 수 (모르면 없음) */
   remaining?: number;

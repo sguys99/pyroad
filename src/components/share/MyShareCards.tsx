@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   Flag,
+  Palette,
   Share2,
   Sparkles,
   Trash2,
@@ -39,6 +40,7 @@ const KIND_ICON: Record<ShareCardKind, typeof Sparkles> = {
   stage: Flag,
   achievement: Award,
   weekly: CalendarDays,
+  creation: Palette,
 };
 
 const STATE_LABEL: Record<MyCardState, string> = {
@@ -163,9 +165,11 @@ export function MyShareCards({
                       <Clock className="size-8" aria-hidden />
                     )}
                     <p className="m-0 text-small font-semibold">
-                      {state === 'hidden'
-                        ? '숨긴 카드라 아무도 볼 수 없어요'
-                        : '90일이 지나 저절로 닫혔어요'}
+                      {card.workOffShow
+                        ? '작품이 갤러리에 없어서 닫혔어요'
+                        : state === 'hidden'
+                          ? '숨긴 카드라 아무도 볼 수 없어요'
+                          : '90일이 지나 저절로 닫혔어요'}
                     </p>
                   </div>
                 )}
@@ -229,6 +233,11 @@ export function MyShareCards({
                       숨기기
                     </Button>
                   </>
+                ) : card.workOffShow ? (
+                  // 작품을 다시 전시해야 열 수 있음 (00056 — 서버도 creation_not_shared 로 막음)
+                  <p className="m-0 text-caption text-muted-foreground">
+                    작품을 갤러리에 다시 올리면 열 수 있어요.
+                  </p>
                 ) : (
                   <Button
                     size="sm"

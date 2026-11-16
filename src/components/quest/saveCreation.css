@@ -1,0 +1,183 @@
+/* 작품으로 저장 (P11-06, SaveCreation.tsx): 결과 쪽지 아래 한 줄 띠 + 저장 시트.
+   띠는 결과 쪽지(.qo-slip)와 같은 옅은 면, 시트 미리보기는 그림판(.ts)과 같은 흰 도화지. 값은 토큰 변수만 */
+
+.cr-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem 0.875rem 0.75rem 1rem;
+  border-radius: var(--round-m);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.cr-bar[data-saved] {
+  background: var(--primary-soft);
+}
+.cr-bar-icon {
+  display: grid;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: var(--round-pill);
+  background: var(--surface);
+  color: var(--accent-text);
+}
+.cr-bar[data-saved] .cr-bar-icon {
+  color: var(--primary-text);
+}
+.cr-bar-icon > svg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+.cr-bar-text {
+  display: grid;
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.cr-bar-title {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.cr-bar-sub {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+
+/* 시트 */
+.cr-sheet {
+  display: grid;
+  gap: 1rem;
+}
+.cr-preview {
+  display: grid;
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: var(--round-m);
+  background: var(--surface-2);
+}
+.cr-paper {
+  display: grid;
+  width: min(100%, 16rem);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--round-s);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.cr-paper > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cr-paper-wait {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  text-align: center;
+}
+.cr-paper-wait > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--accent-text);
+}
+.cr-preview .qo-lines {
+  max-height: 13rem;
+}
+.cr-preview-cap {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  text-align: center;
+}
+
+.cr-field {
+  display: grid;
+  gap: 0.375rem;
+}
+.cr-label {
+  font-weight: 700;
+  font-size: var(--text-small);
+}
+.cr-input {
+  position: relative;
+}
+.cr-input-field {
+  width: 100%;
+  height: 3.25rem;
+  padding: 0 4rem 0 1rem;
+  border: var(--line-w) solid var(--line-strong);
+  border-radius: var(--round-m);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-body);
+  transition: border-color var(--dur-fast) var(--easing-out);
+}
+.cr-input-field:focus-visible {
+  outline: var(--focus-w) solid var(--ring);
+  outline-offset: var(--focus-offset);
+  border-color: var(--primary);
+}
+.cr-input-field[aria-invalid='true'] {
+  border-color: var(--warning);
+}
+.cr-count {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.cr-count[data-over] {
+  color: var(--warning);
+  font-weight: 700;
+}
+.cr-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+
+.cr-private {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--round-m);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.cr-private > svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+}
+.cr-error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--round-m);
+  background: var(--warning-soft);
+  color: var(--text);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.cr-error:empty {
+  display: none;
+}

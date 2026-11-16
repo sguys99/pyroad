@@ -29,7 +29,9 @@ export default async function MyShareCardsPage() {
   const [rows, claimed] = await Promise.all([
     supabase
       .from('share_cards')
-      .select('id, kind, version, is_public, expires_at, created_at, snapshot')
+      .select(
+        'id, kind, ref, version, is_public, expires_at, created_at, snapshot',
+      )
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
     supabase
@@ -43,6 +45,22 @@ export default async function MyShareCardsPage() {
   if (rows.error)
     reportServerError(rows.error, { area: 'share-card', op: 'my cards' });
 
+  // 작품 카드(P11-08): 작품이 지금 갤러리에 전시 중인지 (본인 작품 — RLS 본인 읽기)
+  const workRefs = (rows.data ?? [])
+    .filter((r) => r.kind === 'creation')
+    .map((r) => r.ref);
+  const shown = new Set<string>();
+  if (workRefs.length) {
+    const { data } = await supabase
+      .from('creations')
+      .select('id')
+      .in('id', workRefs)
+      .eq('visibility', 'public')
+      .is('hidden_at', null)
+      .not('published_at', 'is', null);
+    for (const c of data ?? []) shown.add(c.id);
+  }
+
   const cards: MyShareCard[] = (rows.data ?? [])
     .filter((r) => r.kind in KIND_LABEL)
     .map((r) => ({
@@ -54,6 +72,7 @@ export default async function MyShareCardsPage() {
       createdAt: r.created_at,
       imageUrl: shareCardImagePath(r.id, r.version),
       detail: myCardDetail(r.kind, r.snapshot),
+      ...(r.kind === 'creation' && !shown.has(r.ref) && { workOffShow: true }),
     }));
 
   return (

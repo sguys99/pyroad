@@ -211,7 +211,7 @@ export function RunControlsSection() {
     },
     {
       label: '다시 준비 중 (무한 루프를 멈춘 뒤)',
-      note: 'Worker를 다시 띄우는 2~5초 (§2.9)',
+      note: 'Worker를 다시 띄우는 2~5초 (§2.9). 버튼만 못 누름, 안내 상자는 결과 쪽지 안 (P11-03)',
       props: {
         status: 'loading' as const,
         restarting: 'stop' as const,
@@ -288,6 +288,46 @@ function LiveSlipDemo() {
   return <OutputPanel result={null} isRunning liveOutput={store} />;
 }
 
+/**
+ * input() 대화 견본 (P11-01): 실제로 답해 볼 수 있다. 이름 → 좋아하는 숫자 → 끝(다시 처음부터).
+ * 실행기 없이 저장소만 움직여 프롬프트·입력 칸·내 말풍선·멈추기를 보여 준다
+ */
+function InputSlipDemo() {
+  const [store] = useState(() => createLiveOutputStore());
+  const [round, setRound] = useState(0);
+  useEffect(() => {
+    store.reset();
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const later = (fn: () => void) => timers.push(setTimeout(fn, 400));
+    const restart = () => later(() => setRound((r) => r + 1));
+    store.append('안녕! 나는 파이뱀이야.\n이름이 뭐야? ');
+    store.ask({
+      answer: (name) =>
+        later(() => {
+          store.append(`반가워, ${name || '친구'}!\n좋아하는 숫자는? `);
+          store.ask({
+            answer: (n) =>
+              later(() => {
+                store.append(`${n}에 1을 더하면 ${Number(n) + 1}!\n`);
+                restart();
+              }),
+            stop: restart,
+          });
+        }),
+      stop: restart,
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [store, round]);
+  return (
+    <OutputPanel
+      result={null}
+      isRunning
+      liveOutput={store}
+      inputAutoFocus={false}
+    />
+  );
+}
+
 /** 결과 쪽지 견본 (P6-06). "다시 튀어나오기"로 줄 카드 등장 연출을 다시 본다 */
 export function OutputPanelSection() {
   const [round, setRound] = useState(0);
@@ -302,6 +342,46 @@ export function OutputPanelSection() {
       label: '실행 중 (실시간 출력)',
       note: '돌아가는 중 딱지(바쁨 표시) · 줄이 오는 대로 카드로',
       node: <LiveSlipDemo />,
+    },
+    {
+      label: 'input() 대답 기다림 (직접 답해 보기)',
+      note: 'P11-01 · 프롬프트는 나온 글자에 이어서, "대답을 기다려요" 딱지 + 쪽지 안쪽 초록 테두리 · 아래 대화 입력줄(Enter·휴대폰 "보내기", 44px 이상) · 내 말은 오른쪽 초록 말풍선 · 멈추기는 Worker를 살린 채. 기다리는 점은 full·lite만 숨쉼',
+      node: <InputSlipDemo />,
+    },
+    {
+      label: 'input() 대화 끝',
+      note: '끝난 뒤에도 답한 말은 프롬프트 줄 뒤 말풍선으로 남음 (채점은 stdout만, 답은 stdout에 없음)',
+      node: (
+        <OutputPanel
+          result={{
+            ...ok,
+            stdout: '이름이 뭐야? 반가워, 하늘!\n좋아하는 숫자는? 7에 1을 더하면 8!\n',
+            inputs: [
+              { at: 8, value: '하늘' },
+              { at: 27, value: '7' },
+            ],
+          }}
+          isRunning={false}
+          validationResult={{ passed: true }}
+        />
+      ),
+    },
+    {
+      label: 'input()을 받을 수 없는 기기',
+      note: 'JSPI도 SW도 없음(iOS 26 이하 인앱 등, §12-Q74) · 버그가 아니라 차분한 회색 + 새로고침 · "Safari로 열기" 안내. input() 없는 코드는 그대로 돌아감',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '이름이 뭐야? ',
+            stderr: 'InputUnavailable: 이 브라우저에서는 input()으로 답을 받을 수 없어요\n',
+            success: false,
+            hadException: true,
+            errorType: 'InputUnavailable',
+            outcome: 'error',
+          }}
+          isRunning={false}
+        />
+      ),
     },
     {
       label: '통과',
@@ -388,8 +468,25 @@ export function OutputPanelSection() {
       ),
     },
     {
-      label: '멈춤 · 결과 쪽에서 재준비',
-      note: '모바일 결과 쪽: 따로 쌓인 상자 대신 쪽지 아래 한 줄',
+      label: '시간 초과 · 실행기 다시 준비 (P11-03)',
+      note: '그림 없는 무한 반복: 시간 제한 뒤 Worker를 다시 띄우는 2~5초. 잠든 파이뱀·점·흐르는 띠는 바쁨 표시(동작 줄이기면 멈춤), 실행 버튼은 "다시 준비 중..."',
+      node: (
+        <OutputPanel
+          result={{
+            stdout: '',
+            stderr: '',
+            success: false,
+            isTimeout: true,
+            outcome: 'timeout',
+          }}
+          isRunning={false}
+          restarting="timeout"
+        />
+      ),
+    },
+    {
+      label: '멈춤 · 실행기 다시 준비',
+      note: '끝나지 않는 계산을 멈추기로 멈췄을 때. 멈추기 전 글자는 남김',
       node: (
         <OutputPanel
           result={{
@@ -400,7 +497,7 @@ export function OutputPanelSection() {
             outcome: 'stopped',
           }}
           isRunning={false}
-          restarting
+          restarting="stop"
         />
       ),
     },
@@ -888,6 +985,28 @@ const MY_CARD_SAMPLES: MyShareCard[] = [
     createdAt: new Date(Date.now() - 91 * 86_400_000).toISOString(),
     imageUrl: '',
     detail: '8월 둘째 주 · 퀘스트 12개',
+  },
+  // 작품 카드 (P11-08): 전시 중 · 작품을 갤러리에서 내려 닫힘(다시 공개 대신 안내)
+  {
+    id: 'DDDDDDDDDDDDDDDDDDDDDD',
+    kind: 'creation',
+    version: 1,
+    isPublic: true,
+    expiresAt: new Date(Date.now() + 88 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    imageUrl: '/dev/design/share-card/creation-drawing',
+    detail: '「무지개 별」',
+  },
+  {
+    id: 'EEEEEEEEEEEEEEEEEEEEEE',
+    kind: 'creation',
+    version: 1,
+    isPublic: false,
+    expiresAt: new Date(Date.now() + 70 * 86_400_000).toISOString(),
+    createdAt: new Date(Date.now() - 20 * 86_400_000).toISOString(),
+    imageUrl: '',
+    detail: '「두근두근 퀴즈쇼」',
+    workOffShow: true,
   },
 ];
 

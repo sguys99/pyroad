@@ -392,6 +392,160 @@ export type Database = {
           },
         ];
       };
+      creation_reactions: {
+        Row: {
+          created_at: string;
+          creation_id: string;
+          sticker: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          creation_id: string;
+          sticker: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          creation_id?: string;
+          sticker?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creation_reactions_creation_id_fkey';
+            columns: ['creation_id'];
+            isOneToOne: false;
+            referencedRelation: 'creations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'creation_reactions_creation_id_fkey';
+            columns: ['creation_id'];
+            isOneToOne: false;
+            referencedRelation: 'gallery_creations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'creation_reactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      creation_reports: {
+        Row: {
+          created_at: string;
+          creation_id: string;
+          id: string;
+          reason: string;
+          reporter_id: string;
+          target_user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          creation_id: string;
+          id?: string;
+          reason: string;
+          reporter_id: string;
+          target_user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          creation_id?: string;
+          id?: string;
+          reason?: string;
+          reporter_id?: string;
+          target_user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creation_reports_reporter_id_fkey';
+            columns: ['reporter_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'creation_reports_target_user_id_fkey';
+            columns: ['target_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      creations: {
+        Row: {
+          code: string;
+          commands_gz: string | null;
+          created_at: string;
+          hidden_at: string | null;
+          id: string;
+          kind: string;
+          published_at: string | null;
+          quest_id: string | null;
+          show_code: boolean;
+          thumbnail: string | null;
+          title: string;
+          transcript: Json | null;
+          updated_at: string;
+          user_id: string;
+          visibility: string;
+        };
+        Insert: {
+          code?: string;
+          commands_gz?: string | null;
+          created_at?: string;
+          hidden_at?: string | null;
+          id?: string;
+          kind: string;
+          published_at?: string | null;
+          quest_id?: string | null;
+          show_code?: boolean;
+          thumbnail?: string | null;
+          title: string;
+          transcript?: Json | null;
+          updated_at?: string;
+          user_id: string;
+          visibility?: string;
+        };
+        Update: {
+          code?: string;
+          commands_gz?: string | null;
+          created_at?: string;
+          hidden_at?: string | null;
+          id?: string;
+          kind?: string;
+          published_at?: string | null;
+          quest_id?: string | null;
+          show_code?: boolean;
+          thumbnail?: string | null;
+          title?: string;
+          transcript?: Json | null;
+          updated_at?: string;
+          user_id?: string;
+          visibility?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creations_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'creations_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       daily_missions: {
         Row: {
           active: boolean;
@@ -1417,6 +1571,41 @@ export type Database = {
       };
     };
     Views: {
+      gallery_creations: {
+        Row: {
+          author_id: string | null;
+          author_name: string | null;
+          avatar_look: Json | null;
+          avatar_skin: string | null;
+          code: string | null;
+          commands_gz: string | null;
+          id: string | null;
+          kind: string | null;
+          published_at: string | null;
+          quest_id: string | null;
+          show_code: boolean | null;
+          stickers: Json | null;
+          thumbnail: string | null;
+          title: string | null;
+          transcript: Json | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creations_quest_id_fkey';
+            columns: ['quest_id'];
+            isOneToOne: false;
+            referencedRelation: 'quests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'creations_user_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_profiles_public: {
         Row: {
           avatar_look: Json | null;
@@ -1532,6 +1721,10 @@ export type Database = {
           p_per_minute: number;
           p_user_id: string;
         };
+        Returns: Json;
+      };
+      create_creation_share_card: {
+        Args: { p_creation_id: string; p_user_id: string };
         Returns: Json;
       };
       create_share_card: {
@@ -1712,11 +1905,23 @@ export type Database = {
         };
         Returns: Json;
       };
+      report_creation: {
+        Args: {
+          p_creation_id: string;
+          p_reason: string;
+          p_reporter_id: string;
+        };
+        Returns: Json;
+      };
       reset_progress: {
         Args: { p_scope: string; p_stage_id?: string; p_user_id: string };
         Returns: Json;
       };
       settle_streak_shields: { Args: { p_user_id: string }; Returns: string[] };
+      share_card_creation_thumbnail: {
+        Args: { p_id: string };
+        Returns: string;
+      };
       share_card_public: {
         Args: { p_id: string };
         Returns: {

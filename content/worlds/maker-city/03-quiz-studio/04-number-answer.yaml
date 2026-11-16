@@ -1,0 +1,73 @@
+# 3월드 퀘스트 3-4: 숫자 답 안전띠
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-3
+# code_check: 설계의 "except ValueError" 대신 except (whole_word) — 그냥 except: 로 잡아도 맞는 답 (P11-12 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000018
+order: 4
+title: 숫자 답 안전띠
+concept: try / except ValueError
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 숫자가 아닌 답이 들어와도 멈추지 않게 하기
+  learning_goals:
+    - int() 에 숫자가 아닌 글자를 넣으면 ValueError 가 난다는 것을 안다
+    - try / except 로 에러를 잡아 다시 안내할 수 있다
+  story_context: 계산 퀴즈 "7 + 5 = ?" 를 냈는데, 한 손님이 "열둘" 이라고 한글로 답했어요. 그랬더니 퀴즈 기계가 빨간 글씨를 내뿜으며 멈춰 버렸대요! 2월드 버그 병원선에서 배운 안전띠를 매 줘요.
+  exercise_description: 'int() 로 바꿀 때 숫자가 아니면 ValueError 를 잡아 "숫자로 답해 줘요!" 를 출력하세요. 숫자면 12일 때 "딩동댕!", 아니면 "땡!" 이에요'
+  starter_code: |
+    text = input("7 + 5 = ? ")
+
+    # 숫자가 아닌 답이면 int( ) 에서 ValueError 가 나요
+    # try: 와 except ValueError: 로 감싸서 "숫자로 답해 줘요!" 를 출력해요
+    answer = int(text)
+    if answer == 12:
+        print("딩동댕!")
+    else:
+        print("땡!")
+  expected_output_hint: 열둘 손님은 숫자로 답해 줘요, 12 손님은 딩동댕, 13 손님은 땡이 나와야 해요
+  checklist:
+    - 'try: 아래에 int( ) 와 if 줄을 들여 써요'
+    - 'except ValueError: 아래에 "숫자로 답해 줘요!" 를 출력해요'
+    - 열둘 손님에게도 퀴즈 기계가 멈추지 않는지 봐요
+  example_output: '7 + 5 = ? 숫자로 답해 줘요!'
+  fallback_text: 'try: 안의 코드를 해 보다가 에러가 나면 멈추지 않고 except 아래로 가요. int("열둘") 은 ValueError 가 나니까 except ValueError: 아래에 안내 문장을 써요. 에러가 안 나면 except 아래는 건너뛰어요.'
+answer:
+  validation:
+    type: code_check
+    expected: except
+    whole_word: true
+  scenarios:
+    - name: 열둘 손님
+      inputs: ['열둘']
+      expect: { type: contains, expected: 숫자로 답해 줘요 }
+    - name: 12 손님
+      inputs: ['12']
+      expect: { type: contains, expected: 딩동댕 }
+    - name: 13 손님
+      inputs: ['13']
+      expect: { type: contains, expected: 땡 }
+  hints:
+    level_1: 에러가 날 수도 있는 줄을 "해 보기" 상자에 넣고, 에러가 나면 할 일을 따로 정해요.
+    level_2: 'try: 를 쓰고 answer = int(text) 와 if/else 를 한 칸 들여 쓴 뒤, except ValueError: 아래에 print("숫자로 답해 줘요!") 를 써요.'
+    level_3: |-
+      try:
+          answer = int(text)
+          if answer == 12:
+              print("딩동댕!")
+          else:
+              print("땡!")
+      ___ ValueError:
+          print("숫자로 답해 줘요!")
+      빈칸에 에러를 잡는 주문을 넣어 보세요!
+  solution_code: |
+    text = input("7 + 5 = ? ")
+
+    try:
+        answer = int(text)
+        if answer == 12:
+            print("딩동댕!")
+        else:
+            print("땡!")
+    except ValueError:
+        print("숫자로 답해 줘요!")

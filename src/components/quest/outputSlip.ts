@@ -1,6 +1,7 @@
 // 결과 쪽지(OutputPanel, P6-06)의 글 다루기. 정답 기준값(expected_output)은 서버에만 있어(§2.3) 여기서는
 // 학생 출력·공개 규칙 유형(validation_type)·공개 예시 출력(example_output, P7-17)만으로 견줘 볼 거리를 만든다
 import type { ValidationType } from '@/lib/quest/validation';
+import type { RunInput } from '@/lib/pyodide/types';
 
 /** 등장 연출을 거는 앞쪽 줄 수 (긴 출력은 나머지를 그냥 보여 줌) */
 export const POP_LINES = 12;
@@ -11,6 +12,37 @@ export function outputLines(text: string): string[] {
   const lines = text.split('\n');
   if (lines.at(-1) === '') lines.pop();
   return lines;
+}
+
+/** 결과 쪽지 한 줄: 나온 글자 줄 또는 input()에 답한 내 말 (P11-01) */
+export interface TranscriptRow {
+  text: string;
+  answer?: true;
+}
+
+/**
+ * 나온 글자 + input() 답을 대화처럼 줄로 (P11-01). 답은 그때까지 나온 글자 바로 뒤(프롬프트 줄 다음)에 끼우고,
+ * 터미널처럼 답 뒤에는 줄이 바뀐다. stdout에는 답이 들어 있지 않다(CPython `python prog.py < 입력`과 같음)
+ */
+export function transcriptRows(
+  text: string,
+  inputs: readonly RunInput[] = [],
+): TranscriptRow[] {
+  const rows: TranscriptRow[] = [];
+  let pos = 0;
+  for (const input of inputs) {
+    // 화면 상한으로 잘린 출력이면 답은 끝에 붙인다
+    const at = Math.min(Math.max(input.at, pos), text.length);
+    const lines = text.slice(pos, at).split('\n');
+    // 마지막 조각 = 줄바꿈 없이 끝난 프롬프트("이름? "). 비어 있으면 줄을 만들지 않는다
+    const prompt = lines.pop();
+    for (const line of lines) rows.push({ text: line });
+    if (prompt) rows.push({ text: prompt });
+    rows.push({ text: input.value, answer: true });
+    pos = at;
+  }
+  for (const line of outputLines(text.slice(pos))) rows.push({ text: line });
+  return rows;
 }
 
 export interface LineCompare {

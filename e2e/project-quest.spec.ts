@@ -9,6 +9,7 @@ import {
   outputPanel,
   runButton,
   runCode,
+  setCode,
   waitForRunner,
 } from './support/quest';
 
@@ -16,6 +17,15 @@ const project = projectQuest();
 
 const strip = (page: Page) =>
   page.getByTestId('step-strip').filter({ visible: true });
+
+/** 단계 정답 제출: 시험 손님이 있는 단계(1월드 7-3 2~5단계 input(), P11-15)는 "시험 손님 부르기"가 채점 */
+async function submitStep(page: Page, i: number) {
+  const step = project.steps[i];
+  if (!step.guests) return runCode(page, step.solution);
+  await waitForRunner(page);
+  await setCode(page, step.solution);
+  await page.getByTestId('grade-button').filter({ visible: true }).click();
+}
 
 test.describe('프로젝트 퀘스트', () => {
   test.beforeEach(async ({ e2eUser }) => {
@@ -71,7 +81,7 @@ test.describe('프로젝트 퀘스트', () => {
     await expect(outputPanel(page)).toHaveAttribute('data-state', 'empty');
 
     // 2단계는 건너뛰지 않으면 박자 뒤 저절로 넘어감
-    await runCode(page, project.steps[1].solution);
+    await submitStep(page, 1);
     await expect(strip(page)).toHaveAttribute('data-beat', 'pass');
     await expect(strip(page)).toHaveAttribute('data-step', '3');
     await expect(strip(page)).not.toHaveAttribute('data-beat', 'pass', {
@@ -80,7 +90,7 @@ test.describe('프로젝트 퀘스트', () => {
     await expect(strip(page)).toContainText(`단계 3/${total}`);
 
     for (let i = 2; i < total - 1; i++) {
-      await runCode(page, project.steps[i].solution);
+      await submitStep(page, i);
       await strip(page).getByTestId('step-skip').click();
       await expect(strip(page)).toContainText(`단계 ${i + 2}/${total}`);
     }
@@ -89,7 +99,7 @@ test.describe('프로젝트 퀘스트', () => {
     const completion = page.waitForResponse((res) =>
       res.url().endsWith('/api/quest/complete'),
     );
-    await runCode(page, project.steps[total - 1].solution);
+    await submitStep(page, total - 1);
     expect((await completion).ok()).toBe(true);
     await expect(strip(page)).toContainText(`${total}단계 모두 완성!`);
     await expect(strip(page).getByTestId('step-skip')).toHaveCount(0);

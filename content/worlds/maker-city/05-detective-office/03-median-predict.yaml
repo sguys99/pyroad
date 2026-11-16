@@ -1,0 +1,36 @@
+# 3월드 퀴즈 5-3: 가운데는 누구? (출력 예측형 객관식)
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 설계의 [3, 9, 4, 1, 8] 은 줄 세우지 않은 한가운데도 4 라서 줄 세우기를 못 가림 → [7, 2, 9, 4, 1] (P11-13 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000030
+order: 3
+title: 가운데는 누구?
+concept: statistics.median
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 가운데 값은 줄을 세운 다음 찾아요
+  learning_goals:
+    - 가운데 값은 작은 것부터 줄 세웠을 때 한가운데 있는 값이라는 것을 안다
+  story_context: 동물 친구 다섯 명이 오늘 읽은 책 쪽수를 적어 냈어요. 탐정 조수가 "리스트 한가운데에 있는 게 가운데 값이죠?" 하고 물어요. 정말 그럴까요?
+  fallback_text: 가운데 값(중앙값)은 수를 작은 것부터 큰 것까지 줄 세운 다음, 한가운데 자리에 있는 수예요. 적어 낸 차례 그대로의 한가운데가 아니에요. 평균처럼 더하고 나누지도 않아요.
+  quiz:
+    question: 돌리면 무엇이 나올까?
+    code: |-
+      import statistics
+      pages = [7, 2, 9, 4, 1]
+      print(statistics.median(pages))
+    options:
+      - { id: opt-k3w8, text: '4' }
+      - { id: opt-9fqa, text: '9' }
+      - { id: opt-x2mt, text: '4.6' }
+      - { id: opt-5hrv, text: '2' }
+answer:
+  quiz_answer:
+    accepted: [opt-k3w8]
+    explanation: 작은 것부터 줄 세우면 1, 2, 4, 7, 9 예요. 다섯 개 중 한가운데(세 번째)는 4 예요.
+    explanations:
+      opt-9fqa: 9 는 적어 낸 차례의 한가운데예요. 가운데 값은 줄을 세운 다음 찾아요.
+      opt-x2mt: 4.6 은 모두 더해 5로 나눈 평균이에요.
+      opt-5hrv: 줄 세우면 2 는 두 번째예요. 한가운데는 세 번째예요.

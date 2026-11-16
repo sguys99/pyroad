@@ -13,7 +13,11 @@ import { BossLost, BossWon } from '@/components/quest/boss/BossResult';
 import { useSfx } from '@/components/providers/SoundProvider';
 import { WRONG_GAIN } from '@/lib/quest/useQuizSession';
 import { BOSS_HEARTS, BOSS_LOOKS, type BossLook } from '@/lib/quest/boss';
-import { BOSS_LOOK, BugBugStatic } from '@/components/characters/rig';
+import {
+  BOSS_LOOK,
+  BugBugStatic,
+  MAKER_BOSS_LOOK,
+} from '@/components/characters/rig';
 import type { QuizPrompt } from '@/lib/quest/questKind';
 import type {
   BossFx,
@@ -40,7 +44,7 @@ const BOSS = {
 const TOTAL = 5;
 
 /** 스테이지 외형 1월드 7종 (P9-13) + 2월드 7종 (P10-04), 콘텐츠 `prompt.boss.look` */
-const LOOK_NAME: Record<BossLook, string> = {
+const LOOK_NAME: Record<Exclude<BossLook, keyof typeof MAKER_BOSS_LOOK>, string> = {
   village: '1 출력 대장',
   forest: '2 상자 바꿔치기',
   crossroad: '3 갈림길 장난꾼',
@@ -56,6 +60,17 @@ const LOOK_NAME: Record<BossLook, string> = {
   hospital: '2-5 배탈 난',
   ridge: '2-6 산맥 지킴이',
   captain: '2-F 버그버그 선장',
+};
+
+/** 3월드 메이커 시티 외형 7종 (P11-11, world3.md §5). 위 14종과 나눠 진열 */
+const MAKER_LOOK_NAME: Record<keyof typeof MAKER_BOSS_LOOK, string> = {
+  painter: '3-1 물감 범벅',
+  storyteller: '3-2 이야기 뒤죽박죽',
+  host: '3-3 퀴즈쇼 진행자',
+  pet_sitter: '3-4 펫 장난꾸러기',
+  detective: '3-5 수상한 그래프',
+  arcade: '3-6 오락실',
+  mega_robot: '3-F 메가 로봇',
 };
 
 const QUIZ: QuizPrompt = {
@@ -308,7 +323,9 @@ export function BossSection() {
         data-testid="boss-looks"
       >
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-          {BOSS_LOOKS.map((look) => (
+          {BOSS_LOOKS.filter(
+            (look): look is keyof typeof LOOK_NAME => look in LOOK_NAME,
+          ).map((look) => (
             <li key={look} className="flex flex-col items-center gap-1">
               <BugBugStatic
                 state="idle"
@@ -317,6 +334,27 @@ export function BossSection() {
                 {...BOSS_LOOK[look]}
               />
               <span className="text-sm">{LOOK_NAME[look]}</span>
+            </li>
+          ))}
+        </ul>
+      </Demo>
+      <Demo
+        label="3월드 메이커 외형 7종 (P11-11)"
+        note="메이커 소품: 베레모·붓 · 두루마리 + 책 망토 · 헤드셋 마이크 + 나비넥타이 · 강아지 귀 + 밥그릇 · 사냥 모자 + 돋보기 · 오락기 등딱지(십자키·단추) + 조이스틱 더듬이 · 메가 로봇(몸통·팔·쇠 다리 + 조종사 고글). 콘텐츠 prompt.boss.look"
+        data-testid="boss-looks-maker"
+      >
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+          {(
+            Object.keys(MAKER_BOSS_LOOK) as (keyof typeof MAKER_BOSS_LOOK)[]
+          ).map((look) => (
+            <li key={look} className="flex flex-col items-center gap-1">
+              <BugBugStatic
+                state="idle"
+                size={96}
+                label={MAKER_LOOK_NAME[look]}
+                {...MAKER_BOSS_LOOK[look]}
+              />
+              <span className="text-sm">{MAKER_LOOK_NAME[look]}</span>
             </li>
           ))}
         </ul>

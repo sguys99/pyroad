@@ -345,7 +345,220 @@ export const WORLDS: readonly WorldInfo[] = [
     "unlock_rule": {
       "type": "previous_world_cleared"
     },
-    "ready": false,
-    "map": null
+    "ready": true,
+    "map": {
+      "bgm": "world3",
+      "path": "catmull_rom",
+      "layouts": {
+        "wide": {
+          "width": 1200,
+          "height": 720,
+          "node_scale": 1,
+          "nodes": [
+            [190, 540],
+            [420, 610],
+            [620, 470],
+            [400, 330],
+            [640, 200],
+            [880, 320],
+            [1050, 530]
+          ],
+          "decorations": [
+            {
+              "kind": "waves",
+              "x": -10,
+              "y": 700
+            },
+            {
+              "kind": "boat",
+              "x": 2,
+              "y": 668,
+              "scale": 0.75
+            },
+            {
+              "kind": "cog",
+              "x": 830,
+              "y": 120,
+              "scale": 1.3
+            },
+            {
+              "kind": "cog",
+              "x": 220,
+              "y": 300,
+              "scale": 0.9
+            },
+            {
+              "kind": "balloon",
+              "x": 470,
+              "y": 120
+            },
+            {
+              "kind": "bird",
+              "x": 980,
+              "y": 210
+            },
+            {
+              "kind": "bird",
+              "x": 300,
+              "y": 80
+            },
+            {
+              "kind": "house",
+              "x": 120,
+              "y": 330,
+              "scale": 1.1
+            },
+            {
+              "kind": "house",
+              "x": 560,
+              "y": 340
+            },
+            {
+              "kind": "house",
+              "x": 800,
+              "y": 620,
+              "scale": 1.05
+            },
+            {
+              "kind": "house",
+              "x": 1130,
+              "y": 350
+            },
+            {
+              "kind": "house",
+              "x": 300,
+              "y": 470,
+              "scale": 0.9
+            },
+            {
+              "kind": "lamp",
+              "x": 520,
+              "y": 580
+            },
+            {
+              "kind": "lamp",
+              "x": 760,
+              "y": 410
+            },
+            {
+              "kind": "lamp",
+              "x": 260,
+              "y": 640
+            },
+            {
+              "kind": "tree",
+              "x": 980,
+              "y": 660,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 1000,
+              "y": 668
+            },
+            {
+              "kind": "tree",
+              "x": 60,
+              "y": 250,
+              "scale": 1.1
+            },
+            {
+              "kind": "tree",
+              "x": 720,
+              "y": 690
+            }
+          ]
+        },
+        "tall": {
+          "width": 400,
+          "height": 1180,
+          "node_scale": 0.82,
+          "nodes": [
+            [130, 1040],
+            [290, 905],
+            [122, 770],
+            [286, 625],
+            [124, 485],
+            [282, 350],
+            [180, 200]
+          ],
+          "decorations": [
+            {
+              "kind": "waves",
+              "x": 280,
+              "y": 1166
+            },
+            {
+              "kind": "boat",
+              "x": 330,
+              "y": 1130,
+              "scale": 0.8
+            },
+            {
+              "kind": "cog",
+              "x": 350,
+              "y": 120,
+              "scale": 0.9
+            },
+            {
+              "kind": "balloon",
+              "x": 60,
+              "y": 300,
+              "scale": 0.9
+            },
+            {
+              "kind": "bird",
+              "x": 300,
+              "y": 40
+            },
+            {
+              "kind": "house",
+              "x": 340,
+              "y": 760,
+              "scale": 0.85
+            },
+            {
+              "kind": "house",
+              "x": 30,
+              "y": 620,
+              "scale": 0.85
+            },
+            {
+              "kind": "house",
+              "x": 345,
+              "y": 480,
+              "scale": 0.8
+            },
+            {
+              "kind": "lamp",
+              "x": 210,
+              "y": 700
+            },
+            {
+              "kind": "lamp",
+              "x": 190,
+              "y": 980
+            },
+            {
+              "kind": "tree",
+              "x": 30,
+              "y": 920
+            },
+            {
+              "kind": "tree",
+              "x": 370,
+              "y": 1020,
+              "scale": 0.9
+            }
+          ]
+        }
+      },
+      "ambient": {
+        "clouds": true,
+        "sparkles": true,
+        "weather": "none"
+      }
+    },
+    "skill_check": true
   }
 ];

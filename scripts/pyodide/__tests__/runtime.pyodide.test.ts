@@ -13,6 +13,7 @@ import {
   MAX_CAPTURE_LENGTH,
   PYODIDE_VERSION,
 } from '@/lib/pyodide/constants';
+import { INPUT_UNAVAILABLE_ERROR } from '@/lib/pyodide/types';
 import { NodePyodideRunner } from '../nodeRunner';
 
 let runner: NodePyodideRunner;
@@ -41,6 +42,7 @@ describe('버전·상수', () => {
   it('차단 모듈 목록과 출력 상한이 앱 상수와 같음', () => {
     expect(core.BLOCKED_MODULES).toEqual([...BLOCKED_MODULES]);
     expect(core.MAX_CAPTURE_LENGTH).toBe(MAX_CAPTURE_LENGTH);
+    expect(core.INPUT_UNAVAILABLE_ERROR).toBe(INPUT_UNAVAILABLE_ERROR);
   });
 });
 
@@ -334,5 +336,62 @@ describe('JSPI (브라우저와 같은 조건)', () => {
     });
     expect(r.stopped.wall).toBeLessThan(1000);
     expect(r.after.outcome).toBe('ok');
+  });
+});
+
+describe('input() 대화형 채널 (P11-01)', () => {
+  // 브라우저 Worker와 같은 코어를 interactiveInput으로 띄운다. JSPI는 플래그를 켠 Node 프로세스, SW는 동기 함수 대역
+  const runFixture = async (mode: 'jspi' | 'sw' | 'none') => {
+    const { stdout } = await promisify(execFile)(
+      process.execPath,
+      [
+        ...(mode === 'jspi' ? ['--experimental-wasm-jspi'] : []),
+        'scripts/pyodide/__tests__/fixtures/input.mjs',
+        mode,
+      ],
+      { timeout: 60_000 },
+    );
+    return JSON.parse(stdout.trim().split('\n').at(-1)!);
+  };
+
+  it.each(['jspi', 'sw'] as const)(
+    '%s: 프롬프트가 먼저 오고, input·sys.stdin·__init__ 안 input이 답을 받음, 대기 중 멈추기는 Worker 유지',
+    async (mode) => {
+      const r = await runFixture(mode);
+      expect(r.jspi).toBe(mode === 'jspi');
+      expect(r.greet).toMatchObject({
+        outcome: 'ok',
+        stdout: "이름? 안녕 철수\n'둘째 줄\\n'\n",
+      });
+      expect(r.greet.order.slice(0, 2)).toEqual(['stdout', 'input-request']);
+      expect(r.inInit).toMatchObject({
+        outcome: 'ok',
+        stdout: '펫 이름: 뭉치!\n',
+      });
+      expect(r.stopped).toMatchObject({ outcome: 'stopped', errorType: null });
+      expect(r.stopped.wall).toBeLessThan(1000);
+      expect(r.after).toMatchObject({ outcome: 'ok', stdout: 'ok\n' });
+      if (mode === 'sw') {
+        // time.sleep도 SW 채널로 자고, 자는 중 멈추기는 Worker를 살린 채 stopped (P11-03)
+        expect(r.sleepStop).toMatchObject({
+          outcome: 'stopped',
+          errorType: null,
+          stdout: '자 0\n자 1\n자 2\n',
+        });
+        // 자기 전에 나온 글자를 먼저 보낸다 (자는 동안은 이벤트 루프가 돌지 않음)
+        expect(r.sleepStop.order.slice(0, 2)).toEqual(['stdout', 'sleep']);
+      }
+    },
+  );
+
+  it('길이 없으면 input()만 InputUnavailable, 입력 없는 코드는 그대로', async () => {
+    const r = await runFixture('none');
+    expect(r.greet).toMatchObject({
+      outcome: 'error',
+      errorType: 'InputUnavailable',
+      stdout: '이름? ',
+    });
+    expect(r.greet.stderr).toContain('line 1');
+    expect(r.after).toMatchObject({ outcome: 'ok', stdout: 'ok\n' });
   });
 });

@@ -1,0 +1,8 @@
+# 스테이지 3-F: 메이커 박람회 (stages 테이블). 설계: docs/curriculum/world3.md §4
+
+id: a3000000-0000-0000-0000-000000000007
+order: 7
+title: 메이커 박람회
+theme_name: maker_fair
+description: 나만의 작품을 기획하고 만들어 박람회에 전시해요!
+is_final: true

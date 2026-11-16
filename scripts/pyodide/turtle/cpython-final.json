@@ -1,0 +1,32 @@
+{
+  "python": "3.15.2",
+  "programs": {
+    "square": {
+      "src": "\nimport turtle\nt = turtle.Turtle()\nfor i in range(4):\n    t.forward(100)\n    t.left(90)\nCHECK = [t]\n",
+      "final": [[-1.8369701987210297e-14, 1.4210854715202004e-14, 0.0]]
+    },
+    "polygon_star": {
+      "src": "\nimport turtle\nt = turtle.Turtle()\ndef polygon(n, size):\n    for i in range(n):\n        t.forward(size)\n        t.left(360 / n)\nfor n in range(3, 10):\n    polygon(n, 40)\nt.penup(); t.goto(-50, 30); t.pendown()\nfor i in range(5):\n    t.forward(200)\n    t.right(144)\nt.setheading(45); t.forward(70.7); t.back(12.5); t.home()\nt.right(17.25); t.forward(33)\nCHECK = [t]\n",
+      "final": [[31.515658167087107, -9.785871974193904, 342.75]]
+    },
+    "spiral": {
+      "src": "\nimport turtle\nt = turtle.Turtle()\nfor i in range(200):\n    t.forward(i * 1.5)\n    t.left(59)\nt.setheading(123.4); t.back(33)\nfor i in range(37):\n    t.right(i * 7.3)\n    t.forward(11.1)\nCHECK = [t]\n",
+      "final": [[-264.3668179463713, 103.21262044745032, 301.6]]
+    },
+    "circles": {
+      "src": "\nimport turtle, math\nt = turtle.Turtle()\nt.circle(50)\nt.circle(-30, 90)\nt.circle(80, 270, 7)\nt.circle(40, steps=6)\nt.left(33.3)\nt.circle(25.5, -120)\nt.setx(10); t.sety(-20)\nt.circle(100, 45)\nt.goto(37.5, -12.25)\nfor i in range(36):\n    for j in range(2):\n        t.circle(100, 60)\n        t.left(120)\n    t.right(10)\nt.radians(); t.left(math.pi / 3); t.forward(50); t.degrees()\nt.circle(-63.2, 333)\nCHECK = [t]\n",
+      "final": [[15.106929649537854, -12.400477829025407, 225.3]]
+    },
+    "two_turtles": {
+      "src": "\nimport turtle\na = turtle.Turtle()\nb = turtle.Turtle()\nb.left(180)\nfor i in range(30):\n    a.forward(7)\n    a.left(13)\n    b.forward(5.5)\n    b.right(11)\na.goto(b.position())\na.setheading(a.towards(0, 0))\na.forward(a.distance(0, 0) / 3)\nCHECK = [a, b]\n",
+      "final": [
+        [9.274327230398148, 3.467528863974572, 200.5],
+        [13.911490845597221, 5.201293295961875, 210.0]
+      ]
+    },
+    "bars": {
+      "src": "\nimport turtle\nt = turtle.Turtle()\ndata = {'딸기': 7, '바나나': 3, '포도': 5, '사과': 9}\nx = -150\nfor name, count in data.items():\n    t.penup(); t.goto(x, -100); t.pendown()\n    t.setheading(90)\n    t.forward(count * 20)\n    t.right(90)\n    t.forward(40)\n    t.right(90)\n    t.forward(count * 20)\n    x = x + 70\nCHECK = [t]\n",
+      "final": [[100.00000000000003, -99.99999999999997, 270.0]]
+    }
+  }
+}

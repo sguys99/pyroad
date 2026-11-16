@@ -8,7 +8,15 @@
 // - 실행마다 새 namespace + 학생 코드에만 적용되는 import 훅(표준 모듈 내부 import는 그대로)
 // - stdout·stderr를 실행 중에 묶어서(batched) 흘려보냄 + 실행당 출력 상한
 // - traceback은 학생 코드(`<exec>`) 줄만, 예외 여부는 done 메시지로 알림(B25 후속)
-// - `time.sleep` 중 멈추기(JSPI가 있으면 Worker를 살린 채 KeyboardInterrupt)
+// - `time.sleep` 중 멈추기: Worker를 살린 채 KeyboardInterrupt (JSPI는 run_sync, 없으면 SW 동기 XHR로 잠, P11-03)
+// - `input()`·`sys.stdin` (P11-01): 입력 시나리오(CI) → 대화형 채널(JSPI `run_sync` 또는 SW 동기 XHR) → 없으면 안내.
+//   입력 대기 중 멈추기도 Worker를 살린 채 KeyboardInterrupt
+// - 키 입력·프레임 루프 (P11-04): 학생은 `from pyroad import get_key`로 쌓인 키를 하나씩 꺼낸다(없으면 None).
+//   `time.sleep`이 프레임 경계라 잘 때마다 turtle 명령을 보내고(['f'] 표시) 키 시나리오(`keys`)의 다음 칸을 넣는다.
+//   검증 실행(`skipSleep`, Node 기본)은 잠을 건너뛰고 time.time 등은 건너뛴 만큼 앞으로 간다
+// - turtle (P11-02): `options.turtleSource`(public/workers/turtle.py)를 FS `/pyroad/turtle.py`에 설치하고, turtle을 쓰는
+//   실행마다 새 모듈로 불러 그리기 명령을 `{ type: 'turtle', id, chunk }`로 실행 중에 흘려보냄. 명령이 TURTLE_MAX_COMMANDS를
+//   넘으면 shim이 TurtleLimitError를 내서 Worker를 다시 띄우지 않고 끝남
 // - Python에서 `js`·`pyodide_js` 모듈을 뗌. 단 Python 쪽 차단은 우회되므로(gc, __globals__ 등)
 //   진짜 경계는 `removeNetworkGlobals()`로 JS 전역의 네트워크 API를 지우는 것이다.
 //
@@ -50,6 +58,25 @@ export const STUDENT_FILENAME = '<exec>';
 
 /** interruptBuffer[1]에 넣는 KeyboardInterrupt 이유: 시간 초과 (Node 검증 실행기) */
 export const INTERRUPT_REASON_TIMEOUT = 1;
+
+/** 실행 한 번의 turtle 그리기 명령 상한 (src/lib/pyodide/constants.ts와 같아야 함, §12-Q74 ①). 넘으면 TurtleLimitError */
+export const TURTLE_MAX_COMMANDS = 50_000;
+
+/** 실행 중 쌓아 두는 키 최대 개수 (넘으면 새 키를 버림, P11-04) */
+export const MAX_PENDING_KEYS = 32;
+
+/** 키 이름 최대 길이 (Tk 이름 'Left'·'space'·'a' …). 더 긴 값은 버린다 */
+const MAX_KEY_LENGTH = 16;
+
+/** turtle shim을 두는 워커 FS 경로 (§2.9) */
+export const TURTLE_PATH = '/pyroad/turtle.py';
+
+/** 입력을 받을 길(JSPI·SW)이 없는 기기에서 input()을 부르면 나는 예외 이름 (src/lib/pyodide/types.ts INPUT_UNAVAILABLE_ERROR) */
+export const INPUT_UNAVAILABLE_ERROR = 'InputUnavailable';
+
+// readLine()이 Python에 돌려주는 신호. 답은 늘 줄바꿈으로 끝나므로 이 값과 겹치지 않는다
+const READ_STOP = '\0stop';
+const READ_UNAVAILABLE = '\0unavailable';
 
 export const OUTPUT_LIMIT_NOTICE =
   '\n[출력이 너무 많아서 여기서 멈췄어요. 끝없이 반복되는 print가 있는지 확인해 보세요!]\n';
@@ -163,7 +190,7 @@ export function blockedImportMessage(name) {
 // 비공개 dict에서 한 번 실행되는 Python 코드. 학생 namespace에는 아무 이름도 넣지 않는다.
 // (클래스 안의 __이름은 name mangling되므로 쓰지 않음)
 const PRELUDE = String.raw`
-import sys, builtins, linecache, traceback
+import io, sys, builtins, linecache, traceback
 import time as _time
 from pyodide.ffi import run_sync as _run_sync, can_run_sync as _can_run_sync
 
@@ -189,6 +216,22 @@ def _student_builtins():
 
 
 _orig_sleep = _time.sleep
+_sleep_begin, _sleep_end = __pyroad_sleep_begin, __pyroad_sleep_end
+_active_turtle = None
+# 검증 실행에서 건너뛴 잠(초). time.time 등에 더해 "시간이 흐른 것처럼" 보이게 한다 (P11-04)
+_skipped = [0.0]
+
+
+def _clock(fn):
+    def clock():
+        return fn() + _skipped[0]
+
+    clock.__name__ = fn.__name__
+    return clock
+
+
+_time.time, _time.monotonic, _time.perf_counter = (
+    _clock(_time.time), _clock(_time.monotonic), _clock(_time.perf_counter))
 
 
 def _sleep(secs):
@@ -196,15 +239,87 @@ def _sleep(secs):
         raise TypeError(f"'{type(secs).__name__}' object cannot be interpreted as an integer")
     if secs < 0:
         raise ValueError("sleep length must be non-negative")
-    if _can_run_sync():
-        # JSPI: 기다리는 동안 Worker 이벤트 루프가 돌아서 stop 메시지를 받을 수 있다
-        if _run_sync(__pyroad_js_sleep(secs * 1000)) == "stopped":
+    # 잠 = 프레임 경계 (P11-04): 이번 프레임 그림을 보내고, JS가 출력 flush·다음 프레임 키·실행 시간 멈춤을 맡는다
+    if _active_turtle is not None:
+        _active_turtle._pyroad_frame()
+    how = _sleep_begin(secs * 1000)
+    if how == "stopped":
+        raise KeyboardInterrupt
+    if how == "skip":
+        _skipped[0] += secs
+        return
+    try:
+        if _can_run_sync():
+            # JSPI: 기다리는 동안 Worker 이벤트 루프가 돌아서 stop·key 메시지를 받을 수 있다
+            if _run_sync(__pyroad_js_sleep(secs * 1000)) == "stopped":
+                raise KeyboardInterrupt
+            return
+        # JSPI 없음: SW 동기 XHR이 붙잡아 두는 동안 자고(키도 그 답에 실려 옴), 멈추기도 SW가 풀어 준다 (P11-03).
+        # 채널이 없으면 그냥 잔다
+        slept = __pyroad_sleep_sync(secs * 1000)
+        if slept == "stopped":
             raise KeyboardInterrupt
-    else:
-        _orig_sleep(secs)
+        if slept != "ok":
+            _orig_sleep(secs)
+    finally:
+        _sleep_end()
 
 
 _time.sleep = _sleep
+_get_key = __pyroad_get_key
+
+
+def get_key():
+    """누른 키를 하나 꺼낸다 (먼저 누른 것부터). 없으면 None. 이름은 Tk와 같음: 'Left' 'Right' 'Up' 'Down' 'space' 'a'"""
+    key = _get_key()
+    return key if isinstance(key, str) else None
+
+
+def _fresh_pyroad():
+    # 학생이 from pyroad import get_key로 쓰는 pyRoad 전용 모듈. 실행마다 새로 (바꾼 속성이 남지 않게)
+    import types
+
+    mod = types.ModuleType("pyroad", "pyRoad 도우미: get_key()로 누른 키를 읽어요")
+    mod.get_key = get_key
+    mod.__all__ = ["get_key"]
+    sys.modules["pyroad"] = mod
+
+
+class InputUnavailable(Exception):
+    pass
+
+
+InputUnavailable.__module__ = "builtins"
+_read_line = __pyroad_read_line
+_READ_STOP, _READ_UNAVAILABLE = __pyroad_read_stop, __pyroad_read_unavailable
+
+
+class _Stdin(io.TextIOBase):
+    # 학생 코드의 sys.stdin. 내장 input()도 tty가 아니면 sys.stdin.readline()을 부른다 (P11-01)
+    def readable(self):
+        return True
+
+    def readline(self, size=-1):
+        jspi = bool(_can_run_sync())
+        line = _read_line(jspi)
+        if not isinstance(line, str):
+            # JSPI: 답을 기다리는 동안 Worker 이벤트 루프가 돌아 answer·stop 메시지를 받는다
+            line = _run_sync(line)
+        if line == _READ_STOP:
+            raise KeyboardInterrupt
+        if line == _READ_UNAVAILABLE:
+            raise InputUnavailable("이 브라우저에서는 input()으로 답을 받을 수 없어요")
+        return line
+
+    def read(self, size=-1):
+        # shortcut: 입력 끝(EOF)까지 한 줄씩 모음. 대화형에서는 학생이 끝을 보낼 길이 없어 시나리오(CI)용
+        lines = []
+        while (line := self.readline()):
+            lines.append(line)
+        return "".join(lines)
+
+
+_stdin = _Stdin()
 
 
 def _keep_student_frames(te, seen):
@@ -244,12 +359,43 @@ def seed(value):
     random.seed(value)
 
 
+_turtle_code = None
+_turtle_emit, _turtle_max = __pyroad_turtle_emit, __pyroad_turtle_max
+
+
+def install_turtle(path):
+    # 코드 객체만 한 번 만들어 두고 실행마다 새 모듈로 돌린다 (학생이 바꾼 모듈 속성이 다음 실행에 남지 않게)
+    global _turtle_code
+    with open(path, encoding="utf-8") as f:
+        _turtle_code = compile(f.read(), path, "exec")
+    if "/pyroad" not in sys.path:
+        sys.path.insert(0, "/pyroad")
+
+
+def _fresh_turtle(code):
+    import types
+
+    sys.modules.pop("turtle", None)
+    if _turtle_code is None or "turtle" not in code:
+        return None
+    mod = types.ModuleType("turtle")
+    mod.__file__ = _turtle_code.co_filename
+    sys.modules["turtle"] = mod
+    exec(_turtle_code, mod.__dict__)
+    mod._pyroad_begin(_turtle_emit, _turtle_max)
+    return mod
+
+
 def run(code, stopped):
+    global _active_turtle
     # 학생이 바꿔 둔 표준 입출력을 되돌린다
-    sys.stdout, sys.stderr, sys.stdin = sys.__stdout__, sys.__stderr__, sys.__stdin__
+    sys.stdout, sys.stderr, sys.stdin = sys.__stdout__, sys.__stderr__, _stdin
     linecache.cache[FILENAME] = (len(code), None, code.splitlines(True), FILENAME)
     ns = {"__name__": "__main__", "__builtins__": _student_builtins()}
     had_exception, error_type = False, None
+    _skipped[0] = 0.0
+    _fresh_pyroad()
+    turtle = _active_turtle = _fresh_turtle(code)
     try:
         exec(compile(code, FILENAME, "exec"), ns)
     except SystemExit as e:
@@ -265,6 +411,12 @@ def run(code, stopped):
         had_exception, error_type = True, type(e).__name__
         _write_traceback(e)
     finally:
+        _active_turtle = None
+        if turtle is not None:
+            try:
+                turtle._pyroad_end()  # 남은 그리기 명령 (멈췄거나 예외가 나도 그때까지의 그림은 보낸다)
+            except BaseException:
+                pass
         _flush()
     return [had_exception, error_type]
 
@@ -317,10 +469,24 @@ def harden():
  *   maxCaptureLength?: number,
  *   flushIntervalMs?: number,
  *   flushChars?: number,
+ *   interactiveInput?: boolean,
+ *   readLineSync?: (requestId: string) => null | { kind: 'value', value: string } | { kind: 'stop' },
+ *   sleepSync?: (runId: string, ms: number) => 'ok' | 'stop' | null,
+ *   turtleSource?: string,
+ *   turtleMaxCommands?: number,
+ *   skipSleep?: boolean,
  * }} options interruptBuffer: Node처럼 다른 스레드가 SharedArrayBuffer로 KeyboardInterrupt를 보낼 때 넘김.
  *   `new Int32Array(new SharedArrayBuffer(8))`: [0]에 2(SIGINT)를 넣으면 멈추고, [1]은 이유
  *   (INTERRUPT_REASON_TIMEOUT이면 outcome이 'timeout'). 없으면 이 스레드 전용 버퍼를 만든다
  *   (출력 상한을 넘었을 때 실행을 멈추는 데 씀)
+ *   interactiveInput: 브라우저처럼 사람이 답하는 곳이면 true. 입력 시나리오가 없을 때 input()이
+ *   input-request를 보내고 answer를 기다린다(JSPI). false(Node 검증)면 바로 EOF → EOFError.
+ *   readLineSync: JSPI가 없을 때 쓰는 동기 채널(SW 동기 XHR, P0-05 ②). 끊겼으면 null을 돌려준다.
+ *   sleepSync: JSPI가 없을 때 time.sleep을 SW 동기 XHR로 자는 함수(P11-03). 'stop'이면 멈추기, null이면 채널이 끊김.
+ *   세 번째 인자 onKeys(keys)로 자는 동안 SW에 쌓인 키를 넘긴다 (P11-04).
+ *   skipSleep: 실행 메시지에 skipSleep이 없을 때의 기본값. true면 time.sleep을 건너뜀(Node 검증 실행기, P11-04)
+ *   readLineSync·sleepSync는 createRuntime 뒤에 options에 넣어도 된다(실행 때 읽음)
+ *   turtleSource: turtle shim(public/workers/turtle.py) 내용. 주면 TURTLE_PATH에 설치한다 (P11-02)
  */
 export function createRuntime(pyodide, options) {
   const {
@@ -329,14 +495,19 @@ export function createRuntime(pyodide, options) {
     flushIntervalMs = 30,
     flushChars = 4096,
   } = options;
+  const { interactiveInput = false } = options;
   const interrupt = options.interruptBuffer ?? new Int32Array(1);
   pyodide.setInterruptBuffer(interrupt);
   const now = () => performance.now();
 
-  /** @type {null | { id: string, total: number, truncated: boolean, stopReason: null | 'stop' | 'output-limit', stdin: string[] | null }} */
+  /** @type {null | { id: string, total: number, truncated: boolean, stopReason: null | 'stop' | 'output-limit', stdin: string[] | null, keys: string[], script: unknown[] | null, frame: number, skipSleep: boolean, listening: boolean }} */
   let active = null;
   /** @type {null | { resolve: (v: string) => void, timer: any }} */
   let sleeper = null;
+  /** JSPI input() 대기. answer(requestId 같음)나 stop이 오면 풀린다 */
+  /** @type {null | { requestId: string, resolve: (v: string) => void }} */
+  let inputWaiter = null;
+  let inputSeq = 0;
 
   // ---- 출력 스트리밍 -------------------------------------------------------
   const decoders = { stdout: new TextDecoder(), stderr: new TextDecoder() };
@@ -406,20 +577,63 @@ export function createRuntime(pyodide, options) {
   });
   pyodide.setStdout(writer('stdout'));
   pyodide.setStderr(writer('stderr'));
-  pyodide.setStdin({
-    // 입력 시나리오(CI: 미리 정한 답, P11-05)가 있으면 한 줄씩, 없으면 EOF → EOFError
-    // (브라우저 input()은 P11-01에서 input-request / answer로 붙임)
-    stdin: () => {
-      const line = active?.stdin?.shift();
-      return line === undefined ? undefined : `${line}\n`;
-    },
-    isatty: false,
-  });
+  // 학생 코드의 sys.stdin은 Python _Stdin(→ readLine)이다. 진짜 표준 입력은 늘 EOF
+  pyodide.setStdin({ stdin: () => undefined, isatty: false });
+
+  // ---- 입력 (P11-01) ---------------------------------------------------------
+  /**
+   * Python _Stdin.readline()이 부른다. 문자열(한 줄, 끝이면 '') 또는 JSPI면 그 문자열의 Promise.
+   * 순서: 입력 시나리오(CI, P11-05) → 대화형(JSPI 기다리기 / SW 동기 XHR) → 길이 없으면 READ_UNAVAILABLE
+   */
+  function readLine(jspi) {
+    if (!active || active.stopReason) return READ_STOP;
+    if (active.stdin) {
+      const line = active.stdin.shift();
+      if (line === undefined) return '';
+      // 시험 손님 입력 (P11-05): 화면이 프롬프트 바로 뒤에 손님 말풍선을 끼우도록 앞 출력을 먼저 보내고 알림
+      flush();
+      post({ type: 'stdin', id: active.id, value: line });
+      return `${line}\n`;
+    }
+    if (!interactiveInput) return '';
+    // 실행 때 읽는다: 브라우저 Worker는 JSPI가 없다는 걸 안 뒤(canRunSync) SW 채널을 확인하고 넣는다
+    const readLineSync = options.readLineSync;
+    if (!jspi && !readLineSync) return READ_UNAVAILABLE;
+    // 프롬프트("이름? ")가 입력 칸보다 먼저 보이게
+    flush();
+    const requestId = `${active.id}:${++inputSeq}`;
+    const request = { type: 'input-request', id: active.id, requestId };
+    if (jspi) {
+      return new Promise((resolve) => {
+        inputWaiter = { requestId, resolve };
+        post({ ...request, channel: 'jspi' });
+      });
+    }
+    post({ ...request, channel: 'sw' });
+    const reply = readLineSync(requestId);
+    if (reply?.kind === 'value') return `${firstLine(reply.value)}\n`;
+    if (reply?.kind === 'stop') {
+      requestStop('stop');
+      return READ_STOP;
+    }
+    return READ_UNAVAILABLE;
+  }
+
+  function answer(msg) {
+    if (!inputWaiter || msg.requestId !== inputWaiter.requestId) return;
+    const { resolve } = inputWaiter;
+    inputWaiter = null;
+    resolve(`${firstLine(msg.value)}\n`);
+  }
 
   // ---- 멈추기 --------------------------------------------------------------
   function requestStop(reason) {
     if (!active) return;
     active.stopReason ??= reason;
+    if (inputWaiter) {
+      inputWaiter.resolve(READ_STOP);
+      inputWaiter = null;
+    }
     if (sleeper) {
       clearTimeout(sleeper.timer);
       sleeper.resolve('stopped');
@@ -441,12 +655,97 @@ export function createRuntime(pyodide, options) {
       sleeper = { resolve, timer };
     });
 
+  // time.sleep 대체 (JSPI가 없을 때, P11-03). options.sleepSync(SW 동기 XHR)가 있으면 그 안에서 자고 'ok'·'stopped',
+  // 없거나 끊기면 undefined(→ Python None)라 원래 time.sleep으로 잔다(멈추기는 Worker 재시작)
+  const sleepSync = (ms) => {
+    if (!active || active.stopReason) return 'stopped';
+    if (!options.sleepSync) return undefined;
+    const reply = options.sleepSync(active.id, ms, pushKeys);
+    if (reply === 'stop') {
+      requestStop('stop');
+      return 'stopped';
+    }
+    return reply === 'ok' ? 'ok' : undefined;
+  };
+
+  // ---- 키 입력·프레임 (P11-04) --------------------------------------------------
+  /** JSPI로 돌고 있는지 (canRunSync 결과). 키를 Worker로 받을지 SW로 받을지 페이지에 알릴 때 */
+  let jspi = false;
+
+  const pushKey = (key) => {
+    if (
+      active &&
+      typeof key === 'string' &&
+      key.length > 0 &&
+      key.length <= MAX_KEY_LENGTH &&
+      active.keys.length < MAX_PENDING_KEYS
+    ) {
+      active.keys.push(key);
+    }
+  };
+  // SW 경로: 자는 동안 SW에 쌓인 키 (키 시나리오 실행은 진짜 키를 받지 않는다)
+  const pushKeys = (keys) => {
+    if (Array.isArray(keys) && !active?.script) keys.forEach(pushKey);
+  };
+
+  /** 키 시나리오(검증 실행): keys[n]은 n번째 프레임(n번 잔 뒤)이 시작할 때 들어간다. null이면 그 프레임엔 키 없음 */
+  const feedScript = () => {
+    const key = active.script?.[active.frame];
+    if (key !== undefined && key !== null) pushKey(String(key));
+  };
+
+  // Python get_key(). 처음 부르면 페이지에 "이 실행은 키를 들어요"를 알린다(조종판·포커스, 키를 보낼 곳)
+  const getKey = () => {
+    if (!active) return undefined;
+    if (!active.listening) {
+      active.listening = true;
+      const channel = jspi ? 'jspi' : options.sleepSync ? 'sw' : 'none';
+      post({ type: 'keys', id: active.id, channel });
+    }
+    return active.keys.shift();
+  };
+
+  // time.sleep 시작 (모든 경로 공통). 'stopped' · 'skip'(검증 실행) · 'sleep'(진짜로 잠)
+  const sleepBegin = (ms) => {
+    if (!active || active.stopReason) return 'stopped';
+    active.frame++;
+    feedScript();
+    if (active.skipSleep) return 'skip';
+    flush(); // 자기 전에 나온 글자를 먼저 보인다 (SW 경로는 자는 동안 이벤트 루프가 돌지 않음)
+    // 자는 시간은 실행 시간 제한에서 뺀다: 페이지가 sleep~wake 사이 시계를 멈춘다
+    post({ type: 'sleep', id: active.id, ms: Math.round(ms) });
+    return 'sleep';
+  };
+  const sleepEnd = () => {
+    if (active) post({ type: 'wake', id: active.id });
+  };
+
   // ---- Python 준비 ---------------------------------------------------------
   const priv = pyodide.globals.get('dict')();
   priv.set('__pyroad_filename', STUDENT_FILENAME);
   priv.set('__pyroad_blocked', pyodide.toPy(BLOCKED_MODULES));
   priv.set('__pyroad_js_sleep', jsSleep);
+  priv.set('__pyroad_sleep_sync', sleepSync);
+  priv.set('__pyroad_sleep_begin', sleepBegin);
+  priv.set('__pyroad_sleep_end', sleepEnd);
+  priv.set('__pyroad_get_key', getKey);
+  priv.set('__pyroad_read_line', readLine);
+  priv.set('__pyroad_read_stop', READ_STOP);
+  priv.set('__pyroad_read_unavailable', READ_UNAVAILABLE);
+  // turtle 명령 청크 (JSON 배열 문자열, P11-02). 실행 중에만 보낸다
+  priv.set('__pyroad_turtle_emit', (chunk) => {
+    if (active) post({ type: 'turtle', id: active.id, chunk });
+  });
+  priv.set(
+    '__pyroad_turtle_max',
+    options.turtleMaxCommands ?? TURTLE_MAX_COMMANDS,
+  );
   pyodide.runPython(PRELUDE, { globals: priv, filename: '<pyroad>' });
+  if (options.turtleSource) {
+    pyodide.FS.mkdirTree('/pyroad');
+    pyodide.FS.writeFile(TURTLE_PATH, options.turtleSource);
+    priv.get('install_turtle')(TURTLE_PATH);
+  }
   const py = {
     run: priv.get('run'),
     seed: priv.get('seed'),
@@ -499,6 +798,7 @@ export function createRuntime(pyodide, options) {
     try {
       const value = Boolean(await py.probe.callPromising());
       promising = true;
+      jspi = value;
       return value;
     } catch (err) {
       if (isNoStackSwitching(err)) promising = false;
@@ -524,12 +824,22 @@ export function createRuntime(pyodide, options) {
       truncated: false,
       stopReason: null,
       stdin: Array.isArray(msg.stdin) ? msg.stdin.map(String) : null,
+      keys: [],
+      script: Array.isArray(msg.keys) ? msg.keys : null,
+      frame: 0,
+      skipSleep:
+        typeof msg.skipSleep === 'boolean'
+          ? msg.skipSleep
+          : Boolean(options.skipSleep),
+      listening: false,
     };
+    feedScript();
     lastKind = null;
     lastFlush = 0;
     resetInterrupt();
 
     const end = () => {
+      inputWaiter = null;
       flush();
       const state = active;
       active = null;
@@ -594,7 +904,10 @@ export function createRuntime(pyodide, options) {
         if (active && (!msg.id || msg.id === active.id)) requestStop('stop');
         return;
       case 'answer':
-        // P11-01: input-request에 대한 답. 지금은 input()을 브라우저에서 받지 않는다
+        return answer(msg);
+      case 'key':
+        // JSPI: 자는 동안(이벤트 루프) 받는다. 키 시나리오 실행은 진짜 키를 받지 않는다
+        if (active && msg.id === active.id && !active.script) pushKey(msg.key);
         return;
     }
   }
@@ -607,6 +920,11 @@ export function createRuntime(pyodide, options) {
       return active !== null;
     },
   };
+}
+
+/** 답은 한 줄만 (입력 칸은 줄바꿈을 보내지 않지만 메시지는 믿지 않는다) */
+function firstLine(value) {
+  return String(value ?? '').split(/\r?\n/, 1)[0];
 }
 
 /** Pyodide·Python 버전 정보 */

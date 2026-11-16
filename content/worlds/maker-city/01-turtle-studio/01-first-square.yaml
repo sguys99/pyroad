@@ -1,0 +1,63 @@
+# 3월드 퀘스트 1-1: 첫 번째 네모
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-1
+# 그림 규칙(P11-05)은 순서·방향·나눠 그리기와 상관없이 "정사각형이 있다"를 봄. 반복은 code_check range( 로
+
+id: b3000000-0000-0000-0000-000000000001
+order: 1
+title: 첫 번째 네모
+concept: turtle과 for 반복
+xp_reward: 100
+quest_type: code
+# 공개: 학생 화면으로 그대로 내려갑니다 (quests.prompt_skeleton). 정답을 쓰지 마세요
+prompt:
+  topic: 거북이에게 명령해서 정사각형 그리기
+  learning_goals:
+    - import turtle 로 거북이를 불러 forward 와 left 로 움직일 수 있다
+    - 같은 명령을 for 반복으로 여러 번 시킬 수 있다
+  story_context: 메이커 시티에 도착했어요! 그런데 거리의 벽화가 하얗게 지워져 있네요. 화가 거북이 느릿이는 명령을 들어야만 움직인대요. 느릿이에게 첫 그림, 네모를 그려 달라고 해 볼까요?
+  exercise_description: 앞으로 100 가고 왼쪽으로 90도 도는 두 명령을 for 반복으로 4번 시켜서 한 변이 100인 정사각형을 그리세요
+  starter_code: |
+    import turtle
+
+    t = turtle.Turtle()
+
+    # 느릿이가 앞으로 100 가고, 왼쪽으로 90도 돌아요
+    t.forward(100)
+    t.left(90)
+
+    # 위 두 줄을 for 반복으로 4번 하면 네모가 돼요!
+    # for i in range(___): 아래에 두 줄을 들여 써 보세요
+  expected_output_hint: 그림판에 한 변이 100인 정사각형이 그려져야 해요
+  checklist:
+    - for i in range(4) 를 만들어요
+    - 그 아래에 forward(100) 과 left(90) 을 들여 써요
+    - 네 변이 모두 그려지는지 그림판을 봐요
+  example_output: (그림판에 한 변이 100인 정사각형)
+  fallback_text: '거북이는 명령 한 줄에 한 가지씩만 해요. forward(100) 은 앞으로 100칸, left(90) 은 왼쪽으로 90도 돌기예요. 네모는 변이 4개니까 "앞으로 가고 돌기"를 4번 하면 돼요. for i in range(4): 아래에 두 줄을 들여 쓰면 4번 반복해요.'
+# 정답: 서버만 읽습니다 (quest_answer_keys). validation.type 만 공개(quests.validation_type)
+answer:
+  validation:
+    type: all
+    rules:
+      - type: shape
+        shape: regular
+        n: 4
+        side: 100
+      - type: code_check
+        expected: range(
+  hints:
+    level_1: 네모는 변이 몇 개인가요? 그만큼 "앞으로 가고 돌기"를 반복하면 돼요.
+    level_2: 'for i in range(4): 를 쓰고, 그 아래 줄에 t.forward(100) 과 t.left(90) 을 한 칸 들여 써요.'
+    level_3: |-
+      for i in range(___):
+          t.forward(100)
+          t.left(90)
+      빈칸에 네모의 변 개수를 넣어 보세요!
+  solution_code: |
+    import turtle
+
+    t = turtle.Turtle()
+
+    for i in range(4):
+        t.forward(100)
+        t.left(90)

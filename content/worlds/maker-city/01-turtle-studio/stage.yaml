@@ -1,0 +1,9 @@
+# 스테이지 3-1: 거북이 화가 공방 (stages 테이블). 설계: docs/curriculum/world3.md §4
+# 퀘스트는 P11-12~14에서 더함. 퀘스트가 하나도 없는 월드는 seed에 넣지 않고 "준비 중"으로 둠 (content/README.md)
+
+id: a3000000-0000-0000-0000-000000000001
+order: 1
+title: 거북이 화가 공방
+theme_name: turtle_studio
+description: 거북이 느릿이에게 명령해서 하얗게 지워진 벽화를 다시 그려요!
+is_final: false

@@ -57,8 +57,8 @@ test.describe('월드 선택 (P5-01)', () => {
       page.getByRole('heading', { level: 1, name: '어떤 책을 펼쳐 볼까요?' }),
     ).toBeVisible();
 
-    // 월드 1: 모험 중 + 책갈피 / 월드 2: 잠김 + 해제 조건 + 실력 확인 퀴즈(P10-03) / 월드 3: 준비 중 /
-    // 테스트 월드: 잠김, 해제 조건은 바로 앞 월드 코드 바다 (준비 중 월드만 건너뜀)
+    // 월드 1: 모험 중 + 책갈피 / 월드 2: 잠김 + 해제 조건 + 실력 확인 퀴즈(P10-03) / 월드 3: 잠김(P11-14부터 준비 완료) /
+    // 테스트 월드: 잠김, 해제 조건은 바로 앞 월드 메이커 시티
     await expect(book(page, 'python-island')).toContainText('모험 중');
     await expect(book(page, 'python-island')).toContainText('지금 읽는 책');
     await expect(book(page, 'code-sea')).toContainText('잠겨 있어요');
@@ -68,13 +68,13 @@ test.describe('월드 선택 (P5-01)', () => {
     await expect(
       book(page, 'code-sea').getByRole('link', { name: '실력 확인 퀴즈' }),
     ).toHaveAttribute('href', '/world/code-sea/skill-check');
-    await expect(book(page, 'maker-city')).toContainText('준비 중');
+    await expect(book(page, 'maker-city')).toContainText('잠겨 있어요');
     await expect(book(page, 'maker-city')).toContainText(
       '코드 바다를 다 모험하면 열려요',
     );
     await expect(book(page, 'test-meadow')).toContainText('잠겨 있어요');
     await expect(book(page, 'test-meadow')).toContainText(
-      '코드 바다를 다 모험하면 열려요',
+      '메이커 시티를 다 모험하면 열려요',
     );
     // 잠긴 책은 링크가 아니다
     await expect(page.locator('a[data-book-slug="code-sea"]')).toHaveCount(0);
@@ -121,7 +121,7 @@ test.describe('월드 선택 (P5-01)', () => {
     ).toHaveAttribute('href', '/worlds');
 
     await page.goto('/world/maker-city');
-    await expect(page.getByTestId('world-locked')).toContainText('준비 중');
+    await expect(page.getByTestId('world-locked')).toContainText('잠겨 있어요');
     await expect(page.locator('.world-map')).toHaveCount(0);
 
     await page.goto('/world/test-meadow');
@@ -137,13 +137,17 @@ test.describe('월드 선택 (P5-01)', () => {
     await expect(page.locator('.world-map')).toHaveCount(0);
   });
 
-  test('테스트 월드: 앞 월드(파이썬 섬·코드 바다)를 다 깨면 테스트 월드 지도가 데이터만으로 열린다', async ({
+  test('테스트 월드: 앞 월드(파이썬 섬·코드 바다·메이커 시티)를 다 깨면 테스트 월드 지도가 데이터만으로 열린다', async ({
     page,
     e2eUser,
   }) => {
     await completeQuests(
       e2eUser.id,
-      [...allQuestIds(), ...allQuestIds('code-sea')].map((id) => ({
+      [
+        ...allQuestIds(),
+        ...allQuestIds('code-sea'),
+        ...allQuestIds('maker-city'),
+      ].map((id) => ({
         id,
         solution: '',
       })),
@@ -166,6 +170,7 @@ test.describe('월드 선택 (P5-01)', () => {
     await page.goto('/worlds');
     await expect(book(page, 'python-island')).toContainText('다 읽었어요');
     await expect(book(page, 'code-sea')).toContainText('다 읽었어요');
+    await expect(book(page, 'maker-city')).toContainText('다 읽었어요');
     await expect(book(page, 'test-meadow')).toContainText('모험 중');
     await expect(book(page, 'test-meadow')).toContainText('지금 읽는 책');
   });
@@ -176,7 +181,11 @@ test.describe('월드 선택 (P5-01)', () => {
   }) => {
     await completeQuests(
       e2eUser.id,
-      [...allQuestIds(), ...allQuestIds('code-sea')].map((id) => ({
+      [
+        ...allQuestIds(),
+        ...allQuestIds('code-sea'),
+        ...allQuestIds('maker-city'),
+      ].map((id) => ({
         id,
         solution: '',
       })),

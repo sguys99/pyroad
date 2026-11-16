@@ -1,0 +1,424 @@
+# 3월드 프로젝트 3-6: 두근두근 퀴즈쇼 (5단계, 고쳐 나가기 + 자리표 주석 — world3.md §3 제안 B)
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world3.md §4 3-3
+# 섞기는 마지막에 (제안 D): 2·3단계에서 점수를 차례 입력으로 확인하고, 4단계부터는 순서와 상관없는 "모두 틀림" 손님만.
+# random.seed 로 순서를 맞추지 않음 (shuffle 대신 sample 을 쓴 맞는 답이 떨어짐, B09)
+# 마지막 단계를 끝낸 완성 작품(대화 기록)만 갤러리에 출품 (publishableQuests: 3월드 project 완료)
+
+id: b3000000-0000-0000-0000-000000000020
+order: 6
+title: 두근두근 퀴즈쇼
+concept: 문제 은행, 하트, 섞기, 오답 노트 종합
+xp_reward: 360
+quest_type: project
+prompt:
+  topic: '대형 프로젝트: 진짜로 답을 입력받는 퀴즈쇼'
+  learning_goals:
+    - 리스트 속 딕셔너리 문제 은행으로 문제를 내고 채점할 수 있다
+    - 하트가 0이 되면 break 로 게임을 끝낼 수 있다
+    - 문제를 섞어 내고, 등급과 오답 노트를 보여 줄 수 있다
+  story_context: 방송국의 퀴즈 기계를 새로 만들 차례예요! 오프닝 인사, 문제 은행, 하트 3개, 섞어서 내기, 등급과 오답 노트까지 갖춘 진짜 퀴즈쇼를 만들어요. 완성하면 친구들이 갤러리에서 내 퀴즈쇼를 볼 수 있어요.
+  exercise_description: 오프닝과 문제 은행, 차례로 묻고 채점하기, 하트와 게임 오버, 문제 섞기, 등급과 오답 노트를 5단계로 하나씩 더해 퀴즈쇼를 완성하세요.
+  starter_code: |
+    # 두근두근 퀴즈쇼를 만들어 봐요!
+  expected_output_hint: 프로젝트를 5단계로 나누어 완성해요
+  fallback_text: 1단계 코드 아래로 퀴즈쇼가 자라요. 3단계부터는 위에 만든 반복을 고쳐요. 코드 안의 "(3단계) 여기서…" 같은 주석이 고칠 자리를 알려 줘요. 시험 손님 부르기를 누르면 여러 손님이 퀴즈를 풀어 봐요.
+answer:
+  validation:
+    type: all
+    rules:
+      - type: any
+        rules:
+          - { type: code_check, expected: shuffle( }
+          - { type: code_check, expected: sample( }
+      - { type: code_check, expected: wrong.append( }
+  hints:
+    level_1: 이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 오프닝, 묻고 채점하기, 하트, 섞기, 등급과 오답 노트 순서로 만들어요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 코드 안의 자리표 주석이 고칠 곳을 알려 줘요!
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: '오프닝 인사를 하고 len 으로 문제 은행의 문제 수 보여 주기'
+      checklist:
+        - '환영 인사를 출력해요'
+        - 'len(bank) 로 문제 수를 세어 "오늘의 문제 5개" 를 출력해요'
+      example_output: |-
+        두근두근 퀴즈쇼에 오신 것을 환영해요!
+        오늘의 문제 5개
+      starter_code: |
+        # 두근두근 퀴즈쇼
+        bank = [
+            {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+            {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+            {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+            {"q": "한 바퀴는 몇 도일까요?", "a": "360"},
+            {"q": "파이썬 섬에서 만난 튜터 뱀의 이름은?", "a": "파이뱀"},
+        ]
+
+        # 1) "두근두근 퀴즈쇼에 오신 것을 환영해요!" 를 출력해요
+
+        # 2) len( ) 으로 문제 수를 세어 "오늘의 문제 5개" 를 출력해요
+      fallback_text: 'bank 는 문제 카드(딕셔너리) 5장을 모은 리스트예요. len(bank) 는 리스트에 든 카드 수를 세요. 문제를 더 넣거나 빼도 len 이 알아서 세 줘요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: contains, expected: '문제 5개' }
+          - { type: code_check, expected: 'len(bank)' }
+      hints:
+        level_1: '문제 수를 직접 5라고 쓰지 말고 세어 보게 해요.'
+        level_2: 'print(f"오늘의 문제 {len(bank)}개") 처럼 f-string 안에서 len 을 불러요.'
+        level_3: |-
+          print("두근두근 퀴즈쇼에 오신 것을 환영해요!")
+          print(f"오늘의 문제 {___(bank)}개")
+          빈칸에 개수를 세는 주문을 넣어 보세요!
+      solution_code: |
+        # 두근두근 퀴즈쇼
+        bank = [
+            {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+            {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+            {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+            {"q": "한 바퀴는 몇 도일까요?", "a": "360"},
+            {"q": "파이썬 섬에서 만난 튜터 뱀의 이름은?", "a": "파이뱀"},
+        ]
+
+        print("두근두근 퀴즈쇼에 오신 것을 환영해요!")
+        print(f"오늘의 문제 {len(bank)}개")
+  - step_number: 2
+    prompt:
+      step_goal: '문제를 차례로 묻고, 앞뒤 빈칸을 지운 답이 맞으면 점수 올리기'
+      checklist:
+        - 'for card in bank: 로 문제를 하나씩 물어요'
+        - '.strip() 으로 지운 답이 card["a"] 와 같으면 score 를 1 늘려요'
+        - '다 맞힌 손님 5점, 다 모르는 손님 0점이 나오는지 봐요'
+      example_output: |-
+        두근두근 퀴즈쇼에 오신 것을 환영해요!
+        오늘의 문제 5개
+        바다에서 가장 큰 동물은? 딩동댕!
+        무지개는 몇 가지 색일까요? 딩동댕!
+        다리가 8개인 바다 동물은? 땡! 정답은 문어
+        한 바퀴는 몇 도일까요? 딩동댕!
+        파이썬 섬에서 만난 튜터 뱀의 이름은? 땡! 정답은 파이뱀
+        점수: 3
+      starter_code: |
+
+        # 2단계: 문제를 차례로 내요
+        score = 0
+        # for card in bank: 로 문제 카드를 하나씩 꺼내요
+        #   input(card["q"] + " ") 로 묻고 .strip() 으로 앞뒤 빈칸을 지워요
+        #   답이 card["a"] 와 같으면 "딩동댕!" 하고 score 를 1 늘려요
+        #   틀리면 "땡! 정답은 (정답)" 을 출력해요
+
+
+        print(f"점수: {score}")
+      fallback_text: '문제 은행 돌기에서 한 것과 같아요. 카드마다 card["q"] 로 묻고 card["a"] 와 견줘요. 사람이 빈칸을 같이 쳐도 맞게 .strip() 으로 지워요. 문제 순서는 아직 섞지 않아요. 점수가 맞는지 먼저 확인해요!'
+    answer:
+      validation:
+        type: code_check
+        expected: '.strip()'
+      scenarios:
+        - name: 다 맞힌 손님
+          inputs: ['고래', '7', '문어', '360', '파이뱀']
+          expect: { type: contains, expected: '점수: 5' }
+        - name: 다 모르는 손님
+          inputs: ['몰라', '몰라', '몰라', '몰라', '몰라']
+          expect: { type: contains, expected: '점수: 0' }
+        - name: 세 개 맞힌 손님
+          inputs: [' 고래', '7 ', '문어', '몰라', '몰라']
+          expect: { type: contains, expected: '점수: 3' }
+      hints:
+        level_1: '카드 5장을 하나씩 돌며 묻고 견줘요. 빈칸 지우개도 잊지 마세요!'
+        level_2: 'for card in bank: 아래에 answer = input(card["q"] + " ").strip() 을 쓰고, if answer == card["a"]: 와 else: 로 나눠요.'
+        level_3: |-
+          for card in bank:
+              answer = input(card["q"] + " ").___()
+              if answer == card["a"]:
+                  print("딩동댕!")
+                  score = score + 1
+              else:
+                  print("땡! 정답은 " + card["a"])
+          빈칸에 앞뒤 빈칸을 지우는 메서드를 넣어 보세요!
+      solution_code: |
+        # 두근두근 퀴즈쇼
+        bank = [
+            {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+            {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+            {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+            {"q": "한 바퀴는 몇 도일까요?", "a": "360"},
+            {"q": "파이썬 섬에서 만난 튜터 뱀의 이름은?", "a": "파이뱀"},
+        ]
+
+        print("두근두근 퀴즈쇼에 오신 것을 환영해요!")
+        print(f"오늘의 문제 {len(bank)}개")
+
+        # 2단계: 문제를 차례로 내요
+        # (4단계) 여기서 문제를 섞어요
+        # (3단계) 여기에 하트를 만들어요
+        score = 0
+        for card in bank:
+            answer = input(card["q"] + " ").strip()
+            if answer == card["a"]:
+                print("딩동댕!")
+                score = score + 1
+            else:
+                print("땡! 정답은 " + card["a"])
+                # (3단계) 여기서 하트를 줄여요
+
+        print(f"점수: {score}")
+  - step_number: 3
+    prompt:
+      step_goal: '하트 3개를 만들어 틀릴 때마다 하나씩 줄이고, 0이 되면 break 로 게임 오버'
+      checklist:
+        - 'score = 0 위에 hearts = 3 을 만들어요'
+        - '틀리면 hearts 를 1 줄이고 남은 하트를 보여 줘요'
+        - '하트가 0이면 "게임 오버!" 를 출력하고 break 해요'
+      example_output: |-
+        (앞에 이어서)
+        바다에서 가장 큰 동물은? 땡! 정답은 고래
+        남은 하트: 2
+        무지개는 몇 가지 색일까요? 땡! 정답은 7
+        남은 하트: 1
+        다리가 8개인 바다 동물은? 땡! 정답은 문어
+        남은 하트: 0
+        게임 오버!
+        점수: 0
+      starter_code: |
+
+        # 3단계: 하트 3개 — 위 코드를 고쳐요
+        #   1) score = 0 위에 hearts = 3 을 만들어요
+        #   2) 틀렸을 때(else) hearts 를 1 줄이고 "남은 하트: (하트)" 를 출력해요
+        #   3) 하트가 0이 되면 "게임 오버!" 를 출력하고 break 로 반복을 멈춰요
+      fallback_text: 'break 는 반복을 바로 멈추고 반복 다음 줄로 가요. 세 번 틀린 손님은 입력을 세 번만 하니까, break 를 안 하면 네 번째 문제에서 "입력이 더 필요해요" 가 나와요. 하트를 줄이는 줄은 틀렸을 때(else) 안에 들여 써요.'
+    answer:
+      validation:
+        type: code_check
+        expected: 'break'
+        whole_word: true
+      scenarios:
+        - name: 세 번 틀린 손님
+          inputs: ['몰라', '몰라', '몰라']
+          expect: { type: contains, expected: '게임 오버' }
+        - name: 하나 맞히고 세 번 틀린 손님
+          inputs: ['고래', '몰라', '몰라', '몰라']
+          expect: { type: contains, expected: '게임 오버' }
+        - name: 다 맞힌 손님
+          inputs: ['고래', '7', '문어', '360', '파이뱀']
+          expect: { type: contains, expected: '점수: 5' }
+      hints:
+        level_1: '하트는 반복 전에 3으로 시작하고, 틀릴 때만 줄어요. 0이 되면 반복을 멈추는 주문이 있어요!'
+        level_2: 'else: 안에 hearts = hearts - 1 과 print(f"남은 하트: {hearts}") 를 쓰고, if hearts == 0: 아래에 print("게임 오버!") 와 break 를 들여 써요.'
+        level_3: |-
+          else:
+              print("땡! 정답은 " + card["a"])
+              hearts = hearts - 1
+              print(f"남은 하트: {hearts}")
+              if hearts == 0:
+                  print("게임 오버!")
+                  ___
+          빈칸에 반복을 멈추는 주문을 넣어 보세요! (else 는 for 안에 한 칸 들여 써요)
+      solution_code: |
+        # 두근두근 퀴즈쇼
+        bank = [
+            {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+            {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+            {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+            {"q": "한 바퀴는 몇 도일까요?", "a": "360"},
+            {"q": "파이썬 섬에서 만난 튜터 뱀의 이름은?", "a": "파이뱀"},
+        ]
+
+        print("두근두근 퀴즈쇼에 오신 것을 환영해요!")
+        print(f"오늘의 문제 {len(bank)}개")
+
+        # 2단계: 문제를 차례로 내요
+        # (4단계) 여기서 문제를 섞어요
+        hearts = 3
+        score = 0
+        for card in bank:
+            answer = input(card["q"] + " ").strip()
+            if answer == card["a"]:
+                print("딩동댕!")
+                score = score + 1
+            else:
+                print("땡! 정답은 " + card["a"])
+                hearts = hearts - 1
+                print(f"남은 하트: {hearts}")
+                if hearts == 0:
+                    print("게임 오버!")
+                    break
+
+        print(f"점수: {score}")
+  - step_number: 4
+    prompt:
+      step_goal: 'random.shuffle 로 문제 순서를 섞어서 내기'
+      checklist:
+        - 'import random 을 넣어요'
+        - 'for 반복 전에 random.shuffle(bank) 로 섞어요'
+        - '돌릴 때마다 문제 순서가 바뀌는지 봐요'
+      example_output: |-
+        (앞에 이어서, 순서는 돌릴 때마다 달라요)
+        한 바퀴는 몇 도일까요? 딩동댕!
+        바다에서 가장 큰 동물은? 땡! 정답은 고래
+        남은 하트: 2
+        …
+      starter_code: |
+
+        # 4단계: 문제 섞기 — 위 코드를 고쳐요
+        #   hearts = 3 위에 import random 과 random.shuffle(bank) 를 넣어
+        #   돌릴 때마다 문제 순서가 바뀌게 해요
+      fallback_text: '2월드 해적선 놀이공원에서 줄을 섞었던 random.shuffle 이에요. 리스트 순서를 섞어 줘요. 순서가 바뀌어도 카드마다 문제와 정답이 붙어 있어서 채점은 그대로 맞아요. 다 모르는 손님은 순서와 상관없이 세 번 틀려서 게임 오버예요.'
+    answer:
+      validation:
+        # random.sample(bank, len(bank)) 로 섞어도 맞는 답 (P11-12 플레이테스트)
+        type: any
+        rules:
+          - { type: code_check, expected: 'shuffle(' }
+          - { type: code_check, expected: 'sample(' }
+      scenarios:
+        - name: 세 번 틀린 손님
+          inputs: ['몰라', '몰라', '몰라']
+          expect: { type: contains, expected: '게임 오버' }
+        # 3월드 플레이테스트(제안 O): 섞기를 반복 뒤에 두면 순서가 그대로라 이 손님이 다 맞혀 땡이 없음.
+        # 무작위 순서를 보려고 seed 1 로 한 번(shuffle·sample 모두 원래 순서가 아님, 원래 순서로 섞일 확률 1/120)
+        - name: 문제 순서를 외워 온 손님
+          inputs: ['고래', '7', '문어', '360', '파이뱀']
+          seed: 1
+          expect: { type: contains, expected: '땡' }
+      hints:
+        level_1: '섞는 것은 묻기 전에 한 번만 해요. 반복 안에 넣으면 안 돼요! 순서를 외워 온 손님도 헷갈려야 섞인 거예요.'
+        level_2: 'hearts = 3 위에 import random 과 random.shuffle(bank) 두 줄을 넣어요.'
+        level_3: |-
+          import random
+          random.___(bank)
+          빈칸에 "섞다"라는 뜻의 영어 낱말을 넣어 보세요!
+      solution_code: |
+        # 두근두근 퀴즈쇼
+        bank = [
+            {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+            {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+            {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+            {"q": "한 바퀴는 몇 도일까요?", "a": "360"},
+            {"q": "파이썬 섬에서 만난 튜터 뱀의 이름은?", "a": "파이뱀"},
+        ]
+
+        print("두근두근 퀴즈쇼에 오신 것을 환영해요!")
+        print(f"오늘의 문제 {len(bank)}개")
+
+        # 2단계: 문제를 차례로 내요
+        import random
+        random.shuffle(bank)
+        hearts = 3
+        # (5단계) 여기에 오답 노트를 만들어요
+        score = 0
+        for card in bank:
+            answer = input(card["q"] + " ").strip()
+            if answer == card["a"]:
+                print("딩동댕!")
+                score = score + 1
+            else:
+                print("땡! 정답은 " + card["a"])
+                # (5단계) 여기서 틀린 문제를 모아요
+                hearts = hearts - 1
+                print(f"남은 하트: {hearts}")
+                if hearts == 0:
+                    print("게임 오버!")
+                    break
+
+        print(f"점수: {score}")
+  - step_number: 5
+    prompt:
+      step_goal: '틀린 문제를 wrong 에 모으고, 점수로 등급과 오답 노트 보여 주기'
+      checklist:
+        - 'hearts = 3 아래에 wrong = [] 을 만들어요'
+        - '틀리면 wrong.append(card["q"]) 로 문제를 모아요'
+        - 'if, elif, else 로 등급을 말하고 오답 노트를 보여 줘요'
+      example_output: |-
+        (앞에 이어서)
+        게임 오버!
+        점수: 0
+        등급: 퀴즈 새싹! 다음엔 더 잘할 수 있어요
+        오답 노트
+        - 한 바퀴는 몇 도일까요?
+        - 바다에서 가장 큰 동물은?
+        - 다리가 8개인 바다 동물은?
+      starter_code: |
+
+        # 5단계: 등급과 오답 노트
+        #   1) 위 코드를 고쳐요: hearts = 3 아래에 빈 리스트 wrong = [] 을 만들고,
+        #      틀렸을 때(else) wrong.append(card["q"]) 로 틀린 문제를 모아요
+        #   2) 여기 아래에 점수로 등급을 알려 줘요
+        #      4점 이상 "등급: 퀴즈 왕!", 2점 이상 "등급: 퀴즈 박사!",
+        #      아니면 "등급: 퀴즈 새싹! 다음엔 더 잘할 수 있어요"
+        #   3) "오답 노트" 를 출력하고 wrong 의 문제를 "- 문제" 모양으로 한 줄씩 보여 줘요
+      fallback_text: '오답 노트는 처음엔 빈 리스트예요. 틀릴 때마다 append 로 문제를 더하고, 마지막에 for 로 하나씩 보여 줘요. 등급은 큰 점수부터 차례로 if, elif, else 로 견줘요. 다 만들면 갤러리에 퀴즈쇼를 걸 수 있어요!'
+    answer:
+      validation:
+        type: code_check
+        expected: 'wrong.append('
+      scenarios:
+        - name: 세 번 틀린 손님
+          inputs: ['몰라', '몰라', '몰라']
+          expect:
+            type: all
+            rules:
+              - { type: contains, expected: '오답 노트' }
+              - { type: contains, expected: '다음엔 더 잘할 수 있어요' }
+      hints:
+        level_1: '틀린 문제를 모을 빈 리스트가 먼저 있어야 해요. 그리고 틀린 자리에서 하나씩 더해요.'
+        level_2: 'hearts = 3 아래에 wrong = [] 을, else: 안에 wrong.append(card["q"]) 를 쓰고, 맨 아래에 등급 if/elif/else 와 오답 노트 for 를 써요.'
+        level_3: |-
+          if score >= 4:
+              print("등급: 퀴즈 왕!")
+          ___ score >= 2:
+              print("등급: 퀴즈 박사!")
+          else:
+              print("등급: 퀴즈 새싹! 다음엔 더 잘할 수 있어요")
+          print("오답 노트")
+          for q in wrong:
+              print("- " + q)
+          빈칸에 "아니면 만약" 주문을 넣어 보세요!
+      solution_code: |
+        # 두근두근 퀴즈쇼
+        bank = [
+            {"q": "바다에서 가장 큰 동물은?", "a": "고래"},
+            {"q": "무지개는 몇 가지 색일까요?", "a": "7"},
+            {"q": "다리가 8개인 바다 동물은?", "a": "문어"},
+            {"q": "한 바퀴는 몇 도일까요?", "a": "360"},
+            {"q": "파이썬 섬에서 만난 튜터 뱀의 이름은?", "a": "파이뱀"},
+        ]
+
+        print("두근두근 퀴즈쇼에 오신 것을 환영해요!")
+        print(f"오늘의 문제 {len(bank)}개")
+
+        # 2단계: 문제를 차례로 내요
+        import random
+        random.shuffle(bank)
+        hearts = 3
+        wrong = []
+        score = 0
+        for card in bank:
+            answer = input(card["q"] + " ").strip()
+            if answer == card["a"]:
+                print("딩동댕!")
+                score = score + 1
+            else:
+                print("땡! 정답은 " + card["a"])
+                wrong.append(card["q"])
+                hearts = hearts - 1
+                print(f"남은 하트: {hearts}")
+                if hearts == 0:
+                    print("게임 오버!")
+                    break
+
+        print(f"점수: {score}")
+
+        # 5단계: 등급과 오답 노트
+        if score >= 4:
+            print("등급: 퀴즈 왕!")
+        elif score >= 2:
+            print("등급: 퀴즈 박사!")
+        else:
+            print("등급: 퀴즈 새싹! 다음엔 더 잘할 수 있어요")
+
+        print("오답 노트")
+        for q in wrong:
+            print("- " + q)

@@ -1,0 +1,509 @@
+# 3월드 프로젝트 1-7: 거북이 마을 그림 (5단계, 덧붙이기 — world3.md §3 제안 B)
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world3.md §4 3-1
+# 앞 단계 그림이 남으므로 그림 규칙은 모두 "있다" 판정. code_check 는 그 단계에서 새로 쓰는 글자만 (L4)
+# 설계의 "선분 ≥12"(3단계, 가운데를 지나는 햇살은 6줄로 합쳐짐)·"색 ≥3"(4단계)은 앞 단계 그림만으로 이미 통과해서 빼고 code_check 로 (P11-12 작성 메모)
+# 마지막 단계를 끝낸 완성 작품만 갤러리에 출품 (publishableQuests: 3월드 project 완료)
+
+id: b3000000-0000-0000-0000-000000000007
+order: 7
+title: 거북이 마을 그림
+concept: 좌표, 함수, 반복으로 장면 그리기
+xp_reward: 360
+quest_type: project
+prompt:
+  topic: '대형 프로젝트: 거북이 마을 벽화 그리기'
+  learning_goals:
+    - penup 과 goto 로 거북이를 원하는 좌표로 옮길 수 있다
+    - 좌표를 매개변수로 받는 함수로 집과 꽃을 여러 번 그릴 수 있다
+    - 반복과 리스트로 햇살과 꽃밭을 꾸미고 작품에 이름을 붙일 수 있다
+  story_context: 공방 앞 큰 벽이 아직 하얘요. 느릿이와 함께 하늘, 땅, 집, 해님, 꽃밭이 있는 거북이 마을을 그려서 벽화를 되살려요! 다 그리면 작품 이름과 내 별명으로 서명하고, 메이커 박람회 갤러리에 걸 수도 있어요.
+  exercise_description: 땅, 집 두 채, 해님, 꽃밭, 작품 이름표를 5단계로 하나씩 더해 거북이 마을 벽화를 완성하세요. 색과 위치는 마음대로 바꿔도 돼요.
+  starter_code: |
+    # 거북이 마을 그림을 그려 봐요!
+  expected_output_hint: 프로젝트를 5단계로 나누어 완성해요
+  fallback_text: 그림은 아래로 한 단계씩 덧붙여 가요. 거북이를 옮길 때는 펜을 들고(penup) 좌표로 가서(goto) 펜을 내려요(pendown). 가운데가 (0, 0) 이고 왼쪽과 아래는 빼기(-) 숫자예요. 그림판의 모눈을 켜면 좌표가 보여요.
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: shape, shape: rectangle, filled: true }
+      - { type: circles, min: 30 }
+      - { type: text, min: 1 }
+      - type: code_check
+        expected: title(
+  hints:
+    level_1: 이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 땅, 집, 해님, 꽃밭, 이름표 순서로 아래에 덧붙여요. 앞 단계 코드는 지우지 않아요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 시작 코드의 주석이 할 일을 알려 줘요!
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: 펜을 들고 (-300, -100) 으로 옮겨서 초록 땅(채운 직사각형)을 그리기
+      checklist:
+        - t.penup() 으로 펜을 들어요
+        - t.goto(-300, -100) 으로 땅의 왼쪽 위 모서리로 가요
+        - t.pendown() 으로 펜을 내린 뒤 땅을 그려요
+      example_output: (하늘색 바탕 아래쪽에 초록 땅)
+      starter_code: |
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+        turtle.bgcolor("skyblue")   # 하늘색 바탕
+
+        # 1단계: 초록 땅
+        # 펜을 들고(penup) 땅의 왼쪽 위 모서리 (-300, -100) 으로 옮긴 뒤(goto) 펜을 내려요(pendown)
+        # 그림판 도구 줄의 모눈을 켜면 좌표가 보여요!
+
+
+        t.fillcolor("green")
+        t.begin_fill()
+        for i in range(2):
+            t.forward(600)
+            t.right(90)
+            t.forward(200)
+            t.right(90)
+        t.end_fill()
+      fallback_text: '그림판 가운데가 (0, 0) 이에요. 첫 번째 수는 오른쪽(+)·왼쪽(-), 두 번째 수는 위(+)·아래(-)예요. 그래서 (-300, -100) 은 가운데에서 왼쪽으로 300, 아래로 100 간 곳이에요. 옮길 때 선이 그어지지 않게 먼저 penup() 으로 펜을 들어요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: shape, shape: rectangle, filled: true }
+          - type: code_check
+            expected: goto(
+      hints:
+        level_1: 거북이를 선 없이 옮기는 세 주문이 있어요. 펜 들기, 옮기기, 펜 내리기!
+        level_2: t.penup() 다음 줄에 t.goto(-300, -100), 그다음 줄에 t.pendown() 을 써요. 땅 그리는 코드보다 위에요.
+        level_3: |-
+          t.penup()
+          t.goto(___, ___)
+          t.pendown()
+          빈칸에 땅의 왼쪽 위 모서리 좌표를 넣어 보세요!
+      solution_code: |
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+        turtle.bgcolor("skyblue")
+
+        # 1단계: 초록 땅
+        t.penup()
+        t.goto(-300, -100)
+        t.pendown()
+
+        t.fillcolor("green")
+        t.begin_fill()
+        for i in range(2):
+            t.forward(600)
+            t.right(90)
+            t.forward(200)
+            t.right(90)
+        t.end_fill()
+  - step_number: 2
+    prompt:
+      step_goal: 'polygon 으로 벽(정사각형)과 지붕(정삼각형)을 그리는 def house(x, y): 를 만들어 집 두 채 짓기'
+      checklist:
+        - 'def house(x, y): 안에서 (x, y) 로 옮겨 polygon(4, 80) 으로 벽을 그려요'
+        - '(x, y + 80) 으로 옮겨 polygon(3, 80) 으로 지붕을 얹어요'
+        - house( ) 를 두 번 불러 집 두 채를 지어요
+      example_output: (땅 위에 지붕 있는 집 두 채)
+      starter_code: |
+
+        # 2단계: 집 두 채
+        def polygon(n, size):
+            for i in range(n):
+                t.forward(size)
+                t.left(360 / n)
+
+        # def house(x, y): 를 만들어요
+        #   펜을 들고 (x, y) 로 옮겨 펜을 내린 뒤 polygon(4, 80) 으로 벽
+        #   펜을 들고 (x, y + 80) 으로 옮겨 펜을 내린 뒤 polygon(3, 80) 으로 지붕
+
+
+        # 집 두 채를 지어요 (땅 윗변이 y = -100 이에요)
+      fallback_text: 'house(x, y) 의 x, y 는 집을 지을 자리예요. 함수 안에서 t.goto(x, y) 로 가면 부를 때마다 다른 자리에 집이 생겨요. 벽 높이가 80 이니까 지붕은 y + 80 에서 시작해요. 도형 요술 함수에서 만든 polygon 을 그대로 써요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: shape, shape: regular, n: 4, count: 2 }
+          - { type: shape, shape: regular, n: 3, count: 2 }
+          - type: code_check
+            expected: def house(
+      hints:
+        level_1: 벽을 그리는 자리와 지붕을 그리는 자리가 달라요. 지붕은 벽 높이만큼 위예요.
+        level_2: 'def house(x, y): 안에 penup, goto(x, y), pendown, polygon(4, 80) 을 쓰고, 다시 penup, goto(x, y + 80), pendown, polygon(3, 80) 을 써요.'
+        level_3: |-
+          def house(x, y):
+              t.penup()
+              t.goto(x, y)
+              t.pendown()
+              polygon(4, 80)
+              t.penup()
+              t.goto(x, ___)
+              t.pendown()
+              polygon(3, 80)
+
+          house(-250, -100)
+          house(-100, -100)
+          빈칸에 지붕을 그릴 높이를 넣어 보세요!
+      solution_code: |
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+        turtle.bgcolor("skyblue")
+
+        # 1단계: 초록 땅
+        t.penup()
+        t.goto(-300, -100)
+        t.pendown()
+
+        t.fillcolor("green")
+        t.begin_fill()
+        for i in range(2):
+            t.forward(600)
+            t.right(90)
+            t.forward(200)
+            t.right(90)
+        t.end_fill()
+
+        # 2단계: 집 두 채
+        def polygon(n, size):
+            for i in range(n):
+                t.forward(size)
+                t.left(360 / n)
+
+        def house(x, y):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            polygon(4, 80)
+            t.penup()
+            t.goto(x, y + 80)
+            t.pendown()
+            polygon(3, 80)
+
+        house(-250, -100)
+        house(-100, -100)
+  - step_number: 3
+    prompt:
+      step_goal: 오른쪽 하늘에 circle 로 해님을 그리고, for 로 햇살 12줄을 뻗기
+      checklist:
+        - t.circle(30) 으로 해님을 그려요
+        - 해님 가운데 (200, 180) 으로 옮겨요
+        - 'for 로 12번: 앞으로 60, 뒤로 60(back), 왼쪽으로 30도'
+      example_output: (오른쪽 위에 햇살 12줄이 뻗은 해님)
+      starter_code: |
+
+        # 3단계: 해님
+        t.penup()
+        t.goto(200, 150)
+        t.pendown()
+        t.color("orange")
+        # 반지름 30인 원으로 해님을 그려요 (circle)
+
+        # 펜을 들고 해님 가운데 (200, 180) 으로 옮긴 뒤 펜을 내려요
+
+        # 햇살 12줄: 앞으로 60 갔다가 뒤로 60 돌아오고(back), 왼쪽으로 30도 돌기를 12번
+      fallback_text: circle(30) 은 거북이 왼쪽에 가운데를 두고 반지름 30인 원을 그려요. (200, 150) 에서 오른쪽을 보고 그리면 가운데는 (200, 180) 이에요. 햇살은 가운데에서 앞으로 갔다가 back 으로 그대로 돌아오고, 30도씩 돌면 12번에 한 바퀴예요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: circles, min: 1 }
+          - type: any
+            rules:
+              - { type: code_check, expected: back(, whole_word: true }
+              - { type: code_check, expected: backward(, whole_word: true }
+              - { type: code_check, expected: bk(, whole_word: true }
+              # back 대신 펜을 들고 가운데로 돌아와도 맞는 햇살 (P11-12 플레이테스트)
+              - { type: code_check, expected: range(12) }
+      hints:
+        level_1: 해님은 원 하나, 햇살은 "갔다가 돌아오기"를 12번 해요. 돌아오는 주문은 forward 의 반대예요.
+        level_2: 't.circle(30) 으로 원을 그리고, 가운데로 옮긴 다음 for i in range(12): 안에 t.forward(60), t.back(60), t.left(30) 을 써요.'
+        level_3: |-
+          t.circle(30)
+          t.penup()
+          t.goto(200, 180)
+          t.pendown()
+          for i in range(12):
+              t.forward(60)
+              t.___(60)
+              t.left(30)
+          빈칸에 뒤로 가는 주문을 넣어 보세요!
+      solution_code: |
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+        turtle.bgcolor("skyblue")
+
+        # 1단계: 초록 땅
+        t.penup()
+        t.goto(-300, -100)
+        t.pendown()
+
+        t.fillcolor("green")
+        t.begin_fill()
+        for i in range(2):
+            t.forward(600)
+            t.right(90)
+            t.forward(200)
+            t.right(90)
+        t.end_fill()
+
+        # 2단계: 집 두 채
+        def polygon(n, size):
+            for i in range(n):
+                t.forward(size)
+                t.left(360 / n)
+
+        def house(x, y):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            polygon(4, 80)
+            t.penup()
+            t.goto(x, y + 80)
+            t.pendown()
+            polygon(3, 80)
+
+        house(-250, -100)
+        house(-100, -100)
+
+        # 3단계: 해님
+        t.penup()
+        t.goto(200, 150)
+        t.pendown()
+        t.color("orange")
+        t.circle(30)
+
+        t.penup()
+        t.goto(200, 180)
+        t.pendown()
+        for i in range(12):
+            t.forward(60)
+            t.back(60)
+            t.left(30)
+  - step_number: 4
+    prompt:
+      step_goal: '꽃잎 원 6개로 꽃 한 송이를 그리는 def flower(x, y, color): 를 만들고, 색 리스트로 다섯 송이 피우기'
+      checklist:
+        - 'def flower(x, y, color): 안에서 (x, y) 로 옮겨 그 색으로 꽃잎 원 6개를 그려요'
+        - 꽃잎마다 circle(15) 를 그리고 왼쪽으로 60도 돌아요
+        - for 로 colors 리스트의 색을 하나씩 써서 다섯 송이를 피워요
+      example_output: (땅 위에 알록달록 꽃 다섯 송이)
+      starter_code: |
+
+        # 4단계: 꽃밭
+        # def flower(x, y, color): 를 만들어요
+        #   펜을 들고 (x, y) 로 옮겨 펜을 내리고, t.color(color) 로 색을 바꾼 뒤
+        #   for 로 6번: circle(15) 로 꽃잎을 그리고 왼쪽으로 60도
+
+
+        colors = ["red", "pink", "purple", "white", "yellow"]
+        # for 로 다섯 번: flower(-250 + i * 120, -200, colors[i])
+      fallback_text: 빙글빙글 꽃에서 원을 그리고 돌기를 반복했죠? 그걸 함수에 넣고, 어디에 무슨 색으로 그릴지를 매개변수 x, y, color 로 받아요. 꽃 사이를 120씩 띄우려면 x 를 -250 + i * 120 으로 계산해요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: circles, min: 30 }
+          - type: code_check
+            expected: def flower(
+      hints:
+        level_1: 꽃 한 송이 = 꽃잎 원 6개. 함수로 만들면 다섯 송이도 금방이에요!
+        level_2: 'def flower(x, y, color): 안에 penup, goto(x, y), pendown, t.color(color) 를 쓰고 for i in range(6): 안에 t.circle(15) 와 t.left(60) 을 써요.'
+        level_3: |-
+          def flower(x, y, color):
+              t.penup()
+              t.goto(x, y)
+              t.pendown()
+              t.color(color)
+              for i in range(6):
+                  t.circle(15)
+                  t.left(___)
+
+          for i in range(5):
+              flower(-250 + i * 120, -200, colors[i])
+          빈칸에 꽃잎 사이 각도(360 ÷ 6)를 넣어 보세요!
+      solution_code: |
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+        turtle.bgcolor("skyblue")
+
+        # 1단계: 초록 땅
+        t.penup()
+        t.goto(-300, -100)
+        t.pendown()
+
+        t.fillcolor("green")
+        t.begin_fill()
+        for i in range(2):
+            t.forward(600)
+            t.right(90)
+            t.forward(200)
+            t.right(90)
+        t.end_fill()
+
+        # 2단계: 집 두 채
+        def polygon(n, size):
+            for i in range(n):
+                t.forward(size)
+                t.left(360 / n)
+
+        def house(x, y):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            polygon(4, 80)
+            t.penup()
+            t.goto(x, y + 80)
+            t.pendown()
+            polygon(3, 80)
+
+        house(-250, -100)
+        house(-100, -100)
+
+        # 3단계: 해님
+        t.penup()
+        t.goto(200, 150)
+        t.pendown()
+        t.color("orange")
+        t.circle(30)
+
+        t.penup()
+        t.goto(200, 180)
+        t.pendown()
+        for i in range(12):
+            t.forward(60)
+            t.back(60)
+            t.left(30)
+
+        # 4단계: 꽃밭
+        def flower(x, y, color):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(color)
+            for i in range(6):
+                t.circle(15)
+                t.left(60)
+
+        colors = ["red", "pink", "purple", "white", "yellow"]
+        for i in range(5):
+            flower(-250 + i * 120, -200, colors[i])
+  - step_number: 5
+    prompt:
+      step_goal: title 로 작품 이름을 짓고, write 로 그림 아래에 내 별명을 서명해서 완성하기
+      checklist:
+        - turtle.title("작품 이름") 으로 작품 이름을 지어요
+        - 펜을 들고 (-280, -280) 으로 옮겨요
+        - t.write("그린이 ...") 로 진짜 이름 말고 별명을 써요
+      example_output: (그림 위에 작품 이름, 아래에 "그린이 별똥별" 서명)
+      starter_code: |
+
+        # 5단계: 작품 이름표
+        # 1) turtle.title("작품 이름") 으로 작품 이름을 지어요
+
+        # 2) 펜을 들고 그림 아래 (-280, -280) 으로 옮겨요
+
+        # 3) t.color("black") 으로 검은 글씨를 고르고 t.write("그린이 별명") 으로 서명해요
+        #    (진짜 이름 말고 별명을 써요! 갤러리에 걸면 친구들이 봐요)
+      fallback_text: title 은 그림판 위에 작품 이름을 달아 줘요. write 는 거북이가 있는 자리에 글씨를 써요. 글씨를 크게 쓰고 싶으면 t.write("그린이 별똥별", font=("Arial", 16, "normal")) 처럼 글꼴 크기를 정해요. 갤러리에 걸 작품이니 진짜 이름 대신 별명을 써요.
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: text, min: 1 }
+          - type: code_check
+            expected: title(
+      hints:
+        level_1: 작품 이름은 title, 그림 위 글씨는 write 예요.
+        level_2: turtle.title("우리 거북이 마을") 을 쓰고, 펜을 들어 (-280, -280) 으로 옮긴 다음 t.write("그린이 별똥별") 처럼 써요.
+        level_3: |-
+          turtle.___("우리 거북이 마을")
+          t.penup()
+          t.goto(-280, -280)
+          t.color("black")
+          t.___("그린이 별똥별")
+          빈칸에 작품 이름 주문과 글씨 쓰기 주문을 넣어 보세요!
+      solution_code: |
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+        turtle.bgcolor("skyblue")
+
+        # 1단계: 초록 땅
+        t.penup()
+        t.goto(-300, -100)
+        t.pendown()
+
+        t.fillcolor("green")
+        t.begin_fill()
+        for i in range(2):
+            t.forward(600)
+            t.right(90)
+            t.forward(200)
+            t.right(90)
+        t.end_fill()
+
+        # 2단계: 집 두 채
+        def polygon(n, size):
+            for i in range(n):
+                t.forward(size)
+                t.left(360 / n)
+
+        def house(x, y):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            polygon(4, 80)
+            t.penup()
+            t.goto(x, y + 80)
+            t.pendown()
+            polygon(3, 80)
+
+        house(-250, -100)
+        house(-100, -100)
+
+        # 3단계: 해님
+        t.penup()
+        t.goto(200, 150)
+        t.pendown()
+        t.color("orange")
+        t.circle(30)
+
+        t.penup()
+        t.goto(200, 180)
+        t.pendown()
+        for i in range(12):
+            t.forward(60)
+            t.back(60)
+            t.left(30)
+
+        # 4단계: 꽃밭
+        def flower(x, y, color):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(color)
+            for i in range(6):
+                t.circle(15)
+                t.left(60)
+
+        colors = ["red", "pink", "purple", "white", "yellow"]
+        for i in range(5):
+            flower(-250 + i * 120, -200, colors[i])
+
+        # 5단계: 작품 이름표
+        turtle.title("우리 거북이 마을")
+        t.penup()
+        t.goto(-280, -280)
+        t.color("black")
+        t.write("그린이 별똥별", font=("Arial", 16, "normal"))

@@ -14,6 +14,7 @@ import { ShareButton } from '@/components/share/ShareButton';
 import { LearningCalendar } from '@/components/profile/LearningCalendar';
 import {
   AchievementsCard,
+  CreationsCard,
   ProfileCard,
   ProfileHero,
   ProfileStatsCard,
@@ -78,6 +79,7 @@ export default async function ProfilePage() {
     stats,
     shareCards,
     skillChecks,
+    creations,
   ] = await Promise.all([
     supabase
       .from('users')
@@ -113,6 +115,11 @@ export default async function ProfilePage() {
     supabase
       .from('skill_check_attempts')
       .select('user_id, world_id, attempt_on, passed, submitted_at')
+      .eq('user_id', user.id),
+    // 내 작품 수 (P11-06, RLS 본인 읽기). 00054 전 DB 면 오류 → 0
+    supabase
+      .from('creations')
+      .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
   ]);
   if (stats.error)
@@ -207,6 +214,8 @@ export default async function ProfilePage() {
               ).length
             }
           />
+
+          <CreationsCard total={creations.count ?? 0} />
 
           <TreasureCard
             coins={profile.coins}

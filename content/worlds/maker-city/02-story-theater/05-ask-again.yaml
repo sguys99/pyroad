@@ -1,0 +1,72 @@
+# 3월드 퀘스트 2-5: 다시 물어볼게요
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-2
+# 시험 입력 수 = 맞는 프로그램이 딱 쓰는 만큼 → 다시 묻지 않는 답은 결과가 다르고, 끝없이 묻는 답은 EOFError("입력이 더 필요해요")
+
+id: b3000000-0000-0000-0000-000000000012
+order: 5
+title: 다시 물어볼게요
+concept: while 로 다시 묻기
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 잘못 고르면 while 로 다시 묻기
+  learning_goals:
+    - 고른 답이 1도 2도 아니면 while 로 다시 물을 수 있다
+    - 반복 안에서 input() 을 다시 불러야 반복이 끝난다는 것을 안다
+  story_context: 관객 중에 장난꾸러기가 있어요! 1번이나 2번 문을 골라야 하는데 "3"이나 "안녕"을 입력하네요. 이야기가 엉뚱하게 흘러가지 않게, 맞는 문을 고를 때까지 다시 물어봐요.
+  exercise_description: '고른 답이 1도 2도 아니면 "다시 골라 줘요!" 를 출력하고 다시 물어요. 1이나 2를 고를 때까지 while 로 반복한 뒤 그 문의 장면을 보여 주세요'
+  starter_code: |
+    door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+
+    # 1도 2도 아니면 "다시 골라 줘요!" 하고 또 물어요 (while)
+
+
+    if door == "1":
+        print("반짝이는 동굴에 들어왔어요!")
+    else:
+        print("시원한 강에 도착했어요!")
+  expected_output_hint: 3, 안녕, 2 를 차례로 넣은 손님에게는 두 번 다시 묻고 시원한 강을 보여 줘야 해요
+  checklist:
+    - 'while door != "1" and door != "2": 로 반복을 만들어요'
+    - 반복 안에서 "다시 골라 줘요!" 를 출력하고 door 를 다시 입력받아요
+    - 장난꾸러기 손님이 결국 강에 도착하는지 봐요
+  example_output: |-
+    1번 문과 2번 문 중 어디로 갈까요? 다시 골라 줘요!
+    1번 문과 2번 문 중 어디로 갈까요? 다시 골라 줘요!
+    1번 문과 2번 문 중 어디로 갈까요? 시원한 강에 도착했어요!
+  fallback_text: 'while 은 조건이 참인 동안 계속 돌아요. "1도 아니고 2도 아니다"는 door != "1" and door != "2" 예요. 반복 안에서 door 를 다시 입력받지 않으면 조건이 바뀌지 않아서 끝나지 않아요.'
+answer:
+  validation:
+    type: code_check
+    expected: while
+    whole_word: true
+  scenarios:
+    - name: 장난꾸러기 손님
+      inputs: ['3', '안녕', '2']
+      expect:
+        type: all
+        rules:
+          - { type: contains, expected: 다시 골라 줘요 }
+          - { type: contains, expected: 시원한 강 }
+    - name: 바로 고른 손님
+      inputs: ['1']
+      expect: { type: contains, expected: 반짝이는 동굴 }
+  hints:
+    level_1: '"1도 아니고 2도 아닌 동안" 계속 묻는 반복이 필요해요. 어떤 반복이 조건이 참인 동안 돌까요?'
+    level_2: 'while door != "1" and door != "2": 아래에 print("다시 골라 줘요!") 와 door = input(…) 을 들여 써요.'
+    level_3: |-
+      while door != "1" ___ door != "2":
+          print("다시 골라 줘요!")
+          door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+      빈칸에 "그리고"를 뜻하는 낱말을 넣어 보세요!
+  solution_code: |
+    door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+
+    while door != "1" and door != "2":
+        print("다시 골라 줘요!")
+        door = input("1번 문과 2번 문 중 어디로 갈까요? ")
+
+    if door == "1":
+        print("반짝이는 동굴에 들어왔어요!")
+    else:
+        print("시원한 강에 도착했어요!")

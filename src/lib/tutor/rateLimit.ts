@@ -55,6 +55,18 @@ export const TUTOR_RATE_LIMITS: Record<TutorType, RateLimit & { env: string }> =
       perMinute: 3,
       perDay: 20,
     },
+    // 3-F 기획 도우미 (P11-14). 아이가 직접 쓰므로 자유 질문처럼 빡빡하게. 아이디어를 몇 번 바꿔 보는 정도면 충분
+    project_planner: {
+      env: 'TUTOR_LIMIT_PLANNER',
+      perMinute: 3,
+      perDay: 15,
+    },
+    // 작품 평가 (P11-14). 고치고 다시 듣기를 몇 번 — 실행 피드백보다 훨씬 드물게
+    creation_feedback: {
+      env: 'TUTOR_LIMIT_CREATION',
+      perMinute: 3,
+      perDay: 20,
+    },
   };
 
 /**
@@ -109,7 +121,7 @@ export function getTutorRateLimit(
   const def = TUTOR_RATE_LIMITS[type];
   const base = readEnvLimit(def.env, env) ?? def;
   // 자유 질문은 본인 키여도 늘리지 않는다 (P9-17): 한도는 비용보다 아이가 AI와 자유롭게 나누는 대화량을 묶는 안전장치
-  if (!ownKey || type === 'free_question')
+  if (!ownKey || type === 'free_question' || type === 'project_planner')
     return { perMinute: base.perMinute, perDay: base.perDay };
   const mult = readEnvLimit(OWN_KEY_MULTIPLIER_ENV, env) ?? OWN_KEY_MULTIPLIER;
   return {

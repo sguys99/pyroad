@@ -25,9 +25,9 @@ describe('장면 데이터 (Q42)', () => {
     ]);
   });
 
-  it('지금 있는 것(레벨·색 고르기)만 배지 없음, 나머지는 곧 열려요', () => {
+  it('다섯 장면 모두 앱에 있어 "곧 열려요" 배지 없음 (코인 P8 · 자랑하기·보스 P9, B88)', () => {
     const soon = FUN_SCENES.filter((s) => s.soon).map((s) => s.id);
-    expect(soon).toEqual(['coin', 'share', 'boss']);
+    expect(soon).toEqual([]);
   });
 
   it('문구는 제목 + 한 줄 (짧게)', () => {
@@ -81,9 +81,9 @@ describe('쇼케이스 섹션 서버 HTML', () => {
     }
   });
 
-  it('"곧 열려요"는 보이는 배지 + 제목 안 낭독용 글자로 3곳', () => {
-    expect(html.match(/class="ld-fun-soon"/g)).toHaveLength(3);
-    expect(html.match(new RegExp(`\\(${SOON_LABEL}\\)`, 'g'))).toHaveLength(3);
+  it('"곧 열려요" 배지·낭독용 글자·안내 문장이 없다 (B88)', () => {
+    expect(html).not.toContain('class="ld-fun-soon"');
+    expect(html).not.toContain(SOON_LABEL);
   });
 
   it('장면은 처음에 틀지 않는다 (재생 표시 없음, opacity 0 글자 없음)', () => {

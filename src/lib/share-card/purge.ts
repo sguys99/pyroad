@@ -56,3 +56,32 @@ export async function withShareCardPurge<T>(
   }
   return result;
 }
+
+/** 이 작품의 자랑 카드 id (P11-08, 00056 kind = 'creation', ref = 작품 id). service_role */
+export async function creationCardIds(
+  admin: AdminClient,
+  creationId: string,
+): Promise<string[]> {
+  const { data, error } = await admin
+    .from('share_cards')
+    .select('id')
+    .eq('kind', 'creation')
+    .eq('ref', creationId);
+  if (error) {
+    reportServerError(error, { area: 'share-card', op: 'creation cards' });
+    return [];
+  }
+  return (data ?? []).map((c) => c.id);
+}
+
+/**
+ * 작품을 내리기·숨기기·이름 바꾸기·지우기 한 뒤 그 작품 카드의 CDN 사본을 지운다 (P11-08). 카드 행은 00056 트리거가 이미
+ * 닫았거나(is_public false)·다시 그리게 했거나(version + 1)·지웠다. 지우기는 행이 사라지므로 `ids` 를 지우기 전에 구해 넘긴다
+ */
+export async function purgeCreationShareCards(
+  admin: AdminClient,
+  creationId: string,
+  ids?: readonly string[],
+): Promise<void> {
+  await purgeShareCards(ids ?? (await creationCardIds(admin, creationId)));
+}

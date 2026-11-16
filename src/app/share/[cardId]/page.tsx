@@ -42,7 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     height: 630,
     alt,
   };
-  const description = '파이뱀과 함께 파이썬 모험 중! 박수를 보내 주세요.';
+  const description =
+    card.data.kind === 'creation'
+      ? '파이썬 코드로 직접 만든 작품이에요. 박수를 보내 주세요.'
+      : '파이뱀과 함께 파이썬 모험 중! 박수를 보내 주세요.';
   return {
     title: headline,
     description,

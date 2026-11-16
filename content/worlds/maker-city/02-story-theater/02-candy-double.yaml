@@ -1,0 +1,52 @@
+# 3월드 퀘스트 2-2: 사탕 두 배
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-2
+# 시작 코드는 int( ) 없이 글자를 두 번 이어 "33개"가 나오는 버그 그대로 (입력은 늘 글자). int( 는 whole_word (randint 안 걸림)
+
+id: b3000000-0000-0000-0000-000000000009
+order: 2
+title: 사탕 두 배
+concept: int(input())
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 입력한 글자를 숫자로 바꾸기
+  learning_goals:
+    - input() 으로 받은 값은 늘 글자라는 것을 안다
+    - int() 로 입력을 숫자로 바꿔 계산할 수 있다
+  story_context: 극장 매점의 요술 사탕 항아리는 사탕을 두 배로 늘려 줘요! 그런데 3개를 넣었더니 "33개"가 나왔대요. 항아리가 숫자를 글자로 착각했나 봐요. 고쳐 줄까요?
+  exercise_description: 'input() 으로 받은 사탕 수를 int() 로 숫자로 바꿔서, 두 배가 된 사탕 수를 "사탕 6개" 처럼 출력하세요'
+  starter_code: |
+    candy = input("사탕이 몇 개 있어요? ")
+
+    # 3을 넣으면 33이 나와요! 입력은 늘 글자라서 그래요
+    # int( ) 로 숫자로 바꾼 다음 두 배를 해 보세요
+    print(f"요술 항아리에서 나온 사탕 {candy * 2}개!")
+  expected_output_hint: 3을 넣으면 사탕 6개, 10을 넣으면 사탕 20개가 나와야 해요
+  checklist:
+    - int( ) 로 candy 를 숫자로 바꿔요
+    - 3을 넣었을 때 사탕 6개가 나오는지 봐요
+    - 시험 손님 부르기로 10 손님도 확인해요
+  example_output: '사탕이 몇 개 있어요? 요술 항아리에서 나온 사탕 6개!'
+  fallback_text: '글자 "3" 에 2를 곱하면 "33" 처럼 글자가 두 번 이어져요. 숫자 계산을 하려면 int("3") 처럼 숫자로 바꿔야 해요. candy = int(input("사탕이 몇 개 있어요? ")) 처럼 받자마자 바꿔도 되고, 계산할 때 int(candy) * 2 로 바꿔도 돼요.'
+answer:
+  validation:
+    type: code_check
+    expected: int(
+    whole_word: true
+  scenarios:
+    - name: 사탕 3개 손님
+      inputs: ['3']
+      expect: { type: contains, expected: 사탕 6개 }
+    - name: 사탕 10개 손님
+      inputs: ['10']
+      expect: { type: contains, expected: 사탕 20개 }
+  hints:
+    level_1: 지금은 글자 "3" 이 두 번 이어 붙어요. 글자를 숫자로 바꾸는 주문이 필요해요.
+    level_2: 첫 줄을 candy = int(input("사탕이 몇 개 있어요? ")) 로 바꾸면 candy 가 숫자가 돼요.
+    level_3: |-
+      candy = ___(input("사탕이 몇 개 있어요? "))
+      빈칸에 숫자로 바꾸는 주문을 넣어 보세요!
+  solution_code: |
+    candy = int(input("사탕이 몇 개 있어요? "))
+
+    print(f"요술 항아리에서 나온 사탕 {candy * 2}개!")

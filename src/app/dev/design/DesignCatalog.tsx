@@ -50,6 +50,11 @@ import {
   SoundSection,
 } from './_catalog/ExtraSections';
 import { LegalSection } from './_catalog/LegalSection';
+import { TurtleSection } from './_catalog/TurtleSection';
+import { EditorHandleSection } from './_catalog/EditorHandleSection';
+import { CreationSection } from './_catalog/CreationSection';
+import { GallerySection } from './_catalog/GallerySection';
+import { TestGuestSection } from './_catalog/TestGuestSection';
 import { OnboardingSection } from './_catalog/OnboardingSection';
 import { ConsentSection } from './_catalog/ConsentSection';
 import { GuardianReportCatalogSection } from './_catalog/GuardianReportCatalog';
@@ -119,8 +124,13 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
     group: '기타',
     items: [
       ['editor', '코드 에디터'],
+      ['editor-handles', '숫자 손잡이·3월드 키보드'],
       ['run-controls', '실행 버튼'],
       ['output-slip', '결과 쪽지'],
+      ['turtle-stage', '그림판'],
+      ['save-creation', '작품 저장'],
+      ['gallery', '작품 갤러리'],
+      ['test-guests', '시험 손님'],
       ['error-staging', '실패 연출'],
       ['success-staging', '성공 연출'],
       ['quiz', '퀴즈 틀·객관식'],
@@ -170,6 +180,9 @@ export function DesignCatalog({
 
   useSamplingPause(override);
   useHtmlMotionOverride(override, tier, reduced, root.tier, root.reduced);
+  // 하이드레이션 끝 표시 (B91): 부트 스크립트가 서버 HTML 에 data-motion="full" 을 먼저 붙여 e2e 가 손이 붙기 전에 누를 수 있었음
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -183,7 +196,11 @@ export function DesignCatalog({
   return (
     <MotionTierProvider tier={tier} reduced={reduced ? 'on' : 'off'}>
       <TooltipProvider>
-        <div className="min-h-dvh bg-background text-foreground">
+        <div
+          className="min-h-dvh bg-background text-foreground"
+          data-testid="design-catalog"
+          data-hydrated={hydrated || undefined}
+        >
           <MotionBar
             tierChoice={tierChoice}
             reducedChoice={reducedChoice}
@@ -234,8 +251,13 @@ export function DesignCatalog({
               <RigSection />
               <CostumeSection />
               <EditorSection />
+              <EditorHandleSection />
               <RunControlsSection />
               <OutputPanelSection />
+              <TurtleSection />
+              <CreationSection />
+              <GallerySection />
+              <TestGuestSection />
               <ErrorStagingSection />
               <SuccessStagingSection />
               <QuizSection />

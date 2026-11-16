@@ -1,0 +1,64 @@
+# 3월드 퀘스트 3-1: 한 문제 쇼
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-3
+# 시험 손님 " 고래 "(앞뒤 빈칸)가 .strip() 을 확인. 시작 코드에 .strip() 이 없어 code_check 는 새로 쓴 글자 (L4)
+
+id: b3000000-0000-0000-0000-000000000015
+order: 1
+title: 한 문제 쇼
+concept: input() 과 .strip()
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 입력한 답의 앞뒤 빈칸을 지우고 정답과 견주기
+  learning_goals:
+    - .strip() 으로 입력한 글자의 앞뒤 빈칸을 지울 수 있다
+    - 입력한 답을 정답과 견줘 맞았는지 알려 줄 수 있다
+  story_context: 두근두근 퀴즈쇼 방송국의 퀴즈 기계가 고장 났어요! 2월드 항구에서 만든 단어 퀴즈를 떠올려 이번엔 진짜로 답을 입력받는 퀴즈를 만들어요. 그런데 첫 손님이 " 고래 " 처럼 빈칸까지 같이 쳤는데 땡! 이 나왔대요.
+  exercise_description: '"바다에서 가장 큰 동물은?" 하고 묻고, 입력한 답의 앞뒤 빈칸을 .strip() 으로 지운 뒤 고래면 "딩동댕!", 아니면 "땡!" 을 출력하세요'
+  starter_code: |
+    answer = input("바다에서 가장 큰 동물은? ")
+
+    # 1) .strip() 으로 answer 의 앞뒤 빈칸을 지워요
+
+    # 2) 고래면 "딩동댕!", 아니면 "땡!" 을 출력해요
+  expected_output_hint: 고래, " 고래 " 손님은 딩동댕, 상어 손님은 땡만 나와야 해요
+  checklist:
+    - answer = answer.strip() 으로 빈칸을 지워요
+    - if 로 고래와 견줘 딩동댕! 이나 땡! 을 출력해요
+    - 빈칸을 같이 친 손님도 딩동댕인지 봐요
+  example_output: '바다에서 가장 큰 동물은? 딩동댕!'
+  fallback_text: '사람은 답을 칠 때 빈칸을 실수로 넣기도 해요. " 고래 " 와 "고래" 는 파이썬에게 다른 글자예요. .strip() 은 앞뒤 빈칸만 지운 새 글자를 돌려줘서 answer = answer.strip() 처럼 다시 담아요.'
+answer:
+  validation:
+    type: code_check
+    expected: .strip()
+  scenarios:
+    - name: 고래 손님
+      inputs: ['고래']
+      expect: { type: contains, expected: 딩동댕 }
+    - name: 빈칸 친 손님
+      inputs: ['  고래 ']
+      expect: { type: contains, expected: 딩동댕 }
+    # 3월드 플레이테스트(제안 O): 딩동댕과 땡을 늘 둘 다 출력하면 "? 딩동댕!" 다음 줄에 땡이 와서 떨어짐
+    - name: 상어 손님
+      inputs: ['상어']
+      expect: { type: contains, expected: '? 땡' }
+  hints:
+    level_1: 빈칸 친 손님의 답은 " 고래 " 예요. 앞뒤 빈칸을 지우는 메서드가 있어요!
+    level_2: 'answer = answer.strip() 으로 빈칸을 지우고, if answer == "고래": 아래에 딩동댕, else: 아래에 땡을 들여 써요.'
+    level_3: |-
+      answer = answer.___()
+      if answer == "고래":
+          print("딩동댕!")
+      else:
+          print("땡!")
+      빈칸에 앞뒤 빈칸을 지우는 메서드를 넣어 보세요!
+  solution_code: |
+    answer = input("바다에서 가장 큰 동물은? ")
+
+    answer = answer.strip()
+
+    if answer == "고래":
+        print("딩동댕!")
+    else:
+        print("땡!")

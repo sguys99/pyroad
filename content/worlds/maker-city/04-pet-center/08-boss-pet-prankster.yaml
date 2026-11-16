@@ -1,0 +1,204 @@
+# 3월드 보스 4: 펫 장난꾸러기 버그버그 (6문제)
+# 작성 안내: content/README.md "보스". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 퀴즈·보스 코드에는 input()·random 을 넣지 않음 → 메뉴 입력은 고른 번호 리스트로 (world3.md §5)
+
+id: b3000000-0000-0000-0000-000000000204
+order: 8
+title: 펫 장난꾸러기 버그버그
+concept: 펫 설계도 총정리
+xp_reward: 72
+quest_type: boss
+prompt:
+  topic: self, 객체 두 개의 상태, max/min, 메뉴 반복, 메서드 버그 총정리
+  learning_goals:
+    - 같은 설계도로 만든 두 펫의 상태를 따로 따라갈 수 있다
+    - 메서드 안에서 self 로 내 상태를 바꾸고 값을 0~100 안으로 묶을 수 있다
+  story_context: 돌봄 센터에 강아지 귀 머리띠를 쓰고 밥그릇을 든 버그버그가 나타났어요! 펫 설계도를 몰래 고쳐 놓고 펫들이 헷갈리게 만들었대요. "내 장난 여섯 개를 다 풀면 설계도를 돌려주지!"
+  fallback_text: 같은 설계도로 만든 펫은 상태를 각자 따로 가져요. 메서드는 첫 칸 self 로 "나 자신"을 받고, self. 을 붙여야 내 상태가 바뀌어요. max(0, …) 는 0 밑으로, min(100, …) 은 100 위로 못 가게 해요. 메뉴 반복은 0 을 고르면 break 로 멈춰요.
+  boss:
+    name: 펫 장난꾸러기 버그버그
+    look: pet_sitter
+    intro: 멍멍! 아니, 히히! 오늘은 내가 펫 돌보미야. 펫들 상태를 몽땅 뒤섞어 놨지롱. 하트 세 개로 다 맞힐 수 있을까?
+    on_defeat: 끄응, 다 맞혔잖아! 설계도는 돌려줄게. 사실 나도 펫이랑 놀고 싶었어. 다음엔 같이 돌봐 줄래?
+    on_victory: 히히, 펫들이 아직 헷갈려하네! 설계도를 다시 살펴보고 또 와. 펫들이랑 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000025
+    prompt:
+      quiz:
+        question: 콩이는 두 번, 별이는 한 번 놀아요. 돌리면 무엇이 나올까?
+        code: |-
+          class Pet:
+              def __init__(self, name):
+                  self.name = name
+                  self.mood = 50
+
+              def play(self):
+                  self.mood = self.mood + 20
+
+          kong = Pet("콩이")
+          byul = Pet("별이")
+          kong.play()
+          kong.play()
+          byul.play()
+          print(kong.mood, byul.mood)
+        options:
+          - { id: opt-x2v7, text: '90 70' }
+          - { id: opt-d8k3, text: '110 110' }
+          - { id: opt-u5m9, text: '70 70' }
+          - { id: opt-g1p6, text: '90 90' }
+    answer:
+      quiz_answer:
+        accepted: [opt-x2v7]
+        explanation: 두 펫은 기분을 따로 가져요. 콩이는 50 에서 두 번 놀아 90, 별이는 한 번 놀아 70 이에요.
+        explanations:
+          opt-d8k3: 세 번 논 기분을 두 펫이 나눠 가지지 않아요. 펫마다 따로 세요.
+          opt-u5m9: 콩이는 두 번 놀았어요.
+          opt-g1p6: 별이는 한 번만 놀았어요. 콩이가 논 것은 별이 기분을 바꾸지 않아요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000024
+    prompt:
+      quiz:
+        question: 버그버그가 첫 번째 펫의 이름표만 바꿔 달았어요. 돌리면 무엇이 나올까?
+        code: |-
+          class Pet:
+              def __init__(self, name):
+                  self.name = name
+
+          a = Pet("콩이")
+          b = Pet("별이")
+          a.name = "몽이"
+          print(a.name, b.name)
+        options:
+          - { id: opt-f4w1, text: '몽이 별이' }
+          - { id: opt-n7c2, text: '몽이 몽이' }
+          - { id: opt-s3y8, text: '콩이 별이' }
+          - { id: opt-b9h5, text: '별이 몽이' }
+    answer:
+      quiz_answer:
+        accepted: [opt-f4w1]
+        explanation: a.name 을 바꾸면 a 펫의 이름만 몽이가 돼요. b 펫은 따로라서 별이 그대로예요.
+        explanations:
+          opt-n7c2: 같은 설계도로 만들었어도 b 의 이름은 바뀌지 않아요.
+          opt-s3y8: a.name = "몽이" 로 a 의 이름을 바꿨어요.
+          opt-b9h5: a 를 먼저, b 를 나중에 출력해요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000024
+    prompt:
+      quiz:
+        question: 빈칸을 채워 펫 두 마리가 각자 이름을 갖게 해요
+        code: |-
+          class Pet:
+              def __init__({{bk-r5t2}}, name):
+                  {{bk-j8y4}}.name = name
+
+          kong = Pet("콩이")
+          byul = Pet("별이")
+          print(kong.name)
+        tokens:
+          - { id: tok-e3n6, text: self }
+          - { id: tok-w7a1, text: Pet }
+          - { id: tok-k2z9, text: name }
+          - { id: tok-v4q8, text: kong }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-r5t2: tok-e3n6, bk-j8y4: tok-e3n6 }
+        explanation: __init__ 도 메서드라서 첫 칸에 self 를 받고, self.name 에 이름을 담아요. 그래서 kong 은 콩이, byul 은 별이를 따로 가져요.
+        explanations:
+          tok-w7a1: Pet.name 에 담으면 설계도 하나에 이름이 하나뿐이라, 나중에 만든 별이 이름으로 덮여요.
+          tok-k2z9: name 은 받은 이름이에요. "나 자신"을 가리키는 말이 아니에요.
+          tok-v4q8: 펫을 만드는 중에는 kong 이 아직 없어요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000025
+    prompt:
+      quiz:
+        question: 빈칸을 채워 기분이 100 을 넘지 않게 놀아 줘요
+        code: |-
+          class Pet:
+              def __init__(self, name):
+                  self.name = name
+                  self.mood = 90
+
+              def play({{bk-c6m3}}):
+                  self.mood = {{bk-h1x7}}(100, self.mood + 20)
+
+          kong = Pet("콩이")
+          kong.play()
+          print(kong.mood)
+        tokens:
+          - { id: tok-y5b2, text: self }
+          - { id: tok-q8d4, text: min }
+          - { id: tok-l3g7, text: max }
+          - { id: tok-o6j1, text: kong }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-c6m3: tok-y5b2, bk-h1x7: tok-q8d4 }
+        explanation: 메서드는 첫 칸에 self 를 받아요. 90 + 20 은 110 이지만 min(100, 110) 이 둘 중 작은 100 을 골라서 100 이 나와요.
+        explanations:
+          tok-l3g7: max 는 둘 중 큰 값이라 110 이 돼요. 100 위로 못 가게 하려면 작은 값을 골라요.
+          tok-o6j1: 메서드의 "나 자신" 자리는 늘 self 예요.
+  - quiz_kind: parsons
+    review_quest: b3000000-0000-0000-0000-000000000027
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓아, 0 을 고를 때까지 놀아 주는 메뉴를 만들어요
+        indent: true
+        lines:
+          - { id: ln-z4k1, code: 'mood = 50' }
+          - {
+              id: ln-a7p3,
+              code: 'for choice in ["2", "2", "0", "2"]:  # 고른 번호라고 해요',
+            }
+          - { id: ln-m2x8, code: 'if choice == "0":' }
+          - { id: ln-c9r5, code: 'print("잘 가!")' }
+          - { id: ln-e6w2, code: 'break' }
+          - { id: ln-b1t4, code: 'mood = mood + 20' }
+          - { id: ln-q5h9, code: 'print(mood)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-z4k1, indent: 0 }
+            - { id: ln-a7p3, indent: 0 }
+            - { id: ln-m2x8, indent: 1 }
+            - { id: ln-c9r5, indent: 2 }
+            - { id: ln-e6w2, indent: 2 }
+            - { id: ln-b1t4, indent: 1 }
+            - { id: ln-q5h9, indent: 0 }
+        explanation: 기분 50 으로 시작해 두 번 놀아 90 이 되고, 0 을 고르면 잘 가! 하고 break 로 멈춰요. 마지막 2 는 고르지 않아요. 기분은 반복이 끝난 뒤 한 번 보여 줘요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000022
+    prompt:
+      quiz:
+        question: 콩이에게 밥을 줬는데 배고픔이 그대로예요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-u3n8, code: 'class Pet:' }
+          - { id: ln-k6d1, code: '    def __init__(self, name):' }
+          - { id: ln-p9s4, code: '        self.name = name' }
+          - { id: ln-w2f7, code: '        self.hunger = 80' }
+          - { id: ln-g5v3, code: '    def feed(self):' }
+          - { id: ln-r8j6, code: '        hunger = max(0, self.hunger - 30)' }
+          - { id: ln-y1c9, code: 'kong = Pet("콩이")' }
+          - { id: ln-t4m2, code: 'kong.feed()' }
+          - { id: ln-h7b5, code: 'print(kong.hunger)' }
+        fixes:
+          - {
+              id: fx-s6e2,
+              code: '        self.hunger = max(0, self.hunger - 30)',
+            }
+          - { id: fx-n3k7, code: '        self.hunger = max(0, hunger - 30)' }
+          - {
+              id: fx-d9w4,
+              code: '        self.hunger = min(0, self.hunger - 30)',
+            }
+          - { id: fx-f1q8, code: '        kong = max(0, self.hunger - 30)' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-r8j6, fix: fx-s6e2 }
+        explanation: self. 없이 hunger 에 담으면 메서드 안에서만 쓰는 새 이름이 생겨서 펫의 배고픔은 그대로예요. self.hunger 에 담아야 콩이 배고픔이 50 이 돼요.
+        explanations:
+          fx-n3k7: 오른쪽의 hunger 는 아직 없는 이름이라 에러가 나요. 오른쪽도 self.hunger 예요.
+          fx-d9w4: min(0, …) 은 둘 중 작은 값이라 늘 0 이하가 돼요.
+          fx-f1q8: kong 에 담아도 펫의 배고픔은 바뀌지 않아요.

@@ -1,0 +1,104 @@
+# 3월드 퀘스트 4-5: 펫 두 마리
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-4
+# 같은 설계도로 만든 두 펫이 상태를 따로 가짐. 별이만 세 번 놀아서 기분이 min(100, …) 에 걸림 (110 이 아니라 100)
+
+id: b3000000-0000-0000-0000-000000000025
+order: 5
+title: 펫 두 마리
+concept: 메서드, 객체 두 개
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 메서드로 펫 두 마리를 따로 돌보기
+  learning_goals:
+    - 설계도 안에 def 메서드(self) 로 펫이 할 수 있는 행동을 만들 수 있다
+    - 같은 설계도로 만든 두 펫이 상태를 따로 가진다는 것을 안다
+  story_context: 콩이에게 단짝 별이가 생겼어요! 콩이는 배가 고프고 별이는 놀고 싶대요. 같은 설계도로 만든 펫이라도 배고픔과 기분은 각자 따로예요.
+  exercise_description: 'play 메서드를 만들어 기분을 20 올리되 min(100, …) 로 100 을 넘지 않게 하고 "(이름): 신나요!" 를 출력하세요. 콩이는 밥을 한 번 먹고 별이는 세 번 놀아요'
+  starter_code: |
+    class Pet:
+        def __init__(self, name):
+            self.name = name
+            self.hunger = 50
+            self.mood = 50
+
+        def feed(self):
+            self.hunger = max(0, self.hunger - 30)
+            print(f"{self.name}: 냠냠!")
+
+        # play 메서드를 만들어요: 기분 +20 (min(100, ...) 으로 100 을 넘지 않게), "(이름): 신나요!" 출력
+
+
+        def status(self):
+            print(f"{self.name} - 배고픔 {self.hunger}, 기분 {self.mood}")
+
+
+    kong = Pet("콩이")
+    byul = Pet("별이")
+    # 콩이는 밥을 한 번 먹고(feed), 별이는 세 번 놀아요(play)
+
+    kong.status()
+    byul.status()
+  expected_output_hint: 콩이는 배고픔 20, 별이는 기분 100 이 되어야 해요
+  checklist:
+    - 'def play(self): 를 feed 처럼 만들어요'
+    - self.mood 에 min(100, self.mood + 20) 을 다시 담아요
+    - kong.feed() 를 한 번, byul.play() 를 세 번 불러요
+  example_output: |-
+    콩이: 냠냠!
+    별이: 신나요!
+    별이: 신나요!
+    별이: 신나요!
+    콩이 - 배고픔 20, 기분 50
+    별이 - 배고픔 50, 기분 100
+  fallback_text: '메서드는 설계도 안의 함수예요. 첫 칸에 늘 self 를 받아서 "나의" 상태를 바꿔요. kong.feed() 라고 부르면 self 가 콩이가 되고, byul.play() 라고 부르면 self 가 별이가 돼요. 그래서 별이가 놀아도 콩이 기분은 그대로예요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          콩이: 냠냠!
+          별이: 신나요!
+          별이: 신나요!
+          별이: 신나요!
+          콩이 - 배고픔 20, 기분 50
+          별이 - 배고픔 50, 기분 100
+      - type: code_check
+        expected: def play(self
+  hints:
+    level_1: feed 메서드를 따라 만들어 보세요. 바꾸는 값은 기분, 고르는 주문은 작은 값을 고르는 min 이에요.
+    level_2: 'def play(self): 아래에 self.mood = min(100, self.mood + 20) 과 print(f"{self.name}: 신나요!") 를 들여 쓰고, 아래에서 kong.feed() 한 번, byul.play() 세 번을 불러요.'
+    level_3: |-
+      def play(___):
+          self.mood = min(100, self.mood + 20)
+          print(f"{self.name}: 신나요!")
+      빈칸에 "나 자신"을 넣고, 아래에 kong.feed() 와 byul.play() 세 줄을 써 보세요!
+  solution_code: |
+    class Pet:
+        def __init__(self, name):
+            self.name = name
+            self.hunger = 50
+            self.mood = 50
+
+        def feed(self):
+            self.hunger = max(0, self.hunger - 30)
+            print(f"{self.name}: 냠냠!")
+
+        def play(self):
+            self.mood = min(100, self.mood + 20)
+            print(f"{self.name}: 신나요!")
+
+        def status(self):
+            print(f"{self.name} - 배고픔 {self.hunger}, 기분 {self.mood}")
+
+
+    kong = Pet("콩이")
+    byul = Pet("별이")
+    kong.feed()
+    byul.play()
+    byul.play()
+    byul.play()
+
+    kong.status()
+    byul.status()

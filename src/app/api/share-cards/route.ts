@@ -3,7 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isUuid } from '@/lib/api/serverError';
 import { guardianWriteGate } from '@/lib/consent/server';
-import { createShareCardRpc, rewardError } from '@/lib/quest/rewardRpc';
+import {
+  createCreationShareCardRpc,
+  createShareCardRpc,
+  rewardError,
+} from '@/lib/quest/rewardRpc';
 import { isShareCardKind } from '@/lib/share-card/snapshot';
 import { shareCardImagePath } from '@/lib/share-card/publicCard';
 import { kstToday } from '@/lib/time/kst';
@@ -11,8 +15,8 @@ import { kstToday } from '@/lib/time/kst';
 const ACHIEVEMENT_ID = /^[a-z0-9_]{1,64}$/;
 
 /**
- * 공유 카드 만들기 (P9-07, §2.5, §12-Q67). 본문 `{ kind, ref? }` — kind = levelup | stage | achievement | weekly,
- * ref = 스테이지 id(stage) · 업적 id(achievement). 사용자는 `auth.getUser()`로 확인한 id 만
+ * 공유 카드 만들기 (P9-07, §2.5, §12-Q67). 본문 `{ kind, ref? }` — kind = levelup | stage | achievement | weekly | creation,
+ * ref = 스테이지 id(stage) · 업적 id(achievement) · 작품 id(creation, P11-08 — 갤러리에 전시 중인 내 작품만, 00056). 사용자는 `auth.getUser()`로 확인한 id 만
  *
  * - 성과 숫자(레벨·별·업적·이번 주 합계)는 받지 않는다: service_role RPC `create_share_card`(00043)가 실제 기록으로 계산해
  *   공개 정보만 스냅샷으로 저장. 안 깬 스테이지·안 얻은 업적은 409
@@ -36,7 +40,8 @@ export async function POST(request: Request) {
   const kind = body?.kind;
   const ref = body?.ref;
   if (!isShareCardKind(kind)) return rewardError('invalid_arguments');
-  if (kind === 'stage' && !isUuid(ref)) return rewardError('invalid_arguments');
+  if ((kind === 'stage' || kind === 'creation') && !isUuid(ref))
+    return rewardError('invalid_arguments');
   if (
     kind === 'achievement' &&
     (typeof ref !== 'string' || !ACHIEVEMENT_ID.test(ref))
@@ -47,12 +52,15 @@ export async function POST(request: Request) {
   const blocked = await guardianWriteGate(user.id, admin);
   if (blocked) return blocked;
 
-  const result = await createShareCardRpc(
-    admin,
-    user.id,
-    kind,
-    kind === 'stage' || kind === 'achievement' ? (ref as string) : null,
-  );
+  const result =
+    kind === 'creation'
+      ? await createCreationShareCardRpc(admin, user.id, ref as string)
+      : await createShareCardRpc(
+          admin,
+          user.id,
+          kind,
+          kind === 'stage' || kind === 'achievement' ? (ref as string) : null,
+        );
   if (!result.ok) return result.response;
   const { id, version, expires_at } = result.data;
   const { data: claimed } = await supabase

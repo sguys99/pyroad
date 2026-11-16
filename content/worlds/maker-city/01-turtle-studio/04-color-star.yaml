@@ -1,0 +1,62 @@
+# 3월드 퀘스트 1-4: 반짝 색칠 별
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-1
+
+id: b3000000-0000-0000-0000-000000000004
+order: 4
+title: 반짝 색칠 별
+concept: begin_fill 과 end_fill
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 별을 그리고 안을 색칠하기
+  learning_goals:
+    - 144도씩 다섯 번 돌면 별이 된다는 것을 안다
+    - begin_fill() 과 end_fill() 로 그린 도형 안을 색칠할 수 있다
+  story_context: 공방 천장에 별 그림이 있었는데 색이 다 날아갔어요. 느릿이가 노란 물감 통을 들고 왔어요. 별을 그리고 안을 반짝반짝 노랗게 칠해 볼까요?
+  exercise_description: 색칠을 시작하고(begin_fill), 앞으로 100 가고 오른쪽으로 144도 돌기를 5번 반복한 뒤, 색칠을 끝내서(end_fill) 노란 별을 그리세요
+  starter_code: |
+    import turtle
+
+    t = turtle.Turtle()
+    t.fillcolor("yellow")   # 안을 칠할 색
+
+    # 1) 색칠을 시작해요: t.begin_fill()
+
+    # 2) 앞으로 100 가고 오른쪽으로 144도 돌기를 5번 반복해요
+
+    # 3) 색칠을 끝내요: t.end_fill()
+  expected_output_hint: 그림판에 노랗게 칠한 별이 그려져야 해요
+  checklist:
+    - 별을 그리기 전에 t.begin_fill() 을 써요
+    - for 로 forward(100) 과 right(144) 를 5번 해요
+    - 다 그린 뒤 t.end_fill() 을 써요
+  example_output: (그림판에 노랗게 칠한 별)
+  fallback_text: 색칠은 "여기부터 칠할게!" 하고 시작해서 "다 그렸어!" 하고 끝내는 두 주문이에요. 시작은 begin_fill(), 끝은 end_fill() 이고 그 사이에 그린 모양 안이 칠해져요. 별은 꼭짓점마다 144도씩 돌아요. 5번 돌면 144 × 5 = 720, 두 바퀴를 돌아 제자리로 와요.
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: shape, shape: regular, n: 5, k: 2, filled: true }
+      - type: code_check
+        expected: begin_fill(
+  hints:
+    level_1: 색칠 주문은 둘이에요. 그리기 전에 하나, 다 그린 뒤에 하나!
+    level_2: 't.begin_fill() 을 쓰고, for i in range(5): 안에 t.forward(100) 과 t.right(144) 를 넣은 다음, 반복이 끝나면 t.end_fill() 을 써요.'
+    level_3: |-
+      t.begin_fill()
+      for i in range(5):
+          t.forward(100)
+          t.right(___)
+      t.end_fill()
+      빈칸에 별의 각도를 넣어 보세요!
+  solution_code: |
+    import turtle
+
+    t = turtle.Turtle()
+    t.fillcolor("yellow")
+
+    t.begin_fill()
+    for i in range(5):
+        t.forward(100)
+        t.right(144)
+    t.end_fill()

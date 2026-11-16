@@ -1,5 +1,6 @@
 /**
  * 보스 버그버그 스테이지 외형 (P9-13). 리그 팔레트 덮어쓰기(`palette`) + 코스튬 모자(`costume`)만 써서 새 그림 없이 7종을 나눔.
+ * 3월드 7종(P11-11)은 메이커 소품(`MAKER_BOSS_LOOK`): 베레모·두루마리+책 망토·헤드셋+나비넥타이·강아지 귀+밥그릇·사냥 모자+돋보기·오락기 등딱지·메가 로봇.
  * 2월드 7종(P10-04)은 바다 소품(`costume.gear`, `gear.tsx`)을 더함: 산호·털모자·튜브·해적 모자·붕대·아귀 초롱·선장 모자 + 문어 다리.
  * 등딱지·더듬이 끝 색만 바꾸고 얼굴·볼터치는 그대로라 어느 색이어도 같은 "장난꾸러기 친구". 외곽선은 B(기본 스타일)의 몸색 진한 톤.
  */
@@ -14,10 +15,97 @@ type Shell = Pick<
 > &
   Partial<Pick<BugBugPalette, 'spot'>>;
 
-export const BOSS_LOOK: Record<
-  BossLook,
-  { palette?: Shell; costume?: Costume }
-> = {
+type Look = { palette?: Shell; costume?: Costume };
+
+/**
+ * 3월드 메이커 시티 외형 7종 (P11-11). 키는 콘텐츠 `prompt.boss.look` 이름(설계서 world3.md §5).
+ * `BOSS_LOOKS`(src/lib/quest/boss.ts)에도 같은 이름이 있어 콘텐츠에서 바로 씀
+ */
+export const MAKER_BOSS_LOOK = {
+  // 3-1 거북이 화가 공방: 나무 팔레트 등딱지 + 산딸기 물감 점 + 베레모·붓
+  painter: {
+    palette: {
+      shell: '#E6D3AC',
+      shellDark: '#C7AF82',
+      shellLight: '#F4E8CF',
+      outline: '#9C845A',
+      antTip: '#5B8ED6',
+      spot: '#B5476A',
+    },
+    costume: { gear: 'beret' },
+  },
+  // 3-2 모험 이야기 극장: 극장 보라 + 가죽 책 망토 + 머리 위 두루마리
+  storyteller: {
+    palette: {
+      shell: '#6E56A3',
+      shellDark: '#523F80',
+      shellLight: '#957FC4',
+      outline: '#45346B',
+      antTip: '#F2D27A',
+    },
+    costume: { gear: 'scroll' },
+  },
+  // 3-3 퀴즈쇼 진행자: 검은 턱시도 + 금 반짝이 점 + 헤드셋 마이크·나비넥타이
+  host: {
+    palette: {
+      shell: '#38343F',
+      shellDark: '#24212A',
+      shellLight: '#5C576B',
+      outline: '#1E1C24',
+      antTip: '#F0B43C',
+      spot: '#E8C35A',
+    },
+    costume: { gear: 'headset' },
+  },
+  // 3-4 펫 장난꾸러기: 햇살 노랑 + 발바닥 갈색 점 + 강아지 귀 머리띠·밥그릇
+  pet_sitter: {
+    palette: {
+      shell: '#E8B648',
+      shellDark: '#C4932A',
+      shellLight: '#F4D27F',
+      outline: '#A07620',
+      antTip: '#F2B6B0',
+      spot: '#9C6A3E',
+    },
+    costume: { gear: 'puppy' },
+  },
+  // 3-5 수상한 그래프: 짙은 숲색 코트 + 사냥 모자·돋보기
+  detective: {
+    palette: {
+      shell: '#5C7A55',
+      shellDark: '#435C3E',
+      shellLight: '#82A07A',
+      outline: '#36492F',
+      antTip: '#E0B14A',
+    },
+    costume: { gear: 'deerstalker' },
+  },
+  // 3-6 오락실: 옛날 게임기 베이지 등딱지 + 십자키·단추(점 대신) + 빨간 조이스틱 더듬이
+  arcade: {
+    palette: {
+      shell: '#DCD6CB',
+      shellDark: '#B8B0A2',
+      shellLight: '#EEEAE2',
+      outline: '#8E867A',
+      antTip: '#E0524A',
+    },
+    costume: { gear: 'arcade' },
+  },
+  // 3-F 메가 로봇 버그버그 (최종 보스): 강철 파랑 + 리벳 점 + 로봇 몸통·팔·쇠 다리 + 조종사 고글·경고등
+  mega_robot: {
+    palette: {
+      shell: '#7088A8',
+      shellDark: '#53698A',
+      shellLight: '#97ABC6',
+      outline: '#3E4F68',
+      antTip: '#FFD25A',
+      spot: '#D7DEE7',
+    },
+    costume: { gear: 'robot' },
+  },
+} satisfies Record<string, Look>;
+
+export const BOSS_LOOK: Record<BossLook, Look> = {
   // 1단계: 기본 빨간 무당벌레 그대로
   village: {},
   forest: {
@@ -158,4 +246,6 @@ export const BOSS_LOOK: Record<
     },
     costume: { gear: 'captain' },
   },
+  // ── 3월드 메이커 시티 (P11-11)
+  ...MAKER_BOSS_LOOK,
 };

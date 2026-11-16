@@ -1,0 +1,42 @@
+# 3월드 퀴즈 3-5: 점수판 빈칸 (fill_blank)
+# 입력 대신 정해 둔 답 리스트. 빈칸 하나만 다른 토큰으로 바꾸면 결과가 달라지게 고름 (quizzes.content.test)
+
+id: b3000000-0000-0000-0000-000000000019
+order: 5
+title: 점수판 빈칸
+concept: 점수와 하트 바꾸기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 맞히면 점수, 틀리면 하트
+  learning_goals:
+    - 변수에 1을 더하거나 빼서 점수와 하트를 바꿀 수 있다
+  story_context: 퀴즈쇼 점수판의 숫자가 몇 개 지워졌어요! 손님 답 세 개를 채점하면서 점수는 올리고 하트는 줄이는 점수판을 고쳐 줘요.
+  fallback_text: 맞히면 점수에 1을 더하고, 틀리면 하트에서 1을 빼요. 변수 = 변수 + 1 처럼 지금 값에서 새 값을 만들어 다시 담아요.
+  quiz:
+    question: 빈칸을 채워 맞히면 점수가 1 오르고, 틀리면 하트가 1 줄게 해요
+    code: |-
+      answers = ["고래", "8", "문어"]  # 손님이 입력한 답
+      correct = ["고래", "7", "문어"]
+      score = 0
+      hearts = 3
+      for i in range(3):
+          if answers[i] == correct[i]:
+              score = score + {{bk-8wto}}
+          else:
+              hearts = {{bk-w2qv}} - 1
+      print(f"점수 {score}, 하트 {hearts}")
+    tokens:
+      - { id: tok-ku31, text: '1' }
+      - { id: tok-sj4q, text: hearts }
+      - { id: tok-h0v8, text: score }
+      - { id: tok-0unl, text: '0' }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-8wto: tok-ku31, bk-w2qv: tok-sj4q }
+    explanation: 맞힌 두 문제마다 score 에 1을 더해 점수 2, 틀린 한 문제에서 hearts 에서 1을 빼 하트 2 가 돼요.
+    explanations:
+      tok-h0v8: 점수에 점수를 더하면 0 + 0 이라 계속 0 이에요. 하트에서 점수를 빼는 것도 아니에요.
+      tok-0unl: 0을 더하면 점수가 안 올라요. 0 - 1 이면 하트가 -1 이 돼요.

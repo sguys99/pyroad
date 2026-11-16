@@ -820,6 +820,251 @@ async function groupBoss(u) {
   });
 }
 
+// ── 작품 (P11-06, ① 00054) ──
+const GZ = `\\x1f8b${'00'.repeat(30)}`;
+const PNGHEX = `\\x89504e470d0a1a0a${'00'.repeat(70)}`;
+
+async function groupCreations(u) {
+  const drawing = (extra = {}) => ({ user_id: u.alice.id, kind: 'drawing', title: '별 그림', code: 'import turtle', commands_gz: GZ, ...extra });
+
+  await check({
+    group: 'creations',
+    id: 'CRE-1',
+    role: 'authenticated',
+    op: 'creations: 남의 작품·비로그인 읽기 · 공개로 저장/바꾸기 · 숨김·주인 열 쓰기 · 남의 작품 고치기·지우기 (본인 비공개만, 공개는 service_role)',
+    ...WRITE,
+    run: async () => {
+      const bobRow = one(`insert into public.creations (user_id, kind, title, transcript) values
+             ('${u.bob.id}', 'conversation', '밥의 모험', '[{"text":"안녕"}]') returning id`);
+      const mine = one(`insert into public.creations (user_id, kind, title, commands_gz) values
+             ('${u.alice.id}', 'drawing', '앨리스 그림', '${GZ}') returning id`);
+      try {
+        const others = await rest('GET', `/rest/v1/creations?select=id&user_id=eq.${u.bob.id}`, { as: u.alice });
+        if (others.status !== 200 || others.json.length !== 0)
+          return { actual: 'written', detail: `남의 작품 ${others.status} rows=${others.json?.length}` };
+        const own = await rest('GET', '/rest/v1/creations?select=id', { as: u.alice });
+        if (own.status !== 200 || own.json.length !== 1) return { actual: 'error', detail: `본인 작품 ${own.status}` };
+        const anon = classifyRead(await rest('GET', '/rest/v1/creations?select=*'));
+        if (anon.actual === 'allowed') return { actual: 'written', detail: `anon ${anon.detail}` };
+        const tries = [
+          ['INSERT public', rest('POST', '/rest/v1/creations', { as: u.alice, body: drawing({ title: '공개로', visibility: 'public' }), prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creations where title = '공개로')`],
+          ['INSERT 남의 이름', rest('POST', '/rest/v1/creations', { as: u.alice, body: drawing({ title: '사칭', user_id: u.bob.id }), prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creations where title = '사칭')`],
+          ['UPDATE public', rest('PATCH', `/rest/v1/creations?id=eq.${mine}`, { as: u.alice, body: { visibility: 'public' }, prefer: 'return=minimal' }),
+           `select visibility = 'public' from public.creations where id = '${mine}'`],
+          ['UPDATE hidden_at', rest('PATCH', `/rest/v1/creations?id=eq.${mine}`, { as: u.alice, body: { hidden_at: null, published_at: '2026-01-01T00:00:00Z' }, prefer: 'return=minimal' }),
+           `select published_at is not null from public.creations where id = '${mine}'`],
+          ['UPDATE 남의 작품', rest('PATCH', `/rest/v1/creations?id=eq.${bobRow}`, { as: u.alice, body: { title: '바꿈' }, prefer: 'return=minimal' }),
+           `select title = '바꿈' from public.creations where id = '${bobRow}'`],
+          ['DELETE 남의 작품', rest('DELETE', `/rest/v1/creations?id=eq.${bobRow}`, { as: u.alice, prefer: 'return=minimal' }),
+           `select not exists (select 1 from public.creations where id = '${bobRow}')`],
+          ['anon INSERT', rest('POST', '/rest/v1/creations', { body: drawing({ title: '익명' }), prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creations where title = '익명')`],
+        ];
+        let last;
+        for (const [name, req, verify] of tries) {
+          last = await classifyWrite(req, verify);
+          if (last.actual === 'written') return { actual: 'written', detail: `${name} ${last.detail}` };
+          // RLS WITH CHECK 위반(42501)·열 권한(42501)·RLS 0행 = 막힘
+          if (last.actual === 'error' && !/42501/.test(last.detail)) return { actual: 'error', detail: `${name} ${last.detail}` };
+        }
+        return { actual: 'denied', detail: '7가지 쓰기 모두 막힘' };
+      } finally {
+        one(`delete from public.creations where user_id in ('${u.alice.id}', '${u.bob.id}')`);
+      }
+    },
+  });
+
+  await check({
+    group: 'creations',
+    id: 'CRE-2',
+    role: 'authenticated',
+    op: '본인 비공개 저장(그림·대화)·제목 고치기(updated_at)·지우기 · 크기·모양 CHECK(gzip·PNG 머리, 20자, 종류별 내용) · 사용자당 60개',
+    ...OK,
+    run: async () => {
+      try {
+        const post = (body) => rest('POST', '/rest/v1/creations', { as: u.alice, body, prefer: 'return=representation' });
+        const ok = await post(drawing({ thumbnail: PNGHEX }));
+        if (ok.status !== 201 || ok.json[0].visibility !== 'private' || ok.json[0].show_code !== false)
+          return { actual: 'mismatch', detail: `그림 저장 ${ok.status} ${JSON.stringify(ok.json)?.slice(0, 120)}` };
+        const id = ok.json[0].id;
+        const conv = await post({ user_id: u.alice.id, kind: 'conversation', title: '모험', transcript: [{ text: '이름?' }, { text: '콩이', answer: true }] });
+        if (conv.status !== 201) return { actual: 'mismatch', detail: `대화 저장 ${conv.status}` };
+        const bad = [
+          ['gzip 머리 아님', drawing({ commands_gz: `\\x0000${'00'.repeat(30)}` })],
+          ['명령 100KB 초과', drawing({ commands_gz: `\\x1f8b${'00'.repeat(102_400)}` })],
+          ['PNG 머리 아님', drawing({ thumbnail: `\\x${'00'.repeat(80)}` })],
+          ['제목 21자', drawing({ title: '가'.repeat(21) })],
+          ['제목 앞뒤 공백', drawing({ title: ' 별 ' })],
+          ['그림인데 명령 없음', drawing({ commands_gz: null })],
+          ['대화인데 기록 없음', { user_id: u.alice.id, kind: 'conversation', title: '빈 대화' }],
+          ['대화에 그림', { user_id: u.alice.id, kind: 'conversation', title: '섞임', transcript: [{ text: 'x' }], commands_gz: GZ }],
+          ['모르는 종류', drawing({ kind: 'video' })],
+        ];
+        for (const [name, body] of bad) {
+          const r = await post(body);
+          if (r.status < 400 || errCode(r) !== '23514') return { actual: 'mismatch', detail: `${name}: ${r.status} ${errCode(r)}` };
+        }
+        const before = one(`select updated_at from public.creations where id = '${id}'`);
+        const upd = await rest('PATCH', `/rest/v1/creations?id=eq.${id}`, { as: u.alice, body: { title: '새 이름', show_code: true }, prefer: 'return=representation' });
+        if (upd.status !== 200 || upd.json[0]?.title !== '새 이름' || upd.json[0].updated_at === before)
+          return { actual: 'mismatch', detail: `고치기 ${upd.status}` };
+        const del = await rest('DELETE', `/rest/v1/creations?id=eq.${id}`, { as: u.alice, prefer: 'return=representation' });
+        if (del.status !== 200 || del.json.length !== 1) return { actual: 'mismatch', detail: `지우기 ${del.status}` };
+        // 상한: 지금 1개(대화) + 59개 = 60 → 다음 저장은 PT409
+        one(`insert into public.creations (user_id, kind, title, transcript)
+               select '${u.alice.id}', 'conversation', '채움 ' || g, '[{"text":"x"}]' from generate_series(1, 59) g`);
+        const full = await post(drawing({ title: '61번째' }));
+        if (full.status < 400 || !/creations_limit/.test(errMsg(full))) return { actual: 'mismatch', detail: `상한 ${full.status} ${errMsg(full)}` };
+        return { actual: 'ok', detail: '저장·고치기·지우기·CHECK 9가지·60개 상한' };
+      } finally {
+        one(`delete from public.creations where user_id = '${u.alice.id}'`);
+      }
+    },
+  });
+}
+
+// ── 갤러리 (P11-07, ① 00055) ──
+async function groupGallery(u) {
+  const make = (user, extra = '') =>
+    one(`insert into public.creations (user_id, kind, title, transcript, visibility, published_at, show_code, code${extra ? ', hidden_at' : ''})
+           values ('${user}', 'conversation', '갤러리 ' || left(md5(random()::text), 6), '[{"text":"안녕"}]', 'public', now(), false, 'secret_code()'${extra ? `, ${extra}` : ''}) returning id`);
+  const cleanup = () => {
+    one(`delete from public.creation_reports where reporter_id in ('${u.alice.id}', '${u.bob.id}') or target_user_id in ('${u.alice.id}', '${u.bob.id}')`);
+    one(`delete from public.creations where user_id in ('${u.alice.id}', '${u.bob.id}')`);
+  };
+
+  await check({
+    group: 'gallery',
+    id: 'GAL-1',
+    role: 'authenticated',
+    op: '학생·anon 이 갤러리 뷰·남의 공개 작품·스티커·신고 표를 읽거나 쓰기 · report_creation 실행 (서버만)',
+    ...WRITE,
+    run: async () => {
+      const bobRow = make(u.bob.id);
+      try {
+        for (const [who, as] of [['alice', u.alice], ['anon', 'anon']]) {
+          for (const path of [
+            '/rest/v1/gallery_creations?select=id',
+            `/rest/v1/creations?select=id,code&id=eq.${bobRow}`,
+            '/rest/v1/creation_reactions?select=*',
+            '/rest/v1/creation_reports?select=*',
+          ]) {
+            const r = classifyRead(await rest('GET', path, { as }));
+            if (r.actual === 'allowed') return { actual: 'written', detail: `${who} 읽기 ${path} ${r.detail}` };
+          }
+        }
+        const tries = [
+          ['스티커 쓰기', rest('POST', '/rest/v1/creation_reactions', { as: u.alice, body: { creation_id: bobRow, user_id: u.alice.id, sticker: 'love' }, prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creation_reactions where creation_id = '${bobRow}')`],
+          ['신고 쓰기', rest('POST', '/rest/v1/creation_reports', { as: u.alice, body: { creation_id: bobRow, reporter_id: u.alice.id, reason: 'other' }, prefer: 'return=minimal' }),
+           `select exists (select 1 from public.creation_reports where creation_id = '${bobRow}')`],
+          ['report_creation', rest('POST', '/rest/v1/rpc/report_creation', { as: u.alice, body: { p_reporter_id: u.alice.id, p_creation_id: bobRow, p_reason: 'other' } }),
+           `select exists (select 1 from public.creation_reports where creation_id = '${bobRow}')`],
+          ['남의 작품 숨김 풀기', rest('PATCH', `/rest/v1/creations?id=eq.${bobRow}`, { as: u.alice, body: { title: '바꿈' }, prefer: 'return=minimal' }),
+           `select title = '바꿈' from public.creations where id = '${bobRow}'`],
+        ];
+        for (const [name, req, verify] of tries) {
+          const c = await classifyWrite(req, verify);
+          if (c.actual === 'written') return { actual: 'written', detail: `${name} ${c.detail}` };
+          if (c.actual === 'error' && !/42501|PGRST202/.test(c.detail)) return { actual: 'error', detail: `${name} ${c.detail}` };
+        }
+        return { actual: 'denied', detail: '뷰·남의 작품·반응·신고 읽기 8가지, 쓰기 4가지 막힘' };
+      } finally {
+        cleanup();
+      }
+    },
+  });
+
+  await check({
+    group: 'gallery',
+    id: 'GAL-2',
+    role: 'service_role',
+    op: 'gallery_creations: 공개·안 숨긴 작품만, 코드는 show_code 인 것만, 작가는 공개 이름만, 스티커 합계 · 정해진 스티커만(CHECK)·한 사람 한 번(PK)',
+    ...OK,
+    run: async () => {
+      const shown = make(u.bob.id);
+      const hidden = make(u.bob.id, 'now()');
+      const priv = one(`insert into public.creations (user_id, kind, title, transcript) values ('${u.bob.id}', 'conversation', '비공개', '[{"text":"x"}]') returning id`);
+      try {
+        one(`update public.creations set show_code = true, code = 'print(1)' where id = '${shown}'`);
+        const add = (user, sticker) =>
+          rest('POST', '/rest/v1/creation_reactions', { as: 'service', body: { creation_id: shown, user_id: user, sticker }, prefer: 'return=minimal' });
+        await add(u.alice.id, 'love');
+        await add(u.alice.id, 'wow');
+        const dup = await add(u.alice.id, 'love');
+        const bad = await add(u.alice.id, 'poop');
+        const v = await rest('GET', `/rest/v1/gallery_creations?select=*&author_id=eq.${u.bob.id}`, { as: 'service' });
+        if (v.status !== 200) return { actual: 'error', detail: `뷰 ${v.status} ${errMsg(v)}` };
+        const row = v.json.find((r) => r.id === shown);
+        const cols = Object.keys(row ?? {}).sort().join(',');
+        return (
+          compare(
+            '뷰',
+            { ids: [shown], code: 'print(1)', stickers: { love: 1, wow: 1 }, hasEmail: false, dup: '23505', bad: '23514', name: true },
+            {
+              ids: v.json.map((r) => r.id),
+              code: row?.code,
+              stickers: row?.stickers && { love: row.stickers.love, wow: row.stickers.wow },
+              hasEmail: /email|display_name|nickname/.test(cols),
+              dup: errCode(dup),
+              bad: errCode(bad),
+              name: typeof row?.author_name === 'string' && row.author_name.length > 0,
+            },
+          ) ?? { actual: 'ok', detail: `숨김·비공개(${hidden.slice(0, 4)}·${priv.slice(0, 4)}) 빠짐, 스티커 합계·CHECK·PK` }
+        );
+      } finally {
+        cleanup();
+      }
+    },
+  });
+
+  await check({
+    group: 'gallery',
+    id: 'GAL-3',
+    role: 'service_role',
+    op: 'report_creation: 본인·없는·비공개 작품 거절 · 같은 사람 두 번은 already · 서로 다른 3명이면 hidden_at · 숨김 푼 뒤(published_at 새로) 다시 셈',
+    ...OK,
+    run: async () => {
+      const id = make(u.bob.id);
+      const priv = one(`insert into public.creations (user_id, kind, title, transcript) values ('${u.bob.id}', 'conversation', '비공개', '[{"text":"x"}]') returning id`);
+      const extra = [await createUser('gal1', '신고1'), await createUser('gal2', '신고2')];
+      const rep = async (who, target = id) =>
+        (await rpc('report_creation', { p_reporter_id: who, p_creation_id: target, p_reason: 'abuse' })).json;
+      try {
+        const own = await rep(u.bob.id);
+        const missing = await rep(u.alice.id, priv);
+        const first = await rep(u.alice.id);
+        const again = await rep(u.alice.id);
+        const second = await rep(extra[0].id);
+        const third = await rep(extra[1].id);
+        const hidden = one(`select hidden_at is not null from public.creations where id = '${id}'`);
+        const after = await rep(u.alice.id);
+        one(`update public.creations set hidden_at = null, published_at = now() where id = '${id}'`);
+        const reshown = await rep(extra[0].id);
+        const stillShown = one(`select hidden_at is null from public.creations where id = '${id}'`);
+        return (
+          compare(
+            '신고',
+            {
+              own: 'own', missing: 'not_found', first: 'reported', again: 'already',
+              second: false, third: true, hidden: 't', after: 'not_found', reshown: false, stillShown: 't',
+            },
+            {
+              own: own?.result, missing: missing?.result, first: first?.result, again: again?.result,
+              second: second?.hidden, third: third?.hidden, hidden, after: after?.result, reshown: reshown?.hidden, stillShown,
+            },
+          ) ?? { actual: 'ok', detail: '본인·비공개 거절, 중복 already, 3명 자동 숨김, 다시 보인 뒤 새로 셈' }
+        );
+      } finally {
+        cleanup();
+        for (const x of extra) one(`delete from public.creation_reports where reporter_id = '${x.id}'`);
+      }
+    },
+  });
+}
+
 async function groupShareCards(u) {
   const make = (id, kind, ref) =>
     rpc('create_share_card', { p_user_id: id, p_kind: kind, ...(ref && { p_ref: ref }) });
@@ -1045,6 +1290,91 @@ async function groupShareCards(u) {
             otherLeft: Number(otherLeft),
           },
         ) ?? { actual: 'ok', detail: `거부 3종, 닉네임·모자 version+1·펫 그대로, 숨기기·다시 공개 90일·지우기` }
+      );
+    },
+  });
+}
+
+async function groupCreationShareCards() {
+  // ── 작품 자랑 카드 (P11-08, ① 00056) ──
+  const pub = async (id) => (await rpc('share_card_public', { p_id: id })).json;
+  const thumb = async (id) => (await rpc('share_card_creation_thumbnail', { p_id: id })).json;
+  const make = (user, creation) => rpc('create_creation_share_card', { p_user_id: user, p_creation_id: creation });
+  const res = (r) => (r.status === 200 ? 200 : `${r.status}:${errMsg(r)}`);
+  await check({
+    group: 'share',
+    id: 'SCC-2',
+    role: 'service_role',
+    op: '작품 카드: 전시 중인 내 작품만(비공개·남의 작품 거절) · 스냅샷은 이름·대화 앞 4줄(40자)만, 코드 없음 · 썸네일 함수 · 이름 변경 → version+1 · 내리기·숨김 → 카드 닫힘·공개 조회 0행·다시 공개 거절 · 다시 전시 후 다시 공개 · 지우기 → 카드 행 삭제',
+    ...OK,
+    run: async () => {
+      const x = await createUser('scc2', '작품카드');
+      const y = await createUser('scc2b', '남의작품');
+      const draw = one(`insert into public.creations (user_id, kind, title, code, commands_gz, thumbnail, visibility, published_at)
+        values ('${x.id}', 'drawing', '별 그림', 'secret_code()', decode('1f8b' || repeat('00', 30), 'hex'),
+                decode('89504e470d0a1a0a' || repeat('00', 70), 'hex'), 'public', now()) returning id`);
+      const chat = one(`insert into public.creations (user_id, kind, title, code, transcript, visibility, published_at)
+        values ('${x.id}', 'conversation', '퀴즈쇼', 'secret_code()',
+                '[{"text":"이름이 뭐예요?"},{"text":"   "},{"text":"번개","answer":true},{"text":"${'가'.repeat(50)}"},{"text":"넷째"},{"text":"다섯째"}]',
+                'public', now()) returning id`);
+      const priv = one(`insert into public.creations (user_id, kind, title, transcript) values ('${x.id}', 'conversation', '비밀', '[{"text":"x"}]') returning id`);
+      const others = one(`insert into public.creations (user_id, kind, title, transcript, visibility, published_at) values ('${y.id}', 'conversation', '남의', '[{"text":"x"}]', 'public', now()) returning id`);
+      const denied = [await make(x.id, priv), await make(x.id, others)].map(res).join('|');
+
+      const d = (await make(x.id, draw)).json;
+      const c = (await make(x.id, chat)).json;
+      const again = (await make(x.id, draw)).json;
+      const chatLines = c?.snapshot?.lines;
+      const keys = Object.keys(d?.snapshot ?? {}).filter((k) => k !== 'avatar').sort().join(',');
+      const thumbOk = typeof (await thumb(d?.id)) === 'string';
+      const chatThumb = await thumb(c?.id);
+
+      const v0 = Number(one(`select version from public.share_cards where id = '${d.id}'`));
+      one(`update public.creations set title = '무지개 별' where id = '${draw}'`);
+      const renamed = one(`select version || ':' || (snapshot->>'name') from public.share_cards where id = '${d.id}'`);
+
+      one(`update public.creations set visibility = 'private' where id = '${draw}'`);
+      const closed = one(`select is_public from public.share_cards where id = '${d.id}'`);
+      const closedPub = (await pub(d.id))?.length;
+      const closedThumb = await thumb(d.id);
+      const reshow = res(await rpc('manage_share_card', { p_user_id: x.id, p_card_id: d.id, p_action: 'show' }));
+      one(`update public.creations set visibility = 'public' where id = '${draw}'`);
+      const stillClosed = one(`select is_public from public.share_cards where id = '${d.id}'`);
+      const reshow2 = res(await rpc('manage_share_card', { p_user_id: x.id, p_card_id: d.id, p_action: 'show' }));
+      const reopened = (await pub(d.id))?.length;
+
+      one(`update public.creations set hidden_at = now() where id = '${chat}'`);
+      const hiddenPub = (await pub(c.id))?.length;
+      one(`delete from public.creations where id = '${draw}'`);
+      const gone = Number(one(`select count(*) from public.share_cards where id = '${d.id}'`));
+      return (
+        compare(
+          'SCC-2',
+          {
+            denied: '409:creation_not_shared|404:creation_not_found',
+            sameId: true,
+            keys: 'name,nickname,world',
+            lines: [{ text: '이름이 뭐예요?' }, { text: '번개', answer: true }, { text: '가'.repeat(40) }, { text: '넷째' }],
+            thumbs: 'true:null',
+            renamed: `${v0 + 1}:무지개 별`,
+            closed: 'f:0:null',
+            reshow: '409:creation_not_shared|f|200:1',
+            hiddenPub: 0,
+            gone: 0,
+          },
+          {
+            denied,
+            sameId: !!d?.id && again?.id === d.id,
+            keys,
+            lines: chatLines,
+            thumbs: `${thumbOk}:${chatThumb}`,
+            renamed,
+            closed: `${closed}:${closedPub}:${closedThumb}`,
+            reshow: `${reshow}|${stillClosed}|${reshow2}:${reopened}`,
+            hiddenPub,
+            gone,
+          },
+        ) ?? { actual: 'ok', detail: '거절 2종, 같은 id, 이름·4줄·40자, 썸네일, 이름 version+1, 내리기 닫힘·재공개 거절, 숨김, 삭제' }
       );
     },
   });
@@ -2825,6 +3155,18 @@ async function groupRpc(u) {
       u.alice,
       'manage_share_card',
       { p_user_id: u.alice.id, p_card_id: 'rG6TzuP93C8blCS4ZdyehQ', p_action: 'hide' },
+    ],
+    [
+      'SCC-1',
+      u.alice,
+      'create_creation_share_card',
+      { p_user_id: u.alice.id, p_creation_id: '00000000-0000-0000-0000-000000000000' },
+    ],
+    [
+      'SCC-1b',
+      'anon',
+      'share_card_creation_thumbnail',
+      { p_id: 'rG6TzuP93C8blCS4ZdyehQ' },
     ],
     [
       'GR-1',
@@ -4826,6 +5168,8 @@ async function groupAccount(u) {
             from fk
            where confdeltype <> 'c'
              and not (conrelid = 'public.board_reports'::regclass and attname = 'target_user_id' and confdeltype = 'n')
+             -- 갤러리 신고(00055)도 게시판처럼: 신고된 학생이 탈퇴해도 신고 기록은 남김
+             and not (conrelid = to_regclass('public.creation_reports') and attname = 'target_user_id' and confdeltype = 'n')
           union all
           select format('%s.%s (users FK 없음)', c.oid::regclass, a.attname)
             from pg_attribute a
@@ -5856,13 +6200,13 @@ async function groupAchievements(u) {
              ('${x.id}', 'streak_3', '2026-10-01 10:00+09'), ('${x.id}', 'project_builder', '2026-10-02 10:00+09')`);
       const sql = readFileSync(join(HERE, '..', 'migrations', '00036_achievements.sql'), 'utf8');
       // 00048(P9-18)·00053(P10-11) 정의가 있으면 00036 자기 검증이 새 지표를 모른다고 실패 → 지운 뒤 다시 돌리고 00048·00053 으로 되살림 (00048 머리 주석)
-      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three') or category = 'sea'`);
+      one(`delete from public.achievements where metric in ('weeks_two', 'weeks_three') or category in ('sea', 'maker')`);
       const m1 = psql(sql);
       const m2 = psql(sql);
       // B59: 00036 을 다시 돌리면 00038 이 바꾼 achievement_progress 가 00036 본문으로 돌아가 뒤 점검(PS-*)이 옛 정의로 돎 → 00038 다시
       // 00047(B74)·00048(P9-18)·00051(B75)·00053(P10-11, evaluate·claim 도)도 achievement_stats 를 바꾸므로 00038 뒤에 다시
       const m3 = psql(
-        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql', '00053_sea_achievements.sql']
+        ['00038_profile_stats.sql', '00047_boss_metrics.sql', '00048_weekly_study.sql', '00051_boss_no_hint.sql', '00053_sea_achievements.sql', '00057_maker_achievements.sql']
           .map((f) => readFileSync(join(HERE, '..', 'migrations', f), 'utf8'))
           .join('\n'),
       );
@@ -5964,7 +6308,7 @@ async function groupAchievements(u) {
     group: 'achievements',
     id: 'WK-1',
     role: 'service_role',
-    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 53종(00053 코드 바다 7종 포함)',
+    op: '한 주에 n일 공부 (00048): KST 주(월~일)마다 공부한 날 수 · 일요일 23:30 KST 는 그 주, 월요일 00:30 KST 는 다음 주 · 방패 날은 안 셈 · 2일 주 4번 → week2_4(3일 업적은 아직) · 한 주에 하루 더 → weeks_three 1 · 업적 62종(00053 코드 바다 7종 · 00057 메이커 시티 9종 포함)',
     ...OK,
     run: async () => {
       const x = await createUser('wk1', '주말공부');
@@ -5992,7 +6336,7 @@ async function groupAchievements(u) {
       return (
         compare(
           'WK-1',
-          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '53' },
+          { four: '4:0', weekly: 'week2_4', three: '4:1', defs: '62' },
           {
             four,
             weekly: got.filter((a) => a.id.startsWith('week')).map((a) => a.id).join(','),
@@ -6110,6 +6454,102 @@ async function groupAchievements(u) {
           IF (v_r->>'coins_earned')::int <> 30 OR (v_r->>'coins_balance')::int <> v_coins + 30
              OR (SELECT delta FROM public.coin_ledger WHERE user_id = v_uid AND source = 'achievement' AND ref = 'sea_captain') <> 30 THEN
             RAISE EXCEPTION '선장 받기: %', v_r;
+          END IF;
+        END $$;`),
+  });
+
+  // ── 메이커 시티 업적 (P11-14, ① 00057) ──
+  const maker = await createUser('maker1', '메이커');
+  const makerFriend = await createUser('maker2', '메이커친구');
+  await check({
+    group: 'achievements',
+    id: 'MAKER-1',
+    role: 'postgres',
+    op: '메이커 시티 업적 (00057): 작품 저장 → 첫 작품 · 출품 → 첫 전시 · 친구 작품 5개 스티커 → 응원 단장(코인 0, 받은 것으로) · 내 작품 스티커는 안 셈 · 3-1 깸 → 거북이 화가 · 3-2~3-4 → 이야기 짓는 사람 · 3-6 → 게임 개발자 · 3월드 모두(별 3) → 도시 보스·명예 시민·숨김 완벽한 도시 · 받기 골드 100 · 다시 판정해도 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        DO $$
+        DECLARE
+          v_uid   UUID := '${maker.id}';
+          v_fr    UUID := '${makerFriend.id}';
+          v_got   TEXT;
+          v_r     JSONB;
+          v_coins INTEGER;
+          v_c     UUID;
+          q_new   CONSTANT TEXT := $q$SELECT COALESCE(string_agg(e->>'id' || ':' || (e->>'coins'), ',' ORDER BY e->>'id'), '')
+                                     FROM jsonb_array_elements(public.evaluate_achievements($1)) e
+                                    WHERE e->>'id' IN (SELECT id FROM public.achievements WHERE category = 'maker')$q$;
+          q_any   CONSTANT UUID := (SELECT q.id FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
+                                     JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'maker-city' ORDER BY s."order", q."order" LIMIT 1);
+        BEGIN
+          SELECT coins INTO v_coins FROM public.users WHERE id = v_uid;
+          v_r := public.achievement_stats(v_uid);
+          IF (v_r->>'maker_perfect_total')::int <> 7 OR (v_r->>'maker_bosses_total')::int <> 7
+             OR (v_r->>'maker_saves')::int <> 0 OR (v_r->>'maker_cheers')::int <> 0 THEN
+            RAISE EXCEPTION '처음 지표: %', v_r;
+          END IF;
+
+          -- 작품 저장 → 첫 작품, 출품 → 첫 전시
+          INSERT INTO public.creations (user_id, quest_id, kind, title, code, transcript)
+          VALUES (v_uid, q_any, 'conversation', '내 이야기', 'print(1)', '[{"out":"1"}]'::jsonb)
+          RETURNING id INTO v_c;
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'maker_first_save:10' THEN RAISE EXCEPTION '첫 작품: %', v_got; END IF;
+          UPDATE public.creations SET visibility = 'public', published_at = now() WHERE id = v_c;
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'maker_first_post:10' THEN RAISE EXCEPTION '첫 전시: %', v_got; END IF;
+
+          -- 스티커: 내 작품은 안 셈, 친구 작품 4개면 아직, 5개면 응원 단장(코인 0, 얻는 순간 받은 것)
+          INSERT INTO public.creation_reactions (creation_id, user_id, sticker) VALUES (v_c, v_uid, 'wow');
+          INSERT INTO public.creations (user_id, quest_id, kind, title, code, transcript)
+          SELECT v_fr, q_any, 'conversation', '친구 ' || g, 'print(1)', '[{"out":"1"}]'::jsonb FROM generate_series(1, 5) g;
+          INSERT INTO public.creation_reactions (creation_id, user_id, sticker)
+          SELECT c.id, v_uid, s FROM public.creations c, (VALUES ('wow'), ('love')) v(s)
+           WHERE c.user_id = v_fr AND c.title IN ('친구 1', '친구 2', '친구 3', '친구 4');
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '스티커 4개 작품인데: %', v_got; END IF;
+          INSERT INTO public.creation_reactions (creation_id, user_id, sticker)
+          SELECT c.id, v_uid, 'cheer' FROM public.creations c WHERE c.user_id = v_fr AND c.title = '친구 5';
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'cheer_leader:0' THEN RAISE EXCEPTION '응원 단장: %', v_got; END IF;
+          IF (SELECT claimed_at IS NULL FROM public.user_achievements WHERE user_id = v_uid AND achievement_id = 'cheer_leader') THEN
+            RAISE EXCEPTION '코인 0 배지가 받기 대기로 남음';
+          END IF;
+
+          -- 3-1 모두(별 3) → 거북이 화가 + 도시 보스 첫 승리
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '1 hour' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id = 'a3000000-0000-0000-0000-000000000001';
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'maker_boss_first:10,turtle_painter:30' THEN RAISE EXCEPTION '3-1: %', v_got; END IF;
+
+          -- 3-2·3-3 만 → 아직, 3-4 까지 → 이야기 짓는 사람
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '50 minutes' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id IN ('a3000000-0000-0000-0000-000000000002', 'a3000000-0000-0000-0000-000000000003');
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '3-2·3-3 만: %', v_got; END IF;
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '40 minutes' + q."order" * interval '1 second'
+            FROM public.quests q WHERE q.stage_id = 'a3000000-0000-0000-0000-000000000004';
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'story_weaver:30' THEN RAISE EXCEPTION '3-4: %', v_got; END IF;
+
+          -- 나머지(3-5·3-6·3-F) 모두 별 3 → 게임 개발자·명예 시민·완벽한 도시
+          INSERT INTO public.user_progress (user_id, quest_id, status, best_stars, stars, attempts, completed_at)
+          SELECT v_uid, q.id, 'completed', 3, 3, 1, now() - interval '1 minute' + s."order" * interval '1 second' + q."order" * interval '10 ms'
+            FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
+           WHERE s.id IN ('a3000000-0000-0000-0000-000000000005', 'a3000000-0000-0000-0000-000000000006', 'a3000000-0000-0000-0000-000000000007');
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> 'game_maker:30,maker_citizen:100,perfect_city:100' THEN RAISE EXCEPTION '3월드 클리어: %', v_got; END IF;
+          EXECUTE q_new INTO v_got USING v_uid;
+          IF v_got <> '' THEN RAISE EXCEPTION '다시 판정: %', v_got; END IF;
+
+          -- 받기: 골드 100, 원장 한 번
+          v_r := public.claim_achievement(v_uid, 'maker_citizen');
+          IF (v_r->>'coins_earned')::int <> 100 OR (v_r->>'coins_balance')::int <> v_coins + 100 THEN
+            RAISE EXCEPTION '명예 시민 받기: %', v_r;
           END IF;
         END $$;`),
   });
@@ -6324,16 +6764,17 @@ async function groupSchema(u) {
     group: 'schema',
     id: 'WD-4',
     role: 'postgres',
-    op: '스테이지 world_id·quest_type 백필 (1월드 7개 + 2월드 7개, 1월드 project 는 7-1 · project·code·quiz·boss 는 seed 와 같은 수, quiz_kind 는 퀴즈만 · 모바일은 퀴즈·보스만)',
+    op: '스테이지 world_id·quest_type 백필 (1월드 7개 + 2월드 7개 + 3월드 7개(P11-14 부터 seed), 1월드 project 는 7-1 · project·code·quiz·boss 는 seed 와 같은 수, quiz_kind 는 퀴즈만 · 모바일은 퀴즈·보스만)',
     deny: ['mismatch', 'error'],
     allow: ['ok'],
     run: () =>
       sqlCheck(`DO $$ BEGIN
-        -- 1월드(python-island) 7개 + 2월드(code-sea, P10-07 부터 seed) 7개, 그 밖의 월드엔 없음
+        -- 1월드(python-island) 7개 + 2월드(code-sea, P10-07 부터 seed) 7개 + 3월드(maker-city, P11-14 부터 seed) 7개
         IF (SELECT count(*) FROM public.stages WHERE world_id = '${PYTHON_ISLAND}') <> 7
            OR (SELECT count(*) FROM public.stages s JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'code-sea') <> 7
-           OR (SELECT count(*) FROM public.stages) <> 14 THEN
-          RAISE EXCEPTION 'stages: 1월드 7개 · 2월드 7개가 아님';
+           OR (SELECT count(*) FROM public.stages s JOIN public.worlds w ON w.id = s.world_id WHERE w.slug = 'maker-city') <> 7
+           OR (SELECT count(*) FROM public.stages) <> 21 THEN
+          RAISE EXCEPTION 'stages: 1월드 7개 · 2월드 7개 · 3월드 7개가 아님';
         END IF;
         IF (SELECT string_agg(q.id::text, ',') FROM public.quests q JOIN public.stages s ON s.id = q.stage_id
              WHERE q.quest_type = 'project' AND s.world_id = '${PYTHON_ISLAND}') <> '${Q_PROJECT}'
@@ -8730,6 +9171,9 @@ async function main() {
   await groupAchievements(u);
   await groupInventory(u);
   await groupShareCards(u);
+  await groupCreationShareCards();
+  await groupCreations(u);
+  await groupGallery(u);
   await groupBoss(u);
   await groupSkillCheck(u);
   await groupSchema(u);

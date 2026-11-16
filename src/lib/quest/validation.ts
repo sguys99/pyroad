@@ -1,5 +1,15 @@
+import {
+  analyze,
+  checkDrawingRule,
+  DRAWING_RULE_TYPES,
+  type Analysis,
+  type DrawingRule,
+} from '@/lib/turtle/check';
+import type { TurtleCommand } from '@/lib/turtle/scene';
+
 /**
- * 판정 규칙 유형.
+ * DB `quests.validation_type`에 저장되는 규칙 유형 (CHECK 00012). 새 규칙(그림·any·시나리오, P11-05)은
+ * `all` 안에만 들어가므로 이 목록은 그대로다 (`toStoredRule`).
  * - output_match·contains·code_check: 기준값이 문자열 하나 (기존 규칙)
  * - contains_any: 출력에 여러 문자열 중 하나라도 있으면 통과 (무작위 출력 퀘스트, B09·P1-11)
  * - all: 여러 규칙을 모두 통과해야 통과 (예: 코드에 `elif` + 출력에 "커요"·"작아요"·"정답" 중 하나)
@@ -14,13 +24,20 @@ export type ValidationType =
 /**
  * 판정 규칙 (콘텐츠 원본 `content/**.yaml`의 `answer.validation`, 검증 JSON의 `rule`과 같은 형태).
  * DB에는 `toStoredRule()`로 바꿔 `validation_type`(공개) + `expected_output`(정답 테이블) 두 칸에 저장한다.
+ * P11-05: `any`(하나라도 통과, 제안 H) · 그림 규칙(`shape`·`circles`·`colors`·`text`·`segments`·`turtles`·`match_drawing`,
+ * turtle 명령 스트림을 src/lib/turtle/check.ts로 판정) · `scenario`(시험 손님 i번 실행에만 붙는 규칙, 빌드가 만듦)
  */
 export type ValidationRule =
   | { type: 'output_match'; expected: string }
   | { type: 'contains'; expected: string }
   | { type: 'contains_any'; expected: string[] }
   | { type: 'code_check'; expected: string; whole_word?: boolean }
-  | { type: 'all'; rules: ValidationRule[] };
+  | { type: 'all'; rules: ValidationRule[] }
+  | { type: 'any'; rules: ValidationRule[] }
+  | { type: 'scenario'; index: number; rule: ValidationRule }
+  | DrawingRule;
+
+export type RuleType = ValidationRule['type'];
 
 export interface CodeCheckOptions {
   /**
@@ -32,14 +49,24 @@ export interface CodeCheckOptions {
   wholeWord?: boolean;
 }
 
-export interface ValidationInput {
-  validationType: ValidationType;
-  /** DB에 저장된 기준값. contains_any·all은 JSON 문자열 (`toStoredRule` 참고) */
-  expectedOutput: string;
+/** 실행 한 번의 결과 (출력·코드 + P11-05 그림·시험 손님 번호) */
+export interface RunContext {
   stdout: string;
   studentCode: string;
   /** code_check 규칙에만 쓰는 옵션 */
   codeCheck?: CodeCheckOptions;
+  /** 이 실행의 turtle 명령 (그림 규칙). 없으면 빈 그림 */
+  turtle?: readonly TurtleCommand[];
+  /** 시험 손님 번호 (0부터). 없으면 `scenario` 규칙은 건너뜀 (예시 출력 검사 등) */
+  scenario?: number;
+  /** true면 그림 규칙을 통과로 본다 (그림이 없는 예시 출력 검사, schema checkExample) */
+  ignoreDrawing?: boolean;
+}
+
+export interface ValidationInput extends RunContext {
+  validationType: ValidationType;
+  /** DB에 저장된 기준값. contains_any·all은 JSON 문자열 (`toStoredRule` 참고) */
+  expectedOutput: string;
 }
 
 export interface ValidationResult {
@@ -47,17 +74,22 @@ export interface ValidationResult {
   type: ValidationType;
 }
 
-interface MatchContext {
-  stdout: string;
-  studentCode: string;
-  codeCheck?: CodeCheckOptions;
+interface MatchContext extends RunContext {
+  /** 그림 분석은 한 번만 (규칙 여러 개가 같은 그림을 봄) */
+  drawing?: Analysis;
 }
 
-type RuleOf<T extends ValidationType> = Extract<ValidationRule, { type: T }>;
+type RuleOf<T extends RuleType> = Extract<ValidationRule, { type: T }>;
 
-// 규칙 유형별 판정. all은 하위 규칙마다 이 표를 다시 부른다.
+const drawingOf = (ctx: MatchContext): Analysis =>
+  (ctx.drawing ??= analyze(ctx.turtle ?? []));
+
+const drawingMatcher = (rule: DrawingRule, ctx: MatchContext) =>
+  !!ctx.ignoreDrawing || checkDrawingRule(drawingOf(ctx), rule).ok;
+
+// 규칙 유형별 판정. all·any·scenario는 하위 규칙마다 이 표를 다시 부른다.
 const matchers: {
-  [T in ValidationType]: (rule: RuleOf<T>, ctx: MatchContext) => boolean;
+  [T in RuleType]: (rule: RuleOf<T>, ctx: MatchContext) => boolean;
 } = {
   output_match: ({ expected }, { stdout }) => stdout.trim() === expected.trim(),
   contains: ({ expected }, { stdout }) => stdout.includes(expected),
@@ -73,6 +105,17 @@ const matchers: {
   // 하위 규칙이 없으면 실패 (빈 AND가 모든 답을 통과시키지 않게)
   all: ({ rules }, ctx) =>
     rules.length > 0 && rules.every((rule) => matchRule(rule, ctx)),
+  any: ({ rules }, ctx) => rules.some((rule) => matchRule(rule, ctx)),
+  // 그 손님의 실행에만 붙는 규칙. 손님 번호가 없는 판정(예시 출력 검사)에서는 건너뜀
+  scenario: ({ index, rule }, ctx) =>
+    ctx.scenario !== index || matchRule(rule, ctx),
+  shape: drawingMatcher,
+  circles: drawingMatcher,
+  colors: drawingMatcher,
+  text: drawingMatcher,
+  segments: drawingMatcher,
+  turtles: drawingMatcher,
+  match_drawing: drawingMatcher,
 };
 
 function matchRule(rule: ValidationRule, ctx: MatchContext): boolean {
@@ -88,17 +131,42 @@ export function validateResult(input: ValidationInput): ValidationResult {
   const { validationType, expectedOutput, ...ctx } = input;
   const rule = parseStoredRule(validationType, expectedOutput);
   return {
-    passed: rule !== null && matchRule(rule, ctx),
+    passed: rule !== null && matchRule(rule, { ...ctx }),
     type: validationType,
   };
 }
 
 /** 규칙 객체로 판정한다 (콘텐츠 검증 등 DB를 거치지 않는 곳) */
-export function validateRule(
+export function validateRule(rule: ValidationRule, ctx: RunContext): boolean {
+  return matchRule(rule, { ...ctx });
+}
+
+/**
+ * 떨어진 그림 규칙의 이유 (아이에게 보여 주는 한국어 문장, 튜터 힌트로도 씀). 출력 규칙의 이유는 내지 않는다
+ * (기준값이 정답이라 서버 밖으로 내보내지 않음). `any`는 모든 갈래가 떨어졌을 때만 그 이유들을.
+ */
+export function drawingReasons(
   rule: ValidationRule,
-  ctx: Omit<ValidationInput, 'validationType' | 'expectedOutput'>,
-): boolean {
-  return matchRule(rule, ctx);
+  ctx: RunContext,
+): string[] {
+  const c: MatchContext = { ...ctx };
+  const walk = (r: ValidationRule): string[] => {
+    if (DRAWING_RULE_TYPES.has(r.type)) {
+      if (ctx.ignoreDrawing) return [];
+      return checkDrawingRule(drawingOf(c), r as DrawingRule).reasons;
+    }
+    switch (r.type) {
+      case 'all':
+        return r.rules.flatMap(walk);
+      case 'any':
+        return matchRule(r, c) ? [] : r.rules.flatMap(walk);
+      case 'scenario':
+        return ctx.scenario === r.index ? walk(r.rule) : [];
+      default:
+        return [];
+    }
+  };
+  return [...new Set(walk(rule))];
 }
 
 // ------------------------------------------------------------
@@ -136,8 +204,15 @@ export function toStoredRule(rule: ValidationRule): StoredRule {
         };
       }
       return { validation_type: 'code_check', expected_output: rule.expected };
-    default:
+    case 'output_match':
+    case 'contains':
       return { validation_type: rule.type, expected_output: rule.expected };
+    default:
+      // any·그림·시나리오(P11-05)는 공개 칸 CHECK(00012)에 없으므로 all 하나짜리로 감싼다
+      return {
+        validation_type: 'all',
+        expected_output: JSON.stringify([normalizeRule(rule)]),
+      };
   }
 }
 
@@ -161,7 +236,7 @@ export function parseStoredRule(
       const rules = parseJson(expectedOutput);
       return Array.isArray(rules) &&
         rules.length > 0 &&
-        rules.every(isValidationRule)
+        rules.every((r) => isValidationRule(r))
         ? { type: 'all', rules }
         : null;
     }
@@ -192,15 +267,34 @@ export function simplifyRule(rule: ValidationRule): ValidationRule {
 function normalizeRule(rule: ValidationRule): ValidationRule {
   switch (rule.type) {
     case 'all':
-      return { type: 'all', rules: rule.rules.map(normalizeRule) };
+    case 'any':
+      return { type: rule.type, rules: rule.rules.map(normalizeRule) };
+    case 'scenario':
+      return {
+        type: 'scenario',
+        index: rule.index,
+        rule: normalizeRule(rule.rule),
+      };
     case 'code_check':
       return rule.whole_word
         ? { type: 'code_check', expected: rule.expected, whole_word: true }
         : { type: 'code_check', expected: rule.expected };
     case 'contains_any':
       return { type: 'contains_any', expected: [...rule.expected] };
-    default:
+    case 'output_match':
+    case 'contains':
       return { type: rule.type, expected: rule.expected };
+    default: {
+      // 그림 규칙: type 다음 나머지 키를 이름 순으로
+      const { type, ...rest } = rule;
+      const keys = Object.keys(rest).sort() as (keyof typeof rest)[];
+      return {
+        type,
+        ...Object.fromEntries(
+          keys.filter((k) => rest[k] !== undefined).map((k) => [k, rest[k]]),
+        ),
+      } as ValidationRule;
+    }
   }
 }
 
@@ -220,7 +314,18 @@ function isNonEmptyStringList(value: unknown): value is string[] {
   );
 }
 
-const MAX_RULE_DEPTH = 4;
+// all → scenario → all → any → 규칙 (빌드가 시나리오를 감싸는 깊이 + 여유)
+const MAX_RULE_DEPTH = 6;
+/** match_drawing 정답 선분 상한 (그림 퀘스트 정답은 명령 5,000개 이하, world3.md §10) */
+export const MAX_RULE_SEGMENTS = 5000;
+
+const optNum = (v: unknown, min = 0) =>
+  v === undefined || (typeof v === 'number' && Number.isFinite(v) && v >= min);
+const optBool = (v: unknown) => v === undefined || typeof v === 'boolean';
+const isSeg4 = (v: unknown) =>
+  Array.isArray(v) &&
+  v.length === 4 &&
+  v.every((n) => typeof n === 'number' && Number.isFinite(n));
 
 /** DB에서 읽은 JSON이 규칙 모양인지 확인한다 (콘텐츠 원본은 zod 스키마가 먼저 검사함) */
 export function isValidationRule(
@@ -231,22 +336,56 @@ export function isValidationRule(
     return false;
   }
   const rule = value as Record<string, unknown>;
+  const children = () =>
+    Array.isArray(rule.rules) &&
+    rule.rules.length > 0 &&
+    rule.rules.every((child) => isValidationRule(child, depth + 1));
   switch (rule.type) {
     case 'output_match':
     case 'contains':
       return typeof rule.expected === 'string';
     case 'code_check':
-      return (
-        typeof rule.expected === 'string' &&
-        (rule.whole_word === undefined || typeof rule.whole_word === 'boolean')
-      );
+      return typeof rule.expected === 'string' && optBool(rule.whole_word);
     case 'contains_any':
       return isNonEmptyStringList(rule.expected);
     case 'all':
+    case 'any':
+      return children();
+    case 'scenario':
       return (
-        Array.isArray(rule.rules) &&
-        rule.rules.length > 0 &&
-        rule.rules.every((child) => isValidationRule(child, depth + 1))
+        Number.isInteger(rule.index) &&
+        (rule.index as number) >= 0 &&
+        isValidationRule(rule.rule, depth + 1)
+      );
+    case 'shape':
+      return (
+        (rule.shape === 'regular' || rule.shape === 'rectangle') &&
+        optNum(rule.n, 3) &&
+        optNum(rule.k, 1) &&
+        optNum(rule.side) &&
+        optNum(rule.count, 1) &&
+        optBool(rule.filled)
+      );
+    case 'circles':
+      return optNum(rule.min) && optNum(rule.radius);
+    case 'colors':
+    case 'turtles':
+      return typeof rule.min === 'number' && optNum(rule.min);
+    case 'text':
+      return (
+        (rule.includes === undefined || typeof rule.includes === 'string') &&
+        optNum(rule.min)
+      );
+    case 'segments':
+      return optNum(rule.min) && optNum(rule.max);
+    case 'match_drawing':
+      return (
+        Array.isArray(rule.segments) &&
+        rule.segments.length > 0 &&
+        rule.segments.length <= MAX_RULE_SEGMENTS &&
+        rule.segments.every(isSeg4) &&
+        optBool(rule.translate) &&
+        optBool(rule.extra_ok)
       );
     default:
       return false;

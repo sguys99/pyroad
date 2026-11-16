@@ -1,0 +1,32 @@
+# 3월드 퀴즈 4-3: 0보다 작아질까? (출력 예측형 객관식)
+
+id: b3000000-0000-0000-0000-000000000023
+order: 3
+title: 0보다 작아질까?
+concept: max(), min()
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: max 와 min 으로 값을 0~100 안에 묶기
+  learning_goals:
+    - max(0, 값) 은 0 밑으로, min(100, 값) 은 100 위로 못 가게 한다는 것을 안다
+  story_context: 콩이의 배고픔은 20인데 밥을 먹어 30이 줄고, 기분은 95인데 놀아서 10이 올랐어요. 상태 카드에는 0부터 100까지만 나와야 한대요!
+  fallback_text: max 는 둘 중 큰 값, min 은 둘 중 작은 값을 골라요. 그래서 max(0, …) 는 0 밑으로 내려가지 않게 바닥을 받쳐 주고, min(100, …) 은 100 위로 못 올라가게 천장을 막아 줘요. 괄호 안의 계산을 먼저 해요.
+  quiz:
+    question: 돌리면 무엇이 나올까?
+    code: |-
+      print(max(0, 20 - 30), min(100, 95 + 10))
+    options:
+      - { id: opt-k4m2, text: '0 100' }
+      - { id: opt-r7q9, text: '-10 105' }
+      - { id: opt-z3w8, text: '0 105' }
+      - { id: opt-a6n1, text: '-10 100' }
+answer:
+  quiz_answer:
+    accepted: [opt-k4m2]
+    explanation: 20 - 30 은 -10 이지만 max 가 0 과 견줘 큰 0 을 골라요. 95 + 10 은 105 이지만 min 이 100 과 견줘 작은 100 을 골라요.
+    explanations:
+      opt-r7q9: 계산만 하면 그렇지만, max 와 min 이 0~100 안으로 묶어 줘요.
+      opt-z3w8: min(100, 105) 는 둘 중 작은 100 이에요.
+      opt-a6n1: max(0, -10) 은 둘 중 큰 0 이에요.

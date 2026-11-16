@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { NotebookPen, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,35 @@ import type {
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { PyodideLoadStage } from '@/lib/pyodide/types';
 import { RunControls } from './RunControls';
+import { usesTurtle } from '@/lib/turtle/scene';
 import { usePhoneLike } from '@/lib/hooks/usePhoneLike';
+
+// 숫자 손잡이를 놓고 이만큼 조용하면 다시 그린다 (끄는 동안 실행이 줄줄이 쌓이지 않게)
+const PREVIEW_WAIT_MS = 300;
+
+/**
+ * 숫자 손잡이 → 다시 그리기 (world3 제안 L). 바꿀 때마다 부르면 PREVIEW_WAIT_MS 뒤 한 번 실행하고,
+ * 그때 실행 중이면 끝난 뒤 마지막 코드로 한 번 더 (세션 실행 경로 그대로, 채점 없음)
+ */
+function useNumberPreview(onPreview: (() => void) | undefined, busy: boolean) {
+  const wanted = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const latest = useRef({ onPreview, busy });
+  latest.current = { onPreview, busy };
+  useEffect(() => {
+    if (busy || !wanted.current) return;
+    wanted.current = false;
+    onPreview?.();
+  }, [busy, onPreview]);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  return useCallback(() => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      if (latest.current.busy) wanted.current = true;
+      else latest.current.onPreview?.();
+    }, PREVIEW_WAIT_MS);
+  }, []);
+}
 
 /** 공책 머리 제목 (P6-03) */
 export function NotebookTitle() {
@@ -108,6 +136,16 @@ interface CodePanelProps {
   onAskTutor?: () => void;
   /** 스테이지 차례 (코드 키보드가 그 스테이지 주문을 앞으로, P6-11) */
   stage?: number;
+  /** 코드가 turtle을 씀 → 결과 위에 그림판 (P11-02). 없으면 코드에서 직접 본다 */
+  turtle?: boolean;
+  /** 시험 손님 부르기 (P11-05, 손님이 있는 퀘스트만) */
+  onGrade?: () => void;
+  /** 채점 없이 다시 그리기 (world3 제안 L). 있고 turtle 코드면 숫자 손잡이가 켜진다 */
+  onPreview?: () => void;
+  /** 월드 슬러그 (3월드 코드 키보드 앞자리, world3 제안 M) */
+  world?: string;
+  guests?: OutputPanelProps['guests'];
+  reasons?: OutputPanelProps['reasons'];
 }
 
 export function CodePanel({
@@ -132,9 +170,17 @@ export function CodePanel({
   onShowErrorLine,
   onAskTutor,
   stage,
+  turtle,
+  onGrade,
+  onPreview,
+  world,
+  guests,
+  reasons,
 }: CodePanelProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const showKeyboard = usePhoneLike();
+  const drawing = turtle ?? usesTurtle(code);
+  const nudge = useNumberPreview(onPreview, isRunning || isSubmitting);
 
   return (
     // 공책 → 실행 줄 → 결과 간격은 시안 f-run-row·f-result (16px)
@@ -156,9 +202,12 @@ export function CodePanel({
         errorLine={
           runResult?.hadException ? errorLineFromStderr(runResult.stderr) : null
         }
+        onNumberNudge={onPreview && drawing ? nudge : undefined}
       />
       <div className="ck-slot">
-        {showKeyboard && <CodeKeyboard editor={editorRef} stage={stage} />}
+        {showKeyboard && (
+          <CodeKeyboard editor={editorRef} stage={stage} world={world} />
+        )}
       </div>
 
       {/* 실행 버튼 + 준비·재준비·오류 안내 (P6-05) */}
@@ -173,6 +222,8 @@ export function CodePanel({
         onRun={onRun}
         onStop={onStop}
         onRetry={onRetry}
+        onGrade={onGrade}
+        grading={!!guests && (isRunning || isSubmitting)}
       />
 
       {/* 실행 결과 */}
@@ -185,6 +236,11 @@ export function CodePanel({
         onShowErrorLine={onShowErrorLine}
         reward={reward}
         onAskTutor={onAskTutor}
+        turtle={drawing}
+        guests={guests}
+        reasons={reasons}
+        guestHint={!!onGrade}
+        restarting={pyodideStatus === 'loading' ? restarting : null}
       />
     </div>
   );

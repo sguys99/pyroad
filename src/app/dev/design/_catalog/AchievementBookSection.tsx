@@ -31,6 +31,11 @@ const DEFS: AchievementDef[] = [
   ['sea_captain', '코드 바다 선장', '버그버그 선장을 이기고 코드 바다를 끝까지 항해했어요!', 'ShipWheel', 'silver', 'sea', 'sea_clear', 750],
   ['sea_bosses_all', '일곱 바다의 용사', '코드 바다 보스를 모두 이겼어요!', 'Waves', 'gold', 'sea', 'sea_bosses', 760],
   ['sea_perfect', '완벽한 바다', '코드 바다의 모든 퀘스트와 퀴즈에서 별 3개를 받았어요!', 'Shell', 'gold', 'sea', 'sea_perfect', 770, true],
+  ['maker_first_save', '첫 작품', '내 작품을 처음으로 저장했어요!', 'Palette', 'bronze', 'maker', 'maker_saves', 810],
+  ['turtle_painter', '거북이 화가', '거북이 화가 공방을 끝까지 깼어요!', 'Brush', 'silver', 'maker', 'maker_turtle', 840],
+  ['maker_citizen', '메이커 시티 명예 시민', '메가 로봇 버그버그를 이기고 메이커 시티를 끝까지 깼어요!', 'Building2', 'gold', 'maker', 'maker_clear', 870],
+  ['perfect_city', '완벽한 도시', '메이커 시티의 모든 퀘스트와 퀴즈에서 별 3개를 받았어요!', 'Landmark', 'gold', 'maker', 'maker_perfect', 880, true],
+  ['cheer_leader', '응원 단장', '친구 작품 5개에 스티커로 응원했어요!', 'HandHeart', 'bronze', 'maker', 'maker_cheers', 890, false, 0],
 ].map(([id, name, description, icon, tier, category, metric, sort, hidden, coins]) => ({
   id,
   name,

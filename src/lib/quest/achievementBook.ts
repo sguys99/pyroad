@@ -2,7 +2,7 @@ import { coinReward } from './coins';
 import type { AchievementTier } from './achievements';
 
 /**
- * 업적 도감 (P8-10). 서버가 정의(00036·00048·00053 `achievements`) · 내 업적(`user_achievements`) · 진행도(`achievement_progress`)를 읽어
+ * 업적 도감 (P8-10). 서버가 정의(00036·00048·00053·00057 `achievements`) · 내 업적(`user_achievements`) · 진행도(`achievement_progress`)를 읽어
  * 이 함수로 화면 값을 만든다. 숨김 업적은 얻기 전에는 이름·조건·진행을 내려보내지 않음("???").
  */
 export type AchievementCategory =
@@ -12,7 +12,8 @@ export type AchievementCategory =
   | 'habit'
   | 'growth'
   | 'grit'
-  | 'sea';
+  | 'sea'
+  | 'maker';
 
 export const CATEGORY_ORDER: readonly AchievementCategory[] = [
   'learn',
@@ -22,6 +23,7 @@ export const CATEGORY_ORDER: readonly AchievementCategory[] = [
   'growth',
   'grit',
   'sea',
+  'maker',
 ];
 
 export const CATEGORY_LABEL: Record<AchievementCategory, string> = {
@@ -32,6 +34,7 @@ export const CATEGORY_LABEL: Record<AchievementCategory, string> = {
   growth: '성장',
   grit: '실패 칭찬',
   sea: '코드 바다',
+  maker: '메이커 시티',
 };
 
 /** 정의 한 줄 (00036 achievements 에서 쓰는 열) */

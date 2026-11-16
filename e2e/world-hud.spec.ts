@@ -102,8 +102,8 @@ test('코인을 받고 지도로 돌아오면 코인 칩이 지난번 본 값에
   await page.reload();
   const after = (before + 7).toLocaleString('ko-KR');
   await expect(coin).toContainText(`코인 ${after}개`);
-  // 카운트업이 끝나면 보이는 숫자도 새 잔액
-  await expect(coin.locator('.hud-num')).toHaveText(after);
+  // 카운트업이 끝나면 보이는 숫자도 새 잔액. 잔액이 1만을 넘으면 폰용 "1.3만"도 함께 들어 있어 포함으로 본다 (B89)
+  await expect(coin.locator('.hud-num')).toContainText(after);
   await expect
     .poll(() => page.evaluate(() => sessionStorage.getItem('pyroad:hud-coins')))
     .toBe(String(before + 7));

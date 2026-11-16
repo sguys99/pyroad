@@ -112,11 +112,13 @@ describe('생성 seed 를 migrations 위에 적용 (PGlite)', () => {
     expect([...once.answer_keys].sort(byId)).toEqual(
       [...rows.answer_keys].sort(byId),
     );
-    // 실력 확인 퀴즈 (P10-03): 2월드 2벌 × 10문제
+    // 실력 확인 퀴즈 (P10-03): 2·3월드 2벌 × 10문제 (3월드는 P11-13, 월드가 초안이어도 행은 들어감)
     expect(once.skill_checks).toEqual(rows.skill_checks);
     expect(rows.skill_checks.map((r) => `${r.world}:${r.set_no}`)).toEqual([
       ...Array(10).fill('code-sea:1'),
       ...Array(10).fill('code-sea:2'),
+      ...Array(10).fill('maker-city:1'),
+      ...Array(10).fill('maker-city:2'),
     ]);
   });
 

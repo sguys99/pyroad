@@ -1,0 +1,213 @@
+# 3월드 보스 6: 오락실 버그버그 (7문제)
+# 작성 안내: content/README.md "보스". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 퀴즈·보스 코드에는 get_key()·time.sleep·random 을 넣지 않음 → 누른 키는 리스트로, 위치는 print 로 (world3.md §5·제안 G)
+# 순서 맞추기는 반복 안 print 로 프레임마다 출력해서 맞는 순서가 하나뿐
+
+id: b3000000-0000-0000-0000-000000000206
+order: 8
+title: 오락실 버그버그
+concept: 미니 게임 총정리
+xp_reward: 78
+quest_type: boss
+prompt:
+  topic: 게임 루프 횟수, 키로 움직인 위치, 벽, 충돌 함수, 프레임 순서 총정리
+  learning_goals:
+    - 게임 루프가 몇 번 돌고 거북이가 어디로 가는지 머릿속으로 따라갈 수 있다
+    - 벽 조건과 충돌 함수의 버그를 찾을 수 있다
+  story_context: 오락실 게임기가 모두 다시 켜졌어요! 그런데 게임기 등딱지에 조이스틱 더듬이를 단 버그버그가 나타나 화면을 지지직 흔들어요. "내 게임 일곱 판을 다 깨면 오락실을 돌려주지!"
+  fallback_text: 게임 루프는 정해진 횟수만큼 돌아요. 1초에 30번이면 초에 30을 곱해요. 누른 키를 하나씩 따라가며 x 를 더하고 빼고, 벽을 넘으면 벽 자리로 되돌려요. 두 거북이의 거리가 정한 값보다 작으면 닿은 거예요.
+  boss:
+    name: 오락실 버그버그
+    look: arcade
+    intro: 지지직! 나는 오락실 버그버그! 게임기를 다시 켰다고? 내가 만든 일곱 판짜리 게임을 깨 보시지!
+    on_defeat: 으앗, 게임 오버! 일곱 판을 다 깨다니 대단해. 다음엔 나도 끼워 줄래? 같이 별똥별 잡자!
+    on_victory: 지지직, 이번 판은 내가 이겼다! 연습하고 다시 와. 동전 넣고 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000036
+    prompt:
+      quiz:
+        question: 1초에 30번씩 2초 동안 도는 게임 루프예요. 돌리면 무엇이 나올까?
+        code: |-
+          frames = 0
+          for frame in range(30 * 2):
+              frames = frames + 1
+          print(frames)
+        options:
+          - { id: opt-6tqa, text: '60' }
+          - { id: opt-2rhz, text: '59' }
+          - { id: opt-9vwe, text: '32' }
+          - { id: opt-b4yx, text: '30' }
+    answer:
+      quiz_answer:
+        accepted: [opt-6tqa]
+        explanation: range(30 * 2) 는 range(60) 이라서 0부터 59까지 60번 돌아요. 돌 때마다 1씩 더해서 60 이에요.
+        explanations:
+          opt-2rhz: 59 는 마지막 frame 번호예요. 0부터 세니까 모두 60번 돌아요.
+          opt-9vwe: '* 는 곱하기예요. 30 + 2 가 아니에요.'
+          opt-b4yx: 30 은 1초 동안 도는 횟수예요. 2초 동안이에요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000035
+    prompt:
+      quiz:
+        question: 손님이 누른 키를 차례로 읽어 느릿이를 움직여요. None 은 아무 키도 안 누른 프레임이에요. 돌리면 무엇이 나올까?
+        code: |-
+          import turtle
+          t = turtle.Turtle()
+          x = 0
+          for key in ["Right", "Right", None, "Left", "Right"]:
+              if key == "Right":
+                  x = x + 10
+              elif key == "Left":
+                  x = x - 10
+              t.goto(x, 0)
+          print(t.position())
+        options:
+          - { id: opt-k3fz, text: '(20.00,0.00)' }
+          - { id: opt-7ndq, text: '(30.00,0.00)' }
+          - { id: opt-w1mc, text: '(40.00,0.00)' }
+          - { id: opt-e8sp, text: '(0.00,20.00)' }
+    answer:
+      quiz_answer:
+        accepted: [opt-k3fz]
+        explanation: 오른쪽 세 번(+30), 왼쪽 한 번(-10), None 은 그대로라서 x 는 20 이에요. 위치는 (가로, 세로) 라서 (20.00,0.00) 이에요.
+        explanations:
+          opt-7ndq: 왼쪽 키 한 번에 10 이 줄어요.
+          opt-w1mc: Left 는 더하기가 아니라 빼기예요. None 은 움직이지 않아요.
+          opt-e8sp: x 는 가로예요. 위치는 (가로, 세로) 순서로 써요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000037
+    prompt:
+      quiz:
+        question: 느릿이가 벽 가까이에서 오른쪽 키를 네 번 눌렀어요. 돌리면 무엇이 나올까?
+        code: |-
+          x = 180
+          for key in ["Right", "Right", "Right", "Right"]:
+              if key == "Right":
+                  x = x + 10
+              if x > 200:
+                  x = 200
+          print(x)
+        options:
+          - { id: opt-5hmc, text: '200' }
+          - { id: opt-u2rk, text: '220' }
+          - { id: opt-0pva, text: '210' }
+          - { id: opt-c7jt, text: '190' }
+    answer:
+      quiz_answer:
+        accepted: [opt-5hmc]
+        explanation: 190, 200 으로 가다가 210 이 되면 벽에 걸려 200 으로 돌아와요. 네 번째도 210 → 200 이라 끝까지 200 이에요.
+        explanations:
+          opt-u2rk: 벽 조건이 x 를 200 으로 되돌려서 220 까지 못 가요.
+          opt-0pva: 210 이 되는 순간 같은 반복 안에서 바로 200 으로 고쳐요.
+          opt-c7jt: 오른쪽 키를 네 번 눌러서 190 에서 멈추지 않아요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000038
+    prompt:
+      quiz:
+        question: 거리가 20보다 가까우면 닿은 거예요. 빈칸을 채워 별똥별 두 개를 잡았는지 차례로 보여 줘요
+        code: |-
+          import turtle
+          player = turtle.Turtle()
+          far = turtle.Turtle()
+          far.penup()
+          far.goto(30, 40)
+          near = turtle.Turtle()
+          near.penup()
+          near.goto(6, 8)
+
+          def caught(a, b):
+              return a.{{bk-d7xs}}(b) < {{bk-p4nh}}
+
+          print(caught(player, far), caught(player, near))
+        tokens:
+          - { id: tok-q2ge, text: distance }
+          - { id: tok-8mwa, text: goto }
+          - { id: tok-r5ly, text: '20' }
+          - { id: tok-z9kc, text: '100' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-d7xs: tok-q2ge, bk-p4nh: tok-r5ly }
+        explanation: far 까지 거리는 50, near 까지 거리는 10 이에요. 20 보다 작은 쪽만 닿아서 False True 가 나와요.
+        explanations:
+          tok-8mwa: goto 는 거북이를 옮기는 주문이에요. 거리를 재지 않아요.
+          tok-z9kc: 100 보다 작으면 멀리 있는 별까지 닿았다고 해 버려요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000034
+    prompt:
+      quiz:
+        question: 1초에 30번 도는 게임을 3초 동안 돌리려고 해요. 빈칸을 채워 게임 루프가 알맞은 횟수만큼 돌게 해요
+        code: |-
+          seconds = 3
+          frames = 0
+          for frame in range({{bk-v6te}} * seconds):
+              frames = frames + 1
+          print(frames, "프레임")
+        tokens:
+          - { id: tok-h3pu, text: '30' }
+          - { id: tok-m7jb, text: '3' }
+          - { id: tok-4xna, text: '90' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-v6te: tok-h3pu }
+        explanation: 1초에 도는 횟수 30 에 초 수 3 을 곱하면 90 프레임이에요.
+        explanations:
+          tok-m7jb: 3 × 3 이면 9 프레임이라 0.3초 만에 끝나요.
+          tok-4xna: 90 × 3 이면 270 프레임, 9초짜리 게임이 돼요.
+  - quiz_kind: parsons
+    review_quest: b3000000-0000-0000-0000-000000000039
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 키를 읽을 때마다 느릿이의 x 를 한 줄씩 보여 줘요
+        indent: true
+        lines:
+          - { id: ln-w5ak, code: import turtle }
+          - { id: ln-r8pe, code: t = turtle.Turtle() }
+          - {
+              id: ln-c2hv,
+              code: 'for key in ["Right", "Left", None, "Right"]:',
+            }
+          - { id: ln-7jmu, code: 'if key == "Right":' }
+          - { id: ln-g4da, code: t.forward(10) }
+          - { id: ln-0xbn, code: 'elif key == "Left":' }
+          - { id: ln-y3tf, code: t.back(10) }
+          - { id: ln-k9sq, code: print(t.xcor()) }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-w5ak, indent: 0 }
+            - { id: ln-r8pe, indent: 0 }
+            - { id: ln-c2hv, indent: 0 }
+            - { id: ln-7jmu, indent: 1 }
+            - { id: ln-g4da, indent: 2 }
+            - { id: ln-0xbn, indent: 1 }
+            - { id: ln-y3tf, indent: 2 }
+            - { id: ln-k9sq, indent: 1 }
+        explanation: 거북이를 만들고, 키마다 if 와 elif 로 앞뒤로 움직인 뒤, 반복 안(한 칸)에서 x 를 출력해요. 그래서 10.0, 0.0, 0.0, 10.0 이 한 줄씩 나와요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000037
+    prompt:
+      quiz:
+        question: 오른쪽 벽이 200 에 있어야 하는데 느릿이가 벽을 뚫고 나가요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-6dqf, code: 'x = 190' }
+          - { id: ln-h2zw, code: 'for key in ["Right", "Right", "Right"]:' }
+          - { id: ln-5vbr, code: '    if key == "Right":' }
+          - { id: ln-m8ue, code: '        x = x + 10' }
+          - { id: ln-t3ka, code: '    if x < 200:' }
+          - { id: ln-1pgy, code: '        x = 200' }
+          - { id: ln-x4co, code: 'print(x)' }
+        fixes:
+          - { id: fx-a9kr, code: '    if x > 200:' }
+          - { id: fx-5wnd, code: '    if x == 200:' }
+          - { id: fx-q2eh, code: '    if x < 100:' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-t3ka, fix: fx-a9kr }
+        explanation: 벽은 "200 을 넘었으면 200 으로 되돌리기"예요. x > 200 일 때 x = 200 으로 고치면 몇 번을 눌러도 200 에서 멈춰요.
+        explanations:
+          fx-5wnd: 딱 200 일 때만 고쳐서 210, 220 은 그냥 지나가요.
+          fx-q2eh: x 는 100 보다 작아지지 않아서 벽이 한 번도 안 막아요.
