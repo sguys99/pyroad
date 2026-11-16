@@ -30,9 +30,10 @@ test('3월드 코드 키보드: 스테이지 키가 360px에서 넘기지 않고
     await demo.getByRole('tab', { name: tab, exact: true }).tap();
     const front = keyboard.getByRole('group', { name: '이번 스테이지 앞자리' });
     await expect(front.getByRole('button')).toHaveText(labels);
-    // 퀘스트 공책 360px 띠에서 넘기지 않고 보이는 폭은 150px 이상(number-handle.spec이 잼) → 앞자리는 그 안
+    // 퀘스트 공책 360px 띠에서 넘기지 않고 보이는 폭은 150px 이상(number-handle.spec이 잼) → 앞자리는 그 안.
+    // 리눅스 러너는 같은 글꼴도 글자 폭 반올림이 달라 1~2px 넓게 잼(B90) → 오른쪽 흐림(20px) 첫머리 2px까지 허용
     const g = (await front.boundingBox())!;
-    expect(g.width, tab).toBeLessThanOrEqual(150);
+    expect(g.width, tab).toBeLessThanOrEqual(152);
   }
   if (process.env.E2E_SHOTS) {
     await demo.getByRole('tab', { name: '1', exact: true }).tap();
