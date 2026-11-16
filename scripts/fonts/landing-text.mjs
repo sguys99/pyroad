@@ -19,8 +19,11 @@ import ts from 'typescript';
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
-/** 랜딩에서 그려지는 화면의 시작 모듈. 랜딩 구조를 바꾸면 여기를 같이 본다 */
-export const LANDING_ENTRIES = ['src/app/page.tsx'];
+/**
+ * 랜딩 서브셋으로 그리는 화면의 시작 모듈. 랜딩 구조를 바꾸면 여기를 같이 본다.
+ * 루트 not-found(404)도 같은 서브셋을 쓴다 (B99: 앱 조각 CSS를 루트 트리에 넣지 않고 웹폰트로 그리기)
+ */
+export const LANDING_ENTRIES = ['src/app/page.tsx', 'src/app/not-found.tsx'];
 
 /** 서브셋에 항상 넣는 글자: ASCII 인쇄 문자 (숫자·영문·기호는 어디서든 나올 수 있음) */
 export const ALWAYS_CHARS = Array.from({ length: 0x7f - 0x20 }, (_, i) =>

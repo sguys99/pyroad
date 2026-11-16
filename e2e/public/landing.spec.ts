@@ -237,6 +237,31 @@ test.describe('보안 헤더·없는 주소 (B27)', () => {
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByTestId('hero-mascot')).toBeVisible();
   });
+
+  test('404 는 앱 웹폰트(랜딩 서브셋)로 그리고, 20번 열어도 빈 화면이 없다 (B99)', async ({
+    page,
+  }) => {
+    for (let i = 0; i < 20; i++) {
+      const response = await page.goto(`/no-such-page-${i}`);
+      expect(response!.status()).toBe(404);
+      await expect(
+        page.getByRole('heading', { name: '길을 찾을 수 없어요' }),
+      ).toBeVisible();
+      const loaded = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return [...document.fonts]
+          .filter((f) => f.status === 'loaded')
+          .map((f) => f.family.replace(/['"]/g, ''));
+      });
+      expect(loaded, `${i}번째`).toEqual(
+        expect.arrayContaining(['displayNotFound', 'sansNotFound']),
+      );
+      // 글꼴을 받은 뒤에도 그대로 보임 (앞선 시도는 오류 셸이 CSS를 따로 받다 끊기면 빈 화면이 됐음)
+      await expect(
+        page.getByRole('link', { name: '처음으로 가기' }),
+      ).toBeVisible();
+    }
+  });
 });
 
 test.describe('보호 경로', () => {

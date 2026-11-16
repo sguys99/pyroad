@@ -16,6 +16,7 @@
 - **공유 카드**(`next/og`, P2-19)는 브라우저 폰트가 아니라 서버 함수에 번들하는 TTF/OTF 3개(`src/fonts/share-card/`: Jua KS X 1001 2,350자, pyRoad Sans 600 2,350자, pyRoad Sans 700 11,172자 = 대체 폰트, 합계 2.9MB)를 씁니다. 자세한 것은 [share-card.md](share-card.md) §6.
 - **랜딩**(`src/app/page.tsx`)은 `src/fonts/landing.ts`의 `next/font/local` 두 개(제목·본문)만 import합니다. 랜딩 문구에 쓰인 글자만 담은 파일이라 첫 페인트와 거의 동시에 브랜드 폰트로 그려집니다. 앱 조각 CSS는 싣지 않습니다(렌더 차단 CSS 예산). 두 파일이 담는 글자가 다릅니다(P4-12, §3 "랜딩 글자 모으기"): **Jua는 제목 글꼴 자리(`font-display` 클래스·h1~h3)에 쓰인 글자 + 숫자·문장부호**, **pyRoad Sans는 랜딩 글자 전부 + ASCII**(굵기 축 400~700, 브라우저 기본 OpenType 기능 + `tnum`).
 - **앱 화면**은 `src/fonts/app.css`(Jua + pyRoad Sans 조각)를 `(protected)/layout.tsx`·`notice/layout.tsx`·`[...missing]/page.tsx`에서 import합니다. 화면에 나온 글자가 든 조각만 받으므로 닉네임·튜터 답변처럼 미리 모르는 글자도 그립니다. 루트 레이아웃·루트 `not-found.tsx`에서 import하면 랜딩에도 실리니 넣지 마세요.
+- **404**(루트 `not-found.tsx`, B99)는 앱 조각 대신 **랜딩 텍스트 서브셋**을 `src/fonts/notFound.ts`(같은 파일, `preload: false`)로 씁니다. not-found는 랜딩 글자 모으기 시작점(`LANDING_ENTRIES`)이라 그 문구 글자가 서브셋에 들어 있습니다. preload를 켜면 루트 not-found가 모든 라우트 트리에 들어가 모든 화면이 랜딩 글꼴을 미리 받습니다(postbuild가 막음). 랜딩 렌더 차단 CSS·JS는 그대로(측정 14.3KB·172.2KB, 바꾸기 전과 같음)
 - **코드 글꼴**은 `(protected)/quest/layout.tsx`에서만 `pyroad-mono/pyroad-mono.css`를 import합니다. 퀘스트 밖에서 `font-mono`는 시스템 고정폭으로 그려집니다.
 
 ### 토큰과 폴백
