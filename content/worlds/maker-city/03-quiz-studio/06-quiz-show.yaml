@@ -277,8 +277,14 @@ steps:
         - name: 세 번 틀린 손님
           inputs: ['몰라', '몰라', '몰라']
           expect: { type: contains, expected: '게임 오버' }
+        # 3월드 플레이테스트(제안 O): 섞기를 반복 뒤에 두면 순서가 그대로라 이 손님이 다 맞혀 땡이 없음.
+        # 무작위 순서를 보려고 seed 1 로 한 번(shuffle·sample 모두 원래 순서가 아님, 원래 순서로 섞일 확률 1/120)
+        - name: 문제 순서를 외워 온 손님
+          inputs: ['고래', '7', '문어', '360', '파이뱀']
+          seed: 1
+          expect: { type: contains, expected: '땡' }
       hints:
-        level_1: '섞는 것은 묻기 전에 한 번만 해요. 반복 안에 넣으면 안 돼요!'
+        level_1: '섞는 것은 묻기 전에 한 번만 해요. 반복 안에 넣으면 안 돼요! 순서를 외워 온 손님도 헷갈려야 섞인 거예요.'
         level_2: 'hearts = 3 위에 import random 과 random.shuffle(bank) 두 줄을 넣어요.'
         level_3: |-
           import random

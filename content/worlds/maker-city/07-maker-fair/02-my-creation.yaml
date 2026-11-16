@@ -251,6 +251,11 @@ steps:
         rules:
           - { type: contains, expected: 만든 사람 }
           - { type: code_check, expected: 'def credits(' }
+          # 3월드 플레이테스트(제안 O): 크레딧 함수를 만들고 부르지 않은 채 따로 print 하면 떨어짐 (줄 맨 앞 또는 들여 쓴 부르기)
+          - type: any
+            rules:
+              - { type: code_check, expected: "\ncredits(" }
+              - { type: code_check, expected: "\n    credits(" }
       hints:
         level_1: '함수 하나를 만들어 두 줄을 출력하고, 그 함수를 불러요.'
         level_2: 'def credits(): 아래에 print("만든 사람: 별명") 과 print("도와준 친구: 파이뱀") 을 들여 쓰고, 맨 아래 들여 쓰지 않은 줄에 credits() 를 써요.'

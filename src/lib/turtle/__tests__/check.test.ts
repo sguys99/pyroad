@@ -114,6 +114,13 @@ describe('원 찾기', () => {
     );
     expect(f).toHaveLength(12);
   });
+  it('같은 자리에 두 번 그린 꽃은 원 12개로 셈 (3월드 플레이테스트)', () => {
+    const twice = analyze([...commands('flower'), ...commands('flower')]);
+    expect(checkDrawingRule(twice, { type: 'circles', min: 12 }).ok).toBe(true);
+    const r = checkDrawingRule(twice, { type: 'circles', min: 13 });
+    expect(r.ok).toBe(false);
+    expect(r.reasons[0]).toMatch(/지금 12개\). 같은 자리에 겹친 원은/);
+  });
 });
 
 describe('정답 그림 견주기 (matchDrawing)', () => {

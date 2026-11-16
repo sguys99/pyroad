@@ -2,6 +2,7 @@
 # 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-6
 # 제안 F: 게임 규칙을 함수로 떼고, 시작 코드의 고정 좌표 검사 줄 출력으로 채점 (무작위·키 없이 결정적)
 # 프로젝트 4단계가 이 caught() 를 그대로 씀
+# 3월드 플레이테스트(제안 O): 넷째 검사 줄 (12, 16) 은 거리가 꼭 20 → "20보다 작다"를 <= 20 으로 쓰면 떨어짐
 
 id: b3000000-0000-0000-0000-000000000038
 order: 5
@@ -15,7 +16,7 @@ prompt:
     - a.distance(b) 로 두 거북이 사이의 거리를 잴 수 있다
     - 조건이 맞으면 True, 아니면 False 를 돌려주는 함수를 만들 수 있다
   story_context: 별똥별 잡기 게임의 가장 중요한 규칙은 "느릿이가 별똥별에 닿았나?" 예요. 게임 속에서 바로 시험하기는 어려우니까, 규칙만 함수로 떼어 내서 먼저 시험해 봐요!
-  exercise_description: 'def caught(a, b): 가 두 거북이의 거리가 20보다 작으면 True, 아니면 False 를 돌려주게 만드세요. 아래 검사 줄 세 개가 True, False, True 를 출력하면 성공이에요'
+  exercise_description: 'def caught(a, b): 가 두 거북이의 거리가 20보다 작으면 True, 아니면 False 를 돌려주게 만드세요. 검사 줄 네 개로 확인해요'
   starter_code: |
     import turtle
 
@@ -35,22 +36,25 @@ prompt:
     print(caught(player, star))
     star.goto(-5, 12)
     print(caught(player, star))
-  expected_output_hint: 검사 줄 세 개가 차례로 True, False, True 를 출력해야 해요
+    star.goto(12, 16)
+    print(caught(player, star))
+  expected_output_hint: 검사 줄 네 개가 차례로 True, False, True, False 를 출력해야 해요
   checklist:
     - pass 를 지우고 return 으로 돌려줘요
     - a.distance(b) < 20 이면 닿은 거예요
-    - 검사 줄 결과가 True, False, True 인지 봐요
+    - 검사 줄 결과가 True, False, True, False 인지 봐요
   example_output: |-
     True
     False
     True
-  fallback_text: 'a.distance(b) 는 거북이 a 에서 b 까지 거리를 숫자로 알려 줘요. (0, 0) 에서 (10, 0) 까지는 10, (0, 50) 까지는 50 이에요. 거리 < 20 은 맞으면 True, 틀리면 False 가 되는 질문이라서, return a.distance(b) < 20 처럼 그대로 돌려줄 수도 있어요.'
+    False
+  fallback_text: 'a.distance(b) 는 거북이 a 에서 b 까지 거리를 숫자로 알려 줘요. (0, 0) 에서 (10, 0) 까지는 10, (0, 50) 까지는 50, (12, 16) 까지는 꼭 20 이에요. 20 은 20보다 작지 않아서 False! 거리 < 20 은 맞으면 True, 틀리면 False 가 되는 질문이라서, return a.distance(b) < 20 처럼 그대로 돌려줄 수도 있어요.'
 answer:
   validation:
     type: all
     rules:
       - type: output_match
-        expected: "True\nFalse\nTrue"
+        expected: "True\nFalse\nTrue\nFalse"
       - type: code_check
         expected: distance(
   hints:
@@ -79,4 +83,6 @@ answer:
     star.goto(0, 50)
     print(caught(player, star))
     star.goto(-5, 12)
+    print(caught(player, star))
+    star.goto(12, 16)
     print(caught(player, star))

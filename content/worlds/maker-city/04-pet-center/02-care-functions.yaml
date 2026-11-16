@@ -45,8 +45,12 @@ answer:
           콩이에게 밥을 줬어요!
           콩이에게 밥을 줬어요!
           배고픔: 0
-      - type: code_check
-        expected: max(
+      # 3월드 플레이테스트(제안 O): if 로 0 밑을 막아도 맞는 답. 배고픔 0 은 출력이 확인, 코드는 막는 방법 하나
+      - type: any
+        rules:
+          - { type: code_check, expected: max( }
+          - { type: code_check, expected: '< 0' }
+          - { type: code_check, expected: '<= 0' }
   hints:
     level_1: 큰 값을 고르는 주문으로 0과 "빼고 난 값" 중 큰 쪽을 남겨요.
     level_2: 'pet["배고픔"] = max(0, pet["배고픔"] - 30) 을 쓰고, 그 아래에 print(f"{pet[''이름'']}에게 밥을 줬어요!") 를 써요.'

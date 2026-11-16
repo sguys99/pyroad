@@ -649,6 +649,153 @@ const WRONG: Record<string, Edit[]> = {
   ],
 };
 
+/**
+ * 3월드 플레이테스트 (P11-14 제안 O, docs/curriculum/world3-playtest.md): 모의 학생 A(3학년)·B(5학년)·C(6학년)의
+ * 시도 중 이 작업에서 채점을 고친 곳과 새로 확인한 다른 정답을 회귀로 남긴다
+ */
+const PLAYTEST_RIGHT: Record<string, Edit[]> = {
+  'maker-city/1-1': [
+    [
+      ['t.forward(100)', 't.fd(100)'],
+      ['t.left(90)', 't.lt(90)'],
+    ],
+  ],
+  'maker-city/1-3': [[['360 / n', '360 // n']]],
+  'maker-city/1-4': [[['t.fillcolor("yellow")', 't.color("yellow")']]],
+  'maker-city/2-1': [
+    [
+      [
+        'print(f"반가워요, {nickname} 모험가님!")',
+        'print("반가워요,", nickname, "모험가님!")',
+      ],
+    ],
+  ],
+  'maker-city/2-4': [[['else:', 'elif door == "2":']]],
+  'maker-city/3-1': [[['print("땡!")', 'print("땡! 정답은 고래")']]],
+  'maker-city/3-3': [[['score = score + 1', 'score += 1']]],
+  // 3-4 #2: if 로 0 밑을 막아도 맞는 답 (예전엔 max( 검사로 떨어짐)
+  'maker-city/4-2': [
+    [
+      [
+        'pet["배고픔"] = max(0, pet["배고픔"] - 30)',
+        'pet["배고픔"] = pet["배고픔"] - 30\n    if pet["배고픔"] < 0:\n        pet["배고픔"] = 0',
+      ],
+    ],
+  ],
+  // 3-4 프로젝트 3단계: break 없이 while 조건으로 끝내도 맞는 답 (예전엔 break 검사로 떨어짐)
+  'maker-city/4-7#3': [
+    [
+      [
+        'while True:\n    choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")',
+        'choice = ""\nwhile choice != "0":\n    choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")',
+      ],
+      ['\n        break', ''],
+    ],
+  ],
+  // 3-3 프로젝트 4단계: 섞기를 맨 위에 둬도 순서를 외워 온 손님이 헷갈림
+  'maker-city/3-6#4': [
+    [
+      ['import random\nrandom.shuffle(bank)\n', ''],
+      [
+        'print("두근두근',
+        'import random\nrandom.shuffle(bank)\nprint("두근두근',
+      ],
+    ],
+  ],
+  'maker-city/5-6#2': [
+    [
+      [
+        'for fruit, n in count.items():\n    total = total + n\n    if n > best_n:\n        best = fruit\n        best_n = n',
+        'total = sum(count.values())\nbest = max(count, key=count.get)\nbest_n = count[best]',
+      ],
+    ],
+  ],
+  'maker-city/6-4': [[['if x > 200:', 'if x >= 200:']]],
+  'maker-city/6-5': [
+    [
+      [
+        'return a.distance(b) < 20',
+        'if a.distance(b) < 20:\n        return True\n    return False',
+      ],
+    ],
+  ],
+  'maker-city/6-7#5': [
+    [['print(f"게임 끝! 점수: {score}")', 'print("게임 끝! 점수:", score)']],
+    [
+      [
+        'print(f"게임 끝! 점수: {score}")',
+        'print("게임 끝! 점수: " + str(score))',
+      ],
+    ],
+  ],
+};
+
+const PLAYTEST_WRONG: Record<string, Edit[]> = {
+  'maker-city/1-3': [[['polygon(5, 50)', '']]],
+  'maker-city/2-2': [
+    [['int(input("사탕이 몇 개 있어요? "))', 'input("사탕이 몇 개 있어요? ")']],
+  ],
+  // 3-3 #1: 딩동댕과 땡을 늘 둘 다 출력
+  'maker-city/3-1': [
+    [
+      [
+        'if answer == "고래":\n    print("딩동댕!")\nelse:\n    print("땡!")',
+        'print("딩동댕!")\nprint("땡!")',
+      ],
+    ],
+  ],
+  // 3-4 #4 try 대신 isdigit (배울 것이 try/except 라 떨어지는 것이 의도)
+  'maker-city/3-4': [
+    [
+      [
+        'try:\n    answer = int(text)\n    if answer == 12:\n        print("딩동댕!")\n    else:\n        print("땡!")\nexcept ValueError:\n    print("숫자로 답해 줘요!")',
+        'if text.isdigit():\n    if int(text) == 12:\n        print("딩동댕!")\n    else:\n        print("땡!")\nelse:\n    print("숫자로 답해 줘요!")',
+      ],
+    ],
+  ],
+  // 3-3 프로젝트 4단계: 섞기를 반복 뒤에 (순서가 그대로)
+  'maker-city/3-6#4': [
+    [
+      ['random.shuffle(bank)\nhearts', 'hearts'],
+      [
+        'print(f"점수: {score}")',
+        'random.shuffle(bank)\nprint(f"점수: {score}")',
+      ],
+    ],
+  ],
+  'maker-city/4-2': [[['max(0, pet["배고픔"] - 30)', '0']]],
+  'maker-city/4-4': [[['self.hunger = 50', 'hunger = 50']]],
+  'maker-city/5-1': [[['count.get(fruit, 0) + 1', 'count[fruit] + 1']]],
+  // 3-1 프로젝트 4단계: 꽃 다섯 송이를 한 자리에 (같은 자리 원은 하나로 셈)
+  'maker-city/1-7#4': [
+    [['flower(-250 + i * 120, -200, colors[i])', 'flower(0, -200, colors[i])']],
+  ],
+  // 3-5 프로젝트 4단계: "7표" 를 반복 밖에서 한 번만
+  'maker-city/5-6#4': [
+    [
+      ['    t.write(f"{n}표", font=("Arial", 12, "normal"))\n', ''],
+      ['# 4단계: 가로축', 't.write("7표")\n# 4단계: 가로축'],
+    ],
+  ],
+  'maker-city/6-2': [[['key == "Right"', 'key == "right"']]],
+  // 3-6 #5: "20보다 작다" 를 <= 로 (넷째 검사 줄 거리 20)
+  'maker-city/6-5': [[['< 20', '<= 20']]],
+  // 3-6 프로젝트 5단계: 점수를 글자로 박아 둠
+  'maker-city/6-7#5': [
+    [
+      ['print(f"게임 끝! 점수: {score}")', 'print("게임 끝! 점수: 0")'],
+      ['pen.write(f"게임 끝! 점수: {score}"', 'pen.write("게임 끝! 점수: 0"'],
+    ],
+  ],
+  // 3-F 4단계: 크레딧 함수를 만들고 부르지 않은 채 따로 print
+  'maker-city/7-2#4': [[['\ncredits()', '\nprint("만든 사람: 별빛 메이커")']]],
+};
+
+for (const [k, v] of Object.entries(PLAYTEST_RIGHT))
+  (HANDWRITTEN[k] ??= []).push(...v);
+for (const [k, v] of Object.entries(PLAYTEST_WRONG))
+  (WRONG[k] ??= []).push(...v);
+
 const { units } = loadUnits(CONTENT_DIR);
 const byKey = new Map(units.map((u) => [u.key, u]));
 let runner: NodePyodideRunner;

@@ -21,7 +21,7 @@ prompt:
     # 1) .strip() 으로 answer 의 앞뒤 빈칸을 지워요
 
     # 2) 고래면 "딩동댕!", 아니면 "땡!" 을 출력해요
-  expected_output_hint: 고래, " 고래 " 손님은 딩동댕, 상어 손님은 땡이 나와야 해요
+  expected_output_hint: 고래, " 고래 " 손님은 딩동댕, 상어 손님은 땡만 나와야 해요
   checklist:
     - answer = answer.strip() 으로 빈칸을 지워요
     - if 로 고래와 견줘 딩동댕! 이나 땡! 을 출력해요
@@ -39,9 +39,10 @@ answer:
     - name: 빈칸 친 손님
       inputs: ['  고래 ']
       expect: { type: contains, expected: 딩동댕 }
+    # 3월드 플레이테스트(제안 O): 딩동댕과 땡을 늘 둘 다 출력하면 "? 딩동댕!" 다음 줄에 땡이 와서 떨어짐
     - name: 상어 손님
       inputs: ['상어']
-      expect: { type: contains, expected: 땡 }
+      expect: { type: contains, expected: '? 땡' }
   hints:
     level_1: 빈칸 친 손님의 답은 " 고래 " 예요. 앞뒤 빈칸을 지우는 메서드가 있어요!
     level_2: 'answer = answer.strip() 으로 빈칸을 지우고, if answer == "고래": 아래에 딩동댕, else: 아래에 땡을 들여 써요.'

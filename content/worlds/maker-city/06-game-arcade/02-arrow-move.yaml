@@ -15,7 +15,7 @@ prompt:
     - from pyroad import get_key 로 지금 누른 키를 알아 올 수 있다
     - 정해진 횟수만큼 도는 게임 루프에서 키마다 다르게 움직일 수 있다
   story_context: 게임기가 켜졌어요! 화면에 느릿이가 나타났는데, 오른쪽 화살표에만 움직이고 다른 키는 못 알아들어요. 위, 왼쪽, 아래 키도 알아듣게 가르쳐 줘요.
-  exercise_description: '게임 루프 안에서 get_key() 가 "Left" 면 x 를 10 줄이고, "Up" 이면 y 를 10 늘리고, "Down" 이면 y 를 10 줄이세요. 루프가 끝나면 느릿이 위치를 출력해요'
+  exercise_description: '"Right" 처럼 "Left"·"Up"·"Down" 키에도 느릿이가 10씩 움직이게 게임 루프를 채우세요. 끝나면 위치를 출력해요'
   starter_code: |
     import time
     import turtle

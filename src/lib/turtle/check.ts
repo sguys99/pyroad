@@ -636,15 +636,21 @@ export function checkDrawingRule(a: Analysis, r: DrawingRule): CheckResult {
       return findShape(a, r);
     case 'circles': {
       const min = r.min ?? 1;
-      const n = findCircles(a).filter(
+      const full = findCircles(a).filter(
         (c) =>
           c.extent >= 350 &&
           (r.radius == null || Math.abs(c.r - r.radius) <= 3),
-      ).length;
+      );
+      // 같은 자리에 겹쳐 그린 원은 하나로 (도형과 같음, 3월드 플레이테스트: 꽃 다섯 송이를 한 자리에)
+      const n = new Set(
+        full.map((c) => [c.cx, c.cy, c.r].map(Math.round).join()),
+      ).size;
       const size = r.radius == null ? '' : `반지름 ${r.radius}인 `;
+      const overlap =
+        full.length > n ? ' 같은 자리에 겹친 원은 하나로 세요.' : '';
       return res(
         n >= min,
-        `${size}원을 ${min}개 이상 그려야 해요 (지금 ${n}개).`,
+        `${size}원을 ${min}개 이상 그려야 해요 (지금 ${n}개).${overlap}`,
       );
     }
     case 'colors': {

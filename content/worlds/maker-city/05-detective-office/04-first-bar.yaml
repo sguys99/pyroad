@@ -14,7 +14,7 @@ prompt:
     - 위치·높이·색·이름표를 매개변수로 받는 함수를 만들 수 있다
     - 함수를 두 번 불러 막대 두 개를 그릴 수 있다
   story_context: 표 수를 숫자로만 쓰면 한눈에 안 들어와요. 탐정 사무소의 그래프 기계를 고치려면 먼저 막대 하나를 그리는 함수가 필요해요. 느릿이가 붓을 들고 기다리고 있어요!
-  exercise_description: 'def draw_bar(x, height, color, label): 를 만들어 (x, -100) 에서 폭 60, 높이 height 인 채운 막대를 그리고 아래에 label 을 쓰세요. 딸기(높이 140)와 사과(높이 100) 막대 두 개를 그려요'
+  exercise_description: 'def draw_bar(x, height, color, label): 로 폭 60, 높이 height 인 채운 막대와 이름표를 그려서 딸기·사과 막대 두 개를 세우세요'
   starter_code: |
     import turtle
 

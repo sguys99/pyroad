@@ -252,9 +252,11 @@ steps:
         #      "0" 이면 "잘 가, (이름)!" 을 출력하고 break 로 멈춰요
       fallback_text: 'while True: 는 끝없이 도는 반복이라 멈추는 문이 꼭 있어야 해요. 0 을 고르면 break 로 반복을 빠져나가요. 입력은 늘 글자라서 choice == "1" 처럼 따옴표를 붙여 견줘요. break 가 없으면 손님 입력이 다 떨어져서 "입력이 더 필요해요" 가 나와요.'
     answer:
+      # 3월드 플레이테스트(제안 O): while choice != "0": 처럼 break 없이 끝내도 맞는 답.
+      # 0 에서 끝나는지는 손님이 봄(안 끝나면 입력이 모자람), 반복 없이 한 번만 묻는 답은 while 검사로
       validation:
         type: code_check
-        expected: break
+        expected: while
         whole_word: true
       scenarios:
         - name: 콩이 손님

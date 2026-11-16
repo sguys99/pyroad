@@ -276,7 +276,9 @@ steps:
       validation:
         type: all
         rules:
+          # 3월드 플레이테스트(제안 O): "7표" 를 반복 밖에 한 번만 쓰면 떨어지게 막대 네 개 모두 표 수
           - { type: text, includes: 7표 }
+          - { type: text, includes: 표, min: 4 }
           - { type: colors, min: 4 }
       hints:
         level_1: 색은 과일마다 다르게, 숫자는 막대마다 하나씩 써요. 둘 다 반복 안에서 해요.

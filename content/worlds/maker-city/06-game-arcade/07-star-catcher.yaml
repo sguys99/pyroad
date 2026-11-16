@@ -410,6 +410,12 @@ steps:
         rules:
           - { type: contains, expected: '게임 끝! 점수:' }
           - { type: text, includes: 점수 }
+          # 3월드 플레이테스트(제안 O): "점수: 0" 을 글자로 박아 두면 떨어짐 (변수 이름 score 는 4단계 검사가 정함)
+          - type: any
+            rules:
+              - { type: code_check, expected: '{score}' }
+              - { type: code_check, expected: 'str(score)' }
+              - { type: code_check, expected: ', score)' }
       scenarios:
         - name: 오른쪽 세 번 손님
           keys: [Right, Right, Right]
