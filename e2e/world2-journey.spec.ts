@@ -258,7 +258,8 @@ test('실력 확인 퀴즈 합격: 1월드 기록 없이 10문제를 다 맞히�
   );
 
   await page.getByTestId('skill-check-go').click();
-  await expect(page).toHaveURL(/\/world\/code-sea$/);
+  // PR CI 러너에서 지도 첫 RSC 응답(합격 직후 다시 계산)이 10초를 넘긴 일이 있어 넉넉히 (B90)
+  await expect(page).toHaveURL(/\/world\/code-sea$/, { timeout: 30_000 });
   await expect(node(page, SEA[0].id)).not.toHaveAttribute(
     'data-state',
     'locked',
