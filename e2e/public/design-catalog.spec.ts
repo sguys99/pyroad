@@ -215,7 +215,6 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
     const before = await page.evaluate(() =>
       localStorage.getItem('pyroad.motion.prefs.v1'),
     );
-    const detected = await page.locator('html').getAttribute('data-motion');
     await page
       .getByTestId('motion-tier-choice')
       .getByRole('radio', { name: 'minimal' })
@@ -242,10 +241,14 @@ test.describe('카탈로그 /dev/design (P2-12)', () => {
       .getByRole('radio', { name: '기기 설정' })
       .click();
     await expect(page.locator('html')).toHaveAttribute('data-reduced', 'false');
-    await expect(page.locator('html')).toHaveAttribute(
-      'data-motion',
-      detected ?? 'full',
-    );
+    // 루트 감지는 느린 러너에서 테스트 도중에도 내려갈 수 있어(실측 full → lite) 처음 값이 아니라 지금 감지 값과 비교 (B94)
+    await expect
+      .poll(async () => {
+        const motion = await page.locator('html').getAttribute('data-motion');
+        const now = await page.getByTestId('motion-now').textContent();
+        return !!now?.includes(`감지 ${motion}`);
+      })
+      .toBe(true);
     expect(
       await page.evaluate(() => localStorage.getItem('pyroad.motion.prefs.v1')),
     ).toBe(before);
