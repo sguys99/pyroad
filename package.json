@@ -15,6 +15,7 @@
     "test:pyodide": "vitest run --config vitest.pyodide.config.ts",
     "test:content": "vitest run --config vitest.content.config.ts",
     "test:e2e": "playwright test",
+    "test:visual": "bash scripts/visual/run.sh",
     "assets:check": "node scripts/assets/check.mjs",
     "fonts:build": "node scripts/fonts/build-fonts.mjs",
     "tokens:check": "node scripts/design/check-tokens.mjs",
