@@ -17,7 +17,13 @@ export function PageTransition({ children, className }: PageTransitionProps) {
   const { budget } = useMotionTier();
   if (budget.pageTransition === 'none') {
     return (
-      <m.div className={className} initial={false} animate={{ opacity: 1 }}>
+      // y 도 0으로: 첫 렌더(full)의 올라오기가 끝나기 전에 단계가 바뀌면 12px 내려간 채 멈췄음 (B96)
+      <m.div
+        className={className}
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0 }}
+      >
         {children}
       </m.div>
     );
