@@ -1,0 +1,319 @@
+# 3월드 프로젝트 F-2: 나만의 작품 (4단계, 자유 — world3.md §4 3-F, 제안 H·I)
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world3.md §4 3-F·§8
+# 그림·이야기·퀴즈·펫·게임 무엇이든 만드는 자유 작품이라 품질은 채점하지 않고 "개념 표지 + any + 끝 줄"만 봄 (world3.md §10)
+#   1단계 기획 카드(출력 "작품:"·"만들 기능") → 2단계 하나[선분 ≥10 · input( · get_key(] → 3단계 def + if → 4단계 credits()
+# 시험 손님이 없음: 아이마다 입력 수가 달라 손님을 정할 수 없음 → "코드 돌려보기" 한 번이 채점(입력은 직접, 게임은 직접 플레이)
+# 정답(solution_code)은 예시 작품 하나 "반짝반짝 별자리"(그림). 이야기형·게임형 다른 정답은 gradingVariants 에
+# 시작 코드의 빈칸 ___ 은 따옴표 밖이라 안 채우면 NameError → 시작 코드 불합격 (§10 ③)
+# 기획 도우미(project_planner)·작품 평가 친구(creation_feedback)는 화면(MakerHelper)이 이 퀘스트에서 부름 (P11-14)
+# 마지막 단계를 끝낸 완성 작품만 갤러리에 출품 (publishableQuests: 3월드 project 완료)
+
+id: b3000000-0000-0000-0000-000000000042
+order: 2
+title: 나만의 작품
+concept: 기획, 함수와 조건, 엔딩 크레딧 종합
+xp_reward: 480
+quest_type: project
+prompt:
+  topic: '자유 프로젝트: 내가 기획하고 만드는 나만의 작품'
+  learning_goals:
+    - 만들고 싶은 작품을 이름, 종류, 기능 3개로 나눌 수 있다
+    - 첫 기능부터 하나씩 만들고 함수와 조건으로 기능을 더할 수 있다
+    - 엔딩 크레딧 함수로 작품을 마무리하고 피드백을 듣고 한 군데 고칠 수 있다
+  story_context: 메이커 박람회 날이에요! 메이커 시티 친구들이 모두 자기 작품을 전시해요. 이번엔 정해진 숙제가 없어요. 그림, 이야기, 퀴즈, 펫, 게임 무엇이든 내가 만들고 싶은 작품을 기획하고 만들어요. 파이뱀이 기획을 도와주고, 다 만들면 작품을 보고 칭찬과 한 가지 제안을 해 줘요.
+  exercise_description: 기획 카드, 첫 기능, 기능 더하기, 엔딩 크레딧을 4단계로 하나씩 만들어 나만의 작품을 완성하세요.
+  starter_code: |
+    # 나만의 작품을 만들어 봐요!
+  expected_output_hint: 프로젝트를 4단계로 나누어 완성해요
+  fallback_text: 무엇을 만들지 모르겠으면 "파이뱀 기획 도우미"에 하고 싶은 것을 한 줄로 써 봐요. 거북이 화가 공방부터 미니 게임 오락실까지 배운 기술을 무엇이든 써도 돼요. 1~2시간 안에 끝나는 작은 작품부터 시작하고, 큰 꿈은 "다음에 더할 기능"으로 남겨 둬요.
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: contains, expected: '작품:' }
+      - { type: contains, expected: 만든 사람 }
+      - { type: code_check, expected: 'def credits(' }
+  hints:
+    level_1: 이 프로젝트는 4단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 기획 카드, 첫 기능, 기능 더하기, 엔딩 크레딧 순서로 만들어요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 무엇을 만들지 막히면 기획 도우미에게 물어봐요!
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: '기획 카드: 작품 이름, 종류, 만들 기능 3개를 정해 ___ 를 채우고 출력하기'
+      checklist:
+        - 'title 에 작품 이름, kind 에 작품 종류를 따옴표로 감싸 넣어요'
+        - 'features 에 만들 기능 3개를 쉬운 것부터 넣어요'
+        - '진짜 이름이나 학교 대신 별명과 상상 속 이야기를 써요'
+      example_output: |-
+        작품: 반짝반짝 별자리
+        종류: 그림
+        만들 기능
+        1. 밤하늘에 별자리 선 긋기
+        2. 크기가 다른 별 찍기
+        3. 별자리 이름 쓰기
+      starter_code: |
+        # 나만의 작품 기획 카드
+        # 파이뱀 기획 도우미와 이야기한 뒤 ___ 를 지우고 따옴표 글자로 채워요
+        title = ___      # 작품 이름. 예: "반짝반짝 별자리"
+        kind = ___       # 작품 종류: 그림 / 이야기 / 퀴즈 / 펫 / 게임
+        features = [___, ___, ___]   # 만들 기능 3개, 쉬운 것부터
+
+        print("작품:", title)
+        print("종류:", kind)
+        print("만들 기능")
+        for i in range(len(features)):
+            print(f"{i + 1}. {features[i]}")
+      fallback_text: '기획은 무엇을 만들지, 어떤 기능부터 할지 정하는 일이에요. 큰 꿈을 다 넣으면 끝내기 어려우니 오늘 만들 수 있는 기능 3개만 골라요. ___ 는 빈칸이라 그대로 두면 에러가 나요. "그림" 처럼 따옴표로 감싼 글자로 바꿔 줘요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: contains, expected: '작품:' }
+          - { type: contains, expected: 만들 기능 }
+      hints:
+        level_1: '___ 네 군데를 따옴표로 감싼 글자로 바꾸면 돼요. 아래 print 줄은 그대로 둬요.'
+        level_2: 'title = "반짝반짝 별자리" 처럼 써요. features 는 ["기능 1", "기능 2", "기능 3"] 처럼 따옴표 글자 3개를 쉼표로 이어요.'
+        level_3: |-
+          title = "___"
+          kind = "___"
+          features = ["___", "___", "___"]
+          따옴표 안에 내 작품 이름, 종류, 기능을 넣어 보세요!
+      solution_code: |
+        # 나만의 작품 기획 카드
+        title = "반짝반짝 별자리"
+        kind = "그림"
+        features = ["밤하늘에 별자리 선 긋기", "크기가 다른 별 찍기", "별자리 이름 쓰기"]
+
+        print("작품:", title)
+        print("종류:", kind)
+        print("만들 기능")
+        for i in range(len(features)):
+            print(f"{i + 1}. {features[i]}")
+  - step_number: 2
+    prompt:
+      step_goal: '첫 기능: 기획 카드의 1번 기능을 그림, 묻고 답하기, 키 게임 중 하나로 만들기'
+      checklist:
+        - '그림이면 import turtle 로 선을 10개 넘게 그려요'
+        - '이야기·퀴즈·펫이면 input( ) 으로 물어보고 답에 따라 말해요'
+        - '게임이면 from pyroad import get_key 로 키를 읽어요'
+      example_output: '(밤하늘에 금빛 별자리 선이 이어져요)'
+      starter_code: |
+
+        # ── 2단계: 첫 기능 ──
+        # 기획 카드의 1번 기능을 이 아래에 만들어요. 무엇으로 시작할지 골라요
+        #   그림이면        import turtle
+        #   이야기·퀴즈·펫이면  input( ) 으로 묻기
+        #   게임이면        from pyroad import get_key
+      fallback_text: '작업실마다 배운 기술을 떠올려요. 그림은 거북이 화가 공방, 묻고 답하기는 모험 이야기 극장과 퀴즈쇼 방송국, 키 게임은 미니 게임 오락실이에요. 한 가지만 골라 작게 만들어도 충분해요. 입력을 묻는 작품은 "코드 돌려보기"를 누르고 내가 직접 답해 봐요.'
+    answer:
+      validation:
+        type: any
+        rules:
+          - { type: segments, min: 10 }
+          - { type: code_check, expected: 'input(' }
+          - { type: code_check, expected: 'get_key(' }
+      hints:
+        level_1: '그림, 묻고 답하기, 키 게임 중 하나를 골라 1번 기능만 만들어요. 셋 중 하나면 통과예요!'
+        level_2: '그림이면 거북이로 선을 10개 넘게 그어요(예: 점 11개를 차례로 goto). 이야기면 answer = input("…") 으로 묻고 if 로 답해요. 게임이면 for frame in range(300): 안에서 key = get_key() 를 읽어요.'
+        level_3: |-
+          import turtle
+          t = turtle.Turtle()
+          for p in [(-200, 0), (-150, 60), ___]:
+              t.goto(p)
+          빈칸에 점을 더 넣어 선이 10개를 넘게 해 보세요! (그림 작품일 때)
+      solution_code: |
+        # 나만의 작품 기획 카드
+        title = "반짝반짝 별자리"
+        kind = "그림"
+        features = ["밤하늘에 별자리 선 긋기", "크기가 다른 별 찍기", "별자리 이름 쓰기"]
+
+        print("작품:", title)
+        print("종류:", kind)
+        print("만들 기능")
+        for i in range(len(features)):
+            print(f"{i + 1}. {features[i]}")
+
+        # ── 2단계: 첫 기능 ──
+        import turtle
+
+        screen = turtle.Screen()
+        screen.bgcolor("midnightblue")
+        t = turtle.Turtle()
+        t.color("gold")
+        t.pensize(2)
+
+        # 별자리 점 11개를 차례로 이어요
+        points = [(-220, 40), (-170, 110), (-110, 70), (-60, 140), (0, 90), (50, 150), (100, 80), (150, 130), (190, 60), (230, 120), (250, 30)]
+        t.penup()
+        t.goto(points[0])
+        t.pendown()
+        for p in points:
+            t.goto(p)
+  - step_number: 3
+    prompt:
+      step_goal: '기능 더하기: 남은 기능을 만들며 함수(def)와 조건(if)을 하나씩 꼭 쓰기'
+      checklist:
+        - 'def 로 기능 하나를 함수로 만들고 불러요'
+        - 'if 로 상황에 따라 다르게 해요'
+        - '새 코드는 앞 단계 코드 아래에 덧붙여요'
+      example_output: '(별자리 점마다 크고 작은 별이 찍히고 아래에 이름이 써져요)'
+      starter_code: |
+
+        # ── 3단계: 기능 더하기 ──
+        # 기획 카드의 2번, 3번 기능을 더해요
+        # 함수(def)를 하나 만들어 부르고, 조건(if)도 하나 꼭 써 봐요
+      fallback_text: '함수는 여러 번 쓸 기능에 이름을 붙여 두는 거예요. 별 그리기, 장면 보여 주기, 점수 더하기처럼요. 조건은 "이럴 때는 이렇게"예요. 높은 별은 크게, 정답이면 칭찬, 벽에 닿으면 멈추기처럼 내 작품에 맞게 써 봐요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: code_check, expected: 'def ', whole_word: true }
+          - { type: code_check, expected: 'if ', whole_word: true }
+      hints:
+        level_1: '함수 하나와 조건 하나를 내 작품에 맞게 더해요. 무엇을 해도 괜찮아요!'
+        level_2: 'def 이름(값): 아래에 들여 써서 기능을 만들고, 맨 아래에서 이름(값) 으로 불러요. 그리고 if 조건: 으로 상황에 따라 다르게 해요.'
+        level_3: |-
+          def star(x, y, size):
+              ___
+          for p in points:
+              if p[1] > 100:
+                  star(p[0], p[1], 20)
+          빈칸에 별을 그리는 주문을 넣어 보세요! (그림 작품일 때)
+      solution_code: |
+        # 나만의 작품 기획 카드
+        title = "반짝반짝 별자리"
+        kind = "그림"
+        features = ["밤하늘에 별자리 선 긋기", "크기가 다른 별 찍기", "별자리 이름 쓰기"]
+
+        print("작품:", title)
+        print("종류:", kind)
+        print("만들 기능")
+        for i in range(len(features)):
+            print(f"{i + 1}. {features[i]}")
+
+        # ── 2단계: 첫 기능 ──
+        import turtle
+
+        screen = turtle.Screen()
+        screen.bgcolor("midnightblue")
+        t = turtle.Turtle()
+        t.color("gold")
+        t.pensize(2)
+
+        # 별자리 점 11개를 차례로 이어요
+        points = [(-220, 40), (-170, 110), (-110, 70), (-60, 140), (0, 90), (50, 150), (100, 80), (150, 130), (190, 60), (230, 120), (250, 30)]
+        t.penup()
+        t.goto(points[0])
+        t.pendown()
+        for p in points:
+            t.goto(p)
+
+        # ── 3단계: 기능 더하기 ──
+        def star(x, y, size):
+            t.penup()
+            t.goto(x - size / 2, y)
+            t.pendown()
+            t.begin_fill()
+            for i in range(5):
+                t.forward(size)
+                t.right(144)
+            t.end_fill()
+
+        for p in points:
+            if p[1] > 100:
+                star(p[0], p[1], 20)   # 높이 있는 별은 크게
+            else:
+                star(p[0], p[1], 10)
+
+        t.penup()
+        t.goto(-90, -150)
+        t.write(title, font=("Arial", 20, "bold"))
+  - step_number: 4
+    prompt:
+      step_goal: '엔딩 크레딧: def credits(): 로 만든 사람(별명)과 도와준 친구를 출력하고 출품하기'
+      checklist:
+        - 'def credits(): 안에서 "만든 사람: (내 별명)" 을 출력해요'
+        - '"도와준 친구: 파이뱀" 도 출력하고, 맨 아래에서 credits() 를 불러요'
+        - '파이뱀 작품 평가를 듣고 한 군데를 고쳐 봐요'
+      example_output: |-
+        만든 사람: 별빛 메이커
+        도와준 친구: 파이뱀
+      starter_code: |
+
+        # ── 4단계: 엔딩 크레딧 ──
+        # def credits(): 를 만들어 만든 사람(진짜 이름 말고 별명)과 도와준 친구를 출력해요
+        # 그리고 맨 아래에서 credits() 를 불러요
+      fallback_text: '영화가 끝나면 만든 사람들의 이름이 나오죠? 그게 엔딩 크레딧이에요. 내 작품에도 만든 사람과 도와준 친구를 남겨요. 갤러리에 올라가니까 진짜 이름 대신 별명을 써요. 다 만들면 파이뱀이 작품을 보고 칭찬과 제안을 해 줘요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: contains, expected: 만든 사람 }
+          - { type: code_check, expected: 'def credits(' }
+      hints:
+        level_1: '함수 하나를 만들어 두 줄을 출력하고, 그 함수를 불러요.'
+        level_2: 'def credits(): 아래에 print("만든 사람: 별명") 과 print("도와준 친구: 파이뱀") 을 들여 쓰고, 맨 아래 들여 쓰지 않은 줄에 credits() 를 써요.'
+        level_3: |-
+          def ___():
+              print("만든 사람: ___")
+              print("도와준 친구: 파이뱀")
+
+          credits()
+          빈칸에 함수 이름과 내 별명을 넣어 보세요!
+      solution_code: |
+        # 나만의 작품 기획 카드
+        title = "반짝반짝 별자리"
+        kind = "그림"
+        features = ["밤하늘에 별자리 선 긋기", "크기가 다른 별 찍기", "별자리 이름 쓰기"]
+
+        print("작품:", title)
+        print("종류:", kind)
+        print("만들 기능")
+        for i in range(len(features)):
+            print(f"{i + 1}. {features[i]}")
+
+        # ── 2단계: 첫 기능 ──
+        import turtle
+
+        screen = turtle.Screen()
+        screen.bgcolor("midnightblue")
+        t = turtle.Turtle()
+        t.color("gold")
+        t.pensize(2)
+
+        # 별자리 점 11개를 차례로 이어요
+        points = [(-220, 40), (-170, 110), (-110, 70), (-60, 140), (0, 90), (50, 150), (100, 80), (150, 130), (190, 60), (230, 120), (250, 30)]
+        t.penup()
+        t.goto(points[0])
+        t.pendown()
+        for p in points:
+            t.goto(p)
+
+        # ── 3단계: 기능 더하기 ──
+        def star(x, y, size):
+            t.penup()
+            t.goto(x - size / 2, y)
+            t.pendown()
+            t.begin_fill()
+            for i in range(5):
+                t.forward(size)
+                t.right(144)
+            t.end_fill()
+
+        for p in points:
+            if p[1] > 100:
+                star(p[0], p[1], 20)   # 높이 있는 별은 크게
+            else:
+                star(p[0], p[1], 10)
+
+        t.penup()
+        t.goto(-90, -150)
+        t.write(title, font=("Arial", 20, "bold"))
+
+        # ── 4단계: 엔딩 크레딧 ──
+        def credits():
+            print("만든 사람: 별빛 메이커")
+            print("도와준 친구: 파이뱀")
+
+        credits()

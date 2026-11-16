@@ -46,11 +46,11 @@ function contentWithFixture(): string {
 afterEach(cleanup);
 
 describe('월드 지도 데이터 (P5-03)', () => {
-  it('커밋한 월드 목록: 1·2월드는 지도, 3월드는 지도만 있는 "준비 중"(퀘스트 전, P11-11)', () => {
+  it('커밋한 월드 목록: 1·2·3월드 모두 지도와 퀘스트 (3월드는 P11-14에서 7 스테이지가 다 차 준비 완료)', () => {
     expect(WORLDS.map((w) => [w.slug, w.ready, w.map !== null])).toEqual([
       ['python-island', true, true],
       ['code-sea', true, true],
-      ['maker-city', false, true],
+      ['maker-city', true, true],
     ]);
     expect(WORLDS[1].unlock_rule).toEqual({ type: 'previous_world_cleared' });
   });

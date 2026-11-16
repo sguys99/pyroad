@@ -670,16 +670,21 @@ function achievementsNotRetro(r: EconomyResult): number {
 const pct = (a: number, b: number) => `${Math.round((a / b) * 100)}%`;
 const dayLabel = (d: number | null) => (d === null ? '180+' : `${d + 1}일`);
 
-/** `npm run balance:economy -- --world2`: 1월드에 이어 2월드 실제 콘텐츠를 풀 때 (P10-09, balance.md 7절) */
-function mainWorld2() {
-  const days = 365;
+/**
+ * `npm run balance:economy -- --world2`·`--world3`: 1월드부터 이어 n월드 실제 콘텐츠까지 풀 때 (P10-09 balance.md 7절, P11-14 8절).
+ * 표는 n월드 동안 번 것만 (앞 월드 끝 → n월드 끝)
+ */
+function mainWorld(n: 2 | 3) {
+  const days = n === 2 ? 365 : 548;
   const catalogAll = SHOP_ITEMS.filter((i) => i.kind !== 'consumable').reduce(
     (n, i) => n + i.price,
     0,
   );
-  const w1 = world1Stages();
-  const stages = [...w1, ...worldStages(2, w1.length)];
-  const w1End = w1.length;
+  const stages = world1Stages();
+  for (let o = 2; o < n; o++) stages.push(...worldStages(o, stages.length));
+  // 앞 월드 끝 = 마지막 스테이지 순서, n월드 끝 = 전체 마지막
+  const w1End = stages.length;
+  stages.push(...worldStages(n, stages.length));
   const w2End = stages.length;
   const runs = STUDENTS.map((s) => simulateEconomy(s, { days, stages }));
   const noM = STUDENTS.map((s) =>
@@ -688,11 +693,11 @@ function mainWorld2() {
   const at = (r: EconomyResult, d: number) =>
     r.rows[Math.min(d, r.rows.length - 1)];
   const out: string[] = [
-    '| 유형 | 1월드 끝(일째) | 2월드 끝(일째) | 2월드 걸린 날 | Lv (1월드 끝 → 2월드 끝) | 미션 XP 빼면 | 2월드 XP (미션 빼면) |',
+    `| 유형 | ${n - 1}월드 끝(일째) | ${n}월드 끝(일째) | ${n}월드 걸린 날 | Lv (${n - 1}월드 끝 → ${n}월드 끝) | 미션 XP 빼면 | ${n}월드 XP (미션 빼면) |`,
     '|---|---|---|---|---|---|---|',
   ];
   const coinRows: string[] = [
-    `| 유형 | 2월드 동안 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 상자 연 수 | 2월드 끝 잔액 (카탈로그 ${catalogAll} 대비) |`,
+    `| 유형 | ${n}월드 동안 합계 | ${SOURCES.join(' | ')} | 학습 비중 | 상자 연 수 | ${n}월드 끝 잔액 (카탈로그 ${catalogAll} 대비) |`,
     `|---|---|${SOURCES.map(() => '---|').join('')}---|---|---|`,
   ];
   runs.forEach((r, i) => {
@@ -725,7 +730,8 @@ function mainWorld2() {
 }
 
 function main() {
-  if (process.argv.includes('--world2')) return mainWorld2();
+  if (process.argv.includes('--world2')) return mainWorld(2);
+  if (process.argv.includes('--world3')) return mainWorld(3);
   const days = 180;
   const runs = STUDENTS.map((s) => simulateEconomy(s, { days }));
   const noMissionXp = STUDENTS.map((s) =>

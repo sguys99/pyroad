@@ -1,0 +1,204 @@
+# 3월드 보스 7: 메가 로봇 버그버그 (3월드 최종 보스, 7문제 — world3.md §5)
+# 작성 안내: content/README.md "보스". 라운드 하나 = 퀴즈 하나와 같은 규칙. 공개 부분(prompt)에 정답을 쓰지 마세요
+# 3-1 ~ 3-6 에서 한 문제씩 + 종합(펫 + 입력 + 조건) 1문제. review_quest 는 그 개념을 배운 앞 스테이지 퀘스트
+# 퀴즈·보스 코드에는 input()·random·get_key()·time.sleep 을 넣지 않음 → 입력은 "입력했다고 해요" 주석, 키는 리스트, 거북이는 position 출력 (§5·제안 G)
+
+id: b3000000-0000-0000-0000-000000000207
+order: 4
+title: 메가 로봇 버그버그
+concept: 3월드 총정리
+xp_reward: 84
+quest_type: boss
+prompt:
+  topic: 메이커 시티에서 배운 거북이 그림, 입력, 퀴즈 점수, 클래스, 데이터, 게임 루프 총정리
+  learning_goals:
+    - 여러 작업실에서 배운 주문이 섞인 코드를 한 줄씩 따라갈 수 있다
+    - 입력은 글자라는 것과 클래스의 self 를 떠올려 버그를 고칠 수 있다
+    - 게임 루프의 줄 순서와 들여쓰기를 맞출 수 있다
+  story_context: 박람회장 한가운데에 쿵, 쿵! 버그버그가 고철과 나사로 만든 거대한 메가 로봇을 타고 나타났어요. 지금까지 만난 버그버그들이 힘을 모아 만든 로봇이래요. 메이커 시티에서 배운 모든 기술로 일곱 문제를 풀면 로봇이 멈추고 박람회가 다시 열려요!
+  fallback_text: 코드는 위에서 아래로 한 줄씩 따라가요. 거북이는 위치를 (가로, 세로)로 세고, input 으로 받은 값은 늘 글자예요. 클래스 안에서는 self 로 자기 값을 가리키고, 게임 루프는 키를 하나씩 읽어요. 작업실마다 배운 것을 하나씩 떠올려 봐요.
+  boss:
+    name: 메가 로봇 버그버그
+    look: mega_robot
+    intro: 삐빅! 쿵쿵! 나는 메가 로봇 버그버그! 메이커 시티의 모든 버그를 모아 만든 최강 로봇이다! 일곱 문제를 풀면 내 전원을 꺼 주지!
+    on_defeat: 삐… 삐빅… 전원이 꺼진다… 대단해, 너는 진짜 메이커야! 이 로봇 부품으로 나도 내 작품을 만들어 볼래. 박람회에 같이 전시해 줄래?
+    on_victory: 삐빅! 아직 내 로봇은 멀쩡하다! 작업실에서 배운 기술을 다시 떠올리고 돌아오너라. 충전하며 기다릴게!
+rounds:
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000001
+    prompt:
+      quiz:
+        question: 거북이 화가 공방에서 배운 주문이에요. 느릿이가 두 번 가고 돌아요. 돌리면 무엇이 나올까?
+        code: |-
+          import turtle
+          t = turtle.Turtle()
+          for i in range(2):
+              t.forward(50)
+              t.left(90)
+          print(t.position())
+        options:
+          - { id: opt-c4na, text: '(50.00,50.00)' }
+          - { id: opt-7hdm, text: '(100.00,0.00)' }
+          - { id: opt-q2ux, text: '(0.00,50.00)' }
+          - { id: opt-z8kr, text: '(50.00,0.00)' }
+    answer:
+      quiz_answer:
+        accepted: [opt-c4na]
+        explanation: 처음엔 오른쪽으로 50 가서 (50, 0), 왼쪽으로 돌아 위를 보고 50 가서 (50, 50) 이에요. 마지막 left 는 방향만 바꿔요.
+        explanations:
+          opt-7hdm: 첫 번째 forward 뒤에 left(90) 으로 돌아서 두 번째는 위로 가요.
+          opt-q2ux: 처음 50 은 오른쪽(가로)으로 가요. 가로 x 가 0 이 아니에요.
+          opt-z8kr: 반복이 두 번이라 위로도 50 가요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000010
+    prompt:
+      quiz:
+        question: 손님이 3을 입력했는데 사탕이 6개가 아니라 이상하게 나와요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-b5ke, code: 'answer = "3"  # 3을 입력했다고 해요' }
+          - { id: ln-6vqa, code: 'candy = answer * 2' }
+          - { id: ln-m2hz, code: 'print(f"사탕 {candy}개!")' }
+        fixes:
+          - { id: fx-a3pw, code: 'candy = answer + answer' }
+          - { id: fx-k7nc, code: 'candy = int(answer) * 2' }
+          - { id: fx-9tyd, code: 'candy = "answer" * 2' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-6vqa, fix: fx-k7nc }
+        explanation: input 으로 받은 "3" 은 글자라서 * 2 를 하면 "33" 이 돼요. int(answer) 로 숫자로 바꿔야 3 × 2 = 6 이에요.
+        explanations:
+          fx-a3pw: 글자끼리 더하면 이어 붙여져서 여전히 "33" 이에요.
+          fx-9tyd: 따옴표를 붙이면 변수가 아니라 "answer" 라는 글자가 두 번 붙어요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000016
+    prompt:
+      quiz:
+        question: 퀴즈쇼 손님이 앞뒤에 빈칸을 넣어 "고래" 라고 답했어요. 돌리면 무엇이 나올까?
+        code: |-
+          answer = "  고래 "  # 손님이 입력했다고 해요
+          score = 0
+          if answer.strip() == "고래":
+              score = score + 10
+          print(score)
+        options:
+          - { id: opt-u6fb, text: '10' }
+          - { id: opt-1jmw, text: '0' }
+          - { id: opt-h8rq, text: '1' }
+          - { id: opt-e5yz, text: '고래' }
+    answer:
+      quiz_answer:
+        accepted: [opt-u6fb]
+        explanation: .strip() 이 앞뒤 빈칸을 지워서 "고래" 와 같아져요. 그래서 점수에 10 을 더해 10 이에요.
+        explanations:
+          opt-1jmw: .strip() 이 빈칸을 지워 줘서 조건이 맞아요.
+          opt-h8rq: 맞히면 1 이 아니라 10 을 더해요.
+          opt-e5yz: print 하는 것은 answer 가 아니라 score 예요.
+  - quiz_kind: fill_blank
+    review_quest: b3000000-0000-0000-0000-000000000026
+    prompt:
+      quiz:
+        question: 펫 설계도의 feed 가 자기 배고픔을 20 줄여요. 빈칸을 채워 콩이의 이름과 배고픔을 보여 줘요
+        code: |-
+          class Pet:
+              def __init__(self, name):
+                  self.name = name
+                  self.hunger = 50
+
+              def feed(self):
+                  {{bk-r4tw}}.hunger = self.hunger - 20
+
+          kong = Pet("콩이")
+          kong.feed()
+          print(kong.name, kong.hunger)
+        tokens:
+          - { id: tok-s8jm, text: self }
+          - { id: tok-f2pa, text: Pet }
+          - { id: tok-6xqv, text: name }
+    answer:
+      quiz_answer:
+        accepted:
+          - { bk-r4tw: tok-s8jm }
+        explanation: 메서드 안에서 "나 자신" 은 self 예요. self.hunger 를 줄이면 그 펫(콩이)의 배고픔이 50 에서 30 이 돼요.
+        explanations:
+          tok-f2pa: Pet 은 설계도예요. 설계도의 값을 바꾸면 콩이 한 마리의 배고픔은 그대로 50 이에요.
+          tok-6xqv: name 은 "콩이" 라는 글자라서 배고픔이 없어요. 에러가 나요.
+  - quiz_kind: multiple_choice
+    review_quest: b3000000-0000-0000-0000-000000000029
+    prompt:
+      quiz:
+        question: 데이터 탐정이 세 반의 투표 수로 평균을 구해요. 돌리면 무엇이 나올까?
+        code: |-
+          import statistics
+          votes = [3, 5, 4]
+          print(statistics.mean(votes))
+        options:
+          - { id: opt-n3dk, text: '4' }
+          - { id: opt-9wsa, text: '12' }
+          - { id: opt-c6ge, text: '5' }
+          - { id: opt-y2rb, text: '3' }
+    answer:
+      quiz_answer:
+        accepted: [opt-n3dk]
+        explanation: 평균은 모두 더해 똑같이 나눈 값이에요. 3 + 5 + 4 = 12 를 3 으로 나누면 4 예요.
+        explanations:
+          opt-9wsa: 12 는 모두 더한 합이에요. 세 반이니까 3 으로 나눠요.
+          opt-c6ge: 5 는 가장 큰 값이에요.
+          opt-y2rb: 3 은 가장 작은 값이에요.
+  - quiz_kind: parsons
+    review_quest: b3000000-0000-0000-0000-000000000040
+    prompt:
+      quiz:
+        question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 키를 읽을 때마다 x 를 한 줄씩 보여 줘요
+        indent: true
+        lines:
+          - { id: ln-8gkt, code: 'x = 0' }
+          - { id: ln-p3wn, code: 'for key in ["Right", "Right", "Left"]:' }
+          - { id: ln-e6ry, code: 'if key == "Right":' }
+          - { id: ln-z1mf, code: 'x = x + 10' }
+          - { id: ln-k4ua, code: 'else:' }
+          - { id: ln-v9dc, code: 'x = x - 10' }
+          - { id: ln-r2hq, code: print(x) }
+    answer:
+      quiz_answer:
+        accepted:
+          - - { id: ln-8gkt, indent: 0 }
+            - { id: ln-p3wn, indent: 0 }
+            - { id: ln-e6ry, indent: 1 }
+            - { id: ln-z1mf, indent: 2 }
+            - { id: ln-k4ua, indent: 1 }
+            - { id: ln-v9dc, indent: 2 }
+            - { id: ln-r2hq, indent: 1 }
+        explanation: x 를 0 으로 두고, 키마다 오른쪽이면 10 더하고 아니면 10 빼요. 반복 안(한 칸)에서 x 를 보여 주니 10, 20, 10 이 한 줄씩 나와요.
+  - quiz_kind: bug_hunt
+    review_quest: b3000000-0000-0000-0000-000000000027
+    prompt:
+      quiz:
+        question: 손님이 2를 입력해서 별이와 두 번 놀아 주려는데 에러가 나요. 틀린 줄을 찾아 고쳐요
+        lines:
+          - { id: ln-a7sm, code: 'class Pet:' }
+          - { id: ln-4hqe, code: '    def __init__(self, name):' }
+          - { id: ln-w8nb, code: '        self.name = name' }
+          - { id: ln-j2dv, code: '        self.mood = 50' }
+          - { id: ln-f5kx, code: '    def play(self):' }
+          - { id: ln-0rcz, code: '        self.mood = self.mood + 30' }
+          - { id: ln-u9ty, code: 'answer = "2"  # 2를 입력했다고 해요' }
+          - { id: ln-g3pl, code: 'pet = Pet("별이")' }
+          - { id: ln-6mwa, code: 'for i in range(answer):' }
+          - { id: ln-y1eo, code: '    pet.play()' }
+          - { id: ln-q5bj, code: 'if pet.mood >= 100:' }
+          - { id: ln-c8hn, code: '    print(f"{pet.name}: 최고로 신나요!")' }
+          - { id: ln-t0vk, code: 'else:' }
+          - { id: ln-l7fs, code: '    print(f"{pet.name}: 기분 {pet.mood}")' }
+        fixes:
+          - { id: fx-b2qr, code: 'for i in answer:' }
+          - { id: fx-n6xe, code: 'for i in range(int(answer)):' }
+          - { id: fx-h4wd, code: 'for i in range("answer"):' }
+    answer:
+      quiz_answer:
+        accepted:
+          - { line: ln-6mwa, fix: fx-n6xe }
+        explanation: answer 는 글자 "2" 라서 range 에 바로 넣으면 TypeError 예요. int(answer) 로 숫자 2 로 바꾸면 두 번 놀아 기분이 110 이 되고 "최고로 신나요!" 가 나와요.
+        explanations:
+          fx-b2qr: 글자 "2" 를 돌면 한 글자뿐이라 한 번만 놀아요. 기분이 80 에서 멈춰요.
+          fx-h4wd: 따옴표를 붙여도 여전히 글자라서 range 에 넣을 수 없어요.

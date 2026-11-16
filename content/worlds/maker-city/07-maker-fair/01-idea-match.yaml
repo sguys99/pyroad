@@ -1,0 +1,32 @@
+# 3월드 퀴즈 F-1: 이 작품엔 어떤 도구? (개념 객관식, 3월드 복습)
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 기획 도우미(project_planner)가 "기능마다 ○○ 작업실에서 배운 그 기술"을 잇는 것과 같은 생각 (world3.md §8)
+
+id: b3000000-0000-0000-0000-000000000041
+order: 1
+title: 이 작품엔 어떤 도구?
+concept: 작품에 맞는 도구 고르기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 만들고 싶은 작품에 필요한 파이썬 도구
+  learning_goals:
+    - 작품 종류(그림·이야기·데이터·게임)마다 어떤 도구가 필요한지 고를 수 있다
+  story_context: 메이커 박람회 날이에요! 입구에서 파이뱀이 도구 상자를 열어 보여 줘요. "작품을 만들기 전에 어떤 도구가 필요한지부터 골라 볼까요?"
+  fallback_text: 거북이 화가 공방에서는 그림 도구, 이야기 극장에서는 묻는 도구, 데이터 탐정 사무소에서는 세는 도구, 오락실에서는 키를 읽는 도구를 배웠어요. 작품이 무엇을 해야 하는지 떠올려 봐요.
+  quiz:
+    question: 느릿이를 화살표 키로 움직이는 게임을 만들려고 해요. 꼭 필요한 도구는 무엇일까?
+    options:
+      - { id: opt-k8w2, text: 'get_key()' }
+      - { id: opt-3pnf, text: 'input()' }
+      - { id: opt-r6xa, text: 'statistics.mean()' }
+      - { id: opt-d9tc, text: 't.write()' }
+answer:
+  quiz_answer:
+    accepted: [opt-k8w2]
+    explanation: get_key() 는 지금 누른 키를 알려 줘요. 미니 게임 오락실에서 배운 것처럼 게임 루프 안에서 키를 읽고 느릿이를 움직여요.
+    explanations:
+      opt-3pnf: input() 은 엔터를 칠 때까지 기다려요. 게임이 멈춰 버려서 화살표로 바로 움직일 수 없어요.
+      opt-r6xa: statistics.mean() 은 평균을 구하는 도구예요. 설문 그래프 같은 데이터 작품에 써요.
+      opt-d9tc: t.write() 는 그림판에 글씨를 써요. 게임 끝 점수를 보여 줄 때는 좋지만 키를 읽지는 못해요.

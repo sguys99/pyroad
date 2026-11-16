@@ -7,13 +7,13 @@ import {
   worldXp,
 } from '../level-curve';
 
-// F1 목표가 콘텐츠·곡선이 바뀌어도 지켜지는지 (P8-01, docs/balance.md "레벨 곡선"). 1·2월드는 실제 콘텐츠
+// F1 목표가 콘텐츠·곡선이 바뀌어도 지켜지는지 (P8-01, docs/balance.md "레벨 곡선"). 1·2·3월드 모두 실제 콘텐츠 (3월드는 P11-14)
 describe('레벨 곡선 시뮬레이션', () => {
   const [careful, normal, reviewed, hinty] = simulate();
 
-  it('보통 학생: 1월드 Lv 10 · 2월드 Lv 20 · 3월드 ≈ Lv 30 (퀴즈·보스 복습까지 하면 11 · 21)', () => {
+  it('보통 학생: 1월드 Lv 10 · 2월드 Lv 20 · 3월드 Lv 30 (퀴즈·보스 복습까지 하면 11 · 21 · 31)', () => {
     expect(normal.worlds.map((w) => w.level)).toEqual([10, 20, 30]);
-    expect(reviewed.worlds.map((w) => w.level)).toEqual([11, 21, 32]);
+    expect(reviewed.worlds.map((w) => w.level)).toEqual([11, 21, 31]);
   });
 
   it('1월드 끝 레벨은 Lv 8~12 안 (힌트를 많이 써도, 꼼꼼해도 — 보스 포함)', () => {
@@ -26,6 +26,13 @@ describe('레벨 곡선 시뮬레이션', () => {
     const xp = worldXp(worldQuests(2), SCENARIOS[1]);
     expect(xp).toBeGreaterThanOrEqual(5600 * 0.97);
     expect(xp).toBeLessThanOrEqual(5600 * 1.03);
+  });
+
+  // world3.md §9 · balance.md 8절: "보통" 3월드 ≈ 6,700 XP (Lv 20 → 30, 미션 XP 빼고), ±3%
+  it('3월드 실제 콘텐츠: 보통 학생 6,700 XP ± 3%', () => {
+    const xp = worldXp(worldQuests(3), SCENARIOS[1]);
+    expect(xp).toBeGreaterThanOrEqual(6700 * 0.97);
+    expect(xp).toBeLessThanOrEqual(6700 * 1.03);
   });
 
   it('Lv 30 → 50 은 학습 XP 없이는 닿지 않음, 하루 45 XP면 약 1년', () => {

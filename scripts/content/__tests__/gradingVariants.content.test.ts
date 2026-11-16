@@ -80,7 +80,10 @@ function applyEdit(solution: string, edit: Edit): string {
 }
 
 /** 다른 정답 (퀘스트 키 → 코드 또는 정답 고쳐 쓰기). 규칙이 지나치게 좁으면 여기서 걸린다 */
-const HANDWRITTEN: Record<string, (string | Edit)[]> = {
+/** 손님이 없는 퀘스트(3-F 자유 작품)의 이야기형 정답: 아이가 직접 칠 입력을 함께 */
+type WithInputs = { code: string; stdin: string[] };
+
+const HANDWRITTEN: Record<string, (string | Edit | WithInputs)[]> = {
   // U4: 1부터 세는 버그를 0으로 바꾸거나, 번호 없이 돌거나, 쉼표로 출력해도 맞는 고침
   'code-sea/5-8': [
     [['range(len(scores))', 'range(0, len(scores))']],
@@ -370,6 +373,29 @@ const HANDWRITTEN: Record<string, (string | Edit)[]> = {
       ],
     ],
   ],
+  // ── 3-F 나만의 작품 (P11-14): 그림이 아닌 작품도 통과 — 이야기형(입력), 게임형(키), 펫형(class) ──
+  'maker-city/7-2#1': [
+    [
+      ['"반짝반짝 별자리"', '"용감한 고양이 모험"'],
+      ['"그림"', '"이야기"'],
+    ],
+  ],
+  'maker-city/7-2#2': [
+    {
+      code: '# 고양이 모험\ntitle = "고양이 모험"\nkind = "이야기"\nfeatures = ["길 고르기", "친구 만나기", "엔딩"]\nprint("작품:", title)\nprint("종류:", kind)\nprint("만들 기능")\nfor f in features:\n    print("-", f)\n\nway = input("왼쪽 길과 오른쪽 길 중 어디로 갈까? ")\nprint(way, "길로 출발!")\n',
+      stdin: ['왼쪽'],
+    },
+    'title = "별 피하기"\nkind = "게임"\nfeatures = ["좌우로 움직이기", "별 떨어지기", "점수"]\nprint("작품:", title)\nprint("종류:", kind)\nprint("만들 기능")\nprint(features)\n\nimport time\nimport turtle\nfrom pyroad import get_key\n\np = turtle.Turtle()\np.penup()\nx = 0\nfor frame in range(90):\n    key = get_key()\n    if key == "Right":\n        x += 10\n    p.goto(x, -150)\n    time.sleep(1 / 30)\n',
+  ],
+  'maker-city/7-2#3': [
+    {
+      code: 'title = "펫 키우기"\nkind = "펫"\nfeatures = ["이름 짓기", "밥 주기", "기분 보기"]\nprint("작품:", title)\nprint("종류:", kind)\nprint("만들 기능")\nprint(features)\n\nclass Pet:\n    def __init__(self, name):\n        self.name = name\n        self.hunger = 50\n\n    def feed(self):\n        self.hunger = max(0, self.hunger - 30)\n\nmy_pet = Pet(input("펫 이름은? "))\nmy_pet.feed()\nif my_pet.hunger < 30:\n    print(my_pet.name, "배불러요!")\n',
+      stdin: ['몽이'],
+    },
+  ],
+  'maker-city/7-2#4': [
+    [['def credits():', 'def credits(name="별빛 메이커"):']],
+  ],
 };
 
 /** 틀린 코드 (정답 고쳐 쓰기). 출력은 맞거나 비슷해도 떨어져야 함 */
@@ -567,6 +593,31 @@ const WRONG: Record<string, Edit[]> = {
     ],
     [['print(f"게임 끝! 점수: {score}")', 'print(f"점수: {score}")']],
   ],
+  // 3-F: 선이 모자란 그림 · 조건 없는 함수 · 함수 없이 크레딧
+  'maker-city/7-2#2': [
+    [
+      [
+        'points = [(-220, 40), (-170, 110), (-110, 70), (-60, 140), (0, 90), (50, 150), (100, 80), (150, 130), (190, 60), (230, 120), (250, 30)]',
+        'points = [(-220, 40), (-170, 110), (-110, 70), (-60, 140)]',
+      ],
+    ],
+  ],
+  'maker-city/7-2#3': [
+    [
+      [
+        '    if p[1] > 100:\n        star(p[0], p[1], 20)   # 높이 있는 별은 크게\n    else:\n        star(p[0], p[1], 10)',
+        '    star(p[0], p[1], 10)',
+      ],
+    ],
+  ],
+  'maker-city/7-2#4': [
+    [
+      [
+        'def credits():\n    print("만든 사람: 별빛 메이커")\n    print("도와준 친구: 파이뱀")\n\ncredits()',
+        'print("만든 사람: 별빛 메이커")\nprint("도와준 친구: 파이뱀")',
+      ],
+    ],
+  ],
 };
 
 const { units } = loadUnits(CONTENT_DIR);
@@ -579,11 +630,15 @@ beforeAll(async () => {
 afterAll(() => runner?.close());
 
 /** 불합격 이유 (통과면 null) */
-async function failure(unit: CheckUnit, code: string): Promise<string | null> {
+async function failure(
+  unit: CheckUnit,
+  code: string,
+  stdin?: string[],
+): Promise<string | null> {
   for (const p of planRuns(unit.scenarios, { seeds: 1, unseededRuns: 0 })) {
     const r = await runner.run(code, {
       seed: p.seed,
-      stdin: p.stdin,
+      stdin: p.stdin ?? stdin,
       keys: p.keys,
     });
     for (const rule of [unit.rule, unit.questRule]) {
@@ -610,18 +665,25 @@ describe('정답을 다르게 써도 통과', () => {
   for (const unit of units.filter((u) => u.solution))
     it(`${unit.key} ${unit.title}`, async () => {
       const codes = [
-        ...VARIANTS.map(([name, f]) => [name, f(unit.solution!)] as const),
+        ...VARIANTS.map(
+          ([name, f]) => [name, f(unit.solution!), undefined] as const,
+        ),
         ...(HANDWRITTEN[unit.key] ?? []).map(
           (c, i) =>
             [
               `다른 정답 ${i + 1}`,
-              typeof c === 'string' ? c : applyEdit(unit.solution!, c),
+              typeof c === 'string'
+                ? c
+                : Array.isArray(c)
+                  ? applyEdit(unit.solution!, c)
+                  : c.code,
+              Array.isArray(c) || typeof c === 'string' ? undefined : c.stdin,
             ] as const,
         ),
       ];
-      for (const [name, code] of codes) {
+      for (const [name, code, stdin] of codes) {
         if (code === null || code === unit.solution) continue;
-        const why = await failure(unit, code);
+        const why = await failure(unit, code, stdin);
         expect(why, `${unit.where} — ${name}\n${why}`).toBeNull();
       }
     });

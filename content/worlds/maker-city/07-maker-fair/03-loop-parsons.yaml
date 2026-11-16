@@ -1,0 +1,43 @@
+# 3월드 퀴즈 F-3: 게임 루프 순서 (parsons, 들여쓰기, 3-6 복습)
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+# 키는 get_key() 대신 리스트로, 끝에 print(t.position()) 으로 검증 (world3.md §5·제안 G)
+# if 다음에 elif, 거북이를 만든 뒤에 반복 — 맞는 순서는 하나
+
+id: b3000000-0000-0000-0000-000000000043
+order: 3
+title: 게임 루프 순서
+concept: 키 리스트로 움직이는 반복 들여쓰기
+xp_reward: 30
+quest_type: quiz
+quiz_kind: parsons
+prompt:
+  topic: 키를 하나씩 읽어 거북이를 움직이는 반복의 줄 순서와 들여쓰기
+  learning_goals:
+    - 반복 안의 if·elif 와 그 안의 명령 들여쓰기를 고를 수 있다
+    - 반복이 끝난 뒤 한 번만 할 일은 들여 쓰지 않는다는 것을 안다
+  story_context: 박람회 오락실 부스의 게임기가 고장 났어요! 버그버그가 느릿이를 움직이는 주문 줄을 뒤섞어 놨대요.
+  fallback_text: 거북이를 먼저 만들고, 키를 하나씩 도는 for 를 써요. for 안의 if·elif 는 한 칸, 그 안의 움직이는 명령은 두 칸 들여 써요. 위치는 다 움직인 뒤 한 번만 보여 줘요.
+  quiz:
+    question: 줄을 순서대로 놓고 들여쓰기도 맞춰, 키를 다 누른 뒤 느릿이의 위치를 한 번 보여 줘요
+    indent: true
+    lines:
+      - { id: ln-m4qa, code: import turtle }
+      - { id: ln-9zrk, code: t = turtle.Turtle() }
+      - { id: ln-c2vw, code: 'for key in ["Right", "Right", "Up"]:' }
+      - { id: ln-h7eb, code: 'if key == "Right":' }
+      - { id: ln-x5pd, code: t.setx(t.xcor() + 10) }
+      - { id: ln-0gun, code: 'elif key == "Up":' }
+      - { id: ln-t8yf, code: t.sety(t.ycor() + 10) }
+      - { id: ln-w1js, code: print(t.position()) }
+answer:
+  quiz_answer:
+    accepted:
+      - - { id: ln-m4qa, indent: 0 }
+        - { id: ln-9zrk, indent: 0 }
+        - { id: ln-c2vw, indent: 0 }
+        - { id: ln-h7eb, indent: 1 }
+        - { id: ln-x5pd, indent: 2 }
+        - { id: ln-0gun, indent: 1 }
+        - { id: ln-t8yf, indent: 2 }
+        - { id: ln-w1js, indent: 0 }
+    explanation: 거북이를 만들고, 키마다 if 와 elif 로 x 나 y 를 10씩 늘려요. 오른쪽 두 번, 위로 한 번이라 반복이 끝나면 (20.00,10.00) 을 한 번 보여 줘요.
