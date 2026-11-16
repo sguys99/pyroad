@@ -1,0 +1,39 @@
+# 3월드 퀴즈 5-5: 처음 보는 과일 (버그 찾기)
+# 원래 코드는 KeyError, 오답 수정안은 다른 에러나 다른 결과 (quizzes.content.test)
+
+id: b3000000-0000-0000-0000-000000000032
+order: 5
+title: 처음 보는 과일
+concept: KeyError 와 get()
+xp_reward: 30
+quest_type: quiz
+quiz_kind: bug_hunt
+prompt:
+  topic: 처음 세는 과일에서 나는 KeyError 고치기
+  learning_goals:
+    - 딕셔너리에 없는 이름표를 꺼내면 KeyError 가 난다는 것을 안다
+    - get(이름표, 0) 으로 처음 보는 이름표를 0부터 셀 수 있다
+  story_context: 탐정 조수가 설문 쪽지를 세는 코드를 짰는데, 첫 쪽지부터 빨간 글씨 KeyError 가 났대요! 아직 한 번도 안 센 과일은 딕셔너리에 이름표가 없거든요.
+  fallback_text: 'count 는 처음에 빈 딕셔너리라서 count["딸기"] 처럼 꺼내면 그런 이름표가 없다고 KeyError 가 나요. get 은 이름표가 없으면 정해 준 기본값을 돌려줘서, 처음 보는 과일은 0 에서 시작할 수 있어요.'
+  quiz:
+    question: 표를 세다가 KeyError 가 나요. 틀린 줄을 찾아 고쳐요
+    lines:
+      - { id: ln-r7dc, code: 'votes = ["딸기", "사과", "딸기"]' }
+      - { id: ln-2kpv, code: 'count = {}' }
+      - { id: ln-w8qn, code: 'for fruit in votes:' }
+      - { id: ln-h4ms, code: '    count[fruit] = count[fruit] + 1' }
+      - { id: ln-c9ty, code: 'print(count)' }
+    fixes:
+      - { id: fx-q3vn, code: '    count[fruit] = count.get(fruit, 0) + 1' }
+      - { id: fx-6zba, code: '    count[fruit] = count.get(fruit) + 1' }
+      - { id: fx-m1xw, code: '    count[fruit] = 1' }
+      - { id: fx-d8kj, code: '    count.get(fruit, 0) + 1' }
+answer:
+  quiz_answer:
+    accepted:
+      - { line: ln-h4ms, fix: fx-q3vn }
+    explanation: 'count.get(fruit, 0) 은 처음 보는 과일이면 0 을 돌려줘요. 그래서 0 + 1 로 시작하고, 다음부터는 센 수에 1을 더해 {"딸기": 2, "사과": 1} 이 나와요.'
+    explanations:
+      fx-6zba: 기본값을 안 주면 get 이 None 을 돌려줘서 None + 1 에서 에러가 나요.
+      fx-m1xw: 늘 1 로 덮어써서 딸기를 두 번 세도 1 이에요.
+      fx-d8kj: 계산만 하고 count 에 다시 넣지 않아서 count 가 비어 있어요.

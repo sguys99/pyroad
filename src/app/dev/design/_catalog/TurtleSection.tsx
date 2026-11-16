@@ -5,6 +5,7 @@ import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OutputPanel } from '@/components/quest/OutputPanel';
 import { GameKeys } from '@/components/quest/GameKeys';
+import { TurtleStage } from '@/components/quest/TurtleStage';
 import { createLiveOutputStore } from '@/lib/pyodide/liveOutput';
 import type { RunResult } from '@/lib/pyodide/usePyodide';
 import { CodeSample, Demo, Section } from './ui';
@@ -139,6 +140,16 @@ export function TurtleSection() {
       label: '게임 조종판 (P11-04)',
       note: '실행이 get_key()를 부르면 그림판 아래에 나와요. 키보드 화살표·스페이스·글자 키, 폰·태블릿은 ← ↑ → ↓ 패드(64px, 누르고 있으면 계속). 여기선 패드를 늘 보여 줘요',
       node: <GameKeysDemo />,
+    },
+    {
+      label: '게임 중 그림판 (P11-13)',
+      note: 'get_key() 게임이 도는 동안은 도구 줄(빠르기·바로 완성·모눈·저장)을 접고, 터치 화면은 머리 줄·안내 한 줄도 접어 360×740 폰 한 화면에 그림판과 방향 패드가 함께 들어가요. 게임이 끝나면 다시 펼쳐요',
+      node: (
+        <>
+          <TurtleStage store={emptyStore} running={false} game />
+          <GameKeysDemo />
+        </>
+      ),
     },
     {
       label: '게임 조종판 · 키를 못 받는 브라우저',

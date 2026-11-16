@@ -1,0 +1,71 @@
+# 3월드 퀘스트 5-1: 설문 쪽지 세기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-5
+# 데이터는 가상의 동물 친구 설문 (제안 J). 세는 방법(get / in)은 자유, split 만 code_check
+
+id: b3000000-0000-0000-0000-000000000028
+order: 1
+title: 설문 쪽지 세기
+concept: split() 과 딕셔너리로 세기
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 쉼표로 이어 쓴 설문 쪽지를 쪼개서 과일별 표 세기
+  learning_goals:
+    - split(",") 으로 쉼표마다 글자를 쪼개 리스트를 만들 수 있다
+    - 딕셔너리로 과일마다 표 수를 셀 수 있다
+  story_context: 탐정 사무소에 첫 사건이 들어왔어요! "동물 마을 학교 친구들이 가장 좋아하는 과일은?" 설문 쪽지 10장이 한 줄로 이어져 왔어요. 쉼표로 쪼개서 과일마다 몇 표인지 세어 봐요.
+  exercise_description: 'survey 를 split(",") 으로 쪼개고, 딕셔너리로 과일마다 표를 세어 "딸기: 4표" 모양으로 한 줄씩 출력하세요'
+  starter_code: |
+    survey = "딸기,사과,딸기,포도,사과,딸기,귤,딸기,포도,사과"   # 동물 친구 10명의 설문 쪽지
+
+    # 1) split(",") 으로 쉼표마다 쪼개 과일 리스트를 만들어요
+    fruits = ___
+
+    # 2) 빈 딕셔너리 count 에 과일마다 표를 세요
+    count = {}
+
+    # 3) count.items() 를 돌며 "딸기: 4표" 모양으로 한 줄씩 출력해요
+  expected_output_hint: '딸기 4표, 사과 3표, 포도 2표, 귤 1표가 한 줄씩 나와야 해요'
+  checklist:
+    - 'survey.split(",") 으로 과일 리스트를 만들어요'
+    - 'count.get(fruit, 0) + 1 로 과일마다 표를 세요'
+    - '"딸기: 4표" 모양으로 한 줄씩 출력해요'
+  example_output: |-
+    딸기: 4표
+    사과: 3표
+    포도: 2표
+    귤: 1표
+  fallback_text: 'split(",") 은 쉼표가 있는 자리마다 글자를 잘라 리스트로 만들어요. 2월드 등대 도서관에서 반장 투표를 센 것처럼, 처음 보는 과일은 0에서 시작해 1을 더해요. count.get(fruit, 0) 은 없는 이름표면 0을 돌려줘요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          딸기: 4표
+          사과: 3표
+          포도: 2표
+          귤: 1표
+      - type: code_check
+        expected: .split(
+  hints:
+    level_1: 먼저 쪽지를 쉼표마다 쪼개요. 그다음 과일 하나씩 표를 더해요.
+    level_2: 'fruits = survey.split(",") 을 쓰고, for fruit in fruits: 아래에 count[fruit] = count.get(fruit, 0) + 1 을 들여 써요.'
+    level_3: |-
+      fruits = survey.___(",")
+      for fruit in fruits:
+          count[fruit] = count.get(fruit, 0) + 1
+      for fruit, n in count.items():
+          print(f"{fruit}: {n}표")
+      빈칸에 글자를 쪼개는 메서드를 넣어 보세요!
+  solution_code: |
+    survey = "딸기,사과,딸기,포도,사과,딸기,귤,딸기,포도,사과"   # 동물 친구 10명의 설문 쪽지
+
+    fruits = survey.split(",")
+
+    count = {}
+    for fruit in fruits:
+        count[fruit] = count.get(fruit, 0) + 1
+
+    for fruit, n in count.items():
+        print(f"{fruit}: {n}표")

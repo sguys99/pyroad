@@ -46,6 +46,8 @@ export interface TurtleStageProps {
   store?: LiveOutputStore;
   /** Python이 아직 실행 중 (끝나면 renderer에 더 올 명령이 없다고 알림) */
   running: boolean;
+  /** get_key() 게임이 도는 중 (P11-13): 도구 줄을 접어 그림판과 조종판이 폰 한 화면에 들어가게. 끝나면 다시 펼침 */
+  game?: boolean;
 }
 
 /**
@@ -54,7 +56,11 @@ export interface TurtleStageProps {
  * (빠르기는 아이가 바꿀 수 있음). 캔버스는 보일 때만 만든다(데스크톱·모바일 결과 자리가 둘 다 붙어 있어 숨은 쪽은 그리지 않음).
  * 낭독기에는 그림 요약 한 문장(describeDrawing)을 읽어 준다
  */
-export function TurtleStage({ store, running }: TurtleStageProps) {
+export function TurtleStage({
+  store,
+  running,
+  game = false,
+}: TurtleStageProps) {
   const { budget, reduced, tier } = useMotionTier();
   const calm = reduced || budget.effectDuration === 0 || tier === 'minimal';
   const [speed, setSpeed] = useState(calm ? INSTANT : NORMAL);
@@ -190,6 +196,7 @@ export function TurtleStage({ store, running }: TurtleStageProps) {
       aria-label="그림판"
       data-testid="turtle-stage"
       data-state={empty ? 'empty' : live ? 'drawing' : 'done'}
+      data-game={game || undefined}
     >
       <div className="ts-head">
         <span className="ts-k">
@@ -230,7 +237,8 @@ export function TurtleStage({ store, running }: TurtleStageProps) {
         )}
       </div>
 
-      <div className="ts-tools">
+      {/* hidden: 접힌 동안 낭독기·Tab 순서에서도 빠짐 (포커스는 조종판이 가져감) */}
+      <div className="ts-tools" hidden={game} data-testid="turtle-tools">
         <div className="ts-speed">
           <label htmlFor={speedId} className="ts-speed-k">
             빠르기

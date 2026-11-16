@@ -88,6 +88,10 @@ export function GameKeys({
       // 넓은 화면은 결과가 에디터 아래라 게임판이 화면 밖일 수 있음 → 조종판 아랫변까지 보이게 (그림판은 바로 위)
       el.scrollIntoView?.({ block: 'end' });
     }
+    // 폰은 실행하면 결과 쪽으로 넘어가는 중(P6-11)이라 첫 스크롤이 어긋남 → 넘김이 끝난 뒤 한 번 더
+    const again = window.setTimeout(() => {
+      if (visible()) el.scrollIntoView?.({ block: 'end' });
+    }, 450);
     const onKey = (e: KeyboardEvent) => {
       const name = tkKeyName(e);
       if (!name || !visible() || keepsKey(e.target, name)) return;
@@ -95,7 +99,10 @@ export function GameKeys({
       sendRef.current(name);
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      window.clearTimeout(again);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [active, preview]);
 
   useEffect(() => stopRepeat, []);

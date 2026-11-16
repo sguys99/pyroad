@@ -1,0 +1,61 @@
+# 3월드 퀘스트 6-1: 째깍째깍 출발
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-6
+# 검증 실행은 잠을 건너뜀 (P11-04 skipSleep). code_check 는 sleep( — from time import sleep 도 맞는 답
+
+id: b3000000-0000-0000-0000-000000000034
+order: 1
+title: 째깍째깍 출발
+concept: time.sleep()
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: time.sleep 으로 쉬어 가며 반복하기
+  learning_goals:
+    - import time 으로 시간 도구를 불러올 수 있다
+    - time.sleep(1) 로 1초 쉬었다가 다음 줄을 실행할 수 있다
+  story_context: 오락실의 게임기가 모두 꺼져 있어요! 느릿이가 게임기 전원을 켜려면 "3, 2, 1, 출발!" 하고 카운트다운을 해야 한대요. 그런데 숫자가 너무 빨리 지나가서 아무도 못 읽어요. 숫자마다 1초씩 쉬게 해 줘요.
+  exercise_description: 3, 2, 1 을 하나씩 출력하고 그때마다 time.sleep(1) 로 1초 쉰 뒤, 마지막에 "출발!" 을 출력하세요
+  starter_code: |
+    import time
+
+    for n in [3, 2, 1]:
+        print(n)
+        # 여기서 1초 쉬어요: time.sleep(___)
+
+    # 반복이 끝나면 "출발!" 을 출력해요
+  expected_output_hint: 3, 2, 1 이 한 줄씩 1초 간격으로 나오고, 마지막 줄에 출발! 이 나와야 해요
+  checklist:
+    - 반복 안에서 print(n) 다음 줄에 time.sleep(1) 을 써요
+    - 반복이 끝난 뒤 "출발!" 을 출력해요
+    - 숫자가 1초에 하나씩 나오는지 봐요
+  example_output: |-
+    3
+    2
+    1
+    출발!
+  fallback_text: 'time.sleep(1) 은 "1초 동안 쉬어!" 라는 주문이에요. 컴퓨터는 아주 빨라서 그냥 두면 숫자가 한꺼번에 나와요. 쉬는 줄을 반복 안에 들여 쓰면 숫자마다 쉬고, 반복 밖(맨 아래)에 쓴 "출발!" 은 마지막에 한 번만 나와요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: "3\n2\n1\n출발!"
+      - type: code_check
+        expected: sleep(
+  hints:
+    level_1: 쉬는 주문은 time 도구 상자 안에 있어요. 숫자를 보여 준 다음에 쉬어요.
+    level_2: print(n) 아래에 time.sleep(1) 을 같은 칸만큼 들여 쓰고, 맨 아래에 print("출발!") 을 써요.
+    level_3: |-
+      for n in [3, 2, 1]:
+          print(n)
+          time.___(1)
+      print("출발!")
+      빈칸에 "자다, 쉬다" 라는 뜻의 영어 낱말을 넣어 보세요!
+  solution_code: |
+    import time
+
+    for n in [3, 2, 1]:
+        print(n)
+        time.sleep(1)
+
+    print("출발!")

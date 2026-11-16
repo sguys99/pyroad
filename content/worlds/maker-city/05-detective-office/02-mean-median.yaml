@@ -1,0 +1,81 @@
+# 3월드 퀘스트 5-2: 평균과 가운데 값
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-5
+# 평균은 초등 5학년 수학 → "모두 더해 똑같이 나누기", 가운데 값은 줄 세우기 (world3.md §2)
+# code_check: 설계의 "statistics.median(" 대신 mean( + median( — from statistics import median 도 맞는 답 (P11-13 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000029
+order: 2
+title: 평균과 가운데 값
+concept: 평균, statistics.mean, median
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 평균을 직접 구하고 statistics 로 확인하기, 가운데 값 구하기
+  learning_goals:
+    - 모두 더해 사람 수로 똑같이 나누면 평균이라는 것을 안다
+    - statistics.mean 과 statistics.median 으로 평균과 가운데 값을 구할 수 있다
+  story_context: 두 번째 사건! 동물 친구 7명이 줄넘기를 했는데, "보통 몇 번쯤 넘었을까?" 를 알고 싶대요. 탐정은 두 가지 방법으로 평균을 구해서 서로 맞는지 확인해요. 줄을 세웠을 때 한가운데 친구의 기록도 알아봐요.
+  exercise_description: '직접 구한 평균과 statistics.mean 으로 구한 평균(둘 다 소수 첫째 자리까지), 둘이 같은지, statistics.median 으로 구한 가운데 값을 출력하세요'
+  starter_code: |
+    import statistics
+
+    jumps = [35, 42, 28, 50, 42, 31, 46]   # 동물 친구 7명의 줄넘기 기록
+
+    # 1) 직접 구하기: 모두 더해(sum) 사람 수(len)로 똑같이 나누고 소수 첫째 자리까지 반올림해요
+    my_avg = round(___ / len(jumps), 1)
+    print(f"직접 구한 평균: {my_avg}")
+
+    # 2) statistics.mean( ) 으로 평균을 구하고 round( , 1) 로 반올림해 "statistics 평균: ..." 을 출력해요
+
+    # 3) 두 평균이 같은지 == 로 견줘 "같아요? ..." 를 출력해요
+
+    # 4) statistics.median( ) 으로 가운데 값을 구해 "가운데 값: ..." 을 출력해요
+  expected_output_hint: 두 평균이 모두 39.1 이고, 같아요? True, 가운데 값 42 가 나와야 해요
+  checklist:
+    - 'sum(jumps) 를 len(jumps) 로 나눠 직접 평균을 구해요'
+    - 'statistics.mean(jumps) 를 round( , 1) 로 반올림해 견줘요'
+    - 'statistics.median(jumps) 로 가운데 값을 구해요'
+  example_output: |-
+    직접 구한 평균: 39.1
+    statistics 평균: 39.1
+    같아요? True
+    가운데 값: 42
+  fallback_text: '평균은 모두 더한 다음 사람 수로 똑같이 나눈 값이에요. 7명의 기록을 더하면 274, 7로 나누면 39.14… 라서 round( , 1) 로 39.1 로 만들어요. 가운데 값은 기록을 작은 것부터 줄 세웠을 때 한가운데(4번째) 친구의 기록이에요. statistics 가 대신 줄을 세워 찾아 줘요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          직접 구한 평균: 39.1
+          statistics 평균: 39.1
+          같아요? True
+          가운데 값: 42
+      - type: code_check
+        expected: mean(
+      - type: code_check
+        expected: median(
+  hints:
+    level_1: 빈칸에는 기록을 모두 더한 값이 들어가요. 그다음 statistics 도구로 한 번 더 구해 견줘요.
+    level_2: 'sum(jumps) 를 빈칸에 넣고, stat_avg = round(statistics.mean(jumps), 1), print(f"같아요? {my_avg == stat_avg}"), print(f"가운데 값: {statistics.median(jumps)}") 을 써요.'
+    level_3: |-
+      my_avg = round(sum(jumps) / len(jumps), 1)
+      stat_avg = round(statistics.mean(jumps), 1)
+      print(f"statistics 평균: {stat_avg}")
+      print(f"같아요? {my_avg == stat_avg}")
+      print(f"가운데 값: {statistics.___(jumps)}")
+      빈칸에 "가운데" 라는 뜻의 영어 낱말을 넣어 보세요!
+  solution_code: |
+    import statistics
+
+    jumps = [35, 42, 28, 50, 42, 31, 46]   # 동물 친구 7명의 줄넘기 기록
+
+    my_avg = round(sum(jumps) / len(jumps), 1)
+    print(f"직접 구한 평균: {my_avg}")
+
+    stat_avg = round(statistics.mean(jumps), 1)
+    print(f"statistics 평균: {stat_avg}")
+
+    print(f"같아요? {my_avg == stat_avg}")
+
+    print(f"가운데 값: {statistics.median(jumps)}")

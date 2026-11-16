@@ -344,7 +344,11 @@ export function OutputPanel(props: OutputPanelProps) {
   const drawing = useDrawing(props.liveOutput);
   const listening = useListening(props.liveOutput) && props.isRunning;
   const stage = (props.turtle || drawing) && (
-    <TurtleStage store={props.liveOutput} running={props.isRunning} />
+    <TurtleStage
+      store={props.liveOutput}
+      running={props.isRunning}
+      game={listening}
+    />
   );
   return (
     <>

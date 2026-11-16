@@ -89,6 +89,20 @@
   align-items: center;
   gap: 0.25rem 0.75rem;
 }
+/* 게임 중(data-game)에는 접음: 폰 한 화면에 그림판 + 방향 패드 (P11-13) */
+.ts-tools[hidden] {
+  display: none;
+}
+/* 터치 화면 게임 중: 머리도 접고, 도화지는 화면 높이에서 머리 줄·탭·조종판 몫(30rem)을 뺀 만큼까지 —
+   360×740에서도 스크롤 없이 그림판과 방향 패드가 한 화면에 */
+@media (pointer: coarse) {
+  .ts[data-game] .ts-head {
+    display: none;
+  }
+  .ts[data-game] .ts-paper {
+    width: min(100%, 50svh, 28rem, max(10rem, 100svh - 30rem));
+  }
+}
 .ts-speed {
   display: flex;
   flex: 1 1 15rem;

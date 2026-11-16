@@ -1,0 +1,67 @@
+# 3월드 퀘스트 4-2: 돌봄 함수
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-4
+# code_check: 설계의 "max(0" 대신 "max(" — max(pet["배고픔"] - 30, 0) 도 맞는 답 (P11-13 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000022
+order: 2
+title: 돌봄 함수
+concept: 함수로 상태 바꾸기, max()
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 함수로 펫에게 밥 주기
+  learning_goals:
+    - 딕셔너리를 받는 함수 안에서 값을 바꿀 수 있다
+    - max(0, 값) 으로 값이 0 밑으로 내려가지 않게 할 수 있다
+  story_context: 콩이가 배고프대요! 밥을 줄 때마다 배고픔이 30씩 줄어요. 그런데 밥을 두 번 줬더니 배고픔이 -10 이 됐어요. 배고픔이 0보다 작을 수는 없잖아요?
+  exercise_description: 'feed(pet) 함수를 채워서 배고픔을 30 줄이되 max(0, …) 로 0 밑으로 안 가게 하고, "(이름)에게 밥을 줬어요!" 를 출력하세요'
+  starter_code: |
+    pet = {"이름": "콩이", "배고픔": 50, "기분": 40}
+
+    def feed(pet):
+        # 1) 배고픔을 30 줄여요. max(0, ...) 로 감싸면 0 밑으로 안 내려가요
+        # 2) "(이름)에게 밥을 줬어요!" 를 출력해요
+        pass
+
+    feed(pet)
+    feed(pet)
+    print(f"배고픔: {pet['배고픔']}")
+  expected_output_hint: 밥을 두 번 준 뒤 배고픔이 0 이어야 해요
+  checklist:
+    - pass 를 지우고 함수 안을 채워요
+    - pet["배고픔"] 에 max(0, 지금 배고픔 - 30) 을 다시 담아요
+    - 밥을 두 번 준 뒤 배고픔이 0 인지 봐요
+  example_output: |-
+    콩이에게 밥을 줬어요!
+    콩이에게 밥을 줬어요!
+    배고픔: 0
+  fallback_text: 'max(가, 나) 는 둘 중 큰 값을 골라요. max(0, 20) 은 20, max(0, -10) 은 0 이에요. 그래서 max(0, 배고픔 - 30) 으로 쓰면 아무리 빼도 0 밑으로는 안 가요. 함수에 넘긴 딕셔너리를 함수 안에서 바꾸면 밖의 pet 도 바뀌어요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          콩이에게 밥을 줬어요!
+          콩이에게 밥을 줬어요!
+          배고픔: 0
+      - type: code_check
+        expected: max(
+  hints:
+    level_1: 큰 값을 고르는 주문으로 0과 "빼고 난 값" 중 큰 쪽을 남겨요.
+    level_2: 'pet["배고픔"] = max(0, pet["배고픔"] - 30) 을 쓰고, 그 아래에 print(f"{pet[''이름'']}에게 밥을 줬어요!") 를 써요.'
+    level_3: |-
+      def feed(pet):
+          pet["배고픔"] = ___(0, pet["배고픔"] - 30)
+          print(f"{pet['이름']}에게 밥을 줬어요!")
+      빈칸에 둘 중 큰 값을 고르는 주문을 넣어 보세요!
+  solution_code: |
+    pet = {"이름": "콩이", "배고픔": 50, "기분": 40}
+
+    def feed(pet):
+        pet["배고픔"] = max(0, pet["배고픔"] - 30)
+        print(f"{pet['이름']}에게 밥을 줬어요!")
+
+    feed(pet)
+    feed(pet)
+    print(f"배고픔: {pet['배고픔']}")

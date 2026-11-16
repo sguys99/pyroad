@@ -1,0 +1,450 @@
+# 3월드 프로젝트 5-6: 과일 사건 탐정 보고서 (5단계, 덧붙이기 — world3.md §3 제안 B)
+# 작성 안내: content/README.md "프로젝트 퀘스트" · 설계: docs/curriculum/world3.md §4 3-5
+# 데이터는 가상의 동물 친구 20명 (딸기 7 · 사과 5 · 포도 4 · 귤 4). 시작 코드가 draw_bar 를 줌 (P0-06 §6.3)
+# 그림은 아래로 덧붙이고 그림 규칙은 "있다" 판정. 3단계 막대는 한 가지 색(검정 테두리 + 주황) → 4단계 "색 ≥4" 는 앞 그림으로 통과 못 함
+# 4단계는 3단계 정답의 자리표 주석 "(4단계) 여기서…" 두 곳을 고치고 가로축은 맨 아래에 덧붙임
+# 마지막 단계를 끝낸 완성 작품만 갤러리에 출품 (publishableQuests: 3월드 project 완료)
+
+id: b3000000-0000-0000-0000-000000000033
+order: 6
+title: 과일 사건 탐정 보고서
+concept: 세기, 평균, 막대그래프, 결론 종합
+xp_reward: 360
+quest_type: project
+prompt:
+  topic: '대형 프로젝트: 설문을 세고 막대그래프로 탐정 보고서 쓰기'
+  learning_goals:
+    - 설문 데이터를 쪼개고 세어 1등과 평균을 직접 구할 수 있다
+    - 반복으로 함수를 불러 막대그래프를 그리고 숫자와 색으로 꾸밀 수 있다
+    - 데이터를 보고 결론을 한 문장으로 말할 수 있다
+  story_context: '드디어 큰 사건! "동물 마을 학교 친구들 20명이 가장 좋아하는 과일은?" 설문 쪽지를 세고, 1등과 평균을 찾고, 막대그래프를 그려서 탐정 보고서를 완성해요. 완성한 보고서는 갤러리에 걸 수 있어요.'
+  exercise_description: 과일별로 세기, 1등과 평균 찾기, 막대그래프, 숫자와 색 꾸미기, 결론 문장을 5단계로 하나씩 더해 탐정 보고서를 완성하세요.
+  starter_code: |
+    # 과일 사건 탐정 보고서를 만들어 봐요!
+  expected_output_hint: 프로젝트를 5단계로 나누어 완성해요
+  fallback_text: '코드는 아래로 한 단계씩 덧붙여 가요. 4단계에서는 코드 안의 "(4단계) 여기서…" 주석이 고칠 자리를 알려 줘요. 우리 반 데이터로 바꿔 보고 싶으면 친구 이름은 빼고 과일과 표 수만 써요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - { type: shape, shape: rectangle, filled: true, count: 4 }
+      - { type: text, includes: 가장 인기 }
+      - { type: contains, expected: 탐정 보고서 }
+  hints:
+    level_1: 이 프로젝트는 5단계로 나뉘어 있어요. 단계마다 안내와 해 볼 일을 따라가 보세요!
+    level_2: 세기, 1등과 평균, 막대그래프, 꾸미기, 결론 순서로 아래에 덧붙여요. 앞 단계 코드는 지우지 않아요.
+    level_3: 막히면 단계마다 있는 힌트를 열어 보세요. 시작 코드의 주석이 할 일을 알려 줘요!
+steps:
+  - step_number: 1
+    prompt:
+      step_goal: '설문을 쉼표로 쪼개 과일별로 세고 "딸기: 7표" 처럼 출력하기'
+      checklist:
+        - 'survey.split(",") 으로 쪼개요'
+        - 'count.get(fruit, 0) + 1 로 과일마다 세요'
+        - '"딸기: 7표" 모양으로 네 줄을 출력해요'
+      example_output: |-
+        딸기: 7표
+        사과: 5표
+        포도: 4표
+        귤: 4표
+      starter_code: |
+        # 과일 사건 탐정 보고서
+        survey = "딸기,사과,포도,귤,딸기,사과,딸기,포도,귤,딸기,사과,딸기,귤,포도,딸기,사과,귤,딸기,포도,사과"   # 동물 친구 20명
+
+        count = {}
+        # 1) survey 를 split(",") 으로 쪼개 과일마다 count 에 표를 세요
+
+        # 2) "딸기: 7표" 모양으로 한 줄씩 출력해요
+      fallback_text: '설문 쪽지 세기에서 한 것과 같아요. 쪼개고, 세고, 한 줄씩 보여 줘요. 데이터는 가상의 동물 친구 20명이 낸 쪽지예요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: contains, expected: '딸기: 7표' }
+          - { type: contains, expected: '사과: 5표' }
+          - { type: contains, expected: '포도: 4표' }
+          - { type: contains, expected: '귤: 4표' }
+          - { type: code_check, expected: .split( }
+      hints:
+        level_1: 쪼개기 → 세기 → 보여 주기, 세 가지를 차례로 해요.
+        level_2: 'for fruit in survey.split(","): 아래에 count[fruit] = count.get(fruit, 0) + 1, 그다음 for fruit, n in count.items(): 아래에 print 를 써요.'
+        level_3: |-
+          for fruit in survey.split(","):
+              count[fruit] = count.___(fruit, 0) + 1
+          for fruit, n in count.items():
+              print(f"{fruit}: {n}표")
+          빈칸에 없으면 기본값을 주는 메서드를 넣어 보세요!
+      solution_code: |
+        # 과일 사건 탐정 보고서
+        survey = "딸기,사과,포도,귤,딸기,사과,딸기,포도,귤,딸기,사과,딸기,귤,포도,딸기,사과,귤,딸기,포도,사과"   # 동물 친구 20명
+
+        count = {}
+        for fruit in survey.split(","):
+            count[fruit] = count.get(fruit, 0) + 1
+
+        for fruit, n in count.items():
+            print(f"{fruit}: {n}표")
+  - step_number: 2
+    prompt:
+      step_goal: '1등 과일을 직접 찾고, 모두 더해 똑같이 나눈 평균 표 수 구하기'
+      checklist:
+        - 'count.items() 를 돌며 가장 많은 표를 받은 과일을 best 에 남겨요'
+        - '표를 모두 더한 total 을 과일 수 len(count) 로 나눠요'
+        - '"가장 인기: 딸기 (7표)" 와 "평균 5.0표" 를 출력해요'
+      example_output: |-
+        (앞에 이어서)
+        가장 인기: 딸기 (7표)
+        평균 5.0표
+      starter_code: |
+
+        # 2단계: 1등 과일과 평균
+        best = ""
+        best_n = 0
+        total = 0
+        # count.items() 를 돌며
+        #   total 에 표 수를 더하고
+        #   지금 표 수가 best_n 보다 크면 best 와 best_n 을 바꿔요
+        # 다 돌면 "가장 인기: (과일) ((표)표)" 와 "평균 (total ÷ 과일 수)표" 를 출력해요
+      fallback_text: '2월드 알고리즘 산맥에서 가장 큰 물고기를 찾던 방법이에요. 지금까지의 1등보다 크면 1등을 바꿔요. 평균은 표를 모두 더해 과일 4가지로 똑같이 나눈 값이에요. 20 ÷ 4 = 5 예요.'
+    answer:
+      validation:
+        # statistics.mean(count.values()) 은 "평균 5표" (정수) 라서 "평균 5" 까지만 봄 (P11-13 플레이테스트)
+        type: all
+        rules:
+          - { type: contains, expected: '가장 인기: 딸기 (7표)' }
+          - { type: contains, expected: '평균 5' }
+      hints:
+        level_1: 1등 찾기는 "지금까지 1등" 과 하나씩 견주기예요. 평균은 다 더하고 똑같이 나누기!
+        level_2: 'for fruit, n in count.items(): 아래에 total = total + n 과 if n > best_n: (best, best_n 바꾸기) 를 들여 써요.'
+        level_3: |-
+          for fruit, n in count.items():
+              total = total + n
+              if n ___ best_n:
+                  best = fruit
+                  best_n = n
+          print(f"가장 인기: {best} ({best_n}표)")
+          print(f"평균 {total / len(count)}표")
+          빈칸에 "더 크면" 기호를 넣어 보세요!
+      solution_code: |
+        # 과일 사건 탐정 보고서
+        survey = "딸기,사과,포도,귤,딸기,사과,딸기,포도,귤,딸기,사과,딸기,귤,포도,딸기,사과,귤,딸기,포도,사과"   # 동물 친구 20명
+
+        count = {}
+        for fruit in survey.split(","):
+            count[fruit] = count.get(fruit, 0) + 1
+
+        for fruit, n in count.items():
+            print(f"{fruit}: {n}표")
+
+        # 2단계: 1등 과일과 평균
+        best = ""
+        best_n = 0
+        total = 0
+        for fruit, n in count.items():
+            total = total + n
+            if n > best_n:
+                best = fruit
+                best_n = n
+        print(f"가장 인기: {best} ({best_n}표)")
+        print(f"평균 {total / len(count)}표")
+  - step_number: 3
+    prompt:
+      step_goal: 'count.items() 를 돌며 draw_bar 로 막대그래프 그리기 (높이 = 표 × 20)'
+      checklist:
+        - 'x = -200 에서 시작해요'
+        - 'for fruit, n in count.items(): 안에서 draw_bar(x, n * 20, "orange", fruit) 를 불러요'
+        - '막대를 하나 그릴 때마다 x 를 100 늘려요'
+      example_output: (그림판에 이름표가 붙은 주황 막대 네 개)
+      starter_code: |
+
+        # 3단계: 막대그래프
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+
+        def draw_bar(x, height, color, label):
+            t.penup()
+            t.goto(x, -150)
+            t.pendown()
+            t.fillcolor(color)
+            t.begin_fill()
+            for i in range(2):
+                t.forward(60)
+                t.left(90)
+                t.forward(height)
+                t.left(90)
+            t.end_fill()
+            t.penup()
+            t.goto(x + 15, -175)
+            t.write(label, font=("Arial", 12, "normal"))
+
+        # 막대를 반복으로 그려요
+        #   x = -200 에서 시작해 과일마다 draw_bar(x, 표 × 20, "orange", 과일) 을 부르고
+        #   x 를 100 늘려 다음 막대 자리로 가요
+      fallback_text: 'draw_bar 는 막대 하나 그리기에서 만든 함수예요. 과일이 몇 가지든 반복이 알아서 막대를 그려요. 표 1개를 20칸으로 그려서 7표면 140칸 높이예요.'
+    answer:
+      validation:
+        # 줄 처음에서 들여 쓴 draw_bar( = 반복 안에서 부르기 (4번 펼쳐 쓰면 떨어짐).
+        # 앞의 줄바꿈이 없으면 "    draw_bar(" 가 "def draw_bar(" 에도 걸림 (띄어쓰기 맞춤이 들여쓰기를 한 칸으로 봄, P11-13 플레이테스트)
+        type: all
+        rules:
+          - { type: shape, shape: rectangle, filled: true, count: 4 }
+          - { type: text, includes: 딸기 }
+          - { type: text, includes: 사과 }
+          - { type: text, includes: 포도 }
+          - { type: text, includes: 귤 }
+          - { type: code_check, expected: "\n    draw_bar(" }
+      hints:
+        level_1: 막대 네 개를 하나씩 부르지 말고 반복 안에서 불러요. 막대마다 x 자리가 달라야 해요.
+        level_2: 'x = -200 을 만들고, for fruit, n in count.items(): 아래에 draw_bar(x, n * 20, "orange", fruit) 와 x = x + 100 을 들여 써요.'
+        level_3: |-
+          x = -200
+          for fruit, n in count.items():
+              draw_bar(x, n * ___, "orange", fruit)
+              x = x + 100
+          빈칸에 표 하나의 높이를 넣어 보세요!
+      solution_code: |
+        # 과일 사건 탐정 보고서
+        survey = "딸기,사과,포도,귤,딸기,사과,딸기,포도,귤,딸기,사과,딸기,귤,포도,딸기,사과,귤,딸기,포도,사과"   # 동물 친구 20명
+
+        count = {}
+        for fruit in survey.split(","):
+            count[fruit] = count.get(fruit, 0) + 1
+
+        for fruit, n in count.items():
+            print(f"{fruit}: {n}표")
+
+        # 2단계: 1등 과일과 평균
+        best = ""
+        best_n = 0
+        total = 0
+        for fruit, n in count.items():
+            total = total + n
+            if n > best_n:
+                best = fruit
+                best_n = n
+        print(f"가장 인기: {best} ({best_n}표)")
+        print(f"평균 {total / len(count)}표")
+
+        # 3단계: 막대그래프
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+
+        def draw_bar(x, height, color, label):
+            t.penup()
+            t.goto(x, -150)
+            t.pendown()
+            t.fillcolor(color)
+            t.begin_fill()
+            for i in range(2):
+                t.forward(60)
+                t.left(90)
+                t.forward(height)
+                t.left(90)
+            t.end_fill()
+            t.penup()
+            t.goto(x + 15, -175)
+            t.write(label, font=("Arial", 12, "normal"))
+
+        # (4단계) 여기에 과일마다 색을 정해요
+        x = -200
+        for fruit, n in count.items():
+            draw_bar(x, n * 20, "orange", fruit)
+            # (4단계) 여기서 막대 위에 표 수를 써요
+            x = x + 100
+  - step_number: 4
+    prompt:
+      step_goal: '과일마다 다른 색, 막대 위에 "7표" 같은 숫자, 아래에 가로축 선 그리기'
+      checklist:
+        - '(4단계) 주석 자리에 colors 딕셔너리를 만들고 "orange" 대신 colors[fruit] 를 써요'
+        - '막대 위로 가서 write(f"{n}표") 로 표 수를 써요'
+        - '맨 아래에 (-250, -150) 에서 (250, -150) 까지 가로축 선을 그어요'
+      example_output: (그림판에 색이 다른 막대 네 개, 막대 위 숫자, 가로축)
+      starter_code: |
+
+        # 4단계: 그래프 꾸미기
+        #   1) 위 코드를 고쳐요: (4단계) 주석 자리에
+        #      colors = {"딸기": "red", "사과": "green", "포도": "purple", "귤": "orange"} 를 만들고
+        #      draw_bar 의 "orange" 를 colors[fruit] 로 바꿔요
+        #   2) 위 코드를 고쳐요: 막대 위 (x + 15, n * 20 - 145) 로 가서 f"{n}표" 를 써요
+        #   3) 여기 아래에 가로축: (-250, -150) 으로 가서 펜을 내리고 (250, -150) 까지 그어요
+      fallback_text: '딕셔너리로 과일마다 색을 정해 두면 colors[fruit] 로 꺼내 쓸 수 있어요. 막대 꼭대기는 -150 + 높이 자리라서 그보다 조금 위에 숫자를 써요. 그래프 꾸미기에서 색은 마음대로 바꿔도 돼요.'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: text, includes: 7표 }
+          - { type: colors, min: 4 }
+      hints:
+        level_1: 색은 과일마다 다르게, 숫자는 막대마다 하나씩 써요. 둘 다 반복 안에서 해요.
+        level_2: 'colors 딕셔너리를 반복 위에 만들고, 반복 안에서 draw_bar(x, n * 20, colors[fruit], fruit) 다음 줄에 t.goto(x + 15, n * 20 - 145) 와 t.write(f"{n}표") 를 써요.'
+        level_3: |-
+          colors = {"딸기": "red", "사과": "green", "포도": "purple", "귤": "orange"}
+          x = -200
+          for fruit, n in count.items():
+              draw_bar(x, n * 20, colors[___], fruit)
+              t.goto(x + 15, n * 20 - 145)
+              t.write(f"{n}표")
+              x = x + 100
+          빈칸에 지금 그리는 과일 이름이 든 변수를 넣어 보세요!
+      solution_code: |
+        # 과일 사건 탐정 보고서
+        survey = "딸기,사과,포도,귤,딸기,사과,딸기,포도,귤,딸기,사과,딸기,귤,포도,딸기,사과,귤,딸기,포도,사과"   # 동물 친구 20명
+
+        count = {}
+        for fruit in survey.split(","):
+            count[fruit] = count.get(fruit, 0) + 1
+
+        for fruit, n in count.items():
+            print(f"{fruit}: {n}표")
+
+        # 2단계: 1등 과일과 평균
+        best = ""
+        best_n = 0
+        total = 0
+        for fruit, n in count.items():
+            total = total + n
+            if n > best_n:
+                best = fruit
+                best_n = n
+        print(f"가장 인기: {best} ({best_n}표)")
+        print(f"평균 {total / len(count)}표")
+
+        # 3단계: 막대그래프
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+
+        def draw_bar(x, height, color, label):
+            t.penup()
+            t.goto(x, -150)
+            t.pendown()
+            t.fillcolor(color)
+            t.begin_fill()
+            for i in range(2):
+                t.forward(60)
+                t.left(90)
+                t.forward(height)
+                t.left(90)
+            t.end_fill()
+            t.penup()
+            t.goto(x + 15, -175)
+            t.write(label, font=("Arial", 12, "normal"))
+
+        colors = {"딸기": "red", "사과": "green", "포도": "purple", "귤": "orange"}
+        x = -200
+        for fruit, n in count.items():
+            draw_bar(x, n * 20, colors[fruit], fruit)
+            t.goto(x + 15, n * 20 - 145)
+            t.write(f"{n}표", font=("Arial", 12, "normal"))
+            x = x + 100
+
+        # 4단계: 가로축
+        t.goto(-250, -150)
+        t.pendown()
+        t.goto(250, -150)
+        t.penup()
+  - step_number: 5
+    prompt:
+      step_goal: 'title 로 보고서 이름을 달고, 결론 한 문장을 출력과 그림판에 모두 쓰기'
+      checklist:
+        - 'turtle.title("과일 사건 보고서") 로 이름을 달아요'
+        - '"가장 인기 있는 과일은 딸기! (7표)" 같은 결론을 report 에 담아요'
+        - '"탐정 보고서: " + report 를 출력하고, 그림판 위쪽에 write 로도 써요'
+      example_output: |-
+        (앞에 이어서)
+        탐정 보고서: 가장 인기 있는 과일은 딸기! (7표)
+      starter_code: |
+
+        # 5단계: 탐정 보고서
+        #   1) turtle.title("과일 사건 보고서") 로 그림판에 이름을 달아요
+        #   2) report = f"가장 인기 있는 과일은 {best}! ({best_n}표)" 처럼 결론을 만들어요
+        #   3) "탐정 보고서: " + report 를 출력해요
+        #   4) (-200, 100) 으로 가서 write 로 report 를 크게 써요
+      fallback_text: '2단계에서 찾은 best 와 best_n 을 다시 써서 결론을 만들어요. 숫자가 바뀌어도 결론이 저절로 맞게 바뀌어요. 다 만들면 갤러리에 탐정 보고서를 걸 수 있어요!'
+    answer:
+      validation:
+        type: all
+        rules:
+          - { type: contains, expected: 탐정 보고서 }
+          - { type: text, includes: 가장 인기 }
+          - { type: code_check, expected: title( }
+      hints:
+        level_1: 결론 문장을 변수 하나에 담으면 출력과 그림판에 똑같이 쓸 수 있어요.
+        level_2: 'turtle.title("과일 사건 보고서"), report = f"가장 인기 있는 과일은 {best}! ({best_n}표)", print("탐정 보고서: " + report), t.goto(-200, 100), t.write(report, font=("Arial", 16, "normal")) 을 차례로 써요.'
+        level_3: |-
+          turtle.___("과일 사건 보고서")
+          report = f"가장 인기 있는 과일은 {best}! ({best_n}표)"
+          print("탐정 보고서: " + report)
+          t.goto(-200, 100)
+          t.write(report, font=("Arial", 16, "normal"))
+          빈칸에 그림판 이름을 다는 주문을 넣어 보세요!
+      solution_code: |
+        # 과일 사건 탐정 보고서
+        survey = "딸기,사과,포도,귤,딸기,사과,딸기,포도,귤,딸기,사과,딸기,귤,포도,딸기,사과,귤,딸기,포도,사과"   # 동물 친구 20명
+
+        count = {}
+        for fruit in survey.split(","):
+            count[fruit] = count.get(fruit, 0) + 1
+
+        for fruit, n in count.items():
+            print(f"{fruit}: {n}표")
+
+        # 2단계: 1등 과일과 평균
+        best = ""
+        best_n = 0
+        total = 0
+        for fruit, n in count.items():
+            total = total + n
+            if n > best_n:
+                best = fruit
+                best_n = n
+        print(f"가장 인기: {best} ({best_n}표)")
+        print(f"평균 {total / len(count)}표")
+
+        # 3단계: 막대그래프
+        import turtle
+
+        t = turtle.Turtle()
+        t.speed(0)
+
+        def draw_bar(x, height, color, label):
+            t.penup()
+            t.goto(x, -150)
+            t.pendown()
+            t.fillcolor(color)
+            t.begin_fill()
+            for i in range(2):
+                t.forward(60)
+                t.left(90)
+                t.forward(height)
+                t.left(90)
+            t.end_fill()
+            t.penup()
+            t.goto(x + 15, -175)
+            t.write(label, font=("Arial", 12, "normal"))
+
+        colors = {"딸기": "red", "사과": "green", "포도": "purple", "귤": "orange"}
+        x = -200
+        for fruit, n in count.items():
+            draw_bar(x, n * 20, colors[fruit], fruit)
+            t.goto(x + 15, n * 20 - 145)
+            t.write(f"{n}표", font=("Arial", 12, "normal"))
+            x = x + 100
+
+        # 4단계: 가로축
+        t.goto(-250, -150)
+        t.pendown()
+        t.goto(250, -150)
+        t.penup()
+
+        # 5단계: 탐정 보고서
+        turtle.title("과일 사건 보고서")
+        report = f"가장 인기 있는 과일은 {best}! ({best_n}표)"
+        print("탐정 보고서: " + report)
+        t.goto(-200, 100)
+        t.write(report, font=("Arial", 16, "normal"))

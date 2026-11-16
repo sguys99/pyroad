@@ -1,0 +1,45 @@
+# 3월드 퀴즈 4-6: 설계도 빈칸 (fill_blank)
+# 별이에게만 밥을 줌 → 둘째 빈칸에 kong 을 넣으면 콩이 배고픔이 바뀌어 결과가 달라짐 (quizzes.content.test)
+
+id: b3000000-0000-0000-0000-000000000026
+order: 6
+title: 설계도 빈칸
+concept: self
+xp_reward: 30
+quest_type: quiz
+quiz_kind: fill_blank
+prompt:
+  topic: 메서드 안의 "나 자신"
+  learning_goals:
+    - 메서드의 첫 칸과 상태를 가리킬 때 self 를 쓴다는 것을 안다
+  story_context: 버그버그가 펫 설계도의 글자를 두 군데 지워 버렸어요! 별이에게 밥을 줬는데 배고픔이 줄지 않는대요. 빈칸을 채워 설계도를 고쳐 줘요.
+  fallback_text: 메서드는 설계도 안의 함수라서 첫 칸으로 "나 자신"을 받아요. 그 이름으로 내 상태를 가리켜요. byul.feed() 라고 부르면 그 "나 자신"이 별이가 되어서 별이의 배고픔만 바뀌어요. 콩이 배고픔은 그대로예요.
+  quiz:
+    question: 빈칸을 채워 별이에게만 밥을 줘요
+    code: |-
+      class Pet:
+          def __init__(self, name):
+              self.name = name
+              self.hunger = 70
+
+          def feed({{bk-q4n7}}):
+              {{bk-w2e9}}.hunger = self.hunger - 30
+
+      kong = Pet("콩이")
+      byul = Pet("별이")
+      byul.feed()
+      print(kong.hunger, byul.hunger)
+    tokens:
+      - { id: tok-p3k8, text: self }
+      - { id: tok-m6v1, text: kong }
+      - { id: tok-c9x2, text: name }
+      - { id: tok-h5t4, text: Pet }
+answer:
+  quiz_answer:
+    accepted:
+      - { bk-q4n7: tok-p3k8, bk-w2e9: tok-p3k8 }
+    explanation: 메서드는 첫 칸에 self 를 받고, self.hunger 로 내 배고픔을 바꿔요. byul.feed() 에서 self 는 별이라서 별이만 40 이 되고 콩이는 70 그대로예요.
+    explanations:
+      tok-m6v1: kong 이라고 쓰면 별이에게 밥을 줘도 콩이 배고픔이 바뀌어요.
+      tok-c9x2: name 은 펫 이름을 받는 칸이에요. 메서드의 "나 자신"이 아니에요.
+      tok-h5t4: Pet 은 설계도 이름이에요. 펫 한 마리를 가리키려면 self 를 써요.

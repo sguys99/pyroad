@@ -1,0 +1,191 @@
+# 3월드 퀘스트 6-4: 벽에서 멈춰!
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-6
+# 키 손님: 오른쪽 30번 → 200 에서 멈춤, 왼쪽 30번 → -200. 벽에 닿은 뒤 돌아오는 손님으로 "벽에서 영영 멈춤" 버그를 잡음
+# code_check 200 (whole_word): if 로 막든 min/max 로 막든 200 을 씀. 위아래 벽은 이 퀘스트에서 다루지 않음
+
+id: b3000000-0000-0000-0000-000000000037
+order: 4
+title: 벽에서 멈춰!
+concept: 조건으로 화면 끝 막기
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 거북이가 화면 밖으로 나가지 않게 하기
+  learning_goals:
+    - x 가 정한 값을 넘으면 그 값으로 되돌려 벽을 만들 수 있다
+    - 오른쪽 벽과 왼쪽 벽을 따로 생각할 수 있다
+  story_context: 느릿이가 신나서 오른쪽으로 달리다가 게임 화면 밖으로 나가 버렸어요! 화면 양쪽 끝에 보이지 않는 벽을 세워서 느릿이가 x = -200 부터 200 사이에서만 다니게 해 줘요.
+  exercise_description: x 가 200 보다 커지면 200 으로, -200 보다 작아지면 -200 으로 되돌려서 느릿이가 화면 밖으로 나가지 않게 하세요
+  starter_code: |
+    import time
+    import turtle
+    from pyroad import get_key
+
+    t = turtle.Turtle()
+    x = 0
+
+    for frame in range(150):
+        key = get_key()
+        if key == "Right":
+            x = x + 10
+        elif key == "Left":
+            x = x - 10
+
+        # 오른쪽 벽: x 가 200 보다 크면 200 으로 되돌려요
+        # 왼쪽 벽: x 가 -200 보다 작으면 -200 으로 되돌려요
+
+        t.goto(x, 0)
+        time.sleep(1 / 30)
+
+    print(t.position())
+  expected_output_hint: 오른쪽만 30번 눌러도 (200.00,0.00) 에서 멈춰야 해요
+  checklist:
+    - 'if x > 200: 아래에 x = 200 을 써요'
+    - 왼쪽 벽도 -200 으로 만들어요
+    - 벽은 t.goto(x, 0) 보다 위에서 막아요
+  example_output: '(200.00,0.00)'
+  fallback_text: '벽은 "넘었으면 되돌리기"예요. 움직인 다음에 x 가 200 보다 크면 x = 200 으로 고쳐요. 왼쪽은 -200 보다 작으면 x = -200 이에요. 거북이를 옮기는 goto 보다 먼저 고쳐야 벽 너머로 한 번도 안 나가요.'
+answer:
+  validation:
+    type: code_check
+    expected: '200'
+    whole_word: true
+  scenarios:
+    - name: 오른쪽만 30번 손님
+      keys:
+        [
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+        ]
+      expect: { type: contains, expected: '(200.00,0.00)' }
+    - name: 왼쪽만 30번 손님
+      keys:
+        [
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+        ]
+      expect: { type: contains, expected: '(-200.00,0.00)' }
+    - name: 벽에 닿고 돌아오는 손님
+      keys:
+        [
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Right,
+          Left,
+          Left,
+          Left,
+          Left,
+          Left,
+        ]
+      expect: { type: contains, expected: '(150.00,0.00)' }
+  hints:
+    level_1: 움직인 다음에 "벽을 넘었나?" 를 물어보고, 넘었으면 벽 자리로 되돌려요.
+    level_2: 'if x > 200: 아래에 x = 200 을, if x < -200: 아래에 x = -200 을 들여 써요. 둘 다 t.goto(x, 0) 보다 위예요.'
+    level_3: |-
+      if x > 200:
+          x = 200
+      if x < ___:
+          x = -200
+      빈칸에 왼쪽 벽 숫자를 넣어 보세요!
+  solution_code: |
+    import time
+    import turtle
+    from pyroad import get_key
+
+    t = turtle.Turtle()
+    x = 0
+
+    for frame in range(150):
+        key = get_key()
+        if key == "Right":
+            x = x + 10
+        elif key == "Left":
+            x = x - 10
+
+        if x > 200:
+            x = 200
+        if x < -200:
+            x = -200
+
+        t.goto(x, 0)
+        time.sleep(1 / 30)
+
+    print(t.position())

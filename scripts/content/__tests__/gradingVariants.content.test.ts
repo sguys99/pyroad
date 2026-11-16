@@ -194,6 +194,182 @@ const HANDWRITTEN: Record<string, (string | Edit)[]> = {
   'maker-city/3-6#4': [
     [['random.shuffle(bank)', 'bank = random.sample(bank, len(bank))']],
   ],
+  // ── 3-4 다른 정답 (P11-13) ──
+  // f-string 막대 · max 앞뒤 바꾸기 · print 쉼표 · 반복으로 놀기 · if 로 100 에서 멈추기 · tick 을 먼저 · range(5)
+  'maker-city/4-1': [
+    [
+      [
+        '"배고픔: " + "#" * (pet["배고픔"] // 10)',
+        `f"배고픔: {'#' * (pet['배고픔'] // 10)}"`,
+      ],
+    ],
+  ],
+  'maker-city/4-2': [
+    [['max(0, pet["배고픔"] - 30)', 'max(pet["배고픔"] - 30, 0)']],
+  ],
+  'maker-city/4-4': [
+    [['print(f"배고픔: {kong.hunger}")', 'print("배고픔:", kong.hunger)']],
+  ],
+  'maker-city/4-5': [
+    [
+      [
+        'byul.play()\nbyul.play()\nbyul.play()',
+        'for i in range(3):\n    byul.play()',
+      ],
+    ],
+  ],
+  'maker-city/4-7#2': [
+    [
+      [
+        'self.mood = min(100, self.mood + 20)',
+        'self.mood = self.mood + 20\n        if self.mood > 100:\n            self.mood = 100',
+      ],
+    ],
+  ],
+  'maker-city/4-7#4': [
+    [
+      ['    pet.tick()\n    pet.status()', '    pet.status()'],
+      [
+        'choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")\n',
+        'choice = input("1 밥, 2 놀기, 3 잠, 0 끝: ")\n    pet.tick()\n',
+      ],
+    ],
+  ],
+  'maker-city/4-7#5': [
+    [
+      ['range(1, 6)', 'range(5)'],
+      ['{day}일째', '{day + 1}일째'],
+      ['{day}일이 지났어요', '{day + 1}일이 지났어요'],
+    ],
+  ],
+  // ── 3-5 다른 정답 (P11-13) ──
+  // 세기는 if/in 으로, 출력은 + 로 이어도 · statistics 는 from 으로 · 막대는 다른 자리·방향 · 색은 리스트와 번호로
+  'maker-city/5-1': [
+    [
+      [
+        '    count[fruit] = count.get(fruit, 0) + 1',
+        '    if fruit in count:\n        count[fruit] += 1\n    else:\n        count[fruit] = 1',
+      ],
+      ['print(f"{fruit}: {n}표")', 'print(fruit + ": " + str(n) + "표")'],
+    ],
+  ],
+  'maker-city/5-2': [
+    'from statistics import mean, median\n\njumps = [35, 42, 28, 50, 42, 31, 46]\n\ntotal = 0\nfor j in jumps:\n    total = total + j\nmy_avg = round(total / 7, 1)\nprint("직접 구한 평균:", my_avg)\nstat_avg = round(mean(jumps), 1)\nprint("statistics 평균:", stat_avg)\nprint("같아요?", my_avg == stat_avg)\nprint("가운데 값:", median(jumps))\n',
+  ],
+  'maker-city/5-4': [
+    [
+      ['draw_bar(-100, 140', 'draw_bar(60, 140'],
+      ['draw_bar(0, 100', 'draw_bar(-150, 100'],
+    ],
+    [
+      ['t.left(90)', 't.right(90)'],
+      ['t.left(90)', 't.right(90)'],
+    ],
+  ],
+  'maker-city/5-6#1': [
+    [
+      [
+        '    count[fruit] = count.get(fruit, 0) + 1',
+        '    if fruit in count:\n        count[fruit] = count[fruit] + 1\n    else:\n        count[fruit] = 1',
+      ],
+    ],
+  ],
+  'maker-city/5-6#2': [
+    [
+      [
+        'print(f"평균 {total / len(count)}표")',
+        'import statistics\nprint(f"평균 {statistics.mean(count.values())}표")',
+      ],
+    ],
+    [['if n > best_n:', 'if n >= best_n:']],
+  ],
+  'maker-city/5-6#3': [
+    [
+      [
+        'for fruit, n in count.items():\n    draw_bar(x, n * 20, "orange", fruit)',
+        'for fruit in count:\n    draw_bar(x, count[fruit] * 20, "orange", fruit)',
+      ],
+    ],
+  ],
+  'maker-city/5-6#4': [
+    [
+      [
+        'colors = {"딸기": "red", "사과": "green", "포도": "purple", "귤": "orange"}',
+        'colors = ["red", "green", "purple", "orange"]\ni = 0',
+      ],
+      ['colors[fruit]', 'colors[i]'],
+      ['    x = x + 100', '    x = x + 100\n    i = i + 1'],
+    ],
+  ],
+  'maker-city/5-6#5': [
+    [['print("탐정 보고서: " + report)', 'print("탐정 보고서:", report)']],
+  ],
+  // ── 3-6 다른 정답 (P11-13) ──
+  // 3-6: 잠은 from time import sleep, 움직임은 setx·xcor·따로 if·min/max 벽, 충돌은 if/else·position()
+  'maker-city/6-1': [
+    'from time import sleep\nprint(3)\nsleep(1)\nprint(2)\nsleep(1)\nprint(1)\nsleep(1)\nprint("출발!")\n',
+  ],
+  'maker-city/6-2': [
+    'import time, turtle\nfrom pyroad import get_key\nt = turtle.Turtle()\nfor frame in range(0, 150):\n    key = get_key()\n    if key == "Right":\n        t.setx(t.xcor() + 10)\n    if key == "Left":\n        t.setx(t.xcor() - 10)\n    if key == "Up":\n        t.sety(t.ycor() + 10)\n    if key == "Down":\n        t.sety(t.ycor() - 10)\n    time.sleep(1/30)\nprint(t.position())\n',
+  ],
+  'maker-city/6-4': [
+    [
+      [
+        'if x > 200:\n        x = 200\n    if x < -200:\n        x = -200',
+        'x = min(x, 200)\n    x = max(x, -200)',
+      ],
+    ],
+    [
+      ['if key == "Right":', 'if key == "Right" and x < 200:'],
+      ['elif key == "Left":', 'elif key == "Left" and x > -200:'],
+      ['if x > 200:\n        x = 200\n    if x < -200:\n        x = -200', ''],
+    ],
+  ],
+  'maker-city/6-5': [
+    [
+      [
+        'return a.distance(b) < 20',
+        'if a.distance(b.position()) < 20:\n        return True\n    else:\n        return False',
+      ],
+    ],
+    [['return a.distance(b) < 20', 'return b.distance(a) < 20']],
+  ],
+  'maker-city/6-7#2': [
+    [
+      ['for frame in range(900):', 'for frame in range(0, 900):'],
+      [
+        'if x > 200:\n        x = 200\n    if x < -200:\n        x = -200',
+        'x = max(-200, min(200, x))',
+      ],
+      ['screen.update()', 'turtle.update()'],
+    ],
+  ],
+  'maker-city/6-7#3': [
+    [
+      ['star.goto(star.xcor(), star.ycor() - 5)', 'star.sety(star.ycor() - 5)'],
+      [
+        '        star.goto(random.randint(-200, 200), 200)',
+        '        star.goto(random.choice(range(-200, 201)), 200)',
+      ],
+    ],
+  ],
+  'maker-city/6-7#4': [
+    [
+      ['score = score + 1', 'score += 1'],
+      [
+        'return a.distance(b) < 20',
+        'if a.distance(b) < 20:\n        return True\n    return False',
+      ],
+    ],
+  ],
+  'maker-city/6-7#5': [
+    [
+      [
+        'pen = turtle.Turtle()\npen.hideturtle()\npen.color("white")\npen.write(',
+        'player.write(',
+      ],
+    ],
+  ],
 };
 
 /** 틀린 코드 (정답 고쳐 쓰기). 출력은 맞거나 비슷해도 떨어져야 함 */
@@ -284,6 +460,113 @@ const WRONG: Record<string, Edit[]> = {
     ],
   ],
   'maker-city/3-6#5': [[['        wrong.append(card["q"])\n', '']]],
+  // ── 3-4 틀린 답 (P11-13) ──
+  // 막대 글자 고정 · 0/100 에서 안 멈춤 · 글자 그대로 출력 · 다른 펫과 놀기 · 이름 고정 · pass 그대로 · break 없음 · 숫자 0 과 견줌 · tick 안 부름 · 기분 안 줄음 · 기준 틀림
+  'maker-city/4-1': [
+    [
+      ['(pet["배고픔"] // 10)', '6'],
+      ['(pet["기분"] // 10)', '4'],
+    ],
+  ],
+  'maker-city/4-2': [[['max(0, pet["배고픔"] - 30)', 'pet["배고픔"] - 30']]],
+  'maker-city/4-4': [[['{kong.hunger}', '50']]],
+  'maker-city/4-5': [
+    [['min(100, self.mood + 20)', 'self.mood + 20']],
+    [['byul.play()', 'kong.play()']],
+  ],
+  'maker-city/4-7#1': [[['{self.name}의 상태', '콩이의 상태']]],
+  'maker-city/4-7#2': [
+    [
+      [
+        'self.mood = min(100, self.mood + 20)\n        self.hunger = min(100, self.hunger + 10)\n        print(f"{self.name}: 신나요!")',
+        'pass',
+      ],
+    ],
+    [['max(0, self.hunger - 30)', 'self.hunger - 30']],
+  ],
+  'maker-city/4-7#3': [
+    [['\n        break', '']],
+    [['choice == "0"', 'choice == 0']],
+  ],
+  'maker-city/4-7#4': [
+    [['    pet.tick()\n', '']],
+    [['self.mood = max(0, self.mood - 5)', 'self.mood = self.mood']],
+  ],
+  'maker-city/4-7#5': [[['elif pet.mood >= 40:', 'elif pet.mood >= 20:']]],
+  // ── 3-5 틀린 답 (P11-13) ──
+  // 늘 1로 덮어쓰는 세기 · 가운데 값을 손으로 · 반올림 없음 · 채우지 않은 막대 · 같은 자리 막대 · 펼쳐 쓴 막대 · 한 가지 색
+  'maker-city/5-1': [
+    [['count[fruit] = count.get(fruit, 0) + 1', 'count[fruit] = 1']],
+  ],
+  'maker-city/5-2': [
+    [['{statistics.median(jumps)}', '42']],
+    [['round(statistics.mean(jumps), 1)', 'statistics.mean(jumps)']],
+    [['/ len(jumps)', '/ 6']],
+  ],
+  'maker-city/5-4': [
+    [['    t.end_fill()\n', '']],
+    [['draw_bar(0, 100, "green", "사과")', '']],
+    [
+      [
+        'draw_bar(0, 100, "green", "사과")',
+        'draw_bar(-100, 140, "green", "사과")',
+      ],
+    ],
+    [['t.write(label', 't.write("과일"']],
+  ],
+  'maker-city/5-6#2': [
+    [['total / len(count)', 'total / 20']],
+    [['if n > best_n:', 'if n < best_n:']],
+  ],
+  'maker-city/5-6#3': [
+    [
+      [
+        'for fruit, n in count.items():\n    draw_bar(x, n * 20, "orange", fruit)\n    # (4단계) 여기서 막대 위에 표 수를 써요\n    x = x + 100',
+        'draw_bar(-200, 140, "orange", "딸기")\ndraw_bar(-100, 100, "orange", "사과")\ndraw_bar(0, 80, "orange", "포도")\ndraw_bar(100, 80, "orange", "귤")',
+      ],
+    ],
+    [['    x = x + 100\n', '']],
+  ],
+  'maker-city/5-6#4': [
+    [['colors[fruit]', '"orange"']],
+    [['t.write(f"{n}표"', 't.write("표"']],
+  ],
+  'maker-city/5-6#5': [
+    [['t.write(report, font=("Arial", 16, "normal"))', '']],
+    [['turtle.title("과일 사건 보고서")\n', '']],
+  ],
+  // ── 3-6 틀린 답 (P11-13) ──
+  // 3-6: 반복 안의 출발, 아래 키 빠짐, 잠 없음(키가 안 들어옴), 벽 하나·한 칸 모자란 벽, 거리 부등호 반대, 점수 안 셈
+  'maker-city/6-1': [[['print("출발!")', '    print("출발!")']]],
+  'maker-city/6-2': [
+    [['    elif key == "Down":\n        y = y - 10\n', '']],
+    [['time.sleep(1 / 30)', 'pass']],
+  ],
+  'maker-city/6-4': [
+    [['    if x < -200:\n        x = -200\n', '']],
+    [['if x > 200:\n        x = 200', 'if x > 190:\n        x = 190']],
+  ],
+  'maker-city/6-5': [[['< 20', '> 20']], [['< 20', '< 100']]],
+  'maker-city/6-7#2': [
+    [['    if x < -200:\n        x = -200\n', '']],
+    [['    time.sleep(1 / 30)\n', '']],
+  ],
+  'maker-city/6-7#3': [
+    [
+      ['star.goto(random.randint(-200, 200), 200)', 'star.goto(0, 200)'],
+      ['star.goto(random.randint(-200, 200), 200)', 'star.goto(0, 200)'],
+    ],
+  ],
+  'maker-city/6-7#4': [[['< 20', '> 20']], [['score = score + 1', 'pass']]],
+  'maker-city/6-7#5': [
+    [
+      [
+        'pen.write(f"게임 끝! 점수: {score}", align="center", font=("Arial", 24, "bold"))\n',
+        '',
+      ],
+    ],
+    [['print(f"게임 끝! 점수: {score}")', 'print(f"점수: {score}")']],
+  ],
 };
 
 const { units } = loadUnits(CONTENT_DIR);

@@ -1,0 +1,418 @@
+# 실력 확인 퀴즈 (P10-03 방식, docs/curriculum/world3.md §13 ⑦): 2월드를 다 깨지 않고 메이커 시티를 여는 시험
+# 작성 안내: content/README.md "실력 확인 퀴즈". 문제 하나 = 보스 라운드 하나와 같은 모양·규칙
+# - 묶음 2벌 × 10문제, KST 날마다 번갈아 나옴. 8문제 이상 맞히면 합격 (00052)
+# - 2월드 퀴즈·보스와 겹치지 않는 새 문제. 2월드 스테이지 2-1~2-F를 벌마다 모두, 퀴즈 4종을 섞어
+# - review_quest: 틀리면 "더 연습하면 좋은 단계"로 보여 줄 2월드 퀘스트 (그 스테이지 이름이 나옴)
+# - 학생에게 정답·해설을 보여 주지 않습니다 (explanation 은 검수용)
+
+sets:
+  # ── 1벌 ──
+  - questions:
+      # 1 · 2-1 산호 문자열 공방 · 음수 슬라이싱
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000004
+        prompt:
+          quiz:
+            question: 이 코드를 돌리면 무엇이 나올까?
+            code: |-
+              word = "starfish"
+              print(word[-4:])
+            options:
+              - { id: opt-f4ib, text: fish }
+              - { id: opt-s7ta, text: star }
+              - { id: opt-r2fh, text: rfish }
+              - { id: opt-h9qe, text: h }
+        answer:
+          quiz_answer:
+            accepted: [opt-f4ib]
+            explanation: -4 는 끝에서 네 번째 글자 f 예요. 끝 번호를 비우면 마지막 글자까지 잘라서 fish 가 나와요.
+      # 2 · 2-1 산호 문자열 공방 · join()
+      - quiz_kind: fill_blank
+        review_quest: b2000000-0000-0000-0000-000000000008
+        prompt:
+          quiz:
+            question: 빈칸을 채워 친구 이름을 - 로 이어 한 줄로 보여 줘요
+            code: |-
+              names = ["해마", "문어", "게"]
+              print("-".{{bk-j4na}}(names))
+            tokens:
+              - { id: tok-w3jn, text: join }
+              - { id: tok-p8sl, text: split }
+              - { id: tok-u5pr, text: upper }
+        answer:
+          quiz_answer:
+            accepted:
+              - { bk-j4na: tok-w3jn }
+            explanation: '"-".join(names) 는 리스트 글자 사이에 - 를 끼워 해마-문어-게 로 이어요.'
+      # 3 · 2-2 등대 딕셔너리 도서관 · get() 으로 새 이름표 세기
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000014
+        prompt:
+          quiz:
+            question: 바구니에 처음 보는 과일을 넣어요. 돌리면 무엇이 나올까?
+            code: |-
+              box = {"사과": 2}
+              box["배"] = box.get("배", 0) + 1
+              print(box)
+            options:
+              - { id: opt-k3bx, text: "{'사과': 2, '배': 1}" }
+              - { id: opt-d8mz, text: "{'사과': 2, '배': 0}" }
+              - { id: opt-y6vc, text: "{'사과': 3}" }
+              - { id: opt-n1wg, text: KeyError }
+        answer:
+          quiz_answer:
+            accepted: [opt-k3bx]
+            explanation: get("배", 0) 은 배가 없으니 0 을 돌려줘요. 0 + 1 = 1 을 새 이름표 배에 넣어요.
+      # 4 · 2-2 등대 딕셔너리 도서관 · 투표 세기 순서
+      - quiz_kind: parsons
+        review_quest: b2000000-0000-0000-0000-000000000017
+        prompt:
+          quiz:
+            question: 줄을 순서대로 놓고 들여쓰기를 맞춰 투표 수를 세요
+            indent: true
+            lines:
+              - { id: ln-x2ab, code: 'votes = ["별", "달", "별"]' }
+              - { id: ln-c7qd, code: 'count = {}' }
+              - { id: ln-m4ve, code: 'for v in votes:' }
+              - { id: ln-a9kt, code: 'count[v] = count.get(v, 0) + 1' }
+              - { id: ln-r3hw, code: 'print(count)' }
+        answer:
+          quiz_answer:
+            accepted:
+              - - { id: ln-x2ab, indent: 0 }
+                - { id: ln-c7qd, indent: 0 }
+                - { id: ln-m4ve, indent: 0 }
+                - { id: ln-a9kt, indent: 1 }
+                - { id: ln-r3hw, indent: 0 }
+              - - { id: ln-c7qd, indent: 0 }
+                - { id: ln-x2ab, indent: 0 }
+                - { id: ln-m4ve, indent: 0 }
+                - { id: ln-a9kt, indent: 1 }
+                - { id: ln-r3hw, indent: 0 }
+            explanation: 투표 리스트와 빈 딕셔너리를 먼저 만들고(둘은 순서를 바꿔도 돼요), 반복 안에서 한 표씩 더한 뒤 반복 밖에서 한 번 보여 줘요.
+      # 5 · 2-3 소용돌이 반복 미로 · 2차원 리스트
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000022
+        prompt:
+          quiz:
+            question: 배의 좌석표에서 두 자리를 꺼내요. 돌리면 무엇이 나올까?
+            code: |-
+              seats = [["A", "B"], ["C", "D"], ["E", "F"]]
+              print(seats[2][0] + seats[0][1])
+            options:
+              - { id: opt-e5bq, text: EB }
+              - { id: opt-f2az, text: FA }
+              - { id: opt-c8bm, text: CB }
+              - { id: opt-b3ex, text: BE }
+        answer:
+          quiz_answer:
+            accepted: [opt-e5bq]
+            explanation: seats[2] 는 세 번째 줄 ["E", "F"] 라서 [0] 은 E, seats[0][1] 은 첫 줄의 두 번째 B 예요.
+      # 6 · 2-4 해적선 랜덤 놀이공원 · sort()
+      - quiz_kind: fill_blank
+        review_quest: b2000000-0000-0000-0000-000000000032
+        prompt:
+          quiz:
+            question: 빈칸을 채워 물고기 길이를 작은 것부터 줄 세워요
+            code: |-
+              fish = [5, 2, 8]
+              fish.{{bk-s6rt}}()
+              print(fish)
+            tokens:
+              - { id: tok-q4so, text: sort }
+              - { id: tok-v9re, text: reverse }
+              - { id: tok-l2cl, text: clear }
+        answer:
+          quiz_answer:
+            accepted:
+              - { bk-s6rt: tok-q4so }
+            explanation: sort() 는 리스트를 작은 수부터 차례로 줄 세워서 [2, 5, 8] 이 돼요.
+      # 7 · 2-5 버그 병원선 · 에러 이름 맞히기
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000041
+        prompt:
+          quiz:
+            question: 쿠키를 친구 수만큼 나눠요. 이 코드를 돌리면 어떤 에러가 날까?
+            code: |-
+              cookies = 6
+              friends = 0
+              print(cookies / friends)
+            options:
+              - { id: opt-z7dv, text: ZeroDivisionError }
+              - { id: opt-v3ab, text: ValueError }
+              - { id: opt-t5yp, text: TypeError }
+              - { id: opt-n8me, text: NameError }
+        answer:
+          quiz_answer:
+            accepted: [opt-z7dv]
+            explanation: 0 으로 나눌 수는 없어서 ZeroDivisionError 가 나요.
+      # 8 · 2-5 버그 병원선 · 잘못 잡은 에러
+      - quiz_kind: bug_hunt
+        review_quest: b2000000-0000-0000-0000-000000000040
+        prompt:
+          quiz:
+            question: 안전띠를 맸는데도 프로그램이 에러로 멈춰요. 틀린 줄을 찾아 고쳐요
+            lines:
+              - { id: ln-p3tx, code: 'text = "다섯"' }
+              - { id: ln-k8ry, code: 'try:' }
+              - { id: ln-w2nu, code: '    n = int(text)' }
+              - { id: ln-g6cs, code: '    print(n * 2)' }
+              - { id: ln-d4ze, code: 'except ZeroDivisionError:' }
+              - { id: ln-u9pa, code: '    print("숫자로 써 줘요")' }
+            fixes:
+              - { id: fx-a7vl, code: 'except ValueError:' }
+              - { id: fx-j3kk, code: 'except KeyError:' }
+              - { id: fx-q5nm, code: 'except NameError:' }
+        answer:
+          quiz_answer:
+            accepted:
+              - { line: ln-d4ze, fix: fx-a7vl }
+            explanation: int("다섯") 은 숫자로 바꿀 수 없어서 ValueError 가 나요. 그 에러를 잡아야 안내 문장이 나와요.
+      # 9 · 2-6 해저 알고리즘 산맥 · 찾으면 break
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000050
+        prompt:
+          quiz:
+            question: 조개를 하나씩 열다가 진주를 찾으면 멈춰요. 돌리면 무엇이 나올까?
+            code: |-
+              shells = ["돌", "돌", "진주", "돌", "진주"]
+              n = 0
+              for s in shells:
+                  n = n + 1
+                  if s == "진주":
+                      break
+              print(n)
+            options:
+              - { id: opt-m3th, text: '3' }
+              - { id: opt-j5fv, text: '5' }
+              - { id: opt-w8tw, text: '2' }
+              - { id: opt-q1fr, text: '4' }
+        answer:
+          quiz_answer:
+            accepted: [opt-m3th]
+            explanation: 세 번째 조개에서 진주를 찾아 n 이 3 일 때 break 로 멈춰요.
+      # 10 · 2-F 응용 프로젝트 항구 · 기록장 합계
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000055
+        prompt:
+          quiz:
+            question: 용돈 기입장의 남은 돈을 계산해요. 돌리면 무엇이 나올까?
+            code: |-
+              records = [{"내용": "용돈", "금액": 3000}, {"내용": "빵", "금액": -1200}]
+              left = 0
+              for r in records:
+                  left = left + r["금액"]
+              print(left)
+            options:
+              - { id: opt-h6za, text: '1800' }
+              - { id: opt-c2kp, text: '4200' }
+              - { id: opt-r9ux, text: '3000' }
+              - { id: opt-b4ny, text: '-1200' }
+        answer:
+          quiz_answer:
+            accepted: [opt-h6za]
+            explanation: 0 + 3000 - 1200 = 1800 이에요. 쓴 돈은 금액이 빼기라서 더하면 줄어요.
+  # ── 2벌 ──
+  - questions:
+      # 1 · 2-1 산호 문자열 공방 · upper() 는 새 글자를 돌려줌
+      - quiz_kind: bug_hunt
+        review_quest: b2000000-0000-0000-0000-000000000006
+        prompt:
+          quiz:
+            question: 가게 간판을 큰 글자로 바꾸려는데 그대로 나와요. 틀린 줄을 찾아 고쳐요
+            lines:
+              - { id: ln-s4gn, code: 'sign = "fish shop"' }
+              - { id: ln-u2pw, code: 'sign.upper()' }
+              - { id: ln-z7pr, code: 'print(sign)' }
+            fixes:
+              - { id: fx-b5kz, code: 'sign = sign.upper()' }
+              - { id: fx-n3wq, code: 'sign = sign.lower()' }
+              - { id: fx-e8vt, code: 'sign.upper' }
+        answer:
+          quiz_answer:
+            accepted:
+              - { line: ln-u2pw, fix: fx-b5kz }
+            explanation: upper() 는 큰 글자로 바꾼 새 글자를 돌려줄 뿐 sign 을 바꾸지 않아요. 다시 sign 에 넣어야 FISH SHOP 이 나와요.
+      # 2 · 2-1 산호 문자열 공방 · index() 와 len()
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000010
+        prompt:
+          quiz:
+            question: 이 코드를 돌리면 무엇이 나올까?
+            code: |-
+              word = "ocean"
+              print(word.index("e"), len(word))
+            options:
+              - { id: opt-g2fv, text: '2 5' }
+              - { id: opt-x6rb, text: '3 5' }
+              - { id: opt-l4sj, text: '2 4' }
+              - { id: opt-u8nd, text: 'e 5' }
+        answer:
+          quiz_answer:
+            accepted: [opt-g2fv]
+            explanation: 번호는 0 부터 세서 o 0, c 1, e 2 예요. 글자는 모두 5개예요.
+      # 3 · 2-2 등대 딕셔너리 도서관 · in 으로 이름표 확인
+      - quiz_kind: fill_blank
+        review_quest: b2000000-0000-0000-0000-000000000014
+        prompt:
+          quiz:
+            question: 빈칸을 채워 가방에 모자가 있는지 확인해요
+            code: |-
+              bag = {"열쇠": 1, "지도": 2}
+              if "모자" {{bk-i5nb}} bag:
+                  print("모자 있어요")
+              else:
+                  print("모자 없어요")
+            tokens:
+              - { id: tok-h7in, text: in }
+              - { id: tok-r3nt, text: not in }
+              - { id: tok-k9lt, text: '<' }
+        answer:
+          quiz_answer:
+            accepted:
+              - { bk-i5nb: tok-h7in }
+            explanation: '"모자" in bag 은 딕셔너리에 모자 이름표가 있는지 봐요. 없으니 else 로 가서 모자 없어요 가 나와요.'
+      # 4 · 2-2 등대 딕셔너리 도서관 · split() 하고 세기
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000018
+        prompt:
+          quiz:
+            question: 낱말 수를 세어요. 돌리면 무엇이 나올까?
+            code: |-
+              text = "해 달 해 별 해"
+              count = {}
+              for w in text.split():
+                  count[w] = count.get(w, 0) + 1
+              print(count["해"], len(count))
+            options:
+              - { id: opt-a3hc, text: '3 3' }
+              - { id: opt-p7wk, text: '3 5' }
+              - { id: opt-d5me, text: '1 3' }
+              - { id: opt-t2qo, text: '5 3' }
+        answer:
+          quiz_answer:
+            accepted: [opt-a3hc]
+            explanation: 해 는 세 번 나와서 3, 이름표는 해·달·별 세 가지라서 len 도 3 이에요.
+      # 5 · 2-3 소용돌이 반복 미로 · 중첩 반복으로 줄 만들기
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000020
+        prompt:
+          quiz:
+            question: 이 코드를 돌리면 무엇이 나올까?
+            code: |-
+              for r in range(2):
+                  line = ""
+                  for c in range(3):
+                      line = line + str(r + c)
+                  print(line)
+            options:
+              - { id: opt-n4yb, text: "012\n123" }
+              - { id: opt-v6ks, text: "012\n012" }
+              - { id: opt-c9ap, text: "000\n111" }
+              - { id: opt-j1xr, text: "01\n12" }
+        answer:
+          quiz_answer:
+            accepted: [opt-n4yb]
+            explanation: 첫 줄은 r 이 0 이라 0+0, 0+1, 0+2 로 012, 둘째 줄은 r 이 1 이라 1, 2, 3 을 이어 123 이에요.
+      # 6 · 2-4 해적선 랜덤 놀이공원 · 줄 세우고 차례로 태우기
+      - quiz_kind: parsons
+        review_quest: b2000000-0000-0000-0000-000000000032
+        prompt:
+          quiz:
+            question: 줄을 순서대로 놓고 들여쓰기를 맞춰 가나다 차례로 놀이기구에 태워요
+            indent: true
+            lines:
+              - { id: ln-t5ga, code: 'names = ["다람쥐", "토끼", "곰"]' }
+              - { id: ln-b8ur, code: 'names.sort()' }
+              - { id: ln-k3zi, code: 'for n in names:' }
+              - { id: ln-e6pm, code: 'print(n + " 차례")' }
+              - { id: ln-h2wc, code: 'print("모두 탔어요")' }
+        answer:
+          quiz_answer:
+            accepted:
+              - - { id: ln-t5ga, indent: 0 }
+                - { id: ln-b8ur, indent: 0 }
+                - { id: ln-k3zi, indent: 0 }
+                - { id: ln-e6pm, indent: 1 }
+                - { id: ln-h2wc, indent: 0 }
+            explanation: 리스트를 만들고, 줄 세운 뒤, 한 명씩 차례를 부르고, 반복이 끝나면 한 번만 모두 탔다고 말해요.
+      # 7 · 2-5 버그 병원선 · NameError (대문자)
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000036
+        prompt:
+          quiz:
+            question: 점수에 5 를 더해 보여 주려고 해요. 이 코드를 돌리면 어떤 에러가 날까?
+            code: |-
+              score = 10
+              print(Score + 5)
+            options:
+              - { id: opt-n7er, text: NameError }
+              - { id: opt-t3pe, text: TypeError }
+              - { id: opt-v5ae, text: ValueError }
+              - { id: opt-k2ye, text: KeyError }
+        answer:
+          quiz_answer:
+            accepted: [opt-n7er]
+            explanation: 파이썬은 대문자와 소문자를 다르게 봐요. Score 라는 이름은 만든 적이 없어서 NameError 가 나요.
+      # 8 · 2-6 해저 알고리즘 산맥 · 조건에 맞는 것 세기
+      - quiz_kind: fill_blank
+        review_quest: b2000000-0000-0000-0000-000000000049
+        prompt:
+          quiz:
+            question: 빈칸을 채워 키가 130 이상인 친구 수를 세요
+            code: |-
+              heights = [128, 135, 130, 142]
+              n = 0
+              for h in heights:
+                  if h {{bk-g3hx}} 130:
+                      n = n + 1
+              print(n)
+            tokens:
+              - { id: tok-m2ge, text: '>=' }
+              - { id: tok-f6gt, text: '>' }
+              - { id: tok-y4lt, text: '<' }
+        answer:
+          quiz_answer:
+            accepted:
+              - { bk-g3hx: tok-m2ge }
+            explanation: 이상은 130 도 넣어서 >= 를 써요. 135, 130, 142 세 명이에요.
+      # 9 · 2-6 해저 알고리즘 산맥 · 평균은 개수로 나누기
+      - quiz_kind: bug_hunt
+        review_quest: b2000000-0000-0000-0000-000000000046
+        prompt:
+          quiz:
+            question: 진주 세 상자의 평균을 구하려는데 값이 이상해요. 틀린 줄을 찾아 고쳐요
+            lines:
+              - { id: ln-c5aq, code: 'pearls = [4, 6, 8]' }
+              - { id: ln-r8vo, code: 'total = 0' }
+              - { id: ln-y2hm, code: 'for p in pearls:' }
+              - { id: ln-f7jd, code: '    total = total + p' }
+              - { id: ln-w4sb, code: 'print(total / 2)' }
+            fixes:
+              - { id: fx-d6lp, code: 'print(total / len(pearls))' }
+              - { id: fx-m9cq, code: 'print(total / 4)' }
+              - { id: fx-s2wt, code: 'print(total // 2)' }
+        answer:
+          quiz_answer:
+            accepted:
+              - { line: ln-w4sb, fix: fx-d6lp }
+            explanation: 평균은 모두 더한 값을 개수로 나눠요. 상자는 3개라서 18 / 3 = 6.0 이에요.
+      # 10 · 2-F 응용 프로젝트 항구 · True / False 돌려주는 함수
+      - quiz_kind: multiple_choice
+        review_quest: b2000000-0000-0000-0000-000000000057
+        prompt:
+          quiz:
+            question: 단어 퀴즈의 채점 함수를 두 번 불러요. 돌리면 무엇이 나올까?
+            code: |-
+              def check(word, answer):
+                  return word == answer
+              print(check("별", "별"), check("달", "해"))
+            options:
+              - { id: opt-u3tf, text: 'True False' }
+              - { id: opt-e7ft, text: 'False True' }
+              - { id: opt-z4tt, text: 'True True' }
+              - { id: opt-l8bh, text: '별 해' }
+        answer:
+          quiz_answer:
+            accepted: [opt-u3tf]
+            explanation: 별 과 별 은 같아서 True, 달 과 해 는 달라서 False 를 돌려줘요.

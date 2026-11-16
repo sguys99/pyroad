@@ -1,0 +1,35 @@
+# 3월드 퀴즈 6-3: 몇 번 돌까? (출력 예측형 객관식)
+# 작성 안내: content/README.md "퀴즈". 공개 부분(prompt)에 정답을 쓰지 마세요
+
+id: b3000000-0000-0000-0000-000000000036
+order: 3
+title: 몇 번 돌까?
+concept: 프레임과 게임 시간
+xp_reward: 30
+quest_type: quiz
+quiz_kind: multiple_choice
+prompt:
+  topic: 게임 루프가 도는 횟수
+  learning_goals:
+    - 1초에 도는 횟수와 게임 시간을 곱해 게임 루프를 몇 번 돌지 셀 수 있다
+  story_context: 오락실 게임은 1초에 30번씩 화면을 새로 그려요. 이 한 번을 "프레임"이라고 해요. 느릿이가 3초짜리 짧은 게임을 만들려고 하는데, 게임 루프를 몇 번 돌려야 할까요?
+  fallback_text: 1초에 30번이면 2초에는 30 + 30 번, 3초에는 30 + 30 + 30 번이에요. 같은 수를 여러 번 더하는 건 곱하기로 빨리 셀 수 있어요.
+  quiz:
+    question: 돌리면 무엇이 나올까?
+    code: |-
+      frames_per_second = 30
+      seconds = 3
+      print(frames_per_second * seconds)
+    options:
+      - { id: opt-q7m2, text: '90' }
+      - { id: opt-3vkd, text: '33' }
+      - { id: opt-x5ha, text: '10' }
+      - { id: opt-8nwe, text: '30' }
+answer:
+  quiz_answer:
+    accepted: [opt-q7m2]
+    explanation: 1초에 30번씩 3초 동안이니까 30 × 3 = 90 번이에요. 그래서 3초짜리 게임은 for frame in range(90) 으로 돌려요.
+    explanations:
+      opt-3vkd: '* 는 더하기가 아니라 곱하기예요. 30 + 3 이 아니에요.'
+      opt-x5ha: 30 ÷ 3 이 아니라 30 × 3 이에요.
+      opt-8nwe: 30 은 1초 동안 도는 횟수예요. 3초 동안이에요.

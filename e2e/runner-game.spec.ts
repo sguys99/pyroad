@@ -66,15 +66,26 @@ test.describe('게임 (데스크톱 키보드)', () => {
     await page.keyboard.press('ArrowLeft');
     await expect(live).toContainText('Left (10.00,10.00)');
 
-    // 게임판이 화면 안에 있다 (조종판이 나올 때 보이게 스크롤)
-    await expect(pad).toBeInViewport();
+    // 게임판이 화면 안에 있다 (조종판이 나올 때 보이게 스크롤). 게임 중에는 그림판 도구 줄을 접어 캔버스 윗변이 잘리지 않음 (P11-13)
+    const tools = page.locator('[data-testid="turtle-tools"]').first();
+    await expect(tools).toBeHidden();
+    await expect(pad).toBeInViewport({ ratio: 1 });
     await expect(
       page.locator('[data-testid="turtle-canvas"]:visible'),
-    ).toBeInViewport({ ratio: 0.5 });
+    ).toBeInViewport({ ratio: 1 });
+    if (process.env.E2E_SHOTS) {
+      await page.screenshot({
+        path: `${process.env.E2E_SHOTS}/p11-13-game-layout-1280.png`,
+      });
+    }
 
     await page.getByTestId('stop-button').click();
     await expect(outputPanel(page)).toHaveAttribute('data-state', 'stopped');
     await expect(pad).toHaveCount(0);
+    // 끝나면 도구 줄이 다시 펼쳐짐
+    await expect(
+      page.locator('[data-testid="turtle-tools"]:visible'),
+    ).toBeVisible();
     await expect(
       page.locator('[data-testid="runner-waking"]:visible'),
     ).toHaveCount(0);
@@ -112,10 +123,22 @@ test.describe('게임 (폰 방향 패드)', () => {
     const live = page.locator('[data-testid="live-output"]:visible');
     await expect(live).toContainText('Up (10.00,10.00)');
 
+    // 한 화면에 그림판과 방향 패드가 모두 (도구 줄은 게임 중 접힘, 스크롤 없이 — P11-13)
+    await expect(
+      page.locator('[data-testid="turtle-tools"]:visible'),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('[data-testid="turtle-canvas"]:visible'),
+    ).toBeInViewport({ ratio: 1 });
+    await expect(pad.getByTestId('game-key-Down')).toBeInViewport({
+      ratio: 1,
+    });
+    await expect(pad.getByTestId('game-keys-stop')).toBeInViewport({
+      ratio: 1,
+    });
     const shots = process.env.E2E_SHOTS;
     if (shots) {
-      await pad.scrollIntoViewIfNeeded();
-      await page.screenshot({ path: `${shots}/p11-04-game-pad-360.png` });
+      await page.screenshot({ path: `${shots}/p11-13-game-layout-360.png` });
     }
 
     // 폰 결과 쪽에는 실행 줄이 없어 조종판의 멈추기로

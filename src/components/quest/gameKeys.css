@@ -9,6 +9,8 @@
   border-radius: var(--round-m);
   background: var(--surface-2);
   color: var(--text);
+  /* 나올 때 아랫변까지 스크롤해도(GameKeys) 포커스 테두리가 잘리지 않게 */
+  scroll-margin-block-end: calc(var(--focus-w) + var(--focus-offset));
 }
 .gk:focus-visible {
   outline: var(--focus-w) solid var(--ring);
@@ -101,6 +103,15 @@
   }
   .gk .gk-hint-touch {
     display: inline;
+  }
+  /* 패드가 있으면 안내 한 줄은 낭독기에만 (화살표 버튼이 스스로 말해 줌, 폰 한 화면에 들어가게 — P11-13) */
+  .gk[data-pad] .gk-hint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

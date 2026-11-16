@@ -1,0 +1,96 @@
+# 3월드 퀘스트 6-2: 화살표로 움직이기
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-6
+# 키 손님(P11-05·제안 E): keys[n] 은 time.sleep 을 n번 부른 뒤 get_key() 에 들어감. 검증 실행은 잠을 건너뜀
+# 시작 코드에 Right 만 있음 → 위·왼쪽·아래 손님이 시작 코드를 떨어뜨림. get_key( 는 시작 코드에도 있어 손님이 검사의 몫 (L4)
+
+id: b3000000-0000-0000-0000-000000000035
+order: 2
+title: 화살표로 움직이기
+concept: get_key()와 게임 루프
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: 누른 키에 따라 거북이 움직이기
+  learning_goals:
+    - from pyroad import get_key 로 지금 누른 키를 알아 올 수 있다
+    - 정해진 횟수만큼 도는 게임 루프에서 키마다 다르게 움직일 수 있다
+  story_context: 게임기가 켜졌어요! 화면에 느릿이가 나타났는데, 오른쪽 화살표에만 움직이고 다른 키는 못 알아들어요. 위, 왼쪽, 아래 키도 알아듣게 가르쳐 줘요.
+  exercise_description: '게임 루프 안에서 get_key() 가 "Left" 면 x 를 10 줄이고, "Up" 이면 y 를 10 늘리고, "Down" 이면 y 를 10 줄이세요. 루프가 끝나면 느릿이 위치를 출력해요'
+  starter_code: |
+    import time
+    import turtle
+    from pyroad import get_key
+
+    t = turtle.Turtle()
+    x = 0
+    y = 0
+
+    for frame in range(150):    # 1초에 30번씩, 5초 동안 돌아요
+        key = get_key()          # 지금 누른 키 (안 누르면 None)
+        if key == "Right":
+            x = x + 10
+        # "Left" 면 x 를 10 줄여요
+        # "Up" 이면 y 를 10 늘리고, "Down" 이면 y 를 10 줄여요
+
+        t.goto(x, y)
+        time.sleep(1 / 30)
+
+    print(t.position())
+  expected_output_hint: 오른쪽 세 번, 위 한 번 누르면 (30.00,10.00) 이 나와야 해요
+  checklist:
+    - 'elif key == "Left": 아래에서 x 를 10 줄여요'
+    - '"Up" 과 "Down" 이면 y 를 바꿔요'
+    - 시험 손님 부르기로 여러 손님이 키를 눌러 보게 해요
+  example_output: '(30.00,10.00)'
+  fallback_text: 'get_key() 는 지금 누른 키 이름을 알려 줘요. 화살표는 "Left" "Right" "Up" "Down" 이고, 아무것도 안 누르면 None 이에요. 오른쪽과 위는 더하기, 왼쪽과 아래는 빼기예요. time.sleep(1 / 30) 이 한 번 쉴 때마다 화면이 한 번 바뀌는데, 이 한 번을 "프레임"이라고 해요. 휴대폰에서는 그림판 아래 화살표 버튼을 눌러요.'
+answer:
+  validation:
+    type: code_check
+    expected: get_key(
+  scenarios:
+    - name: 오른쪽 세 번, 위 한 번 손님
+      keys: [Right, Right, Right, Up]
+      expect: { type: contains, expected: '(30.00,10.00)' }
+    - name: 왼쪽 두 번, 아래 한 번 손님
+      keys: [Left, Left, Down]
+      expect: { type: contains, expected: '(-20.00,-10.00)' }
+    - name: 쉬엄쉬엄 누르는 손님
+      keys: [Up, null, Up, null, Left, Down]
+      expect: { type: contains, expected: '(-10.00,10.00)' }
+  hints:
+    level_1: 오른쪽이 x 더하기면, 왼쪽은 x 빼기예요. 위아래는 y 를 바꿔요.
+    level_2: 'if key == "Right": 아래에 elif key == "Left": 와 x = x - 10 을, 이어서 "Up" 과 "Down" 도 elif 로 써요.'
+    level_3: |-
+      if key == "Right":
+          x = x + 10
+      elif key == "Left":
+          x = x - 10
+      elif key == "Up":
+          y = y + 10
+      elif key == "___":
+          y = y - 10
+      빈칸에 아래 화살표 키 이름을 넣어 보세요!
+  solution_code: |
+    import time
+    import turtle
+    from pyroad import get_key
+
+    t = turtle.Turtle()
+    x = 0
+    y = 0
+
+    for frame in range(150):    # 1초에 30번씩, 5초 동안 돌아요
+        key = get_key()          # 지금 누른 키 (안 누르면 None)
+        if key == "Right":
+            x = x + 10
+        elif key == "Left":
+            x = x - 10
+        elif key == "Up":
+            y = y + 10
+        elif key == "Down":
+            y = y - 10
+
+        t.goto(x, y)
+        time.sleep(1 / 30)
+
+    print(t.position())

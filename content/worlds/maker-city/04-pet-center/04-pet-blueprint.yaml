@@ -1,0 +1,75 @@
+# 3월드 퀘스트 4-4: 펫 설계도
+# 작성 안내: content/README.md · 설계: docs/curriculum/world3.md §4 3-4
+# class 는 맛보기 (__init__·self·메서드·객체 두 개까지, §13 ⑥)
+# code_check: "class Pet" 은 시작 코드에 이미 있어서(L4) 대신 새로 쓰는 self.hunger 와 kong.hunger (꺼내 쓰기) (P11-13 작성 메모)
+
+id: b3000000-0000-0000-0000-000000000024
+order: 4
+title: 펫 설계도
+concept: class, __init__, self
+xp_reward: 100
+quest_type: code
+prompt:
+  topic: class 로 펫 설계도 만들기
+  learning_goals:
+    - class 는 같은 모양의 물건을 찍어 내는 설계도라는 것을 안다
+    - __init__ 안에서 self.이름 = 값 으로 펫의 상태를 담을 수 있다
+  story_context: 돌봄 센터에 펫이 자꾸 새로 와요! 펫마다 딕셔너리를 하나하나 만들기는 힘들어요. 펫 "설계도"를 만들어 두면 Pet("콩이") 한 줄로 펫을 찍어 낼 수 있대요.
+  exercise_description: '__init__ 안에 self.hunger 에 50, self.mood 에 50 을 담고, kong 의 이름·배고픔·기분을 "배고픔: 50" 처럼 출력하세요'
+  starter_code: |
+    # 펫 설계도
+    class Pet:
+        def __init__(self, name):
+            self.name = name
+            # self.hunger 에 배고픔 50, self.mood 에 기분 50 을 담아요
+
+
+    kong = Pet("콩이")   # 설계도로 펫 한 마리를 찍어 내요
+    print("이름: " + kong.name)
+    # kong.hunger 와 kong.mood 로 배고픔과 기분도 출력해요
+  expected_output_hint: 이름, 배고픔, 기분이 한 줄씩 나와야 해요
+  checklist:
+    - __init__ 안에 self.hunger = 50 과 self.mood = 50 을 써요
+    - kong.hunger 로 배고픔을 꺼내 출력해요
+    - kong.mood 로 기분도 꺼내 출력해요
+  example_output: |-
+    이름: 콩이
+    배고픔: 50
+    기분: 50
+  fallback_text: 'class Pet: 은 펫 설계도예요. Pet("콩이") 처럼 부르면 __init__ 이 저절로 실행되어 새 펫이 만들어져요. self 는 "지금 만들어지는 나 자신"이에요. self.hunger = 50 은 "내 배고픔은 50" 이라는 뜻이에요. 밖에서는 kong.hunger 처럼 펫 이름 뒤에 점을 찍어 꺼내요.'
+answer:
+  validation:
+    type: all
+    rules:
+      - type: output_match
+        expected: |-
+          이름: 콩이
+          배고픔: 50
+          기분: 50
+      - type: code_check
+        expected: self.hunger
+      - type: code_check
+        expected: kong.hunger
+  hints:
+    level_1: 설계도 안에서는 self. 을 붙여 펫의 상태를 담고, 밖에서는 kong. 을 붙여 꺼내요.
+    level_2: '__init__ 안에 self.hunger = 50 과 self.mood = 50 을 한 줄씩 쓰고, 맨 아래에 print(f"배고픔: {kong.hunger}") 와 print(f"기분: {kong.mood}") 를 써요.'
+    level_3: |-
+      class Pet:
+          def __init__(self, name):
+              self.name = name
+              ___.hunger = 50
+              ___.mood = 50
+      빈칸에 "나 자신"을 뜻하는 말을 넣고, print(f"배고픔: {kong.hunger}") 로 꺼내 보세요!
+  solution_code: |
+    # 펫 설계도
+    class Pet:
+        def __init__(self, name):
+            self.name = name
+            self.hunger = 50
+            self.mood = 50
+
+
+    kong = Pet("콩이")   # 설계도로 펫 한 마리를 찍어 내요
+    print("이름: " + kong.name)
+    print(f"배고픔: {kong.hunger}")
+    print(f"기분: {kong.mood}")

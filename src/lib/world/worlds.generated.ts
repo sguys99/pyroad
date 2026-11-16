@@ -558,6 +558,7 @@ export const WORLDS: readonly WorldInfo[] = [
         "sparkles": true,
         "weather": "none"
       }
-    }
+    },
+    "skill_check": true
   }
 ];
