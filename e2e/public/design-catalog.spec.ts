@@ -1149,6 +1149,20 @@ test.describe('보스 배틀 (P9-12)', () => {
         'aria-valuetext',
         '보스 HP 5/5',
       );
+      // 가장 긴 보스 이름도 말줄임 없이 다 보이고 무대 밖으로 안 나감 (B98: 360에서 "출력 대…")
+      expect(
+        await demo.evaluate((arena) => {
+          const name = arena.querySelector<HTMLElement>('.bb-hp-name')!;
+          const was = name.textContent;
+          name.textContent = '이야기 뒤죽박죽 버그버그';
+          const ok =
+            name.scrollWidth <= name.clientWidth &&
+            arena.querySelector('.bb-hp')!.getBoundingClientRect().right <=
+              arena.getBoundingClientRect().right;
+          name.textContent = was;
+          return ok;
+        }),
+      ).toBe(true);
       await demo.getByTestId('boss-demo-attack').click();
       await expect(hp).toHaveAttribute('data-hp', '4');
       await expect(demo.locator('.bb-rig[data-flash]')).toHaveCount(1);

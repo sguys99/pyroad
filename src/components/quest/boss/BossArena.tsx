@@ -264,32 +264,33 @@ export function BossHpBar({
   const ratio = total > 0 ? Math.max(0, Math.min(1, hp / total)) : 0;
   return (
     <div className="bb-hp" data-testid="boss-hp" data-hp={hp}>
-      <p className="bb-hp-name">
-        <span className="font-display">{name}</span>
+      {/* 이름은 한 줄을 다 쓰고(좁으면 어절로 줄바꿈), 숫자는 바 옆 — 하트 칸의 "♥ 3/3"과 같은 짜임 (B98) */}
+      <p className="bb-hp-name font-display">{name}</p>
+      <div className="bb-hp-row">
+        <div
+          className="bb-hp-track"
+          role="progressbar"
+          aria-label="보스 HP"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={hp}
+          aria-valuetext={`보스 HP ${hp}/${total}`}
+          style={{ '--bb-hp': ratio } as CSSProperties}
+        >
+          <span className="bb-hp-lag" />
+          <span className="bb-hp-fill" />
+          {/* 칸 나눔: 문제 하나 = 한 칸 */}
+          {Array.from({ length: Math.max(0, total - 1) }, (_, i) => (
+            <i
+              key={i}
+              className="bb-hp-tick"
+              style={{ left: `${((i + 1) / total) * 100}%` }}
+            />
+          ))}
+        </div>
         <span className="bb-plate-n" aria-hidden>
           HP {hp}/{total}
         </span>
-      </p>
-      <div
-        className="bb-hp-track"
-        role="progressbar"
-        aria-label="보스 HP"
-        aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={hp}
-        aria-valuetext={`보스 HP ${hp}/${total}`}
-        style={{ '--bb-hp': ratio } as CSSProperties}
-      >
-        <span className="bb-hp-lag" />
-        <span className="bb-hp-fill" />
-        {/* 칸 나눔: 문제 하나 = 한 칸 */}
-        {Array.from({ length: Math.max(0, total - 1) }, (_, i) => (
-          <i
-            key={i}
-            className="bb-hp-tick"
-            style={{ left: `${((i + 1) / total) * 100}%` }}
-          />
-        ))}
       </div>
     </div>
   );
