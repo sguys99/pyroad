@@ -6,7 +6,7 @@
 // 3월드 퀘스트는 아직 콘텐츠가 없어(P11-12~14) 1월드 프로젝트 퀘스트 행을 복사해 메이커 시티 첫 스테이지에 잠깐 넣는다(끝나면 지움).
 
 import { randomBytes, randomUUID } from 'node:crypto';
-import { type Browser, type Page } from '@playwright/test';
+import { type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { createServerClient } from '@supabase/ssr';
 import {
   test,
@@ -23,6 +23,8 @@ const CODE =
   'import turtle\nt = turtle.Turtle()\nt.color("purple", "pink")\nt.begin_fill()\nfor i in range(6):\n    t.forward(90)\n    t.left(60)\nt.end_fill()\nturtle.title("보라 벌집")';
 
 const created: string[] = [];
+// 다른 학생으로 연 브라우저 맥락: 테스트가 끝나면 닫는다 (안 닫으면 다음 스펙들 내내 페이지가 살아 CI 러너 CPU 를 씀, B93)
+const contexts: BrowserContext[] = [];
 let tempQuest = '';
 let tempStage = '';
 
@@ -85,6 +87,7 @@ async function openAs(
     locale: 'ko-KR',
     viewport: { width, height: 900 },
   });
+  contexts.push(context);
   await context.addCookies(
     cookies.map((c) => ({ ...c, url: baseURL, sameSite: 'Lax' as const })),
   );
@@ -140,6 +143,10 @@ test.beforeAll(async () => {
   });
   if (error)
     throw new Error(`[e2e] 임시 3월드 프로젝트 실패: ${error.message}`);
+});
+
+test.afterEach(async () => {
+  await Promise.all(contexts.splice(0).map((c) => c.close()));
 });
 
 test.afterAll(async () => {
