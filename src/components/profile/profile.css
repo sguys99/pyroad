@@ -301,6 +301,64 @@
   filter: grayscale(1);
 }
 
+/* 월드별 묶음 (B140): 접힌 줄 = 권·이름·별 합계(잠긴 월드는 잠김) · 꺾쇠. 지금 월드만 펼침, 줄 사이 가는 선 */
+.pf-worlds {
+  display: grid;
+}
+.pf-world + .pf-world {
+  border-top: var(--line-w) solid var(--line);
+}
+.pf-world-sum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--spacing-touch);
+  border-radius: var(--round-s);
+  cursor: pointer;
+  list-style: none;
+}
+.pf-world-sum::-webkit-details-marker {
+  display: none;
+}
+.pf-world-t {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5rem;
+  min-width: 0;
+  font-weight: 700;
+}
+.pf-world-no {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.pf-world-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  margin-right: 0.25rem;
+}
+.pf-world-lock > svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.pf-world-chev {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--text-muted);
+}
+.pf-world[open] .pf-world-chev {
+  transform: rotate(90deg);
+}
+.pf-world[data-locked] .pf-world-t {
+  color: var(--text-muted);
+}
+.pf-world > .pf-stages {
+  padding: 0.25rem 0 1rem;
+}
+
 /* ── 업적 (최근 메달 3개) ── */
 .pf-medals {
   display: grid;

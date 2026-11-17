@@ -5,6 +5,9 @@ import { test, expect } from './support/test';
 import { adminClient, completeQuests } from './support/admin';
 import { stage } from './support/content';
 
+/** 768+ 두 열 높이 차 상한 (B140 전 약 650px) */
+const COL_GAP_MAX = 320;
+
 const noOverflow = (page: import('@playwright/test').Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
@@ -102,6 +105,26 @@ test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 업적·보물), 넘침 
   );
   expect(Math.abs(cal.y - ach.y)).toBeLessThan(2);
   expect(ach.x > cal.x + cal.width).toBe(true);
+  // 별과 보물: 월드(그림책 N권)로 묶고 지금 월드만 펼침, 다른 월드는 접힌 줄(별 합계·잠김) → 키보드로 펼침 (B140)
+  const w1 = page.getByTestId('treasure-world-1');
+  const w2 = page.getByTestId('treasure-world-2');
+  await expect(w1).toHaveAttribute('open', '');
+  await expect(w1.locator('summary')).toContainText('그림책 1권');
+  await expect(w1.getByRole('list')).toBeVisible();
+  await expect(w2).not.toHaveAttribute('open');
+  await expect(w2.locator('summary')).toContainText(/잠김.*0\/\d+/);
+  await expect(w2.getByRole('list')).toBeHidden();
+  await w2.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  await expect(w2).toHaveAttribute('open', '');
+  await expect(w2.getByRole('list')).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(w2).not.toHaveAttribute('open');
+  // 두 열 높이가 비슷함 (전에는 21줄이 다 펼쳐져 오른쪽이 약 650px 길었음)
+  const cols = await page
+    .locator('.pf-col')
+    .evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  expect(Math.abs(cols[0] - cols[1])).toBeLessThan(COL_GAP_MAX);
   // 계정 관리는 접혀 있음 (위험 동작이 바로 보이지 않게)
   await expect(page.getByTestId('reset-scope')).toBeHidden();
   await page.getByText('계정 관리').click();

@@ -28,7 +28,11 @@ import {
   recentAchievements,
   type ProfileStatsRaw,
 } from '@/lib/profile/profileStats';
-import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import {
+  getStageStatuses,
+  getWorldStatuses,
+} from '@/lib/world/getStageStatuses';
+import { serverWorlds } from '@/lib/world/serverWorlds';
 import {
   skillPassWorldIds,
   type SkillCheckAttemptRow,
@@ -132,14 +136,17 @@ export default async function ProfilePage() {
 
   const progress = progressRes.data ?? [];
   const opened = new Set((chestsRes.data ?? []).map((c) => c.ref));
-  const stages = getStageStatuses(
+  const passed = skillPassWorldIds(
+    (skillChecks.data ?? []) as SkillCheckAttemptRow[],
+  );
+  const stages = getStageStatuses(stagesRes.data ?? [], progress, passed);
+  // 별과 보물은 월드(그림책 한 권)로 묶어 지금 월드만 펼침 (B140). 스테이지 없는 "준비 중" 월드는 뺌
+  const worldsProgress = getWorldStatuses(
+    serverWorlds(),
     stagesRes.data ?? [],
     progress,
-    skillPassWorldIds((skillChecks.data ?? []) as SkillCheckAttemptRow[]),
-  ).map((s) => ({
-    ...s,
-    chestOpened: opened.has(s.id),
-  }));
+    passed,
+  );
   const completed = new Set(
     progress.filter((p) => p.status === 'completed').map((p) => p.quest_id),
   );
@@ -219,15 +226,24 @@ export default async function ProfilePage() {
             coins={profile.coins}
             coinsWeek={raw.coins_week}
             threeStars={raw.stats.three_stars}
-            stages={stages.map((s) => ({
-              id: s.id,
-              order: s.order,
-              title: s.title,
-              stars: s.stars,
-              maxStars: s.maxStars,
-              chest: chestState(s),
-              locked: s.status === 'locked',
-            }))}
+            worlds={worldsProgress.worlds
+              .map((w, i) => ({ w, no: i + 1 }))
+              .filter(({ w }) => w.status !== 'coming_soon')
+              .map(({ w, no }) => ({
+                no,
+                title: w.world.title,
+                locked: w.status === 'locked',
+                current: w === worldsProgress.current,
+                stages: w.stages.map((s) => ({
+                  id: s.id,
+                  order: s.order,
+                  title: s.title,
+                  stars: s.stars,
+                  maxStars: s.maxStars,
+                  chest: chestState({ ...s, chestOpened: opened.has(s.id) }),
+                  locked: s.status === 'locked',
+                })),
+              }))}
           />
         </div>
 

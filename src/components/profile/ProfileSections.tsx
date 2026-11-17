@@ -4,6 +4,7 @@ import {
   ChevronRight,
   CircleCheck,
   Flame,
+  Lock,
   Lightbulb,
   RotateCcw,
   Palette,
@@ -261,20 +262,39 @@ const CHEST_LABEL: Record<ChestState, string> = {
   opened: '보물상자 열었어요',
 };
 
-/** 별과 보물: 코인(이번 주 번 코인) · 별 합 · 상자 · 스테이지별 별 막대 */
+/** 월드(그림책 한 권) 하나의 스테이지 별 묶음 */
+export interface WorldStars {
+  /** 그림책 N권 (책장·지도 머리와 같은 번호) */
+  no: number;
+  title: string;
+  /** 첫 스테이지가 아직 잠긴 월드 */
+  locked: boolean;
+  /** 지금 모험 중인 월드: 이것만 펼쳐 둠 */
+  current: boolean;
+  stages: StageStars[];
+}
+
+const sum = (stages: StageStars[], key: 'stars' | 'maxStars') =>
+  stages.reduce((t, s) => t + s[key], 0);
+
+/**
+ * 별과 보물: 코인(이번 주 번 코인) · 별 합 · 상자 · 월드별로 묶은 스테이지 별 막대 (B140).
+ * 월드는 `<details>` — 지금 월드만 펼치고 나머지는 접힌 줄(권·이름·별 합계, 잠긴 월드는 잠김)만. JS 없이 키보드·낭독기로 연다
+ */
 export function TreasureCard({
   coins,
   coinsWeek,
   threeStars,
-  stages,
+  worlds,
 }: {
   coins: number;
   coinsWeek: number;
   threeStars: number;
-  stages: StageStars[];
+  worlds: WorldStars[];
 }) {
-  const stars = stages.reduce((t, s) => t + s.stars, 0);
-  const maxStars = stages.reduce((t, s) => t + s.maxStars, 0);
+  const stages = worlds.flatMap((w) => w.stages);
+  const stars = sum(stages, 'stars');
+  const maxStars = sum(stages, 'maxStars');
   const withChest = stages.filter((s) => s.chest !== 'none');
   const opened = withChest.filter((s) => s.chest === 'opened').length;
   return (
@@ -307,40 +327,71 @@ export function TreasureCard({
           testId="chests"
         />
       </ul>
-      <ul className="pf-stages" aria-label="스테이지별 별">
-        {stages.map((s) => (
-          <li
-            key={s.id}
-            className="pf-stage"
-            data-locked={s.locked || undefined}
+      <div className="pf-worlds">
+        {worlds.map((w) => (
+          <details
+            key={w.no}
+            className="pf-world"
+            open={w.current}
+            data-locked={w.locked || undefined}
+            data-testid={`treasure-world-${w.no}`}
           >
-            <span className="pf-stage-t">
-              {s.order}. {s.title}
-            </span>
-            <span className="pf-stage-v">
-              <RewardIcon kind="star" size={16} />
-              {s.stars}/{s.maxStars}
-              {s.chest !== 'none' && (
-                <span className="pf-chest" data-state={s.chest}>
-                  <RewardIcon
-                    kind={s.chest === 'opened' ? 'chestOpen' : 'chest'}
-                    size={20}
-                    label={CHEST_LABEL[s.chest]}
+            <summary className="pf-world-sum focus-ring">
+              <span className="pf-world-t">
+                <span className="pf-world-no">그림책 {w.no}권</span> {w.title}
+              </span>
+              <span className="pf-stage-v">
+                {w.locked && (
+                  <span className="pf-world-lock">
+                    <Lock aria-hidden />
+                    잠김
+                  </span>
+                )}
+                <RewardIcon kind="star" size={16} label="별" />
+                {sum(w.stages, 'stars')}/{sum(w.stages, 'maxStars')}
+              </span>
+              <ChevronRight className="pf-world-chev" aria-hidden />
+            </summary>
+            <ul
+              className="pf-stages"
+              aria-label={`그림책 ${w.no}권 스테이지별 별`}
+            >
+              {w.stages.map((s) => (
+                <li
+                  key={s.id}
+                  className="pf-stage"
+                  data-locked={s.locked || undefined}
+                >
+                  <span className="pf-stage-t">
+                    {s.order}. {s.title}
+                  </span>
+                  <span className="pf-stage-v">
+                    <RewardIcon kind="star" size={16} />
+                    {s.stars}/{s.maxStars}
+                    {s.chest !== 'none' && (
+                      <span className="pf-chest" data-state={s.chest}>
+                        <RewardIcon
+                          kind={s.chest === 'opened' ? 'chestOpen' : 'chest'}
+                          size={20}
+                          label={CHEST_LABEL[s.chest]}
+                        />
+                      </span>
+                    )}
+                  </span>
+                  <ProgressBar
+                    value={s.stars}
+                    max={Math.max(1, s.maxStars)}
+                    size="sm"
+                    tone="reward"
+                    label={`${s.order}단계 ${s.title} 별`}
+                    valueText={`별 ${s.stars}개 / ${s.maxStars}개`}
                   />
-                </span>
-              )}
-            </span>
-            <ProgressBar
-              value={s.stars}
-              max={Math.max(1, s.maxStars)}
-              size="sm"
-              tone="reward"
-              label={`${s.order}단계 ${s.title} 별`}
-              valueText={`별 ${s.stars}개 / ${s.maxStars}개`}
-            />
-          </li>
+                </li>
+              ))}
+            </ul>
+          </details>
         ))}
-      </ul>
+      </div>
     </ProfileCard>
   );
 }

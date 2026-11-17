@@ -332,6 +332,29 @@ test('프로필', async ({ browser, baseURL }) => {
   await screen(browser, baseURL!, 'profile', 'progress', visit('/profile'));
 });
 
+// 별과 보물은 첫 화면 밖이라 카드만 (B140): 지금 월드(1권)는 펼친 스테이지 줄, 2·3권은 접힌 줄(별 합계·잠김)이 한 장에
+test('프로필 별과 보물 (월드별 접기)', async ({ browser, baseURL }) => {
+  const page = await open(browser, baseURL!, 'progress');
+  try {
+    for (const size of WIDTHS) {
+      await page.setViewportSize(size);
+      await page.goto('/profile');
+      await settle(page);
+      const card = page.getByTestId('profile-treasure');
+      await card.scrollIntoViewIfNeeded();
+      await expect(card).toHaveScreenshot(
+        `profile-treasure-${size.width}.png`,
+        {
+          animations: 'disabled',
+          maxDiffPixelRatio: 0.002,
+        },
+      );
+    }
+  } finally {
+    await page.context().close();
+  }
+});
+
 test('업적 도감', async ({ browser, baseURL }) => {
   await screen(
     browser,
