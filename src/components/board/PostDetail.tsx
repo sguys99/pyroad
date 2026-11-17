@@ -41,7 +41,7 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
           </span>
         )}
       </div>
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+      <p className="whitespace-pre-wrap text-body text-foreground">
         {post.content}
       </p>
       {isOwner && (

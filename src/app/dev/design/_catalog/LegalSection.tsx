@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AgreementChecklist } from '@/components/legal/AgreementChecklist';
 import { LegalNav } from '@/components/legal/LegalPageShell';
 import { Button } from '@/components/ui/button';
+import { NoticeBody } from '@/components/notice/NoticeBody';
 import {
   AGREEMENT_ITEMS,
   emptyAgreementState,
@@ -90,5 +91,42 @@ function WithNextButton() {
         </p>
       )}
     </div>
+  );
+}
+
+const NOTICE_SAMPLE = `pyRoad가 정식 1.0 버전이 되었습니다.
+보호자님께 달라진 점을 안내드립니다.
+
+### AI 튜터
+- 기본 AI 튜터는 이제 외부 AI 서비스를 쓰지 않고, 미리 준비한 힌트와 답변으로만 도와드립니다. 두 줄이 넘는 항목도 들여쓴 채로 이어져요.
+- 본인 키 선택지는 **그대로**입니다.
+
+### 보호자님께서 하실 수 있는 것
+- 개인정보처리방침 전문: [pyroad.vercel.app/privacy](https://pyroad.vercel.app/privacy)
+
+문의: sguys99@gmail.com`;
+
+/** 공지 본문 (B145). 관리자 글만 마크다운 일부, 옛 일반 텍스트 공지도 같은 모양 */
+export function NoticeBodySection() {
+  return (
+    <Section
+      id="notice-body"
+      kicker="기타 (B145)"
+      title="공지 본문"
+      description="### 소제목(본문 굵은 글씨) · - 목록(들여쓰기·항목 간격) · 굵게 · 링크(http(s)·mailto만, 외부는 새 탭). raw HTML·그림·표는 그리지 않고, 줄바꿈 한 번은 그대로 살려요. 게시판(학생 글)은 일반 텍스트 그대로."
+    >
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Demo label="서식 있는 공지" surface="card">
+          <NoticeBody content={NOTICE_SAMPLE} />
+        </Demo>
+        <Demo label="옛 일반 텍스트 공지" surface="card">
+          <NoticeBody
+            content={
+              '안녕, 모험가 친구들!\n이제 카카오·네이버·Google 중에서 골라 들어올 수 있어요.\n\n- 처음 들어오면 나만의 "모험가 등록증"을 만들어요.\n  별명을 짓고, 내 파이뱀 색을 고르면 금색 도장이 쾅!\n- 3~4분이면 끝나요 <꼭>'
+            }
+          />
+        </Demo>
+      </div>
+    </Section>
   );
 }

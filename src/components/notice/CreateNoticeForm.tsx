@@ -96,8 +96,16 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
         >
           내용
         </label>
+        <p
+          id="content-help"
+          className="mb-1 text-caption text-muted-foreground"
+        >
+          소제목은 줄 맨 앞에 ###, 목록은 - 를 씁니다. https:// 주소와 메일
+          주소는 자동으로 링크가 됩니다.
+        </p>
         <textarea
           id="content"
+          aria-describedby="content-help"
           maxLength={5000}
           rows={12}
           value={content}

@@ -39,7 +39,7 @@ export function DeleteNoticeButton({ noticeId }: DeleteNoticeButtonProps) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="rounded-lg border border-border px-3 py-1.5 text-xs text-destructive transition-colors hover:bg-error-soft">
+      <AlertDialogTrigger className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-destructive transition-colors hover:bg-error-soft">
         삭제
       </AlertDialogTrigger>
       <AlertDialogContent size="sm">

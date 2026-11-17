@@ -213,6 +213,49 @@ test('공지', async ({ browser, baseURL }) => {
   await screen(browser, baseURL!, 'notice', null, visit('/notice'));
 });
 
+test('공지 글 (소제목·목록·링크, B145)', async ({ browser, baseURL }) => {
+  const db = adminClient();
+  const { data: me } = await db
+    .from('users')
+    .select('id')
+    .eq('nickname', `${NICK}1`)
+    .single();
+  const { data: notice, error } = await db
+    .from('notices')
+    .insert({
+      user_id: me!.id,
+      title: '[보호자 안내] 1.0에서 달라진 점',
+      content: [
+        'pyRoad가 정식 1.0 버전이 되었습니다.',
+        '보호자님께 달라진 점을 안내드립니다.',
+        '',
+        '### AI 튜터',
+        '- 기본 AI 튜터는 이제 외부 AI 서비스를 쓰지 않고, 미리 준비한 힌트와 답변으로만 도와드립니다.',
+        '- 본인 키 선택지는 **그대로**입니다.',
+        '',
+        '### 보호자님께서 하실 수 있는 것',
+        '- 개인정보처리방침 전문: [pyroad.vercel.app/privacy](https://pyroad.vercel.app/privacy)',
+        '',
+        '문의: sguys99@gmail.com',
+      ].join('\n'),
+    })
+    .select('id')
+    .single();
+  expect(error).toBeNull();
+  try {
+    await screen(
+      browser,
+      baseURL!,
+      'notice-post',
+      null,
+      visit(`/notice/${notice!.id}`),
+    );
+  } finally {
+    // 공지 목록 기준 이미지(빈 목록)가 흔들리지 않게 바로 지운다
+    await db.from('notices').delete().eq('id', notice!.id);
+  }
+});
+
 test('없는 주소 (404)', async ({ browser, baseURL }) => {
   await screen(browser, baseURL!, 'not-found', null, visit('/no-such-page'));
 });

@@ -50,7 +50,7 @@ import {
   ShareCardSection,
   SoundSection,
 } from './_catalog/ExtraSections';
-import { LegalSection } from './_catalog/LegalSection';
+import { LegalSection, NoticeBodySection } from './_catalog/LegalSection';
 import { TurtleSection } from './_catalog/TurtleSection';
 import { EditorHandleSection } from './_catalog/EditorHandleSection';
 import { CreationSection } from './_catalog/CreationSection';
@@ -146,6 +146,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
+      ['notice-body', '공지 본문'],
       ['onboarding', '온보딩·튜토리얼'],
       ['consent', '보호자 동의'],
       ['guardian-report', '보호자 리포트'],
@@ -275,6 +276,7 @@ export function DesignCatalog({
               <ShareCardSection />
               <SoundSection />
               <LegalSection />
+              <NoticeBodySection />
               <OnboardingSection />
               <ConsentSection />
               <GuardianReportCatalogSection />

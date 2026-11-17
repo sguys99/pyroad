@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Notice } from '@/lib/types/database';
 import { formatKstDate } from '@/lib/time/kst';
+import { noticePreview } from '@/lib/notice/preview';
 
 interface NoticeCardProps {
   notice: Notice;
@@ -16,7 +17,7 @@ export function NoticeCard({ notice }: NoticeCardProps) {
           {notice.title}
         </h3>
         <p className="mb-2 line-clamp-2 text-xs text-muted-foreground">
-          {notice.content}
+          {noticePreview(notice.content)}
         </p>
         <div className="flex items-center justify-end text-[11px] text-muted-foreground">
           <span>{date}</span>
