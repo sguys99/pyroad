@@ -59,4 +59,17 @@ test.describe('LLM 폴백 동작', () => {
     // 소개 1 + 코드 피드백 1 + 격려 1
     await expect(page.getByText('저장된 답변')).toHaveCount(3);
   });
+
+  // v1.0 운영 = 서버 Gemini 키 없음 (§12-Q80, B117): 설정에서 Gemini 를 고르거나 Google 키를 넣는 자리가 없고, 막는 안내 대신 지금 상태를 알림
+  test('설정: 서버 키가 없으면 Gemini 선택지·Google 키 칸이 없고 준비된 답 안내', async ({
+    page,
+  }) => {
+    await page.goto('/settings');
+    await expect(
+      page.getByText('지금은 파이뱀이 준비해 둔 힌트와 답으로 도와줘요'),
+    ).toBeVisible();
+    await expect(page.getByText('Google Gemini')).toHaveCount(0);
+    await expect(page.getByText('aistudio.google.com')).toHaveCount(0);
+    await expect(page.getByText('Anthropic Claude').first()).toBeVisible();
+  });
 });

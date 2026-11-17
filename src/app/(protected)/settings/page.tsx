@@ -15,6 +15,7 @@ import { GuardianReportSection } from '@/components/guardian-report/GuardianRepo
 import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
+  USER_KEY_PROVIDERS,
   type LLMProviderType,
 } from '@/lib/tutor/providers/types';
 
@@ -186,7 +187,19 @@ export default function SettingsPage() {
     );
   }
 
-  const allProviders: LLMProviderType[] = ['gemini', 'anthropic', 'openai'];
+  // 서버 Gemini 키가 없으면(v1.0 운영, §12-Q80) 고를 수 없으니 숨김. 학생 Google 키는 받지 않고 저장된 것만 지우기 (B117)
+  const allProviders: LLMProviderType[] = [
+    ...(settings.available_providers.includes('gemini')
+      ? (['gemini'] as const)
+      : []),
+    ...USER_KEY_PROVIDERS,
+  ];
+  const keyProviders: LLMProviderType[] = [
+    ...(settings.has_custom_keys.includes('gemini')
+      ? (['gemini'] as const)
+      : []),
+    ...USER_KEY_PROVIDERS,
+  ];
   const keysEnabled = settings.custom_keys_enabled !== false;
 
   return (
@@ -255,11 +268,11 @@ export default function SettingsPage() {
       >
         {settings.available_providers.length === 0 ? (
           <>
-            <h3 className="mb-1 text-sm font-bold text-warning">
-              API 키를 입력해야 AI 튜터를 사용할 수 있어요
+            <h3 className="mb-1 text-sm font-bold text-foreground">
+              지금은 파이뱀이 준비해 둔 힌트와 답으로 도와줘요
             </h3>
-            <p className="mb-3 text-xs text-warning">
-              아래 중 하나의 API 키를 입력하면 AI 튜터가 활성화돼요.
+            <p className="mb-3 text-xs text-muted-foreground">
+              내 API 키를 넣으면 AI가 내 코드와 질문에 직접 답해 줘요.
             </p>
           </>
         ) : (
@@ -274,19 +287,21 @@ export default function SettingsPage() {
         )}
         {!keysEnabled && (
           <p className="mb-3 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-            지금은 내 API 키를 등록할 수 없어요. 기본 AI 튜터는 그대로 쓸 수
-            있어요.
+            지금은 내 API 키를 등록할 수 없어요. 파이뱀이 준비해 둔 힌트와 답은
+            그대로 쓸 수 있어요.
           </p>
         )}
         <div className="flex flex-col gap-3">
-          {allProviders.map((provider) => {
+          {keyProviders.map((provider) => {
             const hasKey = settings.has_custom_keys.includes(provider);
+            const removeOnly = !USER_KEY_PROVIDERS.includes(provider);
             const masked = settings.masked_keys?.[provider] ?? '••••••••';
             const unreadable = settings.unreadable_keys?.includes(provider);
             return (
               <div key={provider}>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   {PROVIDER_LABELS[provider]}
+                  {removeOnly && ' — 지금은 쓰지 않아요. 지우기만 할 수 있어요'}
                 </label>
                 <div className="relative">
                   <input
@@ -298,7 +313,7 @@ export default function SettingsPage() {
                           ? '키를 다시 입력해 주세요'
                           : 'API 키 입력'
                     }
-                    disabled={!keysEnabled}
+                    disabled={!keysEnabled || removeOnly}
                     autoComplete="off"
                     value={apiKeys[provider] ?? ''}
                     onChange={(e) =>
@@ -332,7 +347,6 @@ export default function SettingsPage() {
           <ul className="text-xs text-muted-foreground space-y-0.5">
             <li>Anthropic: console.anthropic.com</li>
             <li>OpenAI: platform.openai.com/api-keys</li>
-            <li>Google: aistudio.google.com/apikey</li>
           </ul>
         </div>
       </div>

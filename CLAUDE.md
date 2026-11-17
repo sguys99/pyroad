@@ -6,7 +6,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 
 - **Frontend**: Next.js 15 (App Router, Turbopack), TypeScript, Tailwind CSS v4, Base UI. 공통 게임 UI는 `src/components/ui/`(shadcn 기본 버튼 등은 대체됨, [docs/design/components.md](docs/design/components.md))
 - **Backend (BaaS)**: Supabase (Auth, PostgreSQL, RLS, SSR). 로컬 Supabase CLI는 2.115.0 고정
-- **AI/LLM**: 멀티 프로바이더 (`src/lib/tutor/providers/`, 팩토리). 서버 키는 Gemini 무료 티어만, Anthropic·OpenAI는 학생 본인 키(암호화 저장)로만
+- **AI/LLM**: 멀티 프로바이더 (`src/lib/tutor/providers/`, 팩토리). Anthropic·OpenAI는 학생 본인 키(암호화 저장)로만. 서버 키는 Gemini 무료 티어만인데 **운영에는 넣지 않음**(Gemini 약관 18세 미만 금지, §12-Q80 — v1.0은 저장된 답변만, 학생 Google 키도 받지 않음)
 - **Code Execution**: Pyodide 314.0.7 자체 호스팅(`public/pyodide/`, predev·prebuild가 복사) + module Worker `public/workers/pyodide-worker.mjs`. 실행 로직은 공용 코어 `pyodide-core.mjs`(브라우저·Node 테스트 공용)
 - **Editor**: CodeMirror 6 + 키즈 테마 `src/lib/editor/` (pyRoad Mono, 14~20px 짝수만, [docs/design/editor.md](docs/design/editor.md))
 - **Animation**: Framer Motion, CSS keyframes, canvas-confetti. 마스코트는 SVG 리그 `src/components/characters/rig/`(기본 스타일 B, [docs/design/rig.md](docs/design/rig.md)). Lottie는 지금 재생하지 않음(B32, `lottie-react`는 P6-16에서 지움 — `lottie-web`은 `assets:check` 렌더 검사용 devDependency). 일회성 이펙트만 Phase 6에 `lottie_light`로, `public/animations/` + `assets:check` 렌더 검사 통과 필수
@@ -55,7 +55,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 npm install
 cp .env.example .env.local
 # 필수: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
-# 권장: GEMINI_API_KEY (없으면 튜터가 저장된 답변만). 서버 ANTHROPIC·OPENAI 키는 쓰지 않음. 나머지는 .env.example
+# 선택: GEMINI_API_KEY (로컬 프롬프트 시험용, 운영 금지 §12-Q80 — 없으면 튜터가 저장된 답변만). 서버 ANTHROPIC·OPENAI 키는 쓰지 않음. 나머지는 .env.example
 ```
 
 ### 로컬 Supabase ([supabase/README.md](supabase/README.md))

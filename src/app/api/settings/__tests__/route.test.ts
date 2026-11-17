@@ -98,6 +98,22 @@ describe('/api/settings (B13, P1-01)', () => {
     expect(mocks.state.user_api_keys).toEqual([]);
   });
 
+  it('Google(Gemini) 키는 새로 받지 않고, 이미 저장된 키는 보이되 고를 수 없음·지울 수 있음 (B117)', async () => {
+    await patch({ api_keys: { gemini: 'AIzaSy-kid-key-0000' } });
+    expect(mocks.state.user_api_keys).toEqual([]);
+
+    // 예전에 저장된 키
+    vi.stubEnv('GEMINI_API_KEY', '');
+    const { saveUserApiKey } = await import('@/lib/tutor/apiKeys');
+    await saveUserApiKey(U1, 'gemini', 'AIzaSy-old-kid-key-4321');
+    const body = await (await GET()).json();
+    expect(body.has_custom_keys).toEqual(['gemini']);
+    expect(body.available_providers).toEqual([]);
+    expect((await patch({ api_keys: { gemini: '' } })).status).toBe(200);
+    expect(mocks.state.user_api_keys).toEqual([]);
+    vi.unstubAllEnvs();
+  });
+
   it('암호화 키가 없으면 저장은 503, 조회는 기능 꺼짐으로', async () => {
     delete process.env.API_KEY_ENCRYPTION_KEY;
     const res = await patch({ api_keys: { openai: 'sk-proj-disabled-0000' } });

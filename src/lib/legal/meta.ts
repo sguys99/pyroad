@@ -23,7 +23,8 @@ export const LEGAL_OPERATOR = {
 export const TERMS_VERSION = '2026-11-16';
 // v1.0 개정(P12-06 자체 점검, 처리방침만 — 약관은 그대로 2026-11-16): 시행일 = v1.0 배포일(§12-Q77 방식).
 // 배포가 2026-11-17 이 아니면 PRIVACY_VERSION·PRIVACY_EFFECTIVE_DATE 두 값을 실제 배포일로 (docs/legal/v1.0-privacy-audit.md "운영에서 할 일").
-// 다시 동의는 받지 않음: 새로 모으는 항목 없음(Google 이름·사진은 오히려 저장하지 않게 됨), 나머지는 실제 동작에 맞춘 고지
+// 다시 동의는 받지 않음: 새로 모으는 항목 없음(Google 이름·사진은 오히려 저장하지 않게 됨), 나머지는 실제 동작에 맞춘 고지.
+// 같은 개정에 합침(§12-Q80, B117): 기본 AI 튜터가 Google(Gemini)로 보내지 않음 — 수탁·국외 이전이 줄기만 하는 변경이라 재동의 없음
 /** 개인정보처리방침 버전 */
 export const PRIVACY_VERSION = '2026-11-17';
 
