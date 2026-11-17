@@ -138,4 +138,4 @@ cd design/prototypes && node src/sound-review/gen-audio.mjs && node build.mjs so
 
 ## 실기기 확인 (P3-19 · P12-04)
 
-iPhone 무음 스위치(효과음·BGM 무음), 다른 앱 음악과 섞임, 화면 잠금·전화 뒤 다음 탭에서 복구, 카카오톡 인앱, iPadOS 15~17.3 AAC 폴백, 구형 기기 BGM 디코드 시간·메모리, 블루투스 이어폰에서 블립 꺼짐 — P0-15 §7 표.
+iPhone 무음 스위치(효과음·BGM 무음), 다른 앱 음악과 섞임, 화면 잠금·전화 뒤 다음 탭에서 복구, 카카오톡 인앱, iPadOS 15~17.3 AAC 폴백, 구형 기기 BGM 디코드 시간·메모리, 블루투스 이어폰에서 블립 꺼짐 — P0-15 §7 표. P12-04는 헤드리스로 대체해 실기기 미검증, 남은 확인은 [v1.0 체크리스트](../release/v1.0-devices.md) R-31~R-33.

@@ -5,7 +5,8 @@
  * 2) `FrameSampler`: 실제 rAF 간격을 1초 창으로 보고 **하향만** 한다 (첫 3초 중 2초, 이후 4초 중 3초가 끊기면 한 단계).
  *    세션 중 상향 없음(깜빡임 방지), 다음 세션은 저장한 단계에서 시작
  *
- * 임계값은 헤드리스·합성 기록으로 정했다. 실기기·텔레메트리(`motion_tier_change`)로 P12-04에서 조정한다.
+ * 임계값은 헤드리스·합성 기록으로 정했고 P12-04(헤드리스 CPU 1~20배, 실기기 미검증)에서 유지로 결정했다.
+ * 출시 뒤 텔레메트리(`motion_tier_change`)로 다시 본다: docs/perf/P12-04-low-end.md §4·§8
  */
 import { stepDown, tierIndex, type MotionTier } from './tier';
 

@@ -16,7 +16,7 @@
 
 - 알려진 무거운 작업 동안에는 판정을 멈춥니다: `useSamplingPause(active)` 또는 `pauseSampling()`/`resumeSampling()`(겹쳐 불러도 횟수로 셈). 지금은 **Pyodide 로딩·재준비·코드 실행**(`PyodideProvider`). 큰 라우트 이동·보스 배틀 로딩 같은 것을 추가할 때도 감쌉니다.
 - 설정의 "자동" 아래 **다시 재 보기**: 지난 측정을 지우고 정적 추정부터 다시 잽니다 (잠깐의 부하로 내려간 단계를 되돌리는 방법, P0-16 §7).
-- 단계가 바뀌면 익명 이벤트 `motion_tier_change`(from·to·cause·setting·reduced·elapsed_s)를 보냅니다 ([analytics.md](../analytics.md)). 임계값은 이 데이터와 실기기로 P12-04에서 조정합니다.
+- 단계가 바뀌면 익명 이벤트 `motion_tier_change`(from·to·cause·setting·reduced·elapsed_s)를 보냅니다 ([analytics.md](../analytics.md)). 임계값은 P12-04에서 헤드리스 측정으로 **유지**했고(실기기 미검증), 출시 뒤 이 데이터로 다시 봅니다([P12-04-low-end.md](../perf/P12-04-low-end.md) §4·§8).
 
 ### 1.1 첫 화면 깜빡임을 막는 방법 (CSP 안에서)
 

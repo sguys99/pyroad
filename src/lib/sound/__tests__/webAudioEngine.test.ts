@@ -204,6 +204,48 @@ describe('효과음', () => {
     expect(ctx().playing('levelup')).toHaveLength(1);
   });
 
+  it('AAC 폴백 (iPadOS 15~17.3): WebM을 못 쓰거나 디코드가 실패하면 다음 후보 .m4a', async () => {
+    const webm = '/sounds/x/levelup.v1.webm';
+    const m4a = '/sounds/x/levelup.v1.m4a';
+    const two: SoundManifest<S, B> = {
+      ...MANIFEST,
+      sfx: { ...MANIFEST.sfx, levelup: { src: [webm, m4a] } },
+    };
+    const orig = FakeAudioContext.prototype.decodeAudioData;
+    // canPlayType이 Opus를 거절 / 통과했지만 decodeAudioData가 못 엶 (P0-15 §4.4)
+    for (const mode of ['canPlay', 'decode'] as const) {
+      const urls: string[] = [];
+      const decode = vi
+        .spyOn(FakeAudioContext.prototype, 'decodeAudioData')
+        .mockImplementation(function (this: FakeAudioContext, ab) {
+          return (ab as ArrayBuffer & { url?: string }).url === webm
+            ? Promise.reject(new Error('EncodingError'))
+            : orig.call(this, ab);
+        });
+      engine?.dispose();
+      engine = createWebAudioEngine(two, {
+        storage: memoryStorage(),
+        audioContextCtor: FakeAudioContext as unknown as typeof AudioContext,
+        loadBytes: async (url) => {
+          urls.push(url);
+          return Object.assign(await fakeLoadBytes(url), { url });
+        },
+        canPlay: (url) => mode === 'decode' || !url.endsWith('.webm'),
+        listenVisibility: false,
+        audioSessionType: null,
+      });
+      engine.unlock();
+      await flush();
+      engine.play('levelup');
+      await flush();
+      expect(urls.filter((u) => u.includes('levelup'))).toEqual(
+        mode === 'decode' ? [webm, m4a] : [m4a],
+      );
+      expect(ctx().playing('levelup')).toHaveLength(1);
+      decode.mockRestore();
+    }
+  });
+
   it('rate 옵션은 playbackRate로 (별 1→3 상승음)', async () => {
     await unlocked();
     engine.play('coin', { rate: 1.26 });

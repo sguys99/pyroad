@@ -57,7 +57,7 @@
 
 - **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`·`pwa_install_prompt`·`pwa_installed`·`continue_click`·`quiz_try_run`·`phone_quiz_pick`·`daily_quiz_open`·`daily_quiz_finish`·`rest_reminder_shown`·`rest_reminder_choice`·`trial_start`·`trial_run`·`trial_success`·`share_view`·`share_cta_click`·`share_open`·`share_channel`·`guardian_report_view`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
 - 새 이벤트를 더할 때: `events.ts`(타입·이름) → `schema.ts`(strict 스키마) → 이 표. DB는 이름 형식(`^[a-z][a-z0-9_]{1,47}$`)·크기만 보므로 마이그레이션이 필요 없습니다.
-- `motion_tier_change`는 **기기 성능 분포로 연출 단계 임계값을 조정**하려는 것입니다(P12-04: 놓친 프레임 25%, 창 4개 중 3개). 프레임 수치·화면 크기·기기 모델 같은 지문 정보는 보내지 않고 단계 이름과 경과 초만 보냅니다. `device`(서버가 UA로 판별한 유형)와 함께 보면 "태블릿에서 자동 하향이 얼마나 자주, 몇 초 만에 일어나는지"를 알 수 있습니다(SQL 7). 클라이언트 이벤트라 부풀릴 수 있지만 보상·지표 판정에 쓰지 않는 진단용입니다.
+- `motion_tier_change`는 **기기 성능 분포로 연출 단계 임계값을 조정**하려는 것입니다(P12-04: 놓친 프레임 25%, 창 4개 중 3개). 프레임 수치·화면 크기·기기 모델 같은 지문 정보는 보내지 않고 단계 이름과 경과 초만 보냅니다. `device`(서버가 UA로 판별한 유형)와 함께 보면 "태블릿에서 자동 하향이 얼마나 자주, 몇 초 만에 일어나는지"를 알 수 있습니다(SQL 7, 비율·되돌림·직접 고른 설정은 [P12-04-low-end.md](perf/P12-04-low-end.md) §8 ①~③과 출시 뒤 판단 기준 §4). 클라이언트 이벤트라 부풀릴 수 있지만 보상·지표 판정에 쓰지 않는 진단용입니다.
 
 ## 3. 저장 형태와 익명 ID
 
