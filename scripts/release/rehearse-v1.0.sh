@@ -128,11 +128,11 @@ cmd_locktest() {
 }
 
 cmd_rollback() {
-  log "롤백 (런북 3-3 SQL 그대로 = supabase/rollback/00061 → 00060 → 00059)"
+  log "롤백 (런북 3-3 SQL 그대로 = supabase/rollback/00062 → 00061 → 00060 → 00059)"
   runbook_sql '-- 00061' >"$OUT/rollback.sql"
   # 런북 블록이 supabase/rollback/ 파일과 같은 문장인지 (주석·대소문자·공백 무시)
   norm() { sed -e 's/--.*$//' "$@" | tr 'A-Z' 'a-z' | tr -s ' \n' ' ' | sed 's/; */;\n/g' | sed 's/^ *//' | grep -v '^$' | grep -vE '^(begin|commit);' | sort; }
-  diff <(norm "$OUT/rollback.sql") <(norm "$REPO"/supabase/rollback/0006[01]_*.sql "$REPO"/supabase/rollback/00059_*.sql) \
+  diff <(norm "$OUT/rollback.sql") <(norm "$REPO"/supabase/rollback/0006[012]_*.sql "$REPO"/supabase/rollback/00059_*.sql) \
     || die "런북 3-3 롤백 SQL 이 supabase/rollback/ 과 다름"
   paste_sql "$OUT/rollback.sql" rollback
 }

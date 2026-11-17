@@ -27,6 +27,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 │   │   ├── (protected)/      # 인증 필요 페이지 (world, quest, profile, settings, board)
 │   │   ├── api/              # API Routes (tutor, quest, board, notice, account, settings, analytics)
 │   │   ├── auth/             # Auth 콜백
+│   │   ├── admin/            # 운영 지표 /admin (관리자만, 나머지 404, P12-09 — docs/monitoring.md)
 │   │   ├── dev/              # 테스트 전용 /dev/design(컴포넌트 카탈로그)·/dev/editor, 운영 404
 │   │   └── notice/           # 공지 (비로그인 열람)
 │   ├── components/           # quest/(렌더러·celebrations), characters/(rig/), ui/(게임 UI 공통), providers/, sound/, board, landing, world …
@@ -35,14 +36,14 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 │       ├── quest/            # useQuestSession, answerKeys(서버 전용), rewardRpc, validation
 │       ├── content/          # 콘텐츠 zod 스키마·빌드
 │       ├── design/(토큰 원본) motion/ sound/ editor/ share-card/ celebration/
-│       ├── pyodide/ tutor/ supabase/ security/ analytics/ observability/
+│       ├── pyodide/ tutor/ supabase/ security/ analytics/ observability/ monitoring/
 │       └── moderation/ time/ crypto/ env/ api/ auth/ board/ notice/ world/ types/
 ├── public/                   # sounds/, textures/, workers/, pyodide/(복사본, git 제외). images/·animations/는 에셋 파이프라인 생성물
 ├── scripts/                  # content, pyodide, fonts, security, api-keys, assets(에셋 파이프라인), build-sounds.sh, release(운영 SQL Editor 붙여넣기 묶음)
 ├── supabase/                 # migrations/, rollback/, tests/(RLS 회귀), seed.sql(생성물)
 ├── design/                   # Phase 2 디자인 시안 프로토타입 (앱 코드 아님, 자체 package.json, design/README.md)
 ├── e2e/                      # Playwright (e2e/README.md)
-├── docs/                     # 계획서, ci.md, analytics.md, design/(디자인 시스템), assets-license.md, release/(런북), spikes/
+├── docs/                     # 계획서, ci.md, analytics.md, monitoring.md(운영 지표), design/(디자인 시스템), assets-license.md, release/(런북), spikes/
 ├── spikes/                   # Phase 0 스파이크 코드
 └── img/                      # 스크린샷 에셋
 ```

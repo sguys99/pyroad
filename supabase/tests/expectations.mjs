@@ -1365,6 +1365,18 @@ export const EXPECT = {
     activateIn: 'B118',
     note: '① 00061: 온보딩·나이 확인 미완료 + 활동 없음 + max(가입일, 적용 시각) + 30일 — 배포 날 오래된 계정은 아님, 학습 기록·게시글이 있으면 아님',
   },
+  'MON-1': {
+    expect: 'deny',
+    requires: 'public.monitoring_summary()',
+    activateIn: 'P12-09',
+    note: '① 00062: 운영 지표 합계는 service_role 전용 (/admin 이 isAdminUser 확인 뒤)',
+  },
+  'MON-2': {
+    expect: 'allow',
+    requires: 'public.monitoring_summary()',
+    activateIn: 'P12-09',
+    note: '① 00062: 넣은 이벤트만큼 정확히 늘고 같은 기간 직접 SQL 과 같음 (퍼널·D1·세션·튜터·연출·건강)',
+  },
   'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
   'RL-2': {
     expect: 'deny',

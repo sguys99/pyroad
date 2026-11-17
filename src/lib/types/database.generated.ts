@@ -1852,6 +1852,7 @@ export type Database = {
         Args: { p_action: string; p_card_id: string; p_user_id: string };
         Returns: Json;
       };
+      monitoring_summary: { Args: { p_days: number }; Returns: Json };
       open_stage_chest: {
         Args: { p_stage_id: string; p_user_id: string };
         Returns: Json;

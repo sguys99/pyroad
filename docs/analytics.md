@@ -4,6 +4,7 @@
 > - 원칙: 아동 대상이라 **익명 ID만** 저장하고 개인정보는 수집하지 않습니다(§2.6, §7 PostHog 행). IP·User-Agent 원문·URL 쿼리도 저장하지 않습니다.
 > - 코드: `src/lib/analytics/`(이벤트 정의·`track()`·서버 기록), `src/app/api/analytics/route.ts`, 마이그레이션 `supabase/migrations/00017_analytics_events.sql`
 > - 운영 적용: [v0.4 런북](release/v0.4-runbook.md) ① 9번, "분석 이벤트 (운영, P1-17)"
+> - 운영 지표 화면: `/admin`(관리자만, P12-09) — 이 표의 이벤트를 DB 함수 `monitoring_summary`(00062)로 합계만 읽음. [monitoring.md](monitoring.md)
 
 ## 1. 무엇을 재나 (§1 성공 지표와의 연결)
 
@@ -143,7 +144,7 @@ POST /api/analytics
 
 ## 7. 확인용 SQL
 
-SQL Editor(postgres)에서 실행합니다. 날짜는 KST(`public.kst_date`, 00012). 관리자 화면은 만들지 않았습니다.
+SQL Editor(postgres)에서 실행합니다. 날짜는 KST(`public.kst_date`, 00012). 매일 보는 합계(사용·퍼널·§1 지표·튜터·건강)는 관리자 화면 `/admin`(운영 지표, P12-09 — 정의·경고 기준·같은 숫자를 내는 SQL은 [monitoring.md](monitoring.md))에서 봅니다.
 
 ```sql
 -- 1. 랜딩 → CTA → 로그인 (날짜별 합계, 최근 28일). 비로그인 세션과 로그인 사용자는 잇지 않으므로 합계 비율

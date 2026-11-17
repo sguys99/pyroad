@@ -9420,6 +9420,115 @@ async function groupAnalytics(u) {
   }
 }
 
+// ── monitoring: 운영 지표 집계 (P12-09, ① 00062) ──────────
+async function groupMonitoring(u) {
+  const FN = 'public.monitoring_summary()';
+  await check({
+    group: 'monitoring',
+    id: 'MON-1',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/monitoring_summary (운영 지표 훑기)',
+    requires: FN,
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        const r = await rest('POST', '/rest/v1/rpc/monitoring_summary', { as, body: { p_days: 7 } });
+        if (r.status < 300) return { actual: 'allowed', detail: `${r.status}` };
+        if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+          return { actual: 'error', detail: `${r.status} ${errCode(r)} ${errMsg(r)}` };
+      }
+      return { actual: 'denied', detail: '모두 거부' };
+    },
+  });
+  await check({
+    group: 'monitoring',
+    id: 'MON-2',
+    role: 'service_role',
+    op: 'monitoring_summary: 넣은 이벤트만큼 늘고(퍼널·D1·세션·튜터·연출), 같은 기간 직접 SQL 과 같음, 기간은 1·7·28만',
+    requires: FN,
+    ...OK,
+    run: async () => {
+      const get = async (d) => (await rpc('monitoring_summary', { p_days: d })).json;
+      const bad = await rpc('monitoring_summary', { p_days: 5 });
+      if (bad.status < 300) return { actual: 'mismatch', detail: 'p_days=5 가 통과함' };
+      const before = await get(7);
+      const id = (k) => `Mon${k}`.padEnd(22, 'x');
+      const ev = (anon, name, actor, source, props, ago, device = 'desktop') =>
+        `('${name}', '${actor}', '${id(anon)}', '${source}', '${JSON.stringify(props)}'::jsonb, '${device}', now() - interval '${ago}')`;
+      // 방문 2(1명 CTA) · 가입 A(이틀 전, 다음 날 시작·완료·스테이지·힌트·자유 질문) · 가입 B(사흘 전, 그 뒤 없음) · C(자동 하향 뒤 풍성하게)
+      one(`insert into public.analytics_events (name, actor, anon_id, source, props, device, occurred_at) values
+        ${[
+          ev('V1', 'landing_view', 'visitor', 'client', {}, '1 hour', 'mobile'),
+          ev('V1', 'landing_cta_click', 'visitor', 'client', { cta: 'hero', provider: 'google' }, '59 minutes', 'mobile'),
+          ev('V2', 'landing_view', 'visitor', 'client', {}, '2 hours'),
+          ev('A', 'login_success', 'user', 'server', { provider: 'google', new_user: true }, '2 days'),
+          ev('A', 'quest_start', 'user', 'server', { quest_id: Q1 }, '1 day'),
+          ev('A', 'hint_used', 'user', 'server', { quest_id: Q1, level: 1 }, '1 day -1 minute'),
+          ev('A', 'hint_used', 'user', 'server', { quest_id: Q1, level: 3 }, '1 day -2 minutes'),
+          ev('A', 'tutor_free_question', 'user', 'server', { result: 'fallback' }, '1 day -3 minutes'),
+          ev('A', 'tutor_free_question', 'user', 'server', { result: 'answered' }, '1 day -4 minutes'),
+          ev('A', 'quest_complete', 'user', 'server', { quest_id: Q1, hints_used: 2, used_golden_key: false, level_up: false, stage_cleared: true }, '1 day -5 minutes'),
+          ev('B', 'login_success', 'user', 'server', { provider: 'kakao', new_user: true }, '3 days'),
+          ev('C', 'motion_tier_change', 'user', 'client', { from: 'full', to: 'lite', cause: 'measured', setting: 'auto', reduced: 'system', elapsed_s: 5 }, '3 hours', 'tablet'),
+          ev('C', 'motion_tier_change', 'user', 'client', { from: 'lite', to: 'full', cause: 'user', setting: 'full', reduced: 'system', elapsed_s: 60 }, '3 hours -1 minute', 'tablet'),
+        ].join(',\n')}`);
+      try {
+        const after = await get(7);
+        const delta = (path) => {
+          const pick = (o) => path.split('.').reduce((x, k) => x?.[k], o);
+          return pick(after) - pick(before);
+        };
+        const keys = [
+          'events.landing_sessions', 'events.cta_sessions', 'events.visitor_sessions', 'events.signups',
+          'events.active_users', 'events.mobile_ids', 'events.hints', 'events.hints_l1', 'events.hints_l3',
+          'events.free_total', 'events.free_fallback', 'events.free_answered',
+          'cohort.signups', 'cohort.started', 'cohort.completed', 'cohort.stage_cleared',
+          'retention.d1_cohort', 'retention.d1_back', 'sessions.sessions', 'sessions.completes',
+          'motion.client_users', 'motion.downgraded', 'motion.back_to_full',
+        ];
+        const got = Object.fromEntries(keys.map((k) => [k, delta(k)]));
+        const exp = {
+          'events.landing_sessions': 2, 'events.cta_sessions': 1, 'events.visitor_sessions': 2, 'events.signups': 2,
+          'events.active_users': 3, 'events.mobile_ids': 2, 'events.hints': 2, 'events.hints_l1': 1, 'events.hints_l3': 1,
+          'events.free_total': 2, 'events.free_fallback': 1, 'events.free_answered': 1,
+          'cohort.signups': 2, 'cohort.started': 1, 'cohort.completed': 1, 'cohort.stage_cleared': 1,
+          'retention.d1_cohort': 2, 'retention.d1_back': 1, 'sessions.sessions': 4, 'sessions.completes': 1,
+          'motion.client_users': 1, 'motion.downgraded': 1, 'motion.back_to_full': 1,
+        };
+        // 같은 기간을 직접 센 값 (analytics.md SQL 1·3, coin_balance_mismatches, 신고 표)
+        const W = `occurred_at >= (public.kst_today() - 6)::timestamp at time zone 'Asia/Seoul'`;
+        const direct = one(`select concat_ws(',',
+            (select count(distinct anon_id) from public.analytics_events where name = 'landing_view' and ${W}),
+            (select count(distinct anon_id) from public.analytics_events where actor = 'user' and ${W}),
+            (select count(*) from public.analytics_events where name = 'hint_used' and ${W}),
+            (select count(*) from public.coin_balance_mismatches()),
+            (select count(*) from public.board_posts where is_hidden),
+            (select count(*) from public.users where created_at >= (public.kst_today() - 6)::timestamp at time zone 'Asia/Seoul'))`);
+        const fromFn = [
+          after.events.landing_sessions, after.events.active_users, after.events.hints,
+          after.health.coin_mismatches, after.health.hidden_posts, after.accounts.created,
+        ].join(',');
+        const today = await get(1);
+        const shape = {
+          days: [after.days, today.days], daily: [after.daily.length, today.daily.length],
+          from: today.from === today.to,
+        };
+        return (
+          compare('MON-2 늘어난 수', exp, got) ??
+          compare('MON-2 직접 SQL', { v: direct }, { v: fromFn }) ??
+          compare('MON-2 모양', { days: [7, 1], daily: [14, 14], from: true }, shape) ?? {
+            actual: 'ok',
+            detail: `방문 ${after.events.landing_sessions} · 가입 ${after.cohort.signups} · D1 ${after.retention.d1_back}/${after.retention.d1_cohort}`,
+          }
+        );
+      } finally {
+        one(`delete from public.analytics_events where anon_id like 'Mon%'`);
+      }
+    },
+  });
+}
+
 // ── 실행 ──────────────────────────────────────────────────
 async function main() {
   console.log(`[${scenario}] ${S.label}`);
@@ -9499,6 +9608,7 @@ async function main() {
   await groupSeenUnlocks(u);
   await groupQuiz(u);
   await groupAnalytics(u);
+  await groupMonitoring(u);
   await groupAccount(u);
   await groupApp(u);
   await groupSizeLimits(u);

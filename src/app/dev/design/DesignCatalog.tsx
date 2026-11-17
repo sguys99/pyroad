@@ -68,6 +68,7 @@ import { AchievementBookSection } from './_catalog/AchievementBookSection';
 import { RestSection } from './_catalog/RestSection';
 import { ProfileSection } from './_catalog/ProfileSection';
 import { ShopScreenSection, ShopSection } from './_catalog/ShopSection';
+import { MonitoringSection } from './_catalog/MonitoringSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -150,6 +151,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['guardian-report', '보호자 리포트'],
       ['pwa', '앱 아이콘·홈 화면'],
       ['rest', '휴식 알림'],
+      ['monitoring', '운영 지표'],
     ],
   },
 ];
@@ -278,6 +280,7 @@ export function DesignCatalog({
               <GuardianReportCatalogSection />
               <PwaSection />
               <RestSection />
+              <MonitoringSection />
             </div>
           </div>
         </div>
