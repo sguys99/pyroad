@@ -70,6 +70,13 @@ test('360px: 지도를 내리면 아래에 떠 있는 이어하기, 쪽지가 �
     window.scrollTo(0, document.documentElement.scrollHeight),
   );
   await expect(float).toBeVisible();
+  // 버튼 뒤 화면 아래 바탕색 페이드 띠: 화면 폭 전체, 누름은 통과 (B125)
+  expect(
+    await float.evaluate((f) => {
+      const b = getComputedStyle(f, '::before');
+      return [b.pointerEvents, b.width];
+    }),
+  ).toEqual(['none', '360px']);
   // 맨 아래까지 내리면 떠 있는 버튼이 페이지 끝 글자를 가리지 않는다 (페이지 아래 여백 pb-28, P12-02 검수).
   // html 의 부드러운 스크롤이 끝나기 전에 재지 않게 바로 맨 아래로
   expect(
