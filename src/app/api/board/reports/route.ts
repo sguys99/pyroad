@@ -9,6 +9,7 @@ import {
 import {
   BOARD_MESSAGES,
   boardError,
+  boardRateLimited,
   boardServerError,
   isUuid,
   readJsonObject,
@@ -56,6 +57,9 @@ export async function POST(request: Request) {
       field: 'reason',
     });
   }
+
+  const limited = await boardRateLimited(user.id, 'report');
+  if (limited) return limited;
 
   const { data, error } = await createAdminClient().rpc(
     'report_board_content',

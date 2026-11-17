@@ -20,6 +20,8 @@ const mocks = vi.hoisted(() => ({
   user: null as { id: string } | null,
   calls: [] as Call[],
   rpcCalls: [] as { fn: string; args: unknown }[],
+  quotaCalls: [] as unknown[],
+  quota: { allowed: true } as Record<string, unknown>,
   /** table → 조회 결과 (select … maybeSingle) */
   rows: {} as Record<string, unknown>,
   /** 다음 쓰기에 돌려줄 오류 */
@@ -74,6 +76,11 @@ vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
     from: (table: string) => builder(table),
     rpc: async (fn: string, args: unknown) => {
+      // 요청 한도 (B107)는 따로 기록: 기존 rpcCalls 단언은 게시판 RPC 만 봄
+      if (fn === 'consume_rate_limit') {
+        mocks.quotaCalls.push(args);
+        return { data: mocks.quota, error: null };
+      }
       mocks.rpcCalls.push({ fn, args });
       return { data: mocks.rpcResult, error: mocks.rpcError };
     },
@@ -121,6 +128,8 @@ beforeEach(() => {
   mocks.user = { id: U1 };
   mocks.calls = [];
   mocks.rpcCalls = [];
+  mocks.quotaCalls = [];
+  mocks.quota = { allowed: true };
   mocks.rows = {};
   mocks.writeError = null;
   mocks.rpcResult = null;
@@ -531,5 +540,59 @@ describe('제한 모드 (P3-15): 만 14세 미만 + 보호자 동의 전', () =>
     expect(
       (await createPost(req({ title: '질문', content: '내용' }))).status,
     ).toBe(200);
+  });
+});
+
+describe('요청 한도 (B107): 글·댓글·신고 도배 막기', () => {
+  it('확인한 사용자 id 로 board:post·comment·report 를 세고, 넘으면 429 + Retry-After, DB 에 쓰지 않음', async () => {
+    mocks.rows.board_posts = { id: POST_ID, user_id: U2, is_hidden: false };
+    mocks.rpcResult = { result: 'reported', hidden: false };
+    await createPost(req({ title: '질문', content: '내용', user_id: U2 }));
+    await createComment(req({ post_id: POST_ID, content: '댓글' }));
+    await report(
+      req({ target_type: 'post', target_id: POST_ID, reason: 'abuse' }),
+    );
+    expect(mocks.quotaCalls).toEqual([
+      { p_user_id: U1, p_bucket: 'board:post', p_per_minute: 3, p_per_day: 20 },
+      {
+        p_user_id: U1,
+        p_bucket: 'board:comment',
+        p_per_minute: 10,
+        p_per_day: 100,
+      },
+      {
+        p_user_id: U1,
+        p_bucket: 'board:report',
+        p_per_minute: 3,
+        p_per_day: 20,
+      },
+    ]);
+
+    mocks.calls = [];
+    mocks.rpcCalls = [];
+    mocks.quota = { allowed: false, retry_after: 42, scope: 'minute' };
+    for (const res of [
+      await createPost(req({ title: '질문', content: '내용' })),
+      await createComment(req({ post_id: POST_ID, content: '댓글' })),
+      await report(
+        req({ target_type: 'post', target_id: POST_ID, reason: 'abuse' }),
+      ),
+    ]) {
+      expect(res.status).toBe(429);
+      expect(res.headers.get('retry-after')).toBe('42');
+      expect(await res.json()).toMatchObject({ code: 'rate_limited' });
+    }
+    expect(writes()).toEqual([]);
+    expect(mocks.rpcCalls).toEqual([]);
+  });
+
+  it('잘못된 입력·금칙어는 한도를 쓰지 않음, 한도 확인 실패는 막지 않음(fail-open)', async () => {
+    await createPost(req({ title: '', content: 'x' }));
+    await createPost(req({ title: '안녕', content: '이거 시 발 어렵네' }));
+    expect(mocks.quotaCalls).toEqual([]);
+    mocks.quota = { unexpected: true };
+    const res = await createPost(req({ title: '질문', content: '내용' }));
+    expect(res.status).toBe(200);
+    expect(mocks.captured.length).toBeGreaterThan(0);
   });
 });
