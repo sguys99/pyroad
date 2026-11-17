@@ -11,7 +11,12 @@ import { test, expect, type Browser, type Page } from '@playwright/test';
 import { adminClient, completeQuests } from '../support/admin';
 import { stage, stages } from '../support/content';
 import { createSocialUser, deleteSocialUsers } from '../support/socialUsers';
-import { runButton, runCode, waitForRunner } from '../support/quest';
+import {
+  openStageSheet,
+  runButton,
+  runCode,
+  waitForRunner,
+} from '../support/quest';
 import { PHONE_QUIZ_NOTE_KEY, waitStreamSettled } from '../support/test';
 
 const WIDTHS = [
@@ -151,6 +156,7 @@ const dynamic = (page: Page) => [
   page.locator('.ob-card-name'), // 온보딩이 서버에서 무작위로 고른 추천 닉네임
   page.getByTestId('learning-calendar'), // 프로필 학습 달력 (이달·오늘)
   page.locator('.pf-medals'), // 최근 업적 (같은 시각에 받은 것끼리 순서가 바뀜·받은 날)
+  page.getByText(/^\d{4}년 \d{1,2}월 \d{1,2}일$/), // 게시판 글 쓴 날
 ];
 
 async function shoot(page: Page, name: string, width: number) {
@@ -342,6 +348,41 @@ test('설정', async ({ browser, baseURL }) => {
 
 test('게시판', async ({ browser, baseURL }) => {
   await screen(browser, baseURL!, 'board', 'progress', visit('/board'));
+});
+
+test('월드맵 스테이지 시트 (진행 중)', async ({ browser, baseURL }) => {
+  await screen(browser, baseURL!, 'stage-sheet', 'progress', async (page) => {
+    await page.goto('/world');
+    await settle(page);
+    await openStageSheet(page, stage(3).title);
+  });
+});
+
+test('게시판 글 (내 글, 댓글 없음)', async ({ browser, baseURL }) => {
+  const db = adminClient();
+  const { data: me } = await db
+    .from('users')
+    .select('id')
+    .eq('nickname', `${NICK}1`)
+    .single();
+  const { data: post, error } = await db
+    .from('board_posts')
+    .insert({
+      user_id: me!.id,
+      title: '파이썬 마을 보스 어떻게 이겨요?',
+      content:
+        '출력 대장 버그버그를 만났는데 세 번째 문제에서 자꾸 틀려요. 따옴표를 어디에 써야 하는지 헷갈려요. 힌트 있는 친구 있나요?',
+    })
+    .select('id')
+    .single();
+  expect(error).toBeNull();
+  await screen(
+    browser,
+    baseURL!,
+    'board-post',
+    'progress',
+    visit(`/board/${post!.id}`),
+  );
 });
 
 test('갤러리', async ({ browser, baseURL }) => {
