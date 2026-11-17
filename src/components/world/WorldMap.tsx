@@ -162,7 +162,11 @@ function useOpenStage(
   return { open, sheet, celebration, toasts, show, dismiss };
 }
 
-/** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
+/**
+ * 노드 차례 등장: full 크기(보이는 채로), lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15).
+ * 서버 렌더·첫 하이드레이션은 full 값이라 full 에 opacity 0을 걸면 JS가 돌 때까지 스테이지 이름이 안 보임 (§2.10 규칙, B102).
+ * minimal 페이드는 클라이언트에서 단계가 정해진 뒤에 붙는 지도에만 나온다
+ */
 function nodeVariants(budget: MotionBudget): {
   container: Variants;
   item: Variants;
@@ -176,7 +180,7 @@ function nodeVariants(budget: MotionBudget): {
       },
     },
     item: {
-      hidden: budget.springs ? { opacity: 0, scale: 0.85 } : { opacity: 0 },
+      hidden: budget.springs ? { scale: 0.85 } : { opacity: 0 },
       show: {
         opacity: 1,
         scale: 1,
