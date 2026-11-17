@@ -1,0 +1,204 @@
+{
+  "git": "4759e42",
+  "date": "2026-11-17T00:54:01.164Z",
+  "lighthouse": "13.6.0",
+  "chrome": "Chromium 145.0.7632.6",
+  "runs": 3,
+  "routes": {
+    "landing": {
+      "label": "랜딩 /",
+      "median": {
+        "performance": 100,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "lcp": 1055.7,
+        "tbt": 0,
+        "cls": 0,
+        "routeJsKB": 172.1,
+        "hiddenText": [],
+        "jsKB": 214.2,
+        "totalKB": 425.8,
+        "pyodideKB": 0,
+        "requests": 32
+      },
+      "spread": {
+        "performance": [
+          100,
+          100
+        ],
+        "accessibility": [
+          100,
+          100
+        ],
+        "lcp": [
+          1054,
+          1057
+        ],
+        "tbt": [
+          0,
+          13
+        ],
+        "totalKB": [
+          426,
+          426
+        ]
+      }
+    },
+    "world": {
+      "label": "월드맵 /world",
+      "median": {
+        "performance": 77,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "lcp": 6468.2,
+        "tbt": 33,
+        "cls": 0,
+        "routeJsKB": 293,
+        "hiddenText": [],
+        "jsKB": 329.5,
+        "totalKB": 957.8,
+        "pyodideKB": 0,
+        "requests": 79
+      },
+      "spread": {
+        "performance": [
+          74,
+          77
+        ],
+        "accessibility": [
+          100,
+          100
+        ],
+        "lcp": [
+          6467,
+          6777
+        ],
+        "tbt": [
+          3,
+          63
+        ],
+        "totalKB": [
+          953,
+          958
+        ]
+      }
+    },
+    "quest1": {
+      "label": "퀘스트 1-1 (첫 방문)",
+      "median": {
+        "performance": 99,
+        "accessibility": 96,
+        "bestPractices": 100,
+        "lcp": 1667.6,
+        "tbt": 87,
+        "cls": 0,
+        "routeJsKB": 340.3,
+        "hiddenText": [],
+        "jsKB": 647,
+        "totalKB": 1341.1,
+        "pyodideKB": 6346.5,
+        "requests": 120
+      },
+      "spread": {
+        "performance": [
+          98,
+          99
+        ],
+        "accessibility": [
+          96,
+          96
+        ],
+        "lcp": [
+          1657,
+          1672
+        ],
+        "tbt": [
+          85,
+          93
+        ],
+        "totalKB": [
+          1341,
+          1342
+        ]
+      }
+    },
+    "project": {
+      "label": "프로젝트 7-3",
+      "median": {
+        "performance": 98,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "lcp": 1664.1,
+        "tbt": 116.7,
+        "cls": 0,
+        "routeJsKB": 340.3,
+        "hiddenText": [],
+        "jsKB": 647,
+        "totalKB": 1302.1,
+        "pyodideKB": 6346.5,
+        "requests": 112
+      },
+      "spread": {
+        "performance": [
+          98,
+          98
+        ],
+        "accessibility": [
+          100,
+          100
+        ],
+        "lcp": [
+          1662,
+          1821
+        ],
+        "tbt": [
+          100,
+          123
+        ],
+        "totalKB": [
+          1302,
+          1302
+        ]
+      }
+    },
+    "profile": {
+      "label": "프로필 /profile",
+      "median": {
+        "performance": 100,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "lcp": 1208,
+        "tbt": 3.5,
+        "cls": 0,
+        "routeJsKB": 245.2,
+        "hiddenText": [],
+        "jsKB": 334.1,
+        "totalKB": 941.4,
+        "pyodideKB": 0,
+        "requests": 64
+      },
+      "spread": {
+        "performance": [
+          100,
+          100
+        ],
+        "accessibility": [
+          100,
+          100
+        ],
+        "lcp": [
+          1056,
+          1512
+        ],
+        "tbt": [
+          1,
+          17
+        ],
+        "totalKB": [
+          941,
+          941
+        ]
+      }
+    }
+  }
+}

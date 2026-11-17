@@ -43,7 +43,8 @@
     "content:build": "tsx scripts/content/build.ts",
     "content:extract": "tsx scripts/content/extract-from-seed.ts",
     "content:compare": "tsx scripts/content/compare.ts",
-    "pyodide:copy": "node scripts/pyodide/copy-assets.mjs"
+    "pyodide:copy": "node scripts/pyodide/copy-assets.mjs",
+    "perf:lighthouse": "tsx scripts/perf/lighthouse.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -97,6 +98,7 @@
     "eslint-config-next": "^15.5.0",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^29.0.1",
+    "lighthouse": "13.6.0",
     "lottie-web": "^5.13.0",
     "postcss": "^8.4.0",
     "prettier": "^3.8.1",

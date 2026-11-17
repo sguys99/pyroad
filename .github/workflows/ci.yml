@@ -281,7 +281,8 @@ jobs:
   e2e:
     # Playwright 1.58은 ubuntu-latest(26.04)를 지원하지 않아 24.04로 고정. Playwright를 올리면 함께 확인
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    # 45분(B90) + Lighthouse 5화면 × 3회 약 10분 (P12-03)
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -324,6 +325,7 @@ jobs:
           cat "$RUNNER_TEMP/supabase-start.log"
           supabase status -o env | grep -q '^API_URL=' || { echo '::error::Supabase 스택 시작 실패'; exit 1; }
       - name: 로그인 e2e (빌드 포함)
+        id: e2e
         run: npx playwright test --project=chromium
       # 시각 회귀 (P12-02): 경고만 (기준 이미지가 이 러너 아키텍처에서 찍힌 것이 확인될 때까지, docs/ci.md). 위 빌드를 그대로 씀
       - name: 시각 회귀 (비차단)
@@ -342,6 +344,23 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 14
+      # Lighthouse 모바일 5화면 × 3회 중앙값 (P12-03, §2.10). 위 빌드·스택을 그대로 씀. 차단 = Accessibility 90·바이트 예산,
+      # 경고 = Performance·LCP·TBT (job 요약에 표). e2e 스펙이 실패해도 돈다 (서로 다른 신호라서, 빌드가 없으면 스크립트가 그렇게 알리고 실패)
+      - name: Lighthouse (차단 = Accessibility·바이트 예산)
+        id: lighthouse
+        if: ${{ !cancelled() && steps.e2e.outcome != 'skipped' }}
+        run: npm run perf:lighthouse
+      - name: Lighthouse 결과 업로드
+        if: ${{ !cancelled() && steps.lighthouse.outcome != 'skipped' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse
+          path: |
+            build/perf/lighthouse.json
+            build/perf/lighthouse.md
+            build/perf/lighthouse-raw/
+          if-no-files-found: ignore
+          retention-days: 30
       - name: 리포트 업로드
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
