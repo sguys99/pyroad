@@ -1,35 +1,42 @@
+/**
+ * 퀘스트 불러오는 중 (B141): 지금 퀘스트 화면 틀 — 머리 줄(‹ 월드맵 · 단계 · 소리) + 책 한 권 카드
+ * (1024px 이상은 왼쪽 이야기 · 오른쪽 공책 두 쪽) + 아래 레벨 줄. 반복은 투명도만, 동작 줄이기에서 멈춤
+ */
 export default function QuestLoading() {
   return (
-    <div className="flex h-screen flex-col animate-pulse reduced:animate-none">
-      {/* 퀘스트 헤더 스켈레톤 */}
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <div className="h-8 w-8 rounded bg-muted" />
-        <div className="h-5 w-48 rounded bg-muted" />
+    <div
+      className="flex h-screen flex-col animate-pulse reduced:animate-none"
+      aria-busy="true"
+    >
+      <p role="status" className="sr-only">
+        퀘스트를 펼치는 중이에요
+      </p>
+      <div
+        className="flex items-center gap-3 border-b border-border bg-background px-4 py-2"
+        aria-hidden
+      >
+        <div className="h-12 w-24 rounded-full bg-surface-2" />
+        <div className="h-4 w-40 rounded-full bg-surface-2" />
+        <div className="ml-auto size-11 rounded-full bg-surface-2" />
       </div>
-
-      {/* 탭 바 스켈레톤 */}
-      <div className="flex gap-1 border-b border-border px-4 py-2">
-        <div className="h-8 w-16 rounded-lg bg-muted" />
-        <div className="h-8 w-16 rounded-lg bg-muted" />
-        <div className="h-8 w-16 rounded-lg bg-muted" />
-      </div>
-
-      {/* 메인 콘텐츠 스켈레톤 */}
-      <div className="flex-1 p-4 space-y-4">
-        {/* 대화 패널 스켈레톤 */}
-        <div className="flex gap-3">
-          <div className="h-10 w-10 shrink-0 rounded-full bg-muted" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 w-3/4 rounded bg-muted" />
-            <div className="h-4 w-1/2 rounded bg-muted" />
-            <div className="h-4 w-2/3 rounded bg-muted" />
+      <div className="min-h-0 flex-1 p-4 lg:p-6" aria-hidden>
+        <div className="h-full rounded-2xl bg-surface p-5 shadow-card lg:grid lg:grid-cols-2 lg:gap-12 lg:p-8">
+          <div>
+            <div className="h-4 w-40 rounded-full bg-surface-2" />
+            <div className="mt-2 h-8 w-56 max-w-full rounded-full bg-surface-2" />
+            <div className="mt-4 h-40 rounded-xl bg-surface-2" />
+            <div className="mt-4 h-4 w-5/6 rounded-full bg-surface-2" />
+            <div className="mt-6 h-32 rounded-xl bg-surface-2" />
+          </div>
+          <div className="hidden lg:block">
+            <div className="h-6 w-40 rounded-full bg-surface-2" />
+            <div className="mt-6 h-44 rounded-xl bg-surface-2" />
+            <div className="mt-4 h-14 w-48 rounded-xl bg-surface-2" />
           </div>
         </div>
       </div>
-
-      {/* 하단 상태 바 스켈레톤 */}
-      <div className="border-t border-border px-4 py-3">
-        <div className="h-3 w-full rounded-full bg-muted" />
+      <div className="border-t border-border bg-surface px-4 py-3" aria-hidden>
+        <div className="h-6 w-28 rounded-full bg-surface-2" />
       </div>
     </div>
   );
