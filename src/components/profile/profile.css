@@ -288,7 +288,11 @@
 .pf-stage .g-prog {
   grid-column: 1 / -1;
 }
-.pf-stage[data-locked] {
+/* 잠긴 스테이지: 글자는 흐린 글자색(AA 대비)만, 흐리게 하는 건 막대 — 줄 전체 opacity 는 글자 대비 2.3:1 (B103) */
+.pf-stage[data-locked] .pf-stage-t {
+  color: var(--text-muted);
+}
+.pf-stage[data-locked] .g-prog {
   opacity: 0.55;
 }
 .pf-chest[data-state='locked'],
@@ -392,9 +396,9 @@
   outline-offset: 1px;
   font-weight: 700;
 }
+/* 앞으로 올 날: 흐린 글자색만 (opacity 를 겹치면 대비 2.5:1, B103) */
 .pf-day[data-future] {
   color: var(--text-muted);
-  opacity: 0.6;
 }
 .pf-day-shield {
   position: absolute;
