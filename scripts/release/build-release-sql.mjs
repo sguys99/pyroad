@@ -250,7 +250,7 @@ export const RELEASES = [
         stage: 1,
         head: [
           '-- pyRoad v1.0 (Phase 12 병합) 운영 적용: ① 추가형 마이그레이션 (00059 Google 이름·사진 저장 안 함 · 00060 학생이 쓰는 열 크기 상한 · 00061 온보딩 미완료 계정 파기 대상)',
-          '-- feat/phase12 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. 이미 저장된 값 정리는 docs/legal/v1.0-privacy-audit.md "운영에서 할 일"',
+          '-- feat/phase12 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v1.0-runbook.md 2-1 (이미 저장된 Google 이름·사진 정리는 2-7)',
         ],
         // B132 (P12-07 리허설): 다른 트랜잭션이 users·user_progress·auth.users 를 잡고 있으면 ALTER·CREATE TRIGGER 가 기다리는 동안
         // 학생 요청이 그 뒤에 줄줄이 막힘 → 10초 안에 잠금을 못 얻으면 전체를 되돌리고 나중에 다시 붙여 넣음(런북 2-1)
