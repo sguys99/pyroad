@@ -5825,6 +5825,112 @@ async function groupSizeLimits(u) {
   });
 }
 
+/**
+ * P12-05 침투 쓸기:테이블마다 따로 쓴 점검이 새 객체를 빠뜨려도 잡히게, 모든 그룹이 데이터를 만든 뒤 public 의 모든
+ * 테이블·뷰를 비로그인·다른 학생으로 한 번씩 읽어 본다. 열려 있어도 되는 것은 아래 목록뿐(이유와 함께)
+ */
+// 비로그인이 행을 읽어도 되는 것: 공지(비로그인 열람, B02)
+const PEN_ANON_OK = ['notices'];
+// 로그인 학생이 남의 행을 읽어도 되는 것 (보이는 값이 공개 이름·글뿐): 게시판 글·댓글, 공개 프로필 표·뷰,
+// 공지(비로그인도 읽음 — 작성자 열은 관리자 uuid 뿐, P12-05 L15)
+const PEN_CROSS_OK = [
+  'notices.user_id',
+  'board_posts.user_id',
+  'board_comments.user_id',
+  'user_public_profiles.user_id',
+  'user_profiles_public.id',
+];
+
+async function groupPen(u) {
+  const rels = one(`select string_agg(c.relname, ' ' order by c.relname)
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind in ('r', 'v', 'm', 'p')`).split(
+    ' ',
+  );
+  await check({
+    group: 'pen',
+    id: 'PEN-1',
+    role: 'anon',
+    op: 'public 의 모든 테이블·뷰를 비로그인으로 읽기 (행이 오면 열림, 공지 제외)',
+    ...NONE,
+    run: async () => {
+      const open = [];
+      for (const rel of rels) {
+        if (PEN_ANON_OK.includes(rel)) continue;
+        const r = await rest('GET', `/rest/v1/${rel}?select=*&limit=1`);
+        if (classifyRead(r).actual === 'allowed') open.push(rel);
+      }
+      return {
+        actual: open.length ? open.join(' ') : 'none',
+        detail: open.length
+          ? `열림: ${open.join(', ')}`
+          : `${rels.length}개 모두 막힘·0행`,
+      };
+    },
+  });
+
+  // 사용자를 가리키는 열: *user_id·author_id·reporter_id + users.id·user_profiles_public.id
+  const cols = one(`select string_agg(c.relname || '.' || a.attname, ' ' order by 1)
+      from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind in ('r', 'v', 'm', 'p') and a.attnum > 0 and not a.attisdropped
+       and a.atttypid = 'uuid'::regtype
+       and (a.attname ~ '(^|_)user_id$' or a.attname in ('author_id', 'reporter_id')
+            or (c.relname in ('users', 'user_profiles_public') and a.attname = 'id'))`).split(
+    ' ',
+  );
+  await check({
+    group: 'pen',
+    id: 'PEN-2',
+    role: 'authenticated',
+    op: '로그인 학생(alice)이 public 의 모든 테이블·뷰에서 남의 사용자 열 행 읽기 (게시판·공개 프로필 제외)',
+    ...NONE,
+    run: async () => {
+      const open = [];
+      let probed = 0;
+      for (const rc of cols) {
+        if (PEN_CROSS_OK.includes(rc)) continue;
+        const [rel, col] = rc.split('.');
+        // 남의 행이 실제로 있을 때만 의미가 있음 (postgres 로 확인)
+        if (
+          one(
+            `select exists (select 1 from public.${rel} where ${col} is not null and ${col} <> '${u.alice.id}')`,
+          ) !== 't'
+        )
+          continue;
+        probed++;
+        const r = await rest(
+          'GET',
+          `/rest/v1/${rel}?select=${col}&${col}=neq.${u.alice.id}&limit=1`,
+          { as: u.alice },
+        );
+        if (classifyRead(r).actual === 'allowed') open.push(rc);
+      }
+      return {
+        actual: open.length ? open.join(' ') : 'none',
+        detail: open.length
+          ? `남의 행이 보임: ${open.join(', ')}`
+          : `사용자 열 ${cols.length}개 중 남의 행이 있는 ${probed}개 모두 0행·막힘`,
+      };
+    },
+  });
+
+  await check({
+    group: 'pen',
+    id: 'PEN-3',
+    role: 'postgres',
+    op: 'anon/authenticated 가 EXECUTE 할 수 있는 public 함수 (SECURITY DEFINER 여부와 무관, 트리거 제외)',
+    ...NONE,
+    run: () => {
+      const v = one(`select coalesce(string_agg(distinct p.oid::regprocedure::text, ', '), '')
+          from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+         where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype
+           and (has_function_privilege('anon', p.oid, 'EXECUTE')
+                or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+}
+
 async function groupStatic() {
   await check({
     group: 'static',
@@ -9328,6 +9434,7 @@ async function main() {
   await groupAccount(u);
   await groupApp(u);
   await groupSizeLimits(u);
+  await groupPen(u);
   await groupStatic();
 
   const count = (s) => results.filter((r) => r.status === s).length;

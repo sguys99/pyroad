@@ -1450,6 +1450,20 @@ export const EXPECT = {
     note: '00060: 완료 API 상한(20,000자) 한글 코드 + 프로젝트 7단계 코드 자동 저장은 그대로',
   },
 
+  // ── pen: 침투 쓸기 (P12-05) ───────────────────────────────
+  'PEN-1': {
+    expect: 'deny',
+    note: 'P12-05: public 의 모든 테이블·뷰를 비로그인으로 읽어 행이 오는 것 없음 (공지만 예외). 새 테이블을 빠뜨려도 잡힘',
+  },
+  'PEN-2': {
+    expect: 'deny',
+    note: 'P12-05: 로그인 학생이 모든 테이블·뷰의 사용자 열(*user_id·author_id·reporter_id·id)에서 남의 행을 못 읽음 (게시판 글·댓글·공개 프로필·공지 작성자만 예외)',
+  },
+  'PEN-3': {
+    expect: 'deny',
+    note: 'P12-05: anon/authenticated 가 실행할 수 있는 public 함수 없음 (invoker 함수 포함, 트리거 제외 — 함수는 모두 service_role 경유)',
+  },
+
   // ── static: 카탈로그 점검 ─────────────────────────────────
   'ST-1': { expect: 'deny', note: 'public 의 모든 테이블에 RLS' },
   'ST-2': {
