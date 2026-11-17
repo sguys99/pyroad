@@ -436,21 +436,22 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
     }
   });
 
-  test('시트 등장·진행바 빛 띠·토스트·타자 효과가 단계마다 다르다', async ({
-    page,
-  }) => {
-    const expected = {
-      full: { toast: 'g-toast-in', shine: true, caret: true, pop: 'qo-pop' },
-      lite: {
-        toast: 'g-toast-in-lite',
-        shine: true,
-        caret: true,
-        pop: 'qo-pop-lite',
-      },
-      minimal: { toast: 'g-fade-in', shine: false, caret: false, pop: 'none' },
-      reduced: { toast: 'none', shine: false, caret: false, pop: 'none' },
-    };
-    for (const mode of MOTION_MODES.slice(0, 4)) {
+  // 단계마다 테스트 하나: 네 단계를 한 테스트에서 돌면 카탈로그를 네 번 열어 GitHub 러너에서 59~66초, 느릴 때 90초 제한을 넘김 (B147)
+  const expected = {
+    full: { toast: 'g-toast-in', shine: true, caret: true, pop: 'qo-pop' },
+    lite: {
+      toast: 'g-toast-in-lite',
+      shine: true,
+      caret: true,
+      pop: 'qo-pop-lite',
+    },
+    minimal: { toast: 'g-fade-in', shine: false, caret: false, pop: 'none' },
+    reduced: { toast: 'none', shine: false, caret: false, pop: 'none' },
+  };
+  for (const mode of MOTION_MODES.slice(0, 4)) {
+    test(`시트 등장·진행바 빛 띠·토스트·타자 효과가 단계마다 다르다 (${mode.name})`, async ({
+      page,
+    }) => {
       const want = expected[mode.reduced === 'on' ? 'reduced' : mode.tier];
       await openCatalog(page, mode);
 
@@ -525,8 +526,8 @@ test.describe('연출 단계 대체: 일회성 연출 (P2-12)', () => {
         await slipLine.evaluate((el) => getComputedStyle(el).animationName),
         `${mode.name} 줄 카드`,
       ).toBe(want.pop);
-    }
-  });
+    });
+  }
 });
 
 test.describe('동행 펫 슬롯 (P5-08)', () => {
