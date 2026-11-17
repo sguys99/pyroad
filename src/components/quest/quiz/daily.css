@@ -10,19 +10,6 @@
   border-bottom: var(--line-w) solid var(--line);
   background: var(--bg);
 }
-.dq-back {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 0.25rem;
-  min-height: 44px;
-  color: var(--primary-text);
-  font-size: var(--text-small);
-  font-weight: 600;
-}
-.dq-back:hover {
-  text-decoration: underline;
-}
 .dq-title {
   display: grid;
   flex: 1 1 auto;

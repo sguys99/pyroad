@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, CalendarCheck, Check, Flame, Map } from 'lucide-react';
+import { BackLink } from '@/components/ui/back-link';
+import { CalendarCheck, Check, Flame, Map } from 'lucide-react';
 
 import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { Button } from '@/components/ui/button';
@@ -149,10 +149,9 @@ export function DailyQuiz({
   return (
     <div className="dq flex min-h-dvh flex-col bg-bg" data-testid="daily-quiz">
       <header className="dq-head">
-        <Link href={MAP_HREF} className="dq-back">
-          <ArrowLeft aria-hidden className="size-4" />
+        <BackLink href={MAP_HREF} className="shrink-0 text-small">
           월드맵
-        </Link>
+        </BackLink>
         <div className="dq-title">
           <span className="dq-k font-sans">
             {formatKstDate(today, 'monthDay')}

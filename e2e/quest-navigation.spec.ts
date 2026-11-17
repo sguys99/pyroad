@@ -212,3 +212,26 @@ test.describe('퀘스트 사이 이동: 앞 퀘스트 상태가 남지 않는다
     await expect(strip).not.toHaveAttribute('data-beat', 'pass');
   });
 });
+
+test('머리 줄: 뒤로 가기는 공통 BackLink 모양, 768px 은 "N단계"만이라 보스 이름이 안 잘림 (B122)', async ({
+  page,
+  e2eUser,
+}) => {
+  const s1 = stage(1);
+  await completeQuests(e2eUser.id, s1.quests, { withBoss: false });
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto(`/quest/${s1.boss!.id}`);
+  const header = page.locator('header').first();
+  const back = header.getByRole('link', { name: '월드맵' });
+  await expect(back.locator('svg.lucide-chevron-left')).toHaveCount(1);
+  expect((await back.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await expect(header).toContainText('1단계');
+  await expect(header.getByText(s1.title)).toBeHidden();
+  const title = header.getByText(s1.boss!.title, { exact: true });
+  expect(await title.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(
+    true,
+  );
+  // 넓은 화면은 스테이지 이름까지
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(header.getByText(s1.title)).toBeVisible();
+});

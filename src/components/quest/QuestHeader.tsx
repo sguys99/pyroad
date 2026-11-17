@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { BackLink } from '@/components/ui/back-link';
 import { SoundToggle } from '@/components/sound/SoundToggle';
 import { WorldBgm } from '@/components/sound/WorldBgm';
 import type { BgmId } from '@/lib/sound/manifest';
@@ -33,16 +32,14 @@ export function QuestHeader({
   return (
     <header className="flex min-w-0 items-center gap-2 border-b border-border bg-background px-4 py-2 sm:gap-3">
       {/* 소프트 내비게이션 (B22). 완료 후 새 진행은 useQuestSession이 router.refresh()로 받아 둠 */}
-      <Link
-        href={worldHref}
-        className="flex min-h-[44px] shrink-0 items-center gap-1 text-sm font-medium text-primary-text hover:underline"
-      >
-        <ArrowLeft className="h-4 w-4" />
+      {/* 화살표·굵기·색·터치 영역은 다른 화면의 뒤로 가기와 같게(B122). 글자 크기만 빵부스러기 줄에 맞춤 */}
+      <BackLink href={worldHref} className="shrink-0 text-sm">
         월드맵
-      </Link>
+      </BackLink>
       <span className="hidden text-muted-foreground sm:inline">/</span>
-      <span className="hidden truncate text-sm text-muted-foreground sm:inline">
-        {stageOrder}단계: {stageTitle}
+      {/* 태블릿은 진행 점과 퀘스트 제목에 자리를 주려고 "N단계"만 — 스테이지 이름은 바로 아래 눈썹 글자에 있음 (B122) */}
+      <span className="hidden shrink-0 truncate text-sm text-muted-foreground sm:inline lg:min-w-0 lg:shrink">
+        {stageOrder}단계<span className="max-lg:hidden">: {stageTitle}</span>
       </span>
       <span
         className={
