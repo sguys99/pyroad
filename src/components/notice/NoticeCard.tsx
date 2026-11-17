@@ -11,7 +11,7 @@ export function NoticeCard({ notice }: NoticeCardProps) {
 
   return (
     <Link href={`/notice/${notice.id}`}>
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/50">
+      <div className="rounded-2xl bg-card p-4 shadow-card transition-colors hover:bg-accent/50">
         <h3 className="mb-1 truncate text-sm font-bold text-foreground">
           {notice.title}
         </h3>

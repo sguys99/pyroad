@@ -108,7 +108,7 @@ export function CommentSection({
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="mt-4 rounded-2xl bg-card p-4 shadow-card">
       <h2 className="mb-3 text-sm font-bold text-foreground">
         댓글 {comments.length}
       </h2>
@@ -125,7 +125,7 @@ export function CommentSection({
                 className="rounded-lg border border-border/50 bg-background p-3"
               >
                 <div className="mb-1 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-2 text-caption text-muted-foreground">
                     <UserAvatar
                       {...publicLook(comment.user_profiles_public)}
                       size={32}
@@ -143,7 +143,7 @@ export function CommentSection({
                     <button
                       onClick={() => handleDelete(comment.id)}
                       disabled={deletingId === comment.id}
-                      className="text-[11px] text-destructive hover:underline disabled:opacity-50"
+                      className="focus-ring inline-flex min-h-11 items-center rounded-md px-2 text-caption text-destructive hover:underline disabled:opacity-50"
                     >
                       삭제
                     </button>
@@ -159,7 +159,7 @@ export function CommentSection({
           })}
         </div>
       ) : (
-        <p className="mb-4 text-xs text-muted-foreground">
+        <p className="mb-4 text-caption text-muted-foreground">
           아직 댓글이 없어요. 첫 댓글을 남겨 볼까요?
         </p>
       )}

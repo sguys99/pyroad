@@ -13,7 +13,7 @@ export function NoticeDetail({ notice, isAdmin }: NoticeDetailProps) {
   const isEdited = notice.updated_at !== notice.created_at;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="rounded-2xl bg-card p-4 shadow-card">
       <h1 className="mb-2 font-display text-h3">{notice.title}</h1>
       <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{date}</span>

@@ -56,7 +56,7 @@ export function InstallAppCard({
   return (
     <section
       aria-labelledby="install-app-title"
-      className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
+      className="mb-6 rounded-2xl bg-card p-4 shadow-card"
       data-testid="install-app-settings"
       data-platform={platform}
       data-action={action}

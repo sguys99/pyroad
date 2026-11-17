@@ -239,7 +239,7 @@ export function SoundSettingsSection() {
   return (
     <section
       aria-labelledby={`${groupId}-title`}
-      className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
+      className="mb-6 rounded-2xl bg-card p-4 shadow-card"
       data-testid="sound-settings"
     >
       <h2

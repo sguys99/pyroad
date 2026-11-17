@@ -18,10 +18,10 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
   const isEdited = post.updated_at !== post.created_at;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="rounded-2xl bg-card p-4 shadow-card">
       {post.is_hidden && (
         // 숨긴 글은 작성자에게만 보임 (00014 RLS). 해제·삭제는 관리자 (런북 "게시판 신고 처리")
-        <div className="mb-3 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+        <div className="mb-3 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-caption text-muted-foreground">
           <EyeOff className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
           <p>
             신고가 여러 번 들어와서 지금은 나만 볼 수 있어요. 어른이 살펴본 뒤
@@ -30,7 +30,7 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
         </div>
       )}
       <h1 className="mb-2 font-display text-h3">{post.title}</h1>
-      <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="mb-4 flex items-center gap-2 text-caption text-muted-foreground">
         <UserAvatar {...publicLook(post.user_profiles_public)} size={32} />
         <span>{authorName(post.user_profiles_public)}</span>
         <span>{date}</span>
@@ -48,7 +48,7 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
         <div className="mt-4 flex items-center gap-2">
           <Link
             href={`/board/${post.id}/edit`}
-            className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent"
+            className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-muted-foreground transition-colors hover:bg-accent"
           >
             수정
           </Link>
