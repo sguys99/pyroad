@@ -16,11 +16,10 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const BASELINE_FILE = join(ROOT, 'docs/perf/lighthouse-baseline.json');
 
 /**
- * 화면별 예산 (KB, gzip). routeJs = 서버 HTML이 처음부터 거는 `<script src>`를 빌드 파일 gzip -9로 센 합
- * (랜딩 postbuild·perf:quest와 같은 셈, §2.10 랜딩 250·퀘스트 350). total = Lighthouse 전송 바이트 합에서 Pyodide·Worker를 뺀 것.
- * total·Pyodide 값의 근거: §2.10에는 랜딩·퀘스트 라우트 JS와 Pyodide(자체 호스팅 코어 gzip 약 6.2MB)만 있다.
- * shortcut: 월드맵·프로필 JS(앱 화면이라 퀘스트와 같은 350)와 모든 화면 total은 P12-03 첫 실측(2026-11-17) + 약 15% 여유로 정함
- * (docs/perf/lighthouse.md) — 사용자 확정 전 임시값, 확정되면 §2.10 표에 옮긴다
+ * 화면별 예산 (KB, gzip) = 계획서 §2.10 표. routeJs = 서버 HTML이 처음부터 거는 `<script src>`를 빌드 파일 gzip -9로 센 합
+ * (랜딩 postbuild·perf:quest와 같은 셈). total = Lighthouse 전송 바이트 합에서 Pyodide·Worker를 뺀 것. Pyodide = 자체 호스팅 코어.
+ * 월드맵·프로필 JS(앱 화면이라 퀘스트와 같은 350)와 모든 화면 total은 P12-03 첫 실측(2026-11-17) + 약 15% 여유에서 시작해
+ * 사용자가 그대로 확정(§12-Q82, docs/perf/lighthouse.md). 바꿀 때는 §2.10 표와 함께
  */
 export const BUDGETS = {
   landing: { routeJsKB: 250, totalKB: 500 },
