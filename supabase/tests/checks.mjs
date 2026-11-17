@@ -5735,6 +5735,96 @@ function advisorsReport() {
   }
 }
 
+/** B108 (00060): 학생 세션이 직접 쓰는 열의 크기 상한 — 한 행에 수십 MB 를 넣어 DB 를 채우지 못하게 */
+async function groupSizeLimits(u) {
+  const size = { deny: ['denied'], allow: ['written'] };
+  const tooBig = (r) =>
+    errCode(r) === '23514'
+      ? { actual: 'denied', detail: `${r.status} 23514 ${errMsg(r)}` }
+      : null;
+  const save = (body) =>
+    rest('POST', '/rest/v1/user_progress?on_conflict=user_id,quest_id', {
+      as: u.alice,
+      body: { user_id: u.alice.id, quest_id: Q2, ...body },
+      prefer: 'resolution=merge-duplicates,return=minimal',
+    });
+  await check({
+    group: 'write',
+    id: 'B108-1',
+    role: 'authenticated',
+    op: '자동 저장 upsert user_progress code_submitted 50,001자 (1MB 대신 상한 바로 위)',
+    requires: 'public.user_progress',
+    ...size,
+    run: async () => {
+      const r = await save({ code_submitted: 'x'.repeat(50_001) });
+      return (
+        tooBig(r) ??
+        (await classifyWrite(
+          Promise.resolve(r),
+          `select char_length(code_submitted) > 50000 from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q2}'`,
+        ))
+      );
+    },
+  });
+  await check({
+    group: 'write',
+    id: 'B108-2',
+    role: 'authenticated',
+    op: '자동 저장 upsert user_progress step_submissions 600KB',
+    requires: 'public.user_progress',
+    ...size,
+    run: async () => {
+      const r = await save({ step_submissions: { 1: 'y'.repeat(600_000) } });
+      return (
+        tooBig(r) ??
+        (await classifyWrite(
+          Promise.resolve(r),
+          `select coalesce(octet_length(step_submissions::text) > 524288, false) from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q2}'`,
+        ))
+      );
+    },
+  });
+  await check({
+    group: 'write',
+    id: 'B108-3',
+    role: 'authenticated',
+    op: 'PATCH users preferred_provider 33자',
+    ...size,
+    run: async () => {
+      const r = await rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+        as: u.alice,
+        body: { preferred_provider: 'p'.repeat(33) },
+        prefer: 'return=minimal',
+      });
+      return (
+        tooBig(r) ??
+        (await classifyWrite(
+          Promise.resolve(r),
+          `select char_length(preferred_provider) > 32 from public.users where id = '${u.alice.id}'`,
+        ))
+      );
+    },
+  });
+  await check({
+    group: 'app',
+    id: 'B108-4',
+    role: 'authenticated',
+    op: '자동 저장: 완료 API 상한(20,000자) 한글 코드 + 프로젝트 7단계 코드는 그대로 저장됨',
+    requires: 'public.user_progress',
+    ...WRITE,
+    run: () => {
+      const code = '가'.repeat(20_000);
+      const steps = Object.fromEntries(
+        [1, 2, 3, 4, 5, 6, 7].map((n) => [n, '나'.repeat(20_000)]),
+      );
+      return classifyWrite(
+        save({ code_submitted: code, step_submissions: steps }),
+        `select char_length(code_submitted) = 20000 and step_submissions ? '7' from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q2}'`,
+      );
+    },
+  });
+}
+
 async function groupStatic() {
   await check({
     group: 'static',
@@ -9237,6 +9327,7 @@ async function main() {
   await groupAnalytics(u);
   await groupAccount(u);
   await groupApp(u);
+  await groupSizeLimits(u);
   await groupStatic();
 
   const count = (s) => results.filter((r) => r.status === s).length;

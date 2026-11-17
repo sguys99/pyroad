@@ -1432,6 +1432,24 @@ export const EXPECT = {
     note: '클라이언트는 users 를 지울 수 없음 (DELETE 권한·정책 없음, P1-01 00008). 탈퇴는 서버 API 만',
   },
 
+  // ── B108 (00060): 학생 세션이 쓰는 열의 크기 상한 ─────────────
+  'B108-1': {
+    expect: 'deny',
+    note: '00060: user_progress.code_submitted 50,000자 넘는 자동 저장 거부 (한 행에 수십 MB 로 DB 채우기)',
+  },
+  'B108-2': {
+    expect: 'deny',
+    note: '00060: user_progress.step_submissions 512KB 넘는 자동 저장 거부',
+  },
+  'B108-3': {
+    expect: 'deny',
+    note: '00060: users.preferred_provider 32자 넘는 값 거부',
+  },
+  'B108-4': {
+    expect: 'allow',
+    note: '00060: 완료 API 상한(20,000자) 한글 코드 + 프로젝트 7단계 코드 자동 저장은 그대로',
+  },
+
   // ── static: 카탈로그 점검 ─────────────────────────────────
   'ST-1': { expect: 'deny', note: 'public 의 모든 테이블에 RLS' },
   'ST-2': {
