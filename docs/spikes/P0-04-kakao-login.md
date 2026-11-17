@@ -271,16 +271,16 @@ for (const id of user.identities ?? []) {
 ## 6. 이후 Phase 영향 (계획서 교체 문안)
 
 **P0-04** (체크 + 결론)
-> - [x] **P0-04** 스파이크: **Kakao 로그인**. 결론 **대안**: 내장 provider는 `account_email`을 항상 요청해 일반 앱에서 KOE205(supabase/auth#2574, 수정 PR #2579 미머지). 비즈앱 전환 없이 `queryParams: { scope: 'profile_nickname' }`로 scope를 덮어쓰고 "Allow users without an email"을 켜서 사용. 대체안은 `custom:kakao`(OIDC) → [보고서](spikes/P0-04-kakao-login.md)
+> - [x] **P0-04** 스파이크: **Kakao 로그인**. 결론 **대안**: 내장 provider는 `account_email`을 항상 요청해 일반 앱에서 KOE205(supabase/auth#2574, 수정 PR #2579 미머지). 비즈앱 전환 없이 `queryParams: { scope: 'profile_nickname' }`로 scope를 덮어쓰고 "Allow users without an email"을 켜서 사용. 대체안은 `custom:kakao`(OIDC) → [보고서](P0-04-kakao-login.md)
 
 **P3-01**
-> - [ ] **P3-01** Kakao Developers 앱 등록 (일반 앱, 비즈앱 전환 안 함). REST API 키에 Redirect URI `https://<project-ref>.supabase.co/auth/v1/callback` 등록, 클라이언트 시크릿 ON, 카카오 로그인 ON, 동의항목은 **닉네임(선택 동의)만**. 프로필 사진·이메일은 설정하지 않음. 어드민 키는 서버 env `KAKAO_ADMIN_KEY`로만 보관(P3-16). 체크리스트: [P0-04 보고서 §6](spikes/P0-04-kakao-login.md#6-이후-phase-영향-계획서-교체-문안)
+> - [ ] **P3-01** Kakao Developers 앱 등록 (일반 앱, 비즈앱 전환 안 함). REST API 키에 Redirect URI `https://<project-ref>.supabase.co/auth/v1/callback` 등록, 클라이언트 시크릿 ON, 카카오 로그인 ON, 동의항목은 **닉네임(선택 동의)만**. 프로필 사진·이메일은 설정하지 않음. 어드민 키는 서버 env `KAKAO_ADMIN_KEY`로만 보관(P3-16). 체크리스트: [P0-04 보고서 §6](P0-04-kakao-login.md#6-이후-phase-영향-계획서-교체-문안)
 
 **P3-02**
 > - [ ] **P3-02** Supabase Kakao provider 활성화: Client ID = REST API 키, Client Secret, **"Allow users without an email" ON**(끄면 이메일 없는 사용자 가입 실패). 로그인·연결 호출은 헬퍼 한 곳에서 `queryParams: { scope: 'profile_nickname' }`를 붙여서만 하고, `options.scopes`는 쓰지 않음(덧붙기만 함). PR #2579 배포 후 덮어쓰기 제거 (identity `kakao` 그대로라 영향 없음)
 
 **P3-06**
-> - [ ] **P3-06** `handle_new_user` 재작성 ([초안](../spikes/p0-04-kakao/handle_new_user.draft.sql)): provider를 `app_metadata.provider`(google/kakao/custom:*)와 `iss`로 3종 정규화, 이메일 미참조(없는 계정 OK), `display_name`은 "모험가0000" 자리표시자·`avatar_url`은 빈 값(실명·provider 닉네임·사진을 공개 필드에 복사하지 않음), `SET search_path = ''`(B24), `last_login_provider`·`last_login_at`은 가입 트리거 + `last_sign_in_at` UPDATE 트리거로 갱신. 온보딩 닉네임 기본 제안값은 클라이언트가 identity_data를 정규화해 만들고(`normalizeProviderMetadata`, 실명 가능성이 있으면 제안하지 않음) DB에 저장하지 않음
+> - [ ] **P3-06** `handle_new_user` 재작성 ([초안](../../spikes/p0-04-kakao/handle_new_user.draft.sql)): provider를 `app_metadata.provider`(google/kakao/custom:*)와 `iss`로 3종 정규화, 이메일 미참조(없는 계정 OK), `display_name`은 "모험가0000" 자리표시자·`avatar_url`은 빈 값(실명·provider 닉네임·사진을 공개 필드에 복사하지 않음), `SET search_path = ''`(B24), `last_login_provider`·`last_login_at`은 가입 트리거 + `last_sign_in_at` UPDATE 트리거로 갱신. 온보딩 닉네임 기본 제안값은 클라이언트가 identity_data를 정규화해 만들고(`normalizeProviderMetadata`, 실명 가능성이 있으면 제안하지 않음) DB에 저장하지 않음
 
 **P3-07**
 > - [ ] **P3-07** 계정 연결 정책: Kakao는 이메일이 없어 **자동 연결이 일어나지 않음**(Google·Kakao로 각각 들어오면 계정 2개). ① "최근 로그인" 배지(P3-08)로 같은 provider 유도 ② 설정 화면에 "카카오/Google 계정 연결"(`linkIdentity`, Supabase "Manual linking" ON, Kakao는 같은 scope 덮어쓰기) ③ 이미 다른 계정에 묶인 경우 `identity_already_exists` 안내 (계정 합치기는 v1.0 이후) ④ 연결 해제는 identity 2개 이상일 때만, Kakao 해제 시 unlink API 호출(P3-16)

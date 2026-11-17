@@ -1,7 +1,7 @@
 # P5-14 월드맵 저사양·반응형 검수
 
 > - 작성일: 2026-11-09 · 브랜치 `feat/phase5` · 대상 = P5-01~13 반영 + 이 작업
-> - 관련: [계획서](../4.upgrade-plan.md) §2.10 · P5-14 · 기준선 [P0-13](../spikes/P0-13-perf-baseline.md)(v0.3) · 저사양 감지 [P0-16](../spikes/P0-16-low-spec.md) · 앞 측정 [P4-12](P4-12-landing.md)
+> - 관련: [계획서](../4.upgrade-plan.md) §2.10 · P5-14 · 기준선 [P0-13](../spikes/P0-13-perf-baseline.md)(v0.3) · 저사양 감지 [P0-16](../spikes/P0-16-low-spec-detection.md) · 앞 측정 [P4-12](P4-12-landing.md)
 > - 측정 스크립트: [`scripts/perf/world-map-bench.ts`](../../scripts/perf/world-map-bench.ts) (`npm run perf:world`), 판정 [`worldMapBudget.ts`](../../scripts/perf/worldMapBudget.ts)(단위 테스트 있음)
 > - 회귀 e2e: [`e2e/world-responsive.spec.ts`](../../e2e/world-responsive.spec.ts)
 

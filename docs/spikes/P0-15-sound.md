@@ -250,7 +250,7 @@ zzfx(1KB)는 코드로 효과음을 합성하는 도구입니다. 스타터 효�
 
 **§2.5 사운드 줄** (현재: "사운드: `use-sound`(Howler) 기반 `SoundProvider`. 효과음은 기본 ON, BGM은 기본 OFF.")
 
-> - 사운드: 의존성 없는 자체 Web Audio 래퍼(`src/lib/sound/`, gzip 약 5KB) + `SoundProvider`(`src/components/providers/`). 카테고리(효과음·BGM·음성)별 켜기·볼륨과 음소거 토글을 두고, 효과음은 기본 ON, BGM은 기본 OFF(§12-Q8). 효과음은 미리 디코드한 AudioBuffer로 첫 탭부터 바로 재생하고, BGM은 디코드 후 끊김 없이 루프하며 월드를 옮길 때 크로스페이드, 탭이 숨겨지면 멈춥니다. iOS는 `navigator.audioSession.type = 'ambient'`로 무음 스위치를 따릅니다. 포맷은 WebM(Opus) + AAC(.m4a) 폴백. 근거: [P0-15](spikes/P0-15-sound.md)
+> - 사운드: 의존성 없는 자체 Web Audio 래퍼(`src/lib/sound/`, gzip 약 5KB) + `SoundProvider`(`src/components/providers/`). 카테고리(효과음·BGM·음성)별 켜기·볼륨과 음소거 토글을 두고, 효과음은 기본 ON, BGM은 기본 OFF(§12-Q8). 효과음은 미리 디코드한 AudioBuffer로 첫 탭부터 바로 재생하고, BGM은 디코드 후 끊김 없이 루프하며 월드를 옮길 때 크로스페이드, 탭이 숨겨지면 멈춥니다. iOS는 `navigator.audioSession.type = 'ambient'`로 무음 스위치를 따릅니다. 포맷은 WebM(Opus) + AAC(.m4a) 폴백. 근거: [P0-15](P0-15-sound.md)
 
 **§2.2 `users` 행**: `settings jsonb`(사운드 등) 그대로 두고, 형태만 덧붙입니다: `settings.sound = { version, muted, master, sfx:{enabled,volume}, bgm:{enabled,volume}, voice:{enabled,volume}, updatedAt }`
 

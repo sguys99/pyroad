@@ -4,12 +4,12 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 
 ## 기술 스택
 
-- **Frontend**: Next.js 15 (App Router, Turbopack), TypeScript, Tailwind CSS v4, Base UI. 공통 게임 UI는 `src/components/ui/`(shadcn 기본 버튼 등은 대체됨, [docs/design/components.md](docs/design/components.md))
+- **Frontend**: Next.js 15.5 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS v4, Base UI. 공통 게임 UI는 `src/components/ui/`(shadcn 기본 버튼 등은 대체됨, [docs/design/components.md](docs/design/components.md))
 - **Backend (BaaS)**: Supabase (Auth, PostgreSQL, RLS, SSR). 로컬 Supabase CLI는 2.115.0 고정
 - **AI/LLM**: 멀티 프로바이더 (`src/lib/tutor/providers/`, 팩토리). Anthropic·OpenAI는 학생 본인 키(암호화 저장)로만. 서버 키는 Gemini 무료 티어만인데 **운영에는 넣지 않음**(Gemini 약관 18세 미만 금지, §12-Q80 — v1.0은 저장된 답변만, 학생 Google 키도 받지 않음)
 - **Code Execution**: Pyodide 314.0.7 자체 호스팅(`public/pyodide/`, predev·prebuild가 복사) + module Worker `public/workers/pyodide-worker.mjs`. 실행 로직은 공용 코어 `pyodide-core.mjs`(브라우저·Node 테스트 공용)
 - **Editor**: CodeMirror 6 + 키즈 테마 `src/lib/editor/` (pyRoad Mono, 14~20px 짝수만, [docs/design/editor.md](docs/design/editor.md))
-- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. 마스코트는 SVG 리그 `src/components/characters/rig/`(기본 스타일 B, [docs/design/rig.md](docs/design/rig.md)). Lottie는 지금 재생하지 않음(B32, `lottie-react`는 P6-16에서 지움 — `lottie-web`은 `assets:check` 렌더 검사용 devDependency). 일회성 이펙트만 Phase 6에 `lottie_light`로, `public/animations/` + `assets:check` 렌더 검사 통과 필수
+- **Animation**: Framer Motion, CSS keyframes, canvas-confetti. 마스코트는 SVG 리그 `src/components/characters/rig/`(기본 스타일 B, [docs/design/rig.md](docs/design/rig.md)). Lottie는 재생하지 않음(B32). 일회성 이펙트를 넣을 때만 `lottie_light` 지연 로드 + `public/animations/` + `assets:check` 렌더 검사 통과 필수(`lottie-web`은 그 검사용 devDependency)
 - **Sound**: 자체 Web Audio 래퍼 `src/lib/sound/` + `SoundProvider`(`useSfx`·`useBgm`). 파일은 `public/sounds/`(`scripts/build-sounds.sh`, 버전 파일 이름·immutable 캐시, [docs/design/sound.md](docs/design/sound.md))
 - **Fonts**: 자체 호스팅 `src/fonts/` — 제목 Jua · 본문 pyRoad Sans(Pretendard) · 코드 pyRoad Mono(D2Coding, 퀘스트만). 랜딩은 텍스트 서브셋, 앱은 unicode-range 조각. `fonts:build`·`fonts:check` ([docs/design/fonts.md](docs/design/fonts.md))
 - **Validation**: zod / **Markdown**: react-markdown, remark-gfm / **Icons**: Lucide React / **SVG**: SVGO / **에셋**: [docs/design/assets.md](docs/design/assets.md) (래스터는 정지 그림만, sharp·버전 파일 이름)
@@ -24,10 +24,12 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 ├── content/worlds/           # 퀘스트 콘텐츠 원본 YAML (content/README.md)
 ├── src/
 │   ├── app/
-│   │   ├── (protected)/      # 인증 필요 페이지 (world, quest, profile, settings, board)
-│   │   ├── api/              # API Routes (tutor, quest, board, notice, account, settings, analytics)
-│   │   ├── auth/             # Auth 콜백
-│   │   ├── admin/            # 운영 지표 /admin (관리자만, 나머지 404, P12-09 — docs/monitoring.md)
+│   │   ├── (protected)/      # 로그인 필요 (world, worlds, daily, quest, profile, shop, gallery, settings, board)
+│   │   ├── api/              # API Routes (quest, tutor, shop, missions, attendance, achievements, share-cards, creations, gallery, guardian-report, consent, onboarding, board, notice, account, settings, analytics, cron …)
+│   │   ├── auth/ onboarding/ # Auth 콜백, 첫 로그인 온보딩·보호자 동의
+│   │   ├── (legal)/          # 약관·처리방침·오픈소스 고지 (비로그인)
+│   │   ├── share/ guardian/  # 자랑 카드 공개 페이지, 보호자 주간 리포트 (토큰 링크, 비로그인)
+│   │   ├── admin/            # 운영 지표 /admin (관리자만, 나머지 404 — docs/monitoring.md)
 │   │   ├── dev/              # 테스트 전용 /dev/design(컴포넌트 카탈로그)·/dev/editor, 운영 404
 │   │   └── notice/           # 공지 (비로그인 열람)
 │   ├── components/           # quest/(렌더러·celebrations), characters/(rig/), ui/(게임 UI 공통), providers/, sound/, board, landing, world …
@@ -39,11 +41,11 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 │       ├── pyodide/ tutor/ supabase/ security/ analytics/ observability/ monitoring/
 │       └── moderation/ time/ crypto/ env/ api/ auth/ board/ notice/ world/ types/
 ├── public/                   # sounds/, textures/, workers/, pyodide/(복사본, git 제외). images/·animations/는 에셋 파이프라인 생성물
-├── scripts/                  # content, pyodide, fonts, security, api-keys, assets(에셋 파이프라인), build-sounds.sh, release(운영 SQL Editor 붙여넣기 묶음)
+├── scripts/                  # content, pyodide, fonts, design(토큰 검사), assets(에셋 파이프라인), licenses, share-card, perf, balance, visual, security, api-keys, build-sounds.sh, release(운영 SQL Editor 붙여넣기 묶음)
 ├── supabase/                 # migrations/, rollback/, tests/(RLS 회귀), seed.sql(생성물)
 ├── design/                   # Phase 2 디자인 시안 프로토타입 (앱 코드 아님, 자체 package.json, design/README.md)
 ├── e2e/                      # Playwright (e2e/README.md)
-├── docs/                     # 계획서, ci.md, analytics.md, monitoring.md(운영 지표), design/(디자인 시스템), assets-license.md, release/(런북), spikes/
+├── docs/                     # PRD(2.PRD-v2.md)·계획서, ci.md, analytics.md, monitoring.md, balance.md, design/, curriculum/, perf/, security/, legal/, release/(런북·공지), spikes/
 ├── spikes/                   # Phase 0 스파이크 코드
 └── img/                      # 스크린샷 에셋
 ```
@@ -98,7 +100,11 @@ npm run test:content   # 모든 정답 코드 실행 검증
 npm run test:rls       # 켜진 로컬 스택 db reset 후 RLS·권한 회귀
 npm run test:rls:ci    # 격리 임시 스택, 3개 시나리오 (3~4분)
 npm run test:e2e       # Playwright (PORT 3100, 로그인 스펙은 db:start 필요)
+npm run test:visual    # 시각 회귀 (Docker, 기준 이미지 e2e/visual/__screenshots__/)
+npm run perf:lighthouse  # 5화면 모바일 Lighthouse·바이트 예산 (docs/perf/lighthouse.md)
 ```
+
+`perf:world`·`perf:quest`·`perf:celebration`(벤치), `balance:levels`·`balance:economy`(docs/balance.md), `licenses:build`·`licenses:check`(/licenses 생성물, CI)도 있다.
 
 ### 디자인·에셋 ([docs/design/](docs/design/))
 
@@ -135,7 +141,7 @@ npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 ### Supabase·API
 
 - 클라이언트는 `src/lib/supabase/`: `server.ts`(서버), `admin.ts`(service_role, 서버 전용), 클라이언트 컴포넌트는 `client.ts` 정적 import 대신 `loadBrowserClient()`(B33)
-- 인증 필요 페이지는 `(protected)` + `src/middleware.ts`. API Routes는 `auth.getUser()`로 확인한 id만 씀
+- 인증 필요 페이지는 `(protected)` + `src/middleware.ts`(새 경로는 `PROTECTED_PATHS`에도, B120). API Routes는 `auth.getUser()`로 확인한 id만 씀
 - 응답에 DB 오류 메시지 금지: `reportServerError`(`src/lib/api/serverError.ts`)로 로그·Sentry, 응답은 일반 문구
 - 관리자 판별은 `isAdminUser`(`src/lib/admin.ts`, `app_metadata.role`, B37). 이메일·`user_metadata` 비교 금지
 - **정답·힌트·`solution_code`는 `quest_answer_keys`(service_role 전용)에만**, 읽기는 `src/lib/quest/answerKeys.ts`(서버 전용). 클라이언트로 내려보내지 않음
@@ -176,9 +182,10 @@ npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 ### 브랜치
 
 - **Phase당 브랜치 1개**: `feat/phaseN` (예: `feat/phase1`). 항상 최신 `main`에서 분기한다.
-- **긴급 수정**: `main`에서 `hotfix/<주제>` (예: `hotfix/notice-auth`). 기존 `bugfix-<주제>`는 과거 이력이며, `.claude/commands/git/branch.md`의 `hotfix/` 프리픽스 및 `feat/phaseN`의 슬래시 형식과 맞추기 위해 `hotfix/`로 통일한다. 병합 후 `main`을 각 Phase 브랜치에 반영한다.
+- **긴급 수정**: `main`에서 `hotfix/<주제>` (예: `hotfix/notice-auth`, 옛 `bugfix-<주제>` 형식은 쓰지 않음). 병합 후 `main`을 진행 중인 Phase 브랜치에 반영한다.
 - 공유(푸시된) 브랜치에 `--force` 금지. rebase는 아직 푸시하지 않은 커밋에만, 이미 푸시했다면 `git merge main`을 쓴다. 불가피하면 `--force-with-lease`로 본인 브랜치에서만.
-- Phase 2와 3은 병행 가능하므로 서로의 브랜치를 base로 삼지 않고 각자 `main`에서 분기한다. 한쪽이 `main`에 병합되면 다른 쪽에서 즉시 `git merge main`으로 반영한다.
+- 병행하는 Phase(예: 2·3)는 서로의 브랜치를 base로 삼지 않고 각자 `main`에서 분기한다. 한쪽이 `main`에 병합되면 다른 쪽에서 즉시 `git merge main`으로 반영한다.
+- **v1.0 이후**: 긴급 수정은 위 `hotfix/` 규칙 그대로. Phase가 끝난 뒤 기능 작업의 브랜치 이름·패치 태그(v1.0.x) 규칙은 아직 정하지 않았다(§2.7에 없음) — 임의로 만들지 말고 사용자에게 묻는다.
 
 ### 커밋
 
@@ -191,7 +198,7 @@ npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 
 - Phase 종료 시 `feat/phaseN` → `main` PR 1개. 제목: `🎉 feat: Phase N <Phase명> 완료`. 본문은 `.github/pull_request_template.md`를 채운다 (완료한 P/B-ID 목록, DB 스키마·환경 변수 변경, UI 변경 시 360/768/1280 스크린샷).
 - **병합 방식은 Merge commit** (squash 금지). 기존 이력이 PR 병합 커밋 방식이고, 작업별 커밋을 추적·revert하기 위해서다.
-- 마일스톤 태그는 해당 Phase가 `main`에 병합된 뒤 `main`에서 부여: v0.4(Phase 1+3 완료 후, P1-24/P3-20), v0.5(2·4·5·6), v0.6(7·8), v0.7(9), v0.8(10), v0.9(11), v1.0(12). 예: `git tag -a v0.4 -m "..." && git push origin v0.4`.
+- 마일스톤 태그(v0.4~v1.0, Phase 대응은 계획서 §10 표)는 해당 Phase가 `main`에 병합된 뒤 `main`에서 부여. 예: `git tag -a v0.4 -m "..." && git push origin v0.4`.
 - CI가 PR·푸시마다 돈다. `main`은 필수 체크(`lint-typecheck`·`unit`·`content`·`pyodide`·`rls`·`build`·`e2e-smoke` — 목록은 [docs/ci.md](docs/ci.md))를 통과해야 병합된다. PR 전 로컬에서 `npm run lint`, `npx prettier --check .`, `npx tsc --noEmit`, `npx vitest run`(+ 해당되면 `test:content`·`test:rls:ci`·`test:e2e`).
 
 ### 스파이크
