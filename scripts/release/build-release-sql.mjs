@@ -240,6 +240,21 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v1.0-phase12',
+    dir: 'v1.0-phase12',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v1.0 (Phase 12 병합) 운영 적용: ① 추가형 마이그레이션 (00059 Google 이름·사진 저장 안 함)',
+          '-- feat/phase12 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. 이미 저장된 값 정리는 docs/legal/v1.0-privacy-audit.md "운영에서 할 일"',
+        ],
+        parts: ['00059'],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];

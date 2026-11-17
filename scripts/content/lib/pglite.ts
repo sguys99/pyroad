@@ -24,6 +24,13 @@ CREATE TABLE IF NOT EXISTS auth.users (
   raw_app_meta_data jsonb DEFAULT '{}'::jsonb,
   last_sign_in_at timestamptz
 );
+-- 00059(B115) 트리거 대상
+CREATE TABLE IF NOT EXISTS auth.identities (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid,
+  provider text,
+  identity_data jsonb
+);
 CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $f$ SELECT NULL::uuid $f$;
 CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $f$ SELECT 'service_role'::text $f$;
 -- pgcrypto(Supabase 는 extensions 스키마에 기본 설치) 대역: 00043·00050 자기 검증이 부름. 콘텐츠 도구라 난수 품질은 상관없음

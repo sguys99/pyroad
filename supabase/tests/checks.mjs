@@ -7441,6 +7441,56 @@ async function groupAuthTriggers(u) {
       return { actual: v || 'none', detail: v || '(없음)' };
     },
   });
+  // B115 (P12-06): Google 이름·사진은 Auth 에 남기지 않음. Kakao·Naver 메타데이터와 이메일은 그대로
+  await check({
+    group: 'auth',
+    id: 'B115-1',
+    role: 'postgres',
+    op: 'Google 가입·재로그인(병합)·identity 저장 → raw_user_meta_data·identity_data 에 name·full_name·given_name·family_name·picture·avatar_url 없음, iss·sub·email 은 남음. Kakao 메타데이터는 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        INSERT INTO auth.users (id, email, raw_app_meta_data, raw_user_meta_data) VALUES
+          ('d9100000-0000-0000-0000-000000000001', 'b115-kid@gmail.example', '{"provider": "google", "providers": ["google", "kakao"]}',
+           '{"iss": "https://accounts.google.com", "sub": "g-b115", "name": "김실명", "full_name": "김실명", "given_name": "실명",
+             "family_name": "김", "picture": "https://lh3.googleusercontent.com/a/b115", "avatar_url": "https://lh3.googleusercontent.com/a/b115",
+             "email": "b115-kid@gmail.example", "email_verified": true}');
+        INSERT INTO auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at) VALUES
+          ('g-b115', 'd9100000-0000-0000-0000-000000000001',
+           '{"iss": "https://accounts.google.com", "sub": "g-b115", "name": "김실명", "picture": "https://lh3.googleusercontent.com/a/b115",
+             "email": "b115-kid@gmail.example"}', 'google', now()),
+          ('4012345699', 'd9100000-0000-0000-0000-000000000001',
+           '{"iss": "https://kapi.kakao.com", "sub": "4012345699", "name": "카카오닉"}', 'kakao', now());
+        DO $$
+        DECLARE
+          v_uid  UUID := 'd9100000-0000-0000-0000-000000000001';
+          v_keys TEXT[] := ARRAY['name', 'full_name', 'given_name', 'family_name', 'picture', 'avatar_url'];
+          v      JSONB;
+        BEGIN
+          SELECT raw_user_meta_data INTO v FROM auth.users WHERE id = v_uid;
+          IF v ?| v_keys OR v ->> 'email' IS DISTINCT FROM 'b115-kid@gmail.example' OR v ->> 'sub' IS DISTINCT FROM 'g-b115' THEN
+            RAISE EXCEPTION '가입: %', v;
+          END IF;
+          -- Kakao 로그인(병합): Kakao 값은 그대로
+          UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://kapi.kakao.com", "name": "카카오닉"}' WHERE id = v_uid;
+          IF (SELECT raw_user_meta_data ->> 'name' FROM auth.users WHERE id = v_uid) IS DISTINCT FROM '카카오닉' THEN
+            RAISE EXCEPTION 'Kakao 로그인 뒤 Kakao 이름이 지워짐';
+          END IF;
+          -- 다시 Google 로그인(병합): 지움
+          UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://accounts.google.com", "name": "김실명", "picture": "x"}' WHERE id = v_uid;
+          SELECT raw_user_meta_data INTO v FROM auth.users WHERE id = v_uid;
+          IF v ?| v_keys THEN RAISE EXCEPTION 'Google 재로그인: %', v; END IF;
+          SELECT identity_data INTO v FROM auth.identities WHERE user_id = v_uid AND provider = 'google';
+          IF v ?| v_keys OR v ->> 'email' IS DISTINCT FROM 'b115-kid@gmail.example' THEN RAISE EXCEPTION 'Google identity: %', v; END IF;
+          UPDATE auth.identities SET identity_data = identity_data || '{"full_name": "김실명"}' WHERE user_id = v_uid AND provider = 'google';
+          IF (SELECT identity_data ? 'full_name' FROM auth.identities WHERE user_id = v_uid AND provider = 'google') THEN
+            RAISE EXCEPTION 'Google identity 갱신에 이름이 남음';
+          END IF;
+          IF (SELECT identity_data ->> 'name' FROM auth.identities WHERE user_id = v_uid AND provider = 'kakao') IS DISTINCT FROM '카카오닉' THEN
+            RAISE EXCEPTION 'Kakao identity 이름이 지워짐';
+          END IF;
+        END $$;`),
+  });
 }
 
 // ── board: 게시판 안전장치 (P1-18, B19, 00014·00015) ──────────

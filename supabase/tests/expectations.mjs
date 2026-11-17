@@ -1124,6 +1124,12 @@ export const EXPECT = {
     requires: 'public.handle_user_signed_in()',
     activateIn: 'B24',
   },
+  'B115-1': {
+    expect: 'allow',
+    requires: 'public.strip_google_profile()',
+    activateIn: 'B115',
+    note: 'P12-06 수집 최소화: GoTrue 가 Google scope email profile 로 받는 이름·사진을 Auth 에 저장하지 않음 (00059). 이메일은 남김',
+  },
 
   // ── app: 앱이 실제로 보내는 쿼리 (정상 경로) ────────────────
   'APP-1': { expect: 'allow' },
