@@ -11,6 +11,7 @@ export default defineConfig({
     exclude: [
       // Playwright 스펙은 제외. e2e 도우미의 순수 함수 단위 테스트(e2e/support/__tests__/*.test.ts)는 여기서 돈다 (P3-17)
       'e2e/**/*.spec.ts',
+      'scripts/readme-shots/**', // README 스크린샷 (Playwright, npm run shots:readme)
       'node_modules/**',
       'spikes/**',
       '.claude/worktrees/**',

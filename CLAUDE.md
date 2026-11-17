@@ -101,6 +101,7 @@ npm run test:rls       # 켜진 로컬 스택 db reset 후 RLS·권한 회귀
 npm run test:rls:ci    # 격리 임시 스택, 3개 시나리오 (3~4분)
 npm run test:e2e       # Playwright (PORT 3100, 로그인 스펙은 db:start 필요)
 npm run test:visual    # 시각 회귀 (Docker, 기준 이미지 e2e/visual/__screenshots__/)
+npm run shots:readme   # README 스크린샷 img/readme-*.webp (db:start 필요, 데모 학생은 끝나면 지움)
 npm run perf:lighthouse  # 5화면 모바일 Lighthouse·바이트 예산 (docs/perf/lighthouse.md)
 ```
 
@@ -185,7 +186,7 @@ npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 - **긴급 수정**: `main`에서 `hotfix/<주제>` (예: `hotfix/notice-auth`, 옛 `bugfix-<주제>` 형식은 쓰지 않음). 병합 후 `main`을 진행 중인 Phase 브랜치에 반영한다.
 - 공유(푸시된) 브랜치에 `--force` 금지. rebase는 아직 푸시하지 않은 커밋에만, 이미 푸시했다면 `git merge main`을 쓴다. 불가피하면 `--force-with-lease`로 본인 브랜치에서만.
 - 병행하는 Phase(예: 2·3)는 서로의 브랜치를 base로 삼지 않고 각자 `main`에서 분기한다. 한쪽이 `main`에 병합되면 다른 쪽에서 즉시 `git merge main`으로 반영한다.
-- **v1.0 이후**: 긴급 수정은 위 `hotfix/` 규칙 그대로. Phase가 끝난 뒤 기능 작업의 브랜치 이름·패치 태그(v1.0.x) 규칙은 아직 정하지 않았다(§2.7에 없음) — 임의로 만들지 말고 사용자에게 묻는다.
+- **v1.0 이후** (§12-Q84): 기능은 `feat/<주제>`(예: `feat/guardian-email`), 긴급 수정은 `hotfix/<주제>`, 문서만은 `docs/<주제>` — 모두 `main`에서 분기. 항목당 커밋 1개·Merge commit·계획서 기록은 그대로. 운영 앱이나 DB를 바꾸는 핫픽스를 병합하면 `v1.0.N` 주석 태그(같은 날 여러 개면 하나, 문서만 바뀌면 태그 없음)와 README 배지를 함께 올린다.
 
 ### 커밋
 
@@ -198,7 +199,7 @@ npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 
 - Phase 종료 시 `feat/phaseN` → `main` PR 1개. 제목: `🎉 feat: Phase N <Phase명> 완료`. 본문은 `.github/pull_request_template.md`를 채운다 (완료한 P/B-ID 목록, DB 스키마·환경 변수 변경, UI 변경 시 360/768/1280 스크린샷).
 - **병합 방식은 Merge commit** (squash 금지). 기존 이력이 PR 병합 커밋 방식이고, 작업별 커밋을 추적·revert하기 위해서다.
-- 마일스톤 태그(v0.4~v1.0, Phase 대응은 계획서 §10 표)는 해당 Phase가 `main`에 병합된 뒤 `main`에서 부여. 예: `git tag -a v0.4 -m "..." && git push origin v0.4`.
+- 마일스톤 태그(v0.4~v1.0, Phase 대응은 계획서 §10 표. v1.0만 태그 이름 `v1.0.0` — 런북 2-10·README 배지)는 해당 Phase가 `main`에 병합된 뒤 `main`에서 부여. 예: `git tag -a v0.4 -m "..." && git push origin v0.4`.
 - CI가 PR·푸시마다 돈다. `main`은 필수 체크(`lint-typecheck`·`unit`·`content`·`pyodide`·`rls`·`build`·`e2e-smoke` — 목록은 [docs/ci.md](docs/ci.md))를 통과해야 병합된다. PR 전 로컬에서 `npm run lint`, `npx prettier --check .`, `npx tsc --noEmit`, `npx vitest run`(+ 해당되면 `test:content`·`test:rls:ci`·`test:e2e`).
 
 ### 스파이크
