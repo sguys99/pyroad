@@ -58,7 +58,7 @@ export default async function BoardPostPage({
   const isOwner = post.user_id === user.id;
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
       <BackLink href="/board" className="mb-3">
         게시판
       </BackLink>

@@ -27,7 +27,7 @@ export default async function BoardEditPage({
   if (post.user_id !== user.id) redirect('/board');
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
       <BackLink href={`/board/${postId}`}>내 글</BackLink>
 
       <h1 className="mt-2 mb-5 font-display text-h2">글 수정</h1>

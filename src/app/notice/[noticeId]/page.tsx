@@ -25,7 +25,7 @@ export default async function NoticeDetailPage({
   const isAdmin = isAdminUser(user);
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
       <BackLink href="/notice" className="mb-3">
         공지사항
       </BackLink>

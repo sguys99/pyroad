@@ -24,7 +24,7 @@ export default async function NoticeEditPage({
   if (!notice) notFound();
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
       <BackLink href={`/notice/${noticeId}`}>공지</BackLink>
 
       <h1 className="mt-2 mb-5 font-display text-h2">공지 수정</h1>

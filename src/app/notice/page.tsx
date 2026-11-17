@@ -35,7 +35,7 @@ export default async function NoticePage({
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
       {/* 위 줄·제목은 상점·프로필과 같은 짜임 (B100) */}
       <BackLink href={user ? '/world' : '/'}>
         {user ? '월드맵' : '처음 화면'}
