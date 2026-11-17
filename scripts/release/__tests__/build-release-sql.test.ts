@@ -135,6 +135,15 @@ describe('운영 SQL Editor 붙여넣기 묶음 (B39)', () => {
     expect(phase11.indexOf(seedMark)).toBeGreaterThan(
       phase11.indexOf('-- ===== 00058 ====='),
     );
+    // B132: v1.0 묶음은 잠금을 10초 안에 못 얻으면 전체를 되돌림 (트랜잭션 안에서만 유효한 SET LOCAL)
+    const phase12 = readFileSync(
+      join(out, 'v1.0-phase12', '1_먼저실행.sql'),
+      'utf8',
+    );
+    expect(phase12).toMatch(
+      /\nBEGIN;\nSET LOCAL lock_timeout = '10s';\n\n-- ===== 00059 =====\n/,
+    );
+    expect(phase11).not.toContain('lock_timeout');
   });
 
   it('--release 로 고른 릴리즈만, --crlf 면 모든 줄바꿈이 CRLF', () => {
