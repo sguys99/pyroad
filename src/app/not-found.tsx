@@ -18,11 +18,9 @@ export default function NotFound() {
       <p className="text-base text-muted-foreground">
         주소가 바뀌었거나 없는 곳이에요.
       </p>
-      <Link
-        href="/"
-        className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 font-bold text-primary-foreground"
-      >
-        처음으로 가기
+      {/* 다른 화면과 같은 게임 버튼 모양 (B126). 서버 컴포넌트라 `Button`(클라이언트·소리) 대신 같은 클래스만 — 눌림 연출 없음 */}
+      <Link href="/" className="g-btn" data-variant="primary">
+        <span className="g-btn-face font-display">처음으로 가기</span>
       </Link>
     </main>
   );
