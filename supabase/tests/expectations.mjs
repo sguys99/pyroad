@@ -1353,6 +1353,18 @@ export const EXPECT = {
     activateIn: 'P3-15',
     note: '파기 대상은 기한 지난 미동의 만 14세 미만만',
   },
+  'GC-5': {
+    expect: 'deny',
+    requires: 'public.list_expired_incomplete()',
+    activateIn: 'B118',
+    note: '① 00061: 미완료 계정 파기 대상 목록은 service_role 전용 (/api/cron/purge-unconsented)',
+  },
+  'GC-6': {
+    expect: 'allow',
+    requires: 'public.list_expired_incomplete()',
+    activateIn: 'B118',
+    note: '① 00061: 온보딩·나이 확인 미완료 + 활동 없음 + max(가입일, 적용 시각) + 30일 — 배포 날 오래된 계정은 아님, 학습 기록·게시글이 있으면 아님',
+  },
   'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
   'RL-2': {
     expect: 'deny',

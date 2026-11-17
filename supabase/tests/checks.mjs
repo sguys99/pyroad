@@ -8356,6 +8356,74 @@ async function groupConsent(u) {
       );
     },
   });
+  // ── B118 (00061): 온보딩·나이 확인 미완료 계정 파기 대상 ─────────
+  await check({
+    group: 'consent',
+    id: 'GC-5',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/list_expired_incomplete (미완료 계정 파기 대상 훑기)',
+    requires: 'public.list_expired_incomplete()',
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        const r = await rest('POST', '/rest/v1/rpc/list_expired_incomplete', { as, body: { p_limit: 10 } });
+        if (r.status < 300) return { actual: 'allowed', detail: `${r.status}` };
+        if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+          return { actual: 'error', detail: `${r.status} ${errCode(r)} ${errMsg(r)}` };
+      }
+      return { actual: 'denied', detail: '모두 거부' };
+    },
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-6',
+    role: 'service_role',
+    op: 'list_expired_incomplete: 온보딩·나이 확인 미완료 + 활동 없음 + max(가입일, 적용 시각) + 30일 (오래된 계정도 적용 직후엔 아님, 학습 기록·게시글이 있으면 영영 아님)',
+    requires: 'public.list_expired_incomplete()',
+    ...OK,
+    run: async () => {
+      const ids = {};
+      // [이름, 가입 며칠 전(음수 = 미래), onboarded, age_band, 활동]
+      for (const [k, ago, onboarded, band, activity] of [
+        ['old', 100, false, null, null],
+        ['fresh', 0, false, null, null],
+        ['later', -10, false, null, null],
+        ['noage', 100, true, null, null],
+        ['done', 100, true, '14plus', null],
+        ['learner', 100, false, null, 'progress'],
+        ['poster', 100, false, null, 'post'],
+      ]) {
+        const x = await createUser(`gc6${k}`, '미완료점검');
+        ids[k] = x.id;
+        one(`update public.users set created_at = now() - interval '${ago} days',
+               onboarded_at = ${onboarded ? 'now()' : 'null'}, age_band = ${band ? `'${band}'` : 'null'}
+             where id = '${x.id}'`);
+        if (activity === 'progress')
+          one(`insert into public.user_progress (user_id, quest_id, status) values ('${x.id}', '${Q1}', 'in_progress')`);
+        if (activity === 'post')
+          one(`insert into public.board_posts (user_id, title, content) values ('${x.id}', 'gc6', 'x')`);
+      }
+      const listed = async (now, userId) => {
+        const r = await rpc('list_expired_incomplete', { p_limit: 500, p_now: now, ...(userId && { p_user_id: userId }) });
+        return Array.isArray(r.json) ? r.json : [];
+      };
+      const today = await listed(new Date().toISOString());
+      const later = await listed(new Date(Date.now() + 31 * 86400_000).toISOString());
+      const pick = (list) => Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, list.includes(id)]));
+      const one1 = await listed(new Date(Date.now() + 31 * 86400_000).toISOString(), ids.learner);
+      const one2 = await listed(new Date(Date.now() + 31 * 86400_000).toISOString(), ids.old);
+      const none = { old: false, fresh: false, later: false, noage: false, done: false, learner: false, poster: false };
+      return (
+        compare('GC-6 적용 직후', none, pick(today)) ??
+        compare('GC-6 31일 뒤', { ...none, old: true, fresh: true, noage: true }, pick(later)) ??
+        compare('GC-6 한 명 다시 확인', { learner: 0, old: 1 }, { learner: one1.length, old: one2.length }) ?? {
+          actual: 'ok',
+          detail: `31일 뒤 대상 ${later.length}`,
+        }
+      );
+    },
+  });
 }
 
 // ── seen-unlocks: 잠금 해제 연출 본 기록 (P5-05, ① 00025) ──────────

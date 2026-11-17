@@ -1840,6 +1840,10 @@ export type Database = {
         }[];
       };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      list_expired_incomplete: {
+        Args: { p_limit: number; p_now?: string; p_user_id?: string };
+        Returns: string[];
+      };
       list_expired_unconsented: {
         Args: { p_limit: number };
         Returns: string[];

@@ -25,6 +25,7 @@ export const TERMS_VERSION = '2026-11-16';
 // 배포가 2026-11-17 이 아니면 PRIVACY_VERSION·PRIVACY_EFFECTIVE_DATE 두 값을 실제 배포일로 (docs/legal/v1.0-privacy-audit.md "운영에서 할 일").
 // 다시 동의는 받지 않음: 새로 모으는 항목 없음(Google 이름·사진은 오히려 저장하지 않게 됨), 나머지는 실제 동작에 맞춘 고지.
 // 같은 개정에 합침(§12-Q80, B117): 기본 AI 튜터가 Google(Gemini)로 보내지 않음 — 수탁·국외 이전이 줄기만 하는 변경이라 재동의 없음
+// (§12-Q81, B118): 온보딩·나이 확인을 마치지 않은 계정 30일 파기 — 새 수집·새 목적이 아니라 보유 기간을 정한 것이라 재동의 없음
 /** 개인정보처리방침 버전 */
 export const PRIVACY_VERSION = '2026-11-17';
 
