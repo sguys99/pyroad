@@ -444,6 +444,12 @@
   padding-top: 0;
   background: none;
 }
+/* 아직 고르지 않아 누를 수 없는 버튼("답을 골라요")은 떠 있지 않고 제자리 — 폰 첫 화면에서 코드 줄을 가리지 않게.
+   답을 고르면 "정답 확인"이 되며 쪽 아래에 붙는다. 여백은 그대로라 붙을 때 자리가 밀리지 않음 (B123) */
+.qz-actions:has(> .g-btn:disabled:not([data-loading])) {
+  position: static;
+  background: none;
+}
 .qz-actions > :is(button, a) {
   width: 100%;
 }
