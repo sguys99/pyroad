@@ -37,8 +37,8 @@ const req = (body: unknown) =>
     method: 'POST',
     body: JSON.stringify(body),
   });
-const image = (id: string) =>
-  GET(new Request(`http://x/api/share-cards/${id}/image?v=9&nickname=해커`), {
+const image = (id: string, query = '?v=1') =>
+  GET(new Request(`http://x/api/share-cards/${id}/image${query}`), {
     params: Promise.resolve({ id }),
   });
 
@@ -158,6 +158,25 @@ describe('GET /api/share-cards/{id}/image (P9-07)', () => {
     expect((await image(ID)).status).toBe(404);
   });
 
+  it('?v= 가 지금 version 이 아니거나 다른 쿼리가 붙으면 그리지 않고 제 주소로 308 (CDN 우회 렌더 막기, B106)', async () => {
+    publicRow({
+      id: ID,
+      kind: 'levelup',
+      version: 3,
+      expires_at: new Date(Date.now() + 86_400_000).toISOString(),
+      snapshot: { nickname: '하늘별', level: 3 },
+    });
+    for (const q of ['', '?v=9', '?v=4', '?v=3&nickname=해커', '?x=1&v=3']) {
+      const res = await image(ID, q);
+      expect(res.status).toBe(308);
+      expect(res.headers.get('location')).toBe(
+        `/api/share-cards/${ID}/image?v=3`,
+      );
+      expect(res.headers.get('cache-control')).toBe('no-store');
+      expect(res.headers.get('content-type')).not.toBe('image/png');
+    }
+  });
+
   it('PNG 1200×630 + 캐시 헤더(만료까지만) + 파일 이름', async () => {
     publicRow({
       id: ID,
@@ -166,7 +185,7 @@ describe('GET /api/share-cards/{id}/image (P9-07)', () => {
       expires_at: new Date(Date.now() + 86_400_000).toISOString(),
       snapshot: { nickname: '하늘별', level: 3, avatar: { hat: 'hat_crown' } },
     });
-    const res = await image(ID);
+    const res = await image(ID, '?v=3');
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('image/png');
     expect(res.headers.get('cache-control')).toBe('public, max-age=3600');
