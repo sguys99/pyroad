@@ -82,6 +82,12 @@ test('퀘스트를 깨서 다음 스테이지가 열리면 지도에서 연출 �
   await expect(page.locator('.world-node[data-unlock="to"]')).toHaveCount(1);
   await expect(page.getByText(opened)).toBeVisible({ timeout: 15_000 });
   expect((await res).status()).toBe(200);
+  // 넓은 지도는 연출 전 스크롤 뒤에도 위 끝이 위에 붙는 HUD 밑 (B124, 들어올 때 자리 잡기 B97과 같은 규칙)
+  const [mapTop, hudBottom] = await page.evaluate(() => [
+    document.querySelector('.world-map')!.getBoundingClientRect().top,
+    document.querySelector('.wh')!.getBoundingClientRect().bottom,
+  ]);
+  expect(mapTop).toBeGreaterThanOrEqual(hudBottom);
   await expect(page.locator(`[data-stage-id="${s2.id}"]`)).toHaveAttribute(
     'data-state',
     'open',
