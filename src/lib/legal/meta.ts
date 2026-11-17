@@ -21,14 +21,17 @@ export const LEGAL_OPERATOR = {
 // 배포가 다른 날이 되면 아래 네 값을 실제 배포일로 같이 바꾼다 (docs/release/v0.9-runbook.md "일정", docs/release/v0.9-notice.md)
 /** 이용약관 버전 */
 export const TERMS_VERSION = '2026-11-16';
+// v1.0 개정(P12-06 자체 점검, 처리방침만 — 약관은 그대로 2026-11-16): 시행일 = v1.0 배포일(§12-Q77 방식).
+// 배포가 2026-11-17 이 아니면 PRIVACY_VERSION·PRIVACY_EFFECTIVE_DATE 두 값을 실제 배포일로 (docs/legal/v1.0-privacy-audit.md "운영에서 할 일").
+// 다시 동의는 받지 않음: 새로 모으는 항목 없음(Google 이름·사진은 오히려 저장하지 않게 됨), 나머지는 실제 동작에 맞춘 고지
 /** 개인정보처리방침 버전 */
-export const PRIVACY_VERSION = '2026-11-16';
+export const PRIVACY_VERSION = '2026-11-17';
 
 // v0.7 개정(P9-07~11·P9-15·P9-17): 공지일 + 7일 = 시행일 = 배포일. 공지를 올린 날(2026-11-14)이 바뀌면
 // 아래 네 값을 (공지일 + 7일 이후의) 실제 배포일로 같이 바꾼다 — v0.7 런북 "처리방침 개정 공지".
 // 버전만 바뀌고 다시 동의는 받지 않는다(기존 동의 기록은 예전 버전 그대로, 새 가입·보호자 동의부터 이 버전으로 기록)
 export const TERMS_EFFECTIVE_DATE = '2026-11-16';
-export const PRIVACY_EFFECTIVE_DATE = '2026-11-16';
+export const PRIVACY_EFFECTIVE_DATE = '2026-11-17';
 
 /** 법적 고지 페이지 (비로그인 열람, 정적 렌더 — `src/lib/security/csp.ts`의 STATIC_PAGE_PATHS) */
 export const LEGAL_LINKS = [
