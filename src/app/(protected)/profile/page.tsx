@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { BackLink } from '@/components/ui/back-link';
 import { redirect } from 'next/navigation';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Settings } from 'lucide-react';
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -247,11 +247,10 @@ export default async function ProfilePage() {
           />
         </div>
 
+        {/* 아래 보조 줄 (B144): 설정 · 로그아웃 · 계정 관리 모두 조용한 글자 버튼. 로그아웃은 설정과 떨어뜨려 둠 */}
         <div className="pf-foot pf-wide">
-          <Link
-            href="/settings"
-            className="text-small text-primary-text underline"
-          >
+          <Link href="/settings" className="pf-acct-sum focus-ring">
+            <Settings aria-hidden className="pf-acct-chev" />
             설정 (움직임 · AI 튜터)
           </Link>
           <LogoutButton />

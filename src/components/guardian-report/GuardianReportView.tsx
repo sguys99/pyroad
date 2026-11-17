@@ -297,7 +297,8 @@ export function GuardianReportView({
           <DailyBars report={report} />
         </Panel>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        {/* 위아래로 쌓음 (B144): 두 열이면 긴 "새로 익힌 내용" 옆 "꾸준함과 도전" 카드가 빈 면으로 늘어남 → 목록을 768부터 두 줄로 */}
+        <div className="grid gap-5">
           <Panel
             title="새로 익힌 내용"
             icon={<Lightbulb />}
@@ -308,7 +309,7 @@ export function GuardianReportView({
                 이 주에 새로 마친 퀘스트가 없습니다.
               </p>
             ) : (
-              <ul className="grid gap-3">
+              <ul className="grid gap-3 md:grid-cols-2 md:gap-x-6">
                 {report.learned.map((l, i) => (
                   <li key={`${l.title}-${i}`} className="grid gap-0.5">
                     <span className="text-body font-bold text-foreground">

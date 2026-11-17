@@ -227,7 +227,7 @@ export const QuestCelebrations = memo(function QuestCelebrations({
   );
 });
 
-/** 카드 바로 위: 몇 번째 축하인지(점) + 모두 닫기. 카드가 바뀌어도 그대로 있다 */
+/** 카드 바로 위: 몇 번째 축하인지(점) + 모두 닫기. 카드가 바뀌어도 그대로 있다. 닫기는 카드와 같은 불투명 면(B144) — 반투명이면 1280에서 뒤 공책 글자가 비침 */
 function SequenceChrome({
   index,
   total,
@@ -266,7 +266,7 @@ function SequenceChrome({
           e.stopPropagation();
           onSkip();
         }}
-        className="flex min-h-11 min-w-20 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-on-scrim/15 px-3 text-small font-medium text-on-scrim outline-none transition-colors duration-(--dur-fast) hover:bg-on-scrim/25 focus-visible:ring-2 focus-visible:ring-on-scrim/70 reduced:transition-none"
+        className="flex min-h-11 min-w-20 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-surface px-3 text-small font-medium text-foreground shadow-card outline-none transition-colors duration-(--dur-fast) hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-on-scrim/70 reduced:transition-none"
       >
         {total > 1 ? '모두 닫기' : '닫기'}
         <X className="h-4 w-4" aria-hidden />

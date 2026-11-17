@@ -125,6 +125,12 @@ test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 업적·보물), 넘침 
     .locator('.pf-col')
     .evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
   expect(Math.abs(cols[0] - cols[1])).toBeLessThan(COL_GAP_MAX);
+  // 아래 보조 줄: 설정·로그아웃은 같은 조용한 글자 버튼, 44px 누름 (B144)
+  for (const el of [
+    page.getByRole('link', { name: /설정/ }),
+    page.getByRole('button', { name: '로그아웃' }),
+  ])
+    expect((await el.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   // 계정 관리는 접혀 있음 (위험 동작이 바로 보이지 않게)
   await expect(page.getByTestId('reset-scope')).toBeHidden();
   await page.getByText('계정 관리').click();
