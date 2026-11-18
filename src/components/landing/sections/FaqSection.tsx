@@ -20,7 +20,6 @@ export function FaqSection() {
     <LandingSection
       id="faq"
       deferredCss="faq"
-      kicker="궁금한 점"
       title="자주 묻는 질문"
       width="narrow"
     >

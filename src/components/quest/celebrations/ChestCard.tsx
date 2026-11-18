@@ -2,7 +2,7 @@
 
 import { RewardIcon } from '@/components/ui/reward-icon';
 import type { MotionBudget } from '@/lib/motion/tier';
-import { CelebrationCta, CountUp, Kicker, delayStyle } from './parts';
+import { CelebrationCta, CountUp, delayStyle } from './parts';
 
 interface ChestCardProps {
   stageTitle: string;
@@ -48,7 +48,6 @@ export function ChestCard({
       </svg>
 
       <div className="cel-head">
-        <Kicker gold>보물상자</Kicker>
         <h2 id="celebration-title" className="cel-t font-display">
           보물상자가 열렸어요!
         </h2>

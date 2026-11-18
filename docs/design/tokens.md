@@ -109,7 +109,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | `body` | **17 / 1.7** | pyRoad Sans | 본문 (body 기본값, 자간 0, `word-break: keep-all`) |
 | `small` | 15 / 1.6 | pyRoad Sans | 보조 문단·말풍선 이름 |
 | `caption` | **14 / 1.5 (최소)** | pyRoad Sans | 캡션 |
-| `kicker` | 14 / 1.5, 650, 자간 0.02em | pyRoad Sans | 눈썹 글자 (주색 글자와 함께) |
+| `kicker` | 14 / 1.5, 650, 자간 0.02em | pyRoad Sans | 작은 라벨: 위치 줄(권·스테이지·퀘스트)·결과 상태에만. 제목을 되풀이하는 머리말로 쓰지 않음(P13-08) |
 | `code` | 16 / 1.6 | pyRoad Mono | 코드 (D2Coding은 짝수 px만 한글 2칸 정확) |
 
 - 크기는 rem이라 브라우저 글자 크기 설정을 따른다. **14px 미만 금지**(P0-14). Tailwind 기본 `text-xs`(12px)·`text-[11px]` 같은 지금 코드는 레거시 96곳(35파일)이라 기준표로 묶어 늘지 못하게 하고 Phase 4~6 화면 개편에서 없앤다(§5).

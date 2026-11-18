@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Palette, PartyPopper } from 'lucide-react';
 import { PybaemStatic } from '@/components/characters/rig';
 import type { ShareViewKind } from '@/lib/analytics/events';
 import { ShareCta } from './ShareCta';
@@ -84,19 +83,6 @@ export function ShareCardView({
         />
         <section aria-labelledby="share-title" className="grid gap-5">
           <div className="grid gap-2">
-            <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-kicker font-bold text-primary-text">
-              {kind === 'creation' ? (
-                <>
-                  <Palette aria-hidden className="size-4" />
-                  구경해 주세요!
-                </>
-              ) : (
-                <>
-                  <PartyPopper aria-hidden className="size-4" />
-                  축하해 주세요!
-                </>
-              )}
-            </p>
             <h1
               id="share-title"
               className="font-display text-h1 text-balance text-foreground lg:text-hero"

@@ -3,7 +3,7 @@
 import { rewardsCardTiming } from '@/lib/celebration/plan';
 import type { MotionBudget } from '@/lib/motion/tier';
 import { RewardIcon } from '@/components/ui/reward-icon';
-import { CelebrationCta, CountUp, Kicker, StarRow } from './parts';
+import { CelebrationCta, CountUp, StarRow } from './parts';
 
 interface RewardsCardProps {
   stars: { stars: 1 | 2 | 3; gained: number } | null;
@@ -30,7 +30,6 @@ export function RewardsCard({
   return (
     <>
       <div className="cel-head">
-        <Kicker gold>보상</Kicker>
         <h2 id="celebration-title" className="cel-t font-display" data-size="m">
           보상을 받았어요
         </h2>

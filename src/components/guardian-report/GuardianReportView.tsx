@@ -240,7 +240,6 @@ export function GuardianReportView({
         >
           <UserAvatar skin={report.skin} size={64} />
           <div className="grid min-w-0 flex-1 gap-0.5">
-            <p className="text-kicker text-primary-text">주간 학습 리포트</p>
             <h1
               id="guardian-title"
               className="font-display text-h1 text-balance break-keep text-foreground"

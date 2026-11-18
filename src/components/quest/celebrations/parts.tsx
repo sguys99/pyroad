@@ -76,7 +76,7 @@ export function CelebrationCta({
   );
 }
 
-/** 카드 맨 위 작은 머리글 ("레벨 업!", "새 뱃지"). 보상 카드는 금색 */
+/** 카드 맨 위 작은 머리글: 제목에 없는 정보만("새 업적", "스테이지 N 클리어", 희귀도). 제목을 되풀이하지 않음(P13-08). 보상 카드는 금색 */
 export function Kicker({
   children,
   gold = false,

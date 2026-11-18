@@ -47,7 +47,6 @@ export function RetroWelcomeCard({
       data-testid="retro-welcome"
     >
       <div className="at-head">
-        <span className="at-k">그동안의 모험 보상</span>
         <h2 id="retro-title" className="at-t font-display">
           지난 모험도 보상으로 바꿔 왔어요!
         </h2>

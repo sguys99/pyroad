@@ -271,33 +271,6 @@
     );
     pointer-events: none;
   }
-  .hero-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.875rem;
-    padding: 0.3125rem 0.875rem 0.3125rem 0.625rem;
-    border-radius: var(--round-pill);
-    background: var(--surface);
-    box-shadow: var(--elev-card);
-    color: var(--primary-text);
-    font-size: var(--text-kicker);
-    font-weight: var(--text-kicker--font-weight);
-    letter-spacing: var(--text-kicker--letter-spacing);
-    line-height: var(--text-kicker--line-height);
-  }
-  .hero-kicker svg {
-    flex: none;
-    width: 1.125rem;
-    height: 1.125rem;
-  }
-  .hero-pin {
-    fill: var(--accent);
-    stroke: var(--accent-lip);
-  }
-  .hero-pin-dot {
-    fill: var(--surface);
-  }
   .hero-title {
     color: var(--text);
     font-size: var(--text-hero);
@@ -529,9 +502,6 @@
   }
   .hero-copy > :nth-child(3) {
     animation-delay: 140ms;
-  }
-  .hero-copy > :nth-child(4) {
-    animation-delay: 210ms;
   }
   .hero-title .ld-ink-mark::after {
     animation: hero-ink var(--dur-page) var(--easing-ink) 520ms both;

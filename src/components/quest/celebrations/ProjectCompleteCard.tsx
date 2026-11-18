@@ -9,7 +9,6 @@ import {
   CelebrationMascot,
   ConceptChips,
   CountUp,
-  Kicker,
   delayStyle,
 } from './parts';
 import { MapActions } from './StageClearCard';
@@ -43,7 +42,6 @@ export function ProjectCompleteCard({
       <CelebrationMascot size={88} budget={budget} settled={settled} />
 
       <div className="cel-head">
-        <Kicker>프로젝트 완성!</Kicker>
         <h2
           id="celebration-title"
           className="cel-t font-display cel-rise"

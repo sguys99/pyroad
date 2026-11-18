@@ -487,10 +487,6 @@ export function SkillCheckResultCard({
           filters={false}
         />
       </span>
-      <p className="dq-k font-sans">
-        <ClipboardCheck aria-hidden className="size-4" />
-        {passed ? '실력 인정!' : '실력 확인 퀴즈 결과'}
-      </p>
       <h2
         id="sk-result-t"
         ref={heading}

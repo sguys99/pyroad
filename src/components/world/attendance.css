@@ -24,13 +24,6 @@
     align-items: center;
     column-gap: 0.5rem;
   }
-  .at-k {
-    grid-column: 1;
-    color: var(--text-muted);
-    font-size: var(--text-caption);
-    font-weight: 700;
-    line-height: 1.2;
-  }
   .at-t {
     grid-column: 1;
     margin: 0;
@@ -40,7 +33,6 @@
   }
   .at-close {
     grid-column: 2;
-    grid-row: 1 / span 2;
   }
   .at-saved {
     display: inline-flex;

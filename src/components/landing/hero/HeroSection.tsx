@@ -30,18 +30,6 @@ export function HeroSection() {
 
       <div className="hero-in">
         <div className="hero-copy">
-          <p className="hero-kicker">
-            <svg viewBox="0 0 24 24" aria-hidden>
-              <path
-                d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"
-                className="hero-pin"
-                strokeWidth="1.4"
-                strokeLinejoin="round"
-              />
-              <circle className="hero-pin-dot" cx="12" cy="10" r="2.4" />
-            </svg>
-            월드 1 · 파이썬 섬
-          </p>
           <h1 id="hero-title" className="hero-title font-display">
             코드 주문으로
             <br />

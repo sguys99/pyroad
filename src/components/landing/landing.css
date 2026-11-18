@@ -119,7 +119,7 @@
     stroke: var(--accent-text);
   }
 
-  /* ───────────── 섹션 틀 (LandingSection): 위아래 여백 · 가운데 폭 · 머리글(kicker + 제목 + 설명) */
+  /* ───────────── 섹션 틀 (LandingSection): 위아래 여백 · 가운데 폭 · 머리글(제목 + 설명) */
   .ld-sec {
     position: relative;
     padding: 4rem 0;
@@ -155,13 +155,6 @@
     align-items: center;
     margin-inline: auto;
     text-align: center;
-  }
-  .ld-kicker {
-    color: var(--primary-text);
-    font-size: var(--text-kicker);
-    font-weight: var(--text-kicker--font-weight);
-    letter-spacing: var(--text-kicker--letter-spacing);
-    line-height: var(--text-kicker--line-height);
   }
   .ld-h2 {
     color: var(--text);

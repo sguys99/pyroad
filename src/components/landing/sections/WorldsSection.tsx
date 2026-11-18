@@ -19,7 +19,6 @@ export function WorldsSection() {
     <LandingSection
       id="worlds"
       deferredCss="worlds"
-      kicker="한 월드씩 열리는 모험"
       title="세 개의 월드가 기다려요"
       lead="파이썬 섬에서 출발해 바다를 건너 도시까지! 지도는 한 월드씩 펼쳐져요."
       className="ld-worlds"

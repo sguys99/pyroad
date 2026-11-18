@@ -29,7 +29,6 @@ export function FriendsSection() {
     <LandingSection
       id="friends"
       deferredCss="friends"
-      kicker="함께하는 친구들"
       title="함께 모험할 세 친구"
       lead="퀘스트 길에서 늘 만나는 친구들이야. 콕 눌러 봐!"
     >

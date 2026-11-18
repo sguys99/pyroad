@@ -34,9 +34,8 @@ export function ParentsSection() {
       id="parents"
       deferredCss="parents"
       tone="surface"
-      kicker="보호자께"
       title="아이가 안심하고 배우도록 만들었어요"
-      lead="안전과 배움에 대해 짧게 말씀드릴게요."
+      lead="보호자께 안전과 배움에 대해 짧게 말씀드릴게요."
     >
       <ParentsReveal className="ld-parents-letter">
         <div className="ld-parents-cols">

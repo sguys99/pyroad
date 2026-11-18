@@ -92,10 +92,6 @@ export function GalleryBanner({ children }: { children?: React.ReactNode }) {
           <i key={i} />
         ))}
       </span>
-      <span className="gl-kicker">
-        <Sparkles aria-hidden />
-        메이커 박람회
-      </span>
       <h1 className="m-0 font-display text-h1">작품 갤러리</h1>
       <p className="m-0 text-small text-muted-foreground">
         메이커 시티 친구들이 만든 그림과 이야기를 구경하고, 스티커로 응원해요.

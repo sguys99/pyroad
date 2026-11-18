@@ -109,7 +109,6 @@ export const RegistrationCard = forwardRef<
           />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-kicker text-primary-text">파이썬 섬 모험단</p>
           <h2 className="font-display text-h3 text-foreground">
             모험가 등록증
           </h2>

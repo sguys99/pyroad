@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BackLink } from '@/components/ui/back-link';
-import { CalendarCheck, Check, Flame, Map } from 'lucide-react';
+import { Check, Flame, Map } from 'lucide-react';
 
 import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { Button } from '@/components/ui/button';
@@ -358,10 +358,6 @@ export function DailySummary({
           filters={false}
         />
       </span>
-      <p className="dq-k font-sans">
-        <CalendarCheck aria-hidden className="size-4" />
-        오늘의 퀴즈 끝!
-      </p>
       <h2 id="daily-sum-title" className="dq-sum-t font-display" tabIndex={-1}>
         {total}문제 중 {correct}문제 맞혔어요
       </h2>
