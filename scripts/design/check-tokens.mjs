@@ -12,6 +12,7 @@
 //   size    14px 미만 글자(text-xs·text-[11px] …)는 레거시 기준표(tokens-baseline.json)보다 늘면 실패 (Phase 4~6에서 줄인다)
 // CSS(src/**/*.css, src/fonts 제외)는 사용자 정의 속성(--x: …) 밖의 색 리터럴과 font-family를 찾는다 (토큰 정의는 globals.css :root만).
 //
+// CSS는 둥근 카드의 측면 색 띠(stripe, P13-07)도 찾는다: 한쪽 안쪽 그림자·좁은 ::before/::after 세로 띠·굵은 색 옆 테두리.
 // 예외: 아래 ALLOW 표(경로 + 규칙 + 이유), 또는 그 줄이나 바로 윗줄의 `tokens-allow: <이유>` 주석 (브랜드 로고 색 등).
 
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -86,6 +87,7 @@ const MESSAGES = {
   misuse: '장식 전용 토큰을 글자색으로 씀 → text-primary-text / text-accent-text',
   font: 'font-family 직접 지정 → font-display / font-sans / font-mono (TS는 FONT_FAMILY)',
   motion: '모션 값 직접 지정 → sec(\'base\') · EASE.out · framerSpring(\'body\') · duration-(--dur-fast)',
+  stripe: '측면 색 띠(한쪽 inset 그림자·좁은 ::before/::after 세로 띠·2px 이상 색 옆 테두리) → 면 색·아이콘·글자로 (P13-07)',
 };
 
 function allowed(rel, rule) {
@@ -192,10 +194,48 @@ export function checkSource(rel, text) {
   return { violations, smallText };
 }
 
-/** CSS: 사용자 정의 속성 밖의 색 리터럴, font-family */
+// 측면 띠 (P13-07). shortcut: px·rem 리터럴만 본다(var()·calc() 폭, border-width 축약, TS 스타일 객체는 못 봄) — 그런 띠가 생기면 여기에 더한다
+const px = (n, unit) => Number(n) * (unit === 'px' ? 1 : 16);
+const LEN = String.raw`(-?[\d.]+)(px|rem|em)`;
+const INSET_SIDE = new RegExp(String.raw`\binset\s+${LEN}\s+0(?:px)?\s+0(?:px)?(?!\s*[\d.])`);
+const SIDE_BORDER = /^border-(?:left|right|inline-start|inline-end)(?:-width)?$/;
+const FULL_HEIGHT = /(?:^|;)\s*(?:inset(?:-block)?\s*:\s*0(?![\d.])|height\s*:\s*100%)/;
+const decl = (body, prop) => body.match(new RegExp(String.raw`(?:^|[;\s])${prop}\s*:\s*([^;]+)`))?.[1]?.trim();
+
+function isStripeDecl(prop, value) {
+  if (prop === 'box-shadow') {
+    const m = value.match(INSET_SIDE);
+    return !!m && Number(m[1]) !== 0;
+  }
+  if (!SIDE_BORDER.test(prop) || /\b(?:transparent|none)\b/.test(value)) return false;
+  const m = value.match(new RegExp(LEN));
+  return !!m && px(m[1], m[2]) >= 2;
+}
+
+/** 폭 8px 이하 + 위아래 끝까지 + 색 면인 ::before/::after */
+function isStripePseudo(selector, body) {
+  if (!/::?(?:before|after)\b/.test(selector)) return false;
+  const w = decl(body, 'width')?.match(new RegExp(`^${LEN}$`));
+  if (!w || px(w[1], w[2]) <= 0 || px(w[1], w[2]) > 8) return false;
+  const tall = FULL_HEIGHT.test(body) || (decl(body, 'top') === '0' && decl(body, 'bottom') === '0');
+  const bg = decl(body, 'background') ?? decl(body, 'background-color');
+  return tall && !!bg && !/^(?:none|transparent)$/.test(bg);
+}
+
+/** CSS: 사용자 정의 속성 밖의 색 리터럴, font-family, 측면 띠. `tokens-allow: <이유>` 주석(그 줄·바로 윗줄)은 측면 띠 예외 */
 export function checkCss(rel, text) {
   const violations = [];
   const clean = text.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '));
+  const lines = text.split('\n');
+  const lineOf = (index) => clean.slice(0, index).split('\n').length;
+  const stripe = (line, shown) => {
+    if (/tokens-allow:/.test(lines[line - 1] ?? '') || /tokens-allow:/.test(lines[line - 2] ?? '')) return;
+    violations.push({ line, rule: 'stripe', text: shown });
+  };
+  for (const m of clean.matchAll(/([^{};]+)\{([^{}]*)\}/g)) {
+    if (!isStripePseudo(m[1], m[2])) continue;
+    stripe(lineOf(m.index + m[0].search(/(?:^|[;\s{])width\s*:/)), `${m[1].trim().replace(/\s+/g, ' ')} { width: ${decl(m[2], 'width')} }`);
+  }
   const re = /([\w-]+)\s*:\s*([^;{}]+);/g;
   for (const m of clean.matchAll(re)) {
     const [, prop, value] = m;
@@ -205,6 +245,7 @@ export function checkCss(rel, text) {
       violations.push({ line, rule: 'color', text: `${prop}: ${value.trim()}` });
     }
     if (prop === 'font-family') violations.push({ line, rule: 'font', text: `${prop}: ${value.trim()}` });
+    if (isStripeDecl(prop, value)) stripe(line, `${prop}: ${value.trim()}`);
   }
   return { violations, smallText: 0 };
 }

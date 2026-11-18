@@ -1,4 +1,4 @@
-/* 오늘의 퀴즈 쪽지 (P7-10). `DailyQuizCard.tsx`가 import한다. 흰 쪽지 + 왼쪽 금색 띠(달력 도장) — 폰 퀴즈 추천(점선)과 다른 모양.
+/* 오늘의 퀴즈 쪽지 (P7-10). `DailyQuizCard.tsx`가 import한다. 흰 쪽지 + 달력 배지(측면 띠 없음, P13-07 — 상태는 배지와 글자가 알림) — 폰 퀴즈 추천(점선)과 다른 모양.
    진행 칸은 3칸 막대, 다 풀면 초록 도장. 등장은 한 번(full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시). 토큰 변수만 */
 
 @layer components {
@@ -9,16 +9,11 @@
     gap: 0.75rem;
     margin-bottom: 0.75rem;
     padding: 0.625rem 0.75rem;
-    border-left: 0.375rem solid var(--primary-bright);
     border-radius: var(--round-m);
     background: var(--surface);
     box-shadow: var(--elev-card);
   }
-  .dqc[data-state='done'] {
-    border-left-color: var(--primary);
-  }
   .dqc[data-state='empty'] {
-    border-left-color: var(--line);
     box-shadow: none;
   }
   .dqc-badge {

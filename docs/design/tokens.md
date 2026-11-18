@@ -177,6 +177,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
   - `motion` (`src/components`·`src/app`): Framer `duration`·`delay`·`stiffness`·`damping`·`mass`의 0 아닌 숫자(`1.5 * k`도), `ease: '문자열'`, Tailwind `duration-300`·`delay-200`·`duration-[…]`·`ease-[…]`
   - `size`: 14px 미만 글자(`text-xs`·`text-[11px]`·`text-[0.8rem]`)가 `scripts/design/tokens-baseline.json`의 파일별 개수보다 늘면 실패. 줄이면 `npm run tokens:check -- --update-baseline`
   - CSS(`src/**/*.css`, `src/fonts` 제외): 사용자 정의 속성(`--x: …`) 밖의 색 리터럴과 `font-family`. 토큰 값은 globals.css `:root`에만
+  - `stripe` (CSS, P13-07): 둥근 카드·줄의 **측면 색 띠** — (a) 한쪽 안쪽 그림자 `box-shadow: inset ±N(px·rem) 0 0 <색>`(번짐·퍼짐 없는 가로 한쪽. 아랫면 턱 `inset 0 -3px 0`, 테두리 고리 `inset 0 0 0 2px`는 통과) (b) 폭 8px(0.5rem) 이하 + 위아래 끝까지(`inset: 0 …`·`top: 0` + `bottom: 0`·`height: 100%`) + 색 면인 `::before`·`::after` (c) 2px(0.125rem) 이상 색 `border-left`·`border-right`·`border-inline-start`·`border-inline-end`(`-width` 포함. `transparent`·`none`·1px 구분선 `var(--line-w)`는 통과). 정적 휴리스틱이라 px·rem 리터럴만 본다(`var()`·`calc()` 폭, `border-width` 축약, TS 스타일 객체는 못 봄). 띠가 맡던 뜻은 면 색·아이콘·글자로 전한다
 - 토큰 값 드리프트·대비는 `npx vitest run src/lib/design`(CI `unit`).
 - 컴포넌트에 `dark:` 색 클래스를 쓰지 않는다(다크 모드 범위 밖, §7).
 
@@ -191,6 +192,10 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | `src/lib/celebration/**` | motion | 축하 시퀀서·컨페티 박자표(ms 타임라인). 색은 토큰 import |
 | 줄 주석 `// tokens-allow: <이유>` (그 줄 또는 바로 윗줄) | 전부 | 브랜드 가이드 색·외부가 정한 색. 이유를 꼭 쓴다. 지금: 소셜 로그인 로고 SVG 색(`src/components/auth/brandMarks.tsx`: 카카오 심볼 `#000000`, 네이버 N `#FFFFFF`, Google G 4색, P3-05) |
 | `src/components/auth/social-login.css`의 provider별 사용자 정의 속성(`--social-bg`·`--social-fg`·`--social-stroke`) | color | 소셜 로그인 버튼 면·글자·테두리 = 각 사 브랜드 가이드 값(카카오 `#FEE500`·레이블 검정 85%, 네이버 `#03A94D`(2025 갱신, 예전 `#03C75A`)·흰 글자, Google 흰 면·`#747775`·`#1F1F1F`). pyRoad 토큰으로 만들지 않는다(테마가 바뀌어도 그대로여야 함). CSS 검사는 사용자 정의 속성 값을 보지 않으므로 이 표와 `social-login-css.test.ts`가 기록·확인한다. 근거·어긋남은 [components.md](components.md) §12 |
+
+| CSS 주석 `/* tokens-allow: <이유> */` (그 줄 또는 바로 윗줄) | stripe | 뜻이 있는 옆 선. 지금 1곳: `src/components/quest/quiz/parsons.css` `.qz-ps-guide`의 `border-left: 2px dashed` — 줄 맞추기 퀴즈의 **코드 들여쓰기 안내선**(한 칸에 하나, 장식 띠가 아님. P13-audit §5) |
+
+측면 띠 규칙에 걸리지 않아 예외가 필요 없던 것(P13-07 판정, 유지): 1px 구분선(`shop.css` 영수증 칸·`trial.css`·`codeKeyboard.css`·`parsons.css` 칸 선, 모두 `var(--line-w)`), 갤러리 깃발 줄(`gallery.css` `.gl-bunting`의 윗변 3px — 깃발을 매단 줄 그림), 랜딩 그림 속 의사 요소(`parents.css` 정류장 사이 길, `worlds.css` 막대 손잡이 — 위아래 끝까지 붙지 않음), 에디터 커서(`src/lib/editor/kidsTheme.ts`의 `borderLeft: 2px` — CodeMirror 커서, TS라 검사 밖).
 
 공유 카드(P2-19)는 satori가 CSS 변수를 못 읽으므로 `COLOR`를 import해 리터럴 없이 쓴다(예외 불필요). 정지 그림 래스터(히어로·카드 배경 PNG, §12-Q28)는 이미지라 검사 대상이 아니다.
 

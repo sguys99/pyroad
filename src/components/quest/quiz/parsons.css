@@ -146,6 +146,7 @@
   align-self: stretch;
   width: 1.25rem;
   margin: -0.5rem 0;
+  /* tokens-allow: 코드 들여쓰기 안내선 (장식 띠가 아님, tokens.md §6) */
   border-left: 2px dashed var(--line-strong);
 }
 .qz-ps-guide:first-child {
