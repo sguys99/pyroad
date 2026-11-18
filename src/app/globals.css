@@ -88,6 +88,9 @@
   --color-error: var(--error);
   --color-on-error: var(--on-error);
   --color-error-soft: var(--error-soft);
+  --color-caution: var(--caution);
+  --color-caution-text: var(--caution-text);
+  --color-caution-soft: var(--caution-soft);
   --color-on-scrim: var(--on-scrim);
   --color-w1: var(--w1);
   --color-w1-ink: var(--w1-ink);
@@ -198,66 +201,70 @@
    최종 시안(§12-Q31) 기준. 컴포넌트에는 색·글꼴·duration을 직접 쓰지 않는다 → npm run tokens:check */
 :root {
   /* 중립: 단색 바탕 한 톤, 면은 흰색·옅은 회색 차이로만 (line은 장식 구분선, line-strong은 입력 경계 3:1) */
-  --bg: #f6f4ef;
+  --bg: #f6f7f3;
   --surface: #ffffff;
-  --surface-2: #efece5;
-  --surface-lip: #dfdad0;
-  --line: #e5e1d9;
-  --line-strong: #8e877c;
-  --text: #2e2a25;
-  --text-muted: #6b645b;
+  --surface-2: #eceee7;
+  --surface-lip: #d9dcd2;
+  --line: #e2e5dc;
+  --line-strong: #828a7c;
+  --text: #22271f;
+  --text-muted: #5c6457;
   /* 주색: 브랜드 초록 하나. 초록 글자는 --primary-text (AA), lip·bright는 장식 전용. 보조색은 파랑 없이 짙은 중립(포커스 링) */
-  --primary: #3e7b3a;
+  --primary: #2a7d3d;
   --on-primary: #ffffff;
-  --primary-lip: #2f5f2c;
-  --primary-text: #3a7336;
-  --primary-bright: #a9d38f;
-  --primary-soft: #e8f0e3;
-  --secondary: #2e2a25;
+  --primary-lip: #1c5a2c;
+  --primary-text: #257338;
+  --primary-bright: #a1d995;
+  --primary-soft: #e1f2e0;
+  --secondary: #22271f;
   --on-secondary: #ffffff;
   /* 강조색: 금색 하나 (별·코인·도장·"지금 여기"). --accent·lip·light는 장식 전용, 금색 글자는 --accent-text */
-  --accent: #f0b43c;
-  --on-accent: #2e2a25;
-  --accent-lip: #c48a1a;
-  --accent-light: #fbe3a6;
-  --accent-text: #8a5a00;
-  --accent-soft: #fbf1dc;
+  --accent: #f6b92b;
+  --on-accent: #22271f;
+  --accent-lip: #c98f12;
+  --accent-light: #fde5a0;
+  --accent-text: #7a5200;
+  --accent-soft: #fff4d4;
   /* 의미색: 성공 = 초록 글자, 경고 = 금색 글자, 오류 */
-  --success: #3a7336;
-  --success-soft: #e8f0e3;
-  --warning: #8a5a00;
-  --warning-soft: #fbf1dc;
+  --success: #257338;
+  --success-soft: #e1f2e0;
+  --warning: #7a5200;
+  --warning-soft: #fff4d4;
   --error: #b3402f;
   --on-error: #ffffff;
-  --error-soft: #fbeae6;
+  --error-soft: #fce9e5;
+  /* 주의: 틀림·다름 피드백, 주의·안내 띠 (P13-02) */
+  --caution: #ee7f4a;
+  --caution-text: #9c4a1a;
+  --caution-soft: #ffe8d6;
   /* 덮개 (축하·대화 상자 뒤) */
   --on-scrim: #ffffff;
-  --scrim: rgb(46 42 37 / 0.65);
+  --scrim: rgb(34 39 31 / 0.65);
   /* 월드 틴트 (지도·표지 배경만 옅게). 지금 월드는 아래 --world*, [data-world]가 바꾼다 */
-  --w1: #a9cf94;
-  --w1-ink: #3a7336;
-  --w1-soft: #edf3e8;
-  --w2: #b4c8d2;
-  --w2-ink: #6b645b;
-  --w2-soft: #edf1f3;
-  --w2-shallow: #cfe4e3;
-  --w2-deep: #95bac6;
-  --w3: #d9c3a3;
-  --w3-ink: #6b645b;
-  --w3-soft: #f4eee5;
-  --w3-brick: #e2a486;
-  --w3-blueprint: #a7bcc9;
+  --w1: #a4d49a;
+  --w1-ink: #257338;
+  --w1-soft: #e9f4e6;
+  --w2: #9cc4de;
+  --w2-ink: #4a6170;
+  --w2-soft: #e8f2f9;
+  --w2-shallow: #d0e6ef;
+  --w2-deep: #8fb9d4;
+  --w3: #edb787;
+  --w3-ink: #75583f;
+  --w3-soft: #fbeee2;
+  --w3-brick: #dc9478;
+  --w3-blueprint: #a6c1d6;
   --world: var(--w1);
   --world-ink: var(--w1-ink);
   --world-soft: var(--w1-soft);
   /* 코드: 키워드 초록 · 문자열 금색 글자 · 주석 회색 (P2-18 CodeMirror 테마) */
   --code-bg: #ffffff;
-  --code-text: #2e2a25;
-  --code-comment: #7a7268;
-  --code-keyword: #3a7336;
-  --code-string: #8a5a00;
-  --code-number: #2e2a25;
-  --code-func: #2e2a25;
+  --code-text: #22271f;
+  --code-comment: #6c7467;
+  --code-keyword: #257338;
+  --code-string: #7a5200;
+  --code-number: #22271f;
+  --code-func: #22271f;
   /* shadcn/ui 이름은 유지하고 새 토큰을 가리킨다 */
   --background: var(--bg);
   --foreground: var(--text);
@@ -283,8 +290,8 @@
   --round-pill: 9999px;
   --radius: var(--round-m);
   /* 그림자: 기본 한 종류 + 떠 있는 층(시트·토스트·오버레이) */
-  --elev-card: 0 1px 2px rgb(46 42 37 / 0.06), 0 4px 14px rgb(46 42 37 / 0.06);
-  --elev-pop: 0 12px 32px rgb(46 42 37 / 0.14);
+  --elev-card: 0 1px 2px rgb(34 39 31 / 0.06), 0 4px 14px rgb(34 39 31 / 0.06);
+  --elev-pop: 0 12px 32px rgb(34 39 31 / 0.14);
   /* 선: 테두리는 입력·코드 상자 1px만, 버튼은 아랫면 3px, 포커스 링 2px */
   --line-w: 1px;
   --lip-h: 3px;
@@ -387,11 +394,11 @@
   --line-strong: #6d8d99;
   --primary: #1e8ba8;
   --primary-soft: #d6ecf2;
-  --accent-light: #fbe3a6;
-  --accent-soft: #fbf1dc;
-  --accent-text: #8a5a00;
+  --accent-light: #fde5a0;
+  --accent-soft: #fff4d4;
+  --accent-text: #7a5200;
   --error: #b3402f;
-  --error-soft: #fbeae6;
+  --error-soft: #fce9e5;
   --surface: #ffffff;
   --text: #1e3340;
 }
@@ -409,11 +416,11 @@
   --line-strong: #987890;
   --primary: #d0558f;
   --primary-soft: #f9ddea;
-  --accent-light: #fbe3a6;
-  --accent-soft: #fbf1dc;
-  --accent-text: #8a5a00;
+  --accent-light: #fde5a0;
+  --accent-soft: #fff4d4;
+  --accent-text: #7a5200;
   --error: #b3402f;
-  --error-soft: #fbeae6;
+  --error-soft: #fce9e5;
   --surface: #ffffff;
   --text: #3b2836;
 }

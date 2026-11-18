@@ -7,7 +7,7 @@
 import type { PetId } from '@/lib/shop/catalog';
 
 const INK = '#3B2F25';
-const SHADOW = '#8E877C';
+const SHADOW = '#828A7C';
 const CHEEK = '#F2879B';
 
 const line = (stroke: string, w = 1.3) => ({

@@ -30,91 +30,97 @@ export type { DurationName, EasingName, SpringName } from '@/lib/motion/tokens';
 /**
  * 색 토큰. 쓰임(role)은 docs/design/tokens.md 표와 `CONTRAST_PAIRS`를 본다.
  * - **장식 전용**(글자를 얹거나 글자색으로 쓰지 않음): `line`, `surfaceLip`, `primaryLip`, `primaryBright`, `accent`,
- *   `accentLip`, `accentLight`, `w1`·`w2`·`w3`, `w2Shallow`·`w2Deep`(2월드 지도 바다), `w3Brick`·`w3Blueprint`(3월드 지도)
+ *   `accentLip`, `accentLight`, `caution`, `w1`·`w2`·`w3`, `w2Shallow`·`w2Deep`(2월드 지도 바다), `w3Brick`·`w3Blueprint`(3월드 지도)
  * - 초록 글자는 `primaryText`(배경·면·보조 면 위 AA), 금색 계열 글자는 `accentText`
  */
 export const COLOR = {
   // 중립
-  /** 단색 바탕 (따뜻한 오프화이트, 종이 결 없음) */
-  bg: '#F6F4EF',
+  /** 단색 바탕 (누런 기를 뺀 맑은 오프화이트, P13-02 3-A. 종이 결 없음) */
+  bg: '#F6F7F3',
   /** 카드·시트·입력 */
   surface: '#FFFFFF',
   /** 보조 면: 칩·결과 상자·눌린 탭·코드 줄 번호 */
-  surface2: '#EFECE5',
+  surface2: '#ECEEE7',
   /** 흰 버튼 아랫면 (장식). 동작 줄이기에서는 눌린 흰 버튼의 면 (P2-11) */
-  surfaceLip: '#DFDAD0',
+  surfaceLip: '#D9DCD2',
   /** 장식 구분선 (글자·경계 의미 없음) */
-  line: '#E5E1D9',
+  line: '#E2E5DC',
   /** 입력·코드 상자 경계 (UI 3:1) */
-  lineStrong: '#8E877C',
-  text: '#2E2A25',
-  textMuted: '#6B645B',
+  lineStrong: '#828A7C',
+  text: '#22271F',
+  textMuted: '#5C6457',
 
   // 주색: 브랜드 초록 하나
-  primary: '#3E7B3A',
+  primary: '#2A7D3D',
   onPrimary: '#FFFFFF',
   /** 주 버튼 아랫면 (장식) */
-  primaryLip: '#2F5F2C',
+  primaryLip: '#1C5A2C',
   /** 초록 글자·링크 (bg·surface·surface2·primarySoft 위 AA) */
-  primaryText: '#3A7336',
+  primaryText: '#257338',
   /** 장식 전용: 진행 막대 끝·지도 길·나뭇잎 */
-  primaryBright: '#A9D38F',
+  primaryBright: '#A1D995',
   /** 초록 틴트 면: 해 볼 일·성공 말풍선 */
-  primarySoft: '#E8F0E3',
+  primarySoft: '#E1F2E0',
 
   // 보조: 파랑 없음 → 짙은 중립 (포커스 링·어두운 버튼)
-  secondary: '#2E2A25',
+  secondary: '#22271F',
   onSecondary: '#FFFFFF',
 
   // 강조색: 따뜻한 금색 하나 (별·코인·도장·형광펜·"지금 여기")
   /** 장식 전용 면. 글자를 얹으면 `onAccent`만 */
-  accent: '#F0B43C',
-  onAccent: '#2E2A25',
+  accent: '#F6B92B',
+  onAccent: '#22271F',
   /** 금색 버튼 아랫면·별 외곽 (장식) */
-  accentLip: '#C48A1A',
+  accentLip: '#C98F12',
   /** 별·코인 밝은 쪽 (장식) */
-  accentLight: '#FBE3A6',
+  accentLight: '#FDE5A0',
   /** 금색 계열 글자: 도장 문구·보상 수치·경고 */
-  accentText: '#8A5A00',
-  accentSoft: '#FBF1DC',
+  accentText: '#7A5200',
+  accentSoft: '#FFF4D4',
 
   // 의미색 (성공 = 초록 글자, 경고 = 금색 글자: 색 수를 늘리지 않는다)
-  success: '#3A7336',
-  successSoft: '#E8F0E3',
-  warning: '#8A5A00',
-  warningSoft: '#FBF1DC',
+  success: '#257338',
+  successSoft: '#E1F2E0',
+  warning: '#7A5200',
+  warningSoft: '#FFF4D4',
   error: '#B3402F',
   onError: '#FFFFFF',
-  errorSoft: '#FBEAE6',
+  errorSoft: '#FCE9E5',
+  // 주의 (P13-02, P13-audit §7 D1·D2): "틀렸어요·달라요" 피드백과 주의·안내 띠. 빨강보다 순한 주황 — 금색(보상)·초록(정답)·3권 틴트와 다른 색
+  /** 장식 전용: 표시 테두리·아이콘 면 (3:1 미달이라 뜻은 글자·아이콘과 함께) */
+  caution: '#EE7F4A',
+  /** 주의 글자·아이콘 (bg·surface·surface2·cautionSoft 위 AA) */
+  cautionText: '#9C4A1A',
+  cautionSoft: '#FFE8D6',
 
   // 덮개 (축하·대화 상자 뒤). 위에 얹는 글자·점은 onScrim
   onScrim: '#FFFFFF',
 
-  // 월드 틴트 (지도·표지 배경에만 아주 옅게). 글자는 ink (월드 2·3은 중립: 칩·배지마다 다른 색 금지)
-  w1: '#A9CF94',
-  w1Ink: '#3A7336',
-  w1Soft: '#EDF3E8',
-  w2: '#B4C8D2',
-  w2Ink: '#6B645B',
-  w2Soft: '#EDF1F3',
+  // 월드 틴트 (지도·표지 배경에만 옅게): 1권 풀빛 · 2권 하늘 · 3권 살구 (P13-02). 글자 ink는 2·3권도 채도를 낮춘 제 색조(표지·아이콘에만, 칩·배지 색으로 쓰지 않음)
+  w1: '#A4D49A',
+  w1Ink: '#257338',
+  w1Soft: '#E9F4E6',
+  w2: '#9CC4DE',
+  w2Ink: '#4A6170',
+  w2Soft: '#E8F2F9',
   /** 2월드 지도 바다 (P10-04, 장식 전용): 섬 둘레 얕은 물 · 가장자리 깊은 물. 종이 결이 비치게 반투명으로 칠함 */
-  w2Shallow: '#CFE4E3',
-  w2Deep: '#95BAC6',
-  w3: '#D9C3A3',
-  w3Ink: '#6B645B',
-  w3Soft: '#F4EEE5',
+  w2Shallow: '#D0E6EF',
+  w2Deep: '#8FB9D4',
+  w3: '#EDB787',
+  w3Ink: '#75583F',
+  w3Soft: '#FBEEE2',
   /** 3월드 지도 메이커 시티 (P11-11, 장식 전용): 벽돌 지붕·간판 · 설계도 모눈·슬레이트 지붕. 종이 결이 비치게 반투명으로도 칠함 */
-  w3Brick: '#E2A486',
-  w3Blueprint: '#A7BCC9',
+  w3Brick: '#DC9478',
+  w3Blueprint: '#A6C1D6',
 
   // 코드: 키워드 초록 · 문자열 금색 글자 · 주석 회색, 나머지는 본문색
   codeBg: '#FFFFFF',
-  codeText: '#2E2A25',
-  codeComment: '#7A7268',
-  codeKeyword: '#3A7336',
-  codeString: '#8A5A00',
-  codeNumber: '#2E2A25',
-  codeFunc: '#2E2A25',
+  codeText: '#22271F',
+  codeComment: '#6C7467',
+  codeKeyword: '#257338',
+  codeString: '#7A5200',
+  codeNumber: '#22271F',
+  codeFunc: '#22271F',
 } as const;
 
 export type ColorName = keyof typeof COLOR;
@@ -201,11 +207,11 @@ export const EDITOR_THEMES: Record<
     lineStrong: '#6D8D99',
     primary: '#1E8BA8',
     primarySoft: '#D6ECF2',
-    accentLight: '#FBE3A6',
-    accentSoft: '#FBF1DC',
-    accentText: '#8A5A00',
+    accentLight: '#FDE5A0',
+    accentSoft: '#FFF4D4',
+    accentText: '#7A5200',
     error: '#B3402F',
-    errorSoft: '#FBEAE6',
+    errorSoft: '#FCE9E5',
     surface: '#FFFFFF',
     text: '#1E3340',
   },
@@ -224,11 +230,11 @@ export const EDITOR_THEMES: Record<
     lineStrong: '#987890',
     primary: '#D0558F',
     primarySoft: '#F9DDEA',
-    accentLight: '#FBE3A6',
-    accentSoft: '#FBF1DC',
-    accentText: '#8A5A00',
+    accentLight: '#FDE5A0',
+    accentSoft: '#FFF4D4',
+    accentText: '#7A5200',
     error: '#B3402F',
-    errorSoft: '#FBEAE6',
+    errorSoft: '#FCE9E5',
     surface: '#FFFFFF',
     text: '#3B2836',
   },
@@ -266,7 +272,7 @@ export function editorThemePalette(
   return { ...COLOR, ...EDITOR_THEMES[id] };
 }
 
-/** 덮개: 글자색(text)을 반투명으로. CSS `--scrim`. 위에 얹는 흰 글자가 흰 화면 위에서도 4.5:1이 되는 최소 진하기 (0.65 → 4.60) */
+/** 덮개: 글자색(text)을 반투명으로. CSS `--scrim`. 위에 얹는 흰 글자가 흰 화면 위에서도 4.5:1이 넘는 진하기 (0.65 → 4.82, 0.6은 4.16) */
 export const SCRIM = { color: COLOR.text, alpha: 0.65 } as const;
 
 export type WorldId = 1 | 2 | 3;
@@ -365,8 +371,8 @@ export const RADIUS = { s: 10, m: 14, l: 20, pill: 9999 } as const;
 
 /** 그림자: 기본 한 종류(카드) + 떠 있는 층(시트·토스트·오버레이)만 */
 export const SHADOW = {
-  card: '0 1px 2px rgb(46 42 37 / 0.06), 0 4px 14px rgb(46 42 37 / 0.06)',
-  pop: '0 12px 32px rgb(46 42 37 / 0.14)',
+  card: '0 1px 2px rgb(34 39 31 / 0.06), 0 4px 14px rgb(34 39 31 / 0.06)',
+  pop: '0 12px 32px rgb(34 39 31 / 0.14)',
 } as const;
 
 /**
@@ -454,7 +460,7 @@ export function rootCssVars(): Record<string, string> {
   for (const [alias, token] of Object.entries(SHADCN_ALIASES)) {
     vars[alias] = cssVar(token);
   }
-  vars['--scrim'] = `rgb(46 42 37 / ${SCRIM.alpha})`;
+  vars['--scrim'] = `rgb(34 39 31 / ${SCRIM.alpha})`;
   // 지금 월드 (속성이 없으면 1)
   vars['--world'] = cssVar(WORLD_THEMES[1].tint);
   vars['--world-ink'] = cssVar(WORLD_THEMES[1].ink);
@@ -660,6 +666,15 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
     use: '오류 10% 면 글자 (bg-destructive/10)',
   },
   { fg: 'onError', bg: 'error', kind: 'text', use: '위험 버튼 글자' },
+  // 주의 (P13-02): 틀림·다름 피드백, 주의·안내 띠
+  { fg: 'cautionText', bg: 'cautionSoft', kind: 'text', use: '주의 띠 글자' },
+  { fg: 'cautionText', bg: 'surface', kind: 'text', use: '카드 주의 글자' },
+  { fg: 'cautionText', bg: 'bg', kind: 'text', use: '주의 글자 (배경 위)' },
+  { fg: 'text', bg: 'cautionSoft', kind: 'text', use: '주의 띠 본문' },
+  { fg: 'textMuted', bg: 'cautionSoft', kind: 'text', use: '주의 띠 보조 글자' },
+  { fg: 'codeText', bg: 'cautionSoft', kind: 'text', use: '틀린 빈칸·줄 코드 (주의 면)' },
+  { fg: 'codeString', bg: 'cautionSoft', kind: 'text', use: '틀린 보기 코드 문자열 (주의 면)' },
+  { fg: 'codeKeyword', bg: 'cautionSoft', kind: 'text', use: '틀린 보기 코드 키워드 (주의 면)' },
   // 공통 컴포넌트 (P2-11, docs/design/components.md)
   { fg: 'text', bg: 'surfaceLip', kind: 'text', use: '흰 버튼 눌림(동작 줄이기)' },
   { fg: 'error', bg: 'surface2', kind: 'text', use: '위험 버튼 글자 (흰 면 위 보조 면)' },

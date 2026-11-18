@@ -67,6 +67,9 @@ const COLOR_ROLE: Record<ColorName, string> = {
   error: '오류 글자',
   onError: '오류색 위 글자',
   errorSoft: '오류 틴트 면',
+  caution: '주의 표시 (장식)',
+  cautionText: '주의 글자',
+  cautionSoft: '주의 틴트 면',
   onScrim: '덮개 위 글자',
   w1: '월드 1 틴트 (장식)',
   w1Ink: '월드 1 표지 글자',
@@ -94,7 +97,7 @@ const COLOR_GROUPS: [string, ColorName[]][] = [
   ['중립', ['bg', 'surface', 'surface2', 'surfaceLip', 'line', 'lineStrong', 'text', 'textMuted']],
   ['주색 · 보조', ['primary', 'onPrimary', 'primaryLip', 'primaryText', 'primaryBright', 'primarySoft', 'secondary', 'onSecondary']],
   ['강조 금색', ['accent', 'onAccent', 'accentLip', 'accentLight', 'accentText', 'accentSoft']],
-  ['의미색 · 덮개', ['success', 'successSoft', 'warning', 'warningSoft', 'error', 'onError', 'errorSoft', 'onScrim']],
+  ['의미색 · 덮개', ['success', 'successSoft', 'warning', 'warningSoft', 'error', 'onError', 'errorSoft', 'caution', 'cautionText', 'cautionSoft', 'onScrim']],
   ['월드 틴트', ['w1', 'w1Ink', 'w1Soft', 'w2', 'w2Ink', 'w2Soft', 'w2Shallow', 'w2Deep', 'w3', 'w3Ink', 'w3Soft', 'w3Brick', 'w3Blueprint']],
   ['코드', ['codeBg', 'codeText', 'codeComment', 'codeKeyword', 'codeString', 'codeNumber', 'codeFunc']],
 ];
