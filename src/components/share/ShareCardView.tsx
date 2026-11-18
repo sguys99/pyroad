@@ -84,7 +84,7 @@ export function ShareCardView({
         />
         <section aria-labelledby="share-title" className="grid gap-5">
           <div className="grid gap-2">
-            <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-kicker font-bold text-accent-text">
+            <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-kicker font-bold text-primary-text">
               {kind === 'creation' ? (
                 <>
                   <Palette aria-hidden className="size-4" />

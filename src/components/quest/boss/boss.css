@@ -129,7 +129,7 @@
 }
 /* 깎인 만큼의 밝은 잔상이 한 박자 늦게 따라 줄어듦 */
 .bb-hp-lag {
-  background: var(--accent-light);
+  background: color-mix(in srgb, var(--error) 35%, var(--surface));
   transition: transform calc(var(--dur-slow) * var(--bb-k)) var(--easing-in-out)
     calc(var(--dur-base) * var(--bb-k));
 }

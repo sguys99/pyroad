@@ -15,7 +15,7 @@ export function BoardCard({ post }: BoardCardProps) {
 
   return (
     <Link href={`/board/${post.id}`}>
-      <div className="rounded-2xl bg-card p-4 shadow-card transition-colors hover:bg-accent/50">
+      <div className="rounded-2xl bg-card p-4 shadow-card transition-colors hover:bg-muted">
         {post.is_hidden && (
           // 숨긴 글은 RLS 로 작성자에게만 보임 (00014)
           <p className="mb-1 inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-caption text-muted-foreground">

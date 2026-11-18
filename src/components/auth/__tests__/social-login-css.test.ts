@@ -97,10 +97,10 @@ describe('social-login.css 연출 단계', () => {
 });
 
 describe('최근 로그인 이름표 (P3-08)', () => {
-  it('금색 알약 + 흰 테두리, 등장은 단계별 (동작 줄이기는 없음)', () => {
+  it('짙은 알약 + 흰 테두리, 등장은 단계별 (동작 줄이기는 없음)', () => {
     const r = rule('.g-social-recent');
-    expect(r).toContain('background: var(--accent)');
-    expect(r).toContain('color: var(--on-accent)');
+    expect(r).toContain('background: var(--secondary)');
+    expect(r).toContain('color: var(--on-secondary)');
     expect(r).toContain('font-size: var(--text-caption)'); // 14px 미만 금지
     expect(r).toContain('var(--spring-prop)');
     expect(rule(":root[data-motion='minimal'] .g-social-recent")).toContain(

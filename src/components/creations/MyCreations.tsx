@@ -72,7 +72,7 @@ export function MyCreations({
         className="grid justify-items-center gap-2 rounded-3xl bg-surface p-8 text-center shadow-card"
         data-testid="my-creations-empty"
       >
-        <Palette className="size-8 text-accent-text" aria-hidden />
+        <Palette className="size-8 text-muted-foreground" aria-hidden />
         <p className="m-0 font-display text-h3">아직 저장한 작품이 없어요</p>
         <p className="m-0 text-small text-muted-foreground">
           거북이로 그림을 그리거나 대화하는 프로그램을 실행하면 &ldquo;작품으로
@@ -122,7 +122,7 @@ export function MyCreations({
                     />
                   ) : item.kind === 'drawing' ? (
                     <Palette
-                      className="size-10 text-accent-text"
+                      className="size-10 text-muted-foreground"
                       aria-label="그림 작품"
                     />
                   ) : (

@@ -246,7 +246,7 @@ export function SoundSettingsSection() {
         id={`${groupId}-title`}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <Volume2 aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <Volume2 aria-hidden className="h-5 w-5 text-foreground" />
         소리
       </h2>
       <p className="mb-3 text-base text-muted-foreground">

@@ -146,7 +146,7 @@ export function NicknameField({
       <div className="flex flex-wrap items-center gap-2">
         {status.kind === 'taken' && status.suggestion && onUseSuggestion && (
           <Button
-            variant="reward"
+            variant="primary"
             size="sm"
             icon={<Sparkles aria-hidden />}
             onClick={() => onUseSuggestion(status.suggestion!)}

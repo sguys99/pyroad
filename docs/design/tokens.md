@@ -27,15 +27,15 @@
 | `primaryBright` | `--primary-bright` | `#A1D995` | decor: 진행 막대 끝·지도 길·나뭇잎 |
 | `primarySoft` | `--primary-soft` · `bg-primary-soft` | `#E1F2E0` | 초록 틴트 면 (해 볼 일·성공 말풍선) |
 | `secondary` | `--secondary` · `ring-ring` | `#22271F` | 파랑 없음 → 짙은 중립: 포커스 링·어두운 버튼 |
-| `accent` | `--accent` · `bg-accent` | `#F6B92B` | 금색 하나: 별·코인·도장(쓰임을 보상으로 좁히는 일은 P13-03). 글자는 `onAccent`만 얹는다 |
+| `accent` | `--accent` · `bg-accent` | `#F6B92B` | 금색 하나: **보상에만** — 별·코인·도장·받기 버튼과 보상 계열(스트릭 불꽃·황금 열쇠·"전설" 등급·메달·왕관). "지금 여기"·선택은 초록, 패널은 중립, 틀림·주의는 `caution`(P13-03, [P13-audit](P13-audit.md) §6-5). 글자는 `onAccent`만 얹는다 |
 | `onAccent` | `--on-accent` · `text-accent-foreground` | `#22271F` | 금색 면 위 글자 |
 | `accentLip` · `accentLight` | `--accent-lip` · `--accent-light` | `#C98F12` · `#FDE5A0` | decor: 금색 버튼 아랫면·별 외곽 / 별·코인 밝은 쪽 |
 | `accentText` | `--accent-text` · **`text-accent-text`** | `#7A5200` | 금색 계열 글자: 보상 수치·도장 문구 (`text-accent` 금지) |
 | `accentSoft` | `--accent-soft` · `bg-accent-soft` | `#FFF4D4` | 금색 틴트 면 |
 | `success` · `successSoft` | `--success` · `--success-soft` | `#257338` · `#E1F2E0` | 성공 = 초록 글자 (새 색 없음) |
-| `warning` · `warningSoft` | `--warning` · `--warning-soft` · `text-warning` · `bg-warning-soft` | `#7A5200` · `#FFF4D4` | 경고 = 금색 글자 (예전 amber 대체) |
+| `warning` · `warningSoft` | `--warning` · `--warning-soft` · `text-warning` · `bg-warning-soft` | `#9C4A1A` · `#FFE8D6` | 경고 = 주의 글자·면(`cautionText`·`cautionSoft`와 같은 값, P13-03에서 금색 → 주의 색). 토스트 warn·입력 경고·안내 줄 |
 | `error` · `onError` · `errorSoft` | `--error` · `text-destructive` · `bg-error-soft` | `#B3402F` · `#FFFFFF` · `#FCE9E5` | 오류 |
-| `caution` · `cautionText` · `cautionSoft` | `--caution` · `--caution-text` · `--caution-soft` · `text-caution-text` · `bg-caution-soft` | `#EE7F4A` · `#9C4A1A` · `#FFE8D6` | 주의(P13-02): "틀렸어요·달라요" 피드백(퀴즈 틀린 보기·빈칸, 실행 결과 다름)과 주의·안내 띠. 빨강보다 순한 주황 — 보상 금색·정답 초록·3권 틴트와 다른 색. `caution`은 decor(흰 면 2.70:1, 뜻은 글자·아이콘과 함께), 글자는 `cautionText`. 컴포넌트 적용은 P13-03 |
+| `caution` · `cautionText` · `cautionSoft` | `--caution` · `--caution-text` · `--caution-soft` · `text-caution-text` · `bg-caution-soft` | `#EE7F4A` · `#9C4A1A` · `#FFE8D6` | 주의(P13-02): "틀렸어요·달라요" 피드백(퀴즈 틀린 보기·빈칸, 실행 결과 다름)과 주의·안내 띠. 빨강보다 순한 주황 — 보상 금색·정답 초록·3권 틴트와 다른 색. `caution`은 decor(흰 면 2.70:1, 뜻은 글자·아이콘과 함께), 글자는 `cautionText`. 3권 살구 면(`w3Soft`) 위에서는 주의 면이 묻히므로 흰 면 + 주의 글자(메이커 작업대 안내). 컴포넌트 적용 P13-03 |
 | `onScrim` · 덮개 | `--on-scrim` · `--scrim` · `bg-scrim` · `text-on-scrim` | `#FFFFFF` · `rgb(34 39 31 / 0.65)` | 축하·대화 상자 뒤 덮개와 그 위 글자 |
 | `w1`·`w2`·`w3` | `--w1` … · `bg-w2-soft` … | `#A4D49A` · `#9CC4DE` · `#EDB787` | decor: 월드 틴트 (§3) |
 | `w1Ink`·`w2Ink`·`w3Ink` | `--w1-ink` … | `#257338` · `#4A6170` · `#75583F` | 월드 표지 글자·아이콘 (2·3권도 채도를 낮춘 제 색조. 칩·배지 색으로는 쓰지 않음) |
@@ -48,7 +48,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 
 ### 1.1 대비 (WCAG AA, 자동 검사)
 
-`CONTRAST_PAIRS`(71쌍 — P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍, P7-13에서 퀴즈 7쌍, P10-04·P11-11에서 지도 4쌍, P13-02에서 주의 8쌍 추가)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.79:1**(초록 글자 on `bg-primary/10`).
+`CONTRAST_PAIRS`(70쌍 — P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍, P7-13에서 퀴즈 7쌍, P10-04·P11-11에서 지도 4쌍, P13-02에서 주의 8쌍 추가, P13-03에서 쓰임이 사라진 "퀴즈 틀린 빈칸 코드 on `accentSoft`" 1쌍 정리)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.79:1**(초록 글자 on `bg-primary/10`).
 
 | 쓰임 | 글자·전경 | 배경 | 대비 | 기준 |
 |---|---|---|---:|---:|
@@ -68,7 +68,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | 금색 버튼 눌림 | `onAccent` | `accentLip` #C98F12 | 5.38 | 4.5 |
 | 금색 글자 | `accentText` #7A5200 | `bg` / `surface` / `accentSoft` | 6.43 / 6.92 / 6.30 | 4.5 |
 | 금색 20% 배지 글자 | `onAccent` | `accent` 20% over `surface` | 13.58 | 4.5 |
-| 성공 · 경고 글자 | `success` / `warning` | `successSoft` / `warningSoft` | 5.01 / 6.30 | 4.5 |
+| 성공 · 경고 글자 | `success` / `warning` | `successSoft` / `warningSoft` | 5.01 / 5.21 | 4.5 |
 | 오류 글자 | `error` #B3402F | `bg` / `surface` / `errorSoft` | 5.28 / 5.68 / 4.85 | 4.5 |
 | 위험 버튼 글자 | `onError` #FFFFFF | `error` | 5.68 | 4.5 |
 | 주의 글자 | `cautionText` #9C4A1A | `bg` / `surface` / `cautionSoft` #FFE8D6 | 5.72 / 6.16 / 5.21 | 4.5 |
@@ -81,11 +81,11 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | 2·3월드 지도 면 위 글자 | `text` | `w2Shallow` / `w2Deep` / `w3Brick` / `w3Blueprint` | 11.79 / 7.29 / 6.20 / 8.14 | 4.5 |
 | 코드 글자·주석·키워드·문자열 | `codeText` / `codeComment` / `codeKeyword` / `codeString` | `codeBg` #FFFFFF | 15.23 / 4.84 / 5.85 / 6.92 | 4.5 |
 | 코드 줄 번호 | `textMuted` | `surface2` | 5.25 | 4.5 |
-| 퀴즈 칩·빈칸 코드 (흰 면 · 정답 면 · 틀린 면) | `codeText` / `codeString` | `surface` / `successSoft` / `accentSoft` | 15.23 · 6.92 / 13.04 / 13.89 | 4.5 |
+| 퀴즈 칩·빈칸 코드 (흰 면 · 정답 면. 틀린 면은 위 "주의 면 코드") | `codeText` / `codeString` | `surface` / `successSoft` | 15.23 · 6.92 / 13.04 | 4.5 |
 | 퀴즈 빈 빈칸 번호 | `textMuted` | `codeBg` | 6.14 | 4.5 |
 | 퀴즈 정답 체크 동그라미 · 정답 테 | `onPrimary` · `success` | `success` · `surface` | 5.85 / 5.85 | 3 |
 
-(표시값은 소수 둘째 자리에서 내림. 전체 71쌍은 `npx vitest run src/lib/design`)
+(표시값은 소수 둘째 자리에서 내림. 전체 70쌍은 `npx vitest run src/lib/design`)
 
 ### 1.2 P13-02 "3-A 맑게 다듬기" (2026-11-18)
 

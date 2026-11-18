@@ -182,7 +182,7 @@ export default function SettingsPage() {
       id="ai-tutor-title"
       className="mb-3 flex items-center gap-2 text-lg font-bold text-foreground"
     >
-      <Bot aria-hidden className="h-5 w-5 text-accent-foreground" />
+      <Bot aria-hidden className="h-5 w-5 text-foreground" />
       AI 튜터
     </h2>
   );

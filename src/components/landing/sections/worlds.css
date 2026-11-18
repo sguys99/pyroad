@@ -222,10 +222,6 @@
     font-weight: 700;
     line-height: var(--text-caption--line-height);
   }
-  .ld-worlds-soon {
-    background: var(--accent-soft);
-    color: var(--accent-text);
-  }
   .ld-worlds-lock {
     position: absolute;
     top: 0.5rem;
@@ -342,10 +338,10 @@
     outline-offset: var(--focus-offset);
   }
 
-  /* 잠긴 월드를 누름: 자물쇠가 금색으로 + 말풍선 (모든 단계), 흔들림은 아래 연출 단계에서 */
+  /* 잠긴 월드를 누름: 자물쇠가 짙은 색으로 + 말풍선 (모든 단계), 흔들림은 아래 연출 단계에서 */
   .ld-worlds-card[data-tip='on'] .ld-worlds-lock {
-    background: var(--accent-soft);
-    color: var(--accent-text);
+    background: var(--secondary);
+    color: var(--on-secondary);
   }
   .ld-worlds-tip {
     position: absolute;

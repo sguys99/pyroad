@@ -49,7 +49,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
   font-size: var(--text-kicker);
   font-weight: var(--text-kicker--font-weight);
   letter-spacing: var(--text-kicker--letter-spacing);
@@ -80,7 +80,7 @@
 .gl-rules > li > svg {
   width: 0.875rem;
   height: 0.875rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
 }
 
 /* ───────────── 전시 벽: 액자 격자 (360 두 칸 · 768 세 칸 · 1024 네 칸) */
@@ -170,7 +170,7 @@
 .gl-paper-icon {
   width: 2.5rem;
   height: 2.5rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
 }
 
 /* 대화 작품 표지: 말풍선 세 줄 미리보기 */
@@ -764,7 +764,7 @@
   border-radius: var(--round-m);
   background: var(--w3-soft);
   box-shadow: inset 0 0 0 var(--lip-h) var(--w3);
-  color: var(--accent-text);
+  color: var(--w3-ink);
 }
 .gl-empty-easel > svg {
   width: 2.5rem;

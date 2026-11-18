@@ -38,7 +38,7 @@ export function GuardianConsentStatus() {
         </p>
       </div>
       {status.state === 'pending' && (
-        <Button href={GUARDIAN_CONSENT_HREF} variant="reward" size="sm">
+        <Button href={GUARDIAN_CONSENT_HREF} variant="primary" size="sm">
           보호자 동의하기
         </Button>
       )}

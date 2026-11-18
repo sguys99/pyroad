@@ -518,7 +518,7 @@ export function CreationsCard({ total }: { total: number }) {
       data-testid="profile-creations"
       aria-label={`내 작품함, 작품 ${total}개`}
     >
-      <Palette className="size-6 shrink-0 text-accent-text" aria-hidden />
+      <Palette className="size-6 shrink-0 text-muted-foreground" aria-hidden />
       <span className="grid min-w-0 gap-0.5">
         <span className="font-display text-h3 text-foreground">내 작품함</span>
         <span className="text-caption text-muted-foreground">

@@ -213,18 +213,18 @@
   }
 }
 
-/* 결과: 정답 초록 · 틀림 금색 (어느 줄인지는 정답이라 표시하지 않음) · 공개 정답 초록 */
+/* 결과: 정답 초록 · 틀림 주의 색 (어느 줄인지는 정답이라 표시하지 않음) · 공개 정답 초록 */
 .qz-ps-box:is([data-status='correct'], [data-status='revealed']) {
   background: var(--success-soft);
   box-shadow: inset 0 0 0 2px var(--success);
 }
 .qz-ps-box[data-status='wrong'] {
-  background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--caution-soft);
+  box-shadow: inset 0 0 0 2px var(--caution);
 }
 .qz-ps-note {
   margin: 0.625rem 0 0;
-  color: var(--accent-text);
+  color: var(--caution-text);
   font-size: var(--text-small);
   font-weight: 700;
   line-height: var(--text-small--line-height);

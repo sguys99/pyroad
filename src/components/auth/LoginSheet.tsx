@@ -230,7 +230,7 @@ export function LoginSheet({
         <li data-testid="login-sheet-guardian">
           <UsersRound
             aria-hidden
-            className="mr-1 inline-block size-4 align-[-0.2em] text-accent-text"
+            className="mr-1 inline-block size-4 align-[-0.2em] text-caution-text"
           />
           {LOGIN_SHEET_GUARDIAN_NOTE}
         </li>

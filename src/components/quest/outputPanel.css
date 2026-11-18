@@ -20,7 +20,7 @@
   background: var(--success-soft);
 }
 .qo-slip[data-tone='diff'] {
-  background: var(--accent-soft);
+  background: var(--caution-soft);
 }
 .qo-slip[data-tone='bug'] {
   background: var(--error-soft);
@@ -68,7 +68,7 @@
   color: var(--on-primary);
 }
 .qo-chip[data-tone='diff'] {
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .qo-chip[data-tone='bug'] {
   color: var(--error);
@@ -354,14 +354,14 @@
   animation: qo-pop-lite var(--dur-base) var(--easing-out) both;
 }
 
-/* 출력이 다를 때: 공개 안내("해 볼 일에서 나와야 하는 모습")와 견줘 보기. 흰 면 위 옅은 금색 줄 */
+/* 출력이 다를 때: 공개 안내("해 볼 일에서 나와야 하는 모습")와 견줘 보기. 흰 면 위 주의 색 줄 */
 .qo-compare {
   display: grid;
   gap: 0.5rem;
   padding: 0.875rem 1rem;
   border-radius: var(--round-m);
   background: var(--surface);
-  box-shadow: inset 0.25rem 0 0 var(--accent);
+  box-shadow: inset 0.25rem 0 0 var(--caution);
 }
 .qo-goal {
   display: grid;
@@ -483,13 +483,13 @@
   background: var(--surface-2);
 }
 .qo-goal[data-compare] .qo-cmp-row:not([data-same]) {
-  background: var(--accent-soft);
+  background: var(--caution-soft);
 }
 .qo-cmp-mark {
   display: inline-flex;
   flex: none;
   padding-top: 0.25rem;
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .qo-cmp-row[data-same] .qo-cmp-mark {
   color: var(--primary-text);

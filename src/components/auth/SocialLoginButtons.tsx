@@ -159,12 +159,12 @@ export function SocialLoginButtons({
     >
       {hint && (
         <p
-          className="flex items-start gap-2 rounded-xl bg-accent-soft px-3 py-2.5 text-small text-foreground"
+          className="flex items-start gap-2 rounded-xl bg-caution-soft px-3 py-2.5 text-small text-foreground"
           data-testid="login-error-hint"
         >
           <Lightbulb
             aria-hidden
-            className="mt-0.5 size-4 shrink-0 text-accent-text"
+            className="mt-0.5 size-4 shrink-0 text-caution-text"
           />
           {hint}
         </p>

@@ -48,7 +48,7 @@ export function PostDetail({ post, isOwner }: PostDetailProps) {
         <div className="mt-4 flex items-center gap-2">
           <Link
             href={`/board/${post.id}/edit`}
-            className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-muted-foreground transition-colors hover:bg-accent"
+            className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-muted-foreground transition-colors hover:bg-muted"
           >
             수정
           </Link>

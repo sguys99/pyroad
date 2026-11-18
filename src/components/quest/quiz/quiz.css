@@ -77,10 +77,6 @@
   font-weight: 700;
   line-height: var(--text-caption--line-height);
 }
-.qz-chip[data-tone='review'] {
-  background: var(--accent-soft);
-  color: var(--accent-text);
-}
 .qz-notice {
   margin: 0.75rem 0 0;
   padding: 0.5rem 0.75rem;
@@ -273,21 +269,21 @@
   background: var(--primary);
   color: var(--on-primary);
 }
-/* 틀린 답: 금색 면 + X + "고른 답" (빨간 경고 없음) */
+/* 틀린 답: 주의 색 면 + X + "고른 답" (빨간 경고 없음) */
 .qz-opt[data-mark='wrong'] {
-  background: var(--accent-soft);
+  background: var(--caution-soft);
   box-shadow:
-    inset 0 0 0 2px var(--accent),
-    0 var(--lip-h) 0 var(--accent-lip);
+    inset 0 0 0 2px var(--caution),
+    0 var(--lip-h) 0 var(--caution);
 }
 .qz-opt[data-mark='wrong'] .qz-opt-mark {
-  background: var(--accent);
+  background: var(--caution);
   box-shadow: none;
-  color: var(--on-accent);
+  color: var(--text);
 }
 .qz-opt[data-mark='wrong'] .qz-opt-tag {
   background: var(--surface);
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 /* 이번 회차에 틀렸던 답: 흐리게 + X + "아니었어요", 누를 수 없음 */
 .qz-opt[data-mark='miss'] {
@@ -390,7 +386,7 @@
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: var(--round-m);
-  background: var(--accent-soft);
+  background: var(--surface-2);
   color: var(--text);
   font-size: var(--text-body);
   font-weight: 700;
@@ -401,7 +397,7 @@
   width: 1.25rem;
   height: 1.25rem;
   margin-top: 0.125rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
 }
 .qz-try-note,
 .qz-try-wait {
@@ -546,12 +542,12 @@
   color: var(--success);
 }
 .qz-fb-slot[data-mark='wrong'] {
-  background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--caution-soft);
+  box-shadow: inset 0 0 0 2px var(--caution);
   color: var(--text);
 }
 .qz-fb-slot[data-mark='wrong'] > svg {
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .qz-fb-slot:disabled {
   cursor: default;
@@ -777,17 +773,17 @@
   color: var(--on-primary);
 }
 .qz-bh-line[data-mark='wrong'] {
-  background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--caution-soft);
+  box-shadow: inset 0 0 0 2px var(--caution);
 }
 .qz-bh-line[data-mark='wrong'] .qz-bh-mark {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--caution);
+  color: var(--text);
 }
 .qz-bh-line[data-mark='wrong'] .qz-bh-tag,
 .qz-bh-ins[data-mark='wrong'] .qz-opt-tag {
   background: var(--surface);
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .qz:not([data-status='answering']) .qz-bh-line[data-mark='none'] {
   opacity: 0.7;
@@ -994,11 +990,11 @@
   }
 }
 
-/* 버그 찾기 고친 줄에서 바뀐 글자 (B53, changedChars): 금색 밑줄 + 옅은 면. 색만이 아니라 밑줄 모양으로도 */
+/* 버그 찾기 고친 줄에서 바뀐 글자 (B53, changedChars): 초록 밑줄 + 흰 면. 색만이 아니라 밑줄 모양으로도 */
 .qz-diff {
   border-radius: 0.125rem;
-  background: var(--accent-soft);
-  box-shadow: inset 0 -0.1875rem 0 var(--accent);
+  background: var(--surface);
+  box-shadow: inset 0 -0.1875rem 0 var(--primary);
   color: inherit;
 }
 

@@ -54,10 +54,10 @@ export function LoginErrorPanel({
         </p>
       </div>
       {hint && (
-        <p className="flex items-start gap-2 rounded-xl bg-accent-soft px-3 py-2.5 text-left text-small text-foreground">
+        <p className="flex items-start gap-2 rounded-xl bg-caution-soft px-3 py-2.5 text-left text-small text-foreground">
           <Lightbulb
             aria-hidden
-            className="mt-0.5 size-4 shrink-0 text-accent-text"
+            className="mt-0.5 size-4 shrink-0 text-caution-text"
           />
           {hint}
         </p>

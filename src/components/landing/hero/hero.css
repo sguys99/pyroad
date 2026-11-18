@@ -446,7 +446,7 @@
     width: 2.75rem;
     height: 2.75rem;
     margin: -1.375rem 0 0 -1.375rem;
-    border: 2px solid var(--accent);
+    border: 2px solid var(--primary);
     border-radius: 50%;
     opacity: 0;
     pointer-events: none;

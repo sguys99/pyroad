@@ -63,7 +63,11 @@
   gap: 0.5rem;
   padding: 0.875rem 1rem;
   border-radius: var(--round-m);
-  background: var(--accent-soft);
+  background: var(--surface-2);
+}
+/* 중립 면 위 진행 막대: 홈이 같은 색이라 흰 홈으로 */
+.ss-sum .g-prog {
+  background: var(--surface);
 }
 .ss-sum-txt {
   display: flex;
@@ -100,7 +104,7 @@
   align-items: center;
   gap: 0.375rem;
   margin: 0;
-  color: var(--accent-text);
+  color: var(--text-muted);
   font-size: var(--text-small);
   font-weight: 700;
   line-height: var(--text-small--line-height);
@@ -168,7 +172,7 @@
   color: var(--on-primary);
 }
 .ss-row[data-kind='boss'] .ss-no {
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 2px var(--secondary);
 }
 .ss-main {
   display: grid;
@@ -209,8 +213,8 @@
   white-space: nowrap;
 }
 .ss-tag[data-kind='boss'] {
-  background: var(--accent-soft);
-  color: var(--accent-text);
+  background: var(--secondary);
+  color: var(--on-secondary);
 }
 .ss-tag[data-state='done'] {
   background: var(--success-soft);
@@ -231,11 +235,11 @@
     color: var(--text-muted);
   }
 }
-/* "복습 도전 가능" (P8-05, §2.3): 별 판정 다음 날부터 별을 더 모을 수 있는 퀴즈. 금색 테두리 딱지 (보스의 금색 면과 구분) */
+/* "복습 도전 가능" (P8-05, §2.3): 별 판정 다음 날부터 별을 더 모을 수 있는 퀴즈. 중립 테두리 딱지 (금색은 보상에만, P13-03) */
 .ss-tag[data-review] {
   background: var(--surface);
-  box-shadow: inset 0 0 0 1.5px var(--accent);
-  color: var(--accent-text);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  color: var(--text-muted);
 }
 /* 퀴즈 보너스 안내 한 줄 (P7-11) */
 .ss-bonus {
@@ -250,7 +254,7 @@
 }
 .ss-bonus svg {
   flex: none;
-  color: var(--accent);
+  color: var(--text-muted);
 }
 .ss-end {
   display: inline-flex;

@@ -279,7 +279,7 @@ export function LinkedAccountsSection() {
         id={titleId}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <KeyRound aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <KeyRound aria-hidden className="h-5 w-5 text-foreground" />
         로그인 계정 연결
       </h2>
       <p className="mb-3 text-base text-muted-foreground">

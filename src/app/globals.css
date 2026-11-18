@@ -228,8 +228,8 @@
   /* 의미색: 성공 = 초록 글자, 경고 = 금색 글자, 오류 */
   --success: #257338;
   --success-soft: #e1f2e0;
-  --warning: #7a5200;
-  --warning-soft: #fff4d4;
+  --warning: #9c4a1a;
+  --warning-soft: #ffe8d6;
   --error: #b3402f;
   --on-error: #ffffff;
   --error-soft: #fce9e5;

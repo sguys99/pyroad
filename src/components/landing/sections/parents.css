@@ -115,8 +115,8 @@
     color: var(--primary-text);
   }
   .ld-parents-tag[data-status='soon'] {
-    background: var(--accent-soft);
-    color: var(--accent-text);
+    background: var(--surface-2);
+    color: var(--text-muted);
   }
 
   /* ───────────── 배우는 길 (로드맵): 좁은 화면은 세로 길, 768px부터 가로 길 */

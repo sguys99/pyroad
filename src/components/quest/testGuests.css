@@ -23,7 +23,7 @@
 .qg-title > svg {
   width: 1.25rem;
   height: 1.25rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
 }
 .qg-summary {
   color: var(--text-muted);
@@ -50,7 +50,7 @@
   background: var(--success-soft);
 }
 .qg-card[data-tone='diff'] {
-  background: var(--accent-soft);
+  background: var(--caution-soft);
 }
 .qg-card[data-tone='bug'] {
   background: var(--error-soft);
@@ -74,7 +74,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: var(--round-pill);
-  background: var(--accent-light);
+  background: var(--surface);
   color: var(--text);
   font-size: var(--text-body);
 }
@@ -110,7 +110,7 @@
   color: var(--on-primary);
 }
 .qg-chip[data-tone='diff'] {
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .qg-chip[data-tone='bug'] {
   color: var(--error);
@@ -154,7 +154,7 @@
   max-width: 100%;
   padding: 0.25rem 0.875rem;
   border-radius: var(--round-m) var(--round-m) var(--round-s) var(--round-m);
-  background: var(--accent-light);
+  background: var(--surface);
   color: var(--text);
   font-size: var(--text-body);
   font-weight: 700;

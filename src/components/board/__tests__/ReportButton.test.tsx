@@ -108,7 +108,7 @@ describe('BoardFormMessage', () => {
         error={{ message: '다른 말로 바꿔 볼까요?', code: 'moderation' }}
       />,
     );
-    expect(screen.getByRole('alert').className).toContain('bg-accent');
+    expect(screen.getByRole('alert').className).toContain('bg-caution-soft');
     cleanup();
     render(<BoardFormMessage error={{ message: '앗' }} />);
     expect(screen.getByRole('alert').className).toContain('text-destructive');

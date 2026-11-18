@@ -266,7 +266,7 @@ export function MotionSettingsSection({
         id={`${groupId}-title`}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <Sparkles aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <Sparkles aria-hidden className="h-5 w-5 text-foreground" />
         움직임
       </h2>
       <p className="mb-3 text-base text-muted-foreground">

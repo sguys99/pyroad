@@ -20,7 +20,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
   font-size: var(--text-kicker);
   font-weight: var(--text-kicker--font-weight);
   letter-spacing: var(--text-kicker--letter-spacing);

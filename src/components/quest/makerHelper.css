@@ -55,9 +55,6 @@
   width: 1.125rem;
   height: 1.125rem;
 }
-.mk-fb .mk-icon {
-  color: var(--accent-text);
-}
 
 .mk-lead,
 .mk-sub {
@@ -134,4 +131,9 @@
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* 살구빛 설계도 면(--w3-soft) 위에서는 주의 면(--caution-soft)이 묻힌다 → 흰 면 + 주의 글자·아이콘 (P13-03) */
+.mk .qf-note {
+  background: var(--surface);
 }

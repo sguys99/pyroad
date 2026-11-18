@@ -78,11 +78,11 @@ export const COLOR = {
   accentText: '#7A5200',
   accentSoft: '#FFF4D4',
 
-  // 의미색 (성공 = 초록 글자, 경고 = 금색 글자: 색 수를 늘리지 않는다)
+  // 의미색 (성공 = 초록 글자, 경고 = 주의 글자(P13-03, 예전 금색): 색 수를 늘리지 않는다)
   success: '#257338',
   successSoft: '#E1F2E0',
-  warning: '#7A5200',
-  warningSoft: '#FFF4D4',
+  warning: '#9C4A1A',
+  warningSoft: '#FFE8D6',
   error: '#B3402F',
   onError: '#FFFFFF',
   errorSoft: '#FCE9E5',
@@ -642,7 +642,7 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: 'onAccent', bg: 'accentLip', kind: 'text', use: '금색 버튼 눌림(동작 줄이기)' },
   { fg: 'accentText', bg: 'bg', kind: 'text', use: '금색 글자 (보상 수치)' },
   { fg: 'accentText', bg: 'surface', kind: 'text', use: '카드 금색 글자' },
-  { fg: 'accentText', bg: 'accentSoft', kind: 'text', use: '경고·도장 글자' },
+  { fg: 'accentText', bg: 'accentSoft', kind: 'text', use: '도장·보상 글자' },
   { fg: 'text', bg: 'accentSoft', kind: 'text', use: '금색 틴트 면 본문' },
   {
     fg: 'onAccent',
@@ -711,7 +711,6 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: 'codeText', bg: 'surface', kind: 'text', use: '퀴즈 낱말 칩·빈칸 코드' },
   { fg: 'codeString', bg: 'surface', kind: 'text', use: '퀴즈 보기 코드 문자열' },
   { fg: 'codeText', bg: 'successSoft', kind: 'text', use: '퀴즈 정답 빈칸·줄 코드' },
-  { fg: 'codeText', bg: 'accentSoft', kind: 'text', use: '퀴즈 틀린 빈칸·줄 코드' },
   { fg: 'textMuted', bg: 'codeBg', kind: 'text', use: '퀴즈 빈 빈칸 번호' },
   { fg: 'onPrimary', bg: 'success', kind: 'ui', use: '퀴즈 정답 체크 동그라미' },
   { fg: 'success', bg: 'surface', kind: 'ui', use: '퀴즈 정답 테' },
