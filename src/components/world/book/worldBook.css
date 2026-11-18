@@ -155,17 +155,6 @@
     /* P13-04: 0.35는 2·3권 표지를 회색으로 만들었다. 잠김은 자물쇠·상태 글자가 알린다 */
     filter: saturate(0.75);
   }
-  .wb-band {
-    position: absolute;
-    top: 0.625rem;
-    left: 0.625rem;
-    padding: 0.125rem 0.625rem;
-    border-radius: var(--round-pill);
-    background: color-mix(in srgb, var(--surface) 92%, transparent);
-    color: var(--text);
-    font-size: var(--text-caption);
-    font-weight: 700;
-  }
   .wb-clasp {
     position: absolute;
     top: 0.5rem;
@@ -205,9 +194,6 @@
   .wb-book:has(> .wb-skill) > .wb-cover {
     border-bottom-left-radius: 0;
   }
-  .wb-book .wb-band {
-    display: none;
-  }
   .wb-info {
     display: flex;
     min-width: 0;
@@ -230,9 +216,6 @@
     .wb-shelf .wb-info {
       align-self: start;
       padding: 1rem 1.25rem 1.25rem;
-    }
-    .wb-book .wb-band {
-      display: block;
     }
   }
   .wb-kicker {
@@ -384,9 +367,6 @@
   }
   .wb-next .wb-book {
     grid-template-columns: 6rem 1fr;
-  }
-  .wb-next .wb-band {
-    display: none;
   }
 
   /* ───────────── 잠긴 책 안내 (/world/[slug]가 잠겼거나 준비 중) */

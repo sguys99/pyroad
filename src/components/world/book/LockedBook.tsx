@@ -39,7 +39,7 @@ export function LockedBook({
       data-testid="world-locked"
     >
       <div className="wb-book" data-status={entry.status}>
-        <WorldCover book={toBook(entry)} no={no} />
+        <WorldCover book={toBook(entry)} />
       </div>
       <div className="flex flex-col gap-3">
         <p className="text-kicker text-muted-foreground">
