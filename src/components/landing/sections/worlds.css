@@ -201,8 +201,9 @@
     transition: transform var(--spring-face-dur) var(--spring-face);
   }
   .ld-worlds-card[data-state='locked'] .ld-worlds-art {
-    /* 잠긴 월드: 흐림 대신 채도·명도만 낮춘다 (정지 필터, 움직이지 않음) */
-    filter: saturate(0.4) brightness(0.98);
+    /* 잠긴 월드: 흐림 대신 채도만 조금 낮춘다 (정지 필터). 0.4는 2·3권 하늘·살구를 회색으로 만들어
+       제 색이 안 읽혔다(P13-04) — 잠김은 자물쇠와 글자가 알린다 */
+    filter: saturate(0.75);
   }
   .ld-worlds-tags {
     position: absolute;

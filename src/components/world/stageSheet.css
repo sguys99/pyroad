@@ -47,7 +47,7 @@
         color-mix(in srgb, var(--text) 9%, transparent),
         transparent 1.25rem
       ),
-      url('/textures/paper-fiber.v1.png');
+      url('/textures/paper-fiber.v2.png');
     background-size:
       100% 100%,
       256px 256px;
@@ -318,7 +318,7 @@
     bottom: -1.75rem;
     margin: -0.5rem -2.25rem -1.75rem -2.75rem;
     padding: 0.75rem 2.25rem 1.75rem 2.75rem;
-    background: var(--surface) url('/textures/paper-fiber.v1.png') 0 0 / 256px
+    background: var(--surface) url('/textures/paper-fiber.v2.png') 0 0 / 256px
       256px;
   }
 }

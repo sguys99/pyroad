@@ -152,7 +152,8 @@
   }
   .wb-book[data-status='locked'] .wb-cover svg,
   .wb-book[data-status='coming_soon'] .wb-cover svg {
-    filter: saturate(0.35) brightness(0.98);
+    /* P13-04: 0.35는 2·3권 표지를 회색으로 만들었다. 잠김은 자물쇠·상태 글자가 알린다 */
+    filter: saturate(0.75);
   }
   .wb-band {
     position: absolute;

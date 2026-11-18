@@ -56,7 +56,7 @@ npm run assets:svg -- --check   # 최적화 안 된 파일·규칙 위반이 있
 | 파일 | 크기 | 단계 | 용량 | 쓰는 법 |
 |---|---|---|---|---|
 | `public/textures/paper-grain.v1.png` | 128px | 6 | 2.0KB | 잔 입자. `background: url(/textures/paper-grain.v1.png) 0 0/128px` |
-| `public/textures/paper-fiber.v1.png` | 256px | 8 | 7.4KB | 섬유 얼룩(바탕 1겹). `… 0 0/256px` |
+| `public/textures/paper-fiber.v2.png` | 256px | 8 | 7.4KB | 섬유 얼룩(바탕 1겹). `… 0 0/256px`. v2(P13-04)는 결 색만 새 바탕 색조 `#4A5240`으로(무늬는 v1과 같음). v1은 v1.0.0에 배포돼 한 릴리즈 뒤에 지움 |
 
 ```bash
 npm run assets:textures            # 없는 타일만 만든다
@@ -64,7 +64,7 @@ npm run assets:textures -- --check # 파일이 정의와 같은 그림인지 (�
 ```
 
 - 시드 고정 PRNG(mulberry32) + 사칙연산만 써서 어느 기기에서나 같은 픽셀이 나옵니다. 가장자리를 감싸는 흐림이라 이음매 없이 반복됩니다.
-- 색은 잉크 갈색 하나(`#5C462A`)에 인덱스마다 투명도만 다른 팔레트 PNG입니다(최대 불투명도 grain 11%, fiber 4%). 다른 색이 필요하면(다크 모드 등) 같은 파일을 CSS `mask-image`로 쓰고 배경색을 칠합니다.
+- 색은 잉크 하나에 인덱스마다 투명도만 다른 팔레트 PNG입니다(최대 불투명도 grain 11%, fiber 4%). 기본 잉크는 갈색 `#5C462A`(grain), 타일 정의에 `ink`를 주면 그 색(fiber v2 = `#4A5240`, 바탕 `#F6F7F3`과 같은 풀빛 도는 중립 — 갈색 결은 새 바탕·월드 틴트 위에서 누렇게 떴음). 다른 색이 필요하면(다크 모드 등) 같은 파일을 CSS `mask-image`로 쓰고 배경색을 칠합니다.
 - PNG를 고른 이유: WebP 무손실은 8~10%만 작고(1.9KB·6.6KB), 공유 카드(satori + resvg)가 PNG를 확실히 그립니다(P0-10). 한 파일을 웹과 카드가 같이 씁니다.
 - 바꿀 때: `TEXTURES`의 값·알고리즘을 바꾸고 **version을 올린 뒤** 다시 생성. 옛 파일은 한 릴리즈 뒤에 지웁니다.
 - 공유 카드(P2-19): 라우트 핸들러가 `readFile(join(process.cwd(), 'public/textures/paper-grain.v1.png'))`처럼 **고정 경로**로 읽어 data URI로 배경에 반복합니다(동적 경로는 파일 추적이 폴더 전체를 함수에 넣음: P0-10 §4.6). satori `backgroundRepeat`는 P2-19에서 확인: `repeat`(기본)·`repeat-x`·`no-repeat` 모두 CSS대로 동작하고 이음매 없이 반복되지만, 1200×630 전면에 깔면 카드 PNG가 11KB → 117KB로 커지고 렌더가 약 100ms 늘어 지금 카드는 단색 바탕을 씁니다([share-card.md](share-card.md) §5).

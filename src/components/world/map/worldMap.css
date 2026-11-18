@@ -13,8 +13,8 @@
   --wm-sand: color-mix(in srgb, var(--w3) 48%, var(--surface));
 }
 
-/* 종이: 월드 틴트 바탕 + 섬유 결 타일 한 겹 + 가장자리 그을림 (assets.md §3.1). 잔 입자(paper-grain)까지 깔면
-   최종 시안보다 지저분해 보여 섬유만 */
+/* 종이: 월드 틴트 바탕 + 섬유 결 타일 한 겹 + 가장자리 그늘 (assets.md §3.1). 잔 입자(paper-grain)까지 깔면
+   최종 시안보다 지저분해 보여 섬유만. 가장자리 그늘은 월드 색(P13-04: 살구색 --w3 고정이면 1·2권 가장자리가 누렇게 뜸) */
 .world-map {
   position: relative;
   aspect-ratio: var(--tall-ratio);
@@ -23,10 +23,10 @@
   overflow: clip;
   border-radius: var(--round-m);
   background-color: var(--wm-land);
-  background-image: url('/textures/paper-fiber.v1.png');
+  background-image: url('/textures/paper-fiber.v2.png');
   background-size: 256px 256px;
   box-shadow:
-    inset 0 0 40px color-mix(in srgb, var(--w3) 38%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--world) 38%, transparent),
     var(--elev-card);
 }
 .world-node {
