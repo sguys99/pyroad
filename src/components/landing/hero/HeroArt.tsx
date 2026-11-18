@@ -150,17 +150,6 @@ function Bush({
   );
 }
 
-function Sparkle({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
-  return (
-    <g transform={at(x, y, s)}>
-      <path
-        className="ha-spark hm hm-gold"
-        d="M0-11L3-3L11 0L3 3L0 11L-3 3L-11 0L-3-3Z"
-      />
-    </g>
-  );
-}
-
 function Flower({ x, y, gold }: { x: number; y: number; gold?: boolean }) {
   return (
     <g transform={at(x, y)}>
@@ -394,7 +383,7 @@ function FarLayer() {
   );
 }
 
-/** 섬: 모래 · 언덕 두 겹 · 점선 길 · 성(꼭대기) · 탑 · 숲 · 반짝이 */
+/** 섬: 모래 · 언덕 두 겹 · 점선 길 · 성(꼭대기) · 탑 · 숲 */
 function MidLayer() {
   // 왼쪽·오른쪽 해안이 바다로 비스듬히 내려간다 (오른쪽 너머로 바다와 등대 섬이 보이게)
   const hill =
@@ -425,9 +414,6 @@ function MidLayer() {
       </g>
       <Bush x={720} y={700} s={0.9} tone="forest" />
       <Bush x={1290} y={640} s={0.8} />
-      <Sparkle x={980} y={372} s={1.2} />
-      <Sparkle x={1150} y={350} s={0.8} />
-      <Sparkle x={1210} y={410} s={1} />
     </Layer>
   );
 }

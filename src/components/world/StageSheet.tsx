@@ -11,7 +11,6 @@ import {
   MessageCircleQuestion,
   RotateCcw,
   Smartphone,
-  Sparkles,
 } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import type { WorldId } from '@/lib/design/tokens';
@@ -217,7 +216,11 @@ export function StageSheet({
         />
         {quizRows.length > 0 && (
           <p className="ss-sum-quiz" data-testid="stage-sheet-quiz-sum">
-            <Sparkles aria-hidden className="size-4" strokeWidth={2.4} />
+            <MessageCircleQuestion
+              aria-hidden
+              className="size-4"
+              strokeWidth={2.4}
+            />
             보너스 퀴즈 {quizDone}/{quizRows.length}
             {quizStars > 0 && (
               <span className="ss-sum-quiz-stars">
@@ -263,7 +266,10 @@ export function StageSheet({
                   {q.state === 'done' ? (
                     <Check className="size-5" strokeWidth={3} />
                   ) : no?.quiz ? (
-                    <Sparkles className="size-5" strokeWidth={2.4} />
+                    <MessageCircleQuestion
+                      className="size-5"
+                      strokeWidth={2.4}
+                    />
                   ) : (
                     (no?.n ?? q.order)
                   )}
@@ -374,7 +380,6 @@ export function StageSheet({
       {rows.some((r) => r.kind === 'quiz') && (
         // 퀴즈는 스테이지 잠금·클리어 계산에서 빠진다 (countsForClear, §12-Q60)
         <p className="ss-bonus" data-testid="stage-sheet-bonus">
-          <Sparkles aria-hidden className="size-4" strokeWidth={2.4} />
           퀴즈는 보너스예요 — 안 풀어도 다음 스테이지가 열려요
         </p>
       )}

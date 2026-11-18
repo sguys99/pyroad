@@ -7,7 +7,7 @@ import {
   MessagesSquare,
   Palette,
   ShieldAlert,
-  Sparkles,
+  Frame,
   Trash2,
 } from 'lucide-react';
 import {
@@ -150,7 +150,7 @@ export function MyCreations({
                       data-state="public"
                       data-testid="my-creation-public"
                     >
-                      <Sparkles aria-hidden />
+                      <Frame aria-hidden />
                       전시 중
                     </span>
                   ) : (

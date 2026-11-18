@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Bug, MessageCircle, Plus, RotateCcw, Sparkles } from 'lucide-react';
+import { Bug, MessageCircle, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -663,7 +663,7 @@ export function BubbleSection() {
                   tone={tone}
                   tail={tail}
                   speaker={SPEAKER[tone]}
-                  speakerIcon={tone === 'bug' ? <Bug /> : <Sparkles />}
+                  speakerIcon={tone === 'bug' ? <Bug /> : <MessageCircle />}
                   text={BUBBLE_TEXT[tone]}
                 />
               ))}

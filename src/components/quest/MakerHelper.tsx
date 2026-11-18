@@ -1,6 +1,6 @@
 'use client';
 
-import { Lightbulb, Sparkles } from 'lucide-react';
+import { Lightbulb, MessageCircleHeart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { QuestSession } from '@/lib/quest/useQuestSession';
 import { IDEA_CARDS, PLANNER_IDEA_MAX_LENGTH } from '@/lib/tutor/maker';
@@ -100,7 +100,7 @@ export function MakerHelper({ session }: { session: QuestSession }) {
         >
           <h2 id="mk-fb-title" className="mk-title font-display">
             <span className="mk-icon" aria-hidden>
-              <Sparkles />
+              <MessageCircleHeart />
             </span>
             작품 평가 친구
           </h2>
@@ -112,7 +112,6 @@ export function MakerHelper({ session }: { session: QuestSession }) {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Sparkles aria-hidden />}
             disabled={!session.canAskFeedback || busy}
             onClick={() => void session.handleCreationFeedback()}
             data-testid="maker-feedback-ask"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { RotateCcw, Sparkles } from 'lucide-react';
+import { RotateCcw, Wind } from 'lucide-react';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { twinkle } from '@/components/characters/motionClasses';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
@@ -12,6 +12,7 @@ import {
   type MotionTierSetting,
   type ReducedMotionSetting,
 } from '@/lib/motion/tier';
+import { RewardIcon } from '@/components/ui/reward-icon';
 import { cn } from '@/lib/utils';
 
 /**
@@ -151,8 +152,9 @@ function OptionGroup<T extends string>({
   );
 }
 
-/** 고른 단계가 바로 보이는 작은 장면: 파이뱀 숨쉬기·깜빡임(대기 루프) + 반짝이(대기 루프) + 구름(앰비언트) */
+/** 고른 단계가 바로 보이는 작은 장면: 파이뱀 숨쉬기·깜빡임(대기 루프) + 깜빡이는 보상 별 하나(대기 루프) + 구름(앰비언트) */
 function MotionPreview({ reduced }: { reduced: boolean }) {
+  const star = twinkle(1, 0.25, 1.4);
   return (
     <div
       aria-hidden
@@ -171,26 +173,12 @@ function MotionPreview({ reduced }: { reduced: boolean }) {
           } as React.CSSProperties
         }
       />
-      <svg
-        className="absolute left-[22%] top-6 h-5 w-5"
-        viewBox="0 0 20 20"
-        fill="var(--accent)"
+      <span
+        className={cn('absolute left-[22%] top-6', star.className)}
+        style={star.style}
       >
-        <polygon
-          points="10,0 13,7 20,10 13,13 10,20 7,13 0,10 7,7"
-          {...twinkle(1, 0.25, 1.4)}
-        />
-      </svg>
-      <svg
-        className="absolute right-[24%] top-3 h-4 w-4"
-        viewBox="0 0 20 20"
-        fill="var(--accent-lip)"
-      >
-        <polygon
-          points="10,0 13,7 20,10 13,13 10,20 7,13 0,10 7,7"
-          {...twinkle(0.3, 1, 1.8)}
-        />
-      </svg>
+        <RewardIcon kind="star" size={22} />
+      </span>
       <div className="mb-1">
         <CharacterAvatar
           character="pybaem"
@@ -266,7 +254,7 @@ export function MotionSettingsSection({
         id={`${groupId}-title`}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <Sparkles aria-hidden className="h-5 w-5 text-foreground" />
+        <Wind aria-hidden className="h-5 w-5 text-foreground" />
         움직임
       </h2>
       <p className="mb-3 text-base text-muted-foreground">

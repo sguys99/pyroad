@@ -8,7 +8,7 @@ import {
   Lock,
   ShieldAlert,
   ShieldCheck,
-  Sparkles,
+  Frame,
   TriangleAlert,
   Upload,
 } from 'lucide-react';
@@ -146,7 +146,7 @@ export function OwnerPanel({
         </p>
       ) : isPublic ? (
         <p className="gl-note" data-tone="ok" data-testid="owner-public">
-          <Sparkles aria-hidden />
+          <Frame aria-hidden />
           <span>
             <strong>갤러리에 전시 중이에요!</strong> 로그인한 pyRoad 친구들이 볼
             수 있어요.

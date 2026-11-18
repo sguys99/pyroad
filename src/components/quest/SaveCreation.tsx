@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useId, useState, useSyncExternalStore } from 'react';
-import { BookmarkPlus, Check, Lock, Palette, Sparkles } from 'lucide-react';
+import {
+  BookmarkPlus,
+  Check,
+  Lock,
+  MessagesSquare,
+  Palette,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet } from '@/components/ui/sheet';
 import type { LiveOutputStore } from '@/lib/pyodide/liveOutput';
@@ -88,7 +94,13 @@ export function SaveCreationBar({
         data-testid="save-creation-bar"
       >
         <span className="cr-bar-icon" aria-hidden>
-          {saved ? <Check strokeWidth={3} /> : <Sparkles />}
+          {saved ? (
+            <Check strokeWidth={3} />
+          ) : commands.length > 0 ? (
+            <Palette />
+          ) : (
+            <MessagesSquare />
+          )}
         </span>
         <span className="cr-bar-text" role="status">
           <span className="cr-bar-title font-display">

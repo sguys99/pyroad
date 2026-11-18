@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { FlaskConical } from 'lucide-react';
 import { track } from '@/lib/analytics/track';
 import { useSfx } from '@/components/providers/SoundProvider';
 import {
@@ -73,7 +73,7 @@ export function QuizTryRunView({
       data-testid="quiz-try"
     >
       <p className="qz-try-dare" data-testid="quiz-try-dare">
-        <Sparkles aria-hidden />
+        <FlaskConical aria-hidden />
         {tryItPrompt(code)}
       </p>
       <p className="qz-try-note">

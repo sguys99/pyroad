@@ -1,14 +1,7 @@
 'use client';
 
 import { useId, useRef, type ReactNode } from 'react';
-import {
-  CircleCheck,
-  Dices,
-  Info,
-  Loader2,
-  Sparkles,
-  Users,
-} from 'lucide-react';
+import { CircleCheck, Dices, Info, Loader2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NICKNAME_MAX_LENGTH } from '@/lib/profile/nicknameRules';
 import type { NicknameStatus } from './useNicknameCheck';
@@ -148,7 +141,6 @@ export function NicknameField({
           <Button
             variant="primary"
             size="sm"
-            icon={<Sparkles aria-hidden />}
             onClick={() => onUseSuggestion(status.suggestion!)}
             data-testid="nickname-use-suggestion"
           >

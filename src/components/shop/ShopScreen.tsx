@@ -25,7 +25,8 @@ import {
   PawPrint,
   RefreshCw,
   Shirt,
-  Sparkles,
+  Crown,
+  Eye,
   Store,
 } from 'lucide-react';
 
@@ -639,7 +640,7 @@ function ItemCard({
           <ShopItemArt item={item} size={96} skin={skin} />
           {item.rarity !== 'common' && (
             <span className="shop-rarity" data-rarity={item.rarity}>
-              {item.rarity === 'epic' && <Sparkles aria-hidden />}
+              {item.rarity === 'epic' && <Crown aria-hidden />}
               {RARITY_LABEL[item.rarity]}
             </span>
           )}
@@ -698,7 +699,7 @@ function Preview({
         tag={
           trying && (
             <span className="shop-try" aria-hidden>
-              <Sparkles />
+              <Eye />
               미리 보기
             </span>
           )

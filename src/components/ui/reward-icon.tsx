@@ -171,6 +171,24 @@ interface StarsProps {
 }
 
 /** 별 0~3개 (퀘스트 평가). 화면 낭독기에는 "별 2개 / 3개" 한 번으로 읽힌다 */
+/**
+ * 보상 순간의 반짝 점 (4갈래, P13-09). 받을 수 있는 메달·열 수 있는 상자·레벨 업처럼 **축하·보상 자리에만** 쓴다 —
+ * "새로움·추천·AI"를 뜻하는 꾸밈으로는 쓰지 않는다. 늘 장식(`aria-hidden`), 색은 `currentColor`(또는 클래스의 fill)
+ */
+export function Glint(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="-12 -12 24 24"
+      fill="currentColor"
+      aria-hidden
+      focusable={false}
+      {...props}
+    >
+      <path d="M0-11L3-3L11 0L3 3L0 11L-3 3L-11 0L-3-3Z" />
+    </svg>
+  );
+}
+
 export function Stars({
   n,
   max = 3,

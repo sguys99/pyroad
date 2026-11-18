@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import { Check, ShieldCheck, Sparkles, Sprout } from 'lucide-react';
+import { Check, ShieldCheck, Sprout } from 'lucide-react';
+import { PybaemStatic } from '@/components/characters/rig/RigStatic';
 import { LandingSection } from '../LandingSection';
 import { ParentsReveal } from './parents/ParentsReveal';
 import {
@@ -10,9 +11,9 @@ import {
 } from './parents/parents';
 // 스타일 `parents.css`는 여기서 import하지 않는다: 첫 화면 밖이라 렌더 차단 CSS에서 빼고 `../deferredCss.ts`가 늦게 받는다 (P4-12)
 
-const ICON: Record<LetterColumn['id'], typeof ShieldCheck> = {
+/** AI 튜터 원칙 칸은 아이콘 대신 튜터 본인(파이뱀 얼굴)을 보여 준다 (P13-09) */
+const ICON: Partial<Record<LetterColumn['id'], typeof ShieldCheck>> = {
   safety: ShieldCheck,
-  ai: Sparkles,
   learning: Sprout,
 };
 
@@ -49,7 +50,18 @@ export function ParentsSection() {
                 style={order(i)}
               >
                 <span className="ld-parents-ic" aria-hidden>
-                  <Icon strokeWidth={2.2} />
+                  {Icon ? (
+                    <Icon strokeWidth={2.2} />
+                  ) : (
+                    <PybaemStatic
+                      state="teach"
+                      size={40}
+                      framing="avatar"
+                      filters={false}
+                      label=""
+                      idPrefix="ld-parents-py-"
+                    />
+                  )}
                 </span>
                 <h3 className="ld-parents-h3 font-display">{col.title}</h3>
                 <ul className="ld-parents-list">

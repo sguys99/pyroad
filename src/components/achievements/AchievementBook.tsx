@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { BackLink } from '@/components/ui/back-link';
-import { Building2, Check, Sailboat, Sparkle, Sprout } from 'lucide-react';
+import { Building2, Check, Sailboat, Sprout } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { HudCounter } from '@/components/ui/hud';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { RewardIcon } from '@/components/ui/reward-icon';
+import { Glint, RewardIcon } from '@/components/ui/reward-icon';
 import { Sheet } from '@/components/ui/sheet';
 import { SegmentedTabs } from '@/components/ui/tabs';
 import { AchievementMedal } from '@/components/shared/AchievementMedal';
@@ -138,8 +138,8 @@ function Tile({ entry: e, busy, onOpen, onClaim }: TileProps) {
           <BookMedal entry={e} />
           {e.state === 'claimable' && (
             <>
-              <Sparkle className="ab-glint" data-i="0" aria-hidden />
-              <Sparkle className="ab-glint" data-i="1" aria-hidden />
+              <Glint className="ab-glint" data-i="0" />
+              <Glint className="ab-glint" data-i="1" />
             </>
           )}
         </span>

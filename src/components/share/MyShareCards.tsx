@@ -10,7 +10,7 @@ import {
   Flag,
   Palette,
   Share2,
-  Sparkles,
+  ChevronsUp,
   Trash2,
 } from 'lucide-react';
 import {
@@ -35,8 +35,8 @@ import {
 import type { ShareCardKind } from '@/lib/share-card/types';
 import { cn } from '@/lib/utils';
 
-const KIND_ICON: Record<ShareCardKind, typeof Sparkles> = {
-  levelup: Sparkles,
+const KIND_ICON: Record<ShareCardKind, typeof Flag> = {
+  levelup: ChevronsUp,
   stage: Flag,
   achievement: Award,
   weekly: CalendarDays,

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { BackLink } from '@/components/ui/back-link';
 import { redirect } from 'next/navigation';
-import { Sparkles } from 'lucide-react';
+import { Frame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
@@ -47,7 +47,7 @@ export default async function MyCreationsPage() {
           href="/gallery"
           size="sm"
           variant="secondary"
-          icon={<Sparkles aria-hidden />}
+          icon={<Frame aria-hidden />}
           data-testid="my-creations-gallery"
         >
           작품 갤러리

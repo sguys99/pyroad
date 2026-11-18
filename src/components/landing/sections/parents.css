@@ -48,7 +48,7 @@
     background: var(--primary-soft);
     color: var(--primary-text);
   }
-  .ld-parents-ic svg {
+  .ld-parents-ic > svg.lucide {
     width: 1.375rem;
     height: 1.375rem;
   }

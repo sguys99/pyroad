@@ -5,7 +5,7 @@ import {
   Lightbulb,
   MessagesSquare,
   Palette,
-  Sparkles,
+  PartyPopper,
   Sticker,
   ThumbsUp,
   type LucideIcon,
@@ -27,7 +27,7 @@ import './gallery.css';
  */
 
 const STICKER_ICON: Record<StickerId, LucideIcon> = {
-  wow: Sparkles,
+  wow: PartyPopper,
   love: Heart,
   fun: Laugh,
   smart: Lightbulb,
