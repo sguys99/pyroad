@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import dynamic from 'next/dynamic';
 import {
   Award,
@@ -17,7 +17,6 @@ import {
   Code2,
   ListChecks,
   Map,
-  ChevronLeft,
   CircleDashed,
   Coins,
   Lock,
@@ -477,10 +476,7 @@ export function ShopScreen({
 function TopBar({ coins: value }: { coins: number | null }) {
   return (
     <div className="shop-top">
-      <Link href="/world" className="shop-back focus-ring">
-        <ChevronLeft aria-hidden />
-        월드맵
-      </Link>
+      <BackLink href="/world">월드맵</BackLink>
       {value !== null && <HudCounter kind="coin" value={value} />}
     </div>
   );

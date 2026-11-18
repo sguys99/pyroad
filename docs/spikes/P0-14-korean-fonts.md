@@ -275,7 +275,7 @@ Fast 3G, 390px, 각 칸은 그 시각의 화면(CDP screencast 1회). 위에서�
 
 **P0-14 체크** (Phase 0 목록)
 
-> - [x] **P0-14** (추가) 한글 웹폰트 로딩 전략 → [보고서](spikes/P0-14-korean-fonts.md): 채택. 자가 호스팅, 랜딩 = 텍스트 서브셋 preload, 앱 = unicode-range 슬라이스, 코드 = D2Coding
+> - [x] **P0-14** (추가) 한글 웹폰트 로딩 전략 → [보고서](P0-14-korean-fonts.md): 채택. 자가 호스팅, 랜딩 = 텍스트 서브셋 preload, 앱 = unicode-range 슬라이스, 코드 = D2Coding
 
 **`docs/assets-license.md` 초안 (폰트 부분)**
 

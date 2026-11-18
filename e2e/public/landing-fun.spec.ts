@@ -199,21 +199,35 @@ test.describe('랜딩 재미 요소 쇼케이스 (P4-05)', () => {
     await page.goto('/');
     await toFun(page);
     const list = page.getByTestId('fun-list');
-    const m = await list.evaluate((el) => ({
-      sw: el.scrollWidth,
-      cw: el.clientWidth,
-      page: document.documentElement.scrollWidth,
-      vw: document.documentElement.clientWidth,
-    }));
-    expect(m.page).toBeLessThanOrEqual(m.vw);
-    expect(m.sw).toBeGreaterThan(m.cw);
-    // 키보드로도 넘길 수 있다
-    await list.focus();
-    await page.keyboard.press('ArrowRight');
-    await page.keyboard.press('ArrowRight');
+    // 섹션 CSS(fun.css)는 늦게 온다(P4-12) → 가로 목록이 된 뒤에 잰다
     await expect
-      .poll(() => list.evaluate((el) => el.scrollLeft))
-      .toBeGreaterThan(0);
+      .poll(() => list.evaluate((el) => el.scrollWidth > el.clientWidth))
+      .toBe(true);
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
+    // 키보드로도 넘길 수 있다 (B95): → 한 번에 다음 카드가 첫 자리(scroll-padding)에 맞춰 다 보이고 앞 카드는 밀려난다.
+    // 다음 키는 넘김이 끝난 뒤에 — 부드러운 넘김이 끝나기 전에 또 누르면 Chrome(헤드 있는 것도)이 그 키를 삼킴
+    const settledAt = (i: number) =>
+      list.evaluate((el, n) => {
+        const box = el.getBoundingClientRect();
+        const pad = parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0;
+        const card = el.children[n].getBoundingClientRect();
+        return (
+          Math.abs(card.left - (box.left + pad)) <= 1 &&
+          card.right <= box.right &&
+          el.children[n - 1].getBoundingClientRect().left < box.left
+        );
+      }, i);
+    await list.focus();
+    for (const next of [1, 2]) {
+      await page.keyboard.press('ArrowRight');
+      await expect.poll(() => settledAt(next)).toBe(true);
+    }
     // 넘겨서 화면에 들어온 장면이 튼다
     await list.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
     await expect(page.getByTestId('fun-card-boss')).toHaveAttribute(

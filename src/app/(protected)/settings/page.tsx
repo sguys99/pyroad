@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Compass, X } from 'lucide-react';
+import { Bot, Compass, X } from 'lucide-react';
 import { PageTransition } from '@/components/shared/PageTransition';
+import { BackLink } from '@/components/ui/back-link';
 import { Button } from '@/components/ui/button';
 import { LegalNav } from '@/components/legal/LegalPageShell';
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection';
@@ -15,6 +15,7 @@ import { GuardianReportSection } from '@/components/guardian-report/GuardianRepo
 import type { MotionSettings } from '@/lib/motion/tier';
 import {
   PROVIDER_LABELS,
+  USER_KEY_PROVIDERS,
   type LLMProviderType,
 } from '@/lib/tutor/providers/types';
 
@@ -156,15 +157,9 @@ export default function SettingsPage() {
 
   const header = (
     <>
-      {/* 뒤로가기 */}
-      <div className="mb-6">
-        <Link href="/profile" className="text-sm text-primary-text underline">
-          ← 프로필로
-        </Link>
-      </div>
-
-      {/* 제목 */}
-      <h1 className="mb-6 text-xl font-bold text-foreground">설정</h1>
+      {/* 위 줄·제목은 상점·프로필과 같은 짜임 (B100) */}
+      <BackLink href="/profile">프로필</BackLink>
+      <h1 className="mt-2 mb-5 font-display text-h2">설정</h1>
 
       {/* 움직임 (P2-15). 연출 단계 Provider 값이라 서버 응답을 기다리지 않음 */}
       <MotionSettingsSection serverMotion={settings?.motion} />
@@ -178,29 +173,59 @@ export default function SettingsPage() {
       <GuardianConsentStatus />
       {/* 보호자 주간 리포트 비밀 링크 (P9-15) */}
       <GuardianReportSection />
-
-      <h2 className="mb-3 text-lg font-bold text-foreground">AI 튜터</h2>
     </>
   );
 
+  // AI 튜터 절 (B143): 다른 설정 절과 같은 테두리 없는 카드 + 안쪽 제목(아이콘·h2)
+  const aiTitle = (
+    <h2
+      id="ai-tutor-title"
+      className="mb-3 flex items-center gap-2 text-lg font-bold text-foreground"
+    >
+      <Bot aria-hidden className="h-5 w-5 text-accent-foreground" />
+      AI 튜터
+    </h2>
+  );
+  const aiSection = 'mb-6 rounded-2xl bg-card p-4 shadow-card';
+
   if (!settings) {
     return (
-      <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
+      <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
         {header}
-        <p className="text-center text-muted-foreground">불러오는 중...</p>
+        <section aria-labelledby="ai-tutor-title" className={aiSection}>
+          {aiTitle}
+          <p className="text-center text-muted-foreground">불러오는 중...</p>
+        </section>
       </PageTransition>
     );
   }
 
-  const allProviders: LLMProviderType[] = ['gemini', 'anthropic', 'openai'];
+  // 서버 Gemini 키가 없으면(v1.0 운영, §12-Q80) 고를 수 없으니 숨김. 학생 Google 키는 받지 않고 저장된 것만 지우기 (B117)
+  const allProviders: LLMProviderType[] = [
+    ...(settings.available_providers.includes('gemini')
+      ? (['gemini'] as const)
+      : []),
+    ...USER_KEY_PROVIDERS,
+  ];
+  const keyProviders: LLMProviderType[] = [
+    ...(settings.has_custom_keys.includes('gemini')
+      ? (['gemini'] as const)
+      : []),
+    ...USER_KEY_PROVIDERS,
+  ];
   const keysEnabled = settings.custom_keys_enabled !== false;
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
       {header}
 
-      {/* Provider 선택 카드 */}
-      <div className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section
+        aria-labelledby="ai-tutor-title"
+        className={aiSection}
+        data-testid="ai-tutor-section"
+      >
+        {aiTitle}
+        {/* 모델 선택 */}
         <h3 className="mb-3 text-sm font-bold text-foreground">AI 모델 선택</h3>
         <div className="flex flex-col gap-2">
           {allProviders.map((provider) => {
@@ -234,7 +259,7 @@ export default function SettingsPage() {
                   <p className="text-sm font-medium text-foreground">
                     {PROVIDER_LABELS[provider]}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-caption text-muted-foreground">
                     {isAvailable
                       ? hasCustomKey
                         ? '내 API 키 사용 중'
@@ -249,99 +274,95 @@ export default function SettingsPage() {
             );
           })}
         </div>
-      </div>
 
-      {/* API 키 입력 카드 */}
-      <div
-        className={`mb-6 rounded-xl border bg-card p-4 shadow-sm ${
-          settings.available_providers.length === 0
-            ? 'border-accent'
-            : 'border-border'
-        }`}
-      >
-        {settings.available_providers.length === 0 ? (
-          <>
-            <h3 className="mb-1 text-sm font-bold text-warning">
-              API 키를 입력해야 AI 튜터를 사용할 수 있어요
-            </h3>
-            <p className="mb-3 text-xs text-warning">
-              아래 중 하나의 API 키를 입력하면 AI 튜터가 활성화돼요.
+        {/* API 키 입력: 같은 카드 안, 가는 선으로 나눔 (선택지가 없어도 강조 테두리 없음) */}
+        <div className="mt-4 border-t border-line pt-4">
+          {settings.available_providers.length === 0 ? (
+            <>
+              <h3 className="mb-1 text-sm font-bold text-foreground">
+                지금은 파이뱀이 준비해 둔 힌트와 답으로 도와줘요
+              </h3>
+              <p className="mb-3 text-caption text-muted-foreground">
+                내 API 키를 넣으면 AI가 내 코드와 질문에 직접 답해 줘요.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="mb-1 text-sm font-bold text-foreground">
+                API 키 설정
+              </h3>
+              <p className="mb-3 text-caption text-muted-foreground">
+                자신의 API 키를 입력하면 해당 모델을 사용할 수 있어요.
+              </p>
+            </>
+          )}
+          {!keysEnabled && (
+            <p className="mb-3 rounded-lg bg-muted/50 p-3 text-caption text-muted-foreground">
+              지금은 내 API 키를 등록할 수 없어요. 파이뱀이 준비해 둔 힌트와
+              답은 그대로 쓸 수 있어요.
             </p>
-          </>
-        ) : (
-          <>
-            <h3 className="mb-1 text-sm font-bold text-foreground">
-              API 키 설정
-            </h3>
-            <p className="mb-3 text-xs text-muted-foreground">
-              자신의 API 키를 입력하면 해당 모델을 사용할 수 있어요.
-            </p>
-          </>
-        )}
-        {!keysEnabled && (
-          <p className="mb-3 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-            지금은 내 API 키를 등록할 수 없어요. 기본 AI 튜터는 그대로 쓸 수
-            있어요.
-          </p>
-        )}
-        <div className="flex flex-col gap-3">
-          {allProviders.map((provider) => {
-            const hasKey = settings.has_custom_keys.includes(provider);
-            const masked = settings.masked_keys?.[provider] ?? '••••••••';
-            const unreadable = settings.unreadable_keys?.includes(provider);
-            return (
-              <div key={provider}>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  {PROVIDER_LABELS[provider]}
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    placeholder={
-                      hasKey
-                        ? `${masked}  (저장됨)`
-                        : unreadable
-                          ? '키를 다시 입력해 주세요'
-                          : 'API 키 입력'
-                    }
-                    disabled={!keysEnabled}
-                    autoComplete="off"
-                    value={apiKeys[provider] ?? ''}
-                    onChange={(e) =>
-                      setApiKeys((prev) => ({
-                        ...prev,
-                        [provider]: e.target.value,
-                      }))
-                    }
-                    className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${hasKey ? 'pr-9' : ''}`}
-                  />
-                  {hasKey && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteKey(provider)}
-                      disabled={saving}
-                      className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-error-soft hover:text-destructive"
-                      title="API 키 삭제"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
+          )}
+          <div className="flex flex-col gap-3">
+            {keyProviders.map((provider) => {
+              const hasKey = settings.has_custom_keys.includes(provider);
+              const removeOnly = !USER_KEY_PROVIDERS.includes(provider);
+              const masked = settings.masked_keys?.[provider] ?? '••••••••';
+              const unreadable = settings.unreadable_keys?.includes(provider);
+              return (
+                <div key={provider}>
+                  <label className="mb-1 block text-caption font-medium text-muted-foreground">
+                    {PROVIDER_LABELS[provider]}
+                    {removeOnly &&
+                      ' — 지금은 쓰지 않아요. 지우기만 할 수 있어요'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder={
+                        hasKey
+                          ? `${masked}  (저장됨)`
+                          : unreadable
+                            ? '키를 다시 입력해 주세요'
+                            : 'API 키 입력'
+                      }
+                      disabled={!keysEnabled || removeOnly}
+                      autoComplete="off"
+                      value={apiKeys[provider] ?? ''}
+                      onChange={(e) =>
+                        setApiKeys((prev) => ({
+                          ...prev,
+                          [provider]: e.target.value,
+                        }))
+                      }
+                      className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${hasKey ? 'pr-9' : ''}`}
+                    />
+                    {hasKey && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteKey(provider)}
+                        disabled={saving}
+                        className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-error-soft hover:text-destructive"
+                        title="API 키 삭제"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          <div className="mt-3 rounded-lg bg-muted/50 p-3">
+            <p className="text-caption font-medium text-muted-foreground mb-1">
+              API 키는 어디서 받나요?
+            </p>
+            <ul className="text-caption text-muted-foreground space-y-0.5">
+              <li>Anthropic: console.anthropic.com</li>
+              <li>OpenAI: platform.openai.com/api-keys</li>
+            </ul>
+          </div>
         </div>
-        <div className="mt-3 rounded-lg bg-muted/50 p-3">
-          <p className="text-xs font-medium text-muted-foreground mb-1">
-            API 키는 어디서 받나요?
-          </p>
-          <ul className="text-xs text-muted-foreground space-y-0.5">
-            <li>Anthropic: console.anthropic.com</li>
-            <li>OpenAI: platform.openai.com/api-keys</li>
-            <li>Google: aistudio.google.com/apikey</li>
-          </ul>
-        </div>
-      </div>
+      </section>
 
       {/* 저장 버튼 */}
       <div className="flex flex-col items-center gap-2">

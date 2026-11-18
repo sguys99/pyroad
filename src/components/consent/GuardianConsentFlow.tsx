@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Rocket, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, Rocket, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GuideMascot } from '@/components/onboarding/GuideMascot';
 import { OnboardingStamp } from '@/components/onboarding/OnboardingStamp';
@@ -156,15 +156,16 @@ export function GuardianConsentFlow({
     <div className="ob-page" data-testid="guardian-consent">
       <div className="ob-sheet">
         <header className="ob-top">
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<ArrowLeft aria-hidden />}
+          {/* 다른 화면의 뒤로 가기(BackLink "‹ 월드맵")와 같은 꺾쇠·굵기 (B144). 동작은 그대로 history.back */}
+          <button
+            type="button"
             onClick={() => router.back()}
+            className="focus-ring inline-flex min-h-touch items-center gap-0.5 rounded-sm pr-2 font-semibold text-primary-text [&>svg]:size-5"
             data-testid="guardian-back"
           >
+            <ChevronLeft aria-hidden />
             돌아가기
-          </Button>
+          </button>
           <span />
           <span className="ob-top-spacer" />
         </header>

@@ -1,7 +1,7 @@
 # P5-14 월드맵 저사양·반응형 검수
 
 > - 작성일: 2026-11-09 · 브랜치 `feat/phase5` · 대상 = P5-01~13 반영 + 이 작업
-> - 관련: [계획서](../4.upgrade-plan.md) §2.10 · P5-14 · 기준선 [P0-13](../spikes/P0-13-perf-baseline.md)(v0.3) · 저사양 감지 [P0-16](../spikes/P0-16-low-spec.md) · 앞 측정 [P4-12](P4-12-landing.md)
+> - 관련: [계획서](../4.upgrade-plan.md) §2.10 · P5-14 · 기준선 [P0-13](../spikes/P0-13-perf-baseline.md)(v0.3) · 저사양 감지 [P0-16](../spikes/P0-16-low-spec-detection.md) · 앞 측정 [P4-12](P4-12-landing.md)
 > - 측정 스크립트: [`scripts/perf/world-map-bench.ts`](../../scripts/perf/world-map-bench.ts) (`npm run perf:world`), 판정 [`worldMapBudget.ts`](../../scripts/perf/worldMapBudget.ts)(단위 테스트 있음)
 > - 회귀 e2e: [`e2e/world-responsive.spec.ts`](../../e2e/world-responsive.spec.ts)
 
@@ -16,7 +16,7 @@
 | CPU 4배 스크롤 컴포지터 (full · lite) | — | **60 · 60fps** (낸 프레임 비율, 버린 프레임 0% · 0%) | 50fps 이상 |
 | CPU 6배 스크롤 (full · lite) | — | rAF p95 17.6 · 17.6ms, 컴포지터 59.8 · 60fps | (참고) |
 
-실기기(중급 안드로이드 태블릿) 50fps는 P12-04에서 확인합니다. 지금은 P0-13 하네스 게이트(CPU 4배 컴포지터 50fps 이상·rAF p95 33ms 이하)를 통과한 상태입니다.
+실기기(중급 안드로이드 태블릿) 50fps는 P12-04에서 확인합니다 → P12-04는 헤드리스로 대체(4·6배 컴포지터 59.9fps), 실기기 미검증([v1.0 체크리스트](../release/v1.0-devices.md) R-13). 지금은 P0-13 하네스 게이트(CPU 4배 컴포지터 50fps 이상·rAF p95 33ms 이하)를 통과한 상태입니다.
 
 ## 2. 방법
 

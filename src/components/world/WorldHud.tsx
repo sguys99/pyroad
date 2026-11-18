@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Shield,
   Store,
+  TrendingUp,
 } from 'lucide-react';
 
 import { Button, IconButton } from '@/components/ui/button';
@@ -53,6 +54,8 @@ export interface WorldHudProps {
   missions?: ReactNode;
   /** 코인을 안 받은 업적 수 (P8-10) → 메뉴 버튼·"업적 도감" 줄에 금색 점 */
   achievementsReady?: number;
+  /** 관리자(`isAdminUser`, 서버가 판별)면 메뉴 맨 아래에 "운영 지표" (P12-09). 학생 화면에는 그리지 않음 */
+  admin?: boolean;
 }
 
 const SOON = [
@@ -152,6 +155,7 @@ export function WorldHud({
   attendance,
   missions,
   achievementsReady = 0,
+  admin = false,
 }: WorldHudProps) {
   const soon = missions ? [] : SOON;
   const soonName = soon.map((s) => s.label).join('·');
@@ -365,6 +369,17 @@ export function WorldHud({
             >
               게시판
             </Button>
+            {admin && (
+              <Button
+                href="/admin"
+                variant="secondary"
+                icon={<TrendingUp aria-hidden />}
+                className="w-full"
+                data-testid="menu-admin"
+              >
+                운영 지표
+              </Button>
+            )}
             <LogoutButton variant="menu" />
           </nav>
         </Sheet>

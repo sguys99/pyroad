@@ -1840,6 +1840,10 @@ export type Database = {
         }[];
       };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      list_expired_incomplete: {
+        Args: { p_limit: number; p_now?: string; p_user_id?: string };
+        Returns: string[];
+      };
       list_expired_unconsented: {
         Args: { p_limit: number };
         Returns: string[];
@@ -1848,6 +1852,7 @@ export type Database = {
         Args: { p_action: string; p_card_id: string; p_user_id: string };
         Returns: Json;
       };
+      monitoring_summary: { Args: { p_days: number }; Returns: Json };
       open_stage_chest: {
         Args: { p_stage_id: string; p_user_id: string };
         Returns: Json;

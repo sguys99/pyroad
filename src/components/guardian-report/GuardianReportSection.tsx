@@ -60,7 +60,7 @@ export function GuardianReportLinkCard({
   if (!state) return null;
   return (
     <section
-      className="mb-6 grid gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
+      className="mb-6 grid gap-3 rounded-2xl bg-card p-4 shadow-card"
       aria-labelledby="guardian-report-title"
       data-testid="guardian-report-section"
       data-active={state.active || undefined}

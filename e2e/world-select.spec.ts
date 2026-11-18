@@ -208,7 +208,8 @@ test.describe('월드 선택 (P5-01)', () => {
     const html = page.locator('html');
     await page.goto('/world/python-island');
     await expect(html).toHaveAttribute('data-bgm', 'world1');
-    // 첫 사용자 동작 전에는 재생하지 않는다 (자동재생 금지)
+    // 첫 입력 이벤트 전에는 재생하지 않는다. 여기는 goto 의 스트리밍 대기·트레이스가 이미 활성화를 준 뒤라 앱이 "이벤트"를 기다리는지만 봄 —
+    // 진짜 제스처 없는 상태·실제 클릭 잠금 해제는 sound-unlock.spec.ts (P0-15)
     await expect(html).toHaveAttribute('data-bgm-playing', '');
     await page.getByRole('heading', { level: 1 }).click();
     await expect(html).toHaveAttribute('data-bgm-playing', 'world1');

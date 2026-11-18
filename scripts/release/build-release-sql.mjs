@@ -28,6 +28,7 @@ const SEED = join(REPO, 'supabase/seed.sql');
 /**
  * 운영 적용 순서대로. `dir` 은 출력 폴더 아래 하위 폴더('' = 바로 아래, v0.4 가 처음 쓰던 자리라 그대로 둠).
  * 묶음의 `parts` 는 런북 표의 순서이고 `stage` 는 마이그레이션 머리 주석의 릴리즈 단계(①=1, ③=3)와 같아야 함.
+ * `setup`(선택)은 `BEGIN;` 바로 뒤에 넣는 줄(예: `SET LOCAL lock_timeout`).
  */
 export const RELEASES = [
   {
@@ -240,6 +241,24 @@ export const RELEASES = [
       },
     ],
   },
+  {
+    name: 'v1.0-phase12',
+    dir: 'v1.0-phase12',
+    bundles: [
+      {
+        file: '1_먼저실행.sql',
+        stage: 1,
+        head: [
+          '-- pyRoad v1.0 (Phase 12 병합) 운영 적용: ① 추가형 마이그레이션 (00059 Google 이름·사진 저장 안 함 · 00060 학생이 쓰는 열 크기 상한 · 00061 온보딩 미완료 계정 파기 대상 · 00062 운영 지표 집계 함수)',
+          '-- feat/phase12 병합(앱 배포) 전에 실행. 실패하면 전체가 되돌려집니다. docs/release/v1.0-runbook.md 2-1 (이미 저장된 Google 이름·사진 정리는 2-7)',
+        ],
+        // B132 (P12-07 리허설): 다른 트랜잭션이 users·user_progress·auth.users 를 잡고 있으면 ALTER·CREATE TRIGGER 가 기다리는 동안
+        // 학생 요청이 그 뒤에 줄줄이 막힘 → 10초 안에 잠금을 못 얻으면 전체를 되돌리고 나중에 다시 붙여 넣음(런북 2-1)
+        setup: ["SET LOCAL lock_timeout = '10s';"],
+        parts: ['00059', '00060', '00061', '00062'],
+      },
+    ],
+  },
 ];
 /** 운영에 묶음 없이 이미 적용된 마이그레이션 */
 export const ALREADY_APPLIED = ['00001', '00002'];
@@ -316,7 +335,7 @@ export function seedBundle(releases = RELEASES) {
 
 /** 묶음 하나의 SQL (LF) */
 export function bundleText(bundle, files) {
-  const out = [...bundle.head, 'BEGIN;', ''];
+  const out = [...bundle.head, 'BEGIN;', ...(bundle.setup ?? []), ''];
   for (const p of bundle.parts) {
     if (p === 'seed' && bundle !== seedBundle()) {
       out.push(

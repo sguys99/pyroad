@@ -184,7 +184,7 @@ E2E A-1에서 관찰한 흐름입니다.
 변경되는 항목: P0-03(결론), §2(새 절), P3-03, P3-04, P3-06, P3-07, P3-09, P3-10, P3-16, P3-17, P3-19, §11.
 
 **P0-03 결과 줄**
-> - [x] **P0-03** 스파이크: **Naver 로그인** → **채택(방식 변경)**. Supabase 커스텀 provider를 **OIDC 타입**(`custom:naver`, issuer `https://nid.naver.com`, `email_optional: true`)으로 연결. 원안의 OAuth2 + 중첩 userinfo 매핑은 GoTrue가 지원하지 않아 불가(`error missing provider id`). OIDC에서는 id_token의 평탄한 `sub`로 사용자를 식별하므로 중첩 구조가 문제되지 않고 서버 브릿지가 필요 없음. 대안 B(userinfo 어댑터)·C(서버 브릿지)는 프로토타입으로 보관. [보고서](spikes/P0-03-naver-login.md)
+> - [x] **P0-03** 스파이크: **Naver 로그인** → **채택(방식 변경)**. Supabase 커스텀 provider를 **OIDC 타입**(`custom:naver`, issuer `https://nid.naver.com`, `email_optional: true`)으로 연결. 원안의 OAuth2 + 중첩 userinfo 매핑은 GoTrue가 지원하지 않아 불가(`error missing provider id`). OIDC에서는 id_token의 평탄한 `sub`로 사용자를 식별하므로 중첩 구조가 문제되지 않고 서버 브릿지가 필요 없음. 대안 B(userinfo 어댑터)·C(서버 브릿지)는 프로토타입으로 보관. [보고서](P0-03-naver-login.md)
 
 **§2 새 절 (P0-11에서 반영)**
 > ### 2.7 소셜 로그인 (P0-03·P0-04)

@@ -5,6 +5,7 @@ import { guardianWriteGate } from '@/lib/consent/server';
 import {
   BOARD_MESSAGES,
   boardError,
+  boardRateLimited,
   boardServerError,
   checkPostInput,
   readJsonObject,
@@ -34,6 +35,9 @@ export async function POST(request: Request) {
   const checked = checkPostInput(body);
   if (!checked.ok) return checked.response;
   const { title, content } = checked.value;
+
+  const limited = await boardRateLimited(user.id, 'post');
+  if (limited) return limited;
 
   const { data, error } = await createAdminClient()
     .from('board_posts')

@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { redirect } from 'next/navigation';
-import { CalendarDays, ChevronLeft } from 'lucide-react';
+import { CalendarDays, Settings } from 'lucide-react';
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -27,7 +28,11 @@ import {
   recentAchievements,
   type ProfileStatsRaw,
 } from '@/lib/profile/profileStats';
-import { getStageStatuses } from '@/lib/world/getStageStatuses';
+import {
+  getStageStatuses,
+  getWorldStatuses,
+} from '@/lib/world/getStageStatuses';
+import { serverWorlds } from '@/lib/world/serverWorlds';
 import {
   skillPassWorldIds,
   type SkillCheckAttemptRow,
@@ -131,14 +136,17 @@ export default async function ProfilePage() {
 
   const progress = progressRes.data ?? [];
   const opened = new Set((chestsRes.data ?? []).map((c) => c.ref));
-  const stages = getStageStatuses(
+  const passed = skillPassWorldIds(
+    (skillChecks.data ?? []) as SkillCheckAttemptRow[],
+  );
+  const stages = getStageStatuses(stagesRes.data ?? [], progress, passed);
+  // 별과 보물은 월드(그림책 한 권)로 묶어 지금 월드만 펼침 (B140). 스테이지 없는 "준비 중" 월드는 뺌
+  const worldsProgress = getWorldStatuses(
+    serverWorlds(),
     stagesRes.data ?? [],
     progress,
-    skillPassWorldIds((skillChecks.data ?? []) as SkillCheckAttemptRow[]),
-  ).map((s) => ({
-    ...s,
-    chestOpened: opened.has(s.id),
-  }));
+    passed,
+  );
   const completed = new Set(
     progress.filter((p) => p.status === 'completed').map((p) => p.quest_id),
   );
@@ -155,10 +163,7 @@ export default async function ProfilePage() {
     <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-4xl">
       <div className="pf">
         <div className="pf-top pf-wide">
-          <Link href="/world" className="pf-back focus-ring">
-            <ChevronLeft aria-hidden />
-            월드맵
-          </Link>
+          <BackLink href="/world">월드맵</BackLink>
           <HudCounter kind="coin" value={profile.coins} />
         </div>
 
@@ -221,23 +226,31 @@ export default async function ProfilePage() {
             coins={profile.coins}
             coinsWeek={raw.coins_week}
             threeStars={raw.stats.three_stars}
-            stages={stages.map((s) => ({
-              id: s.id,
-              order: s.order,
-              title: s.title,
-              stars: s.stars,
-              maxStars: s.maxStars,
-              chest: chestState(s),
-              locked: s.status === 'locked',
-            }))}
+            worlds={worldsProgress.worlds
+              .map((w, i) => ({ w, no: i + 1 }))
+              .filter(({ w }) => w.status !== 'coming_soon')
+              .map(({ w, no }) => ({
+                no,
+                title: w.world.title,
+                locked: w.status === 'locked',
+                current: w === worldsProgress.current,
+                stages: w.stages.map((s) => ({
+                  id: s.id,
+                  order: s.order,
+                  title: s.title,
+                  stars: s.stars,
+                  maxStars: s.maxStars,
+                  chest: chestState({ ...s, chestOpened: opened.has(s.id) }),
+                  locked: s.status === 'locked',
+                })),
+              }))}
           />
         </div>
 
+        {/* 아래 보조 줄 (B144): 설정 · 로그아웃 · 계정 관리 모두 조용한 글자 버튼. 로그아웃은 설정과 떨어뜨려 둠 */}
         <div className="pf-foot pf-wide">
-          <Link
-            href="/settings"
-            className="text-small text-primary-text underline"
-          >
+          <Link href="/settings" className="pf-acct-sum focus-ring">
+            <Settings aria-hidden className="pf-acct-chev" />
             설정 (움직임 · AI 튜터)
           </Link>
           <LogoutButton />

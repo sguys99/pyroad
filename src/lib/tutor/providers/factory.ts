@@ -1,4 +1,8 @@
-import type { LLMProvider, LLMProviderType } from './types';
+import {
+  USER_KEY_PROVIDERS,
+  type LLMProvider,
+  type LLMProviderType,
+} from './types';
 import { AnthropicProvider } from './anthropic';
 import { OpenAIProvider } from './openai';
 import { GeminiProvider } from './gemini';
@@ -31,10 +35,10 @@ export function getAvailableProviders(): LLMProviderType[] {
  */
 export const FREE_TIER_PROVIDER: LLMProviderType = 'gemini';
 
-/** 사용자가 본인 키를 등록한 provider 목록 (알 수 없는 키·빈 값 제외) */
+/** 사용자가 본인 키를 등록한 provider 목록 (알 수 없는 키·빈 값·Google 키 제외 — B117 `USER_KEY_PROVIDERS`) */
 export function getUserKeyedProviders(customKeys: unknown): LLMProviderType[] {
   const keys = (customKeys ?? {}) as Record<string, unknown>;
-  return (Object.keys(ENV_KEY_MAP) as LLMProviderType[]).filter(
+  return USER_KEY_PROVIDERS.filter(
     (type) => typeof keys[type] === 'string' && keys[type] !== '',
   );
 }
@@ -42,7 +46,7 @@ export function getUserKeyedProviders(customKeys: unknown): LLMProviderType[] {
 /**
  * 튜터 호출에 사용할 provider와 키를 결정한다.
  * - 선호 provider에 본인 키가 있으면 그 키로 호출
- * - 본인 키가 없거나 무료 티어를 선호하면 서버 무료 티어
+ * - 본인 키가 없거나, 서버 무료 티어 키가 있고 그것을 선호하면 서버 무료 티어(키가 없으면 저장된 답변, B117)
  * - 그 외에는 본인 키가 있는 첫 provider
  */
 export function resolveUserProvider(
@@ -56,7 +60,9 @@ export function resolveUserProvider(
   if (keyed.includes(pref)) {
     return { providerType: pref, customApiKey: keys[pref] };
   }
-  if (keyed.length === 0 || pref === FREE_TIER_PROVIDER) {
+  // 서버 키가 없으면(v1.0 운영) 예전 기본값 'gemini'를 고른 학생도 본인 키로
+  const freeTierOn = !!process.env[ENV_KEY_MAP[FREE_TIER_PROVIDER]];
+  if (keyed.length === 0 || (pref === FREE_TIER_PROVIDER && freeTierOn)) {
     return { providerType: FREE_TIER_PROVIDER };
   }
   return { providerType: keyed[0], customApiKey: keys[keyed[0]] };

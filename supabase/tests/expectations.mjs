@@ -1124,6 +1124,12 @@ export const EXPECT = {
     requires: 'public.handle_user_signed_in()',
     activateIn: 'B24',
   },
+  'B115-1': {
+    expect: 'allow',
+    requires: 'public.strip_google_profile()',
+    activateIn: 'B115',
+    note: 'P12-06 수집 최소화: GoTrue 가 Google scope email profile 로 받는 이름·사진을 Auth 에 저장하지 않음 (00059). 이메일은 남김',
+  },
 
   // ── app: 앱이 실제로 보내는 쿼리 (정상 경로) ────────────────
   'APP-1': { expect: 'allow' },
@@ -1347,6 +1353,30 @@ export const EXPECT = {
     activateIn: 'P3-15',
     note: '파기 대상은 기한 지난 미동의 만 14세 미만만',
   },
+  'GC-5': {
+    expect: 'deny',
+    requires: 'public.list_expired_incomplete()',
+    activateIn: 'B118',
+    note: '① 00061: 미완료 계정 파기 대상 목록은 service_role 전용 (/api/cron/purge-unconsented)',
+  },
+  'GC-6': {
+    expect: 'allow',
+    requires: 'public.list_expired_incomplete()',
+    activateIn: 'B118',
+    note: '① 00061: 온보딩·나이 확인 미완료 + 활동 없음 + max(가입일, 적용 시각) + 30일 — 배포 날 오래된 계정은 아님, 학습 기록·게시글이 있으면 아님',
+  },
+  'MON-1': {
+    expect: 'deny',
+    requires: 'public.monitoring_summary()',
+    activateIn: 'P12-09',
+    note: '① 00062: 운영 지표 합계는 service_role 전용 (/admin 이 isAdminUser 확인 뒤)',
+  },
+  'MON-2': {
+    expect: 'allow',
+    requires: 'public.monitoring_summary()',
+    activateIn: 'P12-09',
+    note: '① 00062: 넣은 이벤트만큼 정확히 늘고 같은 기간 직접 SQL 과 같음 (퍼널·D1·세션·튜터·연출·건강)',
+  },
   'RL-1': { expect: 'deny', requires: 'public.api_rate_limits', activateIn: 'P1-19' },
   'RL-2': {
     expect: 'deny',
@@ -1424,6 +1454,38 @@ export const EXPECT = {
   'B28-3': {
     expect: 'deny',
     note: '클라이언트는 users 를 지울 수 없음 (DELETE 권한·정책 없음, P1-01 00008). 탈퇴는 서버 API 만',
+  },
+
+  // ── B108 (00060): 학생 세션이 쓰는 열의 크기 상한 ─────────────
+  'B108-1': {
+    expect: 'deny',
+    note: '00060: user_progress.code_submitted 50,000자 넘는 자동 저장 거부 (한 행에 수십 MB 로 DB 채우기)',
+  },
+  'B108-2': {
+    expect: 'deny',
+    note: '00060: user_progress.step_submissions 512KB 넘는 자동 저장 거부',
+  },
+  'B108-3': {
+    expect: 'deny',
+    note: '00060: users.preferred_provider 32자 넘는 값 거부',
+  },
+  'B108-4': {
+    expect: 'allow',
+    note: '00060: 완료 API 상한(20,000자) 한글 코드 + 프로젝트 7단계 코드 자동 저장은 그대로',
+  },
+
+  // ── pen: 침투 쓸기 (P12-05) ───────────────────────────────
+  'PEN-1': {
+    expect: 'deny',
+    note: 'P12-05: public 의 모든 테이블·뷰를 비로그인으로 읽어 행이 오는 것 없음 (공지만 예외). 새 테이블을 빠뜨려도 잡힘',
+  },
+  'PEN-2': {
+    expect: 'deny',
+    note: 'P12-05: 로그인 학생이 모든 테이블·뷰의 사용자 열(*user_id·author_id·reporter_id·id)에서 남의 행을 못 읽음 (게시판 글·댓글·공개 프로필·공지 작성자만 예외)',
+  },
+  'PEN-3': {
+    expect: 'deny',
+    note: 'P12-05: anon/authenticated 가 실행할 수 있는 public 함수 없음 (invoker 함수 포함, 트리거 제외 — 함수는 모두 service_role 경유)',
   },
 
   // ── static: 카탈로그 점검 ─────────────────────────────────

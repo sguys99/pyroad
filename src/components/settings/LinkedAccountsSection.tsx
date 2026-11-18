@@ -272,7 +272,7 @@ export function LinkedAccountsSection() {
   return (
     <section
       aria-labelledby={titleId}
-      className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
+      className="mb-6 rounded-2xl bg-card p-4 shadow-card"
       data-testid="linked-accounts-section"
     >
       <h2

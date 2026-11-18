@@ -14,6 +14,12 @@ describe('myCardState', () => {
       daysLeft: 90,
     });
   });
+  it('앱 서버 시계가 DB보다 늦어도 90일을 넘게 보이지 않음 (B146)', () => {
+    expect(
+      myCardState({ isPublic: true, expiresAt: at(90 + 2 / 86_400) }, NOW)
+        .daysLeft,
+    ).toBe(90);
+  });
   it('공개인데 기간이 지나면 기간 끝', () => {
     expect(myCardState({ isPublic: true, expiresAt: at(-1) }, NOW).state).toBe(
       'expired',

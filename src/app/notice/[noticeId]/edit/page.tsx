@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { CreateNoticeForm } from '@/components/notice/CreateNoticeForm';
 import { isAdmin } from '@/lib/admin';
@@ -24,17 +24,10 @@ export default async function NoticeEditPage({
   if (!notice) notFound();
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link
-          href={`/notice/${noticeId}`}
-          className="text-sm text-primary-text underline"
-        >
-          ← 돌아가기
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
+      <BackLink href={`/notice/${noticeId}`}>공지</BackLink>
 
-      <h1 className="mb-6 text-2xl font-bold text-foreground">공지 수정</h1>
+      <h1 className="mt-2 mb-5 font-display text-h2">공지 수정</h1>
 
       <CreateNoticeForm
         initialData={{

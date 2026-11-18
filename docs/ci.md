@@ -20,7 +20,7 @@
 | `rls` | 격리 스택(`pyroadci`, 5482x)으로 RLS·권한 회귀. PR·기능 브랜치는 운영 재현(릴리즈 붙여넣기 묶음을 CRLF로, `RLS_CRLF=1`) + legacy, main·수동 실행은 신규 기본값까지 3개 시나리오. 결과 표는 job 요약과 아티팩트 `rls-results`에 | `RLS_CRLF=1 RLS_SKIP_NEWDEFAULT=1 npm run test:rls:ci` (전체는 `RLS_CRLF=1`만). 켜 둔 개발 스택이면 `npm run test:rls` | 약 4~7분 |
 | `build` | `npm run build` (env 없이 됨. Sentry는 DSN이 없으면 꺼짐. 폰트는 저장소에서 자체 호스팅이라 네트워크 불필요. prebuild가 폰트 검사, postbuild가 정적 페이지 CSP·라우트별 font preload·랜딩 폰트 예산·랜딩 JS·CSS 바이트 예산 확인) + 빌드에 들어간 Pyodide 파일 확인 | `npm run build && node scripts/pyodide/copy-assets.mjs --check` | 약 3분 |
 | `e2e-smoke` | **에셋 검사**(`npm run assets:check`, P2-16: SVG 최적화·종이 결 타일·래스터 기록·Lottie 구조 + `lottie_light` 실제 렌더 + 라이선스 기록(P2-17), 아래 "에셋 검사") → 비로그인 e2e(`public` 프로젝트: 랜딩·반응형·reduced-motion·404·보안 헤더·CSP 위반 없음·보호 경로·코드 에디터 한글 주석 정렬 P2-18·컴포넌트 카탈로그와 연출 단계 대체 검사 `design-catalog.spec.ts` P2-12·소셜 로그인 실패 안내와 인앱 브라우저 `social-login.spec.ts` P3-17 — GoTrue authorize 이동을 가로채는 목업이라 provider·스택 없이 돎). Supabase 없이(`E2E_NO_STACK=1`) `npm run build` → `npm run start`. 실패하면 리포트·trace를 아티팩트 `e2e-smoke-report`로 | `npm run assets:check && E2E_NO_STACK=1 npx playwright test --project=public` (`e2e/README.md`) | 로컬 약 2분 (빌드 1.5분 포함, 에셋 검사 약 5초) |
-| `e2e` | 로그인 e2e(`setup` → `chromium` → `teardown`). 저장소 `config.toml`로 Supabase 스택을 띄우고(npm ci·브라우저 설치와 겹치게 백그라운드로) 실행 전용 사용자를 service_role로 만들어 쿠키 주입. LLM 키 없음(저장된 답변). 월드맵·퀘스트의 연출 단계 대체 검사(`motion-tiers.spec.ts`, P2-12) 포함. 실패하면 아티팩트 `e2e-report` | `npm run db:start && npx playwright test --project=chromium` | 로컬 약 5분 + 빌드 |
+| `e2e` | 로그인 e2e(`setup` → `chromium` → `teardown`). 저장소 `config.toml`로 Supabase 스택을 띄우고(npm ci·브라우저 설치와 겹치게 백그라운드로) 실행 전용 사용자를 service_role로 만들어 쿠키 주입. LLM 키 없음(저장된 답변). 월드맵·퀘스트의 연출 단계 대체 검사(`motion-tiers.spec.ts`, P2-12) 포함. 처음부터 끝까지 여정(`journey.spec.ts`)·소리 잠금 해제(`sound-unlock.spec.ts`, P12-01)도 여기서 돎 — 둘 다 로그인·로컬 스택이 필요해 `e2e-smoke`(스택 없음)에는 넣지 않음. 실패하면 아티팩트 `e2e-report`. 끝에 **시각 회귀**(P12-02, 아래)를 비차단 단계로, 그 뒤 **Lighthouse**(P12-03, 아래)를 차단 단계로 |  `npm run db:start && npx playwright test --project=chromium` (Lighthouse는 `npm run perf:lighthouse`) | 로컬 약 5분 + 빌드 (+ Lighthouse 약 10분) |
 
 - `rls`의 운영 재현은 과거 커밋(`git show e800386:…`)을 읽어서 전체 히스토리로 checkout합니다(`fetch-depth: 0`). 얕은 clone이면 `run.sh`가 조용히 건너뛰므로 CI는 결과 표에 `prod_replay`가 있는지 따로 확인합니다.
 - `rls`는 **`RLS_CRLF=1`** 로 돕니다(B76). 이 값이 없으면 운영 재현이 마이그레이션 파일을 하나씩 적용하고 seed를 맨 끝에 넣어, 실제 운영 경로인 릴리즈 묶음(`scripts/release/build-release-sql.mjs`)의 순서·seed 위치 문제를 못 봅니다. 묶음은 `supabase/seed.sql`(지금 콘텐츠의 생성물)을 **seed가 있는 마지막 묶음에만** 넣고, 이미 운영에 적용한 앞 묶음의 seed 자리는 안내 주석입니다. `run.sh`는 FAIL이면 1, 환경·적용 실패면 2로 끝나니 `| tail` 같은 파이프로 볼 때는 `set -o pipefail` 또는 `${PIPESTATUS[0]}`로 종료 코드를 확인합니다.
@@ -28,7 +28,9 @@
 - `prettier --check .`는 P1-21에서 `lint-typecheck`에 넣었습니다(기존 파일은 P1-15 마무리 커밋에서 일괄 정리). 스파이크·생성물·문서(`*.md`)·`supabase/`는 `.prettierignore`로 제외합니다.
 - e2e 재시도는 0입니다(흔들림을 재시도로 가리지 않음). 실패하면 아티팩트의 `test-results/*/trace.zip`을 `npx playwright show-trace`로 봅니다.
 - `e2e-smoke` 제한 시간은 **30분**입니다(B78). GitHub 러너에서 비로그인 e2e 182개가 빌드 포함 약 19분(main도 18분)이라 20분이면 정상 실행도 취소됩니다. 1회성 연출 중 상태(축하 카드 등장·보상 날아감)를 확인하는 스펙은 시간에 기대지 않게 `page.clock`으로 시계를 세운 뒤 확인합니다(느린 러너에선 클릭과 확인 사이에 1.3초가 다 지나감).
-- `e2e`(로그인) 제한 시간은 **45분**입니다(B90). Phase 11에서 스펙이 늘어(3월드 여정·갤러리·게임 등) GitHub 러너에서 30분 안에 끝나지 않고 취소됐습니다.
+- `e2e`(로그인) 제한 시간은 **60분**입니다(B90의 45분 + Lighthouse 약 10분, P12-03).
+- **Lighthouse**(P12-03, `npm run perf:lighthouse`, [docs/perf/lighthouse.md](perf/lighthouse.md)): `e2e` job에서 같은 빌드·스택으로 `next start`(포트 3114)를 띄워 5화면(랜딩·월드맵·퀘스트 1-1 첫 방문·프로젝트 7-3·프로필) × 모바일 3회 중앙값. **차단**(job 실패): Accessibility 90 미만, 라우트 JS·총 전송(Pyodide 뺌)·Pyodide 바이트 예산 초과, 서버 HTML에 opacity 0인 글자(§2.10 규칙), 측정 실패. **경고**(job 요약에 표시만): Performance 80 미만, LCP 2.5초·TBT 800ms 초과, 기준보다 Performance 10점 하락 — 러너 부하에 민감해서. 표는 job 요약(Summary 탭)에, 결과 JSON·요약·회차별 Lighthouse 원본은 아티팩트 `lighthouse`(30일). 비교 기준은 커밋된 `docs/perf/lighthouse-baseline.json`. 앞의 e2e 스펙이 실패해도 돕니다(서로 다른 신호).
+- **시각 회귀**(P12-02, `npm run test:visual`, [e2e/README.md](../e2e/README.md) "시각 회귀"): `e2e` job 끝에서 같은 빌드로(`E2E_SKIP_BUILD=1`) 브라우저만 공식 Playwright Docker 이미지에 띄워 21개 화면 × 3폭(+ 프로필 카드 3장)을 견줍니다. 기준 이미지는 개발 기기 Docker(linux/arm64)에서 찍었고 러너는 linux/amd64라 픽셀이 같다는 근거가 아직 없어 **`continue-on-error`(경고만)**, 차이가 나면 아티팩트 `visual-diff`. 기준을 러너에서 다시 찍으려면 수동 실행에서 입력 `visual_update`를 켜고 아티팩트 `visual-snapshots`를 받아 `e2e/visual/__screenshots__/`에 덮어써 커밋합니다. 그 기준으로 PR 몇 번 0 diff면 `continue-on-error`를 지워 차단으로 올립니다. 앞 단계가 실패하면 돌지 않습니다(그 실패 리포트를 덮어쓰지 않게). Phase 11에서 스펙이 늘어(3월드 여정·갤러리·게임 등) GitHub 러너에서 30분 안에 끝나지 않고 취소됐습니다.
 
 ### 에셋 검사 (`e2e-smoke`)
 
@@ -58,7 +60,7 @@
 - 같은 비교를 `unit` job의 `scripts/licenses/__tests__/licenses.test.ts`도 합니다(로컬 `npx vitest run`에서 먼저 보이게).
 ## 필수 체크 (main 보호 규칙)
 
-`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build` + **`e2e-smoke`**(P1-21, 2026-11-05 첫 통과 뒤 추가). `content-unseeded`는 main 전용이라 넣지 않습니다. `e2e`(로그인)는 PR에서도 돌지만 시간(예상 10분 안팎: 스택 시작 + 빌드 + 테스트 약 5분)과 안정성을 몇 번 지켜본 뒤 필수 체크로 올릴지 정합니다. 너무 느리면 `if:`로 main·수동 실행 전용으로 돌립니다. 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
+`lint-typecheck`, `unit`, `content`, `pyodide`, `rls`, `build` + **`e2e-smoke`**(P1-21, 2026-11-05 첫 통과 뒤 추가). `content-unseeded`는 main 전용이라 넣지 않습니다. `e2e`(로그인)는 PR에서도 돌지만 시간(예상 10분 안팎: 스택 시작 + 빌드 + 테스트 약 5분)과 안정성을 몇 번 지켜본 뒤 필수 체크로 올릴지 정합니다. 너무 느리면 `if:`로 main·수동 실행 전용으로 돌립니다. **Lighthouse 차단(P12-03)도 `e2e` 안의 단계라, `e2e`를 필수 체크로 올려야 병합을 막습니다** — 바이트·Accessibility는 러너 부하에 둔감해 흔들림이 없지만(로컬 2회 실행 같음, [lighthouse.md](perf/lighthouse.md)) `e2e` 전체의 시간·안정성 판단이 먼저입니다(GitHub 설정은 사용자). 보호 규칙은 CI가 PR에서 한 번 통과한 뒤 설정합니다(§12-Q23).
 
 ## Action 고정
 

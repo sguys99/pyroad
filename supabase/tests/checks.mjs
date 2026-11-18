@@ -5735,6 +5735,202 @@ function advisorsReport() {
   }
 }
 
+/** B108 (00060): 학생 세션이 직접 쓰는 열의 크기 상한 — 한 행에 수십 MB 를 넣어 DB 를 채우지 못하게 */
+async function groupSizeLimits(u) {
+  const size = { deny: ['denied'], allow: ['written'] };
+  const tooBig = (r) =>
+    errCode(r) === '23514'
+      ? { actual: 'denied', detail: `${r.status} 23514 ${errMsg(r)}` }
+      : null;
+  const save = (body) =>
+    rest('POST', '/rest/v1/user_progress?on_conflict=user_id,quest_id', {
+      as: u.alice,
+      body: { user_id: u.alice.id, quest_id: Q2, ...body },
+      prefer: 'resolution=merge-duplicates,return=minimal',
+    });
+  await check({
+    group: 'write',
+    id: 'B108-1',
+    role: 'authenticated',
+    op: '자동 저장 upsert user_progress code_submitted 50,001자 (1MB 대신 상한 바로 위)',
+    requires: 'public.user_progress',
+    ...size,
+    run: async () => {
+      const r = await save({ code_submitted: 'x'.repeat(50_001) });
+      return (
+        tooBig(r) ??
+        (await classifyWrite(
+          Promise.resolve(r),
+          `select char_length(code_submitted) > 50000 from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q2}'`,
+        ))
+      );
+    },
+  });
+  await check({
+    group: 'write',
+    id: 'B108-2',
+    role: 'authenticated',
+    op: '자동 저장 upsert user_progress step_submissions 600KB',
+    requires: 'public.user_progress',
+    ...size,
+    run: async () => {
+      const r = await save({ step_submissions: { 1: 'y'.repeat(600_000) } });
+      return (
+        tooBig(r) ??
+        (await classifyWrite(
+          Promise.resolve(r),
+          `select coalesce(octet_length(step_submissions::text) > 524288, false) from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q2}'`,
+        ))
+      );
+    },
+  });
+  await check({
+    group: 'write',
+    id: 'B108-3',
+    role: 'authenticated',
+    op: 'PATCH users preferred_provider 33자',
+    ...size,
+    run: async () => {
+      const r = await rest('PATCH', `/rest/v1/users?id=eq.${u.alice.id}`, {
+        as: u.alice,
+        body: { preferred_provider: 'p'.repeat(33) },
+        prefer: 'return=minimal',
+      });
+      return (
+        tooBig(r) ??
+        (await classifyWrite(
+          Promise.resolve(r),
+          `select char_length(preferred_provider) > 32 from public.users where id = '${u.alice.id}'`,
+        ))
+      );
+    },
+  });
+  await check({
+    group: 'app',
+    id: 'B108-4',
+    role: 'authenticated',
+    op: '자동 저장: 완료 API 상한(20,000자) 한글 코드 + 프로젝트 7단계 코드는 그대로 저장됨',
+    requires: 'public.user_progress',
+    ...WRITE,
+    run: () => {
+      const code = '가'.repeat(20_000);
+      const steps = Object.fromEntries(
+        [1, 2, 3, 4, 5, 6, 7].map((n) => [n, '나'.repeat(20_000)]),
+      );
+      return classifyWrite(
+        save({ code_submitted: code, step_submissions: steps }),
+        `select char_length(code_submitted) = 20000 and step_submissions ? '7' from public.user_progress where user_id = '${u.alice.id}' and quest_id = '${Q2}'`,
+      );
+    },
+  });
+}
+
+/**
+ * P12-05 침투 쓸기:테이블마다 따로 쓴 점검이 새 객체를 빠뜨려도 잡히게, 모든 그룹이 데이터를 만든 뒤 public 의 모든
+ * 테이블·뷰를 비로그인·다른 학생으로 한 번씩 읽어 본다. 열려 있어도 되는 것은 아래 목록뿐(이유와 함께)
+ */
+// 비로그인이 행을 읽어도 되는 것: 공지(비로그인 열람, B02)
+const PEN_ANON_OK = ['notices'];
+// 로그인 학생이 남의 행을 읽어도 되는 것 (보이는 값이 공개 이름·글뿐): 게시판 글·댓글, 공개 프로필 표·뷰,
+// 공지(비로그인도 읽음 — 작성자 열은 관리자 uuid 뿐, P12-05 L15)
+const PEN_CROSS_OK = [
+  'notices.user_id',
+  'board_posts.user_id',
+  'board_comments.user_id',
+  'user_public_profiles.user_id',
+  'user_profiles_public.id',
+];
+
+async function groupPen(u) {
+  const rels = one(`select string_agg(c.relname, ' ' order by c.relname)
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind in ('r', 'v', 'm', 'p')`).split(
+    ' ',
+  );
+  await check({
+    group: 'pen',
+    id: 'PEN-1',
+    role: 'anon',
+    op: 'public 의 모든 테이블·뷰를 비로그인으로 읽기 (행이 오면 열림, 공지 제외)',
+    ...NONE,
+    run: async () => {
+      const open = [];
+      for (const rel of rels) {
+        if (PEN_ANON_OK.includes(rel)) continue;
+        const r = await rest('GET', `/rest/v1/${rel}?select=*&limit=1`);
+        if (classifyRead(r).actual === 'allowed') open.push(rel);
+      }
+      return {
+        actual: open.length ? open.join(' ') : 'none',
+        detail: open.length
+          ? `열림: ${open.join(', ')}`
+          : `${rels.length}개 모두 막힘·0행`,
+      };
+    },
+  });
+
+  // 사용자를 가리키는 열: *user_id·author_id·reporter_id + users.id·user_profiles_public.id
+  const cols = one(`select string_agg(c.relname || '.' || a.attname, ' ' order by 1)
+      from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind in ('r', 'v', 'm', 'p') and a.attnum > 0 and not a.attisdropped
+       and a.atttypid = 'uuid'::regtype
+       and (a.attname ~ '(^|_)user_id$' or a.attname in ('author_id', 'reporter_id')
+            or (c.relname in ('users', 'user_profiles_public') and a.attname = 'id'))`).split(
+    ' ',
+  );
+  await check({
+    group: 'pen',
+    id: 'PEN-2',
+    role: 'authenticated',
+    op: '로그인 학생(alice)이 public 의 모든 테이블·뷰에서 남의 사용자 열 행 읽기 (게시판·공개 프로필 제외)',
+    ...NONE,
+    run: async () => {
+      const open = [];
+      let probed = 0;
+      for (const rc of cols) {
+        if (PEN_CROSS_OK.includes(rc)) continue;
+        const [rel, col] = rc.split('.');
+        // 남의 행이 실제로 있을 때만 의미가 있음 (postgres 로 확인)
+        if (
+          one(
+            `select exists (select 1 from public.${rel} where ${col} is not null and ${col} <> '${u.alice.id}')`,
+          ) !== 't'
+        )
+          continue;
+        probed++;
+        const r = await rest(
+          'GET',
+          `/rest/v1/${rel}?select=${col}&${col}=neq.${u.alice.id}&limit=1`,
+          { as: u.alice },
+        );
+        if (classifyRead(r).actual === 'allowed') open.push(rc);
+      }
+      return {
+        actual: open.length ? open.join(' ') : 'none',
+        detail: open.length
+          ? `남의 행이 보임: ${open.join(', ')}`
+          : `사용자 열 ${cols.length}개 중 남의 행이 있는 ${probed}개 모두 0행·막힘`,
+      };
+    },
+  });
+
+  await check({
+    group: 'pen',
+    id: 'PEN-3',
+    role: 'postgres',
+    op: 'anon/authenticated 가 EXECUTE 할 수 있는 public 함수 (SECURITY DEFINER 여부와 무관, 트리거 제외)',
+    ...NONE,
+    run: () => {
+      const v = one(`select coalesce(string_agg(distinct p.oid::regprocedure::text, ', '), '')
+          from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+         where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype
+           and (has_function_privilege('anon', p.oid, 'EXECUTE')
+                or has_function_privilege('authenticated', p.oid, 'EXECUTE'))`);
+      return { actual: v || 'none', detail: v || '(없음)' };
+    },
+  });
+}
+
 async function groupStatic() {
   await check({
     group: 'static',
@@ -7441,6 +7637,56 @@ async function groupAuthTriggers(u) {
       return { actual: v || 'none', detail: v || '(없음)' };
     },
   });
+  // B115 (P12-06): Google 이름·사진은 Auth 에 남기지 않음. Kakao·Naver 메타데이터와 이메일은 그대로
+  await check({
+    group: 'auth',
+    id: 'B115-1',
+    role: 'postgres',
+    op: 'Google 가입·재로그인(병합)·identity 저장 → raw_user_meta_data·identity_data 에 name·full_name·given_name·family_name·picture·avatar_url 없음, iss·sub·email 은 남음. Kakao 메타데이터는 그대로',
+    ...OK,
+    run: () =>
+      sqlCheck(`
+        INSERT INTO auth.users (id, email, raw_app_meta_data, raw_user_meta_data) VALUES
+          ('d9100000-0000-0000-0000-000000000001', 'b115-kid@gmail.example', '{"provider": "google", "providers": ["google", "kakao"]}',
+           '{"iss": "https://accounts.google.com", "sub": "g-b115", "name": "김실명", "full_name": "김실명", "given_name": "실명",
+             "family_name": "김", "picture": "https://lh3.googleusercontent.com/a/b115", "avatar_url": "https://lh3.googleusercontent.com/a/b115",
+             "email": "b115-kid@gmail.example", "email_verified": true}');
+        INSERT INTO auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at) VALUES
+          ('g-b115', 'd9100000-0000-0000-0000-000000000001',
+           '{"iss": "https://accounts.google.com", "sub": "g-b115", "name": "김실명", "picture": "https://lh3.googleusercontent.com/a/b115",
+             "email": "b115-kid@gmail.example"}', 'google', now()),
+          ('4012345699', 'd9100000-0000-0000-0000-000000000001',
+           '{"iss": "https://kapi.kakao.com", "sub": "4012345699", "name": "카카오닉"}', 'kakao', now());
+        DO $$
+        DECLARE
+          v_uid  UUID := 'd9100000-0000-0000-0000-000000000001';
+          v_keys TEXT[] := ARRAY['name', 'full_name', 'given_name', 'family_name', 'picture', 'avatar_url'];
+          v      JSONB;
+        BEGIN
+          SELECT raw_user_meta_data INTO v FROM auth.users WHERE id = v_uid;
+          IF v ?| v_keys OR v ->> 'email' IS DISTINCT FROM 'b115-kid@gmail.example' OR v ->> 'sub' IS DISTINCT FROM 'g-b115' THEN
+            RAISE EXCEPTION '가입: %', v;
+          END IF;
+          -- Kakao 로그인(병합): Kakao 값은 그대로
+          UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://kapi.kakao.com", "name": "카카오닉"}' WHERE id = v_uid;
+          IF (SELECT raw_user_meta_data ->> 'name' FROM auth.users WHERE id = v_uid) IS DISTINCT FROM '카카오닉' THEN
+            RAISE EXCEPTION 'Kakao 로그인 뒤 Kakao 이름이 지워짐';
+          END IF;
+          -- 다시 Google 로그인(병합): 지움
+          UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || '{"iss": "https://accounts.google.com", "name": "김실명", "picture": "x"}' WHERE id = v_uid;
+          SELECT raw_user_meta_data INTO v FROM auth.users WHERE id = v_uid;
+          IF v ?| v_keys THEN RAISE EXCEPTION 'Google 재로그인: %', v; END IF;
+          SELECT identity_data INTO v FROM auth.identities WHERE user_id = v_uid AND provider = 'google';
+          IF v ?| v_keys OR v ->> 'email' IS DISTINCT FROM 'b115-kid@gmail.example' THEN RAISE EXCEPTION 'Google identity: %', v; END IF;
+          UPDATE auth.identities SET identity_data = identity_data || '{"full_name": "김실명"}' WHERE user_id = v_uid AND provider = 'google';
+          IF (SELECT identity_data ? 'full_name' FROM auth.identities WHERE user_id = v_uid AND provider = 'google') THEN
+            RAISE EXCEPTION 'Google identity 갱신에 이름이 남음';
+          END IF;
+          IF (SELECT identity_data ->> 'name' FROM auth.identities WHERE user_id = v_uid AND provider = 'kakao') IS DISTINCT FROM '카카오닉' THEN
+            RAISE EXCEPTION 'Kakao identity 이름이 지워짐';
+          END IF;
+        END $$;`),
+  });
 }
 
 // ── board: 게시판 안전장치 (P1-18, B19, 00014·00015) ──────────
@@ -8106,6 +8352,74 @@ async function groupConsent(u) {
         compare('GC-4', { expired: true, consented: false, future: false, teen: false, unknown: false }, got) ?? {
           actual: 'ok',
           detail: `대상 ${listed.length}`,
+        }
+      );
+    },
+  });
+  // ── B118 (00061): 온보딩·나이 확인 미완료 계정 파기 대상 ─────────
+  await check({
+    group: 'consent',
+    id: 'GC-5',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/list_expired_incomplete (미완료 계정 파기 대상 훑기)',
+    requires: 'public.list_expired_incomplete()',
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        const r = await rest('POST', '/rest/v1/rpc/list_expired_incomplete', { as, body: { p_limit: 10 } });
+        if (r.status < 300) return { actual: 'allowed', detail: `${r.status}` };
+        if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+          return { actual: 'error', detail: `${r.status} ${errCode(r)} ${errMsg(r)}` };
+      }
+      return { actual: 'denied', detail: '모두 거부' };
+    },
+  });
+  await check({
+    group: 'consent',
+    id: 'GC-6',
+    role: 'service_role',
+    op: 'list_expired_incomplete: 온보딩·나이 확인 미완료 + 활동 없음 + max(가입일, 적용 시각) + 30일 (오래된 계정도 적용 직후엔 아님, 학습 기록·게시글이 있으면 영영 아님)',
+    requires: 'public.list_expired_incomplete()',
+    ...OK,
+    run: async () => {
+      const ids = {};
+      // [이름, 가입 며칠 전(음수 = 미래), onboarded, age_band, 활동]
+      for (const [k, ago, onboarded, band, activity] of [
+        ['old', 100, false, null, null],
+        ['fresh', 0, false, null, null],
+        ['later', -10, false, null, null],
+        ['noage', 100, true, null, null],
+        ['done', 100, true, '14plus', null],
+        ['learner', 100, false, null, 'progress'],
+        ['poster', 100, false, null, 'post'],
+      ]) {
+        const x = await createUser(`gc6${k}`, '미완료점검');
+        ids[k] = x.id;
+        one(`update public.users set created_at = now() - interval '${ago} days',
+               onboarded_at = ${onboarded ? 'now()' : 'null'}, age_band = ${band ? `'${band}'` : 'null'}
+             where id = '${x.id}'`);
+        if (activity === 'progress')
+          one(`insert into public.user_progress (user_id, quest_id, status) values ('${x.id}', '${Q1}', 'in_progress')`);
+        if (activity === 'post')
+          one(`insert into public.board_posts (user_id, title, content) values ('${x.id}', 'gc6', 'x')`);
+      }
+      const listed = async (now, userId) => {
+        const r = await rpc('list_expired_incomplete', { p_limit: 500, p_now: now, ...(userId && { p_user_id: userId }) });
+        return Array.isArray(r.json) ? r.json : [];
+      };
+      const today = await listed(new Date().toISOString());
+      const later = await listed(new Date(Date.now() + 31 * 86400_000).toISOString());
+      const pick = (list) => Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, list.includes(id)]));
+      const one1 = await listed(new Date(Date.now() + 31 * 86400_000).toISOString(), ids.learner);
+      const one2 = await listed(new Date(Date.now() + 31 * 86400_000).toISOString(), ids.old);
+      const none = { old: false, fresh: false, later: false, noage: false, done: false, learner: false, poster: false };
+      return (
+        compare('GC-6 적용 직후', none, pick(today)) ??
+        compare('GC-6 31일 뒤', { ...none, old: true, fresh: true, noage: true }, pick(later)) ??
+        compare('GC-6 한 명 다시 확인', { learner: 0, old: 1 }, { learner: one1.length, old: one2.length }) ?? {
+          actual: 'ok',
+          detail: `31일 뒤 대상 ${later.length}`,
         }
       );
     },
@@ -9106,6 +9420,115 @@ async function groupAnalytics(u) {
   }
 }
 
+// ── monitoring: 운영 지표 집계 (P12-09, ① 00062) ──────────
+async function groupMonitoring(u) {
+  const FN = 'public.monitoring_summary()';
+  await check({
+    group: 'monitoring',
+    id: 'MON-1',
+    role: 'anon·authenticated',
+    op: 'POST /rpc/monitoring_summary (운영 지표 훑기)',
+    requires: FN,
+    deny: ['denied'],
+    allow: (a) => a !== 'denied',
+    run: async () => {
+      for (const as of ['anon', u.alice]) {
+        const r = await rest('POST', '/rest/v1/rpc/monitoring_summary', { as, body: { p_days: 7 } });
+        if (r.status < 300) return { actual: 'allowed', detail: `${r.status}` };
+        if (!(r.status === 401 || r.status === 403 || r.status === 404 || errCode(r) === '42501'))
+          return { actual: 'error', detail: `${r.status} ${errCode(r)} ${errMsg(r)}` };
+      }
+      return { actual: 'denied', detail: '모두 거부' };
+    },
+  });
+  await check({
+    group: 'monitoring',
+    id: 'MON-2',
+    role: 'service_role',
+    op: 'monitoring_summary: 넣은 이벤트만큼 늘고(퍼널·D1·세션·튜터·연출), 같은 기간 직접 SQL 과 같음, 기간은 1·7·28만',
+    requires: FN,
+    ...OK,
+    run: async () => {
+      const get = async (d) => (await rpc('monitoring_summary', { p_days: d })).json;
+      const bad = await rpc('monitoring_summary', { p_days: 5 });
+      if (bad.status < 300) return { actual: 'mismatch', detail: 'p_days=5 가 통과함' };
+      const before = await get(7);
+      const id = (k) => `Mon${k}`.padEnd(22, 'x');
+      const ev = (anon, name, actor, source, props, ago, device = 'desktop') =>
+        `('${name}', '${actor}', '${id(anon)}', '${source}', '${JSON.stringify(props)}'::jsonb, '${device}', now() - interval '${ago}')`;
+      // 방문 2(1명 CTA) · 가입 A(이틀 전, 다음 날 시작·완료·스테이지·힌트·자유 질문) · 가입 B(사흘 전, 그 뒤 없음) · C(자동 하향 뒤 풍성하게)
+      one(`insert into public.analytics_events (name, actor, anon_id, source, props, device, occurred_at) values
+        ${[
+          ev('V1', 'landing_view', 'visitor', 'client', {}, '1 hour', 'mobile'),
+          ev('V1', 'landing_cta_click', 'visitor', 'client', { cta: 'hero', provider: 'google' }, '59 minutes', 'mobile'),
+          ev('V2', 'landing_view', 'visitor', 'client', {}, '2 hours'),
+          ev('A', 'login_success', 'user', 'server', { provider: 'google', new_user: true }, '2 days'),
+          ev('A', 'quest_start', 'user', 'server', { quest_id: Q1 }, '1 day'),
+          ev('A', 'hint_used', 'user', 'server', { quest_id: Q1, level: 1 }, '1 day -1 minute'),
+          ev('A', 'hint_used', 'user', 'server', { quest_id: Q1, level: 3 }, '1 day -2 minutes'),
+          ev('A', 'tutor_free_question', 'user', 'server', { result: 'fallback' }, '1 day -3 minutes'),
+          ev('A', 'tutor_free_question', 'user', 'server', { result: 'answered' }, '1 day -4 minutes'),
+          ev('A', 'quest_complete', 'user', 'server', { quest_id: Q1, hints_used: 2, used_golden_key: false, level_up: false, stage_cleared: true }, '1 day -5 minutes'),
+          ev('B', 'login_success', 'user', 'server', { provider: 'kakao', new_user: true }, '3 days'),
+          ev('C', 'motion_tier_change', 'user', 'client', { from: 'full', to: 'lite', cause: 'measured', setting: 'auto', reduced: 'system', elapsed_s: 5 }, '3 hours', 'tablet'),
+          ev('C', 'motion_tier_change', 'user', 'client', { from: 'lite', to: 'full', cause: 'user', setting: 'full', reduced: 'system', elapsed_s: 60 }, '3 hours -1 minute', 'tablet'),
+        ].join(',\n')}`);
+      try {
+        const after = await get(7);
+        const delta = (path) => {
+          const pick = (o) => path.split('.').reduce((x, k) => x?.[k], o);
+          return pick(after) - pick(before);
+        };
+        const keys = [
+          'events.landing_sessions', 'events.cta_sessions', 'events.visitor_sessions', 'events.signups',
+          'events.active_users', 'events.mobile_ids', 'events.hints', 'events.hints_l1', 'events.hints_l3',
+          'events.free_total', 'events.free_fallback', 'events.free_answered',
+          'cohort.signups', 'cohort.started', 'cohort.completed', 'cohort.stage_cleared',
+          'retention.d1_cohort', 'retention.d1_back', 'sessions.sessions', 'sessions.completes',
+          'motion.client_users', 'motion.downgraded', 'motion.back_to_full',
+        ];
+        const got = Object.fromEntries(keys.map((k) => [k, delta(k)]));
+        const exp = {
+          'events.landing_sessions': 2, 'events.cta_sessions': 1, 'events.visitor_sessions': 2, 'events.signups': 2,
+          'events.active_users': 3, 'events.mobile_ids': 2, 'events.hints': 2, 'events.hints_l1': 1, 'events.hints_l3': 1,
+          'events.free_total': 2, 'events.free_fallback': 1, 'events.free_answered': 1,
+          'cohort.signups': 2, 'cohort.started': 1, 'cohort.completed': 1, 'cohort.stage_cleared': 1,
+          'retention.d1_cohort': 2, 'retention.d1_back': 1, 'sessions.sessions': 4, 'sessions.completes': 1,
+          'motion.client_users': 1, 'motion.downgraded': 1, 'motion.back_to_full': 1,
+        };
+        // 같은 기간을 직접 센 값 (analytics.md SQL 1·3, coin_balance_mismatches, 신고 표)
+        const W = `occurred_at >= (public.kst_today() - 6)::timestamp at time zone 'Asia/Seoul'`;
+        const direct = one(`select concat_ws(',',
+            (select count(distinct anon_id) from public.analytics_events where name = 'landing_view' and ${W}),
+            (select count(distinct anon_id) from public.analytics_events where actor = 'user' and ${W}),
+            (select count(*) from public.analytics_events where name = 'hint_used' and ${W}),
+            (select count(*) from public.coin_balance_mismatches()),
+            (select count(*) from public.board_posts where is_hidden),
+            (select count(*) from public.users where created_at >= (public.kst_today() - 6)::timestamp at time zone 'Asia/Seoul'))`);
+        const fromFn = [
+          after.events.landing_sessions, after.events.active_users, after.events.hints,
+          after.health.coin_mismatches, after.health.hidden_posts, after.accounts.created,
+        ].join(',');
+        const today = await get(1);
+        const shape = {
+          days: [after.days, today.days], daily: [after.daily.length, today.daily.length],
+          from: today.from === today.to,
+        };
+        return (
+          compare('MON-2 늘어난 수', exp, got) ??
+          compare('MON-2 직접 SQL', { v: direct }, { v: fromFn }) ??
+          compare('MON-2 모양', { days: [7, 1], daily: [14, 14], from: true }, shape) ?? {
+            actual: 'ok',
+            detail: `방문 ${after.events.landing_sessions} · 가입 ${after.cohort.signups} · D1 ${after.retention.d1_back}/${after.retention.d1_cohort}`,
+          }
+        );
+      } finally {
+        one(`delete from public.analytics_events where anon_id like 'Mon%'`);
+      }
+    },
+  });
+}
+
 // ── 실행 ──────────────────────────────────────────────────
 async function main() {
   console.log(`[${scenario}] ${S.label}`);
@@ -9185,8 +9608,11 @@ async function main() {
   await groupSeenUnlocks(u);
   await groupQuiz(u);
   await groupAnalytics(u);
+  await groupMonitoring(u);
   await groupAccount(u);
   await groupApp(u);
+  await groupSizeLimits(u);
+  await groupPen(u);
   await groupStatic();
 
   const count = (s) => results.filter((r) => r.status === s).length;

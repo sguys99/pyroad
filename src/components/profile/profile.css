@@ -288,13 +288,75 @@
 .pf-stage .g-prog {
   grid-column: 1 / -1;
 }
-.pf-stage[data-locked] {
+/* 잠긴 스테이지: 글자는 흐린 글자색(AA 대비)만, 흐리게 하는 건 막대 — 줄 전체 opacity 는 글자 대비 2.3:1 (B103) */
+.pf-stage[data-locked] .pf-stage-t {
+  color: var(--text-muted);
+}
+.pf-stage[data-locked] .g-prog {
   opacity: 0.55;
 }
 .pf-chest[data-state='locked'],
 .pf-chest[data-state='none'] {
   opacity: 0.4;
   filter: grayscale(1);
+}
+
+/* 월드별 묶음 (B140): 접힌 줄 = 권·이름·별 합계(잠긴 월드는 잠김) · 꺾쇠. 지금 월드만 펼침, 줄 사이 가는 선 */
+.pf-worlds {
+  display: grid;
+}
+.pf-world + .pf-world {
+  border-top: var(--line-w) solid var(--line);
+}
+.pf-world-sum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--spacing-touch);
+  border-radius: var(--round-s);
+  cursor: pointer;
+  list-style: none;
+}
+.pf-world-sum::-webkit-details-marker {
+  display: none;
+}
+.pf-world-t {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5rem;
+  min-width: 0;
+  font-weight: 700;
+}
+.pf-world-no {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.pf-world-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  margin-right: 0.25rem;
+}
+.pf-world-lock > svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.pf-world-chev {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--text-muted);
+}
+.pf-world[open] .pf-world-chev {
+  transform: rotate(90deg);
+}
+.pf-world[data-locked] .pf-world-t {
+  color: var(--text-muted);
+}
+.pf-world > .pf-stages {
+  padding: 0.25rem 0 1rem;
 }
 
 /* ── 업적 (최근 메달 3개) ── */
@@ -392,9 +454,9 @@
   outline-offset: 1px;
   font-weight: 700;
 }
+/* 앞으로 올 날: 흐린 글자색만 (opacity 를 겹치면 대비 2.5:1, B103) */
 .pf-day[data-future] {
   color: var(--text-muted);
-  opacity: 0.6;
 }
 .pf-day-shield {
   position: absolute;
@@ -440,13 +502,13 @@
   margin: 0;
 }
 
-/* ── 아래: 설정·로그아웃 ── */
+/* ── 아래: 설정·로그아웃 (계정 관리와 같은 조용한 글자 버튼, B144). 둘 사이를 넓게 떼어 잘못 누르지 않게 ── */
 .pf-foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem 1.5rem;
+  gap: 0.25rem 2.5rem;
 }
 
 /* ── 두 열(768+): 열마다 카드를 쌓아 높이 차를 줄임 ── */

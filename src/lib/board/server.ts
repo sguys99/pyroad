@@ -2,6 +2,8 @@ import 'server-only';
 
 import { NextResponse } from 'next/server';
 import { isUuid, reportServerError } from '@/lib/api/serverError';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { consumeRateLimit, type RateLimit } from '@/lib/tutor/rateLimit';
 import { MODERATION_MESSAGES, moderateFields } from '@/lib/moderation/filter';
 import { hasVisibleText } from '@/lib/moderation/normalize';
 import { BOARD_LIMITS, charCount } from './limits';
@@ -57,6 +59,37 @@ export function boardServerError(error: unknown, op: string) {
 
 /** 게시판 라우트가 쓰던 경로 그대로 (구현은 `@/lib/api/serverError`) */
 export { isUuid };
+
+/**
+ * 게시판 쓰기 요청 한도 (B107): 한 사람이 스크립트로 글·댓글을 쏟아 내거나 모든 글을 신고하지 못하게.
+ * 갤러리 신고(`gallery:report` 3/20)와 같은 `consume_rate_limit`(00016). 확인이 실패하면 막지 않음(fail-open, 기록만)
+ */
+export const BOARD_RATE_LIMITS = {
+  post: { perMinute: 3, perDay: 20 },
+  comment: { perMinute: 10, perDay: 100 },
+  report: { perMinute: 3, perDay: 20 },
+} as const satisfies Record<string, RateLimit>;
+
+export async function boardRateLimited(
+  userId: string,
+  kind: keyof typeof BOARD_RATE_LIMITS,
+): Promise<Response | null> {
+  const quota = await consumeRateLimit(
+    createAdminClient(),
+    userId,
+    `board:${kind}`,
+    BOARD_RATE_LIMITS[kind],
+    'board',
+  );
+  if (quota.allowed) return null;
+  return NextResponse.json(
+    {
+      error: '너무 빨리 쓰고 있어요. 잠깐 쉬었다가 다시 해 볼까요?',
+      code: 'rate_limited',
+    },
+    { status: 429, headers: { 'Retry-After': String(quota.retryAfter) } },
+  );
+}
 
 /** JSON 본문 (객체가 아니면 null) */
 export async function readJsonObject(

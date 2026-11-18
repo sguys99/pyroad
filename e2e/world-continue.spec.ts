@@ -70,6 +70,48 @@ test('360px: 지도를 내리면 아래에 떠 있는 이어하기, 쪽지가 �
     window.scrollTo(0, document.documentElement.scrollHeight),
   );
   await expect(float).toBeVisible();
+  // 버튼 뒤 화면 아래 바탕색 페이드 띠: 화면 폭 전체, 누름은 통과 (B125)
+  expect(
+    await float.evaluate((f) => {
+      const b = getComputedStyle(f, '::before');
+      return [b.pointerEvents, b.width];
+    }),
+  ).toEqual(['none', '360px']);
+  // 맨 아래까지 내리면 떠 있는 버튼이 페이지 끝 글자를 가리지 않는다 (페이지 아래 여백 pb-28, P12-02 검수).
+  // html 의 부드러운 스크롤이 끝나기 전에 재지 않게 바로 맨 아래로
+  expect(
+    await float.evaluate((f) => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'instant',
+      });
+      const r = f.getBoundingClientRect();
+      const out: string[] = [];
+      const walk = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+      );
+      while (walk.nextNode()) {
+        const t = walk.currentNode as Text;
+        if (!t.data.trim() || f.contains(t)) continue;
+        if (!t.parentElement?.checkVisibility({ visibilityProperty: true }))
+          continue;
+        const range = document.createRange();
+        range.selectNodeContents(t);
+        for (const b of range.getClientRects())
+          if (
+            b.width > 1 &&
+            b.height > 1 &&
+            b.bottom > r.top &&
+            b.top < r.bottom &&
+            b.right > r.left &&
+            b.left < r.right
+          )
+            out.push(t.data.trim());
+      }
+      return out;
+    }),
+  ).toEqual([]);
   await expect(float).toContainText('이어서 하기');
   await expect(float).toContainText(`1단계 · ${q2.title}`);
   // 가로로 넘치지 않고 화면 안

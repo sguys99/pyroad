@@ -259,7 +259,7 @@
           },
           {
             "name": "@next/env",
-            "version": "15.5.14",
+            "version": "15.5.29",
             "url": "https://github.com/vercel/next.js/tree/HEAD/packages/next-env",
             "copyright": [
               "Author: Next.js Team"
@@ -1350,7 +1350,7 @@
           },
           {
             "name": "next",
-            "version": "15.5.14",
+            "version": "15.5.29",
             "url": "https://github.com/vercel/next.js",
             "copyright": [
               "Copyright (c) 2025 Vercel, Inc."
@@ -1793,7 +1793,7 @@
           },
           {
             "name": "ws",
-            "version": "8.20.0",
+            "version": "8.22.1",
             "url": "https://github.com/websockets/ws",
             "copyright": [
               "Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>",

@@ -3,6 +3,7 @@
 //   npm run perf:quest                       # 이미 만든 빌드(.next)로 서버를 띄워 잰다 (e2e env, 로컬 Supabase 필요)
 //   npm run perf:quest -- --build            # e2e env로 빌드부터 (next build만: postbuild 검사는 건너뜀)
 //   npm run perf:quest -- --base http://localhost:3100 --runs 3 --slow4g --out build/perf/quest.json
+//   npm run perf:quest -- --rate 6           # "4배" 장면을 다른 CPU 배율로 (P12-04, 예산 판정은 4배 기준이라 참고값)
 //
 // 대상: 1스테이지 첫 퀘스트(처음 방문, 진행 없음 = P0-13 `newbie`). 기기 = Lighthouse 모바일과 같은 412×823 DPR 1.75 터치
 // 지표 (매 회 새 사용자·새 컨텍스트 = HTTP 캐시 없음, 3회 중앙값)
@@ -116,6 +117,7 @@ async function main() {
   const { stage } = await import('../../e2e/support/content');
 
   const RUNS = Number(arg('runs', '3'));
+  const RATE = Number(arg('rate', '4'));
   const PORT = Number(arg('port', '3112'));
   const OUT = resolve(REPO_ROOT, arg('out', 'build/perf/quest.json') as string);
   const NEXT = join(REPO_ROOT, '.next');
@@ -343,6 +345,7 @@ async function main() {
     base,
     load1: r1(loadavg()[0]),
     runs: RUNS,
+    rate: RATE, // summary의 tbt4xMs·ready4xMs는 이 배율 값
   };
   const fails: string[] = [];
   try {
@@ -355,9 +358,9 @@ async function main() {
         const b = await open(ctx);
         return { a, b };
       });
-      const t = await withUser((ctx) => open(ctx, { rate: 4, run: true }));
+      const t = await withUser((ctx) => open(ctx, { rate: RATE, run: true }));
       console.log(
-        `#${i + 1} 1배 첫 방문 활성 ${r.a.readyMs}ms · 다시 열기 ${r.b.readyMs}ms · 라우트 JS ${r.a.htmlJsKB}KB · 활성까지 ${r.a.readyJsKB}KB · 2초 뒤까지 ${r.a.allJsKB}KB · 4배 TBT ${t.tbtMs}ms 활성 ${t.readyMs}ms 단계 ${t.tierChanges.join('→')} · LCP ${r.a.lcp}`,
+        `#${i + 1} 1배 첫 방문 활성 ${r.a.readyMs}ms · 다시 열기 ${r.b.readyMs}ms · 라우트 JS ${r.a.htmlJsKB}KB · 활성까지 ${r.a.readyJsKB}KB · 2초 뒤까지 ${r.a.allJsKB}KB · ${RATE}배 TBT ${t.tbtMs}ms 활성 ${t.readyMs}ms 단계 ${t.tierChanges.join('→')} · LCP ${r.a.lcp}`,
       );
       cold.push(r.a);
       revisit.push(r.b);
@@ -367,7 +370,7 @@ async function main() {
     for (const t of slow)
       if (t.tierChanges.length > 1)
         fails.push(
-          `CPU 4배 로딩·실행 중 연출 단계가 바뀜: ${t.tierChanges.join('→')}`,
+          `CPU ${RATE}배 로딩·실행 중 연출 단계가 바뀜: ${t.tierChanges.join('→')}`,
         );
     let slow4g = null;
     if (arg('slow4g')) {

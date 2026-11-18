@@ -28,7 +28,7 @@ export function findServerEnvProblems(
 
   if (!isSet('GEMINI_API_KEY')) {
     warnings.push(
-      'GEMINI_API_KEY 가 없어 튜터는 본인 API 키가 없는 학생에게 저장된 답변만 보냅니다',
+      'GEMINI_API_KEY 가 없어 튜터는 본인 API 키가 없는 학생에게 저장된 답변만 보냅니다 (운영은 의도한 상태 — Gemini 약관 18세 미만 금지, §12-Q80)',
     );
   }
   for (const [type, name] of Object.entries(MODEL_ENV) as [

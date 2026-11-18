@@ -39,15 +39,14 @@ export function DeletePostButton({ postId }: DeletePostButtonProps) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="rounded-lg border border-border px-3 py-1.5 text-xs text-destructive transition-colors hover:bg-error-soft">
+      <AlertDialogTrigger className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-destructive transition-colors hover:bg-error-soft">
         삭제
       </AlertDialogTrigger>
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
-          <AlertDialogTitle>게시글 삭제</AlertDialogTitle>
+          <AlertDialogTitle>글 지우기</AlertDialogTitle>
           <AlertDialogDescription>
-            이 게시글을 삭제하시겠습니까? 댓글도 함께 삭제되며 복구할 수
-            없습니다.
+            이 글을 지울까요? 댓글도 함께 지워지고, 지운 글은 되돌릴 수 없어요.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

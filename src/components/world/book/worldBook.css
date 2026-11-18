@@ -260,6 +260,13 @@
     font-size: var(--text-small);
     line-height: 1.5;
   }
+  .wb-stat {
+    flex-wrap: wrap;
+    gap: 0 0.25rem;
+  }
+  .wb-stat > span {
+    white-space: nowrap;
+  }
   .wb-note svg {
     flex: none;
     margin-top: 0.2em;

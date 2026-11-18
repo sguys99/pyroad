@@ -37,6 +37,8 @@ const SENSITIVE_KEY =
 /** 위 규칙에 걸리지만 진단에 필요한 키 */
 const SAFE_KEYS = new Set(['statuscode', 'errorcode', 'httpstatuscode']);
 
+const LINK_TOKEN_PATH = /\/(guardian|share)\/[\w-]{22}(?![\w-])/g;
+
 const STRING_PATTERNS: Array<[RegExp, string]> = [
   // JWT (Supabase access token 등)
   [/eyJ[\w-]+\.[\w-]+\.[\w-]+/g, FILTERED],
@@ -52,6 +54,8 @@ const STRING_PATTERNS: Array<[RegExp, string]> = [
   ],
   // 이메일
   [/[\w.+-]+@[\w-]+\.[\w.-]+/g, FILTERED],
+  // 링크를 아는 사람만 여는 주소의 토큰 (B116, P12-06): 보호자 리포트 `/guardian/<22자>`, 자랑 카드 `/share/<22자>`
+  [LINK_TOKEN_PATH, '/$1/[id]'],
 ];
 
 const MAX_DEPTH = 6;
@@ -64,10 +68,13 @@ export function scrubString(value: string): string {
   return out;
 }
 
-/** URL에서 쿼리 문자열과 해시를 떼어 낸다 (`/auth/callback?code=…` 같은 값이 남지 않게) */
+/** URL에서 쿼리 문자열과 해시를 떼어 내고(`/auth/callback?code=…`) 공유 링크 토큰을 지운다 */
 export function stripUrlQuery(url: string): string {
   const cut = url.search(/[?#]/);
-  return cut === -1 ? url : url.slice(0, cut);
+  return (cut === -1 ? url : url.slice(0, cut)).replace(
+    LINK_TOKEN_PATH,
+    '/$1/[id]',
+  );
 }
 
 function isSensitiveKey(key: string): boolean {

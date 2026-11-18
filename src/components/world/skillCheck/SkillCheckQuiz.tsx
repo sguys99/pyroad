@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import {
   ArrowLeft,
   ArrowRight,
@@ -136,10 +137,9 @@ export function SkillCheckQuiz({
       data-testid="skill-check"
     >
       <header className="dq-head">
-        <Link href="/worlds" className="dq-back">
-          <ArrowLeft aria-hidden className="size-4" />
+        <BackLink href="/worlds" className="shrink-0 text-small">
           책장
-        </Link>
+        </BackLink>
         <div className="dq-title">
           <span className="dq-k font-sans">{worldTitle} 가는 길</span>
           <h1 className="dq-t font-display">실력 확인 퀴즈</h1>

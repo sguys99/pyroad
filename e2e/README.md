@@ -33,6 +33,8 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 | `social-login.spec.ts` | 로그인: 카카오·네이버·Google 세 갈래 로그인 시트 → (목업) provider → 온보딩 관문(새 사용자) / 월드맵(온보딩 끝낸 사용자), 최근 로그인 저장(`pyroad.lastLogin.v1`)과 로그아웃 뒤 "최근에 사용" 배지. 새 로컬 사용자 4명(로그인 4번) (P3-17) |
 | `auth.setup.ts` / `auth.teardown.ts` | 이번 실행 전용 테스트 사용자를 service_role로 만들고 로그인 쿠키를 `e2e/.auth/`에 저장 / 끝나면 사용자 삭제 |
 | `*.spec.ts` | 로그인 (`chromium` 프로젝트): 퀘스트 흐름·축하 시퀀서·잠긴 스테이지(B38)·실행기(멈추기·재준비)·힌트·LLM 폴백·황금키·캐릭터·움직임 설정(P2-15)·월드맵·퀘스트 연출 단계 대체(`motion-tiers.spec.ts`, P2-12) |
+| `journey.spec.ts` | 처음부터 끝까지 한 학생 여정(P12-01): 랜딩 → 카카오 로그인(목업) → 온보딩(나이 모름 = 만 14세 미만 + 보호자와 함께 동의) → 지도 시트로 1단계 첫 코드 퀘스트 → 보너스 퀴즈 → (남은 코드 퀘스트는 서버 완료 RPC) → 1단계 보스 승리 → 보상(별 3·보스 XP·코인 = 원장, HUD 잔액, 1단계 클리어·2단계 열림) → 번 코인으로 상점 구매·바로 입기 → 프로필 자랑하기 링크 복사 15코인 → 비로그인으로 공유 페이지 열람. 단계별 깊은 검사는 각 스펙 몫이고 여기는 앞 단계가 만든 상태가 다음 단계로 이어지는지만. **새 학생**(`createSocialUser`) |
+| `sound-unlock.spec.ts` | 소리 잠금 해제·자동재생 금지(P12-01, P0-15): 실제 기본 정책(`--autoplay-policy=document-user-activation-required`)으로 띄우고, "제스처 전" 상태는 페이지 스크립트(`addInitScript`)가 로드 3초 뒤 찍어 console로만 보냄(활성화 없음·곡은 정했지만 `data-bgm-playing` 빈 값·새 AudioContext는 `suspended`) → `page.evaluate`로 활성화만 생겨도 앱은 안 열림 → 실제 클릭(`locator.click`, `isTrusted`)으로 BGM 재생·컨텍스트 `running`. 아래 "주의"의 활성화 함정 때문에 이 파일만 트레이스를 끄고 `support/test`(goto 뒤 `waitForFunction`)가 아닌 기본 `test`를 씀 |
 | `world-select.spec.ts` | 월드 선택(P5-01): 월드 BGM(P5-11, `<html data-bgm data-bgm-playing>`로 제스처 전 무음 → 지도·책장·다른 월드·그 퀘스트 곡 전환), 지도 머리 → 월드 바꾸기 → 책장 → 월드 지도, 잠김·준비 중 안내, 없는 월드 404 화면, 테스트 월드(`fixtures/content/worlds/test-meadow`)를 DB에 넣고 월드 1을 다 깨면 두 번째 월드 지도가 열림. `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷도. 테스트 월드 지도 설정은 Playwright가 서버를 띄우기 전에 `content:build -- --fixtures`로 `build/e2e/`에 만들고 서버 env `PYROAD_E2E_WORLDS`로 읽힘 |
 | `world-chest.spec.ts` | 스테이지 보물상자(P8-06): 별 합계 목표 미달이면 시트에 모으는 중·안에 든 것(코인 30), 채우면 노드에 작은 상자·이름에 안내 → 시트 "열기" → `/api/world/chest` 200 → 시트가 닫히고 지도 위 상자 축하 카드 → 잔액 +30·HUD, 다시 열면 "열었음". 리셋해도 원장이 남아 재시도면 열린 모습만 확인 |
 | `world-missions.spec.ts` | 데일리 미션(P8-07): 월드맵 HUD 미션 칸 → 시트 "오늘의 미션"(첫 칸은 퀘스트 미션, 배정은 서버 `daily_missions_today`로 읽어 기대값) → 달성 전 받기 API 409 → 퀘스트를 끝내면 칸에 금색 점·"받기" → 200, 코인(난이도 금액 + 레벨 업 코인)·XP 15, HUD 잔액 → 다시 받으면 `already_claimed`(0). 360px에서 미션 칸이 보이고 곧 열려요는 빠짐, 시트 가로 넘침 0. 원장 키가 남아 같은 날 재시도면 "받았어요"만 확인 |
@@ -43,6 +45,7 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 | `world-continue.spec.ts` | 월드맵 이어하기 CTA(P5-10): 진행 0 → "모험 시작하기"(첫 퀘스트), 하다 만 퀘스트(진행 행) → 다음 차례보다 그 퀘스트, 360px에서 지도를 내리면 아래 떠 있는 버튼(잠긴 노드 쪽지가 뜨면 비켜 줌). `E2E_SHOTS=<폴더>`면 360·768·1280 × full·minimal 스크린샷 |
 | `world-responsive.spec.ts` | Phase 5 화면 반응형 회귀(P5-14): 7개 폭에서 지도·책장·잠긴 월드·스테이지 시트 가로 넘침 0(시트 주 버튼 하나), 320px 세로 지도의 지금 위치 깃발이 모든 노드에서 이름표에 안 걸림, minimal·동작 줄이기에서 위치·크기 변화·패럴랙스 0, full 탭 숨김 시 앰비언트 멈춤, 퀘스트에서 돌아와 닫은 시트가 기록을 겹치지 않음 |
 | `quiz-mobile.spec.ts` | 모바일 퀴즈(P7-15, 360px 탭만): 4종 첫 시도 ⭐3·30 XP·도장·새로고침 뒤 서버 XP, 오답 2번 → ⭐1·오답 응답에 정답 없음, 3번 → 정답 공개, 같은 날 연습, 퀴즈는 보너스(안 풀어도 다음 스테이지), `/daily` 3문제·콤보·요약, 퀴즈 페이지 HTML·RSC·JS에 정답 없음, 가로 스크롤 없음. 정답은 `support/admin.ts`의 `quizKey`(service_role로 `quest_answer_keys`) |
+| `visual/screens.spec.ts` | 시각 회귀(P12-02, `visual` 프로젝트 — 아래 "시각 회귀"): 주요 화면 22개 × 360·768·1280 `toHaveScreenshot` + 프로필 "별과 보물" 카드 3장(B140). 기본 `npm run test:e2e`에는 들어가지 않음 |
 | `support/env.ts` | 로컬 스택 찾기, 앱 서버 env 만들기 |
 | `support/admin.ts` | service_role 도우미 (진행 초기화, 앞 퀘스트 완료) |
 | `support/test.ts` | 로그인 스펙의 `test`: 테스트마다 진행 초기화, 끝날 때 쓰기 요청 대기, CSP 위반 감시 |
@@ -63,6 +66,21 @@ npx playwright show-report               # 마지막 실행 결과 (실패하면
 - 같은 작업 트리에서 다른 `next build`/`next dev`와 동시에 돌리지 마세요 (`.next/`를 같이 씀).
 - 로그인 스펙은 테스트 사용자 한 명을 테스트마다 초기화하며 쓰므로 `workers: 1`입니다. 재시도는 0 — 흔들리면 고칩니다.
 - 로그인은 실행마다 한 번 (로컬 Auth 로그인 한도: 5분에 30회).
+- **사용자 활성화 함정 (P0-15)**: Playwright의 `page.evaluate`·`waitForFunction`·locator 확인(`expect(locator)`·액션의 사전 검사)과 **트레이스 스냅샷**은 CDP 호출에 `userGesture`를 붙여 페이지에 사용자 활성화(sticky)를 줍니다(실측: `trace: 'retain-on-failure'`면 로드 약 40ms 뒤 `navigator.userActivation.hasBeenActive === true`). 그래서 "제스처 전에는 소리가 안 난다"를 보려면 `sound-unlock.spec.ts`처럼 트레이스를 끄고, 그 상태를 페이지 스크립트가 찍어 보내게 하고, 잠금 해제는 실제 클릭으로 합니다. 다른 스펙의 효과음 기록(`pyroad:sfx`)은 요청 이벤트라 활성화와 상관없음
+
+## 시각 회귀 (P12-02)
+
+```bash
+npm run db:start
+npm run test:visual                                  # 비교 (빌드 포함. 직전 빌드가 e2e 빌드면 E2E_SKIP_BUILD=1)
+npm run test:visual -- --update-snapshots=all        # 기준 이미지 다시 찍기 → 바뀐 PNG를 눈으로 보고 커밋
+```
+
+- **어떻게**: `scripts/visual/run.sh`가 공식 Playwright Docker 이미지(`mcr.microsoft.com/playwright:v<설치된 버전>-noble`)에서 `run-server`만 띄우고, 테스트 러너·앱 서버(3100)·로컬 Supabase는 이 기기에 둔 채 `connectOptions.exposeNetwork: '<loopback>'`으로 브라우저의 localhost 요청을 러너 쪽으로 넘깁니다. 그래서 macOS에서도 리눅스 글꼴 렌더링으로 찍히고, 기준 이미지는 플랫폼 접미사 없이 한 벌(`visual/__screenshots__/`)입니다. `visual` 프로젝트는 `E2E_VISUAL_WS`(스크립트가 넣음)가 있을 때만 생겨 `npm run test:e2e`·`--project=chromium`에 섞이지 않습니다. 컨테이너는 `pyroad-visual-<pid>` 하나만 만들고 끝나면 지웁니다.
+- **사용자 3종**(P0-13과 같은 `@supabase/ssr` 쿠키 주입, `support/socialUsers`): 진행 중(1·2스테이지 + 3스테이지 앞 두 퀘스트), 첫 방문(온보딩 전 → 온보딩 뒤 빈 지도, 닉네임이 있으면 "다시 만나서 반가워" 흐름이라 온보딩 뒤에 넣음), 축하 직전(1스테이지 마지막 코드 퀘스트만 남음 → 통과해 축하 오버레이 → 그 뒤 보스 화면).
+- **고정하는 것**: 동작 줄이기(서버 설정·기기 사본·`prefers-reduced-motion` 셋 다, `<html data-reduced="true">` 확인), 애니메이션 끔·캐럿 숨김, 글꼴 로딩·이미지 로드·스트리밍 끝, `Math.random` 씨앗, 시간대 `Asia/Seoul`·`ko-KR`, 닉네임. 날짜·서버 난수에 따라 바뀌는 칸은 mask(출석·미션·미션 타이머·온보딩 등록증 발급일·추천 닉네임·프로필 학습 달력·최근 업적 날짜). 허용 차이는 화면의 0.2%(캐릭터 리그의 소수점 위치 안티에일리어싱만; 12px 밀림 같은 배치 변화는 수만 px라 잡힘).
+- **찍는 것**: 스크롤 없는 첫 화면만(기준 이미지 용량). 랜딩·로그인 시트·공지(목록·서식 있는 글 — 글은 service_role로 넣고 찍은 뒤 바로 지움, B145)·404·온보딩·월드맵(첫 방문·진행 중)·월드 선택·퀘스트(코드·퀴즈)·축하 오버레이·보스·상점·프로필·업적 도감·설정·게시판(목록·내 글 상세 — 글은 service_role로 넣고 쓴 날은 mask)·월드맵 스테이지 시트·갤러리·공유 페이지(B128). 첫 화면 밖인 프로필 "별과 보물"은 카드만(`profile-treasure-*`, 펼친 지금 월드 + 접힌 다른 월드, B140) — 69장. 날짜마다 문제가 바뀌는 `/daily`, 게시판 글쓰기(빈 입력 칸뿐), 법률 문서는 넣지 않음.
+- **기준 이미지 플랫폼**: 개발 기기(Apple Silicon)의 Docker는 linux/arm64, CI 러너는 linux/amd64라 같은 이미지·글꼴이어도 안티에일리어싱이 다를 수 있습니다(로컬에서 amd64로 확인하려 했지만 Docker Desktop의 Rosetta가 꺼져 있으면 qemu 에뮬레이션에서 Chromium이 죽음 — `VISUAL_DOCKER_PLATFORM=linux/amd64`는 Rosetta를 켠 기기용). 그래서 CI(`e2e` job)에서는 **경고만**(비차단)이고 차이가 나면 아티팩트 `visual-diff`를 올립니다. **CI 기준으로 갱신**: Actions → CI → Run workflow에서 `visual_update`를 켜면 그 러너에서 다시 찍은 `e2e/visual/__screenshots__/`가 아티팩트 `visual-snapshots`로 나오니, 받아서 같은 폴더에 덮어쓰고 바뀐 그림을 눈으로 본 뒤 커밋합니다. CI 기준으로 몇 번 0 diff가 확인되면 `continue-on-error`를 지워 차단 체크로 올립니다(그 뒤 로컬 arm64 비교는 참고용).
 
 ## 소셜 로그인 목업 (P3-17)
 

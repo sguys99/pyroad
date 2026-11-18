@@ -1,6 +1,4 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-
+import { BackLink } from '@/components/ui/back-link';
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
 import { skillCheckOfferOf, toBook, unlockText } from '@/lib/world/worldBook';
 
@@ -23,13 +21,9 @@ export function WorldShelf({
 }) {
   return (
     <>
-      <Link
-        href="/world"
-        className="focus-ring mb-4 inline-flex min-h-touch items-center gap-1 rounded-sm text-small font-bold text-primary-text hover:underline"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        모험 지도로
-      </Link>
+      <BackLink href="/world" className="mb-4">
+        월드맵
+      </BackLink>
       <header className="mb-6">
         <p className="text-kicker text-muted-foreground">모험 책장</p>
         <h1 className="font-display text-h1 text-foreground">

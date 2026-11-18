@@ -4,6 +4,7 @@
 > - 원칙: 아동 대상이라 **익명 ID만** 저장하고 개인정보는 수집하지 않습니다(§2.6, §7 PostHog 행). IP·User-Agent 원문·URL 쿼리도 저장하지 않습니다.
 > - 코드: `src/lib/analytics/`(이벤트 정의·`track()`·서버 기록), `src/app/api/analytics/route.ts`, 마이그레이션 `supabase/migrations/00017_analytics_events.sql`
 > - 운영 적용: [v0.4 런북](release/v0.4-runbook.md) ① 9번, "분석 이벤트 (운영, P1-17)"
+> - 운영 지표 화면: `/admin`(관리자만, P12-09) — 이 표의 이벤트를 DB 함수 `monitoring_summary`(00062)로 합계만 읽음. [monitoring.md](monitoring.md)
 
 ## 1. 무엇을 재나 (§1 성공 지표와의 연결)
 
@@ -57,7 +58,7 @@
 
 - **서버 이벤트는 클라이언트가 보낼 수 없습니다.** `/api/analytics`는 `landing_view`·`landing_cta_click`·`motion_tier_change`·`pwa_install_prompt`·`pwa_installed`·`continue_click`·`quiz_try_run`·`phone_quiz_pick`·`daily_quiz_open`·`daily_quiz_finish`·`rest_reminder_shown`·`rest_reminder_choice`·`trial_start`·`trial_run`·`trial_success`·`share_view`·`share_cta_click`·`share_open`·`share_channel`·`guardian_report_view`만 받습니다(나머지는 400). 그래서 로그인·온보딩·시작·완료·힌트 지표는 조작할 수 없고(지표 신뢰도), RLS 회귀 AN-3·AN-4가 테이블 직접 쓰기도 막혀 있는지 확인합니다.
 - 새 이벤트를 더할 때: `events.ts`(타입·이름) → `schema.ts`(strict 스키마) → 이 표. DB는 이름 형식(`^[a-z][a-z0-9_]{1,47}$`)·크기만 보므로 마이그레이션이 필요 없습니다.
-- `motion_tier_change`는 **기기 성능 분포로 연출 단계 임계값을 조정**하려는 것입니다(P12-04: 놓친 프레임 25%, 창 4개 중 3개). 프레임 수치·화면 크기·기기 모델 같은 지문 정보는 보내지 않고 단계 이름과 경과 초만 보냅니다. `device`(서버가 UA로 판별한 유형)와 함께 보면 "태블릿에서 자동 하향이 얼마나 자주, 몇 초 만에 일어나는지"를 알 수 있습니다(SQL 7). 클라이언트 이벤트라 부풀릴 수 있지만 보상·지표 판정에 쓰지 않는 진단용입니다.
+- `motion_tier_change`는 **기기 성능 분포로 연출 단계 임계값을 조정**하려는 것입니다(P12-04: 놓친 프레임 25%, 창 4개 중 3개). 프레임 수치·화면 크기·기기 모델 같은 지문 정보는 보내지 않고 단계 이름과 경과 초만 보냅니다. `device`(서버가 UA로 판별한 유형)와 함께 보면 "태블릿에서 자동 하향이 얼마나 자주, 몇 초 만에 일어나는지"를 알 수 있습니다(SQL 7, 비율·되돌림·직접 고른 설정은 [P12-04-low-end.md](perf/P12-04-low-end.md) §8 ①~③과 출시 뒤 판단 기준 §4). 클라이언트 이벤트라 부풀릴 수 있지만 보상·지표 판정에 쓰지 않는 진단용입니다.
 
 ## 3. 저장 형태와 익명 ID
 
@@ -143,7 +144,7 @@ POST /api/analytics
 
 ## 7. 확인용 SQL
 
-SQL Editor(postgres)에서 실행합니다. 날짜는 KST(`public.kst_date`, 00012). 관리자 화면은 만들지 않았습니다.
+SQL Editor(postgres)에서 실행합니다. 날짜는 KST(`public.kst_date`, 00012). 매일 보는 합계(사용·퍼널·§1 지표·튜터·건강)는 관리자 화면 `/admin`(운영 지표, P12-09 — 정의·경고 기준·같은 숫자를 내는 SQL은 [monitoring.md](monitoring.md))에서 봅니다.
 
 ```sql
 -- 1. 랜딩 → CTA → 로그인 (날짜별 합계, 최근 28일). 비로그인 세션과 로그인 사용자는 잇지 않으므로 합계 비율

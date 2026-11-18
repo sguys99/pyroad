@@ -56,6 +56,19 @@ describe('WorldHud', () => {
     expect(screen.getByRole('button', { name: '메뉴' })).toBeInTheDocument();
   });
 
+  it('관리자만 메뉴에 운영 지표 줄 (P12-09)', async () => {
+    render(<WorldHud {...props} admin />);
+    fireEvent.click(screen.getByRole('button', { name: '메뉴' }));
+    expect(
+      await screen.findByRole('link', { name: '운영 지표' }),
+    ).toHaveAttribute('href', '/admin');
+    cleanup();
+    render(<WorldHud {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: '메뉴' }));
+    await screen.findByRole('link', { name: '게시판' });
+    expect(screen.queryByRole('link', { name: '운영 지표' })).toBeNull();
+  });
+
   it('곧 열려요 칩(미션 칸이 없을 때)을 누르면 아이 말투 쪽지', () => {
     render(<WorldHud {...props} />);
     fireEvent.click(screen.getByTestId('hud-soon-mission'));

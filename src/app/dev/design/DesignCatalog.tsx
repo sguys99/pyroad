@@ -25,6 +25,7 @@ import {
 import {
   ButtonSection,
   CardSection,
+  BackLinkSection,
   AlertDialogSection,
   SheetSection,
   ToastSection,
@@ -49,7 +50,7 @@ import {
   ShareCardSection,
   SoundSection,
 } from './_catalog/ExtraSections';
-import { LegalSection } from './_catalog/LegalSection';
+import { LegalSection, NoticeBodySection } from './_catalog/LegalSection';
 import { TurtleSection } from './_catalog/TurtleSection';
 import { EditorHandleSection } from './_catalog/EditorHandleSection';
 import { CreationSection } from './_catalog/CreationSection';
@@ -67,6 +68,7 @@ import { AchievementBookSection } from './_catalog/AchievementBookSection';
 import { RestSection } from './_catalog/RestSection';
 import { ProfileSection } from './_catalog/ProfileSection';
 import { ShopScreenSection, ShopSection } from './_catalog/ShopSection';
+import { MonitoringSection } from './_catalog/MonitoringSection';
 
 export type TierChoice = 'auto' | MotionTier;
 export type ReducedChoice = ReducedMotionSetting;
@@ -101,6 +103,7 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
     items: [
       ['buttons', '게임 버튼'],
       ['cards', '카드'],
+      ['back-link', '뒤로 가기'],
       ['alert-dialog', '확인 모달'],
       ['sheet', '바텀시트·모달'],
       ['toast', '토스트'],
@@ -143,11 +146,13 @@ const TOC: { group: string; items: [id: string, label: string][] }[] = [
       ['share-card', '공유 카드'],
       ['sound', '효과음'],
       ['legal', '약관 동의'],
+      ['notice-body', '공지 본문'],
       ['onboarding', '온보딩·튜토리얼'],
       ['consent', '보호자 동의'],
       ['guardian-report', '보호자 리포트'],
       ['pwa', '앱 아이콘·홈 화면'],
       ['rest', '휴식 알림'],
+      ['monitoring', '운영 지표'],
     ],
   },
 ];
@@ -238,6 +243,7 @@ export function DesignCatalog({
               <MotionTokenSection />
               <ButtonSection />
               <CardSection />
+              <BackLinkSection />
               <AlertDialogSection />
               <SheetSection />
               <ToastSection />
@@ -270,11 +276,13 @@ export function DesignCatalog({
               <ShareCardSection />
               <SoundSection />
               <LegalSection />
+              <NoticeBodySection />
               <OnboardingSection />
               <ConsentSection />
               <GuardianReportCatalogSection />
               <PwaSection />
               <RestSection />
+              <MonitoringSection />
             </div>
           </div>
         </div>

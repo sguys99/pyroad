@@ -19,6 +19,7 @@ import { pickUnlockIndex, type UnlockPlan } from '@/lib/world/unlockSeen';
 import type { WorldMapConfig } from '@/lib/content/schema';
 import type { StageWithStatus } from '@/lib/types/database';
 import { HERE_MARKER } from '@/lib/world/worlds';
+import { scrollMapTo } from '../scrollMapTo';
 
 /**
  * 잠금 해제 연출 흐름 (P5-05). WorldMap 이 부르고, 연출 박자는 `unlockFx.ts`.
@@ -139,10 +140,13 @@ export function useStageUnlock({
       `[data-unlock='to']`,
     ) as HTMLElement | null;
     let wait = 350;
-    if (node) {
+    if (node && box.current) {
       const r = node.getBoundingClientRect();
-      if (r.top < 80 || r.bottom > window.innerHeight - 40) {
-        node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const hud =
+        document.querySelector('.wh')?.getBoundingClientRect().bottom ?? 0;
+      if (r.top < hud + 16 || r.bottom > window.innerHeight - 40) {
+        // 들어올 때 자리 잡기와 같은 규칙: 넓은 지도는 위 끝을 HUD 밑에 (가운데 맞추면 지도 위쪽이 HUD 밑에 잘림, B124)
+        scrollMapTo(box.current, node, 'smooth');
         wait = 650;
       }
     }

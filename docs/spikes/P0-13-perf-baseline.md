@@ -298,7 +298,7 @@ Best Practices는 모두 100. SEO 90은 로그인 화면에 `meta description`�
 
 **P0-13 항목** (Phase 0 목록)
 > - [x] **P0-13** ✅ **채택**(Lighthouse CI·바이트·Pyodide 회귀) / **대안**(FPS는 같은 장비 상대 비교만, 절대값은 실기기): (추가) 성능 기준선 측정 …
->   - 결과 (모바일 Lighthouse 3회 중앙값, 장비 부하 5~26이라 절대값은 보수적): 랜딩 Perf 64·LCP 5.5초, 월드맵 80, 퀘스트 46/45·TBT 2.4초·전송 6.3MB(Pyodide 5.3MB, jsDelivr), 프로필 85. Accessibility 88~94(브랜드 초록 대비 3.4~3.6:1 전 화면 실패). 퀘스트 실행 가능 시점 1배 4.0초·4배 6.6초·Slow 4G 34초. CPU 4배에서 월드맵 대기 메인 스레드 83%(reduced-motion 27%), 축하 오버레이 rAF p95 117ms·롱태스크 1.9초. 상세: [P0-13-perf-baseline.md](spikes/P0-13-perf-baseline.md), 재현 `spikes/p0-13-perf-baseline/scripts/run-all.sh`
+>   - 결과 (모바일 Lighthouse 3회 중앙값, 장비 부하 5~26이라 절대값은 보수적): 랜딩 Perf 64·LCP 5.5초, 월드맵 80, 퀘스트 46/45·TBT 2.4초·전송 6.3MB(Pyodide 5.3MB, jsDelivr), 프로필 85. Accessibility 88~94(브랜드 초록 대비 3.4~3.6:1 전 화면 실패). 퀘스트 실행 가능 시점 1배 4.0초·4배 6.6초·Slow 4G 34초. CPU 4배에서 월드맵 대기 메인 스레드 83%(reduced-motion 27%), 축하 오버레이 rAF p95 117ms·롱태스크 1.9초. 상세: [P0-13-perf-baseline.md](P0-13-perf-baseline.md), 재현 `spikes/p0-13-perf-baseline/scripts/run-all.sh`
 
 **P4-12** (현재: "성능 예산: LCP 2.5초 미만, 히어로 에셋 우선 로딩, 아래쪽 애니메이션 지연 로딩")
 > **P4-12** 성능 예산 (기준선 P0-13: 모바일 Perf 64·LCP 5.5초·JS 324KB): 모바일 LCP 2.5초 미만, 랜딩 JS 250KB(gzip) 이하, 렌더 차단 CSS 15KB 이하(P0-14 랜딩 서브셋). **첫 화면 글자는 `opacity:0`으로 서버 렌더링하지 않음**(등장 연출은 보이는 상태에서 transform만), 랜딩에서 lottie-web 제거(P0-07), 히어로 에셋 preload, 아래쪽 애니메이션은 화면에 들어올 때 로드. P0-13 하네스로 전후 비교

@@ -50,7 +50,12 @@ const STAGES = [
   { id: 's4', order: 4, title: '반복의 동굴', stars: 0, maxStars: 33, chest: 'none', locked: true },
 ] as const;
 
-/** 프로필 (P8-13): 머리(보통·큰 칭호·최고 레벨) · 학습 달력(잔디·방패·출석·빈 달) · 모험 기록 · 업적 · 별과 보물 */
+const STAGES2 = [
+  { id: 't1', order: 1, title: '산호 문자열 공방', stars: 0, maxStars: 33, chest: 'none', locked: true },
+  { id: 't2', order: 2, title: '등대 딕셔너리 도서관', stars: 0, maxStars: 27, chest: 'none', locked: true },
+] as const;
+
+/** 프로필 (P8-13): 머리(보통·큰 칭호·최고 레벨) · 학습 달력(잔디·방패·출석·빈 달) · 모험 기록 · 업적 · 별과 보물(월드별 접기, B140) */
 export function ProfileSection() {
   const today = kstToday();
   const cal = useMemo(() => {
@@ -71,7 +76,7 @@ export function ProfileSection() {
       id="profile"
       kicker="재미 요소 (P8-13)"
       title="프로필"
-      description="본인만 보는 성장 기록. 360은 한 열, 768부터 두 열 카드. 초록은 학습(레벨 도장·잔디), 금색은 보상(칭호 도장·별·코인·출석). 반복 연출 없음 — 정보는 글자와 낭독 이름으로도."
+      description="본인만 보는 성장 기록. 360은 한 열, 768부터 두 열 카드. 초록은 학습(레벨 도장·잔디), 금색은 보상(칭호 도장·별·코인·출석). 반복 연출 없음 — 정보는 글자와 낭독 이름으로도. 별과 보물의 스테이지 별은 월드(그림책 N권)로 묶어 지금 월드만 펼치고 나머지는 접힌 줄(별 합계, 잠긴 월드는 잠김) — `<details>`라 JS 없이 키보드·낭독기(B140)."
     >
       <div className="pf">
         <ProfileHero name="코딩하는 다람쥐" totalXp={1500} />
@@ -108,7 +113,15 @@ export function ProfileSection() {
             { id: 'c', name: '별 세 개 단골', icon: 'Gem', tier: 'gold', achievedAt: `${today}T01:00:00Z` },
           ]}
         />
-        <TreasureCard coins={1280} coinsWeek={85} threeStars={15} stages={[...STAGES]} />
+        <TreasureCard
+          coins={1280}
+          coinsWeek={85}
+          threeStars={15}
+          worlds={[
+            { no: 1, title: '파이썬 섬', locked: false, current: true, stages: [...STAGES] },
+            { no: 2, title: '코드 바다', locked: true, current: false, stages: [...STAGES2] },
+          ]}
+        />
       </div>
     </Section>
   );

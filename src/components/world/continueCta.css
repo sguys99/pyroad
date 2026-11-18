@@ -55,8 +55,6 @@
     bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
     z-index: 30;
     max-width: calc(100% - 2rem);
-    border-radius: var(--round-m);
-    box-shadow: var(--elev-pop);
     opacity: 0;
     visibility: hidden;
     transform: translateY(140%);
@@ -82,6 +80,29 @@
   }
   .wc-float .wc-sub {
     max-width: 12rem;
+  }
+  /* 버튼 뒤 화면 아래 띠: 지나가는 지도·카드 글자가 버튼 둘레로 비쳐 어수선하지 않게 바탕색으로 옅게 덮는다 (B125).
+     그림자는 띠 위에 보이도록 버튼에 (띠는 이 층의 z -1이라 감싼 상자의 그림자를 덮음) */
+  .wc-float::before {
+    content: '';
+    /* fixed 로 두면 들고 날 때(transform 중) 감싼 상자 폭으로 줄었다가 끝나면 화면 폭으로 튐 → 버튼에 붙여 같이 움직이고 폭만 화면 폭 */
+    position: absolute;
+    left: 50%;
+    bottom: calc(-1rem - env(safe-area-inset-bottom, 0px));
+    z-index: -1;
+    width: 100vw;
+    height: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+    translate: -50% 0;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--background) 0%, transparent),
+      color-mix(in srgb, var(--background) 92%, transparent) 55%
+    );
+    pointer-events: none;
+  }
+  .wc-float > .g-btn {
+    border-radius: var(--round-m);
+    box-shadow: var(--elev-pop);
   }
 }
 

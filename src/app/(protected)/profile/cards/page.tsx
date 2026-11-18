@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { redirect } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { reportServerError } from '@/lib/api/serverError';
@@ -78,10 +77,7 @@ export default async function MyShareCardsPage() {
   return (
     <PageTransition className="mx-auto grid min-h-screen max-w-lg content-start gap-4 px-4 py-4 sm:py-6 md:max-w-4xl">
       <div className="pf-top">
-        <Link href="/profile" className="pf-back focus-ring">
-          <ChevronLeft aria-hidden />
-          프로필
-        </Link>
+        <BackLink href="/profile">프로필</BackLink>
       </div>
       <header className="grid gap-1">
         <h1 className="m-0 font-display text-h2">내 자랑 카드</h1>

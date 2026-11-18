@@ -14,7 +14,10 @@ import {
   saveUserApiKey,
   toApiKeyStatus,
 } from '@/lib/tutor/apiKeys';
-import type { LLMProviderType } from '@/lib/tutor/providers/types';
+import {
+  USER_KEY_PROVIDERS,
+  type LLMProviderType,
+} from '@/lib/tutor/providers/types';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { reportServerError } from '@/lib/api/serverError';
 import { motionSettingsSchema } from '@/lib/motion/schema';
@@ -57,7 +60,13 @@ export async function GET() {
   const serverProviders = getAvailableProviders().filter(
     (p) => p === FREE_TIER_PROVIDER,
   );
-  const allAvailable = [...new Set([...serverProviders, ...status.registered])];
+  // 이미 저장된 학생 Google 키는 튜터가 쓰지 않으므로 고를 수 없음 (B117, 지우기만)
+  const allAvailable = [
+    ...new Set([
+      ...serverProviders,
+      ...status.registered.filter((p) => USER_KEY_PROVIDERS.includes(p)),
+    ]),
+  ];
   const { providerType } = resolveUserProvider(
     profile?.preferred_provider,
     apiKeys.keys,
@@ -142,6 +151,7 @@ export async function PATCH(request: Request) {
         toDelete.push(key);
         continue;
       }
+      if (!USER_KEY_PROVIDERS.includes(key)) continue; // 새 Google 키는 받지 않음 (B117, 지우기만)
       const normalized = normalizeApiKeyInput(value);
       if (!normalized) {
         return NextResponse.json(

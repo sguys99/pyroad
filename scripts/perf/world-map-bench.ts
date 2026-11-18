@@ -4,12 +4,14 @@
 //   npm run perf:world                     # 이미 만든 빌드(.next)로 서버를 띄워 잰다 (e2e와 같은 env, 로컬 Supabase 필요)
 //   npm run perf:world -- --build          # e2e env로 빌드부터 (`npm run build`를 .env.local로 하면 소셜 로그인 e2e가 깨짐)
 //   npm run perf:world -- --base http://localhost:3100 --runs 3 --out build/perf/world-map.json
+//   npm run perf:world -- --rates 1,4,6      # 스크롤·자동 단계를 이 배율들로, full 대기는 4배 밖의 배율도 (P12-04, 기본 스크롤 4,6·단계 1,4,6)
 //
 // 장면 (태블릿 820×1180 DPR 2 터치, 안드로이드 UA, 매 회 새 컨텍스트, CDP CPU 스로틀)
 // - idle   : 4배에서 가만히 5초 — 메인 스레드 바쁨(TaskDuration/시간), rAF fps. 단계 full·lite·minimal·동작 줄이기
 // - scroll : 4배에서 터치 스와이프(800px/s) 아래·위 2번 — rAF p95, Chrome trace PipelineReporter로 컴포지터가 낸 프레임 fps
-// - detect : 자동 단계에서 CPU 1·4·6배 × 기기 신호(deviceMemory·hardwareConcurrency 덮어쓰기) — 10초 뒤 <html data-motion>이
-//            정적 추정(staticGuess, 상한) 이하인지. P0-16 spikes/p0-16-low-spec/bench/validate.mjs의 프로필과 같은 값
+// - detect : 자동 단계에서 CPU 1·4·6배 × 기기 신호(deviceMemory·hardwareConcurrency 덮어쓰기) × runs회 — 15초 동안
+//            <html data-motion> 변화를 시각과 함께 기록(정착 시간, P12-04)하고 끝 단계가 정적 추정(staticGuess, 상한) 이하인지.
+//            P0-16 spikes/p0-16-low-spec/bench/validate.mjs의 프로필과 같은 값
 // - still  : minimal에서 스크롤해도 앰비언트·패럴랙스 0 (getAnimations·.wm-par transform)
 //
 // 예산을 넘으면 종료 코드 1. 테스트 사용자는 실행마다 만들고 끝나면 지운다
@@ -173,6 +175,7 @@ async function main() {
   async function open(
     rate: number,
     profile: (typeof PROFILES)[string] = null,
+    logTier = false,
   ): Promise<{ ctx: BrowserContext; page: Page; cdp: CDPSession }> {
     const ctx = await browser.newContext({
       ...TABLET,
@@ -194,6 +197,21 @@ async function main() {
         });
       }, profile);
     }
+    // 단계 변화 기록: [페이지 시작부터 ms, 단계]. 부트 스크립트가 첫 페인트 전에 쓰는 값부터 잡는다 (detect만, 측정 장면엔 안 붙임)
+    if (logTier)
+      await ctx.addInitScript(() => {
+        const w = window as unknown as { __tiers: Array<[number, string]> };
+        w.__tiers = [];
+        new MutationObserver(() => {
+          const t = document.documentElement?.dataset.motion;
+          if (t && t !== w.__tiers.at(-1)?.[1])
+            w.__tiers.push([Math.round(performance.now()), t]);
+        }).observe(document, {
+          attributes: true,
+          subtree: true,
+          attributeFilter: ['data-motion'],
+        });
+      });
     const page = await ctx.newPage();
     const cdp = await ctx.newCDPSession(page);
     await cdp.send('Emulation.setCPUThrottlingRate', { rate });
@@ -324,11 +342,13 @@ async function main() {
 
   async function detect(rate: number, name: string) {
     const profile = PROFILES[name];
-    const { ctx, page } = await open(rate, profile);
-    await page.waitForTimeout(10_000);
-    const observed = (await page.evaluate(
-      () => document.documentElement.dataset.motion,
-    )) as MotionTier;
+    const { ctx, page } = await open(rate, profile, true);
+    await page.waitForTimeout(15_000);
+    const { observed, tiers } = await page.evaluate(() => ({
+      observed: document.documentElement.dataset.motion,
+      tiers: (window as unknown as { __tiers: Array<[number, string]> })
+        .__tiers,
+    }));
     await ctx.close();
     const guess = staticGuess({
       ...(profile ?? {}),
@@ -339,7 +359,9 @@ async function main() {
       profile: name,
       guess,
       observed,
-      ok: tierOk(observed, guess),
+      // 처음 값 뒤의 변화만 [초, 단계] — 마지막 변화 시각 = 정착 시간
+      changes: tiers.slice(1).map(([ms, t]) => [r1(ms / 1000), t]),
+      ok: tierOk(observed as MotionTier, guess),
     };
   }
 
@@ -406,7 +428,25 @@ async function main() {
     const scrollRows: Array<
       Record<string, unknown> & Measured['scroll4x'][number]
     > = [];
-    for (const rate of [4, 6]) {
+    const RATES = (arg('rates', '4,6') as string).split(',').map(Number);
+    // 4배 밖 배율의 full 대기 (참고, 예산은 4배만)
+    await setMotion('full', 'off');
+    for (const rate of RATES.filter((r) => r !== 4)) {
+      const reps = [];
+      for (let i = 0; i < RUNS; i++) reps.push(await idle(rate));
+      const row = {
+        tier: 'full',
+        reduced: 'off',
+        rate,
+        mainBusyPct: median(reps.map((x) => x.mainBusyPct)),
+        rafFps: median(reps.map((x) => x.rafFps)),
+        rafP95: median(reps.map((x) => x.rafP95)),
+        reps: reps.map((x) => x.mainBusyPct),
+      };
+      idleRows.push(row);
+      console.log(`idle ${rate}x`, JSON.stringify(row));
+    }
+    for (const rate of RATES) {
       for (const tier of ['full', 'lite', 'minimal'] as const) {
         await setMotion(tier, 'off');
         const reps = [];
@@ -428,12 +468,13 @@ async function main() {
 
     await setMotion('auto', 'off');
     const detectRows = [];
-    for (const rate of [1, 4, 6])
-      for (const name of Object.keys(PROFILES)) {
-        const row = await detect(rate, name);
-        detectRows.push(row);
-        console.log('detect', JSON.stringify(row));
-      }
+    for (const rate of arg('rates') ? RATES : [1, 4, 6])
+      for (const name of Object.keys(PROFILES))
+        for (let i = 0; i < RUNS; i++) {
+          const row = await detect(rate, name);
+          detectRows.push(row);
+          console.log('detect', JSON.stringify(row));
+        }
 
     // 대조군: full에서는 앰비언트가 돌고 패럴랙스가 움직여야 아래 0 검사가 살아 있다
     await setMotion('full', 'off');

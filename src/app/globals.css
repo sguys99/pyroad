@@ -26,6 +26,7 @@
 @source '../components/characters/PybaemSvg.tsx';
 @source '../lib';
 @source '../fonts/landing.ts';
+@source '../fonts/notFound.ts';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 /* 한글 폴백 보정 @font-face (P2-10, 생성물). 웹폰트 파일은 여기서 싣지 않는다: src/fonts/landing.ts·app.css */

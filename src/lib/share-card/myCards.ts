@@ -30,13 +30,16 @@ export const KIND_LABEL: Record<ShareCardKind, string> = {
 export type MyCardState = 'public' | 'hidden' | 'expired';
 
 const DAY = 86_400_000;
+/** 공개 기간 (00043·00045 `NOW() + 90 days`) */
+const PUBLIC_DAYS = 90;
 
 export function myCardState(
   c: Pick<MyShareCard, 'isPublic' | 'expiresAt'>,
   now: Date = new Date(),
 ): { state: MyCardState; daysLeft: number } {
   const left = new Date(c.expiresAt).getTime() - now.getTime();
-  const daysLeft = Math.max(0, Math.ceil(left / DAY));
+  // 만료 시각은 DB NOW() 기준이라 앱 서버 시계가 조금만 늦어도 막 공개한 카드가 91일이 됨 (B146)
+  const daysLeft = Math.min(PUBLIC_DAYS, Math.max(0, Math.ceil(left / DAY)));
   if (!c.isPublic) return { state: 'hidden', daysLeft };
   return left > 0
     ? { state: 'public', daysLeft }

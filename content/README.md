@@ -21,9 +21,9 @@ content/
     │   └── 07-project-kingdom/
     │       ├── stage.yaml
     │       └── 01-number-guessing-game.yaml
-    ├── code-sea/                      # 월드 2: world.yaml·map.yaml + 스테이지 7개(퀘스트는 P10-05~07, 빈 스테이지가 있으면 "준비 중")
+    ├── code-sea/                      # 월드 2: 스테이지 7개 · 퀘스트 64
     │   └── skill-check.yaml           # 실력 확인 퀴즈 (선택, P10-03)
-    └── maker-city/                    # 월드 3: world.yaml·map.yaml + 스테이지 7개 껍데기(퀘스트는 P11-12~14). 퀘스트 전이라 "준비 중"
+    └── maker-city/                    # 월드 3: 스테이지 7개 · 퀘스트 50 (skill-check.yaml 포함)
 ```
 
 - 이름은 영문 소문자·숫자·하이픈만 씁니다. 앞 두 자리 번호는 YAML의 `order`와 같아야 합니다(빌드가 확인).

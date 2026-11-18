@@ -31,6 +31,7 @@ import { PetSlot, type PetConfig } from './PetSlot';
 import { useMyLook } from '@/components/profile/MyLook';
 import type { UnlockPlan } from '@/lib/world/unlockSeen';
 import { useStageUnlock } from './unlock/useStageUnlock';
+import { scrollMapTo } from './scrollMapTo';
 import {
   UnlockInk,
   UnlockMarks,
@@ -162,7 +163,11 @@ function useOpenStage(
   return { open, sheet, celebration, toasts, show, dismiss };
 }
 
-/** 노드 차례 등장: full 크기+투명도, lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15) */
+/**
+ * 노드 차례 등장: full 크기(보이는 채로), lite 70% 길이, minimal 페이드만, 동작 줄이기 즉시 (P2-15).
+ * 서버 렌더·첫 하이드레이션은 full 값이라 full 에 opacity 0을 걸면 JS가 돌 때까지 스테이지 이름이 안 보임 (§2.10 규칙, B102).
+ * minimal 페이드는 클라이언트에서 단계가 정해진 뒤에 붙는 지도에만 나온다
+ */
 function nodeVariants(budget: MotionBudget): {
   container: Variants;
   item: Variants;
@@ -176,7 +181,7 @@ function nodeVariants(budget: MotionBudget): {
       },
     },
     item: {
-      hidden: budget.springs ? { opacity: 0, scale: 0.85 } : { opacity: 0 },
+      hidden: budget.springs ? { scale: 0.85 } : { opacity: 0 },
       show: {
         opacity: 1,
         scale: 1,
@@ -352,12 +357,13 @@ export function WorldMap({
   const unlocking = unlock.target >= 0;
   useEffect(() => {
     if (!scrollToCurrent || unlocking) return;
-    const node = box.current?.querySelector('[data-current]');
-    if (!node) return;
+    const map = box.current;
+    const node = map?.querySelector('[data-current]');
+    if (!map || !node) return;
     const r = node.getBoundingClientRect();
+    if (r.top >= 0 && r.bottom <= window.innerHeight) return;
     // 들어올 때 자리 잡기라 바로 (html의 scroll-behavior: smooth면 첫 화면이 미끄러지고, 그동안 누른 곳이 빗나감, B51)
-    if (r.top < 0 || r.bottom > window.innerHeight)
-      node.scrollIntoView({ block: 'center', behavior: 'instant' });
+    scrollMapTo(map, node, 'instant');
   }, [scrollToCurrent, unlocking]);
 
   // 지난 길 그리기: minimal·동작 줄이기는 즉시, lite는 70% 길이 (P2-15)

@@ -175,6 +175,38 @@ describe('scrubString / stripUrlQuery', () => {
     expect(stripUrlQuery('/a/b?c=1#d')).toBe('/a/b');
     expect(stripUrlQuery('/a/b')).toBe('/a/b');
   });
+
+  it('보호자 리포트·자랑 카드 링크 토큰을 지운다 (B116)', () => {
+    const token = 'Ab3_dE9-fGh1jK2lMn4oPq';
+    expect(
+      stripUrlQuery(`https://pyroad.vercel.app/guardian/${token}?w=last`),
+    ).toBe('https://pyroad.vercel.app/guardian/[id]');
+    expect(stripUrlQuery(`/share/${token}`)).toBe('/share/[id]');
+    expect(
+      scrubString(`렌더 실패 /guardian/${token} 와 /share/${token}/x`),
+    ).toBe('렌더 실패 /guardian/[id] 와 /share/[id]/x');
+    // 토큰 모양이 아니면 그대로 (경로 템플릿·짧은 값)
+    expect(stripUrlQuery('/guardian/[token]')).toBe('/guardian/[token]');
+    expect(stripUrlQuery('/share/abc')).toBe('/share/abc');
+  });
+
+  it('트랜잭션·브레드크럼 URL에서도 토큰이 빠진다 (B116)', () => {
+    const token = 'Ab3_dE9-fGh1jK2lMn4oPq';
+    const out = scrubEvent(
+      errorEvent({
+        transaction: `/guardian/${token}`,
+        request: { url: `https://pyroad.vercel.app/share/${token}` },
+      }),
+    );
+    expect(out.transaction).toBe('/guardian/[id]');
+    expect(out.request?.url).toBe('https://pyroad.vercel.app/share/[id]');
+    expect(
+      scrubBreadcrumb({
+        category: 'navigation',
+        data: { to: `/guardian/${token}` },
+      })?.data?.to,
+    ).toBe('/guardian/[id]');
+  });
 });
 
 describe('scrubBreadcrumb', () => {

@@ -2,6 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   ids: [] as string[],
+  /** list_expired_incomplete 대상 (B118). null 이면 함수 없음(00061 전) 오류 */
+  incomplete: [] as string[] | null,
+  /** 지우기 직전 다시 확인할 때도 대상인 id */
+  stillIncomplete: [] as string[],
+  admins: [] as string[],
   rows: {} as Record<string, unknown>,
   deleteUserAccount: vi.fn(async (...args: [unknown, string]) => ({
     args,
@@ -12,7 +17,31 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    rpc: async () => ({ data: mocks.ids, error: null }),
+    rpc: async (fn: string, args: { p_limit: number; p_user_id?: string }) => {
+      if (fn === 'list_expired_unconsented')
+        return { data: mocks.ids, error: null };
+      if (mocks.incomplete === null)
+        return { data: null, error: { code: 'PGRST202' } };
+      if (args.p_user_id)
+        return {
+          data: mocks.stillIncomplete.filter((id) => id === args.p_user_id),
+          error: null,
+        };
+      return { data: mocks.incomplete.slice(0, args.p_limit), error: null };
+    },
+    auth: {
+      admin: {
+        getUserById: async (id: string) => ({
+          data: {
+            user: {
+              id,
+              identities: [],
+              app_metadata: mocks.admins.includes(id) ? { role: 'admin' } : {},
+            },
+          },
+        }),
+      },
+    },
     from: () => {
       let id = '';
       const b = {
@@ -50,6 +79,9 @@ beforeEach(() => {
   vi.stubEnv('CRON_SECRET', 'test-secret');
   vi.spyOn(console, 'info').mockImplementation(() => {});
   mocks.ids = [];
+  mocks.incomplete = [];
+  mocks.stillIncomplete = [];
+  mocks.admins = [];
   mocks.rows = {};
   mocks.deleteUserAccount.mockClear();
 });
@@ -81,6 +113,7 @@ describe('GET /api/cron/purge-unconsented (P3-15)', () => {
       ok: true,
       dry: false,
       candidates: 3,
+      incomplete: 0,
       deleted: 1,
       skipped: 2,
       failed: 0,
@@ -97,5 +130,37 @@ describe('GET /api/cron/purge-unconsented (P3-15)', () => {
     const json = await (await call('Bearer test-secret', '?dry=1')).json();
     expect(json).toMatchObject({ dry: true, candidates: 1, deleted: 0 });
     expect(mocks.deleteUserAccount).not.toHaveBeenCalled();
+  });
+
+  it('온보딩·나이 확인 미완료 계정도 같이 — 다시 확인해 아직 대상인 것만, 관리자는 건너뜀, 합쳐 50명 (B118)', async () => {
+    mocks.ids = ['a'];
+    mocks.rows = { a: expired };
+    mocks.incomplete = ['a', 'n1', 'n2', 'boss'];
+    mocks.stillIncomplete = ['n1', 'boss']; // n2 는 그사이 온보딩을 마침
+    mocks.admins = ['boss'];
+    const json = await (await call('Bearer test-secret')).json();
+    expect(json).toMatchObject({
+      candidates: 4,
+      incomplete: 3,
+      deleted: 2,
+      skipped: 2,
+    });
+    expect(mocks.deleteUserAccount.mock.calls.map((c) => c[1])).toEqual([
+      'a',
+      'n1',
+    ]);
+
+    mocks.ids = Array.from({ length: 50 }, (_, i) => `u${i}`);
+    mocks.deleteUserAccount.mockClear();
+    const full = await (await call('Bearer test-secret', '?dry=1')).json();
+    expect(full).toMatchObject({ candidates: 50, incomplete: 0, more: true });
+  });
+
+  it('00061 전(함수 없음)이면 미동의 파기만 계속', async () => {
+    mocks.ids = ['a'];
+    mocks.rows = { a: expired };
+    mocks.incomplete = null;
+    const json = await (await call('Bearer test-secret')).json();
+    expect(json).toMatchObject({ ok: true, deleted: 1, incomplete: 0 });
   });
 });

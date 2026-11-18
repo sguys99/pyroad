@@ -156,6 +156,16 @@ test.describe('모바일 퀴즈 (360px 터치)', () => {
 
       await page.goto(`/quest/${quiz.id}`);
       await noHorizontalScroll(page);
+      // 고르기 전 "답을 골라요"(누를 수 없음)는 떠 있지 않고 제자리 — 첫 화면 코드를 가리지 않음 (B123).
+      // 순서 맞히기처럼 처음부터 낼 수 있는 유형은 그대로 쪽 아래에 붙음
+      const submit = byId(page, 'quiz-submit');
+      await expect(submit).toBeVisible();
+      await expect(
+        page.locator('.qz-actions').filter({ visible: true }).first(),
+      ).toHaveCSS(
+        'position',
+        (await submit.isDisabled()) ? 'static' : 'sticky',
+      );
       const r = await answer(page, key, key.accepted[0]);
       expect(r).toMatchObject({
         correct: true,

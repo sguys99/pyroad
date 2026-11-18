@@ -1,15 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
-import {
-  Building2,
-  Check,
-  ChevronLeft,
-  Sailboat,
-  Sparkle,
-  Sprout,
-} from 'lucide-react';
+import { BackLink } from '@/components/ui/back-link';
+import { Building2, Check, Sailboat, Sparkle, Sprout } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { HudCounter } from '@/components/ui/hud';
@@ -260,12 +253,7 @@ export function AchievementBook({
   return (
     <div className="ab" data-testid="achievement-book">
       <div className="ab-top">
-        {!embedded && (
-          <Link href="/profile" className="ab-back focus-ring">
-            <ChevronLeft aria-hidden />
-            프로필
-          </Link>
-        )}
+        {!embedded && <BackLink href="/profile">프로필</BackLink>}
         <span data-ab-wallet className="ab-wallet">
           <HudCounter kind="coin" value={coins} />
         </span>

@@ -17,7 +17,7 @@ export function GuardianConsentStatus() {
   if (!status) return null;
   return (
     <section
-      className="cs-status"
+      className="cs-status mb-6" /* 설정의 다른 절과 같은 사이 (B144, 아래 리포트 카드에 붙어 있었음) */
       aria-labelledby="guardian-status-title"
       data-testid="guardian-status"
       data-state={status.state}

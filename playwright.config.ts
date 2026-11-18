@@ -20,6 +20,9 @@ const PORT = Number(process.env.PORT || 3100);
 const BASE_URL = `http://localhost:${PORT}`;
 const SERVER_MODE = process.env.E2E_SERVER === 'dev' ? 'dev' : 'prod';
 const CI = !!process.env.CI;
+// 시각 회귀 (P12-02): `npm run test:visual`(scripts/visual/run.sh)이 Docker 의 Playwright 브라우저 주소를 넣을 때만 프로젝트가 생긴다.
+// 그래서 `npm run test:e2e`·`--project=chromium`에는 들어가지 않고, 기준 이미지는 어디서 찍어도 리눅스 렌더링 한 벌
+const VISUAL_WS = process.env.E2E_VISUAL_WS;
 
 // 테스트 월드(e2e/fixtures/content, Q48·P5-01)의 지도 설정·DB 행을 build/e2e/ 에 만든다. 운영 seed·커밋 생성물은 그대로
 const FIXTURES = 'npm run content:build -- --fixtures e2e/fixtures/content';
@@ -73,13 +76,32 @@ export default defineConfig({
     {
       name: 'chromium',
       // e2e/support/__tests__ 는 vitest 단위 테스트 (P3-17)
-      testIgnore: [/public\//, /__tests__\//],
+      testIgnore: [/public\//, /__tests__\//, /visual\//],
       use: {
         ...devices['Desktop Chrome'],
         storageState: STORAGE_STATE,
       },
       dependencies: ['setup'],
     },
+    ...(VISUAL_WS
+      ? [
+          {
+            name: 'visual',
+            testMatch: /visual\/.*\.spec\.ts/,
+            // 플랫폼 접미사 없이 한 벌 (브라우저가 늘 같은 Docker 이미지라서)
+            snapshotPathTemplate:
+              '{testDir}/{testFileDir}/__screenshots__/{arg}{ext}',
+            use: {
+              ...devices['Desktop Chrome'],
+              connectOptions: {
+                wsEndpoint: VISUAL_WS,
+                // 컨테이너 안 브라우저의 localhost(앱·로컬 Supabase) 요청을 러너 쪽으로
+                exposeNetwork: '<loopback>',
+              },
+            },
+          },
+        ]
+      : []),
   ],
 
   webServer: {

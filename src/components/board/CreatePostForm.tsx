@@ -102,10 +102,10 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
           maxLength={BOARD_LIMITS.title}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목을 입력하세요"
+          placeholder="제목을 써 주세요"
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
-        <p className="mt-1 text-right text-[11px] text-muted-foreground">
+        <p className="mt-1 text-right text-caption text-muted-foreground">
           {title.length}/{BOARD_LIMITS.title}
         </p>
       </div>
@@ -123,10 +123,10 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
           rows={8}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="내용을 입력하세요"
+          placeholder="내용을 써 주세요"
           className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
-        <p className="mt-1 text-right text-[11px] text-muted-foreground">
+        <p className="mt-1 text-right text-caption text-muted-foreground">
           {content.length}/{BOARD_LIMITS.content}
         </p>
       </div>
@@ -134,7 +134,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
       <Button type="submit" loading={submitting}>
         {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
       </Button>
-      <p className="text-center text-[11px] text-muted-foreground">
+      <p className="text-center text-caption text-muted-foreground">
         전화번호, 주소, 학교 같은 개인정보와 친구가 속상할 말은 쓰지 않아요.
       </p>
     </form>

@@ -81,51 +81,13 @@ describe('isAdminUser (B37)', () => {
     });
   });
 
-  describe('ADMIN_EMAIL 폴백 (이행 기간)', () => {
-    it('확인된 같은 이메일이면 관리자 (대소문자·앞뒤 공백 무시)', () => {
-      vi.stubEnv('ADMIN_EMAIL', ' Admin@Example.com ');
-      expect(
-        isAdminUser(
-          user({ email: 'admin@example.com', email_confirmed_at: CONFIRMED }),
-        ),
-      ).toBe(true);
-      expect(
-        isAdminUser(
-          user({ email: 'kid@example.com', email_confirmed_at: CONFIRMED }),
-        ),
-      ).toBe(false);
-    });
-
-    it('이메일이 확인되지 않았으면 관리자가 아님', () => {
-      vi.stubEnv('ADMIN_EMAIL', 'admin@example.com');
-      expect(isAdminUser(user({ email: 'admin@example.com' }))).toBe(false);
-      expect(
-        isAdminUser(
-          user({ email: 'admin@example.com', email_confirmed_at: '' }),
-        ),
-      ).toBe(false);
-    });
-
-    it('ADMIN_EMAIL이 없으면 폴백 없음 (이메일 없는 계정끼리 같다고 보지 않음)', () => {
-      vi.stubEnv('ADMIN_EMAIL', '');
-      expect(isAdminUser(user({ email: undefined }))).toBe(false);
-      expect(
-        isAdminUser(user({ email: '', email_confirmed_at: CONFIRMED })),
-      ).toBe(false);
-    });
-
-    it('이메일 없는 계정(Kakao·Naver)은 role 없이는 관리자가 아님', () => {
-      vi.stubEnv('ADMIN_EMAIL', 'admin@example.com');
-      expect(
-        isAdminUser(
-          user({
-            app_metadata: { provider: 'custom:naver' },
-            email: '',
-            email_confirmed_at: CONFIRMED,
-          }),
-        ),
-      ).toBe(false);
-    });
+  it('이메일로는 관리자가 되지 않음 — ADMIN_EMAIL 폴백 제거 (B119)', () => {
+    vi.stubEnv('ADMIN_EMAIL', 'admin@example.com');
+    expect(
+      isAdminUser(
+        user({ email: 'admin@example.com', email_confirmed_at: CONFIRMED }),
+      ),
+    ).toBe(false);
   });
 
   it('로그인하지 않았으면 관리자가 아님', () => {

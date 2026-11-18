@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
-import Link from 'next/link';
+import { BackLink } from '@/components/ui/back-link';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { PostDetail } from '@/components/board/PostDetail';
 import { CommentSection } from '@/components/board/CommentSection';
@@ -58,12 +58,10 @@ export default async function BoardPostPage({
   const isOwner = post.user_id === user.id;
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-6">
-      <div className="mb-6">
-        <Link href="/board" className="text-sm text-primary-text underline">
-          ← 게시판으로
-        </Link>
-      </div>
+    <PageTransition className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6 md:max-w-2xl">
+      <BackLink href="/board" className="mb-3">
+        게시판
+      </BackLink>
 
       <PostDetail post={post} isOwner={isOwner} />
       <CommentSection

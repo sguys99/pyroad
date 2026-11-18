@@ -11,6 +11,7 @@ import type { WorldMapData } from '@/lib/world/mapData';
 import { currentStreak } from '@/lib/time/streak';
 import { shieldSavedYesterday } from '@/lib/world/attendance';
 import { AttendanceMenuSection } from '@/components/world/AttendanceCard';
+import { isAdmin } from '@/lib/admin';
 
 /**
  * HUD 미션 칸 (P8-07): 서버 RPC `daily_missions_today`(service_role, 확인한 사용자 id)로 오늘 미션·진행을 읽고,
@@ -40,9 +41,11 @@ async function MissionSlot({
  * 서버에서 월드맵 데이터 → HUD 값. 프로필이 없으면 그리지 않음.
  * 스트릭·방패는 서버 `world_daily_status`(P8-08, 학습일·방패로 메운 날, 방패 정산 뒤). 못 읽었으면(00035 전) 예전처럼 완료 시각으로
  */
-export function WorldHudBar({ data }: { data: WorldMapData }) {
+export async function WorldHudBar({ data }: { data: WorldMapData }) {
   const { profile, dailyStatus } = data;
   if (!profile) return null;
+  // 관리자 메뉴 줄 (P12-09). getUser 는 React cache 라 지도 데이터를 읽을 때 한 번 부른 것을 다시 씀
+  const admin = await isAdmin();
   const s = dailyStatus?.streak;
   return (
     <WorldHud
@@ -55,6 +58,7 @@ export function WorldHudBar({ data }: { data: WorldMapData }) {
       }
       shields={s?.shields ?? 0}
       achievementsReady={data.achievementsReady}
+      admin={admin}
       shieldSaved={!!s && shieldSavedYesterday(s, dailyStatus.attendance.today)}
       attendance={
         dailyStatus && (

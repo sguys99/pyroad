@@ -1,6 +1,23 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+/**
+ * 보호 경로: 미인증 → / 리다이렉트. `src/app/(protected)/` 의 모든 라우트 폴더 + /onboarding(P3-11, (protected) 밖이지만 로그인 필요).
+ * 폴더를 더하면 여기에도 — 빠지면 단위 테스트가 실패 (B120, P12-05 L2: /gallery·/shop·/worlds 가 빠져 있었음)
+ */
+export const PROTECTED_PATHS = [
+  '/world',
+  '/worlds',
+  '/daily',
+  '/quest',
+  '/profile',
+  '/board',
+  '/settings',
+  '/gallery',
+  '/shop',
+  '/onboarding',
+];
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -29,17 +46,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 보호 경로: 미인증 → / 리다이렉트. /onboarding(P3-11)은 (protected) 밖이지만 로그인이 필요함
-  const protectedPaths = [
-    '/world',
-    '/daily',
-    '/quest',
-    '/profile',
-    '/board',
-    '/settings',
-    '/onboarding',
-  ];
-  const isProtected = protectedPaths.some((p) =>
+  const isProtected = PROTECTED_PATHS.some((p) =>
     request.nextUrl.pathname.startsWith(p),
   );
 

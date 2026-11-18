@@ -122,7 +122,7 @@ export function ReportButton({
       <AlertDialogTrigger
         className={
           className ??
-          'inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
+          'inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-caption text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
         }
         data-testid="report-open"
         aria-label={
@@ -194,7 +194,7 @@ export function ReportButton({
                     <span className="text-sm font-medium text-foreground">
                       {REPORT_REASON_LABELS[r].label}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-caption text-muted-foreground">
                       {REPORT_REASON_LABELS[r].hint}
                     </span>
                   </span>
