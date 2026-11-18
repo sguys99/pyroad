@@ -151,7 +151,6 @@
 }
 .ss-row[data-state='now'] {
   background: var(--primary-soft);
-  box-shadow: inset 3px 0 0 var(--primary);
 }
 .ss-no {
   display: grid;
