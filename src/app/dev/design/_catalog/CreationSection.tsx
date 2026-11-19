@@ -78,7 +78,7 @@ export function CreationSection() {
       description="그림(turtle)이나 대화(input)가 나온 실행이 끝나면 결과 쪽지 아래에 띠가 나와요. 시트에서 미리보기(400×400 그림 맞춤 썸네일 · 대화 말풍선)를 보고 이름(20자)을 지어 비공개로 저장해요. 갤러리 올리기는 P11-07."
     >
       <div className="grid items-start gap-4 md:grid-cols-2">
-        <Demo label="띠 · 그림" note="저장하면 초록 띠 + 작품함 보기" surface="card">
+        <Demo label="띠 · 그림" note="저장하면 초록 아이콘 원 + 작품함 보기" surface="card">
           <SaveCreationBar
             liveOutput={drawing}
             runResult={OK}

@@ -68,7 +68,7 @@ export function LinkedAccountsList({
   onUnlink,
 }: LinkedAccountsListProps) {
   return (
-    <ul className="flex flex-col gap-2.5" data-testid="linked-accounts">
+    <ul className="flex flex-col" data-testid="linked-accounts">
       {rows.map((row) => {
         const Mark = SOCIAL_MARK[row.provider];
         const name = NAME[row.provider];
@@ -77,7 +77,7 @@ export function LinkedAccountsList({
           <li
             key={row.provider}
             // 로고 | 이름 + 상태(아래로 쌓음) | 버튼. 막힌 이유·마지막 수단 안내는 줄 전체 폭으로 맨 아래 (360px에서 좁은 칸에 갇히지 않게)
-            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl bg-surface-2 p-3"
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border py-3 first:border-t-0 first:pt-0 last:pb-0"
             data-provider={row.provider}
             data-state={row.state}
           >
@@ -89,7 +89,7 @@ export function LinkedAccountsList({
                   ? 'g-social-chip-naver'
                   : row.provider === 'kakao'
                     ? 'g-social-chip-kakao'
-                    : 'bg-card',
+                    : 'bg-surface-2',
               )}
               aria-hidden
             >

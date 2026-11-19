@@ -354,13 +354,11 @@
   animation: qo-pop-lite var(--dur-base) var(--easing-out) both;
 }
 
-/* 출력이 다를 때: 공개 안내("해 볼 일에서 나와야 하는 모습")와 견줘 보기. 흰 면 한 겹(측면 띠 없음, P13-07 — 다름은 "조금 달라요" 칩과 다른 줄의 주의 면이 알림) */
+/* 출력이 다를 때: 공개 안내("해 볼 일에서 나와야 하는 모습")와 견줘 보기. 제 면 없이 결과 쪽지 아래에 바로(P13-10 — 공책 흰 면 위 흰 면이었음. 측면 띠도 없음, P13-07).
+   다름은 "조금 달라요" 칩과 다른 줄의 주의 면이 알림. 줄 카드가 쪽지와 같은 폭 */
 .qo-compare {
   display: grid;
   gap: 0.5rem;
-  padding: 0.875rem 1rem;
-  border-radius: var(--round-m);
-  background: var(--surface);
 }
 .qo-goal {
   display: grid;

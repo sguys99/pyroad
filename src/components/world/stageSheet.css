@@ -57,17 +57,10 @@
   }
 }
 
-/* 진행 요약 */
+/* 진행 요약: 시트 면 위에 바로 (P13-10 — 면 안에 면을 두지 않음). 아래 보물상자와는 1px 선으로 */
 .ss-sum {
   display: grid;
   gap: 0.5rem;
-  padding: 0.875rem 1rem;
-  border-radius: var(--round-m);
-  background: var(--surface-2);
-}
-/* 중립 면 위 진행 막대: 홈이 같은 색이라 흰 홈으로 */
-.ss-sum .g-prog {
-  background: var(--surface);
 }
 .ss-sum-txt {
   display: flex;

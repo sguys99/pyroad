@@ -238,12 +238,13 @@ export default function SettingsPage() {
                 key={provider}
                 onClick={() => isAvailable && setSelected(provider)}
                 disabled={!isAvailable}
-                className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-all ${
+                // P13-10: 고른 줄 = 배경 하나만 (테두리 + 배경 이중 강조 금지)
+                className={`flex items-center gap-3 rounded-lg p-3 text-left transition-colors ${
                   isSelected
-                    ? 'border-primary bg-primary/10'
+                    ? 'bg-primary-soft'
                     : isAvailable
-                      ? 'border-border hover:border-primary/50'
-                      : 'cursor-not-allowed border-border opacity-40'
+                      ? 'hover:bg-surface-2'
+                      : 'cursor-not-allowed opacity-40'
                 }`}
               >
                 <div

@@ -1,4 +1,4 @@
-/* 스테이지 보물상자 한 줄 (P8-06, StageChest.tsx). 스테이지 시트 진행 요약(.ss-sum) 아래.
+/* 스테이지 보물상자 한 줄 (P8-06, StageChest.tsx). 스테이지 시트 진행 요약(.ss-sum) 아래, 선으로 나뉜 줄.
    금색은 보상(상자·별·코인·열기 버튼)에만. 반복 연출은 transform·opacity, full·lite + 동작 줄이기 꺼짐일 때만 (§2.10) */
 
 .sc {
@@ -6,15 +6,16 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.875rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--round-m);
-  background: var(--surface);
-  /* 다른 카드와 같은 테두리 없는 면 + 그림자 (B144, 1px 테두리였음). 열 수 있을 때만 금색 테두리 */
-  box-shadow: var(--shadow-card);
+  /* P13-10: 시트 안의 한 줄 — 제 면·그림자 없이 위 1px 선으로만 나눔 (카드 속 카드 금지) */
+  padding: 0.875rem 0 0;
+  border-top: 1px solid var(--line);
 }
+/* 열 수 있을 때만 옅은 금색 면 하나 (상태 강조 = 면 하나, 테두리 없음. 시트의 "지금 차례" 줄과 같은 방식) */
 .sc[data-state='ready'] {
+  padding: 0.75rem;
+  border-top: 0;
+  border-radius: var(--round-m);
   background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--accent);
 }
 .sc[data-state='opened'] .sc-box {
   opacity: 0.85;
@@ -161,7 +162,7 @@
     animation-delay: -0.9s;
   }
 }
-/* minimal·동작 줄이기: 반짝 점은 멈춘 채 보임 (열 수 있다는 표시는 글자·테두리·버튼이 함) */
+/* minimal·동작 줄이기: 반짝 점은 멈춘 채 보임 (열 수 있다는 표시는 글자·면·버튼이 함) */
 :root[data-motion='minimal'] .sc[data-state='ready'] .sc-glint,
 :root[data-reduced='true'] .sc[data-state='ready'] .sc-glint {
   opacity: 1;

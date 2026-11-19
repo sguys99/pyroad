@@ -102,18 +102,17 @@ function OptionGroup<T extends string>({
       <legend className="mb-2 text-[17px] font-bold text-foreground">
         {legend}
       </legend>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         {options.map((option) => {
           const checked = option.value === value;
           return (
             <label
               key={option.value}
               className={cn(
-                'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2.5 transition-colors',
+                // P13-10: 고른 줄 = 배경 하나만 (테두리 + 배경 이중 강조 금지). 카드 안에 줄마다 테두리 상자를 두지 않음
+                'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors',
                 'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
-                checked
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card hover:border-primary/50',
+                checked ? 'bg-primary-soft' : 'hover:bg-surface-2',
               )}
             >
               <input

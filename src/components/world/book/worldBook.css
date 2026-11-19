@@ -175,12 +175,14 @@
     position: relative;
     display: grid;
     grid-template-columns: 7.5rem 1fr;
-    /* 옆 카드보다 낮아 늘어날 때도 그림이 아래 끝까지 (둘째 줄은 실력 확인 쪽지 자리) */
+    /* 옆 카드보다 낮아 늘어날 때도 그림이 아래 끝까지 (둘째 줄은 글 칸 아래 실력 확인 안내 자리) */
     grid-template-rows: 1fr auto;
     height: 100%;
   }
   /* 카드 반경을 물려받아 닿는 모서리만 둥글게 (카드에 overflow를 걸면 위로 나온 책갈피가 잘림) */
   .wb-book > .wb-cover {
+    /* 실력 확인 안내가 글 칸 아래에 붙어도 그림은 카드 왼쪽 면을 끝까지 (P13-10) */
+    grid-row: 1 / -1;
     aspect-ratio: auto;
     border-radius: inherit;
     border-top-right-radius: 0;
@@ -189,10 +191,6 @@
   .wb-book > .wb-cover > svg {
     position: absolute;
     inset: 0;
-  }
-  /* 아래에 실력 확인 쪽지가 붙으면 그림은 윗줄까지만 */
-  .wb-book:has(> .wb-skill) > .wb-cover {
-    border-bottom-left-radius: 0;
   }
   .wb-info {
     display: flex;
@@ -208,6 +206,7 @@
       grid-template-rows: auto 1fr auto;
     }
     .wb-shelf .wb-book > .wb-cover {
+      grid-row: auto;
       aspect-ratio: 10 / 7;
       border-radius: inherit;
       border-bottom-right-radius: 0;
@@ -393,36 +392,22 @@
     }
   }
 
-  /* ───────────── 실력 확인 퀴즈 쪽지 (P10-03, SkillCheckOffer): 잠긴 책에 끼운 시험지. 점선 테 + 월드 틴트 바탕, 반복 연출 없음 */
+  /* ───────────── 실력 확인 퀴즈 안내 (P10-03, SkillCheckOffer): 잠긴 책 카드 안의 일반 문단 + 버튼.
+     P13-10: 점선 테·틴트 면 없음(카드 속 카드 금지) — 위 글과는 1px 선으로만 나눔. 반복 연출 없음 */
   .wb-skill {
     display: grid;
     justify-items: start;
     gap: 0.5rem;
-    padding: 0.75rem 0.875rem;
-    border: 2px dashed
-      color-mix(
-        in srgb,
-        var(--world, var(--line-strong)) 70%,
-        var(--line-strong)
-      );
-    border-radius: var(--round-m);
-    background: var(--world-soft, var(--surface-2));
-  }
-  .wb-skill[data-tried] {
-    border-color: var(--line-strong);
-    background: var(--surface-2);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
   }
   .wb-skill-k {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--world-ink, var(--text-muted));
-    font-size: var(--text-kicker);
-    font-weight: 750;
-    letter-spacing: 0.02em;
-  }
-  .wb-skill[data-tried] .wb-skill-k {
     color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 700;
   }
   .wb-skill-t {
     margin: 0;
@@ -433,15 +418,15 @@
   .wb-skill .g-btn-face {
     white-space: normal;
   }
-  /* 책장 카드 안: 카드 아래쪽에 붙고 버튼은 한 줄 */
+  /* 책 카드 안: 글 칸(가로 카드는 그림 오른쪽, 세로 표지는 그림 아래)에 이어 붙음 */
   .wb-skill[data-compact] {
-    grid-column: 1 / -1;
-    align-self: end;
-    margin: 0.75rem 0.875rem 0.875rem;
-    padding: 0.625rem 0.75rem;
+    grid-column: 2;
+    margin: 0 1rem 1rem 0.875rem;
   }
   @media (min-width: 640px) {
     .wb-shelf .wb-skill[data-compact] {
+      grid-column: 1;
+      align-self: end;
       margin: 0 1.25rem 1.25rem;
     }
   }
