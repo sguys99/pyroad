@@ -320,7 +320,12 @@ function SkillCheckQuestions({
               <span className="qz-k" data-testid="skill-check-round">
                 <ClipboardCheck aria-hidden />
                 문제 {step + 1} / {questions.length}
-                {def ? ` · ${def.label}` : ''}
+                {def && (
+                  <>
+                    {' '}
+                    <span className="ml-2">{def.label}</span>
+                  </>
+                )}
               </span>
             </div>
             <h2 id={qid} className="qz-q" ref={heading} tabIndex={-1}>

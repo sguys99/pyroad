@@ -248,7 +248,12 @@ export function GuardianReportView({
             </h1>
             <p className="text-small text-muted-foreground">
               {weekRange(report)}
-              {report.level !== null && ` · 레벨 ${report.level}`}
+              {report.level !== null && (
+                <>
+                  {' '}
+                  <span className="ml-2">레벨 {report.level}</span>
+                </>
+              )}
             </p>
           </div>
           <WeekTabs token={token} offset={report.week.offset} />

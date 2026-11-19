@@ -17,7 +17,7 @@ import { FONT, STAGE_W, TEXT_W } from './tokens';
 
 /** 사이트 OG 글 (테스트가 화면 글자와 대조) */
 export const SITE_CARD_TEXT = {
-  kicker: '무료 · 설치 없이 웹에서',
+  kicker: '무료, 설치 없이 웹에서',
   title: ['파이뱀과 떠나는', '파이썬 모험'],
   sub: '퀘스트를 깨며 진짜 파이썬 코드를 배워요',
 } as const;

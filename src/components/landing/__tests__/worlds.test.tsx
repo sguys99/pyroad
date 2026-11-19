@@ -46,7 +46,7 @@ describe('월드 데이터 (Q40·Q2)', () => {
   it('열린 월드는 콘텐츠 수를, 수를 모르면 숫자 없이 안내한다', () => {
     const w1 = WORLD_PREVIEWS[0];
     expect(worldNote(w1, undefined, { stages: 7, quests: 44 })).toBe(
-      '스테이지 7곳 · 퀘스트 44개',
+      '스테이지 7곳, 퀘스트 44개',
     );
     expect(worldNote(w1, undefined, null)).not.toMatch(/\d/);
   });
@@ -127,7 +127,7 @@ describe('세계관 섹션 서버 HTML', () => {
   it('월드 1의 스테이지·퀘스트 수는 콘텐츠에서 온다', () => {
     const stats = countWorldContent(1, CONTENT)!;
     expect(html).toContain(
-      `스테이지 ${stats.stages}곳 · 퀘스트 ${stats.quests}개`,
+      `스테이지 ${stats.stages}곳, 퀘스트 ${stats.quests}개`,
     );
   });
 

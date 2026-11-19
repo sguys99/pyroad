@@ -52,7 +52,7 @@ test('숨기기·다시 공개·닉네임 변경·지우기', async ({
     await page.setViewportSize({ width: 360, height: 780 });
     await page.goto('/profile');
     await expect(page.getByTestId('profile-share-cards')).toContainText(
-      '1장 · 지금 1장 공개 중',
+      '1장, 지금 1장 공개 중',
     );
     await page.getByTestId('profile-share-cards').screenshot({
       path: testInfo.outputPath('profile-entry-360.png'),

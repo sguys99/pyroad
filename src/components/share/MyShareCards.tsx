@@ -203,7 +203,7 @@ export function MyShareCards({
                 )}
                 <p className="m-0 text-caption text-muted-foreground">
                   {formatKstDate(card.createdAt, 'monthDay')}에 만듦
-                  {state === 'public' && ` · ${daysLeft}일 남음`}
+                  {state === 'public' && `, ${daysLeft}일 남음`}
                 </p>
               </div>
 

@@ -199,7 +199,7 @@ export function ProfileStatsCard({ raw }: { raw: ProfileStatsRaw }) {
           label={
             acc === null
               ? '퀴즈 전이에요'
-              : `퀴즈 정답률 · 맞힌 퀴즈 ${n(s.quiz_correct)}개`
+              : `퀴즈 정답률 (맞힌 퀴즈 ${n(s.quiz_correct)}개)`
           }
           testId="quiz"
         />
@@ -221,7 +221,7 @@ export function ProfileStatsCard({ raw }: { raw: ProfileStatsRaw }) {
           icon={<Flame />}
           value={n(raw.streak)}
           unit="일"
-          label={`연속 학습 · 최고 ${n(s.streak)}일`}
+          label={`연속 학습 (최고 ${n(s.streak)}일)`}
           testId="streak"
         />
         <Tile
@@ -314,7 +314,7 @@ export function TreasureCard({
           icon={<RewardIcon kind="star" size={24} />}
           value={n(stars)}
           unit={`/ ${n(maxStars)}`}
-          label={`모은 별 · 별 3개 퀘스트 ${n(threeStars)}개`}
+          label={`모은 별 (별 3개 퀘스트 ${n(threeStars)}개)`}
           tone="reward"
           testId="stars"
         />
@@ -496,7 +496,7 @@ export function ShareCardsCard({
         <span className="text-caption text-muted-foreground">
           {total === 0
             ? '자랑한 카드를 여기서 숨기거나 지울 수 있어요'
-            : `${total}장 · 지금 ${open}장 공개 중`}
+            : `${total}장, 지금 ${open}장 공개 중`}
         </span>
       </span>
       <ChevronRight
@@ -524,7 +524,7 @@ export function CreationsCard({ total }: { total: number }) {
         <span className="text-caption text-muted-foreground">
           {total === 0
             ? '거북이 그림과 대화 작품을 모아 둬요'
-            : `작품 ${total}개 · 나만 볼 수 있어요`}
+            : `작품 ${total}개, 나만 볼 수 있어요`}
         </span>
       </span>
       <ChevronRight

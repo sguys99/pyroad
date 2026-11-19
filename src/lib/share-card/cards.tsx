@@ -231,7 +231,7 @@ export function AchievementCard(d: AchievementCardData) {
       }
     >
       <Kicker color={t.ink} background={t.soft}>
-        {`업적 달성 · ${TIER_LABEL[d.tier]}`}
+        {`${TIER_LABEL[d.tier]} 업적 달성`}
       </Kicker>
       <div
         style={{
@@ -328,7 +328,7 @@ export function WeeklyCard(d: WeeklyCardData) {
     >
       <Kicker color={COLOR.primaryText} background={COLOR.primarySoft}>
         {
-          fitLine(`이번 주 성장 · ${cleanText(d.weekLabel)}`, TEXT_W - 60, {
+          fitLine(`이번 주 성장, ${cleanText(d.weekLabel)}`, TEXT_W - 60, {
             max: TYPE.kicker,
             min: TYPE.kicker,
           }).text

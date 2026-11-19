@@ -771,7 +771,7 @@ function ItemDetail({
       <p className="shop-detail-text">{item.description}</p>
       {limit !== null && (
         <p className="shop-detail-limit">
-          이번 주 {status.bought_this_week[item.id] ?? 0}/{limit}개 샀어요 ·
+          이번 주 {status.bought_this_week[item.id] ?? 0}/{limit}개 샀어요.
           월요일 {nextMonday(status.week_start)}에 다시 열려요
         </p>
       )}

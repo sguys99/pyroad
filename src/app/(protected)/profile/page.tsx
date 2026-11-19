@@ -251,7 +251,7 @@ export default async function ProfilePage() {
         <div className="pf-foot pf-wide">
           <Link href="/settings" className="pf-acct-sum focus-ring">
             <Settings aria-hidden className="pf-acct-chev" />
-            설정 (움직임 · AI 튜터)
+            설정 (움직임, AI 튜터)
           </Link>
           <LogoutButton />
         </div>

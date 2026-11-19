@@ -431,8 +431,8 @@ export function AchievementBook({
           <div className="ab-detail" data-state={open.state}>
             <p className="ab-detail-meta">
               <TierTag tier={open.tier} />
+              <span>{CATEGORY_LABEL[open.category]}</span>{' '}
               <span>
-                {CATEGORY_LABEL[open.category]} ·{' '}
                 {open.coins > 0 ? `코인 ${open.coins}` : '배지만 주는 업적'}
               </span>
             </p>

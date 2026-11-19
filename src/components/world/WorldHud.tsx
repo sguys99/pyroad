@@ -255,7 +255,7 @@ export function WorldHud({
                   type="button"
                   className="wh-soon-b focus-ring"
                   aria-label={`${s.label}, 곧 열려요`}
-                  title={`${s.label} · 곧 열려요`}
+                  title={`${s.label}, 곧 열려요`}
                   onClick={() => say(`${s.label}은 ${SOON_TAIL}`)}
                   data-testid={`hud-soon-${s.key}`}
                 >

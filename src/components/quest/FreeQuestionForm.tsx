@@ -67,7 +67,7 @@ interface FreeQuestionFormProps {
 const FREE_TEXT = {
   label: '파이뱀에게 직접 물어보기',
   placeholder: '직접 물어봐요',
-  help: '파이썬 이야기만 · 이름·연락처·학교는 쓰지 않아요',
+  help: '파이썬 이야기만 물어봐요. 이름·연락처·학교는 쓰지 않아요',
   send: '보내기',
   testId: 'free-ask',
 };
@@ -168,7 +168,11 @@ export function FreeQuestionForm({
       <p id={`${id}-help`} className="qf-help">
         <span>{words.help}</span>
         <span className="qf-count" data-testid={`${words.testId}-count`}>
-          {remaining !== null && !out && `오늘 ${remaining}번 남음 · `}
+          {remaining !== null && !out && (
+            <>
+              <span className="mr-2">오늘 {remaining}번 남음</span>{' '}
+            </>
+          )}
           {text.length}/{FREE_QUESTION_MAX_LENGTH}
         </span>
       </p>

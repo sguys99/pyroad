@@ -364,7 +364,7 @@ export function PublishSheet({
                 {work.kind === 'drawing'
                   ? '그림과 그리는 모습'
                   : '내가 실행한 대화 기록 전부'}
-                {showCode ? ' · 코드' : ''}
+                {showCode ? ', 코드' : ''}
               </span>
             </span>
           </div>

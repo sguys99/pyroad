@@ -95,12 +95,12 @@ export function LinkedAccountsList({
             >
               <Mark className="size-5" />
             </span>
-            {/* @container: 이 칸이 좁으면(360px 화면) 날짜를 "연결됨" 아래 줄로, 넓으면 한 줄 "연결됨 · 날짜" */}
+            {/* @container: 이 칸이 좁으면(360px 화면) 날짜를 "연결됨" 아래 줄로, 넓으면 한 줄 "연결됨  날짜"(간격으로 나눔) */}
             <div className="@container min-w-0">
               <p className="text-base font-bold text-foreground">{name}</p>
               {row.state === 'linked' ? (
                 // "✓ 연결됨"과 날짜는 각각 끊기지 않는 덩어리
-                <p className="flex flex-col items-start gap-x-1 text-small text-muted-foreground @[13rem]:flex-row @[13rem]:items-center">
+                <p className="flex flex-col items-start gap-x-3 text-small text-muted-foreground @[13rem]:flex-row @[13rem]:items-center">
                   <span className="inline-flex items-center gap-1 whitespace-nowrap">
                     <Check
                       aria-hidden
@@ -111,7 +111,6 @@ export function LinkedAccountsList({
                   {/* 글자로 읽을 때 띄어쓰기 (flex 안의 공백 글자 노드는 그려지지 않음) */}{' '}
                   {row.linkedAt && (
                     <span className="whitespace-nowrap">
-                      <span className="hidden @[13rem]:inline">· </span>
                       {formatKstDate(row.linkedAt, 'dot')}
                     </span>
                   )}

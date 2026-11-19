@@ -92,7 +92,7 @@ describe('StageSheet', () => {
       />,
     );
     const dialog = await screen.findByRole('dialog', {
-      name: /3단계 · 지금 모험 중\s*조건의 갈림길/,
+      name: /3단계\s*지금 모험 중\s*조건의 갈림길/,
     });
     expect(dialog).toHaveAccessibleDescription('갈림길에서 길을 골라요');
     // 숫자는 코드 퀘스트끼리, 퀴즈는 따로 (B53): 월드맵 노드와 같은 1/3
@@ -126,7 +126,7 @@ describe('StageSheet', () => {
       screen.getByRole('link', { name: /퀘스트3, 배울 개념\s*개념3/ }),
     ).toBeInTheDocument();
     // 퀴즈: 종류 이름 + 보너스 안내 (P7-11)
-    expect(screen.getByText('퀴즈 · 빈칸 채우기')).toBeInTheDocument();
+    expect(screen.getByText('빈칸 채우기 퀴즈')).toBeInTheDocument();
     expect(screen.getByTestId('stage-sheet-bonus')).toHaveTextContent(
       '퀴즈는 보너스예요 — 안 풀어도 다음 스테이지가 열려요',
     );

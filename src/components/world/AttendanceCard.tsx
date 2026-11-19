@@ -323,8 +323,7 @@ export function AttendanceMenuSection({
         <p className="at-note">
           <RewardIcon kind="shield" size={18} />
           <span>
-            스트릭 방패 {shields}/{MAX_SHIELDS}개 · 하루 쉬면 1개가 불꽃을
-            지켜요
+            스트릭 방패 {shields}/{MAX_SHIELDS}개. 하루 쉬면 1개가 불꽃을 지켜요
           </span>
         </p>
       </div>

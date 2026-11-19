@@ -122,7 +122,7 @@ export const WORLD2_GLOSSARY: readonly GlossaryTerm[] = [
   {
     term: '에러 이름 7종',
     meaning:
-      'SyntaxError 문법 · NameError 없는 이름 · TypeError 섞을 수 없는 종류 · IndexError 없는 번호 · KeyError 없는 이름표 · ValueError 바꿀 수 없는 값 · ZeroDivisionError 0으로 나누기예요.',
+      'SyntaxError 문법, NameError 없는 이름, TypeError 섞을 수 없는 종류, IndexError 없는 번호, KeyError 없는 이름표, ValueError 바꿀 수 없는 값, ZeroDivisionError 0으로 나누기예요.',
     example: '[1, 2][5]  # IndexError',
     match: ['에러 이름', 'error'],
   },

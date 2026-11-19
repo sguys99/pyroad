@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
 
 import type { WorldWithStatus } from '@/lib/world/getStageStatuses';
 import {
@@ -33,10 +32,9 @@ export function NextBooks({
         </h2>
         <Link
           href="/worlds"
-          className="focus-ring inline-flex min-h-touch items-center gap-0.5 rounded-sm text-small font-bold text-primary-text hover:underline"
+          className="focus-ring inline-flex min-h-touch items-center rounded-sm text-small font-bold text-primary-text underline underline-offset-4"
         >
           책장 전체 보기
-          <ChevronRight className="size-4" aria-hidden />
         </Link>
       </div>
       <div className="wb-next-row">

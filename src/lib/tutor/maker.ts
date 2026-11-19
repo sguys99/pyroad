@@ -131,7 +131,7 @@ export function plannerFallback(idea: string): string {
     '',
     '이름과 기능은 내 마음대로 바꿔도 돼요. 쉬운 기능부터 하나씩 만들어요.',
     '',
-    `다른 아이디어 카드: ${others.join(' · ')}`,
+    `다른 아이디어 카드: ${others.join(', ')}`,
   ].join('\n');
 }
 

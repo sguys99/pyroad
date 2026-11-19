@@ -165,8 +165,10 @@ export function StageSheet({
       title={
         <>
           <span className="ss-kicker font-sans">
-            {stage.order}단계 ·{' '}
-            {stage.status === 'completed' ? '통과한 곳' : '지금 모험 중'}
+            {stage.order}단계{' '}
+            <span className="ml-2">
+              {stage.status === 'completed' ? '통과한 곳' : '지금 모험 중'}
+            </span>
           </span>
           {stage.title}
         </>
@@ -243,7 +245,7 @@ export function StageSheet({
             q.kind === 'quiz' && isQuizKind(q.quiz_kind) ? q.quiz_kind : null;
           const { label, Icon } = quizKind
             ? {
-                label: `퀴즈 · ${QUIZ_KIND_LABEL[quizKind]}`,
+                label: `${QUIZ_KIND_LABEL[quizKind]} 퀴즈`,
                 Icon: QUIZ_KIND_ICON[quizKind],
               }
             : KIND[q.kind];

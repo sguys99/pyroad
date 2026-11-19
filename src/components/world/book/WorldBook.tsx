@@ -102,7 +102,7 @@ export function WorldBook({
             {/* 좁으면 "퀘스트 18/51"이 통째로 다음 줄로 (숫자 앞에서 끊기지 않게, B101) */}
             <span className="wb-note wb-stat">
               <span>
-                스테이지 {book.completedStages}/{book.totalStages} ·
+                스테이지 {book.completedStages}/{book.totalStages}
               </span>{' '}
               <span>
                 퀘스트 {book.completedQuests}/{book.totalQuests}
