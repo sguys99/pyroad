@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
  */
 export function ApiKeyAlert() {
   return (
-    <div className="mb-4 rounded-xl border border-caution/50 bg-caution-soft p-4">
+    <div className="mb-4 rounded-xl bg-caution-soft p-4">
       <p className="text-small font-bold text-caution-text">
         파이뱀이 준비해 둔 힌트와 답으로 도와줘요
       </p>

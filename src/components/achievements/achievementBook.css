@@ -263,7 +263,7 @@
 }
 .ab-tile[data-state='claimable'] {
   background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  box-shadow: none;
 }
 .ab-tile:is([data-state='locked'], [data-state='secret']) {
   background: var(--surface-2);
@@ -424,7 +424,6 @@
   border-radius: var(--round-pill);
   background: var(--tier-soft);
   color: var(--tier-ink);
-  box-shadow: inset 0 0 0 1.5px var(--tier-rim);
   font-weight: 700;
 }
 .ab-detail-text {

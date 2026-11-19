@@ -22,7 +22,7 @@ export function BoardFormMessage({
       <div
         role="alert"
         className={cn(
-          'flex items-start gap-2 rounded-lg border border-caution bg-caution-soft px-3 py-2 text-sm text-foreground',
+          'flex items-start gap-2 rounded-lg bg-caution-soft px-3 py-2 text-sm text-foreground',
           className,
         )}
       >

@@ -233,7 +233,6 @@
 }
 .shop-kinds .g-seg-thumb {
   background: var(--primary-soft);
-  box-shadow: inset 0 0 0 2px var(--primary);
 }
 .shop-kinds .g-seg-tab[aria-selected='true'] {
   color: var(--primary-text);

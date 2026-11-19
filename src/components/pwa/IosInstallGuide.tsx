@@ -104,7 +104,7 @@ function Spot({ children, on }: { children: ReactNode; on?: boolean }) {
     <span
       className={cn(
         'grid size-6 place-items-center rounded-full text-text-muted',
-        on && 'bg-primary-soft text-primary-text ring-2 ring-primary',
+        on && 'text-primary-text ring-2 ring-primary',
       )}
     >
       {children}
@@ -151,10 +151,7 @@ function MenuArt() {
         <Bookmark className="size-3.5" />
       </div>
       <div
-        className={cn(
-          row,
-          'bg-primary-soft text-primary-text ring-2 ring-primary ring-inset',
-        )}
+        className={cn(row, 'text-primary-text ring-2 ring-primary ring-inset')}
       >
         <span className={cn(bar, 'bg-primary-bright')} />
         <SquarePlus className="size-3.5" strokeWidth={2.4} />
