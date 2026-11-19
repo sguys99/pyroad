@@ -125,14 +125,14 @@
     fill: var(--surface);
   }
 
-  /* 곧 열려요: 흐린 점선 알약 (랜딩 soon 배지와 같은 금색 글자). 1024px 이상만 펼치고, 그 아래는 버튼 하나(.wh-soon-one) —
+  /* 곧 열려요: 옅은 면 알약 + 흐린 아이콘(P13-14, 점선 없음). 1024px 이상만 펼치고, 그 아래는 버튼 하나(.wh-soon-one) —
      코인 칩(P8-04)이 들어와 닉네임 자리가 줄지 않게 */
   .wh-soon {
     display: none;
     flex: none;
     align-items: center;
     padding: 0 0.25rem;
-    border: var(--line-w) dashed var(--line-strong);
+    background: var(--surface-2);
     border-radius: var(--round-pill);
   }
   .wh-soon-k {
@@ -166,7 +166,7 @@
   }
   .wh-soon-one {
     flex: none;
-    border: var(--line-w) dashed var(--line-strong);
+    background: var(--surface-2);
   }
   @media (hover: hover) {
     .wh-soon-b:hover,

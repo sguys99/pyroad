@@ -665,7 +665,7 @@
 }
 .shop-bill-left {
   padding-top: 0.5rem;
-  border-top: var(--line-w) dashed var(--line-strong);
+  border-top: var(--line-w) solid var(--line);
 }
 .shop-bill-left dt {
   color: var(--accent-text);

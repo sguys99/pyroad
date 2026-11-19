@@ -138,9 +138,7 @@ function DailyBars({ report }: { report: GuardianReport }) {
                 aria-hidden
                 className={cn(
                   'flex h-28 w-full max-w-12 items-end overflow-hidden rounded-lg sm:h-36',
-                  day.future
-                    ? 'border-2 border-dashed border-line'
-                    : 'bg-surface-2',
+                  day.future ? 'border border-line' : 'bg-surface-2',
                 )}
               >
                 {!day.future && day.quests > 0 && (

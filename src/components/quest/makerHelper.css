@@ -14,7 +14,6 @@
   flex-direction: column;
   gap: 0.625rem;
   padding: 0.875rem 1rem 1rem;
-  border: var(--line-w) dashed var(--w3-blueprint);
   border-radius: var(--round-l);
   /* 옅은 모눈: 청사진 선 두 겹을 아주 옅게 (글자 대비는 면색 --w3-soft 기준) */
   background-color: var(--w3-soft);

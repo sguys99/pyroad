@@ -300,12 +300,7 @@
 :root:is([data-motion='minimal'], [data-reduced='true']) .ab-medal {
   transition: none;
 }
-/* 아직 = 실루엣: 흐린 면 + 점선 둘레 */
-.ab-medal[data-earned='false'] {
-  outline: 2px dashed var(--line-strong);
-  outline-offset: -2px;
-  box-shadow: none;
-}
+/* 아직 = 실루엣: 공통 메달의 흐린 면 그대로(P13-14, 점선 둘레 없음) — 잠김은 진행 막대·숫자·"비밀" 글자가 알림 */
 .ab-medal[data-secret] {
   font-size: var(--text-h2);
   line-height: 1;

@@ -34,7 +34,7 @@
   line-height: var(--text-h3--line-height);
 }
 
-/* ───── 진행 점: 지금 = 초록 테두리, 정답 = 초록 도장 + 받은 별, 정답 공개 = 점선 */
+/* ───── 진행 점: 지금 = 초록 테두리, 정답 = 초록 도장 + 받은 별, 정답 공개 = 회색 면 + 눈 아이콘(P13-14, 점선 없음) */
 .dq-dots {
   display: flex;
   flex: none;
@@ -78,7 +78,6 @@
   color: var(--on-primary);
 }
 .dq-dot[data-state='revealed'] .dq-dot-face {
-  border-style: dashed;
   border-color: var(--line-strong);
   background: var(--surface-2);
 }

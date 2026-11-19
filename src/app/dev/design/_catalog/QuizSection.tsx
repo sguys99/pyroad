@@ -1132,7 +1132,7 @@ function DailyDemos() {
     <div className="mt-8 grid items-start gap-4 md:grid-cols-2" data-testid="daily-demo">
       <Demo
         label="오늘의 퀴즈 진행 점 (P7-10)"
-        note="1/3: 지금 푸는 문제는 초록 테두리 · 맞히면 초록 도장 + 받은 별 · 3번 틀려 정답 공개는 점선 · 아직은 흐리게. 화면 읽기는 '2번 문제: 정답, 별 2개'"
+        note="1/3: 지금 푸는 문제는 초록 테두리 · 맞히면 초록 도장 + 받은 별 · 3번 틀려 정답 공개는 회색 면에 눈 아이콘 · 아직은 흐리게. 화면 읽기는 '2번 문제: 정답, 별 2개'"
         data-testid="daily-dots-demo"
       >
         <div className="grid gap-3">

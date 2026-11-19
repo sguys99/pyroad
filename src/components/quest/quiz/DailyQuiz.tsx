@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BackLink } from '@/components/ui/back-link';
-import { Check, Flame, Map } from 'lucide-react';
+import { Check, Eye, Flame, Map } from 'lucide-react';
 
 import { MyPybaemStatic } from '@/components/profile/MyLook';
 import { Button } from '@/components/ui/button';
@@ -268,7 +268,7 @@ function DailyQuestion({
   );
 }
 
-/** 머리 진행 점: 끝난 문제는 별(정답 공개는 전구 대신 점선), 지금 문제는 강조. 글자로도 상태를 읽어 줌 */
+/** 머리 진행 점: 끝난 문제는 별(정답 공개는 회색 면에 눈 아이콘), 지금 문제는 강조. 글자로도 상태를 읽어 줌 */
 export function DailyDots({
   items,
   step,
@@ -309,6 +309,8 @@ export function DailyDots({
             <span aria-hidden className="dq-dot-face">
               {outcome?.status === 'correct' ? (
                 <Check strokeWidth={3} />
+              ) : outcome ? (
+                <Eye />
               ) : (
                 i + 1
               )}
