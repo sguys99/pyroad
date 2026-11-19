@@ -291,7 +291,11 @@ export function StageSheet({
                     </span>
                   )}
                   <span className="ss-tags">
-                    <span className="ss-tag" data-kind={q.kind}>
+                    {/* 알약은 상태 하나만, 나머지 메타는 아이콘 + 글자 (P13-11) */}
+                    <span className="ss-tag" data-state={q.state}>
+                      {STATE_TEXT[q.state]}
+                    </span>
+                    <span className="ss-meta" data-kind={q.kind}>
                       <Icon
                         aria-hidden
                         className="size-3.5"
@@ -299,14 +303,11 @@ export function StageSheet({
                       />
                       {label}
                     </span>
-                    <span className="ss-tag" data-state={q.state}>
-                      {STATE_TEXT[q.state]}
-                    </span>
                     {q.quest_type === 'boss' &&
                       q.state !== 'done' &&
                       bossWaiting && (
                         <span
-                          className="ss-tag"
+                          className="ss-meta"
                           data-boss-lock
                           data-testid="stage-sheet-boss-lock"
                         >
@@ -320,7 +321,7 @@ export function StageSheet({
                       )}
                     {q.state === 'done' && starReviewOpen(q, today) && (
                       <span
-                        className="ss-tag"
+                        className="ss-meta"
                         data-review
                         data-testid="stage-sheet-review"
                       >
@@ -333,7 +334,7 @@ export function StageSheet({
                       </span>
                     )}
                     {q.is_mobile_friendly && phone && (
-                      <span className="ss-tag" data-mobile>
+                      <span className="ss-meta" data-mobile>
                         <Smartphone
                           aria-hidden
                           className="size-3.5"

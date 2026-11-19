@@ -91,17 +91,12 @@
   font-size: var(--text-caption);
   font-weight: 700;
 }
+/* 보상 수치는 아이콘 + 글자 (알약 아님, P13-11) */
 .sc-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.0625rem 0.5rem 0.0625rem 0.25rem;
-  border-radius: var(--round-pill);
-  background: var(--accent-soft);
-  color: var(--accent-text);
-}
-.sc[data-state='ready'] .sc-pill {
-  background: var(--surface);
+  color: var(--text);
 }
 .sc-err {
   margin: 0;

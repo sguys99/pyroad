@@ -115,7 +115,6 @@ export function WorldBook({
           </>
         ) : (
           <span className="wb-note">
-            <Lock className="size-4" aria-hidden />
             <span>
               {status === 'coming_soon' && '지금 만들고 있어요. '}
               {unlock}
