@@ -8,7 +8,7 @@ import { ScrollLink } from './ScrollLink';
 
 /**
  * 랜딩 헤더 (P4-01, 최종 시안 `f-topnav`): 로고 + 바로가기(30초 체험·보호자 안내) + 로그인.
- * 히어로 위에서는 투명하고, 조금 내려가면 바탕색 면이 깔린다(흐림은 full 단계만, landing.css).
+ * 히어로 위에서는 투명하고, 조금 내려가면 불투명 바탕색 면과 아래 1px 선이 생긴다(흐림 없음, landing.css).
  * 360px에서는 로고 + "30초 체험" + 로그인, "보호자 안내"는 640px부터.
  */
 export function LandingHeader() {

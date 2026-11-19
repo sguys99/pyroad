@@ -33,7 +33,7 @@ export function HeroSection() {
           <h1 id="hero-title" className="hero-title font-display">
             코드 주문으로
             <br />
-            <span className="ld-ink-mark">모험 지도</span>를 채워라!
+            <span className="ld-em">모험 지도</span>를 채워라!
           </h1>
           <p className="hero-sub">
             파이뱀 선생님과 퀘스트를 깨며 진짜 파이썬을 배워요. 하나씩 깰 때마다

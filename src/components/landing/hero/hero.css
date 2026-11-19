@@ -8,7 +8,7 @@
 
 @layer components {
   .hero {
-    /* 하늘: 위는 옅은 물빛, 수평선 쪽은 섬 틴트 + 해 근처 금빛 */
+    /* 하늘(그림): 위는 옅은 물빛, 수평선 쪽은 섬 틴트. 해 둘레 빛은 HeroArt의 해가 직접 그린다 (P13-15) */
     --hero-sky-top: color-mix(in srgb, var(--w2-soft) 60%, var(--surface));
     --hero-sky-bottom: color-mix(in srgb, var(--w1-soft) 70%, var(--w2-soft));
     position: relative;
@@ -17,13 +17,11 @@
     flex-direction: column;
     min-height: max(38rem, 100svh);
     overflow: clip;
-    background:
-      radial-gradient(
-        ellipse 42% 36% at 74% 20%,
-        var(--accent-soft),
-        transparent 70%
-      ),
-      linear-gradient(180deg, var(--hero-sky-top), var(--hero-sky-bottom) 64%);
+    background: linear-gradient(
+      180deg,
+      var(--hero-sky-top),
+      var(--hero-sky-bottom) 64%
+    );
   }
   @media (min-width: 900px) {
     .hero {
@@ -57,7 +55,7 @@
       height: auto;
     }
   }
-  /* 폰: 글자 뒤로 겹치는 해·큰 구름은 뺀다 (하늘 빛은 .hero 배경의 금빛 원이 대신) */
+  /* 폰: 글자 뒤로 겹치는 해·큰 구름은 뺀다 */
   @media (max-width: 599px) {
     .hero-scene [data-wide] {
       display: none;
@@ -457,11 +455,6 @@
     transform: translate3d(0, 0.875rem, 0);
   }
 }
-@keyframes hero-ink {
-  from {
-    transform: scaleX(0);
-  }
-}
 @keyframes hero-buddy-in {
   0% {
     transform: translate3d(0, 2.5rem, 0) scale(0.92);
@@ -501,9 +494,6 @@
   }
   .hero-copy > :nth-child(3) {
     animation-delay: 140ms;
-  }
-  .hero-title .ld-ink-mark::after {
-    animation: hero-ink var(--dur-page) var(--easing-ink) 520ms both;
   }
   .hero-buddy-in {
     animation: hero-buddy-in 900ms var(--easing-out) 260ms both;

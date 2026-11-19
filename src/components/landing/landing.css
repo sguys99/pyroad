@@ -18,7 +18,7 @@
     }
   }
 
-  /* ───────────── 헤더: 맨 위에서는 투명, 내려가면 바탕색 면 (full만 흐림) */
+  /* ───────────── 헤더: 맨 위에서는 투명(그림과 하나), 내려가면 불투명 바탕색 면 + 아래 1px 선. 흐림·반투명 없음 (P13-15) */
   .ld-header {
     position: fixed;
     inset: 0 0 auto;
@@ -31,10 +31,6 @@
   .ld-header[data-scrolled='true'] {
     background-color: var(--bg);
     box-shadow: 0 1px 0 var(--line);
-  }
-  :root[data-motion='full'] .ld-header[data-scrolled='true'] {
-    background-color: color-mix(in srgb, var(--bg) 86%, transparent);
-    backdrop-filter: blur(12px) saturate(1.2);
   }
   .ld-header-in {
     display: flex;
@@ -179,20 +175,10 @@
     text-wrap: pretty;
   }
 
-  /* 형광펜 강조: 금색 띠가 글자 아래에 깔린다 (등장 연출은 hero.css) */
-  .ld-ink-mark {
-    position: relative;
-    z-index: 0;
+  /* 제목 속 강조 낱말: 색 하나(초록 글자색)만. 금색 형광펜 띠는 뺐다 — 금색은 보상만 (P13-15) */
+  .ld-em {
+    color: var(--primary-text);
     white-space: nowrap;
-  }
-  .ld-ink-mark::after {
-    content: '';
-    position: absolute;
-    inset: 58% -0.08em 0.04em;
-    z-index: -1;
-    border-radius: 0.2em;
-    background: var(--accent-light);
-    transform-origin: left center;
   }
 
   /* 늦게 오는 섹션 CSS (P4-12, `deferredCss.ts`): 첫 화면 밖 섹션(세계관·쇼케이스·친구·보호자·FAQ)의 CSS는 렌더 차단 CSS에서 빼고

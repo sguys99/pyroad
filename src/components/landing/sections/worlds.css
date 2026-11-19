@@ -111,13 +111,8 @@
     position: relative;
     padding: calc(var(--ld-worlds-rod) + 1.25rem) 0.5rem;
     border-radius: var(--round-l);
-    /* 월드 틴트가 섬 → 바다 → 도시로 이어지는 종이 */
-    background: linear-gradient(
-      180deg,
-      var(--w1-soft) 8%,
-      var(--w2-soft) 50%,
-      var(--w3-soft) 92%
-    );
+    /* 종이: 단색 면. 월드 색은 표지 그림이 맡는다 (P13-15, 세 틴트 그라데이션 삭제) */
+    background: var(--surface-2);
     box-shadow: var(--elev-card);
   }
   /* 접었던 자국 두 줄 */
@@ -520,12 +515,6 @@
     }
     .ld-worlds-paper {
       padding: 2rem calc(var(--ld-worlds-rod) + 1.5rem);
-      background: linear-gradient(
-        90deg,
-        var(--w1-soft) 10%,
-        var(--w2-soft) 50%,
-        var(--w3-soft) 90%
-      );
     }
     .ld-worlds-paper::before {
       background:
