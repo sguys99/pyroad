@@ -168,9 +168,9 @@
   font-size: var(--text-small);
 }
 
-/* 손님 카드 등장 (일회성): full = 스프링으로 차례로, lite = 짧게, minimal·동작 줄이기 = 바로 (keyframes는 outputPanel.css) */
+/* 손님 카드 등장 (일회성): full = 감속으로 차례로(튐 없음, P13-16), lite = 짧게, minimal·동작 줄이기 = 바로 (keyframes는 outputPanel.css) */
 :root[data-reduced='false'][data-motion='full'] .qg-pop {
-  animation: qo-pop var(--spring-body-dur) var(--spring-body) both;
+  animation: qo-pop var(--dur-base) var(--easing-out) both;
   animation-delay: calc(var(--i) * var(--dur-instant));
 }
 :root[data-reduced='false'][data-motion='lite'] .qg-pop {

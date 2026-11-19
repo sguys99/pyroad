@@ -302,7 +302,7 @@
       calc(var(--i, 0) * 120ms) both;
   }
   .ld-parents-road[data-in='true'] .ld-parents-pin {
-    animation: ld-parents-pin var(--dur-slow) var(--easing-back-out)
+    animation: ld-parents-pin var(--dur-slow) var(--easing-out)
       calc(var(--i, 0) * 220ms) both;
   }
   .ld-parents-road[data-in='true'] .ld-parents-stop:not(:last-child)::before {

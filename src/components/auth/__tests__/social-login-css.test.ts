@@ -102,7 +102,7 @@ describe('최근 로그인 이름표 (P3-08)', () => {
     expect(r).toContain('background: var(--secondary)');
     expect(r).toContain('color: var(--on-secondary)');
     expect(r).toContain('font-size: var(--text-caption)'); // 14px 미만 금지
-    expect(r).toContain('var(--spring-prop)');
+    expect(r).toContain('var(--easing-out)'); // 배지는 튀지 않음 (P13-16)
     expect(rule(":root[data-motion='minimal'] .g-social-recent")).toContain(
       'g-fade-in',
     );

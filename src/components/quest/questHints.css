@@ -80,7 +80,7 @@
   border-radius: var(--round-s);
   background: var(--surface-2);
   overflow-wrap: anywhere;
-  animation: qh-note-in var(--spring-body-dur) var(--spring-body) both;
+  animation: qh-note-in var(--dur-base) var(--easing-out) both;
 }
 .qh-note-k {
   display: inline-flex;

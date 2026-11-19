@@ -359,7 +359,7 @@
     transform: translateY(0.375rem) scale(0.92);
     transition:
       opacity var(--dur-fast) var(--easing-out),
-      transform var(--spring-prop-dur) var(--spring-prop),
+      transform var(--dur-fast) var(--easing-out),
       visibility 0s linear var(--dur-fast);
   }
   .ld-worlds-card[data-tip='on'] .ld-worlds-tip {
@@ -368,7 +368,7 @@
     transform: none;
     transition:
       opacity var(--dur-fast) var(--easing-out),
-      transform var(--spring-prop-dur) var(--spring-prop),
+      transform var(--dur-fast) var(--easing-out),
       visibility 0s;
   }
 
@@ -733,7 +733,7 @@
   }
   .ld-worlds-map[data-armed='true'][data-open='true'] .ld-worlds-card-in {
     transform: perspective(48rem) rotateX(0deg);
-    transition: transform var(--spring-body-dur) var(--spring-body)
+    transition: transform var(--dur-slow) var(--easing-out)
       calc(var(--ld-worlds-draw) * var(--s));
   }
 

@@ -348,7 +348,7 @@
   display: block;
 }
 :root[data-reduced='false'][data-motion='full'] .qo-slip > .qr-waking {
-  animation: qo-pop var(--spring-body-dur) var(--spring-body) both;
+  animation: qo-pop var(--dur-base) var(--easing-out) both;
 }
 :root[data-reduced='false'][data-motion='lite'] .qo-slip > .qr-waking {
   animation: qo-pop-lite var(--dur-base) var(--easing-out) both;
@@ -381,7 +381,7 @@
   justify-self: start;
 }
 
-/* 줄 카드 등장 (일회성): full = body 스프링으로 차례로 튀어나옴, lite = 짧게, minimal·동작 줄이기 = 없음(바로 보임) */
+/* 줄 카드 등장 (일회성): full = 감속으로 차례로 올라옴(튐 없음, P13-16), lite = 짧게, minimal·동작 줄이기 = 없음(바로 보임) */
 @keyframes qo-pop {
   from {
     opacity: 0;
@@ -403,7 +403,7 @@
   }
 }
 :root[data-reduced='false'][data-motion='full'] .qo-pop {
-  animation: qo-pop var(--spring-body-dur) var(--spring-body) both;
+  animation: qo-pop var(--dur-base) var(--easing-out) both;
   animation-delay: calc(var(--i) * var(--dur-instant) / 2);
 }
 :root[data-reduced='false'][data-motion='lite'] .qo-pop {

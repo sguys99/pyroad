@@ -312,7 +312,7 @@
   }
 }
 :root[data-motion='full'] .ss-li {
-  animation: ss-in var(--spring-body-dur) var(--spring-body) both;
+  animation: ss-in var(--dur-slow) var(--easing-out) both;
   animation-delay: calc(120ms + min(var(--i), 8) * 45ms);
 }
 :root[data-motion='lite'] .ss-li {

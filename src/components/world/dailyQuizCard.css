@@ -102,7 +102,7 @@
   }
 }
 :root[data-motion='full'] .dqc {
-  animation: dqc-in var(--spring-body-dur) var(--spring-body) backwards;
+  animation: dqc-in var(--dur-slow) var(--easing-out) backwards;
 }
 :root[data-motion='lite'] .dqc {
   animation: dqc-in var(--dur-base) var(--easing-out) backwards;

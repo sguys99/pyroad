@@ -106,7 +106,7 @@
   }
   :root[data-reduced='false']:is([data-motion='full'], [data-motion='lite'])
     .ld-trial-cta {
-    animation: ld-trial-rise var(--spring-body-dur) var(--spring-body) both;
+    animation: ld-trial-rise var(--dur-slow) var(--easing-out) both;
   }
   :root[data-reduced='false'][data-motion='minimal'] .ld-trial-cta {
     animation: ld-trial-fade var(--dur-fade) var(--easing-out) both;

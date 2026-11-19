@@ -197,7 +197,7 @@
   }
 }
 :root[data-motion='full'] :is(.dq-sheet, .dq-sum) {
-  animation: dq-turn var(--spring-body-dur) var(--spring-body) backwards;
+  animation: dq-turn var(--dur-slow) var(--easing-out) backwards;
 }
 :root[data-motion='lite'] :is(.dq-sheet, .dq-sum) {
   animation: dq-turn var(--dur-base) var(--easing-out) backwards;

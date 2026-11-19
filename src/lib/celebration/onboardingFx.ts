@@ -311,12 +311,12 @@ export function diceRoll(icon: Element | null, budget: MotionBudget) {
   );
 }
 
-/** 파이뱀 색을 고른 칸이 톡 (선택 표시는 색·체크로 이미 보임) */
+/** 파이뱀 색을 고른 칸이 제자리로 (선택 칸은 일반 컨트롤이라 튀지 않음, P13-16. 선택 표시는 색·체크로 이미 보임) */
 export function swatchPop(el: Element | null, budget: MotionBudget) {
   if (!el || typeof el.animate !== 'function' || !budget.springs) return;
   if (budget.effectDuration === 0) return;
-  el.animate(
-    [{ transform: 'scale(0.9)' }, { transform: 'scale(1)' }],
-    springTiming('prop'),
-  );
+  el.animate([{ transform: 'scale(0.9)' }, { transform: 'scale(1)' }], {
+    duration: DURATION.base,
+    easing: EASING.out,
+  });
 }

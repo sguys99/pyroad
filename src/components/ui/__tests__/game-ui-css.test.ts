@@ -93,10 +93,10 @@ describe('game-ui.css 연출 단계', () => {
     expect(rule('.g-scrim')).toContain('background: var(--scrim)');
   });
 
-  it('토스트: full body 스프링, lite 짧게, minimal 페이드, 동작 줄이기 없음', () => {
+  it('토스트: full 감속(튐 없음, P13-16), lite 짧게, minimal 페이드, 동작 줄이기 없음', () => {
     expect(rule('.g-toast')).toContain('box-shadow: var(--elev-pop)');
     expect(CSS).toContain(
-      'animation: g-toast-in var(--spring-body-dur) var(--spring-body) both',
+      'animation: g-toast-in var(--dur-base) var(--easing-out) both',
     );
     expect(rule(":root[data-motion='minimal'] .g-toast")).toContain(
       'g-fade-in',

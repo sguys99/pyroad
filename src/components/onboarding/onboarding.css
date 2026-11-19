@@ -842,7 +842,7 @@
     color: var(--on-primary);
     box-shadow: 0 var(--lip-h) 0 var(--primary-lip);
     font-size: 1.375rem;
-    animation: ob-pop calc(420ms * var(--ob-k)) var(--easing-back-out)
+    animation: ob-pop calc(420ms * var(--ob-k)) var(--easing-out)
       calc(1100ms * var(--ob-k)) both;
   }
   .ob-node[data-state='locked'] {
@@ -887,7 +887,7 @@
     font-weight: 700;
     white-space: nowrap;
     transform: translate(-50%, -3.75rem);
-    animation: ob-tag calc(380ms * var(--ob-k)) var(--easing-back-out)
+    animation: ob-tag calc(380ms * var(--ob-k)) var(--easing-out)
       calc(1300ms * var(--ob-k)) both;
   }
 
@@ -985,7 +985,7 @@
     border-radius: var(--round-m);
     background: var(--surface);
     box-shadow: var(--elev-card);
-    animation: ob-rise calc(420ms * var(--ob-k)) var(--easing-back-out)
+    animation: ob-rise calc(420ms * var(--ob-k)) var(--easing-out)
       calc(1550ms * var(--ob-k)) both;
   }
   .ob-mini-out-k {
@@ -1001,7 +1001,7 @@
     height: 1.375rem;
     margin-left: auto;
     color: var(--primary-text);
-    animation: ob-pop-in calc(380ms * var(--ob-k)) var(--easing-back-out)
+    animation: ob-pop-in calc(380ms * var(--ob-k)) var(--easing-out)
       calc(1850ms * var(--ob-k)) both;
   }
 
@@ -1028,7 +1028,7 @@
     height: 1.125rem;
   }
   .ob-chip[data-kind='hint'] {
-    animation: ob-pop calc(420ms * var(--ob-k)) var(--easing-back-out)
+    animation: ob-pop calc(420ms * var(--ob-k)) var(--easing-out)
       calc(200ms * var(--ob-k)) both;
   }
   .ob-chat-q {

@@ -206,7 +206,7 @@
   }
 }
 :root[data-motion='full'] .at:not(.at-menu) {
-  animation: at-in var(--spring-body-dur) var(--spring-body) backwards;
+  animation: at-in var(--dur-slow) var(--easing-out) backwards;
 }
 :root[data-motion='lite'] .at:not(.at-menu) {
   animation: at-in var(--dur-base) var(--easing-out) backwards;
