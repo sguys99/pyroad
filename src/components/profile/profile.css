@@ -402,7 +402,8 @@
 
 /* ── 내 모음: 링크 줄 3개(업적·자랑 카드·작품함), 줄 전체가 링크, 끝에 꺾쇠 (P13-23) ── */
 .pf-links-card {
-  padding-block: 0.25rem;
+  /* 줄(링크)이 카드 위아래 끝까지 — 누르는 자리가 넓고, 첫 줄 위 = 옆 카드 위 */
+  padding-block: 0;
 }
 .pf-links {
   margin: 0;
@@ -417,7 +418,7 @@
   align-items: center;
   gap: 0.75rem;
   min-height: var(--spacing-touch);
-  padding-block: 0.875rem;
+  padding-block: 1.125rem;
   border-radius: var(--round-s);
   color: var(--text);
 }

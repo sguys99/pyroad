@@ -5,8 +5,8 @@ import { test, expect } from './support/test';
 import { adminClient, completeQuests } from './support/admin';
 import { stage } from './support/content';
 
-/** 768+ 두 열 높이 차 상한 (B140 전 약 650px). P13-23 시안 배치(왼쪽 달력·별과 보물 / 오른쪽 기록 줄·내 모음)는 약 540px — 월드가 다 펼쳐지던 때로 돌아가는 것만 막음 */
-const COL_GAP_MAX = 600;
+/** 768+ 두 열 높이 차 상한 (B140 전 약 650px) */
+const COL_GAP_MAX = 320;
 
 const noOverflow = (page: import('@playwright/test').Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
@@ -86,7 +86,7 @@ test('360px: 한 열 · 달력 오늘 칸 낭독 · 모험 기록 · 업적 카�
   await expect(page).toHaveURL(/\/profile\/achievements$/);
 });
 
-test('1280px: 두 열(왼쪽 달력·보물 / 오른쪽 기록·내 모음), 넘침 없음', async ({
+test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 내 모음·보물), 넘침 없음', async ({
   page,
   e2eUser,
 }) => {
@@ -95,16 +95,16 @@ test('1280px: 두 열(왼쪽 달력·보물 / 오른쪽 기록·내 모음), 넘
   await page.goto('/profile');
   await expect(page.getByTestId('profile-achievements')).toBeVisible();
   // 두 상자를 한 프레임에서 잰다: 따로 재면 화면 등장 전환(PageTransition, 12px 올라옴) 사이에 위치가 달라짐 (B71)
-  const [cal, stats] = await page.evaluate(() =>
-    ['profile-calendar', 'profile-stats'].map((id) =>
+  const [cal, ach] = await page.evaluate(() =>
+    ['profile-calendar', 'profile-achievements'].map((id) =>
       document
         .querySelector(`[data-testid="${id}"]`)!
         .getBoundingClientRect()
         .toJSON(),
     ),
   );
-  expect(Math.abs(cal.y - stats.y)).toBeLessThan(2);
-  expect(stats.x > cal.x + cal.width).toBe(true);
+  expect(Math.abs(cal.y - ach.y)).toBeLessThan(2);
+  expect(ach.x > cal.x + cal.width).toBe(true);
   // 별과 보물: 월드(그림책 N권)로 묶고 지금 월드만 펼침, 다른 월드는 접힌 줄(별 합계·잠김) → 키보드로 펼침 (B140)
   const w1 = page.getByTestId('treasure-world-1');
   const w2 = page.getByTestId('treasure-world-2');
