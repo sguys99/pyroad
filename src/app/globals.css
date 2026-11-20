@@ -622,6 +622,17 @@
   h3 {
     @apply font-display;
   }
+  /* 제목은 줄 길이를 고르게, 문단은 끝줄 한 어절 외톨이를 피함 (P13-17). keep-all의 어절 경계 안에서만 고름.
+     text-wrap 줄임 대신 -style만: 줄임은 mode까지 wrap으로 되돌려 부모의 nowrap 상속을 깨므로 */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    text-wrap-style: balance;
+  }
+  p {
+    text-wrap-style: pretty;
+  }
   /* 코드 글꼴은 리거처 없이 (P0-14 §4.6) */
   code,
   kbd,

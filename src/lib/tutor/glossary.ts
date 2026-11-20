@@ -235,7 +235,7 @@ export const WORLD3_GLOSSARY: readonly GlossaryTerm[] = [
   },
   {
     term: 'self',
-    meaning: '"나 자신"이에요. 펫이 자기 배고픔을 가리킬 때 써요.',
+    meaning: '“나 자신”이에요. 펫이 자기 배고픔을 가리킬 때 써요.',
     example: 'self.hunger = 50',
     match: ['self', '__init__'],
   },

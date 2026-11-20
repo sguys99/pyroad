@@ -180,7 +180,7 @@ export function nicknameMessage(reason: NicknameError, char?: string): string {
     case 'too_long':
       return `닉네임은 ${NICKNAME_MAX_LENGTH}글자까지 쓸 수 있어요.`;
     case 'placeholder':
-      return "'모험가'와 숫자로 된 이름은 아직 닉네임을 정하지 않은 친구의 이름이라 쓸 수 없어요.";
+      return '‘모험가’와 숫자로 된 이름은 아직 닉네임을 정하지 않은 친구의 이름이라 쓸 수 없어요.';
     case 'reserved':
       return '운영자나 파이로드 친구 캐릭터로 보일 수 있는 이름은 쓸 수 없어요.';
     case 'banned':

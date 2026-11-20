@@ -64,7 +64,7 @@ const REDUCED_OPTIONS: Array<{
   {
     value: 'system',
     title: '기기 설정 따르기',
-    description: '기기의 "동작 줄이기" 설정대로 해요.',
+    description: '기기의 “동작 줄이기” 설정대로 해요.',
   },
   {
     value: 'on',

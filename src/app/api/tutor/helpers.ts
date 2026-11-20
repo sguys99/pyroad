@@ -1063,7 +1063,7 @@ export function buildFallbackMessage(
       ),
     );
   } else if (body.type === 'stage_summary') {
-    return `🎉 스테이지를 모두 완료했어요! "${skeleton.topic}" 등의 개념을 배웠어요. 대단해요! 🐍`;
+    return `🎉 스테이지를 모두 완료했어요! “${skeleton.topic}” 등의 개념을 배웠어요. 대단해요! 🐍`;
   } else {
     // project_guide
     const stepIdx = (body.current_step ?? 1) - 1;

@@ -293,7 +293,7 @@ export function LinkedAccountsSection() {
           onUnlink={setConfirm}
         />
       ) : (
-        <p className="text-base text-muted-foreground">불러오는 중...</p>
+        <p className="text-base text-muted-foreground">불러오는 중…</p>
       )}
 
       {status && (

@@ -74,7 +74,7 @@ describe('monitoring metrics (P12-09)', () => {
     s.motion = { client_users: 100, downgraded: 40, back_to_full: 5 };
     expect(alertsOf(s).map((a) => a.text)).toEqual([
       '연출 자동 하향 40% (기준 30%)',
-      '하향 뒤 "풍성하게"로 되돌림 12.5% (기준 10%)',
+      '하향 뒤 “풍성하게”로 되돌림 12.5% (기준 10%)',
     ]);
     s.motion = { client_users: 10, downgraded: 9, back_to_full: 9 };
     expect(alertsOf(s)).toEqual([]);

@@ -115,7 +115,7 @@ describe('truncateOutput', () => {
   it('MAX_OUTPUT_LENGTH를 넘으면 자르고 안내를 붙임', () => {
     const long = 'a'.repeat(MAX_OUTPUT_LENGTH + 1);
     expect(truncateOutput(long)).toBe(
-      'a'.repeat(MAX_OUTPUT_LENGTH) + '\n\n...출력이 너무 길어서 잘렸어요',
+      'a'.repeat(MAX_OUTPUT_LENGTH) + '\n\n…출력이 너무 길어서 잘렸어요',
     );
     expect(truncateOutput('짧음')).toBe('짧음');
   });

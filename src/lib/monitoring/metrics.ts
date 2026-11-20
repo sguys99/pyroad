@@ -129,7 +129,7 @@ export function alertsOf(s: MonitoringSummary): Alert[] {
   )
     out.push({
       level: 'warn',
-      text: `하향 뒤 "풍성하게"로 되돌림 ${pct(back)} (기준 10%)`,
+      text: `하향 뒤 “풍성하게”로 되돌림 ${pct(back)} (기준 10%)`,
     });
   const denied = Object.values(s.tutor_today).reduce((a, t) => a + t.denied, 0);
   if (denied > 0)

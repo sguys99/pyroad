@@ -669,7 +669,7 @@ export function checkDrawingRule(a: Analysis, r: DrawingRule): CheckResult {
         n >= min,
         r.includes == null
           ? `write()로 글씨를 ${min}번 이상 써야 해요 (지금 ${n}번).`
-          : `write()로 "${r.includes}"를 써야 해요.`,
+          : `write()로 “${r.includes}”를 써야 해요.`,
       );
     }
     case 'segments': {

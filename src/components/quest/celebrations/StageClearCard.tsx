@@ -67,7 +67,7 @@ export function StageClearCard({
           {summary ? (
             <ReactMarkdown>{summary}</ReactMarkdown>
           ) : (
-            <p className="text-muted-foreground">정리하는 중...</p>
+            <p className="text-muted-foreground">정리하는 중…</p>
           )}
         </div>
       </div>

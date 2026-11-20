@@ -258,9 +258,7 @@ describe('퀘스트 렌더러 스모크', () => {
     expect(screen.getAllByTestId('runner-waking')[0]).toHaveTextContent(
       '너무 오래 걸려서',
     );
-    expect(screen.getByTestId('run-button')).toHaveTextContent(
-      '다시 준비 중...',
-    );
+    expect(screen.getByTestId('run-button')).toHaveTextContent('다시 준비 중…');
     expect(screen.getByTestId('run-button')).toBeDisabled();
     expect(screen.queryByTestId('runner-loading')).toBeNull();
     // 실행기가 준비되지 않았으면 황금키도 막힘 (P1-03 보고)
@@ -299,11 +297,11 @@ describe('퀘스트 렌더러 스모크', () => {
     expect(mocks.runtime.retry).toHaveBeenCalledTimes(1);
   });
 
-  it('Worker 를 띄우기 전(idle)에도 비활성 버튼은 "준비 중..."으로 보인다', () => {
+  it('Worker 를 띄우기 전(idle)에도 비활성 버튼은 "준비 중…"으로 보인다', () => {
     mocks.runtime.status = 'idle';
     render(<CodeQuest {...props(CODE_QUEST)} />);
     const button = screen.getByTestId('run-button');
-    expect(button).toHaveTextContent('준비 중...');
+    expect(button).toHaveTextContent('준비 중…');
     expect(button).not.toHaveTextContent('코드 돌려보기!');
     expect(button).toBeDisabled();
   });

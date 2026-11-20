@@ -32,12 +32,12 @@ export function nowTodoText(input: NowTodoInput): string {
     tip = '벌써 해냈어요! 다음 퀘스트로 가거나, 한 번 더 돌려 복습해 봐요. 🎉';
   } else if (!runResult || !runIsCurrent) {
     tip = runResult
-      ? '코드를 고쳤네요! "코드 돌려보기"로 어떻게 나오는지 확인해 봐요.'
-      : '공책에 주문을 쓰고 "코드 돌려보기"를 눌러 봐요!';
+      ? '코드를 고쳤네요! “코드 돌려보기”로 어떻게 나오는지 확인해 봐요.'
+      : '공책에 주문을 쓰고 “코드 돌려보기”를 눌러 봐요!';
   } else if (runResult.hadException) {
     const line = errorLineFromStderr(runResult.stderr);
     tip = line
-      ? `먼저 ${line}번째 줄에 숨은 버그버그를 찾아 고쳐요. 오류 쪽지의 "${line}번째 줄 보러 가기"를 눌러 봐요.`
+      ? `먼저 ${line}번째 줄에 숨은 버그버그를 찾아 고쳐요. 오류 쪽지의 “${line}번째 줄 보러 가기”를 눌러 봐요.`
       : '먼저 오류 쪽지를 보고 버그버그가 숨은 곳을 고쳐요.';
   } else if (runResult.isTimeout || runResult.outcome === 'output-limit') {
     tip = '반복이 언젠가 멈추는지 살펴보고 다시 돌려 봐요.';

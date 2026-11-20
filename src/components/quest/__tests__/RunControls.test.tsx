@@ -21,9 +21,7 @@ describe('RunControls 재준비 (P11-03)', () => {
       />,
     );
     expect(screen.getByTestId('run-button')).toBeDisabled();
-    expect(screen.getByTestId('run-button')).toHaveTextContent(
-      '다시 준비 중...',
-    );
+    expect(screen.getByTestId('run-button')).toHaveTextContent('다시 준비 중…');
     // 안내 상자는 결과 쪽지 안이라 여기엔 없음
     expect(screen.queryByTestId('runner-waking')).toBeNull();
     const announce = screen.getByTestId('runner-announce');

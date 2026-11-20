@@ -249,7 +249,7 @@ test.describe('Python 실행기', () => {
     const output = outputPanel(page);
     await expect(output).toHaveAttribute('data-state', 'running');
 
-    await expect(runButton(page)).toHaveText('실행 중...');
+    await expect(runButton(page)).toHaveText('실행 중…');
     await page.getByTestId('stop-button').click();
     // CPU 루프는 Worker 가 stop 에 답하지 못해 다시 띄운다 (재준비 연출, P6-05)
     // 재준비 연출은 결과 쪽지 안 (P11-03), 그동안 실행 버튼은 못 누름
@@ -261,7 +261,7 @@ test.describe('Python 실행기', () => {
 
     await waitForRunner(page);
     await expect(waking).toBeHidden();
-    // 실행 중 → 재준비(버튼 "다시 준비 중...", 못 누름) → 준비됨. 재준비는 처음 준비 안내(팁)를 다시 보이지 않는다
+    // 실행 중 → 재준비(버튼 "다시 준비 중…", 못 누름) → 준비됨. 재준비는 처음 준비 안내(팁)를 다시 보이지 않는다
     const states = (await runnerStates()).join(' → ');
     expect(states).toMatch(
       /running:- → restarting:download( → restarting:setup)? → ready:-$/,

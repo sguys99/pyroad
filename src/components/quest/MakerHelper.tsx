@@ -107,7 +107,7 @@ export function MakerHelper({ session }: { session: QuestSession }) {
           <p className="mk-lead">
             {session.canAskFeedback
               ? '작품을 끝까지 돌렸어요! 파이뱀이 잘한 점 두 가지와 한 걸음 더를 알려 줘요.'
-              : '"코드 돌려보기"로 작품을 끝까지 돌리면 파이뱀에게 보여 줄 수 있어요.'}
+              : '“코드 돌려보기”로 작품을 끝까지 돌리면 파이뱀에게 보여 줄 수 있어요.'}
           </p>
           <Button
             variant="secondary"

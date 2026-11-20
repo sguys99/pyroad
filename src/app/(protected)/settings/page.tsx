@@ -194,7 +194,7 @@ export default function SettingsPage() {
         {header}
         <section aria-labelledby="ai-tutor-title" className={aiSection}>
           {aiTitle}
-          <p className="text-center text-muted-foreground">불러오는 중...</p>
+          <p className="text-center text-muted-foreground">불러오는 중…</p>
         </section>
       </PageTransition>
     );
@@ -368,7 +368,7 @@ export default function SettingsPage() {
       {/* 저장 버튼 */}
       <div className="flex flex-col items-center gap-2">
         <Button onClick={handleSave} loading={saving} size="lg">
-          {saving ? '저장 중...' : 'AI 튜터 설정 저장'}
+          {saving ? '저장 중…' : 'AI 튜터 설정 저장'}
         </Button>
         {saved && (
           <p className="text-sm font-medium text-primary-text">저장되었어요!</p>

@@ -16,14 +16,14 @@ export interface StepCopy {
 const NEW: Record<OnboardingStepId, StepCopy> = {
   agree: {
     title: '모험 약속',
-    desc: "pyRoad에서 안전하고 즐겁게 지내기 위한 약속이에요. '보기'를 누르면 내용을 읽을 수 있어요.",
+    desc: 'pyRoad에서 안전하고 즐겁게 지내기 위한 약속이에요. ‘보기’를 누르면 내용을 읽을 수 있어요.',
     line: '안녕! 나는 파이뱀이야. 모험을 떠나기 전에 약속부터 하자!',
     mascot: 'wave',
   },
   age: {
     title: '몇 년에 태어났어요?',
     desc: '만 14세가 안 된 친구는 보호자 동의가 필요해서 물어봐요. 태어난 해는 저장하지 않고, 결과만 기억해요.',
-    line: '몇 년에 태어났는지 알려 줄래? 잘 모르면 "잘 모르겠어요"를 눌러도 돼!',
+    line: '몇 년에 태어났는지 알려 줄래? 잘 모르면 “잘 모르겠어요”를 눌러도 돼!',
     mascot: 'teach',
   },
   guardian: {
@@ -63,7 +63,7 @@ const RETURNING: Record<OnboardingStepId, StepCopy> = {
   ...NEW,
   agree: {
     title: '새 약속 확인하기',
-    desc: "약속이 새로 바뀌었어요. '보기'를 눌러 읽어 보고 체크해 주세요.",
+    desc: '약속이 새로 바뀌었어요. ‘보기’를 눌러 읽어 보고 체크해 주세요.',
     line: '다시 만나서 반가워! 새 약속부터 같이 확인하자!',
     mascot: 'wave',
   },
@@ -115,4 +115,4 @@ export const GUARDIAN_LATER_LINE =
 
 /** 도장 쪽: 보호자 동의 전(제한 모드)일 때 한 줄 */
 export const RESTRICTED_FINALE_NOTE =
-  '보호자 동의 전이라 게시판 글쓰기는 잠시 쉬어요. 30일 안에 보호자와 함께 "보호자 동의하기"를 해 주세요.';
+  '보호자 동의 전이라 게시판 글쓰기는 잠시 쉬어요. 30일 안에 보호자와 함께 “보호자 동의하기”를 해 주세요.';
