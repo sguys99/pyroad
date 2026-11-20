@@ -1,6 +1,6 @@
 # pyRoad
 
-![Version](https://img.shields.io/badge/version-v1.1.0-blue)
+![Version](https://img.shields.io/badge/version-v1.2.0-blue)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
 pyRoad is a free, game-style Python learning site for elementary school students. Learners clear quests on a picture-book world map with Pybaem (파이뱀), a snake tutor, and run real Python in the browser — nothing to install.
