@@ -45,7 +45,7 @@ async function requestClaim(id: string): Promise<ClaimAchievementResult> {
   return body as ClaimAchievementResult;
 }
 
-/** 카테고리 한 줄 소개. 실패 칭찬은 따뜻한 띠로 따로 */
+/** 카테고리 한 줄 소개. 실패 칭찬은 옅은 초록 면으로 따로 */
 const CATEGORY_NOTE: Record<AchievementCategory, string> = {
   learn: '퀘스트를 혼자 풀며 모아요',
   star: '별을 모으면 열려요',
@@ -195,9 +195,10 @@ export interface AchievementBookProps {
  * 업적 도감 (P8-10, §3 F5). `/profile/achievements`.
  *
  * - 위 요약: 얻은 수/전체 · 티어별 · 받을 코인 + "모두 받기"
- * - 거르기 탭(모두·얻었어요·도전 중) + 카테고리 절(학습·별·퀴즈·꾸준함·성장·실패 칭찬·코드 바다 — 실패 칭찬은 따뜻한 띠,
- *   코드 바다는 바다 띠. "실력 인정"처럼 코인 0 배지는 받기 없이 바로 얻음)
- * - 칸: 얻음 = 티어 색 메달 + 날짜 · 받을 수 있음 = 반짝임 + "받기" · 아직 = 실루엣 + 진행 막대 · 숨김 = "???"
+ * - 거르기 탭(모두·얻었어요·도전 중) + 카테고리 절(학습·별·퀴즈·꾸준함·성장·실패 칭찬·코드 바다·메이커 시티 — 실패 칭찬만
+ *   옅은 초록 면, 바다·메이커는 아이콘 소개 줄. "실력 인정"처럼 코인 0 배지는 받기 없이 바로 얻음)
+ * - 진열장(P13-23): 칸에 면 없이 메달 + 이름 + 상태 한 줄. 얻음 = 티어 색 메달 + 날짜 · 받을 수 있음 = 반짝임 + "받기" ·
+ *   아직 = 실루엣 + 진행 막대 · 숨김 = "???"
  * - 칸을 누르면 상세 시트. 받기는 서버 RPC(멱등) → 효과음 `coin` + 코인이 위 지갑으로 날아감 + 응답 잔액으로 카운트업
  *   (router.refresh 없음 — B56)
  */
@@ -358,41 +359,44 @@ export function AchievementBook({
               data-category={c}
               aria-labelledby={`ab-sec-${c}`}
             >
-              <header className="ab-sec-head">
-                <h2 id={`ab-sec-${c}`} className="ab-sec-t font-display">
-                  {CATEGORY_LABEL[c]}
-                </h2>
-                <span className="ab-sec-n tabular-nums">
-                  {all.filter(owned).length}/{all.length}
-                </span>
-              </header>
-              {c === 'grit' ? (
-                <p className="ab-grit">
-                  <Sprout aria-hidden />
-                  <span>
-                    <b className="font-display">실수도 실력이 돼요!</b>{' '}
-                    {CATEGORY_NOTE.grit}
+              {/* 분류 머리: 1280 에서는 왼쪽 열에 붙어 따라옴 (P13-23 진열장) */}
+              <div className="ab-sec-side">
+                <header className="ab-sec-head">
+                  <h2 id={`ab-sec-${c}`} className="ab-sec-t font-display">
+                    {CATEGORY_LABEL[c]}
+                  </h2>
+                  <span className="ab-sec-n tabular-nums">
+                    {all.filter(owned).length}/{all.length}
                   </span>
-                </p>
-              ) : c === 'sea' ? (
-                <p className="ab-sea">
-                  <Sailboat aria-hidden />
-                  <span>
-                    <b className="font-display">코드 바다에서만 얻어요!</b>{' '}
-                    {CATEGORY_NOTE.sea}
-                  </span>
-                </p>
-              ) : c === 'maker' ? (
-                <p className="ab-sea ab-maker">
-                  <Building2 aria-hidden />
-                  <span>
-                    <b className="font-display">메이커 시티에서만 얻어요!</b>{' '}
-                    {CATEGORY_NOTE.maker}
-                  </span>
-                </p>
-              ) : (
-                <p className="ab-sec-note">{CATEGORY_NOTE[c]}</p>
-              )}
+                </header>
+                {c === 'grit' ? (
+                  <p className="ab-grit">
+                    <Sprout aria-hidden />
+                    <span>
+                      <b className="font-display">실수도 실력이 돼요!</b>{' '}
+                      {CATEGORY_NOTE.grit}
+                    </span>
+                  </p>
+                ) : c === 'sea' ? (
+                  <p className="ab-sea">
+                    <Sailboat aria-hidden />
+                    <span>
+                      <b className="font-display">코드 바다에서만 얻어요!</b>{' '}
+                      {CATEGORY_NOTE.sea}
+                    </span>
+                  </p>
+                ) : c === 'maker' ? (
+                  <p className="ab-sea ab-maker">
+                    <Building2 aria-hidden />
+                    <span>
+                      <b className="font-display">메이커 시티에서만 얻어요!</b>{' '}
+                      {CATEGORY_NOTE.maker}
+                    </span>
+                  </p>
+                ) : (
+                  <p className="ab-sec-note">{CATEGORY_NOTE[c]}</p>
+                )}
+              </div>
               <ul className="ab-grid">
                 {list.map((e) => (
                   <Tile

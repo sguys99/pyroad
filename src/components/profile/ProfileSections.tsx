@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import {
   Bug,
   ChevronRight,
@@ -13,7 +14,6 @@ import {
   Trophy,
 } from 'lucide-react';
 
-import { CardButton } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { AchievementMedal } from '@/components/shared/AchievementMedal';
@@ -27,7 +27,6 @@ import {
 import { quizAccuracy, type ProfileStatsRaw } from '@/lib/profile/profileStats';
 import type { ChestState } from '@/lib/world/chest';
 import type { AchievementTier } from '@/lib/quest/achievements';
-import { formatKstDate } from '@/lib/time/kst';
 import './profile.css';
 
 const n = (v: number) => v.toLocaleString('ko-KR');
@@ -66,7 +65,7 @@ export function ProfileCard({
   );
 }
 
-/** 머리: 아바타 + 레벨 도장, 이름, 칭호 도장(5레벨마다 큰 칭호 금색), 다음 칭호까지 경험치 */
+/** 머리: 아바타 + 레벨 도장, 이름, 칭호 도장(5레벨마다 큰 칭호 금색), 다음 칭호까지 경험치. 카드 면 없이 바탕 위에 크게 (P13-23) */
 export function ProfileHero({
   name,
   totalXp,
@@ -88,13 +87,13 @@ export function ProfileHero({
   const span = isMax ? 0 : nextLevelXP - currentLevelXP;
   return (
     <section
-      className="pf-card pf-wide pf-hero"
+      className="pf-wide pf-hero"
       aria-label="내 모험가 카드"
-      data-surface="raised"
       data-testid="profile-hero"
     >
       <div className="pf-avatar">
-        <MyAvatar size={96} />
+        {/* 768 부터 128, 좁은 화면은 CSS 로 줄여 96 */}
+        <MyAvatar size={128} />
         <span className="pf-seal" data-big={big || undefined}>
           <span className="sr-only">레벨 {level}</span>
           <small aria-hidden className="font-sans">
@@ -111,7 +110,6 @@ export function ProfileHero({
           <small>{big ? '큰 칭호' : '칭호'}</small>
           <b className="font-display">{getLevelTitle(level)}</b>
         </p>
-        {action}
       </div>
       <div className="pf-xp">
         <div className="pf-xp-row">
@@ -138,11 +136,13 @@ export function ProfileHero({
           data-testid="xp-progress"
         />
       </div>
+      {action && <div className="pf-act">{action}</div>}
     </section>
   );
 }
 
-function Tile({
+/** 기록 한 줄: 아이콘 · 이름표 · 값 (P13-23, 타일 대신) */
+function Row({
   icon,
   value,
   unit,
@@ -158,41 +158,41 @@ function Tile({
   testId: string;
 }) {
   return (
-    <li className="pf-tile" data-tone={tone} data-testid={`stat-${testId}`}>
-      <span className="pf-tile-ic" aria-hidden>
+    <li className="pf-row" data-tone={tone} data-testid={`stat-${testId}`}>
+      <span className="pf-row-ic" aria-hidden>
         {icon}
       </span>
-      <p className="pf-tile-n font-display">
+      <span className="pf-row-k">{label}</span>
+      <p className="pf-row-v font-display">
         {value}
         {unit && <small className="font-sans">{unit}</small>}
       </p>
-      <p className="pf-tile-k">{label}</p>
     </li>
   );
 }
 
-/** 모험 기록: 숫자 타일 8개 (업적 지표와 같은 수) */
+/** 모험 기록: 기록 8줄 (업적 지표와 같은 수) */
 export function ProfileStatsCard({ raw }: { raw: ProfileStatsRaw }) {
   const s = raw.stats;
   const acc = quizAccuracy(raw.quiz_right, raw.quiz_tries);
   return (
     <ProfileCard title="모험 기록" data-testid="profile-stats">
-      <ul className="pf-tiles">
-        <Tile
+      <ul className="pf-rows">
+        <Row
           icon={<CircleCheck />}
           value={n(s.quests)}
           unit="개"
           label="혼자 푼 퀘스트"
           testId="quests"
         />
-        <Tile
+        <Row
           icon={<Lightbulb />}
           value={n(s.no_hint)}
           unit="개"
           label="힌트 없이 풀었어요"
           testId="no-hint"
         />
-        <Tile
+        <Row
           icon={<Trophy />}
           value={acc === null ? '아직' : acc}
           unit={acc === null ? undefined : '%'}
@@ -203,36 +203,36 @@ export function ProfileStatsCard({ raw }: { raw: ProfileStatsRaw }) {
           }
           testId="quiz"
         />
-        <Tile
+        <Row
           icon={<Bug />}
           value={n(s.errors)}
           unit="번"
           label="에러를 이겨 냈어요"
           testId="errors"
         />
-        <Tile
+        <Row
           icon={<RotateCcw />}
           value={n(s.reviews)}
           unit="번"
           label="복습 도전"
           testId="reviews"
         />
-        <Tile
+        <Row
           icon={<Flame />}
           value={n(raw.streak)}
           unit="일"
           label={`연속 학습 (최고 ${n(s.streak)}일)`}
           testId="streak"
         />
-        <Tile
-          icon={<RewardIcon kind="shield" size={22} />}
+        <Row
+          icon={<RewardIcon kind="shield" size={20} />}
           value={raw.shields}
           unit="/ 2"
           label="가진 스트릭 방패"
           tone="reward"
           testId="shields"
         />
-        <Tile
+        <Row
           icon={<Stamp />}
           value={n(s.attendance)}
           unit="번"
@@ -309,23 +309,19 @@ export function TreasureCard({
           <span className="pf-pill">이번 주 +{n(coinsWeek)}</span>
         )}
       </div>
-      <ul className="pf-tiles">
-        <Tile
-          icon={<RewardIcon kind="star" size={24} />}
-          value={n(stars)}
-          unit={`/ ${n(maxStars)}`}
-          label={`모은 별 (별 3개 퀘스트 ${n(threeStars)}개)`}
-          tone="reward"
-          testId="stars"
-        />
-        <Tile
-          icon={<RewardIcon kind="chestOpen" size={24} />}
-          value={opened}
-          unit={`/ ${withChest.length}`}
-          label="연 보물상자"
-          tone="reward"
-          testId="chests"
-        />
+      {/* 별·상자 합계는 한 줄 (P13-23) */}
+      <ul className="pf-sums">
+        <li data-testid="stat-stars">
+          <RewardIcon kind="star" size={20} />
+          <b className="font-display">{n(stars)}</b>
+          <small>/ {n(maxStars)}</small>
+          모은 별 (별 3개 퀘스트 {n(threeStars)}개)
+        </li>
+        <li data-testid="stat-chests">
+          <RewardIcon kind="chestOpen" size={20} />
+          <b className="font-display">{opened}</b>
+          <small>/ {withChest.length}</small>연 보물상자
+        </li>
       </ul>
       <div className="pf-worlds">
         {worlds.map((w) => (
@@ -404,133 +400,114 @@ export interface RecentMedal {
   achievedAt: string;
 }
 
-/** 업적 카드 → 도감 (P8-10). 얻은 수/전체 · 진행 막대 · 최근 얻은 메달 3개. 받을 코인이 있으면 금색 알약 */
-export function AchievementsCard({
+/**
+ * 내 모음 (P13-23): 업적 도감(P8-10)·내 자랑 카드(P9-11)·내 작품함(P11-06)으로 가는 줄 3개를 한 카드에.
+ * 줄 전체가 링크, 낭독 이름은 줄마다 그대로. 업적 줄은 최근 얻은 메달 3개 + 받을 코인이 있으면 금색 알약
+ */
+export function ProfileLinks({
   earned,
   total,
   claimable,
   recent,
+  shareCards,
+  shareOpen,
+  creations,
 }: {
   earned: number;
   total: number;
   claimable: number;
   recent: RecentMedal[];
+  shareCards: number;
+  shareOpen: number;
+  creations: number;
 }) {
   return (
-    <CardButton
-      href="/profile/achievements"
-      radius="l"
-      padding="lg"
-      className="grid gap-3.5"
-      data-testid="profile-achievements"
-      aria-label={`업적 도감, ${total}개 중 ${earned}개${claimable > 0 ? `, 받을 보상 ${claimable}개` : ''}`}
-    >
-      <div className="flex items-center gap-2">
-        <h2 className="font-display text-h3 whitespace-nowrap text-foreground">
-          업적 {earned}/{total}
-        </h2>
-        {claimable > 0 && (
-          <span className="ach-ready whitespace-nowrap" aria-hidden>
-            받을 코인
-          </span>
-        )}
-        <span className="ml-auto inline-flex shrink-0 items-center text-caption font-semibold whitespace-nowrap text-primary-text">
-          도감 보기
-          <ChevronRight className="size-4" aria-hidden />
-        </span>
-      </div>
-      <ProgressBar
-        value={earned}
-        max={Math.max(1, total)}
-        size="sm"
-        tone="reward"
-        label="얻은 업적"
-        valueText={`${earned} / ${total}`}
-      />
-      {recent.length === 0 ? (
-        <p className="text-caption text-muted-foreground">
-          아직 얻은 업적이 없어요. 퀘스트를 풀면 업적이 생겨요!
-        </p>
-      ) : (
-        <>
-          <p className="text-caption font-semibold text-muted-foreground">
-            최근에 얻은 업적
-          </p>
-          <ul className="pf-medals">
-            {recent.map((a) => (
-              <li key={a.id} className="pf-medal">
-                <AchievementMedal icon={a.icon} tier={a.tier} size="lg" />
-                <p className="font-semibold">{a.name}</p>
-                <p>{formatKstDate(a.achievedAt, 'monthDay')}</p>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </CardButton>
+    <nav className="pf-card pf-links-card" aria-label="내 모음">
+      <ul className="pf-links">
+        <li>
+          <Link
+            href="/profile/achievements"
+            className="pf-link focus-ring"
+            data-testid="profile-achievements"
+            aria-label={`업적 도감, ${total}개 중 ${earned}개${claimable > 0 ? `, 받을 보상 ${claimable}개` : ''}`}
+          >
+            <Trophy className="pf-link-ic" aria-hidden />
+            <span className="pf-link-t">
+              <b className="font-display">
+                업적 {earned}/{total}
+                {claimable > 0 && (
+                  <span className="ach-ready font-sans" aria-hidden>
+                    받을 코인
+                  </span>
+                )}
+              </b>
+              {recent.length === 0 ? (
+                <span>
+                  아직 얻은 업적이 없어요. 퀘스트를 풀면 업적이 생겨요!
+                </span>
+              ) : (
+                <span className="pf-medals">
+                  {recent.map((a) => (
+                    <AchievementMedal
+                      key={a.id}
+                      icon={a.icon}
+                      tier={a.tier}
+                      size="sm"
+                    />
+                  ))}
+                </span>
+              )}
+            </span>
+            <ChevronRight className="pf-link-chev" aria-hidden />
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/profile/cards"
+            className="pf-link focus-ring"
+            data-testid="profile-share-cards"
+            aria-label={`내 자랑 카드, ${shareCards}장 중 ${shareOpen}장 공개 중`}
+          >
+            <Share2 className="pf-link-ic" aria-hidden />
+            <span className="pf-link-t">
+              <b className="font-display">내 자랑 카드</b>
+              <span>
+                {shareCards === 0
+                  ? '자랑한 카드를 여기서 숨기거나 지울 수 있어요'
+                  : `${shareCards}장, 지금 ${shareOpen}장 공개 중`}
+              </span>
+            </span>
+            <ChevronRight className="pf-link-chev" aria-hidden />
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/profile/creations"
+            className="pf-link focus-ring"
+            data-testid="profile-creations"
+            aria-label={`내 작품함, 작품 ${creations}개`}
+          >
+            <Palette className="pf-link-ic" aria-hidden />
+            <span className="pf-link-t">
+              <b className="font-display">내 작품함</b>
+              <span>
+                {creations === 0
+                  ? '거북이 그림과 대화 작품을 모아 둬요'
+                  : `작품 ${creations}개, 나만 볼 수 있어요`}
+              </span>
+            </span>
+            <ChevronRight className="pf-link-chev" aria-hidden />
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 }
 
-/** 내 자랑 카드로 가는 줄 (P9-11): 만든 카드 수 · 지금 공개 중인 수 */
-export function ShareCardsCard({
-  total,
-  open,
-}: {
-  total: number;
-  open: number;
-}) {
-  return (
-    <CardButton
-      href="/profile/cards"
-      radius="l"
-      padding="lg"
-      className="flex items-center gap-3"
-      data-testid="profile-share-cards"
-      aria-label={`내 자랑 카드, ${total}장 중 ${open}장 공개 중`}
-    >
-      <Share2 className="size-6 shrink-0 text-primary-text" aria-hidden />
-      <span className="grid min-w-0 gap-0.5">
-        <span className="font-display text-h3 text-foreground">
-          내 자랑 카드
-        </span>
-        <span className="text-caption text-muted-foreground">
-          {total === 0
-            ? '자랑한 카드를 여기서 숨기거나 지울 수 있어요'
-            : `${total}장, 지금 ${open}장 공개 중`}
-        </span>
-      </span>
-      <ChevronRight
-        className="ml-auto size-5 shrink-0 text-primary-text"
-        aria-hidden
-      />
-    </CardButton>
-  );
-}
-
-/** 프로필 → 내 작품함 (P11-06). 저장한 작품 수만 */
-export function CreationsCard({ total }: { total: number }) {
-  return (
-    <CardButton
-      href="/profile/creations"
-      radius="l"
-      padding="lg"
-      className="flex items-center gap-3"
-      data-testid="profile-creations"
-      aria-label={`내 작품함, 작품 ${total}개`}
-    >
-      <Palette className="size-6 shrink-0 text-muted-foreground" aria-hidden />
-      <span className="grid min-w-0 gap-0.5">
-        <span className="font-display text-h3 text-foreground">내 작품함</span>
-        <span className="text-caption text-muted-foreground">
-          {total === 0
-            ? '거북이 그림과 대화 작품을 모아 둬요'
-            : `작품 ${total}개, 나만 볼 수 있어요`}
-        </span>
-      </span>
-      <ChevronRight
-        className="ml-auto size-5 shrink-0 text-primary-text"
-        aria-hidden
-      />
-    </CardButton>
-  );
+export interface RecentMedal {
+  id: string;
+  name: string;
+  icon: string;
+  tier: AchievementTier;
+  achievedAt: string;
 }

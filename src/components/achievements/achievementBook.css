@@ -1,6 +1,7 @@
 /* 업적 도감 (P8-10, AchievementBook.tsx). 색은 토큰 변수만, 티어 색은 achievementMedal.css 의 --tier-*.
    금색은 보상(받기·받을 코인·반짝임)에만. 반복 연출은 받을 수 있는 칸의 반짝 별 하나(transform·opacity, 대기 루프 = full·lite),
-   minimal·동작 줄이기는 멈춘 채 보임(받을 수 있다는 정보는 금색 테두리·"받기" 버튼·낭독 이름이 함) */
+   minimal·동작 줄이기는 멈춘 채 보임(받을 수 있다는 정보는 "받기" 버튼·낭독 이름이 함).
+   P13-23 분류 진열장: 칸에 면 없이 메달 + 이름 + 상태 한 줄, 분류 사이는 여백 + 1px 선, 면은 실패 칭찬 하나만 */
 
 .ab {
   display: grid;
@@ -123,14 +124,33 @@
   font-weight: 600;
 }
 
-/* ── 절 ── */
+/* ── 절: 여백 + 1px 선으로 나눔. 900px 부터 분류 머리는 왼쪽 열(따라옴), 메달은 오른쪽 ── */
 .ab-sections {
   display: grid;
-  gap: 1.75rem;
 }
 .ab-sec {
   display: grid;
-  gap: 0.625rem;
+  gap: 0.875rem;
+  padding-block: 1.5rem;
+}
+.ab-sec + .ab-sec {
+  border-top: 1px solid var(--line);
+}
+.ab-sec-side {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+}
+@media (min-width: 56.25rem) {
+  .ab-sec {
+    grid-template-columns: 12.5rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1.5rem;
+  }
+  .ab-sec-side {
+    position: sticky;
+    top: 1rem;
+  }
 }
 .ab-sec-head {
   display: flex;
@@ -148,15 +168,20 @@
   font-weight: 600;
 }
 .ab-sec-note {
-  margin: -0.25rem 0 0;
+  margin: 0;
   color: var(--text-muted);
   font-size: var(--text-small);
 }
-/* 실패 칭찬: 따뜻한 띠 (초록 새싹 + 옅은 성공 면) */
+/* 실패 칭찬: 같은 꼴이 되풀이되는 리듬을 한 번 끊는 옅은 초록 면 하나 (초록 새싹) — 앞뒤 선 없음 */
 .ab-sec[data-category='grit'] {
-  padding: 1rem;
+  margin-block: 0.5rem;
+  padding: 1.25rem;
   border-radius: var(--round-l);
-  background: var(--success-soft);
+  background: var(--primary-soft);
+}
+.ab-sec[data-category='grit'],
+.ab-sec[data-category='grit'] + .ab-sec {
+  border-top: 0;
 }
 .ab-grit {
   display: flex;
@@ -180,12 +205,7 @@
   color: var(--success);
 }
 
-/* 코드 바다(2월드, P10-11): 바다 띠 (지도와 같은 얕은 바다 → 옅은 바다 면 + 돛단배) */
-.ab-sec[data-category='sea'] {
-  padding: 1rem;
-  border-radius: var(--round-l);
-  background: linear-gradient(180deg, var(--w2-shallow), var(--w2-soft));
-}
+/* 코드 바다(2월드, P10-11)·메이커 시티(3월드, P11-14): 면 없이 월드 색 아이콘 + 소개 줄 (P13-23) */
 .ab-sea {
   display: flex;
   align-items: flex-start;
@@ -207,72 +227,36 @@
   color: var(--w2-ink);
 }
 
-/* 메이커 시티(3월드, P11-14): 설계도 띠 (지도와 같은 모눈종이 면 + 빌딩) */
-.ab-sec[data-category='maker'] {
-  padding: 1rem;
-  border-radius: var(--round-l);
-  background-color: var(--w3-soft);
-  background-image:
-    linear-gradient(
-      color-mix(in srgb, var(--w3-blueprint) 22%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--w3-blueprint) 22%, transparent) 1px,
-      transparent 1px
-    );
-  background-size: 1.25rem 1.25rem;
-}
 .ab-maker > svg {
   color: var(--w3-ink);
 }
 
-/* ── 칸 ── */
+/* ── 칸: 면 없이 메달 선반. 360 = 3열, 넓어지면 7rem 칸이 흐름 ── */
 .ab-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.625rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.125rem 0.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 @media (min-width: 30rem) {
   .ab-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@media (min-width: 48rem) {
-  .ab-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
   }
 }
 .ab-tile {
   position: relative;
   display: grid;
   align-content: start;
-  gap: 0.5rem;
-  padding: 0.75rem 0.625rem;
-  border-radius: var(--round-m);
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1.5px var(--line);
-}
-.ab-tile[data-state='earned'] {
-  box-shadow: inset 0 0 0 2px var(--tier-rim);
-}
-.ab-tile[data-state='claimable'] {
-  background: var(--accent-soft);
-  box-shadow: none;
-}
-.ab-tile:is([data-state='locked'], [data-state='secret']) {
-  background: var(--surface-2);
-  box-shadow: none;
+  justify-items: center;
+  gap: 0.375rem;
 }
 .ab-open {
   display: grid;
   justify-items: center;
   gap: 0.375rem;
+  width: 100%;
   min-width: 0;
   min-height: var(--spacing-touch);
   padding: 0;
@@ -334,13 +318,12 @@
 }
 .ab-prog {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.375rem;
-  width: 100%;
+  justify-items: center;
+  gap: 0.25rem;
 }
 .ab-prog-bar {
-  height: 0.5rem;
+  width: 4.5rem;
+  height: 0.375rem;
   overflow: hidden;
   border-radius: var(--round-pill);
   background: var(--surface);
@@ -358,7 +341,7 @@
   font-size: var(--text-caption);
 }
 .ab-claim {
-  width: 100%;
+  max-width: 100%;
 }
 
 /* 받을 수 있음: 메달 옆 반짝 별 둘 */

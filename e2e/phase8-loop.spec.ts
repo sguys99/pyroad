@@ -244,7 +244,7 @@ test('새 학생 하루: 출석 → 미션 배정 → 퀘스트 ⭐3·코인 →
   await expect(todayCell).toContainText(
     /^오늘, \d+월 \d+일, 퀘스트 1개, 출석 도장/,
   );
-  const streakN = page.getByTestId('stat-streak').locator('.pf-tile-n');
+  const streakN = page.getByTestId('stat-streak').locator('.pf-row-v');
   await expect(streakN).toHaveText('1일');
   await expect(page.getByTestId('treasure-coins')).toContainText(
     coinText(coinsAfterMissions),

@@ -5,6 +5,7 @@ import { SoundToggle } from '@/components/sound/SoundToggle';
 import { WorldBgm } from '@/components/sound/WorldBgm';
 import type { BgmId } from '@/lib/sound/manifest';
 import type { StageDot } from '@/lib/quest/stageProgress';
+import { worldTint } from '@/lib/world/worldBook';
 import { StageProgress } from './StageProgress';
 
 interface QuestHeaderProps {
@@ -17,6 +18,8 @@ interface QuestHeaderProps {
   questTitle: string;
   /** 스테이지 진행 점 (P6-02). 비었으면 그리지 않음 */
   dots?: StageDot[];
+  /** 그림책 N권 → 머리 줄 바탕에 그 월드 색을 옅게 (P13-22). 모르면 1권 색 */
+  worldNo?: number;
 }
 
 export function QuestHeader({
@@ -26,11 +29,15 @@ export function QuestHeader({
   stageOrder,
   questTitle,
   dots = [],
+  worldNo,
 }: QuestHeaderProps) {
   // 진행 점이 있으면 좁은 화면에서는 퀘스트 제목 대신 점을 보인다 (제목은 이야기 쪽 h1에 있음)
   const hasDots = dots.length > 1;
   return (
-    <header className="flex min-w-0 items-center gap-2 border-b border-border bg-background px-4 py-2 sm:gap-3">
+    <header
+      data-world={worldTint(worldNo ?? 0)}
+      className="flex min-w-0 items-center gap-2 border-b border-border bg-world-wash px-4 py-2 sm:gap-3"
+    >
       {/* 소프트 내비게이션 (B22). 완료 후 새 진행은 useQuestSession이 router.refresh()로 받아 둠 */}
       {/* 화살표·굵기·색·터치 영역은 다른 화면의 뒤로 가기와 같게(B122). 글자 크기만 빵부스러기 줄에 맞춤 */}
       <BackLink href={worldHref} className="shrink-0 text-sm">

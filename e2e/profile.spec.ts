@@ -69,7 +69,7 @@ test('360px: 한 열 · 달력 오늘 칸 낭독 · 모험 기록 · 업적 카�
 
   // 카드는 한 열(같은 왼쪽)
   const lefts = await page
-    .locator('.pf .pf-card, [data-testid="profile-achievements"]')
+    .locator('.pf .pf-card')
     .evaluateAll((els) =>
       els.map((e) => Math.round(e.getBoundingClientRect().left)),
     );
@@ -86,7 +86,7 @@ test('360px: 한 열 · 달력 오늘 칸 낭독 · 모험 기록 · 업적 카�
   await expect(page).toHaveURL(/\/profile\/achievements$/);
 });
 
-test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 업적·보물), 넘침 없음', async ({
+test('1280px: 두 열(왼쪽 달력·기록 / 오른쪽 내 모음·보물), 넘침 없음', async ({
   page,
   e2eUser,
 }) => {

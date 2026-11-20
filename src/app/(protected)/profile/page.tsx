@@ -14,12 +14,10 @@ import { AccountManagementSection } from '@/components/profile/AccountManagement
 import { ShareButton } from '@/components/share/ShareButton';
 import { LearningCalendar } from '@/components/profile/LearningCalendar';
 import {
-  AchievementsCard,
-  CreationsCard,
   ProfileCard,
   ProfileHero,
+  ProfileLinks,
   ProfileStatsCard,
-  ShareCardsCard,
   TreasureCard,
 } from '@/components/profile/ProfileSections';
 import { OWN_PROFILE_SELECT, toOwnProfile } from '@/lib/avatar/ownProfile';
@@ -173,7 +171,7 @@ export default async function ProfilePage() {
           action={<ShareButton kind="levelup">레벨 카드 자랑하기</ShareButton>}
         />
 
-        {/* 768+ 두 열: 왼쪽 달력·모험 기록, 오른쪽 업적·별과 보물 (열마다 쌓아 빈 곳을 줄임) */}
+        {/* 카드 4장 (P13-23). 768+ 두 열: 왼쪽 달력·모험 기록, 오른쪽 내 모음·별과 보물 (높이가 비슷한 짝, 열마다 쌓아 빈 곳을 줄임) */}
         <div className="pf-col">
           <ProfileCard
             title="학습 달력"
@@ -204,23 +202,19 @@ export default async function ProfilePage() {
           <ProfileStatsCard raw={raw} />
         </div>
         <div className="pf-col">
-          <AchievementsCard
+          <ProfileLinks
             earned={definitions.filter((d) => earnedIds.has(d.id)).length}
             total={definitions.length}
             claimable={ownedRows.filter((a) => !a.claimed_at).length}
             recent={recentAchievements(definitions, ownedRows)}
-          />
-
-          <ShareCardsCard
-            total={shareCards.data?.length ?? 0}
-            open={
+            shareCards={shareCards.data?.length ?? 0}
+            shareOpen={
               (shareCards.data ?? []).filter(
                 (c) => c.is_public && new Date(c.expires_at) > new Date(),
               ).length
             }
+            creations={creations.count ?? 0}
           />
-
-          <CreationsCard total={creations.count ?? 0} />
 
           <TreasureCard
             coins={profile.coins}

@@ -225,6 +225,7 @@ export function QuestWorkspace({
       <QuestHeader
         worldHref={worldHref}
         bgm={quest.stage.world?.bgm ?? null}
+        worldNo={quest.stage.world?.no}
         stageTitle={quest.stage.title}
         stageOrder={quest.stage.order}
         questTitle={quest.title}
