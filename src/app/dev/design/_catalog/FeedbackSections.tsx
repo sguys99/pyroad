@@ -13,7 +13,7 @@ import {
 import { SpeechBubble, type BubbleTone } from '@/components/ui/speech-bubble';
 import { DialogueBox } from '@/components/ui/dialogue-box';
 import { PybaemRig } from '@/components/characters/rig/MascotRig';
-import { RewardIcon, Stars, type RewardKind } from '@/components/ui/reward-icon';
+import { Glint, RewardIcon, Stars, type RewardKind } from '@/components/ui/reward-icon';
 import {
   Tooltip,
   TooltipContent,
@@ -134,7 +134,7 @@ function StageProgressDemo() {
     <>
       <Demo
         label="스테이지 진행 점 (StageProgress, P6-02)"
-        note="퀘스트 헤더 오른쪽. 초록 = 끝냄 · 회색 = 아직 · 긴 알약 = 지금(안 끝냈으면 금색, 통과하면 초록) · 작은 마름모 = 보너스 퀴즈(B53). 숫자는 코드 퀘스트끼리(3/5), 퀴즈에서는 '퀴즈 1/2'. 열린 점은 그 퀘스트 링크, 좁은 화면은 제목 대신 점과 숫자"
+        note="퀘스트 헤더 오른쪽. 초록 = 끝냄 · 회색 = 아직 · 긴 알약 = 지금(초록, 지금 여기는 금색이 아님 P13-03) · 작은 마름모 = 보너스 퀴즈(B53). 숫자는 코드 퀘스트끼리(3/5), 퀴즈에서는 '퀴즈 1/2'. 열린 점은 그 퀘스트 링크, 좁은 화면은 제목 대신 점과 숫자"
         data-testid="stage-progress-demo"
       >
         <div className="overflow-hidden rounded-xl ring-1 ring-border">
@@ -194,7 +194,7 @@ function StepStripDemo() {
     <>
       <Demo
         label="프로젝트 단계 띠 (StepStrip, P6-12)"
-        note="공책 쪽 맨 위. 칸 막대·주색 초록만(헤더 스테이지 점의 둥근 점·금색 알약과 구분: 점 = 어느 퀘스트, 칸 = 이 퀘스트 안 단계). 통과하면 칸이 차오르고 “N단계 통과!” → 다음 목표, “다음 단계로”로 건너뜀(앱은 2.2초 뒤 저절로). minimal 페이드 · 동작 줄이기 없음"
+        note="공책 쪽 맨 위. 칸 막대·주색 초록만(헤더 스테이지 점의 둥근 점·긴 알약과 구분: 점 = 어느 퀘스트, 칸 = 이 퀘스트 안 단계). 통과하면 칸이 차오르고 “N단계 통과!” → 다음 목표, “다음 단계로”로 건너뜀(앱은 2.2초 뒤 저절로). minimal 페이드 · 동작 줄이기 없음"
         surface="card"
         data-testid="step-strip-demo"
       >
@@ -488,7 +488,7 @@ function TutorChatDemo() {
     <MotionProvider>
       <Demo
         label="파이뱀에게 물어보기 (AskPybaem + ConversationPanel, P6-10)"
-        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼 3개(무엇을 하면 돼요? = 지금 할 일 · 개념만 · 왜 이렇게 나왔어요?) + 그 아래 자유 질문 칸(P9-17: 100자, 오늘 남은 수, 거른 질문은 대화에 넣지 않고 칸 아래 금색 쪽지 — 견본은 숫자 3개를 쓰면 개인정보 안내, 폰 키보드가 올라오면 버튼 줄을 접고 칸을 키보드 위로). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
+        note="대사창 아래 한 줄: 닫혀 있을 때 파이뱀이 한 말은 새 이야기 수 + 두 줄 미리 보기. 누르면 lg↑는 이 자리에서 펼침(대화만 스크롤), 그 아래는 바텀시트. 질문은 정해진 버튼 3개(무엇을 하면 돼요? = 지금 할 일 · 개념만 · 왜 이렇게 나왔어요?) + 그 아래 자유 질문 칸(P9-17: 100자, 오늘 남은 수, 거른 질문은 대화에 넣지 않고 칸 아래 주의 색 쪽지 — 견본은 숫자 3개를 쓰면 개인정보 안내, 폰 키보드가 올라오면 버튼 줄을 접고 칸을 키보드 위로). 생각 중 점 세 개는 바쁨 표시라 동작 줄이기에서만 멈추고 글자는 늘 보임, 다 쓴 답만 aria-live로 읽음. 키가 없으면 맨 위에 기본 튜터 안내"
         surface="card"
         data-testid="tutor-chat-demo"
       >
@@ -725,8 +725,22 @@ export function RewardSection() {
             </Button>
           </div>
         </Demo>
+        <Demo
+          label="반짝 점 Glint (P13-09)"
+          note="보상 순간 전용 4갈래 점: 받을 수 있는 메달·열 수 있는 상자처럼 축하·보상 자리에만. ‘새로움·추천·AI’ 꾸밈으로는 쓰지 않고(반짝이 아이콘 대신 뜻에 맞는 아이콘), 늘 aria-hidden"
+        >
+          <div className="flex items-end gap-3">
+            {[14, 20, 28].map((size) => (
+              <Glint key={size} width={size} height={size} className="fill-accent" />
+            ))}
+            <span className="relative inline-flex">
+              <RewardIcon kind="chest" size={34} />
+              <Glint width={14} height={14} className="absolute -top-1 -right-2 fill-accent" />
+            </span>
+          </div>
+        </Demo>
       </div>
-      <CodeSample code={`<RewardIcon kind="coin" size={26} label="코인" />\n<Stars n={2} max={3} />`} />
+      <CodeSample code={`<RewardIcon kind="coin" size={26} label="코인" />\n<Stars n={2} max={3} />\n<Glint width={14} height={14} className="fill-accent" /> // 보상 자리만`} />
       <QuestHintsDemo />
     </Section>
   );

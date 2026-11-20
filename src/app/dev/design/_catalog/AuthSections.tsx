@@ -172,7 +172,7 @@ export function SocialLoginSection() {
         ))}
         <Demo
           label="최근에 사용 (P3-08)"
-          note="이 기기에서 최근에 쓴 수단이 맨 위로 + 금색 이름표(full 팝 + 한 번 살랑 · lite 짧은 팝 · minimal 페이드 · 동작 줄이기 없음). 낭독기는 '최근에 ○○로 로그인했어요'를 설명으로 읽어요"
+          note="이 기기에서 최근에 쓴 수단이 맨 위로 + 짙은 이름표('최근에 사용', full 팝 + 한 번 살랑 · lite 짧은 팝 · minimal 페이드 · 동작 줄이기 없음). 낭독기는 '최근에 ○○로 로그인했어요'를 설명으로 읽어요"
           data-testid="social-state-recent"
         >
           <div className="flex flex-wrap gap-2">

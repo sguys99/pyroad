@@ -82,7 +82,7 @@ export function ProfileSection() {
         <ProfileHero name="코딩하는 다람쥐" totalXp={1500} />
         <Demo
           label="5레벨마다 큰 칭호 · 최고 레벨"
-          note="Lv 10 = 금색 레벨 도장 + 금색 면 칭호 도장(레벨업 카드와 같은 톤), Lv 50은 '최고 레벨에 닿았어요!'"
+          note="Lv 10 = 금색 레벨 도장 + 굵은 두 겹 금색 테 칭호 도장(면 없음, P13-13 — 레벨업 카드와 같은 톤), Lv 50은 '최고 레벨에 닿았어요!'"
           className="pf-wide"
         >
           <div className="pf">

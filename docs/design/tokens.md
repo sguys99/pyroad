@@ -44,6 +44,8 @@
 | `w3Brick`·`w3Blueprint` | `--w3-brick`·`--w3-blueprint` | `#DC9478` · `#A6C1D6` | decor: 3월드 지도 메이커 시티 (벽돌 지붕·간판 · 설계도 모눈·슬레이트 지붕, P11-11) |
 | `code*` | `--code-bg` · `--code-keyword` … · `text-code-keyword` | 바탕 `#FFFFFF`, 글자·숫자·함수 `#22271F`, 키워드 `#257338`, 문자열 `#7A5200`, 주석 `#6C7467` | CodeMirror 키즈 테마 ([editor.md](editor.md), 틴트 면 위 대비 포함) |
 
+**색의 역할 (P13-03)**: 초록 = 학습·"지금 여기"·선택·주 버튼, **금색 = 보상만**(별·코인·도장·받기 버튼과 보상 계열 — 스트릭 불꽃·황금 열쇠·"전설" 등급·메달·왕관), 중립 = 패널·안내·칩·보스, **주의 색 = "틀렸어요·달라요"와 주의 안내**(`caution` 장식 · `cautionText` 글자 · `cautionSoft` 면, `warning*`도 같은 값). 금색을 "지금 여기"·선택·패널 면·테두리에 쓰지 않고, 틀림에 빨강(`error`)을 쓰지 않는다(아이에게 센 색 — `error`는 오류 글자·위험 버튼). 남긴 금색의 판정은 [P13-audit](P13-audit.md) §6-5, 쓰지 않는 패턴 전체는 [components.md](components.md) §0.
+
 shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--destructive`·`--border`·`--input`·`--ring` …)은 그대로 두고 위 토큰을 가리킨다. 쓰지 않던 `--chart-*`·`--sidebar-*`는 지웠다.
 
 ### 1.1 대비 (WCAG AA, 자동 검사)
@@ -192,7 +194,6 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | `src/lib/celebration/**` | motion | 축하 시퀀서·컨페티 박자표(ms 타임라인). 색은 토큰 import |
 | 줄 주석 `// tokens-allow: <이유>` (그 줄 또는 바로 윗줄) | 전부 | 브랜드 가이드 색·외부가 정한 색. 이유를 꼭 쓴다. 지금: 소셜 로그인 로고 SVG 색(`src/components/auth/brandMarks.tsx`: 카카오 심볼 `#000000`, 네이버 N `#FFFFFF`, Google G 4색, P3-05) |
 | `src/components/auth/social-login.css`의 provider별 사용자 정의 속성(`--social-bg`·`--social-fg`·`--social-stroke`) | color | 소셜 로그인 버튼 면·글자·테두리 = 각 사 브랜드 가이드 값(카카오 `#FEE500`·레이블 검정 85%, 네이버 `#03A94D`(2025 갱신, 예전 `#03C75A`)·흰 글자, Google 흰 면·`#747775`·`#1F1F1F`). pyRoad 토큰으로 만들지 않는다(테마가 바뀌어도 그대로여야 함). CSS 검사는 사용자 정의 속성 값을 보지 않으므로 이 표와 `social-login-css.test.ts`가 기록·확인한다. 근거·어긋남은 [components.md](components.md) §12 |
-
 | CSS 주석 `/* tokens-allow: <이유> */` (그 줄 또는 바로 윗줄) | stripe | 뜻이 있는 옆 선. 지금 1곳: `src/components/quest/quiz/parsons.css` `.qz-ps-guide`의 `border-left: 2px dashed` — 줄 맞추기 퀴즈의 **코드 들여쓰기 안내선**(한 칸에 하나, 장식 띠가 아님. P13-audit §5) |
 
 측면 띠 규칙에 걸리지 않아 예외가 필요 없던 것(P13-07 판정, 유지): 1px 구분선(`shop.css` 영수증 칸·`trial.css`·`codeKeyboard.css`·`parsons.css` 칸 선, 모두 `var(--line-w)`), 갤러리 깃발 줄(`gallery.css` `.gl-bunting`의 윗변 3px — 깃발을 매단 줄 그림), 랜딩 그림 속 의사 요소(`parents.css` 정류장 사이 길, `worlds.css` 막대 손잡이 — 위아래 끝까지 붙지 않음), 에디터 커서(`src/lib/editor/kidsTheme.ts`의 `borderLeft: 2px` — CodeMirror 커서, TS라 검사 밖).

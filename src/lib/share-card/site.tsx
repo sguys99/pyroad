@@ -107,6 +107,7 @@ export function SiteOgCard(): ReactElement {
         <Stage
           world={1}
           ground={false}
+          sparkles={false}
           backdrop={
             // eslint-disable-next-line @next/next/no-img-element
             <img

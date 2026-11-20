@@ -97,6 +97,8 @@ export interface StageProps {
   ground?: boolean;
   /** 주인공 왼쪽 위치 (기본 가운데) */
   heroLeft?: number;
+  /** 4각 반짝이 두 개 (기본 켬). 반짝이는 축하·자랑 카드에만 — 사이트 OG는 끔 (P13-09) */
+  sparkles?: boolean;
 }
 
 /**
@@ -117,6 +119,7 @@ export function Stage({
   backdrop,
   ground = true,
   heroLeft,
+  sparkles = true,
 }: StageProps) {
   const w = worldPalette(world);
   return (
@@ -146,7 +149,7 @@ export function Stage({
         />
       ) : null}
       {backdrop}
-      {SPARKLES.map((s, i) => (
+      {(sparkles ? SPARKLES : []).map((s, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={i}

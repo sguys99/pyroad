@@ -54,7 +54,7 @@ const COLOR_ROLE: Record<ColorName, string> = {
   primarySoft: '초록 틴트 면',
   secondary: '짙은 중립: 포커스 링·툴팁',
   onSecondary: '짙은 면 위 글자',
-  accent: '금색 면 (장식·보상 버튼)',
+  accent: '금색 면 (보상만: 별·코인·도장·받기)',
   onAccent: '금색 위 글자',
   accentLip: '금색 아랫면·별 외곽 (장식)',
   accentLight: '별·코인 밝은 쪽 (장식)',

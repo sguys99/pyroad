@@ -106,7 +106,7 @@ export function AchievementBookSection() {
       id="achievements"
       kicker="P8-10"
       title="업적 도감"
-      description="/profile/achievements. 얻음(티어 메달·날짜) · 받을 수 있음(반짝 별 + 받기) · 아직(실루엣 + 진행 막대 + 얻는 법) · 비밀(???) · 코드 바다 절(바다 띠, P10-11 — 실력 인정은 코인 없는 배지라 받기 없이 바로 얻음). 칸을 누르면 상세 시트, 받기는 가짜 요청으로 코인이 위 지갑으로 날아가요."
+      description="/profile/achievements. 얻음(티어 메달·날짜) · 받을 수 있음(옅은 금색 면 + 반짝 점 Glint + 받기) · 아직(실루엣 + 진행 막대 + 얻는 법) · 비밀(???) · 코드 바다 절(바다 띠, P10-11 — 실력 인정은 코인 없는 배지라 받기 없이 바로 얻음). 칸을 누르면 상세 시트, 받기는 가짜 요청으로 코인이 위 지갑으로 날아가요."
     >
       <Demo label="도감 (견본 21종)" surface="bg" data-testid="achievement-book-demo">
         <AchievementBook
