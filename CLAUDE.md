@@ -21,6 +21,7 @@ pyRoad - AI 동물 마스코트 튜터와 함께 퀘스트를 깨며 파이썬�
 
 ```
 .
+├── PRODUCT.md · DESIGN.md    # 제품 요약 · 디자인 시스템 입구 (Impeccable 형식, 상세는 docs/design/. 편집 훅 설정 .impeccable/config.json)
 ├── content/worlds/           # 퀘스트 콘텐츠 원본 YAML (content/README.md)
 ├── src/
 │   ├── app/

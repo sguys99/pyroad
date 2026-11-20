@@ -19,3 +19,5 @@ test-results
 src/lib/legal/licenses.generated.json
 # 월드 목록·지도 생성물 (npm run content:build, P5-03). --check 가 생성 형식 그대로 비교
 src/lib/world/worlds.generated.ts
+# Impeccable 설정·사이드카 (impeccable CLI가 다시 씀, P13-24)
+.impeccable

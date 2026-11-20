@@ -24,5 +24,20 @@
     "figma@claude-plugins-official": true,
     "supabase@claude-plugins-official": true,
     "vercel@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DO_NOT_TRACK=1 IMPECCABLE_NO_UPDATE_CHECK=1 IMPECCABLE_NO_STALENESS_CHECK=1 \"${CLAUDE_PROJECT_DIR}/.claude/skills/impeccable/scripts/impeccable\" hook || true",
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
+          }
+        ]
+      }
+    ]
   }
 }

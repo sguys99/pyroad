@@ -75,3 +75,8 @@ public/pyodide/
 
 # Python 바이트코드 (scripts/fonts/fontkit.py 등)
 __pycache__/
+
+# Impeccable 런타임 파일 (훅 캐시·개인 설정). config.json·design.json은 커밋 (P13-24)
+.impeccable/*
+!.impeccable/config.json
+!.impeccable/design.json
