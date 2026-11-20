@@ -55,7 +55,7 @@ export default async function AchievementsPage() {
   );
 
   return (
-    <PageTransition className="mx-auto min-h-screen max-w-3xl px-4 py-4 sm:py-6">
+    <PageTransition className="mx-auto min-h-screen max-w-3xl px-4 py-4 sm:py-6 min-[56.25rem]:max-w-4xl">
       {entries.length === 0 ? (
         <p className="py-16 text-center text-muted-foreground">
           업적 도감을 불러오지 못했어요. 잠시 후 다시 열어 볼까요?

@@ -4,8 +4,8 @@ import { useMemo } from 'react';
 
 import { LearningCalendar } from '@/components/profile/LearningCalendar';
 import {
-  AchievementsCard,
   ProfileHero,
+  ProfileLinks,
   ProfileStatsCard,
   TreasureCard,
 } from '@/components/profile/ProfileSections';
@@ -76,7 +76,7 @@ export function ProfileSection() {
       id="profile"
       kicker="재미 요소 (P8-13)"
       title="프로필"
-      description="본인만 보는 성장 기록. 360은 한 열, 768부터 두 열 카드. 초록은 학습(레벨 도장·잔디), 금색은 보상(칭호 도장·별·코인·출석). 반복 연출 없음 — 정보는 글자와 낭독 이름으로도. 별과 보물의 스테이지 별은 월드(그림책 N권)로 묶어 지금 월드만 펼치고 나머지는 접힌 줄(별 합계, 잠긴 월드는 잠김) — `<details>`라 JS 없이 키보드·낭독기(B140)."
+      description="본인만 보는 성장 기록. 주인공 + 목록(P13-23): 머리는 카드 면 없이 바탕 위에 크게(768부터 아바타 136), 카드는 4장 — 달력 · 별과 보물(별·상자 합계 한 줄) / 모험 기록(아이콘 · 이름표 · 값 줄) · 내 모음(업적·자랑 카드·작품함 링크 줄, 업적 줄에 최근 메달 3개·받을 코인 알약). 360은 한 열, 768부터 두 열. 초록은 학습(레벨 도장·잔디), 금색은 보상(칭호 도장·별·코인·출석). 반복 연출 없음 — 정보는 글자와 낭독 이름으로도. 별과 보물의 스테이지 별은 월드(그림책 N권)로 묶어 지금 월드만 펼치고 나머지는 접힌 줄(별 합계, 잠긴 월드는 잠김) — `<details>`라 JS 없이 키보드·낭독기(B140)."
     >
       <div className="pf">
         <ProfileHero name="코딩하는 다람쥐" totalXp={1500} />
@@ -103,7 +103,10 @@ export function ProfileSection() {
         </Demo>
         <ProfileStatsCard raw={STATS} />
         <ProfileStatsCard raw={{ ...STATS, quiz_tries: 0, quiz_right: 0, stats: { ...STATS.stats, quiz_correct: 0 } }} />
-        <AchievementsCard
+        <ProfileLinks
+          shareCards={3}
+          shareOpen={1}
+          creations={0}
           earned={12}
           total={42}
           claimable={2}
