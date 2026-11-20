@@ -441,3 +441,46 @@ S11(튀는 easing)·S12(색)는 "금지"가 아니라 **쓰는 곳을 좁히는*
 - **D3 = 이 문서 판정 그대로.** 스트릭 불꽃·연속 정답 배지·황금 열쇠·상점 "전설" 등급·메달·왕관은 금색 유지, 보스 스테이지 표시(지도 번호·시트 칩)는 옮김.
 - **D4 = 책갈피 모양은 유지, 색은 초록.**
 - **S3 = 반짝이 18개 파일 전부 교체**(보상 문맥도 남기지 않음, P13-09).
+
+## 8. 재감사 (P13-20, 2026-11-20)
+
+같은 명령을 `DO_NOT_TRACK=1`로 다시 돌렸습니다(§2와 같은 범위·옵션).
+
+### 8-1. Impeccable 탐지기
+
+| 규칙 | 감사(§2-1) | 재감사 | 판정 |
+|---|---:|---:|---|
+| `side-tab` | 2 | **0** | 측면 띠는 `tokens:check` `stripe` 규칙이 막음(P13-07) |
+| `bounce-easing` | 27 | **10** | [motion-guidelines.md](motion-guidelines.md) §4.1 유지 목록과 한 줄씩 일치: 토큰 선언 2(`globals.css` · `tokens.ts`) + `fun.css` · `celebration.css` · `questSuccess.css` · `quiz.css` · `stepStrip.css` · `questWorkspace.css` · `gallery.css` · `worlds.css`(오탐, 길이 토큰 이름) 각 1 |
+| 합계 | 29 | 10 | 종료 코드 0 |
+
+### 8-2. Hallmark sloplint (`src --scope app`)
+
+471개 파일, **FAIL 171 → 161 · REFLEX 19 → 19 · WARN 16 → 13**.
+
+| 게이트 | 등급 | 감사 | 재감사 | 비고 |
+|---|---|---:|---:|---|
+| 54 | FAIL | 9 | **2** | 남은 2건은 위치 표기 "그림책 N권"(`WorldMapHead.tsx:40` · `LockedBook.tsx:45`) — P13-08이 **유지**로 판정(제목이 말하지 않는 "몇 번째 책인가"를 알려 줌, 책 카드의 권 표기와 같은 줄) |
+| 54 | WARN | 2 | 2 | `ShopScreen.tsx:519` · `DailyQuizCard.tsx:38` 제목 요소 없이 라벨이 이름 노릇 — 머리말 아님, 그대로 |
+| 4 | FAIL | 1 | **0** | 카드 속 카드(P13-10) |
+| F2 | WARN | 4 | 1 | 남은 1은 테스트 문자열(`button.test.tsx`) |
+| F3 | WARN | 2 | 1 | 남은 1은 관리자 `monitoring.css` — 전역 규칙이 이미 걸림(P13-17) |
+| 10a | FAIL | 3 | 2 | `settings/page.tsx`의 `transition-all`이 함께 빠짐 |
+| 33 | FAIL | 13 | 12 | 범위 밖 |
+| F7 | WARN | 2 | 3 | 같은 상자 꼴 반복 — 범위 밖 |
+| 63 | FAIL | 16 | 16 | 카탈로그 14 · 관리자 1 · 테스트 1, **운영 화면 0** |
+| 7b | REFLEX | 13 | 13 | 순백 면 — P13-02 판단 유지 |
+| 19 | FAIL | 3 | 3 | 문구 속 긴 줄표(라이선스·관리자·시트 보스 잠김 안내) — 범위 밖 |
+| 48 · 20 · 39a · 24b · 34 · 62 · 28a · 27 · 64 · F1 · F5 · F16 | — | 89 · 24 · 6 · 5 · 3 · 3 · 3 · 1 · 1 · 1 · 1 · 1 | 같음 | §2-2·§5 판정 그대로(오탐·범위 밖) |
+
+### 8-3. grep
+
+- 반짝이: `grep -rnE "\bSparkles?\b" src`(테스트 제외) → 운영 사용 **0건**. 남는 것은 업적 아이콘 표의 DB 키 이름 2줄(`AchievementMedal.tsx:103·104`, `achievements.icon` 값 — 그림은 `CircleStar`·`ShoppingBasket`)
+- 측면 띠·머리말·반짝이·카드 속 카드 운영 화면 0건(위 셋 + 게이트 4) → 완료 기준 1 충족
+
+### 8-4. 자동 검사·e2e·Lighthouse
+
+- 통과: `tokens:check` · `fonts:check` · `assets:check` · `npx vitest run`(280 파일 4311개, 대비 AA·드리프트 포함) · `lint` · `tsc --noEmit` · `prettier --check .` · `content:build -- --check` · `npm run build` + postbuild(정적 페이지 CSP·폰트·랜딩 바이트 예산. 경고 하나는 기존 그대로: 랜딩 font preload 105.9KB > 목표 100KB, fonts.md §4)
+- DB·마이그레이션 0: `git diff --stat main...HEAD -- supabase/migrations supabase/seed.sql content` 비어 있음
+- 전체 e2e(`npm run test:e2e`, PORT 3100, 로컬 스택 pyroad): **343 통과 · 6 건너뜀 · 실패 0**(28.8분, 첫 실행에서 통과 — 재실행·스펙 수정 없음). P13-11·12에서 글자·testid·data 속성을 그대로 둔 덕에 선택자가 깨진 스펙 없음
+- Lighthouse 모바일(5화면 × 3회 중앙값, 같은 e2e 빌드): **차단 통과**. Accessibility 랜딩 100 · 월드맵 100 · 퀘스트 1-1 96 · 프로젝트 7-3 100 · 프로필 100(모두 기준 대비 +0). 라우트 JS 172.7 / 250 · 293.3 / 350 · 341.8 / 350 · 341.8 / 350 · 245.8 / 350KB, 전송 427 / 500 · 961 / 1100 · 1348 / 1500 · 1307 / 1500 · 944 / 1100KB. 경고 2(월드맵 Performance 77·LCP 6.5초)는 기준과 같은 값(+0)
