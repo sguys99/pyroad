@@ -10,7 +10,7 @@ import {
   Flag,
   Palette,
   Share2,
-  Sparkles,
+  ChevronsUp,
   Trash2,
 } from 'lucide-react';
 import {
@@ -35,8 +35,8 @@ import {
 import type { ShareCardKind } from '@/lib/share-card/types';
 import { cn } from '@/lib/utils';
 
-const KIND_ICON: Record<ShareCardKind, typeof Sparkles> = {
-  levelup: Sparkles,
+const KIND_ICON: Record<ShareCardKind, typeof Flag> = {
+  levelup: ChevronsUp,
   stage: Flag,
   achievement: Award,
   weekly: CalendarDays,
@@ -203,7 +203,7 @@ export function MyShareCards({
                 )}
                 <p className="m-0 text-caption text-muted-foreground">
                   {formatKstDate(card.createdAt, 'monthDay')}에 만듦
-                  {state === 'public' && ` · ${daysLeft}일 남음`}
+                  {state === 'public' && `, ${daysLeft}일 남음`}
                 </p>
               </div>
 

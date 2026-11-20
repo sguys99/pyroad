@@ -56,6 +56,6 @@ test('모든 페이지 head: 매니페스트·파비콘 32·apple-touch-icon 180
   // 테마 색 = 단색 바탕
   await expect(head.locator('meta[name="theme-color"]')).toHaveAttribute(
     'content',
-    '#F6F4EF',
+    '#F6F7F3',
   );
 });

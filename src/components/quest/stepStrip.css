@@ -148,7 +148,7 @@
   animation: qp-pop var(--spring-prop-dur) var(--spring-prop) both;
 }
 .qp[data-beat] .qp-goal {
-  animation: qp-rise var(--spring-body-dur) var(--spring-body) 0.25s both;
+  animation: qp-rise var(--dur-slow) var(--easing-out) 0.25s both;
 }
 @keyframes qp-fill {
   from {

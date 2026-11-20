@@ -17,7 +17,7 @@ import { FONT, STAGE_W, TEXT_W } from './tokens';
 
 /** 사이트 OG 글 (테스트가 화면 글자와 대조) */
 export const SITE_CARD_TEXT = {
-  kicker: '무료 · 설치 없이 웹에서',
+  kicker: '무료, 설치 없이 웹에서',
   title: ['파이뱀과 떠나는', '파이썬 모험'],
   sub: '퀘스트를 깨며 진짜 파이썬 코드를 배워요',
 } as const;
@@ -74,7 +74,7 @@ export function siteMapSvg(): string {
   );
 }
 
-/** 제목 한 줄. 둘째 줄은 형광펜(금색 밝은 띠)을 아래쪽 절반에 깐다 (최종 시안 첫 화면 제목과 같은 강조) */
+/** 제목 한 줄. 둘째 줄은 초록 글자색 하나로 강조한다 (랜딩 첫 화면 제목 `.ld-em`과 한 벌, 형광펜 띠 없음 — P13-15) */
 function TitleLine({
   children,
   highlight,
@@ -83,34 +83,17 @@ function TitleLine({
   highlight?: boolean;
 }) {
   return (
-    <div style={{ display: 'flex' }}>
-      <div style={{ display: 'flex', position: 'relative' }}>
-        {highlight ? (
-          <div
-            style={{
-              position: 'absolute',
-              left: -6,
-              right: -6,
-              bottom: 14,
-              height: 32,
-              borderRadius: 8,
-              backgroundColor: COLOR.accentLight,
-            }}
-          />
-        ) : null}
-        <div
-          style={{
-            fontFamily: FONT.display,
-            fontWeight: 400,
-            fontSize: SITE_CARD_TITLE_SIZE,
-            lineHeight: 1.18,
-            color: COLOR.text,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {children}
-        </div>
-      </div>
+    <div
+      style={{
+        fontFamily: FONT.display,
+        fontWeight: 400,
+        fontSize: SITE_CARD_TITLE_SIZE,
+        lineHeight: 1.18,
+        color: highlight ? COLOR.primaryText : COLOR.text,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
     </div>
   );
 }
@@ -124,6 +107,7 @@ export function SiteOgCard(): ReactElement {
         <Stage
           world={1}
           ground={false}
+          sparkles={false}
           backdrop={
             // eslint-disable-next-line @next/next/no-img-element
             <img

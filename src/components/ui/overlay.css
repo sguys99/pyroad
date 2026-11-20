@@ -31,8 +31,8 @@
     box-shadow: var(--elev-pop);
     outline: none;
     transition-property: transform, opacity;
-    transition-duration: var(--spring-body-dur), var(--dur-fast);
-    transition-timing-function: var(--spring-body), var(--easing-out);
+    transition-duration: var(--dur-slow), var(--dur-fast);
+    transition-timing-function: var(--easing-out);
   }
   /* full: 아래에서 살짝 기울어 떠오름 (시안 Sheet 데스크톱) */
   .g-modal[data-starting-style] {
@@ -64,10 +64,10 @@
       var(--elev-pop),
       0 2.5rem 0 var(--surface);
     outline: none;
-    /* full: 아래에서 body 스프링으로 올라와 한 번 살짝 튕기고 멈춤 (P4-09). 닫힐 때는 짧게 미끄러져 내려감 */
+    /* full: 아래에서 감속하며 올라와 멈춤 (P4-09, 튐 없음 P13-16). 닫힐 때는 짧게 미끄러져 내려감 */
     transition-property: transform, opacity;
-    transition-duration: var(--spring-body-dur), var(--dur-fast);
-    transition-timing-function: var(--spring-body), var(--easing-out);
+    transition-duration: var(--dur-slow), var(--dur-fast);
+    transition-timing-function: var(--easing-out);
   }
   .g-sheet:is([data-starting-style], [data-ending-style]) {
     transform: translateY(100%);
@@ -96,8 +96,8 @@
       padding: 2rem;
       border-radius: var(--round-l);
       box-shadow: var(--elev-pop);
-      transition-duration: var(--spring-body-dur), var(--dur-fast);
-      transition-timing-function: var(--spring-body), var(--easing-out);
+      transition-duration: var(--dur-slow), var(--dur-fast);
+      transition-timing-function: var(--easing-out);
     }
     .g-sheet[data-wide] {
       width: min(45rem, calc(100% - 3rem));

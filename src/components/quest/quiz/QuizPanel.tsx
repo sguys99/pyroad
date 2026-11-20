@@ -9,7 +9,6 @@ import {
   MessageCircleQuestion,
   Play,
   RotateCcw,
-  Sparkles,
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -179,8 +178,17 @@ export function QuizPanel(p: QuizPanelProps) {
       >
         <div className="qz-head">
           <span className="qz-k">
-            <Sparkles aria-hidden />
-            {p.source ?? `보너스 퀴즈${def ? ` · ${def.label}` : ''}`}
+            {p.source ?? (
+              <>
+                보너스 퀴즈
+                {def && (
+                  <>
+                    {' '}
+                    <span className="ml-2">{def.label}</span>
+                  </>
+                )}
+              </>
+            )}
           </span>
           {p.mode === 'review' && (
             <span className="qz-chip" data-tone="review">

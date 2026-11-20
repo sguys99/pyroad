@@ -17,7 +17,7 @@ import {
   ChevronLeft,
   HeartHandshake,
   Rocket,
-  Sparkles,
+  Megaphone,
 } from 'lucide-react';
 import type { RigHandle } from '@/components/characters/rig/LiveRig';
 import type { PybaemState } from '@/components/characters/rig';
@@ -525,7 +525,7 @@ export function OnboardingFlow({
           <>
             {returning && (
               <p className="ob-news" data-testid="onboarding-news">
-                <Sparkles aria-hidden className="ob-news-icon" />
+                <Megaphone aria-hidden className="ob-news-icon" />
                 <span>{RETURNING_NEWS}</span>
               </p>
             )}

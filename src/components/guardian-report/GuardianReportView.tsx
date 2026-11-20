@@ -138,9 +138,7 @@ function DailyBars({ report }: { report: GuardianReport }) {
                 aria-hidden
                 className={cn(
                   'flex h-28 w-full max-w-12 items-end overflow-hidden rounded-lg sm:h-36',
-                  day.future
-                    ? 'border-2 border-dashed border-line'
-                    : 'bg-surface-2',
+                  day.future ? 'border border-line' : 'bg-surface-2',
                 )}
               >
                 {!day.future && day.quests > 0 && (
@@ -240,7 +238,6 @@ export function GuardianReportView({
         >
           <UserAvatar skin={report.skin} size={64} />
           <div className="grid min-w-0 flex-1 gap-0.5">
-            <p className="text-kicker text-primary-text">주간 학습 리포트</p>
             <h1
               id="guardian-title"
               className="font-display text-h1 text-balance break-keep text-foreground"
@@ -249,7 +246,12 @@ export function GuardianReportView({
             </h1>
             <p className="text-small text-muted-foreground">
               {weekRange(report)}
-              {report.level !== null && ` · 레벨 ${report.level}`}
+              {report.level !== null && (
+                <>
+                  {' '}
+                  <span className="ml-2">레벨 {report.level}</span>
+                </>
+              )}
             </p>
           </div>
           <WeekTabs token={token} offset={report.week.offset} />

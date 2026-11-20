@@ -56,7 +56,7 @@ export function DeletePostButton({ postId }: DeletePostButtonProps) {
             onClick={handleDelete}
             disabled={deleting}
           >
-            {deleting ? '삭제 중...' : '삭제'}
+            {deleting ? '삭제 중…' : '삭제'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

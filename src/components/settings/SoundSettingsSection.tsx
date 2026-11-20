@@ -158,7 +158,8 @@ function CategoryRow({
   const off = comingSoon || !value.enabled;
   return (
     <div
-      className="rounded-xl border-2 border-border bg-card px-3 py-3"
+      // P13-10: 카드 안의 줄 — 제 테두리 상자 없이 위 1px 선
+      className="border-t border-border pt-3"
       data-testid={`sound-${category}`}
     >
       <div className="flex items-center gap-3">
@@ -246,7 +247,7 @@ export function SoundSettingsSection() {
         id={`${groupId}-title`}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <Volume2 aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <Volume2 aria-hidden className="h-5 w-5 text-foreground" />
         소리
       </h2>
       <p className="mb-3 text-base text-muted-foreground">
@@ -254,7 +255,7 @@ export function SoundSettingsSection() {
         소리를 끌 수 있어요.
       </p>
 
-      <div className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-xl border-2 border-border bg-card px-3 py-2">
+      <div className="mb-3 flex min-h-14 items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[17px] font-bold leading-snug text-foreground">
             소리 모두 끄기

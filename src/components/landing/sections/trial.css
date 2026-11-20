@@ -91,7 +91,7 @@
     gap: 0.25rem;
     padding: 1rem 1.125rem 1.125rem;
     border-radius: var(--round-l);
-    background: var(--accent-soft);
+    background: var(--surface-2);
   }
   .ld-trial-cta-t {
     color: var(--text);
@@ -106,7 +106,7 @@
   }
   :root[data-reduced='false']:is([data-motion='full'], [data-motion='lite'])
     .ld-trial-cta {
-    animation: ld-trial-rise var(--spring-body-dur) var(--spring-body) both;
+    animation: ld-trial-rise var(--dur-slow) var(--easing-out) both;
   }
   :root[data-reduced='false'][data-motion='minimal'] .ld-trial-cta {
     animation: ld-trial-fade var(--dur-fade) var(--easing-out) both;
@@ -229,12 +229,12 @@
     animation: none;
   }
 
-  /* 넘겨받은 직후: 입력칸 둘레 금색 고리 (full·lite는 세 번 조여 들며 나타남, 그 뒤 정지) */
+  /* 넘겨받은 직후: 입력칸 둘레 초록 고리 (full·lite는 세 번 조여 들며 나타남, 그 뒤 정지) */
   .ld-trial-line::after {
     content: '';
     position: absolute;
     inset: -0.3125rem;
-    border: 2px solid var(--accent);
+    border: 2px solid var(--primary);
     border-radius: calc(var(--round-s) + 0.3125rem);
     opacity: 0;
     pointer-events: none;

@@ -93,7 +93,9 @@ describe('BugHunt', () => {
   it('등록되어 있고, 줄 번호 + 코드 순서대로 줄 라디오 그룹을 그린다', () => {
     expect(QUIZ_INPUTS.bug_hunt).toBe(bugHuntInput);
     const p = panel();
-    expect(screen.getByText(/보너스 퀴즈 · 버그 찾기/)).toBeInTheDocument();
+    expect(screen.getByText(/보너스 퀴즈/)).toHaveTextContent(
+      '보너스 퀴즈 버그 찾기',
+    );
     expect(screen.getByTestId('bughunt-steps')).toHaveTextContent(
       '1. 버그가 숨은 줄을 찾아요',
     );

@@ -1,18 +1,15 @@
-/* 작품으로 저장 (P11-06, SaveCreation.tsx): 결과 쪽지 아래 한 줄 띠 + 저장 시트.
-   띠는 결과 쪽지(.qo-slip)와 같은 옅은 면, 시트 미리보기는 그림판(.ts)과 같은 흰 도화지. 값은 토큰 변수만 */
+/* 작품으로 저장 (P11-06, SaveCreation.tsx): 결과 쪽지 아래 한 줄 + 저장 시트.
+   줄은 제 면 없이 위 1px 선으로만 나눔(P13-10, 카드 속 카드 금지) — 상태는 아이콘 원 색과 글자가 알림.
+   시트 미리보기는 그림판(.ts)과 같은 흰 도화지. 값은 토큰 변수만 */
 
 .cr-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  padding: 0.75rem 0.875rem 0.75rem 1rem;
-  border-radius: var(--round-m);
-  background: var(--accent-soft);
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--line);
   color: var(--text);
-}
-.cr-bar[data-saved] {
-  background: var(--primary-soft);
 }
 .cr-bar-icon {
   display: grid;
@@ -21,10 +18,11 @@
   height: 2.5rem;
   place-items: center;
   border-radius: var(--round-pill);
-  background: var(--surface);
-  color: var(--accent-text);
+  background: var(--surface-2);
+  color: var(--text-muted);
 }
 .cr-bar[data-saved] .cr-bar-icon {
+  background: var(--primary-soft);
   color: var(--primary-text);
 }
 .cr-bar-icon > svg {
@@ -87,7 +85,7 @@
 .cr-paper-wait > svg {
   width: 2rem;
   height: 2rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
 }
 .cr-preview .qo-lines {
   max-height: 13rem;

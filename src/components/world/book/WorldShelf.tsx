@@ -25,12 +25,11 @@ export function WorldShelf({
         월드맵
       </BackLink>
       <header className="mb-6">
-        <p className="text-kicker text-muted-foreground">모험 책장</p>
         <h1 className="font-display text-h1 text-foreground">
           어떤 책을 펼쳐 볼까요?
         </h1>
         <p className="mt-1 text-body text-muted-foreground">
-          한 권을 다 모험하면 다음 책이 열려요.
+          모험 책장이에요. 한 권을 다 모험하면 다음 책이 열려요.
         </p>
       </header>
       <ol className="wb-shelf" aria-label="월드 책">

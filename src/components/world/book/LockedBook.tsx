@@ -39,11 +39,12 @@ export function LockedBook({
       data-testid="world-locked"
     >
       <div className="wb-book" data-status={entry.status}>
-        <WorldCover book={toBook(entry)} no={no} />
+        <WorldCover book={toBook(entry)} />
       </div>
       <div className="flex flex-col gap-3">
         <p className="text-kicker text-muted-foreground">
-          그림책 {no}권 · {STATUS_LABEL[entry.status]}
+          그림책 {no}권{' '}
+          <span className="ml-2">{STATUS_LABEL[entry.status]}</span>
         </p>
         <h1 className="font-display text-h1 text-foreground">
           {entry.world.title}

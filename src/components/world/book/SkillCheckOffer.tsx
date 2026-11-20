@@ -10,7 +10,8 @@ import {
 
 /**
  * 잠긴 월드의 "실력 확인 퀴즈" 진입점 (P10-03, docs/curriculum/world2.md §7): 앞 월드를 이미 아는 학생이 바로 여는 길.
- * 책장·다음 권 미리 보기(compact)와 잠긴 책 안내(LockedBook)에 붙는 시험지 쪽지. 오늘 이미 냈으면 "내일 다시" + 오늘 결과 보기.
+ * 책장·다음 권 미리 보기(compact)와 잠긴 책 안내(LockedBook)의 카드 안에 선 하나로 나뉘어 붙는 문단 + 버튼(제 면·테두리 없음, P13-10).
+ * 오늘 이미 냈으면 "내일 다시" + 오늘 결과 보기.
  * 상태는 글자·아이콘으로도 보여 준다(색만으로 구분하지 않음)
  */
 export function SkillCheckOffer({
@@ -35,14 +36,13 @@ export function SkillCheckOffer({
       data-tried={triedToday || undefined}
       data-testid="skill-check-offer"
     >
-      <span className="wb-skill-k">
-        {triedToday ? (
+      {/* 이름 줄은 버튼이 이름을 말하지 않는 "오늘 이미 냄" 때만 (P13-10: 버튼 글자를 되풀이하지 않음) */}
+      {triedToday && (
+        <span className="wb-skill-k">
           <CalendarClock className="size-4" aria-hidden />
-        ) : (
-          <ClipboardCheck className="size-4" aria-hidden />
-        )}
-        실력 확인 퀴즈
-      </span>
+          실력 확인 퀴즈
+        </span>
+      )}
       <p className="wb-skill-t">
         {triedToday
           ? '오늘은 이미 도전했어요. 내일 다시 도전할 수 있어요!'

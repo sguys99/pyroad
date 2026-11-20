@@ -149,7 +149,7 @@ export function AccountManagementSection({
       setNaverStarting(false);
       setNaverStep(false);
       alert(
-        '네이버 확인을 시작하지 못했어요. "건너뛰고 탈퇴"로 계속할 수도 있어요.',
+        '네이버 확인을 시작하지 못했어요. “건너뛰고 탈퇴”로 계속할 수도 있어요.',
       );
     }
   };
@@ -211,7 +211,7 @@ export function AccountManagementSection({
 
   const getResetDescription = (stage: Stage) => {
     const affected = getAffectedStages(stage);
-    const baseMsg = `"${stage.title}" 스테이지의 퀘스트 진행이 초기화되고, 해당 경험치가 차감됩니다.`;
+    const baseMsg = `“${stage.title}” 스테이지의 퀘스트 진행이 초기화되고, 해당 경험치가 차감됩니다.`;
     if (affected.length === 0) return baseMsg;
     const affectedNames = affected
       .map((s) => `${s.order}. ${s.title}`)
@@ -257,7 +257,7 @@ export function AccountManagementSection({
                 <Button variant="secondary" size="sm" disabled={isLoading} />
               }
             >
-              {loading?.startsWith('reset') ? '리셋 중...' : '리셋'}
+              {loading?.startsWith('reset') ? '리셋 중…' : '리셋'}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -301,7 +301,7 @@ export function AccountManagementSection({
             disabled={isLoading}
             className="pf-acct-danger focus-ring"
           >
-            {loading === 'delete' ? '탈퇴 처리 중...' : '탈퇴하기'}
+            {loading === 'delete' ? '탈퇴 처리 중…' : '탈퇴하기'}
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

@@ -182,7 +182,7 @@ export default function SettingsPage() {
       id="ai-tutor-title"
       className="mb-3 flex items-center gap-2 text-lg font-bold text-foreground"
     >
-      <Bot aria-hidden className="h-5 w-5 text-accent-foreground" />
+      <Bot aria-hidden className="h-5 w-5 text-foreground" />
       AI 튜터
     </h2>
   );
@@ -194,7 +194,7 @@ export default function SettingsPage() {
         {header}
         <section aria-labelledby="ai-tutor-title" className={aiSection}>
           {aiTitle}
-          <p className="text-center text-muted-foreground">불러오는 중...</p>
+          <p className="text-center text-muted-foreground">불러오는 중…</p>
         </section>
       </PageTransition>
     );
@@ -238,12 +238,13 @@ export default function SettingsPage() {
                 key={provider}
                 onClick={() => isAvailable && setSelected(provider)}
                 disabled={!isAvailable}
-                className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-all ${
+                // P13-10: 고른 줄 = 배경 하나만 (테두리 + 배경 이중 강조 금지)
+                className={`flex items-center gap-3 rounded-lg p-3 text-left transition-colors ${
                   isSelected
-                    ? 'border-primary bg-primary/10'
+                    ? 'bg-primary-soft'
                     : isAvailable
-                      ? 'border-border hover:border-primary/50'
-                      : 'cursor-not-allowed border-border opacity-40'
+                      ? 'hover:bg-surface-2'
+                      : 'cursor-not-allowed opacity-40'
                 }`}
               >
                 <div
@@ -367,7 +368,7 @@ export default function SettingsPage() {
       {/* 저장 버튼 */}
       <div className="flex flex-col items-center gap-2">
         <Button onClick={handleSave} loading={saving} size="lg">
-          {saving ? '저장 중...' : 'AI 튜터 설정 저장'}
+          {saving ? '저장 중…' : 'AI 튜터 설정 저장'}
         </Button>
         {saved && (
           <p className="text-sm font-medium text-primary-text">저장되었어요!</p>

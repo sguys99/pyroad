@@ -3,7 +3,7 @@
 import { RewardIcon } from '@/components/ui/reward-icon';
 import { withObjectParticle } from '@/lib/korean';
 import type { QuestKind } from '@/lib/quest/questKind';
-import { CelebrationCta, Kicker } from './parts';
+import { CelebrationCta } from './parts';
 
 interface GoldenKeyCardProps {
   kind: QuestKind;
@@ -27,7 +27,6 @@ export function GoldenKeyCard({
       </span>
 
       <div className="cel-head">
-        <Kicker gold>황금키</Kicker>
         <h2 id="celebration-title" className="cel-t font-display" data-size="m">
           황금키로 문을 열었어요
         </h2>

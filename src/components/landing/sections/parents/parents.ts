@@ -89,7 +89,7 @@ export const ROADMAP: readonly Stop[] = [
     world: 1,
     name: '파이썬 섬',
     status: 'open',
-    summary: `print()부터 함수까지, ${WORLD1_STAGES.length}개 스테이지 · ${WORLD1_QUESTS}개 퀘스트`,
+    summary: `print()부터 함수까지 (스테이지 ${WORLD1_STAGES.length}개, 퀘스트 ${WORLD1_QUESTS}개)`,
   },
   {
     // §5 2월드 초안 (Phase 10)

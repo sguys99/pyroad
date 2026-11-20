@@ -42,7 +42,7 @@ async function askFree(page: Page, shot: string) {
   await expect(reply).toContainText('저장된 답변');
   await expect(input).toHaveValue('');
   await expect(chat.getByTestId('free-ask-count')).toHaveText(
-    /^오늘 \d+번 남음 · 0\/100$/,
+    /^오늘 \d+번 남음 0\/100$/,
   );
 
   // 개인정보 → 거름 안내, 대화에 들어가지 않고 글은 남음

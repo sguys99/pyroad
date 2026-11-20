@@ -132,7 +132,7 @@ export function CreatePostForm({ initialData }: CreatePostFormProps) {
       </div>
 
       <Button type="submit" loading={submitting}>
-        {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
+        {submitting ? '저장 중…' : isEdit ? '수정하기' : '게시하기'}
       </Button>
       <p className="text-center text-caption text-muted-foreground">
         전화번호, 주소, 학교 같은 개인정보와 친구가 속상할 말은 쓰지 않아요.

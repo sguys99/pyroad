@@ -4,8 +4,6 @@ import { cn } from '@/lib/utils';
 export interface LandingSectionProps {
   /** 앵커 id (`#try`처럼 헤더·버튼이 가리킴). 제목 id는 `<id>-title` */
   id: string;
-  /** 제목 위 작은 눈썹 글자 */
-  kicker?: ReactNode;
   title: ReactNode;
   /** 제목 아래 한두 줄 설명 */
   lead?: ReactNode;
@@ -33,7 +31,6 @@ export interface LandingSectionProps {
  */
 export function LandingSection({
   id,
-  kicker,
   title,
   lead,
   tone = 'plain',
@@ -56,7 +53,6 @@ export function LandingSection({
     >
       <div className="ld-sec-in">
         <header className="ld-sec-head">
-          {kicker && <span className="ld-kicker">{kicker}</span>}
           <h2 id={titleId} tabIndex={-1} className="ld-h2 font-display">
             {title}
           </h2>

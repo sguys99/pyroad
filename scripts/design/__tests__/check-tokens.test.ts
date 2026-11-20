@@ -68,4 +68,32 @@ describe('토큰 하드코딩 검사 (P2-09)', () => {
     const v = checkCss('src/app/x.css', css).violations;
     expect(v.map((x: { line: number; rule: string }) => [x.line, x.rule])).toEqual([[3, 'color']]);
   });
+
+  it('CSS: 측면 색 띠를 잡는다 (P13-07)', () => {
+    const stripes = (css: string) =>
+      checkCss('src/app/x.css', css)
+        .violations.filter((x: { rule: string }) => x.rule === 'stripe')
+        .map((x: { line: number }) => x.line);
+    // 위반: 한쪽 안쪽 그림자(px·rem·음수), 좁은 ::before 세로 띠, 굵은 색 옆 테두리
+    expect(stripes(`.a { box-shadow: inset 3px 0 0 var(--primary); }`)).toEqual([1]);
+    expect(stripes(`.a { box-shadow: var(--elev-card), inset -0.25rem 0 0 var(--caution); }`)).toEqual([1]);
+    expect(
+      stripes(`.a::before {\n  content: '';\n  position: absolute;\n  inset: 0 auto 0 0;\n  width: 0.375rem;\n  background: var(--world);\n}`),
+    ).toEqual([5]);
+    expect(stripes(`.a::after { top: 0; bottom: 0; width: 6px; background-color: var(--accent); }`)).toEqual([1]);
+    expect(stripes(`.a { border-left: 0.375rem solid var(--primary-bright); }`)).toEqual([1]);
+    expect(stripes(`.a {\n  border-inline-start: 4px solid var(--accent);\n  border-right-width: 2px;\n}`)).toEqual([2, 3]);
+    // 허용: 턱·테두리 고리 그림자, 1px 구분선, 투명 테두리(삼각형), 넓거나 떠 있는 의사 요소, 사유를 적은 줄
+    const ok = [
+      `.a { box-shadow: inset 0 -3px 0 var(--surface-lip); }`,
+      `.a { box-shadow: inset 0 0 0 2px var(--accent); }`,
+      `.a { box-shadow: inset 2px 0 0 1px var(--line); }`,
+      `.a { border-left: var(--line-w) solid var(--line); border-right: 1px solid var(--line); }`,
+      `.a { border-left: 6px solid transparent; border-right: 0; }`,
+      `.a::before { inset: 0; width: 3rem; background: var(--world); }`,
+      `.a::before { top: -0.1875rem; bottom: -0.1875rem; width: 0.5rem; background: var(--w3); }`,
+      `.a {\n  /* tokens-allow: 코드 들여쓰기 안내선 */\n  border-left: 2px dashed var(--line-strong);\n}`,
+    ];
+    for (const css of ok) expect(stripes(css), css).toEqual([]);
+  });
 });

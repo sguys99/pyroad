@@ -5,7 +5,7 @@ import {
   Lightbulb,
   MessagesSquare,
   Palette,
-  Sparkles,
+  PartyPopper,
   Sticker,
   ThumbsUp,
   type LucideIcon,
@@ -27,7 +27,7 @@ import './gallery.css';
  */
 
 const STICKER_ICON: Record<StickerId, LucideIcon> = {
-  wow: Sparkles,
+  wow: PartyPopper,
   love: Heart,
   fun: Laugh,
   smart: Lightbulb,
@@ -91,10 +91,6 @@ export function GalleryBanner({ children }: { children?: React.ReactNode }) {
         {Array.from({ length: 14 }, (_, i) => (
           <i key={i} />
         ))}
-      </span>
-      <span className="gl-kicker">
-        <Sparkles aria-hidden />
-        메이커 박람회
       </span>
       <h1 className="m-0 font-display text-h1">작품 갤러리</h1>
       <p className="m-0 text-small text-muted-foreground">

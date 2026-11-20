@@ -30,7 +30,7 @@
   box-shadow: none;
 }
 .qw-tab-dot[data-tone='bad'] {
-  background: var(--accent);
+  background: var(--caution);
 }
 .qw-book {
   flex: 1;

@@ -1,6 +1,6 @@
 # 디자인 토큰 (P2-09)
 
-> - 기준: 사용자가 승인한 최종 시안(§12-Q31, `design/prototypes/src/final/tokens.ts`·`refine.css`). 단일 톤 바탕 `#F6F4EF`, 테두리 없는 면 + 버튼 아랫면 3px, 색은 **중립 + 주색 초록 하나 + 강조 금색 하나 + 의미색**, 월드색은 지도·표지의 옅은 틴트만, 제목 Jua · 본문 Pretendard(pyRoad Sans)
+> - 기준: 사용자가 승인한 최종 시안(§12-Q31, `design/prototypes/src/final/tokens.ts`·`refine.css`). 단일 톤 바탕(P13-02 "3-A 맑게 다듬기"에서 `#F6F4EF` → `#F6F7F3`, §1.2), 테두리 없는 면 + 버튼 아랫면 3px, 색은 **중립 + 주색 초록 하나 + 강조 금색 하나 + 의미색**, 월드색은 지도·표지의 옅은 틴트만, 제목 Jua · 본문 Pretendard(pyRoad Sans)
 > - 원본: **`src/lib/design/tokens.ts`** (TS 상수). 화면은 `src/app/globals.css`의 `:root` 변수와 Tailwind `@theme inline`으로 쓴다. 두 곳이 같은지는 `src/lib/design/__tests__/tokens.test.ts`가 globals.css를 읽어 양방향으로 비교한다(빠진 변수·남는 변수·다른 값 모두 실패)
 > - 모션 값의 원본은 `src/lib/motion/tokens.ts`(리그 스프링과 공유, [motion-guidelines](motion-guidelines.md)). 디자인 토큰은 다시 내보내기만 하고 CSS 변수 `--dur-*`·`--easing-*`·`--spring-*`로 옮긴다
 > - 글꼴 파일·스택은 [fonts.md](fonts.md)(P2-10). 여기서는 이름(`FONT_FAMILY`)과 크기 단계만 정한다
@@ -12,77 +12,92 @@
 
 | 토큰 (TS) | CSS 변수 · Tailwind | 값 | 쓰임 |
 |---|---|---|---|
-| `bg` | `--bg` · `bg-background` | `#F6F4EF` | 단색 바탕 (종이 결 없음) |
+| `bg` | `--bg` · `bg-background` | `#F6F7F3` | 단색 바탕 (종이 결 없음) |
 | `surface` | `--surface` · `bg-card` · `bg-surface` | `#FFFFFF` | 카드·시트·입력 |
-| `surface2` | `--surface-2` · `bg-muted` · `bg-surface-2` | `#EFECE5` | 보조 면: 칩·결과 상자·눌린 탭·줄 번호 |
-| `surfaceLip` | `--surface-lip` | `#DFDAD0` | decor: 흰 버튼 아랫면 |
-| `line` | `--line` · `border-border` · `border-line` | `#E5E1D9` | decor: 구분선 |
-| `lineStrong` | `--line-strong` · `border-input` · `border-line-strong` | `#8E877C` | ui: 입력·코드 상자 경계 (3:1) |
-| `text` | `--text` · `text-foreground` | `#2E2A25` | 본문 |
-| `textMuted` | `--text-muted` · `text-muted-foreground` | `#6B645B` | 보조 글자 |
-| `primary` | `--primary` · `bg-primary` | `#3E7B3A` | fill: 주 버튼 |
+| `surface2` | `--surface-2` · `bg-muted` · `bg-surface-2` | `#ECEEE7` | 보조 면: 칩·결과 상자·눌린 탭·줄 번호 |
+| `surfaceLip` | `--surface-lip` | `#D9DCD2` | decor: 흰 버튼 아랫면 |
+| `line` | `--line` · `border-border` · `border-line` | `#E2E5DC` | decor: 구분선 |
+| `lineStrong` | `--line-strong` · `border-input` · `border-line-strong` | `#828A7C` | ui: 입력·코드 상자 경계 (3:1) |
+| `text` | `--text` · `text-foreground` | `#22271F` | 본문 |
+| `textMuted` | `--text-muted` · `text-muted-foreground` | `#5C6457` | 보조 글자 |
+| `primary` | `--primary` · `bg-primary` | `#2A7D3D` | fill: 주 버튼 |
 | `onPrimary` | `--on-primary` · `text-primary-foreground` | `#FFFFFF` | 주 버튼 글자 |
-| `primaryLip` | `--primary-lip` · `bg-primary-lip` | `#2F5F2C` | decor: 주 버튼 아랫면, 눌림·hover 면 |
-| `primaryText` | `--primary-text` · **`text-primary-text`** | `#3A7336` | 초록 글자·링크 (`text-primary` 금지) |
-| `primaryBright` | `--primary-bright` | `#A9D38F` | decor: 진행 막대 끝·지도 길·나뭇잎 |
-| `primarySoft` | `--primary-soft` · `bg-primary-soft` | `#E8F0E3` | 초록 틴트 면 (해 볼 일·성공 말풍선) |
-| `secondary` | `--secondary` · `ring-ring` | `#2E2A25` | 파랑 없음 → 짙은 중립: 포커스 링·어두운 버튼 |
-| `accent` | `--accent` · `bg-accent` | `#F0B43C` | 금색 하나: 별·코인·도장·"지금 여기". 글자는 `onAccent`만 얹는다 |
-| `onAccent` | `--on-accent` · `text-accent-foreground` | `#2E2A25` | 금색 면 위 글자 |
-| `accentLip` · `accentLight` | `--accent-lip` · `--accent-light` | `#C48A1A` · `#FBE3A6` | decor: 금색 버튼 아랫면·별 외곽 / 별·코인 밝은 쪽 |
-| `accentText` | `--accent-text` · **`text-accent-text`** | `#8A5A00` | 금색 계열 글자: 보상 수치·도장 문구 (`text-accent` 금지) |
-| `accentSoft` | `--accent-soft` · `bg-accent-soft` | `#FBF1DC` | 금색 틴트 면 |
-| `success` · `successSoft` | `--success` · `--success-soft` | `#3A7336` · `#E8F0E3` | 성공 = 초록 글자 (새 색 없음) |
-| `warning` · `warningSoft` | `--warning` · `--warning-soft` · `text-warning` · `bg-warning-soft` | `#8A5A00` · `#FBF1DC` | 경고 = 금색 글자 (예전 amber 대체) |
-| `error` · `onError` · `errorSoft` | `--error` · `text-destructive` · `bg-error-soft` | `#B3402F` · `#FFFFFF` · `#FBEAE6` | 오류 |
-| `onScrim` · 덮개 | `--on-scrim` · `--scrim` · `bg-scrim` · `text-on-scrim` | `#FFFFFF` · `rgb(46 42 37 / 0.65)` | 축하·대화 상자 뒤 덮개와 그 위 글자 |
-| `w1`·`w2`·`w3` | `--w1` … · `bg-w2-soft` … | `#A9CF94` · `#B4C8D2` · `#D9C3A3` | decor: 월드 틴트 (§3) |
-| `w1Ink`·`w2Ink`·`w3Ink` | `--w1-ink` … | `#3A7336` · `#6B645B` · `#6B645B` | 월드 표지 글자 (2·3은 중립: 칩마다 다른 색 금지) |
-| `w1Soft`·`w2Soft`·`w3Soft` | `--w1-soft` … | `#EDF3E8` · `#EDF1F3` · `#F4EEE5` | 월드 바탕 |
-| `w2Shallow`·`w2Deep` | `--w2-shallow`·`--w2-deep` | `#CFE4E3` · `#95BAC6` | decor: 2월드 지도 바다 (얕은 물·깊은 물, P10-04) |
-| `w3Brick`·`w3Blueprint` | `--w3-brick`·`--w3-blueprint` | `#E2A486` · `#A7BCC9` | decor: 3월드 지도 메이커 시티 (벽돌 지붕·간판 · 설계도 모눈·슬레이트 지붕, P11-11) |
-| `code*` | `--code-bg` · `--code-keyword` … · `text-code-keyword` | 바탕 `#FFFFFF`, 글자·숫자·함수 `#2E2A25`, 키워드 `#3A7336`, 문자열 `#8A5A00`, 주석 `#7A7268` | CodeMirror 키즈 테마 ([editor.md](editor.md), 틴트 면 위 대비 포함) |
+| `primaryLip` | `--primary-lip` · `bg-primary-lip` | `#1C5A2C` | decor: 주 버튼 아랫면, 눌림·hover 면 |
+| `primaryText` | `--primary-text` · **`text-primary-text`** | `#257338` | 초록 글자·링크 (`text-primary` 금지) |
+| `primaryBright` | `--primary-bright` | `#A1D995` | decor: 진행 막대 끝·지도 길·나뭇잎 |
+| `primarySoft` | `--primary-soft` · `bg-primary-soft` | `#E1F2E0` | 초록 틴트 면 (해 볼 일·성공 말풍선) |
+| `secondary` | `--secondary` · `ring-ring` | `#22271F` | 파랑 없음 → 짙은 중립: 포커스 링·어두운 버튼 |
+| `accent` | `--accent` · `bg-accent` | `#F6B92B` | 금색 하나: **보상에만** — 별·코인·도장·받기 버튼과 보상 계열(스트릭 불꽃·황금 열쇠·"전설" 등급·메달·왕관). "지금 여기"·선택은 초록, 패널은 중립, 틀림·주의는 `caution`(P13-03, [P13-audit](P13-audit.md) §6-5). 글자는 `onAccent`만 얹는다 |
+| `onAccent` | `--on-accent` · `text-accent-foreground` | `#22271F` | 금색 면 위 글자 |
+| `accentLip` · `accentLight` | `--accent-lip` · `--accent-light` | `#C98F12` · `#FDE5A0` | decor: 금색 버튼 아랫면·별 외곽 / 별·코인 밝은 쪽 |
+| `accentText` | `--accent-text` · **`text-accent-text`** | `#7A5200` | 금색 계열 글자: 보상 수치·도장 문구 (`text-accent` 금지) |
+| `accentSoft` | `--accent-soft` · `bg-accent-soft` | `#FFF4D4` | 금색 틴트 면 |
+| `success` · `successSoft` | `--success` · `--success-soft` | `#257338` · `#E1F2E0` | 성공 = 초록 글자 (새 색 없음) |
+| `warning` · `warningSoft` | `--warning` · `--warning-soft` · `text-warning` · `bg-warning-soft` | `#9C4A1A` · `#FFE8D6` | 경고 = 주의 글자·면(`cautionText`·`cautionSoft`와 같은 값, P13-03에서 금색 → 주의 색). 토스트 warn·입력 경고·안내 줄 |
+| `error` · `onError` · `errorSoft` | `--error` · `text-destructive` · `bg-error-soft` | `#B3402F` · `#FFFFFF` · `#FCE9E5` | 오류 |
+| `caution` · `cautionText` · `cautionSoft` | `--caution` · `--caution-text` · `--caution-soft` · `text-caution-text` · `bg-caution-soft` | `#EE7F4A` · `#9C4A1A` · `#FFE8D6` | 주의(P13-02): "틀렸어요·달라요" 피드백(퀴즈 틀린 보기·빈칸, 실행 결과 다름)과 주의·안내 띠. 빨강보다 순한 주황 — 보상 금색·정답 초록·3권 틴트와 다른 색. `caution`은 decor(흰 면 2.70:1, 뜻은 글자·아이콘과 함께), 글자는 `cautionText`. 3권 살구 면(`w3Soft`) 위에서는 주의 면이 묻히므로 흰 면 + 주의 글자(메이커 작업대 안내). 컴포넌트 적용 P13-03 |
+| `onScrim` · 덮개 | `--on-scrim` · `--scrim` · `bg-scrim` · `text-on-scrim` | `#FFFFFF` · `rgb(34 39 31 / 0.65)` | 축하·대화 상자 뒤 덮개와 그 위 글자 |
+| `w1`·`w2`·`w3` | `--w1` … · `bg-w2-soft` … | `#A4D49A` · `#9CC4DE` · `#EDB787` | decor: 월드 틴트 (§3) |
+| `w1Ink`·`w2Ink`·`w3Ink` | `--w1-ink` … | `#257338` · `#4A6170` · `#75583F` | 월드 표지 글자·아이콘 (2·3권도 채도를 낮춘 제 색조. 칩·배지 색으로는 쓰지 않음) |
+| `w1Soft`·`w2Soft`·`w3Soft` | `--w1-soft` … | `#E9F4E6` · `#E8F2F9` · `#FBEEE2` | 월드 바탕 |
+| `w2Shallow`·`w2Deep` | `--w2-shallow`·`--w2-deep` | `#D0E6EF` · `#8FB9D4` | decor: 2월드 지도 바다 (얕은 물·깊은 물, P10-04) |
+| `w3Brick`·`w3Blueprint` | `--w3-brick`·`--w3-blueprint` | `#DC9478` · `#A6C1D6` | decor: 3월드 지도 메이커 시티 (벽돌 지붕·간판 · 설계도 모눈·슬레이트 지붕, P11-11) |
+| `code*` | `--code-bg` · `--code-keyword` … · `text-code-keyword` | 바탕 `#FFFFFF`, 글자·숫자·함수 `#22271F`, 키워드 `#257338`, 문자열 `#7A5200`, 주석 `#6C7467` | CodeMirror 키즈 테마 ([editor.md](editor.md), 틴트 면 위 대비 포함) |
+
+**색의 역할 (P13-03)**: 초록 = 학습·"지금 여기"·선택·주 버튼, **금색 = 보상만**(별·코인·도장·받기 버튼과 보상 계열 — 스트릭 불꽃·황금 열쇠·"전설" 등급·메달·왕관), 중립 = 패널·안내·칩·보스, **주의 색 = "틀렸어요·달라요"와 주의 안내**(`caution` 장식 · `cautionText` 글자 · `cautionSoft` 면, `warning*`도 같은 값). 금색을 "지금 여기"·선택·패널 면·테두리에 쓰지 않고, 틀림에 빨강(`error`)을 쓰지 않는다(아이에게 센 색 — `error`는 오류 글자·위험 버튼). 남긴 금색의 판정은 [P13-audit](P13-audit.md) §6-5, 쓰지 않는 패턴 전체는 [components.md](components.md) §0.
 
 shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--destructive`·`--border`·`--input`·`--ring` …)은 그대로 두고 위 토큰을 가리킨다. 쓰지 않던 `--chart-*`·`--sidebar-*`는 지웠다.
 
 ### 1.1 대비 (WCAG AA, 자동 검사)
 
-`CONTRAST_PAIRS`(59쌍, P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍, P7-13에서 퀴즈 7쌍 추가)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.58:1**(초록 글자 on `bg-primary/10`).
+`CONTRAST_PAIRS`(70쌍 — P2-11에서 흰 버튼 눌림·위험 버튼·토스트 틴트 5쌍, P7-13에서 퀴즈 7쌍, P10-04·P11-11에서 지도 4쌍, P13-02에서 주의 8쌍 추가, P13-03에서 쓰임이 사라진 "퀴즈 틀린 빈칸 코드 on `accentSoft`" 1쌍 정리)를 `tokens.test.ts`가 계산해 기준 미달이면 실패한다. 반투명 면(`bg-primary/10` 등)은 아래 색과 합성해 잰다. 새 배경 위 글자·새 버튼을 만들면 표에 먼저 추가한다. 글자 조합 최저 **4.79:1**(초록 글자 on `bg-primary/10`).
 
 | 쓰임 | 글자·전경 | 배경 | 대비 | 기준 |
 |---|---|---|---:|---:|
-| 본문 | `text` #2E2A25 | `bg` #F6F4EF | 12.96 | 4.5 |
-| 카드 본문 | `text` | `surface` #FFFFFF | 14.24 | 4.5 |
-| 보조 면 글자 | `text` | `surface2` #EFECE5 | 12.07 | 4.5 |
-| 보조 글자 | `textMuted` #6B645B | `bg` / `surface` / `surface2` | 5.30 / 5.83 / 4.94 | 4.5 |
-| 초록 글자·링크 | `primaryText` #3A7336 | `bg` / `surface` / `surface2` | 5.18 / 5.69 / 4.82 | 4.5 |
-| 초록 틴트 면 글자 | `primaryText` | `primarySoft` #E8F0E3 | 4.88 | 4.5 |
-| 초록 10% 면 글자 | `primaryText` | `primary` 10% over `bg` #E4E8DD | 4.58 | 4.5 |
-| 주 버튼 글자 | `onPrimary` #FFFFFF | `primary` #3E7B3A | 5.12 | 4.5 |
-| 주 버튼 눌림·hover | `onPrimary` | `primaryLip` #2F5F2C | 7.51 | 4.5 |
-| 주 버튼 면 | `primary` | `bg` / `surface` | 4.66 / 5.12 | 3 |
-| 어두운 버튼 글자 | `onSecondary` #FFFFFF | `secondary` #2E2A25 | 14.24 | 4.5 |
-| 포커스 링 | `secondary` | `bg` / `surface` | 12.96 / 14.24 | 3 |
-| 금색 버튼·배지 글자 | `onAccent` #2E2A25 | `accent` #F0B43C | 7.66 | 4.5 |
-| 금색 버튼 눌림 | `onAccent` | `accentLip` #C48A1A | 4.74 | 4.5 |
-| 금색 글자 | `accentText` #8A5A00 | `bg` / `surface` / `accentSoft` | 5.39 / 5.92 / 5.28 | 4.5 |
-| 금색 20% 배지 글자 | `onAccent` | `accent` 20% over `surface` | 12.61 | 4.5 |
-| 성공 · 경고 글자 | `success` / `warning` | `successSoft` / `warningSoft` | 4.88 / 5.28 | 4.5 |
-| 오류 글자 | `error` #B3402F | `bg` / `surface` / `errorSoft` | 5.17 / 5.68 / 4.88 | 4.5 |
+| 본문 | `text` #22271F | `bg` #F6F7F3 | 14.16 | 4.5 |
+| 카드 본문 | `text` | `surface` #FFFFFF | 15.23 | 4.5 |
+| 보조 면 글자 | `text` | `surface2` #ECEEE7 | 13.02 | 4.5 |
+| 보조 글자 | `textMuted` #5C6457 | `bg` / `surface` / `surface2` | 5.71 / 6.14 / 5.25 | 4.5 |
+| 초록 글자·링크 | `primaryText` #257338 | `bg` / `surface` / `surface2` | 5.43 / 5.85 / 5.00 | 4.5 |
+| 초록 틴트 면 글자 | `primaryText` | `primarySoft` #E1F2E0 | 5.01 | 4.5 |
+| 초록 10% 면 글자 | `primaryText` | `primary` 10% over `bg` #E2EBE1 | 4.79 | 4.5 |
+| 주 버튼 글자 | `onPrimary` #FFFFFF | `primary` #2A7D3D | 5.12 | 4.5 |
+| 주 버튼 눌림·hover | `onPrimary` | `primaryLip` #1C5A2C | 8.24 | 4.5 |
+| 주 버튼 면 | `primary` | `bg` / `surface` | 4.76 / 5.12 | 3 |
+| 어두운 버튼 글자 | `onSecondary` #FFFFFF | `secondary` #22271F | 15.23 | 4.5 |
+| 포커스 링 | `secondary` | `bg` / `surface` | 14.16 / 15.23 | 3 |
+| 금색 버튼·배지 글자 | `onAccent` #22271F | `accent` #F6B92B | 8.63 | 4.5 |
+| 금색 버튼 눌림 | `onAccent` | `accentLip` #C98F12 | 5.38 | 4.5 |
+| 금색 글자 | `accentText` #7A5200 | `bg` / `surface` / `accentSoft` | 6.43 / 6.92 / 6.30 | 4.5 |
+| 금색 20% 배지 글자 | `onAccent` | `accent` 20% over `surface` | 13.58 | 4.5 |
+| 성공 · 경고 글자 | `success` / `warning` | `successSoft` / `warningSoft` | 5.01 / 5.21 | 4.5 |
+| 오류 글자 | `error` #B3402F | `bg` / `surface` / `errorSoft` | 5.28 / 5.68 / 4.85 | 4.5 |
 | 위험 버튼 글자 | `onError` #FFFFFF | `error` | 5.68 | 4.5 |
-| 입력 경계 | `lineStrong` #8E877C | `surface` / `bg` | 3.55 / 3.23 | 3 |
-| 덮개 위 글자 (흰 화면 위, 가장 나쁜 경우) | `onScrim` #FFFFFF | 덮개 65% over `surface` #777571 | 4.59 | 4.5 |
-| 월드 1·2·3 표지 글자 | `w1Ink` / `w2Ink` / `w3Ink` | `w1Soft` / `w2Soft` / `w3Soft` | 5.04 / 5.13 / 5.05 | 4.5 |
-| 월드 바탕 본문 | `text` | `w1Soft` / `w2Soft` / `w3Soft` | 12.60 / 12.53 / 12.35 | 4.5 |
-| 코드 글자·주석·키워드·문자열 | `codeText` / `codeComment` / `codeKeyword` / `codeString` | `codeBg` #FFFFFF | 14.24 / 4.73 / 5.69 / 5.92 | 4.5 |
-| 코드 줄 번호 | `textMuted` | `surface2` | 4.94 | 4.5 |
-| 퀴즈 칩·빈칸 코드 (흰 면 · 정답 면 · 틀린 면) | `codeText` / `codeString` | `surface` / `successSoft` / `accentSoft` | 14.24 · 5.92 / 12.21 / 12.69 | 4.5 |
-| 퀴즈 빈 빈칸 번호 | `textMuted` | `codeBg` | 5.83 | 4.5 |
-| 퀴즈 정답 체크 동그라미 · 정답 테 | `onPrimary` · `success` | `success` · `surface` | 5.69 / 5.69 | 3 |
+| 주의 글자 | `cautionText` #9C4A1A | `bg` / `surface` / `cautionSoft` #FFE8D6 | 5.72 / 6.16 / 5.21 | 4.5 |
+| 주의 면 본문 · 보조 글자 | `text` / `textMuted` | `cautionSoft` | 12.89 / 5.20 | 4.5 |
+| 주의 면 코드 (글자 · 문자열 · 키워드) | `codeText` / `codeString` / `codeKeyword` | `cautionSoft` | 12.89 / 5.85 / 4.95 | 4.5 |
+| 입력 경계 | `lineStrong` #828A7C | `surface` / `bg` | 3.57 / 3.32 | 3 |
+| 덮개 위 글자 (흰 화면 위, 가장 나쁜 경우) | `onScrim` #FFFFFF | 덮개 65% over `surface` #6F736D | 4.82 | 4.5 |
+| 월드 1·2·3 표지 글자 | `w1Ink` / `w2Ink` / `w3Ink` | `w1Soft` / `w2Soft` / `w3Soft` | 5.16 / 5.71 / 5.71 | 4.5 |
+| 월드 바탕 본문 | `text` | `w1Soft` / `w2Soft` / `w3Soft` | 13.45 / 13.42 / 13.37 | 4.5 |
+| 2·3월드 지도 면 위 글자 | `text` | `w2Shallow` / `w2Deep` / `w3Brick` / `w3Blueprint` | 11.79 / 7.29 / 6.20 / 8.14 | 4.5 |
+| 코드 글자·주석·키워드·문자열 | `codeText` / `codeComment` / `codeKeyword` / `codeString` | `codeBg` #FFFFFF | 15.23 / 4.84 / 5.85 / 6.92 | 4.5 |
+| 코드 줄 번호 | `textMuted` | `surface2` | 5.25 | 4.5 |
+| 퀴즈 칩·빈칸 코드 (흰 면 · 정답 면. 틀린 면은 위 "주의 면 코드") | `codeText` / `codeString` | `surface` / `successSoft` | 15.23 · 6.92 / 13.04 | 4.5 |
+| 퀴즈 빈 빈칸 번호 | `textMuted` | `codeBg` | 6.14 | 4.5 |
+| 퀴즈 정답 체크 동그라미 · 정답 테 | `onPrimary` · `success` | `success` · `surface` | 5.85 / 5.85 | 3 |
 
-(표시값은 소수 둘째 자리에서 내림. 전체 59쌍은 `npx vitest run src/lib/design`)
+(표시값은 소수 둘째 자리에서 내림. 전체 70쌍은 `npx vitest run src/lib/design`)
 
-**P0-13 미달 해소**: 예전 브랜드 초록 `#31983d`는 흰 글자 3.69:1, 앱 배경 위 글자 3.39~3.59:1로 미달이었다. 같은 색상 계열에서 명도를 낮춘 `primary` `#3E7B3A`(흰 글자 5.12)와 글자 전용 `primaryText` `#3A7336`(배경 5.18)으로 나눴고, 앱의 `text-primary` 61곳을 모두 `text-primary-text`로 바꿨다. API 키 안내의 `amber-600` on `amber-50`(3.08:1)은 `text-warning` on `bg-warning-soft`(5.28)로, 프로필 `destructive`(3.43)는 `error` `#B3402F`(배경 5.17)로 바뀌었다. `bg-destructive/10` 위 오류 글자는 배경 위에서 4.49로 아슬아슬해 `bg-error-soft`(4.88)로 바꿨고, `hover:bg-primary/90`·`/80`(흰 글자 4.28)은 `hover:bg-primary-lip`(7.51)로 바꿨다.
+### 1.2 P13-02 "3-A 맑게 다듬기" (2026-11-18)
+
+- **무엇을**: 초록·금색 정체성은 그대로 두고 중립색의 누런 기를 뺐다(색상 약 40° 크림 → 약 80~90° 풀빛 도는 중립, 채도는 그대로 낮게 — 차가운 회색으로 가지 않는다). 초록은 올리브에서 맑은 초록으로, 금색·금색 틴트는 채도를 조금 올리고, 2·3권 틴트는 회색(`#B4C8D2`·`#D9C3A3`)에서 하늘(`#9CC4DE`)·살구(`#EDB787`)로.
+- **시안 값과 다른 것**: `primary`는 시안 `#2C8240`이 흰 글자 4.80:1이라 `#2A7D3D`(5.12)로 짙게, 그에 맞춰 `primaryLip` `#1E6130` → `#1C5A2C`. 나머지 시안 값 10개는 그대로.
+- **딸린 토큰**: `line`·`lineStrong`·`surfaceLip`·`codeComment`는 새 중립 색조로, `primaryText`는 새 초록에서 명도만 낮춰(`surface2`·`primarySoft` 위 5.0), `w3Brick`은 살구 틴트와 붙지 않게 한 단계 짙게. 그림자·덮개의 `rgb(46 42 37)`은 새 글자색 `rgb(34 39 31)`. `error`는 누런 기와 무관해 그대로. 파이뱀·펫 바닥 그림자(`lineStrong`과 같은 값, 테스트가 확인)도 함께.
+- **에디터 테마**: 바다·솜사탕은 앱 값을 그대로 쓰던 `accentLight`·`accentSoft`·`accentText`·`errorSoft`만 새 값으로. 밤하늘·오락실은 어두운 면 위 제 색이라 값은 그대로이고, 상자 바깥 테두리가 새 `bg` 위에서 3:1을 넘는지만 다시 쟀다(밤하늘 3.61 · 오락실 4.18).
+- **순백 `#FFFFFF` 면(sloplint 7b)은 바꾸지 않는다**: 카드·버튼에 테두리가 없어 면과 바탕(`#F6F7F3`)의 명도 차가 유일한 구분인데, 면을 바탕 색조로 옮기면 그 차가 더 줄고 흰 글자·초록 글자 대비 여유(5.12)도 깎인다. 바탕에서 누런 기를 뺀 뒤에는 흰 면이 차갑게 뜨지도 않는다.
+
+**P0-13 미달 해소** (P2-09 당시 값. 지금 값은 위 표): 예전 브랜드 초록 `#31983d`는 흰 글자 3.69:1, 앱 배경 위 글자 3.39~3.59:1로 미달이었다. 같은 색상 계열에서 명도를 낮춘 `primary` `#3E7B3A`(흰 글자 5.12)와 글자 전용 `primaryText` `#3A7336`(배경 5.18)으로 나눴고, 앱의 `text-primary` 61곳을 모두 `text-primary-text`로 바꿨다. API 키 안내의 `amber-600` on `amber-50`(3.08:1)은 `text-warning` on `bg-warning-soft`(5.28)로, 프로필 `destructive`(3.43)는 `error` `#B3402F`(배경 5.17)로 바뀌었다. `bg-destructive/10` 위 오류 글자는 배경 위에서 4.49로 아슬아슬해 `bg-error-soft`(4.88)로 바꿨고, `hover:bg-primary/90`·`/80`(흰 글자 4.28)은 `hover:bg-primary-lip`(7.51)로 바꿨다.
 
 ## 2. 글자·모양·간격·선·모션
 
@@ -96,7 +111,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | `body` | **17 / 1.7** | pyRoad Sans | 본문 (body 기본값, 자간 0, `word-break: keep-all`) |
 | `small` | 15 / 1.6 | pyRoad Sans | 보조 문단·말풍선 이름 |
 | `caption` | **14 / 1.5 (최소)** | pyRoad Sans | 캡션 |
-| `kicker` | 14 / 1.5, 650, 자간 0.02em | pyRoad Sans | 눈썹 글자 (주색 글자와 함께) |
+| `kicker` | 14 / 1.5, 650, 자간 0.02em | pyRoad Sans | 작은 라벨: 위치 줄(권·스테이지·퀘스트)·결과 상태에만. 제목을 되풀이하는 머리말로 쓰지 않음(P13-08) |
 | `code` | 16 / 1.6 | pyRoad Mono | 코드 (D2Coding은 짝수 px만 한글 2칸 정확) |
 
 - 크기는 rem이라 브라우저 글자 크기 설정을 따른다. **14px 미만 금지**(P0-14). Tailwind 기본 `text-xs`(12px)·`text-[11px]` 같은 지금 코드는 레거시 96곳(35파일)이라 기준표로 묶어 늘지 못하게 하고 Phase 4~6 화면 개편에서 없앤다(§5).
@@ -108,8 +123,8 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | 토큰 | CSS · Tailwind | 값 |
 |---|---|---|
 | `RADIUS.s/m/l/pill` | `--round-s/m/l/pill` · `rounded-sm`·`rounded-md`(10) · `rounded-lg`·`rounded-xl`(14) · `rounded-2xl` 이상(20) · `rounded-full` | 10 · 14 · 20 · 원형 (`--radius` = 14, shadcn 기준) |
-| `SHADOW.card` | `--elev-card` · `shadow-card` (`shadow-sm`·`shadow-md`도 같은 값) | `0 1px 2px rgb(46 42 37 / .06), 0 4px 14px rgb(46 42 37 / .06)` — 기본 한 종류 |
-| `SHADOW.pop` | `--elev-pop` · `shadow-pop` (`shadow-lg`·`shadow-xl`) | `0 12px 32px rgb(46 42 37 / .14)` — 떠 있는 층(시트·토스트·오버레이)만 |
+| `SHADOW.card` | `--elev-card` · `shadow-card` (`shadow-sm`·`shadow-md`도 같은 값) | `0 1px 2px rgb(34 39 31 / .06), 0 4px 14px rgb(34 39 31 / .06)` — 기본 한 종류 |
+| `SHADOW.pop` | `--elev-pop` · `shadow-pop` (`shadow-lg`·`shadow-xl`) | `0 12px 32px rgb(34 39 31 / .14)` — 떠 있는 층(시트·토스트·오버레이)만 |
 | `LINE.ui` | `--line-w` | 1px: 테두리는 입력·코드 상자만. 버튼·카드·칩은 테두리 없음 |
 | `LINE.lip` | `--lip-h` | 3px: 버튼 아랫면, 눌리면 이만큼 내려감 |
 | `LINE.focus` · `focusOffset` | `--focus-w` · `--focus-offset` · `focus-ring` 유틸리티 | 2px · 2px, 색 `--ring`(짙은 중립) |
@@ -135,7 +150,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 
 ```tsx
 <section data-world={2}>
-  <div className="bg-world-soft">           {/* 월드 2 바탕 #EDF1F3 */}
+  <div className="bg-world-soft">           {/* 월드 2 바탕 #E8F2F9 */}
     <h2 className="text-world-ink">…</h2>   {/* 월드 2 표지 글자 */}
     <div className="bg-world/40" />          {/* 장식 틴트 */}
   </div>
@@ -164,6 +179,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
   - `motion` (`src/components`·`src/app`): Framer `duration`·`delay`·`stiffness`·`damping`·`mass`의 0 아닌 숫자(`1.5 * k`도), `ease: '문자열'`, Tailwind `duration-300`·`delay-200`·`duration-[…]`·`ease-[…]`
   - `size`: 14px 미만 글자(`text-xs`·`text-[11px]`·`text-[0.8rem]`)가 `scripts/design/tokens-baseline.json`의 파일별 개수보다 늘면 실패. 줄이면 `npm run tokens:check -- --update-baseline`
   - CSS(`src/**/*.css`, `src/fonts` 제외): 사용자 정의 속성(`--x: …`) 밖의 색 리터럴과 `font-family`. 토큰 값은 globals.css `:root`에만
+  - `stripe` (CSS, P13-07): 둥근 카드·줄의 **측면 색 띠** — (a) 한쪽 안쪽 그림자 `box-shadow: inset ±N(px·rem) 0 0 <색>`(번짐·퍼짐 없는 가로 한쪽. 아랫면 턱 `inset 0 -3px 0`, 테두리 고리 `inset 0 0 0 2px`는 통과) (b) 폭 8px(0.5rem) 이하 + 위아래 끝까지(`inset: 0 …`·`top: 0` + `bottom: 0`·`height: 100%`) + 색 면인 `::before`·`::after` (c) 2px(0.125rem) 이상 색 `border-left`·`border-right`·`border-inline-start`·`border-inline-end`(`-width` 포함. `transparent`·`none`·1px 구분선 `var(--line-w)`는 통과). 정적 휴리스틱이라 px·rem 리터럴만 본다(`var()`·`calc()` 폭, `border-width` 축약, TS 스타일 객체는 못 봄). 띠가 맡던 뜻은 면 색·아이콘·글자로 전한다
 - 토큰 값 드리프트·대비는 `npx vitest run src/lib/design`(CI `unit`).
 - 컴포넌트에 `dark:` 색 클래스를 쓰지 않는다(다크 모드 범위 밖, §7).
 
@@ -178,6 +194,9 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 | `src/lib/celebration/**` | motion | 축하 시퀀서·컨페티 박자표(ms 타임라인). 색은 토큰 import |
 | 줄 주석 `// tokens-allow: <이유>` (그 줄 또는 바로 윗줄) | 전부 | 브랜드 가이드 색·외부가 정한 색. 이유를 꼭 쓴다. 지금: 소셜 로그인 로고 SVG 색(`src/components/auth/brandMarks.tsx`: 카카오 심볼 `#000000`, 네이버 N `#FFFFFF`, Google G 4색, P3-05) |
 | `src/components/auth/social-login.css`의 provider별 사용자 정의 속성(`--social-bg`·`--social-fg`·`--social-stroke`) | color | 소셜 로그인 버튼 면·글자·테두리 = 각 사 브랜드 가이드 값(카카오 `#FEE500`·레이블 검정 85%, 네이버 `#03A94D`(2025 갱신, 예전 `#03C75A`)·흰 글자, Google 흰 면·`#747775`·`#1F1F1F`). pyRoad 토큰으로 만들지 않는다(테마가 바뀌어도 그대로여야 함). CSS 검사는 사용자 정의 속성 값을 보지 않으므로 이 표와 `social-login-css.test.ts`가 기록·확인한다. 근거·어긋남은 [components.md](components.md) §12 |
+| CSS 주석 `/* tokens-allow: <이유> */` (그 줄 또는 바로 윗줄) | stripe | 뜻이 있는 옆 선. 지금 1곳: `src/components/quest/quiz/parsons.css` `.qz-ps-guide`의 `border-left: 2px dashed` — 줄 맞추기 퀴즈의 **코드 들여쓰기 안내선**(한 칸에 하나, 장식 띠가 아님. P13-audit §5) |
+
+측면 띠 규칙에 걸리지 않아 예외가 필요 없던 것(P13-07 판정, 유지): 1px 구분선(`shop.css` 영수증 칸·`trial.css`·`codeKeyboard.css`·`parsons.css` 칸 선, 모두 `var(--line-w)`), 갤러리 깃발 줄(`gallery.css` `.gl-bunting`의 윗변 3px — 깃발을 매단 줄 그림), 랜딩 그림 속 의사 요소(`parents.css` 정류장 사이 길, `worlds.css` 막대 손잡이 — 위아래 끝까지 붙지 않음), 에디터 커서(`src/lib/editor/kidsTheme.ts`의 `borderLeft: 2px` — CodeMirror 커서, TS라 검사 밖).
 
 공유 카드(P2-19)는 satori가 CSS 변수를 못 읽으므로 `COLOR`를 import해 리터럴 없이 쓴다(예외 불필요). 정지 그림 래스터(히어로·카드 배경 PNG, §12-Q28)는 이미지라 검사 대상이 아니다.
 

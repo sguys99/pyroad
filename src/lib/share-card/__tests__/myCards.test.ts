@@ -45,7 +45,7 @@ describe('myCardDetail', () => {
         xp: 100,
         stars: 9,
       }),
-    ).toBe('11월 둘째 주 · 퀘스트 5개');
+    ).toBe('11월 둘째 주, 퀘스트 5개');
   });
   it('모양이 틀리면 빈 글', () => {
     expect(myCardDetail('levelup', { nickname: '별', email: 'a@b.c' })).toBe(

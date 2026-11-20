@@ -381,7 +381,7 @@ function ExampleCompare({
   if (!example.compare)
     return (
       <div className="qo-goal" data-testid="output-example">
-        <span className="qo-k">이런 모양이면 돼요 · 예시</span>
+        <span className="qo-k">이런 모양이면 돼요 (예시)</span>
         <ol className="qo-cmp">
           {outputLines(example.text.trim()).map((line, i) => (
             <li key={i} className="qo-cmp-row">
@@ -399,7 +399,10 @@ function ExampleCompare({
   return (
     <div className="qo-goal" data-testid="output-example" data-compare>
       <span className="qo-k">
-        이런 모양이면 돼요 · {rows.length}줄 중 {same}줄 같아요
+        이런 모양이면 돼요{' '}
+        <span className="ml-2">
+          {rows.length}줄 중 {same}줄 같아요
+        </span>
       </span>
       <ol className="qo-cmp">
         {rows.map((row, i) => (

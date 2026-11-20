@@ -81,7 +81,7 @@ test.describe('랜딩 세계관 (P4-04)', () => {
     await placeMap(page, 0.3);
     const w1 = page.getByTestId('world-card-1');
     await expect(w1).toContainText('지금 열려 있어요');
-    await expect(w1).toContainText(/스테이지 \d+곳 · 퀘스트 \d+개/);
+    await expect(w1).toContainText(/스테이지 \d+곳, 퀘스트 \d+개/);
     await expect(page.getByTestId('world-card-2')).toContainText(
       '파이썬 섬의 마지막 프로젝트를 끝내면 열려요',
     );

@@ -292,7 +292,12 @@ export function BossQuestion({ session: s }: { session: BossSession }) {
           <span className="qz-k bb-round" data-testid="boss-round">
             <Swords aria-hidden />
             문제 {s.round + 1} / {s.total}
-            {def ? ` · ${def.label}` : ''}
+            {def && (
+              <>
+                {' '}
+                <span className="ml-2">{def.label}</span>
+              </>
+            )}
           </span>
           <ModeChip mode={s.mode} />
         </div>

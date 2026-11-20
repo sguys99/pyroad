@@ -90,17 +90,6 @@
     transform: scaleX(0.72) skewY(8deg);
   }
 }
-@keyframes ha-twinkle {
-  0%,
-  100% {
-    transform: scale(0.55) rotate(0deg);
-    opacity: 0.35;
-  }
-  50% {
-    transform: scale(1.1) rotate(45deg);
-    opacity: 1;
-  }
-}
 @keyframes ha-glow {
   50% {
     opacity: 0.45;
@@ -162,12 +151,6 @@
   }
   .hero .ha-flag {
     animation: ha-flag 1.4s ease-in-out infinite;
-  }
-  .hero .ha-spark {
-    animation: ha-twinkle 2.4s ease-in-out infinite;
-  }
-  .hero g:nth-of-type(odd) > .ha-spark {
-    animation-delay: -1.2s;
   }
   .hero .ha-glow {
     animation: ha-glow 3s ease-in-out infinite;

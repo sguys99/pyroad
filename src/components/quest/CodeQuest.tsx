@@ -28,10 +28,9 @@ export function CodeQuest(props: QuestSessionOptions) {
             이미 완료한 퀘스트예요!{' '}
             {nextQuestId && (
               <>
-                <Link href={`/quest/${nextQuestId}`} className="underline">
+                <Link href={`/quest/${nextQuestId}`} className="mr-2 underline">
                   다음 퀘스트로
-                </Link>
-                {' · '}
+                </Link>{' '}
               </>
             )}
             <Link

@@ -204,7 +204,7 @@ describe('P11-05 더함', () => {
     expect(checkDrawingRule(a, { type: 'text' }).ok).toBe(true);
     expect(checkDrawingRule(a, { type: 'text', includes: '없는 말' })).toEqual({
       ok: false,
-      reasons: ['write()로 "없는 말"를 써야 해요.'],
+      reasons: ['write()로 “없는 말”를 써야 해요.'],
     });
     expect(checkDrawingRule(load('square'), { type: 'text', min: 1 }).ok).toBe(
       false,

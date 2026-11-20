@@ -152,18 +152,8 @@
   }
   .wb-book[data-status='locked'] .wb-cover svg,
   .wb-book[data-status='coming_soon'] .wb-cover svg {
-    filter: saturate(0.35) brightness(0.98);
-  }
-  .wb-band {
-    position: absolute;
-    top: 0.625rem;
-    left: 0.625rem;
-    padding: 0.125rem 0.625rem;
-    border-radius: var(--round-pill);
-    background: color-mix(in srgb, var(--surface) 92%, transparent);
-    color: var(--text);
-    font-size: var(--text-caption);
-    font-weight: 700;
+    /* P13-04: 0.35는 2·3권 표지를 회색으로 만들었다. 잠김은 자물쇠·상태 글자가 알린다 */
+    filter: saturate(0.75);
   }
   .wb-clasp {
     position: absolute;
@@ -174,52 +164,62 @@
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 50%;
-    background: color-mix(in srgb, var(--surface) 92%, transparent);
-    color: var(--text-muted);
+    /* P13-05: 표지가 제 색이라 잠김은 이 걸쇠가 알린다 — 불투명한 면 + 본문 색 아이콘 */
+    background: var(--surface);
+    color: var(--text);
   }
 
-  /* ───────────── 책 카드: 흰 면 + 왼쪽 책등(월드 색 띠). 좁은 화면은 가로 한 줄(그림 | 글), 640px부터 세로 표지 */
+  /* ───────────── 책 카드 (P13-05, 시안 1-A): 흰 면 한 겹, 표지 그림이 카드 가장자리까지. 월드 색은 그림이 맡는다(측면 띠 없음).
+     기본은 가로 한 줄(정사각 그림이 왼쪽 위 | 글), 책장은 640px부터 세로 표지(그림이 윗면 끝까지) */
   .wb-book {
     position: relative;
     display: grid;
     grid-template-columns: 7.5rem 1fr;
-    align-items: center;
-    align-content: start;
-    gap: 0.875rem;
+    /* 둘째 줄은 글 칸 아래 실력 확인 안내 자리 */
+    grid-template-rows: 1fr auto;
     height: 100%;
-    padding: 0.75rem 0.875rem 0.75rem 1.25rem;
   }
-  /* 책등: 왼쪽 월드 색 띠 (잠긴 책은 옅게) */
-  .wb-book::before {
-    content: '';
+  /* 카드 반경을 물려받아 닿는 모서리만 둥글게 (카드에 overflow를 걸면 위로 나온 책갈피가 잘림) */
+  .wb-book > .wb-cover {
+    /* P13-19: 카드 높이를 따라 늘이면 길쭉한 칸에 맞춰 그림이 잘려(하늘·돛 끝만) 정사각으로 왼쪽 위에 고정 —
+       잘림이 생기면 "왼쪽 면 끝까지"보다 비율이 우선(§12-Q85). 그 아래 왼쪽 면은 카드 면 그대로.
+       xMidYMid slice로 가운데 200×140 중 140×140이 보여 성·배·톱니가 안에 들어온다 */
+    grid-row: 1 / -1;
+    align-self: start;
+    aspect-ratio: 1;
+    border-radius: inherit;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .wb-book > .wb-cover > svg {
     position: absolute;
-    inset: 0 auto 0 0;
-    width: 0.375rem;
-    border-radius: var(--round-l) 0 0 var(--round-l);
-    background: var(--world);
-  }
-  .wb-book[data-status='locked']::before,
-  .wb-book[data-status='coming_soon']::before {
-    background: color-mix(in srgb, var(--world) 40%, var(--surface-2));
-  }
-  .wb-book .wb-band {
-    display: none;
-  }
-  @media (min-width: 640px) {
-    .wb-book {
-      grid-template-columns: 1fr;
-      align-items: start;
-      padding: 0.75rem 0.75rem 1rem 1.25rem;
-    }
-    .wb-book .wb-band {
-      display: block;
-    }
+    inset: 0;
   }
   .wb-info {
     display: flex;
     min-width: 0;
     flex-direction: column;
+    align-self: center;
     gap: 0.375rem;
+    padding: 0.875rem 1rem 1rem 0.875rem;
+  }
+  @media (min-width: 640px) {
+    .wb-shelf .wb-book {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+    }
+    .wb-shelf .wb-book > .wb-cover {
+      grid-row: auto;
+      aspect-ratio: 10 / 7;
+      border-radius: inherit;
+      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    .wb-shelf .wb-info {
+      align-self: start;
+      padding: 1rem 1.25rem 1.25rem;
+    }
   }
   .wb-kicker {
     color: var(--text-muted);
@@ -249,8 +249,8 @@
   }
   /* 새로 열린 월드 (P5-05) */
   .wb-status[data-fresh] {
-    background: var(--accent-soft);
-    color: var(--accent-text);
+    background: var(--primary-soft);
+    color: var(--primary-text);
   }
   .wb-note {
     display: flex;
@@ -262,7 +262,7 @@
   }
   .wb-stat {
     flex-wrap: wrap;
-    gap: 0 0.25rem;
+    gap: 0 0.75rem;
   }
   .wb-stat > span {
     white-space: nowrap;
@@ -285,8 +285,8 @@
     right: 1rem;
     z-index: 1;
     padding: 0.5rem 0.375rem 0.75rem;
-    background: var(--accent);
-    color: var(--on-accent);
+    background: var(--primary);
+    color: var(--on-primary);
     font-size: var(--text-caption);
     font-weight: 700;
     line-height: 1.2;
@@ -370,18 +370,6 @@
   }
   .wb-next .wb-book {
     grid-template-columns: 6rem 1fr;
-    align-items: center;
-    padding: 0.625rem 0.75rem 0.625rem 1.125rem;
-  }
-  .wb-next .wb-band {
-    display: none;
-  }
-  .wb-next .wb-clasp {
-    top: 50%;
-    right: 0.375rem;
-    width: 2rem;
-    height: 2rem;
-    margin-top: -1rem;
   }
 
   /* ───────────── 잠긴 책 안내 (/world/[slug]가 잠겼거나 준비 중) */
@@ -392,12 +380,13 @@
     margin: 1rem auto 0;
     padding: 1rem;
   }
+  /* 표지만 따로 놓는 자리: 제 비율·제 반경 */
   .wb-locked .wb-book {
-    padding: 0;
     grid-template-columns: 1fr;
   }
-  .wb-locked .wb-book::before {
-    display: none;
+  .wb-locked .wb-book > .wb-cover {
+    aspect-ratio: 10 / 7;
+    border-radius: var(--round-m);
   }
   @media (min-width: 640px) {
     .wb-locked {
@@ -407,36 +396,22 @@
     }
   }
 
-  /* ───────────── 실력 확인 퀴즈 쪽지 (P10-03, SkillCheckOffer): 잠긴 책에 끼운 시험지. 점선 테 + 월드 틴트 바탕, 반복 연출 없음 */
+  /* ───────────── 실력 확인 퀴즈 안내 (P10-03, SkillCheckOffer): 잠긴 책 카드 안의 일반 문단 + 버튼.
+     P13-10: 점선 테·틴트 면 없음(카드 속 카드 금지) — 위 글과는 1px 선으로만 나눔. 반복 연출 없음 */
   .wb-skill {
     display: grid;
     justify-items: start;
     gap: 0.5rem;
-    padding: 0.75rem 0.875rem;
-    border: 2px dashed
-      color-mix(
-        in srgb,
-        var(--world, var(--line-strong)) 70%,
-        var(--line-strong)
-      );
-    border-radius: var(--round-m);
-    background: var(--world-soft, var(--surface-2));
-  }
-  .wb-skill[data-tried] {
-    border-color: var(--line-strong);
-    background: var(--surface-2);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
   }
   .wb-skill-k {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--world-ink, var(--text-muted));
-    font-size: var(--text-kicker);
-    font-weight: 750;
-    letter-spacing: 0.02em;
-  }
-  .wb-skill[data-tried] .wb-skill-k {
     color: var(--text-muted);
+    font-size: var(--text-caption);
+    font-weight: 700;
   }
   .wb-skill-t {
     margin: 0;
@@ -447,11 +422,17 @@
   .wb-skill .g-btn-face {
     white-space: normal;
   }
-  /* 책장 카드 안: 카드 아래쪽에 붙고 버튼은 한 줄 */
+  /* 책 카드 안: 글 칸(가로 카드는 그림 오른쪽, 세로 표지는 그림 아래)에 이어 붙음 */
   .wb-skill[data-compact] {
-    grid-column: 1 / -1;
-    align-self: end;
-    padding: 0.625rem 0.75rem;
+    grid-column: 2;
+    margin: 0 1rem 1rem 0.875rem;
+  }
+  @media (min-width: 640px) {
+    .wb-shelf .wb-skill[data-compact] {
+      grid-column: 1;
+      align-self: end;
+      margin: 0 1.25rem 1.25rem;
+    }
   }
 
   /* ───────────── 책 ↔ 지도 전환 (View Transitions, 한 번만) */

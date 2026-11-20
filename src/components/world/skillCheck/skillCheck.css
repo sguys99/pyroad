@@ -8,10 +8,9 @@
   gap: 0.5rem;
   width: 100%;
   margin: 0;
-  padding: 0.75rem 0.875rem;
-  border: 2px dashed var(--line-strong);
-  border-radius: var(--round-m);
-  background: var(--surface-2);
+  /* P13-10: 카드 안의 목록 — 점선 테·면 없이 위아래 1px 선 */
+  padding: 0.875rem 0;
+  border-block: 1px solid var(--line);
   list-style: none;
   text-align: left;
 }
@@ -120,7 +119,7 @@
   align-items: center;
   gap: 0.375rem;
   margin: 0;
-  color: var(--accent-text);
+  color: var(--text-muted);
   font-size: var(--text-kicker);
   font-weight: 750;
 }

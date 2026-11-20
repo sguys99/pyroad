@@ -320,7 +320,12 @@ function SkillCheckQuestions({
               <span className="qz-k" data-testid="skill-check-round">
                 <ClipboardCheck aria-hidden />
                 문제 {step + 1} / {questions.length}
-                {def ? ` · ${def.label}` : ''}
+                {def && (
+                  <>
+                    {' '}
+                    <span className="ml-2">{def.label}</span>
+                  </>
+                )}
               </span>
             </div>
             <h2 id={qid} className="qz-q" ref={heading} tabIndex={-1}>
@@ -487,10 +492,6 @@ export function SkillCheckResultCard({
           filters={false}
         />
       </span>
-      <p className="dq-k font-sans">
-        <ClipboardCheck aria-hidden className="size-4" />
-        {passed ? '실력 인정!' : '실력 확인 퀴즈 결과'}
-      </p>
       <h2
         id="sk-result-t"
         ref={heading}

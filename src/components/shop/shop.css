@@ -189,8 +189,8 @@
   gap: 0.25rem;
   padding: 0.125rem 0.625rem 0.125rem 0.5rem;
   border-radius: var(--round-pill);
-  background: var(--accent-soft);
-  color: var(--accent-text);
+  background: var(--surface);
+  color: var(--text);
   font-size: var(--text-caption);
   font-weight: 700;
 }
@@ -233,7 +233,6 @@
 }
 .shop-kinds .g-seg-thumb {
   background: var(--primary-soft);
-  box-shadow: inset 0 0 0 2px var(--primary);
 }
 .shop-kinds .g-seg-tab[aria-selected='true'] {
   color: var(--primary-text);
@@ -379,14 +378,12 @@
 .shop-card[data-short] .shop-price b {
   color: var(--text-muted);
 }
+/* 카드의 알약은 그림 위 등급 딱지 하나. 상태는 가격 자리에 아이콘 + 글자 (P13-11) */
 .shop-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   margin-top: auto;
-  padding: 0.125rem 0.625rem;
-  border-radius: var(--round-pill);
-  background: var(--surface-2);
   color: var(--text-muted);
   font-size: var(--text-caption);
   font-weight: 700;
@@ -396,7 +393,6 @@
   height: 0.875rem;
 }
 .shop-tag[data-state='equipped'] {
-  background: var(--primary-soft);
   color: var(--primary-text);
 }
 .shop-rarity {
@@ -640,8 +636,7 @@
   gap: 0.75rem;
   padding: 1rem;
   border-radius: var(--round-m);
-  background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--surface-2);
 }
 .shop-confirm-q {
   margin: 0;
@@ -670,7 +665,7 @@
 }
 .shop-bill-left {
   padding-top: 0.5rem;
-  border-top: var(--line-w) dashed var(--accent);
+  border-top: var(--line-w) solid var(--line);
 }
 .shop-bill-left dt {
   color: var(--accent-text);

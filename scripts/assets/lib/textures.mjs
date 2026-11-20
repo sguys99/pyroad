@@ -4,8 +4,10 @@
 // - 가장자리를 감싸는(wrap) 흐림이라 이음매 없이 반복된다
 // - 색은 하나(잉크 갈색), 인덱스마다 투명도만 다르게 → 팔레트 PNG가 아주 작다. CSS `mask-image`로 쓰면 다른 색으로도 칠할 수 있다
 
-/** 종이 결 색 (#5C462A, 시안 B와 같음) */
+/** 종이 결 색 (#5C462A, 시안 B와 같음). 타일에 `ink`가 없으면 이 색 */
 export const PAPER_INK = [92, 70, 42];
+/** P13-04: 새 바탕(#F6F7F3, 풀빛 도는 중립)과 같은 색조의 결 색 (#4A5240). 갈색 결은 새 바탕 위에서 누렇게 떴다 */
+export const PAPER_INK_FRESH = [74, 82, 64];
 
 /**
  * 만드는 타일. 알고리즘·값을 바꾸면 `version`을 올린다 (`/textures/*`는 1년 immutable 캐시).
@@ -23,11 +25,12 @@ export const TEXTURES = [
   },
   {
     id: 'paper-fiber',
-    version: 1,
+    version: 2,
     kind: 'fiber',
     size: 256,
     levels: 8,
     seed: 8,
+    ink: PAPER_INK_FRESH,
   },
 ];
 
@@ -129,7 +132,7 @@ export function quantizeAlpha(alpha, size, levels, ink = PAPER_INK) {
 }
 
 export function renderTexture(def) {
-  return quantizeAlpha(textureAlpha(def), def.size, def.levels);
+  return quantizeAlpha(textureAlpha(def), def.size, def.levels, def.ink);
 }
 
 /** 두 팔레트 이미지가 같은 그림인지 (압축 바이트가 아니라 픽셀·색·투명도로) */

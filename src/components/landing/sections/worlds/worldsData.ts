@@ -65,7 +65,7 @@ export function worldNote(
 ): string {
   if (world.state === 'open') {
     return stats
-      ? `스테이지 ${stats.stages}곳 · 퀘스트 ${stats.quests}개`
+      ? `스테이지 ${stats.stages}곳, 퀘스트 ${stats.quests}개`
       : '지금 바로 출발할 수 있어요';
   }
   return prev

@@ -91,7 +91,7 @@ test('작품 카드 만들기 → 공개 페이지 → 내리기 → 404', async
     expect(res.status()).toBe(200);
     const html = await res.text();
     expect(html).toContain('두근두근 퀴즈쇼');
-    expect(html).toContain('구경해 주세요');
+    expect(html).toContain('직접 만든 작품이에요');
     for (const leak of [
       '비밀코드_e2e',
       e2eUser.id,

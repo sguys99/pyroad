@@ -25,7 +25,7 @@ interface RetroWelcomeCardProps {
  * "그동안의 모험 보상" 환영 카드 (P8-11). 새 보상 규칙 전에 모험한 사용자가 소급으로 받은 별 보상·코인을 한 번 알려 줌.
  * 코인은 이미 잔액(HUD)에 들어가 있어 받기 버튼 없이 "좋아요!"로 닫음 → 서버에 본 기록(seen_at), 다음 방문부터 안 보임.
  * 소급 판정한 업적은 축하 카드 없이 도감 "받기 가능"으로만 있으므로 그 수를 한 줄로 알려 도감으로 보냄.
- * 출석 카드와 같은 쪽지 모양(`.at`, 위 금색 띠)이고 출석 카드 위에 놓임
+ * 출석 카드와 같은 쪽지 모양(`.at`)이고 출석 카드 위에 놓임
  */
 export function RetroWelcomeCard({
   retro,
@@ -47,7 +47,6 @@ export function RetroWelcomeCard({
       data-testid="retro-welcome"
     >
       <div className="at-head">
-        <span className="at-k">그동안의 모험 보상</span>
         <h2 id="retro-title" className="at-t font-display">
           지난 모험도 보상으로 바꿔 왔어요!
         </h2>

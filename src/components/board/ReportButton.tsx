@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react';
 import { m } from 'framer-motion';
-import { framerSpring } from '@/lib/motion/tokens';
+import { EASE, sec } from '@/lib/motion/tokens';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
 import { Check, Flag } from 'lucide-react';
 import {
@@ -144,7 +144,9 @@ export function ReportButton({
                 initial={reduceMotion ? false : { scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={
-                  reduceMotion ? { duration: 0 } : framerSpring('prop')
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { duration: sec('base'), ease: EASE.out }
                 }
               >
                 <Check className="size-6" aria-hidden="true" />

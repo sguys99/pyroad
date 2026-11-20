@@ -119,7 +119,7 @@ export function CreateNoticeForm({ initialData }: CreateNoticeFormProps) {
       </div>
 
       <Button type="submit" loading={submitting}>
-        {submitting ? '저장 중...' : isEdit ? '수정하기' : '게시하기'}
+        {submitting ? '저장 중…' : isEdit ? '수정하기' : '게시하기'}
       </Button>
     </form>
   );

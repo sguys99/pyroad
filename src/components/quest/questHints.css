@@ -80,14 +80,14 @@
   border-radius: var(--round-s);
   background: var(--surface-2);
   overflow-wrap: anywhere;
-  animation: qh-note-in var(--spring-body-dur) var(--spring-body) both;
+  animation: qh-note-in var(--dur-base) var(--easing-out) both;
 }
 .qh-note-k {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   margin-bottom: 0.25rem;
-  color: var(--accent-text);
+  color: var(--text-muted);
   font-size: var(--text-caption);
   font-weight: 700;
 }

@@ -68,7 +68,7 @@ export function LinkedAccountsList({
   onUnlink,
 }: LinkedAccountsListProps) {
   return (
-    <ul className="flex flex-col gap-2.5" data-testid="linked-accounts">
+    <ul className="flex flex-col" data-testid="linked-accounts">
       {rows.map((row) => {
         const Mark = SOCIAL_MARK[row.provider];
         const name = NAME[row.provider];
@@ -77,7 +77,7 @@ export function LinkedAccountsList({
           <li
             key={row.provider}
             // 로고 | 이름 + 상태(아래로 쌓음) | 버튼. 막힌 이유·마지막 수단 안내는 줄 전체 폭으로 맨 아래 (360px에서 좁은 칸에 갇히지 않게)
-            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl bg-surface-2 p-3"
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border py-3 first:border-t-0 first:pt-0 last:pb-0"
             data-provider={row.provider}
             data-state={row.state}
           >
@@ -89,18 +89,18 @@ export function LinkedAccountsList({
                   ? 'g-social-chip-naver'
                   : row.provider === 'kakao'
                     ? 'g-social-chip-kakao'
-                    : 'bg-card',
+                    : 'bg-surface-2',
               )}
               aria-hidden
             >
               <Mark className="size-5" />
             </span>
-            {/* @container: 이 칸이 좁으면(360px 화면) 날짜를 "연결됨" 아래 줄로, 넓으면 한 줄 "연결됨 · 날짜" */}
+            {/* @container: 이 칸이 좁으면(360px 화면) 날짜를 "연결됨" 아래 줄로, 넓으면 한 줄 "연결됨  날짜"(간격으로 나눔) */}
             <div className="@container min-w-0">
               <p className="text-base font-bold text-foreground">{name}</p>
               {row.state === 'linked' ? (
                 // "✓ 연결됨"과 날짜는 각각 끊기지 않는 덩어리
-                <p className="flex flex-col items-start gap-x-1 text-small text-muted-foreground @[13rem]:flex-row @[13rem]:items-center">
+                <p className="flex flex-col items-start gap-x-3 text-small text-muted-foreground @[13rem]:flex-row @[13rem]:items-center">
                   <span className="inline-flex items-center gap-1 whitespace-nowrap">
                     <Check
                       aria-hidden
@@ -111,7 +111,6 @@ export function LinkedAccountsList({
                   {/* 글자로 읽을 때 띄어쓰기 (flex 안의 공백 글자 노드는 그려지지 않음) */}{' '}
                   {row.linkedAt && (
                     <span className="whitespace-nowrap">
-                      <span className="hidden @[13rem]:inline">· </span>
                       {formatKstDate(row.linkedAt, 'dot')}
                     </span>
                   )}
@@ -279,7 +278,7 @@ export function LinkedAccountsSection() {
         id={titleId}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <KeyRound aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <KeyRound aria-hidden className="h-5 w-5 text-foreground" />
         로그인 계정 연결
       </h2>
       <p className="mb-3 text-base text-muted-foreground">
@@ -294,7 +293,7 @@ export function LinkedAccountsSection() {
           onUnlink={setConfirm}
         />
       ) : (
-        <p className="text-base text-muted-foreground">불러오는 중...</p>
+        <p className="text-base text-muted-foreground">불러오는 중…</p>
       )}
 
       {status && (

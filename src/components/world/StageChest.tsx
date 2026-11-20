@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
 import type { StageWithStatus } from '@/lib/types/database';
 import {
   achievementEvents,
@@ -11,7 +10,7 @@ import type { AchievementInfo } from '@/lib/quest/achievements';
 import { chestCoins, chestGoal, chestState } from '@/lib/world/chest';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { RewardIcon, Stars } from '@/components/ui/reward-icon';
+import { Glint, RewardIcon, Stars } from '@/components/ui/reward-icon';
 import './stageChest.css';
 
 export type ChestEvent = Extract<CelebrationEvent, { type: 'chest' }>;
@@ -120,8 +119,8 @@ export function StageChest({
         />
         {state === 'ready' && (
           <>
-            <Sparkles className="sc-glint" data-i="0" strokeWidth={2.4} />
-            <Sparkles className="sc-glint" data-i="1" strokeWidth={2.4} />
+            <Glint className="sc-glint" data-i="0" />
+            <Glint className="sc-glint" data-i="1" />
           </>
         )}
       </span>

@@ -75,7 +75,8 @@ export function AgreementChecklist<Id extends string = string>({
         {legend}
       </legend>
 
-      <div className="flex min-h-14 items-center gap-3 rounded-xl bg-primary-soft px-4">
+      {/* P13-10: 줄마다 제 면을 두지 않음 — 구분은 1px 선, 위계는 글자 굵기 */}
+      <div className="flex min-h-14 items-center gap-3">
         <input
           ref={allRef}
           id={`${baseId}-all`}
@@ -93,13 +94,13 @@ export function AgreementChecklist<Id extends string = string>({
         </label>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="border-t border-border">
         {items.map((item) => {
           const inputId = `${baseId}-${item.id}`;
           return (
             <li
               key={item.id}
-              className="flex min-h-12 items-center gap-3 rounded-xl bg-surface-2 px-4"
+              className="flex min-h-12 items-center gap-3 border-b border-border"
             >
               <input
                 id={inputId}

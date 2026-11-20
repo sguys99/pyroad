@@ -53,11 +53,11 @@ export function myCardDetail(kind: string, snapshot: unknown): string {
     case 'levelup':
       return `레벨 ${d.level}`;
     case 'stage':
-      return `「${d.stageName}」 · 별 ${d.stars}개`;
+      return `「${d.stageName}」, 별 ${d.stars}개`;
     case 'achievement':
       return `「${d.name}」`;
     case 'weekly':
-      return `${d.weekLabel} · 퀘스트 ${d.quests}개`;
+      return `${d.weekLabel}, 퀘스트 ${d.quests}개`;
     case 'creation':
       return `「${d.name}」`;
   }

@@ -58,12 +58,15 @@ export function PhoneQuizSlip({
         <span className="pq-t">{pick.title}</span>
         <span className="pq-meta font-sans">
           <Icon aria-hidden className="size-3.5" strokeWidth={2.6} />
-          {QUIZ_KIND_LABEL[pick.kind]} · {pick.stageOrder}단계
+          {QUIZ_KIND_LABEL[pick.kind]}{' '}
+          <span className="ml-2">{pick.stageOrder}단계</span>
           {pick.review && (
             <>
-              {' · '}
-              <Star aria-hidden className="size-3.5" strokeWidth={2.6} />별 더
-              모으기
+              {' '}
+              <span className="ml-2 inline-flex items-center gap-1">
+                <Star aria-hidden className="size-3.5" strokeWidth={2.6} />별 더
+                모으기
+              </span>
             </>
           )}
         </span>

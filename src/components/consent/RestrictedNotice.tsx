@@ -52,7 +52,7 @@ export function RestrictedNotice({
       </div>
       <Button
         href={GUARDIAN_CONSENT_HREF}
-        variant="reward"
+        variant="primary"
         size="sm"
         className="cs-notice-cta"
         data-testid="restricted-notice-cta"

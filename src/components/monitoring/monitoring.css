@@ -121,7 +121,7 @@
   color: var(--text);
 }
 .mon-chip[data-status='warn'] > svg {
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .mon-tile .mon-chip {
   background: var(--surface);
@@ -263,7 +263,7 @@
   height: 1.125rem;
   margin-top: 0.125rem;
   flex: none;
-  color: var(--accent-text);
+  color: var(--caution-text);
 }
 .mon-alerts > li[data-status='ok'] > svg {
   color: var(--success);

@@ -81,7 +81,7 @@ export const BUGBUG_PALETTES: Record<RigStyle, BugBugPalette> = {
     cheekAlpha: '0.75',
     /** 등딱지(#C8553D)의 진한 톤 (P2-07 2차). 다리·더듬이는 잉크 대신 제 색(leg·head) */
     outline: '#8C3B2B',
-    shadow: '#8E877C',
+    shadow: '#828A7C',
     under: '#3B2F25',
     wing: '#EAF1F4',
   },

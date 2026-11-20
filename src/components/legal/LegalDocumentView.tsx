@@ -18,7 +18,8 @@ export function LegalDocumentView({ doc }: { doc: LegalDocument }) {
           {doc.title}
         </h1>
         <p className="text-small text-muted-foreground">
-          시행일 {formatLegalDate(doc.effectiveDate)} · 버전 {doc.version}
+          시행일 {formatLegalDate(doc.effectiveDate)}{' '}
+          <span className="ml-2">버전 {doc.version}</span>
         </p>
       </header>
 
@@ -125,14 +126,9 @@ function KidSummary({ title, items }: { title: string; items: string[] }) {
           </p>
         </div>
       </div>
-      <ul className="mt-4 space-y-2 text-body text-foreground">
+      <ul className="mt-4 list-disc space-y-2 pl-5 text-body text-foreground">
         {items.map((item) => (
-          <li key={item} className="flex gap-2">
-            <span aria-hidden className="text-primary-text">
-              •
-            </span>
-            <span className="min-w-0">{item}</span>
-          </li>
+          <li key={item}>{item}</li>
         ))}
       </ul>
       <p className="mt-4 text-caption text-muted-foreground">

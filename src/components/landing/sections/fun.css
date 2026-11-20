@@ -112,7 +112,7 @@
     padding: 0.0625rem 0.625rem;
     border-radius: var(--round-pill);
     background: var(--surface);
-    color: var(--accent-text);
+    color: var(--text-muted);
     font-size: var(--text-caption);
     font-weight: 700;
     line-height: var(--text-caption--line-height);
@@ -201,22 +201,11 @@
     line-height: 1.3;
     opacity: 0;
   }
-  .ld-fun-s1,
-  .ld-fun-s2,
-  .ld-fun-s3 {
-    transform: scale(0);
-  }
+  /* 레벨 업 알약 옆 반짝 점 하나 (보상 순간, P13-09) */
   .ld-fun-s1 {
-    top: 3.25rem;
-    left: 0.75rem;
-  }
-  .ld-fun-s2 {
-    top: 2.75rem;
-    left: 3.5rem;
-  }
-  .ld-fun-s3 {
-    top: 6.75rem;
-    left: 0.5rem;
+    top: 0.5rem;
+    left: 2.25rem;
+    transform: scale(0);
   }
 
   /* 코인 */
@@ -612,8 +601,6 @@
       .ld-fun-xp,
       .ld-fun-lvup,
       .ld-fun-s1,
-      .ld-fun-s2,
-      .ld-fun-s3,
       .ld-fun-lid,
       .ld-fun-coin,
       .ld-fun-card-mini,
@@ -638,18 +625,8 @@
   }
   :root[data-reduced='false']:not([data-motion='minimal'])
     .ld-fun-scene[data-on]
-    :is(.ld-fun-s1, .ld-fun-s2, .ld-fun-s3) {
+    .ld-fun-s1 {
     animation-name: ld-fun-twinkle;
-  }
-  :root[data-reduced='false']:not([data-motion='minimal'])
-    .ld-fun-scene[data-on]
-    .ld-fun-s2 {
-    animation-delay: calc(var(--ld-fun-t) * 0.03);
-  }
-  :root[data-reduced='false']:not([data-motion='minimal'])
-    .ld-fun-scene[data-on]
-    .ld-fun-s3 {
-    animation-delay: calc(var(--ld-fun-t) * 0.06);
   }
   :root[data-reduced='false']:not([data-motion='minimal'])
     .ld-fun-scene[data-on]

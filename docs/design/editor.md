@@ -28,10 +28,10 @@
 
 | 무엇 | 토큰 | 값 |
 |---|---|---|
-| 키워드 (`if` `for` `in` `and` `def` `import` `True` `False` `None` …) | `codeKeyword` | `#3A7336` (= primaryText) |
-| 문자열 (f-문자열·이스케이프 포함) | `codeString` | `#8A5A00` (= accentText) |
-| 주석 | `codeComment` | `#7A7268` |
-| 이름·숫자·함수·연산자 | `codeText` · `codeNumber` · `codeFunc` | `#2E2A25` (본문색) |
+| 키워드 (`if` `for` `in` `and` `def` `import` `True` `False` `None` …) | `codeKeyword` | `#257338` (= primaryText) |
+| 문자열 (f-문자열·이스케이프 포함) | `codeString` | `#7A5200` (= accentText) |
+| 주석 | `codeComment` | `#6C7467` |
+| 이름·숫자·함수·연산자 | `codeText` · `codeNumber` · `codeFunc` | `#22271F` (본문색) |
 
 상태 표시 (반투명 틴트는 `color-mix(… N%, transparent)`, `TINT` 상수):
 
@@ -46,7 +46,7 @@
 | 찾은 곳 / 지금 찾은 곳 | `accentSoft` / `accentLight` + 1px `accentText` 테두리 | 주석은 `textMuted` |
 | 오류 줄 | `errorSoft` 85% + 아래 2px `error` 선(그림자라 줄 높이 그대로) | 주석은 `textMuted`, 줄 번호는 `error` on `errorSoft` |
 
-**왜 주석만 바꾸나**: 주석색은 흰 면에서 4.73으로 여유가 거의 없어, 아주 옅은 틴트(primary 4% 이상)만 깔려도 4.5 아래로 내려갑니다. 그래서 틴트가 깔린 줄·범위 안의 주석만 한 단계 진한 `textMuted`로 그립니다(구문 클래스가 고정 이름 `pr-tok-*`이라 CSS로 덮을 수 있음).
+**왜 주석만 바꾸나**: 주석색은 흰 면에서 4.84로 여유가 거의 없어, 아주 옅은 틴트(primary 4% 이상)만 깔려도 4.5 아래로 내려갑니다. 그래서 틴트가 깔린 줄·범위 안의 주석만 한 단계 진한 `textMuted`로 그립니다(구문 클래스가 고정 이름 `pr-tok-*`이라 CSS로 덮을 수 있음).
 
 ### 대비 (WCAG, 소수 둘째 자리 내림)
 
@@ -54,26 +54,26 @@
 
 | 면 | codeText | 주석 | 키워드 | 문자열 |
 |---|---|---|---|---|
-| 기본 (`codeBg`) | 14.24 | 4.73 (`codeComment`) | 5.69 | 5.92 |
-| 활성 줄 | 13.16 | 5.39 (`textMuted`) | 5.26 | 5.47 |
-| 선택 (포커스) | 11.53 (모든 글자) | — | — | — |
-| 선택 (포커스 없음) | 13.69 | 4.55 (`codeComment`) | 5.47 | 5.69 |
-| 같은 단어 | 12.21 | 5.00 | 4.88 | 5.08 |
-| 오류 줄 | 12.51 | 5.12 | 5.00 | 5.20 |
-| 찾은 곳 | 12.69 | 5.20 | 5.07 | 5.28 |
-| 지금 찾은 곳·괄호 짝 | 11.28 | 4.62 | 4.51 | 4.69 |
+| 기본 (`codeBg`) | 15.23 | 4.84 (`codeComment`) | 5.85 | 6.92 |
+| 활성 줄 | 14.05 | 5.67 (`textMuted`) | 5.39 | 6.38 |
+| 선택 (포커스) | 12.27 (모든 글자) | — | — | — |
+| 선택 (포커스 없음) | 14.65 | 4.66 (`codeComment`) | 5.62 | 6.65 |
+| 같은 단어 | 13.04 | 5.26 | 5.01 | 5.92 |
+| 오류 줄 | 13.29 | 5.36 | 5.10 | 6.03 |
+| 찾은 곳 | 13.89 | 5.60 | 5.33 | 6.30 |
+| 지금 찾은 곳·괄호 짝 | 12.25 | 4.94 | 4.70 | 5.56 |
 
 | 그 밖 | 대비 | 기준 |
 |---|---|---|
-| 줄 번호 `textMuted` / `surface2` | 4.94 | 4.5 |
-| 활성 줄 번호 `codeText` / primary 10% on surface2 | 10.71 | 4.5 |
-| 오류 줄 번호·짝 없는 괄호 `error` / `errorSoft` | 4.88 | 4.5 |
-| 오류 줄 밑줄 `error` / 오류 줄 면 | 4.99 | 3 (UI) |
-| 커서 `codeText` / `codeBg` | 14.24 | 3 (UI) |
-| 상자 테두리 `lineStrong` / `codeBg` · `bg` | 3.55 · 3.23 | 3 (UI) |
-| 포커스 링 `secondary` / `bg` | 12.96 | 3 (UI) |
-| 찾은 곳 테두리 `accentText` / `accentSoft` | 5.28 | 3 (UI) |
-| 글자 크기 숫자·아이콘 `text` / `surface2` | 12.07 | 4.5 |
+| 줄 번호 `textMuted` / `surface2` | 5.25 | 4.5 |
+| 활성 줄 번호 `codeText` / primary 10% on surface2 | 11.54 | 4.5 |
+| 오류 줄 번호·짝 없는 괄호 `error` / `errorSoft` | 4.85 | 4.5 |
+| 오류 줄 밑줄 `error` / 오류 줄 면 | 4.96 | 3 (UI) |
+| 커서 `codeText` / `codeBg` | 15.23 | 3 (UI) |
+| 상자 테두리 `lineStrong` / `codeBg` · `bg` | 3.57 · 3.32 | 3 (UI) |
+| 포커스 링 `secondary` / `bg` | 14.16 | 3 (UI) |
+| 찾은 곳 테두리 `accentText` / `accentSoft` | 6.30 | 3 (UI) |
+| 글자 크기 숫자·아이콘 `text` / `surface2` | 13.02 | 4.5 |
 
 ## 3. 글자
 
@@ -125,7 +125,7 @@
 | 바다 `ocean` | `#F2F9FB` · `#1E3340` | 바다색 `#066883` | 산호 `#A2461F` | 보라 `#6B46B0` | 해초 `#1F6E4C` | `#5B727D` |
 | 솜사탕 `candy` | `#FFF6FA` · `#3B2836` | 딸기 `#AD2A69` | 라벤더 `#6A48B4` | 청록 `#0D6E77` | 파랑 `#2C62A8` | `#7D6776` |
 
-- **대비**: `kidsTheme.test.ts`가 §2의 `EDITOR_CONTRAST_PAIRS` 전부(숫자·함수 포함 54조합)를 기본 + 테마 3종 색표(`editorThemePalette`)로 검사합니다. 가장 빠듯한 곳: 밤하늘 같은 단어 위 키워드 4.91·괄호 짝 위 키워드 4.99, 바다 기본 면 주석 4.75·포커스 없는 선택 위 주석 4.60, 솜사탕 같은 단어 위 숫자 4.71·상자 테두리 바깥 3.52.
+- **대비**: `kidsTheme.test.ts`가 §2의 `EDITOR_CONTRAST_PAIRS` 전부(숫자·함수 포함 54조합)를 기본 + 테마 3종 색표(`editorThemePalette`)로 검사합니다. 가장 빠듯한 곳: 밤하늘 같은 단어 위 키워드 4.91·괄호 짝 위 키워드 4.99, 바다 기본 면 주석 4.75·포커스 없는 선택 위 주석 4.60, 솜사탕 같은 단어 위 숫자 4.71·상자 테두리 바깥 3.59.
 - **적용**: 퀘스트 레이아웃(`(protected)/quest/layout.tsx`)이 로그인 레이아웃과 같은 조회(`loadOwnUserRow`, React cache)의 `settings`를 `editorThemeFromSettings`(`src/lib/shop/catalog.ts`, 모르는 값·다른 종류 id는 기본)로 읽어 `EditorThemeProvider`에 넣고, `CodeEditor`가 상자에 `data-editor-theme`을 붙입니다. 서버 HTML부터 그 색이라 깜빡이지 않습니다. 코드·프로젝트 퀘스트와 퀴즈 "직접 실행해 보기"가 모두 이 레이아웃 아래입니다. `/dev/editor?theme=night`, 카탈로그 `#editor` "에디터 테마" 견본(기본 + 3종)도 같은 Provider.
 - **상점 견본** `ThemeArt`(`ShopItemArt.tsx`): 같은 `data-editor-theme` 블록으로 줄 번호 칸 + 코드 세 줄(키워드·이름·함수·숫자 / 함수·문자열 + 활성 줄·커서 / 주석)을 색 막대로 그립니다.
 - 검사: 단위 `kidsTheme.test.ts`·`tokens.test.ts`·`catalog.test.ts`(`editorThemeFromSettings`), e2e `editor-theme.spec.ts`(360·1280: 상점 공책 탭에서 쓰기 → 퀘스트 서버 HTML에 `data-editor-theme` + CodeMirror 면 색 → 그만 쓰기 → 기본).

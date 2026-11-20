@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HudCounter, LevelSeal } from '@/components/ui/hud';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { RewardIcon, Stars } from '@/components/ui/reward-icon';
+import { Glint, RewardIcon, Stars } from '@/components/ui/reward-icon';
 import {
   BugBugStatic,
   PybaemStatic,
@@ -63,14 +63,6 @@ function Scene({
   );
 }
 
-function Sparkle({ className }: { className: string }) {
-  return (
-    <svg className={`ld-fun-spark ${className}`} viewBox="-12 -12 24 24">
-      <path d="M0-11L3-3L11 0L3 3L0 11L-3 3L-11 0L-3-3Z" />
-    </svg>
-  );
-}
-
 /** 레벨: XP 바가 차오르고 → 레벨 도장이 오르며 "레벨 업!" → 새 레벨의 XP로 */
 export function LevelScene({ run, playing }: SceneProps) {
   const [level, setLevel] = useState(2);
@@ -83,9 +75,7 @@ export function LevelScene({ run, playing }: SceneProps) {
   return (
     <Scene id="level" run={run} playing={playing}>
       <span className="ld-fun-lvup font-display">레벨 업!</span>
-      <Sparkle className="ld-fun-s1" />
-      <Sparkle className="ld-fun-s2" />
-      <Sparkle className="ld-fun-s3" />
+      <Glint className="ld-fun-spark ld-fun-s1" />
       <span className="ld-fun-hudbox">
         <LevelSeal level={level} />
         <ProgressBar value={xp} max={100} className="ld-fun-xpbar" />
@@ -222,7 +212,7 @@ export function BossScene({ run, playing }: SceneProps) {
         />
       </span>
       <span className="ld-fun-shot">
-        <Sparkle className="ld-fun-shot-star" />
+        <RewardIcon kind="star" size={20} />
       </span>
       <span className="ld-fun-boss">
         <ProgressBar value={hp} max={100} size="sm" className="ld-fun-hp" />

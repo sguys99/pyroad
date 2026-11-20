@@ -65,7 +65,7 @@ export function InstallAppCard({
         id="install-app-title"
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <Smartphone aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <Smartphone aria-hidden className="h-5 w-5 text-foreground" />
         {'홈 화면에 추가'}
       </h2>
       <div className="flex items-center gap-3">

@@ -54,7 +54,7 @@ export const FAQ: readonly FaqItem[] = [
     // AccountManagementSection(프로필 화면 "회원 탈퇴") · 처리방침 "탈퇴하면 바로 삭제"
     id: 'leave',
     q: '탈퇴하면 기록은 어떻게 되나요?',
-    a: '프로필 화면의 "회원 탈퇴"에서 할 수 있어요. 내 정보와 기록은 바로 지워져요.',
+    a: '프로필 화면의 “회원 탈퇴”에서 할 수 있어요. 내 정보와 기록은 바로 지워져요.',
     more: { href: '/privacy', label: '개인정보처리방침' },
   },
 ];

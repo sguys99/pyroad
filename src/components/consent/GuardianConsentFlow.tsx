@@ -120,7 +120,6 @@ export function GuardianConsentFlow({
           <div ref={boxRef} className="cs-done-card">
             <div className="ob-card-head">
               <div className="min-w-0 flex-1">
-                <p className="text-kicker text-primary-text">보호자 동의</p>
                 <h1
                   ref={titleRef}
                   tabIndex={-1}

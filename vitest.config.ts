@@ -14,7 +14,7 @@ export default defineConfig({
       'scripts/readme-shots/**', // README 스크린샷 (Playwright, npm run shots:readme)
       'node_modules/**',
       'spikes/**',
-      '.claude/worktrees/**',
+      '.claude/**', // 워크트리·스킬 폴더의 자체 테스트는 앱 테스트가 아님
       'design/**',
       '**/*.pyodide.test.ts',
       '**/*.content.test.ts',

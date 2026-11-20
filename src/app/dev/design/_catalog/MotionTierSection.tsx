@@ -248,7 +248,7 @@ export function MotionTierSection() {
         </LoopTile>
         <Demo
           label="흐림 (backdrop-blur)"
-          note="full만 흐림 · lite부터 불투명 배경(알파 0.9 이상으로 글자 대비 유지)"
+          note="full만 흐림 · lite부터 불투명 배경(알파 0.9 이상으로 글자 대비 유지). 단계 대체 견본일 뿐 — 랜딩 헤더 유리 효과는 P13-15에서 없앴고 새 화면에 유리판을 쓰지 않아요"
           surface="card"
           data-testid="tile-blur"
         >

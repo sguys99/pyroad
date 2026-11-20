@@ -244,7 +244,6 @@ export function AttendanceCard({
       data-testid="attendance-card"
     >
       <div className="at-head">
-        <span className="at-k">출석 도장</span>
         <h2 id="attendance-title" className="at-t font-display">
           {done
             ? `${view.day_n}일째 출석 완료!`
@@ -312,7 +311,6 @@ export function AttendanceMenuSection({
       data-testid="attendance-menu"
     >
       <div className="at-head">
-        <span className="at-k">출석 달력</span>
         <h2 id="attendance-menu-title" className="at-t font-display">
           {status.stamped_today
             ? `오늘 ${status.day_n}일째 출석했어요`
@@ -325,8 +323,7 @@ export function AttendanceMenuSection({
         <p className="at-note">
           <RewardIcon kind="shield" size={18} />
           <span>
-            스트릭 방패 {shields}/{MAX_SHIELDS}개 · 하루 쉬면 1개가 불꽃을
-            지켜요
+            스트릭 방패 {shields}/{MAX_SHIELDS}개. 하루 쉬면 1개가 불꽃을 지켜요
           </span>
         </p>
       </div>

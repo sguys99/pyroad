@@ -80,7 +80,7 @@ function Step({ n, art, text }: { n: number; art: ReactNode; text: string }) {
     <li className="flex items-center gap-3 rounded-2xl bg-surface-2 p-3">
       <span
         aria-hidden
-        className="grid size-8 flex-none place-items-center rounded-full bg-accent font-display text-base text-on-accent"
+        className="grid size-8 flex-none place-items-center rounded-full bg-primary font-display text-base text-primary-foreground"
       >
         {n}
       </span>
@@ -98,13 +98,13 @@ function Step({ n, art, text }: { n: number; art: ReactNode; text: string }) {
   );
 }
 
-/** 강조 고리: 눌러야 할 곳 (금색 = "지금 여기") */
+/** 강조 고리: 눌러야 할 곳 (초록 = "지금 여기") */
 function Spot({ children, on }: { children: ReactNode; on?: boolean }) {
   return (
     <span
       className={cn(
         'grid size-6 place-items-center rounded-full text-text-muted',
-        on && 'bg-accent-soft text-accent-text ring-2 ring-accent',
+        on && 'text-primary-text ring-2 ring-primary',
       )}
     >
       {children}
@@ -151,12 +151,9 @@ function MenuArt() {
         <Bookmark className="size-3.5" />
       </div>
       <div
-        className={cn(
-          row,
-          'bg-accent-soft text-accent-text ring-2 ring-accent ring-inset',
-        )}
+        className={cn(row, 'text-primary-text ring-2 ring-primary ring-inset')}
       >
-        <span className={cn(bar, 'bg-accent-light')} />
+        <span className={cn(bar, 'bg-primary-bright')} />
         <SquarePlus className="size-3.5" strokeWidth={2.4} />
       </div>
     </div>
@@ -169,7 +166,7 @@ function HomeArt() {
     <div className="grid grid-cols-3 gap-1.5 px-2">
       <span className="size-7 rounded-lg bg-surface-2" />
       <span className="size-7 rounded-lg bg-surface-2" />
-      <span className="rounded-lg ring-2 ring-accent ring-offset-1 ring-offset-surface">
+      <span className="rounded-lg ring-2 ring-primary ring-offset-1 ring-offset-surface">
         <AppIconMini size={28} />
       </span>
       <span className="size-7 rounded-lg bg-surface-2" />

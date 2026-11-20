@@ -32,7 +32,7 @@ export function questHeader(page: Page): Locator {
 
 /**
  * 실행기(Pyodide Worker)가 준비되어 "코드 돌려보기!"를 누를 수 있을 때까지.
- * 준비 전(idle·loading)에는 버튼 글자가 "준비 중..."이라 글자가 바뀌면 준비된 것이지만,
+ * 준비 전(idle·loading)에는 버튼 글자가 "준비 중…"이라 글자가 바뀌면 준비된 것이지만,
  * 준비돼도 에디터가 비었으면 같은 글자로 비활성이므로 활성화까지 본다
  */
 export async function waitForRunner(page: Page): Promise<void> {

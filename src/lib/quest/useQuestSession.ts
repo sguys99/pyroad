@@ -1357,7 +1357,7 @@ export function useQuestSession({
       finishStreaming(
         kind === 'project'
           ? `정답 코드를 살펴볼까요?\n\n\`\`\`python\n${solution}\n\`\`\`\n\n다음에는 직접 도전해보세요! 💪`
-          : `정답 코드를 살펴볼까요?\n\n\`\`\`python\n${solution}\n\`\`\`\n\n이 코드는 "${topic}" 개념을 사용해요. 다음 퀘스트에서는 직접 도전해보세요! 💪`,
+          : `정답 코드를 살펴볼까요?\n\n\`\`\`python\n${solution}\n\`\`\`\n\n이 코드는 “${topic}” 개념을 사용해요. 다음 퀘스트에서는 직접 도전해보세요! 💪`,
         false,
       );
     } catch (err) {

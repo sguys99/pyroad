@@ -25,7 +25,7 @@ export function NoticeDetail({ notice, isAdmin }: NoticeDetailProps) {
         <div className="mt-4 flex items-center gap-2">
           <Link
             href={`/notice/${notice.id}/edit`}
-            className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-muted-foreground transition-colors hover:bg-accent"
+            className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-caption text-muted-foreground transition-colors hover:bg-muted"
           >
             수정
           </Link>

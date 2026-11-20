@@ -19,14 +19,13 @@ import { SkillCheckOffer } from './SkillCheckOffer';
 // 표지 그림 재질·책 모양
 import './worldBook.css';
 
-/** 표지: 월드 그림(랜딩 세계관과 같은 그림) + 권 띠 + 잠김 걸쇠. `data-vt-book`은 책 ↔ 지도 전환의 짝 */
-export function WorldCover({ book, no }: { book: BookSummary; no: number }) {
+/** 표지: 월드 그림(랜딩 세계관과 같은 그림) + 잠김 걸쇠. `data-vt-book`은 책 ↔ 지도 전환의 짝 */
+export function WorldCover({ book }: { book: BookSummary }) {
   const locked = !isOpenable(book);
   return (
     <div className="wb-cover wb-art" data-vt-book>
       {/* 표지 그림은 월드 1·2·3만 있음: 다른 월드(테스트 월드 등)는 1권 그림 */}
       <WorldCoverArt world={worldTint(book.order) ?? 1} />
-      <span className="wb-band">{no}권</span>
       {locked && (
         <span className="wb-clasp" aria-hidden>
           {book.status === 'coming_soon' ? (
@@ -78,7 +77,7 @@ export function WorldBook({
   const body = (
     <>
       {current && <span className="wb-mark">지금 읽는 책</span>}
-      <WorldCover book={book} no={no} />
+      <WorldCover book={book} />
       <div className="wb-info">
         <span className="wb-kicker">그림책 {no}권</span>
         <H className="font-display text-h3 text-foreground">{title}</H>
@@ -103,7 +102,7 @@ export function WorldBook({
             {/* 좁으면 "퀘스트 18/51"이 통째로 다음 줄로 (숫자 앞에서 끊기지 않게, B101) */}
             <span className="wb-note wb-stat">
               <span>
-                스테이지 {book.completedStages}/{book.totalStages} ·
+                스테이지 {book.completedStages}/{book.totalStages}
               </span>{' '}
               <span>
                 퀘스트 {book.completedQuests}/{book.totalQuests}
@@ -116,7 +115,6 @@ export function WorldBook({
           </>
         ) : (
           <span className="wb-note">
-            <Lock className="size-4" aria-hidden />
             <span>
               {status === 'coming_soon' && '지금 만들고 있어요. '}
               {unlock}

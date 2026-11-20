@@ -122,7 +122,7 @@ export const WORLD2_GLOSSARY: readonly GlossaryTerm[] = [
   {
     term: '에러 이름 7종',
     meaning:
-      'SyntaxError 문법 · NameError 없는 이름 · TypeError 섞을 수 없는 종류 · IndexError 없는 번호 · KeyError 없는 이름표 · ValueError 바꿀 수 없는 값 · ZeroDivisionError 0으로 나누기예요.',
+      'SyntaxError 문법, NameError 없는 이름, TypeError 섞을 수 없는 종류, IndexError 없는 번호, KeyError 없는 이름표, ValueError 바꿀 수 없는 값, ZeroDivisionError 0으로 나누기예요.',
     example: '[1, 2][5]  # IndexError',
     match: ['에러 이름', 'error'],
   },
@@ -235,7 +235,7 @@ export const WORLD3_GLOSSARY: readonly GlossaryTerm[] = [
   },
   {
     term: 'self',
-    meaning: '"나 자신"이에요. 펫이 자기 배고픔을 가리킬 때 써요.',
+    meaning: '“나 자신”이에요. 펫이 자기 배고픔을 가리킬 때 써요.',
     example: 'self.hunger = 50',
     match: ['self', '__init__'],
   },

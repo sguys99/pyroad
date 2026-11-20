@@ -37,18 +37,16 @@
     grid-template-columns: auto minmax(0, 1fr);
     align-content: start;
     align-items: center;
-    column-gap: 0.75rem;
+    column-gap: 0.5rem;
   }
+  /* 받침 원 없이 아이콘만 (P13-15). 높이는 파이뱀 얼굴(40px)에 맞춰 세 칸의 제목 줄을 나란히 */
   .ld-parents-ic {
     display: inline-grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: var(--round-pill);
-    background: var(--primary-soft);
+    height: 2.5rem;
     color: var(--primary-text);
   }
-  .ld-parents-ic svg {
+  .ld-parents-ic > svg.lucide {
     width: 1.375rem;
     height: 1.375rem;
   }
@@ -115,8 +113,8 @@
     color: var(--primary-text);
   }
   .ld-parents-tag[data-status='soon'] {
-    background: var(--accent-soft);
-    color: var(--accent-text);
+    background: var(--surface-2);
+    color: var(--text-muted);
   }
 
   /* ───────────── 배우는 길 (로드맵): 좁은 화면은 세로 길, 768px부터 가로 길 */
@@ -157,7 +155,7 @@
     transform-origin: top center;
   }
   .ld-parents-stop[data-status='open']:not(:last-child)::before {
-    background: linear-gradient(180deg, var(--primary), var(--line-strong));
+    background: var(--primary);
   }
   .ld-parents-pin {
     display: grid;
@@ -173,7 +171,6 @@
   .ld-parents-stop[data-status='open'] .ld-parents-pin {
     background: var(--primary);
     color: var(--on-primary);
-    box-shadow: 0 0 0 0.375rem var(--primary-soft);
   }
   .ld-parents-stop-body {
     min-width: 0;
@@ -268,9 +265,6 @@
       );
       transform-origin: left center;
     }
-    .ld-parents-stop[data-status='open']:not(:last-child)::before {
-      background: linear-gradient(90deg, var(--primary), var(--line-strong));
-    }
     .ld-parents-stop-body {
       padding-top: 0;
     }
@@ -308,7 +302,7 @@
       calc(var(--i, 0) * 120ms) both;
   }
   .ld-parents-road[data-in='true'] .ld-parents-pin {
-    animation: ld-parents-pin var(--dur-slow) var(--easing-back-out)
+    animation: ld-parents-pin var(--dur-slow) var(--easing-out)
       calc(var(--i, 0) * 220ms) both;
   }
   .ld-parents-road[data-in='true'] .ld-parents-stop:not(:last-child)::before {

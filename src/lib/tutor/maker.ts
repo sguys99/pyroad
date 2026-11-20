@@ -131,7 +131,7 @@ export function plannerFallback(idea: string): string {
     '',
     '이름과 기능은 내 마음대로 바꿔도 돼요. 쉬운 기능부터 하나씩 만들어요.',
     '',
-    `다른 아이디어 카드: ${others.join(' · ')}`,
+    `다른 아이디어 카드: ${others.join(', ')}`,
   ].join('\n');
 }
 
@@ -208,7 +208,7 @@ export function drawingLine(d: DrawingSummary | undefined): string {
 /** 한 걸음 더 후보 (10줄 안의 작은 것). 작품 모양에 맞는 첫 후보 */
 function nextStep(f: CreationFacts, d: DrawingSummary | undefined): string {
   if (f.keys)
-    return '게임이 끝나면 점수에 따라 다른 말(예: 10점 넘으면 "최고 기록!")이 나오게 해 볼까요?';
+    return '게임이 끝나면 점수에 따라 다른 말(예: 10점 넘으면 “최고 기록!”)이 나오게 해 볼까요?';
   if (f.classes)
     return '펫에게 새 행동 메서드(예: 잠자기)를 하나 더 만들어 볼까요?';
   if (f.inputs) return '이상한 답이 들어오면 while 로 다시 묻게 해 볼까요?';

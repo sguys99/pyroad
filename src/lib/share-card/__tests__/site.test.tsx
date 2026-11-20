@@ -124,7 +124,7 @@ describe('사이트 OG 그림 (P4-10)', () => {
   it('글자 조합은 AA', () => {
     const pairs: [string, string][] = [
       [COLOR.text, COLOR.bg], // 제목
-      [COLOR.text, COLOR.accentLight], // 형광펜 위 제목
+      [COLOR.primaryText, COLOR.bg], // 강조 줄 제목
       [COLOR.textMuted, COLOR.bg], // 설명
       [COLOR.primaryText, COLOR.primarySoft], // 이름표
     ];

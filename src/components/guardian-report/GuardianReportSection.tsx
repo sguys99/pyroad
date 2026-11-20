@@ -81,7 +81,7 @@ export function GuardianReportLinkCard({
           </h2>
           <p className="text-caption text-pretty text-muted-foreground">
             {state.active
-              ? `비밀 링크가 켜져 있어요${state.createdAt ? ` · ${formatKstDate(state.createdAt, 'monthDay')}에 만듦` : ''}. 링크를 받은 사람은 요일별 공부 기록을 볼 수 있어요.`
+              ? `비밀 링크가 켜져 있어요${state.createdAt ? ` (${formatKstDate(state.createdAt, 'monthDay')}에 만듦)` : ''}. 링크를 받은 사람은 요일별 공부 기록을 볼 수 있어요.`
               : '내 한 주 공부 기록(요일별)을 보호자만 볼 수 있는 비밀 링크로 보내요. 코드와 질문은 보이지 않아요.'}
           </p>
         </div>

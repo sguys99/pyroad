@@ -70,8 +70,8 @@ describe('LinkedAccountsSection', () => {
   it('연결된 수단은 "연결됨 · 날짜"만, 이메일·이름은 보이지 않는다', async () => {
     state.identities = [g, k];
     await mount();
-    expect(row('google')).toHaveTextContent('연결됨 · 2026. 11. 1.');
-    expect(row('kakao')).toHaveTextContent('연결됨 · 2026. 11. 3.');
+    expect(row('google')).toHaveTextContent('연결됨 2026. 11. 1.');
+    expect(row('kakao')).toHaveTextContent('연결됨 2026. 11. 3.');
     expect(document.body).not.toHaveTextContent('example.com');
     expect(document.body).not.toHaveTextContent('김철수');
   });

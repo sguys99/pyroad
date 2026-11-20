@@ -1,5 +1,5 @@
 /* 폰에서 하기 좋은 퀴즈 쪽지 (P7-11). `PhoneQuizPick.tsx`가 import한다.
-   이어하기(주 버튼) 아래 보조 추천이라 흰 쪽지 + 옅은 점선 테두리(주 버튼보다 낮은 무게). 토큰 변수만.
+   이어하기(주 버튼) 아래 보조 추천이라 흰 쪽지 + 1px 실선(주 버튼보다 낮은 무게, P13-14). 토큰 변수만.
    등장은 한 번(반복 없음): full 스프링 · lite 짧게 · minimal 페이드 · 동작 줄이기 즉시 */
 
 @layer components {
@@ -10,7 +10,7 @@
     gap: 0.75rem;
     margin-top: 0.75rem;
     padding: 0.625rem 0.75rem;
-    border: var(--line-w) dashed var(--line-strong);
+    border: var(--line-w) solid var(--line);
     border-radius: var(--round-m);
     background: var(--surface);
   }
@@ -74,7 +74,7 @@
   }
 }
 :root[data-motion='full'] .pq {
-  animation: pq-in var(--spring-body-dur) var(--spring-body) both;
+  animation: pq-in var(--dur-slow) var(--easing-out) both;
 }
 :root[data-motion='lite'] .pq {
   animation: pq-in var(--dur-base) var(--easing-out) both;

@@ -2,13 +2,13 @@
    값은 토큰 변수만 (색은 color-mix로 토큰에서 만든다). 연출 단계는 <html data-motion data-reduced>를 본다:
    - 등장(한 번): full·lite (lite는 짧게), minimal·동작 줄이기 없음. 보이는 상태에서 transform만 (첫 화면 글자 opacity 0 없음)
    - 패럴랙스(포인터·스크롤, HeroParallax가 --hx·--hy·--hs를 씀): full만
-   - 앰비언트(구름·물결·깃발·반짝임): full만
+   - 앰비언트(구름·물결·깃발): full만
    - 마스코트 반짝이 터짐: full·lite. 동작 줄이기는 표정·말풍선만 (리그가 위치·크기 0)
    앰비언트와 반짝이 터짐 규칙은 `hero-ambient.css`에 있다: 첫 페인트에 필요 없어 렌더 차단 CSS에서 빼고 늦게 받는다 (P4-12) */
 
 @layer components {
   .hero {
-    /* 하늘: 위는 옅은 물빛, 수평선 쪽은 섬 틴트 + 해 근처 금빛 */
+    /* 하늘(그림): 위는 옅은 물빛, 수평선 쪽은 섬 틴트. 해 둘레 빛은 HeroArt의 해가 직접 그린다 (P13-15) */
     --hero-sky-top: color-mix(in srgb, var(--w2-soft) 60%, var(--surface));
     --hero-sky-bottom: color-mix(in srgb, var(--w1-soft) 70%, var(--w2-soft));
     position: relative;
@@ -17,13 +17,11 @@
     flex-direction: column;
     min-height: max(38rem, 100svh);
     overflow: clip;
-    background:
-      radial-gradient(
-        ellipse 42% 36% at 74% 20%,
-        var(--accent-soft),
-        transparent 70%
-      ),
-      linear-gradient(180deg, var(--hero-sky-top), var(--hero-sky-bottom) 64%);
+    background: linear-gradient(
+      180deg,
+      var(--hero-sky-top),
+      var(--hero-sky-bottom) 64%
+    );
   }
   @media (min-width: 900px) {
     .hero {
@@ -57,7 +55,7 @@
       height: auto;
     }
   }
-  /* 폰: 글자 뒤로 겹치는 해·큰 구름은 뺀다 (하늘 빛은 .hero 배경의 금빛 원이 대신) */
+  /* 폰: 글자 뒤로 겹치는 해·큰 구름은 뺀다 */
   @media (max-width: 599px) {
     .hero-scene [data-wide] {
       display: none;
@@ -271,33 +269,6 @@
     );
     pointer-events: none;
   }
-  .hero-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.875rem;
-    padding: 0.3125rem 0.875rem 0.3125rem 0.625rem;
-    border-radius: var(--round-pill);
-    background: var(--surface);
-    box-shadow: var(--elev-card);
-    color: var(--primary-text);
-    font-size: var(--text-kicker);
-    font-weight: var(--text-kicker--font-weight);
-    letter-spacing: var(--text-kicker--letter-spacing);
-    line-height: var(--text-kicker--line-height);
-  }
-  .hero-kicker svg {
-    flex: none;
-    width: 1.125rem;
-    height: 1.125rem;
-  }
-  .hero-pin {
-    fill: var(--accent);
-    stroke: var(--accent-lip);
-  }
-  .hero-pin-dot {
-    fill: var(--surface);
-  }
   .hero-title {
     color: var(--text);
     font-size: var(--text-hero);
@@ -446,7 +417,7 @@
     width: 2.75rem;
     height: 2.75rem;
     margin: -1.375rem 0 0 -1.375rem;
-    border: 2px solid var(--accent);
+    border: 2px solid var(--primary);
     border-radius: 50%;
     opacity: 0;
     pointer-events: none;
@@ -456,7 +427,6 @@
   .hero .ha-wave,
   .hero .ha-boat,
   .hero .ha-flag,
-  .hero .ha-spark,
   .hero .ha-bird,
   .hero .ha-leaf,
   .hero .ha-glow {
@@ -483,11 +453,6 @@
 @keyframes hero-rise {
   from {
     transform: translate3d(0, 0.875rem, 0);
-  }
-}
-@keyframes hero-ink {
-  from {
-    transform: scaleX(0);
   }
 }
 @keyframes hero-buddy-in {
@@ -529,12 +494,6 @@
   }
   .hero-copy > :nth-child(3) {
     animation-delay: 140ms;
-  }
-  .hero-copy > :nth-child(4) {
-    animation-delay: 210ms;
-  }
-  .hero-title .ld-ink-mark::after {
-    animation: hero-ink var(--dur-page) var(--easing-ink) 520ms both;
   }
   .hero-buddy-in {
     animation: hero-buddy-in 900ms var(--easing-out) 260ms both;

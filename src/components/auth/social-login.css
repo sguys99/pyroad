@@ -131,7 +131,7 @@
     height: 100%;
   }
 
-  /* 최근에 쓴 로그인 수단 이름표 (P3-08): 금색 알약을 오른쪽 위 모서리에 걸쳐 단다(브랜드 면을 덮지 않게 위로 8px 나옴).
+  /* 최근에 쓴 로그인 수단 이름표 (P3-08): 짙은 알약을 오른쪽 위 모서리에 걸쳐 단다(브랜드 면을 덮지 않게 위로 8px 나옴).
      흰 테두리 2px로 카카오 노랑 위에서도 떨어져 보이게. 등장: full = prop 스프링 팝 · lite = 짧게 · minimal = 페이드 · 동작 줄이기 = 없음 */
   .g-social-recent {
     position: absolute;
@@ -140,8 +140,8 @@
     z-index: 1;
     padding: 0.0625rem 0.625rem;
     border-radius: var(--round-pill);
-    background: var(--accent);
-    color: var(--on-accent);
+    background: var(--secondary);
+    color: var(--on-secondary);
     box-shadow:
       0 0 0 2px var(--surface),
       var(--elev-card);
@@ -150,10 +150,10 @@
     line-height: 1.4;
     pointer-events: none;
     transform-origin: 80% 100%;
-    /* full (P4-09): 팝 등장 + 시트가 자리 잡은 뒤 금색 리본처럼 한 번 살랑 (rotate 속성이라 팝의 transform과 겹치지 않음).
+    /* full (P4-09): 팝 등장 + 시트가 자리 잡은 뒤 리본처럼 한 번 살랑 (rotate 속성이라 팝의 transform과 겹치지 않음).
        살랑은 1회뿐이고 채우기 없음(none): 기다리는 동안·끝난 뒤는 제자리 */
     animation:
-      g-social-recent-in var(--spring-prop-dur) var(--spring-prop) both,
+      g-social-recent-in var(--dur-base) var(--easing-out) both,
       g-social-recent-wiggle var(--spring-jelly-ab-dur) var(--easing-in-out)
         var(--dur-page) 1 none;
   }

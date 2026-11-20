@@ -169,6 +169,7 @@ npm run share-card:render  # 공유 카드 샘플 PNG (운영과 같은 next/og)
 - 색·글꼴·반경·그림자·모션은 토큰만: 원본 `src/lib/design/tokens.ts`(모션은 `src/lib/motion/tokens.ts`) → `globals.css`(드리프트·대비 AA 테스트). 컴포넌트에 하드코딩 금지(`tokens:check`, 예외는 [docs/design/tokens.md](docs/design/tokens.md) §6)
 - 랜딩 예산(JS 250KB·렌더 차단 CSS 15KB gzip, postbuild 실패): `globals.css`는 랜딩이 닿는 소스만 Tailwind로 훑고(`@source`, 누락은 테스트가 잡음) 앱 화면 틀은 `@/app/app.css`도 import. 컴포넌트 전용 CSS는 그 컴포넌트가 import, 랜딩 첫 화면 밖 섹션 CSS는 `deferredStyles.ts`로 ([docs/perf/P4-12-landing.md](docs/perf/P4-12-landing.md))
 - 버튼·카드·모달·시트·토스트·탭·HUD 등은 `src/components/ui/` 공통 컴포넌트로. 새 컴포넌트·상태는 `/dev/design` 카탈로그(`src/app/dev/design/_catalog/`)에도 진열
+- 쓰지 않는 패턴: 측면 색 띠(`tokens:check`가 막음)·제목을 되풀이하는 머리말 라벨·반짝이 아이콘(4각 별은 보상 순간만)·카드 속 카드, 금색은 보상에만 — 전체 목록과 예외는 [components.md §0](docs/design/components.md)
 - 반복 연출은 CSS transform·opacity만(Framer `repeat: Infinity`·SMIL 금지). 연출 단계 full/lite/minimal과 동작 줄이기는 JS `useMotionTier().budget`, CSS `<html data-motion data-reduced>`(`@media prefers-reduced-motion` 대신). 대체 동작은 e2e `design-catalog.spec.ts`·`motion-tiers.spec.ts`가 검사 ([docs/design/motion-guidelines.md](docs/design/motion-guidelines.md), §2.10)
 - 캐릭터 연출은 리그(`MascotRig`·포즈 표)로. 효과음은 `useSfx`, 소리만으로 정보를 주지 않음
 - 받은 에셋(폰트·사운드·이미지·Lottie)은 출처·라이선스·원본 해시를 `docs/assets-license.md`에 같은 커밋에서 기록(`assets:check`가 확인)

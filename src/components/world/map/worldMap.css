@@ -13,8 +13,8 @@
   --wm-sand: color-mix(in srgb, var(--w3) 48%, var(--surface));
 }
 
-/* 종이: 월드 틴트 바탕 + 섬유 결 타일 한 겹 + 가장자리 그을림 (assets.md §3.1). 잔 입자(paper-grain)까지 깔면
-   최종 시안보다 지저분해 보여 섬유만 */
+/* 종이: 월드 틴트 바탕 + 섬유 결 타일 한 겹 + 가장자리 그늘 (assets.md §3.1). 잔 입자(paper-grain)까지 깔면
+   최종 시안보다 지저분해 보여 섬유만. 가장자리 그늘은 월드 색(P13-04: 살구색 --w3 고정이면 1·2권 가장자리가 누렇게 뜸) */
 .world-map {
   position: relative;
   aspect-ratio: var(--tall-ratio);
@@ -23,10 +23,10 @@
   overflow: clip;
   border-radius: var(--round-m);
   background-color: var(--wm-land);
-  background-image: url('/textures/paper-fiber.v1.png');
+  background-image: url('/textures/paper-fiber.v2.png');
   background-size: 256px 256px;
   box-shadow:
-    inset 0 0 40px color-mix(in srgb, var(--w3) 38%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--world) 38%, transparent),
     var(--elev-card);
 }
 .world-node {
@@ -624,7 +624,7 @@
   color: var(--accent-text);
 }
 
-/* 진행률 링: 번호 원 둘레 (진행 중만). 트랙은 옅게, 채운 쪽은 금색 */
+/* 진행률 링: 번호 원 둘레 (진행 중만). 트랙은 옅게, 채운 쪽은 흰색 (초록 이름표 위) */
 .wn-prog {
   position: absolute;
   inset: -5px;
@@ -642,7 +642,7 @@
   stroke: color-mix(in srgb, var(--on-primary) 35%, transparent);
 }
 .wn-prog-bar {
-  stroke: var(--accent);
+  stroke: var(--on-primary);
 }
 
 /* 진행 중 = 지금 위치: 초록 이름표 */
@@ -661,14 +661,14 @@
 .wn[data-state='current'] .wn-crown {
   color: var(--accent);
 }
-/* 보스: 금색 번호 원 + 금색 테 */
+/* 보스: 짙은 번호 원 + 짙은 테 (금색은 보상에만, P13-03) */
 .wn[data-boss] .wn-no {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--secondary);
+  color: var(--on-secondary);
 }
 .wn[data-boss] .wn-plate {
   box-shadow:
-    0 0 0 2px var(--accent),
+    0 0 0 2px var(--secondary),
     var(--elev-card);
 }
 /* 잠김: 그림자 없는 옅은 면 + 흐린 글자 (text-muted / surface-2 = AA) */
@@ -758,8 +758,8 @@
   left: 50%;
   padding: 4px 12px;
   border-radius: var(--round-pill);
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--primary);
+  color: var(--on-primary);
   box-shadow: var(--elev-pop);
   font-size: var(--text-caption);
   font-weight: 700;

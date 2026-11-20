@@ -22,12 +22,12 @@ export function BoardFormMessage({
       <div
         role="alert"
         className={cn(
-          'flex items-start gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-sm text-foreground',
+          'flex items-start gap-2 rounded-lg bg-caution-soft px-3 py-2 text-sm text-foreground',
           className,
         )}
       >
         <HeartHandshake
-          className="mt-0.5 size-4 shrink-0 text-accent-foreground"
+          className="mt-0.5 size-4 shrink-0 text-caution-text"
           aria-hidden="true"
         />
         <p>{error.message}</p>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { RotateCcw, Sparkles } from 'lucide-react';
+import { RotateCcw, Wind } from 'lucide-react';
 import { CharacterAvatar } from '@/components/characters/CharacterAvatar';
 import { twinkle } from '@/components/characters/motionClasses';
 import { useMotionTier } from '@/lib/motion/MotionTierProvider';
@@ -12,6 +12,7 @@ import {
   type MotionTierSetting,
   type ReducedMotionSetting,
 } from '@/lib/motion/tier';
+import { RewardIcon } from '@/components/ui/reward-icon';
 import { cn } from '@/lib/utils';
 
 /**
@@ -63,7 +64,7 @@ const REDUCED_OPTIONS: Array<{
   {
     value: 'system',
     title: '기기 설정 따르기',
-    description: '기기의 "동작 줄이기" 설정대로 해요.',
+    description: '기기의 “동작 줄이기” 설정대로 해요.',
   },
   {
     value: 'on',
@@ -101,18 +102,17 @@ function OptionGroup<T extends string>({
       <legend className="mb-2 text-[17px] font-bold text-foreground">
         {legend}
       </legend>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         {options.map((option) => {
           const checked = option.value === value;
           return (
             <label
               key={option.value}
               className={cn(
-                'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2.5 transition-colors',
+                // P13-10: 고른 줄 = 배경 하나만 (테두리 + 배경 이중 강조 금지). 카드 안에 줄마다 테두리 상자를 두지 않음
+                'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors',
                 'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
-                checked
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card hover:border-primary/50',
+                checked ? 'bg-primary-soft' : 'hover:bg-surface-2',
               )}
             >
               <input
@@ -151,8 +151,9 @@ function OptionGroup<T extends string>({
   );
 }
 
-/** 고른 단계가 바로 보이는 작은 장면: 파이뱀 숨쉬기·깜빡임(대기 루프) + 반짝이(대기 루프) + 구름(앰비언트) */
+/** 고른 단계가 바로 보이는 작은 장면: 파이뱀 숨쉬기·깜빡임(대기 루프) + 깜빡이는 보상 별 하나(대기 루프) + 구름(앰비언트) */
 function MotionPreview({ reduced }: { reduced: boolean }) {
+  const star = twinkle(1, 0.25, 1.4);
   return (
     <div
       aria-hidden
@@ -171,26 +172,12 @@ function MotionPreview({ reduced }: { reduced: boolean }) {
           } as React.CSSProperties
         }
       />
-      <svg
-        className="absolute left-[22%] top-6 h-5 w-5"
-        viewBox="0 0 20 20"
-        fill="var(--accent)"
+      <span
+        className={cn('absolute left-[22%] top-6', star.className)}
+        style={star.style}
       >
-        <polygon
-          points="10,0 13,7 20,10 13,13 10,20 7,13 0,10 7,7"
-          {...twinkle(1, 0.25, 1.4)}
-        />
-      </svg>
-      <svg
-        className="absolute right-[24%] top-3 h-4 w-4"
-        viewBox="0 0 20 20"
-        fill="var(--accent-lip)"
-      >
-        <polygon
-          points="10,0 13,7 20,10 13,13 10,20 7,13 0,10 7,7"
-          {...twinkle(0.3, 1, 1.8)}
-        />
-      </svg>
+        <RewardIcon kind="star" size={22} />
+      </span>
       <div className="mb-1">
         <CharacterAvatar
           character="pybaem"
@@ -266,7 +253,7 @@ export function MotionSettingsSection({
         id={`${groupId}-title`}
         className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground"
       >
-        <Sparkles aria-hidden className="h-5 w-5 text-accent-foreground" />
+        <Wind aria-hidden className="h-5 w-5 text-foreground" />
         움직임
       </h2>
       <p className="mb-3 text-base text-muted-foreground">

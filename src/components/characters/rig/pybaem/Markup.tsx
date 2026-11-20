@@ -57,7 +57,7 @@ export const PYBAEM_PALETTES: Record<RigStyle, PybaemPalette> = {
     cheekAlpha: '0.84',
     tongue: '#E07A6C',
     outline: '#5F804E',
-    shadow: '#8E877C',
+    shadow: '#828A7C',
   },
   /** A×B: A의 선명한 초록 + 남색 잉크 외곽선 */
   AB: {

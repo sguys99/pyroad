@@ -50,11 +50,11 @@ export function runnerState({
 }
 
 const LABEL: Record<Exclude<RunnerState, 'error'>, string> = {
-  preparing: '준비 중...',
-  restarting: '다시 준비 중...',
+  preparing: '준비 중…',
+  restarting: '다시 준비 중…',
   ready: '코드 돌려보기',
-  running: '실행 중...',
-  checking: '정답 확인 중...',
+  running: '실행 중…',
+  checking: '정답 확인 중…',
   stepping: '코드 돌려보기',
 };
 
@@ -258,7 +258,7 @@ interface RunControlsProps {
 
 /**
  * 공책 쪽 실행 줄 (P6-05, 최종 시안 `f-run-row`): 큰 초록 게임 버튼 "코드 돌려보기"(아랫면 3px·재생 아이콘) +
- * 실행 중 멈추기 + 상태별 안내 상자(처음 준비 단계·팁 / 실행기 오류). 재준비 중에는 버튼만 "다시 준비 중..."(못 누름)이고
+ * 실행 중 멈추기 + 상태별 안내 상자(처음 준비 단계·팁 / 실행기 오류). 재준비 중에는 버튼만 "다시 준비 중…"(못 누름)이고
  * 안내는 결과 쪽지 안에 (P11-03).
  * 실행 중에는 버튼 면에 빛 띠가 흐른다(full·lite, minimal은 스피너만, 동작 줄이기는 글자만)
  */
@@ -349,7 +349,7 @@ export function RunControls({
             className="qr-grade"
             data-testid="grade-button"
           >
-            {busy && grading ? '손님이 써 보는 중...' : '시험 손님 부르기'}
+            {busy && grading ? '손님이 써 보는 중…' : '시험 손님 부르기'}
           </Button>
         )}
         {state === 'running' && onStop && (

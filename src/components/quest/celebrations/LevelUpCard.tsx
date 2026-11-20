@@ -9,7 +9,6 @@ import {
   CelebrationCta,
   CelebrationMascot,
   CountUp,
-  Kicker,
   delayStyle,
 } from './parts';
 import { CelebrationShare } from './CelebrationShare';
@@ -92,7 +91,6 @@ export function LevelUpCard({
       </span>
 
       <div className="cel-head">
-        <Kicker gold={big}>{big ? '큰 레벨 업!' : '레벨 업!'}</Kicker>
         <h2
           id="celebration-title"
           className="cel-t font-display cel-rise"

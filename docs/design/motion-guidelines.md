@@ -71,6 +71,28 @@
 6. 스프링·길이·easing은 `tokens.ts`에서만 고릅니다. 새 스프링을 만들지 않습니다.
 7. 알려진 무거운 작업은 `useSamplingPause(true)`로 감쌉니다.
 8. 단계를 바꾸는 코드(설정 화면 밖)를 새로 만들지 않습니다. 단계 변경은 Provider만 하고 `motion_tier_change`를 남깁니다.
+9. **튀는 easing(`body`·`prop`·`jelly*` 스프링, `EASING.backOut`)은 캐릭터·보상·도장(+ 게임 버튼 눌림 복귀)에만.** 일반 컨트롤(탭·칩·카드 호버·모달·시트·토스트·툴팁·쪽지·목록 등장)은 `EASING.out` + `DURATION.fast/base/slow`. `face`(ζ 0.83, 넘침 1% 미만)는 튀지 않으므로 컨트롤에 써도 됩니다 (P13-16, §4.1).
+
+### 4.1 튀는 easing을 남긴 곳 (P13-16)
+
+새로 쓰려면 이 표의 분류에 들어가야 합니다. Impeccable 탐지기(`bounce-easing`)는 `animation` 값의 `--spring-*`와 넘치는 `cubic-bezier`를 잡으므로 아래 줄은 계속 걸립니다(예외). 감사 때 27건 → 10건(토큰 선언 2 + 화면 규칙 8).
+
+| 분류 | 어디 | 값 | 탐지기 |
+|---|---|---|---|
+| 캐릭터 | 마스코트 리그(`characters/rig`), `CharacterAvatar`, 퀘스트 상태 줄의 별똥이 등장(`QuestStatusBar`) | 리그 스프링, `jelly()`, `body` | — |
+| 캐릭터 | 랜딩 파이뱀 착지 `.ld-fun-pybaem` | `body` | `fun.css` 1 |
+| 보상 | 축하 카드 `.cel-pop`·`.cel-rise`·`.cel-turn`·`.cel-tilt`·상자 뚜껑 `.cel-chest-lid`, `celebrations/motion.ts`, 잠금 해제 `unlockFx` | `prop`·`body` | `celebration.css` 1 |
+| 보상 | 퀘스트 성공 카드 `.qx` | `body` | `questSuccess.css` 1 |
+| 보상 | 퀴즈 별 `.qz-star`, 연속 정답 숫자 `.qz-combo-n` | `backOut`, `prop` | `quiz.css` 1 |
+| 보상 | HUD 숫자 팝(`hud.tsx`), 연속 출석 불꽃 `.wh-streak[data-spark]`, 온보딩 별 `.ob-star` | `prop`, `backOut` | — |
+| 보상 | 단계 통과 박자의 눈썹 `.qp[data-beat] .qp-k` | `prop` | `stepStrip.css` 1 |
+| 보상 | 랜딩 체험 결과 글자 팝(`trialFx.ts`) | `prop` | — |
+| 도장 | 통과 체크 `.qs-check[data-fresh] .qs-box`, 작품 스티커 `.gl-sticker-face`, 도장 안착(`trialFx.ts`·`onboardingFx.ts`) | `prop`, `jellyB`, `body` | `questWorkspace.css` 1 · `gallery.css` 1 |
+| 버튼 눌림 | `.g-btn-face` 복귀(`button.tsx`의 `jelly()` 포함) — 아랫면 턱이 들어갔다 나오는 정체성 동작 | `jellyB` | — (`transition`) |
+| 토큰 선언 | `globals.css` `--easing-back-out`, `tokens.ts` `EASING.backOut` | — | 2 |
+| 오탐 | 잠긴 권 자물쇠 흔들림 `.ld-worlds-lock`(`ld-worlds-jiggle`) — 거절을 알리는 흔들림 키프레임이고 easing은 `--easing-out`. 길이만 `--spring-prop-dur`를 빌려 이름으로 잡힘 | `out` | `worlds.css` 1 |
+
+`face` 스프링을 쓰는 컨트롤(세그먼트 손잡이 `.g-seg-thumb`, 소셜 버튼, 책 표지·메달 호버, 각 연출의 lite 대체)은 튀지 않아 그대로입니다. 최근 로그인 배지의 살랑(`g-social-recent-wiggle`)은 easing이 아니라 한 번 도는 키프레임이라 두었습니다.
 
 ## 5. 모션 토큰 (`src/lib/motion/tokens.ts`)
 
@@ -81,7 +103,7 @@ P2-09가 CSS 토큰(`--spring-<이름>`·`--spring-<이름>-dur`·`--dur-<이름
 | 이름 | k | c | ζ | 0→1 정착 | 리그에서 | UI에서 |
 |---|---:|---:|---:|---:|---|---|
 | `face` | 420 | 34 | 0.83 | 418ms | 얼굴 파라미터 | 눌림 복귀, 탭·토글 전환 |
-| `body` | 200 | 19 | 0.67 | 743ms | 몸·머리·꼬리 | 카드·모달 등장, 스탬프 안착 |
+| `body` | 200 | 19 | 0.67 | 743ms | 몸·머리·꼬리 | 스탬프 안착, 축하·성공 카드 등장 (일반 카드·모달은 `EASING.out`, §4.9) |
 | `envelope` | 60 | 15 | 0.97 | 1,160ms | 레이어 세기 | 페이드·강조 하이라이트 |
 | `prop` | 170 | 13 | 0.50 | 1,027ms | 소품 팝 | 코인·별·배지·HUD 숫자 팝 |
 | `jellyA` | 520 | 10 | 0.22 | 1,360ms | A 착지 젤리 | A 젤리 스퀴시·버튼 복귀 |
@@ -106,7 +128,7 @@ P2-09가 CSS 토큰(`--spring-<이름>`·`--spring-<이름>-dur`·`--dur-<이름
 | `EASING.out` | `cubic-bezier(0.22, 1, 0.36, 1)` | 등장 |
 | `EASING.inOut` | `cubic-bezier(0.65, 0, 0.35, 1)` | 이동 (코인 → HUD) |
 | `EASING.press` | `cubic-bezier(0.3, 0, 0.5, 1)` | 누름 |
-| `EASING.backOut` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | 스프링을 못 쓰는 CSS 전환 대체 |
+| `EASING.backOut` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | 스프링을 못 쓰는 CSS 전환 대체 — 보상(별·불꽃)에만 (§4.9) |
 | `EASING.stampIn` | `cubic-bezier(0.55, 0, 0.9, 0.3)` | 가속 내려찍기 |
 | `EASING.ink` | `cubic-bezier(0.2, 0.7, 0.3, 1)` | 잉크 번짐·길 그리기 |
 | `EASING.page` | `cubic-bezier(0.45, 0.05, 0.25, 1)` | 페이지 넘김 |
@@ -120,7 +142,7 @@ Framer용 배열은 `EASE.<이름>`. 단계 보정은 `tierDuration(ms, budget)`
 - [ ] JS 연출이면 `useMotionTier().budget`으로 길이(`tierDuration`)·스프링(`springOrFade`)·파티클(`particles`)을 고르나
 - [ ] 동작 줄이기에서 **움직임 없이도 결과를 알 수 있나** (색·글자·표정). 색만으로 알리지 않나(모양·글자도)
 - [ ] 첫 화면 글자를 `opacity: 0`으로 렌더링하지 않나. 등장은 transform만
-- [ ] 스프링·길이·easing을 `tokens.ts`에서 골랐나 (새 값 금지)
+- [ ] 스프링·길이·easing을 `tokens.ts`에서 골랐나 (새 값 금지). 튀는 easing이면 §4.1 분류(캐릭터·보상·도장)에 드나
 - [ ] 흐림·큰 그림자에 `.m-blur`·`.m-shadow`(또는 Tailwind `backdrop-blur-*`, lite부터 자동으로 꺼짐)를 붙였나. 흐림이 꺼져도 글자 대비가 유지되나(배경 알파 0.9 이상)
 - [ ] 무거운 로딩을 동반하면 `useSamplingPause`로 감쌌나
 - [ ] 컨페티는 `fireConfetti`로만

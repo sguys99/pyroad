@@ -77,7 +77,7 @@ function loadRunner(): Promise<RunMini> {
 const LINES = {
   watch: '잘 봐! 내가 주문을 걸어 볼게.',
   out: '와! 파이썬이 그대로 말했어!',
-  turn: '이제 네 차례! "안녕!"을 네 이름으로 고치고 주문을 걸어 봐.',
+  turn: '이제 네 차례! “안녕!”을 네 이름으로 고치고 주문을 걸어 봐.',
 } as const;
 
 /** 성공 뒤 "다른 주문도 걸어 볼래?" 추천 (누르면 공책에 넣고 바로 건다). Q28: 셋만 */
@@ -425,7 +425,7 @@ export function TrialNotebook({ still }: { still: ReactNode }) {
     return {
       who: 'pybaem' as const,
       state: 'happy' as const,
-      line: `"${clip(shown(result.out))}" 잘 들렸어! 방금 진짜 파이썬 주문을 걸었어.`,
+      line: `“${clip(shown(result.out))}” 잘 들렸어! 방금 진짜 파이썬 주문을 걸었어.`,
     };
   }, [demo, mode, said, result, talk]);
 

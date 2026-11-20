@@ -48,7 +48,7 @@ export function isRunSuccessful(result: {
 export function truncateOutput(output: string): string {
   if (output.length > MAX_OUTPUT_LENGTH) {
     return (
-      output.slice(0, MAX_OUTPUT_LENGTH) + '\n\n...출력이 너무 길어서 잘렸어요'
+      output.slice(0, MAX_OUTPUT_LENGTH) + '\n\n…출력이 너무 길어서 잘렸어요'
     );
   }
   return output;
