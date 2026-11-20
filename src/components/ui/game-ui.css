@@ -102,6 +102,14 @@
     --lip: var(--accent-lip);
     --press: var(--accent-lip);
   }
+  /* P13-19: 금색 버튼 위 코인은 면 색이 같아 묻혀서, 몸통·옆면 두 원에만 짙은 테 */
+  .g-btn[data-variant='reward']
+    .g-btn-icon
+    > svg[data-reward='coin']
+    > circle:nth-child(-n + 2) {
+    stroke: var(--on-accent);
+    stroke-width: 1.4;
+  }
   .g-btn[data-variant='danger'] {
     --face: var(--surface);
     --fg: var(--error);

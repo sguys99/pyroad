@@ -170,23 +170,27 @@
   }
 
   /* ───────────── 책 카드 (P13-05, 시안 1-A): 흰 면 한 겹, 표지 그림이 카드 가장자리까지. 월드 색은 그림이 맡는다(측면 띠 없음).
-     기본은 가로 한 줄(그림이 왼쪽 면을 위아래 끝까지 | 글), 책장은 640px부터 세로 표지(그림이 윗면 끝까지) */
+     기본은 가로 한 줄(정사각 그림이 왼쪽 위 | 글), 책장은 640px부터 세로 표지(그림이 윗면 끝까지) */
   .wb-book {
     position: relative;
     display: grid;
     grid-template-columns: 7.5rem 1fr;
-    /* 옆 카드보다 낮아 늘어날 때도 그림이 아래 끝까지 (둘째 줄은 글 칸 아래 실력 확인 안내 자리) */
+    /* 둘째 줄은 글 칸 아래 실력 확인 안내 자리 */
     grid-template-rows: 1fr auto;
     height: 100%;
   }
   /* 카드 반경을 물려받아 닿는 모서리만 둥글게 (카드에 overflow를 걸면 위로 나온 책갈피가 잘림) */
   .wb-book > .wb-cover {
-    /* 실력 확인 안내가 글 칸 아래에 붙어도 그림은 카드 왼쪽 면을 끝까지 (P13-10) */
+    /* P13-19: 카드 높이를 따라 늘이면 길쭉한 칸에 맞춰 그림이 잘려(하늘·돛 끝만) 정사각으로 왼쪽 위에 고정 —
+       잘림이 생기면 "왼쪽 면 끝까지"보다 비율이 우선(§12-Q85). 그 아래 왼쪽 면은 카드 면 그대로.
+       xMidYMid slice로 가운데 200×140 중 140×140이 보여 성·배·톱니가 안에 들어온다 */
     grid-row: 1 / -1;
-    aspect-ratio: auto;
+    align-self: start;
+    aspect-ratio: 1;
     border-radius: inherit;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
   }
   .wb-book > .wb-cover > svg {
     position: absolute;
