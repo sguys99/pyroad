@@ -133,6 +133,7 @@
   --color-world: var(--world);
   --color-world-ink: var(--world-ink);
   --color-world-soft: var(--world-soft);
+  --color-world-wash: color-mix(in srgb, var(--world-soft) 50%, var(--bg));
   /* 반경: Tailwind 이름을 세 단계로 (sm·md 10, lg·xl 14, 2xl 이상 20) */
   --radius-sm: var(--round-s);
   --radius-md: var(--round-s);

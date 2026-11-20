@@ -65,6 +65,10 @@
     gap: 0.125rem;
     width: 6rem;
   }
+  /* 경험치 홈만 지금 월드 색 (P13-22, 채움은 초록 그대로 — 채움/홈 4.5:1). 책장처럼 월드가 없으면 1권 = 거의 --surface-2 */
+  .wh .g-prog {
+    background: var(--world-soft);
+  }
   .wh-xp-k {
     font-size: var(--text-caption);
     line-height: 1.2;

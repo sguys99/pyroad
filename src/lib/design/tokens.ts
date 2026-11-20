@@ -528,6 +528,9 @@ export function themeCssVars(): Record<string, string> {
   vars['--color-world'] = 'var(--world)';
   vars['--color-world-ink'] = 'var(--world-ink)';
   vars['--color-world-soft'] = 'var(--world-soft)';
+  // 지금 어느 책인지 알리는 머리·바탕 면 (P13-22). 쓰는 요소에서 섞여야 [data-world]를 따르므로 @theme inline에만
+  vars['--color-world-wash'] =
+    'color-mix(in srgb, var(--world-soft) 50%, var(--bg))';
   // 반경: Tailwind 이름을 세 단계로 모은다 (sm·md = 10, lg·xl = 14, 2xl 이상 = 20)
   vars['--radius-sm'] = 'var(--round-s)';
   vars['--radius-md'] = 'var(--round-s)';

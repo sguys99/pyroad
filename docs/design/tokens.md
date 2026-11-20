@@ -158,6 +158,7 @@ shadcn/ui 이름(`--background`·`--card`·`--muted`·`--accent-foreground`·`--
 ```
 
 - 월드 지도(P5-02 `WorldMap world={order}`, `src/components/world/map/worldMap.css`)가 종이 바탕·나무·풀 재질을 `--world*`와 섞어 그린다 → `data-world`만 바꾸면 지도 틴트가 바뀐다. 바다·모래 길은 월드와 상관없이 `--w2`·`--w3`.
+- **월드 색 = 위치 신호, 면 틴트만** (P13-22): 지금 어느 책인지는 `bg-world-wash`(`color-mix(in srgb, var(--world-soft) 50%, var(--bg))`, `@theme inline`에만 — 쓰는 요소에서 섞여야 `[data-world]`를 따름) 한 면으로만 알린다. 쓰는 곳은 지도 화면 바탕(`WorldMapScreen`)·퀘스트 머리 줄(`QuestHeader worldNo`)·HUD 경험치 홈(`--world-soft`, 채움은 초록 그대로). 테두리·측면 띠·그라데이션으로 월드 색을 더하지 않는다
 - TS에서 월드별 값이 필요하면 `WORLD_THEMES[id]`(토큰 이름) → `COLOR[...]`.
 
 ## 4. 쓰는 법

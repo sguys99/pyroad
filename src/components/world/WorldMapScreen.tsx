@@ -50,7 +50,11 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
   const cta = map ? data.continueTarget : null;
 
   return (
-    <>
+    // 지금 어느 책인지: 화면 바탕·HUD 경험치 홈에 그 월드 색을 옅게 (P13-22)
+    <div
+      className="bg-world-wash"
+      data-world={entry ? worldTint(entry.world.order) : undefined}
+    >
       {/* 위에 붙어 따라오는 바라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       <WorldHudBar data={data} />
       <PageTransition
@@ -137,6 +141,6 @@ export function WorldMapScreen({ data, entry, notice }: WorldMapScreenProps) {
       {/* fixed 안내라 transform 이 걸리는 PageTransition 밖에 둔다 */}
       {/* 홈 화면에 추가 쪽지 (P4-11): 다른 안내가 떠 있으면 띄우지 않음 (아래 가운데 자리를 같이 씀) */}
       {isStageLockedNotice(notice) ? <StageLockedNotice /> : <InstallHint />}
-    </>
+    </div>
   );
 }
